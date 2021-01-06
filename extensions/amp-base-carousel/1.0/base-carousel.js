@@ -74,6 +74,24 @@ const Direction = {
 
 const MIN_AUTO_ADVANCE_INTERVAL = 1000;
 
+const preventNavigation = (event) => {
+  // Center point of the touch area
+  const touchXPosition = event.touches[0].pageX;
+  // Size of the touch area
+  const touchXRadius = event.touches[0].radiusX || 0;
+
+  // We set a threshold (10px) on both sizes of the screen,
+  // if the touch area overlaps with the screen edges
+  // it's likely to trigger the navigation. We prevent the
+  // touchstart event in that case.
+  if (
+    touchXPosition - touchXRadius < 10 ||
+    touchXPosition + touchXRadius > window.innerWidth - 10
+  ) {
+    event.preventDefault();
+  }
+};
+
 /**
  * @param {!BaseCarouselDef.Props} props
  * @param {{current: (!BaseCarouselDef.CarouselApi|null)}} ref
@@ -307,12 +325,6 @@ function BaseCarouselWithRef(
         }
         interaction.current = Interaction.MOUSE;
       }}
-      onTouchStart={(e) => {
-        if (onTouchStart) {
-          onTouchStart(e);
-        }
-        interaction.current = Interaction.TOUCH;
-      }}
       tabIndex="0"
       {...rest}
     >
@@ -333,6 +345,13 @@ function BaseCarouselWithRef(
         axis={axis}
         loop={loop}
         mixedLength={mixedLength}
+        onTouchStart={(e) => {
+          preventNavigation(e);
+          if (onTouchStart) {
+            onTouchStart(e);
+          }
+          interaction.current = Interaction.TOUCH;
+        }}
         restingIndex={currentSlide}
         setRestingIndex={setRestingIndex}
         snap={snap}

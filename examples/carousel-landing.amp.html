@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html ⚡>
+  <head>
+    <meta charset="utf-8" />
+    <title>Bento Store</title>
+    <link rel="canonical" href="self.html" />
+    <meta
+      name="viewport"
+      content="width=device-width,minimum-scale=1,initial-scale=1"
+    />
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <script async src="/dist/amp.js"></script>
+    <script
+      async
+      custom-element="amp-base-carousel"
+      src="/dist/v0/amp-base-carousel-1.0.max.js"
+    ></script>
+    <script
+      async
+      custom-element="amp-lightbox"
+      src="/dist/v0/amp-lightbox-0.1.max.js"
+    ></script>
+    <script>
+      (self.AMP = self.AMP || []).push(function (AMP) {
+        AMP.toggleExperiment('bento', true);
+      });
+    </script>
+    <style amp-custom>
+      body {
+        font-family: sans-serif;
+        padding: 5% 10%;
+        max-width: 600px;
+      }
+      a {
+        text-decoration: none;
+      }
+      .lightbox-container {
+        background: white;
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .exit-lightbox-btn {
+        position: absolute;
+        left: 0;
+        top: 0;
+        z-index: 1;
+      }
+      .product-img {
+        position: relative;
+      }
+      button {
+        padding: 8px;
+        color: slategrey;
+        font-size: 12px;
+        border: 1px solid slategrey;
+        background: white;
+        position: absolute;
+        right: 0;
+        bottom: 0;
+      }
+      span {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      svg {
+        padding-right: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Woodgrain One Tier Bento Box 800mL | Cherry</h1>
+    <h2>$ 26.21 USD</h2>
+    <div class="product-img">
+      <amp-img
+        src="https://cdn.shopify.com/s/files/1/0029/8962/products/30206-Hakoya-Grain-M-BE01_463x347.jpg?v=1569286244"
+        width="463"
+        height="347"
+        layout="intrinsic"
+      ></amp-img>
+      <button
+        on="tap:product-instructions.goToSlide(index=0),product-lightbox.open"
+      >
+        <span
+          ><svg
+            role="presentation"
+            xmlns="http://www.w3.org/2000/svg"
+            width="13"
+            height="14"
+            viewBox="0 0 13 14"
+            fill="none"
+          >
+            <title>Zoom icon</title>
+            <path
+              d="M7.8 8.77502L12.025 13.325"
+              stroke="currentColor"
+              stroke-width="1.25"
+            ></path>
+            <circle
+              cx="5.19999"
+              cy="5.52498"
+              r="4.55"
+              stroke="currentColor"
+              stroke-width="1.25"
+            ></circle>
+            <path
+              d="M5.2 3.32001V7.72"
+              stroke="currentColor"
+              stroke-width="1.25"
+              stroke-linejoin="round"
+            ></path>
+            <path
+              d="M3 5.52002H7.39999"
+              stroke="currentColor"
+              stroke-width="1.25"
+              stroke-linejoin="round"
+            ></path>
+          </svg>
+          Click to expand</span
+        >
+      </button>
+    </div>
+
+    <h2>Product Description</h2>
+    <p>
+      The
+      <strong>Woodgrain One Tier Bento Box (800 ml) | Cherry </strong>features
+      one spacious compartment with a removable inner container for separating
+      your main dish from your sides. The lid is decorated with a tan cherry
+      woodgrain design, and features a silicone seal on its underside to help it
+      close tightly to the base. The 800 ml capacity makes it adequate for an
+      average adult sized meal.
+    </p>
+    <p>
+      A black elastic bento band complements the color of the base and helps
+      keep everything together. Complete the set with a pair of
+      <strong>Woodgrain Chopsticks</strong>.
+    </p>
+    <amp-lightbox id="product-lightbox" layout="nodisplay">
+      <div class="lightbox-container">
+        <amp-img
+          role="button"
+          tabindex="0"
+          class="exit-lightbox-btn"
+          src="https://fonts.gstatic.com/s/i/googlematerialicons/close/v8/24px.svg"
+          width="50"
+          height="50"
+          on="tap:product-lightbox.close"
+        ></amp-img>
+        <amp-base-carousel id="product-instructions" loop="true" layout="fill">
+          <amp-img
+            src="https://cdn.shopify.com/s/files/1/0029/8962/products/30206-Hakoya-Grain-M-BE01_2048x1536.jpg?v=1569286244"
+            height="50"
+            width="50"
+            layout="responsive"
+          ></amp-img>
+          <amp-img
+            src="https://cdn.shopify.com/s/files/1/0029/8962/products/30206-Hakoya-Grain-M-BE02_2048x1536.jpg?v=1569286245"
+            height="50"
+            width="50"
+            layout="responsive"
+          ></amp-img>
+          <amp-img
+            src="https://cdn.shopify.com/s/files/1/0029/8962/products/30207-Hakoya-Grain-M-inside02_2048x1536.jpg?v=1569286245"
+            height="50"
+            width="50"
+            layout="responsive"
+          ></amp-img>
+          <amp-img
+            src="https://cdn.shopify.com/s/files/1/0029/8962/products/30204-Hakoya-Grain-M-inside_e6ed2ef1-d882-4901-b81a-4a840c7f111b_2048x1536.jpg?v=1569286245"
+            height="50"
+            width="50"
+            layout="responsive"
+          ></amp-img>
+          <amp-img
+            src="https://cdn.shopify.com/s/files/1/0029/8962/products/30204_30205_30206_-30207-Hakoya-Grain-M01_c739f95e-ae0a-42d0-aa58-3cb222d63334_2048x1536.jpg?v=1569286245"
+            height="50"
+            width="50"
+            layout="responsive"
+          ></amp-img>
+        </amp-base-carousel>
+      </div>
+    </amp-lightbox>
+
+    <sub
+      ><a
+        href="https://en.bentoandco.com/products/woodgrain-one-tier-bento-box-800ml-cherry?variant=29142811443305&currency=USD&utm_medium=product_sync&utm_source=google&utm_content=sag_organic&utm_campaign=sag_organic"
+        >Original listing</a
+      ></sub
+    >
+  </body>
+</html>
