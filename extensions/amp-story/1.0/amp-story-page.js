@@ -1740,6 +1740,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     if (!this.openAttachmentEl_) {
       this.openAttachmentEl_ = buildOpenAttachmentElement(this.element);
+      // If the attachment is a link, copy href to the element so it can be previewed on hover and long press.
       const attachmentHref = attachmentEl.getAttribute('href');
       if (attachmentHref) {
         this.openAttachmentEl_.setAttribute('href', attachmentHref);
