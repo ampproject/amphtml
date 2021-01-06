@@ -21,8 +21,6 @@
   "remove-task-timeout": 0,
   "build-in-chunks": 1,
   "visibility-trigger-improvements": 1,
-  "adsense-ptt-exp": 0.1,
-  "doubleclick-ptt-exp": 0.1,
   "fie-resources": 1,
   "amp-cid-backup": 1
 }
