@@ -1098,12 +1098,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
       });
     });
 
-    it('does not set ptt parameter by default', () =>
-      expect(impl.getAdUrl()).to.not.eventually.match(/(\?|&)ptt=(&|$)/));
-    it('sets ptt parameter', () => {
-      impl.experimentIds = ['21068094'];
-      return expect(impl.getAdUrl()).to.eventually.match(/(\?|&)ptt=13(&|$)/);
-    });
+    it('sets ptt parameter', () =>
+      expect(impl.getAdUrl()).to.eventually.match(/(\?|&)ptt=13(&|$)/));
   });
 
   describe('#getPageParameters', () => {

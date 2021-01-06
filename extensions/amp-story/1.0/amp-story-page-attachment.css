@@ -139,6 +139,7 @@ amp-story-page[active] .i-amphtml-story-page-open-attachment {
   pointer-events: none !important;
   z-index: 3 !important;
   animation: open-attachment-fly-in 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) both !important;
+  -webkit-touch-callout: default !important; /* Allow long pressing the button to open context menu in iOS */
 }
 
 amp-story-page .i-amphtml-story-page-open-attachment > * {
