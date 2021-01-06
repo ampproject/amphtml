@@ -204,12 +204,24 @@ function adoptShared(global, callback) {
     }
   }
 
-  console.log(`${IS_ESM ? 'module' :'nomodule'}`, preregisteredExtensions.length);
   // Handle high priority extensions now, and if necessary issue
   // requests for new extensions (used for experimental version
   // locking).
   for (let i = 0; i < preregisteredExtensions.length; i++) {
     const fnOrStruct = preregisteredExtensions[i];
+    if (IS_ESM) {
+      // If we're in a module, splice out non nomodule extensions.
+      if (!fnOrStruct.e) {
+        console.log('in esm mode');
+        preregisteredExtensions.splice(i--, 1);
+      }
+    } else {
+      if (fnOrStruct.e) {
+      // If we're in an nomodule, splice out the module extensions.
+        console.log('not in esm mode');
+        preregisteredExtensions.splice(i--, 1);
+      }
+    }
     if (maybeLoadCorrectVersion(global, fnOrStruct)) {
       preregisteredExtensions.splice(i--, 1);
     } else if (typeof fnOrStruct == 'function' || fnOrStruct.p == 'high') {

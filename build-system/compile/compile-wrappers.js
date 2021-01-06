@@ -20,7 +20,9 @@ const {VERSION} = require('./internal-version');
 // at least try to unhide the body.
 exports.mainBinary =
   'var global=self;self.AMP=self.AMP||[];' +
-  'try{(function(_){\n<%= contents %>})(AMP._=AMP._||{})}catch(e){' +
+  'try{(function(_){' +
+  'if (Object.prototype.toString.call(self.AMP)!=\'[object Object]\') return;' +
+  '\n<%= contents %>})(AMP._=AMP._||{})}catch(e){' +
   'setTimeout(function(){' +
   'var s=document.body.style;' +
   's.opacity=1;' +
@@ -30,6 +32,7 @@ exports.mainBinary =
 
 exports.extension = function (
   name,
+  isModule,
   loadPriority,
   intermediateDeps,
   opt_splitMarker
@@ -56,9 +59,11 @@ exports.extension = function (
     }
     priority = 'p:"high",';
   }
+  // Use a numeric value instead of boolean.
+  isModule = isModule ? 1 : 0;
   return (
     `(self.AMP=self.AMP||[]).push({n:"${name}",${priority}${deps}` +
-    `v:"${VERSION}",f:(function(AMP,_){${opt_splitMarker}\n` +
+    `v:"${VERSION}",e:${isModule},f:(function(AMP,_){${opt_splitMarker}\n` +
     '<%= contents %>\n})});'
   );
 };

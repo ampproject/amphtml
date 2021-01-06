@@ -542,7 +542,7 @@ async function buildExtensionJs(path, name, version, latestVersion, options) {
       // See https://github.com/ampproject/amphtml/issues/3977
       wrapper: options.noWrapper
         ? ''
-        : wrappers.extension(name, options.loadPriority),
+        : wrappers.extension(name, argv.esm, options.loadPriority),
     })
   );
 

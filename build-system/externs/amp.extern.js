@@ -219,6 +219,8 @@ window.AMP.viewport = {};
 window.AMP.viewport.getScrollLeft;
 window.AMP.viewport.getScrollWidth;
 window.AMP.viewport.getWidth;
+/** @type {boolean} */
+window.AMP.IS_ESM;
 
 /** @type {function(!HTMLElement, !Document, !string, Object)} */
 window.AMP.attachShadowDoc = function (element, document, url, options) {};
