@@ -29,9 +29,6 @@ export class AmpStoryPanningImage extends AMP.BaseElement {
     /** @private {?Element} */
     this.container_ = null;
 
-    /** @private {?../../../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = null;
-
     this.pageId_ = null;
 
     this.siblings_ = null;
@@ -68,12 +65,10 @@ export class AmpStoryPanningImage extends AMP.BaseElement {
     // Initialize all services before proceeding
     return Promise.all([
       Services.storyStoreServiceForOrNull(this.win).then((storeService) => {
-        this.storeService_ = storeService;
         storeService.subscribe(StateProperty.CURRENT_PAGE_ID, (currPageId) => {
           this.isOnActivePage_ = currPageId === this.getPageId_();
           this.update_();
         });
-        storeService.subscribe(StateProperty.PAGE_SIZE, () => this.update_());
       }),
     ]).then(() => Promise.resolve());
   }
