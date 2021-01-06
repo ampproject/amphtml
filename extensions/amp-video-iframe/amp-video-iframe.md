@@ -424,7 +424,7 @@ custom variables to log. These are available as `VIDEO_STATE`, keyed by name
 prefixed with `custom_`, i.e. the object `{myVar: 'foo'}` will be available as
 `{'custom_myVar': 'foo}`.
 
-#### <a name="getConsent"></a> `getConsent(callback)`
+#### <a name="getConsentData"></a> `getConsentData(callback)`
 
 The iframe document can request user consent data when the host document uses
 [`amp-consent`](hhttps://amp.dev/documentation/components/amp-consent/).
