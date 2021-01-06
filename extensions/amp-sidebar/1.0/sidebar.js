@@ -18,6 +18,7 @@ import * as Preact from '../../../src/preact';
 import {ContainWrapper} from '../../../src/preact/component';
 import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
 import {forwardRef} from '../../../src/preact/compat';
+import {isRTL} from '../../../src/dom';
 import {
   useCallback,
   useImperativeHandle,
@@ -26,6 +27,12 @@ import {
   useState,
 } from '../../../src/preact';
 import {useStyles} from './sidebar.jss';
+
+/** @private @enum {string} */
+const Side = {
+  LEFT: 'left',
+  RIGHT: 'right',
+};
 
 const ANIMATION_DURATION = 350;
 const ANIMATION_EASE_IN = 'cubic-bezier(0,0,.21,1)';
@@ -91,6 +98,7 @@ function SidebarWithRef(
   const classes = useStyles();
   const sidebarRef = useRef();
   const backdropRef = useRef();
+  const sideRef = useRef(null);
 
   // We are using refs here to refer to common strings, objects, and functions used.
   // This is because they are needed within `useEffect` calls below (but are not depended for triggering)
@@ -130,6 +138,16 @@ function SidebarWithRef(
       return;
     }
 
+    const document = sidebarElement.ownerDocument;
+    if (side != Side.LEFT && side != Side.RIGHT) {
+      sideRef.current = isRTL(document) ? Side.RIGHT : Side.LEFT;
+    } else {
+      sideRef.current = side;
+    }
+    sidebarElement.classList.add(
+      sideRef.current === Side.LEFT ? classes.left : classes.right
+    );
+
     let sidebarAnimation;
     let backdropAnimation;
     // "Make Visible" Animation
@@ -145,13 +163,13 @@ function SidebarWithRef(
 
       safelySetStyles(
         sidebarElement,
-        side === 'left'
+        sideRef.current === Side.LEFT
           ? ANIMATION_STYLES_SIDEBAR_LEFT_INIT
           : ANIMATION_STYLES_SIDEBAR_RIGHT_INIT
       );
       safelySetStyles(backdropElement, ANIMATION_STYLES_BACKDROP_INIT);
       sidebarAnimation = sidebarElement.animate(
-        side === 'left'
+        sideRef.current === Side.LEFT
           ? ANIMATION_KEYFRAMES_SLIDE_IN_LEFT
           : ANIMATION_KEYFRAMES_SLIDE_IN_RIGHT,
         {
@@ -181,7 +199,7 @@ function SidebarWithRef(
         return;
       }
       sidebarAnimation = sidebarElement.animate(
-        side === 'left'
+        sideRef.current === Side.LEFT
           ? ANIMATION_KEYFRAMES_SLIDE_IN_LEFT
           : ANIMATION_KEYFRAMES_SLIDE_IN_RIGHT,
         {
@@ -207,7 +225,7 @@ function SidebarWithRef(
         backdropAnimation.cancel();
       }
     };
-  }, [opened, onAfterCloseRef, side]);
+  }, [opened, onAfterCloseRef, side, classes.left, classes.right]);
 
   return (
     mounted && (
@@ -219,9 +237,7 @@ function SidebarWithRef(
           layout={true}
           paint={true}
           part="sidebar"
-          wrapperClassName={`${classes.sidebarClass} ${
-            classes.defaultSidebarStyles
-          } ${side === 'left' ? classes.left : classes.right}`}
+          wrapperClassName={`${classes.sidebarClass} ${classes.defaultSidebarStyles}`}
           role="menu"
           tabindex="-1"
           {...rest}
