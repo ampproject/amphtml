@@ -30,13 +30,13 @@ const fontProviderAllowList = [
   'https://use.typekit.net',
 ].join(' ');
 
-const sandboxVals = [
-  'allow-forms',
-  'allow-popups',
-  'allow-popups-to-escape-sandbox',
-  'allow-same-origin',
-  'allow-top-navigation',
-];
+const sandboxVals =
+  'allow-forms ' +
+  'allow-popups ' +
+  'allow-popups-to-escape-sandbox ' +
+  'allow-same-origin ' +
+  'allow-scripts ' +
+  'allow-top-navigation';
 
 export const createSecureDocSkeleton = (url, sanitizedHeadElements, body) =>
   `<!DOCTYPE html>
@@ -62,13 +62,14 @@ export const createSecureDocSkeleton = (url, sanitizedHeadElements, body) =>
 
 /**
  * Create iframe with predefined CSP and sandbox attributes for security.
- * @param {!Document} document
+ * @param {!Window} win
  * @param {string} title
  * @param {string} height
  * @param {string} width
  * @return {!HTMLIFrameElement}
  */
-export function createSecureFrame(document, title, height, width) {
+export function createSecureFrame(win, title, height, width) {
+  const {document} = win;
   const iframe = /** @type {!HTMLIFrameElement} */ (createElementWithAttributes(
     document,
     'iframe',
@@ -82,7 +83,7 @@ export function createSecureFrame(document, title, height, width) {
       'allowfullscreen': '',
       'allowtransparency': '',
       'scrolling': 'no',
-      'sandbox': sandboxVals.join(' '),
+      'sandbox': sandboxVals,
     })
   ));
   return iframe;

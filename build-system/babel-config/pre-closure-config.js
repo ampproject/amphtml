@@ -54,7 +54,6 @@ function getPreClosureConfig() {
     './build-system/babel-plugins/babel-plugin-transform-promise-resolve',
     '@babel/plugin-transform-react-constant-elements',
     reactJsxPlugin,
-    './build-system/babel-plugins/babel-plugin-transform-inline-configure-component',
     argv.esm || argv.sxg
       ? './build-system/babel-plugins/babel-plugin-transform-dev-methods'
       : null,
@@ -64,6 +63,10 @@ function getPreClosureConfig() {
       {replaceCallArguments: false},
     ],
     './build-system/babel-plugins/babel-plugin-transform-parenthesize-expression',
+    [
+      './build-system/babel-plugins/babel-plugin-transform-json-import',
+      {freeze: false},
+    ],
     './build-system/babel-plugins/babel-plugin-is_minified-constant-transformer',
     './build-system/babel-plugins/babel-plugin-transform-amp-extension-call',
     './build-system/babel-plugins/babel-plugin-transform-html-template',

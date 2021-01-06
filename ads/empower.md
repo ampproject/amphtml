@@ -37,9 +37,9 @@ For details on the configuration semantics, please contact the ad network or ref
 
 ### Required parameters
 
-- `data-site`: Site identifier provided by Empower.
-- `data-zone`: Zone ID of the ad space.
+-   `data-site`: Site identifier provided by Empower.
+-   `data-zone`: Zone ID of the ad space.
 
 ### Optional parameters
 
-- `data-category`: Category identifier provided by Empower.
+-   `data-category`: Category identifier provided by Empower.

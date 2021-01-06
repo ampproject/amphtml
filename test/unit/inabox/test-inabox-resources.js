@@ -73,71 +73,45 @@ describes.realWin('inabox-resources', {amp: true}, (env) => {
     await env.ampdoc.whenReady();
     expect(buildStub).to.be.calledOnce;
     await new Promise(setTimeout);
-    expect(schedulePassSpy).to.not.be.called;
+    schedulePassSpy.resetHistory();
     resolveBuild();
     await new Promise(setTimeout);
     expect(schedulePassSpy).to.be.calledOnce;
   });
 
-  it('observes element intersections for those opted in', () => {
-    const observe = env.sandbox.spy();
-    win.IntersectionObserver = () => ({observe});
-
-    const element = env.createAmpElement('amp-carousel');
-    resources.add(element);
-
-    expect(observe.withArgs(element)).to.have.been.calledOnce;
-  });
-
-  it('unobserves element intersections when removed', () => {
-    const unobserve = env.sandbox.spy();
-    win.IntersectionObserver = () => ({observe: () => {}, unobserve});
-
-    const element = env.createAmpElement('amp-carousel');
-    resources.add(element);
-    resources.remove(element);
-
-    expect(unobserve.withArgs(element)).to.have.been.calledOnce;
-  });
-
-  it('does not observe element intersections for those not opted in', () => {
-    const observe = env.sandbox.spy();
-    win.IntersectionObserver = () => ({observe});
-
-    const element = env.createAmpElement('amp-foo');
-    resources.add(element);
-
-    expect(observe.withArgs(element)).to.not.have.been.called;
-  });
-
-  it('triggers viewportCallback on intersection for those opted in', () => {
-    let definedCallback;
-    win.IntersectionObserver = (callback, unusedOptions) => {
-      definedCallback = callback;
-      return {observe: () => {}};
-    };
-
-    const element1 = env.createAmpElement('amp-carousel');
-    element1.viewportCallback = env.sandbox.spy();
-
-    const element2 = env.createAmpElement('amp-carousel');
-    element2.viewportCallback = env.sandbox.spy();
-
-    const element3 = env.createAmpElement('amp-carousel');
-    element3.viewportCallback = env.sandbox.spy();
-
+  it('should pause and resume resources on doc visibility', () => {
+    const element1 = env.createAmpElement('amp-foo');
+    const element2 = env.createAmpElement('amp-bar');
     resources.add(element1);
     resources.add(element2);
-    resources.add(element3);
 
-    definedCallback([
-      {target: element1, isIntersecting: true},
-      {target: element2, isIntersecting: false},
-      {target: element3, isIntersecting: false},
-    ]);
+    env.sandbox.stub(element1, 'pauseCallback');
+    env.sandbox.stub(element1, 'resumeCallback');
+    env.sandbox.stub(element2, 'pauseCallback');
+    env.sandbox.stub(element2, 'resumeCallback');
 
-    expect(element1.viewportCallback.withArgs(true)).to.have.been.calledOnce;
-    expect(element2.viewportCallback.withArgs(false)).to.have.been.calledOnce;
-    expect(element3.viewportCallback.withArgs(false)).to.have.been.calledOnce;
+    env.ampdoc.overrideVisibilityState('paused');
+    expect(element1.pauseCallback).to.be.calledOnce;
+    expect(element2.pauseCallback).to.be.calledOnce;
+
+    env.ampdoc.overrideVisibilityState('visible');
+    expect(element1.resumeCallback).to.be.calledOnce;
+    expect(element2.resumeCallback).to.be.calledOnce;
+  });
+
+  it('should unload all resources on dispose', async () => {
+    const element1 = env.createAmpElement('amp-foo');
+    const element2 = env.createAmpElement('amp-bar');
+    resources.add(element1);
+    resources.add(element2);
+
+    const resource1 = resources.get()[0];
+    const resource2 = resources.get()[1];
+    env.sandbox.stub(resource1, 'unload');
+    env.sandbox.stub(resource2, 'unload');
+
+    resources.dispose();
+    expect(resource1.unload).to.be.calledOnce;
+    expect(resource2.unload).to.be.calledOnce;
   });
 });

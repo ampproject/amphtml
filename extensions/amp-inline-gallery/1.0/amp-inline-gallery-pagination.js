@@ -30,8 +30,9 @@ export class AmpInlineGalleryPagination extends PreactBaseElement {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(
-      isExperimentOn(this.win, 'amp-inline-gallery-bento'),
-      'expected amp-inline-gallery-bento experiment to be enabled'
+      isExperimentOn(this.win, 'bento') ||
+        isExperimentOn(this.win, 'bento-inline-gallery'),
+      'expected global "bento" or specific "bento-inline-gallery" experiment to be enabled'
     );
     return layout == Layout.FIXED_HEIGHT;
   }
@@ -42,7 +43,7 @@ AmpInlineGalleryPagination['Component'] = Pagination;
 
 /** @override */
 AmpInlineGalleryPagination['props'] = {
-  'inset': {attr: 'inset', type: 'boolean'},
+  'inset': {attr: 'inset', type: 'boolean', media: true},
 };
 
 /** @override */

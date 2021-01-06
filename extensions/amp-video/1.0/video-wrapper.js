@@ -18,19 +18,23 @@ import * as Preact from '../../../src/preact';
 import {ContainWrapper} from '../../../src/preact/component';
 import {Deferred} from '../../../src/utils/promise';
 import {MIN_VISIBILITY_RATIO_FOR_AUTOPLAY} from '../../../src/video-interface';
-import {dict} from '../../../src/utils/object';
-import {fillContentOverlay, fillStretch} from './video-wrapper.css';
-import {once} from '../../../src/utils/function';
 import {
+  MetadataDef,
   parseFavicon,
   parseOgImage,
   parseSchemaImage,
   setMediaSession,
 } from '../../../src/mediasession-helper';
+import {dict} from '../../../src/utils/object';
+import {fillContentOverlay, fillStretch} from './video-wrapper.css';
+import {forwardRef} from '../../../src/preact/compat';
+import {once} from '../../../src/utils/function';
+import {useAmpContext, useLoad} from '../../../src/preact/context';
 import {useStyles as useAutoplayStyles} from './autoplay.jss';
 import {
   useCallback,
   useEffect,
+  useImperativeHandle,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -40,11 +44,11 @@ import {useResourcesNotify} from '../../../src/preact/utils';
 
 /**
  * @param {?{getMetadata: (function():?JsonObject|undefined)}} player
- * @param {!VideoWrapperProps} props
- * @return {!JsonObject}
+ * @param {!VideoWrapperDef.Props} props
+ * @return {!MetadataDef}
  */
 const getMetadata = (player, props) =>
-  /** @type {!JsonObject} */ Object.assign(
+  /** @type {!MetadataDef} */ (Object.assign(
     dict({
       'title': props.title || props['aria-label'] || document.title,
       'artist': props.artist || '',
@@ -62,29 +66,42 @@ const getMetadata = (player, props) =>
       ],
     }),
     player && player.getMetadata ? player.getMetadata() : Object.create(null)
-  );
+  ));
 
 /**
- * @param {!VideoWrapperProps} props
+ * @param {!VideoWrapperDef.Props} props
+ * @param {{current: (T|null)}} ref
  * @return {PreactDef.Renderable}
+ * @template T
  */
-export function VideoWrapper({
-  component: Component = 'video',
-  autoplay = false,
-  controls = false,
-  noaudio = false,
-  mediasession = true,
-  className,
-  style,
-  children,
-  ...rest
-}) {
+function VideoWrapperWithRef(
+  {
+    component: Component = 'video',
+    loading,
+    unloadOnPause = false,
+    autoplay = false,
+    controls = false,
+    loop = false,
+    noaudio = false,
+    mediasession = true,
+    className,
+    style,
+    src,
+    sources,
+    poster,
+    onLoad,
+    ...rest
+  },
+  ref
+) {
   useResourcesNotify();
+  const {playable} = useAmpContext();
+  const load = useLoad(loading, unloadOnPause);
 
   const [muted, setMuted] = useState(autoplay);
   const [playing, setPlaying] = useState(false);
-  const [metadata, setMetadata] = useState(null);
-  const [userInteracted, setUserInteracted] = useState(false);
+  const [metadata, setMetadata] = useState(/** @type {?MetadataDef}*/ (null));
+  const [hasUserInteracted, setHasUserInteracted] = useState(!autoplay);
 
   const wrapperRef = useRef(null);
   const playerRef = useRef(null);
@@ -94,16 +111,23 @@ export function VideoWrapper({
   const readyDeferred = useMemo(() => new Deferred(), []);
 
   const play = useCallback(() => {
-    readyDeferred.promise.then(() => {
-      playerRef.current.play();
-    });
+    return readyDeferred.promise.then(() => playerRef.current.play());
   }, [readyDeferred]);
 
   const pause = useCallback(() => {
-    readyDeferred.promise.then(() => {
-      playerRef.current.pause();
-    });
+    readyDeferred.promise.then(() => playerRef.current.pause());
   }, [readyDeferred]);
+
+  const requestFullscreen = useCallback(() => {
+    return readyDeferred.promise.then(() =>
+      playerRef.current.requestFullscreen()
+    );
+  }, [readyDeferred]);
+
+  const userInteracted = useCallback(() => {
+    setMuted(false);
+    setHasUserInteracted(true);
+  }, []);
 
   useLayoutEffect(() => {
     if (mediasession && playing && metadata) {
@@ -115,6 +139,65 @@ export function VideoWrapper({
     };
   }, [mediasession, playing, metadata, play, pause]);
 
+  // Pause if the video goes into a "paused" context.
+  useEffect(() => {
+    if (!playable) {
+      pause();
+    }
+  }, [playable, pause]);
+
+  // We'd like this to be as close as possible to the HTMLMediaElement
+  // interface, preferrably as an extension/superset.
+  useImperativeHandle(
+    ref,
+    () => ({
+      // Standard HTMLMediaElement/Element
+      play,
+      pause,
+      requestFullscreen,
+      get currentTime() {
+        if (!playerRef.current) {
+          return 0;
+        }
+        return playerRef.current.currentTime;
+      },
+      get duration() {
+        if (!playerRef.current) {
+          return NaN;
+        }
+        return playerRef.current.duration;
+      },
+      get autoplay() {
+        return autoplay;
+      },
+      get controls() {
+        return controls;
+      },
+      get loop() {
+        return loop;
+      },
+
+      // Non-standard
+      userInteracted,
+      mute: () => setMuted(true),
+      unmute: () => {
+        if (hasUserInteracted) {
+          setMuted(false);
+        }
+      },
+    }),
+    [
+      play,
+      pause,
+      requestFullscreen,
+      userInteracted,
+      hasUserInteracted,
+      autoplay,
+      controls,
+      loop,
+    ]
+  );
+
   return (
     <ContainWrapper
       contentRef={wrapperRef}
@@ -124,37 +207,46 @@ export function VideoWrapper({
       layout
       paint
     >
-      <Component
-        {...rest}
-        ref={playerRef}
-        muted={muted}
-        controls={controls && (!autoplay || userInteracted)}
-        onCanPlay={readyDeferred.resolve}
-        onLoadedMetadata={() => {
-          if (mediasession) {
-            readyDeferred.promise.then(() => {
-              setMetadata(getMetadata(playerRef.current, rest));
-            });
-          }
-        }}
-        onPlaying={() => setPlaying(true)}
-        onPause={() => setPlaying(false)}
-        style={fillStretch}
-      >
-        {children}
-      </Component>
-      {autoplay && !userInteracted && (
+      {load && (
+        <Component
+          {...rest}
+          ref={playerRef}
+          loading={loading}
+          muted={muted}
+          loop={loop}
+          controls={controls && (!autoplay || hasUserInteracted)}
+          onCanPlay={() => {
+            readyDeferred.resolve();
+            if (onLoad) {
+              onLoad();
+            }
+          }}
+          onLoadedMetadata={() => {
+            if (mediasession) {
+              readyDeferred.promise.then(() => {
+                setMetadata(getMetadata(playerRef.current, rest));
+              });
+            }
+          }}
+          onPlaying={() => setPlaying(true)}
+          onPause={() => setPlaying(false)}
+          style={fillStretch}
+          src={src}
+          poster={poster}
+        >
+          {sources}
+        </Component>
+      )}
+      {autoplay && !hasUserInteracted && (
         <Autoplay
+          metadata={metadata}
           playing={playing}
           displayIcon={!noaudio && muted}
           wrapperRef={wrapperRef}
           play={play}
           pause={pause}
           displayOverlay={controls}
-          onOverlayClick={() => {
-            setMuted(false);
-            setUserInteracted(true);
-          }}
+          onOverlayClick={userInteracted}
         />
       )}
     </ContainWrapper>
@@ -162,10 +254,11 @@ export function VideoWrapper({
 }
 
 /**
- * @param {!VideoAutoplayProps} props
+ * @param {!VideoWrapperDef.AutoplayProps} props
  * @return {PreactDef.Renderable}
  */
 function Autoplay({
+  metadata,
   displayIcon,
   playing,
   displayOverlay,
@@ -174,13 +267,22 @@ function Autoplay({
   play,
   pause,
 }) {
+  const {playable} = useAmpContext();
   const classes = useAutoplayStyles();
 
   useEffect(() => {
+    if (!playable) {
+      pause();
+      return;
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[entries.length - 1].isIntersecting) {
-          play();
+          play().catch(() => {
+            // Empty catch to prevent useless unhandled rejection logging.
+            // play() can fail for benign reasons like pausing.
+          });
         } else {
           pause();
         }
@@ -193,7 +295,7 @@ function Autoplay({
     return () => {
       observer.disconnect();
     };
-  }, [wrapperRef, play, pause]);
+  }, [wrapperRef, play, pause, playable]);
 
   return (
     <>
@@ -204,20 +306,27 @@ function Autoplay({
       )}
 
       {displayOverlay && (
-        <div
-          role="button"
+        <button
+          aria-label={(metadata && metadata.title) || 'Unmute video'}
+          tabindex="0"
+          className={classes.autoplayMaskButton}
           style={fillContentOverlay}
           onClick={onOverlayClick}
-        ></div>
+        ></button>
       )}
     </>
   );
 }
 
-/**
- * @return {!PreactDef.Renderable}
- */
-const AutoplayIconContent = once(() => {
-  const classes = useAutoplayStyles();
-  return [1, 2, 3, 4].map((i) => <div className={classes.eqCol} key={i}></div>);
-});
+const AutoplayIconContent = /** @type {function():!PreactDef.Renderable} */ (once(
+  () => {
+    const classes = useAutoplayStyles();
+    return [1, 2, 3, 4].map((i) => (
+      <div className={classes.eqCol} key={i}></div>
+    ));
+  }
+));
+
+const VideoWrapper = forwardRef(VideoWrapperWithRef);
+VideoWrapper.displayName = 'VideoWrapper'; // Make findable for tests.
+export {VideoWrapper};

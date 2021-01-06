@@ -68,7 +68,16 @@ const eqPlaying = {
   '& > div:before, & > div:after': {animationPlayState: 'running'},
 };
 
+const autoplayMaskButton = {
+  display: 'block',
+  appearance: 'none',
+  background: 'transparent',
+  border: 'none',
+  width: '100%',
+};
+
 const JSS = {
+  autoplayMaskButton,
   eq,
   eqPlaying,
   eqCol,

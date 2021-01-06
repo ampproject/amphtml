@@ -119,17 +119,19 @@ const forbiddenTerms = {
       'build-system/pr-check/build.js',
       'build-system/pr-check/build-targets.js',
       'build-system/pr-check/checks.js',
+      'build-system/pr-check/cross-browser-tests.js',
       'build-system/pr-check/dist-bundle-size.js',
       'build-system/pr-check/dist-tests.js',
       'build-system/pr-check/module-dist-bundle-size.js',
+      'build-system/pr-check/esm-tests.js',
       'build-system/pr-check/experiment-tests.js',
       'build-system/pr-check/e2e-tests.js',
       'build-system/pr-check/local-tests.js',
+      'build-system/pr-check/npm-checks.js',
       'build-system/pr-check/performance-tests.js',
       'build-system/pr-check/utils.js',
       'build-system/pr-check/validator-tests.js',
       'build-system/pr-check/visual-diff-tests.js',
-      'build-system/pr-check/yarn-checks.js',
       'build-system/server/app.js',
       'build-system/server/amp4test.js',
       'build-system/tasks/build.js',
@@ -332,7 +334,9 @@ const forbiddenTerms = {
       'extensions/amp-analytics/0.1/instrumentation.js',
       'extensions/amp-analytics/0.1/variables.js',
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js',
+      'extensions/amp-gwd-animation/0.1/amp-gwd-animation.js',
       'src/chunk.js',
+      'src/element-service.js',
       'src/service.js',
       'src/service/cid-impl.js',
       'src/service/origin-experiments-impl.js',
@@ -606,6 +610,7 @@ const forbiddenTerms = {
   'overrideVisibilityState': {
     message: 'overrideVisibilityState is a restricted API.',
     allowlist: [
+      'src/friendly-iframe-embed.js',
       'src/multidoc-manager.js',
       'src/service/ampdoc-impl.js',
       'src/service/viewer-impl.js',
@@ -687,16 +692,6 @@ const forbiddenTerms = {
       'formDataWrapper.getFormData() to get the native FormData object.',
     allowlist: ['src/form-data-wrapper.js'],
   },
-  '([eE]xit|[eE]nter|[cC]ancel|[rR]equest)Full[Ss]creen\\(': {
-    message: 'Use fullscreenEnter() and fullscreenExit() from dom.js instead.',
-    allowlist: [
-      'ads/google/imaVideo.js',
-      'dist.3p/current/integration.js',
-      'src/video-iframe-integration.js',
-      'extensions/amp-consent/0.1/amp-consent.js',
-      'extensions/amp-consent/0.1/consent-ui.js',
-    ],
-  },
   '\\.defer\\(\\)': {
     message: 'Promise.defer() is deprecated and should not be used.',
   },
@@ -772,7 +767,6 @@ const forbiddenTerms = {
       'extensions/amp-a4a/0.1/test/test-a4a-var-source.js',
       'extensions/amp-a4a/0.1/test/test-amp-a4a.js',
       'extensions/amp-a4a/0.1/test/test-amp-ad-utils.js',
-      'extensions/amp-a4a/0.1/test/test-callout-vendors.js',
       'extensions/amp-a4a/0.1/test/test-refresh.js',
       'extensions/amp-access/0.1/test/test-access-expr.js',
       'extensions/amp-access/0.1/test/test-amp-login-done-dialog.js',
@@ -839,6 +833,7 @@ const forbiddenTerms = {
       'test/unit/test-amp-inabox.js',
       'test/unit/test-animation.js',
       'test/unit/test-batched-json.js',
+      'test/unit/test-callout-vendors.js',
       'test/unit/test-chunk.js',
       'test/unit/test-cid.js',
       'test/unit/test-css.js',
@@ -911,18 +906,6 @@ const forbiddenTerms = {
   },
 };
 
-const ThreePTermsMessage =
-  'The 3p bootstrap iframe has no polyfills loaded' +
-  ' and can thus not use most modern web APIs.';
-
-const forbidden3pTerms = {
-  // We need to forbid promise usage because we don't have our own polyfill
-  // available. This allowlisting of callNext is a major hack to allow one
-  // usage in babel's external helpers that is in a code path that we do
-  // not use.
-  '\\.then\\((?!callNext)': ThreePTermsMessage,
-};
-
 const bannedTermsHelpString =
   'Please review viewport service for helper ' +
   'methods or mark with `/*OK*/` or `/*REVIEW*/` and consult the AMP team. ' +
@@ -937,6 +920,10 @@ const bannedTermsHelpString =
   '`object./*OK*/property` if you explicitly need to read or update the ' +
   'forbidden property/method or mark it with `object./*REVIEW*/property` ' +
   'if you are unsure and so that it stands out in code reviews.';
+
+const measurementApiDeprecated =
+  'getLayoutWidth/Box APIs are being deprecated. Please contact the' +
+  ' @ampproject/wg-performance for questions.';
 
 const forbiddenTermsSrcInclusive = {
   '\\.innerHTML(?!_)': bannedTermsHelpString,
@@ -1045,6 +1032,7 @@ const forbiddenTermsSrcInclusive = {
       'src/element-stub.js',
       'src/friendly-iframe-embed.js',
       'src/polyfillstub/intersection-observer-stub.js',
+      'src/polyfillstub/resize-observer-stub.js',
       'src/runtime.js',
       'src/service/extensions-impl.js',
       'src/service/lightbox-manager-discovery.js',
@@ -1141,6 +1129,7 @@ const forbiddenTermsSrcInclusive = {
   '\\.setNonBoolean\\(': {
     message: requiresReviewPrivacy,
     allowlist: [
+      'src/service/cid-impl.js',
       'src/service/storage-impl.js',
       'extensions/amp-consent/0.1/consent-state-manager.js',
     ],
@@ -1171,6 +1160,7 @@ const forbiddenTermsSrcInclusive = {
       'testing/local-amp-chrome-extension/background.js',
       'tools/errortracker/errortracker.go',
       'tools/experiments/experiments.js',
+      'validator/js/engine/htmlparser-interface.js',
       'validator/js/engine/validator-in-browser.js',
       'validator/js/engine/validator.js',
       'validator/js/nodejs/index.js',
@@ -1196,16 +1186,31 @@ const forbiddenTermsSrcInclusive = {
     message: 'Unsupported on IE; use trim() or a helper instead.',
     allowlist: ['validator/js/engine/validator.js'],
   },
-  "process\\.env(\\.TRAVIS|\\[\\'TRAVIS)": {
+  "process\\.env(\\.|\\[\\')(TRAVIS|GITHUB_ACTIONS|CIRCLECI)": {
     message:
-      'Do not directly use process.env.TRAVIS. Instead, add a ' +
-      'function to build-system/common/travis.js',
-    allowlist: [
-      'build-system/common/check-package-manager.js',
-      'build-system/common/travis.js',
-    ],
+      'Do not directly use CI-specific environment vars. Instead, add a ' +
+      'function to build-system/common/ci.js',
   },
   '\\.matches\\(': 'Please use matches() helper in src/dom.js',
+  '\\.getLayoutWidth': {
+    message: measurementApiDeprecated,
+    allowlist: [
+      'builtins/amp-img.js',
+      'src/service/resources-impl.js',
+      'extensions/amp-fx-flying-carpet/0.1/amp-fx-flying-carpet.js',
+    ],
+  },
+  '\\.getIntersectionElementLayoutBox': {
+    message: measurementApiDeprecated,
+    allowlist: [
+      'src/custom-element.js',
+      'extensions/amp-a4a/0.1/amp-a4a.js',
+      'extensions/amp-ad/0.1/amp-ad-3p-impl.js',
+      'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',
+      'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js',
+      'extensions/amp-iframe/0.1/amp-iframe.js',
+    ],
+  },
 };
 
 // Terms that must appear in a source file.
@@ -1356,30 +1361,19 @@ function hasAnyTerms(file) {
   const basename = path.basename(pathname);
   let hasTerms = false;
   let hasSrcInclusiveTerms = false;
-  let has3pTerms = false;
 
   hasTerms = matchTerms(file, forbiddenTerms);
 
   const isTestFile =
     /^test-/.test(basename) ||
     /^_init_tests/.test(basename) ||
-    /_test\.js$/.test(basename);
+    /_test\.js$/.test(basename) ||
+    /storybook\/[^/]+\.js$/.test(pathname);
   if (!isTestFile) {
     hasSrcInclusiveTerms = matchTerms(file, forbiddenTermsSrcInclusive);
   }
 
-  const is3pFile =
-    /\/(3p|ads)\//.test(pathname) ||
-    basename == '3p.js' ||
-    basename == 'style.js';
-  // Yet another reason to move ads/google/a4a somewhere else
-  const isA4A = /\/a4a\//.test(pathname);
-  const isRecaptcha = basename == 'recaptcha.js';
-  if (is3pFile && !isRecaptcha && !isTestFile && !isA4A) {
-    has3pTerms = matchTerms(file, forbidden3pTerms);
-  }
-
-  return hasTerms || hasSrcInclusiveTerms || has3pTerms;
+  return hasTerms || hasSrcInclusiveTerms;
 }
 
 /**

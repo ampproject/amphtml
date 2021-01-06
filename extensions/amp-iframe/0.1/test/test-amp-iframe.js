@@ -402,136 +402,138 @@ describes.realWin(
         });
       });
 
-      it('should deny srcdoc with allow-same-origin', async () => {
-        const asserts = stubUserAsserts();
-        const ampIframe = createAmpIframe(env, {
-          width: 100,
-          height: 100,
-          sandbox: 'allow-same-origin',
-          srcdoc: 'test',
-        });
-        await waitForAmpIframeLayoutPromise(doc, ampIframe);
-        expect(asserts).to.throw(/allow-same-origin.*srcdoc/);
-      });
-
-      it('should deny data uri with allow-same-origin', async () => {
-        const asserts = stubUserAsserts();
-        const ampIframe = createAmpIframe(env, {
-          width: 100,
-          height: 100,
-          sandbox: 'allow-same-origin',
-          src:
-            'data:text/html;charset=utf-8;base64,' +
-            'PHNjcmlwdD5kb2N1bWVudC53cml0ZSgnUiAnICsgZG9jdW1lbnQucmVmZXJyZXIgK' +
-            'yAnLCAnICsgbG9jYXRpb24uaHJlZik8L3NjcmlwdD4=',
-        });
-        await waitForAmpIframeLayoutPromise(doc, ampIframe);
-        expect(asserts).to.throw(/amp-iframe-origin-policy.md/);
-      });
-
-      it('should deny DATA uri with allow-same-origin', async () => {
-        const asserts = stubUserAsserts();
-        const ampIframe = createAmpIframe(env, {
-          width: 100,
-          height: 100,
-          sandbox: 'allow-same-origin',
-          src:
-            'DATA:text/html;charset=utf-8;base64,' +
-            'PHNjcmlwdD5kb2N1bWVudC53cml0ZSgnUiAnICsgZG9jdW1lbnQucmVmZXJyZXIgK' +
-            'yAnLCAnICsgbG9jYXRpb24uaHJlZik8L3NjcmlwdD4=',
-        });
-        await waitForAmpIframeLayoutPromise(doc, ampIframe);
-        expect(asserts).to.throw(/amp-iframe-origin-policy.md/);
-      });
-
-      it('should deny same origin', () => {
-        const ampIframe = createAmpIframe(env);
-        const impl = ampIframe.implementation_;
-        allowConsoleError(() => {
-          expect(() => {
-            impl.assertSource_(
-              'https://google.com/fpp',
-              'https://google.com/abc',
-              'allow-same-origin'
-            );
-          }).to.throw(/must not be equal to container/);
+      describe('allow-same-origin', () => {
+        it('should deny srcdoc with allow-same-origin', async () => {
+          const asserts = stubUserAsserts();
+          const ampIframe = createAmpIframe(env, {
+            width: 100,
+            height: 100,
+            sandbox: 'allow-same-origin',
+            srcdoc: 'test',
+          });
+          await waitForAmpIframeLayoutPromise(doc, ampIframe);
+          expect(asserts).to.throw(/allow-same-origin.*srcdoc/);
         });
 
-        allowConsoleError(() => {
-          expect(() => {
-            impl.assertSource_(
-              'https://google.com/fpp',
-              'https://google.com/abc',
-              'Allow-same-origin'
-            );
-          }).to.throw(/must not be equal to container/);
+        it('should deny data uri with allow-same-origin', async () => {
+          const asserts = stubUserAsserts();
+          const ampIframe = createAmpIframe(env, {
+            width: 100,
+            height: 100,
+            sandbox: 'allow-same-origin',
+            src:
+              'data:text/html;charset=utf-8;base64,' +
+              'PHNjcmlwdD5kb2N1bWVudC53cml0ZSgnUiAnICsgZG9jdW1lbnQucmVmZXJyZXIgK' +
+              'yAnLCAnICsgbG9jYXRpb24uaHJlZik8L3NjcmlwdD4=',
+          });
+          await waitForAmpIframeLayoutPromise(doc, ampIframe);
+          expect(asserts).to.throw(/amp-iframe-origin-policy.md/);
         });
 
-        allowConsoleError(() => {
-          expect(() => {
-            impl.assertSource_(
-              'https://google.com/fpp',
-              'https://google.com/abc',
-              'allow-same-origin allow-scripts'
-            );
-          }).to.throw(/must not be equal to container/);
-        });
-        // Same origin, but sandboxed.
-        impl.assertSource_(
-          'https://google.com/fpp',
-          'https://google.com/abc',
-          ''
-        );
-
-        allowConsoleError(() => {
-          expect(() => {
-            impl.assertSource_('http://google.com/', 'https://foo.com', '');
-          }).to.throw(/Must start with https/);
+        it('should deny DATA uri with allow-same-origin', async () => {
+          const asserts = stubUserAsserts();
+          const ampIframe = createAmpIframe(env, {
+            width: 100,
+            height: 100,
+            sandbox: 'allow-same-origin',
+            src:
+              'DATA:text/html;charset=utf-8;base64,' +
+              'PHNjcmlwdD5kb2N1bWVudC53cml0ZSgnUiAnICsgZG9jdW1lbnQucmVmZXJyZXIgK' +
+              'yAnLCAnICsgbG9jYXRpb24uaHJlZik8L3NjcmlwdD4=',
+          });
+          await waitForAmpIframeLayoutPromise(doc, ampIframe);
+          expect(asserts).to.throw(/amp-iframe-origin-policy.md/);
         });
 
-        allowConsoleError(() => {
-          expect(() => {
-            impl.assertSource_('./foo', location.href, 'allow-same-origin');
-          }).to.throw(/must not be equal to container/);
-        });
+        it('should deny same origin', () => {
+          const ampIframe = createAmpIframe(env);
+          const impl = ampIframe.implementation_;
+          allowConsoleError(() => {
+            expect(() => {
+              impl.assertSource_(
+                'https://google.com/fpp',
+                'https://google.com/abc',
+                'allow-same-origin'
+              );
+            }).to.throw(/must not be equal to container/);
+          });
 
-        impl.assertSource_(
-          'http://iframe.localhost:123/foo',
-          'https://foo.com',
-          ''
-        );
-        impl.assertSource_('https://container.com', 'https://foo.com', '');
-        ampIframe.setAttribute('srcdoc', 'abc');
-        ampIframe.setAttribute('sandbox', 'allow-same-origin');
+          allowConsoleError(() => {
+            expect(() => {
+              impl.assertSource_(
+                'https://google.com/fpp',
+                'https://google.com/abc',
+                'Allow-same-origin'
+              );
+            }).to.throw(/must not be equal to container/);
+          });
 
-        allowConsoleError(() => {
-          expect(() => {
-            impl.transformSrcDoc_(
-              '<script>try{parent.location.href}catch(e){' +
-                "parent.parent./*OK*/postMessage('loaded-iframe', '*');}" +
-                '</script>',
-              'Allow-Same-Origin'
-            );
-          }).to.throw(
-            /allow-same-origin is not allowed with the srcdoc attribute/
+          allowConsoleError(() => {
+            expect(() => {
+              impl.assertSource_(
+                'https://google.com/fpp',
+                'https://google.com/abc',
+                'allow-same-origin allow-scripts'
+              );
+            }).to.throw(/must not be equal to container/);
+          });
+          // Same origin, but sandboxed.
+          impl.assertSource_(
+            'https://google.com/fpp',
+            'https://google.com/abc',
+            ''
           );
-        });
 
-        allowConsoleError(() => {
-          expect(() => {
-            impl.assertSource_(
-              'https://3p.ampproject.net:999/t',
-              'https://google.com/abc'
+          allowConsoleError(() => {
+            expect(() => {
+              impl.assertSource_('http://google.com/', 'https://foo.com', '');
+            }).to.throw(/Must start with https/);
+          });
+
+          allowConsoleError(() => {
+            expect(() => {
+              impl.assertSource_('./foo', location.href, 'allow-same-origin');
+            }).to.throw(/must not be equal to container/);
+          });
+
+          impl.assertSource_(
+            'http://iframe.localhost:123/foo',
+            'https://foo.com',
+            ''
+          );
+          impl.assertSource_('https://container.com', 'https://foo.com', '');
+          ampIframe.setAttribute('srcdoc', 'abc');
+          ampIframe.setAttribute('sandbox', 'allow-same-origin');
+
+          allowConsoleError(() => {
+            expect(() => {
+              impl.transformSrcDoc_(
+                '<script>try{parent.location.href}catch(e){' +
+                  "parent.parent./*OK*/postMessage('loaded-iframe', '*');}" +
+                  '</script>',
+                'Allow-Same-Origin'
+              );
+            }).to.throw(
+              /allow-same-origin is not allowed with the srcdoc attribute/
             );
-          }).to.throw(/not allow embedding of frames from ampproject\.\*/);
-        });
-        allowConsoleError(() => {
-          expect(() => {
-            impl.assertSource_(
-              'https://3p.ampproject.net:999/t',
-              'https://google.com/abc'
-            );
-          }).to.throw(/not allow embedding of frames from ampproject\.\*/);
+          });
+
+          allowConsoleError(() => {
+            expect(() => {
+              impl.assertSource_(
+                'https://3p.ampproject.net:999/t',
+                'https://google.com/abc'
+              );
+            }).to.throw(/not allow embedding of frames from ampproject\.\*/);
+          });
+          allowConsoleError(() => {
+            expect(() => {
+              impl.assertSource_(
+                'https://3p.ampproject.net:999/t',
+                'https://google.com/abc'
+              );
+            }).to.throw(/not allow embedding of frames from ampproject\.\*/);
+          });
         });
       });
 

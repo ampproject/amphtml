@@ -16,6 +16,8 @@
 
 import * as Preact from '../../../../src/preact';
 import {VideoWrapper} from '../video-wrapper';
+import {WithAmpContext} from '../../../../src/preact/context';
+import {createRef} from '../../../../src/preact';
 import {forwardRef} from '../../../../src/preact/compat';
 import {mount} from 'enzyme';
 import {omit} from '../../../../src/utils/object';
@@ -65,7 +67,7 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
     });
   });
 
-  it('should pass children and props to inner instance', () => {
+  it('should pass props to inner instance, sources as children', () => {
     const expectedPassthroughProps = {foo: 1, bar: 2};
     const wrapper = mount(
       <VideoWrapper
@@ -73,15 +75,47 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
         autoplay
         controls
         noaudio
+        sources={<div></div>}
         {...expectedPassthroughProps}
-      >
-        <div></div>
-      </VideoWrapper>
+      />
     );
     const player = wrapper.find(TestPlayer);
     expect(player).to.have.lengthOf(1);
     expect(player.props()).to.include(expectedPassthroughProps);
-    expect(player.props().children).to.equal(wrapper.props().children);
+    expect(player.props().children).to.equal(wrapper.props().sources);
+  });
+
+  it('should render only shell and resolve API as unloaded', () => {
+    const ref = createRef();
+    const wrapper = mount(
+      <VideoWrapper
+        ref={ref}
+        loading="unload"
+        component={TestPlayer}
+        sources={<div></div>}
+      />
+    );
+    const player = wrapper.find(TestPlayer);
+    expect(player).to.have.lengthOf(0);
+
+    // API is functional but returns 0/NaN values.
+    const api = ref.current;
+    expect(api.currentTime).to.equal(0);
+    expect(api.duration).to.be.NaN;
+  });
+
+  it('should render only shell when paused in unloadOnPause', () => {
+    const wrapper = mount(
+      <WithAmpContext playable={false}>
+        <VideoWrapper
+          unloadOnPause={true}
+          component={TestPlayer}
+          sources={<div></div>}
+        />
+      </WithAmpContext>
+    );
+    const player = wrapper.find(TestPlayer);
+    expect(player).to.have.lengthOf(0);
   });
 
   describe('MediaSession', () => {
@@ -176,7 +210,7 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
         <VideoWrapper component={TestPlayer} controls autoplay />
       );
       expect(wrapper.exists(`.${classes.eq}`)).to.be.true;
-      wrapper.find('[role="button"]').simulate('click');
+      wrapper.find('button').simulate('click');
       expect(wrapper.exists(`.${classes.eq}`)).to.be.false;
     });
 
@@ -189,14 +223,14 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
 
     it('should not render mask without controls', () => {
       const wrapper = mount(<VideoWrapper component={TestPlayer} autoplay />);
-      expect(wrapper.exists('[role="button"]')).to.be.false;
+      expect(wrapper.exists('button')).to.be.false;
     });
 
     it('should render mask with controls', () => {
       const wrapper = mount(
         <VideoWrapper component={TestPlayer} controls autoplay />
       );
-      expect(wrapper.exists('[role="button"]')).to.be.true;
+      expect(wrapper.exists('button')).to.be.true;
     });
 
     it('should enable native controls on mask interaction', () => {
@@ -204,7 +238,7 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
         <VideoWrapper component={TestPlayer} controls autoplay />
       );
       expect(wrapper.find(TestPlayer).props().controls).to.be.false;
-      wrapper.find('[role="button"]').simulate('click');
+      wrapper.find('button').simulate('click');
       expect(wrapper.find(TestPlayer).props().controls).to.be.true;
     });
 
@@ -218,7 +252,7 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
         <VideoWrapper component={TestPlayer} controls autoplay />
       );
       expect(wrapper.find(TestPlayer).props().muted).to.be.true;
-      wrapper.find('[role="button"]').simulate('click');
+      wrapper.find('button').simulate('click');
       expect(wrapper.find(TestPlayer).props().muted).to.be.false;
     });
 
@@ -227,7 +261,7 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
         <VideoWrapper component={TestPlayer} controls autoplay />
       );
       expect(wrapper.exists('Autoplay')).to.be.true;
-      wrapper.find('[role="button"]').simulate('click');
+      wrapper.find('button').simulate('click');
       expect(wrapper.exists('Autoplay')).to.be.false;
     });
 
@@ -245,7 +279,7 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
         <VideoWrapper component={TestPlayer} controls autoplay />
       );
       expect(intersectionObserverObserved).to.have.lengthOf(1);
-      wrapper.find('[role="button"]').simulate('click');
+      wrapper.find('button').simulate('click');
       expect(intersectionObserverObserved).to.be.null;
     });
 
@@ -267,6 +301,17 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
       await wrapper.find(TestPlayer).invoke('onCanPlay')();
       expect(play).to.not.have.been.called;
       expect(pause).to.have.been.calledOnce;
+    });
+
+    it('should not play when not playable', async () => {
+      const wrapper = mount(
+        <WithAmpContext playable={false}>
+          <VideoWrapper component={TestPlayer} controls autoplay />
+        </WithAmpContext>
+      );
+      intersectionObserverCallback([{isIntersecting: true}]);
+      await wrapper.find(TestPlayer).invoke('onCanPlay')();
+      expect(play).to.not.have.been.called;
     });
   });
 });

@@ -22,6 +22,7 @@ import {
   childElement,
   childElementByTag,
   childElementsByTag,
+  dispatchCustomEvent,
   fullscreenEnter,
   fullscreenExit,
   insertAfterOrAtStart,
@@ -270,7 +271,7 @@ class AmpVideo extends AMP.BaseElement {
       /* opt_removeMissingAttrs */ true
     );
     if (mutations['src']) {
-      element.dispatchCustomEvent(VideoEvents.RELOAD);
+      dispatchCustomEvent(element, VideoEvents.RELOAD);
     }
     if (mutations['artwork'] || mutations['poster']) {
       const artwork = element.getAttribute('artwork');
@@ -292,11 +293,6 @@ class AmpVideo extends AMP.BaseElement {
     // TODO(@aghassemi, 10756) Either make metadata observable or submit
     // an event indicating metadata changed (in case metadata changes
     // while the video is playing).
-  }
-
-  /** @override */
-  viewportCallback(visible) {
-    this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
   }
 
   /** @override */
@@ -356,9 +352,7 @@ class AmpVideo extends AMP.BaseElement {
         }
         throw reason;
       })
-      .then(() => {
-        this.element.dispatchCustomEvent(VideoEvents.LOAD);
-      });
+      .then(() => this.onVideoLoaded_());
 
     // Resolve layoutCallback right away if the video won't preload.
     if (this.element.getAttribute('preload') === 'none') {
@@ -575,6 +569,7 @@ class AmpVideo extends AMP.BaseElement {
       [
         VideoEvents.ENDED,
         VideoEvents.LOADEDMETADATA,
+        VideoEvents.LOADEDDATA,
         VideoEvents.PAUSE,
         VideoEvents.PLAYING,
         VideoEvents.PLAY,
@@ -588,7 +583,7 @@ class AmpVideo extends AMP.BaseElement {
         return;
       }
       this.muted_ = muted;
-      this.element.dispatchCustomEvent(mutedOrUnmutedEvent(this.muted_));
+      dispatchCustomEvent(this.element, mutedOrUnmutedEvent(this.muted_));
     });
 
     this.unlisteners_.push(forwardEventsUnlisten, mutedOrUnmutedEventUnlisten);
@@ -614,6 +609,13 @@ class AmpVideo extends AMP.BaseElement {
 
     this.uninstallEventHandlers_();
     this.installEventHandlers_();
+    // When source changes, video needs to trigger loaded again.
+    this.loadPromise(this.video_).then(() => this.onVideoLoaded_());
+  }
+
+  /** @private */
+  onVideoLoaded_() {
+    dispatchCustomEvent(this.element, VideoEvents.LOAD);
   }
 
   /** @override */

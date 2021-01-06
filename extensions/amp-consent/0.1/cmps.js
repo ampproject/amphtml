@@ -91,14 +91,33 @@ CMP_CONFIG['opencmp'] = {
   'promptUISrc': 'https://cdn.opencmp.net/tcf-v2/amp/cmp.html',
 };
 
+CMP_CONFIG['quantcast'] = {
+  'consentInstanceId': 'quantcast',
+  'checkConsentHref':
+    'https://apis.quantcast.mgr.consensu.org/amp/check-consent',
+  'promptUISrc': 'https://quantcast.mgr.consensu.org/tcfv2/amp.html',
+};
+
 CMP_CONFIG['SourcePoint'] = {
   'consentInstanceId': 'SourcePoint',
   'checkConsentHref': 'https://sourcepoint.mgr.consensu.org/consent/v2/amp',
   'promptUISrc': 'https://amp.pm.sourcepoint.mgr.consensu.org/',
 };
 
+CMP_CONFIG['UniConsent'] = {
+  'consentInstanceId': 'UniConsent',
+  'checkConsentHref': 'https://edge.uniconsent.com/amp/check-consent',
+  'promptUISrc': 'https://cmp.uniconsent.com/amp/index.html',
+};
+
 CMP_CONFIG['Usercentrics'] = {
   'consentInstanceId': 'Usercentrics',
   'checkConsentHref': 'https://consents.usercentrics.eu/amp/checkConsent',
   'promptUISrc': 'https://amp.usercentrics.eu/amp.html',
+};
+
+CMP_CONFIG['LiveRamp'] = {
+  'consentInstanceId': 'LiveRamp',
+  'checkConsentHref': 'https://api.privacymanager.io/amp/check-consent',
+  'promptUISrc': 'https://amp-consent-tool.privacymanager.io/1/index.html',
 };

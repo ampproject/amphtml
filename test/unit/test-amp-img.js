@@ -38,7 +38,6 @@ describes.sandboxed('amp-img', {}, (env) => {
 
     screenWidth = 320;
     windowWidth = 320;
-    sandbox.stub(BaseElement.prototype, 'isInViewport').returns(true);
     sandbox.stub(BaseElement.prototype, 'getViewport').callsFake(() => {
       return {
         getWidth: () => windowWidth,
@@ -203,6 +202,20 @@ describes.sandboxed('amp-img', {}, (env) => {
     }).then((ampImg) => {
       const img = ampImg.querySelector('img');
       expect(img.getAttribute('data-foo')).to.equal('abc');
+    });
+  });
+
+  it('should not propagate bind attributes', () => {
+    return getImg({
+      src: '/examples/img/sample.jpg',
+      width: 320,
+      height: 240,
+      'data-amp-bind': 'abc',
+      'data-amp-bind-foo': '123',
+    }).then((ampImg) => {
+      const img = ampImg.querySelector('img');
+      expect(img.getAttribute('data-amp-bind')).to.equal('abc');
+      expect(img.getAttribute('data-amp-bind-foo')).to.be.null;
     });
   });
 

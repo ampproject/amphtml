@@ -110,10 +110,10 @@ The `<amp-inline-gallery-pagination>` element includes <a href="https://amp.dev/
 
 The `amp-inline-gallery` component can display thumbnail preview in addition to, or instead of, the pagination indicators. By default, no thumbnails are shown in the gallery. Keep in mind the following best practices when using thumbnails:
 
-- Avoid using both pagination indicators and thumbnails with less than eight slides. The indicator dots are redundant in smaller galleries.
-- When using both pagination indicators and thumbnails, inset the pagination indicators to overlap the slides. View the code sample below to see an example.
-- Use the `media` attribute to show pagination indicators on smaller mobile devices and thumbnails on larger screens.
-- Load lower resolution images at thumbnails by using `srcset`. You can omit the `sizes` on `<amp-img>`, it will be automatically generated based on the rendered width.
+-   Avoid using both pagination indicators and thumbnails with less than eight slides. The indicator dots are redundant in smaller galleries.
+-   When using both pagination indicators and thumbnails, inset the pagination indicators to overlap the slides. View the code sample below to see an example.
+-   Use the `media` attribute to show pagination indicators on smaller mobile devices and thumbnails on larger screens.
+-   Load lower resolution images at thumbnails by using `srcset`. You can omit the `sizes` on `<amp-img>`, it will be automatically generated based on the rendered width.
 
 The example below demonstrates a gallery with thumbnails visible at larger resolutions.
 

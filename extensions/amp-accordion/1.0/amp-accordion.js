@@ -15,43 +15,91 @@
  */
 
 import * as Preact from '../../../src/preact';
-import {Accordion, AccordionSection} from './accordion';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionHeader,
+  AccordionSection,
+} from './accordion';
+import {ActionTrust} from '../../../src/action-constants';
+import {CSS} from '../../../build/amp-accordion-1.0.css';
 import {PreactBaseElement} from '../../../src/preact/base-element';
-import {childElementsByTag, toggleAttribute} from '../../../src/dom';
+import {Services} from '../../../src/services';
+import {
+  childElementsByTag,
+  dispatchCustomEvent,
+  toggleAttribute,
+} from '../../../src/dom';
+import {createCustomEvent} from '../../../src/event-helper';
 import {devAssert, userAssert} from '../../../src/log';
 import {dict, memo} from '../../../src/utils/object';
+import {forwardRef} from '../../../src/preact/compat';
 import {isExperimentOn} from '../../../src/experiments';
-import {toArray} from '../../../src/types';
-import {useLayoutEffect} from '../../../src/preact';
+import {toArray, toWin} from '../../../src/types';
+import {
+  useImperativeHandle,
+  useLayoutEffect,
+  useRef,
+} from '../../../src/preact';
+import {useSlotContext} from '../../../src/preact/slot';
 
 /** @const {string} */
 const TAG = 'amp-accordion';
 
 const SECTION_SHIM_PROP = '__AMP_S_SHIM';
 const HEADER_SHIM_PROP = '__AMP_H_SHIM';
+const CONTENT_SHIM_PROP = '__AMP_C_SHIM';
+const SECTION_POST_RENDER = '__AMP_PR';
+const EXPAND_STATE_SHIM_PROP = '__AMP_EXPAND_STATE_SHIM';
 
+const isDisplayLockingEnabledForAccordion = (win) =>
+  isExperimentOn(win, 'amp-accordion-display-locking') &&
+  win.document.body.onbeforematch !== undefined;
+
+/** @extends {PreactBaseElement<AccordionDef.AccordionApi>} */
 class AmpAccordion extends PreactBaseElement {
   /** @override */
   init() {
+    this.registerApiAction('toggle', (api, invocation) =>
+      api./*OK*/ toggle(invocation.args && invocation.args['section'])
+    );
+    this.registerApiAction('expand', (api, invocation) =>
+      api./*OK*/ expand(invocation.args && invocation.args['section'])
+    );
+    this.registerApiAction('collapse', (api, invocation) =>
+      api./*OK*/ collapse(invocation.args && invocation.args['section'])
+    );
+
     const {element} = this;
+    const experimentDisplayLocking = isDisplayLockingEnabledForAccordion(
+      this.win
+    );
+    if (experimentDisplayLocking) {
+      element.classList.add('i-amphtml-display-locking');
+    }
 
     const mu = new MutationObserver(() => {
       this.mutateProps(getState(element, mu));
     });
     mu.observe(element, {
-      attributeFilter: ['expanded'],
+      attributeFilter: ['expanded', 'id'],
       subtree: true,
+      childList: true,
     });
 
     const {'children': children} = getState(element, mu);
-    return dict({'children': children});
+    return dict({
+      'experimentDisplayLocking': experimentDisplayLocking,
+      'children': children,
+    });
   }
 
   /** @override */
   isLayoutSupported(unusedLayout) {
     userAssert(
-      isExperimentOn(this.win, 'amp-accordion-bento'),
-      'expected amp-accordion-bento experiment to be enabled'
+      isExperimentOn(this.win, 'bento') ||
+        isExperimentOn(this.win, 'bento-accordion'),
+      'expected global "bento" or specific "bento-accordion" experiment to be enabled'
     );
     return true;
   }
@@ -66,39 +114,83 @@ function getState(element, mu) {
   const sections = toArray(childElementsByTag(element, 'section'));
 
   const children = sections.map((section) => {
+    // TODO(wg-bento): This implementation causes infinite loops on DOM mutation.
+    // See https://github.com/ampproject/amp-react-prototype/issues/40.
+    if (!section[SECTION_POST_RENDER]) {
+      section[SECTION_POST_RENDER] = () => mu.takeRecords();
+    }
+
     const sectionShim = memo(
       section,
       SECTION_SHIM_PROP,
       bindSectionShimToElement
     );
     const headerShim = memo(section, HEADER_SHIM_PROP, bindHeaderShimToElement);
-    const expanded = section.hasAttribute('expanded');
-    const props = dict({
+    const contentShim = memo(
+      section,
+      CONTENT_SHIM_PROP,
+      bindContentShimToElement
+    );
+    const expandStateShim = memo(
+      section,
+      EXPAND_STATE_SHIM_PROP,
+      getExpandStateTrigger
+    );
+    const sectionProps = dict({
       'key': section,
       'as': sectionShim,
-      'headerAs': headerShim,
-      'expanded': expanded,
-      // TODO(wg-bento): This implementation causes infinite loops on DOM mutation.
-      // See https://github.com/ampproject/amp-react-prototype/issues/40.
-      'postRender': () => {
-        // Skip mutations to avoid cycles.
-        mu.takeRecords();
-      },
+      'expanded': section.hasAttribute('expanded'),
+      'id': section.getAttribute('id'),
+      'onExpandStateChange': expandStateShim,
     });
-    return <AccordionSection {...props} />;
+    const headerProps = dict({
+      'as': headerShim,
+      'id': section.firstElementChild.getAttribute('id'),
+    });
+    const contentProps = dict({
+      'as': contentShim,
+      'id': section.lastElementChild.getAttribute('id'),
+    });
+    return (
+      <AccordionSection {...sectionProps}>
+        <AccordionHeader {...headerProps}></AccordionHeader>
+        <AccordionContent {...contentProps}></AccordionContent>
+      </AccordionSection>
+    );
   });
   return dict({'children': children});
 }
 
 /**
+ * @param {!Element} section
+ * @return {Function}
+ */
+function getExpandStateTrigger(section) {
+  const action = Services.actionServiceForDoc(section);
+  const triggerEvent = (expanded) => {
+    const eventName = expanded ? 'expand' : 'collapse';
+    const event = createCustomEvent(
+      toWin(section.ownerDocument.defaultView),
+      `accordionSection.${eventName}`,
+      dict()
+    );
+    action.trigger(section, eventName, event, ActionTrust.HIGH);
+    dispatchCustomEvent(section, name);
+  };
+  return triggerEvent;
+}
+
+/**
  * @param {!Element} sectionElement
- * @param {!AccordionDef.SectionProps} props
+ * @param {!AccordionDef.SectionShimProps} props
  * @return {PreactDef.Renderable}
  */
 function SectionShim(sectionElement, {expanded, children}) {
   useLayoutEffect(() => {
     toggleAttribute(sectionElement, 'expanded', expanded);
-    sectionElement.setAttribute('aria-expanded', String(expanded));
+    if (sectionElement[SECTION_POST_RENDER]) {
+      sectionElement[SECTION_POST_RENDER]();
+    }
   }, [sectionElement, expanded]);
   return children;
 }
@@ -111,20 +203,48 @@ const bindSectionShimToElement = (element) => SectionShim.bind(null, element);
 
 /**
  * @param {!Element} sectionElement
- * @param {!AccordionDef.HeaderProps} props
+ * @param {!AccordionDef.HeaderShimProps} props
  * @return {PreactDef.Renderable}
  */
-function HeaderShim(sectionElement, {onClick}) {
+function HeaderShim(
+  sectionElement,
+  {
+    id,
+    role,
+    onClick,
+    'aria-controls': ariaControls,
+    'aria-expanded': ariaExpanded,
+  }
+) {
   const headerElement = sectionElement.firstElementChild;
   useLayoutEffect(() => {
     if (!headerElement || !onClick) {
       return;
     }
+    headerElement.setAttribute('id', id);
+    headerElement.classList.add('i-amphtml-accordion-header');
     headerElement.addEventListener('click', onClick);
+    if (!headerElement.hasAttribute('tabindex')) {
+      headerElement.setAttribute('tabindex', 0);
+    }
+    headerElement.setAttribute('aria-expanded', ariaExpanded);
+    headerElement.setAttribute('aria-controls', ariaControls);
+    headerElement.setAttribute('role', role);
+    if (sectionElement[SECTION_POST_RENDER]) {
+      sectionElement[SECTION_POST_RENDER]();
+    }
     return () => {
       headerElement.removeEventListener('click', devAssert(onClick));
     };
-  }, [headerElement, onClick]);
+  }, [
+    sectionElement,
+    headerElement,
+    id,
+    role,
+    onClick,
+    ariaControls,
+    ariaExpanded,
+  ]);
   return <header />;
 }
 
@@ -134,6 +254,49 @@ function HeaderShim(sectionElement, {onClick}) {
  */
 const bindHeaderShimToElement = (element) => HeaderShim.bind(null, element);
 
+/**
+ * @param {!Element} sectionElement
+ * @param {!AccordionDef.ContentShimProps} props
+ * @param {{current: ?}} ref
+ * @return {PreactDef.Renderable}
+ */
+function ContentShimWithRef(
+  sectionElement,
+  {id, role, 'aria-labelledby': ariaLabelledBy},
+  ref
+) {
+  const contentElement = sectionElement.lastElementChild;
+  const contentRef = useRef();
+  contentRef.current = contentElement;
+  useSlotContext(contentRef);
+  useImperativeHandle(ref, () => contentElement, [contentElement]);
+  useLayoutEffect(() => {
+    if (!contentElement) {
+      return;
+    }
+    contentElement.classList.add('i-amphtml-accordion-content');
+    contentElement.setAttribute('id', id);
+    contentElement.setAttribute('role', role);
+    contentElement.setAttribute('aria-labelledby', ariaLabelledBy);
+    if (sectionElement[SECTION_POST_RENDER]) {
+      sectionElement[SECTION_POST_RENDER]();
+    }
+  }, [sectionElement, contentElement, id, role, ariaLabelledBy]);
+  return <div />;
+}
+
+/**
+ * @param {!Element} element
+ * @return {function(!AccordionDef.ContentProps):PreactDef.Renderable}
+ */
+const bindContentShimToElement = (element) =>
+  forwardRef(
+    /** @type {function(?, {current:?}):PreactDef.Renderable} */ (ContentShimWithRef.bind(
+      null,
+      element
+    ))
+  );
+
 /** @override */
 AmpAccordion['Component'] = Accordion;
 
@@ -142,9 +305,10 @@ AmpAccordion['detached'] = true;
 
 /** @override */
 AmpAccordion['props'] = {
+  'animate': {attr: 'animate', type: 'boolean'},
   'expandSingleSection': {attr: 'expand-single-section', type: 'boolean'},
 };
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpAccordion);
+  AMP.registerElement(TAG, AmpAccordion, CSS);
 });

@@ -30,4 +30,4 @@ For details on the configuration semantics, please contact the ad network or ref
 
 ### Required parameters
 
-- `data-blockid` - insert your block_id
+-   `data-blockid` - insert your block_id

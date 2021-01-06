@@ -49,7 +49,6 @@ import {getValueForExpr} from '../../../src/json';
 import {installStylesForDoc} from '../../../src/style-installer';
 
 import {devAssert, user, userAssert} from '../../../src/log';
-import {startsWith} from '../../../src/string';
 
 const TAG = 'amp-subscriptions-google';
 const PLATFORM_ID = 'subscribe.google.com';
@@ -149,7 +148,7 @@ export class GoogleSubscriptionsPlatform {
     const ampExperimentsForSwg = Object.keys(experimentToggles(ampdoc.win))
       .filter(
         (exp) =>
-          startsWith(exp, 'swg-') && isExperimentOn(ampdoc.win, /*OK*/ exp)
+          exp.startsWith('swg-') && isExperimentOn(ampdoc.win, /*OK*/ exp)
       )
       .map((exp) => exp.substring(4));
 
@@ -519,10 +518,10 @@ export class GoogleSubscriptionsPlatform {
         if (
           // Note we don't use the more generic this.isDev_ flag because that can be triggered
           // by a hash value which would allow non gooogle hostnames to construct LAA urls.
-          ((parsedReferrer.protocol === 'https' &&
+          ((parsedReferrer.protocol === 'https:' &&
             GOOGLE_DOMAIN_RE.test(parsedReferrer.hostname)) ||
             getMode(this.ampdoc_.win).localDev) &&
-          parsedQuery[`gaa_at`] == 'laa' &&
+          parsedQuery[`gaa_at`] == 'la' &&
           parsedQuery[`gaa_n`] &&
           parsedQuery[`gaa_sig`] &&
           parsedQuery[`gaa_ts`] &&

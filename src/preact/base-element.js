@@ -15,24 +15,38 @@
  */
 
 import * as Preact from './index';
+import {ActionTrust} from '../action-constants';
 import {AmpEvents} from '../amp-events';
 import {CanPlay, CanRender, LoadingProp} from '../contextprops';
 import {Deferred} from '../utils/promise';
 import {Loading} from '../loading';
+import {MediaQueryProps} from './media-query-props';
 import {Slot, createSlot} from './slot';
 import {WithAmpContext} from './context';
-import {addGroup, setGroupProp, setParent, subscribe} from '../context';
+import {
+  addGroup,
+  discover,
+  setGroupProp,
+  setParent,
+  subscribe,
+} from '../context';
 import {cancellation} from '../error';
-import {childElementByTag, createElementWithAttributes, matches} from '../dom';
-import {createCustomEvent} from '../event-helper';
+import {
+  childElementByTag,
+  createElementWithAttributes,
+  dispatchCustomEvent,
+  matches,
+  parseBooleanAttribute,
+} from '../dom';
 import {createRef, hydrate, render} from './index';
+import {dashToCamelCase} from '../string';
 import {devAssert} from '../log';
 import {dict, hasOwn} from '../utils/object';
 import {getDate} from '../utils/date';
 import {getMode} from '../mode';
 import {installShadowStyle} from '../shadow-embed';
 import {isLayoutSizeDefined} from '../layout';
-import {startsWith} from '../string';
+import {sequentialIdGenerator} from '../utils/id-generator';
 
 /**
  * The following combinations are allowed.
@@ -40,12 +54,16 @@ import {startsWith} from '../string';
  *   a component prop 1:1.
  * - `attrs` and `parseAttrs` can be specified when multiple attributes map
  *   to a single prop.
+ * - `attrPrefix` can be specified when multiple attributes with the same prefix
+ *   map to a single prop object. The prefix cannot equal the attribute name.
  *
  * @typedef {{
  *   attr: (string|undefined),
  *   type: (string|undefined),
+ *   attrPrefix: (string|undefined),
  *   attrs: (!Array<string>|undefined),
  *   parseAttrs: ((function(!Element):*)|undefined),
+ *   media: (boolean|undefined),
  *   default: *,
  * }}
  */
@@ -79,7 +97,10 @@ const TEMPLATES_MUTATION_INIT = {
 };
 
 /** @const {!JsonObject<string, string>} */
-const SHADOW_CONTAINER_ATTRS = dict({'style': 'display: contents'});
+const SHADOW_CONTAINER_ATTRS = dict({
+  'style': 'display: contents; background: inherit;',
+  'part': 'c',
+});
 
 /** @const {!JsonObject<string, string>} */
 const SERVICE_SLOT_ATTRS = dict({'name': 'i-amphtml-svc'});
@@ -90,6 +111,8 @@ const SERVICE_SLOT_ATTRS = dict({'name': 'i-amphtml-svc'});
  */
 const SIZE_DEFINED_STYLE = {
   'position': 'absolute',
+  'top': '0',
+  'left': '0',
   'width': '100%',
   'height': '100%',
 };
@@ -105,6 +128,8 @@ const UNSLOTTED_GROUP = 'unslotted';
 
 /** @return {boolean} */
 const MATCH_ANY = () => true;
+
+const childIdGenerator = sequentialIdGenerator();
 
 /**
  * Wraps a Preact Component in a BaseElement class.
@@ -168,6 +193,9 @@ export class PreactBaseElement extends AMP.BaseElement {
 
     /** @protected {?MutationObserver} */
     this.observer = null;
+
+    /** @protected {?MediaQueryProps} */
+    this.mediaQueryProps_ = null;
   }
 
   /**
@@ -204,6 +232,10 @@ export class PreactBaseElement extends AMP.BaseElement {
       ...templatesInit,
     });
 
+    this.mediaQueryProps_ = hasMediaQueryProps(Ctor)
+      ? new MediaQueryProps(this.win, () => this.scheduleRender_())
+      : null;
+
     const staticProps = Ctor['staticProps'];
     const initProps = this.init();
     Object.assign(
@@ -213,6 +245,21 @@ export class PreactBaseElement extends AMP.BaseElement {
     );
 
     this.checkPropsPostMutations();
+
+    // Unmount callback.
+    subscribe(this.element, [], () => {
+      return () => {
+        this.mounted_ = false;
+        if (this.container_) {
+          // We have to unmount the component to run all cleanup functions and
+          // release handlers. The only way to unmount right now is by
+          // unrendering the DOM. If the new `unmount` API becomes available, this
+          // code can be changed to `unmount` and the follow up render would
+          // have to execute the fast `hydrate` API.
+          render(null, this.container_);
+        }
+      };
+    });
 
     // Unblock rendering on first `CanRender` response. And keep the context
     // in-sync.
@@ -266,6 +313,9 @@ export class PreactBaseElement extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
+    if (this.mediaQueryProps_) {
+      this.mediaQueryProps_.dispose();
+    }
     const Ctor = this.constructor;
     if (!Ctor['loadable']) {
       return super.unlayoutCallback();
@@ -273,6 +323,16 @@ export class PreactBaseElement extends AMP.BaseElement {
     this.mutateProps(dict({'loading': Loading.UNLOAD}));
     this.onLoadError_(cancellation());
     return true;
+  }
+
+  /** @override */
+  attachedCallback() {
+    discover(this.element);
+  }
+
+  /** @override */
+  detachedCallback() {
+    discover(this.element);
   }
 
   /** @override */
@@ -305,7 +365,7 @@ export class PreactBaseElement extends AMP.BaseElement {
    * @param {../action-constants.ActionTrust} minTrust
    * @protected
    */
-  registerApiAction(alias, handler, minTrust) {
+  registerApiAction(alias, handler, minTrust = ActionTrust.DEFAULT) {
     this.registerAction(
       alias,
       (invocation) => handler(this.api(), invocation),
@@ -314,9 +374,18 @@ export class PreactBaseElement extends AMP.BaseElement {
   }
 
   /**
-   * A callback called immediately or after mutations have been observed. The
-   * implementation can verify if any additional properties need to be mutated
-   * via `mutateProps()` API.
+   * A callback called immediately after mutations have been observed on a
+   * component. This differs from `checkPropsPostMutations` in that it is
+   * called in all cases of mutation.
+   * @param {!Array<MutationRecord>} unusedRecords
+   * @protected
+   */
+  mutationObserverCallback(unusedRecords) {}
+
+  /**
+   * A callback called immediately after mutations have been observed on a
+   * component's defined props. The implementation can verify if any
+   * additional properties need to be mutated via `mutateProps()` API.
    * @protected
    */
   checkPropsPostMutations() {}
@@ -346,6 +415,7 @@ export class PreactBaseElement extends AMP.BaseElement {
    */
   checkMutations_(records) {
     const Ctor = this.constructor;
+    this.mutationObserverCallback(records);
     const rerender = records.some((m) => shouldMutationBeRerendered(Ctor, m));
     if (rerender) {
       this.checkPropsPostMutations();
@@ -366,6 +436,7 @@ export class PreactBaseElement extends AMP.BaseElement {
     if (this.loadDeferred_) {
       this.loadDeferred_.resolve();
       this.loadDeferred_ = null;
+      dispatchCustomEvent(this.element, 'load', null, {bubbles: false});
     }
   }
 
@@ -377,6 +448,7 @@ export class PreactBaseElement extends AMP.BaseElement {
     if (this.loadDeferred_) {
       this.loadDeferred_.reject(opt_reason || new Error('load error'));
       this.loadDeferred_ = null;
+      dispatchCustomEvent(this.element, 'error', null, {bubbles: false});
     }
   }
 
@@ -481,7 +553,8 @@ export class PreactBaseElement extends AMP.BaseElement {
       Ctor,
       this.element,
       this.ref_,
-      this.defaultProps_
+      this.defaultProps_,
+      this.mediaQueryProps_
     );
     this.updatePropsForRendering(props);
 
@@ -521,13 +594,9 @@ export class PreactBaseElement extends AMP.BaseElement {
 
     // Dispatch the DOM_UPDATE event when rendered in the light DOM.
     if (!isShadow && !isDetached) {
-      this.mutateElement(() => {
-        this.element.dispatchEvent(
-          createCustomEvent(this.win, AmpEvents.DOM_UPDATE, /* detail */ null, {
-            bubbles: true,
-          })
-        );
-      });
+      this.mutateElement(() =>
+        dispatchCustomEvent(this.element, AmpEvents.DOM_UPDATE, null)
+      );
     }
 
     if (this.renderDeferred_) {
@@ -673,13 +742,28 @@ function usesShadowDom(Ctor) {
 }
 
 /**
+ * @param {null|string} attributeName
+ * @param {string|undefined} attributePrefix
+ * @return {boolean}
+ */
+function matchesAttrPrefix(attributeName, attributePrefix) {
+  return (
+    attributeName !== null &&
+    attributePrefix !== undefined &&
+    attributeName.startsWith(attributePrefix) &&
+    attributeName !== attributePrefix
+  );
+}
+
+/**
  * @param {typeof PreactBaseElement} Ctor
  * @param {!AmpElement} element
  * @param {{current: ?}} ref
  * @param {!JsonObject|null|undefined} defaultProps
+ * @param {?MediaQueryProps} mediaQueryProps
  * @return {!JsonObject}
  */
-function collectProps(Ctor, element, ref, defaultProps) {
+function collectProps(Ctor, element, ref, defaultProps, mediaQueryProps) {
   const {
     'children': childrenDefs,
     'className': className,
@@ -689,6 +773,10 @@ function collectProps(Ctor, element, ref, defaultProps) {
     'passthroughNonEmpty': passthroughNonEmpty,
     'props': propDefs,
   } = Ctor;
+
+  if (mediaQueryProps) {
+    mediaQueryProps.start();
+  }
 
   const props = /** @type {!JsonObject} */ ({...defaultProps, ref});
 
@@ -714,36 +802,7 @@ function collectProps(Ctor, element, ref, defaultProps) {
   }
 
   // Props.
-  for (const name in propDefs) {
-    const def = /** @type {!AmpElementPropDef} */ (propDefs[name]);
-    let value;
-    if (def.attr) {
-      value =
-        def.type == 'boolean'
-          ? element.hasAttribute(def.attr)
-          : element.getAttribute(def.attr);
-    } else if (def.parseAttrs) {
-      devAssert(def.attrs);
-      value = def.parseAttrs(element);
-    }
-    if (value == null) {
-      if (def.default !== undefined) {
-        props[name] = def.default;
-      }
-    } else {
-      const v =
-        def.type == 'number'
-          ? parseFloat(value)
-          : def.type == 'date'
-          ? getDate(value)
-          : def.type == 'Element'
-          ? // TBD: what's the best way for element referencing compat between
-            // React and AMP? Currently modeled as a Ref.
-            {current: element.getRootNode().getElementById(value)}
-          : value;
-      props[name] = v;
-    }
-  }
+  parsePropDefs(props, propDefs, element, mediaQueryProps);
 
   // Children.
   // There are plain "children" and there're slotted children assigned
@@ -782,13 +841,15 @@ function collectProps(Ctor, element, ref, defaultProps) {
       }
 
       const {single, name, clone, props: slotProps = {}} = def;
+      const parsedSlotProps = {};
+      parsePropDefs(parsedSlotProps, slotProps, childElement, mediaQueryProps);
 
       // TBD: assign keys, reuse slots, etc.
       if (single) {
         props[name] = createSlot(
           childElement,
           childElement.getAttribute('slot') || `i-amphtml-${name}`,
-          slotProps
+          parsedSlotProps
         );
       } else {
         const list =
@@ -799,15 +860,71 @@ function collectProps(Ctor, element, ref, defaultProps) {
             : createSlot(
                 childElement,
                 childElement.getAttribute('slot') ||
-                  `i-amphtml-${name}-${list.length}`,
-                slotProps
+                  `i-amphtml-${name}-${childIdGenerator()}`,
+                parsedSlotProps
               )
         );
       }
     }
   }
 
+  if (mediaQueryProps) {
+    mediaQueryProps.complete();
+  }
+
   return props;
+}
+
+/**
+ * @param {!Object} props
+ * @param {!Object} propDefs
+ * @param {!Element} element
+ * @param {?MediaQueryProps} mediaQueryProps
+ */
+function parsePropDefs(props, propDefs, element, mediaQueryProps) {
+  for (const name in propDefs) {
+    const def = /** @type {!AmpElementPropDef} */ (propDefs[name]);
+    let value;
+    if (def.attr) {
+      value = element.getAttribute(def.attr);
+      if (def.media && value != null) {
+        value = mediaQueryProps.resolve(String(value));
+      }
+    } else if (def.parseAttrs) {
+      devAssert(def.attrs);
+      value = def.parseAttrs(element);
+    } else if (def.attrPrefix) {
+      const currObj = {};
+      let objContains = false;
+      const attrs = element.attributes;
+      for (let i = 0; i < attrs.length; i++) {
+        const attrib = attrs[i];
+        if (matchesAttrPrefix(attrib.name, def.attrPrefix)) {
+          currObj[dashToCamelCase(attrib.name.slice(def.attrPrefix.length))] =
+            attrib.value;
+          objContains = true;
+        }
+      }
+      if (objContains) {
+        value = currObj;
+      }
+    }
+    if (value == null) {
+      if (def.default != null) {
+        props[name] = def.default;
+      }
+    } else {
+      const v =
+        def.type == 'number'
+          ? parseFloat(value)
+          : def.type == 'boolean'
+          ? parseBooleanAttribute(/** @type {string} */ (value))
+          : def.type == 'date'
+          ? getDate(value)
+          : value;
+      props[name] = v;
+    }
+  }
 }
 
 /**
@@ -861,7 +978,7 @@ function shouldMutationForNodeListBeRerendered(nodeList) {
       // `<x slot="i-amphtml-svc">`.
       if (
         node[RENDERED_PROP] ||
-        startsWith(node.tagName, 'I-') ||
+        node.tagName.startsWith('I-') ||
         node.getAttribute('slot') == 'i-amphtml-svc'
       ) {
         continue;
@@ -893,7 +1010,8 @@ function shouldMutationBeRerendered(Ctor, m) {
       const def = /** @type {!AmpElementPropDef} */ (props[name]);
       if (
         m.attributeName == def.attr ||
-        (def.attrs && def.attrs.includes(devAssert(m.attributeName)))
+        (def.attrs && def.attrs.includes(devAssert(m.attributeName))) ||
+        matchesAttrPrefix(m.attributeName, def.attrPrefix)
       ) {
         return true;
       }
@@ -905,6 +1023,23 @@ function shouldMutationBeRerendered(Ctor, m) {
       shouldMutationForNodeListBeRerendered(m.addedNodes) ||
       shouldMutationForNodeListBeRerendered(m.removedNodes)
     );
+  }
+  return false;
+}
+
+/**
+ * @param {typeof PreactBaseElement} Ctor
+ * @return {boolean}
+ */
+function hasMediaQueryProps(Ctor) {
+  const props = Ctor['props'];
+  if (props) {
+    for (const name in props) {
+      const def = /** @type {!AmpElementPropDef} */ (props[name]);
+      if (def.media) {
+        return true;
+      }
+    }
   }
   return false;
 }

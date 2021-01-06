@@ -639,11 +639,7 @@ describes.realWin(
       });
 
       it('renders a custom separator correctly', async () => {
-        const separator = html`
-          <div separator>
-            Custom separator
-          </div>
-        `;
+        const separator = html` <div separator>Custom separator</div> `;
 
         element = await getAmpNextPage({
           inlineConfig: VALID_CONFIG,

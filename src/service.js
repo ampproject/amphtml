@@ -57,34 +57,12 @@ export class Disposable {
 }
 
 /**
- * Returns a service with the given id. Assumes that it has been constructed
- * already.
- *
- * @param {!Element|!ShadowRoot} element
- * @param {string} id
- * @return {?Object}
- */
-export function getExistingServiceForDocInEmbedScope(element, id) {
-  // TODO(#22733): completely remove this method once ampdoc-fie launches.
-  // Resolve via the element's ampdoc.
-  return getServiceForDocOrNullInternal(element, id);
-}
-
-/**
  * Installs a service override on amp-doc level.
- * @param {!Window} embedWin
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  * @param {string} id
  * @param {!Object} service The service.
  */
-export function installServiceInEmbedScope(embedWin, id, service) {
-  // TODO(#22733): completely remove this method once ampdoc-fie launches.
-  const topWin = getTopWindow(embedWin);
-  devAssert(
-    embedWin != topWin,
-    'Service override can only be installed in embed window: %s',
-    id
-  );
-  const ampdoc = getAmpdoc(embedWin.document);
+export function installServiceInEmbedDoc(ampdoc, id, service) {
   registerServiceInternal(
     getAmpdocServiceHolder(ampdoc),
     ampdoc,
@@ -92,6 +70,22 @@ export function installServiceInEmbedScope(embedWin, id, service) {
     function () {
       return service;
     },
+    /* override */ true
+  );
+}
+
+/**
+ * Installs a service override in the scope of an embedded window.
+ * @param {!Window} embedWin
+ * @param {string} id
+ * @param {function(new:Object, !Window)} constructor
+ */
+export function registerServiceBuilderInEmbedWin(embedWin, id, constructor) {
+  registerServiceInternal(
+    embedWin,
+    embedWin,
+    id,
+    constructor,
     /* override */ true
   );
 }
@@ -161,6 +155,18 @@ export function getService(win, id) {
 }
 
 /**
+ * Returns a service for the given id and window (a per-window singleton). But
+ * it looks in the immediate window scope, not the top-level window.
+ * @param {!Window} win
+ * @param {string} id of the service.
+ * @template T
+ * @return {T}
+ */
+export function getServiceInEmbedWin(win, id) {
+  return getServiceInternal(win, id);
+}
+
+/**
  * Returns a promise for a service for the given id and window. Also expects an
  * element that has the actual implementation. The promise resolves when the
  * implementation loaded. Users should typically wrap this as a special purpose
@@ -216,12 +222,12 @@ export function getServiceForDoc(elementOrAmpDoc, id) {
 /**
  * Returns a service for the given id and ampdoc (a per-ampdoc singleton).
  * If service `id` is not registered, returns null.
- * @param {!Element|!ShadowRoot} element
+ * @param {!Element|!ShadowRoot|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @param {string} id
  * @return {?Object}
  */
-function getServiceForDocOrNullInternal(element, id) {
-  const ampdoc = getAmpdoc(element);
+export function getServiceForDocOrNull(elementOrAmpDoc, id) {
+  const ampdoc = getAmpdoc(elementOrAmpDoc);
   const holder = getAmpdocServiceHolder(ampdoc);
   if (isServiceRegistered(holder, id)) {
     return getServiceInternal(holder, id);
@@ -378,8 +384,16 @@ function getServiceInternal(holder, id) {
  * @param {string} id of the service.
  * @param {?function(new:Object, !Window)|?function(new:Object, !./service/ampdoc-impl.AmpDoc)} ctor Constructor function to new the service. Called with context.
  * @param {boolean=} opt_override
+ * @param {boolean=} opt_adopted
  */
-function registerServiceInternal(holder, context, id, ctor, opt_override) {
+function registerServiceInternal(
+  holder,
+  context,
+  id,
+  ctor,
+  opt_override,
+  opt_adopted
+) {
   const services = getServices(holder);
   let s = services[id];
 
@@ -391,6 +405,7 @@ function registerServiceInternal(holder, context, id, ctor, opt_override) {
       reject: null,
       context: null,
       ctor: null,
+      adopted: opt_adopted || false,
     };
   }
 
@@ -401,6 +416,7 @@ function registerServiceInternal(holder, context, id, ctor, opt_override) {
 
   s.ctor = ctor;
   s.context = context;
+  s.adopted = opt_adopted || false;
 
   // The service may have been requested already, in which case there is a
   // pending promise that needs to fulfilled.
@@ -525,14 +541,15 @@ export function disposeServicesForEmbed(embedWin) {
  * @param {!Object} holder Object holding the service instances.
  */
 function disposeServicesInternal(holder) {
-  // TODO(dvoytenko): Consider marking holder as destroyed for later-arriving
-  // service to be canceled automatically.
   const services = getServices(holder);
   for (const id in services) {
     if (!Object.prototype.hasOwnProperty.call(services, id)) {
       continue;
     }
     const serviceHolder = services[id];
+    if (serviceHolder.adopted) {
+      continue;
+    }
     if (serviceHolder.obj) {
       disposeServiceInternal(id, serviceHolder.obj);
     } else if (serviceHolder.promise) {
@@ -575,7 +592,9 @@ export function adoptServiceForEmbedDoc(ampdoc, id) {
     id,
     function () {
       return service;
-    }
+    },
+    /* override */ false,
+    /* adopted */ true
   );
 }
 

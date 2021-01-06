@@ -1,0 +1,47 @@
+{
+  "2": {"string": "Klepnite na Ďalej"},
+  "3": {"string": "Klepnite na Späť"},
+  "4": {"string": "Odkaz sa nepodarilo skopírovať do schránky :("},
+  "5": {"string": "Odkaz bol skopírovaný."},
+  "6": {"string": "Poslať e‑mailom"},
+  "7": {"string": "Facebook"},
+  "8": {"string": "Google+"},
+  "9": {"string": "Získať odkaz"},
+  "10": {"string": "LinkedIn"},
+  "11": {"string": "Pinterest"},
+  "12": {"string": "SMS"},
+  "14": {"string": "Tumblr"},
+  "15": {"string": "Twitter"},
+  "16": {"string": "WhatsApp"},
+  "18": {
+    "string": "Ak si chcete zobraziť toto prostredie, zväčšite výšku aj šírku okna."
+  },
+  "19": {
+    "string": "Ak si chcete zobraziť tento obsah, musíte povoliť experiment s príbehom AMP."
+  },
+  "20": {"string": "Stránka sa najlepšie zobrazí v režime portrétu"},
+  "21": {
+    "string": "Ľutujeme, ale váš prehliadač zrejme toto prostredie nepodporuje"
+  },
+  "22": {"string": "Prijať"},
+  "23": {"string": "Odmietnuť"},
+  "25": {"string": "Zobrazenie v pôvodnej doméne:"},
+  "26": {"string": "Ďalšie informácie o výsledkoch AMP"},
+  "27": {"string": "Pokračovať"},
+  "28": {"string": "Zmeniť nastavenia ochrany súkromia"},
+  "29": {"string": "Nastavenia ochrany súkromia"},
+  "30": {"string": "Ďalšie články"},
+  "31": {"string": "Zvuk je vypnutý"},
+  "32": {"string": "Zvuk je zapnutý"},
+  "33": {"string": "Táto stránka nemá zvuk"},
+  "34": {"string": "Prehrať video"},
+  "35": {"string": "Potiahnuť prstom nahor"},
+  "36": {"string": "Rozbaliť tweet"},
+  "37": {
+    "string": "Ak si chcete zobraziť toto prostredie, zväčšite výšku okna."
+  },
+  "38": {
+    "string": "Ak si chcete zobraziť toto prostredie, zväčšite šírku okna."
+  },
+  "63": {"string": "Line"}
+}

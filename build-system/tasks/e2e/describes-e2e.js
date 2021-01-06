@@ -19,8 +19,8 @@ require('geckodriver');
 
 const argv = require('minimist')(process.argv.slice(2));
 const chrome = require('selenium-webdriver/chrome');
+const fetch = require('node-fetch');
 const firefox = require('selenium-webdriver/firefox');
-const http = require('http');
 const puppeteer = require('puppeteer');
 const {
   clearLastExpectError,
@@ -28,13 +28,17 @@ const {
   installBrowserAssertions,
 } = require('./expect');
 const {
+  getCoverageObject,
+  mergeClientCoverage,
+} = require('istanbul-middleware/lib/core');
+const {
   SeleniumWebDriverController,
 } = require('./selenium-webdriver-controller');
 const {AmpDriver, AmpdocEnvironment} = require('./amp-driver');
 const {Builder, Capabilities, logging} = require('selenium-webdriver');
 const {HOST, PORT} = require('../serve');
 const {installRepl, uninstallRepl} = require('./repl');
-const {isTravisBuild} = require('../../common/travis');
+const {isCiBuild} = require('../../common/ci');
 const {PuppeteerController} = require('./puppeteer-controller');
 
 /** Should have something in the name, otherwise nothing is shown. */
@@ -250,6 +254,10 @@ const EnvironmentVariantMap = {
     name: 'Viewer environment',
     value: {environment: 'viewer-demo'},
   },
+  [AmpdocEnvironment.EMAIL_DEMO]: {
+    name: 'Email environment (viewer)',
+    value: {environment: 'email-demo'},
+  },
   [AmpdocEnvironment.SHADOW_DEMO]: {
     name: 'Shadow environment',
     value: {environment: 'shadow-demo'},
@@ -335,36 +343,28 @@ class ItConfig {
 }
 
 /**
- * Reports code coverage data to an aggregating endpoint.
- * @param {!Object} env e2e driver environment
+ * Extracts code coverage data from the page and aggregates it with other tests.
+ * @param {!Object} env e2e driver environment.
  * @return {Promise<void>}
  */
-async function reportCoverage(env) {
-  // Calling code only needs to wait until we've extracted the coverage data
-  // from the window, then it can begin cleaning up/resetting the state. POSTing
-  // the coverage data can happen asynchronously and doesn't need to block
-  // other testing.
-  const cov = await env.controller.evaluate(() => window.__coverage__);
-  if (cov) {
-    return new Promise((resolve, reject) => {
-      const req = http.request(
-        {
-          host: HOST,
-          port: PORT,
-          path: COV_REPORT_PATH,
-          method: 'POST',
-          headers: {'Content-type': 'application/json'},
-        },
-        (res) => {
-          res.on('data', () => {});
-          res.on('end', resolve);
-          res.on('error', reject);
-        }
-      );
-      req.write(JSON.stringify(cov));
-      req.end();
-    });
+async function updateCoverage(env) {
+  const coverage = await env.controller.evaluate(() => window.__coverage__);
+  if (coverage) {
+    mergeClientCoverage(coverage);
   }
+}
+
+/**
+ * Reports code coverage data to an aggregating endpoint.
+ * @return {Promise<void>}
+ */
+async function reportCoverage() {
+  const coverage = getCoverageObject();
+  await fetch(`https://${HOST}:${PORT}${COV_REPORT_PATH}`, {
+    method: 'POST',
+    body: JSON.stringify(coverage),
+    headers: {'Content-type': 'application/json'},
+  });
 }
 
 /**
@@ -464,14 +464,14 @@ function describeEnv(factory) {
         await fixture.setup(env, browserName, SETUP_RETRIES);
 
         // don't install for CI
-        if (!isTravisBuild()) {
+        if (!isCiBuild()) {
           installRepl(global, env);
         }
       });
 
       afterEach(async function () {
         if (argv.coverage) {
-          await reportCoverage(env);
+          await updateCoverage(env);
         }
 
         // If there is an async expect error, throw it in the final state.
@@ -486,8 +486,14 @@ function describeEnv(factory) {
           delete env[key];
         }
 
-        if (!isTravisBuild()) {
+        if (!isCiBuild()) {
           uninstallRepl();
+        }
+      });
+
+      after(async () => {
+        if (argv.coverage) {
+          await reportCoverage();
         }
       });
 

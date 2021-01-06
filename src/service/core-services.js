@@ -14,8 +14,13 @@
  * limitations under the License.
  */
 
+import {
+  FIE_RESOURCES_EXP,
+  divertFieResources,
+} from '../experiments/fie-resources-exp';
 import {adoptServiceForEmbedDoc} from '../service';
 import {devAssert} from '../log';
+import {getExperimentBranch} from '../experiments';
 import {installActionServiceForDoc} from './action-impl';
 import {installBatchedXhrService} from './batched-xhr-impl';
 import {installCidService} from './cid-impl';
@@ -26,8 +31,10 @@ import {installGlobalSubmitListenerForDoc} from '../document-submit';
 import {installHiddenObserverForDoc} from './hidden-observer-impl';
 import {installHistoryServiceForDoc} from './history-impl';
 import {installImg} from '../../builtins/amp-img';
+import {installInaboxResourcesServiceForDoc} from '../inabox/inabox-resources';
 import {installInputService} from '../input';
 import {installLayout} from '../../builtins/amp-layout';
+import {installLoadingIndicatorForDoc} from './loading-indicator';
 import {installMutatorServiceForDoc} from './mutator-impl';
 import {installOwnersServiceForDoc} from './owners-impl';
 import {installPixel} from '../../builtins/amp-pixel';
@@ -122,15 +129,33 @@ function installAmpdocServicesInternal(ampdoc, isEmbedded) {
   isEmbedded
     ? adoptServiceForEmbedDoc(ampdoc, 'history')
     : installHistoryServiceForDoc(ampdoc);
-  isEmbedded
-    ? adoptServiceForEmbedDoc(ampdoc, 'resources')
-    : installResourcesServiceForDoc(ampdoc);
-  isEmbedded
-    ? adoptServiceForEmbedDoc(ampdoc, 'owners')
-    : installOwnersServiceForDoc(ampdoc);
-  isEmbedded
-    ? adoptServiceForEmbedDoc(ampdoc, 'mutator')
-    : installMutatorServiceForDoc(ampdoc);
+
+  // fie-resources experiment.
+  if (ampdoc.isSingleDoc()) {
+    divertFieResources(ampdoc.win);
+  }
+  const fieResourcesOn =
+    ampdoc.getParent() &&
+    getExperimentBranch(ampdoc.getParent().win, FIE_RESOURCES_EXP.id) ===
+      FIE_RESOURCES_EXP.experiment;
+  if (fieResourcesOn) {
+    isEmbedded
+      ? installInaboxResourcesServiceForDoc(ampdoc)
+      : installResourcesServiceForDoc(ampdoc);
+    installOwnersServiceForDoc(ampdoc);
+    installMutatorServiceForDoc(ampdoc);
+  } else {
+    isEmbedded
+      ? adoptServiceForEmbedDoc(ampdoc, 'resources')
+      : installResourcesServiceForDoc(ampdoc);
+    isEmbedded
+      ? adoptServiceForEmbedDoc(ampdoc, 'owners')
+      : installOwnersServiceForDoc(ampdoc);
+    isEmbedded
+      ? adoptServiceForEmbedDoc(ampdoc, 'mutator')
+      : installMutatorServiceForDoc(ampdoc);
+  }
+
   isEmbedded
     ? adoptServiceForEmbedDoc(ampdoc, 'url-replace')
     : installUrlReplacementsServiceForDoc(ampdoc);
@@ -141,4 +166,9 @@ function installAmpdocServicesInternal(ampdoc, isEmbedded) {
     : installStorageServiceForDoc(ampdoc);
   installGlobalNavigationHandlerForDoc(ampdoc);
   installGlobalSubmitListenerForDoc(ampdoc);
+  if (!isEmbedded) {
+    // Embeds do not show loading indicators, since the whole embed is
+    // usually behind a parent loading indicator.
+    installLoadingIndicatorForDoc(ampdoc);
+  }
 }

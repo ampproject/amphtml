@@ -36,8 +36,6 @@ describes.fakeWin('amp-ad-adplugg-impl', {}, (env) => {
           },
         },
         requestResize() {},
-        onResizeSuccess() {},
-        onResizeDenied() {},
         renderStart() {},
         noContentAvailable() {},
         referrer: null,

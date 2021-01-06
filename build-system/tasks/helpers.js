@@ -39,7 +39,7 @@ const {applyConfig, removeConfig} = require('./prepend-global/index.js');
 const {closureCompile} = require('../compile/compile');
 const {EventEmitter} = require('events');
 const {green, red, cyan} = require('ansi-colors');
-const {isTravisBuild} = require('../common/travis');
+const {isCiBuild} = require('../common/ci');
 const {jsBundles} = require('../compile/bundles.config');
 const {thirdPartyFrames} = require('../test-configs/config');
 const {transpileTs} = require('../compile/typescript');
@@ -442,7 +442,9 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
  */
 async function compileTs(srcDir, srcFilename, destDir, options) {
   options = options || {};
+  const startTime = Date.now();
   await transpileTs(srcDir, srcFilename);
+  endBuildStep('Transpiled', srcFilename, startTime);
   await compileJs(srcDir, srcFilename, destDir, options);
   del.sync(path.join(srcDir, '**/*.js'));
 }
@@ -466,8 +468,7 @@ async function compileJs(srcDir, srcFilename, destDir, options) {
 }
 
 /**
- * Stops the timer for the given build step and prints the execution time,
- * unless we are on Travis.
+ * Stops the timer for the given build step and prints the execution time.
  * @param {string} stepName Name of the action, like 'Compiled' or 'Minified'
  * @param {string} targetName Name of the target, like a filename or path
  * @param {DOMHighResTimeStamp} startTime Start time of build step
@@ -501,7 +502,7 @@ function printConfigHelp(command) {
     cyan(argv.config === 'canary' ? 'canary' : 'prod'),
     green('AMP config.')
   );
-  if (!isTravisBuild()) {
+  if (!isCiBuild()) {
     log(
       green('⤷ Use'),
       cyan('--config={canary|prod}'),
@@ -537,7 +538,7 @@ function printNobuildHelp() {
  * @return {!Promise}
  */
 async function maybePrintCoverageMessage(covPath) {
-  if (!argv.coverage || isTravisBuild()) {
+  if (!argv.coverage || isCiBuild()) {
     return;
   }
 

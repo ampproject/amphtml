@@ -211,12 +211,15 @@ void URL::ParseAuthority() {
   }
 
   // Extract the port, if present.
-  if (port_idx != -1) {
+  if (port_idx != -1 && port_idx < idx) {
     auto port_str = url_.substr(port_idx, idx - port_idx);
+    // Port www.google.com:0000000000000000000000080 is valid. So trim zeros.
+    Strings::TrimLeft(&port_str, "0");
     if (port_str.empty()) {
       port_ = 0;
     } else if (auto is_int = port_str.find_first_not_of("0123456789");
-               is_int == std::string_view::npos) {
+               is_int == std::string_view::npos &&
+               port_str.size() < 6 /* Max 65535 */) {
       port_ = std::stoi(port_str.data());
     } else {
       is_valid_ = false;

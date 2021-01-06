@@ -24,7 +24,7 @@ import {base64EncodeFromBytes} from '../../../src/utils/base64.js';
 import {createCustomEvent, getData, listen} from '../../../src/event-helper';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {endsWith, startsWith} from '../../../src/string';
+import {endsWith} from '../../../src/string';
 import {
   getConsentMetadata,
   getConsentPolicyInfo,
@@ -164,7 +164,7 @@ export class AmpIframe extends AMP.BaseElement {
       !this.sandboxContainsToken_(sandbox, 'allow-same-origin') ||
         (origin != containerUrl.origin && protocol != 'data:'),
       'Origin of <amp-iframe> must not be equal to container %s' +
-        'if allow-same-origin is set. See https://github.com/ampproject/' +
+        ' if allow-same-origin is set. See https://github.com/ampproject/' +
         'amphtml/blob/master/spec/amp-iframe-origin-policy.md for details.',
       element
     );
@@ -510,7 +510,7 @@ export class AmpIframe extends AMP.BaseElement {
       return;
     }
     const data = getData(event);
-    if (typeof data !== 'string' || !startsWith(data, 'pym')) {
+    if (typeof data !== 'string' || !data.startsWith('pym')) {
       return;
     }
 
@@ -662,7 +662,7 @@ export class AmpIframe extends AMP.BaseElement {
     }
     if (this.iframe_ && mutations['title']) {
       // only propagating title because propagating all causes e2e error:
-      // See <https://travis-ci.org/ampproject/amphtml/jobs/657440421>
+      // See <https://travis-ci.com/ampproject/amphtml/jobs/657440421>
       this.propagateAttributes(['title'], this.iframe_);
     }
   }
