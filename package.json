@@ -29,6 +29,7 @@
     "prop-types": "15.7.2",
     "react-dates": "15.5.3",
     "react-jss": "10.3.0",
+    "resize-observer-polyfill": "1.5.1",
     "rrule": "2.6.6",
     "web-activities": "1.13.0",
     "web-animations-js": "2.3.1"
@@ -37,7 +38,7 @@
     "0x": "4.10.2",
     "@ampproject/filesize": "4.2.0",
     "@ampproject/google-closure-compiler": "20201207.0.0",
-    "@ampproject/remapping": "0.3.0",
+    "@ampproject/remapping": "1.0.0",
     "@babel/core": "7.12.10",
     "@babel/eslint-parser": "7.12.1",
     "@babel/helper-module-imports": "7.12.5",

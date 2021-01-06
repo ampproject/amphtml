@@ -426,6 +426,7 @@ exports.rules = [
       'src/polyfills/fetch.js->src/utils/object.js',
       'src/polyfills/fetch.js->src/utils/bytes.js',
       'src/polyfills/intersection-observer.js->src/polyfillstub/intersection-observer-stub.js',
+      'src/polyfills/resize-observer.js->src/polyfillstub/resize-observer-stub.js',
       'src/polyfills/promise.js->node_modules/promise-pjs/promise.js',
       'src/polyfills/custom-elements.js->src/resolved-promise.js',
     ],
@@ -436,6 +437,8 @@ exports.rules = [
     allowlist: [
       'src/polyfillstub/intersection-observer-stub.js->src/services.js',
       'src/polyfillstub/intersection-observer-stub.js->src/resolved-promise.js',
+      'src/polyfillstub/resize-observer-stub.js->src/services.js',
+      'src/polyfillstub/resize-observer-stub.js->src/resolved-promise.js',
     ],
   },
   {
@@ -460,6 +463,7 @@ exports.rules = [
       'src/polyfills.js->src/polyfills/string-starts-with.js',
       'src/polyfills.js->src/polyfills/custom-elements.js',
       'src/polyfills.js->src/polyfills/intersection-observer.js',
+      'src/polyfills.js->src/polyfills/resize-observer.js',
       'src/polyfills.js->src/polyfills/map-set.js',
       'src/polyfills.js->src/polyfills/set-add.js',
       'src/polyfills.js->src/polyfills/weakmap-set.js',
@@ -467,6 +471,7 @@ exports.rules = [
       'src/friendly-iframe-embed.js->src/polyfills/document-contains.js',
       'src/friendly-iframe-embed.js->src/polyfills/domtokenlist.js',
       'src/friendly-iframe-embed.js->src/polyfills/intersection-observer.js',
+      'src/friendly-iframe-embed.js->src/polyfills/resize-observer.js',
     ],
   },
   {
