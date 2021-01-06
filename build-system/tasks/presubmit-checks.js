@@ -119,6 +119,7 @@ const forbiddenTerms = {
       'build-system/pr-check/build.js',
       'build-system/pr-check/build-targets.js',
       'build-system/pr-check/checks.js',
+      'build-system/pr-check/cross-browser-tests.js',
       'build-system/pr-check/dist-bundle-size.js',
       'build-system/pr-check/dist-tests.js',
       'build-system/pr-check/module-dist-bundle-size.js',
@@ -920,6 +921,10 @@ const bannedTermsHelpString =
   'forbidden property/method or mark it with `object./*REVIEW*/property` ' +
   'if you are unsure and so that it stands out in code reviews.';
 
+const measurementApiDeprecated =
+  'getLayoutWidth/Box APIs are being deprecated. Please contact the' +
+  ' @ampproject/wg-performance for questions.';
+
 const forbiddenTermsSrcInclusive = {
   '\\.innerHTML(?!_)': bannedTermsHelpString,
   '\\.outerHTML(?!_)': bannedTermsHelpString,
@@ -1027,6 +1032,7 @@ const forbiddenTermsSrcInclusive = {
       'src/element-stub.js',
       'src/friendly-iframe-embed.js',
       'src/polyfillstub/intersection-observer-stub.js',
+      'src/polyfillstub/resize-observer-stub.js',
       'src/runtime.js',
       'src/service/extensions-impl.js',
       'src/service/lightbox-manager-discovery.js',
@@ -1154,6 +1160,7 @@ const forbiddenTermsSrcInclusive = {
       'testing/local-amp-chrome-extension/background.js',
       'tools/errortracker/errortracker.go',
       'tools/experiments/experiments.js',
+      'validator/js/engine/htmlparser-interface.js',
       'validator/js/engine/validator-in-browser.js',
       'validator/js/engine/validator.js',
       'validator/js/nodejs/index.js',
@@ -1179,21 +1186,36 @@ const forbiddenTermsSrcInclusive = {
     message: 'Unsupported on IE; use trim() or a helper instead.',
     allowlist: ['validator/js/engine/validator.js'],
   },
-  "process\\.env(\\.TRAVIS|\\[\\'TRAVIS)": {
+  "process\\.env(\\.|\\[\\')(TRAVIS|GITHUB_ACTIONS|CIRCLECI)": {
     message:
-      'Do not directly use process.env.TRAVIS. Instead, add a ' +
-      'function to build-system/common/travis.js',
-    allowlist: [
-      'build-system/common/check-package-manager.js',
-      'build-system/common/travis.js',
-    ],
+      'Do not directly use CI-specific environment vars. Instead, add a ' +
+      'function to build-system/common/ci.js',
   },
   '\\.matches\\(': 'Please use matches() helper in src/dom.js',
+  '\\.getLayoutWidth': {
+    message: measurementApiDeprecated,
+    allowlist: [
+      'builtins/amp-img.js',
+      'src/service/resources-impl.js',
+      'extensions/amp-fx-flying-carpet/0.1/amp-fx-flying-carpet.js',
+    ],
+  },
+  '\\.getIntersectionElementLayoutBox': {
+    message: measurementApiDeprecated,
+    allowlist: [
+      'src/custom-element.js',
+      'extensions/amp-a4a/0.1/amp-a4a.js',
+      'extensions/amp-ad/0.1/amp-ad-3p-impl.js',
+      'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',
+      'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js',
+      'extensions/amp-iframe/0.1/amp-iframe.js',
+    ],
+  },
 };
 
 // Terms that must appear in a source file.
 const requiredTerms = {
-  'Copyright 20(15|16|17|18|19|20) The AMP HTML Authors\\.': dedicatedCopyrightNoteSources,
+  'Copyright 20(15|16|17|18|19|2\\d) The AMP HTML Authors\\.': dedicatedCopyrightNoteSources,
   'Licensed under the Apache License, Version 2\\.0': dedicatedCopyrightNoteSources,
   'http\\://www\\.apache\\.org/licenses/LICENSE-2\\.0': dedicatedCopyrightNoteSources,
 };

@@ -20,6 +20,7 @@ import {
   getService,
   getServiceForDoc,
   getServiceForDocOrNull,
+  getServiceInEmbedWin,
   getServicePromiseForDoc,
 } from './service';
 import {
@@ -621,17 +622,6 @@ export class Services {
   }
 
   /**
-   * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!Promise<RealTimeConfigManager>}
-   */
-  static realTimeConfigForDoc(elementOrAmpDoc) {
-    return /** @type {!Promise<RealTimeConfigManager>} */ (getServicePromiseForDoc(
-      elementOrAmpDoc,
-      'real-time-config'
-    ));
-  }
-
-  /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!Promise<!./service/storage-impl.Storage>}
    */
@@ -659,7 +649,7 @@ export class Services {
    */
   static timerFor(window) {
     // TODO(alabiaga): This will always return the top window's Timer service.
-    return /** @type {!./service/timer-impl.Timer} */ (getService(
+    return /** @type {!./service/timer-impl.Timer} */ (getServiceInEmbedWin(
       window,
       'timer'
     ));

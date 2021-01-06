@@ -53,12 +53,12 @@ For configuration details, please contact integrations@widespace.com.
 
 ### Required parameters
 
-- `data-sid`
+-   `data-sid`
 
 ### Optional demography parameters
 
-- `data-demo-Gender`
-- `data-demo-Country`
-- `data-demo-Region`
-- `data-demo-City`
-- `data-demo-Yob`
+-   `data-demo-Gender`
+-   `data-demo-Country`
+-   `data-demo-Region`
+-   `data-demo-City`
+-   `data-demo-Yob`

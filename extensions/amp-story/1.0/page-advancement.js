@@ -520,7 +520,7 @@ export class ManualAdvancement extends AdvancementConfig {
 
     if (
       this.isInStoryPageSideEdge_(event, pageRect) ||
-      this.isTooLargeOnPage_(target, pageRect)
+      this.isTooLargeOnPage_(event, pageRect)
     ) {
       event.preventDefault();
       return false;
@@ -574,6 +574,12 @@ export class ManualAdvancement extends AdvancementConfig {
    * @private
    */
   isInStoryPageSideEdge_(event, pageRect) {
+    // Clicks with coordinates (0,0) are assumed to be from keyboard or Talkback.
+    // These clicks should never be overriden for navigation.
+    if (event.clientX === 0 && event.clientY === 0) {
+      return false;
+    }
+
     const sideEdgeWidthFromPercent =
       pageRect.width * (PROTECTED_SCREEN_EDGE_PERCENT / 100);
     const sideEdgeLimit = Math.max(
@@ -590,12 +596,19 @@ export class ManualAdvancement extends AdvancementConfig {
   /**
    * Checks if click target is too large on the page and preventing navigation.
    * If yes, the link is ignored & logged.
-   * @param {!Element} target
+   * @param {!Event} event
    * @param {!ClientRect} pageRect
    * @return {boolean}
    * @private
    */
-  isTooLargeOnPage_(target, pageRect) {
+  isTooLargeOnPage_(event, pageRect) {
+    // Clicks with coordinates (0,0) are assumed to be from keyboard or Talkback.
+    // These clicks should never be overriden for navigation.
+    if (event.clientX === 0 && event.clientY === 0) {
+      return false;
+    }
+
+    const target = dev().assertElement(event.target);
     const targetRect = target./*OK*/ getBoundingClientRect();
     if (
       (targetRect.height * targetRect.width) /

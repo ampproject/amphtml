@@ -35,9 +35,9 @@ Like all embedded external resources in an AMP file, the audio is "lazily" loade
 
 The `amp-audio` component accepts up to three unique types of HTML nodes as children:
 
-- `source` tags: Just like in the HTML `<audio>` tag, you can add `<source>` tag children to specify different source media files to play.
-- a placeholder for before the audio starts: One or zero immediate child nodes can have the `placeholder` attribute. If present, this node and its children form a placeholder that will display instead of the audio. A click or tap anywhere inside of the `amp-audio` container will replace the placeholder with the audio itself.
-- a fallback if the browser doesn’t support HTML5 audio: One or zero immediate child nodes can have the `fallback` attribute. If present, this node and its children form the content that displays if HTML5 audio is not supported on the user’s browser.
+-   `source` tags: Just like in the HTML `<audio>` tag, you can add `<source>` tag children to specify different source media files to play.
+-   a placeholder for before the audio starts: One or zero immediate child nodes can have the `placeholder` attribute. If present, this node and its children form a placeholder that will display instead of the audio. A click or tap anywhere inside of the `amp-audio` container will replace the placeholder with the audio itself.
+-   a fallback if the browser doesn’t support HTML5 audio: One or zero immediate child nodes can have the `fallback` attribute. If present, this node and its children form the content that displays if HTML5 audio is not supported on the user’s browser.
 
 For example:
 

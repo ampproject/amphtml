@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Deferred, tryResolve} from '../utils/promise';
+import {Deferred} from '../utils/promise';
 import {Layout} from '../layout';
 import {Services} from '../services';
 import {cancellation, isBlockedByConsent, reportError} from '../error';
@@ -541,6 +541,17 @@ export class Resource {
   }
 
   /**
+   * Yields when the resource has been measured.
+   * @return {!Promise}
+   */
+  ensureMeasured() {
+    if (this.hasBeenMeasured()) {
+      return Promise.resolve();
+    }
+    return Services.vsyncFor(this.hostWin).measure(() => this.measure());
+  }
+
+  /**
    * Computes the current layout box and position-fixed state of the element.
    * @param {!ClientRect=} opt_premeasuredRect
    * @private
@@ -661,31 +672,6 @@ export class Resource {
       viewport.getScrollLeft(),
       viewport.getScrollTop()
     );
-  }
-
-  /**
-   * Returns a previously measured layout box relative to the page. The
-   * fixed-position elements are relative to the top of the document.
-   * @return {!../layout-rect.LayoutRectDef}
-   */
-  getPageLayoutBox() {
-    return this.layoutBox_;
-  }
-
-  /**
-   * Returns the resource's layout box relative to the page. It will be
-   * measured if the resource hasn't ever be measured.
-   *
-   * @return {!Promise<!../layout-rect.LayoutRectDef>}
-   */
-  getPageLayoutBoxAsync() {
-    if (this.hasBeenMeasured()) {
-      return tryResolve(() => this.getPageLayoutBox());
-    }
-    return Services.vsyncFor(this.hostWin).measurePromise(() => {
-      this.measure();
-      return this.getPageLayoutBox();
-    });
   }
 
   /**

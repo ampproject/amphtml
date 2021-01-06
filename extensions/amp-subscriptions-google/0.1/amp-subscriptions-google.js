@@ -518,10 +518,10 @@ export class GoogleSubscriptionsPlatform {
         if (
           // Note we don't use the more generic this.isDev_ flag because that can be triggered
           // by a hash value which would allow non gooogle hostnames to construct LAA urls.
-          ((parsedReferrer.protocol === 'https' &&
+          ((parsedReferrer.protocol === 'https:' &&
             GOOGLE_DOMAIN_RE.test(parsedReferrer.hostname)) ||
             getMode(this.ampdoc_.win).localDev) &&
-          parsedQuery[`gaa_at`] == 'laa' &&
+          parsedQuery[`gaa_at`] == 'la' &&
           parsedQuery[`gaa_n`] &&
           parsedQuery[`gaa_sig`] &&
           parsedQuery[`gaa_ts`] &&

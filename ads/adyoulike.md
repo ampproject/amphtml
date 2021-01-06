@@ -38,9 +38,9 @@ For configuration details and to generate your tags, please contact [Adyoulike](
 
 ### Required parameters
 
-- `data-placement`
+-   `data-placement`
 
 ### Optional parameters
 
-- `data-dc`
-- `data-campaign`
+-   `data-dc`
+-   `data-campaign`

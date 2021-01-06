@@ -36,7 +36,12 @@ import {dict, memo} from '../../../src/utils/object';
 import {forwardRef} from '../../../src/preact/compat';
 import {isExperimentOn} from '../../../src/experiments';
 import {toArray, toWin} from '../../../src/types';
-import {useImperativeHandle, useLayoutEffect} from '../../../src/preact';
+import {
+  useImperativeHandle,
+  useLayoutEffect,
+  useRef,
+} from '../../../src/preact';
+import {useSlotContext} from '../../../src/preact/slot';
 
 /** @const {string} */
 const TAG = 'amp-accordion';
@@ -79,6 +84,7 @@ class AmpAccordion extends PreactBaseElement {
     mu.observe(element, {
       attributeFilter: ['expanded', 'id'],
       subtree: true,
+      childList: true,
     });
 
     const {'children': children} = getState(element, mu);
@@ -91,8 +97,9 @@ class AmpAccordion extends PreactBaseElement {
   /** @override */
   isLayoutSupported(unusedLayout) {
     userAssert(
-      isExperimentOn(this.win, 'amp-accordion-bento'),
-      'expected amp-accordion-bento experiment to be enabled'
+      isExperimentOn(this.win, 'bento') ||
+        isExperimentOn(this.win, 'bento-accordion'),
+      'expected global "bento" or specific "bento-accordion" experiment to be enabled'
     );
     return true;
   }
@@ -259,6 +266,9 @@ function ContentShimWithRef(
   ref
 ) {
   const contentElement = sectionElement.lastElementChild;
+  const contentRef = useRef();
+  contentRef.current = contentElement;
+  useSlotContext(contentRef);
   useImperativeHandle(ref, () => contentElement, [contentElement]);
   useLayoutEffect(() => {
     if (!contentElement) {

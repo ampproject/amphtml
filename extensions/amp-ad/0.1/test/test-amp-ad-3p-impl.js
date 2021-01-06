@@ -20,6 +20,7 @@ import * as adCid from '../../../../src/ad-cid';
 import * as consent from '../../../../src/consent';
 import * as lolex from 'lolex';
 import {AmpAd3PImpl} from '../amp-ad-3p-impl';
+import {AmpAdUIHandler} from '../amp-ad-ui';
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {LayoutPriority} from '../../../../src/layout';
 import {Services} from '../../../../src/services';
@@ -199,6 +200,7 @@ describes.realWin(
         adContainerElement.style.position = 'fixed';
         win.document.body.appendChild(adContainerElement);
         const ad3p = createAmpAd(win);
+        ad3p.uiHandler = new AmpAdUIHandler(ad3p);
         adContainerElement.appendChild(ad3p.element);
 
         ad3p.onLayoutMeasure();
@@ -287,14 +289,15 @@ describes.realWin(
 
       describe('during layout', () => {
         it('sticky ad: should not layout w/o scroll', () => {
-          ad3p.isStickyAd_ = true;
+          ad3p.uiHandler.isStickyAd_ = true;
+          expect(ad3p.xOriginIframeHandler_).to.be.null;
           const layoutPromise = ad3p.layoutCallback();
           return Promise.race([macroTask(), layoutPromise])
             .then(() => {
               expect(ad3p.xOriginIframeHandler_).to.be.null;
             })
             .then(() => {
-              ad3p.viewport_.scrollObservable_.fire();
+              Services.viewportForDoc(env.ampdoc).scrollObservable_.fire();
               return layoutPromise;
             })
             .then(() => {

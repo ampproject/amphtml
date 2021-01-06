@@ -36,4 +36,4 @@ For configuration details and to generate your tags, please contact http://adop.
 
 ### Required parameters
 
-- `data-z`
+-   `data-z`

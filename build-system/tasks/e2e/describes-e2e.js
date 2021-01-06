@@ -38,7 +38,7 @@ const {AmpDriver, AmpdocEnvironment} = require('./amp-driver');
 const {Builder, Capabilities, logging} = require('selenium-webdriver');
 const {HOST, PORT} = require('../serve');
 const {installRepl, uninstallRepl} = require('./repl');
-const {isTravisBuild} = require('../../common/travis');
+const {isCiBuild} = require('../../common/ci');
 const {PuppeteerController} = require('./puppeteer-controller');
 
 /** Should have something in the name, otherwise nothing is shown. */
@@ -254,6 +254,10 @@ const EnvironmentVariantMap = {
     name: 'Viewer environment',
     value: {environment: 'viewer-demo'},
   },
+  [AmpdocEnvironment.EMAIL_DEMO]: {
+    name: 'Email environment (viewer)',
+    value: {environment: 'email-demo'},
+  },
   [AmpdocEnvironment.SHADOW_DEMO]: {
     name: 'Shadow environment',
     value: {environment: 'shadow-demo'},
@@ -460,7 +464,7 @@ function describeEnv(factory) {
         await fixture.setup(env, browserName, SETUP_RETRIES);
 
         // don't install for CI
-        if (!isTravisBuild()) {
+        if (!isCiBuild()) {
           installRepl(global, env);
         }
       });
@@ -482,7 +486,7 @@ function describeEnv(factory) {
           delete env[key];
         }
 
-        if (!isTravisBuild()) {
+        if (!isCiBuild()) {
           uninstallRepl();
         }
       });
