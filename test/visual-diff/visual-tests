@@ -679,7 +679,7 @@
     },
     {
       "url": "examples/visual-tests/amp-story/amp-story-dev-tools.html#development=1",
-      "name": "amp-story-dev-tools: preview loading and running",
+      "name": "amp-story-dev-tools: preview tab loading and running",
       "viewport": {"width": 1080, "height": 720},
       "loading_complete_selectors": [
         ".i-amphtml-story-dev-tools-tab.i-amphtml-layout"
@@ -688,7 +688,7 @@
     },
     {
       "url": "examples/visual-tests/amp-story/amp-story-dev-tools.html#development=1&tab=page-experience",
-      "name": "amp-story-dev-tools: page experience loading and running",
+      "name": "amp-story-dev-tools: page experience tab loading and running",
       "viewport": {"width": 1080, "height": 720},
       "loading_complete_selectors": [
         ".i-amphtml-story-dev-tools-tab.i-amphtml-layout"
@@ -697,7 +697,7 @@
     },
     {
       "url": "examples/visual-tests/amp-story/amp-story-dev-tools.html#development=1&tab=logs",
-      "name": "amp-story-dev-tools: logs loading and running",
+      "name": "amp-story-dev-tools: logs tab loading and running",
       "viewport": {"width": 1080, "height": 720},
       "loading_complete_selectors": [
         ".i-amphtml-story-dev-tools-log-status-title"
