@@ -18,6 +18,7 @@ import * as Preact from '../../../src/preact';
 import {ContainWrapper} from '../../../src/preact/component';
 import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
 import {forwardRef} from '../../../src/preact/compat';
+import {isEnumValue} from '../../../src/types';
 import {isRTL} from '../../../src/dom';
 import {
   useCallback,
@@ -139,7 +140,7 @@ function SidebarWithRef(
     }
 
     const document = sidebarElement.ownerDocument;
-    if (side != Side.LEFT && side != Side.RIGHT) {
+    if (!isEnumValue(Side, side)) {
       sideRef.current = isRTL(document) ? Side.RIGHT : Side.LEFT;
     } else {
       sideRef.current = side;
