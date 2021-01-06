@@ -81,6 +81,7 @@ import {
   closest,
   createElementWithAttributes,
   isRTL,
+  matches,
   scopedQuerySelector,
   scopedQuerySelectorAll,
   whenUpgradedToCustomElement,
@@ -800,7 +801,9 @@ export class AmpStory extends AMP.BaseElement {
     this.win.document.addEventListener('contextmenu', (e) => {
       const uiState = this.storeService_.get(StateProperty.UI_STATE);
       if (uiState === UIType.MOBILE) {
-        e.preventDefault();
+        if (!this.allowContextMenuOnMobile_(e.target)) {
+          e.preventDefault();
+        }
         e.stopPropagation();
       }
     });
@@ -2889,6 +2892,21 @@ export class AmpStory extends AMP.BaseElement {
       'amp-story-dev-tools'
     );
     return true;
+  }
+
+  /**
+   * Should enable the context menu (long press) on the element passed.
+   * @private
+   * @param {!Element} element
+   * @return {boolean}
+   */
+  allowContextMenuOnMobile_(element) {
+    // Match page attachments with links.
+    return !!closest(
+      element,
+      (e) => matches(e, 'a.i-amphtml-story-page-open-attachment[href]'),
+      this.element
+    );
   }
 }
 
