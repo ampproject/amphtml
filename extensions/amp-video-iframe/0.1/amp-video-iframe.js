@@ -180,13 +180,13 @@ class AmpVideoIframe extends AMP.BaseElement {
    */
   getMetadata_() {
     const {sourceUrl, canonicalUrl} = Services.documentInfoForDoc(this.element);
-    const rootNode = this.getAmpdoc().getRootNode();
+    const {title, documentElement} = this.getAmpdoc().getRootNode();
 
     return dict({
       'sourceUrl': sourceUrl,
       'canonicalUrl': canonicalUrl,
-      'title': this.getAmpdoc().getRootNode().title || null,
-      'lang': rootNode.documentElement ? rootNode.documentElement.lang : null,
+      'title': title || null,
+      'lang': documentElement ? documentElement.lang : null,
     });
   }
 
