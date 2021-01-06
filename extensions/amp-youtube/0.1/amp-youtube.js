@@ -169,19 +169,11 @@ class AmpYoutube extends AMP.BaseElement {
    */
   getEmbedUrl_() {
     this.assertDatasourceExists_();
-    let urlSuffix = '';
-    if (this.getCredentials_() === 'omit') {
-      urlSuffix = '-nocookie';
-    }
+    const urlSuffix = this.getCredentials_() === 'omit' ? '-nocookie' : '';
     const baseUrl = `https://www.youtube${urlSuffix}.com/embed/`;
-    let descriptor = '';
-    if (this.videoid_) {
-      descriptor = `${encodeURIComponent(this.videoid_ || '')}?`;
-    } else {
-      descriptor =
-        'live_stream?channel=' +
-        `${encodeURIComponent(this.liveChannelid_ || '')}&`;
-    }
+    const descriptor = this.videoid_
+      ? `${encodeURIComponent(this.videoid_ || '')}?`
+      : `live_stream?channel=${encodeURIComponent(this.liveChannelid_ || '')}&`;
     return `${baseUrl}${descriptor}enablejsapi=1&amp=1`;
   }
 
@@ -496,10 +488,9 @@ class AmpYoutube extends AMP.BaseElement {
     // TODO(mkhatib): Maybe add srcset to allow the browser to
     // load the needed size or even better match YTPlayer logic for loading
     // player thumbnails for different screen sizes for a cache win!
-    imgPlaceholder.src =
-      'https://i.ytimg.com/vi/' +
-      encodeURIComponent(videoid) +
-      '/sddefault.jpg#404_is_fine';
+    imgPlaceholder.src = `https://i.ytimg.com/vi/${encodeURIComponent(
+      videoid
+    )}/sddefault.jpg#404_is_fine`;
 
     if (imgPlaceholder.hasAttribute('aria-label')) {
       imgPlaceholder.setAttribute(
@@ -528,10 +519,9 @@ class AmpYoutube extends AMP.BaseElement {
         }
       })
       .catch(() => {
-        imgPlaceholder.src =
-          'https://i.ytimg.com/vi/' +
-          encodeURIComponent(videoid) +
-          '/hqdefault.jpg';
+        imgPlaceholder.src = `https://i.ytimg.com/vi/${encodeURIComponent(
+          videoid
+        )}/hqdefault.jpg`;
         return this.loadPromise(imgPlaceholder);
       })
       .then(() => {

@@ -68,6 +68,12 @@ const FORM_VALUE_PROPERTIES = {
   },
   'TEXTAREA': {
     'text': true,
+    // amp-form relies on FORM_VALUE_CHANGE to update form validity state due
+    // to value changes from amp-bind. However, disabled form elements always
+    // report "valid" even if they have invalid values! A consequence is that
+    // toggling `disabled` via amp-bind may affect validity, so we need to
+    // inform amp-form about these too.
+    'disabled': true,
   },
 };
 
