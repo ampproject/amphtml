@@ -81,6 +81,7 @@ import {
   closest,
   createElementWithAttributes,
   isRTL,
+  matches,
   scopedQuerySelector,
   scopedQuerySelectorAll,
   whenUpgradedToCustomElement,
@@ -2903,7 +2904,7 @@ export class AmpStory extends AMP.BaseElement {
     // Match page attachments with links.
     return !!closest(
       element,
-      (e) => e.matches('a.i-amphtml-story-page-open-attachment[href]'),
+      (e) => matches(e, 'a.i-amphtml-story-page-open-attachment[href]'),
       this.element
     );
   }
