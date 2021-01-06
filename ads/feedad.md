@@ -24,7 +24,7 @@ limitations under the License.
         type="feedad"
         data-client-token="EiRjNjM3MGZlNy00NmQ2LTRmZGYtYjRmNy1jZGZlNWQ4OTgxYTU="
         data-placement-id="amp-example"
-        data-backound="#000">
+        data-background="#000">
 </amp-ad>
 ```
 
