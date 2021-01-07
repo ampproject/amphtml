@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview
+ * Interactive components support a disclaimer bubble that tells users where their data is being sent to.
+ * Disclaimers will retrieve the information from the lookup dictionary in disclaimer-backends-list.json.
+ * In order to add a "Learn more" link or entity name ("Your response will be sent to <Organization>"),
+ * submit a PR with a new entry on the DisclaimerBackendList and tag @wg-stories to review it.
+ */
+
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {htmlFor} from '../../../src/static-template';
 import DisclaimerBackendsList from './disclaimer-backends-list.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-
-/**
- * Disclaimers will retrieve the information from the lookup dictionary below.
- * In order to add a "Learn more" link or entity name ("Your response will be sent to <Organization>"),
- * submit a PR with a new entry on the BACKENDS dictionary and tag @wg-stories to review it.
- */
 
 /**
  * Creates a disclaimer icon and dialog.
