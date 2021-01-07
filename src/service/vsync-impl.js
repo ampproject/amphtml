@@ -462,7 +462,6 @@ export class Vsync {
  * @param {function(!VsyncStateDef):undefined|undefined} callback
  * @param {!VsyncStateDef} state
  * @return {boolean}
- * @noinline
  */
 function callTask_(callback, state) {
   devAssert(callback);

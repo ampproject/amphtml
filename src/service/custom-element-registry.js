@@ -82,7 +82,6 @@ export function upgradeOrRegisterElement(win, name, toClass) {
  * @param {Element} element
  * @param {typeof ../base-element.BaseElement} toClass
  * @private
- * @noinline
  */
 function tryUpgradeElement_(element, toClass) {
   try {
