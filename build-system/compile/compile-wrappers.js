@@ -18,6 +18,10 @@ const {VERSION} = require('./internal-version');
 
 // If there is a sync JS error during initial load,
 // at least try to unhide the body.
+// If "AMP" is already an object then that means another runtime has already
+// been initialized and the current runtime must exit early. This can occur
+// if multiple AMP libraries are included in the html or when both the module
+// and nomodule runtimes execute in older browsers such as safari < 11.
 exports.mainBinary =
   'var global=self;self.AMP=self.AMP||[];' +
   'try{(function(_){' +

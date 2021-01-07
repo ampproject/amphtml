@@ -209,23 +209,6 @@ function adoptShared(global, callback) {
   // locking).
   for (let i = 0; i < preregisteredExtensions.length; i++) {
     const fnOrStruct = preregisteredExtensions[i];
-    if (IS_ESM) {
-      // If we're in a module runtime, trying to execute a nomodule extension
-      // simply remove the nomodule extension so that it is not executed.
-      if (!fnOrStruct.m) {
-        debugger;
-        preregisteredExtensions.splice(i--, 1);
-        continue;
-      }
-    } else {
-      // If we're in a nomodule runtime, trying to execute a module extension
-      // simply remove the module extension so that it is not executed.
-      if (fnOrStruct.m) {
-        debugger;
-        preregisteredExtensions.splice(i--, 1);
-        continue;
-      }
-    }
     if (maybeLoadCorrectVersion(global, fnOrStruct)) {
       preregisteredExtensions.splice(i--, 1);
     } else if (typeof fnOrStruct == 'function' || fnOrStruct.p == 'high') {
@@ -473,6 +456,19 @@ export function adoptShadowMode(global) {
  * @return {boolean}
  */
 function maybeLoadCorrectVersion(win, fnOrStruct) {
+  if (IS_ESM) {
+    // If we're in a module runtime, trying to execute a nomodule extension
+    // simply remove the nomodule extension so that it is not executed.
+    if (!fnOrStruct.m) {
+      return true;
+    }
+  } else {
+    // If we're in a nomodule runtime, trying to execute a module extension
+    // simply remove the module extension so that it is not executed.
+    if (fnOrStruct.m) {
+      return true;
+    }
+  }
   if (getMode().localDev && isExperimentOn(win, 'disable-version-locking')) {
     return false;
   }
