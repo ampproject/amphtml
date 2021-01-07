@@ -38,7 +38,10 @@ function buildDisclaimerLayout(element) {
       class="i-amphtml-story-interactive-disclaimer-alert"
       aria-label="Open disclaimer"
     ></button>
-    <div class="i-amphtml-story-interactive-disclaimer-bubble">
+    <div
+      class="i-amphtml-story-interactive-disclaimer-bubble"
+      role="alertdialog"
+    >
       <div>
         <span class="i-amphtml-story-interactive-disclaimer-note"
           >Your response will be sent to
