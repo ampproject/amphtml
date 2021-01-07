@@ -149,7 +149,7 @@
   display: none !important;
 }
 
-.i-amphtml-story-interactive-disclaimer-bubble {
+.i-amphtml-story-interactive-disclaimer-dialog {
   overflow: hidden !important;
   padding: 1em !important;
   text-align: initial !important;
@@ -161,7 +161,7 @@
 }
 
 .i-amphtml-story-interactive-disclaimer:not([active])
-  .i-amphtml-story-interactive-disclaimer-bubble {
+  .i-amphtml-story-interactive-disclaimer-dialog {
   display: none !important;
 }
 

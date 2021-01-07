@@ -39,7 +39,7 @@ function buildDisclaimerLayout(element) {
       aria-label="Open disclaimer"
     ></button>
     <div
-      class="i-amphtml-story-interactive-disclaimer-bubble"
+      class="i-amphtml-story-interactive-disclaimer-dialog"
       role="alertdialog"
     >
       <div class="i-amphtml-story-interactive-disclaimer-description">
@@ -75,6 +75,9 @@ export function buildInteractiveDisclaimer(interactive) {
   const descriptionEl = disclaimer.querySelector(
     '.i-amphtml-story-interactive-disclaimer-description'
   );
+  const dialogEl = disclaimer.querySelector(
+    '.i-amphtml-story-interactive-disclaimer-dialog'
+  );
   const urlEl = disclaimer.querySelector(
     '.i-amphtml-story-interactive-disclaimer-url'
   );
@@ -107,7 +110,7 @@ export function buildInteractiveDisclaimer(interactive) {
       LocalizedStringId.AMP_STORY_INTERACTIVE_DISCLAIMER_NOTE
     );
     descriptionEl.id = disclaimerDescriptionId;
-    disclaimer.setAttribute('aria-describedby', disclaimerDescriptionId); // For screen readers.
+    dialogEl.setAttribute('aria-describedby', disclaimerDescriptionId); // For screen readers.
     return closeDisclaimer(interactive, disclaimer);
   });
 
