@@ -17,6 +17,7 @@
 import {ActionTrust} from '../../../../src/action-constants';
 import {AmpIframe, setTrackingIframeTimeoutForTesting} from '../amp-iframe';
 import {CommonSignals} from '../../../../src/common-signals';
+import {Deferred} from '../../../../src/utils/promise';
 import {LayoutPriority} from '../../../../src/layout';
 import {Services} from '../../../../src/services';
 import {
@@ -953,6 +954,18 @@ describes.realWin(
       });
 
       it('sends a consent-data message to the iframe', async () => {
+        const consentString = 'foo-consentString';
+        const consentMetadata = 'bar-consentMetadata';
+        const consentPolicyState = 'baz-consentPolicyState';
+
+        env.sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
+          Promise.resolve({
+            getConsentMetadataInfo: () => Promise.resolve(consentMetadata),
+            getConsentStringInfo: () => Promise.resolve(consentString),
+            whenPolicyResolved: () => Promise.resolve(consentPolicyState),
+          })
+        );
+
         const ampIframe = createAmpIframe(env, {
           src: iframeSrc,
           sandbox: 'allow-scripts allow-same-origin',
@@ -960,42 +973,32 @@ describes.realWin(
           height: 100,
         });
 
-        const consentString = 'foo-consentString';
-        const consentMetadata = 'bar-consentMetadata';
-        const consentPolicyState = 'baz-consentPolicyState';
-
-        env.sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
-          Promise.resolve({
-            getConsentMetadataInfo: () => consentMetadata,
-            getConsentStringInfo: () => consentString,
-            whenPolicyResolved: () => consentPolicyState,
-          })
-        );
-
         await waitForAmpIframeLayoutPromise(doc, ampIframe);
 
         const impl = await ampIframe.getImpl();
-        return new Promise((resolve, unusedReject) => {
-          impl.sendConsentDataToIframe_ = (source, origin, message) => {
-            resolve(message);
-          };
-          const iframe = ampIframe.querySelector('iframe');
-          iframe.contentWindow.postMessage(
-            {
+        const {promise: sendConsentDataSpyPromise, resolve} = new Deferred();
+        env.sandbox.stub(impl, 'sendConsentDataToIframe_').callsFake(resolve);
+
+        const iframe = ampIframe.querySelector('iframe');
+        iframe.contentWindow.postMessage(
+          {sentinel: 'amp', type: 'requestSendConsentState'},
+          '*'
+        );
+
+        await sendConsentDataSpyPromise;
+
+        expect(
+          impl.sendConsentDataToIframe_.withArgs(
+            env.sandbox.match.any, // source
+            env.sandbox.match.any, // origin
+            env.sandbox.match({
               sentinel: 'amp',
-              type: 'requestSendConsentState',
-            },
-            '*'
-          );
-        }).then((message) => {
-          expect(message).to.deep.equal({
-            sentinel: 'amp',
-            type: 'consent-data',
-            consentString,
-            consentMetadata,
-            consentPolicyState,
-          });
-        });
+              type: 'consent-data',
+              consentString,
+              consentMetadata,
+            })
+          )
+        ).to.have.been.calledOnce;
       });
 
       it('should propagate `title` when container attribute is mutated', function* () {
