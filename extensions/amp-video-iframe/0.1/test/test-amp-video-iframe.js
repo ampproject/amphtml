@@ -303,6 +303,8 @@ describes.realWin(
           data: {id, method: 'getConsentData'},
         });
 
+        await macroTask();
+
         expect(
           postMessage.withArgs({
             id,
