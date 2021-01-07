@@ -21,7 +21,7 @@ const {VERSION} = require('./internal-version');
 exports.mainBinary =
   'var global=self;self.AMP=self.AMP||[];' +
   'try{(function(_){' +
-  'if (Object.prototype.toString.call(self.AMP)==\'[object Object]\') return;' +
+  'if(self.AMP && !Array.isArray(self.AMP))return;' +
   '\n<%= contents %>})(AMP._=AMP._||{})}catch(e){' +
   'setTimeout(function(){' +
   'var s=document.body.style;' +
@@ -59,11 +59,11 @@ exports.extension = function (
     }
     priority = 'p:"high",';
   }
-  // Use a numeric value instead of boolean.
-  isModule = isModule ? 1 : 0;
+  // Use a numeric value instead of boolean. "m" stands for "module"
+  const m = isModule ? 1 : 0;
   return (
     `(self.AMP=self.AMP||[]).push({n:"${name}",${priority}${deps}` +
-    `v:"${VERSION}",e:${isModule},f:(function(AMP,_){${opt_splitMarker}\n` +
+    `v:"${VERSION}",m:${m},f:(function(AMP,_){${opt_splitMarker}\n` +
     '<%= contents %>\n})});'
   );
 };

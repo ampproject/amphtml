@@ -212,14 +212,16 @@ function adoptShared(global, callback) {
     if (IS_ESM) {
       // If we're in a module runtime, trying to execute a nomodule extension
       // simply remove the nomodule extension so that it is not executed.
-      if (!fnOrStruct.e) {
+      if (!fnOrStruct.m) {
+        debugger;
         preregisteredExtensions.splice(i--, 1);
         continue;
       }
     } else {
       // If we're in a nomodule runtime, trying to execute a module extension
       // simply remove the module extension so that it is not executed.
-      if (fnOrStruct.e) {
+      if (fnOrStruct.m) {
+        debugger;
         preregisteredExtensions.splice(i--, 1);
         continue;
       }
