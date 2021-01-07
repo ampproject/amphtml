@@ -47,10 +47,27 @@ describes.endtoend(
       });
     });
 
+    it.only('should recalculate font size after box size change', async () => {
+      debugger;
+      await verifyElementStyles(await selectContentDiv('test5'), {
+        'font-size': '17px',
+      });
+
+      selectContentButton();
+
+      await verifyElementStyles(await selectContentDiv('test5'), {
+        'font-size': '19px',
+      });
+    });
+
     async function selectContentDiv(id) {
       return await controller.findElement(
         `#${id} .i-amphtml-fit-text-content > div`
       );
+    }
+
+    async function selectContentButton() {
+      return await controller.findElement(`#test5_button`);
     }
 
     async function verifyElementStyles(element, styles) {
