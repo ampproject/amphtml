@@ -669,4 +669,13 @@ $ gulp check-types
 ## Example PRs
 
 -   Adding general UI components
+    -   [amp-accordion](https://github.com/ampproject/amphtml/pull/30446)
+    -   [amp-sidebar](https://github.com/ampproject/amphtml/pull/31593)
+    -   [amp-timeago](https://github.com/ampproject/amphtml/pull/26507)
+    -   [amp-base-carousel](https://github.com/ampproject/amphtml/pull/29303)
+    -   [amp-stream-gallery](https://github.com/ampproject/amphtml/pull/30597)
+-   Adding video components which use `VideoWrapper`
+    -   [amp-video](https://github.com/ampproject/amphtml/pull/30280)
     -   [amp-youtube](https://github.com/ampproject/amphtml/pull/30444)
+-   Adding iframe based embeds
+    -   [amp-instagram](https://github.com/ampproject/amphtml/pull/30230)
