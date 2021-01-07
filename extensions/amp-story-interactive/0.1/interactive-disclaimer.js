@@ -72,11 +72,11 @@ export function buildInteractiveDisclaimer(interactive) {
   const backendUrl = element.getAttribute('endpoint').replace('https://', '');
 
   const disclaimer = buildDisclaimerLayout(element);
-  const descriptionEl = disclaimer.querySelector(
-    '.i-amphtml-story-interactive-disclaimer-description'
-  );
   const dialogEl = disclaimer.querySelector(
     '.i-amphtml-story-interactive-disclaimer-dialog'
+  );
+  const descriptionEl = disclaimer.querySelector(
+    '.i-amphtml-story-interactive-disclaimer-description'
   );
   const urlEl = disclaimer.querySelector(
     '.i-amphtml-story-interactive-disclaimer-url'
