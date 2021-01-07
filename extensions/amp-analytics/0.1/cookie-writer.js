@@ -20,7 +20,6 @@ import {Deferred} from '../../../src/utils/promise';
 import {SameSite, setCookie} from '../../../src/cookies';
 import {Services} from '../../../src/services';
 import {hasOwn} from '../../../src/utils/object';
-import {isAnalyticsChunksExperimentOn} from './analytics-group';
 import {isCookieAllowed} from './cookie-reader';
 import {isObject} from '../../../src/types';
 import {user} from '../../../src/log';
@@ -75,11 +74,8 @@ export class CookieWriter {
       const task = () => {
         this.writeDeferred_.resolve(this.init_());
       };
-      if (isAnalyticsChunksExperimentOn(this.win_)) {
-        chunk(this.element_, task, ChunkPriority.LOW);
-      } else {
-        task();
-      }
+      // CookieWriter is not supported in inabox ad. Always chunk
+      chunk(this.element_, task, ChunkPriority.LOW);
     }
     return this.writeDeferred_.promise;
   }
