@@ -38,12 +38,12 @@ import {
   matches,
   parseBooleanAttribute,
 } from '../dom';
-import {createRef, hydrate, render} from './index';
 import {dashToCamelCase} from '../string';
 import {devAssert} from '../log';
 import {dict, hasOwn, map} from '../utils/object';
 import {getDate} from '../utils/date';
 import {getMode} from '../mode';
+import {hydrate, render} from './index';
 import {installShadowStyle} from '../shadow-embed';
 import {isLayoutSizeDefined} from '../layout';
 import {sequentialIdGenerator} from '../utils/id-generator';
@@ -164,8 +164,8 @@ export class PreactBaseElement extends AMP.BaseElement {
     /** @private {?API_TYPE} */
     this.apiWrapper_ = null;
 
-    /** @private {{current: ?API_TYPE}} */
-    this.ref_ = createRef();
+    /** @private {?API_TYPE} */
+    this.currentRef_ = null;
 
     /** @param {?API_TYPE|null} current */
     this.refSetter_ = (current) => {
@@ -177,7 +177,7 @@ export class PreactBaseElement extends AMP.BaseElement {
           this.initApiWrapper_(current);
         }
       }
-      this.ref_.current = current;
+      this.currentRef_ = current;
     };
 
     /** @type {?Deferred<!API_TYPE>} */
@@ -320,7 +320,7 @@ export class PreactBaseElement extends AMP.BaseElement {
     this.mutateProps(dict({'loading': Loading.EAGER}));
 
     // Check if the element has already been loaded.
-    const api = this.ref_.current;
+    const api = this.currentRef_;
     if (api && api['complete']) {
       return Promise.resolve();
     }
@@ -375,7 +375,7 @@ export class PreactBaseElement extends AMP.BaseElement {
    * @protected
    */
   api() {
-    return devAssert(this.ref_.current);
+    return devAssert(this.currentRef_);
   }
 
   /**
@@ -667,10 +667,9 @@ export class PreactBaseElement extends AMP.BaseElement {
   initApiWrapper_(current) {
     const api = map();
     const keys = Object.keys(current);
-    const ref = this.ref_;
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
-      wrapRefProperty(ref, api, key);
+      wrapRefProperty(this, api, key);
     }
     this.apiWrapper_ = api;
     if (this.deferredApi_) {
@@ -691,7 +690,7 @@ export class PreactBaseElement extends AMP.BaseElement {
     for (let i = 0; i < newKeys.length; i++) {
       const key = newKeys[i];
       if (!hasOwn(api, key)) {
-        wrapRefProperty(this.ref_, api, key);
+        wrapRefProperty(this, api, key);
       }
     }
     const oldKeys = Object.keys(api);
@@ -705,20 +704,21 @@ export class PreactBaseElement extends AMP.BaseElement {
 }
 
 /**
- * @param {!{current: *}} ref
+ * @param {tyepof PreactBaseElement} } ref
+ * @param baseElement
  * @param {!Object} api
  * @param {string} key
  */
-function wrapRefProperty(ref, api, key) {
+function wrapRefProperty(baseElement, api, key) {
   Object.defineProperty(api, key, {
     configurable: true,
 
     get() {
-      return ref.current[key];
+      return baseElement.currentRef_[key];
     },
 
     set(v) {
-      ref.current[key] = v;
+      baseElement.currentRef_[key] = v;
     },
   });
 }
