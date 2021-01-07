@@ -417,7 +417,6 @@ export class AmpAnalytics extends AMP.BaseElement {
    * Calls `AnalyticsGroup.addTrigger` and reports any errors.
    * @param {!JsonObject} config
    * @private
-   * @noinline
    * @return {!Promise}
    */
   addTrigger_(config) {
