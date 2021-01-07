@@ -19,7 +19,7 @@
  * Interactive components support a disclaimer bubble that tells users where their data is being sent to.
  * Disclaimers will retrieve the information from the lookup dictionary in disclaimer-backends-list.json.
  * In order to add a "Learn more" link or entity name ("Your response will be sent to <Organization>"),
- * submit a PR with a new entry on the DisclaimerBackendList and tag @wg-stories to review it.
+ * submit a PR with a new entry on the DisclaimerBackendList and tag @ampproject/wg-stories to review it.
  */
 
 import {LocalizedStringId} from '../../../src/localized-strings';
@@ -42,13 +42,13 @@ function buildDisclaimerLayout(element) {
       class="i-amphtml-story-interactive-disclaimer-bubble"
       role="alertdialog"
     >
-      <div>
+      <div class="i-amphtml-story-interactive-disclaimer-description">
         <span class="i-amphtml-story-interactive-disclaimer-note"
           >Your response will be sent to
         </span>
         <span class="i-amphtml-story-interactive-disclaimer-entity"></span>
+        <div class="i-amphtml-story-interactive-disclaimer-url"></div>
       </div>
-      <div class="i-amphtml-story-interactive-disclaimer-url"></div>
       <div>
         <a target="_blank" class="i-amphtml-story-interactive-disclaimer-link"
           >Learn more</a
@@ -72,14 +72,17 @@ export function buildInteractiveDisclaimer(interactive) {
   const backendUrl = element.getAttribute('endpoint').replace('https://', '');
 
   const disclaimer = buildDisclaimerLayout(element);
+  const descriptionEl = disclaimer.querySelector(
+    '.i-amphtml-story-interactive-disclaimer-description'
+  );
+  const entityEl = disclaimer.querySelector(
+    '.i-amphtml-story-interactive-disclaimer-entity'
+  );
   const urlEl = disclaimer.querySelector(
     '.i-amphtml-story-interactive-disclaimer-url'
   );
   const linkEl = disclaimer.querySelector(
     '.i-amphtml-story-interactive-disclaimer-link'
-  );
-  const entityEl = disclaimer.querySelector(
-    '.i-amphtml-story-interactive-disclaimer-entity'
   );
   const noteEl = disclaimer.querySelector(
     '.i-amphtml-story-interactive-disclaimer-note'
@@ -87,6 +90,7 @@ export function buildInteractiveDisclaimer(interactive) {
 
   // Fill information
   const backendSpecs = getBackendSpecs(backendUrl, DisclaimerBackendsList);
+  const disclaimerDescriptionId = `i-amphtml-story-disclaimer-${interactive.element.id}-description`;
   interactive.mutateElement(() => {
     if (backendSpecs) {
       entityEl.textContent = backendSpecs[1].entityName;
@@ -102,6 +106,8 @@ export function buildInteractiveDisclaimer(interactive) {
     noteEl.textContent = interactive.localizationService.getLocalizedString(
       LocalizedStringId.AMP_STORY_INTERACTIVE_DISCLAIMER_NOTE
     );
+    descriptionEl.id = disclaimerDescriptionId;
+    disclaimer.setAttribute('aria-describedby', disclaimerDescriptionId); // For screen readers.
     return closeDisclaimer(interactive, disclaimer);
   });
 
