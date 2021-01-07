@@ -215,49 +215,75 @@ export function MyElement({propName1, propName2, ...rest}) {
 
 #### PreactBaseElement['className']
 
-TODO
+-   **Default**: Optional.
+-   **Override**: Rarely.
+-   **Usage**: Specify an exact className prop to Preact.
+-   **Example Usage**: n/a
 
 #### PreactBaseElement['layoutSizeDefined']
 
-TODO
-
-#### PreactBaseElement['lightDomTag']
-
-TODO
+-   **Default**: Optional.
+-   **Override**: Sometimes.
+-   **Usage**: Specify that the component requires `layoutSizeDefined`, meaning it can have a layout of any of the following: `fixed`, `fixed-height`, `responsive`, `fill`, `flex-item`, `fluid`, or `intrinsic`. Learn more about how to use this in [Layouts supported in your element](#layouts-supported-in-your-element) or generally with [layouts in AMP](https://amp.dev/documentation/guides-and-tutorials/learn/amp-html-layout).
+-   **Example Usage**: n/a
 
 #### PreactBaseElement['loadable']
 
-TODO
+-   **Default**: Optional.
+-   **Override**: Sometimes, when the element implements a loading protocol.
+-   **Usage**: Indicates a resource intensive component to alloow granular control of when it should be loaded and unloaded.
+-   **Example Usage**: amp-instagram, amp-video
 
 #### PreactBaseElement['shadowCss']
 
-TODO
+-   **Default**: Optional.
+-   **Override**: Sometimes, when the element requires CSS in the shadow.
+-   **Usage**: Define the CSS for shadow stylesheets.
+-   **Example Usage**: amp-lightbox, amp-sidebar
 
 #### PreactBaseElement['usesTemplate']
 
-TODO
-
-#### PreactBaseElement['useContexts']
-
-TODO
+-   **Default**: Optional.
+-   **Override**: Rarely.
+-   **Usage**: Notify when the element uses the template system.
+-   **Example Usage**: amp-date-countdown, amp-date-display
 
 #### Ways to process children (mutually exclusive)
 
+#### PreactBaseElement['lightDomTag']
+
+-   **Default**: Optional.
+-   **Override**: Sometimes.
+-   **Usage**: The tag name used when rendering into the light DOM. This is used when children contents are overwritten.
+-   **Example Usage**: amp-date-countdown, amp-date-display
+
 ##### PreactBaseElement['passthrough']
 
-TODO
+-   **Default**: Optional.
+-   **Override**: Sometimes.
+-   **Usage**: Define if user-supplied children are needed by the Preact component but their shape and structure does not matter.
+-   **Example Usage**: amp-fit-text, amp-sidebar
 
 ##### PreactBaseElement['passthroughNonEmpty']
 
-TODO
+-   **Default**: Optional.
+-   **Override**: Sometimes.
+-   **Usage**: Define if user-supplied children are needed **only when present** by the Preact component but their shape and structure does not matter. If no children are given to the component, the component may render something entirely different.
+-   **Example Usage**: amp-social-share, amp-timeago
 
 ##### PreactBaseElement['children']
 
-TODO
+-   **Default**: Optional.
+-   **Override**: Sometimes.
+-   **Usage**: Define if user-supplied children of a certain shape and structure do matter, and ought to be targeted for more specified props than `children` alone.
+-   **Example Usage**: amp-base-carousel
 
 ##### PreactBaseElement['detached']
 
-TODO
+-   **Default**: Optional.
+-   **Override**: Sometimes.
+-   **Usage**: Define if user-supplied children must be referenced and coordinated with the internal state of the Preact component, but the component itself should not be visible (in favor of viewing the light DOM children).
+-   **Example Usage**: amp-accordion, amp-selector
 
 ## Element styling
 
