@@ -280,12 +280,14 @@ describes.realWin(
         const consentPolicyState = 'baz-consentPolicyState';
         const consentPolicySharedData = 'foo-consentPolicySharedData';
 
-        env.sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns({
-          getConsentMetadataInfo: () => Promise.resolve(consentMetadata),
-          getConsentStringInfo: () => Promise.resolve(consentString),
-          whenPolicyResolved: () => Promise.resolve(consentPolicyState),
-          getMergedSharedData: () => Promise.resolve(consentPolicySharedData),
-        });
+        env.sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
+          Promise.resolve({
+            getConsentMetadataInfo: () => Promise.resolve(consentMetadata),
+            getConsentStringInfo: () => Promise.resolve(consentString),
+            whenPolicyResolved: () => Promise.resolve(consentPolicyState),
+            getMergedSharedData: () => Promise.resolve(consentPolicySharedData),
+          })
+        );
 
         const id = 1234;
 
