@@ -18,5 +18,6 @@
   "ios-fixed-no-transfer": 0,
   "pump-early-frame": 1,
   "fie-resources": 0.1,
-  "visibility-trigger-improvements": 1
+  "visibility-trigger-improvements": 1,
+  "sticky-ad-transition": 0.1
 }
