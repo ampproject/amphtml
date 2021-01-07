@@ -25,7 +25,7 @@ const {VERSION} = require('./internal-version');
 exports.mainBinary =
   'var global=self;self.AMP=self.AMP||[];' +
   'try{(function(_){' +
-  'if(self.AMP && !Array.isArray(self.AMP))return;' +
+  'if(self.AMP&&!Array.isArray(self.AMP))return;' +
   '\n<%= contents %>})(AMP._=AMP._||{})}catch(e){' +
   'setTimeout(function(){' +
   'var s=document.body.style;' +
