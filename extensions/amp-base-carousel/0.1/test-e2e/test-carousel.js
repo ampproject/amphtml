@@ -145,7 +145,7 @@ describes.endtoend(
       });
     });
 
-    it('should go to slide 0 when index is set to 0 ', async function () {
+    it.skip('should go to slide 0 when index is set to 0 ', async function () {
       this.timeout(testTimeout);
       const el = await getScrollingElement(controller);
 
