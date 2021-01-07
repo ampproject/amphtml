@@ -20,6 +20,7 @@ import {dict} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {parseJson} from '../../../src/json';
 import {useLayoutEffect, useRef, useState} from '../../../src/preact';
+import {useLoad} from '../../../src/preact/context';
 
 const NO_HEIGHT_STYLE = dict();
 
@@ -32,14 +33,20 @@ export function Instagram({
   captioned,
   title,
   requestResize,
-  loading = 'lazy',
+  loading,
+  onLoad,
   ...rest
 }) {
+  const load = useLoad(loading, /* unlayoutOnPause */ true);
+
   const iframeRef = useRef(null);
   const [heightStyle, setHeightStyle] = useState(NO_HEIGHT_STYLE);
   const [opacity, setOpacity] = useState(0);
 
   useLayoutEffect(() => {
+    if (!iframeRef.current || !load) {
+      return;
+    }
     const messageHandler = (event) => {
       if (
         event.origin != 'https://www.instagram.com' ||
@@ -67,31 +74,34 @@ export function Instagram({
     return () => {
       defaultView.removeEventListener('message', messageHandler);
     };
-  }, [requestResize, heightStyle]);
+  }, [load, requestResize, heightStyle]);
 
   return (
     <ContainWrapper {...rest} wrapperStyle={heightStyle} layout size paint>
-      <iframe
-        ref={iframeRef}
-        src={
-          'https://www.instagram.com/p/' +
-          encodeURIComponent(shortcode) +
-          '/embed/' +
-          (captioned ? 'captioned/' : '') +
-          '?cr=1&v=12'
-        }
-        scrolling="no"
-        frameborder="0"
-        allowtransparency
-        title={title}
-        loading={loading}
-        style={{
-          width: '100%',
-          height: '100%',
-          opacity,
-          contentVisibility: 'auto',
-        }}
-      />
+      {load && (
+        <iframe
+          ref={iframeRef}
+          src={
+            'https://www.instagram.com/p/' +
+            encodeURIComponent(shortcode) +
+            '/embed/' +
+            (captioned ? 'captioned/' : '') +
+            '?cr=1&v=12'
+          }
+          loading={loading}
+          onLoad={onLoad}
+          scrolling="no"
+          frameborder="0"
+          allowtransparency
+          title={title}
+          style={{
+            width: '100%',
+            height: '100%',
+            opacity,
+            contentVisibility: 'auto',
+          }}
+        />
+      )}
     </ContainWrapper>
   );
 }

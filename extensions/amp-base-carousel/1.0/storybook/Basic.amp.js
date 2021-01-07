@@ -22,7 +22,7 @@ import {withAmp} from '@ampproject/storybook-addon';
 const ORIENTATIONS = ['horizontal', 'vertical'];
 
 export default {
-  title: 'amp-base-carousel',
+  title: 'amp-base-carousel-1_0',
   decorators: [withKnobs, withA11y, withAmp],
 
   parameters: {
@@ -30,7 +30,7 @@ export default {
       {name: 'amp-bind', version: '0.1'},
       {name: 'amp-base-carousel', version: '1.0'},
     ],
-    experiments: ['amp-base-carousel-bento'],
+    experiments: ['bento'],
   },
 };
 

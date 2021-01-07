@@ -1,0 +1,45 @@
+{
+  "2": {"string": "Tik op Volgende"},
+  "3": {"string": "Tik op Terug"},
+  "4": {"string": "Kan link niet kopiëren naar klembord :("},
+  "5": {"string": "Link gekopieerd"},
+  "6": {"string": "E-mail"},
+  "7": {"string": "Facebook"},
+  "8": {"string": "Google+"},
+  "9": {"string": "Link ophalen"},
+  "10": {"string": "LinkedIn"},
+  "11": {"string": "Pinterest"},
+  "12": {"string": "Sms"},
+  "14": {"string": "Tumblr"},
+  "15": {"string": "Twitter"},
+  "16": {"string": "WhatsApp"},
+  "18": {
+    "string": "Maak je venster hoger en breder om deze functionaliteit te bekijken"
+  },
+  "19": {
+    "string": "Je moet het amp-story-experiment inschakelen om deze content te bekijken."
+  },
+  "20": {
+    "string": "De pagina kan het beste worden bekeken in de staande modus"
+  },
+  "21": {"string": "Je browser ondersteunt deze functionaliteit niet"},
+  "22": {"string": "Accepteren"},
+  "23": {"string": "Weigeren"},
+  "25": {"string": "Bekijken op oorspronkelijk domein:"},
+  "26": {"string": "Meer over AMP-resultaten"},
+  "27": {"string": "Toch doorgaan"},
+  "28": {"string": "Privacyinstellingen voor gegevens wijzigen"},
+  "29": {"string": "Privacyinstellingen"},
+  "30": {"string": "Meer om te lezen"},
+  "31": {"string": "Geluid uit"},
+  "32": {"string": "Geluid aan"},
+  "33": {"string": "Deze pagina heeft geen geluid"},
+  "34": {"string": "Video afspelen"},
+  "35": {"string": "Omhoog vegen"},
+  "36": {"string": "Tweet uitvouwen"},
+  "37": {"string": "Maak je venster hoger om deze functionaliteit te bekijken"},
+  "38": {
+    "string": "Maak je venster breder om deze functionaliteit te bekijken"
+  },
+  "63": {"string": "Line"}
+}

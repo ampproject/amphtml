@@ -19,6 +19,7 @@ import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Slot} from '../../../src/preact/slot';
 import {createElementWithAttributes} from '../../../src/dom';
 import {htmlFor} from '../../../src/static-template';
+import {omit} from '../../../src/utils/object';
 import {upgradeOrRegisterElement} from '../../../src/service/custom-element-registry';
 import {waitFor} from '../../../testing/test-helper';
 
@@ -605,28 +606,32 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       expect(children).to.have.lengthOf(2);
       const {0: child1, 1: child2} = children;
       expect(child1.type).to.equal(Slot);
-      expect(child1.props).to.deep.equal({
-        name: 'i-amphtml-children-0',
+      expect(omit(child1.props, 'name')).to.deep.equal({
         boolDefTrue: true,
         combined: 'A+B',
         params: {test: 'helloworld', testTwo: 'confirm'},
       });
-      expect(element.querySelector('#child1').slot).to.equal(
-        'i-amphtml-children-0'
-      );
       expect(child2.type).to.equal(Slot);
-      expect(child2.props).to.deep.equal({
-        name: 'i-amphtml-children-1',
+      expect(omit(child2.props, 'name')).to.deep.equal({
         boolDefTrue: true,
         combined: 'C+D',
         params: {test: 'helloworld2', testTwo: 'confirm2'},
       });
-      expect(element.querySelector('#child2').slot).to.equal(
-        'i-amphtml-children-1'
-      );
+
+      // Names are random and most importantly not equal to each other.
+      expect(child1.props.name).to.match(/i-amphtml-children-\d/);
+      expect(child2.props.name).to.match(/i-amphtml-children-\d/);
+      expect(child1.props.name).to.not.equal(child2.props.name);
+      expect(element.querySelector('#child1').slot).to.equal(child1.props.name);
+      expect(element.querySelector('#child2').slot).to.equal(child2.props.name);
     });
 
     it('should rerender on new children', async () => {
+      await waitFor(() => component.callCount > 0, 'component rendered');
+      const {children: prevChildren} = lastProps;
+      expect(prevChildren).to.have.lengthOf(2);
+      const {0: prevChild1, 1: prevChild2} = prevChildren;
+
       const newChild = createElementWithAttributes(doc, 'div', {
         'id': 'child3',
         'part-a': 'E',
@@ -643,37 +648,40 @@ describes.realWin('PreactBaseElement', spec, (env) => {
 
       // New child.
       expect(child3.type).to.equal(Slot);
-      expect(child3.props).to.deep.equal({
-        name: 'i-amphtml-children-2',
+      expect(omit(child3.props, 'name')).to.deep.equal({
         boolDefTrue: true,
         combined: 'E+F',
       });
-      expect(newChild.slot).to.equal('i-amphtml-children-2');
+      expect(child3.props.name).to.match(/i-amphtml-children-\d/);
+      expect(child3.props.name).to.not.equal(prevChild1.props.name);
+      expect(child3.props.name).to.not.equal(prevChild2.props.name);
+      expect(newChild.slot).to.equal(child3.props.name);
 
       // No changes.
       expect(child1.type).to.equal(Slot);
       expect(child1.props).to.deep.equal({
-        name: 'i-amphtml-children-0',
+        name: prevChild1.props.name,
         boolDefTrue: true,
         combined: 'A+B',
         params: {test: 'helloworld', testTwo: 'confirm'},
       });
-      expect(element.querySelector('#child1').slot).to.equal(
-        'i-amphtml-children-0'
-      );
+      expect(element.querySelector('#child1').slot).to.equal(child1.props.name);
       expect(child2.type).to.equal(Slot);
       expect(child2.props).to.deep.equal({
-        name: 'i-amphtml-children-1',
+        name: prevChild2.props.name,
         boolDefTrue: true,
         combined: 'C+D',
         params: {test: 'helloworld2', testTwo: 'confirm2'},
       });
-      expect(element.querySelector('#child2').slot).to.equal(
-        'i-amphtml-children-1'
-      );
+      expect(element.querySelector('#child2').slot).to.equal(child2.props.name);
     });
 
     it('should rerender when children are removed', async () => {
+      await waitFor(() => component.callCount > 0, 'component rendered');
+      const {children: prevChildren} = lastProps;
+      expect(prevChildren).to.have.lengthOf(2);
+      const {1: prevChild2} = prevChildren;
+
       const oldChild = element.querySelector('#child1');
       element.removeChild(oldChild);
 
@@ -687,17 +695,22 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       // No changes.
       expect(child2.type).to.equal(Slot);
       expect(child2.props).to.deep.equal({
-        name: 'i-amphtml-children-1',
+        name: prevChild2.props.name,
         boolDefTrue: true,
         combined: 'C+D',
         params: {test: 'helloworld2', testTwo: 'confirm2'},
       });
       expect(element.querySelector('#child2').slot).to.equal(
-        'i-amphtml-children-1'
+        prevChild2.props.name
       );
     });
 
     it('should rerender on reorder', async () => {
+      await waitFor(() => component.callCount > 0, 'component rendered');
+      const {children: prevChildren} = lastProps;
+      expect(prevChildren).to.have.lengthOf(2);
+      const {0: prevChild1, 1: prevChild2} = prevChildren;
+
       element.insertBefore(
         element.querySelector('#child2'),
         element.querySelector('#child1')
@@ -713,23 +726,23 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       // No changes, except for ordering.
       expect(child1.type).to.equal(Slot);
       expect(child1.props).to.deep.equal({
-        name: 'i-amphtml-children-0',
+        name: prevChild1.props.name,
         boolDefTrue: true,
         combined: 'A+B',
         params: {test: 'helloworld', testTwo: 'confirm'},
       });
       expect(element.querySelector('#child1').slot).to.equal(
-        'i-amphtml-children-0'
+        prevChild1.props.name
       );
       expect(child2.type).to.equal(Slot);
       expect(child2.props).to.deep.equal({
-        name: 'i-amphtml-children-1',
+        name: prevChild2.props.name,
         boolDefTrue: true,
         combined: 'C+D',
         params: {test: 'helloworld2', testTwo: 'confirm2'},
       });
       expect(element.querySelector('#child2').slot).to.equal(
-        'i-amphtml-children-1'
+        prevChild2.props.name
       );
     });
 

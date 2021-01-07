@@ -52,7 +52,6 @@ function SidebarWithActions(props) {
         </div>
       </Sidebar>
       <div style={{marginTop: 8}}>
-        <br />
         <button onClick={() => ref.current.toggle()}>toggle</button>
         <button onClick={() => ref.current.open()}>open</button>
         <button onClick={() => ref.current.close()}>close</button>
