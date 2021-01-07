@@ -1082,7 +1082,7 @@ describe('mutator changeSize', () => {
       () => {
         const parent = document.createElement('div');
         parent.style.width = '222px';
-        parent.getLayoutWidth = () => 222;
+        parent.getLayoutSize = () => ({width: 222, height: 111});
         const element = document.createElement('div');
         element.overflowCallback = overflowCallbackSpy;
         parent.appendChild(element);
@@ -1132,7 +1132,7 @@ describe('mutator changeSize', () => {
       () => {
         const parent = document.createElement('div');
         parent.style.width = '222px';
-        parent.getLayoutWidth = () => 222;
+        parent.getLayoutSize = () => ({width: 222, height: 111});
         const element = document.createElement('div');
         const sibling = document.createElement('div');
         sibling.style.width = '1px';

@@ -980,7 +980,7 @@ class VideoEntry {
   getAnalyticsDetails() {
     const {video} = this;
     return this.supportsAutoplay_().then((supportsAutoplay) => {
-      const {width, height} = video.element.getLayoutBox();
+      const {width, height} = video.element.getLayoutSize();
       const autoplay = this.hasAutoplay && supportsAutoplay;
       const playedRanges = video.getPlayedRanges();
       const playedTotal = playedRanges.reduce(

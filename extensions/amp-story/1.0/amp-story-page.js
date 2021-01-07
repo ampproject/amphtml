@@ -293,7 +293,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private {?Element} */
     this.cssVariablesStyleEl_ = null;
 
-    /** @private {?../../../src/layout-rect.LayoutRectDef} */
+    /** @private {?../../../src/layout-rect.LayoutSizeDef} */
     this.layoutBox_ = null;
 
     /** @private {!Array<function()>} */
@@ -577,7 +577,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   // equality checks.
   /** @override */
   onLayoutMeasure() {
-    const layoutBox = this.getLayoutBox();
+    const layoutBox = this.getLayoutSize();
     // Only measures from the first story page, that always gets built because
     // of the prerendering optimizations in place.
     if (

@@ -167,7 +167,7 @@ export class AmpScript extends AMP.BaseElement {
       return;
     }
 
-    const {width, height} = this.getLayoutBox();
+    const {width, height} = this.getLayoutSize();
     if (width === 0 && height === 0) {
       user().warn(
         TAG,

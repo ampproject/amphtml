@@ -206,6 +206,14 @@ export class BaseElement {
   }
 
   /**
+   * Returns a previously measured layout size.
+   * @return {!./layout-rect.LayoutSizeDef}
+   */
+  getLayoutSize() {
+    return this.element.getLayoutSize();
+  }
+
+  /**
    * DO NOT CALL. Retained for backward compat during rollout.
    * @public
    * @return {!Window}

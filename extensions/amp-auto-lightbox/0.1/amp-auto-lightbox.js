@@ -159,7 +159,7 @@ export class Criteria {
       dev().assertElement(element.querySelector('img'))
     );
 
-    const {width: renderWidth, height: renderHeight} = element.getLayoutBox();
+    const {width: renderWidth, height: renderHeight} = element.getLayoutSize();
 
     const viewport = Services.viewportForDoc(element);
     const {width: vw, height: vh} = viewport.getSize();

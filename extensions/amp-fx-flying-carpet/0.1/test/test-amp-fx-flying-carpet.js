@@ -146,7 +146,7 @@ describes.realWin(
         impl.mutateElement = function (callback) {
           callback();
         };
-        flyingCarpet.getLayoutWidth = () => width;
+        flyingCarpet.getLayoutSize = () => ({width, height: 100});
 
         impl.layoutCallback();
         expect(container.style.width).to.equal(width + 'px');

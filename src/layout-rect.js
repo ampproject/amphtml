@@ -32,6 +32,17 @@
 export let LayoutRectDef;
 
 /**
+ * The structure that contains the size for an element. The exact
+ * interpretation of the size depends on the use case.
+ *
+ * @typedef {{
+ *   width: number,
+ *   height: number,
+ * }}
+ */
+export let LayoutSizeDef;
+
+/**
  * The structure that represents the margins of an Element.
  *
  * @typedef {{
@@ -279,4 +290,13 @@ export function cloneLayoutMarginsChangeDef(marginsChange) {
     left: marginsChange.left,
     right: marginsChange.right,
   };
+}
+
+/**
+ * @param {!LayoutRectDef|!ClientRect|!DOMRect} rect
+ * @return {!LayoutSizeDef}
+ */
+export function layoutSizeFromRect(rect) {
+  const {width, height} = rect;
+  return {width, height};
 }

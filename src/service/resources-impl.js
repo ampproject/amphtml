@@ -1011,7 +1011,7 @@ export class ResourcesImpl {
                 // If the element has siblings, it's possible that a width-expansion will
                 // cause some of them to be pushed down.
                 const parentWidth =
-                  (parent.getLayoutWidth && parent.getLayoutWidth()) ||
+                  (parent.getLayoutSize && parent.getLayoutSize().width) ||
                   parent./*OK*/ offsetWidth;
                 let cumulativeWidth = widthDiff;
                 for (let i = 0; i < parent.childElementCount; i++) {

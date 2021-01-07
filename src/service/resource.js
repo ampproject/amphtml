@@ -23,6 +23,7 @@ import {dev, devAssert} from '../log';
 import {
   layoutRectLtwh,
   layoutRectSizeEquals,
+  layoutSizeFromRect,
   moveLayoutRect,
   rectsOverlap,
 } from '../layout-rect';
@@ -650,6 +651,14 @@ export class Resource {
    */
   requestMeasure() {
     this.isMeasureRequested_ = true;
+  }
+
+  /**
+   * Returns a previously measured layout size.
+   * @return {!../layout-rect.LayoutSizeDef}
+   */
+  getLayoutSize() {
+    return layoutSizeFromRect(this.layoutBox_);
   }
 
   /**
