@@ -481,7 +481,7 @@ integration.getConsentData(function(consent) {
 });
 ```
 
-A complete [example using `getConsentData` is available as well.](../../examples/amp-video-iframe/frame-es2015-consent.html)
+A complete [example using `getConsentData` is available as well.](../../examples/amp-video-iframe/frame-consent.html)
 
 #### <a name="getIntersection"></a> `getIntersection(callback)`
 
