@@ -75,14 +75,14 @@ export function buildInteractiveDisclaimer(interactive) {
   const descriptionEl = disclaimer.querySelector(
     '.i-amphtml-story-interactive-disclaimer-description'
   );
-  const entityEl = disclaimer.querySelector(
-    '.i-amphtml-story-interactive-disclaimer-entity'
-  );
   const urlEl = disclaimer.querySelector(
     '.i-amphtml-story-interactive-disclaimer-url'
   );
   const linkEl = disclaimer.querySelector(
     '.i-amphtml-story-interactive-disclaimer-link'
+  );
+  const entityEl = disclaimer.querySelector(
+    '.i-amphtml-story-interactive-disclaimer-entity'
   );
   const noteEl = disclaimer.querySelector(
     '.i-amphtml-story-interactive-disclaimer-note'
