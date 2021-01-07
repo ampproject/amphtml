@@ -89,10 +89,10 @@ describes.realWin(
 
     async function layoutAndLoad(element) {
       await whenUpgradedToCustomElement(element);
-      // getLayoutBox() affects looksLikeTrackingIframe().
+      // getLayoutSize() affects looksLikeTrackingIframe().
       // Use default width/height of 100 since element is not sized
       // as expected in test fixture.
-      env.sandbox.stub(element, 'getLayoutBox').returns({
+      env.sandbox.stub(element, 'getLayoutSize').returns({
         width: Number(element.getAttribute('width')) || 100,
         height: Number(element.getAttribute('height')) || 100,
       });

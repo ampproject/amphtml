@@ -873,7 +873,7 @@ describes.realWin(
       it('should correctly classify ads', () => {
         function e(width, height) {
           return {
-            getLayoutBox() {
+            getLayoutSize() {
               return {width, height};
             },
           };
