@@ -305,7 +305,7 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
     if (!this.iframe_) {
       return;
     }
-    const {width, height} = this.getLayoutBox();
+    const {width, height} = this.getLayoutSize();
     this.sendCommand_('ampResize', {'width': width, 'height': height});
   }
 

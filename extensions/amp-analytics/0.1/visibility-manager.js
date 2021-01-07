@@ -123,9 +123,6 @@ export class VisibilityManager {
     /** @const @protected */
     this.ampdoc = ampdoc;
 
-    /** @const @private */
-    this.resources_ = Services.resourcesForDoc(ampdoc);
-
     /** @private {number} */
     this.rootVisibility_ = 0;
 
@@ -499,12 +496,7 @@ export class VisibilityManager {
       if (opt_element) {
         state['elementId'] = opt_element.id;
         state['opacity'] = getMinOpacity(opt_element);
-        const resource = this.resources_.getResourceForElementOptional(
-          opt_element
-        );
-        layoutBox = resource
-          ? resource.getLayoutBox()
-          : viewport.getLayoutRect(opt_element);
+        layoutBox = viewport.getLayoutRect(opt_element);
         const intersectionRatio = this.getElementVisibility(opt_element);
         const intersectionRect = this.getElementIntersectionRect(opt_element);
         Object.assign(

@@ -286,7 +286,7 @@ export class AmpA4A extends AMP.BaseElement {
      */
     this.creativeSize_ = null;
 
-    /** @private {?../../../src/layout-rect.LayoutRectDef} */
+    /** @private {?../../../src/layout-rect.LayoutSizeDef} */
     this.originalSlotSize_ = null;
 
     /**
@@ -1373,7 +1373,7 @@ export class AmpA4A extends AMP.BaseElement {
     // Store original size of slot in order to allow re-expansion on
     // unlayoutCallback so that it is reverted to original size in case
     // of resumeCallback.
-    this.originalSlotSize_ = this.originalSlotSize_ || this.getLayoutBox();
+    this.originalSlotSize_ = this.originalSlotSize_ || this.getLayoutSize();
     return super.attemptChangeSize(newHeight, newWidth);
   }
 
@@ -1583,7 +1583,7 @@ export class AmpA4A extends AMP.BaseElement {
     devAssert(this.uiHandler);
     // Store original size to allow for reverting on unlayoutCallback so that
     // subsequent pageview allows for ad request.
-    this.originalSlotSize_ = this.originalSlotSize_ || this.getLayoutBox();
+    this.originalSlotSize_ = this.originalSlotSize_ || this.getLayoutSize();
     this.uiHandler.applyNoContentUI();
     this.isCollapsed_ = true;
   }

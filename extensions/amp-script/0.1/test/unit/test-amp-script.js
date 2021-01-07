@@ -160,14 +160,14 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
   describe('Initialization skipped warning due to zero height/width', () => {
     it('should not warn when there is positive width/height', () => {
       const warnStub = env.sandbox.stub(user(), 'warn');
-      env.sandbox.stub(script, 'getLayoutBox').returns({height: 1, width: 1});
+      env.sandbox.stub(script, 'getLayoutSize').returns({height: 1, width: 1});
       script.onMeasureChanged();
       expect(warnStub).to.have.callCount(0);
     });
 
     it('should warn if there is zero width/height', () => {
       const warnStub = env.sandbox.stub(user(), 'warn');
-      env.sandbox.stub(script, 'getLayoutBox').returns({height: 0, width: 0});
+      env.sandbox.stub(script, 'getLayoutSize').returns({height: 0, width: 0});
       script.onMeasureChanged();
 
       expect(warnStub).calledWith(

@@ -262,7 +262,7 @@ describes.sandboxed('amp-img', {}, (env) => {
       el.setAttribute('height', 100);
       el.getResources = () => Services.resourcesForDoc(document);
       el.getPlaceholder = sandbox.stub();
-      el.getLayoutWidth = () => 100;
+      el.getLayoutSize = () => ({width: 100, height: 100});
       impl = new AmpImg(el);
       el.toggleFallback = function () {};
       el.togglePlaceholder = function () {};
@@ -416,7 +416,7 @@ describes.sandboxed('amp-img', {}, (env) => {
     el.setAttribute('aria-label', 'Hello');
     el.setAttribute('aria-labelledby', 'id2');
     el.setAttribute('aria-describedby', 'id3');
-    el.getLayoutWidth = () => -1;
+    el.getLayoutSize = () => ({width: 0, height: 0});
 
     el.getPlaceholder = sandbox.stub();
     const impl = new AmpImg(el);
@@ -515,7 +515,7 @@ describes.sandboxed('amp-img', {}, (env) => {
       if (addBlurClass) {
         img.classList.add('i-amphtml-blurry-placeholder');
       }
-      el.getLayoutWidth = () => 200;
+      el.getLayoutSize = () => ({width: 200, height: 100});
       el.appendChild(img);
       el.getResources = () => Services.resourcesForDoc(document);
       const impl = new AmpImg(el);
@@ -612,7 +612,7 @@ describes.sandboxed('amp-img', {}, (env) => {
       }
       el.getResources = () => Services.resourcesForDoc(document);
       el.getPlaceholder = sandbox.stub();
-      el.getLayoutWidth = () => layoutWidth;
+      el.getLayoutSize = () => ({width: layoutWidth, height: 100});
       const impl = new AmpImg(el);
       sandbox.stub(impl, 'getLayout').returns(attributes['layout']);
       el.toggleFallback = function () {};
