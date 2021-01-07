@@ -88,7 +88,7 @@ export class InaboxResources {
     /** @private {boolean} */
     this.documentReady_ = false;
 
-    // TODO(ccordry): cleanup when launched.
+    // TODO(#31776): cleanup when launched.
     if (isExperimentOn(this.win, 'inabox-resources-eager')) {
       this.ampdoc_.whenReady().then(() => {
         this.documentReady_ = true;
@@ -145,7 +145,7 @@ export class InaboxResources {
   /** @override */
   upgraded(element) {
     const resource = Resource.forElement(element);
-    // TODO(ccordry): cleanup when launched.
+    // TODO(#31776): cleanup when launched.
     if (isExperimentOn(this.win, 'inabox-resources-eager')) {
       this.pendingBuildResources_.push(resource);
       this.buildReadyResources_();
