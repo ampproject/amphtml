@@ -98,7 +98,6 @@ module.exports = {
           'export',
           'final',
           'nocollapse',
-          'noinline',
           'package',
           'record',
           'restricted',

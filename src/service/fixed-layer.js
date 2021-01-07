@@ -574,7 +574,6 @@ export class FixedLayer {
    * @param {!Node} root
    * @param {boolean=} opt_lightboxMode
    * @private
-   * @noinline
    */
   trySetupSelectors_(root, opt_lightboxMode) {
     try {

@@ -582,7 +582,6 @@ export class EmbedAnalyticsRoot extends AnalyticsRoot {
  * @param  {!Element} el
  * @param  {string} selector
  * @return {boolean}
- * @noinline
  */
 function tryMatches_(el, selector) {
   try {
