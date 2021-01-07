@@ -300,10 +300,22 @@ class AmpVideoIframe extends AMP.BaseElement {
       return; // we only process valid json
     }
 
-    const messageId = data['id'];
+    // Expected message format:
+    //
+    // @typedef {{
+    //   id: number,
+    //   method: (undefined|string),
+    //   event: (undefined|string),
+    //   analytics: (undefined|{
+    //     eventType: string,
+    //     vars: Object<string, string>,
+    //   }),
+    // }}
+
     const methodReceived = data['method'];
 
     if (methodReceived) {
+      const messageId = data['id'];
       if (methodReceived == 'getIntersection') {
         return measureIntersection(this.element).then((intersection) => {
           this.postIntersection_(messageId, intersection);

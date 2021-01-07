@@ -23,6 +23,7 @@ import {
   whenUpgradedToCustomElement,
 } from '../../../../src/dom';
 import {listenOncePromise} from '../../../../src/event-helper';
+import {macroTask} from '../../../../testing/yield';
 
 function getIntersectionMessage(id) {
   return {data: {id, method: 'getIntersection'}};
@@ -439,6 +440,8 @@ describes.realWin(
           const postMessage = stubPostMessage(videoIframe);
 
           videoIframe.implementation_[method]();
+
+          await macroTask();
 
           expect(
             postMessage.withArgs(
