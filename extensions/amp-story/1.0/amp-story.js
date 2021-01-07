@@ -52,6 +52,7 @@ import {AmpStoryGridLayer} from './amp-story-grid-layer';
 import {AmpStoryHint} from './amp-story-hint';
 import {AmpStoryPage, NavigationDirection, PageState} from './amp-story-page';
 import {AmpStoryPageAttachment} from './amp-story-page-attachment';
+import {AmpStoryPageLayer} from './amp-story-page-layer';
 import {AmpStoryRenderService} from './amp-story-render-service';
 import {AmpStoryViewerMessagingHandler} from './amp-story-viewer-messaging-handler';
 import {AnalyticsVariable, getVariableService} from './variable-service';
@@ -2613,7 +2614,7 @@ export class AmpStory extends AMP.BaseElement {
   updatePausedIcon_() {
     const containsElementsWithPlayback = !!scopedQuerySelector(
       this.element,
-      'amp-story-grid-layer amp-audio, amp-story-grid-layer amp-video, amp-story-page[background-audio], amp-story-page[auto-advance-after]'
+      'amp-story-page amp-audio, amp-story-page amp-video, amp-story-page[background-audio], amp-story-page[auto-advance-after]'
     );
 
     const storyHasBackgroundAudio = this.element.hasAttribute(
@@ -2919,5 +2920,6 @@ AMP.extension('amp-story', '1.0', (AMP) => {
   AMP.registerElement('amp-story-grid-layer', AmpStoryGridLayer);
   AMP.registerElement('amp-story-page', AmpStoryPage);
   AMP.registerElement('amp-story-page-attachment', AmpStoryPageAttachment);
+  AMP.registerElement('amp-story-page-layer', AmpStoryPageLayer);
   AMP.registerServiceForDoc('amp-story-render', AmpStoryRenderService);
 });

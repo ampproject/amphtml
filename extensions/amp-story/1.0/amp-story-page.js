@@ -89,27 +89,27 @@ const PAGE_LOADED_CLASS_NAME = 'i-amphtml-story-page-loaded';
 /**
  * Selectors for media elements.
  * Only get the page media: direct children of amp-story-page (ie:
- * background-audio), or descendant of amp-story-grid-layer. That excludes media
+ * background-audio), or descendant of amp-story-grid/page-layer. That excludes media
  * contained in amp-story-page-attachment.
  * @enum {string}
  */
 export const Selectors = {
   // which media to wait for on page layout.
   ALL_AMP_MEDIA:
-    'amp-story-grid-layer amp-audio, ' +
-    'amp-story-grid-layer amp-video, amp-story-grid-layer amp-img, ' +
-    'amp-story-grid-layer amp-anim',
-  ALL_AMP_VIDEO: 'amp-story-grid-layer amp-video',
-  ALL_IFRAMED_MEDIA: 'audio, video',
+    'amp-story-grid-layer amp-audio, amp-story-page-layer amp-audio, amp-story-grid-layer amp-video, amp-story-page-layer amp-video, amp-story-grid-layer amp-img, amp-story-page-layer amp-img, amp-story-grid-layer amp-anim, amp-story-page-layer amp-anim',
+  ALL_AMP_VIDEO:
+    'amp-story-grid-layer amp-video, amp-story-page-layer amp-video',
+  ALL_IFRAMED_MEDIA:
+    'amp-story-grid-layer audio, amp-story-page-layer audio, amp-story-grid-layer video, amp-story-page-layer video',
   ALL_PLAYBACK_AMP_MEDIA:
-    'amp-story-grid-layer amp-audio, amp-story-grid-layer amp-video',
+    'amp-story-grid-layer amp-audio, amp-story-page-layer amp-audio, amp-story-grid-layer amp-video, amp-story-page-layer amp-video',
   // TODO(gmajoulet): Refactor the way these selectors are used. They will be
   // passed to scopedQuerySelectorAll which expects only one selector and not
   // multiple separated by commas. `> audio` has to be kept first of the list to
   // work with this current implementation.
   ALL_PLAYBACK_MEDIA:
-    '> audio, amp-story-grid-layer audio, amp-story-grid-layer video',
-  ALL_VIDEO: 'amp-story-grid-layer video',
+    '> audio, amp-story-grid-layer audio, amp-story-page-layer audio, amp-story-grid-layer video, amp-story-page-layer video',
+  ALL_VIDEO: 'amp-story-grid-layer video, amp-story-page-layer video',
 };
 
 /** @private @const {string} */
@@ -872,6 +872,8 @@ export class AmpStoryPage extends AMP.BaseElement {
     iterateCursor(scopedQuerySelectorAll(this.element, selector), (el) =>
       mediaSet.push(el)
     );
+
+    console.log(this.element.id, selector, mediaSet);
 
     if (fie) {
       iterateCursor(
