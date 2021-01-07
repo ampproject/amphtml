@@ -952,7 +952,7 @@ describes.realWin(
         expect(iframe.getAttribute('src')).to.contain(newSrc);
       });
 
-      it('sends a consent-data message to the iframe', function* () {
+      it('sends a consent-data message to the iframe', async () => {
         const ampIframe = createAmpIframe(env, {
           src: iframeSrc,
           sandbox: 'allow-scripts allow-same-origin',
@@ -960,22 +960,26 @@ describes.realWin(
           height: 100,
         });
 
-        const impl = ampIframe.implementation_;
-        impl.getConsentString_ = () => Promise.resolve({consentString: true});
-        impl.getConsentMetadata_ = () =>
-          Promise.resolve({consentMetadata: true});
-        impl.getConsentPolicyState_ = () =>
+        const consentString = 'foo-consentString';
+        const consentMetadata = 'bar-consentMetadata';
+        const consentPolicyState = 'baz-consentPolicyState';
+
+        env.sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
           Promise.resolve({
-            consentPolicyState: true,
-          });
+            getConsentMetadataInfo: () => consentMetadata,
+            getConsentStringInfo: () => consentString,
+            whenPolicyResolved: () => consentPolicyState,
+          })
+        );
 
-        yield waitForAmpIframeLayoutPromise(doc, ampIframe);
-        const iframe = ampIframe.querySelector('iframe');
+        await waitForAmpIframeLayoutPromise(doc, ampIframe);
 
+        const impl = await ampIframe.getImpl();
         return new Promise((resolve, unusedReject) => {
           impl.sendConsentDataToIframe_ = (source, origin, message) => {
             resolve(message);
           };
+          const iframe = ampIframe.querySelector('iframe');
           iframe.contentWindow.postMessage(
             {
               sentinel: 'amp',
@@ -987,9 +991,9 @@ describes.realWin(
           expect(message).to.deep.equal({
             sentinel: 'amp',
             type: 'consent-data',
-            consentString: {consentString: true},
-            consentMetadata: {consentMetadata: true},
-            consentPolicyState: {consentPolicyState: true},
+            consentString,
+            consentMetadata,
+            consentPolicyState,
           });
         });
       });
