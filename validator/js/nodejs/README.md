@@ -53,6 +53,10 @@ As expected, this emits errors because the provided string in the example, `<htm
 
 ## Release Notes
 
+### 1.0.34
+
+-   Updated `colors` dependency version (ampproject/amphtml #31656).
+
 ### 1.0.33
 
 -   Update repository location.
