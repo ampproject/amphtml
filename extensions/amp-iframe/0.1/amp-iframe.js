@@ -21,11 +21,11 @@ import {LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
 import {MessageType} from '../../../src/3p-frame-messaging';
 import {Services} from '../../../src/services';
 import {base64EncodeFromBytes} from '../../../src/utils/base64.js';
-import {collectConsents} from '../../../src/consent';
 import {createCustomEvent, getData, listen} from '../../../src/event-helper';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {endsWith} from '../../../src/string';
+import {getConsentDataToForward} from '../../../src/consent';
 import {
   isAdLike,
   listenFor,
@@ -533,19 +533,21 @@ export class AmpIframe extends AMP.BaseElement {
    * @private
    */
   sendConsentData_(source, origin) {
-    collectConsents(this.element, this.getConsentPolicy()).then((consents) => {
-      this.sendConsentDataToIframe_(
-        source,
-        origin,
-        Object.assign(
-          dict({
-            'sentinel': 'amp',
-            'type': MessageType.CONSENT_DATA,
-          }),
-          consents
-        )
-      );
-    });
+    getConsentDataToForward(this.element, this.getConsentPolicy()).then(
+      (consents) => {
+        this.sendConsentDataToIframe_(
+          source,
+          origin,
+          Object.assign(
+            dict({
+              'sentinel': 'amp',
+              'type': MessageType.CONSENT_DATA,
+            }),
+            consents
+          )
+        );
+      }
+    );
   }
 
   /**

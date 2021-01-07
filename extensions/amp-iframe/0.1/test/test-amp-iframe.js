@@ -957,12 +957,14 @@ describes.realWin(
         const consentString = 'foo-consentString';
         const consentMetadata = 'bar-consentMetadata';
         const consentPolicyState = 'baz-consentPolicyState';
+        const consentPolicySharedData = 'foo-consentPolicySharedData';
 
         env.sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
           Promise.resolve({
             getConsentMetadataInfo: () => Promise.resolve(consentMetadata),
             getConsentStringInfo: () => Promise.resolve(consentString),
             whenPolicyResolved: () => Promise.resolve(consentPolicyState),
+            getMergedSharedData: () => Promise.resolve(consentPolicySharedData),
           })
         );
 
@@ -981,7 +983,10 @@ describes.realWin(
 
         const iframe = ampIframe.querySelector('iframe');
         iframe.contentWindow.postMessage(
-          {sentinel: 'amp', type: 'requestSendConsentState'},
+          {
+            sentinel: 'amp',
+            type: 'requestSendConsentState',
+          },
           '*'
         );
 
@@ -996,6 +1001,8 @@ describes.realWin(
               type: 'consent-data',
               consentString,
               consentMetadata,
+              consentPolicyState,
+              consentPolicySharedData,
             })
           )
         ).to.have.been.calledOnce;

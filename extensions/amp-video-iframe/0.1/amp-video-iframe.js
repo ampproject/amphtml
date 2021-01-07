@@ -27,7 +27,6 @@ import {
 } from '../../../src/iframe-video';
 import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
-import {collectConsents} from '../../../src/consent';
 import {
   createElementWithAttributes,
   dispatchCustomEvent,
@@ -41,6 +40,7 @@ import {
   disableScrollingOnIframe,
   looksLikeTrackingIframe,
 } from '../../../src/iframe-helper';
+import {getConsentDataToForward} from '../../../src/consent';
 import {getData, listen} from '../../../src/event-helper';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -410,14 +410,11 @@ class AmpVideoIframe extends AMP.BaseElement {
    * @private
    */
   postConsentData_(messageId) {
-    collectConsents(this.element, this.getConsentPolicy()).then((consents) => {
-      this.postMessage_(
-        dict({
-          'id': messageId,
-          'args': consents,
-        })
-      );
-    });
+    getConsentDataToForward(this.element, this.getConsentPolicy()).then(
+      (consentData) => {
+        this.postMessage_(dict({'id': messageId, 'args': consentData}));
+      }
+    );
   }
 
   /**

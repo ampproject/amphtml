@@ -97,19 +97,23 @@ export function getConsentMetadata(element, policyId = 'default') {
 }
 
 /**
+ * Returns a set of consent values to forward to a 3rd party (like an iframe).
  * @param {!Element} element
  * @param {?string=} opt_policyId
  * @return {!Promise<!JsonObject>}
+ *   See extensions/amp-consent/customizing-extension-behaviors-on-consent.md:
  *    - consentMetadata
  *    - consentString
  *    - consentPolicyState
+ *    - consentPolicySharedData
  */
-export function collectConsents(element, opt_policyId) {
+export function getConsentDataToForward(element, opt_policyId) {
   return Services.consentPolicyServiceForDocOrNull(element).then((policy) => {
     const gettersOrNull = dict({
       'consentMetadata': policy && policy.getConsentMetadataInfo,
       'consentString': policy && policy.getConsentStringInfo,
       'consentPolicyState': policy && policy.whenPolicyResolved,
+      'consentPolicySharedData': policy && policy.getMergedSharedData,
     });
     if (!policy) {
       return gettersOrNull;

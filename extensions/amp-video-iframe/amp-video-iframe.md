@@ -433,9 +433,10 @@ Note: If you only require to block the iframe from loading when consent is not g
 
 The `callback` passed to the function will be executed with an object containing the following properties:
 
--   [**`consentMetadata`**](#on-consent-metadata)
--   [**`consentString`**](#on-consent-string)
--   [**`consentPolicyState`**](#on-consent-state)
+-   [**`consentMetadata`**](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/customizing-extension-behaviors-on-consent.md#on-consent-metadata)
+-   [**`consentString`**](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/customizing-extension-behaviors-on-consent.md#on-consent-string)
+-   [**`consentPolicyState`**](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/customizing-extension-behaviors-on-consent.md#on-consent-state)
+-   [**`consentPolicySharedData`**](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/customizing-extension-behaviors-on-consent.md#on-related-information)
 
 ```json
 {
@@ -446,7 +447,11 @@ The `callback` passed to the function will be executed with an object containing
     "purposeOne": true
   },
   "consentString": "accept-string",
-  "consentPolicyState": 1
+  "consentPolicyState": 1,
+  "consentPolicySharedData": {
+    "tfua": true,
+    "coppa": true
+  }
 }
 ```
 
