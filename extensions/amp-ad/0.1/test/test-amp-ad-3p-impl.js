@@ -289,7 +289,7 @@ describes.realWin(
 
       describe('during layout', () => {
         it('sticky ad: should not layout w/o scroll', () => {
-          ad3p.uiHandler.isStickyAd_ = true;
+          ad3p.uiHandler.stickyAdPosition_ = 'bottom';
           expect(ad3p.xOriginIframeHandler_).to.be.null;
           const layoutPromise = ad3p.layoutCallback();
           return Promise.race([macroTask(), layoutPromise])
