@@ -663,6 +663,7 @@ export class PreactBaseElement extends AMP.BaseElement {
    * stale by the time its actually used.
    *
    * @param {!API_TYPE} current
+   * @private
    */
   initApiWrapper_(current) {
     const api = map();
@@ -683,6 +684,7 @@ export class PreactBaseElement extends AMP.BaseElement {
    * If it does not, the API wrapper is syncrhonized.
    *
    * @param {!API_TYPE} current
+   * @private
    */
   checkApiWrapper_(current) {
     const api = this.apiWrapper_;
