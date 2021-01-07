@@ -294,21 +294,31 @@ the default styling you're providing and allow for easy CSS classes
 and/or well-structure DOM elements.
 
 Element styles are loaded when the element script itself is included in
-an AMP doc. You tell AMP which CSS belongs to this element when
+an AMP doc. You tell AMP which CSS or JSS belongs to this element when
 registering the element (see below).
-
-TODO: Discuss JSS and when to use it.
 
 ## Register element with AMP
 
 Once you have implemented your AMP element, you need to register it with
-AMP; all AMP extensions are prefixed with `amp-`. This is where you
-tell AMP which class to use for this tag name and which CSS to load.
+AMP; all AMP extensions are prefixed with `amp-`.
+
+One way to specify the appropriate styles is to tell AMP which class to use for this tag name and which CSS to load.
 
 ```javascript
-AMP.extension('amp-carousel', '0.1', (AMP) => {
-  AMP.registerElement('amp-carousel', CarouselSelector, CSS);
+import {CSS} from '../../../build/amp-my-element-0.1.css';
+
+AMP.extension('amp-my-element', '0.1', (AMP) => {
+  AMP.registerElement('amp-my-element', AmpMyElement, CSS);
 });
+```
+
+Alternatively, you may have defined styles via JSS that are compiled into CSS and attached via the shadow stylesheet. To tell AMP which class to use, override the `shadowCss` property:
+
+```javascript
+import {CSS} from './my-element.jss';
+
+/** @override */
+AmpMyElement['shadowCss'] = CSS;
 ```
 
 ## Actions and events
@@ -481,6 +491,7 @@ const EXPERIMENTS = [
 Then protect your code with a check for the component-specific flag `isExperimentOn(win, 'bento-my-element')`, or the global flag which enables all Bento components `isExperimentOn(win, 'bento')`, and only execute your code when it is on.
 
 ```javascript
+import {CSS} from '../../../build/amp-my-element-0.1.css';
 import {isExperimentOn} from '../../../src/experiments';
 import {userAssert} from '../../../src/log';
 
