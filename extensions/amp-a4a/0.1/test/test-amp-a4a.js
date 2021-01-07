@@ -42,6 +42,7 @@ import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {Extensions} from '../../../../src/service/extensions-impl';
 import {FetchMock, networkFailure} from './fetch-mock';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
+import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
 import {LayoutPriority} from '../../../../src/layout';
 import {MockA4AImpl, TEST_URL} from './utils';
 import {RealTimeConfigManager} from '../../../../src/service/real-time-config/real-time-config-impl';
@@ -55,7 +56,7 @@ import {
   incrementLoadingAds,
   is3pThrottled,
 } from '../../../amp-ad/0.1/concurrent-load';
-import {layoutRectLtwh} from '../../../../src/layout-rect';
+import {layoutRectLtwh, layoutSizeFromRect} from '../../../../src/layout-rect';
 import {resetScheduledElementForTesting} from '../../../../src/service/custom-element-registry';
 import {data as testFragments} from './testdata/test_fragments';
 import {data as validCSSAmp} from './testdata/valid_css_at_rules_amp.reserialized';
@@ -282,6 +283,7 @@ describe('amp-a4a', () => {
       'height': opt_rect ? String(opt_rect.height) : '50',
       'type': 'adsense',
     });
+    const layoutBox = opt_rect || layoutRectLtwh(0, 0, 200, 50);
     element.getAmpDoc = () => {
       const ampdocService = Services.ampdocServiceFor(doc.defaultView);
       return ampdocService.getAmpDoc(element);
@@ -289,12 +291,8 @@ describe('amp-a4a', () => {
     element.isBuilt = () => {
       return true;
     };
-    element.getLayoutBox = () => {
-      return opt_rect || layoutRectLtwh(0, 0, 200, 50);
-    };
-    element.getPageLayoutBox = () => {
-      return element.getLayoutBox.apply(element, arguments);
-    };
+    element.getLayoutBox = () => layoutBox;
+    element.getLayoutSize = () => layoutSizeFromRect(layoutBox);
     element.getIntersectionChangeEntry = () => {
       return null;
     };
@@ -1926,7 +1924,7 @@ describe('amp-a4a', () => {
           cleanup: () => {},
         };
         window.sandbox
-          .stub(a4a, 'getLayoutBox')
+          .stub(a4a, 'getLayoutSize')
           .returns({width: 123, height: 456});
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.ok;
@@ -2778,6 +2776,94 @@ describe('amp-a4a', () => {
       window.__AMP_MODE = {development: false};
       a4a.promiseErrorHandler_(error);
       expect(devExpectedErrorStub).to.not.be.called;
+    });
+  });
+
+  describe('block-rtc attribute', () => {
+    describes.realWin('block-rtc attribute', {}, (env) => {
+      let geoService, a4a, element, fixture;
+
+      beforeEach(async () => {
+        AMP.RealTimeConfigManager = RealTimeConfigManager;
+        fixture = await createIframePromise();
+        element = createA4aElement(fixture.doc);
+        a4a = new MockA4AImpl(element);
+        geoService = {
+          isInCountryGroup(country) {
+            switch (country) {
+              case 'usca':
+                return GEO_IN_GROUP.IN;
+              case 'gdpr':
+                return GEO_IN_GROUP.NOT_IN;
+              default:
+                return GEO_IN_GROUP.NOT_DEFINED;
+            }
+          },
+        };
+        return fixture;
+      });
+
+      it('should return false if no attribute found', async () => {
+        expect(await a4a.getBlockRtc_()).to.false;
+      });
+
+      it('should return false if empty string', async () => {
+        element.setAttribute('block-rtc', '');
+        expect(await a4a.getBlockRtc_()).to.false;
+      });
+
+      it('should return if doc is served from a defined geo group', async () => {
+        env.sandbox
+          .stub(Services, 'geoForDocOrNull')
+          .returns(Promise.resolve(geoService));
+        element.setAttribute('block-rtc', 'gdpr,usca');
+        expect(await a4a.getBlockRtc_()).to.true;
+      });
+
+      it('should return false when doc is in an undefined group or not in', async () => {
+        const warnSpy = env.sandbox.stub(user(), 'warn');
+        env.sandbox
+          .stub(Services, 'geoForDocOrNull')
+          .returns(Promise.resolve(geoService));
+
+        // Undefined group
+        element.setAttribute('block-rtc', 'tx');
+        expect(await a4a.getBlockRtc_()).to.false;
+        expect(warnSpy.args[0][0]).to.match(/AMP-AD/);
+        expect(warnSpy.args[0][1]).to.match(/Geo group "tx" was not defined./);
+        expect(warnSpy).to.have.been.calledOnce;
+        // Not in
+        element.setAttribute('block-rtc', 'gdpr');
+        expect(await a4a.getBlockRtc_()).to.false;
+      });
+
+      it('should throw an error when there is no geoService', async () => {
+        geoService = null;
+        env.sandbox
+          .stub(Services, 'geoForDocOrNull')
+          .returns(Promise.resolve(geoService));
+        element.setAttribute('block-rtc', 'usca');
+        await expect(a4a.getBlockRtc_()).to.be.rejectedWith(
+          /requires <amp-geo> to use `block-rtc`/
+        );
+      });
+
+      it('should not execute RealTimeConfig if the attribute is valid', async () => {
+        env.sandbox
+          .stub(Services, 'geoForDocOrNull')
+          .returns(Promise.resolve(geoService));
+
+        const maybeExecuteRealTimeConfigStub = window.sandbox.stub();
+        window.sandbox
+          .stub(
+            AMP.RealTimeConfigManager.prototype,
+            'maybeExecuteRealTimeConfig'
+          )
+          .callsFake(maybeExecuteRealTimeConfigStub);
+        element.setAttribute('block-rtc', 'usca');
+        await a4a.tryExecuteRealTimeConfig_();
+        expect(maybeExecuteRealTimeConfigStub).to.not.be.called;
+      });
     });
   });
 

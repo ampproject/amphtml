@@ -14,7 +14,14 @@
  * limitations under the License.
  */
 import * as Preact from '../../../src/preact';
-import {Alignment, Axis, Orientation} from './dimensions';
+import {
+  Alignment,
+  Axis,
+  Orientation,
+  getDimension,
+  getOffsetPosition,
+  getScrollEnd,
+} from './dimensions';
 import {Arrow} from './arrow';
 import {CarouselContext} from './carousel-context';
 import {ContainWrapper} from '../../../src/preact/component';
@@ -107,10 +114,21 @@ function BaseCarouselWithRef(
   const [currentSlideState, setCurrentSlideState] = useState(
     Math.min(Math.max(defaultSlide, 0), length)
   );
-  const currentSlide = carouselContext.currentSlide ?? currentSlideState;
-  const currentSlideRef = useRef(currentSlide);
-  const setCurrentSlide =
+  const globalCurrentSlide = carouselContext.currentSlide ?? currentSlideState;
+  const setGlobalCurrentSlide =
     carouselContext.setCurrentSlide ?? setCurrentSlideState;
+  const currentSlide = _thumbnails ? currentSlideState : globalCurrentSlide;
+  const setCurrentSlide = _thumbnails
+    ? setCurrentSlideState
+    : setGlobalCurrentSlide;
+  const currentSlideRef = useRef(currentSlide);
+  const axis = orientation == Orientation.HORIZONTAL ? Axis.X : Axis.Y;
+
+  useLayoutEffect(() => {
+    // noop if !_thumbnails || !carouselContext.
+    setCurrentSlide(globalCurrentSlide);
+  }, [globalCurrentSlide, setCurrentSlide]);
+
   const {slides, setSlides} = carouselContext;
 
   const scrollRef = useRef(null);
@@ -188,8 +206,12 @@ function BaseCarouselWithRef(
           interaction.current = Interaction.GENERIC;
           prev();
         },
-        root: containRef.current,
-        node: contentRef.current,
+        get root() {
+          return containRef.current;
+        },
+        get node() {
+          return contentRef.current;
+        },
       }),
     [next, prev, setRestingIndex]
   );
@@ -202,10 +224,41 @@ function BaseCarouselWithRef(
     }
   }, [_thumbnails, childrenArray, setSlides, slides]);
 
-  const disableForDir = (dir) =>
-    !loop &&
-    (currentSlide + dir < 0 ||
-      (!mixedLength && currentSlide + visibleCount + dir > length));
+  const disableForDir = (dir) => {
+    if (loop) {
+      // Arrows always available when looping.
+      return false;
+    }
+    if (currentSlide + dir < 0) {
+      // Can no longer advance backwards.
+      return true;
+    }
+    if (currentSlide + visibleCount + dir > length) {
+      // Can no longer advance forwards.
+      return true;
+    }
+    if (mixedLength && dir > 0) {
+      // Measure container to see if we have reached the end.
+      if (!scrollRef.current) {
+        return false;
+      }
+      const container = scrollRef.current.node;
+      if (!container || !container.children.length) {
+        return false;
+      }
+      const scrollEnd = getScrollEnd(axis, container);
+      const scrollStart = getOffsetPosition(
+        axis,
+        container.children[currentSlide]
+      );
+      const {length} = getDimension(axis, container);
+      if (length !== scrollEnd && length + scrollStart >= scrollEnd) {
+        // Can no longer scroll forwards.
+        return true;
+      }
+    }
+    return false;
+  };
 
   const interaction = useRef(Interaction.NONE);
   const hideControls = useMemo(() => {
@@ -276,7 +329,7 @@ function BaseCarouselWithRef(
         advanceCount={advanceCount}
         alignment={snapAlign}
         autoAdvanceCount={autoAdvanceCount}
-        axis={orientation == Orientation.HORIZONTAL ? Axis.X : Axis.Y}
+        axis={axis}
         loop={loop}
         mixedLength={mixedLength}
         restingIndex={currentSlide}

@@ -669,12 +669,8 @@ exports.extensionBundles = [
     version: '1.0',
     latestVersion: '0.1',
     options: {
-      hasCss: false,
-      cssBinaries: [
-        'amp-inline-gallery',
-        'amp-inline-gallery-pagination',
-        'amp-inline-gallery-thumbnails',
-      ],
+      hasCss: true,
+      cssBinaries: ['amp-inline-gallery-pagination'],
     },
     type: TYPES.MISC,
   },
@@ -857,6 +853,12 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-reddit',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.MISC,
+  },
+  {
+    name: 'amp-resize-observer-polyfill',
     version: '0.1',
     latestVersion: '0.1',
     type: TYPES.MISC,

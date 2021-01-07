@@ -16,9 +16,10 @@
 
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {DomFingerprint} from '../../../src/utils/dom-fingerprint';
+import {GEO_IN_GROUP} from '../../../extensions/amp-geo/0.1/amp-geo-in-group';
 import {Services} from '../../../src/services';
 import {buildUrl} from './shared/url-builder';
-import {dev, devAssert} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
   getBinaryType,
@@ -29,6 +30,7 @@ import {getConsentPolicyState} from '../../../src/consent';
 import {getMeasuredResources} from '../../../src/ini-load';
 import {getMode} from '../../../src/mode';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
+import {getPageLayoutBoxBlocking} from '../../../src/utils/page-layout-box';
 import {getTimingDataSync} from '../../../src/service/variable-source';
 import {internalRuntimeVersion} from '../../../src/internal-version';
 import {parseJson} from '../../../src/json';
@@ -196,7 +198,7 @@ export function isReportingEnabled(ampElement) {
  */
 export function googleBlockParameters(a4a, opt_experimentIds) {
   const {element: adElement, win} = a4a;
-  const slotRect = a4a.getPageLayoutBox();
+  const slotRect = getPageLayoutBoxBlocking(adElement);
   const iframeDepth = iframeNestingDepth(win);
   const enclosingContainers = getEnclosingContainerTypes(adElement);
   let eids = adElement.getAttribute(EXPERIMENT_ATTRIBUTE);
@@ -1106,4 +1108,38 @@ function getBrowserCapabilitiesBitmap(win) {
 export function getAmpRuntimeTypeParameter(win) {
   const art = getBinaryTypeNumericalCode(getBinaryType(win));
   return isCdnProxy(win) && art != '0' ? art : null;
+}
+
+/**
+ * Checks if the `always-serve-npa` attribute is present and valid
+ * based on the geolocation.
+ * @param {!Element} element
+ * @return {!Promise<boolean>}
+ * @visibleForTesting
+ */
+export function getServeNpaPromise(element) {
+  if (!element.hasAttribute('always-serve-npa')) {
+    return Promise.resolve(false);
+  }
+  const npaSignal = element.getAttribute('always-serve-npa');
+  if (npaSignal == '') {
+    return Promise.resolve(true);
+  }
+  return Services.geoForDocOrNull(element).then((geoService) => {
+    if (!geoService) {
+      // Err on safe side and signal for NPA.
+      return true;
+    }
+    const locations = npaSignal.split(',');
+    for (let i = 0; i < locations.length; i++) {
+      const geoGroup = geoService.isInCountryGroup(locations[i]);
+      if (geoGroup === GEO_IN_GROUP.IN) {
+        return true;
+      } else if (geoGroup === GEO_IN_GROUP.NOT_DEFINED) {
+        user().warn('AMP-AD', `Geo group "${locations[i]}" was not defined.`);
+      }
+    }
+    // Not in any of the defined geo groups.
+    return false;
+  });
 }
