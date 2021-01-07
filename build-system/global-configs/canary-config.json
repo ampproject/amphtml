@@ -1,5 +1,5 @@
 {
-  "allow-doc-opt-in": ["amp-next-page", "analytics-chunks-inabox"],
+  "allow-doc-opt-in": ["amp-next-page"],
   "allow-url-opt-in": ["pump-early-frame"],
   "amp-accordion-display-locking": 1,
   "canary": 1,
