@@ -155,6 +155,8 @@ describes.realWin('video-iframe-integration', {amp: false}, (env) => {
         integration = new AmpVideoIntegration();
         postToParent = env.sandbox.spy(integration, 'postToParent_');
         callback = env.sandbox.spy();
+
+        integration.listenToOnce_ = env.sandbox.spy();
       });
 
       it('getIntersection should request and receive intersection', () => {
@@ -166,6 +168,8 @@ describes.realWin('video-iframe-integration', {amp: false}, (env) => {
         expect(
           postToParent.withArgs(env.sandbox.match({method: 'getIntersection'}))
         ).to.have.been.calledOnce;
+
+        expect(integration.listenToOnce_).to.have.been.calledOnce;
 
         const response = {tacos: 'al pastor'};
         integration.onMessage_({id, args: response});
@@ -181,6 +185,8 @@ describes.realWin('video-iframe-integration', {amp: false}, (env) => {
         expect(
           postToParent.withArgs(env.sandbox.match({method: 'getConsentData'}))
         ).to.have.been.calledOnce;
+
+        expect(integration.listenToOnce_).to.have.been.calledOnce;
 
         const response = {tacos: 'al pastor'};
         integration.onMessage_({id, args: response});
