@@ -46,7 +46,7 @@
     "@babel/plugin-proposal-class-properties": "7.12.1",
     "@babel/plugin-syntax-import-assertions": "7.12.1",
     "@babel/plugin-transform-react-constant-elements": "7.12.1",
-    "@babel/plugin-transform-react-jsx": "7.12.11",
+    "@babel/plugin-transform-react-jsx": "7.12.12",
     "@babel/preset-env": "7.12.11",
     "@chiragrupani/karma-chromium-edge-launcher": "2.1.0",
     "@jest/core": "26.6.3",
