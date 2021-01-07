@@ -1075,14 +1075,6 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
-     * Returns reference to upgraded implementation, where imperative APIs are placed.
-     * @return {!Promise<!./base-element.BaseElement>}
-     */
-    getApi() {
-      return this.getImpl();
-    }
-
-    /**
      * Returns the layout of the element.
      * @return {!Layout}
      */
