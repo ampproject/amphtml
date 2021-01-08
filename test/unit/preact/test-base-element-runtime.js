@@ -211,7 +211,7 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
   });
 });
 
-describes.realWin.only('whenUpgraded', {amp: true}, (env) => {
+describes.realWin('whenUpgraded', {amp: true}, (env) => {
   let win;
   let doc;
   let Impl;
