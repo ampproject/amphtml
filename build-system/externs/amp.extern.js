@@ -112,6 +112,13 @@ ExtensionPayload.prototype.v;
 ExtensionPayload.prototype.i;
 
 /**
+ * If the value of "m" is 1 then the current extension is of type "module",
+ * else it is of type "nomodule".
+ * @type {number}
+ */
+ExtensionPayload.prototype.m;
+
+/**
  * @typedef {?JsonObject|undefined|string|number|!Array<JsonValue>}
  */
 var JsonValue;
