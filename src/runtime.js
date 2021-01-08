@@ -462,6 +462,21 @@ function maybeLoadCorrectVersion(win, fnOrStruct) {
   if (typeof fnOrStruct == 'function') {
     return false;
   }
+
+  if (IS_ESM) {
+    // If we're in a module runtime, trying to execute a nomodule extension
+    // simply remove the nomodule extension so that it is not executed.
+    if (!fnOrStruct.m) {
+      return true;
+    }
+  } else {
+    // If we're in a nomodule runtime, trying to execute a module extension
+    // simply remove the module extension so that it is not executed.
+    if (fnOrStruct.m) {
+      return true;
+    }
+  }
+
   const {v} = fnOrStruct;
   // This is non-obvious, but we only care about the release version,
   // not about the full rtv version, because these only differ
