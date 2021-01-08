@@ -106,13 +106,11 @@ describes.realWin(
       );
     }
 
-    function stubPostIntersection(videoIframe, time, intersectionRatio) {
+    function stubMeasureIntersection(videoIframe, time, intersectionRatio) {
       const entry = {time, intersectionRatio};
       env.sandbox
-        .stub(videoIframe.implementation_, 'postIntersection_')
-        .callsFake((id) => {
-          videoIframe.implementation_.intersectionCallback_(id, [entry]);
-        });
+        .stub(videoIframe.implementation_, 'measureIntersection')
+        .returns(Promise.resolve(entry));
       return entry;
     }
 
@@ -292,10 +290,10 @@ describes.realWin(
 
         const expectedResponseMessage = {
           id,
-          args: stubPostIntersection(videoIframe, time, intersectionRatio),
+          args: stubMeasureIntersection(videoIframe, time, intersectionRatio),
         };
 
-        videoIframe.implementation_.onMessage_(message);
+        await videoIframe.implementation_.onMessage_(message);
 
         expect(postMessage.withArgs(env.sandbox.match(expectedResponseMessage)))
           .to.have.been.calledOnce;
@@ -313,7 +311,7 @@ describes.realWin(
 
         const postMessage = stubPostMessage(videoIframe);
 
-        stubPostIntersection(videoIframe, time, intersectionRatio);
+        stubMeasureIntersection(videoIframe, time, intersectionRatio);
 
         acceptMockedMessages(videoIframe);
 
@@ -327,7 +325,7 @@ describes.realWin(
           },
         };
 
-        videoIframe.implementation_.onMessage_(message);
+        await videoIframe.implementation_.onMessage_(message);
 
         expect(postMessage.withArgs(env.sandbox.match(expectedResponseMessage)))
           .to.have.been.calledOnce;

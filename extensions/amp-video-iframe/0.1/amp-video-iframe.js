@@ -43,6 +43,7 @@ import {
 import {getData, listen} from '../../../src/event-helper';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {measureIntersection} from '../../../src/utils/intersection';
 import {once} from '../../../src/utils/function';
 
 /** @private @const */
@@ -126,6 +127,12 @@ class AmpVideoIframe extends AMP.BaseElement {
      * @private
      */
     this.boundOnMessage_ = (e) => this.onMessage_(e);
+
+    /**
+     * @param {!Element} element
+     * @return {!Promise<IntersectionObserverEntry>} element
+     */
+    this.measureIntersection = (element) => measureIntersection(element);
   }
 
   /** @override */
@@ -275,6 +282,7 @@ class AmpVideoIframe extends AMP.BaseElement {
 
   /**
    * @param {!Event} event
+   * @returns {Promise}
    * @private
    */
   onMessage_(event) {
@@ -302,8 +310,9 @@ class AmpVideoIframe extends AMP.BaseElement {
 
     if (methodReceived) {
       if (methodReceived == 'getIntersection') {
-        this.postIntersection_(messageId);
-        return;
+        return this.measureIntersection(this.element).then((intersection) => {
+          this.postIntersection_(messageId, intersection);
+        });
       }
       userAssert(false, 'Unknown method `%s`.', methodReceived);
       return;
@@ -360,27 +369,13 @@ class AmpVideoIframe extends AMP.BaseElement {
   }
 
   /**
-   * Creates an IntersectionObserver to fire a single intersection event.
-   *
    * @param {number} messageId
+   * @param {!IntersectionObserverEntry} intersection
    * @private
    */
-  postIntersection_(messageId) {
-    const intersectionObserver = new IntersectionObserver((entries) => {
-      this.intersectionCallback_(messageId, entries);
-      intersectionObserver.disconnect();
-    });
-    intersectionObserver.observe(this.element);
-  }
+  postIntersection_(messageId, intersection) {
+    const {intersectionRatio, time} = intersection;
 
-  /**
-   * @param {number} messageId
-   * @param {Array<IntersectionObserverEntry>} entries
-   * @private
-   */
-  intersectionCallback_(messageId, entries) {
-    const lastEntry = entries[entries.length - 1];
-    const {time, intersectionRatio} = lastEntry;
     // Only post ratio > 0 when in autoplay range to prevent internal autoplay
     // implementations that differ from ours.
     const postedRatio =
