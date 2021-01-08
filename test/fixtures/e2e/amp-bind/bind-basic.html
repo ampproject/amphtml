@@ -16,5 +16,8 @@
   </amp-state>
 
   <button id="setState" on="tap:AMP.setState({})"></button>
+
+  <p id="textDisplay" [text]="foo">hello</p>
+  <button id="changeTextButton" on="tap:AMP.setState({foo: 'world'})">Update Text</button>
 </body>
 </html>

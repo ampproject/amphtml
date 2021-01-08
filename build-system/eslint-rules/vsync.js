@@ -15,7 +15,7 @@
  */
 'use strict';
 
-module.exports = function(context) {
+module.exports = function (context) {
   return {
     CallExpression(node) {
       if (/test-/.test(context.getFilename())) {
@@ -32,13 +32,12 @@ module.exports = function(context) {
         return;
       }
 
-      if (property.leadingComments) {
-        const ok = property.leadingComments.some(comment => {
-          return comment.value === 'OK';
-        });
-        if (ok) {
-          return;
-        }
+      const leadingComments = context.getCommentsBefore(property);
+      const ok = leadingComments.some((comment) => {
+        return comment.value === 'OK';
+      });
+      if (ok) {
+        return;
       }
 
       context.report({

@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {setIsMediaComponent} from '../../../src/video-interface';
 import {userAssert} from '../../../src/log';
 
 class AmpSpringboardPlayer extends AMP.BaseElement {
@@ -46,8 +48,16 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url('https://cms.springboardplatform.com', opt_onLayout);
-    this.preconnect.url('https://www.springboardplatform.com', opt_onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://cms.springboardplatform.com',
+      opt_onLayout
+    );
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://www.springboardplatform.com',
+      opt_onLayout
+    );
   }
 
   /** @override */
@@ -57,6 +67,8 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    setIsMediaComponent(this.element);
+
     this.mode_ = userAssert(
       this.element.getAttribute('data-mode'),
       'The data-mode attribute is required for <amp-springboard-player> %s',
@@ -156,6 +168,6 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-springboard-player', '0.1', AMP => {
+AMP.extension('amp-springboard-player', '0.1', (AMP) => {
   AMP.registerElement('amp-springboard-player', AmpSpringboardPlayer);
 });

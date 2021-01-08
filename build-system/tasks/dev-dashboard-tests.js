@@ -15,34 +15,36 @@
  */
 'use strict';
 
-const config = require('../config');
-const deglob = require('globs-to-files');
+const config = require('../test-configs/config');
+const globby = require('globby');
 const Mocha = require('mocha');
-const {isTravisBuild} = require('../travis');
+const {isCiBuild} = require('../common/ci');
 
 /**
  * Run all the dev dashboard tests
- * @return {*} TODO(#23582): Specify return type
+ * @return {!Promise}
  */
 async function devDashboardTests() {
-  const mocha = new Mocha({reporter: isTravisBuild() ? 'dot' : 'spec'});
+  const mocha = new Mocha({
+    reporter: isCiBuild() ? 'mocha-silent-reporter' : 'spec',
+  });
 
   // Add our files
-  const allDevDashboardTests = deglob.sync(config.devDashboardTestPaths);
-  allDevDashboardTests.forEach(file => {
+  const allDevDashboardTests = globby.sync(config.devDashboardTestPaths);
+  allDevDashboardTests.forEach((file) => {
     mocha.addFile(file);
   });
 
   // Create our deffered
   let resolver;
-  const deferred = new Promise(resolverIn => {
+  const deferred = new Promise((resolverIn) => {
     resolver = resolverIn;
   });
 
   // Run the tests.
-  mocha.run(function(failures) {
+  mocha.run(function (failures) {
     if (failures) {
-      process.exit(1);
+      process.exitCode = 1;
     }
     resolver();
   });

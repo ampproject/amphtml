@@ -33,7 +33,7 @@ export class AttributeMutationDefaultClass {
   }
 
   /** @override */
-  validate() {
+  parseAndValidate() {
     const value = this.mutationRecord_['value'];
 
     // Don't allow the .i-amphtml class
@@ -48,7 +48,7 @@ export class AttributeMutationDefaultClass {
 
   /** @override */
   mutate() {
-    this.elements_.forEach(element => {
+    this.elements_.forEach((element) => {
       element.setAttribute(
         this.mutationRecord_['attributeName'],
         this.mutationRecord_['value']

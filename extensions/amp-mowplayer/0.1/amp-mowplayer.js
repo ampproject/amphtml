@@ -17,7 +17,6 @@
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
-import {addParamsToUrl} from '../../../src/url';
 import {
   createFrameFor,
   isJsonOrObj,
@@ -29,6 +28,7 @@ import {
 import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
+  dispatchCustomEvent,
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
@@ -77,6 +77,12 @@ class AmpMowplayer extends AMP.BaseElement {
 
     /** @private {?Function} */
     this.unlistenMessage_ = null;
+
+    /**
+     * Prefix to embed URLs. Overridden on tests.
+     * @private @const {string}
+     */
+    this.baseUrl_ = 'https://mowplayer.com/watch/';
   }
 
   /**
@@ -84,22 +90,15 @@ class AmpMowplayer extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    const {preconnect} = this;
-    preconnect.url(this.getVideoIframeSrc_());
+    const preconnect = Services.preconnectFor(this.win);
+    preconnect.url(this.getAmpDoc(), this.getVideoIframeSrc_());
     // Host that mowplayer uses to serve JS needed by player.
-    preconnect.url('https://cdn.mowplayer.com', opt_onLayout);
-    // Load player settings
-    preconnect.url('https://code.mowplayer.com', opt_onLayout);
+    preconnect.url(this.getAmpDoc(), 'https://mowplayer.com', opt_onLayout);
   }
 
   /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
-  }
-
-  /** @override */
-  viewportCallback(visible) {
-    this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
   }
 
   /** @override */
@@ -126,15 +125,9 @@ class AmpMowplayer extends AMP.BaseElement {
     if (this.videoIframeSrc_) {
       return this.videoIframeSrc_;
     }
-    const params = dict({
-      'code': this.mediaid_,
-    });
-    const src = addParamsToUrl(
-      'https://cdn.mowplayer.com/player.html',
-      /** @type {!JsonObject} */ (params)
-    );
 
-    return (this.videoIframeSrc_ = src);
+    return (this.videoIframeSrc_ =
+      this.baseUrl_ + encodeURIComponent(this.mediaid_));
   }
 
   /** @override */
@@ -149,7 +142,7 @@ class AmpMowplayer extends AMP.BaseElement {
     const loaded = this.loadPromise(this.iframe_).then(() => {
       // Tell mowplayer that we want to receive messages
       this.listenToFrame_();
-      this.element.dispatchCustomEvent(VideoEvents.LOAD);
+      dispatchCustomEvent(this.element, VideoEvents.LOAD);
     });
     this.playerReadyResolver_(loaded);
     return loaded;
@@ -206,7 +199,7 @@ class AmpMowplayer extends AMP.BaseElement {
         );
         this.iframe_.contentWindow./*OK*/ postMessage(
           message,
-          'https://cdn.mowplayer.com'
+          'https://mowplayer.com'
         );
       }
     });
@@ -217,7 +210,7 @@ class AmpMowplayer extends AMP.BaseElement {
    * @private
    */
   handleMowMessage_(event) {
-    if (!originMatches(event, this.iframe_, 'https://cdn.mowplayer.com')) {
+    if (!originMatches(event, this.iframe_, 'https://mowplayer.com')) {
       return;
     }
     const eventData = getData(event);
@@ -258,7 +251,7 @@ class AmpMowplayer extends AMP.BaseElement {
         return;
       }
       this.muted_ = muted;
-      element.dispatchCustomEvent(mutedOrUnmutedEvent(this.muted_));
+      dispatchCustomEvent(element, mutedOrUnmutedEvent(this.muted_));
       return;
     }
   }
@@ -383,6 +376,6 @@ class AmpMowplayer extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpMowplayer);
 });

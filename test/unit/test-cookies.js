@@ -22,7 +22,7 @@ import {
   setCookie,
 } from '../../src/cookies';
 
-describes.fakeWin('test-cookies', {amp: true}, env => {
+describes.fakeWin('test-cookies', {amp: true}, (env) => {
   let win;
   let clock;
   let doc;
@@ -77,6 +77,17 @@ describes.fakeWin('test-cookies', {amp: true}, env => {
       'c%261=v%261; path=/; expires=Tue, 01 Jan 2019 08:00:00 GMT'
     );
     expect(doc.cookie).to.equal('c%261=v%261');
+  });
+
+  it('should respect the secure option', () => {
+    const date = Date.now() + BASE_CID_MAX_AGE_MILLIS;
+    const utcDate = new Date(date).toUTCString();
+
+    setCookie(win, 'name', 'val', date, {secure: 'true'});
+    expect(doc.lastSetCookieRaw).to.equal(
+      `name=val; path=/; expires=${utcDate}; Secure`
+    );
+    expect(doc.cookie).to.equal('name=val');
   });
 
   it('getHighestAvailableDomain without meta tag', () => {
@@ -188,29 +199,39 @@ describes.fakeWin('test-cookies', {amp: true}, env => {
 
     // Fail if allowOnProxyOrigin is false
     expect(() => {
-      setCookie(win, 'c&1', 'v&1', Date.now() + BASE_CID_MAX_AGE_MILLIS, {});
+      allowConsoleError(() => {
+        setCookie(win, 'c&1', 'v&1', Date.now() + BASE_CID_MAX_AGE_MILLIS, {});
+      });
     }).to.throw(/Should never attempt to set cookie on proxy origin\: c\&1/);
 
     win.location = 'https://CDN.ampproject.org/test.html';
     expect(() => {
-      setCookie(win, 'c&1', 'v&1', Date.now() + BASE_CID_MAX_AGE_MILLIS, {});
+      allowConsoleError(() => {
+        setCookie(win, 'c&1', 'v&1', Date.now() + BASE_CID_MAX_AGE_MILLIS, {});
+      });
     }).to.throw(/Should never attempt to set cookie on proxy origin\: c\&1/);
 
     win.location = 'https://foo.bar.cdn.ampproject.org/test.html';
     expect(() => {
-      setCookie(win, 'c&1', 'v&1', Date.now() + BASE_CID_MAX_AGE_MILLIS, {});
+      allowConsoleError(() => {
+        setCookie(win, 'c&1', 'v&1', Date.now() + BASE_CID_MAX_AGE_MILLIS, {});
+      });
     }).to.throw(/in depth check/);
 
     win.location = 'http://&&&.CDN.ampproject.org/test.html';
     expect(() => {
-      setCookie(win, 'c&1', 'v&1', Date.now() + BASE_CID_MAX_AGE_MILLIS, {});
+      allowConsoleError(() => {
+        setCookie(win, 'c&1', 'v&1', Date.now() + BASE_CID_MAX_AGE_MILLIS, {});
+      });
     }).to.throw(/in depth check/);
 
     // Can't use higestAvailableDomain when allowOnProxyOrigin
     expect(() => {
-      setCookie(win, 'c&1', 'v&1', Date.now() + BASE_CID_MAX_AGE_MILLIS, {
-        allowOnProxyOrigin: true,
-        highestAvailableDomain: true,
+      allowConsoleError(() => {
+        setCookie(win, 'c&1', 'v&1', Date.now() + BASE_CID_MAX_AGE_MILLIS, {
+          allowOnProxyOrigin: true,
+          highestAvailableDomain: true,
+        });
       });
     }).to.throw(/specify domain explicitly/);
 

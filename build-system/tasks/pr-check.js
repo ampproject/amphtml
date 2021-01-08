@@ -24,7 +24,7 @@ const {
   timedExec,
 } = require('../pr-check/utils');
 const {determineBuildTargets} = require('../pr-check/build-targets');
-const {runYarnChecks} = require('../pr-check/yarn-checks');
+const {runNpmChecks} = require('../pr-check/npm-checks');
 
 const FILENAME = 'pr-check.js';
 
@@ -41,7 +41,7 @@ async function prCheck(cb) {
     cb(err);
   };
 
-  const runCheck = cmd => {
+  const runCheck = (cmd) => {
     const {status} = timedExec(cmd, FILENAME);
     if (status != 0) {
       failTask();
@@ -49,7 +49,7 @@ async function prCheck(cb) {
   };
 
   const startTime = startTimer(FILENAME, FILENAME);
-  if (!runYarnChecks(FILENAME)) {
+  if (!runNpmChecks(FILENAME)) {
     stopTimedJob(FILENAME, startTime);
     return;
   }
@@ -57,6 +57,7 @@ async function prCheck(cb) {
   printChangeSummary(FILENAME);
   const buildTargets = determineBuildTargets(FILENAME);
   runCheck('gulp lint --local_changes');
+  runCheck('gulp prettify --local_changes');
   runCheck('gulp presubmit');
   runCheck('gulp check-exact-versions');
 
@@ -70,20 +71,32 @@ async function prCheck(cb) {
 
   if (buildTargets.has('CACHES_JSON')) {
     runCheck('gulp caches-json');
-    runCheck('gulp json-syntax');
   }
 
   if (buildTargets.has('DOCS')) {
-    runCheck('gulp check-links');
+    runCheck('gulp check-links --local_changes');
   }
 
   if (buildTargets.has('DEV_DASHBOARD')) {
     runCheck('gulp dev-dashboard-tests');
   }
 
+  if (buildTargets.has('OWNERS')) {
+    runCheck('gulp check-owners');
+  }
+
+  if (buildTargets.has('RENOVATE_CONFIG')) {
+    runCheck('gulp check-renovate-config');
+  }
+
+  if (buildTargets.has('SERVER')) {
+    runCheck('gulp server-tests');
+  }
+
   if (buildTargets.has('RUNTIME')) {
     runCheck('gulp dep-check');
     runCheck('gulp check-types');
+    runCheck('gulp check-sourcemaps');
   }
 
   if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {
@@ -117,8 +130,7 @@ module.exports = {
   prCheck,
 };
 
-prCheck.description =
-  'Runs a subset of the Travis CI checks against local changes.';
+prCheck.description = 'Runs a subset of the CI checks against local changes.';
 prCheck.flags = {
   'nobuild': '  Skips building the runtime via `gulp dist`.',
 };

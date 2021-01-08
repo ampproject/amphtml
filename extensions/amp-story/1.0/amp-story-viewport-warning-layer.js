@@ -23,8 +23,8 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {createShadowRootWithStyle} from './utils';
+import {getLocalizationService} from './amp-story-localization-service';
 import {htmlFor} from '../../../src/static-template';
-import {isExperimentOn} from '../../../src/experiments';
 import {listen} from '../../../src/event-helper';
 import {throttle} from '../../../src/utils/rate-limit';
 
@@ -42,7 +42,7 @@ const RESIZE_THROTTLE_MS = 300;
  * @param {!Element} element
  * @return {!Element}
  */
-const getTemplate = element => {
+const getTemplate = (element) => {
   return htmlFor(element)`
     <div class="
         i-amphtml-story-no-rotation-overlay i-amphtml-story-system-reset">
@@ -82,9 +82,6 @@ export class ViewportWarningLayer {
     /** @private {boolean} */
     this.isBuilt_ = false;
 
-    // TODO: at this point the localization service is not registered yet. We
-    // should refactor the way it is registered it so it works like the store
-    // and analytics services.
     /** @private {?../../../src/service/localization.LocalizationService} */
     this.localizationService_ = null;
 
@@ -118,12 +115,7 @@ export class ViewportWarningLayer {
     }
 
     this.overlayEl_ = this.getViewportWarningOverlayTemplate_();
-
-    if (!this.overlayEl_) {
-      return;
-    }
-
-    this.localizationService_ = Services.localizationService(this.win_);
+    this.localizationService_ = getLocalizationService(this.storyElement_);
 
     this.isBuilt_ = true;
     const root = this.win_.document.createElement('div');
@@ -155,7 +147,7 @@ export class ViewportWarningLayer {
   initializeListeners_() {
     this.storeService_.subscribe(
       StateProperty.UI_STATE,
-      uiState => {
+      (uiState) => {
         this.onUIStateUpdate_(uiState);
       },
       true /** callToInitialize */
@@ -163,7 +155,7 @@ export class ViewportWarningLayer {
 
     this.storeService_.subscribe(
       StateProperty.VIEWPORT_WARNING_STATE,
-      viewportWarningState => {
+      (viewportWarningState) => {
         this.onViewportWarningStateUpdate_(viewportWarningState);
       },
       true /** callToInitialize */
@@ -238,7 +230,7 @@ export class ViewportWarningLayer {
 
   /**
    * Returns the overlay corresponding to the device currently used.
-   * @return {?Element} template
+   * @return {!Element} template
    * @private
    */
   getViewportWarningOverlayTemplate_() {
@@ -250,12 +242,8 @@ export class ViewportWarningLayer {
       return template;
     }
 
-    if (!isExperimentOn(this.win_, 'disable-amp-story-desktop')) {
-      iconEl.classList.add('i-amphtml-desktop-size-icon');
-      return template;
-    }
-
-    return null;
+    iconEl.classList.add('i-amphtml-desktop-size-icon');
+    return template;
   }
 
   /**

@@ -24,30 +24,25 @@ export class AmpLinkRewriter extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampDoc_ = this.getAmpDoc();
-
     /** @private {?./link-rewriter.LinkRewriter} */
     this.rewriter_ = null;
 
     /** @private {string} */
     this.referrer_ = '';
-
-    this.navigation_ = Services.navigationForDoc(this.ampDoc_);
   }
 
   /** @override */
   buildCallback() {
-    const viewer = Services.viewerForDoc(this.ampDoc_);
+    const viewer = Services.viewerForDoc(this.getAmpDoc());
 
     /**
      * We had to get referrerUrl here because when we use expandUrlSync()
      * inside LinkRewriter it doesn't retrieve the referrerUrl
      */
-    return this.ampDoc_
+    return this.getAmpDoc()
       .whenReady()
       .then(() => viewer.getReferrerUrl())
-      .then(referrer => (this.referrer_ = referrer))
+      .then((referrer) => (this.referrer_ = referrer))
       .then(this.letsRockIt_.bind(this));
   }
 
@@ -58,7 +53,7 @@ export class AmpLinkRewriter extends AMP.BaseElement {
     this.rewriter_ = new LinkRewriter(
       this.referrer_,
       this.element,
-      this.ampDoc_
+      this.getAmpDoc()
     );
 
     this.attachClickEvent_();
@@ -69,7 +64,8 @@ export class AmpLinkRewriter extends AMP.BaseElement {
    * @return {*} TODO(#23582): Specify return type
    */
   attachClickEvent_() {
-    this.navigation_.registerAnchorMutator(anchor => {
+    const nav = Services.navigationForDoc(this.getAmpDoc());
+    nav.registerAnchorMutator((anchor) => {
       this.rewriter_.handleClick(anchor);
     }, Priority.LINK_REWRITER_MANAGER);
 
@@ -82,6 +78,6 @@ export class AmpLinkRewriter extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-link-rewriter', '0.1', AMP => {
+AMP.extension('amp-link-rewriter', '0.1', (AMP) => {
   AMP.registerElement('amp-link-rewriter', AmpLinkRewriter);
 });

@@ -23,7 +23,7 @@ describes.fakeWin(
     amp: true,
     location: 'https://pub.com/doc1',
   },
-  env => {
+  (env) => {
     let win;
     let iframeApi;
     let controllerMock;
@@ -32,9 +32,9 @@ describes.fakeWin(
     beforeEach(() => {
       win = env.win;
       const controller = new AccessController();
-      controllerMock = sandbox.mock(controller);
+      controllerMock = env.sandbox.mock(controller);
       iframeApi = new AmpAccessIframeApi(controller, win);
-      messengerMock = sandbox.mock(iframeApi.messenger_);
+      messengerMock = env.sandbox.mock(iframeApi.messenger_);
     });
 
     afterEach(() => {
@@ -50,14 +50,8 @@ describes.fakeWin(
     it('should connect and initialize', () => {
       const config = {'property': 'A'};
       messengerMock.expects('connect').once();
-      messengerMock
-        .expects('sendCommand')
-        .withExactArgs('connect')
-        .once();
-      messengerMock
-        .expects('getTargetOrigin')
-        .returns('TARGET_ORIGIN')
-        .once();
+      messengerMock.expects('sendCommand').withExactArgs('connect').once();
+      messengerMock.expects('getTargetOrigin').returns('TARGET_ORIGIN').once();
       controllerMock
         .expects('connect')
         .withExactArgs('TARGET_ORIGIN', 'protocol1', config)
@@ -77,7 +71,7 @@ describes.fakeWin(
         .withExactArgs()
         .returns(Promise.resolve({a: 1}))
         .once();
-      return iframeApi.handleCommand_('authorize', {}).then(result => {
+      return iframeApi.handleCommand_('authorize', {}).then((result) => {
         expect(result).to.deep.equal({a: 1});
       });
     });

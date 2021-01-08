@@ -22,15 +22,14 @@ import {installHiddenObserverForDoc} from '../service/hidden-observer-impl';
 import {installHistoryServiceForDoc} from '../service/history-impl';
 import {installIframeMessagingClient} from './inabox-iframe-messaging-client';
 import {installInaboxCidService} from './inabox-cid';
+import {installInaboxMutatorServiceForDoc} from './inabox-mutator';
+import {installInaboxResourcesServiceForDoc} from './inabox-resources';
+import {installInaboxViewerServiceForDoc} from './inabox-viewer';
 import {installInaboxViewportService} from './inabox-viewport';
-import {
-  installOwnersServiceForDoc,
-  installResourcesServiceForDoc,
-} from '../service/resources-impl';
+import {installOwnersServiceForDoc} from '../service/owners-impl';
 import {installStandardActionsForDoc} from '../service/standard-actions-impl';
 import {installUrlForDoc} from '../service/url-impl';
 import {installUrlReplacementsServiceForDoc} from '../service/url-replacements-impl';
-import {installViewerServiceForDoc} from '../service/viewer-impl';
 import {rejectServicePromiseForDoc} from '../service';
 
 /**
@@ -43,12 +42,13 @@ export function installAmpdocServicesForInabox(ampdoc) {
   installUrlForDoc(ampdoc);
   installDocumentInfoServiceForDoc(ampdoc);
   installInaboxCidService(ampdoc);
-  installViewerServiceForDoc(ampdoc);
+  installInaboxViewerServiceForDoc(ampdoc);
   installInaboxViewportService(ampdoc);
   installHiddenObserverForDoc(ampdoc);
   installHistoryServiceForDoc(ampdoc);
-  installResourcesServiceForDoc(ampdoc);
+  installInaboxResourcesServiceForDoc(ampdoc);
   installOwnersServiceForDoc(ampdoc);
+  installInaboxMutatorServiceForDoc(ampdoc);
   installUrlReplacementsServiceForDoc(ampdoc);
   installActionServiceForDoc(ampdoc);
   installStandardActionsForDoc(ampdoc);

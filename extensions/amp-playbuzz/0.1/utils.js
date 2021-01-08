@@ -36,18 +36,17 @@ import {rethrowAsync} from './../../../src/log';
  */
 export function debounce(func, wait, immediate) {
   let timeout;
-  return function() {
-    const context = this,
-      args = arguments;
+  return function () {
+    const args = arguments;
     clearTimeout(timeout);
-    timeout = setTimeout(function() {
+    timeout = setTimeout(() => {
       timeout = null;
       if (!immediate) {
-        func.apply(context, args);
+        func.apply(this, args);
       }
     }, wait);
     if (immediate && !timeout) {
-      func.apply(context, args);
+      func.apply(this, args);
     }
   };
 }
@@ -76,7 +75,7 @@ export function getElementCreator(document) {
  */
 function appendChildren(element, children) {
   children = !children ? [] : Array.isArray(children) ? children : [children];
-  children.forEach(child => element.appendChild(child));
+  children.forEach((child) => element.appendChild(child));
 }
 
 /**
@@ -166,7 +165,8 @@ export function composeEmbedUrl(options) {
  * @return {string}
  */
 function sanitizeUrl(localtion) {
-  return removeFragment(localtion.href).replace(localtion.protocol, ''); //remove scheme (cors) & fragment
+  const url = removeFragment(localtion.href).replace(localtion.protocol, ''); //remove scheme (cors) & fragment
+  return url.replace(/(www\.)?playbuzz\.com/, 'app.ex.co/stories');
 }
 
 /**
@@ -177,7 +177,7 @@ function sanitizeUrl(localtion) {
  * @return {string}
  */
 export function composeItemSrcUrl(src, itemId) {
-  const DEFAULT_BASE_URL = '//www.playbuzz.com/';
+  const DEFAULT_BASE_URL = '//app.ex.co/stories/';
 
   const iframeSrcUrl = itemId
     ? DEFAULT_BASE_URL + 'item/' + itemId

@@ -22,7 +22,7 @@ import {
   remove,
 } from '../../../src/utils/array';
 
-describe('areEqualOrdered', function() {
+describe('areEqualOrdered', function () {
   it('should return true on empty arrays', () => {
     const result = areEqualOrdered([], []);
     expect(result).to.be.true;
@@ -74,14 +74,14 @@ describe('areEqualOrdered', function() {
   });
 });
 
-describe('remove', function() {
+describe('remove', function () {
   let array;
   beforeEach(() => {
     array = [1, 2, 3, 4, 5];
   });
 
   it('should remove elements that return true', () => {
-    const removed = remove(array, i => i > 2);
+    const removed = remove(array, (i) => i > 2);
     expect(array).to.deep.equal([1, 2]);
     expect(removed).to.deep.equal([3, 4, 5]);
   });
@@ -99,14 +99,14 @@ describe('remove', function() {
   });
 });
 
-describe('findIndex', function() {
+describe('findIndex', function () {
   it('should return the index of first matching element', () => {
-    const found = findIndex([4, 1, 5, 3, 4, 5], element => element > 4);
+    const found = findIndex([4, 1, 5, 3, 4, 5], (element) => element > 4);
     expect(found).to.equal(2);
   });
 
   it('should return -1 if no matching element', () => {
-    const found = findIndex([4, 1, 5, 3, 4, 5], element => element > 5);
+    const found = findIndex([4, 1, 5, 3, 4, 5], (element) => element > 5);
     expect(found).to.equal(-1);
   });
 
@@ -124,7 +124,7 @@ describe('findIndex', function() {
   });
 });
 
-describe('fromIterator', function() {
+describe('fromIterator', function () {
   it('should return empty array for empty iterator', () => {
     const iterator = {
       next() {

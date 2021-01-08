@@ -1,42 +1,23 @@
 {
-  "allow-doc-opt-in": [
-    "amp-next-page",
-    "disable-amp-story-desktop",
-    "inabox-viewport-friendly",
-    "inabox-css-cleanup",
-    "inabox-no-chunking"
-  ],
-  "allow-url-opt-in": [
-    "ios-scrollable-iframe",
-    "pump-early-frame",
-    "twitter-default-placeholder",
-    "twitter-default-placeholder-fade",
-    "twitter-default-placeholder-pulse"
-  ],
-
+  "allow-doc-opt-in": ["amp-next-page"],
+  "allow-url-opt-in": ["pump-early-frame"],
   "canary": 0,
-
   "a4aProfilingRate": 0.01,
-  "amp-access-iframe": 1,
-  "amp-ad-ff-adx-ady": 0.01,
-  "amp-auto-ads-adsense-holdout": 0.1,
-  "amp-consent-v2": 1,
-  "amp-list-load-more": 1,
-  "amp-list-viewport-resize": 1,
-  "amp-playbuzz": 1,
+  "adsense-ad-size-optimization": 0.1,
+  "amp-accordion-display-locking": 1,
+  "amp-action-macro": 1,
   "amp-story-responsive-units": 1,
   "amp-story-v1": 1,
-  "ampdoc-closest": 1,
-  "as-use-attr-for-format": 0.01,
-  "blurry-placeholder": 1,
   "chunked-amp": 1,
   "doubleclickSraExp": 0.01,
   "doubleclickSraReportExcludedBlock": 0.1,
-  "fixed-elements-in-lightbox": 1,
+  "expand-json-targeting": 1,
+  "fix-inconsistent-responsive-height-selection": 0,
   "flexAdSlots": 0.05,
-  "hidden-mutation-observer": 1,
+  "intersect-resources": 0,
   "ios-fixed-no-transfer": 0,
-  "ios-scrollable-iframe": 0,
   "pump-early-frame": 1,
-  "version-locking": 1
+  "fie-resources": 0.1,
+  "visibility-trigger-improvements": 1,
+  "sticky-ad-transition": 0.1
 }

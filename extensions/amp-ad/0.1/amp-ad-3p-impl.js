@@ -28,6 +28,7 @@ import {
   LayoutPriority,
   isLayoutSizeDefined,
 } from '../../../src/layout';
+import {Services} from '../../../src/services';
 import {adConfig} from '../../../ads/_config';
 import {clamp} from '../../../src/utils/math';
 import {computedStyle, setStyle} from '../../../src/style';
@@ -41,13 +42,17 @@ import {
   is3pThrottled,
 } from './concurrent-load';
 import {
+  getConsentMetadata,
   getConsentPolicyInfo,
   getConsentPolicySharedData,
   getConsentPolicyState,
 } from '../../../src/consent';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {isExperimentOn} from '../../../src/experiments';
 import {moveLayoutRect} from '../../../src/layout-rect';
+import {
+  observeWithSharedInOb,
+  unobserveWithSharedInOb,
+} from '../../../src/viewport-observer';
 import {toWin} from '../../../src/types';
 
 /** @const {string} Tag name for 3P AD implementation. */
@@ -108,6 +113,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
      * @visibleForTesting
      */
     this.unlistenViewportChanges_ = null;
+
+    /** @private {Array<Function>} */
+    this.unlisteners_ = [];
 
     /**
      * @private {IntersectionObserver}
@@ -233,20 +241,26 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
+    const preconnect = Services.preconnectFor(this.win);
     // We always need the bootstrap.
-    preloadBootstrap(this.win, this.preconnect, this.config.remoteHTMLDisabled);
+    preloadBootstrap(
+      this.win,
+      this.getAmpDoc(),
+      preconnect,
+      this.config.remoteHTMLDisabled
+    );
     if (typeof this.config.prefetch == 'string') {
-      this.preconnect.preload(this.config.prefetch, 'script');
+      preconnect.preload(this.getAmpDoc(), this.config.prefetch, 'script');
     } else if (this.config.prefetch) {
-      this.config.prefetch.forEach(p => {
-        this.preconnect.preload(p, 'script');
+      /** @type {!Array} */ (this.config.prefetch).forEach((p) => {
+        preconnect.preload(this.getAmpDoc(), p, 'script');
       });
     }
     if (typeof this.config.preconnect == 'string') {
-      this.preconnect.url(this.config.preconnect, opt_onLayout);
+      preconnect.url(this.getAmpDoc(), this.config.preconnect, opt_onLayout);
     } else if (this.config.preconnect) {
-      this.config.preconnect.forEach(p => {
-        this.preconnect.url(p, opt_onLayout);
+      /** @type {!Array} */ (this.config.preconnect).forEach((p) => {
+        preconnect.url(this.getAmpDoc(), p, opt_onLayout);
       });
     }
     // If fully qualified src for ad script is specified we preconnect to it.
@@ -254,7 +268,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     if (src) {
       // We only preconnect to the src because we cannot know whether the URL
       // will have caching headers set.
-      this.preconnect.url(src);
+      preconnect.url(this.getAmpDoc(), src);
     }
   }
 
@@ -281,12 +295,12 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       // Nudge into the correct horizontal position by changing side margin.
       this.getVsync().run(
         {
-          measure: state => {
+          measure: (state) => {
             state.direction = computedStyle(this.win, this.element)[
               'direction'
             ];
           },
-          mutate: state => {
+          mutate: (state) => {
             if (state.direction == 'rtl') {
               setStyle(this.element, 'marginRight', layoutBox.left, 'px');
             } else {
@@ -340,89 +354,110 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       return this.layoutPromise_;
     }
     userAssert(
-      !this.isInFixedContainer_,
+      !this.isInFixedContainer_ || this.uiHandler.isStickyAd(),
       '<amp-ad> is not allowed to be placed in elements with ' +
-        'position:fixed: %s',
+        'position:fixed: %s unless it has sticky attribute',
       this.element
     );
 
     const consentPromise = this.getConsentState();
     const consentPolicyId = super.getConsentPolicy();
-    const isConsentV2Experiment = isExperimentOn(this.win, 'amp-consent-v2');
-    const consentStringPromise =
-      consentPolicyId && isConsentV2Experiment
-        ? getConsentPolicyInfo(this.element, consentPolicyId)
-        : Promise.resolve(null);
+    const consentStringPromise = consentPolicyId
+      ? getConsentPolicyInfo(this.element, consentPolicyId)
+      : Promise.resolve(null);
+    const consentMetadataPromise = consentPolicyId
+      ? getConsentMetadata(this.element, consentPolicyId)
+      : Promise.resolve(null);
     const sharedDataPromise = consentPolicyId
       ? getConsentPolicySharedData(this.element, consentPolicyId)
       : Promise.resolve(null);
+
+    // For sticky ad only: must wait for scrolling event before loading the ad
+    const scrollPromise = this.uiHandler.getScrollPromiseForStickyAd();
 
     this.layoutPromise_ = Promise.all([
       getAdCid(this),
       consentPromise,
       sharedDataPromise,
       consentStringPromise,
-    ]).then(consents => {
-      // Use JsonObject to preserve field names so that ampContext can access
-      // values with name
-      // ampcontext.js and this file are compiled in different compilation unit
+      consentMetadataPromise,
+      scrollPromise,
+    ])
+      .then((consents) => {
+        this.uiHandler.maybeInitStickyAd();
 
-      // Note: Field names can by perserved by using JsonObject, or by adding
-      // perserved name to extern. We are doing both right now.
-      // Please also add new introduced variable
-      // name to the extern list.
-      const opt_context = dict({
-        'clientId': consents[0] || null,
-        'container': this.container_,
-        'initialConsentState': consents[1],
-        'consentSharedData': consents[2],
+        // Use JsonObject to preserve field names so that ampContext can access
+        // values with name
+        // ampcontext.js and this file are compiled in different compilation unit
+
+        // Note: Field names can by perserved by using JsonObject, or by adding
+        // perserved name to extern. We are doing both right now.
+        // Please also add new introduced variable
+        // name to the extern list.
+        const opt_context = dict({
+          'clientId': consents[0] || null,
+          'container': this.container_,
+          'initialConsentState': consents[1],
+          'consentSharedData': consents[2],
+          'initialConsentValue': consents[3],
+          'initialConsentMetadata': consents[4],
+        });
+
+        // In this path, the request and render start events are entangled,
+        // because both happen inside a cross-domain iframe.  Separating them
+        // here, though, allows us to measure the impact of ad throttling via
+        // incrementLoadingAds().
+        const iframe = getIframe(
+          toWin(this.element.ownerDocument.defaultView),
+          this.element,
+          this.type_,
+          opt_context,
+          {disallowCustom: this.config.remoteHTMLDisabled}
+        );
+        iframe.title = this.element.title || 'Advertisement';
+        this.xOriginIframeHandler_ = new AmpAdXOriginIframeHandler(this);
+        return this.xOriginIframeHandler_.init(iframe);
+      })
+      .then(() => {
+        observeWithSharedInOb(this.element, (inViewport) =>
+          this.viewportCallback_(inViewport)
+        );
       });
-      if (isConsentV2Experiment) {
-        opt_context['initialConsentValue'] = consents[3];
-      }
-
-      // In this path, the request and render start events are entangled,
-      // because both happen inside a cross-domain iframe.  Separating them
-      // here, though, allows us to measure the impact of ad throttling via
-      // incrementLoadingAds().
-      const iframe = getIframe(
-        toWin(this.element.ownerDocument.defaultView),
-        this.element,
-        this.type_,
-        opt_context,
-        {disallowCustom: this.config.remoteHTMLDisabled}
-      );
-      this.xOriginIframeHandler_ = new AmpAdXOriginIframeHandler(this);
-      return this.xOriginIframeHandler_.init(iframe);
-    });
     incrementLoadingAds(this.win, this.layoutPromise_);
     return this.layoutPromise_;
   }
 
   /**
    * @param {boolean} inViewport
-   * @override
+   * @private
    */
-  viewportCallback(inViewport) {
+  viewportCallback_(inViewport) {
     if (this.xOriginIframeHandler_) {
       this.xOriginIframeHandler_.viewportCallback(inViewport);
     }
   }
 
+  /** @override */
+  unlayoutOnPause() {
+    return true;
+  }
+
   /** @override  */
   unlayoutCallback() {
+    this.unlisteners_.forEach((unlisten) => unlisten());
+    this.unlisteners_.length = 0;
+    unobserveWithSharedInOb(this.element);
+
     this.layoutPromise_ = null;
     this.uiHandler.applyUnlayoutUI();
     if (this.xOriginIframeHandler_) {
       this.xOriginIframeHandler_.freeXOriginIframe();
       this.xOriginIframeHandler_ = null;
     }
+    if (this.uiHandler) {
+      this.uiHandler.cleanup();
+    }
     return true;
-  }
-
-  /** @override */
-  createPlaceholderCallback() {
-    return this.uiHandler.createPlaceholder();
   }
 
   /**

@@ -22,25 +22,25 @@ import {userAssert} from '../log';
 
 /**
  * @param {!Window} win
- * @return {!Object<string, function(new:../base-element.BaseElement, !Element)>}
+ * @return {!Object<string, typeof ../base-element.BaseElement>}
  */
 function getExtendedElements(win) {
-  if (!win.ampExtendedElements) {
-    win.ampExtendedElements = {};
+  if (!win.__AMP_EXTENDED_ELEMENTS) {
+    win.__AMP_EXTENDED_ELEMENTS = {};
   }
-  return win.ampExtendedElements;
+  return win.__AMP_EXTENDED_ELEMENTS;
 }
 
 /**
  * Registers an element. Upgrades it if has previously been stubbed.
  * @param {!Window} win
  * @param {string} name
- * @param {function(new:../base-element.BaseElement, !Element)} toClass
+ * @param {typeof ../base-element.BaseElement} toClass
  */
 export function upgradeOrRegisterElement(win, name, toClass) {
   const knownElements = getExtendedElements(win);
   if (!knownElements[name]) {
-    registerElement(win, name, /** @type {!Function} */ (toClass));
+    registerElement(win, name, toClass);
     return;
   }
   if (knownElements[name] == toClass) {
@@ -80,9 +80,8 @@ export function upgradeOrRegisterElement(win, name, toClass) {
 /**
  * This method should not be inlined to prevent TryCatch deoptimization.
  * @param {Element} element
- * @param {function(new:../base-element.BaseElement, !Element)} toClass
+ * @param {typeof ../base-element.BaseElement} toClass
  * @private
- * @noinline
  */
 function tryUpgradeElement_(element, toClass) {
   try {
@@ -100,7 +99,7 @@ function tryUpgradeElement_(element, toClass) {
  */
 export function stubElementsForDoc(ampdoc) {
   const extensions = extensionScriptsInNode(ampdoc.getHeadNode());
-  extensions.forEach(name => {
+  extensions.forEach((name) => {
     ampdoc.declareExtension(name);
     stubElementIfNotKnown(ampdoc.win, name);
   });
@@ -135,21 +134,13 @@ export function copyElementToChildWindow(parentWin, childWin, name) {
  * Registers a new custom element with its implementation class.
  * @param {!Window} win The window in which to register the elements.
  * @param {string} name Name of the custom element
- * @param {function(new:../base-element.BaseElement, !Element)} implementationClass
+ * @param {typeof ../base-element.BaseElement} implementationClass
  */
 export function registerElement(win, name, implementationClass) {
   const knownElements = getExtendedElements(win);
   knownElements[name] = implementationClass;
-  const klass = createCustomElementClass(win, name);
-
-  const supportsCustomElementsV1 = 'customElements' in win;
-  if (supportsCustomElementsV1) {
-    win['customElements'].define(name, klass);
-  } else {
-    win.document.registerElement(name, {
-      prototype: klass.prototype,
-    });
-  }
+  const klass = createCustomElementClass(win);
+  win['customElements'].define(name, klass);
 }
 
 /**
@@ -174,8 +165,8 @@ export function markElementScheduledForTesting(win, elementName) {
  * @visibleForTesting
  */
 export function resetScheduledElementForTesting(win, elementName) {
-  if (win.ampExtendedElements) {
-    delete win.ampExtendedElements[elementName];
+  if (win.__AMP_EXTENDED_ELEMENTS) {
+    delete win.__AMP_EXTENDED_ELEMENTS[elementName];
   }
 }
 
@@ -187,6 +178,6 @@ export function resetScheduledElementForTesting(win, elementName) {
  * @visibleForTesting
  */
 export function getElementClassForTesting(win, elementName) {
-  const knownElements = win.ampExtendedElements;
+  const knownElements = win.__AMP_EXTENDED_ELEMENTS;
   return (knownElements && knownElements[elementName]) || null;
 }

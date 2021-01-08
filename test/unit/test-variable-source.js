@@ -19,8 +19,6 @@ import {
   getTimingDataAsync,
 } from '../../src/service/variable-source';
 
-import {createElementWithAttributes} from '../../src/dom';
-
 describes.fakeWin(
   'VariableSource',
   {
@@ -28,7 +26,7 @@ describes.fakeWin(
       ampdoc: 'single',
     },
   },
-  env => {
+  (env) => {
     let varSource;
     beforeEach(() => {
       varSource = new VariableSource(env.ampdoc);
@@ -54,26 +52,34 @@ describes.fakeWin(
       return varSource
         .get('Foo')
         ['async']()
-        .then(value => {
+        .then((value) => {
           expect(value).to.equal('bar');
         });
     });
 
     it('Works with both sync and async variables', () => {
-      varSource.setBoth('Foo', () => 'bar', () => Promise.resolve('bar'));
+      varSource.setBoth(
+        'Foo',
+        () => 'bar',
+        () => Promise.resolve('bar')
+      );
       expect(varSource.getExpr()).to.be.ok;
 
       expect(varSource.get('Foo')['sync']()).to.equal('bar');
       return varSource
         .get('Foo')
         ['async']()
-        .then(value => {
+        .then((value) => {
           expect(value).to.equal('bar');
         });
     });
 
     it('Works with multiple variables', () => {
-      varSource.setBoth('Foo', () => 'bar', () => Promise.resolve('bar'));
+      varSource.setBoth(
+        'Foo',
+        () => 'bar',
+        () => Promise.resolve('bar')
+      );
       varSource.set('Baz', () => 'Foo');
       expect(varSource.getExpr()).to.be.ok;
 
@@ -82,7 +88,7 @@ describes.fakeWin(
       return varSource
         .get('Foo')
         ['async']()
-        .then(value => {
+        .then((value) => {
           expect(value).to.equal('bar');
         });
     });
@@ -100,7 +106,7 @@ describes.fakeWin(
       return varSource
         .get('Foo')
         ['async']()
-        .then(value => {
+        .then((value) => {
           expect(value).to.equal('baz');
         });
     });
@@ -113,25 +119,20 @@ describes.fakeWin(
     });
 
     describes.realWin(
-      'Whitelist of variable substitutions',
+      'Allowlist of variable substitutions',
       {
         amp: {
           ampdoc: 'single',
         },
       },
-      env => {
+      (env) => {
         let variableSource;
         beforeEach(() => {
-          env.win.document.head.appendChild(
-            createElementWithAttributes(env.win.document, 'meta', {
-              name: 'amp-allowed-url-macros',
-              content: 'ABC,ABCD,CANONICAL',
-            })
-          );
           variableSource = new VariableSource(env.ampdoc);
+          variableSource.variableAllowlist_ = ['ABC', 'ABCD', 'CANONICAL'];
         });
 
-        it('Works with whitelisted variables', () => {
+        it('Works with allowlisted variables', () => {
           variableSource.setAsync('ABCD', () => Promise.resolve('abcd'));
           expect(variableSource.getExpr()).to.be.ok;
           expect(variableSource.getExpr().toString()).to.contain('ABCD');
@@ -139,12 +140,12 @@ describes.fakeWin(
           return variableSource
             .get('ABCD')
             ['async']()
-            .then(value => {
+            .then((value) => {
               expect(value).to.equal('abcd');
             });
         });
 
-        it('Should not work with unwhitelisted variables', () => {
+        it('Should not work with unallowlisted variables', () => {
           variableSource.setAsync('RANDOM', () => Promise.resolve('0.1234'));
           expect(variableSource.getExpr()).to.be.ok;
           expect(variableSource.getExpr().toString()).not.to.contain('RANDOM');
@@ -152,21 +153,26 @@ describes.fakeWin(
           return variableSource
             .get('RANDOM')
             ['async']()
-            .then(value => {
+            .then((value) => {
               expect(value).to.equal('0.1234');
             });
+        });
+
+        it('Should ignore allowlisted variables for email documents', () => {
+          env.win.document.documentElement.setAttribute('amp4email', '');
+          expect(variableSource.getExpr()).to.be.ok;
+          expect(variableSource.getExpr().toString()).not.to.contain('ABC');
+          expect(variableSource.getExpr().toString()).not.to.contain('ABCD');
+          expect(variableSource.getExpr().toString()).not.to.contain(
+            'CANONICAL'
+          );
         });
       }
     );
 
-    it('Should not work with empty variable whitelist', () => {
-      env.win.document.head.appendChild(
-        createElementWithAttributes(env.win.document, 'meta', {
-          name: 'amp-allowed-url-macros',
-          content: '',
-        })
-      );
+    it('Should not work with empty variable allowlist', () => {
       const variableSource = new VariableSource(env.ampdoc);
+      variableSource.variableAllowlist_ = [''];
 
       variableSource.setAsync('RANDOM', () => Promise.resolve('0.1234'));
       expect(variableSource.getExpr()).to.be.ok;
@@ -175,12 +181,12 @@ describes.fakeWin(
       return variableSource
         .get('RANDOM')
         ['async']()
-        .then(value => {
+        .then((value) => {
           expect(value).to.equal('0.1234');
         });
     });
 
-    describes.fakeWin('getTimingData', {}, env => {
+    describes.fakeWin('getTimingData', {}, (env) => {
       let win;
 
       beforeEach(() => {
@@ -199,7 +205,7 @@ describes.fakeWin(
         expect(win.eventListeners.count('load')).to.equal(1);
         win.performance.timing.loadEventStart = 12;
         win.eventListeners.fire({type: 'load'});
-        return p.then(value => {
+        return p.then((value) => {
           expect(value).to.equal(11);
         });
       });

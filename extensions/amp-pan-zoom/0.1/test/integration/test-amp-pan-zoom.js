@@ -21,12 +21,12 @@ import {toggleExperiment} from '../../../../../src/experiments';
 describe
   .configure()
   .ifChrome()
-  .run('amp-pan-zoom', function() {
+  .run('amp-pan-zoom', function () {
     this.timeout(100000);
     let fixture;
     beforeEach(() => {
       return createFixtureIframe('test/fixtures/amp-pan-zoom.html', 1000).then(
-        f => {
+        (f) => {
           fixture = f;
           toggleExperiment(fixture.win, 'amp-pan-zoom', true, true);
         }

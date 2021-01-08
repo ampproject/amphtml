@@ -16,7 +16,7 @@
 
 import {
   PositionObserverFidelity, // eslint-disable-line no-unused-vars
-  PositionObserverWorker, // eslint-disable-line no-unused-vars
+  PositionObserverWorker,
 } from './position-observer-worker';
 import {Services} from '../../services';
 import {debounce} from '../../utils/rate-limit';
@@ -46,7 +46,7 @@ export class PositionObserver {
     /** @private {!../vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win_);
 
-    /** @private {!../viewport/viewport-impl.Viewport} */
+    /** @private {!../viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = Services.viewportForDoc(ampdoc);
 
     /** @private {Array<function()>} */

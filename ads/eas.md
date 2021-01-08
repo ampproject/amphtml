@@ -23,22 +23,28 @@ limitations under the License.
 Corresponds to `https://eas4.emediate.eu/eas?cu=12345`
 
 ```html
-<amp-ad width="320" height="50"
-    type="eas"
-    data-eas-domain="eas4.emediate.eu"
-    data-eas-cu="12345">
+<amp-ad
+  width="320"
+  height="50"
+  type="eas"
+  data-eas-domain="eas4.emediate.eu"
+  data-eas-cu="12345"
+>
 </amp-ad>
 ```
 
 ### With targeting parameters
 
 ```html
-<amp-ad width="320" height="50"
-    type="eas"
-    data-eas-domain="eas4.emediate.eu"
-    data-eas-cu="12345"
-    data-eas-EASTsomename="somevalue"
-    data-eas-kw1="somekeyword">
+<amp-ad
+  width="320"
+  height="50"
+  type="eas"
+  data-eas-domain="eas4.emediate.eu"
+  data-eas-cu="12345"
+  data-eas-EASTsomename="somevalue"
+  data-eas-kw1="somekeyword"
+>
 </amp-ad>
 ```
 
@@ -46,14 +52,8 @@ Corresponds to `https://eas4.emediate.eu/eas?cu=12345`
 
 ### Required parameters
 
-- `data-eas-domain`: Specify your ad-server domain (e.g., `eas3.emediate.se`); If you're using a custom domain-name (like, `eas.somesite.com`) you should NOT use that one unless you already have an SSL-certificate installed on our ad servers.
+-   `data-eas-domain`: Specify your ad-server domain (e.g., `eas3.emediate.se`); If you're using a custom domain-name (like, `eas.somesite.com`) you should NOT use that one unless you already have an SSL-certificate installed on our ad servers.
 
 ### Optional parameters
 
-- `data-eas-[parameter]`: Any ad-request parameter, like 'cu'.
-
-
-
-
-
-
+-   `data-eas-[parameter]`: Any ad-request parameter, like 'cu'.

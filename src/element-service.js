@@ -17,15 +17,13 @@
 import * as dom from './dom';
 import {
   getAmpdoc,
-  getExistingServiceForDocInEmbedScope,
   getService,
+  getServiceForDocOrNull,
   getServicePromise,
   getServicePromiseForDoc,
   getServicePromiseOrNull,
   getServicePromiseOrNullForDoc,
-  getTopWindow,
 } from './service';
-import {toWin} from './types';
 import {userAssert} from './log';
 
 /**
@@ -43,9 +41,12 @@ import {userAssert} from './log';
  * @return {!Promise<*>}
  */
 export function getElementService(win, id, extension, opt_element) {
-  return getElementServiceIfAvailable(win, id, extension, opt_element).then(
-    service => assertService(service, id, extension)
-  );
+  return getElementServiceIfAvailable(
+    win,
+    id,
+    extension,
+    opt_element
+  ).then((service) => assertService(service, id, extension));
 }
 
 /**
@@ -74,10 +75,10 @@ export function getElementServiceIfAvailable(win, id, extension, opt_element) {
  */
 function isElementScheduled(win, elementName) {
   // Set in custom-element.js
-  if (!win.ampExtendedElements) {
+  if (!win.__AMP_EXTENDED_ELEMENTS) {
     return false;
   }
-  return !!win.ampExtendedElements[elementName];
+  return !!win.__AMP_EXTENDED_ELEMENTS[elementName];
 }
 
 /**
@@ -100,7 +101,7 @@ export function getElementServiceForDoc(element, id, extension, opt_element) {
     id,
     extension,
     opt_element
-  ).then(service => assertService(service, id, extension));
+  ).then((service) => assertService(service, id, extension));
 }
 
 /**
@@ -158,19 +159,11 @@ export function getElementServiceIfAvailableForDocInEmbedScope(
   id,
   extension
 ) {
-  const s = getExistingServiceForDocInEmbedScope(element, id);
+  const s = getServiceForDocOrNull(element, id);
   if (s) {
     return /** @type {!Promise<?Object>} */ (Promise.resolve(s));
   }
-  const win = toWin(element.ownerDocument.defaultView);
-  const topWin = getTopWindow(win);
-  // In embeds, doc services are stored on the embed window.
-  if (win !== topWin) {
-    return getElementServicePromiseOrNull(win, id, extension);
-  } else {
-    // Only fallback to element's ampdoc (top-level) if not embedded.
-    return getElementServiceIfAvailableForDoc(element, id, extension);
-  }
+  return getElementServiceIfAvailableForDoc(element, id, extension);
 }
 
 /**
@@ -196,21 +189,29 @@ function assertService(service, id, extension) {
 }
 
 /**
- * Get list of all the extension JS files
+ * Get list of all the extension JS files.
  * @param {HTMLHeadElement|Element|ShadowRoot} head
  * @return {!Array<string>}
  */
 export function extensionScriptsInNode(head) {
-  // ampdoc.getHeadNode() can return null
+  // ampdoc.getHeadNode() can return null.
   if (!head) {
     return [];
   }
-  const scripts = [];
-  const list = head.querySelectorAll('script[custom-element]');
+  const scripts = {};
+  // Note: Some extensions don't have [custom-element] or [custom-template]
+  // e.g. amp-viewer-integration.
+  const list = head.querySelectorAll(
+    'script[custom-element],script[custom-template]'
+  );
   for (let i = 0; i < list.length; i++) {
-    scripts.push(list[i].getAttribute('custom-element'));
+    const script = list[i];
+    const name =
+      script.getAttribute('custom-element') ||
+      script.getAttribute('custom-template');
+    scripts[name] = true;
   }
-  return scripts;
+  return Object.keys(scripts);
 }
 
 /**

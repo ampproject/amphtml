@@ -1,0 +1,87 @@
+FAIL
+|  <!--
+|    Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+|
+|    Licensed under the Apache License, Version 2.0 (the "License");
+|    you may not use this file except in compliance with the License.
+|    You may obtain a copy of the License at
+|
+|        http://www.apache.org/licenses/LICENSE-2.0
+|
+|    Unless required by applicable law or agreed to in writing, software
+|    distributed under the License is distributed on an "AS-IS" BASIS,
+|    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+|    See the License for the specific language governing permissions and
+|    limitations under the license.
+|  -->
+|  <!--
+|    Test Description:
+|    Tests support for the amp-nested-menu tag.
+|  -->
+|  <!doctype html>
+|  <html ⚡>
+|  <head>
+|    <meta charset="utf-8">
+|    <link rel="canonical" href="./regular-html-version.html">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <script async custom-element="amp-sidebar" src="https://cdn.ampproject.org/v0/amp-sidebar-0.1.js"></script>
+|    <script async custom-element="amp-accordion" src="https://cdn.ampproject.org/v0/amp-accordion-0.1.js"></script>
+|  </head>
+|  <body>
+|    <!-- Invalid: nested menu must be inside sidebar -->
+|    <amp-nested-menu layout="fill"></amp-nested-menu>
+>>   ^~~~~~~~~
+amp-nested-menu/0.1/test/validator-amp-nested-menu-error.html:33:2 The tag 'amp-nested-menu' may only appear as a descendant of tag 'amp-sidebar'. (see https://amp.dev/documentation/components/amp-nested-menu/)
+|    <amp-sidebar layout="nodisplay">
+|      <!-- Invalid: incorrect side value -->
+|      <amp-nested-menu layout="fill" side="center">
+>>     ^~~~~~~~~
+amp-nested-menu/0.1/test/validator-amp-nested-menu-error.html:36:4 The attribute 'side' in tag 'amp-nested-menu' is set to the invalid value 'center'. (see https://amp.dev/documentation/components/amp-nested-menu/)
+|        <!-- Invalid: no element can include more than one submenu attributes -->
+|        <div>
+|          <h4 amp-nested-submenu-open amp-nested-submenu-close></h4>
+>>         ^~~~~~~~~
+amp-nested-menu/0.1/test/validator-amp-nested-menu-error.html:39:8 Mutually exclusive attributes encountered in tag 'h4' - pick one of ['amp-nested-submenu-close', 'amp-nested-submenu-open'].
+|          <div amp-nested-submenu amp-nested-submenu-close></div>
+>>         ^~~~~~~~~
+amp-nested-menu/0.1/test/validator-amp-nested-menu-error.html:40:8 Mutually exclusive attributes encountered in tag 'div' - pick one of ['amp-nested-submenu', 'amp-nested-submenu-close', 'amp-nested-submenu-open'].
+|          <div amp-nested-submenu amp-nested-submenu-open></div>
+>>         ^~~~~~~~~
+amp-nested-menu/0.1/test/validator-amp-nested-menu-error.html:41:8 Mutually exclusive attributes encountered in tag 'div' - pick one of ['amp-nested-submenu', 'amp-nested-submenu-close', 'amp-nested-submenu-open'].
+|        </div>
+|        <!-- Invalid: only divs may include the amp-nested-submenu attribute -->
+|        <div>
+|          <span amp-nested-submenu></span>
+>>         ^~~~~~~~~
+amp-nested-menu/0.1/test/validator-amp-nested-menu-error.html:45:8 The attribute 'amp-nested-submenu' may not appear in tag 'span'.
+|          <button amp-nested-submenu></button>
+>>         ^~~~~~~~~
+amp-nested-menu/0.1/test/validator-amp-nested-menu-error.html:46:8 The attribute 'amp-nested-submenu' may not appear in tag 'button'.
+|        </div>
+|        <!-- Invalid: only buttons, divs, spans and h2-h6 may have submenu open/close attribute -->
+|        <div>
+|          <a amp-nested-submenu-open></a>
+>>         ^~~~~~~~~
+amp-nested-menu/0.1/test/validator-amp-nested-menu-error.html:50:8 The attribute 'amp-nested-submenu-open' may not appear in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#links)
+|          <h1 amp-nested-submenu-close></h1>
+>>         ^~~~~~~~~
+amp-nested-menu/0.1/test/validator-amp-nested-menu-error.html:51:8 The attribute 'amp-nested-submenu-close' may not appear in tag 'h1'.
+|        </div>
+|        <!-- Invalid: submenus cannot be inside an amp-accordion -->
+|        <amp-accordion>
+|          <section>
+|            <h4>accordion header</h4>
+|            <div>
+|              <h4 amp-nested-submenu-open></h4>
+|              <div amp-nested-submenu></div>
+>>             ^~~~~~~~~
+amp-nested-menu/0.1/test/validator-amp-nested-menu-error.html:59:12 The attribute 'amp-nested-submenu' may not appear in tag 'div'.
+|            </div>
+|          </section>
+|        </amp-accordion>
+|      </amp-nested-menu>
+|    </amp-sidebar>
+|  </body>
+|  </html>

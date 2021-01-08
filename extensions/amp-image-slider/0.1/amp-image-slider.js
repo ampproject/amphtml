@@ -22,9 +22,12 @@ import {Services} from '../../../src/services';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {clamp} from '../../../src/utils/math';
 import {dev, user, userAssert} from '../../../src/log';
-import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
+import {
+  observeWithSharedInOb,
+  unobserveWithSharedInOb,
+} from '../../../src/viewport-observer';
 import {setStyles} from '../../../src/style';
 
 export class AmpImageSlider extends AMP.BaseElement {
@@ -144,17 +147,11 @@ export class AmpImageSlider extends AMP.BaseElement {
       '2 <amp-img>s must be provided for comparison'
     );
 
-    // TODO(kqian): remove this after layer launch
-    if (
-      !isExperimentOn(this.win, 'layers') ||
-      !isExperimentOn(this.win, 'layers-prioritization')
-    ) {
-      // see comment in layoutCallback
-      // When layers not enabled
-      const owners = Services.ownersForDoc(this.element);
-      owners.setOwner(dev().assertElement(this.leftAmpImage_), this.element);
-      owners.setOwner(dev().assertElement(this.rightAmpImage_), this.element);
-    }
+    // see comment in layoutCallback
+    // When layers not enabled
+    const owners = Services.ownersForDoc(this.element);
+    owners.setOwner(dev().assertElement(this.leftAmpImage_), this.element);
+    owners.setOwner(dev().assertElement(this.rightAmpImage_), this.element);
 
     this.container_ = this.doc_.createElement('div');
     this.container_.classList.add('i-amphtml-image-slider-container');
@@ -167,7 +164,7 @@ export class AmpImageSlider extends AMP.BaseElement {
 
     this.registerAction(
       'seekTo',
-      invocation => {
+      (invocation) => {
         const {args} = invocation;
         if (args) {
           if (args['percent'] !== undefined) {
@@ -365,7 +362,7 @@ export class AmpImageSlider extends AMP.BaseElement {
 
     this.gestures_ = Gestures.get(this.element);
 
-    this.gestures_.onGesture(SwipeXRecognizer, e => {
+    this.gestures_.onGesture(SwipeXRecognizer, (e) => {
       if (e.data.first) {
         // Disable hint reappearance timeout if needed
         this.animateHideHint_();
@@ -373,9 +370,9 @@ export class AmpImageSlider extends AMP.BaseElement {
       this.pointerMoveX_(e.data.startX + e.data.deltaX);
     });
 
-    this.gestures_.onPointerDown(e => {
+    this.gestures_.onPointerDown((e) => {
       // Ensure touchstart changes slider position
-      this.pointerMoveX_(e.touches[0].pageX, true);
+      this.pointerMoveX_(e.touches[0].pageX);
       this.animateHideHint_();
     });
   }
@@ -423,7 +420,7 @@ export class AmpImageSlider extends AMP.BaseElement {
    */
   onMouseDown_(e) {
     e.preventDefault();
-    this.pointerMoveX_(e.pageX, true);
+    this.pointerMoveX_(e.pageX);
 
     // In case, clear up remnants
     // This is to prevent right mouse button down when left still down
@@ -565,7 +562,10 @@ export class AmpImageSlider extends AMP.BaseElement {
    */
   getCurrentSliderPercentage_() {
     const {left: barLeft} = this.bar_./*OK*/ getBoundingClientRect();
-    const {left: boxLeft, width: boxWidth} = this.getLayoutBox();
+    const {
+      left: boxLeft,
+      width: boxWidth,
+    } = this.element./*OK*/ getBoundingClientRect();
     return (barLeft - boxLeft) / boxWidth;
   }
 
@@ -635,40 +635,26 @@ export class AmpImageSlider extends AMP.BaseElement {
    * Move slider based on given pointer x position
    * Do NOT wrap this in mutateElement!
    * @param {number} pointerX
-   * @param {boolean} opt_recal recalibrate rect
    * @private
    */
-  pointerMoveX_(pointerX, opt_recal = false) {
+  pointerMoveX_(pointerX) {
     let width, left, right;
-    if (!opt_recal) {
-      const layoutBox = this.getLayoutBox();
-      width = layoutBox.width;
-      left = layoutBox.left;
-      right = layoutBox.right;
-      const newPos = clamp(pointerX, left, right);
-      const newPercentage = (newPos - left) / width;
-      this.mutateElement(() => {
+    // This is to address the "snap to leftmost" bug that occurs on
+    // pointer down after scrolling away and back 3+ slides
+    // layoutBox is not updated correctly when first landed on page
+    this.measureMutateElement(
+      () => {
+        const rect = this.element./*OK*/ getBoundingClientRect();
+        width = rect.width;
+        left = rect.left;
+        right = rect.right;
+      },
+      () => {
+        const newPos = clamp(pointerX, left, right);
+        const newPercentage = (newPos - left) / width;
         this.updatePositions_(newPercentage);
-      });
-    } else {
-      // Fix cases where getLayoutBox() cannot be trusted (when in carousel)!
-      // This is to address the "snap to leftmost" bug that occurs on
-      // pointer down after scrolling away and back 3+ slides
-      // layoutBox is not updated correctly when first landed on page
-      this.measureMutateElement(
-        () => {
-          const rect = this.element./*OK*/ getBoundingClientRect();
-          width = rect.width;
-          left = rect.left;
-          right = rect.right;
-        },
-        () => {
-          const newPos = clamp(pointerX, left, right);
-          const newPercentage = (newPos - left) / width;
-          this.updatePositions_(newPercentage);
-        }
-      );
-    }
+      }
+    );
   }
 
   /**
@@ -721,6 +707,9 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    observeWithSharedInOb(this.element, (inViewport) =>
+      this.viewportCallback_(inViewport)
+    );
     // Extensions such as amp-carousel still uses .setOwner()
     // This would break the rendering of the images as carousel
     // will call .scheduleLayout on the slider but not the contents
@@ -764,6 +753,7 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
+    unobserveWithSharedInOb(this.element);
     this.unregisterEvents_();
     return true;
   }
@@ -778,8 +768,11 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.registerEvents_();
   }
 
-  /** @override */
-  viewportCallback(inViewport) {
+  /**
+   * @param {boolean} inViewport
+   * @private
+   */
+  viewportCallback_(inViewport) {
     // Show hint if back into viewport and user does not explicitly
     // disable this
     if (inViewport && this.shouldHintReappear_) {
@@ -788,6 +781,6 @@ export class AmpImageSlider extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-image-slider', '0.1', AMP => {
+AMP.extension('amp-image-slider', '0.1', (AMP) => {
   AMP.registerElement('amp-image-slider', AmpImageSlider, CSS);
 });

@@ -25,10 +25,13 @@ For configuration details and to generate your tags, please refer to [your publi
 ## Example - Passback
 
 ```html
-<amp-ad width="300" height="250"
-    type="criteo"
-    data-tagtype="passback"
-    data-zone="567890">
+<amp-ad
+  width="300"
+  height="250"
+  type="criteo"
+  data-tagtype="passback"
+  data-zone="567890"
+>
 </amp-ad>
 ```
 
@@ -40,5 +43,5 @@ The ad size is based on the setup of your Criteo zone. The `width` and `height` 
 
 Supported parameters:
 
-- `data-tagtype`: identifies the used Criteo technology. Must be "passback". Required.
-- `data-zone`: your Criteo zone identifier. Required.
+-   `data-tagtype`: identifies the used Criteo technology. Must be "passback". Required.
+-   `data-zone`: your Criteo zone identifier. Required.

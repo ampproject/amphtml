@@ -17,25 +17,26 @@
 
 const colors = require('ansi-colors');
 const log = require('fancy-log');
-const {getStderr} = require('../exec');
-const {gitDiffFileMaster} = require('../git');
-const {isTravisBuild} = require('../travis');
+const {getStderr} = require('../common/exec');
+const {gitDiffFileMaster} = require('../common/git');
+const {isCiBuild} = require('../common/ci');
 
 const PACKAGE_JSON_PATHS = [
   'package.json',
   'build-system/tasks/e2e/package.json',
   'build-system/tasks/visual-diff/package.json',
+  'build-system/tasks/storybook/package.json',
 ];
 
 const checkerExecutable = 'npx npm-exact-versions';
 
 /**
  * Makes sure all package.json files in the repo use exact versions.
- * @return {*} TODO(#23582): Specify return type
+ * @return {!Promise}
  */
 async function checkExactVersions() {
   let success = true;
-  PACKAGE_JSON_PATHS.forEach(file => {
+  PACKAGE_JSON_PATHS.forEach((file) => {
     const checkerCmd = `${checkerExecutable} --path ${file}`;
     const err = getStderr(checkerCmd);
     if (err) {
@@ -48,7 +49,7 @@ async function checkExactVersions() {
       console.log(gitDiffFileMaster(file));
       success = false;
     } else {
-      if (!isTravisBuild()) {
+      if (!isCiBuild()) {
         log(
           colors.green('SUCCESS:'),
           'All packages in',

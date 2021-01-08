@@ -42,14 +42,15 @@ export function getAddThisMode(_) {
 }
 
 /**
- * @param {{pubId: string, widgetId: string, productCode: string}} _
+ * @param {{pubId: string, widgetId: string, productCode: string}} mode
  * @return {{
- * hasPubId:boolean,
- * hasWidgetId:boolean,
- * hasProductCode:boolean
+ *   hasPubId: boolean,
+ *   hasWidgetId: boolean,
+ *   hasProductCode: boolean
  * }}
  */
-export function getAddThisModeObject({pubId, widgetId, productCode}) {
+export function getAddThisModeObject(mode) {
+  const {pubId, widgetId, productCode} = mode;
   const hasPubId = isPubId(pubId);
   // widget ids are 4-character strings with lower-case letters and numbers only
   const hasWidgetId = isWidgetId(widgetId);

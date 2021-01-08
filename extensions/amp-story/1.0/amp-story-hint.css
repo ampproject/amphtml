@@ -55,13 +55,8 @@
   flex: 1 !important;
 }
 
-[dir=rtl] .prev-page {
+[dir=rtl].prev-page {
   flex: 1 !important;
-  border-left: 1px dashed transparent !important;
-  border-image-source: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" version="1.1"><line x1="0" y1="0" x2="0" y2="30" fill-rule="evenodd" stroke-width="1" fill="none" stroke-linecap="square" stroke-dasharray="6,6" stroke="white"></line></svg>')  !important;
-  border-image-slice: 33% 33%  !important;
-  border-image-repeat: repeat  !important;
-  border-image-width: 14px !important;
 }
 
 .show-first-page-overlay .i-amphtml-story-navigation-help-overlay {
@@ -70,6 +65,10 @@
 
 .show-first-page-overlay .prev-page {
   background: linear-gradient(to right, rgba(0,0,0,0.5) , rgba(0,0,0,0)) !important;
+}
+
+[dir=rtl].show-first-page-overlay .prev-page {
+  background: linear-gradient(to left, rgba(0,0,0,0.5) , rgba(0,0,0,0)) !important;
 }
 
 .show-first-page-overlay .next-page {
@@ -86,15 +85,15 @@
 
 .i-amphtml-story-hint-container .next-page {
   flex: 3 !important;
-  border-left: 1px dashed transparent !important;
-  border-image-source: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" version="1.1"><line x1="0" y1="0" x2="0" y2="30" fill-rule="evenodd" stroke-width="1" fill="none" stroke-linecap="square" stroke-dasharray="6,6" stroke="white"></line></svg>')  !important;
-  border-image-slice: 33% 33%  !important;
-  border-image-repeat: repeat  !important;
-  border-image-width: 14px !important;
+  background-image: linear-gradient(#e0d5d5 60%, rgba(255,255,255,0) 0%) !important;
+  background-position: left !important;
+  background-size: 1px 15px !important;
+  background-repeat: repeat-y !important;
 }
 
 [dir=rtl].i-amphtml-story-hint-container .next-page {
   border-left: none !important;
+  background-position: right !important;
 }
 
 .show-navigation-overlay .i-amphtml-story-navigation-help-overlay,

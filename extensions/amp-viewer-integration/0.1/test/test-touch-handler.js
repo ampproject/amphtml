@@ -35,12 +35,13 @@ function fakeTouchEvent(type) {
     changedTouches: [
       {'clientX': 20, 'clientY': 30, 'screenX': 10, 'screenY': 20},
     ],
+    cancelable: true,
     preventDefault() {},
   };
 }
 
-describes.fakeWin('TouchHandler', {}, env => {
-  describe('TouchHandler Unit Tests', function() {
+describes.fakeWin('TouchHandler', {}, (env) => {
+  describe('TouchHandler Unit Tests', function () {
     class WindowPortEmulator {
       constructor(win, origin) {
         /** @const {!Window} */
@@ -61,7 +62,6 @@ describes.fakeWin('TouchHandler', {}, env => {
     }
 
     let win;
-    let sandbox;
     let touchHandler;
     let messaging;
     let listeners;
@@ -73,20 +73,23 @@ describes.fakeWin('TouchHandler', {}, env => {
       unlistenCount = 0;
       messages = [];
       win = env.win;
-      win.document.addEventListener = function(eventType, handler, options) {
+      win.document.addEventListener = function (eventType, handler, options) {
         listeners.push({
           type: eventType,
           handler,
           options,
         });
       };
-      win.document.removeEventListener = function(eventType, handler, options) {
+      win.document.removeEventListener = function (
+        eventType,
+        handler,
+        options
+      ) {
         expect(listeners[unlistenCount].type).to.equal(eventType);
         expect(listeners[unlistenCount].handler).to.equal(handler);
         expect(listeners[unlistenCount].options).to.equal(options);
         unlistenCount++;
       };
-      sandbox = sinon.sandbox;
       const port = new WindowPortEmulator(
         this.messageHandlers_,
         'origin doesnt matter'
@@ -117,8 +120,11 @@ describes.fakeWin('TouchHandler', {}, env => {
       expect(listeners[0].options.passive).to.be.true;
       expect(listeners[0].options.capture).to.be.false;
       const fakeEvent = fakeTouchEvent('touchstart');
-      const preventDefaultStub = sandbox.stub(fakeEvent, 'preventDefault');
-      const copyTouchEventStub = sandbox.stub(touchHandler, 'copyTouchEvent_');
+      const preventDefaultStub = env.sandbox.stub(fakeEvent, 'preventDefault');
+      const copyTouchEventStub = env.sandbox.stub(
+        touchHandler,
+        'copyTouchEvent_'
+      );
 
       touchHandler.forwardEvent_(fakeEvent);
       expect(copyTouchEventStub).to.have.been.called;
@@ -138,6 +144,18 @@ describes.fakeWin('TouchHandler', {}, env => {
       expect(unlistenCount).to.equal(6);
       expect(listeners).to.have.length(9);
       expect(listeners[7].options.passive).to.be.true;
+    });
+
+    it('should only cancel touch event when cancelable', () => {
+      const fakeEvent = fakeTouchEvent('touchstart');
+      fakeEvent.cancelable = false;
+      const preventDefaultStub = env.sandbox.stub(fakeEvent, 'preventDefault');
+      env.sandbox.stub(touchHandler, 'copyTouchEvent_');
+
+      touchHandler.scrollLockHandler_('some type', /*lock*/ true, false);
+      touchHandler.forwardEvent_(fakeEvent);
+      expect(messages).to.have.length(1);
+      expect(preventDefaultStub).to.not.have.been.called;
     });
 
     it('should copy events correctly', () => {

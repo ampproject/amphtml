@@ -26,7 +26,7 @@ describes.realWin(
       extensions: ['amp-experiment:1.0'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
 
     beforeEach(() => {
@@ -55,7 +55,7 @@ describes.realWin(
 
         mutation.mutate();
 
-        mutation.elements_.forEach(element => {
+        mutation.elements_.forEach((element) => {
           expect(element.textContent).to.be.equal(TEST_VALUE);
         });
       });

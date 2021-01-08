@@ -47,9 +47,10 @@ const imports = {
   'src/css': ['escapeCssSelectorIdent', 'escapeCssSelectorNth'],
   'src/dom': ['scopedQuerySelector', 'scopedQuerySelectorAll'],
   'src/log': ['user', 'dev'],
+  'src/mode': ['getMode'],
 };
 
-module.exports = function(context) {
+module.exports = function (context) {
   function ImportSpecifier(node, modulePath, mods) {
     const {imported, local} = node;
     const {name} = imported;

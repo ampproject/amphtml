@@ -1,0 +1,21 @@
+{
+  "vars": {
+    "ap": "1"
+  },
+  "transport": {
+    "beacon": false,
+    "xhrpost": false,
+    "image": true
+  },
+  "requests": {
+    "pageview": "${url}?ap=${ap}&dn=${dn}&cn=${cn}&st=${st}&co=${co}&cp=${cp}&au=${canonicalUrl}&ar=${documentReferrer}&ash=${screenHeight}&asw=${screenWidth}&tp=pageview",
+    "event": "${url}?ap=${ap}&dn=${dn}&cn=${cn}&ev=${ev}&st=${st}&co=${co}&cp=${cp}&au=${canonicalUrl}&ar=${documentReferrer}&ash=${screenHeight}&asw=${screenWidth}&tp=event"
+  },
+  "triggers": {
+    "pageview": {
+      "on": "visible",
+      "request": "pageview",
+      "iframePing": true
+    }
+  }
+}

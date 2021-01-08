@@ -42,7 +42,6 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {isObject} from '../../../src/types';
 import {removeElement} from '../../../src/dom';
 import {setStyles} from '../../../src/style';
-import {startsWith} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';
 import {userAssert} from '../../../src/log';
 
@@ -76,10 +75,15 @@ class AmpInstagram extends AMP.BaseElement {
   preconnectCallback(opt_onLayout) {
     // See
     // https://instagram.com/developer/embedding/?hl=en
-    this.preconnect.url('https://www.instagram.com', opt_onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://www.instagram.com',
+      opt_onLayout
+    );
     // Host instagram used for image serving. While the host name is
     // funky this appears to be stable in the post-domain sharding era.
-    this.preconnect.url(
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
       'https://instagram.fsnc1-1.fna.fbcdn.net',
       opt_onLayout
     );
@@ -111,7 +115,7 @@ class AmpInstagram extends AMP.BaseElement {
 
     // This will redirect to the image URL. By experimentation this is
     // always the same URL that is actually used inside of the embed.
-    Services.viewerForDoc(this.element)
+    this.getAmpDoc()
       .whenFirstVisible()
       .then(() => {
         image.setAttribute(
@@ -204,8 +208,7 @@ class AmpInstagram extends AMP.BaseElement {
     if (
       !eventData ||
       !(
-        isObject(eventData) ||
-        startsWith(/** @type {string} */ (eventData), '{')
+        isObject(eventData) || /** @type {string} */ (eventData).startsWith('{')
       )
     ) {
       return; // Doesn't look like JSON.
@@ -218,7 +221,7 @@ class AmpInstagram extends AMP.BaseElement {
       const height = data['details']['height'];
       this.getVsync().measure(() => {
         if (this.iframe_ && this.iframe_./*OK*/ offsetHeight !== height) {
-          this./*OK*/ changeHeight(height);
+          this.forceChangeHeight(height);
         }
       });
     }
@@ -243,6 +246,6 @@ class AmpInstagram extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-instagram', '0.1', AMP => {
+AMP.extension('amp-instagram', '0.1', (AMP) => {
   AMP.registerElement('amp-instagram', AmpInstagram, CSS);
 });

@@ -4,8 +4,9 @@ formats:
   - websites
   - stories
 teaser:
-  text: Creates an iframe and displays a Gist from GitHub
+  text: Creates an iframe and displays a GitHub Gist.
 ---
+
 <!--
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
@@ -24,73 +25,63 @@ limitations under the License.
 
 # amp-gist
 
-Displays a <a href="https://gist.github.com/">GitHub Gist</a>.
+## Usage
 
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-gist" src="https://cdn.ampproject.org/v0/amp-gist-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fixed-height</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://amp.dev/documentation/examples/components/amp-gist/">Annotated code example for amp-gist</a></td>
-  </tr>
-</table>
+Creates an iframe and displays a [GitHub Gist](https://docs.github.com/en/github/writing-on-github/creating-gists).
 
-[TOC]
-
-## Behavior
-
-This extension creates an iframe and displays a [gist from GitHub](https://help.github.com/articles/about-gists/).
-
-#### Example: Embedding multiple files
+The following example shows how to embed multiple files:
 
 ```html
 <amp-gist
-    data-gistid="b9bb35bc68df68259af94430f012425f"
-    layout="fixed-height"
-    height="225">
+  data-gistid="b9bb35bc68df68259af94430f012425f"
+  layout="fixed-height"
+  height="225"
+>
 </amp-gist>
 ```
 
-#### Example: Embedding a single file
+The following example shows how to embed a single file:
 
 ```html
 <amp-gist
-    data-gistid="a19e811dcd7df10c4da0931641538497"
-    data-file="hi.c"
-    layout="fixed-height"
-    height="185">
+  data-gistid="a19e811dcd7df10c4da0931641538497"
+  data-file="hi.c"
+  layout="fixed-height"
+  height="185"
+>
 </amp-gist>
 ```
 
 ## Attributes
 
-<table>
-  <tr>
-    <td width="40%"><strong>data-gistid (required)</strong></td>
-    <td>The ID of the gist to embed.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>layout (required)</strong></td>
-    <td>Currently only supports <code>fixed-height</code>.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>height (required)</strong></td>
-    <td>The initial height of the gist or gist file in pixels.
-<br><br>
-<strong>Note</strong>: You should obtain the height of the gist by inspecting it with your browser (e.g., Chrome Developer Tools). Once the Gist loads the contained iframe will resize to fit so that its contents will fit.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>data-file (optional)</strong></td>
-    <td>If specified, display only one file in a gist.</td>
-  </tr>
-</table>
+### `data-gistid`
 
+The ID of the gist to embed.
+
+### `layout`
+
+Currently only supports `fixed-height`.
+
+### `height`
+
+The initial height of the gist or gist file in pixels.
+
+[tip type="note"]
+
+You should obtain the height of the gist by inspecting it with your browser
+(e.g., Chrome Developer Tools). Once the Gist loads the contained iframe will
+resize to fit so that its contents will fit.
+
+[/tip]
+
+### `data-file` (optional)
+
+If specified, display only one file in a gist.
+
+### title (optional)
+
+Define a `title` attribute for the component to propagate to the underlying `<iframe>` element. The default value is `"Github gist"`.
 
 ## Validation
-See [amp-gist rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-gist/validator-amp-gist.protoascii) in the AMP validator specification.
+
+See [amp-gist rules](validator-amp-gist.protoascii) in the AMP validator specification.

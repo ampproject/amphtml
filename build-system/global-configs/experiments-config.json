@@ -1,10 +1,10 @@
 {
   "experimentA": {
-    "name": "ANALYTICS_VENDOR_SPLIT",
-    "command": "gulp generate-vendor-jsons && gulp dist --defineExperimentConstant=ANALYTICS_VENDOR_SPLIT",
-    "issue": "",
-    "expirationDateUTC": "2019-08-08",
-    "defineExperimentConstant": "ANALYTICS_VENDOR_SPLIT"
+    "name": "A4A No Signing RTV Experiment",
+    "environment": "AMP",
+    "issue": "https://github.com/ampproject/amphtml/issues/27189",
+    "expiration_date_utc": "2020-12-30",
+    "define_experiment_constant": "NO_SIGNING_RTV"
   },
   "experimentB": {},
   "experimentC": {}

@@ -19,10 +19,12 @@ const fs = require('fs-extra');
 const log = require('fancy-log');
 const path = require('path');
 const request = require('request-promise');
+const {ciBuildNumber} = require('../common/ci');
 const {cyan, green} = require('ansi-colors');
-const {gitCommitHash} = require('../git');
-const {replaceUrls: replaceUrlsAppUtil} = require('../app-utils');
-const {travisBuildNumber} = require('../travis');
+const {gitCommitHash} = require('../common/git');
+const {replaceUrls: replaceUrlsAppUtil} = require('../server/app-utils');
+
+const hostNamePrefix = 'https://storage.googleapis.com/amp-test-website-1';
 
 async function walk(dest) {
   const filelist = [];
@@ -39,12 +41,22 @@ async function walk(dest) {
   return filelist;
 }
 
+function getBaseUrl() {
+  return `${hostNamePrefix}/amp_dist_${ciBuildNumber()}`;
+}
+
 async function replace(filePath) {
   const data = await fs.readFile(filePath, 'utf8');
-
+  const hostName = getBaseUrl();
   const inabox = false;
   const storyV1 = true;
-  const result = replaceUrlsAppUtil('compiled', data, '', inabox, storyV1);
+  const result = replaceUrlsAppUtil(
+    'compiled',
+    data,
+    hostName,
+    inabox,
+    storyV1
+  );
 
   await fs.writeFile(filePath, result, 'utf8');
 }
@@ -52,16 +64,17 @@ async function replace(filePath) {
 async function replaceUrls(dir) {
   const files = await walk(dir);
   const promises = files
-    .filter(fileName => path.extname(fileName) == '.html')
-    .map(file => replace(file));
+    .filter((fileName) => path.extname(fileName) == '.html')
+    .map((file) => replace(file));
   await Promise.all(promises);
 }
 
 async function signalDistUpload(result) {
   const sha = gitCommitHash();
-  const travisBuild = travisBuildNumber();
+  const ciBuild = ciBuildNumber();
   const baseUrl = 'https://amp-pr-deploy-bot.appspot.com/v0/pr-deploy/';
-  const url = `${baseUrl}travisbuilds/${travisBuild}/headshas/${sha}/${result}`;
+  // TODO(rsimha, ampproject/amp-github-apps#1110): Update this URL.
+  const url = `${baseUrl}travisbuilds/${ciBuild}/headshas/${sha}/${result}`;
 
   await request.post(url);
   log(
@@ -73,6 +86,7 @@ async function signalDistUpload(result) {
 }
 
 module.exports = {
+  getBaseUrl,
   replaceUrls,
   signalDistUpload,
 };

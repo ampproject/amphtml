@@ -18,14 +18,26 @@
 // Global cache of typedefName: typedefLocation.
 const typedefs = new Map();
 
-module.exports = function(context) {
+module.exports = function (context) {
   return {
-    VariableDeclaration(node) {
-      if (!node.leadingComments) {
-        return;
+    Program() {
+      // When relinting a file, remove all typedefs that it declared.
+      const filename = context.getFilename();
+      const keys = [];
+      for (const [key, file] of typedefs) {
+        if (file === filename) {
+          keys.push(key);
+        }
       }
 
-      const typedefComment = node.leadingComments.find(comment => {
+      for (const key of keys) {
+        typedefs.delete(key);
+      }
+    },
+
+    VariableDeclaration(node) {
+      const leadingComments = context.getCommentsBefore(node);
+      const typedefComment = leadingComments.find((comment) => {
         return comment.type === 'Block' && /@typedef/.test(comment.value);
       });
 

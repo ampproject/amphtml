@@ -19,10 +19,7 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad height="400"
-    type="pressboard"
-    layout="fixed-height"
-    data-media="5">
+<amp-ad height="400" type="pressboard" layout="fixed-height" data-media="5">
 </amp-ad>
 ```
 
@@ -32,4 +29,4 @@ For details on configuration, see [Pressboard documentation](http://help.pressbo
 
 ### Required parameters
 
-- `data-media` - Media ID
+-   `data-media` - Media ID

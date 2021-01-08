@@ -28,7 +28,7 @@ describes.realWin(
       extensions: ['amp-action-macro'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let doc;
 
@@ -47,12 +47,12 @@ describes.realWin(
       });
     }
 
-    it('should build if experiment is on', done => {
+    it('should build if experiment is on', (done) => {
       newActionMacro().then(
         () => {
           done();
         },
-        unused => {
+        (unused) => {
           done(new Error('component should have built'));
         }
       );
@@ -61,7 +61,7 @@ describes.realWin(
     it('should not build if experiment is off', () => {
       return allowConsoleError(() => {
         toggleExperiment(env.win, 'amp-action-macro', false);
-        return newActionMacro().catch(err => {
+        return newActionMacro().catch((err) => {
           expect(err.message).to.include('Experiment is off');
         });
       });
@@ -117,7 +117,7 @@ describes.realWin(
       });
 
       it('should register execute action', () => {
-        const registerAction = sandbox.stub(macro, 'registerAction');
+        const registerAction = env.sandbox.stub(macro, 'registerAction');
         macro.buildCallback();
         expect(registerAction).to.have.been.called;
       });
@@ -143,8 +143,8 @@ describes.realWin(
       });
 
       it('should trigger macro action', () => {
-        const actions = {trigger: sandbox.spy()};
-        sandbox.stub(Services, 'actionServiceForDoc').returns(actions);
+        const actions = {trigger: env.sandbox.spy()};
+        env.sandbox.stub(Services, 'actionServiceForDoc').returns(actions);
         const button = doc.createElement('button');
         // Given the caller was called with a valid defined argument alias
         // 'x'.
@@ -165,8 +165,8 @@ describes.realWin(
       });
 
       it('should not allow recursive calls', () => {
-        const actions = {trigger: sandbox.spy()};
-        sandbox.stub(Services, 'actionServiceForDoc').returns(actions);
+        const actions = {trigger: env.sandbox.spy()};
+        env.sandbox.stub(Services, 'actionServiceForDoc').returns(actions);
         // Given the caller is the amp action macro that is also being invoked.
         const callerAction = new ActionInvocation(
           macro,
@@ -186,8 +186,8 @@ describes.realWin(
       });
 
       it('should allow calls to macros defined before itself', () => {
-        const actions = {trigger: sandbox.spy()};
-        sandbox.stub(Services, 'actionServiceForDoc').returns(actions);
+        const actions = {trigger: env.sandbox.spy()};
+        env.sandbox.stub(Services, 'actionServiceForDoc').returns(actions);
         // Given the caller is an amp action macro that was defined before the
         // action macro being invoked.
         const callerAction = new ActionInvocation(
@@ -207,8 +207,8 @@ describes.realWin(
       });
 
       it('should not allow calls to macros defined after itself', () => {
-        const actions = {trigger: sandbox.spy()};
-        sandbox.stub(Services, 'actionServiceForDoc').returns(actions);
+        const actions = {trigger: env.sandbox.spy()};
+        env.sandbox.stub(Services, 'actionServiceForDoc').returns(actions);
         // Given the caller is an amp action macro that was defined after the
         // action macro being invoked.
         const callerAction = new ActionInvocation(

@@ -53,7 +53,7 @@ describe('e2e expect', () => {
         )
       );
 
-      const testPromise = p.then(x => (x + 1) * 2);
+      const testPromise = p.then((x) => (x + 1) * 2);
 
       /*OK*/ expect(await testPromise).to.equal(2);
       await expect(await testPromise).to.equal(2);
@@ -68,7 +68,7 @@ describe('e2e expect', () => {
         )
       );
 
-      const testPromise = p.then(x => (x + 1) * 2).then(x => x + 1);
+      const testPromise = p.then((x) => (x + 1) * 2).then((x) => x + 1);
 
       /*OK*/ expect(await testPromise).to.equal(3);
       await expect(await testPromise).to.equal(3);
@@ -697,9 +697,7 @@ describe('e2e expect', () => {
         const p = new ControllerPromise(Promise.resolve());
 
         /*OK*/ expect(() =>
-          /*OK*/ expect(p)
-            .to.change({a: 0}, 'a')
-            .by(1)
+          /*OK*/ expect(p).to.change({a: 0}, 'a').by(1)
         ).to.throw('ControllerPromise used with unsupported expectation');
       });
     });
@@ -1342,8 +1340,8 @@ describe('e2e expect', () => {
           getWaitFunction(() => getArrayValueFunction(2, 1))
         );
 
-        /*OK*/ expect(await p).to.satisfy(x => x % 2 == 0);
-        await expect(p).to.satisfy(x => x % 2 == 0);
+        /*OK*/ expect(await p).to.satisfy((x) => x % 2 == 0);
+        await expect(p).to.satisfy((x) => x % 2 == 0);
       });
 
       it('should work in the eventual positive case', async () => {
@@ -1353,7 +1351,7 @@ describe('e2e expect', () => {
         );
 
         /*OK*/ expect(await p).to.equal(1);
-        await expect(p).to.satisfy(x => x % 2 == 0);
+        await expect(p).to.satisfy((x) => x % 2 == 0);
       });
 
       it('should work in the immediate negative case', async () => {
@@ -1362,8 +1360,8 @@ describe('e2e expect', () => {
           getWaitFunction(() => getArrayValueFunction(1, 2))
         );
 
-        /*OK*/ expect(await p).to.not.satisfy(x => x % 2 == 0);
-        await expect(p).to.not.satisfy(x => x % 2 == 0);
+        /*OK*/ expect(await p).to.not.satisfy((x) => x % 2 == 0);
+        await expect(p).to.not.satisfy((x) => x % 2 == 0);
       });
 
       it('should work in the eventual negative case', async () => {
@@ -1372,8 +1370,8 @@ describe('e2e expect', () => {
           getWaitFunction(() => getArrayValueFunction(2, 1))
         );
 
-        /*OK*/ expect(await p).to.satisfy(x => x % 2 == 0);
-        await expect(p).to.not.satisfy(x => x % 2 == 0);
+        /*OK*/ expect(await p).to.satisfy((x) => x % 2 == 0);
+        await expect(p).to.not.satisfy((x) => x % 2 == 0);
       });
     });
     describe('sealed', () => {
@@ -1585,7 +1583,7 @@ describe('e2e expect', () => {
  */
 function getIncrementingValueFunction() {
   let value = 0;
-  return function() {
+  return function () {
     return value++;
   };
 }
@@ -1607,7 +1605,7 @@ function getAsyncValueFunction(valueFunction) {
 function getArrayValueFunction(...args) {
   let i = 0;
   const lastIndex = args.length - 1;
-  return function() {
+  return function () {
     const index = i++;
     return args[index > lastIndex ? lastIndex : index];
   };
@@ -1631,7 +1629,7 @@ function getWaitFunction(valueFunctionGetter) {
      */
     const valueFunction = valueFunctionGetter();
 
-    opt_mutate = opt_mutate || (x => x);
+    opt_mutate = opt_mutate || ((x) => x);
     return new Promise((resolve, reject) => {
       /**
        * Poll for the new value. This simulates behavior in the concrete

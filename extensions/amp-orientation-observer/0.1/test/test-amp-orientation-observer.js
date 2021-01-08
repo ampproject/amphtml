@@ -24,7 +24,7 @@ describes.realWin(
       extensions: ['amp-orientation-observer'],
     },
   },
-  env => {
+  (env) => {
     let impl;
     let triggerEventSpy;
 
@@ -39,6 +39,11 @@ describes.realWin(
           }
           if (attr == 'gamma-range') {
             return '-90 90';
+          }
+        },
+        hasAttribute(attr) {
+          if (attr == 'smoothing') {
+            return false;
           }
         },
       };

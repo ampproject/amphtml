@@ -18,6 +18,7 @@ import {Observable} from './observable';
 import {Pass} from './pass';
 import {devAssert} from './log';
 import {findIndex} from './utils/array';
+import {supportsPassiveEventListener} from './event-helper-listen';
 import {toWin} from './types';
 
 const PROP_ = '__AMP_Gestures';
@@ -63,12 +64,21 @@ export class Gestures {
    * the specified element.
    * @param {!Element} element
    * @param {boolean=} opt_shouldNotPreventDefault
+   * @param {boolean=} opt_shouldStopPropagation
    * @return {!Gestures}
    */
-  static get(element, opt_shouldNotPreventDefault = false) {
+  static get(
+    element,
+    opt_shouldNotPreventDefault = false,
+    opt_shouldStopPropagation = false
+  ) {
     let res = element[PROP_];
     if (!res) {
-      res = new Gestures(element, opt_shouldNotPreventDefault);
+      res = new Gestures(
+        element,
+        opt_shouldNotPreventDefault,
+        opt_shouldStopPropagation
+      );
       element[PROP_] = res;
     }
     return res;
@@ -77,8 +87,9 @@ export class Gestures {
   /**
    * @param {!Element} element
    * @param {boolean} shouldNotPreventDefault
+   * @param {boolean} shouldStopPropagation
    */
-  constructor(element, shouldNotPreventDefault) {
+  constructor(element, shouldNotPreventDefault, shouldStopPropagation) {
     /** @private {!Element} */
     this.element_ = element;
 
@@ -99,6 +110,9 @@ export class Gestures {
 
     /** @private {boolean} */
     this.shouldNotPreventDefault_ = shouldNotPreventDefault;
+
+    /** @private {boolean} */
+    this.shouldStopPropagation_ = shouldStopPropagation;
 
     /**
      * This variable indicates that the eventing has stopped on this
@@ -131,9 +145,19 @@ export class Gestures {
     /** @private @const {function(!Event)} */
     this.boundOnTouchCancel_ = this.onTouchCancel_.bind(this);
 
-    this.element_.addEventListener('touchstart', this.boundOnTouchStart_);
+    const win = element.ownerDocument.defaultView;
+    const passiveSupported = supportsPassiveEventListener(toWin(win));
+    this.element_.addEventListener(
+      'touchstart',
+      this.boundOnTouchStart_,
+      passiveSupported ? {passive: true} : false
+    );
     this.element_.addEventListener('touchend', this.boundOnTouchEnd_);
-    this.element_.addEventListener('touchmove', this.boundOnTouchMove_);
+    this.element_.addEventListener(
+      'touchmove',
+      this.boundOnTouchMove_,
+      passiveSupported ? {passive: true} : false
+    );
     this.element_.addEventListener('touchcancel', this.boundOnTouchCancel_);
 
     /** @private {boolean} */
@@ -157,8 +181,8 @@ export class Gestures {
    * gesture handler registered in this method the recognizer is installed
    * and from that point on it participates in the event processing.
    *
-   * @param {function(new:GestureRecognizer<DATA>, !Gestures)} recognizerConstr
-   * @param {function(!Gesture<DATA>)} handler
+   * @param {function(new:GestureRecognizer, !Gestures)} recognizerConstr
+   * @param {function(!Gesture)} handler
    * @return {!UnlistenDef}
    * @template DATA
    */
@@ -179,7 +203,7 @@ export class Gestures {
    * true if anything was done. Returns false if there were no handlers
    * registered on the given gesture recognizer in first place.
    *
-   * @param {function(new:GestureRecognizer<DATA>, !Gestures)} recognizerConstr
+   * @param {function(new:GestureRecognizer, !Gestures)} recognizerConstr
    * @return {boolean}
    */
   removeGesture(recognizerConstr) {
@@ -187,7 +211,7 @@ export class Gestures {
     const overserver = this.overservers_[type];
     if (overserver) {
       overserver.removeAll();
-      const index = findIndex(this.recognizers_, e => e.getType() == type);
+      const index = findIndex(this.recognizers_, (e) => e.getType() == type);
       if (index < 0) {
         return false;
       }
@@ -437,6 +461,8 @@ export class Gestures {
       if (!this.shouldNotPreventDefault_) {
         event.preventDefault();
       }
+    } else if (this.shouldStopPropagation_) {
+      event.stopPropagation();
     }
     if (this.passAfterEvent_) {
       this.passAfterEvent_ = false;

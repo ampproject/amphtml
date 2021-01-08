@@ -33,14 +33,6 @@ export function _ping_(global, data) {
   global.document.getElementById('c').textContent = data.ping;
   global.ping = Object.create(null);
 
-  global.context.onResizeSuccess(() => {
-    global.ping.resizeSuccess = true;
-  });
-
-  global.context.onResizeDenied(() => {
-    global.ping.resizeSuccess = false;
-  });
-
   if (data.ad_container) {
     devAssert(global.context.container == data.ad_container, 'wrong container');
   }
@@ -71,8 +63,8 @@ export function _ping_(global, data) {
       global.context.renderStart();
     }
     if (data.enableIo) {
-      global.context.observeIntersection(function(changes) {
-        changes.forEach(function(c) {
+      global.context.observeIntersection(function (changes) {
+        /** @type {!Array} */ (changes).forEach(function (c) {
           dev().info(
             'AMP-AD',
             'Intersection: (WxH)' +
@@ -83,10 +75,10 @@ export function _ping_(global, data) {
         global.ping.lastIO = changes[changes.length - 1];
       });
     }
-    global.context.getHtml('a', ['href'], function(html) {
+    global.context.getHtml('a', ['href'], function (html) {
       dev().info('GET-HTML', html);
     });
-    global.context.getConsentState(function(consentState) {
+    global.context.getConsentState(function (consentState) {
       dev().info('GET-CONSENT-STATE', consentState);
     });
     if (global.context.consentSharedData) {
@@ -96,6 +88,10 @@ export function _ping_(global, data) {
     if (global.context.initialConsentValue) {
       const TAG = 'consentStringValue';
       dev().info(TAG, global.context.initialConsentValue);
+    }
+    if (global.context.initialConsentMetadata) {
+      const TAG = 'consentMetadata';
+      dev().info(TAG, global.context.initialConsentMetadata);
     }
   } else {
     global.setTimeout(() => {

@@ -15,6 +15,10 @@
  */
 
 /**
+ * @fileoverview CSS specifically for non-AMP4ADS formats.
+ */
+
+/**
  * Horizontal scrolling interferes with embedded scenarios and predominantly
  * the result of the non-responsive design.
  *
@@ -54,16 +58,6 @@ body {
 }
 
 /**
- * We intentionally break with HTML5's default [hidden] styling to apply
- * !important.
- */
-[hidden] {
-  /* This must be !important, else the toggle helper system would break down
-     due to specificity */
-  display: none !important;
-}
-
-/**
  * The enables passive touch handlers, e.g. for document swipe, since they
  * no will longer need to try to cancel vertical scrolls during swipes.
  * This is only done in the embedded mode because (a) the document swipe
@@ -86,6 +80,11 @@ html.i-amphtml-fie > body {
   overflow: visible !important;
 }
 
+/**
+ * The `position: relative` is necessary to ensure that `paddingTop` can be
+ * applied to a document to offset the header height, and it doesn't missplace
+ * `position: absolute` elements.
+ */
 html.i-amphtml-singledoc:not(.i-amphtml-inabox) > body,
 html.i-amphtml-fie:not(.i-amphtml-inabox) > body {
   position: relative !important;
@@ -181,26 +180,6 @@ html.i-amphtml-ios-embed.i-amphtml-ios-overscroll > #i-amphtml-wrapper {
 }
 
 
-/**
- * iOS-Embed Wrapper shadow root mode. The `body` children are distributed
- * inside a scrollable element inside the shadow root.
- */
-html.i-amphtml-ios-embed-sd {
-  overflow: hidden !important;
-  position: static !important;
-}
-
-html.i-amphtml-ios-embed-sd > body,
-html.i-amphtml-singledoc.i-amphtml-ios-embed-sd > body {
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  overflow: hidden !important;
-}
-
-
 .i-amphtml-scroll-disabled {
   overflow-x: hidden !important;
   overflow-y: hidden !important;
@@ -266,7 +245,7 @@ amp-live-list > [update] {
 /**
  * Display none elements
  */
-amp-experiment, amp-share-tracking {
+amp-experiment {
   display: none;
 }
 
@@ -302,6 +281,20 @@ amp-list[load-more] [load-more-end]
 }
 
 /**
+ * amp-list error messaging container should be hidden at first.
+ */
+ amp-list [fetch-error] {
+  display: none;
+}
+
+/**
+ * amp-list initial content should be displayed (similar to placeholder).
+ */
+amp-list[diffable] div[role="list"] {
+  display: block;
+}
+
+/**
  * amp-story
  */
 amp-story[standalone], amp-story-page {
@@ -324,7 +317,11 @@ amp-story-page {
   background-color: #757575;
 }
 
-amp-story .i-amphtml-loader {
+/* Hide amp-loader in stories
+ * TODO(maxbittker): remove after amp-loader is no longer imported in stories
+ */
+amp-story .amp-active > div,
+amp-story .i-amphtml-loader-background {
   display: none !important;
 }
 
@@ -345,12 +342,14 @@ amp-autocomplete {
   display: inline-block !important;
 }
 
-amp-autocomplete > input {
-  padding: .5rem; /* default-ui-space-large */
-  border: 1px solid rgba(0,0,0,.33) /* default-ui-med-gray */
+amp-autocomplete > input,
+amp-autocomplete > textarea {
+  padding: 0.5rem; /* default-ui-space-large */
+  border: 1px solid rgba(0, 0, 0, 0.33); /* default-ui-med-gray */
 }
 
 amp-autocomplete > input,
+amp-autocomplete > textarea,
 .i-amphtml-autocomplete-results {
   font-size: 1rem; /* default-ui-font-size */
   line-height: 1.5rem; /* default-ui-space-large */
@@ -370,25 +369,14 @@ amp-autocomplete > input,
 }
 
 /**
- * amp-addthis
+ * amp-script[nodom] is an element with no UI, similar to amp-analytics.
  */
-
-/**
- * Make amp-addthis tool floating if user give data-widget-type
- */
-@media only screen and (max-width: 979px) {
-  amp-addthis[data-widget-type="floating"] {
-    position: fixed !important;
-    width: 100% !important;
-    height: 50px;
-    bottom: 0;
-  }
-}
-@media only screen and (min-width: 979px) {
-  amp-addthis[data-widget-type="floating"] {
-    position: fixed !important;
-    width: 70px !important;
-    height: 320px!important;
-    top: 200px;
-  }
+amp-script[nodom] {
+  /* Fixed to make position independent of page other elements. */
+  position: fixed !important;
+  top: 0 !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  visibility: hidden;
 }

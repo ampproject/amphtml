@@ -70,19 +70,6 @@ export function endsWith(string, suffix) {
 }
 
 /**
- * Polyfill for String.prototype.startsWith.
- * @param {string} string
- * @param {string} prefix
- * @return {boolean}
- */
-export function startsWith(string, prefix) {
-  if (prefix.length > string.length) {
-    return false;
-  }
-  return string.lastIndexOf(prefix, 0) == 0;
-}
-
-/**
  * Polyfill for String.prototype.includes.
  * @param {string} string
  * @param {string} substring
@@ -171,4 +158,55 @@ export function trimStart(str) {
   }
 
   return (str + '_').trim().slice(0, -1);
+}
+
+/**
+ * Wrapper around String.replace that handles asynchronous resolution.
+ * @param {string} str
+ * @param {RegExp} regex
+ * @param {Function|string} replacer
+ * @return {!Promise<string>}
+ */
+export function asyncStringReplace(str, regex, replacer) {
+  if (typeof replacer === 'string') {
+    return Promise.resolve(str.replace(regex, replacer));
+  }
+  const stringBuilder = [];
+  let lastIndex = 0;
+
+  str.replace(regex, function (match) {
+    // String.prototype.replace will pass 3 to n number of arguments to the
+    // callback function based on how many capture groups the regex may or may
+    // not contain. We know that the match will always be first, and the
+    // index will always be second to last.
+    const matchIndex = arguments[arguments.length - 2];
+    stringBuilder.push(str.slice(lastIndex, matchIndex));
+    lastIndex = matchIndex + match.length;
+
+    // Store the promise in it's eventual string position.
+    const replacementPromise = replacer.apply(null, arguments);
+    stringBuilder.push(replacementPromise);
+  });
+  stringBuilder.push(str.slice(lastIndex));
+
+  return Promise.all(stringBuilder).then((resolved) => resolved.join(''));
+}
+
+/**
+ * Pads the beginning of a string with a substring to a target length.
+ * @param {string} s
+ * @param {number} targetLength
+ * @param {string} padString
+ * @return {string}
+ */
+export function padStart(s, targetLength, padString) {
+  if (s.length >= targetLength) {
+    return s;
+  }
+  targetLength = targetLength - s.length;
+  let padding = padString;
+  while (targetLength > padding.length) {
+    padding += padString;
+  }
+  return padding.slice(0, targetLength) + s;
 }

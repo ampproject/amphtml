@@ -22,7 +22,7 @@ describes.realWin(
       extensions: ['amp-riddle-quiz'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let element;
 

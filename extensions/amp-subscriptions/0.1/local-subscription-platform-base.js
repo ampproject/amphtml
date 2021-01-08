@@ -22,6 +22,12 @@ import {closestAncestorElementBySelector} from '../../../src/dom';
 import {dev, userAssert} from '../../../src/log';
 
 /**
+ * Surrogate property added to click events marking them as handled by the
+ * amp-subscriptions extension.
+ */
+const CLICK_HANDLED_EVENT_PROPERTY = '_AMP_SUBSCRIPTIONS_CLICK_HANDLED';
+
+/**
  * This implements the methods to interact with various subscription platforms.
  *
  * @implements {./subscription-platform.SubscriptionPlatform}
@@ -109,13 +115,25 @@ export class LocalSubscriptionBasePlatform {
    * @protected
    */
   initializeListeners_() {
-    this.rootNode_.addEventListener('click', e => {
+    const handleClickOncePerEvent = (e) => {
+      if (e[CLICK_HANDLED_EVENT_PROPERTY]) {
+        return;
+      }
+      e[CLICK_HANDLED_EVENT_PROPERTY] = true;
+
       const element = closestAncestorElementBySelector(
         dev().assertElement(e.target),
         '[subscriptions-action]'
       );
       this.handleClick_(element);
-    });
+    };
+    this.rootNode_.addEventListener('click', handleClickOncePerEvent);
+
+    // If the root node has a `body` property, listen to events on that too,
+    // to fix an iOS shadow DOM bug (https://github.com/ampproject/amphtml/issues/25754).
+    if (this.rootNode_.body) {
+      this.rootNode_.body.addEventListener('click', handleClickOncePerEvent);
+    }
   }
 
   /**
@@ -128,7 +146,7 @@ export class LocalSubscriptionBasePlatform {
       const action = element.getAttribute('subscriptions-action');
       const serviceAttr = element.getAttribute('subscriptions-service');
       if (serviceAttr == 'local') {
-        this.executeAction(action);
+        this.executeAction(action, element.id);
       } else if ((serviceAttr || 'auto') == 'auto') {
         if (action == Action.LOGIN) {
           // The "login" action is somewhat special b/c viewers can
@@ -136,24 +154,50 @@ export class LocalSubscriptionBasePlatform {
           const platform = this.serviceAdapter_.selectPlatformForLogin();
           this.serviceAdapter_.delegateActionToService(
             action,
-            platform.getServiceId()
+            platform.getServiceId(),
+            element.id
           );
         } else {
-          this.executeAction(action);
+          this.executeAction(action, element.id);
         }
       } else if (serviceAttr) {
-        this.serviceAdapter_.delegateActionToService(action, serviceAttr);
+        this.serviceAdapter_.delegateActionToService(
+          action,
+          serviceAttr,
+          element.id
+        );
       }
     }
   }
 
   /** @override */
   activate(entitlement) {
-    const renderState = entitlement.json();
-    this.urlBuilder_.setAuthResponse(renderState);
-    this.actions_.build().then(() => {
+    // Note all platforms are resolved at this stage
+    // Get the factor states of each platform and
+    // add them to the renderState object
+    this.createRenderState_(entitlement).then((renderState) => {
       this.renderer_.render(renderState);
     });
+  }
+
+  /**
+   * Factored out for testability
+   * @param {./entitlement.Entitlement} entitlement
+   * @return {!Promise<!JsonObject>}
+   * @private
+   */
+  createRenderState_(entitlement) {
+    const renderState = entitlement.json();
+    return this.serviceAdapter_
+      .getScoreFactorStates()
+      .then((scoresValues) => {
+        renderState['factors'] = scoresValues;
+        return this.urlBuilder_.setAuthResponse(renderState);
+      })
+      .then(() => {
+        return this.actions_.build();
+      })
+      .then(() => renderState);
   }
 
   /** @override */
@@ -164,7 +208,7 @@ export class LocalSubscriptionBasePlatform {
   /** @override */
   executeAction(action) {
     const actionExecution = this.actions_.execute(action);
-    return actionExecution.then(result => {
+    return actionExecution.then((result) => {
       if (result) {
         this.serviceAdapter_.resetPlatforms();
       }
@@ -196,8 +240,6 @@ export class LocalSubscriptionBasePlatform {
 
   /**
    * @override
-   * @param {?./entitlement.Entitlement} unusedEntitlement
-   * @return {!Promise|undefined}
    */
   pingback(unusedEntitlement) {}
 

@@ -16,19 +16,20 @@
 
 import {Mask} from '../mask-impl';
 
-describes.sandboxed('amp-inputmask mask-impl', {}, () => {
+describes.sandboxed('amp-inputmask mask-impl', {}, (env) => {
   class FakeElement {}
 
   describe('config', () => {
     let constructorStub;
 
     beforeEach(() => {
-      constructorStub = sandbox.stub();
-      constructorStub.extendDefaults = function() {};
+      constructorStub = env.sandbox.stub();
+      constructorStub.extendDefaults = function () {};
+      constructorStub.extendAliases = function () {};
+      globalThis.AMP.dependencies = {'inputmaskFactory': () => constructorStub};
 
-      sandbox.stub(Mask, 'getInputmask_').returns(constructorStub);
-
-      FakeElement.prototype.getAttribute = sandbox.stub();
+      FakeElement.prototype.getAttribute = env.sandbox.stub();
+      FakeElement.prototype.addEventListener = env.sandbox.stub();
     });
 
     it(

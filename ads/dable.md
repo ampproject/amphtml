@@ -21,10 +21,13 @@ limitations under the License.
 ### Basic
 
 ```html
-<amp-embed width="500" height="200"
-     type="dable"
-     data-widget-id="jobgqR7W"
-     data-item-id="testitem">
+<amp-embed
+  width="500"
+  height="200"
+  type="dable"
+  data-widget-id="jobgqR7W"
+  data-item-id="testitem"
+>
 </amp-embed>
 ```
 
@@ -34,9 +37,9 @@ For configuration details and to generate your tags, please contact https://admi
 
 ### Required parameters
 
-- `data-widget-id`
+-   `data-widget-id`
 
 ### Optional parameters
 
-- `data-item-id`
-- `data-service-name`
+-   `data-item-id`
+-   `data-service-name`

@@ -32,7 +32,7 @@ describes.realWin(
   {
     amp: {},
   },
-  env => {
+  (env) => {
     let win, doc;
     let unrelated;
     let section, action, dialog;
@@ -71,7 +71,7 @@ describes.realWin(
   {
     amp: {},
   },
-  env => {
+  (env) => {
     let win, doc;
     let ampdoc;
     let renderer;
@@ -92,10 +92,12 @@ describes.realWin(
 
       installStylesForDoc(ampdoc, CSS, () => {}, false, 'amp-subscriptions');
 
-      const resources = Services.resourcesForDoc(ampdoc);
-      sandbox.stub(resources, 'mutateElement').callsFake((element, mutator) => {
-        mutator();
-      });
+      const mutator = Services.mutatorForDoc(ampdoc);
+      env.sandbox
+        .stub(mutator, 'mutateElement')
+        .callsFake((element, mutator) => {
+          mutator();
+        });
 
       unrelated = createElementWithAttributes(doc, 'div', {});
 
@@ -174,7 +176,7 @@ describes.realWin(
         dialog1,
         dialog2,
       ];
-      elements.forEach(element => {
+      elements.forEach((element) => {
         doc.body.appendChild(element);
       });
       renderer = new Renderer(ampdoc);
@@ -182,7 +184,7 @@ describes.realWin(
 
     function displayed(array) {
       expect(isDisplayed(unrelated)).to.be.true;
-      elements.forEach(element => {
+      elements.forEach((element) => {
         const shouldBeDisplayed = array.includes(element);
         expect(isDisplayed(element)).to.equal(
           shouldBeDisplayed,
@@ -217,31 +219,30 @@ describes.realWin(
       let insertBeforeStub;
 
       beforeEach(() => {
-        insertBeforeStub = sandbox.stub(
+        insertBeforeStub = env.sandbox.stub(
           renderer.ampdoc_.getBody(),
           'insertBefore'
         );
       });
 
-      it("shouldn't add a progress bar if loading section is found", () => {
-        return renderer.addLoadingBar().then(() => {
-          expect(insertBeforeStub).to.not.be.called;
-        });
+      it("shouldn't add a progress bar if loading section is found", async () => {
+        await renderer.addLoadingBar();
+        expect(insertBeforeStub).to.not.be.called;
       });
 
-      it('should add a progress bar if no loading section is found', () => {
+      it('should add a progress bar if no loading section is found', async () => {
         loading1.remove();
         loading2.remove();
-        return renderer.addLoadingBar().then(() => {
-          expect(insertBeforeStub).to.be.called;
-          const element = insertBeforeStub.getCall(0).args[0];
-          expect(element.tagName).to.be.equal('DIV');
-          expect(element.className).to.be.equal('i-amphtml-subs-progress');
-          expect(insertBeforeStub.getCall(0).args[1]).to.be.null;
-        });
+
+        await renderer.addLoadingBar();
+        expect(insertBeforeStub).to.be.called;
+        const element = insertBeforeStub.getCall(0).args[0];
+        expect(element.tagName).to.be.equal('DIV');
+        expect(element.className).to.be.equal('i-amphtml-subs-progress');
+        expect(insertBeforeStub.getCall(0).args[1]).to.be.null;
       });
 
-      it('should add a progress bar before footer', () => {
+      it('should add a progress bar before footer', async () => {
         loading1.remove();
         loading2.remove();
         const fakeFooter = createElementWithAttributes(doc, 'footer', {});
@@ -250,13 +251,13 @@ describes.realWin(
         renderer.ampdoc_.getBody().appendChild(fakeFooterContainer);
         const footer = createElementWithAttributes(doc, 'footer', {});
         renderer.ampdoc_.getBody().appendChild(footer);
-        return renderer.addLoadingBar().then(() => {
-          expect(insertBeforeStub).to.be.called;
-          const element = insertBeforeStub.getCall(0).args[0];
-          expect(element.tagName).to.be.equal('DIV');
-          expect(element.className).to.be.equal('i-amphtml-subs-progress');
-          expect(insertBeforeStub.getCall(0).args[1]).to.equal(footer);
-        });
+
+        await renderer.addLoadingBar();
+        expect(insertBeforeStub).to.be.called;
+        const element = insertBeforeStub.getCall(0).args[0];
+        expect(element.tagName).to.be.equal('DIV');
+        expect(element.className).to.be.equal('i-amphtml-subs-progress');
+        expect(insertBeforeStub.getCall(0).args[1]).to.equal(footer);
       });
     });
   }

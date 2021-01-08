@@ -14,10 +14,17 @@
  * limitations under the License.
  */
 
+import {
+  AmpStoryEventTracker,
+  AnalyticsEvent,
+  AnalyticsEventType,
+  CustomEventTracker,
+  getTrackerKeyName,
+} from './events';
 import {AmpdocAnalyticsRoot, EmbedAnalyticsRoot} from './analytics-root';
-import {AnalyticsEvent, AnalyticsEventType, CustomEventTracker} from './events';
 import {AnalyticsGroup} from './analytics-group';
 import {Services} from '../../../src/services';
+import {dict} from '../../../src/utils/object';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {
   getParentWindowFrameElement,
@@ -30,7 +37,7 @@ const PROP = '__AMP_AN_ROOT';
 
 /**
  * @implements {../../../src/service.Disposable}
- * @private
+ * @package
  * @visibleForTesting
  */
 export class InstrumentationService {
@@ -68,18 +75,39 @@ export class InstrumentationService {
   }
 
   /**
+   * @param {string} trackerName
+   * @private
+   */
+  getTrackerClass_(trackerName) {
+    switch (trackerName) {
+      case AnalyticsEventType.STORY:
+        return AmpStoryEventTracker;
+      default:
+        return CustomEventTracker;
+    }
+  }
+
+  /**
    * Triggers the analytics event with the specified type.
    *
    * @param {!Element} target
    * @param {string} eventType
-   * @param {!JsonObject=} opt_vars A map of vars and their values.
+   * @param {!JsonObject} vars A map of vars and their values.
+   * @param {boolean} enableDataVars A boolean to indicate if data-vars-*
+   * attribute value from target element should be included.
    */
-  triggerEventForTarget(target, eventType, opt_vars) {
-    const event = new AnalyticsEvent(target, eventType, opt_vars);
+  triggerEventForTarget(
+    target,
+    eventType,
+    vars = dict(),
+    enableDataVars = true
+  ) {
+    const event = new AnalyticsEvent(target, eventType, vars, enableDataVars);
     const root = this.findRoot_(target);
-    const tracker = /** @type {!CustomEventTracker} */ (root.getTracker(
-      AnalyticsEventType.CUSTOM,
-      CustomEventTracker
+    const trackerName = getTrackerKeyName(eventType);
+    const tracker = /** @type {!CustomEventTracker|!AmpStoryEventTracker} */ (root.getTracker(
+      trackerName,
+      this.getTrackerClass_(trackerName)
     ));
     tracker.trigger(event);
   }

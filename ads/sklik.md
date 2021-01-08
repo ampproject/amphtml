@@ -19,9 +19,12 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width="300" height="300"
+<amp-ad
+  width="300"
+  height="300"
   type="sklik"
-	json= '{ "zoneId": 0, "w": 300, "h": 300 }'>
+  json='{ "zoneId": 0, "w": 300, "h": 300 }'
+>
 </amp-ad>
 ```
 
@@ -31,7 +34,6 @@ For semantics of configuration, please see [Sklik.czdocumentation](https://napov
 
 Supported parameters:
 
-- `width`
-- `height`
-- `json`
-
+-   `width`
+-   `height`
+-   `json`

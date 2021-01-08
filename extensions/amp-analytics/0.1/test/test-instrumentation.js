@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-import {AmpDocFie} from '../../../../src/service/ampdoc-impl';
 import {AmpdocAnalyticsRoot, EmbedAnalyticsRoot} from '../analytics-root';
 import {AnalyticsEventType, CustomEventTracker} from '../events';
 import {InstrumentationService} from '../instrumentation.js';
-import {Services} from '../../../../src/services';
 
-describes.realWin('InstrumentationService', {amp: 1}, env => {
+describes.realWin('InstrumentationService', {amp: 1}, (env) => {
   let win;
   let ampdoc;
   let service;
@@ -46,7 +44,7 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
     expect(root.ampdoc).to.equal(ampdoc);
     expect(root).to.be.instanceof(AmpdocAnalyticsRoot);
 
-    const stub = sandbox.stub(root, 'dispose');
+    const stub = env.sandbox.stub(root, 'dispose');
     service.dispose();
     expect(stub).to.be.calledOnce;
   });
@@ -56,7 +54,7 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
       AnalyticsEventType.CUSTOM,
       CustomEventTracker
     );
-    const triggerStub = sandbox.stub(tracker, 'trigger');
+    const triggerStub = env.sandbox.stub(tracker, 'trigger');
     service.triggerEventForTarget(target, 'test-event', {foo: 'bar'});
     expect(triggerStub).to.be.calledOnce;
 
@@ -68,11 +66,58 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
 });
 
 describes.realWin(
+  'InstrumentationService in main doc accessing FIE',
+  {
+    amp: {ampdoc: 'fie'},
+  },
+  (env) => {
+    let win;
+    let embed;
+    let ampdoc;
+    let service;
+    let root;
+    let analyticsElement;
+    let target;
+
+    beforeEach(() => {
+      win = env.win;
+      embed = env.embed;
+      ampdoc = env.ampdoc;
+      service = new InstrumentationService(env.parentAmpdoc);
+      root = service.root_;
+
+      analyticsElement = win.document.createElement('amp-analytics');
+      win.document.body.appendChild(analyticsElement);
+
+      target = win.document.createElement('div');
+      win.document.body.appendChild(target);
+    });
+
+    it('should create and reuse embed root', () => {
+      expect(root).to.be.instanceof(AmpdocAnalyticsRoot);
+      expect(root.ampdoc).to.equal(env.parentAmpdoc);
+
+      const group1 = service.createAnalyticsGroup(analyticsElement);
+      const embedRoot = group1.root_;
+      expect(embedRoot).to.not.equal(root);
+      expect(embedRoot.ampdoc).to.equal(ampdoc);
+      expect(embedRoot.embed).to.equal(embed);
+
+      // Reuse the previously created instance.
+      const analyticsElement2 = win.document.createElement('amp-analytics');
+      win.document.body.appendChild(analyticsElement2);
+      const group2 = service.createAnalyticsGroup(analyticsElement2);
+      expect(group2.root_).to.equal(embedRoot);
+    });
+  }
+);
+
+describes.realWin(
   'InstrumentationService in FIE',
   {
     amp: {ampdoc: 'fie'},
   },
-  env => {
+  (env) => {
     let win;
     let embed;
     let ampdoc;
@@ -96,12 +141,12 @@ describes.realWin(
     });
 
     it('should create and reuse embed root', () => {
-      expect(root).to.be.instanceof(AmpdocAnalyticsRoot);
+      expect(root).to.be.instanceof(EmbedAnalyticsRoot);
       expect(root.ampdoc).to.equal(ampdoc);
 
       const group1 = service.createAnalyticsGroup(analyticsElement);
       const embedRoot = group1.root_;
-      expect(embedRoot).to.not.equal(root);
+      expect(embedRoot).to.equal(root);
       expect(embedRoot.ampdoc).to.equal(ampdoc);
       expect(embedRoot.embed).to.equal(embed);
 
@@ -110,20 +155,6 @@ describes.realWin(
       win.document.body.appendChild(analyticsElement2);
       const group2 = service.createAnalyticsGroup(analyticsElement2);
       expect(group2.root_).to.equal(embedRoot);
-    });
-
-    it('should create embed root for ampdoc-fie', () => {
-      const parentAmpdoc = ampdoc;
-      ampdoc = new AmpDocFie(win, 'https://example.org', parentAmpdoc);
-      sandbox.stub(Services, 'ampdoc').callsFake(context => {
-        if (context == win.document) {
-          return ampdoc;
-        }
-      });
-      service = new InstrumentationService(ampdoc);
-      root = service.root_;
-      expect(root).to.be.instanceof(EmbedAnalyticsRoot);
-      expect(root.ampdoc).to.equal(ampdoc);
     });
   }
 );

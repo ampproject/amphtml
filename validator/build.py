@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python
 #
 # Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 #
@@ -43,7 +43,7 @@ def EnsureNodeJsIsInstalled():
 
   try:
     output = subprocess.check_output(['node', '--eval', 'console.log("42")'])
-    if output.strip() == '42':
+    if b'42' == output.strip():
       return
   except (subprocess.CalledProcessError, OSError):
     pass
@@ -61,10 +61,10 @@ def CheckPrereqs():
   # Ensure source files are available.
   for f in [
       'validator-main.protoascii', 'validator.proto', 'validator_gen_js.py',
-      'package.json', 'engine/validator.js', 'engine/validator_test.js',
-      'engine/validator-in-browser.js', 'engine/tokenize-css.js',
-      'engine/definitions.js', 'engine/parse-css.js', 'engine/parse-srcset.js',
-      'engine/parse-url.js'
+      'package.json', 'js/engine/validator.js', 'js/engine/validator_test.js',
+      'js/engine/validator-in-browser.js', 'js/engine/tokenize-css.js',
+      'js/engine/definitions.js', 'js/engine/parse-css.js',
+      'js/engine/parse-srcset.js', 'js/engine/parse-url.js'
   ]:
     if not os.path.exists(f):
       Die('%s not found. Must run in amp_validator source directory.' % f)
@@ -76,8 +76,8 @@ def CheckPrereqs():
     Die('Protobuf compiler not found. Try "apt-get install protobuf-compiler" or follow the install instructions at https://github.com/ampproject/amphtml/blob/master/validator/README.md#installation.')
 
   # Ensure 'libprotoc 2.5.0' or newer.
-  m = re.search('^(\\w+) (\\d+)\\.(\\d+)\\.(\\d+)', libprotoc_version)
-  if (m.group(1) != 'libprotoc' or
+  m = re.search(b'^(\\w+) (\\d+)\\.(\\d+)\\.(\\d+)', libprotoc_version)
+  if (m.group(1) != b'libprotoc' or
       (int(m.group(2)), int(m.group(3)), int(m.group(4))) < (2, 5, 0)):
     Die('Expected libprotoc 2.5.0 or newer, saw: %s' % libprotoc_version)
 
@@ -87,15 +87,15 @@ def CheckPrereqs():
     try:
       __import__(module)
     except ImportError:
-      Die('%s not found. Try "pip install protobuf" or follow the install instructions at https://github.com/ampproject/amphtml/blob/master/validator/README.md#installation' % module)
-
-  # Ensure that yarn is installed.
-  try:
-    subprocess.check_output(['yarn', '--version'])
-  except (subprocess.CalledProcessError, OSError):
-    Die('Yarn package manager not found. Run '
-        '"curl -o- -L https://yarnpkg.com/install.sh | bash" '
-        'or see https://yarnpkg.com/docs/install.')
+      # Python3 needs pip3. Python 2 needs pip.
+      if sys.version_info < (3, 0):
+        Die('%s not found. Try "pip install protobuf" or follow the install '
+            'instructions at https://github.com/ampproject/amphtml/blob/master/'
+            'validator/README.md#installation' % module)
+      else:
+        Die('%s not found. Try "pip3 install protobuf" or follow the install '
+            'instructions at https://github.com/ampproject/amphtml/blob/master/'
+            'validator/README.md#installation' % module)
 
   # Ensure JVM installed. TODO: Check for version?
   try:
@@ -122,19 +122,19 @@ def SetupOutDir(out_dir):
 
 
 def InstallNodeDependencies():
-  """Installs the dependencies using yarn."""
+  """Installs the dependencies using npm install."""
   logging.info('entering ...')
   # Install the project dependencies specified in package.json into
   # node_modules.
   logging.info('installing AMP Validator engine dependencies ...')
   subprocess.check_call(
-      ['yarn', 'install'],
-      stdout=(open(os.devnull, 'wb') if os.environ.get('TRAVIS') else sys.stdout))
+      ['npm', 'install', '--userconfig', '../.npmrc'],
+      stdout=(open(os.devnull, 'wb') if os.environ.get('CI') else sys.stdout))
   logging.info('installing AMP Validator nodejs dependencies ...')
-  subprocess.check_call(
-      ['yarn', 'install'],
-      cwd='nodejs',
-      stdout=(open(os.devnull, 'wb') if os.environ.get('TRAVIS') else sys.stdout))
+  subprocess.check_call(['npm', 'install', '--userconfig', '../../../.npmrc'],
+                        cwd='js/nodejs',
+                        stdout=(open(os.devnull, 'wb')
+                                if os.environ.get('CI') else sys.stdout))
   logging.info('... done')
 
 
@@ -165,6 +165,7 @@ def GenValidatorProtoascii(out_dir):
   assert re.match(r'^[a-zA-Z_\-0-9]+$', out_dir), 'bad out_dir: %s' % out_dir
 
   protoascii_segments = [open('validator-main.protoascii').read()]
+  protoascii_segments.append(open('validator-css.protoascii').read())
   extensions = glob.glob('extensions/*/validator-*.protoascii')
   # In the Github project, the extensions are located in a sibling directory
   # to the validator rather than a child directory.
@@ -276,7 +277,7 @@ def CompileWithClosure(js_files, definitions, entry_points, output_file):
 
   cmd = [
       'java', '-jar', 'node_modules/google-closure-compiler-java/compiler.jar',
-      '--language_out=ES5_STRICT', '--dependency_mode=STRICT',
+      '--language_out=ES5_STRICT', '--dependency_mode=PRUNE',
       '--js_output_file=%s' % output_file
   ]
   cmd += ['--entry_point=%s' % e for e in entry_points]
@@ -301,20 +302,18 @@ def CompileValidatorMinified(out_dir):
   logging.info('entering ...')
   CompileWithClosure(
       js_files=[
-          'engine/definitions.js', 'engine/htmlparser.js',
-          'engine/parse-css.js', 'engine/parse-srcset.js',
-          'engine/parse-url.js', 'engine/tokenize-css.js',
+          'js/engine/definitions.js', 'js/engine/htmlparser.js',
+          'js/engine/parse-css.js', 'js/engine/parse-srcset.js',
+          'js/engine/parse-url.js', 'js/engine/tokenize-css.js',
           '%s/validator-generated.js' % out_dir,
           '%s/validator-proto-generated.js' % out_dir,
-          'engine/validator-in-browser.js', 'engine/validator.js',
-          'engine/amp4ads-parse-css.js', 'engine/keyframes-parse-css.js',
-          'engine/htmlparser-interface.js'
+          'js/engine/validator-in-browser.js', 'js/engine/validator.js',
+          'js/engine/amp4ads-parse-css.js', 'js/engine/keyframes-parse-css.js',
+          'js/engine/htmlparser-interface.js'
       ],
       definitions=[],
       entry_points=[
-          'amp.validator.validateString',
-          'amp.validator.renderValidationResult',
-          'amp.validator.renderErrorMessage'
+          'amp.validator',
       ],
       output_file='%s/validator_minified.js' % out_dir)
   logging.info('... done')
@@ -327,25 +326,25 @@ def RunSmokeTest(out_dir):
     out_dir: output directory
   """
   logging.info('entering ...')
-  # Run index.js on the minimum valid amp and observe that it passes.
+  # Run cli.js on the minimum valid amp and observe that it passes.
   p = subprocess.Popen(
       [
-          'node', 'nodejs/index.js', '--validator_js',
+          'node', 'js/nodejs/cli.js', '--validator_js',
           '%s/validator_minified.js' % out_dir,
           'testdata/feature_tests/minimum_valid_amp.html', '--format=text'
       ],
       stdout=subprocess.PIPE,
       stderr=subprocess.PIPE)
   (stdout, stderr) = p.communicate()
-  if ('testdata/feature_tests/minimum_valid_amp.html: PASS\n', '', p.returncode
-     ) != (stdout, stderr, 0):
+  if (b'testdata/feature_tests/minimum_valid_amp.html: PASS\n', b'',
+      p.returncode) != (stdout, stderr, 0):
     Die('Smoke test failed. returncode=%d stdout="%s" stderr="%s"' %
         (p.returncode, stdout, stderr))
 
-  # Run index.js on an empty file and observe that it fails.
+  # Run cli.js on an empty file and observe that it fails.
   p = subprocess.Popen(
       [
-          'node', 'nodejs/index.js', '--validator_js',
+          'node', 'js/nodejs/cli.js', '--validator_js',
           '%s/validator_minified.js' % out_dir,
           'testdata/feature_tests/empty.html', '--format=text'
       ],
@@ -354,8 +353,8 @@ def RunSmokeTest(out_dir):
   (stdout, stderr) = p.communicate()
   if p.returncode != 1:
     Die('smoke test failed. Expected p.returncode==1, saw: %s' % p.returncode)
-  if not stderr.startswith('testdata/feature_tests/empty.html:1:0 '
-                           'The mandatory tag \'html'):
+  if not stderr.startswith(b'testdata/feature_tests/empty.html:1:0 '
+                           b'The mandatory tag \'html'):
     Die('smoke test failed; stderr was: "%s"' % stderr)
   logging.info('... done')
 
@@ -368,7 +367,7 @@ def RunIndexTest():
       ['node', './index_test.js'],
       stdout=subprocess.PIPE,
       stderr=subprocess.PIPE,
-      cwd='nodejs')
+      cwd='js/nodejs')
   (stdout, stderr) = p.communicate()
   if p.returncode != 0:
     Die('index_test.js failed. returncode=%d stdout="%s" stderr="%s"' %
@@ -386,14 +385,14 @@ def CompileValidatorTestMinified(out_dir):
   logging.info('entering ...')
   CompileWithClosure(
       js_files=[
-          'engine/definitions.js', 'engine/htmlparser.js',
-          'engine/parse-css.js', 'engine/parse-srcset.js',
-          'engine/parse-url.js', 'engine/tokenize-css.js',
+          'js/engine/definitions.js', 'js/engine/htmlparser.js',
+          'js/engine/parse-css.js', 'js/engine/parse-srcset.js',
+          'js/engine/parse-url.js', 'js/engine/tokenize-css.js',
           '%s/validator-generated.js' % out_dir,
           '%s/validator-proto-generated.js' % out_dir,
-          'engine/validator-in-browser.js', 'engine/validator.js',
-          'engine/amp4ads-parse-css.js', 'engine/keyframes-parse-css.js',
-          'engine/htmlparser-interface.js', 'engine/validator_test.js'
+          'js/engine/validator-in-browser.js', 'js/engine/validator.js',
+          'js/engine/amp4ads-parse-css.js', 'js/engine/keyframes-parse-css.js',
+          'js/engine/htmlparser-interface.js', 'js/engine/validator_test.js'
       ],
       definitions=[],
       entry_points=['amp.validator.ValidatorTest'],
@@ -411,8 +410,8 @@ def CompileHtmlparserTestMinified(out_dir):
   logging.info('entering ...')
   CompileWithClosure(
       js_files=[
-          'engine/htmlparser.js', 'engine/htmlparser-interface.js',
-          'engine/htmlparser_test.js'
+          'js/engine/htmlparser.js', 'js/engine/htmlparser-interface.js',
+          'js/engine/htmlparser_test.js'
       ],
       definitions=[],
       entry_points=['amp.htmlparser.HtmlParserTest'],
@@ -430,9 +429,9 @@ def CompileParseCssTestMinified(out_dir):
   logging.info('entering ...')
   CompileWithClosure(
       js_files=[
-          'engine/definitions.js', 'engine/parse-css.js', 'engine/parse-url.js',
-          'engine/tokenize-css.js', 'engine/css-selectors.js',
-          'engine/json-testutil.js', 'engine/parse-css_test.js',
+          'js/engine/definitions.js', 'js/engine/parse-css.js',
+          'js/engine/parse-url.js', 'js/engine/tokenize-css.js',
+          'js/engine/json-testutil.js', 'js/engine/parse-css_test.js',
           '%s/validator-generated.js' % out_dir,
           '%s/validator-proto-generated.js' % out_dir
       ],
@@ -452,9 +451,9 @@ def CompileParseUrlTestMinified(out_dir):
   logging.info('entering ...')
   CompileWithClosure(
       js_files=[
-          'engine/definitions.js', 'engine/parse-url.js', 'engine/parse-css.js',
-          'engine/tokenize-css.js', 'engine/css-selectors.js',
-          'engine/json-testutil.js', 'engine/parse-url_test.js',
+          'js/engine/definitions.js', 'js/engine/parse-url.js',
+          'js/engine/parse-css.js', 'js/engine/tokenize-css.js',
+          'js/engine/json-testutil.js', 'js/engine/parse-url_test.js',
           '%s/validator-generated.js' % out_dir,
           '%s/validator-proto-generated.js' % out_dir
       ],
@@ -474,11 +473,10 @@ def CompileAmp4AdsParseCssTestMinified(out_dir):
   logging.info('entering ...')
   CompileWithClosure(
       js_files=[
-          'engine/definitions.js', 'engine/amp4ads-parse-css_test.js',
-          'engine/parse-css.js', 'engine/parse-url.js',
-          'engine/amp4ads-parse-css.js', 'engine/tokenize-css.js',
-          'engine/css-selectors.js', 'engine/json-testutil.js',
-          '%s/validator-generated.js' % out_dir,
+          'js/engine/definitions.js', 'js/engine/amp4ads-parse-css_test.js',
+          'js/engine/parse-css.js', 'js/engine/parse-url.js',
+          'js/engine/amp4ads-parse-css.js', 'js/engine/tokenize-css.js',
+          'js/engine/json-testutil.js', '%s/validator-generated.js' % out_dir,
           '%s/validator-proto-generated.js' % out_dir
       ],
       definitions=[],
@@ -497,11 +495,10 @@ def CompileKeyframesParseCssTestMinified(out_dir):
   logging.info('entering ...')
   CompileWithClosure(
       js_files=[
-          'engine/definitions.js', 'engine/keyframes-parse-css_test.js',
-          'engine/parse-css.js', 'engine/parse-url.js',
-          'engine/keyframes-parse-css.js', 'engine/tokenize-css.js',
-          'engine/css-selectors.js', 'engine/json-testutil.js',
-          '%s/validator-generated.js' % out_dir,
+          'js/engine/definitions.js', 'js/engine/keyframes-parse-css_test.js',
+          'js/engine/parse-css.js', 'js/engine/parse-url.js',
+          'js/engine/keyframes-parse-css.js', 'js/engine/tokenize-css.js',
+          'js/engine/json-testutil.js', '%s/validator-generated.js' % out_dir,
           '%s/validator-proto-generated.js' % out_dir
       ],
       definitions=[],
@@ -520,8 +517,8 @@ def CompileParseSrcsetTestMinified(out_dir):
   logging.info('entering ...')
   CompileWithClosure(
       js_files=[
-          'engine/definitions.js', 'engine/parse-srcset.js',
-          'engine/json-testutil.js', 'engine/parse-srcset_test.js',
+          'js/engine/definitions.js', 'js/engine/parse-srcset.js',
+          'js/engine/json-testutil.js', 'js/engine/parse-srcset_test.js',
           '%s/validator-generated.js' % out_dir,
           '%s/validator-proto-generated.js' % out_dir
       ],
@@ -589,7 +586,7 @@ def Main(parsed_args):
   """The main method, which executes all build steps and runs the tests."""
   logging.basicConfig(
       format='[[%(filename)s %(funcName)s]] - %(message)s',
-      level=(logging.ERROR if os.environ.get('TRAVIS') else logging.INFO))
+      level=(logging.ERROR if os.environ.get('CI') else logging.INFO))
   EnsureNodeJsIsInstalled()
   CheckPrereqs()
   InstallNodeDependencies()

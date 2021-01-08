@@ -23,6 +23,7 @@
 
 import {dev, user} from './log';
 import {getMode} from './mode';
+import {getTopWindow} from './service';
 import {hasOwn} from './utils/object';
 import {parseQueryString} from './url';
 
@@ -37,6 +38,7 @@ const TOGGLES_WINDOW_PROPERTY = '__AMP__EXPERIMENT_TOGGLES';
 
 /**
  * @typedef {{
+ *   experimentId: string,
  *   isTrafficEligible: function(!Window):boolean,
  *   branches: !Array<string>
  * }}
@@ -295,7 +297,7 @@ export const RANDOM_NUMBER_GENERATORS = {
  */
 function selectRandomItem(arr) {
   const rn = RANDOM_NUMBER_GENERATORS.accuratePrng();
-  return arr[Math.floor(rn * arr.length)] || null;
+  return dev().assertString(arr[Math.floor(rn * arr.length)]) || null;
 }
 
 /**
@@ -305,35 +307,29 @@ function selectRandomItem(arr) {
  *
  * Check whether a given experiment is set using isExperimentOn(win,
  * experimentName) and, if it is on, look for which branch is selected in
- * win.experimentBranches[experimentName].
+ * win.__AMP_EXPERIMENT_BRANCHES[experimentName].
  *
  * @param {!Window} win Window context on which to save experiment
  *     selection state.
- * @param {!Object<string, !ExperimentInfo>} experiments  Set of experiments to
+ * @param {!Array<!ExperimentInfo>} experiments  Set of experiments to
  *     configure for this page load.
  * @return {!Object<string, string>} Map of experiment names to selected
  *     branches.
  */
 export function randomlySelectUnsetExperiments(win, experiments) {
-  win.experimentBranches = win.experimentBranches || {};
+  win.__AMP_EXPERIMENT_BRANCHES = win.__AMP_EXPERIMENT_BRANCHES || {};
   const selectedExperiments = {};
-  for (const experimentName in experiments) {
-    // Skip experimentName if it is not a key of experiments object or if it
-    // has already been populated by some other property.
-    if (!hasOwn(experiments, experimentName)) {
-      continue;
-    }
-    if (hasOwn(win.experimentBranches, experimentName)) {
+  for (let i = 0; i < experiments.length; i++) {
+    const experiment = experiments[i];
+    const experimentName = experiment.experimentId;
+    if (hasOwn(win.__AMP_EXPERIMENT_BRANCHES, experimentName)) {
       selectedExperiments[experimentName] =
-        win.experimentBranches[experimentName];
+        win.__AMP_EXPERIMENT_BRANCHES[experimentName];
       continue;
     }
 
-    if (
-      !experiments[experimentName].isTrafficEligible ||
-      !experiments[experimentName].isTrafficEligible(win)
-    ) {
-      win.experimentBranches[experimentName] = null;
+    if (!experiment.isTrafficEligible || !experiment.isTrafficEligible(win)) {
+      win.__AMP_EXPERIMENT_BRANCHES[experimentName] = null;
       continue;
     }
 
@@ -341,13 +337,14 @@ export function randomlySelectUnsetExperiments(win, experiments) {
     // experiment branch (e.g., via a test setup), then randomize the branch
     // choice.
     if (
-      !win.experimentBranches[experimentName] &&
+      !win.__AMP_EXPERIMENT_BRANCHES[experimentName] &&
       isExperimentOn(win, /*OK*/ experimentName)
     ) {
-      const {branches} = experiments[experimentName];
-      win.experimentBranches[experimentName] = selectRandomItem(branches);
+      win.__AMP_EXPERIMENT_BRANCHES[experimentName] = selectRandomItem(
+        experiment.branches
+      );
       selectedExperiments[experimentName] =
-        win.experimentBranches[experimentName];
+        win.__AMP_EXPERIMENT_BRANCHES[experimentName];
     }
   }
   return selectedExperiments;
@@ -363,7 +360,24 @@ export function randomlySelectUnsetExperiments(win, experiments) {
  *     null if experimentName has been tested but no branch was enabled).
  */
 export function getExperimentBranch(win, experimentName) {
-  return win.experimentBranches ? win.experimentBranches[experimentName] : null;
+  return win.__AMP_EXPERIMENT_BRANCHES
+    ? win.__AMP_EXPERIMENT_BRANCHES[experimentName]
+    : null;
+}
+
+/**
+ * Returns an object containing all active experiment branches on the
+ * top Window.
+ *
+ * @param {!Window} win Window context to check for experiment state.
+ * @return {!Object} contains all experiment branches and their ids.
+ */
+export function getActiveExperimentBranches(win) {
+  const topWin = getTopWindow(win);
+  if (!topWin.__AMP_EXPERIMENT_BRANCHES) {
+    topWin.__AMP_EXPERIMENT_BRANCHES = {};
+  }
+  return {...topWin.__AMP_EXPERIMENT_BRANCHES};
 }
 
 /**
@@ -377,7 +391,7 @@ export function getExperimentBranch(win, experimentName) {
  * @visibleForTesting
  */
 export function forceExperimentBranch(win, experimentName, branchId) {
-  win.experimentBranches = win.experimentBranches || {};
+  win.__AMP_EXPERIMENT_BRANCHES = win.__AMP_EXPERIMENT_BRANCHES || {};
   toggleExperiment(win, experimentName, !!branchId, true);
-  win.experimentBranches[experimentName] = branchId;
+  win.__AMP_EXPERIMENT_BRANCHES[experimentName] = branchId;
 }

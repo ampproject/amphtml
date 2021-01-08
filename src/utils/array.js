@@ -101,10 +101,42 @@ export function fromIterator(iterator) {
  *
  * @param {Array<T>} array
  * @param {T} item
+ * @return {boolean}
  * @template T
  */
 export function pushIfNotExist(array, item) {
   if (array.indexOf(item) < 0) {
     array.push(item);
+    return true;
   }
+  return false;
+}
+
+/**
+ * Removes the first matching item in the array. Returns `true` if the array
+ * has changed.
+ *
+ * @param {!Array<T>} array
+ * @param {T} item
+ * @return {boolean}
+ * @template T
+ */
+export function removeItem(array, item) {
+  const index = array.indexOf(item);
+  if (index == -1) {
+    return false;
+  }
+  array.splice(index, 1);
+  return true;
+}
+
+/**
+ * Returns the last item in an array.
+ *
+ * @param {Array<T>} array
+ * @template T
+ * @return {?T}
+ */
+export function lastItem(array) {
+  return array[array.length - 1];
 }

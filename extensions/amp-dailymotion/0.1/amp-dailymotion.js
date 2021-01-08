@@ -31,6 +31,7 @@ import {
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
+  dispatchCustomEvent,
   fullscreenEnter,
   fullscreenExit,
   getDataParamsFromAttributes,
@@ -112,9 +113,17 @@ class AmpDailymotion extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url('https://www.dailymotion.com', opt_onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://www.dailymotion.com',
+      opt_onLayout
+    );
     // Host that Dailymotion uses to serve JS needed by player.
-    this.preconnect.url('https://static1.dmcdn.net', opt_onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://static1.dmcdn.net',
+      opt_onLayout
+    );
   }
 
   /**
@@ -135,11 +144,6 @@ class AmpDailymotion extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
-  }
-
-  /** @override */
-  viewportCallback(visible) {
-    this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
   }
 
   /** @override */
@@ -217,7 +221,7 @@ class AmpDailymotion extends AMP.BaseElement {
           this.muted_ != isMuted
         ) {
           this.muted_ = isMuted;
-          this.element.dispatchCustomEvent(mutedOrUnmutedEvent(isMuted));
+          dispatchCustomEvent(this.element, mutedOrUnmutedEvent(isMuted));
         }
         break;
 
@@ -271,7 +275,7 @@ class AmpDailymotion extends AMP.BaseElement {
       'info',
     ];
 
-    explicitParamsAttributes.forEach(explicitParam => {
+    explicitParamsAttributes.forEach((explicitParam) => {
       const val = this.element.getAttribute(`data-${explicitParam}`);
       if (val) {
         iframeSrc = addParamToUrl(iframeSrc, explicitParam, val);
@@ -318,7 +322,7 @@ class AmpDailymotion extends AMP.BaseElement {
     // Hack to simulate firing mute events when video is not playing
     // since Dailymotion only fires volume changes when the video has started
     this.playerReadyPromise_.then(() => {
-      this.element.dispatchCustomEvent(VideoEvents.MUTED);
+      dispatchCustomEvent(this.element, VideoEvents.MUTED);
       this.muted_ = true;
     });
   }
@@ -331,7 +335,7 @@ class AmpDailymotion extends AMP.BaseElement {
     // Hack to simulate firing mute events when video is not playing
     // since Dailymotion only fires volume changes when the video has started
     this.playerReadyPromise_.then(() => {
-      this.element.dispatchCustomEvent(VideoEvents.UNMUTED);
+      dispatchCustomEvent(this.element, VideoEvents.UNMUTED);
       this.muted_ = false;
     });
   }
@@ -432,6 +436,6 @@ class AmpDailymotion extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpDailymotion);
 });

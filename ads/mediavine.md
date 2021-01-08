@@ -19,9 +19,7 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width="300" height="250"
-    type="mediavine"
-    data-site="amp-project">
+<amp-ad width="300" height="250" type="mediavine" data-site="amp-project">
 </amp-ad>
 ```
 
@@ -31,13 +29,13 @@ For details on the configuration semantics, please contact [Mediavine](http://ww
 
 ### Required parameters
 
-* `data-site` - The site's unique name this ad will be served on. This is the same name from your Mediavine script wrapper.
+-   `data-site` - The site's unique name this ad will be served on. This is the same name from your Mediavine script wrapper.
 
 ## User Consent Integration
 
 When [user consent](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/amp-consent.md#blocking-behaviors) is required. Mediavine approaches user consent in the following ways:
 
-- `CONSENT_POLICY_STATE.SUFFICIENT`: Personalized Ads.
-- `CONSENT_POLICY_STATE.INSUFFICIENT`: Non-Personalized Ads.
-- `CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED`: Personalized Ads.
-- `CONSENT_POLICY_STATE.UNKNOWN`: Non-Personalized Ads.
+-   `CONSENT_POLICY_STATE.SUFFICIENT`: Personalized Ads.
+-   `CONSENT_POLICY_STATE.INSUFFICIENT`: Non-Personalized Ads.
+-   `CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED`: Personalized Ads.
+-   `CONSENT_POLICY_STATE.UNKNOWN`: Non-Personalized Ads.

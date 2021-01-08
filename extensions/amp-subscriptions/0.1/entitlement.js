@@ -19,6 +19,8 @@ import {dict} from '../../../src/utils/object';
 export const GrantReason = {
   'SUBSCRIBER': 'SUBSCRIBER',
   'METERING': 'METERING',
+  'UNLOCKED': 'UNLOCKED',
+  'LAA': 'LAA',
 };
 
 /**
@@ -48,15 +50,16 @@ export class Entitlement {
    * @param {?JsonObject} [input.dataObject]
    * @param {?string} [input.decryptedDocumentKey]
    */
-  constructor({
-    source,
-    raw = '',
-    service,
-    granted = false,
-    grantReason = '',
-    dataObject,
-    decryptedDocumentKey,
-  }) {
+  constructor(input) {
+    const {
+      source,
+      raw = '',
+      service,
+      granted = false,
+      grantReason = '',
+      dataObject,
+      decryptedDocumentKey,
+    } = input;
     /** @const {string} */
     this.raw = raw;
     /** @const {string} */
@@ -94,11 +97,7 @@ export class Entitlement {
    * @return {!JsonObject}
    */
   jsonForPingback() {
-    return /** @type {!JsonObject} */ (Object.assign(
-      {},
-      {'raw': this.raw},
-      this.json()
-    ));
+    return /** @type {!JsonObject} */ ({'raw': this.raw, ...this.json()});
   }
 
   /**

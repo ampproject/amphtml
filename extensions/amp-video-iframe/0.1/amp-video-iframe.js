@@ -16,7 +16,6 @@
 import {Deferred} from '../../../src/utils/promise';
 import {
   MIN_VISIBILITY_RATIO_FOR_AUTOPLAY,
-  VideoAnalyticsEvents,
   VideoEvents,
 } from '../../../src/video-interface';
 import {
@@ -27,6 +26,14 @@ import {
   originMatches,
 } from '../../../src/iframe-video';
 import {Services} from '../../../src/services';
+import {addParamsToUrl} from '../../../src/url';
+import {
+  createElementWithAttributes,
+  dispatchCustomEvent,
+  getDataParamsFromAttributes,
+  isFullscreenElement,
+  removeElement,
+} from '../../../src/dom';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
@@ -34,9 +41,7 @@ import {
   looksLikeTrackingIframe,
 } from '../../../src/iframe-helper';
 import {getData, listen} from '../../../src/event-helper';
-import {htmlFor} from '../../../src/static-template';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isFullscreenElement, removeElement} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {once} from '../../../src/utils/function';
 
@@ -78,6 +83,15 @@ const getAnalyticsEventTypePrefixRegex = once(
 );
 
 /**
+ * @param {string} url
+ * @param {!Element} element
+ * @return {string}
+ * @private
+ */
+const addDataParamsToUrl = (url, element) =>
+  addParamsToUrl(url, getDataParamsFromAttributes(element));
+
+/**
  * @param {string} src
  * @return {string}
  */
@@ -111,7 +125,7 @@ class AmpVideoIframe extends AMP.BaseElement {
      * @return {*} TODO(#23582): Specify return type
      * @private
      */
-    this.boundOnMessage_ = e => this.onMessage_(e);
+    this.boundOnMessage_ = (e) => this.onMessage_(e);
   }
 
   /** @override */
@@ -121,26 +135,17 @@ class AmpVideoIframe extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const {element} = this;
-
-    // TODO(alanorozco): On integration tests, `getLayoutBox` will return a
-    // cached default value, which makes this assertion fail. Move to
-    // `describes.integration` to see if that fixes it.
-    const isIntegrationTest = element.hasAttribute(
-      'i-amphtml-integration-test'
-    );
-
-    this.user().assert(
-      isIntegrationTest || !looksLikeTrackingIframe(element),
-      '<amp-video-iframe> does not allow tracking iframes. ' +
-        'Please use amp-analytics instead.'
-    );
-
-    installVideoManagerForDoc(element);
+    installVideoManagerForDoc(this.element);
   }
 
   /** @override */
   layoutCallback() {
+    this.user().assert(
+      !looksLikeTrackingIframe(this.element),
+      '<amp-video-iframe> does not allow tracking iframes. ' +
+        'Please use amp-analytics instead.'
+    );
+
     const name = JSON.stringify(this.getMetadata_());
 
     this.iframe_ = disableScrollingOnIframe(
@@ -175,10 +180,13 @@ class AmpVideoIframe extends AMP.BaseElement {
    */
   getMetadata_() {
     const {sourceUrl, canonicalUrl} = Services.documentInfoForDoc(this.element);
+    const {title, documentElement} = this.getAmpDoc().getRootNode();
 
     return dict({
       'sourceUrl': sourceUrl,
       'canonicalUrl': canonicalUrl,
+      'title': title || null,
+      'lang': documentElement?.lang || null,
     });
   }
 
@@ -186,23 +194,25 @@ class AmpVideoIframe extends AMP.BaseElement {
   onReady_() {
     const {element} = this;
     Services.videoManagerForDoc(element).register(this);
-    element.dispatchCustomEvent(VideoEvents.LOAD);
+    dispatchCustomEvent(element, VideoEvents.LOAD);
   }
 
   /** @override */
   createPlaceholderCallback() {
     const {element} = this;
-    const html = htmlFor(element);
-    const poster = html`
-      <amp-img layout="fill" placeholder></amp-img>
-    `;
-
-    poster.setAttribute(
-      'src',
-      this.user().assertString(element.getAttribute('poster'))
+    const src = addDataParamsToUrl(
+      user().assertString(element.getAttribute('poster')),
+      element
     );
-
-    return poster;
+    return createElementWithAttributes(
+      devAssert(element.ownerDocument),
+      'amp-img',
+      dict({
+        'src': src,
+        'layout': 'fill',
+        'placeholder': '',
+      })
+    );
   }
 
   /** @override */
@@ -230,10 +240,10 @@ class AmpVideoIframe extends AMP.BaseElement {
   getSrc_() {
     const {element} = this;
     const urlService = Services.urlForDoc(element);
-    const src = urlService.assertHttpsUrl(element.getAttribute('src'), element);
+    const src = element.getAttribute('src');
 
     if (urlService.getSourceOrigin(src) === urlService.getWinOrigin(this.win)) {
-      this.user().warn(
+      user().warn(
         TAG,
         'Origins of document inside amp-video-iframe and the host are the ' +
           'same, which allows for same-origin behavior. However in AMP ' +
@@ -243,7 +253,7 @@ class AmpVideoIframe extends AMP.BaseElement {
       );
     }
 
-    return maybeAddAmpFragment(src);
+    return maybeAddAmpFragment(addDataParamsToUrl(src, element));
   }
 
   /**
@@ -283,6 +293,10 @@ class AmpVideoIframe extends AMP.BaseElement {
 
     const data = objOrParseJson(eventData);
 
+    if (data == null) {
+      return; // we only process valid json
+    }
+
     const messageId = data['id'];
     const methodReceived = data['method'];
 
@@ -312,13 +326,12 @@ class AmpVideoIframe extends AMP.BaseElement {
 
     if (eventReceived == 'analytics') {
       const spec = devAssert(data['analytics']);
-
       this.dispatchCustomAnalyticsEvent_(spec['eventType'], spec['vars']);
       return;
     }
 
     if (ALLOWED_EVENTS.indexOf(eventReceived) > -1) {
-      this.element.dispatchCustomEvent(eventReceived);
+      dispatchCustomEvent(this.element, eventReceived);
       return;
     }
   }
@@ -336,10 +349,14 @@ class AmpVideoIframe extends AMP.BaseElement {
       ANALYTICS_EVENT_TYPE_PREFIX
     );
 
-    this.element.dispatchCustomEvent(VideoAnalyticsEvents.CUSTOM, {
-      eventType,
-      vars,
-    });
+    dispatchCustomEvent(
+      this.element,
+      VideoEvents.CUSTOM_TICK,
+      dict({
+        'eventType': eventType,
+        'vars': vars,
+      })
+    );
   }
 
   /**
@@ -385,14 +402,14 @@ class AmpVideoIframe extends AMP.BaseElement {
    * @private
    */
   postMessage_(message) {
-    if (!this.iframe_ || !this.iframe_.contentWindow) {
-      return;
-    }
-    const {promise} = this.readyDeferred_;
+    const promise = this.readyDeferred_ && this.readyDeferred_.promise;
     if (!promise) {
       return;
     }
     promise.then(() => {
+      if (!this.iframe_ || !this.iframe_.contentWindow) {
+        return;
+      }
       this.iframe_.contentWindow./*OK*/ postMessage(
         JSON.stringify(message),
         '*'
@@ -503,6 +520,6 @@ class AmpVideoIframe extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpVideoIframe);
 });

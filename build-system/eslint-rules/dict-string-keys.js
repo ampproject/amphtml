@@ -15,9 +15,9 @@
  */
 'use strict';
 
-module.exports = function(context) {
+module.exports = function (context) {
   return {
-    CallExpression: function(node) {
+    CallExpression: function (node) {
       if (node.callee.name === 'dict') {
         if (node.arguments[0]) {
           const arg1 = node.arguments[0];
@@ -39,10 +39,10 @@ module.exports = function(context) {
 
 function checkNode(node, context) {
   if (node.type === 'ObjectExpression') {
-    node.properties.forEach(function(prop) {
+    node.properties.forEach(function (prop) {
       if (!prop.key.raw && !prop.computed) {
         context.report({
-          node,
+          node: prop,
           message:
             'Found: ' +
             prop.key.name +
@@ -53,7 +53,7 @@ function checkNode(node, context) {
       checkNode(prop.value, context);
     });
   } else if (node.type === 'ArrayExpression') {
-    node.elements.forEach(function(elem) {
+    node.elements.forEach(function (elem) {
       checkNode(elem, context);
     });
   }

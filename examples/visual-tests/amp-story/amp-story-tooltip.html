@@ -47,6 +47,10 @@
         width: 50px;
         height: 200px;
       }
+
+      .anchor-container {
+        margin: 20px;
+      }
     </style>
   </head>
 
@@ -68,7 +72,9 @@
         <amp-story-grid-layer template="vertical">
           <h1 class="hello-world">Hello world!</h1>
           <p>Page two of four</p>
-          <a href="google.com" role="link" data-tooltip-text="Hola" class="title-small center">Click me!</a>
+          <div class="anchor-container">
+            <a href="google.com" role="link" data-tooltip-text="Hola" class="title-small center">Click me!</a>
+          </div>
           <amp-twitter class="interactive-embed" interactive></amp-twitter>
           <p>Text under embed</p>
         </amp-story-grid-layer>
@@ -85,8 +91,9 @@
 
       <amp-story-page id="page-4">
         <amp-story-grid-layer template="vertical">
-          <h1 class="hello-world">Empty page</h1>
+          <h1 class="hello-world">Last page</h1>
           <p>Page four of four</p>
+          <a href="google.com" role="link" data-tooltip-text="Adios" class="title-small center">Click me!</a>
       </amp-story-page>
 
     </amp-story>

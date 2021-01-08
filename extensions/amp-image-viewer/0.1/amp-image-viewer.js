@@ -29,6 +29,7 @@ import {
 import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
+import {WindowInterface} from '../../../src/window-interface';
 import {bezierCurve} from '../../../src/curve';
 import {boundValue, distance, magnitude} from '../../../src/utils/math';
 import {closestAncestorElementBySelector, elementByTag} from '../../../src/dom';
@@ -327,7 +328,7 @@ export class AmpImageViewer extends AMP.BaseElement {
       });
       st.toggle(ampImg, false);
       this.element.appendChild(this.image_);
-      return ampImg.getImpl().then(ampImg => {
+      return ampImg.getImpl().then((ampImg) => {
         ampImg.propagateAttributes(ARIA_ATTRIBUTES, this.image_);
       });
     });
@@ -422,7 +423,10 @@ export class AmpImageViewer extends AMP.BaseElement {
       this.imageBox_.width * this.maxSeenScale_,
       this.sourceWidth_
     );
-    const src = this.srcset_.select(width, this.getDpr());
+    const src = this.srcset_.select(
+      width,
+      WindowInterface.getDevicePixelRatio()
+    );
     if (src == this.image_.getAttribute('src')) {
       return Promise.resolve();
     }
@@ -444,7 +448,7 @@ export class AmpImageViewer extends AMP.BaseElement {
     this.gestures_ = Gestures.get(this.element);
 
     // Zoomable.
-    this.gestures_.onGesture(DoubletapRecognizer, gesture => {
+    this.gestures_.onGesture(DoubletapRecognizer, (gesture) => {
       const {data} = gesture;
       const newScale = this.scale_ == 1 ? this.maxScale_ : this.minScale_;
       const deltaX = this.elementBox_.width / 2 - data.clientX;
@@ -457,11 +461,11 @@ export class AmpImageViewer extends AMP.BaseElement {
     // Propagate click on tap, since the double tap gesture would prevent it
     // from occurring otherwise. This allows interested parties (e.g. lightbox
     // gallery) to react to clicks, though there will be a delay.
-    this.gestures_.onGesture(TapRecognizer, gesture => {
+    this.gestures_.onGesture(TapRecognizer, (gesture) => {
       this.propagateClickEvent_(gesture.data.target);
     });
 
-    this.gestures_.onGesture(TapzoomRecognizer, gesture => {
+    this.gestures_.onGesture(TapzoomRecognizer, (gesture) => {
       const {data} = gesture;
       this.onTapZoom_(
         data.centerClientX,
@@ -481,7 +485,7 @@ export class AmpImageViewer extends AMP.BaseElement {
       }
     });
 
-    this.gestures_.onGesture(PinchRecognizer, gesture => {
+    this.gestures_.onGesture(PinchRecognizer, (gesture) => {
       const {data} = gesture;
       this.onPinchZoom_(
         data.centerClientX,
@@ -514,7 +518,7 @@ export class AmpImageViewer extends AMP.BaseElement {
     // Movable.
     this.unlistenOnSwipePan_ = this.gestures_.onGesture(
       SwipeXYRecognizer,
-      gesture => {
+      (gesture) => {
         const {data} = gesture;
         this.onMove_(data.deltaX, data.deltaY, false);
         if (data.last) {
@@ -867,7 +871,7 @@ export class AmpImageViewer extends AMP.BaseElement {
       const yFunc = tr.numeric(this.posY_, newPosY);
       promise = Animation.animate(
         dev().assertElement(this.image_),
-        time => {
+        (time) => {
           this.scale_ = scaleFunc(time);
           this.posX_ = xFunc(time);
           this.posY_ = yFunc(time);
@@ -916,6 +920,6 @@ export class AmpImageViewer extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpImageViewer, CSS);
 });

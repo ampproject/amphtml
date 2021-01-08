@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {CtaTypes} from './story-ad-localization';
 import {getCryptoRandomBytesArray} from '../../../src/utils/bytes';
 
 /**
@@ -42,19 +43,25 @@ export function getUniqueId(win) {
 }
 
 /**
- * Finds all meta tags starting with `amp4ads-vars-`.
- * @param {Document} doc
- * @return {!IArrayLike}
+ * Localizes CTA text if it is chosen from our predefined types.a
+ * @param {string} ctaType
+ * @param {!./story-ad-localization.StoryAdLocalization} localizationService
+ * @return {string|null}
  */
-export function getA4AMetaTags(doc) {
-  const selector = 'meta[name^=amp4ads-vars-]';
-  return doc.querySelectorAll(selector);
+export function localizeCtaText(ctaType, localizationService) {
+  // CTA picked from predefined choices.
+  if (CtaTypes[ctaType]) {
+    const ctaLocalizedStringId = CtaTypes[ctaType];
+    return localizationService.getLocalizedString(ctaLocalizedStringId);
+  }
+  // Custom CTA text - Should already be localized.
+  return ctaType;
 }
 
 /**
  * Returns document from given iframe, or null if non FIE.
  * @param {HTMLIFrameElement} iframe
- * @return {Document}
+ * @return {!Document}
  */
 export function getFrameDoc(iframe) {
   return iframe.contentDocument || iframe.contentWindow.document;

@@ -16,35 +16,29 @@
 'use strict';
 
 const colors = require('ansi-colors');
-const requestPromise = require('request-promise');
 const {
   gitBranchCreationPoint,
   gitBranchName,
   gitCommitHash,
   gitDiffCommitLog,
   gitDiffStatMaster,
-  gitTravisMasterBaseline,
+  gitCiMasterBaseline,
   shortSha,
-} = require('../git');
-const {
-  isTravisBuild,
-  travisBuildNumber,
-  travisPullRequestSha,
-} = require('../travis');
-const {execOrDie, execWithError, exec} = require('../exec');
+} = require('../common/git');
+const {execOrDie, execOrThrow, execWithError, exec} = require('../common/exec');
+const {isCiBuild, ciBuildNumber, ciPullRequestSha} = require('../common/ci');
 const {replaceUrls, signalDistUpload} = require('../tasks/pr-deploy-bot-utils');
 
-const BUILD_OUTPUT_FILE = isTravisBuild()
-  ? `amp_build_${travisBuildNumber()}.zip`
-  : '';
-const DIST_OUTPUT_FILE = isTravisBuild()
-  ? `amp_dist_${travisBuildNumber()}.zip`
+const BUILD_OUTPUT_FILE = isCiBuild() ? `amp_build_${ciBuildNumber()}.zip` : '';
+const DIST_OUTPUT_FILE = isCiBuild() ? `amp_dist_${ciBuildNumber()}.zip` : '';
+const ESM_DIST_OUTPUT_FILE = isCiBuild()
+  ? `amp_esm_dist_${ciBuildNumber()}.zip`
   : '';
 
-const BUILD_OUTPUT_DIRS = 'build/ dist/ dist.3p/ EXTENSIONS_CSS_MAP';
-const DIST_OUTPUT_DIRS =
-  'build/ dist/ dist.3p/ dist.tools/ EXTENSIONS_CSS_MAP examples/ test/manual/';
+const BUILD_OUTPUT_DIRS = 'build/ dist/ dist.3p/';
+const APP_SERVING_DIRS = 'dist.tools/ examples/ test/manual/';
 
+// TODO(rsimha, ampproject/amp-github-apps#1110): Update storage details.
 const OUTPUT_STORAGE_LOCATION = 'gs://amp-travis-builds';
 const OUTPUT_STORAGE_KEY_FILE = 'sa-travis-key.json';
 const OUTPUT_STORAGE_PROJECT_ID = 'amp-travis-build-storage';
@@ -62,12 +56,12 @@ function printChangeSummary(fileName) {
   const fileLogPrefix = colors.bold(colors.yellow(`${fileName}:`));
   let commitSha;
 
-  if (isTravisBuild()) {
+  if (isCiBuild()) {
     console.log(
-      `${fileLogPrefix} ${colors.cyan('origin/master')} is currently at ` +
-        `commit ${colors.cyan(shortSha(gitTravisMasterBaseline()))}`
+      `${fileLogPrefix} Latest commit from ${colors.cyan('master')} included ` +
+        `in this build: ${colors.cyan(shortSha(gitCiMasterBaseline()))}`
     );
-    commitSha = travisPullRequestSha();
+    commitSha = ciPullRequestSha();
   } else {
     commitSha = gitCommitHash();
   }
@@ -110,41 +104,6 @@ function printChangeSummary(fileName) {
       colors.cyan(GIT_BRANCH_URL) + '.\n'
     );
   }
-}
-
-/**
- * Starts connection to Sauce Labs after getting account credentials
- * @param {string} functionName
- */
-async function startSauceConnect(functionName) {
-  process.env['SAUCE_USERNAME'] = 'amphtml';
-  const response = await requestPromise(
-    'https://amphtml-sauce-token-dealer.appspot.com/getJwtToken'
-  );
-  process.env['SAUCE_ACCESS_KEY'] = response.trim();
-  const startScCmd = 'build-system/sauce_connect/start_sauce_connect.sh';
-  const fileLogPrefix = colors.bold(colors.yellow(`${functionName}:`));
-  console.log(
-    '\n' + fileLogPrefix,
-    'Starting Sauce Connect Proxy:',
-    colors.cyan(startScCmd)
-  );
-  execOrDie(startScCmd);
-}
-
-/**
- * Stops connection to Sauce Labs
- * @param {string} functionName
- */
-function stopSauceConnect(functionName) {
-  const stopScCmd = 'build-system/sauce_connect/stop_sauce_connect.sh';
-  const fileLogPrefix = colors.bold(colors.yellow(`${functionName}:`));
-  console.log(
-    '\n' + fileLogPrefix,
-    'Stopping Sauce Connect Proxy:',
-    colors.cyan(stopScCmd)
-  );
-  execOrDie(stopScCmd);
 }
 
 /**
@@ -197,42 +156,54 @@ function stopTimedJob(fileName, startTime) {
 }
 
 /**
- * Executes the provided command and times it. Errors, if any, are printed.
- * @param {string} cmd
- * @param {string} fileName
- * @return {!Object} Node process
+ * Wraps an exec helper in a timer. Returns the result of the helper.
+ * @param {!Function(string, string=): ?} execFn
+ * @return {!Function(string, string=): ?}
  */
-function timedExec(cmd, fileName = 'utils.js') {
-  const startTime = startTimer(cmd, fileName);
-  const p = exec(cmd);
-  stopTimer(cmd, fileName, startTime);
-  return p;
+function timedExecFn(execFn) {
+  return (cmd, fileName, ...rest) => {
+    const startTime = startTimer(cmd, fileName);
+    const p = execFn(cmd, ...rest);
+    stopTimer(cmd, fileName, startTime);
+    return p;
+  };
 }
 
 /**
- * Executes the provided command and times it. Errors, if any, are returned.
+ * Executes the provided command and times it. Errors, if any, are printed.
+ * @function
  * @param {string} cmd
  * @param {string} fileName
  * @return {!Object} Node process
  */
-function timedExecWithError(cmd, fileName = 'utils.js') {
-  const startTime = startTimer(cmd, fileName);
-  const p = execWithError(cmd);
-  stopTimer(cmd, fileName, startTime);
-  return p;
-}
+const timedExec = timedExecFn(exec);
+
+/**
+ * Executes the provided command and times it. Errors, if any, are returned.
+ * @function
+ * @param {string} cmd
+ * @param {string} fileName
+ * @return {!Object} Node process
+ */
+const timedExecWithError = timedExecFn(execWithError);
 
 /**
  * Executes the provided command and times it. The program terminates in case of
  * failure.
+ * @function
  * @param {string} cmd
  * @param {string} fileName
  */
-function timedExecOrDie(cmd, fileName = 'utils.js') {
-  const startTime = startTimer(cmd, fileName);
-  execOrDie(cmd);
-  stopTimer(cmd, fileName, startTime);
-}
+const timedExecOrDie = timedExecFn(execOrDie);
+
+/**
+ * Executes the provided command and times it. The program throws on error in
+ * case of failure.
+ * @function
+ * @param {string} cmd
+ * @param {string} fileName
+ */
+const timedExecOrThrow = timedExecFn(execOrThrow);
 
 /**
  * Download output helper
@@ -244,6 +215,7 @@ function timedExecOrDie(cmd, fileName = 'utils.js') {
 function downloadOutput_(functionName, outputFileName, outputDirs) {
   const fileLogPrefix = colors.bold(colors.yellow(`${functionName}:`));
   const buildOutputDownloadUrl = `${OUTPUT_STORAGE_LOCATION}/${outputFileName}`;
+  const dirsToUnzip = outputDirs.split(' ');
 
   console.log(
     `${fileLogPrefix} Downloading build output from ` +
@@ -259,7 +231,9 @@ function downloadOutput_(functionName, outputFileName, outputDirs) {
     `${fileLogPrefix} Extracting ` + colors.cyan(outputFileName) + '...'
   );
   exec('echo travis_fold:start:unzip_results && echo');
-  execOrDie(`unzip -o ${outputFileName}`);
+  dirsToUnzip.forEach((dir) => {
+    execOrDie(`unzip -o ${outputFileName} '${dir.replace('/', '/*')}'`);
+  });
   exec('echo travis_fold:end:unzip_results');
 
   console.log(fileLogPrefix, 'Verifying extracted files...');
@@ -327,7 +301,15 @@ function downloadBuildOutput(functionName) {
  * @param {string} functionName
  */
 function downloadDistOutput(functionName) {
-  downloadOutput_(functionName, DIST_OUTPUT_FILE, DIST_OUTPUT_DIRS);
+  downloadOutput_(functionName, DIST_OUTPUT_FILE, BUILD_OUTPUT_DIRS);
+}
+
+/**
+ * Downloads and unzips esm dist output from storage
+ * @param {string} functionName
+ */
+function downloadEsmDistOutput(functionName) {
+  downloadOutput_(functionName, ESM_DIST_OUTPUT_FILE, BUILD_OUTPUT_DIRS);
 }
 
 /**
@@ -343,7 +325,17 @@ function uploadBuildOutput(functionName) {
  * @param {string} functionName
  */
 function uploadDistOutput(functionName) {
-  uploadOutput_(functionName, DIST_OUTPUT_FILE, DIST_OUTPUT_DIRS);
+  const distOutputDirs = `${BUILD_OUTPUT_DIRS} ${APP_SERVING_DIRS}`;
+  uploadOutput_(functionName, DIST_OUTPUT_FILE, distOutputDirs);
+}
+
+/**
+ * Zips and uploads the esm dist output to a remote storage location
+ * @param {string} functionName
+ */
+function uploadEsmDistOutput(functionName) {
+  const esmDistOutputDirs = `${BUILD_OUTPUT_DIRS} ${APP_SERVING_DIRS}`;
+  uploadOutput_(functionName, ESM_DIST_OUTPUT_FILE, esmDistOutputDirs);
 }
 
 /**
@@ -367,23 +359,25 @@ function decryptTravisKey_() {
   // openssl 1.0.2g, which is used by Travis to decrypt.
   execOrDie(
     `openssl aes-256-cbc -md sha256 -k ${process.env.GCP_TOKEN} -in ` +
-      `build-system/sa-travis-key.json.enc -out ${OUTPUT_STORAGE_KEY_FILE} -d`
+      `build-system/common/sa-travis-key.json.enc -out ` +
+      `${OUTPUT_STORAGE_KEY_FILE} -d`
   );
 }
 
 module.exports = {
   downloadBuildOutput,
   downloadDistOutput,
+  downloadEsmDistOutput,
   printChangeSummary,
   processAndUploadDistOutput,
   startTimer,
   stopTimer,
-  startSauceConnect,
-  stopSauceConnect,
   stopTimedJob,
   timedExec,
   timedExecOrDie,
   timedExecWithError,
+  timedExecOrThrow,
   uploadBuildOutput,
   uploadDistOutput,
+  uploadEsmDistOutput,
 };

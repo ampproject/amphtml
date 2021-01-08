@@ -14,15 +14,22 @@
  * limitations under the License.
  */
 
+import {AMPDOC_SINGLETON_NAME} from '../../../src/enums';
 import {ActionTrust} from '../../../src/action-constants';
-import {IntersectionObserverApi} from '../../../src/intersection-observer-polyfill';
+import {IntersectionObserver3pHost} from '../../../src/utils/intersection-observer-3p-host';
 import {LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
+import {MessageType} from '../../../src/3p-frame-messaging';
 import {Services} from '../../../src/services';
 import {base64EncodeFromBytes} from '../../../src/utils/base64.js';
-import {createCustomEvent, getData} from '../../../src/event-helper';
+import {createCustomEvent, getData, listen} from '../../../src/event-helper';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {endsWith} from '../../../src/string';
+import {
+  getConsentMetadata,
+  getConsentPolicyInfo,
+  getConsentPolicyState,
+} from '../../../src/consent';
 import {
   isAdLike,
   listenFor,
@@ -51,13 +58,11 @@ const ATTRIBUTES_TO_PROPAGATE = [
   'referrerpolicy',
   'scrolling',
   'tabindex',
+  'title',
 ];
 
 /** @type {number}  */
 let count = 0;
-
-/** @type {number}  */
-let trackingIframeCount = 0;
 
 /** @type {number}  */
 let trackingIframeTimeout = 5000;
@@ -94,11 +99,14 @@ export class AmpIframe extends AMP.BaseElement {
     /** @private {boolean} */
     this.isResizable_ = false;
 
-    /** @private {?IntersectionObserverApi} */
-    this.intersectionObserverApi_ = null;
+    /** @private {?IntersectionObserver3pHost} */
+    this.intersectionObserverHostApi_ = null;
 
     /** @private {string} */
     this.sandbox_ = '';
+
+    /** @private {Function} */
+    this.unlistenPym_ = null;
 
     /**
      * The source of the iframe. May change to null for tracking iframes
@@ -119,6 +127,11 @@ export class AmpIframe extends AMP.BaseElement {
      * @private {?string}
      */
     this.targetOrigin_ = null;
+
+    /**
+     * @private {boolean}
+     */
+    this.hasErroredEmbedSize_ = false;
   }
 
   /** @override */
@@ -151,7 +164,7 @@ export class AmpIframe extends AMP.BaseElement {
       !this.sandboxContainsToken_(sandbox, 'allow-same-origin') ||
         (origin != containerUrl.origin && protocol != 'data:'),
       'Origin of <amp-iframe> must not be equal to container %s' +
-        'if allow-same-origin is set. See https://github.com/ampproject/' +
+        ' if allow-same-origin is set. See https://github.com/ampproject/' +
         'amphtml/blob/master/spec/amp-iframe-origin-policy.md for details.',
       element
     );
@@ -248,14 +261,27 @@ export class AmpIframe extends AMP.BaseElement {
     );
   }
 
+  /**
+   * @param {boolean=} onLayout
+   * @override
+   */
+  preconnectCallback(onLayout) {
+    if (this.iframeSrc) {
+      Services.preconnectFor(this.win).url(
+        this.getAmpDoc(),
+        this.iframeSrc,
+        onLayout
+      );
+    }
+  }
+
   /** @override */
-  firstAttachedCallback() {
+  buildCallback() {
     this.sandbox_ = this.element.getAttribute('sandbox');
 
-    const iframeSrc =
-      /** @type {string} */ (this.transformSrc_(
-        this.element.getAttribute('src')
-      ) ||
+    const iframeSrc = /** @type {string} */ (this.transformSrc_(
+      this.element.getAttribute('src')
+    ) ||
       this.transformSrcDoc_(
         this.element.getAttribute('srcdoc'),
         this.sandbox_
@@ -265,20 +291,7 @@ export class AmpIframe extends AMP.BaseElement {
       window.location.href,
       this.sandbox_
     );
-  }
 
-  /**
-   * @param {boolean=} onLayout
-   * @override
-   */
-  preconnectCallback(onLayout) {
-    if (this.iframeSrc) {
-      this.preconnect.url(this.iframeSrc, onLayout);
-    }
-  }
-
-  /** @override */
-  buildCallback() {
     this.placeholder_ = this.getPlaceholder();
     this.isClickToPlay_ = !!this.placeholder_;
 
@@ -308,13 +321,6 @@ export class AmpIframe extends AMP.BaseElement {
     this.isTrackingFrame_ = this.looksLikeTrackingIframe_();
     this.isDisallowedAsAd_ =
       this.isAdLike_ && !isAdPositionAllowed(element, this.win);
-
-    // When the framework has the need to remeasure us, our position might
-    // have changed. Send an intersection record if needed. This can be done by
-    // intersectionObserverApi onlayoutMeasure function.
-    if (this.intersectionObserverApi_) {
-      this.intersectionObserverApi_.fire();
-    }
   }
 
   /**
@@ -383,8 +389,11 @@ export class AmpIframe extends AMP.BaseElement {
     }
 
     if (this.isTrackingFrame_) {
-      trackingIframeCount++;
-      if (trackingIframeCount > 1) {
+      if (
+        !this.getAmpDoc().registerSingleton(
+          AMPDOC_SINGLETON_NAME.TRACKING_IFRAME
+        )
+      ) {
         console /*OK*/
           .error(
             'Only 1 analytics/tracking iframe allowed per ' +
@@ -420,10 +429,14 @@ export class AmpIframe extends AMP.BaseElement {
     iframe.setAttribute('allow', allowVal);
 
     setSandbox(this.element, iframe, this.sandbox_);
+
     iframe.src = this.iframeSrc;
 
     if (!this.isTrackingFrame_) {
-      this.intersectionObserverApi_ = new IntersectionObserverApi(this, iframe);
+      this.intersectionObserverHostApi_ = new IntersectionObserver3pHost(
+        this,
+        iframe
+      );
     }
 
     iframe.onload = () => {
@@ -448,7 +461,7 @@ export class AmpIframe extends AMP.BaseElement {
     listenFor(
       iframe,
       'embed-size',
-      data => {
+      (data) => {
         this.updateSize_(data['height'], data['width']);
       },
       /*opt_is3P*/ undefined,
@@ -456,9 +469,18 @@ export class AmpIframe extends AMP.BaseElement {
       /*opt_allowOpaqueOrigin*/ true
     );
 
+    // Listen for resize messages sent by Pym.js.
+    this.unlistenPym_ = listen(this.win, 'message', (event) => {
+      return this.listenForPymMessage_(/** @type {!MessageEvent} */ (event));
+    });
+
     if (this.isClickToPlay_) {
       listenFor(iframe, 'embed-ready', this.activateIframe_.bind(this));
     }
+
+    listenFor(iframe, MessageType.SEND_CONSENT_DATA, (data, source, origin) => {
+      this.sendConsentData_(source, origin);
+    });
 
     this.container_.appendChild(iframe);
 
@@ -476,6 +498,112 @@ export class AmpIframe extends AMP.BaseElement {
     });
   }
 
+  /**
+   * Listen for Pym.js messages for 'height' and 'width'.
+   *
+   * @see http://blog.apps.npr.org/pym.js/
+   * @param {!MessageEvent} event
+   * @private
+   */
+  listenForPymMessage_(event) {
+    if (!this.iframe_ || event.source !== this.iframe_.contentWindow) {
+      return;
+    }
+    const data = getData(event);
+    if (typeof data !== 'string' || !data.startsWith('pym')) {
+      return;
+    }
+
+    // The format of the message takes the form of `pymxPYMx${id}xPYMx${type}xPYMx${message}`.
+    // The id is unnecessary for integration with amp-iframe; the possible types include
+    // 'height', 'width', 'parentPositionInfo', 'navigateTo', and  'scrollToChildPos'.
+    // Only the 'height' and 'width' messages are currently supported.
+    // See <https://github.com/nprapps/pym.js/blob/57feb68/src/pym.js#L85-L102>
+    const args = data.split(/xPYMx/);
+    if ('height' === args[2]) {
+      this.updateSize_(parseInt(args[3], 10), undefined);
+    } else if ('width' === args[2]) {
+      this.updateSize_(undefined, parseInt(args[3], 10));
+    } else {
+      user().warn(TAG_, `Unsupported Pym.js message: ${data}`);
+    }
+  }
+
+  /**
+   * Requests consent data from consent module
+   * and forwards information to iframe
+   * @param {Window} source
+   * @param {string} origin
+   * @private
+   */
+  sendConsentData_(source, origin) {
+    const consentPolicyId = super.getConsentPolicy() || 'default';
+    const consentStringPromise = this.getConsentString_(consentPolicyId);
+    const metadataPromise = this.getConsentMetadata_(consentPolicyId);
+    const consentPolicyStatePromise = this.getConsentPolicyState_(
+      consentPolicyId
+    );
+
+    Promise.all([
+      metadataPromise,
+      consentStringPromise,
+      consentPolicyStatePromise,
+    ]).then((consents) => {
+      this.sendConsentDataToIframe_(
+        source,
+        origin,
+        dict({
+          'sentinel': 'amp',
+          'type': MessageType.CONSENT_DATA,
+          'consentMetadata': consents[0],
+          'consentString': consents[1],
+          'consentPolicyState': consents[2],
+        })
+      );
+    });
+  }
+
+  /**
+   * Send consent data to iframe
+   * @param {Window} source
+   * @param {string} origin
+   * @param {JsonObject} data
+   * @private
+   */
+  sendConsentDataToIframe_(source, origin, data) {
+    source./*OK*/ postMessage(data, origin);
+  }
+
+  /**
+   * Get the consent string
+   * @param {string} consentPolicyId
+   * @private
+   * @return {Promise}
+   */
+  getConsentString_(consentPolicyId = 'default') {
+    return getConsentPolicyInfo(this.element, consentPolicyId);
+  }
+
+  /**
+   * Get the consent metadata
+   * @param {string} consentPolicyId
+   * @private
+   * @return {Promise}
+   */
+  getConsentMetadata_(consentPolicyId = 'default') {
+    return getConsentMetadata(this.element, consentPolicyId);
+  }
+
+  /**
+   * Get the consent policy state
+   * @param {string} consentPolicyId
+   * @private
+   * @return {Promise}
+   */
+  getConsentPolicyState_(consentPolicyId = 'default') {
+    return getConsentPolicyState(this.element, consentPolicyId);
+  }
+
   /** @override */
   unlayoutOnPause() {
     return true;
@@ -488,6 +616,10 @@ export class AmpIframe extends AMP.BaseElement {
    * @override
    **/
   unlayoutCallback() {
+    if (this.unlistenPym_) {
+      this.unlistenPym_();
+      this.unlistenPym_ = null;
+    }
     if (this.iframe_) {
       removeElement(this.iframe_);
       if (this.placeholder_) {
@@ -495,20 +627,13 @@ export class AmpIframe extends AMP.BaseElement {
       }
 
       this.iframe_ = null;
-      // Needs to clean up intersectionObserverApi_
-      if (this.intersectionObserverApi_) {
-        this.intersectionObserverApi_.destroy();
-        this.intersectionObserverApi_ = null;
+      // Needs to clean up intersectionObserverHostApi_
+      if (this.intersectionObserverHostApi_) {
+        this.intersectionObserverHostApi_.destroy();
+        this.intersectionObserverHostApi_ = null;
       }
     }
     return true;
-  }
-
-  /** @override  */
-  viewportCallback(inViewport) {
-    if (this.intersectionObserverApi_) {
-      this.intersectionObserverApi_.onViewportCallback(inViewport);
-    }
   }
 
   /** @override  */
@@ -534,6 +659,11 @@ export class AmpIframe extends AMP.BaseElement {
           this.sandbox_
         );
       }
+    }
+    if (this.iframe_ && mutations['title']) {
+      // only propagating title because propagating all causes e2e error:
+      // See <https://travis-ci.com/ampproject/amphtml/jobs/657440421>
+      this.propagateAttributes(['title'], this.iframe_);
     }
   }
 
@@ -582,11 +712,14 @@ export class AmpIframe extends AMP.BaseElement {
    */
   updateSize_(height, width) {
     if (!this.isResizable_) {
-      this.user().error(
-        TAG_,
-        'Ignoring embed-size request because this iframe is not resizable',
-        this.element
-      );
+      if (!this.hasErroredEmbedSize_) {
+        this.user().error(
+          TAG_,
+          'Ignoring embed-size request because this iframe is not resizable',
+          this.element
+        );
+        this.hasErroredEmbedSize_ = true;
+      }
       return;
     }
 
@@ -630,6 +763,11 @@ export class AmpIframe extends AMP.BaseElement {
           if (newWidth !== undefined) {
             this.element.setAttribute('width', newWidth);
           }
+          this.element.overflowCallback(
+            /* overflown */ false,
+            newHeight,
+            newWidth
+          );
         },
         () => {}
       );
@@ -660,24 +798,20 @@ export class AmpIframe extends AMP.BaseElement {
 
     // Register action (even if targetOrigin_ is not available so we can
     // provide a helpful error message).
-    this.registerAction(
-      'postMessage',
-      invocation => {
-        if (this.targetOrigin_) {
-          this.iframe_.contentWindow./*OK*/ postMessage(
-            invocation.args,
-            this.targetOrigin_
-          );
-        } else {
-          user().error(
-            TAG_,
-            '"postMessage" action is only allowed with "src"' +
-              'attribute with an origin.'
-          );
-        }
-      },
-      ActionTrust.HIGH
-    );
+    this.registerAction('postMessage', (invocation) => {
+      if (this.targetOrigin_) {
+        this.iframe_.contentWindow./*OK*/ postMessage(
+          invocation.args,
+          this.targetOrigin_
+        );
+      } else {
+        user().error(
+          TAG_,
+          '"postMessage" action is only allowed with "src"' +
+            'attribute with an origin.'
+        );
+      }
+    });
 
     // However, don't listen for 'message' event if targetOrigin_ is null.
     if (!this.targetOrigin_) {
@@ -687,7 +821,7 @@ export class AmpIframe extends AMP.BaseElement {
     const maxUnexpectedMessages = 10;
     let unexpectedMessages = 0;
 
-    const listener = e => {
+    const listener = (e) => {
       if (e.source !== this.iframe_.contentWindow) {
         // Ignore messages from other iframes.
         return;
@@ -803,6 +937,6 @@ export function setTrackingIframeTimeoutForTesting(ms) {
   trackingIframeTimeout = ms;
 }
 
-AMP.extension(TAG_, '0.1', AMP => {
+AMP.extension(TAG_, '0.1', (AMP) => {
   AMP.registerElement(TAG_, AmpIframe);
 });

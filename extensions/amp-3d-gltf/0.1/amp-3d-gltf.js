@@ -15,12 +15,17 @@
  */
 import {ActionTrust} from '../../../src/action-constants';
 import {Deferred} from '../../../src/utils/promise';
+import {Services} from '../../../src/services';
 import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor, postMessage} from '../../../src/iframe-helper';
+import {
+  observeWithSharedInOb,
+  unobserveWithSharedInOb,
+} from '../../../src/viewport-observer';
 import {removeElement} from '../../../src/dom';
 
 const TAG = 'amp-3d-gltf';
@@ -58,16 +63,20 @@ export class Amp3dGltf extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    preloadBootstrap(this.win, this.preconnect);
-    this.preconnect.url(
+    const preconnect = Services.preconnectFor(this.win);
+    preloadBootstrap(this.win, this.getAmpDoc(), preconnect);
+    preconnect.url(
+      this.getAmpDoc(),
       'https://cdnjs.cloudflare.com/ajax/libs/three.js/91/three.js',
       opt_onLayout
     );
-    this.preconnect.url(
+    preconnect.url(
+      this.getAmpDoc(),
       'https://cdn.jsdelivr.net/npm/three@0.91/examples/js/loaders/GLTFLoader.js',
       opt_onLayout
     );
-    this.preconnect.url(
+    preconnect.url(
+      this.getAmpDoc(),
       'https://cdn.jsdelivr.net/npm/three@0.91/examples/js/controls/OrbitControls.js',
       opt_onLayout
     );
@@ -75,6 +84,8 @@ export class Amp3dGltf extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
+    unobserveWithSharedInOb(this.element);
+    this.viewportCallback_(false);
     if (this.iframe_) {
       removeElement(this.iframe_);
       this.iframe_ = null;
@@ -96,9 +107,9 @@ export class Amp3dGltf extends AMP.BaseElement {
         ? fmt(this.element.getAttribute(name))
         : dflt;
 
-    const bool = x => x !== 'false';
-    const string = x => x;
-    const number = x => parseFloat(x);
+    const bool = (x) => x !== 'false';
+    const string = (x) => x;
+    const number = (x) => parseFloat(x);
 
     const src = assertHttpsUrl(getOption('src', string, ''), this.element);
 
@@ -126,9 +137,12 @@ export class Amp3dGltf extends AMP.BaseElement {
     });
     this.registerAction(
       'setModelRotation',
-      invocation => {
-        this.sendCommandWhenReady_('setModelRotation', invocation.args).catch(
-          e => dev().error('AMP-3D-GLTF', 'setModelRotation failed: %s', e)
+      (invocation) => {
+        this.sendCommandWhenReady_(
+          'setModelRotation',
+          invocation.args
+        ).catch((e) =>
+          dev().error('AMP-3D-GLTF', 'setModelRotation failed: %s', e)
         );
       },
       ActionTrust.LOW
@@ -137,13 +151,16 @@ export class Amp3dGltf extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    observeWithSharedInOb(this.element, (inViewport) =>
+      this.viewportCallback_(inViewport)
+    );
     if (!isWebGLSupported()) {
       this.toggleFallback(true);
       return Promise.resolve();
     }
 
     const iframe = getIframe(this.win, this.element, '3d-gltf', this.context_);
-
+    iframe.title = this.element.title || 'GLTF 3D model';
     this.applyFillContent(iframe, true);
     this.iframe_ = iframe;
     this.unlistenMessage_ = devAssert(this.listenGltfViewerMessages_());
@@ -172,7 +189,7 @@ export class Amp3dGltf extends AMP.BaseElement {
         this.toggleFallback(true);
       }),
     ];
-    return () => disposers.forEach(d => d());
+    return () => disposers.forEach((d) => d());
   }
 
   /**
@@ -207,10 +224,10 @@ export class Amp3dGltf extends AMP.BaseElement {
 
   /**
    * @param {boolean} inViewport
-   * @override
+   * @private
    */
-  viewportCallback(inViewport) {
-    return this.sendCommandWhenReady_('toggleAmpViewport', inViewport);
+  viewportCallback_(inViewport) {
+    this.sendCommandWhenReady_('toggleAmpViewport', inViewport);
   }
 
   /** @override */
@@ -228,10 +245,10 @@ export class Amp3dGltf extends AMP.BaseElement {
    *
    */
   onLayoutMeasure() {
-    const box = this.getLayoutBox();
+    const {width, height} = this.getLayoutSize();
     this.sendCommandWhenReady_(
       'setSize',
-      dict({'width': box.width, 'height': box.height})
+      dict({'width': width, 'height': height})
     );
   }
 
@@ -241,6 +258,6 @@ export class Amp3dGltf extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, Amp3dGltf);
 });

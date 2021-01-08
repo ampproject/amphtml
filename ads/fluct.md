@@ -19,10 +19,13 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width="300" height="250"
-    type="fluct"
-    data-g="{GROUP-ID}"
-    data-u="{UNIT-ID}">
+<amp-ad
+  width="300"
+  height="250"
+  type="fluct"
+  data-g="{GROUP-ID}"
+  data-u="{UNIT-ID}"
+>
 </amp-ad>
 ```
 
@@ -32,5 +35,5 @@ For more information, please [contact fluct](https://corp.fluct.jp/en/contact.ph
 
 ### Required parameters
 
-- `data-g`
-- `data-u`
+-   `data-g`
+-   `data-u`

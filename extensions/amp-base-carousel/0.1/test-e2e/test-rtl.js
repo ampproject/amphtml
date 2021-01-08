@@ -18,6 +18,7 @@ import {getNextArrow, getPrevArrow, getSlide} from './helpers';
 
 const pageWidth = 800;
 const pageHeight = 600;
+const arrowMargin = 12;
 
 describes.endtoend(
   'AMP carousel rtl',
@@ -29,7 +30,7 @@ describes.endtoend(
     // TODO(sparhami) Make other environments work too
     environments: ['single'],
   },
-  async env => {
+  async (env) => {
     /** The total number of slides in the carousel */
     const SLIDE_COUNT = 7;
     let controller;
@@ -57,10 +58,10 @@ describes.endtoend(
       // TODO(sparhami) seems like it would be better to modify getElementRect
       // to return us the right coordinate as well like DomRect.
       await expect(controller.getElementRect(prevArrow)).to.include({
-        right: pageWidth,
+        right: pageWidth - arrowMargin,
       });
       await expect(controller.getElementRect(nextArrow)).to.include({
-        left: 0,
+        left: arrowMargin,
       });
     });
   }
