@@ -49,7 +49,10 @@ module.exports = function (context) {
       if (computed) {
         return false;
       }
-      if (object.type !== 'Identifier' || object.name !== 'preact') {
+      if (
+        object.type !== 'Identifier' ||
+        object.name.toLowerCase() !== 'preact'
+      ) {
         return false;
       }
       if (property.type !== 'Identifier' || !property.name.startsWith('use')) {
