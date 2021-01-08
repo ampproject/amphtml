@@ -960,7 +960,7 @@ export class BaseElement {
    * imperative API object, since this is where we define the element's custom
    * APIs.
    *
-   * @return {!Promise<!./base-element.BaseElement>}
+   * @return {!Promise<!Object>}
    */
   getApi() {
     return this;

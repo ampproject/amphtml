@@ -640,7 +640,9 @@ export class PreactBaseElement extends AMP.BaseElement {
   /**
    * Returns reference to upgraded imperative API object, as in React's
    * useImperativeHandle.
+   *
    * @return {!Promise<!API_TYPE>}
+   * @override
    */
   getApi() {
     const api = this.apiWrapper_;
