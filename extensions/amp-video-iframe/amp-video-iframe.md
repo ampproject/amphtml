@@ -455,7 +455,17 @@ Returns an object containing metadata about the host document:
 
 ```json
 {
-  "canonicalUrl": "foo.html",
-  "sourceUrl": "bar.html"
+  "canonicalUrl": "https://example.com/canonical.html",
+  "sourceUrl": "https://example.com/amp.html",
+  "title": "My host document's title",
+  "lang": "en"
 }
 ```
+
+-   `canonicalUrl` is the canonical URL.
+
+-   `sourceUrl` is the AMPHTML URL.
+
+-   `title` is the source URL's document title at the time the `<amp-video-iframe>` is initialized. `null` when the component is loaded in a shadow root.
+
+-   `lang` is the source URL's language specified in `<html ⚡️ lang="en">`. `null` when the component is loaded in a shadow root.

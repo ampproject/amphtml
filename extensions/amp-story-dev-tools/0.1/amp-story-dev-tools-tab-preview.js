@@ -613,8 +613,8 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
    * @private
    * */
   repositionDevices_() {
-    const layoutBox = this.getLayoutBox();
-    layoutBox.width *= 0.8; // To account for 10% horizontal padding.
+    const {width: layoutWidth, height} = this.getLayoutSize();
+    const width = layoutWidth * 0.8; // To account for 10% horizontal padding.
     let sumDeviceWidths = 0;
     let maxDeviceHeights = 0;
     // Find the sum of the device widths and max of heights since they are horizontally laid out.
@@ -627,11 +627,11 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
     });
     // Find the scale that covers up to 90% of width or 80% of height.
     const scale = Math.min(
-      (layoutBox.width / sumDeviceWidths) * 0.9,
-      (layoutBox.height / maxDeviceHeights) * 0.8
+      (width / sumDeviceWidths) * 0.9,
+      (height / maxDeviceHeights) * 0.8
     );
     const paddingSize =
-      (layoutBox.width - sumDeviceWidths * scale) / (this.devices_.length + 1);
+      (width - sumDeviceWidths * scale) / (this.devices_.length + 1);
     let cumWidthSum = paddingSize;
     this.mutateElement(() => {
       this.devices_.forEach((deviceSpecs) => {
