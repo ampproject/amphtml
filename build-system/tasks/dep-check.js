@@ -32,7 +32,7 @@ const {
 const {compileJison} = require('./compile-jison');
 const {css} = require('./css');
 const {cyan, red, yellow} = require('ansi-colors');
-const {isTravisBuild} = require('../common/travis');
+const {isCiBuild} = require('../common/ci');
 
 const root = process.cwd();
 const absPathRegExp = new RegExp(`^${root}/`);
@@ -208,7 +208,7 @@ function getGraph(entryModule) {
   module.deps = [];
 
   // TODO(erwinm): Try and work this in with `gulp build` so that
-  // we're not running browserify twice on travis.
+  // we're not running browserify twice during CI.
   const bundler = browserify(entryModule, {
     debug: true,
     fast: true,
@@ -306,7 +306,7 @@ async function depCheck() {
   const handlerProcess = createCtrlcHandler('dep-check');
   await css();
   await compileJison();
-  if (!isTravisBuild()) {
+  if (!isCiBuild()) {
     log('Checking dependencies...');
   }
   return getSrcs()

@@ -32,6 +32,7 @@ import {installAmpdocServices} from '../../src/service/core-services';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {setShadowDomSupportedVersionForTesting} from '../../src/web-components';
+import {toArray} from '../../src/types';
 import {toggleExperiment} from '../../src/experiments';
 import {vsyncForTesting} from '../../src/service/vsync-impl';
 
@@ -320,6 +321,7 @@ describes.fakeWin(
           expect(amp).to.equal(win.AMP);
           progress += 'HIGH';
         },
+        v: '$internalRuntimeVersion$',
       });
       expect(queueExtensions).to.have.length(2);
       expect(progress).to.equal('');
@@ -344,6 +346,7 @@ describes.fakeWin(
               expect(amp).to.equal(win.AMP);
               progress += 'A';
             },
+            v: '$internalRuntimeVersion$',
           });
           runChunksForTesting(win.document);
           return promise.then(() => {
@@ -364,6 +367,7 @@ describes.fakeWin(
           progress += 'C';
         },
         i: 'ext1',
+        v: '$internalRuntimeVersion$',
       });
       win.AMP.push({
         n: 'ext1',
@@ -372,6 +376,7 @@ describes.fakeWin(
           progress += 'A';
         },
         i: '_base_ext',
+        v: '$internalRuntimeVersion$',
       });
 
       win.AMP.push({
@@ -380,6 +385,7 @@ describes.fakeWin(
           expect(amp).to.equal(win.AMP);
           progress += 'B';
         },
+        v: '$internalRuntimeVersion$',
       });
 
       let script = win.document.querySelector('[data-script=_base_ext]');
@@ -417,6 +423,7 @@ describes.fakeWin(
           progress += 'A';
         },
         i: ['_base_ext1', '_base_ext2'],
+        v: '$internalRuntimeVersion$',
       });
 
       win.AMP.push({
@@ -426,6 +433,7 @@ describes.fakeWin(
           progress += 'B';
         },
         i: ['_base_ext1'],
+        v: '$internalRuntimeVersion$',
       });
 
       win.AMP.push({
@@ -434,6 +442,7 @@ describes.fakeWin(
           expect(amp).to.equal(win.AMP);
           progress += 'C';
         },
+        v: '$internalRuntimeVersion$',
       });
 
       let script1 = win.document.querySelector('[data-script=_base_ext1]');
@@ -537,12 +546,11 @@ describes.fakeWin(
       self.__AMP_MODE = {
         rtvVersion: 'test-version',
       };
-      toggleExperiment(win, 'version-locking', true);
       function addExisting(index) {
         const s = document.createElement('script');
         const name = 'amp-test-element' + index;
         s.setAttribute('custom-element', name);
-        s.setAttribute('src', `/${name}-0.1.js`);
+        s.setAttribute('src', `https://cdn.ampproject.org/v0/${name}-0.1.js`);
         win.document.head.appendChild(s);
         return s;
       }
@@ -634,21 +642,18 @@ describes.fakeWin(
       expect(s3.getAttribute('i-amphtml-loaded-new-version')).to.equal(
         'amp-test-element5'
       );
-      const inserted = win.document.head.querySelectorAll(
-        '[i-amphtml-inserted]'
+
+      const inserted = toArray(
+        win.document.head.querySelectorAll('[i-amphtml-inserted]')
+      ).map((s) => s.src);
+      expect(inserted).to.include(
+        'https://cdn.ampproject.org/rtv/test-version/v0/amp-test-element1-0.1.js'
       );
-      expect(inserted).to.have.length(3);
-      expect(inserted[0].getAttribute('src')).to.equal(
-        'https://cdn.ampproject.org/rtv/test-version' +
-          '/v0/amp-test-element1-0.1.js'
+      expect(inserted).to.include(
+        'https://cdn.ampproject.org/rtv/test-version/v0/amp-test-element4-0.1.js'
       );
-      expect(inserted[1].getAttribute('src')).to.equal(
-        'https://cdn.ampproject.org/rtv/test-version' +
-          '/v0/amp-test-element4-0.1.js'
-      );
-      expect(inserted[2].getAttribute('src')).to.equal(
-        'https://cdn.ampproject.org/rtv/test-version' +
-          '/v0/amp-test-element5-0.1.js'
+      expect(inserted).to.include(
+        'https://cdn.ampproject.org/rtv/test-version/v0/amp-test-element5-0.1.js'
       );
     });
 
@@ -687,7 +692,6 @@ describes.fakeWin(
 
       it('should export properties to global AMP object', () => {
         expect(win.AMP.BaseElement).to.be.a('function');
-        expect(win.AMP.BaseTemplate).to.be.a('function');
         expect(win.AMP.registerElement).to.be.a('function');
         expect(win.AMP.registerTemplate).to.be.a('function');
         expect(win.AMP.setTickFunction).to.be.a('function');
@@ -714,6 +718,7 @@ describes.fakeWin(
           f: (amp) => {
             amp.registerElement('amp-ext', win.AMP.BaseElement);
           },
+          v: '$internalRuntimeVersion$',
         });
         runChunksForTesting(win.document);
         yield extensions.waitForExtension(win, 'amp-ext');
@@ -756,6 +761,7 @@ describes.fakeWin(
           f: (amp) => {
             amp.registerElement('amp-ext', win.AMP.BaseElement, 'a{}');
           },
+          v: '$internalRuntimeVersion$',
         });
         runChunksForTesting(win.document);
 
@@ -801,6 +807,7 @@ describes.fakeWin(
           f: (amp) => {
             amp.registerServiceForDoc('service1', Service1);
           },
+          v: '$internalRuntimeVersion$',
         });
         runChunksForTesting(win.document);
 
@@ -830,6 +837,7 @@ describes.fakeWin(
           f: (amp) => {
             amp.registerServiceForDoc('service1', factory);
           },
+          v: '$internalRuntimeVersion$',
         });
         runChunksForTesting(win.document);
 
@@ -856,7 +864,6 @@ describes.fakeWin(
 
       it('should export properties to global AMP object', () => {
         expect(win.AMP.BaseElement).to.be.a('function');
-        expect(win.AMP.BaseTemplate).to.be.a('function');
         expect(win.AMP.registerElement).to.be.a('function');
         expect(win.AMP.registerTemplate).to.be.a('function');
         expect(win.AMP.setTickFunction).to.be.a('function');
@@ -881,6 +888,7 @@ describes.fakeWin(
           f: (amp) => {
             amp.registerElement('amp-ext', win.AMP.BaseElement);
           },
+          v: '$internalRuntimeVersion$',
         });
         runChunksForTesting(win.document);
 
@@ -928,6 +936,7 @@ describes.fakeWin(
           f: (amp) => {
             amp.registerElement('amp-ext', win.AMP.BaseElement, 'a{}');
           },
+          v: '$internalRuntimeVersion$',
         });
         runChunksForTesting(win.document);
 
@@ -978,6 +987,7 @@ describes.fakeWin(
           f: (amp) => {
             amp.registerServiceForDoc('service1', Service1);
           },
+          v: '$internalRuntimeVersion$',
         });
         runChunksForTesting(win.document);
 
@@ -1082,11 +1092,15 @@ describes.realWin(
           f: (amp) => {
             amp.registerServiceForDoc('service1', Service1);
           },
+          v: '$internalRuntimeVersion$',
         });
 
         const script = win.document.createElement('script');
         script.setAttribute('custom-element', 'amp-ext');
-        script.setAttribute('src', '');
+        script.setAttribute(
+          'src',
+          'https://cdn.ampproject.org/v0/amp-ext-0.1.js'
+        );
         importDoc.head.appendChild(script);
 
         win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
@@ -1218,11 +1232,20 @@ describes.realWin(
         ).to.contain('.keyframes');
       });
 
-      it('should ignore runtime extension', () => {
+      it('should ignore runtime', () => {
         extensionsMock.expects('preloadExtension').never();
 
         const scriptEl = win.document.createElement('script');
         scriptEl.setAttribute('src', 'https://cdn.ampproject.org/v0.js');
+        importDoc.head.appendChild(scriptEl);
+        win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
+      });
+
+      it('should ignore mjs runtime', () => {
+        extensionsMock.expects('preloadExtension').never();
+
+        const scriptEl = win.document.createElement('script');
+        scriptEl.setAttribute('src', 'https://cdn.ampproject.org/v0.mjs');
         importDoc.head.appendChild(scriptEl);
         win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
       });
@@ -1259,8 +1282,46 @@ describes.realWin(
 
         const scriptEl = win.document.createElement('script');
         scriptEl.setAttribute('custom-element', 'amp-ext1');
-        scriptEl.setAttribute('src', '');
+        scriptEl.setAttribute(
+          'src',
+          'https://cdn.ampproject.org/v0/amp-ext-0.1.js'
+        );
         importDoc.head.appendChild(scriptEl);
+        win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
+        expect(win.document.querySelector('script[custom-element="amp-ext1"]'))
+          .to.not.exist;
+      });
+
+      it('should import module/nomodule extension element', () => {
+        extensionsMock
+          .expects('preloadExtension')
+          .withExactArgs('amp-ext1', '0.1')
+          .returns(
+            Promise.resolve({
+              elements: {
+                'amp-ext1': function () {},
+              },
+            })
+          )
+          .once();
+
+        const mod = win.document.createElement('script');
+        mod.setAttribute('custom-element', 'amp-ext1');
+        mod.setAttribute(
+          'src',
+          'https://cdn.ampproject.org/v0/amp-ext-0.1.mjs'
+        );
+        mod.setAttribute('type', 'module');
+        const nomod = win.document.createElement('script');
+        nomod.setAttribute('custom-element', 'amp-ext1');
+        nomod.setAttribute(
+          'src',
+          'https://cdn.ampproject.org/v0/amp-ext-0.1.js'
+        );
+        nomod.setAttribute('nomodule', '');
+
+        importDoc.head.appendChild(mod);
+        importDoc.head.appendChild(nomod);
         win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
         expect(win.document.querySelector('script[custom-element="amp-ext1"]'))
           .to.not.exist;
@@ -1300,7 +1361,10 @@ describes.realWin(
 
         const scriptEl = win.document.createElement('script');
         scriptEl.setAttribute('custom-template', 'amp-ext1');
-        scriptEl.setAttribute('src', '');
+        scriptEl.setAttribute(
+          'src',
+          'https://cdn.ampproject.org/v0/amp-ext1-0.1.js'
+        );
         importDoc.head.appendChild(scriptEl);
         win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
         expect(win.document.querySelector('script[custom-template="amp-ext1"]'))
@@ -1454,9 +1518,12 @@ describes.realWin(
             f: (amp) => {
               amp.registerServiceForDoc('service1', Service1);
             },
+            v: '$internalRuntimeVersion$',
           });
 
-          writer.write('<script custom-element="amp-ext" src=""></script>');
+          writer.write(
+            '<script custom-element="amp-ext" src="https://cdn.ampproject.org/v0/amp-ext-0.1.js"></script>'
+          );
           writer.write('<body>');
 
           return ampdoc.waitForBodyOpen().then(() => {
@@ -1627,11 +1694,6 @@ describes.realWin(
         });
 
         it('should ignore unknown script', () => {
-          expectAsyncConsoleError(
-            '[multidoc-manager] - unknown script:  [object HTMLScriptElement] ' +
-              'https://cdn.ampproject.org/other.js'
-          );
-
           shadowDoc = win.AMP.attachShadowDocAsStream(hostElement, docUrl);
           writer = shadowDoc.writer;
           extensionsMock.expects('preloadExtension').never();
@@ -1665,7 +1727,9 @@ describes.realWin(
               })
             )
             .once();
-          writer.write('<script custom-element="amp-ext1" src=""></script>');
+          writer.write(
+            '<script custom-element="amp-ext1" src="https://cdn.ampproject.org/v0/amp-ext1-0.1.js"></script>'
+          );
           writer.write('<body>');
           return ampdoc.waitForBodyOpen().then(() => {
             expect(
@@ -1682,7 +1746,9 @@ describes.realWin(
             .withExactArgs('amp-ext1', '0.1')
             .returns(Promise.resolve({elements: {}}))
             .once();
-          writer.write('<script custom-template="amp-ext1" src=""></script>');
+          writer.write(
+            '<script custom-template="amp-ext1" src="https://cdn.ampproject.org/v0/amp-ext1-0.1.js"></script>'
+          );
           writer.write('<body>');
           return ampdoc.waitForBodyOpen().then(() => {
             expect(

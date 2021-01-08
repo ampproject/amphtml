@@ -26,8 +26,10 @@ import {Services} from '../../../src/services';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {getLocalizationService} from '../../amp-story/1.0/amp-story-localization-service';
 import {htmlFor} from '../../../src/static-template';
 import {removeChildren} from '../../../src/dom';
+import {setModalAsClosed, setModalAsOpen} from '../../../src/modal';
 import {toggle} from '../../../src/style';
 
 /** @type {string} */
@@ -74,8 +76,8 @@ export class AmpStoryEducation extends AMP.BaseElement {
     /** @private {!Element} */
     this.containerEl_ = this.win.document.createElement('div');
 
-    /** @private @const {!../../../src/service/localization.LocalizationService} */
-    this.localizationService_ = Services.localizationService(this.win);
+    /** @private {?../../../src/service/localization.LocalizationService} */
+    this.localizationService_ = null;
 
     /** @private {?boolean} */
     this.storyPausedStateToRestore_ = null;
@@ -94,7 +96,9 @@ export class AmpStoryEducation extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.localizationService_ = getLocalizationService(this.element);
     this.containerEl_.classList.add('i-amphtml-story-education');
+    toggle(this.element, false);
     toggle(this.containerEl_, false);
     this.startListening_();
     // Extra host to reset inherited styles and further enforce shadow DOM style
@@ -198,11 +202,14 @@ export class AmpStoryEducation extends AMP.BaseElement {
         this.storeService_.dispatch(Action.TOGGLE_EDUCATION, false);
         this.mutateElement(() => {
           removeChildren(this.containerEl_);
+          toggle(this.element, false);
           toggle(this.containerEl_, false);
           this.storeService_.dispatch(
             Action.TOGGLE_PAUSED,
             this.storyPausedStateToRestore_
           );
+          setModalAsClosed(this.element);
+          this.element.removeAttribute('aria-modal');
         });
         break;
       case State.NAVIGATION_TAP:
@@ -270,8 +277,13 @@ export class AmpStoryEducation extends AMP.BaseElement {
 
     this.mutateElement(() => {
       removeChildren(this.containerEl_);
+      toggle(this.element, true);
       toggle(this.containerEl_, true);
       this.containerEl_.appendChild(template);
+      if (!this.element.hasAttribute('aria-modal')) {
+        setModalAsOpen(this.element);
+        this.element.setAttribute('aria-modal', 'true');
+      }
     });
   }
 

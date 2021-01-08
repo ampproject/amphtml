@@ -28,6 +28,7 @@ describe('invokeWebWorker', () => {
 
   let ampWorker;
   let postMessageStub;
+  let blobStub;
   let fakeWorker;
   let fetchTextCallStub;
   let workerReadyPromise;
@@ -38,6 +39,7 @@ describe('invokeWebWorker', () => {
     });
 
     postMessageStub = window.sandbox.stub();
+    blobStub = window.sandbox.stub();
 
     fakeWorker = {};
     fakeWorker.postMessage = postMessageStub;
@@ -45,7 +47,7 @@ describe('invokeWebWorker', () => {
     // Fake Worker constructor just returns our `fakeWorker` instance.
     fakeWin = {
       Worker: () => fakeWorker,
-      Blob: window.sandbox.stub(),
+      Blob: blobStub,
       URL: {createObjectURL: window.sandbox.stub()},
       location: window.location,
     };
@@ -57,7 +59,7 @@ describe('invokeWebWorker', () => {
       .callsFake(() =>
         Promise.resolve({
           text() {
-            return Promise.resolve();
+            return Promise.resolve('//# sourceMappingURL=foo.js');
           },
         })
       );
@@ -276,6 +278,22 @@ describe('invokeWebWorker', () => {
         method: 'e',
         scope: 0,
       });
+    });
+  });
+
+  it('should replace the relative sourceMappingURL with the absolute one', () => {
+    invokeWebWorker(fakeWin, 'foo', ['bar', 123]);
+    getMode(fakeWin).bypassInterceptorForDev = true;
+
+    return workerReadyPromise.then(() => {
+      expect(blobStub).to.have.been.calledWithMatch(
+        [
+          '//# sourceMappingURL=http://localhost:9876/dist/ww.js.map\n//# sourceurl=http://localhost:9876/dist/ww.js',
+        ],
+        {
+          type: 'text/javascript',
+        }
+      );
     });
   });
 });

@@ -25,7 +25,7 @@ import {setStyles} from '../src/style';
  * @param {!Window} global
  */
 function getBeOpinion(global) {
-  loadScript(global, 'https://widget.beopinion.com/sdk.js', function () {});
+  loadScript(global, 'https://widget.beop.io/sdk.js', function () {});
 }
 
 /**
@@ -88,9 +88,6 @@ function createContainer(global, data) {
 function getBeOpinionAsyncInit(global, accountId) {
   const {context} = global;
   return function () {
-    context.onResizeDenied(function (requestedHeight, requestedWidth) {
-      context.requestResize(requestedWidth, requestedHeight);
-    });
     global.BeOpinionSDK.init({
       account: accountId,
       onContentReceive: function (hasContent) {
@@ -103,7 +100,11 @@ function getBeOpinionAsyncInit(global, accountId) {
       onHeightChange: function (newHeight) {
         const c = global.document.getElementById('c');
         const boundingClientRect = c./*REVIEW*/ getBoundingClientRect();
-        context.requestResize(boundingClientRect.width, newHeight);
+        context
+          .requestResize(boundingClientRect.width, newHeight)
+          .catch(function () {
+            context.requestResize(boundingClientRect.width, newHeight);
+          });
       },
     });
     global.BeOpinionSDK['watch'](); // global.BeOpinionSDK.watch() fails 'gulp check-types' validation

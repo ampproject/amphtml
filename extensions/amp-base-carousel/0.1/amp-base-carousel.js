@@ -29,14 +29,15 @@ import {Services} from '../../../src/services';
 import {createCustomEvent, getDetail} from '../../../src/event-helper';
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {htmlFor} from '../../../src/static-template';
-import {isLayoutSizeDefined} from '../../../src/layout';
 import {
+  dispatchCustomEvent,
   isRTL,
   iterateCursor,
   scopedQuerySelectorAll,
   toggleAttribute,
 } from '../../../src/dom';
+import {htmlFor} from '../../../src/static-template';
+import {isLayoutSizeDefined} from '../../../src/layout';
 import {toArray} from '../../../src/types';
 
 /**
@@ -160,6 +161,11 @@ class AmpCarousel extends AMP.BaseElement {
   }
 
   /** @override */
+  prerenderAllowed() {
+    return true;
+  }
+
+  /** @override */
   buildCallback() {
     this.action_ = Services.actionServiceForDoc(this.element);
 
@@ -233,8 +239,13 @@ class AmpCarousel extends AMP.BaseElement {
   /**
    * Moves the Carousel to a given index.
    * @param {number} index
+   * @param {{
+   *   smoothScroll: (boolean|undefined),
+   *   actionSource: (!ActionSource|undefined),
+   * }=} options
    */
-  goToSlide(index, {smoothScroll = false, actionSource} = {}) {
+  goToSlide(index, options = {}) {
+    const {smoothScroll = false, actionSource} = options;
     this.carousel_.goToSlide(index, {smoothScroll, actionSource});
   }
 
@@ -439,7 +450,7 @@ class AmpCarousel extends AMP.BaseElement {
       'goToSlide',
       (actionInvocation) => {
         const {args, trust} = actionInvocation;
-        this.carousel_.goToSlide(args['index'] || -1, {
+        this.carousel_.goToSlide(args['index'] ?? -1, {
           actionSource: this.getActionSource_(trust),
         });
       },
@@ -528,6 +539,7 @@ class AmpCarousel extends AMP.BaseElement {
   updateUi_() {
     const index = this.carousel_.getCurrentIndex();
     const loop = this.carousel_.isLooping();
+    const visibleCount = this.carousel_.getVisibleCount();
     // TODO(sparhami) for Shadow DOM, we will need to get the assigned nodes
     // instead.
     iterateCursor(this.prevArrowSlot_.children, (child) => {
@@ -535,7 +547,7 @@ class AmpCarousel extends AMP.BaseElement {
       toggleAttribute(child, 'disabled', disabled);
     });
     iterateCursor(this.nextArrowSlot_.children, (child) => {
-      const disabled = !loop && index === this.slides_.length - 1;
+      const disabled = !loop && index >= this.slides_.length - visibleCount;
       toggleAttribute(child, 'disabled', disabled);
     });
     toggleAttribute(
@@ -628,7 +640,7 @@ class AmpCarousel extends AMP.BaseElement {
 
     const action = createCustomEvent(this.win, `slidescroll.${name}`, data);
     this.action_.trigger(this.element, name, action, trust);
-    this.element.dispatchCustomEvent(name, data);
+    dispatchCustomEvent(this.element, name, data);
     this.hadTouch_ = this.hadTouch_ || actionSource === ActionSource.TOUCH;
     this.updateUi_();
   }

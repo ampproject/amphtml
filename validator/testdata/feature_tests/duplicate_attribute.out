@@ -35,7 +35,7 @@ feature_tests/duplicate_attribute.html:30:2 The tag 'script' contains the attrib
 >>   ^~~~~~~~~
 feature_tests/duplicate_attribute.html:31:2 The tag 'script' contains the attribute 'custom-element' repeated multiple times.
 >>   ^~~~~~~~~
-feature_tests/duplicate_attribute.html:31:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags)
+feature_tests/duplicate_attribute.html:31:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
 |
 |  </head>
 |  <body>
@@ -45,7 +45,7 @@ feature_tests/duplicate_attribute.html:31:2 Custom JavaScript is not allowed. (s
 >>    ^~~~~~~~~
 feature_tests/duplicate_attribute.html:37:3 The tag 'amp-img' contains the attribute 'width' repeated multiple times.
 >>    ^~~~~~~~~
-feature_tests/duplicate_attribute.html:37:3 The attribute 'width' in tag 'amp-img' is set to the invalid value '100%'. (see https://amp.dev/documentation/components/amp-img)
+feature_tests/duplicate_attribute.html:37:3 The attribute 'width' in tag 'amp-img' is set to the invalid value '100%'. (see https://amp.dev/documentation/components/amp-img/)
 |     <amp-img src="a.png" width=600 width='100%' height=800></amp-img>
 >>    ^~~~~~~~~
 feature_tests/duplicate_attribute.html:38:3 The tag 'amp-img' contains the attribute 'width' repeated multiple times.
@@ -58,7 +58,7 @@ feature_tests/duplicate_attribute.html:41:3 The tag 'script' contains the attrib
 >>    ^~~~~~~~~
 feature_tests/duplicate_attribute.html:42:3 The tag 'script' contains the attribute 'type' repeated multiple times.
 >>    ^~~~~~~~~
-feature_tests/duplicate_attribute.html:42:3 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags)
+feature_tests/duplicate_attribute.html:42:3 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
 |
 |  </body>
 |  </html>

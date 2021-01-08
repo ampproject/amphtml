@@ -120,6 +120,11 @@ export class AmpNestedMenu extends AMP.BaseElement {
     return layout == Layout.FILL;
   }
 
+  /** @override */
+  prerenderAllowed() {
+    return true;
+  }
+
   /**
    * Handler for click event on any element inside the component.
    * @param {!Event} e

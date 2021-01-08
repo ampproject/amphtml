@@ -18,7 +18,6 @@ import {Action, AmpStoryStoreService} from '../amp-story-store-service';
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {AmpStoryGridLayer} from '../amp-story-grid-layer';
 import {AmpStoryPage} from '../amp-story-page';
-import {LocalizationService} from '../../../../src/service/localization';
 import {MediaType} from '../media-pool';
 import {Services} from '../../../../src/services';
 import {registerServiceBuilder} from '../../../../src/service';
@@ -51,11 +50,6 @@ describes.realWin('amp-story-grid-layer', {amp: true}, (env) => {
       return storeService;
     });
 
-    const localizationService = new LocalizationService(win);
-    registerServiceBuilder(win, 'localization', function () {
-      return localizationService;
-    });
-
     registerServiceBuilder(win, 'performance', function () {
       return {
         isPerformanceTrackingOn: () => false,
@@ -64,6 +58,8 @@ describes.realWin('amp-story-grid-layer', {amp: true}, (env) => {
 
     const story = win.document.createElement('amp-story');
     story.getImpl = () => Promise.resolve(mediaPoolRoot);
+    // Makes whenUpgradedToCustomElement() resolve immediately.
+    story.createdCallback = Promise.resolve();
 
     element = win.document.createElement('amp-story-page');
     gridLayerEl = win.document.createElement('amp-story-grid-layer');

@@ -16,12 +16,19 @@
 
 import {
   CONSENT_ITEM_STATE,
+  ConsentMetadataDef,
+  assertMetadataValues,
+  constructMetadata,
   convertEnumValueToState,
   getConsentStateValue,
   hasStoredValue,
 } from './consent-info';
 import {CSS} from '../../../build/amp-consent-0.1.css';
-import {ConsentConfig, expandPolicyConfig} from './consent-config';
+import {
+  ConsentConfig,
+  expandConsentEndpointUrl,
+  expandPolicyConfig,
+} from './consent-config';
 import {ConsentPolicyManager} from './consent-policy-manager';
 import {ConsentStateManager} from './consent-state-manager';
 import {ConsentUI} from './consent-ui';
@@ -40,7 +47,7 @@ import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
-import {isEnumValue} from '../../../src/types';
+import {isEnumValue, isObject} from '../../../src/types';
 import {toggle} from '../../../src/style';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';
@@ -238,15 +245,16 @@ export class AmpConsent extends AMP.BaseElement {
       this.handleAction_(ACTION_TYPE.DISMISS);
     });
 
-    this.registerAction('prompt', () => {
-      this.scheduleDisplay_(true);
-    });
+    this.registerAction('prompt', (invocation) =>
+      this.handleReprompt_(invocation)
+    );
 
     this.enableExternalInteractions_();
   }
 
   /**
    * Listen to external consent flow iframe's response
+   * with consent string and metadata.
    */
   enableExternalInteractions_() {
     this.win.addEventListener('message', (event) => {
@@ -255,6 +263,7 @@ export class AmpConsent extends AMP.BaseElement {
       }
 
       let consentString;
+      let metadata;
       const data = getData(event);
 
       if (!data || data['type'] != 'consent-response') {
@@ -281,12 +290,13 @@ export class AmpConsent extends AMP.BaseElement {
               TAG,
               'Consent string value %s not applicable on user dismiss, ' +
                 'stored value will be kept and used',
-              consentString
+              data['info']
             );
           }
           data['info'] = undefined;
         }
         consentString = data['info'];
+        metadata = this.validateMetadata_(data['consentMetadata']);
       }
 
       const iframes = this.element.querySelectorAll('iframe');
@@ -294,7 +304,7 @@ export class AmpConsent extends AMP.BaseElement {
       for (let i = 0; i < iframes.length; i++) {
         if (iframes[i].contentWindow === event.source) {
           const action = data['action'];
-          this.handleAction_(action, consentString);
+          this.handleAction_(action, consentString, metadata);
           return;
         }
       }
@@ -372,10 +382,12 @@ export class AmpConsent extends AMP.BaseElement {
 
   /**
    * Handler User action
+   *
    * @param {string} action
    * @param {string=} consentString
+   * @param {!ConsentMetadataDef=} opt_consentMetadata
    */
-  handleAction_(action, consentString) {
+  handleAction_(action, consentString, opt_consentMetadata) {
     if (!isEnumValue(ACTION_TYPE, action)) {
       // Unrecognized action
       return;
@@ -397,13 +409,15 @@ export class AmpConsent extends AMP.BaseElement {
       //accept
       this.consentStateManager_.updateConsentInstanceState(
         CONSENT_ITEM_STATE.ACCEPTED,
-        consentString
+        consentString,
+        opt_consentMetadata
       );
     } else if (action == ACTION_TYPE.REJECT) {
       // reject
       this.consentStateManager_.updateConsentInstanceState(
         CONSENT_ITEM_STATE.REJECTED,
-        consentString
+        consentString,
+        opt_consentMetadata
       );
     } else if (action == ACTION_TYPE.DISMISS) {
       this.consentStateManager_.updateConsentInstanceState(
@@ -416,11 +430,23 @@ export class AmpConsent extends AMP.BaseElement {
   }
 
   /**
+   * Handle the prompt action to re-prompt.
+   * Accpet arg expireCache=true
+   * @param {!../../../src/service/action-impl.ActionInvocation} invocation
+   */
+  handleReprompt_(invocation) {
+    const {args} = invocation;
+    if (args && args['expireCache'] === true) {
+      this.consentStateManager_.setDirtyBit();
+    }
+    this.scheduleDisplay_(true);
+  }
+
+  /**
    * Init the amp-consent by registering and initiate consent instance.
    */
   init_() {
     this.passSharedData_();
-    this.setGdprApplies();
     this.syncRemoteConsentState_();
 
     this.getConsentRequiredPromise_()
@@ -484,30 +510,6 @@ export class AmpConsent extends AMP.BaseElement {
   }
 
   /**
-   * Create and set gdprApplies promise form consent manager.
-   * Default value to remote `consentRequired`, if no
-   * `gdprApplies` value is provided.
-   *
-   * TODO(micajuinho) remove this method (and subsequent methods
-   * in consent-state-manager) in favor of consolidation with
-   * consentString
-   */
-  setGdprApplies() {
-    const responsePromise = this.getConsentRemote_();
-    const gdprAppliesPromise = responsePromise.then((response) => {
-      if (!response) {
-        return null;
-      }
-      const gdprApplies = response['gdprApplies'];
-      return gdprApplies === undefined || typeof gdprApplies !== 'boolean'
-        ? response['consentRequired']
-        : gdprApplies;
-    });
-
-    this.consentStateManager_.setConsentInstanceGdprApplies(gdprAppliesPromise);
-  }
-
-  /**
    * Clear cache for server side decision and then sync.
    */
   syncRemoteConsentState_() {
@@ -522,8 +524,6 @@ export class AmpConsent extends AMP.BaseElement {
         this.consentStateManager_.setDirtyBit();
       }
 
-      // TODO(micajuineho) When we consolidate, add gdprApplies field
-      // to be set with consentString.
       // Decision from promptUI takes precedence over consent decision from response
       if (
         !!response['consentRequired'] &&
@@ -531,7 +531,8 @@ export class AmpConsent extends AMP.BaseElement {
       ) {
         this.updateCacheIfNotNull_(
           response['consentStateValue'],
-          response['consentString'] || undefined
+          response['consentString'] || undefined,
+          response['consentMetadata'] || undefined
         );
       }
     });
@@ -539,16 +540,23 @@ export class AmpConsent extends AMP.BaseElement {
 
   /**
    * Sync with local storage if consentRequired is true.
+   *
    * @param {string=} responseStateValue
    * @param {string=} responseConsentString
+   * @param {JsonObject=} opt_responseMetadata
    */
-  updateCacheIfNotNull_(responseStateValue, responseConsentString) {
+  updateCacheIfNotNull_(
+    responseStateValue,
+    responseConsentString,
+    opt_responseMetadata
+  ) {
     const consentStateValue = convertEnumValueToState(responseStateValue);
     // consentStateValue and consentString are treated as a pair that will update together
     if (consentStateValue !== null) {
       this.consentStateManager_.updateConsentInstanceState(
         consentStateValue,
-        responseConsentString
+        responseConsentString,
+        this.validateMetadata_(opt_responseMetadata)
       );
     }
   }
@@ -571,6 +579,7 @@ export class AmpConsent extends AMP.BaseElement {
         const request = /** @type {!JsonObject} */ ({
           'consentInstanceId': this.consentId_,
           'consentStateValue': getConsentStateValue(storedInfo['consentState']),
+          'consentMetadata': storedInfo['consentMetadata'],
           'consentString': storedInfo['consentString'],
           'isDirty': !!storedInfo['isDirty'],
           'matchedGeoGroup': this.matchedGeoGroup_,
@@ -589,13 +598,22 @@ export class AmpConsent extends AMP.BaseElement {
         const sourceBase = getSourceUrl(ampdoc.getUrl());
         const resolvedHref = resolveRelativeUrl(href, sourceBase);
         const xhrService = Services.xhrFor(this.win);
-        return ampdoc.whenFirstVisible().then(() => {
-          return xhrService
-            .fetchJson(resolvedHref, init)
-            .then((res) =>
-              xhrService.xssiJson(res, this.consentConfig_['xssiPrefix'])
-            );
-        });
+        return ampdoc.whenFirstVisible().then(() =>
+          expandConsentEndpointUrl(this.element, resolvedHref).then(
+            (expandedHref) =>
+              xhrService.fetchJson(expandedHref, init).then((res) =>
+                xhrService
+                  .xssiJson(res, this.consentConfig_['xssiPrefix'])
+                  .catch((e) => {
+                    user().error(
+                      TAG,
+                      'Could not parse the `checkConsentHref` response.',
+                      e
+                    );
+                  })
+              )
+          )
+        );
       });
     }
     return this.remoteConfigPromise_;
@@ -683,6 +701,28 @@ export class AmpConsent extends AMP.BaseElement {
    */
   getIsPromptUiOnForTesting() {
     return this.isPromptUIOn_;
+  }
+
+  /**
+   * Convert valid opt_metadta into ConsentMetadataDef
+   * @param {JsonObject=} opt_metadata
+   * @return {ConsentMetadataDef|undefined}
+   */
+  validateMetadata_(opt_metadata) {
+    if (!opt_metadata) {
+      return;
+    }
+    if (!isObject(opt_metadata)) {
+      user().error(TAG, 'CMP metadata is not an object.');
+      return;
+    }
+    assertMetadataValues(opt_metadata);
+    return constructMetadata(
+      opt_metadata['consentStringType'],
+      opt_metadata['additionalConsent'],
+      opt_metadata['gdprApplies'],
+      opt_metadata['purposeOne']
+    );
   }
 }
 

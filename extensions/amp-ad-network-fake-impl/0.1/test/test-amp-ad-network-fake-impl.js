@@ -47,6 +47,9 @@ describes.realWin(
       fakeImplElem = doc.createElement('amp-ad');
       fakeImplElem.setAttribute('type', 'fake');
       fakeImplElem.setAttribute('src', 'https://fake.com');
+      fakeImplElem.setAttribute('layout', 'fixed');
+      fakeImplElem.setAttribute('width', '300');
+      fakeImplElem.setAttribute('height', '250');
     });
 
     it('should not send ad request with valid id', () => {
@@ -219,6 +222,48 @@ describes.realWin(
       );
       expect(transformed).to.include(
         `"images":["data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAD6BAMAAADpQ2fAAAAAG1BMVEUiIiKqqqqIiIhVVVVmZmYzMzN3d3dERESZmZlLV2+BAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAEWklEQVR4nO2azVPaQBiHUyHGY0OtchS0jEeVOvYIlmqPItPao0ypcixTrT2KtZY/u7sJyW7ebBJ2wiZO5/dcDNlk87gfb/ZdsCwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwX9FwU9h7nlodaEFrzqDdPtO85ZPM0HVv5c/LsbL2Xfd7nvu7Oe9PAFo6QEsHaOkALR2gpQO0dICWDtDSwbDWxcnudPbwVXmJ/bY5q8+aoyPF8tiolv0xWOJfxwt/igRg57BILUdKRn7TwneRzGSHVGJQy46kSG+ihb9IxlSfn6/2PFjmMuqF6KfqKVpd73Gt0dWu9+BI3VXfpdlqzuZe84I1VZZ3v0Stc/7ca284O2N2vC4XstZwa0feof3juEAte8qswhbiI6kjCnljrYsJ6BwXpvUlImKz5nklCtmIrkXCwqBRjBZvrL/SZ94+QoQVXpLrg79+cs68D0Wqrpv3J2utsC48IxduSY619GpNBQhW7+vIiVWpF1lP/SlFy6YRgXdcEJusfubOjiEt1k0b8SfticOM4WJIq0/70BttW/PDYRgPCtbaj3dTRZg2RH8Wq9VQdNM0DPSNrIloSMuODy3edYFMWa1VicR08ahQsJyxxYLUy9jJfnhp9krbjNaaFNLlk53woZdlaCnj5WooowgfhWhNVGerYROulvRO7KrCeCVcoThuVi+a0VJONUfMgyFdbxWjpQxMthhRfLEXy4WK0FKMHaa1GRyydaD7mNJeZrSmiiAva3n5h1v7ULAWe+RdHDn0e9ma+xRLpw1rqRFaQcad0GJlaVnOcH7uMWFhVI6W2DepKxqsPC2eHM5PfytMSzXk7+5uyXU3Y9+rU5SWIkAo8VusTusoW8uyDuK9ay6cZi3WJT5zL5JUmtHKXqzL8JC/GT31HLR4JeR6M1rZOUSEaqwXzWjp1jqke1hmtCaav5hao4PLjFY/M7WJUiFbq+YSsnudWmyac5jRWs3MuAh06prRcminZDGMa+l/R5CpZcUCUQY0oujOGUqC1lCz2oK0JppjnnZiP+fv5hK0VlQ7SSnQd7tuhKEkaDl0Wz6d2DbdC9WWT34tvkupUW+VNq5u4KMkafV1VoL86ug2nXbgW1CLvU40RkeDXlzVDXwLaqVuypyTW1jbkI0nWzfwLarF5iLZlLGPg6NJPZLk82+P6byd5osQybuzPKXZlj4PGuH/z6Latmgd/l1jrMO7+XoxWYv3jPsUFA7GUrcwLbf2/izQdRV7lt4OmH/FzdMytfjrlov12u3eydTLBoOSvp+0Pox6vSs/s76kNzveDa0ev1VjSi+gZQebHwGhlkNLFDuDXVG6XC3qtSG9fA8iJapRVJma0rJs6em100jRYCyKtpU3V0MvrbfrQjgnu/4oim/7XfhF9VHSv+V4I7LeOk0oz4ed/CN6O+tL+5R7AQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIC8/APxIjOC0ym0IgAAAABJRU5ErkJggg=="]`
+      );
+    });
+
+    it('renders using srcdoc', async () => {
+      // Allow real fetching of data url, fetch-mock is unable to handle it.
+      env.win.fetch = env.fetchMock.realFetch;
+      const creative = `
+      <!doctype html>
+      <html ⚡4ads>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width,minimum-scale=1">
+        <style amp4ads-boilerplate>body{visibility:hidden}</style>
+        <style amp-custom>
+          #foo { background-color: red; }
+        </style>
+        <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
+      </head>
+      <body>
+        <p id="foo">Hello, AMP4ADS world.</p>
+      </body>
+      </html>
+      `;
+      fakeImplElem.removeAttribute('src');
+      fakeImplElem.setAttribute('srcdoc', creative);
+      fakeImplElem.setAttribute('id', 'i-amphtml-demo-fake');
+      fakeImplElem.setAttribute('a4a-conversion', true);
+      doc.body.appendChild(fakeImplElem);
+
+      const fakeImpl = new AmpAdNetworkFakeImpl(fakeImplElem);
+      fakeImpl.buildCallback();
+
+      expect(fakeImpl.isValidElement()).to.be.true;
+      expect(fakeImpl.getAdUrl()).to.equal(
+        'data:text/html,' + encodeURIComponent(creative)
+      );
+      const response = await fakeImpl.sendXhrRequest(fakeImpl.getAdUrl());
+      const responseText = await response.text();
+      expect(responseText).to.contain('#foo { background-color: red; }');
+      expect(responseText).to.contain('<p id="foo">Hello, AMP4ADS world.</p>');
+      expect(responseText).to.contain(
+        '<script type="application/json" amp-ad-metadata>{"ampRuntimeUtf16CharOffsets":[110,183]}</script></body></html>'
       );
     });
   }

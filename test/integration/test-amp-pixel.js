@@ -18,7 +18,7 @@ import {AmpPixel} from '../../builtins/amp-pixel';
 import {BrowserController, RequestBank} from '../../testing/test-helper';
 import {createElementWithAttributes} from '../../src/dom';
 
-describe.configure().run('amp-pixel', function () {
+describe('amp-pixel', function () {
   describes.integration(
     'amp-pixel macro integration test',
     {
@@ -32,6 +32,10 @@ describe.configure().run('amp-pixel', function () {
       beforeEach(() => {
         const browser = new BrowserController(env.win);
         return browser.waitForElementBuild('amp-pixel');
+      });
+
+      afterEach(() => {
+        return RequestBank.tearDown();
       });
 
       it('should expand the TITLE macro', () => {
@@ -57,6 +61,10 @@ describe.configure().run('amp-pixel', function () {
         return browser.waitForElementBuild('amp-pixel');
       });
 
+      afterEach(() => {
+        return RequestBank.tearDown();
+      });
+
       it('should ignore leading spaces and resolve correctly', () => {
         return RequestBank.withdraw().then((req) => {
           expect(req.url).to.equal('/?nested=1.1234');
@@ -75,6 +83,10 @@ describe.configure().run('amp-pixel', function () {
       beforeEach(() => {
         const browser = new BrowserController(env.win);
         return browser.waitForElementBuild('amp-pixel');
+      });
+
+      afterEach(() => {
+        return RequestBank.tearDown();
       });
 
       it('should keep referrer if no referrerpolicy specified', () => {
@@ -96,6 +108,10 @@ describe.configure().run('amp-pixel', function () {
       beforeEach(() => {
         const browser = new BrowserController(env.win);
         return browser.waitForElementBuild('amp-pixel');
+      });
+
+      afterEach(() => {
+        return RequestBank.tearDown();
       });
 
       it('should remove referrer if referrerpolicy=no-referrer', () => {

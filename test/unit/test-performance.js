@@ -16,12 +16,26 @@
 
 import * as IniLoad from '../../src/ini-load';
 import * as lolex from 'lolex';
+import {
+  Performance,
+  installPerformanceService,
+} from '../../src/service/performance-impl';
 import {Services} from '../../src/services';
 import {VisibilityState} from '../../src/visibility-state';
 import {getMode} from '../../src/mode';
-import {installPerformanceService} from '../../src/service/performance-impl';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installRuntimeServices} from '../../src/service/core-services';
+
+describes.realWin('performance', {amp: false}, (env) => {
+  it('should be resilient to unsupported PerformanceObserver entry types', () => {
+    env.sandbox.stub(env.win.PerformanceObserver.prototype, 'observe').throws();
+    allowConsoleError(() => {
+      expect(() => {
+        new Performance(env.win);
+      }).to.not.throw();
+    });
+  });
+});
 
 describes.realWin('performance', {amp: true}, (env) => {
   let perf;
@@ -779,6 +793,30 @@ describes.realWin('performance with experiment', {amp: true}, (env) => {
       );
     });
   });
+
+  it('adds ssr experiments', () => {
+    env.sandbox
+      .stub(env.ampdoc, 'getMetaByName')
+      .withArgs('amp-usqp')
+      .returns('1=1,2=0');
+    return perf.coreServicesAvailable().then(() => {
+      viewerSendMessageStub.reset();
+      perf.flush();
+      expect(viewerSendMessageStub).to.be.calledWith(
+        'sendCsi',
+        env.sandbox.match((payload) => {
+          const experiments = payload.ampexp.split(',');
+          expect(experiments).to.have.length(3);
+          expect(experiments).to.have.members([
+            'rtv-' + getMode(win).rtvVersion,
+            'ssr-1=1',
+            'ssr-2=0',
+          ]);
+          return true;
+        })
+      );
+    });
+  });
 });
 
 describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
@@ -819,11 +857,12 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
     // offered in fake-dom.js. We can't immediately because
     // document.visibilityState is a read-only property in that object.
     fakeWin = {
+      CustomEvent: env.win.CustomEvent,
       Date: env.win.Date,
       PerformanceObserver: env.sandbox.stub(),
       addEventListener: env.sandbox.stub(),
       removeEventListener: env.win.removeEventListener,
-      dispatchEvent: env.win.dispatchEvent,
+      dispatchEvent: (e) => env.win.dispatchEvent(e),
       document: {
         addEventListener: env.sandbox.stub(),
         hidden: false,
@@ -867,6 +906,8 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       onVisibilityChanged: () => {},
       whenFirstVisible: () => unresolvedPromise,
       getVisibilityState: () => viewerVisibilityState,
+      getFirstVisibleTime: () => 0,
+      isSingleDoc: () => true,
     });
     env.sandbox.stub(Services, 'viewerForDoc').returns({
       isEmbedded: () => {},
@@ -875,9 +916,13 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
     env.sandbox.stub(Services, 'resourcesForDoc').returns({
       getResourcesInRect: () => unresolvedPromise,
       whenFirstPass: () => Promise.resolve(),
+      getSlowElementRatio: () => 1,
     });
     env.sandbox.stub(Services, 'viewportForDoc').returns({
       getSize: () => viewportSize,
+    });
+    env.sandbox.stub(Services, 'documentInfoForDoc').returns({
+      canonicalUrl: 'https://example.com/amp.html',
     });
   }
 
@@ -921,7 +966,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
 
       const perf = Services.performanceFor(env.win);
 
-      expect(perf.events_.length).to.equal(2);
+      expect(perf.events_.length).to.equal(3);
       expect(perf.events_[0]).to.be.jsonEqual(
         {
           label: 'fp',
@@ -929,6 +974,10 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
         },
         {
           label: 'fcp',
+          delta: 15,
+        },
+        {
+          label: 'fcpv',
           delta: 15,
         }
       );
@@ -951,6 +1000,8 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       env.sandbox
         .stub(env.win, 'PerformanceObserver')
         .callsFake(PerformanceObserverStub);
+
+      env.sandbox.stub(env.ampdoc, 'getFirstVisibleTime').callsFake(() => null);
 
       installPerformanceService(env.win);
 
@@ -977,7 +1028,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       };
       // Fake a triggering of the first-input event.
       performanceObserver.triggerCallback(list);
-      expect(perf.events_.length).to.equal(2);
+      expect(perf.events_.length).to.equal(3);
       expect(perf.events_[0]).to.be.jsonEqual(
         {
           label: 'fp',
@@ -985,6 +1036,10 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
         },
         {
           label: 'fcp',
+          delta: 15,
+        },
+        {
+          label: 'fcpv',
           delta: 15,
         }
       );
@@ -995,6 +1050,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
     beforeEach(() => {
       setupFakesForVisibilityStateManipulation();
     });
+
     it('after performance service registered', () => {
       // Fake the Performance API.
       fakeWin.PerformanceObserver.supportedEntryTypes = [
@@ -1039,13 +1095,15 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       // The document has become hidden, e.g. via the user switching tabs.
       toggleVisibility(fakeWin, false);
 
-      expect(perf.events_.length).to.equal(2);
-      expect(perf.events_[0]).to.be.jsonEqual({
+      const lcpEvents = perf.events_.filter((evt) =>
+        evt.label.startsWith('lcp')
+      );
+      expect(lcpEvents.length).to.equal(3);
+      expect(perf.events_).deep.include({
         label: 'lcpl',
         delta: 10,
       });
-
-      expect(perf.events_[1]).to.be.jsonEqual({
+      expect(perf.events_).deep.include({
         label: 'lcpr',
         delta: 23,
       });
@@ -1189,7 +1247,8 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
 
       // The document has become hidden, e.g. via the user switching tabs.
       toggleVisibility(fakeWin, false);
-      expect(perf.events_.length).to.equal(1);
+      let clsEvents = perf.events_.filter((event) => event.label === 'cls');
+      expect(clsEvents.length).equal(1);
       expect(perf.events_[0]).to.be.jsonEqual({
         label: 'cls',
         delta: 0.55,
@@ -1216,8 +1275,9 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       });
 
       toggleVisibility(fakeWin, false);
-      expect(perf.events_.length).to.equal(2);
-      expect(perf.events_[1]).to.be.jsonEqual({
+      clsEvents = perf.events_.filter((event) => event.label.startsWith('cls'));
+      expect(clsEvents.length).to.equal(2);
+      expect(clsEvents).to.deep.include({
         label: 'cls-2',
         delta: 1.5501,
       });
@@ -1231,7 +1291,8 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       });
 
       toggleVisibility(fakeWin, false);
-      expect(perf.events_.length).to.equal(2);
+      clsEvents = perf.events_.filter((event) => event.label.startsWith('cls'));
+      expect(clsEvents.length).to.equal(2);
     });
 
     it('when the viewer visibility changes to inactive', () => {
@@ -1263,11 +1324,32 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       viewerVisibilityState = VisibilityState.INACTIVE;
       perf.onAmpDocVisibilityChange_();
 
-      expect(perf.events_.length).to.equal(1);
-      expect(perf.events_[0]).to.be.jsonEqual({
+      const clsEvents = perf.events_.filter((evt) =>
+        evt.label.startsWith('cls')
+      );
+      expect(clsEvents.length).to.equal(1);
+      expect(perf.events_).deep.include({
         label: 'cls',
         delta: 0.55,
       });
+    });
+  });
+
+  describe('getMetric', () => {
+    beforeEach(() => {
+      setupFakesForVisibilityStateManipulation();
+    });
+
+    function getPerformance() {
+      installPerformanceService(fakeWin);
+      return Services.performanceFor(fakeWin);
+    }
+
+    it('returns a promise that resolves to the value', async () => {
+      const perf = getPerformance();
+      perf.tick('mbv', 1);
+      const value = await perf.getMetric('mbv');
+      expect(value).to.eq(1);
     });
   });
 
@@ -1349,6 +1431,62 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
           delta: 7,
         },
       ]);
+    });
+  });
+
+  describe('inabox environment', () => {
+    let PerformanceObserverConstructorStub;
+
+    beforeEach(() => {
+      PerformanceObserverConstructorStub = env.sandbox.stub(
+        env.win,
+        'PerformanceObserver'
+      );
+    });
+
+    it('disables many observers', () => {
+      PerformanceObserverConstructorStub.supportedEntryTypes = [
+        'navigation',
+        'largest-contentful-paint',
+        'first-input',
+        'layout-shift',
+      ];
+      installPerformanceService(env.win);
+      env.win.__AMP_MODE.runtime = 'inabox';
+      Services.performanceFor(env.win);
+      // Each supported entryType currently leads to creation of new observer.
+      expect(PerformanceObserverConstructorStub).not.to.be.called;
+    });
+  });
+});
+
+describes.realWin('log canonicalUrl', {amp: true}, (env) => {
+  let win;
+  let perf;
+  let viewerSendMessageStub;
+  const canonicalUrl = 'https://example.com/amp.html';
+
+  beforeEach(() => {
+    win = env.win;
+    const viewer = Services.viewerForDoc(env.ampdoc);
+    viewerSendMessageStub = env.sandbox.stub(viewer, 'sendMessage');
+    env.sandbox.stub(viewer, 'whenMessagingReady').returns(Promise.resolve());
+    env.sandbox.stub(viewer, 'getParam').withArgs('csi').returns('1');
+    env.sandbox.stub(viewer, 'isEmbedded').returns(true);
+    env.sandbox.stub(Services, 'documentInfoForDoc').returns({canonicalUrl});
+    installPlatformService(win);
+    installPerformanceService(win);
+    perf = Services.performanceFor(win);
+  });
+
+  it('should add the canonical URL to sendCsi messages', () => {
+    return perf.coreServicesAvailable().then(() => {
+      viewerSendMessageStub.reset();
+      perf.flush();
+      expect(viewerSendMessageStub.lastCall.args[0]).to.equal('sendCsi');
+      expect(viewerSendMessageStub.lastCall.args[1].canonicalUrl).to.equal(
+        canonicalUrl
+      );
     });
   });
 });

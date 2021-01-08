@@ -17,7 +17,7 @@
 import {AnalyticsEventType} from './events';
 import {BatchSegmentDef, defaultSerializer} from './transport-serializer';
 import {ExpansionOptions, variableServiceForDoc} from './variables';
-import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-whitelist';
+import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-allowlist';
 import {Services} from '../../../src/services';
 import {devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -87,7 +87,7 @@ export class RequestHandler {
     this.transport_ = transport;
 
     /** @const @private {!Object|undefined} */
-    this.whiteList_ = isSandbox ? SANDBOX_AVAILABLE_VARS : undefined;
+    this.allowlist_ = isSandbox ? SANDBOX_AVAILABLE_VARS : undefined;
 
     /** @private {?number} */
     this.batchIntervalTimeoutId_ = null;
@@ -142,14 +142,14 @@ export class RequestHandler {
         expansionOption,
         this.element_,
         bindings,
-        this.whiteList_
+        this.allowlist_
       );
 
       this.baseUrlPromise_ = this.baseUrlTemplatePromise_.then((baseUrl) => {
         return this.urlReplacementService_.expandUrlAsync(
           baseUrl,
           bindings,
-          this.whiteList_
+          this.allowlist_
         );
       });
     }
@@ -170,14 +170,14 @@ export class RequestHandler {
           requestOriginExpansionOpt,
           this.element_,
           bindings,
-          this.whiteList_
+          this.allowlist_
         )
         // substitute in URL values e.g. DOCUMENT_REFERRER -> https://example.com
         .then((expandedRequestOrigin) => {
           return this.urlReplacementService_.expandUrlAsync(
             expandedRequestOrigin,
             bindings,
-            this.whiteList_,
+            this.allowlist_,
             true // opt_noEncode
           );
         });
@@ -192,7 +192,7 @@ export class RequestHandler {
       expansionOption,
       bindings,
       this.element_,
-      this.whiteList_
+      this.allowlist_
     ).then((params) => {
       return dict({
         'trigger': trigger['on'],
@@ -273,6 +273,7 @@ export class RequestHandler {
       if (batchSegments.length === 0) {
         return;
       }
+
       // TODO: iframePing will not work with batch. Add a config validation.
       if (trigger['iframePing']) {
         userAssert(
@@ -455,7 +456,7 @@ export function expandPostMessage(
  * @param {!./variables.ExpansionOptions} expansionOption
  * @param {!Object} bindings
  * @param {!Element} element
- * @param {!Object=} opt_whitelist
+ * @param {!Object=} opt_allowlist
  * @return {!Promise<!Object>}
  * @private
  */
@@ -466,8 +467,9 @@ function expandExtraUrlParams(
   expansionOption,
   bindings,
   element,
-  opt_whitelist
+  opt_allowlist
 ) {
+  const newParams = {};
   const requestPromises = [];
   // Don't encode param values here,
   // as we'll do it later in the getExtraUrlParamsString call.
@@ -477,27 +479,41 @@ function expandExtraUrlParams(
     true /* noEncode */
   );
 
-  const expandObject = (params, key) => {
-    const value = params[key];
+  const expandObject = (data, key, expandedData) => {
+    const value = data[key];
 
     if (typeof value === 'string') {
+      expandedData[key] = undefined;
       const request = variableService
         .expandTemplate(value, option, element)
         .then((value) =>
-          urlReplacements.expandStringAsync(value, bindings, opt_whitelist)
+          urlReplacements.expandStringAsync(value, bindings, opt_allowlist)
         )
-        .then((value) => (params[key] = value));
+        .then((value) => {
+          expandedData[key] = value;
+        });
       requestPromises.push(request);
     } else if (isArray(value)) {
-      /** @type {!Array} */ (value).forEach((_, index) =>
-        expandObject(value, index)
-      );
+      expandedData[key] = [];
+      for (let index = 0; index < value.length; index++) {
+        expandObject(value, index, expandedData[key]);
+      }
     } else if (isObject(value) && value !== null) {
-      Object.keys(value).forEach((key) => expandObject(value, key));
+      expandedData[key] = {};
+      const valueKeys = Object.keys(value);
+      for (let index = 0; index < valueKeys.length; index++) {
+        expandObject(value, valueKeys[index], expandedData[key]);
+      }
+    } else {
+      // Number, bool, null
+      expandedData[key] = value;
     }
   };
 
-  Object.keys(params).forEach((key) => expandObject(params, key));
+  const paramKeys = Object.keys(params);
+  for (let index = 0; index < paramKeys.length; index++) {
+    expandObject(params, paramKeys[index], newParams);
+  }
 
-  return Promise.all(requestPromises).then(() => params);
+  return Promise.all(requestPromises).then(() => newParams);
 }

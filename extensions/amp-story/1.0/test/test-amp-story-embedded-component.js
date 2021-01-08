@@ -42,6 +42,11 @@ describes.realWin('amp-story-embedded-component', {amp: true}, (env) => {
   beforeEach(() => {
     win = env.win;
 
+    const localizationService = new LocalizationService(win.document.body);
+    env.sandbox
+      .stub(Services, 'localizationForDoc')
+      .returns(localizationService);
+
     // Making sure mutator tasks run synchronously.
     env.sandbox.stub(Services, 'mutatorForDoc').returns({
       mutateElement: (element, callback) => {
@@ -51,11 +56,6 @@ describes.realWin('amp-story-embedded-component', {amp: true}, (env) => {
       measureMutateElement: (measure, mutate) => {
         return Promise.resolve().then(measure).then(mutate);
       },
-    });
-
-    const localizationService = new LocalizationService(win);
-    registerServiceBuilder(win, 'localization', function () {
-      return localizationService;
     });
 
     parentEl = win.document.createElement('div');

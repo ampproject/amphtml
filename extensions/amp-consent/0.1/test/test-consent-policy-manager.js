@@ -15,8 +15,15 @@
  */
 
 import * as lolex from 'lolex';
-import {CONSENT_ITEM_STATE, constructConsentInfo} from '../consent-info';
-import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
+import {
+  CONSENT_ITEM_STATE,
+  constructConsentInfo,
+  constructMetadata,
+} from '../consent-info';
+import {
+  CONSENT_POLICY_STATE,
+  CONSENT_STRING_TYPE,
+} from '../../../../src/consent-state';
 import {
   ConsentPolicyInstance,
   ConsentPolicyManager,
@@ -65,9 +72,6 @@ describes.realWin(
               })
             );
           },
-          getConsentInstanceGdprApplies: () => {
-            return Promise.resolve(false);
-          },
         });
       });
     });
@@ -80,7 +84,11 @@ describes.realWin(
       let manager;
       beforeEach(() => {
         manager = new ConsentPolicyManager(ampdoc);
-        consentInfo = constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED, 'test');
+        consentInfo = constructConsentInfo(
+          CONSENT_ITEM_STATE.ACCEPTED,
+          'test',
+          constructMetadata(CONSENT_STRING_TYPE.TCF_V1)
+        );
         manager.setLegacyConsentInstanceId('ABC');
       });
 
@@ -89,6 +97,9 @@ describes.realWin(
         expect(consentManagerOnChangeSpy).to.be.called;
         expect(manager.consentState_).to.equal(CONSENT_ITEM_STATE.ACCEPTED);
         expect(manager.consentString_).to.equal('test');
+        expect(manager.consentMetadata_).to.be.deep.equals(
+          constructMetadata(CONSENT_STRING_TYPE.TCF_V1)
+        );
       });
 
       describe('Register policy instance', () => {
@@ -576,23 +587,36 @@ describes.realWin(
       });
     });
 
-    describe('getGdprApplies', () => {
+    describe('getConsentMetadataInfo', () => {
       let manager;
 
       beforeEach(() => {
         manager = new ConsentPolicyManager(ampdoc);
         manager.setLegacyConsentInstanceId('ABC');
+        env.sandbox
+          .stub(ConsentPolicyInstance.prototype, 'getReadyPromise')
+          .callsFake(() => {
+            return Promise.resolve();
+          });
+        consentInfo = constructConsentInfo(
+          CONSENT_ITEM_STATE.ACCEPTED,
+          'test',
+          constructMetadata(CONSENT_STRING_TYPE.TCF_V2, '1~1.10.14.103', false)
+        );
       });
 
-      it('should return gdprApplies value', async () => {
+      it('should return metadata values from state manager', async () => {
         manager.registerConsentPolicyInstance('default', {
           'waitFor': {
             'ABC': undefined,
           },
         });
         await macroTask();
-        // Set above in getConsentInstanceGdprApplies mock
-        await expect(manager.getGdprApplies()).to.eventually.be.false;
+        await expect(
+          manager.getConsentMetadataInfo('default')
+        ).to.eventually.deep.equals(
+          constructMetadata(CONSENT_STRING_TYPE.TCF_V2, '1~1.10.14.103', false)
+        );
       });
     });
   }

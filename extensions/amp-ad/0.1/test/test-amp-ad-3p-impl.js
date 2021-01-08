@@ -20,6 +20,7 @@ import * as adCid from '../../../../src/ad-cid';
 import * as consent from '../../../../src/consent';
 import * as lolex from 'lolex';
 import {AmpAd3PImpl} from '../amp-ad-3p-impl';
+import {AmpAdUIHandler} from '../amp-ad-ui';
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {LayoutPriority} from '../../../../src/layout';
 import {Services} from '../../../../src/services';
@@ -146,7 +147,7 @@ describes.realWin(
         });
       });
 
-      it('should propagate consent state to ad iframe', () => {
+      it('should propagate consent values to ad iframe', () => {
         ad3p.element.setAttribute('data-block-on-consent', '');
         env.sandbox
           .stub(consent, 'getConsentPolicyState')
@@ -154,6 +155,9 @@ describes.realWin(
         env.sandbox
           .stub(consent, 'getConsentPolicySharedData')
           .resolves({a: 1, b: 2});
+        env.sandbox
+          .stub(consent, 'getConsentMetadata')
+          .resolves({consentStringType: 2, gdprApplies: true});
 
         return ad3p.layoutCallback().then(() => {
           const frame = ad3p.element.querySelector('iframe[src]');
@@ -165,6 +169,10 @@ describes.realWin(
             CONSENT_POLICY_STATE.SUFFICIENT
           );
           expect(data._context.consentSharedData).to.deep.equal({a: 1, b: 2});
+          expect(data._context.initialConsentMetadata).to.deep.equal({
+            consentStringType: 2,
+            gdprApplies: true,
+          });
         });
       });
 
@@ -192,6 +200,7 @@ describes.realWin(
         adContainerElement.style.position = 'fixed';
         win.document.body.appendChild(adContainerElement);
         const ad3p = createAmpAd(win);
+        ad3p.uiHandler = new AmpAdUIHandler(ad3p);
         adContainerElement.appendChild(ad3p.element);
 
         ad3p.onLayoutMeasure();
@@ -200,7 +209,7 @@ describes.realWin(
         });
       });
 
-      it('should allow position:fixed with whitelisted ad container', () => {
+      it('should allow position:fixed with an allowed ad container', () => {
         const adContainerElement = win.document.createElement('amp-sticky-ad');
         adContainerElement.style.position = 'fixed';
         win.document.body.appendChild(adContainerElement);
@@ -270,53 +279,40 @@ describes.realWin(
         });
 
         it('should noop pause', () => {
-          expect(() => ad3p.pauseCallback()).to.not.throw;
+          expect(() => ad3p.pauseCallback()).to.not.throw();
         });
 
         it('should noop resume', () => {
-          expect(() => ad3p.resumeCallback()).to.not.throw;
+          expect(() => ad3p.resumeCallback()).to.not.throw();
+        });
+      });
+
+      describe('during layout', () => {
+        it('sticky ad: should not layout w/o scroll', () => {
+          ad3p.uiHandler.stickyAdPosition_ = 'bottom';
+          expect(ad3p.xOriginIframeHandler_).to.be.null;
+          const layoutPromise = ad3p.layoutCallback();
+          return Promise.race([macroTask(), layoutPromise])
+            .then(() => {
+              expect(ad3p.xOriginIframeHandler_).to.be.null;
+            })
+            .then(() => {
+              Services.viewportForDoc(env.ampdoc).scrollObservable_.fire();
+              return layoutPromise;
+            })
+            .then(() => {
+              expect(ad3p.xOriginIframeHandler_).to.not.be.null;
+            });
         });
       });
 
       describe('after layout', () => {
-        let xOriginIframeHandler;
-
-        beforeEach(() => {
-          return ad3p.layoutCallback().then(() => {
-            xOriginIframeHandler = ad3p.xOriginIframeHandler_;
-          });
+        beforeEach(async () => {
+          await ad3p.layoutCallback();
         });
 
-        it('should require unlayout if iframe is not pausable', () => {
-          env.sandbox
-            ./*OK*/ stub(xOriginIframeHandler, 'isPausable')
-            .returns(false);
+        it('should require unlayout', () => {
           expect(ad3p.unlayoutOnPause()).to.be.true;
-        });
-
-        it('should NOT require unlayout if iframe is pausable', () => {
-          window.sandbox
-            ./*OK*/ stub(xOriginIframeHandler, 'isPausable')
-            .returns(true);
-          expect(ad3p.unlayoutOnPause()).to.be.false;
-        });
-
-        it('should pause iframe', () => {
-          const stub = window.sandbox./*OK*/ stub(
-            xOriginIframeHandler,
-            'setPaused'
-          );
-          ad3p.pauseCallback();
-          expect(stub).to.be.calledOnce.calledWith(true);
-        });
-
-        it('should resume iframe', () => {
-          const stub = window.sandbox./*OK*/ stub(
-            xOriginIframeHandler,
-            'setPaused'
-          );
-          ad3p.resumeCallback();
-          expect(stub).to.be.calledOnce.calledWith(false);
         });
       });
     });
@@ -405,7 +401,8 @@ describes.realWin(
         }
       );
 
-      it('should only allow rendering one ad per second', function* () {
+      it('should only allow rendering one ad per second', async () => {
+        ad3p.getVsync().runScheduledTasks_();
         const clock = lolex.install({
           target: win,
           toFake: ['Date', 'setTimeout', 'clearTimeout'],
@@ -420,10 +417,12 @@ describes.realWin(
 
         // Ad loading should only block 1s.
         clock.tick(999);
-        yield macroTask();
+        await macroTask();
         expect(ad3p2.renderOutsideViewport()).to.equal(false);
         clock.tick(2);
-        yield oneSecPromise;
+        await oneSecPromise;
+        clock.tick(2);
+        await macroTask();
         expect(ad3p2.renderOutsideViewport()).to.equal(3);
       });
 

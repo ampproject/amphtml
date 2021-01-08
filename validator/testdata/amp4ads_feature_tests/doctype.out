@@ -1,4 +1,4 @@
-PASS
+FAIL
 |  <!--
 |    Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 |
@@ -19,6 +19,8 @@ PASS
 |    Only html attribute is allowed in <!doctype> declaration.
 |  -->
 |  <!doctype html data-foo id=doctype>
+>> ^~~~~~~~~
+amp4ads_feature_tests/doctype.html:20:0 Invalid or missing doctype declaration. Should be '!doctype html'. (see https://amp.dev/documentation/guides-and-tutorials/start/create/basic_markup/)
 |  <html ⚡4ads>
 |  <head>
 |    <meta charset="utf-8">

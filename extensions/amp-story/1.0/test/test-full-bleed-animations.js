@@ -59,6 +59,11 @@ describes.realWin(
         };
       });
 
+      const localizationService = new LocalizationService(win.document.body);
+      env.sandbox
+        .stub(Services, 'localizationForDoc')
+        .returns(localizationService);
+
       const storeService = new AmpStoryStoreService(win);
       registerServiceBuilder(win, 'story-store', function () {
         return storeService;
@@ -66,11 +71,6 @@ describes.realWin(
 
       storyEl = win.document.createElement('amp-story');
       win.document.body.appendChild(storyEl);
-
-      const localizationService = new LocalizationService(win);
-      registerServiceBuilder(win, 'localization', function () {
-        return localizationService;
-      });
 
       AmpStory.isBrowserSupported = () => true;
 
@@ -113,6 +113,10 @@ describes.realWin(
       const img = win.document.createElement('amp-img');
       img.setAttribute('animate-in', animationName);
       img.setAttribute('layout', 'fill');
+
+      env.sandbox
+        .stub(img, 'signals')
+        .callsFake({whenSignal: () => Promise.resolve()});
 
       const gridLayer = win.document.createElement('amp-story-grid-layer');
       opt_gridLayerTempalate = opt_gridLayerTempalate.length

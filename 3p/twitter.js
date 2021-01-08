@@ -18,7 +18,6 @@
 
 import {loadScript} from './3p';
 import {setStyles} from '../src/style';
-import {startsWith} from '../src/string';
 
 /**
  * Produces the Twitter API object for the passed in callback. If the current
@@ -75,7 +74,7 @@ export function twitter(global, data) {
     } else if (data.timelineSourceType) {
       // Extract properties starting with 'timeline'.
       const timelineData = Object.keys(data)
-        .filter((prop) => startsWith(prop, 'timeline'))
+        .filter((prop) => prop.startsWith('timeline'))
         .reduce((newData, prop) => {
           newData[stripPrefixCamelCase(prop, 'timeline')] = data[prop];
           return newData;
@@ -97,12 +96,12 @@ export function twitter(global, data) {
       return;
     }
 
-    resize(el);
+    resize(/** @type {!Element} */ (el));
     twttr.events.bind('resize', (event) => {
       // To be safe, make sure the resize event was triggered for the widget we
       // created below.
       if (el === event.target) {
-        resize(el);
+        resize(/** @type {!Element} */ (el));
       }
     });
   }

@@ -28,11 +28,11 @@ If you're primarily interested in what's allowed in AMP and what isn't, watch ou
 
 Also, AMP HTML documents can be uploaded to a web server and served just like any other HTML document; no special configuration for the server is necessary. However, they are also designed to be optionally served through specialized AMP serving systems that proxy AMP documents. These documents serve them from their own origin and are allowed to apply transformations to the document that provide additional performance benefits. An incomplete list of optimizations such a serving system might do is:
 
-- Replace image references with images sized to the viewer’s viewport.
-- Inline images that are visible above the fold.
-- Inline CSS variables.
-- Preload extended components.
-- Minify HTML and CSS.
+-   Replace image references with images sized to the viewer’s viewport.
+-   Inline images that are visible above the fold.
+-   Inline CSS variables.
+-   Preload extended components.
+-   Minify HTML and CSS.
 
 AMP HTML uses a set of contributed but centrally managed and hosted custom elements to implement advanced functionality such as image galleries that might be found in an AMP HTML document. While it does allow styling the document using custom CSS, it does not allow author written JavaScript beyond what is provided through the custom elements to reach its performance goals.
 
@@ -43,9 +43,9 @@ By using the AMP format, content producers are making the content in AMP files a
 Predictable performance is a key design goal for AMP HTML. Primarily we are aiming at reducing the time until the content of a page can be consumed / used by the user.
 In concrete terms this means that:
 
-- HTTP requests necessary to render and fully layout the document should be minimized.
-- Resources such as images or ads should only be downloaded if they are likely to be seen by the user.
-- Browsers should be able to calculate the space needed by every resource on the page without fetching that resource.
+-   HTTP requests necessary to render and fully layout the document should be minimized.
+-   Resources such as images or ads should only be downloaded if they are likely to be seen by the user.
+-   Browsers should be able to calculate the space needed by every resource on the page without fetching that resource.
 
 ## The AMP HTML format
 
@@ -169,14 +169,14 @@ In concrete terms this means that:
 
 AMP HTML documents MUST
 
-- <a name="dctp"></a>start with the doctype `<!doctype html>`. [🔗](#dctp)
-- <a name="ampd"></a>contain a top-level `<html ⚡>` tag (`<html amp>` is accepted as well). [🔗](#ampd)
-- <a name="crps"></a>contain `<head>` and `<body>` tags (They are optional in HTML). [🔗](#crps)
-- <a name="canon"></a>contain a `<link rel="canonical" href="$SOME_URL">` tag inside their head that points to the regular HTML version of the AMP HTML document or to itself if no such HTML version exists. [🔗](#canon)
-- <a name="chrs"></a>contain a `<meta charset="utf-8">` tag as the first child of their head tag. [🔗](#chrs)
-- <a name="vprt"></a>contain a `<meta name="viewport" content="width=device-width">` tag inside their head tag. It's also recommended to include `minimum-scale=1` and `initial-scale=1`. [🔗](#vprt)
-- <a name="scrpt"></a>contain a `<script async src="https://cdn.ampproject.org/v0.js"></script>` tag inside their head tag. [🔗](#scrpt)
-- <a name="boilerplate"></a>contain the [AMP boilerplate code](amp-boilerplate.md) (`head > style[amp-boilerplate]` and `noscript > style[amp-boilerplate]`) in their head tag. [🔗](#boilerplate)
+-   <a name="dctp"></a>start with the doctype `<!doctype html>`. [🔗](#dctp)
+-   <a name="ampd"></a>contain a top-level `<html ⚡>` tag (`<html amp>` is accepted as well). [🔗](#ampd)
+-   <a name="crps"></a>contain `<head>` and `<body>` tags (They are optional in HTML). [🔗](#crps)
+-   <a name="canon"></a>contain a `<link rel="canonical" href="$SOME_URL">` tag inside their head that points to the regular HTML version of the AMP HTML document or to itself if no such HTML version exists. [🔗](#canon)
+-   <a name="chrs"></a>contain a `<meta charset="utf-8">` tag as the first child of their head tag. [🔗](#chrs)
+-   <a name="vprt"></a>contain a `<meta name="viewport" content="width=device-width">` tag inside their head tag. It's also recommended to include `minimum-scale=1` and `initial-scale=1`. [🔗](#vprt)
+-   <a name="scrpt"></a>contain a `<script async src="https://cdn.ampproject.org/v0.js"></script>` tag inside their head tag. [🔗](#scrpt)
+-   <a name="boilerplate"></a>contain the [AMP boilerplate code](amp-boilerplate.md) (`head > style[amp-boilerplate]` and `noscript > style[amp-boilerplate]`) in their head tag. [🔗](#boilerplate)
 
 ### Metadata
 
@@ -268,7 +268,7 @@ HTML tags can be used unchanged in AMP HTML. Certain tags have equivalent custom
   </tr>
   <tr>
     <td width="30%">link</td>
-    <td><code>rel</code> values registered on <a href="http://microformats.org/wiki/existing-rel-values">microformats.org</a> are allowed. If a <code>rel</code> value is missing from our white list, <a href="https://github.com/ampproject/amphtml/issues/new">please submit an issue</a>. <code>stylesheet</code> and other values like <code>preconnect</code>, <code>prerender</code> and <code>prefetch</code> that have side effects in the browser are disallowed. There is a special case for fetching stylesheets from white listed font providers.</td>
+    <td><code>rel</code> values registered on <a href="http://microformats.org/wiki/existing-rel-values">microformats.org</a> are allowed. If a <code>rel</code> value is missing from our allowlist, <a href="https://github.com/ampproject/amphtml/issues/new">please submit an issue</a>. <code>stylesheet</code> and other values like <code>preconnect</code>, <code>prerender</code> and <code>prefetch</code> that have side effects in the browser are disallowed. There is a special case for fetching stylesheets from allowlisted font providers.</td>
   </tr>
   <tr>
     <td width="30%">meta</td>
@@ -284,7 +284,7 @@ HTML tags can be used unchanged in AMP HTML. Certain tags have equivalent custom
   </tr>
 </table>
 
-Validator implementations should use a white list based on the HTML5 specification with the above tags removed. See [AMP Tag Addendum](amp-tag-addendum.md).
+Validator implementations should use an allowlist based on the HTML5 specification with the above tags removed. See [AMP Tag Addendum](amp-tag-addendum.md).
 
 ### Comments
 
@@ -352,14 +352,12 @@ Usage of the `!important` qualifier is not allowed. This is a necessary requirem
 
 #### Properties
 
-AMP only allows transitions and animations of properties that can be GPU accelerated in common browsers. We currently white list: `opacity`, `transform` (also `-vendorPrefix-transform`).
+AMP only allows transitions and animations of properties that can be GPU accelerated in common browsers. We currently allow: `opacity`, `transform` (also `-vendorPrefix-transform`).
 
-In the following examples `<property>` needs to be in the white list above.
+In the following examples `<property>` needs to be in the allowed list above.
 
-- `transition <property>` (also -vendorPrefix-transition)
-- `@keyframes name { from: {<property>: value} to {<property: value>} }` (also `@-vendorPrefix-keyframes`)
-
-`overflow` (and `overflow-y`, `overflow-x`) may not be styled as “auto” or “scroll”. No user defined element in an AMP document may have a scrollbar.
+-   `transition <property>` (also -vendorPrefix-transition)
+-   `@keyframes name { from: {<property>: value} to {<property: value>} }` (also `@-vendorPrefix-keyframes`)
 
 #### Maximum size
 
@@ -392,7 +390,7 @@ Example:
 
 ### Custom fonts
 
-Authors may include stylesheets for custom fonts. The 2 supported methods are link tags pointing to white listed font providers and `@font-face` inclusion.
+Authors may include stylesheets for custom fonts. The 2 supported methods are link tags pointing to allowlisted font providers and `@font-face` inclusion.
 
 Example:
 
@@ -403,12 +401,12 @@ Example:
 />
 ```
 
-Font providers can be white listed if they support CSS-only integrations and serve over HTTPS. The following origins are currently allowed for font serving via link tags:
+Font providers can be allowlisted if they support CSS-only integrations and serve over HTTPS. The following origins are currently allowed for font serving via link tags:
 
-- Fonts.com: `https://fast.fonts.net`
-- Google Fonts: `https://fonts.googleapis.com`
-- Font Awesome: `https://maxcdn.bootstrapcdn.com`
-- [Typekit](https://helpx.adobe.com/typekit/using/google-amp.html): `https://use.typekit.net/kitId.css` (replace `kitId` accordingly)
+-   Fonts.com: `https://fast.fonts.net`
+-   Google Fonts: `https://fonts.googleapis.com`
+-   Font Awesome: `https://maxcdn.bootstrapcdn.com, https://use.fontawesome.com`
+-   [Typekit](https://helpx.adobe.com/typekit/using/google-amp.html): `https://use.typekit.net/kitId.css` (replace `kitId` accordingly)
 
 IMPLEMENTERS NOTE: Adding to this list requires a change to the AMP Cache CSP rule.
 
@@ -470,10 +468,10 @@ Example: `on="tap:fooId"`
 
 Some actions, if documented, may accept arguments. The arguments are defined between parentheses in `key=value` notation. The accepted values are:
 
-- simple unquoted strings: `simple-value`;
-- quoted strings: `"string value"` or `'string value'`;
-- boolean values: `true` or `false`;
-- numbers: `11` or `1.1`.
+-   simple unquoted strings: `simple-value`;
+-   quoted strings: `"string value"` or `'string value'`;
+-   boolean values: `true` or `false`;
+-   numbers: `11` or `1.1`.
 
 You can listen to multiple events on an element by separating the two events with a semicolon `;`.
 
@@ -574,18 +572,20 @@ All AMP template elements must go through AMP security review before they can be
 
 Currently, the following SVG elements are allowed:
 
-- basics: "g", "glyph", "glyphRef", "image", "marker", "metadata", "path", "solidcolor", "svg", "switch", "view"
-- shapes: "circle", "ellipse", "line", "polygon", "polyline", "rect"
-- text: "text", "textPath", "tref", "tspan"
-- rendering: "clipPath", "filter", "hkern", "linearGradient", "mask", "pattern", "radialGradient", "vkern"
-- special: "defs" (all children above are allowed here), "symbol", "use"
-- filter: "feColorMatrix", "feComposite", "feGaussianBlur", "feMerge", "feMergeNode", "feOffset", "foreignObject"
-- ARIA: "desc", "title"
+-   [container elements](https://svgwg.org/svg2-draft/struct.html#TermContainerElement): "clipPath", "defs", "g", "marker", "mask", "pattern", "svg", "switch", and "symbol".
+-   [structural elements](https://svgwg.org/svg2-draft/struct.html#TermStructuralElement): "defs", "g", "svg", "symbol", and "use".
+-   [graphics elements](https://svgwg.org/svg2-draft/struct.html#TermGraphicsElement): "circle", "ellipse", "foreignObject", "image", "line", "path", "polygon", "polyline", "rect", "text", "textPath", and "tspan".
+-   [text content elements](https://svgwg.org/svg2-draft/text.html#TermTextContentElement): "text", "textPath", and "tspan".
+-   [paint server elements](https://svgwg.org/svg2-draft/painting.html#TermPaintServerElement): "linearGradient", "pattern", and "radialGradient".
+-   [descriptive elements](https://svgwg.org/svg2-draft/struct.html#TermDescriptiveElement): "desc", "metadata", and "title".
+-   [filter primitive elements](https://drafts.fxtf.org/filter-effects/#filter-primitive): "feColorMatrix", "feComposite", "feGaussianBlur", "feMerge", "feMergeNode", and "feOffset".
+-   uncategorized elements: "view", and "filter".
+-   deprecated elements: ["glyph"](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/glyph), ["glyphRef"](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/glyphRef), ["hkern"](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/hkern), ["solidcolor"](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/solidcolor), ["tref"](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/tref), and ["vkern"](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/vkern).
 
 As well as these attributes:
 
-- "xlink:href": only URIs starting with "#" are allowed
-- "style"
+-   "xlink:href": only URIs starting with "#" are allowed
+-   "style"
 
 ## AMP document discovery
 

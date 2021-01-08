@@ -58,14 +58,11 @@ export function getConsentPolicySharedData(element, policyId) {
 }
 
 /**
- * TODO(micajuine-ho): Combine with getConsentPolicyGdprApplies
- * and (getConsentType in future) getGdprAppliesInfo to return
- * a consentInfo object.
  * @param {!Element|!ShadowRoot} element
- * @param {string} policyId
+ * @param {string=} policyId
  * @return {!Promise<string>}
  */
-export function getConsentPolicyInfo(element, policyId) {
+export function getConsentPolicyInfo(element, policyId = 'default') {
   // Return the stored consent string.
   return Services.consentPolicyServiceForDocOrNull(element).then(
     (consentPolicy) => {
@@ -81,17 +78,19 @@ export function getConsentPolicyInfo(element, policyId) {
 
 /**
  * @param {!Element|!ShadowRoot} element
- * @param {string} policyId
- * @return {!Promise<?boolean>}
+ * @param {string=} policyId
+ * @return {!Promise<?Object|undefined>}
  */
-export function getConsentPolicyGdprApplies(element, policyId) {
-  // Return the stored gdpr applies value.
+export function getConsentMetadata(element, policyId = 'default') {
+  // Return the stored consent metadata.
   return Services.consentPolicyServiceForDocOrNull(element).then(
     (consentPolicy) => {
       if (!consentPolicy) {
         return null;
       }
-      return consentPolicy.getGdprApplies(/** @type {string} */ (policyId));
+      return consentPolicy.getConsentMetadataInfo(
+        /** @type {string} */ (policyId)
+      );
     }
   );
 }

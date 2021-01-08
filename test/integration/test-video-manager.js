@@ -17,6 +17,7 @@
 import {PlayingStates, VideoEvents} from '../../src/video-interface';
 import {Services} from '../../src/services';
 import {VideoUtils} from '../../src/utils/video';
+import {dispatchCustomEvent} from '../../src/dom';
 import {installVideoManagerForDoc} from '../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../src/layout';
 import {listenOncePromise} from '../../src/event-helper';
@@ -47,7 +48,7 @@ describe
   .configure()
   .ifChrome()
   .run('VideoManager', function () {
-    describes.fakeWin(
+    describes.realWin(
       'VideoManager',
       {
         amp: {
@@ -203,8 +204,8 @@ describe
               expect(videoManager.userInteracted(impl)).to.be.true;
             });
 
-            video.dispatchCustomEvent(VideoEvents.AD_START);
-            video.dispatchCustomEvent(VideoEvents.UNMUTED);
+            dispatchCustomEvent(video, VideoEvents.AD_START);
+            dispatchCustomEvent(video, VideoEvents.UNMUTED);
           });
         });
 
@@ -301,9 +302,7 @@ describe
         },
       };
 
-      win = {
-        document: doc,
-      };
+      win = {document: doc};
 
       isLite = false;
 
@@ -364,7 +363,6 @@ describe
     it('should suppress errors if detection play call throws', () => {
       playStub.throws();
       video.paused = true;
-      expect(supportsAutoplay(win, isLite)).not.to.throw;
       return supportsAutoplay(win, isLite).then((supportsAutoplay) => {
         expect(supportsAutoplay).to.be.false;
         expect(playStub.called).to.be.true;
@@ -378,7 +376,6 @@ describe
       );
       playStub.returns(p);
       video.paused = true;
-      expect(supportsAutoplay(win, isLite)).not.to.throw;
       return supportsAutoplay(win, isLite).then((supportsAutoplay) => {
         expect(supportsAutoplay).to.be.false;
         expect(playStub.called).to.be.true;
@@ -437,13 +434,8 @@ function createFakeVideoPlayerClass(win) {
       this.element.appendChild(iframe);
 
       return Promise.resolve().then(() => {
-        this.element.dispatchCustomEvent(VideoEvents.LOAD);
+        dispatchCustomEvent(this.element, VideoEvents.LOAD);
       });
-    }
-
-    /** @override */
-    viewportCallback(visible) {
-      this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
     }
 
     // VideoInterface Implementation. See ../src/video-interface.VideoInterface
@@ -467,10 +459,10 @@ function createFakeVideoPlayerClass(win) {
      */
     play(unusedIsAutoplay) {
       Promise.resolve().then(() => {
-        this.element.dispatchCustomEvent(VideoEvents.PLAYING);
+        dispatchCustomEvent(this.element, VideoEvents.PLAYING);
         this.timeoutId_ = this.timer_.delay(() => {
           this.currentTime_ = this.duration_;
-          this.element.dispatchCustomEvent(VideoEvents.PAUSE);
+          dispatchCustomEvent(this.element, VideoEvents.PAUSE);
         }, this.length_);
       });
     }
@@ -480,7 +472,7 @@ function createFakeVideoPlayerClass(win) {
      */
     pause() {
       Promise.resolve().then(() => {
-        this.element.dispatchCustomEvent(VideoEvents.PAUSE);
+        dispatchCustomEvent(this.element, VideoEvents.PAUSE);
         this.timer_.cancel(this.timeoutId_);
       });
     }
@@ -490,7 +482,7 @@ function createFakeVideoPlayerClass(win) {
      */
     mute() {
       Promise.resolve().then(() => {
-        this.element.dispatchCustomEvent(VideoEvents.MUTED);
+        dispatchCustomEvent(this.element, VideoEvents.MUTED);
       });
     }
 
@@ -499,7 +491,7 @@ function createFakeVideoPlayerClass(win) {
      */
     unmute() {
       Promise.resolve().then(() => {
-        this.element.dispatchCustomEvent(VideoEvents.UNMUTED);
+        dispatchCustomEvent(this.element, VideoEvents.UNMUTED);
       });
     }
 

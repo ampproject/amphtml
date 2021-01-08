@@ -5,6 +5,7 @@
   <meta charset="utf-8">
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+  <script async custom-element="amp-social-share" src="https://cdn.ampproject.org/v0/amp-social-share-0.1.js"></script>
   <title>AMP Story</title>
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <link rel="canonical" href="amp-story.amp.html">
@@ -28,7 +29,8 @@
 </head>
 
 <body>
-  <amp-story standalone supports-landscape>
+  <input type="text"  name="copyText" class="input-field"/>
+  <amp-story standalone>
 
     <amp-story-page id="cover">
       <amp-story-grid-layer template="vertical">

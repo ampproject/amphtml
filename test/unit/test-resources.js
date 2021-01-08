@@ -336,6 +336,7 @@ describe('Resources', () => {
         isInViewport: () => false,
         prerenderAllowed: () => true,
         renderOutsideViewport: () => false,
+        idleRenderOutsideViewport: () => false,
         startLayout: () => {},
         applySizesAndMediaQuery: () => {},
       };
@@ -355,6 +356,7 @@ describe('Resources', () => {
         isInViewport: () => false,
         prerenderAllowed: () => true,
         renderOutsideViewport: () => false,
+        idleRenderOutsideViewport: () => false,
         getLayoutPriority: () => LayoutPriority.METADATA,
         startLayout: () => {},
         layoutScheduled: () => {},
@@ -383,6 +385,31 @@ describe('Resources', () => {
         isInViewport: () => false,
         prerenderAllowed: () => true,
         renderOutsideViewport: () => true,
+        idleRenderOutsideViewport: () => false,
+        getLayoutPriority: () => LayoutPriority.METADATA,
+        startLayout: () => {},
+        layoutScheduled: () => {},
+        getTaskId: () => 'resource#L',
+        applySizesAndMediaQuery: () => {},
+      };
+      resources.scheduleLayoutOrPreload(resource, true);
+      expect(resources.queue_.getSize()).to.equal(1);
+      expect(resources.queue_.tasks_[0].forceOutsideViewport).to.be.false;
+    }
+  );
+
+  it(
+    'should schedule idleRenderOutsideViewport resource when' +
+      ' resource is not visible',
+    () => {
+      const resource = {
+        getState: () => ResourceState.READY_FOR_LAYOUT,
+        isDisplayed: () => true,
+        isFixed: () => false,
+        isInViewport: () => false,
+        prerenderAllowed: () => true,
+        renderOutsideViewport: () => false,
+        idleRenderOutsideViewport: () => true,
         getLayoutPriority: () => LayoutPriority.METADATA,
         startLayout: () => {},
         layoutScheduled: () => {},
@@ -583,8 +610,9 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     element.updateLayoutBox = () => {};
     element.getPlaceholder = () => null;
     element.getLayoutPriority = () => LayoutPriority.CONTENT;
-    element.dispatchCustomEvent = () => {};
     element.getLayout = () => 'fixed';
+
+    element.idleRenderOutsideViewport = () => true;
     element.isInViewport = () => false;
     element.getAttribute = () => null;
     element.hasAttribute = () => false;
@@ -709,6 +737,21 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
       expect(resource2.applySizesAndMediaQuery).to.not.be.called;
     });
 
+    it('should invalidate premeasurements after resize event', () => {
+      resource1.premeasure({});
+      expect(resource1.hasBeenPremeasured()).true;
+      expect(resource1.isMeasureRequested()).false;
+      resources.viewport_.changeObservable_.fire({relayoutAll_: true});
+      expect(resource1.hasBeenPremeasured()).false;
+      expect(resource1.isMeasureRequested()).true;
+    });
+
+    it('should schedule a pass after resize event', () => {
+      const schedulePassStub = sandbox.stub(resources, 'schedulePass');
+      resources.viewport_.changeObservable_.fire({relayoutAll_: false});
+      expect(schedulePassStub).calledOnce;
+    });
+
     it('should applySizesAndMediaQuery on relayout', () => {
       resources.relayoutAll_ = true;
 
@@ -776,31 +819,17 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     expect(resource2.state_).to.equal(ResourceState.LAYOUT_SCHEDULED);
   });
 
-  it('should prerender only one screen with prerenderSize = 1', () => {
+  it('should prerender only one screen in visibilityState=prerender', () => {
     resources.visible_ = false;
     sandbox
       .stub(resources.ampdoc, 'getVisibilityState')
       .returns(VisibilityState.PRERENDER);
-    resources.prerenderSize_ = 1;
     viewportMock.expects('getRect').returns(layoutRectLtwh(0, 0, 300, 1009));
 
     resources.discoverWork_();
 
     expect(resources.queue_.getSize()).to.equal(1);
     expect(resources.queue_.tasks_[0].resource).to.equal(resource1);
-  });
-
-  it('should NOT prerender anything with prerenderSize = 0', () => {
-    resources.visible_ = false;
-    sandbox
-      .stub(resources.ampdoc, 'getVisibilityState')
-      .returns(VisibilityState.PRERENDER);
-    resources.prerenderSize_ = 0;
-    viewportMock.expects('getRect').returns(layoutRectLtwh(0, 0, 300, 400));
-
-    resources.discoverWork_();
-
-    expect(resources.queue_.getSize()).to.equal(0);
   });
 
   // TODO(dvoytenko, #12476): Make this test work with sinon 4.0.
@@ -973,6 +1002,7 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     const layoutCanceledSpy = sandbox.spy(resource1, 'layoutCanceled');
     sandbox.stub(resource1, 'isInViewport').returns(false);
     sandbox.stub(resource1, 'renderOutsideViewport').returns(false);
+    sandbox.stub(resource1, 'idleRenderOutsideViewport').returns(false);
     resources.work_();
     expect(resources.exec_.getSize()).to.equal(0);
     expect(measureSpy).to.be.calledOnce;
@@ -993,6 +1023,7 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     const measureSpy = sandbox.spy(resource1, 'measure');
     sandbox.stub(resource1, 'isInViewport').returns(false);
     sandbox.stub(resource1, 'renderOutsideViewport').returns(false);
+    sandbox.stub(resource1, 'idleRenderOutsideViewport').returns(false);
     resources.work_();
     expect(resources.exec_.getSize()).to.equal(1);
     expect(measureSpy).to.be.calledOnce;
@@ -1083,6 +1114,7 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
       .returns(true)
       .onSecondCall()
       .returns(false);
+    resource2.element.idleRenderOutsideViewport = () => false;
     resource1.state_ = ResourceState.NOT_BUILT;
     resource1.build = sandbox.spy();
 
@@ -1106,6 +1138,7 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
       .returns(false)
       .onSecondCall()
       .returns(true);
+    resource2.element.idleRenderOutsideViewport = () => false;
     resource1.state_ = ResourceState.NOT_BUILT;
     resource1.build = sandbox.spy();
 
@@ -1126,6 +1159,7 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     resource1.prerenderAllowed = () => false;
     resource1.state_ = ResourceState.NOT_BUILT;
     resource1.build = sandbox.spy();
+    resource2.element.idleRenderOutsideViewport = () => false;
 
     resources.discoverWork_();
 
@@ -1139,6 +1173,7 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     resources.buildAttemptsCount_ = 21; // quota is 20
 
     resource1.element.isBuilt = () => false;
+    resource1.element.idleRenderOutsideViewport = () => true;
     resource1.prerenderAllowed = () => true;
     resource1.isBuildRenderBlocking = () => false;
     resource1.state_ = ResourceState.NOT_BUILT;
@@ -1155,6 +1190,7 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     resources.buildAttemptsCount_ = 21; // quota is 20
 
     resource1.element.isBuilt = () => false;
+    resource1.element.idleRenderOutsideViewport = () => true;
     resource1.prerenderAllowed = () => true;
     resource1.isBuildRenderBlocking = () => true;
     resource1.state_ = ResourceState.NOT_BUILT;
@@ -1164,12 +1200,29 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     expect(resource1.build).to.be.called;
   });
 
+  it('should layout resource if outside viewport but idle', () => {
+    const schedulePassStub = sandbox.stub(resources, 'schedulePass');
+    resources.documentReady_ = true;
+    sandbox.stub(resource1.element, 'nextSibling').returns({});
+    resource1.element.isBuilt = () => true;
+    resource1.element.renderOutsideViewport = () => false;
+    resource1.element.idleRenderOutsideViewport = () => true;
+    resource2.element.renderOutsideViewport = () => false;
+    resource2.element.idleRenderOutsideViewport = () => false;
+    resource1.state_ = ResourceState.READY_FOR_LAYOUT;
+
+    resources.discoverWork_();
+
+    expect(schedulePassStub).to.be.calledOnce;
+  });
+
   it('should force build resources during discoverWork layout phase', () => {
     const buildResourceSpy = sandbox.spy(resources, 'buildResourceUnsafe_');
     sandbox.stub(resources, 'schedule_');
     resources.documentReady_ = true;
     // Emulates a resource not building.
     resource1.element.isBuilt = sandbox.stub().returns(false);
+    resource2.element.idleRenderOutsideViewport = () => false;
     resource1.state_ = ResourceState.NOT_BUILT;
     resource1.build = sandbox.spy();
 
@@ -1238,6 +1291,24 @@ describes.realWin(
       expect(resources.maybeChangeHeight_).to.equal(false);
       expect(resources.documentReady_).to.equal(true);
       expect(resources.contentHeight_).to.equal(contentHeight);
+    });
+
+    it('should only send contentHeight to the viewer once amp finishes init', () => {
+      resources.firstPassAfterDocumentReady_ = false;
+      resources.documentReady_ = false;
+      resources.ampInitialized_ = false;
+      resources.doPass();
+      expect(viewerSendMessageStub).not.called;
+
+      resources.firstPassAfterDocumentReady_ = true;
+      resources.documentReady_ = true;
+      resources.ampInitialized_ = true;
+      resources.doPass();
+      expect(viewerSendMessageStub).calledWithExactly(
+        'documentHeight',
+        {height: 0},
+        true
+      );
     });
 
     it('should send contentHeight to viewer if height was changed', () => {
@@ -1315,7 +1386,6 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
       },
       pauseCallback() {},
       resumeCallback() {},
-      dispatchCustomEvent() {},
       applySizesAndMediaQuery() {},
       updateLayoutBox() {},
       getBoundingClientRect() {
@@ -1461,7 +1531,7 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
 
     resources.add(child1);
 
-    expect(resource1.requestMeasure).to.not.be.called;
+    expect(resource1.requestMeasure).to.be.calledOnce;
     expect(observer.observe).to.be.calledOnceWith(child1);
   });
 

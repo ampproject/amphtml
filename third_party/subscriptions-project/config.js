@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.103 */
+/** Version: 0.1.22.138 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -88,7 +88,7 @@ function onDocumentState(doc, condition, callback) {
  * @return {!Promise<!Document>}
  */
 function whenDocumentReady(doc) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     onDocumentReady(doc, resolve);
   });
 }
@@ -401,7 +401,9 @@ class ErrorLogger {
   }
 }
 
-const userLogger = new ErrorLogger(window.__AMP_TOP ? AMP_USER_ERROR_SENTINEL : '');
+const userLogger = new ErrorLogger(
+  self.__AMP_TOP ? AMP_USER_ERROR_SENTINEL : ''
+);
 
 const user = () => userLogger;
 
@@ -741,7 +743,7 @@ class PageConfigResolver {
     this.configResolver_ = null;
 
     /** @private @const {!Promise<!PageConfig>} */
-    this.configPromise_ = new Promise(resolve => {
+    this.configPromise_ = new Promise((resolve) => {
       this.configResolver_ = resolve;
     });
 
@@ -831,7 +833,7 @@ class TypeChecker {
    */
   checkArray(typeArray, expectedTypes) {
     let found = false;
-    typeArray.forEach(candidateType => {
+    typeArray.forEach((candidateType) => {
       found =
         found ||
         expectedTypes.includes(
@@ -943,38 +945,49 @@ class JsonLdParser {
    * @return {?PageConfig}
    */
   tryExtractConfig_(element) {
-    const json = tryParseJson(element.textContent);
-    if (!json) {
+    let possibleConfigs = tryParseJson(element.textContent);
+    if (!possibleConfigs) {
       return null;
     }
 
-    // Must be an ALLOWED_TYPE
-    if (!this.checkType_.checkValue(json['@type'], ALLOWED_TYPES)) {
-      return null;
+    // Support arrays of JSON objects.
+    if (!Array.isArray(possibleConfigs)) {
+      possibleConfigs = [possibleConfigs];
     }
 
-    // Must have a isPartOf[@type=Product].
-    let productId = null;
-    const partOfArray = this.valueArray_(json, 'isPartOf');
-    if (partOfArray) {
-      for (let i = 0; i < partOfArray.length; i++) {
-        productId = this.discoverProductId_(partOfArray[i]);
-        if (productId) {
-          break;
+    for (let i = 0; i < possibleConfigs.length; i++) {
+      const possibleConfig = possibleConfigs[i];
+
+      // Must be an ALLOWED_TYPE
+      if (!this.checkType_.checkValue(possibleConfig['@type'], ALLOWED_TYPES)) {
+        continue;
+      }
+
+      // Must have a isPartOf[@type=Product].
+      let productId = null;
+      const partOfArray = this.valueArray_(possibleConfig, 'isPartOf');
+      if (partOfArray) {
+        for (let i = 0; i < partOfArray.length; i++) {
+          productId = this.discoverProductId_(partOfArray[i]);
+          if (productId) {
+            break;
+          }
         }
       }
-    }
-    if (!productId) {
-      return null;
+      if (!productId) {
+        continue;
+      }
+
+      // Found product id, just check for the access flag.
+      const isAccessibleForFree = this.bool_(
+        this.singleValue_(possibleConfig, 'isAccessibleForFree'),
+        /* default */ true
+      );
+
+      return new PageConfig(productId, !isAccessibleForFree);
     }
 
-    // Found product id, just check for the access flag.
-    const isAccessibleForFree = this.bool_(
-      this.singleValue_(json, 'isAccessibleForFree'),
-      /* default */ true
-    );
-
-    return new PageConfig(productId, !isAccessibleForFree);
+    return null;
   }
 
   /**
@@ -1167,7 +1180,7 @@ class MicrodataParser {
     // Grab all the nodes with an itemtype and filter for our allowed types
     const nodeList = Array.prototype.slice
       .call(this.doc_.getRootNode().querySelectorAll('[itemscope][itemtype]'))
-      .filter(node =>
+      .filter((node) =>
         this.checkType_.checkString(
           node.getAttribute('itemtype'),
           ALLOWED_TYPES

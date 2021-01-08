@@ -16,11 +16,16 @@
 
 import '../amp-sidebar';
 import * as lolex from 'lolex';
+import {ActionService} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/action-constants';
 import {Keys} from '../../../../src/utils/key-codes';
 import {Services} from '../../../../src/services';
 import {assertScreenReaderElement} from '../../../../testing/test-helper';
 import {clearModalStack, getModalStackLength} from '../../../../src/modal';
+import {
+  createElementWithAttributes,
+  whenUpgradedToCustomElement,
+} from '../../../../src/dom';
 
 // Represents the correct value of KeyboardEvent.which for the Escape key
 const KEYBOARD_EVENT_WHICH_ESCAPE = 27;
@@ -76,6 +81,9 @@ describes.realWin(
       }
       if (options.side) {
         ampSidebar.setAttribute('side', options.side);
+      }
+      if (options.disableSwipe) {
+        ampSidebar.setAttribute('data-disable-swipe-close', '');
       }
       if (options.closeText) {
         ampSidebar.setAttribute(
@@ -679,6 +687,37 @@ describes.realWin(
           );
         });
       });
+
+      it('should disable swipe to close when attribute specified', () => {
+        return getAmpSidebar({disableSwipe: true}).then((sidebarElement) => {
+          const impl = sidebarElement.implementation_;
+          expect(impl.disableSwipeClose_).to.be.true;
+        });
+      });
+
+      it('should not allow swipe on input range (slider) element', () => {
+        return getAmpSidebar().then((sidebarElement) => {
+          const impl = sidebarElement.implementation_;
+
+          const swipeMoveStub = env.sandbox.stub(
+            impl.swipeToDismiss_,
+            'swipeMove'
+          );
+
+          // Do not trigger swipeMove when swiping on an input range element
+          const slider = document.createElement('input');
+          slider.setAttribute('type', 'range');
+          const fakeEvent = {target: slider};
+          impl.handleSwipe_({}, fakeEvent);
+          expect(swipeMoveStub).to.not.be.called;
+
+          // Call swipeMove when swiping on any other type of element
+          const input = document.createElement('input');
+          const fakeEvent2 = {target: input};
+          impl.handleSwipe_({}, fakeEvent2);
+          expect(swipeMoveStub).to.be.called.calledOnce;
+        });
+      });
     });
 
     describe('amp-sidebar - toolbars in amp-sidebar', () => {
@@ -723,6 +762,58 @@ describes.realWin(
           });
         }
       );
+    });
+  }
+);
+
+describes.realWin(
+  'amp-sidebar component with runtime on',
+  {
+    amp: {
+      extensions: ['amp-sidebar:0.1'],
+      runtimeOn: true,
+    },
+  },
+  (env) => {
+    it('should allow default actions in email documents', async () => {
+      env.win.document.documentElement.setAttribute('amp4email', '');
+      const action = new ActionService(env.ampdoc, env.win.document);
+      env.sandbox.stub(Services, 'actionServiceForDoc').returns(action);
+
+      const element = createElementWithAttributes(
+        env.win.document,
+        'amp-sidebar',
+        {'layout': 'nodisplay'}
+      );
+      env.win.document.body.appendChild(element);
+      env.sandbox.spy(element, 'enqueAction');
+      env.sandbox.stub(element, 'getDefaultActionAlias');
+      await whenUpgradedToCustomElement(element);
+      await element.whenBuilt();
+
+      ['open', 'close', 'toggle'].forEach((method) => {
+        action.execute(
+          element,
+          method,
+          null,
+          'source',
+          'caller',
+          'event',
+          ActionTrust.HIGH
+        );
+        expect(element.enqueAction).to.be.calledWith(
+          env.sandbox.match({
+            actionEventType: '?',
+            args: null,
+            caller: 'caller',
+            event: 'event',
+            method,
+            node: element,
+            source: 'source',
+            trust: ActionTrust.HIGH,
+          })
+        );
+      });
     });
   }
 );

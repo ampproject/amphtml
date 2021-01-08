@@ -22,7 +22,11 @@
  * impacts on click-throughs.
  */
 
-import {EXPERIMENT_ATTRIBUTE, mergeExperimentIds} from './utils';
+import {
+  AMP_EXPERIMENT_ATTRIBUTE,
+  EXPERIMENT_ATTRIBUTE,
+  mergeExperimentIds,
+} from './utils';
 import {
   ExperimentInfo, // eslint-disable-line no-unused-vars
 } from '../../../src/experiments';
@@ -37,16 +41,6 @@ export let A4aExperimentBranches;
 
 /** @type {string} @private */
 export const MANUAL_EXPERIMENT_ID = '117152632';
-
-/**
- * Experiment IDs used to identify single pass experiments.
- *
- * @enum {string}
- */
-export const SINGLE_PASS_EXPERIMENT_IDS = {
-  MULTI_PASS: '21063529',
-  SINGLE_PASS: '21063530',
-};
 
 /**
  * @param {!Window} win
@@ -151,18 +145,42 @@ export function validateExperimentIds(idList) {
  *
  * @param {string|undefined} experimentId  ID to add to the element.
  * @param {Element} element to add the experiment ID to.
+ * @param {string} attr the attribute name that holds the experiments
  */
-export function addExperimentIdToElement(experimentId, element) {
+function addExpIdToElement(experimentId, element, attr) {
   if (!experimentId) {
     return;
   }
-  const currentEids = element.getAttribute(EXPERIMENT_ATTRIBUTE);
+  const currentEids = element.getAttribute(attr);
   if (currentEids && validateExperimentIds(parseExperimentIds(currentEids))) {
-    element.setAttribute(
-      EXPERIMENT_ATTRIBUTE,
-      mergeExperimentIds([experimentId], currentEids)
-    );
+    element.setAttribute(attr, mergeExperimentIds([experimentId], currentEids));
   } else {
-    element.setAttribute(EXPERIMENT_ATTRIBUTE, experimentId);
+    element.setAttribute(attr, experimentId);
   }
+}
+
+/**
+ * Adds a single experimentID to an element iff it's a valid experiment ID.
+ * No-ops if the experimentId is undefined.
+ *
+ * @param {string|undefined} experimentId  ID to add to the element.
+ * @param {Element} element to add the experiment ID to.
+ */
+export function addExperimentIdToElement(experimentId, element) {
+  addExpIdToElement(experimentId, element, EXPERIMENT_ATTRIBUTE);
+}
+
+/**
+ * Adds a single AMP experimentID to an element iff it's a valid experiment ID.
+ * No-ops if the experimentId is undefined.
+ *
+ * Note that AMP experiment brances do not have their own unique IDs. Instead,
+ * we generate a pseudo ID for them by concatenating the id with the
+ * experiment's value.
+ *
+ * @param {string|undefined} experimentId  ID to add to the element.
+ * @param {Element} element to add the experiment ID to.
+ */
+export function addAmpExperimentIdToElement(experimentId, element) {
+  addExpIdToElement(experimentId, element, AMP_EXPERIMENT_ATTRIBUTE);
 }

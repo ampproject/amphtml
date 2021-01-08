@@ -91,6 +91,8 @@ ident     \-?[a-zA-Z_][\-a-zA-Z0-9_]*
 {C}{I}{R}{C}{L}{E}\(                return 'CIRCLE_START'
 {E}{L}{L}{I}{P}{S}{E}\(             return 'ELLIPSE_START'
 {P}{O}{L}{Y}{G}{O}{N}\(             return 'POLYGON_START'
+{X}\(                               return 'X_START'
+{Y}\(                               return 'Y_START'
 {ident}\(                           return 'FUNCTION_START'
 {ident}                             return 'IDENT'
 \-\-{ident}                         return 'VAR_NAME';
@@ -260,7 +262,7 @@ function:
       {$$ = $1;}
   | translate_function
       {$$ = $1;}
-  | dim_function
+  | rect_function
       {$$ = $1;}
   | num_function
       {$$ = $1;}
@@ -457,25 +459,37 @@ polygon_function:
 
 
 /**
- * AMP-specific `width()` and `height()` functions:
+ * AMP-specific `width()`, `height()`, `x()` and `y()` functions:
  * - `width(".selector")`
  * - `height(".selector")`
  * - `width(closest(".selector"))`
  * - `height(closest(".selector"))`
  */
-dim_function:
+rect_function:
     WIDTH_START ')'
-      {$$ = new ast.CssDimSizeNode('w');}
+      {$$ = new ast.CssRectNode('w');}
   | HEIGHT_START ')'
-      {$$ = new ast.CssDimSizeNode('h');}
+      {$$ = new ast.CssRectNode('h');}
+  | X_START ')'
+      {$$ = new ast.CssRectNode('x');}
+  | Y_START ')'
+      {$$ = new ast.CssRectNode('y');}
   | WIDTH_START STRING ')'
-      {$$ = new ast.CssDimSizeNode('w', $2.slice(1, -1));}
+      {$$ = new ast.CssRectNode('w', $2.slice(1, -1));}
   | HEIGHT_START STRING ')'
-      {$$ = new ast.CssDimSizeNode('h', $2.slice(1, -1));}
+      {$$ = new ast.CssRectNode('h', $2.slice(1, -1));}
+  | X_START STRING ')'
+      {$$ = new ast.CssRectNode('x', $2.slice(1, -1));}
+  | Y_START STRING ')'
+      {$$ = new ast.CssRectNode('y', $2.slice(1, -1));}
   | WIDTH_START CLOSEST_START STRING ')' ')'
-      {$$ = new ast.CssDimSizeNode('w', $3.slice(1, -1), 'closest');}
+      {$$ = new ast.CssRectNode('w', $3.slice(1, -1), 'closest');}
   | HEIGHT_START CLOSEST_START STRING ')' ')'
-      {$$ = new ast.CssDimSizeNode('h', $3.slice(1, -1), 'closest');}
+      {$$ = new ast.CssRectNode('h', $3.slice(1, -1), 'closest');}
+  | X_START CLOSEST_START STRING ')' ')'
+      {$$ = new ast.CssRectNode('x', $3.slice(1, -1), 'closest');}
+  | Y_START CLOSEST_START STRING ')' ')'
+      {$$ = new ast.CssRectNode('y', $3.slice(1, -1), 'closest');}
   ;
 
 

@@ -22,8 +22,12 @@ import {
   extractTitle,
 } from '../utils';
 
-describes.realWin('amp-apester-media-utils', {}, (unused) => {
+describes.realWin('amp-apester-media-utils', {amp: true}, (env) => {
+  let window, document;
+
   beforeEach(() => {
+    window = env.win;
+    document = window.document;
     document.body.textContent = '';
     document.head.textContent = '';
   });

@@ -15,34 +15,48 @@
  */
 
 import {Deferred} from './promise';
-import {Services} from '../services';
 import {dev, devAssert} from '../log';
 import {removeNoScriptElements} from './dom-writer';
 
 export class DomTransformStream {
   /**
    * @param {!Window} win
+   * @param {function=} opt_transferThrottleFunc
    */
-  constructor(win) {
+  constructor(win, opt_transferThrottleFunc) {
     const headDefer = new Deferred();
-    /** @const @private {!Promise<!Element>} */
+    /**
+     * Resolves when head has been written to in memory document.
+     * @const @private {!Promise<!Element>}
+     */
     this.headPromise_ = headDefer.promise;
 
-    /** @const @private {!function()} */
+    /** @const @private {!function(!Element)} */
     this.headResolver_ = headDefer.resolve;
 
     const transferDefer = new Deferred();
-    /** @const @private {!Promise} */
+    /**
+     * Resovles when complete doc has been transfered to the target
+     * body.
+     * @const @private {!Promise}
+     */
     this.bodyTransferPromise_ = transferDefer.promise;
 
-    /** @const @private {!function()} */
+    /** @const @private {!function(!Promise)} */
     this.bodyTransferResolver_ = transferDefer.resolve;
 
     /** @private {?Element} */
     this.detachedBody_ = null;
 
-    /** @private {?Element} */
-    this.targetBody_ = null;
+    const targetBodyDefer = new Deferred();
+    /**
+     * Resolves when target body is ready to receive elements.
+     * @private {!Promise<!Element>}
+     */
+    this.targetBodyPromise_ = targetBodyDefer.promise;
+
+    /** @const @private {!function(!Element)} */
+    this.targetBodyResolver_ = targetBodyDefer.resolve;
 
     /** @private {?Promise} */
     this.currentChunkTransferPromise_ = null;
@@ -50,8 +64,13 @@ export class DomTransformStream {
     /** @private {boolean} */
     this.shouldTransfer_ = false;
 
-    /** @const @private */
-    this.vsync_ = Services.vsyncFor(win);
+    /**
+     * @param {!function} cb
+     * @const @private {!function}
+     * @return {!Promise}
+     */
+    this.transferThrottle_ =
+      opt_transferThrottleFunc || ((cb) => Promise.resolve(cb()));
   }
 
   /**
@@ -65,7 +84,7 @@ export class DomTransformStream {
     // <body> is newly formed.
     if (!this.detachedBody_ && detachedDoc.body) {
       this.detachedBody_ = detachedDoc.body;
-      this.headResolver_(detachedDoc.head);
+      this.headResolver_(dev().assertElement(detachedDoc.head));
     }
 
     // If bodyTransfer has already been called, keep transferring on new chunks.
@@ -109,7 +128,7 @@ export class DomTransformStream {
     );
 
     this.shouldTransfer_ = true;
-    this.targetBody_ = targetBody;
+    this.targetBodyResolver_(targetBody);
 
     this.transferBodyChunk_();
 
@@ -125,15 +144,20 @@ export class DomTransformStream {
       return this.currentChunkTransferPromise_;
     }
 
-    this.currentChunkTransferPromise_ = this.headPromise_.then(() =>
-      this.vsync_.mutatePromise(() => {
+    this.currentChunkTransferPromise_ = Promise.all([
+      this.targetBodyPromise_,
+      this.headPromise_,
+    ]).then((resolvedElements) => {
+      const tranferThrottle = this.transferThrottle_;
+      return tranferThrottle(() => {
         this.currentChunkTransferPromise_ = null;
-        removeNoScriptElements(this.detachedBody_);
+        const targetBody = resolvedElements[0];
+        removeNoScriptElements(dev().assertElement(this.detachedBody_));
         while (this.detachedBody_.firstChild) {
-          this.targetBody_.appendChild(this.detachedBody_.firstChild);
+          targetBody.appendChild(this.detachedBody_.firstChild);
         }
-      })
-    );
+      });
+    });
 
     return this.currentChunkTransferPromise_;
   }

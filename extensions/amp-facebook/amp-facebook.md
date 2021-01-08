@@ -24,11 +24,11 @@ limitations under the License.
 
 # amp-facebook
 
-## Overview
+## Usage
 
 You can use the `amp-facebook` component to embed a Facebook post, a Facebook video or a comment on a Facebook post.
 
-#### Example: Embedding a post
+The following example shows how to embed a post:
 
 [example preview="inline" playground="true" imports="amp-facebook"][sourcecode:html]
 <amp-facebook width="552" height="310"
@@ -37,7 +37,7 @@ You can use the `amp-facebook` component to embed a Facebook post, a Facebook vi
 </amp-facebook>
 [/sourcecode][/example]
 
-#### Example: Embedding a video
+The following example shows how to embed a video:
 
 [example preview="inline" playground="true" imports="amp-facebook"][sourcecode:html]
 <amp-facebook width="476" height="316"
@@ -47,7 +47,7 @@ You can use the `amp-facebook` component to embed a Facebook post, a Facebook vi
 </amp-facebook>
 [/sourcecode][/example]
 
-#### Example: Embedding a comment on a post
+The following example shows how to embed a comment on a post:
 
 [example preview="inline" playground="true" imports="amp-facebook"][sourcecode:html]
 <amp-facebook width="552" height="500"
@@ -59,45 +59,70 @@ You can use the `amp-facebook` component to embed a Facebook post, a Facebook vi
 
 ## Attributes
 
-<table>
-  <tr>
-    <td width="40%"><strong>data-href (required)</strong></td>
-    <td>The URL of the Facebook post/video/comment. For example, a post or video will look like <code>https://www.facebook.com/zuck/posts/10102593740125791</code>. A comment or comment reply will look like <code>https://www.facebook.com/zuck/posts/10102735452532991?comment_id=1070233703036185</code>. For comments, see the Facebook documentation on <a href="https://developers.facebook.com/docs/plugins/embedded-comments#how-to-get-a-comments-url">how to get a comment's URL</a>.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>data-embed-as</strong></td>
-    <td>The value is either <code>post</code>, <code>video</code> or <code>comment</code>. The default is <code>post</code>.
-<br><br>
-Both posts and videos can be embedded as a post. Setting <code>data-embed-as="video"</code> for Facebook videos embeds the player of the video, and adds the accompanying post card with it. Setting <code>data-embed-as="post"</code> ignores the caption card. This is done to make sure we are zooming in on videos correctly.
-<br><br>
-The <code>comment</code> value embeds a single comment (or reply to a comment) on a post. This is not to be confused with <a href="https://amp.dev/documentation/examples/components/amp-facebook-comments/">amp-facebook-comments</a>.
-<br><br>
-Check out the documentation for differences between <a href="https://developers.facebook.com/docs/plugins/embedded-posts">post embeds</a>, <a href="https://developers.facebook.com/docs/plugins/embedded-video-player">video embeds</a>, and <a href="https://developers.facebook.com/docs/plugins/embedded-comments">comment embeds</a>.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>data-include-comment-parent</strong></td>
-    <td>The value is either <code>true</code> or <code>false</code>. The default is <code>false</code>.
-<br><br>
-When you are embedding a comment reply, you can optionally also include the parent comment of the reply.</td>
-  </tr>
-  <tr>
-     <td width="40%"><strong>data-align-center</strong></td>
-     <td>The value is either <code>true</code> or <code>false</code>. The default is <code>false</code>.
-<br><br>
-For posts and videos, having this attribute set to true would align the post/video container to center.</td>
-   </tr>
-   <tr>
-      <td width="40%"><strong>data-locale (optional)</strong></td>
-      <td>By default, the locale is set to user's system language; however, you can specify a locale as well.
-<br><br>
-For details on strings accepted here please visit the <a href="https://developers.facebook.com/docs/internationalization">Facebook API Localization page</a></td>
-    </tr>
-    <tr>
-       <td width="40%"><strong>common attributes</strong></td>
-       <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
-     </tr>
-</table>
+### `data-href`
+
+The URL of the Facebook post/video/comment. For example, a post or video will
+look like `https://www.facebook.com/zuck/posts/10102593740125791`. A comment or
+comment reply will look like
+`https://www.facebook.com/zuck/posts/10102735452532991?comment_id=1070233703036185`.
+For comments, see the Facebook documentation on
+[how to get a comment's URL](https://developers.facebook.com/docs/plugins/embedded-comments#how-to-get-a-comments-url).
+
+### `data-embed-as`
+
+The value is either `post`, `video` or `comment`. The default is `post`.
+
+Both posts and videos can be embedded as a post. Setting `data-embed-as="video"`
+for Facebook videos embeds the player of the video, and adds the accompanying
+post card with it. Setting `data-embed-as="post"` ignores the caption card. This
+is done to make sure we are zooming in on videos correctly.
+
+The `comment` value embeds a single comment (or reply to a comment) on a post.
+This is not to be confused with
+[`amp-facebook-comments`](https://amp.dev/documentation/examples/components/amp-facebook-comments/).
+
+Check out the documentation for differences between
+[post embeds](https://developers.facebook.com/docs/plugins/embedded-posts),
+[video embeds](https://developers.facebook.com/docs/plugins/embedded-video-player),
+and [comment embeds](https://developers.facebook.com/docs/plugins/embedded-comments).
+
+### `data-include-comment-parent`
+
+The value is either `true` or `false`. The default is `false`.
+
+When you are embedding a comment reply, you can optionally also include the
+parent comment of the reply.
+
+### `data-allowfullscreen`
+
+The value is either set or omitted. The default is omitted (no fullscreen).
+
+When embedding a video, set this value to allow for a fullscreen experience.
+
+### `data-align-center`
+
+The value is either `true` or `false`. The default is `false`.
+
+For posts and videos, having this attribute set to true would align the
+post/video container to center.
+
+### `data-locale` (optional)
+
+By default, the locale is set to user's system language; however, you can
+specify a locale as well.
+
+For details on strings accepted here please visit the
+[Facebook API Localization page](https://developers.facebook.com/docs/internationalization).
+
+### title (optional)
+
+Define a `title` attribute for the component to propagate to the underlying `<iframe>` element. The default value is `"Facebook"`.
+
+### Common attributes
+
+This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes)
+extended to AMP components.
 
 ## Validation
 
-See [amp-facebook rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-facebook/validator-amp-facebook.protoascii) in the AMP validator specification.
+See [amp-facebook rules](validator-amp-facebook.protoascii) in the AMP validator specification.

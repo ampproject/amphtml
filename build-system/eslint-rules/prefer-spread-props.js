@@ -52,6 +52,11 @@ module.exports = {
         if (first.type !== 'ObjectExpression') {
           return;
         }
+        for (const arg of args) {
+          if (arg.type === 'SpreadElement') {
+            return;
+          }
+        }
 
         context.report({
           node,

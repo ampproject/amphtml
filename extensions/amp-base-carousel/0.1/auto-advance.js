@@ -82,6 +82,9 @@ export class AutoAdvance {
     /** @private {number} */
     this.maxAdvances_ = Number.POSITIVE_INFINITY;
 
+    /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = element.getAmpDoc();
+
     this.createDebouncedAdvance_(this.autoAdvanceInterval_);
     this.scrollContainer_.addEventListener(
       'scroll',
@@ -214,6 +217,7 @@ export class AutoAdvance {
   shouldAutoAdvance_() {
     return (
       this.autoAdvance_ &&
+      this.ampdoc_.isVisible() &&
       !this.paused_ &&
       !this.stopped_ &&
       this.advances_ < this.maxAdvances_

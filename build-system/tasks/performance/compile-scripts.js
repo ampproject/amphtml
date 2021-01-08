@@ -15,7 +15,7 @@
  */
 
 const argv = require('minimist')(process.argv.slice(2));
-const {dist} = require('../dist');
+const {doDist} = require('../dist');
 const {EXPERIMENT, urlToCachePath} = require('./helpers');
 const {setExtensionsToBuildFromDocuments} = require('../extension-helpers.js');
 
@@ -28,7 +28,7 @@ async function compileScripts(urls) {
   if (!argv.nobuild) {
     const examples = urls.map((url) => urlToCachePath(url, EXPERIMENT));
     setExtensionsToBuildFromDocuments(examples);
-    await dist();
+    await doDist();
   }
 }
 

@@ -22,6 +22,7 @@ import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-access-0.1.css';
 import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
+import {TickLabel} from '../../../src/enums';
 import {cancellation} from '../../../src/error';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -31,7 +32,6 @@ import {installStylesForDoc} from '../../../src/style-installer';
 import {isArray} from '../../../src/types';
 import {isJsonScriptTag} from '../../../src/dom';
 import {listenOnce} from '../../../src/event-helper';
-import {startsWith} from '../../../src/string';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @const */
@@ -134,8 +134,10 @@ export class AccessService {
       this.firstAuthorizationsCompleted_ = true;
       this.analyticsEvent_('access-authorization-received');
       if (this.performance_) {
-        this.performance_.tick('aaa');
-        this.performance_.tickSinceVisible('aaav');
+        this.performance_.tick(TickLabel.ACCESS_AUTHORIZATION);
+        this.performance_.tickSinceVisible(
+          TickLabel.ACCESS_AUTHORIZATION_VISIBLE
+        );
         this.performance_.flush();
       }
     });
@@ -295,7 +297,12 @@ export class AccessService {
    * @private
    */
   analyticsEvent_(eventType) {
-    triggerAnalyticsEvent(this.getRootElement_(), eventType);
+    triggerAnalyticsEvent(
+      this.getRootElement_(),
+      eventType,
+      /** vars */ undefined,
+      /** enableDataVars */ false
+    );
   }
 
   /**
@@ -457,16 +464,24 @@ export class AccessService {
    */
   applyAuthorizationToElement_(element, response) {
     const expr = element.getAttribute('amp-access');
-    const on = this.evaluator_.evaluate(expr, response);
-    let renderPromise = null;
+    let on = false;
+    try {
+      on = this.evaluator_.evaluate(expr, response);
+    } catch (err) {
+      // If evaluating the expression yields an error
+      // it is most likely an invalid expression (publisher error).
+      user().error(TAG, err);
+    }
+
     if (on) {
-      renderPromise = this.renderTemplates_(element, response);
+      const renderTemplate = this.renderTemplates_(element, response);
+      if (renderTemplate) {
+        return renderTemplate.then(() =>
+          this.applyAuthorizationAttrs_(element, on)
+        );
+      }
     }
-    if (renderPromise) {
-      return renderPromise.then(() =>
-        this.applyAuthorizationAttrs_(element, on)
-      );
-    }
+
     return this.applyAuthorizationAttrs_(element, on);
   }
 
@@ -695,7 +710,7 @@ export class AccessService {
         invocation.event.preventDefault();
       }
       this.loginWithType_('');
-    } else if (startsWith(invocation.method, 'login-')) {
+    } else if (invocation.method.startsWith('login-')) {
       if (invocation.event) {
         invocation.event.preventDefault();
       }
@@ -777,7 +792,7 @@ AMP.extension(TAG, '0.1', function (AMP) {
 
 /**
  * @package Visible for testing only.
- * @return {*} TODO(#23582): Specify return type
+ * @return {typeof AccessVars}
  */
 export function getAccessVarsClassForTesting() {
   return AccessVars;

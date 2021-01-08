@@ -30,9 +30,9 @@ AMP template ads are an alternative way to serve valid AMPHTML ads without the c
 
 For any ad network to serve AMPHTML template ads, the integration consists of 3 parts:
 
-- AMPHTML Ad template creation
-- Ad server change: ad serving endpoint
-- Ads tag in AMP
+-   AMPHTML Ad template creation
+-   Ad server change: ad serving endpoint
+-   Ads tag in AMP
 
 ## AMPHTML Ad Template Creation
 
@@ -51,7 +51,7 @@ To make sure the template is valid AMPHTML, ad network must make an HTTP request
 
 To update a template, an ad network just needs to update the page on their domain, then make another cache warm-up request.
 
-Note: at this stage, domains need to be whitelisted manually in AMP Cache to experiment with the feature.
+Note: at this stage, domains need to be allowlisted manually in AMP Cache to experiment with the feature.
 
 ## Ad server
 
@@ -75,9 +75,9 @@ The ad network needs to provide a new serving endpoint that returns a CORS respo
 
 The response requires a couple of custom headers:
 
-- custom headers for CORS
-- AMP-Ad-Template-Extension: amp-mustache
-- Amp-Ad-Response-Type: template
+-   custom headers for CORS
+-   AMP-Ad-Template-Extension: amp-mustache
+-   Amp-Ad-Response-Type: template
 
 ## Ads tag
 

@@ -44,15 +44,11 @@ describes.realWin('TemplateRenderer', realWinConfig, (env) => {
     containerElement.setAttribute('width', 320);
     containerElement.setAttribute('src', templateUrl);
     containerElement.signals = () => ({
+      signal: () => {},
+      reset: () => {},
       whenSignal: () => Promise.resolve(),
     });
     containerElement.renderStarted = () => {};
-    containerElement.getPageLayoutBox = () => ({
-      left: 0,
-      top: 0,
-      width: 0,
-      height: 0,
-    });
     containerElement.getLayoutBox = () => ({
       left: 0,
       top: 0,

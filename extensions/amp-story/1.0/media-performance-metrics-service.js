@@ -19,10 +19,10 @@ import {
   listen,
 } from '../../../src/event-helper';
 import {Services} from '../../../src/services';
+import {TickLabel} from '../../../src/enums';
 import {dev} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {lastChildElement} from '../../../src/dom';
-import {map} from '../../../src/utils/object';
 import {registerServiceBuilder} from '../../../src/service';
 import {urls} from '../../../src/config';
 
@@ -78,9 +78,6 @@ let MetricsDef;
  */
 let MediaEntryDef;
 
-/** @type {string} */
-const ID_PROPERTY = '__AMP_MEDIA_PERFORMANCE_METRICS_ID';
-
 /** @type {number} */
 const MINIMUM_TIME_THRESHOLD_MS = 1000;
 
@@ -119,12 +116,8 @@ export class MediaPerformanceMetricsService {
    * @param {!Window} win
    */
   constructor(win) {
-    /** @private {number} */
-    this.mediaId_ = 1;
-
-    // TODO(gmajoulet): switch to WeakMap once the AMPHTML project allows them.
-    /** @private @const {!Object<number, !MediaEntryDef>} */
-    this.mediaMap_ = map();
+    /** @private @const {!WeakMap<HTMLMediaElement|EventTarget|null, !MediaEntryDef>} */
+    this.mediaMap_ = new WeakMap();
 
     /** @private @const {!../../../src/service/performance-impl.Performance} */
     this.performanceService_ = Services.performanceFor(win);
@@ -159,7 +152,7 @@ export class MediaPerformanceMetricsService {
 
     const unlisteners = this.listen_(media);
     const mediaEntry = this.getNewMediaEntry_(media, unlisteners);
-    this.setMediaEntry_(media, mediaEntry);
+    this.mediaMap_.set(media, mediaEntry);
 
     // Checks if the media already errored (eg: could have failed the source
     // selection).
@@ -179,14 +172,14 @@ export class MediaPerformanceMetricsService {
    * @param {boolean=} sendMetrics
    */
   stopMeasuring(media, sendMetrics = true) {
-    const mediaEntry = this.getMediaEntry_(media);
+    const mediaEntry = this.mediaMap_.get(media);
 
     if (!mediaEntry) {
       return;
     }
 
     mediaEntry.unlisteners.forEach((unlisten) => unlisten());
-    this.deleteMediaEntry_(media);
+    this.mediaMap_.delete(media);
 
     switch (mediaEntry.status) {
       case Status.PLAYING:
@@ -221,11 +214,17 @@ export class MediaPerformanceMetricsService {
         ? CacheState.ORIGIN_CACHE_MISS
         : CacheState.ORIGIN;
     }
-    this.performanceService_.tickDelta('vcs', videoCacheState);
+    this.performanceService_.tickDelta(
+      TickLabel.VIDEO_CACHE_STATE,
+      videoCacheState
+    );
 
     // If the media errored.
     if (metrics.error !== null) {
-      this.performanceService_.tickDelta('verr', metrics.error || 0);
+      this.performanceService_.tickDelta(
+        TickLabel.VIDEO_ERROR,
+        metrics.error || 0
+      );
       this.performanceService_.flush();
       return;
     }
@@ -241,7 +240,10 @@ export class MediaPerformanceMetricsService {
 
     // If the playback did not start.
     if (!metrics.jointLatency) {
-      this.performanceService_.tickDelta('verr', 5 /* Custom error code */);
+      this.performanceService_.tickDelta(
+        TickLabel.VIDEO_ERROR,
+        5 /* Custom error code */
+      );
       this.performanceService_.flush();
       return;
     }
@@ -250,44 +252,29 @@ export class MediaPerformanceMetricsService {
       (metrics.rebufferTime / (metrics.rebufferTime + metrics.watchTime)) * 100
     );
 
-    this.performanceService_.tickDelta('vjl', metrics.jointLatency);
-    this.performanceService_.tickDelta('vwt', metrics.watchTime);
-    this.performanceService_.tickDelta('vrb', metrics.rebuffers);
-    this.performanceService_.tickDelta('vrbr', rebufferRate);
+    this.performanceService_.tickDelta(
+      TickLabel.VIDEO_JOINT_LATENCY,
+      metrics.jointLatency
+    );
+    this.performanceService_.tickDelta(
+      TickLabel.VIDEO_WATCH_TIME,
+      metrics.watchTime
+    );
+    this.performanceService_.tickDelta(
+      TickLabel.VIDEO_REBUFFERS,
+      metrics.rebuffers
+    );
+    this.performanceService_.tickDelta(
+      TickLabel.VIDEO_REBUFFER_RATE,
+      rebufferRate
+    );
     if (metrics.rebuffers) {
       this.performanceService_.tickDelta(
-        'vmtbrb',
+        TickLabel.VIDEO_MEAN_TIME_BETWEEN_REBUFFER,
         Math.round(metrics.watchTime / metrics.rebuffers)
       );
     }
     this.performanceService_.flush();
-  }
-
-  /**
-   * @param {!HTMLMediaElement} media
-   * @return {!MediaEntryDef}
-   * @private
-   */
-  getMediaEntry_(media) {
-    return this.mediaMap_[media[ID_PROPERTY]];
-  }
-
-  /**
-   * @param {!HTMLMediaElement} media
-   * @param {!MediaEntryDef} mediaEntry
-   * @private
-   */
-  setMediaEntry_(media, mediaEntry) {
-    media[ID_PROPERTY] = media[ID_PROPERTY] || this.mediaId_++;
-    this.mediaMap_[media[ID_PROPERTY]] = mediaEntry;
-  }
-
-  /**
-   * @param {!HTMLMediaElement} media
-   * @private
-   */
-  deleteMediaEntry_(media) {
-    delete this.mediaMap_[media[ID_PROPERTY]];
   }
 
   /**
@@ -378,12 +365,9 @@ export class MediaPerformanceMetricsService {
     // Media error target could be either HTMLMediaElement or HTMLSourceElement.
     const media =
       event.target.tagName === 'SOURCE' ? event.target.parent : event.target;
-    const mediaEntry = this.getMediaEntry_(
-      /** @type {!HTMLMediaElement} */ (media)
-    );
+    const mediaEntry = this.mediaMap_.get(media);
 
     mediaEntry.metrics.error = media.error ? media.error.code : 0;
-
     mediaEntry.status = Status.ERRORED;
   }
 
@@ -392,14 +376,11 @@ export class MediaPerformanceMetricsService {
    * @private
    */
   onPauseOrEnded_(event) {
-    const mediaEntry = this.getMediaEntry_(
-      /** @type {!HTMLMediaElement} */ (event.target)
-    );
+    const mediaEntry = this.mediaMap_.get(event.target);
 
     if (mediaEntry.status === Status.PLAYING) {
       this.addWatchTime_(mediaEntry);
     }
-
     mediaEntry.status = Status.PAUSED;
   }
 
@@ -408,9 +389,7 @@ export class MediaPerformanceMetricsService {
    * @private
    */
   onPlaying_(event) {
-    const mediaEntry = this.getMediaEntry_(
-      /** @type {!HTMLMediaElement} */ (event.target)
-    );
+    const mediaEntry = this.mediaMap_.get(event.target);
     const {timeStamps, metrics} = mediaEntry;
 
     if (!metrics.jointLatency) {
@@ -430,9 +409,7 @@ export class MediaPerformanceMetricsService {
    * @private
    */
   onWaiting_(event) {
-    const mediaEntry = this.getMediaEntry_(
-      /** @type {!HTMLMediaElement} */ (event.target)
-    );
+    const mediaEntry = this.mediaMap_.get(event.target);
     const {timeStamps} = mediaEntry;
 
     if (mediaEntry.status === Status.PLAYING) {

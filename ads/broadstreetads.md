@@ -35,12 +35,12 @@ For configuration semantics, see the [Broadstreet Ads documentation](https://inf
 
 ### Required parameters
 
-- `width`
-- `height`
-- `data-network`
-- `data-zone`
+-   `width`
+-   `height`
+-   `data-network`
+-   `data-zone`
 
 ### Optional parameters
 
-- `data-place`
-- `data-keywords`
+-   `data-place`
+-   `data-keywords`

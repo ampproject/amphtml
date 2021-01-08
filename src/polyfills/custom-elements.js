@@ -684,16 +684,18 @@ function installPatches(win, registry) {
       'innerHTML'
     );
   }
-  const innerHTMLSetter = innerHTMLDesc.set;
-  innerHTMLDesc.set = function (html) {
-    innerHTMLSetter.call(this, html);
-    registry.upgrade(this);
-  };
-  Object.defineProperty(
-    /** @type {!Object} */ (innerHTMLProto),
-    'innerHTML',
-    innerHTMLDesc
-  );
+  if (innerHTMLDesc && innerHTMLDesc.configurable) {
+    const innerHTMLSetter = innerHTMLDesc.set;
+    innerHTMLDesc.set = function (html) {
+      innerHTMLSetter.call(this, html);
+      registry.upgrade(this);
+    };
+    Object.defineProperty(
+      /** @type {!Object} */ (innerHTMLProto),
+      'innerHTML',
+      innerHTMLDesc
+    );
+  }
 }
 
 /**
@@ -880,7 +882,7 @@ function supportsUnderProto() {
  * @param {!Object} prototype
  */
 function setPrototypeOf(obj, prototype) {
-  if (Object.setPrototypeOf) {
+  if (IS_ESM || Object.setPrototypeOf) {
     // Every decent browser.
     Object.setPrototypeOf(obj, prototype);
   } else if (supportsUnderProto()) {

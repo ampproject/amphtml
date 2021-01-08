@@ -179,7 +179,7 @@ describes.sandboxed('CSS resolve calc', {}, (env) => {
     it('should resolve left as percent', () => {
       contextMock.expects('getDimension').returns('w');
       contextMock
-        .expects('getCurrentElementSize')
+        .expects('getCurrentElementRect')
         .returns({width: 110, height: 220})
         .once();
       const node = new ast.CssCalcSumNode(
@@ -196,7 +196,7 @@ describes.sandboxed('CSS resolve calc', {}, (env) => {
     it('should resolve right as percent', () => {
       contextMock.expects('getDimension').returns('h');
       contextMock
-        .expects('getCurrentElementSize')
+        .expects('getCurrentElementRect')
         .returns({width: 110, height: 220})
         .once();
       const node = new ast.CssCalcSumNode(
@@ -214,7 +214,7 @@ describes.sandboxed('CSS resolve calc', {}, (env) => {
       contextMock.expects('getCurrentFontSize').returns(2).once();
       contextMock.expects('getDimension').returns('h');
       contextMock
-        .expects('getCurrentElementSize')
+        .expects('getCurrentElementRect')
         .returns({width: 110, height: 220})
         .once();
       const node = new ast.CssCalcSumNode(
@@ -230,12 +230,12 @@ describes.sandboxed('CSS resolve calc', {}, (env) => {
 
     it('should resolve with dimension function', () => {
       contextMock
-        .expects('getElementSize')
+        .expects('getElementRect')
         .returns({width: 111, height: 222})
         .twice();
       const node = new ast.CssCalcSumNode(
-        new ast.CssDimSizeNode('w', '.sel'),
-        new ast.CssDimSizeNode('h', '.sel'),
+        new ast.CssRectNode('w', '.sel'),
+        new ast.CssRectNode('h', '.sel'),
         '+'
       );
       // 111px + 222px = 333px
@@ -542,7 +542,7 @@ describes.sandboxed('CSS resolve calc', {}, (env) => {
       () => {
         contextMock.expects('getDimension').returns('w').atLeast(1);
         contextMock
-          .expects('getCurrentElementSize')
+          .expects('getCurrentElementRect')
           .returns({width: 110, height: 220})
           .atLeast(1);
         return [
@@ -561,7 +561,7 @@ describes.sandboxed('CSS resolve calc', {}, (env) => {
       () => {
         contextMock.expects('getDimension').returns('h').atLeast(1);
         contextMock
-          .expects('getCurrentElementSize')
+          .expects('getCurrentElementRect')
           .returns({width: 110, height: 220})
           .atLeast(1);
         return [new ast.CssLengthNode(25, 'px'), new ast.CssPercentNode(10)];
@@ -577,7 +577,7 @@ describes.sandboxed('CSS resolve calc', {}, (env) => {
         contextMock.expects('getCurrentFontSize').returns(2).atLeast(1);
         contextMock.expects('getDimension').returns('h').atLeast(1);
         contextMock
-          .expects('getCurrentElementSize')
+          .expects('getCurrentElementRect')
           .returns({width: 110, height: 220})
           .atLeast(1);
         return [new ast.CssLengthNode(10, 'em'), new ast.CssPercentNode(10)];
@@ -591,12 +591,12 @@ describes.sandboxed('CSS resolve calc', {}, (env) => {
       'should resolve with dimension function',
       () => {
         contextMock
-          .expects('getElementSize')
+          .expects('getElementRect')
           .returns({width: 111, height: 222})
           .atLeast(1);
         return [
-          new ast.CssDimSizeNode('w', '.sel'),
-          new ast.CssDimSizeNode('h', '.sel'),
+          new ast.CssRectNode('w', '.sel'),
+          new ast.CssRectNode('h', '.sel'),
         ];
       },
       // No CSS.
@@ -610,7 +610,7 @@ describes.sandboxed('CSS resolve calc', {}, (env) => {
       () => {
         contextMock.expects('getDimension').returns('w').atLeast(1);
         contextMock
-          .expects('getCurrentElementSize')
+          .expects('getCurrentElementRect')
           .returns({width: 110, height: 220})
           .atLeast(1);
         contextMock.expects('getCurrentFontSize').returns(1).atLeast(1);
@@ -631,7 +631,7 @@ describes.sandboxed('CSS resolve calc', {}, (env) => {
       () => {
         contextMock.expects('getDimension').returns('w').atLeast(1);
         contextMock
-          .expects('getCurrentElementSize')
+          .expects('getCurrentElementRect')
           .returns({width: 110, height: 220})
           .atLeast(1);
         contextMock.expects('getCurrentFontSize').returns(1).atLeast(1);

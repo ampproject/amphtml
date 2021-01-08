@@ -29,7 +29,7 @@ const request = require('request');
 const util = require('util');
 const {cyan, red, green} = require('ansi-colors');
 const {getFilesToCheck, usesFilesOrLocalChanges} = require('../common/utils');
-const {isTravisBuild} = require('../common/travis');
+const {isCiBuild} = require('../common/ci');
 
 const requestPost = util.promisify(request.post);
 
@@ -62,13 +62,10 @@ async function checkFile(file) {
     return;
   }
 
-  // TODO(rcebulko): Replace this placeholder with a check that uses the
-  // owners-bot parsing API.
-  // See https://github.com/ampproject/amp-github-apps/issues/281.
   const contents = fs.readFileSync(file, 'utf8').toString();
   try {
     JSON5.parse(contents);
-    if (!isTravisBuild()) {
+    if (!isCiBuild()) {
       log(green('SUCCESS:'), 'No errors in', cyan(file));
     }
   } catch {

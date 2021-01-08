@@ -1,11 +1,10 @@
 {
   "experimentA": {
-    "name": "IntersectionObserverPolyfill",
+    "name": "A4A No Signing RTV Experiment",
     "environment": "AMP",
-    "command": "gulp dist --define_experiment_constant=INTERSECTION_OBSERVER_POLYFILL",
-    "issue": "https://github.com/ampproject/amphtml/issues/27807",
-    "expirationDateUTC": "2020-05-31",
-    "defineExperimentConstant": "INTERSECTION_OBSERVER_POLYFILL"
+    "issue": "https://github.com/ampproject/amphtml/issues/27189",
+    "expiration_date_utc": "2020-12-30",
+    "define_experiment_constant": "NO_SIGNING_RTV"
   },
   "experimentB": {},
   "experimentC": {}

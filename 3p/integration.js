@@ -23,7 +23,7 @@
  */
 
 // src/polyfills.js must be the first import.
-import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
+import './polyfills';
 
 import {IntegrationAmpContext} from './ampcontext-integration';
 import {dict} from '../src/utils/object.js';
@@ -41,7 +41,6 @@ import {installEmbedStateListener, manageWin} from './environment';
 import {internalRuntimeVersion} from '../src/internal-version';
 import {parseJson} from '../src/json';
 import {register, run, setExperimentToggles} from './3p';
-import {startsWith} from '../src/string.js';
 import {urls} from '../src/config';
 
 // 3P - please keep in alphabetic order
@@ -93,6 +92,7 @@ import {adspirit} from '../ads/adspirit';
 import {adstir} from '../ads/adstir';
 import {adstyle} from '../ads/adstyle';
 import {adtech} from '../ads/adtech';
+import {adtelligent} from '../ads/adtelligent';
 import {adthrive} from '../ads/adthrive';
 import {adunity} from '../ads/adunity';
 import {aduptech} from '../ads/aduptech';
@@ -105,6 +105,7 @@ import {affiliateb} from '../ads/affiliateb';
 import {aja} from '../ads/aja';
 import {amoad} from '../ads/amoad';
 import {aniview} from '../ads/aniview';
+import {anyclip} from '../ads/anyclip';
 import {appnexus} from '../ads/appnexus';
 import {appvador} from '../ads/appvador';
 import {atomx} from '../ads/atomx';
@@ -141,7 +142,10 @@ import {eplanning} from '../ads/eplanning';
 import {ezoic} from '../ads/ezoic';
 import {f1e} from '../ads/f1e';
 import {f1h} from '../ads/f1h';
+import {fakeDelayed} from '../ads/_fakedelayed_';
+import {feedad} from '../ads/feedad';
 import {felmat} from '../ads/felmat';
+import {firstimpression} from '../ads/firstimpression';
 import {flite} from '../ads/flite';
 import {fluct} from '../ads/fluct';
 import {forkmedia} from '../ads/forkmedia';
@@ -149,6 +153,7 @@ import {freewheel} from '../ads/freewheel';
 import {fusion} from '../ads/fusion';
 import {genieessp} from '../ads/genieessp';
 import {giraff} from '../ads/giraff';
+import {glomex} from '../ads/glomex';
 import {gmossp} from '../ads/gmossp';
 import {gumgum} from '../ads/gumgum';
 import {holder} from '../ads/holder';
@@ -163,6 +168,7 @@ import {inmobi} from '../ads/inmobi';
 import {innity} from '../ads/innity';
 import {insticator} from '../ads/insticator';
 import {invibes} from '../ads/invibes';
+import {iprom} from '../ads/iprom';
 import {ix} from '../ads/ix';
 import {jubna} from '../ads/jubna';
 import {kargo} from '../ads/kargo';
@@ -174,8 +180,12 @@ import {ligatus} from '../ads/ligatus';
 import {lockerdome} from '../ads/lockerdome';
 import {logly} from '../ads/logly';
 import {loka} from '../ads/loka';
+import {luckyads} from '../ads/luckyads';
+import {macaw} from '../ads/macaw';
 import {mads} from '../ads/mads';
 import {mantisDisplay, mantisRecommend} from '../ads/mantis';
+import {marfeel} from '../ads/marfeel';
+import {mediaad} from '../ads/mediaad';
 import {medianet} from '../ads/medianet';
 import {mediavine} from '../ads/mediavine';
 import {medyanet} from '../ads/medyanet';
@@ -187,6 +197,7 @@ import {mixpo} from '../ads/mixpo';
 import {monetizer101} from '../ads/monetizer101';
 import {mox} from '../ads/mox';
 import {my6sense} from '../ads/my6sense';
+import {myoffrz} from '../ads/myoffrz';
 import {mytarget} from '../ads/mytarget';
 import {mywidget} from '../ads/mywidget';
 import {nativeroll} from '../ads/nativeroll';
@@ -197,6 +208,7 @@ import {nend} from '../ads/nend';
 import {netletix} from '../ads/netletix';
 import {noddus} from '../ads/noddus';
 import {nokta} from '../ads/nokta';
+import {oblivki} from '../ads/oblivki';
 import {onead} from '../ads/onead';
 import {onnetwork} from '../ads/onnetwork';
 import {openadstream} from '../ads/openadstream';
@@ -204,10 +216,12 @@ import {openx} from '../ads/openx';
 import {opinary} from '../ads/opinary';
 import {outbrain} from '../ads/outbrain';
 import {pixels} from '../ads/pixels';
+import {playstream} from '../ads/playstream';
 import {plista} from '../ads/plista';
 import {polymorphicads} from '../ads/polymorphicads';
 import {popin} from '../ads/popin';
 import {postquare} from '../ads/postquare';
+import {ppstudio} from '../ads/ppstudio';
 import {pressboard} from '../ads/pressboard';
 import {promoteiq} from '../ads/promoteiq';
 import {pubexchange} from '../ads/pubexchange';
@@ -215,6 +229,7 @@ import {pubguru} from '../ads/pubguru';
 import {pubmatic} from '../ads/pubmatic';
 import {pubmine} from '../ads/pubmine';
 import {puffnetwork} from '../ads/puffnetwork';
+import {pulse} from '../ads/pulse';
 import {pulsepoint} from '../ads/pulsepoint';
 import {purch} from '../ads/purch';
 import {quoraad} from '../ads/quoraad';
@@ -223,8 +238,10 @@ import {rbinfox} from '../ads/rbinfox';
 import {readmo} from '../ads/readmo';
 import {realclick} from '../ads/realclick';
 import {recomad} from '../ads/recomad';
+import {recreativ} from '../ads/recreativ';
 import {relap} from '../ads/relap';
 import {relappro} from '../ads/relappro';
+import {remixd} from '../ads/remixd';
 import {revcontent} from '../ads/revcontent';
 import {revjet} from '../ads/revjet';
 import {rfp} from '../ads/rfp';
@@ -243,6 +260,7 @@ import {smartclip} from '../ads/smartclip';
 import {smi2} from '../ads/smi2';
 import {smilewanted} from '../ads/smilewanted';
 import {sogouad} from '../ads/sogouad';
+import {sona} from '../ads/sona';
 import {sortable} from '../ads/sortable';
 import {sovrn} from '../ads/sovrn';
 import {speakol} from '../ads/speakol';
@@ -271,6 +289,7 @@ import {vdoai} from '../ads/vdoai';
 import {videointelligence} from '../ads/videointelligence';
 import {videonow} from '../ads/videonow';
 import {viralize} from '../ads/viralize';
+import {vlyby} from '../ads/vlyby';
 import {vmfive} from '../ads/vmfive';
 import {webediads} from '../ads/webediads';
 import {weboramaDisplay} from '../ads/weborama';
@@ -280,9 +299,11 @@ import {wisteria} from '../ads/wisteria';
 import {wpmedia} from '../ads/wpmedia';
 import {xlift} from '../ads/xlift';
 import {yahoo} from '../ads/yahoo';
+import {yahoofedads} from '../ads/yahoofedads';
 import {yahoojp} from '../ads/yahoojp';
 import {yahoonativeads} from '../ads/yahoonativeads';
 import {yandex} from '../ads/yandex';
+import {yektanet} from '../ads/yektanet';
 import {yengo} from '../ads/yengo';
 import {yieldbot} from '../ads/yieldbot';
 import {yieldmo} from '../ads/yieldmo';
@@ -307,12 +328,15 @@ const AMP_EMBED_ALLOWED = {
   dable: true,
   engageya: true,
   epeex: true,
+  firstimpression: true,
   forkmedia: true,
+  glomex: true,
   idealmedia: true,
   insticator: true,
   jubna: true,
   kuadio: true,
   'mantis-recommend': true,
+  mediaad: true,
   mgid: true,
   miximedia: true,
   mywidget: true,
@@ -322,9 +346,12 @@ const AMP_EMBED_ALLOWED = {
   outbrain: true,
   plista: true,
   postquare: true,
+  ppstudio: true,
   pubexchange: true,
+  pulse: true,
   rbinfox: true,
   readmo: true,
+  recreativ: true,
   runative: true,
   smartclip: true,
   smi2: true,
@@ -333,8 +360,11 @@ const AMP_EMBED_ALLOWED = {
   svknative: true,
   taboola: true,
   temedya: true,
+  vlyby: true,
   whopainfeed: true,
+  yahoofedads: true,
   yahoonativeads: true,
+  yektanet: true,
   zen: true,
   zergnet: true,
 };
@@ -343,6 +373,7 @@ init(window);
 
 if (getMode().test || getMode().localDev) {
   register('_ping_', _ping_);
+  register('fake-delayed', fakeDelayed);
 }
 
 // Keep the list in alphabetic order
@@ -380,6 +411,7 @@ register('adspirit', adspirit);
 register('adstir', adstir);
 register('adstyle', adstyle);
 register('adtech', adtech);
+register('adtelligent', adtelligent);
 register('adthrive', adthrive);
 register('adunity', adunity);
 register('aduptech', aduptech);
@@ -392,6 +424,7 @@ register('affiliateb', affiliateb);
 register('aja', aja);
 register('amoad', amoad);
 register('aniview', aniview);
+register('anyclip', anyclip);
 register('appnexus', appnexus);
 register('appvador', appvador);
 register('atomx', atomx);
@@ -432,7 +465,9 @@ register('ezoic', ezoic);
 register('f1e', f1e);
 register('f1h', f1h);
 register('facebook', facebook);
+register('feedad', feedad);
 register('felmat', felmat);
+register('firstimpression', firstimpression);
 register('flite', flite);
 register('fluct', fluct);
 register('forkmedia', forkmedia);
@@ -441,6 +476,7 @@ register('fusion', fusion);
 register('genieessp', genieessp);
 register('giraff', giraff);
 register('github', github);
+register('glomex', glomex);
 register('gmossp', gmossp);
 register('gumgum', gumgum);
 register('holder', holder);
@@ -456,6 +492,7 @@ register('inmobi', inmobi);
 register('innity', innity);
 register('insticator', insticator);
 register('invibes', invibes);
+register('iprom', iprom);
 register('ix', ix);
 register('jubna', jubna);
 register('kargo', kargo);
@@ -467,10 +504,14 @@ register('ligatus', ligatus);
 register('lockerdome', lockerdome);
 register('logly', logly);
 register('loka', loka);
+register('luckyads', luckyads);
+register('macaw', macaw);
 register('mads', mads);
 register('mantis-display', mantisDisplay);
 register('mantis-recommend', mantisRecommend);
+register('marfeel', marfeel);
 register('mathml', mathml);
+register('mediaad', mediaad);
 register('medianet', medianet);
 register('mediavine', mediavine);
 register('medyanet', medyanet);
@@ -482,6 +523,7 @@ register('mixpo', mixpo);
 register('monetizer101', monetizer101);
 register('mox', mox);
 register('my6sense', my6sense);
+register('myoffrz', myoffrz);
 register('mytarget', mytarget);
 register('mywidget', mywidget);
 register('nativeroll', nativeroll);
@@ -493,6 +535,7 @@ register('netletix', netletix);
 register('noddus', noddus);
 register('nokta', nokta);
 register('nws', nws);
+register('oblivki', oblivki);
 register('onead', onead);
 register('onnetwork', onnetwork);
 register('openadstream', openadstream);
@@ -500,10 +543,12 @@ register('openx', openx);
 register('opinary', opinary);
 register('outbrain', outbrain);
 register('pixels', pixels);
+register('playstream', playstream);
 register('plista', plista);
 register('polymorphicads', polymorphicads);
 register('popin', popin);
 register('postquare', postquare);
+register('ppstudio', ppstudio);
 register('pressboard', pressboard);
 register('promoteiq', promoteiq);
 register('pubexchange', pubexchange);
@@ -511,6 +556,7 @@ register('pubguru', pubguru);
 register('pubmatic', pubmatic);
 register('pubmine', pubmine);
 register('puffnetwork', puffnetwork);
+register('pulse', pulse);
 register('pulsepoint', pulsepoint);
 register('purch', purch);
 register('quoraad', quoraad);
@@ -520,8 +566,10 @@ register('readmo', readmo);
 register('realclick', realclick);
 register('reddit', reddit);
 register('recomad', recomad);
+register('recreativ', recreativ);
 register('relap', relap);
 register('relappro', relappro);
+register('remixd', remixd);
 register('revcontent', revcontent);
 register('revjet', revjet);
 register('rfp', rfp);
@@ -542,6 +590,7 @@ register('smi2', smi2);
 register('smilewanted', smilewanted);
 register('sogouad', sogouad);
 register('sortable', sortable);
+register('sona', sona);
 register('sovrn', sovrn);
 register('spotx', spotx);
 register('springAds', springAds);
@@ -569,6 +618,7 @@ register('videointelligence', videointelligence);
 register('videonow', videonow);
 register('viqeoplayer', viqeoplayer);
 register('viralize', viralize);
+register('vlyby', vlyby);
 register('vmfive', vmfive);
 register('webediads', webediads);
 register('weborama-display', weboramaDisplay);
@@ -578,9 +628,11 @@ register('wisteria', wisteria);
 register('wpmedia', wpmedia);
 register('xlift', xlift);
 register('yahoo', yahoo);
+register('yahoofedads', yahoofedads);
 register('yahoojp', yahoojp);
 register('yahoonativeads', yahoonativeads);
 register('yandex', yandex);
+register('yektanet', yektanet);
 register('yengo', yengo);
 register('yieldbot', yieldbot);
 register('yieldmo', yieldmo);
@@ -683,7 +735,7 @@ window.draw3p = function (
     manageWin(window);
     installEmbedStateListener();
 
-    // Ugly type annotation is due to Event.prototype.data being blacklisted
+    // Ugly type annotation is due to Event.prototype.data being denylisted
     // and the compiler not being able to discern otherwise
     // TODO(alanorozco): Do this more elegantly once old impl is cleaned up.
     draw3p(
@@ -759,13 +811,13 @@ export function validateAllowedTypes(window, type, allowedTypes) {
   }
   userAssert(
     allowedTypes && allowedTypes.indexOf(type) != -1,
-    'Non-whitelisted 3p type for custom iframe: %s',
+    '3p type for custom iframe not allowed: %s',
     type
   );
 }
 
 /**
- * Check that parent host name was whitelisted.
+ * Check that parent host name was allowed.
  * @param {!Window} window
  * @param {!Array<string>} allowedHostnames Suffixes of allowed host names.
  * @visibleForTesting
@@ -787,11 +839,11 @@ export function validateAllowedEmbeddingOrigins(window, allowedHostnames) {
       .hostname;
   }
   for (let i = 0; i < allowedHostnames.length; i++) {
-    // Either the hostname is exactly as whitelisted…
+    // Either the hostname is allowed
     if (allowedHostnames[i] == hostname) {
       return;
     }
-    // Or it ends in .$hostname (aka is a sub domain of the whitelisted domain.
+    // Or it ends in .$hostname (aka is a sub domain of an allowed domain.
     if (endsWith(hostname, '.' + allowedHostnames[i])) {
       return;
     }
@@ -824,7 +876,7 @@ export function parseFragment(fragment) {
     // Some browser, notably Firefox produce an encoded version of the fragment
     // while most don't. Since we know how the string should start, this is easy
     // to detect.
-    if (startsWith(json, '{%22')) {
+    if (json.startsWith('{%22')) {
       json = decodeURIComponent(json);
     }
     return /** @type {!JsonObject} */ (json ? parseJson(json) : dict());

@@ -17,6 +17,7 @@
 import '../../../amp-mustache/0.1/amp-mustache';
 import '../../../amp-selector/0.1/amp-selector';
 import * as xhrUtils from '../../../../src/utils/xhr-utils';
+import {ActionService} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/action-constants';
 import {AmpEvents} from '../../../../src/amp-events';
 import {
@@ -590,7 +591,7 @@ describes.repeated(
             );
           });
           form.setAttribute('action-xhr', 'https://example.com');
-          expect(() => new AmpForm(form)).to.not.throw;
+          expect(() => new AmpForm(form)).to.not.throw();
           document.body.removeChild(form);
         });
 
@@ -1528,13 +1529,13 @@ describes.repeated(
           });
         });
 
-        it('should degrade trust across submit-* in AMP4EMAIL', async () => {
+        it('should degrade trust across submit-*', async () => {
           const form = getForm();
-          form.ownerDocument.documentElement.setAttribute('amp4email', '');
 
           const actions = {
             installActionHandler: () => {},
             trigger: env.sandbox.spy(),
+            addToAllowlist: () => {},
           };
           env.sandbox.stub(Services, 'actionServiceForDoc').returns(actions);
 
@@ -2946,44 +2947,49 @@ describes.repeated(
           });
         });
 
-        it('should attach auth token with crossorigin attribute', () => {
-          env.sandbox.stub(Services, 'viewerAssistanceForDocOrNull').resolves({
-            getIdTokenPromise: () => Promise.resolve('idToken'),
-          });
-          return getAmpForm(getForm()).then((ampForm) => {
-            const form = ampForm.form_;
-            form.id = 'registration';
+        it('should allow default actions in email documents', async () => {
+          env.win.document.documentElement.setAttribute('amp4email', '');
+          const action = new ActionService(env.ampdoc, env.win.document);
+          env.sandbox.stub(Services, 'actionServiceForDoc').returns(action);
+          const element = getForm();
+          document.body.appendChild(element);
+          const form = new AmpForm(element, 'test-id');
+          const clearSpy = env.sandbox.stub(form, 'handleClearAction_');
+          action.execute(
+            element,
+            'clear',
+            null,
+            'source',
+            'caller',
+            'event',
+            ActionTrust.HIGH
+          );
+          expect(clearSpy).to.be.called;
 
-            const emailInput = createElement('input');
-            emailInput.setAttribute('name', 'email');
-            emailInput.setAttribute('type', 'email');
-            emailInput.setAttribute('value', 'j@hnmiller.com');
-            form.appendChild(emailInput);
-
-            const unnamedInput = createElement('input');
-            unnamedInput.setAttribute('type', 'text');
-            unnamedInput.setAttribute('value', 'unnamed');
-            form.appendChild(unnamedInput);
-
-            ampForm.method_ = 'POST';
-            ampForm.form_.setAttribute(
-              'crossorigin',
-              'amp-viewer-auth-token-via-post'
-            );
-            env.sandbox
-              .stub(ampForm.xhr_, 'fetch')
-              .resolves({json: () => Promise.resolve()});
-
-            return ampForm.handleSubmitAction_(/* invocation */ {}).then(() => {
-              return ampForm.xhrSubmitPromiseForTesting().then(() => {
-                expect(Services.viewerAssistanceForDocOrNull).to.be.called;
-                const fetchCallFormData = ampForm.xhr_.fetch.firstCall.args[1].body.getFormData();
-                expect(fetchCallFormData.get('ampViewerAuthToken')).to.equal(
-                  'idToken'
-                );
-              });
-            });
-          });
+          env.sandbox.stub(form, 'submit_');
+          const submitSpy = env.sandbox.stub(form, 'handleSubmitAction_');
+          action.execute(
+            element,
+            'submit',
+            null,
+            'source',
+            'caller',
+            'event',
+            ActionTrust.HIGH
+          );
+          await whenCalled(submitSpy);
+          expect(submitSpy).to.be.calledWith(
+            env.sandbox.match({
+              actionEventType: '?',
+              args: null,
+              caller: 'caller',
+              event: 'event',
+              method: 'submit',
+              node: element,
+              source: 'source',
+              trust: ActionTrust.HIGH,
+            })
+          );
         });
 
         describe('Async Inputs', () => {

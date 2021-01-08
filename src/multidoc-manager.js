@@ -28,6 +28,7 @@ import {disposeServicesForDoc, getServicePromiseOrNullForDoc} from './service';
 import {getMode} from './mode';
 import {installStylesForDoc} from './style-installer';
 import {isArray, isObject} from './types';
+import {parseExtensionUrl} from './service/extension-location';
 import {parseUrlDeprecated} from './url';
 import {setStyle} from './style';
 
@@ -376,6 +377,17 @@ export class MultidocManager {
               // Must be a font definition: no other stylesheets are allowed.
               if (parentLinks[href]) {
                 dev().fine(TAG, '- stylesheet already included: ', href);
+                // To accomodate icon fonts whose stylesheets include
+                // the class definitions in addition to the font definition,
+                // we re-import the stylesheet into the shadow document.
+                // Note: <link> in shadow mode is not yet fully supported on
+                // all browsers, so we use <style>@import "url"</style> instead
+                installStylesForDoc(
+                  ampdoc,
+                  `@import "${href}"`,
+                  /* callback */ null,
+                  /* isRuntimeCss */ false
+                );
               } else {
                 parentLinks[href] = true;
                 const el = this.win.document.createElement('link');
@@ -417,15 +429,12 @@ export class MultidocManager {
             if (n.hasAttribute('src')) {
               dev().fine(TAG, '- src script: ', n);
               const src = n.getAttribute('src');
-              const isRuntime =
-                src.indexOf('/amp.js') != -1 || src.indexOf('/v0.js') != -1;
+              const urlParts = parseExtensionUrl(src);
+              const isRuntime = !urlParts.extensionId;
               // Note: Some extensions don't have [custom-element] or
               // [custom-template] e.g. amp-viewer-integration.
               const customElement = n.getAttribute('custom-element');
               const customTemplate = n.getAttribute('custom-template');
-              const versionRe = /-(\d+.\d+)(.max)?\.js$/;
-              const match = versionRe.exec(src);
-              const version = match ? match[1] : '0.1';
               if (isRuntime) {
                 dev().fine(TAG, '- ignore runtime script: ', src);
               } else if (customElement || customTemplate) {
@@ -433,14 +442,14 @@ export class MultidocManager {
                 this.extensions_.installExtensionForDoc(
                   ampdoc,
                   customElement || customTemplate,
-                  version
+                  urlParts.extensionVersion
                 );
                 dev().fine(
                   TAG,
                   '- load extension: ',
                   customElement || customTemplate,
                   ' ',
-                  version
+                  urlParts.extensionVersion
                 );
                 if (customElement) {
                   extensionIds.push(customElement);

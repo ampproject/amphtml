@@ -27,9 +27,13 @@ const lazypipe = require('lazypipe');
 const log = require('fancy-log');
 const path = require('path');
 const watch = require('gulp-watch');
-const {getFilesChanged, logOnSameLine} = require('../common/utils');
+const {
+  getFilesChanged,
+  getFilesFromArgv,
+  logOnSameLine,
+} = require('../common/utils');
 const {gitDiffNameOnlyMaster} = require('../common/git');
-const {isTravisBuild} = require('../common/travis');
+const {isCiBuild} = require('../common/ci');
 const {maybeUpdatePackages} = require('./update-packages');
 const {watchDebounceDelay} = require('./helpers');
 
@@ -58,7 +62,7 @@ function initializeStream(globs, streamOptions) {
  * @return {boolean}
  */
 function runLinter(stream) {
-  if (!isTravisBuild()) {
+  if (!isCiBuild()) {
     log(colors.green('Starting linter...'));
   }
   const options = {
@@ -77,7 +81,7 @@ function runLinter(stream) {
     .pipe(
       eslint.result(function (result) {
         const relativePath = path.relative(rootDir, result.filePath);
-        if (!isTravisBuild()) {
+        if (!isCiBuild()) {
           logOnSameLine(colors.green('Linted: ') + relativePath);
         }
         if (options.fix && result.fixed) {
@@ -93,7 +97,7 @@ function runLinter(stream) {
     .pipe(
       eslint.results(function (results) {
         if (results.errorCount == 0 && results.warningCount == 0) {
-          if (!isTravisBuild()) {
+          if (!isCiBuild()) {
             logOnSameLine(
               colors.green('SUCCESS: ') + 'No linter warnings or errors.'
             );
@@ -156,7 +160,7 @@ function eslintRulesChanged() {
   return (
     gitDiffNameOnlyMaster().filter(function (file) {
       return (
-        path.basename(file).includes('.eslintrc') ||
+        path.basename(file).includes('.eslintrc.js') ||
         path.dirname(file) === 'build-system/eslint-rules'
       );
     }).length > 0
@@ -171,7 +175,7 @@ function eslintRulesChanged() {
  */
 function getFilesToLint(files) {
   const filesToLint = globby.sync(files, {gitignore: true});
-  if (!isTravisBuild()) {
+  if (!isCiBuild()) {
     log(colors.green('INFO: ') + 'Running lint on the following files:');
     filesToLint.forEach((file) => {
       log(colors.cyan(file));
@@ -187,9 +191,9 @@ function getFilesToLint(files) {
  */
 function lint() {
   maybeUpdatePackages();
-  let filesToLint = config.lintGlobs;
+  let filesToLint = globby.sync(config.lintGlobs, {gitignore: true});
   if (argv.files) {
-    filesToLint = getFilesToLint(argv.files.split(','));
+    filesToLint = getFilesToLint(getFilesFromArgv());
   } else if (!eslintRulesChanged() && argv.local_changes) {
     const lintableFiles = getFilesChanged(config.lintGlobs);
     if (lintableFiles.length == 0) {

@@ -18,16 +18,19 @@ import {Deferred} from '../utils/promise';
 import {Observable} from '../observable';
 import {Signals} from '../utils/signals';
 import {VisibilityState} from '../visibility-state';
+import {WindowInterface} from '../window-interface';
 import {
   addDocumentVisibilityChangeListener,
   getDocumentVisibilityState,
   removeDocumentVisibilityChangeListener,
 } from '../utils/document-visibility';
 import {dev, devAssert} from '../log';
-import {getParentWindowFrameElement, registerServiceBuilder} from '../service';
-import {getShadowRootNode} from '../shadow-embed';
+import {
+  disposeServicesForDoc,
+  getParentWindowFrameElement,
+  registerServiceBuilder,
+} from '../service';
 import {isDocumentReady, whenDocumentReady} from '../document-ready';
-import {isInAmpdocFieExperiment} from '../ampdoc-fie';
 import {iterateCursor, rootNodeFor, waitForBodyOpenPromise} from '../dom';
 import {map} from '../utils/object';
 import {parseQueryString} from '../url';
@@ -86,12 +89,6 @@ export class AmpDocService {
       });
       win.document[AMPDOC_PROP] = this.singleDoc_;
     }
-
-    /** @private {boolean} */
-    this.ampdocFieExperimentOn_ = isInAmpdocFieExperiment(win);
-
-    /** @private {boolean} */
-    this.mightHaveShadowRoots_ = !isSingleDoc;
   }
 
   /**
@@ -133,93 +130,45 @@ export class AmpDocService {
 
   /**
    * Returns the instance of the ampdoc (`AmpDoc`) that contains the specified
-   * node. If the runtime is in the single-doc mode, the one global `AmpDoc`
-   * instance is returned, unless specfically looking for a closer `AmpDoc`.
-   * Otherwise, this method locates the `AmpDoc` that contains the specified
-   * node and, if necessary, initializes it.
-   *
-   * TODO(#22733): rewrite docs once the ampdoc-fie is launched.
+   * node.
    *
    * @param {!Node} node
    * @return {?AmpDoc}
    */
   getAmpDocIfAvailable(node) {
-    if (this.ampdocFieExperimentOn_) {
-      let n = node;
-      while (n) {
-        // A custom element may already have the reference. If we are looking
-        // for the closest AmpDoc, the element might have a reference to the
-        // global AmpDoc, which we do not want. This occurs when using
-        // <amp-next-page>.
-
-        const cachedAmpDoc = this.getCustomElementAmpDocReference_(node);
-        if (cachedAmpDoc) {
-          return cachedAmpDoc;
-        }
-
-        // Root note: it's either a document, or a shadow document.
-        const rootNode = rootNodeFor(n);
-        if (!rootNode) {
-          break;
-        }
-        const ampdoc = rootNode[AMPDOC_PROP];
-        if (ampdoc) {
-          return ampdoc;
-        }
-
-        // Try to iterate to the host of the current root node.
-        // First try the shadow root's host.
-        if (rootNode.host) {
-          n = rootNode.host;
-        } else {
-          // Then, traverse the boundary of a friendly iframe.
-          n = getParentWindowFrameElement(rootNode, this.win);
-        }
-      }
-
-      return null;
-    }
-
-    // Otherwise discover and possibly create the ampdoc.
     let n = node;
     while (n) {
       // A custom element may already have the reference. If we are looking
       // for the closest AmpDoc, the element might have a reference to the
       // global AmpDoc, which we do not want. This occurs when using
       // <amp-next-page>.
+
       const cachedAmpDoc = this.getCustomElementAmpDocReference_(node);
       if (cachedAmpDoc) {
         return cachedAmpDoc;
       }
 
-      // Traverse the boundary of a friendly iframe.
-      const frameElement = getParentWindowFrameElement(n, this.win);
-      if (frameElement) {
-        n = frameElement;
-        continue;
-      }
-
-      if (!this.mightHaveShadowRoots_) {
+      // Root note: it's either a document, or a shadow document.
+      const rootNode = rootNodeFor(n);
+      if (!rootNode) {
         break;
       }
-
-      // Shadow doc.
-      const shadowRoot =
-        n.nodeType == /* DOCUMENT */ 9 ? n : getShadowRootNode(n);
-      if (!shadowRoot) {
-        break;
-      }
-
-      const ampdoc = shadowRoot[AMPDOC_PROP];
+      const ampdoc = rootNode[AMPDOC_PROP];
       if (ampdoc) {
         return ampdoc;
       }
-      n = shadowRoot.host;
+
+      // Try to iterate to the host of the current root node.
+      // First try the shadow root's host.
+      if (rootNode.host) {
+        n = rootNode.host;
+      } else {
+        // Then, traverse the boundary of a friendly iframe.
+        n = getParentWindowFrameElement(rootNode, this.win);
+      }
     }
 
-    // If we were looking for the closest AmpDoc, then fall back to the single
-    // doc if there is no other AmpDoc that is closer.
-    return this.singleDoc_;
+    return null;
   }
 
   /**
@@ -258,7 +207,6 @@ export class AmpDocService {
    * @restricted
    */
   installShadowDoc(url, shadowRoot, opt_options) {
-    this.mightHaveShadowRoots_ = true;
     devAssert(
       !shadowRoot[AMPDOC_PROP],
       'The shadow root already contains ampdoc'
@@ -308,8 +256,8 @@ export class AmpDoc {
     /** @public @const {!Window} */
     this.win = win;
 
-    /** @private */
-    this.hasTrackingIframe_ = false;
+    /** @private {!Object<../enums.AMPDOC_SINGLETON_NAME, boolean>} */
+    this.registeredSingleton_ = map();
 
     /** @public @const {?AmpDoc} */
     this.parent_ = parent;
@@ -375,6 +323,7 @@ export class AmpDoc {
    * Dispose the document.
    */
   dispose() {
+    disposeServicesForDoc(this);
     this.unsubsribes_.forEach((unsubsribe) => unsubsribe());
   }
 
@@ -533,7 +482,7 @@ export class AmpDoc {
    * @return {!Element}
    */
   getBody() {
-    return dev().assertElement(null, 'not implemented');
+    return /** @type {?} */ (devAssert(null, 'not implemented'));
   }
 
   /**
@@ -570,7 +519,7 @@ export class AmpDoc {
    * @return {string}
    */
   getUrl() {
-    return dev().assertString(null, 'not implemented');
+    return /** @type {?} */ (devAssert(null, 'not implemented'));
   }
 
   /**
@@ -754,16 +703,17 @@ export class AmpDoc {
   }
 
   /**
-   * Allow one tracking iframe for each amp doc. Caller need to handle user
-   * error when registeration returns false
+   * Attempt to register a singleton for each ampdoc.
+   * Caller need to handle user error when registration returns false.
+   * @param {!../enums.AMPDOC_SINGLETON_NAME} name
    * @return {boolean}
    */
-  registerTrackingIframe() {
-    if (this.hasTrackingIframe_) {
-      return false;
+  registerSingleton(name) {
+    if (!this.registeredSingleton_[name]) {
+      this.registeredSingleton_[name] = true;
+      return true;
     }
-    this.hasTrackingIframe_ = true;
-    return true;
+    return false;
   }
 }
 
@@ -801,7 +751,7 @@ export class AmpDocSingle extends AmpDoc {
 
   /** @override */
   getUrl() {
-    return this.win.location.href;
+    return WindowInterface.getLocation(this.win).href;
   }
 
   /** @override */
@@ -1086,14 +1036,4 @@ export function installDocService(win, isSingleDoc, opt_initParams) {
   registerServiceBuilder(win, 'ampdoc', function () {
     return new AmpDocService(win, isSingleDoc, opt_initParams);
   });
-}
-
-/**
- * @param {AmpDocService} ampdocService
- * @param {boolean} value
- * @visibleForTesting
- */
-export function updateFieModeForTesting(ampdocService, value) {
-  // TODO(#22733): remove this method once ampdoc-fie is launched.
-  ampdocService.ampdocFieExperimentOn_ = value;
 }

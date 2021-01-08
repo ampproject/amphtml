@@ -34,7 +34,14 @@ describes.realWin(
       );
     }
 
-    function getPin(pinDo, pinUrl, pinMedia, pinDescription) {
+    function getPin(
+      pinDo,
+      pinUrl,
+      pinMedia,
+      pinDescription,
+      width = 20,
+      height = 40
+    ) {
       const div = document.createElement('div');
       env.win.document.body.appendChild(div);
 
@@ -43,6 +50,9 @@ describes.realWin(
       pin.setAttribute('data-url', pinUrl);
       pin.setAttribute('data-media', pinMedia);
       pin.setAttribute('data-description', pinDescription);
+      pin.setAttribute('layout', 'responsive');
+      pin.setAttribute('width', width);
+      pin.setAttribute('height', height);
       div.appendChild(pin);
       pin.implementation_.buildCallback();
       return pin.implementation_.layoutCallback().then(() => {
@@ -60,6 +70,9 @@ describes.realWin(
       const pin = env.win.document.createElement('amp-pinterest');
       pin.setAttribute('data-do', 'embedPin');
       pin.setAttribute('data-url', pinURL + pinID);
+      pin.setAttribute('layout', 'responsive');
+      pin.setAttribute('width', '100');
+      pin.setAttribute('height', '100');
       if (pinAlt) {
         pin.setAttribute('alt', pinAlt);
       }
@@ -88,6 +101,33 @@ describes.realWin(
             'taticflickr.com%2F8%2F7027%2F6851755809_df5b2051c9_b.jpg&de' +
             'scription=Next%20stop%3A%20Pinterest'
         );
+      });
+    });
+
+    it('renders text content', () => {
+      return getPin(
+        'buttonPin',
+        'http://www.flickr.com/photos/kentbrew/6851755809/',
+        'http://c2.staticflickr.com/8/7027/6851755809_df5b2051c9_b.jpg',
+        'Next stop: Pinterest'
+      ).then((pin) => {
+        const a = pin.querySelector('a');
+        expect(a.textContent).to.equal('Save');
+      });
+    });
+
+    it('renders an aria-label if there is no text content', () => {
+      return getPin(
+        'buttonPin',
+        'http://www.flickr.com/photos/kentbrew/6851755809/',
+        'http://c2.staticflickr.com/8/7027/6851755809_df5b2051c9_b.jpg',
+        'Next stop: Pinterest',
+        100,
+        100
+      ).then((pin) => {
+        const a = pin.querySelector('a');
+        expect(a.textContent).to.equal('');
+        expect(a.getAttribute('aria-label')).to.equal('Save');
       });
     });
 
@@ -242,7 +282,7 @@ describes.realWin(
             'pinner': {
               'about': '',
               'location': 'London',
-              'full_name': 'Paul Matthews',
+              'full_name': 'Paul Matthews&auml;',
               'follower_count': 10,
               'image_small_url':
                 'https://i.pinimg.com/30x30_RS/f0/3e/21/f03e21f499084c44fca771555f547474.jpg',
@@ -343,6 +383,10 @@ describes.realWin(
             'rails in SF, cable car rails #cablecar #sanfrancisco #endoftheline ' +
             '#tourist #rails #saturdayafternoon #california'
         );
+
+        expect(
+          pin.querySelector('.-amp-pinterest-embed-pin-pinner-name').textContent
+        ).to.equal('Paul Matthewsä');
       });
     });
 

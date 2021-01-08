@@ -19,7 +19,7 @@ import {pubmine} from '../../../ads/pubmine';
 describes.fakeWin('pubmine', {}, (env) => {
   let win;
   const mockData = {
-    siteid: 'amp-test',
+    siteid: '12345',
     section: 1,
     pt: 2,
     ht: 2,
@@ -32,7 +32,7 @@ describes.fakeWin('pubmine', {}, (env) => {
   }
 
   function getSlotElement() {
-    return win.document.querySelector('#atatags-amp-test1');
+    return win.document.querySelector('#atatags-123451');
   }
 
   beforeEach(() => {
@@ -50,6 +50,7 @@ describes.fakeWin('pubmine', {}, (env) => {
       tn: 'amp',
       amp: true,
       consent: 0,
+      siteid: 12345,
     };
     pubmine(win, mockData);
     expect(win.__ATA_PP).to.deep.equal(expectedConfig);

@@ -19,7 +19,6 @@ import {Deferred} from '../../../src/utils/promise';
 import {dev, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {getTrackerKeyName, getTrackerTypesForParentType} from './events';
-import {isExperimentOn} from '../../../src/experiments';
 import {toWin} from '../../../src/types';
 
 /**
@@ -80,11 +79,11 @@ export class AnalyticsGroup {
   addTrigger(config, handler) {
     const eventType = dev().assertString(config['on']);
     const trackerKey = getTrackerKeyName(eventType);
-    const trackerWhitelist = getTrackerTypesForParentType(this.root_.getType());
+    const trackerAllowlist = getTrackerTypesForParentType(this.root_.getType());
 
-    const tracker = this.root_.getTrackerForWhitelist(
+    const tracker = this.root_.getTrackerForAllowlist(
       trackerKey,
-      trackerWhitelist
+      trackerAllowlist
     );
     userAssert(
       !!tracker,
@@ -106,7 +105,6 @@ export class AnalyticsGroup {
     };
     if (
       this.triggerCount_ < IMMEDIATE_TRIGGER_THRES ||
-      !isExperimentOn(this.win_, 'analytics-chunks') ||
       getMode(this.win_).runtime == 'inabox'
     ) {
       task();

@@ -65,7 +65,7 @@ export class Mask {
    * @param {string} mask
    */
   constructor(element, mask) {
-    this.Inputmask_ = Mask.getInputmask_(element);
+    this.Inputmask_ = this.getInputmask_(element);
 
     this.element_ = element;
 
@@ -108,7 +108,7 @@ export class Mask {
    * @return {function(!Object):!Inputmask}
    * @private visible for testing
    */
-  static getInputmask_(element) {
+  getInputmask_(element) {
     if (this.Inputmask_) {
       return this.Inputmask_;
     }

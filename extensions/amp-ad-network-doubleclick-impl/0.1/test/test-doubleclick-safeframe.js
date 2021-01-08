@@ -341,14 +341,6 @@ describes.realWin(
       });
 
       it('should get current geometry when safeframe fills amp-ad', () => {
-        env.sandbox
-          ./*OK*/ stub(safeframeHost.baseInstance_, 'getPageLayoutBox')
-          .returns({
-            top: 0,
-            left: 0,
-            right: 300,
-            bottom: 250,
-          });
         const safeframeMock = createElementWithAttributes(doc, 'iframe', {
           'class': 'safeframe',
         });
@@ -392,14 +384,6 @@ describes.realWin(
       });
 
       it('should get geometry when safeframe does not fill amp-ad', () => {
-        env.sandbox
-          ./*OK*/ stub(safeframeHost.baseInstance_, 'getPageLayoutBox')
-          .returns({
-            top: 0,
-            left: 0,
-            right: 50,
-            bottom: 50,
-          });
         // In this case, the safeframe is smaller than its containing
         // amp-ad element.
         const safeframeMock = createElementWithAttributes(doc, 'iframe', {
@@ -444,14 +428,6 @@ describes.realWin(
 
       it('should handle cancellation', () => {
         expectAsyncConsoleError(/cancellation/i, 1);
-        env.sandbox
-          ./*OK*/ stub(safeframeHost.baseInstance_, 'getPageLayoutBox')
-          .returns({
-            top: 0,
-            left: 0,
-            right: 50,
-            bottom: 50,
-          });
         // In this case, the safeframe is smaller than its containing
         // amp-ad element.
         const safeframeMock = createElementWithAttributes(doc, 'iframe', {
@@ -481,14 +457,6 @@ describes.realWin(
       });
 
       it('should get geometry when scrolled', () => {
-        env.sandbox
-          ./*OK*/ stub(safeframeHost.baseInstance_, 'getPageLayoutBox')
-          .returns({
-            top: 0,
-            left: 0,
-            right: 50,
-            bottom: 50,
-          });
         // In this case, the safeframe is smaller than its containing
         // amp-ad element.
         const safeframeMock = createElementWithAttributes(doc, 'iframe', {
@@ -589,14 +557,6 @@ describes.realWin(
 
     describe('formatGeom', () => {
       it('should build proper geometry update', () => {
-        env.sandbox
-          ./*OK*/ stub(safeframeHost.baseInstance_, 'getPageLayoutBox')
-          .returns({
-            top: 200,
-            left: 100,
-            right: 400,
-            bottom: 800,
-          });
         const iframeBox = {
           top: 300,
           left: 200,

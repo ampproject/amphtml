@@ -43,6 +43,7 @@ export const MessageType = {
   NO_CONTENT: 'no-content',
   GET_HTML: 'get-html',
   GET_CONSENT_STATE: 'get-consent-state',
+  SIGNAL_INTERACTIVE: 'signal-interactive',
 
   // For the frame to be placed in full overlay mode for lightboxes
   FULL_OVERLAY_FRAME: 'full-overlay-frame',
@@ -61,6 +62,10 @@ export const MessageType = {
 
   // For user-error-in-iframe
   USER_ERROR_IN_IFRAME: 'user-error-in-iframe',
+
+  // For amp-iframe
+  SEND_CONSENT_DATA: 'send-consent-data',
+  CONSENT_DATA: 'consent-data',
 };
 
 /**

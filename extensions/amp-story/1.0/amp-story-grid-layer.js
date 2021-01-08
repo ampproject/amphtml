@@ -29,7 +29,9 @@
 import {AmpStoryBaseLayer} from './amp-story-base-layer';
 import {StateProperty, getStoreService} from './amp-story-store-service';
 import {assertDoesNotContainDisplay, px, setStyles} from '../../../src/style';
-import {matches, scopedQuerySelectorAll} from '../../../src/dom';
+import {escapeCssSelectorIdent} from '../../../src/css';
+import {parseQueryString} from '../../../src/url';
+import {scopedQuerySelectorAll} from '../../../src/dom';
 
 /**
  * A mapping of attribute names we support for grid layers to the CSS Grid
@@ -83,20 +85,30 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
   constructor(element) {
     super(element);
 
-    /** @private {boolean} */
-    this.prerenderAllowed_ = false;
+    /** @private {?boolean} */
+    this.isPrerenderActivePage_ = null;
 
     /** @private {?{horiz: number, vert: number}} */
     this.aspectRatio_ = null;
   }
 
-  /** @override */
-  firstAttachedCallback() {
-    // Only prerender if child of the first page.
-    this.prerenderAllowed_ = matches(
-      this.element,
-      'amp-story-page:first-of-type amp-story-grid-layer'
-    );
+  /**
+   * Returns true if the page should be prerendered (for being an active page or first page)
+   * @return {boolean}
+   */
+  isPrerenderActivePage() {
+    if (this.isPrerenderActivePage_ != null) {
+      return this.isPrerenderActivePage_;
+    }
+    const hashId = parseQueryString(this.win.location.href)['page'];
+    let selector = 'amp-story-page:first-of-type';
+    if (hashId) {
+      selector += `, amp-story-page#${escapeCssSelectorIdent(hashId)}`;
+    }
+    const selectorNodes = this.win.document.querySelectorAll(selector);
+    this.isPrerenderActivePage_ =
+      selectorNodes[selectorNodes.length - 1] === this.element.parentElement;
+    return this.isPrerenderActivePage_;
   }
 
   /** @override */
@@ -110,7 +122,7 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
 
   /** @override */
   prerenderAllowed() {
-    return this.prerenderAllowed_;
+    return this.isPrerenderActivePage();
   }
 
   /** @private */
@@ -171,7 +183,7 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
   }
 
   /**
-   * Copies the whitelisted CSS grid styles for descendants of the
+   * Copies the allowlisted CSS grid styles for descendants of the
    * <amp-story-grid-layer> element.
    * @private
    */
@@ -187,7 +199,7 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
   }
 
   /**
-   * Copies the whitelisted CSS grid styles for the <amp-story-grid-layer>
+   * Copies the allowlisted CSS grid styles for the <amp-story-grid-layer>
    * element itself.
    * @private
    */
@@ -197,7 +209,7 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
 
   /**
    * Copies the values of an element's attributes to its styles, if the
-   * attributes/properties are in the whitelist.
+   * attributes/properties are in the allowlist.
    *
    * @param {!Element} element The element whose styles should be copied from
    *     its attributes.
