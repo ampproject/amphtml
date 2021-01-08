@@ -17,6 +17,7 @@ const argv = require('minimist')(process.argv.slice(2));
 const fastGlob = require('fast-glob');
 const log = require('fancy-log');
 const path = require('path');
+const tempy = require('tempy');
 const {cyan, magenta, yellow} = require('ansi-colors');
 const {getOutput} = require('../../common/process');
 const {readJsonSync, writeFileSync} = require('fs-extra');
@@ -110,11 +111,13 @@ const jscodeshift = (transform, args = []) =>
 
 /**
  * @param {string} id
+ * @param {string} experimentsRemovedJson
  * @return {Array<string>} modified files
  */
-function removeFromExperimentsConfig(id) {
+function removeFromExperimentsConfig(id, experimentsRemovedJson) {
   jscodeshift('remove-experiment-config.js', [
     `--experimentId=${id}`,
+    `--experimentsRemovedJson=${experimentsRemovedJson}`,
     experimentsConfigPath,
   ]);
   return [experimentsConfigPath];
@@ -258,6 +261,25 @@ const findConfigBitCommits = (
     };
   });
 
+const issueUrlToNumberRe = new RegExp(
+  `^${
+    // Only use regex groups using parens () for issue number in this list.
+    [
+      'https://github.com/ampproject/amphtml/issues/(\\d+)',
+      'https://github.com/ampproject/amphtml/pull/(\\d+)',
+      'https://go.amp.dev/issue/(\\d+)',
+      'https://go.amp.dev/pr/(\\d+)',
+      '#(\\d+)',
+      '(\\d+)',
+    ].join('|')
+  }$`
+);
+function issueUrlToNumberOrUrl(url) {
+  const match = url.match(issueUrlToNumberRe);
+  const number = match && match[1];
+  return number ? `#${number}` : url;
+}
+
 /**
  * @param {string} files
  * @return {string}
@@ -277,6 +299,7 @@ const readmeMdGithubLink = () =>
 /**
  * @param {{
  *   removed: string,
+ *   cleanupIssues: Array<Object>,
  *   cutoffDateFormatted: string,
  *   modifiedSourceFiles: Array<string>,
  *   htmlFilesWithReferences: Array<string>,
@@ -285,6 +308,7 @@ const readmeMdGithubLink = () =>
  */
 function summaryCommitMessage({
   removed,
+  cleanupIssues,
   cutoffDateFormatted,
   modifiedSourceFiles,
   htmlFilesWithReferences,
@@ -294,6 +318,20 @@ function summaryCommitMessage({
     `Sweep experiments last flipped globally up to ${cutoffDateFormatted}:`,
     removed.join('\n'),
   ];
+
+  if (cleanupIssues.length > 0) {
+    paragraphs.push(
+      '---',
+      '### Cleanup issues',
+      "Close these once they've been addressed and this PR has been merged:",
+      cleanupIssues
+        .map(
+          ({id, cleanupIssue}) =>
+            `- [ ] \`${id}\`: ${issueUrlToNumberOrUrl(cleanupIssue)}`
+        )
+        .join('\n')
+    );
+  }
 
   if (modifiedSourceFiles.length > 0) {
     paragraphs.push(
@@ -424,11 +462,13 @@ async function sweepExperiments() {
 
   const removed = [];
 
+  const removedFromExperimentsConfigJson = tempy.file();
+
   Object.entries(include).forEach(([id, workItem], i) => {
     log(`🚮 ${i + 1}/${total}`, magenta(`${id}...`));
 
     const modified = [
-      ...removeFromExperimentsConfig(id),
+      ...removeFromExperimentsConfig(id, removedFromExperimentsConfigJson),
       ...removeFromJsonConfig(prodConfig, prodConfigPath, id),
       ...removeFromJsonConfig(canaryConfig, canaryConfigPath, id),
       ...removeFromRuntimeSource(id, workItem.percentage),
@@ -448,6 +488,13 @@ async function sweepExperiments() {
   });
 
   if (removed.length > 0) {
+    const removedFromExperimentsConfig =
+      readJsonSync(removedFromExperimentsConfigJson, {throws: false}) || [];
+
+    const cleanupIssues = removedFromExperimentsConfig.filter(
+      ({cleanupIssue}) => !!cleanupIssue
+    );
+
     const modifiedSourceFiles = getModifiedSourceFiles(headHash);
 
     const htmlFilesWithReferences = filesContainingPattern(
@@ -460,6 +507,7 @@ async function sweepExperiments() {
         `git commit --allow-empty -m "${cmdEscape(
           summaryCommitMessage({
             removed,
+            cleanupIssues,
             modifiedSourceFiles,
             htmlFilesWithReferences,
             cutoffDateFormatted: truncateYyyyMmDd(cutoffDateFormatted),

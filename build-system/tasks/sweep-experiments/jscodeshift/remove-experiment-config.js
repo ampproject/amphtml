@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import {readJsonSync, writeJsonSync} from 'fs-extra';
+import json5 from 'json5';
+
 /**
  * Removes an entry from files like tools/experiments/experiments-config.js,
  * whose id property is specified by --experimentId:
@@ -40,7 +43,7 @@
 export default function transformer(file, api, options) {
   const j = api.jscodeshift;
 
-  const {experimentId} = options;
+  const {experimentId, experimentsRemovedJson} = options;
 
   return j(file.source)
     .find(j.ObjectExpression)
@@ -53,6 +56,24 @@ export default function transformer(file, api, options) {
           })
           .size() !== 0
     )
-    .remove()
+    .forEach((path) => {
+      if (experimentsRemovedJson) {
+        const entry = json5.parse(
+          j(
+            j.objectExpression(
+              // Only collect literal value properties so we can parse as JSON5
+              path.value.properties.filter(
+                ({value}) => value.type === 'Literal'
+              )
+            )
+          ).toSource()
+        );
+        writeJsonSync(experimentsRemovedJson, [
+          ...(readJsonSync(experimentsRemovedJson, {throws: false}) || []),
+          entry,
+        ]);
+      }
+      path.prune();
+    })
     .toSource();
 }
