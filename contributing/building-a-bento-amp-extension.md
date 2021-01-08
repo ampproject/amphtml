@@ -6,7 +6,7 @@ provides `amp-accordion`, `amp-base-carousel` and `amp-sidebar` as
 extensions.
 
 Bento AMP is a project that allows you to take AMP components and use them in otherwise non-AMP pages. Many of these Bento-enabled AMP components also build
-upon a Preact form under the hood that is also usable in isolation in React development contexts, but this is not a requirement. The only requirement of
+upon an independent Preact component that may be used in isolation in React development contexts, but this is not a requirement. The only requirement of
 a Bento component is that it can be fully functional on non-AMP pages.
 
 If you'd like to add an extension to support your company
@@ -39,7 +39,7 @@ non-AMP pages, you'd do this by building an extension in the Bento paradigm.
 
 This document describes how to create a new Bento AMP extension, which is one of the most common ways of adding a new feature to AMP.
 
-Before diving into the details on creating a new Bento AMP extension, please familiarize yourself with the [general process for contributing code and features to AMP](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md). Since you are adding a new extension you will likely need to follow the [process for making a significant change](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#process-for-significant-changes), including filing an ["Intent to Implement" issue](https://github.com/ampproject/amphtml/labels/INTENT%20TO%20IMPLEMENT) and finding a guide before you start significant development.
+Before diving into the details on creating a new Bento AMP extension, please familiarize yourself with the [general process for contributing code and features to AMP](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md). Since you are adding a new extension you will likely need to follow the [process for making a significant change](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#process-for-significant-changes), including filing an ["Intent to Implement" issue](https://go.amp.dev/i2i) and finding a guide before you start significant development.
 
 ## Naming
 
@@ -63,7 +63,7 @@ The directory structure is below:
 |   |   ├── test-amp-my-element.js
 |   |   └── More test JS files (optional)
 |   ├── my-element.js                    # Preact implementation (req'd)
-|   ├── my-element.type.css              # Preact type definitions (req'd)
+|   ├── my-element.type.js               # Preact type definitions (req'd)
 |   ├── amp-my-element.js                # Element's implementation (req'd)
 |   ├── amp-my-element.css               # Custom CSS (optional)
 |   ├── my-element.jss.js                # Preact JSS (optional)
@@ -85,17 +85,17 @@ the BaseElement Callbacks section of [Building an AMP Extension](https://github.
 [BaseElement](https://github.com/ampproject/amphtml/blob/master/src/base-element.js)
 class.
 
-All Bento AMP extensions extend AMP.PreactBaseElement, which builds upon
+All Preact-based Bento AMP extensions extend AMP.PreactBaseElement, which builds upon
 BaseElement to extricate the component implementation from the aforementioned
 callbacks. Bento AMP extensions differ from AMP extensions because they are self-managing and independent, and therefore usable in a wider range of contexts beyond AMP pages, while still being fully integrated with the AMP environment
 in a fully AMP document.
 
-The configurations which bridge the Preact implementation of the component and its custom element counterpart in an HTML or AMP document are explained in the AMP/Preact Bridge section, and the callbacks which handle AMP- and DOM- specific mutability traits are explained in the PreactBaseElement Callbacks section. All of these are also explained inline in the [PreactBaseElement](https://github.com/ampproject/amphtml/blob/master/src/preact/base-element.js) class.
+The configurations which bridge the Preact implementation of the component and its custom element counterpart in an HTML or AMP document are explained in the [AMP/Preact Bridge](#amp/preact-bridge) section, and the callbacks which handle AMP- and DOM- specific mutability traits are explained in the [PreactBaseElement Callbacks](#preactbaseelement-callbacks) section. All of these are also explained inline in the [PreactBaseElement](https://github.com/ampproject/amphtml/blob/master/src/preact/base-element.js) class.
 
 ### Element and Component classes
 
 The following shows the overall structure of your element implementation
-file (extensions/amp-my-element/0.1/amp-my-element.js).
+file (`extensions/amp-my-element/0.1/amp-my-element.js`). See [Experiments](#experiments) to make sure your component is experimentally gated if necessary.
 
 ```js
 import {func1, func2} from '../../../src/module';
@@ -113,7 +113,15 @@ class AmpMyElement extends AMP.PreactBaseElement {
   /** @override */
   init() {
     // Perform any additional processing of prop values that are not
-    // straightforward attribute passthroughs.
+    // straightforward attribute passthroughs, as well as AMP-specific
+    // work such as registering actions and events.
+    this.registerApiAction('close', (api) => api.close());
+
+    const processedProp = parseInt(element.getAttribute('data-binary'), 2);
+    return dict({
+      'processedProp': processedProp,
+      'onClose': (event) => fireAmpEvent(event)}
+    );
   }
 
   /** @override */
@@ -160,35 +168,35 @@ export function MyElement({propName1, propName2, ...rest}) {
 -   **Default**: Optional.
 -   **Override**: Rarely.
 -   **Usage**: A callback called immediately after mutations have been observed on a component's defined props. This can verify if any additional properties need to be mutated via `mutateProps()` API.
--   **Example Usage**: amp-date-display
+-   **Example Usage**: `amp-date-display`
 
 #### isReady
 
 -   **Default**: Optional.
 -   **Override**: Rarely.
 -   **Usage**: States whether the element is ready for rendering. Used if there are additional processing requirements before the Component can be rendered, such as providing rendering templates or defining critical asynchronous props.
--   **Example Usage**: amp-date-countdown, amp-date-display
+-   **Example Usage**: `amp-date-countdown`, `amp-date-display`
 
 #### init
 
 -   **Default**: Optional.
 -   **Override**: Sometimes, if additional processing is needed in the DOM.
 -   **Usage**: If your extension 'props' definition is not sufficient, or when registering AMP actions and events.
--   **Example Usage**: amp-base-carousel, amp-lightbox
+-   **Example Usage**: `amp-base-carousel`, `amp-lightbox`
 
 #### mutationObserverCallback
 
 -   **Default**: Optional.
 -   **Override**: Sometimes, if additional processing is needed to make the DOM mutable.
 -   **Usage**: A callback called immediately after mutations have been observed on a component. This differs from `checkPropsPostMutations` in that it is called in all cases of mutation, not just the subset of attributes configured in the extension 'props' definition.
--   **Example Usage**: amp-base-carousel, amp-sidebar
+-   **Example Usage**: `amp-base-carousel`, `amp-sidebar`
 
 #### updatePropsForRendering
 
 -   **Default**: Optional.
 -   **Override**: Sometimes, if additional processing is needed in the DOM.
 -   **Usage**: A callback called to compute props before rendering is run. The properties computed here are ephemeral and thus should not be persisted via a `mutateProps()` method.
--   **Example Usage**: amp-timeago
+-   **Example Usage**: `amp-timeago`
 
 ### AMP/Preact Bridge
 
@@ -197,14 +205,14 @@ export function MyElement({propName1, propName2, ...rest}) {
 -   **Default**: Required.
 -   **Override**: Always.
 -   **Usage**: Define the corresponding Preact functional component.
--   **Example Usage**: amp-fit-text, amp-timeago
+-   **Example Usage**: `amp-fit-text`, `amp-timeago`
 
 #### PreactBaseElement['props']
 
 -   **Default**: Optional.
 -   **Override**: Almost always.
 -   **Usage**: Define the mapping of Preact prop to AmpElement DOM attributes. These will update and re-render the component on DOM mutation.
--   **Example Usage**: amp-base-carousel, amp-lightbox
+-   **Example Usage**: `amp-base-carousel`, `amp-lightbox`
 
 #### PreactBaseElement['staticProps']
 
@@ -230,60 +238,60 @@ export function MyElement({propName1, propName2, ...rest}) {
 #### PreactBaseElement['loadable']
 
 -   **Default**: Optional.
--   **Override**: Sometimes, when the element implements a loading protocol.
--   **Usage**: Indicates a resource intensive component to alloow granular control of when it should be loaded and unloaded.
--   **Example Usage**: amp-instagram, amp-video
+-   **Override**: Required for any component that makes network requests (directly or via other DOM elements). Optional otherwise.
+-   **Usage**: Indicates a resource intensive component to allow granular control of when it should be loaded and unloaded.
+-   **Example Usage**: `amp-instagram`, `amp-video`
 
 #### PreactBaseElement['shadowCss']
 
 -   **Default**: Optional.
--   **Override**: Sometimes, when the element requires CSS in the shadow.
+-   **Override**: Required CSS when shadow DOM is used.
 -   **Usage**: Define the CSS for shadow stylesheets.
--   **Example Usage**: amp-lightbox, amp-sidebar
+-   **Example Usage**: `amp-lightbox`, `amp-sidebar`
 
 #### PreactBaseElement['usesTemplate']
 
 -   **Default**: Optional.
 -   **Override**: Rarely.
 -   **Usage**: Notify when the element uses the template system.
--   **Example Usage**: amp-date-countdown, amp-date-display
+-   **Example Usage**: `amp-date-countdown`, `amp-date-display`
 
 #### Ways to process children (mutually exclusive)
 
-#### PreactBaseElement['lightDomTag']
+##### PreactBaseElement['lightDomTag']
 
 -   **Default**: Optional.
 -   **Override**: Sometimes.
 -   **Usage**: The tag name used when rendering into the light DOM. This is used when children contents are overwritten.
--   **Example Usage**: amp-date-countdown, amp-date-display
+-   **Example Usage**: `amp-date-countdown`, `amp-date-display`
 
 ##### PreactBaseElement['passthrough']
 
 -   **Default**: Optional.
 -   **Override**: Sometimes.
 -   **Usage**: Define if user-supplied children are needed by the Preact component but their shape and structure does not matter.
--   **Example Usage**: amp-fit-text, amp-sidebar
+-   **Example Usage**: `amp-fit-text`, `amp-sidebar`
 
 ##### PreactBaseElement['passthroughNonEmpty']
 
 -   **Default**: Optional.
 -   **Override**: Sometimes.
 -   **Usage**: Define if user-supplied children are needed **only when present** by the Preact component but their shape and structure does not matter. If no children are given to the component, the component may render something entirely different.
--   **Example Usage**: amp-social-share, amp-timeago
+-   **Example Usage**: `amp-social-share`, `amp-timeago`
 
 ##### PreactBaseElement['children']
 
 -   **Default**: Optional.
 -   **Override**: Sometimes.
 -   **Usage**: Define if user-supplied children of a certain shape and structure do matter, and ought to be targeted for more specified props than `children` alone.
--   **Example Usage**: amp-base-carousel
+-   **Example Usage**: `amp-base-carousel`
 
 ##### PreactBaseElement['detached']
 
 -   **Default**: Optional.
 -   **Override**: Sometimes.
 -   **Usage**: Define if user-supplied children must be referenced and coordinated with the internal state of the Preact component, but the component itself should not be visible (in favor of viewing the light DOM children).
--   **Example Usage**: amp-accordion, amp-selector
+-   **Example Usage**: `amp-accordion`, `amp-selector`
 
 ## Element styling
 
@@ -362,7 +370,7 @@ And to expose actions use `registerApiAction` method that your element
 inherits from `PreactBaseElement`. Note, this should correspond directly with the API exposed in the corresponding Preact compnent via `useImperativeHandle`, and the component should be defined using a `forwardRef` accordingly.
 
 ```javascript
-this.registerApiAction('close', this.close.bind(this));
+this.registerApiAction('close', (api) => api.close());
 ```
 
 Your element could also choose to override the `activate` method
@@ -385,7 +393,7 @@ includes
 -   Required attributes for the element
 -   Specific values that an attribute accepts (e.g. `myattr="TYPE1|TYPE2"`)
 -   Layouts your element supports (see [Layout specs](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md) and [Layouts supported in your element](#layouts-supported-in-your-element))
--   If there are restrictions where your element can or can't appear (e.g. disallowed_ancestory, mandatory_parent...)
+-   If there are restrictions where your element can or can't appear (e.g. `disallowed_ancestory`, `mandatory_parent`...)
 
 For more details take a look at [Contributing Component Validator
 Rules](https://github.com/ampproject/amphtml/blob/master/contributing/component-validator-rules.md).
@@ -394,12 +402,12 @@ Rules](https://github.com/ampproject/amphtml/blob/master/contributing/component-
 
 ### Loading external resources
 
-If your extension needs to load external resources (like an sdk) then
+If your extension needs to load external resources (like an SDK) then
 you might need to add proper third party integration for it to work and
 use the proper third party iframe. Loading external resources is only
 allowed inside a 3p iframe which AMP serves on a different domain for
 security and performance reasons. Take a look at adding
-[&lt;amp-facebook&gt;](https://github.com/ampproject/amphtml/pull/1479/files)
+[`amp-facebook`](https://github.com/ampproject/amphtml/pull/1479/files)
 extension PR for examples of 3p integration.
 
 Read about [Inclusion of third party software, embeds and services into
@@ -413,7 +421,7 @@ iframe with no 3p integration needed, similarly, `amp-youtube` and others.
 ## Layouts supported in your element
 
 AMP defines different layouts that elements can choose whether or not to
-support Your element needs to announce which layouts it supports through
+support. Your element needs to announce which layouts it supports through
 overriding the `isLayoutSupported(layout)` callback and returning true
 if the element supports that layout. [Read more about AMP Layout
 System](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md)
@@ -452,7 +460,7 @@ class AmpBaseCarousel extends AMP.BaseElement {
 
 Please note that for components that support all size-defined layouts, they also need to override the `layoutSizeDefined` property as follows:
 
-```
+```javascript
 /** @override */
 AmpBaseCarousel['layoutSizeDefined'] = true;
 ```
@@ -477,7 +485,7 @@ in EXPERIMENTS variable.
 const EXPERIMENTS = [
   // ...
   {
-    id: 'amp-my-element',
+    id: 'bento-my-element',
     name: 'AMP My Element',
     spec:
       'https://github.com/ampproject/amphtml/blob/master/extensions/' +
@@ -498,7 +506,7 @@ import {userAssert} from '../../../src/log';
 /** @const */
 const TAG = 'amp-my-element';
 
-Class AmpMyElement extends AMP.PreactBaseElement {
+class AmpMyElement extends AMP.PreactBaseElement {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(
@@ -527,7 +535,7 @@ File a GitHub issue to cleanup your experiment. Assign it to yourself as a remin
 
 ## Documenting your element
 
-Create a .md file that serves as the main documentation for your element. This document should include:
+Create a `.md` file that serves as the main documentation for your element. This document should include:
 
 -   Summary table
 -   Overview
@@ -536,7 +544,7 @@ Create a .md file that serves as the main documentation for your element. This d
 -   Attributes to specify (optional and required)
 -   Validation
 
-For samples of element documentation, see: [amp-accordion](https://github.com/ampproject/amphtml/blob/master/extensions/amp-accordion/amp-accordion.md), [amp-instagram](https://github.com/ampproject/amphtml/blob/master/extensions/amp-instagram/amp-instagram.md), [amp-stream-gallery](https://github.com/ampproject/amphtml/blob/master/extensions/amp-stream-gallery/amp-stream-gallery.md)
+For samples of element documentation, see: [`amp-accordion`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-accordion/amp-accordion.md), [`amp-instagram`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-instagram/amp-instagram.md), [`amp-stream-gallery`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-stream-gallery/amp-stream-gallery.md)
 
 Note that for Bento upgrades of existing AMP extensions, a `Migration notes` section is required to detail any differences between the newer Bento and prior versions.
 
