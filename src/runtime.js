@@ -456,6 +456,13 @@ export function adoptShadowMode(global) {
  * @return {boolean}
  */
 function maybeLoadCorrectVersion(win, fnOrStruct) {
+  if (getMode().localDev && isExperimentOn(win, 'disable-version-locking')) {
+    return false;
+  }
+  if (typeof fnOrStruct == 'function') {
+    return false;
+  }
+
   if (IS_ESM) {
     // If we're in a module runtime, trying to execute a nomodule extension
     // simply remove the nomodule extension so that it is not executed.
@@ -469,12 +476,7 @@ function maybeLoadCorrectVersion(win, fnOrStruct) {
       return true;
     }
   }
-  if (getMode().localDev && isExperimentOn(win, 'disable-version-locking')) {
-    return false;
-  }
-  if (typeof fnOrStruct == 'function') {
-    return false;
-  }
+
   const {v} = fnOrStruct;
   // This is non-obvious, but we only care about the release version,
   // not about the full rtv version, because these only differ
