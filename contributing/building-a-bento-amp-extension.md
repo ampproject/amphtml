@@ -546,7 +546,7 @@ Create a `.md` file that serves as the main documentation for your element. This
 
 For samples of element documentation, see: [`amp-accordion`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-accordion/amp-accordion.md), [`amp-instagram`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-instagram/amp-instagram.md), [`amp-stream-gallery`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-stream-gallery/amp-stream-gallery.md)
 
-Note that for Bento upgrades of existing AMP extensions, a `Migration notes` section is required to detail any differences between the newer Bento and prior versions.
+Note that for Bento upgrades of existing AMP extensions, a `Migration notes` section is required to detail any differences between the newer Bento and prior versions. For an example, reference the issue filed for [`amp-fit-text`](https://github.com/ampproject/amphtml/issues/28281).
 
 ## Example of using your extension
 
