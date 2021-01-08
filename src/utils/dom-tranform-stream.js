@@ -143,16 +143,17 @@ export class DomTransformStream {
     this.currentChunkTransferPromise_ = Promise.all([
       this.targetBodyPromise_,
       this.headPromise_,
-    ]).then((resolvedElements) =>
-      this.transferThrottle_(() => {
+    ]).then((resolvedElements) => {
+      const tranferThrottle = this.transferThrottle_;
+      tranferThrottle(() => {
         this.currentChunkTransferPromise_ = null;
         const targetBody = resolvedElements[0];
         removeNoScriptElements(dev().assertElement(this.detachedBody_));
         while (this.detachedBody_.firstChild) {
           targetBody.appendChild(this.detachedBody_.firstChild);
         }
-      })
-    );
+      });
+    });
 
     return this.currentChunkTransferPromise_;
   }
