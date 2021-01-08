@@ -23,7 +23,7 @@ import {loadScript, validateData} from '../3p/3p';
 export function digiteka(global, data) {
 
   global._digiteka_amp = {
-    allowed_data: ['mdtk'],
+    allowed_data: ['mdtk','zone'],
     data,
   };
 
@@ -34,7 +34,7 @@ export function digiteka(global, data) {
 
   loadScript(
     global,
-    'https://web-gra02.ultimedia.com/js/test-ot.js'
+    'https://ot.digiteka.com/amp.js'
   );
 
 }
