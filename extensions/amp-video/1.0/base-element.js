@@ -17,7 +17,6 @@ import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from './autoplay.jss';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {VideoWrapper} from './video-wrapper';
-import {isLayoutSizeDefined} from '../../../src/layout';
 
 /** @extends {PreactBaseElement<VideoWrapperDef.Api>} */
 export class VideoBaseElement extends PreactBaseElement {
@@ -61,7 +60,7 @@ export class VideoBaseElement extends PreactBaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout);
+    return super.isLayoutSupported(layout);
   }
 }
 
