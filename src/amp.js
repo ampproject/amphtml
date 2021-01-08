@@ -178,7 +178,8 @@ if (shouldMainBootstrapRun) {
       self.location.href
     );
   }
-  if (getMode().test) {
+  // This code is eleminated in prod build through a babel transformer.
+  if (getMode().localDev) {
     self.document.documentElement.setAttribute('esm', IS_ESM ? 1 : 0);
   }
   self.document.documentElement.setAttribute(

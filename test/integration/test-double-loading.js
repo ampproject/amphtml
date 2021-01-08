@@ -29,26 +29,31 @@ function checkElementUpgrade(element) {
 
 describe.configure().run('runtime', () => {
 
-  it('should only execute module code when module/nomodule exists', async () => {
+  it('should only execute module code', async () => {
     const testExtension = 'amp-carousel';
     const fixture = await createFixtureIframe(
       'test/fixtures/doubleload-module.html',
       500
     );
     expect(fixture.doc.querySelectorAll(testExtension)).to.have.length(1);
+    // Wait for a the LOAD_START event which is enough of a signal that the
+    // runtime has executed.
     await fixture.awaitEvent(AmpEvents.LOAD_START, 1);
     expect(fixture.doc.documentElement.getAttribute('esm')).to.equal('1');
     checkElementUpgrade(fixture.doc.querySelector(testExtension));
   });
 
-  it('should only execute nomodule code when module/nomodule exists', async () => {
+  it('should only execute nomodule code', async () => {
     const testExtension = 'amp-carousel';
     const fixture = await createFixtureIframe(
       'test/fixtures/doubleload-nomodule.html',
       500
     );
     expect(fixture.doc.querySelectorAll(testExtension)).to.have.length(1);
+    // Wait for a the LOAD_START event which is enough of a signal that the
+    // runtime has executed.
     await fixture.awaitEvent(AmpEvents.LOAD_START, 1);
+    expect(fixture.doc.documentElement.getAttribute('esm')).to.equal('0');
     checkElementUpgrade(fixture.doc.querySelector(testExtension));
   });
 
