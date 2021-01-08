@@ -713,8 +713,7 @@ export class PreactBaseElement extends AMP.BaseElement {
 }
 
 /**
- * @param {tyepof PreactBaseElement} } ref
- * @param baseElement
+ * @param {tyepof PreactBaseElement} baseElement
  * @param {!Object} api
  * @param {string} key
  */
