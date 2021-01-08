@@ -17,7 +17,6 @@
 import {ActionTrust} from '../../../../src/action-constants';
 import {AmpIframe, setTrackingIframeTimeoutForTesting} from '../amp-iframe';
 import {CommonSignals} from '../../../../src/common-signals';
-import {Deferred} from '../../../../src/utils/promise';
 import {LayoutPriority} from '../../../../src/layout';
 import {Services} from '../../../../src/services';
 import {
@@ -43,7 +42,8 @@ describes.realWin(
       ampdoc: 'single',
     },
   },
-  (env) => {
+  function (env) {
+    this.timeout(99999999);
     describe('amp-iframe', () => {
       let iframeSrc;
       let clickableIframeSrc;
