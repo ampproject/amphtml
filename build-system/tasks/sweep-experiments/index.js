@@ -336,7 +336,9 @@ function collectWork(
 ) {
   if (removeExperiment) {
     // 0 if not on prodConfig
-    const percentage = Number(prodConfig[removeExperiment]);
+    const percentage = prodConfig[removeExperiment]
+      ? Number(prodConfig[removeExperiment])
+      : 0;
     const previousHistory = findConfigBitCommits(
       cutoffDateFormatted,
       prodConfigPath,
@@ -396,14 +398,14 @@ async function sweepExperiments() {
     argv.experiment
   );
 
-  if (Object.keys(exclude).length > 0) {
+  if (exclude && Object.keys(exclude).length > 0) {
     log(yellow('The following experiments are excluded as they are special:'));
     for (const experiment in exclude) {
       log(readableRemovalId(experiment, exclude[experiment]));
     }
   }
 
-  const total = Object.keys(include).length;
+  const total = include ? Object.keys(include).length : 0;
   if (total === 0) {
     log(cyan('No experiments to remove.'));
     log(`Cutoff at ${cutoffDateFormatted}`);
