@@ -17,27 +17,16 @@
 import {measureIntersection} from '../../../src/utils/intersection';
 
 describes.fakeWin('utils/intersection', {}, (env) => {
-  function fireIntersections(entries) {
-    if (entries.length == 0) {
-      return;
-    }
-
-    const win = entries[0].target.ownerDocument.defaultView;
-    const {callback} = win.IntersectionObserver;
-
-    callback(entries);
-  }
-
   function getInObConstructorStub() {
     const ctor = (cb) => {
       if (ctor.callback) {
-        throw new Error('Only a single instance per Window may exist.');
+        throw new Error('Only a single InOb instance allowed per Window.');
       }
       const observedEls = new Set();
       ctor.callback = (entries) => {
         if (entries.some((x) => !observedEls.has(x.target))) {
           throw new Error(
-            'May not fire intersection entry for unobserved element.'
+            'Attempted to fire intersection for unobserved element.'
           );
         }
         cb(entries);
@@ -49,6 +38,14 @@ describes.fakeWin('utils/intersection', {}, (env) => {
       };
     };
     return ctor;
+  }
+
+  function fireIntersections(entries) {
+    if (entries.length == 0) {
+      return;
+    }
+    const win = entries[0].target.ownerDocument.defaultView;
+    win.IntersectionObserver.callback(entries);
   }
 
   let el;
