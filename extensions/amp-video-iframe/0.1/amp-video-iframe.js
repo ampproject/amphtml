@@ -282,7 +282,7 @@ class AmpVideoIframe extends AMP.BaseElement {
 
   /**
    * @param {!Event} event
-   * @returns {Promise}
+   * @return {Promise}
    * @private
    */
   onMessage_(event) {
