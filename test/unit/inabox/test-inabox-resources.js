@@ -13,7 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {Deferred} from '../../../src/utils/promise';
 import {InaboxResources} from '../../../src/inabox/inabox-resources';
+import {macroTask} from '../../../testing/yield';
+import {toggleExperiment} from '../../../src/experiments';
 
 describes.realWin('inabox-resources', {amp: true}, (env) => {
   let win;
@@ -77,6 +80,36 @@ describes.realWin('inabox-resources', {amp: true}, (env) => {
     resolveBuild();
     await new Promise(setTimeout);
     expect(schedulePassSpy).to.be.calledOnce;
+  });
+
+  it('eagerly builds amp elements', async () => {
+    toggleExperiment(win, 'inabox-resources-eager', true);
+    const readySignal = new Deferred();
+    env.sandbox.stub(env.ampdoc, 'whenReady').returns(readySignal.promise);
+    resources = new InaboxResources(env.ampdoc);
+
+    const element1 = env.createAmpElement('amp-one');
+    resources.add(element1);
+    const resource1 = resources.getResourceForElement(element1);
+    const build1 = env.sandbox.stub(resource1, 'build').resolves();
+    win.document.body.appendChild(element1);
+
+    resources.upgraded(element1);
+    expect(build1).not.to.be.called;
+
+    const element2 = env.createAmpElement('amp-two');
+    resources.add(element2);
+    const resource2 = resources.getResourceForElement(element2);
+    const build2 = env.sandbox.stub(resource2, 'build').resolves();
+    win.document.body.appendChild(element2);
+
+    resources.upgraded(element2);
+    expect(build1).to.be.called;
+    expect(build2).not.to.be.called;
+
+    readySignal.resolve();
+    await macroTask();
+    expect(build2).to.be.called;
   });
 
   it('should pause and resume resources on doc visibility', () => {
