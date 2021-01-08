@@ -15,7 +15,6 @@
  */
 
 import {DomTransformStream} from '../../../src/utils/dom-tranform-stream';
-import {Services} from '../../../src/services';
 import {macroTask} from '../../../testing/yield';
 
 describes.fakeWin('DomTransformStream', {amp: true}, (env) => {
@@ -28,21 +27,21 @@ describes.fakeWin('DomTransformStream', {amp: true}, (env) => {
   let win;
   let transformer;
   let detachedDoc;
+  let transferThrottleSpy;
 
   beforeEach(() => {
     win = env.win;
     detachedDoc = win.document.implementation.createHTMLDocument().open();
-    transformer = new DomTransformStream(win);
+    transferThrottleSpy = env.sandbox.stub().callsArgAsync(0);
+    transformer = new DomTransformStream(
+      win,
+      transferThrottleSpy // opt_transferThrottleFunc
+    );
   });
 
   describe('#onEnd', () => {
     it('should only transfer after targetBody is ready', async () => {
-      const mutateSpy = env.sandbox.spy(
-        Services.vsyncFor(env.win),
-        'mutatePromise'
-      );
       const {body} = win.document;
-
       detachedDoc.write(`
         <!doctype html>
         <html ⚡>
@@ -59,12 +58,12 @@ describes.fakeWin('DomTransformStream', {amp: true}, (env) => {
       transformer.onEnd();
       await flush();
 
-      expect(mutateSpy).not.to.have.been.called;
+      expect(transferThrottleSpy).not.to.have.been.called;
       transformer.transferBody(body /* targetBody */);
 
       await flush();
 
-      expect(mutateSpy).to.have.been.calledOnce;
+      expect(transferThrottleSpy).to.have.been.calledOnce;
       expect(body.querySelector('child-one')).to.exist;
       expect(body.querySelector('child-two')).to.exist;
     });
