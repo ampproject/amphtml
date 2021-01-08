@@ -70,7 +70,7 @@
     "chai": "4.2.0",
     "chai-as-promised": "7.1.1",
     "check-dependencies": "1.1.0",
-    "cli-highlight": "2.1.9",
+    "cli-highlight": "2.1.10",
     "codecov": "3.8.1",
     "commander": "6.2.1",
     "connect-header": "0.0.5",
