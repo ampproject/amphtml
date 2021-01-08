@@ -145,7 +145,7 @@ export class DomTransformStream {
       this.headPromise_,
     ]).then((resolvedElements) => {
       const tranferThrottle = this.transferThrottle_;
-      tranferThrottle(() => {
+      return tranferThrottle(() => {
         this.currentChunkTransferPromise_ = null;
         const targetBody = resolvedElements[0];
         removeNoScriptElements(dev().assertElement(this.detachedBody_));
