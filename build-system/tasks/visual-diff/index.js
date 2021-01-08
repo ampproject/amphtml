@@ -442,10 +442,13 @@ async function generateSnapshots(webpages) {
  */
 async function snapshotWebpages(browser, webpages) {
   const availablePages = [];
+  const allPages = [];
 
   log('verbose', 'Preallocating', colors.cyan(MAX_PARALLEL_TABS), 'tabs...');
   for (let i = 0; i < MAX_PARALLEL_TABS; i++) {
-    availablePages.push(await newPage(browser));
+    const page = await newPage(browser);
+    availablePages.push(page);
+    allPages.push(page);
   }
 
   const pagePromises = [];
@@ -465,6 +468,16 @@ async function snapshotWebpages(browser, webpages) {
         await sleep(WAIT_FOR_TABS_MS);
       }
       const page = availablePages.shift();
+
+      const name = testName ? `${pageName} (${testName})` : pageName;
+      log(
+        'info',
+        'Starting test',
+        colors.yellow(name),
+        'on tab',
+        colors.yellow(`#${allPages.indexOf(page) + 1}`)
+      );
+
       await resetPage(page, viewport);
 
       const consoleMessages = [];
@@ -472,9 +485,6 @@ async function snapshotWebpages(browser, webpages) {
         consoleMessages.push(consoleMessage);
       };
       page.on('console', consoleLogger);
-
-      const name = testName ? `${pageName} (${testName})` : pageName;
-      log('info', 'Starting test', colors.yellow(name));
 
       // Puppeteer is flaky when it comes to catching navigation requests, so
       // retry the page navigation up to NAVIGATE_RETRIES times and eventually
