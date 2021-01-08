@@ -1,5 +1,5 @@
 {
-  "allow-doc-opt-in": ["amp-next-page", "analytics-chunks-inabox"],
+  "allow-doc-opt-in": ["amp-next-page"],
   "allow-url-opt-in": [],
   "canary": 0,
   "a4aProfilingRate": 0.01,
@@ -11,8 +11,7 @@
   "flexAdSlots": 0.05,
   "intersect-resources": 0,
   "ios-fixed-no-transfer": 0,
-  "adsense-ptt-exp": 0.1,
-  "doubleclick-ptt-exp": 0.1,
   "fie-resources": 0.1,
-  "visibility-trigger-improvements": 1
+  "visibility-trigger-improvements": 1,
+  "sticky-ad-transition": 0.1
 }

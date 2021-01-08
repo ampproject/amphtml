@@ -922,7 +922,7 @@ const bannedTermsHelpString =
   'if you are unsure and so that it stands out in code reviews.';
 
 const measurementApiDeprecated =
-  'getLayoutWidth/Box APIs are being deprecated. Please contact the' +
+  'getLayoutSize/Box APIs are being deprecated. Please contact the' +
   ' @ampproject/wg-performance for questions.';
 
 const forbiddenTermsSrcInclusive = {
@@ -1032,6 +1032,7 @@ const forbiddenTermsSrcInclusive = {
       'src/element-stub.js',
       'src/friendly-iframe-embed.js',
       'src/polyfillstub/intersection-observer-stub.js',
+      'src/polyfillstub/resize-observer-stub.js',
       'src/runtime.js',
       'src/service/extensions-impl.js',
       'src/service/lightbox-manager-discovery.js',
@@ -1191,12 +1192,22 @@ const forbiddenTermsSrcInclusive = {
       'function to build-system/common/ci.js',
   },
   '\\.matches\\(': 'Please use matches() helper in src/dom.js',
-  '\\.getLayoutWidth': {
+  '\\.getLayoutBox': {
     message: measurementApiDeprecated,
     allowlist: [
-      'builtins/amp-img.js',
+      'src/base-element.js',
+      'src/custom-element.js',
+      'src/friendly-iframe-embed.js',
+      'src/service/mutator-impl.js',
+      'src/service/resource.js',
       'src/service/resources-impl.js',
+      'extensions/amp-ad/0.1/amp-ad-3p-impl.js',
+      'extensions/amp-ad-network-adsense-impl/0.1/responsive-state.js',
       'extensions/amp-fx-flying-carpet/0.1/amp-fx-flying-carpet.js',
+      'extensions/amp-iframe/0.1/amp-iframe.js',
+      'extensions/amp-next-page/1.0/visibility-observer.js',
+      'extensions/amp-playbuzz/0.1/amp-playbuzz.js',
+      'extensions/amp-story/1.0/page-advancement.js',
     ],
   },
   '\\.getIntersectionElementLayoutBox': {
@@ -1214,7 +1225,7 @@ const forbiddenTermsSrcInclusive = {
 
 // Terms that must appear in a source file.
 const requiredTerms = {
-  'Copyright 20(15|16|17|18|19|20) The AMP HTML Authors\\.': dedicatedCopyrightNoteSources,
+  'Copyright 20(15|16|17|18|19|2\\d) The AMP HTML Authors\\.': dedicatedCopyrightNoteSources,
   'Licensed under the Apache License, Version 2\\.0': dedicatedCopyrightNoteSources,
   'http\\://www\\.apache\\.org/licenses/LICENSE-2\\.0': dedicatedCopyrightNoteSources,
 };

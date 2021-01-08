@@ -148,7 +148,7 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
       this.initialPositionChecked_ = true;
     }
 
-    const width = this.element.getLayoutWidth();
+    const {width} = this.element.getLayoutSize();
     setStyle(this.container_, 'width', width, 'px');
     Services.ownersForDoc(this.element).scheduleLayout(
       this.element,

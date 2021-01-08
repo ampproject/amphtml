@@ -289,7 +289,7 @@ describes.realWin(
 
       describe('during layout', () => {
         it('sticky ad: should not layout w/o scroll', () => {
-          ad3p.uiHandler.isStickyAd_ = true;
+          ad3p.uiHandler.stickyAdPosition_ = 'bottom';
           expect(ad3p.xOriginIframeHandler_).to.be.null;
           const layoutPromise = ad3p.layoutCallback();
           return Promise.race([macroTask(), layoutPromise])
@@ -401,7 +401,8 @@ describes.realWin(
         }
       );
 
-      it('should only allow rendering one ad per second', function* () {
+      it('should only allow rendering one ad per second', async () => {
+        ad3p.getVsync().runScheduledTasks_();
         const clock = lolex.install({
           target: win,
           toFake: ['Date', 'setTimeout', 'clearTimeout'],
@@ -416,10 +417,12 @@ describes.realWin(
 
         // Ad loading should only block 1s.
         clock.tick(999);
-        yield macroTask();
+        await macroTask();
         expect(ad3p2.renderOutsideViewport()).to.equal(false);
         clock.tick(2);
-        yield oneSecPromise;
+        await oneSecPromise;
+        clock.tick(2);
+        await macroTask();
         expect(ad3p2.renderOutsideViewport()).to.equal(3);
       });
 

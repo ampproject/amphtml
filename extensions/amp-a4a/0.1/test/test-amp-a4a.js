@@ -56,7 +56,7 @@ import {
   incrementLoadingAds,
   is3pThrottled,
 } from '../../../amp-ad/0.1/concurrent-load';
-import {layoutRectLtwh} from '../../../../src/layout-rect';
+import {layoutRectLtwh, layoutSizeFromRect} from '../../../../src/layout-rect';
 import {resetScheduledElementForTesting} from '../../../../src/service/custom-element-registry';
 import {data as testFragments} from './testdata/test_fragments';
 import {data as validCSSAmp} from './testdata/valid_css_at_rules_amp.reserialized';
@@ -283,6 +283,7 @@ describe('amp-a4a', () => {
       'height': opt_rect ? String(opt_rect.height) : '50',
       'type': 'adsense',
     });
+    const layoutBox = opt_rect || layoutRectLtwh(0, 0, 200, 50);
     element.getAmpDoc = () => {
       const ampdocService = Services.ampdocServiceFor(doc.defaultView);
       return ampdocService.getAmpDoc(element);
@@ -290,9 +291,8 @@ describe('amp-a4a', () => {
     element.isBuilt = () => {
       return true;
     };
-    element.getLayoutBox = () => {
-      return opt_rect || layoutRectLtwh(0, 0, 200, 50);
-    };
+    element.getLayoutBox = () => layoutBox;
+    element.getLayoutSize = () => layoutSizeFromRect(layoutBox);
     element.getIntersectionChangeEntry = () => {
       return null;
     };
@@ -1924,7 +1924,7 @@ describe('amp-a4a', () => {
           cleanup: () => {},
         };
         window.sandbox
-          .stub(a4a, 'getLayoutBox')
+          .stub(a4a, 'getLayoutSize')
           .returns({width: 123, height: 456});
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.ok;
