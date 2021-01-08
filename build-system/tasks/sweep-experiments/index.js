@@ -262,8 +262,8 @@ const findConfigBitCommits = (
  * @param {string} files
  * @return {string}
  */
-const fileListMarkdown = (files) =>
-  files.map((path) => `- \`${path}\``).join('\n');
+const checkedFileListMarkdown = (files) =>
+  files.map((path) => `- [ ] \`${path}\``).join('\n');
 
 /**
  * @return {string}
@@ -300,7 +300,7 @@ function summaryCommitMessage({
       '---',
       '### ⚠️ Javascript source files require intervention',
       'The following may contain errors and/or require intervention to remove superfluous conditionals:',
-      fileListMarkdown(modifiedSourceFiles),
+      checkedFileListMarkdown(modifiedSourceFiles),
       `Refer to the removal guide for [suggestions on handling these modified Javascript files.](${readmeMdGithubLink()}#followup)`
     );
   }
@@ -310,7 +310,7 @@ function summaryCommitMessage({
       '---',
       '### ⚠️ HTML files may still contain references',
       'The following HTML files contain references to experiment names which may be stale and should be manually removed:',
-      fileListMarkdown(htmlFilesWithReferences),
+      checkedFileListMarkdown(htmlFilesWithReferences),
       `Refer to the removal guide for [suggestions on handling these HTML files.](${readmeMdGithubLink()}#followup:html)`
     );
   }
