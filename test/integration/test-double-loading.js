@@ -28,7 +28,6 @@ function checkElementUpgrade(element) {
 }
 
 describe.configure().run('runtime', () => {
-
   it('should only execute module code', async () => {
     const testExtension = 'amp-carousel';
     const fixture = await createFixtureIframe(
@@ -56,5 +55,4 @@ describe.configure().run('runtime', () => {
     expect(fixture.doc.documentElement.getAttribute('esm')).to.equal('0');
     checkElementUpgrade(fixture.doc.querySelector(testExtension));
   });
-
 });

@@ -25,6 +25,7 @@
 const colors = require('ansi-colors');
 const {
   downloadDistOutput,
+  downloadEsmDistOutput,
   printChangeSummary,
   startTimer,
   stopTimer,
@@ -44,6 +45,7 @@ function main() {
 
   if (!isPullRequestBuild()) {
     downloadDistOutput(FILENAME);
+    downloadEsmDistOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
 
     try {
@@ -77,6 +79,7 @@ function main() {
     }
 
     downloadDistOutput(FILENAME);
+    downloadEsmDistOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
 
     if (
