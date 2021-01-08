@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {installResizeObserver} from 'resize-observer-polyfill/resize-observer.install';
+import {installResizeObserver} from '../../../third_party/resize-observer-polyfill/ResizeObserver.install';
 import {registerServiceBuilder} from '../../../src/service';
 import {upgradePolyfill} from '../../../src/polyfillstub/resize-observer-stub';
 
