@@ -621,6 +621,7 @@ for all checked in code. We use the following frameworks for testing:
 -   [Mocha](https://mochajs.org/), our test framework
 -   [Karma](https://karma-runner.github.io/), our tests runner
 -   [Sinon](http://sinonjs.org/), spies, stubs and mocks.
+-   [Enzyme](https://enzymejs.github.io/enzyme/), our Preact test utility.
 
 For faster testing during development, consider using --files argument
 to only run your extensions' tests.
@@ -628,6 +629,8 @@ to only run your extensions' tests.
 ```shell
 $ gulp unit --files=extensions/amp-my-element/0.1/test/test-amp-my-element.js --watch
 ```
+
+Please also reference [Testing in AMP HTML](https://github.com/ampproject/amphtml/blob/master/contributing/TESTING.md) for the full range of testing commands available.
 
 ## Linting and formatting
 
