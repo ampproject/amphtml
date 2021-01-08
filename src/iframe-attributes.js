@@ -21,7 +21,6 @@ import {getLengthNumeral} from './layout';
 import {getModeObject} from './mode-object';
 import {getPageLayoutBoxBlocking} from './utils/page-layout-box';
 import {internalRuntimeVersion} from './internal-version';
-import {measureIntersection} from './utils/intersection';
 import {urls} from './config';
 
 /**
@@ -30,7 +29,7 @@ import {urls} from './config';
  * @param {!AmpElement} element
  * @param {string} sentinel
  * @param {!JsonObject=} attributes
- * @return {!Promise<!JsonObject>>}
+ * @return {!JsonObject}
  */
 export function getContextMetadata(
   parentWindow,
@@ -103,9 +102,5 @@ export function getContextMetadata(
   if (adSrc) {
     attributes['src'] = adSrc;
   }
-
-  return measureIntersection(element).then((initialIntersection) => {
-    attributes['initialIntersection'] = initialIntersection;
-    return attributes;
-  });
+  return attributes;
 }

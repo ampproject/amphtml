@@ -48,6 +48,10 @@ import {
   getConsentPolicyState,
 } from '../../../src/consent';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
+import {
+  intersectionEntryToJson,
+  measureIntersection,
+} from '../../../src/utils/intersection';
 import {moveLayoutRect} from '../../../src/layout-rect';
 import {
   observeWithSharedInOb,
@@ -407,13 +411,17 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         // because both happen inside a cross-domain iframe.  Separating them
         // here, though, allows us to measure the impact of ad throttling via
         // incrementLoadingAds().
-        return getIframe(
-          toWin(this.element.ownerDocument.defaultView),
-          this.element,
-          this.type_,
-          opt_context,
-          {disallowCustom: this.config.remoteHTMLDisabled}
-        ).then((iframe) => {
+        return measureIntersection(this.element).then((intersection) => {
+          const iframe = getIframe(
+            toWin(this.element.ownerDocument.defaultView),
+            this.element,
+            this.type_,
+            opt_context,
+            {
+              disallowCustom: this.config.remoteHTMLDisabled,
+              initialIntersection: intersectionEntryToJson(intersection),
+            }
+          );
           iframe.title = this.element.title || 'Advertisement';
           this.xOriginIframeHandler_ = new AmpAdXOriginIframeHandler(this);
           return this.xOriginIframeHandler_.init(iframe);

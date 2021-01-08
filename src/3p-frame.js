@@ -39,7 +39,7 @@ const TAG = '3p-frame';
  * @param {!AmpElement} element
  * @param {string=} opt_type
  * @param {Object=} opt_context
- * @return {!Promise<!JsonObject>>} Contains
+ * @return {!JsonObject} Contains
  *     - type, width, height, src attributes of <amp-ad> tag. These have
  *       precedence over the data- attributes.
  *     - data-* attributes of the <amp-ad> tag with the "data-" removed.
@@ -52,15 +52,10 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
   let attributes = dict();
   // Do these first, as the other attributes have precedence.
   addDataAndJsonAttributes_(element, attributes);
-
-  return getContextMetadata(parentWindow, element, sentinel, attributes).then(
-    (contextMetadata) => {
-      attributes = contextMetadata;
-      attributes['type'] = type;
-      Object.assign(attributes['_context'], opt_context);
-      return attributes;
-    }
-  );
+  attributes = getContextMetadata(parentWindow, element, sentinel, attributes);
+  attributes['type'] = type;
+  Object.assign(attributes['_context'], opt_context);
+  return attributes;
 }
 
 /**
@@ -73,8 +68,9 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
  * @param {{
  *   disallowCustom: (boolean|undefined),
  *   allowFullscreen: (boolean|undefined),
+ *   initialIntersection: (IntersectionObserverEntry|undefined),
  * }=} options Options for the created iframe.
- * @return {!Promise<!HTMLIFrameElement>>} The iframe.
+ * @return {!HTMLIFrameElement} The iframe.
  */
 export function getIframe(
   parentWindow,
@@ -83,7 +79,11 @@ export function getIframe(
   opt_context,
   options = {}
 ) {
-  const {disallowCustom = false, allowFullscreen = false} = options;
+  const {
+    disallowCustom = false,
+    allowFullscreen = false,
+    initialIntersection,
+  } = options;
   // Check that the parentElement is already in DOM. This code uses a new and
   // fast `isConnected` API and thus only used when it's available.
   devAssert(
@@ -97,6 +97,10 @@ export function getIframe(
     opt_type,
     opt_context
   );
+  if (initialIntersection) {
+    attributes['_context']['initialIntersection'] = initialIntersection;
+  }
+
   const iframe = /** @type {!HTMLIFrameElement} */ (parentWindow.document.createElement(
     'iframe'
   ));

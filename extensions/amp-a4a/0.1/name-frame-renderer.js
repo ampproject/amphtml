@@ -19,6 +19,10 @@ import {createElementWithAttributes} from '../../../src/dom';
 import {dict} from '../../../src/utils/object';
 import {getContextMetadata} from '../../../src/iframe-attributes';
 import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
+import {
+  intersectionEntryToJson,
+  measureIntersection,
+} from '../../../src/utils/intersection';
 import {utf8Decode} from '../../../src/utils/bytes';
 
 /**
@@ -43,13 +47,17 @@ export class NameFrameRenderer extends Renderer {
         /** @type {!ArrayBuffer} */ (crossDomainData.rawCreativeBytes)
       );
     const srcPath = getDefaultBootstrapBaseUrl(context.win, 'nameframe');
-    return getContextMetadata(
+    const contextMetadata = getContextMetadata(
       context.win,
       element,
       context.sentinel,
       crossDomainData.additionalContextMetadata
-    ).then((contextMetadata) => {
-      contextMetadata['creative'] = creative;
+    );
+    contextMetadata['creative'] = creative;
+    return measureIntersection(element).then((intersection) => {
+      contextMetadata['_context'][
+        'initialIntersection'
+      ] = intersectionEntryToJson(intersection);
       const attributes = dict({
         'src': srcPath,
         'name': JSON.stringify(contextMetadata),

@@ -138,28 +138,27 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
         renderer: this.renderer_,
         animationData: data,
       };
-      return getIframe(
+      const iframe = getIframe(
         this.win,
         this.element,
         'bodymovinanimation',
         opt_context
-      ).then((iframe) => {
-        iframe.title = this.element.title || 'Airbnb BodyMovin animation';
-        return Services.vsyncFor(this.win)
-          .mutatePromise(() => {
-            this.applyFillContent(iframe);
-            this.unlistenMessage_ = listen(
-              this.win,
-              'message',
-              this.handleBodymovinMessages_.bind(this)
-            );
-            this.element.appendChild(iframe);
-            this.iframe_ = iframe;
-          })
-          .then(() => {
-            return this.playerReadyPromise_;
-          });
-      });
+      );
+      iframe.title = this.element.title || 'Airbnb BodyMovin animation';
+      return Services.vsyncFor(this.win)
+        .mutatePromise(() => {
+          this.applyFillContent(iframe);
+          this.unlistenMessage_ = listen(
+            this.win,
+            'message',
+            this.handleBodymovinMessages_.bind(this)
+          );
+          this.element.appendChild(iframe);
+          this.iframe_ = iframe;
+        })
+        .then(() => {
+          return this.playerReadyPromise_;
+        });
     });
   }
 

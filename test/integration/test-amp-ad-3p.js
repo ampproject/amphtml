@@ -95,16 +95,11 @@ describe('amp-ad 3P', () => {
         });
         const {initialIntersection} = context;
         expect(initialIntersection.rootBounds).to.deep.equal(
-          layoutRectLtwh(0, 0, 500, 3000)
+          layoutRectLtwh(0, 0, window.innerWidth, window.innerHeight)
         );
         expect(initialIntersection.boundingClientRect).to.deep.equal(
           layoutRectLtwh(0, platform.isIos() ? 1001 : 1000, 300, 250)
         );
-        expect(initialIntersection.intersectionRect).to.deep.equal(
-          layoutRectLtwh(0, platform.isIos() ? 1001 : 1000, 300, 250)
-        );
-        expect(initialIntersection.intersectionRatio).to.equal(1);
-        expect(initialIntersection.time).to.be.a('number');
         expect(context.isMaster).to.exist;
         expect(context.computeInMasterFrame).to.exist;
         expect(context.location).to.deep.equal({

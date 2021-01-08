@@ -128,7 +128,7 @@ class AmpViqeoPlayer extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    getIframe(
+    const iframe = getIframe(
       this.win,
       this.element,
       'viqeoplayer',
@@ -138,25 +138,24 @@ class AmpViqeoPlayer extends AMP.BaseElement {
       {
         allowFullscreen: true,
       }
-    ).then((iframe) => {
-      iframe.title = this.element.title || 'Viqeo video';
+    );
+    iframe.title = this.element.title || 'Viqeo video';
 
-      // required to display the user gesture in the iframe
-      iframe.setAttribute('allow', 'autoplay');
+    // required to display the user gesture in the iframe
+    iframe.setAttribute('allow', 'autoplay');
 
-      this.unlistenMessage_ = listen(
-        this.win,
-        'message',
-        this.handleViqeoMessages_.bind(this)
-      );
+    this.unlistenMessage_ = listen(
+      this.win,
+      'message',
+      this.handleViqeoMessages_.bind(this)
+    );
 
-      return this.mutateElement(() => {
-        this.element.appendChild(iframe);
-        this.iframe_ = iframe;
-        this.applyFillContent(iframe);
-      }).then(() => {
-        return this.playerReadyPromise_;
-      });
+    return this.mutateElement(() => {
+      this.element.appendChild(iframe);
+      this.iframe_ = iframe;
+      this.applyFillContent(iframe);
+    }).then(() => {
+      return this.playerReadyPromise_;
     });
   }
 
