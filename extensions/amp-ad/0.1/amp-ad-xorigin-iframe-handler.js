@@ -100,7 +100,6 @@ export class AmpAdXOriginIframeHandler {
     devAssert(!this.iframe, 'multiple invocations of init without destroy!');
     this.iframe = iframe;
     this.iframe.setAttribute('scrolling', 'no');
-    this.baseInstance_.applyFillContent(this.iframe);
     const timer = Services.timerFor(this.baseInstance_.win);
 
     // Init the legacy observeInterection API service.
