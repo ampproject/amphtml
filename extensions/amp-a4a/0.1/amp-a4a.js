@@ -1804,7 +1804,8 @@ export class AmpA4A extends AMP.BaseElement {
     Promise.all([fieInstallPromise, transferComplete.promise]).then(
       (values) => {
         const friendlyIframeEmbed = values[0];
-        friendlyIframeEmbed.renderCompleted();
+        // #installFriendlyIframeEmbed will return null if removed before install is complete.
+        friendlyIframeEmbed && friendlyIframeEmbed.renderCompleted();
       }
     );
 
