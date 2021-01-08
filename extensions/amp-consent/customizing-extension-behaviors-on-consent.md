@@ -51,9 +51,13 @@ Access the value within the ad iframe using `window.context.initialConsentState`
 
 Get the value using `CONSENT_STATE` macro, or `${consentState}`. A request with the variable will only be sent out after the state has resolved to one of the above state.
 
-#### If you integrate with AMP as a third party video vendor
+#### If you integrate with AMP through an iframe.
 
--   Documents loaded by `<amp-video-iframe>` [may use the `getConsentData` method](<https://amp.dev/documentation/components/amp-video-iframe/#getconsentdata()>) to get this value from the host document.
+To get consent data from the host:
+
+-   Documents loaded by `<amp-iframe>` [may post a `send-consent-data` message](https://amp.dev/documentation/components/amp-iframe/#iframe-&-consent-data).
+
+-   Documents loaded by `<amp-video-iframe>` [may use the `getConsentData` method](<https://amp.dev/documentation/components/amp-video-iframe/#getconsentdata()>).
 
 -   Third party video extensions (like `<amp-youtube>`) can use utilities like `getConsentPolicyInfo`.
 
