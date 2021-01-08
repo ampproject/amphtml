@@ -42,8 +42,7 @@ describes.realWin(
       ampdoc: 'single',
     },
   },
-  function (env) {
-    this.timeout(99999999);
+  (env) => {
     describe('amp-iframe', () => {
       let iframeSrc;
       let clickableIframeSrc;
