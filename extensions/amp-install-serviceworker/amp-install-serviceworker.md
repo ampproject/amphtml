@@ -127,7 +127,7 @@ The URL of the ServiceWorker to register, which must use `https` protocol.
 
 ### `data-iframe-src`
 
-The URL of an HTML document that installs a ServiceWorker. The URL must use `https` protocol.
+The URL of an HTML document that installs a ServiceWorker. The URL must use `https` protocol. This attribute is necessary if the AMP page is going to be served from an AMP Cache.
 
 ### `data-scope`
 
