@@ -278,11 +278,11 @@ function issueUrlToNumberOrUrl(url) {
 }
 
 /**
- * @param {string} files
+ * @param {string} list
  * @return {string}
  */
-const checkedFileListMarkdown = (files) =>
-  files.map((path) => `- [ ] \`${path}\``).join('\n');
+const checkedListMarkdown = (list) =>
+  list.map((item) => `- [ ] ${item}`).join('\n');
 
 /**
  * @return {string}
@@ -321,12 +321,12 @@ function summaryCommitMessage({
       '---',
       '### Cleanup issues',
       "Close these once they've been addressed and this PR has been merged:",
-      cleanupIssues
-        .map(
+      checkedListMarkdown(
+        cleanupIssues.map(
           ({id, cleanupIssue}) =>
-            `- [ ] \`${id}\`: ${issueUrlToNumberOrUrl(cleanupIssue)}`
+            `\`${id}\`: ${issueUrlToNumberOrUrl(cleanupIssue)}`
         )
-        .join('\n')
+      )
     );
   }
 
@@ -335,7 +335,7 @@ function summaryCommitMessage({
       '---',
       '### ⚠️ Javascript source files require intervention',
       'The following may contain errors and/or require intervention to remove superfluous conditionals:',
-      checkedFileListMarkdown(modifiedSourceFiles),
+      checkedListMarkdown(modifiedSourceFiles.map((file) => `\`${file}\``)),
       `Refer to the removal guide for [suggestions on handling these modified Javascript files.](${readmeMdGithubLink()}#followup)`
     );
   }
@@ -345,7 +345,7 @@ function summaryCommitMessage({
       '---',
       '### ⚠️ HTML files may still contain references',
       'The following HTML files contain references to experiment names which may be stale and should be manually removed:',
-      checkedFileListMarkdown(htmlFilesWithReferences),
+      checkedListMarkdown(htmlFilesWithReferences.map((file) => `\`${file}\``)),
       `Refer to the removal guide for [suggestions on handling these HTML files.](${readmeMdGithubLink()}#followup:html)`
     );
   }
