@@ -479,10 +479,6 @@ function maybeLoadCorrectVersion(win, fnOrStruct) {
  *     pumped.
  */
 function maybePumpEarlyFrame(win, cb) {
-  if (!(/* isExperimentOn(win, 'pump-early-frame') // launched: true */ true)) {
-    cb();
-    return;
-  }
   // There is definitely nothing to draw yet, so we might as well
   // proceed.
   if (!win.document.body) {
