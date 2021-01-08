@@ -22,9 +22,6 @@ import {toWin} from './types';
  * Only use this if x-origin iframe rootMargin support is considered nice-to-have,
  * since if not supported this InOb will fallback to one without rootMargin.
  *
- * - If iframed: rootMargin is ignored unless natively supported (Chrome 81+).
- * - If not iframed: all features work properly in both polyfill and built-in.
- *
  * @param {function(!Array<!IntersectionObserverEntry>)} ioCallback
  * @param {!Window} win
  * @param {(number|!Array<number>)=} threshold
