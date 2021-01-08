@@ -64,9 +64,13 @@ export class DomTransformStream {
     /** @private {boolean} */
     this.shouldTransfer_ = false;
 
-    const noThrottleFunc = (cb) => Promise.resolve(cb());
-    /** @const @private {!function}*/
-    this.transferThrottle_ = opt_transferThrottleFunc || noThrottleFunc;
+    /**
+     * @param {!function} cb
+     * @const @private {!function}
+     * @return {!Promise}
+     */
+    this.transferThrottle_ =
+      opt_transferThrottleFunc || ((cb) => Promise.resolve(cb()));
   }
 
   /**
