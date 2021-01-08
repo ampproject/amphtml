@@ -46,15 +46,10 @@ export default function transformer(file, api, options) {
   const {experimentId, experimentsRemovedJson} = options;
 
   return j(file.source)
-    .find(j.ObjectExpression)
-    .filter(
-      (path) =>
-        j(path)
-          .find(j.ObjectProperty, {
-            key: {type: 'Identifier', name: 'id'},
-            value: {value: experimentId},
-          })
-          .size() !== 0
+    .find(j.ObjectExpression, (node) =>
+      node.properties.some(
+        ({key, value}) => key.name === 'id' && value.value === experimentId
+      )
     )
     .forEach((path) => {
       if (experimentsRemovedJson) {
