@@ -47,6 +47,7 @@ export class AmpStoryBaseLayer extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.element.classList.add('i-amphtml-story-layer');
+    this.aspectRatio_ = this.parseAspectRatio_();
   }
 
   /**
@@ -70,44 +71,60 @@ export class AmpStoryBaseLayer extends AMP.BaseElement {
   }
 
   /** @protected */
-  initializeAspectRatioListeners() {
-    const aspectRatio = this.element.getAttribute('aspect-ratio');
-    if (aspectRatio) {
-      const aspectRatioSplits = aspectRatio.split(':');
-      const horiz = parseInt(aspectRatioSplits[0], 10);
-      const vert = parseInt(aspectRatioSplits[1], 10);
-      if (horiz > 0 && vert > 0) {
-        this.aspectRatio_ = {horiz, vert};
-        const storeService = getStoreService(this.win);
-        storeService.subscribe(
-          StateProperty.PAGE_SIZE,
-          this.updatePageSize_.bind(this),
-          true /* callToInitialize */
-        );
-      }
-    }
+  initializePageSizeListeners() {
+    const storeService = getStoreService(this.win);
+    storeService.subscribe(
+      StateProperty.PAGE_SIZE,
+      this.onPageSizeUpdate_.bind(this),
+      true /* callToInitialize */
+    );
   }
 
   /**
-   * @param {?{width: number, height: number}} pageSize
+   * @param {{width: number, height: number}} pageSize
    * @private
    */
-  updatePageSize_(pageSize) {
+  onPageSizeUpdate_(pageSize) {
     if (!pageSize) {
       return;
     }
-    const {width: vw, height: vh} = pageSize;
-    const {horiz, vert} = this.aspectRatio_;
-    const width = Math.min(vw, (vh * horiz) / vert);
-    const height = Math.min(vh, (vw * vert) / horiz);
-    if (width > 0 && height > 0) {
-      this.getVsync().mutate(() => {
-        this.element.classList.add('i-amphtml-story-layer-template-aspect');
-        setStyles(this.element, {
-          '--i-amphtml-story-layer-width': px(width),
-          '--i-amphtml-story-layer-height': px(height),
-        });
+    const {width, height} = this.calculateLayerSize(pageSize);
+    this.getVsync().mutate(() => {
+      this.element.classList.add('i-amphtml-story-layer-template-size');
+      setStyles(this.element, {
+        '--i-amphtml-story-layer-width': px(width),
+        '--i-amphtml-story-layer-height': px(height),
       });
+    });
+  }
+
+  /**
+   * Turns the page size into layer size.
+   * Can be overriden to alter layer sizing.
+   * @protected
+   * @param {{width: number, height: number}} pageSize
+   * @return {{width: number, height: number}}
+   */
+  calculateLayerSize(pageSize) {
+    const {horiz, vert} = this.aspectRatio_;
+    const width = Math.min(pageSize.width, (pageSize.height * horiz) / vert);
+    const height = Math.min(pageSize.height, (pageSize.width * vert) / horiz);
+    return {width, height};
+  }
+
+  /**
+   * Get the horiz and vert from the aspect-ratio attribute
+   * @private
+   * @return {?{horiz: number, vert: number}}
+   */
+  parseAspectRatio_() {
+    const aspectRatio = this.element.getAttribute('aspect-ratio');
+    if (!aspectRatio) {
+      return null;
     }
+    const aspectRatioSplits = aspectRatio.split(':');
+    const horiz = parseInt(aspectRatioSplits[0], 10);
+    const vert = parseInt(aspectRatioSplits[1], 10);
+    return {horiz, vert};
   }
 }
