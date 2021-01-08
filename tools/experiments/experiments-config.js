@@ -245,4 +245,9 @@ export const EXPERIMENTS = [
     name: 'To measure the CWV impact of ads idle rendering',
     spec: 'https://github.com/ampproject/amphtml/issues/31436',
   },
+  {
+    id: 'inabox-resources-eager',
+    name: 'Determine impact of building inabox/fie amp elements ASAP',
+    spec: 'https://github.com/ampproject/amphtml/issues/31776',
+  },
 ];
