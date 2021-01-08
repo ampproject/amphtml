@@ -655,7 +655,7 @@ export class PreactBaseElement extends AMP.BaseElement {
 
   /**
    * Creates a wrapper around a Preact ref. The API surface exposed by this ref
-   * **should** be consistent accross all rerenders.
+   * **must** be consistent accross all rerenders.
    *
    * This wrapper is necessary because every time React rerenders, it creates
    * (depending on deps checking) a new imperative handle and sets that to
@@ -687,19 +687,26 @@ export class PreactBaseElement extends AMP.BaseElement {
    * @private
    */
   checkApiWrapper_(current) {
+    if (!getMode().localDev) {
+      return;
+    }
     const api = this.apiWrapper_;
     const newKeys = Object.keys(current);
     for (let i = 0; i < newKeys.length; i++) {
       const key = newKeys[i];
       if (!hasOwn(api, key)) {
-        wrapRefProperty(this, api, key);
+        throw new Error(
+          `Inconsistent Bento API shape: imperative API gained a "${key}" key`
+        );
       }
     }
     const oldKeys = Object.keys(api);
     for (let i = 0; i < oldKeys.length; i++) {
       const key = oldKeys[i];
       if (!hasOwn(current, key)) {
-        delete api[key];
+        throw new Error(
+          `Inconsistent Bento API shape: imperative API lost a "${key}" key`
+        );
       }
     }
   }
