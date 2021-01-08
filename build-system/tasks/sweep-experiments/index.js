@@ -99,9 +99,13 @@ const getModifiedSourceFiles = (fromHash) =>
  */
 const jscodeshift = (transform, args = []) =>
   getStdoutThrowOnError(
-    'npx jscodeshift ' +
-      ` -t ${__dirname}/jscodeshift/${transform} ` +
-      args.join(' ')
+    [
+      'npx jscodeshift',
+      '--parser babylon',
+      `--parser-config ${__dirname}/jscodeshift/parser-config.json`,
+      `--transform ${__dirname}/jscodeshift/${transform}`,
+      ...args,
+    ].join(' ')
   );
 
 /**
