@@ -302,7 +302,7 @@ describes.realWin('whenUpgraded', {amp: true}, (env) => {
     expect(api.state).to.equal(1);
   });
 
-  it('synchronizes API surface after rerender', async () => {
+  it('throws when API surface changes after rerender', async () => {
     let setState;
     Component = env.sandbox.stub().callsFake((props, ref) => {
       const [api, set] = Preact.useState({
@@ -322,7 +322,7 @@ describes.realWin('whenUpgraded', {amp: true}, (env) => {
 
     const api = await p;
     expect(api.first).to.be.true;
-    expect(api.second).to.be.undefined;
+    expect(el).not.to.have.display('none');
 
     const current = Component.callCount;
     setState({
@@ -333,7 +333,6 @@ describes.realWin('whenUpgraded', {amp: true}, (env) => {
       'rerender after setState'
     );
 
-    expect(api.first).to.be.undefined;
-    expect(api.second).to.be.true;
+    expect(el).to.have.class('i-amphtml-error');
   });
 });

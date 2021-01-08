@@ -39,7 +39,7 @@ import {
   parseBooleanAttribute,
 } from '../dom';
 import {dashToCamelCase} from '../string';
-import {devAssert} from '../log';
+import {dev, devAssert} from '../log';
 import {dict, hasOwn, map} from '../utils/object';
 import {getDate} from '../utils/date';
 import {getMode} from '../mode';
@@ -694,20 +694,22 @@ export class PreactBaseElement extends AMP.BaseElement {
     const newKeys = Object.keys(current);
     for (let i = 0; i < newKeys.length; i++) {
       const key = newKeys[i];
-      if (!hasOwn(api, key)) {
-        throw new Error(
-          `Inconsistent Bento API shape: imperative API gained a "${key}" key`
-        );
-      }
+      dev().assert(
+        hasOwn(api, key),
+        'Inconsistent Bento API shape: imperative API gained a "%s" key for %s',
+        key,
+        this.element
+      );
     }
     const oldKeys = Object.keys(api);
     for (let i = 0; i < oldKeys.length; i++) {
       const key = oldKeys[i];
-      if (!hasOwn(current, key)) {
-        throw new Error(
-          `Inconsistent Bento API shape: imperative API lost a "${key}" key`
-        );
-      }
+      dev().assert(
+        hasOwn(current, key),
+        'Inconsistent Bento API shape: imperative API lost a "%s" key for %s',
+        key,
+        this.element
+      );
     }
   }
 }
