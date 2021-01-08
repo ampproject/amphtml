@@ -262,21 +262,18 @@ const findConfigBitCommits = (
   });
 
 const issueUrlToNumberRe = new RegExp(
-  `^${
-    // Only use regex groups using parens () for issue number in this list.
-    [
-      'https://github.com/ampproject/amphtml/issues/(\\d+)',
-      'https://github.com/ampproject/amphtml/pull/(\\d+)',
-      'https://go.amp.dev/issue/(\\d+)',
-      'https://go.amp.dev/pr/(\\d+)',
-      '#(\\d+)',
-      '(\\d+)',
-    ].join('|')
-  }$`
+  [
+    '^https://github.com/ampproject/amphtml/issues/(\\d+)',
+    '^https://github.com/ampproject/amphtml/pull/(\\d+)',
+    '^https://go.amp.dev/issue/(\\d+)',
+    '^https://go.amp.dev/pr/(\\d+)',
+    '^#?(\\d+)$',
+  ].join('|')
 );
+
 function issueUrlToNumberOrUrl(url) {
   const match = url.match(issueUrlToNumberRe);
-  const number = match && match[1];
+  const number = match && match.find((group) => /^\d+$/.test(group));
   return number ? `#${number}` : url;
 }
 
