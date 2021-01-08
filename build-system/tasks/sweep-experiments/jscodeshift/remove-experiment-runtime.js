@@ -64,8 +64,7 @@ export default function transformer(file, api, options) {
         node.callee.type === 'Identifier' &&
         (node.callee.name === 'isExperimentOn' ||
           node.callee.name === 'toggleExperiment') &&
-        (node.arguments[1].type === 'Literal' ||
-          node.arguments[1].type === 'StringLiteral') &&
+        node.arguments[1] &&
         node.arguments[1].value === isExperimentOnExperiment
     )
     .forEach((path) => {

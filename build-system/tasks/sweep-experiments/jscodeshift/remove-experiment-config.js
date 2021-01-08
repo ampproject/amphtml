@@ -50,9 +50,9 @@ export default function transformer(file, api, options) {
     .filter(
       (path) =>
         j(path)
-          .find(j.Property, {
+          .find(j.ObjectProperty, {
             key: {type: 'Identifier', name: 'id'},
-            value: {type: 'Literal', value: experimentId},
+            value: {value: experimentId},
           })
           .size() !== 0
     )
@@ -63,7 +63,11 @@ export default function transformer(file, api, options) {
             j.objectExpression(
               // Only collect literal value properties so we can parse as JSON5
               path.value.properties.filter(
-                ({value}) => value.type === 'Literal'
+                ({value}) =>
+                  value.type === 'Literal' ||
+                  value.type === 'BooleanLiteral' ||
+                  value.type === 'NumericLiteral' ||
+                  value.type === 'StringLiteral'
               )
             )
           ).toSource()
