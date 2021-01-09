@@ -7,7 +7,7 @@
     "define_experiment_constant": "NO_SIGNING_RTV"
   },
   "experimentB": {
-    "name": "Inabox resources eager building",
+    "name": "Inabox resources eager building.",
     "environment": "INABOX",
     "issue": "https://github.com/ampproject/amphtml/issues/31776",
     "expiration_date_utc": "2021-06-30",
