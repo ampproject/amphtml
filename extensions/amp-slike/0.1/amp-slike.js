@@ -97,8 +97,6 @@ export class AmpSlike extends AMP.BaseElement {
     this.cb_ = this.element.getAttribute('data-cb');
     this.autoplay_ = this.element.getAttribute('data-autoplay') || 'true';
 
-   // installVideoManagerForDoc(this.element);
-  //  Services.videoManagerForDoc(this.element).register(this);
     setIsMediaComponent(this.element);
   }
 
