@@ -24,7 +24,6 @@ import {VisibilityState} from '../visibility-state';
 import {dev} from '../log';
 import {getMode} from '../mode';
 import {hasNextNodeInDocumentOrder} from '../dom';
-import {isExperimentOn} from '../experiments';
 import {registerServiceBuilderForDoc} from '../service';
 
 const TAG = 'inabox-resources';
@@ -89,7 +88,8 @@ export class InaboxResources {
     this.documentReady_ = false;
 
     // TODO(#31776): cleanup when launched.
-    if (isExperimentOn(this.win, 'inabox-resources-eager')) {
+    // eslint-disable-next-line no-undef
+    if (INABOX_RESOURCES_EAGER) {
       this.ampdoc_.whenReady().then(() => {
         this.documentReady_ = true;
         this.buildReadyResources_();
@@ -146,7 +146,8 @@ export class InaboxResources {
   upgraded(element) {
     const resource = Resource.forElement(element);
     // TODO(#31776): cleanup when launched.
-    if (isExperimentOn(this.win, 'inabox-resources-eager')) {
+    // eslint-disable-next-line no-undef
+    if (INABOX_RESOURCES_EAGER) {
       this.pendingBuildResources_.push(resource);
       this.buildReadyResources_();
     } else {
