@@ -164,6 +164,7 @@ describes.fakeWin(
       );
       expect(queueExtensions).to.have.length(3);
       const promise = adopt(win);
+      clock.tick(1); // await early frame
       runChunksForTesting(win.document);
       return promise
         .then(() => {
@@ -322,6 +323,7 @@ describes.fakeWin(
       expect(queueExtensions).to.have.length(2);
       expect(progress).to.equal('');
       const promise = adopt(win);
+      clock.tick(1); // await early frame
       return promise
         .then(() => {
           // Notice the queue is down to 0 but there is a micro task to execute
@@ -387,6 +389,7 @@ describes.fakeWin(
       let script = win.document.querySelector('[data-script=_base_ext]');
       expect(script).to.be.null;
       const promise = adopt(win);
+      clock.tick(1); // await early frame
       const e = Services.extensionsFor(win);
 
       expect(queueExtensions).to.have.length(0);
@@ -446,6 +449,7 @@ describes.fakeWin(
       expect(script1).to.be.null;
       expect(script2).to.be.null;
       const promise = adopt(win);
+      clock.tick(1); // await early frame
       const e = Services.extensionsFor(win);
 
       expect(queueExtensions).to.have.length(0);
@@ -511,6 +515,7 @@ describes.fakeWin(
         })
       );
       const promise = adopt(win);
+      clock.tick(1); // await early frame
       runChunksForTesting(win.document);
 
       yield waitNext(promise);
@@ -590,6 +595,7 @@ describes.fakeWin(
         })
       );
       const promise = adopt(win);
+      clock.tick(1); // await early frame
       runChunksForTesting(win.document);
 
       yield waitNext(promise);
@@ -671,6 +677,7 @@ describes.fakeWin(
         })
       );
       const promise = adopt(win);
+      clock.tick(1); // await early frame
       runChunksForTesting(win.document);
       yield promise;
       expect(progress).to.equal('13');
@@ -717,6 +724,8 @@ describes.fakeWin(
           v: '$internalRuntimeVersion$',
         });
         runChunksForTesting(win.document);
+        clock.tick(1); // await early frame
+
         yield extensions.waitForExtension(win, 'amp-ext');
 
         // Extension is added immediately. Can't find for micro-tasks here.
@@ -760,6 +769,7 @@ describes.fakeWin(
           v: '$internalRuntimeVersion$',
         });
         runChunksForTesting(win.document);
+        clock.tick(1); // await early frame
 
         // Extension is added immediately. Can't find for micro-tasks here.
         yield extensions.waitForExtension(win, 'amp-ext');
@@ -806,6 +816,7 @@ describes.fakeWin(
           v: '$internalRuntimeVersion$',
         });
         runChunksForTesting(win.document);
+        clock.tick(1); // await early frame
 
         // No factories
         yield extensions.waitForExtension(win, 'amp-ext');
@@ -836,6 +847,7 @@ describes.fakeWin(
           v: '$internalRuntimeVersion$',
         });
         runChunksForTesting(win.document);
+        clock.tick(1); // await early frame
 
         // No factories
         yield extensions.waitForExtension(win, 'amp-ext');
@@ -887,6 +899,7 @@ describes.fakeWin(
           v: '$internalRuntimeVersion$',
         });
         runChunksForTesting(win.document);
+        clock.tick(1); // await early frame
 
         // Extension is added immediately. Can't find for micro-tasks here.
         yield extensions.waitForExtension(win, 'amp-ext');
@@ -935,6 +948,7 @@ describes.fakeWin(
           v: '$internalRuntimeVersion$',
         });
         runChunksForTesting(win.document);
+        clock.tick(1); // await early frame
 
         // Extension is added immediately. Can't find for micro-tasks here.
         yield extensions.waitForExtension(win, 'amp-ext');
@@ -986,6 +1000,7 @@ describes.fakeWin(
           v: '$internalRuntimeVersion$',
         });
         runChunksForTesting(win.document);
+        clock.tick(1); // await early frame
 
         // Factory recorded.
         yield extensions.waitForExtension(win, 'amp-ext');
