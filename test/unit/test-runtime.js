@@ -47,6 +47,11 @@ describes.fakeWin(
     let ampdocServiceMock;
     let extensionElementIndex;
 
+    function runChunks(elementOrAmpDoc) {
+      clock.tick(1); // for early frame
+      runChunksForTesting(elementOrAmpDoc);
+    }
+
     beforeEach(() => {
       win = env.win;
       clock = env.sandbox.useFakeTimers();
@@ -164,8 +169,7 @@ describes.fakeWin(
       );
       expect(queueExtensions).to.have.length(3);
       const promise = adopt(win);
-      clock.tick(1); // await early frame
-      runChunksForTesting(win.document);
+      runChunks(win.document);
       return promise
         .then(() => {
           expect(queueExtensions).to.have.length(0);
@@ -176,7 +180,7 @@ describes.fakeWin(
               progress += '4';
             })
           );
-          runChunksForTesting(win.document);
+          runChunks(win.document);
           return promise;
         })
         .then(() => {
@@ -187,7 +191,7 @@ describes.fakeWin(
               progress += '5';
             })
           );
-          runChunksForTesting(win.document);
+          runChunks(win.document);
           return promise;
         })
         .then(() => {
@@ -259,7 +263,7 @@ describes.fakeWin(
       );
       expect(queueExtensions).to.have.length(5);
       const promise = adopt(win);
-      runChunksForTesting(win.document);
+      runChunks(win.document);
       return promise
         .then(() => {
           // Skip a microtask.
@@ -281,7 +285,7 @@ describes.fakeWin(
           expect(queueExtensions).to.have.length(4);
           clock.tick(1);
           expect(queueExtensions).to.have.length(0);
-          runChunksForTesting(win.document);
+          runChunks(win.document);
           return promise;
         })
         .then(() => {
@@ -292,7 +296,7 @@ describes.fakeWin(
               progress += '5';
             })
           );
-          runChunksForTesting(win.document);
+          runChunks(win.document);
           return promise;
         })
         .then(() => {
@@ -346,7 +350,7 @@ describes.fakeWin(
             },
             v: '$internalRuntimeVersion$',
           });
-          runChunksForTesting(win.document);
+          runChunks(win.document);
           return promise.then(() => {
             expect(progress).to.equal('1HIGHA');
           });
@@ -389,12 +393,11 @@ describes.fakeWin(
       let script = win.document.querySelector('[data-script=_base_ext]');
       expect(script).to.be.null;
       const promise = adopt(win);
-      clock.tick(1); // await early frame
       const e = Services.extensionsFor(win);
 
       expect(queueExtensions).to.have.length(0);
       expect(progress).to.equal('');
-      runChunksForTesting(win.document);
+      runChunks(win.document);
       script = win.document.querySelector('[data-script=_base_ext]');
       expect(script).to.be.not.null;
       return promise.then(() => {
@@ -449,12 +452,11 @@ describes.fakeWin(
       expect(script1).to.be.null;
       expect(script2).to.be.null;
       const promise = adopt(win);
-      clock.tick(1); // await early frame
       const e = Services.extensionsFor(win);
 
       expect(queueExtensions).to.have.length(0);
       expect(progress).to.equal('');
-      runChunksForTesting(win.document);
+      runChunks(win.document);
       script1 = win.document.querySelector('[data-script=_base_ext1]');
       script2 = win.document.querySelector('[data-script=_base_ext2]');
       expect(script1).to.not.be.null;
@@ -464,7 +466,7 @@ describes.fakeWin(
         // ext1 should not be executed yet and needs to wait on _base_ext
         // Notice that ext0 executes before A
         expect(progress).to.equal('C');
-        runChunksForTesting(win.document);
+        runChunks(win.document);
         return e
           .waitForExtension(win, '_base_ext2')
           .then(() => {
@@ -515,8 +517,7 @@ describes.fakeWin(
         })
       );
       const promise = adopt(win);
-      clock.tick(1); // await early frame
-      runChunksForTesting(win.document);
+      runChunks(win.document);
 
       yield waitNext(promise);
       // Extensions are still unprocessed
@@ -529,14 +530,14 @@ describes.fakeWin(
           progress += '4';
         })
       );
-      runChunksForTesting(win.document);
+      runChunks(win.document);
 
       yield waitNext(promise);
       expect(progress).to.equal('');
 
       // Body is available now.
       bodyResolver();
-      runChunksForTesting(win.document);
+      runChunks(win.document);
 
       yield waitNext(promise);
       expect(progress).to.equal('1234');
@@ -595,8 +596,7 @@ describes.fakeWin(
         })
       );
       const promise = adopt(win);
-      clock.tick(1); // await early frame
-      runChunksForTesting(win.document);
+      runChunks(win.document);
 
       yield waitNext(promise);
       // Extensions are still unprocessed
@@ -623,14 +623,14 @@ describes.fakeWin(
           progress += '5';
         }, 'version123')
       );
-      runChunksForTesting(win.document);
+      runChunks(win.document);
 
       yield waitNext(promise);
       expect(progress).to.equal('');
 
       // Body is available now.
       bodyResolver();
-      runChunksForTesting(win.document);
+      runChunks(win.document);
 
       yield waitNext(promise);
       expect(progress).to.equal('134');
@@ -677,8 +677,7 @@ describes.fakeWin(
         })
       );
       const promise = adopt(win);
-      clock.tick(1); // await early frame
-      runChunksForTesting(win.document);
+      runChunks(win.document);
       yield promise;
       expect(progress).to.equal('13');
     });
@@ -723,8 +722,7 @@ describes.fakeWin(
           },
           v: '$internalRuntimeVersion$',
         });
-        runChunksForTesting(win.document);
-        clock.tick(1); // await early frame
+        runChunks(win.document);
 
         yield extensions.waitForExtension(win, 'amp-ext');
 
@@ -768,8 +766,7 @@ describes.fakeWin(
           },
           v: '$internalRuntimeVersion$',
         });
-        runChunksForTesting(win.document);
-        clock.tick(1); // await early frame
+        runChunks(win.document);
 
         // Extension is added immediately. Can't find for micro-tasks here.
         yield extensions.waitForExtension(win, 'amp-ext');
@@ -815,8 +812,7 @@ describes.fakeWin(
           },
           v: '$internalRuntimeVersion$',
         });
-        runChunksForTesting(win.document);
-        clock.tick(1); // await early frame
+        runChunks(win.document);
 
         // No factories
         yield extensions.waitForExtension(win, 'amp-ext');
@@ -846,8 +842,7 @@ describes.fakeWin(
           },
           v: '$internalRuntimeVersion$',
         });
-        runChunksForTesting(win.document);
-        clock.tick(1); // await early frame
+        runChunks(win.document);
 
         // No factories
         yield extensions.waitForExtension(win, 'amp-ext');
@@ -898,8 +893,7 @@ describes.fakeWin(
           },
           v: '$internalRuntimeVersion$',
         });
-        runChunksForTesting(win.document);
-        clock.tick(1); // await early frame
+        runChunks(win.document);
 
         // Extension is added immediately. Can't find for micro-tasks here.
         yield extensions.waitForExtension(win, 'amp-ext');
@@ -947,8 +941,7 @@ describes.fakeWin(
           },
           v: '$internalRuntimeVersion$',
         });
-        runChunksForTesting(win.document);
-        clock.tick(1); // await early frame
+        runChunks(win.document);
 
         // Extension is added immediately. Can't find for micro-tasks here.
         yield extensions.waitForExtension(win, 'amp-ext');
@@ -999,8 +992,7 @@ describes.fakeWin(
           },
           v: '$internalRuntimeVersion$',
         });
-        runChunksForTesting(win.document);
-        clock.tick(1); // await early frame
+        runChunks(win.document);
 
         // Factory recorded.
         yield extensions.waitForExtension(win, 'amp-ext');
