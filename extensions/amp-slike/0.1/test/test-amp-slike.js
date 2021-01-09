@@ -35,8 +35,8 @@ describes.realWin(
       for (const key in attributes) {
         slikePlayer.setAttribute(key, attributes[key]);
       }
-      slikePlayer.setAttribute('width', '111');
-      slikePlayer.setAttribute('height', '222');
+      slikePlayer.setAttribute('width', '320');
+      slikePlayer.setAttribute('height', '180');
 
       if (opt_responsive) {
         slikePlayer.setAttribute('layout', 'responsive');

@@ -42,6 +42,7 @@ limitations under the License.
 
 The `width` and `height` attributes determine the aspect ratio of the player embedded in responsive layout.
 
+Example:
 
 ```html
 <amp-slike
