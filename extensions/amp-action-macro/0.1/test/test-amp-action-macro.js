@@ -44,26 +44,7 @@ describes.realWin(
       });
     }
 
-    it('should build if experiment is on', (done) => {
-      newActionMacro().then(
-        () => {
-          done();
-        },
-        (unused) => {
-          done(new Error('component should have built'));
-        }
-      );
-    });
-
-    it('should not build if experiment is off', () => {
-      return allowConsoleError(() => {
-        /* toggleExperiment(env.win, 'amp-action-macro', false) // launched: true */
-        false;
-        return newActionMacro().catch((err) => {
-          expect(err.message).to.include('Experiment is off');
-        });
-      });
-    });
+    it('should build', newActionMacro);
 
     describe('registered action', () => {
       let macro;
