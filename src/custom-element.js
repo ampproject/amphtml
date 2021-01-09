@@ -1075,6 +1075,17 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * Returns the object which holds the API surface (the thing we add the
+     * custom methods/properties onto). In Bento, this is the imperative API
+     * object. In AMP, this is the BaseElement instance.
+     *
+     * @return {!Promise<!Object>}
+     */
+    getApi() {
+      return this.getImpl().then((impl) => impl.getApi());
+    }
+
+    /**
      * Returns the layout of the element.
      * @return {!Layout}
      */
