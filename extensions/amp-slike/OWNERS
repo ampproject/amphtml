@@ -4,7 +4,7 @@
 {
   rules: [
     {
-      owners: [{name: 'ampproject/wg-components'}],
+      owners: [{name: 'slikeTech'}, {name: 'ampproject/wg-components'}],
     },
   ],
 }
