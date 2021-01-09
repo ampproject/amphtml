@@ -15,10 +15,8 @@
  */
 
 import {SandboxOptions, originMatches} from '../../../src/iframe-video';
-import {Services} from '../../../src/services';
 import {dict} from '../../../src/utils/object';
 import {getData, listen} from '../../../src/event-helper';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {setIsMediaComponent} from '../../../src/video-interface';
 import {userAssert} from '../../../src/log';
@@ -99,8 +97,8 @@ export class AmpSlike extends AMP.BaseElement {
     this.cb_ = this.element.getAttribute('data-cb');
     this.autoplay_ = this.element.getAttribute('data-autoplay') || 'true';
 
-    installVideoManagerForDoc(this.element);
-    Services.videoManagerForDoc(this.element).register(this);
+   // installVideoManagerForDoc(this.element);
+  //  Services.videoManagerForDoc(this.element).register(this);
     setIsMediaComponent(this.element);
   }
 
