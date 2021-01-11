@@ -28,15 +28,20 @@ const spec = {amp: true, frameStyle: {width: '300px'}};
 describes.realWin('PreactBaseElement', spec, (env) => {
   let win, doc, html;
   let Impl, component, lastProps;
+  let isLayoutSupportedOverride;
 
   beforeEach(() => {
     win = env.win;
     doc = win.document;
     html = htmlFor(doc);
 
+    isLayoutSupportedOverride = () => true;
     Impl = class extends PreactBaseElement {
-      isLayoutSupported() {
-        return true;
+      isLayoutSupported(layout) {
+        if (isLayoutSupportedOverride !== undefined) {
+          return isLayoutSupportedOverride(layout);
+        }
+        return super.isLayoutSupported(layout);
       }
     };
     component = env.sandbox.stub().callsFake((props) => {
@@ -68,6 +73,24 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       return new Promise((resolve) => setTimeout(resolve, 32));
     });
   }
+
+  describe('layout mapping', () => {
+    let element;
+
+    beforeEach(() => {
+      element = doc.createElement('amp-preact');
+      isLayoutSupportedOverride = undefined;
+    });
+
+    it('should allow container for layoutSizeDefined', async () => {
+      Impl['layoutSizeDefined'] = true;
+      doc.body.appendChild(element);
+      await element.build();
+      const impl = await element.getImpl();
+      expect(impl.isLayoutSupported('fixed')).to.be.true;
+      expect(impl.isLayoutSupported('container')).to.be.true;
+    });
+  });
 
   describe('attribute mapping', () => {
     const DATE_STRING = '2018-01-01T08:00:00Z';
