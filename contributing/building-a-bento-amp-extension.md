@@ -6,8 +6,7 @@ provides `amp-accordion`, `amp-base-carousel` and `amp-sidebar` as
 extensions.
 
 Bento AMP is a project that allows you to take AMP components and use them in otherwise non-AMP pages. Many of these Bento-enabled AMP components also build
-upon an independent Preact component that may be used in isolation in React development contexts, but this is not a requirement. The only requirement of
-a Bento component is that it can be fully functional on non-AMP pages.
+upon a Preact component, but this is not a requirement. The only requirement of a Bento component is that it can be fully functional on non-AMP pages. However, when there is an underlying Preact component, that component must also be usable in isolation in React development contexts.
 
 If you'd like to add an extension to support your company
 video player, rich embed or just a general UI component like a star
