@@ -104,7 +104,7 @@ export const styles = () => {
               border: ${border};
               top: ${top};
               max-height: ${maxHeight} !important;
-              max-width: ${maxWidth} !important;
+              max-width: ${maxWidth};
               min-width: ${minWidth} !important;
               outline: ${outline};
               z-index: ${zIndex};

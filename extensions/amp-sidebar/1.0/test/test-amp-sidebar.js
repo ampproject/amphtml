@@ -291,10 +291,8 @@ describes.realWin(
           `${win.innerHeight}px`
         );
 
-        // maxWidth defaults to 80vw, so should be 80% of viewport width
-        expect(win.getComputedStyle(sidebarElement).maxWidth).to.equal(
-          `${win.innerWidth * 0.8}px`
-        );
+        // maxWidth is not set as !important so is overridable
+        expect(win.getComputedStyle(sidebarElement).maxWidth).to.equal(`600px`);
 
         // 45px is default, user supplied 200px does not overwrite w/o !important
         expect(win.getComputedStyle(sidebarElement).minWidth).to.equal('45px');
