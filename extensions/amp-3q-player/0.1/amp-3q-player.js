@@ -92,7 +92,6 @@ class Amp3QPlayer extends AMP.BaseElement {
     const explicitParamsAttributes = ['key', 'timestamp', 'controls'];
 
     let iframeSrc = 'https://playout.3qsdn.com/';
-
     if (this.element.getAttribute(`data-datasource`)) {
       iframeSrc +=
         'config_by_metadata/' +
