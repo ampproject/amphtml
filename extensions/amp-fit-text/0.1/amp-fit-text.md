@@ -2,14 +2,15 @@
 $category@: presentation
 formats:
   - websites
+  - stories
+  - ads
+  - email
 teaser:
   text: Expands or shrinks font size to fit the content within the space given.
-experimental: true
-bento: true
 ---
 
 <!---
-Copyright 2021 The AMP HTML Authors. All Rights Reserved.
+Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -62,10 +63,6 @@ The following example is similar to the one above, but in this example we specif
 
 [/example]
 
-### Migrating from 0.1
-
-Unlike `0.1`, the experimental `1.0` version of `amp-fit-text` does not account for margin and border size as contributing to the total fit-text coverage area.
-
 ### Overflowing content
 
 If the content of the `amp-fit-text` overflows the available space, even with a
@@ -108,3 +105,7 @@ This element includes [common attributes](https://amp.dev/documentation/guides-a
 ## Styling
 
 You can style the `amp-fit-text` with standard CSS. In particular, you can use `text-align`, `font-weight`, `color` and many other CSS properties, with the main exception of `font-size`.
+
+## Validation
+
+See [amp-fit-text rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-fit-text/validator-amp-fit-text.protoascii) in the AMP validator specification.
