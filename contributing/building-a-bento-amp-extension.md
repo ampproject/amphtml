@@ -368,7 +368,7 @@ actionServiceForDoc(doc.documentElement).trigger(
 ```
 
 And to expose actions use `registerApiAction` method that your element
-inherits from `PreactBaseElement`. Note, this should correspond directly with the API exposed in the corresponding Preact compnent via `useImperativeHandle`, and the component should be defined using a `forwardRef` accordingly.
+inherits from `PreactBaseElement`. Note, this should correspond directly with the API exposed in the corresponding Preact compnent via [`useImperativeHandle`](https://reactjs.org/docs/hooks-reference.html#useimperativehandle), and the component should be defined using a [`forwardRef`](https://preactjs.com/guide/v10/switching-to-preact/#forwardref) accordingly.
 
 ```javascript
 this.registerApiAction('close', (api) => api.close());
