@@ -68,7 +68,7 @@ export class RequestHandler {
     /** @private {!../../../src/service/url-impl.Url} */
     this.urlService_ = Services.urlForDoc(element);
 
-    /** @private {?Promise<?string>} */
+    /** @private {?Promise<string>} */
     this.baseUrlPromise_ = null;
 
     /** @private {?Promise<string>} */
