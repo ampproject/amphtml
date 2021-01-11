@@ -61,14 +61,7 @@ function useValueRef(current) {
  * @return {PreactDef.Renderable}
  */
 function LightboxWithRef(
-  {
-    animateIn = 'fade-in',
-    children,
-    onBeforeOpen,
-    onAfterClose,
-    enableAnimation = true,
-    ...rest
-  },
+  {animateIn = 'fade-in', children, onBeforeOpen, onAfterClose, ...rest},
   ref
 ) {
   // There are two phases to open and close.
@@ -86,7 +79,6 @@ function LightboxWithRef(
   const animateInRef = useValueRef(animateIn);
   const onBeforeOpenRef = useValueRef(onBeforeOpen);
   const onAfterCloseRef = useValueRef(onAfterClose);
-  const enableAnimationRef = useValueRef(enableAnimation);
 
   useImperativeHandle(
     ref,
@@ -121,7 +113,7 @@ function LightboxWithRef(
         setStyle(element, 'visibility', 'visible');
         element./*REVIEW*/ focus();
       };
-      if (!element.animate || !enableAnimationRef.current) {
+      if (!element.animate) {
         postVisibleAnim();
         return;
       }
@@ -142,7 +134,7 @@ function LightboxWithRef(
         animation = null;
         setMounted(false);
       };
-      if (!element.animate || !enableAnimationRef.current) {
+      if (!element.animate) {
         postInvisibleAnim();
         return;
       }
@@ -159,7 +151,7 @@ function LightboxWithRef(
         animation.cancel();
       }
     };
-  }, [visible, animateInRef, enableAnimationRef, onAfterCloseRef]);
+  }, [visible, animateInRef, onAfterCloseRef]);
 
   return (
     mounted && (
