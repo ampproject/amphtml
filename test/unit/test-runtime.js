@@ -263,7 +263,7 @@ describes.fakeWin(
       );
       expect(queueExtensions).to.have.length(5);
       const promise = adopt(win);
-      runChunks(win.document);
+      runChunksForTesting(win.document);
       return promise
         .then(() => {
           // Skip a microtask.
@@ -393,11 +393,11 @@ describes.fakeWin(
       let script = win.document.querySelector('[data-script=_base_ext]');
       expect(script).to.be.null;
       const promise = adopt(win);
-      const e = Services.extensionsFor(win);
+      runChunks(win.document);
 
+      const e = Services.extensionsFor(win);
       expect(queueExtensions).to.have.length(0);
       expect(progress).to.equal('');
-      runChunks(win.document);
       script = win.document.querySelector('[data-script=_base_ext]');
       expect(script).to.be.not.null;
       return promise.then(() => {
@@ -452,11 +452,11 @@ describes.fakeWin(
       expect(script1).to.be.null;
       expect(script2).to.be.null;
       const promise = adopt(win);
-      const e = Services.extensionsFor(win);
+      runChunks(win.document);
 
+      const e = Services.extensionsFor(win);
       expect(queueExtensions).to.have.length(0);
       expect(progress).to.equal('');
-      runChunks(win.document);
       script1 = win.document.querySelector('[data-script=_base_ext1]');
       script2 = win.document.querySelector('[data-script=_base_ext2]');
       expect(script1).to.not.be.null;
