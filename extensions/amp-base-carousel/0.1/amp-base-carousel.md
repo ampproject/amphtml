@@ -303,4 +303,4 @@ addition, when changing `visible-slides`, you likely want to change
 
 ## Validation
 
-See [amp-base-carousel rules](validator-amp-base-carousel.protoascii) in the AMP validator specification.
+See [amp-base-carousel rules](../validator-amp-base-carousel.protoascii) in the AMP validator specification.
