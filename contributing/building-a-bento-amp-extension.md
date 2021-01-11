@@ -22,7 +22,7 @@ non-AMP pages, you'd do this by building an extension in the Bento paradigm.
 -   [Element styling](#element-styling)
 -   [Register element with AMP](#register-element-with-amp)
 -   [Actions and events](#actions-and-events)
--   [Allowing proper validations](#allowing-proper-validations)
+-   [Allowing proper validation](#allowing-proper-validation)
 -   [Performance considerations](#performance-considerations)
 -   [Layouts supported in your element](#layouts-supported-in-your-element)
 -   [Experiments](#experiments)
@@ -381,22 +381,15 @@ default case.
 Make sure your element documentation documents the events and actions it
 exposes both in its own documentation and in [`AMP Actions and Events`](https://github.com/ampproject/amphtml/blob/master/spec/amp-actions-and-events.md).
 
-## Allowing proper validations
+## Allowing proper validation
 
 One of AMP's features is that a document can be checked against
-validation rules to confirm it's AMP-valid. While your Bento component can be used in non-AMP contexts, it should also smoothly integrate with AMP documents. When you implement your element, the AMP validator needs to be updated to add rules for your element to keep documents using your element valid. In order to do that you need
-to file an issue on the GitHub repo select "Related to: Validator" and
-mention what rules the validator needs to validate. This usually
-includes
-
--   Your element tag-name
--   Required attributes for the element
--   Specific values that an attribute accepts (e.g. `myattr="TYPE1|TYPE2"`)
--   Layouts your element supports (see [Layout specs](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md) and [Layouts supported in your element](#layouts-supported-in-your-element))
--   If there are restrictions where your element can or can't appear (e.g. `disallowed_ancestory`, `mandatory_parent`...)
-
-For more details take a look at [Contributing Component Validator
-Rules](https://github.com/ampproject/amphtml/blob/master/contributing/component-validator-rules.md).
+validation rules to confirm it's valid AMP. When you implement your
+element, the [AMP Validator](https://github.com/ampproject/amphtml/blob/master/validator/README.md)
+needs to be updated to add rules for your element to keep documents
+using your element valid. Create your own rules by following the
+directions at
+[Contributing Component Validator Rules](https://github.com/ampproject/amphtml/blob/master/contributing/component-validator-rules.md).
 
 ## Performance considerations
 
