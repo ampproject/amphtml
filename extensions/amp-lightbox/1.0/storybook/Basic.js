@@ -16,7 +16,7 @@
 
 import * as Preact from '../../../../src/preact';
 import {Lightbox} from '../lightbox';
-import {boolean, select, text, withKnobs} from '@storybook/addon-knobs';
+import {select, text, withKnobs} from '@storybook/addon-knobs';
 import {useRef} from '../../../../src/preact';
 import {withA11y} from '@storybook/addon-a11y';
 
