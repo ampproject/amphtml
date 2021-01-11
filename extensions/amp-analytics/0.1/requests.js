@@ -68,7 +68,7 @@ export class RequestHandler {
     /** @private {!../../../src/service/url-impl.Url} */
     this.urlService_ = Services.urlForDoc(element);
 
-    /** @private {?Promise<string>} */
+    /** @private {?Promise<?string>} */
     this.baseUrlPromise_ = null;
 
     /** @private {?Promise<string>} */
@@ -145,13 +145,13 @@ export class RequestHandler {
         this.allowlist_
       );
 
-      this.baseUrlPromise_ = this.baseUrlTemplatePromise_.then((baseUrl) => {
-        return this.urlReplacementService_.expandUrlAsync(
-          baseUrl,
-          bindings,
-          this.allowlist_
-        );
-      });
+      this.baseUrlPromise_ = this.baseUrlTemplatePromise_.then((baseUrl) =>
+        this.urlReplacementService_
+          .expandUrlAsync(baseUrl, bindings, this.allowlist_)
+          .catch((e) =>
+            userAssert(false, `Could not expand URL "${baseUrl}": ${e.message}`)
+          )
+      );
     }
 
     // expand requestOrigin if it is declared
