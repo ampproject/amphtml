@@ -20,7 +20,7 @@ amp-story-panning-media {
   align-items: center !important;
 }
 
-amp-story-panning-media amp-img {
+.i-amphtml-story-loaded amp-story-panning-media amp-img {
   transition: transform 1s ease-in-out;
 }
 
