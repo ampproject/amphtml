@@ -722,15 +722,24 @@ export class ManualAdvancement extends AdvancementConfig {
     }
 
     if (this.isHandledByPlayerActionLink_(target)) {
+      event.preventDefault();
+      event.stopPropagation();
       const playerLink = closest(target, (element) =>
         matches(element, PLAYER_ACTION_LINK_SELECTOR)
       );
-      // TODO: check when a link also has an href - then override href bc it's a player-action.
-      event.preventDefault();
-      event.stopPropagation();
+      // Falls back on the provided href when the player is not viewed in a context
+      // where the player action can be executed.
+      const acceptableHostDomainsList = playerLink.dataset.expectedHostDomains.split(
+        ' '
+      );
+      const currentDomain = window.location.hostname;
+      if (!acceptableHostDomainsList.includes(currentDomain)) {
+        playerLink.href = playerLink.dataset.fallbackUrl;
+        return;
+      }
       const viewer = Services.viewerForDoc(this.ampdoc_);
       viewer.sendMessage(
-        'addToCartPlayerAction',
+        'triggerPlayerAction',
         dict({'productId': playerLink.getAttribute('player-action')}),
         false
       );

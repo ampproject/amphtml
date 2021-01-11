@@ -738,8 +738,8 @@ export class AmpStory extends AMP.BaseElement {
       this.onNoPreviousPage_();
     });
 
-    this.element.addEventListener(EventType.ADD_TO_CART_PLAYER_ACTION, () => {
-      this.onAddToCartPlayerAction_();
+    this.element.addEventListener(EventType.TRIGGER_PLAYER_ACTION, () => {
+      this.onTriggerPlayerAction_();
     });
 
     this.advancement_.addOnTapNavigationListener((direction) => {
@@ -1392,12 +1392,12 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * Handles EventType.ADD_TO_CART_PLAYER_ACTION events.
+   * Handles EventType.TRIGGER_PLAYER_ACTION events.
    * @private
    */
-  onAddToCartPlayerAction_() {
+  onTriggerPlayerAction_() {
     this.viewerMessagingHandler_.send(
-      'addToCartPlayerAction',
+      'triggerPlayerAction',
       dict({'productId': this.element.getAttribute('player-action')})
     );
   }

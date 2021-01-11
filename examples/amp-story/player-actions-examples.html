@@ -70,7 +70,7 @@
   </body>
   <script type="text/javascript">
     const playerEl = document.querySelector('amp-story-player');
-    playerEl.addEventListener('addToCartPlayerAction', (event) => {
+    playerEl.addEventListener('triggerPlayerAction', (event) => {
       const cart = document.getElementById("shopping-cart-contents");
       const item = document.createTextNode(event.detail.productId);
       const li = document.createElement("LI");

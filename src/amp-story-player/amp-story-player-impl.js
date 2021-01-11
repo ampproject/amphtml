@@ -588,8 +588,8 @@ export class AmpStoryPlayer {
             this.onSelectDocument_(/** @type {!Object} */ (data));
           });
 
-          messaging.registerHandler('addToCartPlayerAction', (event, data) => {
-            this.onAddToCartPlayerAction_(/** @type {!Object} */ (data));
+          messaging.registerHandler('triggerPlayerAction', (event, data) => {
+            this.onTriggerPlayerAction_(/** @type {!Object} */ (data));
           });
 
           messaging.sendRequest(
@@ -1136,7 +1136,7 @@ export class AmpStoryPlayer {
     this.messagingPromises_[detachedStory.iframeIdx].then((messaging) => {
       messaging.unregisterHandler('documentStateUpdate');
       messaging.unregisterHandler('selectDocument');
-      messaging.unregisterHandler('addToCartPlayerAction');
+      messaging.unregisterHandler('triggerPlayerAction');
       messaging.unregisterHandler('touchstart');
       messaging.unregisterHandler('touchmove');
       messaging.unregisterHandler('touchend');
@@ -1507,16 +1507,16 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * React to addToCartPlayerAction events.
+   * React to triggerPlayerAction events.
    * @param {!Object} data
    * @private
    */
-  onAddToCartPlayerAction_(data) {
-    this.playerActionLinkState_ = PlayerActionLinkState.CLICKED;
+  onTriggerPlayerAction_(data) {
+    this.playerActionLinkState_ = PlayerActionLinkState.DEFAULT_STATE;
     this.element_.dispatchEvent(
       createCustomEvent(
         this.win_,
-        'addToCartPlayerAction',
+        'triggerPlayerAction',
         dict({'productId': data.productId})
       )
     );
