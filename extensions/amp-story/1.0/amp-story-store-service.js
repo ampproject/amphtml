@@ -77,8 +77,7 @@ export const EmbeddedComponentState = {
 export let InteractiveComponentDef;
 
 export const PlayerActionLinkState = {
-  NOT_CLICKED: 0, // Link is present in page and has not been clicked, or has been unclicked.
-  CLICKED: 1, // Link has been clicked.
+  DEFAULT_STATE: 0, // Link is present in page.
 };
 
 /**
@@ -125,6 +124,7 @@ export let InteractiveReactData;
  *    pageAudioState: boolean,
  *    pageHasElementsWithPlaybackState: boolean,
  *    pausedState: boolean,
+ *    playerActionLinkState: !PlayerActionLinkDef,
  *    previewState: boolean,
  *    rtlState: boolean,
  *    shareMenuState: boolean,
@@ -230,7 +230,7 @@ export const Action = {
   TOGGLE_PAGE_HAS_AUDIO: 'togglePageHasAudio',
   TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK: 'togglePageHasElementWithPlayblack',
   TOGGLE_PAUSED: 'togglePaused',
-  TOGGLE_PLAYER_ACTION_LINK: 'togglePlayerActionComponent',
+  TOGGLE_PLAYER_ACTION_LINK: 'togglePlayerActionLink',
   TOGGLE_RTL: 'toggleRtl',
   TOGGLE_SHARE_MENU: 'toggleShareMenu',
   TOGGLE_SIDEBAR: 'toggleSidebar',
@@ -410,10 +410,8 @@ const actions = (state, action, data) => {
       });
     // Triggers a Player Action.
     case Action.TOGGLE_PLAYER_ACTION_LINK:
-      data = /** @type {PlayerActionLinkDef} */ (data);
       return /** @type {!State} */ ({
         ...state,
-        [StateProperty.PAUSED_STATE]: !!data,
         [StateProperty.PLAYER_ACTION_LINK_STATE]: data,
       });
     case Action.TOGGLE_RTL:
@@ -633,7 +631,7 @@ export class AmpStoryStoreService {
       [StateProperty.PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE]: false,
       [StateProperty.PAUSED_STATE]: false,
       [StateProperty.PLAYER_ACTION_LINK_STATE]:
-        PlayerActionLinkState.NOT_CLICKED,
+        PlayerActionLinkState.DEFAULT_STATE,
       [StateProperty.RTL_STATE]: false,
       [StateProperty.SHARE_MENU_STATE]: false,
       [StateProperty.SIDEBAR_STATE]: false,
