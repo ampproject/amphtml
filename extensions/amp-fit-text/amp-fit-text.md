@@ -30,13 +30,6 @@ limitations under the License.
 
 Expands or shrinks its font size to fit the content within the space given to it.
 
-[tip type="note"]
-
-The `amp-fit-text` [Bento component](link to general Bento guide) is
-[experimental](https://amp.dev/documentation/guides-and-tutorials/learn/experimental) and under active development. To use the Bento version (1.0) of `amp-fit-text` or all Bento components for a document, enable the `bento-fit-text` or `bento` experiment respectively.
-
-[/tip]
-
 The `amp-fit-text` component allows you to manage the size and fit of text within a specified area. For content contained in an `amp-fit-text` element, the `amp-fit-text` component finds the best font size to fit all of the content within the available space. The expected content for `amp-fit-text` is text or other inline content, but it can also contain non-inline content.
 
 In the following example, the `<amp-fit-text>` element is nested within a 300x300 blue `div` block. For the `<amp-fit-text>` element, we specified a `responsive` layout. As a result, the text scales responsively per the aspect ratio provided by the width and height (200x200) of the `<amp-fit-text>` element, but the text does not exceed the size of its parent.
