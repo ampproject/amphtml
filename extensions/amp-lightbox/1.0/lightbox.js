@@ -66,7 +66,7 @@ function LightboxWithRef(
     children,
     onBeforeOpen,
     onAfterClose,
-    enableAnimation,
+    enableAnimation = true,
     ...rest
   },
   ref

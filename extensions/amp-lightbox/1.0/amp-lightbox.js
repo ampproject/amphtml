@@ -101,7 +101,6 @@ AmpLightbox['props'] = {
   'animateIn': {attr: 'animate-in'},
   'scrollable': {attr: 'scrollable', type: 'boolean'},
   'id': {attr: 'id'},
-  'enableAnimation': {attr: 'enable-animation', type: 'boolean'},
 };
 
 /** @override */

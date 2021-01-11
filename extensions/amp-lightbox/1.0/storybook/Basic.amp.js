@@ -34,7 +34,6 @@ export const Default = () => {
     'fly-in-top',
     'fly-in-bottom',
   ]);
-  const enableAnimation = boolean('enable animation', true);
   const backgroundColor = text('background color', '');
   const color = text('font color', '');
   return (
@@ -46,12 +45,7 @@ export const Default = () => {
         }
       `}</style>
       <div style="height: 300px;">
-        <amp-lightbox
-          id="lightbox"
-          layout="nodisplay"
-          animate-in={animateIn}
-          enable-animation={enableAnimation}
-        >
+        <amp-lightbox id="lightbox" layout="nodisplay" animate-in={animateIn}>
           <p>Test</p>
           <button on="tap:lightbox.close">Close</button>
         </amp-lightbox>
