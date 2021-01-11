@@ -55,14 +55,8 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    // TODO: only get components with same children.
-    document.querySelectorAll('amp-story-panning-media').forEach((sibling) => {
-      sibling.getImpl().then((siblingImpl) => {
-        this.siblings_.push(siblingImpl);
-      });
-    });
+    this.getSiblings();
 
-    // Initialize all services before proceeding
     return Promise.all([
       Services.storyStoreServiceForOrNull(this.win).then((storeService) => {
         storeService.subscribe(StateProperty.CURRENT_PAGE_ID, (currPageId) => {
@@ -87,6 +81,17 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
         const imgEl = dev().assertElement(this.element_.querySelector('img'));
         imgEl.classList = '';
       });
+  }
+
+  /** @private */
+  getSiblings() {
+    document.querySelectorAll('amp-story-panning-media').forEach((sibling) => {
+      if (this.element_.innerHTML === sibling.innerHTML) {
+        sibling.getImpl().then((siblingImpl) => {
+          this.siblings_.push(siblingImpl);
+        });
+      }
+    });
   }
 
   /** @private */
