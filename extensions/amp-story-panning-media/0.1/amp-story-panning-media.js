@@ -57,6 +57,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
   buildCallback() {
     this.getSiblings();
 
+    // Initialize all services before proceeding
     return Promise.all([
       Services.storyStoreServiceForOrNull(this.win).then((storeService) => {
         storeService.subscribe(StateProperty.CURRENT_PAGE_ID, (currPageId) => {
