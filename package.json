@@ -82,7 +82,7 @@
     "doctrine": "3.0.0",
     "envify": "4.1.0",
     "enzyme": "3.11.0",
-    "enzyme-adapter-preact-pure": "2.2.3",
+    "enzyme-adapter-preact-pure": "3.0.0",
     "escodegen": "2.0.0",
     "eslint": "7.17.0",
     "eslint-config-prettier": "7.1.0",
