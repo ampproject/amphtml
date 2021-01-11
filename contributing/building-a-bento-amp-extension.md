@@ -30,6 +30,7 @@ non-AMP pages, you'd do this by building an extension in the Bento paradigm.
 -   [Example of using your extension](#example-of-using-your-extension)
 -   [Updating build configs](#updating-build-configs)
 -   [Versioning](#versioning)
+-   [Using Storybook](#using-storybook)
 -   [Unit tests](#unit-tests)
 -   [Linting and formatting](#linting-and-formatting)
 -   [Type checking](#type-checking)
@@ -547,7 +548,7 @@ This greatly helps users to understand and demonstrate how
 your element works, and provides an easy start-point for them to
 experiment with it. This is basically where you actually build AMP
 HTML and non-AMP HTML documents and use your element in it by creating a file in the local `storybook/` directory, usually with the `Basic.amp.js` file
-name. There should also be a file which uses the component in a Preact environment with the `Basic.js` file name. Browse `storybook/` directories in other extensions directories to see examples for other elements and extensions.
+name. There should also be a file which uses the component in a Preact environment with the `Basic.js` file name. Browse `storybook/` directories in other extensions directories to see examples for other elements and extensions. See how to view these samples on a local server in [Using Storybook](#using-storybook)
 
 Also consider contributing an example to
 [amp.dev](https://amp.dev/) on
@@ -605,6 +606,16 @@ If your extension is still in experiments breaking changes usually are
 fine so you can just update the same version.
 
 Note that Bento upgrades to existing AMP components should go by one major version, meaning it should create a 1.0 directory next to an existing 0.1 or 0.2.
+
+## Using Storybook
+
+To speed up development and testing of components, it is advised to use the Storybook dashboard and develop "stories" (testing scenarios) for components. [Storybook](https://storybook.js.org/) has many features that assist with the isolated development and manual testing of components including easy manual interaction with component parameters, integrated accessibility auditing, and responsiveness testing.
+
+To run these environments and explore existing components, run:
+
+```
+gulp storybook
+```
 
 ## Unit tests
 
