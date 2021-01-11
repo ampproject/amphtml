@@ -73,6 +73,19 @@ function safelySetStyles(element, styles) {
 }
 
 /**
+ * @param {?string|undefined} side
+ * @param {!Document} document
+ * @return {string}
+ */
+function calculateSide(side, document) {
+  if (isEnumValue(Side, side)) {
+    return side;
+  } else {
+    return isRTL(document) ? Side.RIGHT : Side.LEFT;
+  }
+}
+
+/**
  * @param {!SidebarDef.Props} props
  * @param {{current: (!SidebarDef.SidebarApi|null)}} ref
  * @return {PreactDef.Renderable}
@@ -80,7 +93,7 @@ function safelySetStyles(element, styles) {
 function SidebarWithRef(
   {
     as: Comp = 'div',
-    side = 'left',
+    side: sideProp,
     onBeforeOpen,
     onAfterClose,
     backdropStyle,
@@ -96,10 +109,12 @@ function SidebarWithRef(
   // `mounted` mounts the component. `opened` plays the animation.
   const [mounted, setMounted] = useState(false);
   const [opened, setOpened] = useState(false);
+  const [side, setSide] = useState(
+    typeof document === 'object' ? calculateSide(sideProp, document) : sideProp
+  );
   const classes = useStyles();
   const sidebarRef = useRef();
   const backdropRef = useRef();
-  const sideRef = useRef(null);
 
   // We are using refs here to refer to common strings, objects, and functions used.
   // This is because they are needed within `useEffect` calls below (but are not depended for triggering)
@@ -140,14 +155,11 @@ function SidebarWithRef(
     }
 
     const document = sidebarElement.ownerDocument;
-    if (!isEnumValue(Side, side)) {
-      sideRef.current = isRTL(document) ? Side.RIGHT : Side.LEFT;
-    } else {
-      sideRef.current = side;
+    const newSide = calculateSide(side, document);
+    if (newSide !== side) {
+      setSide(newSide);
+      return;
     }
-    sidebarElement.classList.add(
-      sideRef.current === Side.LEFT ? classes.left : classes.right
-    );
 
     let sidebarAnimation;
     let backdropAnimation;
@@ -164,13 +176,13 @@ function SidebarWithRef(
 
       safelySetStyles(
         sidebarElement,
-        sideRef.current === Side.LEFT
+        side === Side.LEFT
           ? ANIMATION_STYLES_SIDEBAR_LEFT_INIT
           : ANIMATION_STYLES_SIDEBAR_RIGHT_INIT
       );
       safelySetStyles(backdropElement, ANIMATION_STYLES_BACKDROP_INIT);
       sidebarAnimation = sidebarElement.animate(
-        sideRef.current === Side.LEFT
+        side === Side.LEFT
           ? ANIMATION_KEYFRAMES_SLIDE_IN_LEFT
           : ANIMATION_KEYFRAMES_SLIDE_IN_RIGHT,
         {
@@ -200,7 +212,7 @@ function SidebarWithRef(
         return;
       }
       sidebarAnimation = sidebarElement.animate(
-        sideRef.current === Side.LEFT
+        side === Side.LEFT
           ? ANIMATION_KEYFRAMES_SLIDE_IN_LEFT
           : ANIMATION_KEYFRAMES_SLIDE_IN_RIGHT,
         {
@@ -226,7 +238,7 @@ function SidebarWithRef(
         backdropAnimation.cancel();
       }
     };
-  }, [opened, onAfterCloseRef, side, classes.left, classes.right]);
+  }, [opened, onAfterCloseRef, side]);
 
   return (
     mounted && (
@@ -238,7 +250,9 @@ function SidebarWithRef(
           layout={true}
           paint={true}
           part="sidebar"
-          wrapperClassName={`${classes.sidebarClass} ${classes.defaultSidebarStyles}`}
+          wrapperClassName={`${classes.sidebarClass} ${
+            classes.defaultSidebarStyles
+          } ${side === Side.LEFT ? classes.left : classes.right}`}
           role="menu"
           tabindex="-1"
           {...rest}
