@@ -43,21 +43,19 @@ function LightboxWithActions(props) {
 }
 
 export const _default = () => {
-  const animateIn = select('animateIn', [
+  const animation = select('animation', [
     'fade-in',
     'fly-in-top',
     'fly-in-bottom',
   ]);
-  const enableAnimation = boolean('enable animation', true);
   const backgroundColor = text('background color', '');
   const color = text('font color', '');
   return (
     <div>
       <LightboxWithActions
         id="lightbox"
-        animateIn={animateIn}
+        animation={animation}
         style={{backgroundColor, color}}
-        enableAnimation={enableAnimation}
       >
         <p>
           Lorem <i>ips</i>um dolor sit amet, has nisl nihil convenire et, vim at
