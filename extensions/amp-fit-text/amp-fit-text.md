@@ -2,15 +2,14 @@
 $category@: presentation
 formats:
   - websites
-  - stories
-  - ads
-  - email
 teaser:
   text: Expands or shrinks font size to fit the content within the space given.
+experimental: true
+bento: true
 ---
 
 <!---
-Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+Copyright 2021 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -30,6 +29,13 @@ limitations under the License.
 ## Usage
 
 Expands or shrinks its font size to fit the content within the space given to it.
+
+[tip type="note"]
+
+The `amp-fit-text` [Bento component](link to general Bento guide) is
+[experimental](https://amp.dev/documentation/guides-and-tutorials/learn/experimental) and under active development. To use the Bento version (1.0) of `amp-fit-text` or all Bento components for a document, enable the `bento-fit-text` or `bento` experiment respectively.
+
+[/tip]
 
 The `amp-fit-text` component allows you to manage the size and fit of text within a specified area. For content contained in an `amp-fit-text` element, the `amp-fit-text` component finds the best font size to fit all of the content within the available space. The expected content for `amp-fit-text` is text or other inline content, but it can also contain non-inline content.
 
@@ -62,6 +68,10 @@ The following example is similar to the one above, but in this example we specif
 ```
 
 [/example]
+
+### Migrating from 0.1
+
+Unlike `0.1`, the experimental `1.0` version of `amp-fit-text` does not account for margin and border size as contributing to the total fit-text coverage area.
 
 ### Overflowing content
 
@@ -108,4 +118,4 @@ You can style the `amp-fit-text` with standard CSS. In particular, you can use `
 
 ## Validation
 
-See [amp-fit-text rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-fit-text/validator-amp-fit-text.protoascii) in the AMP validator specification.
+Please note that version `1.0` of `amp-fit-text` is not currently valid AMP, though this is an imminent milestone in the Bento roadmap. Use version `0.1` for a similar experience on a valid AMP document.
