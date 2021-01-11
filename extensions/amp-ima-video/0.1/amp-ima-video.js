@@ -228,7 +228,7 @@ class AmpImaVideo extends AMP.BaseElement {
     if (!this.iframe_) {
       return;
     }
-    const {width, height} = this.getLayoutBox();
+    const {width, height} = this.getLayoutSize();
     this.sendCommand_('resize', {'width': width, 'height': height});
   }
 

@@ -156,12 +156,6 @@ function createBaseCustomElementClass(win) {
       this.layout_ = Layout.NODISPLAY;
 
       /** @private {number} */
-      this.layoutWidth_ = -1;
-
-      /** @private {number} */
-      this.layoutHeight_ = -1;
-
-      /** @private {number} */
       this.layoutCount_ = 0;
 
       /** @private {boolean} */
@@ -412,15 +406,6 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
-     * TODO(wg-performance, #25824): Make Resource.getLayoutBox() the source of truth.
-     * @return {number}
-     * @deprecated
-     */
-    getLayoutWidth() {
-      return this.layoutWidth_;
-    }
-
-    /**
      * Get the default action alias.
      * @return {?string}
      */
@@ -553,8 +538,6 @@ function createBaseCustomElementClass(win) {
      * @param {boolean} sizeChanged
      */
     updateLayoutBox(layoutBox, sizeChanged = false) {
-      this.layoutWidth_ = layoutBox.width;
-      this.layoutHeight_ = layoutBox.height;
       if (this.isBuilt()) {
         this.onMeasure(sizeChanged);
       }
@@ -1022,6 +1005,15 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * Returns a previously measured layout size.
+     * @return {!./layout-rect.LayoutSizeDef}
+     * @final
+     */
+    getLayoutSize() {
+      return this.getResource_().getLayoutSize();
+    }
+
+    /**
      * @return {?Element}
      * @final
      */
@@ -1080,6 +1072,17 @@ function createBaseCustomElementClass(win) {
     getImpl(waitForBuild = true) {
       const waitFor = waitForBuild ? this.whenBuilt() : this.whenUpgraded();
       return waitFor.then(() => this.implementation_);
+    }
+
+    /**
+     * Returns the object which holds the API surface (the thing we add the
+     * custom methods/properties onto). In Bento, this is the imperative API
+     * object. In AMP, this is the BaseElement instance.
+     *
+     * @return {!Promise<!Object>}
+     */
+    getApi() {
+      return this.getImpl().then((impl) => impl.getApi());
     }
 
     /**

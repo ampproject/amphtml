@@ -21,6 +21,10 @@ import {DetachedDomStream} from '../../../src/utils/detached-dom-stream';
 import {DomTransformStream} from '../../../src/utils/dom-tranform-stream';
 import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
 import {Layout, LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
+import {
+  STICKY_AD_TRANSITION_EXP,
+  divertStickyAdTransition,
+} from '../../../src/experiments/sticky-ad-transition-exp';
 import {Services} from '../../../src/services';
 import {SignatureVerifier, VerificationStatus} from './signature-verifier';
 import {
@@ -51,6 +55,7 @@ import {
   getConsentPolicyState,
 } from '../../../src/consent';
 import {getContextMetadata} from '../../../src/iframe-attributes';
+import {getExperimentBranch} from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {
@@ -286,7 +291,7 @@ export class AmpA4A extends AMP.BaseElement {
      */
     this.creativeSize_ = null;
 
-    /** @private {?../../../src/layout-rect.LayoutRectDef} */
+    /** @private {?../../../src/layout-rect.LayoutSizeDef} */
     this.originalSlotSize_ = null;
 
     /**
@@ -1373,7 +1378,7 @@ export class AmpA4A extends AMP.BaseElement {
     // Store original size of slot in order to allow re-expansion on
     // unlayoutCallback so that it is reverted to original size in case
     // of resumeCallback.
-    this.originalSlotSize_ = this.originalSlotSize_ || this.getLayoutBox();
+    this.originalSlotSize_ = this.originalSlotSize_ || this.getLayoutSize();
     return super.attemptChangeSize(newHeight, newWidth);
   }
 
@@ -1583,7 +1588,7 @@ export class AmpA4A extends AMP.BaseElement {
     devAssert(this.uiHandler);
     // Store original size to allow for reverting on unlayoutCallback so that
     // subsequent pageview allows for ad request.
-    this.originalSlotSize_ = this.originalSlotSize_ || this.getLayoutBox();
+    this.originalSlotSize_ = this.originalSlotSize_ || this.getLayoutSize();
     this.uiHandler.applyNoContentUI();
     this.isCollapsed_ = true;
   }
@@ -1759,7 +1764,6 @@ export class AmpA4A extends AMP.BaseElement {
       height,
       width
     );
-    this.applyFillContent(this.iframe);
 
     let body = '';
     const transferComplete = new Deferred();
@@ -1800,7 +1804,8 @@ export class AmpA4A extends AMP.BaseElement {
     Promise.all([fieInstallPromise, transferComplete.promise]).then(
       (values) => {
         const friendlyIframeEmbed = values[0];
-        friendlyIframeEmbed.renderCompleted();
+        // #installFriendlyIframeEmbed will return null if removed before install is complete.
+        friendlyIframeEmbed && friendlyIframeEmbed.renderCompleted();
       }
     );
 
@@ -1848,7 +1853,13 @@ export class AmpA4A extends AMP.BaseElement {
         'title': this.getIframeTitle(),
       })
     ));
-    this.applyFillContent(this.iframe);
+    divertStickyAdTransition(this.win);
+    if (
+      getExperimentBranch(this.win, STICKY_AD_TRANSITION_EXP.id) !==
+      STICKY_AD_TRANSITION_EXP.experiment
+    ) {
+      this.applyFillContent(this.iframe);
+    }
     const fontsArray = [];
     if (creativeMetaData.customStylesheets) {
       creativeMetaData.customStylesheets.forEach((s) => {

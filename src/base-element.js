@@ -206,6 +206,14 @@ export class BaseElement {
   }
 
   /**
+   * Returns a previously measured layout size.
+   * @return {!./layout-rect.LayoutSizeDef}
+   */
+  getLayoutSize() {
+    return this.element.getLayoutSize();
+  }
+
+  /**
    * DO NOT CALL. Retained for backward compat during rollout.
    * @public
    * @return {!Window}
@@ -945,5 +953,16 @@ export class BaseElement {
    */
   user() {
     return user(this.element);
+  }
+
+  /**
+   * Returns this BaseElement instance. This is equivalent to Bento's
+   * imperative API object, since this is where we define the element's custom
+   * APIs.
+   *
+   * @return {!Promise<!Object>}
+   */
+  getApi() {
+    return this;
   }
 }

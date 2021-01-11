@@ -87,7 +87,9 @@ function extractCssJsFileMap() {
  */
 function getImports(jsFile) {
   const jsFileContents = fs.readFileSync(jsFile, 'utf8');
-  const {imports} = listImportsExports.parse(jsFileContents);
+  const {imports} = listImportsExports.parse(jsFileContents, [
+    'importAssertions',
+  ]);
   const files = [];
   const jsFileDir = path.dirname(jsFile);
   imports.forEach(function (file) {
