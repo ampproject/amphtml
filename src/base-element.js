@@ -954,4 +954,15 @@ export class BaseElement {
   user() {
     return user(this.element);
   }
+
+  /**
+   * Returns this BaseElement instance. This is equivalent to Bento's
+   * imperative API object, since this is where we define the element's custom
+   * APIs.
+   *
+   * @return {!Promise<!Object>}
+   */
+  getApi() {
+    return this;
+  }
 }
