@@ -98,7 +98,7 @@ AmpLightbox['Component'] = Lightbox;
 
 /** @override */
 AmpLightbox['props'] = {
-  'animateIn': {attr: 'animate-in'},
+  'animation': {attr: 'animation'},
   'scrollable': {attr: 'scrollable', type: 'boolean'},
   'id': {attr: 'id'},
 };

@@ -61,7 +61,7 @@ function useValueRef(current) {
  * @return {PreactDef.Renderable}
  */
 function LightboxWithRef(
-  {animateIn = 'fade-in', children, onBeforeOpen, onAfterClose, ...rest},
+  {animation = 'fade-in', children, onBeforeOpen, onAfterClose, ...rest},
   ref
 ) {
   // There are two phases to open and close.
@@ -76,7 +76,7 @@ function LightboxWithRef(
   // We are using refs here to refer to common strings, objects, and functions used.
   // This is because they are needed within `useEffect` calls below (but are not depended for triggering)
   // We use `useValueRef` for props that might change (user-controlled)
-  const animateInRef = useValueRef(animateIn);
+  const animationRef = useValueRef(animation);
   const onBeforeOpenRef = useValueRef(onBeforeOpen);
   const onAfterCloseRef = useValueRef(onAfterClose);
 
@@ -117,7 +117,7 @@ function LightboxWithRef(
         postVisibleAnim();
         return;
       }
-      animation = element.animate(ANIMATION_PRESETS[animateInRef.current], {
+      animation = element.animate(ANIMATION_PRESETS[animationRef.current], {
         duration: ANIMATION_DURATION,
         fill: 'both',
         easing: 'ease-in',
@@ -138,7 +138,7 @@ function LightboxWithRef(
         postInvisibleAnim();
         return;
       }
-      animation = element.animate(ANIMATION_PRESETS[animateInRef.current], {
+      animation = element.animate(ANIMATION_PRESETS[animationRef.current], {
         duration: ANIMATION_DURATION,
         direction: 'reverse',
         fill: 'both',
@@ -151,7 +151,7 @@ function LightboxWithRef(
         animation.cancel();
       }
     };
-  }, [visible, animateInRef, onAfterCloseRef]);
+  }, [visible, animationRef, onAfterCloseRef]);
 
   return (
     mounted && (
