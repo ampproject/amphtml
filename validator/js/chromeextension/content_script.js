@@ -71,7 +71,7 @@ function getAmpHtmlLinkHref() {
           link.hasAttribute('rel') &&
           globals.amphtmlRegex.test(link.getAttribute('rel')) &&
           link.hasAttribute('href') &&
-          validUrlPrefixRe.test(link.GetAttribute('href'))) {
+          validUrlPrefixRe.test(link.getAttribute('href'))) {
         ampHtmlLinkHref = link.getAttribute('href');
         break;
       }
