@@ -63,7 +63,6 @@ function useValueRef(current) {
 function LightboxWithRef(
   {
     animateIn = 'fade-in',
-    closeButtonAriaLabel = DEFAULT_CLOSE_LABEL,
     children,
     onBeforeOpen,
     onAfterClose,
@@ -184,7 +183,7 @@ function LightboxWithRef(
       >
         {children}
         <button
-          ariaLabel={closeButtonAriaLabel}
+          ariaLabel={DEFAULT_CLOSE_LABEL}
           tabIndex={-1}
           className={classes.closeButton}
           onClick={() => {

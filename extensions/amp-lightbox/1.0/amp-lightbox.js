@@ -101,7 +101,6 @@ AmpLightbox['props'] = {
   'animateIn': {attr: 'animate-in'},
   'scrollable': {attr: 'scrollable', type: 'boolean'},
   'id': {attr: 'id'},
-  'closeButtonAriaLabel': {attr: 'data-close-button-aria-label'},
   'enableAnimation': {attr: 'enable-animation', type: 'boolean'},
 };
 
