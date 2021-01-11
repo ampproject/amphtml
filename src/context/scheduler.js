@@ -51,7 +51,7 @@ export function throttleTail(handler, defaultScheduler = null) {
  * @param {function():*} callback
  * @return {*}
  */
-export function protectedNoInline(callback) {
+export function tryCallback(callback) {
   try {
     return callback();
   } catch (e) {

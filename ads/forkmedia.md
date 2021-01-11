@@ -20,11 +20,12 @@ limitations under the License.
 
 ```html
 <amp-ad
-  width="50"
-  height="66"
-  type="forkmedia"
-  data-product="inread"
-  data-html-access-allowed
+    width="300"
+    height="50"
+    type="forkmedia"
+    data-product="contextads"
+    data-format="impulse"
+    data-html-access-allowed
 >
 </amp-ad>
 ```
@@ -35,5 +36,5 @@ For details on the configuration semantics, please contact Fork Media.
 
 ### Required parameters
 
-- `data-product`
-- `data-html-access-allowed`
+-   `data-product`
+-   `data-html-access-allowed`

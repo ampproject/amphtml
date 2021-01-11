@@ -47,7 +47,7 @@ As of 2018-07-16, version 0.1 is considered deprecated, and will be deleted on 2
 
 ## AMP story format
 
-An [AMP story](#story:-amp-story) is a complete AMP HTML document that is comprised of [pages](#pages:-amp-story-page), within the pages are [layers](#layers:-amp-story-grid-layer), within the layers are AMP & HTML elements, like media, analytics, text, and so on.
+An [AMP story](#story:-amp-story) is a complete AMP HTML document that is comprised of [pages](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/amp-story-page.md), within the pages are [layers](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/amp-story-grid-layer.md), within the layers are AMP & HTML elements, like media, analytics, text, and so on.
 
 <amp-img alt="AMP story tag hierarchy" layout="responsive" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-tag-hierarchy.png" width="591" height="358">
   <noscript>
@@ -230,9 +230,9 @@ These metadata attributes supplement and do not replace any Structured Data (e.g
 
 These guidelines apply to the publisher logo image:
 
-- Provide a raster file, such as `.jpg`, `.png`, or `.gif`. Avoid vector files, such as `.svg` or `.eps`.
-- Avoid animated images, such as animated gifs.
-- Image logo should be legible on the background color.
+-   Provide a raster file, such as `.jpg`, `.png`, or `.gif`. Avoid vector files, such as `.svg` or `.eps`.
+-   Avoid animated images, such as animated gifs.
+-   Image logo should be legible on the background color.
 
 <table>
   <tr>
@@ -272,23 +272,23 @@ These guidelines apply to the publisher logo image:
   </tr>
 </table>
 
-- Logos should be at least 96x96 pixels and a perfect square.
-- The background should not be transparent.
-- Use one logo per brand that is consistent across AMP stories.
+-   Logos should be at least 96x96 pixels and a perfect square.
+-   The background should not be transparent.
+-   Use one logo per brand that is consistent across AMP stories.
 
 #### Poster guidelines (for `poster-portrait-src`, `poster-landscape-src`, and `poster-square-src`)
 
 These guidelines apply to the story poster image(s):
 
-- The poster image should be representative of the entire AMP story.
-- The poster image should be visible to the user when the AMP story begins. To accommodate sizing, cropping or minor styling changes or preview purposes, the image file URL used in the metadata does not need to be an exact match to the URL on the first page of the story.
-- Provide a raster file, such as `.jpg`, `.png`, or `.gif`. Avoid vector files, such as `.svg` or `.eps`.
-- The poster image should be in 3x4 aspect ratio for portrait, 4x3 for landscape, and 1x1 for square.
-- If the poster image is derived from a frame in a video, the thumbnail should be representative of the video. For example, the first frame in a video is often not representative.
-- Each poster image should meet the recommended minimium size:
-  - Portrait: 640px x 853px
-  - Landscape: 853px x 640px
-  - Square: 640px x 640px
+-   The poster image should be representative of the entire AMP story.
+-   The poster image should be visible to the user when the AMP story begins. To accommodate sizing, cropping or minor styling changes or preview purposes, the image file URL used in the metadata does not need to be an exact match to the URL on the first page of the story.
+-   Provide a raster file, such as `.jpg`, `.png`, or `.gif`. Avoid vector files, such as `.svg` or `.eps`.
+-   The poster image should be in 3x4 aspect ratio for portrait, 4x3 for landscape, and 1x1 for square.
+-   If the poster image is derived from a frame in a video, the thumbnail should be representative of the video. For example, the first frame in a video is often not representative.
+-   Each poster image should meet the recommended minimium size:
+    -   Portrait: 640px x 853px
+    -   Landscape: 853px x 640px
+    -   Square: 640px x 640px
 
 ### Story generator meta tags
 
@@ -303,8 +303,8 @@ Optional HTML meta tags can be used to indicate which Story generator the docume
 
 If the `supports-landscape` attribute is specified on the `<amp-story>` element, it will:
 
-- Allow the story to be seen when a mobile device is held in a landscape orientation.
-- Change the desktop experience to an immersive full bleed mode, replacing the default three portrait panels experience.
+-   Allow the story to be seen when a mobile device is held in a landscape orientation.
+-   Change the desktop experience to an immersive full bleed mode, replacing the default three portrait panels experience.
 
 Usage: `<amp-story ... supports-landscape>...</amp-story>`
 
@@ -345,7 +345,7 @@ In most implementations for live blogs, content is either pushed by the server t
 
 This means that publishers of stories do not need to set up a JSON endpoint or push mechanism for this functionality to work.
 
-Content is updated by publishing to the same URL with valid `<amp-story>` markup. The content is pulled into the user's client instance during the next poll. Poll intervals are configurable using the [`data-poll-interval`](#data-poll-interval) attribute.
+Content is updated by publishing to the same URL with valid `<amp-story>` markup. The content is pulled into the user's client instance during the next poll. Poll intervals are configurable using the [`data-poll-interval`](<#data-poll-interval-(optional)>) attribute.
 
 #### Stop polling
 
@@ -353,12 +353,12 @@ As long as the `live-story` attribute is present on the `<amp-story>` element, t
 
 #### Usage
 
-- Specify an `id` on the `<amp-story>` element.
-- Add the `live-story` attribute to the `<amp-story>` element.
-- [Optional] Add the [`data-poll-interval`](#data-poll-interval) attribute to the `<amp-story>` element to specify a time interval for checking for new updates.
-- [Optional] When finishing the live broadcast, add the [`live-story-disabled`](#live-story-disabled) attribute to the `<amp-story>` element to disable the polling.
-- On each `<amp-story-page>`:
-  - Specify a `data-sort-time` attribute with a valid value. This is a timestamp used for sorting the pages. Higher timestamps will be inserted after older page entries. We recommend using [Unix time](https://www.unixtimestamp.com/).
+-   Specify an `id` on the `<amp-story>` element.
+-   Add the `live-story` attribute to the `<amp-story>` element.
+-   [Optional] Add the [`data-poll-interval`](<#data-poll-interval-(optional)>) attribute to the `<amp-story>` element to specify a time interval for checking for new updates.
+-   [Optional] When finishing the live broadcast, add the [`live-story-disabled`](<#live-story-disabled-(optional)>) attribute to the `<amp-story>` element to disable the polling.
+-   On each `<amp-story-page>`:
+    -   Specify a `data-sort-time` attribute with a valid value. This is a timestamp used for sorting the pages. Higher timestamps will be inserted after older page entries. We recommend using [Unix time](https://www.unixtimestamp.com/).
 
 ```html
 <amp-story id="story1" live-story ...>
@@ -370,7 +370,7 @@ As long as the `live-story` attribute is present on the `<amp-story>` element, t
 
 ### Children (of amp-story)
 
-The `<amp-story>` component contains one or more [`<amp-story-page>`](#pages:-amp-story-page) components, containing each of the individual screens of the story. The first page specified in the document order is the first page shown in the story.
+The `<amp-story>` component contains one or more [`<amp-story-page>`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/amp-story-page.md) components, containing each of the individual screens of the story. The first page specified in the document order is the first page shown in the story.
 
 #### Optional customization
 
@@ -464,8 +464,8 @@ We support inline links `<a>` as a descendant of `amp-story-grid-layer`. Wheneve
 
 Please note the following guidelines for including links in your amp-story:
 
-- Parts of links that are too far to the left or right edge of a story page will yield to navigation.
-- Links that occupy too much of the page area will be ignored for navigation.
+-   Parts of links that are too far to the left or right edge of a story page will yield to navigation.
+-   Links that occupy too much of the page area will be ignored for navigation.
 
 #### Customizing tooltip for links or interactive components
 
@@ -522,9 +522,9 @@ The following example demonstrates a table of contents inside of an `amp-sidebar
 
 The following are other components usable in AMP stories that require some story-specific caveats.
 
-- [amp-consent](https://amp.dev/documentation/components/amp-consent#prompt-ui-for-stories)
-- [amp-sidebar](https://amp.dev/documentation/components/amp-sidebar#sidebar-for-stories)
-- [amp-twitter](https://amp.dev/documentation/components/amp-twitter)
+-   [amp-consent](https://amp.dev/documentation/components/amp-consent#prompt-ui-for-stories)
+-   [amp-sidebar](https://amp.dev/documentation/components/amp-sidebar#sidebar-for-stories)
+-   [amp-twitter](https://amp.dev/documentation/components/amp-twitter)
 
 For more generally usable components see the [list of allowed children](https://amp.dev/documentation/components/amp-story#children).
 
@@ -843,36 +843,36 @@ where `page-id` refers to the unique id of an `amp-story-page`. You can also use
 
 To localize your story, include the language code in the `lang` attribute on the `<html>` tag of your story, such as `<html ⚡ lang="en">` for English. The supported language codes are:
 
-- ar (Arabic)
-- de (German)
-- en-GB (English, UK)
-- en (English, US)
-- es-419 (Spanish, Central/Latin America)
-- es (Spanish, Spain)
-- fr-CA (French, Canada)
-- fr (French, France)
-- hi (Hindi)
-- id (Indonesian)
-- it (Italian)
-- ja (Japanese)
-- ko (Korean)
-- nl (Dutch)
-- no (Norwegian)
-- pt-BR (Portuguese, Brazil)
-- pt (Portuguese, Portugal)
-- ru (Russian)
-- tr (Turkish)
-- vi (Vietnamese)
-- zh-TW (Traditional Chinese)
-- zh (Simplified Chinese)
+-   ar (Arabic)
+-   de (German)
+-   en-GB (English, UK)
+-   en (English, US)
+-   es-419 (Spanish, Central/Latin America)
+-   es (Spanish, Spain)
+-   fr-CA (French, Canada)
+-   fr (French, France)
+-   hi (Hindi)
+-   id (Indonesian)
+-   it (Italian)
+-   ja (Japanese)
+-   ko (Korean)
+-   nl (Dutch)
+-   no (Norwegian)
+-   pt-BR (Portuguese, Brazil)
+-   pt (Portuguese, Portugal)
+-   ru (Russian)
+-   tr (Turkish)
+-   vi (Vietnamese)
+-   zh-TW (Traditional Chinese)
+-   zh (Simplified Chinese)
 
 Additionally, for right-to-left languages, you may include the `dir="rtl"` attribute on the `<html>` tag of your story. This may be used in conjunction with the language code as well, e.g. `<html ⚡ lang="ar" dir="rtl">`.
 
 ## Related resources
 
-- [Tutorial: Create a visual AMP story](https://www.ampproject.org/docs/tutorials/visual_story)
-- [Samples on AMP By Example](https://amp.dev/documentation/examples/?format=stories)
-- [Best practices for creating an AMP story](https://amp.dev/documentation/guides-and-tutorials/develop/amp_story_best_practices)
+-   [Tutorial: Create a visual AMP story](https://www.ampproject.org/docs/tutorials/visual_story)
+-   [Samples on AMP By Example](https://amp.dev/documentation/examples/?format=stories)
+-   [Best practices for creating an AMP story](https://amp.dev/documentation/guides-and-tutorials/develop/amp_story_best_practices)
 
 ## Validation
 

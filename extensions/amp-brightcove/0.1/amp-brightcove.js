@@ -17,7 +17,7 @@
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
-import {addParamsToUrl} from '../../../src/url';
+import {addParamToUrl, addParamsToUrl} from '../../../src/url';
 import {
   createFrameFor,
   isJsonOrObj,
@@ -35,6 +35,11 @@ import {
   isFullscreenElement,
   removeElement,
 } from '../../../src/dom';
+import {
+  getConsentPolicyInfo,
+  getConsentPolicySharedData,
+  getConsentPolicyState,
+} from '../../../src/consent';
 import {getData, listen} from '../../../src/event-helper';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -86,6 +91,15 @@ class AmpBrightcove extends AMP.BaseElement {
 
     /** @private {?../../../src/service/url-replacements-impl.UrlReplacements} */
     this.urlReplacements_ = null;
+
+    /**@private {?number} */
+    this.consentState_ = null;
+
+    /**@private {?object} */
+    this.consentSharedData_ = null;
+
+    /**@private {?string} */
+    this.consentString_ = null;
   }
 
   /** @override */
@@ -123,17 +137,45 @@ class AmpBrightcove extends AMP.BaseElement {
     ));
   }
 
-  /** @override */
+  /**
+   * @return {Promise[]}
+   */
+  getConsents_() {
+    const consentPolicy = super.getConsentPolicy();
+    const consentPromise = consentPolicy
+      ? getConsentPolicyState(this.element, consentPolicy)
+      : Promise.resolve(null);
+    const consentStringPromise = consentPolicy
+      ? getConsentPolicyInfo(this.element, consentPolicy)
+      : Promise.resolve(null);
+    const sharedDataPromise = consentPolicy
+      ? getConsentPolicySharedData(this.element, consentPolicy)
+      : Promise.resolve(null);
+    return Promise.all([
+      consentPromise,
+      sharedDataPromise,
+      consentStringPromise,
+    ]).then((arr) => {
+      this.consentState_ = arr[0];
+      this.consentSharedData_ = arr[1];
+      this.consentString_ = arr[2];
+    });
+  }
+
+  /**
+   * @override
+   * @return {!Promise}
+   */
   layoutCallback() {
-    const iframe = createFrameFor(this, this.getIframeSrc_());
-
-    this.iframe_ = iframe;
-
-    this.unlistenMessage_ = listen(this.win, 'message', (e) =>
-      this.handlePlayerMessage_(e)
-    );
-
-    return this.loadPromise(iframe).then(() => this.playerReadyPromise_);
+    return this.getConsents_().then(() => {
+      this.iframe_ = createFrameFor(this, this.getIframeSrc_());
+      this.unlistenMessage_ = listen(this.win, 'message', (e) =>
+        this.handlePlayerMessage_(e)
+      );
+      return this.loadPromise(this.iframe_).then(
+        () => this.playerReadyPromise_
+      );
+    });
   }
 
   /**
@@ -259,16 +301,18 @@ class AmpBrightcove extends AMP.BaseElement {
   }
 
   /**
-   * @return {string}
+   * @return {string} iframe source url
    * @private
    */
   getIframeSrc_() {
     const {element: el} = this;
+
     const account = userAssert(
       el.getAttribute('data-account'),
       'The data-account attribute is required for <amp-brightcove> %s',
       el
     );
+
     const embed = el.getAttribute('data-embed') || 'default';
 
     this.playerId_ =
@@ -276,7 +320,7 @@ class AmpBrightcove extends AMP.BaseElement {
       el.getAttribute('data-player-id') ||
       'default';
 
-    const src =
+    let src =
       `https://players.brightcove.net/${encodeURIComponent(account)}` +
       `/${encodeURIComponent(this.playerId_)}` +
       `_${encodeURIComponent(embed)}/index.html` +
@@ -290,10 +334,25 @@ class AmpBrightcove extends AMP.BaseElement {
     const customReferrer = el.getAttribute('data-referrer');
 
     if (customReferrer) {
-      el.setAttribute(
-        'data-param-referrer',
+      src = addParamToUrl(
+        src,
+        'referrer',
         this.urlReplacements_.expandUrlSync(customReferrer)
       );
+    }
+
+    if (this.consentState_) {
+      src = addParamToUrl(src, 'ampInitialConsentState', this.consentState_);
+    }
+    if (this.consentSharedData_) {
+      src = addParamToUrl(
+        src,
+        'ampConsentSharedData',
+        JSON.stringify(this.consentSharedData_)
+      );
+    }
+    if (this.consentString_) {
+      src = addParamToUrl(src, 'ampInitialConsentValue', this.consentString_);
     }
 
     el.setAttribute('data-param-playsinline', 'true');

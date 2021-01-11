@@ -41,10 +41,10 @@ For semantics of configuration, please see [PubExchange's documentation](https:/
 
 ### Required parameters
 
-- `data-publication`: Shortcode identifying publication provided by PubExchange account manager
-- `data-module-id`: Shortcode identifying module provided by PubExchange account manager
-- `data-module-num`: ID identifying module provided by PubExchange account manager
+-   `data-publication`: Shortcode identifying publication provided by PubExchange account manager
+-   `data-module-id`: Shortcode identifying module provided by PubExchange account manager
+-   `data-module-num`: ID identifying module provided by PubExchange account manager
 
 ### Optional parameters
 
-- `data-test`: Pass the parameter with the "true" value to test the PubExchange module
+-   `data-test`: Pass the parameter with the "true" value to test the PubExchange module
