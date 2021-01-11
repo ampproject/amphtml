@@ -23,6 +23,7 @@ import {dev, devAssert} from '../log';
 import {
   layoutRectLtwh,
   layoutRectSizeEquals,
+  layoutSizeFromRect,
   moveLayoutRect,
   rectsOverlap,
 } from '../layout-rect';
@@ -653,6 +654,14 @@ export class Resource {
   }
 
   /**
+   * Returns a previously measured layout size.
+   * @return {!../layout-rect.LayoutSizeDef}
+   */
+  getLayoutSize() {
+    return layoutSizeFromRect(this.layoutBox_);
+  }
+
+  /**
    * Returns a previously measured layout box adjusted to the viewport. This
    * mainly affects fixed-position elements that are adjusted to be always
    * relative to the document position in the viewport.
@@ -672,15 +681,6 @@ export class Resource {
       viewport.getScrollLeft(),
       viewport.getScrollTop()
     );
-  }
-
-  /**
-   * Returns a previously measured layout box relative to the page. The
-   * fixed-position elements are relative to the top of the document.
-   * @return {!../layout-rect.LayoutRectDef}
-   */
-  getPageLayoutBox() {
-    return this.layoutBox_;
   }
 
   /**

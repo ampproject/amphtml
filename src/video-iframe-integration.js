@@ -31,14 +31,6 @@ const __AMP__ = '__AMP__VIDEO_IFRAME__';
 
 /**
  * @typedef {{
- *   sourceUrl: string,
- *   canonicalUrl: string,
- * }}
- */
-let DocMetadataDef;
-
-/**
- * @typedef {{
  *   on: function(string, function()),
  *   play: function(),
  *   pause: function(),
@@ -120,16 +112,13 @@ export class AmpVideoIntegration {
     this.usedListenToHelper_ = false;
 
     /**
-     * @return {!DocMetadataDef}
+     * @return {!JsonObject}
      * @private
      */
-    this.getMetadataOnce_ = once(() => {
-      const {canonicalUrl, sourceUrl} = tryParseJson(this.win_.name);
-      return {canonicalUrl, sourceUrl};
-    });
+    this.getMetadataOnce_ = once(() => tryParseJson(this.win_.name));
   }
 
-  /** @return {!DocMetadataDef} */
+  /** @return {!JsonObject} */
   getMetadata() {
     return this.getMetadataOnce_();
   }
