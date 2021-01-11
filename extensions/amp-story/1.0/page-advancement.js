@@ -727,7 +727,7 @@ export class ManualAdvancement extends AdvancementConfig {
       const playerLink = closest(target, (element) =>
         matches(element, PLAYER_ACTION_LINK_SELECTOR)
       );
-      // Falls back on the provided href when the player is not viewed in a context
+      // Falls back on the provided url when the player is not viewed in a context
       // where the player action can be executed.
       const acceptableHostDomainsList = playerLink.dataset.expectedHostDomains.split(
         ' '
