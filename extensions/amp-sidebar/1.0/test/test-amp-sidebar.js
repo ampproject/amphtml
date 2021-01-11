@@ -139,13 +139,13 @@ describes.realWin(
         expect(container.children.length).to.equal(0);
       });
 
-      it('should close when the mask is clicked', async () => {
+      it('should close when the backdrop is clicked', async () => {
         element.enqueAction(invocation('open'));
         await waitForOpen(element, true);
 
         expect(container.children.length).to.equal(2);
-        const mask = container.children[1];
-        mask.click();
+        const backdrop = container.children[1];
+        backdrop.click();
 
         await waitForOpen(element, false);
 
@@ -181,6 +181,121 @@ describes.realWin(
           'Lorem ipsum dolor sit amet'
         );
         expect(sidebarChildren.lastElementChild.children.length).to.equal(3);
+      });
+
+      it('should render with default colors', async () => {
+        // open the sidebar
+        openButton.click();
+        await waitForOpen(element, true);
+        expect(element).to.have.attribute('open');
+
+        const {
+          firstElementChild: sidebarElement,
+          lastElementChild: backdropElement,
+        } = container;
+
+        expect(win.getComputedStyle(sidebarElement).color).to.equal(
+          'rgb(0, 0, 0)'
+        );
+        expect(win.getComputedStyle(sidebarElement).backgroundColor).to.equal(
+          'rgb(239, 239, 239)'
+        );
+        expect(win.getComputedStyle(backdropElement).backgroundColor).to.equal(
+          'rgba(0, 0, 0, 0.5)'
+        );
+      });
+
+      it('should reflect user supplied CSS for various properties', async () => {
+        const style = html`
+          <style>
+            amp-sidebar {
+              color: rgb(1, 1, 1);
+              background-color: rgb(2, 2, 2);
+              height: 300px;
+              width: 301px;
+              padding: 15px;
+              border: solid 1px black;
+              top: 10px;
+              max-height: 500px !important;
+              max-width: 600px !important;
+              min-width: 200px !important;
+              outline: solid 1px red;
+              z-index: 15;
+            }
+            amp-sidebar::part(backdrop) {
+              background-color: rgb(3, 3, 3);
+            }
+          </style>
+        `;
+        fullHtml.appendChild(style);
+
+        // open the sidebar
+        openButton.click();
+        await waitForOpen(element, true);
+        expect(element).to.have.attribute('open');
+
+        const {
+          firstElementChild: sidebarElement,
+          lastElementChild: backdropElement,
+        } = container;
+
+        expect(win.getComputedStyle(sidebarElement).color).to.equal(
+          'rgb(1, 1, 1)'
+        );
+        expect(win.getComputedStyle(sidebarElement).backgroundColor).to.equal(
+          'rgb(2, 2, 2)'
+        );
+        expect(win.getComputedStyle(sidebarElement).height).to.equal('300px');
+        expect(win.getComputedStyle(sidebarElement).width).to.equal('301px');
+        expect(win.getComputedStyle(sidebarElement).padding).to.equal('15px');
+        expect(win.getComputedStyle(sidebarElement).border).to.equal(
+          '1px solid rgb(0, 0, 0)'
+        );
+        expect(win.getComputedStyle(sidebarElement).top).to.equal('10px');
+        expect(win.getComputedStyle(sidebarElement).maxHeight).to.equal(
+          '500px'
+        );
+        expect(win.getComputedStyle(sidebarElement).maxWidth).to.equal('600px');
+        expect(win.getComputedStyle(sidebarElement).minWidth).to.equal('200px');
+        expect(win.getComputedStyle(sidebarElement).outline).to.equal(
+          'rgb(255, 0, 0) solid 1px'
+        );
+        expect(win.getComputedStyle(sidebarElement).zIndex).to.equal('15');
+
+        expect(win.getComputedStyle(backdropElement).backgroundColor).to.equal(
+          'rgb(3, 3, 3)'
+        );
+      });
+
+      it('should not update some CSS properties w/o !important', async () => {
+        const style = html`
+          <style>
+            amp-sidebar {
+              max-height: 500px;
+              max-width: 600px;
+              min-width: 200px;
+            }
+          </style>
+        `;
+        fullHtml.appendChild(style);
+
+        // open the sidebar
+        openButton.click();
+        await waitForOpen(element, true);
+        expect(element).to.have.attribute('open');
+
+        const {firstElementChild: sidebarElement} = container;
+
+        // maxHeight defaults to 100vh, so should be the same height as viewport
+        expect(win.getComputedStyle(sidebarElement).maxHeight).to.equal(
+          `${win.innerHeight}px`
+        );
+
+        // maxWidth is not set as !important so is overridable
+        expect(win.getComputedStyle(sidebarElement).maxWidth).to.equal(`600px`);
+
+        // 45px is default, user supplied 200px does not overwrite w/o !important
+        expect(win.getComputedStyle(sidebarElement).minWidth).to.equal('45px');
       });
 
       describe('programatic access to imperative API', () => {
@@ -346,7 +461,7 @@ describes.realWin(
         openButton.click();
         await waitForOpen(element, true);
 
-        // once for mask, once for sidebar
+        // once for backdrop, once for sidebar
         expect(animateStub).to.be.calledTwice;
         animation.onfinish();
 
@@ -375,7 +490,7 @@ describes.realWin(
         closeButton.click();
         await waitFor(() => animateStub.callCount > 0, 'animation started');
 
-        // once for mask, once for sidebar
+        // once for backdrop, once for sidebar
         expect(animateStub).to.be.calledTwice;
 
         // still displayed while animating
