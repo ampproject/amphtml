@@ -45,7 +45,7 @@ non-AMP pages, you'd do this by building an extension in the Bento paradigm.
 
 This document describes how to create a new Bento AMP extension, which is one of the most common ways of adding a new feature to AMP.
 
-Before diving into the details on creating a new Bento AMP extension, please familiarize yourself with the [general process for contributing code and features to AMP](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md). Since you are adding a new extension you will likely need to follow the [process for making a significant change](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#process-for-significant-changes), including filing an ["Intent to Implement" issue](https://go.amp.dev/i2i) and finding a guide before you start significant development.
+Before diving into the details on creating a new Bento AMP extension, please familiarize yourself with the [general process for contributing code and features to AMP](https://go.amp.dev/contribute/code). Since you are adding a new extension you will likely need to follow the [process for making a significant change](https://go.amp.dev/contribute/code#process-for-significant-changes), including filing an ["Intent to Implement" issue](https://go.amp.dev/i2i) and finding a guide before you start significant development.
 
 ## Naming
 
