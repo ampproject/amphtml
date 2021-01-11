@@ -57,11 +57,6 @@ export class VideoBaseElement extends PreactBaseElement {
       minTrust
     );
   }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    return super.isLayoutSupported(layout);
-  }
 }
 
 /** @override */
