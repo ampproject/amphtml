@@ -202,6 +202,9 @@ class RuntimeTestConfig {
       adTypes: getAdTypes(),
       mochaTimeout: this.client.mocha.timeout,
       testServerPort: this.client.testServerPort,
+      // This is used in _init_tests for matchers such as `skipModuleBuild` and
+      // `ifModuleBuild`.
+      isModuleBuild: !!argv.esm,
     };
 
     if (argv.coverage && this.testType != 'a4a') {

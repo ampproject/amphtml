@@ -245,10 +245,10 @@ export class Amp3dGltf extends AMP.BaseElement {
    *
    */
   onLayoutMeasure() {
-    const box = this.getLayoutBox();
+    const {width, height} = this.getLayoutSize();
     this.sendCommandWhenReady_(
       'setSize',
-      dict({'width': box.width, 'height': box.height})
+      dict({'width': width, 'height': height})
     );
   }
 

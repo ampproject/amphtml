@@ -210,6 +210,11 @@ const adConfig = jsonConfiguration({
     preconnect: ['https://mads.at.atwola.com', 'https://aka-cdn.adtechus.com'],
   },
 
+  'adtelligent': {
+    preconnect: ['https://s.adtelligent.com'],
+    renderStartImplemented: true,
+  },
+
   'adthrive': {
     prefetch: ['https://www.googletagservices.com/tag/js/gpt.js'],
     preconnect: [
@@ -1307,6 +1312,8 @@ const adConfig = jsonConfiguration({
       'https://rfetch.yektanet.net',
       'https://scrapper.yektanet.com',
       'https://ua.yektanet.com',
+      'https://bfetch.yektanet.com',
+      'https://mostatil.cdn.yektanet.com',
     ],
     renderStartImplemented: true,
   },
