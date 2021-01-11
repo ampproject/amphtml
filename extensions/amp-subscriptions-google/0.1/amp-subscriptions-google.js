@@ -54,6 +54,13 @@ const TAG = 'amp-subscriptions-google';
 const PLATFORM_ID = 'subscribe.google.com';
 const GOOGLE_DOMAIN_RE = /(^|\.)google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)$/;
 
+/** @enum {number} */
+const GoogleMeteringStrategy = {
+  NONE: 1,
+  LEAD_ARTICLE: 2,
+  EXTENDED_ACCESS: 3,
+};
+
 /** @const */
 const SERVICE_TIMEOUT = 3000;
 
@@ -287,10 +294,12 @@ export class GoogleSubscriptionsPlatform {
     /** @private @const {boolean} */
     this.enableLAA_ = !!this.serviceConfig_['enableLAA'];
 
-    // Allow a publisher to turn off the entitlments check, needed
-    // in the case where LAA is in use but no other Google service is configured
-    // defaults true for backward compatibility
-    /** @private @const {boolean} */
+    /**
+     * Allows publishers to turn off SwG entitlement checks.
+     * Some publishers just use LAA entitlements.
+     * SwG entitlement checks are enabled by default, for backward compatibility.
+     * @private @const {boolean}
+     */
     this.enableEntitlements_ =
       this.serviceConfig_['enableEntitlements'] === false ? false : true;
 
@@ -496,53 +505,86 @@ export class GoogleSubscriptionsPlatform {
   }
 
   /**
-   * get LAA params - in it's own method so we can stub it for test.
+   * Returns URL params - in its own method so we can stub it for testing.
    * @return {Object<string>}
    * @private
    */
-  getLAAParams_() {
+  getUrlParams_() {
     return parseQueryString(this.ampdoc_.win.location.search);
   }
 
   /**
-   * Checks enableLAA flag and LAA header params and if present
-   * and unexpired generates an LAA entitlement.
+   * Returns a LAA entitlement for this article, if it's appropriate.
    * @return {!Promise<?Entitlement>}
    * @private
    */
   maybeGetLAAEntitlement_() {
-    if (this.enableLAA_) {
-      return this.viewerPromise_.getReferrerUrl().then((referrer) => {
-        const parsedQuery = this.getLAAParams_();
-        const parsedReferrer = parseUrlDeprecated(referrer);
-        if (
-          // Note we don't use the more generic this.isDev_ flag because that can be triggered
-          // by a hash value which would allow non gooogle hostnames to construct LAA urls.
-          ((parsedReferrer.protocol === 'https:' &&
-            GOOGLE_DOMAIN_RE.test(parsedReferrer.hostname)) ||
-            getMode(this.ampdoc_.win).localDev) &&
-          parsedQuery[`gaa_at`] == 'la' &&
-          parsedQuery[`gaa_n`] &&
-          parsedQuery[`gaa_sig`] &&
-          parsedQuery[`gaa_ts`] &&
-          parseInt(parsedQuery[`gaa_ts`], 16) > Date.now() / 1000
-        ) {
-          // All the criteria are met to return an LAA entitlement
-          return Promise.resolve(
-            new Entitlement({
-              source: 'google:laa',
-              raw: '',
-              service: PLATFORM_ID,
-              granted: true,
-              grantReason: GrantReason.LAA,
-              dataObject: {},
-              decryptedDocumentKey: null,
-            })
-          );
-        }
+    return this.getGoogleMeteringStrategy_().then((strategy) => {
+      // Verify Google's metering strategy for this article.
+      if (strategy !== GoogleMeteringStrategy.LEAD_ARTICLE) {
+        return null;
+      }
+
+      // All the criteria are met to return an LAA entitlement
+      return new Entitlement({
+        source: 'google:laa',
+        raw: '',
+        service: PLATFORM_ID,
+        granted: true,
+        grantReason: GrantReason.LAA,
+        dataObject: {},
+        decryptedDocumentKey: null,
       });
+    });
+  }
+
+  /**
+   * Returns Google's metering strategy for this article.
+   * @private
+   * @return {!Promise<!GoogleMeteringStrategy>}
+   */
+  getGoogleMeteringStrategy_() {
+    // Verify the service config enables a Google metering strategy.
+    if (!this.enableLAA_ && !this.enableMetering_) {
+      return Promise.resolve(GoogleMeteringStrategy.NONE);
     }
-    return Promise.resolve(null);
+
+    return this.viewerPromise_.getReferrerUrl().then((referrer) => {
+      // Check referrer.
+      const parsedReferrer = parseUrlDeprecated(referrer);
+      if (
+        (parsedReferrer.protocol !== 'https:' ||
+          !GOOGLE_DOMAIN_RE.test(parsedReferrer.hostname)) &&
+        // Note we don't use the more generic this.isDev_ flag because that can be
+        // triggered by a hash value which would allow non gooogle hostnames to
+        // construct LAA urls.
+        !getMode(this.ampdoc_.win).localDev
+      ) {
+        return GoogleMeteringStrategy.NONE;
+      }
+
+      // Parse URL params.
+      const urlParams = this.getUrlParams_();
+
+      // Verify timestamp.
+      if (parseInt(urlParams[`gaa_ts`], 16) < Date.now() / 1000) {
+        return GoogleMeteringStrategy.NONE;
+      }
+
+      // Verify a few params exist.
+      if (!urlParams[`gaa_n`] || !urlParams[`gaa_sig`]) {
+        return GoogleMeteringStrategy.NONE;
+      }
+
+      // Determine Google metering strategy.
+      if (urlParams[`gaa_at`] === 'la') {
+        return GoogleMeteringStrategy.LEAD_ARTICLE;
+      } else if (urlParams[`gaa_at`] === 'gaa') {
+        return GoogleMeteringStrategy.EXTENDED_ACCESS;
+      } else {
+        return GoogleMeteringStrategy.NONE;
+      }
+    });
   }
 
   /** @override */
@@ -552,9 +594,13 @@ export class GoogleSubscriptionsPlatform {
      * entitlement at prerender time does not leak any private
      * information.  If it's not a google viewer then we wait
      * for the page to be visible to avoid leaking that the
-     * page was prerendered
+     * page was prerendered.
+     *
+     * If the article enables metering, then it's not prerender safe.
+     * This extension sends publishers a metering state request which
+     * would reveal to the publisher that the page was prerendered.
      */
-    return this.isGoogleViewer_;
+    return this.isGoogleViewer_ && !this.enableMetering_;
   }
 
   /** @override */
@@ -571,23 +617,124 @@ export class GoogleSubscriptionsPlatform {
       if (laaEntitlement) {
         return laaEntitlement;
       }
+
+      // Allow publishers to disable SwG entitlement checks.
+      // Some publishers just use LAA entitlements.
       if (!this.enableEntitlements_) {
         return null;
       }
-      let params = {};
-      if (encryptedDocumentKey) {
-        params = {
-          encryption: {encryptedDocumentKey},
-        };
-      }
-      return this.runtime_.getEntitlements(params).then((swgEntitlements) => {
+
+      const googleMeteringStrategyPromise = this.getGoogleMeteringStrategy_();
+
+      // Assemble params for the getEntitlements API.
+      const getEntitlementsParamsPromise = Promise.all([
+        this.serviceAdapter_.getReaderId('local'),
+        googleMeteringStrategyPromise,
+      ]).then((results) => {
+        const params = {};
+
+        // Add encryption param.
+        if (encryptedDocumentKey) {
+          params.encryption = {encryptedDocumentKey};
+        }
+
+        // Add metering param.
+        const googleMeteringStrategy = results[1];
+        if (googleMeteringStrategy === GoogleMeteringStrategy.EXTENDED_ACCESS) {
+          const ampReaderId = results[0];
+          if (/registered=1/.test(location.search)) {
+            console.log('ASG: I am adding metering params!');
+            params.metering = {
+              state: {
+                id: ampReaderId,
+                // Standard attributes which affect your meters.
+                // Each attribute has a corresponding timestamp, which
+                // allows meters to do things like granting access
+                // for up to 30 days after a certain action.
+                //
+                // TODO: Describe standard attributes, once they're defined.
+                standardAttributes: {
+                  // TODO: We must request this from a URL the serviceConfig defines.
+                  // eslint-disable-next-line google-camelcase/google-camelcase
+                  registered_user: {
+                    timestamp: Math.floor(Date.now() / 1000),
+                  },
+                },
+              },
+            };
+          }
+        }
+        return params;
+      });
+
+      const swgEntitlementsPromise = getEntitlementsParamsPromise.then(
+        (params) => this.runtime_.getEntitlements(params)
+      );
+
+      // Respond to all entitlements when they return.
+      console.log(
+        'ASG: I am waiting for all platform entitlements to come back.'
+      );
+      Promise.all([
+        this.serviceAdapter_.getAllPlatformsEntitlements(),
+        swgEntitlementsPromise,
+        googleMeteringStrategyPromise,
+      ]).then((results) => {
+        const allEntitlements = results[0];
+        const swgEntitlements = results[1];
+        const googleMeteringStrategy = results[2];
+        console.log(
+          'ASG: Now I want to determine whether to show regwall, toast, or nothing.'
+        );
+        if (googleMeteringStrategy === GoogleMeteringStrategy.NONE) {
+          console.log('ASG: Metering is not even enabled my dude.');
+          return;
+        }
+        const grantedWithoutSwg =
+          allEntitlements.filter((entitlement) => {
+            console.log(entitlement);
+            return entitlement.granted && entitlement.service !== PLATFORM_ID;
+          }).length > 0;
+
+        if (grantedWithoutSwg) {
+          console.log(
+            'We are good! The SwG plugin does not need to do metering stuff.'
+          );
+          return;
+        }
+
+        console.log(swgEntitlements);
+        if (swgEntitlements.enablesThisWithGoogleMetering()) {
+          console.log('ASG: Page is unlocked with Google Metering!');
+          swgEntitlements.consume(() => {
+            console.log('Consumed!!!');
+          });
+        } else {
+          getEntitlementsParamsPromise.then((params) => {
+            console.log(
+              'ASG: I will show the Regwall. Only if the metering params were missing though!'
+            );
+            if (!params.metering) {
+              GaaMeteringRegwall.show({
+                // Specify a URL that renders a Google Sign-In button.
+                iframeUrl: this.serviceConfig_['googleSignInHelperUrl'],
+              }).then((result) => {
+                // TODO: Tell the server about this!
+                console.log(result);
+                // location.search = location.search + '&registered=1';
+              });
+            }
+          });
+        }
+      });
+
+      return swgEntitlementsPromise.then((swgEntitlements) => {
         // Get and store the isReadyToPay signal which is independent of
         // any entitlments existing.
         if (swgEntitlements.isReadyToPay) {
           this.isReadyToPay_ = true;
         }
 
-        // Get the specifc entitlement we're looking for
         let swgEntitlement = swgEntitlements.getEntitlementForThis();
         let granted = false;
         if (swgEntitlement && swgEntitlement.source) {
