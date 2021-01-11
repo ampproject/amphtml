@@ -25,7 +25,7 @@ export function isClickInsideElementRect(e, element) {
     return false;
   }
 
-  const rect = element.getBoundingClientRect();
+  const rect = element./*REVIEW*/ getBoundingClientRect();
 
   return (
     e.clientX > rect.left &&

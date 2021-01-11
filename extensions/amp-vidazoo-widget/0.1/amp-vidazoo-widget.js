@@ -371,7 +371,7 @@ class AmpVidazooWidget extends AMP.BaseElement {
       return;
     }
 
-    this.iframe_.contentWindow.postMessage(
+    this.iframe_.contentWindow./*REVIEW*/ postMessage(
       JSON.stringify({
         'vdzw_artemis_amp_broadcast': true,
         data,
@@ -399,7 +399,7 @@ class AmpVidazooWidget extends AMP.BaseElement {
 
     this.closeButton_ = this.element.ownerDocument.createElement('a');
     this.closeButton_.classList.add('i-amphtml-vidazoo-close-button');
-    this.closeButton_.innerHTML = '&#215;';
+    this.closeButton_./*REVIEW*/ innerHTML = '&#215;';
 
     const position = closeButtonOptions.position.split('-');
     const extend = getCloseButtonExtendedRadius(
