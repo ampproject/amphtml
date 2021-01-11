@@ -821,13 +821,10 @@ class AmpVideo extends AMP.BaseElement {
         ? listenOncePromise(this.element, VideoEvents.LOAD)
         : Promise.resolve();
     // After the intended video is loaded, listen for first timeupdate to remove placeholder. Context #31358.
+
     correctVideoLoadedPromise
-      .then(() => {
-        listenOncePromise(this.video_, 'timeupdate', {capture: true});
-      })
-      .then(() => {
-        this.removePosterForAndroidBug_();
-      });
+      .then(() => listenOncePromise(this.video_, 'timeupdate', {capture: true}))
+      .then(() => this.removePosterForAndroidBug_());
   }
 
   /**
