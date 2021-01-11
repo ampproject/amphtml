@@ -17,10 +17,11 @@
 </head>
 <body>
   <h1>An Auto Advancing Carousel</h1>
-  <amp-base-carousel id="carousel-1" width="300" height="200" layout="responsive" loop="true" auto-advance="true">
+  <amp-base-carousel id="carousel-1" width="300" height="200" layout="responsive" loop="false" auto-advance="true" auto-advance-loops="2">
     <amp-img src="./img/redgradient.png" layout="flex-item"></amp-img>
     <amp-img src="./img/greengradient.png" layout="flex-item"></amp-img>
     <amp-img src="./img/bluegradient.png" layout="flex-item"></amp-img>
   </amp-base-carousel>
+  <button id="next" on="tap:carousel-1.next()">Go to next slide</button>
 </body>
 </html>

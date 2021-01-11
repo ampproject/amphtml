@@ -20,7 +20,6 @@ const colors = require('ansi-colors');
 const fs = require('fs');
 const JSON5 = require('json5');
 const path = require('path');
-const sleep = require('sleep-promise');
 const {
   createCtrlcHandler,
   exitCtrlcHandler,
@@ -31,22 +30,32 @@ const {
   waitForPageLoad,
   verifySelectorsInvisible,
   verifySelectorsVisible,
+  sleep,
 } = require('./helpers');
 const {
   gitBranchName,
   gitCommitterEmail,
-  gitTravisMasterBaseline,
+  gitCiMasterBaseline,
   shortSha,
 } = require('../../common/git');
 const {buildRuntime, installPackages} = require('../../common/utils');
 const {execScriptAsync} = require('../../common/exec');
-const {isTravisBuild} = require('../../common/travis');
+const {isCiBuild} = require('../../common/ci');
 const {startServer, stopServer} = require('../serve');
 const {waitUntilUsed} = require('tcp-port-used');
 
 // optional dependencies for local development (outside of visual diff tests)
 let puppeteer;
 let percySnapshot;
+
+// CSS injected in every page tested.
+// Normally, as in https://docs.percy.io/docs/percy-specific-css
+// Otherwise, as a <style> in an iframe, see snippets/iframe-wrapper.js
+const percyCss = [
+  // Loader animation may otherwise be captured in slightly different points,
+  // causing the test to flake.
+  '.i-amphtml-new-loader * { animation: none !important; }',
+].join('\n');
 
 const SNAPSHOT_SINGLE_BUILD_OPTIONS = {
   widths: [375],
@@ -77,6 +86,10 @@ const FREEZE_FORM_VALUE_SNIPPET = fs.readFileSync(
   path.resolve(__dirname, 'snippets/freeze-form-values.js'),
   'utf8'
 );
+const FREEZE_CANVAS_IMAGE_SNIPPET = fs.readFileSync(
+  path.resolve(__dirname, 'snippets/freeze-canvas-image.js'),
+  'utf8'
+);
 
 // HTML snippet to create an error page snapshot.
 const SNAPSHOT_ERROR_SNIPPET = fs.readFileSync(
@@ -104,7 +117,7 @@ function maybeOverridePercyEnvironmentVariables() {
  * as baselines for future builds.
  */
 function setPercyBranch() {
-  if (!process.env['PERCY_BRANCH'] && (!argv.master || !isTravisBuild())) {
+  if (!process.env['PERCY_BRANCH'] && (!argv.master || !isCiBuild())) {
     const userName = gitCommitterEmail();
     const branchName = gitBranchName();
     process.env['PERCY_BRANCH'] = userName + '-' + branchName;
@@ -117,13 +130,13 @@ function setPercyBranch() {
  * This will let Percy determine which build to use as the baseline for this new
  * build.
  *
- * Only does something on Travis, and for non-master branches, since master
+ * Only does something during CI, and for non-master branches, since master
  * builds are always built on top of the previous commit (we use the squash and
  * merge method for pull requests.)
  */
 function setPercyTargetCommit() {
-  if (isTravisBuild() && !argv.master) {
-    process.env['PERCY_TARGET_COMMIT'] = gitTravisMasterBaseline();
+  if (isCiBuild() && !argv.master) {
+    process.env['PERCY_TARGET_COMMIT'] = gitCiMasterBaseline();
   }
 }
 
@@ -265,7 +278,7 @@ async function resetPage(page, viewport = null) {
 }
 
 /**
- * Adds a test error and logs it if running locally (not on Travis).
+ * Adds a test error and logs it if running locally (not as part of CI).
  *
  * @param {!Array<!JsonObject>} testErrors array of testError objects.
  * @param {string} name full name of the test.
@@ -276,7 +289,7 @@ async function resetPage(page, viewport = null) {
  */
 function addTestError(testErrors, name, message, error, consoleMessages) {
   const testError = {name, message, error, consoleMessages};
-  if (!isTravisBuild()) {
+  if (!isCiBuild()) {
     logTestError(testError);
   }
   testErrors.push(testError);
@@ -564,6 +577,7 @@ async function snapshotWebpages(browser, webpages) {
         // snippet files for description of each.
         await page.evaluate(REMOVE_AMP_SCRIPTS_SNIPPET);
         await page.evaluate(FREEZE_FORM_VALUE_SNIPPET);
+        await page.evaluate(FREEZE_CANVAS_IMAGE_SNIPPET);
 
         // Create a default set of snapshot options for Percy and modify
         // them based on the test's configuration.
@@ -576,11 +590,12 @@ async function snapshotWebpages(browser, webpages) {
           snapshotOptions.widths = [viewport.width];
           log('verbose', 'Wrapping viewport-constrained page in an iframe');
           await page.evaluate(
-            WRAP_IN_IFRAME_SNIPPET.replace(
-              /__WIDTH__/g,
-              viewport.width
-            ).replace(/__HEIGHT__/g, viewport.height)
+            WRAP_IN_IFRAME_SNIPPET.replace(/__WIDTH__/g, viewport.width)
+              .replace(/__HEIGHT__/g, viewport.height)
+              .replace(/__PERCY_CSS__/g, percyCss)
           );
+        } else {
+          snapshotOptions.percyCss = percyCss;
         }
 
         try {
@@ -623,16 +638,10 @@ async function snapshotWebpages(browser, webpages) {
   }
 
   await Promise.all(pagePromises);
-  if (isTravisBuild() && testErrors.length > 0) {
+  if (isCiBuild() && testErrors.length > 0) {
     testErrors.sort((a, b) => a.name.localeCompare(b.name));
-    log(
-      'info',
-      colors.yellow('Tests warnings and errors:'),
-      'expand this section'
-    );
-    console./*OK*/ log('travis_fold:start:visual_tests\n');
+    log('info', colors.yellow('Tests warnings and errors:'));
     testErrors.forEach(logTestError);
-    console./*OK*/ log('travis_fold:end:visual_tests');
     return false;
   }
   return true;

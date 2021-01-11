@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {CtaTypes} from './story-ad-localization';
 import {assertHttpsUrl} from '../../../src/url';
 import {CSS as attributionCSS} from '../../../build/amp-story-auto-ads-attribution-0.1.css';
 import {
@@ -107,30 +106,18 @@ export function getStoryAdMetadataFromElement(adElement) {
 }
 
 /**
- * Localizes CTA text if it is chosen from our predefined types.a
- * @param {string} ctaType
- * @param {!./story-ad-localization.StoryAdLocalization} localizationService
- * @return {string|null}
- */
-export function localizeCtaText(ctaType, localizationService) {
-  // CTA picked from predefined choices.
-  if (CtaTypes[ctaType]) {
-    const ctaLocalizedStringId = CtaTypes[ctaType];
-    return localizationService.getLocalizedString(ctaLocalizedStringId);
-  }
-  // Custom CTA text - Should already be localized.
-  return ctaType;
-}
-
-/**
  * Returns a boolean indicating if there is sufficent metadata to render CTA.
  * @param {!StoryAdUIMetadata} metadata
+ * @param {=boolean} opt_inabox
  * @return {boolean}
  */
-export function validateCtaMetadata(metadata) {
+export function validateCtaMetadata(metadata, opt_inabox) {
   // If making a CTA layer we need a button name & outlink url.
   if (!metadata[A4AVarNames.CTA_TYPE] || !metadata[A4AVarNames.CTA_URL]) {
-    user().error(TAG, 'Both CTA Type & CTA Url are required in ad response.');
+    // Don't polute inabox logs, as we don't know when this is intended to
+    // be a story ad.
+    !opt_inabox &&
+      user().error(TAG, 'Both CTA Type & CTA Url are required in ad response.');
     return false;
   }
   return true;

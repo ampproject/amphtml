@@ -15,6 +15,8 @@
  */
 import '../../../amp-base-carousel/1.0/amp-base-carousel';
 import '../amp-stream-gallery';
+import {ActionInvocation} from '../../../../src/service/action-impl';
+import {ActionTrust} from '../../../../src/action-constants';
 import {
   createElementWithAttributes,
   waitForChildPromise,
@@ -41,7 +43,7 @@ describes.realWin(
 
     beforeEach(async () => {
       win = env.win;
-      toggleExperiment(win, 'amp-stream-gallery-bento', true, true);
+      toggleExperiment(win, 'bento-stream-gallery', true, true);
       element = createElementWithAttributes(
         win.document,
         'amp-stream-gallery',
@@ -61,7 +63,7 @@ describes.realWin(
     });
 
     afterEach(() => {
-      toggleExperiment(win, 'amp-stream-gallery-bento', false, true);
+      toggleExperiment(win, 'bento-stream-gallery', false, true);
     });
 
     function newSlide(id) {
@@ -162,6 +164,67 @@ describes.realWin(
       expect(
         renderedSlideWrappers[2].querySelector('slot').assignedElements()
       ).to.deep.equal([userSuppliedChildren[1]]);
+    });
+
+    describe('imperative api', () => {
+      let scroller;
+      let slides;
+
+      beforeEach(async () => {
+        element.setAttribute('max-visible-count', '1');
+        win.document.body.appendChild(element);
+        slides = await getSlidesFromShadow();
+
+        scroller = element.shadowRoot.querySelector(
+          `[class*=${styles.scrollContainer}]`
+        );
+      });
+
+      afterEach(() => {
+        win.document.body.removeChild(element);
+        scroller = null;
+      });
+
+      function invocation(method, args = {}) {
+        const source = null;
+        const caller = null;
+        const event = null;
+        const trust = ActionTrust.DEFAULT;
+        return new ActionInvocation(
+          element,
+          method,
+          args,
+          source,
+          caller,
+          event,
+          trust
+        );
+      }
+
+      it('should execute next and prev actions', async () => {
+        element.enqueAction(invocation('next'));
+        await waitFor(
+          () => scroller.scrollLeft === slides[1].offsetLeft,
+          'advanced to next slide'
+        );
+
+        element.enqueAction(invocation('prev'));
+        await waitFor(
+          () => scroller.scrollLeft === slides[0].offsetLeft,
+          'returned to prev slide'
+        );
+      });
+
+      it('should execute goToSlide action', async () => {
+        element.enqueAction(invocation('goToSlide', {index: 1}));
+        await waitFor(() => scroller.scrollLeft > 0, 'go to slide 1');
+
+        element.enqueAction(invocation('goToSlide', {index: 0}));
+        await waitFor(
+          () => scroller.scrollLeft == 0,
+          'returned to first slide'
+        );
+      });
     });
   }
 );

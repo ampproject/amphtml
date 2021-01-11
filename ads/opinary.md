@@ -35,4 +35,4 @@ For details on the configuration semantics, please contact the ad network or ref
 
 ### Required parameters
 
-- `data-client` - the publishers name in the Opinary AMS system
+-   `data-client` - the publishers name in the Opinary AMS system

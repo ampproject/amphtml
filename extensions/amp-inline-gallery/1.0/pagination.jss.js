@@ -35,7 +35,7 @@ const container = {
     right: 0,
     bottom: 0,
     display: 'flex',
-    margin: '18px',
+    margin: '18px 0',
     zIndex: 1,
   },
 };

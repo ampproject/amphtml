@@ -498,9 +498,11 @@ class AmpCarousel extends AMP.BaseElement {
     this.prevButton_.classList.toggle('amp-disabled', prevDisabled);
     this.prevButton_.setAttribute('aria-disabled', prevDisabled);
     this.prevButton_.title = this.getPrevButtonTitle_(index);
+    this.prevButton_.tabIndex = prevDisabled ? -1 : 0;
     this.nextButton_.classList.toggle('amp-disabled', nextDisabled);
     this.nextButton_.setAttribute('aria-disabled', nextDisabled);
     this.nextButton_.title = this.getNextButtonTitle_(index);
+    this.nextButton_.tabIndex = nextDisabled ? -1 : 0;
   }
 
   /**
@@ -528,7 +530,10 @@ class AmpCarousel extends AMP.BaseElement {
 
       if (isSlides) {
         const wrapper = document.createElement('div');
-        wrapper.className = 'i-amphtml-carousel-slotted';
+        wrapper.classList.add(
+          'i-amphtml-carousel-slotted',
+          'i-amphtml-carousel-wrapper'
+        );
         wrapper.appendChild(slide);
         return wrapper;
       }
@@ -564,10 +569,11 @@ class AmpCarousel extends AMP.BaseElement {
     const name = 'slideChange';
     const isHighTrust = this.isHighTrustActionSource_(actionSource);
     const trust = isHighTrust ? ActionTrust.HIGH : ActionTrust.LOW;
+    const dataWithActionTrust = dict({'index': index, 'actionTrust': trust});
 
     const action = createCustomEvent(this.win, `slidescroll.${name}`, data);
     this.action_.trigger(this.element, name, action, trust);
-    dispatchCustomEvent(this.element, name, data);
+    dispatchCustomEvent(this.element, name, dataWithActionTrust);
     this.triggerAnalyticsEvent_(prevIndex, index);
   }
 

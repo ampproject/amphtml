@@ -47,6 +47,7 @@ export const METADATA_STORAGE_KEY = {
   CONSENT_STRING_TYPE: 'cst',
   ADDITIONAL_CONSENT: 'ac',
   GDPR_APPLIES: 'ga',
+  PURPOSE_ONE: 'po',
 };
 
 /**
@@ -90,6 +91,7 @@ export let ConsentInfoDef;
  *  consentStringType: (CONSENT_STRING_TYPE|undefined),
  *  additionalConsent: (string|undefined),
  *  gdprApplies: (boolean|undefined),
+ *  purposeOne: (boolean|undefined),
  * }}
  */
 export let ConsentMetadataDef;
@@ -286,17 +288,20 @@ export function constructConsentInfo(
  * @param {CONSENT_STRING_TYPE=} opt_consentStringType
  * @param {string=} opt_additionalConsent
  * @param {boolean=} opt_gdprApplies
+ * @param {boolean=} opt_purposeOne
  * @return {!ConsentMetadataDef}
  */
 export function constructMetadata(
   opt_consentStringType,
   opt_additionalConsent,
-  opt_gdprApplies
+  opt_gdprApplies,
+  opt_purposeOne
 ) {
   return {
     'consentStringType': opt_consentStringType,
     'additionalConsent': opt_additionalConsent,
     'gdprApplies': opt_gdprApplies,
+    'purposeOne': opt_purposeOne,
   };
 }
 
@@ -384,6 +389,10 @@ export function composeMetadataStoreValue(consentInfoMetadata) {
     storageMetadata[METADATA_STORAGE_KEY.GDPR_APPLIES] =
       consentInfoMetadata['gdprApplies'];
   }
+  if (consentInfoMetadata['purposeOne'] != undefined) {
+    storageMetadata[METADATA_STORAGE_KEY.PURPOSE_ONE] =
+      consentInfoMetadata['purposeOne'];
+  }
   return storageMetadata;
 }
 
@@ -402,7 +411,8 @@ export function convertStorageMetadata(storageMetadata) {
   return constructMetadata(
     storageMetadata[METADATA_STORAGE_KEY.CONSENT_STRING_TYPE],
     storageMetadata[METADATA_STORAGE_KEY.ADDITIONAL_CONSENT],
-    storageMetadata[METADATA_STORAGE_KEY.GDPR_APPLIES]
+    storageMetadata[METADATA_STORAGE_KEY.GDPR_APPLIES],
+    storageMetadata[METADATA_STORAGE_KEY.PURPOSE_ONE]
   );
 }
 
@@ -415,6 +425,7 @@ export function assertMetadataValues(metadata) {
   const consentStringType = metadata['consentStringType'];
   const additionalConsent = metadata['additionalConsent'];
   const gdprApplies = metadata['gdprApplies'];
+  const purposeOne = metadata['purposeOne'];
   const errorFields = [];
 
   if (
@@ -431,6 +442,10 @@ export function assertMetadataValues(metadata) {
   if (gdprApplies && typeof gdprApplies != 'boolean') {
     delete metadata['gdprApplies'];
     errorFields.push('gdprApplies');
+  }
+  if (purposeOne && typeof purposeOne != 'boolean') {
+    delete metadata['purposeOne'];
+    errorFields.push('purposeOne');
   }
   for (let i = 0; i < errorFields.length; i++) {
     user().error(

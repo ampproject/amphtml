@@ -740,8 +740,16 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     it('should invalidate premeasurements after resize event', () => {
       resource1.premeasure({});
       expect(resource1.hasBeenPremeasured()).true;
+      expect(resource1.isMeasureRequested()).false;
       resources.viewport_.changeObservable_.fire({relayoutAll_: true});
       expect(resource1.hasBeenPremeasured()).false;
+      expect(resource1.isMeasureRequested()).true;
+    });
+
+    it('should schedule a pass after resize event', () => {
+      const schedulePassStub = sandbox.stub(resources, 'schedulePass');
+      resources.viewport_.changeObservable_.fire({relayoutAll_: false});
+      expect(schedulePassStub).calledOnce;
     });
 
     it('should applySizesAndMediaQuery on relayout', () => {

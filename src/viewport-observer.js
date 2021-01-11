@@ -15,16 +15,10 @@
  */
 import {devAssert} from '../src/log';
 import {getMode} from './mode';
-import {isIframed} from './dom';
 import {toWin} from './types';
 
 /**
  * Returns an IntersectionObserver tracking the Viewport.
- * Only use this if x-origin iframe rootMargin support is considered nice-to-have,
- * since if not supported this InOb will fallback to one without rootMargin.
- *
- * - If iframed: rootMargin is ignored unless natively supported (Chrome 81+).
- * - If not iframed: all features work properly in both polyfill and built-in.
  *
  * @param {function(!Array<!IntersectionObserverEntry>)} ioCallback
  * @param {!Window} win
@@ -33,28 +27,7 @@ import {toWin} from './types';
  * @return {!IntersectionObserver}
  */
 export function createViewportObserver(ioCallback, win, threshold) {
-  const iframed = isIframed(win);
-  const root = /** @type {?Element} */ (iframed
-    ? /** @type {*} */ (win.document)
-    : null);
-
-  // TODO(#30794): See if we can safely remove rootMargin without adversely
-  // affecting metrics.
-
-  // Chrome 81+ supports rootMargin in x-origin iframes via {root: document}
-  // but this throws in other browsers.
-  try {
-    return new win.IntersectionObserver(ioCallback, {
-      root,
-      rootMargin: '25%',
-      threshold,
-    });
-  } catch (e) {
-    return new win.IntersectionObserver(ioCallback, {
-      rootMargin: '150px',
-      threshold,
-    });
-  }
+  return new win.IntersectionObserver(ioCallback, {threshold});
 }
 
 /** @type {!WeakMap<!Window, !IntersectionObserver>} */
@@ -114,6 +87,8 @@ function ioCallback(entries) {
   for (let i = 0; i < entries.length; i++) {
     const {isIntersecting, target} = entries[i];
     const viewportCallback = viewportCallbacks.get(target);
-    viewportCallback(isIntersecting);
+    if (viewportCallback) {
+      viewportCallback(isIntersecting);
+    }
   }
 }

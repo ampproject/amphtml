@@ -30,4 +30,4 @@ Please consult internal reference documents on AMP. This is used only for first-
 
 Required parameter:
 
-- `data-aid`
+-   `data-aid`
