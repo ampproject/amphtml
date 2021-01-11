@@ -72,6 +72,7 @@ function addJobAndBuildInfo(testType, reportJson) {
   }
 
   return {
+    repository: process.env.GITHUB_REPOSITORY,
     results: reportJson,
     build: {
       buildNumber,
