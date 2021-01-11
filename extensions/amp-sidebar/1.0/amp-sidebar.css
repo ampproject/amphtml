@@ -20,7 +20,12 @@ amp-sidebar {
   height: 100vh;
   top: 0;
   max-height: 100vh !important;
-  max-width: 80vw !important;
+  /** 
+   * Max width allowed to be configurable by user.  If user wants width to be
+   * controlled by content size and max-width, then this property needs to be
+   * configurable.
+   */
+  max-width: 80vw;
   min-width: 45px !important;
   outline: none;
   z-index: 2147483647;
