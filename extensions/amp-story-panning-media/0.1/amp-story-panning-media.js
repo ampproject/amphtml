@@ -36,40 +36,26 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     this.element_ = element;
 
     /** @public {?Element} */
-    this.image = null;
+    this.ampImgEl_ = dev().assertElement(
+      this.element_.querySelector('amp-img')
+    );
 
     /** @private {?string} */
-    this.x_ = null;
+    this.x_ = this.element_.getAttribute('x') || '0%';
 
     /** @private {?string} */
-    this.y_ = null;
+    this.y_ = this.y_ = this.element_.getAttribute('y') || '0%';
 
     /** @private {?string} */
-    this.zoom_ = null;
-
-    /** @private {?string} */
-    this.activeX_ = null;
-
-    /** @private {?string} */
-    this.activeY_ = null;
-
-    /** @private {?string} */
-    this.activeZoom_ = null;
+    this.zoom_ = this.element_.getAttribute('zoom') || '1';
 
     /** @private {Array<Element>} */
     this.siblings_ = [];
-
-    /** @private {?boolean} */
-    this.isOnActivePage_ = null;
   }
 
   /** @override */
   buildCallback() {
-    this.x_ = this.element_.getAttribute('x') || '0%';
-    this.y_ = this.element_.getAttribute('y') || '0%';
-    this.zoom_ = this.element_.getAttribute('zoom') || '1';
-
-    // Gets components with same children.
+    // TODO: only get components with same children.
     document.querySelectorAll('amp-story-panning-media').forEach((sibling) => {
       sibling.getImpl().then((siblingImpl) => {
         this.siblings_.push(siblingImpl);
@@ -80,8 +66,10 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     return Promise.all([
       Services.storyStoreServiceForOrNull(this.win).then((storeService) => {
         storeService.subscribe(StateProperty.CURRENT_PAGE_ID, (currPageId) => {
-          this.isOnActivePage_ = currPageId === this.getPageId_();
-          this.update_();
+          const isOnActivePage = currPageId === this.getPageId_();
+          if (isOnActivePage) {
+            this.updateSiblings_();
+          }
         });
       }),
     ]).then(() => Promise.resolve());
@@ -89,43 +77,33 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    this.ampImgEl = dev().assertElement(this.element_.querySelector('amp-img'));
-    return whenUpgradedToCustomElement(this.ampImgEl)
-      .then(() => this.ampImgEl.signals().whenSignal(CommonSignals.LOAD_END))
+    return whenUpgradedToCustomElement(this.ampImgEl_)
+      .then(() => this.ampImgEl_.signals().whenSignal(CommonSignals.LOAD_END))
       .then(() => {
-        this.image = dev().assertElement(this.element.querySelector('img'));
-        // Remove layout="fill" classes so image is not clipped.
-        this.image.classList = '';
-        // Fill image to 100% height of viewport.
-        // TODO(#31515): Handle base zoom of aspect ratio wider than image
-        setStyles(this.image, {height: '100%'});
-        return this.updateTransform();
-      })
-      .catch(() => user().error(TAG, 'Failed to load the amp-img.'));
+        setStyles(this.ampImgEl_, {
+          left: 'auto',
+          right: 'auto',
+        });
+        const imgEl = dev().assertElement(this.element_.querySelector('img'));
+        imgEl.classList = '';
+      });
   }
 
   /** @private */
-  update_() {
-    if (this.isOnActivePage_) {
-      this.siblings_.forEach((siblingImpl) => {
-        siblingImpl.activeX_ = this.x_;
-        siblingImpl.activeY_ = this.y_;
-        siblingImpl.activeZoom_ = this.zoom_;
-        if (siblingImpl.image) {
-          siblingImpl.updateTransform();
-        }
-      });
-    }
+  updateSiblings_() {
+    this.siblings_.forEach((siblingImpl) => {
+      siblingImpl.updateTransform(this.x_, this.y_, this.zoom_);
+    });
   }
 
   /**
    * @return {!Promise}
    * @public
    */
-  updateTransform() {
+  updateTransform(x, y, zoom) {
     return this.mutateElement(() => {
-      setStyles(this.image, {
-        transform: `scale(${this.activeZoom_}) translate(${this.activeX_}, ${this.activeY_})`,
+      setStyles(this.ampImgEl_, {
+        transform: `scale(${zoom}) translate(${x}, ${y})`,
       });
     });
   }
