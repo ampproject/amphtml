@@ -108,7 +108,3 @@ This element includes [common attributes](https://amp.dev/documentation/guides-a
 ## Styling
 
 You can style the `amp-fit-text` with standard CSS. In particular, you can use `text-align`, `font-weight`, `color` and many other CSS properties, with the main exception of `font-size`.
-
-## Validation
-
-Please note that version `1.0` of `amp-fit-text` is not currently valid AMP, though this is an imminent milestone in the Bento roadmap. Use version `0.1` for a similar experience on a valid AMP document.
