@@ -43,9 +43,6 @@ amp-sidebar::part(sidebar) {
   width: inherit;
   padding: inherit;
   border: inherit;
-
-  /* Children of amp-sidebar should be visible */
-  visibility: visible !important;
 }
 
 /** 
@@ -55,4 +52,13 @@ amp-sidebar::part(sidebar) {
 amp-sidebar {
   visibility: hidden !important;
   position: fixed !important;
+}
+
+/** 
+ * The host element, amp-sidebar, is not visible to allow direct styling to be
+ * inherited by its children.  Its children should be visible so the styling 
+ * is displayed.
+ */
+amp-sidebar::part(c) {
+  visibility: visible !important;
 }
