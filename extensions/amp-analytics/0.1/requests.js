@@ -17,6 +17,10 @@
 import {AnalyticsEventType} from './events';
 import {BatchSegmentDef, defaultSerializer} from './transport-serializer';
 import {ExpansionOptions, variableServiceForDoc} from './variables';
+import {
+  ResolverReturnDef,
+  SyncResolverDef,
+} from '../../../src/service/variable-source';
 import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-allowlist';
 import {Services} from '../../../src/services';
 import {devAssert, userAssert} from '../../../src/log';
@@ -72,9 +76,6 @@ export class RequestHandler {
     this.baseUrlPromise_ = null;
 
     /** @private {?Promise<string>} */
-    this.baseUrlTemplatePromise_ = null;
-
-    /** @private {?Promise<string>} */
     this.requestOriginPromise_ = null;
 
     /** @private {!Array<!Promise<!BatchSegmentDef>>} */
@@ -116,9 +117,9 @@ export class RequestHandler {
    * Real ping may be batched and send out later.
    * @param {?JsonObject} configParams
    * @param {!JsonObject} trigger
-   * @param {!./variables.ExpansionOptions} expansionOption
+   * @param {!./variables.ExpansionOptions} expansionOptions
    */
-  send(configParams, trigger, expansionOption) {
+  send(configParams, trigger, expansionOptions) {
     const isImportant = trigger['important'] === true;
     if (!this.reportRequest_ && !isImportant) {
       // Ignore non important trigger out reportWindow
@@ -135,52 +136,29 @@ export class RequestHandler {
     );
 
     if (!this.baseUrlPromise_) {
-      expansionOption.freezeVar('extraUrlParams');
+      expansionOptions.freezeVar('extraUrlParams');
 
-      this.baseUrlTemplatePromise_ = this.variableService_.expandTemplate(
+      this.baseUrlPromise_ = this.expandTemplateUrl_(
         this.baseUrl,
-        expansionOption,
-        this.element_,
-        bindings,
-        this.allowlist_
-      );
-
-      this.baseUrlPromise_ = this.baseUrlTemplatePromise_.then((baseUrl) =>
-        this.urlReplacementService_
-          .expandUrlAsync(baseUrl, bindings, this.allowlist_)
-          .catch((e) =>
-            userAssert(false, `Could not expand URL "${baseUrl}": ${e.message}`)
-          )
+        expansionOptions,
+        bindings
       );
     }
 
     // expand requestOrigin if it is declared
     if (!this.requestOriginPromise_ && this.requestOrigin_) {
       // do not encode vars in request origin
-      const requestOriginExpansionOpt = new ExpansionOptions(
-        expansionOption.vars,
-        expansionOption.iterations,
-        true // opt_noEncode
+      const requestOriginExpansionOptions = new ExpansionOptions(
+        expansionOptions.vars,
+        expansionOptions.iterations,
+        /* opt_noEncode */ true
       );
 
-      this.requestOriginPromise_ = this.variableService_
-        // expand variables in request origin
-        .expandTemplate(
-          this.requestOrigin_,
-          requestOriginExpansionOpt,
-          this.element_,
-          bindings,
-          this.allowlist_
-        )
-        // substitute in URL values e.g. DOCUMENT_REFERRER -> https://example.com
-        .then((expandedRequestOrigin) => {
-          return this.urlReplacementService_.expandUrlAsync(
-            expandedRequestOrigin,
-            bindings,
-            this.allowlist_,
-            true // opt_noEncode
-          );
-        });
+      this.requestOriginPromise_ = this.expandTemplateUrl_(
+        this.requestOrigin_,
+        requestOriginExpansionOptions,
+        bindings
+      );
     }
 
     const params = {...configParams, ...trigger['extraUrlParams']};
@@ -189,7 +167,7 @@ export class RequestHandler {
       this.variableService_,
       this.urlReplacementService_,
       params,
-      expansionOption,
+      expansionOptions,
       bindings,
       this.element_,
       this.allowlist_
@@ -223,6 +201,30 @@ export class RequestHandler {
   }
 
   /**
+   * @param {string} url
+   * @param {!ExpansionOptions} expansionOptions
+   * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=} bindings
+   * @return {!Promise<string>}
+   */
+  expandTemplateUrl_(url, expansionOptions, bindings) {
+    return this.variableService_
+      .expandTemplate(
+        url,
+        expansionOptions,
+        this.element_,
+        bindings,
+        this.allowlist_
+      )
+      .then((url) =>
+        this.urlReplacementService_
+          .expandUrlAsync(url, bindings, this.allowlist_)
+          .catch((e) =>
+            userAssert(false, `Could not expand URL "${url}": ${e.message}`)
+          )
+      );
+  }
+
+  /**
    * Function that schedule the actual request send.
    * @param {boolean} isImmediate
    * @private
@@ -246,7 +248,6 @@ export class RequestHandler {
   fire_() {
     const {
       requestOriginPromise_: requestOriginPromise,
-      baseUrlTemplatePromise_: baseUrlTemplatePromise,
       baseUrlPromise_: baseUrlPromise,
       batchSegmentPromises_: segmentPromises,
     } = this;
@@ -256,7 +257,7 @@ export class RequestHandler {
     // preconnect to requestOrigin if available, otherwise baseUrlTemplate
     const preconnectPromise = requestOriginPromise
       ? requestOriginPromise
-      : baseUrlTemplatePromise;
+      : baseUrlPromise;
 
     preconnectPromise.then((preUrl) => {
       this.preconnect_.url(this.ampdoc_, preUrl, true);
@@ -298,7 +299,6 @@ export class RequestHandler {
   reset_() {
     this.queueSize_ = 0;
     this.baseUrlPromise_ = null;
-    this.baseUrlTemplatePromise_ = null;
     this.batchSegmentPromises_ = [];
     this.lastTrigger_ = null;
   }
