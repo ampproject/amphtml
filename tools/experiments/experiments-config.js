@@ -210,12 +210,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26823',
   },
   {
-    id: 'analytics-chunks-inabox',
-    name: 'AMP Analytics Break long tasks to chunks (AMP Ads only)',
-    spec: 'https://github.com/ampproject/amphtml/issues/28435',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/28435',
-  },
-  {
     id: 'a4a-no-signing',
     name: 'Remove signing requirement for AMPHTML ads',
     spec: 'https://github.com/ampproject/amphtml/issues/27189',
@@ -250,5 +244,10 @@ export const EXPERIMENTS = [
     id: 'dfp-render-on-idle-cwv-exp',
     name: 'To measure the CWV impact of ads idle rendering',
     spec: 'https://github.com/ampproject/amphtml/issues/31436',
+  },
+  {
+    id: 'inabox-resources-eager',
+    name: 'Determine impact of building inabox/fie amp elements ASAP',
+    spec: 'https://github.com/ampproject/amphtml/issues/31776',
   },
 ];

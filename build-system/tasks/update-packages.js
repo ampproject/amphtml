@@ -104,10 +104,10 @@ function patchIntersectionObserver() {
 function patchResizeObserver() {
   // Copies intersection-observer into a new file that has an export.
   const patchedName =
-    'node_modules/resize-observer-polyfill/resize-observer.install.js';
+    'node_modules/resize-observer-polyfill/ResizeObserver.install.js';
   let file = fs
     .readFileSync(
-      'node_modules/resize-observer-polyfill/dist/ResizeObserver.global.js'
+      'node_modules/resize-observer-polyfill/dist/ResizeObserver.js'
     )
     .toString();
 
