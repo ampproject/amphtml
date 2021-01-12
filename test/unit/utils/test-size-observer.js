@@ -76,7 +76,6 @@ describes.realWin('size-observer', {}, (env) => {
     const results = [];
     let deferred = null;
     const caller = (value) => {
-      console.log('QQQQ: result:', value);
       results.push(value);
       if (deferred) {
         const next = results.shift();

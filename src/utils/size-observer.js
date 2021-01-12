@@ -23,11 +23,11 @@ let ContentSizeObserverCallbackDef;
 /** @const {!WeakMap<!Window, !ResizeObserver>} */
 const observers = new WeakMap();
 
-/** @const {!WeakMap<!Element, !ContentSizeObserverCallbackDef>} */
-const targetObserverListMap = new WeakMap();
+/** @const {!WeakMap<!Element, !Array<!ContentSizeObserverCallbackDef>>} */
+const targetObserverMultimap = new WeakMap();
 
 /** @const {!WeakMap<!Element, !../layout-rect.LayoutSizeDef>} */
-const targetSizeListMap = new WeakMap();
+const targetSizeMap = new WeakMap();
 
 /**
  * @param {!Element} element
@@ -38,14 +38,14 @@ export function observeContentSize(element, callback) {
   if (!win) {
     return;
   }
-  let callbacks = targetObserverListMap.get(element);
+  let callbacks = targetObserverMultimap.get(element);
   if (!callbacks) {
     callbacks = [];
-    targetObserverListMap.set(element, callbacks);
+    targetObserverMultimap.set(element, callbacks);
     getObserver(win).observe(element);
   }
   if (pushIfNotExist(callbacks, callback)) {
-    const size = targetSizeListMap.get(element);
+    const size = targetSizeMap.get(element);
     if (size) {
       setTimeout(() => callCallbackNoInline(callback, size));
     }
@@ -57,14 +57,14 @@ export function observeContentSize(element, callback) {
  * @param {!ObserverCallbackDef} callback
  */
 export function unobserveContentSize(element, callback) {
-  const callbacks = targetObserverListMap.get(element);
+  const callbacks = targetObserverMultimap.get(element);
   if (!callbacks) {
     return;
   }
   removeItem(callbacks, callback);
   if (callbacks.length == 0) {
-    targetObserverListMap.delete(element);
-    targetSizeListMap.delete(element);
+    targetObserverMultimap.delete(element);
+    targetSizeMap.delete(element);
     const win = element.ownerDocument.defaultView;
     if (win) {
       getObserver(win).unobserve(element);
@@ -103,26 +103,21 @@ function getObserver(win) {
  * @param {!Array<!ResizeObserverEntry>} entries
  */
 function processEntries(entries) {
+  const seen = new Set();
   for (let i = entries.length - 1; i >= 0; i--) {
     const {target, contentRect} = entries[i];
-    let seenTarget = false;
-    for (let j = i + 1; j < entries.length; j++) {
-      if (entries[j].target == target) {
-        seenTarget = true;
-        break;
-      }
-    }
-    if (seenTarget) {
+    if (seen.has(target)) {
       continue;
     }
-    const callbacks = targetObserverListMap.get(target);
+    seen.add(target);
+    const callbacks = targetObserverMultimap.get(target);
     if (!callbacks) {
       continue;
     }
     const {width, height} = contentRect;
     /** @type {../layout-rect.LayoutSizeDef} */
     const size = {width, height};
-    targetSizeListMap.set(target, size);
+    targetSizeMap.set(target, size);
     for (let k = 0; k < callbacks.length; k++) {
       callCallbackNoInline(callbacks[k], size);
     }
