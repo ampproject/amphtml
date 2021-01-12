@@ -97,9 +97,6 @@ import {isArray, toWin} from './types';
  * element instance. This can be used to do additional style calculations
  * without triggering style recalculations.
  *
- * When the dimensions of an element has changed, the 'onMeasureChanged'
- * callback is called.
- *
  * For more details, see {@link custom-element.js}.
  *
  * Each method is called exactly once and overriding them in subclasses
@@ -940,13 +937,6 @@ export class BaseElement {
    * @public
    */
   onLayoutMeasure() {}
-
-  /**
-   * Called only when the measurements of an amp-element changes. This
-   * would not trigger for every measurement invalidation caused by a mutation.
-   * @public
-   */
-  onMeasureChanged() {}
 
   /**
    * @return {./log.Log}

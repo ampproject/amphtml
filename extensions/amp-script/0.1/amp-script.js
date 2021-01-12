@@ -96,6 +96,9 @@ export class AmpScript extends AMP.BaseElement {
     /** @private {boolean} */
     this.layoutCompleted_ = false;
 
+    /** @private {boolean} */
+    this.reportedZeroSize_ = false;
+
     /** @private {Deferred} */
     this.initialize_ = new Deferred();
 
@@ -162,13 +165,14 @@ export class AmpScript extends AMP.BaseElement {
   /**
    * @override
    */
-  onMeasureChanged() {
-    if (this.layoutCompleted_) {
+  onLayoutMeasure() {
+    if (this.layoutCompleted_ || this.reportedZeroSize_) {
       return;
     }
 
     const {width, height} = this.getLayoutSize();
     if (width === 0 && height === 0) {
+      this.reportedZeroSize_ = true;
       user().warn(
         TAG,
         'Skipped initializing amp-script due to zero width and height.',
