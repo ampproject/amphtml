@@ -60,9 +60,7 @@ async function firebase() {
   if (argv.file) {
     log(colors.green(`Processing file: ${argv.file}.`));
     log(colors.green('Writing file to firebase.index.html.'));
-    await fs.copyFile(/*src*/ argv.file, 'firebase/index.html', {
-      overwrite: true,
-    });
+    await fs.copyFile(/*src*/ argv.file, 'firebase/index.html');
     await replaceUrls('firebase/index.html');
   } else {
     log(colors.green('Copying test/manual and examples folders.'));
@@ -78,9 +76,7 @@ async function firebase() {
   ]);
 
   await Promise.all([
-    fs.copyFile('firebase/dist/ww.max.js', 'firebase/dist/ww.js', {
-      overwrite: true,
-    }),
+    fs.copyFile('firebase/dist/ww.max.js', 'firebase/dist/ww.js'),
   ]);
 }
 

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.131 */
+/** Version: 0.1.22.140 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -52,6 +52,9 @@ const AnalyticsEvent = {
   IMPRESSION_SELECT_OFFER_SWG_BUTTON: 18,
   IMPRESSION_SHOW_CONTRIBUTIONS_SWG_BUTTON: 19,
   IMPRESSION_SELECT_CONTRIBUTION_SWG_BUTTON: 20,
+  IMPRESSION_METER_TOAST: 21,
+  IMPRESSION_REGWALL: 22,
+  IMPRESSION_SHOWCASE_REGWALL: 23,
   ACTION_SUBSCRIBE: 1000,
   ACTION_PAYMENT_COMPLETE: 1001,
   ACTION_ACCOUNT_CREATED: 1002,
@@ -77,6 +80,11 @@ const AnalyticsEvent = {
   ACTION_USER_DENY_DEFERRED_ACCOUNT: 1022,
   ACTION_DEFERRED_ACCOUNT_REDIRECT: 1023,
   ACTION_GET_ENTITLEMENTS: 1024,
+  ACTION_METER_TOAST_SUBSCRIBE_CLICK: 1025,
+  ACTION_METER_TOAST_EXPANDED: 1026,
+  ACTION_METER_TOAST_CLOSED_BY_ARTICLE_INTERACTION: 1027,
+  ACTION_METER_TOAST_CLOSED_BY_SWIPE_DOWN: 1028,
+  ACTION_METER_TOAST_CLOSED_BY_X_CLICKED: 1029,
   EVENT_PAYMENT_FAILED: 2000,
   EVENT_CUSTOM: 3000,
   EVENT_CONFIRM_TX_ID: 3001,
@@ -89,6 +97,7 @@ const AnalyticsEvent = {
   EVENT_UNLOCKED_BY_METER: 3008,
   EVENT_NO_ENTITLEMENTS: 3009,
   EVENT_HAS_METERING_ENTITLEMENTS: 3010,
+  EVENT_OFFERED_METER: 3011,
   EVENT_SUBSCRIPTION_STATE: 4000,
 };
 /** @enum {number} */
@@ -5059,6 +5068,10 @@ class Entitlements {
    */
   getEntitlementFor(product, source) {
     if (!product) {
+      // Require a product ID.
+      log_4(
+        'SwG needs this article to define a product ID (e.g. example.com:premium). Articles can define a product ID using JSON+LD. SwG can check entitlements after this article defines a product ID.'
+      );
       return null;
     }
 
@@ -6079,7 +6092,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.131',
+    '_client': 'SwG 0.1.22.140',
   });
 }
 
@@ -7198,7 +7211,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.131',
+        '_client': 'SwG 0.1.22.140',
         'supportsEventManager': true,
       },
       args || {}
@@ -8047,7 +8060,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl$1(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.131');
+    context.setClientVersion('SwG 0.1.22.140');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString$1(this.getQueryString_());
@@ -10410,6 +10423,13 @@ class DialogManager {
     }
   }
 
+  /**
+   * @returns {?Dialog}
+   */
+  getDialog() {
+    return this.dialog_;
+  }
+
   /** @private */
   close_() {
     this.dialog_.close();
@@ -10478,6 +10498,9 @@ const MeterClientTypes = {
  * limitations under the License.
  */
 
+const IFRAME_BOX_SHADOW =
+  'rgba(60, 64, 67, .3) 0 -2px 5px, rgba(60, 64, 67, .15) 0 -5px 5px';
+
 class MeterToastApi {
   /**
    * @param {!./deps.DepsDef} deps
@@ -10495,25 +10518,42 @@ class MeterToastApi {
     /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
-    /** @private @const {!function()} */
-    this.sendCloseRequestFunction_ = () => {
-      const closeRequest = new ToastCloseRequest();
-      closeRequest.setClose(true);
-      this.activityIframeView_.execute(closeRequest);
-    };
-
+    const iframeArgs = this.activityPorts_.addDefaultArguments({
+      isClosable: true,
+      hasSubscriptionCallback: deps.callbacks().hasSubscribeRequestCallback(),
+    });
     /** @private @const {!ActivityIframeView} */
     this.activityIframeView_ = new ActivityIframeView(
       this.win_,
       this.activityPorts_,
       feUrl('/metertoastiframe'),
-      feArgs({
-        publicationId: deps.pageConfig().getPublicationId(),
-        productId: deps.pageConfig().getProductId(),
-        hasSubscriptionCallback: deps.callbacks().hasSubscribeRequestCallback(),
-      }),
+      iframeArgs,
       /* shouldFadeBody */ false
     );
+
+    /**
+     * Function this class calls when a user dismisses the toast to consume a free read.
+     * @private {?function()}
+     */
+    this.onConsumeCallback_ = null;
+
+    /** @private @const {!function()} */
+    this.sendCloseRequestFunction_ = () => {
+      this.deps_
+        .eventManager()
+        .logSwgEvent(
+          AnalyticsEvent.ACTION_METER_TOAST_CLOSED_BY_ARTICLE_INTERACTION,
+          true
+        );
+      const closeRequest = new ToastCloseRequest();
+      closeRequest.setClose(true);
+      this.activityIframeView_.execute(closeRequest);
+      this.removeCloseEventListener();
+
+      if (this.onConsumeCallback_) {
+        this.onConsumeCallback_();
+      }
+    };
   }
 
   /**
@@ -10524,27 +10564,73 @@ class MeterToastApi {
     this.deps_
       .callbacks()
       .triggerFlowStarted(SubscriptionFlows.SHOW_METER_TOAST);
-    this.win_.addEventListener('click', this.sendCloseRequestFunction_);
     this.activityIframeView_.on(
       ViewSubscriptionsResponse,
       this.startNativeFlow_.bind(this)
     );
-    return this.dialogManager_.openView(this.activityIframeView_);
+    if (!this.deps_.callbacks().hasSubscribeRequestCallback()) {
+      const errorMessage =
+        '[swg.js]: `setOnNativeSubscribeRequest` has not been ' +
+        'set before starting the metering flow, so users will not be able to ' +
+        'subscribe from the metering dialog directly. Please call ' +
+        '`setOnNativeSubscribeRequest` with a subscription flow callback before ' +
+        'starting metering.';
+      log_4(errorMessage);
+    }
+    return this.dialogManager_.openView(this.activityIframeView_).then(() => {
+      this.setDialogBoxShadow_();
+      // Allow closing of the iframe with any scroll or click event.
+      this.win_.addEventListener('click', this.sendCloseRequestFunction_);
+      this.win_.addEventListener('touchstart', this.sendCloseRequestFunction_);
+      this.win_.addEventListener('mousedown', this.sendCloseRequestFunction_);
+      this.win_.addEventListener('wheel', this.sendCloseRequestFunction_);
+      // Making body's overflow property 'hidden' to prevent scrolling
+      // while swiping on the iframe.
+      const $body = this.win_.document.body;
+      setStyle($body, 'overflow', 'hidden');
+      this.deps_
+        .eventManager()
+        .logSwgEvent(AnalyticsEvent.IMPRESSION_METER_TOAST);
+      this.deps_.eventManager().logSwgEvent(AnalyticsEvent.EVENT_OFFERED_METER);
+    });
   }
 
   /**
-   * Sets a callback function to happen onCancel.
-   * @param {function()} onCancelCallback
+   * Sets a callback function this class calls when a user dismisses the toast to consume a free read.
+   * @param {function()} onConsumeCallback
    */
-  setOnCancelCallback(onCancelCallback) {
-    this.activityIframeView_.onCancel(onCancelCallback);
+  setOnConsumeCallback(onConsumeCallback) {
+    this.onConsumeCallback_ = onConsumeCallback;
   }
 
   /**
-   * Removes the event listener that closes the iframe.
+   * Removes the event listeners that close the iframe and make the body visible.
    */
   removeCloseEventListener() {
     this.win_.removeEventListener('click', this.sendCloseRequestFunction_);
+    this.win_.removeEventListener('touchstart', this.sendCloseRequestFunction_);
+    this.win_.removeEventListener('mousedown', this.sendCloseRequestFunction_);
+    this.win_.removeEventListener('wheel', this.sendCloseRequestFunction_);
+    const $body = this.win_.document.body;
+    setStyle($body, 'overflow', 'visible');
+  }
+
+  /**
+   * Changes the iframe box shadow to match desired specifications on mobile.
+   */
+  setDialogBoxShadow_() {
+    const mq = this.win_.matchMedia('(max-width: 640px), (max-height: 640px)');
+    const element = this.dialogManager_.getDialog().getElement();
+    if (mq.matches) {
+      setImportantStyles(element, {'box-shadow': IFRAME_BOX_SHADOW});
+    }
+    mq.addListener((changed) => {
+      if (changed.matches) {
+        setImportantStyles(element, {'box-shadow': IFRAME_BOX_SHADOW});
+      } else {
+        setImportantStyles(element, {'box-shadow': ''});
+      }
+    });
   }
 
   /**
@@ -10553,6 +10639,7 @@ class MeterToastApi {
    */
   startNativeFlow_(response) {
     if (response.getNative()) {
+      this.removeCloseEventListener();
       this.deps_.callbacks().triggerSubscribeRequest();
     }
   }
@@ -11212,11 +11299,10 @@ class EntitlementsManager {
   consume_(entitlements, onCloseDialog) {
     if (entitlements.enablesThisWithGoogleMetering()) {
       const meterToastApi = new MeterToastApi(this.deps_);
-      meterToastApi.setOnCancelCallback(() => {
+      meterToastApi.setOnConsumeCallback(() => {
         if (onCloseDialog) {
           onCloseDialog();
         }
-        meterToastApi.removeCloseEventListener();
         this.sendPingback_(entitlements);
       });
       return meterToastApi.start();
@@ -12690,7 +12776,15 @@ class MeterRegwallApi {
     this.deps_
       .callbacks()
       .triggerFlowStarted(SubscriptionFlows.SHOW_METER_REGWALL);
-    return this.dialogManager_.openView(this.activityIframeView_);
+    return this.dialogManager_.openView(this.activityIframeView_).then(() => {
+      // Log that we showed a regwall.
+      this.deps_.eventManager().logSwgEvent(AnalyticsEvent.IMPRESSION_REGWALL);
+
+      // Log that we showed a showcase regwall.
+      this.deps_
+        .eventManager()
+        .logSwgEvent(AnalyticsEvent.IMPRESSION_SHOWCASE_REGWALL);
+    });
   }
 }
 
@@ -17342,6 +17436,11 @@ class ConfiguredRuntime {
   /** @override */
   getLogger() {
     return Promise.resolve(this.logger_);
+  }
+
+  /** @override */
+  setShowcaseEntitlement(unusedEntitlement) {
+    // TODO
   }
 }
 

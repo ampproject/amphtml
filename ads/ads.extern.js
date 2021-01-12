@@ -256,6 +256,8 @@ google.ima.AdEvent.Type.AD_PROGRESS;
 google.ima.AdEvent.Type.CONTENT_PAUSE_REQUESTED;
 google.ima.AdEvent.Type.CONTENT_RESUME_REQUESTED;
 google.ima.AdEvent.Type.LOADED;
+google.ima.AdEvent.Type.PAUSED;
+google.ima.AdEvent.Type.RESUMED;
 google.ima.AdEvent.Type.ALL_ADS_COMPLETED;
 google.ima.AdsManager;
 google.ima.AdsManager.getRemainingTime;

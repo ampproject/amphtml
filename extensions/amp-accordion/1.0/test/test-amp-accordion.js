@@ -16,7 +16,9 @@
 import '../amp-accordion';
 import {ActionInvocation} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/action-constants';
+import {CanRender} from '../../../../src/contextprops';
 import {htmlFor} from '../../../../src/static-template';
+import {subscribe, unsubscribe} from '../../../../src/context';
 import {toggleExperiment} from '../../../../src/experiments';
 import {waitFor} from '../../../../testing/test-helper';
 
@@ -35,14 +37,25 @@ describes.realWin(
     async function waitForExpanded(el, expanded) {
       const isExpandedOrNot = () =>
         el.hasAttribute('expanded') === expanded &&
-        el.lastElementChild.hidden === !expanded;
+        el.firstElementChild.getAttribute('aria-expanded') === String(expanded);
       await waitFor(isExpandedOrNot, 'element expanded updated');
+    }
+
+    function readContextProp(element, prop) {
+      return new Promise((resolve) => {
+        const handler = (value) => {
+          resolve(value);
+          unsubscribe(element, [prop], handler);
+        };
+        subscribe(element, [prop], handler);
+      });
     }
 
     beforeEach(async () => {
       win = env.win;
       html = htmlFor(win.document);
-      toggleExperiment(win, 'amp-accordion-bento', true, true);
+      toggleExperiment(win, 'bento-accordion', true, true);
+      toggleExperiment(win, 'amp-accordion-display-locking', true, true);
       element = html`
         <amp-accordion layout="fixed" width="300" height="200">
           <section expanded id="section1">
@@ -82,6 +95,18 @@ describes.realWin(
         sections[2].firstElementChild.getAttribute('aria-expanded')
       ).to.equal('false');
       expect(sections[2].lastElementChild).to.have.display('none');
+    });
+
+    it('should propagate renderable context', async () => {
+      const sections = element.children;
+      const renderables = await Promise.all([
+        readContextProp(sections[0].lastElementChild, CanRender),
+        readContextProp(sections[1].lastElementChild, CanRender),
+        readContextProp(sections[2].lastElementChild, CanRender),
+      ]);
+      expect(renderables[0]).to.be.true;
+      expect(renderables[1]).to.be.false;
+      expect(renderables[2]).to.be.false;
     });
 
     it('should have amp specific classes for CSS', () => {
@@ -235,30 +260,125 @@ describes.realWin(
       expect(header0).to.have.attribute('aria-controls');
       expect(header0).to.have.attribute('role');
       expect(header0).to.have.attribute('aria-expanded');
+      expect(header0).to.have.attribute('id');
       expect(header0.getAttribute('aria-expanded')).to.equal('true');
       expect(content0).to.have.attribute('id');
+      expect(content0).to.have.attribute('aria-labelledby');
+      expect(content0).to.have.attribute('role');
       expect(header0.getAttribute('aria-controls')).to.equal(
         content0.getAttribute('id')
+      );
+      expect(header0.getAttribute('id')).to.equal(
+        content0.getAttribute('aria-labelledby')
       );
 
       expect(header1).to.have.attribute('tabindex');
       expect(header1).to.have.attribute('aria-controls');
       expect(header1).to.have.attribute('role');
       expect(header1).to.have.attribute('aria-expanded');
+      expect(header1).to.have.attribute('id');
       expect(header1.getAttribute('aria-expanded')).to.equal('false');
       expect(content1).to.have.attribute('id');
+      expect(content1).to.have.attribute('aria-labelledby');
+      expect(content1).to.have.attribute('role');
       expect(header1.getAttribute('aria-controls')).to.equal(
         content1.getAttribute('id')
+      );
+      expect(header1.getAttribute('id')).to.equal(
+        content1.getAttribute('aria-labelledby')
       );
 
       expect(header2).to.have.attribute('tabindex');
       expect(header2).to.have.attribute('aria-controls');
       expect(header2).to.have.attribute('role');
       expect(header2).to.have.attribute('aria-expanded');
+      expect(header2).to.have.attribute('id');
       expect(header2.getAttribute('aria-expanded')).to.equal('false');
       expect(content2).to.have.attribute('id');
+      expect(content2).to.have.attribute('aria-labelledby');
+      expect(content2).to.have.attribute('role');
       expect(header2.getAttribute('aria-controls')).to.equal(
         content2.getAttribute('id')
+      );
+      expect(header2.getAttribute('id')).to.equal(
+        content2.getAttribute('aria-labelledby')
+      );
+    });
+
+    it('should not overwrite existing header and content ids', async () => {
+      element = html`
+        <amp-accordion layout="fixed" width="300" height="200">
+          <section expanded id="section1">
+            <h1 id="h1">header1</h1>
+            <div id="c1">content1</div>
+          </section>
+          <section>
+            <h1 id="h2">header2</h1>
+            <div>content2</div>
+          </section>
+          <section>
+            <h1>header3</h1>
+            <div id="c3">content3</div>
+          </section>
+        </amp-accordion>
+      `;
+      win.document.body.appendChild(element);
+      await element.build();
+
+      const sections = element.children;
+      const {
+        firstElementChild: header0,
+        lastElementChild: content0,
+      } = sections[0];
+      const {
+        firstElementChild: header1,
+        lastElementChild: content1,
+      } = sections[1];
+      const {
+        firstElementChild: header2,
+        lastElementChild: content2,
+      } = sections[2];
+
+      expect(header0.getAttribute('id')).to.equal('h1');
+      expect(content0.getAttribute('id')).to.equal('c1');
+      expect(header0.getAttribute('aria-controls')).to.equal(
+        content0.getAttribute('id')
+      );
+      expect(header0.getAttribute('id')).to.equal(
+        content0.getAttribute('aria-labelledby')
+      );
+
+      expect(header1.getAttribute('id')).to.equal('h2');
+      expect(header1.getAttribute('aria-controls')).to.equal(
+        content1.getAttribute('id')
+      );
+      expect(header1.getAttribute('id')).to.equal(
+        content1.getAttribute('aria-labelledby')
+      );
+
+      expect(content2.getAttribute('id')).to.equal('c3');
+      expect(header2.getAttribute('aria-controls')).to.equal(
+        content2.getAttribute('id')
+      );
+      expect(header2.getAttribute('id')).to.equal(
+        content2.getAttribute('aria-labelledby')
+      );
+    });
+
+    it('should pick up new children', async () => {
+      const newSection = document.createElement('section');
+      newSection.setAttribute('expanded', '');
+      newSection.appendChild(document.createElement('h2'));
+      newSection.appendChild(document.createElement('div'));
+      element.appendChild(newSection);
+
+      await waitForExpanded(newSection, true);
+
+      expect(newSection.firstElementChild.className).to.include(
+        'i-amphtml-accordion-header'
+      );
+      expect(newSection.lastElementChild.className).to.include(
+        'i-amphtml-accordion-content'
       );
     });
 
@@ -435,6 +555,89 @@ describes.realWin(
         animation.onfinish();
         await waitForExpanded(sections[0], false);
         expect(section.lastElementChild).to.have.display('none');
+      });
+    });
+
+    describe('display locking', () => {
+      let defaultCssSupports;
+      let defaultBeforeMatch;
+
+      beforeEach(async () => {
+        toggleExperiment(win, 'amp-accordion-display-locking', true);
+        element = html`
+          <amp-accordion>
+            <section>
+              <h2>Section 1</h2>
+              <div>Puppies are cute.</div>
+            </section>
+            <section expanded>
+              <h2>Section 2</h2>
+              <div>Kittens are furry.</div>
+            </section>
+            <section expanded>
+              <h2>Section 3</h2>
+              <div>Elephants have great memory.</div>
+            </section>
+          </amp-accordion>
+        `;
+        defaultCssSupports = win.CSS.supports;
+        defaultBeforeMatch = win.document.body.onbeforematch;
+      });
+
+      afterEach(() => {
+        win.CSS.supports = defaultCssSupports;
+        win.document.body.onbeforematch = defaultBeforeMatch;
+        toggleExperiment(win, 'amp-accordion-display-locking', false);
+      });
+
+      it('should expand collpased section with beforematch event', async () => {
+        win.document.body.appendChild(element);
+        win.CSS.supports = () => true;
+        win.document.body.onbeforematch = null;
+        await element.build();
+
+        const section1 = element.children[0];
+        const content1 = section1.lastElementChild;
+
+        expect(section1).not.to.have.attribute('expanded');
+        content1.dispatchEvent(new Event('beforematch'));
+        await waitForExpanded(section1, true);
+        expect(section1).to.have.attribute('expanded');
+      });
+
+      it('should not expand already expanded section', async () => {
+        win.document.body.appendChild(element);
+        win.CSS.supports = () => true;
+        win.document.body.onbeforematch = null;
+        await element.build();
+
+        const section2 = element.children[1];
+        const content2 = section2.lastElementChild;
+
+        expect(section2).to.have.attribute('expanded');
+        content2.dispatchEvent(new Event('beforematch'));
+
+        // Section should is already expanded and stays expanded
+        await waitForExpanded(section2, true);
+        expect(section2).to.have.attribute('expanded');
+      });
+
+      it('should not toggle section with two synchronous beforematch events', async () => {
+        win.document.body.appendChild(element);
+        win.CSS.supports = () => true;
+        win.document.body.onbeforematch = null;
+        await element.build();
+
+        const section1 = element.children[0];
+        const content1 = section1.lastElementChild;
+
+        expect(section1).not.to.have.attribute('expanded');
+        content1.dispatchEvent(new Event('beforematch'));
+        content1.dispatchEvent(new Event('beforematch'));
+
+        // Section should be expanded (not toggled opened then closed)
+        await waitForExpanded(section1, true);
+        expect(section1).to.have.attribute('expanded');
       });
     });
 

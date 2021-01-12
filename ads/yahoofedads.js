@@ -36,6 +36,7 @@ export function yahoofedads(global, data) {
     'adPositionOverride': data.adPositionOverride,
     'adUnit': data.adUnit,
     'forceSource': data.forceSource,
+    'height': data.height,
     'lang': data.lang,
     'publisherUrl': data.url,
     'region': data.region,
@@ -43,6 +44,7 @@ export function yahoofedads(global, data) {
     'sectionId': data.sectionId,
     'site': data.site,
     'spaceId': data.spaceId,
+    'width': data.width,
   };
 
   loadScript(

@@ -31,8 +31,8 @@ Please visit our [website](https://target.my.com) for more information about us.
 
 Required parameters:
 
-- data-ad-slot
+-   data-ad-slot
 
 Optional parameters:
 
-- data-ad-query
+-   data-ad-query

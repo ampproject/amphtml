@@ -34,4 +34,4 @@ For semantics of configuration, please see [Rb.Infox documentation](https://adm.
 
 ### Required parameters
 
-- `src`
+-   `src`

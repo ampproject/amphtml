@@ -25,7 +25,7 @@ const {
   verifyExtensionBundles,
 } = require('../compile/bundles.config');
 const {endBuildStep, watchDebounceDelay} = require('./helpers');
-const {isTravisBuild} = require('../common/travis');
+const {isCiBuild} = require('../common/ci');
 const {jsifyCssAsync} = require('./jsify-css');
 const {maybeToEsmName, compileJs, mkdirSync} = require('./helpers');
 const {vendorConfigs} = require('./vendor-configs');
@@ -178,7 +178,7 @@ function getExtensionsToBuild(preBuild = false) {
   if (extensionsToBuild) {
     return extensionsToBuild;
   }
-  extensionsToBuild = DEFAULT_EXTENSION_SET;
+  extensionsToBuild = argv.core_runtime_only ? [] : DEFAULT_EXTENSION_SET;
   if (argv.extensions) {
     if (typeof argv.extensions !== 'string') {
       log(red('ERROR:'), 'Missing list of extensions.');
@@ -217,7 +217,7 @@ function getExtensionsToBuild(preBuild = false) {
  * @param {boolean=} preBuild
  */
 function parseExtensionFlags(preBuild = false) {
-  if (isTravisBuild()) {
+  if (isCiBuild()) {
     return;
   }
 
@@ -542,7 +542,7 @@ async function buildExtensionJs(path, name, version, latestVersion, options) {
       // See https://github.com/ampproject/amphtml/issues/3977
       wrapper: options.noWrapper
         ? ''
-        : wrappers.extension(name, options.loadPriority),
+        : wrappers.extension(name, argv.esm, options.loadPriority),
     })
   );
 
