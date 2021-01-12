@@ -43,7 +43,8 @@ describes.realWin(
       let closeButton;
       let toggleButton;
       let animateFunction;
-      let consoleWarnStub;
+      let consoleWarnSpy;
+      let consoleWarn;
 
       function invocation(method, args = {}) {
         const source = null;
@@ -68,7 +69,10 @@ describes.realWin(
         // disable animations for synchronous testing
         animateFunction = Element.prototype.animate;
         Element.prototype.animate = null;
-        consoleWarnStub = env.sandbox.stub(console, 'warn');
+        // disable warnings and check against spy when needed
+        consoleWarn = console.warn;
+        console.warn = () => true;
+        consoleWarnSpy = env.sandbox.spy(console, 'warn');
 
         fullHtml = html`
           <div>
@@ -104,6 +108,7 @@ describes.realWin(
 
       afterEach(() => {
         Element.prototype.animate = animateFunction;
+        console.warn = consoleWarn;
       });
 
       it('open attribute is synced with component mounted', async () => {
@@ -304,7 +309,7 @@ describes.realWin(
       it('should display a warning when sidebar is not child of body', async () => {
         // sidebar is wrapped in a div so not direct child of body
         // warning should be calledOnce
-        expect(consoleWarnStub).to.be.calledOnce;
+        expect(consoleWarnSpy).to.be.calledOnce;
 
         const noWarnSidebar = html`
           <amp-sidebar id="sidebar" side="left">
@@ -327,7 +332,7 @@ describes.realWin(
         // the 'noWarnSidebar' above is appended directly to the body and
         // should not throw a warning
         // the stub should still only have been called once
-        expect(consoleWarnStub).to.be.calledOnce;
+        expect(consoleWarnSpy).to.be.calledOnce;
       });
 
       describe('programatic access to imperative API', () => {
