@@ -24,9 +24,14 @@ module.exports = {
     await page.tap('.i-amphtml-story-page-open-attachment-label');
     await page.waitFor(410);
   },
-  'open attachment UI element with link': async (page, name) => {
-    const screen = page.touchscreen;
-    await screen.tap(200, 240);
-    await page.waitFor('amp-story-page#page-2[active]');
-  },
+  /**
+   * TODO(@ampproject/wg-stories): fix flaky test:
+   * https://percy.io/ampproject/amphtml/builds-next/8331061/changed/473805330
+   *
+   * 'open attachment UI element with link': async (page, name) => {
+   *   const screen = page.touchscreen;
+   *   await screen.tap(200, 240);
+   *   await page.waitFor('amp-story-page#page-2[active]');
+   * },
+   */
 };
