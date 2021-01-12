@@ -28,6 +28,6 @@ module.exports = {
     const screen = page.touchscreen;
     await screen.tap(200, 240);
     await page.waitFor('amp-story-page#page-2[active]');
-    await page.waitFor(100);
+    await page.waitFor(1600);
    },
 };
