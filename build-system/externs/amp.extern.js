@@ -650,8 +650,6 @@ AMP.AmpAdUIHandler = class {
   constructor(baseInstance) {}
 };
 
-AMP.RealTimeConfigManager;
-
 /**
  * Actual filled values for this exists in
  * src/service/real-time-config/real-time-config-impl.js
