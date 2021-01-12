@@ -2,7 +2,8 @@
     "vars" : {
         "tid": 1,
         "appname": "amp",
-        "suid": "${clientId(_iwa_vid_main)}"
+        "suid": "${clientId(_iwa_vid_main)}",
+        "pvid": "${pageViewId}"
     },
     "requests": {
         "base": "//iwa3.hit.interia.pl:8443?json=",

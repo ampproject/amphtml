@@ -76,6 +76,7 @@
       <option>infonline</option>
       <option>infonline_anonymous</option>
       <option>iplabel</option>
+      <option>iwa</option>
       <option>keen</option>
       <option>kenshoo</option>
       <option>krux</option>
@@ -347,7 +348,7 @@ For complete documentation and additional examples please see: https://marketing
 <!-- Black Crow AI example -->
 <amp-analytics type="blackcrowai">
   <script type="application/json">
-    { 
+    {
       "vars": {
         "google_tracking_id": "YOUR-GA-Account-ID-like-UA-134511847-1",
         "site_name": "YOUR-SITE-NAME-PROVIDED-BY-YOUR-BLACK-CROW"
@@ -829,6 +830,28 @@ For complete documentation and additional examples please see: https://marketing
 }
 </script>
 </amp-analytics>
+
+<!-- IWA tracking -->
+<amp-analytics type="iwa" id="iwa">
+<script type="application/json">
+{
+   "vars": {
+   "sh": "SERVICE_HOST"
+   },
+  "triggers": {
+    "load": {
+      "on": "visible",
+      "request": "load"
+    },
+    "endpageview": {
+      "on": "hidden",
+      "request": "endpageview"
+    }
+  }
+}
+</script>
+</amp-analytics>
+<!-- End IWA example -->
 
 <!-- Keen Analytics tracking -->
 <amp-analytics type="keen" id="keen">

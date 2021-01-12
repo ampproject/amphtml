@@ -217,6 +217,10 @@ More details for adding INFOnline anonymous support can be found at [www.infonli
 
 Type attribute value: `iplabel`
 
+### iwa
+
+Type attribute value: `iwa`
+
 ### Keen
 
 Type attribute value: `keen`
