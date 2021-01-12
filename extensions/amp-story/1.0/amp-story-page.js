@@ -535,10 +535,11 @@ export class AmpStoryPage extends AMP.BaseElement {
         this.preloadAllMedia_().then(() => {
           this.startMeasuringAllVideoPerformance_();
           this.startListeningToVideoEvents_();
-          this.playAllMedia_();
-          if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
-            this.unmuteAllMedia();
-          }
+          this.playAllMedia_().then(() => {
+            if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
+              this.unmuteAllMedia();
+            }
+          });
         });
       });
       this.prefersReducedMotion_()
