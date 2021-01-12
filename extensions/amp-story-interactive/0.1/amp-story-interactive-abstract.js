@@ -31,12 +31,17 @@ import {
   assertAbsoluteHttpOrHttpsUrl,
 } from '../../../src/url';
 import {base64UrlEncodeFromString} from '../../../src/utils/base64';
+import {
+  buildInteractiveDisclaimer,
+  tryCloseDisclaimer,
+} from './interactive-disclaimer';
 import {closest} from '../../../src/dom';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {deduplicateInteractiveIds} from './utils';
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {emojiConfetti} from './interactive-confetti';
+import {isExperimentOn} from '../../../src/experiments';
 import {toArray} from '../../../src/types';
 
 /** @const {string} */
@@ -363,6 +368,14 @@ export class AmpStoryInteractive extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    if (
+      isExperimentOn(this.win, 'amp-story-interactive-disclaimer') &&
+      this.element.hasAttribute('endpoint')
+    ) {
+      // Needs to be called after buildCallback to measure properly.
+      this.disclaimerEl_ = buildInteractiveDisclaimer(this);
+      this.rootEl_.appendChild(this.disclaimerEl_);
+    }
     this.initializeListeners_();
     return (this.backendDataPromise_ = this.element.hasAttribute('endpoint')
       ? this.retrieveInteractiveData_()
@@ -449,6 +462,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
             currPageId === this.getPageId_()
           );
         });
+        tryCloseDisclaimer(this, this.disclaimerEl_);
       },
       true /** callToInitialize */
     );
@@ -485,6 +499,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
           confettiEmoji
         );
       }
+      tryCloseDisclaimer(this, this.disclaimerEl_);
     }
   }
 
