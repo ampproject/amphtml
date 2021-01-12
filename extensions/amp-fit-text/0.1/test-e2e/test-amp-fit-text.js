@@ -100,17 +100,20 @@ describes.endtoend(
     });
 
     it.only('should recalculate font size after box size change', async () => {
-      debugger;
-      await verifyElementStyles(await selectContentDiv('test5'), {
-        'font-size': '17px',
-      });
-
       const contentButton = await controller.findElement('#test5_button');
-      await controller.click(contentButton);
+      const contentDiv = await selectContentDiv('test5');
 
-      await verifyElementStyles(await selectContentDiv('test5'), {
-        'font-size': '34px',
-      });
+      const originalFontSize = parseInt(
+        await controller.getElementCssValue(contentDiv, 'font-size'),
+        10
+      );
+      await controller.click(contentButton);
+      const updatedFontSize = parseInt(
+        await controller.getElementCssValue(contentDiv, 'font-size'),
+        10
+      );
+
+      await expect(updatedFontSize).to.be.greaterThan(originalFontSize);
     });
 
     async function selectContentDiv(id) {
