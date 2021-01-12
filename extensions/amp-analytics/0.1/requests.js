@@ -254,7 +254,7 @@ export class RequestHandler {
     const trigger = /** @type {!JsonObject} */ (this.lastTrigger_);
     this.reset_();
 
-    // preconnect to requestOrigin if available, otherwise baseUrlTemplate
+    // preconnect to requestOrigin if available, otherwise baseUrl
     const preconnectPromise = requestOriginPromise
       ? requestOriginPromise
       : baseUrlPromise;
