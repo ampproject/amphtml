@@ -158,7 +158,7 @@ The attributes above behave the same way as they do on a standard HTML [`<option
 Events may trigger actions on other AMP components using the `on` attribute.
 e.g. `on="select: my-tab.show"`
 
-Read more about [AMP Actions and Events](../../spec/amp-actions-and-events.md).
+Read more about [AMP Actions and Events](../../../spec/amp-actions-and-events.md).
 
 ### select
 
