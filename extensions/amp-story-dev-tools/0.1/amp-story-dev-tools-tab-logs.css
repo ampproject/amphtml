@@ -117,5 +117,30 @@ amp-story-dev-tools-tab-logs {
 }
 
 .i-amphtml-story-dev-tools-logs-success-image {
-  background-image: url('');
+  background-image: url('https://raw.githubusercontent.com/mszylkowski/amphtml/devtools_images/extensions/amp-story-dev-tools/img/logs-success.svg') !important; /* TODO: Change to master */
+  width: 260px !important;
+  height: 300px !important;
+  margin-bottom: 20px !important;
+}
+
+.i-amphtml-story-dev-tools-logs-success {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-direction: column;
+  height: 100% !important;
+  white-space: pre !important;
+  text-align: center !important;
+  position: relative !important;
+}
+
+.i-amphtml-story-dev-tools-logs-success .i-amphtml-story-dev-tools-log-status-title {
+  position: absolute !important;
+  left: 0 !important;
+  top: 0 !important;
+}
+
+.i-amphtml-story-dev-tools-logs-success-message {
+  font-size: 28px !important;
+  font-weight: bold !important;
 }

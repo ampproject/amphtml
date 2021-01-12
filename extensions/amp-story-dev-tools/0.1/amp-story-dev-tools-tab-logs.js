@@ -96,7 +96,7 @@ export class AmpStoryDevToolsTabLogs extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    return this.buildLogsContent_(this.errorList_);
+    return this.buildLogsContent_();
   }
 
   /** @override */
@@ -135,52 +135,15 @@ export class AmpStoryDevToolsTabLogs extends AMP.BaseElement {
 
   /**
    * @private
-   * @param {Array<Object>} errorList
    * @return {!Promise}
    */
-  buildLogsContent_(errorList) {
+  buildLogsContent_() {
     const logsContainer = this.element.ownerDocument.createElement('div');
-    logsContainer.appendChild(this.buildLogsTitle_(errorList.length));
-    if (!errorList.length) {
-      logsContainer.classList.add('i-amphtml-story-dev-tools-logs-success');
-      logsContainer.appendChild(
-        createElementWithAttributes(this.element.ownerDocument, 'div', {
-          'class': 'i-amphtml-story-dev-tools-logs-success-image',
-        })
-      );
-      const successMessage = this.element.ownerDocument.createElement('div');
-      successMessage.textContent = 'Great Job!\nNo issues found.';
-      logsContainer.appendChild(successMessage);
+    logsContainer.appendChild(this.buildLogsTitle_(this.errorList_.length));
+    if (!this.errorList_.length) {
+      this.addSuccessMessageToLogs_(logsContainer);
     } else {
-      errorList.forEach((content) => {
-        const logEl = buildLogMessageTemplate(this.element);
-        logEl.querySelector('.i-amphtml-story-dev-tools-log-type').textContent =
-          content.code;
-        const codeEl = logEl.querySelector(
-          '.i-amphtml-story-dev-tools-log-code'
-        );
-        content.htmlLines.forEach((l, i) => {
-          const lineEl = this.element.ownerDocument.createElement('span');
-          lineEl.classList.add('i-amphtml-story-dev-tools-log-code-line');
-          lineEl.textContent = (i + content.line - 1).toString() + '|' + l;
-          codeEl.appendChild(lineEl);
-        });
-        logEl.querySelector(
-          '.i-amphtml-story-dev-tools-log-position'
-        ).textContent = `${content.line}:${content.col}`;
-        logEl.querySelector(
-          '.i-amphtml-story-dev-tools-log-description'
-        ).textContent = content.message;
-        const specUrlElement = logEl.querySelector(
-          '.i-amphtml-story-dev-tools-log-spec'
-        );
-        if (content.specUrl) {
-          specUrlElement.href = content.specUrl;
-        } else {
-          specUrlElement.remove();
-        }
-        logsContainer.appendChild(logEl);
-      });
+      this.addErrorsToLogs_(logsContainer);
     }
     this.mutateElement(() => {
       this.element.textContent = '';
@@ -234,5 +197,61 @@ export class AmpStoryDevToolsTabLogs extends AMP.BaseElement {
       statusIcon = buildStatusIcon(this.element, true);
     }
     this.mutateElement(() => logsTabSelector.appendChild(statusIcon));
+  }
+
+  /**
+   * @private
+   * @param {!Element} logsContainer
+   */
+  addSuccessMessageToLogs_(logsContainer) {
+    logsContainer.classList.add('i-amphtml-story-dev-tools-logs-success');
+    logsContainer.appendChild(
+      createElementWithAttributes(this.element.ownerDocument, 'div', {
+        'class': 'i-amphtml-story-dev-tools-logs-success-image',
+      })
+    );
+    const successMessage = createElementWithAttributes(
+      this.element.ownerDocument,
+      'div',
+      {
+        'class': 'i-amphtml-story-dev-tools-logs-success-message',
+      }
+    );
+    successMessage.textContent = `Great Job!\r\nNo issues found.`;
+    logsContainer.appendChild(successMessage);
+  }
+
+  /**
+   * @private
+   * @param {!Element} logsContainer
+   */
+  addErrorsToLogs_(logsContainer) {
+    this.errorList_.forEach((content) => {
+      const logEl = buildLogMessageTemplate(this.element);
+      logEl.querySelector('.i-amphtml-story-dev-tools-log-type').textContent =
+        content.code;
+      const codeEl = logEl.querySelector('.i-amphtml-story-dev-tools-log-code');
+      content.htmlLines.forEach((l, i) => {
+        const lineEl = this.element.ownerDocument.createElement('span');
+        lineEl.classList.add('i-amphtml-story-dev-tools-log-code-line');
+        lineEl.textContent = (i + content.line - 1).toString() + '|' + l;
+        codeEl.appendChild(lineEl);
+      });
+      logEl.querySelector(
+        '.i-amphtml-story-dev-tools-log-position'
+      ).textContent = `${content.line}:${content.col}`;
+      logEl.querySelector(
+        '.i-amphtml-story-dev-tools-log-description'
+      ).textContent = content.message;
+      const specUrlElement = logEl.querySelector(
+        '.i-amphtml-story-dev-tools-log-spec'
+      );
+      if (content.specUrl) {
+        specUrlElement.href = content.specUrl;
+      } else {
+        specUrlElement.remove();
+      }
+      logsContainer.appendChild(logEl);
+    });
   }
 }
