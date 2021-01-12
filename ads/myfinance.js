@@ -19,6 +19,7 @@ import { validateData, writeScript } from '../3p/3p';
 const mandatoryFields = [
   'adType'
 ];
+
 const ad_url = 'https://www.myfinance.com/amp/ad';
 
 /**
