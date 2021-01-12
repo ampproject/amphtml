@@ -48,6 +48,8 @@ const ANIMATION_KEYFRAMES_SLIDE_IN_RIGHT = [
   {'transform': 'translateX(0)'},
 ];
 
+const SIDE_STYLES_HIDDEN = {'visibility': 'hidden'};
+const SIDE_STYLES_VISIBLE = {'visibility': ''};
 const ANIMATION_STYLES_SIDEBAR_LEFT_INIT = {'transform': 'translateX(-100%)'};
 const ANIMATION_STYLES_SIDEBAR_RIGHT_INIT = {'transform': 'translateX(100%)'};
 const ANIMATION_STYLES_BACKDROP_INIT = {'opacity': '0'};
@@ -109,9 +111,8 @@ function SidebarWithRef(
   // `mounted` mounts the component. `opened` plays the animation.
   const [mounted, setMounted] = useState(false);
   const [opened, setOpened] = useState(false);
-  const [side, setSide] = useState(
-    typeof document === 'object' ? calculateSide(sideProp, document) : sideProp
-  );
+  const [side, setSide] = useState(null);
+
   const classes = useStyles();
   const sidebarRef = useRef();
   const backdropRef = useRef();
@@ -148,18 +149,30 @@ function SidebarWithRef(
   );
 
   useLayoutEffect(() => {
+    if (side) {
+      return;
+    }
+    const sidebarElement = sidebarRef.current;
+    if (!sidebarElement) {
+      return;
+    }
+    setSide(calculateSide(sideProp, sidebarElement.ownerDocument));
+  }, [sideProp, side, mounted]);
+
+  useLayoutEffect(() => {
     const sidebarElement = sidebarRef.current;
     const backdropElement = backdropRef.current;
     if (!sidebarElement || !backdropElement) {
       return;
     }
 
-    const document = sidebarElement.ownerDocument;
-    const newSide = calculateSide(side, document);
-    if (newSide !== side) {
-      setSide(newSide);
+    if (!side) {
+      safelySetStyles(sidebarElement, SIDE_STYLES_HIDDEN);
+      safelySetStyles(backdropElement, SIDE_STYLES_HIDDEN);
       return;
     }
+    safelySetStyles(sidebarElement, SIDE_STYLES_VISIBLE);
+    safelySetStyles(backdropElement, SIDE_STYLES_VISIBLE);
 
     let sidebarAnimation;
     let backdropAnimation;
@@ -206,6 +219,7 @@ function SidebarWithRef(
         sidebarAnimation = null;
         backdropAnimation = null;
         setMounted(false);
+        setSide(null);
       };
       if (!sidebarElement.animate || !backdropElement.animate) {
         postInvisibleAnim();
