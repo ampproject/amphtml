@@ -128,7 +128,7 @@ describes.realWin('size-observer', {}, (env) => {
     expect(size2.height).to.equal(102);
   });
 
-  it.only('should only observe last change', async () => {
+  it('should only observe last change', async () => {
     const callbackCaller = createCallbackCaller();
     observeContentSize(element, callbackCaller);
 
