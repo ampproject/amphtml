@@ -53,10 +53,11 @@ describes.endtoend(
         'font-size': '17px',
       });
 
-      selectContentButton();
+      const contentButton = await controller.findElement('#test5_button');
+      await controller.click(contentButton);
 
       await verifyElementStyles(await selectContentDiv('test5'), {
-        'font-size': '19px',
+        'font-size': '34px',
       });
     });
 
@@ -64,10 +65,6 @@ describes.endtoend(
       return await controller.findElement(
         `#${id} .i-amphtml-fit-text-content > div`
       );
-    }
-
-    async function selectContentButton() {
-      return await controller.findElement(`#test5_button`);
     }
 
     async function verifyElementStyles(element, styles) {
