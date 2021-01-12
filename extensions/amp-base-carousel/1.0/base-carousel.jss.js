@@ -85,9 +85,16 @@ const slideElement = {
   justifyContent: 'center',
 };
 
+const startAlign = {};
+const centerAlign = {};
 const enableSnap = {
-  scrollSnapAlign: 'start',
   scrollSnapStop: 'always',
+  '&$startAlign': {
+    scrollSnapAlign: 'start',
+  },
+  '&$centerAlign': {
+    scrollSnapAlign: 'center',
+  },
 };
 
 const disableSnap = {
@@ -254,6 +261,8 @@ const JSS = {
   verticalScroll,
   slideElement,
   thumbnails,
+  startAlign,
+  centerAlign,
   enableSnap,
   disableSnap,
   slideSizing,
