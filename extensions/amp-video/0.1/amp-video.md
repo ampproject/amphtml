@@ -2,14 +2,14 @@
 $category@: media
 formats:
   - websites
+  - stories
+  - ads
 teaser:
   text: Replaces the HTML5 video tag.
-experimental: true
-bento: true
 ---
 
 <!---
-Copyright 2021 The AMP HTML Authors. All Rights Reserved.
+Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -86,6 +86,10 @@ This attribute is similar to the `controls` attribute in the HTML5 `video`. If t
 
 Same as [controlsList](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList) attribute of HTML5 video element. Only supported by certain browsers.
 
+### dock<
+
+Requires [`amp-video-docking`](../amp-video-docking/amp-video-docking.md) component. If this attribute is present and the video is playing manually, the video will be "minimized" and fixed to a corner or an element when the user scrolls out of the video component's visual area.
+
 ### loop
 
 If present, the video will automatically loop back to the start upon reaching the end.
@@ -161,3 +165,7 @@ Indicates the name/title of the video, specified as a string. If not provided, t
 ### Click-to-Play overlay
 
 Providing a click-to-play overlay is a common UX feature for video players on the web. For example, you could display a custom play icon that the user can click, as well as include the title of the video, different sized poster images, and so on. Because the `amp-video` component supports the standard `play` AMP action, you can easily implement click-to-play.
+
+## Validation
+
+See [amp-video rules](validator-amp-video.protoascii) in the AMP validator specification.
