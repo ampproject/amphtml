@@ -106,12 +106,16 @@ describes.realWin(
       );
     }
 
-    function stubMeasureIntersection(videoIframe, time, intersectionRatio) {
-      const entry = {time, intersectionRatio};
-      env.sandbox
-        .stub(videoIframe.implementation_, 'measureIntersection')
-        .returns(Promise.resolve(entry));
-      return entry;
+    function stubMeasureIntersection(target, time, intersectionRatio) {
+      env.win.IntersectionObserver = (callback) => ({
+        observe() {
+          Promise.resolve().then(() => {
+            callback([{target, time, intersectionRatio}]);
+          });
+        },
+        unobserve() {},
+        disconnect() {},
+      });
     }
 
     describe('#layoutCallback', () => {
@@ -288,10 +292,8 @@ describes.realWin(
 
         const message = getIntersectionMessage(id);
 
-        const expectedResponseMessage = {
-          id,
-          args: stubMeasureIntersection(videoIframe, time, intersectionRatio),
-        };
+        stubMeasureIntersection(videoIframe, time, intersectionRatio);
+        const expectedResponseMessage = {id, args: {time, intersectionRatio}};
 
         await videoIframe.implementation_.onMessage_(message);
 

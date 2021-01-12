@@ -127,12 +127,6 @@ class AmpVideoIframe extends AMP.BaseElement {
      * @private
      */
     this.boundOnMessage_ = (e) => this.onMessage_(e);
-
-    /**
-     * @param {!Element} element
-     * @return {!Promise<IntersectionObserverEntry>} element
-     */
-    this.measureIntersection = (element) => measureIntersection(element);
   }
 
   /** @override */
@@ -282,7 +276,7 @@ class AmpVideoIframe extends AMP.BaseElement {
 
   /**
    * @param {!Event} event
-   * @return {Promise}
+   * @return {!Promise|undefined}
    * @private
    */
   onMessage_(event) {
@@ -310,7 +304,7 @@ class AmpVideoIframe extends AMP.BaseElement {
 
     if (methodReceived) {
       if (methodReceived == 'getIntersection') {
-        return this.measureIntersection(this.element).then((intersection) => {
+        return measureIntersection(this.element).then((intersection) => {
           this.postIntersection_(messageId, intersection);
         });
       }
