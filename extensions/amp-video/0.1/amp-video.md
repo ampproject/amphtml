@@ -76,7 +76,7 @@ Alternatively, you can present a click-to-play overlay.
 
 If this attribute is present, and the browser supports autoplay, the video will be automatically
 played as soon as it becomes visible. There are some conditions that the component needs to meet
-to be played, [which are outlined in the Video in AMP spec](../../spec/amp-video-interface.md#autoplay).
+to be played, [which are outlined in the Video in AMP spec](../../../spec/amp-video-interface.md#autoplay).
 
 ### controls
 
@@ -86,9 +86,9 @@ This attribute is similar to the `controls` attribute in the HTML5 `video`. If t
 
 Same as [controlsList](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList) attribute of HTML5 video element. Only supported by certain browsers.
 
-### dock<
+### dock
 
-Requires [`amp-video-docking`](../amp-video-docking/amp-video-docking.md) component. If this attribute is present and the video is playing manually, the video will be "minimized" and fixed to a corner or an element when the user scrolls out of the video component's visual area.
+Requires [`amp-video-docking`](../../amp-video-docking/amp-video-docking.md) component. If this attribute is present and the video is playing manually, the video will be "minimized" and fixed to a corner or an element when the user scrolls out of the video component's visual area.
 
 ### loop
 
@@ -113,7 +113,7 @@ when the video has autoplay.
 
 ### rotate-to-fullscreen
 
-If the video is visible, the video displays fullscreen after the user rotates their device into landscape mode. For more details, see the [Video in AMP spec](../../spec/amp-video-interface.md#rotate-to-fullscreen).
+If the video is visible, the video displays fullscreen after the user rotates their device into landscape mode. For more details, see the [Video in AMP spec](../../../spec/amp-video-interface.md#rotate-to-fullscreen).
 
 ### common attributes
 
@@ -158,7 +158,7 @@ Indicates the name/title of the video, specified as a string. If not provided, t
 
 ## Analytics
 
-`amp-video` supports analytics out of the box. See [video analytics](../amp-analytics/amp-video-analytics.md) for more information.
+`amp-video` supports analytics out of the box. See [video analytics](../../amp-analytics/amp-video-analytics.md) for more information.
 
 ## Styling
 
@@ -168,4 +168,4 @@ Providing a click-to-play overlay is a common UX feature for video players on th
 
 ## Validation
 
-See [amp-video rules](validator-amp-video.protoascii) in the AMP validator specification.
+See [amp-video rules](../validator-amp-video.protoascii) in the AMP validator specification.

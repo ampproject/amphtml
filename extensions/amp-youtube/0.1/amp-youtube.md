@@ -105,7 +105,7 @@ Use the `autoplay` attribute instead of `data-param-autoplay` and the `loop` att
 
 ### dock
 
-Requires [`amp-video-docking`](../amp-video-docking/amp-video-docking.md) component. If this attribute is present and the video is playing manually, the video will be "minimized" and fixed to a corner or an element when the user scrolls out of the video component's visual area.
+Requires [`amp-video-docking`](../../amp-video-docking/amp-video-docking.md) component. If this attribute is present and the video is playing manually, the video will be "minimized" and fixed to a corner or an element when the user scrolls out of the video component's visual area.
 
 ### credentials (optional)
 

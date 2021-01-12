@@ -30,7 +30,7 @@ The `amp-date-display` component displays time data that you can render in your
 AMP page. By providing specific [attributes](#attributes) in the
 `amp-date-display` tag, the `amp-date-display` extension returns a list of time
 parameters, which you can pass to
-[an amp-mustache template](../amp-mustache/amp-mustache.md)
+[an amp-mustache template](../../amp-mustache/amp-mustache.md)
 for rendering. Refer to the
 [list below for each returned time parameter](#returned-time-parameters).
 
@@ -117,4 +117,4 @@ the given date.
 
 ## Validation
 
-See [amp-date-display rules](validator-amp-date-display.protoascii) in the AMP validator specification.
+See [amp-date-display rules](../validator-amp-date-display.protoascii) in the AMP validator specification.

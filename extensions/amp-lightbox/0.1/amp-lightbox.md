@@ -37,9 +37,9 @@ child elements of the `amp-lightbox`.
 [tip type="read-on"]
 
 For showing images in a lightbox, there's also the
-[`<amp-image-lightbox>`](../amp-image-lightbox/amp-image-lightbox.md)
+[`<amp-image-lightbox>`](../../amp-image-lightbox/amp-image-lightbox.md)
 component. To show a gallery of images in a lightbox, you can use
-[`<amp-lightbox-gallery>`](../amp-lightbox-gallery/amp-lightbox-gallery.md).
+[`<amp-lightbox-gallery>`](../../amp-lightbox-gallery/amp-lightbox-gallery.md).
 
 [/tip]
 
@@ -48,7 +48,7 @@ component. To show a gallery of images in a lightbox, you can use
 ### Using `amp-lightbox` in AMPHTML ads <a name="a4a"></a>
 
 There are some differences between using `amp-lightbox` in normal AMP documents
-vs. [ads written in AMPHTML](../amp-a4a/amp-a4a-format.md).
+vs. [ads written in AMPHTML](../../amp-a4a/amp-a4a-format.md).
 
 [tip type="note"]
 
@@ -211,5 +211,5 @@ attribute value, will be created and focused on.
 
 ## Validation
 
-See [`amp-lightbox` rules](validator-amp-lightbox.protoascii)
+See [`amp-lightbox` rules](../validator-amp-lightbox.protoascii)
 in the AMP validator specification.
