@@ -740,7 +740,10 @@ export class ManualAdvancement extends AdvancementConfig {
       const viewer = Services.viewerForDoc(this.ampdoc_);
       viewer.sendMessage(
         'triggerPlayerAction',
-        dict({'productId': playerLink.getAttribute('player-action')}),
+        dict({
+          'productId': JSON.parse(playerLink.getAttribute('player-action'))
+            .productId,
+        }),
         false
       );
       return;
