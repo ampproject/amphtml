@@ -43,7 +43,7 @@ class AmpFitText extends AMP.BaseElement {
     /** @private {number} */
     this.maxFontSize_ = -1;
 
-    /** @private {?unlistenDef} */
+    /** @private {?UnlistenDef} */
     this.resizeObserverUnlistener_ = null;
 
     /**
@@ -123,6 +123,25 @@ class AmpFitText extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+    if (window.ResizeObserver) {
+      if (this.observer_ == null) {
+        this.observer_ = new ResizeObserver(() =>
+          this.mutateElement(() => {
+            this.updateMeasurerContent_();
+            this.updateFontSize_();
+          })
+        );
+      }
+      this.observer_.observe(this.content_);
+      this.observer_.observe(this.measurer_);
+      this.unlisteners_.push(() => {
+        this.observer_.disconnect();
+      });
+=======
+>>>>>>> master
     if (this.win.ResizeObserver && this.resizeObserverUnlistener_ === null) {
       const observer = new this.win.ResizeObserver(
         throttle(
@@ -141,6 +160,10 @@ class AmpFitText extends AMP.BaseElement {
       this.resizeObserverUnlistener_ = function () {
         observer.disconnect();
       };
+<<<<<<< HEAD
+=======
+>>>>>>> 7fc69a6a0794c8c5f92f32b6481ff1311b323728
+>>>>>>> master
     }
     return this.mutateElement(() => {
       this.updateFontSize_();
@@ -149,9 +172,20 @@ class AmpFitText extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
+<<<<<<< HEAD
     if (this.resizeObserverUnlistener_ !== null) {
       this.resizeObserverUnlistener_();
       this.resizeObserverUnlistener_ = null;
+=======
+<<<<<<< HEAD
+    while (this.unlisteners_.length > 0) {
+      this.unlisteners_.pop()();
+=======
+    if (this.resizeObserverUnlistener_ !== null) {
+      this.resizeObserverUnlistener_();
+      this.resizeObserverUnlistener_ = null;
+>>>>>>> 7fc69a6a0794c8c5f92f32b6481ff1311b323728
+>>>>>>> master
     }
   }
 
