@@ -23,6 +23,7 @@ import {
 } from '../experiments/intersect-resources-exp';
 import {Pass} from '../pass';
 import {READY_SCAN_SIGNAL, ResourcesInterface} from './resources-interface';
+
 import {Resource, ResourceState} from './resource';
 import {Services} from '../services';
 import {TaskQueue} from './task-queue';
@@ -225,9 +226,10 @@ export class ResourcesImpl {
     divertIntersectResources(this.win);
 
     if (
+      isExperimentOn(this.win, 'bento') ||
       getExperimentBranch(this.win, INTERSECT_RESOURCES_EXP.id) ===
-        INTERSECT_RESOURCES_EXP.experiment &&
-      !isAmp4Email(this.win.document)
+        INTERSECT_RESOURCES_EXP.experiment ||
+      isAmp4Email(this.win.document)
     ) {
       const iframed = isIframed(this.win);
 
@@ -1009,7 +1011,7 @@ export class ResourcesImpl {
                 // If the element has siblings, it's possible that a width-expansion will
                 // cause some of them to be pushed down.
                 const parentWidth =
-                  (parent.getLayoutWidth && parent.getLayoutWidth()) ||
+                  (parent.getLayoutSize && parent.getLayoutSize().width) ||
                   parent./*OK*/ offsetWidth;
                 let cumulativeWidth = widthDiff;
                 for (let i = 0; i < parent.childElementCount; i++) {

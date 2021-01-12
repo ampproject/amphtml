@@ -97,9 +97,6 @@ import {isArray, toWin} from './types';
  * element instance. This can be used to do additional style calculations
  * without triggering style recalculations.
  *
- * When the dimensions of an element has changed, the 'onMeasureChanged'
- * callback is called.
- *
  * For more details, see {@link custom-element.js}.
  *
  * Each method is called exactly once and overriding them in subclasses
@@ -206,12 +203,11 @@ export class BaseElement {
   }
 
   /**
-   * Returns a previously measured layout box relative to the page. The
-   * fixed-position elements are relative to the top of the document.
-   * @return {!./layout-rect.LayoutRectDef}
+   * Returns a previously measured layout size.
+   * @return {!./layout-rect.LayoutSizeDef}
    */
-  getPageLayoutBox() {
-    return this.element.getPageLayoutBox();
+  getLayoutSize() {
+    return this.element.getLayoutSize();
   }
 
   /**
@@ -943,16 +939,20 @@ export class BaseElement {
   onLayoutMeasure() {}
 
   /**
-   * Called only when the measurements of an amp-element changes. This
-   * would not trigger for every measurement invalidation caused by a mutation.
-   * @public
-   */
-  onMeasureChanged() {}
-
-  /**
    * @return {./log.Log}
    */
   user() {
     return user(this.element);
+  }
+
+  /**
+   * Returns this BaseElement instance. This is equivalent to Bento's
+   * imperative API object, since this is where we define the element's custom
+   * APIs.
+   *
+   * @return {!Promise<!Object>}
+   */
+  getApi() {
+    return this;
   }
 }

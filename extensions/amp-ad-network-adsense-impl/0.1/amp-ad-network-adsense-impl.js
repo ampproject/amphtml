@@ -37,12 +37,14 @@ import {
   getCsiAmpAnalyticsVariables,
   getEnclosingContainerTypes,
   getIdentityToken,
+  getServeNpaPromise,
   googleAdUrl,
   isCdnProxy,
   isReportingEnabled,
   maybeAppendErrorParameter,
 } from '../../../ads/google/a4a/utils';
 import {ResponsiveState} from './responsive-state';
+import {STICKY_AD_TRANSITION_EXP} from '../../../src/experiments/sticky-ad-transition-exp';
 import {Services} from '../../../src/services';
 import {
   addAmpExperimentIdToElement,
@@ -70,15 +72,6 @@ const ADSENSE_BASE_URL = 'https://googleads.g.doubleclick.net/pagead/ads';
 
 /** @const {string} */
 const TAG = 'amp-ad-network-adsense-impl';
-
-/** @const {string} */
-const PTT_EXP = 'adsense-ptt-exp';
-
-/** @const @enum{string} */
-const PTT_EXP_BRANCHES = {
-  CONTROL: '21068091',
-  EXPERIMENT: '21068092',
-};
 
 /**
  * Shared state for AdSense ad slots. This is used primarily for ad request url
@@ -236,9 +229,12 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   divertExperiments() {
     const experimentInfoList = /** @type {!Array<!../../../src/experiments.ExperimentInfo>} */ ([
       {
-        experimentId: PTT_EXP,
+        experimentId: STICKY_AD_TRANSITION_EXP.id,
         isTrafficEligible: () => true,
-        branches: Object.values(PTT_EXP_BRANCHES),
+        branches: [
+          STICKY_AD_TRANSITION_EXP.control,
+          STICKY_AD_TRANSITION_EXP.experiment,
+        ],
       },
     ]);
     const setExps = randomlySelectUnsetExperiments(
@@ -287,7 +283,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 
   /** @override */
-  getAdUrl(consentTuple) {
+  getAdUrl(consentTuple, opt_unusedRtcResponsesPromise, opt_serveNpaSignal) {
     let consentState = undefined;
     let consentString = undefined;
     let gdprApplies = undefined;
@@ -357,14 +353,12 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'format': format,
       'w': sizeToSend.width,
       'h': sizeToSend.height,
-      'ptt':
-        getExperimentBranch(this.win, PTT_EXP) === PTT_EXP_BRANCHES.EXPERIMENT
-          ? 12
-          : null,
+      'ptt': 12,
       'iu': slotname,
       'npa':
         consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
-        consentState == CONSENT_POLICY_STATE.UNKNOWN
+        consentState == CONSENT_POLICY_STATE.UNKNOWN ||
+        !!opt_serveNpaSignal
           ? 1
           : null,
       'adtest': adTestOn ? 'on' : null,
@@ -428,6 +422,11 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         experimentIds
       );
     });
+  }
+
+  /** @override */
+  getServeNpaSignal() {
+    return getServeNpaPromise(this.element);
   }
 
   /** @override */

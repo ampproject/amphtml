@@ -15,12 +15,12 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {boolean, select, withKnobs} from '@storybook/addon-knobs';
+import {select, text, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
 export default {
-  title: 'amp-lightbox',
+  title: 'amp-lightbox-1_0',
   decorators: [withKnobs, withA11y, withAmp],
 
   parameters: {
@@ -29,27 +29,31 @@ export default {
 };
 
 export const Default = () => {
-  const animateIn = select('animate-in', [
+  const animation = select('animation', [
     'fade-in',
     'fly-in-top',
     'fly-in-bottom',
   ]);
-  const enableAnimation = boolean('enable animation', true);
+  const backgroundColor = text('background color', '');
+  const color = text('font color', '');
   return (
-    <div style="height: 300px;">
-      <amp-lightbox
-        id="lightbox"
-        layout="nodisplay"
-        animate-in={animateIn}
-        enable-animation={enableAnimation}
-      >
-        <p>Test</p>
-        <button on="tap:lightbox.close">Close</button>
-      </amp-lightbox>
-      <div class="buttons">
-        <button on="tap:lightbox">Open</button>
+    <>
+      <style>{`
+        #lightbox {
+          background-color: ${backgroundColor};
+          color: ${color};
+        }
+      `}</style>
+      <div style="height: 300px;">
+        <amp-lightbox id="lightbox" layout="nodisplay" animation={animation}>
+          <p>Test</p>
+          <button on="tap:lightbox.close">Close</button>
+        </amp-lightbox>
+        <div class="buttons">
+          <button on="tap:lightbox">Open</button>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

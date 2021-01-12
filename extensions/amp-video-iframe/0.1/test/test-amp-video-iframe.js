@@ -23,7 +23,6 @@ import {
   whenUpgradedToCustomElement,
 } from '../../../../src/dom';
 import {listenOncePromise} from '../../../../src/event-helper';
-import {tryParseJson} from '../../../../src/json';
 
 function getIntersectionMessage(id) {
   return {data: {id, method: 'getIntersection'}};
@@ -89,10 +88,10 @@ describes.realWin(
 
     async function layoutAndLoad(element) {
       await whenUpgradedToCustomElement(element);
-      // getLayoutBox() affects looksLikeTrackingIframe().
+      // getLayoutSize() affects looksLikeTrackingIframe().
       // Use default width/height of 100 since element is not sized
       // as expected in test fixture.
-      env.sandbox.stub(element, 'getLayoutBox').returns({
+      env.sandbox.stub(element, 'getLayoutSize').returns({
         width: Number(element.getAttribute('width')) || 100,
         height: Number(element.getAttribute('height')) || 100,
       });
@@ -127,20 +126,30 @@ describes.realWin(
       });
 
       it('sets metadata in iframe name', async () => {
-        const metadata = {
-          canonicalUrl: 'foo.html',
-          sourceUrl: 'bar.html',
-        };
+        const canonicalUrl = 'foo.html';
+        const sourceUrl = 'bar.html';
+        const title = 'My test title';
+        const lang = 'es';
 
-        env.sandbox.stub(Services, 'documentInfoForDoc').returns(metadata);
+        env.sandbox.stub(win.document, 'title').value(title);
+        env.sandbox.stub(win.document.documentElement, 'lang').value(lang);
+
+        env.sandbox.stub(Services, 'documentInfoForDoc').returns({
+          canonicalUrl,
+          sourceUrl,
+        });
 
         const videoIframe = createVideoIframe();
 
         await layoutAndLoad(videoIframe);
 
-        const {name} = videoIframe.implementation_.iframe_;
-
-        expect(tryParseJson(name)).to.deep.equal(metadata);
+        const iframe = videoIframe.querySelector('iframe');
+        expect(JSON.parse(iframe.name)).to.deep.equal({
+          canonicalUrl,
+          sourceUrl,
+          title,
+          lang,
+        });
       });
 
       it('sets amp=1 fragment in src', async () => {
@@ -149,8 +158,8 @@ describes.realWin(
 
         await layoutAndLoad(videoIframe);
 
-        const {src} = videoIframe.implementation_.iframe_;
-        expect(src).to.equal(`${rawSrc}#amp=1`);
+        const iframe = videoIframe.querySelector('iframe');
+        expect(iframe.src).to.equal(`${rawSrc}#amp=1`);
       });
 
       it('does not set amp=1 fragment in src when fragment present', async () => {
@@ -159,8 +168,8 @@ describes.realWin(
 
         await layoutAndLoad(videoIframe);
 
-        const {src} = videoIframe.implementation_.iframe_;
-        expect(src).to.equal(rawSrc);
+        const iframe = videoIframe.querySelector('iframe');
+        expect(iframe.src).to.equal(rawSrc);
       });
     });
 

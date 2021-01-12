@@ -85,8 +85,9 @@ class AmpLightbox extends PreactBaseElement {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(
-      isExperimentOn(this.win, 'amp-lightbox-bento'),
-      'expected amp-lightbox-bento experiment to be enabled'
+      isExperimentOn(this.win, 'bento') ||
+        isExperimentOn(this.win, 'bento-lightbox'),
+      'expected global "bento" or specific "bento-lightbox" experiment to be enabled'
     );
     return super.isLayoutSupported(layout);
   }
@@ -97,11 +98,9 @@ AmpLightbox['Component'] = Lightbox;
 
 /** @override */
 AmpLightbox['props'] = {
-  'animateIn': {attr: 'animate-in'},
+  'animation': {attr: 'animation'},
   'scrollable': {attr: 'scrollable', type: 'boolean'},
   'id': {attr: 'id'},
-  'closeButtonAriaLabel': {attr: 'data-close-button-aria-label'},
-  'enableAnimation': {attr: 'enable-animation', type: 'boolean'},
 };
 
 /** @override */

@@ -19,8 +19,8 @@ import {ContainWrapper} from '../../../src/preact/component';
 import {forwardRef} from '../../../src/preact/compat';
 import {setStyle} from '../../../src/style';
 import {
-  useEffect,
   useImperativeHandle,
+  useLayoutEffect,
   useRef,
   useState,
 } from '../../../src/preact';
@@ -61,16 +61,7 @@ function useValueRef(current) {
  * @return {PreactDef.Renderable}
  */
 function LightboxWithRef(
-  {
-    id,
-    animateIn = 'fade-in',
-    closeButtonAriaLabel = DEFAULT_CLOSE_LABEL,
-    children,
-    onBeforeOpen,
-    onAfterClose,
-    enableAnimation,
-    ...rest
-  },
+  {animation = 'fade-in', children, onBeforeOpen, onAfterClose, ...rest},
   ref
 ) {
   // There are two phases to open and close.
@@ -85,10 +76,9 @@ function LightboxWithRef(
   // We are using refs here to refer to common strings, objects, and functions used.
   // This is because they are needed within `useEffect` calls below (but are not depended for triggering)
   // We use `useValueRef` for props that might change (user-controlled)
-  const animateInRef = useValueRef(animateIn);
+  const animationRef = useValueRef(animation);
   const onBeforeOpenRef = useValueRef(onBeforeOpen);
   const onAfterCloseRef = useValueRef(onAfterClose);
-  const enableAnimationRef = useValueRef(enableAnimation);
 
   useImperativeHandle(
     ref,
@@ -107,12 +97,14 @@ function LightboxWithRef(
     [onBeforeOpenRef]
   );
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const element = lightboxRef.current;
-    if (element == undefined) {
+    if (!element) {
       return;
     }
     let animation;
+    // Set pre-animation visibility state, to be flipped post-animation.
+    setStyle(element, 'visibility', visible ? 'hidden' : 'visible');
 
     // "Make Visible" Animation
     if (visible) {
@@ -121,11 +113,11 @@ function LightboxWithRef(
         setStyle(element, 'visibility', 'visible');
         element./*REVIEW*/ focus();
       };
-      if (!element.animate || !enableAnimationRef.current) {
+      if (!element.animate) {
         postVisibleAnim();
         return;
       }
-      animation = element.animate(ANIMATION_PRESETS[animateInRef.current], {
+      animation = element.animate(ANIMATION_PRESETS[animationRef.current], {
         duration: ANIMATION_DURATION,
         fill: 'both',
         easing: 'ease-in',
@@ -142,11 +134,11 @@ function LightboxWithRef(
         animation = null;
         setMounted(false);
       };
-      if (!element.animate || !enableAnimationRef.current) {
+      if (!element.animate) {
         postInvisibleAnim();
         return;
       }
-      animation = element.animate(ANIMATION_PRESETS[animateInRef.current], {
+      animation = element.animate(ANIMATION_PRESETS[animationRef.current], {
         duration: ANIMATION_DURATION,
         direction: 'reverse',
         fill: 'both',
@@ -159,20 +151,19 @@ function LightboxWithRef(
         animation.cancel();
       }
     };
-  }, [visible, animateInRef, enableAnimationRef, onAfterCloseRef]);
+  }, [visible, animationRef, onAfterCloseRef]);
 
   return (
     mounted && (
       <ContainWrapper
-        id={id}
         ref={(r) => {
           lightboxRef.current = r;
         }}
-        style={{visibility: 'hidden'}}
         size={true}
         layout={true}
         paint={true}
-        className={classes.lightboxContainWrapper}
+        part="lightbox"
+        wrapperClassName={`${classes.defaultStyles} ${classes.wrapper}`}
         role="dialog"
         tabindex="0"
         onKeyDown={(event) => {
@@ -184,7 +175,7 @@ function LightboxWithRef(
       >
         {children}
         <button
-          ariaLabel={closeButtonAriaLabel}
+          ariaLabel={DEFAULT_CLOSE_LABEL}
           tabIndex={-1}
           className={classes.closeButton}
           onClick={() => {

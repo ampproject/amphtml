@@ -17,8 +17,8 @@ import '../amp-lightbox';
 import {ActionInvocation} from '../../../../src/service/action-impl';
 import {ActionTrust, DEFAULT_ACTION} from '../../../../src/action-constants';
 import {htmlFor} from '../../../../src/static-template';
+import {poll} from '../../../../testing/iframe';
 import {toggleExperiment} from '../../../../src/experiments';
-import {waitFor} from '../../../../testing/test-helper';
 
 describes.realWin(
   'amp-lightbox:1.0',
@@ -34,7 +34,8 @@ describes.realWin(
 
     async function waitForOpen(el, open) {
       const isOpenOrNot = () => el.hasAttribute('open') === open;
-      await waitFor(isOpenOrNot, 'element open updated');
+      // Extend timeout due to animation delay.
+      await poll('element open updated', isOpenOrNot, undefined, 500);
     }
 
     function getContent() {
@@ -46,7 +47,7 @@ describes.realWin(
     beforeEach(async () => {
       win = env.win;
       html = htmlFor(win.document);
-      toggleExperiment(win, 'amp-selector-bento', true, true);
+      toggleExperiment(win, 'bento-selector', true, true);
       element = html`
         <amp-lightbox layout="nodisplay">
           <p>Hello World</p>
@@ -54,6 +55,10 @@ describes.realWin(
       `;
       win.document.body.appendChild(element);
       await element.build();
+    });
+
+    afterEach(() => {
+      win.document.body.removeChild(element);
     });
 
     it('should render closed', async () => {
