@@ -86,7 +86,7 @@ let BoundPropertyDef;
 
 /**
  * A tuple containing a single element and all of its bound properties.
- * @typedef {{boundProperties: !Array<BoundPropertyDef>, element: !Element}}
+ * @typedef {{boundProperties: !Array<BoundPropertyDef>, element: !Element, defaultClasses: !Array<string>}}
  */
 let BoundElementDef;
 
@@ -415,9 +415,9 @@ export class Bind {
     }
     // Only pass state for history updates to trusted viewers, since they
     // may contain user data e.g. form input.
-    return this.viewer_.isTrustedViewer().then((trusted) => {
-      return trusted ? data : null;
-    });
+    return this.viewer_
+      .isTrustedViewer()
+      .then((trusted) => (trusted ? data : null));
   }
 
   /**
@@ -974,12 +974,15 @@ export class Bind {
   scanElement_(element, quota, outBindings) {
     let quotaExceeded = false;
     const boundProperties = this.boundPropertiesInElement_(element);
+    const defaultClasses = element.className
+      .split(' ')
+      .filter((value) => value !== '');
     if (boundProperties.length > quota) {
       boundProperties.length = quota;
       quotaExceeded = true;
     }
     if (boundProperties.length > 0) {
-      this.boundElements_.push({element, boundProperties});
+      this.boundElements_.push({element, boundProperties, defaultClasses});
     }
     const {tagName} = element;
     boundProperties.forEach((boundProperty) => {
@@ -1266,9 +1269,14 @@ export class Bind {
       let width, height;
 
       updates.forEach((update) => {
-        const {boundProperty, newValue} = update;
+        const {boundProperty, newValue, defaultClasses} = update;
         const {property} = boundProperty;
-        const mutation = this.applyBinding_(boundProperty, element, newValue);
+        const mutation = this.applyBinding_(
+          boundProperty,
+          element,
+          defaultClasses,
+          newValue
+        );
 
         if (mutation) {
           mutations[mutation.name] = mutation.value;
@@ -1340,11 +1348,12 @@ export class Bind {
    * Mutates the bound property of `element` with `newValue`.
    * @param {!BoundPropertyDef} boundProperty
    * @param {!Element} element
+   * @param {!Array<string>} defaultClasses
    * @param {BindExpressionResultDef} newValue
    * @return {?{name: string, value:BindExpressionResultDef}}
    * @private
    */
-  applyBinding_(boundProperty, element, newValue) {
+  applyBinding_(boundProperty, element, defaultClasses, newValue) {
     const {property} = boundProperty;
     const tag = element.tagName;
 
@@ -1372,6 +1381,7 @@ export class Bind {
         break;
 
       case 'class':
+      case 'class+':
         // Preserve internal AMP classes.
         const ampClasses = [];
         for (let i = 0; i < element.classList.length; i++) {
@@ -1379,6 +1389,9 @@ export class Bind {
           if (AMP_CSS_RE.test(cssClass)) {
             ampClasses.push(cssClass);
           }
+        }
+        if (property === 'class+') {
+          ampClasses.concat(defaultClasses);
         }
         if (Array.isArray(newValue) || typeof newValue === 'string') {
           element.setAttribute('class', ampClasses.concat(newValue).join(' '));
