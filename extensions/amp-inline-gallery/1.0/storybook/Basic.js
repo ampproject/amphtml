@@ -34,7 +34,7 @@ export const _default = () => {
   const paginationHeight = number('top indicator height', 20);
   const topInset = boolean('top indicator inset?', false);
   const bottomInset = boolean('bottom indicator inset?', false);
-  const autoAdvance = boolean('auto advance', true);
+  const autoAdvance = boolean('auto advance', false);
   const autoAdvanceCount = number('auto advance count', 1);
   const autoAdvanceInterval = number('auto advance interval', 1000);
   const autoAdvanceLoops = number('auto advance loops', 3);
@@ -50,7 +50,15 @@ export const _default = () => {
   return (
     <>
       <InlineGallery style={{width}}>
-        <Pagination inset={topInset} style={{height: paginationHeight}} />
+        <Pagination style={{height: paginationHeight}} inset={topInset} />
+        <Thumbnails
+          aspectRatio={aspectRatio}
+          loop={loop}
+          style={{height: thumbnailHeight}}
+        />
+        <br />
+        <Thumbnails />
+        <br />
         <BaseCarousel
           style={{height}}
           autoAdvanceCount={autoAdvanceCount}
@@ -85,13 +93,6 @@ export const _default = () => {
           />
         </BaseCarousel>
         <Pagination inset={bottomInset} />
-        <Thumbnails
-          aspectRatio={aspectRatio}
-          loop={loop}
-          style={{height: thumbnailHeight}}
-        />
-        <br />
-        <Thumbnails />
       </InlineGallery>
       Content below carousel
     </>

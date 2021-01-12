@@ -28,22 +28,65 @@ describes.realWin(
   (env) => {
     let win;
     let element;
+    let panningMedia;
 
-    beforeEach(() => {
-      win = env.win;
+    function appendAmpImg(parent, path) {
+      const ampImg = createElementWithAttributes(win.document, 'amp-img', {
+        'src': path,
+        'width': '4000',
+        'height': '3059',
+      });
+      parent.appendChild(ampImg);
+    }
+
+    async function createAmpStoryPanningMedia(imagePath, positionValues = {}) {
+      const pageEl = win.document.createElement('amp-story-page');
+      pageEl.id = 'page1';
       element = createElementWithAttributes(
         win.document,
         'amp-story-panning-media',
         {
-          layout: 'fill',
+          'layout': 'fill',
+          ...positionValues,
         }
       );
-      win.document.body.appendChild(element);
+      if (imagePath) {
+        appendAmpImg(element, imagePath);
+      }
+      pageEl.appendChild(element);
+      win.document.body.appendChild(pageEl);
+
+      panningMedia = await element.getImpl();
+    }
+
+    beforeEach(() => {
+      win = env.win;
     });
 
-    it('should contain "hello world" when built', async () => {
-      await element.whenBuilt();
-      expect(element.querySelector('div').textContent).to.equal('hello world');
+    it('should build', async () => {
+      await createAmpStoryPanningMedia(
+        '/examples/amp-story/img/conservatory-coords.jpg'
+      );
+      return expect(() => panningMedia.layoutCallback()).to.not.throw();
+    });
+
+    it('should throw if nested amp-img is missing', async () => {
+      await createAmpStoryPanningMedia();
+      return expect(() => panningMedia.layoutCallback()).to.throw(
+        'Element expected: null'
+      );
+    });
+
+    it('sets transform of image element from attributes', async () => {
+      const positionValues = {x: '50%', y: '50%', zoom: '2'};
+      await createAmpStoryPanningMedia(
+        '/examples/amp-story/img/conservatory-coords.jpg',
+        positionValues
+      );
+      await panningMedia.layoutCallback();
+      expect(panningMedia.image_.style.transform).to.equal(
+        `scale(${positionValues.zoom}) translate(${positionValues.x}, ${positionValues.y})`
+      );
     });
   }
 );

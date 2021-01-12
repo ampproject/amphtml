@@ -1,0 +1,47 @@
+{
+  "2": {"string": "Palieskite „Kitas“"},
+  "3": {"string": "Palieskite „Atgal“"},
+  "4": {"string": "Nepavyko nukopijuoti nuorodos į iškarpinę."},
+  "5": {"string": "Nuoroda nukopijuota!"},
+  "6": {"string": "El. paštas"},
+  "7": {"string": "Facebook"},
+  "8": {"string": "Google+"},
+  "9": {"string": "Gauti nuorodą"},
+  "10": {"string": "LinkedIn"},
+  "11": {"string": "Pinterest"},
+  "12": {"string": "SMS"},
+  "14": {"string": "Tumblr"},
+  "15": {"string": "Twitter"},
+  "16": {"string": "WhatsApp"},
+  "18": {
+    "string": "Padidinkite lango aukštį ir plotį, kad galėtumėte peržiūrėti šią funkciją"
+  },
+  "19": {
+    "string": "Turite įgalinti AMP istorijos eksperimentą, kad galėtumėte peržiūrėti šį turinį."
+  },
+  "20": {"string": "Puslapį geriausia žiūrėti portreto režimu"},
+  "21": {
+    "string": "Apgailestaujame, bet panašu, kad jūsų naršyklėje ši funkcija nepalaikoma"
+  },
+  "22": {"string": "Sutikti"},
+  "23": {"string": "Atmesti"},
+  "25": {"string": "Peržiūra pradiniame domene:"},
+  "26": {"string": "Daugiau apie AMP rezultatus"},
+  "27": {"string": "Vis tiek tęsti"},
+  "28": {"string": "Keisti duomenų privatumo nustatymus"},
+  "29": {"string": "Privatumo nustatymai"},
+  "30": {"string": "Skaityti daugiau"},
+  "31": {"string": "Garsas išjungtas"},
+  "32": {"string": "Garsas įjungtas"},
+  "33": {"string": "Nėra šios puslapio garso"},
+  "34": {"string": "Leisti vaizdo įrašą"},
+  "35": {"string": "Perbraukti aukštyn"},
+  "36": {"string": "Išskleisti „Twitter“ įrašą"},
+  "37": {
+    "string": "Padidinkite lango aukštį, kad galėtumėte peržiūrėti šią funkciją"
+  },
+  "38": {
+    "string": "Padidinkite lango plotį, kad galėtumėte peržiūrėti šią funkciją"
+  },
+  "63": {"string": "Line"}
+}

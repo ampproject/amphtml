@@ -268,7 +268,7 @@ HTML tags can be used unchanged in AMP HTML. Certain tags have equivalent custom
   </tr>
   <tr>
     <td width="30%">link</td>
-    <td><code>rel</code> values registered on <a href="http://microformats.org/wiki/existing-rel-values">microformats.org</a> are allowed. If a <code>rel</code> value is missing from our white list, <a href="https://github.com/ampproject/amphtml/issues/new">please submit an issue</a>. <code>stylesheet</code> and other values like <code>preconnect</code>, <code>prerender</code> and <code>prefetch</code> that have side effects in the browser are disallowed. There is a special case for fetching stylesheets from white listed font providers.</td>
+    <td><code>rel</code> values registered on <a href="http://microformats.org/wiki/existing-rel-values">microformats.org</a> are allowed. If a <code>rel</code> value is missing from our allowlist, <a href="https://github.com/ampproject/amphtml/issues/new">please submit an issue</a>. <code>stylesheet</code> and other values like <code>preconnect</code>, <code>prerender</code> and <code>prefetch</code> that have side effects in the browser are disallowed. There is a special case for fetching stylesheets from allowlisted font providers.</td>
   </tr>
   <tr>
     <td width="30%">meta</td>
@@ -284,7 +284,7 @@ HTML tags can be used unchanged in AMP HTML. Certain tags have equivalent custom
   </tr>
 </table>
 
-Validator implementations should use a white list based on the HTML5 specification with the above tags removed. See [AMP Tag Addendum](amp-tag-addendum.md).
+Validator implementations should use an allowlist based on the HTML5 specification with the above tags removed. See [AMP Tag Addendum](amp-tag-addendum.md).
 
 ### Comments
 
@@ -352,9 +352,9 @@ Usage of the `!important` qualifier is not allowed. This is a necessary requirem
 
 #### Properties
 
-AMP only allows transitions and animations of properties that can be GPU accelerated in common browsers. We currently white list: `opacity`, `transform` (also `-vendorPrefix-transform`).
+AMP only allows transitions and animations of properties that can be GPU accelerated in common browsers. We currently allow: `opacity`, `transform` (also `-vendorPrefix-transform`).
 
-In the following examples `<property>` needs to be in the white list above.
+In the following examples `<property>` needs to be in the allowed list above.
 
 -   `transition <property>` (also -vendorPrefix-transition)
 -   `@keyframes name { from: {<property>: value} to {<property: value>} }` (also `@-vendorPrefix-keyframes`)
@@ -390,7 +390,7 @@ Example:
 
 ### Custom fonts
 
-Authors may include stylesheets for custom fonts. The 2 supported methods are link tags pointing to white listed font providers and `@font-face` inclusion.
+Authors may include stylesheets for custom fonts. The 2 supported methods are link tags pointing to allowlisted font providers and `@font-face` inclusion.
 
 Example:
 
@@ -401,7 +401,7 @@ Example:
 />
 ```
 
-Font providers can be white listed if they support CSS-only integrations and serve over HTTPS. The following origins are currently allowed for font serving via link tags:
+Font providers can be allowlisted if they support CSS-only integrations and serve over HTTPS. The following origins are currently allowed for font serving via link tags:
 
 -   Fonts.com: `https://fast.fonts.net`
 -   Google Fonts: `https://fonts.googleapis.com`
@@ -572,13 +572,15 @@ All AMP template elements must go through AMP security review before they can be
 
 Currently, the following SVG elements are allowed:
 
--   basics: "g", "glyph", "glyphRef", "image", "marker", "metadata", "path", "solidcolor", "svg", "switch", "view"
--   shapes: "circle", "ellipse", "line", "polygon", "polyline", "rect"
--   text: "text", "textPath", "tref", "tspan"
--   rendering: "clipPath", "filter", "hkern", "linearGradient", "mask", "pattern", "radialGradient", "vkern"
--   special: "defs" (all children above are allowed here), "symbol", "use"
--   filter: "feColorMatrix", "feComposite", "feGaussianBlur", "feMerge", "feMergeNode", "feOffset", "foreignObject"
--   ARIA: "desc", "title"
+-   [container elements](https://svgwg.org/svg2-draft/struct.html#TermContainerElement): "clipPath", "defs", "g", "marker", "mask", "pattern", "svg", "switch", and "symbol".
+-   [structural elements](https://svgwg.org/svg2-draft/struct.html#TermStructuralElement): "defs", "g", "svg", "symbol", and "use".
+-   [graphics elements](https://svgwg.org/svg2-draft/struct.html#TermGraphicsElement): "circle", "ellipse", "foreignObject", "image", "line", "path", "polygon", "polyline", "rect", "text", "textPath", and "tspan".
+-   [text content elements](https://svgwg.org/svg2-draft/text.html#TermTextContentElement): "text", "textPath", and "tspan".
+-   [paint server elements](https://svgwg.org/svg2-draft/painting.html#TermPaintServerElement): "linearGradient", "pattern", and "radialGradient".
+-   [descriptive elements](https://svgwg.org/svg2-draft/struct.html#TermDescriptiveElement): "desc", "metadata", and "title".
+-   [filter primitive elements](https://drafts.fxtf.org/filter-effects/#filter-primitive): "feColorMatrix", "feComposite", "feGaussianBlur", "feMerge", "feMergeNode", and "feOffset".
+-   uncategorized elements: "view", and "filter".
+-   deprecated elements: ["glyph"](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/glyph), ["glyphRef"](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/glyphRef), ["hkern"](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/hkern), ["solidcolor"](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/solidcolor), ["tref"](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/tref), and ["vkern"](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/vkern).
 
 As well as these attributes:
 

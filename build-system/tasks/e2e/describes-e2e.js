@@ -254,6 +254,10 @@ const EnvironmentVariantMap = {
     name: 'Viewer environment',
     value: {environment: 'viewer-demo'},
   },
+  [AmpdocEnvironment.EMAIL_DEMO]: {
+    name: 'Email environment (viewer)',
+    value: {environment: 'email-demo'},
+  },
   [AmpdocEnvironment.SHADOW_DEMO]: {
     name: 'Shadow environment',
     value: {environment: 'shadow-demo'},

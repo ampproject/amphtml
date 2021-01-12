@@ -157,7 +157,7 @@ export function processHead(win, adElement, head) {
 }
 
 /**
- * Allows json scripts and allow listed amp elements while removing others.
+ * Allows json scripts and allowlisted amp elements while removing others.
  * @param {!Array} extensions
  * @param {!Element} script
  */

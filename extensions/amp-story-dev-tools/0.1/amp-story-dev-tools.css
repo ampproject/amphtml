@@ -15,6 +15,7 @@
  */
 
 @import './amp-story-dev-tools-tab-logs.css';
+@import './amp-story-dev-tools-tab-page-experience.css';
 @import './amp-story-dev-tools-tab-preview.css';
 
 amp-story-dev-tools {
@@ -126,6 +127,8 @@ amp-story-dev-tools, amp-story-dev-tools * {
   outline: none !important;
   box-shadow: none !important;
   font-family: inherit !important;
+  display: inline-flex !important;
+  align-items: center !important;
 }
 
 .i-amphtml-story-dev-tools-tab-selector:not([active]):hover, .i-amphtml-story-dev-tools-tabs > button:not([active]):focus {

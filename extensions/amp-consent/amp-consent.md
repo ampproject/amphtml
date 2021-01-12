@@ -581,7 +581,7 @@ You should try out the [advanced consent flows](https://amp.dev/documentation/ex
 
 ##### How can I show a persistent UX element for users to update their consent preferences?
 
-You can use the optional [post-prompt UI](#post-prompt) to accomplish this. View this [sample on AMP By Example](https://amp.dev/documentation/examples/user-consent/client_side_user_consent_flow/) for a similar implementation.
+You can use the optional [post-prompt UI](<#post-prompt-ui-(optional)>) to accomplish this. View this [sample on AMP By Example](https://amp.dev/documentation/examples/user-consent/client_side_user_consent_flow/) for a similar implementation.
 
 ##### Can I keep the non-EU experience unchanged and just deliver an "opt-out" experience to all EU users?
 
@@ -632,6 +632,7 @@ Join in on the discussion where we are discussing [upcoming potential features](
 -   Quantcast : [Website](https://www.quantcast.com) - [Documentation](https://help.quantcast.com/hc/en-us/categories/360002940873-Quantcast-Choice)
 -   Sirdata : [Website](http://www.sirdata.com/) - [Documentation](https://cmp.sirdata.com/#/docs)
 -   SourcePoint : [Website](https://www.sourcepoint.com/) - [Documentation](./cmps/sourcepoint.md)
+-   UniConsent : [Website](http://www.uniconsent.com/) - [Documentation](./cmps/uniconsent.md)
 -   Usercentrics : [Website](https://www.usercentrics.com/) - [Documentation](./cmps/usercentrics.md)
 
 -   Your Integrated platform here!

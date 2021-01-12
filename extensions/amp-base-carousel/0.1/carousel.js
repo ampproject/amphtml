@@ -52,6 +52,8 @@ import {iterateCursor} from '../../../src/dom';
  */
 const RESET_SCROLL_REFERENCE_POINT_WAIT_MS = 200;
 
+const SPACER_CLASS = 'i-amphtml-carousel-spacer';
+
 /**
  * Runs a callback while disabling smooth scrolling by temporarily setting
  * the `scrollBehavior` to `auto`.
@@ -962,7 +964,7 @@ export class Carousel {
     const spacers = [];
     for (let i = 0; i < count; i++) {
       const spacer = document.createElement('div');
-      spacer.className = 'i-amphtml-carousel-spacer';
+      spacer.className = SPACER_CLASS;
       spacers.push(spacer);
     }
     return spacers;
@@ -1045,17 +1047,17 @@ export class Carousel {
       // If an item is at the start of the group, it gets an aligned.
       const shouldSnap = mod(slideIndex, this.snapBy_) === 0;
 
-      // If it is type=slides, make sure to set the alignment of the element
-      // with the content and not the wrapping div.
-      const snapElement =
-        child.firstChild &&
-        child.classList.contains('i-amphtml-carousel-wrapper')
-          ? child.firstChild
-          : child;
-      setStyles(snapElement, {
-        'scroll-snap-align': shouldSnap ? this.alignment_ : 'none',
-        'scroll-snap-coordinate': shouldSnap ? coordinate : 'none',
-      });
+      // Only apply `snap` feature on non-looping carousels
+      // or only the spacers of the looping carousels.
+      // Adding `snap` feature to non-spacers in a looping carousel
+      // causes all weird behaviors due to non-homogenous siblings,
+      // i.e. <amp-img> with lots of non-fixed sized children, etc.
+      if (child.classList.contains(SPACER_CLASS) || !this.isLooping()) {
+        setStyles(child, {
+          'scroll-snap-align': shouldSnap ? this.alignment_ : 'none',
+          'scroll-snap-coordinate': shouldSnap ? coordinate : 'none',
+        });
+      }
     });
   }
 
