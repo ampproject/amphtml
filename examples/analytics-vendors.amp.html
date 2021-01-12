@@ -87,6 +87,7 @@
       <option>mediarithmics</option>
       <option>mediator</option>
       <option>memo</option>
+      <option>metrika</option>
       <option>mobify</option>
       <option>moengage</option>
       <option>mparticle</option>
@@ -347,7 +348,7 @@ For complete documentation and additional examples please see: https://marketing
 <!-- Black Crow AI example -->
 <amp-analytics type="blackcrowai">
   <script type="application/json">
-    { 
+    {
       "vars": {
         "google_tracking_id": "YOUR-GA-Account-ID-like-UA-134511847-1",
         "site_name": "YOUR-SITE-NAME-PROVIDED-BY-YOUR-BLACK-CROW"
@@ -2045,6 +2046,52 @@ For complete documentation and additional examples please see: https://marketing
   </script>
 </amp-analytics>
 <!-- end WebEngage Analytics example -->
+
+<!-- start Yandex Metrika example -->
+<amp-analytics type="metrika">
+  <script type="application/json">
+    {
+      "vars": {
+        "counterId": "71129776",
+        "yaParams": "{\"key\": \"value\"}"
+      },
+      "requests": {},
+      "triggers": {
+        "notBounce": {
+          "on": "timer",
+          "timerSpec": {
+            "immediate": false,
+            "interval": 15,
+            "maxTimerLength": 14
+          },
+          "request": "notBounce"
+        },
+        "someGoalReach": {
+          "on": "click",
+          "selector": "#test1",
+          "request": "reachGoal",
+          "vars": {
+            "goalId": "superGoalId",
+            "yaParams": "{\"inner-key\": \"inner-value\"}"
+          }
+        },
+        "halfScroll": {
+          "on": "scroll",
+          "scrollSpec": {
+            "verticalBoundaries": [
+              50
+            ]
+          },
+          "request": "reachGoal",
+          "vars": {
+            "goalId": "halfScrollGoal"
+          }
+        }
+      }
+    }
+  </script>
+</amp-analytics>
+<!-- end Yandex Metrika example -->
 </div>
 
 <div class="logo"></div>
