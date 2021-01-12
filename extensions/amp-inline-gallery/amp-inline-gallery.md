@@ -113,7 +113,7 @@ The pagination indicator location defaults to underneath the carousel. Adding th
 
 Displays the pagination indicator as inset, overlaying the carousel itself. When using `inset`, you should give the `<amp-inline-gallery-pagination>` element `layout="nodisplay"`.
 
-Note that when specifying an `inset` element, the `<amp-inline-gallery-pagination>` will be positioned with `bottom: 0` to its parent element. You may target and overwrite this to position the element over the carousel in the case where they may be other elements (such as `<amp-inline-gallery-thumbnails>`) directly below it.
+The default CSS for an `<amp-inline-gallery-pagination>` element with `inset` specifies it at `bottom: 0` with respect to its parent element. You may overwrite this to position the element over the carousel if there are other elements, such as `<amp-inline-gallery-thumbnails>`, directly below it.
 
 ##### common attributes
 

@@ -59,7 +59,7 @@ With the responsive layout, the width and height from the example should yield c
 
 ### Migrating from 0.1
 
-Unlike `0.1`, the experimental `1.0` version does not automatically convert `data-param-controls` to `controls`, and takes `controls` directly as an attribute.
+The experimental `1.0` version of `amp-youtube` does not automatically convert `data-param-controls` to `controls`. Instead it takes `controls` directly as an attribute.
 
 ## Attributes
 

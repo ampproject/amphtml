@@ -45,7 +45,7 @@ component. To show a gallery of images in a lightbox, you can use
 
 ### Migrating from 0.1
 
-Unlike `0.1`, the experimental `1.0` version of `amp-lightbox` employs the following changes:
+The experimental `1.0` version of `amp-lightbox` employs the following differences from version `0.1`:
 
 -   This component does not currently support modifying browser history state.
 -   `data-close-button-aria-label` is not supported and will soon be replaced with support for `slot="close-button"`.
