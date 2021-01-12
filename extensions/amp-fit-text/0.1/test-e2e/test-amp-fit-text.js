@@ -55,13 +55,23 @@ describes.endtoend(
         await controller.getElementCssValue(contentDiv, 'font-size'),
         10
       );
+      const originalWidth = await controller.getElementCssValue(
+        contentDiv,
+        'width'
+      );
+
+      await expect(originalWidth).to.equal('100px');
+
       await controller.click(contentButton);
       const updatedFontSize = parseInt(
         await controller.getElementCssValue(contentDiv, 'font-size'),
         10
       );
-      const updatedWidth = controller.getElementCssValue(contentDiv, 'width');
-      await expect(updatedWidth).to.equal('200');
+      const updatedWidth = await controller.getElementCssValue(
+        contentDiv,
+        'width'
+      );
+      await expect(updatedWidth).to.equal('200px');
 
       await expect(updatedFontSize).to.be.greaterThan(originalFontSize);
     });
