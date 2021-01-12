@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!-- ## Introduction --><!--
   [`amp-fit-text`](/content/amp-dev/documentation/components/reference/amp-fit-text-v0.1.md) enables you to manage the size and fit of text within a given area.
 --><!-- -->
@@ -8,6 +9,11 @@
     <!--
       Include the `amp-fit-text` component.
     -->
+=======
+<!doctype html>
+<html ⚡>
+<head>
+>>>>>>> 7fc69a6a0794c8c5f92f32b6481ff1311b323728
     <script async custom-element="amp-fit-text" src="https://cdn.ampproject.org/v0/amp-fit-text-0.1.js"></script>
     <meta charset="utf-8">
     <title>amp-fit-text</title>
@@ -42,40 +48,40 @@
       </style>
   </head>
   <body>
-    <!-- ## Basic usage -->
-    <!--
+    <!-- 
+      Basic usage
       In each of these examples, the `amp-fit-text` element is nested within a container with fixed dimensions to demonstrate the differences in attributes and layout values. When `amp-fit-text` is used with a given `height`, `width`, and `layout="responsive"` attribute, the text will scale to fit the parent container.
     -->
     <div>
-      <div class="square-small"><amp-fit-text width="1" height="1" layout="responsive">Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.</amp-fit-text></div>
-      <div class="square-medium"><amp-fit-text width="1" height="1" layout="responsive">Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.</amp-fit-text></div>
-      <div class="square-large"><amp-fit-text width="1" height="1" layout="responsive">Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.</amp-fit-text></div>
+      <div class="square-small"><amp-fit-text id="basic small" width="1" height="1" layout="responsive">Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.</amp-fit-text></div>
+      <div class="square-medium"><amp-fit-text id="basic medium" width="1" height="1" layout="responsive">Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.</amp-fit-text></div>
+      <div class="square-large"><amp-fit-text  id="basic large" width="1" height="1" layout="responsive">Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.</amp-fit-text></div>
     </div>
-    <!-- ## Aspect ratio -->
-    <!--
+    <!-- 
+      Aspect ratio
       The text will scale responsively in the ratio defined by the responsive layout, but not exceed the size of its parent. This sample defines an aspect ratio of 1.5:1 (3:2).
     -->
     <div>
-      <div class="square-small"><amp-fit-text width="300" height="200" layout="responsive">Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.</amp-fit-text></div>
-      <div class="square-medium"><amp-fit-text width="300" height="200" layout="responsive">Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.</amp-fit-text></div>
-      <div class="square-large"><amp-fit-text width="300" height="200" layout="responsive">Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.</amp-fit-text></div>
+      <div class="square-small"><amp-fit-text id="aspect small" width="300" height="200" layout="responsive">Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.</amp-fit-text></div>
+      <div class="square-medium"><amp-fit-text id="aspect medium" width="300" height="200" layout="responsive">Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.</amp-fit-text></div>
+      <div class="square-large"><amp-fit-text id="aspect large" width="300" height="200" layout="responsive">Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.</amp-fit-text></div>
     </div>
-    <!-- ## min-font-size -->
-    <!--
+    <!-- 
+      min-font-size
       The `min-font-size` attribute dictates a minimum size for the text.  In this case, we've dictated a minimum of 30, which will cause it to exceed the size of its fixed block parent and be truncated to fit as appropriate.
     -->
     <div>
-      <div class="square-small"><amp-fit-text width="200" height="200" layout="responsive" min-font-size="18">Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.</amp-fit-text></div>
-      <div class="square-medium"><amp-fit-text width="200" height="200" layout="responsive" min-font-size="18">Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.</amp-fit-text></div>
-      <div class="square-large"><amp-fit-text width="200" height="200" layout="responsive" min-font-size="18">Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.</amp-fit-text></div>
+      <div class="square-small"><amp-fit-text id="min small" width="200" height="200" layout="responsive" min-font-size="18">Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.</amp-fit-text></div>
+      <div class="square-medium"><amp-fit-text id="min medium" width="200" height="200" layout="responsive" min-font-size="18">Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.</amp-fit-text></div>
+      <div class="square-large"><amp-fit-text id="min large" width="200" height="200" layout="responsive" min-font-size="18">Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.</amp-fit-text></div>
     </div>
-    <!-- ## max-font-size -->
     <!--
+      max-font-size
       The `max-font-size` attribute dictates a maximum size for the text.  In this case, we've dictated a maximum of 10, ensuring it won't fill the size of its parent element.
     -->
     <div>
-      <div class="square-small"><amp-fit-text width="200" height="200" layout="responsive" max-font-size="18">Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.</amp-fit-text></div>
-      <div class="square-medium"><amp-fit-text width="200" height="200" layout="responsive" max-font-size="18">Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.</amp-fit-text></div>
-      <div class="square-large"><amp-fit-text width="200" height="200" layout="responsive" max-font-size="18">Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.</amp-fit-text></div>
+      <div class="square-small"><amp-fit-text id="max small" width="200" height="200" layout="responsive" max-font-size="18">Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.</amp-fit-text></div>
+      <div class="square-medium"><amp-fit-text id="max medium" width="200" height="200" layout="responsive" max-font-size="18">Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.</amp-fit-text></div>
+      <div class="square-large"><amp-fit-text id="max large" width="200" height="200" layout="responsive" max-font-size="18">Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.</amp-fit-text></div>
     </div>
 </body></html>

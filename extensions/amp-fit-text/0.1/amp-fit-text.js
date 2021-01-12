@@ -17,9 +17,11 @@
 import {CSS} from '../../../build/amp-fit-text-0.1.css';
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import {px, setStyle, setStyles} from '../../../src/style';
+import {throttle} from '../../../src/utils/rate-limit';
 
 const TAG = 'amp-fit-text';
 const LINE_HEIGHT_EM_ = 1.15;
+const RESIZE_THROTTLE_MS = 100;
 
 class AmpFitText extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -41,11 +43,8 @@ class AmpFitText extends AMP.BaseElement {
     /** @private {number} */
     this.maxFontSize_ = -1;
 
-    /** @private {!Array<unlistenDef>} */
-    this.unlisteners_ = [];
-
-    /** @private {ResizeObserver} */
-    this.observer_ = null;
+    /** @private {?UnlistenDef} */
+    this.resizeObserverUnlistener_ = null;
 
     /**
      * Synchronously stores updated textContent, but only after it has been
@@ -124,6 +123,7 @@ class AmpFitText extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+<<<<<<< HEAD
     if (window.ResizeObserver) {
       if (this.observer_ == null) {
         this.observer_ = new ResizeObserver(() =>
@@ -138,6 +138,26 @@ class AmpFitText extends AMP.BaseElement {
       this.unlisteners_.push(() => {
         this.observer_.disconnect();
       });
+=======
+    if (this.win.ResizeObserver && this.resizeObserverUnlistener_ === null) {
+      const observer = new this.win.ResizeObserver(
+        throttle(
+          this.win,
+          () =>
+            this.mutateElement(() => {
+              this.updateMeasurerContent_();
+              this.updateFontSize_();
+            }),
+          RESIZE_THROTTLE_MS
+        )
+      );
+
+      observer.observe(this.content_);
+      observer.observe(this.measurer_);
+      this.resizeObserverUnlistener_ = function () {
+        observer.disconnect();
+      };
+>>>>>>> 7fc69a6a0794c8c5f92f32b6481ff1311b323728
     }
     return this.mutateElement(() => {
       this.updateFontSize_();
@@ -146,8 +166,14 @@ class AmpFitText extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
+<<<<<<< HEAD
     while (this.unlisteners_.length > 0) {
       this.unlisteners_.pop()();
+=======
+    if (this.resizeObserverUnlistener_ !== null) {
+      this.resizeObserverUnlistener_();
+      this.resizeObserverUnlistener_ = null;
+>>>>>>> 7fc69a6a0794c8c5f92f32b6481ff1311b323728
     }
   }
 

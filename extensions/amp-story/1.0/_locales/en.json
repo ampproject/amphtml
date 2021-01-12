@@ -246,5 +246,9 @@
   "88": {
     "string": "Skip next",
     "description": "Label for a button that advances to the next element in the carousel"
+  },
+  "89": {
+    "string": "Your response will be sent to",
+    "description": "Text displayed to users after clicking a button that reveals a disclaimer, telling them more about where their user data will be stored, after they interact with a poll or quiz."
   }
 }

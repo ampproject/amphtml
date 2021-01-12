@@ -61,15 +61,7 @@ function useValueRef(current) {
  * @return {PreactDef.Renderable}
  */
 function LightboxWithRef(
-  {
-    animateIn = 'fade-in',
-    closeButtonAriaLabel = DEFAULT_CLOSE_LABEL,
-    children,
-    onBeforeOpen,
-    onAfterClose,
-    enableAnimation,
-    ...rest
-  },
+  {animation = 'fade-in', children, onBeforeOpen, onAfterClose, ...rest},
   ref
 ) {
   // There are two phases to open and close.
@@ -84,10 +76,9 @@ function LightboxWithRef(
   // We are using refs here to refer to common strings, objects, and functions used.
   // This is because they are needed within `useEffect` calls below (but are not depended for triggering)
   // We use `useValueRef` for props that might change (user-controlled)
-  const animateInRef = useValueRef(animateIn);
+  const animationRef = useValueRef(animation);
   const onBeforeOpenRef = useValueRef(onBeforeOpen);
   const onAfterCloseRef = useValueRef(onAfterClose);
-  const enableAnimationRef = useValueRef(enableAnimation);
 
   useImperativeHandle(
     ref,
@@ -122,11 +113,11 @@ function LightboxWithRef(
         setStyle(element, 'visibility', 'visible');
         element./*REVIEW*/ focus();
       };
-      if (!element.animate || !enableAnimationRef.current) {
+      if (!element.animate) {
         postVisibleAnim();
         return;
       }
-      animation = element.animate(ANIMATION_PRESETS[animateInRef.current], {
+      animation = element.animate(ANIMATION_PRESETS[animationRef.current], {
         duration: ANIMATION_DURATION,
         fill: 'both',
         easing: 'ease-in',
@@ -143,11 +134,11 @@ function LightboxWithRef(
         animation = null;
         setMounted(false);
       };
-      if (!element.animate || !enableAnimationRef.current) {
+      if (!element.animate) {
         postInvisibleAnim();
         return;
       }
-      animation = element.animate(ANIMATION_PRESETS[animateInRef.current], {
+      animation = element.animate(ANIMATION_PRESETS[animationRef.current], {
         duration: ANIMATION_DURATION,
         direction: 'reverse',
         fill: 'both',
@@ -160,7 +151,7 @@ function LightboxWithRef(
         animation.cancel();
       }
     };
-  }, [visible, animateInRef, enableAnimationRef, onAfterCloseRef]);
+  }, [visible, animationRef, onAfterCloseRef]);
 
   return (
     mounted && (
@@ -184,7 +175,7 @@ function LightboxWithRef(
       >
         {children}
         <button
-          ariaLabel={closeButtonAriaLabel}
+          ariaLabel={DEFAULT_CLOSE_LABEL}
           tabIndex={-1}
           className={classes.closeButton}
           onClick={() => {
