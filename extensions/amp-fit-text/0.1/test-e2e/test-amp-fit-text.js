@@ -48,6 +48,7 @@ describes.endtoend(
     });
 
     it.only('should recalculate font size after box size change', async () => {
+      debugger;
       const contentButton = await controller.findElement('#test5_button');
       const contentDiv = await selectContentDiv('test5');
 
