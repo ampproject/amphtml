@@ -141,9 +141,9 @@ export class AmpStoryDevToolsTabLogs extends AMP.BaseElement {
     const logsContainer = this.element.ownerDocument.createElement('div');
     logsContainer.appendChild(this.buildLogsTitle_(this.errorList_.length));
     if (!this.errorList_.length) {
-      this.addSuccessMessageToLogs_(logsContainer);
+      this.addSuccessMessageToTemplate_(logsContainer);
     } else {
-      this.addErrorsToLogs_(logsContainer);
+      this.addErrorsToTemplate_(logsContainer);
     }
     this.mutateElement(() => {
       this.element.textContent = '';
@@ -203,7 +203,7 @@ export class AmpStoryDevToolsTabLogs extends AMP.BaseElement {
    * @private
    * @param {!Element} logsContainer
    */
-  addSuccessMessageToLogs_(logsContainer) {
+  addSuccessMessageToTemplate_(logsContainer) {
     logsContainer.classList.add('i-amphtml-story-dev-tools-logs-success');
     logsContainer.appendChild(
       createElementWithAttributes(this.element.ownerDocument, 'div', {
@@ -225,7 +225,7 @@ export class AmpStoryDevToolsTabLogs extends AMP.BaseElement {
    * @private
    * @param {!Element} logsContainer
    */
-  addErrorsToLogs_(logsContainer) {
+  addErrorsToTemplate_(logsContainer) {
     this.errorList_.forEach((content) => {
       const logEl = buildLogMessageTemplate(this.element);
       logEl.querySelector('.i-amphtml-story-dev-tools-log-type').textContent =
