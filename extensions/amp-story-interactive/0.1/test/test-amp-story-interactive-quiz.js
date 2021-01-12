@@ -23,10 +23,7 @@ import {
   addConfigToInteractive,
   getMockInteractiveData,
 } from './test-amp-story-interactive';
-import {
-  registerServiceBuilder,
-  registerServiceBuilderForDoc,
-} from '../../../../src/service';
+import {registerServiceBuilder} from '../../../../src/service';
 
 /**
  * Populates the quiz with some number of prompts and some number of options.
@@ -82,6 +79,11 @@ describes.realWin(
         return storeService;
       });
 
+      const localizationService = new LocalizationService(win.document.body);
+      env.sandbox
+        .stub(Services, 'localizationServiceForOrNull')
+        .returns(Promise.resolve(localizationService));
+
       storyEl = win.document.createElement('amp-story');
       const storyPage = win.document.createElement('amp-story-page');
       const gridLayer = win.document.createElement('amp-story-grid-layer');
@@ -91,11 +93,6 @@ describes.realWin(
 
       win.document.body.appendChild(storyEl);
       ampStoryQuiz = new AmpStoryInteractiveQuiz(ampStoryQuizEl);
-
-      const localizationService = new LocalizationService(win.document.body);
-      registerServiceBuilderForDoc(ampStoryQuizEl, 'localization', function () {
-        return localizationService;
-      });
 
       env.sandbox.stub(ampStoryQuiz, 'mutateElement').callsFake((fn) => fn());
     });
