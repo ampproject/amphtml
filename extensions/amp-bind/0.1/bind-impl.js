@@ -974,9 +974,7 @@ export class Bind {
   scanElement_(element, quota, outBindings) {
     let quotaExceeded = false;
     const boundProperties = this.boundPropertiesInElement_(element);
-    const defaultClasses = element.className
-      .split(' ')
-      .filter((value) => value !== '');
+    const defaultClasses = toArray(element.classList);
     if (boundProperties.length > quota) {
       boundProperties.length = quota;
       quotaExceeded = true;
