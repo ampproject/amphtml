@@ -324,7 +324,6 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [Content.ad](../../ads/contentad.md)
 -   [Criteo](../../ads/criteo.md)
 -   [CSA](../../ads/google/csa.md)
--   [CxenseDisplay](../../ads/eas.md)
 -   [Directadvert](../../ads/directadvert.md)
 -   [DistroScale](../../ads/distroscale.md)
 -   [Dot and Media](../../ads/dotandads.md)
