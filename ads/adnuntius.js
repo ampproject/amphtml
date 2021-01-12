@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,22 @@
  * limitations under the License.
  */
 
-import {validateData, writeScript} from '../3p/3p';
+import {loadScript, validateData} from '../3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
-export function eas(global, data) {
-  validateData(data, ['easDomain']);
-  global.easAmpParams = data;
-  writeScript(global, 'https://amp.emediate.eu/amp.v0.js');
+export function adnuntius(global, data) {
+  validateData(data, ['auId']);
+
+  loadScript(global, 'https://cdn.adnuntius.com/adn.js', () => {
+    global.adn = global.adn || {};
+    global.adn.calls = global.adn.calls || [];
+    global.adn.calls.push(() => {
+      global.adn.request({
+        amp: {data},
+      });
+    });
+  });
 }
