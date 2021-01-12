@@ -117,14 +117,14 @@ export class AmpConsent extends AMP.BaseElement {
     /** @private {?string} */
     this.matchedGeoGroup_ = null;
 
-    /** @private {?string} */
-    this.tcfPostMessageProxyExperiment_ = isExperimentOn(
+    /** @private {?boolean} */
+    this.isTcfPostMessageProxyExperimentOn_ = isExperimentOn(
       this.win,
       'tcf-post-message-proxy-api'
     );
 
     /** @private @const {?Function} */
-    this.boundHandleIframeMessages_ = this.tcfPostMessageProxyExperiment_
+    this.boundHandleIframeMessages_ = this.isTcfPostMessageProxyExperimentOn_
       ? this.handleIframeMessages_.bind(this)
       : null;
   }
@@ -779,7 +779,7 @@ export class AmpConsent extends AMP.BaseElement {
    */
   maybeSetUpTcfPostMessageProxy_() {
     if (
-      !this.tcfPostMessageProxyExperiment_ ||
+      !this.isTcfPostMessageProxyExperimentOn_ ||
       !this.consentConfig_['exposesTcfApi']
     ) {
       return;
