@@ -60,6 +60,8 @@ describes.endtoend(
         await controller.getElementCssValue(contentDiv, 'font-size'),
         10
       );
+      const updatedWidth = controller.getElementCssValue(contentDiv, 'width');
+      await expect(updatedWidth).to.equal('200');
 
       await expect(updatedFontSize).to.be.greaterThan(originalFontSize);
     });
