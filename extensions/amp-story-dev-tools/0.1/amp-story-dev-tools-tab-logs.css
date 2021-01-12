@@ -15,7 +15,7 @@
  */
 
 amp-story-dev-tools-tab-logs {
-  overflow-y: scroll !important;
+  overflow-y: auto !important;
   padding: var(--i-amphtml-story-dev-tools-vertical-spacing) 10% !important;
 }
 
@@ -114,4 +114,8 @@ amp-story-dev-tools-tab-logs {
   font-weight: bold !important;
   display: initial !important;
   padding: 1px !important;
+}
+
+.i-amphtml-story-dev-tools-logs-success-image {
+  background-image: url('');
 }

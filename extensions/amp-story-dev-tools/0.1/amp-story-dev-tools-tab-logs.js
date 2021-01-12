@@ -89,14 +89,14 @@ export class AmpStoryDevToolsTabLogs extends AMP.BaseElement {
         this.validateUrl_(/* global amp: false */ amp.validator, this.storyUrl_)
       )
       .then((errorList) => {
-        this.errorList_ = errorList;
+        this.errorList_ = [];
         this.updateLogsTabIcon(errorList);
       });
   }
 
   /** @override */
   layoutCallback() {
-    return this.buildLogsList_(this.errorList_);
+    return this.buildLogsContent_(this.errorList_);
   }
 
   /** @override */
@@ -138,36 +138,50 @@ export class AmpStoryDevToolsTabLogs extends AMP.BaseElement {
    * @param {Array<Object>} errorList
    * @return {!Promise}
    */
-  buildLogsList_(errorList) {
+  buildLogsContent_(errorList) {
     const logsContainer = this.element.ownerDocument.createElement('div');
     logsContainer.appendChild(this.buildLogsTitle_(errorList.length));
-    errorList.forEach((content) => {
-      const logEl = buildLogMessageTemplate(this.element);
-      logEl.querySelector('.i-amphtml-story-dev-tools-log-type').textContent =
-        content.code;
-      const codeEl = logEl.querySelector('.i-amphtml-story-dev-tools-log-code');
-      content.htmlLines.forEach((l, i) => {
-        const lineEl = this.element.ownerDocument.createElement('span');
-        lineEl.classList.add('i-amphtml-story-dev-tools-log-code-line');
-        lineEl.textContent = (i + content.line - 1).toString() + '|' + l;
-        codeEl.appendChild(lineEl);
-      });
-      logEl.querySelector(
-        '.i-amphtml-story-dev-tools-log-position'
-      ).textContent = `${content.line}:${content.col}`;
-      logEl.querySelector(
-        '.i-amphtml-story-dev-tools-log-description'
-      ).textContent = content.message;
-      const specUrlElement = logEl.querySelector(
-        '.i-amphtml-story-dev-tools-log-spec'
+    if (!errorList.length) {
+      logsContainer.classList.add('i-amphtml-story-dev-tools-logs-success');
+      logsContainer.appendChild(
+        createElementWithAttributes(this.element.ownerDocument, 'div', {
+          'class': 'i-amphtml-story-dev-tools-logs-success-image',
+        })
       );
-      if (content.specUrl) {
-        specUrlElement.href = content.specUrl;
-      } else {
-        specUrlElement.remove();
-      }
-      logsContainer.appendChild(logEl);
-    });
+      const successMessage = this.element.ownerDocument.createElement('div');
+      successMessage.textContent = 'Great Job!\nNo issues found.';
+      logsContainer.appendChild(successMessage);
+    } else {
+      errorList.forEach((content) => {
+        const logEl = buildLogMessageTemplate(this.element);
+        logEl.querySelector('.i-amphtml-story-dev-tools-log-type').textContent =
+          content.code;
+        const codeEl = logEl.querySelector(
+          '.i-amphtml-story-dev-tools-log-code'
+        );
+        content.htmlLines.forEach((l, i) => {
+          const lineEl = this.element.ownerDocument.createElement('span');
+          lineEl.classList.add('i-amphtml-story-dev-tools-log-code-line');
+          lineEl.textContent = (i + content.line - 1).toString() + '|' + l;
+          codeEl.appendChild(lineEl);
+        });
+        logEl.querySelector(
+          '.i-amphtml-story-dev-tools-log-position'
+        ).textContent = `${content.line}:${content.col}`;
+        logEl.querySelector(
+          '.i-amphtml-story-dev-tools-log-description'
+        ).textContent = content.message;
+        const specUrlElement = logEl.querySelector(
+          '.i-amphtml-story-dev-tools-log-spec'
+        );
+        if (content.specUrl) {
+          specUrlElement.href = content.specUrl;
+        } else {
+          specUrlElement.remove();
+        }
+        logsContainer.appendChild(logEl);
+      });
+    }
     this.mutateElement(() => {
       this.element.textContent = '';
       this.element.appendChild(logsContainer);
