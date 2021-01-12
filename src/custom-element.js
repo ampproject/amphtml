@@ -544,18 +544,13 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
-     * Calls onLayoutMeasure() (and onMeasureChanged() if size changed)
-     * on the BaseElement implementation.
+     * Calls onLayoutMeasure() on the BaseElement implementation.
      * Should only be called by Resources.
-     * @param {boolean} sizeChanged
      */
-    onMeasure(sizeChanged = false) {
+    onMeasure() {
       devAssert(this.isBuilt());
       try {
         this.implementation_.onLayoutMeasure();
-        if (sizeChanged) {
-          this.implementation_.onMeasureChanged();
-        }
       } catch (e) {
         reportError(e, this);
       }

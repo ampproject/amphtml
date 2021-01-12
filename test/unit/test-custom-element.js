@@ -358,48 +358,6 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         });
       });
 
-      it(
-        'should not call onMeasureChanged callback when element dimensions ' +
-          'have not changed',
-        () => {
-          const element = new ElementClass();
-          const onMeasureChangeStub = env.sandbox.stub(
-            element.implementation_,
-            'onMeasureChanged'
-          );
-          container.appendChild(element);
-          return element.buildingPromise_.then(() => {
-            element.updateLayoutBox(
-              {top: 0, left: 0, width: 111, height: 51},
-              /* opt_hasMeasurementsChanged */ false
-            );
-            expect(element.getLayoutSize()).to.be.ok;
-            expect(onMeasureChangeStub).to.have.not.been.called;
-          });
-        }
-      );
-
-      it(
-        'should call onMeasureChanged callback when element dimensions ' +
-          'have changed',
-        () => {
-          const element = new ElementClass();
-          const onMeasureChangeStub = env.sandbox.stub(
-            element.implementation_,
-            'onMeasureChanged'
-          );
-          container.appendChild(element);
-          return element.buildingPromise_.then(() => {
-            element.updateLayoutBox(
-              {top: 0, left: 0, width: 111, height: 51},
-              /* opt_hasMeasurementsChanged */ true
-            );
-            expect(element.getLayoutSize()).to.be.ok;
-            expect(onMeasureChangeStub).to.have.been.called;
-          });
-        }
-      );
-
       it('StubElement - upgrade after attached', () => {
         const element = new StubElementClass();
         expect(element.isUpgraded()).to.equal(false);
