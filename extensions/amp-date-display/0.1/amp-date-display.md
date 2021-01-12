@@ -4,12 +4,10 @@ formats:
   - websites
 teaser:
   text: The amp-date-display component displays time data that you can render in your AMP page.
-experiental: true
-bento: true
 ---
 
 <!--
-Copyright 2021 The AMP HTML Authors. All Rights Reserved.
+Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -116,3 +114,7 @@ date to UTC.
 
 The `offset-seconds` attribute specifies an integer number of seconds to shift
 the given date.
+
+## Validation
+
+See [amp-date-display rules](validator-amp-date-display.protoascii) in the AMP validator specification.
