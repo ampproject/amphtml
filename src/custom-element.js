@@ -544,18 +544,13 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
-     * Calls onLayoutMeasure() (and onMeasureChanged() if size changed)
-     * on the BaseElement implementation.
+     * Calls onLayoutMeasure() on the BaseElement implementation.
      * Should only be called by Resources.
-     * @param {boolean} sizeChanged
      */
-    onMeasure(sizeChanged = false) {
+    onMeasure() {
       devAssert(this.isBuilt());
       try {
         this.implementation_.onLayoutMeasure();
-        if (sizeChanged) {
-          this.implementation_.onMeasureChanged();
-        }
       } catch (e) {
         reportError(e, this);
       }
@@ -1072,6 +1067,17 @@ function createBaseCustomElementClass(win) {
     getImpl(waitForBuild = true) {
       const waitFor = waitForBuild ? this.whenBuilt() : this.whenUpgraded();
       return waitFor.then(() => this.implementation_);
+    }
+
+    /**
+     * Returns the object which holds the API surface (the thing we add the
+     * custom methods/properties onto). In Bento, this is the imperative API
+     * object. In AMP, this is the BaseElement instance.
+     *
+     * @return {!Promise<!Object>}
+     */
+    getApi() {
+      return this.getImpl().then((impl) => impl.getApi());
     }
 
     /**
