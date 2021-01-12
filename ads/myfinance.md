@@ -72,24 +72,25 @@ Serves ads from [MyFinance](https://www.myfinance.com/).
 
 #### Required parameters
 
-- `data-type` - set to `widget`
+-   `data-type` - set to `widget`
 
 #### Widgets require one of the following parameters to be set
-- `data-selector` - corresponds to the div id on the canonical page that has dynamic ads configured
-- `data-creative-set` - the id of the creative set to pull ads from
-- `data-widget` - the id of the widget to serve 
+
+-   `data-selector` - corresponds to the div id on the canonical page that has dynamic ads configured
+-   `data-creative-set` - the id of the creative set to pull ads from
+-   `data-widget` - the id of the widget to serve
 
 #### Optional parameters
 
-- `data-sub-id` - pass through for a partner sub id
+-   `data-sub-id` - pass through for a partner sub id
 
 ### Content Recommendation Unit
 
 #### Required parameters
 
-- `data-type` - set to `cru`
-- `data-campaign` - set to a valid campaign
+-   `data-type` - set to `cru`
+-   `data-campaign` - set to a valid campaign
 
 #### Optional parameters
 
-- `data-selector` - corresponds to the div id on the canonical page that has a pre-rendered cru configured 
+-   `data-selector` - corresponds to the div id on the canonical page that has a pre-rendered cru configured
