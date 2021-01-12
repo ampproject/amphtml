@@ -2,12 +2,10 @@
 $category@: ads-analytics
 formats:
   - websites
-experimental: true
-bento: true
 ---
 
 <!---
-Copyright 2021 The AMP HTML Authors. All Rights Reserved.
+Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -205,10 +203,6 @@ You can use [global AMP variables substitution](https://github.com/ampproject/am
 >
 </amp-social-share>
 ```
-
-### Migrating from 0.1
-
-Unlike `0.1`, the experimental `1.0` version of `amp-social-share`
 
 ## Attributes
 

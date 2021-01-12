@@ -4,12 +4,10 @@ formats:
   - websites
 teaser:
   text: Displays a countdown sequence to a specified date.
-experimental: true
-bento: true
 ---
 
 <!--
-Copyright 2021 The AMP HTML Authors. All Rights Reserved.
+Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -93,10 +91,6 @@ This table provides examples of formatted values specified in a Mustache templat
 | {h} {hours} {m} {minutes}                       | 240 hours 10 minutes                 | `biggest-unit='hours'` |
 | {d} {days} {h} {hours} {m} {minutes}            | 50 天 5 小时 10 分钟                 | `locale='zh-cn'`       |
 
-### Migrating from 0.1
-
-Unlike `0.1`, the experimental `1.0` version of `amp-date-countdown` does not currently support the `data-count-up` attribute which enables the component to count in the opposite direction.
-
 ## Attributes
 
 You must specify at least one of these required attributes: `end-date`,
@@ -168,6 +162,10 @@ on the specified `biggest-unit` value. For example, assume there are `50 days 10
 
 -   Supported values: `days`, `hours`, `minutes`, `seconds`
 -   Default: `days`
+
+### data-count-up (optional)
+
+Include this attribute to reverse the direction of the countdown to count up instead. Useful to display the time elapsed since a target date in the past. To continue the countdown when the target date is in the past, be sure to include the `when-ended` attribute with the `continue` value. If the target date is in the future, `amp-date-countdown` will display a decrementing (toward 0) negative value.
 
 ## Events
 

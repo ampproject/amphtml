@@ -6,12 +6,10 @@ formats:
   - email
 teaser:
   text: A stacked list of headers that collapse or expand content sections with user interaction.
-experimental: true
-bento: true
 ---
 
 <!---
-Copyright 2021 The AMP HTML Authors. All Rights Reserved.
+Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -71,8 +69,10 @@ on mobile devices.
 
 The example below contains an `amp-accordion` with three sections. The
 `expanded` attribute on the third section expands it on page load.
+[filter formats="websites, ads"]Include the `disable-session-state` attribute
+to preserve the collapsed/expanded state.[/filter]
 
-[example preview="top-frame" playground="true" imports="amp-accordion:1.0"]
+[example preview="top-frame" playground="true"]
 
 ```html
 <amp-accordion id="my-accordion"{% if not format=='email'%} disable-session-states{% endif %}>
@@ -95,12 +95,6 @@ The example below contains an `amp-accordion` with three sections. The
 
 [/example]
 
-### Migrating from 0.1
-
-Unlike `0.1`, the experimental `1.0` version of `amp-accordion` does not currently support session states. It behaves as if the `disable-session-states` attribute is always set.
-
-Both `0.1` and `1.0` versions of `amp-accordion` can be used with `amp-bind`. However, in `1.0` `amp-bind` can bind directly to the `expanded` attribute whereas in `0.1` `amp-bind` operates on the `[data-expand]` attribute. The `[data-expand]` attribute is no longer used in `1.0`. See the `expanded` attribute in the next section for more information.
-
 ## Attributes
 
 ### animate
@@ -108,7 +102,7 @@ Both `0.1` and `1.0` versions of `amp-accordion` can be used with `amp-bind`. Ho
 Include the `animate` attribute in `<amp-accordion>` to add a "roll down"
 animation when the content is expanded and "roll up" animation when collapsed.
 
-[example preview="top-frame" playground="true" imports="amp-accordion:1.0"]
+[example preview="top-frame" playground="true"]
 
 ```html
 <amp-accordion animate>
@@ -133,40 +127,18 @@ animation when the content is expanded and "roll up" animation when collapsed.
 
 [/example]
 
+[filter formats="websites"]
+
+### disable-session-states
+
+Include the `disable-session-states` attribute on `<amp-accordion>` to disable
+collapsed/expanded state preservation.
+
+[/filter] <!-- formats="websites" -->
+
 ### expanded
 
 Apply the `expanded` attribute to a nested `<section>` to expand that section when the page loads.
-
-Bind the `expanded` attribute to a `<section>` to expand or collapse that
-section. An expanded section collapses if the expression evaluates as false. A
-collapsed section expands if the expression evaluates as anything other than
-false.
-
-[example preview="top-frame" playground="true" imports="amp-accordion:1.0"]
-
-```html
-<amp-accordion>
-  <section
-    [expanded]="sectionOne"
-    on="expand:AMP.setState({sectionOne: true});collapse:AMP.setState({sectionOne: false})"
-  >
-    <h2>Section 1</h2>
-    <p>Bunch of awesome content</p>
-  </section>
-  <section>
-    <h2>Section 2</h2>
-    <div>Bunch of awesome content</div>
-  </section>
-  <section expanded>
-    <h2>Section 3</h2>
-    <div>Bunch of awesome content</div>
-  </section>
-</amp-accordion>
-<button on="tap:AMP.setState({sectionOne: true})">Expand section 1</button>
-<button on="tap:AMP.setState({sectionOne: false})">Collapse section 1</button>
-```
-
-[/example]
 
 ### expand-single-section
 
@@ -174,7 +146,7 @@ Apply the `expand-single-section` attribute to `amp-accordion` to specify that
 only one `<section>` can expand at a time. If the user clicks or taps on a
 collapsed `<section>`, any currently expanded `<section>` collapses.
 
-[example preview="top-frame" playground="true" imports="amp-accordion:1.0"]
+[example preview="top-frame" playground="true"]
 
 ```html
 <amp-accordion expand-single-section>
@@ -199,6 +171,39 @@ collapsed `<section>`, any currently expanded `<section>` collapses.
 
 [/example]
 
+### [data-expand]
+
+Bind the `[data-expand]` attribute to a `<section>` to expand or collapse that
+section. An expanded section collapses if the expression evaluates as false. A
+collapsed section expands if the expression evaluates as anything other than
+false.
+
+[example preview="top-frame" playground="true"]
+
+```html
+<amp-accordion>
+  <section
+    [data-expand]="sectionOne"
+    on="expand:AMP.setState({sectionOne: true});collapse:AMP.setState({sectionOne: false})"
+  >
+    <h2>Section 1</h2>
+    <p>Bunch of awesome content</p>
+  </section>
+  <section>
+    <h2>Section 2</h2>
+    <div>Bunch of awesome content</div>
+  </section>
+  <section>
+    <h2>Section 3</h2>
+    <div>Bunch of awesome content</div>
+  </section>
+</amp-accordion>
+<button on="tap:AMP.setState({sectionOne: true})">Expand section 1</button>
+<button on="tap:AMP.setState({sectionOne: false})">Collapse section 1</button>
+```
+
+[/example]
+
 [filter formats="websites"]
 
 ## Actions
@@ -210,7 +215,7 @@ The `toggle` action switches the `expanded` and `collapsed` states of
 of the accordion. To specify a specific section, add the `section` argument and
 use its corresponding `id` as the value.
 
-[example preview="top-frame" playground="true" imports="amp-accordion:1.0"]
+[example preview="top-frame" playground="true"]
 
 ```html
 <amp-accordion id="myAccordion">
@@ -275,7 +280,7 @@ The `expand` event triggers the targeted `amp-accordion` section to change from
 the collapsed state to the expanded state. Call `expand` on an already expanded
 section to trigger the `expand` event.
 
-[example preview="top-frame" playground="true" imports="amp-accordion:1.0"]
+[example preview="top-frame" playground="true"]
 
 ```html
 <amp-accordion id="myAccordion">
@@ -298,7 +303,7 @@ The `collapse` event triggers the targeted `amp-accordion` section to change
 from the expanded state to the collapsed state. Call `collapse` on an already
 collapsed section to trigger the event.
 
-[example preview="top-frame" playground="true" imports="amp-accordion:1.0"]
+[example preview="top-frame" playground="true"]
 
 ```html
 <amp-accordion id="myAccordion">
