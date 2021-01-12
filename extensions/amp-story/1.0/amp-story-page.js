@@ -535,6 +535,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         this.preloadAllMedia_().then(() => {
           this.startMeasuringAllVideoPerformance_();
           this.startListeningToVideoEvents_();
+          // iOS 14.2 and 14.3 requires play to be called before unmute
           this.playAllMedia_().then(() => {
             if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
               this.unmuteAllMedia();
