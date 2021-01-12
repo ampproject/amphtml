@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {readJsonSync, writeJsonSync} from 'fs-extra';
+
 /**
  * Removes an entry from files like tools/experiments/experiments-config.js,
  * whose id property is specified by --experimentId:
@@ -40,19 +42,29 @@
 export default function transformer(file, api, options) {
   const j = api.jscodeshift;
 
-  const {experimentId} = options;
+  const {experimentId, experimentsRemovedJson} = options;
 
   return j(file.source)
-    .find(j.ObjectExpression)
-    .filter(
-      (path) =>
-        j(path)
-          .find(j.Property, {
-            key: {type: 'Identifier', name: 'id'},
-            value: {type: 'Literal', value: experimentId},
-          })
-          .size() !== 0
+    .find(j.ObjectExpression, (node) =>
+      node.properties.some(
+        ({key, value}) => key.name === 'id' && value.value === experimentId
+      )
     )
+    .forEach((path) => {
+      if (experimentsRemovedJson) {
+        const serializable = {};
+        path.value.properties.forEach(({key, value}) => {
+          // Only keep literal properties.
+          if ('name' in key && 'value' in value) {
+            serializable[key.name] = value.value;
+          }
+        });
+        writeJsonSync(experimentsRemovedJson, [
+          ...(readJsonSync(experimentsRemovedJson, {throws: false}) || []),
+          serializable,
+        ]);
+      }
+    })
     .remove()
     .toSource();
 }

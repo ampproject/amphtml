@@ -17,6 +17,7 @@ const argv = require('minimist')(process.argv.slice(2));
 const fastGlob = require('fast-glob');
 const log = require('fancy-log');
 const path = require('path');
+const tempy = require('tempy');
 const {cyan, magenta, yellow} = require('ansi-colors');
 const {getOutput} = require('../../common/process');
 const {readJsonSync, writeFileSync} = require('fs-extra');
@@ -99,18 +100,24 @@ const getModifiedSourceFiles = (fromHash) =>
  */
 const jscodeshift = (transform, args = []) =>
   getStdoutThrowOnError(
-    'npx jscodeshift ' +
-      ` -t ${__dirname}/jscodeshift/${transform} ` +
-      args.join(' ')
+    [
+      'npx jscodeshift',
+      '--parser babylon',
+      `--parser-config ${__dirname}/jscodeshift/parser-config.json`,
+      `--transform ${__dirname}/jscodeshift/${transform}`,
+      ...args,
+    ].join(' ')
   );
 
 /**
  * @param {string} id
+ * @param {string} experimentsRemovedJson
  * @return {Array<string>} modified files
  */
-function removeFromExperimentsConfig(id) {
+function removeFromExperimentsConfig(id, experimentsRemovedJson) {
   jscodeshift('remove-experiment-config.js', [
     `--experimentId=${id}`,
+    `--experimentsRemovedJson=${experimentsRemovedJson}`,
     experimentsConfigPath,
   ]);
   return [experimentsConfigPath];
@@ -254,12 +261,28 @@ const findConfigBitCommits = (
     };
   });
 
+const issueUrlToNumberRe = new RegExp(
+  [
+    '^https://github.com/ampproject/amphtml/issues/(\\d+)',
+    '^https://github.com/ampproject/amphtml/pull/(\\d+)',
+    '^https://go.amp.dev/issue/(\\d+)',
+    '^https://go.amp.dev/pr/(\\d+)',
+    '^#?(\\d+)$',
+  ].join('|')
+);
+
+function issueUrlToNumberOrUrl(url) {
+  const match = url.match(issueUrlToNumberRe);
+  const number = match && match.find((group) => /^\d+$/.test(group));
+  return number ? `#${number}` : url;
+}
+
 /**
- * @param {string} files
+ * @param {string} list
  * @return {string}
  */
-const fileListMarkdown = (files) =>
-  files.map((path) => `- \`${path}\``).join('\n');
+const checklistMarkdown = (list) =>
+  list.map((item) => `- [ ] ${item}`).join('\n');
 
 /**
  * @return {string}
@@ -273,6 +296,7 @@ const readmeMdGithubLink = () =>
 /**
  * @param {{
  *   removed: string,
+ *   cleanupIssues: Array<Object>,
  *   cutoffDateFormatted: string,
  *   modifiedSourceFiles: Array<string>,
  *   htmlFilesWithReferences: Array<string>,
@@ -281,6 +305,7 @@ const readmeMdGithubLink = () =>
  */
 function summaryCommitMessage({
   removed,
+  cleanupIssues,
   cutoffDateFormatted,
   modifiedSourceFiles,
   htmlFilesWithReferences,
@@ -291,12 +316,26 @@ function summaryCommitMessage({
     removed.join('\n'),
   ];
 
+  if (cleanupIssues.length > 0) {
+    paragraphs.push(
+      '---',
+      '### Cleanup issues',
+      "Close these once they've been addressed and this PR has been merged:",
+      checklistMarkdown(
+        cleanupIssues.map(
+          ({id, cleanupIssue}) =>
+            `\`${id}\`: ${issueUrlToNumberOrUrl(cleanupIssue)}`
+        )
+      )
+    );
+  }
+
   if (modifiedSourceFiles.length > 0) {
     paragraphs.push(
       '---',
       '### ⚠️ Javascript source files require intervention',
       'The following may contain errors and/or require intervention to remove superfluous conditionals:',
-      fileListMarkdown(modifiedSourceFiles),
+      checklistMarkdown(modifiedSourceFiles.map((file) => `\`${file}\``)),
       `Refer to the removal guide for [suggestions on handling these modified Javascript files.](${readmeMdGithubLink()}#followup)`
     );
   }
@@ -306,7 +345,7 @@ function summaryCommitMessage({
       '---',
       '### ⚠️ HTML files may still contain references',
       'The following HTML files contain references to experiment names which may be stale and should be manually removed:',
-      fileListMarkdown(htmlFilesWithReferences),
+      checklistMarkdown(htmlFilesWithReferences.map((file) => `\`${file}\``)),
       `Refer to the removal guide for [suggestions on handling these HTML files.](${readmeMdGithubLink()}#followup:html)`
     );
   }
@@ -332,7 +371,9 @@ function collectWork(
 ) {
   if (removeExperiment) {
     // 0 if not on prodConfig
-    const percentage = Number(prodConfig[removeExperiment]);
+    const percentage = prodConfig[removeExperiment]
+      ? Number(prodConfig[removeExperiment])
+      : 0;
     const previousHistory = findConfigBitCommits(
       cutoffDateFormatted,
       prodConfigPath,
@@ -392,14 +433,14 @@ async function sweepExperiments() {
     argv.experiment
   );
 
-  if (Object.keys(exclude).length > 0) {
+  if (exclude && Object.keys(exclude).length > 0) {
     log(yellow('The following experiments are excluded as they are special:'));
     for (const experiment in exclude) {
       log(readableRemovalId(experiment, exclude[experiment]));
     }
   }
 
-  const total = Object.keys(include).length;
+  const total = include ? Object.keys(include).length : 0;
   if (total === 0) {
     log(cyan('No experiments to remove.'));
     log(`Cutoff at ${cutoffDateFormatted}`);
@@ -418,11 +459,13 @@ async function sweepExperiments() {
 
   const removed = [];
 
+  const removedFromExperimentsConfigJson = tempy.file();
+
   Object.entries(include).forEach(([id, workItem], i) => {
     log(`🚮 ${i + 1}/${total}`, magenta(`${id}...`));
 
     const modified = [
-      ...removeFromExperimentsConfig(id),
+      ...removeFromExperimentsConfig(id, removedFromExperimentsConfigJson),
       ...removeFromJsonConfig(prodConfig, prodConfigPath, id),
       ...removeFromJsonConfig(canaryConfig, canaryConfigPath, id),
       ...removeFromRuntimeSource(id, workItem.percentage),
@@ -442,6 +485,13 @@ async function sweepExperiments() {
   });
 
   if (removed.length > 0) {
+    const removedFromExperimentsConfig =
+      readJsonSync(removedFromExperimentsConfigJson, {throws: false}) || [];
+
+    const cleanupIssues = removedFromExperimentsConfig.filter(
+      ({cleanupIssue}) => !!cleanupIssue
+    );
+
     const modifiedSourceFiles = getModifiedSourceFiles(headHash);
 
     const htmlFilesWithReferences = filesContainingPattern(
@@ -454,6 +504,7 @@ async function sweepExperiments() {
         `git commit --allow-empty -m "${cmdEscape(
           summaryCommitMessage({
             removed,
+            cleanupIssues,
             modifiedSourceFiles,
             htmlFilesWithReferences,
             cutoffDateFormatted: truncateYyyyMmDd(cutoffDateFormatted),
