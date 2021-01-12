@@ -23,7 +23,6 @@ import {StreamGallery} from './stream-gallery';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
-import {isLayoutSizeDefined} from '../../../src/layout';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
@@ -57,7 +56,7 @@ class AmpStreamGallery extends PreactBaseElement {
       isExperimentOn(this.win, 'bento-stream-gallery'),
       'expected global "bento" or specific "bento-stream-gallery" experiment to be enabled'
     );
-    return isLayoutSizeDefined(layout);
+    return super.isLayoutSupported(layout);
   }
 }
 
