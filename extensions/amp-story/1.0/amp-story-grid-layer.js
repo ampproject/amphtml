@@ -29,6 +29,7 @@
 import {AmpStoryBaseLayer} from './amp-story-base-layer';
 import {StateProperty, getStoreService} from './amp-story-store-service';
 import {assertDoesNotContainDisplay, px, setStyles} from '../../../src/style';
+import {devAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {parseQueryString} from '../../../src/url';
 import {scopedQuerySelectorAll} from '../../../src/dom';
@@ -78,6 +79,26 @@ export const GRID_LAYER_TEMPLATE_CLASS_NAMES = {
 };
 
 /**
+ * The attribute name for grid layer presets.
+ * @private @const {string}
+ */
+const PRESET_ATTRIBUTE_NAME = 'preset';
+
+/**
+ * The attributes that will be applied for each preset.
+ * @private @const {!Object<string, !Object<string, string>>}
+ */
+const GRID_LAYER_PRESETS_ATTRIBUTES = {
+  '2021-background': {
+    'aspect-ratio': '69:116',
+    'scaling-factor': '1.142',
+  },
+  '2021-foreground': {
+    'aspect-ratio': '69:116',
+  },
+};
+
+/**
  * Grid layer template templating system.
  */
 export class AmpStoryGridLayer extends AmpStoryBaseLayer {
@@ -114,6 +135,7 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
   /** @override */
   buildCallback() {
     super.buildCallback();
+    this.applyPresets_();
     this.applyTemplateClassName_();
     this.setOwnCssGridStyles_();
     this.setDescendentCssGridStyles_();
@@ -123,6 +145,25 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
   /** @override */
   prerenderAllowed() {
     return this.isPrerenderActivePage();
+  }
+
+  /**
+   * Applies the attributes to the layer from the preset specified in the [preset] attribute.
+   * @private
+   */
+  applyPresets_() {
+    if (!this.element.hasAttribute(PRESET_ATTRIBUTE_NAME)) {
+      return;
+    }
+    const preset = this.element.getAttribute(PRESET_ATTRIBUTE_NAME);
+    const presetAttributes = GRID_LAYER_PRESETS_ATTRIBUTES[preset];
+    devAssert(
+      presetAttributes,
+      `Preset not found for amp-story-grid-layer: ${preset}`
+    );
+    Object.entries(presetAttributes).forEach((keyValue) =>
+      this.element.setAttribute(keyValue[0], keyValue[1])
+    );
   }
 
   /** @private */
