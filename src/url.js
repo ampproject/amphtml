@@ -577,7 +577,7 @@ export function resolveRelativeUrl(relativeUrlString, baseUrl) {
   if (typeof baseUrl == 'string') {
     baseUrl = parseUrlDeprecated(baseUrl);
   }
-  if (typeof URL == 'function') {
+  if (IS_ESM || typeof URL == 'function') {
     return new URL(relativeUrlString, baseUrl.href).toString();
   }
   return resolveRelativeUrlFallback_(relativeUrlString, baseUrl);
