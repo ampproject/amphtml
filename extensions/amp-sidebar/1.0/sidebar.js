@@ -18,7 +18,6 @@ import * as Preact from '../../../src/preact';
 import {ContainWrapper} from '../../../src/preact/component';
 import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
 import {forwardRef} from '../../../src/preact/compat';
-import {isEnumValue} from '../../../src/types';
 import {isRTL} from '../../../src/dom';
 import {
   useCallback,
@@ -48,8 +47,6 @@ const ANIMATION_KEYFRAMES_SLIDE_IN_RIGHT = [
   {'transform': 'translateX(0)'},
 ];
 
-const SIDE_STYLES_HIDDEN = {'visibility': 'hidden'};
-const SIDE_STYLES_VISIBLE = {'visibility': ''};
 const ANIMATION_STYLES_SIDEBAR_LEFT_INIT = {'transform': 'translateX(-100%)'};
 const ANIMATION_STYLES_SIDEBAR_RIGHT_INIT = {'transform': 'translateX(100%)'};
 const ANIMATION_STYLES_BACKDROP_INIT = {'opacity': '0'};
@@ -72,19 +69,6 @@ function useValueRef(current) {
  */
 function safelySetStyles(element, styles) {
   setStyles(element, assertDoesNotContainDisplay(styles));
-}
-
-/**
- * @param {?string|undefined} side
- * @param {!Document} document
- * @return {string}
- */
-function calculateSide(side, document) {
-  if (isEnumValue(Side, side)) {
-    return side;
-  } else {
-    return isRTL(document) ? Side.RIGHT : Side.LEFT;
-  }
 }
 
 /**
@@ -111,7 +95,7 @@ function SidebarWithRef(
   // `mounted` mounts the component. `opened` plays the animation.
   const [mounted, setMounted] = useState(false);
   const [opened, setOpened] = useState(false);
-  const [side, setSide] = useState(null);
+  const [side, setSide] = useState(sideProp);
 
   const classes = useStyles();
   const sidebarRef = useRef();
@@ -156,8 +140,8 @@ function SidebarWithRef(
     if (!sidebarElement) {
       return;
     }
-    setSide(calculateSide(sideProp, sidebarElement.ownerDocument));
-  }, [sideProp, side, mounted]);
+    setSide(isRTL(sidebarElement.ownerDocument) ? Side.RIGHT : Side.LEFT);
+  }, [side, mounted]);
 
   useLayoutEffect(() => {
     const sidebarElement = sidebarRef.current;
@@ -167,12 +151,8 @@ function SidebarWithRef(
     }
 
     if (!side) {
-      safelySetStyles(sidebarElement, SIDE_STYLES_HIDDEN);
-      safelySetStyles(backdropElement, SIDE_STYLES_HIDDEN);
       return;
     }
-    safelySetStyles(sidebarElement, SIDE_STYLES_VISIBLE);
-    safelySetStyles(backdropElement, SIDE_STYLES_VISIBLE);
 
     let sidebarAnimation;
     let backdropAnimation;
@@ -219,7 +199,6 @@ function SidebarWithRef(
         sidebarAnimation = null;
         backdropAnimation = null;
         setMounted(false);
-        setSide(null);
       };
       if (!sidebarElement.animate || !backdropElement.animate) {
         postInvisibleAnim();
@@ -269,6 +248,7 @@ function SidebarWithRef(
           } ${side === Side.LEFT ? classes.left : classes.right}`}
           role="menu"
           tabindex="-1"
+          hidden={!side}
           {...rest}
         >
           {children}
@@ -281,6 +261,7 @@ function SidebarWithRef(
           className={`${backdropClassName ?? ''} ${classes.backdropClass} ${
             classes.defaultBackdropStyles
           }`}
+          hidden={!side}
         ></div>
       </>
     )
