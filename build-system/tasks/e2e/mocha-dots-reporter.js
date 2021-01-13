@@ -15,52 +15,64 @@
  */
 'use strict';
 
-const {Base} = require('mocha').reporters;
-const {inherits} = require('mocha').utils;
+const log = require('fancy-log');
+const Mocha = require('mocha');
+const {
+  EVENT_RUN_BEGIN,
+  EVENT_RUN_END,
+  EVENT_TEST_FAIL,
+  EVENT_TEST_PASS,
+  EVENT_TEST_PENDING,
+} = Mocha.Runner.constants;
+const {Base} = Mocha.reporters;
+const {green, red, yellow} = require('ansi-colors');
+const {icon, nbDotsPerLine} = require('../karma.conf').superDotsReporter;
 const {reportTestFinished} = require('../report-test-status');
-const {symbols} = require('../karma.conf').mochaReporter;
 
 /**
  * Custom Mocha reporter for CI builds.
- * Mimics the style of the Karma reporter.
+ * Mimics the style of the Karma super-dots reporter.
  * @param {*} runner
  */
-function MochaDotsReporter(runner) {
-  Base.call(this, runner);
-  const self = this;
+class MochaDotsReporter extends Base {
+  constructor(runner) {
+    super(runner);
 
-  runner.on('pass', function () {
-    process.stdout.write(Base.color('green', symbols.success));
-  });
+    let wrapCounter = 0;
+    const wrapIfNecessary = () => {
+      if (++wrapCounter >= nbDotsPerLine) {
+        wrapCounter = 0;
+        process.stdout.write('\n');
+      }
+    };
 
-  runner.on('pending', function () {
-    process.stdout.write(Base.color('bright yellow', symbols.info));
-  });
-
-  runner.on('fail', function () {
-    process.stdout.write(Base.color('fail', symbols.error));
-  });
-
-  runner.on('end', function () {
-    epilogue();
-  });
-
-  function epilogue() {
-    const {failures, stats} = self;
-    reportTestFinished(stats.passes, stats.failures);
-
-    Base.list(failures);
-    process.stdout.write(
-      `Executed ${stats.failures + stats.passes} of ${stats.tests} ` +
-        `(Skipped ${stats.pending}) `
-    );
-    if (stats.failures == 0) {
-      process.stdout.write(Base.color('green', 'SUCCESS \n'));
-    } else {
-      process.stdout.write(Base.color('fail', `${stats.failures} FAILED \n`));
-    }
+    runner
+      .once(EVENT_RUN_BEGIN, () => {
+        log('Running tests...');
+      })
+      .on(EVENT_TEST_PASS, () => {
+        process.stdout.write(green(icon.success));
+        wrapIfNecessary();
+      })
+      .on(EVENT_TEST_FAIL, () => {
+        process.stdout.write(red(icon.failure));
+        wrapIfNecessary();
+      })
+      .on(EVENT_TEST_PENDING, () => {
+        process.stdout.write(yellow(icon.ignore));
+        wrapIfNecessary();
+      })
+      .once(EVENT_RUN_END, () => {
+        Base.list(this.failures);
+        const {passes, pending, failures, tests} = runner.stats;
+        console.log(
+          `Executed ${failures + passes} of ${tests}`,
+          `(Skipped ${pending})`,
+          failures == 0 ? green('SUCCESS') : red(`${failures} FAILED`)
+        );
+        reportTestFinished(passes, failures);
+      });
   }
 }
 
-inherits(MochaDotsReporter, Base);
 module.exports = MochaDotsReporter;
