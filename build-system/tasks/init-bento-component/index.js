@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const fetch = require('node-fetch');
 const fs = require('fs').promises;
 const log = require('fancy-log');
 const path = require('path');
@@ -42,8 +41,7 @@ function dashToPascalCase(name) {
 
 /**
  * Create a mutator function from a map of keys/values to replace.
- * @param {Map<string, string>}
- * @param replaceMap
+ * @param {Map<string, string>} replaceMap
  * @return {function(string): string}
  */
 function makeReplacementFn(replaceMap) {
