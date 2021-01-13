@@ -141,6 +141,7 @@ export class AmpStoryDevTools extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.loadFonts_();
+    this.removeCustomCSS_();
     this.buildLayout_();
     this.initializeListeners_();
 
@@ -259,6 +260,13 @@ export class AmpStoryDevTools extends AMP.BaseElement {
         });
       });
     }
+  }
+
+  /** @private */
+  removeCustomCSS_() {
+    this.element.ownerDocument
+      .querySelectorAll('style[amp-custom]')
+      .forEach((e) => e.remove());
   }
 }
 
