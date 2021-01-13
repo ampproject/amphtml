@@ -123,22 +123,6 @@ class AmpFitText extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-<<<<<<< HEAD
-    if (window.ResizeObserver) {
-      if (this.observer_ == null) {
-        this.observer_ = new ResizeObserver(() =>
-          this.mutateElement(() => {
-            this.updateMeasurerContent_();
-            this.updateFontSize_();
-          })
-        );
-      }
-      this.observer_.observe(this.content_);
-      this.observer_.observe(this.measurer_);
-      this.unlisteners_.push(() => {
-        this.observer_.disconnect();
-      });
-=======
     if (this.win.ResizeObserver && this.resizeObserverUnlistener_ === null) {
       const observer = new this.win.ResizeObserver(
         throttle(
@@ -157,7 +141,6 @@ class AmpFitText extends AMP.BaseElement {
       this.resizeObserverUnlistener_ = function () {
         observer.disconnect();
       };
->>>>>>> 7fc69a6a0794c8c5f92f32b6481ff1311b323728
     }
     return this.mutateElement(() => {
       this.updateFontSize_();
@@ -166,14 +149,9 @@ class AmpFitText extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
-<<<<<<< HEAD
-    while (this.unlisteners_.length > 0) {
-      this.unlisteners_.pop()();
-=======
     if (this.resizeObserverUnlistener_ !== null) {
       this.resizeObserverUnlistener_();
       this.resizeObserverUnlistener_ = null;
->>>>>>> 7fc69a6a0794c8c5f92f32b6481ff1311b323728
     }
   }
 
@@ -186,8 +164,8 @@ class AmpFitText extends AMP.BaseElement {
 
   /** @private */
   updateFontSize_() {
-    const maxHeight = this.content_./*OK*/ offsetHeight;
-    const maxWidth = this.content_./*OK*/ offsetWidth;
+    const {offsetHeight: maxHeight, offsetWidth: maxWidth} = this.content_;
+
     const fontSize = calculateFontSize_(
       this.measurer_,
       maxHeight,
@@ -221,8 +199,8 @@ export function calculateFontSize_(
   while (maxFontSize - minFontSize > 1) {
     const mid = Math.floor((minFontSize + maxFontSize) / 2);
     setStyle(measurer, 'fontSize', px(mid));
-    const height = measurer./*OK*/ offsetHeight;
-    const width = measurer./*OK*/ offsetWidth;
+    const {offsetHeight: height, offsetWidth: width} = measurer;
+
     if (height > expectedHeight || width > expectedWidth) {
       maxFontSize = mid;
     } else {
