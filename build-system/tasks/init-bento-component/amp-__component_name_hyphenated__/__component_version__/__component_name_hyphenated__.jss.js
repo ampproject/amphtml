@@ -18,7 +18,7 @@ import {createUseStyles} from 'react-jss';
 
 // Example class used for styling
 const exampleContentHidden = {
-  display: 'none';
+  display: 'none',
 };
 
 const JSS = {

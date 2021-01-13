@@ -47,6 +47,6 @@ export function __component_name_pascalcase__({exampleTagNameProp, ...rest}) {
       <div className={`${classes.exampleContentHidden}`}>
         This is hidden
       </div>
-    <ContainWrapper/>
+    </ContainWrapper>
   );
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {__component_name_pascalcase__} from './fit-text';
+import {__component_name_pascalcase__} from './__component_name_hyphenated__';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
@@ -26,9 +26,11 @@ const TAG = 'amp-__component_name_hyphenated__';
 class Amp__component_name_pascalcase__ extends PreactBaseElement {
   /** @override */
   init() {
+    this.registerApiAction('exampleToggle', (api) => api./*OK*/exampleToggle());
+
     return dict({
       // Extra props passed by wrapper AMP component
-      exampleTagNameProp: this.element.tagName,
+      'exampleTagNameProp': this.element.tagName,
     });
   }
 
@@ -44,7 +46,7 @@ class Amp__component_name_pascalcase__ extends PreactBaseElement {
 }
 
 /** @override */
-Amp__component_name_pascalcase__['Component'] = __component_name_pascalecase__;
+Amp__component_name_pascalcase__['Component'] = __component_name_pascalcase__;
 
 /** @override */
 Amp__component_name_pascalcase__['props'] = {};

@@ -22,8 +22,8 @@ describes.realWin(
   'amp-__component_name_hyphenated__-v__component_version__',
   {
     amp: {
-      extensions: ['amp-__component_name_hyphenated__:__component_version__']
-    }
+      extensions: ['amp-__component_name_hyphenated__:__component_version__'],
+    },
   },
   (env) => {
     let win, doc, element;
@@ -31,7 +31,7 @@ describes.realWin(
     beforeEach(async function () {
       win = env.win;
       doc = win.document;
-      toggleExperiment(win, 'bento-amp-__component_name_hyphenated__', true, true);
+      toggleExperiment(win, 'bento-__component_name_hyphenated__', true, true);
     });
 
     it('example test renders', async () => {
