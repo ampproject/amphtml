@@ -221,6 +221,10 @@ Type attribute value: `iplabel`
 
 Type attribute value: `iwa`
 
+Adds support for Interia Web Analytics (IWA). It's Recommended to define variables:
+-   `pageTitle`: encoded page title
+-   `articleId`: id for an article
+
 ### Keen
 
 Type attribute value: `keen`
