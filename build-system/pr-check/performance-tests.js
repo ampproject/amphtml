@@ -22,7 +22,7 @@
  */
 
 const {
-  downloadDistOutput,
+  downloadNomoduleOutput,
   startTimer,
   stopTimer,
   timedExecOrDie: timedExecOrDieBase,
@@ -33,7 +33,7 @@ const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
 async function main() {
   const startTime = startTimer(FILENAME, FILENAME);
 
-  downloadDistOutput(FILENAME);
+  downloadNomoduleOutput(FILENAME);
   timedExecOrDie('gulp update-packages');
   timedExecOrDie('gulp performance --nobuild --quiet --headless');
 

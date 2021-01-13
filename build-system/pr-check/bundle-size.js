@@ -23,10 +23,9 @@
  */
 
 const colors = require('ansi-colors');
-const log = require('fancy-log');
 const {
-  downloadEsmDistOutput,
-  downloadDistOutput,
+  downloadModuleOutput,
+  downloadNomoduleOutput,
   printChangeSummary,
   startTimer,
   stopTimer,
@@ -49,19 +48,19 @@ async function main() {
   }
 
   if (!isPullRequestBuild()) {
-    downloadDistOutput(FILENAME);
-    downloadEsmDistOutput(FILENAME);
+    downloadNomoduleOutput(FILENAME);
+    downloadModuleOutput(FILENAME);
     timedExecOrDie('gulp bundle-size --on_push_build');
   } else {
     printChangeSummary(FILENAME);
     const buildTargets = determineBuildTargets(FILENAME);
     if (buildTargets.has('RUNTIME') || buildTargets.has('FLAG_CONFIG')) {
-      downloadDistOutput(FILENAME);
-      downloadEsmDistOutput(FILENAME);
+      downloadNomoduleOutput(FILENAME);
+      downloadModuleOutput(FILENAME);
       timedExecOrDie('gulp bundle-size --on_pr_build');
     } else {
       timedExecOrDie('gulp bundle-size --on_skipped_build');
-      log(
+      console.log(
         `${FILELOGPREFIX} Skipping`,
         colors.cyan('Bundle Size'),
         'because this commit does not affect the runtime or flag configs.'
