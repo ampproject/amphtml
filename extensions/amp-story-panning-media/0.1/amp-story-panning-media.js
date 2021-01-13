@@ -75,12 +75,13 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     return whenUpgradedToCustomElement(this.ampImgEl_)
       .then(() => this.ampImgEl_.signals().whenSignal(CommonSignals.LOAD_END))
       .then(() => {
+        const imgEl = dev().assertElement(this.element_.querySelector('img'));
+        // Remove layout="fill" classes so image is not clipped.
+        imgEl.classList = '';
         setStyles(this.ampImgEl_, {
           left: 'auto',
           right: 'auto',
         });
-        const imgEl = dev().assertElement(this.element_.querySelector('img'));
-        imgEl.classList = '';
       });
   }
 
