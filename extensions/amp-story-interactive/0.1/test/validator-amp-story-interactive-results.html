@@ -70,6 +70,14 @@
           option-3-text="Uruguay" option-3-results-category="Bunny"
           option-4-text="Spain" option-4-results-category="Mouse">
         </amp-story-interactive-results>
+        <!-- Invalid: Threshold has to be specified as a number -->
+        <amp-story-interactive-results
+          id="threshold attributes"
+          option-1-text="France" option-1-results-category="Dog" option-1-results-threshold="100"
+          option-2-text="Spain" option-2-results-category="Cat" option-2-results-threshold="100"
+          option-3-text="Uruguay" option-3-results-category="Bunny" option-3-results-threshold="100"
+          option-4-text="Spain" option-4-results-category="Mouse" option-4-results-threshold="a">
+        </amp-story-interactive-results>
       </amp-story-grid-layer>
     </amp-story-page>
   </amp-story>

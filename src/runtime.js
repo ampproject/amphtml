@@ -15,7 +15,6 @@
  */
 
 import {BaseElement} from './base-element';
-import {BaseTemplate, registerExtendedTemplate} from './service/template-impl';
 import {
   LogLevel, // eslint-disable-line no-unused-vars
   dev,
@@ -40,8 +39,10 @@ import {
 } from './service/extensions-impl';
 import {internalRuntimeVersion} from './internal-version';
 import {isExperimentOn, toggleExperiment} from './experiments';
+import {registerExtendedTemplate} from './service/template-impl';
 import {reportErrorForWin} from './error';
 import {scheduleUpgradeIfNeeded as scheduleInObUpgradeIfNeeded} from './polyfillstub/intersection-observer-stub';
+import {scheduleUpgradeIfNeeded as scheduleResObUpgradeIfNeeded} from './polyfillstub/resize-observer-stub';
 import {setStyle} from './style';
 import {startupChunk} from './chunk';
 import {stubElementsForDoc} from './service/custom-element-registry';
@@ -122,8 +123,6 @@ function adoptShared(global, callback) {
 
   global.AMP.BaseElement = BaseElement;
 
-  global.AMP.BaseTemplate = BaseTemplate;
-
   /**
    * Registers an extended element and installs its styles.
    * @param {string} name
@@ -135,7 +134,7 @@ function adoptShared(global, callback) {
   /**
    * Registers an extended template.
    * @param {string} name
-   * @param {typeof BaseTemplate} implementationClass
+   * @param {typeof ./base-template.BaseTemplate} implementationClass
    */
   global.AMP.registerTemplate = function (name, implementationClass) {
     registerExtendedTemplate(global, name, implementationClass);
@@ -271,6 +270,7 @@ function adoptShared(global, callback) {
 
   // Some deferred polyfills.
   scheduleInObUpgradeIfNeeded(global);
+  scheduleResObUpgradeIfNeeded(global);
 
   return iniPromise;
 }
@@ -451,21 +451,32 @@ export function adoptShadowMode(global) {
  * If they are different, returns false, and initiates a load
  * of the respective extension via a versioned URL.
  *
- * This is currently guarded by the 'version-locking' experiment.
- * With this active, all scripts in a given page are guaranteed
- * to have the same AMP release version.
- *
  * @param {!Window} win
  * @param {function(!Object, !Object)|!ExtensionPayload} fnOrStruct
  * @return {boolean}
  */
 function maybeLoadCorrectVersion(win, fnOrStruct) {
-  if (!isExperimentOn(win, 'version-locking')) {
+  if (getMode().localDev && isExperimentOn(win, 'disable-version-locking')) {
     return false;
   }
   if (typeof fnOrStruct == 'function') {
     return false;
   }
+
+  if (IS_ESM) {
+    // If we're in a module runtime, trying to execute a nomodule extension
+    // simply remove the nomodule extension so that it is not executed.
+    if (!fnOrStruct.m) {
+      return true;
+    }
+  } else {
+    // If we're in a nomodule runtime, trying to execute a module extension
+    // simply remove the module extension so that it is not executed.
+    if (fnOrStruct.m) {
+      return true;
+    }
+  }
+
   const {v} = fnOrStruct;
   // This is non-obvious, but we only care about the release version,
   // not about the full rtv version, because these only differ
@@ -485,10 +496,6 @@ function maybeLoadCorrectVersion(win, fnOrStruct) {
  *     pumped.
  */
 function maybePumpEarlyFrame(win, cb) {
-  if (!isExperimentOn(win, 'pump-early-frame')) {
-    cb();
-    return;
-  }
   // There is definitely nothing to draw yet, so we might as well
   // proceed.
   if (!win.document.body) {

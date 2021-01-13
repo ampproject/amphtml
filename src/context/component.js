@@ -15,8 +15,8 @@
  */
 
 import {ContextNode} from './node';
-import {protectedNoInline, throttleTail} from './scheduler';
 import {pushIfNotExist, removeItem} from '../utils/array';
+import {throttleTail, tryCallback} from './scheduler';
 import {withComponent} from './component-hooks';
 
 const EMPTY_ARRAY = [];
@@ -347,7 +347,7 @@ export class Component {
   run_() {
     // Cleanup the previous run.
     if (this.runCleanup_) {
-      protectedNoInline(this.runCleanup_);
+      tryCallback(this.runCleanup_);
       this.runCleanup_ = null;
     }
 
@@ -386,7 +386,7 @@ export class Component {
 
     // The last run's cleanup.
     if (this.runCleanup_) {
-      protectedNoInline(this.runCleanup_);
+      tryCallback(this.runCleanup_);
       this.runCleanup_ = null;
     }
 
@@ -394,7 +394,7 @@ export class Component {
     const cleanups = this.cleanups_;
     if (cleanups) {
       for (let i = 0; i < cleanups.length; i++) {
-        protectedNoInline(cleanups[i]);
+        tryCallback(cleanups[i]);
       }
       this.cleanups_.length = 0;
     }

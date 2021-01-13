@@ -28,9 +28,9 @@ For configuration details and to generate your tags, please contact https://www.
 
 ### Required parameters
 
-- `data-adspot-id`
+-   `data-adspot-id`
 
 ### Optional parameters
 
-- `data-stylesheet-url`
-- `data-country`
+-   `data-stylesheet-url`
+-   `data-country`

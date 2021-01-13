@@ -73,6 +73,8 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
 
     const story = win.document.createElement('amp-story');
     story.getImpl = () => Promise.resolve(mediaPoolRoot);
+    // Makes whenUpgradedToCustomElement() resolve immediately.
+    story.createdCallback = Promise.resolve();
 
     element = win.document.createElement('amp-story-page');
     gridLayerEl = win.document.createElement('amp-story-grid-layer');
@@ -229,6 +231,8 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
       .then(() => page.mediaPoolPromise_)
       .then((mediaPool) => {
         mediaPoolMock = env.sandbox.mock(mediaPool);
+        mediaPoolMock.expects('preload').resolves();
+        mediaPoolMock.expects('play').resolves();
         mediaPoolMock.expects('unmute').once();
 
         page.setState(PageState.PLAYING);

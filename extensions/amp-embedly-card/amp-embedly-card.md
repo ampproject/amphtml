@@ -87,8 +87,8 @@ is not loaded, try a different image or domain.
 
 Enables share icons.
 
-- `0`: Disable share icons.
-- `1`: Enable share icons
+-   `0`: Disable share icons.
+-   `1`: Enable share icons
 
 The default is `1`.
 
@@ -102,8 +102,8 @@ default value is `center`.
 When recommendations are supported, it disables embedly recommendations on video
 and rich cards. These are recommendations created by embedly.
 
-- `0`: Disables embedly recommendations.
-- `1`: Enables embedly recommendations.
+-   `0`: Disables embedly recommendations.
+-   `1`: Enables embedly recommendations.
 
 The default value is `1`.
 
@@ -117,6 +117,10 @@ Allows settings the `dark` theme which changes the background color of the main
 card container. Use `dark` to set this theme. For dark backgrounds it's better
 to specify this. The default is `light`, which sets no background color of the
 main card container.
+
+### title (optional)
+
+Define a `title` attribute for the component to propagate to the underlying `<iframe>` element. The default value is `"Embedly card"`.
 
 ### Common attributes
 

@@ -60,8 +60,8 @@ For details on the configuration semantics, please contact the ad network or ref
 
 ### Required parameters
 
-- `data-siteid`: Site Id is the InMobi property id. You can get this from InMobi dashboard.
-- `data-slotid`: Slot Id is the ad size.
+-   `data-siteid`: Site Id is the InMobi property id. You can get this from InMobi dashboard.
+-   `data-slotid`: Slot Id is the ad size.
 
 ### Test Ads
 

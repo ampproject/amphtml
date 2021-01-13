@@ -29,6 +29,7 @@ import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
 import {
   createElementWithAttributes,
+  dispatchCustomEvent,
   getDataParamsFromAttributes,
   isFullscreenElement,
   removeElement,
@@ -42,6 +43,7 @@ import {
 import {getData, listen} from '../../../src/event-helper';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {measureIntersection} from '../../../src/utils/intersection';
 import {once} from '../../../src/utils/function';
 
 /** @private @const */
@@ -179,10 +181,13 @@ class AmpVideoIframe extends AMP.BaseElement {
    */
   getMetadata_() {
     const {sourceUrl, canonicalUrl} = Services.documentInfoForDoc(this.element);
+    const {title, documentElement} = this.getAmpDoc().getRootNode();
 
     return dict({
       'sourceUrl': sourceUrl,
       'canonicalUrl': canonicalUrl,
+      'title': title || null,
+      'lang': documentElement?.lang || null,
     });
   }
 
@@ -190,7 +195,7 @@ class AmpVideoIframe extends AMP.BaseElement {
   onReady_() {
     const {element} = this;
     Services.videoManagerForDoc(element).register(this);
-    element.dispatchCustomEvent(VideoEvents.LOAD);
+    dispatchCustomEvent(element, VideoEvents.LOAD);
   }
 
   /** @override */
@@ -271,6 +276,7 @@ class AmpVideoIframe extends AMP.BaseElement {
 
   /**
    * @param {!Event} event
+   * @return {!Promise|undefined}
    * @private
    */
   onMessage_(event) {
@@ -298,8 +304,9 @@ class AmpVideoIframe extends AMP.BaseElement {
 
     if (methodReceived) {
       if (methodReceived == 'getIntersection') {
-        this.postIntersection_(messageId);
-        return;
+        return measureIntersection(this.element).then((intersection) => {
+          this.postIntersection_(messageId, intersection);
+        });
       }
       userAssert(false, 'Unknown method `%s`.', methodReceived);
       return;
@@ -327,7 +334,7 @@ class AmpVideoIframe extends AMP.BaseElement {
     }
 
     if (ALLOWED_EVENTS.indexOf(eventReceived) > -1) {
-      this.element.dispatchCustomEvent(eventReceived);
+      dispatchCustomEvent(this.element, eventReceived);
       return;
     }
   }
@@ -345,7 +352,8 @@ class AmpVideoIframe extends AMP.BaseElement {
       ANALYTICS_EVENT_TYPE_PREFIX
     );
 
-    this.element.dispatchCustomEvent(
+    dispatchCustomEvent(
+      this.element,
       VideoEvents.CUSTOM_TICK,
       dict({
         'eventType': eventType,
@@ -356,10 +364,11 @@ class AmpVideoIframe extends AMP.BaseElement {
 
   /**
    * @param {number} messageId
+   * @param {!IntersectionObserverEntry} intersection
    * @private
    */
-  postIntersection_(messageId) {
-    const {time, intersectionRatio} = this.element.getIntersectionChangeEntry();
+  postIntersection_(messageId, intersection) {
+    const {intersectionRatio, time} = intersection;
 
     // Only post ratio > 0 when in autoplay range to prevent internal autoplay
     // implementations that differ from ours.

@@ -101,15 +101,6 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
     );
   }
 
-  /** @override */
-  viewportCallback(inViewport) {
-    Services.ownersForDoc(this.element).updateInViewport(
-      this.element,
-      this.children_,
-      inViewport
-    );
-  }
-
   /**
    * Asserts that the flying carpet does not appear in the first or last
    * viewport.
@@ -157,7 +148,7 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
       this.initialPositionChecked_ = true;
     }
 
-    const width = this.element.getLayoutWidth();
+    const {width} = this.element.getLayoutSize();
     setStyle(this.container_, 'width', width, 'px');
     Services.ownersForDoc(this.element).scheduleLayout(
       this.element,

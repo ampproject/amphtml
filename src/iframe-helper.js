@@ -21,7 +21,7 @@ import {dict} from './utils/object';
 import {getData} from './event-helper';
 import {parseUrlDeprecated} from './url';
 import {remove} from './utils/array';
-import {setStyle, toggle} from './style';
+import {setStyle} from './style';
 import {tryParseJson} from './json';
 
 /**
@@ -29,13 +29,6 @@ import {tryParseJson} from './json';
  * @type {string}
  */
 const UNLISTEN_SENTINEL = 'unlisten';
-
-/**
- * The iframe feature policy that forces the iframe to pause when it's not
- * display.
- * See https://github.com/dtapuska/iframe-freeze.
- */
-const EXECUTION_WHILE_NOT_RENDERED = 'execution-while-not-rendered';
 
 /**
  * @typedef {{
@@ -518,9 +511,9 @@ export class SubscriptionApi {
  * @return {boolean}
  */
 export function looksLikeTrackingIframe(element) {
-  const box = element.getLayoutBox();
+  const {width, height} = element.getLayoutSize();
   // This heuristic is subject to change.
-  if (box.width > 10 || box.height > 10) {
+  if (width > 10 || height > 10) {
     return false;
   }
   // Iframe is not tracking iframe if open with user interaction
@@ -543,8 +536,7 @@ const adSizes = [
  * @visibleForTesting
  */
 export function isAdLike(element) {
-  const box = element.getLayoutBox();
-  const {height, width} = box;
+  const {width, height} = element.getLayoutSize();
   for (let i = 0; i < adSizes.length; i++) {
     const refWidth = adSizes[i][0];
     const refHeight = adSizes[i][1];
@@ -593,7 +585,6 @@ export function canInspectWindow(win) {
     // to optimize this check away.
     return !!win.location.href && (win['test'] || true);
   } catch (unusedErr) {
-    // eslint-disable-line no-unused-vars
     return false;
   }
 }
@@ -624,36 +615,4 @@ export function isInFie(element) {
     element.classList.contains('i-amphtml-fie') ||
     !!closestAncestorElementBySelector(element, '.i-amphtml-fie')
   );
-}
-
-/**
- * @param {!HTMLIFrameElement} iframe
- */
-export function makePausable(iframe) {
-  const oldAllow = (iframe.getAttribute('allow') || '').trim();
-  iframe.setAttribute(
-    'allow',
-    `${EXECUTION_WHILE_NOT_RENDERED} 'none';` + oldAllow
-  );
-}
-
-/**
- * @param {!HTMLIFrameElement} iframe
- * @return {boolean}
- */
-export function isPausable(iframe) {
-  return (
-    !!iframe.featurePolicy &&
-    iframe.featurePolicy.features().indexOf(EXECUTION_WHILE_NOT_RENDERED) !=
-      -1 &&
-    !iframe.featurePolicy.allowsFeature(EXECUTION_WHILE_NOT_RENDERED)
-  );
-}
-
-/**
- * @param {!HTMLIFrameElement} iframe
- * @param {boolean} paused
- */
-export function setPaused(iframe, paused) {
-  toggle(iframe, !paused);
 }

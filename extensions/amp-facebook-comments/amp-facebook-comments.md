@@ -65,15 +65,20 @@ For details, see the
 The order to use when displaying comments. For details, see the
 [Facebook comments documentation](https://developers.facebook.com/docs/plugins/comments).
 
-### `data-colorscheme` (optional)
+### title (optional)
 
-The color scheme. For details, see the
-[Facebook comments documentation](https://developers.facebook.com/docs/plugins/comments).
+Define a `title` attribute for the component to propagate to the underlying `<iframe>` element. The default value is `"Facebook comments"`.
 
 ### Common attributes
 
 This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes)
 extended to AMP components.
+
+### Deprecated attributes
+
+**`data-colorscheme` (optional)**
+
+The color scheme. For details, see the <a href="https://developers.facebook.com/docs/plugins/comments">Facebook comments documentation</a>.<br><br><em>Note: This is no longer supported by Facebook. For more details, follow our <a href="https://github.com/ampproject/amphtml/issues/29980">our tracking issue</a> and <a href="https://developers.facebook.com/support/bugs/1759174414250782/">Facebook's bug report</a>.</em>
 
 ## Validation
 
