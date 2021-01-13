@@ -2136,11 +2136,6 @@ export class AmpA4A extends AMP.BaseElement {
         ? measureIntersection(this.element)
         : Promise.resolve(this.element.getIntersectionChangeEntry());
       return intersectionPromise.then((intersection) => {
-        console.error(
-          `Async: ${asyncIntersection}, intersection: ${JSON.stringify(
-            intersection
-          )}`
-        );
         contextMetadata['initialIntersection'] = intersectionEntryToJson(
           intersection
         );
