@@ -35,18 +35,18 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     /** @private {?Element} */
     this.element_ = element;
 
-    /** @private {?Element} */
+    /** @private {?Element} The element that is transitioned. */
     this.ampImgEl_ = dev().assertElement(
       this.element_.querySelector('amp-img')
     );
 
-    /** @public {?string} */
+    /** @public {?string} Sent to siblings to update their position. */
     this.x = this.element_.getAttribute('x') || '0%';
 
-    /** @public {?string} */
+    /** @public {?string} Sent to siblings to update their position. */
     this.y = this.element_.getAttribute('y') || '0%';
 
-    /** @public {?string} */
+    /** @public {?string} Sent to siblings to update their position. */
     this.zoom = this.element_.getAttribute('zoom') || '1';
 
     /** @private {Array<Element>} */
