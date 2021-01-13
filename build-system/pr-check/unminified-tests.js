@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,13 @@
 
 /**
  * @fileoverview
- * This script runs the unit and integration tests against minified code
- * on a local CI service VM.
- * This is run during the CI stage = test; job = dist tests.
+ * This script runs the unit and integration tests locally on a VM.
+ * This is run during the CI stage = test; job = unminified tests.
  */
 
 const colors = require('ansi-colors');
 const {
-  downloadDistOutput,
+  downloadUnminifiedOutput,
   printChangeSummary,
   startTimer,
   stopTimer,
@@ -34,7 +33,7 @@ const {
 const {determineBuildTargets} = require('./build-targets');
 const {isPullRequestBuild} = require('../common/ci');
 
-const FILENAME = 'dist-tests.js';
+const FILENAME = 'unminified-tests.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
 const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
 const timedExecOrThrow = (cmd, msg) => timedExecOrThrowBase(cmd, FILENAME, msg);
@@ -43,13 +42,21 @@ function main() {
   const startTime = startTimer(FILENAME, FILENAME);
 
   if (!isPullRequestBuild()) {
-    downloadDistOutput(FILENAME);
+    downloadUnminifiedOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
 
     try {
       timedExecOrThrow(
-        'gulp integration --nobuild --headless --compiled --report',
-        'Integration tests failed!'
+        'gulp integration --nobuild --headless --coverage --report',
+        'Integration tests failed! Skipping remaining tests.'
+      );
+      timedExecOrThrow(
+        'gulp unit --nobuild --headless --coverage --report',
+        'Unit tests failed!'
+      );
+      timedExecOrThrow(
+        'gulp codecov-upload',
+        'Failed to upload code coverage to Codecov!'
       );
     } catch (e) {
       if (e.status) {
@@ -64,27 +71,40 @@ function main() {
     if (
       !buildTargets.has('RUNTIME') &&
       !buildTargets.has('FLAG_CONFIG') &&
+      !buildTargets.has('UNIT_TEST') &&
       !buildTargets.has('INTEGRATION_TEST')
     ) {
       console.log(
         `${FILELOGPREFIX} Skipping`,
-        colors.cyan('Dist Tests'),
+        colors.cyan('Unminified Tests'),
         'because this commit not affect the runtime, flag configs,',
-        'or integration tests.'
+        'unit tests, or integration tests.'
       );
       stopTimer(FILENAME, FILENAME, startTime);
       return;
     }
 
-    downloadDistOutput(FILENAME);
+    downloadUnminifiedOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
+
+    if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {
+      timedExecOrDie('gulp unit --nobuild --headless --local_changes');
+    }
 
     if (
       buildTargets.has('RUNTIME') ||
       buildTargets.has('FLAG_CONFIG') ||
       buildTargets.has('INTEGRATION_TEST')
     ) {
-      timedExecOrDie('gulp integration --nobuild --headless --compiled');
+      timedExecOrDie('gulp integration --nobuild --headless --coverage');
+    }
+
+    if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {
+      timedExecOrDie('gulp unit --nobuild --headless --coverage');
+    }
+
+    if (buildTargets.has('RUNTIME')) {
+      timedExecOrDie('gulp codecov-upload');
     }
   }
 

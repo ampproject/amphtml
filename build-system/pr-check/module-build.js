@@ -18,18 +18,17 @@
 /**
  * @fileoverview
  * This script builds the esm minified AMP runtime.
- * This is run during the CI stage = build; job = Module Build.
+ * This is run during the CI stage = build; job = module build.
  */
 
 const colors = require('ansi-colors');
-const log = require('fancy-log');
 const {
   printChangeSummary,
   startTimer,
   stopTimer,
   stopTimedJob,
   timedExecOrDie: timedExecOrDieBase,
-  uploadEsmDistOutput,
+  uploadModuleOutput,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isPullRequestBuild} = require('../common/ci');
@@ -49,7 +48,7 @@ function main() {
   if (!isPullRequestBuild()) {
     timedExecOrDie('gulp update-packages');
     timedExecOrDie('gulp dist --esm --fortesting');
-    uploadEsmDistOutput(FILENAME);
+    uploadModuleOutput(FILENAME);
   } else {
     printChangeSummary(FILENAME);
     const buildTargets = determineBuildTargets(FILENAME);
@@ -63,9 +62,9 @@ function main() {
     ) {
       timedExecOrDie('gulp update-packages');
       timedExecOrDie('gulp dist --esm --fortesting');
-      uploadEsmDistOutput(FILENAME);
+      uploadModuleOutput(FILENAME);
     } else {
-      log(
+      console.log(
         `${FILELOGPREFIX} Skipping`,
         colors.cyan('Module Build'),
         'because this commit does not affect the runtime or flag configs.'

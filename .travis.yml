@@ -49,17 +49,13 @@ stages:
 jobs:
   include:
     - stage: build
-      name: 'Unminified Build'
-      script:
-        - unbuffer node build-system/pr-check/unminified-build.js
-    - stage: build
       name: 'Checks'
       script:
         - unbuffer node build-system/pr-check/checks.js
     - stage: build
-      name: 'Validator Tests'
+      name: 'Unminified Build'
       script:
-        - unbuffer node build-system/pr-check/validator-tests.js
+        - unbuffer node build-system/pr-check/unminified-build.js
     - stage: build
       name: 'Nomodule Build'
       script:
@@ -68,6 +64,10 @@ jobs:
       name: 'Module Build'
       script:
         - unbuffer node build-system/pr-check/module-build.js
+    - stage: build
+      name: 'Validator Tests'
+      script:
+        - unbuffer node build-system/pr-check/validator-tests.js
     - stage: test
       name: 'Bundle Size'
       script:
@@ -77,21 +77,21 @@ jobs:
       script:
         - unbuffer node build-system/pr-check/visual-diff-tests.js
     - stage: test
-      name: 'Local Tests'
+      name: 'Unminified Tests'
       script:
-        - unbuffer node build-system/pr-check/local-tests.js
+        - unbuffer node build-system/pr-check/unminified-tests.js
     - stage: test
-      name: 'Dist Tests'
+      name: 'Nomodule Tests'
       script:
-        - unbuffer node build-system/pr-check/dist-tests.js
+        - unbuffer node build-system/pr-check/nomodule-tests.js
+    - stage: test
+      name: 'Module Tests'
+      script:
+        - unbuffer node build-system/pr-check/module-tests.js
     - stage: test
       name: 'End to End Tests'
       script:
         - unbuffer node build-system/pr-check/e2e-tests.js
-    - stage: test
-      name: 'ESM Tests'
-      script:
-        - unbuffer node build-system/pr-check/esm-tests.js
     - stage: experiment
       name: 'Experiment A Tests'
       script:

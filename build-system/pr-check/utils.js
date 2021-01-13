@@ -29,10 +29,14 @@ const {execOrDie, execOrThrow, execWithError, exec} = require('../common/exec');
 const {isCiBuild, ciBuildNumber, ciPullRequestSha} = require('../common/ci');
 const {replaceUrls, signalDistUpload} = require('../tasks/pr-deploy-bot-utils');
 
-const BUILD_OUTPUT_FILE = isCiBuild() ? `amp_build_${ciBuildNumber()}.zip` : '';
-const DIST_OUTPUT_FILE = isCiBuild() ? `amp_dist_${ciBuildNumber()}.zip` : '';
-const ESM_DIST_OUTPUT_FILE = isCiBuild()
-  ? `amp_esm_dist_${ciBuildNumber()}.zip`
+const UNMINIFIED_OUTPUT_FILE = isCiBuild()
+  ? `amp_unminified_${ciBuildNumber()}.zip`
+  : '';
+const NOMODULE_OUTPUT_FILE = isCiBuild()
+  ? `amp_nomodule_${ciBuildNumber()}.zip`
+  : '';
+const MODULE_OUTPUT_FILE = isCiBuild()
+  ? `amp_module_${ciBuildNumber()}.zip`
   : '';
 
 const BUILD_OUTPUT_DIRS = 'build/ dist/ dist.3p/';
@@ -44,6 +48,8 @@ const OUTPUT_STORAGE_KEY_FILE = 'sa-travis-key.json';
 const OUTPUT_STORAGE_PROJECT_ID = 'amp-travis-build-storage';
 const OUTPUT_STORAGE_SERVICE_ACCOUNT =
   'sa-travis@amp-travis-build-storage.iam.gserviceaccount.com';
+
+const GCLOUD_LOGGING_FLAGS = '--quiet --verbosity error';
 
 const GIT_BRANCH_URL =
   'https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md#create-a-git-branch';
@@ -222,24 +228,16 @@ function downloadOutput_(functionName, outputFileName, outputDirs) {
       colors.cyan(buildOutputDownloadUrl) +
       '...'
   );
-  exec('echo travis_fold:start:download_results && echo');
   authenticateWithStorageLocation_();
   execOrDie(`gsutil cp ${buildOutputDownloadUrl} ${outputFileName}`);
-  exec('echo travis_fold:end:download_results');
 
   console.log(
     `${fileLogPrefix} Extracting ` + colors.cyan(outputFileName) + '...'
   );
-  exec('echo travis_fold:start:unzip_results && echo');
   dirsToUnzip.forEach((dir) => {
-    execOrDie(`unzip -o ${outputFileName} '${dir.replace('/', '/*')}'`);
+    execOrDie(`unzip -q -o ${outputFileName} '${dir.replace('/', '/*')}'`);
   });
-  exec('echo travis_fold:end:unzip_results');
-
-  console.log(fileLogPrefix, 'Verifying extracted files...');
-  exec('echo travis_fold:start:verify_unzip_results && echo');
-  execOrDie(`ls -laR ${outputDirs}`);
-  exec('echo travis_fold:end:verify_unzip_results');
+  execOrDie(`du -sh ${outputDirs}`);
 }
 
 /**
@@ -259,9 +257,8 @@ function uploadOutput_(functionName, outputFileName, outputDirs) {
       colors.cyan(outputFileName) +
       '...'
   );
-  exec('echo travis_fold:start:zip_results && echo');
-  execOrDie(`zip -r ${outputFileName} ${outputDirs}`);
-  exec('echo travis_fold:end:zip_results');
+  execOrDie(`zip -r -q ${outputFileName} ${outputDirs}`);
+  execOrDie(`du -sh ${outputFileName}`);
 
   console.log(
     `${fileLogPrefix} Uploading ` +
@@ -270,83 +267,85 @@ function uploadOutput_(functionName, outputFileName, outputDirs) {
       colors.cyan(OUTPUT_STORAGE_LOCATION) +
       '...'
   );
-  exec('echo travis_fold:start:upload_results && echo');
   authenticateWithStorageLocation_();
   execOrDie(`gsutil -m cp -r ${outputFileName} ${OUTPUT_STORAGE_LOCATION}`);
-  exec('echo travis_fold:end:upload_results');
 }
 
 function authenticateWithStorageLocation_() {
   decryptTravisKey_();
   execOrDie(
-    'gcloud auth activate-service-account ' +
-      `--key-file ${OUTPUT_STORAGE_KEY_FILE}`
+    `gcloud auth activate-service-account --key-file ${OUTPUT_STORAGE_KEY_FILE} ${GCLOUD_LOGGING_FLAGS}`
   );
-  execOrDie(`gcloud config set account ${OUTPUT_STORAGE_SERVICE_ACCOUNT}`);
-  execOrDie('gcloud config set pass_credentials_to_gsutil true');
-  execOrDie(`gcloud config set project ${OUTPUT_STORAGE_PROJECT_ID}`);
-  execOrDie('gcloud config list');
+  execOrDie(
+    `gcloud config set account ${OUTPUT_STORAGE_SERVICE_ACCOUNT} ${GCLOUD_LOGGING_FLAGS}`
+  );
+  execOrDie(
+    `gcloud config set pass_credentials_to_gsutil true ${GCLOUD_LOGGING_FLAGS}`
+  );
+  execOrDie(
+    `gcloud config set project ${OUTPUT_STORAGE_PROJECT_ID} ${GCLOUD_LOGGING_FLAGS}`
+  );
 }
 
 /**
  * Downloads and unzips build output from storage
  * @param {string} functionName
  */
-function downloadBuildOutput(functionName) {
-  downloadOutput_(functionName, BUILD_OUTPUT_FILE, BUILD_OUTPUT_DIRS);
+function downloadUnminifiedOutput(functionName) {
+  downloadOutput_(functionName, UNMINIFIED_OUTPUT_FILE, BUILD_OUTPUT_DIRS);
 }
 
 /**
- * Downloads and unzips dist output from storage
+ * Downloads and unzips nomodule output from storage
  * @param {string} functionName
  */
-function downloadDistOutput(functionName) {
-  downloadOutput_(functionName, DIST_OUTPUT_FILE, BUILD_OUTPUT_DIRS);
+function downloadNomoduleOutput(functionName) {
+  downloadOutput_(functionName, NOMODULE_OUTPUT_FILE, BUILD_OUTPUT_DIRS);
 }
 
 /**
- * Downloads and unzips esm dist output from storage
+ * Downloads and unzips module output from storage
  * @param {string} functionName
  */
-function downloadEsmDistOutput(functionName) {
-  downloadOutput_(functionName, ESM_DIST_OUTPUT_FILE, BUILD_OUTPUT_DIRS);
+function downloadModuleOutput(functionName) {
+  downloadOutput_(functionName, MODULE_OUTPUT_FILE, BUILD_OUTPUT_DIRS);
 }
 
 /**
  * Zips and uploads the build output to a remote storage location
  * @param {string} functionName
  */
-function uploadBuildOutput(functionName) {
-  uploadOutput_(functionName, BUILD_OUTPUT_FILE, BUILD_OUTPUT_DIRS);
+function uploadUnminifiedOutput(functionName) {
+  uploadOutput_(functionName, UNMINIFIED_OUTPUT_FILE, BUILD_OUTPUT_DIRS);
 }
 
 /**
- * Zips and uploads the dist output to a remote storage location
+ * Zips and uploads the nomodule output to a remote storage location
  * @param {string} functionName
  */
-function uploadDistOutput(functionName) {
-  const distOutputDirs = `${BUILD_OUTPUT_DIRS} ${APP_SERVING_DIRS}`;
-  uploadOutput_(functionName, DIST_OUTPUT_FILE, distOutputDirs);
+function uploadNomoduleOutput(functionName) {
+  const nomoduleOutputDirs = `${BUILD_OUTPUT_DIRS} ${APP_SERVING_DIRS}`;
+  uploadOutput_(functionName, NOMODULE_OUTPUT_FILE, nomoduleOutputDirs);
 }
 
 /**
- * Zips and uploads the esm dist output to a remote storage location
+ * Zips and uploads the module output to a remote storage location
  * @param {string} functionName
  */
-function uploadEsmDistOutput(functionName) {
-  const esmDistOutputDirs = `${BUILD_OUTPUT_DIRS} ${APP_SERVING_DIRS}`;
-  uploadOutput_(functionName, ESM_DIST_OUTPUT_FILE, esmDistOutputDirs);
+function uploadModuleOutput(functionName) {
+  const moduleOutputDirs = `${BUILD_OUTPUT_DIRS} ${APP_SERVING_DIRS}`;
+  uploadOutput_(functionName, MODULE_OUTPUT_FILE, moduleOutputDirs);
 }
 
 /**
- * Replaces URLS in HTML files, zips and uploads dist output,
+ * Replaces URLS in HTML files, zips and uploads nomodule output,
  * and signals to the AMP PR Deploy bot that the upload is complete.
  * @param {string} functionName
  */
-async function processAndUploadDistOutput(functionName) {
+async function processAndUploadNomoduleOutput(functionName) {
   await replaceUrls('test/manual');
   await replaceUrls('examples');
-  uploadDistOutput(functionName);
+  uploadNomoduleOutput(functionName);
   await signalDistUpload('success');
 }
 
@@ -365,11 +364,11 @@ function decryptTravisKey_() {
 }
 
 module.exports = {
-  downloadBuildOutput,
-  downloadDistOutput,
-  downloadEsmDistOutput,
+  downloadUnminifiedOutput,
+  downloadNomoduleOutput,
+  downloadModuleOutput,
   printChangeSummary,
-  processAndUploadDistOutput,
+  processAndUploadNomoduleOutput,
   startTimer,
   stopTimer,
   stopTimedJob,
@@ -377,7 +376,7 @@ module.exports = {
   timedExecOrDie,
   timedExecWithError,
   timedExecOrThrow,
-  uploadBuildOutput,
-  uploadDistOutput,
-  uploadEsmDistOutput,
+  uploadUnminifiedOutput,
+  uploadNomoduleOutput,
+  uploadModuleOutput,
 };
