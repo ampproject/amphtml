@@ -387,6 +387,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [Monetizer101](../../ads/monetizer101.md)
 -   [mox](../../ads/mox.md)
 -   [my6Sense](../../ads/my6sense.md)
+-   [myFinance](../../ads/myfinance.md)
 -   [MyOffrz](../../ads/myoffrz.md)
 -   [myTarget](../../ads/mytarget.md)
 -   [myWidget](../../ads/mywidget.md)
