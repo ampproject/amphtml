@@ -1316,7 +1316,10 @@ export class ResourcesImpl {
     ) {
       for (let i = 0; i < this.resources_.length; i++) {
         const r = this.resources_[i];
-        if (r.hasOwner() && !r.isMeasureRequested()) {
+        if (
+          (r.hasOwner() && !r.isMeasureRequested()) ||
+          r.element.isLoadableV2()
+        ) {
           // If element has owner, and measure is not requested, do nothing.
           continue;
         }
@@ -1377,7 +1380,11 @@ export class ResourcesImpl {
     // Phase 3: Set inViewport status for resources.
     for (let i = 0; i < this.resources_.length; i++) {
       const r = this.resources_[i];
-      if (r.getState() == ResourceState.NOT_BUILT || r.hasOwner()) {
+      if (
+        r.getState() == ResourceState.NOT_BUILT ||
+        r.hasOwner() ||
+        r.element.isLoadableV2()
+      ) {
         continue;
       }
       // Note that when the document is not visible, neither are any of its
@@ -1412,7 +1419,11 @@ export class ResourcesImpl {
             /* ignoreQuota */ true
           );
         }
-        if (r.getState() != ResourceState.READY_FOR_LAYOUT || r.hasOwner()) {
+        if (
+          r.getState() != ResourceState.READY_FOR_LAYOUT ||
+          r.hasOwner() ||
+          r.isLoadableV2()
+        ) {
           continue;
         }
         // TODO(dvoytenko, #3434): Reimplement the use of `isFixed` with
@@ -1437,6 +1448,7 @@ export class ResourcesImpl {
         if (
           r.getState() == ResourceState.READY_FOR_LAYOUT &&
           !r.hasOwner() &&
+          !r.element.isLoadableV2() &&
           r.isDisplayed() &&
           r.idleRenderOutsideViewport()
         ) {
@@ -1456,6 +1468,7 @@ export class ResourcesImpl {
         if (
           r.getState() == ResourceState.READY_FOR_LAYOUT &&
           !r.hasOwner() &&
+          !r.isLoadableV2() &&
           r.isDisplayed()
         ) {
           dev().fine(TAG_, 'idle layout:', r.debugid);

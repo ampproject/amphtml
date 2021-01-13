@@ -110,7 +110,7 @@ export class OwnersImpl {
       if (resource.getState() != ResourceState.LAYOUT_SCHEDULED) {
         promises.push(resource.element.load());
       } else if (resource.isDisplayed()) {
-        promises.push(resource.loadedOnce());
+        promises.push(resource.element.load());
       }
     });
     return Promise.all(promises);
