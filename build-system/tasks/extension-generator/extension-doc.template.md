@@ -76,6 +76,14 @@ Below is an example for ads.
 
 [/example][/filter]
 
+### Standalone use outside the AMP environment (optional)
+
+Information on Bento AMP usage.
+
+#### Bento Example
+
+Code snippet of component usage in Bento.
+
 ### Behavior users should be aware of (optional)
 
 What to do if they want behavior. How to work around it.
