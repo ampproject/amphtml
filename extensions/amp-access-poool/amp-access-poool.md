@@ -168,6 +168,16 @@ See [documentation](https://dev.poool.tech/doc/sdk#custom_segment) for more info
 Following latest GDPR requirements, we decided to disable cookies by default inside our paywall. You will have to explicitly set this attribute to reflect the user's consent.
 See [documentation](https://dev.poool.tech/doc/sdk#cookies_enabled) for more information.
 
+### locale
+
+Set default locale for all texts inside the paywall.
+See [documentation](https://dev.poool.tech/doc/sdk#locale) for more information.
+
+### context
+
+Override default or native contexts with a custom context value.
+See [documentation](https://dev.poool.tech/doc/sdk#context) for more information.
+
 ## Validation
 
 See [`amp-access-poool` rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-access-poool/validator-amp-access-poool.protoascii) in the AMP validator specification.

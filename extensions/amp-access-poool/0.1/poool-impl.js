@@ -45,6 +45,8 @@ const AUTHORIZATION_TIMEOUT = 3000;
  *   videoClient: (string|null),
  *   customSegment: (string|null),
  *   cookiesEnabled: (boolean),
+ *   locale: (string|null),
+ *   context: (string|null),
  * }}
  */
 let PooolConfigDef;
@@ -205,6 +207,8 @@ export class PooolVendor {
               : getMode().development || getMode().localDev,
           'fw': this.pooolConfig_['forceWidget'],
           'cs': this.pooolConfig_['customSegment'],
+          'lo': this.pooolConfig_['locale'],
+          'co': this.pooolConfig_['context'],
         })
       ),
       false
