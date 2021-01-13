@@ -144,18 +144,17 @@ export class OwnersImpl {
     });
   }
 
-  /**
-   * @param {!Element} element
-   * @param {function(!Resource)} callback
-   */
-  discoverResourcesForElement_(element, callback) {
+  /** @override */
+  findClosestAmpElements(element, callback, findPlaceholder) {
     // Breadth-first search.
     if (element.classList.contains('i-amphtml-element')) {
-      callback(this.resources_.getResourceForElement(element));
+      callback(element);
       // Also schedule amp-element that is a placeholder for the element.
-      const placeholder = element.getPlaceholder();
-      if (placeholder) {
-        this.discoverResourcesForElement_(placeholder, callback);
+      if (findPlaceholder) {
+        const placeholder = element.getPlaceholder();
+        if (placeholder) {
+          this.findClosestAmpElements(placeholder, callback, findPlaceholder);
+        }
       }
     } else {
       const ampElements = element.getElementsByClassName('i-amphtml-element');
@@ -171,10 +170,23 @@ export class OwnersImpl {
         }
         if (!covered) {
           seen.push(ampElement);
-          callback(this.resources_.getResourceForElement(ampElement));
+          callback(ampElement);
         }
       }
     }
+  }
+
+  /**
+   * @param {!Element} element
+   * @param {function(!Resource)} callback
+   */
+  discoverResourcesForElement_(element, callback) {
+    this.findClosestAmpElements(
+      element,
+      (ampElement) =>
+        callback(this.resources_.getResourceForElement(ampElement)),
+      true
+    );
   }
 
   /**

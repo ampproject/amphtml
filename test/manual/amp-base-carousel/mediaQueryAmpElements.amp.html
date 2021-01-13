@@ -1,0 +1,25 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>My AMP Page</title>
+  <link rel="canonical" href="self.html" />
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.2.js"></script>
+</head>
+<body>  
+  <amp-carousel controls width="450" height="300" type="slides" role="region" aria-label="Basic carousel">
+    <amp-img id="slide-1-desktop-image" media="(min-width:650px)" src="./img/tealgradient.png" layout="fill"></amp-img>
+    <div id="slide-2">
+      <!-- first should show on mobile, second image should show on desktop -->
+      <amp-img id="slide-2-desktop-image" media="(min-width:650px)" src="./img/redgradient.png" layout="fill"></amp-img>
+      <amp-img id="slide-2-mobile-image" media="(max-width:649px)" src="./img/greengradient.png" layout="fill"></amp-img>
+    </div>
+    <div id="slide-3">
+      <amp-img id="slide-3-both-image" src="./img/bluegradient.png" layout="fill"></amp-img>
+    </div>
+  </amp-carousel>
+</body>
+</html>

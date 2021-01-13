@@ -68,6 +68,8 @@ const ViewportChangeState = {
   LEAVE: 1,
 };
 
+const SLIDE_ID = 'i-amphtml-child-layout-manager-slide-id';
+
 /**
  * Manages scheduling layout/unlayout for children of an AMP component as they
  * intersect with the AMP component. The parent AMP component should notify the
@@ -165,6 +167,9 @@ export class ChildLayoutManager {
     /** @private {?IntersectionObserver} */
     this.inViewportObserver_ = null;
 
+    /** @private {!JsonObject<string, Element>} */
+    this.underlyingAmpElementParent_ = {};
+
     /** @private {boolean} */
     this.laidOut_ = false;
   }
@@ -261,7 +266,17 @@ export class ChildLayoutManager {
         return isIntersecting;
       })
       .forEach((entry) => {
-        const {target} = entry;
+        let {target} = entry;
+        // Change the flag for the parent if it's an underlying AMP element
+        // If it's a parent it will do the same thing.
+        if (
+          target.hasAttribute(SLIDE_ID) &&
+          this.underlyingAmpElementParent_[target.getAttribute(SLIDE_ID)]
+        ) {
+          target = this.underlyingAmpElementParent_[
+            target.getAttribute(SLIDE_ID)
+          ];
+        }
         target[NEAR_VIEWPORT_FLAG] = ViewportChangeState.ENTER;
       });
 
@@ -282,7 +297,16 @@ export class ChildLayoutManager {
         return !isIntersecting;
       })
       .forEach((entry) => {
-        const {target} = entry;
+        let {target} = entry;
+        // Change the flag for the parent if it's an underlying AMP element
+        if (
+          target.hasAttribute(SLIDE_ID) &&
+          this.underlyingAmpElementParent_[target.getAttribute(SLIDE_ID)]
+        ) {
+          target = this.underlyingAmpElementParent_[
+            target.getAttribute(SLIDE_ID)
+          ];
+        }
         target[NEAR_VIEWPORT_FLAG] = ViewportChangeState.LEAVE;
       });
 
@@ -386,10 +410,41 @@ export class ChildLayoutManager {
       return;
     }
 
+    // Find all underlying AMP elements and observe
     for (let i = 0; i < this.children_.length; i++) {
-      this.nearingViewportObserver_.observe(this.children_[i]);
-      this.backingAwayViewportObserver_.observe(this.children_[i]);
-      this.inViewportObserver_.observe(this.children_[i]);
+      const child = this.children_[i];
+      this.owners_.findClosestAmpElements(
+        child,
+        (ampElement) => {
+          // Don't observe the child, will do later.
+          if (ampElement === child) {
+            return;
+          }
+          const id = child.getAttribute(SLIDE_ID);
+          ampElement.setAttribute(SLIDE_ID, id);
+          this.underlyingAmpElementParent_[id] = child;
+          // No need to observe in viewport, it only triggers pause and resume.
+          this.observeElement_(ampElement, false);
+        },
+        false
+      );
+    }
+
+    // Observe slides
+    for (let i = 0; i < this.children_.length; i++) {
+      this.observeElement_(this.children_[i]);
+    }
+  }
+
+  /**
+   * @param {Element} element
+   * @param {boolean} opt_observeViewport
+   */
+  observeElement_(element, opt_observeViewport = true) {
+    this.nearingViewportObserver_.observe(element);
+    this.backingAwayViewportObserver_.observe(element);
+    if (opt_observeViewport) {
+      this.inViewportObserver_.observe(element);
     }
   }
 
@@ -406,6 +461,7 @@ export class ChildLayoutManager {
     }
 
     for (let i = 0; i < this.children_.length; i++) {
+      this.children_[i].setAttribute(SLIDE_ID, `${i}`);
       this.owners_.setOwner(this.children_[i], this.ampElement_.element);
     }
 

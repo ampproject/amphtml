@@ -95,6 +95,12 @@ describes.realWin('child layout manager', {}, (env) => {
       scheduleUnlayout: env.sandbox.spy(),
       schedulePause: env.sandbox.spy(),
       scheduleResume: env.sandbox.spy(),
+      findClosestAmpElements: (element, callback) => {
+        const els = element.getElementsByTagName('amp-element');
+        for (let i = 0; i < els.length; i++) {
+          callback(els[i]);
+        }
+      },
     };
     env.sandbox.stub(Services, 'ownersForDoc').returns(ownersMock);
   });
@@ -105,8 +111,14 @@ describes.realWin('child layout manager', {}, (env) => {
 
   /**
    * @param {number} childCount
+   * @param {number=} opt_ampChildCount
+   * @param {number=} opt_nestedAmpChildCount
    */
-  function createHorizontalScroller(childCount) {
+  function createHorizontalScroller(
+    childCount,
+    opt_ampChildCount,
+    opt_nestedAmpChildCount
+  ) {
     const el = document.createElement('div');
     setStyles(el, {
       'overflowX': 'auto',
@@ -114,7 +126,7 @@ describes.realWin('child layout manager', {}, (env) => {
       'height': '200px',
     });
     setInitialDisplay(el, 'flex');
-    replaceChildren(el, childCount);
+    replaceChildren(el, childCount, opt_ampChildCount, opt_nestedAmpChildCount);
 
     container.appendChild(el);
     return el;
@@ -124,12 +136,31 @@ describes.realWin('child layout manager', {}, (env) => {
    *
    * @param {!Element} el
    * @param {number} childCount
+   * @param {number=} opt_ampChildCount
+   * @param {number=} opt_nestedAmpChildCount
    */
-  function replaceChildren(el, childCount) {
+  function replaceChildren(
+    el,
+    childCount,
+    opt_ampChildCount = 0,
+    opt_nestedAmpChildCount = 0
+  ) {
     el.innerHTML = '';
 
-    for (let i = 0; i < childCount; i++) {
-      const child = document.createElement('div');
+    for (
+      let i = 0;
+      i < childCount + opt_ampChildCount + opt_nestedAmpChildCount;
+      i++
+    ) {
+      const child =
+        i < childCount + opt_nestedAmpChildCount
+          ? document.createElement('div')
+          : document.createElement('amp-element');
+      if (i >= childCount && i < childCount + opt_nestedAmpChildCount) {
+        const nestedAmpElement = document.createElement('amp-element');
+        nestedAmpElement.id = `child${i}`;
+        child.append(nestedAmpElement);
+      }
       child.id = `child${i}`;
       setStyles(child, {
         'flexShrink': '0',
@@ -141,6 +172,28 @@ describes.realWin('child layout manager', {}, (env) => {
     }
 
     return el.children;
+  }
+
+    /**
+   *
+   * @param {!Element} el
+   * @param {number} childCount
+   * @param {number=} opt_ampChildCount
+   * @param {number=} opt_nestedAmpChildCount
+   * @return {!Array<Element>}
+   */
+  function getObservedElementsFromChildren(element) {
+    const arr = Array.from(element.children);
+    for (let i = 0; i < element.children.length; i++) {
+      const child = element.children[i];
+      if (
+        child.firstElementChild &&
+        child.firstElementChild.tagName.toUpperCase() === 'AMP-ELEMENT'
+      ) {
+        arr.push(child.firstElementChild);
+      }
+    }
+    return arr;
   }
 
   describe('when not queuing changes', () => {
@@ -316,6 +369,118 @@ describes.realWin('child layout manager', {}, (env) => {
         .to.have.been.calledWith(domElementMock, el.children[2])
         .to.have.been.calledWith(domElementMock, el.children[3])
         .to.have.been.calledWith(domElementMock, el.children[4]);
+    });
+
+    it('should observe AMP elements of slides', async () => {
+      // 5 divs, 2 amp-elements, 3 nested amp-elements
+      const el = createHorizontalScroller(5, 2, 3);
+      const observedElements = getObservedElementsFromChildren(el);
+      const clm = new ChildLayoutManager({
+        ampElement: ampElementMock,
+        intersectionElement: el,
+      });
+
+      const observeElementSpy = env.sandbox.stub(clm, 'observeElement_');
+
+      clm.updateChildren(el.children);
+      clm.wasLaidOut();
+      await afterRenderPromise();
+
+      console.debug(observeElementSpy.args);
+      expect(observeElementSpy.args.length).to.equal(5 + 2 + 3 + 3);
+
+      // Expect first 3 args to be the nested amp-elements
+      for (let i = 0; i < 3; i++) {
+        expect(observeElementSpy.args[i][0]).to.be.equal(
+          observedElements[observedElements.length - 3 + i]
+        );
+        expect(observeElementSpy.args[i][1]).to.be.false;
+      }
+
+      // Expect the rest of the args to be the parent slides
+      for (let i = 3; i < observeElementSpy.args.length; i++) {
+        expect(observeElementSpy.args[i][0]).to.be.equal(
+          observedElements[i - 3]
+        );
+        expect(observeElementSpy.args[i][1]).to.be.undefined;
+      }
+    });
+
+    it('changes flag for parent', async () => {
+      // 1 div, 1 amp-element, 1 nested amp-element
+      const el = createHorizontalScroller(1, 1, 1);
+      const observedElements = getObservedElementsFromChildren(el);
+      const mockEntries = [
+        // Nested amp-element nearing
+        {
+          isIntersecting: true,
+          target: observedElements[observedElements.length - 1],
+        },
+        // Nested amp-element backing away
+        {
+          isIntersecting: false,
+          target: observedElements[observedElements.length - 1],
+        },
+      ];
+      const clm = new ChildLayoutManager({
+        ampElement: ampElementMock,
+        intersectionElement: el,
+      });
+
+      clm.updateChildren(el.children);
+      clm.wasLaidOut();
+      await afterRenderPromise();
+
+      // These reset the flags.
+      clm.flushNearingViewportChanges_ = () => {};
+      clm.flushBackingAwayViewportChanges_ = () => {};
+
+      clm.processNearingChanges_(mockEntries);
+      expect(clm.children_[1].__AMP_CAROUSEL_NEAR_VIEWPORT).to.equal(0);
+
+      clm.processBackingAwayChanges_(mockEntries);
+      expect(clm.children_[1].__AMP_CAROUSEL_NEAR_VIEWPORT).to.equal(1);
+    });
+
+    it('should trigger layout based upon child', async () => {
+      // 1 div, 1 amp-element, 1 nested amp-element
+      const el = createHorizontalScroller(1, 1, 1);
+      const observedElements = getObservedElementsFromChildren(el);
+      const mockEntries = [
+        // Nested amp-element nearing
+        {
+          isIntersecting: true,
+          target: observedElements[observedElements.length - 1],
+        },
+        // Nested amp-element backing away
+        {
+          isIntersecting: false,
+          target: observedElements[observedElements.length - 1],
+        },
+      ];
+      const clm = new ChildLayoutManager({
+        ampElement: ampElementMock,
+        intersectionElement: el,
+      });
+
+      clm.updateChildren(el.children);
+      clm.wasLaidOut();
+      await afterRenderPromise();
+
+      ownersMock.scheduleLayout.resetHistory();
+      ownersMock.scheduleUnlayout.resetHistory();
+
+      clm.processNearingChanges_(mockEntries);
+      clm.processBackingAwayChanges_(mockEntries);
+
+      expect(ownersMock.scheduleLayout.args[0][1]).to.equal(
+        observedElements[1]
+      );
+      expect(ownersMock.scheduleLayout).to.have.been.calledOnce;
+      expect(ownersMock.scheduleUnlayout.args[0][1]).to.equal(
+        observedElements[1]
+      );
+      expect(ownersMock.scheduleUnlayout).to.have.been.calledOnce;
     });
   });
 

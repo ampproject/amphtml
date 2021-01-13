@@ -60,8 +60,9 @@ describes.realWin(
       );
     });
 
-    function createElement() {
+    function createElement(id) {
       const element = env.createAmpElement('amp-test');
+      element.id = id;
       env.sandbox.stub(element, 'isUpgraded').returns(true);
       return element;
     }
@@ -70,7 +71,7 @@ describes.realWin(
       id,
       state = ResourceState.LAYOUT_COMPLETE
     ) {
-      const element = createElement();
+      const element = createElement(id);
       const resource = new Resource(id, element, resources);
       resource.state_ = state;
       env.sandbox.stub(resource, 'measure').callsFake(() => {
@@ -372,6 +373,30 @@ describes.realWin(
         const scheduledElements = await owners.requireLayout(parent);
         expect(scheduledElements).to.have.length(1);
         expect(scheduleLayoutOrPreloadStub).to.not.be.called;
+      });
+    });
+
+    describe('findClosestAmpElements', () => {
+      it('should find all closest AMP elements', async () => {
+        const callbackSpy = env.sandbox.spy();
+        const newParent = doc.createElement('div');
+
+        owners.findClosestAmpElements(parent, callbackSpy);
+        expect(callbackSpy).to.be.calledOnce;
+        expect(callbackSpy.args[0][0]).to.equal(parent);
+        callbackSpy.resetHistory();
+
+        newParent.appendChild(parent);
+        owners.findClosestAmpElements(newParent, callbackSpy);
+        expect(callbackSpy).to.be.calledOnce;
+        expect(callbackSpy.args[0][0]).to.equal(parent);
+        callbackSpy.resetHistory();
+
+        // <div>
+        owners.findClosestAmpElements(children[0], callbackSpy);
+        expect(callbackSpy).to.be.calledTwice;
+        expect(callbackSpy.args[0][0]).to.equal(children[3]);
+        expect(callbackSpy.args[1][0]).to.equal(children[4]);
       });
     });
   }

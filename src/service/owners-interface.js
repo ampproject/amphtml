@@ -84,5 +84,13 @@ export class OwnersInterface {
    * @return {!Promise}
    */
   requireLayout(element, opt_parentPriority) {}
+
+  /**
+   * Finds closest underlying AMP elements and executes the callback.
+   * @param {!Element} element
+   * @param {function(!AmpElement)} callback
+   * @param {boolean} findPlaceholder
+   */
+  findClosestAmpElements(element, callback, findPlaceholder) {}
 }
 /* eslint-enable no-unused-vars */
