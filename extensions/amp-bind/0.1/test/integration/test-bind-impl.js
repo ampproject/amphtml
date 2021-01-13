@@ -318,29 +318,29 @@ describe
           container = env.ampdoc.getBody();
         });
 
-        // it('should scan for bindings when ampdoc is ready', () => {
-        //   createElement(env, container, '[text]="1+1"');
-        //   expect(bind.numberOfBindings()).to.equal(0);
-        //   return onBindReady(env, bind).then(() => {
-        //     expect(bind.numberOfBindings()).to.equal(1);
-        //   });
-        // });
+        it('should scan for bindings when ampdoc is ready', () => {
+          createElement(env, container, '[text]="1+1"');
+          expect(bind.numberOfBindings()).to.equal(0);
+          return onBindReady(env, bind).then(() => {
+            expect(bind.numberOfBindings()).to.equal(1);
+          });
+        });
 
-        // it('should not update document title for <title> elements', () => {
-        //   createElement(
-        //     env,
-        //     container,
-        //     '[text]="\'bar\'"',
-        //     'title',
-        //     /* opt_amp */ false,
-        //     /* opt_head */ true
-        //   );
-        //   env.win.document.title = 'foo';
-        //   return onBindReadyAndSetState(env, bind, {}).then(() => {
-        //     // Make sure does not update the host window's document title.
-        //     expect(env.win.document.title).to.equal('foo');
-        //   });
-        // });
+        it('should not update document title for <title> elements', () => {
+          createElement(
+            env,
+            container,
+            '[text]="\'bar\'"',
+            'title',
+            /* opt_amp */ false,
+            /* opt_head */ true
+          );
+          env.win.document.title = 'foo';
+          return onBindReadyAndSetState(env, bind, {}).then(() => {
+            // Make sure does not update the host window's document title.
+            expect(env.win.document.title).to.equal('foo');
+          });
+        });
       }
     ); // in shadow ampdoc
 
