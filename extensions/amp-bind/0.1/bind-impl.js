@@ -1226,7 +1226,6 @@ export class Bind {
   apply_(results, opts) {
     const promises = [];
 
-    console.log('apply', this.boundElements_);
     this.boundElements_.forEach((boundElement) => {
       // If this evaluation is triggered by an <amp-state> mutation, we must
       // ignore updates to any <amp-state> element to prevent update cycles.
