@@ -442,10 +442,13 @@ async function generateSnapshots(webpages) {
  */
 async function snapshotWebpages(browser, webpages) {
   const availablePages = [];
+  const allPages = [];
 
   log('verbose', 'Preallocating', colors.cyan(MAX_PARALLEL_TABS), 'tabs...');
   for (let i = 0; i < MAX_PARALLEL_TABS; i++) {
-    availablePages.push(await newPage(browser));
+    const page = await newPage(browser);
+    availablePages.push(page);
+    allPages.push(page);
   }
 
   const pagePromises = [];
@@ -465,6 +468,16 @@ async function snapshotWebpages(browser, webpages) {
         await sleep(WAIT_FOR_TABS_MS);
       }
       const page = availablePages.shift();
+
+      const name = testName ? `${pageName} (${testName})` : pageName;
+      log(
+        'info',
+        'Starting test',
+        colors.yellow(name),
+        'on tab',
+        colors.yellow(`#${allPages.indexOf(page) + 1}`)
+      );
+
       await resetPage(page, viewport);
 
       const consoleMessages = [];
@@ -472,9 +485,6 @@ async function snapshotWebpages(browser, webpages) {
         consoleMessages.push(consoleMessage);
       };
       page.on('console', consoleLogger);
-
-      const name = testName ? `${pageName} (${testName})` : pageName;
-      log('info', 'Starting test', colors.yellow(name));
 
       // Puppeteer is flaky when it comes to catching navigation requests, so
       // retry the page navigation up to NAVIGATE_RETRIES times and eventually
@@ -526,86 +536,58 @@ async function snapshotWebpages(browser, webpages) {
           addTestError(
             testErrors,
             name,
-            'The browser test runner failed to complete the navigation ' +
-              'to the test page',
+            'The browser test runner failed to complete the navigation to the test page',
             navigationError,
             consoleMessages
           );
           log('warning', 'Continuing to verify page regardless...');
         }
 
-        // Perform visibility checks: wait for all AMP built-in loader dots
-        // to disappear (i.e., all visible components are finished being
-        // layed out and external resources such as images are loaded and
-        // displayed), then, depending on the test configurations, wait for
-        // invisibility/visibility of specific elements that match the
-        // configured CSS selectors.
-        await waitForPageLoad(page, name);
-        if (webpage.loading_incomplete_selectors) {
-          await verifySelectorsInvisible(
-            page,
-            name,
-            webpage.loading_incomplete_selectors
-          );
-        }
-        if (webpage.loading_complete_selectors) {
-          await verifySelectorsVisible(
-            page,
-            name,
-            webpage.loading_complete_selectors
-          );
-        }
-
-        // Based on test configuration, wait for a specific amount of time.
-        if (webpage.loading_complete_delay_ms) {
-          log(
-            'verbose',
-            'Waiting',
-            colors.cyan(`${webpage.loading_complete_delay_ms}ms`),
-            'for loading to complete'
-          );
-          await sleep(webpage.loading_complete_delay_ms);
-        }
-
-        // Run any other custom code located in the test's interactive_tests
-        // file. If there is no interactive test, this defaults to an empty
-        // function.
-        await testFunction(page, name);
-
-        // Execute post-scripts that clean up the page's HTML and send
-        // prepare it for snapshotting on Percy. See comments inside the
-        // snippet files for description of each.
-        await page.evaluate(REMOVE_AMP_SCRIPTS_SNIPPET);
-        await page.evaluate(FREEZE_FORM_VALUE_SNIPPET);
-        await page.evaluate(FREEZE_CANVAS_IMAGE_SNIPPET);
-
-        // Create a default set of snapshot options for Percy and modify
-        // them based on the test's configuration.
-        const snapshotOptions = {};
-        if (webpage.enable_percy_javascript) {
-          snapshotOptions.enableJavaScript = true;
-        }
-
-        if (viewport) {
-          snapshotOptions.widths = [viewport.width];
-          log('verbose', 'Wrapping viewport-constrained page in an iframe');
-          await page.evaluate(
-            WRAP_IN_IFRAME_SNIPPET.replace(/__WIDTH__/g, viewport.width)
-              .replace(/__HEIGHT__/g, viewport.height)
-              .replace(/__PERCY_CSS__/g, percyCss)
-          );
-        } else {
-          snapshotOptions.percyCss = percyCss;
-        }
-
+        let performSnapshot = true;
         try {
-          // Finally, send the snapshot to percy.
-          await percySnapshot(page, name, snapshotOptions);
+          // Perform visibility checks: wait for all AMP built-in loader dots
+          // to disappear (i.e., all visible components are finished being
+          // layed out and external resources such as images are loaded and
+          // displayed), then, depending on the test configurations, wait for
+          // invisibility/visibility of specific elements that match the
+          // configured CSS selectors.
+          await waitForPageLoad(page, name);
+          if (webpage.loading_incomplete_selectors) {
+            await verifySelectorsInvisible(
+              page,
+              name,
+              webpage.loading_incomplete_selectors
+            );
+          }
+          if (webpage.loading_complete_selectors) {
+            await verifySelectorsVisible(
+              page,
+              name,
+              webpage.loading_complete_selectors
+            );
+          }
+
+          // Based on test configuration, wait for a specific amount of time.
+          if (webpage.loading_complete_delay_ms) {
+            log(
+              'verbose',
+              'Waiting',
+              colors.cyan(`${webpage.loading_complete_delay_ms}ms`),
+              'for loading to complete'
+            );
+            await sleep(webpage.loading_complete_delay_ms);
+          }
+
+          // Run any other custom code located in the test's interactive_tests
+          // file. If there is no interactive test, this defaults to an empty
+          // function.
+          await testFunction(page, name);
         } catch (testError) {
+          performSnapshot = false;
           addTestError(
             testErrors,
             name,
-            'Unknown failure in test page',
+            'Test page failed',
             testError,
             consoleMessages
           );
@@ -622,6 +604,48 @@ async function snapshotWebpages(browser, webpages) {
               .replace('__HTML_SNAPSHOT__', escapeHtml(htmlSnapshot))
           );
           await percySnapshot(page, name, SNAPSHOT_SINGLE_BUILD_OPTIONS);
+        }
+
+        if (performSnapshot) {
+          try {
+            // Execute post-scripts that clean up the page's HTML and send
+            // prepare it for snapshotting on Percy. See comments inside the
+            // snippet files for description of each.
+            await page.evaluate(REMOVE_AMP_SCRIPTS_SNIPPET);
+            await page.evaluate(FREEZE_FORM_VALUE_SNIPPET);
+            await page.evaluate(FREEZE_CANVAS_IMAGE_SNIPPET);
+
+            // Create a default set of snapshot options for Percy and modify
+            // them based on the test's configuration.
+            const snapshotOptions = {};
+            if (webpage.enable_percy_javascript) {
+              snapshotOptions.enableJavaScript = true;
+            }
+
+            if (viewport) {
+              snapshotOptions.widths = [viewport.width];
+              log('verbose', 'Wrapping viewport-constrained page in an iframe');
+              await page.evaluate(
+                WRAP_IN_IFRAME_SNIPPET.replace(/__WIDTH__/g, viewport.width)
+                  .replace(/__HEIGHT__/g, viewport.height)
+                  .replace(/__PERCY_CSS__/g, percyCss)
+              );
+            } else {
+              snapshotOptions.percyCss = percyCss;
+            }
+
+            // Finally, send the snapshot to percy.
+            await percySnapshot(page, name, snapshotOptions);
+          } catch (snapshotError) {
+            addTestError(
+              testErrors,
+              name,
+              'Failed to set up or take the Percy snapshot',
+              snapshotError,
+              consoleMessages
+            );
+            throw snapshotError;
+          }
         }
 
         log(
