@@ -86,7 +86,9 @@ const slideElement = {
 };
 
 const startAlign = {};
+
 const centerAlign = {};
+
 const enableSnap = {
   scrollSnapStop: 'always',
   '&$startAlign': {
