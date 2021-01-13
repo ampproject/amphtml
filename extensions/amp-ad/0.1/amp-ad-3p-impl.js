@@ -52,6 +52,7 @@ import {
   intersectionEntryToJson,
   measureIntersection,
 } from '../../../src/utils/intersection';
+import {isExperimentOn} from '../../../src/experiments';
 import {moveLayoutRect} from '../../../src/layout-rect';
 import {
   observeWithSharedInOb,
@@ -411,7 +412,14 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         // because both happen inside a cross-domain iframe.  Separating them
         // here, though, allows us to measure the impact of ad throttling via
         // incrementLoadingAds().
-        return measureIntersection(this.element).then((intersection) => {
+        const asyncIntersection = isExperimentOn(
+          this.win,
+          'ads-initialIntersection'
+        );
+        const intersectionPromise = asyncIntersection
+          ? measureIntersection(this.element)
+          : Promise.resolve(this.element.getIntersectionChangeEntry());
+        return intersectionPromise.then((intersection) => {
           const iframe = getIframe(
             toWin(this.element.ownerDocument.defaultView),
             this.element,

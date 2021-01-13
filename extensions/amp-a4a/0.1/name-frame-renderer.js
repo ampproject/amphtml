@@ -23,6 +23,7 @@ import {
   intersectionEntryToJson,
   measureIntersection,
 } from '../../../src/utils/intersection';
+import {isExperimentOn} from '../../../src/experiments';
 import {utf8Decode} from '../../../src/utils/bytes';
 
 /**
@@ -54,7 +55,14 @@ export class NameFrameRenderer extends Renderer {
       crossDomainData.additionalContextMetadata
     );
     contextMetadata['creative'] = creative;
-    return measureIntersection(element).then((intersection) => {
+    const asyncIntersection = isExperimentOn(
+      element.ownerDocument.defaultView,
+      'ads-initialIntersection'
+    );
+    const intersectionPromise = asyncIntersection
+      ? measureIntersection(element)
+      : Promise.resolve(element.getIntersectionChangeEntry());
+    return intersectionPromise.then((intersection) => {
       contextMetadata['_context'][
         'initialIntersection'
       ] = intersectionEntryToJson(intersection);

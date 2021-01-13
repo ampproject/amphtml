@@ -55,7 +55,7 @@ import {
   getConsentPolicyState,
 } from '../../../src/consent';
 import {getContextMetadata} from '../../../src/iframe-attributes';
-import {getExperimentBranch} from '../../../src/experiments';
+import {getExperimentBranch, isExperimentOn} from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {
@@ -69,6 +69,7 @@ import {
 } from '../../../src/utils/intersection';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isArray, isEnumValue, isObject} from '../../../src/types';
+
 import {listenOnce} from '../../../src/event-helper';
 import {
   observeWithSharedInOb,
@@ -2126,7 +2127,20 @@ export class AmpA4A extends AMP.BaseElement {
         this.sentinel,
         this.getAdditionalContextMetadata(method == XORIGIN_MODE.SAFEFRAME)
       );
-      return measureIntersection(this.element).then((intersection) => {
+
+      const asyncIntersection = isExperimentOn(
+        this.win,
+        'ads-initialIntersection'
+      );
+      const intersectionPromise = asyncIntersection
+        ? measureIntersection(this.element)
+        : Promise.resolve(this.element.getIntersectionChangeEntry());
+      return intersectionPromise.then((intersection) => {
+        console.error(
+          `Async: ${asyncIntersection}, intersection: ${JSON.stringify(
+            intersection
+          )}`
+        );
         contextMetadata['initialIntersection'] = intersectionEntryToJson(
           intersection
         );
