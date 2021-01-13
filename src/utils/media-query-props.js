@@ -17,7 +17,7 @@
 /** @typedef {!Array<{query: ?MediaQueryList, value: string}>} */
 let ExprDef;
 
-const MEDIA_QUERY_VALUE_RE = /[A-Za-z0-9.]+$/;
+const MEDIA_QUERY_VALUE_RE = /[A-Za-z0-9.%]+$/;
 
 /** @package */
 export class MediaQueryProps {

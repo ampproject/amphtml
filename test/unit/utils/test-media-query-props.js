@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {MediaQueryProps} from '../../../src/preact/media-query-props';
+import {MediaQueryProps} from '../../../src/utils/media-query-props';
 import {waitFor} from '../../../testing/test-helper';
 
 describes.realWin('MediaQueryProps', {frameStyle: {width: '300px'}}, (env) => {
@@ -53,6 +53,12 @@ describes.realWin('MediaQueryProps', {frameStyle: {width: '300px'}}, (env) => {
     resolver.start();
     expect(resolver.resolve('(min-width: 301px) a, b')).to.equal('b');
     expect(resolver.resolve('(min-width: 299px) a, b')).to.equal('a');
+  });
+
+  it('should allow % expressions', () => {
+    resolver.start();
+    expect(resolver.resolve('1%')).to.equal('1%');
+    expect(resolver.resolve('(min-width: 301px) 1%, 2%')).to.equal('2%');
   });
 
   it('should resolve a first matching expression', () => {
