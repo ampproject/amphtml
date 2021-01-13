@@ -352,7 +352,7 @@ class AmpVideo extends AMP.BaseElement {
         }
         throw reason;
       })
-      .then(() => (this.isManagedByPool_() ? null : this.onVideoLoaded_()));
+      .then(() => this.onVideoLoaded_());
 
     // Resolve layoutCallback right away if the video won't preload.
     if (this.element.getAttribute('preload') === 'none') {
@@ -615,7 +615,10 @@ class AmpVideo extends AMP.BaseElement {
 
   /** @private */
   onVideoLoaded_() {
-    dispatchCustomEvent(this.element, VideoEvents.LOAD);
+    // When managed, only dispatch if the video was swapped.
+    if (!this.isManagedByPool_() || this.containsPoolVideo_()) {
+      dispatchCustomEvent(this.element, VideoEvents.LOAD);
+    }
   }
 
   /** @override */
@@ -813,16 +816,9 @@ class AmpVideo extends AMP.BaseElement {
     if (!this.hideBlurryPlaceholder_()) {
       this.togglePlaceholder(false);
     }
-    // if (!Services.platformFor(this.win).isAndroid()) {
-    //   return;
-    // }
-    const correctVideoLoadedPromise =
-      this.isManagedByPool_() && !this.containsPoolVideo_()
-        ? listenOncePromise(this.element, VideoEvents.LOAD)
-        : Promise.resolve();
     // After the intended video is loaded, listen for first timeupdate to remove placeholder. Context #31358.
 
-    correctVideoLoadedPromise
+    listenOncePromise(this.element, VideoEvents.LOAD)
       .then(() => listenOncePromise(this.video_, 'timeupdate', {capture: true}))
       .then(() => this.removePosterForAndroidBug_());
   }
