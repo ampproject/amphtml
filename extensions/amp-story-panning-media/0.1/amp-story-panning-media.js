@@ -55,19 +55,20 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.getSiblings();
+    this.getSiblings_().then((siblings_) => {
+      this.siblings_ = siblings_;
+    });
 
-    // Initialize all services before proceeding
-    return Promise.all([
-      Services.storyStoreServiceForOrNull(this.win).then((storeService) => {
+    return Services.storyStoreServiceForOrNull(this.win).then(
+      (storeService) => {
         storeService.subscribe(StateProperty.CURRENT_PAGE_ID, (currPageId) => {
           const isOnActivePage = currPageId === this.getPageId_();
           if (isOnActivePage) {
             this.updateSiblings_();
           }
         });
-      }),
-    ]).then(() => Promise.resolve());
+      }
+    );
   }
 
   /** @override */
@@ -89,14 +90,20 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       .catch(() => user().error(TAG, 'Failed to load the amp-img.'));
   }
 
-  /** @private */
-  getSiblings() {
-    document.querySelectorAll('amp-story-panning-media').forEach((sibling) => {
-      // TODO Group siblings to be transitioned together #31932
-      sibling.getImpl().then((siblingImpl) => {
-        this.siblings_.push(siblingImpl);
-      });
-    });
+  /**
+   * @return {!Promise<Array<Element>>}
+   */
+  getSiblings_() {
+    // TODO Group siblings to be transitioned together #31932
+    const siblings = Array.from(
+      document.querySelectorAll('amp-story-panning-media')
+    );
+
+    return Promise.all(
+      siblings.map((sibling) =>
+        sibling.getImpl().then((siblingImpl) => siblingImpl)
+      )
+    ).then((siblings) => Promise.resolve(siblings));
   }
 
   /** @private */
