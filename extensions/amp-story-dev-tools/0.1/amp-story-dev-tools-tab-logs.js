@@ -217,6 +217,7 @@ export class AmpStoryDevToolsTabLogs extends AMP.BaseElement {
     );
     successMessage.textContent = `Great Job!\r\nNo issues found.`;
     logsContainer.appendChild(successMessage);
+    return logsContainer;
   }
 
   /**
