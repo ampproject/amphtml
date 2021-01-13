@@ -71,7 +71,7 @@ export function measureIntersection(el) {
 
   const inOb = getInOb(toWin(el.ownerDocument.defaultView));
   inOb.observe(el);
-
+  
   const deferred = new Deferred();
   intersectionDeferreds.set(el, deferred);
   return deferred.promise;
