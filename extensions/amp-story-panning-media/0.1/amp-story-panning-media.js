@@ -40,13 +40,13 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       this.element_.querySelector('amp-img')
     );
 
-    /** @public {?string} Sent to siblings to update their position. */
+    /** @private {?string} Sent to siblings to update their position. */
     this.x = this.element_.getAttribute('x') || '0%';
 
-    /** @public {?string} Sent to siblings to update their position. */
+    /** @private {?string} Sent to siblings to update their position. */
     this.y = this.element_.getAttribute('y') || '0%';
 
-    /** @public {?string} Sent to siblings to update their position. */
+    /** @private {?string} Sent to siblings to update their position. */
     this.zoom = this.element_.getAttribute('zoom') || '1';
 
     /** @private {Array<Element>} */
