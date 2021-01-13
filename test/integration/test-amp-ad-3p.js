@@ -36,7 +36,7 @@ describe('amp-ad 3P', () => {
   });
 
   it('create an iframe with APIs', async function () {
-    toggleExperiment('ads-initialIntersection');
+    toggleExperiment(window, 'ads-initialIntersection');
     this.timeout(20000);
     let iframe;
     let lastIO = null;
