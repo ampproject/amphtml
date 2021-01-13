@@ -82,7 +82,8 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
           left: 'auto',
           right: 'auto',
         });
-      });
+      })
+      .catch(() => user().error(TAG, 'Failed to load the amp-img.'));
   }
 
   /** @private */
