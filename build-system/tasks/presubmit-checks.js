@@ -135,6 +135,7 @@ const forbiddenTerms = {
       'build-system/pr-check/visual-diff-tests.js',
       'build-system/server/app.js',
       'build-system/server/amp4test.js',
+      'build-system/tasks/e2e/mocha-dots-reporter.js',
       'build-system/tasks/build.js',
       'build-system/tasks/check-exact-versions.js',
       'build-system/tasks/check-owners.js',

@@ -163,7 +163,6 @@ async function runTests_() {
     });
   }
 
-  log('Running tests...');
   await reportTestStarted();
 
   // return promise to gulp that resolves when there's an error.
@@ -190,7 +189,6 @@ async function runWatch_() {
   log('Watching', cyan(filesToWatch), 'for changes...');
   watch(filesToWatch).on('change', (file) => {
     log('Detected a change in', cyan(file));
-    log('Running tests...');
     const mocha = createMocha_();
     addMochaFile_(mocha, file);
     mocha.run();
