@@ -39,7 +39,8 @@ class MochaDotsReporter extends Base {
     super(runner);
 
     let wrapCounter = 0;
-    const wrapIfNecessary = () => {
+    const printDot = (dot) => {
+      process.stdout.write(dot);
       if (++wrapCounter >= nbDotsPerLine) {
         wrapCounter = 0;
         process.stdout.write('\n');
@@ -51,16 +52,13 @@ class MochaDotsReporter extends Base {
         log('Running tests...');
       })
       .on(EVENT_TEST_PASS, () => {
-        process.stdout.write(green(icon.success));
-        wrapIfNecessary();
+        printDot(green(icon.success));
       })
       .on(EVENT_TEST_FAIL, () => {
-        process.stdout.write(red(icon.failure));
-        wrapIfNecessary();
+        printDot(red(icon.failure));
       })
       .on(EVENT_TEST_PENDING, () => {
-        process.stdout.write(yellow(icon.ignore));
-        wrapIfNecessary();
+        printDot(yellow(icon.ignore));
       })
       .once(EVENT_RUN_END, () => {
         Base.list(this.failures);
