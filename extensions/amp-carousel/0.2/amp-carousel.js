@@ -41,6 +41,9 @@ const CarouselType = {
   SLIDES: 'slides',
 };
 
+/** @type {string} */
+const TAG = 'amp-carousel';
+
 class AmpCarousel extends AMP.BaseElement {
   /**
    * @private
@@ -142,6 +145,9 @@ class AmpCarousel extends AMP.BaseElement {
 
     const {element, win} = this;
     const slides = this.getRealChildren();
+    if (!slides || !slides.length) {
+      dev().warn(TAG, 'No slides were found.');
+    }
 
     element.appendChild(this.renderContainerDom_());
     this.scrollContainer_ = this.element.querySelector(
