@@ -28,6 +28,9 @@ const {
   checkRenovateConfig,
 } = require('./build-system/tasks/check-renovate-config');
 const {
+  initBentoComponent,
+} = require('./build-system/tasks/init-bento-component');
+const {
   process3pGithubPr,
 } = require('./build-system/tasks/process-3p-github-pr');
 const {a4a} = require('./build-system/tasks/a4a');
@@ -156,6 +159,7 @@ createTask('e2e', e2e);
 createTask('firebase', firebase);
 createTask('get-zindex', getZindex);
 createTask('integration', integration);
+createTask('init-bento-component', initBentoComponent);
 createTask('lint', lint);
 createTask('make-extension', makeExtension);
 createTask('performance', performance);
