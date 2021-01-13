@@ -78,10 +78,13 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
         const imgEl = dev().assertElement(this.element_.querySelector('img'));
         // Remove layout="fill" classes so image is not clipped.
         imgEl.classList = '';
+        // Centers the amp-img horizontally. The image does not load if this is done in CSS.
+        // TODO(#31515): Handle base zoom of aspect ratio wider than image
         setStyles(this.ampImgEl_, {
           left: 'auto',
           right: 'auto',
         });
+        return Promise.resolve();
       })
       .catch(() => user().error(TAG, 'Failed to load the amp-img.'));
   }

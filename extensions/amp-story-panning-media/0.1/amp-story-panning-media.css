@@ -21,11 +21,12 @@ amp-story-panning-media {
   align-items: center !important;
 }
 
-.i-amphtml-story-loaded amp-story-panning-media amp-img {
+amp-story-panning-media amp-img {
   transition: transform 1s ease-in-out;
 }
 
 .i-amphtml-story-grid-template-fill amp-story-panning-media amp-img img {
+  /* overrides layout=fill This centers the image without clipping it */
   position: relative !important;
   display: block !important;
   height: 100% !important;
