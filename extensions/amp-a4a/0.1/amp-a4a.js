@@ -69,7 +69,6 @@ import {
 } from '../../../src/utils/intersection';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isArray, isEnumValue, isObject} from '../../../src/types';
-
 import {listenOnce} from '../../../src/event-helper';
 import {
   observeWithSharedInOb,
@@ -2051,7 +2050,15 @@ export class AmpA4A extends AMP.BaseElement {
       this.element,
       this.sentinel
     );
-    return measureIntersection(this.element).then((intersection) => {
+    const asyncIntersection = isExperimentOn(
+      this.win,
+      'ads-initialIntersection'
+    );
+    const intersectionPromise = asyncIntersection
+      ? measureIntersection(this.element)
+      : Promise.resolve(this.element.getIntersectionChangeEntry());
+
+    return intersectionPromise.then((intersection) => {
       contextMetadata['_context'][
         'initialIntersection'
       ] = intersectionEntryToJson(intersection);
