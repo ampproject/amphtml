@@ -43,7 +43,59 @@ describes.endtoend(
       });
 
       await verifyElementStyles(await selectContentDiv('test4'), {
-        'font-size': '20px',
+        'font-size': '19px',
+      });
+    });
+
+    describe('user initiated dom changes cause recalculations', function () {
+      it('when box size increases font size should increase', async () => {
+        const contentButton = await controller.findElement('#test5_button');
+        const contentDiv = await selectContentDiv('test5');
+
+        // Button click increases amp-fit-text box size
+        const originalfontsize = parseInt(
+          await controller.getElementCssValue(contentDiv, 'font-size'),
+          10
+        );
+        await controller.click(contentButton);
+        // wait for the resizeobserver to recognize the changes
+        // 90ms chosen so that the wait is less than the throttle value for the resizeobserver.
+        await new Promise((resolve) => {
+          setTimeout(() => {
+            resolve();
+          }, 90);
+        });
+        const updatedfontsize = parseInt(
+          await controller.getElementCssValue(contentDiv, 'font-size'),
+          10
+        );
+
+        await expect(updatedfontsize).to.be.greaterThan(originalfontsize);
+      });
+
+      it('when box size decreases font size should decrease', async () => {
+        const contentButton = await controller.findElement('#test6_button');
+        const contentDiv = await selectContentDiv('test6');
+
+        // Button click decreases amp-fit-text box size
+        const originalFontSize = parseInt(
+          await controller.getElementCssValue(contentDiv, 'font-size'),
+          10
+        );
+        await controller.click(contentButton);
+        // wait for the resizeobserver to recognize the changes
+        // 90ms chosen so that the wait is less than the throttle value for the resizeobserver.
+        await new Promise((resolve) => {
+          setTimeout(() => {
+            resolve();
+          }, 90);
+        });
+        const updatedFontSize = parseInt(
+          await controller.getElementCssValue(contentDiv, 'font-size'),
+          10
+        );
+
+        await expect(updatedFontSize).to.be.lessThan(originalFontSize);
       });
     });
 
@@ -63,3 +115,6 @@ describes.endtoend(
     }
   }
 );
+// user initialted dom changes cause recalculatiions
+
+//a11y software modifies dom causes recaluclations
