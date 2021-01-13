@@ -23,24 +23,22 @@ const globby = require('globby');
 const {isCiBuild} = require('../common/ci');
 
 const TEST_SERVER_PORT = 8081;
-
+const DOT_WRAPPING_WIDTH = 150;
 const COMMON_CHROME_FLAGS = [
   // Dramatically speeds up iframe creation time.
   '--disable-extensions',
   // Allows simulating user actions (e.g unmute) which otherwise will be denied.
   '--autoplay-policy=no-user-gesture-required',
-];
-
-if (argv.debug) {
-  COMMON_CHROME_FLAGS.push('--auto-open-devtools-for-tabs');
-}
+  // Makes debugging easy by auto-opening devtools.
+  argv.debug ? '--auto-open-devtools-for-tabs' : null,
+].filter(Boolean);
 
 // Used by persistent browserify caching to further salt hashes with our
 // environment state. Eg, when updating a babel-plugin, the environment hash
 // must change somehow so that the cache busts and the file is retransformed.
 const createHash = (input) =>
   crypto.createHash('sha1').update(input).digest('hex');
-
+let wrapCounter = 0;
 const persistentCache = browserifyPersistFs(
   '.karma-cache',
   {
@@ -57,6 +55,10 @@ const persistentCache = browserifyPersistFs(
   },
   () => {
     process.stdout.write('.');
+    if (++wrapCounter >= DOT_WRAPPING_WIDTH) {
+      wrapCounter = 0;
+      process.stdout.write('\n');
+    }
   }
 );
 
@@ -114,7 +116,7 @@ module.exports = {
   reporters: ['super-dots', 'karmaSimpleReporter'],
 
   superDotsReporter: {
-    nbDotsPerLine: 100000,
+    nbDotsPerLine: DOT_WRAPPING_WIDTH,
     color: {
       success: 'green',
       failure: 'red',
