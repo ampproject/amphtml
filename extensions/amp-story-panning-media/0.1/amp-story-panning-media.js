@@ -35,19 +35,19 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     /** @private {?Element} */
     this.element_ = element;
 
-    /** @public {?Element} */
+    /** @private {?Element} */
     this.ampImgEl_ = dev().assertElement(
       this.element_.querySelector('amp-img')
     );
 
-    /** @private {?string} */
-    this.x_ = this.element_.getAttribute('x') || '0%';
+    /** @public {?string} */
+    this.x = this.element_.getAttribute('x') || '0%';
 
-    /** @private {?string} */
-    this.y_ = this.y_ = this.element_.getAttribute('y') || '0%';
+    /** @public {?string} */
+    this.y = this.element_.getAttribute('y') || '0%';
 
-    /** @private {?string} */
-    this.zoom_ = this.element_.getAttribute('zoom') || '1';
+    /** @public {?string} */
+    this.zoom = this.element_.getAttribute('zoom') || '1';
 
     /** @private {Array<Element>} */
     this.siblings_ = [];
@@ -87,24 +87,27 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
   /** @private */
   getSiblings() {
     document.querySelectorAll('amp-story-panning-media').forEach((sibling) => {
-      if (this.element_.innerHTML === sibling.innerHTML) {
-        sibling.getImpl().then((siblingImpl) => {
-          this.siblings_.push(siblingImpl);
-        });
-      }
+      // TODO Group siblings to be transitioned together #31932
+      sibling.getImpl().then((siblingImpl) => {
+        this.siblings_.push(siblingImpl);
+      });
     });
   }
 
   /** @private */
   updateSiblings_() {
     this.siblings_.forEach((siblingImpl) => {
-      siblingImpl.updateTransform(this.x_, this.y_, this.zoom_);
+      siblingImpl.updateTransform(this.x, this.y, this.zoom);
     });
   }
 
   /**
-   * @return {!Promise}
+   * The active page's component calls this and passes it's position values.
    * @public
+   * @param {x} string
+   * @param {y} string
+   * @param {z} string
+   * @return {!Promise}
    */
   updateTransform(x, y, zoom) {
     return this.mutateElement(() => {
@@ -115,8 +118,8 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
   }
 
   /**
-   * @return {string} the page id
    * @private
+   * @return {string} the page id
    */
   getPageId_() {
     if (this.pageId_ == null) {
