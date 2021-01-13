@@ -634,7 +634,6 @@ function createBaseCustomElementClass(win) {
 
     /** @private */
     disposeMediaAttrs_() {
-      console.log('disposeMediaAttrs_');
       if (this.mediaQueryProps_) {
         this.mediaQueryProps_.dispose();
         this.mediaQueryProps_ = null;
@@ -675,7 +674,6 @@ function createBaseCustomElementClass(win) {
       if (heightsAttr) {
         const sizer = this.getSizer_();
         if (sizer) {
-          console.log('newHeight=', props.resolve(heightsAttr));
           setStyle(sizer, 'paddingTop', props.resolve(heightsAttr));
         }
       }
