@@ -1389,7 +1389,7 @@ export class Bind {
           }
         }
         if (property === 'class+') {
-          ampClasses.concat(defaultClasses);
+          ampClasses.push(defaultClasses);
         }
         if (Array.isArray(newValue) || typeof newValue === 'string') {
           element.setAttribute('class', ampClasses.concat(newValue).join(' '));
