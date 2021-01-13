@@ -17,10 +17,6 @@
 import {AnalyticsEventType} from './events';
 import {BatchSegmentDef, defaultSerializer} from './transport-serializer';
 import {ExpansionOptions, variableServiceForDoc} from './variables';
-import {
-  ResolverReturnDef,
-  SyncResolverDef,
-} from '../../../src/service/variable-source';
 import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-allowlist';
 import {Services} from '../../../src/services';
 import {devAssert, userAssert} from '../../../src/log';
@@ -203,7 +199,7 @@ export class RequestHandler {
   /**
    * @param {string} url
    * @param {!ExpansionOptions} expansionOptions
-   * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=} bindings
+   * @param {!Object<string, (!../../../src/service/variable-source.ResolverReturnDef|!../../../src/service/variable-source.SyncResolverDef)>=} bindings
    * @return {!Promise<string>}
    */
   expandTemplateUrl_(url, expansionOptions, bindings) {
