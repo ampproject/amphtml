@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,71 +17,53 @@
 
 /**
  * @fileoverview
- * This script builds the minified AMP runtime.
- * This is run during the CI stage = build; job = Nomodule Build.
+ * This script builds and tests the AMP runtime in esm mode.
+ * This is run during the CI stage = test; job = module tests.
  */
 
 const colors = require('ansi-colors');
-const log = require('fancy-log');
 const {
   printChangeSummary,
-  processAndUploadNomoduleOutput,
   startTimer,
   stopTimer,
-  stopTimedJob,
-  timedExecWithError,
   timedExecOrDie: timedExecOrDieBase,
-  uploadNomoduleOutput,
+  downloadModuleOutput,
+  downloadNomoduleOutput,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isPullRequestBuild} = require('../common/ci');
-const {runNpmChecks} = require('./npm-checks');
-const {signalDistUpload} = require('../tasks/pr-deploy-bot-utils');
 
-const FILENAME = 'nomodule-build.js';
+const FILENAME = 'module-tests.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
-const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
+const timedExecOrDie = (cmd, unusedFileName) =>
+  timedExecOrDieBase(cmd, FILENAME);
 
-async function main() {
+function main() {
   const startTime = startTimer(FILENAME, FILENAME);
-  if (!runNpmChecks(FILENAME)) {
-    stopTimedJob(FILENAME, startTime);
-    return;
-  }
 
   if (!isPullRequestBuild()) {
+    downloadNomoduleOutput(FILENAME);
+    downloadModuleOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
-    timedExecOrDie('gulp dist --fortesting');
-    uploadNomoduleOutput(FILENAME);
+    timedExecOrDie('gulp integration --nobuild --compiled --headless --esm');
   } else {
     printChangeSummary(FILENAME);
     const buildTargets = determineBuildTargets(FILENAME);
     if (
       buildTargets.has('RUNTIME') ||
       buildTargets.has('FLAG_CONFIG') ||
-      buildTargets.has('INTEGRATION_TEST') ||
-      buildTargets.has('E2E_TEST') ||
-      buildTargets.has('VISUAL_DIFF') ||
-      buildTargets.has('UNIT_TEST')
+      buildTargets.has('INTEGRATION_TEST')
     ) {
+      downloadNomoduleOutput(FILENAME);
+      downloadModuleOutput(FILENAME);
       timedExecOrDie('gulp update-packages');
-      const process = timedExecWithError('gulp dist --fortesting', FILENAME);
-      if (process.status !== 0) {
-        const error = process.error || new Error('unknown error, check logs');
-        log(colors.red('ERROR'), colors.yellow(error.message));
-        await signalDistUpload('errored');
-        stopTimedJob(FILENAME, startTime);
-        return;
-      }
-      timedExecOrDie('gulp storybook --build');
-      await processAndUploadNomoduleOutput(FILENAME);
+      timedExecOrDie('gulp integration --nobuild --compiled --headless --esm');
     } else {
-      await signalDistUpload('skipped');
       console.log(
         `${FILELOGPREFIX} Skipping`,
-        colors.cyan('Nomodule Build'),
+        colors.cyan('Module Tests'),
         'because this commit does not affect the runtime, flag configs,',
-        'integration tests, end-to-end tests, or visual diff tests.'
+        'or integration tests.'
       );
     }
   }
