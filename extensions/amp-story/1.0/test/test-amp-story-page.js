@@ -231,6 +231,8 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
       .then(() => page.mediaPoolPromise_)
       .then((mediaPool) => {
         mediaPoolMock = env.sandbox.mock(mediaPool);
+        mediaPoolMock.expects('preload').resolves();
+        mediaPoolMock.expects('play').resolves();
         mediaPoolMock.expects('unmute').once();
 
         page.setState(PageState.PLAYING);
