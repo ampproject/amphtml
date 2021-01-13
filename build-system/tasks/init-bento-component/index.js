@@ -136,11 +136,13 @@ ${green('FINISHED:')} Boilerplate for your new ${cyan(
   )}
 
 You can run tests on your new component with the following command:
-    gulp unit --files=extensions/amp-${componentName}/1.0/test/test-amp-${componentName}.js
+    ${cyan(
+      `gulp unit --files=extensions/amp-${componentName}/1.0/test/test-amp-${componentName}.js`
+    )}
 If the component was generated successfully, the example test should pass.
 
 You may also view the component during development in storybook:
-    gulp storybook
+    ${cyan(`gulp storybook`)}
 `);
 }
 
