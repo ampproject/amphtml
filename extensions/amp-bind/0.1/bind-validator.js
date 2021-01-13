@@ -36,6 +36,9 @@ const GLOBAL_PROPERTY_RULES = {
   'class': {
     denylistedValueRegex: '(^|\\W)i-amphtml-',
   },
+  'class+': {
+    denylistedValueRegex: '(^|\\W)i-amphtml-',
+  },
   'hidden': null,
   'text': null,
 };

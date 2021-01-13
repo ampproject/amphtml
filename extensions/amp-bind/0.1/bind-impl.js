@@ -974,12 +974,13 @@ export class Bind {
   scanElement_(element, quota, outBindings) {
     let quotaExceeded = false;
     const boundProperties = this.boundPropertiesInElement_(element);
-    const defaultClasses = toArray(element.classList);
+
     if (boundProperties.length > quota) {
       boundProperties.length = quota;
       quotaExceeded = true;
     }
     if (boundProperties.length > 0) {
+      const defaultClasses = toArray(element.classList);
       this.boundElements_.push({element, boundProperties, defaultClasses});
     }
     const {tagName} = element;
@@ -1185,11 +1186,12 @@ export class Bind {
    * will only return properties that need to be updated along with their
    * new value.
    * @param {!Array<!BoundPropertyDef>} boundProperties
+   * @param {!Array<string>} defaultClasses
    * @param {Object<string, BindExpressionResultDef>} results
-   * @return {!Array<{boundProperty: !BoundPropertyDef, newValue: BindExpressionResultDef}>}
+   * @return {!Array<{boundProperty: !BoundPropertyDef, defaultClasses: !Array<string>, newValue: BindExpressionResultDef}>}
    * @private
    */
-  calculateUpdates_(boundProperties, results) {
+  calculateUpdates_(boundProperties, defaultClasses, results) {
     const updates = [];
     boundProperties.forEach((boundProperty) => {
       const {expressionString, previousResult} = boundProperty;
@@ -1202,7 +1204,7 @@ export class Bind {
       ) {
       } else {
         boundProperty.previousResult = newValue;
-        updates.push({boundProperty, newValue});
+        updates.push({boundProperty, defaultClasses, newValue});
       }
     });
     return updates;
@@ -1224,6 +1226,7 @@ export class Bind {
   apply_(results, opts) {
     const promises = [];
 
+    console.log('apply', this.boundElements_);
     this.boundElements_.forEach((boundElement) => {
       // If this evaluation is triggered by an <amp-state> mutation, we must
       // ignore updates to any <amp-state> element to prevent update cycles.
@@ -1240,8 +1243,12 @@ export class Bind {
         return;
       }
 
-      const {element, boundProperties} = boundElement;
-      const updates = this.calculateUpdates_(boundProperties, results);
+      const {element, boundProperties, defaultClasses} = boundElement;
+      const updates = this.calculateUpdates_(
+        boundProperties,
+        defaultClasses,
+        results
+      );
       // If this is a "evaluate only" application, skip the DOM mutations.
       if (opts.evaluateOnly) {
         return;
@@ -1255,7 +1262,7 @@ export class Bind {
   /**
    * Applies expression results to a single BoundElementDef.
    * @param {!Element} element
-   * @param {!Array<{boundProperty: !BoundPropertyDef, newValue: BindExpressionResultDef}>} updates
+   * @param {!Array<{boundProperty: !BoundPropertyDef, defaultClasses: !Array<string>, newValue: BindExpressionResultDef}>} updates
    * @return {!Promise}
    */
   applyUpdatesToElement_(element, updates) {
