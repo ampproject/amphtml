@@ -95,7 +95,7 @@ This table provides examples of formatted values specified in a Mustache templat
 
 ### Migrating from 0.1
 
-Unlike `0.1`, the experimental `1.0` version of `amp-date-countdown` does not currently support the `data-count-up` attribute which enables the component to count in the opposite direction.
+The experimental `1.0` version of `amp-date-countdown` does not support the `data-count-up` attribute. This means the `1.0` component is unable to count in the opposite direction.
 
 ## Attributes
 
@@ -228,7 +228,3 @@ Renders as:
          width="359" height="270">
 </noscript>
 </amp-img>
-
-## Validation
-
-See [amp-date-countdown rules](validator-amp-date-countdown.protoascii) in the AMP validator specification.

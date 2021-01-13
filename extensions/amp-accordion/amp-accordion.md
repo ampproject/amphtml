@@ -97,9 +97,9 @@ The example below contains an `amp-accordion` with three sections. The
 
 ### Migrating from 0.1
 
-Unlike `0.1`, the experimental `1.0` version of `amp-accordion` does not currently support session states. It behaves as if the `disable-session-states` attribute is always set.
+The experimental `1.0` version of `amp-accordion` does not support session states. It behaves as if the `disable-session-states` attribute is always applied.
 
-Both `0.1` and `1.0` versions of `amp-accordion` can be used with `amp-bind`. However, in `1.0` `amp-bind` can bind directly to the `expanded` attribute whereas in `0.1` `amp-bind` operates on the `[data-expand]` attribute. The `[data-expand]` attribute is no longer used in `1.0`. See the `expanded` attribute in the next section for more information.
+Version `0.1` and `1.0` are compatible with `amp-bind`, but some binding syntax is different. You may bind directly with the `expanded` attribute in version `1.0`. The `[data-expanded]` is not supported in version `1.0`. See the `expanded` attribute below for further information.
 
 ## Attributes
 
@@ -137,10 +137,7 @@ animation when the content is expanded and "roll up" animation when collapsed.
 
 Apply the `expanded` attribute to a nested `<section>` to expand that section when the page loads.
 
-Bind the `expanded` attribute to a `<section>` to expand or collapse that
-section. An expanded section collapses if the expression evaluates as false. A
-collapsed section expands if the expression evaluates as anything other than
-false.
+Use `amp-bind` to bind the `[expanded]` attribute to programmatically expand or collapse a `<section>` element. An expanded section collapses when the expression evaluates as `false`. A collapsed section expands if the expression evaluates to anything other than `false`.
 
 [example preview="top-frame" playground="true" imports="amp-accordion:1.0"]
 
@@ -170,9 +167,7 @@ false.
 
 ### expand-single-section
 
-Apply the `expand-single-section` attribute to `amp-accordion` to specify that
-only one `<section>` can expand at a time. If the user clicks or taps on a
-collapsed `<section>`, any currently expanded `<section>` collapses.
+Allow only one section to expand at a time by applying the `expand-single-section` attribute to the `<amp-accordion>` element. This means if a user taps on a collapsed `<section>`, it will expand and collapse other expanded `<section>`'s.
 
 [example preview="top-frame" playground="true" imports="amp-accordion:1.0"]
 
@@ -351,8 +346,3 @@ Keep the following points in mind when you style an amp-accordion:
 -   `tabindex`: Applied to the header element of each `amp-accordion` section.
 -   `role=button`: Applied to the header element of each `amp-accordion` section.
 -   `role=region`: Applied to the content element of each `amp-accordion` section.
-
-## Validation
-
-See [amp-accordion rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-accordion/validator-amp-accordion.protoascii)
-in the AMP validator specification.
