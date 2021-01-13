@@ -33,6 +33,7 @@
 <body>
   <!-- VALID BINDINGS ON NON-AMP ELEMENTS -->
   <p [text]="foo" [class]="foo">p</p>
+  <p class="bar" [class+]="bar">p</p>
   <textarea [defaultText]="foo" [text]="foo">textarea</textarea>
   <a [href]="foo">a</a>
   <amp-img src="http://example.com/image.jpg" width=10 height=10 [src]="foo" [alt]="foo" [width]="foo" [height]="foo"></amp-img>
