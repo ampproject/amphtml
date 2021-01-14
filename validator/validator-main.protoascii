@@ -5819,6 +5819,9 @@ attr_lists: {
   attrs: { name: "[aria-valuenow]" }
   attrs: { name: "[aria-valuetext]" }
   attrs: { name: "[class]" }
+  # Added here while working on PR, will need the condition to only allow when `[class]` is not present.
+  attrs: { name: "[dynamic-class]" }
+  # Added here while working on PR, will need the condition to only allow when `[class]` is not present.
   attrs: { name: "data-amp-bind-dynamic-class" }
   attrs: { name: "[hidden]" }
   attrs: { name: "[text]" }
