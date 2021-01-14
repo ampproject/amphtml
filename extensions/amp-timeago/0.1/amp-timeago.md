@@ -2,14 +2,13 @@
 $category@: presentation
 formats:
   - websites
+  - email
 teaser:
   text: Provides fuzzy timestamps by formatting dates as time ago (for example, 3 hours ago).
-experimental: true
-bento: true
 ---
 
 <!--
-Copyright 2021 The AMP HTML Authors. All Rights Reserved.
+Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -34,7 +33,7 @@ The component replaces the text node with a fuzzy timestamp, such as `in 30 year
 
 Example:
 
-[example preview="inline" playground="true" imports="amp-timeago:1.0"]
+[example preview="inline" playground="true" imports="amp-timeago"]
 
 ```html
 <amp-timeago
@@ -110,3 +109,7 @@ Add the `cutoff` attribute to display the date specified in the `datatime` attri
 ### Common attributes
 
 The AMP provided set of [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) is available to `<amp-timeago>`.
+
+## Validation
+
+See [amp-timeago rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-timeago/validator-amp-timeago.protoascii) in the AMP validator specification.
