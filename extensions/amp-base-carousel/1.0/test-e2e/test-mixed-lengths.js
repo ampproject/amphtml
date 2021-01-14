@@ -54,24 +54,23 @@ describes.endtoend(
 
         await expect(prop(slideOne, 'offsetWidth')).to.equal(slideWidth);
         await expect(controller.getElementRect(slideOne)).to.include({
-          x: 0,
+          x: (pageWidth - slideWidth) / 2,
         });
 
         await expect(prop(slideTwo, 'offsetWidth')).to.equal(slideWidth);
         await expect(controller.getElementRect(slideTwo)).to.include({
-          x: slideWidth,
+          x: slideWidth + (pageWidth - slideWidth) / 2,
         });
       });
 
-      // TODO(wg-bento): test with snap-align=center when fixed.
-      it('should snap on the start point', async () => {
+      it('should snap on the center point', async () => {
         const el = await getScrollingElement(styles, controller);
         const slideTwo = await getSlide(styles, controller, 1);
         const scrollAmount = 1;
 
         await controller.scrollBy(el, {left: scrollAmount});
         await expect(controller.getElementRect(slideTwo)).to.include({
-          x: 0,
+          x: (pageWidth - slideWidth) / 2,
         });
       });
     });
