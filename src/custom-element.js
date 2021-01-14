@@ -498,6 +498,14 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * Unloads the element.
+     * @final
+     */
+    unload() {
+      this.getResource_().unload();
+    }
+
+    /**
      * Called to instruct the element to preconnect to hosts it uses during
      * layout.
      * @param {boolean} onLayout Whether this was called after a layout.
