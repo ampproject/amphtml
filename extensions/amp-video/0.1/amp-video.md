@@ -63,7 +63,7 @@ The `amp-video` component accepts up to four unique types of HTML nodes as child
 
 ### src
 
-Required if no <`<source>` children are present. Must be HTTPS.
+Required if no `<source>` children are present. Must be HTTPS.
 
 ### poster
 
