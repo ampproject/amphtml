@@ -19,10 +19,10 @@ const argv = require('minimist')(process.argv.slice(2));
 const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const log = require('fancy-log');
-const {execOrThrow} = require('../../common/exec');
+const {
+  insertExtensionBundlesConfig,
+} = require('./insert-extension-bundles-config');
 const {makeBentoExtension} = require('./bento');
-
-const bundlesConfigJs = 'build-system/compile/bundles.config.js';
 
 const year = new Date().getFullYear();
 
@@ -34,40 +34,6 @@ function pascalCase(str) {
     str.slice(1).replace(/-([a-z])/g, function (g) {
       return g[1].toUpperCase();
     })
-  );
-}
-
-/**
- * Runs a jscodeshift transform under this directory.
- * @param {string} transform
- * @param {Array<string>=} args
- * @return {string}
- */
-const jscodeshift = (transform, args = []) =>
-  execOrThrow(
-    [
-      'npx jscodeshift',
-      `--transform ${__dirname}/jscodeshift/${transform}`,
-      ...args,
-    ].join(' ')
-  ).stdout;
-
-/**
- * @param {{name: string, version: string, latestVersion: (string|undefined)}} bundle
- * @return {string}
- */
-function insertExtensionBundlesConfig(bundle) {
-  // stringify twice to escape into string:
-  // {"name": "foo"} -> "{\"name\": \"foo\"}"
-  const insertExtensionBundleArg = JSON.stringify(JSON.stringify(bundle));
-
-  jscodeshift('insert-extension-bundles-config.js', [
-    `--insertExtensionBundle ${insertExtensionBundleArg}`,
-    bundlesConfigJs,
-  ]);
-
-  execOrThrow(
-    `./node_modules/prettier/bin-prettier.js --write ${bundlesConfigJs}`
   );
 }
 
