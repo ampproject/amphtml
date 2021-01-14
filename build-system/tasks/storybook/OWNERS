@@ -8,7 +8,7 @@
         {name: 'ampproject/wg-infra'},
         {name: 'ampproject/wg-bento'},
         {name: 'ampproject/wg-performance'},
-        {name: 'wassgha', notify: true},
+        {name: 'alanorozco', notify: true},
       ],
     },
     {
