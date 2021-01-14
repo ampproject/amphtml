@@ -16,12 +16,15 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const log = require('fancy-log');
 const path = require('path');
 const {createCtrlcHandler} = require('../../common/ctrlcHandler');
+const {cyan} = require('ansi-colors');
 const {defaultTask: runAmpDevBuildServer} = require('../default-task');
-const {execScriptAsync} = require('../../common/exec');
+const {exec, execScriptAsync} = require('../../common/exec');
 const {getBaseUrl} = require('../pr-deploy-bot-utils');
 const {installPackages} = require('../../common/utils');
+const {isCiBuild} = require('../../common/ci');
 const {isPullRequestBuild} = require('../../common/ci');
 const {writeFileSync} = require('fs-extra');
 
@@ -39,30 +42,22 @@ const repoDir = path.join(__dirname, '../../..');
 const envConfigDir = (env) => path.join(__dirname, `${env}-env`);
 
 /**
- * @param {string} bin
- * @param {...string} args
- * @return {!ChildProcess}
- */
-const execLocalNodeBinAsync = (bin, ...args) =>
-  execScriptAsync(`./node_modules/.bin/${bin} ${args.join(' ')}`, {
-    stdio: [null, process.stdout, process.stderr],
-    cwd: __dirname,
-    env: process.env,
-  });
-
-/**
  * @param {string} env 'amp' or 'preact'
  * @return {!ChildProcess}
  */
 function launchEnv(env) {
-  const {ci, 'storybook_port': storybookPort = ENV_PORTS[env]} = argv;
-  return execLocalNodeBinAsync(
-    'start-storybook',
-    `--config-dir ${envConfigDir(env)}`,
-    '--quiet',
-    `--static-dir ${repoDir}/`,
-    `--port ${storybookPort}`,
-    ci ? '--ci' : ''
+  log(`Launching storybook for the ${cyan(env)} environment...`);
+  const {'storybook_port': port = ENV_PORTS[env]} = argv;
+  return execScriptAsync(
+    [
+      './node_modules/.bin/start-storybook',
+      `--config-dir ${envConfigDir(env)}`,
+      `--static-dir ${repoDir}/`,
+      `--port ${port}`,
+      '--quiet',
+      isCiBuild() ? '--ci' : '',
+    ].join(' '),
+    {cwd: __dirname, stdio: 'inherit'}
   );
 }
 
@@ -87,11 +82,16 @@ function buildEnv(env) {
        })});`
     );
   }
-
-  return execLocalNodeBinAsync(
-    'build-storybook',
-    `--config-dir ${configDir}`,
-    `--output-dir ${repoDir}/examples/storybook/${env}`
+  log(`Building storybook for the ${cyan(env)} environment...`);
+  return exec(
+    [
+      './node_modules/.bin/build-storybook',
+      `--config-dir ${configDir}`,
+      `--output-dir ${repoDir}/examples/storybook/${env}`,
+      '--quiet',
+      `--loglevel ${isCiBuild() ? 'warn' : 'info'}`,
+    ].join(' '),
+    {cwd: __dirname, stdio: 'inherit'}
   );
 }
 
@@ -120,5 +120,4 @@ storybook.flags = {
   'storybook_env':
     "  Set environment(s) to run Storybook, either 'amp', 'preact' or a list as 'amp,preact'",
   'storybook_port': '  Set port from which to run the Storybook dashboard.',
-  'ci': "  CI mode (skip interactive prompts, don't open browser)",
 };

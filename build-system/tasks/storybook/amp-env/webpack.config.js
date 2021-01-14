@@ -15,20 +15,20 @@
  */
 const path = require('path');
 
-module.exports = {
-  resolveLoader: {
+module.exports = ({config}) => {
+  config.resolveLoader = {
     modules: [
       path.join(__dirname, '../node_modules'),
       path.join(__dirname, '../../../../node_modules'),
     ],
-  },
-  resolve: {
+  };
+  config.resolve = {
     modules: [
       path.join(__dirname, '../node_modules'),
       path.join(__dirname, '../../../../node_modules'),
     ],
-  },
-  module: {
+  };
+  config.module = {
     rules: [
       {
         test: /\.jsx?$/,
@@ -55,5 +55,6 @@ module.exports = {
         },
       },
     ],
-  },
+  };
+  return config;
 };
