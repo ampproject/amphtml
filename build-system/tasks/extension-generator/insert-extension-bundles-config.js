@@ -22,16 +22,6 @@ const extensionBundlesJson =
 /**
  * Inserts an extension entry into bundles.config.extensions.json
  *
- * ```
- *    const extensionBundles = [
- *      ...,
- *   +  {
- *   +    name: "amp-foo",
- *   +    version: "1.0",
- *   +  }
- *      ...,
- *    ]
- * ```
  * @param {{name: string, version: string, latestVersion: (string|undefined)}} bundle
  * @return {string}
  */
