@@ -112,7 +112,7 @@ export class IframePool {
    */
   findAdjacent(storyIdx, maxIdx) {
     const iframesToPosition = Math.min(MAX_IFRAMES, maxIdx + 1);
-    let iframesToLoad = MAX_IFRAMES_TO_LOAD;
+
     const adjacent = [];
 
     if (maxIdx < storyIdx) {
@@ -121,10 +121,9 @@ export class IframePool {
 
     adjacent.push({
       storyIdx,
-      shouldLoad: iframesToLoad > 0,
+      shouldLoad: adjacent.length < MAX_IFRAMES_TO_LOAD,
       position: IframePosition.CURRENT,
     });
-    --iframesToLoad;
 
     let cursorRight = storyIdx + 1;
     let cursorLeft = storyIdx - 1;
@@ -132,22 +131,18 @@ export class IframePool {
     while (adjacent.length < iframesToPosition) {
       if (cursorRight <= maxIdx) {
         adjacent.push({
-          storyIdx: cursorRight,
-          shouldLoad: iframesToLoad > 0,
+          storyIdx: cursorRight++,
+          shouldLoad: adjacent.length < MAX_IFRAMES_TO_LOAD,
           position: IframePosition.NEXT,
         });
-        --iframesToLoad;
-        ++cursorRight;
       }
 
-      if (cursorLeft >= 0) {
+      if (cursorLeft >= 0 && adjacent.length < iframesToPosition) {
         adjacent.push({
-          storyIdx: cursorLeft,
-          shouldLoad: iframesToLoad > 0,
+          storyIdx: cursorLeft--,
+          shouldLoad: adjacent.length < MAX_IFRAMES_TO_LOAD,
           position: IframePosition.PREVIOUS,
         });
-        --iframesToLoad;
-        --cursorLeft;
       }
     }
 
