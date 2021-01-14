@@ -78,15 +78,16 @@ Example:
 
 ##### Request
 
-AMP sends the consent instance ID in the `consentInstanceId` field with the POST request.
+AMP sends the following fields with the POST request:
 
 ```
 {
-  "consentInstanceId": {string},
-  "consentStateValue": {enum}, // the stored consent state in client cache
-                               // takes value of ["accepted", "rejected", "unknown"]
-  "consentString": {string},   // the stored consent string in client cache
-  "matchedGeoGroup": {string}, // (new) the user's geoGroup detected by AMP.
+  "consentInstanceId": {string}, // the consentInstanceId specified in the JSON config
+  "consentStateValue": {enum},   // the stored consent state in client cache
+                                 // one of ["accepted", "rejected", "unknown"]
+  "consentString": {string},     // the stored consent string in client cache
+  "clientConfig": {?object},     // the clientConfig object, if any, specified in the JSON config
+  "matchedGeoGroup": {string},   // (new) the user's geoGroup detected by AMP
 }
 ```
 
@@ -115,6 +116,8 @@ AMP expects the response to be a JSON object like the following:
                                                 // Set to `true` in conjunction with
                                                 // consentStateValue='accepted'/'rejected'
                                                 // to enforce server side consent state
+  "sharedData": {?object} [default: null]       // Optional key-value pairs that are made
+                                                // available to other AMP extensions 
 }
 ```
 
@@ -126,7 +129,7 @@ Optionally, additional key-value pairs can be returned in the response as the `s
 
 ```json
 {
-  "consentRequire": true,
+  "consentRequired": true,
   "sharedData": {
     "a-key": "some-string-value",
     "key-with-bool-value": true,
@@ -141,7 +144,7 @@ remote endpoint to agree on particular meaning of those key-value pairs. One
 example use case is for the remote endpoint to convey extra consent related info of the
 current user to the 3rd party vendor extensions.
 
-Unlike consent state, this `shareData` is not persisted in client side storage.
+Unlike consent state, this `sharedData` is not persisted in client side storage.
 
 #### consentRequired
 
@@ -156,7 +159,7 @@ Note that this value will be ignored if there is previous consent state stored i
 
 `onUpdateHref`: Instructs AMP to make a CORS HTTPS POST request with credentials to the specified URL whenever the stored consent state changes.
 
-AMP sends the consent instance ID, a generated user id only for this usage and the consent state along with the POST request.
+AMP sends the consent instance ID, a generated user id only for this usage, and the consent state along with the POST request.
 
 ```
 {
@@ -172,6 +175,10 @@ AMP sends the consent instance ID, a generated user id only for this usage and t
 
 The consent decisions collected from user via this prompt UI will be stored in `localStorage` as client cache. See the [Client caching](#client-caching) section for how the cache is used.
 
+### clientConfig
+
+`clientConfig`: Specifies Consent Manager Provider-specific configuration that is passed to the [`promptUI`](#promptUI) iframe (see [Integrating Your CMP](./integrating-consent.md#client-information-passed-to-iframe)), and as part of the `POST` body request to [`checkConsentHref`](#checkConsentHref).
+
 #### geoOverride
 
 `geoOverride` provides a way to utilize the `<amp-geo>` component to detect user's geo location to assist client side decisions.
@@ -181,7 +188,7 @@ The consent decisions collected from user via this prompt UI will be stored in `
 Two important tips when configuring `amp-geo`:
 
 -   All geo groups should be mutually exclusive. The behavior is undetermined if a user falls into multiple geo override.
--   Provide an `geoGroupUnknown` override for users that are failed be be identified by `<amp-geo>`.
+-   Provide a `geoGroupUnknown` override for users that are failed be be identified by `<amp-geo>`.
 
 Take the following config as an example:
 
@@ -255,7 +262,7 @@ For users in `geoGroupUnknown`, the merged config is
 }
 ```
 
-AMP will check client cache and server in parallel to find the previous consent state. Because `"consentRequired": true` it will collect consent via the specified prompt UI if cache is empty w/o waiting for the server response. The server response is mainly for cache refresh or fetching `shareData`.
+AMP will check client cache and server in parallel to find the previous consent state. Because `"consentRequired": true` it will collect consent via the specified prompt UI if cache is empty w/o waiting for the server response. The server response is mainly for cache refresh or fetching `sharedData`.
 
 #### xssiPrefix
 
