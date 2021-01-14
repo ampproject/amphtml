@@ -214,6 +214,15 @@ exports.jsBundles = {
 
 /**
  * Used to generate extension build targets
+ *
+ * WARNING: an automated transform[1] depends on this variable being declared in
+ * a specific way:
+ *   `const extensionBundles = []`
+ *     - do NOT rename
+ *     - do NOT do `exports.extensionBundles = []`
+ *     - do NOT do `const extensionBundles = [].sort()`
+ *
+ * [1]: build-system/tasks/extension-generator/jscodeshift/insert-extension-bundles-config.js
  */
 const extensionBundles = [
   {
