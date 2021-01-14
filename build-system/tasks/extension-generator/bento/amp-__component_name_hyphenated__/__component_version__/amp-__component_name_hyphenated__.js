@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {CSS} from './__component_name_hyphenated__.jss';
 import {__component_name_pascalcase__} from './__component_name_hyphenated__';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {dict} from '../../../src/utils/object';
@@ -58,6 +59,9 @@ Amp__component_name_pascalcase__['passthrough'] = true;
 
 /** @override */
 Amp__component_name_pascalcase__['layoutSizeDefined'] = true;
+
+/** @override */
+Amp__component_name_pascalcase__['shadowCss'] = CSS;
 
 AMP.extension(TAG, '__component_version__', (AMP) => {
   AMP.registerElement(TAG, Amp__component_name_pascalcase__);
