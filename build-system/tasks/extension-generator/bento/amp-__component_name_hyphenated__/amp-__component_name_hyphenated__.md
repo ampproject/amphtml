@@ -2,7 +2,6 @@
 $category@: presentation
 formats:
   - websites
-  - email
 teaser:
   text: Fill this in with teaser text to improve SEO. Use the component description.
 ---
