@@ -39,7 +39,7 @@ The `amp-video` component accepts up to four unique types of HTML nodes as child
 -   a placeholder for before the video starts
 -   a fallback if the browser doesn’t support HTML5 video: One or zero immediate child nodes can have the `fallback` attribute. If present, this node and its children form the content that displays if HTML5 video is not supported on the user’s browser.
 
-[example preview="inline" playground="true" imports="amp-video"]
+[example preview="inline" playground="true" imports="amp-video:1.0"]
 
 ```html
 <amp-video {% if format=='stories'%}autoplay {% endif %}controls

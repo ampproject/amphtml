@@ -34,7 +34,7 @@ The component replaces the text node with a fuzzy timestamp, such as `in 30 year
 
 Example:
 
-[example preview="inline" playground="true" imports="amp-timeago"]
+[example preview="inline" playground="true" imports="amp-timeago:1.0"]
 
 ```html
 <amp-timeago

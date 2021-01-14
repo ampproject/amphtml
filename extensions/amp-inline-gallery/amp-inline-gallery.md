@@ -30,7 +30,7 @@ limitations under the License.
 
 The `<amp-inline-gallery>` component uses an `<amp-base-carousel>` to display slides. The page must have the required scripts for both components in the document head. Typical usage might look like:
 
-[example preview="inline" playground="true" imports="amp-inline-gallery,amp-base-carousel,amp-lightbox-gallery"]
+[example preview="inline" playground="true" imports="amp-inline-gallery:1.0,amp-base-carousel:1.0]
 
 ```html
 <amp-inline-gallery layout="container">
@@ -42,7 +42,6 @@ The `<amp-inline-gallery>` component uses an `<amp-base-carousel>` to display sl
     snap-align="center"
     loop="true"
     visible-count="1.2"
-    lightbox
   >
     <amp-img
       src="{{server_for_email}}/static/inline-examples/images/image1.jpg"
@@ -130,7 +129,7 @@ The `amp-inline-gallery` component can display thumbnail preview in addition to,
 
 The example below demonstrates a gallery with thumbnails visible at larger resolutions.
 
-[example preview="inline" playground="true" imports="amp-inline-gallery,amp-base-carousel"]
+[example preview="inline" playground="true" imports="amp-inline-gallery:1.0,amp-base-carousel:1.0"]
 
 ```html
 <amp-inline-gallery layout="container">
