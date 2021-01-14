@@ -775,6 +775,15 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'myfinance': {
+    preconnect: [
+      'https://a.myfidevs.io',
+      'https://static.myfinance.com',
+      'https://www.myfinance.com',
+    ],
+    renderStartImplemented: true,
+  },
+
   'myoffrz': {
     renderStartImplemented: true,
   },
