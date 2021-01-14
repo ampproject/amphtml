@@ -777,6 +777,27 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
         expect(errorResponse).to.be.undefined;
       });
     });
+
+    it('should expand globally allowed macros', async () => {
+      const url = 'https://www.foo.example/?cid=CLIENT_ID(foo)';
+      rtc.rtcConfig_ = {
+        timeoutMillis: 1000,
+      };
+      const macros = {};
+      inflateAndSendRtc_(
+        url,
+        macros,
+        /* errorReportingUrl */ undefined,
+        () => {} // checkStillCurrent
+      );
+      await rtc.promiseArray_[0];
+      expect(fetchJsonStub).to.be.called;
+      expect(
+        fetchJsonStub.calledWithMatch(
+          /https:\/\/www.foo.example\/\?cid=amp-\S+$/
+        )
+      ).to.be.true;
+    });
   });
 
   describe('modifyRtcConfigForConsentStateSettings', () => {
