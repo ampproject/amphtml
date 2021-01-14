@@ -37,6 +37,12 @@ Read this document to learn how to create a new Bento AMP component.
 
 The first step to creating a new Bento AMP component is familiarizing yourself with [AMP's contributor guidelines](https://go.amp.dev/contribute/code). Adding new components follow the [process for making a significant change](https://go.amp.dev/contribute/code#process-for-significant-changes). This process includes filing an ["Intent to Implement" issue](https://go.amp.dev/i2i) and working with an assigned AMP developer guide before starting significant work.
 
+To bootstrap the creation of a new component (or the Bento version of an existing component), the following command will create the directory structure and boilerplate code for you:
+
+```shell
+$ gulp make-extension --bento --name=amp-my-element
+```
+
 ## Naming
 
 All Bento AMP component extensions have their tag names prefixed with `amp-`.
