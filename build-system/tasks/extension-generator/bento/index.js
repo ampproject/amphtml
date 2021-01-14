@@ -141,7 +141,23 @@ If the component was generated successfully, the example test should pass.
 
 You may also view the component during development in storybook:
     ${cyan(`gulp storybook`)}
-`);
+
+To enable generating a binary for this extension, add the following
+to ${cyan('extensionBundles')} in ${cyan(
+    'amphtml/build-system/compile/bundles.config.js'
+  )}:
+
+${cyan(`{
+  name: 'amp-${componentName}',
+  version: ['${version}'],
+  latestVersion: '0.1',  // This may be '${version}' for a new component
+  options: {hasCss: true},
+  type: TYPES.MISC,
+},`)}
+
+See ${cyan(
+    'https://github.com/ampproject/amphtml/blob/master/contributing/building-an-amp-extension.md#updating-build-configs'
+  )} for more information.`);
 }
 
 module.exports = {
