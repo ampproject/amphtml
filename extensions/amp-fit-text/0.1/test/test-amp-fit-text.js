@@ -93,8 +93,6 @@ describes.realWin(
       expect(updateFontSizeSpy).to.be.calledOnce;
       updateFontSizeSpy.resetHistory();
       // Modify the size of the fit-text box.
-      ft.setAttribute('width', '50');
-      ft.setAttribute('height', '100');
       ft.style.width = '50px';
       ft.style.height = '100px';
 
