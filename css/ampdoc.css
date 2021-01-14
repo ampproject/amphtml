@@ -64,7 +64,7 @@ body {
  * is only possible in this case, and (b) we'd like to preserve pinch-zoom.
  */
 html.i-amphtml-singledoc.i-amphtml-embedded {
-  touch-action: pan-y;
+  touch-action: pan-y pinch-zoom;
 }
 
 /**

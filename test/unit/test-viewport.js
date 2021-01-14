@@ -1081,7 +1081,9 @@ describes.fakeWin('Viewport', {}, (env) => {
       .run('should set pan-y with experiment', () => {
         viewer.isEmbedded = () => true;
         viewport = new ViewportImpl(ampdoc, binding, viewer);
-        expect(win.getComputedStyle(root)['touch-action']).to.equal('pan-y');
+        expect(win.getComputedStyle(root)['touch-action']).to.equal(
+          'pan-y pinch-zoom'
+        );
       });
   });
 
