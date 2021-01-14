@@ -109,19 +109,20 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
   /** @private */
   updateSiblings_() {
     this.siblings_.forEach((siblingImpl) => {
-      siblingImpl.updateTransform_(this.x, this.y, this.zoom);
+      // Call the updateTransform method on siblings with the active pages position values.
+      siblingImpl.updateTransform(this.x, this.y, this.zoom);
     });
   }
 
   /**
    * The active page's instance calls this and passes it's position values.
-   * @private
+   * @public
    * @param {x} string
    * @param {y} string
    * @param {z} string
    * @return {!Promise}
    */
-  updateTransform_(x, y, zoom) {
+  updateTransform(x, y, zoom) {
     return this.mutateElement(() => {
       setStyles(this.ampImgEl_, {
         transform: `scale(${zoom}) translate(${x}, ${y})`,
