@@ -45,4 +45,4 @@ export const ExampleUseCase = () => {
 
 ExampleUseCase.story = {
   name: 'Example use case story'
-}
+};
