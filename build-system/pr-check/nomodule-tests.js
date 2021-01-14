@@ -17,54 +17,74 @@
 
 /**
  * @fileoverview
- * This script builds and tests the AMP runtime in esm mode.
- * This is run during the CI stage = test; job = esm tests.
+ * This script runs the unit and integration tests against minified code
+ * on a local CI service VM.
+ * This is run during the CI stage = test; job = nomodule tests.
  */
 
 const colors = require('ansi-colors');
 const {
+  downloadNomoduleOutput,
   printChangeSummary,
   startTimer,
   stopTimer,
   timedExecOrDie: timedExecOrDieBase,
-  downloadEsmDistOutput,
-  downloadDistOutput,
+  timedExecOrThrow: timedExecOrThrowBase,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isPullRequestBuild} = require('../common/ci');
 
-const FILENAME = 'esm-tests.js';
+const FILENAME = 'nomodule-tests.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
-const timedExecOrDie = (cmd, unusedFileName) =>
-  timedExecOrDieBase(cmd, FILENAME);
+const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
+const timedExecOrThrow = (cmd, msg) => timedExecOrThrowBase(cmd, FILENAME, msg);
 
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
 
   if (!isPullRequestBuild()) {
-    downloadDistOutput(FILENAME);
-    downloadEsmDistOutput(FILENAME);
+    downloadNomoduleOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
-    timedExecOrDie('gulp integration --nobuild --compiled --headless --esm');
+
+    try {
+      timedExecOrThrow(
+        'gulp integration --nobuild --headless --compiled --report',
+        'Integration tests failed!'
+      );
+    } catch (e) {
+      if (e.status) {
+        process.exitCode = e.status;
+      }
+    } finally {
+      timedExecOrDie('gulp test-report-upload');
+    }
   } else {
     printChangeSummary(FILENAME);
     const buildTargets = determineBuildTargets(FILENAME);
+    if (
+      !buildTargets.has('RUNTIME') &&
+      !buildTargets.has('FLAG_CONFIG') &&
+      !buildTargets.has('INTEGRATION_TEST')
+    ) {
+      console.log(
+        `${FILELOGPREFIX} Skipping`,
+        colors.cyan('Nomodule Tests'),
+        'because this commit not affect the runtime, flag configs,',
+        'or integration tests.'
+      );
+      stopTimer(FILENAME, FILENAME, startTime);
+      return;
+    }
+
+    downloadNomoduleOutput(FILENAME);
+    timedExecOrDie('gulp update-packages');
+
     if (
       buildTargets.has('RUNTIME') ||
       buildTargets.has('FLAG_CONFIG') ||
       buildTargets.has('INTEGRATION_TEST')
     ) {
-      downloadDistOutput(FILENAME);
-      downloadEsmDistOutput(FILENAME);
-      timedExecOrDie('gulp update-packages');
-      timedExecOrDie('gulp integration --nobuild --compiled --headless --esm');
-    } else {
-      console.log(
-        `${FILELOGPREFIX} Skipping`,
-        colors.cyan('ESM Tests'),
-        'because this commit does not affect the runtime, flag configs,',
-        'or integration tests.'
-      );
+      timedExecOrDie('gulp integration --nobuild --headless --compiled');
     }
   }
 

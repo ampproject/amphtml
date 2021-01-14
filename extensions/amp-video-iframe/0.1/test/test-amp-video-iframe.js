@@ -23,10 +23,7 @@ import {
   whenUpgradedToCustomElement,
 } from '../../../../src/dom';
 import {listenOncePromise} from '../../../../src/event-helper';
-
-function getIntersectionMessage(id) {
-  return {data: {id, method: 'getIntersection'}};
-}
+import {macroTask} from '../../../../testing/yield';
 
 describes.realWin(
   'amp-video-iframe',
@@ -106,12 +103,16 @@ describes.realWin(
       );
     }
 
-    function stubIntersectionEntry(element, time, intersectionRatio) {
-      const entry = {time, intersectionRatio};
-      env.sandbox
-        ./*OK*/ stub(element, 'getIntersectionChangeEntry')
-        .returns(entry);
-      return entry;
+    function stubMeasureIntersection(target, time, intersectionRatio) {
+      env.win.IntersectionObserver = (callback) => ({
+        observe() {
+          Promise.resolve().then(() => {
+            callback([{target, time, intersectionRatio}]);
+          });
+        },
+        unobserve() {},
+        disconnect() {},
+      });
     }
 
     describe('#layoutCallback', () => {
@@ -273,6 +274,50 @@ describes.realWin(
         }
       });
 
+      it('should return consent data on getConsentData', async () => {
+        const consentString = 'foo-consentString';
+        const consentMetadata = 'bar-consentMetadata';
+        const consentPolicyState = 'baz-consentPolicyState';
+        const consentPolicySharedData = 'foo-consentPolicySharedData';
+
+        env.sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
+          Promise.resolve({
+            getConsentMetadataInfo: () => Promise.resolve(consentMetadata),
+            getConsentStringInfo: () => Promise.resolve(consentString),
+            whenPolicyResolved: () => Promise.resolve(consentPolicyState),
+            getMergedSharedData: () => Promise.resolve(consentPolicySharedData),
+          })
+        );
+
+        const id = 1234;
+
+        const videoIframe = createVideoIframe();
+
+        await layoutAndLoad(videoIframe);
+
+        const postMessage = stubPostMessage(videoIframe);
+
+        acceptMockedMessages(videoIframe);
+
+        videoIframe.implementation_.onMessage_({
+          data: {id, method: 'getConsentData'},
+        });
+
+        await macroTask();
+
+        expect(
+          postMessage.withArgs({
+            id,
+            args: {
+              consentString,
+              consentMetadata,
+              consentPolicyState,
+              consentPolicySharedData,
+            },
+          })
+        ).to.have.been.calledOnce;
+      });
+
       it('should return intersection ratio if in autoplay range', async () => {
         const id = 1234;
         const time = 1.234;
@@ -286,14 +331,12 @@ describes.realWin(
 
         acceptMockedMessages(videoIframe);
 
-        const message = getIntersectionMessage(id);
+        const message = {data: {id, method: 'getIntersection'}};
 
-        const expectedResponseMessage = {
-          id,
-          args: stubIntersectionEntry(videoIframe, time, intersectionRatio),
-        };
+        stubMeasureIntersection(videoIframe, time, intersectionRatio);
+        const expectedResponseMessage = {id, args: {time, intersectionRatio}};
 
-        videoIframe.implementation_.onMessage_(message);
+        await videoIframe.implementation_.onMessage_(message);
 
         expect(postMessage.withArgs(env.sandbox.match(expectedResponseMessage)))
           .to.have.been.calledOnce;
@@ -311,11 +354,11 @@ describes.realWin(
 
         const postMessage = stubPostMessage(videoIframe);
 
-        stubIntersectionEntry(videoIframe, time, intersectionRatio);
+        stubMeasureIntersection(videoIframe, time, intersectionRatio);
 
         acceptMockedMessages(videoIframe);
 
-        const message = getIntersectionMessage(id);
+        const message = {data: {id, method: 'getIntersection'}};
 
         const expectedResponseMessage = {
           id,
@@ -325,7 +368,7 @@ describes.realWin(
           },
         };
 
-        videoIframe.implementation_.onMessage_(message);
+        await videoIframe.implementation_.onMessage_(message);
 
         expect(postMessage.withArgs(env.sandbox.match(expectedResponseMessage)))
           .to.have.been.calledOnce;
@@ -437,6 +480,8 @@ describes.realWin(
           const postMessage = stubPostMessage(videoIframe);
 
           videoIframe.implementation_[method]();
+
+          await macroTask();
 
           expect(
             postMessage.withArgs(
