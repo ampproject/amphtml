@@ -17,12 +17,12 @@
 
 module.exports = {
   'open attachment UI element': async (page, name) => {
-    await page.waitFor(1600);
+    await page.waitForTimeout(1600);
   },
 
   'open attachment': async (page, name) => {
     await page.tap('.i-amphtml-story-page-open-attachment-label');
-    await page.waitFor(410);
+    await page.waitForTimeout(410);
   },
   /**
    * TODO(@ampproject/wg-stories): fix flaky test:
@@ -31,7 +31,7 @@ module.exports = {
    * 'open attachment UI element with link': async (page, name) => {
    *   const screen = page.touchscreen;
    *   await screen.tap(200, 240);
-   *   await page.waitFor('amp-story-page#page-2[active]');
+   *   await page.waitForSelector('amp-story-page#page-2[active]');
    * },
    */
 };

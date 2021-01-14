@@ -18,6 +18,6 @@
 module.exports = {
   'dismiss user notification': async (page, name) => {
     await page.tap('amp-user-notification>button');
-    await page.waitFor(500);
+    await page.waitForTimeout(500);
   },
- };
+};
