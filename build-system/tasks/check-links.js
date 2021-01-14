@@ -126,6 +126,7 @@ function checkLinksInFile(file) {
       {pattern: /https:\/\/codepen.*/},
       // Templated links are merely used to generate other markdown files.
       {pattern: /\$\{[a-z]*\}/},
+      {pattern: /https:.*?__component_name\w*__/},
     ],
   };
 
