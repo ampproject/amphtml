@@ -145,11 +145,10 @@ describes.realWin('amp-story-grid-layer', {amp: true}, (env) => {
     expect(gridLayerEl).to.have.class('i-amphtml-story-grid-template-aspect');
   });
 
-  it('should throw error if preset passed is incorrect', async () => {
-    expectAsyncConsoleError(
-      'Preset not found for amp-story-grid-layer: wrong-preset!'
-    );
-    gridLayerEl.setAttribute('preset', 'wrong-preset!');
-    allowConsoleError(async () => buildGridLayer());
+  it('should not add aspect-ratio attribute if preset passed is incorrect', async () => {
+    gridLayerEl.setAttribute('preset', 'wrong-preset');
+    await buildGridLayer();
+
+    expect(gridLayerEl.hasAttribute('aspect-ratio')).to.be.false;
   });
 });

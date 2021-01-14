@@ -157,10 +157,9 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
     }
     const preset = this.element.getAttribute(PRESET_ATTRIBUTE_NAME);
     const presetAttributes = GRID_LAYER_PRESETS_ATTRIBUTES[preset];
-    devAssert(
-      presetAttributes,
-      `Preset not found for amp-story-grid-layer: ${preset}`
-    );
+    if (!presetAttributes) {
+      return;
+    }
     Object.entries(presetAttributes).forEach((keyValue) =>
       this.element.setAttribute(keyValue[0], keyValue[1])
     );
