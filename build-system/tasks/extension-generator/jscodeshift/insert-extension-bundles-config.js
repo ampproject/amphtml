@@ -46,8 +46,6 @@ export default function transform(file, api, options) {
     )
     .filter(
       ({parentPath}) =>
-        // in case we switch to ESM:
-        // `export const extensionBundles = []`
         parentPath.value.type == j.VariableDeclarator &&
         parentPath.value.id.name === arrayAssignmentIdName
     )
