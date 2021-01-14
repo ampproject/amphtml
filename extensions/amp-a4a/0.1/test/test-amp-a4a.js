@@ -294,7 +294,12 @@ describe('amp-a4a', () => {
     element.getLayoutBox = () => layoutBox;
     element.getLayoutSize = () => layoutSizeFromRect(layoutBox);
     element.getIntersectionChangeEntry = () => {
-      return null;
+      return {
+        time: null,
+        boundingClientRect: {},
+        rootBounds: {},
+        intersectionRect: {},
+      };
     };
     const signals = new Signals();
     element.signals = () => signals;
