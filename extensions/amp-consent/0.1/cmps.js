@@ -91,6 +91,12 @@ CMP_CONFIG['opencmp'] = {
   'promptUISrc': 'https://cdn.opencmp.net/tcf-v2/amp/cmp.html',
 };
 
+CMP_CONFIG['pubtech'] = {
+  'consentInstanceId': 'pubtech',
+  'checkConsentHref': 'https://amp.pubtech.it/cmp-amp-check-consent',
+  'promptUISrc': 'https://cdn.pubtech.ai/amp/index.html',
+};
+
 CMP_CONFIG['quantcast'] = {
   'consentInstanceId': 'quantcast',
   'checkConsentHref':
