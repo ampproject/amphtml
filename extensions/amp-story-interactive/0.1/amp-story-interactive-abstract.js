@@ -148,7 +148,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     this.backendDataPromise_ = null;
 
     /** @protected {?Promise<!../../../src/service/cid-impl.CidDef>} */
-    this.clientIdService_ = Services.cidForDoc(this.element);
+    this.clientIdService_ = null;
 
     /** @protected {?Promise<JsonObject>} */
     this.clientIdPromise_ = null;
@@ -183,8 +183,8 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     /** @protected {?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
 
-    /** @protected {../../../src/service/url-impl.Url} */
-    this.urlService_ = Services.urlForDoc(this.element);
+    /** @protected {?../../../src/service/url-impl.Url} */
+    this.urlService_ = null;
 
     /** @protected {?../../amp-story/1.0/variable-service.AmpStoryVariableService} */
     this.variableService_ = null;
@@ -250,6 +250,8 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     devAssert(this.element.children.length == 0, 'Too many children');
 
     // Initialize all the services before proceeding, and update store with state
+    this.clientIdService_ = Services.cidForDoc(this.element);
+    this.urlService_ = Services.urlForDoc(this.element);
     return Promise.all([
       Services.storyVariableServiceForOrNull(this.win).then((service) => {
         this.variableService_ = service;
