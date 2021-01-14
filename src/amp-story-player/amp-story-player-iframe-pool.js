@@ -106,74 +106,6 @@ export class IframePool {
    * 0 -> [x] [1]
    * 1 -> [1] [x]
    *
-   * Flow chart:
-   *
-   *                       +------------------------+
-   *     +---------------> | Visit iframe in cursor +<-----------------+
-   *     |                 +------------------------+                  |
-   *     |                            |                                |
-   *     |                            v                                |
-   *     |                 +-------------------------+        +--------------------+
-   *     |                 |                         |    N   |                    |
-   *     |                 | cursor inside of bounds?|        |move cursor to other|
-   *     |                 |                         +------->+      extreme       |
-   *     |                 +-------------------------+        +--------------------+
-   *     |                            |
-   *     |                            |  Y
-   *     |                            |
-   *     |                            v
-   *     |              +--------------------------------+
-   *     |              |                                |
-   *     |              | should this iframe load a src? |
-   *     |              |   (iframesToLoad > 0 ?)        +--------+
-   *     |              |                                |        |
-   *     |              +--------------------------------+        |
-   *     |                            |                           |
-   *     |                            |  Y                        |
-   *     |                            |                           |
-   *     |                            v                           |
-   *     |               +-------------------------------         |
-   *     |               |                             |          |
-   *     |               | mark iframe to load its src |        N |
-   *     |               |                             |          |
-   *     |               +-----------------------------+          |
-   *     |                            |                           |
-   *     |                            |                           |
-   *     |                            v                           |
-   *     |                +---------------------------+           |
-   *     |                |                           |           |
-   *     |                |   mark its positioning    |           |
-   *     |                |(previous / current / next)| <---------+
-   *     |                |                           |
-   *     |                +---------------------------+
-   *     |                            |
-   *     |                            v
-   *     |            +--------------------------------------+     Y      +-------------------------+
-   *     |            |   finished finding adjacent iframes? +------------> exit and return adjacent|
-   *     |            +--------------------------------------+            |       array             |
-   *     |                            |                                   +-------------------------+
-   *     |                            |  N
-   *     |                            v
-   *     |                +---------------------------+
-   *     |                |                           |
-   *     |                | is cursor to the left of  |
-   *     |        Y       | storyIdx or IS storyIdx?  |       N
-   *     |          +-----+                           +------+
-   *     |          |     +---------------------------+      |
-   *     |          |                                        |
-   *     |          v                                        v
-   *     |  +---------------------------+    +----------------------+
-   *     |  |                           |    |                      |
-   *     |  |  move cursor to the right |    |  move cursor to the  |
-   *     |  |      of storyIdx          |    |  left of storyIdx    |
-   *     |  |                           |    |                      |
-   *     |  +---------------------------+    +----------------------+
-   *     |          |                                        |
-   *     |          |                                        |
-   *     |          +----------------------------------------+
-   *     |                               |
-   *     +-------------------------------+
-   *
    * @param {number} storyIdx
    * @param {number} maxIdx
    * @return {!Array<!Object>}
@@ -181,53 +113,41 @@ export class IframePool {
   findAdjacent(storyIdx, maxIdx) {
     const iframesToPosition = Math.min(MAX_IFRAMES, maxIdx + 1);
     let iframesToLoad = MAX_IFRAMES_TO_LOAD;
+    const adjacent = [];
 
     if (maxIdx < storyIdx) {
       throw new Error('maxIdx must be greater than or equal than storyIdx.');
     }
 
-    let cursor = storyIdx;
-    let distance = 0;
-    const adjacent = [];
+    adjacent.push({
+      storyIdx,
+      shouldLoad: iframesToLoad > 0,
+      position: IframePosition.CURRENT,
+    });
+    --iframesToLoad;
+
+    let cursorRight = storyIdx + 1;
+    let cursorLeft = storyIdx - 1;
+
     while (adjacent.length < iframesToPosition) {
-      if (cursor > maxIdx) {
-        // No more stories to the right, move to the left.
-        cursor = storyIdx - distance;
-        continue;
+      if (cursorRight <= maxIdx) {
+        adjacent.push({
+          storyIdx: cursorRight,
+          shouldLoad: iframesToLoad > 0,
+          position: IframePosition.NEXT,
+        });
+        --iframesToLoad;
+        ++cursorRight;
       }
 
-      if (cursor < 0) {
-        // No more stories to the left, move to the right.
-        cursor = storyIdx + distance;
-        continue;
-      }
-
-      adjacent.push({
-        storyIdx: cursor,
-        shouldLoad: iframesToLoad > 0,
-        position:
-          cursor === storyIdx
-            ? IframePosition.CURRENT
-            : cursor > storyIdx
-            ? IframePosition.NEXT
-            : IframePosition.PREVIOUS,
-      });
-      --iframesToLoad;
-
-      if (cursor > storyIdx) {
-        // Cursor is currently at the right of storyIdx.
-        // Move to the left of storyIdx and increase distance.
-        cursor = storyIdx - distance;
-        distance++;
-        continue;
-      }
-
-      if (cursor <= storyIdx) {
-        // Cursor is currently at the left of (or is) storyIdx.
-        // Move to the right of storyIdx and increase distance.
-        cursor = cursor === storyIdx ? cursor + 1 : storyIdx + distance;
-        distance++;
-        continue;
+      if (cursorLeft >= 0) {
+        adjacent.push({
+          storyIdx: cursorLeft,
+          shouldLoad: iframesToLoad > 0,
+          position: IframePosition.PREVIOUS,
+        });
+        --iframesToLoad;
+        --cursorLeft;
       }
     }
 
