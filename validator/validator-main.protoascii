@@ -5819,7 +5819,7 @@ attr_lists: {
   attrs: { name: "[aria-valuenow]" }
   attrs: { name: "[aria-valuetext]" }
   attrs: { name: "[class]" }
-  attrs: { name: "[class+]" }
+  attrs: { name: "data-amp-dynamic-classes" }
   attrs: { name: "[hidden]" }
   attrs: { name: "[text]" }
   # <amp-sidebar>

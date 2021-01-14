@@ -738,11 +738,11 @@ describe
           });
         });
 
-        it('should support binding to CSS classes with strings, including class+', () => {
+        it('should support binding to CSS classes with strings, including data-amp-dynamic-classes', () => {
           const element = createElement(
             env,
             container,
-            "class='abc' [class+]=\"['def']\""
+            "class='abc' data-amp-dynamic-classes=\"['def']\""
           );
           expect(toArray(element.classList)).to.deep.equal(['abc']);
           return onBindReadyAndSetState(env, bind, {}).then(() => {
@@ -762,11 +762,11 @@ describe
           });
         });
 
-        it('should support binding to CSS classes with arrays, including class+', () => {
+        it('should support binding to CSS classes with arrays, including data-amp-dynamic-classes', () => {
           const element = createElement(
             env,
             container,
-            "class='a' [class+]=\"['b','c']\""
+            "class='a' data-amp-dynamic-classes=\"['b','c']\""
           );
           expect(toArray(element.classList)).to.deep.equal(['a']);
           return onBindReadyAndSetState(env, bind, {}).then(() => {
