@@ -35,6 +35,48 @@ function pascalCase(str) {
   );
 }
 
+/**
+ * Runs a jscodeshift transform under this directory.
+ * @param {string} transform
+ * @param {Array<string>=} args
+ * @return {string}
+ */
+const jscodeshift = (transform, args = []) => {
+  // throw [
+  //   'npx jscodeshift',
+  //   `--transform ${__dirname}/jscodeshift/${transform}`,
+  //   ...args,
+  // ].join(' ');
+  return getStdoutThrowOnError(
+    [
+      'npx jscodeshift',
+      `--transform ${__dirname}/jscodeshift/${transform}`,
+      ...args,
+    ].join(' ')
+  );
+};
+
+/**
+ * @param {{name: string, version: string, latestVersion: (string|undefined)}} bundle
+ * @return {string}
+ */
+function insertExtensionBundlesConfig(bundle) {
+  const bundlesConfigJs = 'build-system/compile/bundles.config.js';
+
+  // stringify twice to escape into string:
+  // {"name": "foo"} -> "{\"name\": \"foo\"}"
+  const insertExtensionBundleArg = JSON.stringify(JSON.stringify(bundle));
+
+  jscodeshift('insert-extension-bundles-config.js', [
+    `--insertExtensionBundle ${insertExtensionBundleArg}`,
+    bundlesConfigJs,
+  ]);
+
+  getStdoutThrowOnError(
+    `./node_modules/prettier/bin-prettier.js --write ${bundlesConfigJs}`
+  );
+}
+
 function getValidatorFile(name) {
   return `#
 # Copyright ${year} The AMP HTML Authors. All Rights Reserved.
@@ -250,7 +292,10 @@ async function makeAmpExtension() {
 
   fs.writeFileSync(`examples/${name}.amp.html`, examplesFile);
 
-  return insertExtensionBundlesConfig({name, version});
+  return insertExtensionBundlesConfig({
+    name,
+    version: typeof version === 'string' ? version : version.toFixed(1),
+  });
 }
 
 async function makeExtension() {
@@ -267,42 +312,6 @@ function getStdoutThrowOnError(cmd) {
     throw new Error(`${cmd}\n\n${stderr}`);
   }
   return stdout && stdout.trim();
-}
-
-/**
- * Runs a jscodeshift transform under this directory.
- * @param {string} transform
- * @param {Array<string>=} args
- * @return {string}
- */
-const jscodeshift = (transform, args = []) =>
-  getStdoutThrowOnError(
-    [
-      'npx jscodeshift',
-      `--transform ${__dirname}/jscodeshift/${transform}`,
-      ...args,
-    ].join(' ')
-  );
-
-/**
- * @param {{name: string, version: string, latestVersion: (string|undefined)}} bundle
- * @return {string}
- */
-function insertExtensionBundlesConfig(bundle) {
-  const bundlesConfigJs = 'build-system/compile/bundles.config.js';
-
-  // stringify twice to escape into string:
-  // {"name": "foo"} -> "{\"name\": \"foo\"}"
-  const insertExtensionBundleArg = JSON.stringify(JSON.stringify(bundle));
-
-  jscodeshift('insert-extension-bundles-config.js', [
-    `--insertExtensionBundle ${insertExtensionBundleArg}`,
-    bundlesConfigJs,
-  ]);
-
-  getStdoutThrowOnError(
-    `./node_modules/prettier/bin-prettier.js --write ${bundlesConfigJs}`
-  );
 }
 
 module.exports = {
