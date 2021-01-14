@@ -29,7 +29,6 @@
 import {AmpStoryBaseLayer} from './amp-story-base-layer';
 import {StateProperty, getStoreService} from './amp-story-store-service';
 import {assertDoesNotContainDisplay, px, setStyles} from '../../../src/style';
-import {devAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {parseQueryString} from '../../../src/url';
 import {scopedQuerySelectorAll} from '../../../src/dom';
@@ -85,10 +84,18 @@ export const GRID_LAYER_TEMPLATE_CLASS_NAMES = {
 const PRESET_ATTRIBUTE_NAME = 'preset';
 
 /**
- * The attributes that will be applied for each preset.
- * @private @const {!Object<string, !Object<string, string>>}
+ * @typedef {{
+ *  aspect-ratio: string,
+ * scaling-factor: ?string,
+ * }}
  */
-const GRID_LAYER_PRESETS_ATTRIBUTES = {
+export let PresetAttributes;
+
+/**
+ * The attributes that will be applied for each preset.
+ * @private @const {!Object<string, !PresetAttributes>}
+ */
+const GRID_LAYER_PRESET_ATTRIBUTES = {
   '2021-background': {
     'aspect-ratio': '69:116',
     'scaling-factor': '1.142',
@@ -156,7 +163,7 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
       return;
     }
     const preset = this.element.getAttribute(PRESET_ATTRIBUTE_NAME);
-    const presetAttributes = GRID_LAYER_PRESETS_ATTRIBUTES[preset];
+    const presetAttributes = GRID_LAYER_PRESET_ATTRIBUTES[preset];
     if (!presetAttributes) {
       return;
     }
