@@ -9,6 +9,12 @@
       "options": {"parser": "json5"}
     },
     {
+      "files": "build-system/tasks/init-bento-component/amp-__component_name_hyphenated__/**",
+      "options": {
+        "requirePragma": true
+      }
+    },
+    {
       "files": "*.md",
       "options": {
         "parser": "markdown",
