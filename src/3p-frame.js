@@ -68,6 +68,7 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
  * @param {{
  *   disallowCustom: (boolean|undefined),
  *   allowFullscreen: (boolean|undefined),
+ *   initialIntersection: (IntersectionObserverEntry|undefined),
  * }=} options Options for the created iframe.
  * @return {!HTMLIFrameElement} The iframe.
  */
@@ -78,7 +79,11 @@ export function getIframe(
   opt_context,
   options = {}
 ) {
-  const {disallowCustom = false, allowFullscreen = false} = options;
+  const {
+    disallowCustom = false,
+    allowFullscreen = false,
+    initialIntersection,
+  } = options;
   // Check that the parentElement is already in DOM. This code uses a new and
   // fast `isConnected` API and thus only used when it's available.
   devAssert(
@@ -92,6 +97,10 @@ export function getIframe(
     opt_type,
     opt_context
   );
+  if (initialIntersection) {
+    attributes['_context']['initialIntersection'] = initialIntersection;
+  }
+
   const iframe = /** @type {!HTMLIFrameElement} */ (parentWindow.document.createElement(
     'iframe'
   ));
