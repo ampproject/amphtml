@@ -215,7 +215,7 @@ exports.jsBundles = {
 /**
  * Used to generate extension build targets
  */
-exports.extensionBundles = [
+const extensionBundles = [
   {
     name: 'amp-3d-gltf',
     version: '0.1',
@@ -243,16 +243,16 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {
+    name: 'amp-access-poool',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.MISC,
+  },
+  {
     name: 'amp-access-scroll',
     version: '0.1',
     latestVersion: '0.1',
     options: {hasCss: true},
-    type: TYPES.MISC,
-  },
-  {
-    name: 'amp-access-poool',
-    version: '0.1',
-    latestVersion: '0.1',
     type: TYPES.MISC,
   },
   {
@@ -282,6 +282,12 @@ exports.extensionBundles = [
     type: TYPES.AD,
   },
   {
+    name: 'amp-ad-exit',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.AD,
+  },
+  {
     name: 'amp-ad-network-adsense-impl',
     version: '0.1',
     latestVersion: '0.1',
@@ -300,19 +306,13 @@ exports.extensionBundles = [
     type: TYPES.AD,
   },
   {
-    name: 'amp-ad-network-nws-impl',
-    version: '0.1',
-    latestVersion: '0.1',
-    type: TYPES.AD,
-  },
-  {
     name: 'amp-ad-network-fake-impl',
     version: '0.1',
     latestVersion: '0.1',
     type: TYPES.AD,
   },
   {
-    name: 'amp-ad-exit',
+    name: 'amp-ad-network-nws-impl',
     version: '0.1',
     latestVersion: '0.1',
     type: TYPES.AD,
@@ -375,16 +375,16 @@ exports.extensionBundles = [
     type: TYPES.AD,
   },
   {
+    name: 'amp-auto-lightbox',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.MISC,
+  },
+  {
     name: 'amp-autocomplete',
     version: '0.1',
     latestVersion: '0.1',
     options: {hasCss: true},
-    type: TYPES.MISC,
-  },
-  {
-    name: 'amp-auto-lightbox',
-    version: '0.1',
-    latestVersion: '0.1',
     type: TYPES.MISC,
   },
   {
@@ -425,13 +425,6 @@ exports.extensionBundles = [
     type: TYPES.MEDIA,
   },
   {
-    name: 'amp-delight-player',
-    version: '0.1',
-    latestVersion: '0.1',
-    options: {hasCss: true},
-    type: TYPES.MEDIA,
-  },
-  {
     name: 'amp-brightcove',
     version: '0.1',
     latestVersion: '0.1',
@@ -443,12 +436,6 @@ exports.extensionBundles = [
     latestVersion: '0.1',
     options: {hasCss: true},
     type: TYPES.MISC,
-  },
-  {
-    name: 'amp-kaltura-player',
-    version: '0.1',
-    latestVersion: '0.1',
-    type: TYPES.MEDIA,
   },
   {
     name: 'amp-call-tracking',
@@ -464,17 +451,17 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {
+    name: 'amp-connatix-player',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.MEDIA,
+  },
+  {
     name: 'amp-consent',
     version: '0.1',
     latestVersion: '0.1',
     options: {hasCss: true},
     type: TYPES.MISC,
-  },
-  {
-    name: 'amp-connatix-player',
-    version: '0.1',
-    latestVersion: '0.1',
-    type: TYPES.MEDIA,
   },
   {
     name: 'amp-crypto-polyfill',
@@ -501,10 +488,19 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {
-    name: 'amp-google-document-embed',
+    name: 'amp-date-picker',
     version: '0.1',
     latestVersion: '0.1',
+    options: {hasCss: true},
     type: TYPES.MISC,
+    postPrepend: ['third_party/react-dates/bundle.js'],
+  },
+  {
+    name: 'amp-delight-player',
+    version: '0.1',
+    latestVersion: '0.1',
+    options: {hasCss: true},
+    type: TYPES.MEDIA,
   },
   {
     name: 'amp-dynamic-css-classes',
@@ -606,6 +602,12 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {
+    name: 'amp-google-document-embed',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.MISC,
+  },
+  {
     name: 'amp-gwd-animation',
     version: '0.1',
     latestVersion: '0.1',
@@ -639,6 +641,13 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-image-slider',
+    version: '0.1',
+    latestVersion: '0.1',
+    options: {hasCss: true},
+    type: TYPES.MISC,
+  },
+  {
+    name: 'amp-image-viewer',
     version: '0.1',
     latestVersion: '0.1',
     options: {hasCss: true},
@@ -719,6 +728,12 @@ exports.extensionBundles = [
     type: TYPES.MEDIA,
   },
   {
+    name: 'amp-kaltura-player',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.MEDIA,
+  },
+  {
     name: 'amp-lightbox',
     version: '0.1',
     latestVersion: '0.1',
@@ -737,6 +752,12 @@ exports.extensionBundles = [
     version: '0.1',
     latestVersion: '0.1',
     options: {hasCss: true},
+    type: TYPES.MISC,
+  },
+  {
+    name: 'amp-link-rewriter',
+    version: '0.1',
+    latestVersion: '0.1',
     type: TYPES.MISC,
   },
   {
@@ -779,6 +800,24 @@ exports.extensionBundles = [
     version: '0.1',
     latestVersion: '0.1',
     type: TYPES.MEDIA,
+  },
+  {
+    name: 'amp-minute-media-player',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.MEDIA,
+  },
+  {
+    name: 'amp-mowplayer',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.MEDIA,
+  },
+  {
+    name: 'amp-mraid',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.AD,
   },
   {
     name: 'amp-mustache',
@@ -826,6 +865,19 @@ exports.extensionBundles = [
     type: TYPES.MEDIA,
   },
   {
+    name: 'amp-orientation-observer',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.MISC,
+  },
+  {
+    name: 'amp-pan-zoom',
+    version: '0.1',
+    latestVersion: '0.1',
+    options: {hasCss: true},
+    type: TYPES.MISC,
+  },
+  {
     name: 'amp-pinterest',
     version: '0.1',
     latestVersion: '0.1',
@@ -840,10 +892,29 @@ exports.extensionBundles = [
     type: TYPES.MEDIA,
   },
   {
+    name: 'amp-position-observer',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.MISC,
+  },
+  {
+    name: 'amp-powr-player',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.MEDIA,
+  },
+  {
     name: 'amp-reach-player',
     version: '0.1',
     latestVersion: '0.1',
     type: TYPES.MEDIA,
+  },
+  {
+    name: 'amp-recaptcha-input',
+    version: '0.1',
+    latestVersion: '0.1',
+    options: {hasCss: true},
+    type: TYPES.MISC,
   },
   {
     name: 'amp-redbull-player',
@@ -877,6 +948,13 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {
+    name: 'amp-selector',
+    version: ['0.1', '1.0'],
+    latestVersion: '0.1',
+    options: {hasCss: true},
+    type: TYPES.MISC,
+  },
+  {
     name: 'amp-sidebar',
     version: ['0.1', '0.2', '1.0'],
     latestVersion: '0.1',
@@ -889,10 +967,33 @@ exports.extensionBundles = [
     latestVersion: '0.1',
     type: TYPES.MISC,
   },
+  /**
+   * @deprecated `amp-slides` is deprecated and will be deleted before 1.0.
+   * Please see {@link AmpCarousel} with `type=slides` attribute instead.
+   */ {
+    name: 'amp-slides',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.MISC,
+  },
   {
     name: 'amp-smartlinks',
     version: '0.1',
     latestVersion: '0.1',
+    type: TYPES.MISC,
+  },
+  {
+    name: 'amp-social-share',
+    version: '0.1',
+    latestVersion: '0.1',
+    options: {hasCss: true},
+    type: TYPES.MISC,
+  },
+  {
+    name: 'amp-social-share',
+    version: '1.0',
+    latestVersion: '0.1',
+    options: {hasCss: true},
     type: TYPES.MISC,
   },
   {
@@ -1023,53 +1124,6 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {
-    name: 'amp-selector',
-    version: ['0.1', '1.0'],
-    latestVersion: '0.1',
-    options: {hasCss: true},
-    type: TYPES.MISC,
-  },
-  {
-    name: 'amp-web-push',
-    version: '0.1',
-    latestVersion: '0.1',
-    options: {hasCss: true},
-    type: TYPES.MISC,
-  },
-  {
-    name: 'amp-wistia-player',
-    version: '0.1',
-    latestVersion: '0.1',
-    type: TYPES.MEDIA,
-  },
-  {
-    name: 'amp-position-observer',
-    version: '0.1',
-    latestVersion: '0.1',
-    type: TYPES.MISC,
-  },
-  {
-    name: 'amp-orientation-observer',
-    version: '0.1',
-    latestVersion: '0.1',
-    type: TYPES.MISC,
-  },
-  {
-    name: 'amp-date-picker',
-    version: '0.1',
-    latestVersion: '0.1',
-    options: {hasCss: true},
-    type: TYPES.MISC,
-    postPrepend: ['third_party/react-dates/bundle.js'],
-  },
-  {
-    name: 'amp-image-viewer',
-    version: '0.1',
-    latestVersion: '0.1',
-    options: {hasCss: true},
-    type: TYPES.MISC,
-  },
-  {
     name: 'amp-subscriptions',
     version: '0.1',
     latestVersion: '0.1',
@@ -1079,44 +1133,6 @@ exports.extensionBundles = [
   {
     name: 'amp-subscriptions-google',
     version: '0.1',
-    latestVersion: '0.1',
-    options: {hasCss: true},
-    type: TYPES.MISC,
-  },
-  {
-    name: 'amp-pan-zoom',
-    version: '0.1',
-    latestVersion: '0.1',
-    options: {hasCss: true},
-    type: TYPES.MISC,
-  },
-  {
-    name: 'amp-recaptcha-input',
-    version: '0.1',
-    latestVersion: '0.1',
-    options: {hasCss: true},
-    type: TYPES.MISC,
-  },
-  /**
-   * @deprecated `amp-slides` is deprecated and will be deleted before 1.0.
-   * Please see {@link AmpCarousel} with `type=slides` attribute instead.
-   */
-  {
-    name: 'amp-slides',
-    version: '0.1',
-    latestVersion: '0.1',
-    type: TYPES.MISC,
-  },
-  {
-    name: 'amp-social-share',
-    version: '0.1',
-    latestVersion: '0.1',
-    options: {hasCss: true},
-    type: TYPES.MISC,
-  },
-  {
-    name: 'amp-social-share',
-    version: '1.0',
     latestVersion: '0.1',
     options: {hasCss: true},
     type: TYPES.MISC,
@@ -1151,43 +1167,6 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {
-    name: 'amp-vimeo',
-    version: '0.1',
-    latestVersion: '0.1',
-    type: TYPES.MEDIA,
-  },
-  {
-    name: 'amp-vine',
-    version: '0.1',
-    latestVersion: '0.1',
-    type: TYPES.MISC,
-  },
-  {
-    name: 'amp-viz-vega',
-    version: '0.1',
-    latestVersion: '0.1',
-    options: {hasCss: true},
-    type: TYPES.MISC,
-    postPrepend: [
-      'third_party/d3/d3.js',
-      'third_party/d3-geo-projection/d3-geo-projection.js',
-      'third_party/vega/vega.js',
-    ],
-  },
-  {
-    name: 'amp-viewer-integration',
-    version: '0.1',
-    latestVersion: '0.1',
-    options: {
-      // The viewer integration code needs to run asap, so that viewers
-      // can influence document state asap. Otherwise the document may take
-      // a long time to learn that it should start process other extensions
-      // faster.
-      loadPriority: 'high',
-    },
-    type: TYPES.MISC,
-  },
-  {
     name: 'amp-video',
     version: '0.1',
     latestVersion: '0.1',
@@ -1213,16 +1192,66 @@ exports.extensionBundles = [
     type: TYPES.MEDIA,
   },
   {
+    name: 'amp-viewer-integration',
+    version: '0.1',
+    latestVersion: '0.1',
+    options: {
+      // The viewer integration code needs to run asap, so that viewers
+      // can influence document state asap. Otherwise the document may take
+      // a long time to learn that it should start process other extensions
+      // faster.
+      loadPriority: 'high',
+    },
+    type: TYPES.MISC,
+  },
+  {
+    name: 'amp-vimeo',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.MEDIA,
+  },
+  {
+    name: 'amp-vine',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.MISC,
+  },
+  {
     name: 'amp-viqeo-player',
     version: '0.1',
     latestVersion: '0.1',
     type: TYPES.MEDIA,
   },
   {
+    name: 'amp-viz-vega',
+    version: '0.1',
+    latestVersion: '0.1',
+    options: {hasCss: true},
+    type: TYPES.MISC,
+    postPrepend: [
+      'third_party/d3/d3.js',
+      'third_party/d3-geo-projection/d3-geo-projection.js',
+      'third_party/vega/vega.js',
+    ],
+  },
+  {
     name: 'amp-vk',
     version: '0.1',
     latestVersion: '0.1',
     type: TYPES.MISC,
+  },
+  {
+    name: 'amp-web-push',
+    version: '0.1',
+    latestVersion: '0.1',
+    options: {hasCss: true},
+    type: TYPES.MISC,
+  },
+  {
+    name: 'amp-wistia-player',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.MEDIA,
   },
   {
     name: 'amp-yotpo',
@@ -1242,37 +1271,11 @@ exports.extensionBundles = [
     latestVersion: '0.1',
     type: TYPES.MEDIA,
   },
-  {
-    name: 'amp-mowplayer',
-    version: '0.1',
-    latestVersion: '0.1',
-    type: TYPES.MEDIA,
-  },
-  {
-    name: 'amp-powr-player',
-    version: '0.1',
-    latestVersion: '0.1',
-    type: TYPES.MEDIA,
-  },
-  {
-    name: 'amp-mraid',
-    version: '0.1',
-    latestVersion: '0.1',
-    type: TYPES.AD,
-  },
-  {
-    name: 'amp-link-rewriter',
-    version: '0.1',
-    latestVersion: '0.1',
-    type: TYPES.MISC,
-  },
-  {
-    name: 'amp-minute-media-player',
-    version: '0.1',
-    latestVersion: '0.1',
-    type: TYPES.MEDIA,
-  },
-].sort((a, b) => a.name.localeCompare(b.name));
+];
+
+exports.extensionBundles = extensionBundles.sort((a, b) =>
+  a.name.localeCompare(b.name)
+);
 
 /**
  * Used to alias a version of an extension to an older deprecated version.

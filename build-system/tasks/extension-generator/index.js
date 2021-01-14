@@ -19,6 +19,7 @@ const argv = require('minimist')(process.argv.slice(2));
 const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const log = require('fancy-log');
+const {getOutput} = require('../../common/process');
 const {makeBentoExtension} = require('./bento');
 
 const year = new Date().getFullYear();
@@ -211,10 +212,10 @@ async function makeAmpExtension() {
   if (!argv.name) {
     log(colors.red('Error! Please pass in the "--name" flag with a value'));
   }
-  const {name} = argv;
+  const {name, version = '0.1'} = argv;
   const examplesFile = getExamplesFile(name);
 
-  fs.mkdirpSync(`extensions/${name}/0.1/test`);
+  fs.mkdirpSync(`extensions/${name}/${version}/test`);
   fs.writeFileSync(
     `extensions/${name}/${name}.md`,
     await getMarkdownDocFile(name)
@@ -224,15 +225,15 @@ async function makeAmpExtension() {
     getValidatorFile(name)
   );
   fs.writeFileSync(
-    `extensions/${name}/0.1/${name}.js`,
+    `extensions/${name}/${version}/${name}.js`,
     getJsExtensionFile(name)
   );
   fs.writeFileSync(
-    `extensions/${name}/0.1/test/test-${name}.js`,
+    `extensions/${name}/${version}/test/test-${name}.js`,
     getJsTestExtensionFile(name)
   );
   fs.writeFileSync(
-    `extensions/${name}/0.1/test/validator-${name}.html`,
+    `extensions/${name}/${version}/test/validator-${name}.html`,
     examplesFile
   );
 
@@ -243,19 +244,70 @@ async function makeAmpExtension() {
     .join('\n');
 
   fs.writeFileSync(
-    `extensions/${name}/0.1/test/validator-${name}.out`,
+    `extensions/${name}/${version}/test/validator-${name}.out`,
     ['PASS', examplesFileValidatorOut].join('\n')
   );
 
   fs.writeFileSync(`examples/${name}.amp.html`, examplesFile);
+
+  return insertExtensionBundlesConfig({name, version});
 }
 
 async function makeExtension() {
   return argv.bento ? makeBentoExtension() : makeAmpExtension();
 }
 
+/**
+ * @param {string} cmd
+ * @return {?string}
+ */
+function getStdoutThrowOnError(cmd) {
+  const {stdout, stderr} = getOutput(cmd);
+  if (!stdout && stderr) {
+    throw new Error(`${cmd}\n\n${stderr}`);
+  }
+  return stdout && stdout.trim();
+}
+
+/**
+ * Runs a jscodeshift transform under this directory.
+ * @param {string} transform
+ * @param {Array<string>=} args
+ * @return {string}
+ */
+const jscodeshift = (transform, args = []) =>
+  getStdoutThrowOnError(
+    [
+      'npx jscodeshift',
+      `--transform ${__dirname}/jscodeshift/${transform}`,
+      ...args,
+    ].join(' ')
+  );
+
+/**
+ * @param {{name: string, version: string, latestVersion: (string|undefined)}} bundle
+ * @return {string}
+ */
+function insertExtensionBundlesConfig(bundle) {
+  const bundlesConfigJs = 'build-system/compile/bundles.config.js';
+
+  // stringify twice to escape into string:
+  // {"name": "foo"} -> "{\"name\": \"foo\"}"
+  const insertExtensionBundleArg = JSON.stringify(JSON.stringify(bundle));
+
+  jscodeshift('insert-extension-bundles-config.js', [
+    `--insertExtensionBundle ${insertExtensionBundleArg}`,
+    bundlesConfigJs,
+  ]);
+
+  getStdoutThrowOnError(
+    `./node_modules/prettier/bin-prettier.js --write ${bundlesConfigJs}`
+  );
+}
+
 module.exports = {
   makeExtension,
+  insertExtensionBundlesConfig,
 };
 
 makeExtension.description = 'Create an extension skeleton';

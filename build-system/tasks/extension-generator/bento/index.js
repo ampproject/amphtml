@@ -26,6 +26,7 @@ const fs = require('fs').promises;
 const log = require('fancy-log');
 const path = require('path');
 const {cyan, green, red, yellow} = require('ansi-colors');
+const {insertExtensionBundlesConfig} = require('../');
 
 const EXTENSIONS_DIR = path.join(__dirname, '../../../../extensions');
 const TEMPLATE_DIR = path.join(__dirname, 'amp-__component_name_hyphenated__');
@@ -124,6 +125,9 @@ async function makeBentoExtension() {
 
     log(green('SUCCESS:'), 'Created file', cyan(destination));
   }
+
+  insertExtensionBundlesConfig({name: `amp-${componentName}`, version});
+  log(green('SUCCESS:'), 'Wrote bundles.config.js');
 
   log(`
 ========================================
