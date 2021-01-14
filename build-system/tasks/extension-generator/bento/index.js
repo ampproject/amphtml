@@ -27,7 +27,7 @@ const log = require('fancy-log');
 const path = require('path');
 const {cyan, green, red, yellow} = require('ansi-colors');
 
-const EXTENSIONS_DIR = path.join(__dirname, '../../../extensions');
+const EXTENSIONS_DIR = path.join(__dirname, '../../../../extensions');
 const TEMPLATE_DIR = path.join(__dirname, 'amp-__component_name_hyphenated__');
 
 /**
@@ -69,8 +69,8 @@ async function* walkDir(dir) {
   }
 }
 
-async function initBentoComponent() {
-  const componentName = argv.name.replace(/^amp-/, '');
+async function makeBentoExtension() {
+  const componentName = (argv.name || '').replace(/^amp-/, '');
   const version = argv.version || '1.0';
   if (!componentName) {
     log(red('ERROR:'), 'Must specify component name with', cyan('--name'));
@@ -145,11 +145,11 @@ You may also view the component during development in storybook:
 }
 
 module.exports = {
-  initBentoComponent,
+  makeBentoExtension,
 };
 
-initBentoComponent.description = 'Creates a new Bento component boilerplate';
-initBentoComponent.flags = {
+makeBentoExtension.description = 'Creates a new Bento component boilerplate';
+makeBentoExtension.flags = {
   name: '  Required. Sets the component name (ex. "foo-bar" or "amp-foo-bar")',
   version: '  Sets the verison number (default: 1.0)',
   overwrite: '  Overwrites existing files at the destination, if present',
