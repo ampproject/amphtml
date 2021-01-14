@@ -30,7 +30,6 @@ const {
   timedExecOrDie: timedExecOrDieBase,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
-const {extensionBundles} = require('../compile/bundles.config');
 const {isPullRequestBuild} = require('../common/ci');
 const {reportAllExpectedTests} = require('../tasks/report-test-status');
 const {runNpmChecks} = require('./npm-checks');
@@ -38,27 +37,12 @@ const {runNpmChecks} = require('./npm-checks');
 const FILENAME = 'checks.js';
 const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
 
-function checkBundlesConfigExtensionBundles() {
-  let previousName = '';
-  for (const {name} of extensionBundles) {
-    if (name.localeCompare(previousName) < 0) {
-      throw new Error(
-        'extensionBundles in bundles.config.js should be alphabetically sorted by name. ' +
-          `${name} is out of order.`
-      );
-    }
-    previousName = name;
-  }
-}
-
 async function main() {
   const startTime = startTimer(FILENAME, FILENAME);
   if (!runNpmChecks(FILENAME)) {
     stopTimedJob(FILENAME, startTime);
     return;
   }
-
-  checkBundlesConfigExtensionBundles();
 
   if (!isPullRequestBuild()) {
     timedExecOrDie('gulp update-packages');

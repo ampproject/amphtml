@@ -1156,13 +1156,20 @@ function verifyBundle_(condition, field, message, name, found) {
 }
 
 exports.verifyExtensionBundles = function () {
-  exports.extensionBundles.forEach((bundle) => {
+  extensionBundles.forEach((bundle, i) => {
     const bundleString = JSON.stringify(bundle, null, 2);
     verifyBundle_(
       'name' in bundle,
       'name',
       'is missing from',
       '',
+      bundleString
+    );
+    verifyBundle_(
+      i === 0 || bundle.name.localeCompare(extensionBundles[i - 1].name) >= 0,
+      'name',
+      'is out of order. extensionBundles should be alphabetically sorted by name.',
+      bundle.name,
       bundleString
     );
     verifyBundle_(
