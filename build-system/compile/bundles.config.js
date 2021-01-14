@@ -216,6 +216,7 @@ exports.jsBundles = {
  * [1]: build-system/tasks/extension-generator/jscodeshift/insert-extension-bundles-config.js
  */
 const extensionBundles = [
+  // Keep this list alphabetically sorted by name.
   {
     name: 'amp-3d-gltf',
     version: '0.1',
@@ -1118,9 +1119,7 @@ const extensionBundles = [
   },
 ];
 
-exports.extensionBundles = extensionBundles.sort((a, b) =>
-  a.name.localeCompare(b.name)
-);
+exports.extensionBundles = extensionBundles;
 
 /**
  * Used to alias a version of an extension to an older deprecated version.
