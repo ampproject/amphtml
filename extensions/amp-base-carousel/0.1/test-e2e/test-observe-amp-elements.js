@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getNextArrow, getPrevArrow, getSlideChild, sleep} from './helpers';
+import {sleep} from './helpers';
 
 const pageWidth = 600;
 const pageHeight = 800;
@@ -35,7 +35,9 @@ describes.endtoend(
     });
 
     it('should render image after resize', async () => {
-      const imageOne = await controller.findElement('amp-img#slide-1-desktop-image');
+      const imageOne = await controller.findElement(
+        'amp-img#slide-1-desktop-image'
+      );
       let imageOneRect = await controller.getElementRect(imageOne);
 
       // Assert image not seen
@@ -54,13 +56,19 @@ describes.endtoend(
     });
 
     // Test slide 2 (go back)
-    it.only('should swap between images on resize', async () => {
-      const ampCarouselNextButton = await controller.findElement('.amp-carousel-button.amp-carousel-button-next');
+    it('should swap between images on resize', async () => {
+      const ampCarouselNextButton = await controller.findElement(
+        '.amp-carousel-button.amp-carousel-button-next'
+      );
       await controller.click(ampCarouselNextButton);
       await sleep(500);
 
-      const imageOne = await controller.findElement('amp-img#slide-2-desktop-image');
-      const imageTwo = await controller.findElement('amp-img#slide-2-mobile-image');
+      const imageOne = await controller.findElement(
+        'amp-img#slide-2-desktop-image'
+      );
+      const imageTwo = await controller.findElement(
+        'amp-img#slide-2-mobile-image'
+      );
       let imageOneRect = await controller.getElementRect(imageOne);
       let imageTwoRect = await controller.getElementRect(imageTwo);
 

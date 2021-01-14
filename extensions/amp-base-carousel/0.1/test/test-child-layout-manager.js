@@ -174,7 +174,7 @@ describes.realWin('child layout manager', {}, (env) => {
     return el.children;
   }
 
-    /**
+  /**
    *
    * @param {!Element} el
    * @param {number} childCount

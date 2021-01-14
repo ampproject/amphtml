@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { isAmpElement } from '../../../src/dom';
 import {Services} from '../../../src/services';
+import {isAmpElement} from '../../../src/dom';
 
 /**
  * Used for tracking whether or not an item is near the viewport. This is set
@@ -268,7 +268,7 @@ export class ChildLayoutManager {
       })
       .forEach((entry) => {
         let {target} = entry;
-        // Change the flag for the parent if it's the first time 
+        // Change the flag for the parent if it's the first time
         // the underlying AMP element is nearing viewport & unobserve.
         if (
           target.hasAttribute(SLIDE_ID) &&
@@ -300,13 +300,8 @@ export class ChildLayoutManager {
         return !isIntersecting;
       })
       .forEach((entry) => {
-        let {target} = entry;
-        if (
-          !target.hasAttribute(SLIDE_ID) ||
-          !this.underlyingAmpElementParent_[target.getAttribute(SLIDE_ID)]
-        ) {
-          target[NEAR_VIEWPORT_FLAG] = ViewportChangeState.LEAVE;
-        }
+        const {target} = entry;
+        target[NEAR_VIEWPORT_FLAG] = ViewportChangeState.LEAVE;
       });
 
     if (!this.queueChanges_) {
@@ -439,7 +434,7 @@ export class ChildLayoutManager {
 
   /**
    * @param {Element} element
-   * @param {boolean} opt_onlyNearingViewport
+   * @param {boolean=} opt_onlyNearingViewport
    */
   observeElement_(element, opt_onlyNearingViewport = false) {
     this.nearingViewportObserver_.observe(element);
