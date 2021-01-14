@@ -32,7 +32,7 @@ import {parseQueryString} from '../../../src/url';
 import {toggle} from '../../../src/style';
 import {updateHash} from './utils';
 
-/** @const {Array<Object>} fontFaces with urls from https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&amp;display=swap */
+/** @const {Array<Object>} fontFaces with urls from https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&amp;display=swap */
 const fontsToLoad = [
   {
     family: 'Poppins',
@@ -42,9 +42,9 @@ const fontsToLoad = [
   },
   {
     family: 'Poppins',
-    weight: '700',
+    weight: '600',
     src:
-      "url(https://fonts.gstatic.com/s/poppins/v9/pxiByp8kv8JHgFVrLCz7Z1xlFd2JQEk.woff2) format('woff2')",
+      "url(https://fonts.gstatic.com/s/poppins/v15/pxiByp8kv8JHgFVrLEj6Z1xlFd2JQEk.woff2) format('woff2')",
   },
 ];
 

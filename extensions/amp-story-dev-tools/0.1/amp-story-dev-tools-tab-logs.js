@@ -104,7 +104,7 @@ export class AmpStoryDevToolsTabLogs extends AMP.BaseElement {
         this.validateUrl_(/* global amp: false */ amp.validator, this.storyUrl_)
       )
       .then((errorList) => {
-        this.errorList_ = errorList;
+        this.errorList_ = [];
         this.updateLogsTabIcon(errorList);
       });
   }
@@ -156,7 +156,7 @@ export class AmpStoryDevToolsTabLogs extends AMP.BaseElement {
     const logsContainer = this.errorList_.length
       ? this.createErrorsList_()
       : buildSuccessMessageTemplate(this.element);
-    logsContainer.prepend(this.buildLogsTitle_(this.errorList_));
+    logsContainer.prepend(this.buildLogsTitle_(this.errorList_.length));
     this.mutateElement(() => {
       this.element.textContent = '';
       this.element.appendChild(logsContainer);
