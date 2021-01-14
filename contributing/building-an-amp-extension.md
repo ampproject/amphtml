@@ -33,6 +33,12 @@ This document describes how to create a new AMP extension, which is one of the m
 
 Before diving into the details on creating a new AMP extension, please familiarize yourself with the [general process for contributing code and features to AMP](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md). Since you are adding a new extension you will likely need to follow the [process for making a significant change](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#process-for-significant-changes), including filing an ["Intent to Implement" issue](https://github.com/ampproject/amphtml/labels/INTENT%20TO%20IMPLEMENT) and finding a guide before you start significant development.
 
+To bootstrap the creation of a new component, the following command will create the directory structure and boilerplate code for you:
+
+```shell
+$ gulp make-extension --name=amp-my-element
+```
+
 ## Naming
 
 All AMP extensions (and built-in elements) have their tag names prefixed
