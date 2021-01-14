@@ -88,9 +88,6 @@ export default function transform(file, api, options) {
           getObjectExpressionProperty(existingOrNull, 'latestVersion') ||
           latestVersion ||
           version,
-        type:
-          getObjectExpressionProperty(existingOrNull, 'type') ||
-          j.memberExpression(j.identifier('TYPES'), j.identifier('MISC')),
       };
 
       elements.push(
