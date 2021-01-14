@@ -29,6 +29,7 @@ import {Scroller} from './scroller';
 import {WithAmpContext} from '../../../src/preact/context';
 import {forwardRef} from '../../../src/preact/compat';
 import {isRTL} from '../../../src/dom';
+import {mod} from '../../../src/utils/math';
 import {
   toChildArray,
   useCallback,
@@ -353,7 +354,12 @@ function BaseCarouselWithRef(
           and next viewport.
         */}
         {childrenArray.map((child, index) =>
-          Math.abs(index - currentSlide) < visibleCount * 3 || mixedLength ? (
+          Math.min(
+            // Distance from currentSlide.
+            Math.abs(index - currentSlide),
+            // Account for wraparound when looping.
+            loop ? mod(length + currentSlide - index, length) : length
+          ) < Math.ceil(visibleCount * 3) || mixedLength ? (
             <WithAmpContext
               key={index}
               renderable={index == currentSlide}

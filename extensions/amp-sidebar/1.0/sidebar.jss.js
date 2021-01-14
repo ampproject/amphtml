@@ -18,15 +18,21 @@ import {createUseStyles} from 'react-jss';
 
 const sidebarClass = {
   position: 'fixed !important',
-  top: 0,
-  maxHeight: '100vh !important',
-  height: '100vh',
-  maxWidth: '80vw',
-  backgroundColor: '#efefef',
-  minWidth: '45px !important',
-  outline: 'none',
   overflowX: 'hidden !important',
   overflowY: 'auto !important',
+  boxSizing: 'border-box !important',
+};
+
+// User overridable styles
+const defaultSidebarStyles = {
+  color: '#000000',
+  backgroundColor: '#efefef',
+  height: '100vh',
+  top: 0,
+  maxHeight: '100vh',
+  maxWidth: '80vw',
+  minWidth: '45px',
+  outline: 'none',
   zIndex: 2147483647,
 };
 
@@ -38,7 +44,7 @@ const right = {
   right: 0,
 };
 
-const maskClass = {
+const backdropClass = {
   position: 'fixed !important',
   top: '0 !important',
   left: '0 !important',
@@ -46,13 +52,19 @@ const maskClass = {
   height: '100vh !important',
   /* Prevent someone from making this a full-sceen image */
   backgroundImage: 'none !important',
-  backgroundColor: 'rgba(0, 0, 0, 0.5)',
   zIndex: 2147483646,
+};
+
+// User overridable styles
+const defaultBackdropStyles = {
+  backgroundColor: 'rgba(0, 0, 0, 0.5)',
 };
 
 const JSS = {
   sidebarClass,
-  maskClass,
+  defaultSidebarStyles,
+  backdropClass,
+  defaultBackdropStyles,
   left,
   right,
 };
