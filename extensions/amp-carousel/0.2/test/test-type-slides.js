@@ -17,7 +17,6 @@
 import '../amp-carousel';
 import {ActionTrust} from '../../../../src/action-constants';
 import {CarouselEvents} from '../../../amp-base-carousel/0.1/carousel-events';
-import {dev} from '../../../../src/log';
 import {getDetail, listenOncePromise} from '../../../../src/event-helper';
 
 /**
@@ -210,27 +209,6 @@ describes.realWin(
       expect(win.getComputedStyle(impl.nextButton_).border).to.equal(
         '1px solid rgb(0, 0, 0)'
       );
-    });
-
-    it('should warn if no slides', async () => {
-      const warnSpy = env.sandbox.spy(dev(), 'warn');
-      const carousel = doc.createElement('amp-carousel');
-      carousel.setAttribute('type', 'slides');
-      carousel.setAttribute('width', '400');
-      carousel.setAttribute('height', '300');
-      carousel.style.position = 'relative';
-      carousel.setAttribute('controls', '');
-      container.appendChild(carousel);
-
-      await carousel.build();
-
-      expect(warnSpy).to.be.calledOnce;
-      expect(warnSpy.args[0][0]).to.match(/amp-carousel/);
-      expect(warnSpy.args[0][1]).to.match(/No slides were found./);
-
-      warnSpy.resetHistory();
-      await getCarousel({loop: true});
-      expect(warnSpy).to.not.be.called;
     });
 
     describe('loop', () => {

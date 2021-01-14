@@ -33,6 +33,7 @@ import {backwardWrappingDistance, forwardWrappingDistance} from './array-util';
 import {clamp, mod} from '../../../src/utils/math';
 import {createCustomEvent, listen, listenOnce} from '../../../src/event-helper';
 import {debounce} from '../../../src/utils/rate-limit';
+import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
   getStyle,
@@ -53,6 +54,9 @@ import {iterateCursor} from '../../../src/dom';
 const RESET_SCROLL_REFERENCE_POINT_WAIT_MS = 200;
 
 const SPACER_CLASS = 'i-amphtml-carousel-spacer';
+
+/** @type {string} */
+const TAG = 'amp-base-carousel';
 
 /**
  * Runs a callback while disabling smooth scrolling by temporarily setting
@@ -612,6 +616,9 @@ export class Carousel {
    * @param {!Array<!Element>} slides
    */
   updateSlides(slides) {
+    if (!slides.length) {
+      dev().warn(TAG, 'No slides were found.');
+    }
     this.slides_ = slides;
     this.carouselAccessibility_.updateSlides(slides);
     // TODO(sparhami) Should need to call `this.updateUi()` here.
