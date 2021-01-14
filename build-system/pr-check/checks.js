@@ -43,7 +43,8 @@ function checkBundlesConfigExtensionBundles() {
   for (const {name} of extensionBundles) {
     if (name.localeCompare(previousName) < 0) {
       throw new Error(
-        'extensionBundles in bundles.config.js should be alphabetically sorted by name'
+        'extensionBundles in bundles.config.js should be alphabetically sorted by name. ' +
+          `${name} is out of order.`
       );
     }
     previousName = name;
