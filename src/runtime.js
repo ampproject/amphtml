@@ -394,7 +394,14 @@ function adoptServicesAndResources(global) {
  */
 function adoptMultiDocDeps(global) {
   global.AMP.installAmpdocServices = installAmpdocServices.bind(null);
-  global.AMP.combinedCss = ampDocCss + ampSharedCss;
+  if (IS_ESM) {
+    // The runtime styles always come before the runtime JS, so this should work.
+    global.AMP.combinedCss = global.document.querySelector(
+      'style[amp-runtime]'
+    ).textContent;
+  } else {
+    global.AMP.combinedCss = ampDocCss + ampSharedCss;
+  }
 }
 
 /**
