@@ -20,7 +20,7 @@ const extensionBundlesJson =
   'build-system/compile/bundles.config.extensions.json';
 
 /**
- * Inserts an extension entry into bundles.config.js
+ * Inserts an extension entry into bundles.config.extensions.json
  *
  * ```
  *    const extensionBundles = [

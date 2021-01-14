@@ -130,8 +130,8 @@ function declareExtension(
 }
 
 /**
- * Initializes all extensions from build-system/compile/bundles.config.js if not
- * already done and populates the given extensions object.
+ * Initializes all extensions from build-system/compile/bundles.config.extensions.json
+ * if not already done and populates the given extensions object.
  * @param {?Object} extensionsObject
  * @param {?boolean} includeLatest
  */

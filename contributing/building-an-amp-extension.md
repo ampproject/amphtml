@@ -742,7 +742,7 @@ Also consider contributing an example to
 ## Updating build configs
 
 In order for your element to build correctly you would need to make few
-changes to [`build-system/compile/bundles.config.js`](../build-system/compile/bundles.config.js) to tell it about your
+changes to [`build-system/compile/bundles.config.extensions.json`](../build-system/compile/bundles.config.extensions.json) to tell it about your
 extension, its files and its examples. You will need to add an entry in the `extensionBundles` array.
 
 ```javascript
