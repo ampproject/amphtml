@@ -127,13 +127,29 @@ describes.realWin('amp-story-grid-layer', {amp: true}, (env) => {
     ).to.equal(562);
   });
 
-  it('should apply the preset attributes', async () => {
+  it('should apply the aspect-ratio attribute from the responsiveness preset', async () => {
     gridLayerEl.setAttribute('preset', '2021-foreground');
     await buildGridLayer();
 
     storeService.dispatch(Action.SET_PAGE_SIZE, {width: 1000, height: 1000});
 
     expect(gridLayerEl.getAttribute('aspect-ratio')).to.equal('69:116');
+  });
+
+  it('should use the responsiveness preset to change the layer aspect', async () => {
+    gridLayerEl.setAttribute('preset', '2021-foreground');
+    await buildGridLayer();
+
+    storeService.dispatch(Action.SET_PAGE_SIZE, {width: 1000, height: 1000});
+
     expect(gridLayerEl).to.have.class('i-amphtml-story-grid-template-aspect');
+  });
+
+  it('should throw error if preset passed is incorrect', async () => {
+    expectAsyncConsoleError(
+      'Preset not found for amp-story-grid-layer: wrong-preset!'
+    );
+    gridLayerEl.setAttribute('preset', 'wrong-preset!');
+    allowConsoleError(async () => buildGridLayer());
   });
 });

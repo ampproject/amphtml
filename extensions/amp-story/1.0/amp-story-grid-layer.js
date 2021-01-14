@@ -135,7 +135,7 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
   /** @override */
   buildCallback() {
     super.buildCallback();
-    this.applyPresets_();
+    this.applyResponsivenessPresets_();
     this.applyTemplateClassName_();
     this.setOwnCssGridStyles_();
     this.setDescendentCssGridStyles_();
@@ -151,7 +151,7 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
    * Applies the attributes to the layer from the preset specified in the [preset] attribute.
    * @private
    */
-  applyPresets_() {
+  applyResponsivenessPresets_() {
     if (!this.element.hasAttribute(PRESET_ATTRIBUTE_NAME)) {
       return;
     }
