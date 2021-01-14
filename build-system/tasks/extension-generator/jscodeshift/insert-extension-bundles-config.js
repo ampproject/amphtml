@@ -17,6 +17,24 @@
 const arrayAssignmentIdName = 'extensionBundles';
 
 /**
+ * Inserts an extension entry into bundles.config.js
+ *
+ * ```
+ *    const extensionBundles = [
+ *      ...,
+ *   +  {
+ *   +    name: "amp-foo",
+ *   +    version: "1.0",
+ *   +  }
+ *      ...,
+ *    ]
+ * ```
+ *
+ * Properties of inserted object are defined by --insertExtensionBundle:
+ *  - name
+ *  - version
+ *  - latestVersion (optional)
+ *
  * @param {*} file
  * @param {*} api
  * @param {*} options
