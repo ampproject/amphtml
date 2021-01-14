@@ -38,6 +38,7 @@ async function clean() {
     'dist.tools',
     'test-bin',
     'validator/**/dist',
+    'examples/storybook',
   ];
   if (argv.include_subpackages) {
     pathsToDelete.push('**/node_modules', '!node_modules');

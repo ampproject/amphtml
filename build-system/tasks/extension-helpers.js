@@ -175,9 +175,6 @@ function setExtensionsToBuildFromDocuments(examples) {
  * @return {!Array<string>}
  */
 function getExtensionsToBuild(preBuild = false) {
-  if (extensionsToBuild) {
-    return extensionsToBuild;
-  }
   extensionsToBuild = argv.core_runtime_only ? [] : DEFAULT_EXTENSION_SET;
   if (argv.extensions) {
     if (typeof argv.extensions !== 'string') {
