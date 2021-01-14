@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays multiple similar pieces of content at a time along a horizontal axis, for features like related products or articles.
 experimental: true
+bento: true
 ---
 
 <!---
@@ -242,7 +243,3 @@ location, you can use the following HTML:
   <button on="tap:carousel-1.prev()">Previous</button>
   <button on="tap:carousel-1.next()">Next</button>
 ```
-
-## Validation
-
-See `[amp-stream-gallery rules](validator-amp-stream-gallery.protoascii)` in the AMP validator specification.
