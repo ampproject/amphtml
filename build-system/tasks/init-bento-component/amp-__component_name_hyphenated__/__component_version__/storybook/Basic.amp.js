@@ -24,10 +24,12 @@ export default {
   decorators: [withKnobs, withA11y, withAmp],
 
   parameters: {
-    extensions: [{
-      name: 'amp-__component_name_hyphenated__',
-      version: '__component_version__',
-    }],
+    extensions: [
+      {
+        name: 'amp-__component_name_hyphenated__',
+        version: '__component_version__',
+      },
+    ],
     experiments: ['bento'],
   },
 };
