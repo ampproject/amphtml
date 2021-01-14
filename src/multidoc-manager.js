@@ -463,7 +463,8 @@ export class MultidocManager {
               if (type.indexOf('javascript') == -1) {
                 shadowRoot.appendChild(this.win.document.importNode(n, true));
                 dev().fine(TAG, '- non-src script: ', n);
-              } else {
+              } else if (!n.hasAttribute('amp-onerror')) {
+                // Don't error on amp-onerror script (https://github.com/ampproject/amphtml/issues/31966)
                 user().error(TAG, '- unallowed inline javascript: ', n);
               }
             }
