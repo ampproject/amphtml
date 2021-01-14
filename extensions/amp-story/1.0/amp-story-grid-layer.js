@@ -86,19 +86,19 @@ const PRESET_ATTRIBUTE_NAME = 'preset';
 /**
  * @typedef {{
  *  aspect-ratio: string,
- * scaling-factor: ?string,
+ *  scaling-factor: ?float,
  * }}
  */
-export let PresetAttributes;
+export let PresetDetails;
 
 /**
  * The attributes that will be applied for each preset.
- * @private @const {!Object<string, !PresetAttributes>}
+ * @private @const {!Object<string, !PresetDetails>}
  */
-const GRID_LAYER_PRESET_ATTRIBUTES = {
+const GRID_LAYER_PRESET_DETAILS = {
   '2021-background': {
     'aspect-ratio': '69:116',
-    'scaling-factor': '1.142',
+    'scaling-factor': 1.142,
   },
   '2021-foreground': {
     'aspect-ratio': '69:116',
@@ -163,11 +163,11 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
       return;
     }
     const preset = this.element.getAttribute(PRESET_ATTRIBUTE_NAME);
-    const presetAttributes = GRID_LAYER_PRESET_ATTRIBUTES[preset];
-    if (!presetAttributes) {
+    const presetDetails = GRID_LAYER_PRESET_DETAILS[preset];
+    if (!presetDetails) {
       return;
     }
-    Object.entries(presetAttributes).forEach((keyValue) =>
+    Object.entries(presetDetails).forEach((keyValue) =>
       this.element.setAttribute(keyValue[0], keyValue[1])
     );
   }
