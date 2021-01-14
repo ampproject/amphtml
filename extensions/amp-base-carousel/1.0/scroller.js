@@ -15,6 +15,7 @@
  */
 import * as Preact from '../../../src/preact';
 import {
+  Alignment,
   Axis,
   findOverlappingIndex,
   getPercentageOffsetFromAlignment,
@@ -137,6 +138,7 @@ function ScrollerWithRef(
 
   const slides = renderSlides(
     {
+      alignment,
       children,
       loop,
       mixedLength,
@@ -340,6 +342,7 @@ export {Scroller};
  */
 function renderSlides(
   {
+    alignment,
     children,
     loop,
     mixedLength,
@@ -364,6 +367,10 @@ function renderSlides(
           snap && mod(index, snapBy) === 0
             ? classes.enableSnap
             : classes.disableSnap
+        } ${
+          alignment === Alignment.CENTER
+            ? classes.centerAlign
+            : classes.startAlign
         } ${_thumbnails ? classes.thumbnails : ''} `}
         part="slide"
         style={{
