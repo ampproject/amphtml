@@ -335,6 +335,72 @@ describes.realWin(
         expect(consoleWarnSpy).to.be.calledOnce;
       });
 
+      it('should default "left" or "right" based on document.dir when side not provided', async () => {
+        const documentDir = win.document.dir;
+
+        /**
+         * document.dir is not 'rtl' and side is not provided to the element
+         * so we should default to 'left'
+         */
+        win.document.dir = 'blah';
+        fullHtml = html`
+          <div>
+            <amp-sidebar id="sidebar2">
+              <div>Hello World!</div>
+            </amp-sidebar>
+            <div id="buttons">
+              <button id="open" on="tap:sidebar2.open()">open</button>
+            </div>
+          </div>
+        `;
+        element = fullHtml.firstElementChild;
+        win.document.body.appendChild(fullHtml);
+        await element.build();
+        container = element.shadowRoot.firstElementChild;
+        openButton = fullHtml.querySelector('#open');
+
+        // open the sidebar
+        openButton.click();
+        await waitForOpen(element, true);
+        expect(element).to.have.attribute('open');
+        let sidebarElement = container.firstElementChild;
+
+        // defaults to left if document is not 'ltr'
+        expect(sidebarElement.className.includes('left')).to.be.true;
+
+        /**
+         * document.dir is 'rtl' and side is not provided to the element
+         * so we should default to 'right'
+         */
+        win.document.dir = 'rtl';
+        fullHtml = html`
+          <div>
+            <amp-sidebar id="sidebar3">
+              <div>Hello World!</div>
+            </amp-sidebar>
+            <div id="buttons">
+              <button id="open" on="tap:sidebar3.open()">open</button>
+            </div>
+          </div>
+        `;
+        element = fullHtml.firstElementChild;
+        win.document.body.appendChild(fullHtml);
+        await element.build();
+        container = element.shadowRoot.firstElementChild;
+        openButton = fullHtml.querySelector('#open');
+
+        // open the sidebar
+        openButton.click();
+        await waitForOpen(element, true);
+        expect(element).to.have.attribute('open');
+        sidebarElement = container.firstElementChild;
+
+        // defaults to right if document is 'rtl'
+        expect(sidebarElement.className.includes('right')).to.be.true;
+
+        win.document.dir = documentDir;
+      });
+
       describe('programatic access to imperative API', () => {
         it('open', async () => {
           // sidebar is initially closed
