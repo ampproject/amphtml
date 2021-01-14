@@ -35,4 +35,4 @@ export const _default = () => {
       This text is inside.
     </amp-__component_name_hyphenated__>
   );
-}
+};
