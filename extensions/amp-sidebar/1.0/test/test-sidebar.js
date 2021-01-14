@@ -185,7 +185,7 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       let sidebarNode = sidebar.getDOMNode();
       expect(sidebarNode.className.includes('right')).to.be.true;
 
-      // default the left
+      // default to left
       document.dir = 'ltr';
       ref = Preact.createRef();
       wrapper = mount(
