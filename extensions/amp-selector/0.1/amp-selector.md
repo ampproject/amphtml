@@ -2,14 +2,13 @@
 $category@: dynamic-content
 formats:
   - websites
+  - email
 teaser:
   text: Represents a control that presents a menu of options and lets the user choose from it.
-experimental: true
-bento: true
 ---
 
 <!---
-Copyright 2021 The AMP HTML Authors. All Rights Reserved.
+Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -103,7 +102,7 @@ Example:
 
 ### Clearing selections
 
-To clear all selections when an element is tapped or clicked, set the [`on`](../../spec/amp-actions-and-events.md) action attribute on the element, and specify the AMP Selector `id` with the `clear` action method.
+To clear all selections when an element is tapped or clicked, set the [`on`](../../../spec/amp-actions-and-events.md) action attribute on the element, and specify the AMP Selector `id` with the `clear` action method.
 
 Example:
 
@@ -115,6 +114,10 @@ Example:
   <div option>Option Three</div>
 </amp-selector>
 ```
+
+{% call callout('Tip', type='success') %}
+See live demos at [AMP By Example](https://amp.dev/documentation/examples/components/amp-selector/).
+{% endcall %}
 
 ## Attributes
 
@@ -155,7 +158,7 @@ The attributes above behave the same way as they do on a standard HTML [`<option
 Events may trigger actions on other AMP components using the `on` attribute.
 e.g. `on="select: my-tab.show"`
 
-Read more about [AMP Actions and Events](../../spec/amp-actions-and-events.md).
+Read more about [AMP Actions and Events](../../../spec/amp-actions-and-events.md).
 
 ### select
 
@@ -170,3 +173,7 @@ Tapping disabled options does not trigger the `select` event.
   `event.selectedOptions` contains an array of the `option` attribute values of all selected elements.
   </li>
 </ul>
+
+## Validation
+
+See [amp-selector rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-selector/validator-amp-selector.protoascii) in the AMP validator specification.
