@@ -116,24 +116,26 @@ const forbiddenTerms = {
       'allowlist a legit case.',
     allowlist: [
       'build-system/common/check-package-manager.js',
-      'build-system/pr-check/build.js',
       'build-system/pr-check/build-targets.js',
       'build-system/pr-check/checks.js',
       'build-system/pr-check/cross-browser-tests.js',
-      'build-system/pr-check/dist-bundle-size.js',
-      'build-system/pr-check/dist-tests.js',
-      'build-system/pr-check/module-dist-bundle-size.js',
-      'build-system/pr-check/esm-tests.js',
+      'build-system/pr-check/bundle-size.js',
       'build-system/pr-check/experiment-tests.js',
       'build-system/pr-check/e2e-tests.js',
-      'build-system/pr-check/local-tests.js',
+      'build-system/pr-check/module-build.js',
+      'build-system/pr-check/module-tests.js',
+      'build-system/pr-check/nomodule-build.js',
+      'build-system/pr-check/nomodule-tests.js',
       'build-system/pr-check/npm-checks.js',
       'build-system/pr-check/performance-tests.js',
+      'build-system/pr-check/unminified-build.js',
+      'build-system/pr-check/unminified-tests.js',
       'build-system/pr-check/utils.js',
       'build-system/pr-check/validator-tests.js',
       'build-system/pr-check/visual-diff-tests.js',
       'build-system/server/app.js',
       'build-system/server/amp4test.js',
+      'build-system/tasks/e2e/mocha-dots-reporter.js',
       'build-system/tasks/build.js',
       'build-system/tasks/check-exact-versions.js',
       'build-system/tasks/check-owners.js',
@@ -1229,6 +1231,8 @@ const requiredTerms = {
   'Licensed under the Apache License, Version 2\\.0': dedicatedCopyrightNoteSources,
   'http\\://www\\.apache\\.org/licenses/LICENSE-2\\.0': dedicatedCopyrightNoteSources,
 };
+// Exclude extension generator templates
+const requiredTermsExcluded = /amp-__component_name_hyphenated__/;
 
 /**
  * Check if root of path is test/ or file is in a folder named test.
@@ -1399,7 +1403,7 @@ function isMissingTerms(file) {
   return Object.keys(requiredTerms)
     .map(function (term) {
       const filter = requiredTerms[term];
-      if (!filter.test(file.path)) {
+      if (!filter.test(file.path) || requiredTermsExcluded.test(file.path)) {
         return false;
       }
 

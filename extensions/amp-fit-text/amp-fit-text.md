@@ -34,7 +34,7 @@ The `amp-fit-text` component allows you to manage the size and fit of text withi
 
 In the following example, the `<amp-fit-text>` element is nested within a 300x300 blue `div` block. For the `<amp-fit-text>` element, we specified a `responsive` layout. As a result, the text scales responsively per the aspect ratio provided by the width and height (200x200) of the `<amp-fit-text>` element, but the text does not exceed the size of its parent.
 
-[example preview="inline" playground="true" imports="amp-fit-text"]
+[example preview="inline" playground="true" imports="amp-fit-text:1.0"]
 
 ```html
 <div style="width: 300px; height: 300px; background:#005AF0; color: #FFF;">
@@ -49,7 +49,7 @@ In the following example, the `<amp-fit-text>` element is nested within a 300x30
 
 The following example is similar to the one above, but in this example we specify a `max-font-size` of `22`, so the text is smaller but still fits the space:
 
-[example preview="inline" playground="true" imports="amp-fit-text"]
+[example preview="inline" playground="true" imports="amp-fit-text:1.0"]
 
 ```html
 <div style="width: 300px; height: 300px; background:#005AF0; color: #FFF;">
@@ -73,7 +73,7 @@ If the content of the `amp-fit-text` overflows the available space, even with a
 
 In the following example, we specified a `min-font-size` of `40`, and added more content inside the `amp-fit-text` element. This causes the content to exceed the size of its fixed block parent, so the text is truncated to fit the container.
 
-[example preview="inline" playground="true" imports="amp-fit-text"]
+[example preview="inline" playground="true" imports="amp-fit-text:1.0"]
 
 ```html
 <div style="width: 300px; height: 300px; background:#005AF0; color: #FFF;">

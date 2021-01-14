@@ -159,6 +159,58 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       expect(sidebarNode.className.includes('right')).to.be.true;
     });
 
+    it('should default "left" or "right" based on document.dir when side not provided', () => {
+      const documentDir = document.dir;
+
+      //default to right
+      document.dir = 'rtl';
+      ref = Preact.createRef();
+      wrapper = mount(
+        <>
+          <Sidebar ref={ref}>
+            <div>Content</div>
+          </Sidebar>
+          <button id="toggle" onClick={() => ref.current.toggle()}></button>
+          <button id="open" onClick={() => ref.current.open()}></button>
+          <button id="close" onClick={() => ref.current.close()}></button>
+        </>
+      );
+
+      sidebar = wrapper.find(Sidebar);
+      openButton = wrapper.find('#open');
+      openButton.getDOMNode().click();
+      wrapper.update();
+      sidebar = wrapper.find(Sidebar);
+
+      let sidebarNode = sidebar.getDOMNode();
+      expect(sidebarNode.className.includes('right')).to.be.true;
+
+      // default to left
+      document.dir = 'ltr';
+      ref = Preact.createRef();
+      wrapper = mount(
+        <>
+          <Sidebar ref={ref}>
+            <div>Content</div>
+          </Sidebar>
+          <button id="toggle" onClick={() => ref.current.toggle()}></button>
+          <button id="open" onClick={() => ref.current.open()}></button>
+          <button id="close" onClick={() => ref.current.close()}></button>
+        </>
+      );
+
+      sidebar = wrapper.find(Sidebar);
+      openButton = wrapper.find('#open');
+      openButton.getDOMNode().click();
+      wrapper.update();
+      sidebar = wrapper.find(Sidebar);
+
+      sidebarNode = sidebar.getDOMNode();
+      expect(sidebarNode.className.includes('left')).to.be.true;
+
+      document.dir = documentDir;
+    });
+
     describe('programatic access to imperative API', () => {
       it('open', () => {
         // Sidebar is initially closed (no rendered nodes)
