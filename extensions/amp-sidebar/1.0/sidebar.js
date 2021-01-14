@@ -18,6 +18,7 @@ import * as Preact from '../../../src/preact';
 import {ContainWrapper} from '../../../src/preact/component';
 import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
 import {forwardRef} from '../../../src/preact/compat';
+import {isRTL} from '../../../src/dom';
 import {
   useCallback,
   useImperativeHandle,
@@ -26,6 +27,12 @@ import {
   useState,
 } from '../../../src/preact';
 import {useStyles} from './sidebar.jss';
+
+/** @private @enum {string} */
+const Side = {
+  LEFT: 'left',
+  RIGHT: 'right',
+};
 
 const ANIMATION_DURATION = 350;
 const ANIMATION_EASE_IN = 'cubic-bezier(0,0,.21,1)';
@@ -72,7 +79,7 @@ function safelySetStyles(element, styles) {
 function SidebarWithRef(
   {
     as: Comp = 'div',
-    side = 'left',
+    side: sideProp,
     onBeforeOpen,
     onAfterClose,
     backdropStyle,
@@ -88,6 +95,8 @@ function SidebarWithRef(
   // `mounted` mounts the component. `opened` plays the animation.
   const [mounted, setMounted] = useState(false);
   const [opened, setOpened] = useState(false);
+  const [side, setSide] = useState(sideProp);
+
   const classes = useStyles();
   const sidebarRef = useRef();
   const backdropRef = useRef();
@@ -124,9 +133,24 @@ function SidebarWithRef(
   );
 
   useLayoutEffect(() => {
+    if (side) {
+      return;
+    }
+    const sidebarElement = sidebarRef.current;
+    if (!sidebarElement) {
+      return;
+    }
+    setSide(isRTL(sidebarElement.ownerDocument) ? Side.RIGHT : Side.LEFT);
+  }, [side, mounted]);
+
+  useLayoutEffect(() => {
     const sidebarElement = sidebarRef.current;
     const backdropElement = backdropRef.current;
     if (!sidebarElement || !backdropElement) {
+      return;
+    }
+
+    if (!side) {
       return;
     }
 
@@ -145,13 +169,13 @@ function SidebarWithRef(
 
       safelySetStyles(
         sidebarElement,
-        side === 'left'
+        side === Side.LEFT
           ? ANIMATION_STYLES_SIDEBAR_LEFT_INIT
           : ANIMATION_STYLES_SIDEBAR_RIGHT_INIT
       );
       safelySetStyles(backdropElement, ANIMATION_STYLES_BACKDROP_INIT);
       sidebarAnimation = sidebarElement.animate(
-        side === 'left'
+        side === Side.LEFT
           ? ANIMATION_KEYFRAMES_SLIDE_IN_LEFT
           : ANIMATION_KEYFRAMES_SLIDE_IN_RIGHT,
         {
@@ -181,7 +205,7 @@ function SidebarWithRef(
         return;
       }
       sidebarAnimation = sidebarElement.animate(
-        side === 'left'
+        side === Side.LEFT
           ? ANIMATION_KEYFRAMES_SLIDE_IN_LEFT
           : ANIMATION_KEYFRAMES_SLIDE_IN_RIGHT,
         {
@@ -221,9 +245,10 @@ function SidebarWithRef(
           part="sidebar"
           wrapperClassName={`${classes.sidebarClass} ${
             classes.defaultSidebarStyles
-          } ${side === 'left' ? classes.left : classes.right}`}
+          } ${side === Side.LEFT ? classes.left : classes.right}`}
           role="menu"
           tabindex="-1"
+          hidden={!side}
           {...rest}
         >
           {children}
@@ -236,6 +261,7 @@ function SidebarWithRef(
           className={`${backdropClassName ?? ''} ${classes.backdropClass} ${
             classes.defaultBackdropStyles
           }`}
+          hidden={!side}
         ></div>
       </>
     )
