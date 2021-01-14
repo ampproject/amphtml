@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 const {execOrThrow} = require('../../common/exec');
+const {readJsonSync, writeJsonSync} = require('fs-extra');
 
-const bundlesConfigJs = 'build-system/compile/bundles.config.js';
+const extensionBundlesJson =
+  'build-system/compile/bundles.config.extensions.json';
 
 /**
  * Inserts an extension entry into bundles.config.js
@@ -34,22 +36,35 @@ const bundlesConfigJs = 'build-system/compile/bundles.config.js';
  * @return {string}
  */
 function insertExtensionBundlesConfig(bundle) {
-  // stringify twice to escape into string:
-  // {"name": "foo"} -> "{\"name\": \"foo\"}"
-  const insertExtensionBundleArg = JSON.stringify(JSON.stringify(bundle));
+  const extensionBundles = readJsonSync(extensionBundlesJson);
 
-  execOrThrow(
-    [
-      'npx jscodeshift',
-      `--transform ${__dirname}/jscodeshift/insert-extension-bundles-config.js`,
-      `--insertExtensionBundle ${insertExtensionBundleArg}`,
-      bundlesConfigJs,
-    ].join(' ')
+  const existingOrNull = extensionBundles.find(
+    ({name}) => name === bundle.name
   );
 
-  execOrThrow(
-    `./node_modules/prettier/bin-prettier.js --write ${bundlesConfigJs}`
+  extensionBundles.push({
+    ...bundle,
+    latestVersion:
+      (existingOrNull && existingOrNull.latestVersion) ||
+      bundle.latestVersion ||
+      bundle.version,
+    options: {hasCss: true},
+  });
+
+  writeJsonSync(
+    extensionBundlesJson,
+    extensionBundles.sort((a, b) => {
+      if (!a.name) {
+        return 1;
+      }
+      if (!b.name) {
+        return -1;
+      }
+      return a.name.localeCompare(b.name);
+    })
   );
+
+  execOrThrow(`npx prettier --write ${extensionBundlesJson}`);
 }
 
 module.exports = {insertExtensionBundlesConfig};
