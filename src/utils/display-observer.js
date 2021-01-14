@@ -78,7 +78,6 @@ export class DisplayObserver {
   observe(target, callback) {
     let callbacks = this.targetObserverMultimap_.get(target);
     if (!callbacks) {
-      console.log('DisplayObserver: observe', target.id);
       callbacks = [];
       this.targetObserverMultimap_.set(target, callbacks);
       this.docObserver_.observe(target);
@@ -108,7 +107,6 @@ export class DisplayObserver {
     }
     removeItem(callbacks, callback);
     if (callbacks.length == 0) {
-      console.log('DisplayObserver: unobserve', target.id);
       this.targetObserverMultimap_.delete(target);
       this.targetDisplayMap_.delete(target);
       this.docObserver_.unobserve(target);
@@ -139,12 +137,6 @@ export class DisplayObserver {
     const seen = new Set();
     for (let i = entries.length - 1; i >= 0; i--) {
       const {target, isIntersecting} = entries[i];
-      console.log(
-        'DisplayObserver: observed_:',
-        index,
-        target.id,
-        isIntersecting
-      );
       if (seen.has(target)) {
         continue;
       }
