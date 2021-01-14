@@ -127,7 +127,7 @@ async function makeBentoExtension() {
   }
 
   insertExtensionBundlesConfig({name: `amp-${componentName}`, version});
-  log(green('SUCCESS:'), 'Wrote bundles.config.js');
+  log(green('SUCCESS:'), 'Wrote', cyan('bundles.config.js'));
 
   log(`
 ========================================
