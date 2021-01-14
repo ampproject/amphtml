@@ -204,6 +204,9 @@ exports.jsBundles = {
   },
 };
 
+/**
+ * Used to generate extension build targets
+ */
 exports.extensionBundles = extensionBundles;
 
 /**
