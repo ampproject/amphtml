@@ -41,7 +41,8 @@ const timedExecOrThrow = (cmd, msg) => timedExecOrThrowBase(cmd, FILENAME, msg);
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
 
-  if (!isPullRequestBuild()) {
+  if (true || !isPullRequestBuild()) {
+    // NO SUBMIT PLZ
     downloadUnminifiedOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
 
