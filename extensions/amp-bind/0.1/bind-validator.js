@@ -36,7 +36,7 @@ const GLOBAL_PROPERTY_RULES = {
   'class': {
     denylistedValueRegex: '(^|\\W)i-amphtml-',
   },
-  'data-amp-dynamic-classes': {
+  'dynamic-class': {
     denylistedValueRegex: '(^|\\W)i-amphtml-',
   },
   'hidden': null,

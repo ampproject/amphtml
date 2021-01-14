@@ -34,8 +34,8 @@ PASS
 |  <body>
 |    <!-- VALID BINDINGS ON NON-AMP ELEMENTS -->
 |    <p [text]="foo" [class]="foo">p</p>
-|    <p class="bar" data-amp-dynamic-classes="bar">p</p>
-|    <p data-amp-dynamic-classes="bar">p</p>
+|    <p class="bar" data-amp-bind-dynamic-class="bar">p</p>
+|    <p data-amp-bind-dynamic-class="bar">p</p>
 |    <textarea [defaultText]="foo" [text]="foo">textarea</textarea>
 |    <a [href]="foo">a</a>
 |    <amp-img src="http://example.com/image.jpg" width=10 height=10 [src]="foo" [alt]="foo" [width]="foo" [height]="foo"></amp-img>

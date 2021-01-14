@@ -34,15 +34,15 @@
   <p class="foo" [class]="foo bar">Standard Bound Class</p>
 
   <!-- Valid: A single additional bound class -->
-  <p data-amp-dynamic-classes="foo">Additional Bound Class</p>
+  <p data-amp-bind-dynamic-class="foo">Additional Bound Class</p>
 
   <!-- Valid: Single additional bound class and existing class attribute -->
-  <p class="foo" data-amp-dynamic-classes="bar">Standard Bound Class</p>
+  <p class="foo" data-amp-bind-dynamic-class="bar">Standard Bound Class</p>
 
   <!-- Invalid: Combining a bound class and additional bound class -->
-  <p [class]="foo" data-amp-dynamic-classes="bar">Standard and Additional Bound Class</p>
+  <p [class]="foo" data-amp-bind-dynamic-classs="bar">Standard and Additional Bound Class</p>
 
   <!-- Invalid: Combining a bound class, additional bound class, and existing class attribute -->
-  <p class="foo" [class]="foo" data-amp-dynamic-classes="bar">Standard and Additional Bound Class</p>
+  <p class="foo" [class]="foo" data-amp-bind-dynamic-class="bar">Standard and Additional Bound Class</p>
 </body>
 </html>

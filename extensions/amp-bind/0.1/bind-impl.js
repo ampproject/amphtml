@@ -1385,7 +1385,7 @@ export class Bind {
         break;
 
       case 'class':
-      case 'data-amp-dynamic-classes':
+      case 'dynamic-class':
         // Preserve internal AMP classes.
         const ampClasses = [];
         for (let i = 0; i < element.classList.length; i++) {
@@ -1394,7 +1394,7 @@ export class Bind {
             ampClasses.push(cssClass);
           }
         }
-        if (property === 'data-amp-dynamic-classes') {
+        if (property === 'dynamic-class') {
           ampClasses.push(defaultClasses);
         }
         if (Array.isArray(newValue) || typeof newValue === 'string') {
