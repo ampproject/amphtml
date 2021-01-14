@@ -21,7 +21,6 @@ tags: {  # amp-slike
     name: "amp-slike"
     version: "0.1"
     version: "latest"
-    requires_usage: NONE
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
