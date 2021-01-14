@@ -38,6 +38,7 @@ export default function transform(file, api, options) {
       nodeOrNull &&
       nodeOrNull.properties &&
       nodeOrNull.properties.find(({key}) => key.name === keyIdentifierName)
+        .value
     );
   }
 
@@ -58,7 +59,7 @@ export default function transform(file, api, options) {
 
       const existingOrNull = elements.find(
         (node) =>
-          getObjectExpressionProperty(node, 'name').value.value ===
+          getObjectExpressionProperty(node, 'name').value ===
           insertExtensionBundle.name
       );
 
@@ -86,18 +87,16 @@ export default function transform(file, api, options) {
         )
       );
 
-      elements.sort((a, b) => {
-        const aNameProperty = getObjectExpressionProperty(a.properties, 'name');
-        const bNameProperty = getObjectExpressionProperty(b.properties, 'name');
+      path.value.elements = elements.sort((a, b) => {
+        const aNameProperty = getObjectExpressionProperty(a, 'name');
+        const bNameProperty = getObjectExpressionProperty(b, 'name');
         if (!aNameProperty) {
           return 1;
         }
         if (!bNameProperty) {
           return -1;
         }
-        return aNameProperty.value.value.localeCompare(
-          bNameProperty.value.value
-        );
+        return aNameProperty.value.localeCompare(bNameProperty.value);
       });
     })
     .toSource();
