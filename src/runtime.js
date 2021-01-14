@@ -394,7 +394,7 @@ function adoptServicesAndResources(global) {
  */
 function adoptMultiDocDeps(global) {
   global.AMP.installAmpdocServices = installAmpdocServices.bind(null);
-  if (IS_ESM) {
+  if (IS_ESM && getMode().minified) {
     // The runtime styles always come before the runtime JS, so this should work.
     global.AMP.combinedCss = global.document.querySelector(
       'style[amp-runtime]'
