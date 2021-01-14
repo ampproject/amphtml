@@ -2,14 +2,13 @@
 $category@: media
 formats:
   - websites
+  - ads
 teaser:
   text: Displays a YouTube video.
-experimental: true
-bento: true
 ---
 
 <!---
-Copyright 2021 The AMP HTML Authors. All Rights Reserved.
+Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -57,10 +56,6 @@ With the responsive layout, the width and height from the example should yield c
 </amp-youtube>
 ```
 
-### Migrating from 0.1
-
-The experimental `1.0` version of `amp-youtube` does not automatically convert `data-param-controls` to `controls`. Instead it takes `controls` directly as an attribute.
-
 ## Attributes
 
 ### autoplay
@@ -100,13 +95,17 @@ All `data-param-*` attributes (with the exception of `data-param-autoplay` and `
 
 Keys and values will be URI encoded. Keys will be camel cased
 
-### controls
+`data-param-controls=1` becomes `&controls=1`
 
 See [YouTube Embedded Player Parameters](https://developers.google.com/youtube/player_parameters) for more parameter options for YouTube.
 
 [tip type="note"]
 Use the `autoplay` attribute instead of `data-param-autoplay` and the `loop` attribute instead of `data-param-loop` since both the autoplay and looping behaviors are handled internally by AMP instead of the Youtube player.
 [/tip]
+
+### dock
+
+Requires [`amp-video-docking`](../../amp-video-docking/amp-video-docking.md) component. If this attribute is present and the video is playing manually, the video will be "minimized" and fixed to a corner or an element when the user scrolls out of the video component's visual area.
 
 ### credentials (optional)
 
@@ -126,3 +125,7 @@ Define a `title` attribute for the component to propagate to the underlying `<if
 ### common attributes
 
 This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.
+
+## Validation
+
+See [amp-youtube rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-youtube/validator-amp-youtube.protoascii) in the AMP validator specification.
