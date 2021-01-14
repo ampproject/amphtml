@@ -41,7 +41,7 @@ export const ExampleUseCase = () => {
       This text is inside.
     </amp-__component_name_hyphenated__>
   );
-}
+};
 
 ExampleUseCase.story = {
   name: 'Example use case story'
