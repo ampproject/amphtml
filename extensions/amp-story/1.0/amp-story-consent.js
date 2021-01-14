@@ -184,7 +184,7 @@ export class AmpStoryConsent extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @const @private {?../../../src/service/action-impl.ActionService} */
+    /** @private {?../../../src/service/action-impl.ActionService} */
     this.actions_ = null;
 
     /** @private {?Object} */
