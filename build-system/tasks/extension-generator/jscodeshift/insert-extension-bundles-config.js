@@ -33,8 +33,12 @@ export default function transform(file, api, options) {
 
   const {name, version, latestVersion} = insertExtensionBundle;
 
-  function getObjectExpressionProperty(properties, keyIdentifierName) {
-    return properties.find(({key}) => key.name === keyIdentifierName);
+  function getObjectExpressionProperty(nodeOrNull, keyIdentifierName) {
+    return (
+      nodeOrNull &&
+      nodeOrNull.properties &&
+      nodeOrNull.properties.find(({key}) => key.name === keyIdentifierName)
+    );
   }
 
   return j(file.source)
@@ -51,67 +55,37 @@ export default function transform(file, api, options) {
     )
     .forEach((path) => {
       const {elements} = path.value;
-      let insertionIndexProperty;
-      let insertionIndex = -1;
-      let existingIndex = -1;
 
-      // find lexicographic position
-      do {
-        const {properties} = elements[++insertionIndex] || {};
-        insertionIndexProperty =
-          properties && getObjectExpressionProperty(properties, 'name');
-        if (
-          insertionIndexProperty &&
-          insertionIndexProperty.value.value === name
-        ) {
-          existingIndex = insertionIndex;
-        }
-      } while (
-        insertionIndex < elements.length &&
-        name.localeCompare(insertionIndexProperty.value.value) >= 0
+      const existingOrNull = elements.find(
+        (node) =>
+          getObjectExpressionProperty(node, 'name').value.value ===
+          insertExtensionBundle.name
       );
 
-      const existingPropertyLatestVersion =
-        existingIndex > -1 &&
-        getObjectExpressionProperty(
-          elements[existingIndex].properties,
-          'latestVersion'
-        );
+      const inserted = {
+        name,
+        version,
+        latestVersion:
+          getObjectExpressionProperty(existingOrNull, 'latestVersion') ||
+          latestVersion ||
+          version,
+        type:
+          getObjectExpressionProperty(existingOrNull, 'type') ||
+          j.memberExpression(j.identifier('TYPES'), j.identifier('MISC')),
+      };
 
-      const existingPropertyType =
-        existingIndex > -1 &&
-        getObjectExpressionProperty(elements[existingIndex].properties, 'type');
-
-      const resolvedLatestVersion =
-        latestVersion ||
-        (existingPropertyLatestVersion &&
-          existingPropertyLatestVersion.value.value) ||
-        version;
-
-      const inserted = [
-        ['name', name],
-        ['version', version],
-        ['latestVersion', resolvedLatestVersion],
-        [
-          'type',
-          // TYPES.MISC or type of existing extension with given name
-          (existingPropertyType && existingPropertyType.value) ||
-            j.memberExpression(j.identifier('TYPES'), j.identifier('MISC')),
-        ],
-      ];
-      elements.splice(
-        insertionIndex,
-        0,
+      elements.push(
         j.objectExpression(
-          inserted.map(([key, value]) =>
-            j.objectProperty(
+          Object.keys(inserted).map((key) => {
+            const value = inserted[key];
+            return j.objectProperty(
               j.identifier(key),
               typeof value === 'string' ? j.stringLiteral(value) : value
-            )
-          )
+            );
+          })
         )
       );
-      // sorting may have been manually messed up previously
+
       elements.sort((a, b) => {
         const aNameProperty = getObjectExpressionProperty(a.properties, 'name');
         const bNameProperty = getObjectExpressionProperty(b.properties, 'name');
