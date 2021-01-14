@@ -42,7 +42,7 @@ function main() {
   const startTime = startTimer(FILENAME, FILENAME);
 
   if (true || !isPullRequestBuild()) {
-    // NO SUBMIT PLZ
+    // NO SUBMIT PLZ (force rebuild)
     downloadUnminifiedOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
 
