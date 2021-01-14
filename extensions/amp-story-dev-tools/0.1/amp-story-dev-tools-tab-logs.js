@@ -34,6 +34,21 @@ export function createTabLogsElement(win, storyUrl) {
 }
 
 /**
+ * Creates the success message when there are no errors.
+ * @param {!ELement} element
+ * @return {!Element} the layout
+ */
+const buildSuccessMessageTemplate = (element) => {
+  const html = htmlFor(element);
+  return html`<div class="i-amphtml-story-dev-tools-logs-success">
+    <div class="i-amphtml-story-dev-tools-logs-success-image"></div>
+    <h1 class="i-amphtml-story-dev-tools-logs-success-message">
+      Great Job!<br />No issues found
+    </h1>
+  </div>`;
+};
+
+/**
  * Returns a "failed" or "passed" icon from the status
  * @param {!Element} element
  * @param {boolean} statusPassed
@@ -89,7 +104,7 @@ export class AmpStoryDevToolsTabLogs extends AMP.BaseElement {
         this.validateUrl_(/* global amp: false */ amp.validator, this.storyUrl_)
       )
       .then((errorList) => {
-        this.errorList_ = errorList;
+        this.errorList_ = [];
         this.updateLogsTabIcon(errorList);
       });
   }
@@ -140,7 +155,8 @@ export class AmpStoryDevToolsTabLogs extends AMP.BaseElement {
   buildLogsContent_() {
     const logsContainer = this.errorList_.length
       ? this.createErrorsList_()
-      : this.createSuccessMessage_();
+      : buildSuccessMessageTemplate(this.element);
+    logsContainer.prepend(this.buildLogsTitle_(this.errorList_));
     this.mutateElement(() => {
       this.element.textContent = '';
       this.element.appendChild(logsContainer);
@@ -199,34 +215,8 @@ export class AmpStoryDevToolsTabLogs extends AMP.BaseElement {
    * @private
    * @return {!Element}
    */
-  createSuccessMessage_() {
-    const logsContainer = this.element.ownerDocument.createElement('div');
-    logsContainer.appendChild(this.buildLogsTitle_(this.errorList_.length));
-    logsContainer.classList.add('i-amphtml-story-dev-tools-logs-success');
-    logsContainer.appendChild(
-      createElementWithAttributes(this.element.ownerDocument, 'div', {
-        'class': 'i-amphtml-story-dev-tools-logs-success-image',
-      })
-    );
-    const successMessage = createElementWithAttributes(
-      this.element.ownerDocument,
-      'div',
-      {
-        'class': 'i-amphtml-story-dev-tools-logs-success-message',
-      }
-    );
-    successMessage.textContent = `Great Job!\r\nNo issues found.`;
-    logsContainer.appendChild(successMessage);
-    return logsContainer;
-  }
-
-  /**
-   * @private
-   * @return {!Element}
-   */
   createErrorsList_() {
     const logsContainer = this.element.ownerDocument.createElement('div');
-    logsContainer.appendChild(this.buildLogsTitle_(this.errorList_.length));
     this.errorList_.forEach((content) => {
       const logEl = buildLogMessageTemplate(this.element);
       logEl.querySelector('.i-amphtml-story-dev-tools-log-type').textContent =
