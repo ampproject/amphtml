@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.140 */
+/** Version: 0.1.22.141 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -98,6 +98,7 @@ const AnalyticsEvent = {
   EVENT_NO_ENTITLEMENTS: 3009,
   EVENT_HAS_METERING_ENTITLEMENTS: 3010,
   EVENT_OFFERED_METER: 3011,
+  EVENT_UNLOCKED_FREE_PAGE: 3012,
   EVENT_SUBSCRIPTION_STATE: 4000,
 };
 /** @enum {number} */
@@ -108,6 +109,7 @@ const EventOriginator = {
   PROPENSITY_CLIENT: 3,
   SWG_SERVER: 4,
   PUBLISHER_CLIENT: 5,
+  SHOWCASE_CLIENT: 6,
 };
 
 /**
@@ -880,6 +882,9 @@ class EventParams {
 
     /** @private {?string} */
     this.oldTransactionId_ = data[4 + base] == null ? null : data[4 + base];
+
+    /** @private {?boolean} */
+    this.isUserRegistered_ = data[5 + base] == null ? null : data[5 + base];
   }
 
   /**
@@ -953,6 +958,20 @@ class EventParams {
   }
 
   /**
+   * @return {?boolean}
+   */
+  getIsUserRegistered() {
+    return this.isUserRegistered_;
+  }
+
+  /**
+   * @param {boolean} value
+   */
+  setIsUserRegistered(value) {
+    this.isUserRegistered_ = value;
+  }
+
+  /**
    * @param {boolean} includeLabel
    * @return {!Array<?>}
    * @override
@@ -964,6 +983,7 @@ class EventParams {
         this.hadLogged_, // field 3 - had_logged
         this.sku_, // field 4 - sku
         this.oldTransactionId_, // field 5 - old_transaction_id
+        this.isUserRegistered_, // field 6 - is_user_registered
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -6007,6 +6027,9 @@ function getCanonicalUrl(doc) {
   return (node && node.href) || '';
 }
 
+const PARSED_URL = parseUrl$1(self.window.location.href);
+const PARSED_REFERRER = parseUrl$1(self.document.referrer);
+
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -6092,7 +6115,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.140',
+    '_client': 'SwG 0.1.22.141',
   });
 }
 
@@ -7211,7 +7234,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.140',
+        '_client': 'SwG 0.1.22.141',
         'supportsEventManager': true,
       },
       args || {}
@@ -7611,13 +7634,6 @@ const ExperimentFlags = {
    *  changed from '<uuid>' to '<uuid>.swg'.
    */
   UPDATE_GOOGLE_TRANSACTION_ID: 'update-google-transaction-id',
-
-  /**
-   * Enables PayClient to be instantiated within start() instead of upon instantiation.
-   * Also moves google preconnects to Runtime from PayClient, and runs Pay
-   * preloads upon start() instead of within the ctor.
-   */
-  PAY_CLIENT_LAZYLOAD: 'pay-client-lazyload',
 };
 
 /**
@@ -8060,7 +8076,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl$1(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.140');
+    context.setClientVersion('SwG 0.1.22.141');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString$1(this.getQueryString_());
@@ -10051,6 +10067,14 @@ class Dialog {
   }
 
   /**
+   * Gets the LoadingView for this dialog.
+   * @return {LoadingView}
+   */
+  getLoadingView() {
+    return this.loadingView_;
+  }
+
+  /**
    * Transitions to the next view.
    * @private
    */
@@ -10389,14 +10413,21 @@ class DialogManager {
    * @return {!Promise}
    */
   openView(view, hidden = false) {
-    view.whenComplete().catch((reason) => {
+    this.handleCancellations(view);
+    return this.openDialog(hidden).then((dialog) => dialog.openView(view));
+  }
+
+  /**
+   * Handles cancellations (ex: user clicks close button on dialog).
+   * @param {!./view.View} view
+   * @return {!Promise}
+   */
+  handleCancellations(view) {
+    return view.whenComplete().catch((reason) => {
       if (isCancelError(reason)) {
         this.completeView(view);
       }
       throw reason;
-    });
-    return this.openDialog(hidden).then((dialog) => {
-      return dialog.openView(view);
     });
   }
 
@@ -10499,7 +10530,8 @@ const MeterClientTypes = {
  */
 
 const IFRAME_BOX_SHADOW =
-  'rgba(60, 64, 67, .3) 0 -2px 5px, rgba(60, 64, 67, .15) 0 -5px 5px';
+  'rgba(60, 64, 67, 0.3) 0px -2px 5px, rgba(60, 64, 67, 0.15) 0px -5px 5px';
+const MINIMIZED_IFRAME_SIZE = '420px';
 
 class MeterToastApi {
   /**
@@ -10577,21 +10609,30 @@ class MeterToastApi {
         'starting metering.';
       log_4(errorMessage);
     }
-    return this.dialogManager_.openView(this.activityIframeView_).then(() => {
+    this.dialogManager_.handleCancellations(this.activityIframeView_);
+    return this.dialogManager_.openDialog().then((dialog) => {
       this.setDialogBoxShadow_();
-      // Allow closing of the iframe with any scroll or click event.
-      this.win_.addEventListener('click', this.sendCloseRequestFunction_);
-      this.win_.addEventListener('touchstart', this.sendCloseRequestFunction_);
-      this.win_.addEventListener('mousedown', this.sendCloseRequestFunction_);
-      this.win_.addEventListener('wheel', this.sendCloseRequestFunction_);
-      // Making body's overflow property 'hidden' to prevent scrolling
-      // while swiping on the iframe.
-      const $body = this.win_.document.body;
-      setStyle($body, 'overflow', 'hidden');
-      this.deps_
-        .eventManager()
-        .logSwgEvent(AnalyticsEvent.IMPRESSION_METER_TOAST);
-      this.deps_.eventManager().logSwgEvent(AnalyticsEvent.EVENT_OFFERED_METER);
+      this.setLoadingViewWidth_();
+      return dialog.openView(this.activityIframeView_).then(() => {
+        // Allow closing of the iframe with any scroll or click event.
+        this.win_.addEventListener('click', this.sendCloseRequestFunction_);
+        this.win_.addEventListener(
+          'touchstart',
+          this.sendCloseRequestFunction_
+        );
+        this.win_.addEventListener('mousedown', this.sendCloseRequestFunction_);
+        this.win_.addEventListener('wheel', this.sendCloseRequestFunction_);
+        // Making body's overflow property 'hidden' to prevent scrolling
+        // while swiping on the iframe.
+        const $body = this.win_.document.body;
+        setStyle($body, 'overflow', 'hidden');
+        this.deps_
+          .eventManager()
+          .logSwgEvent(AnalyticsEvent.IMPRESSION_METER_TOAST);
+        this.deps_
+          .eventManager()
+          .logSwgEvent(AnalyticsEvent.EVENT_OFFERED_METER);
+      });
     });
   }
 
@@ -10619,18 +10660,40 @@ class MeterToastApi {
    * Changes the iframe box shadow to match desired specifications on mobile.
    */
   setDialogBoxShadow_() {
-    const mq = this.win_.matchMedia('(max-width: 640px), (max-height: 640px)');
+    const mobileMediaQuery = this.win_.matchMedia(
+      '(max-width: 640px), (max-height: 640px)'
+    );
     const element = this.dialogManager_.getDialog().getElement();
-    if (mq.matches) {
+    if (mobileMediaQuery.matches) {
       setImportantStyles(element, {'box-shadow': IFRAME_BOX_SHADOW});
     }
-    mq.addListener((changed) => {
+    mobileMediaQuery.addListener((changed) => {
       if (changed.matches) {
         setImportantStyles(element, {'box-shadow': IFRAME_BOX_SHADOW});
       } else {
         setImportantStyles(element, {'box-shadow': ''});
       }
     });
+  }
+
+  /**
+   * Changes the size of the loading iframe on desktop to match the size of
+   * the meter toast iframe.
+   */
+  setLoadingViewWidth_() {
+    const desktopMediaQuery = this.win_.matchMedia(
+      '(min-width: 640px) and (min-height: 640px)'
+    );
+    if (desktopMediaQuery.matches) {
+      const element = this.dialogManager_
+        .getDialog()
+        .getLoadingView()
+        .getElement();
+      setImportantStyles(element, {
+        'width': MINIMIZED_IFRAME_SIZE,
+        'margin': 'auto',
+      });
+    }
   }
 
   /**
@@ -11298,14 +11361,41 @@ class EntitlementsManager {
    */
   consume_(entitlements, onCloseDialog) {
     if (entitlements.enablesThisWithGoogleMetering()) {
-      const meterToastApi = new MeterToastApi(this.deps_);
-      meterToastApi.setOnConsumeCallback(() => {
+      const onConsumeCallback = () => {
         if (onCloseDialog) {
           onCloseDialog();
         }
         this.sendPingback_(entitlements);
-      });
+      };
+      const showToast = this.getShowToastFromEntitlements_(entitlements);
+      if (showToast === false) {
+        // If showToast is explicitly false, call onConsumeCallback directly.
+        return onConsumeCallback();
+      }
+      const meterToastApi = new MeterToastApi(this.deps_);
+      meterToastApi.setOnConsumeCallback(onConsumeCallback);
       return meterToastApi.start();
+    }
+  }
+
+  /**
+   * Gets the `showToast` value (or null/undefined if unavailable) from
+   * the Google metering entitlement details in the input entitlements.
+   * @param {!Entitlements} entitlements
+   * @return {boolean|undefined}
+   * @private
+   */
+  getShowToastFromEntitlements_(entitlements) {
+    const entitlement = entitlements.getEntitlementForThis();
+    if (!entitlement || entitlement.source !== GOOGLE_METERING_SOURCE) {
+      return;
+    }
+    try {
+      const meteringJwt = this.jwtHelper_.decode(entitlement.subscriptionToken);
+      return meteringJwt['metering'] && meteringJwt['metering']['showToast'];
+    } catch (e) {
+      // Ignore decoding errors.
+      return;
     }
   }
 
