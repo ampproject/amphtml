@@ -19,8 +19,10 @@ const argv = require('minimist')(process.argv.slice(2));
 const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const log = require('fancy-log');
-const {getOutput} = require('../../common/process');
+const {execOrThrow} = require('../../common/exec');
 const {makeBentoExtension} = require('./bento');
+
+const bundlesConfigJs = 'build-system/compile/bundles.config.js';
 
 const year = new Date().getFullYear();
 
@@ -41,28 +43,20 @@ function pascalCase(str) {
  * @param {Array<string>=} args
  * @return {string}
  */
-const jscodeshift = (transform, args = []) => {
-  // throw [
-  //   'npx jscodeshift',
-  //   `--transform ${__dirname}/jscodeshift/${transform}`,
-  //   ...args,
-  // ].join(' ');
-  return getStdoutThrowOnError(
+const jscodeshift = (transform, args = []) =>
+  execOrThrow(
     [
       'npx jscodeshift',
       `--transform ${__dirname}/jscodeshift/${transform}`,
       ...args,
     ].join(' ')
-  );
-};
+  ).stdout;
 
 /**
  * @param {{name: string, version: string, latestVersion: (string|undefined)}} bundle
  * @return {string}
  */
 function insertExtensionBundlesConfig(bundle) {
-  const bundlesConfigJs = 'build-system/compile/bundles.config.js';
-
   // stringify twice to escape into string:
   // {"name": "foo"} -> "{\"name\": \"foo\"}"
   const insertExtensionBundleArg = JSON.stringify(JSON.stringify(bundle));
@@ -72,7 +66,7 @@ function insertExtensionBundlesConfig(bundle) {
     bundlesConfigJs,
   ]);
 
-  getStdoutThrowOnError(
+  execOrThrow(
     `./node_modules/prettier/bin-prettier.js --write ${bundlesConfigJs}`
   );
 }
@@ -300,18 +294,6 @@ async function makeAmpExtension() {
 
 async function makeExtension() {
   return argv.bento ? makeBentoExtension() : makeAmpExtension();
-}
-
-/**
- * @param {string} cmd
- * @return {?string}
- */
-function getStdoutThrowOnError(cmd) {
-  const {stdout, stderr} = getOutput(cmd);
-  if (!stdout && stderr) {
-    throw new Error(`${cmd}\n\n${stderr}`);
-  }
-  return stdout && stdout.trim();
 }
 
 module.exports = {
