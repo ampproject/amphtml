@@ -147,9 +147,6 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     /** @protected {?Promise<?InteractiveResponseType|?JsonObject|undefined>} */
     this.backendDataPromise_ = null;
 
-    /** @protected {?Promise<!../../../src/service/cid-impl.CidDef>} */
-    this.clientIdService_ = null;
-
     /** @protected {?Promise<JsonObject>} */
     this.clientIdPromise_ = null;
 
@@ -250,7 +247,6 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     devAssert(this.element.children.length == 0, 'Too many children');
 
     // Initialize all the services before proceeding, and update store with state
-    this.clientIdService_ = Services.cidForDoc(this.element);
     this.urlService_ = Services.urlForDoc(this.element);
     return Promise.all([
       Services.storyVariableServiceForOrNull(this.win).then((service) => {
@@ -397,7 +393,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    */
   getClientId_() {
     if (!this.clientIdPromise_) {
-      this.clientIdPromise_ = this.clientIdService_.then((data) => {
+      this.clientIdPromise_ = Services.cidForDoc(this.element).then((data) => {
         return data.get(
           {scope: 'amp-story', createCookieIfNotPresent: true},
           /* consent */ Promise.resolve()
