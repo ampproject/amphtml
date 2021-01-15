@@ -71,7 +71,7 @@
     "check-dependencies": "1.1.0",
     "cli-highlight": "2.1.10",
     "codecov": "3.8.1",
-    "commander": "6.2.1",
+    "commander": "7.0.0",
     "connect-header": "0.0.5",
     "css-what": "4.0.0",
     "cssnano": "4.1.10",
