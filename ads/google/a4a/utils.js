@@ -197,6 +197,7 @@ export function isReportingEnabled(ampElement) {
  * @return {!Object<string,null|number|string>} block level parameters
  */
 export function googleBlockParameters(a4a, opt_experimentIds) {
+  opt_experimentIds.push('21068941');
   const {element: adElement, win} = a4a;
   const slotRect = getPageLayoutBoxBlocking(adElement);
   const iframeDepth = iframeNestingDepth(win);
