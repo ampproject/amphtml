@@ -28,12 +28,12 @@ export default {
 export const _default = () => {
   // __do_not_submit__: This is example code only.
   return (
-    <amp-__component_name_hyphenated__
+    <__component_name_hyphenated__
       width="300"
       height="200"
       example-property="example string property value"
     >
       This text is inside.
-    </amp-__component_name_hyphenated__>
+    </__component_name_hyphenated__>
   );
 };
