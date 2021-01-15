@@ -76,12 +76,12 @@ function addJobAndBuildInfo(testType, reportJson) {
     repository: process.env.GITHUB_REPOSITORY,
     results: reportJson,
     build: {
-      buildNumber: buildId,
+      buildId,
       commitSha,
       url: ciBuildUrl(),
     },
     job: {
-      jobNumber: jobId,
+      jobId,
       testSuiteType: testType,
       url: ciJobUrl(),
     },
