@@ -103,7 +103,10 @@ exports.postClosureBabel = function () {
         file.sourceMap
       );
 
-      const {compressed, terserMap} = await terserMinify(code, path.basename(file.path));
+      const {compressed, terserMap} = await terserMinify(
+        code,
+        path.basename(file.path)
+      );
       file.contents = Buffer.from(compressed, 'utf-8');
       file.sourceMap = remapping(
         [terserMap, babelMap, map],

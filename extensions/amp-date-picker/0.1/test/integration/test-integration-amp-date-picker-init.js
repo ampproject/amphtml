@@ -30,7 +30,6 @@ function checkElementUpgrade(element) {
 const config = describe.configure().ifModuleBuild();
 
 config.run('amp-date-picker', async () => {
-
   it('initializes the date picker', async () => {
     const testExtension = 'amp-date-picker';
     const fixture = await createFixtureIframe(
