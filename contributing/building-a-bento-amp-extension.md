@@ -531,7 +531,7 @@ Also consider contributing an example to
 
 ## Updating build configs
 
-You must make changes to [`build-system/compile/bundles.config.js`](../build-system/compile/bundles.config.js) for your Bento component to successfully build. You will need to add an entry in the `extensionBundles` array.
+You must make changes to [`build-system/compile/bundles.config.extensions.json`](../build-system/compile/bundles.config.extensions.json) for your Bento component to successfully build. You will need to add an entry in the top-level array.
 
 ```javascript
 exports.extensionBundles = [
