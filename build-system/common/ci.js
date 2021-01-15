@@ -157,16 +157,16 @@ function ciCommitSha() {
 }
 
 /**
- * Returns the number of the current build.
+ * Returns the ID of the current build.
  * @return {string}
  */
-function ciBuildNumber() {
+function ciBuildId() {
   return isTravis
     ? env('TRAVIS_BUILD_NUMBER')
     : isGithubActions
     ? env('GITHUB_RUN_ID')
     : isCircleci
-    ? env('CIRCLE_BUILD_NUM')
+    ? env('CIRCLE_WORKFLOW_ID')
     : '';
 }
 
@@ -185,10 +185,10 @@ function ciBuildUrl() {
 }
 
 /**
- * Returns the number of the current job.
+ * Returns the ID of the current job.
  * @return {string}
  */
-function ciJobNumber() {
+function ciJobId() {
   return isTravis
     ? env('TRAVIS_JOB_NUMBER')
     : isGithubActions
@@ -228,10 +228,10 @@ function ciRepoSlug() {
 }
 
 module.exports = {
-  ciBuildNumber,
+  ciBuildId,
   ciBuildUrl,
   ciCommitSha,
-  ciJobNumber,
+  ciJobId,
   ciJobUrl,
   ciPullRequestBranch,
   ciPullRequestSha,
