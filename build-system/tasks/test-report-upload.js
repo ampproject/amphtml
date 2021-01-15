@@ -31,6 +31,7 @@ const {
   ciJobNumber,
   ciJobUrl,
   ciCommitSha,
+  ciRepoSlug,
 } = require('../common/ci');
 
 const {cyan, green, red, yellow} = require('ansi-colors');
@@ -72,7 +73,7 @@ function addJobAndBuildInfo(testType, reportJson) {
   }
 
   return {
-    repository: process.env.GITHUB_REPOSITORY,
+    repository: ciRepoSlug(),
     results: reportJson,
     build: {
       buildNumber,
@@ -118,7 +119,7 @@ async function sendCiKarmaReport(testType) {
       'failed to report results of type',
       cyan(testType),
       ': \n',
-      yellow(response.statusText)
+      yellow(await response.text())
     );
   }
 }
