@@ -94,7 +94,6 @@ export function getContextMetadata(
           'height': layoutRect.height,
         }
       : null,
-    'initialIntersection': element.getIntersectionChangeEntry(),
     'domFingerprint': DomFingerprint.generate(element),
     'experimentToggles': experimentToggles(parentWindow),
     'sentinel': sentinel,
