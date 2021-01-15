@@ -72,7 +72,7 @@
     const playerEl = document.querySelector('amp-story-player');
     playerEl.addEventListener('triggerPlayerAction', (event) => {
       const cart = document.getElementById("shopping-cart-contents");
-      const item = document.createTextNode(event.detail.productId);
+      const item = document.createTextNode(event.detail.name);
       const li = document.createElement("LI");
       li.appendChild(item);
       cart.appendChild(li);

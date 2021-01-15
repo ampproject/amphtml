@@ -730,9 +730,8 @@ export class ManualAdvancement extends AdvancementConfig {
 
       // TODO: Falls back on the provided url when the player is not
       // viewed in a context where the player action is enabled.
-      const acceptableHostDomainsList = playerLink.dataset.expectedHostDomains.split(
-        ' '
-      );
+      const expectedHostDomains = 'localhost google.com';
+      const acceptableHostDomainsList = expectedHostDomains.split(' ');
       const currentDomain = window.location.hostname;
       if (!acceptableHostDomainsList.includes(currentDomain)) {
         playerLink.href = playerLink.dataset.fallbackUrl;
@@ -743,8 +742,8 @@ export class ManualAdvancement extends AdvancementConfig {
       viewer.sendMessage(
         'triggerPlayerAction',
         dict({
-          'productId': JSON.parse(playerLink.getAttribute('player-action'))
-            .productId,
+          'name': JSON.parse(playerLink.getAttribute('data-player-action-data'))
+            .name,
         }),
         false
       );

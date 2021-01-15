@@ -1395,8 +1395,8 @@ export class AmpStory extends AMP.BaseElement {
     this.viewerMessagingHandler_.send(
       'triggerPlayerAction',
       dict({
-        'productId': JSON.parse(this.element.getAttribute('player-action'))
-          .productId,
+        'name': JSON.parse(this.element.getAttribute('data-player-action-data'))
+          .name,
       })
     );
   }
