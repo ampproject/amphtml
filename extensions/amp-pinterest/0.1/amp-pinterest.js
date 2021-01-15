@@ -86,9 +86,12 @@ class AmpPinterest extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    return this.render().then((node) => {
-      return this.element.appendChild(node);
-    });
+    return this.render().then((node) => this.element.appendChild(node));
+  }
+
+  /** @override */
+  firstLayoutCompleted() {
+    this.attemptChangeHeight(this.element.getBoundingClientRect().height);
   }
 
   /**
