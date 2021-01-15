@@ -26,6 +26,7 @@ export default {
 };
 
 export const _default = () => {
+  // __do_not_submit__: This is example code only.
   return (
     <amp-__component_name_hyphenated__
       width="300"

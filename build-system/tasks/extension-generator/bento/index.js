@@ -87,6 +87,10 @@ async function makeBentoExtension() {
     '__component_name_hyphenated__': componentName,
     '__component_name_hyphenated_capitalized__': componentName.toUpperCase(),
     '__component_name_pascalcase__': dashToPascalCase(componentName),
+    // This allows generated code to contain "DO_NOT_SUBMIT", which will cause
+    // PRs to fail CI if example code isn't removed from the PR. We can't
+    // actually write that out, here or in templates, without CI failing.
+    '__do_not_submit__': 'DO_NOT_SUBMIT'.replace(/_/g, ' '),
   });
 
   const destinationPath = (templatePath) =>
@@ -99,6 +103,12 @@ async function makeBentoExtension() {
 
   for await (const templatePath of walkDir(TEMPLATE_DIR)) {
     const destination = destinationPath(templatePath);
+
+    // Skip CSS files if --no_css flag is set
+    if (argv.no_css && /.css$/.test(templatePath)) {
+      log(cyan('INFO:'), 'Skipping CSS file', cyan(destination));
+      continue;
+    }
 
     // Skip if the destination file already exists
     try {
@@ -128,7 +138,12 @@ async function makeBentoExtension() {
     log(green('SUCCESS:'), 'Created file', cyan(destination));
   }
 
-  insertExtensionBundlesConfig({name: `amp-${componentName}`, version});
+  // Update bundles.config.js with an entry for the new component
+  const bundleConfig = {name: `amp-${componentName}`, version};
+  if (!argv.no_css) {
+    bundleConfig.options = {hasCss: true};
+  }
+  insertExtensionBundlesConfig(bundleConfig);
   log(green('SUCCESS:'), 'Wrote', cyan('bundles.config.js'));
 
   log(`

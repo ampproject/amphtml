@@ -32,6 +32,7 @@ import {useStyles} from './__component_name_hyphenated__.jss';
  */
 export function __component_name_pascalcase__({exampleTagNameProp, ...rest}) {
   // Examples of state and hooks
+  // __do_not_submit__: This is example code only.
   const [exampleValue, setExampleValue] = useState(0);
   const exampleRef = useRef(null);
   const classes = useStyles();

@@ -27,6 +27,7 @@ const TAG = 'amp-__component_name_hyphenated__';
 class Amp__component_name_pascalcase__ extends PreactBaseElement {
   /** @override */
   init() {
+    // __do_not_submit__: This is example code only.
     this.registerApiAction('exampleToggle', (api) => api./*OK*/exampleToggle());
 
     return dict({

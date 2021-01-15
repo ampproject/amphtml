@@ -35,6 +35,7 @@ describes.realWin(
     });
 
     it('example test renders', async () => {
+      // __do_not_submit__: This is example code only.
       element = doc.createElement('amp-__component_name_hyphenated__');
       doc.body.appendChild(element);
       await waitFor(() => element.isConnected, 'element connected');
