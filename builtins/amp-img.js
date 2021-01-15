@@ -16,6 +16,7 @@
 
 import {BaseElement} from '../src/base-element';
 import {Layout, isLayoutSizeDefined} from '../src/layout';
+import {ReadyState} from '../src/ready-state';
 import {Services} from '../src/services';
 import {dev} from '../src/log';
 import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '../src/utils/img';
@@ -46,8 +47,36 @@ const ATTRIBUTES_TO_PROPAGATE = [
 
 export class AmpImg extends BaseElement {
   /** @override @nocollapse */
+  static V2() {
+    return V2_IMG_VIDEO;
+  }
+
+  /** @override @nocollapse */
   static prerenderAllowed() {
     return true;
+  }
+
+  /** @override @nocollapse */
+  static getPreconnects(element) {
+    const src = element.getAttribute('src');
+    if (src) {
+      return [src];
+    }
+
+    // NOTE(@wassgha): since parseSrcset is computationally expensive and can
+    // not be inside the `buildCallback`, we went with preconnecting to the
+    // `src` url if it exists or the first srcset url.
+    const srcset = element.getAttribute('srcset');
+    if (srcset) {
+      // We try to find the first url in the srcset
+      const srcseturl = /\S+/.exec(srcset);
+      // Connect to the first url if it exists
+      if (srcseturl) {
+        return [srcseturl[0]];
+      }
+    }
+
+    return null;
   }
 
   /** @param {!AmpElement} element */
@@ -105,6 +134,10 @@ export class AmpImg extends BaseElement {
 
       if (!IS_ESM) {
         guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
+      }
+
+      if (AmpImg.V2() && !this.img_.complete) {
+        this.onReadyState(ReadyState.LOADING);
       }
     }
   }
@@ -261,6 +294,38 @@ export class AmpImg extends BaseElement {
   }
 
   /** @override */
+  buildCallback() {
+    if (!AmpImg.V2()) {
+      return;
+    }
+
+    // A V2 amp-img loads and reloads automatically.
+    this.onReadyState(ReadyState.LOADING);
+    this.initialize_();
+    const img = dev().assertElement(this.img_);
+    if (img.complete) {
+      this.onReadyState(ReadyState.COMPLETE);
+      this.firstLayoutCompleted();
+      this.hideFallbackImg_();
+    }
+    listen(img, 'load', () => {
+      this.onReadyState(ReadyState.COMPLETE);
+      this.firstLayoutCompleted();
+      this.hideFallbackImg_();
+    });
+    listen(img, 'error', (reason) => {
+      this.onReadyState(ReadyState.ERROR, reason);
+      this.onImgLoadingError_();
+    });
+  }
+
+  /** @override */
+  ensureLoaded() {
+    const img = dev().assertElement(this.img_);
+    img.loading = 'eager';
+  }
+
+  /** @override */
   layoutCallback() {
     this.initialize_();
     const img = dev().assertElement(this.img_);
@@ -275,6 +340,10 @@ export class AmpImg extends BaseElement {
 
   /** @override */
   unlayoutCallback() {
+    if (!AmpImg.V2()) {
+      return;
+    }
+
     if (this.unlistenError_) {
       this.unlistenError_();
       this.unlistenError_ = null;
@@ -319,10 +388,8 @@ export class AmpImg extends BaseElement {
       !this.allowImgLoadFallback_ &&
       this.img_.classList.contains('i-amphtml-ghost')
     ) {
-      this.getVsync().mutate(() => {
-        this.img_.classList.remove('i-amphtml-ghost');
-        this.toggleFallback(false);
-      });
+      this.img_.classList.remove('i-amphtml-ghost');
+      this.toggleFallback(false);
     }
   }
 
@@ -332,13 +399,11 @@ export class AmpImg extends BaseElement {
    */
   onImgLoadingError_() {
     if (this.allowImgLoadFallback_) {
-      this.getVsync().mutate(() => {
-        this.img_.classList.add('i-amphtml-ghost');
-        this.toggleFallback(true);
-        // Hide placeholders, as browsers that don't support webp
-        // Would show the placeholder underneath a transparent fallback
-        this.togglePlaceholder(false);
-      });
+      this.img_.classList.add('i-amphtml-ghost');
+      this.toggleFallback(true);
+      // Hide placeholders, as browsers that don't support webp
+      // Would show the placeholder underneath a transparent fallback
+      this.togglePlaceholder(false);
       this.allowImgLoadFallback_ = false;
     }
   }

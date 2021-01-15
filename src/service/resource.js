@@ -1020,6 +1020,9 @@ export class Resource {
    * @return {!Promise}
    */
   loadedOnce() {
+    if (this.element.V2()) {
+      return this.element.whenLoaded();
+    }
     return this.loadPromise_;
   }
 

@@ -148,6 +148,18 @@ const forbiddenTerms = {
     ],
   },
   // Service factories that should only be installed once.
+  '\\.buildInternal': {
+    message: 'can only be called by the framework',
+    allowlist: [
+      'src/service/builder.js',
+      'src/service/resource.js',
+      'testing/iframe.js',
+    ],
+  },
+  'getBuilderForDoc': {
+    message: 'can only be used by the runtime',
+    allowlist: ['src/custom-element.js', 'src/service/builder.js'],
+  },
   'installActionServiceForDoc': {
     message: privateServiceFactory,
     allowlist: [
@@ -308,6 +320,7 @@ const forbiddenTerms = {
       'src/chunk.js',
       'src/element-service.js',
       'src/service.js',
+      'src/service/builder.js',
       'src/service/cid-impl.js',
       'src/service/origin-experiments-impl.js',
       'src/services.js',
@@ -1384,6 +1397,7 @@ function hasAnyTerms(srcFile) {
     /^test-/.test(basename) ||
     /^_init_tests/.test(basename) ||
     /_test\.js$/.test(basename) ||
+    /testing\//.test(srcFile) ||
     /storybook\/[^/]+\.js$/.test(srcFile);
   if (!isTestFile) {
     hasSrcInclusiveTerms = matchTerms(srcFile, forbiddenTermsSrcInclusive);
