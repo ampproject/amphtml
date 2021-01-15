@@ -211,9 +211,7 @@ describes.realWin(
         return getAmpSidebar({'stubHistory': true}).then((sidebarElement) => {
           const impl = sidebarElement.implementation_;
           execute(impl, 'open');
-          expect(doc.querySelectorAll('.amphtml-sidebar-mask').length).to.equal(
-            1
-          );
+          expect(doc.querySelectorAll('.amp-sidebar-mask').length).to.equal(1);
         });
       });
 
