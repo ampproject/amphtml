@@ -19,6 +19,8 @@ const argv = require('minimist')(process.argv.slice(2));
 const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const log = require('fancy-log');
+const path = require('path');
+const {makeBentoExtension} = require('./bento');
 
 const year = new Date().getFullYear();
 
@@ -73,12 +75,18 @@ tags: {  # <${name}>
 `;
 }
 
-const getMarkdownDocFile = async (name) =>
-  (await fs.readFile(`${__dirname}/extension-doc.template.md`))
+const getMarkdownDocFile = async (name) => {
+  const nameWithoutPrefix = name.replace(/^amp-/, '');
+  const templatePath = path.join(
+    __dirname,
+    '/bento/amp-__component_name_hyphenated__/amp-__component_name_hyphenated__.md'
+  );
+
+  return (await fs.readFile(templatePath))
     .toString('utf-8')
-    .replace(/\\\$category/g, '$category')
-    .replace(/\\?\${name}/g, name)
-    .replace(/\\?\${year}/g, year);
+    .replace(/__component_name_hyphenated__/g, nameWithoutPrefix)
+    .replace(/__current_year__/g, year);
+};
 
 function getJsTestExtensionFile(name) {
   return `/**
@@ -206,7 +214,7 @@ function getExamplesFile(name) {
 `;
 }
 
-async function makeExtension() {
+async function makeAmpExtension() {
   if (!argv.name) {
     log(colors.red('Error! Please pass in the "--name" flag with a value'));
   }
@@ -249,6 +257,10 @@ async function makeExtension() {
   fs.writeFileSync(`examples/${name}.amp.html`, examplesFile);
 }
 
+async function makeExtension() {
+  return argv.bento ? makeBentoExtension() : makeAmpExtension();
+}
+
 module.exports = {
   makeExtension,
 };
@@ -256,4 +268,8 @@ module.exports = {
 makeExtension.description = 'Create an extension skeleton';
 makeExtension.flags = {
   name: '  The name of the extension. Preferable prefixed with `amp-*`',
+  bento: '  Generate a Bento component',
+  version: '  Sets the verison number (default: 1.0); --bento only',
+  overwrite:
+    '  Overwrites existing files at the destination, if present; --bento only',
 };

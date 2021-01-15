@@ -1231,6 +1231,8 @@ const requiredTerms = {
   'Licensed under the Apache License, Version 2\\.0': dedicatedCopyrightNoteSources,
   'http\\://www\\.apache\\.org/licenses/LICENSE-2\\.0': dedicatedCopyrightNoteSources,
 };
+// Exclude extension generator templates
+const requiredTermsExcluded = /amp-__component_name_hyphenated__/;
 
 /**
  * Check if root of path is test/ or file is in a folder named test.
@@ -1401,7 +1403,7 @@ function isMissingTerms(file) {
   return Object.keys(requiredTerms)
     .map(function (term) {
       const filter = requiredTerms[term];
-      if (!filter.test(file.path)) {
+      if (!filter.test(file.path) || requiredTermsExcluded.test(file.path)) {
         return false;
       }
 
