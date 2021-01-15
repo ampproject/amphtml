@@ -36,18 +36,16 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     this.element_ = element;
 
     /** @private {?Element} The element that is transitioned. */
-    this.ampImgEl_ = dev().assertElement(
-      this.element_.querySelector('amp-img')
-    );
+    this.ampImgEl_ = null;
 
     /** @private {?string} Sent to siblings to update their position. */
-    this.x = this.element_.getAttribute('x') || '0%';
+    this.x = null;
 
     /** @private {?string} Sent to siblings to update their position. */
-    this.y = this.element_.getAttribute('y') || '0%';
+    this.y = null;
 
     /** @private {?string} Sent to siblings to update their position. */
-    this.zoom = this.element_.getAttribute('zoom') || '1';
+    this.zoom = null;
 
     /** @private {Array<Element>} */
     this.siblings_ = [];
@@ -55,18 +53,30 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.getSiblings_().then((siblings_) => {
-      this.siblings_ = siblings_;
+    this.ampImgEl_ = dev().assertElement(
+      this.element_.querySelector('amp-img')
+    );
+
+    this.x = this.element_.getAttribute('x') || '0%';
+    this.y = this.element_.getAttribute('y') || '0%';
+    this.zoom = this.element_.getAttribute('zoom') || '1';
+
+    this.getSiblings_().then((siblings) => {
+      this.siblings_ = siblings;
     });
 
     return Services.storyStoreServiceForOrNull(this.win).then(
       (storeService) => {
-        storeService.subscribe(StateProperty.CURRENT_PAGE_ID, (currPageId) => {
-          const isOnActivePage = currPageId === this.getPageId_();
-          if (isOnActivePage) {
-            this.updateSiblings_();
-          }
-        });
+        storeService.subscribe(
+          StateProperty.CURRENT_PAGE_ID,
+          (currPageId) => {
+            const isOnActivePage = currPageId === this.getPageId_();
+            if (isOnActivePage) {
+              this.updateSiblings_();
+            }
+          },
+          true /** callToInitialize */
+        );
       }
     );
   }
@@ -94,7 +104,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
    * @return {!Promise<Array<Element>>}
    */
   getSiblings_() {
-    // TODO Group siblings to be transitioned together #31932
+    // TODO(#31932): Group siblings to be transitioned together.
     const siblings = Array.from(
       document.querySelectorAll('amp-story-panning-media')
     );

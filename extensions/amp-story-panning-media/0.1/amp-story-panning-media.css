@@ -21,7 +21,7 @@ amp-story-panning-media {
   align-items: center !important;
 }
 
-/* TODO: #31934 do not transition element when landing on the page */
+/* TODO(#31934): do not transition element when landing on the page. */
 amp-story-panning-media amp-img {
   transition: transform 1s ease-in-out;
 }
