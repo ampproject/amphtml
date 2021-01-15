@@ -252,12 +252,10 @@ async function makeAmpExtension() {
     `extensions/${name}/${version}/${name}.js`,
     getJsExtensionFile(name)
   );
-  if (!argv.no_amp_css) {
-    fs.writeFileSync(
-      `extensions/${name}/${version}/${name}.css`,
-      await getAmpCssFile(name)
-    );
-  }
+  fs.writeFileSync(
+    `extensions/${name}/${version}/${name}.css`,
+    await getAmpCssFile(name)
+  );
   fs.writeFileSync(
     `extensions/${name}/${version}/test/test-${name}.js`,
     getJsTestExtensionFile(name)
@@ -284,7 +282,7 @@ async function makeAmpExtension() {
   return {
     name,
     version: typeof version === 'string' ? version : version.toFixed(1),
-    options: argv.no_amp_css ? undefined : {hasCss: true},
+    options: {hasCss: true},
   };
 }
 
@@ -307,7 +305,6 @@ makeExtension.description = 'Create an extension skeleton';
 makeExtension.flags = {
   name: '  The name of the extension. Preferable prefixed with `amp-*`',
   bento: '  Generate a Bento component',
-  'no_amp_css': '  Generates extension without CSS boilerplate; --bento only',
   version: '  Sets the verison number (default: 1.0); --bento only',
   overwrite:
     '  Overwrites existing files at the destination, if present; --bento only',

@@ -104,12 +104,6 @@ async function makeBentoExtension() {
   for await (const templatePath of walkDir(TEMPLATE_DIR)) {
     const destination = destinationPath(templatePath);
 
-    // Skip CSS files if --no_css flag is set
-    if (argv.no_amp_css && /.css$/.test(templatePath)) {
-      log(cyan('INFO:'), 'Skipping CSS file', cyan(destination));
-      continue;
-    }
-
     // Skip if the destination file already exists
     try {
       await fs.access(destination);
@@ -159,7 +153,7 @@ You may also view the component during development in storybook:
   return {
     name: `amp-${componentName}`,
     version,
-    options: argv.no_amp_css ? undefined : {hasCss: true},
+    options: {hasCss: true},
   };
 }
 
