@@ -16,7 +16,7 @@
 
 import {createUseStyles} from 'react-jss';
 
-// Example class used for styling
+// __do_not_submit__: Example class used for styling
 const exampleContentHidden = {
   display: 'none',
 };

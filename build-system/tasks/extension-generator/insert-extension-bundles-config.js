@@ -22,7 +22,12 @@ const extensionBundlesJson =
 /**
  * Inserts an extension entry into bundles.config.extensions.json
  *
- * @param {{name: string, version: string, latestVersion: (string|undefined)}} bundle
+ * @param {{
+ *   name: string,
+ *   version: string,
+ *   latestVersion: (string|undefined)
+ *   options: ({hasCss: boolean}|undefined)
+ * }} bundle
  * @return {string}
  */
 function insertExtensionBundlesConfig(bundle) {
@@ -38,7 +43,6 @@ function insertExtensionBundlesConfig(bundle) {
       (existingOrNull && existingOrNull.latestVersion) ||
       bundle.latestVersion ||
       bundle.version,
-    options: {hasCss: true},
   });
 
   writeJsonSync(
