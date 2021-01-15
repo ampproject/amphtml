@@ -45,8 +45,7 @@ function TruncateTextWithRef(
   },
   ref
 ) {
-  const containerRef = useRef();
-  const measurerRef = useRef();
+  const wrapperRef = useRef();
   const collapsedRef = useRef();
   const persistentRef = useRef();
 
@@ -56,20 +55,20 @@ function TruncateTextWithRef(
   const [expanded, setExpanded] = useState(false);
   const [ready, setReady] = useState(false);
 
-  // TODO(rcebulko): Rewrite `truncateText` for Preact
-  /** Perform truncation on contents. */
-  const truncate = useCallback(() => {
-    truncateText({
-      container: measurerRef.current,
-      overflowNodes: [persistentRef.current, collapsedRef.current],
-    });
-  });
-
   // Provide API actions
   useImperativeHandle(ref, () => ({
     expand: () => setExpanded(true),
     collapse: () => setExpanded(false),
   }));
+
+  // TODO(rcebulko): Rewrite `truncateText` for Preact
+  /** Perform truncation on contents. */
+  const truncate = useCallback(() => {
+    truncateText({
+      container: wrapperRef.current,
+      overflowNodes: [persistentRef.current, collapsedRef.current],
+    });
+  });
 
   // Truncate the text when expanded/collapsed
   useLayoutEffect(() => {
@@ -92,7 +91,7 @@ function TruncateTextWithRef(
 
   // Don't display contents until after the first measure/truncate
   useLayoutEffect(() => {
-    setStyle(containerRef.current, 'visibility', ready ? 'visible' : 'hidden');
+    setStyle(wrapperRef.current, 'visibility', ready ? 'visible' : 'hidden');
   }, [ready]);
 
   const classes = useStyles();
@@ -110,12 +109,11 @@ function TruncateTextWithRef(
   ));
 
   return (
-    <ContainWrapper
-      ref={containerRef}
-      wrapperClassName={classes.truncateTextContainer}
+    <Wrapper
+      ref={wrapperRef}
+      // Required to un-set defaults that break truncation
       wrapperStyle={{position: null}}
-      contentRef={measurerRef}
-      contentClassName={`i-amphtml-truncate-content ${
+      wrapperClassName={`i-amphtml-truncate-content ${
         classes.truncateTextContent
       } ${
         expanded
@@ -141,7 +139,7 @@ function TruncateTextWithRef(
       )}
 
       <TruncateSlot name="persistent" ref={persistentRef} />
-    </ContainWrapper>
+    </Wrapper>
   );
 }
 
