@@ -224,6 +224,16 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
         Ctor = nonStructThis['implementationClassForTesting'];
       }
 
+      console.log(
+        'CustomElement: new: ',
+        this.id,
+        Ctor ? Ctor.name : 'n/a',
+        'V2:',
+        Ctor ? Ctor.V1() : 'n/a',
+        'deferredBuild:',
+        Ctor ? Ctor.deferredBuild(this) : 'n/a'
+      );
+
       /** @private {?(typeof ../base-element.BaseElement)} */
       this.implClass_ = Ctor === ElementStub ? null : Ctor || null;
 
@@ -349,6 +359,13 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
      * @final @package
      */
     upgrade(newImplClass) {
+      console.log(
+        'CustomElement: upgraded: ',
+        this.id,
+        newImplClass.name,
+        newImplClass.V1(),
+        newImplClass.deferredBuild(this)
+      );
       if (this.isInTemplate_) {
         return;
       }
@@ -490,6 +507,8 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
       if (this.buildingPromise_) {
         return this.buildingPromise_;
       }
+
+      console.log('CustomElement: buildInternal:', this.id);
 
       this.setReadyStateInternal(ReadyState.BUILDING);
 
@@ -845,6 +864,13 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
         return;
       }
 
+      console.log(
+        'CustomElement: setReadyStateInternal:',
+        this.id,
+        state,
+        opt_failure
+      );
+
       this.readyState_ = state;
 
       if (!this.V1()) {
@@ -1130,6 +1156,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
      * @final
      */
     connectedCallback() {
+      console.log('CustomElement: connectedCallback:', this.id);
       if (!isTemplateTagSupported() && this.isInTemplate_ === undefined) {
         this.isInTemplate_ = !!dom.closestAncestorElementBySelector(
           this,
@@ -1293,6 +1320,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
         'Implementation must not be a stub'
       );
 
+      console.log('CustomElement: create: ', this.id, Ctor.name);
       const impl = new Ctor(this);
 
       // The `upgradeCallback` only allows redirect once for the top-level
@@ -1591,6 +1619,9 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
      * TODO(#31915): remove once V1 migration is complete.
      */
     layoutCallback(signal) {
+      console.log('CustomElement: layoutCallback:', this.id);
+      devAssert(!this.V1(), 'not allowed for V2');
+
       assertNotTemplate(this);
       devAssert(this.isBuilt(), 'Must be built to receive viewport events');
       // A lot of tests call layoutCallback manually, and don't pass a signal.
@@ -2085,6 +2116,7 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
      * @package @final
      */
     overflowCallback(overflown, requestedHeight, requestedWidth) {
+      console.log('CustomElement: overflowCallback:', overflown);
       this.getOverflowElement();
       if (!this.overflowElement_) {
         if (overflown && this.warnOnMissingOverflow) {

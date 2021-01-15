@@ -65,6 +65,11 @@ let count = 0;
 let trackingIframeTimeout = 5000;
 
 export class AmpIframe extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static V1() {
+    return true;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -305,6 +310,30 @@ export class AmpIframe extends AMP.BaseElement {
     this.container_ = makeIOsScrollable(this.element);
 
     this.registerIframeMessaging_();
+
+    if (AmpIframe.V1()) {
+      this.layoutCallback();
+    }
+  }
+
+  /** @override */
+  ensureLoaded() {
+    if (!this.iframe_) {
+      this.layoutCallback();
+    }
+  }
+
+  /** @override */
+  attachedCallback() {
+    observeDisplay(this.element, this.onDisplay_);
+    if (AmpIframe.V1()) {
+      this.setReadyState('loading');
+    }
+  }
+
+  /** @override */
+  detachedCallback() {
+    unobserveDisplay(this.element, this.onDisplay_);
   }
 
   /** @override */
@@ -405,6 +434,19 @@ export class AmpIframe extends AMP.BaseElement {
 
     const iframe = this.element.ownerDocument.createElement('iframe');
 
+    if (AmpIframe.V1()) {
+      this.setReadyState('loading');
+      if (iframe.readyState == 'complete') {
+        this.setReadyState('complete');
+      }
+      listen(iframe, 'load', () => {
+        this.setReadyState('complete');
+      });
+      listen(iframe, 'error', (reason) => {
+        this.setReadyState('error', reason);
+      });
+    }
+
     this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
 
     this.applyFillContent(iframe);
@@ -481,6 +523,12 @@ export class AmpIframe extends AMP.BaseElement {
     });
 
     this.container_.appendChild(iframe);
+
+    // DO NOT SUBMIT: might be worth to just fork amp-iframe completely for V2.
+    if (!AmpIframe.V1()) {
+      this.isDisplayed_ = false;
+      observeDisplay(this.element, this.onDisplay_);
+    }
 
     return this.loadPromise(iframe).then(() => {
       // On iOS the iframe at times fails to render inside the `overflow:auto`
@@ -572,6 +620,9 @@ export class AmpIframe extends AMP.BaseElement {
    * @override
    **/
   unlayoutCallback() {
+    if (!AmpIframe.V1()) {
+      unobserveDisplay(this.element, this.onDisplay_);
+    }
     if (this.unlistenPym_) {
       this.unlistenPym_();
       this.unlistenPym_ = null;
@@ -626,6 +677,38 @@ export class AmpIframe extends AMP.BaseElement {
   /** @override */
   unlayoutOnPause() {
     return true;
+  }
+
+  /**
+   * @param {boolean} isDisplayed
+   * @private
+   */
+  onDisplay_(isDisplayed) {
+    console.log(
+      'amp-iframe: onDisplay_:',
+      isDisplayed,
+      this.isDisplayed_,
+      !!this.iframe_
+    );
+    if (isDisplayed === this.isDisplayed_) {
+      return;
+    }
+    this.isDisplayed_ = isDisplayed;
+
+    if (AmpIframe.V1()) {
+      const iframeExists = !!this.iframe_;
+      if (isDisplayed !== iframeExists) {
+        if (isDisplayed) {
+          this.layoutCallback();
+        } else {
+          this.unlayoutCallback();
+        }
+      }
+    } else {
+      if (!isDisplayed && this.iframe_) {
+        this.getVsync().mutate(() => this.unload());
+      }
+    }
   }
 
   /**
@@ -718,6 +801,7 @@ export class AmpIframe extends AMP.BaseElement {
     if (newHeight !== undefined || newWidth !== undefined) {
       this.attemptChangeSize(newHeight, newWidth).then(
         () => {
+          console.log('amp-iframe: updateSize_: approved');
           if (newHeight !== undefined) {
             this.element.setAttribute('height', newHeight);
           }
@@ -730,7 +814,9 @@ export class AmpIframe extends AMP.BaseElement {
             newWidth
           );
         },
-        () => {}
+        () => {
+          console.log('amp-iframe: updateSize_: denied');
+        }
       );
     } else {
       this.user().error(

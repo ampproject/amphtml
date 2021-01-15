@@ -85,6 +85,11 @@ const ATTRS_TO_PROPAGATE = ATTRS_TO_PROPAGATE_ON_BUILD.concat(
  * @implements {../../../src/video-interface.VideoInterface}
  */
 export class AmpVideo extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static V1() {
+    return true;
+  }
+
   /**
    * AMP Cache may selectively cache certain video sources (based on various
    * heuristics such as video type, extensions, etc...).
@@ -264,6 +269,30 @@ export class AmpVideo extends AMP.BaseElement {
     installVideoManagerForDoc(element);
 
     Services.videoManagerForDoc(element).register(this);
+
+    if (AmpVideo.V1()) {
+      this.setReadyState('loading');
+
+      const video = devAssert(this.video_);
+
+      if (video.readyState > 0) {
+        this.setReadyState('complete');
+      }
+      listen(video, 'loadedmetadata', () => {
+        this.setReadyState('complete');
+      });
+      listen(video, 'error', (reason) => {
+        this.setReadyState('error', reason);
+      });
+
+      this.layoutCallback();
+    }
+  }
+
+  /** @override */
+  ensureLoaded() {
+    const video = dev().assertElement(this.video_);
+    video.loading = 'eager';
   }
 
   /**
@@ -339,6 +368,10 @@ export class AmpVideo extends AMP.BaseElement {
     // TODO(@aghassemi, 10756) Either make metadata observable or submit
     // an event indicating metadata changed (in case metadata changes
     // while the video is playing).
+
+    if (AmpVideo.V1() && this.video_.readyState === 0) {
+      this.setReadyState('loading');
+    }
   }
 
   /** @override */

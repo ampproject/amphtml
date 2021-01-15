@@ -322,7 +322,7 @@ export function isLoadingAllowed(element) {
  */
 export function isIframeVideoPlayerComponent(tagName) {
   if (tagName == 'AMP-VIDEO') {
-    return false;
+    return true; // DO NOT SUBMIT: why was this `false` before?
   }
   return videoPlayerTagNameRe.test(tagName);
 }

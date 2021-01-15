@@ -163,6 +163,10 @@ export class OwnersImpl {
    */
   scheduleLayoutOrPreloadForSubresources_(parentResource, layout, subElements) {
     this.findResourcesInElements_(parentResource, subElements, (resource) => {
+      console.log(
+        'OwnersImpl: measureAndTryScheduleLayout_: ',
+        resource.debugid
+      );
       resource.element.ensureLoaded(parentResource.getLayoutPriority());
     });
   }

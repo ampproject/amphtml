@@ -48,7 +48,7 @@ const ATTRIBUTES_TO_PROPAGATE = [
 export class AmpImg extends BaseElement {
   /** @override @nocollapse */
   static V1() {
-    return V1_IMG_DEFERRED_BUILD;
+    return true;
   }
 
   /** @override @nocollapse */

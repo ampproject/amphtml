@@ -74,6 +74,12 @@ export class Scheduler {
    * @param {!AmpElement} target
    */
   scheduleAsap(target) {
+    console.log(
+      'Builder: scheduleAsap:',
+      target.id,
+      'mutable:',
+      target.mutable()
+    );
     this.targets_.set(target, {asap: true, isIntersecting: false});
     this.waitParsing_(target);
   }
@@ -110,6 +116,8 @@ export class Scheduler {
     if (!this.targets_.has(target)) {
       return;
     }
+
+    console.log('Builder: unschedule:', target.id);
 
     this.targets_.delete(target);
 
@@ -220,6 +228,14 @@ export class Scheduler {
     if (parsingTargets) {
       for (let i = 0; i < parsingTargets.length; i++) {
         const target = parsingTargets[i];
+        console.log(
+          'Builder: parse complete?:',
+          target.id,
+          'docReady:',
+          documentReady,
+          'hasNext:',
+          hasNextNodeInDocumentOrder(target, this.ampdoc_.getRootNode())
+        );
         if (
           documentReady ||
           hasNextNodeInDocumentOrder(target, this.ampdoc_.getRootNode())
@@ -279,6 +295,12 @@ export class Scheduler {
         vs == VisibilityState.HIDDEN ||
         // Prerender can only proceed when allowed.
         (vs == VisibilityState.PRERENDER && target.prerenderAllowed()));
+    console.log('Builder: build?:', target.id, toBuild, {
+      parsed,
+      isIntersecting,
+      dovVis: this.ampdoc_.getVisibilityState(),
+      prerender: target.prerenderAllowed(),
+    });
     if (!toBuild) {
       return;
     }
