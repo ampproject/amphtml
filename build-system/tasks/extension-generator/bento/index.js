@@ -25,6 +25,9 @@ const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs').promises;
 const log = require('fancy-log');
 const path = require('path');
+const {
+  insertExtensionBundlesConfig,
+} = require('../insert-extension-bundles-config');
 const {cyan, green, red, yellow} = require('ansi-colors');
 
 const EXTENSIONS_DIR = path.join(__dirname, '../../../../extensions');
@@ -125,6 +128,9 @@ async function makeBentoExtension() {
     log(green('SUCCESS:'), 'Created file', cyan(destination));
   }
 
+  insertExtensionBundlesConfig({name: `amp-${componentName}`, version});
+  log(green('SUCCESS:'), 'Wrote', cyan('bundles.config.js'));
+
   log(`
 ========================================
 ${green('FINISHED:')} Boilerplate for your new ${cyan(
@@ -140,24 +146,7 @@ You can run tests on your new component with the following command:
 If the component was generated successfully, the example test should pass.
 
 You may also view the component during development in storybook:
-    ${cyan(`gulp storybook`)}
-
-To enable generating a binary for this extension, add the following
-to ${cyan('extensionBundles')} in ${cyan(
-    'amphtml/build-system/compile/bundles.config.js'
-  )}:
-
-${cyan(`{
-  name: 'amp-${componentName}',
-  version: ['${version}'],
-  latestVersion: '0.1',  // This may be '${version}' for a new component
-  options: {hasCss: true},
-  type: TYPES.MISC,
-},`)}
-
-See ${cyan(
-    'https://github.com/ampproject/amphtml/blob/master/contributing/building-an-amp-extension.md#updating-build-configs'
-  )} for more information.`);
+    ${cyan(`gulp storybook`)}`);
 }
 
 module.exports = {
