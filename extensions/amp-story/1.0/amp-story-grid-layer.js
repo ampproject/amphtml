@@ -29,6 +29,7 @@
 import {AmpStoryBaseLayer} from './amp-story-base-layer';
 import {StateProperty, getStoreService} from './amp-story-store-service';
 import {assertDoesNotContainDisplay, px, setStyles} from '../../../src/style';
+import {devAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {parseQueryString} from '../../../src/url';
 import {scopedQuerySelectorAll} from '../../../src/dom';
@@ -118,6 +119,9 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
 
     /** @private {?{horiz: number, vert: number}} */
     this.aspectRatio_ = null;
+
+    /** @private {number} */
+    this.scalingFactor_ = 1;
   }
 
   /**
@@ -175,6 +179,10 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
   /** @private */
   initializeListeners_() {
     const aspectRatio = this.element.getAttribute('aspect-ratio');
+    const scalingFactorAttribute = this.element.getAttribute('scaling-factor');
+    if (scalingFactorAttribute) {
+      this.scalingFactor_ = parseFloat(scalingFactorAttribute);
+    }
     if (aspectRatio) {
       const aspectRatioSplits = aspectRatio.split(':');
       const horiz = parseInt(aspectRatioSplits[0], 10);
@@ -207,8 +215,8 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
       this.getVsync().mutate(() => {
         this.element.classList.add('i-amphtml-story-grid-template-aspect');
         setStyles(this.element, {
-          '--i-amphtml-story-layer-width': px(width),
-          '--i-amphtml-story-layer-height': px(height),
+          '--i-amphtml-story-layer-width': px(width * this.scalingFactor_),
+          '--i-amphtml-story-layer-height': px(height * this.scalingFactor_),
         });
       });
     }
