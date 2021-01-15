@@ -15,12 +15,15 @@
  */
 
 import * as Preact from '../../../src/preact';
-import {ContainWrapper} from '../../../src/preact/component';
+import {ContainWrapper, Wrapper} from '../../../src/preact/component';
+import {forwardRef} from '../../../src/preact/compat';
+import {setStyle} from '../../../src/style';
+import {truncateText} from '../0.1/truncate-text';
 import {
   useCallback,
   useEffect,
+  useImperativeHandle,
   useLayoutEffect,
-  useMemo,
   useRef,
   useState,
 } from '../../../src/preact';
@@ -28,26 +31,120 @@ import {useStyles} from './truncate-text.jss';
 
 /**
  * @param {!TruncateTextDef.Props} props
+ * @param {{current: (!TruncateTextDef.TruncateTextApi|null)}} ref
  * @return {PreactDef.Renderable}
  */
-export function TruncateText({exampleTagNameProp, ...rest}) {
-  // Examples of state and hooks
-  // DO NOT SUBMIT: This is example code only.
-  const [exampleValue, setExampleValue] = useState(0);
-  const exampleRef = useRef(null);
-  const classes = useStyles();
+function TruncateTextWithRef(
+  {
+    slotPersistent,
+    slotCollapsed,
+    slotExpanded,
+    onBeforeExpand,
+    onAfterCollapse,
+    ...rest
+  },
+  ref
+) {
+  const containerRef = useRef();
+  const measurerRef = useRef();
+  const collapsedRef = useRef();
+  const persistentRef = useRef();
 
-  useCallback(() => {/* Do things */}, [])
-  useEffect(() => {/* Do things */}, [])
-  useLayoutEffect(() => {/* Do things */}, [])
-  useMemo(() => {/* Do things */}, [])
+  const onBeforeExpandRef = useRef(onBeforeExpand);
+  const onAfterCollapseRef = useRef(onAfterCollapse);
+
+  const [expanded, setExpanded] = useState(false);
+  const [ready, setReady] = useState(false);
+
+  // TODO(rcebulko): Rewrite `truncateText` for Preact
+  /** Perform truncation on contents. */
+  const truncate = useCallback(() => {
+    truncateText({
+      container: measurerRef.current,
+      overflowNodes: [persistentRef.current, collapsedRef.current],
+    });
+  });
+
+  // Provide API actions
+  useImperativeHandle(ref, () => ({
+    expand: () => setExpanded(true),
+    collapse: () => setExpanded(false),
+  }));
+
+  // Truncate the text when expanded/collapsed
+  useLayoutEffect(() => {
+    // Update container element attributes
+    if (expanded) {
+      onBeforeExpandRef.current && onBeforeExpandRef.current();
+    } else {
+      onAfterCollapseRef.current && onAfterCollapseRef.current();
+    }
+
+    // Truncate contents to fit/expand container
+    truncate();
+  }, [expanded]);
+
+  // After the first layout, measure/truncate/display
+  useEffect(() => {
+    truncate();
+    setReady(true);
+  }, []);
+
+  // Don't display contents until after the first measure/truncate
+  useLayoutEffect(() => {
+    setStyle(containerRef.current, 'visibility', ready ? 'visible' : 'hidden');
+  }, [ready]);
+
+  const classes = useStyles();
+  const slots = {
+    'default': <slot />,
+    'persistent': slotPersistent,
+    'collapsed': slotCollapsed,
+    'expanded': slotExpanded,
+  };
+
+  const TruncateSlot = forwardRef(({name, ...rest}, ref) => (
+    <span class={`i-amphtml-truncate-${name}-slot`} ref={ref} {...rest}>
+      {slots[name]}
+    </span>
+  ));
 
   return (
-    <ContainWrapper layout size paint {...rest} >
-      {{exampleTagNameProp}}
-      <div className={`${classes.exampleContentHidden}`}>
-        This is hidden
-      </div>
+    <ContainWrapper
+      ref={containerRef}
+      wrapperClassName={classes.truncateTextContainer}
+      wrapperStyle={{position: null}}
+      contentRef={measurerRef}
+      contentClassName={`i-amphtml-truncate-content ${
+        classes.truncateTextContent
+      } ${
+        expanded
+          ? classes.truncateTextExpandedContent
+          : classes.truncateTextCollapsedContent
+      }`}
+      {...rest}
+    >
+      <TruncateSlot name="default" />
+
+      {expanded ? (
+        <TruncateSlot
+          name="expanded"
+          onClick={() => setExpanded(false)}
+          className={classes.truncateTextExpandedSlot}
+        />
+      ) : (
+        <TruncateSlot
+          name="collapsed"
+          ref={collapsedRef}
+          onClick={() => setExpanded(true)}
+        />
+      )}
+
+      <TruncateSlot name="persistent" ref={persistentRef} />
     </ContainWrapper>
   );
 }
+
+const TruncateText = forwardRef(TruncateTextWithRef);
+TruncateText.displayName = 'TruncateText';
+export {TruncateText};

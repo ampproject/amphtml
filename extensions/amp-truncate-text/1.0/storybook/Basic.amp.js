@@ -34,19 +34,21 @@ export default {
   },
 };
 
-// DO NOT SUBMIT: This is example code only.
-export const ExampleUseCase = () => {
-  return (
-    <amp-truncate-text
-      width="300"
-      height="200"
-      example-property="example string property value"
-    >
-      This text is inside.
-    </amp-truncate-text>
-  );
-};
+export const SimpleTruncatedText = () => (
+  <amp-truncate-text layout="fixed" height="4em" width="20em" class="box">
+    Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+    tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+    quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+    consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+    cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat
+    non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+    <p> Hello</p>
+    <button slot="persistent">Lorem Ipsum</button>
+    <button slot="collapsed">See more</button>
+    <button slot="expanded">See less</button>
+  </amp-truncate-text>
+);
 
-ExampleUseCase.story = {
-  name: 'Example use case story'
+SimpleTruncatedText.story = {
+  name: 'Text truncated with a few buttons',
 };

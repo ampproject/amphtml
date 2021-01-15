@@ -21,13 +21,19 @@ var TruncateTextDef = {};
 
 /**
  * @typedef {{
- *   exampleProperty: (string|undefined), (DO NOT SUBMIT)
+ *   slotCollapsed: (?PreactDef.VNode|undefined),
+ *   slotExpanded: (?PreactDef.VNode|undefined),
+ *   slotPersistent: (?PreactDef.VNode|undefined),
+ *   onBeforeOpen: (function|undefined),
+ *   onAfterClose: (function|undefined),
  * }}
  */
 TruncateTextDef.Props;
 
 /** @interface */
 TruncateTextDef.TruncateTextApi = class {
-  /** Example: API method to toggle the component */
-  exampleToggle() {} // DO NOT SUBMIT
+  /** Expand the component, displaying the overflow */
+  expand() {}
+  /** Collapse the component, trucating its contents */
+  collapse() {}
 };

@@ -15,9 +15,8 @@
  */
 
 import {CSS as COMPONENT_CSS} from './truncate-text.jss';
-import {CSS} from '../../../build/amp-truncate-text-1.0.css';
-import {TruncateText} from './truncate-text';
 import {PreactBaseElement} from '../../../src/preact/base-element';
+import {TruncateText} from './truncate-text';
 import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {userAssert} from '../../../src/log';
@@ -28,13 +27,29 @@ const TAG = 'amp-truncate-text';
 class AmpTruncateText extends PreactBaseElement {
   /** @override */
   init() {
-    // DO NOT SUBMIT: This is example code only.
-    this.registerApiAction('exampleToggle', (api) => api./*OK*/exampleToggle());
+    this.registerApiAction('expand', (api) => api./*OK*/ expand());
+    this.registerApiAction('collapse', (api) => api./*OK*/ collapse());
 
     return dict({
-      // Extra props passed by wrapper AMP component
-      'exampleTagNameProp': this.element.tagName,
+      'onBeforeExpand': this.beforeExpand_.bind(this),
+      'onAfterCollapse': this.afterCollpase_.bind(this),
     });
+  }
+
+  /**
+   * Setting the expanded attribute (backward-compatibility to match AMP)
+   * @private
+   */
+  beforeExpand_() {
+    this.element.setAttribute('i-amphtml-truncate-expanded', '');
+  }
+
+  /**
+   * Un-setting the expanded attribute (backward-compatibility to match AMP)
+   * @private
+   */
+  afterCollpase_() {
+    this.element.removeAttribute('i-amphtml-truncate-expanded');
   }
 
   /** @override */
@@ -55,9 +70,23 @@ AmpTruncateText['Component'] = TruncateText;
 AmpTruncateText['props'] = {};
 
 /** @override */
-AmpTruncateText['passthrough'] = true;
-// AmpTruncateText['passthroughNonEmpty'] = true;
-// AmpTruncateText['children'] = {};
+AmpTruncateText['children'] = {
+  'slot-collapsed': {
+    name: 'slotCollapsed',
+    selector: '[slot=collapsed]',
+    single: true,
+  },
+  'slot-expanded': {
+    name: 'slotExpanded',
+    selector: '[slot=expanded]',
+    single: true,
+  },
+  'slot-persistent': {
+    name: 'slotPersistent',
+    selector: '[slot=persistent]',
+    single: true,
+  },
+};
 
 /** @override */
 AmpTruncateText['layoutSizeDefined'] = true;
@@ -66,5 +95,5 @@ AmpTruncateText['layoutSizeDefined'] = true;
 AmpTruncateText['shadowCss'] = COMPONENT_CSS;
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpTruncateText, CSS);
+  AMP.registerElement(TAG, AmpTruncateText);
 });

@@ -16,13 +16,47 @@
 
 import {createUseStyles} from 'react-jss';
 
-// DO NOT SUBMIT: Example class used for styling
-const exampleContentHidden = {
-  display: 'none',
+const truncateTextContainer = {
+  'padding': 0,
+  'border': 'none',
+
+  '&[i-amphtml-truncate-expanded]': {
+    'height': 'auto',
+
+    '& > i-amphtml-sizer': {
+      'display': 'none',
+    },
+  },
+
+  '[i-amphtml-truncate-overflow] [i-amphtml-truncate-child-overflow]': {
+    'display': 'none',
+  },
+};
+
+const truncateTextContent = {
+  'top': 0,
+  'left': 0,
+  'bottom': 0,
+  'right': 0,
+};
+const truncateTextExpandedContent = {
+  'position': 'static',
+};
+const truncateTextCollapsedContent = {
+  'position': 'absolute',
+};
+
+const truncateTextExpandedSlot = {
+  'margin': 0,
+  'white-space': 'nowrap',
 };
 
 const JSS = {
-  exampleContentHidden,
+  truncateTextContainer,
+  truncateTextContent,
+  truncateTextExpandedContent,
+  truncateTextCollapsedContent,
+  truncateTextExpandedSlot,
 };
 
 // useStyles gets replaced for AMP builds via `babel-plugin-transform-jss`.

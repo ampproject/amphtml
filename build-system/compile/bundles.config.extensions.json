@@ -530,7 +530,6 @@
   {
     "name": "amp-truncate-text",
     "version": "1.0",
-    "options": {"hasCss": true},
     "latestVersion": "0.1"
   },
   {"name": "amp-twitter", "version": "0.1", "latestVersion": "0.1"},
