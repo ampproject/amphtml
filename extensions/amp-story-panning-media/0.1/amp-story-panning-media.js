@@ -17,7 +17,10 @@
 import {CSS} from '../../../build/amp-story-panning-media-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {Layout} from '../../../src/layout';
-import {StateProperty} from '../../../extensions/amp-story/1.0/amp-story-store-service';
+import {
+  StateProperty,
+  Action,
+} from '../../../extensions/amp-story/1.0/amp-story-store-service';
 import {Services} from '../../../src/services';
 import {closest} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
@@ -46,9 +49,6 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
 
     /** @private {?string} Sent to siblings to update their position. */
     this.zoom = null;
-
-    /** @private {Array<Element>} */
-    this.siblings_ = [];
   }
 
   /** @override */
@@ -61,21 +61,36 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     this.y = this.element_.getAttribute('y') || '0%';
     this.zoom = this.element_.getAttribute('zoom') || '1';
 
-    this.getSiblings_().then((siblings) => {
-      this.siblings_ = siblings;
-    });
-
     return Services.storyStoreServiceForOrNull(this.win).then(
       (storeService) => {
+        // If page is active, set panning media state
         storeService.subscribe(
           StateProperty.CURRENT_PAGE_ID,
           (currPageId) => {
             const isOnActivePage = currPageId === this.getPageId_();
             if (isOnActivePage) {
-              this.updateSiblings_();
+              // TODO(#31932): A key could be sent here to update elements of the same group.
+              // Note, this will not work when there are 2 or more panning components on the same page.
+              // It might need to dynamic to hold more than 1 set of positions.
+              storeService.dispatch(Action.SET_PANNING_MEDIA_STATE, {
+                x: this.x,
+                y: this.y,
+                zoom: this.zoom,
+              });
             }
           },
           true /** callToInitialize */
+        );
+        // If page is active, set panning media state
+        storeService.subscribe(
+          StateProperty.PANNING_MEDIA_STATE,
+          (panningMediaState) => {
+            if (panningMediaState) {
+              const {x, y, zoom} = panningMediaState;
+              // TODO(#31932): Update siblings that are part of the same group.
+              this.updateTransform(x, y, zoom);
+            }
+          }
         );
       }
     );
@@ -97,30 +112,6 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
         });
       })
       .catch(() => user().error(TAG, 'Failed to load the amp-img.'));
-  }
-
-  /**
-   * @return {!Promise<Array<Element>>}
-   */
-  getSiblings_() {
-    // TODO(#31932): Group siblings to be transitioned together.
-    const siblings = Array.from(
-      document.querySelectorAll('amp-story-panning-media')
-    );
-
-    return Promise.all(
-      siblings.map((sibling) =>
-        sibling.getImpl().then((siblingImpl) => siblingImpl)
-      )
-    );
-  }
-
-  /** @private */
-  updateSiblings_() {
-    this.siblings_.forEach((siblingImpl) => {
-      // Call the updateTransform method on siblings with the active pages position values.
-      siblingImpl.updateTransform(this.x, this.y, this.zoom);
-    });
   }
 
   /**
