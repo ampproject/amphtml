@@ -105,7 +105,7 @@ async function makeBentoExtension() {
     const destination = destinationPath(templatePath);
 
     // Skip CSS files if --no_css flag is set
-    if (argv.no_css && /.css$/.test(templatePath)) {
+    if (argv.no_amp_css && /.css$/.test(templatePath)) {
       log(cyan('INFO:'), 'Skipping CSS file', cyan(destination));
       continue;
     }
@@ -140,7 +140,7 @@ async function makeBentoExtension() {
 
   // Update bundles.config.js with an entry for the new component
   const bundleConfig = {name: `amp-${componentName}`, version};
-  if (!argv.no_css) {
+  if (!argv.no_amp_css) {
     bundleConfig.options = {hasCss: true};
   }
   insertExtensionBundlesConfig(bundleConfig);
@@ -166,11 +166,4 @@ You may also view the component during development in storybook:
 
 module.exports = {
   makeBentoExtension,
-};
-
-makeBentoExtension.description = 'Creates a new Bento component boilerplate';
-makeBentoExtension.flags = {
-  name: '  Required. Sets the component name (ex. "foo-bar" or "amp-foo-bar")',
-  version: '  Sets the verison number (default: 1.0)',
-  overwrite: '  Overwrites existing files at the destination, if present',
 };

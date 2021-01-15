@@ -91,6 +91,21 @@ const getMarkdownDocFile = async (name) => {
     .replace(/__current_year__/g, year);
 };
 
+const getAmpCssFile = async (name) => {
+  const nameWithoutPrefix = name.replace(/^amp-/, '');
+  const templatePath = path.join(
+    __dirname,
+    '/bento/amp-__component_name_hyphenated__/amp-__component_name_hyphenated__.css'
+  );
+  const dns = 'DO_NOT_SUBMIT'.replace(/_/g, ' ');
+
+  return (await fs.readFile(templatePath))
+    .toString('utf-8')
+    .replace(/__component_name_hyphenated__/g, nameWithoutPrefix)
+    .replace(/__current_year__/g, year)
+    .replace(/__do_not_submit__/g, dns);
+};
+
 function getJsTestExtensionFile(name) {
   return `/**
  * Copyright ${year} The AMP HTML Authors. All Rights Reserved.
@@ -237,6 +252,12 @@ async function makeAmpExtension() {
     `extensions/${name}/${version}/${name}.js`,
     getJsExtensionFile(name)
   );
+  if (!argv.no_amp_css) {
+    fs.writeFileSync(
+      `extensions/${name}/${version}/${name}.css`,
+      getAmpCssFile(name)
+    );
+  }
   fs.writeFileSync(
     `extensions/${name}/${version}/test/test-${name}.js`,
     getJsTestExtensionFile(name)
@@ -259,10 +280,14 @@ async function makeAmpExtension() {
 
   fs.writeFileSync(`examples/${name}.amp.html`, examplesFile);
 
-  return insertExtensionBundlesConfig({
+  const bundleConfig = {
     name,
     version: typeof version === 'string' ? version : version.toFixed(1),
-  });
+  };
+  if (!argv.no_amp_css) {
+    bundleConfig.options = {hasCss: true};
+  }
+  insertExtensionBundlesConfig(bundleConfig);
 }
 
 async function makeExtension() {
@@ -278,7 +303,7 @@ makeExtension.description = 'Create an extension skeleton';
 makeExtension.flags = {
   name: '  The name of the extension. Preferable prefixed with `amp-*`',
   bento: '  Generate a Bento component',
-  'no_css': '  Generates extension without CSS boilerplate; --bento only',
+  'no_amp_css': '  Generates extension without CSS boilerplate; --bento only',
   version: '  Sets the verison number (default: 1.0); --bento only',
   overwrite:
     '  Overwrites existing files at the destination, if present; --bento only',
