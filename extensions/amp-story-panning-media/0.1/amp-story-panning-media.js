@@ -42,13 +42,13 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     this.ampImgEl_ = null;
 
     /** @private {?string} Sent to siblings to update their position. */
-    this.x = null;
+    this.x_ = null;
 
     /** @private {?string} Sent to siblings to update their position. */
-    this.y = null;
+    this.y_ = null;
 
     /** @private {?string} Sent to siblings to update their position. */
-    this.zoom = null;
+    this.zoom_ = null;
   }
 
   /** @override */
@@ -57,9 +57,9 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       this.element_.querySelector('amp-img')
     );
 
-    this.x = this.element_.getAttribute('x') || '0%';
-    this.y = this.element_.getAttribute('y') || '0%';
-    this.zoom = this.element_.getAttribute('zoom') || '1';
+    this.x_ = this.element_.getAttribute('x') || '0%';
+    this.y_ = this.element_.getAttribute('y') || '0%';
+    this.zoom_ = this.element_.getAttribute('zoom') || '1';
 
     return Services.storyStoreServiceForOrNull(this.win).then(
       (storeService) => {
@@ -73,9 +73,9 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
               // Note, this will not work when there are 2 or more panning components on the same page.
               // It might need to dynamic to hold more than 1 set of positions.
               storeService.dispatch(Action.SET_PANNING_MEDIA_STATE, {
-                x: this.x,
-                y: this.y,
-                zoom: this.zoom,
+                x: this.x_,
+                y: this.y_,
+                zoom: this.zoom_,
               });
             }
           },
@@ -88,7 +88,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
             if (panningMediaState) {
               const {x, y, zoom} = panningMediaState;
               // TODO(#31932): Update siblings that are part of the same group.
-              this.updateTransform(x, y, zoom);
+              this.updateTransform_(x, y, zoom);
             }
           }
         );
@@ -116,13 +116,13 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
 
   /**
    * The active page's instance calls this and passes it's position values.
-   * @public
+   * @private
    * @param {x} string
    * @param {y} string
    * @param {z} string
    * @return {!Promise}
    */
-  updateTransform(x, y, zoom) {
+  updateTransform_(x, y, zoom) {
     return this.mutateElement(() => {
       setImportantStyles(this.ampImgEl_, {
         transform: `scale(${zoom}) translate(${x}, ${y})`,
