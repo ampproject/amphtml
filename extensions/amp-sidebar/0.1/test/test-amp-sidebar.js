@@ -207,6 +207,16 @@ describes.realWin(
         });
       });
 
+      it('should create styleable mask element in DOM', () => {
+        return getAmpSidebar({'stubHistory': true}).then((sidebarElement) => {
+          const impl = sidebarElement.implementation_;
+          execute(impl, 'open');
+          expect(doc.querySelectorAll('.amphtml-sidebar-mask').length).to.equal(
+            1
+          );
+        });
+      });
+
       it('should create an invisible close button for screen readers only', () => {
         return getAmpSidebar().then((sidebarElement) => {
           const impl = sidebarElement.implementation_;
