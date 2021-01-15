@@ -16,23 +16,6 @@
 
 import {createUseStyles} from 'react-jss';
 
-const truncateTextContainer = {
-  'padding': 0,
-  'border': 'none',
-
-  '&[i-amphtml-truncate-expanded]': {
-    'height': 'auto',
-
-    '& > i-amphtml-sizer': {
-      'display': 'none',
-    },
-  },
-
-  '[i-amphtml-truncate-overflow] [i-amphtml-truncate-child-overflow]': {
-    'display': 'none',
-  },
-};
-
 const truncateTextContent = {
   'top': 0,
   'left': 0,
@@ -52,7 +35,6 @@ const truncateTextExpandedSlot = {
 };
 
 const JSS = {
-  truncateTextContainer,
   truncateTextContent,
   truncateTextExpandedContent,
   truncateTextCollapsedContent,

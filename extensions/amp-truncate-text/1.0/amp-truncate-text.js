@@ -15,6 +15,7 @@
  */
 
 import {CSS as COMPONENT_CSS} from './truncate-text.jss';
+import {CSS} from '../../../build/amp-truncate-text-1.0.css';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {TruncateText} from './truncate-text';
 import {dict} from '../../../src/utils/object';
@@ -95,5 +96,5 @@ AmpTruncateText['layoutSizeDefined'] = true;
 AmpTruncateText['shadowCss'] = COMPONENT_CSS;
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpTruncateText);
+  AMP.registerElement(TAG, AmpTruncateText, CSS);
 });
