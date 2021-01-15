@@ -991,6 +991,7 @@ exports.extensionBundles = [
         'amp-story-interactive-poll',
         'amp-story-interactive-quiz',
         'amp-story-interactive-results',
+        'amp-story-interactive-text',
       ],
     },
     type: TYPES.MISC,
