@@ -15,7 +15,7 @@
  */
 
 import {COMPONENT_CSS} from './__component_name_hyphenated__.jss';
-import {CSS} from '../../../build/amp-__component_name_hyphenated__-__component_version__.css'
+import {CSS} from '../../../build/amp-__component_name_hyphenated__-__component_version__.css';
 import {__component_name_pascalcase__} from './__component_name_hyphenated__';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {dict} from '../../../src/utils/object';
