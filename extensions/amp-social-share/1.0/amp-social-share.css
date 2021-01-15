@@ -20,6 +20,16 @@
   * See https://github.com/ampproject/amphtml/issues/4277 for more details.
   */
 
+amp-social-share:focus-within {
+  outline: #0389ff solid 2px;
+  outline-offset: 2px;
+}
+
+amp-social-share::part(button):focus {
+  outline: none;
+  outline-offset: 0;
+}
+
 /* Twitter Styling */
 .amp-social-share-twitter {
   color: #fff;
