@@ -39,6 +39,7 @@ const mainBundles = Object.keys(jsBundles).map((key) => {
  * @return {Promise<Object<string, string>>}
  */
 async function terserMinify(code, filename) {
+  const basename = path.basename(filename, argv.esm ? '.mjs' : '.js');
   const options = {
     mangle: false,
     compress: {
@@ -50,13 +51,10 @@ async function terserMinify(code, filename) {
       comments: /\/*/,
       // eslint-disable-next-line google-camelcase/google-camelcase
       keep_quoted_props: true,
+      preamble: mainBundles.includes(basename) ? ';' : undefined,
     },
     sourceMap: true,
   };
-  const basename = path.basename(filename, argv.esm ? '.mjs' : '.js');
-  if (mainBundles.includes(basename)) {
-    options.output.preamble = ';';
-  }
   const minified = await terser.minify(code, options);
 
   return {
