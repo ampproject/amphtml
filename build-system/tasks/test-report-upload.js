@@ -71,16 +71,17 @@ function addJobAndBuildInfo(testType, reportJson) {
     throw new ReferenceError('CI fields are not defined.');
   }
 
+  // (TODO ampproject/amp-github-apps/pull:1194) Update field names in database.
   return {
     repository: process.env.GITHUB_REPOSITORY,
     results: reportJson,
     build: {
-      buildId,
+      buildNumber: buildId,
       commitSha,
       url: ciBuildUrl(),
     },
     job: {
-      jobId,
+      jobNumber: jobId,
       testSuiteType: testType,
       url: ciJobUrl(),
     },
