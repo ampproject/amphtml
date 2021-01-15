@@ -25,9 +25,6 @@ const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs').promises;
 const log = require('fancy-log');
 const path = require('path');
-const {
-  insertExtensionBundlesConfig,
-} = require('../insert-extension-bundles-config');
 const {cyan, green, red, yellow} = require('ansi-colors');
 
 const EXTENSIONS_DIR = path.join(__dirname, '../../../../extensions');
