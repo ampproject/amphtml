@@ -104,7 +104,7 @@ export class AmpStoryDevToolsTabLogs extends AMP.BaseElement {
         this.validateUrl_(/* global amp: false */ amp.validator, this.storyUrl_)
       )
       .then((errorList) => {
-        this.errorList_ = [];
+        this.errorList_ = errorList;
         this.updateLogsTabIcon(errorList);
       });
   }
