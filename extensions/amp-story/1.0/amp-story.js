@@ -1395,8 +1395,10 @@ export class AmpStory extends AMP.BaseElement {
     this.viewerMessagingHandler_.send(
       'triggerPlayerAction',
       dict({
-        'name': JSON.parse(this.element.getAttribute('data-player-action-data'))
-          .name,
+        'playerAction': this.element.getAttribute('player-action'),
+        'playerActionData': JSON.stringify(
+          this.element.getAttribute('data-player-action-data')
+        ),
       })
     );
   }

@@ -742,8 +742,10 @@ export class ManualAdvancement extends AdvancementConfig {
       viewer.sendMessage(
         'triggerPlayerAction',
         dict({
-          'name': JSON.parse(playerLink.getAttribute('data-player-action-data'))
-            .name,
+          'playerAction': playerLink.getAttribute('player-action'),
+          'playerActionData': JSON.stringify(
+            playerLink.getAttribute('data-player-action-data')
+          ),
         }),
         false
       );

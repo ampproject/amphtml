@@ -1517,7 +1517,10 @@ export class AmpStoryPlayer {
       createCustomEvent(
         this.win_,
         'triggerPlayerAction',
-        dict({'name': data.name})
+        dict({
+          'playerAction': data.playerAction,
+          'playerActionData': data.playerActionData,
+        })
       )
     );
   }
