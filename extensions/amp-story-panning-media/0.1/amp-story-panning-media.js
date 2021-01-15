@@ -21,7 +21,7 @@ import {StateProperty} from '../../../extensions/amp-story/1.0/amp-story-store-s
 import {Services} from '../../../src/services';
 import {closest} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
-import {setStyles} from '../../../src/style';
+import {setImportantStyles, setStyles} from '../../../src/style';
 import {whenUpgradedToCustomElement} from '../../../src/dom';
 
 /** @const {string} */
@@ -95,7 +95,6 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
           left: 'auto',
           right: 'auto',
         });
-        return Promise.resolve();
       })
       .catch(() => user().error(TAG, 'Failed to load the amp-img.'));
   }
@@ -113,7 +112,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       siblings.map((sibling) =>
         sibling.getImpl().then((siblingImpl) => siblingImpl)
       )
-    ).then((siblings) => Promise.resolve(siblings));
+    );
   }
 
   /** @private */
@@ -134,7 +133,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
    */
   updateTransform(x, y, zoom) {
     return this.mutateElement(() => {
-      setStyles(this.ampImgEl_, {
+      setImportantStyles(this.ampImgEl_, {
         transform: `scale(${zoom}) translate(${x}, ${y})`,
       });
     });
