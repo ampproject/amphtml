@@ -25,7 +25,7 @@ export default {
   decorators: [withKnobs, withA11y],
 };
 
-export const _default = () => (
+export const SimpleTruncatedText = () => (
   <truncate-text>
     Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
     tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
@@ -34,8 +34,12 @@ export const _default = () => (
     cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat
     non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
     <p> Hello</p>
-    <button slot="persistent">Lorem Ipsum</button>
-    <button slot="collapsed">See more</button>
-    <button slot="expanded">See less</button>
+    <button slot-persistent>Lorem Ipsum</button>
+    <button slot-collapsed>See more</button>
+    <button slot-expanded>See less</button>
   </truncate-text>
 );
+
+SimpleTruncatedText.story = {
+  name: 'Text truncated with a few buttons',
+};
