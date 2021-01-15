@@ -95,7 +95,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
 
   /** @private */
   initializeListeners_() {
-    storeService.subscribe(
+    this.storeService_.subscribe(
       StateProperty.CURRENT_PAGE_ID,
       (currPageId) => {
         this.isOnActivePage = currPageId === this.getPageId_();
@@ -103,9 +103,10 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       },
       true /** callToInitialize */
     );
-    storeService.subscribe(
+    this.storeService_.subscribe(
       StateProperty.PANNING_MEDIA_STATE,
-      (panningMediaState) => this.onPanningMediaStateChange_(panningMediaState)
+      (panningMediaState) => this.onPanningMediaStateChange_(panningMediaState),
+      true /** callToInitialize */
     );
   }
 
@@ -115,7 +116,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       // TODO(#31932): A key could be sent here to update elements of the same group.
       // Note, this will not work when there are 2 or more panning components on the same page.
       // It might need to dynamic to hold more than 1 set of positions.
-      storeService.dispatch(Action.SET_PANNING_MEDIA_STATE, {
+      this.storeService_.dispatch(Action.SET_PANNING_MEDIA_STATE, {
         x: this.x_,
         y: this.y_,
         zoom: this.zoom_,
