@@ -19,7 +19,7 @@ const fs = require('fs-extra');
 const log = require('fancy-log');
 const path = require('path');
 const request = require('request-promise');
-const {ciBuildNumber} = require('../common/ci');
+const {ciBuildId} = require('../common/ci');
 const {cyan, green} = require('ansi-colors');
 const {gitCommitHash} = require('../common/git');
 const {replaceUrls: replaceUrlsAppUtil} = require('../server/app-utils');
@@ -42,7 +42,7 @@ async function walk(dest) {
 }
 
 function getBaseUrl() {
-  return `${hostNamePrefix}/amp_dist_${ciBuildNumber()}`;
+  return `${hostNamePrefix}/amp_dist_${ciBuildId()}`;
 }
 
 async function replace(filePath) {
@@ -71,7 +71,7 @@ async function replaceUrls(dir) {
 
 async function signalDistUpload(result) {
   const sha = gitCommitHash();
-  const ciBuild = ciBuildNumber();
+  const ciBuild = ciBuildId();
   const baseUrl = 'https://amp-pr-deploy-bot.appspot.com/v0/pr-deploy/';
   // TODO(rsimha, ampproject/amp-github-apps#1110): Update this URL.
   const url = `${baseUrl}travisbuilds/${ciBuild}/headshas/${sha}/${result}`;

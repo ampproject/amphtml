@@ -26,18 +26,12 @@ const {
   shortSha,
 } = require('../common/git');
 const {execOrDie, execOrThrow, execWithError, exec} = require('../common/exec');
-const {isCiBuild, ciBuildNumber, ciPullRequestSha} = require('../common/ci');
+const {isCiBuild, ciBuildId, ciPullRequestSha} = require('../common/ci');
 const {replaceUrls, signalDistUpload} = require('../tasks/pr-deploy-bot-utils');
 
-const UNMINIFIED_OUTPUT_FILE = isCiBuild()
-  ? `amp_unminified_${ciBuildNumber()}.zip`
-  : '';
-const NOMODULE_OUTPUT_FILE = isCiBuild()
-  ? `amp_nomodule_${ciBuildNumber()}.zip`
-  : '';
-const MODULE_OUTPUT_FILE = isCiBuild()
-  ? `amp_module_${ciBuildNumber()}.zip`
-  : '';
+const UNMINIFIED_OUTPUT_FILE = `amp_unminified_${ciBuildId()}.zip`;
+const NOMODULE_OUTPUT_FILE = `amp_nomodule_${ciBuildId()}.zip`;
+const MODULE_OUTPUT_FILE = `amp_module_${ciBuildId()}.zip`;
 
 const BUILD_OUTPUT_DIRS = 'build/ dist/ dist.3p/';
 const APP_SERVING_DIRS = 'dist.tools/ examples/ test/manual/';

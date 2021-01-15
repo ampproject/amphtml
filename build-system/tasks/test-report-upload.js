@@ -26,9 +26,9 @@ const fs = require('fs').promises;
 const log = require('fancy-log');
 const path = require('path');
 const {
-  ciBuildNumber,
+  ciBuildId,
   ciBuildUrl,
-  ciJobNumber,
+  ciJobId,
   ciJobUrl,
   ciCommitSha,
   ciRepoSlug,
@@ -64,24 +64,25 @@ async function getReport(testType) {
  * @return {Object.<string,Object>} Object containing the build, job, and test results.
  */
 function addJobAndBuildInfo(testType, reportJson) {
-  const buildNumber = ciBuildNumber();
+  const buildId = ciBuildId();
   const commitSha = ciCommitSha();
-  const jobNumber = ciJobNumber();
+  const jobId = ciJobId();
 
-  if (!buildNumber || !commitSha || !jobNumber) {
+  if (!buildId || !commitSha || !jobId) {
     throw new ReferenceError('CI fields are not defined.');
   }
 
+  // (TODO ampproject/amp-github-apps/pull:1194) Update field names in database.
   return {
     repository: ciRepoSlug(),
     results: reportJson,
     build: {
-      buildNumber,
+      buildId,
       commitSha,
       url: ciBuildUrl(),
     },
     job: {
-      jobNumber,
+      jobId,
       testSuiteType: testType,
       url: ciJobUrl(),
     },
