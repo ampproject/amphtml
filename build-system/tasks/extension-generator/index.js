@@ -280,18 +280,22 @@ async function makeAmpExtension() {
 
   fs.writeFileSync(`examples/${name}.amp.html`, examplesFile);
 
-  const bundleConfig = {
+  // Return the resulting extension bundle config.
+  return {
     name,
     version: typeof version === 'string' ? version : version.toFixed(1),
+    options: argv.no_amp_css ? undefined : {hasCss: true},
   };
-  if (!argv.no_amp_css) {
-    bundleConfig.options = {hasCss: true};
-  }
-  insertExtensionBundlesConfig(bundleConfig);
 }
 
 async function makeExtension() {
-  return argv.bento ? makeBentoExtension() : makeAmpExtension();
+  const bundleConfig = await (argv.bento
+    ? makeBentoExtension()
+    : makeAmpExtension());
+
+  // Update bundles.config.js with an entry for the new component
+  insertExtensionBundlesConfig(bundleConfig);
+  log(colors.green('SUCCESS:'), 'Wrote', colors.cyan('bundles.config.js'));
 }
 
 module.exports = {

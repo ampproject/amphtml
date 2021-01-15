@@ -138,14 +138,6 @@ async function makeBentoExtension() {
     log(green('SUCCESS:'), 'Created file', cyan(destination));
   }
 
-  // Update bundles.config.js with an entry for the new component
-  const bundleConfig = {name: `amp-${componentName}`, version};
-  if (!argv.no_amp_css) {
-    bundleConfig.options = {hasCss: true};
-  }
-  insertExtensionBundlesConfig(bundleConfig);
-  log(green('SUCCESS:'), 'Wrote', cyan('bundles.config.js'));
-
   log(`
 ========================================
 ${green('FINISHED:')} Boilerplate for your new ${cyan(
@@ -162,6 +154,13 @@ If the component was generated successfully, the example test should pass.
 
 You may also view the component during development in storybook:
     ${cyan(`gulp storybook`)}`);
+
+  // Return the resulting extension bundle config.
+  return {
+    name: `amp-${componentName}`,
+    version,
+    options: argv.no_amp_css ? undefined : {hasCss: true},
+  };
 }
 
 module.exports = {
