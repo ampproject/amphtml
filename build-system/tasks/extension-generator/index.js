@@ -274,13 +274,11 @@ module.exports = {
   insertExtensionBundlesConfig,
 };
 
-/* eslint "google-camelcase/google-camelcase": 0 */
-
 makeExtension.description = 'Create an extension skeleton';
 makeExtension.flags = {
   name: '  The name of the extension. Preferable prefixed with `amp-*`',
   bento: '  Generate a Bento component',
-  no_css: '  Generates extension without CSS boilerplate; --bento only',
+  'no_css': '  Generates extension without CSS boilerplate; --bento only',
   version: '  Sets the verison number (default: 1.0); --bento only',
   overwrite:
     '  Overwrites existing files at the destination, if present; --bento only',
