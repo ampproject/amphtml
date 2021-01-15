@@ -78,6 +78,34 @@ export const GRID_LAYER_TEMPLATE_CLASS_NAMES = {
 };
 
 /**
+ * The attribute name for grid layer presets.
+ * @private @const {string}
+ */
+const PRESET_ATTRIBUTE_NAME = 'preset';
+
+/**
+ * @typedef {{
+ *  aspect-ratio: string,
+ *  scaling-factor: ?float,
+ * }}
+ */
+export let PresetDetails;
+
+/**
+ * The attributes that will be applied for each preset.
+ * @private @const {!Object<string, !PresetDetails>}
+ */
+const GRID_LAYER_PRESET_DETAILS = {
+  '2021-background': {
+    'aspect-ratio': '69:116',
+    'scaling-factor': 1.142,
+  },
+  '2021-foreground': {
+    'aspect-ratio': '69:116',
+  },
+};
+
+/**
  * Grid layer template templating system.
  */
 export class AmpStoryGridLayer extends AmpStoryBaseLayer {
@@ -114,6 +142,7 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
   /** @override */
   buildCallback() {
     super.buildCallback();
+    this.applyResponsivenessPresets_();
     this.applyTemplateClassName_();
     this.setOwnCssGridStyles_();
     this.setDescendentCssGridStyles_();
@@ -123,6 +152,24 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
   /** @override */
   prerenderAllowed() {
     return this.isPrerenderActivePage();
+  }
+
+  /**
+   * Applies the attributes to the layer from the preset specified in the [preset] attribute.
+   * @private
+   */
+  applyResponsivenessPresets_() {
+    if (!this.element.hasAttribute(PRESET_ATTRIBUTE_NAME)) {
+      return;
+    }
+    const preset = this.element.getAttribute(PRESET_ATTRIBUTE_NAME);
+    const presetDetails = GRID_LAYER_PRESET_DETAILS[preset];
+    if (!presetDetails) {
+      return;
+    }
+    Object.entries(presetDetails).forEach((keyValue) =>
+      this.element.setAttribute(keyValue[0], keyValue[1])
+    );
   }
 
   /** @private */
