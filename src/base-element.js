@@ -18,6 +18,7 @@ import {ActionTrust, DEFAULT_ACTION} from './action-constants';
 import {Layout, LayoutPriority} from './layout';
 import {Services} from './services';
 import {devAssert, user, userAssert} from './log';
+import {dispatchCustomEvent} from './dom';
 import {getData, listen, loadPromise} from './event-helper';
 import {getMode} from './mode';
 import {isArray, toWin} from './types';
@@ -36,18 +37,9 @@ import {isArray, toWin} from './types';
  *
  * The complete lifecycle of a custom DOM element is:
  *
- *           ||
- *           || createdCallback
- *           ||
- *           \/
- *    State: <NOT BUILT> <NOT UPGRADED> <NOT ATTACHED>
+ *    State: <NOT BUILT> <NOT UPGRADED>
  *           ||
  *           || upgrade
- *           ||
- *           \/
- *    State: <NOT BUILT> <NOT ATTACHED>
- *           ||
- *           || firstAttachedCallback
  *           ||
  *           \/
  *    State: <NOT BUILT>
@@ -70,7 +62,6 @@ import {isArray, toWin} from './types';
  *           ||                         ||
  *           ||                 =========
  *           ||
- *           || viewportCallback
  *           || unlayoutCallback may be called N times after this.
  *           ||
  *           \/
@@ -106,9 +97,6 @@ import {isArray, toWin} from './types';
  * element instance. This can be used to do additional style calculations
  * without triggering style recalculations.
  *
- * When the dimensions of an element has changed, the 'onMeasureChanged'
- * callback is called.
- *
  * For more details, see {@link custom-element.js}.
  *
  * Each method is called exactly once and overriding them in subclasses
@@ -135,9 +123,6 @@ export class BaseElement {
 
     /** @package {!Layout} */
     this.layout_ = Layout.NODISPLAY;
-
-    /** @package {boolean} */
-    this.inViewport_ = false;
 
     /** @public @const {!Window} */
     this.win = toWin(element.ownerDocument.defaultView);
@@ -218,12 +203,11 @@ export class BaseElement {
   }
 
   /**
-   * Returns a previously measured layout box relative to the page. The
-   * fixed-position elements are relative to the top of the document.
-   * @return {!./layout-rect.LayoutRectDef}
+   * Returns a previously measured layout size.
+   * @return {!./layout-rect.LayoutSizeDef}
    */
-  getPageLayoutBox() {
-    return this.element.getPageLayoutBox();
+  getLayoutSize() {
+    return this.element.getLayoutSize();
   }
 
   /**
@@ -291,13 +275,6 @@ export class BaseElement {
   }
 
   /**
-   * @return {boolean}
-   */
-  isInViewport() {
-    return this.inViewport_;
-  }
-
-  /**
    * This method is called when the element is added to DOM for the first time
    * and before `buildCallback` to give the element a chance to redirect its
    * implementation to another `BaseElement` implementation. The returned
@@ -313,23 +290,6 @@ export class BaseElement {
   upgradeCallback() {
     // Subclasses may override.
     return null;
-  }
-
-  /**
-   * Called when the element is first created. Note that for element created
-   * using createElement this may be before any children are added.
-   */
-  createdCallback() {
-    // Subclasses may override.
-  }
-
-  /**
-   * Override in subclass to adjust the element when it is being added to the
-   * DOM. Could e.g. be used to insert a fallback. Should not typically start
-   * loading a resource.
-   */
-  firstAttachedCallback() {
-    // Subclasses may override.
   }
 
   /**
@@ -357,6 +317,16 @@ export class BaseElement {
    * @param {boolean=} opt_onLayout
    */
   preconnectCallback(opt_onLayout) {
+    // Subclasses may override.
+  }
+
+  /**
+   * Override in subclass to adjust the element when it is being added to
+   * the DOM. Could e.g. be used to add a listener. Notice, that this
+   * callback is called immediately after `buildCallback()` if the element
+   * is attached to the DOM.
+   */
+  attachedCallback() {
     // Subclasses may override.
   }
 
@@ -478,13 +448,6 @@ export class BaseElement {
   firstLayoutCompleted() {
     this.togglePlaceholder(false);
   }
-
-  /**
-   * Instructs the resource that it has either entered or exited the visible
-   * viewport. Intended to be implemented by actual components.
-   * @param {boolean} unusedInViewport
-   */
-  viewportCallback(unusedInViewport) {}
 
   /**
    * Requests the element to stop its activity when the document goes into
@@ -646,27 +609,6 @@ export class BaseElement {
   }
 
   /**
-   * Utility method to propagate all data attributes from this element
-   * to the target element. (For use with arbitrary data attributes.)
-   * Removes any data attributes that are missing on this element from
-   * the target element.
-   * @param {!Element} targetElement
-   */
-  propagateDataset(targetElement) {
-    for (const key in targetElement.dataset) {
-      if (!(key in this.element.dataset)) {
-        delete targetElement.dataset[key];
-      }
-    }
-
-    for (const key in this.element.dataset) {
-      if (targetElement.dataset[key] !== this.element.dataset[key]) {
-        targetElement.dataset[key] = this.element.dataset[key];
-      }
-    }
-  }
-
-  /**
    * Utility method that forwards the given list of non-bubbling events
    * from the given element to this element as custom events with the same name.
    * @param  {string|!Array<string>} events
@@ -677,7 +619,7 @@ export class BaseElement {
   forwardEvents(events, element) {
     const unlisteners = (isArray(events) ? events : [events]).map((eventType) =>
       listen(element, eventType, (event) => {
-        this.element.dispatchCustomEvent(eventType, getData(event) || {});
+        dispatchCustomEvent(this.element, eventType, getData(event) || {});
       })
     );
 
@@ -724,20 +666,11 @@ export class BaseElement {
   /**
    * Hides or shows the loading indicator.
    * @param {boolean} state
+   * @param {boolean=} force
    * @public @final
    */
-  toggleLoading(state) {
-    this.element.toggleLoading(state);
-  }
-
-  /**
-   * Returns whether the loading indicator is reused again after the first
-   * render.
-   * @return {boolean}
-   * @public
-   */
-  isLoadingReused() {
-    return false;
+  toggleLoading(state, force = false) {
+    this.element.toggleLoading(state, force);
   }
 
   /**
@@ -983,15 +916,6 @@ export class BaseElement {
   }
 
   /**
-   * Called every time an owned AmpElement expands itself.
-   * See {@link expand}.
-   * @param {!AmpElement} unusedElement Child element that was expanded.
-   */
-  expandedCallback(unusedElement) {
-    // Subclasses may override.
-  }
-
-  /**
    * Called when one or more attributes are mutated.
    * Note:
    * - Must be called inside a mutate context.
@@ -1015,16 +939,20 @@ export class BaseElement {
   onLayoutMeasure() {}
 
   /**
-   * Called only when the measurements of an amp-element changes. This
-   * would not trigger for every measurement invalidation caused by a mutation.
-   * @public
-   */
-  onMeasureChanged() {}
-
-  /**
    * @return {./log.Log}
    */
   user() {
     return user(this.element);
+  }
+
+  /**
+   * Returns this BaseElement instance. This is equivalent to Bento's
+   * imperative API object, since this is where we define the element's custom
+   * APIs.
+   *
+   * @return {!Promise<!Object>}
+   */
+  getApi() {
+    return this;
   }
 }

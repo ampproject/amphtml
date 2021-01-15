@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as WorkerDOM from '@ampproject/worker-dom/dist/amp/main.mjs';
+import * as WorkerDOM from '@ampproject/worker-dom/dist/amp-production/main.mjs';
 import {
   AmpScript,
   AmpScriptService,
@@ -56,8 +56,10 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
       .resolves({text: () => Promise.resolve('/* noop */')});
     env.sandbox.stub(Services, 'xhrFor').returns(xhr);
 
-    // Make @ampproject/worker-dom dependency a no-op for these unit tests.
-    env.sandbox.stub(WorkerDOM, 'upgrade').resolves();
+    // Make @ampproject/worker-dom dependency essentially a noop for these tests.
+    env.sandbox
+      .stub(WorkerDOM, 'upgrade')
+      .callsFake((unused, scriptsPromise) => scriptsPromise);
   });
 
   function stubFetch(url, headers, text, responseUrl) {
@@ -82,6 +84,33 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
 
     expectAsyncConsoleError(/Same-origin "src" requires/);
     return script.layoutCallback().should.be.rejected;
+  });
+
+  it('should support nodom variant', async () => {
+    element.setAttribute('nodom', '');
+    element.setAttribute('src', 'https://foo.example/foo.txt');
+    env.sandbox.stub(env.ampdoc, 'getUrl').returns('https://foo.example/');
+    stubFetch(
+      'https://foo.example/foo.txt',
+      {'Content-Type': 'text/javascript; charset=UTF-8'}, // Valid content-type.
+      'alert(1)'
+    );
+
+    xhr.fetchText
+      .withArgs(env.sandbox.match(/amp-script-worker-0.1.js/))
+      .rejects();
+    xhr.fetchText
+      .withArgs(env.sandbox.match(/amp-script-worker-nodom-0.1.js/))
+      .resolves({text: () => Promise.resolve('/* noop */')});
+    registerServiceBuilderForDoc(
+      env.win.document,
+      'amp-script',
+      AmpScriptService
+    );
+
+    await script.buildCallback();
+    await script.layoutCallback();
+    resetServiceForTesting(env.win, 'amp-script');
   });
 
   it('should work with "text/javascript" content-type for same-origin src', () => {
@@ -113,18 +142,33 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
     expect(service.checkSha384).to.be.called;
   });
 
+  it('callFunction waits for initialization to complete before returning', async () => {
+    element.setAttribute('script', 'local-script');
+    const result = script.callFunction('fetchData');
+    script.workerDom_ = {
+      callFunction(fnIdent) {
+        if (fnIdent === 'fetchData') {
+          return Promise.resolve(42);
+        }
+        return Promise.reject();
+      },
+    };
+    script.initialize_.resolve();
+    expect(await result).to.equal(42);
+  });
+
   describe('Initialization skipped warning due to zero height/width', () => {
     it('should not warn when there is positive width/height', () => {
       const warnStub = env.sandbox.stub(user(), 'warn');
-      env.sandbox.stub(script, 'getLayoutBox').returns({height: 1, width: 1});
-      script.onMeasureChanged();
+      env.sandbox.stub(script, 'getLayoutSize').returns({height: 1, width: 1});
+      script.onLayoutMeasure();
       expect(warnStub).to.have.callCount(0);
     });
 
     it('should warn if there is zero width/height', () => {
       const warnStub = env.sandbox.stub(user(), 'warn');
-      env.sandbox.stub(script, 'getLayoutBox').returns({height: 0, width: 0});
-      script.onMeasureChanged();
+      env.sandbox.stub(script, 'getLayoutSize').returns({height: 0, width: 0});
+      script.onLayoutMeasure();
 
       expect(warnStub).calledWith(
         'amp-script',
@@ -139,7 +183,7 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
       allowConsoleError(() => {
         script.layoutCallback();
       });
-      script.onMeasureChanged();
+      script.onLayoutMeasure();
       expect(warnStub).to.have.callCount(0);
     });
   });

@@ -48,7 +48,6 @@ describe('mutator changeSize', () => {
       getBoundingClientRect: () => rect,
       applySizesAndMediaQuery: () => {},
       layoutCallback: () => Promise.resolve(),
-      viewportCallback: window.sandbox.spy(),
       prerenderAllowed: () => true,
       renderOutsideViewport: () => false,
       unlayoutCallback: () => true,
@@ -191,6 +190,7 @@ describe('mutator changeSize', () => {
       false
     );
     expect(resources.requestsChangeSize_.length).to.equal(2);
+    resource1.state_ = ResourceState.LAYOUT_SCHEDULED;
     resource1.unload();
     resources.cleanupTasks_(resource1);
     expect(resources.requestsChangeSize_.length).to.equal(1);
@@ -1082,7 +1082,7 @@ describe('mutator changeSize', () => {
       () => {
         const parent = document.createElement('div');
         parent.style.width = '222px';
-        parent.getLayoutWidth = () => 222;
+        parent.getLayoutSize = () => ({width: 222, height: 111});
         const element = document.createElement('div');
         element.overflowCallback = overflowCallbackSpy;
         parent.appendChild(element);
@@ -1132,7 +1132,7 @@ describe('mutator changeSize', () => {
       () => {
         const parent = document.createElement('div');
         parent.style.width = '222px';
-        parent.getLayoutWidth = () => 222;
+        parent.getLayoutSize = () => ({width: 222, height: 111});
         const element = document.createElement('div');
         const sibling = document.createElement('div');
         sibling.style.width = '1px';
@@ -1388,7 +1388,6 @@ describes.realWin('mutator mutateElement and collapse', {amp: true}, (env) => {
     element.updateLayoutBox = () => {};
     element.getPlaceholder = () => null;
     element.getLayoutPriority = () => LayoutPriority.CONTENT;
-    element.dispatchCustomEvent = () => {};
     element.getLayout = () => 'fixed';
 
     element.isInViewport = () => false;
@@ -1397,7 +1396,6 @@ describes.realWin('mutator mutateElement and collapse', {amp: true}, (env) => {
     element.getBoundingClientRect = () => rect;
     element.applySizesAndMediaQuery = () => {};
     element.layoutCallback = () => Promise.resolve();
-    element.viewportCallback = env.sandbox.spy();
     element.prerenderAllowed = () => true;
     element.renderOutsideViewport = () => true;
     element.isRelayoutNeeded = () => true;

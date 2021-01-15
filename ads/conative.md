@@ -20,7 +20,7 @@ CONATIVE support for AMP.
 
 ## Example
 
-- All CONATIVE `<amp-ad>` tags require the `width`, `height`, `layout`, `sizes` and `type="conative"` parameters.
+-   All CONATIVE `<amp-ad>` tags require the `width`, `height`, `layout`, `sizes` and `type="conative"` parameters.
 
 ```html
 <amp-ad
@@ -41,9 +41,9 @@ For configuration details and to generate your tags, please contact https://www.
 
 ### Required parameters
 
-- `data-domain`
-- `data-adslot`
+-   `data-domain`
+-   `data-adslot`
 
 ### Optional parameters
 
-- `data-preview`
+-   `data-preview`

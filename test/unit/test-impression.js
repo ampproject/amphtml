@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
+import * as lolex from 'lolex';
 import {Services} from '../../src/services';
+import {WindowInterface} from '../../src/window-interface';
+import {dev, user} from '../../src/log';
 import {
   getExtraParamsUrl,
   getTrackImpressionPromise,
@@ -25,9 +28,9 @@ import {
 } from '../../src/impression';
 import {macroTask} from '../../testing/yield';
 import {toggleExperiment} from '../../src/experiments';
-import {user} from '../../src/log';
 
-describe('impression', () => {
+describes.realWin('impression', {amp: true}, (env) => {
+  let window, document;
   let ampdoc;
   let viewer;
   let xhr;
@@ -36,14 +39,17 @@ describe('impression', () => {
   let warnStub;
 
   beforeEach(() => {
-    ampdoc = Services.ampdoc(window.document);
-    viewer = Services.viewerForDoc(window.document);
-    window.sandbox.stub(viewer, 'getParam');
-    window.sandbox.stub(viewer, 'hasCapability');
+    window = env.win;
+    document = window.document;
+    ampdoc = Services.ampdoc(document);
+    viewer = Services.viewerForDoc(document);
+    env.sandbox.stub(viewer, 'getParam');
+    env.sandbox.stub(viewer, 'hasCapability');
     xhr = Services.xhrFor(window);
     expect(xhr.fetchJson).to.exist;
-    const stub = window.sandbox.stub(xhr, 'fetchJson');
-    warnStub = window.sandbox.stub(user(), 'warn');
+    const stub = env.sandbox.stub(xhr, 'fetchJson');
+    warnStub = env.sandbox.stub(user(), 'warn');
+    env.sandbox.stub(dev(), 'warn');
     stub.returns(
       Promise.resolve({
         json() {
@@ -51,12 +57,12 @@ describe('impression', () => {
         },
       })
     );
-    window.sandbox.stub(ampdoc, 'whenFirstVisible').returns(Promise.resolve());
+    env.sandbox.stub(ampdoc, 'whenFirstVisible').returns(Promise.resolve());
     isTrustedViewer = false;
-    window.sandbox.stub(viewer, 'isTrustedViewer').callsFake(() => {
+    env.sandbox.stub(viewer, 'isTrustedViewer').callsFake(() => {
       return Promise.resolve(isTrustedViewer);
     });
-    window.sandbox.stub(viewer, 'getReferrerUrl').callsFake(() => {
+    env.sandbox.stub(viewer, 'getReferrerUrl').callsFake(() => {
       return Promise.resolve(referrer);
     });
     resetTrackImpressionPromiseForTesting();
@@ -69,7 +75,7 @@ describe('impression', () => {
   it('should do nothing if the experiment is off', () => {
     viewer.getParam.throws(new Error('Should not be called'));
     maybeTrackImpression(window);
-    return getTrackImpressionPromise().should.be.fulfilled;
+    return expect(getTrackImpressionPromise()).to.eventually.be.fulfilled;
   });
 
   it('should resolve if no click no replaceUrl', () => {
@@ -77,7 +83,7 @@ describe('impression', () => {
     viewer.getParam.withArgs('click').returns('');
     viewer.hasCapability.withArgs('replaceUrl').returns(false);
     maybeTrackImpression(window);
-    return getTrackImpressionPromise();
+    return expect(getTrackImpressionPromise()).to.eventually.be.fulfilled;
   });
 
   it('should resolve trackImpressionPromise after timeout', () => {
@@ -85,10 +91,16 @@ describe('impression', () => {
     viewer.hasCapability.withArgs('replaceUrl').returns(true);
     viewer.getParam.withArgs('replaceUrl').returns('https://www.example.com');
     viewer.getParam.withArgs('click').returns('https://www.example.com');
-    const clock = window.sandbox.useFakeTimers();
+    env.sandbox
+      .stub(viewer, 'sendMessageAwaitResponse')
+      .callsFake(() => new Promise(() => {}));
+
+    const clock = lolex.install({target: window});
     maybeTrackImpression(window);
     clock.tick(8001);
-    return getTrackImpressionPromise();
+    const promise = getTrackImpressionPromise();
+    clock.uninstall();
+    return promise;
   });
 
   it('should resolve after clickUrl and replaceUrl', () => {
@@ -96,7 +108,7 @@ describe('impression', () => {
     viewer.hasCapability.withArgs('replaceUrl').returns(true);
     viewer.getParam.withArgs('replaceUrl').returns('https://www.example.com');
     viewer.getParam.withArgs('click').returns('https://www.example.com');
-    window.sandbox
+    env.sandbox
       .stub(viewer, 'sendMessageAwaitResponse')
       .callsFake((message) => {
         if (message == 'getReplaceUrl') {
@@ -113,7 +125,7 @@ describe('impression', () => {
       })
     );
     maybeTrackImpression(window);
-    return getTrackImpressionPromise();
+    return expect(getTrackImpressionPromise()).to.eventually.be.fulfilled;
   });
 
   describe('clickUrl', () => {
@@ -122,7 +134,7 @@ describe('impression', () => {
       viewer.getParam.withArgs('click').returns('');
       maybeTrackImpression(window);
       expect(xhr.fetchJson).to.have.not.been.called;
-      return getTrackImpressionPromise().should.be.fulfilled;
+      return expect(getTrackImpressionPromise()).to.eventually.be.fulfilled;
     });
 
     it('should do nothing if there is the click arg is http', () => {
@@ -130,11 +142,11 @@ describe('impression', () => {
       viewer.getParam.withArgs('click').returns('http://www.example.com');
       maybeTrackImpression(window);
       expect(xhr.fetchJson).to.have.not.been.called;
-      return getTrackImpressionPromise().should.be.fulfilled;
+      return expect(getTrackImpressionPromise()).to.eventually.be.fulfilled;
     });
 
     it('should invoke click URL with experiment on', function* () {
-      window.sandbox.spy(viewer, 'sendMessageAwaitResponse');
+      env.sandbox.spy(viewer, 'sendMessageAwaitResponse');
       toggleExperiment(window, 'alp', true);
       isTrustedViewer = false;
       viewer.getParam.withArgs('click').returns('https://www.example.com');
@@ -192,10 +204,12 @@ describe('impression', () => {
         })
       );
       const {href} = window.location;
-      const clock = window.sandbox.useFakeTimers();
+      const clock = lolex.install({target: window});
       maybeTrackImpression(window);
       clock.tick(8001);
-      return getTrackImpressionPromise().then(() => {
+      const promise = getTrackImpressionPromise();
+      clock.uninstall();
+      return promise.then(() => {
         expect(window.location.href).to.equal(href);
       });
     });
@@ -252,7 +266,7 @@ describe('impression', () => {
         })
       );
       maybeTrackImpression(window);
-      return getTrackImpressionPromise();
+      return expect(getTrackImpressionPromise()).to.eventually.be.fulfilled;
     });
 
     it('should replace location href only with query params', () => {
@@ -268,15 +282,22 @@ describe('impression', () => {
           },
         })
       );
-      const prevHref = window.location.href;
-      window.history.replaceState(null, '', prevHref + '?bar=foo&test=4321');
+
+      const location = {
+        hash: '',
+        search: '?bar=foo&test=4321',
+        href: 'https://example.org?bar=foo&test=4321',
+      };
+      env.sandbox.stub(WindowInterface, 'getLocation').returns(location);
+      const replaceStateStub = env.sandbox.stub(window.history, 'replaceState');
+
       maybeTrackImpression(window);
       return getTrackImpressionPromise().then(() => {
-        expect(window.location.href).to.equal(
-          'http://localhost:9876/context.html' +
-            '?bar=foo&test=4321&gclid=123456&foo=bar&example=123'
+        expect(replaceStateStub).to.be.calledOnce.calledWith(
+          null,
+          '',
+          'https://example.org?bar=foo&test=4321&gclid=123456&foo=bar&example=123'
         );
-        window.history.replaceState(null, '', prevHref);
       });
     });
   });
@@ -284,12 +305,12 @@ describe('impression', () => {
   describe('replaceUrl', () => {
     it('do nothing if no init replaceUrl param', function* () {
       toggleExperiment(window, 'alp', true);
-      window.sandbox.spy(viewer, 'replaceUrl');
+      env.sandbox.spy(viewer, 'replaceUrl');
       viewer.hasCapability.withArgs('replaceUrl').returns(true);
       maybeTrackImpression(window);
       yield macroTask();
       expect(viewer.replaceUrl).to.have.not.been.called;
-      return getTrackImpressionPromise().should.be.fulfilled;
+      return expect(getTrackImpressionPromise()).to.eventually.be.fulfilled;
     });
 
     it('should use init replaceUrl parm if viewer has no capability', () => {
@@ -298,19 +319,24 @@ describe('impression', () => {
       viewer.getParam
         .withArgs('replaceUrl')
         .returns('http://localhost:9876/v/s/f.com/?gclid=1234&amp_js_v=1&init');
-      const prevHref = window.location.href;
+      const location = {
+        hash: '',
+        search: '?',
+        href: 'http://localhost:9876',
+      };
+      env.sandbox.stub(WindowInterface, 'getLocation').returns(location);
+      const replaceUrlStub = env.sandbox.stub(viewer, 'replaceUrl');
       maybeTrackImpression(window);
       return getTrackImpressionPromise().then(() => {
-        expect(window.location.href).to.equal(
+        expect(replaceUrlStub).to.be.calledOnce.calledWith(
           'http://localhost:9876/v/s/f.com/?gclid=1234&amp_js_v=1&init'
         );
-        window.history.replaceState(null, '', prevHref);
       });
     });
 
     it('should request replaceUrl if viewer signals', function* () {
       toggleExperiment(window, 'alp', true);
-      window.sandbox.spy(viewer, 'sendMessageAwaitResponse');
+      env.sandbox.spy(viewer, 'sendMessageAwaitResponse');
       viewer.getParam.withArgs('replaceUrl').returns('http://www.example.com');
       viewer.hasCapability.withArgs('replaceUrl').returns(true);
       maybeTrackImpression(window);
@@ -323,7 +349,7 @@ describe('impression', () => {
       viewer.getParam.withArgs('click').returns(undefined);
       viewer.getParam.withArgs('replaceUrl').returns('http://www.example.com');
       viewer.hasCapability.withArgs('replaceUrl').returns(true);
-      window.sandbox
+      env.sandbox
         .stub(viewer, 'sendMessageAwaitResponse')
         .callsFake((message) => {
           if (message == 'getReplaceUrl') {
@@ -331,14 +357,14 @@ describe('impression', () => {
           }
         });
       maybeTrackImpression(window);
-      return getTrackImpressionPromise();
+      return expect(getTrackImpressionPromise()).to.eventually.be.fulfilled;
     });
 
     it('should replace location href with replaceUrl from viewer', () => {
       toggleExperiment(window, 'alp', true);
       viewer.getParam.withArgs('replaceUrl').returns('http://www.example.com');
       viewer.hasCapability.withArgs('replaceUrl').returns(true);
-      window.sandbox
+      env.sandbox
         .stub(viewer, 'sendMessageAwaitResponse')
         .callsFake((message) => {
           if (message == 'getReplaceUrl') {
@@ -348,39 +374,39 @@ describe('impression', () => {
             });
           }
         });
-      const prevHref = window.location.href;
-      window.history.replaceState(
-        null,
-        '',
-        prevHref + '?bar=foo&test=4321#hash'
-      );
+      const replaceUrlStub = env.sandbox.stub(viewer, 'replaceUrl');
+      const location = {
+        hash: '#hash',
+        search: '?bar=foo&test=4321',
+        href: 'http://localhost:9876?bar=foo&test=4321#hash',
+      };
+      env.sandbox.stub(WindowInterface, 'getLocation').returns(location);
       maybeTrackImpression(window);
       return getTrackImpressionPromise().then(() => {
-        expect(window.location.href).to.equal(
-          'http://localhost:9876/v/s/f.com/?gclid=1234&amp_js_v=1#hash'
+        expect(replaceUrlStub).to.be.calledOnce.calledWith(
+          'http://localhost:9876/v/s/f.com/?gclid=1234&amp_js_v=1'
         );
-        window.history.replaceState(null, '', prevHref);
       });
     });
   });
 
   it('shouldAppendExtraParams', () => {
-    const div = window.document.createElement('amp-analytics');
+    const div = document.createElement('amp-analytics');
     div.setAttribute('type', 'fake');
     const ampdocApi = {
       whenReady: () => {
         return Promise.resolve();
       },
       getBody: () => {
-        return window.document.body;
+        return document.body;
       },
     };
-    window.document.body.appendChild(div);
+    document.body.appendChild(div);
     return shouldAppendExtraParams(ampdocApi).then((res) => {
       expect(res).to.be.false;
-      const div2 = window.document.createElement('amp-analytics');
+      const div2 = document.createElement('amp-analytics');
       div2.setAttribute('type', 'googleanalytics');
-      window.document.body.appendChild(div2);
+      document.body.appendChild(div2);
       return shouldAppendExtraParams(ampdocApi).then((res) => {
         expect(res).to.be.true;
       });
@@ -397,7 +423,7 @@ describe('impression', () => {
     });
 
     it('should append gclid and gclsrc from window href', () => {
-      const target = window.document.createElement('a');
+      const target = document.createElement('a');
       target.href = 'https://www.test.com?a=1&b=2&c=QUERY_PARAM(c)';
       windowApi.location.href = 'www.current.com?gclid=123&gclsrc=abc';
       expect(getExtraParamsUrl(windowApi, target)).to.equal(
@@ -406,7 +432,7 @@ describe('impression', () => {
     });
 
     it('should respect window location href', () => {
-      const target = window.document.createElement('a');
+      const target = document.createElement('a');
       target.href = 'https://www.test.com?a=1&b=2&c=QUERY_PARAM(c)';
       windowApi.location.href = 'www.current.com';
       expect(getExtraParamsUrl(windowApi, target)).to.equal('');
@@ -421,7 +447,7 @@ describe('impression', () => {
     });
 
     it('should respect param in url', () => {
-      const target = window.document.createElement('a');
+      const target = document.createElement('a');
       target.href = 'https://www.test.com?a=1&b=2&gclid=123';
       windowApi.location.href = 'www.current.com?gclid=123&gclsrc=abc';
       expect(getExtraParamsUrl(windowApi, target)).to.equal(
@@ -430,7 +456,7 @@ describe('impression', () => {
     });
 
     it('should respect param in data-amp-addparams', () => {
-      const target = window.document.createElement('a');
+      const target = document.createElement('a');
       target.href = 'https://www.test.com?a=1&b=2&gclid=123';
       target.setAttribute('data-amp-addparams', 'gclid=QUERY_PARAM(gclid)');
       windowApi.location.href = 'www.current.com?gclid=123&gclsrc=abc';

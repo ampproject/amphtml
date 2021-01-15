@@ -18,7 +18,6 @@ const debounce = require('debounce');
 const file = require('gulp-file');
 const fs = require('fs-extra');
 const gulp = require('gulp');
-const gulpWatch = require('gulp-watch');
 const {
   endBuildStep,
   mkdirSync,
@@ -28,6 +27,7 @@ const {
 const {buildExtensions} = require('./extension-helpers');
 const {jsifyCssAsync} = require('./jsify-css');
 const {maybeUpdatePackages} = require('./update-packages');
+const {watch} = require('gulp');
 
 /**
  * Entry point for 'gulp css'
@@ -90,7 +90,7 @@ function compileCss(options = {}) {
     const watchFunc = () => {
       compileCss();
     };
-    gulpWatch('css/**/*.css', debounce(watchFunc, watchDebounceDelay));
+    watch('css/**/*.css').on('change', debounce(watchFunc, watchDebounceDelay));
   }
 
   /**
@@ -104,13 +104,9 @@ function compileCss(options = {}) {
    */
   function writeCss(css, jsFilename, cssFilename, append) {
     return toPromise(
-      file(
-        jsFilename,
-        '/** @noinline */ export const cssText = ' + JSON.stringify(css),
-        {
-          src: true,
-        }
-      )
+      file(jsFilename, 'export const cssText = ' + JSON.stringify(css), {
+        src: true,
+      })
         .pipe(gulp.dest('build'))
         .on('end', function () {
           mkdirSync('build');

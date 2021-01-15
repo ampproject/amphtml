@@ -25,13 +25,11 @@ limitations under the License.
 
 # amp-mega-menu
 
-Horizontal navigation bar with menu items that open/close content containers on click.
+## Usage
 
-## Overview
+Displays a horizontal navigation bar with menu items that open/close content containers on click.
 
 `<amp-mega-menu>` provides a way to organize and display large collections of navigational content at the top of an AMP page. The component is intended primarily for desktop and tablet use cases, and it can be used jointly with [`<amp-sidebar>`](../amp-sidebar/0.1/amp-sidebar.md) to create a responsive menu.
-
-## Usage
 
 The `<amp-mega-menu>` component includes a single `<nav>` element containing either a `<ul>` or `<ol>`, where each `<li>` element is a menu item.
 
@@ -41,11 +39,11 @@ The `<nav>` element must be parented by either the `<amp-mega-menu>` component o
 
 Each menu item can contain any of the following tags as direct children:
 
-- `<h1>`, `<h2>`, `<h3>`, `<h4>`, `<h5>`, `<h6>`
-- `<a>`
-- `<button>`
-- `<span>`
-- `<div>`
+-   `<h1>`, `<h2>`, `<h3>`, `<h4>`, `<h5>`, `<h6>`
+-   `<a>`
+-   `<button>`
+-   `<span>`
+-   `<div>`
 
 ### Toggleable dropdowns
 
@@ -58,13 +56,13 @@ A mask will cover the rest of the page when a dropdown is open. Content, such as
 
 Each dropdown may contain any of the following AMP elements:
 
-- `<amp-ad>`
-- `<amp-carousel>`
-- `<amp-form>`
-- `<amp-img>`
-- `<amp-lightbox>`
-- `<amp-list>`
-- `<amp-video>`
+-   `<amp-ad>`
+-   `<amp-carousel>`
+-   `<amp-form>`
+-   `<amp-img>`
+-   `<amp-lightbox>`
+-   `<amp-list>`
+-   `<amp-video>`
 
 The example below demonstrates an `<amp-mega-menu>` with three menu items. The first two are toggleable and the third is an external link.
 
@@ -247,30 +245,27 @@ The example below hides `<amp-mega-menu>` when the viewport width is less than 5
 
 ## Attributes
 
-<table>
-  <tr>
-    <td width="40%"><strong>data-close-button-aria-label (optional)</strong></td>
-    <td>Optional attribute used to set ARIA label for the close buttons added for accessibility.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
-  </tr>
-</table>
+### data-close-button-aria-label (optional)
+
+Optional attribute used to set ARIA label for the close buttons added for accessibility.
+
+### Common attributes
+
+This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.
 
 ## Styling
 
 The `<amp-mega-menu>` component can be styled with standard CSS.
 
-- The `<nav>` element and dropdown elements have a default white background.
-- When open, the dropdown containers will fill the entire viewport width. This can be overridden with the left and width properties.
-- Expanding a menu item applies the `open` attribute to the `<amp-mega-menu>` component as well as the expanded `<li>` element.
+-   The `<nav>` element and dropdown elements have a default white background.
+-   When open, the dropdown containers will fill the entire viewport width. This can be overridden with the left and width properties.
+-   Expanding a menu item applies the `open` attribute to the `<amp-mega-menu>` component as well as the expanded `<li>` element.
 
 The example below customizes:
 
-- The background color of the navigation bar.
-- The appearance of opened menu buttons.
-- The position of the dropdown containers.
+-   The background color of the navigation bar.
+-   The appearance of opened menu buttons.
+-   The position of the dropdown containers.
 
 [example playground="true" preview="top-frame" orientation="landscape"]
 
@@ -354,14 +349,14 @@ In addition, to assist screen reader users, an invisible but tabbable close butt
 
 Keyboard support for the component includes:
 
-- Left/right arrow keys to navigate between menu items when focused.
-- Enter/Space keys to trigger an active menu item button.
-- Esc key to collapse the mega menu.
+-   Left/right arrow keys to navigate between menu items when focused.
+-   Enter/Space keys to trigger an active menu item button.
+-   Esc key to collapse the mega menu.
 
 Open on hover is not currently supported by `<amp-mega-menu>` due to UX and accessibility concerns. In particular, we want to avoid scenarios where:
 
-- A user moves cursor over a button that toggles the dropdown menu and clicks, which immediately closes the dropdown after opening it on hover.
-- A user wants to click on an element below a closed dropdown but accidentally opens it on hover and clicks inside the dropdown instead.
+-   A user moves cursor over a button that toggles the dropdown menu and clicks, which immediately closes the dropdown after opening it on hover.
+-   A user wants to click on an element below a closed dropdown but accidentally opens it on hover and clicks inside the dropdown instead.
 
 More information on this topic can be found in the [Accessibility Developer Guide](https://www.accessibility-developer-guide.com/examples/widgets/dropdown/).
 

@@ -23,11 +23,7 @@ import {
   whenUpgradedToCustomElement,
 } from '../../../../src/dom';
 import {listenOncePromise} from '../../../../src/event-helper';
-import {tryParseJson} from '../../../../src/json';
-
-function getIntersectionMessage(id) {
-  return {data: {id, method: 'getIntersection'}};
-}
+import {macroTask} from '../../../../testing/yield';
 
 describes.realWin(
   'amp-video-iframe',
@@ -42,12 +38,10 @@ describes.realWin(
     let win;
     let doc;
     let videoManagerStub;
-    let any;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
-      any = env.sandbox.match.any;
 
       videoManagerStub = {
         register: env.sandbox.spy(),
@@ -83,10 +77,6 @@ describes.realWin(
       return el;
     }
 
-    function spyDispatch(el) {
-      return env.sandbox.spy(el, 'dispatchCustomEvent');
-    }
-
     function acceptMockedMessages(videoIframe) {
       env.sandbox
         ./*OK*/ stub(videoIframe.implementation_, 'originMatches_')
@@ -95,10 +85,10 @@ describes.realWin(
 
     async function layoutAndLoad(element) {
       await whenUpgradedToCustomElement(element);
-      // getLayoutBox() affects looksLikeTrackingIframe().
+      // getLayoutSize() affects looksLikeTrackingIframe().
       // Use default width/height of 100 since element is not sized
       // as expected in test fixture.
-      env.sandbox.stub(element, 'getLayoutBox').returns({
+      env.sandbox.stub(element, 'getLayoutSize').returns({
         width: Number(element.getAttribute('width')) || 100,
         height: Number(element.getAttribute('height')) || 100,
       });
@@ -113,12 +103,16 @@ describes.realWin(
       );
     }
 
-    function stubIntersectionEntry(element, time, intersectionRatio) {
-      const entry = {time, intersectionRatio};
-      env.sandbox
-        ./*OK*/ stub(element, 'getIntersectionChangeEntry')
-        .returns(entry);
-      return entry;
+    function stubMeasureIntersection(target, time, intersectionRatio) {
+      env.win.IntersectionObserver = (callback) => ({
+        observe() {
+          Promise.resolve().then(() => {
+            callback([{target, time, intersectionRatio}]);
+          });
+        },
+        unobserve() {},
+        disconnect() {},
+      });
     }
 
     describe('#layoutCallback', () => {
@@ -133,20 +127,30 @@ describes.realWin(
       });
 
       it('sets metadata in iframe name', async () => {
-        const metadata = {
-          canonicalUrl: 'foo.html',
-          sourceUrl: 'bar.html',
-        };
+        const canonicalUrl = 'foo.html';
+        const sourceUrl = 'bar.html';
+        const title = 'My test title';
+        const lang = 'es';
 
-        env.sandbox.stub(Services, 'documentInfoForDoc').returns(metadata);
+        env.sandbox.stub(win.document, 'title').value(title);
+        env.sandbox.stub(win.document.documentElement, 'lang').value(lang);
+
+        env.sandbox.stub(Services, 'documentInfoForDoc').returns({
+          canonicalUrl,
+          sourceUrl,
+        });
 
         const videoIframe = createVideoIframe();
 
         await layoutAndLoad(videoIframe);
 
-        const {name} = videoIframe.implementation_.iframe_;
-
-        expect(tryParseJson(name)).to.deep.equal(metadata);
+        const iframe = videoIframe.querySelector('iframe');
+        expect(JSON.parse(iframe.name)).to.deep.equal({
+          canonicalUrl,
+          sourceUrl,
+          title,
+          lang,
+        });
       });
 
       it('sets amp=1 fragment in src', async () => {
@@ -155,8 +159,8 @@ describes.realWin(
 
         await layoutAndLoad(videoIframe);
 
-        const {src} = videoIframe.implementation_.iframe_;
-        expect(src).to.equal(`${rawSrc}#amp=1`);
+        const iframe = videoIframe.querySelector('iframe');
+        expect(iframe.src).to.equal(`${rawSrc}#amp=1`);
       });
 
       it('does not set amp=1 fragment in src when fragment present', async () => {
@@ -165,8 +169,8 @@ describes.realWin(
 
         await layoutAndLoad(videoIframe);
 
-        const {src} = videoIframe.implementation_.iframe_;
-        expect(src).to.equal(rawSrc);
+        const iframe = videoIframe.querySelector('iframe');
+        expect(iframe.src).to.equal(rawSrc);
       });
     });
 
@@ -234,13 +238,13 @@ describes.realWin(
 
         await layoutAndLoad(videoIframe);
 
-        const dispatch = spyDispatch(videoIframe);
-
         const invalidEvents = 'tacos al pastor'.split(' ');
 
         invalidEvents.forEach((event) => {
+          const spy = env.sandbox.spy();
+          videoIframe.addEventListener(event, spy);
           videoIframe.implementation_.onMessage_({data: {event}});
-          expect(dispatch.withArgs(event)).to.not.have.been.called;
+          expect(spy).to.not.have.been.called;
         });
       });
 
@@ -248,8 +252,6 @@ describes.realWin(
         const videoIframe = createVideoIframe();
 
         await layoutAndLoad(videoIframe);
-
-        const dispatch = spyDispatch(videoIframe);
 
         acceptMockedMessages(videoIframe);
 
@@ -265,9 +267,55 @@ describes.realWin(
 
         for (let i = 0; i < validEvents.length; i++) {
           const event = validEvents[i];
+          const spy = env.sandbox.spy();
+          videoIframe.addEventListener(event, spy);
           videoIframe.implementation_.onMessage_({data: {event}});
-          expect(dispatch.withArgs(event)).to.have.been.calledOnce;
+          expect(spy).to.have.been.calledOnce;
         }
+      });
+
+      it('should return consent data on getConsentData', async () => {
+        const consentString = 'foo-consentString';
+        const consentMetadata = 'bar-consentMetadata';
+        const consentPolicyState = 'baz-consentPolicyState';
+        const consentPolicySharedData = 'foo-consentPolicySharedData';
+
+        env.sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
+          Promise.resolve({
+            getConsentMetadataInfo: () => Promise.resolve(consentMetadata),
+            getConsentStringInfo: () => Promise.resolve(consentString),
+            whenPolicyResolved: () => Promise.resolve(consentPolicyState),
+            getMergedSharedData: () => Promise.resolve(consentPolicySharedData),
+          })
+        );
+
+        const id = 1234;
+
+        const videoIframe = createVideoIframe();
+
+        await layoutAndLoad(videoIframe);
+
+        const postMessage = stubPostMessage(videoIframe);
+
+        acceptMockedMessages(videoIframe);
+
+        videoIframe.implementation_.onMessage_({
+          data: {id, method: 'getConsentData'},
+        });
+
+        await macroTask();
+
+        expect(
+          postMessage.withArgs({
+            id,
+            args: {
+              consentString,
+              consentMetadata,
+              consentPolicyState,
+              consentPolicySharedData,
+            },
+          })
+        ).to.have.been.calledOnce;
       });
 
       it('should return intersection ratio if in autoplay range', async () => {
@@ -283,14 +331,12 @@ describes.realWin(
 
         acceptMockedMessages(videoIframe);
 
-        const message = getIntersectionMessage(id);
+        const message = {data: {id, method: 'getIntersection'}};
 
-        const expectedResponseMessage = {
-          id,
-          args: stubIntersectionEntry(videoIframe, time, intersectionRatio),
-        };
+        stubMeasureIntersection(videoIframe, time, intersectionRatio);
+        const expectedResponseMessage = {id, args: {time, intersectionRatio}};
 
-        videoIframe.implementation_.onMessage_(message);
+        await videoIframe.implementation_.onMessage_(message);
 
         expect(postMessage.withArgs(env.sandbox.match(expectedResponseMessage)))
           .to.have.been.calledOnce;
@@ -308,11 +354,11 @@ describes.realWin(
 
         const postMessage = stubPostMessage(videoIframe);
 
-        stubIntersectionEntry(videoIframe, time, intersectionRatio);
+        stubMeasureIntersection(videoIframe, time, intersectionRatio);
 
         acceptMockedMessages(videoIframe);
 
-        const message = getIntersectionMessage(id);
+        const message = {data: {id, method: 'getIntersection'}};
 
         const expectedResponseMessage = {
           id,
@@ -322,7 +368,7 @@ describes.realWin(
           },
         };
 
-        videoIframe.implementation_.onMessage_(message);
+        await videoIframe.implementation_.onMessage_(message);
 
         expect(postMessage.withArgs(env.sandbox.match(expectedResponseMessage)))
           .to.have.been.calledOnce;
@@ -352,7 +398,8 @@ describes.realWin(
 
         it(`should ${verb} custom analytics event ${sufix}`, async () => {
           const videoIframe = createVideoIframe();
-          const dispatch = spyDispatch(videoIframe);
+          const eventSpy = env.sandbox.spy();
+          videoIframe.addEventListener(VideoEvents.CUSTOM_TICK, eventSpy);
 
           await layoutAndLoad(videoIframe);
 
@@ -373,18 +420,16 @@ describes.realWin(
 
           if (accept) {
             const expectedEventVars = {eventType, vars: vars || {}};
-            const expectedDispatch = dispatch.withArgs(
-              VideoEvents.CUSTOM_TICK,
-              expectedEventVars
-            );
             implementation_.onMessage_({data});
-            expect(expectedDispatch).to.have.been.calledOnce;
+            expect(eventSpy).to.be.calledOnce;
+            const eventData = eventSpy.firstCall.firstArg.data;
+            expect(eventData.eventType).to.equal(expectedEventVars.eventType);
+            expect(eventData.vars).to.deep.equal(expectedEventVars.vars);
           } else {
             allowConsoleError(() => {
               expect(() => implementation_.onMessage_({data})).to.throw();
             });
-            expect(dispatch.withArgs(VideoEvents.CUSTOM_TICK, any)).to.not.have
-              .been.called;
+            expect(eventSpy).to.not.have.been.called;
           }
         });
       });
@@ -435,6 +480,8 @@ describes.realWin(
           const postMessage = stubPostMessage(videoIframe);
 
           videoIframe.implementation_[method]();
+
+          await macroTask();
 
           expect(
             postMessage.withArgs(

@@ -24,14 +24,14 @@
 const atob = require('atob');
 const colors = require('ansi-colors');
 const {
-  downloadDistOutput,
+  downloadNomoduleOutput,
   printChangeSummary,
   startTimer,
   stopTimer,
   timedExecOrDie: timedExecOrDieBase,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
-const {isTravisPullRequestBuild} = require('../common/travis');
+const {isPullRequestBuild} = require('../common/ci');
 
 const FILENAME = 'visual-diff-tests.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
@@ -40,11 +40,11 @@ const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
 
-  if (!isTravisPullRequestBuild()) {
-    downloadDistOutput(FILENAME);
+  if (!isPullRequestBuild()) {
+    downloadNomoduleOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
     process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
-    timedExecOrDie('gulp visual-diff --compiled --nobuild --master');
+    timedExecOrDie('gulp visual-diff --nobuild --master');
   } else {
     printChangeSummary(FILENAME);
     const buildTargets = determineBuildTargets(FILENAME);
@@ -54,9 +54,9 @@ function main() {
       buildTargets.has('FLAG_CONFIG') ||
       buildTargets.has('VISUAL_DIFF')
     ) {
-      downloadDistOutput(FILENAME);
+      downloadNomoduleOutput(FILENAME);
       timedExecOrDie('gulp update-packages');
-      timedExecOrDie('gulp visual-diff --compiled --nobuild');
+      timedExecOrDie('gulp visual-diff --nobuild');
     } else {
       timedExecOrDie('gulp visual-diff --empty');
       console.log(

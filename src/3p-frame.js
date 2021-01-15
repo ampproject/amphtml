@@ -21,7 +21,6 @@ import {getContextMetadata} from '../src/iframe-attributes';
 import {getMode} from './mode';
 import {internalRuntimeVersion} from './internal-version';
 import {setStyle} from './style';
-import {startsWith} from './string';
 import {tryParseJson} from './json';
 import {urls} from './config';
 
@@ -66,10 +65,11 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
  * @param {!AmpElement} parentElement
  * @param {string=} opt_type
  * @param {Object=} opt_context
- * @param {!{
- *   disallowCustom,
- *   allowFullscreen,
- * }=} opt_options Options for the created iframe.
+ * @param {{
+ *   disallowCustom: (boolean|undefined),
+ *   allowFullscreen: (boolean|undefined),
+ *   initialIntersection: (IntersectionObserverEntry|undefined),
+ * }=} options Options for the created iframe.
  * @return {!HTMLIFrameElement} The iframe.
  */
 export function getIframe(
@@ -77,8 +77,13 @@ export function getIframe(
   parentElement,
   opt_type,
   opt_context,
-  {disallowCustom, allowFullscreen} = {}
+  options = {}
 ) {
+  const {
+    disallowCustom = false,
+    allowFullscreen = false,
+    initialIntersection,
+  } = options;
   // Check that the parentElement is already in DOM. This code uses a new and
   // fast `isConnected` API and thus only used when it's available.
   devAssert(
@@ -92,6 +97,10 @@ export function getIframe(
     opt_type,
     opt_context
   );
+  if (initialIntersection) {
+    attributes['_context']['initialIntersection'] = initialIntersection;
+  }
+
   const iframe = /** @type {!HTMLIFrameElement} */ (parentWindow.document.createElement(
     'iframe'
   ));
@@ -175,7 +184,7 @@ export function addDataAndJsonAttributes_(element, attributes) {
   for (const name in dataset) {
     // data-vars- is reserved for amp-analytics
     // see https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/analytics-vars.md#variables-as-data-attribute
-    if (!startsWith(name, 'vars')) {
+    if (!name.startsWith('vars')) {
       attributes[name] = dataset[name];
     }
   }

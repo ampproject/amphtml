@@ -23,10 +23,8 @@ const del = require('del');
 const file = require('gulp-file');
 const fs = require('fs-extra');
 const gulp = require('gulp');
-const gulpIf = require('gulp-if');
-const gulpWatch = require('gulp-watch');
-const istanbul = require('gulp-istanbul');
 const log = require('fancy-log');
+const open = require('open');
 const path = require('path');
 const regexpSourcemaps = require('gulp-regexp-sourcemaps');
 const rename = require('gulp-rename');
@@ -41,10 +39,11 @@ const {applyConfig, removeConfig} = require('./prepend-global/index.js');
 const {closureCompile} = require('../compile/compile');
 const {EventEmitter} = require('events');
 const {green, red, cyan} = require('ansi-colors');
-const {isTravisBuild} = require('../common/travis');
+const {isCiBuild} = require('../common/ci');
 const {jsBundles} = require('../compile/bundles.config');
 const {thirdPartyFrames} = require('../test-configs/config');
 const {transpileTs} = require('../compile/typescript');
+const {watch: gulpWatch} = require('gulp');
 
 /**
  * Tasks that should print the `--nobuild` help text.
@@ -128,7 +127,10 @@ async function bootstrapThirdPartyFrames(options) {
       const watchFunc = () => {
         thirdPartyBootstrap(frameObject.max, frameObject.min, options);
       };
-      gulpWatch(frameObject.max, debounce(watchFunc, watchDebounceDelay));
+      gulpWatch(frameObject.max).on(
+        'change',
+        debounce(watchFunc, watchDebounceDelay)
+      );
     });
   }
   await Promise.all(promises);
@@ -249,7 +251,7 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
         options.onWatchBuild(compileComplete);
       }
     };
-    gulpWatch(entryPoint, debounce(watchFunc, watchDebounceDelay));
+    gulpWatch(entryPoint).on('change', debounce(watchFunc, watchDebounceDelay));
   }
 
   async function doCompileMinifiedJs(continueOnError) {
@@ -389,7 +391,6 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
         )
         .pipe(source(srcFilename))
         .pipe(buffer())
-        .pipe(gulpIf(argv.coverage, istanbul()))
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(
           regexpSourcemaps(
@@ -441,7 +442,9 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
  */
 async function compileTs(srcDir, srcFilename, destDir, options) {
   options = options || {};
+  const startTime = Date.now();
   await transpileTs(srcDir, srcFilename);
+  endBuildStep('Transpiled', srcFilename, startTime);
   await compileJs(srcDir, srcFilename, destDir, options);
   del.sync(path.join(srcDir, '**/*.js'));
 }
@@ -465,8 +468,7 @@ async function compileJs(srcDir, srcFilename, destDir, options) {
 }
 
 /**
- * Stops the timer for the given build step and prints the execution time,
- * unless we are on Travis.
+ * Stops the timer for the given build step and prints the execution time.
  * @param {string} stepName Name of the action, like 'Compiled' or 'Minified'
  * @param {string} targetName Name of the target, like a filename or path
  * @param {DOMHighResTimeStamp} startTime Start time of build step
@@ -500,7 +502,7 @@ function printConfigHelp(command) {
     cyan(argv.config === 'canary' ? 'canary' : 'prod'),
     green('AMP config.')
   );
-  if (!isTravisBuild()) {
+  if (!isCiBuild()) {
     log(
       green('⤷ Use'),
       cyan('--config={canary|prod}'),
@@ -516,7 +518,6 @@ function printConfigHelp(command) {
  */
 function printNobuildHelp() {
   for (const task of NOBUILD_HELP_TASKS) {
-    // eslint-disable-line local/no-for-of-statement
     if (argv._.includes(task)) {
       log(
         green('To skip building during future'),
@@ -530,6 +531,20 @@ function printNobuildHelp() {
       return;
     }
   }
+}
+
+/**
+ * @param {string=} covPath
+ * @return {!Promise}
+ */
+async function maybePrintCoverageMessage(covPath) {
+  if (!argv.coverage || isCiBuild()) {
+    return;
+  }
+
+  const url = 'file://' + path.resolve(covPath);
+  log(green('INFO:'), 'Generated code coverage report at', cyan(url));
+  await open(url, {wait: false});
 }
 
 /**
@@ -654,6 +669,7 @@ module.exports = {
   compileTs,
   doBuildJs,
   endBuildStep,
+  maybePrintCoverageMessage,
   maybeToEsmName,
   mkdirSync,
   printConfigHelp,

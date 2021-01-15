@@ -37,7 +37,7 @@ For details on the configuration semantics, please contact the ad network or ref
 
 Supported parameters:
 
-- `data-sid`
-- `data-loc`
-- `data-keywords`
-- `data-uservars`
+-   `data-sid`
+-   `data-loc`
+-   `data-keywords`
+-   `data-uservars`

@@ -67,7 +67,9 @@ describes.realWin(
       it('should generate the attributes', () => {
         const adNetwork = getAdNetworkConfig('alright', ampAutoAdsElem);
         expect(adNetwork.getAttributes()).to.deep.equal({
-          'layout': 'fixed',
+          'width': 300,
+          'height': 250,
+          'layout': 'responsive',
           'data-multi-size-validation': 'false',
           'type': 'doubleclick',
           'data-ad': 'alright',

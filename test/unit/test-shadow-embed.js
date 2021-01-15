@@ -24,8 +24,9 @@ import {
 import {
   createShadowDomWriter,
   createShadowRoot,
-  getShadowRootNode,
   importShadowBody,
+  installShadowStyle,
+  resetShadowStyleCacheForTesting,
   scopeShadowCss,
   setShadowDomStreamingSupportedForTesting,
 } from '../../src/shadow-embed';
@@ -261,30 +262,6 @@ describes.sandboxed('shadow-embed', {}, () => {
     }
   );
 
-  describe('getShadowRootNode', () => {
-    let content, host, shadowRoot;
-
-    beforeEach(() => {
-      host = document.createElement('div');
-      shadowRoot = createShadowRoot(host);
-      content = document.createElement('span');
-      shadowRoot.appendChild(content);
-    });
-
-    it('should find itself as the root node', () => {
-      expect(getShadowRootNode(shadowRoot)).to.equal(shadowRoot);
-    });
-
-    it('should find the root node from ancestors', () => {
-      expect(getShadowRootNode(content)).to.equal(shadowRoot);
-    });
-
-    it('should find the root node via polyfill', () => {
-      setShadowDomSupportedVersionForTesting(ShadowDomVersion.NONE);
-      expect(getShadowRootNode(content)).to.equal(shadowRoot);
-    });
-  });
-
   describe('scopeShadowCss', () => {
     let shadowRoot;
 
@@ -313,6 +290,63 @@ describes.sandboxed('shadow-embed', {}, () => {
       expect(scope('body-x {}')).to.equal('.h body-x {}');
       expect(scope('body_x {}')).to.equal('.h body_x {}');
       expect(scope('body1 {}')).to.equal('.h body1 {}');
+    });
+  });
+
+  describe('installShadowStyle', () => {
+    let shadowRoot, shadowRoot2;
+
+    beforeEach(() => {
+      shadowRoot = document.createElement('div');
+      shadowRoot2 = document.createElement('div');
+    });
+
+    afterEach(() => {
+      resetShadowStyleCacheForTesting(window);
+    });
+
+    describe('adopted stylesheets supported', () => {
+      before(function () {
+        if (!document.adoptedStyleSheets) {
+          this.skipTest();
+        }
+      });
+
+      it('should re-use constructable stylesheet when supported', function () {
+        shadowRoot.adoptedStyleSheets = [];
+        installShadowStyle(shadowRoot, 'A', '* {color: red}');
+
+        expect(shadowRoot.adoptedStyleSheets).to.have.length(1);
+        const styleSheet1 = shadowRoot.adoptedStyleSheets[0];
+        expect(styleSheet1.rules).to.have.length(1);
+        expect(styleSheet1.rules[0].cssText.replace(/(\s|;)/g, '')).to.equal(
+          '*{color:red}'
+        );
+        expect(shadowRoot.querySelector('style')).to.be.null;
+
+        // A different stylesheet.
+        installShadowStyle(shadowRoot, 'B', '* {color: blue}');
+        expect(shadowRoot.adoptedStyleSheets).to.have.length(2);
+
+        // Repeated call uses the cache.
+        shadowRoot2.adoptedStyleSheets = [];
+        installShadowStyle(shadowRoot2, 'A', 'not even CSS');
+        expect(shadowRoot2.adoptedStyleSheets).to.have.length(1);
+        expect(shadowRoot2.adoptedStyleSheets[0]).to.equal(styleSheet1);
+
+        // A different stylesheet in a different root.
+        shadowRoot2.adoptedStyleSheets = [];
+        installShadowStyle(shadowRoot2, 'B', '* {color: blue}');
+        expect(shadowRoot2.adoptedStyleSheets).to.have.length(1);
+        expect(shadowRoot2.adoptedStyleSheets[0]).to.not.equal(styleSheet1);
+      });
+    });
+
+    it('should create a legacy stylesheet when constructable not supported', () => {
+      installShadowStyle(shadowRoot, 'A', '* {color: red}');
+
+      const styleEl = shadowRoot.querySelector('style');
+      expect(styleEl.textContent).to.equal('* {color: red}');
     });
   });
 

@@ -27,7 +27,7 @@ import {getDetail, listenOncePromise} from '../../../../src/event-helper';
 
 /**
  * @param {!Element} el
- * @param {number=} index An intex to wait for.
+ * @param {number=} index An index to wait for.
  * @return {!Promise<undefined>}
  */
 async function afterIndexUpdate(el, index) {
@@ -59,6 +59,13 @@ function getPrevTitle(el) {
 function getSlideWrappers(el) {
   return el.querySelectorAll(
     '.i-amphtml-carousel-scroll > .i-amphtml-carousel-slide-item'
+  );
+}
+
+function isScreenReaderHidden(element) {
+  const computedStyle = getComputedStyle(element);
+  return (
+    computedStyle.visibility === 'hidden' || computedStyle.display === 'none'
   );
 }
 
@@ -156,6 +163,54 @@ describes.realWin(
       expect(slideWrappers[1].getAttribute('aria-hidden')).to.equal('true');
     });
 
+    it('should style snap for container and content correctly', async () => {
+      const carousel = await getCarousel({loop: true});
+      const slideWrappers = getSlideWrappers(carousel);
+      expect(slideWrappers.length).to.equal(5);
+
+      const slides = carousel.querySelector('.i-amphtml-carousel-scroll')
+        .children;
+
+      // Ensure that the spacers have the snap property and not the
+      // slides.
+      for (let i = 0; i < slides.length; i++) {
+        const slide = slides[i];
+        if (slide.classList.contains('i-amphtml-carousel-spacer')) {
+          // type=slides is always center alignment.
+          expect(slide.style.scrollSnapAlign).to.equal('center');
+        } else {
+          expect(slide.style.scrollSnapAlign).to.equal('');
+          expect(slide.children[0].style.scrollSnapAlign).to.equal('');
+        }
+      }
+    });
+
+    it('should show focus outline and border on next and prev buttons', async () => {
+      const carousel = await getCarousel({loop: false});
+
+      carousel.implementation_.interactionNext();
+      await afterIndexUpdate(carousel);
+
+      const impl = carousel.implementation_;
+      impl.prevButton_.focus();
+      expect(doc.activeElement).to.equal(impl.prevButton_);
+      expect(win.getComputedStyle(impl.prevButton_).outline).to.equal(
+        'rgb(255, 255, 255) solid 1px'
+      );
+      expect(win.getComputedStyle(impl.prevButton_).border).to.equal(
+        '1px solid rgb(0, 0, 0)'
+      );
+
+      impl.nextButton_.focus();
+      expect(doc.activeElement).to.equal(impl.nextButton_);
+      expect(win.getComputedStyle(impl.nextButton_).outline).to.equal(
+        'rgb(255, 255, 255) solid 1px'
+      );
+      expect(win.getComputedStyle(impl.nextButton_).border).to.equal(
+        '1px solid rgb(0, 0, 0)'
+      );
+    });
+
     describe('loop', () => {
       it('should go to the correct slide clicking next', async () => {
         const carousel = await getCarousel({loop: true});
@@ -199,6 +254,28 @@ describes.realWin(
           'true'
         );
       });
+
+      it('should correctly style controls; focusable but not visible', async () => {
+        const carousel = await getCarousel({loop: false});
+
+        getNextButton(carousel).focus();
+        carousel.implementation_.goToSlide(4);
+        await afterIndexUpdate(carousel);
+        expect(getNextButton(carousel).getAttribute('tabIndex')).to.equal('-1');
+        expect(getPrevButton(carousel).getAttribute('tabIndex')).to.equal('0');
+        expect(isScreenReaderHidden(getPrevButton(carousel))).to.be.false;
+        expect(isScreenReaderHidden(getNextButton(carousel))).to.be.false;
+        expect(doc.activeElement).to.equal(getNextButton(carousel));
+
+        getPrevButton(carousel).focus();
+        carousel.implementation_.goToSlide(0);
+        await afterIndexUpdate(carousel);
+        expect(getNextButton(carousel).getAttribute('tabIndex')).to.equal('0');
+        expect(getPrevButton(carousel).getAttribute('tabIndex')).to.equal('-1');
+        expect(isScreenReaderHidden(getPrevButton(carousel))).to.be.false;
+        expect(isScreenReaderHidden(getNextButton(carousel))).to.be.false;
+        expect(doc.activeElement).to.equal(getPrevButton(carousel));
+      });
     });
 
     describe('slideChange event', () => {
@@ -210,15 +287,19 @@ describes.realWin(
         expect(eventSpy).to.have.not.been.called;
       });
 
-      it('should dispatch when changing slides', async () => {
-        const eventSpy = env.sandbox.spy();
-        container.addEventListener('slideChange', eventSpy);
+      it('should dispatch event with index and actionTrust when changing slides', async () => {
+        let event;
+        container.addEventListener('slideChange', (e) => {
+          expect(event).to.be.undefined;
+          event = e;
+        });
         const carousel = await getCarousel({loop: false});
 
         carousel.implementation_.interactionNext();
         await afterIndexUpdate(carousel);
 
-        expect(eventSpy).to.have.been.calledOnce;
+        expect(event.data.index).to.equal(1);
+        expect(event.data.actionTrust).to.equal(ActionTrust.HIGH);
       });
     });
 

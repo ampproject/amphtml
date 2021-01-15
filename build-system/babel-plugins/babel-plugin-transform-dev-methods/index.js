@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const {resolve, dirname} = require('path');
+const {resolve, dirname, relative, join} = require('path').posix;
 
 // Returns a new Map<string, {detected: boolean, removeable: Array<string>}
 // key is a valid callee name to potentially remove.
@@ -27,23 +27,22 @@ function defaultCalleeToPropertiesMap() {
       'dev',
       {
         detected: false,
-        removeable: ['info', 'fine'],
+        removeable: ['info', 'fine', 'warn'],
       },
     ],
     [
       'user',
       {
         detected: false,
-        removeable: ['fine'],
+        removeable: ['info', 'fine', 'warn'],
       },
     ],
   ]);
 }
 
 // This Babel Plugin removes
-// 1. `dev().info(...)`
-// 2. `dev().fine(...)`
-// 3. `user().fine(...)`
+// - `dev().(info|fine|warn)(...)`
+// - `user().(info|fine|warn)(...)`
 // CallExpressions for production ESM builds.
 module.exports = function () {
   let calleeToPropertiesMap = defaultCalleeToPropertiesMap();
@@ -66,12 +65,12 @@ module.exports = function () {
         }
         specifiers.forEach((specifier) => {
           if (specifier.imported) {
-            const filepath = resolve(
-              dirname(state.file.opts.filename),
-              source.value
+            const filepath = relative(
+              join(__dirname, '../../../'),
+              resolve(dirname(state.file.opts.filename), source.value)
             );
 
-            if (filepath.endsWith('/amphtml/src/log')) {
+            if (filepath.endsWith('src/log')) {
               const propertyMapped = calleeToPropertiesMap.get(
                 specifier.imported.name
               );

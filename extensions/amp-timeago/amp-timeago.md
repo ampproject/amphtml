@@ -2,13 +2,14 @@
 $category@: presentation
 formats:
   - websites
-  - email
 teaser:
   text: Provides fuzzy timestamps by formatting dates as time ago (for example, 3 hours ago).
+experimental: true
+bento: true
 ---
 
 <!--
-Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+Copyright 2021 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -27,13 +28,13 @@ limitations under the License.
 
 ## Usage
 
-Use the amp-timago component to count up to, or away from, a specified date and time.
+Use the `amp-timeago` component to count up to, or away from, a specified date and time.
 
 The component replaces the text node with a fuzzy timestamp, such as `in 30 years` or `3 hours ago`.
 
 Example:
 
-[example preview="inline" playground="true" imports="amp-timeago"]
+[example preview="inline" playground="true" imports="amp-timeago:1.0"]
 
 ```html
 <amp-timeago
@@ -57,50 +58,50 @@ The `amp-timeago` component requires a placeholder in the text node. The calcula
 
 The required `datetime` attribute sets the date and time. The value must be an [ISO datetime](https://www.w3.org/QA/Tips/iso-date).
 
-- Express time in UTC (Coordinated Universal Time): `2017-03-10T01:00:00Z`
-- Express in local time with a time zone offset: `2017-03-09T20:00:00-05:00`
+-   Express time in UTC (Coordinated Universal Time): `2017-03-10T01:00:00Z`
+-   Express in local time with a time zone offset: `2017-03-09T20:00:00-05:00`
 
 ### `locale` (optional)
 
 The local default is `en`. Add the `locale` attribute and specify one of the following values to chance the local.
 
-- `ar` (Arabic)
-- `be` (Belarusian)
-- `bg` (Bulgarian)
-- `ca` (Catalan)
-- `da` (Danish)
-- `de` (German)
-- `el` (Greek)
-- `en` (English)
-- `enShort` (English - short)
-- `es` (Spanish)
-- `eu` (Basque)
-- `fi` (Finnish)
-- `fr` (French)
-- `he` (Hebrew)
-- `hu` (Hungarian)
-- `inBG` (Bangla)
-- `inHI` (Hindi)
-- `inID` (Malay)
-- `it` (Italian)
-- `ja` (Japanese)
-- `ko` (Korean)
-- `ml` (Malayalam)
-- `nbNO` (Norwegian Bokmål)
-- `nl` (Dutch)
-- `nnNO` (Norwegian Nynorsk)
-- `pl` (Polish)
-- `ptBR` (Portuguese)
-- `ro` (Romanian)
-- `ru` (Russian)
-- `sv` (Swedish)
-- `ta` (Tamil)
-- `th` (Thai)
-- `tr` (Turkish)
-- `uk` (Ukrainian)
-- `vi` (Vietnamese)
-- `zhCN` (Chinese)
-- `zhTW` (Taiwanese)
+-   `ar` (Arabic)
+-   `be` (Belarusian)
+-   `bg` (Bulgarian)
+-   `ca` (Catalan)
+-   `da` (Danish)
+-   `de` (German)
+-   `el` (Greek)
+-   `en` (English)
+-   `enShort` (English - short)
+-   `es` (Spanish)
+-   `eu` (Basque)
+-   `fi` (Finnish)
+-   `fr` (French)
+-   `he` (Hebrew)
+-   `hu` (Hungarian)
+-   `inBG` (Bangla)
+-   `inHI` (Hindi)
+-   `inID` (Malay)
+-   `it` (Italian)
+-   `ja` (Japanese)
+-   `ko` (Korean)
+-   `ml` (Malayalam)
+-   `nbNO` (Norwegian Bokmål)
+-   `nl` (Dutch)
+-   `nnNO` (Norwegian Nynorsk)
+-   `pl` (Polish)
+-   `ptBR` (Portuguese)
+-   `ro` (Romanian)
+-   `ru` (Russian)
+-   `sv` (Swedish)
+-   `ta` (Tamil)
+-   `th` (Thai)
+-   `tr` (Turkish)
+-   `uk` (Ukrainian)
+-   `vi` (Vietnamese)
+-   `zhCN` (Chinese)
+-   `zhTW` (Taiwanese)
 
 ### `cutoff`
 
@@ -109,7 +110,3 @@ Add the `cutoff` attribute to display the date specified in the `datatime` attri
 ### Common attributes
 
 The AMP provided set of [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) is available to `<amp-timeago>`.
-
-## Validation
-
-See [amp-timeago rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-timeago/validator-amp-timeago.protoascii) in the AMP validator specification.

@@ -53,6 +53,7 @@
       <option>atinternet</option>
       <option>afsanalytics</option>
       <option>baiduanalytics</option>
+      <option>blackcrowai</option>
       <option>blueconic</option>
       <option>browsi</option>
       <option>burt</option>
@@ -86,6 +87,7 @@
       <option>mediarithmics</option>
       <option>mediator</option>
       <option>memo</option>
+      <option>metrika</option>
       <option>mobify</option>
       <option>moengage</option>
       <option>mparticle</option>
@@ -112,6 +114,7 @@
       <option>simplereach</option>
       <option>snowplow</option>
       <option>snowplow_v2</option>
+      <option>tail</option>
       <option>teaanalytics</option>
       <option>tealiumcollect</option>
       <option>top100</option>
@@ -341,6 +344,19 @@ For complete documentation and additional examples please see: https://marketing
     </script>
 </amp-analytics>
 <!-- Baidu stats example -->
+
+<!-- Black Crow AI example -->
+<amp-analytics type="blackcrowai">
+  <script type="application/json">
+    {
+      "vars": {
+        "google_tracking_id": "YOUR-GA-Account-ID-like-UA-134511847-1",
+        "site_name": "YOUR-SITE-NAME-PROVIDED-BY-YOUR-BLACK-CROW"
+      }
+    }
+  </script>
+</amp-analytics>
+<!-- END Black Crow AI example -->
 
 <!-- BlueConic analytics tracking -->
 <amp-analytics type="blueconic" id="blueconic">
@@ -1616,6 +1632,33 @@ For complete documentation and additional examples please see: https://marketing
 </amp-analytics>
 <!-- End Snowplow Analytics example -->
 
+<!-- Tail Analytics Example
+    Ensure you replace account with your account id.
+ -->
+<amp-analytics type="tail" id="tail">
+  <script type="application/json">
+    {
+      "vars": {
+        "account": "TT-0000-0"
+      },
+      "triggers": {
+        "click": {
+          "on": "click",
+          "selector": "#test1",
+          "request": "event",
+          "vars": {
+            "eventValue": "value1",
+            "eventCategory": "category1",
+            "eventAction": "action1",
+            "eventLabel": "label1"
+          }
+        }
+      }
+    }
+  </script>
+</amp-analytics>
+<!-- End Tail Analytics example -->
+
 <!-- TEA Analytics Example
     Ensure you replace app_id with your appId.
     Ensure you replace channel with correct value.
@@ -2003,6 +2046,52 @@ For complete documentation and additional examples please see: https://marketing
   </script>
 </amp-analytics>
 <!-- end WebEngage Analytics example -->
+
+<!-- start Yandex Metrika example -->
+<amp-analytics type="metrika">
+  <script type="application/json">
+    {
+      "vars": {
+        "counterId": "71129776",
+        "yaParams": "{\"key\": \"value\"}"
+      },
+      "requests": {},
+      "triggers": {
+        "notBounce": {
+          "on": "timer",
+          "timerSpec": {
+            "immediate": false,
+            "interval": 15,
+            "maxTimerLength": 14
+          },
+          "request": "notBounce"
+        },
+        "someGoalReach": {
+          "on": "click",
+          "selector": "#test1",
+          "request": "reachGoal",
+          "vars": {
+            "goalId": "superGoalId",
+            "yaParams": "{\"inner-key\": \"inner-value\"}"
+          }
+        },
+        "halfScroll": {
+          "on": "scroll",
+          "scrollSpec": {
+            "verticalBoundaries": [
+              50
+            ]
+          },
+          "request": "reachGoal",
+          "vars": {
+            "goalId": "halfScrollGoal"
+          }
+        }
+      }
+    }
+  </script>
+</amp-analytics>
+<!-- end Yandex Metrika example -->
 </div>
 
 <div class="logo"></div>

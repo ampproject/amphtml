@@ -112,6 +112,13 @@ ExtensionPayload.prototype.v;
 ExtensionPayload.prototype.i;
 
 /**
+ * If the value of "m" is 1 then the current extension is of type "module",
+ * else it is of type "nomodule".
+ * @type {number}
+ */
+ExtensionPayload.prototype.m;
+
+/**
  * @typedef {?JsonObject|undefined|string|number|!Array<JsonValue>}
  */
 var JsonValue;
@@ -207,7 +214,6 @@ window.AMP.ampdoc;
 window.AMP.config;
 window.AMP.config.urls;
 window.AMP.BaseElement;
-window.AMP.BaseTemplate;
 window.AMP.registerElement;
 window.AMP.registerTemplate;
 window.AMP.registerServiceForDoc;
@@ -644,13 +650,11 @@ AMP.AmpAdUIHandler = class {
   constructor(baseInstance) {}
 };
 
-AMP.BaseTemplate;
-
 AMP.RealTimeConfigManager;
 
 /**
  * Actual filled values for this exists in
- * extensions/amp-a4a/0.1/real-time-config-manager.js
+ * src/service/real-time-config/real-time-config-impl.js
  * @enum {string}
  */
 const RTC_ERROR_ENUM = {};
@@ -905,3 +909,12 @@ class FeaturePolicy {
  * @type {?FeaturePolicy}
  */
 HTMLIFrameElement.prototype.featurePolicy;
+
+/**
+ * Going through the standardization process now.
+ *
+ * See https://developers.google.com/web/updates/2019/02/constructable-stylesheets.
+ *
+ * @param {string} cssText
+ */
+CSSStyleSheet.prototype.replaceSync = function (cssText) {};

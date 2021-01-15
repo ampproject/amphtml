@@ -16,7 +16,9 @@
 
 import * as Preact from '../../../src/preact';
 import * as styles from './fit-text.css';
+import {ContainWrapper} from '../../../src/preact/component';
 import {px, resetStyles, setStyle, setStyles} from '../../../src/style';
+import {toWin} from '../../../src/types';
 import {useCallback, useLayoutEffect, useRef} from '../../../src/preact';
 
 const {LINE_HEIGHT_EM_} = styles;
@@ -31,14 +33,15 @@ export function FitText({
   maxFontSize = 72,
   ...rest
 }) {
-  const contentRef = useRef(null);
+  const containerRef = useRef(null);
   const measurerRef = useRef(null);
+  const heightRef = useRef(null);
 
   const resize = useCallback(() => {
-    if (!measurerRef.current || !contentRef.current) {
+    if (!measurerRef.current || !containerRef.current) {
       return;
     }
-    const {clientHeight, clientWidth} = contentRef.current;
+    const {clientHeight, clientWidth} = containerRef.current;
     const fontSize = calculateFontSize(
       measurerRef.current,
       clientHeight,
@@ -49,39 +52,39 @@ export function FitText({
     setOverflowStyle(measurerRef.current, clientHeight, fontSize);
   }, [maxFontSize, minFontSize]);
 
-  // Here and below, useLayoutEffect is used so intermediary font sizes
-  // during resizing are resolved before the component visually updates.
-  // Font size should readjust when container resizes.
+  // useLayoutEffect is used so intermediary font sizes during calculation
+  // are resolved before the component visually updates.
   useLayoutEffect(() => {
-    const node = contentRef.current;
-    if (!node) {
+    const container = containerRef.current;
+    const content = heightRef.current;
+    if (!container || !content) {
       return;
     }
-    const observer = new ResizeObserver(() => resize());
-    observer.observe(node);
+    const win = toWin(container.ownerDocument.defaultView);
+    if (!win) {
+      return undefined;
+    }
+    const observer = new win.ResizeObserver(() => resize());
+    observer.observe(container);
+    observer.observe(content);
     return () => observer.disconnect();
   }, [resize]);
 
-  // Font size should readjust when content changes.
-  useLayoutEffect(() => {
-    resize();
-  }, [children, resize]);
-
   return (
-    <div {...rest}>
-      <div
-        ref={contentRef}
-        style={{
-          ...styles.fitTextContent,
-          'width': '100%',
-          'height': '100%',
-        }}
-      >
-        <div ref={measurerRef} style={styles.fitTextContentWrapper}>
-          {children}
-        </div>
+    <ContainWrapper
+      size={true}
+      layout={true}
+      paint={true}
+      ref={containerRef}
+      wrapperStyle={styles.fitTextContentWrapper}
+      contentRef={measurerRef}
+      contentStyle={styles.fitTextContent}
+      {...rest}
+    >
+      <div ref={heightRef} style={styles.minContentHeight}>
+        {children}
       </div>
-    </div>
+    </ContainWrapper>
   );
 }
 

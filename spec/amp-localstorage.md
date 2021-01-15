@@ -53,11 +53,11 @@ The following AMP components and service are using the localStorage.
 
 \*\* Please add all future usage to the following list
 
-- `<amp-ad-network-adsense-impl>` : Store publisher ad size opt in status.
-- `<amp-app-banner>` : Store the user decision on dismiss banner
-- `<amp-user-notification>` : Store the user decision on dismiss notification
-- `<amp-consent>` : Store the user decision and granular information on consent
-- Client ID Service : Store the user decision to opt-out CID service.
+-   `<amp-ad-network-adsense-impl>` : Store publisher ad size opt in status.
+-   `<amp-app-banner>` : Store the user decision on dismiss banner
+-   `<amp-user-notification>` : Store the user decision on dismiss notification
+-   `<amp-consent>` : Store the user decision and granular information on consent
+-   Client ID Service : Store the user decision to opt-out CID service.
 
 ## Guidance on localStorage Usage in AMP
 

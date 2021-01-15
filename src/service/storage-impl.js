@@ -53,6 +53,9 @@ export class Storage {
     /** @private @const {!StorageBindingDef} */
     this.binding_ = binding;
 
+    /** @private @const {boolean} */
+    this.isViewerStorage_ = binding instanceof ViewerStorageBinding;
+
     /** @const @private {string} */
     this.origin_ = getSourceOrigin(this.ampdoc.win.location);
 
@@ -73,10 +76,11 @@ export class Storage {
    * Returns the promise that yields the value of the property for the specified
    * key.
    * @param {string} name
+   * @param {number=} opt_duration
    * @return {!Promise<*>}
    */
-  get(name) {
-    return this.getStore_().then((store) => store.get(name));
+  get(name, opt_duration) {
+    return this.getStore_().then((store) => store.get(name, opt_duration));
   }
 
   /**
@@ -113,6 +117,14 @@ export class Storage {
    */
   remove(name) {
     return this.saveStore_((store) => store.remove(name));
+  }
+
+  /**
+   * Returns if this.binding is an instance of ViewerStorageBinding
+   * @return {boolean}
+   */
+  isViewerStorage() {
+    return this.isViewerStorage_;
   }
 
   /**
@@ -212,12 +224,19 @@ export class Store {
 
   /**
    * @param {string} name
+   * @param {number|undefined} opt_duration
    * @return {*|undefined}
    */
-  get(name) {
+  get(name, opt_duration) {
     // The structure is {key: {v: *, t: time}}
     const item = this.values_[name];
-    return item ? item['v'] : undefined;
+    const timestamp = item ? item['t'] : undefined;
+    const isNotExpired =
+      opt_duration && timestamp != undefined
+        ? timestamp + opt_duration > Date.now()
+        : true;
+    const value = item && isNotExpired ? item['v'] : undefined;
+    return value;
   }
 
   /**

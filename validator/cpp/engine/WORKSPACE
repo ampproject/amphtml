@@ -1,0 +1,62 @@
+workspace(name = "ampvalidator")
+
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+http_archive(
+    name = "com_google_absl",
+    strip_prefix = "abseil-cpp-master",
+    urls = ["https://github.com/abseil/abseil-cpp/archive/master.zip"],
+)
+
+http_archive(
+    name = "com_google_googletest",
+    sha256 = "7f958f2f142e0733cf46437c0ae28e41c617950e4a6d5962319bb3876e41a24b",
+    strip_prefix = "googletest-6c58c11d5497b6ee1df3cb400ce30deb72fc28c0",
+    urls = ["https://github.com/google/googletest/archive/6c58c11d5497b6ee1df3cb400ce30deb72fc28c0.zip"],  # 2019-01-07
+)
+
+http_archive(
+    name = "com_googlesource_code_re2",
+    sha256 = "bcf28bcb3bdf7859e1647fad6772b52ddac8cbd5c7ece3834d5579a13b3beb0f",
+    strip_prefix = "re2-c33d1680c7e9ab7edea02d7465a8db13e80b558d",
+    urls = [
+        "https://github.com/google/re2/archive/c33d1680c7e9ab7edea02d7465a8db13e80b558d.tar.gz",
+    ],
+)
+
+http_archive(
+    name = "com_github_gflags_gflags",
+    strip_prefix = "gflags-master",
+    urls = ["https://github.com/gflags/gflags/archive/master.zip"],
+)
+
+http_archive(
+    name = "com_github_re2",
+    strip_prefix = "re2-master",
+    urls = ["https://github.com/google/re2/archive/master.zip"],
+)
+
+http_archive(
+    name = "com_github_glog",
+    strip_prefix = "glog-master",
+    urls = ["https://github.com/google/glog/archive/master.zip"],
+)
+
+http_archive(
+    name = "com_google_protobuf",
+    strip_prefix = "protobuf-master",
+    urls = ["https://github.com/protocolbuffers/protobuf/archive/master.zip"],
+)
+
+load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
+protobuf_deps()
+
+local_repository(
+    name = "validator",
+    path = "../../",
+)
+
+local_repository(
+    name = "htmlparser",
+    path = "../htmlparser/",
+)

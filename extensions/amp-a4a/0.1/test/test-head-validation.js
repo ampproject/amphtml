@@ -16,6 +16,7 @@
 
 import {Services} from '../../../../src/services';
 import {processHead} from '../head-validation';
+import {rootNodeFor} from '../../../../src/dom';
 
 describes.realWin('head validation', {amp: true}, (env) => {
   let adElement;
@@ -26,10 +27,17 @@ describes.realWin('head validation', {amp: true}, (env) => {
     adElement = doc.createElement('amp-ad');
     doc.body.appendChild(adElement);
     head = doc.createElement('head');
+    doc.body.appendChild(head);
+    rootNodeFor(head).documentElement.setAttribute('amp4ads', '');
   });
 
   describe('processHead', () => {
     it('returns null when head is empty', () => {
+      const validated = processHead(env.win, adElement, head);
+      expect(validated).to.be.null;
+    });
+
+    it('returns null when no amp4ads or ⚡️4ads', () => {
       const validated = processHead(env.win, adElement, head);
       expect(validated).to.be.null;
     });
@@ -164,9 +172,10 @@ describes.realWin('head validation', {amp: true}, (env) => {
       head.innerHTML = `
         <style amp-custom></style>
         <style amp-keyframes></style>
+        <style amp4ads-boilerplate></style>
       `;
       const validated = processHead(env.win, adElement, head);
-      expect(validated.head.querySelectorAll('style')).to.have.length(2);
+      expect(validated.head.querySelectorAll('style')).to.have.length(3);
     });
 
     it('removes other styles', () => {

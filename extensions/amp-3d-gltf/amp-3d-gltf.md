@@ -50,8 +50,8 @@ You must use a [WebGL](https://developer.mozilla.org/en-US/docs/Web/API/WebGL_AP
 The component supports [glTF 2.0](https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#cameras),
 with the following exceptions:
 
-- Embedded cameras
-- Animation
+-   Embedded cameras
+-   Animation
 
 ### Set CORS headers
 
@@ -100,6 +100,10 @@ center. To enable rotation, set the value to `true`. `autorotate` defaults to
 Use the `enableZoom` attribute to disable zooming in and out of the model. To
 disable zoom, set the value to `false`. `autororate` defaults to `true`.
 
+### title (optional)
+
+Define a `title` attribute for the component to propagate to the underlying `<iframe>` element. The default value is `"GLTF 3D model"`.
+
 ## Actions
 
 ### setModelRotation
@@ -107,12 +111,12 @@ disable zoom, set the value to `false`. `autororate` defaults to `true`.
 The `setModelRotation` action specifies the model's rotation. The rotation order
 is ZYX.
 
-- Specify the rotation value of the x, y, and/or z axis with `x`, `y`, and/or
-  `z` arguments. This action accepts a number between 0 and 1. It defaults to the
-  previous value.
-- Specify the angle of rotation in radians with `xMin`, `xMax`, `yMin`, `yMax`,
-  and/or `zMin`, `zMax` arguments. Use a min and a max to define the target range.
-  The angle range defaults to `0 / pi * 2`.
+-   Specify the rotation value of the x, y, and/or z axis with `x`, `y`, and/or
+    `z` arguments. This action accepts a number between 0 and 1. It defaults to the
+    previous value.
+-   Specify the angle of rotation in radians with `xMin`, `xMax`, `yMin`, `yMax`,
+    and/or `zMin`, `zMax` arguments. Use a min and a max to define the target range.
+    The angle range defaults to `0 / pi * 2`.
 
 The following action changes the x axis of the component’s rotation to 1.57 when fired.
 
@@ -124,9 +128,9 @@ setModelRotation((x = 0.5), (xMin = 0), (xMax = 3.14))
 
 Here are a few things to keep in mind for style:
 
-- The `alpha` attribute specifies transparency.
-- The `clearColor` attribute specifies the color of the background if it isn't transparent.
-- `amp-3d-gltf` defaults to a white background if you don't specify a background color.
+-   The `alpha` attribute specifies transparency.
+-   The `clearColor` attribute specifies the color of the background if it isn't transparent.
+-   `amp-3d-gltf` defaults to a white background if you don't specify a background color.
 
 ## Validation
 

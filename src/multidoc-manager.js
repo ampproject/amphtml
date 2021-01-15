@@ -377,6 +377,17 @@ export class MultidocManager {
               // Must be a font definition: no other stylesheets are allowed.
               if (parentLinks[href]) {
                 dev().fine(TAG, '- stylesheet already included: ', href);
+                // To accomodate icon fonts whose stylesheets include
+                // the class definitions in addition to the font definition,
+                // we re-import the stylesheet into the shadow document.
+                // Note: <link> in shadow mode is not yet fully supported on
+                // all browsers, so we use <style>@import "url"</style> instead
+                installStylesForDoc(
+                  ampdoc,
+                  `@import "${href}"`,
+                  /* callback */ null,
+                  /* isRuntimeCss */ false
+                );
               } else {
                 parentLinks[href] = true;
                 const el = this.win.document.createElement('link');
@@ -452,7 +463,8 @@ export class MultidocManager {
               if (type.indexOf('javascript') == -1) {
                 shadowRoot.appendChild(this.win.document.importNode(n, true));
                 dev().fine(TAG, '- non-src script: ', n);
-              } else {
+              } else if (!n.hasAttribute('amp-onerror')) {
+                // Don't error on amp-onerror script (https://github.com/ampproject/amphtml/issues/31966)
                 user().error(TAG, '- unallowed inline javascript: ', n);
               }
             }

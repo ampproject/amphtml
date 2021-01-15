@@ -16,7 +16,7 @@
 
 import {LruCache} from './utils/lru-cache';
 import {dict, hasOwn} from './utils/object';
-import {endsWith, startsWith} from './string';
+import {endsWith} from './string';
 import {getMode} from './mode';
 import {isArray} from './types';
 import {parseQueryString_} from './url-parse-query-string';
@@ -36,8 +36,6 @@ const SERVING_TYPE_PREFIX = dict({
   'a': true,
   // Ad
   'ad': true,
-  // Actions viewer
-  'action': true,
 });
 
 /**
@@ -94,15 +92,18 @@ export function getWinOrigin(win) {
  * testing by freezing the object.
  * @param {string} url
  * @param {boolean=} opt_nocache
+ *   Cache is always ignored on ESM builds, see https://go.amp.dev/pr/31594
  * @return {!Location}
  */
 export function parseUrlDeprecated(url, opt_nocache) {
   if (!a) {
     a = /** @type {!HTMLAnchorElement} */ (self.document.createElement('a'));
-    cache = self.__AMP_URL_CACHE || (self.__AMP_URL_CACHE = new LruCache(100));
+    cache = IS_ESM
+      ? null
+      : self.__AMP_URL_CACHE || (self.__AMP_URL_CACHE = new LruCache(100));
   }
 
-  return parseUrlWithA(a, url, opt_nocache ? null : cache);
+  return parseUrlWithA(a, url, IS_ESM || opt_nocache ? null : cache);
 }
 
 /**
@@ -113,10 +114,16 @@ export function parseUrlDeprecated(url, opt_nocache) {
  * @param {!HTMLAnchorElement} a
  * @param {string} url
  * @param {LruCache=} opt_cache
+ *   Cache is always ignored on ESM builds, see https://go.amp.dev/pr/31594
  * @return {!Location}
  * @restricted
  */
 export function parseUrlWithA(a, url, opt_cache) {
+  if (IS_ESM) {
+    a.href = '';
+    return /** @type {!Location} */ (new URL(url, a.href));
+  }
+
   if (opt_cache && opt_cache.has(url)) {
     return opt_cache.get(url);
   }
@@ -570,7 +577,7 @@ export function resolveRelativeUrl(relativeUrlString, baseUrl) {
   if (typeof baseUrl == 'string') {
     baseUrl = parseUrlDeprecated(baseUrl);
   }
-  if (typeof URL == 'function') {
+  if (IS_ESM || typeof URL == 'function') {
     return new URL(relativeUrlString, baseUrl.href).toString();
   }
   return resolveRelativeUrlFallback_(relativeUrlString, baseUrl);
@@ -581,7 +588,7 @@ export function resolveRelativeUrl(relativeUrlString, baseUrl) {
  * @param {string} relativeUrlString
  * @param {string|!Location} baseUrl
  * @return {string}
- * @private Visible for testing.
+ * @private @visibleForTesting
  */
 export function resolveRelativeUrlFallback_(relativeUrlString, baseUrl) {
   if (typeof baseUrl == 'string') {
@@ -591,17 +598,17 @@ export function resolveRelativeUrlFallback_(relativeUrlString, baseUrl) {
   const relativeUrl = parseUrlDeprecated(relativeUrlString);
 
   // Absolute URL.
-  if (startsWith(relativeUrlString.toLowerCase(), relativeUrl.protocol)) {
+  if (relativeUrlString.toLowerCase().startsWith(relativeUrl.protocol)) {
     return relativeUrl.href;
   }
 
   // Protocol-relative URL.
-  if (startsWith(relativeUrlString, '//')) {
+  if (relativeUrlString.startsWith('//')) {
     return baseUrl.protocol + relativeUrlString;
   }
 
   // Absolute path.
-  if (startsWith(relativeUrlString, '/')) {
+  if (relativeUrlString.startsWith('/')) {
     return baseUrl.origin + relativeUrlString;
   }
 

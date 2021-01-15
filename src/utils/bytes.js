@@ -100,16 +100,20 @@ export function bytesToUInt32(bytes) {
  * @return {?Uint8Array}
  */
 export function getCryptoRandomBytesArray(win, length) {
+  let {crypto} = win;
+
   // Support IE 11
-  const cryptoLib = /** @type {!webCrypto.Crypto|undefined} */ (win.crypto ||
-    win.msCrypto);
-  if (!cryptoLib || !cryptoLib.getRandomValues) {
-    return null;
+  if (!IS_ESM) {
+    crypto = /** @type {!webCrypto.Crypto|undefined} */ (crypto ||
+      win.msCrypto);
+    if (!crypto || !crypto.getRandomValues) {
+      return null;
+    }
   }
 
   // Widely available in browsers we support:
   // http://caniuse.com/#search=getRandomValues
   const uint8array = new Uint8Array(length);
-  cryptoLib.getRandomValues(uint8array);
+  crypto.getRandomValues(uint8array);
   return uint8array;
 }

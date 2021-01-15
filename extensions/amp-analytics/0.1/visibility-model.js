@@ -437,6 +437,7 @@ export class VisibilityModel {
         this.minVisiblePercentage_ > 0
           ? Math.min(this.minVisiblePercentage_, visibility)
           : visibility;
+
       this.maxVisiblePercentage_ = Math.max(
         this.maxVisiblePercentage_,
         visibility

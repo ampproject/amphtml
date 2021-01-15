@@ -33,7 +33,6 @@ import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {setShadowDomSupportedVersionForTesting} from '../../src/web-components';
 import {toArray} from '../../src/types';
-import {toggleExperiment} from '../../src/experiments';
 import {vsyncForTesting} from '../../src/service/vsync-impl';
 
 describes.fakeWin(
@@ -47,6 +46,11 @@ describes.fakeWin(
     let ampdocService;
     let ampdocServiceMock;
     let extensionElementIndex;
+
+    function runChunks(elementOrAmpDoc) {
+      clock.tick(1); // for early frame
+      runChunksForTesting(elementOrAmpDoc);
+    }
 
     beforeEach(() => {
       win = env.win;
@@ -165,7 +169,7 @@ describes.fakeWin(
       );
       expect(queueExtensions).to.have.length(3);
       const promise = adopt(win);
-      runChunksForTesting(win.document);
+      runChunks(win.document);
       return promise
         .then(() => {
           expect(queueExtensions).to.have.length(0);
@@ -176,7 +180,7 @@ describes.fakeWin(
               progress += '4';
             })
           );
-          runChunksForTesting(win.document);
+          runChunks(win.document);
           return promise;
         })
         .then(() => {
@@ -187,7 +191,7 @@ describes.fakeWin(
               progress += '5';
             })
           );
-          runChunksForTesting(win.document);
+          runChunks(win.document);
           return promise;
         })
         .then(() => {
@@ -202,7 +206,6 @@ describes.fakeWin(
     );
 
     it('should not maybePumpEarlyFrame when body not yet present', () => {
-      toggleExperiment(win, 'pump-early-frame', true);
       // Make document.body be null on first invocation to simulate
       // JS executing before the rest of the doc has been parsed.
       const {body} = win.document;
@@ -223,14 +226,12 @@ describes.fakeWin(
       'should not maybePumpEarlyFrame ' +
         'when a renderDelayingExtension is present',
       () => {
-        toggleExperiment(win, 'pump-early-frame', true);
         win.document.body.appendChild(document.createElement('amp-experiment'));
         extensionRegistrationTest();
       }
     );
 
     it('should maybePumpEarlyFrame and delay extension execution', () => {
-      toggleExperiment(win, 'pump-early-frame', true);
       let progress = '';
       const queueExtensions = win.AMP;
       const highPriority = regularExtension((amp) => {
@@ -284,7 +285,7 @@ describes.fakeWin(
           expect(queueExtensions).to.have.length(4);
           clock.tick(1);
           expect(queueExtensions).to.have.length(0);
-          runChunksForTesting(win.document);
+          runChunks(win.document);
           return promise;
         })
         .then(() => {
@@ -295,7 +296,7 @@ describes.fakeWin(
               progress += '5';
             })
           );
-          runChunksForTesting(win.document);
+          runChunks(win.document);
           return promise;
         })
         .then(() => {
@@ -321,10 +322,12 @@ describes.fakeWin(
           expect(amp).to.equal(win.AMP);
           progress += 'HIGH';
         },
+        v: '$internalRuntimeVersion$',
       });
       expect(queueExtensions).to.have.length(2);
       expect(progress).to.equal('');
       const promise = adopt(win);
+      clock.tick(1); // await early frame
       return promise
         .then(() => {
           // Notice the queue is down to 0 but there is a micro task to execute
@@ -345,8 +348,9 @@ describes.fakeWin(
               expect(amp).to.equal(win.AMP);
               progress += 'A';
             },
+            v: '$internalRuntimeVersion$',
           });
-          runChunksForTesting(win.document);
+          runChunks(win.document);
           return promise.then(() => {
             expect(progress).to.equal('1HIGHA');
           });
@@ -365,6 +369,7 @@ describes.fakeWin(
           progress += 'C';
         },
         i: 'ext1',
+        v: '$internalRuntimeVersion$',
       });
       win.AMP.push({
         n: 'ext1',
@@ -373,6 +378,7 @@ describes.fakeWin(
           progress += 'A';
         },
         i: '_base_ext',
+        v: '$internalRuntimeVersion$',
       });
 
       win.AMP.push({
@@ -381,16 +387,17 @@ describes.fakeWin(
           expect(amp).to.equal(win.AMP);
           progress += 'B';
         },
+        v: '$internalRuntimeVersion$',
       });
 
       let script = win.document.querySelector('[data-script=_base_ext]');
       expect(script).to.be.null;
       const promise = adopt(win);
-      const e = Services.extensionsFor(win);
+      runChunks(win.document);
 
+      const e = Services.extensionsFor(win);
       expect(queueExtensions).to.have.length(0);
       expect(progress).to.equal('');
-      runChunksForTesting(win.document);
       script = win.document.querySelector('[data-script=_base_ext]');
       expect(script).to.be.not.null;
       return promise.then(() => {
@@ -418,6 +425,7 @@ describes.fakeWin(
           progress += 'A';
         },
         i: ['_base_ext1', '_base_ext2'],
+        v: '$internalRuntimeVersion$',
       });
 
       win.AMP.push({
@@ -427,6 +435,7 @@ describes.fakeWin(
           progress += 'B';
         },
         i: ['_base_ext1'],
+        v: '$internalRuntimeVersion$',
       });
 
       win.AMP.push({
@@ -435,6 +444,7 @@ describes.fakeWin(
           expect(amp).to.equal(win.AMP);
           progress += 'C';
         },
+        v: '$internalRuntimeVersion$',
       });
 
       let script1 = win.document.querySelector('[data-script=_base_ext1]');
@@ -442,11 +452,11 @@ describes.fakeWin(
       expect(script1).to.be.null;
       expect(script2).to.be.null;
       const promise = adopt(win);
-      const e = Services.extensionsFor(win);
+      runChunks(win.document);
 
+      const e = Services.extensionsFor(win);
       expect(queueExtensions).to.have.length(0);
       expect(progress).to.equal('');
-      runChunksForTesting(win.document);
       script1 = win.document.querySelector('[data-script=_base_ext1]');
       script2 = win.document.querySelector('[data-script=_base_ext2]');
       expect(script1).to.not.be.null;
@@ -456,7 +466,7 @@ describes.fakeWin(
         // ext1 should not be executed yet and needs to wait on _base_ext
         // Notice that ext0 executes before A
         expect(progress).to.equal('C');
-        runChunksForTesting(win.document);
+        runChunks(win.document);
         return e
           .waitForExtension(win, '_base_ext2')
           .then(() => {
@@ -507,7 +517,7 @@ describes.fakeWin(
         })
       );
       const promise = adopt(win);
-      runChunksForTesting(win.document);
+      runChunks(win.document);
 
       yield waitNext(promise);
       // Extensions are still unprocessed
@@ -520,14 +530,14 @@ describes.fakeWin(
           progress += '4';
         })
       );
-      runChunksForTesting(win.document);
+      runChunks(win.document);
 
       yield waitNext(promise);
       expect(progress).to.equal('');
 
       // Body is available now.
       bodyResolver();
-      runChunksForTesting(win.document);
+      runChunks(win.document);
 
       yield waitNext(promise);
       expect(progress).to.equal('1234');
@@ -538,7 +548,6 @@ describes.fakeWin(
       self.__AMP_MODE = {
         rtvVersion: 'test-version',
       };
-      toggleExperiment(win, 'version-locking', true);
       function addExisting(index) {
         const s = document.createElement('script');
         const name = 'amp-test-element' + index;
@@ -587,7 +596,7 @@ describes.fakeWin(
         })
       );
       const promise = adopt(win);
-      runChunksForTesting(win.document);
+      runChunks(win.document);
 
       yield waitNext(promise);
       // Extensions are still unprocessed
@@ -614,14 +623,14 @@ describes.fakeWin(
           progress += '5';
         }, 'version123')
       );
-      runChunksForTesting(win.document);
+      runChunks(win.document);
 
       yield waitNext(promise);
       expect(progress).to.equal('');
 
       // Body is available now.
       bodyResolver();
-      runChunksForTesting(win.document);
+      runChunks(win.document);
 
       yield waitNext(promise);
       expect(progress).to.equal('134');
@@ -668,7 +677,7 @@ describes.fakeWin(
         })
       );
       const promise = adopt(win);
-      runChunksForTesting(win.document);
+      runChunks(win.document);
       yield promise;
       expect(progress).to.equal('13');
     });
@@ -685,7 +694,6 @@ describes.fakeWin(
 
       it('should export properties to global AMP object', () => {
         expect(win.AMP.BaseElement).to.be.a('function');
-        expect(win.AMP.BaseTemplate).to.be.a('function');
         expect(win.AMP.registerElement).to.be.a('function');
         expect(win.AMP.registerTemplate).to.be.a('function');
         expect(win.AMP.setTickFunction).to.be.a('function');
@@ -712,8 +720,10 @@ describes.fakeWin(
           f: (amp) => {
             amp.registerElement('amp-ext', win.AMP.BaseElement);
           },
+          v: '$internalRuntimeVersion$',
         });
-        runChunksForTesting(win.document);
+        runChunks(win.document);
+
         yield extensions.waitForExtension(win, 'amp-ext');
 
         // Extension is added immediately. Can't find for micro-tasks here.
@@ -754,8 +764,9 @@ describes.fakeWin(
           f: (amp) => {
             amp.registerElement('amp-ext', win.AMP.BaseElement, 'a{}');
           },
+          v: '$internalRuntimeVersion$',
         });
-        runChunksForTesting(win.document);
+        runChunks(win.document);
 
         // Extension is added immediately. Can't find for micro-tasks here.
         yield extensions.waitForExtension(win, 'amp-ext');
@@ -799,8 +810,9 @@ describes.fakeWin(
           f: (amp) => {
             amp.registerServiceForDoc('service1', Service1);
           },
+          v: '$internalRuntimeVersion$',
         });
-        runChunksForTesting(win.document);
+        runChunks(win.document);
 
         // No factories
         yield extensions.waitForExtension(win, 'amp-ext');
@@ -828,8 +840,9 @@ describes.fakeWin(
           f: (amp) => {
             amp.registerServiceForDoc('service1', factory);
           },
+          v: '$internalRuntimeVersion$',
         });
-        runChunksForTesting(win.document);
+        runChunks(win.document);
 
         // No factories
         yield extensions.waitForExtension(win, 'amp-ext');
@@ -854,7 +867,6 @@ describes.fakeWin(
 
       it('should export properties to global AMP object', () => {
         expect(win.AMP.BaseElement).to.be.a('function');
-        expect(win.AMP.BaseTemplate).to.be.a('function');
         expect(win.AMP.registerElement).to.be.a('function');
         expect(win.AMP.registerTemplate).to.be.a('function');
         expect(win.AMP.setTickFunction).to.be.a('function');
@@ -879,8 +891,9 @@ describes.fakeWin(
           f: (amp) => {
             amp.registerElement('amp-ext', win.AMP.BaseElement);
           },
+          v: '$internalRuntimeVersion$',
         });
-        runChunksForTesting(win.document);
+        runChunks(win.document);
 
         // Extension is added immediately. Can't find for micro-tasks here.
         yield extensions.waitForExtension(win, 'amp-ext');
@@ -926,8 +939,9 @@ describes.fakeWin(
           f: (amp) => {
             amp.registerElement('amp-ext', win.AMP.BaseElement, 'a{}');
           },
+          v: '$internalRuntimeVersion$',
         });
-        runChunksForTesting(win.document);
+        runChunks(win.document);
 
         // Extension is added immediately. Can't find for micro-tasks here.
         yield extensions.waitForExtension(win, 'amp-ext');
@@ -976,8 +990,9 @@ describes.fakeWin(
           f: (amp) => {
             amp.registerServiceForDoc('service1', Service1);
           },
+          v: '$internalRuntimeVersion$',
         });
-        runChunksForTesting(win.document);
+        runChunks(win.document);
 
         // Factory recorded.
         yield extensions.waitForExtension(win, 'amp-ext');
@@ -1080,6 +1095,7 @@ describes.realWin(
           f: (amp) => {
             amp.registerServiceForDoc('service1', Service1);
           },
+          v: '$internalRuntimeVersion$',
         });
 
         const script = win.document.createElement('script');
@@ -1505,6 +1521,7 @@ describes.realWin(
             f: (amp) => {
               amp.registerServiceForDoc('service1', Service1);
             },
+            v: '$internalRuntimeVersion$',
           });
 
           writer.write(
