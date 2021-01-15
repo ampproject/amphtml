@@ -728,9 +728,14 @@ export class ManualAdvancement extends AdvancementConfig {
         matches(element, PLAYER_ACTION_LINK_SELECTOR)
       );
 
-      // TODO: Falls back on the provided href url when the player is not
+      // TODO: Falls back on the provided url when the player is not
       // viewed in a context where the player action is enabled.
-      if (false) {
+      const acceptableHostDomainsList = playerLink.dataset.expectedHostDomains.split(
+        ' '
+      );
+      const currentDomain = window.location.hostname;
+      if (!acceptableHostDomainsList.includes(currentDomain)) {
+        playerLink.href = playerLink.dataset.fallbackUrl;
         return;
       }
 
