@@ -95,7 +95,7 @@ const getAmpCssFile = async (name) => {
   const nameWithoutPrefix = name.replace(/^amp-/, '');
   const templatePath = path.join(
     __dirname,
-    '/bento/amp-__component_name_hyphenated__/amp-__component_name_hyphenated__.css'
+    '/bento/amp-__component_name_hyphenated__/__component_version__/amp-__component_name_hyphenated__.css'
   );
   const dns = 'DO_NOT_SUBMIT'.replace(/_/g, ' ');
 
@@ -255,7 +255,7 @@ async function makeAmpExtension() {
   if (!argv.no_amp_css) {
     fs.writeFileSync(
       `extensions/${name}/${version}/${name}.css`,
-      getAmpCssFile(name)
+      await getAmpCssFile(name)
     );
   }
   fs.writeFileSync(
