@@ -29,16 +29,6 @@ function getPreClosureConfig() {
   const isTestTask = testTasks.some((task) => argv._.includes(task));
   const isFortesting = argv.fortesting || isTestTask;
 
-  const filterImportsPlugin = [
-    'filter-imports',
-    {
-      imports: {
-        // Imports that are not needed for valid transformed documents.
-        '../build/ampshared.css': ['cssText', 'ampSharedCss'],
-        '../build/ampdoc.css': ['cssText', 'ampDocCss'],
-      },
-    },
-  ];
   const reactJsxPlugin = [
     '@babel/plugin-transform-react-jsx',
     {
@@ -76,7 +66,6 @@ function getPreClosureConfig() {
     './build-system/babel-plugins/babel-plugin-transform-default-assignment',
     replacePlugin,
     './build-system/babel-plugins/babel-plugin-transform-amp-asserts',
-    argv.esm || argv.sxg ? filterImportsPlugin : null,
     // TODO(erwinm, #28698): fix this in fixit week
     // argv.esm
     //? './build-system/babel-plugins/babel-plugin-transform-function-declarations'
