@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {TruncateText} from '../truncate-text'
+import {TruncateText} from '../truncate-text';
 import {withA11y} from '@storybook/addon-a11y';
 import {withKnobs} from '@storybook/addon-knobs';
 
@@ -25,14 +25,17 @@ export default {
   decorators: [withKnobs, withA11y],
 };
 
-export const _default = () => {
-  // DO NOT SUBMIT: This is example code only.
-  return (
-    <truncate-text
-      style={{width: 300, height: 200}}
-      example-property="example string property value"
-    >
-      This text is inside.
-    </truncate-text>
-  );
-};
+export const _default = () => (
+  <truncate-text>
+    Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+    tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+    quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+    consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+    cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat
+    non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+    <p> Hello</p>
+    <button slot="persistent">Lorem Ipsum</button>
+    <button slot="collapsed">See more</button>
+    <button slot="expanded">See less</button>
+  </truncate-text>
+);
