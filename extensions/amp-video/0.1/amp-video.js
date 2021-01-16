@@ -643,13 +643,14 @@ class AmpVideo extends AMP.BaseElement {
 
   /** @private */
   updateIsPlaying_(isPlaying) {
-    if (isPlaying !== this.isPlaying_) {
-      this.isPlaying_ = isPlaying;
-      if (isPlaying) {
-        observeDisplay(this.element, this.onDisplay_);
-      } else {
-        unobserveDisplay(this.element, this.onDisplay_);
-      }
+    if (isPlaying === this.isPlaying_) {
+      return;
+    }
+    this.isPlaying_ = isPlaying;
+    if (isPlaying) {
+      observeDisplay(this.element, this.onDisplay_);
+    } else {
+      unobserveDisplay(this.element, this.onDisplay_);
     }
   }
 
