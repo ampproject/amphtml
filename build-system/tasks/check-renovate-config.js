@@ -49,9 +49,9 @@
 
 'use strict';
 
-const log = require('fancy-log');
 const {cyan, red, green} = require('ansi-colors');
 const {getOutput} = require('../common/exec');
+const {log} = require('../common/logging');
 
 /**
  * Checks Renovate config for correctness using the validator provided by the
