@@ -41,9 +41,9 @@ export const _default = () => {
   return (
     <amp-truncate-text
       layout="fixed"
+      className="box"
       height={`${height}em`}
       width={`${width}em`}
-      class="box"
     >
       Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
       tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim

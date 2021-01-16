@@ -102,8 +102,12 @@ function TruncateTextWithRef(
     'expanded': slotExpanded,
   };
 
-  const TruncateSlot = forwardRef(({name, ...rest}, ref) => (
-    <span class={`i-amphtml-truncate-${name}-slot`} ref={ref} {...rest}>
+  const TruncateSlot = forwardRef(({name, className, ...rest}, ref) => (
+    <span
+      className={`i-amphtml-truncate-${name}-slot ${className || ''}`}
+      ref={ref}
+      {...rest}
+    >
       {slots[name]}
     </span>
   ));
