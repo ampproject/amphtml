@@ -68,7 +68,7 @@ function TruncateTextWithRef(
       container: wrapperRef.current,
       overflowNodes: [persistentRef.current, collapsedRef.current],
     });
-  });
+  }, []);
 
   // Truncate the text when expanded/collapsed
   useLayoutEffect(() => {
@@ -81,13 +81,13 @@ function TruncateTextWithRef(
 
     // Truncate contents to fit/expand container
     truncate();
-  }, [expanded]);
+  }, [expanded, truncate]);
 
   // After the first layout, measure/truncate/display
   useEffect(() => {
     truncate();
     setReady(true);
-  }, []);
+  }, [truncate]);
 
   // Don't display contents until after the first measure/truncate
   useLayoutEffect(() => {
