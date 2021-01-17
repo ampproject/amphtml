@@ -851,7 +851,8 @@ export class AmpList extends AMP.BaseElement {
         (response) => {
           userAssert(
             response,
-            'Error proxying amp-list templates, received no response.'
+            'Failed fetching JSON data: XHR Failed fetching ' +
+              `(${request.xhrUrl}): received no response.`
           );
           const init = response['init'];
           if (init) {
@@ -859,21 +860,27 @@ export class AmpList extends AMP.BaseElement {
             if (status >= 300) {
               /** HTTP status codes of 300+ mean redirects and errors. */
               throw user().createError(
-                'Error proxying amp-list templates with status: ',
+                `Failed fetching JSON data (${request.xhrUrl}): HTTP error`,
                 status
               );
             }
           }
           userAssert(
             typeof response['html'] === 'string',
-            'Expected response with format {html: <string>}. Received: ',
+            'Failed fetching JSON data: XHR Failed fetching ' +
+              `(${request.xhrUrl}): Expected response with format ` +
+              'html: <string>}. Received: ',
             response
           );
           request.fetchOpt.responseType = 'application/json';
           return response;
         },
         (error) => {
-          throw user().createError('Error proxying amp-list templates', error);
+          throw user().createError(
+            'Failed fetching JSON data: XHR Failed fetching ' +
+              `(${request.xhrUrl})`,
+            error
+          );
         }
       )
       .then((data) => {
