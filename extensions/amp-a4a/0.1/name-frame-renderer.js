@@ -19,6 +19,11 @@ import {createElementWithAttributes} from '../../../src/dom';
 import {dict} from '../../../src/utils/object';
 import {getContextMetadata} from '../../../src/iframe-attributes';
 import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
+import {
+  intersectionEntryToJson,
+  measureIntersection,
+} from '../../../src/utils/intersection';
+import {isExperimentOn} from '../../../src/experiments';
 import {utf8Decode} from '../../../src/utils/bytes';
 
 /**
@@ -50,28 +55,39 @@ export class NameFrameRenderer extends Renderer {
       crossDomainData.additionalContextMetadata
     );
     contextMetadata['creative'] = creative;
-    const attributes = dict({
-      'src': srcPath,
-      'name': JSON.stringify(contextMetadata),
-      'height': context.size.height,
-      'width': context.size.width,
-      'frameborder': '0',
-      'allowfullscreen': '',
-      'allowtransparency': '',
-      'scrolling': 'no',
-      'marginwidth': '0',
-      'marginheight': '0',
-    });
-    if (crossDomainData.sentinel) {
-      attributes['data-amp-3p-sentinel'] = crossDomainData.sentinel;
-    }
-    const iframe = createElementWithAttributes(
-      /** @type {!Document} */ (element.ownerDocument),
-      'iframe',
-      /** @type {!JsonObject} */ (attributes)
+    const asyncIntersection = isExperimentOn(
+      element.ownerDocument.defaultView,
+      'ads-initialIntersection'
     );
-    // TODO(glevitzky): Ensure that applyFillContent or equivalent is called.
-    element.appendChild(iframe);
-    return Promise.resolve();
+    const intersectionPromise = asyncIntersection
+      ? measureIntersection(element)
+      : Promise.resolve(element.getIntersectionChangeEntry());
+    return intersectionPromise.then((intersection) => {
+      contextMetadata['_context'][
+        'initialIntersection'
+      ] = intersectionEntryToJson(intersection);
+      const attributes = dict({
+        'src': srcPath,
+        'name': JSON.stringify(contextMetadata),
+        'height': context.size.height,
+        'width': context.size.width,
+        'frameborder': '0',
+        'allowfullscreen': '',
+        'allowtransparency': '',
+        'scrolling': 'no',
+        'marginwidth': '0',
+        'marginheight': '0',
+      });
+      if (crossDomainData.sentinel) {
+        attributes['data-amp-3p-sentinel'] = crossDomainData.sentinel;
+      }
+      const iframe = createElementWithAttributes(
+        /** @type {!Document} */ (element.ownerDocument),
+        'iframe',
+        /** @type {!JsonObject} */ (attributes)
+      );
+      // TODO(glevitzky): Ensure that applyFillContent or equivalent is called.
+      element.appendChild(iframe);
+    });
   }
 }

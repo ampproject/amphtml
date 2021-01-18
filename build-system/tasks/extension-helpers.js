@@ -130,8 +130,8 @@ function declareExtension(
 }
 
 /**
- * Initializes all extensions from build-system/compile/bundles.config.js if not
- * already done and populates the given extensions object.
+ * Initializes all extensions from build-system/compile/bundles.config.extensions.json
+ * if not already done and populates the given extensions object.
  * @param {?Object} extensionsObject
  * @param {?boolean} includeLatest
  */
@@ -175,9 +175,6 @@ function setExtensionsToBuildFromDocuments(examples) {
  * @return {!Array<string>}
  */
 function getExtensionsToBuild(preBuild = false) {
-  if (extensionsToBuild) {
-    return extensionsToBuild;
-  }
   extensionsToBuild = argv.core_runtime_only ? [] : DEFAULT_EXTENSION_SET;
   if (argv.extensions) {
     if (typeof argv.extensions !== 'string') {
