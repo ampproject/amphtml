@@ -737,14 +737,6 @@
     }
   },
   {
-    "name": "amp-vidazoo-widget",
-    "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
-  },
-  {
     "name": "amp-sidebar",
     "version": [
       "0.1",
@@ -957,6 +949,14 @@
   },
   {
     "name": "amp-user-notification",
+    "version": "0.1",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
+    "name": "amp-vidazoo-widget",
     "version": "0.1",
     "latestVersion": "0.1",
     "options": {
