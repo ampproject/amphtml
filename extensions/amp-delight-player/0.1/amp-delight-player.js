@@ -187,7 +187,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
     iframe.setAttribute('allow', 'vr');
 
     this.unlistenMessage_ = listen(this.win, 'message', (event) => {
-      this.handleDelightMessage_(event);
+      this.handleMessage_(event);
     });
 
     this.iframe_ = iframe;
@@ -273,7 +273,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
    * @param {!Event} event
    * @private
    */
-  handleDelightMessage_(event) {
+  handleMessage_(event) {
     if (!originMatches(event, this.iframe_, /.*/)) {
       return;
     }

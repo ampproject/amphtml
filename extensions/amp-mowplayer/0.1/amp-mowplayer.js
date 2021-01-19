@@ -77,12 +77,6 @@ class AmpMowplayer extends AMP.BaseElement {
 
     /** @private {?Function} */
     this.unlistenMessage_ = null;
-
-    /**
-     * Prefix to embed URLs. Overridden on tests.
-     * @private @const {string}
-     */
-    this.baseUrl_ = 'https://mowplayer.com/watch/';
   }
 
   /**
@@ -127,7 +121,7 @@ class AmpMowplayer extends AMP.BaseElement {
     }
 
     return (this.videoIframeSrc_ =
-      this.baseUrl_ + encodeURIComponent(this.mediaid_));
+      'https://mowplayer.com/watch/' + encodeURIComponent(this.mediaid_));
   }
 
   /** @override */
@@ -137,7 +131,7 @@ class AmpMowplayer extends AMP.BaseElement {
     this.unlistenMessage_ = listen(
       this.win,
       'message',
-      this.handleMowMessage_.bind(this)
+      this.handleMessage_.bind(this)
     );
     const loaded = this.loadPromise(this.iframe_).then(() => {
       // Tell mowplayer that we want to receive messages
@@ -209,7 +203,7 @@ class AmpMowplayer extends AMP.BaseElement {
    * @param {!Event} event
    * @private
    */
-  handleMowMessage_(event) {
+  handleMessage_(event) {
     if (!originMatches(event, this.iframe_, 'https://mowplayer.com')) {
       return;
     }

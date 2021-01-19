@@ -134,7 +134,7 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
     this.iframe_ = iframe;
 
     this.unlistenMessage_ = listen(this.win, 'message', (event) => {
-      this.handleOoyalaMessage_(event);
+      this.handleMessage_(event);
     });
 
     const loaded = this.loadPromise(this.iframe_).then(() => {
@@ -180,7 +180,7 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
    * @param {!Event} event
    * @private
    */
-  handleOoyalaMessage_(event) {
+  handleMessage_(event) {
     if (event.source != this.iframe_.contentWindow) {
       return;
     }

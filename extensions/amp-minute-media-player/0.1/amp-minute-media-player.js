@@ -164,7 +164,7 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
    * @param {!Event} event
    * @private
    */
-  handleMinuteMediaPlayerMessage_(event) {
+  handleMessage_(event) {
     if (!originMatches(event, this.iframe_, 'https://www.oo-syringe.com')) {
       return;
     }
@@ -227,7 +227,7 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
     this.iframe_ = iframe;
 
     this.unlistenMessage_ = listen(this.win, 'message', (event) =>
-      this.handleMinuteMediaPlayerMessage_(event)
+      this.handleMessage_(event)
     );
 
     installVideoManagerForDoc(this.element);

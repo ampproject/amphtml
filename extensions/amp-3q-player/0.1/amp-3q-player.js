@@ -101,7 +101,7 @@ class Amp3QPlayer extends AMP.BaseElement {
     this.unlistenMessage_ = listen(
       this.win,
       'message',
-      this.sdnBridge_.bind(this)
+      this.handleMessage_.bind(this)
     );
 
     return this.loadPromise(this.iframe_).then(() => this.playerReadyPromise_);
@@ -141,7 +141,7 @@ class Amp3QPlayer extends AMP.BaseElement {
    * @param {!Event} event
    * @private
    */
-  sdnBridge_(event) {
+  handleMessage_(event) {
     if (event.source) {
       if (event.source != this.iframe_.contentWindow) {
         return;

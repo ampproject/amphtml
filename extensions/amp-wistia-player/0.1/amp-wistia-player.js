@@ -114,7 +114,7 @@ class AmpWistiaPlayer extends AMP.BaseElement {
     this.unlistenMessage_ = listen(
       this.win,
       'message',
-      this.handleWistiaMessage_.bind(this)
+      this.handleMessage_.bind(this)
     );
 
     const loaded = this.loadPromise(this.iframe_).then(() => {
@@ -155,7 +155,7 @@ class AmpWistiaPlayer extends AMP.BaseElement {
    * @param {!Event} event
    * @private
    */
-  handleWistiaMessage_(event) {
+  handleMessage_(event) {
     if (!originMatches(event, this.iframe_, 'https://fast.wistia.net')) {
       return;
     }

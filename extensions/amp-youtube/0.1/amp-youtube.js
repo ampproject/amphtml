@@ -260,7 +260,7 @@ class AmpYoutube extends AMP.BaseElement {
     this.unlistenMessage_ = listen(
       this.win,
       'message',
-      this.handleYoutubeMessage_.bind(this)
+      this.handleMessage_.bind(this)
     );
 
     if (this.isLoop_ && !this.isPlaylist_) {
@@ -393,7 +393,7 @@ class AmpYoutube extends AMP.BaseElement {
    * @param {!Event} event
    * @private
    */
-  handleYoutubeMessage_(event) {
+  handleMessage_(event) {
     if (!originMatches(event, this.iframe_, 'https://www.youtube.com')) {
       return;
     }
