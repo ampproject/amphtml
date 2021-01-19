@@ -5,7 +5,7 @@
     <script async src="https://cdn.ampproject.org/v0.js"></script>
     <script async custom-element="amp-story"
         src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
-    <title>Page layer story</title>
+    <title>Grid layer presets story</title>
     <meta name="viewport"
           content="width=device-width,minimum-scale=1,initial-scale=1">
     <link rel="canonical" href="page-layer.html">
@@ -14,6 +14,9 @@
     <style amp-custom>
       body {
         font-family: 'Poppins', sans-serif;
+      }
+      amp-story-page {
+        background: black;
       }
       .lower-title {
         color: white;
@@ -31,6 +34,10 @@
       }
       .bordered {
         border: 2px solid #ffffff6f;
+      }
+      .small span {
+        font-size: 0.3em;
+        color: white;
       }
       .lower-title span {
         font-size: 0.2em;
@@ -105,6 +112,42 @@
           </div>
         </amp-story-grid-layer>
       </amp-story-page>
+
+      <amp-story-page id="anchors">
+        <amp-story-grid-layer template="fill" preset="2021-background">
+          <amp-img src="https://images.unsplash.com/photo-1522072629756-c9274e34ef5e?w=1000&q=80"
+            layout="responsive" width="69" height="116">
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer preset="2021-foreground" anchor="right" class="bordered small">
+          <span style="position: absolute; right: 0; top: 45%">Right</span>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer preset="2021-foreground" anchor="left" class="bordered small">
+          <span style="position: absolute; left: 0; top: 45%">Left</span>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer preset="2021-foreground" anchor="top" class="bordered small">
+          <span style="position: absolute; left: 40%; top: 0">Top</span>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer preset="2021-foreground" anchor="bottom" class="bordered small">
+          <span style="position: absolute; left: 40%; bottom: 0">Bottom</span>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer preset="2021-foreground" class="bordered small">
+          <span style="position: absolute; left: 40%; top: 45%">Center</span>
+          <span style="position: absolute; left: 0; top: 70%; right:0; text-align: center">(test with #development=1!)</span>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer preset="2021-foreground" anchor="top right" class="bordered small">
+          <span style="position: absolute; right: 0; top: 0">Top Right</span>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer preset="2021-foreground" anchor="top left" class="bordered small">
+          <span style="position: absolute; left: 0; top: 0">Top Left</span>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer preset="2021-foreground" anchor="bottom right" class="bordered small">
+          <span style="position: absolute; right: 0; bottom: 0">Bottom Right</span>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer preset="2021-foreground" anchor="bottom left" class="bordered small">
+          <span style="position: absolute; left: 0; bottom: 0">Bottom Left</span>
+        </amp-story-grid-layer>
+      </amp-story-grid>
     </amp-story>
   </body>
 </html>
