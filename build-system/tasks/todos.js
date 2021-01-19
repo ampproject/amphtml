@@ -15,12 +15,12 @@
  */
 'use strict';
 
-const colors = require('ansi-colors');
 const gulp = require('gulp');
-const log = require('fancy-log');
 const srcGlobs = require('../test-configs/config').presubmitGlobs;
 const through2 = require('through2');
 const util = require('util');
+const {log} = require('../common/logging');
+const {red} = require('ansi-colors');
 
 const request = util.promisify(require('request'));
 
@@ -64,7 +64,7 @@ async function findClosedTodosInFile(file) {
       return acc + v;
     }, 0);
   } catch (error) {
-    log(colors.red('Failed in', file.path, error, error.stack));
+    log(red('Failed in', file.path, error, error.stack));
     return 0;
   }
 }
@@ -85,7 +85,7 @@ function reportClosedIssue(file, issueId, todo) {
     const issue = JSON.parse(response.body);
     const value = issue.state == 'closed' ? 1 : 0;
     if (value) {
-      log(colors.red(todo, 'in', file.path));
+      log(red(todo, 'in', file.path));
     }
     return value;
   })());
@@ -137,7 +137,7 @@ function todosFindClosed() {
     )
     .on('end', function () {
       if (foundCount > 0) {
-        log(colors.red('Found closed TODOs: ', foundCount));
+        log(red('Found closed TODOs: ', foundCount));
         process.exit(1);
       }
     });

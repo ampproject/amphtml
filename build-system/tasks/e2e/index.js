@@ -23,7 +23,6 @@ const dotsReporter = require('./mocha-dots-reporter');
 const fs = require('fs');
 const glob = require('glob');
 const http = require('http');
-const log = require('fancy-log');
 const Mocha = require('mocha');
 const path = require('path');
 const {
@@ -35,6 +34,7 @@ const {cyan} = require('ansi-colors');
 const {execOrDie} = require('../../common/exec');
 const {HOST, PORT, startServer, stopServer} = require('../serve');
 const {isCiBuild} = require('../../common/ci');
+const {log} = require('../../common/logging');
 const {maybePrintCoverageMessage} = require('../helpers');
 const {reportTestStarted} = require('../report-test-status');
 const {watch} = require('gulp');

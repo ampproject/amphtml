@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 const argv = require('minimist')(process.argv.slice(2));
-const colors = require('ansi-colors');
 const fs = require('fs-extra');
-const log = require('fancy-log');
 const path = require('path');
 const {clean} = require('./clean');
 const {doBuild} = require('./build');
 const {doDist} = require('./dist');
+const {green} = require('ansi-colors');
+const {log} = require('../common/logging');
 
 async function walk(dest) {
   const filelist = [];
@@ -58,18 +58,18 @@ async function firebase() {
   }
   await fs.mkdirp('firebase');
   if (argv.file) {
-    log(colors.green(`Processing file: ${argv.file}.`));
-    log(colors.green('Writing file to firebase.index.html.'));
+    log(green(`Processing file: ${argv.file}.`));
+    log(green('Writing file to firebase.index.html.'));
     await fs.copyFile(/*src*/ argv.file, 'firebase/index.html');
     await replaceUrls('firebase/index.html');
   } else {
-    log(colors.green('Copying test/manual and examples folders.'));
+    log(green('Copying test/manual and examples folders.'));
     await Promise.all([
       copyAndReplaceUrls('test/manual', 'firebase/manual'),
       copyAndReplaceUrls('examples', 'firebase/examples'),
     ]);
   }
-  log(colors.green('Copying local amp files from dist folder.'));
+  log(green('Copying local amp files from dist folder.'));
   await Promise.all([
     fs.copy('dist', 'firebase/dist', {overwrite: true}),
     fs.copy('dist.3p/current', 'firebase/dist.3p/current', {overwrite: true}),

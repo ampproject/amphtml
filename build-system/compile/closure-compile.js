@@ -16,13 +16,13 @@
 'use strict';
 
 const closureCompiler = require('@ampproject/google-closure-compiler');
-const log = require('fancy-log');
 const path = require('path');
 const pumpify = require('pumpify');
 const sourcemaps = require('gulp-sourcemaps');
 const {cyan, red, yellow} = require('ansi-colors');
 const {EventEmitter} = require('events');
 const {highlight} = require('cli-highlight');
+const {log} = require('../common/logging');
 
 let compilerErrors = '';
 

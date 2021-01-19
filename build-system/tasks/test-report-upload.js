@@ -23,7 +23,6 @@
 
 const fetch = require('node-fetch');
 const fs = require('fs').promises;
-const log = require('fancy-log');
 const path = require('path');
 const {
   ciBuildId,
@@ -33,6 +32,7 @@ const {
   ciCommitSha,
   ciRepoSlug,
 } = require('../common/ci');
+const {log} = require('../common/logging');
 
 const {cyan, green, red, yellow} = require('ansi-colors');
 

@@ -17,12 +17,12 @@
 
 const globby = require('globby');
 const gulpBabel = require('gulp-babel');
-const log = require('fancy-log');
 const path = require('path');
 const through = require('through2');
 const {BABEL_SRC_GLOBS, THIRD_PARTY_TRANSFORM_GLOBS} = require('./sources');
 const {debug, CompilationLifecycles} = require('./debug-compilation-lifecycle');
 const {EventEmitter} = require('events');
+const {log} = require('../common/logging');
 const {red, cyan} = require('ansi-colors');
 
 /**

@@ -18,8 +18,8 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const gulp = require('gulp-help')(require('gulp'));
-const log = require('fancy-log');
 const {cyan, red} = require('ansi-colors');
+const {log} = require('./build-system/common/logging');
 
 const {
   checkExactVersions,

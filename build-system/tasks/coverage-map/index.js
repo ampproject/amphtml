@@ -15,11 +15,11 @@
  */
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs').promises;
-const log = require('fancy-log');
 const {buildNewServer} = require('../../server/typescript-compile');
 const {cyan} = require('ansi-colors');
 const {dist} = require('../dist');
 const {installPackages} = require('../../common/utils');
+const {log} = require('../../common/logging');
 const {startServer, stopServer} = require('../serve');
 
 const coverageJsonName = argv.json || 'coverage.json';

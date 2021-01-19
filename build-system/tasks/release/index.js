@@ -20,11 +20,11 @@ const experimentsConfig = require('../../global-configs/experiments-config.json'
 const fetch = require('node-fetch');
 const fs = require('fs-extra');
 const klaw = require('klaw');
-const log = require('fancy-log');
 const path = require('path');
 const tar = require('tar');
 const {cyan, green} = require('ansi-colors');
 const {execOrDie} = require('../../common/exec');
+const {log} = require('../../common/logging');
 const {MINIFIED_TARGETS} = require('../helpers');
 const {VERSION} = require('../../compile/internal-version');
 

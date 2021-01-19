@@ -16,10 +16,10 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const colors = require('ansi-colors');
 const extensionBundles = require('./bundles.config.extensions.json');
-const log = require('fancy-log');
 const wrappers = require('./compile-wrappers');
+const {cyan, red} = require('ansi-colors');
+const {log} = require('../common/logging');
 
 const {VERSION: internalRuntimeVersion} = require('./internal-version');
 
@@ -232,13 +232,7 @@ exports.extensionAliasBundles = {
  */
 function verifyBundle_(condition, field, message, name, found) {
   if (!condition) {
-    log(
-      colors.red('ERROR:'),
-      colors.cyan(field),
-      message,
-      colors.cyan(name),
-      '\n' + found
-    );
+    log(red('ERROR:'), cyan(field), message, cyan(name), '\n' + found);
     process.exit(1);
   }
 }

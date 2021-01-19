@@ -17,7 +17,6 @@
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs-extra');
 const globby = require('globby');
-const log = require('fancy-log');
 const path = require('path');
 const {clean} = require('../tasks/clean');
 const {doBuild} = require('../tasks/build');
@@ -25,7 +24,7 @@ const {doDist} = require('../tasks/dist');
 const {execOrDie} = require('./exec');
 const {gitDiffNameOnlyMaster} = require('./git');
 const {green, cyan, yellow} = require('ansi-colors');
-const {isCiBuild} = require('./ci');
+const {log, logLocalDev} = require('./logging');
 
 const ROOT_DIR = path.resolve(__dirname, '../../');
 
@@ -44,20 +43,6 @@ async function buildRuntime(opt_compiled = false) {
   } else {
     await doBuild({fortesting: true});
   }
-}
-
-/**
- * Logs a message on the same line to indicate progress
- *
- * @param {string} message
- */
-function logOnSameLine(message) {
-  if (!isCiBuild() && process.stdout.isTTY) {
-    process.stdout.moveCursor(0, -1);
-    process.stdout.cursorTo(0);
-    process.stdout.clearLine();
-  }
-  log(message);
 }
 
 /**
@@ -81,11 +66,9 @@ function getFilesChanged(globs) {
  * @return {!Array<string>}
  */
 function logFiles(files) {
-  if (!isCiBuild()) {
-    log(green('INFO: ') + 'Checking the following files:');
-    for (const file of files) {
-      log(cyan(file));
-    }
+  logLocalDev(green('INFO: ') + 'Checking the following files:');
+  for (const file of files) {
+    logLocalDev(cyan(file));
   }
   return files;
 }
@@ -180,6 +163,5 @@ module.exports = {
   getFilesFromArgv,
   getFilesToCheck,
   installPackages,
-  logOnSameLine,
   usesFilesOrLocalChanges,
 };

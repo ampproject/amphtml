@@ -17,7 +17,6 @@
 const colors = require('ansi-colors');
 const debounce = require('debounce');
 const fs = require('fs-extra');
-const log = require('fancy-log');
 const wrappers = require('../compile/compile-wrappers');
 const {
   extensionAliasBundles,
@@ -27,6 +26,7 @@ const {
 const {endBuildStep, watchDebounceDelay} = require('./helpers');
 const {isCiBuild} = require('../common/ci');
 const {jsifyCssAsync} = require('./jsify-css');
+const {log} = require('../common/logging');
 const {maybeToEsmName, compileJs, mkdirSync} = require('./helpers');
 const {vendorConfigs} = require('./vendor-configs');
 const {watch} = require('gulp');

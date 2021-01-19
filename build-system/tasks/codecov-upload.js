@@ -17,7 +17,6 @@
 
 const colors = require('ansi-colors');
 const fs = require('fs-extra');
-const log = require('fancy-log');
 const {
   ciCommitSha,
   ciPullRequestSha,
@@ -25,6 +24,7 @@ const {
   isPullRequestBuild,
 } = require('../common/ci');
 const {getStdout} = require('../common/exec');
+const {log} = require('../common/logging');
 const {shortSha} = require('../common/git');
 
 const {green, yellow, cyan} = colors;

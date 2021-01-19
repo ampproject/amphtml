@@ -15,10 +15,10 @@
  */
 'use strict';
 
-const colors = require('ansi-colors');
 const gulp = require('gulp');
-const log = require('fancy-log');
 const through2 = require('through2');
+const {log} = require('../common/logging');
+const {red, yellow} = require('ansi-colors');
 
 const expectedCaches = ['google'];
 
@@ -37,7 +37,7 @@ async function cachesJson() {
         obj = JSON.parse(file.contents.toString());
       } catch (e) {
         log(
-          colors.yellow(
+          yellow(
             `Could not parse ${cachesJsonPath}. ` +
               'This is most likely a fatal error that ' +
               'will be found by checkValidJson'
@@ -52,9 +52,7 @@ async function cachesJson() {
       for (const cache of expectedCaches) {
         if (!foundCaches.includes(cache)) {
           log(
-            colors.red(
-              'Missing expected cache "' + cache + `" in ${cachesJsonPath}`
-            )
+            red('Missing expected cache "' + cache + `" in ${cachesJsonPath}`)
           );
           process.exitCode = 1;
         }

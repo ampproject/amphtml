@@ -15,8 +15,8 @@
  */
 'use strict';
 
-const log = require('fancy-log');
 const through = require('through2');
+const {log} = require('../common/logging');
 const {red, cyan, yellow} = require('ansi-colors');
 
 /**
