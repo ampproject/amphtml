@@ -14,7 +14,7 @@
   "devDependencies": {
     "google-closure-compiler": "20210106.0.0",
     "google-closure-library": "20210106.0.0",
-    "jasmine": "3.6.3",
+    "jasmine": "3.6.4",
     "jasmine-console-reporter": "3.1.0"
   },
   "resolutions": {
