@@ -15,11 +15,11 @@
  */
 const argv = require('minimist')(process.argv.slice(2));
 const fastGlob = require('fast-glob');
-const log = require('fancy-log');
 const path = require('path');
 const tempy = require('tempy');
 const {cyan, magenta, yellow} = require('ansi-colors');
 const {getOutput} = require('../../common/process');
+const {log} = require('../../common/logging');
 const {readJsonSync, writeFileSync} = require('fs-extra');
 
 const containRuntimeSource = ['3p', 'ads', 'extensions', 'src', 'test'];

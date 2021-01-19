@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-const colors = require('ansi-colors');
 const fs = require('fs');
 const gulp = require('gulp');
-const log = require('fancy-log');
 const path = require('path');
 const through2 = require('through2');
+const {green, red, yellow} = require('ansi-colors');
+const {log} = require('../common/logging');
 
 const CONFIG_PATH = 'build-system/tasks/performance/config.json';
 const LOCAL_HOST_URL = 'http://localhost:8000/';
@@ -48,7 +48,7 @@ async function performanceUrls() {
       try {
         obj = JSON.parse(file.contents.toString());
       } catch (e) {
-        log(colors.yellow(`Could not parse ${CONFIG_PATH}. `));
+        log(yellow(`Could not parse ${CONFIG_PATH}. `));
         throwError(`Could not parse ${CONFIG_PATH}. `);
         return;
       }
@@ -61,15 +61,12 @@ async function performanceUrls() {
       );
       for (const filepath of filepaths) {
         if (!fs.existsSync(filepath)) {
-          log(colors.red(filepath + ' does not exist.'));
+          log(red(filepath + ' does not exist.'));
           throwError(`${filepath} does not exist.`);
           return;
         }
       }
-      log(
-        colors.green('SUCCESS:'),
-        'All local performance task urls are valid.'
-      );
+      log(green('SUCCESS:'), 'All local performance task urls are valid.');
     })
   );
 }

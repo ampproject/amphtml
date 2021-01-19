@@ -16,14 +16,13 @@
 'use strict';
 
 const fs = require('fs-extra');
-const log = require('fancy-log');
 const markdownLinkCheck = require('markdown-link-check');
 const path = require('path');
 const {getFilesToCheck, usesFilesOrLocalChanges} = require('../common/utils');
 const {gitDiffAddedNameOnlyMaster} = require('../common/git');
 const {green, cyan, red, yellow} = require('ansi-colors');
-const {isCiBuild} = require('../common/ci');
 const {linkCheckGlobs} = require('../test-configs/config');
+const {log, logLocalDev} = require('../common/logging');
 const {maybeUpdatePackages} = require('./update-packages');
 
 const LARGE_REFACTOR_THRESHOLD = 20;
@@ -47,9 +46,7 @@ async function checkLinks() {
     log(green('INFO:'), 'Skipping check because this is a large refactor.');
     return;
   }
-  if (!isCiBuild()) {
-    log(green('Starting checks...'));
-  }
+  logLocalDev(green('Starting checks...'));
   filesIntroducedByPr = gitDiffAddedNameOnlyMaster();
   const results = await Promise.all(filesToCheck.map(checkLinksInFile));
   reportResults(results);
@@ -152,14 +149,10 @@ function checkLinksInFile(file) {
         }
         switch (status) {
           case 'alive':
-            if (!isCiBuild()) {
-              log(`[${green('✔')}] ${link}`);
-            }
+            logLocalDev(`[${green('✔')}] ${link}`);
             break;
           case 'ignored':
-            if (!isCiBuild()) {
-              log(`[${yellow('•')}] ${link}`);
-            }
+            logLocalDev(`[${yellow('•')}] ${link}`);
             break;
           case 'dead':
             containsDeadLinks = true;

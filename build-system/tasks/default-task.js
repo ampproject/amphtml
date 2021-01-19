@@ -15,10 +15,10 @@
  */
 
 const argv = require('minimist')(process.argv.slice(2));
-const log = require('fancy-log');
 const {createCtrlcHandler} = require('../common/ctrlcHandler');
 const {cyan, green} = require('ansi-colors');
 const {doServe} = require('./serve');
+const {log} = require('../common/logging');
 const {maybeUpdatePackages} = require('./update-packages');
 const {parseExtensionFlags} = require('./extension-helpers');
 const {printConfigHelp} = require('./helpers');

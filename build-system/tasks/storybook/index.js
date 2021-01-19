@@ -16,7 +16,6 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const log = require('fancy-log');
 const path = require('path');
 const {createCtrlcHandler} = require('../../common/ctrlcHandler');
 const {cyan} = require('ansi-colors');
@@ -26,6 +25,7 @@ const {getBaseUrl} = require('../pr-deploy-bot-utils');
 const {installPackages} = require('../../common/utils');
 const {isCiBuild} = require('../../common/ci');
 const {isPullRequestBuild} = require('../../common/ci');
+const {log} = require('../../common/logging');
 const {writeFileSync} = require('fs-extra');
 
 const ENV_PORTS = {

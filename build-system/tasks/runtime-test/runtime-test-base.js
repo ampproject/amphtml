@@ -17,7 +17,6 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const karmaConfig = require('../karma.conf');
-const log = require('fancy-log');
 const testConfig = require('../../test-configs/config');
 const {
   createCtrlcHandler,
@@ -28,6 +27,7 @@ const {createKarmaServer, getAdTypes} = require('./helpers');
 const {getFilesFromArgv} = require('../../common/utils');
 const {green, yellow, cyan, red} = require('ansi-colors');
 const {isCiBuild} = require('../../common/ci');
+const {log} = require('../../common/logging');
 const {reportTestStarted} = require('.././report-test-status');
 const {startServer, stopServer} = require('../serve');
 const {unitTestsToRun} = require('./helpers-unit');

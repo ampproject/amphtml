@@ -17,10 +17,10 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs');
-const log = require('fancy-log');
 const path = require('path');
 const {green, yellow, cyan} = require('ansi-colors');
 const {isCiBuild} = require('../../common/ci');
+const {log} = require('../../common/logging');
 const {maybePrintCoverageMessage} = require('../helpers');
 const {reportTestRunComplete} = require('../report-test-status');
 const {Server} = require('karma');

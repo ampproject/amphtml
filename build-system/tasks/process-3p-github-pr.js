@@ -23,10 +23,10 @@
 'use strict';
 const argv = require('minimist')(process.argv.slice(2));
 const assert = require('assert');
-const colors = require('ansi-colors');
 const extend = require('util')._extend;
-const log = require('fancy-log');
 const util = require('util');
+const {blue, green, red} = require('ansi-colors');
+const {log} = require('../common/logging');
 
 const request = util.promisify(require('request'));
 
@@ -122,9 +122,9 @@ function calculateReviewer() {
  */
 async function process3pGithubPr() {
   if (!GITHUB_ACCESS_TOKEN) {
-    log(colors.red('You have not set the GITHUB_ACCESS_TOKEN env var.'));
+    log(red('You have not set the GITHUB_ACCESS_TOKEN env var.'));
     log(
-      colors.green(
+      green(
         'See https://help.github.com/articles/' +
           'creating-an-access-token-for-command-line-use/ ' +
           'for instructions on how to create a github access token. We only ' +
@@ -145,7 +145,7 @@ async function process3pGithubPr() {
   const allIssues = [].concat.apply([], responses);
   const allTasks = allIssues.map(handleIssue);
   await Promise.all(allTasks);
-  log(colors.blue('auto triaging succeed!'));
+  log(blue('auto triaging succeed!'));
 }
 
 async function handleIssue(issue) {
@@ -289,7 +289,7 @@ async function applyComment(issue, comment) {
     defaultOption
   );
   if (isDryrun) {
-    log(colors.blue(`apply comment to PR #${number}, comment is ${comment}`));
+    log(blue(`apply comment to PR #${number}, comment is ${comment}`));
     return;
   }
   return request(options);
@@ -316,7 +316,7 @@ async function assignIssue(issue, assignees) {
     defaultOption
   );
   if (isDryrun) {
-    log(colors.blue(`assign PR #${number}, to ${assignees}`));
+    log(blue(`assign PR #${number}, to ${assignees}`));
     return;
   }
   return request(options);

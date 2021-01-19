@@ -16,7 +16,6 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs');
-const log = require('fancy-log');
 const {
   CDN_URL,
   CONTROL,
@@ -33,6 +32,7 @@ const {
   getAnalyticsMetrics,
 } = require('./analytics-handler');
 const {cyan, green} = require('ansi-colors');
+const {log} = require('../../common/logging');
 const {setupAdRequestHandler} = require('./ads-handler');
 
 // Require Puppeteer dynamically to prevent throwing error during CI
