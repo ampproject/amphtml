@@ -28,11 +28,11 @@ export default {
 export const _default = () => {
   // __do_not_submit__: This is example code only.
   return (
-    <__component_name_hyphenated__
+    <__component_name_pascalcase__
       style={{width: 300, height: 200}}
       example-property="example string property value"
     >
       This text is inside.
-    </__component_name_hyphenated__>
+    </__component_name_pascalcase__>
   );
 };
