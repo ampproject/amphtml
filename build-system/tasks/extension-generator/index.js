@@ -20,6 +20,9 @@ const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const log = require('fancy-log');
 const path = require('path');
+const {
+  insertExtensionBundlesConfig,
+} = require('./insert-extension-bundles-config');
 const {makeBentoExtension} = require('./bento');
 
 const year = new Date().getFullYear();
@@ -86,6 +89,21 @@ const getMarkdownDocFile = async (name) => {
     .toString('utf-8')
     .replace(/__component_name_hyphenated__/g, nameWithoutPrefix)
     .replace(/__current_year__/g, year);
+};
+
+const getAmpCssFile = async (name) => {
+  const nameWithoutPrefix = name.replace(/^amp-/, '');
+  const templatePath = path.join(
+    __dirname,
+    '/bento/amp-__component_name_hyphenated__/__component_version__/amp-__component_name_hyphenated__.css'
+  );
+  const dns = 'DO_NOT_SUBMIT'.replace(/_/g, ' ');
+
+  return (await fs.readFile(templatePath))
+    .toString('utf-8')
+    .replace(/__component_name_hyphenated__/g, nameWithoutPrefix)
+    .replace(/__current_year__/g, year)
+    .replace(/__do_not_submit__/g, dns);
 };
 
 function getJsTestExtensionFile(name) {
@@ -218,10 +236,10 @@ async function makeAmpExtension() {
   if (!argv.name) {
     log(colors.red('Error! Please pass in the "--name" flag with a value'));
   }
-  const {name} = argv;
+  const {name, version = '0.1'} = argv;
   const examplesFile = getExamplesFile(name);
 
-  fs.mkdirpSync(`extensions/${name}/0.1/test`);
+  fs.mkdirpSync(`extensions/${name}/${version}/test`);
   fs.writeFileSync(
     `extensions/${name}/${name}.md`,
     await getMarkdownDocFile(name)
@@ -231,15 +249,19 @@ async function makeAmpExtension() {
     getValidatorFile(name)
   );
   fs.writeFileSync(
-    `extensions/${name}/0.1/${name}.js`,
+    `extensions/${name}/${version}/${name}.js`,
     getJsExtensionFile(name)
   );
   fs.writeFileSync(
-    `extensions/${name}/0.1/test/test-${name}.js`,
+    `extensions/${name}/${version}/${name}.css`,
+    await getAmpCssFile(name)
+  );
+  fs.writeFileSync(
+    `extensions/${name}/${version}/test/test-${name}.js`,
     getJsTestExtensionFile(name)
   );
   fs.writeFileSync(
-    `extensions/${name}/0.1/test/validator-${name}.html`,
+    `extensions/${name}/${version}/test/validator-${name}.html`,
     examplesFile
   );
 
@@ -250,19 +272,33 @@ async function makeAmpExtension() {
     .join('\n');
 
   fs.writeFileSync(
-    `extensions/${name}/0.1/test/validator-${name}.out`,
+    `extensions/${name}/${version}/test/validator-${name}.out`,
     ['PASS', examplesFileValidatorOut].join('\n')
   );
 
   fs.writeFileSync(`examples/${name}.amp.html`, examplesFile);
+
+  // Return the resulting extension bundle config.
+  return {
+    name,
+    version: typeof version === 'string' ? version : version.toFixed(1),
+    options: {hasCss: true},
+  };
 }
 
 async function makeExtension() {
-  return argv.bento ? makeBentoExtension() : makeAmpExtension();
+  const bundleConfig = await (argv.bento
+    ? makeBentoExtension()
+    : makeAmpExtension());
+
+  // Update bundles.config.js with an entry for the new component
+  insertExtensionBundlesConfig(bundleConfig);
+  log(colors.green('SUCCESS:'), 'Wrote', colors.cyan('bundles.config.js'));
 }
 
 module.exports = {
   makeExtension,
+  insertExtensionBundlesConfig,
 };
 
 makeExtension.description = 'Create an extension skeleton';

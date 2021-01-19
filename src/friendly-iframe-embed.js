@@ -756,11 +756,12 @@ export class Installers {
       .then(getDelayPromise)
       .then(() => {
         if (IS_ESM) {
-          const css = parentWin.document.querySelector('style[amp-runtime]')
-            .textContent;
+          // TODO: This is combined (ampdoc + shared), not just shared
+          // const css = parentWin.document.querySelector('style[amp-runtime]')
+          // .textContent;
           installStylesForDoc(
             ampdoc,
-            css,
+            ampSharedCss,
             /* callback */ null,
             /* opt_isRuntimeCss */ true,
             /* opt_ext */ 'amp-runtime'

@@ -84,6 +84,10 @@ async function makeBentoExtension() {
     '__component_name_hyphenated__': componentName,
     '__component_name_hyphenated_capitalized__': componentName.toUpperCase(),
     '__component_name_pascalcase__': dashToPascalCase(componentName),
+    // This allows generated code to contain "DO_NOT_SUBMIT", which will cause
+    // PRs to fail CI if example code isn't removed from the PR. We can't
+    // actually write that out, here or in templates, without CI failing.
+    '__do_not_submit__': 'DO_NOT_SUBMIT'.replace(/_/g, ' '),
   });
 
   const destinationPath = (templatePath) =>
@@ -140,33 +144,16 @@ You can run tests on your new component with the following command:
 If the component was generated successfully, the example test should pass.
 
 You may also view the component during development in storybook:
-    ${cyan(`gulp storybook`)}
+    ${cyan(`gulp storybook`)}`);
 
-To enable generating a binary for this extension, add the following
-to ${cyan('extensionBundles')} in ${cyan(
-    'amphtml/build-system/compile/bundles.config.js'
-  )}:
-
-${cyan(`{
-  name: 'amp-${componentName}',
-  version: ['${version}'],
-  latestVersion: '0.1',  // This may be '${version}' for a new component
-  options: {hasCss: true},
-  type: TYPES.MISC,
-},`)}
-
-See ${cyan(
-    'https://github.com/ampproject/amphtml/blob/master/contributing/building-an-amp-extension.md#updating-build-configs'
-  )} for more information.`);
+  // Return the resulting extension bundle config.
+  return {
+    name: `amp-${componentName}`,
+    version,
+    options: {hasCss: true},
+  };
 }
 
 module.exports = {
   makeBentoExtension,
-};
-
-makeBentoExtension.description = 'Creates a new Bento component boilerplate';
-makeBentoExtension.flags = {
-  name: '  Required. Sets the component name (ex. "foo-bar" or "amp-foo-bar")',
-  version: '  Sets the verison number (default: 1.0)',
-  overwrite: '  Overwrites existing files at the destination, if present',
 };
