@@ -45,6 +45,7 @@ const {
   recaptchaRouter,
 } = require('./recaptcha-router');
 const {getServeMode} = require('./app-utils');
+const {logWithoutTimestamp} = require('../common/logging');
 const {renderShadowViewer} = require('./shadow-viewer');
 const {replaceUrls, isRtvMode} = require('./app-utils');
 
@@ -156,7 +157,7 @@ app.get('/proxy', async (req, res, next) => {
     const proxyUrl = `${modePrefix}/proxy/s/${ampdocUrlSuffix}`;
     res.redirect(proxyUrl);
   } catch ({message}) {
-    console.log(`ERROR: ${message}`);
+    logWithoutTimestamp(`ERROR: ${message}`);
     next();
   }
 });
@@ -170,7 +171,7 @@ app.get('/proxy', async (req, res, next) => {
  */
 function requestAmphtmlDocUrl(urlSuffix, protocol = 'https') {
   const defaultUrl = `${protocol}://${urlSuffix}`;
-  console.log(`Fetching URL: ${defaultUrl}`);
+  logWithoutTimestamp(`Fetching URL: ${defaultUrl}`);
   return new Promise((resolve, reject) => {
     request(defaultUrl, (error, response, body) => {
       if (
@@ -489,7 +490,7 @@ function proxyToAmpProxy(req, res, mode) {
     'https://cdn.ampproject.org/' +
     (req.query['amp_js_v'] ? 'v' : 'c') +
     req.url;
-  console.log('Fetching URL: ' + url);
+  logWithoutTimestamp('Fetching URL: ' + url);
   request(url, function (error, response, body) {
     body = body
       // Unversion URLs.
@@ -555,7 +556,7 @@ app.use('/examples/live-list-update(-reverse)?.amp.html', (req, res, next) => {
   }
   if (!liveListDoc) {
     const liveListUpdateFullPath = `${pc.cwd()}${req.baseUrl}`;
-    console.log('liveListUpdateFullPath', liveListUpdateFullPath);
+    logWithoutTimestamp('liveListUpdateFullPath', liveListUpdateFullPath);
     const liveListFile = fs.readFileSync(liveListUpdateFullPath);
     liveListDoc = liveListDocs[req.baseUrl] = new jsdom.JSDOM(
       liveListFile
@@ -614,7 +615,7 @@ function liveListReplace(item) {
 
 function liveListInsert(liveList, node) {
   const iterCount = Math.floor(Math.random() * 2) + 1;
-  console.log(`inserting ${iterCount} item(s)`);
+  logWithoutTimestamp(`inserting ${iterCount} item(s)`);
   for (let i = 0; i < iterCount; i++) {
     const child = node.cloneNode(true);
     child.setAttribute('id', `list-item-${itemCtr++}`);
@@ -625,7 +626,7 @@ function liveListInsert(liveList, node) {
 
 function liveListTombstone(liveList) {
   const tombstoneId = Math.floor(Math.random() * itemCtr);
-  console.log(`trying to tombstone #list-item-${tombstoneId}`);
+  logWithoutTimestamp(`trying to tombstone #list-item-${tombstoneId}`);
   // We can tombstone any list item except item-1 since we always do a
   // replace example on item-1.
   if (tombstoneId != 1) {
