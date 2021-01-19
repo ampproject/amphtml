@@ -16,7 +16,7 @@
 
 import {createUseStyles} from 'react-jss';
 
-const focus = {
+const button = {
   '&:focus': {
     outline: '#0389ff solid 2px',
     outlineOffset: '2px',
@@ -24,7 +24,7 @@ const focus = {
 };
 
 const JSS = {
-  focus,
+  button,
 };
 
 // useStyles gets replaced for AMP builds via `babel-plugin-transform-jss`.

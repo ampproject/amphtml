@@ -86,7 +86,7 @@ export function SocialShare({
         ...style,
       }}
       part="button"
-      wrapperClassName={classes.focus}
+      wrapperClassName={classes.button}
     >
       {processChildren(
         /** @type {string} */ (type),

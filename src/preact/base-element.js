@@ -513,7 +513,10 @@ export class PreactBaseElement extends AMP.BaseElement {
           this.hydrationPending_ = true;
         } else {
           // Create new shadow root.
-          shadowRoot = this.element.attachShadow({mode: 'open'});
+          shadowRoot = this.element.attachShadow({
+            mode: 'open',
+            delegatesFocus: true,
+          });
 
           // The pre-constructed shadow root is required to have the stylesheet
           // inline. Thus, only the new shadow roots share the stylesheets.

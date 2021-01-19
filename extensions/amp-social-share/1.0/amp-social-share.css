@@ -20,7 +20,7 @@
   * See https://github.com/ampproject/amphtml/issues/4277 for more details.
   */
 
-amp-social-share:focus-within {
+amp-social-share:focus {
   outline: #0389ff solid 2px;
   outline-offset: 2px;
 }
