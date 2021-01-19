@@ -18,7 +18,6 @@ const colors = require('ansi-colors');
 const file = require('gulp-file');
 const fs = require('fs-extra');
 const gulp = require('gulp');
-const log = require('fancy-log');
 const {
   bootstrapThirdPartyFrames,
   compileAllJs,
@@ -43,6 +42,7 @@ const {cleanupBuildDir} = require('../compile/compile');
 const {compileCss, cssEntryPoints} = require('./css');
 const {compileJison} = require('./compile-jison');
 const {formatExtractedMessages} = require('../compile/log-messages');
+const {log} = require('../common/logging');
 const {maybeUpdatePackages} = require('./update-packages');
 const {VERSION} = require('../compile/internal-version');
 

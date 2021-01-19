@@ -23,7 +23,6 @@ const del = require('del');
 const file = require('gulp-file');
 const fs = require('fs-extra');
 const gulp = require('gulp');
-const log = require('fancy-log');
 const open = require('open');
 const path = require('path');
 const regexpSourcemaps = require('gulp-regexp-sourcemaps');
@@ -41,6 +40,7 @@ const {EventEmitter} = require('events');
 const {green, red, cyan} = require('ansi-colors');
 const {isCiBuild} = require('../common/ci');
 const {jsBundles} = require('../compile/bundles.config');
+const {log, logLocalDev} = require('../common/logging');
 const {thirdPartyFrames} = require('../test-configs/config');
 const {transpileTs} = require('../compile/typescript');
 const {watch: gulpWatch} = require('gulp');
@@ -502,15 +502,13 @@ function printConfigHelp(command) {
     cyan(argv.config === 'canary' ? 'canary' : 'prod'),
     green('AMP config.')
   );
-  if (!isCiBuild()) {
-    log(
-      green('⤷ Use'),
-      cyan('--config={canary|prod}'),
-      green('with your'),
-      cyan(command),
-      green('command to specify which config to apply.')
-    );
-  }
+  logLocalDev(
+    green('⤷ Use'),
+    cyan('--config={canary|prod}'),
+    green('with your'),
+    cyan(command),
+    green('command to specify which config to apply.')
+  );
 }
 
 /**

@@ -16,12 +16,12 @@
 'use strict';
 
 const checkDependencies = require('check-dependencies');
-const colors = require('ansi-colors');
 const del = require('del');
 const fs = require('fs-extra');
-const log = require('fancy-log');
+const {cyan, green, yellow} = require('ansi-colors');
 const {execOrDie} = require('../common/exec');
 const {isCiBuild} = require('../common/ci');
+const {log, logLocalDev} = require('../common/logging');
 
 /**
  * Writes the given contents to the patched file if updated
@@ -31,9 +31,7 @@ const {isCiBuild} = require('../common/ci');
 function writeIfUpdated(patchedName, file) {
   if (!fs.existsSync(patchedName) || fs.readFileSync(patchedName) != file) {
     fs.writeFileSync(patchedName, file);
-    if (!isCiBuild()) {
-      log(colors.green('Patched'), colors.cyan(patchedName));
-    }
+    logLocalDev(green('Patched'), cyan(patchedName));
   }
 }
 
@@ -135,9 +133,7 @@ function removeRruleSourcemap() {
   const rruleMapFile = 'node_modules/rrule/dist/es5/rrule.js.map';
   if (fs.existsSync(rruleMapFile)) {
     del.sync(rruleMapFile);
-    if (!isCiBuild()) {
-      log(colors.green('Deleted'), colors.cyan(rruleMapFile));
-    }
+    logLocalDev(green('Deleted'), cyan(rruleMapFile));
   }
 }
 
@@ -152,19 +148,19 @@ function runNpmCheck() {
   });
   if (!results.depsWereOk) {
     log(
-      colors.yellow('WARNING:'),
+      yellow('WARNING:'),
       'The packages in',
-      colors.cyan('node_modules'),
+      cyan('node_modules'),
       'do not match',
-      colors.cyan('package.json') + '.'
+      cyan('package.json') + '.'
     );
-    log('Running', colors.cyan('npm install'), 'to update packages...');
+    log('Running', cyan('npm install'), 'to update packages...');
     execOrDie('npm install');
   } else {
     log(
-      colors.green('All packages in'),
-      colors.cyan('node_modules'),
-      colors.green('are up to date.')
+      green('All packages in'),
+      cyan('node_modules'),
+      green('are up to date.')
     );
   }
 }

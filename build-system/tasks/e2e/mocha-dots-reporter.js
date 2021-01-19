@@ -15,8 +15,8 @@
  */
 'use strict';
 
-const log = require('fancy-log');
 const Mocha = require('mocha');
+const {log, logWithoutTimestamp} = require('../../common/logging');
 const {
   EVENT_RUN_BEGIN,
   EVENT_RUN_END,
@@ -63,7 +63,7 @@ class MochaDotsReporter extends Base {
       .once(EVENT_RUN_END, () => {
         Base.list(this.failures);
         const {passes, pending, failures, tests} = runner.stats;
-        console.log(
+        logWithoutTimestamp(
           `Executed ${failures + passes} of ${tests}`,
           `(Skipped ${pending})`,
           failures == 0 ? green('SUCCESS') : red(`${failures} FAILED`)

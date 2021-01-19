@@ -17,16 +17,17 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const {
+  abortTimedJob,
   printChangeSummary,
   startTimer,
   stopTimer,
-  stopTimedJob,
   timedExec,
 } = require('../pr-check/utils');
 const {determineBuildTargets} = require('../pr-check/build-targets');
 const {runNpmChecks} = require('../pr-check/npm-checks');
+const {setLoggingPrefix} = require('../common/logging');
 
-const FILENAME = 'pr-check.js';
+const jobName = 'pr-check.js';
 
 /**
  * This file runs tests against the local workspace to mimic the CI build as
@@ -34,28 +35,30 @@ const FILENAME = 'pr-check.js';
  * @param {Function} cb
  */
 async function prCheck(cb) {
+  setLoggingPrefix(jobName);
+
   const failTask = () => {
-    stopTimer(FILENAME, FILENAME, startTime);
+    stopTimer(jobName, startTime);
     const err = new Error('Local PR check failed. See logs above.');
     err.showStack = false;
     cb(err);
   };
 
   const runCheck = (cmd) => {
-    const {status} = timedExec(cmd, FILENAME);
+    const {status} = timedExec(cmd);
     if (status != 0) {
       failTask();
     }
   };
 
-  const startTime = startTimer(FILENAME, FILENAME);
-  if (!runNpmChecks(FILENAME)) {
-    stopTimedJob(FILENAME, startTime);
-    return;
+  const startTime = startTimer(jobName);
+  if (!runNpmChecks()) {
+    abortTimedJob(jobName, startTime);
+    failTask();
   }
 
-  printChangeSummary(FILENAME);
-  const buildTargets = determineBuildTargets(FILENAME);
+  printChangeSummary();
+  const buildTargets = determineBuildTargets();
   runCheck('gulp lint --local_changes');
   runCheck('gulp prettify --local_changes');
   runCheck('gulp presubmit');
@@ -123,7 +126,7 @@ async function prCheck(cb) {
     runCheck('gulp validator-webui');
   }
 
-  stopTimer(FILENAME, FILENAME, startTime);
+  stopTimer(jobName, startTime);
 }
 
 module.exports = {

@@ -16,7 +16,6 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const log = require('fancy-log');
 const requestPromise = require('request-promise');
 const {
   isPullRequestBuild,
@@ -26,6 +25,7 @@ const {
 const {ciJobUrl} = require('../common/ci');
 const {cyan, green, yellow} = require('ansi-colors');
 const {gitCommitHash} = require('../common/git');
+const {log} = require('../common/logging');
 
 const reportBaseUrl = 'https://amp-test-status-bot.appspot.com/v0/tests';
 

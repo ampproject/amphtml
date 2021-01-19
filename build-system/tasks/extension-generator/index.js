@@ -16,13 +16,13 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const colors = require('ansi-colors');
 const fs = require('fs-extra');
-const log = require('fancy-log');
 const path = require('path');
 const {
   insertExtensionBundlesConfig,
 } = require('./insert-extension-bundles-config');
+const {cyan, green, red} = require('ansi-colors');
+const {log} = require('../../common/logging');
 const {makeBentoExtension} = require('./bento');
 
 const year = new Date().getFullYear();
@@ -234,7 +234,7 @@ function getExamplesFile(name) {
 
 async function makeAmpExtension() {
   if (!argv.name) {
-    log(colors.red('Error! Please pass in the "--name" flag with a value'));
+    log(red('Error! Please pass in the "--name" flag with a value'));
   }
   const {name, version = '0.1'} = argv;
   const examplesFile = getExamplesFile(name);
@@ -293,7 +293,7 @@ async function makeExtension() {
 
   // Update bundles.config.js with an entry for the new component
   insertExtensionBundlesConfig(bundleConfig);
-  log(colors.green('SUCCESS:'), 'Wrote', colors.cyan('bundles.config.js'));
+  log(green('SUCCESS:'), 'Wrote', cyan('bundles.config.js'));
 }
 
 module.exports = {

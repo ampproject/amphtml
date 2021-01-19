@@ -19,7 +19,6 @@ const connect = require('gulp-connect');
 const debounce = require('debounce');
 const globby = require('globby');
 const header = require('connect-header');
-const log = require('fancy-log');
 const minimist = require('minimist');
 const morgan = require('morgan');
 const open = require('opn');
@@ -37,6 +36,7 @@ const {
 const {createCtrlcHandler} = require('../common/ctrlcHandler');
 const {cyan, green, red} = require('ansi-colors');
 const {logServeMode, setServeMode} = require('../server/app-utils');
+const {log} = require('../common/logging');
 const {watchDebounceDelay} = require('./helpers');
 const {watch} = require('gulp');
 
