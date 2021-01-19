@@ -50,6 +50,8 @@
   border-radius: 30px !important;
   background: var(--i-amphtml-story-dev-tools-gray-2) !important;
   overflow: hidden !important;
+  display: flex;
+  flex-direction: column;
 }
 
 amp-story-player a {
@@ -308,7 +310,14 @@ amp-story-player a {
   padding-bottom: 82px !important;
 }
 
+.i-amphtml-story-dev-tools-device[pixel3] {
+  padding-top: 50px !important;
+  padding-bottom: 50px !important;
+}
+
 .i-amphtml-story-dev-tools-device[pixel2] .i-amphtml-story-dev-tools-device-screen,
+.i-amphtml-story-dev-tools-device[pixel3] .i-amphtml-story-dev-tools-device-screen,
+.i-amphtml-story-dev-tools-device[iphone8] .i-amphtml-story-dev-tools-device-screen,
 .i-amphtml-story-dev-tools-device[oneplus5t] .i-amphtml-story-dev-tools-device-screen {
   border-radius: 5px !important;
 }
@@ -338,6 +347,10 @@ amp-story-player a {
   padding: 12px !important;
 }
 
+.i-amphtml-story-dev-tools-device[iphone8] {
+  padding: 90px 12px !important;
+}
+
 .i-amphtml-story-dev-tools-device[iphone11] .i-amphtml-story-dev-tools-device-screen,
 .i-amphtml-story-dev-tools-device[iphone11pro] .i-amphtml-story-dev-tools-device-screen {
   border-radius: 47px !important;
@@ -357,29 +370,40 @@ amp-story-player a {
   background: var(--i-amphtml-story-dev-tools-gray-1) !important;
 }
 
-.i-amphtml-story-dev-tools-device-top {
-  height: 92px;
+.i-amphtml-story-dev-tools-device[iphone8]::after {
+  content: "";
+  width: 54px;
+  height: 54px;
+  border-radius: 30px;
+  position: absolute;
+  bottom: 18px;
+  border: 2px solid var(--i-amphtml-story-dev-tools-gray-3) !important;
+  left: 168px;
+}
+
+.i-amphtml-story-dev-tools-device-statusbar {
+  flex: 1;
   width: 100%;
   position: relative;
 }
 
-.i-amphtml-story-dev-tools-device[android][browser] .i-amphtml-story-dev-tools-device-top {
+.i-amphtml-story-dev-tools-device[android][browser] .i-amphtml-story-dev-tools-device-statusbar {
   height: 77px;
 }
 
-.i-amphtml-story-dev-tools-device[browser] .i-amphtml-story-dev-tools-device-top::after {
+.i-amphtml-story-dev-tools-device[browser] .i-amphtml-story-dev-tools-device-statusbar::after {
   content: "";
   left: 20px;
   right: 20px;
   height: 30px;
-  bottom: 15px;
+  bottom: 8px;
   border-radius: 15px;
   position: absolute;
   background: #525358 !important;
 }
 
-.i-amphtml-story-dev-tools-device[native] .i-amphtml-story-dev-tools-device-top::after,
-.i-amphtml-story-dev-tools-device[native] .i-amphtml-story-dev-tools-device-top::before {
+.i-amphtml-story-dev-tools-device[native] .i-amphtml-story-dev-tools-device-statusbar::after,
+.i-amphtml-story-dev-tools-device[native] .i-amphtml-story-dev-tools-device-statusbar::before {
   content: "";
   left: 20px;
   height: 30px;
@@ -390,7 +414,7 @@ amp-story-player a {
   background: #525358 !important;
 }
 
-.i-amphtml-story-dev-tools-device[native] .i-amphtml-story-dev-tools-device-top::after {
+.i-amphtml-story-dev-tools-device[native] .i-amphtml-story-dev-tools-device-statusbar::after {
   left: auto;
   right: 20px;
 }
@@ -402,15 +426,19 @@ amp-story-player a {
   border-radius: 6px;
 }
 
-.i-amphtml-story-dev-tools-device-top {
+.i-amphtml-story-dev-tools-device-statusbar {
   display: flex;
   justify-content: space-between;
   padding: 10px 20px;
 }
 
-.i-amphtml-story-dev-tools-device[android] .i-amphtml-story-dev-tools-device-top {
+.i-amphtml-story-dev-tools-device[android] .i-amphtml-story-dev-tools-device-statusbar {
   flex-direction: row-reverse;
   justify-content: flex-start;
+}
+
+.i-amphtml-story-dev-tools-device[iphone8] .i-amphtml-story-dev-tools-device-statusbar {
+  height: 70px;
 }
 
 .i-amphtml-story-dev-tools-device[android] .i-amphtml-story-dev-tools-device-icons {
@@ -435,4 +463,88 @@ amp-story-player a {
   clip-path: polygon(100% 0, 50% 100%, 0 0);
   border-radius: 0;
   width: 14px;
+}
+
+.i-amphtml-story-dev-tools-device-navigation {
+  height: 15px;
+  position: relative;
+}
+
+.i-amphtml-story-dev-tools-device[ios][browser] .i-amphtml-story-dev-tools-device-bottombar {
+  height: 42px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.i-amphtml-story-dev-tools-device[ios][browser] .i-amphtml-story-dev-tools-device-bottombar > div {
+  background: #525358;
+  width: 30px;
+  height: 30px;
+  border-radius: 15px;
+}
+
+.i-amphtml-story-dev-tools-device[iphone8] .i-amphtml-story-dev-tools-device-navigation {
+  display: none;
+}
+
+.i-amphtml-story-dev-tools-device[ios][native] .i-amphtml-story-dev-tools-device-navigation {
+  height: 15px;
+}
+
+.i-amphtml-story-dev-tools-device[ios][browser] .i-amphtml-story-dev-tools-device-navigation {
+  height: 45px;
+}
+
+.i-amphtml-story-dev-tools-device-navigation::after {
+  content: "";
+  width: 36%;
+  height: 5px;
+  background: white;
+  border-radius: 5px;
+  position: absolute;
+  bottom: 5px;
+  left: 32%;
+}
+
+.i-amphtml-story-dev-tools-device[oneplus5t] .i-amphtml-story-dev-tools-device-navigation::after,
+.i-amphtml-story-dev-tools-device[oneplus7pro] .i-amphtml-story-dev-tools-device-navigation::after {
+  width: 26%;
+  left: 37%;
+  height: 4px;
+}
+
+.i-amphtml-story-dev-tools-device[oneplus5t] .i-amphtml-story-dev-tools-device-navigation,
+.i-amphtml-story-dev-tools-device[oneplus7pro] .i-amphtml-story-dev-tools-device-navigation {
+  background: black;
+}
+
+.i-amphtml-story-dev-tools-device[pixel2] .i-amphtml-story-dev-tools-device-navigation,
+.i-amphtml-story-dev-tools-device[pixel3] .i-amphtml-story-dev-tools-device-navigation {
+  background: black;
+  height: 48px;
+  flex: none;
+}
+
+.i-amphtml-story-dev-tools-device[pixel2] .i-amphtml-story-dev-tools-device-navigation::after,
+.i-amphtml-story-dev-tools-device[pixel3] .i-amphtml-story-dev-tools-device-navigation::after {
+  width: 8%;
+  left: 46%;
+  bottom: 0;
+  top: 0;
+  margin: auto;
+  height: 10px;
+}
+
+.i-amphtml-story-dev-tools-device[pixel2] .i-amphtml-story-dev-tools-device-navigation::before,
+.i-amphtml-story-dev-tools-device[pixel3] .i-amphtml-story-dev-tools-device-navigation::before {
+  content: "";
+  position: absolute;
+  left: 20%;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+  width: 7px;
+  height: 11px;
+  background: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M6.93996 1.60675L5.99996 0.666748L0.666626 6.00008L5.99996 11.3334L6.93996 10.3934L2.55329 6.00008" fill="white"/></svg>')
 }

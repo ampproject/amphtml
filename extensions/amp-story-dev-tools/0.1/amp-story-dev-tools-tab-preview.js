@@ -53,7 +53,7 @@ const buildDeviceTemplate = (element) => {
   return html`
     <div class="i-amphtml-story-dev-tools-device">
       <div class="i-amphtml-story-dev-tools-device-screen">
-        <div class="i-amphtml-story-dev-tools-device-top">
+        <div class="i-amphtml-story-dev-tools-device-statusbar">
           <div class="i-amphtml-story-dev-tools-device-clock"></div>
           <div class="i-amphtml-story-dev-tools-device-icons">
             <div></div>
@@ -61,9 +61,18 @@ const buildDeviceTemplate = (element) => {
             <div></div>
           </div>
         </div>
+        <div class="i-amphtml-story-dev-tools-device-appbar"></div>
         <amp-story-player width="1" height="1" layout="container">
           <a></a>
         </amp-story-player>
+        <div class="i-amphtml-story-dev-tools-device-bottombar">
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+        </div>
+        <div class="i-amphtml-story-dev-tools-device-navigation"></div>
       </div>
     </div>
   `;
@@ -253,7 +262,7 @@ const ALL_DEVICES = [
     'height': 554,
     'deviceHeight': 667,
     'deviceSpaces': 1,
-    'details': ['iphone8', 'browser', 'android'],
+    'details': ['iphone8', 'browser', 'ios'],
   },
   {
     'name': 'iPhone 8 (Native)',
@@ -314,7 +323,7 @@ const ALL_DEVICES = [
   {
     'name': 'OnePlus 7 Pro',
     'width': 412,
-    'height': 743,
+    'height': 782,
     'deviceHeight': 892,
     'deviceSpaces': 1,
     'details': ['oneplus7pro', 'browser', 'android'],
