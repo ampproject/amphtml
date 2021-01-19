@@ -74,6 +74,15 @@
       const cart = document.getElementById("shopping-cart-contents");
       const item = document.createTextNode(event.detail.playerAction);
       const item2 = document.createTextNode(event.detail.playerActionData);
+
+      const json = "{\"name\":\"vulture\", \"productId\":\"vulture-big-2\", \"color\":\"purple\", \"size\":\"Large\"}";
+      const parsedJson = JSON.parse(json);
+      const name = parsedJson["name"];
+      console.log(json);
+      console.log(parsedJson);
+      console.log(name);
+
+
       const li = document.createElement("LI");
       li.appendChild(item);
       li.appendChild(item2);
