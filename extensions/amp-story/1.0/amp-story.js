@@ -1396,9 +1396,7 @@ export class AmpStory extends AMP.BaseElement {
       'triggerPlayerAction',
       dict({
         'playerAction': this.element.getAttribute('player-action'),
-        'playerActionData': JSON.stringify(
-          this.element.getAttribute('data-player-action-data')
-        ),
+        'playerActionData': this.element.getAttribute('data-player-action-data'),
       })
     );
   }

@@ -743,9 +743,7 @@ export class ManualAdvancement extends AdvancementConfig {
         'triggerPlayerAction',
         dict({
           'playerAction': playerLink.getAttribute('player-action'),
-          'playerActionData': JSON.stringify(
-            playerLink.getAttribute('data-player-action-data')
-          ),
+          'playerActionData': playerLink.getAttribute('data-player-action-data'),
         }),
         false
       );

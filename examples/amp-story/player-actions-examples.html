@@ -72,20 +72,9 @@
     const playerEl = document.querySelector('amp-story-player');
     playerEl.addEventListener('triggerPlayerAction', (event) => {
       const cart = document.getElementById("shopping-cart-contents");
-      const item = document.createTextNode(event.detail.playerAction);
-      const item2 = document.createTextNode(event.detail.playerActionData);
-
-      const json = event.detail.playerActionData;
-      const parsedJson = JSON.parse(json);
-      const name = parsedJson["name"];
-      console.log(json);
-      console.log(parsedJson);
-      console.log(name);
-
-
+      const itemName = document.createTextNode(JSON.parse(event.detail.playerActionData).name);
       const li = document.createElement("LI");
-      li.appendChild(item);
-      li.appendChild(item2);
+      li.appendChild(itemName);
       cart.appendChild(li);
     });
   </script>
