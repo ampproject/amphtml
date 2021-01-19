@@ -25,14 +25,18 @@
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs-extra');
 const gulp = require('gulp');
-const log = require('fancy-log');
 const path = require('path');
 const prettier = require('gulp-prettier');
 const tempy = require('tempy');
+const {
+  log,
+  logLocalDev,
+  logOnSameLineLocalDev,
+  logWithoutTimestamp,
+} = require('../common/logging');
 const {exec} = require('../common/exec');
 const {getFilesToCheck, logOnSameLine} = require('../common/utils');
 const {green, cyan, red, yellow} = require('ansi-colors');
-const {isCiBuild} = require('../common/ci');
 const {maybeUpdatePackages} = require('./update-packages');
 const {prettifyGlobs} = require('../test-configs/config');
 
@@ -66,7 +70,7 @@ function prettify() {
  * @param {string} file
  */
 function printErrorWithSuggestedFixes(file) {
-  console.log('\n');
+  logWithoutTimestamp('\n');
   log(`Suggested fixes for ${cyan(file)}:`);
   const fixedFile = `${tempDir}/${file}`;
   fs.ensureDirSync(path.dirname(fixedFile));
@@ -82,14 +86,12 @@ function printErrorWithSuggestedFixes(file) {
  * @return {!Promise}
  */
 function runPrettify(filesToCheck) {
-  if (!isCiBuild()) {
-    log(green('Starting checks...'));
-  }
+  logLocalDev(green('Starting checks...'));
   return new Promise((resolve, reject) => {
     const onData = (data) => {
-      if (!isCiBuild()) {
-        logOnSameLine(green('Checked: ') + path.relative(rootDir, data.path));
-      }
+      logOnSameLineLocalDev(
+        green('Checked: ') + path.relative(rootDir, data.path)
+      );
     };
 
     const rejectWithReason = (reasonText) => {
@@ -148,9 +150,9 @@ function runPrettify(filesToCheck) {
     };
 
     const onFinish = () => {
-      if (!isCiBuild()) {
-        logOnSameLine('Checked ' + cyan(filesToCheck.length) + ' file(s)');
-      }
+      logOnSameLineLocalDev(
+        'Checked ' + cyan(filesToCheck.length) + ' file(s)'
+      );
       resolve();
     };
 
