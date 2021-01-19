@@ -169,7 +169,7 @@ export class ChildLayoutManager {
     this.inViewportObserver_ = null;
 
     /** @private {!JsonObject<string, Element>} */
-    this.underlyingAmpElementParent_ = {};
+    this.slideElementMap_ = {};
 
     /** @private {boolean} */
     this.laidOut_ = false;
@@ -268,15 +268,18 @@ export class ChildLayoutManager {
       })
       .forEach((entry) => {
         let {target} = entry;
-        // Change the flag for the parent if it's the first time
-        // the underlying AMP element is nearing viewport & unobserve.
+        // Check if the target is an AMP element--the child of a slide.
+        // If it is an AMP element, then make sure the nearing viewport 
+        // flag for the parent is on. 
+        // Then unobserve the AMP element.
+        // Otherwise, mark the slide as nearing the viewport.
         if (
           target.hasAttribute(SLIDE_ID) &&
-          this.underlyingAmpElementParent_[target.getAttribute(SLIDE_ID)] &&
+          this.slideElementMap_[target.getAttribute(SLIDE_ID)] &&
           isAmpElement(target)
         ) {
           this.nearingViewportObserver_.unobserve(target);
-          target = this.underlyingAmpElementParent_[
+          target = this.slideElementMap_[
             target.getAttribute(SLIDE_ID)
           ];
         }
@@ -416,7 +419,7 @@ export class ChildLayoutManager {
           }
           const id = child.getAttribute(SLIDE_ID);
           ampElement.setAttribute(SLIDE_ID, id);
-          this.underlyingAmpElementParent_[id] = child;
+          this.slideElementMap_[id] = child;
           // Only need to observe nearing AMP elements whose layout
           // may not have been scheduled initially (otherwise,
           // slide child will not be scheduled).
@@ -456,7 +459,7 @@ export class ChildLayoutManager {
       return;
     }
 
-    this.underlyingAmpElementParent_ = {};
+    this.slideElementMap_ = {};
     for (let i = 0; i < this.children_.length; i++) {
       this.children_[i].setAttribute(SLIDE_ID, `${i}`);
       this.owners_.setOwner(this.children_[i], this.ampElement_.element);

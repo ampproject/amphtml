@@ -386,7 +386,6 @@ describes.realWin('child layout manager', {}, (env) => {
       clm.wasLaidOut();
       await afterRenderPromise();
 
-      console.debug(observeElementSpy.args);
       expect(observeElementSpy.args.length).to.equal(5 + 2 + 3 + 3);
 
       // Expect first 3 args to be the nested amp-elements
