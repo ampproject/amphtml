@@ -29,7 +29,6 @@
 import {AmpStoryBaseLayer} from './amp-story-base-layer';
 import {StateProperty, getStoreService} from './amp-story-store-service';
 import {assertDoesNotContainDisplay, px, setStyles} from '../../../src/style';
-import {devAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {parseQueryString} from '../../../src/url';
 import {scopedQuerySelectorAll} from '../../../src/dom';
@@ -179,9 +178,11 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
   /** @private */
   initializeListeners_() {
     const aspectRatio = this.element.getAttribute('aspect-ratio');
-    const scalingFactorAttribute = this.element.getAttribute('scaling-factor');
-    if (scalingFactorAttribute) {
-      this.scalingFactor_ = parseFloat(scalingFactorAttribute);
+    const scalingFactorFloat = parseFloat(
+      this.element.getAttribute('scaling-factor')
+    );
+    if (scalingFactorFloat && scalingFactorFloat > 0) {
+      this.scalingFactor_ = scalingFactorFloat;
     }
     if (aspectRatio) {
       const aspectRatioSplits = aspectRatio.split(':');
