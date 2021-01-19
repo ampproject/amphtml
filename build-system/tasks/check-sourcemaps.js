@@ -17,10 +17,10 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs');
-const log = require('fancy-log');
 const {cyan, green, red} = require('ansi-colors');
 const {decode} = require('sourcemap-codec');
 const {execOrDie} = require('../common/exec');
+const {log} = require('../common/logging');
 
 // Compile related constants
 const distWithSourcemapsCmd = 'gulp dist --core_runtime_only --full_sourcemaps';

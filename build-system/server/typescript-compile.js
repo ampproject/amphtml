@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const log = require('fancy-log');
 const pathModule = require('path');
 const {cyan, green} = require('ansi-colors');
 const {exec} = require('../common/exec');
+const {log} = require('../common/logging');
 
 const SERVER_TRANSFORM_PATH = 'build-system/server/new-server/transforms';
 
