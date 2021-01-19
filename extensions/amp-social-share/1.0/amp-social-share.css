@@ -26,8 +26,8 @@ amp-social-share:focus {
 }
 
 amp-social-share::part(button):focus {
-  outline: none;
-  outline-offset: 0;
+  outline: none !important;
+  outline-offset: 0 !important;
 }
 
 /* Twitter Styling */
