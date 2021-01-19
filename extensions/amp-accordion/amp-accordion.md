@@ -257,6 +257,18 @@ it collapses all sections of the accordion. To specify a section, add the
 </button>
 ```
 
+### Actions in Bento Mode
+
+In Bento mode, the above actions can be called via `getApi()`. For example:
+
+```html
+<script>
+  var api = await document.querySelector('#myAccordion').getApi();
+  api.toggle();
+  api.toggle('section1');
+</script>
+```
+
 [/filter] <!-- formats="websites" -->
 
 ## Events
