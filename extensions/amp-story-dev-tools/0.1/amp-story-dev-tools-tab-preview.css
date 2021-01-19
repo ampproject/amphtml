@@ -50,7 +50,6 @@
   border-radius: 30px !important;
   background: var(--i-amphtml-story-dev-tools-gray-2) !important;
   overflow: hidden !important;
-  padding-top: 40px !important;
 }
 
 amp-story-player a {
@@ -287,4 +286,153 @@ amp-story-player a {
 
 .i-amphtml-story-dev-tools-device-dialog-help-tips .i-amphtml-story-dev-tools-device-dialog-help-hint b {
   color: var(--i-amphtml-story-dev-tools-accent-light) !important;
+}
+
+/* Device details */
+
+.i-amphtml-story-dev-tools-device[native] .i-amphtml-story-dev-tools-device-screen {
+  background: black !important;
+}
+
+.i-amphtml-story-dev-tools-device[oneplus7pro] {
+  padding: 12px 5px !important;
+}
+
+.i-amphtml-story-dev-tools-device[oneplus5t] {
+  padding-top: 45px !important;
+  padding-bottom: 45px !important;
+}
+
+.i-amphtml-story-dev-tools-device[pixel2] {
+  padding-top: 82px !important;
+  padding-bottom: 82px !important;
+}
+
+.i-amphtml-story-dev-tools-device[pixel2] .i-amphtml-story-dev-tools-device-screen,
+.i-amphtml-story-dev-tools-device[oneplus5t] .i-amphtml-story-dev-tools-device-screen {
+  border-radius: 5px !important;
+}
+
+.i-amphtml-story-dev-tools-device[pixel2]::after,
+.i-amphtml-story-dev-tools-device[pixel2]::before {
+  content: "";
+  width: 157px;
+  height: 8px;
+  border-radius: 4px;
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin: auto;
+  top: 40px;
+  background: var(--i-amphtml-story-dev-tools-gray-2) !important;
+}
+
+.i-amphtml-story-dev-tools-device[pixel2]::before {
+  top: auto;
+  bottom: 40px;
+}
+
+.i-amphtml-story-dev-tools-device[iphone11],
+.i-amphtml-story-dev-tools-device[iphone11pro] {
+  border-radius: 59px !important;
+  padding: 12px !important;
+}
+
+.i-amphtml-story-dev-tools-device[iphone11] .i-amphtml-story-dev-tools-device-screen,
+.i-amphtml-story-dev-tools-device[iphone11pro] .i-amphtml-story-dev-tools-device-screen {
+  border-radius: 47px !important;
+}
+
+.i-amphtml-story-dev-tools-device[iphone11]::after,
+.i-amphtml-story-dev-tools-device[iphone11pro]::after {
+  content: "";
+  width: 55%;
+  height: 30px;
+  border-radius: 0 0 22px 22px;
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin: auto;
+  top: 10px;
+  background: var(--i-amphtml-story-dev-tools-gray-1) !important;
+}
+
+.i-amphtml-story-dev-tools-device-top {
+  height: 92px;
+  width: 100%;
+  position: relative;
+}
+
+.i-amphtml-story-dev-tools-device[android][browser] .i-amphtml-story-dev-tools-device-top {
+  height: 77px;
+}
+
+.i-amphtml-story-dev-tools-device[browser] .i-amphtml-story-dev-tools-device-top::after {
+  content: "";
+  left: 20px;
+  right: 20px;
+  height: 30px;
+  bottom: 15px;
+  border-radius: 15px;
+  position: absolute;
+  background: #525358 !important;
+}
+
+.i-amphtml-story-dev-tools-device[native] .i-amphtml-story-dev-tools-device-top::after,
+.i-amphtml-story-dev-tools-device[native] .i-amphtml-story-dev-tools-device-top::before {
+  content: "";
+  left: 20px;
+  height: 30px;
+  width: 30px;
+  bottom: 10px;
+  border-radius: 15px;
+  position: absolute;
+  background: #525358 !important;
+}
+
+.i-amphtml-story-dev-tools-device[native] .i-amphtml-story-dev-tools-device-top::after {
+  left: auto;
+  right: 20px;
+}
+
+.i-amphtml-story-dev-tools-device-clock {
+  width: 30px;
+  height: 12px;
+  background: var(--i-amphtml-story-dev-tools-white-transparent-2);
+  border-radius: 6px;
+}
+
+.i-amphtml-story-dev-tools-device-top {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 20px;
+}
+
+.i-amphtml-story-dev-tools-device[android] .i-amphtml-story-dev-tools-device-top {
+  flex-direction: row-reverse;
+  justify-content: flex-start;
+}
+
+.i-amphtml-story-dev-tools-device[android] .i-amphtml-story-dev-tools-device-icons {
+  margin-right: 10px;
+}
+
+.i-amphtml-story-dev-tools-device-icons > div {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  background: var(--i-amphtml-story-dev-tools-white-transparent-2);
+  border-radius: 6px;
+  margin-left: 1px;
+  vertical-align: top;
+}
+
+.i-amphtml-story-dev-tools-device-icons > div:last-child {
+  border-radius: 0;
+}
+
+.i-amphtml-story-dev-tools-device-icons > div:nth-child(2) {
+  clip-path: polygon(100% 0, 50% 100%, 0 0);
+  border-radius: 0;
+  width: 14px;
 }
