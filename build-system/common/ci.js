@@ -180,7 +180,7 @@ function ciBuildUrl() {
     : isGithubActions
     ? `${env('GITHUB_SERVER_URL')}/${env('GITHUB_REPOSITORY')}/actions/runs/${env('GITHUB_RUN_ID')}` // prettier-ignore
     : isCircleci
-    ? env('CIRCLE_BUILD_URL')
+    ? `https://app.circleci.com/pipelines/workflows/${env('CIRCLE_WORKFLOW_ID')}` // prettier-ignore
     : '';
 }
 
@@ -209,7 +209,7 @@ function ciJobUrl() {
     ? // TODO(rsimha): Try to reverse engineer the GH Actions job URL from the build URL.
       `${env('GITHUB_SERVER_URL')}/${env('GITHUB_REPOSITORY')}/actions/runs/${env('GITHUB_RUN_ID')}` // prettier-ignore
     : isCircleci
-    ? env('CIRCLE_BUILD_URL') // TODO(rsimha): Test and modify if necessary.
+    ? env('CIRCLE_BUILD_URL')
     : '';
 }
 
