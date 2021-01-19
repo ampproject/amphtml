@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
+import {
+  Action,
+  StateProperty,
+} from '../../../extensions/amp-story/1.0/amp-story-store-service';
 import {CSS} from '../../../build/amp-story-panning-media-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {Layout} from '../../../src/layout';
-import {
-  StateProperty,
-  Action,
-} from '../../../extensions/amp-story/1.0/amp-story-store-service';
 import {Services} from '../../../src/services';
-import {closest} from '../../../src/dom';
+import {closest, whenUpgradedToCustomElement} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {setImportantStyles} from '../../../src/style';
-import {whenUpgradedToCustomElement} from '../../../src/dom';
 
 /** @const {string} */
 const TAG = 'AMP_STORY_PANNING_MEDIA';
@@ -98,7 +97,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     this.storeService_.subscribe(
       StateProperty.CURRENT_PAGE_ID,
       (currPageId) => {
-        this.isOnActivePage = currPageId === this.getPageId_();
+        this.isOnActivePage_ = currPageId === this.getPageId_();
         this.onPageNavigation_();
       },
       true /** callToInitialize */
@@ -112,7 +111,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
 
   /** @private */
   onPageNavigation_() {
-    if (this.isOnActivePage) {
+    if (this.isOnActivePage_) {
       // TODO(#31932): A key could be sent here to update elements of the same group.
       // Note, this will not work when there are 2 or more panning components on the same page.
       // It might need to dynamic to hold more than 1 set of positions.
