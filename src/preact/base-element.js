@@ -1033,7 +1033,7 @@ function parsePropDefs(props, propDefs, element, mediaQueryProps) {
     if (def.attr) {
       value = element.getAttribute(def.attr);
       if (def.media && value != null) {
-        value = mediaQueryProps.resolve(String(value));
+        value = mediaQueryProps.resolveListQuery(String(value));
       }
     } else if (def.parseAttrs) {
       devAssert(def.attrs);

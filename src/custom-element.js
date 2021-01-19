@@ -55,9 +55,6 @@ const UpgradeState = {
   UPGRADE_IN_PROGRESS: 4,
 };
 
-/** @const {!Array<string>} */
-const MEDIA_ATTRS = ['media', 'sizes', 'heights'];
-
 /**
  * Caches whether the template tag is supported to avoid memory allocations.
  * @type {boolean|undefined}
@@ -108,16 +105,6 @@ function createBaseCustomElementClass(win) {
    * @abstract @extends {HTMLElement}
    */
   class BaseCustomElement extends htmlElement {
-    /**
-     * Part of CE API. Enumerates the set of attributes that are notified to
-     * the element.
-     * @return {!Array<string>}
-     * @final
-     */
-    static get observedAttributes() {
-      return MEDIA_ATTRS;
-    }
-
     /** */
     constructor() {
       super();
@@ -600,18 +587,6 @@ function createBaseCustomElementClass(win) {
       }
     }
 
-    /**
-     * Part of CE API. Called when a subscribed attribute has changed. See
-     * `observedAttributes` for the set of attributes.
-     * @param {string} name
-     * @final
-     */
-    attributeChangedCallback(name) {
-      if (this.isConnected_ && MEDIA_ATTRS.includes(name)) {
-        this.initMediaAttrs_();
-      }
-    }
-
     /** @private */
     initMediaAttrs_() {
       const hasMediaAttrs =
@@ -625,11 +600,11 @@ function createBaseCustomElementClass(win) {
           this.mediaQueryProps_ = new MediaQueryProps(win, () =>
             this.applyMediaAttrs_()
           );
+          this.applyMediaAttrs_();
         } else {
           this.disposeMediaAttrs_();
         }
       }
-      this.applyMediaAttrs_();
     }
 
     /** @private */
@@ -644,8 +619,6 @@ function createBaseCustomElementClass(win) {
     applyMediaAttrs_() {
       const props = this.mediaQueryProps_;
       if (!props) {
-        // The "media" attribute is the only attribute we can undo.
-        this.classList.toggle('i-amphtml-hidden-by-media-query', false);
         return;
       }
 
@@ -654,7 +627,7 @@ function createBaseCustomElementClass(win) {
       // Media query.
       const mediaAttr = this.getAttribute('media') || null;
       const matchesMedia = mediaAttr
-        ? props.resolve(`${mediaAttr} 1, 0`) === '1'
+        ? props.resolveMatchQuery(mediaAttr)
         : true;
       this.classList.toggle('i-amphtml-hidden-by-media-query', !matchesMedia);
 
@@ -663,7 +636,7 @@ function createBaseCustomElementClass(win) {
         ? null
         : this.getAttribute('sizes');
       if (sizesAttr) {
-        setStyle(this, 'width', props.resolve(sizesAttr));
+        setStyle(this, 'width', props.resolveListQuery(sizesAttr));
       }
 
       // Heights.
@@ -674,7 +647,7 @@ function createBaseCustomElementClass(win) {
       if (heightsAttr) {
         const sizer = this.getSizer_();
         if (sizer) {
-          setStyle(sizer, 'paddingTop', props.resolve(heightsAttr));
+          setStyle(sizer, 'paddingTop', props.resolveListQuery(heightsAttr));
         }
       }
 
