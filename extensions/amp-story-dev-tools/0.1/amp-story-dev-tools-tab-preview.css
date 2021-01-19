@@ -347,6 +347,12 @@ amp-story-player a {
   padding: 12px !important;
 }
 
+.i-amphtml-story-dev-tools-device[iphone11],
+.i-amphtml-story-dev-tools-device[iphone11pro] {
+  border-radius: 59px !important;
+  padding: 12px !important;
+}
+
 .i-amphtml-story-dev-tools-device[iphone8] {
   padding: 90px 12px !important;
 }
@@ -391,7 +397,12 @@ amp-story-player a {
   height: 77px;
 }
 
-.i-amphtml-story-dev-tools-device[browser] .i-amphtml-story-dev-tools-device-statusbar::after {
+.i-amphtml-story-dev-tools-device-appbar {
+  height: 48px;
+  position: relative;
+}
+
+.i-amphtml-story-dev-tools-device[browser] .i-amphtml-story-dev-tools-device-appbar::after {
   content: "";
   left: 20px;
   right: 20px;
@@ -402,8 +413,8 @@ amp-story-player a {
   background: #525358 !important;
 }
 
-.i-amphtml-story-dev-tools-device[native] .i-amphtml-story-dev-tools-device-statusbar::after,
-.i-amphtml-story-dev-tools-device[native] .i-amphtml-story-dev-tools-device-statusbar::before {
+.i-amphtml-story-dev-tools-device[native] .i-amphtml-story-dev-tools-device-appbar::after,
+.i-amphtml-story-dev-tools-device[native] .i-amphtml-story-dev-tools-device-appbar::before {
   content: "";
   left: 20px;
   height: 30px;
@@ -439,6 +450,10 @@ amp-story-player a {
 
 .i-amphtml-story-dev-tools-device[iphone8] .i-amphtml-story-dev-tools-device-statusbar {
   height: 70px;
+}
+
+.i-amphtml-story-dev-tools-device[desktop] .i-amphtml-story-dev-tools-device-statusbar {
+  display: none;
 }
 
 .i-amphtml-story-dev-tools-device[android] .i-amphtml-story-dev-tools-device-icons {
@@ -484,7 +499,10 @@ amp-story-player a {
   border-radius: 15px;
 }
 
-.i-amphtml-story-dev-tools-device[iphone8] .i-amphtml-story-dev-tools-device-navigation {
+.i-amphtml-story-dev-tools-device[iphone8] .i-amphtml-story-dev-tools-device-navigation,
+.i-amphtml-story-dev-tools-device[ipad] .i-amphtml-story-dev-tools-device-navigation,
+.i-amphtml-story-dev-tools-device[desktop] .i-amphtml-story-dev-tools-device-navigation,
+.i-amphtml-story-dev-tools-device[ios][browser][ipad] .i-amphtml-story-dev-tools-device-bottombar {
   display: none;
 }
 

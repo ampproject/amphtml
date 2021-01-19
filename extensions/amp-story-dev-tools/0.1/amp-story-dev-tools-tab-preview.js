@@ -331,7 +331,7 @@ const ALL_DEVICES = [
   {
     'name': 'Desktop 1080p',
     'width': 1920,
-    'height': 1080,
+    'height': 1038,
     'deviceHeight': 1080,
     'deviceSpaces': 2,
     'details': ['desktop1080', 'browser', 'desktop'],
