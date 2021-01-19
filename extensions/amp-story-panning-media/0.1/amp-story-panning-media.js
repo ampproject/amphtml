@@ -24,7 +24,7 @@ import {
 import {Services} from '../../../src/services';
 import {closest} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
-import {setImportantStyles, setStyles} from '../../../src/style';
+import {setImportantStyles} from '../../../src/style';
 import {whenUpgradedToCustomElement} from '../../../src/dom';
 
 /** @const {string} */
@@ -85,7 +85,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
         imgEl.classList = '';
         // Centers the amp-img horizontally. The image does not load if this is done in CSS.
         // TODO(#31515): Handle base zoom of aspect ratio wider than image
-        setStyles(this.ampImgEl_, {
+        setImportantStyles(this.ampImgEl_, {
           left: 'auto',
           right: 'auto',
         });
