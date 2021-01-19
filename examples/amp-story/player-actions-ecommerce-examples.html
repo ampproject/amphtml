@@ -103,9 +103,13 @@
     <div id="myModal" class="modal">
       <div class="modal-content">
         <span class="close">&times;</span>
-        <h1>My Shopping Cart</h1>
-        <div> Your cart currently contains the following items:</div>
+        <div>You may also be interested in:</div>
+        <p id="suggested-items"></p>
+        <div>Your cart currently contains the following items:</div>
         <p id="shopping-cart-contents"></p>
+        <a href="./player-actions-checkout.html">
+          <button>Go to Checkout</button>
+        </a> 
       </div>
     </div>
   </body>
@@ -126,11 +130,24 @@
     const playerEl = document.querySelector('amp-story-player');
     playerEl.addEventListener('triggerPlayerAction', (event) => {
       modal.style.display = "block";
+
       const cart = document.getElementById("shopping-cart-contents");
       const itemName = document.createTextNode(JSON.parse(event.detail.playerActionData).name);
       const li = document.createElement("LI");
       li.appendChild(itemName);
       cart.appendChild(li);
-    });
+
+      const suggestedItems = document.getElementById("suggested-items");
+      while (suggestedItems.hasChildNodes()) {
+        suggestedItems.removeChild(suggestedItems.lastChild);
+      }
+      const suggestedItemsArray = JSON.parse(event.detail.playerActionData).similar;
+      suggestedItemsArray.forEach(element => {
+        const suggestedItemName = document.createTextNode(element);
+        const li2 = document.createElement("LI");
+        li2.appendChild(suggestedItemName);
+        suggestedItems.appendChild(li2);
+      });
+    }); 
   </script>
 </html>
