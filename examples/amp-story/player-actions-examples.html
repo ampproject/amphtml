@@ -75,7 +75,7 @@
       const item = document.createTextNode(event.detail.playerAction);
       const item2 = document.createTextNode(event.detail.playerActionData);
 
-      const json = "{\"name\":\"vulture\", \"productId\":\"vulture-big-2\", \"color\":\"purple\", \"size\":\"Large\"}";
+      const json = event.detail.playerActionData;
       const parsedJson = JSON.parse(json);
       const name = parsedJson["name"];
       console.log(json);
