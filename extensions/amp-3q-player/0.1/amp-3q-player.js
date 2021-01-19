@@ -17,6 +17,7 @@
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
+import {addParamToUrl} from '../../../src/url';
 import {
   createFrameFor,
   objOrParseJson,
@@ -86,15 +87,38 @@ class Amp3QPlayer extends AMP.BaseElement {
     Services.videoManagerForDoc(el).register(this);
   }
 
+  /** @private */
+  generateIframeSrc_() {
+    const explicitParamsAttributes = ['key', 'timestamp', 'controls'];
+
+    let iframeSrc = 'https://playout.3qsdn.com/';
+    if (this.element.getAttribute(`data-datasource`)) {
+      iframeSrc +=
+        'config_by_metadata/' +
+        this.element.getAttribute(`data-project`) +
+        '/' +
+        this.element.getAttribute(`data-datafield`) +
+        '/';
+    }
+
+    iframeSrc +=
+      dev().assertString(this.dataId) +
+      // Autoplay is handled by VideoManager
+      '?autoplay=false&amp=true';
+
+    explicitParamsAttributes.forEach((explicitParam) => {
+      const val = this.element.getAttribute(`data-${explicitParam}`);
+      if (val) {
+        iframeSrc = addParamToUrl(iframeSrc, explicitParam, val);
+      }
+    });
+
+    return encodeURIComponent(iframeSrc);
+  }
+
   /** @override */
   layoutCallback() {
-    const iframe = createFrameFor(
-      this,
-      'https://playout.3qsdn.com/' +
-        encodeURIComponent(dev().assertString(this.dataId)) +
-        // Autoplay is handled by VideoManager
-        '?autoplay=false&amp=true'
-    );
+    const iframe = createFrameFor(this, this.generateIframeSrc_());
 
     this.iframe_ = iframe;
 
