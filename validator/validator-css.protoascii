@@ -607,7 +607,7 @@ css {
   spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#stylesheets"
 
   max_bytes: 112500
-  max_bytes_per_inline_style: 1000
+  max_bytes_per_inline_style: 1500
   max_bytes_spec_url:
   "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size"
   url_bytes_included: false
