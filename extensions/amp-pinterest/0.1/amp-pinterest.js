@@ -93,8 +93,9 @@ class AmpPinterest extends AMP.BaseElement {
   firstLayoutCompleted() {
     if (this.element.firstElementChild) {
       this.attemptChangeHeight(
-        this.element.firstElementChild.getBoundingClientRect() /* REVIEW */
-          .height
+        this.element.firstElementChild
+          .getBoundingClientRect /* REVIEW */
+          ().height
       );
     }
   }
