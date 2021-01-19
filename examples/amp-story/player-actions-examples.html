@@ -46,12 +46,48 @@
           width: 360px;
           height: 600px;
       }
+
+      /* The Modal (background) */
+      .modal {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        z-index: 1; /* Sit on top */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgb(0,0,0); /* Fallback color */
+        background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+      }
+
+      /* Modal Content/Box */
+      .modal-content {
+        background-color: #fefefe;
+        margin: 15% auto; /* 15% from the top and centered */
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%; /* Could be more or less, depending on screen size */
+      }
+
+      /* The Close Button */
+      .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+      }
+
+      .close:hover,
+      .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+      }
     </style>
     <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   </head>
   <body>
-    <h1>This is a Non-AMP webpage that displays Stories containing Player Actions.</h1>
-    <div class="subtitle">For more info on player actions, see go/amp-story-player-actions.</div>
     <amp-story-player>
         <a href="./shop-for-pets.html"
             data-poster-portrait-src="/examples/visual-tests/amp-story/img/overview.jpg"
@@ -64,13 +100,32 @@
           <span class="title">Shop for stuff</span>
         </a>
     </amp-story-player>
-    <h1>My Shopping Cart</h1>
-    <div> Your cart currently contains the following items:</div>
-    <p id="shopping-cart-contents"></p>
+    <div id="myModal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h1>My Shopping Cart</h1>
+        <div> Your cart currently contains the following items:</div>
+        <p id="shopping-cart-contents"></p>
+      </div>
+    </div>
   </body>
   <script type="text/javascript">
+    var modal = document.getElementById("myModal");
+    var span = document.getElementsByClassName("close")[0];
+    
+    span.onclick = function() {
+      modal.style.display = "none";
+    }
+
+    window.onclick = function(event) {
+      if (event.target == modal) {
+        modal.style.display = "none";
+      }
+    }
+
     const playerEl = document.querySelector('amp-story-player');
     playerEl.addEventListener('triggerPlayerAction', (event) => {
+      modal.style.display = "block";
       const cart = document.getElementById("shopping-cart-contents");
       const itemName = document.createTextNode(JSON.parse(event.detail.playerActionData).name);
       const li = document.createElement("LI");
