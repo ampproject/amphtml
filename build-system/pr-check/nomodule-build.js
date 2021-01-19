@@ -25,13 +25,13 @@ const colors = require('ansi-colors');
 const log = require('fancy-log');
 const {
   printChangeSummary,
-  processAndUploadDistOutput,
+  processAndUploadNomoduleOutput,
   startTimer,
   stopTimer,
   stopTimedJob,
   timedExecWithError,
   timedExecOrDie: timedExecOrDieBase,
-  uploadDistOutput,
+  uploadNomoduleOutput,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isPullRequestBuild} = require('../common/ci');
@@ -52,7 +52,7 @@ async function main() {
   if (!isPullRequestBuild()) {
     timedExecOrDie('gulp update-packages');
     timedExecOrDie('gulp dist --fortesting');
-    uploadDistOutput(FILENAME);
+    uploadNomoduleOutput(FILENAME);
   } else {
     printChangeSummary(FILENAME);
     const buildTargets = determineBuildTargets(FILENAME);
@@ -65,7 +65,6 @@ async function main() {
       buildTargets.has('UNIT_TEST')
     ) {
       timedExecOrDie('gulp update-packages');
-
       const process = timedExecWithError('gulp dist --fortesting', FILENAME);
       if (process.status !== 0) {
         const error = process.error || new Error('unknown error, check logs');
@@ -74,13 +73,11 @@ async function main() {
         stopTimedJob(FILENAME, startTime);
         return;
       }
-
       timedExecOrDie('gulp storybook --build');
-      await processAndUploadDistOutput(FILENAME);
+      await processAndUploadNomoduleOutput(FILENAME);
     } else {
       await signalDistUpload('skipped');
-
-      log(
+      console.log(
         `${FILELOGPREFIX} Skipping`,
         colors.cyan('Nomodule Build'),
         'because this commit does not affect the runtime, flag configs,',

@@ -14,7 +14,14 @@
  * limitations under the License.
  */
 import * as Preact from '../../../src/preact';
-import {Alignment, Axis, Orientation} from './dimensions';
+import {
+  Alignment,
+  Axis,
+  Orientation,
+  getDimension,
+  getOffsetPosition,
+  getScrollEnd,
+} from './dimensions';
 import {Arrow} from './arrow';
 import {CarouselContext} from './carousel-context';
 import {ContainWrapper} from '../../../src/preact/component';
@@ -22,6 +29,7 @@ import {Scroller} from './scroller';
 import {WithAmpContext} from '../../../src/preact/context';
 import {forwardRef} from '../../../src/preact/compat';
 import {isRTL} from '../../../src/dom';
+import {mod} from '../../../src/utils/math';
 import {
   toChildArray,
   useCallback,
@@ -115,6 +123,7 @@ function BaseCarouselWithRef(
     ? setCurrentSlideState
     : setGlobalCurrentSlide;
   const currentSlideRef = useRef(currentSlide);
+  const axis = orientation == Orientation.HORIZONTAL ? Axis.X : Axis.Y;
 
   useLayoutEffect(() => {
     // noop if !_thumbnails || !carouselContext.
@@ -198,8 +207,12 @@ function BaseCarouselWithRef(
           interaction.current = Interaction.GENERIC;
           prev();
         },
-        root: containRef.current,
-        node: contentRef.current,
+        get root() {
+          return containRef.current;
+        },
+        get node() {
+          return contentRef.current;
+        },
       }),
     [next, prev, setRestingIndex]
   );
@@ -224,6 +237,26 @@ function BaseCarouselWithRef(
     if (currentSlide + visibleCount + dir > length) {
       // Can no longer advance forwards.
       return true;
+    }
+    if (mixedLength && dir > 0) {
+      // Measure container to see if we have reached the end.
+      if (!scrollRef.current) {
+        return false;
+      }
+      const container = scrollRef.current.node;
+      if (!container || !container.children.length) {
+        return false;
+      }
+      const scrollEnd = getScrollEnd(axis, container);
+      const scrollStart = getOffsetPosition(
+        axis,
+        container.children[currentSlide]
+      );
+      const {length} = getDimension(axis, container);
+      if (length !== scrollEnd && length + scrollStart >= scrollEnd) {
+        // Can no longer scroll forwards.
+        return true;
+      }
     }
     return false;
   };
@@ -297,7 +330,7 @@ function BaseCarouselWithRef(
         advanceCount={advanceCount}
         alignment={snapAlign}
         autoAdvanceCount={autoAdvanceCount}
-        axis={orientation == Orientation.HORIZONTAL ? Axis.X : Axis.Y}
+        axis={axis}
         loop={loop}
         mixedLength={mixedLength}
         restingIndex={currentSlide}
@@ -321,7 +354,12 @@ function BaseCarouselWithRef(
           and next viewport.
         */}
         {childrenArray.map((child, index) =>
-          Math.abs(index - currentSlide) < visibleCount * 3 || mixedLength ? (
+          Math.min(
+            // Distance from currentSlide.
+            Math.abs(index - currentSlide),
+            // Account for wraparound when looping.
+            loop ? mod(length + currentSlide - index, length) : length
+          ) < Math.ceil(visibleCount * 3) || mixedLength ? (
             <WithAmpContext
               key={index}
               renderable={index == currentSlide}

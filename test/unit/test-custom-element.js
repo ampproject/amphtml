@@ -49,6 +49,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
       let testElementResumeCallback;
       let testElementAttachedCallback;
       let testElementDetachedCallback;
+      let testOnLayoutMeasureCallback;
 
       class TestElement extends BaseElement {
         isLayoutSupported(unusedLayout) {
@@ -89,6 +90,9 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         }
         detachedCallback() {
           testElementDetachedCallback();
+        }
+        onLayoutMeasure() {
+          testOnLayoutMeasureCallback();
         }
       }
 
@@ -134,6 +138,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         testElementResumeCallback = env.sandbox.spy();
         testElementAttachedCallback = env.sandbox.spy();
         testElementDetachedCallback = env.sandbox.spy();
+        testOnLayoutMeasureCallback = env.sandbox.spy();
       });
 
       afterEach(() => {
@@ -321,10 +326,15 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
       it('Element - updateLayoutBox', () => {
         const element = new ElementClass();
         container.appendChild(element);
-        expect(element.getLayoutWidth()).to.equal(-1);
+        expect(element.getLayoutSize()).to.deep.equal({width: 0, height: 0});
 
-        element.updateLayoutBox({top: 0, left: 0, width: 111, height: 51});
-        expect(element.getLayoutWidth()).to.equal(111);
+        const rect = {top: 0, left: 0, width: 111, height: 51};
+        element.updateLayoutBox(rect);
+        expect(testOnLayoutMeasureCallback).to.not.be.called;
+
+        env.sandbox.stub(element, 'isBuilt').returns(true);
+        element.updateLayoutBox(rect);
+        expect(testOnLayoutMeasureCallback).to.be.calledOnce;
       });
 
       it('should tolerate errors in onLayoutMeasure', () => {
@@ -342,53 +352,11 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         return element.buildingPromise_.then(() => {
           allowConsoleError(() => {
             element.updateLayoutBox({top: 0, left: 0, width: 111, height: 51});
-            expect(element.getLayoutWidth()).to.equal(111);
+            expect(element.getLayoutSize()).to.be.ok;
             expect(errorStub).to.be.calledWith(AmpEvents.ERROR, 'intentional');
           });
         });
       });
-
-      it(
-        'should not call onMeasureChanged callback when element dimensions ' +
-          'have not changed',
-        () => {
-          const element = new ElementClass();
-          const onMeasureChangeStub = env.sandbox.stub(
-            element.implementation_,
-            'onMeasureChanged'
-          );
-          container.appendChild(element);
-          return element.buildingPromise_.then(() => {
-            element.updateLayoutBox(
-              {top: 0, left: 0, width: 111, height: 51},
-              /* opt_hasMeasurementsChanged */ false
-            );
-            expect(element.getLayoutWidth()).to.equal(111);
-            expect(onMeasureChangeStub).to.have.not.been.called;
-          });
-        }
-      );
-
-      it(
-        'should call onMeasureChanged callback when element dimensions ' +
-          'have changed',
-        () => {
-          const element = new ElementClass();
-          const onMeasureChangeStub = env.sandbox.stub(
-            element.implementation_,
-            'onMeasureChanged'
-          );
-          container.appendChild(element);
-          return element.buildingPromise_.then(() => {
-            element.updateLayoutBox(
-              {top: 0, left: 0, width: 111, height: 51},
-              /* opt_hasMeasurementsChanged */ true
-            );
-            expect(element.getLayoutWidth()).to.equal(111);
-            expect(onMeasureChangeStub).to.have.been.called;
-          });
-        }
-      );
 
       it('StubElement - upgrade after attached', () => {
         const element = new StubElementClass();

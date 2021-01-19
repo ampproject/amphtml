@@ -23,6 +23,10 @@ import {
 import {closest} from '../../../src/dom';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {htmlFor} from '../../../src/static-template';
+import {
+  observeContentSize,
+  unobserveContentSize,
+} from '../../../src/utils/size-observer';
 import {setStyles} from '../../../src/style';
 
 /**
@@ -372,6 +376,8 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
 
     /** @private {!Element} container for the device previews */
     this.devicesContainer_ = null;
+
+    this.onResize_ = this.onResize_.bind(this);
   }
 
   /** @override */
@@ -406,6 +412,12 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     this.element.addEventListener('click', (e) => this.handleTap_(e.target));
+    observeContentSize(this.element, this.onResize_);
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    unobserveContentSize(this.element, this.onResize_);
   }
 
   /**
@@ -613,8 +625,8 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
    * @private
    * */
   repositionDevices_() {
-    const layoutBox = this.getLayoutBox();
-    layoutBox.width *= 0.8; // To account for 10% horizontal padding.
+    const {width: layoutWidth, height} = this.getLayoutSize();
+    const width = layoutWidth * 0.8; // To account for 10% horizontal padding.
     let sumDeviceWidths = 0;
     let maxDeviceHeights = 0;
     // Find the sum of the device widths and max of heights since they are horizontally laid out.
@@ -627,11 +639,11 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
     });
     // Find the scale that covers up to 90% of width or 80% of height.
     const scale = Math.min(
-      (layoutBox.width / sumDeviceWidths) * 0.9,
-      (layoutBox.height / maxDeviceHeights) * 0.8
+      (width / sumDeviceWidths) * 0.9,
+      (height / maxDeviceHeights) * 0.8
     );
     const paddingSize =
-      (layoutBox.width - sumDeviceWidths * scale) / (this.devices_.length + 1);
+      (width - sumDeviceWidths * scale) / (this.devices_.length + 1);
     let cumWidthSum = paddingSize;
     this.mutateElement(() => {
       this.devices_.forEach((deviceSpecs) => {
@@ -647,8 +659,8 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
     });
   }
 
-  /** @override */
-  onMeasureChanged() {
+  /** @private */
+  onResize_() {
     this.repositionDevices_();
   }
 

@@ -16,7 +16,6 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const log = require('fancy-log');
 const requestPromise = require('request-promise');
 const {
   isPullRequestBuild,
@@ -26,6 +25,7 @@ const {
 const {ciJobUrl} = require('../common/ci');
 const {cyan, green, yellow} = require('ansi-colors');
 const {gitCommitHash} = require('../common/git');
+const {log} = require('../common/logging');
 
 const reportBaseUrl = 'https://amp-test-status-bot.appspot.com/v0/tests';
 
@@ -40,9 +40,9 @@ const TEST_TYPE_SUBTYPES = isGithubActionsBuild()
     ])
   : isTravisBuild()
   ? new Map([
-      ['integration', ['unminified', 'minified', 'esm']],
+      ['integration', ['unminified', 'nomodule', 'module']],
       ['unit', ['unminified', 'local-changes']],
-      ['e2e', ['minified']],
+      ['e2e', ['nomodule']],
     ])
   : new Map([]);
 const TEST_TYPE_BUILD_TARGETS = new Map([
@@ -68,7 +68,7 @@ function inferTestType() {
   const subtype = argv.local_changes
     ? 'local-changes'
     : argv.esm
-    ? 'esm'
+    ? 'module'
     : argv.firefox
     ? 'firefox'
     : argv.safari
@@ -78,7 +78,7 @@ function inferTestType() {
     : argv.ie
     ? 'ie'
     : argv.compiled
-    ? 'minified'
+    ? 'nomodule'
     : 'unminified';
 
   return `${type}/${subtype}`;

@@ -169,7 +169,7 @@ const buildErrorMessageElement = (element) =>
  */
 const buildOpenAttachmentElement = (element) =>
   htmlFor(element)`
-      <div class="
+      <a class="
           i-amphtml-story-page-open-attachment i-amphtml-story-system-reset"
           role="button">
         <span class="i-amphtml-story-page-open-attachment-icon">
@@ -177,7 +177,7 @@ const buildOpenAttachmentElement = (element) =>
           <span class="i-amphtml-story-page-open-attachment-bar-right"></span>
         </span>
         <span class="i-amphtml-story-page-open-attachment-label"></span>
-      </div>`;
+      </a>`;
 
 /**
  * amp-story-page states.
@@ -293,7 +293,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private {?Element} */
     this.cssVariablesStyleEl_ = null;
 
-    /** @private {?../../../src/layout-rect.LayoutRectDef} */
+    /** @private {?../../../src/layout-rect.LayoutSizeDef} */
     this.layoutBox_ = null;
 
     /** @private {!Array<function()>} */
@@ -535,10 +535,12 @@ export class AmpStoryPage extends AMP.BaseElement {
         this.preloadAllMedia_().then(() => {
           this.startMeasuringAllVideoPerformance_();
           this.startListeningToVideoEvents_();
-          this.playAllMedia_();
-          if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
-            this.unmuteAllMedia();
-          }
+          // iOS 14.2 and 14.3 requires play to be called before unmute
+          this.playAllMedia_().then(() => {
+            if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
+              this.unmuteAllMedia();
+            }
+          });
         });
       });
       this.prefersReducedMotion_()
@@ -577,7 +579,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   // equality checks.
   /** @override */
   onLayoutMeasure() {
-    const layoutBox = this.getLayoutBox();
+    const layoutBox = this.getLayoutSize();
     // Only measures from the first story page, that always gets built because
     // of the prerendering optimizations in place.
     if (
@@ -1740,6 +1742,11 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     if (!this.openAttachmentEl_) {
       this.openAttachmentEl_ = buildOpenAttachmentElement(this.element);
+      // If the attachment is a link, copy href to the element so it can be previewed on hover and long press.
+      const attachmentHref = attachmentEl.getAttribute('href');
+      if (attachmentHref) {
+        this.openAttachmentEl_.setAttribute('href', attachmentHref);
+      }
       this.openAttachmentEl_.addEventListener('click', () =>
         this.openAttachment()
       );

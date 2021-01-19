@@ -18,18 +18,17 @@
 /**
  * @fileoverview
  * This script builds the AMP runtime.
- * This is run during the CI stage = build; job = Unminified Build.
+ * This is run during the CI stage = build; job = unminified build.
  */
 
 const colors = require('ansi-colors');
-const log = require('fancy-log');
 const {
   printChangeSummary,
   startTimer,
   stopTimer,
   stopTimedJob,
   timedExecOrDie: timedExecOrDieBase,
-  uploadBuildOutput,
+  uploadUnminifiedOutput,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isPullRequestBuild} = require('../common/ci');
@@ -49,7 +48,7 @@ function main() {
   if (!isPullRequestBuild()) {
     timedExecOrDie('gulp update-packages');
     timedExecOrDie('gulp build --fortesting');
-    uploadBuildOutput(FILENAME);
+    uploadUnminifiedOutput(FILENAME);
   } else {
     printChangeSummary(FILENAME);
     const buildTargets = determineBuildTargets(FILENAME);
@@ -61,9 +60,9 @@ function main() {
     ) {
       timedExecOrDie('gulp update-packages');
       timedExecOrDie('gulp build --fortesting');
-      uploadBuildOutput(FILENAME);
+      uploadUnminifiedOutput(FILENAME);
     } else {
-      log(
+      console.log(
         `${FILELOGPREFIX} Skipping`,
         colors.cyan('Unminified Build'),
         'because this commit does not affect the runtime, flag configs,',

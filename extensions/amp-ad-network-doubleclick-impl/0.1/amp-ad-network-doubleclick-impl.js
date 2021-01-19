@@ -64,6 +64,7 @@ import {
   RefreshManager, // eslint-disable-line no-unused-vars
   getRefreshManager,
 } from '../../amp-a4a/0.1/refresh-manager';
+import {STICKY_AD_TRANSITION_EXP} from '../../../src/experiments/sticky-ad-transition-exp';
 import {SafeframeHostApi} from './safeframe-host';
 import {Services} from '../../../src/services';
 import {
@@ -106,6 +107,7 @@ import {
 } from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
+
 import {getOrCreateAdCid} from '../../../src/ad-cid';
 
 import {getPageLayoutBoxBlocking} from '../../../src/utils/page-layout-box';
@@ -147,15 +149,6 @@ const ZINDEX_EXP = 'zIndexExp';
 const ZINDEX_EXP_BRANCHES = {
   NO_ZINDEX: '21065356',
   HOLDBACK: '21065357',
-};
-
-/** @const {string} */
-const PTT_EXP = 'doubleclick-ptt-exp';
-
-/** @const @enum{string} */
-const PTT_EXP_BRANCHES = {
-  CONTROL: '21068093',
-  EXPERIMENT: '21068094',
 };
 
 /** @const {string} */
@@ -483,11 +476,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         branches: Object.values(ZINDEX_EXP_BRANCHES),
       },
       {
-        experimentId: PTT_EXP,
-        isTrafficEligible: () => true,
-        branches: Object.values(PTT_EXP_BRANCHES),
-      },
-      {
         experimentId: IDLE_CWV_EXP,
         isTrafficEligible: () => {
           return (
@@ -496,6 +484,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           );
         },
         branches: Object.values(IDLE_CWV_EXP_BRANCHES),
+      },
+      {
+        experimentId: STICKY_AD_TRANSITION_EXP.id,
+        isTrafficEligible: () => true,
+        branches: [
+          STICKY_AD_TRANSITION_EXP.control,
+          STICKY_AD_TRANSITION_EXP.experiment,
+        ],
       },
     ]);
     const setExps = this.randomlySelectUnsetExperiments_(experimentInfoList);
@@ -643,9 +639,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const {consentString, gdprApplies} = consentTuple;
 
     return {
-      'ptt': this.experimentIds.includes(PTT_EXP_BRANCHES.EXPERIMENT)
-        ? 13
-        : null,
+      'ptt': 13,
       'npa':
         consentTuple.consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
         consentTuple.consentState == CONSENT_POLICY_STATE.UNKNOWN ||

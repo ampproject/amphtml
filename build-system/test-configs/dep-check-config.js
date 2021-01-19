@@ -82,6 +82,7 @@ exports.rules = [
       'extensions/amp-list/**->third_party/set-dom/set-dom.js',
       'extensions/amp-mustache/**/amp-mustache.js->third_party/mustache/mustache.js',
       'extensions/amp-recaptcha-input/**/*.js->third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm.js',
+      'extensions/amp-resize-observer-polyfill/**/*.js->third_party/resize-observer-polyfill/ResizeObserver.install.js',
       'extensions/amp-story-360/0.1/amp-story-360.js->third_party/zuho/zuho.js',
       'extensions/amp-subscriptions-google/**/*.js->third_party/subscriptions-project/swg.js',
       'extensions/amp-subscriptions/**/*.js->third_party/subscriptions-project/aes_gcm.js',
@@ -426,6 +427,7 @@ exports.rules = [
       'src/polyfills/fetch.js->src/utils/object.js',
       'src/polyfills/fetch.js->src/utils/bytes.js',
       'src/polyfills/intersection-observer.js->src/polyfillstub/intersection-observer-stub.js',
+      'src/polyfills/resize-observer.js->src/polyfillstub/resize-observer-stub.js',
       'src/polyfills/promise.js->node_modules/promise-pjs/promise.js',
       'src/polyfills/custom-elements.js->src/resolved-promise.js',
     ],
@@ -436,6 +438,8 @@ exports.rules = [
     allowlist: [
       'src/polyfillstub/intersection-observer-stub.js->src/services.js',
       'src/polyfillstub/intersection-observer-stub.js->src/resolved-promise.js',
+      'src/polyfillstub/resize-observer-stub.js->src/services.js',
+      'src/polyfillstub/resize-observer-stub.js->src/resolved-promise.js',
     ],
   },
   {
@@ -460,6 +464,7 @@ exports.rules = [
       'src/polyfills.js->src/polyfills/string-starts-with.js',
       'src/polyfills.js->src/polyfills/custom-elements.js',
       'src/polyfills.js->src/polyfills/intersection-observer.js',
+      'src/polyfills.js->src/polyfills/resize-observer.js',
       'src/polyfills.js->src/polyfills/map-set.js',
       'src/polyfills.js->src/polyfills/set-add.js',
       'src/polyfills.js->src/polyfills/weakmap-set.js',
@@ -467,6 +472,7 @@ exports.rules = [
       'src/friendly-iframe-embed.js->src/polyfills/document-contains.js',
       'src/friendly-iframe-embed.js->src/polyfills/domtokenlist.js',
       'src/friendly-iframe-embed.js->src/polyfills/intersection-observer.js',
+      'src/friendly-iframe-embed.js->src/polyfills/resize-observer.js',
     ],
   },
   {

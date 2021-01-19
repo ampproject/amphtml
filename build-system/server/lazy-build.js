@@ -139,7 +139,7 @@ async function preBuildRuntimeFiles() {
  * Pre-builds default extensions and ones requested via command line flags.
  */
 async function preBuildExtensions() {
-  const extensions = getExtensionsToBuild();
+  const extensions = getExtensionsToBuild(/* preBuild */ true);
   for (const extensionBundle in extensionBundles) {
     const extension = extensionBundles[extensionBundle].name;
     if (extensions.includes(extension) && !extensionBundle.endsWith('latest')) {

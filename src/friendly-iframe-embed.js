@@ -35,6 +35,7 @@ import {install as installCustomElements} from './polyfills/custom-elements';
 import {install as installDOMTokenList} from './polyfills/domtokenlist';
 import {install as installDocContains} from './polyfills/document-contains';
 import {installForChildWin as installIntersectionObserver} from './polyfills/intersection-observer';
+import {installForChildWin as installResizeObserver} from './polyfills/resize-observer';
 import {installStylesForDoc} from './style-installer';
 import {installTimerInEmbedWindow} from './service/timer-impl';
 import {isDocumentReady} from './document-ready';
@@ -713,6 +714,7 @@ function installPolyfillsInChildWindow(parentWin, childWin) {
   if (!IS_SXG) {
     installCustomElements(childWin, class {});
     installIntersectionObserver(parentWin, childWin);
+    installResizeObserver(parentWin, childWin);
   }
 }
 
@@ -754,11 +756,12 @@ export class Installers {
       .then(getDelayPromise)
       .then(() => {
         if (IS_ESM) {
-          const css = parentWin.document.querySelector('style[amp-runtime]')
-            .textContent;
+          // TODO: This is combined (ampdoc + shared), not just shared
+          // const css = parentWin.document.querySelector('style[amp-runtime]')
+          // .textContent;
           installStylesForDoc(
             ampdoc,
-            css,
+            ampSharedCss,
             /* callback */ null,
             /* opt_isRuntimeCss */ true,
             /* opt_ext */ 'amp-runtime'
