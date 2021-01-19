@@ -1093,7 +1093,7 @@ describes.realWin(
       setDisplay(ampIframe, false);
 
       await new Promise((resolve) => {
-        env.sandbox.stub(ampIframe, 'unload').callsFake(resolve);
+        env.sandbox./*OK*/ stub(ampIframe, 'unload').callsFake(resolve);
       });
       expect(ampIframe.unload).to.be.calledOnce;
     });
@@ -1107,7 +1107,7 @@ describes.realWin(
       expect(ampIframe.querySelector('iframe')).to.not.exist;
       expect(ampIframe.unlayoutOnPause()).to.be.false;
 
-      env.sandbox.stub(ampIframe, 'unload');
+      env.sandbox./*OK*/ stub(ampIframe, 'unload');
       setDisplay(ampIframe, false);
 
       await ampIframe.implementation_.getVsync().mutate(() => {});
