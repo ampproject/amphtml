@@ -129,7 +129,7 @@ describes.realWin('amp-story-grid-layer', {amp: true}, (env) => {
 
   it('should use the scaling factor to set the size of the layer', async () => {
     gridLayerEl.setAttribute('aspect-ratio', '1:2');
-    gridLayerEl.setAttribute('scaling-factor', '2');
+    gridLayerEl.setAttribute('scaling-factor', '1.5');
     await buildGridLayer();
 
     storeService.dispatch(Action.SET_PAGE_SIZE, {width: 1000, height: 1000});
@@ -140,13 +140,13 @@ describes.realWin('amp-story-grid-layer', {amp: true}, (env) => {
         gridLayerEl.style.getPropertyValue('--i-amphtml-story-layer-width'),
         10
       )
-    ).to.equal(1000);
+    ).to.equal(750);
     expect(
       parseInt(
         gridLayerEl.style.getPropertyValue('--i-amphtml-story-layer-height'),
         10
       )
-    ).to.equal(2000);
+    ).to.equal(1500);
   });
 
   it('should apply the aspect-ratio attribute from the responsiveness preset', async () => {
