@@ -17,13 +17,12 @@
 
 const gulp = require('gulp');
 const gulpAva = require('gulp-ava');
-const {isCiBuild} = require('../common/ci');
 
 /**
  * Runs ava tests.
  * @return {!Vinyl}
  */
-async function ava() {
+function ava() {
   return gulp
     .src([
       require.resolve('./csvify-size/test.js'),
@@ -34,7 +33,6 @@ async function ava() {
       gulpAva({
         'concurrency': 5,
         'failFast': true,
-        'silent': isCiBuild(),
       })
     );
 }
