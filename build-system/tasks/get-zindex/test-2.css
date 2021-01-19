@@ -28,3 +28,11 @@
 .selector-4 {
   z-index: 80;
 }
+
+.selector-5 {
+  z-index: initial;
+}
+
+.selector-6 {
+  z-index: auto;
+}
