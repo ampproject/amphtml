@@ -14,38 +14,20 @@
  * limitations under the License.
  */
 
-import {
-  STICKY_AD_TRANSITION_EXP,
-  divertStickyAdTransition,
-} from '../../../src/experiments/sticky-ad-transition-exp';
 import {Services} from '../../../src/services';
 import {
   ancestorElementsByTag,
   createElementWithAttributes,
   removeElement,
 } from '../../../src/dom';
-import {devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {getExperimentBranch} from '../../../src/experiments';
 
 import {getAdContainer} from '../../../src/ad-helper';
 import {listen} from '../../../src/event-helper';
-import {setStyle, setStyles} from '../../../src/style';
+import {setStyles} from '../../../src/style';
 
 const STICKY_AD_MAX_SIZE_LIMIT = 0.2;
 const STICKY_AD_MAX_HEIGHT_LIMIT = 0.5;
-
-/**
- * Permissible sticky ad options.
- * @const @enum {string}
- */
-const StickyAdPositions = {
-  TOP: 'top',
-  BOTTOM: 'bottom',
-  BOTTOM_RIGHT: 'bottom-right',
-};
-
-const STICKY_AD_PROP = 'sticky';
 
 export class AmpAdUIHandler {
   /**
@@ -64,18 +46,10 @@ export class AmpAdUIHandler {
     this.containerElement_ = null;
 
     /**
-     * If this is a sticky ad unit, the sticky position option.
-     * @private {?StickyAdPositions}
+     * Whether this is a sticky ad unit.
+     * @private {boolean}
      */
-    this.stickyAdPosition_ = null;
-    if (this.element_.hasAttribute(STICKY_AD_PROP)) {
-      // TODO(powerivq@) Kargo is currently running an experiment using empty sticky attribute, so
-      // we default the position to bottom right. Remove this default afterwards.
-      this.stickyAdPosition_ =
-        this.element_.getAttribute(STICKY_AD_PROP) ||
-        StickyAdPositions.BOTTOM_RIGHT;
-      this.element_.setAttribute(STICKY_AD_PROP, this.stickyAdPosition_);
-    }
+    this.isStickyAd_ = this.element_.hasAttribute('sticky');
 
     /**
      * Whether the close button has been rendered for a sticky ad unit.
@@ -204,26 +178,22 @@ export class AmpAdUIHandler {
    * @return {boolean}
    */
   isStickyAd() {
-    return this.stickyAdPosition_ !== null;
+    return this.isStickyAd_;
   }
 
   /**
    * Initialize sticky ad related features
    */
   maybeInitStickyAd() {
-    if (this.isStickyAd()) {
-      setStyle(this.element_, 'visibility', 'visible');
+    if (this.isStickyAd_) {
+      setStyles(this.element_, {
+        position: 'fixed',
+        bottom: '0',
+        right: '0',
+        visibility: 'visible',
+      });
 
-      if (this.stickyAdPosition_ == StickyAdPositions.BOTTOM) {
-        const paddingBar = this.doc_.createElement('amp-ad-sticky-padding');
-        this.element_.insertBefore(
-          paddingBar,
-          devAssert(
-            this.element_.firstChild,
-            'amp-ad should have been expanded.'
-          )
-        );
-      }
+      this.element_.classList.add('i-amphtml-amp-ad-sticky-layout');
     }
   }
 
@@ -232,7 +202,7 @@ export class AmpAdUIHandler {
    * @return {Promise}
    */
   getScrollPromiseForStickyAd() {
-    if (this.isStickyAd()) {
+    if (this.isStickyAd_) {
       return new Promise((resolve) => {
         const unlisten = Services.viewportForDoc(
           this.element_.getAmpDoc()
@@ -249,7 +219,7 @@ export class AmpAdUIHandler {
    * When a sticky ad is shown, the close button should be rendered at the same time.
    */
   onResizeSuccess() {
-    if (this.isStickyAd() && !this.closeButtonRendered_) {
+    if (this.isStickyAd_ && !this.closeButtonRendered_) {
       this.addCloseButton_();
       this.closeButtonRendered_ = true;
     }
@@ -329,10 +299,10 @@ export class AmpAdUIHandler {
     }
 
     // Special case: for sticky ads, we enforce 20% size limit and 50% height limit
-    if (this.isStickyAd()) {
+    if (this.element_.hasAttribute('sticky')) {
       const viewport = this.baseInstance_.getViewport();
       if (
-        height * width >
+        newHeight * newWidth >
           STICKY_AD_MAX_SIZE_LIMIT *
             viewport.getHeight() *
             viewport.getWidth() ||
@@ -345,36 +315,12 @@ export class AmpAdUIHandler {
     return this.baseInstance_
       .attemptChangeSize(newHeight, newWidth, event)
       .then(
-        () => {
-          divertStickyAdTransition(this.baseInstance_.win);
-          if (
-            getExperimentBranch(
-              this.baseInstance_.win,
-              STICKY_AD_TRANSITION_EXP.id
-            ) === STICKY_AD_TRANSITION_EXP.experiment
-          ) {
-            this.setSize_(this.element_.querySelector('iframe'), height, width);
-          }
-          return resizeInfo;
-        },
+        () => resizeInfo,
         () => {
           resizeInfo.success = false;
           return resizeInfo;
         }
       );
-  }
-
-  /**
-   * Force set the dimensions for an element
-   * @param {Any} element
-   * @param {number} newHeight
-   * @param {number} newWidth
-   */
-  setSize_(element, newHeight, newWidth) {
-    setStyles(element, {
-      'height': `${newHeight}px`,
-      'width': `${newWidth}px`,
-    });
   }
 
   /**
