@@ -53,6 +53,8 @@ export class MediaQueryProps {
    * @return {boolean} value
    */
   resolveMatchQuery(queryString) {
+    // This will create a list query like this:
+    // `[{query: matchMedia(queryString), value: true}, {query: null, value: false}]`
     return (
       this.resolve_(queryString, parseMediaQueryMatchExpr, TRUE_VALUE) ===
       TRUE_VALUE
@@ -95,7 +97,6 @@ export class MediaQueryProps {
    * @param {function(!Window, string):!ExprDef} parser
    * @param {string} emptyExprValue
    * @return {string} value
-   * @template T
    */
   resolve_(exprString, parser, emptyExprValue) {
     if (!exprString || !exprString.trim()) {

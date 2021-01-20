@@ -1116,6 +1116,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         let element1;
         let element2;
         let matchMedia;
+        let matchMinWidth1px;
         let requestMeasureStub;
 
         beforeEach(() => {
@@ -1125,10 +1126,14 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
             element1.ownerDocument.defaultView,
             'matchMedia'
           );
-          matchMedia.withArgs('(min-width: 1px)').returns({matches: true});
+          matchMinWidth1px = {
+            matches: true,
+            onchange: null,
+          };
+          matchMedia.withArgs('(min-width: 1px)').returns(matchMinWidth1px);
           matchMedia
             .withArgs('(min-width: 1111111px)')
-            .returns({matches: false});
+            .returns({matches: false, onchange: null});
 
           element2 = new ElementClass();
           element2.ampdoc_ = env.ampdoc;
@@ -1161,6 +1166,18 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
           element2.setAttribute('media', '(min-width: 1111111px)');
           doc.body.appendChild(element2);
           expect(element2).to.have.class('i-amphtml-hidden-by-media-query');
+          expect(requestMeasureStub).to.be.calledTwice;
+        });
+
+        it('should re-apply media condition', () => {
+          element1.setAttribute('media', '(min-width: 1px)');
+          doc.body.appendChild(element1);
+          expect(element1).to.not.have.class('i-amphtml-hidden-by-media-query');
+          expect(requestMeasureStub).to.be.calledOnce;
+
+          matchMinWidth1px.matches = false;
+          matchMinWidth1px.onchange();
+          expect(element1).to.have.class('i-amphtml-hidden-by-media-query');
           expect(requestMeasureStub).to.be.calledTwice;
         });
 
