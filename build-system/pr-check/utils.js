@@ -28,7 +28,7 @@ const {cyan, green, yellow} = require('ansi-colors');
 const {execOrDie, execOrThrow, execWithError, exec} = require('../common/exec');
 const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
 const {isCiBuild, ciBuildId, ciPullRequestSha} = require('../common/ci');
-const {replaceUrls, signalDistUpload} = require('../tasks/pr-deploy-bot-utils');
+const {replaceUrls} = require('../tasks/pr-deploy-bot-utils');
 
 const UNMINIFIED_OUTPUT_FILE = `amp_unminified_${ciBuildId()}.zip`;
 const NOMODULE_OUTPUT_FILE = `amp_nomodule_${ciBuildId()}.zip`;
@@ -154,7 +154,7 @@ function stopTimer(jobNameOrCmd, startTime) {
  * @param {string} jobName
  * @param {startTime} startTime
  */
-function stopTimedJob(jobName, startTime) {
+function abortTimedJob(jobName, startTime) {
   stopTimer(jobName, startTime);
   process.exitCode = 1;
 }
@@ -313,11 +313,10 @@ async function processAndUploadNomoduleOutput() {
   await replaceUrls('test/manual');
   await replaceUrls('examples');
   uploadNomoduleOutput();
-  await signalDistUpload('success');
 }
 
 module.exports = {
-  stopTimedJob,
+  abortTimedJob,
   downloadUnminifiedOutput,
   downloadNomoduleOutput,
   downloadModuleOutput,

@@ -22,7 +22,7 @@
  */
 
 const {
-  stopTimedJob,
+  abortTimedJob,
   printChangeSummary,
   printSkipMessage,
   startTimer,
@@ -41,7 +41,7 @@ function main() {
   setLoggingPrefix(jobName);
   const startTime = startTimer(jobName);
   if (!runNpmChecks()) {
-    return stopTimedJob(jobName, startTime);
+    return abortTimedJob(jobName, startTime);
   }
 
   if (!isPullRequestBuild()) {
@@ -54,8 +54,7 @@ function main() {
     if (
       buildTargets.has('RUNTIME') ||
       buildTargets.has('FLAG_CONFIG') ||
-      buildTargets.has('INTEGRATION_TEST') ||
-      buildTargets.has('UNIT_TEST')
+      buildTargets.has('INTEGRATION_TEST')
     ) {
       timedExecOrDie('gulp update-packages');
       timedExecOrDie('gulp build --fortesting');

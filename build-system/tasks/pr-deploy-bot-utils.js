@@ -69,7 +69,7 @@ async function replaceUrls(dir) {
   await Promise.all(promises);
 }
 
-async function signalDistUpload(result) {
+async function signalPrDeployUpload(result) {
   const loggingPrefix = getLoggingPrefix();
   logWithoutTimestamp(
     `${loggingPrefix} Reporting`,
@@ -87,5 +87,5 @@ async function signalDistUpload(result) {
 module.exports = {
   getBaseUrl,
   replaceUrls,
-  signalDistUpload,
+  signalPrDeployUpload,
 };

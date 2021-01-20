@@ -16,7 +16,7 @@
 'use strict';
 
 const {
-  stopTimedJob,
+  abortTimedJob,
   printChangeSummary,
   printSkipMessage,
   startTimer,
@@ -71,13 +71,13 @@ function runIntegrationTestsForPlatform() {
 function runUnitTestsForPlatform() {
   switch (process.platform) {
     case 'linux':
-      timedExecOrDie('gulp unit --nobuild --headless --firefox');
+      timedExecOrDie('gulp unit --headless --firefox');
       break;
     case 'darwin':
-      timedExecOrDie('gulp unit --nobuild --safari');
+      timedExecOrDie('gulp unit --safari');
       break;
     case 'win32':
-      timedExecOrDie('gulp unit --nobuild --headless --edge');
+      timedExecOrDie('gulp unit --headless --edge');
       break;
     default:
       log(
@@ -92,7 +92,7 @@ async function main() {
   setLoggingPrefix(jobName);
   const startTime = startTimer(jobName);
   if (!runNpmChecks()) {
-    return stopTimedJob(jobName, startTime);
+    return abortTimedJob(jobName, startTime);
   }
   if (!isPullRequestBuild()) {
     timedExecOrDie('gulp update-packages');
