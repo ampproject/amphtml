@@ -118,6 +118,9 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
 
     /** @private {?{horiz: number, vert: number}} */
     this.aspectRatio_ = null;
+
+    /** @private {number} */
+    this.scalingFactor_ = 1;
   }
 
   /**
@@ -175,6 +178,12 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
   /** @private */
   initializeListeners_() {
     const aspectRatio = this.element.getAttribute('aspect-ratio');
+    const scalingFactorFloat = parseFloat(
+      this.element.getAttribute('scaling-factor')
+    );
+    if (scalingFactorFloat && scalingFactorFloat > 0) {
+      this.scalingFactor_ = scalingFactorFloat;
+    }
     if (aspectRatio) {
       const aspectRatioSplits = aspectRatio.split(':');
       const horiz = parseInt(aspectRatioSplits[0], 10);
@@ -207,8 +216,8 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
       this.getVsync().mutate(() => {
         this.element.classList.add('i-amphtml-story-grid-template-aspect');
         setStyles(this.element, {
-          '--i-amphtml-story-layer-width': px(width),
-          '--i-amphtml-story-layer-height': px(height),
+          '--i-amphtml-story-layer-width': px(width * this.scalingFactor_),
+          '--i-amphtml-story-layer-height': px(height * this.scalingFactor_),
         });
       });
     }
