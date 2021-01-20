@@ -4,7 +4,7 @@
   "amp-accordion-display-locking": 1,
   "canary": 1,
   "a4aProfilingRate": 0.01,
-  "adsense-ad-size-optimization": 0.1,
+  "adsense-ad-size-optimization": 1,
   "doubleclickSraExp": 0.01,
   "doubleclickSraReportExcludedBlock": 0.1,
   "dfp-render-on-idle-cwv-exp": 1,
