@@ -489,7 +489,7 @@ export class BaseElement {
    * @final
    */
   unload() {
-    this.getResources().getResourceForElement(this.element).unload();
+    this.element.getResources().getResourceForElement(this.element).unload();
   }
 
   /**
