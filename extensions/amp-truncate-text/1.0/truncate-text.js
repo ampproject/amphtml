@@ -18,7 +18,7 @@ import * as Preact from '../../../src/preact';
 import {Wrapper} from '../../../src/preact/component';
 import {forwardRef} from '../../../src/preact/compat';
 import {setStyle} from '../../../src/style';
-import {truncateText} from '../0.1/truncate-text';
+import {truncateText} from './truncation';
 import {
   useCallback,
   useEffect,
