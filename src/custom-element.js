@@ -591,7 +591,7 @@ function createBaseCustomElementClass(win) {
     initMediaAttrs_() {
       const hasMediaAttrs =
         this.hasAttribute('media') ||
-        this.hasAttribute('sizes') ||
+        (this.hasAttribute('sizes') && !this.hasAttribute('disable-inline-width')) ||
         this.hasAttribute('heights');
       const hadMediaAttrs = !!this.mediaQueryProps_;
       const win = this.ownerDocument.defaultView;
@@ -652,24 +652,7 @@ function createBaseCustomElementClass(win) {
       }
 
       props.complete();
-    }
-
-    /**
-     * If the element has a media attribute, evaluates the value as a media
-     * query and based on the result adds or removes the class
-     * `i-amphtml-hidden-by-media-query`. The class adds display:none to the
-     * element which in turn prevents any of the resource loading to happen for
-     * the element.
-     *
-     * This method is called by Resources and shouldn't be called by anyone
-     * else.
-     *
-     * @final
-     * @package
-     * TODO(#31915): remove this method once once "loaderV2" is fully launched.
-     */
-    applySizesAndMediaQuery() {
-      this.applyMediaAttrs_();
+      this.getResource_().requestMeasure();
     }
 
     /**
