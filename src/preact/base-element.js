@@ -515,7 +515,7 @@ export class PreactBaseElement extends AMP.BaseElement {
           // Create new shadow root.
           shadowRoot = this.element.attachShadow({
             mode: 'open',
-            delegatesFocus: true,
+            delegatesFocus: Ctor['delegatesFocus'],
           });
 
           // The pre-constructed shadow root is required to have the stylesheet
@@ -864,6 +864,14 @@ PreactBaseElement['shadowCss'] = null;
  * @protected {boolean}
  */
 PreactBaseElement['detached'] = false;
+
+/**
+ * This enables the 'delegatesFocus' option when creating the shadow DOM for
+ * this component.  A key feature of 'delegatesFocus' set to true is that
+ * when elements within the shadow DOM gain focus, the focus is also applied
+ * to the host element.
+ */
+PreactBaseElement['delegatesFocus'] = false;
 
 /**
  * Provides a mapping of Preact prop to AmpElement DOM attributes.
