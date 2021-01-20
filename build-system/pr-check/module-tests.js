@@ -21,54 +21,51 @@
  * This is run during the CI stage = test; job = module tests.
  */
 
-const colors = require('ansi-colors');
 const {
   printChangeSummary,
+  printSkipMessage,
   startTimer,
   stopTimer,
-  timedExecOrDie: timedExecOrDieBase,
+  timedExecOrDie,
   downloadModuleOutput,
   downloadNomoduleOutput,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isPullRequestBuild} = require('../common/ci');
+const {setLoggingPrefix} = require('../common/logging');
 
-const FILENAME = 'module-tests.js';
-const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
-const timedExecOrDie = (cmd, unusedFileName) =>
-  timedExecOrDieBase(cmd, FILENAME);
+const jobName = 'module-tests.js';
 
 function main() {
-  const startTime = startTimer(FILENAME, FILENAME);
+  setLoggingPrefix(jobName);
+  const startTime = startTimer(jobName);
 
   if (!isPullRequestBuild()) {
-    downloadNomoduleOutput(FILENAME);
-    downloadModuleOutput(FILENAME);
+    downloadNomoduleOutput();
+    downloadModuleOutput();
     timedExecOrDie('gulp update-packages');
     timedExecOrDie('gulp integration --nobuild --compiled --headless --esm');
   } else {
-    printChangeSummary(FILENAME);
-    const buildTargets = determineBuildTargets(FILENAME);
+    printChangeSummary();
+    const buildTargets = determineBuildTargets();
     if (
       buildTargets.has('RUNTIME') ||
       buildTargets.has('FLAG_CONFIG') ||
       buildTargets.has('INTEGRATION_TEST')
     ) {
-      downloadNomoduleOutput(FILENAME);
-      downloadModuleOutput(FILENAME);
+      downloadNomoduleOutput();
+      downloadModuleOutput();
       timedExecOrDie('gulp update-packages');
       timedExecOrDie('gulp integration --nobuild --compiled --headless --esm');
     } else {
-      console.log(
-        `${FILELOGPREFIX} Skipping`,
-        colors.cyan('Module Tests'),
-        'because this commit does not affect the runtime, flag configs,',
-        'or integration tests.'
+      printSkipMessage(
+        jobName,
+        'this PR does not affect the runtime, flag configs, or integration tests'
       );
     }
   }
 
-  stopTimer(FILENAME, FILENAME, startTime);
+  stopTimer(jobName, startTime);
 }
 
 main();

@@ -22,30 +22,28 @@
  * This is run during the CI stage = test; job = nomodule tests.
  */
 
-const colors = require('ansi-colors');
 const {
   downloadNomoduleOutput,
   printChangeSummary,
+  printSkipMessage,
   startTimer,
   stopTimer,
-  timedExecOrDie: timedExecOrDieBase,
-  timedExecOrThrow: timedExecOrThrowBase,
+  timedExecOrDie,
+  timedExecOrThrow,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isPullRequestBuild} = require('../common/ci');
+const {setLoggingPrefix} = require('../common/logging');
 
-const FILENAME = 'nomodule-tests.js';
-const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
-const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
-const timedExecOrThrow = (cmd, msg) => timedExecOrThrowBase(cmd, FILENAME, msg);
+const jobName = 'nomodule-tests.js';
 
 function main() {
-  const startTime = startTimer(FILENAME, FILENAME);
+  setLoggingPrefix(jobName);
+  const startTime = startTimer(jobName);
 
   if (!isPullRequestBuild()) {
-    downloadNomoduleOutput(FILENAME);
+    downloadNomoduleOutput();
     timedExecOrDie('gulp update-packages');
-
     try {
       timedExecOrThrow(
         'gulp integration --nobuild --headless --compiled --report',
@@ -59,24 +57,22 @@ function main() {
       timedExecOrDie('gulp test-report-upload');
     }
   } else {
-    printChangeSummary(FILENAME);
-    const buildTargets = determineBuildTargets(FILENAME);
+    printChangeSummary();
+    const buildTargets = determineBuildTargets();
     if (
       !buildTargets.has('RUNTIME') &&
       !buildTargets.has('FLAG_CONFIG') &&
       !buildTargets.has('INTEGRATION_TEST')
     ) {
-      console.log(
-        `${FILELOGPREFIX} Skipping`,
-        colors.cyan('Nomodule Tests'),
-        'because this commit not affect the runtime, flag configs,',
-        'or integration tests.'
+      printSkipMessage(
+        jobName,
+        'this PR does not affect the runtime, flag configs, or integration tests'
       );
-      stopTimer(FILENAME, FILENAME, startTime);
+      stopTimer(jobName, startTime);
       return;
     }
 
-    downloadNomoduleOutput(FILENAME);
+    downloadNomoduleOutput();
     timedExecOrDie('gulp update-packages');
 
     if (
@@ -88,7 +84,7 @@ function main() {
     }
   }
 
-  stopTimer(FILENAME, FILENAME, startTime);
+  stopTimer(jobName, startTime);
 }
 
 main();

@@ -23,25 +23,25 @@
  */
 
 const {
+  stopTimedJob,
   printChangeSummary,
   startTimer,
   stopTimer,
-  stopTimedJob,
-  timedExecOrDie: timedExecOrDieBase,
+  timedExecOrDie,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isPullRequestBuild} = require('../common/ci');
 const {reportAllExpectedTests} = require('../tasks/report-test-status');
 const {runNpmChecks} = require('./npm-checks');
+const {setLoggingPrefix} = require('../common/logging');
 
-const FILENAME = 'checks.js';
-const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
+const jobName = 'checks.js';
 
 async function main() {
-  const startTime = startTimer(FILENAME, FILENAME);
-  if (!runNpmChecks(FILENAME)) {
-    stopTimedJob(FILENAME, startTime);
-    return;
+  setLoggingPrefix(jobName);
+  const startTime = startTimer(jobName);
+  if (!runNpmChecks()) {
+    return stopTimedJob(jobName, startTime);
   }
 
   if (!isPullRequestBuild()) {
@@ -61,8 +61,8 @@ async function main() {
     timedExecOrDie('gulp check-sourcemaps');
     timedExecOrDie('gulp performance-urls');
   } else {
-    printChangeSummary(FILENAME);
-    const buildTargets = determineBuildTargets(FILENAME);
+    printChangeSummary();
+    const buildTargets = determineBuildTargets();
     await reportAllExpectedTests(buildTargets);
     timedExecOrDie('gulp update-packages');
 
@@ -113,7 +113,7 @@ async function main() {
     }
   }
 
-  stopTimer(FILENAME, FILENAME, startTime);
+  stopTimer(jobName, startTime);
 }
 
 main();

@@ -21,28 +21,27 @@
  * This is run during the CI stage = test; job = unminified tests.
  */
 
-const colors = require('ansi-colors');
 const {
   downloadUnminifiedOutput,
   printChangeSummary,
+  printSkipMessage,
   startTimer,
   stopTimer,
-  timedExecOrDie: timedExecOrDieBase,
-  timedExecOrThrow: timedExecOrThrowBase,
+  timedExecOrDie,
+  timedExecOrThrow,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isPullRequestBuild} = require('../common/ci');
+const {setLoggingPrefix} = require('../common/logging');
 
-const FILENAME = 'unminified-tests.js';
-const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
-const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
-const timedExecOrThrow = (cmd, msg) => timedExecOrThrowBase(cmd, FILENAME, msg);
+const jobName = 'unminified-tests.js';
 
 function main() {
-  const startTime = startTimer(FILENAME, FILENAME);
+  setLoggingPrefix(jobName);
+  const startTime = startTimer(jobName);
 
   if (!isPullRequestBuild()) {
-    downloadUnminifiedOutput(FILENAME);
+    downloadUnminifiedOutput();
     timedExecOrDie('gulp update-packages');
 
     try {
@@ -51,7 +50,7 @@ function main() {
         'Integration tests failed! Skipping remaining tests.'
       );
       timedExecOrThrow(
-        'gulp unit --nobuild --headless --coverage --report',
+        'gulp unit --headless --coverage --report',
         'Unit tests failed!'
       );
       timedExecOrThrow(
@@ -66,25 +65,23 @@ function main() {
       timedExecOrDie('gulp test-report-upload');
     }
   } else {
-    printChangeSummary(FILENAME);
-    const buildTargets = determineBuildTargets(FILENAME);
+    printChangeSummary();
+    const buildTargets = determineBuildTargets();
     if (
       !buildTargets.has('RUNTIME') &&
       !buildTargets.has('FLAG_CONFIG') &&
       !buildTargets.has('UNIT_TEST') &&
       !buildTargets.has('INTEGRATION_TEST')
     ) {
-      console.log(
-        `${FILELOGPREFIX} Skipping`,
-        colors.cyan('Unminified Tests'),
-        'because this commit not affect the runtime, flag configs,',
-        'unit tests, or integration tests.'
+      printSkipMessage(
+        jobName,
+        'this PR does not affect the runtime, flag configs, unit tests, or integration tests'
       );
-      stopTimer(FILENAME, FILENAME, startTime);
+      stopTimer(jobName, startTime);
       return;
     }
 
-    downloadUnminifiedOutput(FILENAME);
+    downloadUnminifiedOutput();
     timedExecOrDie('gulp update-packages');
 
     if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {
@@ -108,7 +105,7 @@ function main() {
     }
   }
 
-  stopTimer(FILENAME, FILENAME, startTime);
+  stopTimer(jobName, startTime);
 }
 
 main();

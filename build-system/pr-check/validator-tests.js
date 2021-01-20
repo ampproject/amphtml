@@ -21,48 +21,45 @@
  * This is run during the CI stage = build; job = validator.
  */
 
-const colors = require('ansi-colors');
 const {
+  stopTimedJob,
   printChangeSummary,
+  printSkipMessage,
   startTimer,
   stopTimer,
-  stopTimedJob,
-  timedExecOrDie: timedExecOrDieBase,
+  timedExecOrDie,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isPullRequestBuild} = require('../common/ci');
 const {runNpmChecks} = require('./npm-checks');
+const {setLoggingPrefix} = require('../common/logging');
 
-const FILENAME = 'validator-tests.js';
-const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
-const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
+const jobName = 'validator-tests.js';
 
 function main() {
-  const startTime = startTimer(FILENAME, FILENAME);
-  if (!runNpmChecks(FILENAME)) {
-    stopTimedJob(FILENAME, startTime);
-    return;
+  setLoggingPrefix(jobName);
+  const startTime = startTimer(jobName);
+  if (!runNpmChecks()) {
+    return stopTimedJob(jobName, startTime);
   }
 
   if (!isPullRequestBuild()) {
     timedExecOrDie('gulp validator');
     timedExecOrDie('gulp validator-webui');
   } else {
-    printChangeSummary(FILENAME);
-    const buildTargets = determineBuildTargets(FILENAME);
+    printChangeSummary();
+    const buildTargets = determineBuildTargets();
     if (
       !buildTargets.has('RUNTIME') &&
       !buildTargets.has('VALIDATOR') &&
       !buildTargets.has('VALIDATOR_WEBUI') &&
       !buildTargets.has('VALIDATOR_JAVA')
     ) {
-      console.log(
-        `${FILELOGPREFIX} Skipping`,
-        colors.cyan('Validator Tests'),
-        'because this commit does not affect the runtime, validator,',
-        'or validator web UI.'
+      printSkipMessage(
+        jobName,
+        'this PR does not affect the runtime, validator, or validator web UI'
       );
-      stopTimer(FILENAME, FILENAME, startTime);
+      stopTimer(jobName, startTime);
       return;
     }
 
@@ -75,7 +72,7 @@ function main() {
     }
   }
 
-  stopTimer(FILENAME, FILENAME, startTime);
+  stopTimer(jobName, startTime);
 }
 
 main();

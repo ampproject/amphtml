@@ -17,7 +17,7 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const {
-  abortTimedJob,
+  stopTimedJob,
   printChangeSummary,
   startTimer,
   stopTimer,
@@ -53,7 +53,7 @@ async function prCheck(cb) {
 
   const startTime = startTimer(jobName);
   if (!runNpmChecks()) {
-    abortTimedJob(jobName, startTime);
+    stopTimedJob(jobName, startTime);
     failTask();
   }
 
