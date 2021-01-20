@@ -297,7 +297,7 @@ makeExtension.description = 'Create an extension skeleton';
 makeExtension.flags = {
   name: '  The name of the extension. Should be prefixed with `amp-*`',
   bento: '  Generate a Bento component',
-  version: '  Sets the verison number (default: 0.1; or 1.0 with --bento)',
+  version: '  Sets the version number (default: 0.1; or 1.0 with --bento)',
   overwrite:
     '  Overwrites existing files at the destination, if present; --bento only',
 };
