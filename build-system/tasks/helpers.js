@@ -610,14 +610,6 @@ async function applyAmpConfig(targetFile, localDev, fortesting) {
 }
 
 /**
- * Synchronously concatenates the given files into a string.
- *
- * @param {Array<string>} files A list of file paths.
- * @return {string} The concatenated contents of the given files.
- */
-function concatFilesToString(files) {}
-
-/**
  * Copies frame.html to output folder, replaces js references to minified
  * copies, and generates symlink to it.
  *
