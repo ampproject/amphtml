@@ -472,6 +472,7 @@ amp-story-grid-layer .i-amphtml-embedded-component::after {
   width: var(--i-amphtml-story-layer-width, 100%);
   height: var(--i-amphtml-story-layer-height, 100%);
   font-size: calc(var(--i-amphtml-story-layer-height, 100vh) / 10);
+  margin-left: calc((var(--story-page-vw, 1%) * 100 - var(--i-amphtml-story-layer-width, 100%)) * 0.5); /* Set margin to 1/2 of page-width - layer-width to center layer */
 }
 
 /**
