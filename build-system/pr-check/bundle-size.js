@@ -53,6 +53,7 @@ async function main() {
       jobName,
       'this is a Travis build. Sizes will be reported from CircleCI'
     );
+    return;
   }
 
   if (!isPullRequestBuild()) {
