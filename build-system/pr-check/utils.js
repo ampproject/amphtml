@@ -30,9 +30,10 @@ const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
 const {isCiBuild, ciPullRequestSha} = require('../common/ci');
 const {replaceUrls} = require('../tasks/pr-deploy-bot-utils');
 
-const UNMINIFIED_OUTPUT_FILE = `amp_unminified_${ciPullRequestSha()}.zip`;
-const NOMODULE_OUTPUT_FILE = `amp_nomodule_${ciPullRequestSha()}.zip`;
-const MODULE_OUTPUT_FILE = `amp_module_${ciPullRequestSha()}.zip`;
+const SUFFIX = shortSha(ciPullRequestSha());
+const UNMINIFIED_OUTPUT_FILE = `amp_unminified_${SUFFIX}.zip`;
+const NOMODULE_OUTPUT_FILE = `amp_nomodule_${SUFFIX}.zip`;
+const MODULE_OUTPUT_FILE = `amp_module_${SUFFIX}.zip`;
 
 const BUILD_OUTPUT_DIRS = 'build/ dist/ dist.3p/';
 const APP_SERVING_DIRS = 'dist.tools/ examples/ test/manual/';
