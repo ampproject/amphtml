@@ -18,6 +18,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const requestPromise = require('request-promise');
 const {
+  isCircleciBuild,
   isPullRequestBuild,
   isGithubActionsBuild,
   isTravisBuild,
@@ -38,7 +39,7 @@ const TEST_TYPE_SUBTYPES = isGithubActionsBuild()
       ['integration', ['firefox', 'safari', 'edge', 'ie']],
       ['unit', ['firefox', 'safari', 'edge']],
     ])
-  : isTravisBuild()
+  : isCircleciBuild()
   ? new Map([
       ['integration', ['unminified', 'nomodule', 'module']],
       ['unit', ['unminified', 'local-changes']],
@@ -85,7 +86,8 @@ function inferTestType() {
 }
 
 async function postReport(type, action) {
-  if (type && isPullRequestBuild()) {
+  // TODO(rsimha): Remove `!isTravisBuild()` condition once Travis is shut off.
+  if (type && isPullRequestBuild() && !isTravisBuild()) {
     const commitHash = gitCommitHash();
 
     try {

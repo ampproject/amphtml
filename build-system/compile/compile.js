@@ -32,7 +32,6 @@ const {
 const {checkForUnknownDeps} = require('./check-for-unknown-deps');
 const {CLOSURE_SRC_GLOBS} = require('./sources');
 const {cpus} = require('os');
-const {isCiBuild} = require('../common/ci');
 const {postClosureBabel} = require('./post-closure-babel');
 const {preClosureBabel, handlePreClosureError} = require('./pre-closure-babel');
 const {sanitize} = require('./sanitize');
@@ -42,9 +41,8 @@ const {writeSourcemaps} = require('./helpers');
 const queue = [];
 let inProgress = 0;
 
-const MAX_PARALLEL_CLOSURE_INVOCATIONS = isCiBuild()
-  ? 10
-  : parseInt(argv.closure_concurrency, 10) || cpus().length;
+const MAX_PARALLEL_CLOSURE_INVOCATIONS =
+  parseInt(argv.closure_concurrency, 10) || cpus().length;
 
 // Compiles AMP with the closure compiler. This is intended only for
 // production use. During development we intend to continue using

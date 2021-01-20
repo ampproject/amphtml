@@ -1,0 +1,237 @@
+version: 2.1
+
+orbs:
+  browser-tools: circleci/browser-tools@1.1.1
+
+skip_pr_branches: &skip_pr_branches
+  filters:
+    branches:
+      ignore: /^pull\/.*$/
+
+executors:
+  amphtml-executor:
+    machine:
+      image: ubuntu-2004:202010-01
+    resource_class: xlarge
+
+commands:
+  setup_vm:
+    steps:
+      - checkout
+      - browser-tools/install-chrome:
+          replace-existing: true
+      - run:
+          name: 'Install Google Cloud SDK'
+          command: |
+            cd ~/
+            curl -Ss --retry 5 https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-323.0.0-linux-x86_64.tar.gz | tar xz
+            echo 'source ~/google-cloud-sdk/path.bash.inc' >> $BASH_ENV
+      - run:
+          # TODO(rsimha, ampproject/amp-github-apps#1110): Update storage details.
+          name: 'Setup Storage'
+          command: |
+            openssl aes-256-cbc -k $GCP_TOKEN -in build-system/common/sa-travis-key.json.enc -out sa-travis-key.json -d
+            gcloud auth activate-service-account --key-file=sa-travis-key.json
+            gcloud config set account sa-travis@amp-travis-build-storage.iam.gserviceaccount.com
+            gcloud config set pass_credentials_to_gsutil true
+            gcloud config set project amp-travis-build-storage
+      - run:
+          name: 'Configure Hosts'
+          command: |
+            echo "127.0.0.1 ads.localhost" | sudo tee -a /etc/hosts
+            echo "127.0.0.1 iframe.localhost" | sudo tee -a /etc/hosts
+            echo "127.0.0.1 jgla3zmib2ggq5buc4hwi5taloh6jlvzukddfr4zltz3vay5s5rq.recaptcha.localhost" | sudo tee -a /etc/hosts
+            echo "127.0.0.1 fonts.googleapis.com" | sudo tee -a /etc/hosts
+      - run:
+          name: 'Install NVM'
+          command: |
+            curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
+      - run:
+          name: 'Install Node LTS'
+          command: |
+            nvm install 'lts/*'
+            echo "export PATH=`which node`:$PATH" >> $BASH_ENV
+      - run:
+          name: 'Install Dependencies'
+          command: |
+            npm install --global gulp-cli
+            npm ci
+
+jobs:
+  'Checks':
+    executor:
+      name: amphtml-executor
+    steps:
+      - setup_vm
+      - run:
+          name: 'Checks'
+          command: node build-system/pr-check/checks.js
+  'Unminified Build':
+    executor:
+      name: amphtml-executor
+    steps:
+      - setup_vm
+      - run:
+          name: 'Unminified Build'
+          command: node build-system/pr-check/unminified-build.js
+  'Nomodule Build':
+    executor:
+      name: amphtml-executor
+    steps:
+      - setup_vm
+      - run:
+          name: 'Nomodule Build'
+          command: node build-system/pr-check/nomodule-build.js
+  'Module Build':
+    executor:
+      name: amphtml-executor
+    steps:
+      - setup_vm
+      - run:
+          name: 'Module Build'
+          command: node build-system/pr-check/module-build.js
+  'Bundle Size':
+    executor:
+      name: amphtml-executor
+    steps:
+      - setup_vm
+      - run:
+          name: 'Bundle Size'
+          command: node build-system/pr-check/bundle-size.js
+  'Validator Tests':
+    executor:
+      name: amphtml-executor
+    steps:
+      - setup_vm
+      - run:
+          name: 'Install Protobuf'
+          command: pip3 install --user protobuf
+      - run:
+          name: 'Validator Tests'
+          command: node build-system/pr-check/validator-tests.js
+  'Visual Diff Tests':
+    executor:
+      name: amphtml-executor
+    steps:
+      - setup_vm
+      - run:
+          name: 'Visual Diff Tests'
+          command: node build-system/pr-check/visual-diff-tests.js
+  'Unminified Tests':
+    executor:
+      name: amphtml-executor
+    steps:
+      - setup_vm
+      - run:
+          name: 'Unminified Tests'
+          command: node build-system/pr-check/unminified-tests.js
+  'Nomodule Tests':
+    executor:
+      name: amphtml-executor
+    steps:
+      - setup_vm
+      - run:
+          name: 'Nomodule Tests'
+          command: node build-system/pr-check/nomodule-tests.js
+  'Module Tests':
+    executor:
+      name: amphtml-executor
+    steps:
+      - setup_vm
+      - run:
+          name: 'Module Tests'
+          command: node build-system/pr-check/module-tests.js
+  'End-to-End Tests':
+    executor:
+      name: amphtml-executor
+    steps:
+      - setup_vm
+      - run:
+          name: 'End-to-End Tests'
+          command: node build-system/pr-check/e2e-tests.js
+  'Performance Tests':
+    executor:
+      name: amphtml-executor
+    steps:
+      - setup_vm
+      - run:
+          name: 'Performance Tests'
+          command: node build-system/pr-check/performance-tests.js
+  'Experiment A Tests':
+    executor:
+      name: amphtml-executor
+    steps:
+      - setup_vm
+      - run:
+          name: 'Experiment A Tests'
+          command: node build-system/pr-check/experiment-tests.js --experiment=experimentA
+  'Experiment B Tests':
+    executor:
+      name: amphtml-executor
+    steps:
+      - setup_vm
+      - run:
+          name: 'Experiment B Tests'
+          command: node build-system/pr-check/experiment-tests.js --experiment=experimentB
+  'Experiment C Tests':
+    executor:
+      name: amphtml-executor
+    steps:
+      - setup_vm
+      - run:
+          name: 'Experiment C Tests'
+          command: node build-system/pr-check/experiment-tests.js --experiment=experimentC
+
+workflows:
+  'CircleCI PR Check':
+    jobs:
+      - 'Checks':
+          context: amphtml-context
+      - 'Unminified Build':
+          context: amphtml-context
+      - 'Nomodule Build':
+          context: amphtml-context
+      - 'Module Build':
+          context: amphtml-context
+      - 'Bundle Size':
+          context: amphtml-context
+          requires:
+            - 'Nomodule Build'
+            - 'Module Build'
+      - 'Validator Tests':
+          context: amphtml-context
+      - 'Visual Diff Tests':
+          context: amphtml-context
+          requires:
+            - 'Nomodule Build'
+      - 'Unminified Tests':
+          context: amphtml-context
+          requires:
+            - 'Unminified Build'
+      - 'Nomodule Tests':
+          context: amphtml-context
+          requires:
+            - 'Nomodule Build'
+      - 'Module Tests':
+          context: amphtml-context
+          requires:
+            - 'Nomodule Build'
+            - 'Module Build'
+      - 'End-to-End Tests':
+          context: amphtml-context
+          requires:
+            - 'Nomodule Build'
+      - 'Performance Tests':
+          <<: *skip_pr_branches
+          context: amphtml-context
+          requires:
+            - 'Nomodule Build'
+      - 'Experiment A Tests':
+          <<: *skip_pr_branches
+          context: amphtml-context
+      - 'Experiment B Tests':
+          <<: *skip_pr_branches
+          context: amphtml-context
+      - 'Experiment C Tests':
+          <<: *skip_pr_branches
+          context: amphtml-context

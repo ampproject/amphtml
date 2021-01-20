@@ -33,7 +33,7 @@ const {
   timedExecOrDie,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
-const {isPullRequestBuild} = require('../common/ci');
+const {isPullRequestBuild, isTravisBuild} = require('../common/ci');
 const {runNpmChecks} = require('./npm-checks');
 const {setLoggingPrefix} = require('../common/logging');
 
@@ -45,6 +45,14 @@ async function main() {
 
   if (!runNpmChecks()) {
     return abortTimedJob(jobName, startTime);
+  }
+
+  // TODO(rsimha): Remove this block once Travis is shut off.
+  if (isTravisBuild()) {
+    printSkipMessage(
+      jobName,
+      'this is a Travis build. Sizes will be reported from CircleCI'
+    );
   }
 
   if (!isPullRequestBuild()) {

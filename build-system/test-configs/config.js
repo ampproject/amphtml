@@ -158,6 +158,7 @@ const prettifyGlobs = [
   '.travis.yml',
   '.prettierrc',
   '.renovaterc.json',
+  '.circleci/config.yml',
   '.vscode/settings.json',
   '.github/workflows/continuous-integration-workflow.yml',
   '**/*.json',
