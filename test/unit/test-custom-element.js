@@ -1133,7 +1133,10 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
           element2 = new ElementClass();
           element2.ampdoc_ = env.ampdoc;
 
-          requestMeasureStub = env.sandbox.stub(Resource.prototype, 'requestMeasure');
+          requestMeasureStub = env.sandbox.stub(
+            Resource.prototype,
+            'requestMeasure'
+          );
         });
 
         it('should not request remeasure when no media attributes', () => {

@@ -591,7 +591,8 @@ function createBaseCustomElementClass(win) {
     initMediaAttrs_() {
       const hasMediaAttrs =
         this.hasAttribute('media') ||
-        (this.hasAttribute('sizes') && !this.hasAttribute('disable-inline-width')) ||
+        (this.hasAttribute('sizes') &&
+          !this.hasAttribute('disable-inline-width')) ||
         this.hasAttribute('heights');
       const hadMediaAttrs = !!this.mediaQueryProps_;
       const win = this.ownerDocument.defaultView;
