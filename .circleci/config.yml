@@ -193,12 +193,11 @@ workflows:
           context: amphtml-context
       - 'Module Build':
           context: amphtml-context
-      # TODO(rsimha): Uncomment after Travis is shut off (avoid duplicate reporting)
-      # - 'Bundle Size':
-      #     context: amphtml-context
-      #     requires:
-      #       - 'Nomodule Build'
-      #       - 'Module Build'
+      - 'Bundle Size':
+          context: amphtml-context
+          requires:
+            - 'Nomodule Build'
+            - 'Module Build'
       - 'Validator Tests':
           context: amphtml-context
       - 'Visual Diff Tests':
