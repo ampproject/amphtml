@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {MEDIA_LOAD_FAILURE_SRC_PROPERTY} from '../../../../src/event-helper';
 import {MediaPerformanceMetricsService} from '../media-performance-metrics-service';
 import {Services} from '../../../../src/services';
@@ -26,7 +26,7 @@ describes.fakeWin('media-performance-metrics-service', {amp: true}, (env) => {
   let win;
 
   before(() => {
-    clock = lolex.install({
+    clock = fakeTimers.install({
       target: win,
       toFake: ['Date'],
       now: 0,

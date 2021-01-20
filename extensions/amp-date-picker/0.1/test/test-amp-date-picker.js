@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import '../../../../third_party/react-dates/bundle';
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {AmpDatePicker} from '../amp-date-picker';
 import {createElementWithAttributes} from '../../../../src/dom.js';
 import {requireExternal} from '../../../../src/module';
@@ -107,7 +107,7 @@ describes.realWin(
     beforeEach(() => {
       win = env.win;
       document = env.win.document;
-      clock = lolex.install({
+      clock = fakeTimers.install({
         // Use the global window and not env.win. There is no way to inject the
         // env.win into moment right now.
         target: window,

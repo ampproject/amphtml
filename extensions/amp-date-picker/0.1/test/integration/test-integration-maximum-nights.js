@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {htmlFor} from '../../../../../src/static-template';
 import {poll} from '../../../../../testing/iframe';
 
@@ -39,16 +39,12 @@ config.run('amp-date-picker', function () {
     (env) => {
       let win;
       let doc;
-      //TODO(31104)(31103): Remove eslint exception when test unskipped
-      // eslint-disable-next-line
       let clock;
 
       beforeEach(() => {
         win = env.win;
         doc = env.win.document;
-        //TODO(31104)(31103): Remove eslint exception when test unskipped
-        // eslint-disable-next-line
-        clock = lolex.install({
+        clock = fakeTimers.install({
           target: win,
           now: new Date('2018-01-01T08:00:00Z'),
         });
@@ -72,9 +68,7 @@ config.run('amp-date-picker', function () {
       });
 
       after(() => {
-        //TODO(31104)(31103): Uncomment when the test below is unskipped
-        //Required to skip the after function for now as it is erroring
-        //clock.uninstall();
+        clock.uninstall();
       });
 
       function getCalendarButtonByDay(calendar, day) {

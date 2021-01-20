@@ -15,7 +15,7 @@
  */
 
 import '../amp-sidebar';
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {ActionService} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/action-constants';
 import {Keys} from '../../../../src/utils/key-codes';
@@ -229,7 +229,7 @@ describes.realWin(
         const screenReaderCloseButton = sidebarElement.querySelector(
           'button.i-amphtml-screen-reader'
         );
-        clock = lolex.install({
+        clock = fakeTimers.install({
           target: impl.win,
           toFake: ['Date', 'setTimeout'],
         });
@@ -336,7 +336,7 @@ describes.realWin(
       it('should close sidebar on button click', async () => {
         const sidebarElement = await getAmpSidebar({'stubHistory': true});
         const impl = sidebarElement.implementation_;
-        clock = lolex.install({
+        clock = fakeTimers.install({
           target: impl.win,
           toFake: ['Date', 'setTimeout'],
         });
@@ -384,7 +384,7 @@ describes.realWin(
           'button.i-amphtml-screen-reader'
         );
         const impl = sidebarElement.implementation_;
-        clock = lolex.install({
+        clock = fakeTimers.install({
           target: impl.win,
           toFake: ['Date', 'setTimeout'],
         });
@@ -419,7 +419,7 @@ describes.realWin(
       it('should close sidebar on escape', async () => {
         const sidebarElement = await getAmpSidebar({stubHistory: true});
         const impl = sidebarElement.implementation_;
-        clock = lolex.install({
+        clock = fakeTimers.install({
           target: impl.win,
           toFake: ['Date', 'setTimeout'],
         });
@@ -451,7 +451,7 @@ describes.realWin(
       it('should reflect state of the sidebar', async () => {
         const sidebarElement = await getAmpSidebar({stubHistory: true});
         const impl = sidebarElement.implementation_;
-        clock = lolex.install({
+        clock = fakeTimers.install({
           target: impl.win,
           toFake: ['Date', 'setTimeout'],
         });
@@ -531,7 +531,7 @@ describes.realWin(
         const anchor = sidebarElement.getElementsByTagName('a')[0];
         anchor.href = '#newloc';
         const impl = sidebarElement.implementation_;
-        clock = lolex.install({
+        clock = fakeTimers.install({
           target: impl.win,
           toFake: ['Date', 'setTimeout'],
         });

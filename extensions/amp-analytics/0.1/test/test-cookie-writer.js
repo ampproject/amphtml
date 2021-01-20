@@ -15,7 +15,7 @@
  */
 
 import * as cookie from '../../../../src/cookies';
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {CookieWriter} from '../cookie-writer';
 import {dict} from '../../../../src/utils/object';
 import {installLinkerReaderService} from '../linker-reader';
@@ -214,7 +214,7 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, (env) => {
   beforeEach(() => {
     win = env.win;
     doc = env.ampdoc;
-    clock = lolex.install({
+    clock = fakeTimers.install({
       target: window,
       now: new Date('2018-01-01T08:00:00Z'),
     });

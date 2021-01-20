@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {JankMeter} from '../../src/service/jank-meter';
 
 describes.realWin('jank-meter', {}, (env) => {
@@ -24,7 +24,7 @@ describes.realWin('jank-meter', {}, (env) => {
 
   beforeEach(() => {
     win = env.win;
-    clock = lolex.install({
+    clock = fakeTimers.install({
       target: win,
       toFake: ['Date', 'setTimeout', 'clearTimeout'],
     });

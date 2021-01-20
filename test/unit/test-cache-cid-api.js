@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {CacheCidApi} from '../../src/service/cache-cid-api';
 import {installTimerService} from '../../src/service/timer-impl';
 import {mockServiceForDoc, stubService} from '../../testing/test-helper';
@@ -35,7 +35,7 @@ describes.realWin('cacheCidApi', {amp: true}, (env) => {
       'isProxyOrigin',
     ]);
 
-    clock = lolex.install({
+    clock = fakeTimers.install({
       target: env.win,
       toFake: ['Date', 'setTimeout', 'clearTimeout'],
     });

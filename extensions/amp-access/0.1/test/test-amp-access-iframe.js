@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {AccessIframeAdapter} from '../amp-access-iframe';
 import {Messenger} from '../iframe-api/messenger';
 import {dev} from '../../../../src/log';
@@ -33,7 +33,7 @@ describes.fakeWin(
 
     beforeEach(() => {
       ampdoc = env.ampdoc;
-      clock = lolex.install({
+      clock = fakeTimers.install({
         target: ampdoc.win,
         toFake: ['Date', 'setTimeout', 'clearTimeout'],
       });

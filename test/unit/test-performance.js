@@ -15,7 +15,7 @@
  */
 
 import * as IniLoad from '../../src/ini-load';
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {
   Performance,
   installPerformanceService,
@@ -47,7 +47,7 @@ describes.realWin('performance', {amp: true}, (env) => {
   beforeEach(() => {
     win = env.win;
     ampdoc = env.ampdoc;
-    clock = lolex.install({
+    clock = fakeTimers.install({
       target: win,
       toFake: ['Date', 'setTimeout', 'clearTimeout'],
       // set initial Date.now to 100, so that we can differentiate between time relative to epoch and relative to process start (value vs. delta).

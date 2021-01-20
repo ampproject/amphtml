@@ -15,7 +15,7 @@
  */
 
 import * as cookie from '../../src/cookies';
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import * as url from '../../src/url';
 import {Crypto, installCryptoService} from '../../src/service/crypto-impl';
 import {Services} from '../../src/services';
@@ -826,7 +826,7 @@ describes.realWin('cid', {amp: true}, (env) => {
   beforeEach(() => {
     win = env.win;
     ampdoc = env.ampdoc;
-    clock = lolex.install({
+    clock = fakeTimers.install({
       target: win,
       toFake: ['Date', 'setTimeout', 'clearTimeout'],
     });
