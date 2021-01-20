@@ -82,12 +82,17 @@ Before creating a `<form>`, you must include the required script for the `<amp-f
 #### Allowed
 
 -   Other form-related elements, including: `<textarea>`, `<select>`, `<option>`, `<fieldset>`, `<label>`, `<input type=text>`, `<input type=submit>`, and so on.
+    [filter formats="websites, ads"]
 -   `<input type=password>` and `<input type=file>` inside of `<form method=POST action-xhr>`.
+    [/filter]<!-- formats="websites, ads" -->
 -   [`amp-selector`](https://amp.dev/documentation/components/amp-selector)
 
 #### Not Allowed
 
 -   `<input type=button>`, `<input type=image>`
+    [filter formats="email"]
+-   `<input type=password>` and `<input type=file>`
+    [/filter]<!-- formats="email" -->
 -   Most of the form-related attributes on inputs including: `form`, `formaction`, `formtarget`, `formmethod` and others.
 
 (Relaxing some of these rules might be reconsidered in the future - [please let us know](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#suggestions-and-feature-requests) if you require these and provide use cases).
