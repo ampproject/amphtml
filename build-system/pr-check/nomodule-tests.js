@@ -60,27 +60,18 @@ function main() {
     printChangeSummary();
     const buildTargets = determineBuildTargets();
     if (
-      !buildTargets.has('RUNTIME') &&
-      !buildTargets.has('FLAG_CONFIG') &&
-      !buildTargets.has('INTEGRATION_TEST')
-    ) {
-      printSkipMessage(
-        jobName,
-        'this PR does not affect the runtime, flag configs, or integration tests'
-      );
-      stopTimer(jobName, startTime);
-      return;
-    }
-
-    downloadNomoduleOutput();
-    timedExecOrDie('gulp update-packages');
-
-    if (
       buildTargets.has('RUNTIME') ||
       buildTargets.has('FLAG_CONFIG') ||
       buildTargets.has('INTEGRATION_TEST')
     ) {
-      timedExecOrDie('gulp integration --nobuild --headless --compiled');
+      downloadNomoduleOutput();
+      timedExecOrDie('gulp update-packages');
+      timedExecOrDie('gulp integration --nobuild --compiled --headless');
+    } else {
+      printSkipMessage(
+        jobName,
+        'this PR does not affect the runtime, flag configs, or integration tests'
+      );
     }
   }
 
