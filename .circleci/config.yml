@@ -117,6 +117,14 @@ jobs:
       - run:
           name: 'Visual Diff Tests'
           command: node build-system/pr-check/visual-diff-tests.js
+  'Unit Tests':
+    executor:
+      name: amphtml-executor
+    steps:
+      - setup_vm
+      - run:
+          name: 'Unit Tests'
+          command: node build-system/pr-check/unit-tests.js
   'Unminified Tests':
     executor:
       name: amphtml-executor
@@ -204,6 +212,8 @@ workflows:
           context: amphtml-context
           requires:
             - 'Nomodule Build'
+      - 'Unit Tests':
+          context: amphtml-context
       - 'Unminified Tests':
           context: amphtml-context
           requires:
