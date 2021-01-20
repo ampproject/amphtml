@@ -23,9 +23,11 @@ const del = require('del');
 const file = require('gulp-file');
 const fs = require('fs-extra');
 const gulp = require('gulp');
+const MagicString = require('magic-string');
 const open = require('open');
 const path = require('path');
 const regexpSourcemaps = require('gulp-regexp-sourcemaps');
+const remapping = require('@ampproject/remapping');
 const rename = require('gulp-rename');
 const source = require('vinyl-source-stream');
 const sourcemaps = require('gulp-sourcemaps');
@@ -66,6 +68,7 @@ const EXTENSION_BUNDLE_MAP = {
     'third_party/vega/vega.js',
   ],
   'amp-inputmask.js': ['third_party/inputmask/bundle.js'],
+  'amp-date-picker.js': ['third_party/react-dates/bundle.js'],
 };
 
 /**
@@ -191,34 +194,63 @@ async function compileAllJs(options) {
 }
 
 /**
- * Allows (ap|pre)pending to the already compiled, minified JS file
- *
+ * Allows pending inside the compile wrapper to the already compiled, minified JS file.
  * @param {string} srcFilename Name of the JS source file
  * @param {string} destFilePath File path to the compiled JS file
+ * @param {?Object} options
  */
-function appendToCompiledFile(srcFilename, destFilePath) {
+function combineWithCompiledFile(srcFilename, destFilePath, options) {
   const bundleFiles = EXTENSION_BUNDLE_MAP[srcFilename];
-  if (bundleFiles) {
-    const newSource = concatFilesToString(bundleFiles.concat([destFilePath]));
-    fs.writeFileSync(destFilePath, newSource, 'utf8');
-  } else if (srcFilename == 'amp-date-picker.js') {
-    // For amp-date-picker, we inject the react-dates bundle after compile
-    // to avoid CC from messing with browserify's module boilerplate.
-    const file = fs.readFileSync(destFilePath, 'utf8');
-    const firstLineBreak = file.indexOf('\n');
-    const wrapperOpen = file.substr(0, firstLineBreak + 1);
-    const reactDates = fs.readFileSync(
-      'third_party/react-dates/bundle.js',
-      'utf8'
-    );
-    // Inject the bundle inside the standard AMP wrapper (after the first line).
-    const newSource = [
-      wrapperOpen,
-      reactDates,
-      file.substr(firstLineBreak + 1),
-    ].join('\n');
-    fs.writeFileSync(destFilePath, newSource, 'utf8');
+  if (!bundleFiles) {
+    return;
   }
+  const bundle = new MagicString.Bundle({
+    separator: '\n',
+  });
+  // We need to inject the code _inside_ the extension wrapper
+  const destFileName = path.basename(destFilePath);
+  const contents = new MagicString(fs.readFileSync(destFilePath, 'utf8'), {
+    filename: destFileName,
+  });
+  const map = JSON.parse(fs.readFileSync(`${destFilePath}.map`, 'utf8'));
+  const {sourceRoot} = map;
+  map.sourceRoot = undefined;
+
+  // The wrapper may have been minified further. Search backwards from the
+  // expected <%=contents%> location to find the start of the `{` in the
+  // wrapping function.
+  const wrapperIndex = options.wrapper.indexOf('<%= contents %>');
+  const index = contents.original.lastIndexOf('{', wrapperIndex) + 1;
+
+  const wrapperOpen = contents.snip(0, index);
+  const remainingContents = contents.snip(index, contents.length());
+
+  bundle.addSource(wrapperOpen);
+  for (const bundleFile of bundleFiles) {
+    const contents = fs.readFileSync(bundleFile, 'utf8');
+    bundle.addSource(new MagicString(contents, {filename: bundleFile}));
+    bundle.append(MODULE_SEPARATOR);
+  }
+  bundle.addSource(remainingContents);
+
+  const bundledMap = bundle.generateDecodedMap({
+    file: destFileName,
+    hires: true,
+  });
+  const remapped = remapping(
+    bundledMap,
+    (file) => {
+      if (file === destFileName) {
+        return map;
+      }
+      return null;
+    },
+    !argv.full_sourcemaps
+  );
+  remapped.sourceRoot = sourceRoot;
+
+  fs.writeFileSync(destFilePath, bundle.toString(), 'utf8');
+  fs.writeFileSync(`${destFilePath}.map`, remapped.toString(), 'utf8');
 }
 
 function toEsmName(name) {
@@ -265,7 +297,7 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
     }
 
     const destPath = path.join(destDir, minifiedName);
-    appendToCompiledFile(srcFilename, destPath);
+    combineWithCompiledFile(srcFilename, destPath, options);
     fs.writeFileSync(path.join(destDir, 'version.txt'), internalRuntimeVersion);
     if (options.latestName) {
       fs.copySync(
@@ -324,7 +356,11 @@ function handleBundleError(err, continueOnError, destFilename) {
  * @param {?Object} options
  */
 function finishBundle(srcFilename, destDir, destFilename, options) {
-  appendToCompiledFile(srcFilename, path.join(destDir, destFilename));
+  combineWithCompiledFile(
+    srcFilename,
+    path.join(destDir, destFilename),
+    options
+  );
 
   if (options.latestName) {
     // "amp-foo-latest.js" -> "amp-foo-latest.max.js"
@@ -571,20 +607,6 @@ async function applyAmpConfig(targetFile, localDev, fortesting) {
       /* opt_fortesting */ fortesting
     );
   });
-}
-
-/**
- * Synchronously concatenates the given files into a string.
- *
- * @param {Array<string>} files A list of file paths.
- * @return {string} The concatenated contents of the given files.
- */
-function concatFilesToString(files) {
-  return files
-    .map(function (filePath) {
-      return fs.readFileSync(filePath, 'utf8');
-    })
-    .join(MODULE_SEPARATOR);
 }
 
 /**
