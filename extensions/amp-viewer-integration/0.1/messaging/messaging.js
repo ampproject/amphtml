@@ -171,13 +171,14 @@ export class Messaging {
           return;
         }
         if (
-          event.origin == origin &&
+          (event.origin == origin ||
+            event.origin.endsWith('.cdn.ampproject.org')) &&
           (!event.source || event.source == target) &&
           message.app === APP &&
           message.name === CHANNEL_OPEN_MSG
         ) {
           source.removeEventListener('message', listener);
-          const port = new WindowPortEmulator(source, origin, target);
+          const port = new WindowPortEmulator(source, event.origin, target);
           const messaging = new Messaging(
             null,
             port,
