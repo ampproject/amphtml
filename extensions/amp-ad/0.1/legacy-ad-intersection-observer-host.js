@@ -221,13 +221,10 @@ export class LegacyAdIntersectionObserverHost {
       this.intersectionObserver_.observe(this.baseElement_.element);
     }
     if (!this.fireInOb_) {
-      this.fireInOb_ = new IntersectionObserver(
-        (entries) => {
-          const lastEntry = entries[entries.length - 1];
-          this.sendElementIntersection_(lastEntry);
-        },
-        {root: this.baseElement_.win}
-      );
+      this.fireInOb_ = new IntersectionObserver((entries) => {
+        const lastEntry = entries[entries.length - 1];
+        this.sendElementIntersection_(lastEntry);
+      });
     }
     this.fire();
   }
@@ -272,6 +269,16 @@ export class LegacyAdIntersectionObserverHost {
    */
   sendElementIntersection_(entry) {
     const change = intersectionEntryToJson(entry);
+    // rootBounds is always null when in viewer due to sec. issues.
+    // See https://github.com/w3c/IntersectionObserver/issues/79
+    // Since before using a real InOb we used to provide rootBounds,
+    // we are temporarily continuing to do so now.
+    // TODO: eventually remove this when confident consumers don't rely on it.
+    console.error(JSON.stringify(change));
+    if (change.rootBounds === null) {
+      change.rootBounds = this.baseElement_.getViewport().getRect();
+    }
+    console.error({change});
 
     if (
       this.pendingChanges_.length > 0 &&
