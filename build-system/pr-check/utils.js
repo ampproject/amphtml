@@ -15,7 +15,6 @@
  */
 'use strict';
 
-const colors = require('ansi-colors');
 const {
   gitBranchCreationPoint,
   gitBranchName,
@@ -25,7 +24,9 @@ const {
   gitCiMasterBaseline,
   shortSha,
 } = require('../common/git');
+const {cyan, green, yellow} = require('ansi-colors');
 const {execOrDie, execOrThrow, execWithError, exec} = require('../common/exec');
+const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
 const {isCiBuild, ciBuildId, ciPullRequestSha} = require('../common/ci');
 const {replaceUrls, signalDistUpload} = require('../tasks/pr-deploy-bot-utils');
 
@@ -44,108 +45,117 @@ const GIT_BRANCH_URL =
 
 /**
  * Prints a summary of files changed by, and commits included in the PR.
- * @param {string} fileName
  */
-function printChangeSummary(fileName) {
-  const fileLogPrefix = colors.bold(colors.yellow(`${fileName}:`));
+function printChangeSummary() {
+  const loggingPrefix = getLoggingPrefix();
   let commitSha;
 
   if (isCiBuild()) {
-    console.log(
-      `${fileLogPrefix} Latest commit from ${colors.cyan('master')} included ` +
-        `in this build: ${colors.cyan(shortSha(gitCiMasterBaseline()))}`
+    logWithoutTimestamp(
+      `${loggingPrefix} Latest commit from ${cyan('master')} included ` +
+        `in this build: ${cyan(shortSha(gitCiMasterBaseline()))}`
     );
     commitSha = ciPullRequestSha();
   } else {
     commitSha = gitCommitHash();
   }
-  console.log(
-    `${fileLogPrefix} Testing the following changes at commit ` +
-      `${colors.cyan(shortSha(commitSha))}`
+  logWithoutTimestamp(
+    `${loggingPrefix} Testing the following changes at commit ` +
+      `${cyan(shortSha(commitSha))}`
   );
 
   const filesChanged = gitDiffStatMaster();
-  console.log(filesChanged);
+  logWithoutTimestamp(filesChanged);
 
   const branchCreationPoint = gitBranchCreationPoint();
   if (branchCreationPoint) {
-    console.log(
-      `${fileLogPrefix} Commit log since branch`,
-      `${colors.cyan(gitBranchName())} was forked from`,
-      `${colors.cyan('master')} at`,
-      `${colors.cyan(shortSha(branchCreationPoint))}:`
+    logWithoutTimestamp(
+      `${loggingPrefix} Commit log since branch`,
+      `${cyan(gitBranchName())} was forked from`,
+      `${cyan('master')} at`,
+      `${cyan(shortSha(branchCreationPoint))}:`
     );
-    console.log(gitDiffCommitLog() + '\n');
+    logWithoutTimestamp(gitDiffCommitLog() + '\n');
   } else {
-    console.error(
-      fileLogPrefix,
-      colors.yellow('WARNING:'),
+    logWithoutTimestamp(
+      loggingPrefix,
+      yellow('WARNING:'),
       'Could not find a common ancestor for',
-      colors.cyan(gitBranchName()),
+      cyan(gitBranchName()),
       'and',
-      colors.cyan('master') + '. (This can happen with older PR branches.)'
+      cyan('master') + '. (This can happen with older PR branches.)'
     );
-    console.error(
-      fileLogPrefix,
-      colors.yellow('NOTE 1:'),
+    logWithoutTimestamp(
+      loggingPrefix,
+      yellow('NOTE 1:'),
       'If this causes unexpected test failures, try rebasing the PR branch on',
-      colors.cyan('master') + '.'
+      cyan('master') + '.'
     );
-    console.error(
-      fileLogPrefix,
-      colors.yellow('NOTE 2:'),
+    logWithoutTimestamp(
+      loggingPrefix,
+      yellow('NOTE 2:'),
       "If rebasing doesn't work, you may have to recreate the branch. See",
-      colors.cyan(GIT_BRANCH_URL) + '.\n'
+      cyan(GIT_BRANCH_URL) + '.\n'
     );
   }
 }
 
 /**
- * Starts a timer to measure the execution time of the given function.
- * @param {string} functionName
- * @param {string} fileName
+ * Prints a message indicating why a job was skipped.
+ * @param {string} jobName
+ * @param {string} skipReason
+ */
+function printSkipMessage(jobName, skipReason) {
+  const loggingPrefix = getLoggingPrefix();
+  logWithoutTimestamp(
+    `${loggingPrefix} Skipping ${cyan(jobName)} because ${skipReason}.`
+  );
+}
+
+/**
+ * Starts a timer to measure the execution time of the given job / command.
+ * @param {string} jobNameOrCmd
  * @return {DOMHighResTimeStamp}
  */
-function startTimer(functionName, fileName) {
+function startTimer(jobNameOrCmd) {
   const startTime = Date.now();
-  const fileLogPrefix = colors.bold(colors.yellow(`${fileName}:`));
-  console.log(
-    '\n' + fileLogPrefix,
+  const loggingPrefix = getLoggingPrefix();
+  logWithoutTimestamp(
+    '\n' + loggingPrefix,
     'Running',
-    colors.cyan(functionName) + '...'
+    cyan(jobNameOrCmd) + '...'
   );
   return startTime;
 }
 
 /**
- * Stops the timer for the given function and prints the execution time.
- * @param {string} functionName
- * @param {string} fileName
+ * Stops the timer for the given job / command and prints the execution time.
+ * @param {string} jobNameOrCmd
  * @param {DOMHighResTimeStamp} startTime
  * @return {number}
  */
-function stopTimer(functionName, fileName, startTime) {
+function stopTimer(jobNameOrCmd, startTime) {
   const endTime = Date.now();
   const executionTime = endTime - startTime;
   const mins = Math.floor(executionTime / 60000);
   const secs = Math.floor((executionTime % 60000) / 1000);
-  const fileLogPrefix = colors.bold(colors.yellow(`${fileName}:`));
-  console.log(
-    fileLogPrefix,
+  const loggingPrefix = getLoggingPrefix();
+  logWithoutTimestamp(
+    loggingPrefix,
     'Done running',
-    colors.cyan(functionName),
+    cyan(jobNameOrCmd),
     'Total time:',
-    colors.green(mins + 'm ' + secs + 's')
+    green(mins + 'm ' + secs + 's')
   );
 }
 
 /**
- * Stops the Node process and timer
- * @param {string} fileName
+ * Aborts the process after stopping the timer for a given job
+ * @param {string} jobName
  * @param {startTime} startTime
  */
-function stopTimedJob(fileName, startTime) {
-  stopTimer(fileName, fileName, startTime);
+function stopTimedJob(jobName, startTime) {
+  stopTimer(jobName, startTime);
   process.exitCode = 1;
 }
 
@@ -155,10 +165,10 @@ function stopTimedJob(fileName, startTime) {
  * @return {!Function(string, string=): ?}
  */
 function timedExecFn(execFn) {
-  return (cmd, fileName, ...rest) => {
-    const startTime = startTimer(cmd, fileName);
+  return (cmd, ...rest) => {
+    const startTime = startTimer(cmd);
     const p = execFn(cmd, ...rest);
-    stopTimer(cmd, fileName, startTime);
+    stopTimer(cmd, startTime);
     return p;
   };
 }
@@ -167,7 +177,6 @@ function timedExecFn(execFn) {
  * Executes the provided command and times it. Errors, if any, are printed.
  * @function
  * @param {string} cmd
- * @param {string} fileName
  * @return {!Object} Node process
  */
 const timedExec = timedExecFn(exec);
@@ -176,7 +185,6 @@ const timedExec = timedExecFn(exec);
  * Executes the provided command and times it. Errors, if any, are returned.
  * @function
  * @param {string} cmd
- * @param {string} fileName
  * @return {!Object} Node process
  */
 const timedExecWithError = timedExecFn(execWithError);
@@ -186,7 +194,6 @@ const timedExecWithError = timedExecFn(execWithError);
  * failure.
  * @function
  * @param {string} cmd
- * @param {string} fileName
  */
 const timedExecOrDie = timedExecFn(execOrDie);
 
@@ -195,31 +202,29 @@ const timedExecOrDie = timedExecFn(execOrDie);
  * case of failure.
  * @function
  * @param {string} cmd
- * @param {string} fileName
  */
 const timedExecOrThrow = timedExecFn(execOrThrow);
 
 /**
  * Download output helper
- * @param {string} functionName
  * @param {string} outputFileName
  * @param {string} outputDirs
  * @private
  */
-function downloadOutput_(functionName, outputFileName, outputDirs) {
-  const fileLogPrefix = colors.bold(colors.yellow(`${functionName}:`));
+function downloadOutput_(outputFileName, outputDirs) {
+  const loggingPrefix = getLoggingPrefix();
   const buildOutputDownloadUrl = `${GCLOUD_STORAGE_BUCKET}/${outputFileName}`;
   const dirsToUnzip = outputDirs.split(' ');
 
-  console.log(
-    `${fileLogPrefix} Downloading build output from ` +
-      colors.cyan(buildOutputDownloadUrl) +
+  logWithoutTimestamp(
+    `${loggingPrefix} Downloading build output from ` +
+      cyan(buildOutputDownloadUrl) +
       '...'
   );
   execOrDie(`gsutil -q cp ${buildOutputDownloadUrl} ${outputFileName}`);
 
-  console.log(
-    `${fileLogPrefix} Extracting ` + colors.cyan(outputFileName) + '...'
+  logWithoutTimestamp(
+    `${loggingPrefix} Extracting ` + cyan(outputFileName) + '...'
   );
   dirsToUnzip.forEach((dir) => {
     execOrDie(`unzip -q -o ${outputFileName} '${dir.replace('/', '/*')}'`);
@@ -229,29 +234,28 @@ function downloadOutput_(functionName, outputFileName, outputDirs) {
 
 /**
  * Upload output helper
- * @param {string} functionName
  * @param {string} outputFileName
  * @param {string} outputDirs
  * @private
  */
-function uploadOutput_(functionName, outputFileName, outputDirs) {
-  const fileLogPrefix = colors.bold(colors.yellow(`${functionName}:`));
+function uploadOutput_(outputFileName, outputDirs) {
+  const loggingPrefix = getLoggingPrefix();
 
-  console.log(
-    `\n${fileLogPrefix} Compressing ` +
-      colors.cyan(outputDirs.split(' ').join(', ')) +
+  logWithoutTimestamp(
+    `\n${loggingPrefix} Compressing ` +
+      cyan(outputDirs.split(' ').join(', ')) +
       ' into ' +
-      colors.cyan(outputFileName) +
+      cyan(outputFileName) +
       '...'
   );
   execOrDie(`zip -r -q ${outputFileName} ${outputDirs}`);
   execOrDie(`du -sh ${outputFileName}`);
 
-  console.log(
-    `${fileLogPrefix} Uploading ` +
-      colors.cyan(outputFileName) +
+  logWithoutTimestamp(
+    `${loggingPrefix} Uploading ` +
+      cyan(outputFileName) +
       ' to ' +
-      colors.cyan(GCLOUD_STORAGE_BUCKET) +
+      cyan(GCLOUD_STORAGE_BUCKET) +
       '...'
   );
   execOrDie(`gsutil -q -m cp -r ${outputFileName} ${GCLOUD_STORAGE_BUCKET}`);
@@ -259,75 +263,69 @@ function uploadOutput_(functionName, outputFileName, outputDirs) {
 
 /**
  * Downloads and unzips build output from storage
- * @param {string} functionName
  */
-function downloadUnminifiedOutput(functionName) {
-  downloadOutput_(functionName, UNMINIFIED_OUTPUT_FILE, BUILD_OUTPUT_DIRS);
+function downloadUnminifiedOutput() {
+  downloadOutput_(UNMINIFIED_OUTPUT_FILE, BUILD_OUTPUT_DIRS);
 }
 
 /**
  * Downloads and unzips nomodule output from storage
- * @param {string} functionName
  */
-function downloadNomoduleOutput(functionName) {
-  downloadOutput_(functionName, NOMODULE_OUTPUT_FILE, BUILD_OUTPUT_DIRS);
+function downloadNomoduleOutput() {
+  downloadOutput_(NOMODULE_OUTPUT_FILE, BUILD_OUTPUT_DIRS);
 }
 
 /**
  * Downloads and unzips module output from storage
- * @param {string} functionName
  */
-function downloadModuleOutput(functionName) {
-  downloadOutput_(functionName, MODULE_OUTPUT_FILE, BUILD_OUTPUT_DIRS);
+function downloadModuleOutput() {
+  downloadOutput_(MODULE_OUTPUT_FILE, BUILD_OUTPUT_DIRS);
 }
 
 /**
  * Zips and uploads the build output to a remote storage location
- * @param {string} functionName
  */
-function uploadUnminifiedOutput(functionName) {
-  uploadOutput_(functionName, UNMINIFIED_OUTPUT_FILE, BUILD_OUTPUT_DIRS);
+function uploadUnminifiedOutput() {
+  uploadOutput_(UNMINIFIED_OUTPUT_FILE, BUILD_OUTPUT_DIRS);
 }
 
 /**
  * Zips and uploads the nomodule output to a remote storage location
- * @param {string} functionName
  */
-function uploadNomoduleOutput(functionName) {
+function uploadNomoduleOutput() {
   const nomoduleOutputDirs = `${BUILD_OUTPUT_DIRS} ${APP_SERVING_DIRS}`;
-  uploadOutput_(functionName, NOMODULE_OUTPUT_FILE, nomoduleOutputDirs);
+  uploadOutput_(NOMODULE_OUTPUT_FILE, nomoduleOutputDirs);
 }
 
 /**
  * Zips and uploads the module output to a remote storage location
- * @param {string} functionName
  */
-function uploadModuleOutput(functionName) {
+function uploadModuleOutput() {
   const moduleOutputDirs = `${BUILD_OUTPUT_DIRS} ${APP_SERVING_DIRS}`;
-  uploadOutput_(functionName, MODULE_OUTPUT_FILE, moduleOutputDirs);
+  uploadOutput_(MODULE_OUTPUT_FILE, moduleOutputDirs);
 }
 
 /**
  * Replaces URLS in HTML files, zips and uploads nomodule output,
  * and signals to the AMP PR Deploy bot that the upload is complete.
- * @param {string} functionName
  */
-async function processAndUploadNomoduleOutput(functionName) {
+async function processAndUploadNomoduleOutput() {
   await replaceUrls('test/manual');
   await replaceUrls('examples');
-  uploadNomoduleOutput(functionName);
+  uploadNomoduleOutput();
   await signalDistUpload('success');
 }
 
 module.exports = {
+  stopTimedJob,
   downloadUnminifiedOutput,
   downloadNomoduleOutput,
   downloadModuleOutput,
   printChangeSummary,
+  printSkipMessage,
   processAndUploadNomoduleOutput,
   startTimer,
   stopTimer,
-  stopTimedJob,
   timedExec,
   timedExecOrDie,
   timedExecWithError,

@@ -21,41 +21,41 @@
  * This is run during the CI stage = build; job = Nomodule Build.
  */
 
-const colors = require('ansi-colors');
-const log = require('fancy-log');
 const {
+  stopTimedJob,
   printChangeSummary,
+  printSkipMessage,
   processAndUploadNomoduleOutput,
   startTimer,
   stopTimer,
-  stopTimedJob,
   timedExecWithError,
-  timedExecOrDie: timedExecOrDieBase,
+  timedExecOrDie,
   uploadNomoduleOutput,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isPullRequestBuild} = require('../common/ci');
+const {log} = require('../common/logging');
+const {red, yellow} = require('ansi-colors');
 const {runNpmChecks} = require('./npm-checks');
+const {setLoggingPrefix} = require('../common/logging');
 const {signalDistUpload} = require('../tasks/pr-deploy-bot-utils');
 
-const FILENAME = 'nomodule-build.js';
-const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
-const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
+const jobName = 'nomodule-build.js';
 
 async function main() {
-  const startTime = startTimer(FILENAME, FILENAME);
-  if (!runNpmChecks(FILENAME)) {
-    stopTimedJob(FILENAME, startTime);
-    return;
+  setLoggingPrefix(jobName);
+  const startTime = startTimer(jobName);
+  if (!runNpmChecks()) {
+    return stopTimedJob(jobName, startTime);
   }
 
   if (!isPullRequestBuild()) {
     timedExecOrDie('gulp update-packages');
     timedExecOrDie('gulp dist --fortesting');
-    uploadNomoduleOutput(FILENAME);
+    uploadNomoduleOutput();
   } else {
-    printChangeSummary(FILENAME);
-    const buildTargets = determineBuildTargets(FILENAME);
+    printChangeSummary();
+    const buildTargets = determineBuildTargets();
     if (
       buildTargets.has('RUNTIME') ||
       buildTargets.has('FLAG_CONFIG') ||
@@ -65,28 +65,26 @@ async function main() {
       buildTargets.has('UNIT_TEST')
     ) {
       timedExecOrDie('gulp update-packages');
-      const process = timedExecWithError('gulp dist --fortesting', FILENAME);
+      const process = timedExecWithError('gulp dist --fortesting');
       if (process.status !== 0) {
         const error = process.error || new Error('unknown error, check logs');
-        log(colors.red('ERROR'), colors.yellow(error.message));
+        log(red('ERROR'), yellow(error.message));
         await signalDistUpload('errored');
-        stopTimedJob(FILENAME, startTime);
-        return;
+        return stopTimedJob(jobName, startTime);
       }
       timedExecOrDie('gulp storybook --build');
-      await processAndUploadNomoduleOutput(FILENAME);
+      await processAndUploadNomoduleOutput();
     } else {
       await signalDistUpload('skipped');
-      console.log(
-        `${FILELOGPREFIX} Skipping`,
-        colors.cyan('Nomodule Build'),
-        'because this commit does not affect the runtime, flag configs,',
-        'integration tests, end-to-end tests, or visual diff tests.'
+      printSkipMessage(
+        jobName,
+        'this PR does not affect the runtime, flag configs, integration ' +
+          'tests, end-to-end tests, or visual diff tests'
       );
     }
   }
 
-  stopTimer(FILENAME, FILENAME, startTime);
+  stopTimer(jobName, startTime);
 }
 
 main();

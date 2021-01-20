@@ -21,37 +21,36 @@
  * This is run during the CI stage = build; job = module build.
  */
 
-const colors = require('ansi-colors');
 const {
+  stopTimedJob,
   printChangeSummary,
+  printSkipMessage,
   startTimer,
   stopTimer,
-  stopTimedJob,
-  timedExecOrDie: timedExecOrDieBase,
+  timedExecOrDie,
   uploadModuleOutput,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isPullRequestBuild} = require('../common/ci');
 const {runNpmChecks} = require('./npm-checks');
+const {setLoggingPrefix} = require('../common/logging');
 
-const FILENAME = 'module-build.js';
-const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
-const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
+const jobName = 'module-build.js';
 
 function main() {
-  const startTime = startTimer(FILENAME, FILENAME);
-  if (!runNpmChecks(FILENAME)) {
-    stopTimedJob(FILENAME, startTime);
-    return;
+  setLoggingPrefix(jobName);
+  const startTime = startTimer(jobName);
+  if (!runNpmChecks()) {
+    return stopTimedJob(jobName, startTime);
   }
 
   if (!isPullRequestBuild()) {
     timedExecOrDie('gulp update-packages');
     timedExecOrDie('gulp dist --esm --fortesting');
-    uploadModuleOutput(FILENAME);
+    uploadModuleOutput();
   } else {
-    printChangeSummary(FILENAME);
-    const buildTargets = determineBuildTargets(FILENAME);
+    printChangeSummary();
+    const buildTargets = determineBuildTargets();
     // TODO(#31102): This list must eventually match the same buildTargets check
     // found in pr-check/nomodule-build.js as we turn on the systems that
     // run against the module build. (ex. visual diffs, e2e, etc.)
@@ -62,17 +61,16 @@ function main() {
     ) {
       timedExecOrDie('gulp update-packages');
       timedExecOrDie('gulp dist --esm --fortesting');
-      uploadModuleOutput(FILENAME);
+      uploadModuleOutput();
     } else {
-      console.log(
-        `${FILELOGPREFIX} Skipping`,
-        colors.cyan('Module Build'),
-        'because this commit does not affect the runtime or flag configs.'
+      printSkipMessage(
+        jobName,
+        'this PR does not affect the runtime, flag configs, or integration tests'
       );
     }
   }
 
-  stopTimer(FILENAME, FILENAME, startTime);
+  stopTimer(jobName, startTime);
 }
 
 main();

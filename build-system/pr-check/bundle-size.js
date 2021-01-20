@@ -22,53 +22,52 @@
  * This is run during the CI stage = test; job = Bundle Size.
  */
 
-const colors = require('ansi-colors');
 const {
+  stopTimedJob,
   downloadModuleOutput,
   downloadNomoduleOutput,
   printChangeSummary,
+  printSkipMessage,
   startTimer,
   stopTimer,
-  stopTimedJob,
-  timedExecOrDie: timedExecOrDieBase,
+  timedExecOrDie,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isPullRequestBuild} = require('../common/ci');
 const {runNpmChecks} = require('./npm-checks');
+const {setLoggingPrefix} = require('../common/logging');
 
-const FILENAME = 'bundle-size.js';
-const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
-const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
+const jobName = 'bundle-size.js';
 
 async function main() {
-  const startTime = startTimer(FILENAME, FILENAME);
-  if (!runNpmChecks(FILENAME)) {
-    stopTimedJob(FILENAME, startTime);
-    return;
+  setLoggingPrefix(jobName);
+  const startTime = startTimer(jobName);
+
+  if (!runNpmChecks()) {
+    return stopTimedJob(jobName, startTime);
   }
 
   if (!isPullRequestBuild()) {
-    downloadNomoduleOutput(FILENAME);
-    downloadModuleOutput(FILENAME);
+    downloadNomoduleOutput();
+    downloadModuleOutput();
     timedExecOrDie('gulp bundle-size --on_push_build');
   } else {
-    printChangeSummary(FILENAME);
-    const buildTargets = determineBuildTargets(FILENAME);
+    printChangeSummary();
+    const buildTargets = determineBuildTargets();
     if (buildTargets.has('RUNTIME') || buildTargets.has('FLAG_CONFIG')) {
-      downloadNomoduleOutput(FILENAME);
-      downloadModuleOutput(FILENAME);
+      downloadNomoduleOutput();
+      downloadModuleOutput();
       timedExecOrDie('gulp bundle-size --on_pr_build');
     } else {
       timedExecOrDie('gulp bundle-size --on_skipped_build');
-      console.log(
-        `${FILELOGPREFIX} Skipping`,
-        colors.cyan('Bundle Size'),
-        'because this commit does not affect the runtime or flag configs.'
+      printSkipMessage(
+        jobName,
+        'this PR does not affect the runtime or flag configs'
       );
     }
   }
 
-  stopTimer(FILENAME, FILENAME, startTime);
+  stopTimer(jobName, startTime);
 }
 
 main();
