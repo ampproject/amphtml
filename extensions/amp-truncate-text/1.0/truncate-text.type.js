@@ -24,8 +24,6 @@ var TruncateTextDef = {};
  *   slotCollapsed: (?PreactDef.VNode|undefined),
  *   slotExpanded: (?PreactDef.VNode|undefined),
  *   slotPersistent: (?PreactDef.VNode|undefined),
- *   onBeforeOpen: (function|undefined),
- *   onAfterClose: (function|undefined),
  * }}
  */
 TruncateTextDef.Props;
