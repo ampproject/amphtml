@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as lolex from 'lolex';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {LayoutPriority} from '../../src/layout';
 import {Resource, ResourceState} from '../../src/service/resource';
@@ -25,12 +26,17 @@ import {layoutRectLtwh} from '../../src/layout-rect';
 import {loadPromise} from '../../src/event-helper';
 
 /*eslint "google-camelcase/google-camelcase": 0*/
-describe('Resources', () => {
+describes.realWin('Resources', {amp: true}, (env) => {
+  let window, document;
   let clock;
   let resources;
 
   beforeEach(() => {
-    clock = window.sandbox.useFakeTimers();
+    window = env.win;
+    document = window.document;
+    delete window.requestIdleCallback;
+    delete window.cancelIdleCallback;
+    clock = lolex.install({target: window});
     resources = new ResourcesImpl(new AmpDocSingle(window));
     resources.isRuntimeOn_ = false;
   });
@@ -41,7 +47,7 @@ describe('Resources', () => {
 
   it('should calculate correct calcTaskScore', () => {
     const viewportRect = layoutRectLtwh(0, 100, 300, 400);
-    window.sandbox.stub(resources.viewport_, 'getRect').returns(viewportRect);
+    env.sandbox.stub(resources.viewport_, 'getRect').returns(viewportRect);
 
     // Task 1 is right in the middle of the viewport and priority 0
     const task_in_viewport_p0 = {
@@ -272,7 +278,7 @@ describe('Resources', () => {
         applySizesAndMediaQuery: () => {},
       };
       resources.visible_ = false;
-      window.sandbox
+      env.sandbox
         .stub(resources.ampdoc, 'getVisibilityState')
         .returns(VisibilityState.PRERENDER);
       resources.scheduleLayoutOrPreload(resource, true);
@@ -295,7 +301,7 @@ describe('Resources', () => {
       applySizesAndMediaQuery: () => {},
     };
     resources.visible_ = false;
-    window.sandbox
+    env.sandbox
       .stub(resources.ampdoc, 'getVisibilityState')
       .returns(VisibilityState.PRERENDER);
     resources.scheduleLayoutOrPreload(resource, true);
@@ -318,7 +324,7 @@ describe('Resources', () => {
       applySizesAndMediaQuery: () => {},
     };
     resources.visible_ = false;
-    window.sandbox
+    env.sandbox
       .stub(resources.ampdoc, 'getVisibilityState')
       .returns(VisibilityState.HIDDEN);
     resources.scheduleLayoutOrPreload(resource, true);

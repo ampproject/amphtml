@@ -257,7 +257,7 @@ export class ResourcesImpl {
     // When user scrolling stops, run pass to check newly in-viewport elements.
     // When viewport is resized, we have to re-measure everything.
     this.viewport_.onChanged((event) => {
-      this.lastScrollTime_ = Date.now();
+      this.lastScrollTime_ = this.win.Date.now();
       this.lastVelocity_ = event.velocity;
       if (event.relayoutAll) {
         this.relayoutAll_ = true;
@@ -274,14 +274,14 @@ export class ResourcesImpl {
       this.schedulePass();
     });
     this.viewport_.onScroll(() => {
-      this.lastScrollTime_ = Date.now();
+      this.lastScrollTime_ = this.win.Date.now();
     });
 
     // When document becomes visible, e.g. from "prerender" mode, do a
     // simple pass.
     this.ampdoc.onVisibilityChanged(() => {
       if (this.firstVisibleTime_ == -1 && this.ampdoc.isVisible()) {
-        this.firstVisibleTime_ = Date.now();
+        this.firstVisibleTime_ = this.win.Date.now();
       }
       this.schedulePass();
     });
@@ -858,7 +858,7 @@ export class ResourcesImpl {
     // scroll adjustment to avoid active viewport changing without user's
     // action. The elements in the active viewport are not resized and instead
     // the overflow callbacks are called.
-    const now = Date.now();
+    const now = this.win.Date.now();
     const viewportRect = this.viewport_.getRect();
     const topOffset = viewportRect.height / 10;
     const bottomOffset = viewportRect.height / 10;
@@ -1186,7 +1186,7 @@ export class ResourcesImpl {
   discoverWork_() {
     // TODO(dvoytenko): vsync separation may be needed for different phases
 
-    const now = Date.now();
+    const now = this.win.Date.now();
 
     // Ensure all resources layout phase complete; when relayoutAll is requested
     // force re-layout.
@@ -1460,7 +1460,7 @@ export class ResourcesImpl {
    * @private
    */
   work_() {
-    const now = Date.now();
+    const now = this.win.Date.now();
 
     let timeout = -1;
     let task = this.queue_.peek(this.boundTaskScorer_);
@@ -1613,7 +1613,7 @@ export class ResourcesImpl {
    * @private
    */
   calcTaskTimeout_(task) {
-    const now = Date.now();
+    const now = this.win.Date.now();
 
     if (this.exec_.getSize() == 0) {
       // If we've never been visible, return 0. This follows the previous
@@ -1787,7 +1787,7 @@ export class ResourcesImpl {
         Math.max(resource.getLayoutPriority(), parentPriority) + priorityOffset,
       forceOutsideViewport,
       callback,
-      scheduleTime: Date.now(),
+      scheduleTime: this.win.Date.now(),
       startTime: 0,
       promise: null,
     };

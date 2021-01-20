@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as lolex from 'lolex';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {LayoutPriority} from '../../src/layout';
 import {MutatorImpl} from '../../src/service/mutator-impl';
@@ -29,7 +30,54 @@ import {layoutRectLtwh} from '../../src/layout-rect';
 /** @type {?Event|undefined} */
 const NO_EVENT = undefined;
 
-describe('mutator changeSize', () => {
+describes.realWin('mutator changeSize', {amp: true}, (env) => {
+  let window, document;
+  let clock;
+  let viewportMock;
+  let resources, mutator;
+  let resource1, resource2;
+
+  beforeEach(() => {
+    window = env.win;
+    document = window.document;
+    delete window.requestIdleCallback;
+    delete window.cancelIdleCallback;
+    clock = lolex.install({target: window});
+    const ampdoc = new AmpDocSingle(window);
+    resources = new ResourcesImpl(ampdoc);
+    resources.isRuntimeOn_ = false;
+    resources.win = {
+      location: {
+        href: 'https://example.org/doc1',
+      },
+      Date: window.Date,
+      getComputedStyle: (el) => {
+        return el.fakeComputedStyle
+          ? el.fakeComputedStyle
+          : window.getComputedStyle(el);
+      },
+    };
+    mutator = new MutatorImpl(ampdoc);
+    mutator.win = resources.win;
+    mutator.resources_ = resources;
+
+    installPlatformService(resources.win);
+    const platform = Services.platformFor(resources.win);
+    env.sandbox.stub(platform, 'isIe').returns(false);
+
+    installInputService(resources.win);
+
+    viewportMock = env.sandbox.mock(mutator.viewport_);
+
+    resource1 = createResource(1, layoutRectLtwh(10, 10, 100, 100));
+    resource2 = createResource(2, layoutRectLtwh(10, 1010, 100, 100));
+    resources.owners_ = [resource1, resource2];
+  });
+
+  afterEach(() => {
+    viewportMock.verify();
+  });
+
   function createElement(rect) {
     const signals = new Signals();
     return {
@@ -57,7 +105,7 @@ describe('mutator changeSize', () => {
       /* eslint-disable google-camelcase/google-camelcase */
       contains: (unused_otherElement) => false,
       updateLayoutBox: () => {},
-      togglePlaceholder: () => window.sandbox.spy(),
+      togglePlaceholder: () => env.sandbox.spy(),
       overflowCallback: (
         unused_overflown,
         unused_requestedHeight,
@@ -80,50 +128,9 @@ describe('mutator changeSize', () => {
     resource.element['__AMP__RESOURCE'] = resource;
     resource.state_ = ResourceState.READY_FOR_LAYOUT;
     resource.initialLayoutBox_ = resource.layoutBox_ = rect;
-    resource.changeSize = window.sandbox.spy();
+    resource.changeSize = env.sandbox.spy();
     return resource;
   }
-
-  let clock;
-  let viewportMock;
-  let resources, mutator;
-  let resource1, resource2;
-
-  beforeEach(() => {
-    clock = window.sandbox.useFakeTimers();
-    const ampdoc = new AmpDocSingle(window);
-    resources = new ResourcesImpl(ampdoc);
-    resources.isRuntimeOn_ = false;
-    resources.win = {
-      location: {
-        href: 'https://example.org/doc1',
-      },
-      getComputedStyle: (el) => {
-        return el.fakeComputedStyle
-          ? el.fakeComputedStyle
-          : window.getComputedStyle(el);
-      },
-    };
-    mutator = new MutatorImpl(ampdoc);
-    mutator.win = resources.win;
-    mutator.resources_ = resources;
-
-    installPlatformService(resources.win);
-    const platform = Services.platformFor(resources.win);
-    window.sandbox.stub(platform, 'isIe').returns(false);
-
-    installInputService(resources.win);
-
-    viewportMock = window.sandbox.mock(mutator.viewport_);
-
-    resource1 = createResource(1, layoutRectLtwh(10, 10, 100, 100));
-    resource2 = createResource(2, layoutRectLtwh(10, 1010, 100, 100));
-    resources.owners_ = [resource1, resource2];
-  });
-
-  afterEach(() => {
-    viewportMock.verify();
-  });
 
   it('should schedule separate requests', () => {
     mutator.scheduleChangeSize_(
@@ -294,8 +301,8 @@ describe('mutator changeSize', () => {
 
   it('should measure non-measured elements', () => {
     resource1.initialLayoutBox_ = null;
-    resource1.measure = window.sandbox.spy();
-    resource2.measure = window.sandbox.spy();
+    resource1.measure = env.sandbox.spy();
+    resource2.measure = env.sandbox.spy();
 
     mutator.scheduleChangeSize_(resource1, 111, 200, undefined, NO_EVENT, true);
     mutator.scheduleChangeSize_(resource2, 111, 222, undefined, NO_EVENT, true);
@@ -323,7 +330,7 @@ describe('mutator changeSize', () => {
     let viewportRect;
 
     beforeEach(() => {
-      overflowCallbackSpy = window.sandbox.spy();
+      overflowCallbackSpy = env.sandbox.spy();
       resource1.element.overflowCallback = overflowCallbackSpy;
 
       viewportRect = {top: 2, left: 0, right: 100, bottom: 200, height: 200};
@@ -335,12 +342,12 @@ describe('mutator changeSize', () => {
         bottom: 50,
         height: 50,
       };
-      vsyncSpy = window.sandbox.stub(mutator.vsync_, 'run');
+      vsyncSpy = env.sandbox.stub(mutator.vsync_, 'run');
       resources.visible_ = true;
     });
 
     it('should NOT change size when height is unchanged', () => {
-      const callback = window.sandbox.spy();
+      const callback = env.sandbox.spy();
       resource1.layoutBox_ = {
         top: 10,
         left: 0,
@@ -365,7 +372,7 @@ describe('mutator changeSize', () => {
     });
 
     it('should NOT change size when height and margins are unchanged', () => {
-      const callback = window.sandbox.spy();
+      const callback = env.sandbox.spy();
       resource1.layoutBox_ = {
         top: 10,
         left: 0,
@@ -401,7 +408,7 @@ describe('mutator changeSize', () => {
     });
 
     it('should change size when margins but not height changed', () => {
-      const callback = window.sandbox.spy();
+      const callback = env.sandbox.spy();
       resource1.layoutBox_ = {
         top: 10,
         left: 0,
@@ -454,7 +461,7 @@ describe('mutator changeSize', () => {
       .skipSafari()
       .run('should change size when document is invisible', () => {
         resources.visible_ = false;
-        window.sandbox
+        env.sandbox
           .stub(resources.ampdoc, 'getVisibilityState')
           .returns(VisibilityState.PRERENDER);
         mutator.scheduleChangeSize_(
@@ -611,7 +618,7 @@ describe('mutator changeSize', () => {
       () => {
         viewportMock.expects('getContentHeight').returns(10000).atLeast(1);
 
-        const callback = window.sandbox.spy();
+        const callback = env.sandbox.spy();
         resource1.layoutBox_ = {
           top: 100,
           left: 0,
