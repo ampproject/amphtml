@@ -433,7 +433,7 @@ amp-story-player a {
 .i-amphtml-story-dev-tools-device-clock {
   width: 30px;
   height: 12px;
-  background: var(--i-amphtml-story-dev-tools-white-transparent-2);
+  /* background: var(--i-amphtml-story-dev-tools-white-transparent-2); */
   border-radius: 6px;
 }
 

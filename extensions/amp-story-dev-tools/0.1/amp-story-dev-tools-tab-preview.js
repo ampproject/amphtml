@@ -54,7 +54,7 @@ const buildDeviceTemplate = (element) => {
     <div class="i-amphtml-story-dev-tools-device">
       <div class="i-amphtml-story-dev-tools-device-screen">
         <div class="i-amphtml-story-dev-tools-device-statusbar">
-          <div class="i-amphtml-story-dev-tools-device-clock"></div>
+          <div class="i-amphtml-story-dev-tools-device-clock">16:45</div>
           <div class="i-amphtml-story-dev-tools-device-icons">
             <div></div>
             <div></div>
