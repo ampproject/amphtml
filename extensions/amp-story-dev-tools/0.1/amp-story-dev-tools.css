@@ -39,6 +39,8 @@ amp-story-dev-tools {
   --i-amphtml-story-dev-tools-white-transparent-1: #FFFFFF22 !important;
   --i-amphtml-story-dev-tools-white-transparent-2: #FFFFFF77 !important;
   --i-amphtml-story-dev-tools-white-transparent-3: #FFFFFFCC !important;
+  --i-amphtml-story-dev-tools-black-transparent-1: #00000077 !important;
+
 
   --i-amphtml-story-dev-tools-material-easing-standard: cubic-bezier(0.4, 0.0, 0.2, 1) !important;
   --i-amphtml-story-dev-tools-material-easing-accelerated: cubic-bezier(0.4, 0.0, 1, 1) !important;

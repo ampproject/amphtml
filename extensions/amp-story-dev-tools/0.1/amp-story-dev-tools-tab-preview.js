@@ -54,23 +54,24 @@ const buildDeviceTemplate = (element) => {
     <div class="i-amphtml-story-dev-tools-device">
       <div class="i-amphtml-story-dev-tools-device-screen">
         <div class="i-amphtml-story-dev-tools-device-statusbar">
-          <div class="i-amphtml-story-dev-tools-device-clock">16:45</div>
-          <div class="i-amphtml-story-dev-tools-device-icons">
-            <div></div>
-            <div></div>
-            <div></div>
-          </div>
+          <div class="i-amphtml-story-dev-tools-device-statusbar-clock"></div>
+          <div class="i-amphtml-story-dev-tools-device-statusbar-icons"></div>
         </div>
-        <div class="i-amphtml-story-dev-tools-device-appbar"></div>
+        <div class="i-amphtml-story-dev-tools-device-appbar">
+          <div class="i-amphtml-story-dev-tools-device-appbar-icon"></div>
+          <div class="i-amphtml-story-dev-tools-device-appbar-urlbar"></div>
+          <div class="i-amphtml-story-dev-tools-device-appbar-icon"></div>
+          <div class="i-amphtml-story-dev-tools-device-appbar-icon"></div>
+        </div>
         <amp-story-player width="1" height="1" layout="container">
           <a></a>
         </amp-story-player>
         <div class="i-amphtml-story-dev-tools-device-bottombar">
-          <div></div>
-          <div></div>
-          <div></div>
-          <div></div>
-          <div></div>
+          <div class="i-amphtml-story-dev-tools-device-appbar-icon"></div>
+          <div class="i-amphtml-story-dev-tools-device-appbar-icon"></div>
+          <div class="i-amphtml-story-dev-tools-device-appbar-icon"></div>
+          <div class="i-amphtml-story-dev-tools-device-appbar-icon"></div>
+          <div class="i-amphtml-story-dev-tools-device-appbar-icon"></div>
         </div>
         <div class="i-amphtml-story-dev-tools-device-navigation"></div>
       </div>
@@ -267,7 +268,7 @@ const ALL_DEVICES = [
   {
     'name': 'iPhone 8 (Native)',
     'width': 375,
-    'height': 632,
+    'height': 596,
     'deviceHeight': 667,
     'deviceSpaces': 1,
     'details': ['iphone8', 'native', 'ios'],
@@ -331,7 +332,7 @@ const ALL_DEVICES = [
   {
     'name': 'Desktop 1080p',
     'width': 1920,
-    'height': 1038,
+    'height': 1000,
     'deviceHeight': 1080,
     'deviceSpaces': 2,
     'details': ['desktop1080', 'browser', 'desktop'],
