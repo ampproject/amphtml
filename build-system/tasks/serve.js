@@ -22,6 +22,7 @@ const header = require('connect-header');
 const minimist = require('minimist');
 const morgan = require('morgan');
 const open = require('opn');
+const os = require('os');
 const path = require('path');
 const {
   buildNewServer,
@@ -42,7 +43,7 @@ const {watch} = require('gulp');
 
 const argv = minimist(process.argv.slice(2), {string: ['rtv']});
 
-const HOST = argv.host || 'localhost';
+const HOST = argv.host || '0.0.0.0';
 const PORT = argv.port || 8000;
 
 // Used for logging.
@@ -114,8 +115,21 @@ async function startServer(
   };
   connect.server(options, started);
   await startedPromise;
-  url = `http${options.https ? 's' : ''}://${options.host}:${options.port}`;
-  log(green('Started'), cyan(options.name), green('at'), cyan(url));
+
+  function makeUrl(host) {
+    return `http${options.https ? 's' : ''}://${host}:${options.port}`;
+  }
+
+  url = makeUrl(options.host);
+  log(green('Started'), cyan(options.name), green('at:'));
+  log('\t', cyan(url));
+  for (const device of Object.entries(os.networkInterfaces())) {
+    for (const detail of device[1]) {
+      if (detail.family === 'IPv4') {
+        log('\t', cyan(makeUrl(detail.address)));
+      }
+    }
+  }
   if (argv.coverage == 'live') {
     const covUrl = `${url}/coverage`;
     log(green('Collecting live code coverage at'), cyan(covUrl));
