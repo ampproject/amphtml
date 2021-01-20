@@ -170,13 +170,23 @@ function resolveMediaQueryListExpr(expr) {
 
 /**
  * @param {!ExprDef} expr
- * @param {?function()} onChange
+ * @param {?function()} callback
  */
-function setOnChange(expr, onChange) {
+function setOnChange(expr, callback) {
   for (let i = 0; i < expr.length; i++) {
     const {query} = expr[i];
     if (query) {
-      query.onchange = onChange;
+      // The `onchange` API is preferred, but the IE only supports
+      // the `addListener/removeListener` APIs.
+      if (query.onchange !== undefined) {
+        query.onchange = callback;
+      } else {
+        if (callback) {
+          query.addListener(callback);
+        } else {
+          query.removeListener(callback);
+        }
+      }
     }
   }
 }
