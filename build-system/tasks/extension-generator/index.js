@@ -267,7 +267,9 @@ async function makeAmpExtension() {
     fs.writeFileSync(filename, await fileContent[filename]);
   }
 
-  const filenames = Object.keys(fileContent);
+  const filenames = Object.keys(fileContent)
+    // Don't format .html because AMP boilerplate would expand into multiple lines.
+    .filter((filename) => !filename.endsWith('.html'));
   execOrThrow(`npx prettier --ignore-unknown --write ${filenames.join(' ')}`);
 
   // Return the resulting extension bundle config.
