@@ -19,6 +19,7 @@ import {ActionTrust} from '../action-constants';
 import {AmpEvents} from '../amp-events';
 import {CanPlay, CanRender, LoadingProp} from '../contextprops';
 import {Deferred} from '../utils/promise';
+import {Layout, isLayoutSizeDefined} from '../layout';
 import {Loading} from '../loading';
 import {MediaQueryProps} from './media-query-props';
 import {Slot, createSlot} from './slot';
@@ -45,7 +46,6 @@ import {getDate} from '../utils/date';
 import {getMode} from '../mode';
 import {hydrate, render} from './index';
 import {installShadowStyle} from '../shadow-embed';
-import {isLayoutSizeDefined} from '../layout';
 import {sequentialIdGenerator} from '../utils/id-generator';
 
 /**
@@ -228,7 +228,20 @@ export class PreactBaseElement extends AMP.BaseElement {
   isLayoutSupported(layout) {
     const Ctor = this.constructor;
     if (Ctor['layoutSizeDefined']) {
-      return isLayoutSizeDefined(layout);
+      return (
+        isLayoutSizeDefined(layout) ||
+        // This allows a developer to specify the component's size using the
+        // user stylesheet without the help of AMP's static layout rules.
+        // Bento components use `ContainWrapper` with `contain:strict`, thus
+        // if a user stylesheet doesn't provide for the appropriate size, the
+        // element's size will be 0. The user stylesheet CSS can use
+        // fixed `width`/`height`, `aspect-ratio`, `flex`, `grid`, or any
+        // other CSS layouts coupled with `@media` queries and other CSS tools.
+        // Besides normal benefits of using plain CSS, an important feature of
+        // using this layout is that AMP does not add "sizer" elements thus
+        // keeping the user DOM clean.
+        layout == Layout.CONTAINER
+      );
     }
     return super.isLayoutSupported(layout);
   }

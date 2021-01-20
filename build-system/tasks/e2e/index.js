@@ -23,7 +23,6 @@ const dotsReporter = require('./mocha-dots-reporter');
 const fs = require('fs');
 const glob = require('glob');
 const http = require('http');
-const log = require('fancy-log');
 const Mocha = require('mocha');
 const path = require('path');
 const {
@@ -35,6 +34,7 @@ const {cyan} = require('ansi-colors');
 const {execOrDie} = require('../../common/exec');
 const {HOST, PORT, startServer, stopServer} = require('../serve');
 const {isCiBuild} = require('../../common/ci');
+const {log} = require('../../common/logging');
 const {maybePrintCoverageMessage} = require('../helpers');
 const {reportTestStarted} = require('../report-test-status');
 const {watch} = require('gulp');
@@ -163,7 +163,6 @@ async function runTests_() {
     });
   }
 
-  log('Running tests...');
   await reportTestStarted();
 
   // return promise to gulp that resolves when there's an error.
@@ -190,7 +189,6 @@ async function runWatch_() {
   log('Watching', cyan(filesToWatch), 'for changes...');
   watch(filesToWatch).on('change', (file) => {
     log('Detected a change in', cyan(file));
-    log('Running tests...');
     const mocha = createMocha_();
     addMochaFile_(mocha, file);
     mocha.run();

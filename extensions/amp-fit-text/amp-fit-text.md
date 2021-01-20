@@ -2,15 +2,14 @@
 $category@: presentation
 formats:
   - websites
-  - stories
-  - ads
-  - email
 teaser:
   text: Expands or shrinks font size to fit the content within the space given.
+experimental: true
+bento: true
 ---
 
 <!---
-Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+Copyright 2021 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -35,7 +34,7 @@ The `amp-fit-text` component allows you to manage the size and fit of text withi
 
 In the following example, the `<amp-fit-text>` element is nested within a 300x300 blue `div` block. For the `<amp-fit-text>` element, we specified a `responsive` layout. As a result, the text scales responsively per the aspect ratio provided by the width and height (200x200) of the `<amp-fit-text>` element, but the text does not exceed the size of its parent.
 
-[example preview="inline" playground="true" imports="amp-fit-text"]
+[example preview="inline" playground="true" imports="amp-fit-text:1.0"]
 
 ```html
 <div style="width: 300px; height: 300px; background:#005AF0; color: #FFF;">
@@ -50,7 +49,7 @@ In the following example, the `<amp-fit-text>` element is nested within a 300x30
 
 The following example is similar to the one above, but in this example we specify a `max-font-size` of `22`, so the text is smaller but still fits the space:
 
-[example preview="inline" playground="true" imports="amp-fit-text"]
+[example preview="inline" playground="true" imports="amp-fit-text:1.0"]
 
 ```html
 <div style="width: 300px; height: 300px; background:#005AF0; color: #FFF;">
@@ -63,6 +62,10 @@ The following example is similar to the one above, but in this example we specif
 
 [/example]
 
+### Migrating from 0.1
+
+Unlike `0.1`, the experimental `1.0` version of `amp-fit-text` does not account for margin and border size as contributing to the total fit-text coverage area.
+
 ### Overflowing content
 
 If the content of the `amp-fit-text` overflows the available space, even with a
@@ -70,7 +73,7 @@ If the content of the `amp-fit-text` overflows the available space, even with a
 
 In the following example, we specified a `min-font-size` of `40`, and added more content inside the `amp-fit-text` element. This causes the content to exceed the size of its fixed block parent, so the text is truncated to fit the container.
 
-[example preview="inline" playground="true" imports="amp-fit-text"]
+[example preview="inline" playground="true" imports="amp-fit-text:1.0"]
 
 ```html
 <div style="width: 300px; height: 300px; background:#005AF0; color: #FFF;">
@@ -105,7 +108,3 @@ This element includes [common attributes](https://amp.dev/documentation/guides-a
 ## Styling
 
 You can style the `amp-fit-text` with standard CSS. In particular, you can use `text-align`, `font-weight`, `color` and many other CSS properties, with the main exception of `font-size`.
-
-## Validation
-
-See [amp-fit-text rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-fit-text/validator-amp-fit-text.protoascii) in the AMP validator specification.

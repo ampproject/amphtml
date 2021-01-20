@@ -21,17 +21,17 @@
  * This is run during the CI stage = test; job = experiments tests.
  */
 
-const colors = require('ansi-colors');
 const experimentsConfig = require('../global-configs/experiments-config.json');
 const {
+  printSkipMessage,
   startTimer,
   stopTimer,
-  timedExecOrDie: timedExecOrDieBase,
+  timedExecOrDie,
 } = require('./utils');
 const {experiment} = require('minimist')(process.argv.slice(2));
-const FILENAME = `${experiment}-tests.js`;
-const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
-const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
+const {setLoggingPrefix} = require('../common/logging');
+
+const jobName = `${experiment}-tests.js`;
 
 function getConfig_() {
   const config = experimentsConfig[experiment];
@@ -60,19 +60,19 @@ function test_() {
 }
 
 function main() {
-  const startTime = startTimer(FILENAME, FILENAME);
+  setLoggingPrefix(jobName);
+  const startTime = startTimer(jobName);
   const config = getConfig_();
   if (config) {
     build_(config);
     test_();
   } else {
-    console.log(
-      `${FILELOGPREFIX} Skipping`,
-      colors.cyan(`${experiment} Tests`),
-      `because ${experiment} is expired, misconfigured, or does not exist.`
+    printSkipMessage(
+      jobName,
+      `${experiment} is expired, misconfigured, or does not exist`
     );
   }
-  stopTimer(FILENAME, FILENAME, startTime);
+  stopTimer(jobName, startTime);
 }
 
 main();

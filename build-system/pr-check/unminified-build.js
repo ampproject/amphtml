@@ -18,61 +18,56 @@
 /**
  * @fileoverview
  * This script builds the AMP runtime.
- * This is run during the CI stage = build; job = Unminified Build.
+ * This is run during the CI stage = build; job = unminified build.
  */
 
-const colors = require('ansi-colors');
-const log = require('fancy-log');
 const {
+  abortTimedJob,
   printChangeSummary,
+  printSkipMessage,
   startTimer,
   stopTimer,
-  stopTimedJob,
-  timedExecOrDie: timedExecOrDieBase,
-  uploadBuildOutput,
+  timedExecOrDie,
+  uploadUnminifiedOutput,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isPullRequestBuild} = require('../common/ci');
 const {runNpmChecks} = require('./npm-checks');
+const {setLoggingPrefix} = require('../common/logging');
 
-const FILENAME = 'unminified-build.js';
-const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
-const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
+const jobName = 'unminified-build.js';
 
 function main() {
-  const startTime = startTimer(FILENAME, FILENAME);
-  if (!runNpmChecks(FILENAME)) {
-    stopTimedJob(FILENAME, startTime);
-    return;
+  setLoggingPrefix(jobName);
+  const startTime = startTimer(jobName);
+  if (!runNpmChecks()) {
+    return abortTimedJob(jobName, startTime);
   }
 
   if (!isPullRequestBuild()) {
     timedExecOrDie('gulp update-packages');
     timedExecOrDie('gulp build --fortesting');
-    uploadBuildOutput(FILENAME);
+    uploadUnminifiedOutput();
   } else {
-    printChangeSummary(FILENAME);
-    const buildTargets = determineBuildTargets(FILENAME);
+    printChangeSummary();
+    const buildTargets = determineBuildTargets();
     if (
       buildTargets.has('RUNTIME') ||
       buildTargets.has('FLAG_CONFIG') ||
-      buildTargets.has('INTEGRATION_TEST') ||
-      buildTargets.has('UNIT_TEST')
+      buildTargets.has('INTEGRATION_TEST')
     ) {
       timedExecOrDie('gulp update-packages');
       timedExecOrDie('gulp build --fortesting');
-      uploadBuildOutput(FILENAME);
+      uploadUnminifiedOutput();
     } else {
-      log(
-        `${FILELOGPREFIX} Skipping`,
-        colors.cyan('Unminified Build'),
-        'because this commit does not affect the runtime, flag configs,',
-        'or integration tests.'
+      printSkipMessage(
+        jobName,
+        'this PR does not affect the runtime, flag configs, or integration tests'
       );
     }
   }
 
-  stopTimer(FILENAME, FILENAME, startTime);
+  stopTimer(jobName, startTime);
 }
 
 main();

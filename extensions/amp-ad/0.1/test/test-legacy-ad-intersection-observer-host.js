@@ -461,7 +461,7 @@ describes.sandboxed('IntersectionObserverHostForAd', {}, () => {
     );
     stubFireInOb(ioInstance);
     insert(testIframe);
-    ioInstance.onViewportCallback_(true);
+    ioInstance.onViewportCallback_(getInObEntry());
     expect(sendElementIntersectionSpy).to.be.calledOnce;
     expect(onScrollSpy).to.be.calledOnce;
     expect(onChangeSpy).to.be.calledOnce;
@@ -479,7 +479,7 @@ describes.sandboxed('IntersectionObserverHostForAd', {}, () => {
     );
     insert(testIframe);
     ioInstance.onViewportCallback_(getInObEntry());
-    ioInstance.onViewportCallback_({intersectionRatio: false});
+    ioInstance.onViewportCallback_({...getInObEntry(), intersectionRatio: 0});
     expect(sendElementIntersectionSpy).to.have.callCount(2);
     expect(ioInstance.unlistenViewportChanges_).to.be.null;
   });

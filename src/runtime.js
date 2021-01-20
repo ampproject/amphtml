@@ -394,7 +394,12 @@ function adoptServicesAndResources(global) {
  */
 function adoptMultiDocDeps(global) {
   global.AMP.installAmpdocServices = installAmpdocServices.bind(null);
-  global.AMP.combinedCss = ampDocCss + ampSharedCss;
+  if (IS_ESM) {
+    const style = global.document.querySelector('style[amp-runtime]');
+    global.AMP.combinedCss = style ? style.textContent : '';
+  } else {
+    global.AMP.combinedCss = ampDocCss + ampSharedCss;
+  }
 }
 
 /**
@@ -496,10 +501,6 @@ function maybeLoadCorrectVersion(win, fnOrStruct) {
  *     pumped.
  */
 function maybePumpEarlyFrame(win, cb) {
-  if (!isExperimentOn(win, 'pump-early-frame')) {
-    cb();
-    return;
-  }
   // There is definitely nothing to draw yet, so we might as well
   // proceed.
   if (!win.document.body) {

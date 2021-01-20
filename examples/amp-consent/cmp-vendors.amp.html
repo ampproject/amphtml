@@ -103,6 +103,7 @@
           <option>Marfeel</option>
           <option>Ogury</option>
           <option>opencmp</option>
+          <option>pubtech</option>
           <option>quantcast</option>
           <option>sirdata</option>
           <option>SourcePoint</option>
@@ -245,7 +246,7 @@
         </div>
       </amp-consent>
       <!-- End LiveRamp example-->
-      
+
       <!-- Marfeel example -->
       <amp-consent id='marfeelConsent' layout='nodisplay' type='Marfeel'>
         <script type="application/json">
@@ -320,6 +321,24 @@
       </amp-consent>
       <!-- End opencmp example -->
 
+      <!-- Pubtech Example -->
+      <amp-consent id="pubtech" layout="nodisplay" type="pubtech">
+        <script type="application/json">
+              {
+                "postPromptUI": "pubtech-post-prompt",
+                "clientConfig": {
+                  "privacyUrl": "",
+                  "isAmp": true,
+                  "websiteName": "Pubtech"
+                }
+              }
+            </script>
+        <div id="pubtech-post-prompt">
+          <button on="tap:pubtech.prompt(consent=pubtech)" role="button">Privacy settings</button>
+        </div>
+      </amp-consent>
+      <!-- End Pubtech example -->
+
       <!-- Quantcast Example -->
       <amp-consent id="quantcast" layout="nodisplay" type="quantcast">
         <script type="application/json">
@@ -358,7 +377,7 @@
         </div>
       </amp-consent>
       <!-- End sirdata example -->
-      
+
       <!-- SourcePoint example -->
       <amp-consent id='consent' layout='nodisplay' type='SourcePoint'>
         <script type="application/json">

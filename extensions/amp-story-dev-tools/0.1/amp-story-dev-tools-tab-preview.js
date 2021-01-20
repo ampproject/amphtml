@@ -23,6 +23,10 @@ import {
 import {closest} from '../../../src/dom';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {htmlFor} from '../../../src/static-template';
+import {
+  observeContentSize,
+  unobserveContentSize,
+} from '../../../src/utils/size-observer';
 import {setStyles} from '../../../src/style';
 
 /**
@@ -372,6 +376,8 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
 
     /** @private {!Element} container for the device previews */
     this.devicesContainer_ = null;
+
+    this.onResize_ = this.onResize_.bind(this);
   }
 
   /** @override */
@@ -406,6 +412,12 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     this.element.addEventListener('click', (e) => this.handleTap_(e.target));
+    observeContentSize(this.element, this.onResize_);
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    unobserveContentSize(this.element, this.onResize_);
   }
 
   /**
@@ -647,8 +659,8 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
     });
   }
 
-  /** @override */
-  onMeasureChanged() {
+  /** @private */
+  onResize_() {
     this.repositionDevices_();
   }
 
