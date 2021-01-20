@@ -18,6 +18,7 @@
  */
 
 import {Carousel} from '../carousel';
+import {dev} from '../../../../src/log';
 import {setInitialDisplay, setStyle, setStyles} from '../../../../src/style';
 import {toArray} from '../../../../src/types';
 
@@ -260,5 +261,20 @@ describes.realWin('carousel implementation', {}, (env) => {
         expect(carousel.requestedIndex_).to.be.null;
       }
     );
+  });
+
+  it('should warn if no slides', async () => {
+    const warnSpy = env.sandbox.spy(dev(), 'warn');
+    await createCarousel({slideCount: 0, loop: false});
+
+    expect(warnSpy).to.be.calledOnce;
+    expect(warnSpy.args[0][1]).to.match(/No slides were found./);
+
+    warnSpy.resetHistory();
+    await createCarousel({
+      slideCount: 12,
+      loop: false,
+    });
+    expect(warnSpy).to.not.be.called;
   });
 });
