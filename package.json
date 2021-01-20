@@ -154,6 +154,7 @@
     "lazypipe": "1.0.2",
     "list-imports-exports": "0.1.2",
     "lolex": "5.1.2",
+    "magic-string": "0.25.7",
     "markdown-link-check": "3.8.6",
     "minimatch": "3.0.4",
     "minimist": "1.2.5",
