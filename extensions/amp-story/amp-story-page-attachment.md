@@ -64,7 +64,7 @@ A UI prompt to open the attachment will automatically be added at the bottom of 
 The `<amp-story-page-attachment>` element must be the last child of `<amp-story-page>`, and must have the `layout="nodisplay"` attribute. The attachment AMPHTML content is expected to be provided inline in your AMP Story, within this `<amp-story-page-attachment>` tag.
 
 [tip type="important"]
-  Both [`amp-story-cta-layer`](amp-story-cta-layer.md) and `amp-story-page-attachment` must be the last child tag of an [`amp-story-page`](amp-story-page.md). Because of this, you may include neither or one, but not both.
+Both [`amp-story-cta-layer`](amp-story-cta-layer.md) and `amp-story-page-attachment` must be the last child tag of an [`amp-story-page`](amp-story-page.md). Because of this, you may include neither or one, but not both.
 [/tip]
 
 ### Linked content
