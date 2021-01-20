@@ -23,7 +23,7 @@
  */
 
 const {
-  stopTimedJob,
+  abortTimedJob,
   downloadModuleOutput,
   downloadNomoduleOutput,
   printChangeSummary,
@@ -44,7 +44,7 @@ async function main() {
   const startTime = startTimer(jobName);
 
   if (!runNpmChecks()) {
-    return stopTimedJob(jobName, startTime);
+    return abortTimedJob(jobName, startTime);
   }
 
   if (!isPullRequestBuild()) {

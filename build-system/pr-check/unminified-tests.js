@@ -85,7 +85,7 @@ function main() {
     timedExecOrDie('gulp update-packages');
 
     if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {
-      timedExecOrDie('gulp unit --nobuild --headless --local_changes');
+      timedExecOrDie('gulp unit --headless --local_changes');
     }
 
     if (
@@ -97,7 +97,7 @@ function main() {
     }
 
     if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {
-      timedExecOrDie('gulp unit --nobuild --headless --coverage');
+      timedExecOrDie('gulp unit --headless --coverage');
     }
 
     if (buildTargets.has('RUNTIME')) {

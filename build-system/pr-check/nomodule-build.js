@@ -22,7 +22,7 @@
  */
 
 const {
-  stopTimedJob,
+  abortTimedJob,
   printChangeSummary,
   printSkipMessage,
   processAndUploadNomoduleOutput,
@@ -38,7 +38,7 @@ const {log} = require('../common/logging');
 const {red, yellow} = require('ansi-colors');
 const {runNpmChecks} = require('./npm-checks');
 const {setLoggingPrefix} = require('../common/logging');
-const {signalDistUpload} = require('../tasks/pr-deploy-bot-utils');
+const {signalPrDeployUpload} = require('../tasks/pr-deploy-bot-utils');
 
 const jobName = 'nomodule-build.js';
 
@@ -46,7 +46,7 @@ async function main() {
   setLoggingPrefix(jobName);
   const startTime = startTimer(jobName);
   if (!runNpmChecks()) {
-    return stopTimedJob(jobName, startTime);
+    return abortTimedJob(jobName, startTime);
   }
 
   if (!isPullRequestBuild()) {
@@ -61,21 +61,21 @@ async function main() {
       buildTargets.has('FLAG_CONFIG') ||
       buildTargets.has('INTEGRATION_TEST') ||
       buildTargets.has('E2E_TEST') ||
-      buildTargets.has('VISUAL_DIFF') ||
-      buildTargets.has('UNIT_TEST')
+      buildTargets.has('VISUAL_DIFF')
     ) {
       timedExecOrDie('gulp update-packages');
       const process = timedExecWithError('gulp dist --fortesting');
       if (process.status !== 0) {
         const error = process.error || new Error('unknown error, check logs');
         log(red('ERROR'), yellow(error.message));
-        await signalDistUpload('errored');
-        return stopTimedJob(jobName, startTime);
+        await signalPrDeployUpload('errored');
+        return abortTimedJob(jobName, startTime);
       }
       timedExecOrDie('gulp storybook --build');
       await processAndUploadNomoduleOutput();
+      await signalPrDeployUpload('success');
     } else {
-      await signalDistUpload('skipped');
+      await signalPrDeployUpload('skipped');
       printSkipMessage(
         jobName,
         'this PR does not affect the runtime, flag configs, integration ' +

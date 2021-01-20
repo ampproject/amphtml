@@ -23,7 +23,7 @@
  */
 
 const {
-  stopTimedJob,
+  abortTimedJob,
   printChangeSummary,
   startTimer,
   stopTimer,
@@ -41,7 +41,7 @@ async function main() {
   setLoggingPrefix(jobName);
   const startTime = startTimer(jobName);
   if (!runNpmChecks()) {
-    return stopTimedJob(jobName, startTime);
+    return abortTimedJob(jobName, startTime);
   }
 
   if (!isPullRequestBuild()) {
