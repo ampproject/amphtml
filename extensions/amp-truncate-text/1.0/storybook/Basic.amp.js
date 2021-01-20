@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {number, text, withKnobs} from '@storybook/addon-knobs';
+import {number, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
