@@ -15,19 +15,21 @@
  */
 'use strict';
 
-const log = require('fancy-log');
 const {
+  stopTimedJob,
   printChangeSummary,
+  printSkipMessage,
   startTimer,
   stopTimer,
-  stopTimedJob,
-  timedExecOrDie: timedExecOrDieBase,
+  timedExecOrDie,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isPullRequestBuild} = require('../common/ci');
-const {red, cyan, bold, yellow} = require('ansi-colors');
+const {log} = require('../common/logging');
+const {red, cyan} = require('ansi-colors');
 const {reportAllExpectedTests} = require('../tasks/report-test-status');
 const {runNpmChecks} = require('./npm-checks');
+const {setLoggingPrefix} = require('../common/logging');
 
 /**
  * @fileoverview
@@ -35,9 +37,7 @@ const {runNpmChecks} = require('./npm-checks');
  * Windows. This is run on Github Actions CI stage = Cross-Browser Tests.
  */
 
-const FILENAME = 'cross-browser-tests.js';
-const FILELOGPREFIX = bold(yellow(`${FILENAME}:`));
-const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
+const jobName = 'cross-browser-tests.js';
 
 /**
  * Helper that runs platform-specific integration tests
@@ -89,10 +89,10 @@ function runUnitTestsForPlatform() {
 }
 
 async function main() {
-  const startTime = startTimer(FILENAME, FILENAME);
-  if (!runNpmChecks(FILENAME)) {
-    stopTimedJob(FILENAME, startTime);
-    return;
+  setLoggingPrefix(jobName);
+  const startTime = startTimer(jobName);
+  if (!runNpmChecks()) {
+    return stopTimedJob(jobName, startTime);
   }
   if (!isPullRequestBuild()) {
     timedExecOrDie('gulp update-packages');
@@ -100,8 +100,8 @@ async function main() {
     runIntegrationTestsForPlatform();
     runUnitTestsForPlatform();
   } else {
-    printChangeSummary(FILENAME);
-    const buildTargets = determineBuildTargets(FILENAME);
+    printChangeSummary();
+    const buildTargets = determineBuildTargets();
     if (process.platform == 'linux') {
       await reportAllExpectedTests(buildTargets); // Only once is sufficient.
     }
@@ -111,13 +111,11 @@ async function main() {
       !buildTargets.has('UNIT_TEST') &&
       !buildTargets.has('INTEGRATION_TEST')
     ) {
-      console.log(
-        `${FILELOGPREFIX} Skipping`,
-        cyan('Cross-Browser Tests'),
-        'because this commit not affect the runtime, flag configs,',
-        'unit tests, or integration tests.'
+      printSkipMessage(
+        jobName,
+        'this PR does not affect the runtime, flag configs, unit tests, or integration tests'
       );
-      stopTimer(FILENAME, FILENAME, startTime);
+      stopTimer(jobName, startTime);
       return;
     }
     timedExecOrDie('gulp update-packages');
@@ -133,7 +131,7 @@ async function main() {
       runUnitTestsForPlatform();
     }
   }
-  stopTimer(FILENAME, FILENAME, startTime);
+  stopTimer(jobName, startTime);
 }
 
 main();

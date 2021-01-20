@@ -22,53 +22,51 @@
  */
 
 const atob = require('atob');
-const colors = require('ansi-colors');
 const {
   downloadNomoduleOutput,
   printChangeSummary,
+  printSkipMessage,
   startTimer,
   stopTimer,
-  timedExecOrDie: timedExecOrDieBase,
+  timedExecOrDie,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isPullRequestBuild} = require('../common/ci');
+const {setLoggingPrefix} = require('../common/logging');
 
-const FILENAME = 'visual-diff-tests.js';
-const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
-const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
+const jobName = 'visual-diff-tests.js';
 
 function main() {
-  const startTime = startTimer(FILENAME, FILENAME);
+  setLoggingPrefix(jobName);
+  const startTime = startTimer(jobName);
 
   if (!isPullRequestBuild()) {
-    downloadNomoduleOutput(FILENAME);
+    downloadNomoduleOutput();
     timedExecOrDie('gulp update-packages');
     process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
     timedExecOrDie('gulp visual-diff --nobuild --master');
   } else {
-    printChangeSummary(FILENAME);
-    const buildTargets = determineBuildTargets(FILENAME);
+    printChangeSummary();
+    const buildTargets = determineBuildTargets();
     process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
     if (
       buildTargets.has('RUNTIME') ||
       buildTargets.has('FLAG_CONFIG') ||
       buildTargets.has('VISUAL_DIFF')
     ) {
-      downloadNomoduleOutput(FILENAME);
+      downloadNomoduleOutput();
       timedExecOrDie('gulp update-packages');
       timedExecOrDie('gulp visual-diff --nobuild');
     } else {
       timedExecOrDie('gulp visual-diff --empty');
-      console.log(
-        `${FILELOGPREFIX} Skipping`,
-        colors.cyan('Visual Diff Tests'),
-        'because this commit does not affect the runtime, flag configs,',
-        'or visual diff tests.'
+      printSkipMessage(
+        jobName,
+        'this PR does not affect the runtime, flag configs, or visual diff tests'
       );
     }
   }
 
-  stopTimer(FILENAME, FILENAME, startTime);
+  stopTimer(jobName, startTime);
 }
 
 main();
