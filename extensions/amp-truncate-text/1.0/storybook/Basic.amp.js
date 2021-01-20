@@ -35,8 +35,8 @@ export default {
 };
 
 export const _default = () => {
-  const width = number('width (em)', 20);
-  const height = number('height (em)', 4);
+  const width = text('width', '20em');
+  const height = text('height', '4em');
 
   return (
     <amp-truncate-text
