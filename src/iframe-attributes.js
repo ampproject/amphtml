@@ -73,7 +73,7 @@ export function getContextMetadata(
     'ampcontextVersion': internalRuntimeVersion(),
     'ampcontextFilepath': `${
       urls.thirdParty
-    }/${internalRuntimeVersion()}/ampcontext-v0.js`,
+    }/${'2101200139000'}/ampcontext-v0.js`,
     'sourceUrl': docInfo.sourceUrl,
     'referrer': referrer,
     'canonicalUrl': docInfo.canonicalUrl,

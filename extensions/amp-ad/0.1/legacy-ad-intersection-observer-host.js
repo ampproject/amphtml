@@ -221,10 +221,13 @@ export class LegacyAdIntersectionObserverHost {
       this.intersectionObserver_.observe(this.baseElement_.element);
     }
     if (!this.fireInOb_) {
-      this.fireInOb_ = new IntersectionObserver((entries) => {
-        const lastEntry = entries[entries.length - 1];
-        this.sendElementIntersection_(lastEntry);
-      });
+      this.fireInOb_ = new IntersectionObserver(
+        (entries) => {
+          const lastEntry = entries[entries.length - 1];
+          this.sendElementIntersection_(lastEntry);
+        },
+        {root: this.baseElement_.win}
+      );
     }
     this.fire();
   }
