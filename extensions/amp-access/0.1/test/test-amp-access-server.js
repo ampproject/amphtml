@@ -33,7 +33,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, (env) => {
     win = env.win;
     document = win.document;
     ampdoc = env.ampdoc;
-    clock = fakeTimers.install({target: win});
+    clock = fakeTimers.withGlobal(win).install();
 
     validConfig = {
       'authorization': 'https://acme.com/a?rid=READER_ID',

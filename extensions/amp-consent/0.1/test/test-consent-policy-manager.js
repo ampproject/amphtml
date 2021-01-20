@@ -444,7 +444,7 @@ describes.realWin(
             },
           };
 
-          clock = fakeTimers.install({target: ampdoc.win});
+          clock = fakeTimers.withGlobal(ampdoc.win).install();
         });
 
         it('consent policy should resolve after timeout', function* () {

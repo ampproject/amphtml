@@ -44,8 +44,7 @@ config.run('amp-date-picker', function () {
       beforeEach(() => {
         win = env.win;
         doc = env.win.document;
-        clock = fakeTimers.install({
-          target: win,
+        clock = fakeTimers.withGlobal(win).install({
           now: new Date('2018-01-01T08:00:00Z'),
         });
 
@@ -67,7 +66,7 @@ config.run('amp-date-picker', function () {
           .then(() => picker.implementation_.layoutCallback());
       });
 
-      after(() => {
+      afterEach(() => {
         clock.uninstall();
       });
 

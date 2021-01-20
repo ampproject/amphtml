@@ -32,7 +32,7 @@ describes.realWin(
 
     beforeEach(() => {
       ampdoc = env.ampdoc;
-      clock = fakeTimers.install({target: ampdoc.win});
+      clock = fakeTimers.withGlobal(ampdoc.win).install();
 
       validConfig = {
         'authorization': 'https://acme.com/a?rid=READER_ID',

@@ -324,7 +324,7 @@ describes.realWin(
     beforeEach(() => {
       win = env.win;
       doc = win.document;
-      clock = fakeTimers.install();
+      clock = fakeTimers.withGlobal(win).install();
 
       env.sandbox.stub(WindowInterface, 'getDevicePixelRatio').returns(1);
       lightbox = {

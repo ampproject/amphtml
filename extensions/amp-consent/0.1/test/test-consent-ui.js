@@ -168,7 +168,7 @@ describes.realWin(
           'promptUISrc': 'https://promptUISrc',
         });
         consentUI = new ConsentUI(mockInstance, config);
-        const clock = fakeTimers.install({target: win});
+        const clock = fakeTimers.withGlobal(win).install();
 
         // Append iframe, and remove iframe after 1sec timeout
         expect(elementByTag(parent, 'iframe')).to.be.null;
@@ -394,7 +394,7 @@ describes.realWin(
           consentUI = new ConsentUI(mockInstance, {
             'promptUISrc': 'https://promptUISrc',
           });
-          const clock = fakeTimers.install({target: win});
+          const clock = fakeTimers.withGlobal(win).install();
           consentUI.show(false);
           consentUI.iframeReady_.resolve();
           await macroTask();

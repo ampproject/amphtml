@@ -32,8 +32,7 @@ describes.realWin('ad-cid', {amp: true}, (env) => {
 
   beforeEach(() => {
     win = env.win;
-    clock = fakeTimers.install({
-      target: win,
+    clock = fakeTimers.withGlobal(win).install({
       toFake: ['Date', 'setTimeout', 'clearTimeout'],
     });
     element = env.win.document.createElement('amp-ad');

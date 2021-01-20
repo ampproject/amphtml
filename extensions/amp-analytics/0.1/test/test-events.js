@@ -1169,7 +1169,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
     let tracker;
 
     beforeEach(() => {
-      clock = fakeTimers.install({target: root.ampdoc.win});
+      clock = fakeTimers.withGlobal(root.ampdoc.win).install();
       tracker = root.getTracker(AnalyticsEventType.TIMER, TimerEventTracker);
     });
 

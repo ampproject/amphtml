@@ -33,8 +33,7 @@ describes.realWin(
 
     beforeEach(() => {
       win = env.win;
-      clock = fakeTimers.install({
-        target: win,
+      clock = fakeTimers.withGlobal(win).install({
         now: new Date('2018-01-01T08:00:00Z'),
       });
 

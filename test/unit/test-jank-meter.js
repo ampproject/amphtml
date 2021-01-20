@@ -24,8 +24,7 @@ describes.realWin('jank-meter', {}, (env) => {
 
   beforeEach(() => {
     win = env.win;
-    clock = fakeTimers.install({
-      target: win,
+    clock = fakeTimers.withGlobal(win).install({
       toFake: ['Date', 'setTimeout', 'clearTimeout'],
     });
 

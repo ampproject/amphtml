@@ -27,10 +27,9 @@ describes.sandboxed('amp-date-picker', {}, () => {
   }
 
   beforeEach(() => {
-    clock = fakeTimers.install({
-      // Use the global window and not env.win. There is no way to inject the
-      // env.win into moment right now.
-      target: window,
+    // Use the global window and not env.win. There is no way to inject the
+    // env.win into moment right now.
+    clock = fakeTimers.withGlobal(window).install({
       now: new Date('2018-01-01T08:00:00Z'),
     });
   });

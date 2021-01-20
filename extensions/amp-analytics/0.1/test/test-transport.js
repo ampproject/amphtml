@@ -342,7 +342,7 @@ describes.realWin(
       }
 
       it('should create and delete an iframe', () => {
-        const clock = fakeTimers.install({target: win});
+        const clock = fakeTimers.withGlobal(win).install();
         installTimerService(win);
         sendRequestUsingIframe(win, url);
         const iframe = doc.querySelector('iframe[src="' + url + '"]');

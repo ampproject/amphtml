@@ -35,8 +35,7 @@ describes.realWin('cacheCidApi', {amp: true}, (env) => {
       'isProxyOrigin',
     ]);
 
-    clock = fakeTimers.install({
-      target: env.win,
+    clock = fakeTimers.withGlobal(env.win).install({
       toFake: ['Date', 'setTimeout', 'clearTimeout'],
     });
     installTimerService(env.win);

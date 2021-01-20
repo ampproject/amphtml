@@ -30,8 +30,7 @@ describes.fakeWin('test-cookies', {amp: true}, (env) => {
   beforeEach(() => {
     win = env.win;
     doc = win.document;
-    clock = fakeTimers.install({
-      target: window,
+    clock = fakeTimers.withGlobal(window).install({
       now: new Date('2018-01-01T08:00:00Z'),
     });
   });

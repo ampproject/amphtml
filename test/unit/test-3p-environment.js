@@ -106,7 +106,7 @@ describe('3p environment', () => {
       progress = '';
       // testWin is created before each test and destroyed when the iframe it
       // comes from gets detached, causing bugs if we call clock.uninstall().
-      clock = fakeTimers.install({target: testWin});
+      clock = fakeTimers.withGlobal(testWin).install();
     });
 
     function add(p) {

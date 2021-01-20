@@ -36,7 +36,7 @@ describes.realWin(
     beforeEach(() => {
       win = env.win;
       doc = win.document;
-      clock = fakeTimers.install({target: win});
+      clock = fakeTimers.withGlobal(win).install();
     });
 
     async function getNestedMenu(options) {

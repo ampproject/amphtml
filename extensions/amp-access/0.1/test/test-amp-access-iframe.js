@@ -33,8 +33,7 @@ describes.fakeWin(
 
     beforeEach(() => {
       ampdoc = env.ampdoc;
-      clock = fakeTimers.install({
-        target: ampdoc.win,
+      clock = fakeTimers.withGlobal(ampdoc.win).install({
         toFake: ['Date', 'setTimeout', 'clearTimeout'],
       });
 

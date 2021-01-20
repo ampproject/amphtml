@@ -376,8 +376,7 @@ describe
 
           history = bind.historyForTesting();
 
-          clock = fakeTimers.install({
-            target: win,
+          clock = fakeTimers.withGlobal(win).install({
             toFake: ['Date', 'setTimeout'],
           });
         });

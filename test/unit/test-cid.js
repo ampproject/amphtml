@@ -826,8 +826,7 @@ describes.realWin('cid', {amp: true}, (env) => {
   beforeEach(() => {
     win = env.win;
     ampdoc = env.ampdoc;
-    clock = fakeTimers.install({
-      target: win,
+    clock = fakeTimers.withGlobal(win).install({
       toFake: ['Date', 'setTimeout', 'clearTimeout'],
     });
     cid = cidServiceForDocForTesting(ampdoc);

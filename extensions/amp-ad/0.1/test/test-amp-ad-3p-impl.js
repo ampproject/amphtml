@@ -403,8 +403,7 @@ describes.realWin(
 
       it('should only allow rendering one ad per second', async () => {
         ad3p.getVsync().runScheduledTasks_();
-        const clock = fakeTimers.install({
-          target: win,
+        const clock = fakeTimers.withGlobal(win).install({
           toFake: ['Date', 'setTimeout', 'clearTimeout'],
         });
         const ad3p2 = createAmpAd(win);

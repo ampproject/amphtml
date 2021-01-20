@@ -78,8 +78,7 @@ describes.realWin('concurrent-load', {}, (env) => {
 
     beforeEach(() => {
       win = env.win;
-      clock = fakeTimers.install({
-        target: win,
+      clock = fakeTimers.withGlobal(win).install({
         toFake: ['Date', 'setTimeout', 'clearTimeout'],
       });
       installTimerService(win);

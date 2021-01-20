@@ -49,7 +49,7 @@ describe('waitForServices', () => {
 
     return createIframePromise().then((iframe) => {
       win = iframe.win;
-      clock = fakeTimers.install({target: win});
+      clock = fakeTimers.withGlobal(win).install();
     });
   });
 

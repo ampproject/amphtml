@@ -35,7 +35,7 @@ describes.realWin('Requests', {amp: 1}, (env) => {
     installLinkerReaderService(env.win);
     installVariableServiceForTesting(ampdoc);
     ampdoc.defaultView = env.win;
-    clock = fakeTimers.install({target: ampdoc.win});
+    clock = fakeTimers.withGlobal(ampdoc.win).install();
     preconnectSpy = env.sandbox.spy();
     preconnect = {
       url: preconnectSpy,

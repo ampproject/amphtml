@@ -36,7 +36,7 @@ describes.realWin('PositionObserver', {amp: 1}, (env) => {
     let elem1;
     let clock;
     beforeEach(() => {
-      clock = fakeTimers.install({target: ampdoc.win});
+      clock = fakeTimers.withGlobal(ampdoc.win).install();
       posOb = new PositionObserver(ampdoc);
       env.sandbox.stub(posOb.vsync_, 'measure').callsFake((callback) => {
         win.setTimeout(callback, 1);

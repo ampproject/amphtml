@@ -40,7 +40,7 @@ describes.sandboxed('preconnect', {}, (env) => {
 
   function getPreconnectIframe(detectFeatures = false) {
     return createIframePromise().then((iframe) => {
-      iframeClock = fakeTimers.install({target: iframe.win});
+      iframeClock = fakeTimers.withGlobal(iframe.win).install();
       if (detectFeatures) {
         setPreconnectFeaturesForTesting(null);
       } else {

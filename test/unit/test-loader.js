@@ -28,7 +28,7 @@ describes.fakeWin('Loader', {amp: true}, (env) => {
   beforeEach(() => {
     ampdoc = env.ampdoc;
     el = document.createElement('div');
-    clock = fakeTimers.install({target: env.win, now: 50});
+    clock = fakeTimers.withGlobal(env.win).install({now: 50});
 
     env.sandbox
       .stub(Services, 'extensionsFor')

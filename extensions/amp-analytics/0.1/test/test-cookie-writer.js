@@ -214,8 +214,7 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, (env) => {
   beforeEach(() => {
     win = env.win;
     doc = env.ampdoc;
-    clock = fakeTimers.install({
-      target: window,
+    clock = fakeTimers.withGlobal(window).install({
       now: new Date('2018-01-01T08:00:00Z'),
     });
     installVariableServiceForTesting(doc);
