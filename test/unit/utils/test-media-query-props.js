@@ -125,6 +125,64 @@ describes.realWin('MediaQueryProps', {frameStyle: {width: '300px'}}, (env) => {
       expect(query1.onchange).to.be.null;
       expect(query2.onchange).to.be.null;
     });
+
+    it('should unlisten the old queries with old API', () => {
+      const query1 = {
+        matches: true,
+        onchange_: null,
+        addListener(cb) {
+          this.onchange_ = cb;
+        },
+        removeListener(cb) {
+          if (this.onchange_ === cb) {
+            this.onchange_ = null;
+          }
+        },
+      };
+      const query2 = {
+        matches: true,
+        onchange_: null,
+        addListener(cb) {
+          this.onchange_ = cb;
+        },
+        removeListener(cb) {
+          if (this.onchange_ === cb) {
+            this.onchange_ = null;
+          }
+        },
+      };
+      const stub = env.sandbox.stub(win, 'matchMedia').callsFake((q) => {
+        switch (q) {
+          case '(q1)':
+            return query1;
+          case '(q2)':
+            return query2;
+        }
+      });
+
+      // First pass.
+      resolver.start();
+      resolver.resolveListQuery('(q1) a, b');
+      resolver.resolveListQuery('(q2) a, b');
+      resolver.complete();
+      expect(query1.onchange_).to.equal(callback);
+      expect(query2.onchange_).to.equal(callback);
+
+      // Second pass.
+      resolver.start();
+      resolver.resolveListQuery('(q2) a, b');
+      resolver.complete();
+      expect(query1.onchange_).to.be.null;
+      expect(query2.onchange_).to.equal(callback);
+
+      // Called only twice. Second pass are used from cache.
+      expect(stub).to.be.calledTwice;
+
+      // Unlisten all.
+      resolver.dispose();
+      expect(query1.onchange_).to.be.null;
+      expect(query2.onchange_).to.be.null;
+    });
   });
 
   describe('resolveMatchQuery', () => {

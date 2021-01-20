@@ -76,7 +76,7 @@ export class MediaQueryProps {
   complete() {
     for (const k in this.prevExprMap_) {
       if (!(k in this.exprMap_)) {
-        setOnChange(this.prevExprMap_[k], null);
+        toggleOnChange(this.prevExprMap_[k], this.callback_, false);
       }
     }
     this.prevExprMap_ = null;
@@ -87,7 +87,7 @@ export class MediaQueryProps {
    */
   dispose() {
     for (const k in this.exprMap_) {
-      setOnChange(this.exprMap_[k], null);
+      toggleOnChange(this.exprMap_[k], this.callback_, false);
     }
     this.exprMap_ = {};
   }
@@ -105,7 +105,7 @@ export class MediaQueryProps {
     let expr = this.exprMap_[exprString] || this.prevExprMap_[exprString];
     if (!expr) {
       expr = parser(this.win_, exprString);
-      setOnChange(expr, this.callback_);
+      toggleOnChange(expr, this.callback_, true);
     }
     this.exprMap_[exprString] = expr;
     return resolveMediaQueryListExpr(expr);
@@ -171,18 +171,19 @@ function resolveMediaQueryListExpr(expr) {
 
 /**
  * @param {!ExprDef} expr
- * @param {?function()} callback
+ * @param {function()} callback
+ * @param {boolean} on
  */
-function setOnChange(expr, callback) {
+function toggleOnChange(expr, callback, on) {
   for (let i = 0; i < expr.length; i++) {
     const {query} = expr[i];
     if (query) {
       // The `onchange` API is preferred, but the IE only supports
       // the `addListener/removeListener` APIs.
       if (query.onchange !== undefined) {
-        query.onchange = callback;
+        query.onchange = on ? callback : null;
       } else {
-        if (callback) {
+        if (on) {
           query.addListener(callback);
         } else {
           query.removeListener(callback);
