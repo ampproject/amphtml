@@ -268,7 +268,6 @@ describes.realWin('carousel implementation', {}, (env) => {
     await createCarousel({slideCount: 0, loop: false});
 
     expect(warnSpy).to.be.calledOnce;
-    expect(warnSpy.args[0][0]).to.match(/amp-base-carousel/);
     expect(warnSpy.args[0][1]).to.match(/No slides were found./);
 
     warnSpy.resetHistory();
