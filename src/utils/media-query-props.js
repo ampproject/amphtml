@@ -20,7 +20,6 @@ let ExprDef;
 const MEDIA_QUERY_VALUE_RE = /[A-Za-z0-9.%]+$/;
 const TRUE_VALUE = '1';
 
-/** @package */
 export class MediaQueryProps {
   /**
    * @param {!Window} win
