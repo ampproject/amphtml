@@ -42,7 +42,7 @@ async function walk(dest) {
 }
 
 function getBaseUrl() {
-  return `${hostNamePrefix}/amp_dist_${ciBuildId()}`;
+  return `${hostNamePrefix}/amp_nomodule_${ciBuildId()}`;
 }
 
 async function replace(filePath) {
@@ -79,8 +79,7 @@ async function signalPrDeployUpload(result) {
   const sha = gitCommitHash();
   const ciBuild = ciBuildId();
   const baseUrl = 'https://amp-pr-deploy-bot.appspot.com/v0/pr-deploy/';
-  // TODO(rsimha, ampproject/amp-github-apps#1110): Update this URL.
-  const url = `${baseUrl}travisbuilds/${ciBuild}/headshas/${sha}/${result}`;
+  const url = `${baseUrl}cibuilds/${ciBuild}/headshas/${sha}/${result}`;
   await request.post(url);
 }
 
