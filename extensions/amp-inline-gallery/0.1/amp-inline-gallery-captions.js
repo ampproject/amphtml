@@ -37,7 +37,7 @@ export class AmpInlineGalleryCaptions extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const {height} = this.getLayoutBox();
+    const {height} = this./*OK*/ getLayoutBox();
     const parentGallery = closestAncestorElementBySelector(
       this.element,
       'amp-inline-gallery'
