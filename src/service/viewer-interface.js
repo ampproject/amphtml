@@ -175,8 +175,7 @@ export class ViewerInterface {
   /**
    * Provides a message delivery mechanism by which AMP document can send
    * messages to the viewer.
-   * @param {function(string, (?JsonObject|string|undefined), boolean):
-   *     (!Promise<*>|undefined)} deliverer
+   * @param {function(string, (?JsonObject|string|undefined), boolean):(!Promise<*>|undefined)} deliverer
    * @param {string} origin
    * @export
    */
