@@ -58,10 +58,6 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.ampImgEl_ = dev().assertElement(
-      this.element_.querySelector('amp-img')
-    );
-
     this.x_ = this.element_.getAttribute('x') || '0%';
     this.y_ = this.element_.getAttribute('y') || '0%';
     this.zoom_ = this.element_.getAttribute('zoom') || '1';
@@ -75,6 +71,9 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    this.ampImgEl_ = dev().assertElement(
+      this.element_.querySelector('amp-img')
+    );
     this.initializeListeners_();
     return whenUpgradedToCustomElement(this.ampImgEl_)
       .then(() => this.ampImgEl_.signals().whenSignal(CommonSignals.LOAD_END))
@@ -104,8 +103,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     );
     this.storeService_.subscribe(
       StateProperty.PANNING_MEDIA_STATE,
-      (panningMediaState) => this.onPanningMediaStateChange_(panningMediaState),
-      true /** callToInitialize */
+      (panningMediaState) => this.onPanningMediaStateChange_(panningMediaState)
     );
   }
 
