@@ -164,7 +164,8 @@ class AmpFitText extends AMP.BaseElement {
 
   /** @private */
   updateFontSize_() {
-    const {offsetHeight: maxHeight, offsetWidth: maxWidth} = this.content_;
+    const maxHeight = this.content_./*OK*/ offsetHeight;
+    const maxWidth = this.content_./*OK*/ offsetWidth;
 
     const fontSize = calculateFontSize_(
       this.measurer_,
@@ -199,7 +200,8 @@ export function calculateFontSize_(
   while (maxFontSize - minFontSize > 1) {
     const mid = Math.floor((minFontSize + maxFontSize) / 2);
     setStyle(measurer, 'fontSize', px(mid));
-    const {offsetHeight: height, offsetWidth: width} = measurer;
+    const height = measurer./*OK*/ offsetHeight;
+    const width = measurer./*OK*/ offsetWidth;
 
     if (height > expectedHeight || width > expectedWidth) {
       maxFontSize = mid;

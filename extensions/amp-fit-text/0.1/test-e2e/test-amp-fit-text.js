@@ -43,7 +43,7 @@ describes.endtoend(
       });
 
       await verifyElementStyles(await selectContentDiv('test4'), {
-        'font-size': '19px',
+        'font-size': '20px',
       });
     });
 
@@ -63,6 +63,3 @@ describes.endtoend(
     }
   }
 );
-// user initialted dom changes cause recalculatiions
-
-//a11y software modifies dom causes recaluclations
