@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {urls} from '../../../../src/config';
+
 const TAG = 'amp-viewer-messaging';
 const CHANNEL_OPEN_MSG = 'channelOpen';
 const HANDSHAKE_POLL_MSG = 'handshake-poll';
@@ -171,8 +173,7 @@ export class Messaging {
           return;
         }
         if (
-          (event.origin == origin ||
-            event.origin.endsWith('.cdn.ampproject.org')) &&
+          (event.origin == origin || urls.cdnProxyRegex.test(event.origin)) &&
           (!event.source || event.source == target) &&
           message.app === APP &&
           message.name === CHANNEL_OPEN_MSG
