@@ -112,7 +112,7 @@ class AmpInlineGallery extends AMP.BaseElement {
       scopedQuerySelectorAll(this.element, CHILDREN_FOR_PROGRESS_SELECTOR),
       (el) => {
         el.getImpl().then((pagination) => {
-          pagination.updateProgress(total, index, offset);
+          pagination.updateProgress(slides, total, index, offset);
         });
       }
     );
