@@ -164,11 +164,11 @@ const Attributes = {
 };
 
 /**
- * The duration of time (in milliseconds) to wait for a page to be loaded,
- * before the story becomes visible.
+ * The duration of time (in milliseconds) to wait for the Story initial content
+ * to be loaded before marking the story as loaded.
  * @const {number}
  */
-const PAGE_LOAD_TIMEOUT_MS = 5000;
+const INITIAL_CONTENT_LOAD_TIMEOUT_MS = 8000;
 
 /**
  * Single page ads may be injected later. If the original story contains 0 media
@@ -1024,7 +1024,9 @@ export class AmpStory extends AMP.BaseElement {
     // Do not block the layout callback on the completion of these promises, as
     // that prevents descendents from being laid out (and therefore loaded).
     storyLayoutPromise
-      .then(() => this.whenPagesLoaded_(PAGE_LOAD_TIMEOUT_MS))
+      .then(() =>
+        this.whenInitialContentLoaded_(INITIAL_CONTENT_LOAD_TIMEOUT_MS)
+      )
       .then(() => {
         this.markStoryAsLoaded_();
         this.initializeLiveStory_();
@@ -1119,11 +1121,11 @@ export class AmpStory extends AMP.BaseElement {
   /**
    * @param {number} timeoutMs The maximum amount of time to wait, in
    *     milliseconds.
-   * @return {!Promise} A promise that is resolved when the page is loaded or
-   *     the timeout has been exceeded, whichever happens first.
+   * @return {!Promise} A promise that is resolved when the initial content is
+   *     loaded or the timeout has been exceeded, whichever happens first.
    * @private
    */
-  whenPagesLoaded_(timeoutMs = 0) {
+  whenInitialContentLoaded_(timeoutMs = 0) {
     const pagesToWaitFor =
       this.storeService_.get(StateProperty.UI_STATE) === UIType.DESKTOP_PANELS
         ? [this.pages_[0], this.pages_[1]]
