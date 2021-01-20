@@ -47,7 +47,7 @@ export class AmpInlineGallerySlide extends AMP.BaseElement {
       </figure>
     `;
     const expand = content.querySelector('[slot="collapsed"]');
-    expand.addEventListener('click', e => {
+    expand.addEventListener('click', (e) => {
       this.openLightbox();
       e.stopPropagation();
     });
@@ -70,7 +70,7 @@ export class AmpInlineGallerySlide extends AMP.BaseElement {
         const el = document.querySelector('amp-lightbox-gallery');
         return el.getImpl();
       })
-      .then(impl => {
+      .then((impl) => {
         impl.open(this.element, true);
       });
   }
@@ -95,20 +95,20 @@ export class AmpInlineGallerySlide extends AMP.BaseElement {
     const childNodesArray = toArray(this.element.childNodes);
 
     childNodesArray
-      .filter(n => {
+      .filter((n) => {
         return n.hasAttribute && n.getAttribute('slot') === 'caption';
       })
-      .forEach(node => captionSlot.appendChild(node));
+      .forEach((node) => captionSlot.appendChild(node));
     childNodesArray
-      .filter(n => {
+      .filter((n) => {
         return !n.hasAttribute || !n.hasAttribute('slot');
       })
-      .forEach(node => contentSlot.appendChild(node));
+      .forEach((node) => contentSlot.appendChild(node));
     childNodesArray
-      .filter(n => {
+      .filter((n) => {
         return n.hasAttribute && n.getAttribute('slot') === 'attribution';
       })
-      .forEach(node => attributionSlot.appendChild(node));
+      .forEach((node) => attributionSlot.appendChild(node));
 
     this.element.appendChild(dom);
   }
