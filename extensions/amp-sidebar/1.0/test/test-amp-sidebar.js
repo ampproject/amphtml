@@ -43,6 +43,8 @@ describes.realWin(
       let closeButton;
       let toggleButton;
       let animateFunction;
+      let consoleWarnSpy;
+      let consoleWarn;
 
       function invocation(method, args = {}) {
         const source = null;
@@ -67,6 +69,11 @@ describes.realWin(
         // disable animations for synchronous testing
         animateFunction = Element.prototype.animate;
         Element.prototype.animate = null;
+        // disable warnings and check against spy when needed
+        consoleWarn = console.warn;
+        console.warn = () => true;
+        consoleWarnSpy = env.sandbox.spy(console, 'warn');
+
         fullHtml = html`
           <div>
             <amp-sidebar id="sidebar" side="left">
@@ -101,6 +108,7 @@ describes.realWin(
 
       afterEach(() => {
         Element.prototype.animate = animateFunction;
+        console.warn = consoleWarn;
       });
 
       it('open attribute is synced with component mounted', async () => {
@@ -298,6 +306,101 @@ describes.realWin(
         expect(win.getComputedStyle(sidebarElement).minWidth).to.equal('45px');
       });
 
+      it('should display a warning when sidebar is not child of body', async () => {
+        // sidebar is wrapped in a div so not direct child of body
+        // warning should be calledOnce
+        expect(consoleWarnSpy).to.be.calledOnce;
+
+        const noWarnSidebar = html`
+          <amp-sidebar id="sidebar" side="left">
+            <div>
+              <span>
+                Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at
+                aeque inermis reprehendunt.
+              </span>
+              <ul>
+                <li>1</li>
+                <li>2</li>
+                <li>3</li>
+              </ul>
+            </div>
+          </amp-sidebar>
+        `;
+        win.document.body.appendChild(noWarnSidebar);
+        await noWarnSidebar.build();
+
+        // the 'noWarnSidebar' above is appended directly to the body and
+        // should not throw a warning
+        // the stub should still only have been called once
+        expect(consoleWarnSpy).to.be.calledOnce;
+      });
+
+      it('should default "left" or "right" based on document.dir when side not provided', async () => {
+        const documentDir = win.document.dir;
+
+        /**
+         * document.dir is not 'rtl' and side is not provided to the element
+         * so we should default to 'left'
+         */
+        win.document.dir = 'blah';
+        fullHtml = html`
+          <div>
+            <amp-sidebar id="sidebar2">
+              <div>Hello World!</div>
+            </amp-sidebar>
+            <div id="buttons">
+              <button id="open" on="tap:sidebar2.open()">open</button>
+            </div>
+          </div>
+        `;
+        element = fullHtml.firstElementChild;
+        win.document.body.appendChild(fullHtml);
+        await element.build();
+        container = element.shadowRoot.firstElementChild;
+        openButton = fullHtml.querySelector('#open');
+
+        // open the sidebar
+        openButton.click();
+        await waitForOpen(element, true);
+        expect(element).to.have.attribute('open');
+        let sidebarElement = container.firstElementChild;
+
+        // defaults to left if document is not 'ltr'
+        expect(sidebarElement.className.includes('left')).to.be.true;
+
+        /**
+         * document.dir is 'rtl' and side is not provided to the element
+         * so we should default to 'right'
+         */
+        win.document.dir = 'rtl';
+        fullHtml = html`
+          <div>
+            <amp-sidebar id="sidebar3">
+              <div>Hello World!</div>
+            </amp-sidebar>
+            <div id="buttons">
+              <button id="open" on="tap:sidebar3.open()">open</button>
+            </div>
+          </div>
+        `;
+        element = fullHtml.firstElementChild;
+        win.document.body.appendChild(fullHtml);
+        await element.build();
+        container = element.shadowRoot.firstElementChild;
+        openButton = fullHtml.querySelector('#open');
+
+        // open the sidebar
+        openButton.click();
+        await waitForOpen(element, true);
+        expect(element).to.have.attribute('open');
+        sidebarElement = container.firstElementChild;
+
+        // defaults to right if document is 'rtl'
+        expect(sidebarElement.className.includes('right')).to.be.true;
+
+        win.document.dir = documentDir;
+      });
+
       describe('programatic access to imperative API', () => {
         it('open', async () => {
           // sidebar is initially closed
@@ -408,11 +511,18 @@ describes.realWin(
       let openButton;
       let closeButton;
       let animateStub;
+      let consoleWarn;
 
       beforeEach(async () => {
         win = env.win;
         html = htmlFor(win.document);
         toggleExperiment(win, 'bento-sidebar', true, true);
+
+        // disable warnings since sidebar is child of a div container
+        // (and not body)
+        consoleWarn = console.warn;
+        console.warn = () => true;
+
         fullHtml = html`
           <div>
             <amp-sidebar id="sidebar" side="left">
@@ -442,6 +552,10 @@ describes.realWin(
         container = element.shadowRoot.firstElementChild;
         openButton = fullHtml.querySelector('#open');
         closeButton = fullHtml.querySelector('#close');
+      });
+
+      afterEach(() => {
+        console.warn = consoleWarn;
       });
 
       it('should not animate on build', () => {

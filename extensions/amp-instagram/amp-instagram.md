@@ -4,10 +4,12 @@ formats:
   - websites
 teaser:
   text: Displays an Instagram embed.
+experimental: true
+bento: true
 ---
 
 <!---
-Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+Copyright 2021 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -67,7 +69,3 @@ For example, in https://instagram.com/p/fBwFP, <code>fBwFP</code> is the data-sh
     <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
-
-## Validation
-
-See [amp-instagram rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-instagram/validator-amp-instagram.protoascii) in the AMP validator specification.

@@ -276,9 +276,9 @@ describes.realWin('amp-story-consent', {amp: true}, (env) => {
   });
 
   it('should broadcast the amp actions', () => {
-    env.sandbox.stub(storyConsent.actions_, 'trigger');
-
     storyConsent.buildCallback();
+
+    env.sandbox.stub(storyConsent.actions_, 'trigger');
 
     // Builds and appends a fake button directly in the storyConsent Shadow DOM.
     const buttonEl = win.document.createElement('button');
