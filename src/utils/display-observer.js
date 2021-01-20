@@ -31,17 +31,16 @@ export class DisplayObserver {
   constructor(ampdoc) {
     const {win} = ampdoc;
 
-    /** @private @const {!IntersectionObserver} */
-    this.docObserver_ = new win.IntersectionObserver(
+    /** @private @const {!Array<!IntersectionObserver>} */
+    this.observers_ = [];
+    this.observers_[DOC_OBSERVER] = new win.IntersectionObserver(
       (e) => this.observed_(e, DOC_OBSERVER),
       {
         root: ampdoc.getBody(),
         threshold: 0.001,
       }
     );
-
-    /** @private @const {!IntersectionObserver} */
-    this.viewportObserver_ = new win.IntersectionObserver(
+    this.observers_[VIEWPORT_OBSERVER] = new win.IntersectionObserver(
       (e) => this.observed_(e, VIEWPORT_OBSERVER),
       {threshold: 0.001}
     );
@@ -58,20 +57,20 @@ export class DisplayObserver {
     });
 
     /** @private @const {!Map<!Element, !Array<function(boolean)>>} */
-    this.targetObserverMultimap_ = new Map();
+    this.targetObserverCallbacks_ = new Map();
 
     /** @private @const {!Map<!Element, !Array<boolean>>} */
-    this.targetDisplayMap_ = new Map();
+    this.targetObservations_ = new Map();
   }
 
   /** @override */
   dispose() {
-    this.docObserver_.disconnect();
-    this.viewportObserver_.disconnect();
+    this.observers_[DOC_OBSERVER].disconnect();
+    this.observers_[VIEWPORT_OBSERVER].disconnect();
     this.visibilityUnlisten_();
     this.visibilityUnlisten_ = null;
-    this.targetObserverMultimap_.clear();
-    this.targetDisplayMap_.clear();
+    this.targetObserverCallbacks_.clear();
+    this.targetObservations_.clear();
   }
 
   /**
@@ -79,18 +78,19 @@ export class DisplayObserver {
    * @param {function(boolean)} callback
    */
   observe(target, callback) {
-    let callbacks = this.targetObserverMultimap_.get(target);
+    let callbacks = this.targetObserverCallbacks_.get(target);
     if (!callbacks) {
       callbacks = [];
-      this.targetObserverMultimap_.set(target, callbacks);
-      this.docObserver_.observe(target);
-      this.viewportObserver_.observe(target);
+      this.targetObserverCallbacks_.set(target, callbacks);
+      this.observers_[DOC_OBSERVER].observe(target);
+      this.observers_[VIEWPORT_OBSERVER].observe(target);
     }
     if (pushIfNotExist(callbacks, callback)) {
-      if (this.targetDisplayMap_.has(target)) {
+      if (this.targetObservations_.has(target)) {
+        // Notify the existing observation immediately.
         setTimeout(() => {
-          const display = getDisplay(
-            this.targetDisplayMap_.get(target),
+          const display = computeDisplay(
+            this.targetObservations_.get(target),
             this.isDocVisible_
           );
           if (display != null) {
@@ -106,25 +106,25 @@ export class DisplayObserver {
    * @param {function()} callback
    */
   unobserve(target, callback) {
-    const callbacks = this.targetObserverMultimap_.get(target);
+    const callbacks = this.targetObserverCallbacks_.get(target);
     if (!callbacks) {
       return;
     }
     removeItem(callbacks, callback);
     if (callbacks.length == 0) {
-      this.targetObserverMultimap_.delete(target);
-      this.targetDisplayMap_.delete(target);
-      this.docObserver_.unobserve(target);
-      this.viewportObserver_.unobserve(target);
+      this.targetObserverCallbacks_.delete(target);
+      this.targetObservations_.delete(target);
+      this.observers_[DOC_OBSERVER].unobserve(target);
+      this.observers_[VIEWPORT_OBSERVER].unobserve(target);
     }
   }
 
   /** @private */
   docVisibilityChanged_() {
-    this.targetObserverMultimap_.forEach((callbacks, target) => {
-      const displays = this.targetDisplayMap_.get(target);
-      const oldDisplay = getDisplay(displays, !this.isDocVisible_);
-      const newDisplay = getDisplay(displays, this.isDocVisible_);
+    this.targetObserverCallbacks_.forEach((callbacks, target) => {
+      const observations = this.targetObservations_.get(target);
+      const oldDisplay = computeDisplay(observations, !this.isDocVisible_);
+      const newDisplay = computeDisplay(observations, this.isDocVisible_);
       if (newDisplay != null && newDisplay !== oldDisplay) {
         for (let k = 0; k < callbacks.length; k++) {
           callCallbackNoInline(callbacks[k], newDisplay);
@@ -146,18 +146,18 @@ export class DisplayObserver {
         continue;
       }
       seen.add(target);
-      const callbacks = this.targetObserverMultimap_.get(target);
+      const callbacks = this.targetObserverCallbacks_.get(target);
       if (!callbacks) {
         continue;
       }
-      let displays = this.targetDisplayMap_.get(target);
-      if (!displays) {
-        displays = [];
-        this.targetDisplayMap_.set(target, displays);
+      let observations = this.targetObservations_.get(target);
+      if (!observations) {
+        observations = [];
+        this.targetObservations_.set(target, observations);
       }
-      const oldDisplay = getDisplay(displays, this.isDocVisible_);
-      displays[observer] = isIntersecting;
-      const newDisplay = getDisplay(displays, this.isDocVisible_);
+      const oldDisplay = computeDisplay(observations, this.isDocVisible_);
+      observations[observer] = isIntersecting;
+      const newDisplay = computeDisplay(observations, this.isDocVisible_);
       if (newDisplay != null && newDisplay !== oldDisplay) {
         for (let k = 0; k < callbacks.length; k++) {
           callCallbackNoInline(callbacks[k], newDisplay);
@@ -220,25 +220,25 @@ function callCallbackNoInline(callback, size) {
 }
 
 /**
- * @param {?Array<boolean>} displays
+ * @param {?Array<boolean>} observations
  * @param {boolean} isDocVisible
  * @return {?boolean}
  */
-function getDisplay(displays, isDocVisible) {
+function computeDisplay(observations, isDocVisible) {
   if (!isDocVisible) {
     return false;
   }
-  if (!displays) {
+  if (!observations) {
     // Unknown yet.
     return null;
   }
-  if (displays[DOC_OBSERVER] || displays[VIEWPORT_OBSERVER]) {
+  if (observations[DOC_OBSERVER] || observations[VIEWPORT_OBSERVER]) {
     // OR condition: one true - the result is true.
     return true;
   }
   if (
-    displays[DOC_OBSERVER] === false &&
-    displays[VIEWPORT_OBSERVER] === false
+    observations[DOC_OBSERVER] === false &&
+    observations[VIEWPORT_OBSERVER] === false
   ) {
     // Reverse of OR: both must be false for the result to be false.
     return false;

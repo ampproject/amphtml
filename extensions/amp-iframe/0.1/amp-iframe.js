@@ -634,7 +634,7 @@ export class AmpIframe extends AMP.BaseElement {
    */
   onDisplay_(isDisplayed) {
     if (!isDisplayed && this.iframe_) {
-      this.getVsync().mutate(() => this.element.unload());
+      this.getVsync().mutate(() => this.unload());
     }
   }
 

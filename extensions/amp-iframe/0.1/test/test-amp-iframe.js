@@ -1086,6 +1086,7 @@ describes.realWin(
         width: 100,
         height: 100,
       });
+      const impl = ampIframe.implementation_;
       await waitForAmpIframeLayoutPromise(doc, ampIframe);
       expect(ampIframe.querySelector('iframe')).to.exist;
       expect(ampIframe.unlayoutOnPause()).to.be.false;
@@ -1093,9 +1094,9 @@ describes.realWin(
       setDisplay(ampIframe, false);
 
       await new Promise((resolve) => {
-        env.sandbox./*OK*/ stub(ampIframe, 'unload').callsFake(resolve);
+        env.sandbox./*OK*/ stub(impl, 'unload').callsFake(resolve);
       });
-      expect(ampIframe.unload).to.be.calledOnce;
+      expect(impl.unload).to.be.calledOnce;
     });
 
     it('should not allow pausing before loaded', async () => {
@@ -1104,14 +1105,15 @@ describes.realWin(
         width: 100,
         height: 100,
       });
+      const impl = ampIframe.implementation_;
       expect(ampIframe.querySelector('iframe')).to.not.exist;
       expect(ampIframe.unlayoutOnPause()).to.be.false;
 
-      env.sandbox./*OK*/ stub(ampIframe, 'unload');
+      env.sandbox./*OK*/ stub(impl, 'unload');
       setDisplay(ampIframe, false);
 
       await ampIframe.implementation_.getVsync().mutate(() => {});
-      expect(ampIframe.unload).to.not.be.called;
+      expect(impl.unload).to.not.be.called;
     });
 
     describe('throwIfCannotNavigate()', () => {
