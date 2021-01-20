@@ -62,7 +62,11 @@ Adds support for AT Internet. More details for adding AT Internet support can be
 
 Type attribute value: `baiduanalytics`
 
+<!-- markdown-link-check-disable -->
+
 Adds support for Baidu Analytics. More details for adding Baidu Analytics support can be found at [tongji.baidu.com/](http://tongji.baidu.com/web/help/article?id=268&type=0).
+
+<!-- markdown-link-check-enable -->
 
 ### Black Crow AI
 
@@ -438,7 +442,11 @@ Type attribute value: `shinystat`
 
 Type attribute value: `mpulse`
 
+<!-- markdown-link-check-disable -->
+
 Adds support for [SOASTA mPulse](https://www.soasta.com/mPulse). Configuration details can be found at [docs.soasta.com](http://docs.soasta.com/).
+
+<!-- markdown-link-check-enable -->
 
 ### SimpleReach
 
