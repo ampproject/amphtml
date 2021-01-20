@@ -61,7 +61,7 @@ Linkedin is one of the pre-configured providers, so you do not need to provide t
 
 ### Pre-configured providers
 
-The `amp-social-share` component provides [some pre-configured providers](0.1/amp-social-share-config.js) that know their sharing endpoints as well as some default parameters.
+The `amp-social-share` component provides [some pre-configured providers](amp-social-share-config.js) that know their sharing endpoints as well as some default parameters.
 
 <table>
   <tr>

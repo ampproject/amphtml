@@ -229,4 +229,4 @@ Renders as:
 
 ## Validation
 
-See [amp-date-countdown rules](validator-amp-date-countdown.protoascii) in the AMP validator specification.
+See [amp-date-countdown rules](../validator-amp-date-countdown.protoascii) in the AMP validator specification.
