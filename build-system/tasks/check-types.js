@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-const log = require('fancy-log');
 const {
   createCtrlcHandler,
   exitCtrlcHandler,
@@ -25,6 +24,7 @@ const {
 const {cleanupBuildDir, closureCompile} = require('../compile/compile');
 const {compileCss} = require('./css');
 const {extensions, maybeInitializeExtensions} = require('./extension-helpers');
+const {log} = require('../common/logging');
 const {maybeUpdatePackages} = require('./update-packages');
 
 /**

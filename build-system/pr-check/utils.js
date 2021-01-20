@@ -26,30 +26,18 @@ const {
   shortSha,
 } = require('../common/git');
 const {execOrDie, execOrThrow, execWithError, exec} = require('../common/exec');
-const {isCiBuild, ciBuildNumber, ciPullRequestSha} = require('../common/ci');
+const {isCiBuild, ciBuildId, ciPullRequestSha} = require('../common/ci');
 const {replaceUrls, signalDistUpload} = require('../tasks/pr-deploy-bot-utils');
 
-const UNMINIFIED_OUTPUT_FILE = isCiBuild()
-  ? `amp_unminified_${ciBuildNumber()}.zip`
-  : '';
-const NOMODULE_OUTPUT_FILE = isCiBuild()
-  ? `amp_nomodule_${ciBuildNumber()}.zip`
-  : '';
-const MODULE_OUTPUT_FILE = isCiBuild()
-  ? `amp_module_${ciBuildNumber()}.zip`
-  : '';
+const UNMINIFIED_OUTPUT_FILE = `amp_unminified_${ciBuildId()}.zip`;
+const NOMODULE_OUTPUT_FILE = `amp_nomodule_${ciBuildId()}.zip`;
+const MODULE_OUTPUT_FILE = `amp_module_${ciBuildId()}.zip`;
 
 const BUILD_OUTPUT_DIRS = 'build/ dist/ dist.3p/';
 const APP_SERVING_DIRS = 'dist.tools/ examples/ test/manual/';
 
 // TODO(rsimha, ampproject/amp-github-apps#1110): Update storage details.
-const OUTPUT_STORAGE_LOCATION = 'gs://amp-travis-builds';
-const OUTPUT_STORAGE_KEY_FILE = 'sa-travis-key.json';
-const OUTPUT_STORAGE_PROJECT_ID = 'amp-travis-build-storage';
-const OUTPUT_STORAGE_SERVICE_ACCOUNT =
-  'sa-travis@amp-travis-build-storage.iam.gserviceaccount.com';
-
-const GCLOUD_LOGGING_FLAGS = '--quiet --verbosity error';
+const GCLOUD_STORAGE_BUCKET = 'gs://amp-travis-builds';
 
 const GIT_BRANCH_URL =
   'https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md#create-a-git-branch';
@@ -220,7 +208,7 @@ const timedExecOrThrow = timedExecFn(execOrThrow);
  */
 function downloadOutput_(functionName, outputFileName, outputDirs) {
   const fileLogPrefix = colors.bold(colors.yellow(`${functionName}:`));
-  const buildOutputDownloadUrl = `${OUTPUT_STORAGE_LOCATION}/${outputFileName}`;
+  const buildOutputDownloadUrl = `${GCLOUD_STORAGE_BUCKET}/${outputFileName}`;
   const dirsToUnzip = outputDirs.split(' ');
 
   console.log(
@@ -228,8 +216,7 @@ function downloadOutput_(functionName, outputFileName, outputDirs) {
       colors.cyan(buildOutputDownloadUrl) +
       '...'
   );
-  authenticateWithStorageLocation_();
-  execOrDie(`gsutil cp ${buildOutputDownloadUrl} ${outputFileName}`);
+  execOrDie(`gsutil -q cp ${buildOutputDownloadUrl} ${outputFileName}`);
 
   console.log(
     `${fileLogPrefix} Extracting ` + colors.cyan(outputFileName) + '...'
@@ -264,27 +251,10 @@ function uploadOutput_(functionName, outputFileName, outputDirs) {
     `${fileLogPrefix} Uploading ` +
       colors.cyan(outputFileName) +
       ' to ' +
-      colors.cyan(OUTPUT_STORAGE_LOCATION) +
+      colors.cyan(GCLOUD_STORAGE_BUCKET) +
       '...'
   );
-  authenticateWithStorageLocation_();
-  execOrDie(`gsutil -m cp -r ${outputFileName} ${OUTPUT_STORAGE_LOCATION}`);
-}
-
-function authenticateWithStorageLocation_() {
-  decryptTravisKey_();
-  execOrDie(
-    `gcloud auth activate-service-account --key-file ${OUTPUT_STORAGE_KEY_FILE} ${GCLOUD_LOGGING_FLAGS}`
-  );
-  execOrDie(
-    `gcloud config set account ${OUTPUT_STORAGE_SERVICE_ACCOUNT} ${GCLOUD_LOGGING_FLAGS}`
-  );
-  execOrDie(
-    `gcloud config set pass_credentials_to_gsutil true ${GCLOUD_LOGGING_FLAGS}`
-  );
-  execOrDie(
-    `gcloud config set project ${OUTPUT_STORAGE_PROJECT_ID} ${GCLOUD_LOGGING_FLAGS}`
-  );
+  execOrDie(`gsutil -q -m cp -r ${outputFileName} ${GCLOUD_STORAGE_BUCKET}`);
 }
 
 /**
@@ -347,20 +317,6 @@ async function processAndUploadNomoduleOutput(functionName) {
   await replaceUrls('examples');
   uploadNomoduleOutput(functionName);
   await signalDistUpload('success');
-}
-
-/**
- * Decrypts key used by storage service account
- */
-function decryptTravisKey_() {
-  // -md sha256 is required due to encryption differences between
-  // openssl 1.1.1a, which was used to encrypt the key, and
-  // openssl 1.0.2g, which is used by Travis to decrypt.
-  execOrDie(
-    `openssl aes-256-cbc -md sha256 -k ${process.env.GCP_TOKEN} -in ` +
-      `build-system/common/sa-travis-key.json.enc -out ` +
-      `${OUTPUT_STORAGE_KEY_FILE} -d`
-  );
 }
 
 module.exports = {

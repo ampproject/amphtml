@@ -542,11 +542,13 @@ def GenerateTestRunner(out_dir):
   # to the validator rather than a child directory.
   if not os.path.isdir(extensions_dir):
     extensions_dir = '../extensions'
+  log_level = ('false' if os.environ.get('CI') else '\'dots\'')
   f.write("""#!/usr/bin/env node
              global.assert = require('assert');
              global.fs = require('fs');
              global.path = require('path');
              var JasmineRunner = require('jasmine');
+             var Reporter = require('jasmine-console-reporter');
              var jasmine = new JasmineRunner();
              process.env.TESTDATA_ROOTS = 'testdata:%s'
              require('./validator_test_minified');
@@ -556,11 +558,14 @@ def GenerateTestRunner(out_dir):
              require('./amp4ads-parse-css_test_minified');
              require('./keyframes-parse-css_test_minified');
              require('./parse-srcset_test_minified');
+             var reporter = new Reporter({verbosity: 1, activity: %s});
+             jasmine.env.clearReporters();
+             jasmine.env.addReporter(reporter);
              jasmine.onComplete(function (passed) {
                  process.exit(passed ? 0 : 1);
              });
              jasmine.execute();
-          """ % extensions_dir)
+          """ % (extensions_dir, log_level))
   os.chmod('%s/test_runner' % out_dir, 0o750)
   logging.info('... success')
 

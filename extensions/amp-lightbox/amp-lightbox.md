@@ -2,14 +2,14 @@
 $category@: layout
 formats:
   - websites
-  - ads
-  - email
 teaser:
   text: Displays elements in a full-viewport “lightbox” modal.
+experimental: true
+bento: true
 ---
 
 <!---
-Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+Copyright 2021 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -43,85 +43,13 @@ component. To show a gallery of images in a lightbox, you can use
 
 [/tip]
 
-[filter formats="ads"]
+### Migrating from 0.1
 
-### Using `amp-lightbox` in AMPHTML ads <a name="a4a"></a>
+The experimental `1.0` version of `amp-lightbox` employs the following differences from version `0.1`:
 
-There are some differences between using `amp-lightbox` in normal AMP documents
-vs. [ads written in AMPHTML](../amp-a4a/amp-a4a-format.md).
-
-[tip type="note"]
-
-The `amp-lightbox` component for use in AMPHTML ads is
-[experimental](https://amp.dev/documentation/guides-and-tutorials/learn/experimental)
-and under active development. To use `amp-lightbox` in AMPHTML ads,
-[enable the `amp-lightbox-a4a-proto` experiment](http://cdn.ampproject.org/experiments.html).
-
-[/tip]
-
-#### Required `close-button`
-
-For AMPHTML ads, the `close-button` attribute is required. This attribute causes
-a header to render at the top of your lightbox. The header contains a close
-button and a label that displays "Ad". Requirement of this header is needed to:
-
--   Set a consistent and predictable user experience for AMPHTML ads.
--   Ensure that an exit point for the lightbox always exists, otherwise the
-    creative could effectively hijack the host document content via a lightbox.
-
-The `close-button` attribute is required and only allowed in AMPHTML ads. In
-regular AMP documents, you can render a close button wherever you need it as
-part of the `<amp-lightbox>` content.
-
-#### Scrollable lightboxes are disallowed
-
-For AMPHTML ads, scrollable lightboxes are not allowed.
-
-#### Transparent background
-
-When you use `<amp-lightbox>` in AMPHTML ads, the background of your `<body>`
-element becomes transparent because the AMP runtime resizes and realigns your
-creative's content before the lightbox is expanded. This is done to prevent a
-visual "jump" of the creative while the lightbox opens. If your creative needs a
-background, set it on an intermediate container (like a full-size `<div>`)
-instead of the `<body>`.
-
-When the AMPHTML ad is running in a third-party environment (for example, in a
-non-AMP document), the creative is centered relative to the viewport and is then
-expanded. This is because third-party iframes need to rely on a postMessage API
-to enable features like frame resizing, which is asynchronous, so centering the
-creative first allows a smooth transition without visual jumps.
-
-#### Examples of transitions in lightboxes for AMPHTML ads
-
-In the examples below, we demonstrate how the transition looks for an AMPHTML ad
-that has the `animate-in="fly-in-bottom"` attribute set on the lightbox element
-for an AMPHTML ad in a friendly iframe, and an AMPHTML ad in a third-party
-iframe.
-
-##### On friendly iframes (e.g., coming from an AMP cache)
-
-<amp-img alt="lightbox ad in friendly iframe"
-    layout="fixed"
-    width="360" height="480"
-    src="https://github.com/ampproject/amphtml/raw/master/spec/img/lightbox-ad-fie.gif" >
-<noscript>
-<img alt="lightbox ad in friendly iframe" src="../../spec/img/lightbox-ad-fie.gif" />
-</noscript>
-</amp-img>
-
-##### On third-party iframes (e.g., outside the AMP cache)
-
-<amp-img alt="lightbox ad in 3p iframe"
-    layout="fixed"
-    width="360" height="480"
-    src="https://github.com/ampproject/amphtml/raw/master/spec/img/lightbox-ad-3p.gif" >
-<noscript>
-<img alt="lightbox ad in 3p iframe" src="../../spec/img/lightbox-ad-3p.gif" />
-</noscript>
-</amp-img>
-
-[/filter]<!-- formats="ads" -->
+-   This component does not currently support modifying browser history state.
+-   `data-close-button-aria-label` is not supported and will soon be replaced with support for `slot="close-button"`.
+-   `animate-in` has been renamed to `animation`.
 
 ## Attributes
 
@@ -133,16 +61,7 @@ A unique identifier for the lightbox.
 
 Must be set to `nodisplay`.
 
-[filter formats="ads"]
-
-### `close-button`
-
-Renders a close button header at the top of the lightbox. This attribute is
-required for use with [AMPHTML Ads](#a4a). It is invalid on other AMP formats.
-
-[/filter]<!-- formats="ads" -->
-
-### `animate-in` (optional)
+### `animation` (optional)
 
 Defines the style of animation for opening the lightbox. By default, this will
 be set to `fade-in`. Valid values are `fade-in`, `fly-in-bottom`, and
@@ -156,20 +75,6 @@ property of the `amp-lightbox` element. Do not rely on transforming the
 nested element instead.
 
 [/tip]
-
-[filter formats="websites, stories"]
-
-### `data-close-button-aria-label` (optional)
-
-Optional attribute used to set ARIA label for the autogenerated close button
-added for accessibility. By default the applied label is "Close the modal".
-
-### `scrollable` (optional)
-
-When the `scrollable` attribute is present, the content of the lightbox can
-scroll when overflowing the height of the lightbox.
-
-[/filter]<!-- formats="websites, stories" -->
 
 ## Actions
 
@@ -208,8 +113,3 @@ attribute value, will be created and focused on.
   <button on="tap:quote-lb.close">Nice!</button>
 </amp-lightbox>
 ```
-
-## Validation
-
-See [`amp-lightbox` rules](validator-amp-lightbox.protoascii)
-in the AMP validator specification.

@@ -2,13 +2,14 @@
 $category@: dynamic-content
 formats:
   - websites
-  - email
 teaser:
   text: Represents a control that presents a menu of options and lets the user choose from it.
+experimental: true
+bento: true
 ---
 
 <!---
-Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+Copyright 2021 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -115,10 +116,6 @@ Example:
 </amp-selector>
 ```
 
-{% call callout('Tip', type='success') %}
-See live demos at [AMP By Example](https://amp.dev/documentation/examples/components/amp-selector/).
-{% endcall %}
-
 ## Attributes
 
 ### Attributes on `<amp-selector>`
@@ -173,7 +170,3 @@ Tapping disabled options does not trigger the `select` event.
   `event.selectedOptions` contains an array of the `option` attribute values of all selected elements.
   </li>
 </ul>
-
-## Validation
-
-See [amp-selector rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-selector/validator-amp-selector.protoascii) in the AMP validator specification.
