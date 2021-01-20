@@ -29,6 +29,9 @@ import {setImportantStyles} from '../../../src/style';
 /** @const {string} */
 const TAG = 'AMP_STORY_PANNING_MEDIA';
 
+/** @const {string}  */
+const DURATION = 60;
+
 export class AmpStoryPanningMedia extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -40,17 +43,20 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     /** @private {?Element} The element that is transitioned. */
     this.ampImgEl_ = null;
 
-    /** @private {?string} Sent to siblings to update their position. */
+    /** @private {?number} */
     this.x_ = null;
 
-    /** @private {?string} Sent to siblings to update their position. */
+    /** @private {?number} */
     this.y_ = null;
 
-    /** @private {?string} Sent to siblings to update their position. */
+    /** @private {?number} */
     this.zoom_ = null;
 
     /** @private {?../../../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
+
+    /** @private {?string} */
+    this.pageId_ = null;
 
     /** @private {boolean} */
     this.isOnActivePage_ = false;
@@ -58,9 +64,9 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.x_ = this.element_.getAttribute('x') || '0%';
-    this.y_ = this.element_.getAttribute('y') || '0%';
-    this.zoom_ = this.element_.getAttribute('zoom') || '1';
+    this.x_ = parseFloat(this.element_.getAttribute('x')) || 0;
+    this.y_ = parseFloat(this.element_.getAttribute('y')) || 0;
+    this.zoom_ = parseFloat(this.element_.getAttribute('zoom')) || 1;
 
     return Services.storyStoreServiceForOrNull(this.win).then(
       (storeService) => {
@@ -105,6 +111,16 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       StateProperty.PANNING_MEDIA_STATE,
       (panningMediaState) => this.onPanningMediaStateChange_(panningMediaState)
     );
+    // Mutation observer for distance attribute
+    const config = {attributes: true, attributeFilter: ['distance']};
+    const callback = (mutationsList) => {
+      this.distance_ = parseInt(
+        mutationsList[0].target.getAttribute('distance'),
+        10
+      );
+    };
+    const observer = new MutationObserver(callback);
+    this.getPage_() && observer.observe(this.getPage_(), config);
   }
 
   /** @private */
@@ -113,12 +129,38 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       // TODO(#31932): A key could be sent here to update elements of the same group.
       // Note, this will not work when there are 2 or more panning components on the same page.
       // It might need to dynamic to hold more than 1 set of positions.
-      this.storeService_.dispatch(Action.SET_PANNING_MEDIA_STATE, {
-        x: this.x_,
-        y: this.y_,
-        zoom: this.zoom_,
-      });
+      this.animate_();
     }
+  }
+
+  /**
+   * Animates from current position to active components position.
+   * @private
+   */
+  animate_() {
+    const startPos = this.storeService_.get(
+      StateProperty.PANNING_MEDIA_STATE
+    ) || {x: this.x_, y: this.y_, zoom: this.zoom_};
+
+    const easeInOutQuad = (val) =>
+      val < 0.5 ? 2 * val * val : 1 - Math.pow(-2 * val + 2, 2) / 2;
+
+    let tick = 0;
+    const nextFrame = () => {
+      tick++;
+      if (tick < DURATION) {
+        const easing = easeInOutQuad(tick / DURATION);
+        this.storeService_.dispatch(Action.SET_PANNING_MEDIA_STATE, {
+          x: startPos.x + (this.x_ - startPos.x) * easing,
+          y: startPos.y + (this.y_ - startPos.y) * easing,
+          zoom: startPos.zoom + (this.zoom_ - startPos.zoom) * easing,
+        });
+        this.isOnActivePage_ && requestAnimationFrame(nextFrame);
+      } else {
+        this.storeService_.dispatch(Action.SET_PANNING_MEDIA_STATE, to);
+      }
+    };
+    nextFrame();
   }
 
   /**
@@ -126,7 +168,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
    * @param {!Object<string, string>} panningMediaState
    */
   onPanningMediaStateChange_(panningMediaState) {
-    if (panningMediaState) {
+    if (panningMediaState && this.distance_ >= -1 && this.distance_ <= 1) {
       // TODO(#31932): Update siblings that are part of the same group.
       this.updateTransform_(panningMediaState);
     }
@@ -141,7 +183,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     const {x, y, zoom} = panningMediaState;
     return this.mutateElement(() => {
       setImportantStyles(this.ampImgEl_, {
-        transform: `scale(${zoom}) translate(${x}, ${y})`,
+        transform: `scale(${zoom}) translate(${x}%, ${y}%)`,
       });
     });
   }
@@ -152,12 +194,20 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
    */
   getPageId_() {
     if (this.pageId_ == null) {
-      this.pageId_ = closest(
-        dev().assertElement(this.element),
-        (el) => el.tagName.toLowerCase() === 'amp-story-page'
-      ).getAttribute('id');
+      this.pageId_ = this.getPage_().getAttribute('id');
     }
     return this.pageId_;
+  }
+
+  /**
+   * @private
+   * @return {?Element} the parent amp-story-page
+   */
+  getPage_() {
+    return closest(
+      dev().assertElement(this.element),
+      (el) => el.tagName.toLowerCase() === 'amp-story-page'
+    );
   }
 
   /** @override */
