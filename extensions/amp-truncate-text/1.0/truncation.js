@@ -97,10 +97,16 @@ function forEachChild(node, cb) {
   // We want to get the contents of the "caption" slot and iterate over them.
   // We use flatten so that we get the slot default contents, if nothing is
   // slotted.
-  const childNodes =
-    node.localName == 'slot'
-      ? node.assignedNodes({flatten: true})
-      : node.childNodes;
+  //
+  // In Preact mode, a slot may exist in the light DOM, so we fallback to
+  // `childNodes` if `assignedNodes` comes up empty.
+  let {childNodes} = node;
+  if (node.localName == 'slot') {
+    const assignedNodes = node.assignedNodes({flatten: true});
+    if (assignedNodes.length) {
+      childNodes = assignedNodes;
+    }
+  }
 
   for (let i = 0; i < childNodes.length; i++) {
     cb(childNodes[i]);
@@ -176,6 +182,7 @@ function getOverflowY(element) {
  * }} config
  */
 export function truncateText({container, overflowNodes}) {
+  console.log(container, overflowNodes);
   clearTruncated(container);
 
   // If everything fits while the overflow button is hidden, we are done.
