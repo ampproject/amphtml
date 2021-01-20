@@ -36,7 +36,7 @@ export function renderInteractionOverlay(elOrDoc, metadata) {
   const element = html`
     <button
       aria-label="Unmute video"
-      class="i-amphtml-video-mask i-amphtml-fill-content"
+      class="i-amphtml-video-mask i-amphtml-fill-content i-amphtml-doink"
       tabindex="0"
     ></button>
   `;
