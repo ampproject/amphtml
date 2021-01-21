@@ -14,51 +14,34 @@
  * limitations under the License.
  */
 
-/**
- * @param {!Window} win
- * @return {typeof AbortController}
- */
-function createAbortController(win) {
-  class AbortController {
-    /** */
-    constructor() {
-      /** @const {!AbortSignal} */
-      this.signal_ = new AbortSignal();
-    }
+class AbortController {
+  /** */
+  constructor() {
+    /** @const {!AbortSignal} */
+    this.signal_ = new AbortSignal();
+  }
 
-    /** */
-    abort() {
-      this.signal_.isAborted_ = true;
-      if (this.signal_.onabort_) {
-        const event = win.document.createEvent('CustomEvent');
-        event.initCustomEvent(
-          'abort',
-          /* bubbles */ false,
-          /* cancelable */ false,
-          /* detail */ null
-        );
-        // Notice that in IE the target/currentTarget are not overridable.
-        try {
-          Object.defineProperties(event, {
-            'target': {value: this.signal_},
-            'currentTarget': {value: this.signal_},
-          });
-        } catch (e) {
-          // Ignore.
-        }
-        this.signal_.onabort_(event);
-      }
-    }
-
-    /**
-     * @return {!AbortSignal}
-     */
-    get signal() {
-      return this.signal_;
+  /** */
+  abort() {
+    this.signal_.isAborted_ = true;
+    if (this.signal_.onabort_) {
+      const event = {
+        'type': 'abort',
+        'bubbles': false,
+        'cancelable': false,
+        'target': this.signal_,
+        'currentTarget': this.signal_,
+      };
+      this.signal_.onabort_(event);
     }
   }
 
-  return AbortController;
+  /**
+   * @return {!AbortSignal}
+   */
+  get signal() {
+    return this.signal_;
+  }
 }
 
 class AbortSignal {
@@ -103,7 +86,7 @@ export function install(win) {
     configurable: true,
     enumerable: false,
     writable: true,
-    value: createAbortController(win),
+    value: AbortController,
   });
   Object.defineProperty(win, 'AbortSignal', {
     configurable: true,

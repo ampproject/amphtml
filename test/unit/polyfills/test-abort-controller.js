@@ -56,8 +56,7 @@ describes.realWin('AbortController', {}, (env) => {
       bubbles: false,
       cancelable: false,
     });
-    // In IE, target/currentTarget are not overridable.
-    expect(event.target === null || event.target === signal).to.be.true;
-    expect(event.currentTarget === null || event.currentTarget === signal).to.be.true;
+    expect(event.target).to.equal(signal);
+    expect(event.currentTarget).to.equal(signal);
   });
 });
