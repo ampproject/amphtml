@@ -1091,12 +1091,33 @@ describes.realWin(
       expect(ampIframe.querySelector('iframe')).to.exist;
       expect(ampIframe.unlayoutOnPause()).to.be.false;
 
+      // The element should become visible before pause is necessary.
+      setDisplay(ampIframe, true);
       setDisplay(ampIframe, false);
 
       await new Promise((resolve) => {
         env.sandbox./*OK*/ stub(impl, 'unload').callsFake(resolve);
       });
       expect(impl.unload).to.be.calledOnce;
+    });
+
+    it('should now need pausing before displayed', async () => {
+      const ampIframe = createAmpIframe(env, {
+        src: iframeSrc,
+        width: 100,
+        height: 100,
+      });
+      const impl = ampIframe.implementation_;
+      await waitForAmpIframeLayoutPromise(doc, ampIframe);
+      expect(ampIframe.querySelector('iframe')).to.exist;
+      expect(ampIframe.unlayoutOnPause()).to.be.false;
+
+      // The element was never visible.
+      env.sandbox./*OK*/ stub(impl, 'unload');
+      setDisplay(ampIframe, false);
+
+      await ampIframe.implementation_.getVsync().mutate(() => {});
+      expect(impl.unload).to.not.be.called;
     });
 
     it('should not allow pausing before loaded', async () => {
@@ -1110,6 +1131,7 @@ describes.realWin(
       expect(ampIframe.unlayoutOnPause()).to.be.false;
 
       env.sandbox./*OK*/ stub(impl, 'unload');
+      setDisplay(ampIframe, true);
       setDisplay(ampIframe, false);
 
       await ampIframe.implementation_.getVsync().mutate(() => {});
