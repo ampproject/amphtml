@@ -34,33 +34,34 @@ import {useStyles} from './truncate-text.jss';
  * @return {PreactDef.Renderable}
  */
 function TruncateTextWithRef(
-  {slotPersistent, slotCollapsed, slotExpanded, children, ...rest},
+  {persistent, collapsed, expanded, children, ...rest},
   ref
 ) {
   const wrapperRef = useRef();
   const collapsedRef = useRef();
   const persistentRef = useRef();
 
-  const [expanded, setExpanded] = useState(false);
-  const [ready, setReady] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   // Provide API actions
   useImperativeHandle(ref, () => ({
-    expand: () => setExpanded(true),
-    collapse: () => setExpanded(false),
+    expand: () => setIsExpanded(true),
+    collapse: () => setIsExpanded(false),
   }));
 
   // TODO(rcebulko): Rewrite `truncateText` for Preact
   /** Perform truncation on contents. */
   const truncate = useCallback(() => {
-    truncateText({
-      container: wrapperRef.current,
-      overflowNodes: [persistentRef.current, collapsedRef.current],
-    });
-  }, []);
+    const container = wrapperRef.current;
+    const overflowNodes = [persistentRef.current, collapsedRef.current].filter(
+      Boolean
+    );
+
+    container && truncateText({container, overflowNodes});
+  }, [truncateText]);
 
   // Truncate the text when expanded/collapsed
-  useLayoutEffect(truncate, [expanded, truncate, ready]);
+  useLayoutEffect(truncate, [isExpanded, truncate]);
 
   const classes = useStyles();
   return (
@@ -68,10 +69,10 @@ function TruncateTextWithRef(
       layout
       ref={wrapperRef}
       wrapperClassName={`${classes.truncateTextWrapper} ${
-        expanded ? classes.truncateTextExpandedWrapper : ''
+        isExpanded ? classes.truncateTextExpandedWrapper : ''
       }`}
       contentClassName={`${classes.truncateTextContent} ${
-        expanded
+        isExpanded
           ? classes.truncateTextExpandedContent
           : classes.truncateTextCollapsedContent
       }`}
@@ -81,23 +82,23 @@ function TruncateTextWithRef(
         <slot children={children} />
       </span>
 
-      {expanded ? (
+      {isExpanded ? (
         <span
           name="expanded"
-          onClick={() => setExpanded(false)}
+          onClick={() => setIsExpanded(false)}
           className={classes.truncateTextExpandedSlot}
-          children={slotExpanded}
+          children={expanded}
         />
       ) : (
         <span
           name="collapsed"
           ref={collapsedRef}
-          onClick={() => setExpanded(true)}
-          children={slotCollapsed}
+          onClick={() => setIsExpanded(true)}
+          children={collapsed}
         />
       )}
 
-      <span name="persistent" ref={persistentRef} children={slotPersistent} />
+      <span name="persistent" ref={persistentRef} children={persistent} />
     </ContainWrapper>
   );
 }

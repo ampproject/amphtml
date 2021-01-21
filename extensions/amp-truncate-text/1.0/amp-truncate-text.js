@@ -49,18 +49,18 @@ AmpTruncateText['props'] = {};
 
 /** @override */
 AmpTruncateText['children'] = {
-  'slot-collapsed': {
-    name: 'slotCollapsed',
+  'collapsed': {
+    name: 'collapsed',
     selector: '[slot=collapsed]',
     single: true,
   },
-  'slot-expanded': {
-    name: 'slotExpanded',
+  'expanded': {
+    name: 'expanded',
     selector: '[slot=expanded]',
     single: true,
   },
-  'slot-persistent': {
-    name: 'slotPersistent',
+  'persistent': {
+    name: 'persistent',
     selector: '[slot=persistent]',
     single: true,
   },

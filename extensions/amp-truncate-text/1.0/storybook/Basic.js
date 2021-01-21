@@ -34,9 +34,9 @@ export const SimpleTruncatedText = () => {
       className="amp-truncate-text"
       layout="fixed"
       style={{width, height}}
-      slotPersistent={<button slot="persistent">Lorem Ipsum</button>}
-      slotCollapsed={<button slot="collapsed">See more</button>}
-      slotExpanded={<button slot="expanded">See less</button>}
+      persistent={<button>Lorem Ipsum</button>}
+      collapsed={<button>See more</button>}
+      expanded={<button>See less</button>}
     >
       Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
       tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
