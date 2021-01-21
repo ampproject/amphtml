@@ -24,5 +24,6 @@
   "adsense-ptt-exp": 0.1,
   "doubleclick-ptt-exp": 0.1,
   "fie-resources": 1,
+  "ads-initialIntersection": 0,
   "amp-cid-backup": 1
 }
