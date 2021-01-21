@@ -80,6 +80,10 @@ jobs:
       script:
         - unbuffer node build-system/pr-check/visual-diff-tests.js
     - stage: test
+      name: 'Unit Tests'
+      script:
+        - unbuffer node build-system/pr-check/unit-tests.js
+    - stage: test
       name: 'Unminified Tests'
       script:
         - unbuffer node build-system/pr-check/unminified-tests.js

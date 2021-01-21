@@ -58,7 +58,8 @@ describes.endtoend(
       prevArrow = await getPrevArrow(styles, controller);
     });
 
-    it('should move forwards once', async () => {
+    // TODO(carolineliu, #24195): This test is flaky during CI.
+    it.skip('should move forwards once', async () => {
       await controller.click(nextArrow);
 
       // Wait for render with updated active slide.

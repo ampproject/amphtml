@@ -47,7 +47,8 @@ describes.endtoend(
       nextArrow = await getNextArrow(controller);
     });
 
-    it('should move forwards once', async () => {
+    // TODO(micajuine-ho, #24195): This test is flaky during CI.
+    it.skip('should move forwards once', async () => {
       await controller.click(nextArrow);
       await sleep(500);
       prevArrow = await getPrevArrow(controller);

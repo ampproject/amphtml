@@ -15,11 +15,10 @@
  */
 'use strict';
 
-const colors = require('ansi-colors');
-const log = require('fancy-log');
+const {cyan, green, red} = require('ansi-colors');
 const {getStderr} = require('../common/exec');
 const {gitDiffFileMaster} = require('../common/git');
-const {isCiBuild} = require('../common/ci');
+const {log, logLocalDev, logWithoutTimestamp} = require('../common/logging');
 
 const PACKAGE_JSON_PATHS = [
   'package.json',
@@ -41,22 +40,20 @@ async function checkExactVersions() {
     const err = getStderr(checkerCmd);
     if (err) {
       log(
-        colors.red('ERROR:'),
+        red('ERROR:'),
         'One or more packages in',
-        colors.cyan(file),
+        cyan(file),
         'do not have an exact version.'
       );
-      console.log(gitDiffFileMaster(file));
+      logWithoutTimestamp(gitDiffFileMaster(file));
       success = false;
     } else {
-      if (!isCiBuild()) {
-        log(
-          colors.green('SUCCESS:'),
-          'All packages in',
-          colors.cyan(file),
-          'have exact versions.'
-        );
-      }
+      logLocalDev(
+        green('SUCCESS:'),
+        'All packages in',
+        cyan(file),
+        'have exact versions.'
+      );
     }
   });
   if (success) {

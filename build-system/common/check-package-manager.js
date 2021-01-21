@@ -363,10 +363,6 @@ function checkPythonVersion() {
  * @return {Promise}
  */
 async function main() {
-  // NPM is already used by default during CI, so there is nothing more to do.
-  if (process.env.CI) {
-    return;
-  }
   ensureNpm();
   await checkNodeVersion();
   runGulpChecks();

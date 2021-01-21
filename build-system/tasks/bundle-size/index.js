@@ -17,7 +17,6 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const globby = require('globby');
-const log = require('fancy-log');
 const path = require('path');
 const url = require('url');
 const util = require('util');
@@ -36,6 +35,7 @@ const {
   VERSION: internalRuntimeVersion,
 } = require('../../compile/internal-version');
 const {cyan, green, red, yellow} = require('ansi-colors');
+const {log} = require('../../common/logging');
 const {report, Report} = require('@ampproject/filesize');
 
 const requestPost = util.promisify(require('request').post);
