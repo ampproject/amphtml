@@ -53,9 +53,27 @@ const buildDeviceTemplate = (element) => {
   return html`
     <div class="i-amphtml-story-dev-tools-device">
       <div class="i-amphtml-story-dev-tools-device-screen">
+        <div class="i-amphtml-story-dev-tools-device-statusbar">
+          <div class="i-amphtml-story-dev-tools-device-statusbar-clock"></div>
+          <div class="i-amphtml-story-dev-tools-device-statusbar-icons"></div>
+        </div>
+        <div class="i-amphtml-story-dev-tools-device-appbar">
+          <div class="i-amphtml-story-dev-tools-device-appbar-icon"></div>
+          <div class="i-amphtml-story-dev-tools-device-appbar-urlbar"></div>
+          <div class="i-amphtml-story-dev-tools-device-appbar-icon"></div>
+          <div class="i-amphtml-story-dev-tools-device-appbar-icon"></div>
+        </div>
         <amp-story-player width="1" height="1" layout="container">
           <a></a>
         </amp-story-player>
+        <div class="i-amphtml-story-dev-tools-device-bottombar">
+          <div class="i-amphtml-story-dev-tools-device-appbar-icon"></div>
+          <div class="i-amphtml-story-dev-tools-device-appbar-icon"></div>
+          <div class="i-amphtml-story-dev-tools-device-appbar-icon"></div>
+          <div class="i-amphtml-story-dev-tools-device-appbar-icon"></div>
+          <div class="i-amphtml-story-dev-tools-device-appbar-icon"></div>
+        </div>
+        <div class="i-amphtml-story-dev-tools-device-navigation"></div>
       </div>
     </div>
   `;
@@ -229,6 +247,7 @@ const ALL_DEVICES = [
     'height': 605,
     'deviceHeight': 731,
     'deviceSpaces': 1,
+    'details': ['pixel2', 'browser', 'android'],
   },
   {
     'name': 'Pixel 3',
@@ -236,6 +255,7 @@ const ALL_DEVICES = [
     'height': 686,
     'deviceHeight': 823,
     'deviceSpaces': 1,
+    'details': ['pixel3', 'browser', 'android'],
   },
   {
     'name': 'iPhone 8 (Browser)',
@@ -243,13 +263,15 @@ const ALL_DEVICES = [
     'height': 554,
     'deviceHeight': 667,
     'deviceSpaces': 1,
+    'details': ['iphone8', 'browser', 'ios'],
   },
   {
     'name': 'iPhone 8 (Native)',
     'width': 375,
-    'height': 632,
+    'height': 596,
     'deviceHeight': 667,
     'deviceSpaces': 1,
+    'details': ['iphone8', 'native', 'ios'],
   },
   {
     'name': 'iPhone 11 (Browser)',
@@ -257,6 +279,7 @@ const ALL_DEVICES = [
     'height': 724,
     'deviceHeight': 896,
     'deviceSpaces': 1,
+    'details': ['iphone11', 'browser', 'ios'],
   },
   {
     'name': 'iPhone 11 (Native)',
@@ -264,6 +287,7 @@ const ALL_DEVICES = [
     'height': 795,
     'deviceHeight': 896,
     'deviceSpaces': 1,
+    'details': ['iphone11', 'native', 'ios'],
   },
   {
     'name': 'iPhone 11 Pro (Browser)',
@@ -271,6 +295,7 @@ const ALL_DEVICES = [
     'height': 635,
     'deviceHeight': 812,
     'deviceSpaces': 1,
+    'details': ['iphone11pro', 'browser', 'ios'],
   },
   {
     'name': 'iPhone 11 Pro (Native)',
@@ -278,6 +303,7 @@ const ALL_DEVICES = [
     'height': 713,
     'deviceHeight': 812,
     'deviceSpaces': 1,
+    'details': ['iphone11pro', 'native', 'ios'],
   },
   {
     'name': 'iPad (Browser)',
@@ -285,6 +311,7 @@ const ALL_DEVICES = [
     'height': 1010,
     'deviceHeight': 1080,
     'deviceSpaces': 2,
+    'details': ['ipad', 'browser', 'ios'],
   },
   {
     'name': 'OnePlus 5T',
@@ -292,20 +319,23 @@ const ALL_DEVICES = [
     'height': 820,
     'deviceHeight': 910,
     'deviceSpaces': 1,
+    'details': ['oneplus5t', 'browser', 'android'],
   },
   {
     'name': 'OnePlus 7 Pro',
     'width': 412,
-    'height': 743,
+    'height': 782,
     'deviceHeight': 892,
     'deviceSpaces': 1,
+    'details': ['oneplus7pro', 'browser', 'android'],
   },
   {
     'name': 'Desktop 1080p',
     'width': 1920,
-    'height': 1080,
+    'height': 1000,
     'deviceHeight': 1080,
     'deviceSpaces': 2,
+    'details': ['desktop1080', 'browser', 'desktop'],
   },
 ];
 
@@ -458,6 +488,7 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
    */
   buildDeviceLayout_(device) {
     const deviceLayout = buildDeviceTemplate(this.element);
+    device.details.forEach((detail) => deviceLayout.setAttribute(detail, ''));
     const devicePlayer = deviceLayout.querySelector('amp-story-player');
     devicePlayer.setAttribute('width', device.width);
     devicePlayer.setAttribute('height', device.height);
