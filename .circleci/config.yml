@@ -235,11 +235,12 @@ workflows:
           context: amphtml-context
           requires:
             - 'Nomodule Build'
-      - 'Performance Tests':
-          <<: *skip_pr_branches
-          context: amphtml-context
-          requires:
-            - 'Nomodule Build'
+      # TODO(wg-performance, #12128): This takes 30 mins and fails regularly.
+      # - 'Performance Tests':
+      #     <<: *skip_pr_branches
+      #     context: amphtml-context
+      #     requires:
+      #       - 'Nomodule Build'
       - 'Experiment A Tests':
           <<: *skip_pr_branches
           context: amphtml-context
