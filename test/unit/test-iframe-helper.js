@@ -206,7 +206,8 @@ describe
       });
     });
 
-    it('should set sentinel on postMessage data', () => {
+    // TODO(wg-components, #32103): This fails regularly during CI
+    it.skip('should set sentinel on postMessage data', () => {
       insert(testIframe);
       const postMessageSpy = window.sandbox /*OK*/
         .spy(testIframe.contentWindow, 'postMessage');
