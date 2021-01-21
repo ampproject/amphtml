@@ -27,6 +27,9 @@ const SLIDE_COUNT = 4;
 const pageWidth = 600;
 const pageHeight = 600;
 
+/** Increase timeout for running on CircleCI **/
+const testTimeout = 40000;
+
 describes.endtoend(
   'amp-base-carousel:1.0 - arrows when non-looping',
   {
@@ -47,6 +50,7 @@ describes.endtoend(
     }
 
     beforeEach(async () => {
+      this.timeout(testTimeout);
       controller = env.controller;
       const carousel = await getCarousel(controller);
       await controller.switchToShadowRoot(carousel);

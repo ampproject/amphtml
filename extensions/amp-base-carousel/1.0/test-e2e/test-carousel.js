@@ -20,8 +20,8 @@ import {useStyles} from '../base-carousel.jss';
 const pageWidth = 800;
 const pageHeight = 600;
 
-/** Increase timeout for running on Travis macOS **/
-const testTimeout = 30000;
+/** Increase timeout for running on CircleCI **/
+const testTimeout = 40000;
 
 describes.endtoend(
   'amp-base-carousel:1.0 - basic functionality',
