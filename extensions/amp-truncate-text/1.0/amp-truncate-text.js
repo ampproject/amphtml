@@ -79,6 +79,7 @@ AmpTruncateText['children'] = {
 
 /** @override */
 AmpTruncateText['layoutSizeDefined'] = true;
+AmpTruncateText.detacted = true;
 
 /** @override */
 AmpTruncateText['shadowCss'] = COMPONENT_CSS;

@@ -17,7 +17,6 @@
 import * as Preact from '../../../src/preact';
 import {ContainWrapper} from '../../../src/preact/component';
 import {forwardRef} from '../../../src/preact/compat';
-import {setStyle} from '../../../src/style';
 import {truncateText} from './truncation';
 import {
   useCallback,
@@ -61,12 +60,12 @@ function TruncateTextWithRef(
 
     container && truncateText({container, overflowNodes});
     onToggle && onToggle(isExpanded);
-  }, [truncateText, onToggle, isExpanded]);
+  }, [onToggle, isExpanded]);
 
   // Truncate the text when expanded/collapsed
   useLayoutEffect(truncate, [isExpanded, truncate]);
   // When used in an AMP component, requires an initial truncate to layout.
-  onToggle && useEffect(truncate, []);
+  useEffect(() => onToggle && truncate(), [onToggle, truncate]);
 
   const classes = useStyles();
   return (
