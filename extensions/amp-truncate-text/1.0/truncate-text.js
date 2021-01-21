@@ -21,6 +21,7 @@ import {setStyle} from '../../../src/style';
 import {truncateText} from './truncation';
 import {
   useCallback,
+  useEffect,
   useImperativeHandle,
   useLayoutEffect,
   useRef,
@@ -34,7 +35,7 @@ import {useStyles} from './truncate-text.jss';
  * @return {PreactDef.Renderable}
  */
 function TruncateTextWithRef(
-  {persistent, collapsed, expanded, children, ...rest},
+  {persistent, collapsed, expanded, onToggle, children, ...rest},
   ref
 ) {
   const wrapperRef = useRef();
@@ -52,16 +53,20 @@ function TruncateTextWithRef(
   // TODO(rcebulko): Rewrite `truncateText` for Preact
   /** Perform truncation on contents. */
   const truncate = useCallback(() => {
+    console.log(`truncate(${isExpanded})`);
     const container = wrapperRef.current;
     const overflowNodes = [persistentRef.current, collapsedRef.current].filter(
       Boolean
     );
 
     container && truncateText({container, overflowNodes});
-  }, [truncateText]);
+    onToggle && onToggle(isExpanded);
+  }, [truncateText, onToggle, isExpanded]);
 
   // Truncate the text when expanded/collapsed
   useLayoutEffect(truncate, [isExpanded, truncate]);
+  // When used in an AMP component, requires an initial truncate to layout.
+  onToggle && useEffect(truncate, []);
 
   const classes = useStyles();
   return (

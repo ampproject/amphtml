@@ -15,19 +15,33 @@
  */
 
 import {CSS as COMPONENT_CSS} from './truncate-text.jss';
+import {CSS} from '../../../build/amp-truncate-text-1.0.css';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {TruncateText} from './truncate-text';
+import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-truncate-text';
+const EXPANDED_ATTR = 'i-amphtml-truncate-expanded';
 
 class AmpTruncateText extends PreactBaseElement {
   /** @override */
   init() {
     this.registerApiAction('expand', (api) => api./*OK*/ expand());
     this.registerApiAction('collapse', (api) => api./*OK*/ collapse());
+
+    return dict({
+      'onToggle': (isExpanded) => {
+        console.log(`toggle(${isExpanded})`);
+        if (isExpanded) {
+          this.element.setAttribute(EXPANDED_ATTR, '');
+        } else {
+          this.element.removeAttribute(EXPANDED_ATTR);
+        }
+      },
+    });
   }
 
   /** @override */
@@ -73,5 +87,5 @@ AmpTruncateText['layoutSizeDefined'] = true;
 AmpTruncateText['shadowCss'] = COMPONENT_CSS;
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpTruncateText);
+  AMP.registerElement(TAG, AmpTruncateText, CSS);
 });
