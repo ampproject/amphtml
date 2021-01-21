@@ -86,9 +86,20 @@ export function measureIntersection(el) {
 export function intersectionEntryToJson(entry) {
   return {
     time: entry.time,
-    rootBounds: layoutRectFromDomRect(entry.rootBounds),
-    boundingClientRect: layoutRectFromDomRect(entry.boundingClientRect),
-    intersectionRect: layoutRectFromDomRect(entry.intersectionRect),
+    rootBounds: safeLayoutRectFromDomRect(entry.rootBounds),
+    boundingClientRect: safeLayoutRectFromDomRect(entry.boundingClientRect),
+    intersectionRect: safeLayoutRectFromDomRect(entry.intersectionRect),
     intersectionRatio: entry.intersectionRatio,
   };
+}
+
+/**
+ * @param {DOMRect} rect
+ * @return {DOMRect}
+ */
+function safeLayoutRectFromDomRect(rect) {
+  if (rect === null) {
+    return null;
+  }
+  return layoutRectFromDomRect(rect);
 }

@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {measureIntersection} from '../../../src/utils/intersection';
+import {
+  intersectionEntryToJson,
+  measureIntersection,
+} from '../../../src/utils/intersection';
 
 describes.fakeWin('utils/intersection', {}, (env) => {
   function getInObConstructorStub() {
@@ -122,5 +125,44 @@ describes.fakeWin('utils/intersection', {}, (env) => {
 
     expect(await intersection1).equal(firstEntry);
     expect(await intersection2).equal(secondEntry);
+  });
+
+  describe('intersectionEntryToJson', () => {
+    const zeros = {
+      left: 0,
+      right: 0,
+      width: 0,
+      height: 0,
+      top: 0,
+      bottom: 0,
+      x: 0,
+      y: 0,
+    };
+
+    it('clones an IntersectionObserverEntry', () => {
+      const entry = {
+        time: 0,
+        intersectionRatio: 0,
+        rootBounds: zeros,
+        intersectionRect: zeros,
+        boundingClientRect: zeros,
+      };
+      const json = intersectionEntryToJson(entry);
+      expect(entry).eql(json);
+      expect(entry).not.equal(json);
+    });
+
+    it('clones with null rootBounds', () => {
+      const entry = {
+        time: 0,
+        intersectionRatio: 0,
+        rootBounds: null,
+        intersectionRect: zeros,
+        boundingClientRect: zeros,
+      };
+      const json = intersectionEntryToJson(entry);
+      expect(entry).eql(json);
+      expect(entry).not.equal(json);
+    });
   });
 });
