@@ -324,7 +324,13 @@ export class PreactBaseElement extends AMP.BaseElement {
   }
 
   /** @override */
-  layoutCallback() {
+  isLoadableV2() {
+    const Ctor = this.constructor;
+    return Ctor['loadable'];
+  }
+
+  /** @override */
+  loadCallback() {
     const Ctor = this.constructor;
     if (!Ctor['loadable']) {
       return super.layoutCallback();

@@ -415,9 +415,37 @@ export class BaseElement {
    * {@link layoutCallback} calls. Note that this method is not consulted for
    * the first layout given that each element must be laid out at least once.
    * @return {boolean}
+   * TODO(#31915): rename to isReloadNeeded
    */
   isRelayoutNeeded() {
     return false;
+  }
+
+  /**
+   * Whether this element supports loaderV2 scheduler.
+   * @return {boolean}
+   * TODO(#31915): rename to just isLoadable
+   */
+  isLoadableV2() {
+    return false;
+  }
+
+  /**
+   * Called when the element should perform loading. At this point the element
+   * should load/reload resources associated with it. This method is called
+   * by the runtime and cannot be called manually. Returns promise that will
+   * complete when loading is considered to be complete.
+   *
+   * The first layout call is always called. If the subclass is interested in
+   * receiving additional callbacks, it has to opt in to do so using
+   * {@link isRelayoutNeeded} method.
+   *
+   * This method is only called if {@link isLoadableV2} returns `true`.
+   *
+   * @return {!Promise|undefind}
+   */
+  loadCallback() {
+    return this.layoutCallback();
   }
 
   /**
@@ -431,6 +459,7 @@ export class BaseElement {
    * {@link isRelayoutNeeded} method.
    *
    * @return {!Promise}
+   * TODO(#31915): deprecate and remove when loaderV2 is fully launched.
    */
   layoutCallback() {
     return Promise.resolve();
