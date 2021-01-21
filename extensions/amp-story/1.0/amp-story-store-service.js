@@ -255,6 +255,12 @@ const stateComparisonFunctions = {
     curr === null ||
     old.width !== curr.width ||
     old.height !== curr.height,
+  [StateProperty.PANNING_MEDIA_STATE]: (old, curr) =>
+    old === null ||
+    curr === null ||
+    old.x !== curr.x ||
+    old.y !== curr.y ||
+    old.zoom !== curr.zoom,
   [StateProperty.INTERACTIVE_REACT_STATE]: (old, curr) =>
     !deepEquals(old, curr, 3),
 };
