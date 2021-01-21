@@ -111,7 +111,7 @@ export let InteractiveReactData;
  *    mutedState: boolean,
  *    pageAudioState: boolean,
  *    pageHasElementsWithPlaybackState: boolean,
- *    panningMediaState: {x: number, y: number, zoom: number},
+ *    panningMediaState: {x: string, y: string, zoom: string},
  *    pausedState: boolean,
  *    previewState: boolean,
  *    rtlState: boolean,
