@@ -7,11 +7,19 @@
   "main": "dist/purifier.js",
   "module": "dist/purifier.mjs",
   "types": "purifier.d.ts",
-  "files": ["dist/*", "purifier.d.ts"],
+  "files": [
+    "dist/*",
+    "purifier.d.ts"
+  ],
   "scripts": {
     "build": "rollup -c rollup.config.js"
   },
-  "keywords": ["amp", "sanitizer", "sanitize", "purify"],
+  "keywords": [
+    "amp",
+    "sanitizer",
+    "sanitize",
+    "purify"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/ampproject/amphtml.git",
@@ -23,7 +31,7 @@
     "rollup": "2.37.0"
   },
   "dependencies": {
-    "dompurify": "2.0.7"
+    "dompurify": "2.2.6"
   },
   "optionalDependencies": {
     "@types/dompurify": "2.2.1"
