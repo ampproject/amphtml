@@ -23,6 +23,10 @@ class AbortController {
 
   /** */
   abort() {
+    if (this.signal_.isAborted_) {
+      // Already aborted.
+      return;
+    }
     this.signal_.isAborted_ = true;
     if (this.signal_.onabort_) {
       const event = {

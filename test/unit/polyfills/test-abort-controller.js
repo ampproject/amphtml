@@ -59,4 +59,16 @@ describes.realWin('AbortController', {}, (env) => {
       currentTarget: signal,
     });
   });
+
+  it('should only call listener once', () => {
+    const spy = env.sandbox.spy();
+    signal.onabort = spy;
+    expect(signal.onabort).to.equal(spy);
+
+    controller.abort();
+    expect(spy).to.be.calledOnce;
+
+    controller.abort();
+    expect(spy).to.be.calledOnce;
+  });
 });
