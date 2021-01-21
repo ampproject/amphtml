@@ -50,8 +50,8 @@
   border-radius: 30px !important;
   background: var(--i-amphtml-story-dev-tools-gray-2) !important;
   overflow: hidden !important;
-  display: flex;
-  flex-direction: column;
+  display: flex !important;
+  flex-direction: column !important;
 }
 
 amp-story-player a {
@@ -90,7 +90,6 @@ amp-story-player a {
 }
 
 .i-amphtml-story-dev-tools-device-chip svg {
-  cursor: pointer !important;
   background: var(--i-amphtml-story-dev-tools-device-chip-icon-background) !important;
   border-radius: 50% !important;
   padding: 2px !important;
@@ -108,7 +107,7 @@ amp-story-player a {
 .i-amphtml-story-dev-tools-device-chip[disabled] {
   cursor: initial !important;
   --i-amphtml-story-dev-tools-device-chip-background-hover: var(--i-amphtml-story-dev-tools-device-chip-background) !important;
-  opacity: 0.5 !important;
+  opacity: 0.2 !important;
 }
 
 .i-amphtml-story-dev-tools-device-chip[inactive] svg {
@@ -188,7 +187,7 @@ amp-story-player a {
 }
 
 .i-amphtml-story-dev-tools-device-dialog-link {
-  color: var(--i-amphtml-story-dev-tools-white-transparent-3) !important;
+  color: var(--i-amphtml-story-dev-tools-white-transparent-4) !important;
   text-decoration: none !important;
   display: block !important;
   padding: 10px 0 !important;
@@ -278,7 +277,7 @@ amp-story-player a {
 }
 
 .i-amphtml-story-dev-tools-device-dialog-help-tips .i-amphtml-story-dev-tools-device-dialog-help-hint {
-  color: var(--i-amphtml-story-dev-tools-white-transparent-2) !important;
+  color: var(--i-amphtml-story-dev-tools-white-transparent-3) !important;
   border: 1px solid var(--i-amphtml-story-dev-tools-white-transparent-1) !important;
   font-size: 12px !important;
   padding: 10px 20px !important;
@@ -419,6 +418,11 @@ amp-story-player a {
   border-radius: 5px 5px 0 0 !important;
 }
 
+.i-amphtml-story-dev-tools-device-statusbar-icons,
+.i-amphtml-story-dev-tools-device-statusbar-clock {
+  opacity: 0.21 !important;
+}
+
 .i-amphtml-story-dev-tools-device[android] .i-amphtml-story-dev-tools-device-statusbar-icons {
   width: 83px !important;
   height: 15px !important;
@@ -445,7 +449,7 @@ amp-story-player a {
 .i-amphtml-story-dev-tools-device[ios] .i-amphtml-story-dev-tools-device-statusbar-clock {
   width: 40px !important;
   height: 12px !important;
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="12" fill="none"><path fill="#fff" d="M3.5 11h1.89V.43H3.5L.74 2.37v1.78L3.37 2.3h.13V11zm4.49-7.44h1.77c0-1.11.73-1.88 1.88-1.88 1.1 0 1.77.74 1.77 1.7 0 .8-.32 1.31-1.66 2.66L8.1 9.73V11h7.34V9.43h-4.78v-.12l2.27-2.24c1.82-1.78 2.36-2.63 2.36-3.86 0-1.76-1.43-3.04-3.53-3.04-2.2 0-3.76 1.39-3.76 3.39zm10.61.6c.7 0 1.17-.48 1.17-1.14 0-.65-.47-1.13-1.17-1.13-.69 0-1.17.48-1.17 1.13 0 .66.48 1.14 1.17 1.14zm0 5.38c.7 0 1.17-.5 1.17-1.14 0-.65-.47-1.14-1.17-1.14-.69 0-1.17.49-1.17 1.14 0 .64.48 1.14 1.17 1.14zm5.65-3.26h1.32c1.3 0 2.1.66 2.1 1.72 0 1.02-.86 1.71-2.07 1.71-1.23 0-2.05-.63-2.14-1.61h-1.8c.08 1.91 1.66 3.16 3.96 3.16 2.28 0 3.98-1.31 3.98-3.13 0-1.44-.9-2.37-2.33-2.6v-.12c1.12-.3 1.91-1.14 1.92-2.42 0-1.51-1.26-2.82-3.5-2.82-2.3 0-3.73 1.3-3.83 3.15h1.77c.08-1.06.8-1.64 1.95-1.64 1.12 0 1.79.68 1.79 1.56 0 .96-.75 1.63-1.83 1.63h-1.3v1.41zm10.92 4.98c2.53 0 4.03-2.04 4.03-5.54S37.67.17 35.17.17c-2.51 0-4.04 2.04-4.04 5.53 0 3.51 1.5 5.56 4.04 5.56zm0-1.53c-1.34 0-2.13-1.39-2.13-4.03 0-2.61.8-4 2.13-4 1.32 0 2.12 1.38 2.12 4 0 2.65-.78 4.03-2.12 4.03z"/></svg>') !;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="12" fill="none"><path fill="#fff" d="M3.5 11h1.89V.43H3.5L.74 2.37v1.78L3.37 2.3h.13V11zm4.49-7.44h1.77c0-1.11.73-1.88 1.88-1.88 1.1 0 1.77.74 1.77 1.7 0 .8-.32 1.31-1.66 2.66L8.1 9.73V11h7.34V9.43h-4.78v-.12l2.27-2.24c1.82-1.78 2.36-2.63 2.36-3.86 0-1.76-1.43-3.04-3.53-3.04-2.2 0-3.76 1.39-3.76 3.39zm10.61.6c.7 0 1.17-.48 1.17-1.14 0-.65-.47-1.13-1.17-1.13-.69 0-1.17.48-1.17 1.13 0 .66.48 1.14 1.17 1.14zm0 5.38c.7 0 1.17-.5 1.17-1.14 0-.65-.47-1.14-1.17-1.14-.69 0-1.17.49-1.17 1.14 0 .64.48 1.14 1.17 1.14zm5.65-3.26h1.32c1.3 0 2.1.66 2.1 1.72 0 1.02-.86 1.71-2.07 1.71-1.23 0-2.05-.63-2.14-1.61h-1.8c.08 1.91 1.66 3.16 3.96 3.16 2.28 0 3.98-1.31 3.98-3.13 0-1.44-.9-2.37-2.33-2.6v-.12c1.12-.3 1.91-1.14 1.92-2.42 0-1.51-1.26-2.82-3.5-2.82-2.3 0-3.73 1.3-3.83 3.15h1.77c.08-1.06.8-1.64 1.95-1.64 1.12 0 1.79.68 1.79 1.56 0 .96-.75 1.63-1.83 1.63h-1.3v1.41zm10.92 4.98c2.53 0 4.03-2.04 4.03-5.54S37.67.17 35.17.17c-2.51 0-4.04 2.04-4.04 5.53 0 3.51 1.5 5.56 4.04 5.56zm0-1.53c-1.34 0-2.13-1.39-2.13-4.03 0-2.61.8-4 2.13-4 1.32 0 2.12 1.38 2.12 4 0 2.65-.78 4.03-2.12 4.03z"/></svg>') !important;
 }
 
 .i-amphtml-story-dev-tools-device-appbar {
@@ -466,17 +470,17 @@ amp-story-player a {
   background: var(--i-amphtml-story-dev-tools-white-transparent-1) !important;
 }
 
-.i-amphtml-story-dev-tools-device[ios][browser] .i-amphtml-story-dev-tools-device-appbar > .i-amphtml-story-dev-tools-device-appbar-icon,
-.i-amphtml-story-dev-tools-device[ios][native] .i-amphtml-story-dev-tools-device-appbar > .i-amphtml-story-dev-tools-device-appbar-icon:last-child {
-  display: none !important;
-}
-
 .i-amphtml-story-dev-tools-device .i-amphtml-story-dev-tools-device-appbar-icon {
-  background: var(--i-amphtml-story-dev-tools-white-transparent-1) !important;
+  background: var(--i-amphtml-story-dev-tools-white-transparent-2) !important;
   width: 24px !important;
   height: 24px !important;
   border-radius: 12px !important;
   margin: 5px !important;
+}
+
+.i-amphtml-story-dev-tools-device[ios][browser] .i-amphtml-story-dev-tools-device-appbar > .i-amphtml-story-dev-tools-device-appbar-icon,
+.i-amphtml-story-dev-tools-device[ios][native] .i-amphtml-story-dev-tools-device-appbar > .i-amphtml-story-dev-tools-device-appbar-icon:last-child {
+  display: none !important;
 }
 
 .i-amphtml-story-dev-tools-device[browser] .i-amphtml-story-dev-tools-device-appbar-urlbar {
