@@ -3,10 +3,20 @@ version: 2.1
 orbs:
   browser-tools: circleci/browser-tools@1.1.1
 
-skip_pr_branches: &skip_pr_branches
+push_and_pr_builds: &push_and_pr_builds
   filters:
     branches:
-      ignore: /^pull\/.*$/
+      only:
+        - master
+        - /^amp-release-.*$/
+        - /^pull\/.*$/
+
+push_builds_only: &push_builds_only
+  filters:
+    branches:
+      only:
+        - master
+        - /^amp-release-.*$/
 
 executors:
   amphtml-executor:
@@ -198,55 +208,66 @@ workflows:
   'CircleCI PR Check':
     jobs:
       - 'Checks':
+          <<: *push_and_pr_builds
           context: amphtml-context
       - 'Unminified Build':
+          <<: *push_and_pr_builds
           context: amphtml-context
       - 'Nomodule Build':
+          <<: *push_and_pr_builds
           context: amphtml-context
       - 'Module Build':
+          <<: *push_and_pr_builds
           context: amphtml-context
       - 'Bundle Size':
+          <<: *push_and_pr_builds
           context: amphtml-context
           requires:
             - 'Nomodule Build'
             - 'Module Build'
       - 'Validator Tests':
+          <<: *push_and_pr_builds
           context: amphtml-context
       - 'Visual Diff Tests':
+          <<: *push_and_pr_builds
           context: amphtml-context
           requires:
             - 'Nomodule Build'
       - 'Unit Tests':
           context: amphtml-context
       - 'Unminified Tests':
+          <<: *push_and_pr_builds
           context: amphtml-context
           requires:
             - 'Unminified Build'
       - 'Nomodule Tests':
+          <<: *push_and_pr_builds
           context: amphtml-context
           requires:
             - 'Nomodule Build'
       - 'Module Tests':
+          <<: *push_and_pr_builds
           context: amphtml-context
           requires:
             - 'Nomodule Build'
             - 'Module Build'
       - 'End-to-End Tests':
+          <<: *push_and_pr_builds
           context: amphtml-context
           requires:
             - 'Nomodule Build'
       # TODO(wg-performance, #12128): This takes 30 mins and fails regularly.
       # - 'Performance Tests':
-      #     <<: *skip_pr_branches
+      #     <<: *push_builds_only
       #     context: amphtml-context
       #     requires:
       #       - 'Nomodule Build'
       - 'Experiment A Tests':
-          <<: *skip_pr_branches
+          <<: *push_builds_only
           context: amphtml-context
       - 'Experiment B Tests':
-          <<: *skip_pr_branches
+          <<: *push_builds_only
           context: amphtml-context
       - 'Experiment C Tests':
-          <<: *skip_pr_branches
+          <<: *push_builds_only
           context: amphtml-context
