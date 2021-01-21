@@ -17,9 +17,9 @@
 /** @typedef {!Array<{query: ?MediaQueryList, value: string}>} */
 let ExprDef;
 
-const MEDIA_QUERY_VALUE_RE = /[A-Za-z0-9.]+$/;
+const MEDIA_QUERY_VALUE_RE = /[A-Za-z0-9.%]+$/;
+const TRUE_VALUE = '1';
 
-/** @package */
 export class MediaQueryProps {
   /**
    * @param {!Window} win
@@ -49,20 +49,24 @@ export class MediaQueryProps {
   }
 
   /**
+   * @param {string} queryString
+   * @return {boolean} value
+   */
+  resolveMatchQuery(queryString) {
+    // This will create a list query like this:
+    // `[{query: matchMedia(queryString), value: true}, {query: null, value: false}]`
+    return (
+      this.resolve_(queryString, parseMediaQueryMatchExpr, TRUE_VALUE) ===
+      TRUE_VALUE
+    );
+  }
+
+  /**
    * @param {string} exprString
    * @return {string} value
    */
-  resolve(exprString) {
-    if (!exprString) {
-      return '';
-    }
-    let expr = this.exprMap_[exprString] || this.prevExprMap_[exprString];
-    if (!expr) {
-      expr = parseMediaQueryListExpr(this.win_, exprString);
-      setOnChange(expr, this.callback_);
-    }
-    this.exprMap_[exprString] = expr;
-    return resolveMediaQueryListExpr(expr);
+  resolveListQuery(exprString) {
+    return this.resolve_(exprString, parseMediaQueryListExpr, '');
   }
 
   /**
@@ -72,7 +76,7 @@ export class MediaQueryProps {
   complete() {
     for (const k in this.prevExprMap_) {
       if (!(k in this.exprMap_)) {
-        setOnChange(this.prevExprMap_[k], null);
+        toggleOnChange(this.prevExprMap_[k], this.callback_, false);
       }
     }
     this.prevExprMap_ = null;
@@ -83,10 +87,42 @@ export class MediaQueryProps {
    */
   dispose() {
     for (const k in this.exprMap_) {
-      setOnChange(this.exprMap_[k], null);
+      toggleOnChange(this.exprMap_[k], this.callback_, false);
     }
     this.exprMap_ = {};
   }
+
+  /**
+   * @param {string} exprString
+   * @param {function(!Window, string):!ExprDef} parser
+   * @param {string} emptyExprValue
+   * @return {string} value
+   */
+  resolve_(exprString, parser, emptyExprValue) {
+    if (!exprString || !exprString.trim()) {
+      return emptyExprValue;
+    }
+    let expr = this.exprMap_[exprString] || this.prevExprMap_[exprString];
+    if (!expr) {
+      expr = parser(this.win_, exprString);
+      toggleOnChange(expr, this.callback_, true);
+    }
+    this.exprMap_[exprString] = expr;
+    return resolveMediaQueryListExpr(expr);
+  }
+}
+
+/**
+ * @param {!Window} win
+ * @param {string} queryString
+ * @return {!ExprDef}
+ */
+function parseMediaQueryMatchExpr(win, queryString) {
+  const query = win.matchMedia(queryString);
+  return [
+    {query, value: TRUE_VALUE},
+    {query: null, value: ''},
+  ];
 }
 
 /**
@@ -135,13 +171,24 @@ function resolveMediaQueryListExpr(expr) {
 
 /**
  * @param {!ExprDef} expr
- * @param {?function()} onChange
+ * @param {function()} callback
+ * @param {boolean} on
  */
-function setOnChange(expr, onChange) {
+function toggleOnChange(expr, callback, on) {
   for (let i = 0; i < expr.length; i++) {
     const {query} = expr[i];
     if (query) {
-      query.onchange = onChange;
+      // The `onchange` API is preferred, but the IE only supports
+      // the `addListener/removeListener` APIs.
+      if (query.onchange !== undefined) {
+        query.onchange = on ? callback : null;
+      } else {
+        if (on) {
+          query.addListener(callback);
+        } else {
+          query.removeListener(callback);
+        }
+      }
     }
   }
 }

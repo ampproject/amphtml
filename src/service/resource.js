@@ -381,13 +381,6 @@ export class Resource {
   }
 
   /**
-   * Optionally hides or shows the element depending on the media query.
-   */
-  applySizesAndMediaQuery() {
-    this.element.applySizesAndMediaQuery();
-  }
-
-  /**
    * Instructs the element to change its size and transitions to the state
    * awaiting the measure and possibly layout.
    * @param {number|undefined} newHeight

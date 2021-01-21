@@ -1207,23 +1207,13 @@ export class ResourcesImpl {
         this.buildOrScheduleBuildForResource_(r, /* checkForDupes */ true);
       }
       if (this.intersectionObserver_) {
-        // With IntersectionObserver, we call applySizesAndMediaQuery() early
-        // in connectedCallback(), so we only need to re-apply on relayout.
-        // relayoutCount is also irrelevant and doesn't need an increment.
-        if (relayoutAll) {
-          r.applySizesAndMediaQuery();
-          dev().fine(TAG_, 'apply sizes/media query:', r.debugid);
-        }
+        // Do nothing.
       } else if (
         relayoutAll ||
         !r.hasBeenMeasured() ||
         // NOT_LAID_OUT is the state after build() but before measure().
         r.getState() == ResourceState.NOT_LAID_OUT
       ) {
-        // TODO(willchou): We sometimes call this needlessly/repeatedly.
-        // All elements outside of the loading rect are NOT_LAID_OUT!
-        r.applySizesAndMediaQuery();
-        dev().fine(TAG_, 'apply sizes/media query:', r.debugid);
         relayoutCount++;
       }
       if (r.isMeasureRequested()) {
