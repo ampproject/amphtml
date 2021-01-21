@@ -298,6 +298,24 @@
       ]
     },
     {
+      "url": "examples/visual-tests/amp-story/amp-story-grid-layer-presets.html",
+      "name": "amp-story: Grid layer anchoring with preset (vertically)",
+      "viewport": {"width": 250, "height": 500},
+      "loading_complete_selectors": [
+        ".i-amphtml-story-loaded",
+        ".i-amphtml-story-grid-template-aspect"
+      ]
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-grid-layer-presets.html",
+      "name": "amp-story: Grid layer anchoring with preset (horizontally)",
+      "viewport": {"width": 400, "height": 500},
+      "loading_complete_selectors": [
+        ".i-amphtml-story-loaded",
+        ".i-amphtml-story-grid-template-aspect"
+      ]
+    },
+    {
       "url": "examples/visual-tests/amp-story/amp-story-cta-layer.html",
       "name": "amp-story: CTA layer",
       "viewport": {"width": 320, "height": 480},
