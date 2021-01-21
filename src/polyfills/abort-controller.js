@@ -23,7 +23,21 @@ class AbortController {
 
   /** */
   abort() {
+    if (this.signal_.isAborted_) {
+      // Already aborted.
+      return;
+    }
     this.signal_.isAborted_ = true;
+    if (this.signal_.onabort_) {
+      const event = {
+        'type': 'abort',
+        'bubbles': false,
+        'cancelable': false,
+        'target': this.signal_,
+        'currentTarget': this.signal_,
+      };
+      this.signal_.onabort_(event);
+    }
   }
 
   /**
@@ -39,6 +53,8 @@ class AbortSignal {
   constructor() {
     /** @private {boolean} */
     this.isAborted_ = false;
+    /** @private {?function(!Event)} */
+    this.onabort_ = null;
   }
 
   /**
@@ -46,6 +62,20 @@ class AbortSignal {
    */
   get aborted() {
     return this.isAborted_;
+  }
+
+  /**
+   * @return {?function(!Event)}
+   */
+  get onabort() {
+    return this.onabort_;
+  }
+
+  /**
+   * @param {?function(!Event)} value
+   */
+  set onabort(value) {
+    this.onabort_ = value;
   }
 }
 
