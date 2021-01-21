@@ -967,7 +967,6 @@ describes.realWin('PreactBaseElement', spec, (env) => {
 
   describe('delegatesFocus mapping', () => {
     let element;
-    let style;
 
     beforeEach(async () => {
       Impl['delegatesFocus'] = true;
@@ -975,14 +974,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       element = html`
         <amp-preact layout="fixed" width="100" height="100"></amp-preact>
       `;
-
-      style = html`<style>
-        amp-preact:focus {
-          outline: #0389ff solid 2px;
-        }
-      </style>`;
       doc.body.appendChild(element);
-      doc.body.appendChild(style);
       await element.build();
       await waitFor(() => component.callCount > 0, 'component rendered');
     });
@@ -990,9 +982,6 @@ describes.realWin('PreactBaseElement', spec, (env) => {
     it('should focus on the host when an element in the shadow DOM receives focus', async () => {
       // initial focus is not on host
       expect(doc.activeElement).to.not.equal(element);
-      expect(win.getComputedStyle(element)['outline']).to.equal(
-        'rgb(0, 0, 0) none 0px'
-      );
 
       // focus an element within the shadow DOM
       const inner = element.shadowRoot.querySelector('#component');
@@ -1002,9 +991,6 @@ describes.realWin('PreactBaseElement', spec, (env) => {
 
       // host receives focus and custom style for outline
       expect(doc.activeElement).to.equal(element);
-      expect(win.getComputedStyle(element)['outline']).to.equal(
-        'rgb(3, 137, 255) solid 2px'
-      );
     });
   });
 });

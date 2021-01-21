@@ -15,7 +15,6 @@
  */
 
 import '../amp-social-share';
-import {htmlFor} from '../../../../src/static-template';
 import {toggleExperiment} from '../../../../src/experiments';
 import {waitFor, whenCalled} from '../../../../testing/test-helper.js';
 import {waitForChildPromise} from '../../../../src/dom';
@@ -35,7 +34,6 @@ describes.realWin(
   (env) => {
     let win, doc;
     let element;
-    let html;
 
     const waitForRender = async () => {
       await whenCalled(env.sandbox.spy(element, 'attachShadow'));
@@ -59,7 +57,6 @@ describes.realWin(
       doc = win.document;
       doc.title = 'Test Title';
       toggleExperiment(win, 'bento-social-share', true);
-      html = htmlFor(win.document);
     });
 
     it('renders custom endpoint when not using a pre-configured type', async () => {
@@ -229,7 +226,7 @@ describes.realWin(
       ).to.be.equal('inherit');
     });
 
-    it('should show default and custom focus indicator styles', async () => {
+    it('should focus on the host when an element in the shadow DOM receives focus', async () => {
       element = win.document.createElement('amp-social-share');
       element.setAttribute('type', 'email');
       win.document.body.appendChild(element);
@@ -237,39 +234,29 @@ describes.realWin(
 
       // element is not focused and does not have focus indication styles
       expect(win.document.activeElement).to.not.equal(element);
-      expect(win.getComputedStyle(element)['outline']).to.equal(
-        'rgb(255, 255, 255) none 0px'
-      );
-      expect(win.getComputedStyle(element)['outlineOffset']).to.equal('0px');
 
       // focus the button within the shadow DOM
       const button = element.shadowRoot.querySelector("[part='button']");
       button.focus();
 
-      // host receives focus and focus indication styles
+      // host receives focus
       expect(win.document.activeElement).to.equal(element);
-      expect(win.getComputedStyle(element)['outline']).to.equal(
-        'rgb(3, 137, 255) solid 2px'
-      );
-      expect(win.getComputedStyle(element)['outlineOffset']).to.equal('2px');
+    });
 
-      // customize focus indication styles
-      const style = html`
-        <style>
-          amp-social-share:focus {
-            outline: #aaaaaa solid 3px;
-            outline-offset: 3px;
-          }
-        </style>
-      `;
-      win.document.body.appendChild(style);
+    it('should allow focus directly on the host', async () => {
+      element = win.document.createElement('amp-social-share');
+      element.setAttribute('type', 'email');
+      win.document.body.appendChild(element);
+      await waitForRender();
 
-      // updated focus indicator styles
+      // element is not focused and does not have focus indication styles
+      expect(win.document.activeElement).to.not.equal(element);
+
+      // focus the host
+      element.focus();
+
+      // host receives focus
       expect(win.document.activeElement).to.equal(element);
-      expect(win.getComputedStyle(element)['outline']).to.equal(
-        'rgb(170, 170, 170) solid 3px'
-      );
-      expect(win.getComputedStyle(element)['outlineOffset']).to.equal('3px');
     });
 
     describe('dynamically update attributes', () => {
