@@ -15,8 +15,8 @@
  */
 
 import {
-  intersectionEntryToJson,
   measureIntersection,
+  intersectionEntryToJson,
 } from '../../../src/utils/intersection';
 
 describes.fakeWin('utils/intersection', {}, (env) => {
@@ -138,6 +138,7 @@ describes.fakeWin('utils/intersection', {}, (env) => {
       x: 0,
       y: 0,
     };
+
     it('clones an IntersectionObserverEntry', () => {
       const entry = {
         time: 0,
