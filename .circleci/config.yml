@@ -18,6 +18,10 @@ commands:
   setup_vm:
     steps:
       - checkout
+      - run:
+          name: 'Fetch Merge Commit'
+          command: |
+            ./.circleci/fetch_merge_commit.sh
       - browser-tools/install-chrome:
           replace-existing: true
       - run:
