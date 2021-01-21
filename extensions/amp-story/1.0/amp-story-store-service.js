@@ -127,6 +127,7 @@ export let InteractiveReactData;
  *    consentId: ?string,
  *    currentPageId: string,
  *    currentPageIndex: number,
+ *    pageDistanceMap: !Map<string, !string>,
  *    pageIds: !Array<string>,
  *    newPageAvailableId: string,
  *    pageSize: {width: number, height: number},
@@ -189,6 +190,7 @@ export const StateProperty = {
   ADVANCEMENT_MODE: 'advancementMode',
   NAVIGATION_PATH: 'navigationPath',
   NEW_PAGE_AVAILABLE_ID: 'newPageAvailableId',
+  PAGE_DISTANCE_MAP: 'pageDistanceMap',
   PAGE_IDS: 'pageIds',
   PAGE_SIZE: 'pageSize',
 };
@@ -201,6 +203,7 @@ export const Action = {
   SET_CONSENT_ID: 'setConsentId',
   SET_ADVANCEMENT_MODE: 'setAdvancementMode',
   SET_NAVIGATION_PATH: 'setNavigationPath',
+  SET_PAGE_DISTANCE_MAP: 'setPageDistanceMap',
   SET_PAGE_IDS: 'setPageIds',
   TOGGLE_ACCESS: 'toggleAccess',
   TOGGLE_AD: 'toggleAd',
@@ -473,6 +476,11 @@ const actions = (state, action, data) => {
         ...state,
         [StateProperty.NAVIGATION_PATH]: data,
       });
+    case Action.SET_PAGE_DISTANCE_MAP:
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.PAGE_DISTANCE_MAP]: data,
+      });
     case Action.SET_PAGE_IDS:
       return /** @type {!State} */ ({
         ...state,
@@ -628,6 +636,7 @@ export class AmpStoryStoreService {
       [StateProperty.ADVANCEMENT_MODE]: '',
       [StateProperty.NEW_PAGE_AVAILABLE_ID]: '',
       [StateProperty.NAVIGATION_PATH]: [],
+      [StateProperty.PAGE_DISTANCE_MAP]: {},
       [StateProperty.PAGE_IDS]: [],
       [StateProperty.PAGE_SIZE]: null,
       [StateProperty.PREVIEW_STATE]: false,

@@ -358,16 +358,16 @@ export class AmpStory360 extends AMP.BaseElement {
     this.applyFillContent(container, /* replacedContent */ true);
 
     // Mutation observer for distance attribute
-    const config = {attributes: true, attributeFilter: ['distance']};
-    const callback = (mutationsList) => {
-      this.distance_ = parseInt(
-        mutationsList[0].target.getAttribute('distance'),
-        10
-      );
-      this.restoreOrLoseGlContext_();
-    };
-    const observer = new MutationObserver(callback);
-    this.getPage_() && observer.observe(this.getPage_(), config);
+    // const config = {attributes: true, attributeFilter: ['distance']};
+    // const callback = (mutationsList) => {
+    //   this.distance_ = parseInt(
+    //     mutationsList[0].target.getAttribute('distance'),
+    //     10
+    //   );
+    //   this.restoreOrLoseGlContext_();
+    // };
+    // const observer = new MutationObserver(callback);
+    // this.getPage_() && observer.observe(this.getPage_(), config);
 
     // Initialize all services before proceeding
     return Promise.all([
@@ -391,6 +391,13 @@ export class AmpStory360 extends AMP.BaseElement {
           this.onPageNavigation_();
           this.maybeShowDiscoveryAnimation_();
         });
+
+        storeService.subscribe(
+          StateProperty.PAGE_DISTANCE_MAP,
+          (pageDistanceMap) => {
+            this.distance_ = pageDistanceMap[this.getPageId_()];
+          }
+        );
 
         this.storeService_.subscribe(StateProperty.PAUSED_STATE, (isPaused) => {
           if (this.isOnActivePage_) {

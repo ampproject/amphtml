@@ -355,6 +355,15 @@ export class AmpStoryPage extends AMP.BaseElement {
       (uiState) => this.onUIStateUpdate_(uiState),
       true /* callToInitialize */
     );
+    this.storeService_.subscribe(
+      StateProperty.PAGE_DISTANCE_MAP,
+      (pageDistanceMap) => {
+        const distance = pageDistanceMap[this.element.id];
+        this.mutateElement(() => {
+          this.setDistance(distance);
+        });
+      }
+    );
     this.setPageDescription_();
     this.element.setAttribute('role', 'region');
     this.initializeImgAltTags_();
