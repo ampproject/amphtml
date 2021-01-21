@@ -544,6 +544,24 @@ describe
         expect(purifyTripleMustache(html)).to.be.equal(html);
       });
 
+      it('should allowlist container elements', () => {
+        const html =
+          '<article>Article</article>' +
+          '<aside></aside>' +
+          '<blockquote>A quote</blockquote>' +
+          '<details></details>' +
+          '<figcaption></figcaption>' +
+          '<figure></figure>' +
+          '<footer>Footer</footer>' +
+          '<header></header>' +
+          '<main class="content"></main>' +
+          '<nav></nav>' +
+          '<pre></pre>' +
+          '<section id="sec"></section>' +
+          '<summary></summary>';
+        expect(purifyTripleMustache(html)).to.be.equal(html);
+      });
+
       it('should sanitize tags, removing unsafe attributes', () => {
         const html =
           '<a href="javascript:alert(\'XSS\')">test</a>' +
