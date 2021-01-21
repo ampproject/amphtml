@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,10 @@
 /**
  * @fileoverview
  * This script runs the unit and integration tests locally on a VM.
- * This is run during the CI stage = test; job = unminified tests.
+ * This is run during the CI stage = test; job = unit tests.
  */
 
 const {
-  downloadUnminifiedOutput,
   printChangeSummary,
   printSkipMessage,
   startTimer,
@@ -34,20 +33,18 @@ const {determineBuildTargets} = require('./build-targets');
 const {isPullRequestBuild} = require('../common/ci');
 const {setLoggingPrefix} = require('../common/logging');
 
-const jobName = 'unminified-tests.js';
+const jobName = 'unit-tests.js';
 
 function main() {
   setLoggingPrefix(jobName);
   const startTime = startTimer(jobName);
 
   if (!isPullRequestBuild()) {
-    downloadUnminifiedOutput();
     timedExecOrDie('gulp update-packages');
-
     try {
       timedExecOrThrow(
-        'gulp integration --nobuild --headless --coverage --report',
-        'Integration tests failed!'
+        'gulp unit --headless --coverage --report',
+        'Unit tests failed!'
       );
       timedExecOrThrow(
         'gulp codecov-upload',
@@ -63,19 +60,15 @@ function main() {
   } else {
     printChangeSummary();
     const buildTargets = determineBuildTargets();
-    if (
-      buildTargets.has('RUNTIME') ||
-      buildTargets.has('FLAG_CONFIG') ||
-      buildTargets.has('INTEGRATION_TEST')
-    ) {
-      downloadUnminifiedOutput();
+    if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {
       timedExecOrDie('gulp update-packages');
-      timedExecOrDie('gulp integration --nobuild --headless --coverage');
+      timedExecOrDie('gulp unit --headless --local_changes');
+      timedExecOrDie('gulp unit --headless --coverage');
       timedExecOrDie('gulp codecov-upload');
     } else {
       printSkipMessage(
         jobName,
-        'this PR does not affect the runtime, flag configs, or integration tests'
+        'this PR does not affect the runtime or unit tests'
       );
     }
   }
