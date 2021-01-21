@@ -946,12 +946,15 @@ export class Resource {
 
     const promise = new Promise((resolve, reject) => {
       Services.vsyncFor(this.hostWin).mutate(() => {
+        let callbackResult;
         try {
-          resolve(this.element.layoutCallback(signal));
+          callbackResult = this.element.layoutCallback(signal);
         } catch (e) {
           reject(e);
         }
+        Promise.resolve(callbackResult).then(resolve, reject);
       });
+      signal.onabort = () => reject(cancellation());
     }).then(
       () => this.layoutComplete_(true, signal),
       (reason) => this.layoutComplete_(false, signal, reason)
