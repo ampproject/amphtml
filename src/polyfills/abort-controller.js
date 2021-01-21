@@ -14,24 +14,51 @@
  * limitations under the License.
  */
 
-class AbortController {
-  /** */
-  constructor() {
-    /** @const {!AbortSignal} */
-    this.signal_ = new AbortSignal();
+/**
+ * @param {!Window} win
+ * @return {typeof AbortController}
+ */
+function createAbortController(win) {
+  class AbortController {
+    /** */
+    constructor() {
+      /** @const {!AbortSignal} */
+      this.signal_ = new AbortSignal();
+    }
+
+    /** */
+    abort() {
+      this.signal_.isAborted_ = true;
+      if (this.signal_.onabort_) {
+        const event = win.document.createEvent('CustomEvent');
+        event.initCustomEvent(
+          'abort',
+          /* bubbles */ false,
+          /* cancelable */ false,
+          /* detail */ null
+        );
+        // Notice that in IE the target/currentTarget are not overridable.
+        try {
+          Object.defineProperties(event, {
+            'target': {value: this.signal_},
+            'currentTarget': {value: this.signal_},
+          });
+        } catch (e) {
+          // Ignore.
+        }
+        this.signal_.onabort_(event);
+      }
+    }
+
+    /**
+     * @return {!AbortSignal}
+     */
+    get signal() {
+      return this.signal_;
+    }
   }
 
-  /** */
-  abort() {
-    this.signal_.isAborted_ = true;
-  }
-
-  /**
-   * @return {!AbortSignal}
-   */
-  get signal() {
-    return this.signal_;
-  }
+  return AbortController;
 }
 
 class AbortSignal {
@@ -39,6 +66,8 @@ class AbortSignal {
   constructor() {
     /** @private {boolean} */
     this.isAborted_ = false;
+    /** @private {?function(!Event)} */
+    this.onabort_ = null;
   }
 
   /**
@@ -46,6 +75,20 @@ class AbortSignal {
    */
   get aborted() {
     return this.isAborted_;
+  }
+
+  /**
+   * @return {?function(!Event)}
+   */
+  get onabort() {
+    return this.onabort_;
+  }
+
+  /**
+   * @param {?function(!Event)} value
+   */
+  set onabort(value) {
+    this.onabort_ = value;
   }
 }
 
@@ -60,7 +103,7 @@ export function install(win) {
     configurable: true,
     enumerable: false,
     writable: true,
-    value: AbortController,
+    value: createAbortController(win),
   });
   Object.defineProperty(win, 'AbortSignal', {
     configurable: true,
