@@ -2,6 +2,7 @@ version: 2.1
 
 orbs:
   browser-tools: circleci/browser-tools@1.1.1
+  build-tools: circleci/build-tools@2.7.1
 
 skip_pr_branches: &skip_pr_branches
   filters:
@@ -18,6 +19,7 @@ commands:
   setup_vm:
     steps:
       - checkout
+      - build-tools/merge-with-parent
       - browser-tools/install-chrome:
           replace-existing: true
       - run:
