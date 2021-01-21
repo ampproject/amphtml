@@ -1520,6 +1520,23 @@ export class AmpStory extends AMP.BaseElement {
           }
         }
 
+        const pagesByDistance = this.getPagesByDistance_();
+
+        const pageDistanceMap = pagesByDistance.reduce(
+          (acc, pageIds, distance) => {
+            pageIds.forEach((pageId) => {
+              acc[pageId] = distance;
+            });
+            return acc;
+          },
+          {}
+        );
+
+        this.storeService_.dispatch(
+          Action.SET_PAGE_DISTANCE_MAP,
+          pageDistanceMap
+        );
+
         this.storeService_.dispatch(Action.CHANGE_PAGE, {
           id: targetPageId,
           index: storePageIndex,
@@ -2267,17 +2284,6 @@ export class AmpStory extends AMP.BaseElement {
       });
       return;
     }
-
-    const pagesByDistance = this.getPagesByDistance_();
-
-    const pageDistanceMap = pagesByDistance.reduce((acc, pageIds, distance) => {
-      pageIds.forEach((pageId) => {
-        acc[pageId] = distance;
-      });
-      return acc;
-    }, {});
-
-    this.storeService_.dispatch(Action.SET_PAGE_DISTANCE_MAP, pageDistanceMap);
   }
 
   /**
