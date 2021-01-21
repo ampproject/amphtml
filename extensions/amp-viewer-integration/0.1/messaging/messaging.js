@@ -14,7 +14,20 @@
  * limitations under the License.
  */
 
-import {urls} from '../../../../src/config';
+/**
+ * Allows for runtime configuration. Internally, the runtime should
+ * use the src/config.js module for various constants. We can use the
+ * AMP_CONFIG global to translate user-defined configurations to this
+ * module.
+ * @type {!Object<string, string>}
+ */
+const env = self.AMP_CONFIG || {};
+
+const cdnProxyRegex =
+  (typeof env['cdnProxyRegex'] == 'string'
+    ? new RegExp(env['cdnProxyRegex'])
+    : env['cdnProxyRegex']) ||
+  /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org$/;
 
 const TAG = 'amp-viewer-messaging';
 const CHANNEL_OPEN_MSG = 'channelOpen';
@@ -173,7 +186,7 @@ export class Messaging {
           return;
         }
         if (
-          (event.origin == origin || urls.cdnProxyRegex.test(event.origin)) &&
+          (event.origin == origin || cdnProxyRegex.test(event.origin)) &&
           (!event.source || event.source == target) &&
           message.app === APP &&
           message.name === CHANNEL_OPEN_MSG
