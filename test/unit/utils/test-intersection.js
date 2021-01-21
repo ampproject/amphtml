@@ -15,8 +15,8 @@
  */
 
 import {
-  measureIntersection,
   intersectionEntryToJson,
+  measureIntersection,
 } from '../../../src/utils/intersection';
 
 describes.fakeWin('utils/intersection', {}, (env) => {
