@@ -15,13 +15,12 @@
  */
 
 import * as Preact from '../../../src/preact';
-import {Wrapper} from '../../../src/preact/component';
+import {ContainWrapper} from '../../../src/preact/component';
 import {forwardRef} from '../../../src/preact/compat';
 import {setStyle} from '../../../src/style';
 import {truncateText} from './truncation';
 import {
   useCallback,
-  useEffect,
   useImperativeHandle,
   useLayoutEffect,
   useRef,
@@ -35,22 +34,12 @@ import {useStyles} from './truncate-text.jss';
  * @return {PreactDef.Renderable}
  */
 function TruncateTextWithRef(
-  {
-    slotPersistent,
-    slotCollapsed,
-    slotExpanded,
-    onBeforeExpand,
-    onAfterCollapse,
-    ...rest
-  },
+  {slotPersistent, slotCollapsed, slotExpanded, children, ...rest},
   ref
 ) {
   const wrapperRef = useRef();
   const collapsedRef = useRef();
   const persistentRef = useRef();
-
-  const onBeforeExpandRef = useRef(onBeforeExpand);
-  const onAfterCollapseRef = useRef(onAfterCollapse);
 
   const [expanded, setExpanded] = useState(false);
   const [ready, setReady] = useState(false);
@@ -71,79 +60,45 @@ function TruncateTextWithRef(
   }, []);
 
   // Truncate the text when expanded/collapsed
-  useLayoutEffect(() => {
-    // Update container element attributes
-    if (expanded) {
-      onBeforeExpandRef.current && onBeforeExpandRef.current();
-    } else {
-      onAfterCollapseRef.current && onAfterCollapseRef.current();
-    }
-
-    // Truncate contents to fit/expand container
-    truncate();
-  }, [expanded, truncate]);
-
-  // After the first layout, measure/truncate/display
-  useEffect(() => {
-    truncate();
-    setReady(true);
-  }, [truncate]);
-
-  // Don't display contents until after the first measure/truncate
-  useLayoutEffect(() => {
-    setStyle(wrapperRef.current, 'visibility', ready ? 'visible' : 'hidden');
-  }, [ready]);
+  useLayoutEffect(truncate, [expanded, truncate, ready]);
 
   const classes = useStyles();
-  const slots = {
-    'default': <slot />,
-    'persistent': slotPersistent,
-    'collapsed': slotCollapsed,
-    'expanded': slotExpanded,
-  };
-
-  const TruncateSlot = forwardRef(({name, className, ...rest}, ref) => (
-    <span
-      className={`i-amphtml-truncate-${name}-slot ${className || ''}`}
-      ref={ref}
-      {...rest}
-    >
-      {slots[name]}
-    </span>
-  ));
-
   return (
-    <Wrapper
+    <ContainWrapper
+      layout
       ref={wrapperRef}
-      // Required to un-set defaults that break truncation
-      wrapperStyle={{position: null}}
-      wrapperClassName={`i-amphtml-truncate-content ${
-        classes.truncateTextContent
-      } ${
+      wrapperClassName={`${classes.truncateTextWrapper} ${
+        expanded ? classes.truncateTextExpandedWrapper : ''
+      }`}
+      contentClassName={`${classes.truncateTextContent} ${
         expanded
           ? classes.truncateTextExpandedContent
           : classes.truncateTextCollapsedContent
       }`}
       {...rest}
     >
-      <TruncateSlot name="default" />
+      <span name="default">
+        <slot children={children} />
+      </span>
 
       {expanded ? (
-        <TruncateSlot
+        <span
           name="expanded"
           onClick={() => setExpanded(false)}
           className={classes.truncateTextExpandedSlot}
+          children={slotExpanded}
         />
       ) : (
-        <TruncateSlot
+        <span
           name="collapsed"
           ref={collapsedRef}
           onClick={() => setExpanded(true)}
+          children={slotCollapsed}
         />
       )}
 
-      <TruncateSlot name="persistent" ref={persistentRef} />
-    </Wrapper>
+      <span name="persistent" ref={persistentRef} children={slotPersistent} />
+    </ContainWrapper>
   );
 }
 

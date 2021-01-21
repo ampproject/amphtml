@@ -16,8 +16,8 @@
 
 import * as Preact from '../../../../src/preact';
 import {TruncateText} from '../truncate-text';
+import {number, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
-import {withKnobs} from '@storybook/addon-knobs';
 
 export default {
   title: 'TruncateText',
@@ -25,20 +25,30 @@ export default {
   decorators: [withKnobs, withA11y],
 };
 
-export const SimpleTruncatedText = () => (
-  <truncate-text>
-    Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-    tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-    quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-    consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
-    cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat
-    non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-    <p> Hello</p>
-    <button slot-persistent>Lorem Ipsum</button>
-    <button slot-collapsed>See more</button>
-    <button slot-expanded>See less</button>
-  </truncate-text>
-);
+export const SimpleTruncatedText = () => {
+  const width = number('width', 320);
+  const height = number('height', 64);
+
+  return (
+    <TruncateText
+      className="amp-truncate-text"
+      layout="fixed"
+      style={{width, height}}
+      slotPersistent={<button slot="persistent">Lorem Ipsum</button>}
+      slotCollapsed={<button slot="collapsed">See more</button>}
+      slotExpanded={<button slot="expanded">See less</button>}
+    >
+      Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+      tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
+      veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
+      commodo consequat. Duis aute irure dolor in reprehenderit in voluptate
+      velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
+      cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id
+      est laborum.
+      <p> Hello</p>
+    </TruncateText>
+  );
+};
 
 SimpleTruncatedText.story = {
   name: 'Text truncated with a few buttons',
