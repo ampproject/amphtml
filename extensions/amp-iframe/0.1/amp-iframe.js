@@ -96,6 +96,9 @@ export class AmpIframe extends AMP.BaseElement {
     /** @private  {?HTMLIFrameElement} */
     this.iframe_ = null;
 
+    /** @private  {boolean} */
+    this.isDisplayed_ = false;
+
     /** @private {boolean} */
     this.isResizable_ = false;
 
@@ -486,6 +489,7 @@ export class AmpIframe extends AMP.BaseElement {
 
     this.container_.appendChild(iframe);
 
+    this.isDisplayed_ = false;
     observeDisplay(this.element, this.onDisplay_);
 
     return this.loadPromise(iframe).then(() => {
@@ -633,6 +637,10 @@ export class AmpIframe extends AMP.BaseElement {
    * @private
    */
   onDisplay_(isDisplayed) {
+    if (isDisplayed === this.isDisplayed_) {
+      return;
+    }
+    this.isDisplayed_ = isDisplayed;
     if (!isDisplayed && this.iframe_) {
       this.getVsync().mutate(() => this.unload());
     }
