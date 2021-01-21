@@ -16,7 +16,7 @@
 
 import * as Preact from '../../../../src/preact';
 import {TruncateText} from '../truncate-text';
-import {number, withKnobs} from '@storybook/addon-knobs';
+import {text, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 
 export default {
@@ -26,8 +26,8 @@ export default {
 };
 
 export const SimpleTruncatedText = () => {
-  const width = number('width', 320);
-  const height = number('height', 64);
+  const width = text('width', '320em');
+  const height = text('height', '64em');
 
   return (
     <TruncateText

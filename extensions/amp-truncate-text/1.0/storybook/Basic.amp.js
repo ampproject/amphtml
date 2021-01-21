@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {number, withKnobs} from '@storybook/addon-knobs';
+import {text, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
@@ -39,12 +39,7 @@ export const _default = () => {
   const height = text('height', '4em');
 
   return (
-    <amp-truncate-text
-      layout="fixed"
-      className="box"
-      height={`${height}em`}
-      width={`${width}em`}
-    >
+    <amp-truncate-text layout="fixed" className="box" {...{width, height}}>
       Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
       tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
       veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
