@@ -20,7 +20,7 @@ import {BaseElement} from '../../src/base-element';
 import {CommonSignals} from '../../src/common-signals';
 import {ElementStub} from '../../src/element-stub';
 import {LOADING_ELEMENTS_, Layout} from '../../src/layout';
-import {ResourceState} from '../../src/service/resource';
+import {Resource, ResourceState} from '../../src/service/resource';
 import {Services} from '../../src/services';
 import {chunkInstanceForTesting} from '../../src/chunk';
 import {createAmpElementForTesting} from '../../src/custom-element';
@@ -110,6 +110,8 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         doc = win.document;
         ampdoc = env.ampdoc;
         clock = lolex.install({target: win});
+        delete win.requestIdleCallback;
+        delete win.cancelIdleCallback;
         resources = Services.resourcesForDoc(doc);
         resources.isBuildOn_ = true;
         resourcesMock = env.sandbox.mock(resources);
@@ -1114,51 +1116,81 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         let element1;
         let element2;
         let matchMedia;
+        let matchMinWidth1px;
+        let requestMeasureStub;
 
         beforeEach(() => {
           element1 = new ElementClass();
 
-          // Fixes #19752. The window.matchMedia call in the code
-          // path of element.applySizesAndMediaQuery is not behaving consistently
-          // in headless mode, thus we mock the calls here. This is fine as we are
-          // not testing window behavior.
           matchMedia = env.sandbox.stub(
             element1.ownerDocument.defaultView,
             'matchMedia'
           );
-          matchMedia.withArgs('(min-width: 1px)').returns({matches: true});
+          matchMinWidth1px = {
+            matches: true,
+            onchange: null,
+          };
+          matchMedia.withArgs('(min-width: 1px)').returns(matchMinWidth1px);
           matchMedia
             .withArgs('(min-width: 1111111px)')
-            .returns({matches: false});
+            .returns({matches: false, onchange: null});
+
           element2 = new ElementClass();
           element2.ampdoc_ = env.ampdoc;
+
+          requestMeasureStub = env.sandbox.stub(
+            Resource.prototype,
+            'requestMeasure'
+          );
+        });
+
+        it('should not request remeasure when no media attributes', () => {
+          doc.body.appendChild(element1);
+          expect(requestMeasureStub).to.not.be.called;
         });
 
         it('should not apply sizes when "disable-inline-width" is present', () => {
           element1.setAttribute('disable-inline-width', null);
           element1.setAttribute('sizes', '(min-width: 1px) 200px, 50vw');
-          element1.applySizesAndMediaQuery();
+          doc.body.appendChild(element1);
           expect(element1.style.width).not.to.equal('200px');
+          expect(requestMeasureStub).to.not.be.called;
         });
 
         it('should apply media condition', () => {
           element1.setAttribute('media', '(min-width: 1px)');
-          element1.applySizesAndMediaQuery();
+          doc.body.appendChild(element1);
           expect(element1).to.not.have.class('i-amphtml-hidden-by-media-query');
+          expect(requestMeasureStub).to.be.calledOnce;
 
           element2.setAttribute('media', '(min-width: 1111111px)');
-          element2.applySizesAndMediaQuery();
+          doc.body.appendChild(element2);
           expect(element2).to.have.class('i-amphtml-hidden-by-media-query');
+          expect(requestMeasureStub).to.be.calledTwice;
+        });
+
+        it('should re-apply media condition', () => {
+          element1.setAttribute('media', '(min-width: 1px)');
+          doc.body.appendChild(element1);
+          expect(element1).to.not.have.class('i-amphtml-hidden-by-media-query');
+          expect(requestMeasureStub).to.be.calledOnce;
+
+          matchMinWidth1px.matches = false;
+          matchMinWidth1px.onchange();
+          expect(element1).to.have.class('i-amphtml-hidden-by-media-query');
+          expect(requestMeasureStub).to.be.calledTwice;
         });
 
         it('should apply sizes condition', () => {
           element1.setAttribute('sizes', '(min-width: 1px) 200px, 50vw');
-          element1.applySizesAndMediaQuery();
+          doc.body.appendChild(element1);
           expect(element1.style.width).to.equal('200px');
+          expect(requestMeasureStub).to.be.calledOnce;
 
           element2.setAttribute('sizes', '(min-width: 1111111px) 200px, 50vw');
-          element2.applySizesAndMediaQuery();
+          doc.body.appendChild(element2);
           expect(element2.style.width).to.equal('50vw');
+          expect(requestMeasureStub).to.be.calledTwice;
         });
 
         it('should apply heights condition', () => {
@@ -1168,8 +1200,9 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
           element1.setAttribute('height', '200px');
           element1.setAttribute('heights', '(min-width: 1px) 99%, 1%');
           container.appendChild(element1);
-          element1.applySizesAndMediaQuery();
+          doc.body.appendChild(element1);
           expect(element1.sizerElement.style.paddingTop).to.equal('99%');
+          expect(requestMeasureStub).to.be.calledOnce;
 
           element2.sizerElement = doc.createElement('div');
           element2.setAttribute('layout', 'responsive');
@@ -1177,40 +1210,9 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
           element2.setAttribute('height', '200px');
           element2.setAttribute('heights', '(min-width: 1111111px) 99%, 1%');
           container.appendChild(element2);
-          element2.applySizesAndMediaQuery();
+          doc.body.appendChild(element2);
           expect(element2.sizerElement.style.paddingTop).to.equal('1%');
-        });
-
-        it('should rediscover sizer to apply heights in SSR', () => {
-          element1.setAttribute('i-amphtml-layout', 'responsive');
-          element1.setAttribute('layout', 'responsive');
-          element1.setAttribute('width', '200px');
-          element1.setAttribute('height', '200px');
-          element1.setAttribute('heights', '(min-width: 1px) 99%, 1%');
-          container.appendChild(element1);
-
-          const sizer = doc.createElement('i-amphtml-sizer');
-          expect(element1.sizerElement).to.be.undefined;
-          element1.appendChild(sizer);
-          element1.applySizesAndMediaQuery();
-          expect(element1.sizerElement).to.equal(sizer);
-          expect(sizer.style.paddingTop).to.equal('99%');
-        });
-
-        it('should NOT rediscover sizer after reset in SSR', () => {
-          element1.setAttribute('i-amphtml-layout', 'responsive');
-          element1.setAttribute('layout', 'responsive');
-          element1.setAttribute('width', '200px');
-          element1.setAttribute('height', '200px');
-          element1.setAttribute('heights', '(min-width: 1px) 99%, 1%');
-          container.appendChild(element1);
-
-          const sizer = doc.createElement('i-amphtml-sizer');
-          element1.appendChild(sizer);
-          element1.sizerElement = null;
-          element1.applySizesAndMediaQuery();
-          expect(element1.sizerElement).to.be.null;
-          expect(sizer.style.paddingTop).to.equal('');
+          expect(requestMeasureStub).to.be.calledTwice;
         });
       });
 
@@ -1316,17 +1318,6 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         element.appendChild(sizer);
         element.applySize(111);
         expect(intrinsicSizer.getAttribute('src')).to.equal('');
-      });
-
-      it('should NOT apply media condition in template', () => {
-        const element1 = new ElementClass();
-        element1.setAttribute('media', '(min-width: 1px)');
-        element1.isInTemplate_ = true;
-        allowConsoleError(() => {
-          expect(() => {
-            element1.applySizesAndMediaQuery();
-          }).to.throw(/Must never be called in template/);
-        });
       });
 
       it('should change size to zero', () => {
