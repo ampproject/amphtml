@@ -22,6 +22,18 @@ import {
 import {createElementWithAttributes} from '../../../../src/dom';
 import {registerServiceBuilder} from '../../../../src/service';
 
+/**
+ * @return {!Promise<undefined>} A Promise that resolves after the browser has
+ *    rendered.
+ */
+function afterRenderPromise() {
+  return new Promise((resolve) => {
+    requestAnimationFrame(() => {
+      setTimeout(resolve);
+    });
+  });
+}
+
 describes.realWin(
   'amp-story-panning-media',
   {
@@ -91,17 +103,15 @@ describes.realWin(
 
     it('sets transform of amp-img on page change', async () => {
       const positionValues = {x: '50%', y: '50%', zoom: '2'};
-
       await createAmpStoryPanningMedia(
         '/examples/amp-story/img/conservatory-coords.jpg',
         positionValues
       );
       await panningMedia.layoutCallback();
       await storeService.dispatch(Action.CHANGE_PAGE, {id: 'page1', index: 0});
-      requestAnimationFrame(() =>
-        expect(panningMedia.ampImgEl_.style.transform).to.equal(
-          `scale(${positionValues.zoom}) translate(${positionValues.x}, ${positionValues.y})`
-        )
+      await afterRenderPromise();
+      expect(panningMedia.ampImgEl_.style.transform).to.equal(
+        `scale(${positionValues.zoom}) translate(${positionValues.x}, ${positionValues.y})`
       );
     });
   }
