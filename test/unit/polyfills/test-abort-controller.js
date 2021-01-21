@@ -55,8 +55,8 @@ describes.realWin('AbortController', {}, (env) => {
       type: 'abort',
       bubbles: false,
       cancelable: false,
+      target: signal,
+      currentTarget: signal,
     });
-    expect(event.target).to.equal(signal);
-    expect(event.currentTarget).to.equal(signal);
   });
 });
