@@ -173,6 +173,15 @@ tags: {  # <amp-story-grid-layer>
     name: "aspect-ratio"
     value_regex: "\\d+:\\d+"
   }
+  attrs: {
+    name: "preset"
+    value: "2021-background"
+    value: "2021-foreground"
+  }
+  attrs: {
+    name: "anchor"
+    value_regex: "top|bottom|left|right|(top|bottom) (left|right)"
+  }
   descendant_tag_list: "amp-story-grid-layer-allowed-descendants"
   reference_points: {
     tag_spec_name: "AMP-STORY-GRID-LAYER default"
