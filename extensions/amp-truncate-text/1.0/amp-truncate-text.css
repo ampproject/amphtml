@@ -13,23 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+amp-truncate-text {
+  padding: 0 !important;
+  border: none !important;
+}
 
-/** @externs */
+amp-truncate-text[i-amphtml-truncate-expanded] {
+  /*height: auto !important;*/
+  overflow: visible !important;
+}
 
-/** @const */
-var TruncateTextDef = {};
-
-/**
- * @typedef {{
- *   slotCollapsed: (?PreactDef.VNode|undefined),
- *   slotExpanded: (?PreactDef.VNode|undefined),
- *   slotPersistent: (?PreactDef.VNode|undefined),
- * }}
- */
-TruncateTextDef.Props;
-
-/** @interface */
-TruncateTextDef.TruncateTextApi = class {
-  /** Expand/collapse the component */
-  toggle() {}
-};
+[i-amphtml-truncate-child-overflow] {
+  display: none !important;
+}
