@@ -274,11 +274,9 @@ export class LegacyAdIntersectionObserverHost {
     // Since before using a real InOb we used to provide rootBounds,
     // we are temporarily continuing to do so now.
     // TODO: eventually remove this when confident consumers don't rely on it.
-    console.error(JSON.stringify(change));
     if (change.rootBounds === null) {
       change.rootBounds = this.baseElement_.getViewport().getRect();
     }
-    console.error({change});
 
     if (
       this.pendingChanges_.length > 0 &&
