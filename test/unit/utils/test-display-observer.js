@@ -60,7 +60,7 @@ describes.realWin('display-observer', {amp: true}, (env) => {
       notify(entries) {
         const {callback} = this;
         return Promise.resolve().then(() => {
-          callback(entries);
+          callback(entries, this);
         });
       }
     }

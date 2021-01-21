@@ -80,8 +80,9 @@ export class DisplayObserver {
 
     /** @private @const {!Array<!IntersectionObserver>} */
     this.observers_ = [];
+    const boundObserved = this.observed_.bind(this);
     this.observers_.push(
-      new win.IntersectionObserver((e) => this.observed_(e, 0), {
+      new win.IntersectionObserver(boundObserved, {
         root: ampdoc.getBody(),
         threshold: DISPLAY_THRESHOLD,
       })
@@ -89,7 +90,7 @@ export class DisplayObserver {
     // Viewport observer is only needed because `postion:fixed` elements
     // are not observable by a documentElement or body's root.
     this.observers_.push(
-      new win.IntersectionObserver((e) => this.observed_(e, 1), {
+      new win.IntersectionObserver(boundObserved, {
         threshold: DISPLAY_THRESHOLD,
       })
     );
@@ -181,7 +182,7 @@ export class DisplayObserver {
 
   /**
    * @param {!Array<!IntersectionObserverEntry>} entries
-   * @param {number} observer
+   * @param {!IntersectionObserver} observer
    * @private
    */
   observed_(entries, observer) {
@@ -202,7 +203,8 @@ export class DisplayObserver {
         this.targetObservations_.set(target, observations);
       }
       const oldDisplay = computeDisplay(observations, this.isDocVisible_);
-      observations[observer] = isIntersecting;
+      const index = this.observers_.indexOf(observer);
+      observations[index] = isIntersecting;
       const newDisplay = computeDisplay(observations, this.isDocVisible_);
       notifyIfChanged(callbacks, newDisplay, oldDisplay);
     }
