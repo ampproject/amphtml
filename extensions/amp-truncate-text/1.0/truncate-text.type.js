@@ -21,9 +21,11 @@ var TruncateTextDef = {};
 
 /**
  * @typedef {{
- *   slotCollapsed: (?PreactDef.VNode|undefined),
- *   slotExpanded: (?PreactDef.VNode|undefined),
- *   slotPersistent: (?PreactDef.VNode|undefined),
+ *   collapsed: (?PreactDef.Renderable|undefined),
+ *   expanded: (?PreactDef.Renderable|undefined),
+ *   persistent: (?PreactDef.Renderable|undefined),
+ *   children: (?PreactDef.Renderable|undefined),
+ *   onToggle: (function(boolean):undefined|undefined)
  * }}
  */
 TruncateTextDef.Props;
