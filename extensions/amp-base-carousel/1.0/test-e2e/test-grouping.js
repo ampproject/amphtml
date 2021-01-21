@@ -25,7 +25,7 @@ const pivotIndex = Math.floor(slideCount / 2);
 const expectedScrollPosition = (pageWidth / advanceCount) * pivotIndex;
 
 describes.endtoend(
-  'AMP carousel grouping',
+  'amp-base-carousel:1.0 - grouping',
   {
     testUrl:
       'http://localhost:8000/test/manual/amp-base-carousel/1.0/' +
