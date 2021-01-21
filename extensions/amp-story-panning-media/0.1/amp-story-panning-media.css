@@ -14,9 +14,21 @@
  * limitations under the License.
  */
 
-amp-story-panning-media amp-img {
+amp-story-panning-media {
   /* Child img gets 100% height. This centers the image. */
   display: flex !important;
   justify-content: center !important;
   align-items: center !important;
+}
+
+/* TODO(#31934): do not transition element when landing on the page. */
+amp-story-panning-media amp-img {
+  transition: transform 1s ease-in-out;
+}
+
+.i-amphtml-story-grid-template-fill amp-story-panning-media amp-img img {
+  /* override for layout=fill. This centers the image without clipping it */
+  position: relative !important;
+  display: block !important;
+  height: 100% !important;
 }
