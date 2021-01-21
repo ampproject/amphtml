@@ -24,7 +24,7 @@ const pageHeight = 600;
 const testTimeout = 30000;
 
 describes.endtoend(
-  'AMP carousel',
+  'amp-base-carousel:1.0 - basic functionality',
   {
     testUrl:
       'http://localhost:8000/test/manual/amp-base-carousel/1.0/basic.amp.html',

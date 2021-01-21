@@ -28,7 +28,7 @@ const pageWidth = 600;
 const pageHeight = 600;
 
 describes.endtoend(
-  'AMP carousel arrows when non-looping',
+  'amp-base-carousel:1.0 - arrows when non-looping',
   {
     testUrl:
       'http://localhost:8000/test/manual/amp-base-carousel/1.0/non-looping.amp.html',
