@@ -38,11 +38,12 @@ describes.endtoend(
           await controller.findElement('#recalculate-resize-200-200')
         );
         // wait for the resizeobserver to recognize the changes
-        // 110ms chosen to allow sufficient time for fit-text to recalculate font sizes.
+        // 5000ms chosen to allow sufficient time for fit-text to recalculate font sizes.
+        //TODO(rebeccanthomas): Update this test to use `waitFor` instead of a promise resolve
         await new Promise((resolve) => {
           setTimeout(() => {
             resolve();
-          }, 110);
+          }, 5000);
         });
         const updatedFontSize = await getFontSize(controller, contentDiv);
         await expect(updatedFontSize).to.be.greaterThan(originalFontSize);
@@ -53,11 +54,12 @@ describes.endtoend(
           await controller.findElement('#recalculate-resize-100-100')
         );
         // wait for the resizeobserver to recognize the changes
-        // 110ms chosen to allow sufficient time for fit-text to recalculate font sizes.
+        // 5000ms chosen to allow sufficient time for fit-text to recalculate font sizes.
+        //TODO(rebeccanthomas): Update this test to use `waitFor` instead of a promise resolve
         await new Promise((resolve) => {
           setTimeout(() => {
             resolve();
-          }, 110);
+          }, 5000);
         });
         const updatedFontSize = await getFontSize(controller, contentDiv);
         await expect(updatedFontSize).to.be.lessThan(originalFontSize);
