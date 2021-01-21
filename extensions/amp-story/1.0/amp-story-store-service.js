@@ -111,6 +111,7 @@ export let InteractiveReactData;
  *    mutedState: boolean,
  *    pageAudioState: boolean,
  *    pageHasElementsWithPlaybackState: boolean,
+ *    panningMediaState: {x: string, y: string, zoom: string},
  *    pausedState: boolean,
  *    previewState: boolean,
  *    rtlState: boolean,
@@ -164,6 +165,7 @@ export const StateProperty = {
   MUTED_STATE: 'mutedState',
   PAGE_HAS_AUDIO_STATE: 'pageAudioState',
   PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE: 'pageHasElementsWithPlaybackState',
+  PANNING_MEDIA_STATE: 'panningMediaState',
   PAUSED_STATE: 'pausedState',
   // Story preview state.
   PREVIEW_STATE: 'previewState',
@@ -229,6 +231,7 @@ export const Action = {
   TOGGLE_VIEWPORT_WARNING: 'toggleViewportWarning',
   ADD_NEW_PAGE_ID: 'addNewPageId',
   SET_PAGE_SIZE: 'updatePageSize',
+  SET_PANNING_MEDIA_STATE: 'setPanningMediaState',
   SET_VIEWER_CUSTOM_CONTROLS: 'setCustomControls',
 };
 
@@ -252,6 +255,12 @@ const stateComparisonFunctions = {
     curr === null ||
     old.width !== curr.width ||
     old.height !== curr.height,
+  [StateProperty.PANNING_MEDIA_STATE]: (old, curr) =>
+    old === null ||
+    curr === null ||
+    old.x !== curr.x ||
+    old.y !== curr.y ||
+    old.zoom !== curr.zoom,
   [StateProperty.INTERACTIVE_REACT_STATE]: (old, curr) =>
     !deepEquals(old, curr, 3),
 };
@@ -483,6 +492,11 @@ const actions = (state, action, data) => {
         ...state,
         [StateProperty.PAGE_SIZE]: data,
       });
+    case Action.SET_PANNING_MEDIA_STATE:
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.PANNING_MEDIA_STATE]: data,
+      });
     case Action.SET_VIEWER_CUSTOM_CONTROLS:
       return /** @type {!State} */ ({
         ...state,
@@ -608,6 +622,7 @@ export class AmpStoryStoreService {
       [StateProperty.PAGE_ATTACHMENT_STATE]: false,
       [StateProperty.PAGE_HAS_AUDIO_STATE]: false,
       [StateProperty.PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE]: false,
+      [StateProperty.PANNING_MEDIA_STATE]: null,
       [StateProperty.PAUSED_STATE]: false,
       [StateProperty.RTL_STATE]: false,
       [StateProperty.SHARE_MENU_STATE]: false,
