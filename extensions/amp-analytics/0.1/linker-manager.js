@@ -301,6 +301,13 @@ export class LinkerManager {
    */
   isDomainMatch_(url, name, domains) {
     const {hostname} = this.urlService_.parse(url);
+    // Don't append linker for exact domain match, relative urls, or
+    // fragments.
+    const winHostname = WindowInterface.getHostname(this.ampdoc_.win);
+    if (winHostname === hostname) {
+      return false;
+    }
+
     // If given domains, but not in the right format.
     if (domains && !Array.isArray(domains)) {
       user().warn(TAG, '%s destinationDomains must be an array.', name);
@@ -313,14 +320,6 @@ export class LinkerManager {
     }
 
     // Fallback to default behavior
-
-    // Don't append linker for exact domain match, relative urls, or
-    // fragments.
-    const winHostname = WindowInterface.getHostname(this.ampdoc_.win);
-    if (winHostname === hostname) {
-      return false;
-    }
-
     const {sourceUrl, canonicalUrl} = Services.documentInfoForDoc(this.ampdoc_);
     const canonicalOrigin = this.urlService_.parse(canonicalUrl).hostname;
     const isFriendlyCanonicalOrigin = areFriendlyDomains(
