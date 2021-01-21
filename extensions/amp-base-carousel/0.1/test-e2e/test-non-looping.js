@@ -20,7 +20,7 @@ const pageWidth = 800;
 const pageHeight = 600;
 
 describes.endtoend(
-  'Non-looping AMP carousel',
+  'amp-base-carousel:0.1 - non-looping',
   {
     testUrl:
       'http://localhost:8000/test/manual/amp-base-carousel/' +

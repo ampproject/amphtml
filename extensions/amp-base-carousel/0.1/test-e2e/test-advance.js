@@ -20,7 +20,7 @@ const pageWidth = 500;
 const pageHeight = 800;
 
 describes.endtoend(
-  'AMP carousel advance',
+  'amp-base-carousel:0.1 - advance',
   {
     testUrl:
       'http://localhost:8000/test/manual/amp-base-carousel/advance.amp.html',
