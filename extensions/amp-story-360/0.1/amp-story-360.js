@@ -513,7 +513,7 @@ export class AmpStory360 extends AMP.BaseElement {
       // Debounce onDeviceOrientation_ to rAF.
       let rafTimeout;
       this.win.addEventListener('deviceorientation', (e) => {
-        if (this.isReady_ && this.distance_ < MIN_WEBGL_DISTANCE) {
+        if (this.isReady_) {
           rafTimeout && this.win.cancelAnimationFrame(rafTimeout);
           rafTimeout = this.win.requestAnimationFrame(() => {
             if (!this.isOnActivePage_) {

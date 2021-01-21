@@ -127,7 +127,7 @@ export let InteractiveReactData;
  *    consentId: ?string,
  *    currentPageId: string,
  *    currentPageIndex: number,
- *    pageDistanceMap: !Map<string, !string>,
+ *    pageDistanceMap: !Map<string, !number>,
  *    pageIds: !Array<string>,
  *    newPageAvailableId: string,
  *    pageSize: {width: number, height: number},
