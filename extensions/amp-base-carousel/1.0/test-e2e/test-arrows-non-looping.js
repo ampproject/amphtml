@@ -49,7 +49,7 @@ describes.endtoend(
       return controller.getElementCssValue(handle, name);
     }
 
-    beforeEach(async () => {
+    beforeEach(async function () {
       this.timeout(testTimeout);
       controller = env.controller;
       const carousel = await getCarousel(controller);

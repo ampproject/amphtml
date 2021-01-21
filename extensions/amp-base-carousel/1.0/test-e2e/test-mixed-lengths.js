@@ -51,7 +51,7 @@ describes.endtoend(
     describe('snap', () => {
       const slideWidth = pageWidth * 0.75;
 
-      it('should have the correct initial slide positions', async () => {
+      it('should have the correct initial slide positions', async function () {
         this.timeout(testTimeout);
         const slideOne = await getSlide(styles, controller, 0);
         const slideTwo = await getSlide(styles, controller, 1);
@@ -67,7 +67,7 @@ describes.endtoend(
         });
       });
 
-      it('should snap on the center point', async () => {
+      it('should snap on the center point', async function () {
         this.timeout(testTimeout);
         const el = await getScrollingElement(styles, controller);
         const slideTwo = await getSlide(styles, controller, 1);
