@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
@@ -32,6 +33,10 @@ import {
   isFullscreenElement,
   removeElement,
 } from '../../../src/dom';
+import {
+  getConsentPolicyInfo,
+  getConsentPolicyState,
+} from '../../../src/consent';
 import {getData, listen} from '../../../src/event-helper';
 import {htmlFor} from '../../../src/static-template';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
@@ -269,6 +274,50 @@ class AmpBridPlayer extends AMP.BaseElement {
   }
 
   /**
+   * Requests consent data from consent module
+   * and forwards information to player
+   * @private
+   */
+  getConsentData_() {
+    const consentPolicy = super.getConsentPolicy() || 'default';
+    const consentStatePromise = consentPolicy
+      ? getConsentPolicyState(this.element, consentPolicy)
+      : Promise.resolve(null);
+    const consentStringPromise = consentPolicy
+      ? getConsentPolicyInfo(this.element, consentPolicy)
+      : Promise.resolve(null);
+
+    return Promise.all([consentStatePromise, consentStringPromise]).then(
+      (consents) => {
+        let consentData;
+        switch (consents[0]) {
+          case CONSENT_POLICY_STATE.SUFFICIENT:
+            consentData = {
+              'gdprApplies': true,
+              'userConsent': 1,
+              'gdprString': consents[1],
+            };
+            break;
+          case CONSENT_POLICY_STATE.INSUFFICIENT:
+          case CONSENT_POLICY_STATE.UNKNOWN:
+            consentData = {
+              'gdprApplies': true,
+              'userConsent': 0,
+              'gdprString': consents[1],
+            };
+            break;
+          case CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED:
+          default:
+            consentData = {
+              'gdprApplies': false,
+            };
+        }
+        this.sendCommand_('setAMPGDPR', JSON.stringify(consentData));
+      }
+    );
+  }
+
+  /**
    * @param {!Event} event
    * @private
    */
@@ -288,6 +337,9 @@ class AmpBridPlayer extends AMP.BaseElement {
     if (params[2] == 'trigger') {
       if (params[3] == 'ready') {
         this.playerReadyResolver_(this.iframe_);
+      }
+      if (params[3] == 'requestAMPGDPR') {
+        this.getConsentData_();
       }
       redispatch(element, params[3], {
         'ready': VideoEvents.LOAD,
