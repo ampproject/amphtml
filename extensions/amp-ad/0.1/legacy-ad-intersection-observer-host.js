@@ -272,7 +272,6 @@ export class LegacyAdIntersectionObserverHost {
    */
   sendElementIntersection_(entry) {
     const change = intersectionEntryToJson(entry);
-    console.error({change});
 
     if (
       this.pendingChanges_.length > 0 &&
