@@ -26,8 +26,8 @@ export default {
 };
 
 export const SimpleTruncatedText = () => {
-  const width = text('width', '320em');
-  const height = text('height', '64em');
+  const width = text('width', '20em');
+  const height = text('height', '4em');
 
   return (
     <TruncateText
