@@ -59,9 +59,6 @@ class AmpTruncateText extends PreactBaseElement {
 AmpTruncateText['Component'] = TruncateText;
 
 /** @override */
-AmpTruncateText['props'] = {};
-
-/** @override */
 AmpTruncateText['children'] = {
   'collapsed': {
     name: 'collapsed',
