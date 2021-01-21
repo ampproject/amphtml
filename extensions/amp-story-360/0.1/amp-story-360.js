@@ -357,18 +357,6 @@ export class AmpStory360 extends AMP.BaseElement {
     container.appendChild(this.canvas_);
     this.applyFillContent(container, /* replacedContent */ true);
 
-    // Mutation observer for distance attribute
-    // const config = {attributes: true, attributeFilter: ['distance']};
-    // const callback = (mutationsList) => {
-    //   this.distance_ = parseInt(
-    //     mutationsList[0].target.getAttribute('distance'),
-    //     10
-    //   );
-    //   this.restoreOrLoseGlContext_();
-    // };
-    // const observer = new MutationObserver(callback);
-    // this.getPage_() && observer.observe(this.getPage_(), config);
-
     // Initialize all services before proceeding
     return Promise.all([
       Services.storyStoreServiceForOrNull(this.win).then((storeService) => {
