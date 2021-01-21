@@ -94,7 +94,6 @@ describes.realWin('mutator changeSize', {amp: true}, (env) => {
       },
       hasAttribute: () => false,
       getBoundingClientRect: () => rect,
-      applySizesAndMediaQuery: () => {},
       layoutCallback: () => Promise.resolve(),
       prerenderAllowed: () => true,
       renderOutsideViewport: () => false,
@@ -1401,7 +1400,6 @@ describes.realWin('mutator mutateElement and collapse', {amp: true}, (env) => {
     element.getAttribute = () => null;
     element.hasAttribute = () => false;
     element.getBoundingClientRect = () => rect;
-    element.applySizesAndMediaQuery = () => {};
     element.layoutCallback = () => Promise.resolve();
     element.prerenderAllowed = () => true;
     element.renderOutsideViewport = () => true;

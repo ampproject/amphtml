@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,52 +17,58 @@
 
 /**
  * @fileoverview
- * This script builds the AMP runtime.
- * This is run during the CI stage = build; job = unminified build.
+ * This script runs the unit and integration tests locally on a VM.
+ * This is run during the CI stage = test; job = unit tests.
  */
 
 const {
-  abortTimedJob,
   printChangeSummary,
   printSkipMessage,
   startTimer,
   stopTimer,
   timedExecOrDie,
-  uploadUnminifiedOutput,
+  timedExecOrThrow,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isPullRequestBuild} = require('../common/ci');
-const {runNpmChecks} = require('./npm-checks');
 const {setLoggingPrefix} = require('../common/logging');
 
-const jobName = 'unminified-build.js';
+const jobName = 'unit-tests.js';
 
 function main() {
   setLoggingPrefix(jobName);
   const startTime = startTimer(jobName);
-  if (!runNpmChecks()) {
-    return abortTimedJob(jobName, startTime);
-  }
 
   if (!isPullRequestBuild()) {
     timedExecOrDie('gulp update-packages');
-    timedExecOrDie('gulp build --fortesting');
-    uploadUnminifiedOutput();
+    try {
+      timedExecOrThrow(
+        'gulp unit --headless --coverage --report',
+        'Unit tests failed!'
+      );
+      timedExecOrThrow(
+        'gulp codecov-upload',
+        'Failed to upload code coverage to Codecov!'
+      );
+    } catch (e) {
+      if (e.status) {
+        process.exitCode = e.status;
+      }
+    } finally {
+      timedExecOrDie('gulp test-report-upload');
+    }
   } else {
     printChangeSummary();
     const buildTargets = determineBuildTargets();
-    if (
-      buildTargets.has('RUNTIME') ||
-      buildTargets.has('FLAG_CONFIG') ||
-      buildTargets.has('INTEGRATION_TEST')
-    ) {
+    if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {
       timedExecOrDie('gulp update-packages');
-      timedExecOrDie('gulp build --fortesting');
-      uploadUnminifiedOutput();
+      timedExecOrDie('gulp unit --headless --local_changes');
+      timedExecOrDie('gulp unit --headless --coverage');
+      timedExecOrDie('gulp codecov-upload');
     } else {
       printSkipMessage(
         jobName,
-        'this PR does not affect the runtime, flag configs, or integration tests'
+        'this PR does not affect the runtime or unit tests'
       );
     }
   }
