@@ -18,7 +18,7 @@
 const fs = require('fs-extra');
 const path = require('path');
 const request = require('request-promise');
-const {ciBuildId, ciPullRequestSha, isCircleciBuild} = require('../common/ci');
+const {ciPullRequestSha, isCircleciBuild} = require('../common/ci');
 const {cyan} = require('ansi-colors');
 const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
 const {replaceUrls: replaceUrlsAppUtil} = require('../server/app-utils');
@@ -81,9 +81,8 @@ async function signalPrDeployUpload(result) {
     'to the pr-deploy GitHub App...'
   );
   const sha = shortSha(ciPullRequestSha());
-  const ciBuild = ciBuildId();
   const baseUrl = 'https://amp-pr-deploy-bot.appspot.com/v0/pr-deploy/';
-  const url = `${baseUrl}cibuilds/${ciBuild}/headshas/${sha}/${result}`;
+  const url = `${baseUrl}headshas/${sha}/${result}`;
   await request.post(url);
 }
 
