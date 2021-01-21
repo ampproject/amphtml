@@ -249,6 +249,7 @@ const stateComparisonFunctions = {
      */
     (old, curr) => old.element !== curr.element || old.state !== curr.state,
   [StateProperty.NAVIGATION_PATH]: (old, curr) => old.length !== curr.length,
+  [StateProperty.PAGE_DISTANCE_MAP]: (old, curr) => !deepEquals(old, curr),
   [StateProperty.PAGE_IDS]: (old, curr) => old.length !== curr.length,
   [StateProperty.PAGE_SIZE]: (old, curr) =>
     old === null ||
