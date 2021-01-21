@@ -24,6 +24,9 @@ if [ -z "$CIRCLE_PR_NUMBER" ]; then
   exit
 fi
 
+# GitHub provides refs/pull/<PR_NUMBER>/merge for every PR branch that can be
+# cleanly merged to `master`. See this discussion for more details:
+# https://discuss.circleci.com/t/show-test-results-for-prospective-merge-of-a-github-pr/1662
 MERGE_BRANCH="refs/pull/$CIRCLE_PR_NUMBER/merge"
 (set -x && git pull --ff-only origin "$MERGE_BRANCH") || err=$?
 
