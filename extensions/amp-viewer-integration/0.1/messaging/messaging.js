@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {urls} from '../../../../src/config';
+
 const TAG = 'amp-viewer-messaging';
 const CHANNEL_OPEN_MSG = 'channelOpen';
 const HANDSHAKE_POLL_MSG = 'handshake-poll';
@@ -171,13 +173,13 @@ export class Messaging {
           return;
         }
         if (
-          event.origin == origin &&
+          (event.origin == origin || urls.cdnProxyRegex.test(event.origin)) &&
           (!event.source || event.source == target) &&
           message.app === APP &&
           message.name === CHANNEL_OPEN_MSG
         ) {
           source.removeEventListener('message', listener);
-          const port = new WindowPortEmulator(source, origin, target);
+          const port = new WindowPortEmulator(source, event.origin, target);
           const messaging = new Messaging(
             null,
             port,
