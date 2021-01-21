@@ -2,12 +2,10 @@
 $category@: ads-analytics
 formats:
   - websites
-experimental: true
-bento: true
 ---
 
 <!---
-Copyright 2021 The AMP HTML Authors. All Rights Reserved.
+Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -63,7 +61,7 @@ Linkedin is one of the pre-configured providers, so you do not need to provide t
 
 ### Pre-configured providers
 
-The `amp-social-share` component provides [some pre-configured providers](0.1/amp-social-share-config.js) that know their sharing endpoints as well as some default parameters.
+The `amp-social-share` component provides [some pre-configured providers](amp-social-share-config.js) that know their sharing endpoints as well as some default parameters.
 
 <table>
   <tr>
@@ -206,20 +204,6 @@ You can use [global AMP variables substitution](https://github.com/ampproject/am
 </amp-social-share>
 ```
 
-### Migrating from 0.1
-
-The `1.0` version of `amp-social-share` has a few additional features that differentiate it from the `0.1` version.
-
-1. The default icons for pre-configured providers have been updated to reflect the
-   most up-to-date logos and colors from their associated companies so expect a new
-   set of logos when migrating to `1.0`.
-2. Both the foreground and background colors of the default icons can now be styled
-   with CSS. See the `Styling` section below for more information.
-3. Support for custom logos or text on the default icons is now included. If the
-   `amp-social-share` component has any children elements, they will now be displayed
-   instead of the default icon. (In `0.1` they would be overlaid on the existing
-   icon.)
-
 ## Attributes
 
 ### type (required)
@@ -262,8 +246,8 @@ Sometimes you want to provide your own style. You can simply override the provid
 
 ```css
 amp-social-share[type='twitter'] {
-  color: blue;
   background: red;
+  background-image: url(datauri:svg/myownsvgicon);
 }
 ```
 
@@ -271,8 +255,40 @@ When customizing the style of an `amp-social-share` icon please ensure that the 
 
 ## Accessibility
 
+### Indication of focus
+
+The `amp-social-share` element defaults to a blue outline as a visible focus indicator. It also defaults `tabindex=0` making it easy for a user to follow along as he or she tabs through multiple `amp-social-share` elements used together on a page.
+
+The default focus indicator is achieved with the following CSS rule-set.
+
+```css
+amp-social-share:focus {
+  outline: #0389ff solid 2px;
+  outline-offset: 2px;
+}
+```
+
+The default focus indicator can be overwritten by defining CSS styles for focus and including them within a `style` tag on an AMP HTML page. In the example below, the first CSS rule-set removes the focus indicator on all `amp-social-share` elements by setting the `outline` property to `none`. The second rule-set specifies a red outline (instead of the default blue) and also sets the `outline-offset` to be `3px` for all `amp-social-share` elements with the class `custom-focus`.
+
+```css
+amp-social-share:focus{
+  outline: none;
+}
+
+amp-social-share.custom-focus:focus {
+  outline: red solid 2px;
+  outline-offset: 3px;
+}
+```
+
+With these CSS rules, `amp-social-share` elements would not show the visible focus indicator unless they included the class `custom-focus` in which case they would have the red outlined indicator.
+
 ### Color contrast
 
 Note that `amp-social-share` with a `type` value of `twitter`, `whatsapp`, or `line` will display a button with a foreground/background color combination that falls below the 3:1 threshold recommended for non-text content defined in [WCAG 2.1 SC 1.4.11 Non-text Contrast](https://www.w3.org/WAI/WCAG21/Understanding/non-text-contrast.html).
 
 Without sufficient contrast, content can be difficult to perceive and therefore difficult to identify. In extreme cases, content with low contrast may not be visible at all to people with colour perception impairments. In the case of the above share buttons, users may not be able to appropriately perceive/understand what the share controls are, what service they relate to.
+
+## Validation
+
+See [amp-social-share rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-social-share/validator-amp-social-share.protoascii) in the AMP validator specification.
