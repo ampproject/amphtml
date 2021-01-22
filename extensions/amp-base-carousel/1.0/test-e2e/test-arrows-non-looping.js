@@ -27,8 +27,11 @@ const SLIDE_COUNT = 4;
 const pageWidth = 600;
 const pageHeight = 600;
 
+/** Increase timeout for running on CircleCI **/
+const testTimeout = 40000;
+
 describes.endtoend(
-  'AMP carousel arrows when non-looping',
+  'amp-base-carousel:1.0 - arrows when non-looping',
   {
     testUrl:
       'http://localhost:8000/test/manual/amp-base-carousel/1.0/non-looping.amp.html',
@@ -46,7 +49,8 @@ describes.endtoend(
       return controller.getElementCssValue(handle, name);
     }
 
-    beforeEach(async () => {
+    beforeEach(async function () {
+      this.timeout(testTimeout);
       controller = env.controller;
       const carousel = await getCarousel(controller);
       await controller.switchToShadowRoot(carousel);

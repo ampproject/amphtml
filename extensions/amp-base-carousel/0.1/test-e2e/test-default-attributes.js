@@ -18,7 +18,7 @@ const pageWidth = 800;
 const pageHeight = 800;
 
 describes.endtoend(
-  'AMP carousel test default attributes',
+  'amp-base-carousel:0.1 - default attributes',
   {
     testUrl:
       'http://localhost:8000/test/manual/amp-base-carousel/default-attributes.amp.html',
