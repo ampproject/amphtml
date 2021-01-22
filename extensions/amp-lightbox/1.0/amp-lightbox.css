@@ -35,3 +35,8 @@ amp-lightbox::part(lightbox) {
   background: inherit;
   color: inherit;
 }
+
+/* Prevent scrolling while lightbox is open */
+amp-lightbox[open]:root {
+  overflow: hidden;
+}
