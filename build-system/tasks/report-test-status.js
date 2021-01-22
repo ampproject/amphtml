@@ -21,7 +21,6 @@ const {
   isCircleciBuild,
   isPullRequestBuild,
   isGithubActionsBuild,
-  isTravisBuild,
 } = require('../common/ci');
 const {ciJobUrl} = require('../common/ci');
 const {cyan, green, yellow} = require('ansi-colors');
@@ -40,8 +39,7 @@ const TEST_TYPE_SUBTYPES = isGithubActionsBuild()
       ['integration', ['firefox', 'safari', 'edge', 'ie']],
       ['unit', ['firefox', 'safari', 'edge']],
     ])
-  : // TODO(rsimha): Remove `isTravisBuild()` condition once Travis is shut off.
-  isCircleciBuild() || isTravisBuild()
+  : isCircleciBuild()
   ? new Map([
       ['integration', ['unminified', 'nomodule', 'module']],
       ['unit', ['unminified', 'local-changes']],
@@ -88,8 +86,7 @@ function inferTestType() {
 }
 
 async function postReport(type, action) {
-  // TODO(rsimha): Remove `isTravisBuild()` condition once Travis is shut off.
-  if (type && isPullRequestBuild() && isTravisBuild()) {
+  if (type && isPullRequestBuild()) {
     const commitHash = gitCommitHash();
 
     try {
