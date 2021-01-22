@@ -227,8 +227,17 @@ function ciRepoSlug() {
     : '';
 }
 
+/**
+ * Returns the commit SHA being tested by a push or PR build.
+ * @return {string}
+ */
+function ciBuildSha() {
+  return isPullRequestBuild() ? ciPullRequestSha() : ciCommitSha();
+}
+
 module.exports = {
   ciBuildId,
+  ciBuildSha,
   ciBuildUrl,
   ciCommitSha,
   ciJobId,
