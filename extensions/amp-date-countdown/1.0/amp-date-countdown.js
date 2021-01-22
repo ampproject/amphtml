@@ -120,10 +120,7 @@ AmpDateCountdown['props'] = {
   'whenEnded': {attr: 'when-ended', type: 'string'},
   'locale': {attr: 'locale', type: 'string'},
   'biggestUnit': {attr: 'biggest-unit', type: 'string'},
-  'countUp': {
-    attrs: ['data-count-up'],
-    parseAttrs: (el) => el.hasAttribute('data-count-up'),
-  },
+  'countUp': {attr: 'data-count-up', type: 'boolean'},
 };
 
 /**
