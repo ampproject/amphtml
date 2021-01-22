@@ -62,7 +62,13 @@ Adds support for AT Internet. More details for adding AT Internet support can be
 
 Type attribute value: `baiduanalytics`
 
-Adds support for Baidu Analytics. More details for adding Baidu Analytics support can be found at [tongji.baidu.com/](http://tongji.baidu.com/web/help/article?id=268&type=0).
+Adds support for Baidu Analytics. More details for adding Baidu Analytics support can be found at [sensorsdata.com](https://manual.sensorsdata.cn/sa/latest/web-js-sdk-7548149.html).
+
+### SensorsData Analytics
+
+Type attribute value: `sensorsanalytics`
+
+Adds support for Sensors Analytics. More details for adding Sensors Analytics support can be found at [tongji.baidu.com/](http://tongji.baidu.com/web/help/article?id=268&type=0).
 
 ### Black Crow AI
 
