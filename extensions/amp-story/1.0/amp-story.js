@@ -2177,44 +2177,12 @@ export class AmpStory extends AMP.BaseElement {
    */
 
   getPagesByDistance_() {
-    if (!this.timeEndSum1 || !this.timeEndSum2) {
-      this.timeEndSum1 = [];
-      this.timeEndSum2 = [];
-    }
-
-    let timeStart1 = performance.now();
-    const distanceMap = this.getPageDistanceMapHelper_(
-      /* distance */ 0,
-      /* map */ {},
-      this.activePage_.element.id
-    );
-    let timeEnd1 = performance.now() - timeStart1;
-    this.timeEndSum1.push(timeEnd1);
-    const averageTime1 =
-      this.timeEndSum1.reduce((acc, val) => acc + val, 0) /
-      this.timeEndSum1.length;
-    console.log(
-      'original getPageDistanceMapHelper_ : ' + timeEnd1,
-      'original average ' + averageTime1
-    );
-
-    let timeStart2 = performance.now();
-    const distanceMapRefactor = this.getPageDistanceMapHelperRefactor_();
-    let timeEnd2 = performance.now() - timeStart2;
-    // console.log('getPageDistanceMapHelperRefactor_', timeEnd2);
-    this.timeEndSum2.push(timeEnd2);
-    const averageTime2 =
-      this.timeEndSum2.reduce((acc, val) => acc + val, 0) /
-      this.timeEndSum2.length;
-    console.log(
-      'refactor getPageDistanceMapHelper_ : ' + timeEnd2,
-      'refactor average: ' + averageTime2
-    );
+    const distanceMap = this.getPageDistanceMap_();
 
     // Transpose the map into a 2D array.
     const pagesByDistance = [];
-    Object.keys(distanceMapRefactor).forEach((pageId) => {
-      let distance = distanceMapRefactor[pageId];
+    Object.keys(distanceMap).forEach((pageId) => {
+      let distance = distanceMap[pageId];
       // If on last page, mark first page with distance 1.
       if (
         pageId === this.pages_[0].element.id &&
@@ -2255,48 +2223,12 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * Creates a map of a page and all of the pages reachable from that page, by
-   * distance.
+   * Creates a map of pages by distance to active page.
    *
-   * @param {number} distance The distance that the page with the specified
-   *     pageId is from the active page.
-   * @param {!Object<string, number>} map A mapping from pageId to its distance
-   *     from the active page.
-   * @param {string} pageId The page to be added to the map.
-   * @return {!Object<string, number>} A mapping from page ID to the priority of
-   *     that page.
+   * @return {!Object<string, number>}
    * @private
    */
-  getPageDistanceMapHelper_(distance, map, pageId) {
-    if (map[pageId] !== undefined && map[pageId] <= distance) {
-      return map;
-    }
-
-    map[pageId] = distance;
-    const page = this.getPageById(pageId);
-    page.getAdjacentPageIds().forEach((adjacentPageId) => {
-      if (
-        map[adjacentPageId] !== undefined &&
-        map[adjacentPageId] <= distance
-      ) {
-        return;
-      }
-
-      // TODO(newmuis): Remove the assignment and return, as they're
-      // unnecessary.
-      map = this.getPageDistanceMapHelper_(distance + 1, map, adjacentPageId);
-    });
-
-    return map;
-  }
-
-  /**
-   * Creates a map of a page and all of the pages reachable from that page, by
-   * distance.
-   * @private
-   */
-
-  getPageDistanceMapHelperRefactor_() {
+  getPageDistanceMap_() {
     const activePageIndex = this.pages_.indexOf(this.activePage_);
     return this.pages_.reduce((distanceMap, page, index) => {
       const distance = Math.abs(index - activePageIndex);
