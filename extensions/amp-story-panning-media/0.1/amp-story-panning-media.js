@@ -49,7 +49,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     /** @private {?float} Percentage between [-50; 50] */
     this.y_ = null;
 
-    /** @private {?float} */
+    /** @private {?float} 0 is not visible. 1 fills the viewport vertically */
     this.zoom_ = null;
 
     /** @private {?../../../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
