@@ -43,13 +43,13 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     /** @private {?Element} The element that is transitioned. */
     this.ampImgEl_ = null;
 
-    /** @private {?number} */
+    /** @private {?float} Percentage between [-50; 50] */
     this.x_ = null;
 
-    /** @private {?number} */
+    /** @private {?float} Percentage between [-50; 50] */
     this.y_ = null;
 
-    /** @private {?number} */
+    /** @private {?float} */
     this.zoom_ = null;
 
     /** @private {?../../../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
