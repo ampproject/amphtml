@@ -785,6 +785,8 @@ tags: {  # <style amp-custom>, [AMP]
       at_rule_spec: { name: 'media' }
       at_rule_spec: { name: 'page' }
       at_rule_spec: { name: 'supports' }
+      # https://github.com/ampproject/amphtml/issues/26406
+      at_rule_spec: { name: '-moz-document' }
     }
     disallowed_cdata_regex: {
       regex: "<!--"
