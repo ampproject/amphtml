@@ -1052,6 +1052,7 @@ export class AmpStoryPlayer {
 
   /**
    * @param {!StoryDef} story
+   * @private
    */
   appendToDom_(story) {
     this.rootEl_.appendChild(story.iframe);
@@ -1060,6 +1061,7 @@ export class AmpStoryPlayer {
 
   /**
    * @param {!StoryDef} story
+   * @private
    */
   removeFromDom_(story) {
     story.iframe.remove();
