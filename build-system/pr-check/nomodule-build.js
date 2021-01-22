@@ -16,75 +16,63 @@
 'use strict';
 
 /**
- * @fileoverview
- * This script builds the minified AMP runtime.
- * This is run during the CI stage = build; job = Nomodule Build.
+ * @fileoverview Script that builds the nomodule AMP runtime during CI.
  */
 
 const {
   abortTimedJob,
-  printChangeSummary,
   printSkipMessage,
   processAndUploadNomoduleOutput,
   startTimer,
-  stopTimer,
   timedExecWithError,
   timedExecOrDie,
   uploadNomoduleOutput,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
-const {isPullRequestBuild} = require('../common/ci');
 const {log} = require('../common/logging');
 const {red, yellow} = require('ansi-colors');
-const {runNpmChecks} = require('./npm-checks');
-const {setLoggingPrefix} = require('../common/logging');
+const {runCiJob} = require('./ci-job');
 const {signalPrDeployUpload} = require('../tasks/pr-deploy-bot-utils');
 
 const jobName = 'nomodule-build.js';
 
-async function main() {
-  setLoggingPrefix(jobName);
-  const startTime = startTimer(jobName);
-  if (!runNpmChecks()) {
-    return abortTimedJob(jobName, startTime);
-  }
-
-  if (!isPullRequestBuild()) {
-    timedExecOrDie('gulp update-packages');
-    timedExecOrDie('gulp dist --fortesting');
-    uploadNomoduleOutput();
-  } else {
-    printChangeSummary();
-    const buildTargets = determineBuildTargets();
-    if (
-      buildTargets.has('RUNTIME') ||
-      buildTargets.has('FLAG_CONFIG') ||
-      buildTargets.has('INTEGRATION_TEST') ||
-      buildTargets.has('E2E_TEST') ||
-      buildTargets.has('VISUAL_DIFF')
-    ) {
-      timedExecOrDie('gulp update-packages');
-      const process = timedExecWithError('gulp dist --fortesting');
-      if (process.status !== 0) {
-        const error = process.error || new Error('unknown error, check logs');
-        log(red('ERROR'), yellow(error.message));
-        await signalPrDeployUpload('errored');
-        return abortTimedJob(jobName, startTime);
-      }
-      timedExecOrDie('gulp storybook --build');
-      await processAndUploadNomoduleOutput();
-      await signalPrDeployUpload('success');
-    } else {
-      await signalPrDeployUpload('skipped');
-      printSkipMessage(
-        jobName,
-        'this PR does not affect the runtime, flag configs, integration ' +
-          'tests, end-to-end tests, or visual diff tests'
-      );
-    }
-  }
-
-  stopTimer(jobName, startTime);
+function pushBuildWorkflow() {
+  timedExecOrDie('gulp update-packages');
+  timedExecOrDie('gulp dist --fortesting');
+  uploadNomoduleOutput();
 }
 
-main();
+async function prBuildWorkflow() {
+  const startTime = startTimer(jobName);
+  const buildTargets = determineBuildTargets();
+  if (
+    buildTargets.has('RUNTIME') ||
+    buildTargets.has('FLAG_CONFIG') ||
+    buildTargets.has('INTEGRATION_TEST') ||
+    buildTargets.has('E2E_TEST') ||
+    buildTargets.has('VISUAL_DIFF')
+  ) {
+    timedExecOrDie('gulp update-packages');
+    const process = timedExecWithError('gulp dist --fortesting');
+    if (process.status !== 0) {
+      const message = process?.error
+        ? process.error.message
+        : 'Unknown error, check logs';
+      log(red('ERROR'), yellow(message));
+      await signalPrDeployUpload('errored');
+      return abortTimedJob(jobName, startTime);
+    }
+    timedExecOrDie('gulp storybook --build');
+    await processAndUploadNomoduleOutput();
+    await signalPrDeployUpload('success');
+  } else {
+    await signalPrDeployUpload('skipped');
+    printSkipMessage(
+      jobName,
+      'this PR does not affect the runtime, flag configs, integration ' +
+        'tests, end-to-end tests, or visual diff tests'
+    );
+  }
+}
+
+runCiJob(jobName, pushBuildWorkflow, prBuildWorkflow);

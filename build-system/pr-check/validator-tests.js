@@ -16,63 +16,42 @@
 'use strict';
 
 /**
- * @fileoverview
- * This script runs validator tests.
- * This is run during the CI stage = build; job = validator.
+ * @fileoverview Script that runs the validator tests during CI.
  */
 
-const {
-  abortTimedJob,
-  printChangeSummary,
-  printSkipMessage,
-  startTimer,
-  stopTimer,
-  timedExecOrDie,
-} = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
-const {isPullRequestBuild} = require('../common/ci');
-const {runNpmChecks} = require('./npm-checks');
-const {setLoggingPrefix} = require('../common/logging');
+const {printSkipMessage, timedExecOrDie} = require('./utils');
+const {runCiJob} = require('./ci-job');
 
 const jobName = 'validator-tests.js';
 
-function main() {
-  setLoggingPrefix(jobName);
-  const startTime = startTimer(jobName);
-  if (!runNpmChecks()) {
-    return abortTimedJob(jobName, startTime);
-  }
-
-  if (!isPullRequestBuild()) {
-    timedExecOrDie('gulp validator');
-    timedExecOrDie('gulp validator-webui');
-  } else {
-    printChangeSummary();
-    const buildTargets = determineBuildTargets();
-    if (
-      !buildTargets.has('RUNTIME') &&
-      !buildTargets.has('VALIDATOR') &&
-      !buildTargets.has('VALIDATOR_WEBUI') &&
-      !buildTargets.has('VALIDATOR_JAVA')
-    ) {
-      printSkipMessage(
-        jobName,
-        'this PR does not affect the runtime, validator, or validator web UI'
-      );
-      stopTimer(jobName, startTime);
-      return;
-    }
-
-    if (buildTargets.has('RUNTIME') || buildTargets.has('VALIDATOR')) {
-      timedExecOrDie('gulp validator');
-    }
-
-    if (buildTargets.has('VALIDATOR_WEBUI')) {
-      timedExecOrDie('gulp validator-webui');
-    }
-  }
-
-  stopTimer(jobName, startTime);
+function pushBuildWorkflow() {
+  timedExecOrDie('gulp validator');
+  timedExecOrDie('gulp validator-webui');
 }
 
-main();
+function prBuildWorkflow() {
+  const buildTargets = determineBuildTargets();
+  if (
+    !buildTargets.has('RUNTIME') &&
+    !buildTargets.has('VALIDATOR') &&
+    !buildTargets.has('VALIDATOR_WEBUI') &&
+    !buildTargets.has('VALIDATOR_JAVA')
+  ) {
+    printSkipMessage(
+      jobName,
+      'this PR does not affect the runtime, validator, or validator web UI'
+    );
+    return;
+  }
+
+  if (buildTargets.has('RUNTIME') || buildTargets.has('VALIDATOR')) {
+    timedExecOrDie('gulp validator');
+  }
+
+  if (buildTargets.has('VALIDATOR_WEBUI')) {
+    timedExecOrDie('gulp validator-webui');
+  }
+}
+
+runCiJob(jobName, pushBuildWorkflow, prBuildWorkflow);
