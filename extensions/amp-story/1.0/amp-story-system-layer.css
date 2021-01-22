@@ -245,8 +245,9 @@
   display: block !important;
 }
 
-.i-amphtml-story-has-audio:not([muted]) .i-amphtml-story-mute-audio-control,
-.i-amphtml-story-has-audio[muted] .i-amphtml-story-unmute-audio-control {
+/* #31592 Audio UI appears for pages that have no sound. Check that the current page has audio. */
+[i-amphtml-current-page-has-audio].i-amphtml-story-has-audio:not([muted]) .i-amphtml-story-mute-audio-control,
+[i-amphtml-current-page-has-audio].i-amphtml-story-has-audio[muted] .i-amphtml-story-unmute-audio-control {
   display: block !important;
 }
 
