@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {AmpEvents} from '../../src/amp-events';
 import {BaseElement} from '../../src/base-element';
 import {CommonSignals} from '../../src/common-signals';
@@ -109,7 +109,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         win = env.win;
         doc = win.document;
         ampdoc = env.ampdoc;
-        clock = lolex.install({target: win});
+        clock = fakeTimers.withGlobal(win).install();
         delete win.requestIdleCallback;
         delete win.cancelIdleCallback;
         resources = Services.resourcesForDoc(doc);
@@ -1660,7 +1660,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
       beforeEach(() => {
         win = env.win;
         doc = win.document;
-        clock = lolex.install({target: win, now: 42});
+        clock = fakeTimers.withGlobal(win).install({now: 42});
         ElementClass = createAmpElementForTesting(win, TestElement);
         win.customElements.define('amp-test-loader', ElementClass);
         win.__AMP_EXTENDED_ELEMENTS['amp-test-loader'] = TestElement;

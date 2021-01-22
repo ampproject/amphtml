@@ -15,7 +15,7 @@
  */
 
 import * as DocumentFetcher from '../../../../src/document-fetcher';
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {AccessServerAdapter} from '../amp-access-server';
 import {removeFragment} from '../../../../src/url';
 
@@ -33,7 +33,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, (env) => {
     win = env.win;
     document = win.document;
     ampdoc = env.ampdoc;
-    clock = lolex.install({target: win});
+    clock = fakeTimers.withGlobal(win).install();
 
     validConfig = {
       'authorization': 'https://acme.com/a?rid=READER_ID',

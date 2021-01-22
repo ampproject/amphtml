@@ -15,7 +15,7 @@
  */
 
 import '../amp-nested-menu';
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {Keys} from '../../../../src/utils/key-codes';
 import {htmlFor} from '../../../../src/static-template';
 import {tryFocus} from '../../../../src/dom';
@@ -36,7 +36,7 @@ describes.realWin(
     beforeEach(() => {
       win = env.win;
       doc = win.document;
-      clock = lolex.install({target: win});
+      clock = fakeTimers.withGlobal(win).install();
     });
 
     async function getNestedMenu(options) {

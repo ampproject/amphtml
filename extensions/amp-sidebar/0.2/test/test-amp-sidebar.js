@@ -15,7 +15,7 @@
  */
 
 import '../amp-sidebar';
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {ActionTrust} from '../../../../src/action-constants';
 import {Keys} from '../../../../src/utils/key-codes';
 import {Services} from '../../../../src/services';
@@ -224,8 +224,7 @@ describes.realWin(
         const screenReaderCloseButton = sidebarElement.querySelector(
           'button.i-amphtml-screen-reader'
         );
-        clock = lolex.install({
-          target: impl.win,
+        clock = fakeTimers.withGlobal(impl.win).install({
           toFake: ['Date', 'setTimeout'],
         });
         const historyPushSpy = env.sandbox.spy();
@@ -294,8 +293,7 @@ describes.realWin(
       it('should close sidebar on button click', async () => {
         const sidebarElement = await getAmpSidebar({'stubHistory': true});
         const impl = sidebarElement.implementation_;
-        clock = lolex.install({
-          target: impl.win,
+        clock = fakeTimers.withGlobal(impl.win).install({
           toFake: ['Date', 'setTimeout'],
         });
         owners.schedulePause = env.sandbox.spy();
@@ -342,8 +340,7 @@ describes.realWin(
           'button.i-amphtml-screen-reader'
         );
         const impl = sidebarElement.implementation_;
-        clock = lolex.install({
-          target: impl.win,
+        clock = fakeTimers.withGlobal(impl.win).install({
           toFake: ['Date', 'setTimeout'],
         });
         owners.scheduleLayout = env.sandbox.spy();
@@ -377,8 +374,7 @@ describes.realWin(
       it('should close sidebar on escape', async () => {
         const sidebarElement = await getAmpSidebar({stubHistory: true});
         const impl = sidebarElement.implementation_;
-        clock = lolex.install({
-          target: impl.win,
+        clock = fakeTimers.withGlobal(impl.win).install({
           toFake: ['Date', 'setTimeout'],
         });
         owners.schedulePause = env.sandbox.spy();
@@ -409,8 +405,7 @@ describes.realWin(
       it('should reflect state of the sidebar', async () => {
         const sidebarElement = await getAmpSidebar({stubHistory: true});
         const impl = sidebarElement.implementation_;
-        clock = lolex.install({
-          target: impl.win,
+        clock = fakeTimers.withGlobal(impl.win).install({
           toFake: ['Date', 'setTimeout'],
         });
         owners.schedulePause = env.sandbox.spy();
@@ -489,8 +484,7 @@ describes.realWin(
         const anchor = sidebarElement.getElementsByTagName('a')[0];
         anchor.href = '#newloc';
         const impl = sidebarElement.implementation_;
-        clock = lolex.install({
-          target: impl.win,
+        clock = fakeTimers.withGlobal(impl.win).install({
           toFake: ['Date', 'setTimeout'],
         });
         owners.schedulePause = env.sandbox.spy();

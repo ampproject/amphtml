@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {LayoutPriority} from '../../src/layout';
 import {MutatorImpl} from '../../src/service/mutator-impl';
@@ -42,7 +42,7 @@ describes.realWin('mutator changeSize', {amp: true}, (env) => {
     document = window.document;
     delete window.requestIdleCallback;
     delete window.cancelIdleCallback;
-    clock = lolex.install({target: window});
+    clock = fakeTimers.withGlobal(window).install();
     const ampdoc = new AmpDocSingle(window);
     resources = new ResourcesImpl(ampdoc);
     resources.isRuntimeOn_ = false;
