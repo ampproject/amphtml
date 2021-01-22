@@ -25,10 +25,6 @@ const truncateTextWrapper = {
 const truncateTextExpandedWrapper = {
   // Must be !important to override height set on element by prop
   height: 'auto !important',
-
-  '& > i-amphtml-sizer': {
-    display: 'none',
-  },
 };
 
 const truncateTextContent = {
