@@ -18,7 +18,7 @@
 const fs = require('fs-extra');
 const path = require('path');
 const request = require('request-promise');
-const {ciPullRequestSha, isTravisBuild} = require('../common/ci');
+const {ciBuildSha, isTravisBuild} = require('../common/ci');
 const {cyan} = require('ansi-colors');
 const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
 const {replaceUrls: replaceUrlsAppUtil} = require('../server/app-utils');
@@ -41,7 +41,7 @@ async function walk(dest) {
 }
 
 function getBaseUrl() {
-  return `${hostNamePrefix}/amp_nomodule_${ciPullRequestSha()}`;
+  return `${hostNamePrefix}/amp_nomodule_${ciBuildSha()}`;
 }
 
 async function replace(filePath) {
@@ -79,7 +79,7 @@ async function signalPrDeployUpload(result) {
     cyan(result),
     'to the pr-deploy GitHub App...'
   );
-  const sha = ciPullRequestSha();
+  const sha = ciBuildSha();
   const baseUrl = 'https://amp-pr-deploy-bot.appspot.com/v0/pr-deploy/';
   const url = `${baseUrl}headshas/${sha}/${result}`;
   await request.post(url);
