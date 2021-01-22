@@ -32,6 +32,7 @@ import {
 import {ConsentPolicyManager} from './consent-policy-manager';
 import {ConsentStateManager} from './consent-state-manager';
 import {ConsentUI} from './consent-ui';
+import {CookieWriter} from './cookie-writer';
 import {Deferred} from '../../../src/utils/promise';
 import {
   NOTIFICATION_UI_MANAGER,
@@ -220,10 +221,17 @@ export class AmpConsent extends AMP.BaseElement {
       this.notificationUiManager_ = /** @type {!NotificationUiManager} */ (manager);
     });
 
+    const configRewritterPromise = new CookieWriter(
+      this.win,
+      this.element,
+      this.consentConfig_
+    ).write();
+
     Promise.all([
       consentStateManagerPromise,
       notificationUiManagerPromise,
       consentPolicyManagerPromise,
+      configRewritterPromise,
     ]).then(() => {
       this.init_();
     });
@@ -600,8 +608,8 @@ export class AmpConsent extends AMP.BaseElement {
         const xhrService = Services.xhrFor(this.win);
         return ampdoc.whenFirstVisible().then(() =>
           expandConsentEndpointUrl(this.element, resolvedHref).then(
-            (expandedHref) =>
-              xhrService.fetchJson(expandedHref, init).then((res) =>
+            (expandedHref) => {
+              return xhrService.fetchJson(expandedHref, init).then((res) =>
                 xhrService
                   .xssiJson(res, this.consentConfig_['xssiPrefix'])
                   .catch((e) => {
@@ -611,7 +619,8 @@ export class AmpConsent extends AMP.BaseElement {
                       e
                     );
                   })
-              )
+              );
+            }
           )
         );
       });
