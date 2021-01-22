@@ -29,16 +29,6 @@
         "additionalBranchPrefix": "subpackage-"
       }
     },
-    {
-      "paths": ["src/**"],
-      "labels": ["WG: runtime"],
-
-      "groupName": "runtime devDependencies",
-      "major": {
-        "groupName": null,
-        "additionalBranchPrefix": "runtime-"
-      }
-    },
 
     {
       "paths": ["build-system/**"],
