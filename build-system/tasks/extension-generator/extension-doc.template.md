@@ -123,6 +123,10 @@ Description of action. Use cases of `action-name`. Include all the nuances, such
 
 Description of event. Use cases of event-name. Include all the nuances, such as: `${name}` needs to be identified with an `id` to work.
 
+#### Valid AMP
+
+Syntax and argument details for use in fully valid AMP pages.
+
 [example preview=”top-frame” playground=”true”]
 
 ```html
@@ -147,6 +151,14 @@ Description of event. Use cases of event-name. Include all the nuances, such as:
 ```
 
 [/example]
+
+#### Bento mode
+
+Syntax and argument details for use in Bento mode.
+
+```
+Bento example
+```
 
 ## Styling (optional)
 
