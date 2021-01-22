@@ -51,7 +51,7 @@ const LoadStateClass = {
 };
 
 /** @enum {number} */
-const IframePosition = {
+const StoryPosition = {
   PREVIOUS: -1,
   CURRENT: 0,
   NEXT: 1,
@@ -282,12 +282,19 @@ export class AmpStoryPlayer {
       story.idx = this.stories_.push(story) - 1;
       story.distance = story.idx - this.currentIdx_;
 
-      this.buildIframe_(story);
-      this.setIframeSrc_(story);
+      this.build_(story);
+
+      if (story.distance === 0) {
+        this.appendToDom_(story);
+        this.updateCurrentStory_(story);
+        continue;
+      }
+
+      this.setSrc_(story);
 
       if (story.distance === 1) {
         this.appendToDom_(story);
-        this.updatePosition_(story, IframePosition.NEXT);
+        this.updatePosition_(story, StoryPosition.NEXT);
       }
     }
   }
@@ -347,7 +354,7 @@ export class AmpStoryPlayer {
 
     this.initializeStories_();
     this.initializeShadowRoot_();
-    this.initializeIframes_();
+    this.buildStories_();
     this.initializeButton_();
     this.readPlayerConfig_();
     this.maybeFetchMoreStories_(this.stories_.length - this.currentIdx_ - 1);
@@ -381,9 +388,9 @@ export class AmpStoryPlayer {
   }
 
   /** @private */
-  initializeIframes_() {
+  buildStories_() {
     this.stories_.forEach((story) => {
-      this.buildIframe_(story);
+      this.build_(story);
       if (story.distance <= 1) {
         this.appendToDom_(story);
       }
@@ -476,7 +483,7 @@ export class AmpStoryPlayer {
    * @param {!StoryDef} story
    * @private
    */
-  buildIframe_(story) {
+  build_(story) {
     const iframeEl = this.doc_.createElement('iframe');
     if (story.poster) {
       setStyle(iframeEl, 'backgroundImage', story.poster);
@@ -639,7 +646,7 @@ export class AmpStoryPlayer {
   /** @private */
   prerenderStories_() {
     this.stories_.forEach((story) => {
-      this.setIframeSrc_(story).then(() =>
+      this.setSrc_(story).then(() =>
         this.prerenderFirstStoryDeferred_.resolve()
       );
     });
@@ -712,7 +719,8 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * Resolves when story in given iframe is finished loading.
+   * Resolves currentStoryLoadDeferred_ when given story's content is finished
+   * loading.
    * @param {!StoryDef} story
    * @private
    */
@@ -894,7 +902,7 @@ export class AmpStoryPlayer {
     this.currentIdx_++;
 
     const previousStory = this.stories_[this.currentIdx_ - 1];
-    this.updatePreviousStory_(previousStory, IframePosition.PREVIOUS);
+    this.updatePreviousStory_(previousStory, StoryPosition.PREVIOUS);
 
     const currentStory = this.stories_[this.currentIdx_];
     this.updateCurrentStory_(currentStory);
@@ -926,7 +934,7 @@ export class AmpStoryPlayer {
     this.currentIdx_--;
 
     const previousStory = this.stories_[this.currentIdx_ + 1];
-    this.updatePreviousStory_(previousStory, IframePosition.NEXT);
+    this.updatePreviousStory_(previousStory, StoryPosition.NEXT);
 
     const currentStory = this.stories_[this.currentIdx_];
     this.updateCurrentStory_(currentStory);
@@ -971,7 +979,7 @@ export class AmpStoryPlayer {
   /**
    * Updates story to the `previous` state.
    * @param {!StoryDef} story
-   * @param {!IframePosition} position
+   * @param {!StoryPosition} position
    * @private
    */
   updatePreviousStory_(story, position) {
@@ -985,10 +993,10 @@ export class AmpStoryPlayer {
    * @private
    */
   updateCurrentStory_(story) {
-    this.setIframeSrc_(story).then(() => {
-      // call setIframeSrc to cancel previous story load if needed.
+    // setSrc() must be called first to cancel previous story load if needed.
+    this.setSrc_(story).then(() => {
       this.updateVisibilityState_(story, VisibilityState.VISIBLE);
-      this.updatePosition_(story, IframePosition.CURRENT);
+      this.updatePosition_(story, StoryPosition.CURRENT);
       tryFocus(story.iframe);
     });
   }
@@ -996,7 +1004,7 @@ export class AmpStoryPlayer {
   /**
    * Updates story position.
    * @param {!StoryDef} story
-   * @param {!IframePosition} position
+   * @param {!StoryPosition} position
    * @private
    */
   updatePosition_(story, position) {
@@ -1032,10 +1040,10 @@ export class AmpStoryPlayer {
 
         const position =
           story.distance === 0
-            ? IframePosition.CURRENT
+            ? StoryPosition.CURRENT
             : story.idx > this.currentIdx_
-            ? IframePosition.NEXT
-            : IframePosition.PREVIOUS;
+            ? StoryPosition.NEXT
+            : StoryPosition.PREVIOUS;
 
         this.updatePosition_(story, position);
       }
@@ -1058,13 +1066,13 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * Updates the iframe src. It waits for first story before setting it to
-   * neighboring stories
+   * Sets the story src. It waits for first story before setting it to
+   * neighboring stories.
    * @param {!StoryDef} story
    * @return {!Promise}
    * @private
    */
-  setIframeSrc_(story) {
+  setSrc_(story) {
     const {iframe} = story;
     return this.maybeGetCacheUrl_(story.href)
       .then((storyUrl) => {
@@ -1521,16 +1529,16 @@ export class AmpStoryPlayer {
 
       if (this.swipingState_ === SwipingState.SWIPING_TO_LEFT) {
         delta > TOGGLE_THRESHOLD_PX &&
-        (this.getSecondaryIframe_() || this.isCircularWrappingEnabled_)
+        (this.getSecondaryStory_() || this.isCircularWrappingEnabled_)
           ? this.next_()
-          : this.resetIframeStyles_();
+          : this.resetStoryStyles_();
       }
 
       if (this.swipingState_ === SwipingState.SWIPING_TO_RIGHT) {
         delta > TOGGLE_THRESHOLD_PX &&
-        (this.getSecondaryIframe_() || this.isCircularWrappingEnabled_)
+        (this.getSecondaryStory_() || this.isCircularWrappingEnabled_)
           ? this.previous_()
-          : this.resetIframeStyles_();
+          : this.resetStoryStyles_();
       }
 
       return;
@@ -1540,10 +1548,10 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * Resets styles for the currently swiped iframes.
+   * Resets styles for the currently swiped story.
    * @private
    */
-  resetIframeStyles_() {
+  resetStoryStyles_() {
     const currentIframe = this.stories_[this.currentIdx_].iframe;
 
     requestAnimationFrame(() => {
@@ -1553,10 +1561,10 @@ export class AmpStoryPlayer {
       ]);
     });
 
-    const secondaryIframe = this.getSecondaryIframe_();
-    if (secondaryIframe) {
+    const secondaryStory = this.getSecondaryStory_();
+    if (secondaryStory) {
       requestAnimationFrame(() => {
-        resetStyles(dev().assertElement(secondaryIframe), [
+        resetStyles(dev().assertElement(secondaryStory.iframe), [
           'transform',
           'transition',
         ]);
@@ -1565,21 +1573,21 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * Gets accompanying iframe for the currently swiped iframe if any.
+   * Gets accompanying story for the currently swiped story if any.
    * @private
-   * @return {?Element}
+   * @return {?StoryDef}
    */
-  getSecondaryIframe_() {
+  getSecondaryStory_() {
     const nextStoryIdx =
       this.swipingState_ === SwipingState.SWIPING_TO_LEFT
         ? this.currentIdx_ + 1
         : this.currentIdx_ - 1;
 
-    if (nextStoryIdx < 0 || nextStoryIdx >= this.stories_.length) {
+    if (this.isIndexOutofBounds_(nextStoryIdx)) {
       return null;
     }
 
-    return this.stories_[nextStoryIdx].iframe;
+    return this.stories_[nextStoryIdx];
   }
 
   /**
@@ -1645,13 +1653,13 @@ export class AmpStoryPlayer {
       });
     });
 
-    const secondaryIframe = this.getSecondaryIframe_();
-    if (!secondaryIframe) {
+    const secondaryStory = this.getSecondaryStory_();
+    if (!secondaryStory) {
       return;
     }
 
     requestAnimationFrame(() => {
-      setStyles(dev().assertElement(secondaryIframe), {
+      setStyles(dev().assertElement(secondaryStory.iframe), {
         transform: secondaryTranslate,
         transition: 'none',
       });
