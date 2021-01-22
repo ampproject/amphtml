@@ -16,30 +16,18 @@
 'use strict';
 
 /**
- * @fileoverview
- * This script runs performance tests.
- * This is run during the CI stage = experiment; job = performance tests.
+ * @fileoverview Script that runs the performance tests during CI.
  */
 
-const {
-  downloadNomoduleOutput,
-  startTimer,
-  stopTimer,
-  timedExecOrDie,
-} = require('./utils');
-const {setLoggingPrefix} = require('../common/logging');
+const {downloadNomoduleOutput, timedExecOrDie} = require('./utils');
+const {runCiJob} = require('./ci-job');
 
 const jobName = 'performance-tests.js';
 
-async function main() {
-  setLoggingPrefix(jobName);
-  const startTime = startTimer(jobName);
-
+function pushBuildWorkflow() {
   downloadNomoduleOutput(jobName);
   timedExecOrDie('gulp update-packages');
   timedExecOrDie('gulp performance --nobuild --quiet --headless');
-
-  stopTimer(jobName, startTime);
 }
 
-main();
+runCiJob(jobName, pushBuildWorkflow, () => {});

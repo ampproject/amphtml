@@ -16,57 +16,45 @@
 'use strict';
 
 /**
- * @fileoverview
- * This script runs the visual diff tests.
- * This is run during the CI stage = test; job = visual diff tests.
+ * @fileoverview Script that runs the visual diff tests during CI.
  */
 
 const atob = require('atob');
 const {
   downloadNomoduleOutput,
-  printChangeSummary,
   printSkipMessage,
-  startTimer,
-  stopTimer,
   timedExecOrDie,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
-const {isPullRequestBuild} = require('../common/ci');
-const {setLoggingPrefix} = require('../common/logging');
+const {runCiJob} = require('./ci-job');
 
 const jobName = 'visual-diff-tests.js';
 
-function main() {
-  setLoggingPrefix(jobName);
-  const startTime = startTimer(jobName);
-
-  if (!isPullRequestBuild()) {
-    downloadNomoduleOutput();
-    timedExecOrDie('gulp update-packages');
-    process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
-    timedExecOrDie('gulp visual-diff --nobuild --master');
-  } else {
-    printChangeSummary();
-    const buildTargets = determineBuildTargets();
-    process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
-    if (
-      buildTargets.has('RUNTIME') ||
-      buildTargets.has('FLAG_CONFIG') ||
-      buildTargets.has('VISUAL_DIFF')
-    ) {
-      downloadNomoduleOutput();
-      timedExecOrDie('gulp update-packages');
-      timedExecOrDie('gulp visual-diff --nobuild');
-    } else {
-      timedExecOrDie('gulp visual-diff --empty');
-      printSkipMessage(
-        jobName,
-        'this PR does not affect the runtime, flag configs, or visual diff tests'
-      );
-    }
-  }
-
-  stopTimer(jobName, startTime);
+function pushBuildWorkflow() {
+  downloadNomoduleOutput();
+  timedExecOrDie('gulp update-packages');
+  process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
+  timedExecOrDie('gulp visual-diff --nobuild --master');
 }
 
-main();
+function prBuildWorkflow() {
+  const buildTargets = determineBuildTargets();
+  process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
+  if (
+    buildTargets.has('RUNTIME') ||
+    buildTargets.has('FLAG_CONFIG') ||
+    buildTargets.has('VISUAL_DIFF')
+  ) {
+    downloadNomoduleOutput();
+    timedExecOrDie('gulp update-packages');
+    timedExecOrDie('gulp visual-diff --nobuild');
+  } else {
+    timedExecOrDie('gulp visual-diff --empty');
+    printSkipMessage(
+      jobName,
+      'this PR does not affect the runtime, flag configs, or visual diff tests'
+    );
+  }
+}
+
+runCiJob(jobName, pushBuildWorkflow, prBuildWorkflow);
