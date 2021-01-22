@@ -191,7 +191,7 @@ export function truncateText({container, overflowNodes}) {
 
   // Measure here, since we just measured and the container rect should not
   // depend on truncateing.
-  containerRect = container./*OK*/ getBoundingClientRect();
+  const containerRect = container./*OK*/ getBoundingClientRect();
   // Set the container as truncateed, so we show the overflow element and we can
   // truncate taking the size into account.
   setTruncated(container);

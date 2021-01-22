@@ -62,11 +62,6 @@ export function binarySearch(
   stop = BinarySearchStop.IMMEDIATE,
   preference = BinarySearchPreference.NEXT
 ) {
-  // This currently fails in Preact mode of Storybook. Seems to rely on v0.js
-  // helpers that aren't available to Preact components. Is there an analog
-  // that's available?
-  // devAssert(start <= end);
-
   let low = start;
   let high = end - 1;
   let prefIndex = NaN;
