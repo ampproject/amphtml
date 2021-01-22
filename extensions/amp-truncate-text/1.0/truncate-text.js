@@ -74,6 +74,7 @@ function TruncateTextWithRef(
   }, [onToggle, expanded]);
 
   // Truncate the text when expanded/collapsed
+  // TODO(#31685): Add ResizeObserver to watch for height changes.
   useLayoutEffect(truncate, [expanded, truncate]);
   // When used in an AMP component, requires an initial truncate to layout.
   useEffect(() => onToggle && truncate(), [onToggle, truncate]);
