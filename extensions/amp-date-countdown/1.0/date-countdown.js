@@ -53,6 +53,7 @@ const TimeUnit = {
 const DEFAULT_LOCALE = 'en';
 const DEFAULT_WHEN_ENDED = 'stop';
 const DEFAULT_BIGGEST_UNIT = 'DAYS';
+const DEFAULT_COUNT_UP = false;
 
 /**
  * @param {!JsonObject} data
@@ -73,6 +74,7 @@ export function DateCountdown({
   whenEnded = DEFAULT_WHEN_ENDED,
   locale = DEFAULT_LOCALE,
   biggestUnit = DEFAULT_BIGGEST_UNIT,
+  countUp = DEFAULT_COUNT_UP,
   render = DEFAULT_RENDER,
   ...rest
 }) {
@@ -92,8 +94,8 @@ export function DateCountdown({
   // Only update data when timeleft (or other dependencies) are updated
   // Does not update on 2nd render triggered by useRenderer
   const data = useMemo(
-    () => getDataForTemplate(timeleft, biggestUnit, localeStrings),
-    [timeleft, biggestUnit, localeStrings]
+    () => getDataForTemplate(timeleft, biggestUnit, localeStrings, countUp),
+    [timeleft, biggestUnit, localeStrings, countUp]
   );
 
   // Reference to DOM element to get access to correct window
@@ -133,11 +135,12 @@ export function DateCountdown({
  * @param {number} timeleft
  * @param {string|undefined} biggestUnit
  * @param {!JsonObject} localeStrings
+ * @param {boolean} countUp
  * @return {!JsonObject}
  */
-function getDataForTemplate(timeleft, biggestUnit, localeStrings) {
+function getDataForTemplate(timeleft, biggestUnit, localeStrings, countUp) {
   return /** @type {!JsonObject} */ ({
-    ...getYDHMSFromMs(timeleft, /** @type {string} */ (biggestUnit)),
+    ...getYDHMSFromMs(timeleft, /** @type {string} */ (biggestUnit), countUp),
     ...localeStrings,
   });
 }
@@ -171,9 +174,17 @@ function getLocaleWord(locale) {
  * days, hours, minutes, etc. and returns formatted strings in an object.
  * @param {number} ms
  * @param {string} biggestUnit
+ * @param {boolean} countUp
  * @return {JsonObject}
  */
-function getYDHMSFromMs(ms, biggestUnit) {
+function getYDHMSFromMs(ms, biggestUnit, countUp) {
+  // If 'count-up' prop is true, we return the negative of what
+  // we would originally return since we are counting time-elapsed from a
+  // set time instead of time until that time
+  if (countUp) {
+    ms *= -1;
+  }
+
   //Math.trunc is used instead of Math.floor to support negative past date
   const d =
     TimeUnit[biggestUnit] == TimeUnit.DAYS

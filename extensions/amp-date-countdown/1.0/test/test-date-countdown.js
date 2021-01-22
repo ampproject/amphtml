@@ -205,6 +205,80 @@ describes.sandboxed('DateCountdown 1.0 preact component', {}, (env) => {
     wrapper.unmount();
   });
 
+  it('should count up when countUp prop is set to "true"', () => {
+    // Reference date is 2018-01-01T08:00:00Z
+    // Timer should have -10 seconds on it
+    const props = {
+      render,
+      datetime: Date.parse('2018-01-01T08:00:10Z'),
+      countUp: true,
+    };
+    const wrapper = mount(<DateCountdown {...props} />);
+    let data = JSON.parse(wrapper.text());
+
+    // Count up 7 seconds
+    clock.tick(7000);
+    wrapper.update();
+    data = JSON.parse(wrapper.text());
+
+    // -3 seconds left on the clock
+    expect(data['d']).to.equal('0');
+    expect(data['dd']).to.equal('00');
+    expect(data['h']).to.equal('0');
+    expect(data['hh']).to.equal('00');
+    expect(data['m']).to.equal('0');
+    expect(data['mm']).to.equal('00');
+    expect(data['s']).to.equal('-3');
+    expect(data['ss']).to.equal('-03');
+
+    // Count up 10 more seconds
+    clock.tick(10000);
+    wrapper.update();
+    data = JSON.parse(wrapper.text());
+
+    // 0 seconds left on the clock (does not continue past 0)
+    expect(data['d']).to.equal('0');
+    expect(data['dd']).to.equal('00');
+    expect(data['h']).to.equal('0');
+    expect(data['hh']).to.equal('00');
+    expect(data['m']).to.equal('0');
+    expect(data['mm']).to.equal('00');
+    expect(data['s']).to.equal('0');
+    expect(data['ss']).to.equal('00');
+
+    wrapper.unmount();
+  });
+
+  it('should count up past 0 when whenEnded prop is set to "continue"', () => {
+    // Reference date is 2018-01-01T08:00:00Z
+    // Timer should have -10 seconds on it
+    const props = {
+      render,
+      datetime: Date.parse('2018-01-01T08:00:10Z'),
+      countUp: true,
+      whenEnded: 'continue',
+    };
+    const wrapper = mount(<DateCountdown {...props} />);
+    let data = JSON.parse(wrapper.text());
+
+    // Count up 15 seconds
+    clock.tick(15000);
+    wrapper.update();
+    data = JSON.parse(wrapper.text());
+
+    // 4 seconds on the clock counting upwards (has an extra second at 0)
+    expect(data['d']).to.equal('0');
+    expect(data['dd']).to.equal('00');
+    expect(data['h']).to.equal('0');
+    expect(data['hh']).to.equal('00');
+    expect(data['m']).to.equal('0');
+    expect(data['mm']).to.equal('00');
+    expect(data['s']).to.equal('4');
+    expect(data['ss']).to.equal('04');
+
+    wrapper.unmount();
+  });
+
   it('should display biggest unit as "days" by default', () => {
     // Reference date is 2018-01-01T08:00:00Z
     // Timer should have 1 day and 10 seconds on it
