@@ -25,13 +25,16 @@ var TruncateTextDef = {};
  *   expandedContent: (?PreactDef.Renderable|undefined),
  *   persistentContent: (?PreactDef.Renderable|undefined),
  *   children: (?PreactDef.Renderable|undefined),
- *   onToggle: (function(boolean):undefined|undefined)
+ *   onToggle: (function(boolean|undefined):undefined|undefined)
  * }}
  */
 TruncateTextDef.Props;
 
 /** @interface */
 TruncateTextDef.TruncateTextApi = class {
-  /** Expand/collapse the component */
-  toggle() {}
+  /**
+   * Expand/collapse the component
+   * @param {boolean=} opt_expanded
+   */
+  toggle(opt_expanded) {}
 };

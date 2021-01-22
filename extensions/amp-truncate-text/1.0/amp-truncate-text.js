@@ -20,6 +20,7 @@ import {PreactBaseElement} from '../../../src/preact/base-element';
 import {TruncateText} from './truncate-text';
 import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
+import {toggleAttribute} from '../../../src/dom';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
@@ -33,13 +34,7 @@ class AmpTruncateText extends PreactBaseElement {
     this.registerApiAction('collapse', (api) => api./*OK*/ collapse());
 
     return dict({
-      'onToggle': (isExpanded) => {
-        if (isExpanded) {
-          this.element.setAttribute(EXPANDED_ATTR, '');
-        } else {
-          this.element.removeAttribute(EXPANDED_ATTR);
-        }
-      },
+      'onToggle': toggleAttribute.bind(null, this.element, EXPANDED_ATTR),
     });
   }
 
