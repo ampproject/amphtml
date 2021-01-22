@@ -170,10 +170,13 @@ function LightboxWithRef(
         layout={true}
         paint={true}
         part="lightbox"
-        contentClassName={classes.containScroll}
-        contentStyle={{
-          overflow: scrollable ? 'scroll' : 'hidden',
-        }}
+        contentStyle={
+          // Prefer style over class to override `ContainWrapper`'s overflow
+          scrollable && {
+            overflow: 'scroll',
+            overscrollBehavior: 'none',
+          }
+        }
         wrapperClassName={`${classes.defaultStyles} ${classes.wrapper} ${
           scrollable ? '' : classes.containScroll
         }`}
