@@ -26,7 +26,7 @@ describes.fakeWin('media-performance-metrics-service', {amp: true}, (env) => {
   let win;
 
   before(() => {
-    clock = fakeTimers.withGlobal(win).install({toFake: ['Date'], now: 0});
+    clock = fakeTimers.withGlobal(window).install({toFake: ['Date'], now: 0});
   });
 
   after(() => {
