@@ -18,16 +18,19 @@ import {
   Action,
   EmbeddedComponentState,
   InteractiveComponentDef,
+  PlayerActionLinkDef,
   StateProperty,
   UIType,
   getStoreService,
 } from './amp-story-store-service';
 import {AdvancementMode} from './story-analytics';
+import {PLAYER_ACTION_LINK_SELECTOR} from './amp-story-player-action-link';
 import {Services} from '../../../src/services';
 import {TAPPABLE_ARIA_ROLES} from '../../../src/service/action-impl';
 import {VideoEvents} from '../../../src/video-interface';
 import {closest, matches} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {getAmpdoc} from '../../../src/service';
 import {hasTapAction, timeStrToMillis} from './utils';
@@ -668,6 +671,19 @@ export class ManualAdvancement extends AdvancementConfig {
   }
 
   /**
+   * Check if click is on a Player Action link.
+   * @param {!Element} target
+   * @private
+   * @return {boolean}
+   */
+  isHandledByPlayerActionLink_(target) {
+    const playerLink = closest(target, (element) =>
+      matches(element, PLAYER_ACTION_LINK_SELECTOR)
+    );
+    return !!playerLink;
+  }
+
+  /**
    * Performs a system navigation if it is determined that the specified event
    * was a click intended for navigation.
    * @param {!Event} event 'click' event
@@ -702,6 +718,35 @@ export class ManualAdvancement extends AdvancementConfig {
       } else {
         this.storeService_.dispatch(Action.TOGGLE_AFFILIATE_LINK, null);
       }
+      return;
+    }
+
+    if (this.isHandledByPlayerActionLink_(target)) {
+      event.preventDefault();
+      event.stopPropagation();
+      const playerLink = closest(target, (element) =>
+        matches(element, PLAYER_ACTION_LINK_SELECTOR)
+      );
+
+      // TODO: Falls back on the provided url when the player is not
+      // viewed in a context where the player action is enabled.
+      const expectedHostDomains = 'localhost google.com';
+      const acceptableHostDomainsList = expectedHostDomains.split(' ');
+      const currentDomain = window.location.hostname;
+      if (!acceptableHostDomainsList.includes(currentDomain)) {
+        playerLink.href = playerLink.dataset.fallbackUrl;
+        return;
+      }
+
+      const viewer = Services.viewerForDoc(this.ampdoc_);
+      viewer.sendMessage(
+        'triggerPlayerAction',
+        dict({
+          'playerAction': playerLink.getAttribute('player-action'),
+          'playerActionData': playerLink.getAttribute('data-player-action-data'),
+        }),
+        false
+      );
       return;
     }
 

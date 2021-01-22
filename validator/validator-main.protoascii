@@ -1398,6 +1398,29 @@ tags: {
     value: "auto"
     value: "true"
   }
+  attrs: {
+    name: "player-action"
+    value_casei: "text/html"
+    trigger: {
+        also_requires_attr: "data-player-action-data"
+    }
+  }
+  attrs: {
+    name: "data-player-action-data"
+    value_casei: "text/html"
+    trigger: {
+      also_requires_attr: "data-fallback-url"
+    }
+  }
+  attrs: {
+    name: "data-fallback-url"
+    value_url: {
+      protocol: "data"
+      protocol: "http"
+      protocol: "https"
+      allow_relative: false
+    }
+  }
   attr_lists: "name-attr"
   # <amp-bind>
   attrs: { name: "[href]" }

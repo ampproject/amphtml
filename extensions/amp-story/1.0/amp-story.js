@@ -734,6 +734,10 @@ export class AmpStory extends AMP.BaseElement {
       this.onNoPreviousPage_();
     });
 
+    this.element.addEventListener(EventType.TRIGGER_PLAYER_ACTION, () => {
+      this.onTriggerPlayerAction_();
+    });
+
     this.advancement_.addOnTapNavigationListener((direction) => {
       this.performTapNavigation_(direction);
     });
@@ -1383,6 +1387,20 @@ export class AmpStory extends AMP.BaseElement {
     if (this.storeService_.get(StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP)) {
       this.ampStoryHint_.showFirstPageHintOverlay();
     }
+  }
+
+  /**
+   * Handles EventType.TRIGGER_PLAYER_ACTION events.
+   * @private
+   */
+  onTriggerPlayerAction_() {
+    this.viewerMessagingHandler_.send(
+      'triggerPlayerAction',
+      dict({
+        'playerAction': this.element.getAttribute('player-action'),
+        'playerActionData': this.element.getAttribute('data-player-action-data'),
+      })
+    );
   }
 
   /**

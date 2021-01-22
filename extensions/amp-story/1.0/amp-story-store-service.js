@@ -76,6 +76,18 @@ export const EmbeddedComponentState = {
  */
 export let InteractiveComponentDef;
 
+export const PlayerActionLinkState = {
+  DEFAULT_STATE: 0, // Link is present in page.
+};
+
+/**
+ * @typedef {{
+ *    element: !Element,
+ *    state: !EmbeddedComponentState,
+ * }}
+ */
+export let PlayerActionLinkDef;
+
 /**
  * @typedef {{
  *    option: ?../../amp-story-interactive/0.1/amp-story-interactive-abstract.OptionConfigType,
@@ -113,6 +125,7 @@ export let InteractiveReactData;
  *    pageHasElementsWithPlaybackState: boolean,
  *    panningMediaState: {x: string, y: string, zoom: string},
  *    pausedState: boolean,
+ *    playerActionLinkState: !PlayerActionLinkDef,
  *    previewState: boolean,
  *    rtlState: boolean,
  *    shareMenuState: boolean,
@@ -167,6 +180,7 @@ export const StateProperty = {
   PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE: 'pageHasElementsWithPlaybackState',
   PANNING_MEDIA_STATE: 'panningMediaState',
   PAUSED_STATE: 'pausedState',
+  PLAYER_ACTION_LINK_STATE: 'playerActionLinkState',
   // Story preview state.
   PREVIEW_STATE: 'previewState',
   RTL_STATE: 'rtlState',
@@ -218,6 +232,7 @@ export const Action = {
   TOGGLE_PAGE_HAS_AUDIO: 'togglePageHasAudio',
   TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK: 'togglePageHasElementWithPlayblack',
   TOGGLE_PAUSED: 'togglePaused',
+  TOGGLE_PLAYER_ACTION_LINK: 'togglePlayerActionLink',
   TOGGLE_RTL: 'toggleRtl',
   TOGGLE_SHARE_MENU: 'toggleShareMenu',
   TOGGLE_SIDEBAR: 'toggleSidebar',
@@ -401,6 +416,12 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ ({
         ...state,
         [StateProperty.PAUSED_STATE]: !!data,
+      });
+    // Triggers a Player Action.
+    case Action.TOGGLE_PLAYER_ACTION_LINK:
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.PLAYER_ACTION_LINK_STATE]: data,
       });
     case Action.TOGGLE_RTL:
       return /** @type {!State} */ ({
@@ -624,6 +645,8 @@ export class AmpStoryStoreService {
       [StateProperty.PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE]: false,
       [StateProperty.PANNING_MEDIA_STATE]: null,
       [StateProperty.PAUSED_STATE]: false,
+      [StateProperty.PLAYER_ACTION_LINK_STATE]:
+        PlayerActionLinkState.DEFAULT_STATE,
       [StateProperty.RTL_STATE]: false,
       [StateProperty.SHARE_MENU_STATE]: false,
       [StateProperty.SIDEBAR_STATE]: false,

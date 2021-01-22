@@ -36,6 +36,7 @@ import {createCustomEvent} from '../event-helper';
 import {dict, map} from '../utils/object';
 import {isJsonScriptTag, tryFocus} from '../dom';
 // Source for this constant is css/amp-story-player-iframe.css
+import {PlayerActionLinkState} from '../../extensions/amp-story/1.0/amp-story-store-service';
 import {cssText} from '../../build/amp-story-player-iframe.css';
 import {dev} from '../log';
 import {findIndex} from '../utils/array';
@@ -587,6 +588,10 @@ export class AmpStoryPlayer {
             this.onSelectDocument_(/** @type {!Object} */ (data));
           });
 
+          messaging.registerHandler('triggerPlayerAction', (event, data) => {
+            this.onTriggerPlayerAction_(/** @type {!Object} */ (data));
+          });
+
           messaging.sendRequest(
             'onDocumentState',
             dict({'state': STORY_MESSAGE_STATE_TYPE.PAGE_ATTACHMENT_STATE}),
@@ -1131,6 +1136,7 @@ export class AmpStoryPlayer {
     this.messagingPromises_[detachedStory.iframeIdx].then((messaging) => {
       messaging.unregisterHandler('documentStateUpdate');
       messaging.unregisterHandler('selectDocument');
+      messaging.unregisterHandler('triggerPlayerAction');
       messaging.unregisterHandler('touchstart');
       messaging.unregisterHandler('touchmove');
       messaging.unregisterHandler('touchend');
@@ -1498,6 +1504,25 @@ export class AmpStoryPlayer {
     } else if (data.previous) {
       this.previous_();
     }
+  }
+
+  /**
+   * React to triggerPlayerAction events.
+   * @param {!Object} data
+   * @private
+   */
+  onTriggerPlayerAction_(data) {
+    this.playerActionLinkState_ = PlayerActionLinkState.DEFAULT_STATE;
+    this.element_.dispatchEvent(
+      createCustomEvent(
+        this.win_,
+        'triggerPlayerAction',
+        dict({
+          'playerAction': data.playerAction,
+          'playerActionData': data.playerActionData,
+        })
+      )
+    );
   }
 
   /**

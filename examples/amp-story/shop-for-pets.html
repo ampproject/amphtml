@@ -1,0 +1,102 @@
+<!doctype html>
+<html amp lang="en">
+  <head>
+    <meta charset="utf-8">
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-story"
+        src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+    <script async src="https://cdn.ampproject.org/v0/amp-viewer-integration-0.1.js"></script>
+    <title>My Story</title>
+    <meta name="viewport"
+          content="width=device-width,minimum-scale=1,initial-scale=1">
+    <link rel="canonical" href="helloworld.html">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <style amp-custom>
+      body {
+        font-family: 'Roboto', sans-serif;
+      }
+      amp-story-page {
+        background: white;
+      }
+      h1 {
+        font-size: 2.875em;
+        font-weight: normal;
+        line-height: 1.174;
+        text-transform: uppercase;
+      }
+      .pinkBackground {
+        background: rgba(255, 0, 0, 0.3);
+      }
+      .top {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 20px;
+        height: 20px;
+        background: green;
+      }
+      .bottom {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        width: 20px;
+        height: 20px;
+        background: blue;
+      }
+    </style>
+  </head>
+
+  <body>
+    <amp-story standalone>
+
+      <amp-story-page id="cover" auto-advance-after="5s">
+        <amp-story-grid-layer class="pinkBackground" template="vertical">
+          <h1>Shop For Pets</h1>
+          <p>Add items from this story into your cart for purchase.</p>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page-1" auto-advance-after="5s">
+        <amp-story-grid-layer class="pinkBackground" template="vertical">
+          <h1>Pug</h1>
+          <p>Buy a pug</p>
+          <amp-img src="https://picsum.photos/id/1025/4951/3301"
+              width="300"
+              height="170">
+          </amp-img>
+          <a player-action="ebayAddToCart" data-player-action-data='{"name":"pug", "similar":["leash", "collar", "bowl"]}' data-fallback-url="https://www.dog.com/pug-12">
+            <button>Add To Cart</button>
+          </a>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page-2" auto-advance-after="5s">
+        <amp-story-grid-layer class="pinkBackground" template="vertical">
+          <h1>Deer</h1>
+          <p>Buy a pet deer</p>
+          <amp-img src="https://picsum.photos/id/1003/1181/1772"
+              width="300"
+              height="250">
+          </amp-img>
+          <a player-action="ebayAddToCart" data-player-action-data='{"name":"deer", "similar":["moose", "antlers"]}' data-fallback-url="https://www.deers.com/age-3">
+            <button>Add To Cart</button>
+          </a>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page-3" auto-advance-after="5s">
+        <amp-story-grid-layer class="pinkBackground" template="vertical">
+          <h1>Vulture</h1>
+          <p>Buy a vulture</p>
+          <amp-img src="https://picsum.photos/id/1024/1920/1280"
+              width="300"
+              height="170">
+          </amp-img>
+          <a player-action="ebayAddToCart" data-player-action-data='{"name":"vulture", "similar":["eagle", "raven", "feather"]}' data-fallback-url="https://www.birds.com/vulture-big-2">
+            <button>Add To Cart</button>
+          </a>
+        </amp-story-grid-layer>
+      </amp-story-page>
+    </amp-story>
+  </body>
+</html>

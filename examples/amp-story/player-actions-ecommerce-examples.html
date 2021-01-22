@@ -1,0 +1,153 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Player Actions Ecommerce</title>
+    <script async src="../../dist/amp-story-player.js"></script>
+    <link href="https://cdn.ampproject.org/amp-story-player-v0.css" rel='stylesheet' type='text/css'>
+    <style page>
+      body {
+        font-family: sans-serif;
+      }
+    </style>
+    <style injected>
+      .story-player-iframe {
+        background-size: cover;
+        display: block;
+        position: relative;
+        height: 100%;
+        width: 100%;
+        flex: 0 0 100%;
+      }
+
+      .title {
+        background: linear-gradient(to bottom, rgba(0, 0, 0, 0), rgba(0, 0, 0, 1));
+        display: block;
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        color: #fff;
+        font-size: 40px;
+        padding: 88px 32px 32px 32px;
+        line-height: 1.25;
+        text-shadow: 3px 3px #000;
+      }
+
+      div {
+          font-size: 24px;
+      }
+
+      .subtitle {
+          padding: 0 0 20px 0;
+      }
+
+      amp-story-player {
+          padding: 0px 0px 20px 0px;
+          width: 360px;
+          height: 600px;
+      }
+
+      /* The Modal (background) */
+      .modal {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        z-index: 1; /* Sit on top */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgb(0,0,0); /* Fallback color */
+        background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+      }
+
+      /* Modal Content/Box */
+      .modal-content {
+        background-color: #fefefe;
+        margin: 15% auto; /* 15% from the top and centered */
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%; /* Could be more or less, depending on screen size */
+      }
+
+      /* The Close Button */
+      .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+      }
+
+      .close:hover,
+      .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+      }
+    </style>
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  </head>
+  <body>
+    <amp-story-player>
+        <a href="./shop-for-pets.html"
+            data-poster-portrait-src="/examples/visual-tests/amp-story/img/overview.jpg"
+            class="story">
+          <span class="title">Shop for pets</span>
+        </a>
+        <a href="./shop-for-stuff.html"
+            data-poster-portrait-src="/examples/visual-tests/amp-story/img/overview.jpg"
+            class="story">
+          <span class="title">Shop for stuff</span>
+        </a>
+    </amp-story-player>
+    <div id="myModal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <div>You may also be interested in:</div>
+        <p id="suggested-items"></p>
+        <div>Your cart currently contains the following items:</div>
+        <p id="shopping-cart-contents"></p>
+        <a href="./player-actions-checkout.html">
+          <button>Go to Checkout</button>
+        </a> 
+      </div>
+    </div>
+  </body>
+  <script type="text/javascript">
+    var modal = document.getElementById("myModal");
+    var span = document.getElementsByClassName("close")[0];
+    
+    span.onclick = function() {
+      modal.style.display = "none";
+    }
+
+    window.onclick = function(event) {
+      if (event.target == modal) {
+        modal.style.display = "none";
+      }
+    }
+
+    const playerEl = document.querySelector('amp-story-player');
+    playerEl.addEventListener('triggerPlayerAction', (event) => {
+      modal.style.display = "block";
+
+      const cart = document.getElementById("shopping-cart-contents");
+      const itemName = document.createTextNode(JSON.parse(event.detail.playerActionData).name);
+      const li = document.createElement("LI");
+      li.appendChild(itemName);
+      cart.appendChild(li);
+
+      const suggestedItems = document.getElementById("suggested-items");
+      while (suggestedItems.hasChildNodes()) {
+        suggestedItems.removeChild(suggestedItems.lastChild);
+      }
+      const suggestedItemsArray = JSON.parse(event.detail.playerActionData).similar;
+      suggestedItemsArray.forEach(element => {
+        const suggestedItemName = document.createTextNode(element);
+        const li2 = document.createElement("LI");
+        li2.appendChild(suggestedItemName);
+        suggestedItems.appendChild(li2);
+      });
+    }); 
+  </script>
+</html>
