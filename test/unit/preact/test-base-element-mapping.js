@@ -980,6 +980,9 @@ describes.realWin('PreactBaseElement', spec, (env) => {
     });
 
     it('should focus on the host when an element in the shadow DOM receives focus', async () => {
+      // expect the shadowRoot to have delegatesFocus property set to true
+      expect(element.shadowRoot.delegatesFocus).to.be.true;
+
       // initial focus is not on host
       expect(doc.activeElement).to.not.equal(element);
 
