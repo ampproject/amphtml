@@ -103,8 +103,8 @@ const buildContainerTemplate = (element) => {
 /** @enum {string} */
 const DevToolsTab = {
   PREVIEW: 'Preview',
-  PAGE_EXPERIENCE: 'Page Experience',
   LOGS: 'Logs',
+  PAGE_EXPERIENCE: 'Page Experience',
 };
 
 export class AmpStoryDevTools extends AMP.BaseElement {
