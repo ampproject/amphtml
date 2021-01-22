@@ -31,8 +31,6 @@ export const SimpleTruncatedText = () => {
 
   return (
     <TruncateText
-      className="amp-truncate-text"
-      layout="fixed"
       style={{width, height}}
       persistentContent={<button>Lorem Ipsum</button>}
       collapsedContent={<button>See more</button>}
