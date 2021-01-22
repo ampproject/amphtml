@@ -511,9 +511,13 @@ function describeEnv(factory) {
    */
   const mainFunc = function (name, specOrSpecList, fn) {
     if (!Array.isArray(specOrSpecList)) {
-      specOrSpecList = [specOrSpecList];
+      templateFunc(name, specOrSpecList, fn, describe);
+    } else {
+      specOrSpecList.forEach((spec) => {
+        const {version} = spec;
+        templateFunc(`[v${version || '?'}] ${name}`, spec, fn, describe);
+      });
     }
-    specOrSpecList.forEach((spec) => templateFunc(name, spec, fn, describe));
   };
 
   /**
