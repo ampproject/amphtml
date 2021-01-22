@@ -44,10 +44,14 @@ function TruncateTextWithRef(
   const [isExpanded, setIsExpanded] = useState(false);
 
   // Provide API actions
-  useImperativeHandle(ref, () => ({
-    expand: () => setIsExpanded(true),
-    collapse: () => setIsExpanded(false),
-  }));
+  useImperativeHandle(
+    ref,
+    () => ({
+      expand: () => setIsExpanded(true),
+      collapse: () => setIsExpanded(false),
+    }),
+    []
+  );
 
   // TODO(rcebulko): Rewrite `truncateText` for Preact
   /** Perform truncation on contents. */
