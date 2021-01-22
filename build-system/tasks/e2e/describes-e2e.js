@@ -611,9 +611,16 @@ function getDriver(
 
 async function setUpTest(
   {environment, ampDriver, controller},
-  {testUrl, experiments = [], initialRect}
+  {testUrl, version, experiments = [], initialRect}
 ) {
   const url = new URL(testUrl);
+
+  // When a component version is specified in the e2e spec, provide it as a
+  // request param.
+  if (version) {
+    url.searchParams.set('componentVersion', version);
+  }
+
   if (experiments.length > 0) {
     if (environment.includes('inabox')) {
       // inabox experiments are toggled at server side using <meta> tag
