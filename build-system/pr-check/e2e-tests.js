@@ -16,66 +16,53 @@
 'use strict';
 
 /**
- * @fileoverview
- * This script runs end to end tests.
- * This is run during the CI stage = test; job = e2e tests.
+ * @fileoverview Script that runs the end-to-end tests during CI.
  */
 
 const {
   downloadNomoduleOutput,
-  printChangeSummary,
   printSkipMessage,
-  startTimer,
-  stopTimer,
   timedExecOrDie,
   timedExecOrThrow,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
-const {isPullRequestBuild} = require('../common/ci');
-const {setLoggingPrefix} = require('../common/logging');
+const {runCiJob} = require('./ci-job');
 
 const jobName = 'e2e-tests.js';
 
-async function main() {
-  setLoggingPrefix(jobName);
-  const startTime = startTimer(jobName);
-
-  if (!isPullRequestBuild()) {
-    downloadNomoduleOutput();
-    timedExecOrDie('gulp update-packages');
-
-    try {
-      timedExecOrThrow(
-        'gulp e2e --nobuild --headless --compiled --report',
-        'End-to-end tests failed!'
-      );
-    } catch (e) {
-      if (e.status) {
-        process.exitCode = e.status;
-      }
-    } finally {
-      timedExecOrDie('gulp test-report-upload');
+function pushBuildWorkflow() {
+  downloadNomoduleOutput();
+  timedExecOrDie('gulp update-packages');
+  try {
+    timedExecOrThrow(
+      'gulp e2e --nobuild --headless --compiled --report',
+      'End-to-end tests failed!'
+    );
+  } catch (e) {
+    if (e.status) {
+      process.exitCode = e.status;
     }
-  } else {
-    printChangeSummary();
-    const buildTargets = determineBuildTargets();
-    if (
-      buildTargets.has('RUNTIME') ||
-      buildTargets.has('FLAG_CONFIG') ||
-      buildTargets.has('E2E_TEST')
-    ) {
-      downloadNomoduleOutput();
-      timedExecOrDie('gulp update-packages');
-      timedExecOrDie('gulp e2e --nobuild --headless --compiled');
-    } else {
-      printSkipMessage(
-        jobName,
-        'this PR does not affect the runtime, flag configs, or end-to-end tests'
-      );
-    }
+  } finally {
+    timedExecOrDie('gulp test-report-upload');
   }
-
-  stopTimer(jobName, startTime);
 }
 
-main();
+function prBuildWorkflow() {
+  const buildTargets = determineBuildTargets();
+  if (
+    buildTargets.has('RUNTIME') ||
+    buildTargets.has('FLAG_CONFIG') ||
+    buildTargets.has('E2E_TEST')
+  ) {
+    downloadNomoduleOutput();
+    timedExecOrDie('gulp update-packages');
+    timedExecOrDie('gulp e2e --nobuild --headless --compiled');
+  } else {
+    printSkipMessage(
+      jobName,
+      'this PR does not affect the runtime, flag configs, or end-to-end tests'
+    );
+  }
+}
+
+runCiJob(jobName, pushBuildWorkflow, prBuildWorkflow);

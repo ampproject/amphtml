@@ -16,56 +16,44 @@
 'use strict';
 
 /**
- * @fileoverview
- * This script builds and tests the AMP runtime in esm mode.
- * This is run during the CI stage = test; job = module tests.
+ * @fileoverview Script that tests the module AMP runtime during CI.
  */
 
 const {
-  printChangeSummary,
-  printSkipMessage,
-  startTimer,
-  stopTimer,
-  timedExecOrDie,
   downloadModuleOutput,
   downloadNomoduleOutput,
+  printSkipMessage,
+  timedExecOrDie,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
-const {isPullRequestBuild} = require('../common/ci');
-const {setLoggingPrefix} = require('../common/logging');
+const {runCiJob} = require('./ci-job');
 
 const jobName = 'module-tests.js';
 
-function main() {
-  setLoggingPrefix(jobName);
-  const startTime = startTimer(jobName);
+function pushBuildWorkflow() {
+  downloadNomoduleOutput();
+  downloadModuleOutput();
+  timedExecOrDie('gulp update-packages');
+  timedExecOrDie('gulp integration --nobuild --compiled --headless --esm');
+}
 
-  if (!isPullRequestBuild()) {
+function prBuildWorkflow() {
+  const buildTargets = determineBuildTargets();
+  if (
+    buildTargets.has('RUNTIME') ||
+    buildTargets.has('FLAG_CONFIG') ||
+    buildTargets.has('INTEGRATION_TEST')
+  ) {
     downloadNomoduleOutput();
     downloadModuleOutput();
     timedExecOrDie('gulp update-packages');
     timedExecOrDie('gulp integration --nobuild --compiled --headless --esm');
   } else {
-    printChangeSummary();
-    const buildTargets = determineBuildTargets();
-    if (
-      buildTargets.has('RUNTIME') ||
-      buildTargets.has('FLAG_CONFIG') ||
-      buildTargets.has('INTEGRATION_TEST')
-    ) {
-      downloadNomoduleOutput();
-      downloadModuleOutput();
-      timedExecOrDie('gulp update-packages');
-      timedExecOrDie('gulp integration --nobuild --compiled --headless --esm');
-    } else {
-      printSkipMessage(
-        jobName,
-        'this PR does not affect the runtime, flag configs, or integration tests'
-      );
-    }
+    printSkipMessage(
+      jobName,
+      'this PR does not affect the runtime, flag configs, or integration tests'
+    );
   }
-
-  stopTimer(jobName, startTime);
 }
 
-main();
+runCiJob(jobName, pushBuildWorkflow, prBuildWorkflow);
