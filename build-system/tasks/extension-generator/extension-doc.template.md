@@ -113,22 +113,18 @@ example
 
 #### Layout and style
 
-Fully valid AMP pages use the AMP layout system to infer sizing of elements to create a page structure before downloading any remote resources. However, Bento use imports components into less controlled environments and AMP's layout system is inaccessible. 
+Fully valid AMP pages use the AMP layout system to infer sizing of elements to create a page structure before downloading any remote resources. However, Bento use imports components into less controlled environments and AMP's layout system is inaccessible.
 
-For the best page experience follow these guidelines for `${name}`:
+**Container type**
 
-**defined `width` and `height`**
+The `${name}` component has a container/non-container layout type. To ensure the component renders correctly, apply the following styles:
 
-Avoid content shifting by defining a `width` and `height`, then apply them as styles to `${name}`.
-
-```
-`${name}` {
-  width: 100px;
-  height: 100px;
-}
+```css
+example
 ```
 
-**style/layout guidelines 2**
+**style/layout guidelines 2 (optional)**
+
 Information on how to layout and style `${name}`.
 
 ```
