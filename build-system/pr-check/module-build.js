@@ -16,61 +16,44 @@
 'use strict';
 
 /**
- * @fileoverview
- * This script builds the esm minified AMP runtime.
- * This is run during the CI stage = build; job = module build.
+ * @fileoverview Script that builds the module AMP runtime during CI.
  */
 
 const {
-  abortTimedJob,
-  printChangeSummary,
   printSkipMessage,
-  startTimer,
-  stopTimer,
   timedExecOrDie,
   uploadModuleOutput,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
-const {isPullRequestBuild} = require('../common/ci');
-const {runNpmChecks} = require('./npm-checks');
-const {setLoggingPrefix} = require('../common/logging');
+const {runCiJob} = require('./ci-job');
 
 const jobName = 'module-build.js';
 
-function main() {
-  setLoggingPrefix(jobName);
-  const startTime = startTimer(jobName);
-  if (!runNpmChecks()) {
-    return abortTimedJob(jobName, startTime);
-  }
+function pushBuildWorkflow() {
+  timedExecOrDie('gulp update-packages');
+  timedExecOrDie('gulp dist --esm --fortesting');
+  uploadModuleOutput();
+}
 
-  if (!isPullRequestBuild()) {
+function prBuildWorkflow() {
+  const buildTargets = determineBuildTargets();
+  // TODO(#31102): This list must eventually match the same buildTargets check
+  // found in pr-check/nomodule-build.js as we turn on the systems that
+  // run against the module build. (ex. visual diffs, e2e, etc.)
+  if (
+    buildTargets.has('RUNTIME') ||
+    buildTargets.has('FLAG_CONFIG') ||
+    buildTargets.has('INTEGRATION_TEST')
+  ) {
     timedExecOrDie('gulp update-packages');
     timedExecOrDie('gulp dist --esm --fortesting');
     uploadModuleOutput();
   } else {
-    printChangeSummary();
-    const buildTargets = determineBuildTargets();
-    // TODO(#31102): This list must eventually match the same buildTargets check
-    // found in pr-check/nomodule-build.js as we turn on the systems that
-    // run against the module build. (ex. visual diffs, e2e, etc.)
-    if (
-      buildTargets.has('RUNTIME') ||
-      buildTargets.has('FLAG_CONFIG') ||
-      buildTargets.has('INTEGRATION_TEST')
-    ) {
-      timedExecOrDie('gulp update-packages');
-      timedExecOrDie('gulp dist --esm --fortesting');
-      uploadModuleOutput();
-    } else {
-      printSkipMessage(
-        jobName,
-        'this PR does not affect the runtime, flag configs, or integration tests'
-      );
-    }
+    printSkipMessage(
+      jobName,
+      'this PR does not affect the runtime, flag configs, or integration tests'
+    );
   }
-
-  stopTimer(jobName, startTime);
 }
 
-main();
+runCiJob(jobName, pushBuildWorkflow, prBuildWorkflow);

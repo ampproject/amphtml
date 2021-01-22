@@ -16,71 +16,59 @@
 'use strict';
 
 /**
- * @fileoverview
- * This script runs the unit and integration tests locally on a VM.
- * This is run during the CI stage = test; job = unminified tests.
+ * @fileoverview Script that tests the unminified AMP runtime during CI.
  */
 
 const {
   downloadUnminifiedOutput,
-  printChangeSummary,
   printSkipMessage,
-  startTimer,
-  stopTimer,
   timedExecOrDie,
   timedExecOrThrow,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
-const {isPullRequestBuild} = require('../common/ci');
-const {setLoggingPrefix} = require('../common/logging');
+const {runCiJob} = require('./ci-job');
 
 const jobName = 'unminified-tests.js';
 
-function main() {
-  setLoggingPrefix(jobName);
-  const startTime = startTimer(jobName);
+function pushBuildWorkflow() {
+  downloadUnminifiedOutput();
+  timedExecOrDie('gulp update-packages');
 
-  if (!isPullRequestBuild()) {
-    downloadUnminifiedOutput();
-    timedExecOrDie('gulp update-packages');
-
-    try {
-      timedExecOrThrow(
-        'gulp integration --nobuild --headless --coverage --report',
-        'Integration tests failed!'
-      );
-      timedExecOrThrow(
-        'gulp codecov-upload',
-        'Failed to upload code coverage to Codecov!'
-      );
-    } catch (e) {
-      if (e.status) {
-        process.exitCode = e.status;
-      }
-    } finally {
-      timedExecOrDie('gulp test-report-upload');
+  try {
+    timedExecOrThrow(
+      'gulp integration --nobuild --headless --coverage --report',
+      'Integration tests failed!'
+    );
+    timedExecOrThrow(
+      'gulp codecov-upload',
+      'Failed to upload code coverage to Codecov!'
+    );
+  } catch (e) {
+    if (e.status) {
+      process.exitCode = e.status;
     }
-  } else {
-    printChangeSummary();
-    const buildTargets = determineBuildTargets();
-    if (
-      buildTargets.has('RUNTIME') ||
-      buildTargets.has('FLAG_CONFIG') ||
-      buildTargets.has('INTEGRATION_TEST')
-    ) {
-      downloadUnminifiedOutput();
-      timedExecOrDie('gulp update-packages');
-      timedExecOrDie('gulp integration --nobuild --headless --coverage');
-      timedExecOrDie('gulp codecov-upload');
-    } else {
-      printSkipMessage(
-        jobName,
-        'this PR does not affect the runtime, flag configs, or integration tests'
-      );
-    }
+  } finally {
+    timedExecOrDie('gulp test-report-upload');
   }
-
-  stopTimer(jobName, startTime);
 }
 
-main();
+function prBuildWorkflow() {
+  const buildTargets = determineBuildTargets();
+  if (
+    buildTargets.has('RUNTIME') ||
+    buildTargets.has('FLAG_CONFIG') ||
+    buildTargets.has('INTEGRATION_TEST')
+  ) {
+    downloadUnminifiedOutput();
+    timedExecOrDie('gulp update-packages');
+    timedExecOrDie('gulp integration --nobuild --headless --coverage');
+    timedExecOrDie('gulp codecov-upload');
+  } else {
+    printSkipMessage(
+      jobName,
+      'this PR does not affect the runtime, flag configs, or integration tests'
+    );
+  }
+}
+
+runCiJob(jobName, pushBuildWorkflow, prBuildWorkflow);
