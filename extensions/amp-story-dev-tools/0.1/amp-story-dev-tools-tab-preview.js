@@ -660,7 +660,7 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
     } = this.element.querySelector(
       '.i-amphtml-story-dev-tools-devices-container'
     );
-    let sumDeviceWidths = MIN_DEVICE_PADDING_PX * this.devices_.length;
+    let sumDeviceWidths = 0;
     let maxDeviceHeights = 0;
     // Find the sum of the device widths and max of heights since they are horizontally laid out.
     this.devices_.forEach((deviceSpecs) => {
