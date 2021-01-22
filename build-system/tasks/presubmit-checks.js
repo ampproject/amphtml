@@ -317,6 +317,7 @@ const forbiddenTerms = {
       'src/service/cid-impl.js',
       'src/service/origin-experiments-impl.js',
       'src/services.js',
+      'src/utils/display-observer.js',
       'testing/test-helper.js',
     ],
   },
