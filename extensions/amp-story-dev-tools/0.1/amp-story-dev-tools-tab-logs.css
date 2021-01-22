@@ -19,6 +19,17 @@ amp-story-dev-tools-tab-logs {
   padding: var(--i-amphtml-story-dev-tools-vertical-spacing) 10% !important;
 }
 
+amp-story-dev-tools-tab-logs::-webkit-scrollbar {
+  width: 8px !important;
+}
+amp-story-dev-tools-tab-logs::-webkit-scrollbar-thumb {
+  background-color: var(--i-amphtml-story-dev-tools-white-transparent-1) !important;
+  border-radius: 3px !important;
+}
+amp-story-dev-tools-tab-logs::-webkit-scrollbar-thumb:hover {
+  background-color: var(--i-amphtml-story-dev-tools-white-transparent-2) !important;
+}
+
 .i-amphtml-story-dev-tools-log-status-title {
   font-size: 16px !important;
   display: flex !important;
