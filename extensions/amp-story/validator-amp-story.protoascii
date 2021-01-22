@@ -157,12 +157,12 @@ tags: {  # <amp-story-grid-layer>
   tag_name: "AMP-STORY-GRID-LAYER"
   mandatory_ancestor: "AMP-STORY-PAGE"
   attrs: {
-    name: "template"
-    mandatory: true
-    value: "fill"
-    value: "horizontal"
-    value: "thirds"
-    value: "vertical"
+    name: "anchor"
+    value_regex: "top|bottom|left|right|(top|bottom)[ -](left|right)|(left|right)[ -](top|bottom)"
+  }
+  attrs: {
+    name: "aspect-ratio"
+    value_regex: "\\d+:\\d+"
   }
   attrs: {
     name: "position"
@@ -170,8 +170,17 @@ tags: {  # <amp-story-grid-layer>
     value: "landscape-half-right"
   }
   attrs: {
-    name: "aspect-ratio"
-    value_regex: "\\d+:\\d+"
+    name: "preset"
+    value: "2021-background"
+    value: "2021-foreground"
+  }
+  attrs: {
+    name: "template"
+    mandatory: true
+    value: "fill"
+    value: "horizontal"
+    value: "thirds"
+    value: "vertical"
   }
   descendant_tag_list: "amp-story-grid-layer-allowed-descendants"
   reference_points: {
