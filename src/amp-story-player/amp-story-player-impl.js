@@ -1009,7 +1009,10 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * @param startingIdx
+   * Updates distances of the stories. Appends to the DOM if new distance is
+   * <= 1 and removes from DOM if new distance > 1. It also positions the iframe
+   * for those appended to the DOM.
+   * @param {number=} startingIdx
    * @private
    */
   updateDistances_(startingIdx = 0) {
