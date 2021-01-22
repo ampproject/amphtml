@@ -17,40 +17,39 @@
 import {createUseStyles} from 'react-jss';
 
 const truncateTextWrapper = {
-  'display': 'block',
-  'padding': 0,
-  'border': 'none',
+  display: 'block',
+  padding: 0,
+  border: 'none',
 };
 
 const truncateTextExpandedWrapper = {
   // Must be !important to override height set on element by prop
-  'height': 'auto !important',
+  height: 'auto !important',
 
   '& > i-amphtml-sizer': {
-    'display': 'none',
+    display: 'none',
   },
 };
 
 const truncateTextContent = {
-  'top': 0,
-  'left': 0,
-  'bottom': 0,
-  'right': 0,
+  top: 0,
+  left: 0,
+  bottom: 0,
+  right: 0,
 
   '& [i-amphtml-truncate-child-overflow]': {
-    'display': 'none',
+    display: 'none',
   },
 };
 const truncateTextExpandedContent = {
-  'position': 'static',
+  position: 'static',
 };
 const truncateTextCollapsedContent = {
-  'position': 'absolute',
+  position: 'absolute',
 };
 
 const truncateTextExpandedSlot = {
-  'margin': 0,
-  'white-space': 'nowrap',
+  whiteSpace: 'nowrap',
 };
 
 const JSS = {
