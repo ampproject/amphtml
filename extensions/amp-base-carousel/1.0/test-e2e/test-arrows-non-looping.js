@@ -27,9 +27,6 @@ const SLIDE_COUNT = 4;
 const pageWidth = 600;
 const pageHeight = 600;
 
-/** Increase timeout for running on CircleCI **/
-const testTimeout = 40000;
-
 describes.endtoend(
   'amp-base-carousel:1.0 - arrows when non-looping',
   {
@@ -50,7 +47,6 @@ describes.endtoend(
     }
 
     beforeEach(async function () {
-      this.timeout(testTimeout);
       controller = env.controller;
       const carousel = await getCarousel(controller);
       await controller.switchToShadowRoot(carousel);
@@ -59,18 +55,19 @@ describes.endtoend(
       nextArrow = await getNextArrow(styles, controller);
     });
 
-    it('should have the arrows in the correct initial state', async () => {
+    // TODO(wg-bento): getPrevArrow does not always find element in time.
+    it.skip('should have the arrows in the correct initial state', async () => {
       await expect(css(prevArrow, 'opacity')).to.equal('0');
       await expect(css(nextArrow, 'opacity')).to.equal('1');
     });
 
-    it('should show the prev arrow when going to the first slide', async () => {
+    it.skip('should show the prev arrow when going to the first slide', async () => {
       await controller.click(nextArrow);
       await expect(css(prevArrow, 'opacity')).to.equal('1');
       await expect(css(nextArrow, 'opacity')).to.equal('1');
     });
 
-    it('should hide the next arrow when going to the end', async () => {
+    it.skip('should hide the next arrow when going to the end', async () => {
       const el = await getScrollingElement(styles, controller);
       await controller.scrollTo(el, {left: (SLIDE_COUNT - 1) * pageWidth});
 
