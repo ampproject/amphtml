@@ -24,15 +24,15 @@ const {
   gitCiMasterBaseline,
   shortSha,
 } = require('../common/git');
+const {ciBuildSha, ciPullRequestSha, isCiBuild} = require('../common/ci');
 const {cyan, green, yellow} = require('ansi-colors');
 const {execOrDie, execOrThrow, execWithError, exec} = require('../common/exec');
 const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
-const {isCiBuild, ciPullRequestSha} = require('../common/ci');
 const {replaceUrls} = require('../tasks/pr-deploy-bot-utils');
 
-const UNMINIFIED_OUTPUT_FILE = `amp_unminified_${ciPullRequestSha()}.zip`;
-const NOMODULE_OUTPUT_FILE = `amp_nomodule_${ciPullRequestSha()}.zip`;
-const MODULE_OUTPUT_FILE = `amp_module_${ciPullRequestSha()}.zip`;
+const UNMINIFIED_OUTPUT_FILE = `amp_unminified_${ciBuildSha()}.zip`;
+const NOMODULE_OUTPUT_FILE = `amp_nomodule_${ciBuildSha()}.zip`;
+const MODULE_OUTPUT_FILE = `amp_module_${ciBuildSha()}.zip`;
 
 const BUILD_OUTPUT_DIRS = 'build/ dist/ dist.3p/';
 const APP_SERVING_DIRS = 'dist.tools/ examples/ test/manual/';
