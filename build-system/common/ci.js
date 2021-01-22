@@ -157,16 +157,16 @@ function ciCommitSha() {
 }
 
 /**
- * Returns the number of the current build.
+ * Returns the ID of the current build.
  * @return {string}
  */
-function ciBuildNumber() {
+function ciBuildId() {
   return isTravis
     ? env('TRAVIS_BUILD_NUMBER')
     : isGithubActions
     ? env('GITHUB_RUN_ID')
     : isCircleci
-    ? env('CIRCLE_BUILD_NUM')
+    ? env('CIRCLE_WORKFLOW_ID')
     : '';
 }
 
@@ -180,15 +180,15 @@ function ciBuildUrl() {
     : isGithubActions
     ? `${env('GITHUB_SERVER_URL')}/${env('GITHUB_REPOSITORY')}/actions/runs/${env('GITHUB_RUN_ID')}` // prettier-ignore
     : isCircleci
-    ? env('CIRCLE_BUILD_URL')
+    ? `https://app.circleci.com/pipelines/workflows/${env('CIRCLE_WORKFLOW_ID')}` // prettier-ignore
     : '';
 }
 
 /**
- * Returns the number of the current job.
+ * Returns the ID of the current job.
  * @return {string}
  */
-function ciJobNumber() {
+function ciJobId() {
   return isTravis
     ? env('TRAVIS_JOB_NUMBER')
     : isGithubActions
@@ -209,7 +209,7 @@ function ciJobUrl() {
     ? // TODO(rsimha): Try to reverse engineer the GH Actions job URL from the build URL.
       `${env('GITHUB_SERVER_URL')}/${env('GITHUB_REPOSITORY')}/actions/runs/${env('GITHUB_RUN_ID')}` // prettier-ignore
     : isCircleci
-    ? env('CIRCLE_BUILD_URL') // TODO(rsimha): Test and modify if necessary.
+    ? env('CIRCLE_BUILD_URL')
     : '';
 }
 
@@ -227,11 +227,20 @@ function ciRepoSlug() {
     : '';
 }
 
+/**
+ * Returns the commit SHA being tested by a push or PR build.
+ * @return {string}
+ */
+function ciBuildSha() {
+  return isPullRequestBuild() ? ciPullRequestSha() : ciCommitSha();
+}
+
 module.exports = {
-  ciBuildNumber,
+  ciBuildId,
+  ciBuildSha,
   ciBuildUrl,
   ciCommitSha,
-  ciJobNumber,
+  ciJobId,
   ciJobUrl,
   ciPullRequestBranch,
   ciPullRequestSha,

@@ -158,11 +158,13 @@ const prettifyGlobs = [
   '.travis.yml',
   '.prettierrc',
   '.renovaterc.json',
+  '.circleci/config.yml',
   '.vscode/settings.json',
   '.github/workflows/continuous-integration-workflow.yml',
   '**/*.json',
   '**/OWNERS',
   '**/*.md',
+  '!**/package*.json',
   '!.github/ISSUE_TEMPLATE/**',
   '!**/{node_modules,build,dist,dist.3p,dist.tools,.karma-cache}/**',
 ];

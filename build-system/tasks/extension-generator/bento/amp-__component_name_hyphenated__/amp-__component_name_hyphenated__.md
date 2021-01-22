@@ -1,8 +1,7 @@
 ---
-\$category@: presentation
+$category@: presentation
 formats:
   - websites
-  - email
 teaser:
   text: Fill this in with teaser text to improve SEO. Use the component description.
 ---
@@ -17,7 +16,7 @@ teaser:
 -->
 
 <!--
-Copyright ${year} The AMP HTML Authors. All Rights Reserved.
+Copyright __current_year__ The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -32,7 +31,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# \${name}
+# amp-__component_name_hyphenated__
 
 <!--
   If the component is relevant for more than one format and operates differently between these
@@ -47,12 +46,12 @@ One to three paragraphs explaining the component usage. List important functiona
 
 Below is an example for websites.
 
-[example preview="inline" playground="true" imports="${name}"]
+[example preview="inline" playground="true" imports="amp-__component_name_hyphenated__"]
 
 ```html
-<${name} required-attribute>
+<amp-__component_name_hyphenated__ required-attribute>
   I am a hello world inline executable code sample for websites!
-</${name}>
+</amp-__component_name_hyphenated__>
 ```
 
 [/example][/filter]
@@ -66,12 +65,12 @@ Below is an example for websites.
 
 Below is an example for ads.
 
-[example preview=“inline” playground=“true” imports="${name}"]
+[example preview=“inline” playground=“true” imports="amp-__component_name_hyphenated__"]
 
 ```html
-<${name} required-attribute>
+<amp-__component_name_hyphenated__ required-attribute>
   I am a hello world inline executable code sample for ads!
-</${name}>
+</amp-__component_name_hyphenated__>
 ```
 
 [/example][/filter]
@@ -89,9 +88,9 @@ Code snippet of component usage in Bento.
 What to do if they want behavior. How to work around it.
 
 ```html
-<${name} required-attribute>
+<amp-__component_name_hyphenated__ required-attribute>
   Code sample of behavior or behavior workaround.
-</${name}>
+</amp-__component_name_hyphenated__>
 ```
 
 ### Behavior restrictions
@@ -104,24 +103,24 @@ What is allowed, what isn't.
 
 Description of attribute. Use cases for this attribute.
 
--   `attribute-value-option-one` (default): `attribute-option-one-value` does this to `${name}`.
--   `attribute-value-option-two`: `attribute-option-two-value` does this to `${name}`.
+-   `attribute-value-option-one` (default): `attribute-option-one-value` does this to `amp-__component_name_hyphenated__`.
+-   `attribute-value-option-two`: `attribute-option-two-value` does this to `amp-__component_name_hyphenated__`.
 
 ### `optional-attribute-name` (optional)
 
-Here, I write what `optional-attribute-name` will do to `${name}`.
+Here, I write what `optional-attribute-name` will do to `amp-__component_name_hyphenated__`.
 
 ## Actions (optional)
 
 ### `action-name`
 
-Description of action. Use cases of `action-name`. Include all the nuances, such as: `${name}` needs to be identified with an `id` to work.
+Description of action. Use cases of `action-name`. Include all the nuances, such as: `amp-__component_name_hyphenated__` needs to be identified with an `id` to work.
 
 ## Events (optional)
 
 ### `event-name`
 
-Description of event. Use cases of event-name. Include all the nuances, such as: `${name}` needs to be identified with an `id` to work.
+Description of event. Use cases of event-name. Include all the nuances, such as: `amp-__component_name_hyphenated__` needs to be identified with an `id` to work.
 
 #### Valid AMP
 
@@ -132,18 +131,18 @@ Syntax and argument details for use in fully valid AMP pages.
 ```html
 <head>
   <script
-    custom-element="${name}"
+    custom-element="amp-__component_name_hyphenated__"
     async
-    src="https://cdn.ampproject.org/v0/${name}-latest.js"
+    src="https://cdn.ampproject.org/v0/amp-__component_name_hyphenated__-latest.js"
   ></script>
 </head>
 <body>
-  <${name}
+  <amp-__component_name_hyphenated__
     required-attribute
     on="event-name: my-button.show"
   >
     Hello World!
-  </${name}>
+  </amp-__component_name_hyphenated__>
   <button id="my-button" hidden>
     Here I am!
   </button>
@@ -174,7 +173,7 @@ Explain analytics.
 
 ## Accessibility (optional)
 
-Accessibility information related to `${name}`.
+Accessibility information related to `amp-__component_name_hyphenated__`.
 
 ## Version notes (optional)
 
@@ -182,4 +181,4 @@ Information on version differences and migration notes.
 
 ## Validation
 
-See [\${name} rules](https://github.com/ampproject/amphtml/blob/master/extensions/${name}/validator-${name}.protoascii) in the AMP validator specification.
+See [amp-__component_name_hyphenated__ rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-__component_name_hyphenated__/validator-amp-__component_name_hyphenated__.protoascii) in the AMP validator specification.

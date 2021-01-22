@@ -19,6 +19,7 @@ import {Services} from '../../../src/services';
 import {SubscriptionApi} from '../../../src/iframe-helper';
 import {devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {intersectionEntryToJson} from '../../../src/utils/intersection';
 import {
   layoutRectLtwh,
   moveLayoutRect,
@@ -268,6 +269,15 @@ export class LegacyAdIntersectionObserverHost {
    */
   sendElementIntersection_(entry) {
     const change = intersectionEntryToJson(entry);
+    // rootBounds is always null in 3p iframe (e.g. Viewer).
+    // See https://github.com/w3c/IntersectionObserver/issues/79
+    //
+    // Since before using a real InOb we used to provide rootBounds,
+    // we are temporarily continuing to do so now.
+    // TODO: determine if consumers rely on this functionality and remove if not.
+    if (change.rootBounds === null) {
+      change.rootBounds = this.baseElement_.getViewport().getRect();
+    }
 
     if (
       this.pendingChanges_.length > 0 &&
@@ -318,35 +328,4 @@ export class LegacyAdIntersectionObserverHost {
     this.unlistenOnOutViewport_();
     this.postMessageApi_.destroy();
   }
-}
-
-/**
- * Convert a DOMRect to a regular object to make it serializable.
- *
- * @param {!DOMRect} domRect
- * @return {!DOMRect}
- */
-function domRectToJson(domRect) {
-  if (domRect == null) {
-    return domRect;
-  }
-
-  const {x, y, width, height, top, right, bottom, left} = domRect;
-  return {x, y, width, height, top, right, bottom, left};
-}
-
-/**
- * Convert an IntersectionObserverEntry to a regular object to make it serializable.
- *
- * @param {!IntersectionObserverEntry} entry
- * @return {!IntersectionObserverEntry}
- */
-function intersectionEntryToJson(entry) {
-  return {
-    time: entry.time,
-    rootBounds: domRectToJson(entry.rootBounds),
-    boundingClientRect: domRectToJson(entry.boundingClientRect),
-    intersectionRect: domRectToJson(entry.intersectionRect),
-    intersectionRatio: entry.intersectionRatio,
-  };
 }

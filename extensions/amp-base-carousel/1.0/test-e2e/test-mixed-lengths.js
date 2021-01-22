@@ -20,8 +20,11 @@ import {useStyles} from '../base-carousel.jss';
 const pageWidth = 800;
 const pageHeight = 600;
 
+/** Increase timeout for running on CircleCI **/
+const testTimeout = 40000;
+
 describes.endtoend(
-  'AMP carousel mixed length slides',
+  'amp-base-carousel:1.0 - mixed length slides',
   {
     testUrl:
       'http://localhost:8000/test/manual/amp-base-carousel/1.0/' +
@@ -48,30 +51,31 @@ describes.endtoend(
     describe('snap', () => {
       const slideWidth = pageWidth * 0.75;
 
-      it('should have the correct initial slide positions', async () => {
+      it('should have the correct initial slide positions', async function () {
+        this.timeout(testTimeout);
         const slideOne = await getSlide(styles, controller, 0);
         const slideTwo = await getSlide(styles, controller, 1);
 
         await expect(prop(slideOne, 'offsetWidth')).to.equal(slideWidth);
         await expect(controller.getElementRect(slideOne)).to.include({
-          x: 0,
+          x: (pageWidth - slideWidth) / 2,
         });
 
         await expect(prop(slideTwo, 'offsetWidth')).to.equal(slideWidth);
         await expect(controller.getElementRect(slideTwo)).to.include({
-          x: slideWidth,
+          x: slideWidth + (pageWidth - slideWidth) / 2,
         });
       });
 
-      // TODO(wg-bento): test with snap-align=center when fixed.
-      it('should snap on the start point', async () => {
+      it('should snap on the center point', async function () {
+        this.timeout(testTimeout);
         const el = await getScrollingElement(styles, controller);
         const slideTwo = await getSlide(styles, controller, 1);
         const scrollAmount = 1;
 
         await controller.scrollBy(el, {left: scrollAmount});
         await expect(controller.getElementRect(slideTwo)).to.include({
-          x: 0,
+          x: (pageWidth - slideWidth) / 2,
         });
       });
     });

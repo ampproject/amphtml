@@ -30,6 +30,7 @@ import {
 } from './service';
 import {escapeHtml} from './dom';
 import {getExperimentBranch} from './experiments';
+import {install as installAbortController} from './polyfills/abort-controller';
 import {installAmpdocServicesForEmbed} from './service/core-services';
 import {install as installCustomElements} from './polyfills/custom-elements';
 import {install as installDOMTokenList} from './polyfills/domtokenlist';
@@ -715,6 +716,7 @@ function installPolyfillsInChildWindow(parentWin, childWin) {
     installCustomElements(childWin, class {});
     installIntersectionObserver(parentWin, childWin);
     installResizeObserver(parentWin, childWin);
+    installAbortController(childWin);
   }
 }
 
@@ -756,11 +758,12 @@ export class Installers {
       .then(getDelayPromise)
       .then(() => {
         if (IS_ESM) {
-          const css = parentWin.document.querySelector('style[amp-runtime]')
-            .textContent;
+          // TODO: This is combined (ampdoc + shared), not just shared
+          // const css = parentWin.document.querySelector('style[amp-runtime]')
+          // .textContent;
           installStylesForDoc(
             ampdoc,
-            css,
+            ampSharedCss,
             /* callback */ null,
             /* opt_isRuntimeCss */ true,
             /* opt_ext */ 'amp-runtime'
