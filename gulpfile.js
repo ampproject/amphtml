@@ -179,4 +179,4 @@ createTask('validator', validator);
 createTask('validator-webui', validatorWebui);
 createTask('vendor-configs', vendorConfigs);
 createTask('visual-diff', visualDiff);
-createTask('watch', watch);
+createTask('watch', watch); 
