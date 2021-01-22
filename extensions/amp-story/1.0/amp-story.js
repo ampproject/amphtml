@@ -2175,17 +2175,46 @@ export class AmpStory extends AMP.BaseElement {
    *     active page; the inner array is a list of page IDs at the specified
    *     distance.
    */
+
   getPagesByDistance_() {
+    if (!this.timeEndSum1 || !this.timeEndSum2) {
+      this.timeEndSum1 = [];
+      this.timeEndSum2 = [];
+    }
+
+    let timeStart1 = performance.now();
     const distanceMap = this.getPageDistanceMapHelper_(
       /* distance */ 0,
       /* map */ {},
       this.activePage_.element.id
     );
+    let timeEnd1 = performance.now() - timeStart1;
+    this.timeEndSum1.push(timeEnd1);
+    const averageTime1 =
+      this.timeEndSum1.reduce((acc, val) => acc + val, 0) /
+      this.timeEndSum1.length;
+    console.log(
+      'original getPageDistanceMapHelper_ : ' + timeEnd1,
+      'original average ' + averageTime1
+    );
+
+    let timeStart2 = performance.now();
+    const distanceMapRefactor = this.getPageDistanceMapHelperRefactor_();
+    let timeEnd2 = performance.now() - timeStart2;
+    // console.log('getPageDistanceMapHelperRefactor_', timeEnd2);
+    this.timeEndSum2.push(timeEnd2);
+    const averageTime2 =
+      this.timeEndSum2.reduce((acc, val) => acc + val, 0) /
+      this.timeEndSum2.length;
+    console.log(
+      'refactor getPageDistanceMapHelper_ : ' + timeEnd2,
+      'refactor average: ' + averageTime2
+    );
 
     // Transpose the map into a 2D array.
     const pagesByDistance = [];
-    Object.keys(distanceMap).forEach((pageId) => {
-      let distance = distanceMap[pageId];
+    Object.keys(distanceMapRefactor).forEach((pageId) => {
+      let distance = distanceMapRefactor[pageId];
       // If on last page, mark first page with distance 1.
       if (
         pageId === this.pages_[0].element.id &&
@@ -2259,6 +2288,21 @@ export class AmpStory extends AMP.BaseElement {
     });
 
     return map;
+  }
+
+  /**
+   * Creates a map of a page and all of the pages reachable from that page, by
+   * distance.
+   * @private
+   */
+
+  getPageDistanceMapHelperRefactor_() {
+    const activePageIndex = this.pages_.indexOf(this.activePage_);
+    return this.pages_.reduce((distanceMap, page, index) => {
+      const distance = Math.abs(index - activePageIndex);
+      distanceMap[page.element.id] = distance;
+      return distanceMap;
+    }, {});
   }
 
   /** @private */
