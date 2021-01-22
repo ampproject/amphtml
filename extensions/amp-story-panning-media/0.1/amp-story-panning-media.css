@@ -21,6 +21,10 @@ amp-story-panning-media {
   align-items: center !important;
 }
 
+amp-story-panning-media amp-img {
+backface-visibility: hidden !important;
+}
+
 .i-amphtml-story-grid-template-fill amp-story-panning-media amp-img img {
   /* override for layout=fill. This centers the image without clipping it */
   position: relative !important;
