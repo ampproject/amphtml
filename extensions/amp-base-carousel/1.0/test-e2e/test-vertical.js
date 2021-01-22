@@ -93,7 +93,8 @@ describes.endtoend(
       await expect(prop(el, 'scrollTop')).to.equal(scrollTop);
     });
 
-    describe('looping', () => {
+    // TODO(wg-bento): getScrollingElement does not always find element in time.
+    describe.skip('looping', () => {
       it('should display slides correctly when moving forwards', async () => {
         const el = await getScrollingElement(styles, controller);
         const lastSlide = await getSlide(styles, controller, SLIDE_COUNT - 1);

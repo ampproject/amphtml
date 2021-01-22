@@ -20,9 +20,6 @@ import {useStyles} from '../base-carousel.jss';
 const pageWidth = 800;
 const pageHeight = 600;
 
-/** Increase timeout for running on CircleCI **/
-const testTimeout = 40000;
-
 describes.endtoend(
   'amp-base-carousel:1.0 - mixed length slides',
   {
@@ -52,7 +49,6 @@ describes.endtoend(
       const slideWidth = pageWidth * 0.75;
 
       it('should have the correct initial slide positions', async function () {
-        this.timeout(testTimeout);
         const slideOne = await getSlide(styles, controller, 0);
         const slideTwo = await getSlide(styles, controller, 1);
 
@@ -67,8 +63,8 @@ describes.endtoend(
         });
       });
 
-      it('should snap on the center point', async function () {
-        this.timeout(testTimeout);
+      // TODO(wg-bento): getScrollingElement does not always find element in time.
+      it.skip('should snap on the center point', async function () {
         const el = await getScrollingElement(styles, controller);
         const slideTwo = await getSlide(styles, controller, 1);
         const scrollAmount = 1;
