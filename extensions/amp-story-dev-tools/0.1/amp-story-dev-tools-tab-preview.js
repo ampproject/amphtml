@@ -222,8 +222,6 @@ const buildAddDeviceDialogTemplate = (element) => {
 
 const MAX_DEVICE_SPACES = 4;
 
-const MIN_DEVICE_PADDING_PX = 30;
-
 /**
  * @typedef {{
  *  element: !Element,
