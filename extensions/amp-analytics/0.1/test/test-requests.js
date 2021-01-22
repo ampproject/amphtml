@@ -15,8 +15,8 @@
  */
 
 import * as ResourceTiming from '../resource-timing';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import * as log from '../../../../src/log';
-import * as lolex from 'lolex';
 import {ExpansionOptions, installVariableServiceForTesting} from '../variables';
 import {RequestHandler, expandPostMessage} from '../requests';
 import {Services} from '../../../../src/services';
@@ -35,7 +35,7 @@ describes.realWin('Requests', {amp: 1}, (env) => {
     installLinkerReaderService(env.win);
     installVariableServiceForTesting(ampdoc);
     ampdoc.defaultView = env.win;
-    clock = lolex.install({target: ampdoc.win});
+    clock = fakeTimers.withGlobal(ampdoc.win).install();
     preconnectSpy = env.sandbox.spy();
     preconnect = {
       url: preconnectSpy,

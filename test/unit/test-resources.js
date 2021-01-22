@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {LayoutPriority} from '../../src/layout';
 import {Resource, ResourceState} from '../../src/service/resource';
@@ -36,7 +36,7 @@ describes.realWin('Resources', {amp: true}, (env) => {
     document = window.document;
     delete window.requestIdleCallback;
     delete window.cancelIdleCallback;
-    clock = lolex.install({target: window});
+    clock = fakeTimers.withGlobal(window).install();
     resources = new ResourcesImpl(new AmpDocSingle(window));
     resources.isRuntimeOn_ = false;
   });
