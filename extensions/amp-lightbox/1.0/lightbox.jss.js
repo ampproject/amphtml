@@ -55,10 +55,16 @@ const defaultStyles = {
   color: '#fff',
 };
 
+const containScroll = {
+  overflow: 'scroll',
+  overscrollBehavior: 'none',
+};
+
 const JSS = {
   closeButton,
   wrapper,
   defaultStyles,
+  containScroll,
 };
 
 // useStyles gets replaced for AMP builds via `babel-plugin-transform-jss`.

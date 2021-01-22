@@ -61,7 +61,14 @@ function useValueRef(current) {
  * @return {PreactDef.Renderable}
  */
 function LightboxWithRef(
-  {animation = 'fade-in', children, onBeforeOpen, onAfterClose, ...rest},
+  {
+    animation = 'fade-in',
+    children,
+    onBeforeOpen,
+    onAfterClose,
+    scrollable = false,
+    ...rest
+  },
   ref
 ) {
   // There are two phases to open and close.
@@ -163,7 +170,13 @@ function LightboxWithRef(
         layout={true}
         paint={true}
         part="lightbox"
-        wrapperClassName={`${classes.defaultStyles} ${classes.wrapper}`}
+        contentClassName={classes.containScroll}
+        contentStyle={{
+          overflow: scrollable ? 'scroll' : 'hidden',
+        }}
+        wrapperClassName={`${classes.defaultStyles} ${classes.wrapper} ${
+          scrollable ? '' : classes.containScroll
+        }`}
         role="dialog"
         tabindex="0"
         onKeyDown={(event) => {
