@@ -222,6 +222,8 @@ const buildAddDeviceDialogTemplate = (element) => {
 
 const MAX_DEVICE_SPACES = 4;
 
+const MIN_DEVICE_PADDING_PX = 30;
+
 /**
  * @typedef {{
  *  element: !Element,
@@ -521,25 +523,23 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
       (el) => el.hasAttribute('data-action'),
       this.element
     );
-    if (actionElement.hasAttribute('disabled')) {
+    if (!actionElement || actionElement.hasAttribute('disabled')) {
       return;
     }
-    if (actionElement) {
-      switch (actionElement.getAttribute('data-action')) {
-        case PREVIEW_ACTIONS.SHOW_HELP_DIALOG:
-          this.showHelpDialog_();
-          break;
-        case PREVIEW_ACTIONS.SHOW_ADD_DEVICE_DIALIG:
-          this.showAddDeviceDialog_();
-          break;
-        case PREVIEW_ACTIONS.CLOSE_DIALOG:
-          this.hideCurrentDialog_();
-          break;
-        case PREVIEW_ACTIONS.REMOVE_DEVICE:
-        case PREVIEW_ACTIONS.TOGGLE_DEVICE_CHIP:
-          this.onDeviceChipToggled_(actionElement);
-          break;
-      }
+    switch (actionElement.getAttribute('data-action')) {
+      case PREVIEW_ACTIONS.SHOW_HELP_DIALOG:
+        this.showHelpDialog_();
+        break;
+      case PREVIEW_ACTIONS.SHOW_ADD_DEVICE_DIALIG:
+        this.showAddDeviceDialog_();
+        break;
+      case PREVIEW_ACTIONS.CLOSE_DIALOG:
+        this.hideCurrentDialog_();
+        break;
+      case PREVIEW_ACTIONS.REMOVE_DEVICE:
+      case PREVIEW_ACTIONS.TOGGLE_DEVICE_CHIP:
+        this.onDeviceChipToggled_(actionElement);
+        break;
     }
   }
 
@@ -656,9 +656,13 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
    * @private
    * */
   repositionDevices_() {
-    const {width: layoutWidth, height} = this.getLayoutSize();
-    const width = layoutWidth * 0.8; // To account for 10% horizontal padding.
-    let sumDeviceWidths = 0;
+    const {
+      offsetWidth: width,
+      offsetHeight: height,
+    } = this.element.querySelector(
+      '.i-amphtml-story-dev-tools-devices-container'
+    );
+    let sumDeviceWidths = MIN_DEVICE_PADDING_PX * this.devices_.length;
     let maxDeviceHeights = 0;
     // Find the sum of the device widths and max of heights since they are horizontally laid out.
     this.devices_.forEach((deviceSpecs) => {
