@@ -34,7 +34,6 @@ class AmpTruncateText extends PreactBaseElement {
 
     return dict({
       'onToggle': (isExpanded) => {
-        console.log(`toggle(${isExpanded})`);
         if (isExpanded) {
           this.element.setAttribute(EXPANDED_ATTR, '');
         } else {

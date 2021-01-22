@@ -182,7 +182,6 @@ function getOverflowY(element) {
  * }} config
  */
 export function truncateText({container, overflowNodes}) {
-  console.log(container, overflowNodes);
   clearTruncated(container);
 
   // If everything fits while the overflow button is hidden, we are done.
@@ -192,7 +191,7 @@ export function truncateText({container, overflowNodes}) {
 
   // Measure here, since we just measured and the container rect should not
   // depend on truncateing.
-  const containerRect = container./*OK*/ getBoundingClientRect();
+  containerRect = container./*OK*/ getBoundingClientRect();
   // Set the container as truncateed, so we show the overflow element and we can
   // truncate taking the size into account.
   setTruncated(container);

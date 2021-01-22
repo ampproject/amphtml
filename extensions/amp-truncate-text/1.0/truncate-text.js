@@ -53,10 +53,9 @@ function TruncateTextWithRef(
     []
   );
 
-  // TODO(rcebulko): Rewrite `truncateText` for Preact
+  // TODO(#31685): Rewrite `truncateText` for Preact
   /** Perform truncation on contents. */
   const truncate = useCallback(() => {
-    console.log(`truncate(${isExpanded})`);
     const container = wrapperRef.current;
     const overflowNodes = [persistentRef.current, collapsedRef.current].filter(
       Boolean
@@ -72,6 +71,7 @@ function TruncateTextWithRef(
   useEffect(() => onToggle && truncate(), [onToggle, truncate]);
 
   const classes = useStyles();
+  // TODO(#31685): Remove extra <slot> in default span if possible.
   return (
     <ContainWrapper
       layout
