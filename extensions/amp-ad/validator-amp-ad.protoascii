@@ -65,6 +65,8 @@ tags: {  # <amp-ad>
   attrs: { name: "template" }
   attrs: { name: "type" mandatory: true }
   attrs: { name: "sticky" value: "" }
+  attrs: { name: "always-serve-npa" }
+  attrs: { name: "block-rtc" }
   attr_lists: "extended-amp-global"
   spec_url: "https://amp.dev/documentation/components/amp-ad/"
   amp_layout: {
@@ -146,6 +148,8 @@ tags: {  # <amp-ad data-multi-size>
     }
     disallowed_value_regex: "__amp_source_origin"
   }
+  attrs: { name: "always-serve-npa" }
+  attrs: { name: "block-rtc" }
   attrs: { name: "type" mandatory: true }
   attr_lists: "extended-amp-global"
   spec_url: "https://amp.dev/documentation/components/amp-ad/"
@@ -223,6 +227,8 @@ tags: {  # <amp-embed>
     disallowed_value_regex: "__amp_source_origin"
   }
   attrs: { name: "type" mandatory: true }
+  attrs: { name: "always-serve-npa" }
+  attrs: { name: "block-rtc" }
   attr_lists: "extended-amp-global"
   spec_url: "https://amp.dev/documentation/components/amp-ad/"
   amp_layout: {
@@ -258,6 +264,8 @@ tags: {  # <amp-embed data-multi-size>
   }
   attrs: { name: "json" }
   attrs: { name: "rtc-config" }
+  attrs: { name: "always-serve-npa" }
+  attrs: { name: "block-rtc" }
   attrs: {
     name: "src"
     value_url: {
