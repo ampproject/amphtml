@@ -21,9 +21,9 @@ var TruncateTextDef = {};
 
 /**
  * @typedef {{
- *   collapsed: (?PreactDef.Renderable|undefined),
- *   expanded: (?PreactDef.Renderable|undefined),
- *   persistent: (?PreactDef.Renderable|undefined),
+ *   collapsedContent: (?PreactDef.Renderable|undefined),
+ *   expandedContent: (?PreactDef.Renderable|undefined),
+ *   persistentContent: (?PreactDef.Renderable|undefined),
  *   children: (?PreactDef.Renderable|undefined),
  *   onToggle: (function(boolean):undefined|undefined)
  * }}

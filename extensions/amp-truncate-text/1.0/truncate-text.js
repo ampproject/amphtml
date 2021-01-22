@@ -34,21 +34,28 @@ import {useStyles} from './truncate-text.jss';
  * @return {PreactDef.Renderable}
  */
 function TruncateTextWithRef(
-  {persistent, collapsed, expanded, onToggle, children, ...rest},
+  {
+    persistentContent,
+    collapsedContent,
+    expandedContent,
+    onToggle,
+    children,
+    ...rest
+  },
   ref
 ) {
   const wrapperRef = useRef();
-  const collapsedRef = useRef();
-  const persistentRef = useRef();
+  const collapsedContentRef = useRef();
+  const persistentContentRef = useRef();
 
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(false);
 
   // Provide API actions
   useImperativeHandle(
     ref,
     () => ({
-      expand: () => setIsExpanded(true),
-      collapse: () => setIsExpanded(false),
+      expand: () => setExpanded(true),
+      collapse: () => setExpanded(false),
     }),
     []
   );
@@ -57,16 +64,17 @@ function TruncateTextWithRef(
   /** Perform truncation on contents. */
   const truncate = useCallback(() => {
     const container = wrapperRef.current;
-    const overflowNodes = [persistentRef.current, collapsedRef.current].filter(
-      Boolean
-    );
+    const overflowNodes = [
+      persistentContentRef.current,
+      collapsedContentRef.current,
+    ].filter(Boolean);
 
     container && truncateText({container, overflowNodes});
-    onToggle && onToggle(isExpanded);
-  }, [onToggle, isExpanded]);
+    onToggle && onToggle(expanded);
+  }, [onToggle, expanded]);
 
   // Truncate the text when expanded/collapsed
-  useLayoutEffect(truncate, [isExpanded, truncate]);
+  useLayoutEffect(truncate, [expanded, truncate]);
   // When used in an AMP component, requires an initial truncate to layout.
   useEffect(() => onToggle && truncate(), [onToggle, truncate]);
 
@@ -77,10 +85,10 @@ function TruncateTextWithRef(
       layout
       ref={wrapperRef}
       wrapperClassName={`${classes.truncateTextWrapper} ${
-        isExpanded ? classes.truncateTextExpandedWrapper : ''
+        expanded ? classes.truncateTextExpandedWrapper : ''
       }`}
       contentClassName={`${classes.truncateTextContent} ${
-        isExpanded
+        expanded
           ? classes.truncateTextExpandedContent
           : classes.truncateTextCollapsedContent
       }`}
@@ -90,25 +98,29 @@ function TruncateTextWithRef(
         <slot children={children} />
       </span>
 
-      {isExpanded ? (
+      {expanded ? (
         <span
           name="expanded"
           role="button"
-          onClick={() => setIsExpanded(false)}
+          onClick={() => setExpanded(false)}
           className={classes.truncateTextExpandedSlot}
-          children={expanded}
+          children={expandedContent}
         />
       ) : (
         <span
           name="collapsed"
           role="button"
-          ref={collapsedRef}
-          onClick={() => setIsExpanded(true)}
-          children={collapsed}
+          ref={collapsedContentRef}
+          onClick={() => setExpanded(true)}
+          children={collapsedContent}
         />
       )}
 
-      <span name="persistent" ref={persistentRef} children={persistent} />
+      <span
+        name="persistent"
+        ref={persistentContentRef}
+        children={persistentContent}
+      />
     </ContainWrapper>
   );
 }

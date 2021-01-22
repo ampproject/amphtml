@@ -59,18 +59,18 @@ AmpTruncateText['Component'] = TruncateText;
 
 /** @override */
 AmpTruncateText['children'] = {
-  'collapsed': {
-    name: 'collapsed',
+  'collapsedContent': {
+    name: 'collapsedContent',
     selector: '[slot=collapsed]',
     single: true,
   },
-  'expanded': {
-    name: 'expanded',
+  'expandedContent': {
+    name: 'expandedContent',
     selector: '[slot=expanded]',
     single: true,
   },
-  'persistent': {
-    name: 'persistent',
+  'persistentContent': {
+    name: 'persistentContent',
     selector: '[slot=persistent]',
     single: true,
   },
