@@ -505,12 +505,15 @@ function describeEnv(factory) {
 
   /**
    * @param {string} name
-   * @param {!Object} spec
+   * @param {!Object|Array<!Object>} specOrSpecList
    * @param {function(!Object)} fn
    * @return {function()}
    */
-  const mainFunc = function (name, spec, fn) {
-    return templateFunc(name, spec, fn, describe);
+  const mainFunc = function (name, specOrSpecList, fn) {
+    if (!Array.isArray(specOrSpecList)) {
+      specOrSpecList = [specOrSpecList];
+    }
+    specOrSpecList.forEach((spec) => templateFunc(name, spec, fn, describe));
   };
 
   /**
