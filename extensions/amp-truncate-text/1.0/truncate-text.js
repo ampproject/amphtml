@@ -93,6 +93,7 @@ function TruncateTextWithRef(
       {isExpanded ? (
         <span
           name="expanded"
+          role="button"
           onClick={() => setIsExpanded(false)}
           className={classes.truncateTextExpandedSlot}
           children={expanded}
@@ -100,6 +101,7 @@ function TruncateTextWithRef(
       ) : (
         <span
           name="collapsed"
+          role="button"
           ref={collapsedRef}
           onClick={() => setIsExpanded(true)}
           children={collapsed}
