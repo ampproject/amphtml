@@ -474,7 +474,6 @@ export class AmpStoryPlayer {
 
   /**
    * @param {!StoryDef} story
-   * @return {!Element}
    * @private
    */
   buildIframe_(story) {
@@ -1044,8 +1043,7 @@ export class AmpStoryPlayer {
   }
 
   /**
-   *
-   * @param {*} story
+   * @param {!StoryDef} story
    */
   appendToDom_(story) {
     this.rootEl_.appendChild(story.iframe);
@@ -1053,8 +1051,7 @@ export class AmpStoryPlayer {
   }
 
   /**
-   *
-   * @param {*} story
+   * @param {!StoryDef} story
    */
   removeFromDom_(story) {
     story.iframe.remove();
