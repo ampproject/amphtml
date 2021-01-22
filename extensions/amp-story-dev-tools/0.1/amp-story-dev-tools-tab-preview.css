@@ -17,11 +17,13 @@
  amp-story-dev-tools-tab-preview {
   --i-amphtml-story-dev-tools-device-shadow: 0px 11.0046px 27.5114px rgba(0, 0, 0, 0.34), inset 0px 2.20091px 3.30137px rgba(44, 46, 52, 0.6) !important;
   padding: var(--i-amphtml-story-dev-tools-vertical-spacing) 10% !important;
+  padding-bottom: calc(var(--i-amphtml-story-dev-tools-vertical-spacing) + 64px) !important;
 }
 
 .i-amphtml-story-dev-tools-devices-container {
   width: 100% !important;
   height: 100% !important;
+  position: relative;
 }
 
 .i-amphtml-story-dev-tools-device {
@@ -150,7 +152,7 @@ amp-story-player a {
 .i-amphtml-story-dev-tools-device-dialog-container {
   background: black !important;
   width: min(650px, 90%) !important;
-  border-radius: 10px !important;
+  border-radius: 30px !important;
   padding: 40px !important;
   position: relative !important;
   transition: transform 0.2s var(--i-amphtml-story-dev-tools-material-easing-accelerated), opacity 0.2s var(--i-amphtml-story-dev-tools-material-easing-accelerated) !important;
@@ -224,8 +226,8 @@ amp-story-player a {
   width: 40px !important;
   height: 40px !important;
   position: absolute !important;
-  top: 0 !important;
-  right: 0 !important;
+  top: 6px !important;
+  right: 6px !important;
   opacity: .6 !important;
   background: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="18px" height="18px"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>') !important;
   background-repeat: no-repeat !important;
