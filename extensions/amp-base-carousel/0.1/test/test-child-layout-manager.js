@@ -170,7 +170,7 @@ describes.realWin('child layout manager', {}, (env) => {
       await afterRenderPromise();
 
       expect(ownersMock.scheduleLayout)
-        .to.have.callCount(2)
+        .to.have.callCount(3)
         .to.have.been.calledWith(domElementMock, el.children[0])
         .to.have.been.calledWith(domElementMock, el.children[1]);
     });
@@ -191,7 +191,7 @@ describes.realWin('child layout manager', {}, (env) => {
       await afterRenderPromise();
 
       expect(ownersMock.scheduleLayout)
-        .to.have.callCount(2)
+        .to.have.callCount(3)
         .to.have.been.calledWith(domElementMock, el.children[0])
         .to.have.been.calledWith(domElementMock, el.children[1]);
     });
@@ -213,7 +213,7 @@ describes.realWin('child layout manager', {}, (env) => {
       await afterRenderPromise();
 
       expect(ownersMock.scheduleLayout)
-        .to.have.callCount(2)
+        .to.have.callCount(3)
         .to.have.been.calledWith(domElementMock, newChildren[0])
         .to.have.been.calledWith(domElementMock, newChildren[1]);
     });
@@ -267,7 +267,7 @@ describes.realWin('child layout manager', {}, (env) => {
       await afterScrollAndIntersectingPromise(el.children[1], el);
 
       expect(ownersMock.scheduleLayout)
-        .to.have.callCount(1)
+        .to.have.callCount(2)
         .to.have.been.calledWith(domElementMock, el.children[2]);
     });
 
@@ -357,7 +357,7 @@ describes.realWin('child layout manager', {}, (env) => {
       clm.flushChanges();
 
       expect(ownersMock.scheduleLayout)
-        .to.have.callCount(1)
+        .to.have.callCount(2)
         .to.have.been.calledWith(domElementMock, el.children[2]);
     });
 
