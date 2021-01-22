@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {PositionObserver} from '../../src/service/position-observer/position-observer-impl';
 import {PositionObserverFidelity} from '../../src/service/position-observer/position-observer-worker';
 import {Services} from '../../src/services';
@@ -36,7 +36,7 @@ describes.realWin('PositionObserver', {amp: 1}, (env) => {
     let elem1;
     let clock;
     beforeEach(() => {
-      clock = lolex.install({target: ampdoc.win});
+      clock = fakeTimers.withGlobal(ampdoc.win).install();
       posOb = new PositionObserver(ampdoc);
       env.sandbox.stub(posOb.vsync_, 'measure').callsFake((callback) => {
         win.setTimeout(callback, 1);

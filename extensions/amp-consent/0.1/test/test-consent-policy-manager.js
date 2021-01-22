@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {
   CONSENT_ITEM_STATE,
   constructConsentInfo,
@@ -444,7 +444,7 @@ describes.realWin(
             },
           };
 
-          clock = lolex.install({target: ampdoc.win});
+          clock = fakeTimers.withGlobal(ampdoc.win).install();
         });
 
         it('consent policy should resolve after timeout', function* () {

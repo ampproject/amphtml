@@ -19,7 +19,7 @@
  * because it requires building web-worker binary.
  */
 
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {AmpEvents} from '../../../../../src/amp-events';
 import {Bind} from '../../bind-impl';
 import {BindEvents} from '../../bind-events';
@@ -376,7 +376,9 @@ describe
 
           history = bind.historyForTesting();
 
-          clock = lolex.install({target: win, toFake: ['Date', 'setTimeout']});
+          clock = fakeTimers.withGlobal(win).install({
+            toFake: ['Date', 'setTimeout'],
+          });
         });
 
         afterEach(() => {

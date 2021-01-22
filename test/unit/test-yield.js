@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {macroTask} from '../../testing/yield';
 
 describes.realWin('yield', {}, (env) => {
@@ -22,8 +22,7 @@ describes.realWin('yield', {}, (env) => {
 
   beforeEach(() => {
     win = env.win;
-    clock = lolex.install({
-      target: win,
+    clock = fakeTimers.withGlobal(win).install({
       toFake: ['Date', 'setTimeout', 'clearTimeout'],
     });
   });

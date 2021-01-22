@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {BASE_CID_MAX_AGE_MILLIS} from '../../src/service/cid-impl';
 import {
   getCookie,
@@ -30,8 +30,7 @@ describes.fakeWin('test-cookies', {amp: true}, (env) => {
   beforeEach(() => {
     win = env.win;
     doc = win.document;
-    clock = lolex.install({
-      target: window,
+    clock = fakeTimers.withGlobal(window).install({
       now: new Date('2018-01-01T08:00:00Z'),
     });
   });

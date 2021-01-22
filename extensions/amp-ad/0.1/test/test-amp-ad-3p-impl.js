@@ -18,7 +18,7 @@ import '../../../amp-ad/0.1/amp-ad';
 import '../../../amp-sticky-ad/1.0/amp-sticky-ad';
 import * as adCid from '../../../../src/ad-cid';
 import * as consent from '../../../../src/consent';
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {AmpAd3PImpl} from '../amp-ad-3p-impl';
 import {AmpAdUIHandler} from '../amp-ad-ui';
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
@@ -403,8 +403,7 @@ describes.realWin(
 
       it('should only allow rendering one ad per second', async () => {
         ad3p.getVsync().runScheduledTasks_();
-        const clock = lolex.install({
-          target: win,
+        const clock = fakeTimers.withGlobal(win).install({
           toFake: ['Date', 'setTimeout', 'clearTimeout'],
         });
         const ad3p2 = createAmpAd(win);
