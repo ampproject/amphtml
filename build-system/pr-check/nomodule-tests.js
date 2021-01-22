@@ -16,66 +16,53 @@
 'use strict';
 
 /**
- * @fileoverview
- * This script runs the unit and integration tests against minified code
- * on a local CI service VM.
- * This is run during the CI stage = test; job = nomodule tests.
+ * @fileoverview Script that tests the nomodule AMP runtime during CI.
  */
 
 const {
   downloadNomoduleOutput,
-  printChangeSummary,
   printSkipMessage,
-  startTimer,
-  stopTimer,
   timedExecOrDie,
   timedExecOrThrow,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
-const {isPullRequestBuild} = require('../common/ci');
-const {setLoggingPrefix} = require('../common/logging');
+const {runCiJob} = require('./ci-job');
 
 const jobName = 'nomodule-tests.js';
 
-function main() {
-  setLoggingPrefix(jobName);
-  const startTime = startTimer(jobName);
-
-  if (!isPullRequestBuild()) {
-    downloadNomoduleOutput();
-    timedExecOrDie('gulp update-packages');
-    try {
-      timedExecOrThrow(
-        'gulp integration --nobuild --headless --compiled --report',
-        'Integration tests failed!'
-      );
-    } catch (e) {
-      if (e.status) {
-        process.exitCode = e.status;
-      }
-    } finally {
-      timedExecOrDie('gulp test-report-upload');
+function pushBuildWorkflow() {
+  downloadNomoduleOutput();
+  timedExecOrDie('gulp update-packages');
+  try {
+    timedExecOrThrow(
+      'gulp integration --nobuild --headless --compiled --report',
+      'Integration tests failed!'
+    );
+  } catch (e) {
+    if (e.status) {
+      process.exitCode = e.status;
     }
-  } else {
-    printChangeSummary();
-    const buildTargets = determineBuildTargets();
-    if (
-      buildTargets.has('RUNTIME') ||
-      buildTargets.has('FLAG_CONFIG') ||
-      buildTargets.has('INTEGRATION_TEST')
-    ) {
-      downloadNomoduleOutput();
-      timedExecOrDie('gulp update-packages');
-      timedExecOrDie('gulp integration --nobuild --compiled --headless');
-    } else {
-      printSkipMessage(
-        jobName,
-        'this PR does not affect the runtime, flag configs, or integration tests'
-      );
-    }
+  } finally {
+    timedExecOrDie('gulp test-report-upload');
   }
-
-  stopTimer(jobName, startTime);
 }
 
-main();
+function prBuildWorkflow() {
+  const buildTargets = determineBuildTargets();
+  if (
+    buildTargets.has('RUNTIME') ||
+    buildTargets.has('FLAG_CONFIG') ||
+    buildTargets.has('INTEGRATION_TEST')
+  ) {
+    downloadNomoduleOutput();
+    timedExecOrDie('gulp update-packages');
+    timedExecOrDie('gulp integration --nobuild --compiled --headless');
+  } else {
+    printSkipMessage(
+      jobName,
+      'this PR does not affect the runtime, flag configs, or integration tests'
+    );
+  }
+}
+
+runCiJob(jobName, pushBuildWorkflow, prBuildWorkflow);
