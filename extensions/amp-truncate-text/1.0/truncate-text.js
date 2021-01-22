@@ -96,7 +96,7 @@ function TruncateTextWithRef(
       {...rest}
     >
       <span name="default">
-        <slot children={children} />
+        <slot>{children}</slot>
       </span>
 
       {expanded ? (
@@ -106,8 +106,9 @@ function TruncateTextWithRef(
           tabindex="0"
           onClick={() => setExpanded(false)}
           className={classes.truncateTextExpandedSlot}
-          children={expandedContent}
-        />
+        >
+          {expandedContent}
+        </span>
       ) : (
         <span
           name="collapsed"
@@ -115,15 +116,14 @@ function TruncateTextWithRef(
           tabindex="0"
           ref={collapsedContentRef}
           onClick={() => setExpanded(true)}
-          children={collapsedContent}
-        />
+        >
+          {collapsedContent}
+        </span>
       )}
 
-      <span
-        name="persistent"
-        ref={persistentContentRef}
-        children={persistentContent}
-      />
+      <span name="persistent" ref={persistentContentRef}>
+        {persistentContent}
+      </span>
     </ContainWrapper>
   );
 }
