@@ -28,7 +28,7 @@ const {
   timedExecOrDie,
   uploadNomoduleOutput,
 } = require('./utils');
-const {determineBuildTargets} = require('./build-targets');
+const {buildTargetsInclude, Targets} = require('./build-targets');
 const {log} = require('../common/logging');
 const {red, yellow} = require('ansi-colors');
 const {runCiJob} = require('./ci-job');
@@ -44,13 +44,14 @@ function pushBuildWorkflow() {
 
 async function prBuildWorkflow() {
   const startTime = startTimer(jobName);
-  const buildTargets = determineBuildTargets();
   if (
-    buildTargets.has('RUNTIME') ||
-    buildTargets.has('FLAG_CONFIG') ||
-    buildTargets.has('INTEGRATION_TEST') ||
-    buildTargets.has('E2E_TEST') ||
-    buildTargets.has('VISUAL_DIFF')
+    buildTargetsInclude(
+      Targets.RUNTIME,
+      Targets.FLAG_CONFIG,
+      Targets.INTEGRATION_TEST,
+      Targets.E2E_TEST,
+      Targets.VISUAL_DIFF
+    )
   ) {
     timedExecOrDie('gulp update-packages');
     const process = timedExecWithError('gulp dist --fortesting');
