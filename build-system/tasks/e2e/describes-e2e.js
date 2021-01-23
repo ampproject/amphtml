@@ -540,7 +540,7 @@ function describeEnv(factory) {
           ...versionSpec,
           version,
         };
-        templateFunc(`[v${version || '?'}] ${name}`, fullSpec, fn, describe);
+        templateFunc(`[v${version}] ${name}`, fullSpec, fn, describe);
       });
     }
   };
