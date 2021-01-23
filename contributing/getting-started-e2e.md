@@ -38,7 +38,7 @@ If you do not yet have a specific code contribution project in mind as you go th
     -   [Code quality and style](#code-quality-and-style)
 -   [Testing your changes](#testing-your-changes)
     -   [Running tests locally](#running-tests-locally)
-    -   [Running all the Travis CI checks locally](#running-all-the-travis-ci-checks-locally)
+    -   [Running all the CircleCI checks locally](#running-all-the-circleci-checks-locally)
     -   [Adding tests for your change](#adding-tests-for-your-change)
 -   [Push your changes to your GitHub fork](#push-your-changes-to-your-github-fork)
 -   [Send a Pull Request (i.e. request a code review)](#send-a-pull-request-ie-request-a-code-review)
@@ -416,9 +416,9 @@ By default, all tests are run on Chrome. Pass one of the following flags to run 
 
 If you need help with fixing failing tests, please ask on the GitHub issue you're working on or reach out to the community as described in [How to get help](#how-to-get-help).
 
-## Running Travis CI checks locally
+## Running all the CircleCI checks locally
 
-To avoid repeatedly waiting for Travis to run all pull-request checks, you can run them locally:
+To avoid repeatedly waiting for CircleCI to run all pull-request checks, you can run them locally:
 
 ```sh
 gulp pr-check
@@ -427,7 +427,7 @@ gulp pr-check
 Notes:
 
 -   This will force a clean build and run all the PR checks one by one.
--   Just like on Travis, a failing check will prevent subsequent checks from being run.
+-   Just like on CircleCI, a failing check will prevent subsequent checks from being run.
 -   The `gulp visual-diff` check will be skipped unless you have set up a Percy account as described in the [Testing](TESTING.md#running-visual-diff-tests-locally) guide.
 -   Unit and integration tests will be run on local Chrome.
 
@@ -532,13 +532,13 @@ When you're done click "Create pull request." This will bring you to your Pull R
 
 On the Pull Request page you can see that a few checks are running:
 
--   The tests are being run on [Travis](https://travis-ci.com/ampproject/amphtml/pull_requests)
+-   The tests are being run on [CircleCI](https://app.circleci.com/pipelines/github/ampproject/amphtml)
 
 -   The system is verifying that you have signed a CLA (Contributor License Agreement). If this is your first time submitting a Pull Request for AMP on GitHub you'll need to sign a CLA. (Make sure the email address you use to sign the CLA is the same one that you configured Git with.) See details in the [Contributing code](../CONTRIBUTING.md#contributing-code) documentation.
 
 -   Your code is going through static analysis by [LGTM](https://lgtm.com/projects/g/ampproject/amphtml/).
 
--   Visual diff tests that are run on Travis are being analyzed by [Percy](http://percy.io/ampproject/amphtml).
+-   Visual diff tests that are run on CircleCI are being analyzed by [Percy](http://percy.io/ampproject/amphtml).
 
 If you don't hear back from your reviewer within 2 business days, feel free to ping the pull request by adding a comment.
 

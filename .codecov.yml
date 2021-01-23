@@ -2,8 +2,6 @@
 # See https://docs.codecov.io/docs/codecovyml-reference
 codecov:
   bot: 'amp-coverage-bot'
-  ci:
-    - 'travis.com'
   max_report_age: 24
   require_ci_to_pass: no
   notify:

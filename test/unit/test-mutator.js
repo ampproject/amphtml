@@ -975,7 +975,7 @@ describes.realWin('mutator changeSize', {amp: true}, (env) => {
       expect(overflowCallbackSpy).to.not.been.called;
     });
 
-    // TODO(#25518): investigate failure on Travis Safari
+    // TODO(#25518): investigate failure on Safari
     it.configure().skipSafari(
       'in viewport should change size if in the last 15% and ' +
         'in the last 1000px',
