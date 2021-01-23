@@ -240,6 +240,20 @@ function getFirefoxArgs(config) {
 let TestSpec;
 
 /**
+ * @typedef {{
+ *  browsers: (!Array<string>|undefined),
+ *  environments: (!Array<!AmpdocEnvironment>|undefined),
+ *  testUrl: string,
+ *  fixture: string,
+ *  manualFixture: string,
+ *  initialRect: ({{width: number, height:number}}|undefined),
+ *  deviceName: string|undefined,
+ *  versions: {{[version: string]: TestSpec}}
+ * }}
+ */
+let RootSpec;
+
+/**
  * An end2end test using Selenium Web Driver or Puppeteer
  */
 const endtoend = describeEnv((spec) => new EndToEndFixture(spec));
@@ -507,17 +521,26 @@ function describeEnv(factory) {
 
   /**
    * @param {string} name
-   * @param {!Object|Array<!Object>} specOrSpecList
+   * @param {!RootSpec} spec
    * @param {function(!Object)} fn
    * @return {function()}
    */
-  const mainFunc = function (name, specOrSpecList, fn) {
-    if (!Array.isArray(specOrSpecList)) {
-      templateFunc(name, specOrSpecList, fn, describe);
+  const mainFunc = function (name, spec, fn) {
+    const {versions, ...baseSpec} = spec;
+    if (!versions) {
+      templateFunc(name, spec, fn, describe);
     } else {
-      specOrSpecList.forEach((spec) => {
-        const {version} = spec;
-        templateFunc(`[v${version || '?'}] ${name}`, spec, fn, describe);
+      // A root `describes.endtoend` spec may contain a `versions` object, where
+      // the key represents the version number and the value is an object with
+      // test specs for that version. This allows specs to share test fixtures,
+      // browsers, and other settings.
+      Object.entries(versions).forEach(([version, versionSpec]) => {
+        const fullSpec = {
+          ...baseSpec,
+          ...versionSpec,
+          version,
+        };
+        templateFunc(`[v${version || '?'}] ${name}`, fullSpec, fn, describe);
       });
     }
   };
@@ -697,6 +720,7 @@ function intersect(a, b) {
 }
 
 module.exports = {
+  RootSpec,
   TestSpec,
   endtoend,
   configure,
