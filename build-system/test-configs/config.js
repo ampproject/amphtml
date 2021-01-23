@@ -152,6 +152,7 @@ const presubmitGlobs = [
  * 2. Make sure it is listed in .vscode/settings.json (for auto-fix-on-save)
  */
 const prettifyGlobs = [
+  '.circleci/config.yml',
   '.codecov.yml',
   '.lando.yml',
   '.lgtm.yml',

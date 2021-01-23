@@ -19,7 +19,7 @@ import {getScrollingElement, getSlide, waitForCarouselImg} from './helpers';
 const pageWidth = 800;
 const pageHeight = 600;
 
-/** Increase timeout for running on Travis macOS **/
+/** Increase timeout for running on macOS **/
 const testTimeout = 20000;
 
 describes.endtoend(

@@ -76,7 +76,7 @@ t.run('AMPHTML ad on AMP Page', () => {
         return RequestBank.tearDown();
       });
 
-      // TODO(#24657): Flaky on Travis.
+      // TODO(#24657): Flaky on CI.
       it.skip('should layout amp-img, amp-pixel, amp-analytics', () => {
         // Open http://ads.localhost:9876/amp4test/a4a/12345 to see ad content
         return testAmpComponentsBTF(env.win);
