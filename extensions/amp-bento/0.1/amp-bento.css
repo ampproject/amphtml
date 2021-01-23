@@ -1,0 +1,89 @@
+/**
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/* Special elements that require FOUC. */
+
+@import 'amp-accordion.css';
+@import 'amp-social-share.css';
+
+
+/* Common boilerplate */
+
+/* display:block elements */
+amp-accordion,
+amp-base-carousel,
+amp-fit-text,
+amp-inline-gallery,
+amp-inline-gallery-pagination,
+amp-inline-gallery-thumbnails,
+amp-instagram,
+amp-selector,
+amp-stream-gallery {
+  display: block;
+}
+
+/* display:inline-block elements */
+amp-date-countdown,
+amp-date-display,
+amp-social-share,
+amp-timeago {
+  display: inline-block;
+}
+
+/* contain:layout elements */
+amp-accordion,
+amp-inline-gallery,
+amp-selector {
+  contain: layout;
+}
+
+/* contain:strict elements */
+amp-base-carousel,
+amp-date-countdown,
+amp-date-display,
+amp-fit-text,
+amp-inline-gallery-pagination,
+amp-inline-gallery-thumbnails,
+amp-instagram,
+amp-social-share,
+amp-stream-gallery,
+amp-timeago {
+  contain: strict;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Size-defining elements: hide children until build */
+amp-fit-text:not(.i-amphtml-built) {
+  color: transparent !important;
+}
+
+amp-base-carousel:not(.i-amphtml-built) > :not([placeholder]),
+amp-date-countdown:not(.i-amphtml-built) > :not([placeholder]),
+amp-fit-text:not(.i-amphtml-built) > :not([placeholder]),
+amp-inline-gallery-pagination:not(.i-amphtml-built) > :not([placeholder]),
+amp-inline-gallery-thumbnails:not(.i-amphtml-built) > :not([placeholder]),
+amp-stream-gallery:not(.i-amphtml-built) > :not([placeholder]),
+amp-timeago:not(.i-amphtml-built) > :not([placeholder]) {
+  display: none !important;
+  content-visibility: hidden !important;
+}
+
+/* offscreen */
+amp-lightbox[hidden],
+amp-sidebar[hidden] {
+  display: none !important;
+}
