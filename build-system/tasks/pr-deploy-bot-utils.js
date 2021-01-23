@@ -70,7 +70,7 @@ async function replaceUrls(dir) {
 
 async function signalPrDeployUpload(result) {
   // TODO(rsimha): Remove this check once Travis is shut down.
-  if (!isTravisBuild()) {
+  if (isTravisBuild()) {
     return;
   }
   const loggingPrefix = getLoggingPrefix();
