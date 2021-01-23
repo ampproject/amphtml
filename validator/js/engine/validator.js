@@ -2519,7 +2519,7 @@ class CdataMatcher {
       const {params} = errorToken;
       // Override the first parameter with the name of this style tag.
       params[0] = getTagDescriptiveName(this.tagSpec_);
-      context.addError(
+      context.addWarning(
           errorToken.code, new LineCol(errorToken.line, errorToken.col), params,
           /* url */ '', validationResult);
     }
