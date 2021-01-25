@@ -3,6 +3,8 @@
 formats:
   - websites
   - email
+  - stories
+  - ads
 teaser:
   text: Fill this in with teaser text to improve SEO. Use the component description.
 ---
@@ -78,15 +80,36 @@ Below is an example for ads.
 
 ### Standalone use outside valid AMP documents (optional)
 
-Bento AMP allows you to use AMP components in non-AMP pages without needing to commit to fully valid AMP. You can take these components and place them in implementations with frameworks and CMSs that don't support AMP. Read more in our guide [Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/)
+<!-- TODO: Remove backticks from link when guide is live -->
+
+Bento AMP allows you to use AMP components in non-AMP pages without needing to commit to fully valid AMP. You can take these components and place them in implementations with frameworks and CMSs that don't support AMP. Read more in our guide `[Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/)`.
 
 #### Example
 
-Code snippet of Bento component in standalone usage.
+The example below demonstrates `${name}` component in standalone use.
+
+```
+<head>
+...
+<script async src="https://cdn.ampproject.org/v0.js"></script>
+
+<script async custom-element="amp-bento-component-name" src="https://cdn.ampproject.org/v0/amp-bento-component-name-1.0.js"></script>
+...
+</head>
+<amp-bento-component>
+  ...
+</amp-bento-component>
+<button id="element-id">
+  Event Trigger
+</button>
+<script>
+  example of one API usage
+</script>
+```
 
 #### Interactivity and API usage
 
-Bento enabled components in standalone use are highly interactive through their API. Because standalone mode doesn't require valid AMP, you can create custom interactivity without the use of [`amp-bind`](https://amp.dev/documentation/components/amp-bind/?format=websites) implementations and the API replaces [AMP actions and events](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events/?format=websites).
+Bento enabled components in standalone use are highly interactive through their API. In Bento standalone use, the element's API replaces AMP Actions and events and [`amp-bind`](https://amp.dev/documentation/components/amp-bind/?format=websites).
 
 The `${name}` component API is accessible by including the following script tag in your document:
 
@@ -106,6 +129,13 @@ example
 
 **event 2**
 Explanation of event, proper syntax/arguments.
+
+```
+example
+```
+
+**action 1**
+Explanation of action, proper syntax/arguments.
 
 ```
 example
