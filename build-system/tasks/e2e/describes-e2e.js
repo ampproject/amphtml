@@ -626,7 +626,6 @@ class EndToEndFixture {
     let {testUrl} = spec;
     const {fixture, manualFixture} = spec;
     if (!!testUrl + !!fixture + !!manualFixture > 1) {
-      console.log(spec);
       throw new Error(
         'Only one of [testUrl, fixture, manualFixture] may be specified'
       );
