@@ -244,6 +244,27 @@ describes.realWin(
       });
     });
 
+    // TODO(wg-bento): This test fails?
+    it.skip('should fire DOM event', async () => {
+      const userSuppliedChildren = setSlides(3);
+      userSuppliedChildren.forEach((child) => element.appendChild(child));
+      win.document.body.appendChild(element);
+      await getSlidesFromShadow();
+
+      const eventSpy = env.sandbox.spy();
+      element.addEventListener('slideChange', eventSpy);
+
+      const api = await element.getApi();
+      api.next();
+
+      expect(eventSpy).to.be.calledOnce;
+      expect(eventSpy.firstCall).calledWithMatch({
+        'data': {
+          'index': 1,
+        },
+      });
+    });
+
     describe('imperative api', () => {
       let scroller;
       let slides;

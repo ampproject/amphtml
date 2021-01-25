@@ -166,6 +166,25 @@ describes.realWin(
       ).to.deep.equal([userSuppliedChildren[1]]);
     });
 
+    // TODO(wg-bento): This test fails?
+    it.skip('should fire DOM event', async () => {
+      win.document.body.appendChild(element);
+      await element.build();
+
+      const eventSpy = env.sandbox.spy();
+      element.addEventListener('slideChange', eventSpy);
+
+      const api = await element.getApi();
+      api.next();
+
+      expect(eventSpy).to.be.calledOnce;
+      expect(eventSpy.firstCall).calledWithMatch({
+        'data': {
+          'index': 1,
+        },
+      });
+    });
+
     describe('imperative api', () => {
       let scroller;
       let slides;
@@ -202,6 +221,9 @@ describes.realWin(
       }
 
       it('should execute next and prev actions', async () => {
+        const eventSpy = env.sandbox.spy();
+        element.addEventListener('slideChange', eventSpy);
+
         element.enqueAction(invocation('next'));
         await waitFor(
           () => scroller.scrollLeft === slides[1].offsetLeft,
