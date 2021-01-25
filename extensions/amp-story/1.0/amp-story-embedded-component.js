@@ -1463,10 +1463,8 @@ export class AmpStoryEmbeddedComponent {
    */
   onAnchorClick_(event) {
     event.preventDefault();
-    const outerAnchor = this.win_.document.createElement('a');
-    outerAnchor.href = this.tooltip_.href;
-    outerAnchor.target = this.tooltip_.target;
-    this.win_.document.appendChild(outerAnchor);
+    const outerAnchor = this.tooltip_.cloneNode();
+    this.storyEl_.appendChild(outerAnchor);
     outerAnchor.click();
     outerAnchor.remove();
   }
