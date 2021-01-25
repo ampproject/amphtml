@@ -16,6 +16,50 @@
 </head>
 <body>
   <h1>Input Masking</h1>
+  <h2>Mask with amp-state</h2>
+  <form
+    method="post"
+    action-xhr="/form/echo-json/post"
+    target="_blank"
+    >
+      <label
+        >Masked input:
+        <input
+          [value]="maskedValue"
+          on="change:AMP.setState({maskedValue: event.value})"
+          name="statemask"
+          mask="000-000-000"
+          mask-output="alphanumeric" 
+          placeholder="Type some numbers..."
+      /></label>
+      <input type="submit">
+      <div submit-success>
+        <template type="amp-mustache">
+          {{statemask}}, 
+          {{statemask-unmasked}}
+        </template>
+      </div>
+    </form>
+    <div>
+      <div class="pt-15">
+        <button on="tap:AMP.setState({maskedValue:''})">
+          Reset value with AMP.setState
+        </button>
+      </div>
+      <div class="pt-15">
+        <label
+          ><button on="tap:AMP.setState({maskedValue:maskedValueProxy || ''})">
+            Apply value with AMP.setState
+          </button>
+          <input
+            [value]="maskedValueProxy"
+            on="change:AMP.setState({maskedValueProxy: event.value})"
+            name="maskedValueProxy"
+            mask="000-000-000"
+            placeholder="Type value to be applied..."
+        /></label>
+      </div>
+    </div>
 
   <h2>Named Masks</h2>
   <form method="post"

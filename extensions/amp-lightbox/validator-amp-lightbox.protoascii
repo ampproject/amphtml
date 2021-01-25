@@ -16,13 +16,12 @@
 
 tags: {  # amp-lightbox
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-lightbox"
     version: "0.1"
     version: "latest"
-    requires_usage: GRANDFATHERED
+    requires_usage: EXEMPTED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -54,7 +53,6 @@ tags: {  # amp-lightbox
 tags: {  # <amp-lightbox>
   html_format: AMP
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "AMP-LIGHTBOX"
   requires_extension: "amp-lightbox"
   attrs: {
@@ -65,7 +63,10 @@ tags: {  # <amp-lightbox>
   }
   attrs: { name: "controls" }
   attrs: { name: "from" }
-  attrs: { name: "scrollable" }
+  attrs: {
+    name: "scrollable"
+    disabled_by: "amp4email"
+  }
   # <amp-bind>
   attrs: { name: "[open]" }
   attr_lists: "extended-amp-global"

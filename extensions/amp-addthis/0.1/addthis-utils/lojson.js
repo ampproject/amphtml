@@ -72,10 +72,11 @@ let LojsonDataDef;
 let AtConfigDef;
 
 /**
- * @param {!LojsonDataDef} param1
+ * @param {!LojsonDataDef} jsonData
  * @return {!JsonObject}
  */
-export function getLojsonData({loc, title, pubId, atConfig, referrer, ampDoc}) {
+export function getLojsonData(jsonData) {
+  const {loc, title, pubId, atConfig, referrer, ampDoc} = jsonData;
   const {href, hostname, host, search, pathname, hash, protocol, port} = loc;
   const pageInfo = {
     du: href.split('#').shift(),

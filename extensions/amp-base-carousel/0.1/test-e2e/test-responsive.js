@@ -20,7 +20,7 @@ const pageWidth = 1000;
 const pageHeight = 600;
 
 describes.endtoend(
-  'AMP Carousel responsive attributes',
+  'amp-base-carousel:0.1 - responsive attributes',
   {
     testUrl:
       'http://localhost:8000/test/manual/amp-base-carousel/' +
@@ -30,7 +30,7 @@ describes.endtoend(
     //TODO(spaharmi): fails on shadow demo
     environments: ['single', 'viewer-demo'],
   },
-  async env => {
+  async (env) => {
     let controller;
 
     function prop(el, name) {

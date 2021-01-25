@@ -19,6 +19,7 @@ import {dict} from './utils/object.js';
 import {experimentToggles, isCanary} from './experiments';
 import {getLengthNumeral} from './layout';
 import {getModeObject} from './mode-object';
+import {getPageLayoutBoxBlocking} from './utils/page-layout-box';
 import {internalRuntimeVersion} from './internal-version';
 import {urls} from './config';
 
@@ -53,13 +54,12 @@ export function getContextMetadata(
     locationHref = parentWindow.parent.location.href;
   }
 
+  const ampdoc = Services.ampdoc(element);
   const docInfo = Services.documentInfoForDoc(element);
   const viewer = Services.viewerForDoc(element);
   const referrer = viewer.getUnconfirmedReferrerUrl();
 
-  // TODO(alanorozco): Redesign data structure so that fields not exposed by
-  // AmpContext are not part of this object.
-  const layoutRect = element.getPageLayoutBox();
+  const layoutRect = getPageLayoutBoxBlocking(element);
 
   // Use JsonObject to preserve field names so that ampContext can access
   // values with name
@@ -85,7 +85,7 @@ export function getContextMetadata(
     'tagName': element.tagName,
     'mode': getModeObject(),
     'canary': isCanary(parentWindow),
-    'hidden': !viewer.isVisible(),
+    'hidden': !ampdoc.isVisible(),
     'initialLayoutRect': layoutRect
       ? {
           'left': layoutRect.left,
@@ -94,7 +94,6 @@ export function getContextMetadata(
           'height': layoutRect.height,
         }
       : null,
-    'initialIntersection': element.getIntersectionChangeEntry(),
     'domFingerprint': DomFingerprint.generate(element),
     'experimentToggles': experimentToggles(parentWindow),
     'sentinel': sentinel,

@@ -3,8 +3,9 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: Displays a simple embedded Hulu video.
+  text: Displays an embedded Hulu video.
 ---
+
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
@@ -23,47 +24,30 @@ limitations under the License.
 
 # amp-hulu
 
-Displays a simple embedded <a href="http://www.hulu.com">Hulu</a> video.
+## Usage
 
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-hulu" src="https://cdn.ampproject.org/v0/amp-hulu-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, responsive</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://amp.dev/documentation/examples/components/amp-hulu/">Annotated code example for amp-hulu</a></td>
-  </tr>
-</table>
-
-[TOC]
-
-## Example
+Displays an embedded Hulu video.
 
 ```html
-<amp-hulu width="412" height="213" layout="responsive"
-  data-eid="4Dk5F2PYTtrgciuvloH3UA">
+<amp-hulu
+  width="412"
+  height="213"
+  layout="responsive"
+  data-eid="4Dk5F2PYTtrgciuvloH3UA"
+>
 </amp-hulu>
 ```
 
 ## Attributes
 
-<table>
-  <tr>
-    <td width="40%"><strong>data-eid</strong></td>
-    <td>The ID of the video. For example, <code>4Dk5F2PYTtrgciuvloH3UA</code> is the eid in the following URL: https://player.hulu.com/site/dash/mobile_embed.html?eid=4Dk5F2PYTtrgciuvloH3UA.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
-  </tr>
-</table>
+### data-eid
 
+The id of the video. For example, `4Dk5F2PYTtrgciuvloH3UA` is the eid in the following URL: `https://player.hulu.com/site/dash/mobile_embed.html?eid=4Dk5F2PYTtrgciuvloH3UA`.
+
+### Common attributes
+
+This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.
 
 ## Validation
 
-See [amp-hulu rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-hulu/validator-amp-hulu.protoascii) in the AMP validator specification.
+See [amp-hulu rules](validator-amp-hulu.protoascii) in the AMP validator specification.

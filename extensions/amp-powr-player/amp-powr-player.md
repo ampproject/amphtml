@@ -5,6 +5,7 @@ formats:
 teaser:
   text: An amp-powr-player component displays the Powr Player as configured in the Powr platform.
 ---
+
 <!---
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -23,21 +24,6 @@ limitations under the License.
 
 # amp-powr-player
 
-An <code>amp-powr-player</code> component displays the Powr Player as configured in the <a href="https://powr.com">Powr</a> platform.
-
-<table>
-  <tr>
-    <td class="col-fourty"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-powr-player" src="https://cdn.ampproject.org/v0/amp-powr-player-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Example
 
 The `width` and `height` attributes determine the aspect ratio of the player embedded in responsive layouts.
@@ -46,11 +32,13 @@ Example:
 
 ```html
 <amp-powr-player
-    data-account="12345"
-    data-player="12345"
-    data-video="12345"
-    layout="responsive"
-    width="480" height="270">
+  data-account="12345"
+  data-player="12345"
+  data-video="12345"
+  layout="responsive"
+  width="480"
+  height="270"
+>
 </amp-powr-player>
 ```
 

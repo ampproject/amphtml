@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {PositionObserver} from '../../src/service/position-observer/position-observer-impl';
 import {PositionObserverFidelity} from '../../src/service/position-observer/position-observer-worker';
 import {Services} from '../../src/services';
@@ -22,7 +22,7 @@ import {layoutRectLtwh} from '../../src/layout-rect';
 import {macroTask} from '../../testing/yield';
 import {setStyles} from '../../src/style';
 
-describes.realWin('PositionObserver', {amp: 1}, env => {
+describes.realWin('PositionObserver', {amp: 1}, (env) => {
   let win;
   let ampdoc;
   beforeEach(() => {
@@ -36,9 +36,9 @@ describes.realWin('PositionObserver', {amp: 1}, env => {
     let elem1;
     let clock;
     beforeEach(() => {
-      clock = lolex.install({target: ampdoc.win});
+      clock = fakeTimers.withGlobal(ampdoc.win).install();
       posOb = new PositionObserver(ampdoc);
-      sandbox.stub(posOb.vsync_, 'measure').callsFake(callback => {
+      env.sandbox.stub(posOb.vsync_, 'measure').callsFake((callback) => {
         win.setTimeout(callback, 1);
       });
       elem = win.document.createElement('div');
@@ -65,7 +65,7 @@ describes.realWin('PositionObserver', {amp: 1}, env => {
 
     describe('API functions includes observe/unobserve/changeFidelity', () => {
       it('should observe identical element and start', () => {
-        const spy = sandbox.spy(posOb, 'startCallback_');
+        const spy = env.sandbox.spy(posOb, 'startCallback_');
         posOb.observe(elem, PositionObserverFidelity.LOW, () => {});
         posOb.observe(elem1, PositionObserverFidelity.LOW, () => {});
         expect(posOb.workers_).to.have.length(2);
@@ -73,7 +73,7 @@ describes.realWin('PositionObserver', {amp: 1}, env => {
       });
 
       it('should unobserve and stop', () => {
-        const spy = sandbox.spy(posOb, 'stopCallback_');
+        const spy = env.sandbox.spy(posOb, 'stopCallback_');
         posOb.observe(elem, PositionObserverFidelity.LOW, () => {});
         posOb.observe(elem1, PositionObserverFidelity.LOW, () => {});
         posOb.unobserve(elem);
@@ -88,12 +88,14 @@ describes.realWin('PositionObserver', {amp: 1}, env => {
       let top;
       beforeEach(() => {
         top = 0;
-        sandbox.stub(posOb.viewport_, 'getClientRectAsync').callsFake(() => {
-          return Promise.resolve(layoutRectLtwh(0, top, 0, 0));
-        });
+        env.sandbox
+          .stub(posOb.viewport_, 'getClientRectAsync')
+          .callsFake(() => {
+            return Promise.resolve(layoutRectLtwh(0, top, 0, 0));
+          });
       });
-      it('should update new position with scroll event', function*() {
-        const spy = sandbox.spy();
+      it('should update new position with scroll event', function* () {
+        const spy = env.sandbox.spy();
         posOb.observe(elem, PositionObserverFidelity.HIGH, spy);
         clock.tick(2);
         yield macroTask();
@@ -118,8 +120,8 @@ describes.realWin('PositionObserver', {amp: 1}, env => {
         expect(spy).to.not.be.called;
       });
 
-      it('should not update if element position does not change', function*() {
-        const spy = sandbox.spy();
+      it('should not update if element position does not change', function* () {
+        const spy = env.sandbox.spy();
         posOb.observe(elem, PositionObserverFidelity.HIGH, spy);
         yield macroTask();
         expect(spy).to.be.calledOnce;
@@ -133,15 +135,17 @@ describes.realWin('PositionObserver', {amp: 1}, env => {
       let top;
       beforeEach(() => {
         top = 0;
-        sandbox.stub(posOb.viewport_, 'getClientRectAsync').callsFake(() => {
-          return Promise.resolve(layoutRectLtwh(2, top, 20, 10));
-        });
+        env.sandbox
+          .stub(posOb.viewport_, 'getClientRectAsync')
+          .callsFake(() => {
+            return Promise.resolve(layoutRectLtwh(2, top, 20, 10));
+          });
       });
 
-      it('overlap with viewport', function*() {
+      it('overlap with viewport', function* () {
         const viewport = Services.viewportForDoc(ampdoc);
         const sizes = viewport.getSize();
-        const spy = sandbox.spy();
+        const spy = env.sandbox.spy();
         top = 1;
         posOb.observe(elem, PositionObserverFidelity.HIGH, spy);
         yield macroTask();
@@ -170,7 +174,7 @@ describes.realWin('PositionObserver', {amp: 1}, env => {
         });
       });
 
-      it('out of viewport', function*() {
+      it('out of viewport', function* () {
         setStyles(elem, {
           'position': 'absolute',
           'top': '1px',
@@ -180,7 +184,7 @@ describes.realWin('PositionObserver', {amp: 1}, env => {
         });
         const viewport = Services.viewportForDoc(ampdoc);
         const sizes = viewport.getSize();
-        const spy = sandbox.spy();
+        const spy = env.sandbox.spy();
         posOb.observe(elem, PositionObserverFidelity.HIGH, spy);
         yield macroTask();
         spy.resetHistory();

@@ -20,7 +20,7 @@ import {AmpSmartlinks} from '../amp-smartlinks';
 import {LinkRewriterManager} from '../../../amp-skimlinks/0.1/link-rewriter/link-rewriter-manager';
 import {Services} from '../../../../src/services';
 
-const helpersFactory = env => {
+const helpersFactory = (env) => {
   return {
     createAmpSmartlinks(extensionAttrs) {
       const ampTag = document.createElement('amp-smartlinks');
@@ -37,7 +37,7 @@ const helpersFactory = env => {
 describes.fakeWin(
   'amp-smartlinks',
   {amp: {extensions: ['amp-smartlinks']}},
-  env => {
+  (env) => {
     let ampSmartlinks, helpers, xhr;
 
     beforeEach(() => {
@@ -114,15 +114,19 @@ describes.fakeWin(
         env.sandbox.spy(ampSmartlinks, 'getLinkmateOptions_');
         env.sandbox.stub(xhr, 'fetchJson');
 
-        return ampSmartlinks.buildCallback().then(() => {
-          expect(ampSmartlinks.getLinkmateOptions_.calledOnce).to.be.true;
-        });
+        return (
+          ampSmartlinks
+            .buildCallback()
+            // Skip microtask.
+            .then(() => Promise.resolve())
+            .then(() => {
+              expect(ampSmartlinks.getLinkmateOptions_.calledOnce).to.be.true;
+            })
+        );
       });
     });
 
     describe('runSmartlinks_', () => {
-      let fakeViewer;
-
       beforeEach(() => {
         const options = {
           'nrtv-account-name': 'thisisnotapublisher',
@@ -131,29 +135,45 @@ describes.fakeWin(
         };
 
         ampSmartlinks = helpers.createAmpSmartlinks(options);
-        fakeViewer = Services.viewerForDoc(env.ampdoc);
-
-        env.sandbox
-          .stub(ampSmartlinks, 'getLinkmateOptions_')
-          .returns(Promise.resolve({'publisher_id': 999}));
         env.sandbox.stub(xhr, 'fetchJson');
       });
 
+      it('should not call downstream methods with invalid configuration', () => {
+        env.sandbox
+          .stub(ampSmartlinks, 'getLinkmateOptions_')
+          .returns(Promise.resolve(undefined));
+        env.sandbox.spy(ampSmartlinks, 'postPageImpression_');
+        env.sandbox.spy(ampSmartlinks, 'initLinkRewriter_');
+
+        return ampSmartlinks.buildCallback().then(() => {
+          env.ampdoc.whenFirstVisible().then(() => {
+            expect(ampSmartlinks.postPageImpression_.calledOnce).to.be.false;
+            expect(ampSmartlinks.initLinkRewriter_.calledOnce).to.be.false;
+          });
+        });
+      });
+
       it('Should call postPageImpression_', () => {
+        env.sandbox
+          .stub(ampSmartlinks, 'getLinkmateOptions_')
+          .returns(Promise.resolve({'publisher_id': 999}));
         env.sandbox.spy(ampSmartlinks, 'postPageImpression_');
 
         return ampSmartlinks.buildCallback().then(() => {
-          fakeViewer.whenFirstVisible().then(() => {
+          env.ampdoc.whenFirstVisible().then(() => {
             expect(ampSmartlinks.postPageImpression_.calledOnce).to.be.true;
           });
         });
       });
 
       it('Should call initLinkRewriter_', () => {
+        env.sandbox
+          .stub(ampSmartlinks, 'getLinkmateOptions_')
+          .returns(Promise.resolve({'publisher_id': 999}));
         env.sandbox.spy(ampSmartlinks, 'initLinkRewriter_');
 
         return ampSmartlinks.buildCallback().then(() => {
-          fakeViewer.whenFirstVisible().then(() => {
+          env.ampdoc.whenFirstVisible().then(() => {
             expect(ampSmartlinks.initLinkRewriter_.calledOnce).to.be.true;
           });
         });

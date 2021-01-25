@@ -14,10 +14,19 @@
  * limitations under the License.
  */
 
-import {BookendComponentInterface} from './bookend-component-interface';
+import {
+  AMP_STORY_BOOKEND_COMPONENT_DATA,
+  BOOKEND_COMPONENT_TYPES,
+  BookendComponentInterface,
+} from './bookend-component-interface';
 import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
-import {getSourceOriginForElement, userAssertValidProtocol} from '../../utils';
+import {
+  getSourceOriginForElement,
+  resolveImgSrc,
+  userAssertValidProtocol,
+} from '../../utils';
+import {getSourceUrl, resolveRelativeUrl} from '../../../../../src/url';
 import {htmlFor, htmlRefs} from '../../../../../src/static-template';
 import {userAssert} from '../../../../../src/log';
 
@@ -53,12 +62,12 @@ export class LandscapeComponent {
   assertValidity(landscapeJson, element) {
     const requiredFields = ['title', 'image', 'url'];
     const hasAllRequiredFields = !requiredFields.some(
-      field => !(field in landscapeJson)
+      (field) => !(field in landscapeJson)
     );
     userAssert(
       hasAllRequiredFields,
       'Landscape component must contain ' +
-        requiredFields.map(field => '`' + field + '`').join(', ') +
+        requiredFields.map((field) => '`' + field + '`').join(', ') +
         ' fields, skipping invalid.'
     );
 
@@ -88,13 +97,12 @@ export class LandscapeComponent {
   }
 
   /** @override */
-  buildElement(landscapeData, doc) {
+  buildElement(landscapeData, win, data) {
     landscapeData = /** @type {LandscapeComponentDef} */ (landscapeData);
-    const html = htmlFor(doc);
+    const html = htmlFor(win.document);
     const el = html`
         <a class="i-amphtml-story-bookend-landscape
-          i-amphtml-story-bookend-component"
-          target="_top">
+            i-amphtml-story-bookend-component" target="_top">
           <h2 class="i-amphtml-story-bookend-component-category"
             ref="category"></h2>
           <h2 class="i-amphtml-story-bookend-article-heading"
@@ -105,7 +113,20 @@ export class LandscapeComponent {
           <div class="i-amphtml-story-bookend-component-meta"
             ref="meta"></div>
         </a>`;
-    addAttributesToElement(el, dict({'href': landscapeData.url}));
+    addAttributesToElement(
+      el,
+      dict({
+        'href': resolveRelativeUrl(
+          landscapeData.url,
+          getSourceUrl(win.location)
+        ),
+      })
+    );
+
+    el[AMP_STORY_BOOKEND_COMPONENT_DATA] = {
+      position: data.position,
+      type: BOOKEND_COMPONENT_TYPES.LANDSCAPE,
+    };
 
     if (landscapeData['amphtml'] === true) {
       addAttributesToElement(el, dict({'rel': 'amphtml'}));
@@ -121,7 +142,12 @@ export class LandscapeComponent {
 
     category.textContent = landscapeData.category;
     title.textContent = landscapeData.title;
-    addAttributesToElement(image, dict({'src': landscapeData.image}));
+
+    addAttributesToElement(
+      image,
+      dict({'src': resolveImgSrc(win, landscapeData.image)})
+    );
+
     meta.textContent = landscapeData.domainName;
 
     return el;

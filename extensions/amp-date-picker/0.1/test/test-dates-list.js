@@ -21,8 +21,8 @@ import {requireExternal} from '../../../../src/module';
 describes.sandboxed('DatesList', {}, () => {
   const moment = requireExternal('moment');
 
-  it('should accept date strings and RRULE strings', function() {
-    this.timeout(3000);
+  it('should accept date strings and RRule strings', function () {
+    this.timeout(5000);
     const containedDate = '09/04/1998';
     const notContainedDate = '09/03/1998';
     const containedRrule =
@@ -38,7 +38,9 @@ describes.sandboxed('DatesList', {}, () => {
   it('should accept moment objects', () => {
     const containedDate = '09/04/1998';
     const containedMoment = moment(containedDate);
-    const datesList = new DatesList([containedMoment]);
+    const containedRrule =
+      'FREQ=WEEKLY;COUNT=10;DTSTART=20180101T000000Z;WKST=SU;BYDAY=TU,SA';
+    const datesList = new DatesList([containedMoment, containedRrule]);
 
     expect(datesList.contains(containedDate)).to.be.true;
     expect(datesList.contains(containedMoment)).to.be.true;

@@ -98,13 +98,13 @@ export class AmpAdCustom extends AMP.BaseElement {
       ampCustomadXhrPromises[fullUrl] ||
       Services.xhrFor(this.win)
         .fetchJson(fullUrl)
-        .then(res => res.json());
+        .then((res) => res.json());
     if (this.slot_ !== null) {
       // Cache this response if using `data-slot` feature so only one request
       // is made per url
       ampCustomadXhrPromises[fullUrl] = responsePromise;
     }
-    return responsePromise.then(data => {
+    return responsePromise.then((data) => {
       // We will get here when the data has been fetched from the server
       let templateData = data;
       if (this.slot_ !== null) {
@@ -116,14 +116,16 @@ export class AmpAdCustom extends AMP.BaseElement {
         return;
       }
 
-      templateData = this.handleTemplateData_(templateData);
+      templateData = this.handleTemplateData_(
+        /** @type {!JsonObject} */ (templateData)
+      );
 
       this.renderStarted();
 
       try {
         Services.templatesFor(this.win)
           .findAndRenderTemplate(this.element, templateData)
-          .then(renderedElement => {
+          .then((renderedElement) => {
             // Get here when the template has been rendered Clear out the
             // child template and replace it by the rendered version Note that
             // we can't clear templates that's not ad's child because they
@@ -197,11 +199,6 @@ export class AmpAdCustom extends AMP.BaseElement {
   unlayoutCallback() {
     this.uiHandler.applyUnlayoutUI();
     return true;
-  }
-
-  /** @override */
-  createPlaceholderCallback() {
-    return this.uiHandler.createPlaceholder();
   }
 
   /**

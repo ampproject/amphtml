@@ -22,7 +22,7 @@ const pageWidth = 600;
 const pageHeight = 600;
 
 describes.endtoend(
-  'AMP carousel arrows when non-looping',
+  'amp-base-carousel:0.1 - arrows when non-looping',
   {
     testUrl:
       'http://localhost:8000/test/manual/amp-base-carousel/non-looping.amp.html',
@@ -31,7 +31,7 @@ describes.endtoend(
     //TODO(spaharmi): fails on shadow demo
     environments: ['single', 'viewer-demo'],
   },
-  async env => {
+  async (env) => {
     let controller;
     let prevArrow;
     let nextArrow;

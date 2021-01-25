@@ -16,6 +16,7 @@
 
 import {CSS} from '../../../build/amp-sticky-ad-1.0.css';
 import {CommonSignals} from '../../../src/common-signals';
+import {Services} from '../../../src/services';
 import {
   computedStyle,
   removeAlphaFromColor,
@@ -36,7 +37,7 @@ class AmpStickyAd extends AMP.BaseElement {
     /** @private {?Element} */
     this.ad_ = null;
 
-    /** @private {?../../../src/service/viewport/viewport-impl.Viewport} */
+    /** @private {?../../../src/service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = null;
 
     /** @private {boolean} */
@@ -56,6 +57,7 @@ class AmpStickyAd extends AMP.BaseElement {
   buildCallback() {
     this.viewport_ = this.getViewport();
     this.element.classList.add('i-amphtml-sticky-ad-layout');
+
     const children = this.getRealChildren();
     userAssert(
       children.length == 1 && children[0].tagName == 'AMP-AD',
@@ -63,12 +65,12 @@ class AmpStickyAd extends AMP.BaseElement {
     );
 
     this.ad_ = children[0];
-    this.setAsOwner(this.ad_);
+    Services.ownersForDoc(this.element).setOwner(this.ad_, this.element);
 
     this.adReadyPromise_ = whenUpgradedToCustomElement(
       dev().assertElement(this.ad_)
     )
-      .then(ad => {
+      .then((ad) => {
         return ad.whenBuilt();
       })
       .then(() => {
@@ -96,8 +98,8 @@ class AmpStickyAd extends AMP.BaseElement {
       toggle(this.element, true);
       const borderBottom = this.element./*OK*/ offsetHeight;
       this.viewport_.updatePaddingBottom(borderBottom);
-      this.updateInViewport(dev().assertElement(this.ad_), true);
-      this.scheduleLayout(dev().assertElement(this.ad_));
+      const owners = Services.ownersForDoc(this.element);
+      owners.scheduleLayout(this.element, dev().assertElement(this.ad_));
     }
     return Promise.resolve();
   }
@@ -119,7 +121,12 @@ class AmpStickyAd extends AMP.BaseElement {
   }
 
   /** @override */
-  collapsedCallback() {
+  collapsedCallback(element) {
+    // We will only collapse the stick-ad when the ad collapses. The analytics
+    // element will collapse after it's done initializing, which is normal.
+    if (element !== this.ad_) {
+      return;
+    }
     this.collapsed_ = true;
     this.visible_ = false;
     toggle(this.element, false);
@@ -180,7 +187,7 @@ class AmpStickyAd extends AMP.BaseElement {
    * @private
    */
   scheduleLayoutForAd_() {
-    whenUpgradedToCustomElement(dev().assertElement(this.ad_)).then(ad => {
+    whenUpgradedToCustomElement(dev().assertElement(this.ad_)).then((ad) => {
       ad.whenBuilt().then(this.layoutAd_.bind(this));
     });
   }
@@ -192,8 +199,8 @@ class AmpStickyAd extends AMP.BaseElement {
    */
   layoutAd_() {
     const ad = dev().assertElement(this.ad_);
-    this.updateInViewport(ad, true);
-    this.scheduleLayout(ad);
+    const owners = Services.ownersForDoc(this.element);
+    owners.scheduleLayout(this.element, ad);
     // Wait for the earliest: `render-start` or `load-end` signals.
     // `render-start` is expected to arrive first, but it's not emitted by
     // all types of ads.
@@ -242,7 +249,10 @@ class AmpStickyAd extends AMP.BaseElement {
   onCloseButtonClick_() {
     this.vsync_.mutate(() => {
       this.visible_ = false;
-      this./*OK*/ scheduleUnlayout(dev().assertElement(this.ad_));
+      Services.ownersForDoc(this.element)./*OK*/ scheduleUnlayout(
+        this.element,
+        dev().assertElement(this.ad_)
+      );
       this.viewport_.removeFromFixedLayer(this.element);
       removeElement(this.element);
       this.viewport_.updatePaddingBottom(0);
@@ -268,6 +278,6 @@ class AmpStickyAd extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-sticky-ad', '1.0', AMP => {
+AMP.extension('amp-sticky-ad', '1.0', (AMP) => {
   AMP.registerElement('amp-sticky-ad', AmpStickyAd, CSS);
 });

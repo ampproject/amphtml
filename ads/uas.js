@@ -72,7 +72,7 @@ export function uas(global, data) {
   const uasDivId = 'uas-amp-slot';
   global.document.write('<div id="' + uasDivId + '"></div>');
   loadScript(global, 'https://ads.pubmatic.com/AdServer/js/phoenix.js', () => {
-    global.Phoenix.EQ.push(function() {
+    global.Phoenix.EQ.push(function () {
       global.Phoenix.enableSingleRequestCallMode();
       global.Phoenix.setInfo('AMP', 1); // Need to set the AMP flag
       global.Phoenix.setInfo('ACCID', data.accId);
@@ -80,7 +80,7 @@ export function uas(global, data) {
       global.Phoenix.setInfo(
         'PAGEURL',
         global.context.sourceUrl || global.context.location.href
-      ); // eslint-disable-line max-len
+      );
       data.pageURL && global.Phoenix.setInfo('PAGEURL', data.pageURL);
       data.locLat && global.Phoenix.setInfo('LAT', data.locLat);
       data.locLon && global.Phoenix.setInfo('LON', data.locLon);
@@ -91,10 +91,10 @@ export function uas(global, data) {
         uasDivId
       );
       slot.setVisibility(1);
-      forEachOnObject(data.targetings, function(key, value) {
+      forEachOnObject(data.targetings, function (key, value) {
         slot.setTargeting(key, value);
       });
-      forEachOnObject(data.extraParams, function(key, value) {
+      forEachOnObject(data.extraParams, function (key, value) {
         slot.setExtraParameters(key, value);
       });
       global.Phoenix.display(uasDivId);

@@ -23,13 +23,16 @@ For configuration details and to generate your tags, please refer to [your publi
 ## Example - Passback
 
 ```html
-<amp-ad width="320" height="800" 
-  type="speakol" 
-  layout="responsive" 
-  data-widgetid="1825">
+<amp-ad
+  width="320"
+  height="800"
+  type="speakol"
+  layout="responsive"
+  data-widgetid="1825"
+>
 </amp-ad>
 ```
 
 parameters:
 
-- `data-widgetid`: widget id. Required.
+-   `data-widgetid`: widget id. Required.

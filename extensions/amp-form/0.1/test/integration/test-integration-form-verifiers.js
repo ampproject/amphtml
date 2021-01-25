@@ -17,13 +17,10 @@ import {poll} from '../../../../../testing/iframe';
 
 const RENDER_TIMEOUT = 15000;
 
-const describeChrome = describe
-  .configure()
-  .ifChrome()
-  .skipSinglePass();
+const describeChrome = describe.configure().ifChrome();
 
 // TODO(cvializ, #19647): Broken on SL Chrome 71.
-describeChrome.skip('amp-form verifiers', function() {
+describeChrome.skip('amp-form verifiers', function () {
   const {testServerPort} = window.ampTestRuntimeConfig;
   const baseUrl = `http://localhost:${testServerPort}`;
 
@@ -51,7 +48,7 @@ describeChrome.skip('amp-form verifiers', function() {
 </form>
 `,
     },
-    env => {
+    (env) => {
       let win, doc;
 
       beforeEach(() => {
@@ -59,7 +56,7 @@ describeChrome.skip('amp-form verifiers', function() {
         doc = win.document;
       });
 
-      it('should render when the verifier runs', function() {
+      it('should render when the verifier runs', function () {
         const email = doc.getElementById('email');
         email.value = 'x@x';
 
@@ -96,7 +93,7 @@ describeChrome.skip('amp-form verifiers', function() {
 <span id="message" hidden>Mistakes were triggered</span>
 `,
     },
-    env => {
+    (env) => {
       this.timeout(RENDER_TIMEOUT);
 
       let win, doc;
@@ -106,7 +103,7 @@ describeChrome.skip('amp-form verifiers', function() {
         doc = win.document;
       });
 
-      it('should trigger when the verifier runs', function() {
+      it('should trigger when the verifier runs', function () {
         const email = doc.getElementById('email');
         const message = doc.getElementById('message');
         const waitForMessage = poll(

@@ -17,7 +17,6 @@
 import {getMode} from './mode';
 import {loadPromise} from './event-helper';
 import {parseQueryString} from './url';
-import {startsWith} from './string';
 import {urls} from './config';
 
 /**
@@ -29,7 +28,7 @@ import {urls} from './config';
  */
 export function maybeValidate(win) {
   const filename = win.location.href;
-  if (startsWith(filename, 'about:')) {
+  if (filename.startsWith('about:')) {
     // Should only happen in tests.
     return;
   }
@@ -44,7 +43,7 @@ export function maybeValidate(win) {
   if (validator) {
     loadScript(win.document, `${urls.cdn}/v0/validator.js`).then(() => {
       /* global amp: false */
-      amp.validator.validateUrlAndLog(filename, win.document, getMode().filter);
+      amp.validator.validateUrlAndLog(filename, win.document);
     });
   } else if (getMode().examiner) {
     loadScript(win.document, `${urls.cdn}/examiner.js`);
@@ -58,9 +57,16 @@ export function maybeValidate(win) {
  * @param {string} url
  * @return {!Promise}
  */
-function loadScript(doc, url) {
+export function loadScript(doc, url) {
   const script = doc.createElement('script');
   script.src = url;
+
+  // Propagate nonce to all generated script tags.
+  const currentScript = doc.head.querySelector('script[nonce]');
+  if (currentScript) {
+    script.setAttribute('nonce', currentScript.getAttribute('nonce'));
+  }
+
   const promise = loadPromise(script).then(
     () => {
       doc.head.removeChild(script);

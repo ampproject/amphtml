@@ -19,10 +19,7 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-embed height="354"
-    type="zen"
-    data-clid="[123, 456]">
-</amp-embed>
+<amp-embed height="354" type="zen" data-clid="[123, 456]"> </amp-embed>
 ```
 
 ## Configuration
@@ -31,11 +28,12 @@ For details on the configuration semantics, please see [Zen's documentation](htt
 
 ### Required parameters
 
-- `data-clid`
+-   `data-clid`
 
 ### Optional parameters
-- `width`
-- `data-size`
-- `data-orientation`
-- `data-on-render`
-- `data-on-error`
+
+-   `width`
+-   `data-size`
+-   `data-orientation`
+-   `data-on-render`
+-   `data-on-error`

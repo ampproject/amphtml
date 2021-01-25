@@ -16,14 +16,15 @@ limitations under the License.
 
 # LockerDome
 
-
-
 ## Example
 
 ```html
-<amp-ad width="300" height="250"
-    type="lockerdome"
-    data-slot="10238273616545382">
+<amp-ad
+  width="300"
+  height="250"
+  type="lockerdome"
+  data-slot="10238273616545382"
+>
 </amp-ad>
 ```
 
@@ -33,4 +34,4 @@ For details on the configuration semantics, please contact [LockerDome](https://
 
 ### Required parameters
 
-- `data-slot`
+-   `data-slot`

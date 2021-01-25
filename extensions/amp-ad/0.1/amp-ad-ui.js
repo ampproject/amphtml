@@ -14,11 +14,20 @@
  * limitations under the License.
  */
 
-import {ancestorElementsByTag} from '../../../src/dom';
-import {getAdContainer} from '../../../src/ad-helper';
-import {user} from '../../../src/log';
+import {Services} from '../../../src/services';
+import {
+  ancestorElementsByTag,
+  createElementWithAttributes,
+  removeElement,
+} from '../../../src/dom';
+import {dict} from '../../../src/utils/object';
 
-const TAG = 'amp-ad';
+import {getAdContainer} from '../../../src/ad-helper';
+import {listen} from '../../../src/event-helper';
+import {setStyles} from '../../../src/style';
+
+const STICKY_AD_MAX_SIZE_LIMIT = 0.2;
+const STICKY_AD_MAX_HEIGHT_LIMIT = 0.5;
 
 export class AmpAdUIHandler {
   /**
@@ -35,6 +44,23 @@ export class AmpAdUIHandler {
     this.doc_ = baseInstance.win.document;
 
     this.containerElement_ = null;
+
+    /**
+     * Whether this is a sticky ad unit.
+     * @private {boolean}
+     */
+    this.isStickyAd_ = this.element_.hasAttribute('sticky');
+
+    /**
+     * Whether the close button has been rendered for a sticky ad unit.
+     */
+    this.closeButtonRendered_ = false;
+
+    /**
+     * Unlisteners to be unsubscribed after destroying.
+     * @private {!Array<!Function>}
+     */
+    this.unlisteners_ = [];
 
     if (this.element_.hasAttribute('data-ad-container-id')) {
       const id = this.element_.getAttribute('data-ad-container-id');
@@ -56,14 +82,6 @@ export class AmpAdUIHandler {
         this.baseInstance_.element.appendChild(fallback);
       }
     }
-  }
-
-  /**
-   * Create a default placeholder if not provided.
-   * Should be called in baseElement createPlaceholderCallback.
-   */
-  createPlaceholder() {
-    return this.addDefaultUiComponent_('placeholder');
   }
 
   /**
@@ -93,7 +111,7 @@ export class AmpAdUIHandler {
       );
       const flyingCarpetElement = flyingCarpetElements[0];
 
-      flyingCarpetElement.getImpl().then(implementation => {
+      flyingCarpetElement.getImpl().then((implementation) => {
         const children = implementation.getChildren();
 
         if (children.length === 1 && children[0] === this.element_) {
@@ -106,9 +124,9 @@ export class AmpAdUIHandler {
     let attemptCollapsePromise;
     if (this.containerElement_) {
       // Collapse the container element if there's one
-      attemptCollapsePromise = this.element_
-        .getResources()
-        .attemptCollapse(this.containerElement_);
+      attemptCollapsePromise = Services.mutatorForDoc(
+        this.element_.getAmpDoc()
+      ).attemptCollapse(this.containerElement_);
       attemptCollapsePromise.then(() => {});
     } else {
       attemptCollapsePromise = this.baseInstance_.attemptCollapse();
@@ -157,6 +175,86 @@ export class AmpAdUIHandler {
   }
 
   /**
+   * @return {boolean}
+   */
+  isStickyAd() {
+    return this.isStickyAd_;
+  }
+
+  /**
+   * Initialize sticky ad related features
+   */
+  maybeInitStickyAd() {
+    if (this.isStickyAd_) {
+      setStyles(this.element_, {
+        position: 'fixed',
+        bottom: '0',
+        right: '0',
+        visibility: 'visible',
+      });
+
+      this.element_.classList.add('i-amphtml-amp-ad-sticky-layout');
+    }
+  }
+
+  /**
+   * Scroll promise for sticky ad
+   * @return {Promise}
+   */
+  getScrollPromiseForStickyAd() {
+    if (this.isStickyAd_) {
+      return new Promise((resolve) => {
+        const unlisten = Services.viewportForDoc(
+          this.element_.getAmpDoc()
+        ).onScroll(() => {
+          resolve();
+          unlisten();
+        });
+      });
+    }
+    return Promise.resolve(null);
+  }
+
+  /**
+   * When a sticky ad is shown, the close button should be rendered at the same time.
+   */
+  onResizeSuccess() {
+    if (this.isStickyAd_ && !this.closeButtonRendered_) {
+      this.addCloseButton_();
+      this.closeButtonRendered_ = true;
+    }
+  }
+
+  /**
+   * The function that add a close button to sticky ad
+   */
+  addCloseButton_() {
+    const closeButton = createElementWithAttributes(
+      /** @type {!Document} */ (this.element_.ownerDocument),
+      'button',
+      dict({
+        'aria-label':
+          this.element_.getAttribute('data-close-button-aria-label') ||
+          'Close this ad',
+      })
+    );
+
+    this.unlisteners_.push(
+      listen(closeButton, 'click', () => {
+        Services.vsyncFor(this.baseInstance_.win).mutate(() => {
+          const viewport = Services.viewportForDoc(this.element_.getAmpDoc());
+          viewport.removeFromFixedLayer(this.element);
+          removeElement(this.element_);
+          viewport.updatePaddingBottom(0);
+        });
+      })
+    );
+
+    closeButton.classList.add('amp-ad-close-button');
+    this.element_.appendChild(closeButton);
+  }
+
+  /**
    * @param {number|string|undefined} height
    * @param {number|string|undefined} width
    * @param {number} iframeHeight
@@ -199,23 +297,38 @@ export class AmpAdUIHandler {
       resizeInfo.success = false;
       return Promise.resolve(resizeInfo);
     }
-    user().expectedError(TAG, 'RESIZE_REQUEST');
-    return this.baseInstance_.attemptChangeSize(newHeight, newWidth).then(
-      () => {
-        return resizeInfo;
-      },
-      () => {
-        user().expectedError(TAG, 'RESIZE_REJECT');
-        const activated =
-          event && event.userActivation && event.userActivation.hasBeenActive;
-        if (activated) {
-          // Report false negatives.
-          user().expectedError(TAG, 'RESIZE_REJECT_ACTIVE');
-        }
+
+    // Special case: for sticky ads, we enforce 20% size limit and 50% height limit
+    if (this.element_.hasAttribute('sticky')) {
+      const viewport = this.baseInstance_.getViewport();
+      if (
+        newHeight * newWidth >
+          STICKY_AD_MAX_SIZE_LIMIT *
+            viewport.getHeight() *
+            viewport.getWidth() ||
+        newHeight > STICKY_AD_MAX_HEIGHT_LIMIT * viewport.getHeight()
+      ) {
         resizeInfo.success = false;
-        return resizeInfo;
+        return Promise.resolve(resizeInfo);
       }
-    );
+    }
+    return this.baseInstance_
+      .attemptChangeSize(newHeight, newWidth, event)
+      .then(
+        () => resizeInfo,
+        () => {
+          resizeInfo.success = false;
+          return resizeInfo;
+        }
+      );
+  }
+
+  /**
+   * Clean up the listeners
+   */
+  cleanup() {
+    this.unlisteners_.forEach((unlistener) => unlistener());
+    this.unlisteners_.length = 0;
   }
 }
 

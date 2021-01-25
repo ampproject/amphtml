@@ -57,6 +57,7 @@ const Key = {
   'Enter': 'Enter',
   'Escape': 'Escape',
   'Tab': 'Tab',
+  'CtrlV': 'CtrlV',
 };
 
 /** @interface */
@@ -87,6 +88,15 @@ class FunctionalTestController {
   async getTitle() {}
 
   /**
+   * Select the given window.
+   * {@link https://www.w3.org/TR/webdriver1/#dfn-switch-to-window}
+   *
+   * @param {string} unusedString
+   * @return {!Promise}
+   */
+  async switchToWindow(unusedString) {}
+
+  /**
    * Selects the current top-level browsing context or a child browsing context
    * of the current browsing context to use as the current browsing context for
    * subsequent commands.
@@ -108,7 +118,7 @@ class FunctionalTestController {
   async switchToParent() {}
 
   /**
-   * Selects a subtree inside a ShadowDOM ShadowRoot to use as the current
+   * Selects the body of a subtree inside a ShadowDOM ShadowRoot to use as the current
    * browsing context for subsequent commands.
    * {@link https://github.com/w3c/webdriver/pull/1320}
    * https://github.com/SeleniumHQ/selenium/issues/5869
@@ -117,6 +127,17 @@ class FunctionalTestController {
    * @return {!Promise}
    */
   async switchToShadow(unusedHandle) {}
+
+  /**
+   * Selects a subtree inside a ShadowDOM ShadowRoot to use as the current
+   * browsing context for subsequent commands.
+   * {@link https://github.com/w3c/webdriver/pull/1320}
+   * https://github.com/SeleniumHQ/selenium/issues/5869
+   *
+   * @param {!ElementHandle} unusedHandle
+   * @return {!Promise}
+   */
+  async switchToShadowRoot(unusedHandle) {}
 
   /**
    * Selects the main top-level DOM tree to use as the current
@@ -149,9 +170,10 @@ class FunctionalTestController {
    * {@link https://www.w3.org/TR/webdriver1/#find-element}
    *
    * @param {string} unusedSelector
+   * @param {number=} unusedTimeout
    * @return {!Promise<!ElementHandle>}
    */
-  async findElement(unusedSelector) {}
+  async findElement(unusedSelector, unusedTimeout) {}
 
   /**
    * The Find Elements command is used to find all elements matching the
@@ -304,6 +326,15 @@ class FunctionalTestController {
   async isElementEnabled(unusedHandle) {}
 
   /**
+   * Return an array of handles consisting of all windows in the browser
+   * session.
+   * {@link https://www.w3.org/TR/webdriver1/#get-window-handles}
+   *
+   * @return {!Promise<Array<string>>}
+   */
+  async getAllWindows() {}
+
+  /**
    * The Set Window Rect command alters the size and the position of the
    * operating system window corresponding to the current top-level browsing
    * context.
@@ -353,6 +384,14 @@ class FunctionalTestController {
    * @return {!Promise}
    */
   async type(unusedHandle, unusedKeys) {}
+
+  /**
+   * Pastes from the clipboard by perfoming the keyboard shortcut.
+   * {@link https://stackoverflow.com/a/41046276}
+   *
+   * @return {!Promise}
+   */
+  async pasteFromClipboard() {}
 
   /**
    * Scrolls the given element using the scroll options if provided.

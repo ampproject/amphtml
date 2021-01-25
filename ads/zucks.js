@@ -23,14 +23,13 @@ import {loadScript, validateData, writeScript} from '../3p/3p';
 export function zucks(global, data) {
   validateData(data, ['frameId']);
   if (data['adtype'] === 'zoe') {
-    loadScript(global, 'https://j.zoe.zucks.net/zoe.min.js', function() {
+    loadScript(global, 'https://j.zoe.zucks.net/zoe.min.js', function () {
       const frameId = data['frameId'];
       const elementId = 'zucks-widget-parent';
 
       const d = global.document.createElement('ins');
       d.id = elementId;
-      const container = document.getElementById('c');
-      container.appendChild(d);
+      global.document.getElementById('c').appendChild(d);
 
       if (data['zoeMultiAd'] !== 'true') {
         (global.gZgokZoeQueue = global.gZgokZoeQueue || []).push({frameId});
@@ -42,7 +41,9 @@ export function zucks(global, data) {
       });
     });
   } else if (data['adtype'] === 'native') {
-    loadScript(global, `https://j.zucks.net.zimg.jp/n?f=${data['frameId']}`);
+    const s = global.document.createElement('script');
+    s.src = `https://j.zucks.net.zimg.jp/n?f=${data['frameId']}`;
+    global.document.getElementById('c').appendChild(s);
   } else {
     writeScript(global, `https://j.zucks.net.zimg.jp/j?f=${data['frameId']}`);
   }

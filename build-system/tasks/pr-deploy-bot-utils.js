@@ -16,13 +16,14 @@
 'use strict';
 
 const fs = require('fs-extra');
-const log = require('fancy-log');
 const path = require('path');
 const request = require('request-promise');
-const {cyan, green} = require('ansi-colors');
-const {gitCommitHash} = require('../git');
-const {replaceUrls: replaceUrlsAppUtil} = require('../app-utils');
-const {travisBuildNumber} = require('../travis');
+const {ciBuildSha, isTravisBuild} = require('../common/ci');
+const {cyan} = require('ansi-colors');
+const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
+const {replaceUrls: replaceUrlsAppUtil} = require('../server/app-utils');
+
+const hostNamePrefix = 'https://storage.googleapis.com/amp-test-website-1';
 
 async function walk(dest) {
   const filelist = [];
@@ -39,12 +40,22 @@ async function walk(dest) {
   return filelist;
 }
 
+function getBaseUrl() {
+  return `${hostNamePrefix}/amp_nomodule_${ciBuildSha()}`;
+}
+
 async function replace(filePath) {
   const data = await fs.readFile(filePath, 'utf8');
-
+  const hostName = getBaseUrl();
   const inabox = false;
   const storyV1 = true;
-  const result = replaceUrlsAppUtil('compiled', data, '', inabox, storyV1);
+  const result = replaceUrlsAppUtil(
+    'compiled',
+    data,
+    hostName,
+    inabox,
+    storyV1
+  );
 
   await fs.writeFile(filePath, result, 'utf8');
 }
@@ -52,27 +63,30 @@ async function replace(filePath) {
 async function replaceUrls(dir) {
   const files = await walk(dir);
   const promises = files
-    .filter(fileName => path.extname(fileName) == '.html')
-    .map(file => replace(file));
+    .filter((fileName) => path.extname(fileName) == '.html')
+    .map((file) => replace(file));
   await Promise.all(promises);
 }
 
-async function signalDistUpload(result) {
-  const sha = gitCommitHash();
-  const travisBuild = travisBuildNumber();
-  const baseUrl = 'https://amp-pr-deploy-bot.appspot.com/v0/pr-deploy/';
-  const url = `${baseUrl}travisbuilds/${travisBuild}/headshas/${sha}/${result}`;
-
-  await request.post(url);
-  log(
-    green('INFO:'),
-    'reported ',
-    cyan(`dist: ${result}`),
-    'to the pr-deploy GitHub App'
+async function signalPrDeployUpload(result) {
+  // TODO(rsimha): Remove this check once Travis is shut down.
+  if (isTravisBuild()) {
+    return;
+  }
+  const loggingPrefix = getLoggingPrefix();
+  logWithoutTimestamp(
+    `${loggingPrefix} Reporting`,
+    cyan(result),
+    'to the pr-deploy GitHub App...'
   );
+  const sha = ciBuildSha();
+  const baseUrl = 'https://amp-pr-deploy-bot.appspot.com/v0/pr-deploy/';
+  const url = `${baseUrl}headshas/${sha}/${result}`;
+  await request.post(url);
 }
 
 module.exports = {
+  getBaseUrl,
   replaceUrls,
-  signalDistUpload,
+  signalPrDeployUpload,
 };

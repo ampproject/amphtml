@@ -26,6 +26,7 @@ import {
 import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
+  dispatchCustomEvent,
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
@@ -65,7 +66,11 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url(this.getVideoIframeSrc_(), opt_onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      this.getVideoIframeSrc_(),
+      opt_onLayout
+    );
   }
 
   /** @override */
@@ -133,23 +138,18 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
   }
 
   /** @override */
-  viewportCallback(visible) {
-    this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
-  }
-
-  /** @override */
   layoutCallback() {
     const iframe = createFrameFor(this, this.getVideoIframeSrc_());
 
     this.iframe_ = iframe;
 
-    this.unlistenMessage_ = listen(this.win, 'message', event => {
+    this.unlistenMessage_ = listen(this.win, 'message', (event) => {
       this.handleNexxMessage_(event);
     });
 
     this.element.appendChild(this.iframe_);
     const loaded = this.loadPromise(this.iframe_).then(() => {
-      this.element.dispatchCustomEvent(VideoEvents.LOAD);
+      dispatchCustomEvent(this.element, VideoEvents.LOAD);
     });
     this.playerReadyResolver_(loaded);
     return loaded;
@@ -213,7 +213,7 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     }
 
     const data = objOrParseJson(eventData);
-    if (!data) {
+    if (data == null) {
       return;
     }
 
@@ -330,6 +330,6 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpNexxtvPlayer);
 });

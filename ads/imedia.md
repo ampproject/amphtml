@@ -19,10 +19,13 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width="300" height="250"
+<amp-ad
+  width="300"
+  height="250"
   type="imedia"
   data-id="p1"
-  data-positions='[{"id":"p1", "zoneId":"seznam.novinky.ikona2"}, {"id":"p2", "zoneId":"seznam.novinky.ikona"}]'>
+  data-positions='[{"id":"p1", "zoneId":"seznam.novinky.ikona2"}, {"id":"p2", "zoneId":"seznam.novinky.ikona"}]'
+>
 </amp-ad>
 ```
 
@@ -32,10 +35,10 @@ For configuration semantics, see [Imedia's documentation](https://iimedia.sbeta.
 
 Required parameters:
 
-- `data-id`
-- `data-positions`: JSON value
+-   `data-id`
+-   `data-positions`: JSON value
 
 Required JSON fields:
 
-* `id`: unique element id
-* `zoneId`: advertisement identificator
+-   `id`: unique element id
+-   `zoneId`: advertisement identificator

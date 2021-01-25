@@ -17,20 +17,13 @@
 import {Services} from '../../../src/services';
 import {dict} from '../../../src/utils/object';
 import {
-  getViewerAuthTokenIfAvailable,
   getViewerInterceptResponse,
   setupAMPCors,
   setupInit,
   setupJsonFetchInit,
 } from '../../../src/utils/xhr-utils';
 
-describes.sandboxed('utils/xhr-utils', {}, env => {
-  let sandbox;
-
-  beforeEach(() => {
-    sandbox = env.sandbox;
-  });
-
+describes.sandboxed('utils/xhr-utils', {}, (env) => {
   describe('setupAMPCors', () => {
     it('should set AMP-Same-Origin header', () => {
       // Given a same origin request.
@@ -100,23 +93,25 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
 
     beforeEach(() => {
       ampDocSingle = {
-        getRootNode: () => {
+        getRootNode() {
           return {documentElement: doc};
         },
+        whenFirstVisible: env.sandbox.stub().returns(Promise.resolve()),
       };
       doc = document.createElement('html');
       doc.setAttribute('allow-xhr-interception', 'true');
       init = {};
       input = 'https://sample.com';
       viewer = {
-        hasCapability: unusedParam => true,
+        hasCapability: (unusedParam) => true,
         isTrustedViewer: () => Promise.resolve(true),
-        sendMessageAwaitResponse: sandbox.stub().returns(Promise.resolve({})),
-        whenFirstVisible: sandbox.stub().returns(Promise.resolve()),
+        sendMessageAwaitResponse: env.sandbox
+          .stub()
+          .returns(Promise.resolve({})),
       };
-      viewerForDoc = sandbox.stub(Services, 'viewerForDoc').returns(viewer);
+      viewerForDoc = env.sandbox.stub(Services, 'viewerForDoc').returns(viewer);
       win = {
-        AMP_MODE: {
+        __AMP_MODE: {
           localDev: false,
         },
         location: {
@@ -135,7 +130,7 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
     });
 
     it('should not intercept if viewer can not intercept', async () => {
-      viewer.hasCapability = unusedParam => false;
+      viewer.hasCapability = (unusedParam) => false;
 
       await getViewerInterceptResponse(win, ampDocSingle, input, init);
 
@@ -148,7 +143,7 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
       init = {
         bypassInterceptorForDev: true,
       };
-      win.AMP_MODE = {
+      win.__AMP_MODE = {
         localDev: true,
       };
 
@@ -201,7 +196,7 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
     it('should wait for visibility', async () => {
       await getViewerInterceptResponse(win, ampDocSingle, input, init);
 
-      expect(viewer.whenFirstVisible).to.have.been.calledOnce;
+      expect(ampDocSingle.whenFirstVisible).to.have.been.calledOnce;
     });
 
     it('should not wait for visibility if prerenderSafe', async () => {
@@ -211,88 +206,7 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
 
       await getViewerInterceptResponse(win, ampDocSingle, input, init);
 
-      expect(viewer.whenFirstVisible).to.not.have.been.called;
-    });
-  });
-
-  describe('getViewerAuthTokenIfAvailable', () => {
-    it('should return undefined if crossorigin attr is not present', () => {
-      const el = document.createElement('html');
-      return getViewerAuthTokenIfAvailable(el).then(token => {
-        expect(token).to.equal(undefined);
-      });
-    });
-
-    it(
-      'should return undefined if crossorigin attr does not contain ' +
-        'exactly "amp-viewer-auth-token-post"',
-      () => {
-        const el = document.createElement('html');
-        el.setAttribute('crossorigin', '');
-        return getViewerAuthTokenIfAvailable(el).then(token => {
-          expect(token).to.be.undefined;
-        });
-      }
-    );
-
-    it('should return an auth token if one is present', () => {
-      sandbox.stub(Services, 'viewerAssistanceForDocOrNull').returns(
-        Promise.resolve({
-          getIdTokenPromise: () => Promise.resolve('idToken'),
-        })
-      );
-      const el = document.createElement('html');
-      el.setAttribute('crossorigin', 'amp-viewer-auth-token-via-post');
-      return getViewerAuthTokenIfAvailable(el).then(token => {
-        expect(token).to.equal('idToken');
-      });
-    });
-
-    it('should return an empty auth token if there is not one present', () => {
-      sandbox.stub(Services, 'viewerAssistanceForDocOrNull').returns(
-        Promise.resolve({
-          getIdTokenPromise: () => Promise.resolve(undefined),
-        })
-      );
-      const el = document.createElement('html');
-      el.setAttribute('crossorigin', 'amp-viewer-auth-token-via-post');
-      return getViewerAuthTokenIfAvailable(el).then(token => {
-        expect(token).to.equal('');
-      });
-    });
-
-    it(
-      'should return an empty auth token if there is an issue retrieving ' +
-        'the identity token',
-      () => {
-        sandbox.stub(Services, 'viewerAssistanceForDocOrNull').returns(
-          Promise.reject({
-            getIdTokenPromise: () => Promise.reject(),
-          })
-        );
-        const el = document.createElement('html');
-        el.setAttribute('crossorigin', 'amp-viewer-auth-token-via-post');
-        return getViewerAuthTokenIfAvailable(el).then(token => {
-          expect(token).to.equal('');
-        });
-      }
-    );
-
-    it('should assert that amp-viewer-assistance extension is present', () => {
-      sandbox
-        .stub(Services, 'viewerAssistanceForDocOrNull')
-        .returns(Promise.resolve());
-      const el = document.createElement('html');
-      el.setAttribute('crossorigin', 'amp-viewer-auth-token-via-post');
-      expectAsyncConsoleError(
-        'crossorigin="amp-viewer-auth-token-post" ' +
-          'requires amp-viewer-assistance extension.',
-        1
-      );
-      return getViewerAuthTokenIfAvailable(el).then(
-        undefined,
-        e => expect(e).to.not.be.undefined
-      );
+      expect(ampDocSingle.whenFirstVisible).to.not.have.been.called;
     });
   });
 });

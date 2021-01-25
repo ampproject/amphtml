@@ -15,7 +15,7 @@
  */
 
 import '../amp-date-display';
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin(
@@ -25,7 +25,7 @@ describes.realWin(
       extensions: ['amp-date-display'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let element;
     let impl;
@@ -33,8 +33,7 @@ describes.realWin(
 
     beforeEach(() => {
       win = env.win;
-      clock = lolex.install({
-        target: win,
+      clock = fakeTimers.withGlobal(win).install({
         now: new Date('2018-01-01T08:00:00Z'),
       });
 

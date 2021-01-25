@@ -16,9 +16,9 @@
 import {Services} from './services';
 import {VideoEvents} from './video-interface';
 import {dev} from './log';
+import {dispatchCustomEvent} from './dom';
 import {htmlFor} from './static-template';
 import {isArray, isObject} from './types';
-import {startsWith} from './string';
 import {tryParseJson} from './json';
 
 /** @enum {string} */
@@ -61,8 +61,8 @@ export function redispatch(element, event, events) {
     return false;
   }
   const dispatchEvent = events[event];
-  (isArray(dispatchEvent) ? dispatchEvent : [dispatchEvent]).forEach(e => {
-    element.dispatchCustomEvent(dev().assertString(e));
+  (isArray(dispatchEvent) ? dispatchEvent : [dispatchEvent]).forEach((e) => {
+    dispatchCustomEvent(element, dev().assertString(e));
   });
   return true;
 }
@@ -108,9 +108,7 @@ export function isJsonOrObj(anything) {
   if (!anything) {
     return false;
   }
-  return (
-    isObject(anything) || startsWith(/** @type {string} */ (anything), '{')
-  );
+  return isObject(anything) || /** @type {string} */ (anything).startsWith('{');
 }
 
 /**

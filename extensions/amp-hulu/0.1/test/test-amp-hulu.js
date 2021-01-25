@@ -23,7 +23,7 @@ describes.realWin(
       extensions: ['amp-hulu'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
 
     beforeEach(() => {
@@ -47,7 +47,7 @@ describes.realWin(
     }
 
     it('renders', () => {
-      return getHulu('4Dk5F2PYTtrgciuvloH3UA').then(hulu => {
+      return getHulu('4Dk5F2PYTtrgciuvloH3UA').then((hulu) => {
         const iframe = hulu.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.tagName).to.equal('IFRAME');
@@ -58,7 +58,7 @@ describes.realWin(
     });
 
     it('renders responsively', () => {
-      return getHulu('4Dk5F2PYTtrgciuvloH3UA', true).then(hulu => {
+      return getHulu('4Dk5F2PYTtrgciuvloH3UA', true).then((hulu) => {
         const iframe = hulu.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.className).to.match(/i-amphtml-fill-content/);

@@ -20,7 +20,7 @@ import {getNextArrow, getPrevArrow, getSlide} from './helpers';
 const SLIDE_COUNT = 7;
 
 describes.endtoend(
-  'AMP carousel arrows with custom arrows',
+  'amp-base-carousel:0.1 - arrows with custom arrows',
   {
     testUrl:
       'http://localhost:8000/test/manual/amp-base-carousel/custom-arrows.amp.html',
@@ -29,11 +29,10 @@ describes.endtoend(
       'layers',
       'amp-lightbox-gallery-base-carousel',
     ],
-    browsers: ['chrome', 'firefox'],
     //TODO(spaharmi): fails on shadow demo
     environments: ['single', 'viewer-demo'],
   },
-  async function(env) {
+  async function (env) {
     let controller;
     let prevArrow;
     let nextArrow;

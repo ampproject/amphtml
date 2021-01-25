@@ -457,7 +457,7 @@ export class WindowMessenger {
      */
     this.messagePort_./*OK*/ postMessage(payload);
 
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       this.messages_[payload.id] = {
         message: data,
         topic,
@@ -486,7 +486,7 @@ export class WindowMessenger {
     }
     this.messagePort_./*OK*/ postMessage(payload);
 
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       this.messages_[payload.id] = {
         message: data,
         topic,

@@ -15,6 +15,7 @@
  */
 
 import '../amp-pan-zoom';
+import {Services} from '../../../../src/services';
 import {createPointerEvent} from '../../../../testing/test-helper';
 import {htmlFor} from '../../../../src/static-template';
 import {listenOncePromise} from '../../../../src/event-helper';
@@ -27,18 +28,15 @@ describes.realWin(
       extensions: ['amp-pan-zoom'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let doc;
-    let sandbox;
     let el;
     let impl;
     let svg;
 
     const measureMutateElementStub = (measure, mutate) => {
-      return Promise.resolve()
-        .then(measure)
-        .then(mutate);
+      return Promise.resolve().then(measure).then(mutate);
     };
 
     /**
@@ -67,19 +65,18 @@ describes.realWin(
       doc.body.appendChild(el);
       return el.build().then(() => {
         impl = el.implementation_;
-        sandbox
+        env.sandbox
           .stub(impl, 'measureMutateElement')
           .callsFake(measureMutateElementStub);
-        sandbox
+        env.sandbox
           .stub(impl, 'mutateElement')
-          .callsFake(mutate => measureMutateElementStub(undefined, mutate));
+          .callsFake((mutate) => measureMutateElementStub(undefined, mutate));
       });
     }
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
-      sandbox = env.sandbox;
       env.iframe.height = 500;
       env.iframe.width = 400;
     });
@@ -88,11 +85,14 @@ describes.realWin(
       let scheduleLayoutSpy;
       return getPanZoom()
         .then(() => {
-          scheduleLayoutSpy = sandbox.spy(impl, 'scheduleLayout');
+          scheduleLayoutSpy = env.sandbox.spy(
+            Services.ownersForDoc(impl.element),
+            'scheduleLayout'
+          );
           el.layoutCallback();
         })
         .then(() => {
-          expect(scheduleLayoutSpy).to.be.calledOnceWith(svg);
+          expect(scheduleLayoutSpy).to.be.calledOnceWith(impl.element, svg);
         });
     });
 
@@ -286,7 +286,7 @@ describes.realWin(
     });
 
     describe('reset-on-resize', () => {
-      it('should clear inline width/height before measuring', async function() {
+      it('should clear inline width/height before measuring', async function () {
         await getPanZoom();
         await el.layoutCallback();
         expect(svg.style.width).to.equal('300px');
@@ -304,7 +304,7 @@ describes.realWin(
     });
 
     describe('gestures', () => {
-      it('should pan correctly via mouse when zoomed', async function() {
+      it('should pan correctly via mouse when zoomed', async function () {
         await getPanZoom();
         await el.layoutCallback();
         await impl.transform(0, 0, 2);
@@ -322,20 +322,20 @@ describes.realWin(
     });
 
     describe('transformEnd', () => {
-      it('should trigger only once after double tap zoom', async function() {
+      it('should trigger only once after double tap zoom', async function () {
         await getPanZoom();
         await el.layoutCallback();
         const transformEndPromise = listenOncePromise(el, 'transformEnd');
-        const actionTriggerSpy = sandbox.spy(impl.action_, 'trigger');
+        const actionTriggerSpy = env.sandbox.spy(impl.action_, 'trigger');
         impl.handleDoubleTap({clientX: 10, clientY: 10});
         await transformEndPromise;
         expect(actionTriggerSpy).to.be.calledOnce;
       });
 
-      it('should not trigger while pinch zooming', async function() {
+      it('should not trigger while pinch zooming', async function () {
         await getPanZoom();
         await el.layoutCallback();
-        const actionTriggerSpy = sandbox.spy(impl.action_, 'trigger');
+        const actionTriggerSpy = env.sandbox.spy(impl.action_, 'trigger');
         await impl.handlePinch({
           centerClientX: 10,
           centerClientY: 10,
@@ -347,11 +347,11 @@ describes.realWin(
         expect(actionTriggerSpy).not.to.be.called;
       });
 
-      it('should trigger exactly once after pinch zoom ends', async function() {
+      it('should trigger exactly once after pinch zoom ends', async function () {
         await getPanZoom();
         await el.layoutCallback();
         const transformEndPromise = listenOncePromise(el, 'transformEnd');
-        const actionTriggerSpy = sandbox.spy(impl.action_, 'trigger');
+        const actionTriggerSpy = env.sandbox.spy(impl.action_, 'trigger');
         impl.handlePinch({
           centerClientX: 10,
           centerClientY: 10,
@@ -364,10 +364,10 @@ describes.realWin(
         expect(actionTriggerSpy).to.be.calledOnce;
       });
 
-      it('should not trigger while panning', async function() {
+      it('should not trigger while panning', async function () {
         await getPanZoom();
         await el.layoutCallback();
-        const actionTriggerSpy = sandbox.spy(impl.action_, 'trigger');
+        const actionTriggerSpy = env.sandbox.spy(impl.action_, 'trigger');
         await impl.handleSwipe({
           deltaX: 10,
           deltaY: 10,
@@ -378,11 +378,11 @@ describes.realWin(
         expect(actionTriggerSpy).not.to.be.called;
       });
 
-      it('should trigger exactly once after panning ends', async function() {
+      it('should trigger exactly once after panning ends', async function () {
         await getPanZoom();
         await el.layoutCallback();
         const transformEndPromise = listenOncePromise(el, 'transformEnd');
-        const actionTriggerSpy = sandbox.spy(impl.action_, 'trigger');
+        const actionTriggerSpy = env.sandbox.spy(impl.action_, 'trigger');
         impl.handleSwipe({
           deltaX: 10,
           deltaY: 10,

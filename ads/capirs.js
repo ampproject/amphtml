@@ -50,7 +50,7 @@ export function capirs(global, data) {
       },
     },
     block: {
-      draw: feed => {
+      draw: (feed) => {
         const banner = feed['banners']['graph'][0];
 
         global.context.renderStart({
@@ -61,19 +61,19 @@ export function capirs(global, data) {
         const reportId = 'capirs-' + banner['banner_id'];
         global.context.reportRenderedEntityIdentifier(reportId);
       },
-      unexist: function() {
+      unexist: function () {
         global.context.noContentAvailable();
       },
     },
   };
 
-  loadScript(global, '//ssp.rambler.ru/lpdid.js');
   loadScript(global, '//ssp.rambler.ru/capirs_async.js');
 }
 
 /**
  * @param {!Window} global
  * @param {!Object} banner
+ * @return {*} TODO(#23582): Specify return type
  */
 function getWidth(global, banner) {
   let width;

@@ -111,7 +111,7 @@ export class AmpBysideContent extends AMP.BaseElement {
     /** @const {function()} */
     this.boundUpdateSize_ = debounce(
       this.win,
-      data => {
+      (data) => {
         this.updateSize_(/** @type {Object} */ (data));
       },
       100
@@ -129,7 +129,11 @@ export class AmpBysideContent extends AMP.BaseElement {
    */
   preconnectCallback(onLayout) {
     if (this.origin_) {
-      this.preconnect.url(this.origin_, onLayout);
+      Services.preconnectFor(this.win).url(
+        this.getAmpDoc(),
+        this.origin_,
+        onLayout
+      );
     }
   }
 
@@ -196,7 +200,7 @@ export class AmpBysideContent extends AMP.BaseElement {
     this.applyFillContent(iframe);
 
     return this.composeSrcUrl_()
-      .then(src => {
+      .then((src) => {
         this.iframeSrc_ = assertHttpsUrl(src, this.element, this.getName_());
         iframe.src = this.iframeSrc_;
 
@@ -216,7 +220,10 @@ export class AmpBysideContent extends AMP.BaseElement {
       });
   }
 
-  /** @private */
+  /**
+   * @private
+   * @return {string}
+   */
   composeOrigin_() {
     const subDomain =
       this.webcareZone_ === MAIN_WEBCARE_ZONE_
@@ -226,7 +233,10 @@ export class AmpBysideContent extends AMP.BaseElement {
     return 'https://' + encodeURIComponent(subDomain) + '.' + BYSIDE_DOMAIN_;
   }
 
-  /** @private */
+  /**
+   * @private
+   * @return {*} TODO(#23582): Specify return type
+   */
   composeSrcUrl_() {
     const src = this.baseUrl_ + 'placeholder.php';
     const params = dict({
@@ -381,7 +391,7 @@ export class AmpBysideContent extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
-    this.unlisteners_.forEach(unlisten => unlisten());
+    this.unlisteners_.forEach((unlisten) => unlisten());
     this.unlisteners_.length = 0;
 
     if (this.iframe_) {
@@ -393,6 +403,6 @@ export class AmpBysideContent extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-byside-content', '0.1', AMP => {
+AMP.extension('amp-byside-content', '0.1', (AMP) => {
   AMP.registerElement('amp-byside-content', AmpBysideContent, CSS);
 });

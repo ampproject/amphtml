@@ -15,7 +15,6 @@
  */
 
 import {getMode} from './mode';
-import {getModeObject} from './mode-object';
 import {internalRuntimeVersion} from './internal-version';
 import {isArray, isEnumValue} from './types';
 import {once} from './utils/function';
@@ -51,6 +50,14 @@ export function isUserErrorMessage(message) {
 
 /**
  * @param {string} message
+ * @return {string} The new message without USER_ERROR_SENTINEL
+ */
+export function stripUserError(message) {
+  return message.replace(USER_ERROR_SENTINEL, '');
+}
+
+/**
+ * @param {string} message
  * @return {boolean} Whether this message was a a user error from an iframe embed.
  */
 export function isUserErrorEmbed(message) {
@@ -59,7 +66,6 @@ export function isUserErrorEmbed(message) {
 
 /**
  * @enum {number}
- * @private Visible for testing only.
  */
 export const LogLevel = {
   OFF: 0,
@@ -75,7 +81,7 @@ export const LogLevel = {
  * @param {function(*, !Element=)|undefined} fn
  */
 export function setReportError(fn) {
-  self.reportError = fn;
+  self.__AMP_REPORT_ERROR = fn;
 }
 
 /**
@@ -92,28 +98,39 @@ export function overrideLogLevel(level) {
 }
 
 /**
- * URL that displays a log message on amp.dev.
- * Query params should be appended postfacto.
- * This prefixes `internalRuntimeVersion` with the `01` channel signifier (for prod.)
- * It doesn't matter if this gets the prod table for a different channel, since message
- * tables are guaranteed not to divert as long as `internalRuntimeVersion` is the same.
+ * Prefixes `internalRuntimeVersion` with the `01` channel signifier (for prod.) for
+ * extracted message URLs.
+ * (Specific channel is irrelevant: message tables are invariant on internal version.)
  * @return {string}
  */
-const externalMessagesUrl = () =>
-  `https://log.amp.dev/?v=01${encodeURIComponent(internalRuntimeVersion())}&`;
+const messageUrlRtv = () => `01${internalRuntimeVersion()}`;
+
+/**
+ * Gets a URL to display a message on amp.dev.
+ * @param {string} id
+ * @param {!Array} interpolatedParts
+ * @return {string}
+ */
+const externalMessageUrl = (id, interpolatedParts) =>
+  interpolatedParts.reduce(
+    (prefix, arg) => `${prefix}&s[]=${messageArgToEncodedComponent(arg)}`,
+    `https://log.amp.dev/?v=${messageUrlRtv()}&id=${encodeURIComponent(id)}`
+  );
 
 /**
  * URL to simple log messages table JSON file, which contains an Object<string, string>
  * which maps message id to full message template.
- * This prefixes `internalRuntimeVersion` with the `01` channel signifier (for prod.)
- * It doesn't matter if this gets the prod table for a different channel, since message
- * tables are guaranteed not to divert as long as `internalRuntimeVersion` is the same.
  * @return {string}
  */
 const externalMessagesSimpleTableUrl = () =>
-  `${urls.cdn}/rtv/01${encodeURIComponent(
-    internalRuntimeVersion()
-  )}/log-messages.simple.json`;
+  `${urls.cdn}/rtv/${messageUrlRtv()}/log-messages.simple.json`;
+
+/**
+ * @param {*} arg
+ * @return {string}
+ */
+const messageArgToEncodedComponent = (arg) =>
+  encodeURIComponent(String(elementStringOrPassthru(arg)));
 
 /**
  * Logging class. Use of sentinel string instead of a boolean to check user/dev
@@ -134,7 +151,7 @@ export class Log {
    * https://blog.sentry.io/2016/01/04/client-javascript-reporting-window-onerror.html
    *
    * @param {!Window} win
-   * @param {function(!./mode.ModeDef):!LogLevel} levelFunc
+   * @param {function(number, boolean):!LogLevel} levelFunc
    * @param {string=} opt_suffix
    */
   constructor(win, levelFunc, opt_suffix = '') {
@@ -143,9 +160,9 @@ export class Log {
      * the tests runs because only the former is relayed to the console.
      * @const {!Window}
      */
-    this.win = getMode().test && win.AMP_TEST_IFRAME ? win.parent : win;
+    this.win = getMode().test && win.__AMP_TEST_IFRAME ? win.parent : win;
 
-    /** @private @const {function(!./mode.ModeDef):!LogLevel} */
+    /** @private @const {function(number, boolean):!LogLevel} */
     this.levelFunc_ = levelFunc;
 
     /** @private @const {!LogLevel} */
@@ -160,8 +177,8 @@ export class Log {
     this.fetchExternalMessagesOnce_ = once(() => {
       win
         .fetch(externalMessagesSimpleTableUrl())
-        .then(response => response.json(), noop)
-        .then(opt_messages => {
+        .then((response) => response.json(), noop)
+        .then((opt_messages) => {
           if (opt_messages) {
             this.messages_ = /** @type {!JsonObject} */ (opt_messages);
           }
@@ -202,8 +219,16 @@ export class Log {
       return LogLevel.INFO;
     }
 
+    return this.defaultLevelWithFunc_();
+  }
+
+  /**
+   * @return {!LogLevel}
+   * @private
+   */
+  defaultLevelWithFunc_() {
     // Delegate to the specific resolver.
-    return this.levelFunc_(getModeObject());
+    return this.levelFunc_(parseInt(getMode().log, 10), getMode().development);
   }
 
   /**
@@ -221,9 +246,14 @@ export class Log {
       } else if (level == 'WARN') {
         fn = this.win.console.warn || fn;
       }
-      const args = this.maybeExpandArguments_(messages);
-      if (getMode().localDev) {
-        args.unshift('[' + tag + ']');
+      const args = this.maybeExpandMessageArgs_(messages);
+      // Prefix console message with "[tag]".
+      const prefix = `[${tag}]`;
+      if (typeof args[0] === 'string') {
+        // Prepend string to avoid breaking string substitutions e.g. %s.
+        args[0] = prefix + ' ' + args[0];
+      } else {
+        args.unshift(prefix);
       }
       fn.apply(this.win.console, args);
     }
@@ -300,8 +330,8 @@ export class Log {
     const error = this.error_.apply(this, arguments);
     if (error) {
       error.name = tag || error.name;
-      // reportError is installed globally per window in the entry point.
-      self.reportError(error);
+      // __AMP_REPORT_ERROR is installed globally per window in the entry point.
+      self.__AMP_REPORT_ERROR(error);
     }
   }
 
@@ -315,8 +345,8 @@ export class Log {
     const error = this.error_.apply(this, arguments);
     if (error) {
       error.expected = true;
-      // reportError is installed globally per window in the entry point.
-      self.reportError(error);
+      // __AMP_REPORT_ERROR is installed globally per window in the entry point.
+      self.__AMP_REPORT_ERROR(error);
     }
   }
 
@@ -355,32 +385,23 @@ export class Log {
    *   elements in an array. When e.g. passed to console.error this yields
    *   native displays of things like HTML elements.
    *
-   * NOTE: for an explanation of the tempate R implementation see
-   * https://github.com/google/closure-library/blob/08858804/closure/goog/asserts/asserts.js#L192-L213
-   *
    * @param {T} shouldBeTrueish The value to assert. The assert fails if it does
    *     not evaluate to true.
    * @param {!Array|string=} opt_message The assertion message
    * @param {...*} var_args Arguments substituted into %s in the message.
-   * @return {R} The value of shouldBeTrueish.
-   * @throws {!Error} When `value` is `null` or `undefined`.
+   * @return {T} The value of shouldBeTrueish.
+   * @throws {!Error} When `value` is falsey.
    * @template T
-   * @template R :=
-   *     mapunion(T, (V) =>
-   *         cond(eq(V, 'null'),
-   *             none(),
-   *             cond(eq(V, 'undefined'),
-   *                 none(),
-   *                 V)))
-   *  =:
-   * @closurePrimitive {asserts.matchesReturn}
+   * @closurePrimitive {asserts.truthy}
    */
   assert(shouldBeTrueish, opt_message, var_args) {
     let firstElement;
     if (isArray(opt_message)) {
-      return this.assert(
-        shouldBeTrueish,
-        this.expandLogMessage_(/** @type {!Array} */ (opt_message))
+      return this.assert.apply(
+        this,
+        [shouldBeTrueish].concat(
+          this.expandMessageArgs_(/** @type {!Array} */ (opt_message))
+        )
       );
     }
     if (!shouldBeTrueish) {
@@ -399,15 +420,15 @@ export class Log {
         }
         messageArray.push(val);
         pushIfNonEmpty(messageArray, nextConstant.trim());
-        formatted += toString(val) + nextConstant;
+        formatted += stringOrElementString(val) + nextConstant;
       }
       const e = new Error(formatted);
       e.fromAssert = true;
       e.associatedElement = firstElement;
       e.messageArray = messageArray;
       this.prepareError_(e);
-      // reportError is installed globally per window in the entry point.
-      self.reportError(e);
+      // __AMP_REPORT_ERROR is installed globally per window in the entry point.
+      self.__AMP_REPORT_ERROR(e);
       throw e;
     }
     return shouldBeTrueish;
@@ -426,10 +447,11 @@ export class Log {
    */
   assertElement(shouldBeElement, opt_message) {
     const shouldBeTrueish = shouldBeElement && shouldBeElement.nodeType == 1;
-    this.assert(
+    this.assertType_(
+      shouldBeElement,
       shouldBeTrueish,
-      (opt_message || 'Element expected') + ': %s',
-      shouldBeElement
+      'Element expected',
+      opt_message
     );
     return /** @type {!Element} */ (shouldBeElement);
   }
@@ -446,10 +468,11 @@ export class Log {
    * @closurePrimitive {asserts.matchesReturn}
    */
   assertString(shouldBeString, opt_message) {
-    this.assert(
+    this.assertType_(
+      shouldBeString,
       typeof shouldBeString == 'string',
-      (opt_message || 'String expected') + ': %s',
-      shouldBeString
+      'String expected',
+      opt_message
     );
     return /** @type {string} */ (shouldBeString);
   }
@@ -467,10 +490,11 @@ export class Log {
    * @closurePrimitive {asserts.matchesReturn}
    */
   assertNumber(shouldBeNumber, opt_message) {
-    this.assert(
+    this.assertType_(
+      shouldBeNumber,
       typeof shouldBeNumber == 'number',
-      (opt_message || 'Number expected') + ': %s',
-      shouldBeNumber
+      'Number expected',
+      opt_message
     );
     return /** @type {number} */ (shouldBeNumber);
   }
@@ -485,10 +509,11 @@ export class Log {
    * @closurePrimitive {asserts.matchesReturn}
    */
   assertArray(shouldBeArray, opt_message) {
-    this.assert(
-      Array.isArray(shouldBeArray),
-      (opt_message || 'Array expected') + ': %s',
-      shouldBeArray
+    this.assertType_(
+      shouldBeArray,
+      isArray(shouldBeArray),
+      'Array expected',
+      opt_message
     );
     return /** @type {!Array} */ (shouldBeArray);
   }
@@ -504,10 +529,11 @@ export class Log {
    * @closurePrimitive {asserts.matchesReturn}
    */
   assertBoolean(shouldBeBoolean, opt_message) {
-    this.assert(
+    this.assertType_(
+      shouldBeBoolean,
       !!shouldBeBoolean === shouldBeBoolean,
-      (opt_message || 'Boolean expected') + ': %s',
-      shouldBeBoolean
+      'Boolean expected',
+      opt_message
     );
     return /** @type {boolean} */ (shouldBeBoolean);
   }
@@ -552,9 +578,9 @@ export class Log {
    * @return {!Array}
    * @private
    */
-  maybeExpandArguments_(args) {
+  maybeExpandMessageArgs_(args) {
     if (isArray(args[0])) {
-      return [this.expandLogMessage_(/** @type {!Array} */ (args[0]))];
+      return this.expandMessageArgs_(/** @type {!Array} */ (args[0]));
     }
     return args;
   }
@@ -568,30 +594,44 @@ export class Log {
    * methods instead.
    *
    * @param {!Array} parts
-   * @return {string}
+   * @return {!Array}
    * @private
    */
-  expandLogMessage_(parts) {
+  expandMessageArgs_(parts) {
     // First value should exist.
-    const id = parts[0];
+    const id = parts.shift();
     // Best effort fetch of message template table.
     // Since this is async, the first few logs might be indirected to a URL even
     // if in development mode. Message table is ~small so this should be a short
     // gap.
-    if (getMode(this.win).development && !this.messages_) {
+    if (getMode(this.win).development) {
       this.fetchExternalMessagesOnce_();
     }
-    const args = parts.slice(1);
     if (this.messages_ && id in this.messages_) {
-      const template = this.messages_[id];
-      const {message} = createErrorVargs.apply(null, [template].concat(args));
-      return message;
+      return [this.messages_[id]].concat(parts);
     }
-    const url = args.reduce(
-      (prefix, arg) => `${prefix}&s[]=${encodeURIComponent(toString(arg))}`,
-      `${externalMessagesUrl()}id=${encodeURIComponent(id)}`
-    );
-    return `More info at ${url}`;
+    return [`More info at ${externalMessageUrl(id, parts)}`];
+  }
+
+  /**
+   * Asserts types, backbone of `assertNumber`, `assertString`, etc.
+   *
+   * It understands array-based "id"-contracted messages.
+   *
+   * Otherwise creates a sprintf syntax string containing the optional message or the
+   * default. An interpolation token is added at the end to include the `subject`.
+   * @param {*} subject
+   * @param {*} assertion
+   * @param {string} defaultMessage
+   * @param {!Array|string=} opt_message
+   * @private
+   */
+  assertType_(subject, assertion, defaultMessage, opt_message) {
+    if (isArray(opt_message)) {
+      this.assert(assertion, opt_message.concat(subject));
+    } else {
+      this.assert(assertion, `${opt_message || defaultMessage}: %s`, subject);
+    }
   }
 }
 
@@ -599,12 +639,19 @@ export class Log {
  * @param {string|!Element} val
  * @return {string}
  */
-function toString(val) {
+const stringOrElementString = (val) =>
+  /** @type {string} */ (elementStringOrPassthru(val));
+
+/**
+ * @param {*} val
+ * @return {*}
+ */
+function elementStringOrPassthru(val) {
   // Do check equivalent to `val instanceof Element` without cross-window bug
   if (val && val.nodeType == 1) {
     return val.tagName.toLowerCase() + (val.id ? '#' + val.id : '');
   }
-  return /** @type {string} */ (val);
+  return val;
 }
 
 /**
@@ -676,7 +723,7 @@ export function rethrowAsync(var_args) {
   const error = createErrorVargs.apply(null, arguments);
   setTimeout(() => {
     // reportError is installed globally per window in the entry point.
-    self.reportError(error);
+    self.__AMP_REPORT_ERROR(error);
     throw error;
   });
 }
@@ -686,24 +733,24 @@ export function rethrowAsync(var_args) {
  * on Log and closure literally can't even.
  * @type {{user: ?Log, dev: ?Log, userForEmbed: ?Log}}
  */
-self.log = self.log || {
+self.__AMP_LOG = self.__AMP_LOG || {
   user: null,
   dev: null,
   userForEmbed: null,
 };
 
-const logs = self.log;
+const logs = self.__AMP_LOG;
 
 /**
  * Eventually holds a constructor for Log objects. Lazily initialized, so we
  * can avoid ever referencing the real constructor except in JS binaries
  * that actually want to include the implementation.
- * @type {?Function}
+ * @type {?typeof Log}
  */
 let logConstructor = null;
 
 /**
- * Initializes log contructor.
+ * Initializes log constructor.
  */
 export function initLogConstructor() {
   logConstructor = Log;
@@ -720,7 +767,7 @@ export function initLogConstructor() {
 }
 
 /**
- * Resets log contructor for testing.
+ * Resets log constructor for testing.
  */
 export function resetLogConstructorForTesting() {
   logConstructor = null;
@@ -763,9 +810,8 @@ function getUserLogger(suffix) {
   }
   return new logConstructor(
     self,
-    mode => {
-      const logNum = parseInt(mode.log, 10);
-      if (mode.development || logNum >= 1) {
+    (logNum, development) => {
+      if (development || logNum >= 1) {
         return LogLevel.FINE;
       }
       return LogLevel.WARN;
@@ -793,8 +839,7 @@ export function dev() {
   if (!logConstructor) {
     throw new Error('failed to call initLogConstructor');
   }
-  return (logs.dev = new logConstructor(self, mode => {
-    const logNum = parseInt(mode.log, 10);
+  return (logs.dev = new logConstructor(self, (logNum) => {
     if (logNum >= 3) {
       return LogLevel.FINE;
     }
@@ -829,9 +874,6 @@ export function isFromEmbed(win, opt_element) {
  *   elements in an array. When e.g. passed to console.error this yields
  *   native displays of things like HTML elements.
  *
- * NOTE: for an explanation of the tempate R implementation see
- * https://github.com/google/closure-library/blob/08858804/closure/goog/asserts/asserts.js#L192-L213
- *
  * @param {T} shouldBeTrueish The value to assert. The assert fails if it does
  *     not evaluate to true.
  * @param {!Array|string=} opt_message The assertion message
@@ -844,18 +886,10 @@ export function isFromEmbed(win, opt_element) {
  * @param {*=} opt_7 Optional argument
  * @param {*=} opt_8 Optional argument
  * @param {*=} opt_9 Optional argument
- * @return {R} The value of shouldBeTrueish.
+ * @return {T} The value of shouldBeTrueish.
+ * @throws {!Error} When `shouldBeTrueish` is falsey.
  * @template T
- * @template R :=
- *     mapunion(T, (V) =>
- *         cond(eq(V, 'null'),
- *             none(),
- *             cond(eq(V, 'undefined'),
- *                 none(),
- *                 V)))
- *  =:
- * @throws {!Error} When `value` is `null` or `undefined`.
- * @closurePrimitive {asserts.matchesReturn}
+ * @closurePrimitive {asserts.truthy}
  */
 export function devAssert(
   shouldBeTrueish,
@@ -900,9 +934,6 @@ export function devAssert(
  *   elements in an array. When e.g. passed to console.error this yields
  *   native displays of things like HTML elements.
  *
- * NOTE: for an explanation of the tempate R implementation see
- * https://github.com/google/closure-library/blob/08858804/closure/goog/asserts/asserts.js#L192-L213
- *
  * @param {T} shouldBeTrueish The value to assert. The assert fails if it does
  *     not evaluate to true.
  * @param {!Array|string=} opt_message The assertion message
@@ -915,18 +946,10 @@ export function devAssert(
  * @param {*=} opt_7 Optional argument
  * @param {*=} opt_8 Optional argument
  * @param {*=} opt_9 Optional argument
- * @return {R} The value of shouldBeTrueish.
+ * @return {T} The value of shouldBeTrueish.
+ * @throws {!Error} When `shouldBeTrueish` is falsey.
  * @template T
- * @template R :=
- *     mapunion(T, (V) =>
- *         cond(eq(V, 'null'),
- *             none(),
- *             cond(eq(V, 'undefined'),
- *                 none(),
- *                 V)))
- *  =:
- * @throws {!Error} When `value` is `null` or `undefined`.
- * @closurePrimitive {asserts.matchesReturn}
+ * @closurePrimitive {asserts.truthy}
  */
 export function userAssert(
   shouldBeTrueish,

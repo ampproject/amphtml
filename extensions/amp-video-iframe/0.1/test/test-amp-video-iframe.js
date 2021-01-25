@@ -16,21 +16,14 @@
 
 import '../amp-video-iframe';
 import {Services} from '../../../../src/services';
-import {
-  VideoAnalyticsEvents,
-  VideoEvents,
-} from '../../../../src/video-interface';
+import {VideoEvents} from '../../../../src/video-interface';
 import {
   addAttributesToElement,
+  createElementWithAttributes,
   whenUpgradedToCustomElement,
 } from '../../../../src/dom';
-import {htmlFor} from '../../../../src/static-template';
 import {listenOncePromise} from '../../../../src/event-helper';
-import {tryParseJson} from '../../../../src/json';
-
-function getIntersectionMessage(id) {
-  return {data: {id, method: 'getIntersection'}};
-}
+import {macroTask} from '../../../../testing/yield';
 
 describes.realWin(
   'amp-video-iframe',
@@ -39,8 +32,7 @@ describes.realWin(
       extensions: ['amp-video-iframe'],
     },
   },
-  env => {
-    const {any} = sinon.match;
+  (env) => {
     const defaultFixture = 'video-iframe.html';
 
     let win;
@@ -62,11 +54,12 @@ describes.realWin(
 
     function getIframeSrc(fixture = null) {
       const {port} = location;
-      return `http://iframe.localhost:${port}/test/fixtures/served/${fixture ||
-        defaultFixture}`;
+      return `http://iframe.localhost:${port}/test/fixtures/served/${
+        fixture || defaultFixture
+      }`;
     }
 
-    const layoutConfigAttrs = size =>
+    const layoutConfigAttrs = (size) =>
       !size
         ? {layout: 'fill'}
         : {
@@ -75,19 +68,13 @@ describes.realWin(
             height: size[1],
           };
 
-    function createVideoIframe({size, src} = {}) {
-      const html = htmlFor(doc);
-      const el = html`
-        <amp-video-iframe poster="foo.png"></amp-video-iframe>
-      `;
-      el.setAttribute('src', src || getIframeSrc());
-      addAttributesToElement(el, layoutConfigAttrs(size));
+    function createVideoIframe(attrs = {}, opt_size) {
+      const el = createElementWithAttributes(doc, 'amp-video-iframe', attrs);
+      const {src = getIframeSrc(), poster = 'foo.png'} = attrs;
+      addAttributesToElement(el, {src, poster});
+      addAttributesToElement(el, layoutConfigAttrs(opt_size));
       doc.body.appendChild(el);
       return el;
-    }
-
-    function spyDispatch(el) {
-      return env.sandbox.spy(el, 'dispatchCustomEvent');
     }
 
     function acceptMockedMessages(videoIframe) {
@@ -96,11 +83,17 @@ describes.realWin(
         .returns(true);
     }
 
-    function layoutAndLoad(videoIframe) {
-      return whenUpgradedToCustomElement(videoIframe).then(() => {
-        videoIframe.implementation_.layoutCallback();
-        return listenOncePromise(videoIframe, VideoEvents.LOAD);
+    async function layoutAndLoad(element) {
+      await whenUpgradedToCustomElement(element);
+      // getLayoutSize() affects looksLikeTrackingIframe().
+      // Use default width/height of 100 since element is not sized
+      // as expected in test fixture.
+      env.sandbox.stub(element, 'getLayoutSize').returns({
+        width: Number(element.getAttribute('width')) || 100,
+        height: Number(element.getAttribute('height')) || 100,
       });
+      element.implementation_.layoutCallback();
+      return listenOncePromise(element, VideoEvents.LOAD);
     }
 
     function stubPostMessage(videoIframe) {
@@ -110,30 +103,54 @@ describes.realWin(
       );
     }
 
-    function stubIntersectionEntry(element, time, intersectionRatio) {
-      const entry = {time, intersectionRatio};
-      env.sandbox
-        ./*OK*/ stub(element, 'getIntersectionChangeEntry')
-        .returns(entry);
-      return entry;
+    function stubMeasureIntersection(target, time, intersectionRatio) {
+      env.win.IntersectionObserver = (callback) => ({
+        observe() {
+          Promise.resolve().then(() => {
+            callback([{target, time, intersectionRatio}]);
+          });
+        },
+        unobserve() {},
+        disconnect() {},
+      });
     }
 
     describe('#layoutCallback', () => {
-      it('sets metadata in iframe name', async () => {
-        const metadata = {
-          canonicalUrl: 'foo.html',
-          sourceUrl: 'bar.html',
-        };
+      it('uses data-param-* in src', async () => {
+        const element = createVideoIframe({
+          'data-param-vid': 'my_vid',
+          'data-param-foo-bar': 'foo bar',
+        });
+        await layoutAndLoad(element);
+        const {src} = element.querySelector('iframe');
+        expect(src).to.match(/\?vid=my_vid&fooBar=foo%20bar#.*$/);
+      });
 
-        env.sandbox.stub(Services, 'documentInfoForDoc').returns(metadata);
+      it('sets metadata in iframe name', async () => {
+        const canonicalUrl = 'foo.html';
+        const sourceUrl = 'bar.html';
+        const title = 'My test title';
+        const lang = 'es';
+
+        env.sandbox.stub(win.document, 'title').value(title);
+        env.sandbox.stub(win.document.documentElement, 'lang').value(lang);
+
+        env.sandbox.stub(Services, 'documentInfoForDoc').returns({
+          canonicalUrl,
+          sourceUrl,
+        });
 
         const videoIframe = createVideoIframe();
 
         await layoutAndLoad(videoIframe);
 
-        const {name} = videoIframe.implementation_.iframe_;
-
-        expect(tryParseJson(name)).to.deep.equal(metadata);
+        const iframe = videoIframe.querySelector('iframe');
+        expect(JSON.parse(iframe.name)).to.deep.equal({
+          canonicalUrl,
+          sourceUrl,
+          title,
+          lang,
+        });
       });
 
       it('sets amp=1 fragment in src', async () => {
@@ -142,8 +159,8 @@ describes.realWin(
 
         await layoutAndLoad(videoIframe);
 
-        const {src} = videoIframe.implementation_.iframe_;
-        expect(src).to.equal(`${rawSrc}#amp=1`);
+        const iframe = videoIframe.querySelector('iframe');
+        expect(iframe.src).to.equal(`${rawSrc}#amp=1`);
       });
 
       it('does not set amp=1 fragment in src when fragment present', async () => {
@@ -152,8 +169,8 @@ describes.realWin(
 
         await layoutAndLoad(videoIframe);
 
-        const {src} = videoIframe.implementation_.iframe_;
-        expect(src).to.equal(rawSrc);
+        const iframe = videoIframe.querySelector('iframe');
+        expect(iframe.src).to.equal(rawSrc);
       });
     });
 
@@ -172,10 +189,10 @@ describes.realWin(
           [1, 1],
         ];
 
-        trackingSizes.forEach(size => {
-          const {implementation_} = createVideoIframe({size});
+        trackingSizes.forEach((size) => {
+          const {implementation_} = createVideoIframe({}, size);
           allowConsoleError(() => {
-            expect(() => implementation_.buildCallback()).to.throw();
+            expect(() => implementation_.layoutCallback()).to.throw();
           });
         });
       });
@@ -183,16 +200,23 @@ describes.realWin(
 
     describe('#createPlaceholderCallback', () => {
       it('creates an amp-img with the poster as src', () => {
-        const videoIframe = createVideoIframe();
-
-        const placeholder = videoIframe.implementation_.createPlaceholderCallback();
-
+        const poster = 'foo.bar';
+        const placeholder = createVideoIframe({poster}).createPlaceholder();
         expect(placeholder).to.have.attribute('placeholder');
         expect(placeholder.tagName.toLowerCase()).to.equal('amp-img');
         expect(placeholder.getAttribute('layout')).to.equal('fill');
-        expect(placeholder.getAttribute('src')).to.equal(
-          videoIframe.getAttribute('poster')
-        );
+        expect(placeholder.getAttribute('src')).to.equal(poster);
+      });
+
+      it("uses data-param-* in the poster's src", () => {
+        expect(
+          createVideoIframe({
+            'data-param-my-poster-param': 'my param',
+            'data-param-another': 'value',
+          })
+            .createPlaceholder()
+            .getAttribute('src')
+        ).to.match(/\?myPosterParam=my%20param&another=value$/);
       });
     });
 
@@ -214,13 +238,13 @@ describes.realWin(
 
         await layoutAndLoad(videoIframe);
 
-        const dispatch = spyDispatch(videoIframe);
-
         const invalidEvents = 'tacos al pastor'.split(' ');
 
-        invalidEvents.forEach(event => {
+        invalidEvents.forEach((event) => {
+          const spy = env.sandbox.spy();
+          videoIframe.addEventListener(event, spy);
           videoIframe.implementation_.onMessage_({data: {event}});
-          expect(dispatch.withArgs(event)).to.not.have.been.called;
+          expect(spy).to.not.have.been.called;
         });
       });
 
@@ -228,8 +252,6 @@ describes.realWin(
         const videoIframe = createVideoIframe();
 
         await layoutAndLoad(videoIframe);
-
-        const dispatch = spyDispatch(videoIframe);
 
         acceptMockedMessages(videoIframe);
 
@@ -245,9 +267,55 @@ describes.realWin(
 
         for (let i = 0; i < validEvents.length; i++) {
           const event = validEvents[i];
+          const spy = env.sandbox.spy();
+          videoIframe.addEventListener(event, spy);
           videoIframe.implementation_.onMessage_({data: {event}});
-          expect(dispatch.withArgs(event)).to.have.been.calledOnce;
+          expect(spy).to.have.been.calledOnce;
         }
+      });
+
+      it('should return consent data on getConsentData', async () => {
+        const consentString = 'foo-consentString';
+        const consentMetadata = 'bar-consentMetadata';
+        const consentPolicyState = 'baz-consentPolicyState';
+        const consentPolicySharedData = 'foo-consentPolicySharedData';
+
+        env.sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
+          Promise.resolve({
+            getConsentMetadataInfo: () => Promise.resolve(consentMetadata),
+            getConsentStringInfo: () => Promise.resolve(consentString),
+            whenPolicyResolved: () => Promise.resolve(consentPolicyState),
+            getMergedSharedData: () => Promise.resolve(consentPolicySharedData),
+          })
+        );
+
+        const id = 1234;
+
+        const videoIframe = createVideoIframe();
+
+        await layoutAndLoad(videoIframe);
+
+        const postMessage = stubPostMessage(videoIframe);
+
+        acceptMockedMessages(videoIframe);
+
+        videoIframe.implementation_.onMessage_({
+          data: {id, method: 'getConsentData'},
+        });
+
+        await macroTask();
+
+        expect(
+          postMessage.withArgs({
+            id,
+            args: {
+              consentString,
+              consentMetadata,
+              consentPolicyState,
+              consentPolicySharedData,
+            },
+          })
+        ).to.have.been.calledOnce;
       });
 
       it('should return intersection ratio if in autoplay range', async () => {
@@ -263,17 +331,15 @@ describes.realWin(
 
         acceptMockedMessages(videoIframe);
 
-        const message = getIntersectionMessage(id);
+        const message = {data: {id, method: 'getIntersection'}};
 
-        const expectedResponseMessage = {
-          id,
-          args: stubIntersectionEntry(videoIframe, time, intersectionRatio),
-        };
+        stubMeasureIntersection(videoIframe, time, intersectionRatio);
+        const expectedResponseMessage = {id, args: {time, intersectionRatio}};
 
-        videoIframe.implementation_.onMessage_(message);
+        await videoIframe.implementation_.onMessage_(message);
 
-        expect(postMessage.withArgs(sinon.match(expectedResponseMessage))).to
-          .have.been.calledOnce;
+        expect(postMessage.withArgs(env.sandbox.match(expectedResponseMessage)))
+          .to.have.been.calledOnce;
       });
 
       it('should return 0 if not in autoplay range', async () => {
@@ -288,11 +354,11 @@ describes.realWin(
 
         const postMessage = stubPostMessage(videoIframe);
 
-        stubIntersectionEntry(videoIframe, time, intersectionRatio);
+        stubMeasureIntersection(videoIframe, time, intersectionRatio);
 
         acceptMockedMessages(videoIframe);
 
-        const message = getIntersectionMessage(id);
+        const message = {data: {id, method: 'getIntersection'}};
 
         const expectedResponseMessage = {
           id,
@@ -302,10 +368,10 @@ describes.realWin(
           },
         };
 
-        videoIframe.implementation_.onMessage_(message);
+        await videoIframe.implementation_.onMessage_(message);
 
-        expect(postMessage.withArgs(sinon.match(expectedResponseMessage))).to
-          .have.been.calledOnce;
+        expect(postMessage.withArgs(env.sandbox.match(expectedResponseMessage)))
+          .to.have.been.calledOnce;
       });
 
       [
@@ -332,7 +398,8 @@ describes.realWin(
 
         it(`should ${verb} custom analytics event ${sufix}`, async () => {
           const videoIframe = createVideoIframe();
-          const dispatch = spyDispatch(videoIframe);
+          const eventSpy = env.sandbox.spy();
+          videoIframe.addEventListener(VideoEvents.CUSTOM_TICK, eventSpy);
 
           await layoutAndLoad(videoIframe);
 
@@ -353,18 +420,16 @@ describes.realWin(
 
           if (accept) {
             const expectedEventVars = {eventType, vars: vars || {}};
-            const expectedDispatch = dispatch.withArgs(
-              VideoAnalyticsEvents.CUSTOM,
-              expectedEventVars
-            );
             implementation_.onMessage_({data});
-            expect(expectedDispatch).to.have.been.calledOnce;
+            expect(eventSpy).to.be.calledOnce;
+            const eventData = eventSpy.firstCall.firstArg.data;
+            expect(eventData.eventType).to.equal(expectedEventVars.eventType);
+            expect(eventData.vars).to.deep.equal(expectedEventVars.vars);
           } else {
             allowConsoleError(() => {
               expect(() => implementation_.onMessage_({data})).to.throw();
             });
-            expect(dispatch.withArgs(VideoAnalyticsEvents.CUSTOM, any)).to.not
-              .have.been.called;
+            expect(eventSpy).to.not.have.been.called;
           }
         });
       });
@@ -403,7 +468,7 @@ describes.realWin(
       'fullscreenExit',
     ];
 
-    implementedVideoInterfaceMethods.forEach(method => {
+    implementedVideoInterfaceMethods.forEach((method) => {
       describe(`#${method}`, () => {
         const lowercaseMethod = method.toLowerCase();
 
@@ -416,9 +481,11 @@ describes.realWin(
 
           videoIframe.implementation_[method]();
 
+          await macroTask();
+
           expect(
             postMessage.withArgs(
-              sinon.match({
+              env.sandbox.match({
                 event: 'method',
                 method: lowercaseMethod,
               })

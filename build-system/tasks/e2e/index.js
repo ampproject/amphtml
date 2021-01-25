@@ -10,95 +10,51 @@
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS-IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
+ * See the License for the specific lan``guage governing permissions and
  * limitations under the License.
  */
 
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const ciReporter = require('../mocha-ci-reporter');
-const config = require('../../config');
+const ciReporter = require('./mocha-ci-reporter');
+const config = require('../../test-configs/config');
+const dotsReporter = require('./mocha-dots-reporter');
+const fs = require('fs');
 const glob = require('glob');
-const log = require('fancy-log');
+const http = require('http');
 const Mocha = require('mocha');
-const tryConnect = require('try-net-connect');
+const path = require('path');
+const {
+  buildRuntime,
+  getFilesFromArgv,
+  installPackages,
+} = require('../../common/utils');
 const {cyan} = require('ansi-colors');
-const {execOrDie, execScriptAsync} = require('../../exec');
+const {execOrDie} = require('../../common/exec');
+const {HOST, PORT, startServer, stopServer} = require('../serve');
+const {isCiBuild} = require('../../common/ci');
+const {log} = require('../../common/logging');
+const {maybePrintCoverageMessage} = require('../helpers');
 const {reportTestStarted} = require('../report-test-status');
 const {watch} = require('gulp');
 
-const HOST = 'localhost';
-const PORT = 8000;
-const WEBSERVER_TIMEOUT_RETRIES = 10;
 const SLOW_TEST_THRESHOLD_MS = 2500;
-const TEST_RETRIES = 2;
+const TEST_RETRIES = isCiBuild() ? 2 : 0;
 
-let webServerProcess_;
+const COV_DOWNLOAD_PATH = '/coverage/download';
+const COV_OUTPUT_DIR = './test/coverage-e2e';
+const COV_OUTPUT_HTML = path.resolve(COV_OUTPUT_DIR, 'lcov-report/index.html');
 
-function installPackages_() {
-  log('Running', cyan('yarn'), 'to install packages...');
-  execOrDie('npx yarn --cwd build-system/tasks/e2e', {'stdio': 'ignore'});
-}
-
-function buildRuntime_() {
-  execOrDie('gulp clean');
-  execOrDie(`gulp dist --fortesting --config ${argv.config}`);
-}
-
-function launchWebServer_() {
-  log('Launching webserver at', cyan(`http://${HOST}:${PORT}`) + '...');
-  webServerProcess_ = execScriptAsync(
-    `gulp serve --compiled --host ${HOST} --port ${PORT}`,
-    {stdio: 'ignore'}
-  );
-
-  let resolver;
-  const deferred = new Promise(resolverIn => {
-    resolver = resolverIn;
-  });
-
-  tryConnect({
-    host: HOST,
-    port: PORT,
-    retries: WEBSERVER_TIMEOUT_RETRIES, // retry timeout defaults to 1 sec
-  }).on('connected', () => {
-    return resolver(webServerProcess_);
-  });
-
-  return deferred;
-}
-
-async function cleanUp_() {
-  if (webServerProcess_ && !webServerProcess_.killed) {
-    webServerProcess_.kill('SIGKILL');
-  }
-}
-
-function createMocha_() {
-  const mocha = new Mocha({
-    // e2e tests have a different standard for when a test is too slow,
-    // so we set a non-default threshold.
-    slow: SLOW_TEST_THRESHOLD_MS,
-    reporter: argv.testnames || argv.watch ? '' : ciReporter,
-    retries: TEST_RETRIES,
-    fullStackTrace: true,
-  });
-
-  return mocha;
-}
-
-async function e2e() {
+/**
+ * Set up the e2e testing environment.
+ * @return {!Promise}
+ */
+async function setUpTesting_() {
   // install e2e-specific modules
-  installPackages_();
+  installPackages(__dirname);
 
-  // set up promise to return to gulp.task()
-  let resolver;
-  const deferred = new Promise(resolverIn => {
-    resolver = resolverIn;
-  });
-
-  require('@babel/register');
+  require('@babel/register')({caller: {name: 'test'}});
   const {describes} = require('./helper');
   describes.configure({
     browsers: argv.browsers,
@@ -108,57 +64,147 @@ async function e2e() {
 
   // build runtime
   if (!argv.nobuild) {
-    buildRuntime_();
+    await buildRuntime();
   }
 
   // start up web server
-  await launchWebServer_();
+  return startServer(
+    {host: HOST, port: PORT},
+    {quiet: !argv.debug},
+    {compiled: argv.compiled}
+  );
+}
 
-  // run tests
-  if (!argv.watch) {
-    log('Running tests...');
-    const mocha = createMocha_();
-
-    // specify tests to run
-    if (argv.files) {
-      glob.sync(argv.files).forEach(file => {
-        delete require.cache[file];
-        mocha.addFile(file);
-      });
-    } else {
-      config.e2eTestPaths.forEach(path => {
-        glob.sync(path).forEach(file => {
-          delete require.cache[file];
-          mocha.addFile(file);
-        });
-      });
-    }
-
-    await reportTestStarted();
-    mocha.run(async failures => {
-      // end web server
-      await cleanUp_();
-
-      // end task
-      process.exitCode = failures ? 1 : 0;
-      await resolver();
-    });
+/**
+ * Creates a mocha test instance with configuration determined by CLI args.
+ * @return {!Mocha}
+ */
+function createMocha_() {
+  let reporter;
+  if (argv.testnames || argv.watch) {
+    reporter = '';
+  } else if (argv.report) {
+    reporter = ciReporter;
   } else {
-    const filesToWatch = argv.files ? [argv.files] : [config.e2eTestPaths];
-    const watcher = watch(filesToWatch);
-    log('Watching', cyan(filesToWatch), 'for changes...');
-    watcher.on('change', ({path}) => {
-      log('Detected a change in', cyan(path));
-      log('Running tests...');
-      // clear file from node require cache if running test again
-      delete require.cache[path];
-      const mocha = createMocha_();
-      mocha.files = [path];
-      mocha.run();
+    reporter = dotsReporter;
+  }
+
+  return new Mocha({
+    // e2e tests have a different standard for when a test is too slow,
+    // so we set a non-default threshold.
+    slow: SLOW_TEST_THRESHOLD_MS,
+    reporter,
+    retries: TEST_RETRIES,
+    fullStackTrace: true,
+  });
+}
+
+/**
+ * Refreshes require cache and adds file to a Mocha instance.
+ * @param {!Mocha} mocha Mocha test instance.
+ * @param {string} file relative path to test file to add.
+ */
+function addMochaFile_(mocha, file) {
+  delete require.cache[path.resolve(file)];
+  mocha.addFile(file);
+}
+
+/**
+ * Fetch aggregated coverage data from server.
+ * @param {string} outDir relative path to coverage files directory.
+ */
+async function fetchCoverage_(outDir) {
+  // Note: We could access the coverage UI directly through the server started
+  // for the e2e tests, but then that coverage data would vanish once that
+  // server instance was closed. This method will persist the coverage data so
+  // it can be accessed separately.
+
+  // Clear out previous coverage data.
+  fs.rmdirSync(outDir, {recursive: true});
+  fs.mkdirSync(outDir);
+
+  const zipFilename = path.join(outDir, 'coverage.zip');
+  const zipFile = fs.createWriteStream(zipFilename);
+  await new Promise((resolve, reject) => {
+    http
+      .get(
+        {
+          host: HOST,
+          port: PORT,
+          path: COV_DOWNLOAD_PATH,
+        },
+        (response) => {
+          response.pipe(zipFile);
+          zipFile.on('finish', () => zipFile.close(resolve));
+        }
+      )
+      .on('error', (err) => {
+        fs.unlinkSync(zipFilename);
+        reject(err);
+      });
+  });
+  execOrDie(`unzip -o ${zipFilename} -d ${outDir}`);
+}
+
+/**
+ * Runs e2e tests on all files under test.
+ * @return {!Promise}
+ */
+async function runTests_() {
+  const mocha = createMocha_();
+  const addFile = addMochaFile_.bind(null, mocha);
+
+  // specify tests to run
+  if (argv.files) {
+    getFilesFromArgv().forEach(addFile);
+  } else {
+    config.e2eTestPaths.forEach((path) => {
+      glob.sync(path).forEach(addFile);
     });
   }
 
-  return deferred;
+  await reportTestStarted();
+
+  // return promise to gulp that resolves when there's an error.
+  return new Promise((resolve) => {
+    mocha.run(async (failures) => {
+      if (argv.coverage) {
+        await fetchCoverage_(COV_OUTPUT_DIR);
+        maybePrintCoverageMessage(COV_OUTPUT_HTML);
+      }
+      await stopServer();
+      process.exitCode = failures ? 1 : 0;
+      resolve();
+    });
+  });
+}
+
+/**
+ * Watches files a under test, running affected e2e tests on changes.
+ * @return {!Promise}
+ */
+async function runWatch_() {
+  const filesToWatch = argv.files ? getFilesFromArgv() : config.e2eTestPaths;
+
+  log('Watching', cyan(filesToWatch), 'for changes...');
+  watch(filesToWatch).on('change', (file) => {
+    log('Detected a change in', cyan(file));
+    const mocha = createMocha_();
+    addMochaFile_(mocha, file);
+    mocha.run();
+  });
+
+  // return non-resolving promise to gulp.
+  return new Promise(() => {});
+}
+
+/**
+ * Entry-point to run e2e tests.
+ * @return {!Promise}
+ */
+async function e2e() {
+  await setUpTesting_();
+  return argv.watch ? runWatch_() : runTests_();
 }
 
 module.exports = {
@@ -169,10 +215,14 @@ e2e.description = 'Runs e2e tests';
 e2e.flags = {
   'browsers':
     '  Run only the specified browser tests. Options are ' +
-    '`chrome`, `firefox`.',
+    '`chrome`, `firefox`, `safari`.',
   'config':
     '  Sets the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',
-  'nobuild': '  Skips building the runtime via `gulp dist --fortesting`',
+  'core_runtime_only': '  Builds only the core runtime.',
+  'nobuild':
+    '  Skips building the runtime via `gulp (build|dist) --fortesting`',
+  'extensions': '  Builds only the listed extensions.',
+  'compiled': '  Runs tests against minified JS',
   'files': '  Run tests found in a specific path (ex: **/test-e2e/*.js)',
   'testnames': '  Lists the name of each test being run',
   'watch': '  Watches for changes in files, runs corresponding test(s)',
@@ -180,4 +230,7 @@ e2e.flags = {
     '  The automation engine that orchestrates the browser. ' +
     'Options are `puppeteer` or `selenium`. Default: `selenium`',
   'headless': '  Runs the browser in headless mode',
+  'debug': '  Prints debugging information while running tests',
+  'report': '  Write test result report to a local file',
+  'coverage': '  Collect coverage data from instrumented code',
 };

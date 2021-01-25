@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {RefreshIntersectionObserverWrapper} from './refresh-intersection-observer-wrapper';
 import {Services} from '../../../src/services';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -43,21 +42,17 @@ const TAG = 'AMP-AD';
  * Retrieves the publisher-specified refresh interval, if one were set. This
  * function first checks for appropriate slot attributes and then for
  * metadata tags, preferring whichever it finds first.
- * @param {!Element} element
- * @param {!Window} win
+ * @param {!AmpElement} element
+ * @param {!Window} unusedWin
  * @return {?number}
  * @visibleForTesting
  */
-export function getPublisherSpecifiedRefreshInterval(element, win) {
+export function getPublisherSpecifiedRefreshInterval(element, unusedWin) {
   const refreshInterval = element.getAttribute(DATA_ATTR_NAME);
   if (refreshInterval) {
     return checkAndSanitizeRefreshInterval(refreshInterval);
   }
-  let metaTag;
-  const metaTagContent =
-    (metaTag = win.document.getElementsByName(METATAG_NAME)) &&
-    metaTag[0] &&
-    metaTag[0].getAttribute('content');
+  const metaTagContent = element.getAmpDoc().getMetaByName(METATAG_NAME);
   if (!metaTagContent) {
     return null;
   }
@@ -136,7 +131,7 @@ const RefreshLifecycleState = {
  * Each IO is configured to a different threshold, and all elements that
  * share the same visiblePercentageMin will be monitored by the same IO.
  *
- * @const {!Object<string, (!IntersectionObserver|!RefreshIntersectionObserverWrapper)>}
+ * @const {!Object<string, (!IntersectionObserver)>}
  */
 const observers = {};
 
@@ -230,20 +225,15 @@ export class RefreshManager {
    * one if one does not yet exist.
    *
    * @param {number} threshold
-   * @return {(!IntersectionObserver|!RefreshIntersectionObserverWrapper)}
+   * @return {!IntersectionObserver}
    */
   getIntersectionObserverWithThreshold_(threshold) {
     const thresholdString = String(threshold);
     return (
       observers[thresholdString] ||
-      (observers[thresholdString] =
-        'IntersectionObserver' in this.win_
-          ? new this.win_['IntersectionObserver'](this.ioCallback_, {threshold})
-          : new RefreshIntersectionObserverWrapper(
-              this.ioCallback_,
-              this.a4a_,
-              {threshold}
-            ))
+      (observers[
+        thresholdString
+      ] = new this.win_.IntersectionObserver(this.ioCallback_, {threshold}))
     );
   }
 
@@ -255,7 +245,7 @@ export class RefreshManager {
    * @param {!Array<!IntersectionObserverEntry>} entries
    */
   ioCallback_(entries) {
-    entries.forEach(entry => {
+    entries.forEach((entry) => {
       const refreshManagerId = entry.target.getAttribute(DATA_MANAGER_ID_NAME);
       devAssert(refreshManagerId);
       const refreshManager = managers[refreshManagerId];
@@ -328,7 +318,7 @@ export class RefreshManager {
    *    refresh timer elapses successfully.
    */
   startRefreshTimer_() {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       this.refreshTimeoutId_ = this.timer_.delay(() => {
         this.state_ = RefreshLifecycleState.INITIAL;
         this.unobserve();

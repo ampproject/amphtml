@@ -24,5 +24,5 @@ export function adyoulike(global, data) {
   validateData(data, ['placement'], ['dc', 'campaign']);
   global.adyoulikeParams = data;
 
-  writeScript(global, 'https://pixels.omnitagjs.com/amp.js');
+  writeScript(global, 'https://fo-static.omnitagjs.com/amp.js');
 }

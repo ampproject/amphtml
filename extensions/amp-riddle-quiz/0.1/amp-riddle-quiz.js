@@ -126,6 +126,6 @@ export class AmpRiddleQuiz extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-riddle-quiz', '0.1', AMP => {
+AMP.extension('amp-riddle-quiz', '0.1', (AMP) => {
   AMP.registerElement('amp-riddle-quiz', AmpRiddleQuiz, false);
 });

@@ -15,8 +15,8 @@
  */
 
 import {AmpdocAnalyticsRoot} from '../analytics-root.js';
-import {AnalyticsGroup} from '../analytics-group.js';
 import {
+  AnalyticsEventType,
   ClickEventTracker,
   CustomEventTracker,
   IniLoadTracker,
@@ -25,8 +25,10 @@ import {
   TimerEventTracker,
   VisibilityTracker,
 } from '../events';
+import {AnalyticsGroup} from '../analytics-group.js';
+import {toggleExperiment} from '../../../../src/experiments.js';
 
-describes.realWin('AnalyticsGroup', {amp: 1}, env => {
+describes.realWin('AnalyticsGroup', {amp: 1}, (env) => {
   let win;
   let root;
   let analyticsElement;
@@ -40,12 +42,16 @@ describes.realWin('AnalyticsGroup', {amp: 1}, env => {
     group = new AnalyticsGroup(root, analyticsElement);
   });
 
+  afterEach(() => {
+    toggleExperiment(win, 'analytics-chunks', false);
+  });
+
   it('should create group for the ampdoc root', () => {
     expect(group.root_).to.equal(root);
   });
 
   it('should reject trigger in a disallowed environment', () => {
-    sandbox.stub(root, 'getType').callsFake(() => 'other');
+    env.sandbox.stub(root, 'getType').callsFake(() => 'other');
     allowConsoleError(() => {
       expect(() => {
         group.addTrigger({on: 'click', selector: '*'});
@@ -54,7 +60,7 @@ describes.realWin('AnalyticsGroup', {amp: 1}, env => {
   });
 
   it('should reject trigger that fails to initialize', () => {
-    sandbox.stub(root, 'getTracker').callsFake(() => {
+    env.sandbox.stub(root, 'getTracker').callsFake(() => {
       throw new Error('intentional');
     });
     expect(() => {
@@ -62,42 +68,53 @@ describes.realWin('AnalyticsGroup', {amp: 1}, env => {
     }).to.throw(/intentional/);
   });
 
-  it('should add "click" trigger', () => {
+  it('should add "click" trigger', async () => {
     const tracker = root.getTracker('click', ClickEventTracker);
-    const unlisten = function() {};
-    const stub = sandbox.stub(tracker, 'add').callsFake(() => unlisten);
+    const unlisten = function () {};
+    const stub = env.sandbox.stub(tracker, 'add').callsFake(() => unlisten);
     const config = {on: 'click', selector: '*'};
-    const handler = function() {};
+    const handler = function () {};
     expect(group.listeners_).to.be.empty;
-    group.addTrigger(config, handler);
+    await group.addTrigger(config, handler);
     expect(stub).to.be.calledOnce;
     expect(stub).to.be.calledWith(analyticsElement, 'click', config, handler);
     expect(group.listeners_).to.have.length(1);
     expect(group.listeners_[0]).to.equal(unlisten);
   });
 
-  it('should add "scroll" trigger', () => {
-    const tracker = root.getTracker('scroll', ScrollEventTracker);
-    const unlisten = function() {};
-    const stub = sandbox.stub(tracker, 'add').callsFake(() => unlisten);
+  it('should add "scroll" trigger', async () => {
+    const tracker = root.getTracker(
+      AnalyticsEventType.SCROLL,
+      ScrollEventTracker
+    );
+    const unlisten = function () {};
+    const stub = env.sandbox.stub(tracker, 'add').callsFake(() => unlisten);
     const config = {on: 'scroll', selector: '*'};
-    const handler = function() {};
+    const handler = function () {};
     expect(group.listeners_).to.be.empty;
-    group.addTrigger(config, handler);
+    await group.addTrigger(config, handler);
     expect(stub).to.be.calledOnce;
-    expect(stub).to.be.calledWith(analyticsElement, 'scroll', config, handler);
+    expect(stub).to.be.calledWith(
+      analyticsElement,
+      AnalyticsEventType.SCROLL,
+      config,
+      handler
+    );
     expect(group.listeners_).to.have.length(1);
     expect(group.listeners_[0]).to.equal(unlisten);
   });
 
-  it('should add "custom" trigger', () => {
-    const tracker = root.getTracker('custom', CustomEventTracker);
-    const unlisten = function() {};
-    const stub = sandbox.stub(tracker, 'add').callsFake(() => unlisten);
+  it('should add "custom" trigger', async () => {
+    const tracker = root.getTracker(
+      AnalyticsEventType.CUSTOM,
+      CustomEventTracker
+    );
+    const unlisten = function () {};
+    const stub = env.sandbox.stub(tracker, 'add').callsFake(() => unlisten);
     const config = {on: 'custom-event-1', selector: '*'};
-    const handler = function() {};
+    const handler = function () {};
     expect(group.listeners_).to.be.empty;
-    group.addTrigger(config, handler);
+    await group.addTrigger(config, handler);
     expect(stub).to.be.calledOnce;
     expect(stub).to.be.calledWith(
       analyticsElement,
@@ -109,16 +126,16 @@ describes.realWin('AnalyticsGroup', {amp: 1}, env => {
     expect(group.listeners_[0]).to.equal(unlisten);
   });
 
-  it('should add "render-start" trigger', () => {
+  it('should add "render-start" trigger', async () => {
     const config = {on: 'render-start'};
-    group.addTrigger(config, handler);
+    await group.addTrigger(config, handler);
     const tracker = root.getTrackerOptional('render-start');
     expect(tracker).to.be.instanceOf(SignalTracker);
 
-    const unlisten = function() {};
-    const stub = sandbox.stub(tracker, 'add').callsFake(() => unlisten);
-    const handler = function() {};
-    group.addTrigger(config, handler);
+    const unlisten = function () {};
+    const stub = env.sandbox.stub(tracker, 'add').callsFake(() => unlisten);
+    const handler = function () {};
+    await group.addTrigger(config, handler);
     expect(stub).to.be.calledOnce;
     expect(stub).to.be.calledWith(
       analyticsElement,
@@ -128,16 +145,16 @@ describes.realWin('AnalyticsGroup', {amp: 1}, env => {
     );
   });
 
-  it('should add "ini-load" trigger', () => {
+  it('should add "ini-load" trigger', async () => {
     const config = {on: 'ini-load'};
-    group.addTrigger(config, handler);
+    await group.addTrigger(config, handler);
     const tracker = root.getTrackerOptional('ini-load');
     expect(tracker).to.be.instanceOf(IniLoadTracker);
 
-    const unlisten = function() {};
-    const stub = sandbox.stub(tracker, 'add').callsFake(() => unlisten);
-    const handler = function() {};
-    group.addTrigger(config, handler);
+    const unlisten = function () {};
+    const stub = env.sandbox.stub(tracker, 'add').callsFake(() => unlisten);
+    const handler = function () {};
+    await group.addTrigger(config, handler);
     expect(stub).to.be.calledOnce;
     expect(stub).to.be.calledWith(
       analyticsElement,
@@ -147,15 +164,15 @@ describes.realWin('AnalyticsGroup', {amp: 1}, env => {
     );
   });
 
-  it('should add "timer" trigger', () => {
-    const handler = function() {};
-    const unlisten = function() {};
-    const stub = sandbox
+  it('should add "timer" trigger', async () => {
+    const handler = function () {};
+    const unlisten = function () {};
+    const stub = env.sandbox
       .stub(TimerEventTracker.prototype, 'add')
       .callsFake(() => unlisten);
     const config = {on: 'timer'};
-    group.addTrigger(config, handler);
-    const tracker = root.getTrackerOptional('timer');
+    await group.addTrigger(config, handler);
+    const tracker = root.getTrackerOptional(AnalyticsEventType.TIMER);
     expect(tracker).to.be.instanceOf(TimerEventTracker);
     expect(stub).to.be.calledOnce;
     expect(stub).to.be.calledWith(analyticsElement, 'timer', config, handler);
@@ -163,29 +180,44 @@ describes.realWin('AnalyticsGroup', {amp: 1}, env => {
     expect(group.listeners_[0]).to.equal(unlisten);
   });
 
-  it('should add "visible" trigger', () => {
+  it('should add "visible" trigger', async () => {
     const config = {on: 'visible'};
-    group.addTrigger(config, handler);
+    await group.addTrigger(config, handler);
     const tracker = root.getTrackerOptional('visible');
     expect(tracker).to.be.instanceOf(VisibilityTracker);
 
-    const unlisten = function() {};
-    const stub = sandbox.stub(tracker, 'add').callsFake(() => unlisten);
-    const handler = function() {};
-    group.addTrigger(config, handler);
+    const unlisten = function () {};
+    const stub = env.sandbox.stub(tracker, 'add').callsFake(() => unlisten);
+    const handler = function () {};
+    await group.addTrigger(config, handler);
     expect(stub).to.be.calledOnce;
     expect(stub).to.be.calledWith(analyticsElement, 'visible', config, handler);
   });
 
-  it('should add "visible" trigger for hidden', () => {
+  it('should add "visible" trigger for hidden', async () => {
     const config = {on: 'hidden'};
-    const getTrackerSpy = sandbox.spy(root, 'getTracker');
-    group.addTrigger(config, () => {});
+    const getTrackerSpy = env.sandbox.spy(root, 'getTracker');
+    await group.addTrigger(config, () => {});
     expect(getTrackerSpy).to.be.calledWith('visible');
     const tracker = root.getTrackerOptional('visible');
-    const unlisten = function() {};
-    const stub = sandbox.stub(tracker, 'add').callsFake(() => unlisten);
-    group.addTrigger(config, () => {});
+    const unlisten = function () {};
+    const stub = env.sandbox.stub(tracker, 'add').callsFake(() => unlisten);
+    await group.addTrigger(config, () => {});
     expect(stub).to.be.calledWith(analyticsElement, 'hidden', config);
+  });
+
+  it('should prioritize first trigger', async () => {
+    toggleExperiment(win, 'analytics-chunks', true);
+    const config = {on: 'visible'};
+    // First trigger is handled immediately
+    group.addTrigger(config, handler);
+    const tracker = root.getTrackerOptional('visible');
+    expect(tracker).to.be.instanceOf(VisibilityTracker);
+    const unlisten = function () {};
+    const stub = env.sandbox.stub(tracker, 'add').callsFake(() => unlisten);
+    const handler = function () {};
+    await group.addTrigger(config, handler);
+    expect(stub).to.be.calledOnce;
+    expect(stub).to.be.calledWith(analyticsElement, 'visible', config, handler);
   });
 });

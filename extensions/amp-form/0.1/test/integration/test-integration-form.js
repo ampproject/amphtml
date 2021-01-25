@@ -35,11 +35,10 @@ describes.realWin(
     },
     mockFetch: false,
   },
-  env => {
+  (env) => {
     const {testServerPort} = window.ampTestRuntimeConfig;
     const baseUrl = `http://localhost:${testServerPort}`;
     let doc;
-    let sandbox;
 
     const realSetTimeout = window.setTimeout;
     const stubSetTimeout = (callback, delay) => {
@@ -51,10 +50,9 @@ describes.realWin(
     };
 
     beforeEach(() => {
-      sandbox = env.sandbox;
       doc = env.win.document;
 
-      sandbox.stub(Services, 'formSubmitForDoc').returns(
+      env.sandbox.stub(Services, 'formSubmitForDoc').returns(
         Promise.resolve(() => {
           fire: () => {};
         })
@@ -148,9 +146,9 @@ describes.realWin(
           on: 'submit:sameform.submit',
         });
         const ampForm = new AmpForm(form, 'sameform');
-        sandbox.spy(ampForm, 'handleXhrSubmit_');
-        sandbox.spy(ampForm, 'handleSubmitAction_');
-        sandbox.spy(ampForm.xhr_, 'fetch');
+        env.sandbox.spy(ampForm, 'handleXhrSubmit_');
+        env.sandbox.spy(ampForm, 'handleSubmitAction_');
+        env.sandbox.spy(ampForm.xhr_, 'fetch');
         const fetch = poll('submit request sent', () =>
           ampForm.xhrSubmitPromiseForTesting()
         );
@@ -172,7 +170,7 @@ describes.realWin(
     });
 
     // TODO(cvializ, #19647): Broken on SL Chrome 71.
-    describeChrome.skip('Submit xhr-POST', function() {
+    describeChrome.skip('Submit xhr-POST', function () {
       this.timeout(RENDER_TIMEOUT);
 
       it('should submit and render success', () => {
@@ -209,7 +207,7 @@ describes.realWin(
         // Stubbing timeout to catch async-thrown errors and expect
         // them. These catch errors thrown inside the catch-clause of the
         // xhr request using rethrowAsync.
-        sandbox.stub(window, 'setTimeout').callsFake(stubSetTimeout);
+        env.sandbox.stub(window, 'setTimeout').callsFake(stubSetTimeout);
 
         const form = getForm({
           id: 'form1',
@@ -222,7 +220,7 @@ describes.realWin(
           },
         });
         const ampForm = new AmpForm(form, 'form1');
-        const fetchSpy = sandbox.spy(ampForm.xhr_, 'fetch');
+        const fetchSpy = env.sandbox.spy(ampForm.xhr_, 'fetch');
         const fetch = poll(
           'submit request sent',
           () => fetchSpy.returnValues[0]
@@ -234,7 +232,7 @@ describes.realWin(
           () => {
             throw new Error('UNREACHABLE');
           },
-          fetchError => {
+          (fetchError) => {
             expect(fetchError.message).to.match(/HTTP error 500/);
             return render.then(() => {
               const rendered = form.querySelector('[i-amphtml-rendered]');
@@ -249,7 +247,7 @@ describes.realWin(
     });
 
     // TODO(cvializ, #19647): Broken on SL Chrome 71.
-    describeChrome.skip('Submit xhr-GET', function() {
+    describeChrome.skip('Submit xhr-GET', function () {
       this.timeout(RENDER_TIMEOUT);
 
       it('should submit and render success', () => {
@@ -288,7 +286,7 @@ describes.realWin(
         // Stubbing timeout to catch async-thrown errors and expect
         // them. These catch errors thrown inside the catch-clause of the
         // xhr request using rethrowAsync.
-        sandbox.stub(window, 'setTimeout').callsFake(stubSetTimeout);
+        env.sandbox.stub(window, 'setTimeout').callsFake(stubSetTimeout);
 
         const form = getForm({
           id: 'form1',
@@ -301,7 +299,7 @@ describes.realWin(
           },
         });
         const ampForm = new AmpForm(form, 'form1');
-        const fetchSpy = sandbox.spy(ampForm.xhr_, 'fetch');
+        const fetchSpy = env.sandbox.spy(ampForm.xhr_, 'fetch');
         const fetch = poll(
           'submit request sent',
           () => fetchSpy.returnValues[0]
@@ -313,7 +311,7 @@ describes.realWin(
           () => {
             throw new Error('UNREACHABLE');
           },
-          fetchError => {
+          (fetchError) => {
             expect(fetchError.message).to.match(/HTTP error 500/);
             return render.then(() => {
               const rendered = form.querySelector('[i-amphtml-rendered]');
@@ -333,7 +331,7 @@ describes.realWin(
         // Stubbing timeout to catch async-thrown errors and expect
         // them. These catch errors thrown inside the catch-clause of the
         // xhr request using rethrowAsync.
-        sandbox.stub(window, 'setTimeout').callsFake(stubSetTimeout);
+        env.sandbox.stub(window, 'setTimeout').callsFake(stubSetTimeout);
 
         const form = getForm({
           id: 'form1',
@@ -348,7 +346,7 @@ describes.realWin(
           },
         });
         const ampForm = new AmpForm(form, 'form1');
-        const fetchSpy = sandbox.spy(ampForm.xhr_, 'fetch');
+        const fetchSpy = env.sandbox.spy(ampForm.xhr_, 'fetch');
         const fetch = poll(
           'submit request sent',
           () => fetchSpy.returnValues[0]
@@ -359,7 +357,7 @@ describes.realWin(
           () => {
             throw new Error('UNREACHABLE');
           },
-          fetchError => {
+          (fetchError) => {
             expect(fetchError.message).to.match(/HTTP error 500/);
 
             // It shouldn't have the i-amphtml-rendered attribute since no

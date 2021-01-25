@@ -173,7 +173,7 @@ class PuppeteerController {
    */
   async evaluate(fn, ...args) {
     const frame = await this.getCurrentFrame_();
-    return await evaluate(frame, fn, ...args);
+    return evaluate(frame, fn, ...args);
   }
 
   /**
@@ -189,17 +189,18 @@ class PuppeteerController {
 
   /**
    * @param {string} selector
+   * @param {number=} timeout
    * @return {!Promise<!ElementHandle<!PuppeteerHandle>>}
    * @override
    */
-  async findElement(selector) {
+  async findElement(selector, timeout = DEFAULT_WAIT_TIMEOUT) {
     const frame = await this.getCurrentFrame_();
     const root = await this.getRoot_();
     const jsHandle = await frame.waitForFunction(
       (root, selector) => {
         return root./*OK*/ querySelector(selector);
       },
-      {timeout: DEFAULT_WAIT_TIMEOUT},
+      {timeout},
       root,
       selector
     );
@@ -301,8 +302,11 @@ class PuppeteerController {
     this.isXpathInstalled_ = true;
 
     const scripts = await Promise.all([
-      fs.readFileAsync('third_party/wgxpath/wgxpath.js', 'utf8'),
-      fs.readFileAsync('build-system/tasks/e2e/driver/query-xpath.js', 'utf8'),
+      fs.promises.readFile('third_party/wgxpath/wgxpath.js', 'utf8'),
+      fs.promises.readFile(
+        'build-system/tasks/e2e/driver/query-xpath.js',
+        'utf8'
+      ),
     ]);
     const frame = await this.getCurrentFrame_();
     await frame.evaluate(scripts.join('\n\n'));
@@ -314,7 +318,7 @@ class PuppeteerController {
    */
   async getDocumentElement() {
     const root = await this.getRoot_();
-    const getter = root => root.ownerDocument.documentElement;
+    const getter = (root) => root.ownerDocument.documentElement;
     const element = await this.evaluate(getter, root);
     return new ElementHandle(element);
   }
@@ -356,7 +360,7 @@ class PuppeteerController {
    */
   getElementText(handle) {
     const element = handle.getElement();
-    const getter = element => ({value: element./*OK*/ innerText.trim()});
+    const getter = (element) => ({value: element./*OK*/ innerText.trim()});
     return new ControllerPromise(
       this.evaluateValue_(getter, element),
       this.getWaitFn_(getter, element)
@@ -427,7 +431,7 @@ class PuppeteerController {
    */
   getElementRect(handle) {
     const element = handle.getElement();
-    const getter = element => {
+    const getter = (element) => {
       // Extracting the values seems to perform better than returning
       // the raw ClientRect from the element, in terms of flakiness.
       // The raw ClientRect also has hundredths of a pixel. We round to int.
@@ -453,7 +457,7 @@ class PuppeteerController {
       };
     };
     return new ControllerPromise(
-      this.evaluate(getter, element).then(handle => handle.jsonValue()),
+      this.evaluate(getter, element).then((handle) => handle.jsonValue()),
       this.getWaitFn_(getter, element)
     );
   }
@@ -523,7 +527,9 @@ class PuppeteerController {
     try {
       const {windowId} = await browser._connection.send(
         'Browser.getWindowForTarget',
-        {targetId}
+        {
+          targetId,
+        }
       );
 
       // Resize.
@@ -548,10 +554,11 @@ class PuppeteerController {
    * @override
    */
   getTitle() {
-    const title = this.getCurrentFrame_().then(frame => frame.title());
-    return new ControllerPromise(title, () =>
-      this.getCurrentFrame_().then(frame => frame.title())
-    );
+    const title = this.getCurrentFrame_().then((frame) => frame.title());
+    return new ControllerPromise(title, async () => {
+      const frame = await this.getCurrentFrame_();
+      return frame.title();
+    });
   }
 
   /**
@@ -559,8 +566,10 @@ class PuppeteerController {
    * @override
    */
   async getActiveElement() {
-    const getter = () => document.activeElement;
-    const element = await this.evaluate(getter);
+    const root = await this.getRoot_();
+    const getter = (root) =>
+      root.activeElement || root.ownerDocument.activeElement;
+    const element = await this.evaluate(getter, root);
     return new ElementHandle(element);
   }
 
@@ -616,7 +625,7 @@ class PuppeteerController {
    */
   async takeScreenshot(path) {
     const root = new ElementHandle(await this.getRoot_());
-    return await this.takeElementScreenshot(root, path);
+    return this.takeElementScreenshot(root, path);
   }
 
   /**
@@ -640,7 +649,7 @@ class PuppeteerController {
       type: 'png',
     };
     const element = handle.getElement();
-    return await element.screenshot(options);
+    return element.screenshot(options);
   }
 
   /**
@@ -664,9 +673,32 @@ class PuppeteerController {
     this.currentFrame_ = frame;
   }
 
-  async switchToShadow(handle) {
+  /**
+   * Switch controller to shadowRoot body hosted by given element.
+   * @param {!ElementHandle<!PuppeteerHandle} handle
+   * @return {!Promise}
+   */
+  switchToShadow(handle) {
+    const getter = (shadowHost) => shadowHost.shadowRoot.body;
+    return this.switchToShadowInternal_(handle, getter);
+  }
+
+  /**
+   * Switch controller to shadowRoot hosted by given element.
+   * @param {!ElementHandle<!PuppeteerHandle>} handle
+   * @return {!Promise}
+   */
+  switchToShadowRoot(handle) {
+    const getter = (shadowHost) => shadowHost.shadowRoot;
+    return this.switchToShadowInternal_(handle, getter);
+  }
+
+  /**.
+   * @param {!ElementHandle<!PuppeteerHandle>} handle
+   * @param {!Function} getter
+   */
+  async switchToShadowInternal_(handle, getter) {
     const shadowHost = handle.getElement();
-    const getter = shadowHost => shadowHost.shadowRoot.body;
     const shadowRootBodyHandle = await this.evaluate(getter, shadowHost);
     this.shadowRoot_ = shadowRootBodyHandle.asElement();
   }
@@ -684,7 +716,7 @@ class PuppeteerController {
       return this.shadowRoot_;
     }
 
-    return await this.evaluate(() => document.documentElement);
+    return this.evaluate(() => document.documentElement);
   }
 
   /**

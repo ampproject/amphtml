@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays a Wistia video.
 ---
+
 <!---
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -23,27 +24,14 @@ limitations under the License.
 
 # amp-wistia-player
 
-Displays a <a href="https://wistia.com">Wistia</a> video.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-wistia-player" src="https://cdn.ampproject.org/v0/amp-wistia-player-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, responsive</td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Example
 
 ```html
 <amp-wistia-player
-    data-media-hashed-id="u8p9wq6mq8"
-    width="512" height="360"></amp-wistia-player>
+  data-media-hashed-id="u8p9wq6mq8"
+  width="512"
+  height="360"
+></amp-wistia-player>
 ```
 
 ## Attributes

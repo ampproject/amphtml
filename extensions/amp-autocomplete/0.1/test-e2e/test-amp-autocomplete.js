@@ -22,10 +22,9 @@ describes.endtoend(
     // TODO: Restore 'environments' to default after supporting fourth test in
     // shadow environment.
     environments: ['single', 'viewer-demo'],
-    experiments: ['amp-autocomplete'],
     initialRect: {width: 800, height: 800},
   },
-  env => {
+  (env) => {
     let controller;
 
     beforeEach(() => {

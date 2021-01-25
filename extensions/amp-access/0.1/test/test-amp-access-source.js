@@ -23,6 +23,7 @@ import {AccessSource} from '../amp-access-source';
 import {AccessVendorAdapter} from '../amp-access-vendor';
 import {cidServiceForDocForTesting} from '../../../../src/service/cid-impl';
 import {installPerformanceService} from '../../../../src/service/performance-impl';
+import {installPlatformService} from '../../../../src/service/platform-impl';
 import {toggleExperiment} from '../../../../src/experiments';
 
 describes.fakeWin(
@@ -31,7 +32,7 @@ describes.fakeWin(
     amp: true,
     location: 'https://pub.com/doc1',
   },
-  env => {
+  (env) => {
     let win, document;
     let ampdoc;
     let element;
@@ -45,6 +46,7 @@ describes.fakeWin(
       document = win.document;
 
       cidServiceForDocForTesting(ampdoc);
+      installPlatformService(win);
       installPerformanceService(win);
 
       element = document.createElement('script');
@@ -56,7 +58,6 @@ describes.fakeWin(
 
     afterEach(() => {
       toggleExperiment(win, 'amp-access-server', false);
-      toggleExperiment(win, 'amp-access-iframe', false);
     });
 
     function expectSourceType(ampdoc, config, type, adapter) {
@@ -109,12 +110,8 @@ describes.fakeWin(
       config['type'] = 'client';
       expectSourceType(ampdoc, config, 'client', AccessClientAdapter);
 
-      allowConsoleError(() => {
-        config['type'] = 'iframe';
-        expectSourceType(ampdoc, config, 'client', AccessClientAdapter);
-        toggleExperiment(win, 'amp-access-iframe', true);
-        expectSourceType(ampdoc, config, 'iframe', AccessIframeAdapter);
-      });
+      config['type'] = 'iframe';
+      expectSourceType(ampdoc, config, 'iframe', AccessIframeAdapter);
 
       config['type'] = 'server';
       expectSourceType(ampdoc, config, 'client', AccessClientAdapter);
@@ -155,7 +152,7 @@ describes.fakeWin(
         onReauthorizeFn,
         element
       );
-      sandbox.stub(source.adapter_, 'getConfig');
+      env.sandbox.stub(source.adapter_, 'getConfig');
       source.getAdapterConfig();
       expect(source.adapter_.getConfig.called).to.be.true;
     });
@@ -232,11 +229,8 @@ describes.fakeWin(
         onReauthorizeFn,
         element
       );
-      const sourceMock = sandbox.mock(source);
-      sourceMock
-        .expects('login_')
-        .withExactArgs('https://url', '')
-        .once();
+      const sourceMock = env.sandbox.mock(source);
+      sourceMock.expects('login_').withExactArgs('https://url', '').once();
       source.loginWithUrl('https://url');
     });
   }
@@ -248,7 +242,7 @@ describes.fakeWin(
     amp: true,
     location: 'https://pub.com/doc1',
   },
-  env => {
+  (env) => {
     let win, document, ampdoc;
     let clock;
     let configElement;
@@ -262,10 +256,11 @@ describes.fakeWin(
       win = env.win;
       ampdoc = env.ampdoc;
       document = win.document;
-      clock = sandbox.useFakeTimers();
+      clock = env.sandbox.useFakeTimers();
       clock.tick(0);
 
       cidServiceForDocForTesting(ampdoc);
+      installPlatformService(win);
       installPerformanceService(win);
 
       const config = {
@@ -303,7 +298,7 @@ describes.fakeWin(
           '?rid=READER_ID&type=AUTHDATA(child.type)',
           /* useAuthData */ false
         )
-        .then(url => {
+        .then((url) => {
           expect(url).to.equal('?rid=reader1&type=');
         });
     });
@@ -314,7 +309,7 @@ describes.fakeWin(
           '?rid=READER_ID&type=AUTHDATA(child.type)',
           /* useAuthData */ true
         )
-        .then(url => {
+        .then((url) => {
           expect(url).to.equal('?rid=reader1&type=');
         });
     });
@@ -326,7 +321,7 @@ describes.fakeWin(
           '?rid=READER_ID&type=AUTHDATA(child.type)',
           /* useAuthData */ false
         )
-        .then(url => {
+        .then((url) => {
           expect(url).to.equal('?rid=reader1&type=');
         });
     });
@@ -338,7 +333,7 @@ describes.fakeWin(
           '?rid=READER_ID&type=AUTHDATA(child.type)',
           /* useAuthData */ true
         )
-        .then(url => {
+        .then((url) => {
           expect(url).to.equal('?rid=reader1&type=premium');
         });
     });
@@ -350,13 +345,13 @@ describes.fakeWin(
           '?rid=READER_ID&type=AUTHDATA(child.type2)',
           /* useAuthData */ true
         )
-        .then(url => {
+        .then((url) => {
           expect(url).to.equal('?rid=reader1&type=');
         });
     });
 
     it('should return adapter config', () => {
-      sandbox.stub(source.adapter_, 'getConfig');
+      env.sandbox.stub(source.adapter_, 'getConfig');
       source.getAdapterConfig();
       expect(source.adapter_.getConfig.called).to.be.true;
     });
@@ -369,7 +364,7 @@ describes.fakeWin(
     amp: true,
     location: 'https://pub.com/doc1',
   },
-  env => {
+  (env) => {
     let win, ampdoc;
     let clock;
     let adapterMock;
@@ -381,10 +376,11 @@ describes.fakeWin(
     beforeEach(() => {
       win = env.win;
       ampdoc = env.ampdoc;
-      clock = sandbox.useFakeTimers();
+      clock = env.sandbox.useFakeTimers();
       clock.tick(0);
 
       cidServiceForDocForTesting(ampdoc);
+      installPlatformService(win);
       installPerformanceService(win);
 
       const config = {
@@ -409,7 +405,7 @@ describes.fakeWin(
         authorize: () => {},
       };
       source.adapter_ = adapter;
-      adapterMock = sandbox.mock(adapter);
+      adapterMock = env.sandbox.mock(adapter);
     });
 
     afterEach(() => {

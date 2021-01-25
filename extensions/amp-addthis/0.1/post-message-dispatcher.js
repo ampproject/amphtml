@@ -17,8 +17,6 @@
 import {CONFIGURATION_EVENT, ORIGIN, SHARE_EVENT} from './constants';
 import {getData} from '../../../src/event-helper';
 import {isObject} from '../../../src/types';
-import {startsWith} from '../../../src/string';
-
 import {tryParseJson} from '../../../src/json';
 
 export class PostMessageDispatcher {
@@ -50,22 +48,25 @@ export class PostMessageDispatcher {
     if (!this.listeners_[eventType]) {
       return;
     }
-    this.listeners_[eventType].forEach(listener => listener(eventData));
+    /** @type {!Array} */ (this.listeners_[eventType]).forEach((listener) =>
+      listener(eventData)
+    );
   }
 
   /**
    * Utility method to parse out the data from the supplied `postMessage` event.
    * @param {!Event} event
+   * @return {?JsonObject|undefined}
    * @private
    */
   getMessageData_(event) {
     const data = getData(event);
 
     if (isObject(data)) {
-      return data;
+      return /** @type {!JsonObject} */ (data);
     }
 
-    if (typeof data === 'string' && startsWith(data, '{')) {
+    if (typeof data === 'string' && data.startsWith('{')) {
       return tryParseJson(data);
     }
 
@@ -84,18 +85,19 @@ export class PostMessageDispatcher {
 
     const data = this.getMessageData_(event) || {};
 
-    switch (data.event) {
+    switch (data['event']) {
       case CONFIGURATION_EVENT: {
         this.emit_(
           CONFIGURATION_EVENT,
-          /** @type {!JsonObject} */ (Object.assign({}, data, {
+          /** @type {!JsonObject} */ ({
+            ...data,
             'source': event.source,
-          }))
+          })
         );
         break;
       }
       case SHARE_EVENT: {
-        this.emit_(SHARE_EVENT, data);
+        this.emit_(SHARE_EVENT, /** @type {!JsonObject} */ (data));
         break;
       }
     }

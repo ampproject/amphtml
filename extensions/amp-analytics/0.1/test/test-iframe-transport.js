@@ -16,20 +16,18 @@
 
 import {
   IframeTransport,
-  getIframeTransportScriptUrl,
+  getIframeTransportScriptUrlForTesting,
 } from '../iframe-transport';
 import {addParamsToUrl} from '../../../../src/url';
 import {expectPostMessage} from '../../../../testing/iframe.js';
 import {urls} from '../../../../src/config';
 import {user} from '../../../../src/log';
 
-describes.realWin('amp-analytics.iframe-transport', {amp: true}, env => {
-  let sandbox;
+describes.realWin('amp-analytics.iframe-transport', {amp: true}, (env) => {
   let iframeTransport;
-  const frameUrl = 'http://example.com';
+  const frameUrl = 'http://example.test';
 
   beforeEach(() => {
-    sandbox = env.sandbox;
     iframeTransport = new IframeTransport(
       env.ampdoc.win,
       'some_vendor_type',
@@ -50,7 +48,7 @@ describes.realWin('amp-analytics.iframe-transport', {amp: true}, env => {
   }
 
   it('creates one frame per vendor type', () => {
-    const createCrossDomainIframeSpy = sandbox.spy(
+    const createCrossDomainIframeSpy = env.sandbox.spy(
       iframeTransport,
       'createCrossDomainIframe'
     );
@@ -63,7 +61,7 @@ describes.realWin('amp-analytics.iframe-transport', {amp: true}, env => {
   });
 
   it('enqueues event messages correctly', () => {
-    const url = 'https://example.com/test';
+    const url = 'https://example.test/test';
     const config = {iframe: url};
     iframeTransport.sendRequest('hello, world!', config);
     const {queue} = IframeTransport.getFrameData(iframeTransport.getType());
@@ -76,8 +74,8 @@ describes.realWin('amp-analytics.iframe-transport', {amp: true}, env => {
     const iframeTransport2 = new IframeTransport(
       env.ampdoc.win,
       'some_other_vendor_type',
-      {iframe: 'https://example.com/test2'},
-      'https://example.com/test2-2'
+      {iframe: 'https://example.test/test2'},
+      'https://example.test/test2-2'
     );
 
     const frame1 = IframeTransport.getFrameData(iframeTransport.getType());
@@ -91,7 +89,7 @@ describes.realWin('amp-analytics.iframe-transport', {amp: true}, env => {
   });
 
   it('correctly tracks usageCount and destroys iframes', () => {
-    const frameUrl2 = 'https://example.com/test2';
+    const frameUrl2 = 'https://example.test/test2';
     const iframeTransport2 = new IframeTransport(
       env.ampdoc.win,
       'some_other_vendor_type',
@@ -153,7 +151,7 @@ describes.realWin('amp-analytics.iframe-transport', {amp: true}, env => {
   });
 
   it('creates one PerformanceObserver per vendor type', () => {
-    const createPerformanceObserverSpy = sandbox.spy(
+    const createPerformanceObserverSpy = env.sandbox.spy(
       IframeTransport.prototype,
       'createPerformanceObserver_'
     );
@@ -163,7 +161,7 @@ describes.realWin('amp-analytics.iframe-transport', {amp: true}, env => {
     expect(createPerformanceObserverSpy).to.not.be.called;
 
     // Create frame for a new vendor
-    const frameUrl2 = 'https://example.com/test2';
+    const frameUrl2 = 'https://example.test/test2';
     new IframeTransport(
       env.ampdoc.win,
       'some_other_vendor_type',
@@ -174,13 +172,13 @@ describes.realWin('amp-analytics.iframe-transport', {amp: true}, env => {
   });
 
   it('gets correct client lib URL in local/test mode', () => {
-    const url = getIframeTransportScriptUrl(env.ampdoc.win);
+    const url = getIframeTransportScriptUrlForTesting(env.ampdoc.win);
     expect(url).to.contain(env.win.location.host);
     expect(url).to.contain('/dist/iframe-transport-client-lib.js');
   });
 
   it('gets correct client lib URL in prod mode', () => {
-    const url = getIframeTransportScriptUrl(env.ampdoc.win, true);
+    const url = getIframeTransportScriptUrlForTesting(env.ampdoc.win, true);
     expect(url).to.contain(urls.thirdParty);
     expect(url).to.contain('/iframe-transport-client-v0.js');
     expect(url).to.equal(
@@ -193,7 +191,7 @@ describes.realWin('amp-analytics.iframe-transport', {amp: true}, env => {
 describes.realWin(
   'amp-analytics.iframe-transport',
   {amp: true, allowExternalResources: true},
-  env => {
+  (env) => {
     it('logs poor performance of vendor iframe', () => {
       const body =
         '<html><head><script>' +
@@ -227,15 +225,15 @@ describes.realWin(
           '/amp4test/compose-doc',
         {body}
       );
-      sandbox.stub(env.ampdoc.win.document.body, 'appendChild');
+      env.sandbox.stub(env.ampdoc.win.document.body, 'appendChild');
       new IframeTransport(
         env.ampdoc.win,
         'some_other_vendor_type',
         {iframe: frameUrl2},
         frameUrl2 + '-3'
       );
-      sandbox.restore();
-      const errorSpy = sandbox.spy(user(), 'error');
+      env.sandbox.restore();
+      const errorSpy = env.sandbox.spy(user(), 'error');
       const {frame} = IframeTransport.getFrameData('some_other_vendor_type');
       frame.setAttribute('style', '');
       env.ampdoc.win.document.body.appendChild(frame);

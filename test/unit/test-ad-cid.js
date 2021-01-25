@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {Services} from '../../src/services';
 import {adConfig} from '../../ads/_config';
 import {cidServiceForDocForTesting} from '../../src/service/cid-impl';
 import {getAdCid} from '../../src/ad-cid';
 
-describes.realWin('ad-cid', {amp: true}, env => {
+describes.realWin('ad-cid', {amp: true}, (env) => {
   const cidScope = 'cid-in-ads-test';
   const config = adConfig['_ping_'];
-  let sandbox;
 
   let cidService;
   let clock;
@@ -33,9 +32,7 @@ describes.realWin('ad-cid', {amp: true}, env => {
 
   beforeEach(() => {
     win = env.win;
-    sandbox = env.sandbox;
-    clock = lolex.install({
-      target: win,
+    clock = fakeTimers.withGlobal(win).install({
       toFake: ['Date', 'setTimeout', 'clearTimeout'],
     });
     element = env.win.document.createElement('amp-ad');
@@ -57,11 +54,11 @@ describes.realWin('ad-cid', {amp: true}, env => {
     config.clientIdScope = cidScope;
 
     let getCidStruct;
-    sandbox.stub(cidService, 'get').callsFake(struct => {
+    env.sandbox.stub(cidService, 'get').callsFake((struct) => {
       getCidStruct = struct;
       return Promise.resolve('test123');
     });
-    return getAdCid(adElement).then(cid => {
+    return getAdCid(adElement).then((cid) => {
       expect(cid).to.equal('test123');
       expect(getCidStruct).to.deep.equal({
         scope: cidScope,
@@ -76,11 +73,11 @@ describes.realWin('ad-cid', {amp: true}, env => {
     config.clientIdCookieName = 'different-cookie-name';
 
     let getCidStruct;
-    sandbox.stub(cidService, 'get').callsFake(struct => {
+    env.sandbox.stub(cidService, 'get').callsFake((struct) => {
       getCidStruct = struct;
       return Promise.resolve('test123');
     });
-    return getAdCid(adElement).then(cid => {
+    return getAdCid(adElement).then((cid) => {
       expect(cid).to.equal('test123');
       expect(getCidStruct).to.deep.equal({
         scope: cidScope,
@@ -92,10 +89,10 @@ describes.realWin('ad-cid', {amp: true}, env => {
 
   it('should return on timeout', () => {
     config.clientIdScope = cidScope;
-    sandbox.stub(cidService, 'get').callsFake(() => {
+    env.sandbox.stub(cidService, 'get').callsFake(() => {
       return Services.timerFor(win).promise(2000);
     });
-    const p = getAdCid(adElement).then(cid => {
+    const p = getAdCid(adElement).then((cid) => {
       expect(cid).to.be.undefined;
       expect(win.Date.now()).to.equal(1000);
     });
@@ -108,8 +105,9 @@ describes.realWin('ad-cid', {amp: true}, env => {
   });
 
   it('should return undefined on failed CID', () => {
+    expectAsyncConsoleError(/nope/);
     config.clientIdScope = cidScope;
-    sandbox.stub(cidService, 'get').callsFake(() => {
+    env.sandbox.stub(cidService, 'get').callsFake(() => {
       return Promise.reject(new Error('nope'));
     });
     return expect(getAdCid(adElement)).to.eventually.be.undefined;

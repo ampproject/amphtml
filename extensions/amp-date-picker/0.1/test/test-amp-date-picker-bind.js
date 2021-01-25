@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import '../../../../third_party/react-dates/bundle';
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {AmpDatePicker} from '../amp-date-picker';
 import {createElementWithAttributes} from '../../../../src/dom.js';
 
@@ -26,7 +26,7 @@ describes.realWin(
       extensions: ['amp-date-picker'],
     },
   },
-  env => {
+  (env) => {
     let clock;
     let document;
 
@@ -46,7 +46,7 @@ describes.realWin(
      * }}
      */
     function createDatePicker(opt_attrs = {}, opt_parent = document.body) {
-      const attrs = Object.assign({}, DEFAULT_ATTRS, opt_attrs);
+      const attrs = {...DEFAULT_ATTRS, ...opt_attrs};
       let input = null;
       let endInput = null;
       if (attrs['mode'] === 'overlay') {
@@ -94,10 +94,9 @@ describes.realWin(
 
     beforeEach(() => {
       document = env.win.document;
-      clock = lolex.install({
-        // Use the global window and not env.win. There is no way to inject the
-        // env.win into moment right now.
-        target: window,
+      // Use the global window and not env.win. There is no way to inject the
+      // env.win into moment right now.
+      clock = fakeTimers.withGlobal(window).install({
         now: new Date('2018-01-01T08:00:00Z'),
       });
     });
@@ -111,8 +110,8 @@ describes.realWin(
         const {picker, layoutCallback} = createDatePicker({
           src: 'https://localhost:8000/examples/date-picker.json',
         });
-        sandbox.stub(picker, 'fetchSrc_').resolves();
-        const setStateSpy = sandbox.spy(picker, 'setState_');
+        env.sandbox.stub(picker, 'fetchSrc_').resolves();
+        const setStateSpy = env.sandbox.spy(picker, 'setState_');
         await layoutCallback();
 
         await picker.mutatedAttributesCallback({

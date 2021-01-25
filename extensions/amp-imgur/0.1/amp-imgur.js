@@ -31,7 +31,6 @@ import {getData, listen} from '../../../src/event-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {isObject} from '../../../src/types';
 import {removeElement} from '../../../src/dom';
-import {startsWith} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';
 import {userAssert} from '../../../src/log';
 
@@ -79,10 +78,13 @@ export class AmpImgur extends AMP.BaseElement {
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
 
-    iframe.src =
-      'https://imgur.com/' +
-      encodeURIComponent(this.imgurid_) +
-      '/embed?pub=true';
+    const sanitizedID = this.imgurid_.replace(
+      /^(a\/)?(.*)/,
+      (match, aSlash, rest) => {
+        return 'a/' + encodeURIComponent(rest);
+      }
+    );
+    iframe.src = 'https://imgur.com/' + sanitizedID + '/embed?pub=true';
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
     return this.loadPromise(iframe);
@@ -103,8 +105,7 @@ export class AmpImgur extends AMP.BaseElement {
     if (
       !eventData ||
       !(
-        isObject(eventData) ||
-        startsWith(/** @type {string} */ (eventData), '{')
+        isObject(eventData) || /** @type {string} */ (eventData).startsWith('{')
       )
     ) {
       return;
@@ -129,6 +130,6 @@ export class AmpImgur extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-imgur', '0.1', AMP => {
+AMP.extension('amp-imgur', '0.1', (AMP) => {
   AMP.registerElement('amp-imgur', AmpImgur);
 });

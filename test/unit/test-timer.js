@@ -16,64 +16,55 @@
 
 import {Timer} from '../../src/service/timer-impl';
 
-describes.fakeWin('Timer', {}, env => {
-  let sandbox;
+describes.fakeWin('Timer', {}, (env) => {
   let windowMock;
   let timer;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
-    const WindowApi = function() {};
-    WindowApi.prototype.setTimeout = function(unusedCallback, unusedDelay) {};
-    WindowApi.prototype.clearTimeout = function(unusedTimerId) {};
+    const WindowApi = function () {};
+    WindowApi.prototype.setTimeout = function (unusedCallback, unusedDelay) {};
+    WindowApi.prototype.clearTimeout = function (unusedTimerId) {};
     WindowApi.prototype.document = {};
     WindowApi.prototype.Promise = window.Promise;
     const windowApi = new WindowApi();
-    windowMock = sandbox.mock(windowApi);
+    windowMock = env.sandbox.mock(windowApi);
 
     timer = new Timer(windowApi);
   });
 
   afterEach(() => {
     windowMock.verify();
-    sandbox.restore();
   });
 
   it('delay', () => {
     const handler = () => {};
-    windowMock
-      .expects('setTimeout')
-      .returns(1)
-      .once();
+    windowMock.expects('setTimeout').returns(1).once();
     windowMock.expects('clearTimeout').never();
     timer.delay(handler, 111);
   });
 
-  it('delay 0 real window', done => {
+  it('delay 0 real window', (done) => {
     timer = new Timer(self);
     timer.delay(done, 0);
   });
 
-  it('delay 1 real window', done => {
+  it('delay 1 real window', (done) => {
     timer = new Timer(self);
     timer.delay(done, 1);
   });
 
-  it('delay default', done => {
+  it('delay default', (done) => {
     windowMock.expects('setTimeout').never();
     windowMock.expects('clearTimeout').never();
     timer.delay(done);
   });
 
   it('cancel', () => {
-    windowMock
-      .expects('clearTimeout')
-      .withExactArgs(1)
-      .once();
+    windowMock.expects('clearTimeout').withExactArgs(1).once();
     timer.cancel(1);
   });
 
-  it('cancel default', done => {
+  it('cancel default', (done) => {
     windowMock.expects('setTimeout').never();
     windowMock.expects('clearTimeout').never();
     const id = timer.delay(() => {
@@ -90,7 +81,7 @@ describes.fakeWin('Timer', {}, env => {
     windowMock
       .expects('setTimeout')
       .withExactArgs(
-        sinon.match(value => {
+        env.sandbox.match((value) => {
           value();
           return true;
         }),
@@ -100,7 +91,7 @@ describes.fakeWin('Timer', {}, env => {
       .once();
 
     let c = 0;
-    return timer.promise(111).then(result => {
+    return timer.promise(111).then((result) => {
       c++;
       expect(c).to.equal(1);
       expect(result).to.be.undefined;
@@ -111,7 +102,7 @@ describes.fakeWin('Timer', {}, env => {
     windowMock
       .expects('setTimeout')
       .withExactArgs(
-        sinon.match(value => {
+        env.sandbox.match((value) => {
           value();
           return true;
         }),
@@ -123,11 +114,11 @@ describes.fakeWin('Timer', {}, env => {
     let c = 0;
     return timer
       .timeoutPromise(111)
-      .then(result => {
+      .then((result) => {
         c++;
         assert.fail('must never be here: ' + result);
       })
-      .catch(reason => {
+      .catch((reason) => {
         c++;
         expect(c).to.equal(1);
         expect(reason.message).to.contain('timeout');
@@ -138,7 +129,7 @@ describes.fakeWin('Timer', {}, env => {
     windowMock
       .expects('setTimeout')
       .withExactArgs(
-        sinon.match(unusedValue => {
+        env.sandbox.match((unusedValue) => {
           // No timeout
           return true;
         }),
@@ -148,7 +139,7 @@ describes.fakeWin('Timer', {}, env => {
       .once();
 
     let c = 0;
-    return timer.timeoutPromise(111, Promise.resolve('A')).then(result => {
+    return timer.timeoutPromise(111, Promise.resolve('A')).then((result) => {
       c++;
       expect(c).to.equal(1);
       expect(result).to.equal('A');
@@ -159,7 +150,7 @@ describes.fakeWin('Timer', {}, env => {
     windowMock
       .expects('setTimeout')
       .withExactArgs(
-        sinon.match(value => {
+        env.sandbox.match((value) => {
           // Immediate timeout
           value();
           return true;
@@ -172,11 +163,11 @@ describes.fakeWin('Timer', {}, env => {
     let c = 0;
     return timer
       .timeoutPromise(111, new Promise(() => {}))
-      .then(result => {
+      .then((result) => {
         c++;
         assert.fail('must never be here: ' + result);
       })
-      .catch(reason => {
+      .catch((reason) => {
         c++;
         expect(c).to.equal(1);
         expect(reason.message).to.contain('timeout');
@@ -200,7 +191,7 @@ describes.fakeWin('Timer', {}, env => {
 
   it('poll - clears out interval when complete', () => {
     const realTimer = new Timer(env.win);
-    const clearIntervalStub = sandbox.stub();
+    const clearIntervalStub = env.sandbox.stub();
     env.win.clearInterval = clearIntervalStub;
     return realTimer
       .poll(111, () => {

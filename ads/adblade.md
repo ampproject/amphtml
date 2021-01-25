@@ -19,11 +19,14 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width="300" height="250"
-    type="adblade"
-    data-width="300"
-    data-height="250"
-    data-cid="19626-3798936394">
+<amp-ad
+  width="300"
+  height="250"
+  type="adblade"
+  data-width="300"
+  data-height="250"
+  data-cid="19626-3798936394"
+>
 </amp-ad>
 ```
 
@@ -33,6 +36,6 @@ For semantics of configuration, see [Adblade's documentation](https://www.adblad
 
 Supported parameters:
 
-- `data-cid`
-- `data-width`
-- `data-height`
+-   `data-cid`
+-   `data-width`
+-   `data-height`

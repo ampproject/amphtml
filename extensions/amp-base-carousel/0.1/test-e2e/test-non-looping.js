@@ -20,7 +20,7 @@ const pageWidth = 800;
 const pageHeight = 600;
 
 describes.endtoend(
-  'Non-looping AMP carousel',
+  'amp-base-carousel:0.1 - non-looping',
   {
     testUrl:
       'http://localhost:8000/test/manual/amp-base-carousel/' +
@@ -28,7 +28,7 @@ describes.endtoend(
     experiments: ['amp-base-carousel', 'layers'],
     initialRect: {width: pageWidth, height: pageHeight},
   },
-  async env => {
+  async (env) => {
     /** The total number of slides in the carousel */
     const SLIDE_COUNT = 4;
     let controller;

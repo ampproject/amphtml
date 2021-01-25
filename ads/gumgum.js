@@ -33,9 +33,9 @@ export function gumgum(global, data) {
 
   const {max} = Math,
     slotId = parseInt(data.slot, 10),
-    onLoad = function(type) {
-      return function(evt) {
-        const ad = Object.assign({width: 0, height: 0}, evt.ad || {}),
+    onLoad = function (type) {
+      return function (evt) {
+        const ad = {width: 0, height: 0, ...(evt.ad || {})},
           identifier = ['GUMGUM', type, evt.id].join('_');
         ctx.reportRenderedEntityIdentifier(identifier);
         ctx.renderStart({
@@ -44,7 +44,7 @@ export function gumgum(global, data) {
         });
       };
     },
-    noFill = function() {
+    noFill = function () {
       ctx.noContentAvailable();
     };
 

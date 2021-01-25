@@ -25,7 +25,7 @@ describes.realWin(
       canonicalUrl: 'https://foo.bar/baz',
     },
   },
-  env => {
+  (env) => {
     const accountId = '589446dd42ee0d6fdd9c3dfd';
     const contentId = '5a703a2f46e0fb00016d51b3';
     let win, doc;
@@ -49,7 +49,7 @@ describes.realWin(
     }
 
     it('renders iframe in amp-beopinion', () => {
-      return getAmpBeOpinion(accountId).then(ampBeOpinion => {
+      return getAmpBeOpinion(accountId).then((ampBeOpinion) => {
         const iframe = ampBeOpinion.firstChild;
         expect(iframe).to.not.be.null;
         expect(iframe.tagName).to.equal('IFRAME');
@@ -78,7 +78,7 @@ describes.realWin(
     });
 
     it('removes iframe after unlayoutCallback', () => {
-      return getAmpBeOpinion(accountId).then(ampBeOpinion => {
+      return getAmpBeOpinion(accountId).then((ampBeOpinion) => {
         const iframe = ampBeOpinion.querySelector('iframe');
         expect(iframe).to.not.be.null;
         const obj = ampBeOpinion.implementation_;

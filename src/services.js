@@ -16,10 +16,11 @@
 
 import {
   getAmpdoc,
-  getExistingServiceForDocInEmbedScope,
   getExistingServiceOrNull,
   getService,
   getServiceForDoc,
+  getServiceForDocOrNull,
+  getServiceInEmbedWin,
   getServicePromiseForDoc,
 } from './service';
 import {
@@ -96,7 +97,7 @@ export class Services {
    * @return {!./service/action-impl.ActionService}
    */
   static actionServiceForDoc(element) {
-    return /** @type {!./service/action-impl.ActionService} */ (getExistingServiceForDocInEmbedScope(
+    return /** @type {!./service/action-impl.ActionService} */ (getServiceForDocOrNull(
       element,
       'action'
     ));
@@ -107,7 +108,7 @@ export class Services {
    * @return {!./service/standard-actions-impl.StandardActions}
    */
   static standardActionsForDoc(element) {
-    return /** @type {!./service/standard-actions-impl.StandardActions} */ (getExistingServiceForDocInEmbedScope(
+    return /** @type {!./service/standard-actions-impl.StandardActions} */ (getServiceForDocOrNull(
       element,
       'standard-actions'
     ));
@@ -205,7 +206,19 @@ export class Services {
   }
 
   /**
-   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @param {!Element|!ShadowRoot} element
+   * @return {!Promise<?../extensions/amp-script/0.1/amp-script.AmpScriptService>}
+   */
+  static scriptForDocOrNull(element) {
+    return /** @type {!Promise<?../extensions/amp-script/0.1/amp-script.AmpScriptService>} */ (getElementServiceIfAvailableForDocInEmbedScope(
+      element,
+      'amp-script',
+      'amp-script'
+    ));
+  }
+
+  /**
+   * @param {!Element|!ShadowRoot|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!Promise<!./service/cid-impl.CidDef>}
    */
   static cidForDoc(elementOrAmpDoc) {
@@ -223,6 +236,30 @@ export class Services {
     return /** @type {!./service/navigation.Navigation} */ (getServiceForDoc(
       elementOrAmpDoc,
       'navigation'
+    ));
+  }
+
+  /**
+   * @param {!Element|!ShadowRoot} element
+   * @return {!Promise<!../extensions/amp-loader/0.1/amp-loader.LoaderService>}
+   */
+  static loaderServiceForDoc(element) {
+    return /** @type {!Promise<!../extensions/amp-loader/0.1/amp-loader.LoaderService>} */ (getElementServiceForDoc(
+      element,
+      'loader',
+      'amp-loader'
+    ));
+  }
+
+  /**
+   * @param {!Element|!ShadowRoot} element
+   * @return {!Promise<!../extensions/amp-standalone/0.1/amp-standalone.StandaloneService>}
+   */
+  static standaloneServiceForDoc(element) {
+    return /** @type {!Promise<!../extensions/amp-standalone/0.1/amp-standalone.StandaloneService>} */ (getElementServiceForDoc(
+      element,
+      'standalone',
+      'amp-standalone'
     ));
   }
 
@@ -273,21 +310,12 @@ export class Services {
   }
 
   /**
-   * @param {!Window} window
-   * @return {!./service/document-state.DocumentState}
-   * @restricted  Only to be used for global document services, such as vsync.
-   */
-  static globalDocumentStateFor(window) {
-    return getService(window, 'documentState');
-  }
-
-  /**
    * Returns service to listen for `hidden` attribute mutations.
    * @param {!Element|!ShadowRoot} element
    * @return {!./service/hidden-observer-impl.HiddenObserver}
    */
   static hiddenObserverForDoc(element) {
-    return /** @type {!./service/hidden-observer-impl.HiddenObserver} */ (getExistingServiceForDocInEmbedScope(
+    return /** @type {!./service/hidden-observer-impl.HiddenObserver} */ (getServiceForDocOrNull(
       element,
       'hidden-observer'
     ));
@@ -328,12 +356,45 @@ export class Services {
 
   /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!./service/layers-impl.LayoutLayers}
+   * @return {?./service/loading-indicator.LoadingIndicatorImpl}
    */
-  static layersForDoc(elementOrAmpDoc) {
-    return /** @type {!./service/layers-impl.LayoutLayers} */ (getServiceForDoc(
+  static loadingIndicatorOrNull(elementOrAmpDoc) {
+    return /** @type {?./service/loading-indicator.LoadingIndicatorImpl} */ (getServiceForDocOrNull(
       elementOrAmpDoc,
-      'layers'
+      'loadingIndicator'
+    ));
+  }
+
+  /**
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @return {!../extensions/amp-next-page/1.0/service.NextPageService}
+   */
+  static nextPageServiceForDoc(elementOrAmpDoc) {
+    return /** @type {!../extensions/amp-next-page/1.0/service.NextPageService} */ (getServiceForDoc(
+      elementOrAmpDoc,
+      'next-page'
+    ));
+  }
+
+  /**
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @return {!./service/mutator-interface.MutatorInterface}
+   */
+  static mutatorForDoc(elementOrAmpDoc) {
+    return /** @type {!./service/mutator-interface.MutatorInterface} */ (getServiceForDoc(
+      elementOrAmpDoc,
+      'mutator'
+    ));
+  }
+
+  /**
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @return {!./service/owners-interface.OwnersInterface}
+   */
+  static ownersForDoc(elementOrAmpDoc) {
+    return /** @type {!./service/owners-interface.OwnersInterface} */ (getServiceForDoc(
+      elementOrAmpDoc,
+      'owners'
     ));
   }
 
@@ -384,11 +445,19 @@ export class Services {
   }
 
   /**
+   * @param {!Window} window
+   * @return {!./preconnect.PreconnectService}
+   */
+  static preconnectFor(window) {
+    return getService(window, 'preconnect');
+  }
+
+  /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!./service/resources-impl.ResourcesDef}
+   * @return {!./service/resources-interface.ResourcesInterface}
    */
   static resourcesForDoc(elementOrAmpDoc) {
-    return /** @type {!./service/resources-impl.ResourcesDef} */ (getServiceForDoc(
+    return /** @type {!./service/resources-interface.ResourcesInterface} */ (getServiceForDoc(
       elementOrAmpDoc,
       'resources'
     ));
@@ -396,10 +465,10 @@ export class Services {
 
   /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!Promise<!./service/resources-impl.ResourcesDef>}
+   * @return {!Promise<!./service/resources-interface.ResourcesInterface>}
    */
   static resourcesPromiseForDoc(elementOrAmpDoc) {
-    return /** @type {!Promise<!./service/resources-impl.ResourcesDef>} */ (getServicePromiseForDoc(
+    return /** @type {!Promise<!./service/resources-interface.ResourcesInterface>} */ (getServicePromiseForDoc(
       elementOrAmpDoc,
       'resources'
     ));
@@ -407,26 +476,12 @@ export class Services {
 
   /**
    * @param {!Window} win
-   * @return {?Promise<?{incomingFragment: string, outgoingFragment: string}>}
-   */
-  static shareTrackingForOrNull(win) {
-    return /** @type {!Promise<?{incomingFragment: string, outgoingFragment: string}>} */ (getElementServiceIfAvailable(
-      win,
-      'share-tracking',
-      'amp-share-tracking',
-      true
-    ));
-  }
-
-  /**
-   * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
-   * @param {!Window} win
-   * @return {?Promise<?../extensions/amp-story/1.0/variable-service.StoryVariableDef>}
+   * @return {?Promise<?../extensions/amp-story/1.0/variable-service.AmpStoryVariableService>}
    */
   static storyVariableServiceForOrNull(win) {
     return (
-      /** @type {!Promise<?../extensions/amp-story/1.0/variable-service.StoryVariableDef>} */
-      (getElementServiceIfAvailable(win, 'story-variable', 'amp-story', true))
+      /** @type {!Promise<?../extensions/amp-story/1.0/variable-service.AmpStoryVariableService>} */
+      (getElementServiceIfAvailable(win, 'story-variable', 'amp-story'))
     );
   }
 
@@ -445,11 +500,11 @@ export class Services {
    * Version of the story store service depends on which version of amp-story
    * the publisher is loading. They all have the same implementation.
    * @param {!Window} win
-   * @return {?Promise<?../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService|?../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService>}
+   * @return {?Promise<?../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService>}
    */
   static storyStoreServiceForOrNull(win) {
     return (
-      /** @type {!Promise<?../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService|?../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService>} */
+      /** @type {!Promise<?../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService>} */
       (getElementServiceIfAvailable(win, 'story-store', 'amp-story'))
     );
   }
@@ -477,6 +532,18 @@ export class Services {
   }
 
   /**
+   * Get promise with story request service
+   * @param {!Window} win
+   * @return {?Promise<?../extensions/amp-story/1.0/amp-story-request-service.AmpStoryRequestService>}
+   */
+  static storyRequestServiceForOrNull(win) {
+    return (
+      /** @type {!Promise<?../extensions/amp-story/1.0/amp-story-request-service.AmpStoryRequestService>} */
+      (getElementServiceIfAvailable(win, 'story-request', 'amp-story'))
+    );
+  }
+
+  /**
    * @param {!Window} win
    * @return {?../extensions/amp-story/1.0/amp-story-request-service.AmpStoryRequestService}
    */
@@ -489,21 +556,35 @@ export class Services {
 
   /**
    * @param {!Window} win
-   * @return {!Promise<?./service/localization.LocalizationService>}
+   * @return {?../extensions/amp-story/1.0/media-performance-metrics-service.MediaPerformanceMetricsService}
    */
-  static localizationServiceForOrNull(win) {
+  static mediaPerformanceMetricsService(win) {
     return (
-      /** @type {!Promise<?./service/localization.LocalizationService>} */
-      (getElementServiceIfAvailable(win, 'localization', 'amp-story', true))
+      /** @type {?../extensions/amp-story/1.0/media-performance-metrics-service.MediaPerformanceMetricsService} */
+      (getExistingServiceOrNull(win, 'media-performance-metrics'))
     );
   }
 
   /**
-   * @param {!Window} win
-   * @return {!./service/localization.LocalizationService}
+   * @param {!Element} el
+   * @return {!Promise<./service/localization.LocalizationService>}
    */
-  static localizationService(win) {
-    return getService(win, 'localization');
+  static localizationServiceForOrNull(el) {
+    return /** @type {!Promise<?./service/localization.LocalizationService>} */ (getServicePromiseForDoc(
+      el,
+      'localization'
+    ));
+  }
+
+  /**
+   * @param {!Element} element
+   * @return {?./service/localization.LocalizationService}
+   */
+  static localizationForDoc(element) {
+    return /** @type {?./service/localization.LocalizationService} */ (getServiceForDocOrNull(
+      element,
+      'localization'
+    ));
   }
 
   /**
@@ -526,61 +607,6 @@ export class Services {
     return (
       /** @type {?../extensions/amp-story/1.0/story-analytics.StoryAnalyticsService} */
       (getExistingServiceOrNull(win, 'story-analytics'))
-    );
-  }
-
-  /**
-   * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
-   * @param {!Window} win
-   * @return {!../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService}
-   */
-  static storyStoreServiceV01(win) {
-    return getService(win, 'story-store');
-  }
-
-  /**
-   * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
-   * @param {!Window} win
-   * @return {!../extensions/amp-story/0.1/amp-story-request-service.AmpStoryRequestService}
-   */
-  static storyRequestServiceV01(win) {
-    return getService(win, 'story-request-v01');
-  }
-
-  /**
-   * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
-   * @param {!Window} win
-   * @return {!Promise<?./service/localization.LocalizationService>}
-   */
-  static localizationServiceForOrNullV01(win) {
-    return (
-      /** @type {!Promise<?./service/localization.LocalizationService>} */
-      (getElementServiceIfAvailable(win, 'localization-v01', 'amp-story', true))
-    );
-  }
-
-  /**
-   * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
-   * @param {!Window} win
-   * @return {!./service/localization.LocalizationService}
-   */
-  static localizationServiceV01(win) {
-    return getService(win, 'localization-v01');
-  }
-
-  /**
-   * @param {!Window} win
-   * @return {?Promise<?../extensions/amp-viewer-integration/0.1/variable-service.ViewerIntegrationVariableDef>}
-   */
-  static viewerIntegrationVariableServiceForOrNull(win) {
-    return (
-      /** @type {!Promise<?../extensions/amp-viewer-integration/0.1/variable-service.ViewerIntegrationVariableDef>} */
-      (getElementServiceIfAvailable(
-        win,
-        'viewer-integration-variable',
-        'amp-viewer-integration',
-        true
-      ))
     );
   }
 
@@ -623,7 +649,7 @@ export class Services {
    */
   static timerFor(window) {
     // TODO(alabiaga): This will always return the top window's Timer service.
-    return /** @type {!./service/timer-impl.Timer} */ (getService(
+    return /** @type {!./service/timer-impl.Timer} */ (getServiceInEmbedWin(
       window,
       'timer'
     ));
@@ -634,7 +660,7 @@ export class Services {
    * @return {!./service/url-replacements-impl.UrlReplacements}
    */
   static urlReplacementsForDoc(element) {
-    return /** @type {!./service/url-replacements-impl.UrlReplacements} */ (getExistingServiceForDocInEmbedScope(
+    return /** @type {!./service/url-replacements-impl.UrlReplacements} */ (getServiceForDocOrNull(
       element,
       'url-replace'
     ));
@@ -688,28 +714,13 @@ export class Services {
   }
 
   /**
-   * Returns a promise for the geo service or a promise for null if
-   * the service is not available on the current page.
-   * @param {!Element|!ShadowRoot} element
-   * @return {!Promise<?../extensions/amp-user-location/0.1/user-location-service.UserLocationService>}
-   */
-  static userLocationForDocOrNull(element) {
-    return /** @type {!Promise<?../extensions/amp-user-location/0.1/user-location-service.UserLocationService>} */ (getElementServiceIfAvailableForDoc(
-      element,
-      'user-location',
-      'amp-user-location',
-      true
-    ));
-  }
-
-  /**
    * Unlike most service getters, passing `Node` is necessary for some FIE-scope
    * services since sometimes we only have the FIE Document for context.
    * @param {!Element|!ShadowRoot} element
    * @return {!./service/url-impl.Url}
    */
   static urlForDoc(element) {
-    return /** @type {!./service/url-impl.Url} */ (getExistingServiceForDocInEmbedScope(
+    return /** @type {!./service/url-impl.Url} */ (getServiceForDocOrNull(
       element,
       'url'
     ));
@@ -742,26 +753,11 @@ export class Services {
   }
 
   /**
-   * @param {!Element|!ShadowRoot} element
-   * @return {!Promise<?../extensions/amp-viewer-assistance/0.1/amp-viewer-assistance.AmpViewerAssistance>}
-   */
-  static viewerAssistanceForDocOrNull(element) {
-    return (
-      /** @type {!Promise<?../extensions/amp-viewer-assistance/0.1/amp-viewer-assistance.AmpViewerAssistance>} */
-      (getElementServiceIfAvailableForDoc(
-        element,
-        'amp-viewer-assistance',
-        'amp-viewer-assistance'
-      ))
-    );
-  }
-
-  /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!./service/viewer-impl.Viewer}
+   * @return {!./service/viewer-interface.ViewerInterface}
    */
   static viewerForDoc(elementOrAmpDoc) {
-    return /** @type {!./service/viewer-impl.Viewer} */ (getServiceForDoc(
+    return /** @type {!./service/viewer-interface.ViewerInterface} */ (getServiceForDoc(
       elementOrAmpDoc,
       'viewer'
     ));
@@ -772,10 +768,10 @@ export class Services {
    * for services that need reference to the viewer before it has been
    * initialized. Most of the code, however, just should use `viewerForDoc`.
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!Promise<!./service/viewer-impl.Viewer>}
+   * @return {!Promise<!./service/viewer-interface.ViewerInterface>}
    */
   static viewerPromiseForDoc(elementOrAmpDoc) {
-    return /** @type {!Promise<!./service/viewer-impl.Viewer>} */ (getServicePromiseForDoc(
+    return /** @type {!Promise<!./service/viewer-interface.ViewerInterface>} */ (getServicePromiseForDoc(
       elementOrAmpDoc,
       'viewer'
     ));
@@ -794,10 +790,10 @@ export class Services {
 
   /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!./service/viewport/viewport-impl.Viewport}
+   * @return {!./service/viewport/viewport-interface.ViewportInterface}
    */
   static viewportForDoc(elementOrAmpDoc) {
-    return /** @type {!./service/viewport/viewport-impl.Viewport} */ (getServiceForDoc(
+    return /** @type {!./service/viewport/viewport-interface.ViewportInterface} */ (getServiceForDoc(
       elementOrAmpDoc,
       'viewport'
     ));

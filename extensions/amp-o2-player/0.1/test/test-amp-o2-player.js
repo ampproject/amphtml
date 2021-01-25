@@ -15,6 +15,9 @@
  */
 
 import '../amp-o2-player';
+import * as iframeHelper from '../../../../src/iframe-helper';
+import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
+import {MessageType} from '../../../../src/3p-frame-messaging';
 
 describes.realWin(
   'amp-o2-player',
@@ -23,7 +26,7 @@ describes.realWin(
       extensions: ['amp-o2-player'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
 
     beforeEach(() => {
@@ -31,7 +34,7 @@ describes.realWin(
       doc = win.document;
     });
 
-    function getO2player(attributes, opt_responsive) {
+    async function getO2player(attributes, opt_responsive, implExtends) {
       const o2 = doc.createElement('amp-o2-player');
       for (const key in attributes) {
         o2.setAttribute(key, attributes[key]);
@@ -42,38 +45,39 @@ describes.realWin(
         o2.setAttribute('layout', 'responsive');
       }
       doc.body.appendChild(o2);
-      return o2
-        .build()
-        .then(() => o2.layoutCallback())
-        .then(() => o2);
+
+      if (implExtends) {
+        implExtends(o2);
+      }
+      await o2.build();
+      await o2.layoutCallback();
+      return o2;
     }
 
-    it('renders', () => {
-      return getO2player({
+    it('renders', async () => {
+      const o2 = await getO2player({
         'data-pid': '123',
         'data-bcid': '456',
-      }).then(o2 => {
-        const iframe = o2.querySelector('iframe');
-        expect(iframe).to.not.be.null;
-        expect(iframe.tagName).to.equal('IFRAME');
-        expect(iframe.src).to.equal(
-          'https://delivery.vidible.tv/htmlembed/pid=123/456.html'
-        );
       });
+      const iframe = o2.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.tagName).to.equal('IFRAME');
+      expect(iframe.src).to.equal(
+        'https://delivery.vidible.tv/htmlembed/pid=123/456.html'
+      );
     });
 
-    it('renders responsively', () => {
-      return getO2player(
+    it('renders responsively', async () => {
+      const o2 = await getO2player(
         {
           'data-pid': '573acb47e4b0564ec2e10011',
           'data-bcid': '50d595ec0364e95588c77bd2',
         },
         true
-      ).then(o2 => {
-        const iframe = o2.querySelector('iframe');
-        expect(iframe).to.not.be.null;
-        expect(iframe.className).to.match(/i-amphtml-fill-content/);
-      });
+      );
+      const iframe = o2.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.className).to.match(/i-amphtml-fill-content/);
     });
 
     it('requires data-pid', () => {
@@ -104,48 +108,189 @@ describes.realWin(
       });
     });
 
-    it('renders with data-vid passed', () => {
-      return getO2player({
+    it('renders with data-vid passed', async () => {
+      const o2 = await getO2player({
         'data-pid': '123',
         'data-bcid': '456',
         'data-vid': '789',
         'data-bid': '987',
-      }).then(o2 => {
-        const iframe = o2.querySelector('iframe');
-        expect(iframe).to.not.be.null;
-        expect(iframe.tagName).to.equal('IFRAME');
-        expect(iframe.src).to.equal(
-          'https://delivery.vidible.tv/htmlembed/pid=123/456.html?bid=987&vid=789'
-        );
       });
+      const iframe = o2.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.tagName).to.equal('IFRAME');
+      expect(iframe.src).to.equal(
+        'https://delivery.vidible.tv/htmlembed/pid=123/456.html?bid=987&vid=789'
+      );
     });
 
-    it('renders with data-macros passed', () => {
-      return getO2player({
+    it('renders with data-macros passed', async () => {
+      const o2 = await getO2player({
         'data-pid': '123',
         'data-bcid': '456',
         'data-macros': 'm.test=test',
-      }).then(o2 => {
-        const iframe = o2.querySelector('iframe');
-        expect(iframe).to.not.be.null;
-        expect(iframe.tagName).to.equal('IFRAME');
-        expect(iframe.src).to.equal(
-          'https://delivery.vidible.tv/htmlembed/pid=123/456.html?m.test=test'
-        );
       });
+      const iframe = o2.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.tagName).to.equal('IFRAME');
+      expect(iframe.src).to.equal(
+        'https://delivery.vidible.tv/htmlembed/pid=123/456.html?m.test=test'
+      );
     });
 
-    it('respects data-env parameter', () => {
-      return getO2player({
+    it('respects data-env parameter', async () => {
+      const o2 = await getO2player({
         'data-pid': '123',
         'data-bcid': '456',
         'data-env': 'stage',
-      }).then(o2 => {
-        const iframe = o2.querySelector('iframe');
-        expect(iframe).to.not.be.null;
-        expect(iframe.tagName).to.equal('IFRAME');
-        expect(iframe.src).to.equal(
-          'https://delivery.dev.vidible.tv/htmlembed/pid=123/456.html'
+      });
+      const iframe = o2.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.tagName).to.equal('IFRAME');
+      expect(iframe.src).to.equal(
+        'https://delivery.dev.vidible.tv/htmlembed/pid=123/456.html'
+      );
+    });
+
+    describe('sends a consent-data', () => {
+      let sendConsentDataToIframe;
+      const resSource = 'my source';
+      const resOrigin = 'my origin';
+      const resConsentString = 'consent string';
+      let consentData = {
+        'gdprApplies': true,
+        'user_consent': 1,
+        'gdprString': resConsentString,
+      };
+      const resData = {
+        sentinel: 'amp',
+        type: MessageType.CONSENT_DATA,
+      };
+
+      it('sends a consent-data CONSENT_POLICY_STATE.SUFFICIENT message', async function () {
+        resData.consentData = consentData;
+
+        const implExtends = function (o2) {
+          env.sandbox
+            .stub(o2.implementation_, 'getConsentString_')
+            .resolves(resConsentString);
+
+          env.sandbox
+            .stub(o2.implementation_, 'getConsentPolicyState_')
+            .resolves(CONSENT_POLICY_STATE.SUFFICIENT);
+
+          sendConsentDataToIframe = env.sandbox.spy(
+            o2.implementation_,
+            'sendConsentDataToIframe_'
+          );
+        };
+
+        env.sandbox
+          .stub(iframeHelper, 'listenFor')
+          .callsFake((iframe, message, callback) => {
+            expect(message).to.equal(MessageType.SEND_CONSENT_DATA);
+            callback('', resSource, resOrigin);
+          });
+
+        await getO2player(
+          {
+            'data-pid': '123',
+            'data-bcid': '456',
+          },
+          null,
+          implExtends
+        );
+
+        expect(sendConsentDataToIframe).to.have.been.calledWith(
+          resSource,
+          resOrigin,
+          resData
+        );
+      });
+
+      it('sends a consent-data INSUFFICIENT or UNKNOWN message', async function () {
+        consentData['user_consent'] = 0;
+        resData.consentData = consentData;
+
+        const implExtends = function (o2) {
+          env.sandbox
+            .stub(o2.implementation_, 'getConsentString_')
+            .resolves(resConsentString);
+
+          env.sandbox
+            .stub(o2.implementation_, 'getConsentPolicyState_')
+            .resolves(CONSENT_POLICY_STATE.INSUFFICIENT);
+
+          sendConsentDataToIframe = env.sandbox.spy(
+            o2.implementation_,
+            'sendConsentDataToIframe_'
+          );
+        };
+
+        env.sandbox
+          .stub(iframeHelper, 'listenFor')
+          .callsFake((iframe, message, callback) => {
+            expect(message).to.equal(MessageType.SEND_CONSENT_DATA);
+            callback('', resSource, resOrigin);
+          });
+
+        await getO2player(
+          {
+            'data-pid': '123',
+            'data-bcid': '456',
+          },
+          null,
+          implExtends
+        );
+
+        expect(sendConsentDataToIframe).to.have.been.calledWith(
+          resSource,
+          resOrigin,
+          resData
+        );
+      });
+
+      it('sends a consent-data UNKNOWN_NOT_REQUIRED or default message', async function () {
+        consentData = {
+          'gdprApplies': false,
+        };
+
+        resData.consentData = consentData;
+
+        const implExtends = function (o2) {
+          env.sandbox
+            .stub(o2.implementation_, 'getConsentString_')
+            .resolves(resConsentString);
+
+          env.sandbox
+            .stub(o2.implementation_, 'getConsentPolicyState_')
+            .resolves(CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED);
+
+          sendConsentDataToIframe = env.sandbox.spy(
+            o2.implementation_,
+            'sendConsentDataToIframe_'
+          );
+        };
+
+        env.sandbox
+          .stub(iframeHelper, 'listenFor')
+          .callsFake((iframe, message, callback) => {
+            expect(message).to.equal(MessageType.SEND_CONSENT_DATA);
+            callback('', resSource, resOrigin);
+          });
+
+        await getO2player(
+          {
+            'data-pid': '123',
+            'data-bcid': '456',
+          },
+          null,
+          implExtends
+        );
+
+        expect(sendConsentDataToIframe).to.have.been.calledWith(
+          resSource,
+          resOrigin,
+          resData
         );
       });
     });

@@ -15,10 +15,18 @@
  */
 
 import '../amp-accordion';
+import {ActionService} from '../../../../src/service/action-impl';
+import {ActionTrust} from '../../../../src/action-constants';
 import {Keys} from '../../../../src/utils/key-codes';
+import {Services} from '../../../../src/services';
 import {computedStyle} from '../../../../src/style';
+import {
+  createElementWithAttributes,
+  tryFocus,
+  whenUpgradedToCustomElement,
+} from '../../../../src/dom';
 import {poll} from '../../../../testing/iframe';
-import {tryFocus} from '../../../../src/dom';
+import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin(
   'amp-accordion',
@@ -27,7 +35,7 @@ describes.realWin(
       extensions: ['amp-accordion'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
     let counter = 0;
 
@@ -58,7 +66,7 @@ describes.realWin(
       return ampAccordion
         .build()
         .then(() => {
-          ampAccordion.implementation_.mutateElement = fn =>
+          ampAccordion.implementation_.mutateElement = (fn) =>
             new Promise(() => {
               fn();
             });
@@ -68,20 +76,31 @@ describes.realWin(
     }
 
     function getAmpAccordion(opt_shouldSetId) {
-      const contents = [0, 1, 2].map(i => {
+      const contents = [0, 1, 2].map((i) => {
         return (
-          '<h2 tabindex="0">Section ' +
-          i +
-          "<span>nested stuff<span></h2><div id='test" +
-          i +
-          "'>Loreum ipsum</div>"
+          '<h2 tabindex="0">' +
+          `Section ${i}<span>nested stuff<span>` +
+          `</h2><div id='test${i}'>Lorem ipsum</div>`
         );
       });
       return getAmpAccordionWithContents(contents, opt_shouldSetId);
     }
 
-    it('should expand when toggle action is triggered on a collapsed section', () => {
-      return getAmpAccordion().then(ampAccordion => {
+    /** Helper for invoking expand/collapse actions on amp-accordion. */
+    function execute(impl, method, trust = ActionTrust.HIGH, opt_sectionId) {
+      const invocation = {
+        method,
+        trust,
+        satisfiesTrust: (min) => trust >= min,
+      };
+      if (opt_sectionId) {
+        invocation.args = {section: opt_sectionId};
+      }
+      impl.executeAction(invocation);
+    }
+
+    it('should expand when high trust toggle action is triggered on a collapsed section', () => {
+      return getAmpAccordion().then((ampAccordion) => {
         const impl = ampAccordion.implementation_;
         const headerElements = doc.querySelectorAll('section > *:first-child');
         expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be
@@ -89,7 +108,7 @@ describes.realWin(
         expect(headerElements[0].getAttribute('aria-expanded')).to.equal(
           'false'
         );
-        impl.toggle_(headerElements[0].parentNode);
+        impl.toggle_(headerElements[0].parentNode, ActionTrust.HIGH);
         expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be
           .true;
         expect(headerElements[0].getAttribute('aria-expanded')).to.equal(
@@ -112,8 +131,8 @@ describes.realWin(
       });
     });
 
-    it('should collapse when toggle action is triggered on a expanded section', () => {
-      return getAmpAccordion().then(ampAccordion => {
+    it('should collapse when high trust toggle action is triggered on a expanded section', () => {
+      return getAmpAccordion().then((ampAccordion) => {
         const impl = ampAccordion.implementation_;
         const headerElements = doc.querySelectorAll('section > *:first-child');
         expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be
@@ -121,7 +140,9 @@ describes.realWin(
         expect(headerElements[1].getAttribute('aria-expanded')).to.equal(
           'true'
         );
-        impl.toggle_(headerElements[1].parentNode);
+
+        impl.toggle_(headerElements[1].parentNode, ActionTrust.HIGH);
+
         expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be
           .false;
         expect(headerElements[1].getAttribute('aria-expanded')).to.equal(
@@ -131,7 +152,7 @@ describes.realWin(
     });
 
     it('should expand when expand action is triggered on a collapsed section', () => {
-      return getAmpAccordion().then(ampAccordion => {
+      return getAmpAccordion().then((ampAccordion) => {
         const impl = ampAccordion.implementation_;
         const headerElements = doc.querySelectorAll('section > *:first-child');
         expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be
@@ -139,7 +160,7 @@ describes.realWin(
         expect(headerElements[0].getAttribute('aria-expanded')).to.equal(
           'false'
         );
-        impl.expand_(headerElements[0].parentNode);
+        impl.toggle_(headerElements[0].parentNode, ActionTrust.HIGH, true);
         expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be
           .true;
         expect(headerElements[0].getAttribute('aria-expanded')).to.equal(
@@ -152,7 +173,7 @@ describes.realWin(
       'should collapse other sections when expand action is triggered on a ' +
         'collapsed section if expand-single-section attribute is set',
       () => {
-        return getAmpAccordion().then(ampAccordion => {
+        return getAmpAccordion().then((ampAccordion) => {
           ampAccordion.setAttribute('expand-single-section', '');
           expect(ampAccordion.hasAttribute('expand-single-section')).to.be.true;
           const impl = ampAccordion.implementation_;
@@ -165,17 +186,14 @@ describes.realWin(
           expect(headerElements[1].getAttribute('aria-expanded')).to.equal(
             'true'
           );
-
           // expand the first section
-          impl.expand_(headerElements[0].parentNode);
-
+          impl.toggle_(headerElements[0].parentNode, ActionTrust.HIGH, true);
           // we expect the first section to be expanded
           expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be
             .true;
           expect(headerElements[0].getAttribute('aria-expanded')).to.equal(
             'true'
           );
-
           // we expect the second section to be collapsed
           expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be
             .false;
@@ -186,20 +204,78 @@ describes.realWin(
       }
     );
 
+    it('should expand when low trust toggle action is triggered on a collapsed section', () => {
+      return getAmpAccordion().then((ampAccordion) => {
+        const impl = ampAccordion.implementation_;
+        const headerElements = doc.querySelectorAll('section > *:first-child');
+        expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be
+          .false;
+        expect(headerElements[0].getAttribute('aria-expanded')).to.equal(
+          'false'
+        );
+        impl.toggle_(headerElements[0].parentNode, ActionTrust.LOW);
+        expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be
+          .true;
+        expect(headerElements[0].getAttribute('aria-expanded')).to.equal(
+          'true'
+        );
+      });
+    });
+
+    it('should collapse when low trust toggle action is triggered on an expanded section', () => {
+      return getAmpAccordion().then((ampAccordion) => {
+        const impl = ampAccordion.implementation_;
+        const headerElements = doc.querySelectorAll('section > *:first-child');
+        expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be
+          .true;
+        expect(headerElements[1].getAttribute('aria-expanded')).to.equal(
+          'true'
+        );
+
+        impl.toggle_(headerElements[1].parentNode, ActionTrust.LOW);
+
+        expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be
+          .false;
+        expect(headerElements[1].getAttribute('aria-expanded')).to.equal(
+          'false'
+        );
+      });
+    });
+
+    it('should expand when beforematch event is triggered on a collapsed section', () => {
+      // Enable display locking feature.
+      toggleExperiment(win, 'amp-accordion-display-locking', true);
+      doc.body.onbeforematch = null;
+      return getAmpAccordion().then(() => {
+        const section = doc.querySelector('section:not([expanded])');
+        const header = section.firstElementChild;
+        const content = section.children[1];
+        expect(section.hasAttribute('expanded')).to.be.false;
+        expect(header.getAttribute('aria-expanded')).to.equal('false');
+        content.dispatchEvent(new Event('beforematch'));
+        expect(section.hasAttribute('expanded')).to.be.true;
+        expect(header.getAttribute('aria-expanded')).to.equal('true');
+
+        // Reset display locking feature
+        toggleExperiment(win, 'amp-accordion-display-locking', false);
+        doc.body.onbeforematch = undefined;
+      });
+    });
+
     it(
       "should trigger a section's expand event the section is expanded " +
         'without animation',
       () => {
         let impl;
         return getAmpAccordion(true)
-          .then(ampAccordion => {
+          .then((ampAccordion) => {
             impl = ampAccordion.implementation_;
             impl.sections_[0].setAttribute(
               'on',
               `expand:acc${counter}.expand(section='acc${counter}sec${2}')`
             );
             expect(impl.sections_[2].hasAttribute('expanded')).to.be.false;
-            impl.toggle_(impl.sections_[0], true);
+            impl.toggle_(impl.sections_[0], ActionTrust.HIGH, true);
             return poll('wait for first section to expand', () =>
               impl.sections_[0].hasAttribute('expanded')
             );
@@ -216,14 +292,14 @@ describes.realWin(
       () => {
         let impl;
         return getAmpAccordion(true)
-          .then(ampAccordion => {
+          .then((ampAccordion) => {
             impl = ampAccordion.implementation_;
             impl.sections_[1].setAttribute(
               'on',
               `collapse:acc${counter}.expand(section='acc${counter}sec${2}')`
             );
             expect(impl.sections_[2].hasAttribute('expanded')).to.be.false;
-            impl.toggle_(impl.sections_[1], false);
+            impl.toggle_(impl.sections_[1], ActionTrust.HIGH, false);
             return poll(
               'wait for first section to expand',
               () => !impl.sections_[1].hasAttribute('expanded')
@@ -241,7 +317,7 @@ describes.realWin(
       () => {
         let impl;
         return getAmpAccordion(true)
-          .then(ampAccordion => {
+          .then((ampAccordion) => {
             ampAccordion.setAttribute('animate', '');
             impl = ampAccordion.implementation_;
             impl.sections_[0].setAttribute(
@@ -249,7 +325,7 @@ describes.realWin(
               `expand:acc${counter}.expand(section='acc${counter}sec${2}')`
             );
             expect(impl.sections_[2].hasAttribute('expanded')).to.be.false;
-            impl.toggle_(impl.sections_[0], true);
+            impl.toggle_(impl.sections_[0], ActionTrust.HIGH, true);
             return poll('wait for first section to expand', () =>
               impl.sections_[0].hasAttribute('expanded')
             );
@@ -268,7 +344,7 @@ describes.realWin(
       () => {
         let impl;
         return getAmpAccordion(true)
-          .then(ampAccordion => {
+          .then((ampAccordion) => {
             ampAccordion.setAttribute('animate', '');
             impl = ampAccordion.implementation_;
             impl.sections_[1].setAttribute(
@@ -276,7 +352,7 @@ describes.realWin(
               `collapse:acc${counter}.expand(section='acc${counter}sec${2}')`
             );
             expect(impl.sections_[2].hasAttribute('expanded')).to.be.false;
-            impl.toggle_(impl.sections_[1], false);
+            impl.toggle_(impl.sections_[1], ActionTrust.HIGH, false);
             return poll(
               'wait for first section to expand',
               () => !impl.sections_[1].hasAttribute('expanded')
@@ -304,7 +380,7 @@ describes.realWin(
 
       ampAccordion.setAttribute('animate', '');
       ampAccordion.style.width = '300px';
-      impl.toggle_(firstSection, true);
+      impl.toggle_(firstSection, ActionTrust.HIGH, true);
       await poll('wait for first section to finish animating', () => {
         return (
           firstSection.hasAttribute('expanded') &&
@@ -332,7 +408,7 @@ describes.realWin(
 
       ampAccordion.setAttribute('animate', '');
       ampAccordion.style.width = '400px';
-      impl.toggle_(firstSection, true);
+      impl.toggle_(firstSection, ActionTrust.HIGH, true);
       await poll('wait for first section to finish animating', () => {
         return (
           firstSection.hasAttribute('expanded') &&
@@ -347,7 +423,7 @@ describes.realWin(
     });
 
     it('should stay expanded on the expand action when expanded', () => {
-      return getAmpAccordion().then(ampAccordion => {
+      return getAmpAccordion().then((ampAccordion) => {
         const impl = ampAccordion.implementation_;
         const headerElements = doc.querySelectorAll('section > *:first-child');
         expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be
@@ -355,7 +431,7 @@ describes.realWin(
         expect(headerElements[1].getAttribute('aria-expanded')).to.equal(
           'true'
         );
-        impl.expand_(headerElements[1].parentNode);
+        impl.toggle_(headerElements[1].parentNode, ActionTrust.HIGH, true);
         expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be
           .true;
         expect(headerElements[1].getAttribute('aria-expanded')).to.equal(
@@ -365,7 +441,7 @@ describes.realWin(
     });
 
     it('should collapse on the collapse action when expanded', () => {
-      return getAmpAccordion().then(ampAccordion => {
+      return getAmpAccordion().then((ampAccordion) => {
         const impl = ampAccordion.implementation_;
         const headerElements = doc.querySelectorAll('section > *:first-child');
         expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be
@@ -373,7 +449,7 @@ describes.realWin(
         expect(headerElements[1].getAttribute('aria-expanded')).to.equal(
           'true'
         );
-        impl.collapse_(headerElements[1].parentNode);
+        impl.toggle_(headerElements[1].parentNode, ActionTrust.HIGH, false);
         expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be
           .false;
         expect(headerElements[1].getAttribute('aria-expanded')).to.equal(
@@ -383,7 +459,7 @@ describes.realWin(
     });
 
     it('should stay collapsed on the collapse action when collapsed', () => {
-      return getAmpAccordion().then(ampAccordion => {
+      return getAmpAccordion().then((ampAccordion) => {
         const impl = ampAccordion.implementation_;
         const headerElements = doc.querySelectorAll('section > *:first-child');
         expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be
@@ -391,7 +467,7 @@ describes.realWin(
         expect(headerElements[0].getAttribute('aria-expanded')).to.equal(
           'false'
         );
-        impl.collapse_(headerElements[0].parentNode);
+        impl.toggle_(headerElements[0].parentNode, ActionTrust.HIGH, false);
         expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be
           .false;
         expect(headerElements[0].getAttribute('aria-expanded')).to.equal(
@@ -401,12 +477,12 @@ describes.realWin(
     });
 
     it('should expand when header of a collapsed section is clicked', () => {
-      return getAmpAccordion().then(ampAccordion => {
+      return getAmpAccordion().then((ampAccordion) => {
         const headerElements = doc.querySelectorAll('section > *:first-child');
         const clickEvent = {
           target: headerElements[0],
           currentTarget: headerElements[0],
-          preventDefault: sandbox.spy(),
+          preventDefault: env.sandbox.spy(),
         };
         expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be
           .false;
@@ -424,7 +500,7 @@ describes.realWin(
     });
 
     it("should expand section when header's child is clicked", () => {
-      return getAmpAccordion().then(ampAccordion => {
+      return getAmpAccordion().then((ampAccordion) => {
         const headerElements = doc.querySelectorAll('section > *:first-child');
         const header = headerElements[0];
         const child = doc.createElement('div');
@@ -432,7 +508,7 @@ describes.realWin(
         const clickEvent = {
           target: child,
           currentTarget: header,
-          preventDefault: sandbox.spy(),
+          preventDefault: env.sandbox.spy(),
         };
         expect(header.parentNode.hasAttribute('expanded')).to.be.false;
         expect(header.getAttribute('aria-expanded')).to.equal('false');
@@ -444,12 +520,12 @@ describes.realWin(
     });
 
     it('should collapse when header of an expanded section is clicked', () => {
-      return getAmpAccordion().then(ampAccordion => {
+      return getAmpAccordion().then((ampAccordion) => {
         const headerElements = doc.querySelectorAll('section > *:first-child');
         const clickEvent = {
           target: headerElements[1],
           currentTarget: headerElements[1],
-          preventDefault: sandbox.spy(),
+          preventDefault: env.sandbox.spy(),
         };
         expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be
           .true;
@@ -467,14 +543,14 @@ describes.realWin(
     });
 
     it('should allow for clickable links in header', () => {
-      return getAmpAccordion().then(ampAccordion => {
+      return getAmpAccordion().then((ampAccordion) => {
         const headerElements = doc.querySelectorAll('section > *:first-child');
         const a = doc.createElement('a');
         headerElements[0].appendChild(a);
         const aClickEvent = {
           target: a,
           currentTarget: headerElements[0],
-          preventDefault: sandbox.spy(),
+          preventDefault: env.sandbox.spy(),
         };
         ampAccordion.implementation_.clickHandler_(aClickEvent);
         expect(aClickEvent.preventDefault).to.not.have.been.called;
@@ -485,7 +561,7 @@ describes.realWin(
       'should expand when header of a collapsed section is ' +
         'activated via keyboard',
       () => {
-        return getAmpAccordion().then(ampAccordion => {
+        return getAmpAccordion().then((ampAccordion) => {
           const headerElements = doc.querySelectorAll(
             'section > *:first-child'
           );
@@ -493,7 +569,7 @@ describes.realWin(
             key: Keys.SPACE,
             target: headerElements[0],
             currentTarget: headerElements[0],
-            preventDefault: sandbox.spy(),
+            preventDefault: env.sandbox.spy(),
           };
           expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be
             .false;
@@ -515,7 +591,7 @@ describes.realWin(
       "should NOT expand section when header's child is " +
         'activated via keyboard',
       () => {
-        return getAmpAccordion().then(ampAccordion => {
+        return getAmpAccordion().then((ampAccordion) => {
           const headerElements = doc.querySelectorAll(
             'section > *:first-child'
           );
@@ -525,7 +601,7 @@ describes.realWin(
             key: Keys.ENTER,
             target: child,
             currentTarget: headerElements[0],
-            preventDefault: sandbox.spy(),
+            preventDefault: env.sandbox.spy(),
           };
           expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be
             .false;
@@ -547,7 +623,7 @@ describes.realWin(
       'should collapse when header of an expanded section is ' +
         'activated via keyboard',
       () => {
-        return getAmpAccordion().then(ampAccordion => {
+        return getAmpAccordion().then((ampAccordion) => {
           const headerElements = doc.querySelectorAll(
             'section > *:first-child'
           );
@@ -555,7 +631,7 @@ describes.realWin(
             key: Keys.ENTER,
             target: headerElements[1],
             currentTarget: headerElements[1],
-            preventDefault: sandbox.spy(),
+            preventDefault: env.sandbox.spy(),
           };
           expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be
             .true;
@@ -577,7 +653,7 @@ describes.realWin(
       'should be navigable by up and down arrow keys when ' +
         'any header has focus',
       () => {
-        return getAmpAccordion().then(ampAccordion => {
+        return getAmpAccordion().then((ampAccordion) => {
           const headerElements = doc.querySelectorAll(
             'section > *:first-child'
           );
@@ -588,7 +664,7 @@ describes.realWin(
             key: Keys.UP_ARROW,
             target: headerElements[0],
             currentTarget: headerElements[0],
-            preventDefault: sandbox.spy(),
+            preventDefault: env.sandbox.spy(),
           };
           ampAccordion.implementation_.keyDownHandler_(upArrowEvent);
           expect(doc.activeElement).to.equal(
@@ -598,7 +674,7 @@ describes.realWin(
             key: Keys.DOWN_ARROW,
             target: headerElements[headerElements.length - 1],
             currentTarget: headerElements[headerElements.length - 1],
-            preventDefault: sandbox.spy(),
+            preventDefault: env.sandbox.spy(),
           };
           ampAccordion.implementation_.keyDownHandler_(downArrowEvent);
           expect(doc.activeElement).to.equal(headerElements[0]);
@@ -607,7 +683,7 @@ describes.realWin(
     );
 
     it('should return correct sessionStorageKey', () => {
-      return getAmpAccordion().then(ampAccordion => {
+      return getAmpAccordion().then((ampAccordion) => {
         const impl = ampAccordion.implementation_;
         const url = win.location.href;
         impl.element.id = '321';
@@ -618,18 +694,18 @@ describes.realWin(
     });
 
     it('should set sessionStorage on change in expansion', () => {
-      return getAmpAccordion().then(ampAccordion => {
+      return getAmpAccordion().then((ampAccordion) => {
         const impl = ampAccordion.implementation_;
         const headerElements = doc.querySelectorAll('section > *:first-child');
         const clickEventExpandElement = {
           target: headerElements[0],
           currentTarget: headerElements[0],
-          preventDefault: sandbox.spy(),
+          preventDefault: env.sandbox.spy(),
         };
         const clickEventCollapseElement = {
           target: headerElements[1],
           currentTarget: headerElements[1],
-          preventDefault: sandbox.spy(),
+          preventDefault: env.sandbox.spy(),
         };
         expect(Object.keys(impl.currentState_)).to.have.length(0);
         impl.onHeaderPicked_(clickEventExpandElement);
@@ -643,7 +719,7 @@ describes.realWin(
     });
 
     it('should respect session states and expand/collapse', () => {
-      return getAmpAccordion().then(ampAccordion => {
+      return getAmpAccordion().then((ampAccordion) => {
         const impl = ampAccordion.implementation_;
         let headerElements = doc.querySelectorAll('section > *:first-child');
         expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be
@@ -655,7 +731,7 @@ describes.realWin(
           .true;
         expect(headerElements[2].parentNode.hasAttribute('expanded')).to.be
           .false;
-        impl.getSessionState_ = function() {
+        impl.getSessionState_ = function () {
           return {
             'test0': true,
           };
@@ -671,7 +747,7 @@ describes.realWin(
           .true;
         expect(headerElements[2].parentNode.hasAttribute('expanded')).to.be
           .false;
-        impl.getSessionState_ = function() {
+        impl.getSessionState_ = function () {
           return {
             'test0': true,
             'test1': false,
@@ -692,14 +768,14 @@ describes.realWin(
     });
 
     it('should disable sessionStorage when opt-out', () => {
-      return getAmpAccordion().then(ampAccordion => {
+      return getAmpAccordion().then((ampAccordion) => {
         const impl = ampAccordion.implementation_;
-        const setSessionStateSpy = sandbox.spy();
-        const getSessionStateSpy = sandbox.spy();
-        impl.win.sessionStorage.setItem = function() {
+        const setSessionStateSpy = env.sandbox.spy();
+        const getSessionStateSpy = env.sandbox.spy();
+        impl.win.sessionStorage.setItem = function () {
           setSessionStateSpy();
         };
-        impl.win.sessionStorage.getItem = function() {
+        impl.win.sessionStorage.getItem = function () {
           getSessionStateSpy();
         };
 
@@ -710,7 +786,7 @@ describes.realWin(
         const clickEventExpandElement = {
           target: headerElements[0],
           currentTarget: headerElements[0],
-          preventDefault: sandbox.spy(),
+          preventDefault: env.sandbox.spy(),
         };
         impl.onHeaderPicked_(clickEventExpandElement);
         expect(getSessionStateSpy).to.not.have.been.called;
@@ -720,7 +796,7 @@ describes.realWin(
     });
 
     it('two accordions should not affect each other', () => {
-      return getAmpAccordion().then(ampAccordion => {
+      return getAmpAccordion().then((ampAccordion) => {
         const ampAccordion1 = ampAccordion;
         const ampAccordion2 = doc.createElement('amp-accordion');
         for (let i = 0; i < 3; i++) {
@@ -737,7 +813,7 @@ describes.realWin(
         return ampAccordion2
           .build()
           .then(() => {
-            ampAccordion.implementation_.mutateElement = fn => fn();
+            ampAccordion.implementation_.mutateElement = (fn) => fn();
             return ampAccordion.layoutCallback();
           })
           .then(() => {
@@ -747,7 +823,7 @@ describes.realWin(
             const clickEventElement = {
               target: headerElements1[0],
               currentTarget: headerElements1[0],
-              preventDefault: sandbox.spy(),
+              preventDefault: env.sandbox.spy(),
             };
             ampAccordion1.implementation_.onHeaderPicked_(clickEventElement);
             const headerElements2 = ampAccordion2.querySelectorAll(
@@ -758,6 +834,156 @@ describes.realWin(
             expect(headerElements2[0].parentNode.hasAttribute('expanded')).to.be
               .false;
           });
+      });
+    });
+
+    it('should trigger expand/collapse events', () => {
+      return getAmpAccordion(true).then((ampAccordion) => {
+        const impl = ampAccordion.implementation_;
+
+        const actions = impl.getActionServiceForTesting();
+        env.sandbox.stub(actions, 'trigger');
+
+        execute(impl, 'collapse', 123, `acc${counter}sec1`);
+
+        expect(actions.trigger).to.be.calledOnce;
+        expect(actions.trigger.getCall(0)).to.be.calledWith(
+          /* element */ env.sandbox.match.has('tagName'),
+          'collapse',
+          /* event */ env.sandbox.match.has('detail'),
+          /* trust */ 123
+        );
+
+        execute(impl, 'expand', 456, `acc${counter}sec1`);
+
+        expect(actions.trigger).to.be.calledTwice;
+        expect(actions.trigger.getCall(1)).to.be.calledWith(
+          /* element */ env.sandbox.match.has('tagName'),
+          'expand',
+          /* event */ env.sandbox.match.has('detail'),
+          /* trust */ 456
+        );
+      });
+    });
+
+    it('should include a11y related attributes', () => {
+      return getAmpAccordion().then(() => {
+        const sectionElements = doc.querySelectorAll('section');
+        expect(sectionElements.length).to.equal(3);
+
+        const section0 = sectionElements[0];
+        const section1 = sectionElements[1];
+        const section2 = sectionElements[2];
+        const {
+          firstElementChild: header0,
+          lastElementChild: content0,
+        } = section0;
+        const {
+          firstElementChild: header1,
+          lastElementChild: content1,
+        } = section1;
+        const {
+          firstElementChild: header2,
+          lastElementChild: content2,
+        } = section2;
+
+        expect(header0).to.have.attribute('id');
+        expect(header0.getAttribute('aria-controls')).to.equal('test0');
+        expect(header0.getAttribute('tabindex')).to.equal('0');
+        expect(header0.getAttribute('role')).to.equal('button');
+        expect(content0).to.have.attribute('aria-labelledby');
+        expect(content0.getAttribute('id')).to.equal('test0');
+        expect(content0.getAttribute('role')).to.equal('region');
+        expect(header0.getAttribute('aria-controls')).to.equal(
+          content0.getAttribute('id')
+        );
+        expect(header0.getAttribute('id')).to.equal(
+          content0.getAttribute('aria-labelledby')
+        );
+
+        expect(header1).to.have.attribute('id');
+        expect(header1.getAttribute('aria-controls')).to.equal('test1');
+        expect(header1.getAttribute('tabindex')).to.equal('0');
+        expect(header1.getAttribute('role')).to.equal('button');
+        expect(content1).to.have.attribute('aria-labelledby');
+        expect(content1.getAttribute('id')).to.equal('test1');
+        expect(content1.getAttribute('role')).to.equal('region');
+        expect(header1.getAttribute('aria-controls')).to.equal(
+          content1.getAttribute('id')
+        );
+        expect(header1.getAttribute('id')).to.equal(
+          content1.getAttribute('aria-labelledby')
+        );
+
+        expect(header2).to.have.attribute('id');
+        expect(header2.getAttribute('aria-controls')).to.equal('test2');
+        expect(header2.getAttribute('tabindex')).to.equal('0');
+        expect(header2.getAttribute('role')).to.equal('button');
+        expect(content2).to.have.attribute('aria-labelledby');
+        expect(content2.getAttribute('id')).to.equal('test2');
+        expect(content2.getAttribute('role')).to.equal('region');
+        expect(header2.getAttribute('aria-controls')).to.equal(
+          content2.getAttribute('id')
+        );
+        expect(header2.getAttribute('id')).to.equal(
+          content2.getAttribute('aria-labelledby')
+        );
+      });
+    });
+  }
+);
+
+describes.realWin(
+  'amp-accordion component with runtime on',
+  {
+    amp: {
+      extensions: ['amp-accordion:0.1'],
+      runtimeOn: true,
+    },
+  },
+  (env) => {
+    it('should allow default actions in email documents', async () => {
+      env.win.document.documentElement.setAttribute('amp4email', '');
+      const action = new ActionService(env.ampdoc, env.win.document);
+      env.sandbox.stub(Services, 'actionServiceForDoc').returns(action);
+
+      const element = createElementWithAttributes(
+        env.win.document,
+        'amp-accordion',
+        {'layout': 'container'}
+      );
+      const section = env.win.document.createElement('section');
+      section.appendChild(env.win.document.createElement('h1'));
+      section.appendChild(env.win.document.createElement('p'));
+      element.appendChild(section);
+      env.win.document.body.appendChild(element);
+      env.sandbox.spy(element, 'enqueAction');
+      env.sandbox.stub(element, 'getDefaultActionAlias');
+      await whenUpgradedToCustomElement(element);
+      await element.whenBuilt();
+
+      ['toggle', 'expand', 'collapse'].forEach((method) => {
+        action.execute(
+          element,
+          method,
+          null,
+          'source',
+          'caller',
+          'event',
+          ActionTrust.HIGH
+        );
+        expect(element.enqueAction).to.be.calledWith(
+          env.sandbox.match({
+            actionEventType: '?',
+            args: null,
+            caller: 'caller',
+            event: 'event',
+            method,
+            node: element,
+            source: 'source',
+            trust: ActionTrust.HIGH,
+          })
+        );
       });
     });
   }

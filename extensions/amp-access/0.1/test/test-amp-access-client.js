@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import * as mode from '../../../../src/mode';
 import {AccessClientAdapter} from '../amp-access-client';
 
@@ -23,7 +23,7 @@ describes.realWin(
   {
     amp: true,
   },
-  env => {
+  (env) => {
     let ampdoc;
     let clock;
     let validConfig;
@@ -32,7 +32,7 @@ describes.realWin(
 
     beforeEach(() => {
       ampdoc = env.ampdoc;
-      clock = lolex.install({target: ampdoc.win});
+      clock = fakeTimers.withGlobal(ampdoc.win).install();
 
       validConfig = {
         'authorization': 'https://acme.com/a?rid=READER_ID',
@@ -42,7 +42,7 @@ describes.realWin(
       context = {
         buildUrl: () => {},
       };
-      contextMock = sandbox.mock(context);
+      contextMock = env.sandbox.mock(context);
     });
 
     afterEach(() => {
@@ -77,7 +77,7 @@ describes.realWin(
       });
 
       it('should allow only lower-than-default timeout in production', () => {
-        sandbox.stub(mode, 'getMode').callsFake(() => {
+        env.sandbox.stub(mode, 'getMode').callsFake(() => {
           return {development: false, localDev: false};
         });
 
@@ -148,7 +148,7 @@ describes.realWin(
 
       beforeEach(() => {
         adapter = new AccessClientAdapter(ampdoc, validConfig, context);
-        xhrMock = sandbox.mock(adapter.xhr_);
+        xhrMock = env.sandbox.mock(adapter.xhr_);
       });
 
       afterEach(() => {
@@ -178,7 +178,7 @@ describes.realWin(
               })
             )
             .once();
-          return adapter.authorize().then(response => {
+          return adapter.authorize().then((response) => {
             expect(response).to.exist;
             expect(response.access).to.equal('A');
           });
@@ -204,7 +204,7 @@ describes.realWin(
             () => {
               throw new Error('must never happen');
             },
-            error => {
+            (error) => {
               expect(error).to.match(/intentional/);
             }
           );
@@ -236,7 +236,7 @@ describes.realWin(
               () => {
                 throw new Error('must never happen');
               },
-              error => {
+              (error) => {
                 expect(error).to.match(/timeout/);
               }
             );
@@ -257,7 +257,7 @@ describes.realWin(
             .expects('sendSignal')
             .withExactArgs(
               'https://acme.com/p?rid=reader1',
-              sinon.match(init => {
+              env.sandbox.match((init) => {
                 return (
                   init.method == 'POST' &&
                   init.credentials == 'include' &&
@@ -285,7 +285,7 @@ describes.realWin(
             .expects('sendSignal')
             .withExactArgs(
               'https://acme.com/p?rid=reader1',
-              sinon.match(init => {
+              env.sandbox.match((init) => {
                 return (
                   init.method == 'POST' &&
                   init.credentials == 'include' &&
@@ -301,7 +301,7 @@ describes.realWin(
             () => {
               throw new Error('must never happen');
             },
-            error => {
+            (error) => {
               expect(error).to.match(/intentional/);
             }
           );

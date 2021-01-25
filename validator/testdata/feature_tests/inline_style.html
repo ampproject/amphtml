@@ -38,5 +38,7 @@
   <amp-img layout=fill src=lemur.png style="lemur: lemur;"></amp-img>
   <!-- Invalid: attribute [style] is not allowed -->
   <amp-img layout=fill src=lemur.png style="display:block;" [style]="display:block;"></amp-img>
+  <!-- Invalid: mailto protocol not allowed in URLs -->
+  <b style="background-image: url('mailto:foo@bar.com')"></b>
 </body>
 </html>

@@ -17,9 +17,11 @@
 const FINAL_URL_RE = /^(data|https)\:/i;
 const DEG_TO_RAD = (2 * Math.PI) / 360;
 const GRAD_TO_RAD = Math.PI / 200;
-const VAR_CSS_RE = /(calc|var|url|rand|index|width|height|num|length)\(/i;
+const VAR_CSS_RE = /\b(calc|min|max|clamp|var|url|rand|index|width|height|num|length|x|y)\(/i;
 const NORM_CSS_RE = /\d(%|em|rem|vw|vh|vmin|vmax|s|deg|grad)/i;
 const INFINITY_RE = /^(infinity|infinite)$/i;
+const BOX_DIMENSIONS = ['h', 'w', 'h', 'w'];
+const TUPLE_DIMENSIONS = ['w', 'h'];
 
 /**
  * Returns `true` if the CSS expression contains variable components. The CSS
@@ -85,18 +87,18 @@ export class CssContext {
   getViewportSize() {}
 
   /**
-   * Returns the current element's size.
-   * @return {!{width: number, height: number}}
+   * Returns the current element's rectangle.
+   * @return {!../../../../src/layout-rect.LayoutRectDef}
    */
-  getCurrentElementSize() {}
+  getCurrentElementRect() {}
 
   /**
-   * Returns the specified element's size.
+   * Returns the specified element's rectangle.
    * @param {string} unusedSelector
    * @param {?string} unusedSelectionMethod
-   * @return {!{width: number, height: number}}
+   * @return {!../../../../src/layout-rect.LayoutRectDef}
    */
-  getElementSize(unusedSelector, unusedSelectionMethod) {}
+  getElementRect(unusedSelector, unusedSelectionMethod) {}
 
   /**
    * Returns the dimension: "w" for width or "h" for height.
@@ -194,11 +196,24 @@ export class CssPassthroughNode extends CssNode {
  * `1s normal`, etc.
  */
 export class CssConcatNode extends CssNode {
-  /** @param {!Array<!CssNode>=} opt_array */
-  constructor(opt_array) {
+  /**
+   * @param {(!Array<!CssNode>|!CssNode)=} opt_array
+   * @param {?Array<string>=} opt_dimensions
+   */
+  constructor(opt_array, opt_dimensions) {
     super();
+
     /** @private {!Array<!CssNode>} */
-    this.array_ = opt_array || [];
+    this.array_ =
+      opt_array instanceof CssConcatNode
+        ? opt_array.array_
+        : Array.isArray(opt_array)
+        ? opt_array
+        : opt_array
+        ? [opt_array]
+        : [];
+    /** @const @private {?Array<string>} */
+    this.dimensions_ = opt_dimensions || null;
   }
 
   /**
@@ -224,7 +239,7 @@ export class CssConcatNode extends CssNode {
 
   /** @override */
   css() {
-    return this.array_.map(node => node.css()).join(' ');
+    return this.array_.map((node) => node.css()).join(' ');
   }
 
   /** @override */
@@ -237,17 +252,13 @@ export class CssConcatNode extends CssNode {
 
   /** @override */
   calc(context, normalize) {
-    const resolvedArray = [];
-    for (let i = 0; i < this.array_.length; i++) {
-      const resolved = this.array_[i].resolve(context, normalize);
-      if (resolved) {
-        resolvedArray.push(resolved);
-      } else {
-        // One element is null - the result is null.
-        return null;
-      }
-    }
-    return new CssConcatNode(resolvedArray);
+    const resolvedArray = resolveArray(
+      context,
+      normalize,
+      this.array_,
+      this.dimensions_
+    );
+    return resolvedArray ? new CssConcatNode(resolvedArray) : null;
   }
 }
 
@@ -476,8 +487,8 @@ export class CssLengthNode extends CssNumericNode {
   /** @override */
   calcPercent(percent, context) {
     const dim = context.getDimension();
-    const size = context.getCurrentElementSize();
-    const side = getDimSide(dim, size);
+    const size = context.getCurrentElementRect();
+    const side = getRectField(dim, size);
     return new CssLengthNode((side * percent) / 100, 'px');
   }
 }
@@ -599,7 +610,7 @@ export class CssFuncNode extends CssNode {
 
   /** @override */
   css() {
-    const args = this.args_.map(node => node.css()).join(',');
+    const args = this.args_.map((node) => node.css()).join(',');
     return `${this.name_}(${args})`;
   }
 
@@ -613,26 +624,190 @@ export class CssFuncNode extends CssNode {
 
   /** @override */
   calc(context, normalize) {
-    const resolvedArgs = [];
-    for (let i = 0; i < this.args_.length; i++) {
-      const node = this.args_[i];
-      let resolved;
-      if (this.dimensions_ && i < this.dimensions_.length) {
-        resolved = context.withDimension(this.dimensions_[i], () =>
-          node.resolve(context, normalize)
-        );
-      } else {
-        resolved = node.resolve(context, normalize);
-      }
-      if (resolved) {
-        resolvedArgs.push(resolved);
-      } else {
-        // One argument is null - the function's result is null.
-        return null;
-      }
-    }
-    return new CssFuncNode(this.name_, resolvedArgs);
+    const resolvedArgs = resolveArray(
+      context,
+      normalize,
+      this.args_,
+      this.dimensions_
+    );
+    return resolvedArgs ? new CssFuncNode(this.name_, resolvedArgs) : null;
   }
+}
+
+/**
+ * A space separated box declaration (https://developer.mozilla.org/en-US/docs/Web/CSS/margin).
+ *
+ * Typical forms are:
+ * - `<top> <right> <bottom> <left>` (e.g. `10% 20em 30px var(--x)`)
+ * - `<top> <horizontal> <bottom>` (e.g. `10% 20em 30vw`)
+ * - `<vertical> <horizontal>` (e.g. `10% 20em`)
+ * - `<all>` (e.g. `10%`)
+ *
+ * @param {!CssNode} value
+ * @param {?Array<string>=} opt_dimensions
+ * @return {!CssNode}
+ */
+export function createBoxNode(value, opt_dimensions) {
+  const dims = opt_dimensions || BOX_DIMENSIONS;
+
+  const args = value instanceof CssConcatNode ? value.array_ : [value];
+  if (args.length < 1 || args.length > 4) {
+    throw new Error('box must have between 1 and 4 components');
+  }
+
+  if (dims.length > 0) {
+    // We have to always turn all forms into the full form at least two
+    // `<vertical> <horizontal>`, because we cannot otherwise apply
+    // the correct dimensions to a single argument.
+    return new CssConcatNode(
+      args.length == 1 ? [args[0], args[0]] : args,
+      dims
+    );
+  }
+  return new CssConcatNode(args);
+}
+
+/**
+ * A CSS `border-radius()` expression: `box` or `box1 / box2`.
+ *
+ * See https://developer.mozilla.org/en-US/docs/Web/CSS/border-radius
+ *
+ * @param {!CssNode} box1
+ * @param {!CssNode=} opt_box2
+ * @return {!CssNode}
+ */
+export function createBorderRadiusNode(box1, opt_box2) {
+  const box1Node = createBoxNode(box1, []);
+  if (opt_box2) {
+    return new CssConcatNode([
+      box1Node,
+      new CssPassthroughNode('/'),
+      createBoxNode(opt_box2, []),
+    ]);
+  }
+  return box1Node;
+}
+
+/**
+ * A CSS `position` expression.
+ *
+ * See See https://developer.mozilla.org/en-US/docs/Web/CSS/position_value
+ *
+ * Variants:
+ * - `10%` - X percentage.
+ * - `10% 10%` - X and Y percentages.
+ * - `left 10%` - X keyword and Y percentage.
+ * - `left 10% top 20%` - X keyword and Y percentage.
+ *
+ * @param {!CssNode} value
+ * @return {!CssNode}
+ */
+export function createPositionNode(value) {
+  const args = value instanceof CssConcatNode ? value.array_ : [value];
+  if (args.length != 1 && args.length != 2 && args.length != 4) {
+    throw new Error('position is either 1, 2, or 4 components');
+  }
+
+  let dims = null;
+  if (args.length == 1) {
+    dims = ['w'];
+  } else if (args.length == 2) {
+    dims = ['w', 'h'];
+  } else {
+    // [ left | center | right ] || [ top | center | bottom ]
+    dims = ['', '', '', ''];
+    for (let i = 0; i < args.length; i += 2) {
+      const kw = args[i].css().toLowerCase();
+      const dim =
+        kw == 'left' || kw == 'right'
+          ? 'w'
+          : kw == 'top' || kw == 'bottom'
+          ? 'h'
+          : '';
+      dims[i] = dims[i + 1] = dim;
+    }
+  }
+  return new CssConcatNode(args, dims);
+}
+
+/**
+ * A CSS `inset()` expression:
+ * `inset( <length-percentage>{1,4} [ round <'border-radius'> ]? )`.
+ *
+ * See https://developer.mozilla.org/en-US/docs/Web/CSS/clip-path#inset().
+ *
+ * @param {!CssNode} box
+ * @param {!CssNode=} opt_round
+ * @return {!CssNode}
+ */
+export function createInsetNode(box, opt_round) {
+  const boxNode = createBoxNode(box);
+  if (opt_round) {
+    return new CssFuncNode('inset', [
+      new CssConcatNode([boxNode, new CssPassthroughNode('round'), opt_round]),
+    ]);
+  }
+  return new CssFuncNode('inset', [boxNode]);
+}
+
+/**
+ * A CSS `circle()` expression:
+ * `<circle()> = circle( [ <shape-radius> ]? [ at <position> ]? )`.
+ *
+ * See https://developer.mozilla.org/en-US/docs/Web/CSS/clip-path#circle()
+ *
+ * @param {?CssNode} radius
+ * @param {!CssNode=} opt_position
+ * @return {!CssNode}
+ */
+export function createCircleNode(radius, opt_position) {
+  return createEllipseNode(radius, opt_position, 'circle');
+}
+
+/**
+ * A CSS `ellipse()` expression:
+ * `<ellipse()> = ellipse( [ <shape-radius>{2} ]? [ at <position> ]? )`.
+ *
+ * See https://developer.mozilla.org/en-US/docs/Web/CSS/clip-path#ellipse()
+ *
+ * @param {?CssNode} radii
+ * @param {!CssNode=} opt_position
+ * @param {string=} opt_name
+ * @return {!CssNode}
+ */
+export function createEllipseNode(radii, opt_position, opt_name) {
+  const name = opt_name || 'ellipse';
+  const position = opt_position ? createPositionNode(opt_position) : null;
+  if (!radii && !position) {
+    return new CssFuncNode(name, []);
+  }
+  if (radii && position) {
+    return new CssFuncNode(name, [
+      new CssConcatNode([radii, new CssPassthroughNode('at'), position]),
+    ]);
+  }
+  if (position) {
+    return new CssFuncNode(name, [
+      new CssConcatNode([new CssPassthroughNode('at'), position]),
+    ]);
+  }
+  return new CssFuncNode(name, [radii]);
+}
+
+/**
+ * A CSS `polygon()` expression:
+ * `<polygon()> = polygon( [ <length-percentage> <length-percentage> ]# )`.
+ *
+ * See https://developer.mozilla.org/en-US/docs/Web/CSS/clip-path#polygon()
+ *
+ * @param {!Array<!CssNode>} tuples
+ * @return {!CssNode}
+ */
+export function createPolygonNode(tuples) {
+  const tuplesWithDims = tuples.map(
+    (tuple) => new CssConcatNode(tuple, TUPLE_DIMENSIONS)
+  );
+  return new CssFuncNode('polygon', tuplesWithDims);
 }
 
 /**
@@ -672,16 +847,16 @@ export class CssTranslateNode extends CssFuncNode {
 /**
  * AMP-specific `width()` and `height()` functions.
  */
-export class CssDimSizeNode extends CssNode {
+export class CssRectNode extends CssNode {
   /**
-   * @param {string} dim
+   * @param {string} field x, y, width or height
    * @param {?string=} opt_selector
    * @param {?string=} opt_selectionMethod Either `undefined` or "closest".
    */
-  constructor(dim, opt_selector, opt_selectionMethod) {
+  constructor(field, opt_selector, opt_selectionMethod) {
     super();
     /** @const @private */
-    this.dim_ = dim;
+    this.field_ = field;
     /** @const @private */
     this.selector_ = opt_selector || null;
     /** @const @private */
@@ -700,10 +875,10 @@ export class CssDimSizeNode extends CssNode {
 
   /** @override */
   calc(context) {
-    const size = this.selector_
-      ? context.getElementSize(this.selector_, this.selectionMethod_)
-      : context.getCurrentElementSize();
-    return new CssLengthNode(getDimSide(this.dim_, size), 'px');
+    const rect = this.selector_
+      ? context.getElementRect(this.selector_, this.selectionMethod_)
+      : context.getCurrentElementRect();
+    return new CssLengthNode(getRectField(this.field_, rect), 'px');
   }
 }
 
@@ -1097,6 +1272,100 @@ export class CssCalcProductNode extends CssNode {
 }
 
 /**
+ * CSS `min()` and `max()`.
+ * See https://developer.mozilla.org/en-US/docs/Web/CSS/min
+ * See https://developer.mozilla.org/en-US/docs/Web/CSS/max
+ */
+export class CssMinMaxNode extends CssFuncNode {
+  /**
+   * @param {string} name
+   * @param {!Array<!CssNode>} args
+   */
+  constructor(name, args) {
+    super(name, args);
+  }
+
+  /** @override */
+  isConst() {
+    return false;
+  }
+
+  /** @override */
+  calc(context, normalize) {
+    let resolvedArgs = resolveArray(context, normalize, this.args_, null);
+    if (!resolvedArgs) {
+      return null;
+    }
+
+    let firstNonPercent = null;
+    let hasPercent = false;
+    let hasDifferentUnits = false;
+    resolvedArgs.forEach((arg) => {
+      if (!(arg instanceof CssNumericNode)) {
+        throw new Error('arguments must be numerical');
+      }
+      if (arg instanceof CssPercentNode) {
+        hasPercent = true;
+      } else if (firstNonPercent) {
+        if (arg.type_ != firstNonPercent.type_) {
+          throw new Error('arguments must be the same type');
+        }
+        if (arg.units_ != firstNonPercent.units_) {
+          hasDifferentUnits = true;
+        }
+      } else {
+        firstNonPercent = arg;
+      }
+    });
+    if (firstNonPercent && hasPercent) {
+      hasDifferentUnits = true;
+    }
+
+    if (firstNonPercent) {
+      // Recalculate percent values and normalize units.
+      if (hasDifferentUnits) {
+        firstNonPercent = firstNonPercent.norm(context);
+      }
+      resolvedArgs = resolvedArgs.map((arg) => {
+        if (arg == firstNonPercent) {
+          return arg;
+        }
+
+        // Percent values.
+        if (arg instanceof CssPercentNode) {
+          return firstNonPercent.calcPercent(arg.num_, context);
+        }
+
+        // Units are the same, the math is simple: numerals are summed.
+        // Otherwise, the units neeed to be normalized first.
+        if (hasDifferentUnits) {
+          return /** @type {!CssNumericNode} */ (arg).norm(context);
+        }
+        return arg;
+      });
+    }
+
+    // Calculate.
+    const nums = resolvedArgs.map((arg) => arg.num_);
+    let value;
+    if (this.name_ == 'min') {
+      // min(...)
+      value = Math.min.apply(null, nums);
+    } else if (this.name_ == 'max') {
+      // max(...)
+      value = Math.max.apply(null, nums);
+    } else {
+      // clamp(min, preferred, max)
+      const min = nums[0];
+      const preferred = nums[1];
+      const max = nums[2];
+      value = Math.max(min, Math.min(max, preferred));
+    }
+    return resolvedArgs[0].createSameUnits(value);
+  }
+}
+
+/**
  * @param {string} units
  * @return {!Error}
  */
@@ -1112,10 +1381,45 @@ function noCss() {
 }
 
 /**
- * @param {?string} dim
- * @param {!{width: number, height: number}} size
+ * @param {?string} field
+ * @param {!../../../../src/layout-rect.LayoutRectDef} rect
  * @return {number}
  */
-function getDimSide(dim, size) {
-  return dim == 'w' ? size.width : dim == 'h' ? size.height : 0;
+function getRectField(field, rect) {
+  if (field == 'w') {
+    return rect.width;
+  }
+  if (field == 'h') {
+    return rect.height;
+  }
+  return rect[field] ?? 0;
+}
+
+/**
+ * @param {!CssContext} context
+ * @param {boolean} normalize
+ * @param {!Array<!CssNode>} array
+ * @param {?Array<string>} dimensions
+ * @return {?Array<!CssNode>}
+ */
+function resolveArray(context, normalize, array, dimensions) {
+  const resolvedArray = [];
+  for (let i = 0; i < array.length; i++) {
+    const node = array[i];
+    let resolved;
+    if (dimensions && i < dimensions.length) {
+      resolved = context.withDimension(dimensions[i], () =>
+        node.resolve(context, normalize)
+      );
+    } else {
+      resolved = node.resolve(context, normalize);
+    }
+    if (resolved) {
+      resolvedArray.push(resolved);
+    } else {
+      // One argument is null - the function's result is null.
+      return null;
+    }
+  }
+  return resolvedArray;
 }

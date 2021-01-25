@@ -17,6 +17,7 @@
 import {
   getRGBFromCssColorValue,
   getTextColorForRGB,
+  shouldShowStoryUrlInfo,
   timeStrToMillis,
 } from '../utils';
 
@@ -46,9 +47,15 @@ describes.fakeWin('amp-story utils', {}, () => {
       expect(millisForSeconds).to.equal(2500);
     });
 
-    it('should return undefined for invalid types', () => {
+    it('should return NaN for invalid types', () => {
       const convertedMillis = timeStrToMillis('10kg');
       expect(convertedMillis).to.be.NaN;
+    });
+
+    it('should return fallback value for invalid types', () => {
+      const fallback = 312;
+      const convertedMillis = timeStrToMillis('10kg', fallback);
+      expect(convertedMillis).to.equal(fallback);
     });
   });
 
@@ -93,6 +100,40 @@ describes.fakeWin('amp-story utils', {}, () => {
 
     it('should return white for a light background', () => {
       expect(getTextColorForRGB({r: 200, g: 200, b: 200})).to.equal('#000');
+    });
+  });
+
+  describe('shouldShowStoryUrlInfo', () => {
+    it('should be true when isEmbedded', () => {
+      const fakeViewer = {
+        getParam: () => null,
+        isEmbedded: () => true,
+      };
+      expect(shouldShowStoryUrlInfo(fakeViewer)).to.be.true;
+    });
+
+    it('should be forced to false when isEmbedded', () => {
+      const fakeViewer = {
+        getParam: () => '0',
+        isEmbedded: () => true,
+      };
+      expect(shouldShowStoryUrlInfo(fakeViewer)).to.be.false;
+    });
+
+    it('should be false when !isEmbedded', () => {
+      const fakeViewer = {
+        getParam: () => null,
+        isEmbedded: () => false,
+      };
+      expect(shouldShowStoryUrlInfo(fakeViewer)).to.be.false;
+    });
+
+    it('should be forced to true when !isEmbedded', () => {
+      const fakeViewer = {
+        getParam: () => '1',
+        isEmbedded: () => false,
+      };
+      expect(shouldShowStoryUrlInfo(fakeViewer)).to.be.true;
     });
   });
 });

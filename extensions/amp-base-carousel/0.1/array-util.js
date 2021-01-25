@@ -23,8 +23,10 @@ import {mod} from '../../../src/utils/math';
  * @param {number} a A start index.
  * @param {number} b An end index.
  * @param {!IArrayLike} arr An array like Object.
+ * @return {number}
  */
-export function forwardWrappingDistance(a, b, {length}) {
+export function forwardWrappingDistance(a, b, arr) {
+  const {length} = arr;
   return a === b ? length : mod(b - a, length);
 }
 
@@ -35,7 +37,9 @@ export function forwardWrappingDistance(a, b, {length}) {
  * @param {number} a A start index.
  * @param {number} b An end index.
  * @param {!IArrayLike} arr An array like Object.
+ * @return {number}
  */
-export function backwardWrappingDistance(a, b, {length}) {
+export function backwardWrappingDistance(a, b, arr) {
+  const {length} = arr;
   return a === b ? length : mod(a - b, length);
 }

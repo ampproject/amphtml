@@ -62,8 +62,6 @@ function setupPreview(global, data) {
   if (global.ado && data.aoPreview && !isFalseString(data.aoPreview)) {
     global.ado.preview({
       enabled: true,
-      emiter: data['aoEmitter'],
-      id: data['aoPreview'],
     });
   }
 }
@@ -147,17 +145,17 @@ function appendPlacement(mode, global, data) {
 
   if (global.ado) {
     if (mode == 'sync') {
-      runSync(global, function() {
+      runSync(global, function () {
         global['ado']['placement'](config);
       });
 
-      runSync(global, function() {
+      runSync(global, function () {
         if (!config['_hasAd']) {
           window.context.noContentAvailable();
         }
       });
     } else {
-      global['ado']['onAd'](data['aoId'], function(isAd) {
+      global['ado']['onAd'](data['aoId'], function (isAd) {
         if (!isAd) {
           window.context.noContentAvailable();
         }
@@ -204,10 +202,10 @@ function requestCodes(masterId, data, global, callback) {
   computeInMasterFrame(
     global,
     'ao-master-exec',
-    done => {
-      executeMaster(masterId, data, global, codes => done(codes));
+    (done) => {
+      executeMaster(masterId, data, global, (codes) => done(codes));
     },
-    codes => {
+    (codes) => {
       const creative = codes[slaveId];
       if (codes[slaveId + '_second_phase']) {
         creative['code'] += '\n' + codes[slaveId + '_second_phase']['code'];
@@ -342,7 +340,7 @@ export function adocean(global, data) {
         ado['features']['passback'] = false;
       }
 
-      requestCodes(masterId, data, global, codes => {
+      requestCodes(masterId, data, global, (codes) => {
         executeSlave(data['aoId'], codes, global);
       });
     } else {

@@ -34,7 +34,7 @@ export const DEFAULT_CONFIG = {
 };
 
 // Domains excluded from impressions & affiliation & NA click tracking.
-export const GLOBAL_DOMAIN_BLACKLIST = [
+export const GLOBAL_DOMAIN_DENYLIST = [
   'facebook.com',
   'go.redirectingat.com',
   'go.skimresources.com',

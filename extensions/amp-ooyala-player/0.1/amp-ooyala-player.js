@@ -24,6 +24,7 @@ import {
 } from '../../../src/iframe-video';
 import {dev, userAssert} from '../../../src/log';
 import {
+  dispatchCustomEvent,
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
@@ -68,7 +69,11 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url('https://player.ooyala.com', opt_onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://player.ooyala.com',
+      opt_onLayout
+    );
   }
 
   /** @override */
@@ -109,7 +114,7 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
     const playerVersion = el.getAttribute('data-playerversion') || '';
     if (playerVersion.toLowerCase() == 'v4') {
       src =
-        'https://player.ooyala.com/static/v4/sandbox/amp_iframe/' +
+        'https://player.ooyala.com/static/v4/production/latest/' +
         'skin-plugin/amp_iframe.html?pcode=' +
         encodeURIComponent(this.pCode_);
       const configUrl = el.getAttribute('data-config');
@@ -128,12 +133,12 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
 
     this.iframe_ = iframe;
 
-    this.unlistenMessage_ = listen(this.win, 'message', event => {
+    this.unlistenMessage_ = listen(this.win, 'message', (event) => {
       this.handleOoyalaMessage_(event);
     });
 
     const loaded = this.loadPromise(this.iframe_).then(() => {
-      el.dispatchCustomEvent(VideoEvents.LOAD);
+      dispatchCustomEvent(el, VideoEvents.LOAD);
     });
     this.playerReadyResolver_(loaded);
     return loaded;
@@ -159,11 +164,6 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
-  }
-
-  /** @override */
-  viewportCallback(visible) {
-    this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
   }
 
   /** @override */
@@ -314,6 +314,6 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpOoyalaPlayer);
 });

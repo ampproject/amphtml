@@ -19,7 +19,6 @@
  * @enum {string}
  */
 export const AmpEvents = {
-  BUILT: 'amp:built',
   DOM_UPDATE: 'amp:dom-update',
   FORM_DIRTINESS_CHANGE: 'amp:form-dirtiness-change',
   FORM_VALUE_CHANGE: 'amp:form-value-change',
@@ -28,8 +27,9 @@ export const AmpEvents = {
   // TODO(choumx): Move these to a separate enum so they can be DCE'd.
   ATTACHED: 'amp:attached',
   STUBBED: 'amp:stubbed',
-  LOAD_START: 'amp:load:start',
-  LOAD_END: 'amp:load:end',
+  LOAD_START: 'amp:load-start',
+  LOAD_END: 'amp:load-end',
   ERROR: 'amp:error',
   SIZE_CHANGED: 'amp:size-changed',
+  UNLOAD: 'amp:unload',
 };

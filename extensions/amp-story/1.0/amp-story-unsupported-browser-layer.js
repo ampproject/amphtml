@@ -86,6 +86,7 @@ export class UnsupportedBrowserLayer {
 
   /**
    * Builds and appends the component in the story.
+   * @return {*} TODO(#23582): Specify return type
    */
   build() {
     if (this.root_) {

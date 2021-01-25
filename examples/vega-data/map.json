@@ -7,12 +7,14 @@
       "name": "world",
       "url": "vega-data/world-110m.json",
       "format": {"type": "topojson", "feature": "countries"},
-      "transform": [{
-        "type": "geopath",
-        "projection": "winkel3",
-        "scale": 170,
-        "translate": [350, 250]
-      }]
+      "transform": [
+        {
+          "type": "geopath",
+          "projection": "winkel3",
+          "scale": 170,
+          "translate": [350, 250]
+        }
+      ]
     }
   ],
   "marks": [

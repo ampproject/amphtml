@@ -18,11 +18,10 @@ import {ActionTrust, DEFAULT_ACTION} from './action-constants';
 import {Layout, LayoutPriority} from './layout';
 import {Services} from './services';
 import {devAssert, user, userAssert} from './log';
+import {dispatchCustomEvent} from './dom';
 import {getData, listen, loadPromise} from './event-helper';
 import {getMode} from './mode';
 import {isArray, toWin} from './types';
-import {isExperimentOn} from './experiments';
-import {preconnectForElement} from './preconnect';
 
 /**
  * Base class for all custom element implementations. Instead of inheriting
@@ -38,18 +37,9 @@ import {preconnectForElement} from './preconnect';
  *
  * The complete lifecycle of a custom DOM element is:
  *
- *           ||
- *           || createdCallback
- *           ||
- *           \/
- *    State: <NOT BUILT> <NOT UPGRADED> <NOT ATTACHED>
+ *    State: <NOT BUILT> <NOT UPGRADED>
  *           ||
  *           || upgrade
- *           ||
- *           \/
- *    State: <NOT BUILT> <NOT ATTACHED>
- *           ||
- *           || firstAttachedCallback
  *           ||
  *           \/
  *    State: <NOT BUILT>
@@ -72,7 +62,6 @@ import {preconnectForElement} from './preconnect';
  *           ||                         ||
  *           ||                 =========
  *           ||
- *           || viewportCallback
  *           || unlayoutCallback may be called N times after this.
  *           ||
  *           \/
@@ -108,9 +97,6 @@ import {preconnectForElement} from './preconnect';
  * element instance. This can be used to do additional style calculations
  * without triggering style recalculations.
  *
- * When the dimensions of an element has changed, the 'onMeasureChanged'
- * callback is called.
- *
  * For more details, see {@link custom-element.js}.
  *
  * Each method is called exactly once and overriding them in subclasses
@@ -129,19 +115,14 @@ export class BaseElement {
         \__/  \__/ /__/     \__\ | _| `._____||__| \__| |__| |__| \__|  \______|
 
     Any private property for BaseElement should be declared in
-    build-system/amp.multipass.extern.js, this is so closure compiler doesn't
-    reuse the same symbol it would use in the core compilation unit for the
-    private property in the extensions compilation unit's private properties.
-     */
+    build-system/externs/amp.multipass.extern.js. This is so closure compiler
+    doesn't reuse the same symbol it would use in the core compilation unit for
+    the private property in the extensions compilation unit's private
+    properties.
+    */
 
     /** @package {!Layout} */
     this.layout_ = Layout.NODISPLAY;
-
-    /** @package {number} */
-    this.layoutWidth_ = -1;
-
-    /** @package {boolean} */
-    this.inViewport_ = false;
 
     /** @public @const {!Window} */
     this.win = toWin(element.ownerDocument.defaultView);
@@ -157,22 +138,6 @@ export class BaseElement {
 
     /** @private {?string} */
     this.defaultActionAlias_ = null;
-
-    /** @public {!./preconnect.Preconnect} */
-    this.preconnect = preconnectForElement(this.element);
-
-    /** @public {?Object} For use by sub classes */
-    this.config = null;
-
-    /**
-     * The time at which this element was scheduled for layout relative to the
-     * epoch. This value will be set to 0 until the this element has been
-     * scheduled.
-     * Note that this value may change over time if the element is enqueued,
-     * then dequeued and re-enqueued by the scheduler.
-     * @public {number}
-     */
-    this.layoutScheduleTime = 0;
   }
 
   /**
@@ -238,17 +203,17 @@ export class BaseElement {
   }
 
   /**
-   * Returns a previously measured layout box relative to the page. The
-   * fixed-position elements are relative to the top of the document.
-   * @return {!./layout-rect.LayoutRectDef}
+   * Returns a previously measured layout size.
+   * @return {!./layout-rect.LayoutSizeDef}
    */
-  getPageLayoutBox() {
-    return this.element.getPageLayoutBox();
+  getLayoutSize() {
+    return this.element.getLayoutSize();
   }
 
   /**
    * DO NOT CALL. Retained for backward compat during rollout.
-   * @public @return {!Window}
+   * @public
+   * @return {!Window}
    */
   getWin() {
     return this.win;
@@ -263,20 +228,12 @@ export class BaseElement {
     return this.element.getAmpDoc();
   }
 
-  /** @public @return {!./service/vsync-impl.Vsync} */
+  /**
+   * @public
+   * @return {!./service/vsync-impl.Vsync}
+   */
   getVsync() {
     return Services.vsyncFor(this.win);
-  }
-
-  /**
-   * Returns the layout width for this element. A `-1` value indicates that the
-   * layout is not yet known. A `0` value indicates that the element is not
-   * visible.
-   * @return {number}
-   * @public
-   */
-  getLayoutWidth() {
-    return this.layoutWidth_;
   }
 
   /**
@@ -318,13 +275,6 @@ export class BaseElement {
   }
 
   /**
-   * @return {boolean}
-   */
-  isInViewport() {
-    return this.inViewport_;
-  }
-
-  /**
    * This method is called when the element is added to DOM for the first time
    * and before `buildCallback` to give the element a chance to redirect its
    * implementation to another `BaseElement` implementation. The returned
@@ -340,23 +290,6 @@ export class BaseElement {
   upgradeCallback() {
     // Subclasses may override.
     return null;
-  }
-
-  /**
-   * Called when the element is first created. Note that for element created
-   * using createElement this may be before any children are added.
-   */
-  createdCallback() {
-    // Subclasses may override.
-  }
-
-  /**
-   * Override in subclass to adjust the element when it is being added to the
-   * DOM. Could e.g. be used to insert a fallback. Should not typically start
-   * loading a resource.
-   */
-  firstAttachedCallback() {
-    // Subclasses may override.
   }
 
   /**
@@ -388,23 +321,21 @@ export class BaseElement {
   }
 
   /**
+   * Override in subclass to adjust the element when it is being added to
+   * the DOM. Could e.g. be used to add a listener. Notice, that this
+   * callback is called immediately after `buildCallback()` if the element
+   * is attached to the DOM.
+   */
+  attachedCallback() {
+    // Subclasses may override.
+  }
+
+  /**
    * Override in subclass to adjust the element when it is being removed from
    * the DOM. Could e.g. be used to remove a listener.
    */
   detachedCallback() {
     // Subclasses may override.
-  }
-
-  /**
-   * Sets this element as the owner of the specified element. By setting itself
-   * as an owner, the element declares that it will manage the lifecycle of
-   * the owned element itself. This element, as an owner, will have to call
-   * {@link scheduleLayout}, {@link schedulePreload}, {@link updateInViewport}
-   * and similar methods.
-   * @param {!Element} element
-   */
-  setAsOwner(element) {
-    this.element.getResources().setOwner(element, this.element);
   }
 
   /**
@@ -421,6 +352,18 @@ export class BaseElement {
   }
 
   /**
+   * Subclasses can override this method to indicate that it is has
+   * render-blocking service.
+   *
+   * The return value of this function is used to determine if the element
+   * built _and_ laid out will be prioritized.
+   * @return {boolean}
+   */
+  isBuildRenderBlocking() {
+    return false;
+  }
+
+  /**
    * Subclasses can override this method to create a dynamic placeholder
    * element and return it to be appended to the element. This will only
    * be called if the element doesn't already have a placeholder.
@@ -433,10 +376,13 @@ export class BaseElement {
   /**
    * Subclasses can override this method to provide a svg logo that will be
    * displayed as the loader.
-   * @return {?Element}
+   * @return {{
+   *  content: (!Element|undefined),
+   *  color: (string|undefined),
+   * }}
    */
   createLoaderLogoCallback() {
-    return null;
+    return {};
   }
 
   /**
@@ -504,13 +450,6 @@ export class BaseElement {
   }
 
   /**
-   * Instructs the resource that it has either entered or exited the visible
-   * viewport. Intended to be implemented by actual components.
-   * @param {boolean} unusedInViewport
-   */
-  viewportCallback(unusedInViewport) {}
-
-  /**
    * Requests the element to stop its activity when the document goes into
    * inactive state. The scope is up to the actual component. Among other
    * things the active playback of video or audio content must be stopped.
@@ -546,6 +485,14 @@ export class BaseElement {
   }
 
   /**
+   * Unloads the element.
+   * @final
+   */
+  unload() {
+    this.element.getResources().getResourceForElement(this.element).unload();
+  }
+
+  /**
    * Whether the element needs to be reconstructed after it has been
    * re-parented. Many elements cannot survive fully the reparenting and
    * are better to be reconstructed from scratch.
@@ -561,21 +508,6 @@ export class BaseElement {
    */
   reconstructWhenReparented() {
     return true;
-  }
-
-  /**
-   * Instructs the element that its activation is requested based on some
-   * user event. Intended to be implemented by actual components.
-   * @param {!./service/action-impl.ActionInvocation} unusedInvocation
-   */
-  activate(unusedInvocation) {}
-
-  /**
-   * Minimum event trust required for activate().
-   * @return {ActionTrust}
-   */
-  activationTrust() {
-    return ActionTrust.HIGH;
   }
 
   /**
@@ -608,7 +540,7 @@ export class BaseElement {
    * @param {ActionTrust} minTrust
    * @public
    */
-  registerAction(alias, handler, minTrust = ActionTrust.HIGH) {
+  registerAction(alias, handler, minTrust = ActionTrust.DEFAULT) {
     this.initActionMap_();
     this.actionMap_[alias] = {handler, minTrust};
   }
@@ -623,7 +555,7 @@ export class BaseElement {
   registerDefaultAction(
     handler,
     alias = DEFAULT_ACTION,
-    minTrust = ActionTrust.HIGH
+    minTrust = ActionTrust.DEFAULT
   ) {
     devAssert(
       !this.defaultActionAlias_,
@@ -643,6 +575,7 @@ export class BaseElement {
    *   for the element to be resolved, upgraded and built.
    * @final
    * @package
+   * @return {*} TODO(#23582): Specify return type
    */
   executeAction(invocation, unusedDeferred) {
     let {method} = invocation;
@@ -661,14 +594,6 @@ export class BaseElement {
   }
 
   /**
-   * Returns the most optimal DPR currently recommended.
-   * @return {number}
-   */
-  getDpr() {
-    return this.win.devicePixelRatio || 1;
-  }
-
-  /**
    * Utility method that propagates attributes from this element
    * to the given element.
    * If `opt_removeMissingAttrs` is true, then also removes any specified
@@ -682,8 +607,9 @@ export class BaseElement {
     attributes = isArray(attributes) ? attributes : [attributes];
     for (let i = 0; i < attributes.length; i++) {
       const attr = attributes[i];
-      if (this.element.hasAttribute(attr)) {
-        element.setAttribute(attr, this.element.getAttribute(attr));
+      const val = this.element.getAttribute(attr);
+      if (null !== val) {
+        element.setAttribute(attr, val);
       } else if (opt_removeMissingAttrs) {
         element.removeAttribute(attr);
       }
@@ -699,13 +625,13 @@ export class BaseElement {
    * @return {!UnlistenDef}
    */
   forwardEvents(events, element) {
-    const unlisteners = (isArray(events) ? events : [events]).map(eventType =>
-      listen(element, eventType, event => {
-        this.element.dispatchCustomEvent(eventType, getData(event) || {});
+    const unlisteners = (isArray(events) ? events : [events]).map((eventType) =>
+      listen(element, eventType, (event) => {
+        dispatchCustomEvent(this.element, eventType, getData(event) || {});
       })
     );
 
-    return () => unlisteners.forEach(unlisten => unlisten());
+    return () => unlisteners.forEach((unlisten) => unlisten());
   }
 
   /**
@@ -746,24 +672,13 @@ export class BaseElement {
   }
 
   /**
-   * Hides or shows the loading indicator. This function must only
-   * be called inside a mutate context.
+   * Hides or shows the loading indicator.
    * @param {boolean} state
-   * @param {boolean=} opt_force
+   * @param {boolean=} force
    * @public @final
    */
-  toggleLoading(state, opt_force) {
-    this.element.toggleLoading(state, {force: !!opt_force});
-  }
-
-  /**
-   * Returns whether the loading indicator is reused again after the first
-   * render.
-   * @return {boolean}
-   * @public
-   */
-  isLoadingReused() {
-    return false;
+  toggleLoading(state, force = false) {
+    this.element.toggleLoading(state, force);
   }
 
   /**
@@ -825,7 +740,7 @@ export class BaseElement {
 
   /**
    * Returns the viewport within which the element operates.
-   * @return {!./service/viewport/viewport-impl.Viewport}
+   * @return {!./service/viewport/viewport-interface.ViewportInterface}
    */
   getViewport() {
     return Services.viewportForDoc(this.getAmpDoc());
@@ -841,63 +756,22 @@ export class BaseElement {
   }
 
   /**
-   * Schedule the layout request for the children element or elements
-   * specified. Resource manager will perform the actual layout based on the
-   * priority of this element and its children.
-   * @param {!Element|!Array<!Element>} elements
-   * @public
+   * Collapses the element, setting it to `display: none`, and notifies its
+   * owner (if there is one) through {@link collapsedCallback} that the element
+   * is no longer visible.
    */
-  scheduleLayout(elements) {
-    this.element.getResources().scheduleLayout(this.element, elements);
+  collapse() {
+    Services.mutatorForDoc(this.getAmpDoc()).collapseElement(this.element);
   }
 
   /**
-   * @param {!Element|!Array<!Element>} elements
-   * @public
+   * Return a promise that request the runtime to collapse one element
+   * @return {!Promise}
    */
-  schedulePause(elements) {
-    this.element.getResources().schedulePause(this.element, elements);
-  }
-
-  /**
-   * @param {!Element|!Array<!Element>} elements
-   * @public
-   */
-  scheduleResume(elements) {
-    this.element.getResources().scheduleResume(this.element, elements);
-  }
-
-  /**
-   * Schedule the preload request for the children element or elements
-   * specified. Resource manager will perform the actual preload based on the
-   * priority of this element and its children.
-   * @param {!Element|!Array<!Element>} elements
-   * @public
-   */
-  schedulePreload(elements) {
-    this.element.getResources().schedulePreload(this.element, elements);
-  }
-
-  /**
-   * @param {!Element|!Array<!Element>} elements
-   * @public
-   */
-  scheduleUnlayout(elements) {
-    this.element.getResources()./*OK*/ scheduleUnlayout(this.element, elements);
-  }
-
-  /**
-   * Update inViewport state of the specified children element or elements.
-   * Resource manager will perform the actual changes to the inViewport state
-   * based on the state of these elements and their parent subtree.
-   * @param {!Element|!Array<!Element>} elements
-   * @param {boolean} inLocalViewport
-   * @public
-   */
-  updateInViewport(elements, inLocalViewport) {
-    this.element
-      .getResources()
-      .updateInViewport(this.element, elements, inLocalViewport);
+  attemptCollapse() {
+    return Services.mutatorForDoc(this.getAmpDoc()).attemptCollapse(
+      this.element
+    );
   }
 
   /**
@@ -907,34 +781,19 @@ export class BaseElement {
    * @param {number} newHeight
    * @public
    */
-  changeHeight(newHeight) {
-    this.element
-      .getResources()
-      ./*OK*/ changeSize(this.element, newHeight, /* newWidth */ undefined);
-  }
-
-  /**
-   * Collapses the element, setting it to `display: none`, and notifies its
-   * owner (if there is one) through {@link collapsedCallback} that the element
-   * is no longer visible.
-   */
-  collapse() {
-    this.element.getResources().collapseElement(this.element);
-  }
-
-  /**
-   * Return a promise that request the runtime to collapse one element
-   * @return {!Promise}
-   */
-  attemptCollapse() {
-    return this.element.getResources().attemptCollapse(this.element);
+  forceChangeHeight(newHeight) {
+    Services.mutatorForDoc(this.getAmpDoc()).forceChangeSize(
+      this.element,
+      newHeight,
+      /* newWidth */ undefined
+    );
   }
 
   /**
    * Return a promise that requests the runtime to update
    * the height of this element to the specified value.
    * The runtime will schedule this request and attempt to process it
-   * as soon as possible. However, unlike in {@link changeHeight}, the runtime
+   * as soon as possible. However, unlike in {@link forceChangeHeight}, the runtime
    * may refuse to make a change in which case it will show the element's
    * overflow element if provided, which is supposed to provide the reader with
    * the necessary user action. (The overflow element is shown only if the
@@ -945,9 +804,11 @@ export class BaseElement {
    * @public
    */
   attemptChangeHeight(newHeight) {
-    return this.element
-      .getResources()
-      .attemptChangeSize(this.element, newHeight, /* newWidth */ undefined);
+    return Services.mutatorForDoc(this.getAmpDoc()).requestChangeSize(
+      this.element,
+      newHeight,
+      /* newWidth */ undefined
+    );
   }
 
   /**
@@ -962,13 +823,18 @@ export class BaseElement {
    * The promise is resolved if the height is successfully updated.
    * @param {number|undefined} newHeight
    * @param {number|undefined} newWidth
+   * @param {?Event=} opt_event
    * @return {!Promise}
    * @public
    */
-  attemptChangeSize(newHeight, newWidth) {
-    return this.element
-      .getResources()
-      .attemptChangeSize(this.element, newHeight, newWidth);
+  attemptChangeSize(newHeight, newWidth, opt_event) {
+    return Services.mutatorForDoc(this.getAmpDoc()).requestChangeSize(
+      this.element,
+      newHeight,
+      newWidth,
+      /* newMargin */ undefined,
+      opt_event
+    );
   }
 
   /**
@@ -979,7 +845,7 @@ export class BaseElement {
    * @return {!Promise}
    */
   measureElement(measurer) {
-    return this.element.getResources().measureElement(measurer);
+    return Services.mutatorForDoc(this.getAmpDoc()).measureElement(measurer);
   }
 
   /**
@@ -1017,9 +883,26 @@ export class BaseElement {
    * @return {!Promise}
    */
   measureMutateElement(measurer, mutator, opt_element) {
-    return this.element
-      .getResources()
-      .measureMutateElement(opt_element || this.element, measurer, mutator);
+    return Services.mutatorForDoc(this.getAmpDoc()).measureMutateElement(
+      opt_element || this.element,
+      measurer,
+      mutator
+    );
+  }
+
+  /**
+   * Runs the specified mutation on the element. Will not cause remeasurements.
+   * Only use this function when the mutations will not affect any resource sizes.
+   *
+   * @param {function()} mutator
+   * @return {!Promise}
+   */
+  mutateElementSkipRemeasure(mutator) {
+    return Services.mutatorForDoc(this.getAmpDoc()).mutateElement(
+      this.element,
+      mutator,
+      /* skipRemeasure */ true
+    );
   }
 
   /**
@@ -1037,16 +920,7 @@ export class BaseElement {
    * is no longer visible.
    */
   expand() {
-    this.element.getResources().expandElement(this.element);
-  }
-
-  /**
-   * Called every time an owned AmpElement expands itself.
-   * See {@link expand}.
-   * @param {!AmpElement} unusedElement Child element that was expanded.
-   */
-  expandedCallback(unusedElement) {
-    // Subclasses may override.
+    Services.mutatorForDoc(this.getAmpDoc()).expandElement(this.element);
   }
 
   /**
@@ -1073,13 +947,6 @@ export class BaseElement {
   onLayoutMeasure() {}
 
   /**
-   * Called only when the measurements of an amp-element changes. This
-   * would not trigger for every measurement invalidation caused by a mutation.
-   * @public
-   */
-  onMeasureChanged() {}
-
-  /**
    * @return {./log.Log}
    */
   user() {
@@ -1087,17 +954,13 @@ export class BaseElement {
   }
 
   /**
-   * Declares a child element (or ourselves) as a Layer
-   * @param {!Element=} opt_element
+   * Returns this BaseElement instance. This is equivalent to Bento's
+   * imperative API object, since this is where we define the element's custom
+   * APIs.
+   *
+   * @return {!Promise<!Object>}
    */
-  declareLayer(opt_element) {
-    devAssert(
-      isExperimentOn(this.win, 'layers'),
-      'Layers must be enabled to declare layer.'
-    );
-    if (opt_element) {
-      devAssert(this.element.contains(opt_element));
-    }
-    return this.element.getLayers().declareLayer(opt_element || this.element);
+  getApi() {
+    return this;
   }
 }

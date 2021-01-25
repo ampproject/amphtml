@@ -107,6 +107,7 @@ export function a9(global, data) {
 
 /**
  * @param {!Object} data
+ * @return {string}
  */
 function getURL(data) {
   let url = 'https://z-na.amazon-adsystem.com/widgets/onejs?MarketPlace=US';

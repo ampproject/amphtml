@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import * as CID from '../../src/service/cid-impl';
+
 import {Services} from '../../src/services';
 import {createIframePromise} from '../../testing/iframe';
 import {installDocService} from '../../src/service/ampdoc-impl';
@@ -23,18 +25,12 @@ describe
   .configure()
   .skipFirefox()
   .run('document-info', () => {
-    let sandbox;
-
     beforeEach(() => {
-      sandbox = sinon.sandbox;
-    });
-
-    afterEach(() => {
-      sandbox.restore();
+      window.sandbox.stub(CID, 'getRandomString64').returns('abcdef');
     });
 
     function getWin(links, metas) {
-      return createIframePromise().then(iframe => {
+      return createIframePromise().then((iframe) => {
         if (links) {
           for (const rel in links) {
             const hrefs = links[rel];
@@ -59,14 +55,15 @@ describe
         }
         const {win} = iframe;
         installDocService(win, /* isSingleDoc */ true);
-        sandbox.stub(win.Math, 'random').callsFake(() => 0.123456789);
+        window.sandbox.stub(win.Math, 'random').callsFake(() => 0.123456789);
+        win.__AMP_SERVICES.documentInfo = null;
         installDocumentInfoServiceForDoc(win.document);
         return iframe.win;
       });
     }
 
     it('should provide the canonicalUrl', () => {
-      return getWin({'canonical': ['https://twitter.com/']}).then(win => {
+      return getWin({'canonical': ['https://twitter.com/']}).then((win) => {
         expect(Services.documentInfoForDoc(win.document).canonicalUrl).to.equal(
           'https://twitter.com/'
         );
@@ -77,6 +74,15 @@ describe
       const win = {
         document: {
           nodeType: /* DOCUMENT */ 9,
+          head: {
+            nodeType: /* ELEMENT */ 1,
+            querySelector() {
+              return null;
+            },
+            querySelectorAll() {
+              return [];
+            },
+          },
           querySelector() {
             return 'http://www.origin.com/foo/?f=0';
           },
@@ -105,6 +111,15 @@ describe
       const win = {
         document: {
           nodeType: /* document */ 9,
+          head: {
+            nodeType: /* ELEMENT */ 1,
+            querySelector() {
+              return null;
+            },
+            querySelectorAll() {
+              return [];
+            },
+          },
           querySelector() {
             return 'http://www.origin.com/foo/?f=0';
           },
@@ -135,7 +150,7 @@ describe
     });
 
     it('should provide the pageViewId', () => {
-      return getWin({'canonical': ['https://twitter.com/']}).then(win => {
+      return getWin({'canonical': ['https://twitter.com/']}).then((win) => {
         expect(Services.documentInfoForDoc(win.document).pageViewId).to.equal(
           '1234'
         );
@@ -145,8 +160,19 @@ describe
       });
     });
 
+    it('should provide the pageViewId64', () => {
+      return getWin({'canonical': ['https://twitter.com/']}).then((win) => {
+        expect(Services.documentInfoForDoc(win.document).pageViewId64).to.equal(
+          'abcdef'
+        );
+        expect(Services.documentInfoForDoc(win.document).pageViewId64).to.equal(
+          'abcdef'
+        );
+      });
+    });
+
     it('should provide the relative canonicalUrl as absolute', () => {
-      return getWin({'canonical': ['./foo.html']}).then(win => {
+      return getWin({'canonical': ['./foo.html']}).then((win) => {
         expect(Services.documentInfoForDoc(win.document).canonicalUrl).to.equal(
           'http://localhost:' + location.port + '/foo.html'
         );
@@ -157,7 +183,7 @@ describe
       return getWin({
         'canonical': ['https://twitter.com/'],
         'icon': ['https://foo.html/bar.gif'],
-      }).then(win => {
+      }).then((win) => {
         expect(
           Services.documentInfoForDoc(win.document).linkRels['canonical']
         ).to.equal('https://twitter.com/');
@@ -168,7 +194,7 @@ describe
     });
 
     it('should provide empty linkRels if there are no link tags', () => {
-      return getWin().then(win => {
+      return getWin().then((win) => {
         expect(Services.documentInfoForDoc(win.document).linkRels).to.be.empty;
       });
     });
@@ -177,7 +203,7 @@ describe
       return getWin({
         'canonical': ['./foo.html'],
         'icon': ['./bar.gif'],
-      }).then(win => {
+      }).then((win) => {
         expect(
           Services.documentInfoForDoc(win.document).linkRels['canonical']
         ).to.equal('http://localhost:' + location.port + '/foo.html');
@@ -194,7 +220,7 @@ describe
         return getWin({
           'sharelink canonical': ['https://twitter.com/'],
           'icon': ['https://foo.html/bar.gif'],
-        }).then(win => {
+        }).then((win) => {
           expect(
             Services.documentInfoForDoc(win.document).linkRels['sharelink']
           ).to.equal('https://twitter.com/');
@@ -219,7 +245,7 @@ describe
             'https://foo.html/style1.css',
             'https://foo.html/style2.css',
           ],
-        }).then(win => {
+        }).then((win) => {
           const documentInfo = Services.documentInfoForDoc(win.document);
           expect(documentInfo.linkRels['canonical']).to.equal(
             'https://twitter.com/'
@@ -248,7 +274,7 @@ describe
           'prefetch': ['https://foo1.com'],
           'preload': ['https://foo2.com'],
           'preconnect': ['https://foo3.com'],
-        }).then(win => {
+        }).then((win) => {
           expect(
             Services.documentInfoForDoc(win.document).linkRels['canonical']
           ).to.equal('https://twitter.com/');
@@ -266,22 +292,16 @@ describe
       }
     );
 
-    it('should provide the metaTags', () => {
+    it('should provide the viewport', () => {
       return getWin(
         {},
         {
-          'theme-color': ['#123456'],
+          'viewport': ['width=device-width'],
         }
-      ).then(win => {
-        expect(
-          Services.documentInfoForDoc(win.document).metaTags['theme-color']
-        ).to.equal('#123456');
-      });
-    });
-
-    it('should provide empty metaTags if there are no meta tags', () => {
-      return getWin().then(win => {
-        expect(Services.documentInfoForDoc(win.document).metaTags).to.be.empty;
+      ).then((win) => {
+        expect(Services.documentInfoForDoc(win.document).viewport).to.equal(
+          'width=device-width'
+        );
       });
     });
 
@@ -290,6 +310,15 @@ describe
       const win = {
         document: {
           nodeType: /* document */ 9,
+          head: {
+            nodeType: /* ELEMENT */ 1,
+            querySelector() {
+              return null;
+            },
+            querySelectorAll() {
+              return [];
+            },
+          },
           querySelector() {
             return 'http://www.origin.com/foo/?f=0';
           },
@@ -319,6 +348,15 @@ describe
       const win = {
         document: {
           nodeType: /* document */ 9,
+          head: {
+            nodeType: /* ELEMENT */ 1,
+            querySelector() {
+              return null;
+            },
+            querySelectorAll() {
+              return [];
+            },
+          },
           querySelector() {
             return 'http://www.origin.com/foo/?f=0';
           },
@@ -347,6 +385,15 @@ describe
       const win = {
         document: {
           nodeType: /* document */ 9,
+          head: {
+            nodeType: /* ELEMENT */ 1,
+            querySelector() {
+              return null;
+            },
+            querySelectorAll() {
+              return [];
+            },
+          },
           querySelector() {
             return 'http://www.origin.com/foo/?f=0';
           },

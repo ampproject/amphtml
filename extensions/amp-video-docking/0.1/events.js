@@ -19,12 +19,13 @@ import {dev} from '../../../src/log';
 /** @enum {string} */
 export const VideoDockingEvents = {
   DISMISS_ON_TAP: 'dock-dismiss-on-tap',
+  SCROLL_BACK: 'dock-scroll-back',
 };
 
 /**
  * @param {!MouseEvent|!TouchEvent} e
  * @return {{x: number, y: number}}
- * @private
+ * @package
  */
 export function pointerCoords(e) {
   const coords = e.touches ? e.touches[0] : e;

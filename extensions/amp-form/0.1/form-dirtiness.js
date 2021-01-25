@@ -58,6 +58,11 @@ export class FormDirtiness {
     this.wasDirty_ = false;
 
     this.installEventHandlers_();
+
+    // New forms are usually clean. However, if `amp-bind` mutates a form field
+    // before the `amp-form` is initialized, the `amp-form` will miss the
+    // `FORM_VALUE_CHANGE` event dispatched.
+    this.determineInitialDirtiness_();
   }
 
   /**
@@ -134,6 +139,14 @@ export class FormDirtiness {
       AmpEvents.FORM_VALUE_CHANGE,
       this.onInput_.bind(this)
     );
+  }
+
+  /** @private */
+  determineInitialDirtiness_() {
+    for (let i = 0; i < this.form_.elements.length; ++i) {
+      this.checkDirtinessAfterUserInteraction_(this.form_.elements[i]);
+    }
+    this.updateClassAndDispatchEventIfDirtyStateChanged_();
   }
 
   /**

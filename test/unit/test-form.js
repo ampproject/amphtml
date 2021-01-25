@@ -21,7 +21,7 @@ import {
   isFieldEmpty,
 } from '../../src/form.js';
 
-describes.realWin('getFormAsObject', {}, env => {
+describes.realWin('getFormAsObject', {}, (env) => {
   let form;
 
   beforeEach(() => {
@@ -247,7 +247,7 @@ describes.realWin('getFormAsObject', {}, env => {
     input2.value = 'quux';
     form.appendChild(input2);
 
-    Object.defineProperty(form, 'ownerDocument', {
+    env.sandbox.defineProperty(form, 'ownerDocument', {
       get() {
         return {activeElement: input};
       },
@@ -270,7 +270,7 @@ describes.realWin('getFormAsObject', {}, env => {
 
     expect(getFormAsObject(form)).to.deep.equal({'foo': ['bar']});
 
-    Object.defineProperty(form, 'ownerDocument', {
+    env.sandbox.defineProperty(form, 'ownerDocument', {
       get() {
         return {activeElement: input2};
       },
@@ -289,7 +289,7 @@ describes.realWin('getFormAsObject', {}, env => {
     input2.value = 'quux';
     form.appendChild(input2);
 
-    Object.defineProperty(form, 'ownerDocument', {
+    env.sandbox.defineProperty(form, 'ownerDocument', {
       get() {
         return {activeElement: env.win.document.body};
       },
@@ -310,7 +310,7 @@ describes.realWin('getFormAsObject', {}, env => {
 
     expect(getFormAsObject(form)).to.deep.equal({'foo': ['bar']});
 
-    Object.defineProperty(form, 'ownerDocument', {
+    env.sandbox.defineProperty(form, 'ownerDocument', {
       get() {
         return {activeElement: input2};
       },
@@ -368,7 +368,7 @@ describes.realWin('getFormAsObject', {}, env => {
   });
 });
 
-describes.fakeWin('isDisabled', {}, env => {
+describes.fakeWin('isDisabled', {}, (env) => {
   let doc;
 
   beforeEach(() => {
@@ -422,7 +422,7 @@ describes.fakeWin('isDisabled', {}, env => {
   });
 });
 
-describes.realWin('isFieldDefault', {}, env => {
+describes.realWin('isFieldDefault', {}, (env) => {
   let doc;
 
   beforeEach(() => {
@@ -573,7 +573,7 @@ describes.realWin('isFieldDefault', {}, env => {
   });
 });
 
-describes.fakeWin('isFieldEmpty', {}, env => {
+describes.fakeWin('isFieldEmpty', {}, (env) => {
   let doc;
 
   beforeEach(() => {

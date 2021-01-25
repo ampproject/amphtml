@@ -1,0 +1,13 @@
+Test json files downloaded from public sources to validate json parsing. The
+data contained in json files is not used inside any AMP projects.
+
+1.json : States of India
+2.json : Sample http request header.
+3.json : Noble prize winners: http://api.nobelprize.org/v1/prize.json
+4.json : Github emojis: https://api.github.com/emojis
+5.json : Global temperature anomalies: https://www.ncdc.noaa.gov/cag/global/time-series/globe/land_ocean/ytd/12/1880-2016.json
+6.json : United States of America population: http://api.worldbank.org/countries/USA/indicators/SP.POP.TOTL?per_page=5000&format=json
+7.json : United States of America Senators : https://www.govtrack.us/api/v2/role?current=true&role_type=senator
+8.json : United States of America Representatives : https://www.govtrack.us/api/v2/role?current=true&role_type=representative&limit=438.
+9.json : United States of America annual preciptation: https://www.ncdc.noaa.gov/cag/national/time-series/110-pcp-ytd-12-1895-2016.json?base_prd=true&begbaseyear=1901&endbaseyear=2000
+10.json : United States of America exchange rate : https://api.exchangerate-api.com/v4/latest/USD

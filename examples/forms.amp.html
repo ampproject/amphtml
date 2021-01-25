@@ -182,6 +182,17 @@
     </script>
 </amp-analytics>
 
+<h4>Form with textarea</h4>
+<form method="post" action-xhr="/form/echo-json/post" target="_blank">
+  <textarea name="textarea-ctrl-submit">Press Ctrl+Enter to submit this text</textarea><br>
+  <input name="submit-button" type="submit" value="Submit" />
+  <div submit-success>
+    <template type="amp-mustache">
+      Success! {{textarea-ctrl-submit}}
+    </template>
+  </div>
+</form>
+
 <h4>Search (GET non-xhr same origin)</h4>
 <form method="get" action="/form/search-html/get" target="_blank">
     <fieldset>

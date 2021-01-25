@@ -14,14 +14,10 @@
  * limitations under the License.
  */
 
-import {
-  ADSENSE_EXPERIMENTS,
-  ADSENSE_EXP_NAMES,
-} from '../../amp-ad-network-adsense-impl/0.1/adsense-a4a-config';
 import {CONSTANTS, MessageType} from '../../../src/3p-frame-messaging';
 import {CommonSignals} from '../../../src/common-signals';
 import {Deferred} from '../../../src/utils/promise';
-import {IntersectionObserver} from '../../../src/intersection-observer';
+import {LegacyAdIntersectionObserverHost} from './legacy-ad-intersection-observer-host';
 import {Services} from '../../../src/services';
 import {
   SubscriptionApi,
@@ -32,8 +28,9 @@ import {
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
-import {getExperimentBranch, isExperimentOn} from '../../../src/experiments';
 import {getHtml} from '../../../src/get-html';
+import {isExperimentOn} from '../../../src/experiments';
+import {isGoogleAdsA4AValidEnvironment} from '../../../ads/google/a4a/utils';
 import {removeElement} from '../../../src/dom';
 import {reportErrorToAnalytics} from '../../../src/error';
 import {setStyle} from '../../../src/style';
@@ -42,6 +39,9 @@ import {throttle} from '../../../src/utils/rate-limit';
 const VISIBILITY_TIMEOUT = 10000;
 
 const MIN_INABOX_POSITION_EVENT_INTERVAL = 100;
+
+/** @type {string} */
+const TAG = 'amp-ad-xorigin-iframe';
 
 export class AmpAdXOriginIframeHandler {
   /**
@@ -60,11 +60,11 @@ export class AmpAdXOriginIframeHandler {
     /** @private {?./amp-ad-ui.AmpAdUIHandler} */
     this.uiHandler_ = baseInstance.uiHandler;
 
-    /** @type {?Element} iframe instance */
+    /** @type {?HTMLIFrameElement} iframe instance */
     this.iframe = null;
 
-    /** @private {?IntersectionObserver} */
-    this.intersectionObserver_ = null;
+    /** @private {?LegacyAdIntersectionObserverHost} */
+    this.legacyIntersectionObserverApiHost_ = null;
 
     /** @private {SubscriptionApi} */
     this.embedStateApi_ = null;
@@ -78,11 +78,11 @@ export class AmpAdXOriginIframeHandler {
     /** @private {!Array<!Function>} functions to unregister listeners */
     this.unlisteners_ = [];
 
-    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = Services.viewerForDoc(this.baseInstance_.getAmpDoc());
-
-    /** @private @const {!../../../src/service/viewport/viewport-impl.Viewport} */
+    /** @private @const {!../../../src/service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = Services.viewportForDoc(this.baseInstance_.getAmpDoc());
+
+    /** @private {boolean} */
+    this.inViewport_ = false;
 
     /** @private {boolean} */
     this.sendPositionPending_ = false;
@@ -90,7 +90,7 @@ export class AmpAdXOriginIframeHandler {
 
   /**
    * Sets up listeners and iframe state for iframe containing ad creative.
-   * @param {!Element} iframe
+   * @param {!HTMLIFrameElement} iframe
    * @param {boolean=} opt_isA4A when true do not listen to ad response
    * @param {boolean=} opt_letCreativeTriggerRenderStart Whether to wait for
    *    render start from the creative, or simply trigger it in here.
@@ -103,31 +103,27 @@ export class AmpAdXOriginIframeHandler {
     this.baseInstance_.applyFillContent(this.iframe);
     const timer = Services.timerFor(this.baseInstance_.win);
 
-    // Init IntersectionObserver service.
-    this.intersectionObserver_ = new IntersectionObserver(
+    // Init the legacy observeInterection API service.
+    // (Behave like position observer)
+    this.legacyIntersectionObserverApiHost_ = new LegacyAdIntersectionObserverHost(
       this.baseInstance_,
-      this.iframe,
-      true
+      this.iframe
     );
 
     this.embedStateApi_ = new SubscriptionApi(
       this.iframe,
       'send-embed-state',
       true,
-      () => this.sendEmbedInfo_(this.baseInstance_.isInViewport())
+      () => this.sendEmbedInfo_(this.inViewport_)
     );
 
-    // TODO(bradfrizzell): Would be better to turn this on if
-    // A4A.isXhrEnabled() is false, or if we simply decide it is
-    // ok to turn this on for all traffic.
+    // Enable creative position observer if inabox experiment enabled OR
+    // adsense running on non-CDN cache where AMP creatives are xdomained and
+    // may require this information.
     if (
-      getExperimentBranch(
-        this.win_,
-        ADSENSE_EXP_NAMES.UNCONDITIONED_CANONICAL
-      ) == ADSENSE_EXPERIMENTS.UNCONDITIONED_CANONICAL_EXP ||
-      getExperimentBranch(this.win_, ADSENSE_EXP_NAMES.CANONICAL) ==
-        ADSENSE_EXPERIMENTS.CANONICAL_EXP ||
-      isExperimentOn(this.win_, 'inabox-position-api')
+      isExperimentOn(this.win_, 'inabox-position-api') ||
+      (/^adsense$/i.test(this.element_.getAttribute('type')) &&
+        !isGoogleAdsA4AValidEnvironment(this.win_))
     ) {
       // To provide position to inabox.
       this.inaboxPositionApi_ = new SubscriptionApi(
@@ -144,11 +140,11 @@ export class AmpAdXOriginIframeHandler {
     }
     // Triggered by context.reportRenderedEntityIdentifier(…) inside the ad
     // iframe.
-    listenForOncePromise(this.iframe, 'entity-id', true).then(info => {
+    listenForOncePromise(this.iframe, 'entity-id', true).then((info) => {
       this.element_.creativeId = info.data['id'];
     });
 
-    this.handleOneTimeRequest_(MessageType.GET_HTML, payload => {
+    this.handleOneTimeRequest_(MessageType.GET_HTML, (payload) => {
       const selector = payload['selector'];
       const attributes = payload['attributes'];
       let content = '';
@@ -159,7 +155,7 @@ export class AmpAdXOriginIframeHandler {
     });
 
     this.handleOneTimeRequest_(MessageType.GET_CONSENT_STATE, () => {
-      return this.baseInstance_.getConsentState().then(consentState => {
+      return this.baseInstance_.getConsentState().then((consentState) => {
         return {consentState};
       });
     });
@@ -174,6 +170,7 @@ export class AmpAdXOriginIframeHandler {
             this.element_.warnOnMissingOverflow = false;
           }
           this.handleResize_(
+            data['id'],
             data['height'],
             data['width'],
             source,
@@ -186,9 +183,24 @@ export class AmpAdXOriginIframeHandler {
       )
     );
 
+    if (this.uiHandler_.isStickyAd()) {
+      setStyle(iframe, 'pointer-events', 'none');
+      this.unlisteners_.push(
+        listenFor(
+          this.iframe,
+          'signal-interactive',
+          () => {
+            setStyle(iframe, 'pointer-events', 'auto');
+          },
+          true,
+          true
+        )
+      );
+    }
+
     this.unlisteners_.push(
-      this.viewer_.onVisibilityChanged(() => {
-        this.sendEmbedInfo_(this.baseInstance_.isInViewport());
+      this.baseInstance_.getAmpDoc().onVisibilityChanged(() => {
+        this.sendEmbedInfo_(this.inViewport_);
       })
     );
 
@@ -196,8 +208,11 @@ export class AmpAdXOriginIframeHandler {
       listenFor(
         this.iframe,
         MessageType.USER_ERROR_IN_IFRAME,
-        data => {
-          this.userErrorForAnalytics_(data['message']);
+        (data) => {
+          this.userErrorForAnalytics_(
+            data['message'],
+            data['expected'] == true
+          );
         },
         true,
         true /* opt_includingNestedWindows */
@@ -236,7 +251,7 @@ export class AmpAdXOriginIframeHandler {
         this.iframe,
         ['render-start', 'no-content'],
         true
-      ).then(info => {
+      ).then((info) => {
         const {data} = info;
         if (data['type'] == 'render-start') {
           this.renderStartMsgHandler_(info);
@@ -286,11 +301,18 @@ export class AmpAdXOriginIframeHandler {
       setStyle(this.iframe, 'visibility', 'hidden');
     }
 
-    Promise.race([
-      renderStartPromise,
-      iframeLoadPromise,
-      timer.promise(VISIBILITY_TIMEOUT),
-    ]).then(() => {
+    // If A4A where creative is responsible for triggering render start (e.g
+    // no fill for sticky ad case), only trigger if renderStart listener promise
+    // explicitly fired (though we do not expect this to occur for A4A).
+    const triggerRenderStartPromise =
+      opt_isA4A && opt_letCreativeTriggerRenderStart
+        ? renderStartPromise
+        : Promise.race([
+            renderStartPromise,
+            iframeLoadPromise,
+            timer.promise(VISIBILITY_TIMEOUT),
+          ]);
+    triggerRenderStartPromise.then(() => {
       // Common signal RENDER_START invoked at toggle visibility time
       // Note: 'render-start' msg and common signal RENDER_START are different
       // 'render-start' msg is a way for implemented Ad to display ad earlier
@@ -324,7 +346,7 @@ export class AmpAdXOriginIframeHandler {
           const messageId = info[CONSTANTS.messageIdFieldName];
           const payload = info[CONSTANTS.payloadFieldName];
 
-          getter(payload).then(content => {
+          getter(payload).then((content) => {
             const result = dict();
             result[CONSTANTS.messageIdFieldName] = messageId;
             result[CONSTANTS.contentFieldName] = content;
@@ -351,6 +373,7 @@ export class AmpAdXOriginIframeHandler {
   renderStartMsgHandler_(info) {
     const data = getData(info);
     this.handleResize_(
+      undefined,
       data['height'],
       data['width'],
       info['source'],
@@ -395,7 +418,7 @@ export class AmpAdXOriginIframeHandler {
    * @private
    */
   cleanup_() {
-    this.unlisteners_.forEach(unlistener => unlistener());
+    this.unlisteners_.forEach((unlistener) => unlistener());
     this.unlisteners_.length = 0;
     if (this.embedStateApi_) {
       this.embedStateApi_.destroy();
@@ -405,9 +428,9 @@ export class AmpAdXOriginIframeHandler {
       this.inaboxPositionApi_.destroy();
       this.inaboxPositionApi_ = null;
     }
-    if (this.intersectionObserver_) {
-      this.intersectionObserver_.destroy();
-      this.intersectionObserver_ = null;
+    if (this.legacyIntersectionObserverApiHost_) {
+      this.legacyIntersectionObserverApiHost_.destroy();
+      this.legacyIntersectionObserverApiHost_ = null;
     }
   }
 
@@ -415,6 +438,7 @@ export class AmpAdXOriginIframeHandler {
    * Updates the element's dimensions to accommodate the iframe's
    * requested dimensions. Notifies the window that request the resize
    * of success or failure.
+   * @param {number|undefined} id
    * @param {number|string|undefined} height
    * @param {number|string|undefined} width
    * @param {!Window} source
@@ -422,7 +446,7 @@ export class AmpAdXOriginIframeHandler {
    * @param {!MessageEvent} event
    * @private
    */
-  handleResize_(height, width, source, origin, event) {
+  handleResize_(id, height, width, source, origin, event) {
     this.baseInstance_.getVsync().mutate(() => {
       if (!this.iframe) {
         // iframe can be cleanup before vsync.
@@ -433,9 +457,11 @@ export class AmpAdXOriginIframeHandler {
       this.uiHandler_
         .updateSize(height, width, iframeHeight, iframeWidth, event)
         .then(
-          info => {
+          (info) => {
+            this.uiHandler_.onResizeSuccess();
             this.sendEmbedSizeResponse_(
               info.success,
+              id,
               info.newWidth,
               info.newHeight,
               source,
@@ -450,6 +476,7 @@ export class AmpAdXOriginIframeHandler {
   /**
    * Sends a response to the window which requested a resize.
    * @param {boolean} success
+   * @param {number|undefined} id
    * @param {number} requestedWidth
    * @param {number} requestedHeight
    * @param {!Window} source
@@ -458,6 +485,7 @@ export class AmpAdXOriginIframeHandler {
    */
   sendEmbedSizeResponse_(
     success,
+    id,
     requestedWidth,
     requestedHeight,
     source,
@@ -472,6 +500,7 @@ export class AmpAdXOriginIframeHandler {
       [{win: source, origin}],
       success ? 'embed-size-changed' : 'embed-size-denied',
       dict({
+        'id': id,
         'requestedWidth': requestedWidth,
         'requestedHeight': requestedHeight,
       }),
@@ -491,19 +520,20 @@ export class AmpAdXOriginIframeHandler {
       'embed-state',
       dict({
         'inViewport': inViewport,
-        'pageHidden': !this.viewer_.isVisible(),
+        'pageHidden': !this.baseInstance_.getAmpDoc().isVisible(),
       })
     );
   }
 
   /**
    * Retrieve iframe position entry in next animation frame.
+   * @return {*} TODO(#23582): Specify return type
    * @private
    */
   getIframePositionPromise_() {
     return this.viewport_
       .getClientRectAsync(dev().assertElement(this.iframe))
-      .then(position => {
+      .then((position) => {
         devAssert(
           position,
           'element clientRect should intersects with root clientRect'
@@ -524,7 +554,7 @@ export class AmpAdXOriginIframeHandler {
     }
 
     this.sendPositionPending_ = true;
-    this.getIframePositionPromise_().then(position => {
+    this.getIframePositionPromise_().then((position) => {
       this.sendPositionPending_ = false;
       this.inaboxPositionApi_.send(MessageType.POSITION, position);
     });
@@ -544,7 +574,7 @@ export class AmpAdXOriginIframeHandler {
         throttle(
           this.win_,
           () => {
-            this.getIframePositionPromise_().then(position => {
+            this.getIframePositionPromise_().then((position) => {
               this.inaboxPositionApi_.send(MessageType.POSITION, position);
             });
           },
@@ -554,7 +584,7 @@ export class AmpAdXOriginIframeHandler {
     );
     this.unlisteners_.push(
       this.viewport_.onResize(() => {
-        this.getIframePositionPromise_().then(position => {
+        this.getIframePositionPromise_().then((position) => {
           this.inaboxPositionApi_.send(MessageType.POSITION, position);
         });
       })
@@ -566,9 +596,7 @@ export class AmpAdXOriginIframeHandler {
    * @param {boolean} inViewport
    */
   viewportCallback(inViewport) {
-    if (this.intersectionObserver_) {
-      this.intersectionObserver_.onViewportCallback(inViewport);
-    }
+    this.inViewport_ = inViewport;
     this.sendEmbedInfo_(inViewport);
   }
 
@@ -578,17 +606,23 @@ export class AmpAdXOriginIframeHandler {
   onLayoutMeasure() {
     // When the framework has the need to remeasure us, our position might
     // have changed. Send an intersection record if needed.
-    if (this.intersectionObserver_) {
-      this.intersectionObserver_.fire();
+    if (this.legacyIntersectionObserverApiHost_) {
+      this.legacyIntersectionObserverApiHost_.fire();
     }
   }
 
   /**
    * @param {string} message
+   * @param {boolean} expected
    * @private
    */
-  userErrorForAnalytics_(message) {
-    if (typeof message == 'string') {
+  userErrorForAnalytics_(message, expected) {
+    if (typeof message != 'string') {
+      return;
+    }
+    if (expected) {
+      dev().expectedError(TAG, message);
+    } else {
       const e = new Error(message);
       e.name = '3pError';
       reportErrorToAnalytics(e, this.baseInstance_.win);

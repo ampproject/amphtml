@@ -27,14 +27,14 @@ export function swoop(global, data) {
   computeInMasterFrame(
     global,
     'swoop-load',
-    done => {
+    (done) => {
       global.swoopIabConfig = data;
 
       loadScript(global, 'https://www.swoop-amp.com/amp.js', () =>
         done(global.Swoop != null)
       );
     },
-    success => {
+    (success) => {
       if (success) {
         if (!global.context.isMaster) {
           global.context.master.Swoop.announcePlace(global, data);

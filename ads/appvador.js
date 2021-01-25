@@ -42,7 +42,7 @@ export function appvador(global, data) {
     (data.options ? ',' + data.options : '') +
     '}).load();';
 
-  const cb = function() {
+  const cb = function () {
     const apvLoadScript = global.document.createElement('script');
     apvLoadScript.text = apvScript;
     container.appendChild(apvLoadScript);

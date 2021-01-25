@@ -22,7 +22,7 @@ import {
 
 const NOOP = () => {};
 
-describes.fakeWin('inabox-host:FrameOverlayManager', {}, env => {
+describes.fakeWin('inabox-host:FrameOverlayManager', {}, (env) => {
   let win;
   let addEventListenerSpy;
 
@@ -30,20 +30,15 @@ describes.fakeWin('inabox-host:FrameOverlayManager', {}, env => {
 
   beforeEach(() => {
     win = env.win;
-    addEventListenerSpy = sandbox.spy(win, 'addEventListener');
+    addEventListenerSpy = env.sandbox.spy(win, 'addEventListener');
 
     manager = new FrameOverlayManager(win);
-  });
-
-  afterEach(() => {
-    sandbox.reset();
-    sandbox.restore();
   });
 
   it('should listen to window resize event', () => {
     expect(addEventListenerSpy).to.have.been.calledWith(
       'resize',
-      sinon.match.any
+      env.sandbox.match.any
     );
   });
 
@@ -51,30 +46,36 @@ describes.fakeWin('inabox-host:FrameOverlayManager', {}, env => {
     const expandedRect = {a: 2, b: 3};
     const iframe = {};
 
-    const expandFrame = sandbox.spy((win, iframe, onFinish) => {
+    const expandFrame = env.sandbox.spy((win, iframe, onFinish) => {
       onFinish({}, expandedRect);
     });
 
-    const callback = sandbox.spy();
+    const callback = env.sandbox.spy();
 
     stubExpandFrameForTesting(expandFrame);
 
     manager.expandFrame(iframe, callback);
 
     expect(callback).to.have.been.calledWith(expandedRect);
-    expect(expandFrame).to.have.been.calledWith(win, iframe, sinon.match.any);
+    expect(expandFrame).to.have.been.calledWith(
+      win,
+      iframe,
+      env.sandbox.match.any
+    );
   });
 
   it('should collapse frame and execute callback with remeasured box', () => {
     const remeasuredCollapsedRect = {a: 2, b: 3};
     const iframe = {};
 
-    const collapseFrame = sandbox.spy((win, iframe, onFinish, onRemeasure) => {
-      onFinish();
-      onRemeasure(remeasuredCollapsedRect);
-    });
+    const collapseFrame = env.sandbox.spy(
+      (win, iframe, onFinish, onRemeasure) => {
+        onFinish();
+        onRemeasure(remeasuredCollapsedRect);
+      }
+    );
 
-    const callback = sandbox.spy();
+    const callback = env.sandbox.spy();
 
     stubCollapseFrameForTesting(collapseFrame);
     stubExpandFrameForTesting((win, iframe, onFinish) => onFinish({}, {}));
@@ -87,8 +88,8 @@ describes.fakeWin('inabox-host:FrameOverlayManager', {}, env => {
     expect(collapseFrame).to.have.been.calledWith(
       win,
       iframe,
-      sinon.match.any,
-      sinon.match.any
+      env.sandbox.match.any,
+      env.sandbox.match.any
     );
   });
 
@@ -97,12 +98,14 @@ describes.fakeWin('inabox-host:FrameOverlayManager', {}, env => {
 
     const iframe = {};
 
-    const collapseFrame = sandbox.spy((win, iframe, onFinish, onRemeasure) => {
-      onFinish();
-      onRemeasure({});
-    });
+    const collapseFrame = env.sandbox.spy(
+      (win, iframe, onFinish, onRemeasure) => {
+        onFinish();
+        onRemeasure({});
+      }
+    );
 
-    const callback = sandbox.spy();
+    const callback = env.sandbox.spy();
 
     stubCollapseFrameForTesting(collapseFrame);
     stubExpandFrameForTesting((win, iframe, onFinish) =>
@@ -116,8 +119,8 @@ describes.fakeWin('inabox-host:FrameOverlayManager', {}, env => {
     expect(collapseFrame).to.have.been.calledWith(
       win,
       iframe,
-      sinon.match.any,
-      sinon.match.any
+      env.sandbox.match.any,
+      env.sandbox.match.any
     );
   });
 });

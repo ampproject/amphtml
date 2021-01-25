@@ -1,0 +1,22 @@
+{
+  "requests": {
+    "base": "https://${ampAtrkHost}/atrk.gif?account=${atrk_acct}&domain=${domain}",
+    "pageview": "${base}&jsv=amp-${ampVersion}&frame_height=${viewportHeight}&frame_width=${viewportWidth}&title=${title}&time=${timestamp}&time_zone_offset=${timezone}&screen_params=${screenWidth}x${screenHeight}x${screenColorDepth}&ref_url=${documentReferrer}&host_url=${sourceUrl}&random_number=${random}&user_cookie=${clientId(__auc)}&user_cookie_flag=0&user_lang=${browserLanguage}&amp_doc_url=${ampdocUrl}"
+  },
+  "vars": {
+    "atrk_acct": "",
+    "domain": "",
+    "ampAtrkHost": "certify-amp.alexametrics.com"
+  },
+  "triggers": {
+    "trackPageview": {
+      "on": "visible",
+      "request": "pageview"
+    }
+  },
+  "transport": {
+    "xhrpost": false,
+    "beacon": false,
+    "image": true
+  }
+}
