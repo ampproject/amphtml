@@ -64,8 +64,18 @@ describes.sandboxed('shouldLoadPolyfill', {}, () => {
     const win = {
       IntersectionObserver: NativeIntersectionObserver,
       IntersectionObserverEntry: NativeIntersectionObserverEntry,
+      navigator: {userAgent: 'Mozilla'},
     };
     expect(shouldLoadPolyfill(win)).to.be.false;
+  });
+
+  it('should always load in WebKit', () => {
+    const win = {
+      IntersectionObserver: NativeIntersectionObserver,
+      IntersectionObserverEntry: NativeIntersectionObserverEntry,
+      navigator: {userAgent: 'WebKit'},
+    };
+    expect(shouldLoadPolyfill(win)).to.be.true;
   });
 
   it('should load when native does not support {root: document}', () => {
