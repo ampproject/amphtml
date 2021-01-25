@@ -25,7 +25,7 @@ const {
   printSkipMessage,
   timedExecOrDie,
 } = require('./utils');
-const {determineBuildTargets} = require('./build-targets');
+const {buildTargetsInclude, Targets} = require('./build-targets');
 const {runCiJob} = require('./ci-job');
 
 const jobName = 'visual-diff-tests.js';
@@ -38,12 +38,13 @@ function pushBuildWorkflow() {
 }
 
 function prBuildWorkflow() {
-  const buildTargets = determineBuildTargets();
   process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
   if (
-    buildTargets.has('RUNTIME') ||
-    buildTargets.has('FLAG_CONFIG') ||
-    buildTargets.has('VISUAL_DIFF')
+    buildTargetsInclude(
+      Targets.RUNTIME,
+      Targets.FLAG_CONFIG,
+      Targets.VISUAL_DIFF
+    )
   ) {
     downloadNomoduleOutput();
     timedExecOrDie('gulp update-packages');

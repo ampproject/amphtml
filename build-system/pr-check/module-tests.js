@@ -25,7 +25,7 @@ const {
   printSkipMessage,
   timedExecOrDie,
 } = require('./utils');
-const {determineBuildTargets} = require('./build-targets');
+const {buildTargetsInclude, Targets} = require('./build-targets');
 const {runCiJob} = require('./ci-job');
 
 const jobName = 'module-tests.js';
@@ -38,11 +38,12 @@ function pushBuildWorkflow() {
 }
 
 function prBuildWorkflow() {
-  const buildTargets = determineBuildTargets();
   if (
-    buildTargets.has('RUNTIME') ||
-    buildTargets.has('FLAG_CONFIG') ||
-    buildTargets.has('INTEGRATION_TEST')
+    buildTargetsInclude(
+      Targets.RUNTIME,
+      Targets.FLAG_CONFIG,
+      Targets.INTEGRATION_TEST
+    )
   ) {
     downloadNomoduleOutput();
     downloadModuleOutput();
