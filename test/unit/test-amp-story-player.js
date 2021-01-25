@@ -524,7 +524,11 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       await player.load();
 
-      await player.show('https://example.com/story3.html');
+      player.show('https://example.com/story3.html');
+      await nextTick();
+
+      fireHandler['storyContentLoaded']('storyContentLoaded', {});
+      await nextTick();
 
       const stories = playerEl.getStories();
 
@@ -533,6 +537,33 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       expect(playerEl.contains(stories[2].iframe)).to.be.true;
       expect(playerEl.contains(stories[3].iframe)).to.be.true;
       expect(playerEl.contains(stories[4].iframe)).to.be.true;
+    });
+
+    it('show() callback should prerender next story after current one is loaded', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      appendStoriesToPlayer(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+
+      player.show('https://example.com/story3.html');
+      await nextTick();
+
+      fireHandler['storyContentLoaded']('storyContentLoaded', {});
+      await nextTick();
+
+      const storyIframes = playerEl.querySelectorAll('iframe');
+
+      expect(storyIframes[0].getAttribute('src')).to.include(
+        'https://example.com/story3.html#visibilityState=prerender'
+      );
+      expect(storyIframes[1].getAttribute('src')).to.include(
+        'https://example.com/story4.html#visibilityState=prerender'
+      );
+      expect(storyIframes[2].getAttribute('src')).to.include(
+        'https://example.com/story2.html#visibilityState=prerender'
+      );
     });
 
     // TODO(proyectoramirez): delete once add() is implemented.
