@@ -206,4 +206,13 @@ export class SaveButton {
     }
     return promise.then(this.renderTemplate.bind(this));
   }
+
+  /**
+   * Determine the height of the contents to allow resizing after first layout.
+   *
+   * @return {number|null}
+   */
+  height() {
+    return null;
+  }
 }

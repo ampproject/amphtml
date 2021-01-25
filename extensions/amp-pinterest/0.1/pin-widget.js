@@ -28,6 +28,9 @@ const POP =
   'personalbar=no,directories=no,location=no,toolbar=no,' +
   'menubar=no,width=900,height=500,left=0,top=0';
 
+// Matches the height padding caused by .-amp-pinterest-embed-pin
+const EMBED_PIN_PADDING = 10;
+
 /**
  * Pinterest Pin Widget
  * data-url: the source url for the Pin
@@ -35,6 +38,7 @@ const POP =
 export class PinWidget {
   /** @param {!Element} rootElement */
   constructor(rootElement) {
+    console.log('pinWidget', {rootElement});
     userAssert(
       rootElement.getAttribute('data-url'),
       'The data-url attribute is required for Pin widgets'
@@ -46,6 +50,9 @@ export class PinWidget {
     this.pinUrl = '';
     this.width = '';
     this.layout = '';
+
+    /** @private {!Element} */
+    this.heightOwnerElement_ = null;
   }
 
   /**
@@ -122,7 +129,7 @@ export class PinWidget {
     const structure = Util.make(this.element.ownerDocument, {'span': {}});
     structure.className = className + ' i-amphtml-fill-content';
 
-    const container = Util.make(this.element.ownerDocument, {
+    this.heightOwnerElement_ = Util.make(this.element.ownerDocument, {
       'span': {
         'className': '-amp-pinterest-embed-pin-inner',
         'data-pin-log': 'embed_pin',
@@ -144,7 +151,7 @@ export class PinWidget {
         'alt': this.alt,
       },
     });
-    container.appendChild(img);
+    this.heightOwnerElement_.appendChild(img);
 
     // repin button
     const repin = Util.make(this.element.ownerDocument, {
@@ -165,7 +172,7 @@ export class PinWidget {
         'tabindex': '0',
       },
     });
-    container.appendChild(repin);
+    this.heightOwnerElement_.appendChild(repin);
 
     // text container
     const text = Util.make(this.element.ownerDocument, {
@@ -302,8 +309,8 @@ export class PinWidget {
       text.appendChild(pinner);
     }
 
-    container.appendChild(text);
-    structure.appendChild(container);
+    this.heightOwnerElement_.appendChild(text);
+    structure.appendChild(this.heightOwnerElement_);
 
     // listen for clicks
     structure.addEventListener('click', this.handleClick.bind(this));
@@ -335,5 +342,18 @@ export class PinWidget {
     }
 
     return this.fetchPin().then(this.renderPin.bind(this));
+  }
+
+  /**
+   * Determine the height of the contents to allow resizing after first layout.
+   *
+   * @return {number|null}
+   */
+  height() {
+    return (
+      this.heightOwnerElement_
+        .getBoundingClientRect /* REVIEW */
+        ().height + EMBED_PIN_PADDING
+    );
   }
 }

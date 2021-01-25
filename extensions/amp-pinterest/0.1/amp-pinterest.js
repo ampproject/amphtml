@@ -56,6 +56,9 @@ class AmpPinterest extends AMP.BaseElement {
 
     /** @private {string} */
     this.type_ = '';
+
+    /** @private {*} */
+    this.renderClass_ = null;
   }
   /**
    * @param {boolean=} onLayout
@@ -82,21 +85,36 @@ class AmpPinterest extends AMP.BaseElement {
       'The data-do attribute is required for <amp-pinterest> %s',
       this.element
     );
+
+    switch (this.type_) {
+      case 'embedPin':
+        this.renderClass_ = new PinWidget(this.element);
+        break;
+      case 'buttonPin':
+        this.renderClass_ = new SaveButton(this.element);
+        break;
+      case 'buttonFollow':
+        this.renderClass_ = new FollowButton(this.element);
+        break;
+      default:
+        return Promise.reject(
+          user().createError('Invalid type: %s', this.type_)
+        );
+    }
   }
 
   /** @override */
   layoutCallback() {
-    return this.render().then((node) => this.element.appendChild(node));
+    return this.renderClass_
+      .render()
+      .then((node) => this.element.appendChild(node));
   }
 
   /** @override */
   firstLayoutCompleted() {
-    if (this.element.firstElementChild) {
-      this.attemptChangeHeight(
-        this.element.firstElementChild
-          .getBoundingClientRect /* REVIEW */
-          ().height
-      );
+    const renderedHeight = this.renderClass_.height();
+    if (renderedHeight !== null) {
+      this.attemptChangeHeight(renderedHeight);
     }
   }
 
