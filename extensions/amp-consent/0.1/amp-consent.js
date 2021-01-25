@@ -608,8 +608,8 @@ export class AmpConsent extends AMP.BaseElement {
         const xhrService = Services.xhrFor(this.win);
         return ampdoc.whenFirstVisible().then(() =>
           expandConsentEndpointUrl(this.element, resolvedHref).then(
-            (expandedHref) => {
-              return xhrService.fetchJson(expandedHref, init).then((res) =>
+            (expandedHref) =>
+              xhrService.fetchJson(expandedHref, init).then((res) =>
                 xhrService
                   .xssiJson(res, this.consentConfig_['xssiPrefix'])
                   .catch((e) => {
@@ -619,8 +619,7 @@ export class AmpConsent extends AMP.BaseElement {
                       e
                     );
                   })
-              );
-            }
+              )
           )
         );
       });
