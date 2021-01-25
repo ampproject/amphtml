@@ -38,7 +38,11 @@ import {
   matches,
   tryFocus,
 } from '../../../src/dom';
-import {createShadowRootWithStyle, getSourceOriginForElement} from './utils';
+import {
+  clickAnchorOnDom,
+  createShadowRootWithStyle,
+  getSourceOriginForElement,
+} from './utils';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getAmpdoc} from '../../../src/service';
@@ -1457,16 +1461,13 @@ export class AmpStoryEmbeddedComponent {
   }
 
   /**
-   * Linkers don't work on shadow root elements so we need to create an anchor outside it.
+   * Linkers don't work on shadow root elements so we click a clone of the anchor on the root dom.
    * @param {!Event} event
    * @private
    */
   onAnchorClick_(event) {
     event.preventDefault();
-    const outerAnchor = this.tooltip_.cloneNode();
-    this.storyEl_.appendChild(outerAnchor);
-    outerAnchor.click();
-    outerAnchor.remove();
+    clickAnchorOnDom(this.tooltip_, this.storyEl_);
   }
 
   /**
