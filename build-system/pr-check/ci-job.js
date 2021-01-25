@@ -21,6 +21,7 @@ const {
   startTimer,
   stopTimer,
 } = require('./utils');
+const {determineBuildTargets} = require('./build-targets');
 const {isPullRequestBuild} = require('../common/ci');
 const {runNpmChecks} = require('./npm-checks');
 const {setLoggingPrefix} = require('../common/logging');
@@ -40,6 +41,7 @@ async function runCiJob(jobName, pushBuildWorkflow, prBuildWorkflow) {
   }
   if (isPullRequestBuild()) {
     printChangeSummary();
+    determineBuildTargets();
     await prBuildWorkflow();
   } else {
     await pushBuildWorkflow();

@@ -17,13 +17,17 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const {
+  buildTargetsInclude,
+  determineBuildTargets,
+  Targets,
+} = require('../pr-check/build-targets');
+const {
   stopTimedJob,
   printChangeSummary,
   startTimer,
   stopTimer,
   timedExec,
 } = require('../pr-check/utils');
-const {determineBuildTargets} = require('../pr-check/build-targets');
 const {runNpmChecks} = require('../pr-check/npm-checks');
 const {setLoggingPrefix} = require('../common/logging');
 
@@ -58,58 +62,60 @@ async function prCheck(cb) {
   }
 
   printChangeSummary();
-  const buildTargets = determineBuildTargets();
+  determineBuildTargets();
   runCheck('gulp lint --local_changes');
   runCheck('gulp prettify --local_changes');
   runCheck('gulp presubmit');
   runCheck('gulp check-exact-versions');
 
-  if (buildTargets.has('AVA')) {
+  if (buildTargetsInclude(Targets.AVA)) {
     runCheck('gulp ava');
   }
 
-  if (buildTargets.has('BABEL_PLUGIN')) {
+  if (buildTargetsInclude(Targets.BABEL_PLUGIN)) {
     runCheck('gulp babel-plugin-tests');
   }
 
-  if (buildTargets.has('CACHES_JSON')) {
+  if (buildTargetsInclude(Targets.CACHES_JSON)) {
     runCheck('gulp caches-json');
   }
 
-  if (buildTargets.has('DOCS')) {
+  if (buildTargetsInclude(Targets.DOCS)) {
     runCheck('gulp check-links --local_changes');
   }
 
-  if (buildTargets.has('DEV_DASHBOARD')) {
+  if (buildTargetsInclude(Targets.DEV_DASHBOARD)) {
     runCheck('gulp dev-dashboard-tests');
   }
 
-  if (buildTargets.has('OWNERS')) {
+  if (buildTargetsInclude(Targets.OWNERS)) {
     runCheck('gulp check-owners');
   }
 
-  if (buildTargets.has('RENOVATE_CONFIG')) {
+  if (buildTargetsInclude(Targets.RENOVATE_CONFIG)) {
     runCheck('gulp check-renovate-config');
   }
 
-  if (buildTargets.has('SERVER')) {
+  if (buildTargetsInclude(Targets.SERVER)) {
     runCheck('gulp server-tests');
   }
 
-  if (buildTargets.has('RUNTIME')) {
+  if (buildTargetsInclude(Targets.RUNTIME)) {
     runCheck('gulp dep-check');
     runCheck('gulp check-types');
     runCheck('gulp check-sourcemaps');
   }
 
-  if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {
+  if (buildTargetsInclude(Targets.RUNTIME, Targets.UNIT_TEST)) {
     runCheck('gulp unit --local_changes --headless');
   }
 
   if (
-    buildTargets.has('RUNTIME') ||
-    buildTargets.has('FLAG_CONFIG') ||
-    buildTargets.has('INTEGRATION_TEST')
+    buildTargetsInclude(
+      Targets.RUNTIME,
+      Targets.FLAG_CONFIG,
+      Targets.INTEGRATION_TEST
+    )
   ) {
     if (!argv.nobuild) {
       runCheck('gulp clean');
@@ -118,11 +124,11 @@ async function prCheck(cb) {
     runCheck('gulp integration --nobuild --compiled --headless');
   }
 
-  if (buildTargets.has('RUNTIME') || buildTargets.has('VALIDATOR')) {
+  if (buildTargetsInclude(Targets.RUNTIME, Targets.VALIDATOR)) {
     runCheck('gulp validator');
   }
 
-  if (buildTargets.has('VALIDATOR_WEBUI')) {
+  if (buildTargetsInclude(Targets.VALIDATOR_WEBUI)) {
     runCheck('gulp validator-webui');
   }
 

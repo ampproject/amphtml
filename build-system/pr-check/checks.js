@@ -19,7 +19,7 @@
  * @fileoverview Script that runs various checks during CI.
  */
 
-const {determineBuildTargets} = require('./build-targets');
+const {buildTargetsInclude, Targets} = require('./build-targets');
 const {reportAllExpectedTests} = require('../tasks/report-test-status');
 const {runCiJob} = require('./ci-job');
 const {timedExecOrDie} = require('./utils');
@@ -45,8 +45,7 @@ function pushBuildWorkflow() {
 }
 
 async function prBuildWorkflow() {
-  const buildTargets = determineBuildTargets();
-  await reportAllExpectedTests(buildTargets);
+  await reportAllExpectedTests();
   timedExecOrDie('gulp update-packages');
 
   timedExecOrDie('gulp check-exact-versions');
@@ -55,41 +54,41 @@ async function prBuildWorkflow() {
   timedExecOrDie('gulp presubmit');
   timedExecOrDie('gulp performance-urls');
 
-  if (buildTargets.has('AVA')) {
+  if (buildTargetsInclude(Targets.AVA)) {
     timedExecOrDie('gulp ava');
   }
 
-  if (buildTargets.has('BABEL_PLUGIN')) {
+  if (buildTargetsInclude(Targets.BABEL_PLUGIN)) {
     timedExecOrDie('gulp babel-plugin-tests');
   }
 
-  if (buildTargets.has('CACHES_JSON')) {
+  if (buildTargetsInclude(Targets.CACHES_JSON)) {
     timedExecOrDie('gulp caches-json');
   }
 
   // Check document links only for PR builds.
-  if (buildTargets.has('DOCS')) {
+  if (buildTargetsInclude(Targets.DOCS)) {
     timedExecOrDie('gulp check-links --local_changes');
   }
 
-  if (buildTargets.has('DEV_DASHBOARD')) {
+  if (buildTargetsInclude(Targets.DEV_DASHBOARD)) {
     timedExecOrDie('gulp dev-dashboard-tests');
   }
 
   // Validate owners syntax only for PR builds.
-  if (buildTargets.has('OWNERS')) {
+  if (buildTargetsInclude(Targets.OWNERS)) {
     timedExecOrDie('gulp check-owners --local_changes');
   }
 
-  if (buildTargets.has('RENOVATE_CONFIG')) {
+  if (buildTargetsInclude(Targets.RENOVATE_CONFIG)) {
     timedExecOrDie('gulp check-renovate-config');
   }
 
-  if (buildTargets.has('SERVER')) {
+  if (buildTargetsInclude(Targets.SERVER)) {
     timedExecOrDie('gulp server-tests');
   }
 
-  if (buildTargets.has('RUNTIME')) {
+  if (buildTargetsInclude(Targets.RUNTIME)) {
     timedExecOrDie('gulp dep-check');
     timedExecOrDie('gulp check-types');
     timedExecOrDie('gulp check-sourcemaps');
