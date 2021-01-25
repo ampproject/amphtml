@@ -724,6 +724,7 @@ export class AmpStoryEmbeddedComponent {
           StoryAnalyticsEvent.CLICK_THROUGH,
           this.triggeringTarget_
         );
+        this.tooltip_.href && this.onAnchorClick_(event);
       },
       true /** capture */
     );
@@ -1453,6 +1454,21 @@ export class AmpStoryEmbeddedComponent {
       undefined,
       {bubbles: true}
     );
+  }
+
+  /**
+   * Linkers don't work on shadow root elements so we need to create an anchor outside it.
+   * @param {!Event} event
+   * @private
+   */
+  onAnchorClick_(event) {
+    event.preventDefault();
+    const outerAnchor = this.win_.document.createElement('a');
+    outerAnchor.href = this.tooltip_.href;
+    outerAnchor.target = this.tooltip_.target;
+    this.win_.document.appendChild(outerAnchor);
+    outerAnchor.click();
+    outerAnchor.remove();
   }
 
   /**
