@@ -30,6 +30,14 @@ const TAG = 'amp-base-carousel';
 
 /** @extends {PreactBaseElement<BaseCarouselDef.CarouselApi>} */
 class AmpBaseCarousel extends PreactBaseElement {
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {?number} */
+    this.slide_ = null;
+  }
+
   /** @override */
   init() {
     const {element} = this;
@@ -43,7 +51,10 @@ class AmpBaseCarousel extends PreactBaseElement {
       },
       ActionTrust.LOW
     );
+
+    this.slide_ = parseInt(element.getAttribute('slide'), 10);
     return dict({
+      'defaultSlide': this.slide_ || 0,
       'onSlideChange': (index) => {
         fireSlideChangeEvent(this.win, element, index, ActionTrust.HIGH);
       },
@@ -53,10 +64,23 @@ class AmpBaseCarousel extends PreactBaseElement {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(
-      isExperimentOn(this.win, 'amp-base-carousel-bento'),
-      'expected amp-base-carousel-bento experiment to be enabled'
+      isExperimentOn(this.win, 'bento') ||
+        isExperimentOn(this.win, 'bento-carousel'),
+      'expected global "bento" or specific "bento-carousel" experiment to be enabled'
     );
     return super.isLayoutSupported(layout);
+  }
+
+  /** @override */
+  mutationObserverCallback() {
+    const slide = parseInt(this.element.getAttribute('slide'), 10);
+    if (slide === this.slide_) {
+      return;
+    }
+    this.slide_ = slide;
+    if (!isNaN(slide)) {
+      this.api().goToSlide(slide);
+    }
   }
 }
 
@@ -100,10 +124,18 @@ AmpBaseCarousel['props'] = {
   },
   'autoAdvanceLoops': {attr: 'auto-advance-loops', type: 'number', media: true},
   'controls': {attr: 'controls', type: 'string', media: true},
+  'orientation': {
+    attr: 'orientation',
+    type: 'string',
+    media: true,
+    default: 'horizontal',
+  },
   'loop': {attr: 'loop', type: 'boolean', media: true},
   'mixedLength': {attr: 'mixed-length', type: 'boolean', media: true},
   'outsetArrows': {attr: 'outset-arrows', type: 'boolean', media: true},
   'snap': {attr: 'snap', type: 'boolean', media: true, default: true},
+  'snapBy': {attr: 'snap-by', type: 'number', media: true},
+  'snapAlign': {attr: 'snap-align', type: 'string', media: true},
   'visibleCount': {attr: 'visible-count', type: 'number', media: true},
 };
 

@@ -84,6 +84,7 @@ startupChunk(self.document, function initial() {
   self.document.documentElement.classList.add('i-amphtml-inabox');
   installStylesForDoc(
     ampdoc,
+    // TODO: Can this be eliminated in ESM mode?
     ampSharedCss +
       'html.i-amphtml-inabox{width:100%!important;height:100%!important}',
     () => {
@@ -112,10 +113,7 @@ startupChunk(self.document, function initial() {
         self.document,
         function final() {
           Navigation.installAnchorClickInterceptor(ampdoc, self);
-          // eslint-disable-next-line no-undef
-          if (STORY_AD_INABOX) {
-            maybeRenderInaboxAsStoryAd(ampdoc);
-          }
+          maybeRenderInaboxAsStoryAd(ampdoc);
           maybeValidate(self);
           makeBodyVisible(self.document);
         },

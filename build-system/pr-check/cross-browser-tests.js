@@ -15,8 +15,21 @@
  */
 'use strict';
 
-const log = require('fancy-log');
+const {
+  abortTimedJob,
+  printChangeSummary,
+  printSkipMessage,
+  startTimer,
+  stopTimer,
+  timedExecOrDie,
+} = require('./utils');
+const {determineBuildTargets} = require('./build-targets');
+const {isPullRequestBuild} = require('../common/ci');
+const {log} = require('../common/logging');
 const {red, cyan} = require('ansi-colors');
+const {reportAllExpectedTests} = require('../tasks/report-test-status');
+const {runNpmChecks} = require('./npm-checks');
+const {setLoggingPrefix} = require('../common/logging');
 
 /**
  * @fileoverview
@@ -24,44 +37,101 @@ const {red, cyan} = require('ansi-colors');
  * Windows. This is run on Github Actions CI stage = Cross-Browser Tests.
  */
 
-const {
-  startTimer,
-  stopTimer,
-  timedExecOrDie: timedExecOrDieBase,
-} = require('./utils');
+const jobName = 'cross-browser-tests.js';
 
-const FILENAME = 'cross-browser-tests.js';
-const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
-
-async function main() {
-  const startTime = startTimer(FILENAME, FILENAME);
-  timedExecOrDie('gulp update-packages');
-  timedExecOrDie('gulp dist --fortesting');
-
+/**
+ * Helper that runs platform-specific integration tests
+ */
+function runIntegrationTestsForPlatform() {
   switch (process.platform) {
     case 'linux':
-      timedExecOrDie('gulp unit --nobuild --headless --firefox');
       timedExecOrDie(
         'gulp integration --nobuild --compiled --headless --firefox'
       );
       break;
     case 'darwin':
-      timedExecOrDie('gulp unit --nobuild --safari');
       timedExecOrDie('gulp integration --nobuild --compiled --safari');
       break;
     case 'win32':
-      timedExecOrDie('gulp unit --nobuild --headless --edge');
       timedExecOrDie('gulp integration --nobuild --compiled --headless --edge');
       timedExecOrDie('gulp integration --nobuild --compiled --ie');
       break;
     default:
       log(
         red('ERROR:'),
-        'Cannot run cross-browser tests on',
+        'Cannot run cross-browser integration tests on',
         cyan(process.platform) + '.'
       );
   }
-  stopTimer(FILENAME, FILENAME, startTime);
+}
+
+/**
+ * Helper that runs platform-specific unit tests
+ */
+function runUnitTestsForPlatform() {
+  switch (process.platform) {
+    case 'linux':
+      timedExecOrDie('gulp unit --headless --firefox');
+      break;
+    case 'darwin':
+      timedExecOrDie('gulp unit --safari');
+      break;
+    case 'win32':
+      timedExecOrDie('gulp unit --headless --edge');
+      break;
+    default:
+      log(
+        red('ERROR:'),
+        'Cannot run cross-browser unit tests on',
+        cyan(process.platform) + '.'
+      );
+  }
+}
+
+async function main() {
+  setLoggingPrefix(jobName);
+  const startTime = startTimer(jobName);
+  if (!runNpmChecks()) {
+    return abortTimedJob(jobName, startTime);
+  }
+  if (!isPullRequestBuild()) {
+    timedExecOrDie('gulp update-packages');
+    timedExecOrDie('gulp dist --fortesting');
+    runIntegrationTestsForPlatform();
+    runUnitTestsForPlatform();
+  } else {
+    printChangeSummary();
+    const buildTargets = determineBuildTargets();
+    if (process.platform == 'linux') {
+      await reportAllExpectedTests(buildTargets); // Only once is sufficient.
+    }
+    if (
+      !buildTargets.has('RUNTIME') &&
+      !buildTargets.has('FLAG_CONFIG') &&
+      !buildTargets.has('UNIT_TEST') &&
+      !buildTargets.has('INTEGRATION_TEST')
+    ) {
+      printSkipMessage(
+        jobName,
+        'this PR does not affect the runtime, flag configs, unit tests, or integration tests'
+      );
+      stopTimer(jobName, startTime);
+      return;
+    }
+    timedExecOrDie('gulp update-packages');
+    if (
+      buildTargets.has('RUNTIME') ||
+      buildTargets.has('FLAG_CONFIG') ||
+      buildTargets.has('INTEGRATION_TEST')
+    ) {
+      timedExecOrDie('gulp dist --fortesting');
+      runIntegrationTestsForPlatform();
+    }
+    if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {
+      runUnitTestsForPlatform();
+    }
+  }
+  stopTimer(jobName, startTime);
 }
 
 main();

@@ -40,7 +40,7 @@ For details on the configuration semantics, please contact the ad network or ref
 
 ### Required parameters
 
-- `layout`: AMP layout style, should match the `layout` attribute of the `amp-ad` tag
-- `publisher`: Publisher ID
-- `placement`: Placement type
-- `slot`: Slot ID
+-   `layout`: AMP layout style, should match the `layout` attribute of the `amp-ad` tag
+-   `publisher`: Publisher ID
+-   `placement`: Placement type
+-   `slot`: Slot ID

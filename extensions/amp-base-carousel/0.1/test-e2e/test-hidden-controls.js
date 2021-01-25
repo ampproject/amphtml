@@ -17,7 +17,7 @@
 import {getNextArrow} from './helpers';
 
 describes.endtoend(
-  'AMP carousel arrows with hidden controls',
+  'amp-base-carousel:0.1 - arrows with hidden controls',
   {
     testUrl:
       'http://localhost:8000/test/manual/amp-base-carousel/hidden-controls.amp.html',

@@ -5,10 +5,11 @@ formats:
 teaser:
   text: Displays multiple similar pieces of content along a horizontal axis or vertical axis.
 experimental: true
+bento: true
 ---
 
 <!---
-Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+Copyright 2021 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -38,6 +39,10 @@ navigational arrows to go forward or backwards a single item.
 
 The carousel advances between items if the user swipes or uses the customizable
 arrow buttons.
+
+### Migrating from 0.1
+
+Unlike `0.1`, the experimental `1.0` version of `amp-base-carousel` allows configuring the carousel slide orientation via `"orientation"="horizontal"|"vertical"` attributes instead of `"horizontal"="true"|"false"` attributes.
 
 ## Attributes
 
@@ -128,6 +133,14 @@ useful when using `visible-count`. This
 
 #### Miscellaneous
 
+##### controls
+
+Either `"always"`, `"auto"`, or `"never"`, defaults to `"auto"`. This determines if and when prev/next navigational arrows are displayed. Note: When `outset-arrows` is `true`, the arrows are shown `"always"`.
+
+-   `always`: Arrows are always displayed.
+-   `auto`: Arrows are displayed when the carousel has most recently received interaction via mouse, and not displayed when the carousel has most recently received interaction via touch. On first load for touch devices, arrows are displayed until first interaction.
+-   `never`: Arrows are never displayed.
+
 ##### slide
 
 A number, defaults to `0`. This determines the initial slide shown in the
@@ -136,15 +149,11 @@ showing.
 
 ##### loop
 
-Either `true` or `false`, defaults to `true`. When true, the carousel will allow
-the user to move from the first item back to the last item and visa versa. There
-must be at least three slides present for looping to occur.
+Either `true` or `false`, defaults to `false` when omitted. When true, the carousel will allow the user to move from the first item back to the last item and visa versa. There must be at least three times the `visible-count` of slides present for looping to occur.
 
-##### horizontal
+##### orientation
 
-Either `true` or `false`, defaults to `true`. When true the carousel will lay
-out horizontally, with the user being able to swipe left and right. When false,
-the carousel lays out vertically, with the user being able to swipe up and down.
+Either `horizontal` or `vertical`, defaults to `horizontal`. When `horizontal` the carousel will lay out horizontally, with the user being able to swipe left and right. When `vertical`, the carousel lays out vertically, with the user being able to swipe up and down.
 
 ##### common attributes
 
@@ -294,7 +303,3 @@ addition, when changing `visible-slides`, you likely want to change
   …
 </amp-base-carousel>
 ```
-
-## Validation
-
-See [amp-base-carousel rules](validator-amp-base-carousel.protoascii) in the AMP validator specification.

@@ -20,12 +20,13 @@
  * This script sets the build targets for our PR check, where the build targets
  * determine which tasks are required to run for pull request builds.
  */
-const colors = require('ansi-colors');
 const config = require('../test-configs/config');
 const minimatch = require('minimatch');
 const path = require('path');
+const {cyan} = require('ansi-colors');
+const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
 const {gitDiffNameOnlyMaster} = require('../common/git');
-const {isTravisBuild} = require('../common/travis');
+const {isCiBuild} = require('../common/ci');
 
 /**
  * Checks if the given file is an OWNERS file.
@@ -216,10 +217,9 @@ const targetMatchers = {
  * Populates buildTargets with a set of build targets contained in a PR after
  * making sure they are valid. Used to determine which checks to perform / tests
  * to run during PR builds.
- * @param {string} fileName
  * @return {boolean}
  */
-function determineBuildTargets(fileName = 'build-targets.js') {
+function determineBuildTargets() {
   const filesChanged = gitDiffNameOnlyMaster();
   const buildTargets = new Set();
   for (const file of filesChanged) {
@@ -235,17 +235,17 @@ function determineBuildTargets(fileName = 'build-targets.js') {
       buildTargets.add('RUNTIME'); // Default to RUNTIME for files that don't match a target.
     }
   }
-  const fileLogPrefix = colors.bold(colors.yellow(`${fileName}:`));
-  console.log(
-    `${fileLogPrefix} Detected build targets:`,
-    colors.cyan(Array.from(buildTargets).sort().join(', '))
+  const loggingPrefix = getLoggingPrefix();
+  logWithoutTimestamp(
+    `${loggingPrefix} Detected build targets:`,
+    cyan(Array.from(buildTargets).sort().join(', '))
   );
   // Test the runtime for babel plugin and server changes.
   if (buildTargets.has('BABEL_PLUGIN') || buildTargets.has('SERVER')) {
     buildTargets.add('RUNTIME');
   }
-  // Test all targets on Travis during package upgrades.
-  if (isTravisBuild() && buildTargets.has('PACKAGE_UPGRADE')) {
+  // Test all targets during CI builds for package upgrades.
+  if (isCiBuild() && buildTargets.has('PACKAGE_UPGRADE')) {
     const allTargets = Object.keys(targetMatchers);
     allTargets.forEach((target) => buildTargets.add(target));
   }

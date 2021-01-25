@@ -20,6 +20,7 @@ import {OwnersImpl} from '../../src/service/owners-impl';
 import {Resource, ResourceState} from '../../src/service/resource';
 import {ResourcesImpl} from '../../src/service/resources-impl';
 import {Services} from '../../src/services';
+import {isCancellation} from '../../src/error';
 import {layoutRectLtwh} from '../../src/layout-rect';
 
 describes.realWin('Resource', {amp: true}, (env) => {
@@ -245,10 +246,6 @@ describes.realWin('Resource', {amp: true}, (env) => {
       resource.measure();
     }).to.not.throw();
     expect(resource.getLayoutBox()).to.eql(layoutRectLtwh(0, 100, 300, 100));
-    // pageLayoutBox == layoutBox
-    expect(resource.getPageLayoutBox()).to.eql(
-      layoutRectLtwh(0, 100, 300, 100)
-    );
   });
 
   it('should allow measure even when not built', () => {
@@ -431,9 +428,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
     });
     resource.measure();
     expect(resource.isFixed()).to.be.true;
-    // layoutBox != pageLayoutBox
     expect(resource.getLayoutBox()).to.eql(layoutRectLtwh(0, 11, 10, 10));
-    expect(resource.getPageLayoutBox()).to.eql(layoutRectLtwh(0, 0, 10, 10));
   });
 
   it('should calculate fixed for fixed-style parent', () => {
@@ -460,20 +455,16 @@ describes.realWin('Resource', {amp: true}, (env) => {
     });
     resource.measure();
     expect(resource.isFixed()).to.be.true;
-    // layoutBox != pageLayoutBox
     expect(resource.getLayoutBox()).to.eql(layoutRectLtwh(0, 11, 10, 10));
-    expect(resource.getPageLayoutBox()).to.eql(layoutRectLtwh(0, 0, 10, 10));
   });
 
-  describe('getPageLayoutBoxAsync', () => {
+  describe('ensureMeasured', () => {
     it('should return layout box when the resource has NOT been measured', () => {
       env.sandbox.stub(element, 'isUpgraded').returns(true);
       env.sandbox
         .stub(element, 'getBoundingClientRect')
         .returns(layoutRectLtwh(0, 0, 10, 10));
-      return expect(resource.getPageLayoutBoxAsync()).to.eventually.eql(
-        layoutRectLtwh(0, 0, 10, 10)
-      );
+      return resource.ensureMeasured();
     });
 
     it('should return layout box when the resource has been measured', () => {
@@ -482,9 +473,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
         .stub(element, 'getBoundingClientRect')
         .returns(layoutRectLtwh(0, 0, 10, 10));
       resource.measure();
-      return expect(resource.getPageLayoutBoxAsync()).to.eventually.eql(
-        layoutRectLtwh(0, 0, 10, 10)
-      );
+      return resource.ensureMeasured();
     });
   });
 
@@ -631,6 +620,27 @@ describes.realWin('Resource', {amp: true}, (env) => {
     resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 10};
     resource.startLayout();
     expect(resource.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
+  });
+
+  it('should abort startLayout with unload', async () => {
+    const neverEndingPromise = new Promise(() => {});
+    elementMock.expects('layoutCallback').returns(neverEndingPromise).once();
+
+    resource.state_ = ResourceState.LAYOUT_SCHEDULED;
+    resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 10};
+    const layoutPromise = resource.startLayout();
+    expect(resource.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
+
+    resource.unload();
+
+    let error;
+    try {
+      await layoutPromise;
+    } catch (e) {
+      error = e;
+    }
+    expect(error).to.exist;
+    expect(isCancellation(error)).to.be.true;
   });
 
   it('should ignore startLayout for re-layout when not opt-in', () => {

@@ -22,54 +22,61 @@
  * This is run during the CI stage = test; job = Bundle Size.
  */
 
-const colors = require('ansi-colors');
-const log = require('fancy-log');
 const {
-  downloadEsmDistOutput,
-  downloadDistOutput,
+  abortTimedJob,
+  downloadModuleOutput,
+  downloadNomoduleOutput,
   printChangeSummary,
+  printSkipMessage,
   startTimer,
   stopTimer,
-  stopTimedJob,
-  timedExecOrDie: timedExecOrDieBase,
+  timedExecOrDie,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
-const {isTravisPullRequestBuild} = require('../common/travis');
+const {isPullRequestBuild, isTravisBuild} = require('../common/ci');
 const {runNpmChecks} = require('./npm-checks');
+const {setLoggingPrefix} = require('../common/logging');
 
-const FILENAME = 'bundle-size.js';
-const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
-const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
+const jobName = 'bundle-size.js';
 
 async function main() {
-  const startTime = startTimer(FILENAME, FILENAME);
-  if (!runNpmChecks(FILENAME)) {
-    stopTimedJob(FILENAME, startTime);
+  setLoggingPrefix(jobName);
+  const startTime = startTimer(jobName);
+
+  if (!runNpmChecks()) {
+    return abortTimedJob(jobName, startTime);
+  }
+
+  // TODO(rsimha): Remove this block once Travis is shut off.
+  if (isTravisBuild()) {
+    printSkipMessage(
+      jobName,
+      'this is a Travis build. Sizes will be reported from CircleCI'
+    );
     return;
   }
 
-  if (!isTravisPullRequestBuild()) {
-    downloadDistOutput(FILENAME);
-    downloadEsmDistOutput(FILENAME);
+  if (!isPullRequestBuild()) {
+    downloadNomoduleOutput();
+    downloadModuleOutput();
     timedExecOrDie('gulp bundle-size --on_push_build');
   } else {
-    printChangeSummary(FILENAME);
-    const buildTargets = determineBuildTargets(FILENAME);
+    printChangeSummary();
+    const buildTargets = determineBuildTargets();
     if (buildTargets.has('RUNTIME') || buildTargets.has('FLAG_CONFIG')) {
-      downloadDistOutput(FILENAME);
-      downloadEsmDistOutput(FILENAME);
+      downloadNomoduleOutput();
+      downloadModuleOutput();
       timedExecOrDie('gulp bundle-size --on_pr_build');
     } else {
       timedExecOrDie('gulp bundle-size --on_skipped_build');
-      log(
-        `${FILELOGPREFIX} Skipping`,
-        colors.cyan('Bundle Size'),
-        'because this commit does not affect the runtime or flag configs.'
+      printSkipMessage(
+        jobName,
+        'this PR does not affect the runtime or flag configs'
       );
     }
   }
 
-  stopTimer(FILENAME, FILENAME, startTime);
+  stopTimer(jobName, startTime);
 }
 
 main();

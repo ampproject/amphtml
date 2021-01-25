@@ -16,8 +16,8 @@
 
 import '../amp-social-share';
 import {toggleExperiment} from '../../../../src/experiments';
+import {waitFor, whenCalled} from '../../../../testing/test-helper.js';
 import {waitForChildPromise} from '../../../../src/dom';
-import {whenCalled} from '../../../../testing/test-helper.js';
 
 const BUTTON_SELECTOR = 'div[role="button"]';
 const WINDOW_FEATURES = 'resizable,scrollbars,width=640,height=480';
@@ -43,11 +43,20 @@ describes.realWin(
       });
     };
 
+    // Should be called after waitForRender (assumes shadow already attached)
+    // Waits for the type change to propagate to within the shadowDOM
+    const waitForTypeChange = async (el, type) => {
+      await waitFor(
+        () => el.shadowRoot.querySelector('svg').getAttribute('type') === type,
+        'type attribute is updated'
+      );
+    };
+
     beforeEach(() => {
       win = env.win;
       doc = win.document;
       doc.title = 'Test Title';
-      toggleExperiment(win, 'amp-social-share-bento', true);
+      toggleExperiment(win, 'bento-social-share', true);
     });
 
     it('renders custom endpoint when not using a pre-configured type', async () => {
@@ -215,6 +224,103 @@ describes.realWin(
       expect(
         element.shadowRoot.querySelector('svg').style.backgroundColor
       ).to.be.equal('inherit');
+    });
+
+    describe('dynamically update attributes', () => {
+      it('updates default url and css class when "type" attribute is updated', async () => {
+        element = win.document.createElement('amp-social-share');
+        element.setAttribute('type', 'email');
+        win.document.body.appendChild(element);
+        await waitForRender();
+
+        // Has email class (for css) and does not have facebook class
+        expect(element.className).to.include('amp-social-share-email');
+        expect(element.className).to.not.include('amp-social-share-facebook');
+
+        element.setAttribute('type', 'facebook');
+        await waitForTypeChange(element, 'FACEBOOK');
+
+        const openWindowDialogStub = env.sandbox.stub(window, 'open');
+        element.shadowRoot.querySelector(BUTTON_SELECTOR).click();
+
+        // Verify that the facebook default URL is used instead of email
+        expect(openWindowDialogStub).to.be.calledWithExactly(
+          'https://www.facebook.com/dialog/share?' +
+            'href=https%3A%2F%2Fcanonicalexample.com%2F',
+          '_blank',
+          WINDOW_FEATURES
+        );
+
+        // Has facebook class (for css) and does not have email class
+        expect(element.className).to.include('amp-social-share-facebook');
+        expect(element.className).to.not.include('amp-social-share-email');
+      });
+
+      it('updates target when "data-target" attribute is updated', async () => {
+        element = win.document.createElement('amp-social-share');
+        element.setAttribute('type', 'email');
+        win.document.body.appendChild(element);
+        await waitForRender();
+
+        element.setAttribute('type', 'facebook');
+        element.setAttribute('data-target', 'test-value');
+        await waitForTypeChange(element, 'FACEBOOK');
+
+        const openWindowDialogStub = env.sandbox.stub(window, 'open');
+        element.shadowRoot.querySelector(BUTTON_SELECTOR).click();
+
+        // Verify that target is updated to the "test-value"
+        expect(openWindowDialogStub).to.be.calledWithExactly(
+          'https://www.facebook.com/dialog/share?' +
+            'href=https%3A%2F%2Fcanonicalexample.com%2F',
+          'test-value',
+          WINDOW_FEATURES
+        );
+      });
+
+      it('updates endpoint when "data-share-endpoint" attribute is updated', async () => {
+        element = win.document.createElement('amp-social-share');
+        element.setAttribute('type', 'email');
+        win.document.body.appendChild(element);
+        await waitForRender();
+
+        element.setAttribute('type', 'custom');
+        element.setAttribute('data-share-endpoint', 'test-value');
+        await waitForTypeChange(element, 'CUSTOM');
+
+        const openWindowDialogStub = env.sandbox.stub(window, 'open');
+        element.shadowRoot.querySelector(BUTTON_SELECTOR).click();
+
+        // Verify that the endpoint is updated to the "test-value"
+        expect(openWindowDialogStub).to.be.calledWithExactly(
+          'test-value',
+          '_blank',
+          WINDOW_FEATURES
+        );
+      });
+
+      it('updates params when "data-param-*" attributes are added', async () => {
+        element = win.document.createElement('amp-social-share');
+        element.setAttribute('type', 'email');
+        win.document.body.appendChild(element);
+        await waitForRender();
+
+        element.setAttribute('type', 'custom');
+        element.setAttribute('data-share-endpoint', 'test-value');
+        element.setAttribute('data-param-cat', 'meow');
+        element.setAttribute('data-param-dog', 'woof');
+        await waitForTypeChange(element, 'CUSTOM');
+
+        const openWindowDialogStub = env.sandbox.stub(window, 'open');
+        element.shadowRoot.querySelector(BUTTON_SELECTOR).click();
+
+        // Verify that the "cat" and "dog" params are appended to the endpoint
+        expect(openWindowDialogStub).to.be.calledWithExactly(
+          'test-value?cat=meow&dog=woof',
+          '_blank',
+          WINDOW_FEATURES
+        );
+      });
     });
   }
 );

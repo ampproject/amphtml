@@ -23,7 +23,7 @@ const pageHeight = 600;
 const testTimeout = 20000;
 
 describes.endtoend(
-  'AMP carousel',
+  'amp-base-carousel:0.1 - basic functionality',
   {
     testUrl:
       'http://localhost:8000/test/manual/amp-base-carousel/basic.amp.html',
@@ -145,7 +145,7 @@ describes.endtoend(
       });
     });
 
-    it('should go to slide 0 when index is set to 0 ', async function () {
+    it.skip('should go to slide 0 when index is set to 0 ', async function () {
       this.timeout(testTimeout);
       const el = await getScrollingElement(controller);
 

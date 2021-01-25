@@ -18,7 +18,6 @@
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs-extra');
 const globby = require('globby');
-const log = require('fancy-log');
 const pathModule = require('path');
 const {
   RuntimeTestRunner,
@@ -27,6 +26,7 @@ const {
 const {buildNewServer} = require('../server/typescript-compile');
 const {buildRuntime} = require('../common/utils');
 const {cyan, yellow} = require('ansi-colors');
+const {log} = require('../common/logging');
 const {maybePrintArgvMessages} = require('./runtime-test/helpers');
 
 const INTEGRATION_FIXTURES = [

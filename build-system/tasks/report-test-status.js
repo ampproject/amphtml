@@ -16,11 +16,17 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const log = require('fancy-log');
 const requestPromise = require('request-promise');
+const {
+  isCircleciBuild,
+  isPullRequestBuild,
+  isGithubActionsBuild,
+  isTravisBuild,
+} = require('../common/ci');
+const {ciJobUrl} = require('../common/ci');
 const {cyan, green, yellow} = require('ansi-colors');
 const {gitCommitHash} = require('../common/git');
-const {travisJobUrl, isTravisPullRequestBuild} = require('../common/travis');
+const {log} = require('../common/logging');
 
 const reportBaseUrl = 'https://amp-test-status-bot.appspot.com/v0/tests';
 
@@ -28,15 +34,18 @@ const IS_GULP_INTEGRATION = argv._[0] === 'integration';
 const IS_GULP_UNIT = argv._[0] === 'unit';
 const IS_GULP_E2E = argv._[0] === 'e2e';
 
-const IS_LOCAL_CHANGES = !!argv.local_changes;
-const IS_DIST = !!argv.compiled;
-const IS_ESM = !!argv.esm;
-
-const TEST_TYPE_SUBTYPES = new Map([
-  ['integration', ['local', 'minified', 'esm']],
-  ['unit', ['local', 'local-changes']],
-  ['e2e', ['local']],
-]);
+const TEST_TYPE_SUBTYPES = isGithubActionsBuild()
+  ? new Map([
+      ['integration', ['firefox', 'safari', 'edge', 'ie']],
+      ['unit', ['firefox', 'safari', 'edge']],
+    ])
+  : isCircleciBuild()
+  ? new Map([
+      ['integration', ['unminified', 'nomodule', 'module']],
+      ['unit', ['unminified', 'local-changes']],
+      ['e2e', ['nomodule']],
+    ])
+  : new Map([]);
 const TEST_TYPE_BUILD_TARGETS = new Map([
   ['integration', ['RUNTIME', 'FLAG_CONFIG', 'INTEGRATION_TEST']],
   ['unit', ['RUNTIME', 'UNIT_TEST']],
@@ -44,33 +53,41 @@ const TEST_TYPE_BUILD_TARGETS = new Map([
 ]);
 
 function inferTestType() {
-  if (IS_GULP_E2E) {
-    return 'e2e/local';
-  }
-
-  let type;
-  if (IS_GULP_UNIT) {
-    type = 'unit';
-  } else if (IS_GULP_INTEGRATION) {
-    type = 'integration';
-  } else {
+  // Determine type (early exit if there's no match).
+  const type = IS_GULP_E2E
+    ? 'e2e'
+    : IS_GULP_INTEGRATION
+    ? 'integration'
+    : IS_GULP_UNIT
+    ? 'unit'
+    : null;
+  if (type == null) {
     return null;
   }
 
-  if (IS_LOCAL_CHANGES) {
-    return `${type}/local-changes`;
-  } else if (IS_DIST) {
-    if (IS_ESM) {
-      return `${type}/esm`;
-    }
-    return `${type}/minified`;
-  } else {
-    return `${type}/local`;
-  }
+  // Determine subtype (more specific cases come first).
+  const subtype = argv.local_changes
+    ? 'local-changes'
+    : argv.esm
+    ? 'module'
+    : argv.firefox
+    ? 'firefox'
+    : argv.safari
+    ? 'safari'
+    : argv.edge
+    ? 'edge'
+    : argv.ie
+    ? 'ie'
+    : argv.compiled
+    ? 'nomodule'
+    : 'unminified';
+
+  return `${type}/${subtype}`;
 }
 
 async function postReport(type, action) {
-  if (type !== null && isTravisPullRequestBuild()) {
+  // TODO(rsimha): Remove `!isTravisBuild()` condition once Travis is shut off.
+  if (type && isPullRequestBuild() && !isTravisBuild()) {
     const commitHash = gitCommitHash();
 
     try {
@@ -78,7 +95,7 @@ async function postReport(type, action) {
         method: 'POST',
         uri: `${reportBaseUrl}/${commitHash}/${type}/${action}`,
         body: JSON.stringify({
-          travisJobUrl: travisJobUrl(),
+          ciJobUrl: ciJobUrl(),
         }),
         headers: {
           'Content-Type': 'application/json',

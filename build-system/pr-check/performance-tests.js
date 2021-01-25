@@ -22,22 +22,24 @@
  */
 
 const {
-  downloadDistOutput,
+  downloadNomoduleOutput,
   startTimer,
   stopTimer,
-  timedExecOrDie: timedExecOrDieBase,
+  timedExecOrDie,
 } = require('./utils');
-const FILENAME = 'performance-tests.js';
-const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
+const {setLoggingPrefix} = require('../common/logging');
+
+const jobName = 'performance-tests.js';
 
 async function main() {
-  const startTime = startTimer(FILENAME, FILENAME);
+  setLoggingPrefix(jobName);
+  const startTime = startTimer(jobName);
 
-  downloadDistOutput(FILENAME);
+  downloadNomoduleOutput(jobName);
   timedExecOrDie('gulp update-packages');
   timedExecOrDie('gulp performance --nobuild --quiet --headless');
 
-  stopTimer(FILENAME, FILENAME, startTime);
+  stopTimer(jobName, startTime);
 }
 
 main();

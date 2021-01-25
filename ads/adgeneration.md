@@ -28,8 +28,8 @@ For details on the configuration semantics, please see [Ad Generation's document
 
 Supported parameters:
 
-- `data-id`
-- `data-targetid`
-- `data-displayid`
-- `data-adtype`
-- `data-option`
+-   `data-id`
+-   `data-targetid`
+-   `data-displayid`
+-   `data-adtype`
+-   `data-option`

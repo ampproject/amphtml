@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {
   CONSENT_ITEM_STATE,
   constructConsentInfo,
@@ -168,7 +168,7 @@ describes.realWin(
           'promptUISrc': 'https://promptUISrc',
         });
         consentUI = new ConsentUI(mockInstance, config);
-        const clock = lolex.install({target: win});
+        const clock = fakeTimers.withGlobal(win).install();
 
         // Append iframe, and remove iframe after 1sec timeout
         expect(elementByTag(parent, 'iframe')).to.be.null;
@@ -216,6 +216,30 @@ describes.realWin(
         consentUI.disableScroll_();
         consentUI.hide();
         expect(consentUI.scrollEnabled_).to.be.true;
+      });
+
+      it('should set the iframe transform class on parent', async () => {
+        const config = dict({
+          'promptUISrc': 'https://promptUISrc',
+        });
+        consentUI = new ConsentUI(mockInstance, config);
+
+        consentUI.show(false);
+        consentUI.handleIframeMessages_({
+          source: consentUI.ui_.contentWindow,
+          data: {
+            type: 'consent-ui',
+            action: 'ready',
+            initialHeight: '80vh',
+          },
+        });
+        await macroTask();
+        expect(
+          consentUI.parent_.style.getPropertyValue('--i-amphtml-modal-height')
+        ).to.equal('80vh');
+        expect(
+          consentUI.parent_.classList.contains(consentUiClasses.iframeTransform)
+        ).to.be.true;
       });
     });
 
@@ -370,7 +394,7 @@ describes.realWin(
           consentUI = new ConsentUI(mockInstance, {
             'promptUISrc': 'https://promptUISrc',
           });
-          const clock = lolex.install({target: win});
+          const clock = fakeTimers.withGlobal(win).install();
           consentUI.show(false);
           consentUI.iframeReady_.resolve();
           await macroTask();

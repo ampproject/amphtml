@@ -727,7 +727,8 @@ export class AmpConsent extends AMP.BaseElement {
     return constructMetadata(
       opt_metadata['consentStringType'],
       opt_metadata['additionalConsent'],
-      opt_metadata['gdprApplies']
+      opt_metadata['gdprApplies'],
+      opt_metadata['purposeOne']
     );
   }
 

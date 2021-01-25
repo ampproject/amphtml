@@ -1492,7 +1492,7 @@ describe('ValidatorRulesMakeSense', () => {
         expect(specNameIsUnique.hasOwnProperty(tagSpec.specName)).toBe(false);
         specNameIsUnique[tagSpec.specName] = 0;
       } else if (tagSpec.extensionSpec !== null) {
-        const specName = tagSpec.extensionSpec.name + ' extension .js script';
+        const specName = tagSpec.extensionSpec.name + ' extension script';
 
         expect(specNameIsUnique.hasOwnProperty(specName)).toBe(false);
         specNameIsUnique[specName] = 0;
@@ -1747,7 +1747,7 @@ describe('ValidatorRulesMakeSense', () => {
            // it's sufficiently wrapped in private context inside the validator
            // that I don't see a way to call it.  For now just gold the current
            // index.
-           expect(tagSpec.attrLists[0]).toEqual(20);
+           expect(tagSpec.attrLists[0]).toEqual(22);
          });
     }
 
@@ -1816,6 +1816,7 @@ describe('ValidatorRulesMakeSense', () => {
               tagSpec.cdata.cdataRegex !== null ||
               tagSpec.cdata.mandatoryCdata !== null ||
               tagSpec.cdata.maxBytes === -1 ||
+              tagSpec.cdata.whitespaceOnly !== null ||
               tagSpec.cdata.cssSpec.validateKeyframes)
               .toBe(true);
         });

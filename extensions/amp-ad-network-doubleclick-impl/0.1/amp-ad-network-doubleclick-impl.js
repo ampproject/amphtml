@@ -39,6 +39,7 @@ import {
   getCsiAmpAnalyticsVariables,
   getEnclosingContainerTypes,
   getIdentityToken,
+  getServeNpaPromise,
   googleAdUrl,
   googleBlockParameters,
   googlePageParameters,
@@ -50,10 +51,12 @@ import {
 } from '../../../ads/google/a4a/utils';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {Deferred} from '../../../src/utils/promise';
+import {FIE_RESOURCES_EXP} from '../../../src/experiments/fie-resources-exp';
 import {
   FlexibleAdSlotDataTypeDef,
   getFlexibleAdSlotData,
 } from './flexible-ad-slot-utils';
+import {INTERSECT_RESOURCES_EXP} from '../../../src/experiments/intersect-resources-exp';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Navigation} from '../../../src/service/navigation';
 import {RTC_VENDORS} from '../../../src/service/real-time-config/callout-vendors';
@@ -96,14 +99,16 @@ import {
   waitFor3pThrottle,
 } from '../../amp-ad/0.1/concurrent-load';
 import {getCryptoRandomBytesArray, utf8Decode} from '../../../src/utils/bytes';
-import {getMode} from '../../../src/mode';
-import {getMultiSizeDimensions} from '../../../ads/google/utils';
-import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {
+  getExperimentBranch,
   isExperimentOn,
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
+import {getMode} from '../../../src/mode';
+import {getMultiSizeDimensions} from '../../../ads/google/utils';
+import {getOrCreateAdCid} from '../../../src/ad-cid';
 
+import {getPageLayoutBoxBlocking} from '../../../src/utils/page-layout-box';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {isArray} from '../../../src/types';
 import {isCancellation} from '../../../src/error';
@@ -145,12 +150,12 @@ const ZINDEX_EXP_BRANCHES = {
 };
 
 /** @const {string} */
-const PTT_EXP = 'doubleclick-ptt-exp';
+const IDLE_CWV_EXP = 'dfp-render-on-idle-cwv-exp';
 
 /** @const @enum{string} */
-const PTT_EXP_BRANCHES = {
-  CONTROL: '21068093',
-  EXPERIMENT: '21068094',
+const IDLE_CWV_EXP_BRANCHES = {
+  CONTROL: '20208860',
+  EXPERIMENT: '20208859',
 };
 
 /**
@@ -221,6 +226,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @private {!../../../src/service/extensions-impl.Extensions} */
     this.extensions_ = Services.extensionsFor(this.win);
+
+    /** @private @const {?../../../src/service/performance-impl.Performance} */
+    this.performance_ = Services.performanceForOrNull(this.win);
 
     /** @private {?string} */
     this.qqid_ = null;
@@ -342,6 +350,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
      * @private {boolean}
      */
     this.inZIndexHoldBack_ = false;
+
+    /**
+     * A signal from publishers to serve NPA through ad url.
+     * @private {boolean}
+     */
+    this.serveNpaSignal_ = false;
   }
 
   /**
@@ -363,7 +377,27 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       // holdback branch sends non-numeric value.
       return false;
     }
-    return vpRange || 12;
+
+    if (vpRange) {
+      return vpRange;
+    }
+
+    let fallbackRange = 12;
+    if (!this.performance_) {
+      return fallbackRange;
+    }
+
+    const idleCwvExpSelectedBranch = getExperimentBranch(
+      this.win,
+      IDLE_CWV_EXP
+    );
+    if (idleCwvExpSelectedBranch === IDLE_CWV_EXP_BRANCHES.CONTROL) {
+      this.performance_.addEnabledExperiment('dfp-idle-cwv-control');
+    } else if (idleCwvExpSelectedBranch === IDLE_CWV_EXP_BRANCHES.EXPERIMENT) {
+      fallbackRange = 3;
+      this.performance_.addEnabledExperiment('dfp-idle-cwv-exp');
+    }
+    return fallbackRange;
   }
 
   /** @override */
@@ -383,9 +417,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // being schedule due to being beyond viewport max offset.  If slot
     // comes within standard outside viewport range, then ensure throttling
     // will not be applied.
-    this.getResource()
-      .whenWithinViewport(renderOutsideViewport)
-      .then(() => (this.isIdleRender_ = false));
+    this.whenWithinViewport(renderOutsideViewport).then(
+      () => (this.isIdleRender_ = false)
+    );
     return vpRange;
   }
 
@@ -440,9 +474,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         branches: Object.values(ZINDEX_EXP_BRANCHES),
       },
       {
-        experimentId: PTT_EXP,
-        isTrafficEligible: () => true,
-        branches: Object.values(PTT_EXP_BRANCHES),
+        experimentId: IDLE_CWV_EXP,
+        isTrafficEligible: () => {
+          return (
+            !!this.performance_ &&
+            !this.element.getAttribute('data-loading-strategy')
+          );
+        },
+        branches: Object.values(IDLE_CWV_EXP_BRANCHES),
       },
     ]);
     const setExps = this.randomlySelectUnsetExperiments_(experimentInfoList);
@@ -453,6 +492,23 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (moduleNomoduleExpId) {
       this.experimentIds.push(moduleNomoduleExpId);
     }
+
+    const intersectResourcesExpId = getExperimentBranch(
+      this.win,
+      INTERSECT_RESOURCES_EXP.id
+    );
+    if (intersectResourcesExpId) {
+      this.experimentIds.push(intersectResourcesExpId);
+    }
+
+    const fieResourcesExpId = getExperimentBranch(
+      this.win,
+      FIE_RESOURCES_EXP.id
+    );
+    if (fieResourcesExpId) {
+      this.experimentIds.push(fieResourcesExpId);
+    }
+
     const ssrExpIds = this.getSsrExpIds_();
     for (let i = 0; i < ssrExpIds.length; i++) {
       addAmpExperimentIdToElement(ssrExpIds[i], this.element);
@@ -573,12 +629,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const {consentString, gdprApplies} = consentTuple;
 
     return {
-      'ptt': this.experimentIds.includes(PTT_EXP_BRANCHES.EXPERIMENT)
-        ? 13
-        : null,
+      'ptt': 13,
       'npa':
         consentTuple.consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
-        consentTuple.consentState == CONSENT_POLICY_STATE.UNKNOWN
+        consentTuple.consentState == CONSENT_POLICY_STATE.UNKNOWN ||
+        this.serveNpaSignal_
           ? 1
           : null,
       'gdfp_req': '1',
@@ -603,7 +658,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.ifi_ =
       (this.isRefreshing && this.ifi_) || this.win['ampAdGoogleIfiCounter']++;
     const pageLayoutBox = this.isSinglePageStoryAd
-      ? this.element.getPageLayoutBox()
+      ? getPageLayoutBoxBlocking(this.element)
       : null;
     let msz = null;
     let psz = null;
@@ -684,10 +739,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  getAdUrl(opt_consentTuple, opt_rtcResponsesPromise) {
+  getAdUrl(opt_consentTuple, opt_rtcResponsesPromise, opt_serveNpaSignal) {
     if (this.useSra) {
       this.sraDeferred = this.sraDeferred || new Deferred();
     }
+    this.serveNpaSignal_ = !!opt_serveNpaSignal;
     const consentTuple = opt_consentTuple || {};
     if (
       consentTuple.consentState == CONSENT_POLICY_STATE.UNKNOWN &&
@@ -755,6 +811,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     });
     this.troubleshootData_.adUrl = this.getAdUrlDeferred.promise;
     return this.getAdUrlDeferred.promise;
+  }
+
+  /** @override */
+  getServeNpaSignal() {
+    return getServeNpaPromise(this.element);
   }
 
   /**
@@ -922,7 +983,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           return this.element.getAttribute(name);
         }
       },
-      ELEMENT_POS: () => this.element.getPageLayoutBox().top,
+      ELEMENT_POS: () => getPageLayoutBoxBlocking(this.element).top,
       SCROLL_TOP: () =>
         Services.viewportForDoc(this.getAmpDoc()).getScrollTop(),
       PAGE_HEIGHT: () =>
@@ -1481,7 +1542,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       } else {
         // Must center creative within the viewport
         const viewportWidth = this.getViewport().getRect().width;
-        const pageLayoutBox = this.element.getPageLayoutBox();
+        const pageLayoutBox = getPageLayoutBoxBlocking(this.element);
         const whitespace = (viewportWidth - newWidth) / 2;
         if (isRtl) {
           style['margin-right'] = getMarginStr(

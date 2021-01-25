@@ -65,8 +65,8 @@ Your site must be approved and active with [AdThrive](http://www.adthrive.com) p
 
 ### Required parameters
 
-- `data-site-id` - Your AdThrive site id.
-- `data-ad-unit` - AdThrive provided ad unit.
+-   `data-site-id` - Your AdThrive site id.
+-   `data-ad-unit` - AdThrive provided ad unit.
 
 ### Optional parameters
 
