@@ -44,6 +44,10 @@ amp-carousel:not([type="slides"]) .i-amphtml-carousel-content {
   margin-inline-end: 0;
 }
 
+.amp-scrollable-carousel-slide.i-amphtml-layout-responsive {
+  width: 100%
+}
+
 .amp-scrollable-carousel-slide:first-child {
   margin-left: 0px;
   margin-inline-start: 0;
