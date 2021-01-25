@@ -74,7 +74,7 @@ import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {listen} from '../../../src/event-helper';
 import {parseQueryString} from '../../../src/url';
-import {px, toggle} from '../../../src/style';
+import {px, setImportantStyles, toggle} from '../../../src/style';
 import {renderPageDescription} from './semantic-render';
 import {setTextBackgroundColor} from './utils';
 import {toArray} from '../../../src/types';
@@ -1253,6 +1253,31 @@ export class AmpStoryPage extends AMP.BaseElement {
     if (distance > 0 && distance <= 2) {
       this.findAndPrepareEmbeddedComponents_();
       registerAllPromise.then(() => this.preloadAllMedia_());
+    }
+
+    if (distance === 0) {
+      const allLinks = this.element.querySelectorAll('a');
+
+      allLinks.forEach((link) => {
+        const left = link.offsetLeft;
+        const width = link.offsetWidth;
+        const top = link.offsetTop;
+        const height = link.offsetHeight;
+
+        const posX = left + width / 2;
+        const posY = top + height / 2;
+
+        const tapHint = document.createElement('div');
+        tapHint.classList.add('tap-hint');
+        this.element.appendChild(tapHint);
+        setImportantStyles(tapHint, {
+          left: `${posX}px`,
+          top: `${posY}px`,
+        });
+      });
+    } else {
+      const tapHints = this.element.querySelectorAll('.tap-hint');
+      tapHints.forEach((tapHint) => tapHint.remove());
     }
   }
 
