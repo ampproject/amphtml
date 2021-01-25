@@ -15,6 +15,10 @@
  */
 
 import {TCF_POST_MESSAGE_API_COMMANDS} from './consent-info';
+import {isEnumValue, isObject} from '../../../src/types';
+import {user} from '../../../src/log';
+
+const TAG = 'amp-consent';
 
 /**
  * @param {!Object} payload
@@ -30,4 +34,33 @@ export function handleTcfCommand(payload) {
     default:
       return;
   }
+}
+
+/**
+ * Checks if the payload from the `tcfapiCall` is valid.
+ * @param {JsonObject} payload
+ * @return {boolean}
+ */
+export function isValidTcfApiCall(payload) {
+  if (!isObject(payload)) {
+    user().error(TAG, `"tcfapiCall" is not an object: ${payload}`);
+    return false;
+  }
+  const {command, parameter, version} = payload;
+  if (!isEnumValue(TCF_POST_MESSAGE_API_COMMANDS, command)) {
+    user().error(TAG, `Unsupported command found in "tcfapiCall": ${command}`);
+    return false;
+  }
+  if (parameter !== undefined) {
+    user().error(
+      TAG,
+      `Unsupported parameter found in "tcfapiCall": ${parameter}`
+    );
+    return false;
+  }
+  if (version != '2') {
+    user().error(TAG, `Found incorrect version in "tcfapiCall": ${version}`);
+    return false;
+  }
+  return true;
 }

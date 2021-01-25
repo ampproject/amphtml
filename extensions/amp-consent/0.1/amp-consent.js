@@ -17,7 +17,6 @@
 import {
   CONSENT_ITEM_STATE,
   ConsentMetadataDef,
-  TCF_POST_MESSAGE_API_COMMANDS,
   assertMetadataValues,
   constructMetadata,
   convertEnumValueToState,
@@ -48,7 +47,7 @@ import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
-import {handleTcfCommand} from './tcf-api-commands';
+import {handleTcfCommand, isValidTcfApiCall} from './tcf-api-commands';
 import {isEnumValue, isObject} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {toggle} from '../../../src/style';
@@ -742,38 +741,6 @@ export class AmpConsent extends AMP.BaseElement {
   }
 
   /**
-   * Checks if the payload from the `tcfapiCall` is valid.
-   * @param {JsonObject} payload
-   * @return {boolean}
-   */
-  isValidTcfApiCall_(payload) {
-    if (!isObject(payload)) {
-      user().error(TAG, `"tcfapiCall" is not an object: ${payload}`);
-      return false;
-    }
-    const {command, parameter, version} = payload;
-    if (!isEnumValue(TCF_POST_MESSAGE_API_COMMANDS, command)) {
-      user().error(
-        TAG,
-        `Unsupported command found in "tcfapiCall": ${command}`
-      );
-      return false;
-    }
-    if (parameter !== undefined) {
-      user().error(
-        TAG,
-        `Unsupported parameter found in "tcfapiCall": ${parameter}`
-      );
-      return false;
-    }
-    if (version != '2') {
-      user().error(TAG, `Found incorrect version in "tcfapiCall": ${version}`);
-      return false;
-    }
-    return true;
-  }
-
-  /**
    * Maybe set up the __tfcApiLocator window and listeners.
    *
    * The window is a dummy iframe that signals to 3p iframes
@@ -800,7 +767,6 @@ export class AmpConsent extends AMP.BaseElement {
     }
   }
 
-
   /**
    * Listen to iframe messages and handle events.
    *
@@ -823,15 +789,11 @@ export class AmpConsent extends AMP.BaseElement {
     if (
       !data ||
       !data['__tcfapiCall'] ||
-      !this.isValidTcfApiCall_(data['__tcfapiCall'])
+      !isValidTcfApiCall(data['__tcfapiCall'])
     ) {
       return;
     }
-    handleTcfCommand(
-      data.__tcfapiCall,
-      event.source,
-      this.consentPolicyManager_
-    );
+    handleTcfCommand(data.__tcfapiCall);
   }
 }
 

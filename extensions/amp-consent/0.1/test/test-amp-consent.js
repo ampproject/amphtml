@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as TcfApiCommands from '../tcf-api-commands';
 import {ACTION_TYPE, AmpConsent} from '../amp-consent';
 import {
   CONSENT_ITEM_STATE,
@@ -930,52 +931,13 @@ describes.realWin(
         });
 
         it('installs window level event listener', async () => {
-          listenerSpy = env.sandbox.stub(ampConsent, 'isValidTcfApiCall_');
+          listenerSpy = env.sandbox.stub(TcfApiCommands, 'isValidTcfApiCall');
           event.data = msg;
           await ampConsent.buildCallback();
           await macroTask();
           win.dispatchEvent(event);
           expect(listenerSpy).to.be.calledOnce;
           expect(listenerSpy.args[0][0]).to.deep.equals(msg.__tcfapiCall);
-        });
-
-        it('validates __tcfapiCall post message', async () => {
-          const errorSpy = env.sandbox.stub(user(), 'error');
-          msg.__tcfapiCall = 'bad';
-          expect(ampConsent.isValidTcfApiCall_(msg.__tcfapiCall)).to.be.false;
-          expect(errorSpy.args[0][1]).to.match(
-            /"tcfapiCall" is not an object: bad/
-          );
-          errorSpy.resetHistory();
-
-          msg.__tcfapiCall = {
-            'command': 'bad',
-          };
-          expect(ampConsent.isValidTcfApiCall_(msg.__tcfapiCall)).to.be.false;
-          expect(errorSpy.args[0][1]).to.match(
-            /Unsupported command found in "tcfapiCall": bad/
-          );
-          errorSpy.resetHistory();
-
-          msg.__tcfapiCall.command = 'ping';
-          msg.__tcfapiCall.parameter = [1, 2, 3];
-          expect(ampConsent.isValidTcfApiCall_(msg.__tcfapiCall)).to.be.false;
-          expect(errorSpy.args[0][1]).to.match(
-            /Unsupported parameter found in "tcfapiCall": [1,2,3]/
-          );
-          errorSpy.resetHistory();
-
-          msg.__tcfapiCall.parameter = undefined;
-          msg.__tcfapiCall.version = 1;
-          expect(ampConsent.isValidTcfApiCall_(msg.__tcfapiCall)).to.be.false;
-          expect(errorSpy.args[0][1]).to.match(
-            /Found incorrect version in "tcfapiCall": 1/
-          );
-          errorSpy.resetHistory();
-
-          msg.__tcfapiCall.version = 2;
-          expect(ampConsent.isValidTcfApiCall_(msg.__tcfapiCall)).to.be.true;
-          expect(errorSpy).to.not.be.called;
         });
       });
     });
