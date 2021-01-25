@@ -51,6 +51,7 @@ export function shouldLoadPolyfill(win) {
  * See: https://bugs.webkit.org/show_bug.cgi?id=219495.
  *
  * @param {!Window} win
+ * @return {boolean}
  */
 function isWebkit(win) {
   const ua = win.navigator && win.navigator.userAgent;
