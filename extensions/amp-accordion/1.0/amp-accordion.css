@@ -30,16 +30,23 @@ amp-accordion > section > :first-child {
   margin: 0;
 }
 
-amp-accordion > section > :first-child {
-  border: 1px solid transparent;
-}
-
 /* Display the first 2 elements (heading and content) */
 amp-accordion > section > * {
   display: block;
   float: none;
   overflow: hidden; /* clearfix */
   position: relative;
+}
+
+/*
+ * Lowest-specificity UI styles. Mostly duplicated by the
+ * i-amphtml-accordion-header for cross-browser compatibility.
+ */
+:where(amp-accordion > section) > :first-child {
+  cursor: pointer;
+  background-color: #efefef;
+  padding-right: 20px;
+  border: 1px solid #dfdfdf;
 }
 
 /* heading
@@ -49,7 +56,7 @@ amp-accordion > section > * {
   cursor: pointer;
   background-color: #efefef;
   padding-right: 20px;
-  border: solid 1px #dfdfdf;
+  border: 1px solid #dfdfdf;
 }
 
 /* Collapse content by default. */
