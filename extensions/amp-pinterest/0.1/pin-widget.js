@@ -18,6 +18,7 @@ import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
 import {Util} from './util';
 import {assertAbsoluteHttpOrHttpsUrl, assertHttpsUrl} from '../../../src/url';
+import {measureIntersection} from '../../../src/utils/intersection';
 import {openWindowDialog} from '../../../src/dom';
 import {toWin} from '../../../src/types';
 import {user, userAssert} from '../../../src/log';
@@ -346,13 +347,11 @@ export class PinWidget {
   /**
    * Determine the height of the contents to allow resizing after first layout.
    *
-   * @return {number|null}
+   * @return {!Promise<number|null>}
    */
   height() {
-    return (
-      this.heightOwnerElement_
-        .getBoundingClientRect /* REVIEW */
-        ().height + EMBED_PIN_PADDING
+    return measureIntersection(this.heightOwnerElement_).then(
+      (entry) => entry.boundingClientRect.height + EMBED_PIN_PADDING
     );
   }
 }

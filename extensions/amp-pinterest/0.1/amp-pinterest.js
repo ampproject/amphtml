@@ -112,10 +112,11 @@ class AmpPinterest extends AMP.BaseElement {
 
   /** @override */
   firstLayoutCompleted() {
-    const renderedHeight = this.renderClass_.height();
-    if (renderedHeight !== null) {
-      this.attemptChangeHeight(renderedHeight);
-    }
+    this.renderClass_.height().then((renderedHeight) => {
+      if (renderedHeight !== null) {
+        this.attemptChangeHeight(renderedHeight);
+      }
+    });
   }
 
   /**
