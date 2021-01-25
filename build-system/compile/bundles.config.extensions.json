@@ -1,3 +1,18 @@
+/**
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 [
   {
     "name": "amp-3d-gltf",
@@ -19,10 +34,7 @@
   },
   {
     "name": "amp-access-laterpay",
-    "version": [
-      "0.1",
-      "0.2"
-    ],
+    "version": ["0.1", "0.2"],
     "latestVersion": "0.2",
     "options": {
       "hasCss": true
@@ -43,10 +55,7 @@
   },
   {
     "name": "amp-accordion",
-    "version": [
-      "0.1",
-      "1.0"
-    ],
+    "version": ["0.1", "1.0"],
     "latestVersion": "0.1",
     "options": {
       "hasCss": true
@@ -230,10 +239,7 @@
   },
   {
     "name": "amp-carousel",
-    "version": [
-      "0.1",
-      "0.2"
-    ],
+    "version": ["0.1", "0.2"],
     "latestVersion": "0.1",
     "options": {
       "hasCss": true
@@ -264,18 +270,12 @@
   },
   {
     "name": "amp-date-countdown",
-    "version": [
-      "0.1",
-      "1.0"
-    ],
+    "version": ["0.1", "1.0"],
     "latestVersion": "0.1"
   },
   {
     "name": "amp-date-display",
-    "version": [
-      "0.1",
-      "1.0"
-    ],
+    "version": ["0.1", "1.0"],
     "latestVersion": "0.1"
   },
   {
@@ -304,10 +304,7 @@
   },
   {
     "name": "amp-experiment",
-    "version": [
-      "0.1",
-      "1.0"
-    ],
+    "version": ["0.1", "1.0"],
     "latestVersion": "0.1"
   },
   {
@@ -454,9 +451,7 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true,
-      "cssBinaries": [
-        "amp-inline-gallery-pagination"
-      ]
+      "cssBinaries": ["amp-inline-gallery-pagination"]
     }
   },
   {
@@ -585,10 +580,7 @@
   },
   {
     "name": "amp-mustache",
-    "version": [
-      "0.1",
-      "0.2"
-    ],
+    "version": ["0.1", "0.2"],
     "latestVersion": "0.2"
   },
   {
@@ -601,10 +593,7 @@
   },
   {
     "name": "amp-next-page",
-    "version": [
-      "0.1",
-      "1.0"
-    ],
+    "version": ["0.1", "1.0"],
     "latestVersion": "1.0",
     "options": {
       "hasCss": true
@@ -715,10 +704,7 @@
   },
   {
     "name": "amp-selector",
-    "version": [
-      "0.1",
-      "1.0"
-    ],
+    "version": ["0.1", "1.0"],
     "latestVersion": "0.1",
     "options": {
       "hasCss": true
@@ -732,11 +718,7 @@
   },
   {
     "name": "amp-sidebar",
-    "version": [
-      "0.1",
-      "0.2",
-      "1.0"
-    ],
+    "version": ["0.1", "0.2", "1.0"],
     "latestVersion": "0.1",
     "options": {
       "hasCss": true
@@ -924,10 +906,7 @@
   },
   {
     "name": "amp-timeago",
-    "version": [
-      "0.1",
-      "1.0"
-    ],
+    "version": ["0.1", "1.0"],
     "latestVersion": "0.1"
   },
   {
@@ -936,10 +915,7 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true,
-      "cssBinaries": [
-        "amp-truncate-text",
-        "amp-truncate-text-shadow"
-      ]
+      "cssBinaries": ["amp-truncate-text", "amp-truncate-text-shadow"]
     }
   },
   {
