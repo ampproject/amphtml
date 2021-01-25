@@ -19,7 +19,7 @@
  * - display:block element
  * - contain:strict element
  */
-amp-instagram {
+amp-youtube {
   display: block;
   contain: strict;
   overflow: hidden;
@@ -27,7 +27,7 @@ amp-instagram {
 }
 
 /* Pre-upgrade: size-defining element - hide children. */
-amp-instagram:not(.i-amphtml-built) > :not([placeholder]) {
+amp-youtube:not(.i-amphtml-built) > :not([placeholder]) {
   display: none !important;
   content-visibility: hidden !important;
 }
