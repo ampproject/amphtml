@@ -8,13 +8,13 @@
     "@babel/core": "7.12.10",
     "@babel/preset-react": "7.12.10",
     "@babel/runtime-corejs3": "7.12.5",
-    "@storybook/addon-a11y": "5.3.18",
-    "@storybook/addon-knobs": "5.3.18",
-    "@storybook/addon-viewport": "5.3.18",
-    "@storybook/preact": "5.3.18",
+    "@storybook/addon-a11y": "5.3.21",
+    "@storybook/addon-knobs": "5.3.21",
+    "@storybook/addon-viewport": "5.3.21",
+    "@storybook/preact": "5.3.21",
     "babel-loader": "8.2.2",
     "core-js": "3.8.3",
-    "preact": "10.5.10",
+    "preact": "10.5.11",
     "preact-render-to-string": "5.1.12",
     "styled-jsx": "3.4.1"
   }
