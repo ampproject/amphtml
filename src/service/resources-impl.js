@@ -17,8 +17,13 @@
 import {Deferred} from '../utils/promise';
 import {FiniteStateMachine} from '../finite-state-machine';
 import {FocusHistory} from '../focus-history';
+import {
+  INTERSECT_RESOURCES_EXP,
+  divertIntersectResources,
+} from '../experiments/intersect-resources-exp';
 import {Pass} from '../pass';
 import {READY_SCAN_SIGNAL, ResourcesInterface} from './resources-interface';
+
 import {Resource, ResourceState} from './resource';
 import {Services} from '../services';
 import {TaskQueue} from './task-queue';
@@ -26,13 +31,14 @@ import {VisibilityState} from '../visibility-state';
 import {dev, devAssert} from '../log';
 import {dict} from '../utils/object';
 import {expandLayoutRect} from '../layout-rect';
+import {getExperimentBranch, isExperimentOn} from '../experiments';
 import {getMode} from '../mode';
 import {getSourceUrl} from '../url';
 import {hasNextNodeInDocumentOrder, isIframed} from '../dom';
 import {ieIntrinsicCheckAndFix} from './ie-intrinsic-bug';
 import {ieMediaCheckAndFix} from './ie-media-bug';
+import {isAmp4Email} from '../format';
 import {isBlockedByConsent, reportError} from '../error';
-import {isExperimentOn} from '../experiments';
 import {listen, loadPromise} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
 import {remove} from '../utils/array';
@@ -217,7 +223,14 @@ export class ResourcesImpl {
      */
     this.intersectionObserverCallbackFired_ = false;
 
-    if (isExperimentOn(this.win, 'intersect-resources')) {
+    divertIntersectResources(this.win);
+
+    if (
+      isExperimentOn(this.win, 'bento') ||
+      getExperimentBranch(this.win, INTERSECT_RESOURCES_EXP.id) ===
+        INTERSECT_RESOURCES_EXP.experiment ||
+      isAmp4Email(this.win.document)
+    ) {
       const iframed = isIframed(this.win);
 
       // Classic IntersectionObserver doesn't support viewport tracking and
@@ -251,16 +264,14 @@ export class ResourcesImpl {
         this.maybeChangeHeight_ = true;
       }
 
-      // With IntersectionObserver, we only need to handle viewport resize.
-      if (this.relayoutAll_ || !this.intersectionObserver_) {
-        this.schedulePass();
-      }
       // Unfortunately, a viewport size change invalidates all premeasurements.
       if (this.relayoutAll_ && this.intersectionObserver_) {
         this.resources_.forEach((resource) =>
-          resource.invalidatePremeasurement()
+          resource.invalidatePremeasurementAndRequestMeasure()
         );
       }
+
+      this.schedulePass();
     });
     this.viewport_.onScroll(() => {
       this.lastScrollTime_ = Date.now();
@@ -1000,7 +1011,7 @@ export class ResourcesImpl {
                 // If the element has siblings, it's possible that a width-expansion will
                 // cause some of them to be pushed down.
                 const parentWidth =
-                  (parent.getLayoutWidth && parent.getLayoutWidth()) ||
+                  (parent.getLayoutSize && parent.getLayoutSize().width) ||
                   parent./*OK*/ offsetWidth;
                 let cumulativeWidth = widthDiff;
                 for (let i = 0; i < parent.childElementCount; i++) {
@@ -1241,7 +1252,7 @@ export class ResourcesImpl {
         const expediteFirstMeasure =
           !r.hasBeenMeasured() && r.element.tagName == 'AMP-AD';
         const needsMeasure =
-          premeasured || requested || this.relayoutAll_ || expediteFirstMeasure;
+          premeasured || requested || relayoutAll || expediteFirstMeasure;
         if (needsMeasure) {
           const isDisplayed = this.measureResource_(
             r,

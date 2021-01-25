@@ -58,6 +58,15 @@
     </template>
   </amp-list>
 
+  <!-- If the `amp-list` contains unescaped HTML (allow <h1> <h2> <h3> and <amp-img> tags) -->
+  <!-- See: https://github.com/ampproject/amphtml/issues/27344 -->
+  <h3>amp-list with unescaped HTML</h3>
+  <amp-list id="list1" width="auto" height="300" layout="fixed-height" src="list.example.json" class="m1" reset-on-refresh>
+    <template type="amp-mustache" id="amp-template-id">
+      <div>{{{html}}}</div>
+    </template>
+  </amp-list>
+
   <!-- [diffable] -->
   <h3>amp-list[diffable]</h3>
   <amp-list diffable id="list1" width="auto" height="300" layout="fixed-height" src="list.example.json" class="m1" reset-on-refresh>

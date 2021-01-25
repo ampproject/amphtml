@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Deferred, tryResolve} from '../utils/promise';
+import {Deferred} from '../utils/promise';
 import {Layout} from '../layout';
 import {Services} from '../services';
 import {cancellation, isBlockedByConsent, reportError} from '../error';
@@ -23,6 +23,7 @@ import {dev, devAssert} from '../log';
 import {
   layoutRectLtwh,
   layoutRectSizeEquals,
+  layoutSizeFromRect,
   moveLayoutRect,
   rectsOverlap,
 } from '../layout-rect';
@@ -212,9 +213,6 @@ export class Resource {
      * @private {!./resources-impl.SizeDef|undefined}
      */
     this.pendingChangeSize_ = undefined;
-
-    /** @private {boolean} */
-    this.loadedOnce_ = false;
 
     const deferred = new Deferred();
 
@@ -463,8 +461,9 @@ export class Resource {
   }
 
   /** Removes the premeasured rect, likely forcing a manual measure. */
-  invalidatePremeasurement() {
+  invalidatePremeasurementAndRequestMeasure() {
     this.premeasuredRect_ = null;
+    this.requestMeasure();
   }
 
   /**
@@ -540,6 +539,17 @@ export class Resource {
     }
 
     this.element.updateLayoutBox(newBox, sizeChanges);
+  }
+
+  /**
+   * Yields when the resource has been measured.
+   * @return {!Promise}
+   */
+  ensureMeasured() {
+    if (this.hasBeenMeasured()) {
+      return Promise.resolve();
+    }
+    return Services.vsyncFor(this.hostWin).measure(() => this.measure());
   }
 
   /**
@@ -644,6 +654,14 @@ export class Resource {
   }
 
   /**
+   * Returns a previously measured layout size.
+   * @return {!../layout-rect.LayoutSizeDef}
+   */
+  getLayoutSize() {
+    return layoutSizeFromRect(this.layoutBox_);
+  }
+
+  /**
    * Returns a previously measured layout box adjusted to the viewport. This
    * mainly affects fixed-position elements that are adjusted to be always
    * relative to the document position in the viewport.
@@ -663,31 +681,6 @@ export class Resource {
       viewport.getScrollLeft(),
       viewport.getScrollTop()
     );
-  }
-
-  /**
-   * Returns a previously measured layout box relative to the page. The
-   * fixed-position elements are relative to the top of the document.
-   * @return {!../layout-rect.LayoutRectDef}
-   */
-  getPageLayoutBox() {
-    return this.layoutBox_;
-  }
-
-  /**
-   * Returns the resource's layout box relative to the page. It will be
-   * measured if the resource hasn't ever be measured.
-   *
-   * @return {!Promise<!../layout-rect.LayoutRectDef>}
-   */
-  getPageLayoutBoxAsync() {
-    if (this.hasBeenMeasured()) {
-      return tryResolve(() => this.getPageLayoutBox());
-    }
-    return Services.vsyncFor(this.hostWin).measurePromise(() => {
-      this.measure();
-      return this.getPageLayoutBox();
-    });
   }
 
   /**
@@ -761,6 +754,8 @@ export class Resource {
    *    viewport range given.
    */
   whenWithinViewport(viewport) {
+    // TODO(#30620): remove this method once IntersectionObserver{root:doc} is
+    // polyfilled.
     devAssert(viewport !== false);
     // Resolve is already laid out or viewport is true.
     if (!this.isLayoutPending() || viewport === true) {
@@ -994,7 +989,6 @@ export class Resource {
       this.loadPromiseResolve_ = null;
     }
     this.layoutPromise_ = null;
-    this.loadedOnce_ = true;
     this.state_ = success
       ? ResourceState.LAYOUT_COMPLETE
       : ResourceState.LAYOUT_FAILED;
@@ -1010,7 +1004,7 @@ export class Resource {
   /**
    * Returns true if the resource layout has not completed or failed.
    * @return {boolean}
-   * */
+   */
   isLayoutPending() {
     return (
       this.state_ != ResourceState.LAYOUT_COMPLETE &&
@@ -1027,13 +1021,6 @@ export class Resource {
    */
   loadedOnce() {
     return this.loadPromise_;
-  }
-
-  /**
-   * @return {boolean} true if the resource has been loaded at least once.
-   */
-  hasLoadedOnce() {
-    return this.loadedOnce_;
   }
 
   /**

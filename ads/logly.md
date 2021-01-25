@@ -35,4 +35,4 @@ For configuration details, please contact [LOGLY](https://www.logly.co.jp/forms/
 
 Supported parameters:
 
-- `data-adspotid`
+-   `data-adspotid`

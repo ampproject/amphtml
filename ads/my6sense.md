@@ -38,11 +38,11 @@ For semantics of configuration and examples, sign-in and see the [My6sense platf
 
 ## Required parameters:
 
-- `data-widget-key` : string, non-empty
+-   `data-widget-key` : string, non-empty
 
 ## Optional parameters:
 
-- `data-zone` : string, non-empty
-- `data-url` : string, non-empty
-- `data-organic-clicks` : string, non-empty
-- `data-paid-clicks` : string, non-empty
+-   `data-zone` : string, non-empty
+-   `data-url` : string, non-empty
+-   `data-organic-clicks` : string, non-empty
+-   `data-paid-clicks` : string, non-empty

@@ -104,6 +104,12 @@ CMP_CONFIG['SourcePoint'] = {
   'promptUISrc': 'https://amp.pm.sourcepoint.mgr.consensu.org/',
 };
 
+CMP_CONFIG['UniConsent'] = {
+  'consentInstanceId': 'UniConsent',
+  'checkConsentHref': 'https://edge.uniconsent.com/amp/check-consent',
+  'promptUISrc': 'https://cmp.uniconsent.com/amp/index.html',
+};
+
 CMP_CONFIG['Usercentrics'] = {
   'consentInstanceId': 'Usercentrics',
   'checkConsentHref': 'https://consents.usercentrics.eu/amp/checkConsent',

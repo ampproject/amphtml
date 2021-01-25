@@ -565,7 +565,7 @@ std::optional<Rule> TableBuilder::ReadRule(std::string_view line,
   }
 
   RemoveLeadingWhitespace(&line);
-  std::string transition(line.substr(0, line.find_first_of(";")));
+  std::string transition(line.substr(0, line.find_first_of(';')));
   if (transition.find(' ') != std::string::npos) {
     std::cerr << "Invalid syntax at line: " << line_no << ":"
               << line_size - line.size() << std::endl;;

@@ -56,7 +56,6 @@ import {
   addAttributesToElement,
   closestAncestorElementBySelector,
   iterateCursor,
-  matches,
   scopedQuerySelectorAll,
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
@@ -64,6 +63,7 @@ import {debounce} from '../../../src/utils/rate-limit';
 import {delegateAutoplay} from '../../../src/video-interface';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {escapeCssSelectorIdent} from '../../../src/css';
 import {getAmpdoc} from '../../../src/service';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {getLocalizationService} from './amp-story-localization-service';
@@ -73,6 +73,7 @@ import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {listen} from '../../../src/event-helper';
+import {parseQueryString} from '../../../src/url';
 import {px, toggle} from '../../../src/style';
 import {renderPageDescription} from './semantic-render';
 import {setTextBackgroundColor} from './utils';
@@ -168,7 +169,7 @@ const buildErrorMessageElement = (element) =>
  */
 const buildOpenAttachmentElement = (element) =>
   htmlFor(element)`
-      <div class="
+      <a class="
           i-amphtml-story-page-open-attachment i-amphtml-story-system-reset"
           role="button">
         <span class="i-amphtml-story-page-open-attachment-icon">
@@ -176,7 +177,7 @@ const buildOpenAttachmentElement = (element) =>
           <span class="i-amphtml-story-page-open-attachment-bar-right"></span>
         </span>
         <span class="i-amphtml-story-page-open-attachment-label"></span>
-      </div>`;
+      </a>`;
 
 /**
  * amp-story-page states.
@@ -244,7 +245,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     );
 
     /** @private {?boolean}  */
-    this.isFirstPage_ = null;
+    this.isPrerenderActivePage_ = null;
 
     /** @private {?LoadingSpinner} */
     this.loadingSpinner_ = null;
@@ -292,7 +293,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private {?Element} */
     this.cssVariablesStyleEl_ = null;
 
-    /** @private {?../../../src/layout-rect.LayoutRectDef} */
+    /** @private {?../../../src/layout-rect.LayoutSizeDef} */
     this.layoutBox_ = null;
 
     /** @private {!Array<function()>} */
@@ -379,14 +380,22 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
-   * Returns true if a child of the first page.
+   * Returns true if the page should be prerendered (for being an active page or first page)
    * @return {boolean}
    */
-  isFirstPage() {
-    if (this.isFirstPage_ === null) {
-      this.isFirstPage_ = matches(this.element, 'amp-story-page:first-of-type');
+  isPrerenderActivePage() {
+    if (this.isPrerenderActivePage_ != null) {
+      return this.isPrerenderActivePage_;
     }
-    return this.isFirstPage_;
+    const hashId = parseQueryString(this.win.location.href)['page'];
+    let selector = 'amp-story-page:first-of-type';
+    if (hashId) {
+      selector += `, amp-story-page#${escapeCssSelectorIdent(hashId)}`;
+    }
+    const selectorNodes = this.win.document.querySelectorAll(selector);
+    this.isPrerenderActivePage_ =
+      selectorNodes[selectorNodes.length - 1] === this.element;
+    return this.isPrerenderActivePage_;
   }
 
   /**
@@ -568,11 +577,11 @@ export class AmpStoryPage extends AMP.BaseElement {
   // equality checks.
   /** @override */
   onLayoutMeasure() {
-    const layoutBox = this.getLayoutBox();
+    const layoutBox = this.getLayoutSize();
     // Only measures from the first story page, that always gets built because
     // of the prerendering optimizations in place.
     if (
-      !this.isFirstPage() ||
+      !this.isPrerenderActivePage() ||
       (this.layoutBox_ &&
         this.layoutBox_.width === layoutBox.width &&
         this.layoutBox_.height === layoutBox.height)
@@ -823,7 +832,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @override */
   prerenderAllowed() {
-    return this.isFirstPage();
+    return this.isPrerenderActivePage();
   }
 
   /**
@@ -1731,6 +1740,11 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     if (!this.openAttachmentEl_) {
       this.openAttachmentEl_ = buildOpenAttachmentElement(this.element);
+      // If the attachment is a link, copy href to the element so it can be previewed on hover and long press.
+      const attachmentHref = attachmentEl.getAttribute('href');
+      if (attachmentHref) {
+        this.openAttachmentEl_.setAttribute('href', attachmentHref);
+      }
       this.openAttachmentEl_.addEventListener('click', () =>
         this.openAttachment()
       );

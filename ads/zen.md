@@ -28,12 +28,12 @@ For details on the configuration semantics, please see [Zen's documentation](htt
 
 ### Required parameters
 
-- `data-clid`
+-   `data-clid`
 
 ### Optional parameters
 
-- `width`
-- `data-size`
-- `data-orientation`
-- `data-on-render`
-- `data-on-error`
+-   `width`
+-   `data-size`
+-   `data-orientation`
+-   `data-on-render`
+-   `data-on-error`

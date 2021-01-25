@@ -31,12 +31,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4005',
   },
   {
-    id: 'amp-access-iframe',
-    name: 'AMP Access iframe prototype (launched)',
-    spec: 'https://github.com/ampproject/amphtml/issues/13287',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/13287',
-  },
-  {
     id: 'amp-access-server',
     name: 'AMP Access server side prototype',
     spec: '',
@@ -52,14 +46,6 @@ export const EXPERIMENTS = [
     id: 'amp-base-carousel',
     name: 'AMP extension for a basic, flexible, carousel',
     spec: 'https://github.com/ampproject/amphtml/issues/20595',
-  },
-  {
-    id: 'amp-google-vrview-image',
-    name: 'AMP VR Viewer for images via Google VRView',
-    spec:
-      'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-      'amp-google-vrview-image/amp-google-vrview-image.md',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3996',
   },
   {
     id: 'amp-sidebar-v2',
@@ -88,12 +74,6 @@ export const EXPERIMENTS = [
     id: 'amp-lightbox-a4a-proto',
     name: 'Allows the new lightbox experience to be used in A4A (prototype).',
     spec: 'https://github.com/ampproject/amphtml/issues/7743',
-  },
-  {
-    id: 'amp-playbuzz',
-    name: 'AMP extension for playbuzz items (launched)',
-    spec: 'https://github.com/ampproject/amphtml/issues/6106',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/pull/6351',
   },
   {
     id: 'amp-action-macro',
@@ -151,12 +131,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14357',
   },
   {
-    id: 'disable-amp-story-default-media',
-    name: 'Removes default media for amp-story',
-    spec: 'https://github.com/ampproject/amphtml/issues/14535',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14535',
-  },
-  {
     id: 'amp-story-responsive-units',
     name: 'Scale pages in amp-story by rewriting responsive units',
     spec: 'https://github.com/ampproject/amphtml/issues/15955',
@@ -194,14 +168,6 @@ export const EXPERIMENTS = [
     name: 'Enables <amp-video dock>',
     spec: 'https://github.com/ampproject/amphtml/issues/14061',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17161',
-  },
-  {
-    id: 'amp-user-location',
-    name:
-      'Expose the browser geolocation API for latitude and longitude ' +
-      'access after user interaction and approval',
-    spec: 'https://github.com/ampproject/amphtml/issues/8929',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22177',
   },
   {
     id: 'untrusted-xhr-interception',
@@ -244,12 +210,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26823',
   },
   {
-    id: 'analytics-chunks-inabox',
-    name: 'AMP Analytics Break long tasks to chunks (AMP Ads only)',
-    spec: 'https://github.com/ampproject/amphtml/issues/28435',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/28435',
-  },
-  {
     id: 'a4a-no-signing',
     name: 'Remove signing requirement for AMPHTML ads',
     spec: 'https://github.com/ampproject/amphtml/issues/27189',
@@ -274,5 +234,25 @@ export const EXPERIMENTS = [
     id: 'layout-aspect-ratio-css',
     name: 'Responsive layouts implemented via aspect-ratio CSS',
     spec: 'https://github.com/ampproject/amphtml/issues/30291',
+  },
+  {
+    id: 'tcf-post-message-proxy-api',
+    name: 'Proxy for TCF PostMessageAPI to send TCData to 3p iframes',
+    spec: 'https://github.com/ampproject/amphtml/issues/30385',
+  },
+  {
+    id: 'fie-resources',
+    name: 'Separate FIE resource manager from the main doc',
+    spec: 'https://github.com/ampproject/amphtml/issues/31246',
+  },
+  {
+    id: 'dfp-render-on-idle-cwv-exp',
+    name: 'To measure the CWV impact of ads idle rendering',
+    spec: 'https://github.com/ampproject/amphtml/issues/31436',
+  },
+  {
+    id: 'inabox-resources-eager',
+    name: 'Determine impact of building inabox/fie amp elements ASAP',
+    spec: 'https://github.com/ampproject/amphtml/issues/31776',
   },
 ];

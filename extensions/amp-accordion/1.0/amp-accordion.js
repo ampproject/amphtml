@@ -15,7 +15,12 @@
  */
 
 import * as Preact from '../../../src/preact';
-import {Accordion, AccordionSection} from './accordion';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionHeader,
+  AccordionSection,
+} from './accordion';
 import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-accordion-1.0.css';
 import {PreactBaseElement} from '../../../src/preact/base-element';
@@ -31,7 +36,12 @@ import {dict, memo} from '../../../src/utils/object';
 import {forwardRef} from '../../../src/preact/compat';
 import {isExperimentOn} from '../../../src/experiments';
 import {toArray, toWin} from '../../../src/types';
-import {useImperativeHandle, useLayoutEffect} from '../../../src/preact';
+import {
+  useImperativeHandle,
+  useLayoutEffect,
+  useRef,
+} from '../../../src/preact';
+import {useSlotContext} from '../../../src/preact/slot';
 
 /** @const {string} */
 const TAG = 'amp-accordion';
@@ -41,6 +51,10 @@ const HEADER_SHIM_PROP = '__AMP_H_SHIM';
 const CONTENT_SHIM_PROP = '__AMP_C_SHIM';
 const SECTION_POST_RENDER = '__AMP_PR';
 const EXPAND_STATE_SHIM_PROP = '__AMP_EXPAND_STATE_SHIM';
+
+const isDisplayLockingEnabledForAccordion = (win) =>
+  isExperimentOn(win, 'amp-accordion-display-locking') &&
+  win.document.body.onbeforematch !== undefined;
 
 /** @extends {PreactBaseElement<AccordionDef.AccordionApi>} */
 class AmpAccordion extends PreactBaseElement {
@@ -57,24 +71,35 @@ class AmpAccordion extends PreactBaseElement {
     );
 
     const {element} = this;
+    const experimentDisplayLocking = isDisplayLockingEnabledForAccordion(
+      this.win
+    );
+    if (experimentDisplayLocking) {
+      element.classList.add('i-amphtml-display-locking');
+    }
 
     const mu = new MutationObserver(() => {
       this.mutateProps(getState(element, mu));
     });
     mu.observe(element, {
-      attributeFilter: ['expanded'],
+      attributeFilter: ['expanded', 'id'],
       subtree: true,
+      childList: true,
     });
 
     const {'children': children} = getState(element, mu);
-    return dict({'children': children});
+    return dict({
+      'experimentDisplayLocking': experimentDisplayLocking,
+      'children': children,
+    });
   }
 
   /** @override */
   isLayoutSupported(unusedLayout) {
     userAssert(
-      isExperimentOn(this.win, 'amp-accordion-bento'),
-      'expected amp-accordion-bento experiment to be enabled'
+      isExperimentOn(this.win, 'bento') ||
+        isExperimentOn(this.win, 'bento-accordion'),
+      'expected global "bento" or specific "bento-accordion" experiment to be enabled'
     );
     return true;
   }
@@ -111,16 +136,27 @@ function getState(element, mu) {
       EXPAND_STATE_SHIM_PROP,
       getExpandStateTrigger
     );
-    const props = dict({
+    const sectionProps = dict({
       'key': section,
       'as': sectionShim,
-      'headerAs': headerShim,
-      'contentAs': contentShim,
       'expanded': section.hasAttribute('expanded'),
       'id': section.getAttribute('id'),
       'onExpandStateChange': expandStateShim,
     });
-    return <AccordionSection {...props} />;
+    const headerProps = dict({
+      'as': headerShim,
+      'id': section.firstElementChild.getAttribute('id'),
+    });
+    const contentProps = dict({
+      'as': contentShim,
+      'id': section.lastElementChild.getAttribute('id'),
+    });
+    return (
+      <AccordionSection {...sectionProps}>
+        <AccordionHeader {...headerProps}></AccordionHeader>
+        <AccordionContent {...contentProps}></AccordionContent>
+      </AccordionSection>
+    );
   });
   return dict({'children': children});
 }
@@ -146,7 +182,7 @@ function getExpandStateTrigger(section) {
 
 /**
  * @param {!Element} sectionElement
- * @param {!AccordionDef.SectionProps} props
+ * @param {!AccordionDef.SectionShimProps} props
  * @return {PreactDef.Renderable}
  */
 function SectionShim(sectionElement, {expanded, children}) {
@@ -167,18 +203,25 @@ const bindSectionShimToElement = (element) => SectionShim.bind(null, element);
 
 /**
  * @param {!Element} sectionElement
- * @param {!AccordionDef.HeaderProps} props
+ * @param {!AccordionDef.HeaderShimProps} props
  * @return {PreactDef.Renderable}
  */
 function HeaderShim(
   sectionElement,
-  {onClick, 'aria-controls': ariaControls, 'aria-expanded': ariaExpanded}
+  {
+    id,
+    role,
+    onClick,
+    'aria-controls': ariaControls,
+    'aria-expanded': ariaExpanded,
+  }
 ) {
   const headerElement = sectionElement.firstElementChild;
   useLayoutEffect(() => {
     if (!headerElement || !onClick) {
       return;
     }
+    headerElement.setAttribute('id', id);
     headerElement.classList.add('i-amphtml-accordion-header');
     headerElement.addEventListener('click', onClick);
     if (!headerElement.hasAttribute('tabindex')) {
@@ -186,14 +229,22 @@ function HeaderShim(
     }
     headerElement.setAttribute('aria-expanded', ariaExpanded);
     headerElement.setAttribute('aria-controls', ariaControls);
-    headerElement.setAttribute('role', 'button');
+    headerElement.setAttribute('role', role);
     if (sectionElement[SECTION_POST_RENDER]) {
       sectionElement[SECTION_POST_RENDER]();
     }
     return () => {
       headerElement.removeEventListener('click', devAssert(onClick));
     };
-  }, [sectionElement, headerElement, onClick, ariaControls, ariaExpanded]);
+  }, [
+    sectionElement,
+    headerElement,
+    id,
+    role,
+    onClick,
+    ariaControls,
+    ariaExpanded,
+  ]);
   return <header />;
 }
 
@@ -205,12 +256,19 @@ const bindHeaderShimToElement = (element) => HeaderShim.bind(null, element);
 
 /**
  * @param {!Element} sectionElement
- * @param {!AccordionDef.ContentProps} props
+ * @param {!AccordionDef.ContentShimProps} props
  * @param {{current: ?}} ref
  * @return {PreactDef.Renderable}
  */
-function ContentShimWithRef(sectionElement, {hidden, id}, ref) {
+function ContentShimWithRef(
+  sectionElement,
+  {id, role, 'aria-labelledby': ariaLabelledBy},
+  ref
+) {
   const contentElement = sectionElement.lastElementChild;
+  const contentRef = useRef();
+  contentRef.current = contentElement;
+  useSlotContext(contentRef);
   useImperativeHandle(ref, () => contentElement, [contentElement]);
   useLayoutEffect(() => {
     if (!contentElement) {
@@ -218,11 +276,12 @@ function ContentShimWithRef(sectionElement, {hidden, id}, ref) {
     }
     contentElement.classList.add('i-amphtml-accordion-content');
     contentElement.setAttribute('id', id);
-    toggleAttribute(contentElement, 'hidden', hidden);
+    contentElement.setAttribute('role', role);
+    contentElement.setAttribute('aria-labelledby', ariaLabelledBy);
     if (sectionElement[SECTION_POST_RENDER]) {
       sectionElement[SECTION_POST_RENDER]();
     }
-  }, [sectionElement, contentElement, hidden, id]);
+  }, [sectionElement, contentElement, id, role, ariaLabelledBy]);
   return <div />;
 }
 

@@ -140,7 +140,12 @@
 
         window.__tcfapi = function (cmd, version, callback, arg) {
           if (!cmpFrame) {
-              callback({ msg: "CMP not found" }, false);
+              callback(
+                { 
+                  msg: "CMP not found" 
+                }, 
+                false
+              );
             } else {
             const callId = Math.random() + "";
             const msg = {
