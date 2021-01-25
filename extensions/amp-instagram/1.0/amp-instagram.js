@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {CSS} from '../../../build/amp-instagram-1.0.css';
 import {Instagram} from './instagram';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {dict} from '../../../src/utils/object';
@@ -64,5 +65,5 @@ AmpInstagram['props'] = {
 AmpInstagram['layoutSizeDefined'] = true;
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpInstagram);
+  AMP.registerElement(TAG, AmpInstagram, CSS);
 });

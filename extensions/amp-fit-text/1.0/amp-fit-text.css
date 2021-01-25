@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,29 +14,25 @@
  * limitations under the License.
  */
 
-/* Pre-upgrade: display:block element */
-amp-inline-gallery,
-amp-inline-gallery-pagination,
-amp-inline-gallery-thumbnails {
+/*
+ * Pre-upgrade:
+ * - display:block element
+ * - contain:strict element
+ */
+amp-fit-text {
   display: block;
-}
-
-/* Pre-upgrade: contain:layout element */
-amp-inline-gallery {
-  contain: layout;
-}
-
-/* Pre-upgrade: contain:strict element */
-amp-inline-gallery-pagination,
-amp-inline-gallery-thumbnails {
   contain: strict;
   overflow: hidden;
   position: relative;
 }
 
+/* Pre-upgrade: size-defining element - hide text. */
+amp-fit-text:not(.i-amphtml-built) {
+  color: transparent !important;
+}
+
 /* Pre-upgrade: size-defining element - hide children. */
-amp-inline-gallery-pagination:not(.i-amphtml-built) > :not([placeholder]),
-amp-inline-gallery-thumbnails:not(.i-amphtml-built) > :not([placeholder]) {
+amp-fit-text:not(.i-amphtml-built) > :not([placeholder]) {
   display: none !important;
   content-visibility: hidden !important;
 }
