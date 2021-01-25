@@ -30,8 +30,7 @@ commands:
       - checkout
       - run:
           name: 'Fetch Merge Commit'
-          command: |
-            ./.circleci/fetch_merge_commit.sh
+          command: ./.circleci/fetch_merge_commit.sh
       - browser-tools/install-chrome:
           replace-existing: true
       - run:
@@ -41,25 +40,14 @@ commands:
             curl -Ss --retry 5 https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-323.0.0-linux-x86_64.tar.gz | tar xz
             echo 'source ~/google-cloud-sdk/path.bash.inc' >> $BASH_ENV
       - run:
-          # TODO(rsimha, ampproject/amp-github-apps#1110): Update storage details.
           name: 'Setup Storage'
-          command: |
-            openssl aes-256-cbc -k $GCP_TOKEN -in build-system/common/sa-travis-key.json.enc -out sa-travis-key.json -d
-            gcloud auth activate-service-account --key-file=sa-travis-key.json
-            gcloud config set account sa-travis@amp-travis-build-storage.iam.gserviceaccount.com
-            gcloud config set pass_credentials_to_gsutil true
-            gcloud config set project amp-travis-build-storage
+          command: ./.circleci/setup-storage.sh
       - run:
           name: 'Configure Hosts'
-          command: |
-            echo "127.0.0.1 ads.localhost" | sudo tee -a /etc/hosts
-            echo "127.0.0.1 iframe.localhost" | sudo tee -a /etc/hosts
-            echo "127.0.0.1 jgla3zmib2ggq5buc4hwi5taloh6jlvzukddfr4zltz3vay5s5rq.recaptcha.localhost" | sudo tee -a /etc/hosts
-            echo "127.0.0.1 fonts.googleapis.com" | sudo tee -a /etc/hosts
+          command: cat ./build-system/test-configs/hosts | sudo tee -a /etc/hosts
       - run:
           name: 'Install NVM'
-          command: |
-            curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
+          command: curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
       - run:
           name: 'Install Node LTS'
           command: |
