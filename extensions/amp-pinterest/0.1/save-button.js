@@ -213,6 +213,6 @@ export class SaveButton {
    * @return {!Promise<number|null>}
    */
   height() {
-    return Promise.resolve().then(() => null);
+    return Promise.resolve(null);
   }
 }

@@ -97,6 +97,6 @@ export class FollowButton {
    * @return {!Promise<number|null>}
    */
   height() {
-    return Promise.resolve().then(() => null);
+    return Promise.resolve(null);
   }
 }

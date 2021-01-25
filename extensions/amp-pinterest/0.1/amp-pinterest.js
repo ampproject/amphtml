@@ -119,22 +119,6 @@ class AmpPinterest extends AMP.BaseElement {
     });
   }
 
-  /**
-   * Renders the component
-   * @return {*} TODO(#23582): Specify return type
-   */
-  render() {
-    switch (this.type_) {
-      case 'embedPin':
-        return new PinWidget(this.element).render();
-      case 'buttonPin':
-        return new SaveButton(this.element).render();
-      case 'buttonFollow':
-        return new FollowButton(this.element).render();
-    }
-    return Promise.reject(user().createError('Invalid type: %s', this.type_));
-  }
-
   /** @override */
   createLoaderLogoCallback() {
     if (this.type_ != 'embedPin') {
