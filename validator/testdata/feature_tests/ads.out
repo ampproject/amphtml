@@ -651,6 +651,21 @@ PASS
 |        rtc-config="{foo: bar}">
 |    </amp-ad>
 |
+|    <h2>Doubleclick with block-rtc attribute</h2>
+|    <amp-ad width="320" height="50"
+|        type="doubleclick"
+|        data-slot="/4119129/mobile_ad_banner"
+|        block-rtc="gdpr"
+|        rtc-config="{foo: bar}">
+|    </amp-ad>
+|
+|    <h2>Doubleclick with always-serve-npa attribute</h2>
+|    <amp-ad width="320" height="50"
+|        type="doubleclick"
+|        data-slot="/4119129/mobile_ad_banner"
+|        always-serve-npa="gdpr">
+|    </amp-ad>
+|
 |    <h2>Doubleclick with JSON based parameters</h2>
 |    <amp-ad width="320" height="50"
 |        type="doubleclick"
