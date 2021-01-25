@@ -25,6 +25,7 @@ const {
 } = require('../common/ci');
 const {ciJobUrl} = require('../common/ci');
 const {cyan, green, yellow} = require('ansi-colors');
+const {determineBuildTargets, Targets} = require('../pr-check/build-targets');
 const {gitCommitHash} = require('../common/git');
 const {log} = require('../common/logging');
 
@@ -47,9 +48,12 @@ const TEST_TYPE_SUBTYPES = isGithubActionsBuild()
     ])
   : new Map([]);
 const TEST_TYPE_BUILD_TARGETS = new Map([
-  ['integration', ['RUNTIME', 'FLAG_CONFIG', 'INTEGRATION_TEST']],
-  ['unit', ['RUNTIME', 'UNIT_TEST']],
-  ['e2e', ['RUNTIME', 'FLAG_CONFIG', 'E2E_TEST']],
+  [
+    'integration',
+    [Targets.RUNTIME, Targets.FLAG_CONFIG, Targets.INTEGRATION_TEST],
+  ],
+  ['unit', [Targets.RUNTIME, Targets.UNIT_TEST]],
+  ['e2e', [Targets.RUNTIME, Targets.FLAG_CONFIG, Targets.E2E_TEST]],
 ]);
 
 function inferTestType() {
@@ -145,7 +149,8 @@ function reportTestStarted() {
   return postReport(inferTestType(), 'started');
 }
 
-async function reportAllExpectedTests(buildTargets) {
+async function reportAllExpectedTests() {
+  const buildTargets = determineBuildTargets();
   for (const [type, subTypes] of TEST_TYPE_SUBTYPES) {
     const testTypeBuildTargets = TEST_TYPE_BUILD_TARGETS.get(type);
     const action = testTypeBuildTargets.some((target) =>

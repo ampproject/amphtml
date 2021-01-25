@@ -19,7 +19,7 @@
  * @fileoverview Script that runs the unit tests during CI.
  */
 
-const {determineBuildTargets} = require('./build-targets');
+const {buildTargetsInclude, Targets} = require('./build-targets');
 const {printSkipMessage, timedExecOrDie, timedExecOrThrow} = require('./utils');
 const {runCiJob} = require('./ci-job');
 
@@ -46,8 +46,7 @@ function pushBuildWorkflow() {
 }
 
 function prBuildWorkflow() {
-  const buildTargets = determineBuildTargets();
-  if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {
+  if (buildTargetsInclude(Targets.RUNTIME, Targets.UNIT_TEST)) {
     timedExecOrDie('gulp update-packages');
     timedExecOrDie('gulp unit --headless --local_changes');
     timedExecOrDie('gulp unit --headless --coverage');

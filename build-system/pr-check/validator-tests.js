@@ -19,7 +19,7 @@
  * @fileoverview Script that runs the validator tests during CI.
  */
 
-const {determineBuildTargets} = require('./build-targets');
+const {buildTargetsInclude, Targets} = require('./build-targets');
 const {printSkipMessage, timedExecOrDie} = require('./utils');
 const {runCiJob} = require('./ci-job');
 
@@ -31,12 +31,12 @@ function pushBuildWorkflow() {
 }
 
 function prBuildWorkflow() {
-  const buildTargets = determineBuildTargets();
   if (
-    !buildTargets.has('RUNTIME') &&
-    !buildTargets.has('VALIDATOR') &&
-    !buildTargets.has('VALIDATOR_WEBUI') &&
-    !buildTargets.has('VALIDATOR_JAVA')
+    !buildTargetsInclude(
+      Targets.RUNTIME,
+      Targets.VALIDATOR,
+      Targets.VALIDATOR_WEBUI
+    )
   ) {
     printSkipMessage(
       jobName,
@@ -45,11 +45,11 @@ function prBuildWorkflow() {
     return;
   }
 
-  if (buildTargets.has('RUNTIME') || buildTargets.has('VALIDATOR')) {
+  if (buildTargetsInclude(Targets.RUNTIME, Targets.VALIDATOR)) {
     timedExecOrDie('gulp validator');
   }
 
-  if (buildTargets.has('VALIDATOR_WEBUI')) {
+  if (buildTargetsInclude(Targets.VALIDATOR_WEBUI)) {
     timedExecOrDie('gulp validator-webui');
   }
 }

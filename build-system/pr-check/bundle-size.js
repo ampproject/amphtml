@@ -25,7 +25,7 @@ const {
   printSkipMessage,
   timedExecOrDie,
 } = require('./utils');
-const {determineBuildTargets} = require('./build-targets');
+const {buildTargetsInclude, Targets} = require('./build-targets');
 const {isTravisBuild} = require('../common/ci');
 const {runCiJob} = require('./ci-job');
 
@@ -38,8 +38,7 @@ function pushBuildWorkflow() {
 }
 
 function prBuildWorkflow() {
-  const buildTargets = determineBuildTargets();
-  if (buildTargets.has('RUNTIME') || buildTargets.has('FLAG_CONFIG')) {
+  if (buildTargetsInclude(Targets.RUNTIME, Targets.FLAG_CONFIG)) {
     downloadNomoduleOutput();
     downloadModuleOutput();
     timedExecOrDie('gulp bundle-size --on_pr_build');
