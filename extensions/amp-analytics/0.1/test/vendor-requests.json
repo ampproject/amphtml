@@ -5,6 +5,9 @@
     "pageview": "https://us-east-1-decisionapi.lift.acquia.com/capture?account_id=xxxxxxxx&site_id=xxxxxxxx&ident=_client_id(tc_ptid)_&identsrc=amp&es=Amp&url=_canonical_url_&rurl=_document_referrer_&cttl=_title_&en=Content View",
     "click": "https://us-east-1-decisionapi.lift.acquia.com/capture?account_id=xxxxxxxx&site_id=xxxxxxxx&ident=_client_id(tc_ptid)_&identsrc=amp&es=Amp&url=_canonical_url_&rurl=_document_referrer_&cttl=_title_&en=Click-Through"
   },
+  "sensorsanalytics": {
+    "event": "https://jssdkdata.debugbox.sensorsdata.cn/sa?project=liangshuang"
+  },
   "adobeanalytics": {
     "requestPath": "/b/ss/!reportSuites/2/amp-1.0/s_random_",
     "basePrefix": "vid=z_client_id(adobe_amp_id)_&ndh=0&ce=_document_charset_&pageName=_title_&g=_ampdoc_url_&r=_document_referrer_&bh=_available_screen_height_&bw=_available_screen_width_&c=_screen_color_depth_&j=amp&s=_screen_width_x_screen_height_",
