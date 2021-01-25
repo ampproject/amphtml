@@ -1463,8 +1463,8 @@ class ParsedValidatorRules {
   ValidatorRules rules_;
   HtmlFormat::Code html_format_;
   vector<ParsedTagSpec> tagspec_by_id_;
-  unordered_map<std::string, TagSpecDispatch> tagspecs_by_tagname_;
-  unordered_map<std::string, vector<int32_t>> ext_tag_spec_ids_by_ext_name_;
+  absl::node_hash_map<std::string, TagSpecDispatch> tagspecs_by_tagname_;
+  absl::node_hash_map<std::string, vector<int32_t>> ext_tag_spec_ids_by_ext_name_;
   TagSpecDispatch empty_dispatch_;
   vector<int32_t> mandatory_tagspecs_;
   vector<ErrorCodeMetaData> error_codes_;
