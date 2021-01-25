@@ -89,8 +89,8 @@ The example below demonstrates `amp-__component_name_hyphenated__` component in 
 <head>
 ...
 <script async src="https://cdn.ampproject.org/v0.js"></script>
-
-<script async custom-element="amp-bento-component-name" src="https://cdn.ampproject.org/v0/amp-bento-component-name-1.0.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-__component_name_hyphenated__-__component_version__.css">
+<script async custom-element="amp-__component_name_hyphenated__" src="https://cdn.ampproject.org/v0/amp-__component_name_hyphenated__-__component_version__.js"></script>
 ...
 </head>
 <amp-bento-component>
@@ -111,8 +111,8 @@ Bento enabled components in standalone use are highly interactive through their 
 The `amp-__component_name_hyphenated__` component API is accessible by including the following script tag in your document:
 
 ```
-await customElements.whenDefined('${name}-component');
-const api = await ${name}.getApi();
+await customElements.whenDefined('amp-__component_name_hyphenated__-component');
+const api = await __component_name_pascalcase__.getApi();
 ```
 
 The `amp-__component_name_hyphenated__` API allows you to register and respond to the following events:
@@ -140,7 +140,13 @@ example
 
 #### Layout and style
 
-Fully valid AMP pages use the AMP layout system to infer sizing of elements to create a page structure before downloading any remote resources. However, Bento use imports components into less controlled environments and AMP's layout system is inaccessible.
+Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
+
+```
+<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-__component_name_hyphenated__-__component_version__.css">
+```
+
+Fully valid AMP pages use the AMP layout system to infer sizing of elements to create a page structure before downloading any remote resources. However, Bento use imports components into less controlled environments and AMP's layout system is inaccessible. 
 
 **Container type**
 
