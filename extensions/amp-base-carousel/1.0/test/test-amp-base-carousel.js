@@ -28,7 +28,7 @@ import {useStyles} from '../base-carousel.jss';
 import {waitFor, whenCalled} from '../../../../testing/test-helper';
 
 describes.realWin(
-  'amp-base-carousel',
+  'amp-base-carousel:1.0',
   {
     amp: {
       runtimeOn: true,

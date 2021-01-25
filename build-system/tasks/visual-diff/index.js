@@ -16,7 +16,6 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const colors = require('ansi-colors');
 const fs = require('fs');
 const JSON5 = require('json5');
 const path = require('path');
@@ -39,6 +38,7 @@ const {
   shortSha,
 } = require('../../common/git');
 const {buildRuntime, installPackages} = require('../../common/utils');
+const {cyan, yellow} = require('ansi-colors');
 const {execScriptAsync} = require('../../common/exec');
 const {isCiBuild} = require('../../common/ci');
 const {startServer, stopServer} = require('../serve');
@@ -236,16 +236,16 @@ async function newPage(browser, viewport = null) {
       log(
         'verbose',
         'Mocked network request for',
-        colors.yellow(requestUrl.href),
+        yellow(requestUrl.href),
         'with file',
-        colors.cyan(mockedFilepath)
+        cyan(mockedFilepath)
       );
       return interceptedRequest.respond(fs.readFileSync(mockedFilepath));
     } else {
       log(
         'verbose',
         'Blocked external network request for',
-        colors.yellow(requestUrl.href)
+        yellow(requestUrl.href)
       );
       return interceptedRequest.abort('blockedbyclient');
     }
@@ -268,9 +268,9 @@ async function resetPage(page, viewport = null) {
   log(
     'verbose',
     'Resetting tab to',
-    colors.yellow('about:blank'),
+    yellow('about:blank'),
     'with size',
-    colors.yellow(`${width}×${height}`)
+    yellow(`${width}×${height}`)
   );
 
   await page.goto('about:blank');
@@ -304,7 +304,7 @@ function logTestError(testError) {
   log(
     'error',
     'Error in test',
-    colors.yellow(testError.name),
+    yellow(testError.name),
     '\n  ',
     testError.message,
     '\n  ',
@@ -313,11 +313,11 @@ function logTestError(testError) {
   if (testError.consoleMessages.length > 0) {
     log(
       'error',
-      colors.cyan(testError.consoleMessages.length),
+      cyan(testError.consoleMessages.length),
       'Console messages in the browser so far:'
     );
     for (const message of testError.consoleMessages) {
-      log('error', colors.cyan(`[console.${message.type()}]`), message.text());
+      log('error', cyan(`[console.${message.type()}]`), message.text());
     }
   }
 }
@@ -334,7 +334,7 @@ async function runVisualTests(webpages) {
     log(
       'info',
       'The Percy build is baselined on top of commit',
-      colors.cyan(shortSha(process.env['PERCY_TARGET_COMMIT']))
+      cyan(shortSha(process.env['PERCY_TARGET_COMMIT']))
     );
   }
 
@@ -356,7 +356,7 @@ async function generateSnapshots(webpages) {
     log(
       'info',
       'Skipping',
-      colors.cyan(numUnfilteredPages - webpages.length),
+      cyan(numUnfilteredPages - webpages.length),
       'flaky pages'
     );
   }
@@ -364,9 +364,9 @@ async function generateSnapshots(webpages) {
     webpages = webpages.filter((webpage) => argv.grep.test(webpage.name));
     log(
       'info',
-      colors.cyan(`--grep ${argv.grep}`),
+      cyan(`--grep ${argv.grep}`),
       'matched',
-      colors.cyan(webpages.length),
+      cyan(webpages.length),
       'pages'
     );
   }
@@ -389,9 +389,9 @@ async function generateSnapshots(webpages) {
         log(
           'fatal',
           'Failed to load interactive test',
-          colors.cyan(webpage.interactive_tests),
+          cyan(webpage.interactive_tests),
           'for test',
-          colors.cyan(webpage.name),
+          cyan(webpage.name),
           '\nError:',
           error
         );
@@ -409,9 +409,9 @@ async function generateSnapshots(webpages) {
     log(
       'info',
       'Executing',
-      colors.cyan(totalTests),
+      cyan(totalTests),
       'visual diff tests on',
-      colors.cyan(webpages.length),
+      cyan(webpages.length),
       'pages'
     );
   }
@@ -444,7 +444,7 @@ async function snapshotWebpages(browser, webpages) {
   const availablePages = [];
   const allPages = [];
 
-  log('verbose', 'Preallocating', colors.cyan(MAX_PARALLEL_TABS), 'tabs...');
+  log('verbose', 'Preallocating', cyan(MAX_PARALLEL_TABS), 'tabs...');
   for (let i = 0; i < MAX_PARALLEL_TABS; i++) {
     const page = await newPage(browser);
     availablePages.push(page);
@@ -473,9 +473,9 @@ async function snapshotWebpages(browser, webpages) {
       log(
         'info',
         'Starting test',
-        colors.yellow(name),
+        yellow(name),
         'on tab',
-        colors.yellow(`#${allPages.indexOf(page) + 1}`)
+        yellow(`#${allPages.indexOf(page) + 1}`)
       );
 
       await resetPage(page, viewport);
@@ -509,17 +509,17 @@ async function snapshotWebpages(browser, webpages) {
               log(
                 'verbose',
                 'Response for url',
-                colors.yellow(response.url()),
+                yellow(response.url()),
                 'with status',
-                colors.cyan(response.status()),
-                colors.cyan(response.statusText())
+                cyan(response.status()),
+                cyan(response.statusText())
               );
               clearTimeout(responseTimeout);
               resolve();
             });
           });
 
-          log('verbose', 'Navigating to page', colors.yellow(webpage.url));
+          log('verbose', 'Navigating to page', yellow(webpage.url));
           await Promise.all([
             responseWatcher,
             page.goto(fullUrl, {waitUntil: 'networkidle2'}),
@@ -528,7 +528,7 @@ async function snapshotWebpages(browser, webpages) {
           log(
             'verbose',
             'Page navigation of test',
-            colors.yellow(name),
+            yellow(name),
             'is done, verifying page'
           );
         } catch (navigationError) {
@@ -572,7 +572,7 @@ async function snapshotWebpages(browser, webpages) {
             log(
               'verbose',
               'Waiting',
-              colors.cyan(`${webpage.loading_complete_delay_ms}ms`),
+              cyan(`${webpage.loading_complete_delay_ms}ms`),
               'for loading to complete'
             );
             await sleep(webpage.loading_complete_delay_ms);
@@ -651,7 +651,7 @@ async function snapshotWebpages(browser, webpages) {
         log(
           hasWarnings ? 'warning' : 'info',
           'Finished test',
-          colors.yellow(name),
+          yellow(name),
           hasWarnings ? 'with warnings' : ''
         );
         page.removeListener('console', consoleLogger);
@@ -664,7 +664,7 @@ async function snapshotWebpages(browser, webpages) {
   await Promise.all(pagePromises);
   if (isCiBuild() && testErrors.length > 0) {
     testErrors.sort((a, b) => a.name.localeCompare(b.name));
-    log('info', colors.yellow('Tests warnings and errors:'));
+    log('info', yellow('Tests warnings and errors:'));
     testErrors.forEach(logTestError);
     return false;
   }
@@ -733,12 +733,7 @@ async function visualDiff() {
 async function performVisualTests() {
   setDebuggingLevel();
   if (!argv.percy_disabled && !process.env.PERCY_TOKEN) {
-    log(
-      'fatal',
-      'Could not find',
-      colors.cyan('PERCY_TOKEN'),
-      'environment variable'
-    );
+    log('fatal', 'Could not find', cyan('PERCY_TOKEN'), 'environment variable');
   } else {
     try {
       await launchPercyAgent();
@@ -781,9 +776,9 @@ async function ensureOrBuildAmpRuntimeInTestMode_() {
       log(
         'fatal',
         'The AMP runtime was not built in test mode. Run',
-        colors.cyan('gulp dist --fortesting'),
+        cyan('gulp dist --fortesting'),
         'or remove the',
-        colors.cyan('--nobuild'),
+        cyan('--nobuild'),
         'option from this command'
       );
     }

@@ -15,29 +15,18 @@
  */
 'use strict';
 
-const log = require('fancy-log');
-const {
-  printChangeSummary,
-  startTimer,
-  stopTimer,
-  stopTimedJob,
-  timedExecOrDie: timedExecOrDieBase,
-} = require('./utils');
-const {determineBuildTargets} = require('./build-targets');
-const {isPullRequestBuild} = require('../common/ci');
-const {red, cyan, bold, yellow} = require('ansi-colors');
-const {reportAllExpectedTests} = require('../tasks/report-test-status');
-const {runNpmChecks} = require('./npm-checks');
-
 /**
- * @fileoverview
- * This script kicks off the unit and integration tests on Linux, Mac OS, and
- * Windows. This is run on Github Actions CI stage = Cross-Browser Tests.
+ * @fileoverview Script that builds and tests on Linux, macOS, and Windows during CI.
  */
 
-const FILENAME = 'cross-browser-tests.js';
-const FILELOGPREFIX = bold(yellow(`${FILENAME}:`));
-const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
+const {determineBuildTargets} = require('./build-targets');
+const {log} = require('../common/logging');
+const {printSkipMessage, timedExecOrDie} = require('./utils');
+const {red, cyan} = require('ansi-colors');
+const {reportAllExpectedTests} = require('../tasks/report-test-status');
+const {runCiJob} = require('./ci-job');
+
+const jobName = 'cross-browser-tests.js';
 
 /**
  * Helper that runs platform-specific integration tests
@@ -71,13 +60,13 @@ function runIntegrationTestsForPlatform() {
 function runUnitTestsForPlatform() {
   switch (process.platform) {
     case 'linux':
-      timedExecOrDie('gulp unit --nobuild --headless --firefox');
+      timedExecOrDie('gulp unit --headless --firefox');
       break;
     case 'darwin':
-      timedExecOrDie('gulp unit --nobuild --safari');
+      timedExecOrDie('gulp unit --safari');
       break;
     case 'win32':
-      timedExecOrDie('gulp unit --nobuild --headless --edge');
+      timedExecOrDie('gulp unit --headless --edge');
       break;
     default:
       log(
@@ -88,52 +77,42 @@ function runUnitTestsForPlatform() {
   }
 }
 
-async function main() {
-  const startTime = startTimer(FILENAME, FILENAME);
-  if (!runNpmChecks(FILENAME)) {
-    stopTimedJob(FILENAME, startTime);
-    return;
-  }
-  if (!isPullRequestBuild()) {
-    timedExecOrDie('gulp update-packages');
-    timedExecOrDie('gulp dist --fortesting');
-    runIntegrationTestsForPlatform();
-    runUnitTestsForPlatform();
-  } else {
-    printChangeSummary(FILENAME);
-    const buildTargets = determineBuildTargets(FILENAME);
-    if (process.platform == 'linux') {
-      await reportAllExpectedTests(buildTargets); // Only once is sufficient.
-    }
-    if (
-      !buildTargets.has('RUNTIME') &&
-      !buildTargets.has('FLAG_CONFIG') &&
-      !buildTargets.has('UNIT_TEST') &&
-      !buildTargets.has('INTEGRATION_TEST')
-    ) {
-      console.log(
-        `${FILELOGPREFIX} Skipping`,
-        cyan('Cross-Browser Tests'),
-        'because this commit not affect the runtime, flag configs,',
-        'unit tests, or integration tests.'
-      );
-      stopTimer(FILENAME, FILENAME, startTime);
-      return;
-    }
-    timedExecOrDie('gulp update-packages');
-    if (
-      buildTargets.has('RUNTIME') ||
-      buildTargets.has('FLAG_CONFIG') ||
-      buildTargets.has('INTEGRATION_TEST')
-    ) {
-      timedExecOrDie('gulp dist --fortesting');
-      runIntegrationTestsForPlatform();
-    }
-    if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {
-      runUnitTestsForPlatform();
-    }
-  }
-  stopTimer(FILENAME, FILENAME, startTime);
+function pushBuildWorkflow() {
+  timedExecOrDie('gulp update-packages');
+  timedExecOrDie('gulp dist --fortesting');
+  runIntegrationTestsForPlatform();
+  runUnitTestsForPlatform();
 }
 
-main();
+async function prBuildWorkflow() {
+  const buildTargets = determineBuildTargets();
+  if (process.platform == 'linux') {
+    await reportAllExpectedTests(buildTargets); // Only once is sufficient.
+  }
+  if (
+    !buildTargets.has('RUNTIME') &&
+    !buildTargets.has('FLAG_CONFIG') &&
+    !buildTargets.has('UNIT_TEST') &&
+    !buildTargets.has('INTEGRATION_TEST')
+  ) {
+    printSkipMessage(
+      jobName,
+      'this PR does not affect the runtime, flag configs, unit tests, or integration tests'
+    );
+    return;
+  }
+  timedExecOrDie('gulp update-packages');
+  if (
+    buildTargets.has('RUNTIME') ||
+    buildTargets.has('FLAG_CONFIG') ||
+    buildTargets.has('INTEGRATION_TEST')
+  ) {
+    timedExecOrDie('gulp dist --fortesting');
+    runIntegrationTestsForPlatform();
+  }
+  if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {
+    runUnitTestsForPlatform();
+  }
+}
+
+runCiJob(jobName, pushBuildWorkflow, prBuildWorkflow);

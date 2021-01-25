@@ -15,12 +15,12 @@
  */
 'use strict';
 
-const colors = require('ansi-colors');
 const gulp = require('gulp');
-const log = require('fancy-log');
 const path = require('path');
 const srcGlobs = require('../test-configs/config').presubmitGlobs;
 const through2 = require('through2');
+const {blue, red} = require('ansi-colors');
+const {log} = require('../common/logging');
 
 const dedicatedCopyrightNoteSources = /(\.js|\.css|\.go)$/;
 
@@ -111,40 +111,14 @@ const forbiddenTerms = {
       '  If this is cross domain, overwrite the method directly.',
   },
   'console\\.\\w+\\(': {
-    message:
-      'If you run against this, use console/*OK*/.[log|error] to ' +
-      'allowlist a legit case.',
+    message: String(
+      'console.log is generally forbidden. For the runtime, use ' +
+        'console/*OK*/.[log|error] to allowlist a legit case. ' +
+        'For build-system, use the functions in build-system/common/logging.js.'
+    ),
     allowlist: [
       'build-system/common/check-package-manager.js',
-      'build-system/pr-check/build-targets.js',
-      'build-system/pr-check/checks.js',
-      'build-system/pr-check/cross-browser-tests.js',
-      'build-system/pr-check/bundle-size.js',
-      'build-system/pr-check/experiment-tests.js',
-      'build-system/pr-check/e2e-tests.js',
-      'build-system/pr-check/module-build.js',
-      'build-system/pr-check/module-tests.js',
-      'build-system/pr-check/nomodule-build.js',
-      'build-system/pr-check/nomodule-tests.js',
-      'build-system/pr-check/npm-checks.js',
-      'build-system/pr-check/performance-tests.js',
-      'build-system/pr-check/unminified-build.js',
-      'build-system/pr-check/unminified-tests.js',
-      'build-system/pr-check/utils.js',
-      'build-system/pr-check/validator-tests.js',
-      'build-system/pr-check/visual-diff-tests.js',
-      'build-system/server/app.js',
-      'build-system/server/amp4test.js',
-      'build-system/tasks/e2e/mocha-dots-reporter.js',
-      'build-system/tasks/build.js',
-      'build-system/tasks/check-exact-versions.js',
-      'build-system/tasks/check-owners.js',
-      'build-system/tasks/check-types.js',
-      'build-system/tasks/dist.js',
-      'build-system/tasks/dns-monitor.js',
-      'build-system/tasks/helpers.js',
-      'build-system/tasks/prettify.js',
-      'build-system/tasks/server-tests.js',
+      'build-system/common/logging.js',
       'src/purifier/noop.js',
       'validator/js/engine/parse-css.js',
       'validator/js/engine/validator-in-browser.js',
@@ -343,6 +317,7 @@ const forbiddenTerms = {
       'src/service/cid-impl.js',
       'src/service/origin-experiments-impl.js',
       'src/services.js',
+      'src/utils/display-observer.js',
       'testing/test-helper.js',
     ],
   },
@@ -1188,7 +1163,7 @@ const forbiddenTermsSrcInclusive = {
     message: 'Unsupported on IE; use trim() or a helper instead.',
     allowlist: ['validator/js/engine/validator.js'],
   },
-  "process\\.env(\\.|\\[\\')(TRAVIS|GITHUB_ACTIONS|CIRCLECI)": {
+  "process\\.env(\\.|\\[\\')(GITHUB_ACTIONS|CIRCLECI)": {
     message:
       'Do not directly use CI-specific environment vars. Instead, add a ' +
       'function to build-system/common/ci.js',
@@ -1221,6 +1196,15 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js',
       'extensions/amp-iframe/0.1/amp-iframe.js',
+    ],
+  },
+  "require\\('fancy-log'\\)": {
+    message:
+      'Instead of fancy-log, use the logging functions in build-system/common/logging.js.',
+    allowlist: [
+      'build-system/common/logging.js',
+      'build-system/tasks/visual-diff/helpers.js',
+      'validator/js/gulpjs/index.js',
     ],
   },
 };
@@ -1331,7 +1315,7 @@ function matchTerms(file, terms) {
         }
 
         log(
-          colors.red(
+          red(
             'Found forbidden: "' +
               match[0] +
               '" in ' +
@@ -1350,9 +1334,9 @@ function matchTerms(file, terms) {
 
         // log the possible fix information if provided for the term.
         if (fix) {
-          log(colors.blue(fix));
+          log(blue(fix));
         }
-        log(colors.blue('=========='));
+        log(blue('=========='));
       }
 
       return hasTerm;
@@ -1409,12 +1393,8 @@ function isMissingTerms(file) {
 
       const matches = contents.match(new RegExp(term));
       if (!matches) {
-        log(
-          colors.red(
-            'Did not find required: "' + term + '" in ' + file.relative
-          )
-        );
-        log(colors.blue('=========='));
+        log(red('Did not find required: "' + term + '" in ' + file.relative));
+        log(blue('=========='));
         return true;
       }
       return false;
@@ -1443,15 +1423,11 @@ function presubmit() {
     )
     .on('end', function () {
       if (forbiddenFound) {
-        log(
-          colors.blue(
-            'Please remove these usages or consult with the AMP team.'
-          )
-        );
+        log(blue('Please remove these usages or consult with the AMP team.'));
       }
       if (missingRequirements) {
         log(
-          colors.blue(
+          blue(
             'Adding these terms (e.g. by adding a required LICENSE ' +
               'to the file)'
           )

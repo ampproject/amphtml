@@ -16,12 +16,11 @@
 'use strict';
 
 const fs = require('fs-extra');
-const log = require('fancy-log');
 const path = require('path');
 const request = require('request-promise');
-const {ciBuildId} = require('../common/ci');
-const {cyan, green} = require('ansi-colors');
-const {gitCommitHash} = require('../common/git');
+const {ciBuildSha, isTravisBuild} = require('../common/ci');
+const {cyan} = require('ansi-colors');
+const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
 const {replaceUrls: replaceUrlsAppUtil} = require('../server/app-utils');
 
 const hostNamePrefix = 'https://storage.googleapis.com/amp-test-website-1';
@@ -42,7 +41,7 @@ async function walk(dest) {
 }
 
 function getBaseUrl() {
-  return `${hostNamePrefix}/amp_dist_${ciBuildId()}`;
+  return `${hostNamePrefix}/amp_nomodule_${ciBuildSha()}`;
 }
 
 async function replace(filePath) {
@@ -69,24 +68,25 @@ async function replaceUrls(dir) {
   await Promise.all(promises);
 }
 
-async function signalDistUpload(result) {
-  const sha = gitCommitHash();
-  const ciBuild = ciBuildId();
-  const baseUrl = 'https://amp-pr-deploy-bot.appspot.com/v0/pr-deploy/';
-  // TODO(rsimha, ampproject/amp-github-apps#1110): Update this URL.
-  const url = `${baseUrl}travisbuilds/${ciBuild}/headshas/${sha}/${result}`;
-
-  await request.post(url);
-  log(
-    green('INFO:'),
-    'reported ',
-    cyan(`dist: ${result}`),
-    'to the pr-deploy GitHub App'
+async function signalPrDeployUpload(result) {
+  // TODO(rsimha): Remove this check once Travis is shut down.
+  if (isTravisBuild()) {
+    return;
+  }
+  const loggingPrefix = getLoggingPrefix();
+  logWithoutTimestamp(
+    `${loggingPrefix} Reporting`,
+    cyan(result),
+    'to the pr-deploy GitHub App...'
   );
+  const sha = ciBuildSha();
+  const baseUrl = 'https://amp-pr-deploy-bot.appspot.com/v0/pr-deploy/';
+  const url = `${baseUrl}headshas/${sha}/${result}`;
+  await request.post(url);
 }
 
 module.exports = {
   getBaseUrl,
   replaceUrls,
-  signalDistUpload,
+  signalPrDeployUpload,
 };

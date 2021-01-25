@@ -16,59 +16,48 @@
 'use strict';
 
 /**
- * @fileoverview
- * This script downloads the module and nomodule builds then runs the bundle
- * size check.
- * This is run during the CI stage = test; job = Bundle Size.
+ * @fileoverview Script that runs the bundle-size checks during CI.
  */
 
-const colors = require('ansi-colors');
 const {
   downloadModuleOutput,
   downloadNomoduleOutput,
-  printChangeSummary,
-  startTimer,
-  stopTimer,
-  stopTimedJob,
-  timedExecOrDie: timedExecOrDieBase,
+  printSkipMessage,
+  timedExecOrDie,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
-const {isPullRequestBuild} = require('../common/ci');
-const {runNpmChecks} = require('./npm-checks');
+const {isTravisBuild} = require('../common/ci');
+const {runCiJob} = require('./ci-job');
 
-const FILENAME = 'bundle-size.js';
-const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
-const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
+const jobName = 'bundle-size.js';
 
-async function main() {
-  const startTime = startTimer(FILENAME, FILENAME);
-  if (!runNpmChecks(FILENAME)) {
-    stopTimedJob(FILENAME, startTime);
-    return;
-  }
-
-  if (!isPullRequestBuild()) {
-    downloadNomoduleOutput(FILENAME);
-    downloadModuleOutput(FILENAME);
-    timedExecOrDie('gulp bundle-size --on_push_build');
-  } else {
-    printChangeSummary(FILENAME);
-    const buildTargets = determineBuildTargets(FILENAME);
-    if (buildTargets.has('RUNTIME') || buildTargets.has('FLAG_CONFIG')) {
-      downloadNomoduleOutput(FILENAME);
-      downloadModuleOutput(FILENAME);
-      timedExecOrDie('gulp bundle-size --on_pr_build');
-    } else {
-      timedExecOrDie('gulp bundle-size --on_skipped_build');
-      console.log(
-        `${FILELOGPREFIX} Skipping`,
-        colors.cyan('Bundle Size'),
-        'because this commit does not affect the runtime or flag configs.'
-      );
-    }
-  }
-
-  stopTimer(FILENAME, FILENAME, startTime);
+function pushBuildWorkflow() {
+  downloadNomoduleOutput();
+  downloadModuleOutput();
+  timedExecOrDie('gulp bundle-size --on_push_build');
 }
 
-main();
+function prBuildWorkflow() {
+  const buildTargets = determineBuildTargets();
+  if (buildTargets.has('RUNTIME') || buildTargets.has('FLAG_CONFIG')) {
+    downloadNomoduleOutput();
+    downloadModuleOutput();
+    timedExecOrDie('gulp bundle-size --on_pr_build');
+  } else {
+    timedExecOrDie('gulp bundle-size --on_skipped_build');
+    printSkipMessage(
+      jobName,
+      'this PR does not affect the runtime or flag configs'
+    );
+  }
+}
+
+// TODO(rsimha): Remove this block once Travis is shut off.
+if (isTravisBuild()) {
+  printSkipMessage(
+    jobName,
+    'this is a Travis build. Sizes will be reported from CircleCI'
+  );
+  return;
+}
+runCiJob(jobName, pushBuildWorkflow, prBuildWorkflow);
