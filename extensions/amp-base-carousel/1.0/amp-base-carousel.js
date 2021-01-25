@@ -22,6 +22,7 @@ import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/utils/object';
+import {dispatchCustomEvent} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
 import {userAssert} from '../../../src/log';
 
@@ -155,13 +156,20 @@ AmpBaseCarousel['useContexts'] = [CarouselContextProp];
  * @private
  */
 function fireSlideChangeEvent(win, el, index, trust) {
-  const name = 'slideChange';
+  const eventName = 'slideChange';
+  const data = dict({'index': index});
   const slideChangeEvent = createCustomEvent(
     win,
-    `amp-base-carousel.${name}`,
-    dict({'index': index})
+    `amp-base-carousel.${eventName}`,
+    data
   );
-  Services.actionServiceForDoc(el).trigger(el, name, slideChangeEvent, trust);
+  Services.actionServiceForDoc(el).trigger(
+    el,
+    eventName,
+    slideChangeEvent,
+    trust
+  );
+  dispatchCustomEvent(el, eventName, data);
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {

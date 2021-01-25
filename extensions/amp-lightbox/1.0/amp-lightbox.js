@@ -19,7 +19,10 @@ import {CSS as COMPONENT_CSS} from './lightbox.jss';
 import {CSS} from '../../../build/amp-lightbox-1.0.css';
 import {Lightbox} from './lightbox';
 import {PreactBaseElement} from '../../../src/preact/base-element';
+import {Services} from '../../../src/services';
+import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/utils/object';
+import {dispatchCustomEvent} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
 import {toggle} from '../../../src/style';
 import {userAssert} from '../../../src/log';
@@ -60,6 +63,7 @@ class AmpLightbox extends PreactBaseElement {
     this.open_ = true;
     toggle(this.element, true);
     this.element.setAttribute('open', '');
+    fireEvent(this.win, this.element, 'open', ActionTrust.HIGH);
   }
 
   /**
@@ -70,6 +74,7 @@ class AmpLightbox extends PreactBaseElement {
     this.open_ = false;
     toggle(this.element, false);
     this.element.removeAttribute('open');
+    fireEvent(this.win, this.element, 'close', ActionTrust.HIGH);
   }
 
   /** @override */
@@ -91,6 +96,21 @@ class AmpLightbox extends PreactBaseElement {
     );
     return super.isLayoutSupported(layout);
   }
+}
+
+/**
+ * Triggers the given `event`.
+ *
+ * @param {!Window} win
+ * @param {!Element} el The element that was selected or deslected.
+ * @param {string} eventName
+ * @param {!ActionTrust} trust
+ * @private
+ */
+function fireEvent(win, el, eventName, trust) {
+  const event = createCustomEvent(win, `amp-lightbox.${eventName}`);
+  Services.actionServiceForDoc(el).trigger(el, eventName, event, trust);
+  dispatchCustomEvent(el, eventName);
 }
 
 /** @override */
