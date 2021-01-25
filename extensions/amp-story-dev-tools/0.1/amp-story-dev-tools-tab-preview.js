@@ -387,6 +387,9 @@ const PREVIEW_ACTIONS = {
   TOGGLE_DEVICE_CHIP: 'toggleDeviceChip',
 };
 
+/** @private {number} navigation events in this threshold are programmatic if coming from a different player */
+const NAVIGATION_BETWEEN_PLAYERS_THRESHOLD_MS = 100;
+
 export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
   /** @param {!Element} element */
   constructor(element) {
@@ -405,6 +408,9 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
     this.devicesContainer_ = null;
 
     this.onResize_ = this.onResize_.bind(this);
+
+    /** @private {!{player: ?Element, timestamp: number}} the last player that navigated and the timestamp */
+    this.lastNavigationData_ = {player: null, timestamp: 0};
   }
 
   /** @override */
@@ -553,6 +559,20 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
       deviceSpecs.player
         .getElement()
         .addEventListener('storyNavigation', (event) => {
+          const currTimestamp = Date.now();
+          // Skip sending navigation if it came from a player that's not the latest, and it's within the threshold.
+          // This avoids triggering navigation on programmatic advancements.
+          if (
+            this.lastNavigationData_.player != deviceSpecs.player &&
+            currTimestamp - this.lastNavigationData_.timestamp <
+              NAVIGATION_BETWEEN_PLAYERS_THRESHOLD_MS
+          ) {
+            return;
+          }
+          this.lastNavigationData_ = {
+            player: deviceSpecs.player,
+            timestamp: currTimestamp,
+          };
           this.devices_.forEach((d) => {
             if (d != deviceSpecs) {
               d.player.show(null, event.detail.pageId);
