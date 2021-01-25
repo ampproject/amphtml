@@ -30,7 +30,7 @@ import {setImportantStyles} from '../../../src/style';
 const TAG = 'AMP_STORY_PANNING_MEDIA';
 
 /** @const {string}  */
-const MAX_FRAMES = 60;
+const DURATION_MS = 1000;
 
 export class AmpStoryPanningMedia extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -148,11 +148,14 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     const easeInOutQuad = (val) =>
       val < 0.5 ? 2 * val * val : 1 - Math.pow(-2 * val + 2, 2) / 2;
 
-    let frame = 0;
-    const nextFrame = () => {
-      frame++;
-      if (frame < MAX_FRAMES) {
-        const easing = easeInOutQuad(frame / MAX_FRAMES);
+    let start;
+    const nextFrame = (timestamp) => {
+      if (!start) {
+        start = timestamp;
+      }
+      const elapsed = timestamp - start;
+      if (elapsed < DURATION_MS) {
+        const easing = easeInOutQuad(elapsed / DURATION_MS);
         this.storeService_.dispatch(Action.SET_PANNING_MEDIA_STATE, {
           x: startPos.x + (this.x_ - startPos.x) * easing,
           y: startPos.y + (this.y_ - startPos.y) * easing,
@@ -167,7 +170,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
         });
       }
     };
-    nextFrame();
+    requestAnimationFrame(nextFrame);
   }
 
   /**
