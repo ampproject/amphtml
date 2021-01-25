@@ -24,6 +24,7 @@ import {
   isInternalElement,
   isLoadingAllowed,
 } from './layout';
+import {MediaQueryProps} from './utils/media-query-props';
 import {ResourceState} from './service/resource';
 import {Services} from './services';
 import {Signals} from './utils/signals';
@@ -36,7 +37,6 @@ import {
 import {dev, devAssert, rethrowAsync, user, userAssert} from './log';
 import {getIntersectionChangeEntry} from './utils/intersection-observer-3p-host';
 import {getMode} from './mode';
-import {parseSizeList} from './size-list';
 import {setStyle} from './style';
 import {shouldBlockOnConsentByMeta} from './consent';
 import {startupChunk} from './chunk';
@@ -164,15 +164,6 @@ function createBaseCustomElementClass(win) {
       /** @private {boolean} */
       this.paused_ = false;
 
-      /** @private {string|null|undefined} */
-      this.mediaQuery_ = undefined;
-
-      /** @private {!./size-list.SizeList|null|undefined} */
-      this.sizeList_ = undefined;
-
-      /** @private {!./size-list.SizeList|null|undefined} */
-      this.heightsList_ = undefined;
-
       /** @public {boolean} */
       this.warnOnMissingOverflow = true;
 
@@ -248,6 +239,9 @@ function createBaseCustomElementClass(win) {
       const perf = Services.performanceForOrNull(win);
       /** @private {boolean} */
       this.perfOn_ = perf && perf.isPerformanceTrackingOn();
+
+      /** @private {?MediaQueryProps} */
+      this.mediaQueryProps_ = null;
 
       if (nonStructThis[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER]) {
         nonStructThis[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER](nonStructThis);
@@ -593,68 +587,73 @@ function createBaseCustomElementClass(win) {
       }
     }
 
-    /**
-     * If the element has a media attribute, evaluates the value as a media
-     * query and based on the result adds or removes the class
-     * `i-amphtml-hidden-by-media-query`. The class adds display:none to the
-     * element which in turn prevents any of the resource loading to happen for
-     * the element.
-     *
-     * This method is called by Resources and shouldn't be called by anyone
-     * else.
-     *
-     * @final
-     * @package
-     */
-    applySizesAndMediaQuery() {
-      assertNotTemplate(this);
-
-      // Media query.
-      if (this.mediaQuery_ === undefined) {
-        this.mediaQuery_ = this.getAttribute('media') || null;
-      }
-      if (this.mediaQuery_) {
-        const {defaultView} = this.ownerDocument;
-        this.classList.toggle(
-          'i-amphtml-hidden-by-media-query',
-          !defaultView.matchMedia(this.mediaQuery_).matches
-        );
-      }
-
-      // Sizes.
-      if (this.sizeList_ === undefined) {
-        const sizesAttr = this.getAttribute('sizes');
-        const isDisabled = this.hasAttribute('disable-inline-width');
-        this.sizeList_ =
-          !isDisabled && sizesAttr ? parseSizeList(sizesAttr) : null;
-      }
-      if (this.sizeList_) {
-        setStyle(
-          this,
-          'width',
-          this.sizeList_.select(toWin(this.ownerDocument.defaultView))
-        );
-      }
-      // Heights.
-      if (
-        this.heightsList_ === undefined &&
-        this.layout_ === Layout.RESPONSIVE
-      ) {
-        const heightsAttr = this.getAttribute('heights');
-        this.heightsList_ = heightsAttr
-          ? parseSizeList(heightsAttr, /* allowPercent */ true)
-          : null;
-      }
-      if (this.heightsList_) {
-        const sizer = this.getSizer_();
-        if (sizer) {
-          setStyle(
-            sizer,
-            'paddingTop',
-            this.heightsList_.select(toWin(this.ownerDocument.defaultView))
+    /** @private */
+    initMediaAttrs_() {
+      const hasMediaAttrs =
+        this.hasAttribute('media') ||
+        (this.hasAttribute('sizes') &&
+          !this.hasAttribute('disable-inline-width')) ||
+        this.hasAttribute('heights');
+      const hadMediaAttrs = !!this.mediaQueryProps_;
+      const win = this.ownerDocument.defaultView;
+      if (hasMediaAttrs != hadMediaAttrs && win) {
+        if (hasMediaAttrs) {
+          this.mediaQueryProps_ = new MediaQueryProps(win, () =>
+            this.applyMediaAttrs_()
           );
+          this.applyMediaAttrs_();
+        } else {
+          this.disposeMediaAttrs_();
         }
       }
+    }
+
+    /** @private */
+    disposeMediaAttrs_() {
+      if (this.mediaQueryProps_) {
+        this.mediaQueryProps_.dispose();
+        this.mediaQueryProps_ = null;
+      }
+    }
+
+    /** @private */
+    applyMediaAttrs_() {
+      const props = this.mediaQueryProps_;
+      if (!props) {
+        return;
+      }
+
+      props.start();
+
+      // Media query.
+      const mediaAttr = this.getAttribute('media') || null;
+      const matchesMedia = mediaAttr
+        ? props.resolveMatchQuery(mediaAttr)
+        : true;
+      this.classList.toggle('i-amphtml-hidden-by-media-query', !matchesMedia);
+
+      // Sizes.
+      const sizesAttr = this.hasAttribute('disable-inline-width')
+        ? null
+        : this.getAttribute('sizes');
+      if (sizesAttr) {
+        setStyle(this, 'width', props.resolveListQuery(sizesAttr));
+      }
+
+      // Heights.
+      const heightsAttr =
+        this.layout_ === Layout.RESPONSIVE
+          ? this.getAttribute('heights')
+          : null;
+      if (heightsAttr) {
+        const sizer = this.getSizer_();
+        if (sizer) {
+          setStyle(sizer, 'paddingTop', props.resolveListQuery(heightsAttr));
+        }
+      }
+
+      props.complete();
+      this.getResource_().requestMeasure();
     }
 
     /**
@@ -787,6 +786,7 @@ function createBaseCustomElementClass(win) {
             this,
             Services.platformFor(toWin(this.ownerDocument.defaultView)).isIe()
           );
+          this.initMediaAttrs_();
         } catch (e) {
           reportError(e, this);
         }
@@ -797,13 +797,6 @@ function createBaseCustomElementClass(win) {
           this.classList.add('amp-unresolved');
           this.classList.add('i-amphtml-unresolved');
           this.dispatchCustomEventForTesting(AmpEvents.STUBBED);
-        }
-        // Classically, sizes/media queries are applied just before
-        // Resource.measure. With IntersectionObserver, observe() is the
-        // equivalent which happens above in Resources.add(). Applying here
-        // also avoids unnecessary reinvocation during reparenting.
-        if (this.getResources().isIntersectionExperimentOn()) {
-          this.applySizesAndMediaQuery();
         }
       }
 
@@ -914,6 +907,7 @@ function createBaseCustomElementClass(win) {
       this.getResources().remove(this);
       this.implementation_.detachedCallback();
       this.toggleLoading(false);
+      this.disposeMediaAttrs_();
     }
 
     /**

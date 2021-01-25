@@ -269,6 +269,15 @@ export class LegacyAdIntersectionObserverHost {
    */
   sendElementIntersection_(entry) {
     const change = intersectionEntryToJson(entry);
+    // rootBounds is always null in 3p iframe (e.g. Viewer).
+    // See https://github.com/w3c/IntersectionObserver/issues/79
+    //
+    // Since before using a real InOb we used to provide rootBounds,
+    // we are temporarily continuing to do so now.
+    // TODO: determine if consumers rely on this functionality and remove if not.
+    if (change.rootBounds === null) {
+      change.rootBounds = this.baseElement_.getViewport().getRect();
+    }
 
     if (
       this.pendingChanges_.length > 0 &&

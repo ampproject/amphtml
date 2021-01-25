@@ -16,59 +16,44 @@
 'use strict';
 
 /**
- * @fileoverview
- * This script builds and tests the AMP runtime in esm mode.
- * This is run during the CI stage = test; job = module tests.
+ * @fileoverview Script that tests the module AMP runtime during CI.
  */
 
-const colors = require('ansi-colors');
 const {
-  printChangeSummary,
-  startTimer,
-  stopTimer,
-  timedExecOrDie: timedExecOrDieBase,
   downloadModuleOutput,
   downloadNomoduleOutput,
+  printSkipMessage,
+  timedExecOrDie,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
-const {isPullRequestBuild} = require('../common/ci');
+const {runCiJob} = require('./ci-job');
 
-const FILENAME = 'module-tests.js';
-const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
-const timedExecOrDie = (cmd, unusedFileName) =>
-  timedExecOrDieBase(cmd, FILENAME);
+const jobName = 'module-tests.js';
 
-function main() {
-  const startTime = startTimer(FILENAME, FILENAME);
+function pushBuildWorkflow() {
+  downloadNomoduleOutput();
+  downloadModuleOutput();
+  timedExecOrDie('gulp update-packages');
+  timedExecOrDie('gulp integration --nobuild --compiled --headless --esm');
+}
 
-  if (!isPullRequestBuild()) {
-    downloadNomoduleOutput(FILENAME);
-    downloadModuleOutput(FILENAME);
+function prBuildWorkflow() {
+  const buildTargets = determineBuildTargets();
+  if (
+    buildTargets.has('RUNTIME') ||
+    buildTargets.has('FLAG_CONFIG') ||
+    buildTargets.has('INTEGRATION_TEST')
+  ) {
+    downloadNomoduleOutput();
+    downloadModuleOutput();
     timedExecOrDie('gulp update-packages');
     timedExecOrDie('gulp integration --nobuild --compiled --headless --esm');
   } else {
-    printChangeSummary(FILENAME);
-    const buildTargets = determineBuildTargets(FILENAME);
-    if (
-      buildTargets.has('RUNTIME') ||
-      buildTargets.has('FLAG_CONFIG') ||
-      buildTargets.has('INTEGRATION_TEST')
-    ) {
-      downloadNomoduleOutput(FILENAME);
-      downloadModuleOutput(FILENAME);
-      timedExecOrDie('gulp update-packages');
-      timedExecOrDie('gulp integration --nobuild --compiled --headless --esm');
-    } else {
-      console.log(
-        `${FILELOGPREFIX} Skipping`,
-        colors.cyan('Module Tests'),
-        'because this commit does not affect the runtime, flag configs,',
-        'or integration tests.'
-      );
-    }
+    printSkipMessage(
+      jobName,
+      'this PR does not affect the runtime, flag configs, or integration tests'
+    );
   }
-
-  stopTimer(FILENAME, FILENAME, startTime);
 }
 
-main();
+runCiJob(jobName, pushBuildWorkflow, prBuildWorkflow);
