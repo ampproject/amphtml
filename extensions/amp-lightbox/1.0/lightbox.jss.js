@@ -57,13 +57,13 @@ const defaultStyles = {
 
 /* 
   overflow: hidden does not trigger overscrollBehavior, so 
-  overflow: scroll is needed even when the lightbox should not be scrollable.
+  overflow: auto is applied even though the lightbox should not scroll.
   We rely instead on the overflow: hidden in ContainWrapper to prevent 
   scrolling inside the lightbox.
 */
 const containScroll = {
-  overflow: 'scroll',
-  overscrollBehavior: 'none',
+  overflow: 'auto', // Prevent scrolling inside lightbox.
+  overscrollBehavior: 'none', // Prevent scrolling outside lightbox.
 };
 
 const JSS = {
