@@ -31,6 +31,7 @@ import {
   resetServiceForTesting,
 } from '../../../../src/service';
 import {removeSearch} from '../../../../src/url';
+import {toggleExperiment} from '../../../../src/experiments';
 import {user} from '../../../../src/log';
 import {xhrServiceForTesting} from '../../../../src/service/xhr-impl';
 
@@ -847,6 +848,14 @@ describes.realWin(
     describe('exposes api', () => {
       let ampConsent;
       let consentElement;
+
+      beforeEach(() => {
+        toggleExperiment(win, 'tcf-post-message-proxy-api', true);
+      });
+
+      afterEach(() => {
+        toggleExperiment(win, 'tcf-post-message-proxy-api', false);
+      });
 
       describe('config', () => {
         it('shoud expose if in config', async () => {

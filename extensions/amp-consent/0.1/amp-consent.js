@@ -50,6 +50,7 @@ import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {handleTcfCommand} from './tcf-api-commands';
 import {isEnumValue, isObject} from '../../../src/types';
+import {isExperimentOn} from '../../../src/experiments';
 import {toggle} from '../../../src/style';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';
@@ -117,8 +118,16 @@ export class AmpConsent extends AMP.BaseElement {
     /** @private {?string} */
     this.matchedGeoGroup_ = null;
 
-    /** @private @const {!Function} */
-    this.boundHandleIframeMessages_ = this.handleIframeMessages_.bind(this);
+    /** @private {?boolean} */
+    this.isTcfPostMessageProxyExperimentOn_ = isExperimentOn(
+      this.win,
+      'tcf-post-message-proxy-api'
+    );
+
+    /** @private @const {?Function} */
+    this.boundHandleIframeMessages_ = this.isTcfPostMessageProxyExperimentOn_
+      ? this.handleIframeMessages_.bind(this)
+      : null;
   }
 
   /** @override */
@@ -771,7 +780,10 @@ export class AmpConsent extends AMP.BaseElement {
    * that the document supports the tcfPostMessage API.
    */
   maybeSetUpTcfPostMessageProxy_() {
-    if (!this.consentConfig_['exposesTcfApi']) {
+    if (
+      !this.isTcfPostMessageProxyExperimentOn_ ||
+      !this.consentConfig_['exposesTcfApi']
+    ) {
       return;
     }
     // Check if __tcfApiLocator API already exists (dirty AMP)
@@ -787,6 +799,7 @@ export class AmpConsent extends AMP.BaseElement {
       this.element.appendChild(dev().assertElement(iframe));
     }
   }
+
 
   /**
    * Listen to iframe messages and handle events.
