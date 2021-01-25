@@ -225,9 +225,6 @@ export class AmpStoryPlayer {
     this.currentStoryLoadDeferred_ = null;
 
     /** @private {!Deferred} */
-    this.prerenderFirstStoryDeferred_ = new Deferred();
-
-    /** @private {!Deferred} */
     this.visibleDeferred_ = new Deferred();
 
     this.attachCallbacksToElement_();
@@ -265,39 +262,34 @@ export class AmpStoryPlayer {
   /**
    * Adds stories to the player. Additionally, creates or assigns
    * iframes to those that are close to the current playing story.
-   * @param {!Array<!{href: string, title: ?string, posterImage: ?string}>} stories
+   * @param {!Array<!{href: string, title: ?string, posterImage: ?string}>} newStories
    * @public
    */
-  add(stories) {
-    if (stories.length <= 0) {
+  add(newStories) {
+    if (newStories.length <= 0) {
       return;
     }
 
     const isStoryDef = (story) => story && story.href;
-    if (!Array.isArray(stories) || !stories.every(isStoryDef)) {
+    if (!Array.isArray(newStories) || !newStories.every(isStoryDef)) {
       throw new Error('"stories" parameter has the wrong structure');
     }
 
-    for (let i = 0; i < stories.length; i++) {
-      const story = stories[i];
+    const renderStartingIdx = this.stories_.length;
+
+    for (let i = 0; i < newStories.length; i++) {
+      const story = newStories[i];
       story.idx = this.stories_.push(story) - 1;
       story.distance = story.idx - this.currentIdx_;
 
       this.build_(story);
-
-      if (story.distance === 0) {
-        this.appendToDom_(story);
-        this.updateCurrentStory_(story);
-        continue;
-      }
-
-      this.setSrc_(story);
-
-      if (story.distance === 1) {
-        this.appendToDom_(story);
-        this.updatePosition_(story, StoryPosition.NEXT);
-      }
     }
+
+    this.render_(
+      /* addingStories */ true,
+      /* startingIdx */ renderStartingIdx,
+      /* limit */ newStories.length
+    );
   }
 
   /**
@@ -392,9 +384,6 @@ export class AmpStoryPlayer {
   buildStories_() {
     this.stories_.forEach((story) => {
       this.build_(story);
-      if (story.distance <= 1) {
-        this.appendToDom_(story);
-      }
     });
   }
 
@@ -646,33 +635,6 @@ export class AmpStoryPlayer {
     };
   }
 
-  /** @private */
-  prerenderStories_() {
-    this.stories_.forEach((story) => {
-      this.setSrc_(story).then(() =>
-        this.prerenderFirstStoryDeferred_.resolve()
-      );
-    });
-
-    // Unblock layoutCallback when there are no stories initially.
-    if (this.stories_.length === 0) {
-      this.prerenderFirstStoryDeferred_.resolve();
-    }
-  }
-
-  /** @private */
-  initializeVisibleIO_() {
-    const visibleCb = () => {
-      this.prerenderFirstStoryDeferred_.promise.then(() =>
-        this.visibleDeferred_.resolve()
-      );
-    };
-
-    new AmpStoryPlayerViewportObserver(this.win_, this.element_, () =>
-      visibleCb()
-    );
-  }
-
   /**
    * @public
    */
@@ -680,14 +642,12 @@ export class AmpStoryPlayer {
     if (this.isLaidOut_) {
       return;
     }
-    this.prerenderStories_();
-    this.initializeVisibleIO_();
 
-    this.visibleDeferred_.promise.then(() => {
-      if (this.stories_[0]) {
-        this.updateVisibilityState_(this.stories_[0], VisibilityState.VISIBLE);
-      }
-    });
+    new AmpStoryPlayerViewportObserver(this.win_, this.element_, () =>
+      this.visibleDeferred_.resolve()
+    );
+
+    this.render_(/* addingStories */ true);
 
     this.isLaidOut_ = true;
   }
@@ -727,7 +687,7 @@ export class AmpStoryPlayer {
    * @param {!StoryDef} story
    * @private
    */
-  waitForStoryToLoadPromise_(story) {
+  initStoryContentLoadedPromise_(story) {
     this.currentStoryLoadDeferred_ = new Deferred();
 
     story.messagingPromise.then((messaging) =>
@@ -754,13 +714,9 @@ export class AmpStoryPlayer {
     }
 
     if (storyIdx !== this.currentIdx_) {
-      const story = this.stories_[storyIdx];
       this.currentIdx_ = storyIdx;
 
-      this.updateDistances_(storyIdx /* startingIdx */);
-      this.updateVisibilityState_(story, VisibilityState.VISIBLE);
-
-      tryFocus(story.iframe);
+      this.render_();
       this.onNavigation_();
     }
 
@@ -903,14 +859,8 @@ export class AmpStoryPlayer {
     }
 
     this.currentIdx_++;
+    this.render_();
 
-    const previousStory = this.stories_[this.currentIdx_ - 1];
-    this.updatePreviousStory_(previousStory, StoryPosition.PREVIOUS);
-
-    const currentStory = this.stories_[this.currentIdx_];
-    this.updateCurrentStory_(currentStory);
-
-    this.updateDistances_();
     this.onNavigation_();
   }
 
@@ -935,14 +885,8 @@ export class AmpStoryPlayer {
     }
 
     this.currentIdx_--;
+    this.render_();
 
-    const previousStory = this.stories_[this.currentIdx_ + 1];
-    this.updatePreviousStory_(previousStory, StoryPosition.NEXT);
-
-    const currentStory = this.stories_[this.currentIdx_];
-    this.updateCurrentStory_(currentStory);
-
-    this.updateDistances_();
     this.onNavigation_();
   }
 
@@ -980,37 +924,18 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * Updates story to the `previous` state.
-   * @param {!StoryDef} story
-   * @param {!StoryPosition} position
-   * @private
-   */
-  updatePreviousStory_(story, position) {
-    this.updateVisibilityState_(story, VisibilityState.INACTIVE);
-    this.updatePosition_(story, position);
-  }
-
-  /**
-   * Updates a story to the `current` state.
-   * @param {!StoryDef} story
-   * @private
-   */
-  updateCurrentStory_(story) {
-    // setSrc() must be called first to cancel previous story load if needed.
-    this.setSrc_(story).then(() => {
-      this.updateVisibilityState_(story, VisibilityState.VISIBLE);
-      this.updatePosition_(story, StoryPosition.CURRENT);
-      tryFocus(story.iframe);
-    });
-  }
-
-  /**
    * Updates story position.
    * @param {!StoryDef} story
-   * @param {!StoryPosition} position
    * @private
    */
-  updatePosition_(story, position) {
+  updatePosition_(story) {
+    const position =
+      story.distance === 0
+        ? StoryPosition.CURRENT
+        : story.idx > this.currentIdx_
+        ? StoryPosition.NEXT
+        : StoryPosition.PREVIOUS;
+
     requestAnimationFrame(() => {
       const {iframe} = story;
       resetStyles(iframe, ['transform', 'transition']);
@@ -1019,38 +944,103 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * Updates distances of the stories. Appends to the DOM if new distance is
-   * <= 1 and removes from DOM if new distance > 1. It also positions the iframe
-   * for those appended to the DOM.
-   * @param {number=} startingIdx
+   * Returns a promise that makes sure current story gets loaded first before
+   * others.
+   * @param {!StoryDef} story
+   * @return {!Promise}
    * @private
    */
-  updateDistances_(startingIdx = 0) {
-    for (let i = 0; i < this.stories_.length; i++) {
+  currentStoryFirstPromise_(story) {
+    if (story.distance !== 0) {
+      return this.currentStoryLoadDeferred_.promise;
+    }
+
+    if (this.currentStoryLoadDeferred_) {
+      // Cancel previous story load promise.
+      this.currentStoryLoadDeferred_.reject(
+        'Cancelling previous story load promise.'
+      );
+    }
+    this.initStoryContentLoadedPromise_(story);
+    return Promise.resolve();
+  }
+
+  /**
+   * - Updates distances of the stories.
+   * - Appends / removes from the DOM depending on distances.
+   * - Sets visibility state.
+   * - Loads iframe N+1 when N is ready.
+   * - Positions iframes depending on distance.
+   * @param {boolean=} addingStories Whether new stories are being added or not.
+   * @param {number=} startingIdx
+   * @param {number=} limit
+   * @private
+   */
+  render_(
+    addingStories = false,
+    startingIdx = this.currentIdx_,
+    limit = this.stories_.length
+  ) {
+    for (let i = 0; i < limit; i++) {
       const story = this.stories_[(i + startingIdx) % this.stories_.length];
 
       const oldDistance = story.distance;
       story.distance = Math.abs(this.currentIdx_ - story.idx);
 
+      // 1. Determine whether iframe should be in DOM tree or not.
       if (oldDistance <= 1 && story.distance > 1) {
         this.removeFromDom_(story);
       }
 
-      if (story.distance <= 1) {
-        if (oldDistance > 1) {
-          this.appendToDom_(story);
-        }
-
-        const position =
-          story.distance === 0
-            ? StoryPosition.CURRENT
-            : story.idx > this.currentIdx_
-            ? StoryPosition.NEXT
-            : StoryPosition.PREVIOUS;
-
-        this.updatePosition_(story, position);
+      if ((oldDistance > 1 || addingStories) && story.distance <= 1) {
+        this.appendToDom_(story);
       }
+
+      // 2. Sets src to iframe.
+      this.setSrc_(story)
+        .then(() => {
+          // 3. Waits for player to be visible before moving on.
+          return this.visibleDeferred_.promise;
+        })
+        .then(() => {
+          // 4. Update the visibility state of the story.
+          if (story.distance === 0) {
+            return this.updateVisibilityState_(story, VisibilityState.VISIBLE);
+          }
+
+          if (oldDistance === 0 && story.distance === 1) {
+            return this.updateVisibilityState_(story, VisibilityState.INACTIVE);
+          }
+        })
+        .then(() => {
+          // 5. Finally update the story position.
+          if (story.distance <= 1) {
+            this.updatePosition_(story);
+          }
+
+          if (story.distance === 0) {
+            tryFocus(story.iframe);
+          }
+        });
     }
+  }
+
+  /**
+   * @param {!StoryDef} story
+   * @private
+   */
+  appendToDom_(story) {
+    this.rootEl_.appendChild(story.iframe);
+    this.setUpMessagingForStory_(story);
+  }
+
+  /**
+   * @param {!StoryDef} story
+   * @private
+   */
+  removeFromDom_(story) {
+    story.iframe.setAttribute('src', '');
+    story.iframe.remove();
   }
 
   /**
@@ -1085,25 +1075,12 @@ export class AmpStoryPlayer {
           return Promise.resolve();
         }
 
-        let navigationPromise;
-        if (story.distance === 0) {
-          if (this.currentStoryLoadDeferred_) {
-            // Cancel previous story load promise.
-            this.currentStoryLoadDeferred_.reject(
-              'Cancelling previous story load promise.'
-            );
-          }
-          navigationPromise = Promise.resolve();
-          this.waitForStoryToLoadPromise_(story);
-        } else {
-          navigationPromise = this.currentStoryLoadDeferred_.promise;
-        }
-
-        return navigationPromise.then(() => {
+        this.currentStoryFirstPromise_(story).then(() => {
           const {href} = this.getEncodedLocation_(
             storyUrl,
             VisibilityState.PRERENDER
           );
+
           iframe.setAttribute('src', href);
           if (story.title) {
             iframe.setAttribute('title', story.title);
@@ -1203,12 +1180,13 @@ export class AmpStoryPlayer {
    * Updates the visibility state of the story inside the iframe.
    * @param {!StoryDef} story
    * @param {!VisibilityState} visibilityState
+   * @return {!Promise}
    * @private
    */
   updateVisibilityState_(story, visibilityState) {
-    story.messagingPromise.then((messaging) => {
-      messaging.sendRequest('visibilitychange', {state: visibilityState}, true);
-    });
+    return story.messagingPromise.then((messaging) =>
+      messaging.sendRequest('visibilitychange', {state: visibilityState}, true)
+    );
   }
 
   /**
