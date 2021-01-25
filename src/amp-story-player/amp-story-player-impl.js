@@ -961,7 +961,7 @@ export class AmpStoryPlayer {
    * @return {!Promise}
    * @private
    */
-  currentStoryFirstPromise_(story) {
+  currentStoryPromise_(story) {
     if (this.stories_[this.currentIdx_].storyContentLoaded) {
       return Promise.resolve();
     }
@@ -1016,7 +1016,7 @@ export class AmpStoryPlayer {
 
       renderPromises.push(
         // 1. Wait for current story to load before moving on.
-        this.currentStoryFirstPromise_(story)
+        this.currentStoryPromise_(story)
           .then(() => {
             if (story.distance <= 1) {
               return this.maybeGetCacheUrl_(story.href);
@@ -1032,7 +1032,7 @@ export class AmpStoryPlayer {
               story.iframe.src
             );
             if (story.distance <= 1 && !urlsAreEqual) {
-              return this.setSrc_(story);
+              this.setSrc_(story, storyUrl);
             }
           })
           .then(() => {
@@ -1106,18 +1106,15 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * Sets the story src. It waits for first story before setting it to
-   * neighboring stories.
+   * Sets the story src to the iframe.
    * @param {!StoryDef} story
+   * @param {string} url
    * @return {!Promise}
    * @private
    */
-  setSrc_(story) {
+  setSrc_(story, url) {
     const {iframe} = story;
-    const {href} = this.getEncodedLocation_(
-      story.href,
-      VisibilityState.PRERENDER
-    );
+    const {href} = this.getEncodedLocation_(url, VisibilityState.PRERENDER);
 
     iframe.setAttribute('src', href);
     if (story.title) {
