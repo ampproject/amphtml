@@ -38,7 +38,6 @@ const EMBED_PIN_PADDING = 10;
 export class PinWidget {
   /** @param {!Element} rootElement */
   constructor(rootElement) {
-    console.log('pinWidget', {rootElement});
     userAssert(
       rootElement.getAttribute('data-url'),
       'The data-url attribute is required for Pin widgets'
