@@ -23,10 +23,7 @@ import {
 import {closest} from '../../../src/dom';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {htmlFor} from '../../../src/static-template';
-import {
-  observeContentSize,
-  unobserveContentSize,
-} from '../../../src/utils/size-observer';
+import {observeContentSize} from '../../../src/utils/size-observer';
 import {setStyles} from '../../../src/style';
 
 /**
@@ -430,24 +427,18 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
     chipListContainer.appendChild(chipList);
     chipListContainer.appendChild(this.buildAddDeviceButton_());
     chipListContainer.appendChild(this.buildHelpButton_());
+  }
 
+  /** @override */
+  layoutCallback() {
     parseDevices(
       this.element.getAttribute('data-devices') || DEFAULT_DEVICES
     ).forEach((device) => {
       this.addDevice_(device.name);
     });
     this.repositionDevices_();
-  }
-
-  /** @override */
-  layoutCallback() {
     this.element.addEventListener('click', (e) => this.handleTap_(e.target));
     observeContentSize(this.element, this.onResize_);
-  }
-
-  /** @override */
-  unlayoutCallback() {
-    unobserveContentSize(this.element, this.onResize_);
   }
 
   /**
