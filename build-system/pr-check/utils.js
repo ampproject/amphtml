@@ -167,7 +167,9 @@ function abortTimedJob(jobName, startTime) {
 function timedExecFn(execFn) {
   return (cmd, ...rest) => {
     const startTime = startTimer(cmd);
-    const p = execFn(cmd, ...rest);
+    const cmdToRun =
+      isCiBuild() && cmd.startsWith('gulp ') ? cmd.concat(' --color') : cmd;
+    const p = execFn(cmdToRun, ...rest);
     stopTimer(cmd, startTime);
     return p;
   };
