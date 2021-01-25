@@ -19,7 +19,11 @@ push_builds_only: &push_builds_only
         - /^amp-release-.*$/
 
 executors:
-  amphtml-executor:
+  amphtml-large-executor:
+    machine:
+      image: ubuntu-2004:202010-01
+    resource_class: large
+  amphtml-xlarge-executor:
     machine:
       image: ubuntu-2004:202010-01
     resource_class: xlarge
@@ -62,7 +66,7 @@ commands:
 jobs:
   'Checks':
     executor:
-      name: amphtml-executor
+      name: amphtml-large-executor
     steps:
       - setup_vm
       - run:
@@ -70,7 +74,7 @@ jobs:
           command: node build-system/pr-check/checks.js
   'Unminified Build':
     executor:
-      name: amphtml-executor
+      name: amphtml-xlarge-executor
     steps:
       - setup_vm
       - run:
@@ -78,7 +82,7 @@ jobs:
           command: node build-system/pr-check/unminified-build.js
   'Nomodule Build':
     executor:
-      name: amphtml-executor
+      name: amphtml-xlarge-executor
     steps:
       - setup_vm
       - run:
@@ -86,7 +90,7 @@ jobs:
           command: node build-system/pr-check/nomodule-build.js
   'Module Build':
     executor:
-      name: amphtml-executor
+      name: amphtml-xlarge-executor
     steps:
       - setup_vm
       - run:
@@ -94,7 +98,7 @@ jobs:
           command: node build-system/pr-check/module-build.js
   'Bundle Size':
     executor:
-      name: amphtml-executor
+      name: amphtml-large-executor
     steps:
       - setup_vm
       - run:
@@ -102,7 +106,7 @@ jobs:
           command: node build-system/pr-check/bundle-size.js
   'Validator Tests':
     executor:
-      name: amphtml-executor
+      name: amphtml-large-executor
     steps:
       - setup_vm
       - run:
@@ -113,7 +117,7 @@ jobs:
           command: node build-system/pr-check/validator-tests.js
   'Visual Diff Tests':
     executor:
-      name: amphtml-executor
+      name: amphtml-large-executor
     steps:
       - setup_vm
       - run:
@@ -121,7 +125,7 @@ jobs:
           command: node build-system/pr-check/visual-diff-tests.js
   'Unit Tests':
     executor:
-      name: amphtml-executor
+      name: amphtml-large-executor
     steps:
       - setup_vm
       - run:
@@ -129,7 +133,7 @@ jobs:
           command: node build-system/pr-check/unit-tests.js
   'Unminified Tests':
     executor:
-      name: amphtml-executor
+      name: amphtml-large-executor
     steps:
       - setup_vm
       - run:
@@ -137,7 +141,7 @@ jobs:
           command: node build-system/pr-check/unminified-tests.js
   'Nomodule Tests':
     executor:
-      name: amphtml-executor
+      name: amphtml-large-executor
     steps:
       - setup_vm
       - run:
@@ -145,7 +149,7 @@ jobs:
           command: node build-system/pr-check/nomodule-tests.js
   'Module Tests':
     executor:
-      name: amphtml-executor
+      name: amphtml-large-executor
     steps:
       - setup_vm
       - run:
@@ -153,7 +157,7 @@ jobs:
           command: node build-system/pr-check/module-tests.js
   'End-to-End Tests':
     executor:
-      name: amphtml-executor
+      name: amphtml-large-executor
     steps:
       - setup_vm
       - run:
@@ -161,7 +165,7 @@ jobs:
           command: node build-system/pr-check/e2e-tests.js
   'Performance Tests':
     executor:
-      name: amphtml-executor
+      name: amphtml-xlarge-executor
     steps:
       - setup_vm
       - run:
@@ -169,7 +173,7 @@ jobs:
           command: node build-system/pr-check/performance-tests.js
   'Experiment A Tests':
     executor:
-      name: amphtml-executor
+      name: amphtml-xlarge-executor
     steps:
       - setup_vm
       - run:
@@ -177,7 +181,7 @@ jobs:
           command: node build-system/pr-check/experiment-tests.js --experiment=experimentA
   'Experiment B Tests':
     executor:
-      name: amphtml-executor
+      name: amphtml-xlarge-executor
     steps:
       - setup_vm
       - run:
@@ -185,7 +189,7 @@ jobs:
           command: node build-system/pr-check/experiment-tests.js --experiment=experimentB
   'Experiment C Tests':
     executor:
-      name: amphtml-executor
+      name: amphtml-xlarge-executor
     steps:
       - setup_vm
       - run:
