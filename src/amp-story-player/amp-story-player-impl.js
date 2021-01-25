@@ -1005,11 +1005,11 @@ export class AmpStoryPlayer {
         .then(() => {
           // 4. Update the visibility state of the story.
           if (story.distance === 0) {
-            return this.updateVisibilityState_(story, VisibilityState.VISIBLE);
+            this.updateVisibilityState_(story, VisibilityState.VISIBLE);
           }
 
           if (oldDistance === 0 && story.distance === 1) {
-            return this.updateVisibilityState_(story, VisibilityState.INACTIVE);
+            this.updateVisibilityState_(story, VisibilityState.INACTIVE);
           }
         })
         .then(() => {
@@ -1180,11 +1180,10 @@ export class AmpStoryPlayer {
    * Updates the visibility state of the story inside the iframe.
    * @param {!StoryDef} story
    * @param {!VisibilityState} visibilityState
-   * @return {!Promise}
    * @private
    */
   updateVisibilityState_(story, visibilityState) {
-    return story.messagingPromise.then((messaging) =>
+    story.messagingPromise.then((messaging) =>
       messaging.sendRequest('visibilitychange', {state: visibilityState}, true)
     );
   }
