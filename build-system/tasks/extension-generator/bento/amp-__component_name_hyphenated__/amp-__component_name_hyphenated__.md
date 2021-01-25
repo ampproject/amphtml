@@ -75,13 +75,88 @@ Below is an example for ads.
 
 [/example][/filter]
 
-### Standalone use outside the AMP environment (optional)
+### Standalone use outside valid AMP documents (optional)
 
-Bento AMP allows you to use AMP components in non-AMP pages without needing to commit to fully valid AMP. You can take these components and place them in implementations with frameworks and CMSs that don't support AMP. Read more in our guide [Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/)
+<!-- TODO: Remove backticks from link when guide is live -->
 
-#### Bento Example
+Bento AMP allows you to use AMP components in non-AMP pages without needing to commit to fully valid AMP. You can take these components and place them in implementations with frameworks and CMSs that don't support AMP. Read more in our guide `[Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/)`.
 
-Code snippet of component usage in Bento.
+#### Example
+
+The example below demonstrates `amp-__component_name_hyphenated__` component in standalone use.
+
+```
+<head>
+...
+<script async src="https://cdn.ampproject.org/v0.js"></script>
+
+<script async custom-element="amp-bento-component-name" src="https://cdn.ampproject.org/v0/amp-bento-component-name-1.0.js"></script>
+...
+</head>
+<amp-bento-component>
+  ...
+</amp-bento-component>
+<button id="element-id">
+  Event Trigger
+</button>
+<script>
+  example of one API usage
+</script>
+```
+
+#### Interactivity and API usage
+
+Bento enabled components in standalone use are highly interactive through their API. In Bento standalone use, the element's API replaces AMP Actions and events and [`amp-bind`](https://amp.dev/documentation/components/amp-bind/?format=websites).
+
+The `amp-__component_name_hyphenated__` component API is accessible by including the following script tag in your document:
+
+```
+await customElements.whenDefined('${name}-component');
+const api = await ${name}.getApi();
+```
+
+The `amp-__component_name_hyphenated__` API allows you to register and respond to the following events:
+
+**event 1**
+Explanation of event, proper syntax/arguments.
+
+```
+example
+```
+
+**event 2**
+Explanation of event, proper syntax/arguments.
+
+```
+example
+```
+
+**action 1**
+Explanation of action, proper syntax/arguments.
+
+```
+example
+```
+
+#### Layout and style
+
+Fully valid AMP pages use the AMP layout system to infer sizing of elements to create a page structure before downloading any remote resources. However, Bento use imports components into less controlled environments and AMP's layout system is inaccessible.
+
+**Container type**
+
+The `amp-__component_name_hyphenated__` component has a container/non-container layout type. To ensure the component renders correctly, apply the following styles:
+
+```css
+example
+```
+
+**style/layout guidelines 2 (optional)**
+
+Information on how to layout and style `amp-__component_name_hyphenated__`.
+
+```
+example
+```
 
 ### Behavior users should be aware of (optional)
 
