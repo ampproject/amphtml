@@ -180,7 +180,7 @@
     "request": "2.88.2",
     "request-promise": "4.2.6",
     "rocambole": "0.7.0",
-    "sinon": "9.2.3",
+    "sinon": "9.2.4",
     "sinon-chai": "3.5.0",
     "sourcemap-codec": "1.4.8",
     "tar": "6.1.0",
