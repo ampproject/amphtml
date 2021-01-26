@@ -996,15 +996,15 @@ TEST(ValidatorTest, TestTransformedAmpCssLengthWithUrls) {
     EXPECT_EQ(expected_output, output) << "test case " << test_case_name;
   }
 
-  // 0 bytes in the stylesheet, 75009 bytes inline style with a relative URL.
+  // 0 bytes in the stylesheet, 112530 bytes inline style with a relative URL.
   {
     std::string test_case_name =
         StrCat(test_case.name, "[ExtraInlineBytesUrlTest]");
     // This string is 33 bytes of inline style inside a B tag.
     const std::string inline_33_bytes =
         "<b style=\"color: url('a-relative-url.html')\"></b>";
-    // 2273 x 33 = 75009
-    std::string inline_style = RepeatString(inline_33_bytes, /*n_times=*/2273);
+    // 3410 x 33 = 112530
+    std::string inline_style = RepeatString(inline_33_bytes, /*n_times=*/3510);
     std::string test_html =
         TestWithCSS(test_case.input_content, "", inline_style);
     std::string output = RenderResult(
@@ -1014,15 +1014,15 @@ TEST(ValidatorTest, TestTransformedAmpCssLengthWithUrls) {
     EXPECT_EQ(expected_output, output) << "test case " << test_case_name;
   }
 
-  // 0 bytes in the stylesheet, 75009 bytes inline style with a data URL.
+  // 0 bytes in the stylesheet, 112530 bytes inline style with a data URL.
   {
     std::string test_case_name =
         StrCat(test_case.name, "[ExtraInlineBytesUrlTest]");
     // This string is 33 bytes of inline style inside a B tag.
     const std::string inline_33_bytes =
         "<b style=\"color: url('data:nineteen-bytes')\"></b>";
-    // 2273 x 33 = 75009
-    std::string inline_style = RepeatString(inline_33_bytes, /*n_times=*/2273);
+    // 3410 x 33 = 112530
+    std::string inline_style = RepeatString(inline_33_bytes, /*n_times=*/3410);
     std::string test_html =
         TestWithCSS(test_case.input_content, "", inline_style);
     std::string output = RenderResult(
@@ -1032,7 +1032,7 @@ TEST(ValidatorTest, TestTransformedAmpCssLengthWithUrls) {
         "FAIL\n", test_case_name,
         ":36:6 The author stylesheet specified in tag 'style amp-custom' "
         "and the combined inline styles is too large - document contains "
-        "75009 bytes whereas the limit is 75000 bytes. (see "
+        "112530 bytes whereas the limit is 112500 bytes. (see "
         "https://amp.dev/documentation/guides-and-tutorials/learn/spec/"
         "amphtml/#maximum-size)");
     EXPECT_EQ(expected_output, output) << "test case " << test_case_name;
