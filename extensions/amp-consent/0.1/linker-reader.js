@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-// import {getService, registerServiceBuilder} from '../../../src/service';
 import {hasOwn} from '../../../src/utils/object';
 import {parseLinker} from './linker';
 import {parseQueryString} from '../../../src/url';

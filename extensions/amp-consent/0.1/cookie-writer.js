@@ -79,7 +79,7 @@ export class CookieWriter {
    * cookies: {
    *   enabled: true/false, //Default to true
    *   cookieNameA: {
-   *     value: cookieValueA (QUERY_PARAM/LINKER_PARAM)
+   *     value: cookieValueA (LINKER_PARAM)
    *   },
    *   cookieValueB: {
    *     value: cookieValueB
@@ -169,8 +169,8 @@ export class CookieWriter {
   }
 
   /**
-   * Check whether the cookie value is supported. Currently only support
-   * QUERY_PARAM(***) and LINKER_PARAM(***, ***)
+   * Check whether the cookie value is supported. Currently only
+   * support LINKER_PARAM(***, ***)
    *
    * CookieObj should looks like
    * cookieName: {
@@ -206,8 +206,6 @@ export class CookieWriter {
    * @return {!Promise}
    */
   expandAndWrite_(cookieName, cookieValue, cookieExpireDateMs) {
-    // Note: Have to use `expandStringAsync` because QUERY_PARAM can wait for
-    // trackImpressionPromise and resolve async
     return Services.urlReplacementsForDoc(this.element_)
       .expandStringAsync(
         cookieValue,
