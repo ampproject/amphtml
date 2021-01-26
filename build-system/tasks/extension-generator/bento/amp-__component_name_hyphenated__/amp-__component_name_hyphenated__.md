@@ -85,6 +85,7 @@ Bento AMP allows you to use AMP components in non-AMP pages without needing to c
 
 The example below demonstrates `amp-__component_name_hyphenated__` component in standalone use.
 
+[example preview="top-frame" playground="false"]
 ```
 <head>
 ...
@@ -103,6 +104,7 @@ The example below demonstrates `amp-__component_name_hyphenated__` component in 
   example of one API usage
 </script>
 ```
+[/example]
 
 #### Interactivity and API usage
 
