@@ -275,6 +275,7 @@ function ContentShimWithRef(
       return;
     }
     contentElement.classList.add('i-amphtml-accordion-content');
+    contentElement.classList.add('i-amphtml-qqqq');
     contentElement.setAttribute('id', id);
     contentElement.setAttribute('role', role);
     contentElement.setAttribute('aria-labelledby', ariaLabelledBy);
