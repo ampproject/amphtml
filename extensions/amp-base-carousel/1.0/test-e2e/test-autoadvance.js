@@ -27,7 +27,7 @@ describes.endtoend(
       'http://localhost:8000/test/manual/amp-base-carousel/1.0/autoadvance.amp.html',
     experiments: ['bento-carousel'],
     initialRect: {width: pageWidth, height: pageHeight},
-    environments: ['single'/*QQQQ , 'viewer-demo' */],
+    environments: ['single', 'viewer-demo'],
   },
   async (env) => {
     let controller;
@@ -43,10 +43,8 @@ describes.endtoend(
       await controller.switchToShadowRoot(carousel);
     });
 
-    it.only('should move forwards', async () => {
-      debugger;//QQQQQQQ
+    it('should move forwards', async () => {
       const slides = await getSlides(styles, controller);
-      debugger;//QQQQQQQ
 
       await expect(rect(slides[1])).to.include({x: 0});
       await expect(rect(slides[2])).to.include({x: 0});
