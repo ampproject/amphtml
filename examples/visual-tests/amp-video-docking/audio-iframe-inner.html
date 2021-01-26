@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <script
+      async
+      src="https://cdn.ampproject.org/video-iframe-integration-v0.js"
+    ></script>
+    <style>
+      body {
+        font-family: sans-serif;
+        font-size: 16px;
+        font-weight: bold;
+        margin: 0;
+        height: 100vh;
+        line-height: 100vh;
+        text-align: center;
+        box-sizing: border-box;
+        background: #77f;
+        color: white;
+      }
+      [hidden] {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    This text should never be covered
+    <script>
+      // Mock audio playback without actual audio.
+      // https://go.amp.dev/c/amp-video-iframe#custom-integrations
+      (window.AmpVideoIframe = window.AmpVideoIframe || []).push(function (
+        amp
+      ) {
+        amp.postEvent('canplay');
+
+        amp.method('play', function () {
+          amp.postEvent('playing');
+
+          setTimeout(function () {
+            amp.postEvent('ad_start');
+          }, 2000);
+        });
+
+        amp.method('pause', function () {
+          amp.postEvent('pause');
+        });
+
+        amp.method('mute', function () {
+          amp.postEvent('muted');
+        });
+
+        amp.method('unmute', function () {
+          amp.postEvent('unmuted');
+        });
+      });
+    </script>
+  </body>
+</html>

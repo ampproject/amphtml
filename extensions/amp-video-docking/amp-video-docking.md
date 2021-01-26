@@ -60,7 +60,7 @@ Note that the video won't be docked unless it's playing _manually_. This means:
 -   If the video does not have `autoplay`, the feature will not be triggered unless the user plays the video.
 -   If the video is paused while scrolling, it will not be docked.
 
-### Docking target
+### <a id="docking-target"></a> Docking target
 
 On scroll, the video will minimize to an automatically calculated corner or to a custom defined position.
 
@@ -72,7 +72,11 @@ When setting the `dock` attribute with an empty value, the video will dock to a 
 <amp-video src="my-video.mp4" ... dock></amp-video>
 ```
 
-By default, the video will be minimized to the top-right corner. It will be sized at 30% of the viewport's width, no less than 180 pixels wide. If the document is [RTL](https://www.w3.org/International/questions/qa-html-dir), the video will dock to the top-left corner. When in this mode, users can drag the docked video to snap to either corner.
+By default, the video will be minimized to the top-right corner. It will cover 15% of the viewport's area. The element will also be at least 180 pixels wide, as long as it's not scaled over 100%.
+
+If the document is [RTL](https://www.w3.org/International/questions/qa-html-dir), the video will dock to the top-left corner.
+
+When in this mode, users can drag the docked video to snap to either corner.
 
 #### Custom position by "slot"
 
@@ -92,10 +96,28 @@ In order for custom positioning to work properly, the slot element must be [`pos
 
 Custom positioning will be rejected when the element target is not visible. This means that corner targets or slot elements can be picked depending on layout by [CSS media queries.](https://developer.mozilla.org/en-US/docs/Web/CSS/Media_Queries/Using_media_queries) For an example where target types are combined and applied in different layout conditions, [see AMP by Example.](https://amp.dev/documentation/examples/multimedia-animations/advanced_video_docking/)
 
+### Resizing & controls
+
+The component's element may or may not be resized when docked, according to the [calculated
+target area](#docking-target).
+
+-   If the element **doesn't shrink**, its controls aren't replaced.
+
+-   If the element **has to shrink** when docked, its drawn controls are also resized due to its [resizing CSS transform,](https://developer.mozilla.org/en-US/docs/Web/CSS/transform) potentially making them unusable due to their size In this case, `amp-video-docking` replaces the video's controls with its own set, [which can be styled](#styling). These controls are shown when hovered or tapped.
+
+<center>
+  <figure>
+    <img src="https://user-images.githubusercontent.com/254946/106194631-f1201400-6163-11eb-9e6f-61c55b36b06a.png" style="max-width:100%;">
+    <figcaption>Differences in component's controls. <b>Left</b>: controls are kept, <b>right</b>: controls are replaced when shrunk.</figcaption>
+  </figure>
+</center>
+
+You may try out the differences in resizing and controls [on this demo page.](TODODOODODODOD)
+
 ## Attributes
 
 N/A. `amp-video-docking` does not define any custom elements. To use this extension, set the `dock` attribute on
-an [elligible video player component.](#support)
+an [eligible video player component.](#support)
 
 ## Events
 
@@ -157,7 +179,7 @@ The dismiss button is **not** part of a controls set and is always displayed.
 A button "group" that usually contains two buttons, with only one displayed at
 a time. It's used to draw a background when the button is active. It has a
 `border-radius` and a `background-color` set by default, both of which can be
-removed or overrridden.
+removed or overridden.
 
 Direct children (`.amp-docked-video-button-group > [role=button]`) represent
 buttons, which have an SVG background. The color of the SVG can be changed by
