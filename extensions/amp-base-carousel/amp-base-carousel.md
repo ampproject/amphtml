@@ -181,7 +181,7 @@ amp-base-carousel > * {
 }
 ```
 
-### Behavior users should be aware of (optional)
+### Behavior users should be aware of
 
 #### RTL
 
