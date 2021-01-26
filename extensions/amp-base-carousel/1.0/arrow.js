@@ -55,7 +55,7 @@ export function Arrow({
       {Preact.cloneElement(customArrow, {
         'onClick': onClick,
         'disabled': isDisabled,
-        'aria-disabled': String(isDisabled),
+        'aria-disabled': String(!!isDisabled),
       })}
     </div>
   );
