@@ -39,9 +39,9 @@ import {
   tryFocus,
 } from '../../../src/dom';
 import {
-  clickAnchorOnDom,
   createShadowRootWithStyle,
   getSourceOriginForElement,
+  triggerClickFromLightDom,
 } from './utils';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -1467,7 +1467,7 @@ export class AmpStoryEmbeddedComponent {
    */
   onAnchorClick_(event) {
     event.preventDefault();
-    clickAnchorOnDom(this.tooltip_, this.storyEl_);
+    triggerClickFromLightDom(this.tooltip_, this.storyEl_);
   }
 
   /**

@@ -287,12 +287,12 @@ export function setTextBackgroundColor(element) {
 }
 
 /**
- * Click a clone of the anchor passed in the context of the domElement.
- * Used to apply linker logic on shadow-dom anchors
+ * Click a clone of the anchor in the context of the light dom.
+ * Used to apply linker logic on shadow-dom anchors.
  * @param {!Element} anchorElement
- * @param {!Element} domElement
+ * @param {!Element} domElement element from the light dom
  */
-export function clickAnchorOnDom(anchorElement, domElement) {
+export function triggerClickFromLightDom(anchorElement, domElement) {
   const outerAnchor = anchorElement.cloneNode();
   toggle(outerAnchor, false);
   domElement.appendChild(outerAnchor);

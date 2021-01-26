@@ -106,6 +106,16 @@
                 "on": "story-audio-unmuted",
                 "request": "pageView"
               }
+            },
+            "linkers": {
+              "enabled": true,
+              "destinationDomains": ["google.com"],
+              "proxyOnly": false,
+              "linker": {
+                "ids": {
+                  "cid": "CLIENT_ID(cid)"
+                }
+              }
             }
           }
         </script>
@@ -134,10 +144,10 @@
       <amp-story-page id="p3">
         <amp-story-grid-layer template="vertical">
           <h1>Page Three</h1>
-          <a href="google.com">click me</a>
+          <a href="https://google.com">tooltip link</a>
         </amp-story-grid-layer>
         <amp-story-cta-layer>
-          <a>click me</a>
+          <a href="https://google.com">CTA link</a>
         </amp-story-cta-layer>
       </amp-story-page>
 
