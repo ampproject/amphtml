@@ -183,6 +183,13 @@ export class VideoManager {
     devAssert(video);
     const videoBE = /** @type {!AMP.BaseElement} */ (video);
 
+    this.entries_ = this.entries_ || [];
+
+    // Don't register duplicate entries
+    if (this.entries_.some((entry) => entry.video === video)) {
+      return;
+    }
+
     this.registerCommonActions_(video);
 
     if (!video.supportsPlatform()) {
@@ -206,7 +213,6 @@ export class VideoManager {
     this.viewportObserver_.observe(videoBE.element);
     listen(videoBE.element, VideoEvents.RELOAD, () => entry.videoLoaded());
 
-    this.entries_ = this.entries_ || [];
     const entry = new VideoEntry(this, video);
     this.entries_.push(entry);
 
