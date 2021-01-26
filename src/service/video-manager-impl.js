@@ -188,6 +188,12 @@ export class VideoManager {
     if (!video.supportsPlatform()) {
       return;
     }
+
+    if (this.getEntryOrNull_(video)) {
+      // already registered
+      return;
+    }
+
     if (!this.viewportObserver_) {
       const viewportCallback = (
         /** @type {!Array<!IntersectionObserverEntry>} */ records
@@ -270,16 +276,16 @@ export class VideoManager {
 
   /**
    * Returns the entry in the video manager corresponding to the video or
-   * element provided
+   * element provided, or null if unavailable.
    * @param {!../video-interface.VideoOrBaseElementDef|!Element} videoOrElement
-   * @return {VideoEntry} entry
+   * @return {?VideoEntry} entry
    */
-  getEntry_(videoOrElement) {
+  getEntryOrNull_(videoOrElement) {
     if (isEntryFor(this.lastFoundEntry_, videoOrElement)) {
       return this.lastFoundEntry_;
     }
 
-    for (let i = 0; i < this.entries_.length; i++) {
+    for (let i = 0; this.entries_ && i < this.entries_.length; i++) {
       const entry = this.entries_[i];
       if (isEntryFor(entry, videoOrElement)) {
         this.lastFoundEntry_ = entry;
@@ -287,8 +293,18 @@ export class VideoManager {
       }
     }
 
+    return null;
+  }
+
+  /**
+   * Returns the entry in the video manager corresponding to the video or
+   * element provided
+   * @param {!../video-interface.VideoOrBaseElementDef|!Element} videoOrElement
+   * @return {VideoEntry} entry
+   */
+  getEntry_(videoOrElement) {
     return devAssert(
-      null,
+      this.getEntryOrNull_(videoOrElement),
       '%s not registered to VideoManager',
       videoOrElement.element || videoOrElement
     );
