@@ -24,7 +24,7 @@ Vendors that wish to integrate their service with [`<amp-analytics>`](https://am
 
 Type attribute value: `sensorsanalytics`
 
-Adds support for Sensors Analytics. More details for adding Sensors Analytics support can be found at [sensorsdata.com](https://manual.sensorsdata.cn/sa/latest/web-js-sdk-7548149.html).
+Adds support for Sensors Data. More details for adding Sensors Data support can be found at [sensorsdata.com](https://manual.sensorsdata.cn/sa/latest/web-js-sdk-7548149.html).
 
 ### Acquia Lift
 
