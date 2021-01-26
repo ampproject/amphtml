@@ -244,7 +244,7 @@ describes.realWin(
       });
     });
 
-    it.only('should fire DOM event', async () => {
+    it('should fire DOM event', async () => {
       const userSuppliedChildren = setSlides(3);
       userSuppliedChildren.forEach((child) => element.appendChild(child));
       win.document.body.appendChild(element);
