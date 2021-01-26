@@ -226,6 +226,39 @@ describes.realWin(
       ).to.be.equal('inherit');
     });
 
+    it('should focus on the host when an element in the shadow DOM receives focus', async () => {
+      element = win.document.createElement('amp-social-share');
+      element.setAttribute('type', 'email');
+      win.document.body.appendChild(element);
+      await waitForRender();
+
+      // element is not focused and does not have focus indication styles
+      expect(win.document.activeElement).to.not.equal(element);
+
+      // focus the button within the shadow DOM
+      const button = element.shadowRoot.querySelector("[part='button']");
+      button.focus();
+
+      // host receives focus
+      expect(win.document.activeElement).to.equal(element);
+    });
+
+    it('should allow focus directly on the host', async () => {
+      element = win.document.createElement('amp-social-share');
+      element.setAttribute('type', 'email');
+      win.document.body.appendChild(element);
+      await waitForRender();
+
+      // element is not focused and does not have focus indication styles
+      expect(win.document.activeElement).to.not.equal(element);
+
+      // focus the host
+      element.focus();
+
+      // host receives focus
+      expect(win.document.activeElement).to.equal(element);
+    });
+
     describe('dynamically update attributes', () => {
       it('updates default url and css class when "type" attribute is updated', async () => {
         element = win.document.createElement('amp-social-share');
