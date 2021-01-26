@@ -35,7 +35,8 @@ const NOMODULE_OUTPUT_FILE = `amp_nomodule_${ciBuildSha()}.zip`;
 const MODULE_OUTPUT_FILE = `amp_module_${ciBuildSha()}.zip`;
 
 const BUILD_OUTPUT_DIRS = 'build/ dist/ dist.3p/';
-const APP_SERVING_DIRS = 'dist.tools/ examples/ test/manual/';
+const APP_SERVING_DIRS =
+  'dist.tools/ examples/ test/manual/ texst/fixtures/e2e/';
 
 // TODO(rsimha, ampproject/amp-github-apps#1110): Update storage details.
 const GCLOUD_STORAGE_BUCKET = 'gs://amp-travis-builds';
