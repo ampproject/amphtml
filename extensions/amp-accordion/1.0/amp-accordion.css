@@ -39,8 +39,9 @@ amp-accordion > section > * {
 }
 
 /*
- * Lowest-specificity UI styles. Mostly duplicated by the
- * i-amphtml-accordion-header for cross-browser compatibility.
+ * Note! This is a new CSS incompatible with older browsers. It provides
+ * low-specificity UI styles. The same styles are later set for older browsers
+ * via the `i-amphtml-accordion-header` class.
  */
 :where(amp-accordion > section) > :first-child {
   cursor: pointer;
