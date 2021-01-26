@@ -42,6 +42,17 @@ export const UPGRADE_TO_CUSTOMELEMENT_PROMISE = '__AMP_UPG_PRM';
 export const UPGRADE_TO_CUSTOMELEMENT_RESOLVER = '__AMP_UPG_RES';
 
 /**
+ * @typedef {{
+ *   bubbles: (boolean|undefined),
+ *   cancelable: (boolean|undefined),
+ * }}
+ */
+export let CustomEventOptionsDef;
+
+/** @const {!CustomEventOptionsDef} */
+const DEFAULT_CUSTOM_EVENT_OPTIONS = {bubbles: true, cancelable: true};
+
+/**
  * Waits until the child element is constructed. Once the child is found, the
  * callback is executed.
  * @param {!Element} parent
@@ -55,7 +66,7 @@ export function waitForChild(parent, checkFunc, callback) {
   }
   /** @const {!Window} */
   const win = toWin(parent.ownerDocument.defaultView);
-  if (win.MutationObserver) {
+  if (IS_ESM || win.MutationObserver) {
     /** @const {MutationObserver} */
     const observer = new win.MutationObserver(() => {
       if (checkFunc(parent)) {
@@ -958,12 +969,14 @@ export function getVerticalScrollbarWidth(win) {
  * @param {!Node} node
  * @param {string} name
  * @param {!Object=} opt_data Event data.
+ * @param {!CustomEventOptionsDef=} opt_options
  */
-export function dispatchCustomEvent(node, name, opt_data) {
+export function dispatchCustomEvent(node, name, opt_data, opt_options) {
   const data = opt_data || {};
   // Constructors of events need to come from the correct window. Sigh.
   const event = node.ownerDocument.createEvent('Event');
   event.data = data;
-  event.initEvent(name, /* bubbles */ true, /* cancelable */ true);
+  const {bubbles, cancelable} = opt_options || DEFAULT_CUSTOM_EVENT_OPTIONS;
+  event.initEvent(name, bubbles, cancelable);
   node.dispatchEvent(event);
 }

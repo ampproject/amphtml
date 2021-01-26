@@ -168,13 +168,20 @@ describes.realWin(
       const slideWrappers = getSlideWrappers(carousel);
       expect(slideWrappers.length).to.equal(5);
 
-      // Ensure that the content has the snap property not wrapper
-      // or else it will break scrolling animation.
-      for (let i = 0; i < slideWrappers.length; i++) {
-        expect(slideWrappers[i].style.scrollSnapAlign).to.equal('');
-        expect(slideWrappers[i].children[0].style.scrollSnapAlign).to.not.equal(
-          ''
-        );
+      const slides = carousel.querySelector('.i-amphtml-carousel-scroll')
+        .children;
+
+      // Ensure that the spacers have the snap property and not the
+      // slides.
+      for (let i = 0; i < slides.length; i++) {
+        const slide = slides[i];
+        if (slide.classList.contains('i-amphtml-carousel-spacer')) {
+          // type=slides is always center alignment.
+          expect(slide.style.scrollSnapAlign).to.equal('center');
+        } else {
+          expect(slide.style.scrollSnapAlign).to.equal('');
+          expect(slide.children[0].style.scrollSnapAlign).to.equal('');
+        }
       }
     });
 
@@ -280,15 +287,19 @@ describes.realWin(
         expect(eventSpy).to.have.not.been.called;
       });
 
-      it('should dispatch when changing slides', async () => {
-        const eventSpy = env.sandbox.spy();
-        container.addEventListener('slideChange', eventSpy);
+      it('should dispatch event with index and actionTrust when changing slides', async () => {
+        let event;
+        container.addEventListener('slideChange', (e) => {
+          expect(event).to.be.undefined;
+          event = e;
+        });
         const carousel = await getCarousel({loop: false});
 
         carousel.implementation_.interactionNext();
         await afterIndexUpdate(carousel);
 
-        expect(eventSpy).to.have.been.calledOnce;
+        expect(event.data.index).to.equal(1);
+        expect(event.data.actionTrust).to.equal(ActionTrust.HIGH);
       });
     });
 

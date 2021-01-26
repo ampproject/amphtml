@@ -16,9 +16,9 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const log = require('fancy-log');
 const {execOrThrow, getOutput} = require('../common/exec');
 const {green, cyan, red, yellow} = require('ansi-colors');
+const {log} = require('../common/logging');
 
 /**
  * Determines the name of the cherry-pick branch.

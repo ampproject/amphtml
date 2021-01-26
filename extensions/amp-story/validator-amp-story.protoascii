@@ -157,12 +157,12 @@ tags: {  # <amp-story-grid-layer>
   tag_name: "AMP-STORY-GRID-LAYER"
   mandatory_ancestor: "AMP-STORY-PAGE"
   attrs: {
-    name: "template"
-    mandatory: true
-    value: "fill"
-    value: "horizontal"
-    value: "thirds"
-    value: "vertical"
+    name: "anchor"
+    value_regex: "top|bottom|left|right|(top|bottom)[ -](left|right)|(left|right)[ -](top|bottom)"
+  }
+  attrs: {
+    name: "aspect-ratio"
+    value_regex: "\\d+:\\d+"
   }
   attrs: {
     name: "position"
@@ -170,8 +170,17 @@ tags: {  # <amp-story-grid-layer>
     value: "landscape-half-right"
   }
   attrs: {
-    name: "aspect-ratio"
-    value_regex: "\\d+:\\d+"
+    name: "preset"
+    value: "2021-background"
+    value: "2021-foreground"
+  }
+  attrs: {
+    name: "template"
+    mandatory: true
+    value: "fill"
+    value: "horizontal"
+    value: "thirds"
+    value: "vertical"
   }
   descendant_tag_list: "amp-story-grid-layer-allowed-descendants"
   reference_points: {
@@ -655,7 +664,6 @@ descendant_tag_list: {
   tag: "AMP-FIT-TEXT"
   tag: "AMP-FONT"
   tag: "AMP-GIST"
-  tag: "AMP-GOOGLE-VRVIEW-IMAGE"
   tag: "AMP-IMG"
   tag: "AMP-INSTALL-SERVICEWORKER"
   tag: "AMP-LIST"
@@ -667,6 +675,7 @@ descendant_tag_list: {
   tag: "AMP-STORY-INTERACTIVE-POLL"
   tag: "AMP-STORY-INTERACTIVE-QUIZ"
   tag: "AMP-STORY-INTERACTIVE-RESULTS"
+  tag: "AMP-STORY-PANNING-MEDIA"
   tag: "AMP-TIMEAGO"
   tag: "AMP-TWITTER"
   tag: "AMP-VIDEO"
@@ -941,7 +950,6 @@ descendant_tag_list {
   tag: "AMP-GFYCAT"
   tag: "AMP-GIST"
   tag: "AMP-GOOGLE-DOCUMENT-EMBED"
-  tag: "AMP-GOOGLE-VRVIEW-IMAGE"
   tag: "AMP-HULU"
   tag: "AMP-IMA-VIDEO"
   tag: "AMP-IMAGE-SLIDER"

@@ -19,8 +19,8 @@ import {ContainWrapper} from '../../../src/preact/component';
 import {forwardRef} from '../../../src/preact/compat';
 import {setStyle} from '../../../src/style';
 import {
-  useEffect,
   useImperativeHandle,
+  useLayoutEffect,
   useRef,
   useState,
 } from '../../../src/preact';
@@ -42,6 +42,8 @@ const ANIMATION_PRESETS = {
   ],
 };
 
+const DEFAULT_CLOSE_LABEL = 'Close the modal';
+
 /**
  * @param {T} current
  * @return {{current: T}}
@@ -60,14 +62,11 @@ function useValueRef(current) {
  */
 function LightboxWithRef(
   {
-    id,
-    animateIn = 'fade-in',
-    closeButtonAriaLabel,
+    animation = 'fade-in',
     children,
-    initialOpen,
     onBeforeOpen,
     onAfterClose,
-    enableAnimation,
+    scrollable = false,
     ...rest
   },
   ref
@@ -76,18 +75,17 @@ function LightboxWithRef(
   // To open, we mount and render the contents (invisible), then animate the display (visible).
   // To close, it's the reverse.
   // `mounted` mounts the component. `visible` plays the animation.
-  const [mounted, setMounted] = useState(initialOpen);
-  const [visible, setVisible] = useState(initialOpen);
+  const [mounted, setMounted] = useState(false);
+  const [visible, setVisible] = useState(false);
   const classes = useStyles();
   const lightboxRef = useRef();
 
   // We are using refs here to refer to common strings, objects, and functions used.
   // This is because they are needed within `useEffect` calls below (but are not depended for triggering)
   // We use `useValueRef` for props that might change (user-controlled)
-  const animateInRef = useValueRef(animateIn);
+  const animationRef = useValueRef(animation);
   const onBeforeOpenRef = useValueRef(onBeforeOpen);
   const onAfterCloseRef = useValueRef(onAfterClose);
-  const enableAnimationRef = useValueRef(enableAnimation);
 
   useImperativeHandle(
     ref,
@@ -106,12 +104,14 @@ function LightboxWithRef(
     [onBeforeOpenRef]
   );
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const element = lightboxRef.current;
-    if (element == undefined) {
+    if (!element) {
       return;
     }
     let animation;
+    // Set pre-animation visibility state, to be flipped post-animation.
+    setStyle(element, 'visibility', visible ? 'hidden' : 'visible');
 
     // "Make Visible" Animation
     if (visible) {
@@ -120,11 +120,11 @@ function LightboxWithRef(
         setStyle(element, 'visibility', 'visible');
         element./*REVIEW*/ focus();
       };
-      if (!element.animate || !enableAnimationRef.current) {
+      if (!element.animate) {
         postVisibleAnim();
         return;
       }
-      animation = element.animate(ANIMATION_PRESETS[animateInRef.current], {
+      animation = element.animate(ANIMATION_PRESETS[animationRef.current], {
         duration: ANIMATION_DURATION,
         fill: 'both',
         easing: 'ease-in',
@@ -141,11 +141,11 @@ function LightboxWithRef(
         animation = null;
         setMounted(false);
       };
-      if (!element.animate || !enableAnimationRef.current) {
+      if (!element.animate) {
         postInvisibleAnim();
         return;
       }
-      animation = element.animate(ANIMATION_PRESETS[animateInRef.current], {
+      animation = element.animate(ANIMATION_PRESETS[animationRef.current], {
         duration: ANIMATION_DURATION,
         direction: 'reverse',
         fill: 'both',
@@ -158,20 +158,28 @@ function LightboxWithRef(
         animation.cancel();
       }
     };
-  }, [visible, animateInRef, enableAnimationRef, onAfterCloseRef]);
+  }, [visible, animationRef, onAfterCloseRef]);
 
   return (
     mounted && (
       <ContainWrapper
-        id={id}
         ref={(r) => {
           lightboxRef.current = r;
         }}
-        style={{visibility: 'hidden'}}
         size={true}
         layout={true}
         paint={true}
-        className={classes.lightboxContainWrapper}
+        part="lightbox"
+        contentStyle={
+          // Prefer style over class to override `ContainWrapper`'s overflow
+          scrollable && {
+            overflow: 'scroll',
+            overscrollBehavior: 'none',
+          }
+        }
+        wrapperClassName={`${classes.defaultStyles} ${classes.wrapper} ${
+          scrollable ? '' : classes.containScroll
+        }`}
         role="dialog"
         tabindex="0"
         onKeyDown={(event) => {
@@ -183,7 +191,7 @@ function LightboxWithRef(
       >
         {children}
         <button
-          ariaLabel={closeButtonAriaLabel}
+          ariaLabel={DEFAULT_CLOSE_LABEL}
           tabIndex={-1}
           className={classes.closeButton}
           onClick={() => {

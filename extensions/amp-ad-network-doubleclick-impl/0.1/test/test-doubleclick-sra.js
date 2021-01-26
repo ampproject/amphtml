@@ -83,6 +83,20 @@ describes.realWin('Doubleclick SRA', config, (env) => {
     return element;
   }
 
+  function createElementWithRect(rect) {
+    const el = doc.createElement('div');
+    setElementRect(el, rect);
+    return el;
+  }
+
+  function setElementRect(el, {top, left, width, height}) {
+    env.sandbox.stub(el, 'offsetParent').value(null);
+    env.sandbox.stub(el, 'offsetLeft').value(left);
+    env.sandbox.stub(el, 'offsetTop').value(top);
+    env.sandbox.stub(el, 'offsetWidth').value(width);
+    env.sandbox.stub(el, 'offsetHeight').value(height);
+  }
+
   describe('#SRA enabled', () => {
     it('should be disabled by default', () => {
       const element = createAndAppendAdElement();
@@ -274,12 +288,12 @@ describes.realWin('Doubleclick SRA', config, (env) => {
       expect(getForceSafeframe(impls)).to.jsonEqual({'fsfs': '0,1,1'});
     });
     it('should combine page offsets', () => {
-      impls[0] = {getPageLayoutBox: () => ({left: 123, top: 456})};
+      impls[0] = {element: createElementWithRect({left: 123, top: 456})};
       expect(getPageOffsets(impls)).to.jsonEqual({
         'adxs': '123',
         'adys': '456',
       });
-      impls[1] = {getPageLayoutBox: () => ({left: 123, top: 789})};
+      impls[1] = {element: createElementWithRect({left: 123, top: 789})};
       expect(getPageOffsets(impls)).to.jsonEqual({
         'adxs': '123,123',
         'adys': '456,789',
@@ -362,10 +376,8 @@ describes.realWin('Doubleclick SRA', config, (env) => {
           'data-multi-size': '9999x9999',
         };
         const element1 = createElementWithAttributes(doc, 'amp-ad', config1);
+        setElementRect(element1, {top: 123, left: 456});
         const impl1 = new AmpAdNetworkDoubleclickImpl(element1);
-        env.sandbox
-          .stub(impl1, 'getPageLayoutBox')
-          .returns({top: 123, left: 456});
         impl1.experimentIds = [MANUAL_EXPERIMENT_ID];
         env.sandbox
           .stub(impl1, 'generateAdKey_')
@@ -393,10 +405,8 @@ describes.realWin('Doubleclick SRA', config, (env) => {
           'data-multi-size': '1x2,3x4',
         };
         const element2 = createElementWithAttributes(doc, 'amp-ad', config2);
+        setElementRect(element2, {top: 789, left: 101});
         const impl2 = new AmpAdNetworkDoubleclickImpl(element2);
-        env.sandbox
-          .stub(impl2, 'getPageLayoutBox')
-          .returns({top: 789, left: 101});
         env.sandbox
           .stub(impl2, 'generateAdKey_')
           .withArgs('250x300')

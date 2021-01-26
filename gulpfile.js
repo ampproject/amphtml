@@ -18,8 +18,9 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const gulp = require('gulp-help')(require('gulp'));
-const log = require('fancy-log');
 const {cyan, red} = require('ansi-colors');
+const {isCiBuild} = require('./build-system/common/ci');
+const {log} = require('./build-system/common/logging');
 
 const {
   checkExactVersions,
@@ -69,6 +70,7 @@ const {serverTests} = require('./build-system/tasks/server-tests');
 const {serve} = require('./build-system/tasks/serve.js');
 const {size} = require('./build-system/tasks/size');
 const {storybook} = require('./build-system/tasks/storybook');
+const {sweepExperiments} = require('./build-system/tasks/sweep-experiments');
 const {testReportUpload} = require('./build-system/tasks/test-report-upload');
 const {todosFindClosed} = require('./build-system/tasks/todos');
 const {unit} = require('./build-system/tasks/unit');
@@ -99,6 +101,9 @@ function checkFlags(name, taskFunc) {
     return; // This isn't the task being run.
   }
   const validFlags = taskFunc.flags ? Object.keys(taskFunc.flags) : [];
+  if (isCiBuild()) {
+    validFlags.push('color'); // Used to enable log coloring during CI.
+  }
   const usedFlags = Object.keys(argv).slice(1); // Skip the '_' argument
   const invalidFlags = [];
   usedFlags.forEach((flag) => {
@@ -170,6 +175,7 @@ createTask('serve', serve);
 createTask('server-tests', serverTests);
 createTask('size', size);
 createTask('storybook', storybook);
+createTask('sweep-experiments', sweepExperiments);
 createTask('todos:find-closed', todosFindClosed);
 createTask('unit', unit);
 createTask('update-packages', updatePackages);

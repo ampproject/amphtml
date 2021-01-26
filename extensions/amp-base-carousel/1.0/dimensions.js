@@ -33,6 +33,14 @@ export const Alignment = {
 };
 
 /**
+ * @enum {string}
+ */
+export const Orientation = {
+  HORIZONTAL: 'horizontal',
+  VERTICAL: 'vertical',
+};
+
+/**
  * @typedef {{
  *   start: number,
  *   end: number,
@@ -57,9 +65,9 @@ export function getDimension(axis, el) {
   } = el./*OK*/ getBoundingClientRect();
 
   return {
-    start: axis == Axis.X ? left : top,
-    end: axis == Axis.X ? right : bottom,
-    length: axis == Axis.X ? width : height,
+    start: Math.round(axis == Axis.X ? left : top),
+    end: Math.round(axis == Axis.X ? right : bottom),
+    length: Math.round(axis == Axis.X ? width : height),
   };
 }
 
@@ -105,7 +113,7 @@ export function getPosition(axis, alignment, el) {
 export function overlaps(axis, el, position) {
   const {start, end} = getDimension(axis, el);
   // Ignore the end point, since that is shared with the adjacent Element.
-  return Math.round(start) <= position && position < Math.round(end);
+  return start <= position && position < end;
 }
 
 /**
@@ -170,8 +178,8 @@ export function findOverlappingIndex(
 
 /**
  * Gets the current scroll position for an element along a given axis.
- * @param {!Axis} axis The axis to set the scroll position for.
- * @param {!Element} el The Element to set the scroll position for.
+ * @param {!Axis} axis The axis to get the scroll position for.
+ * @param {!Element} el The Element to get the scroll position for.
  * @return {number} The scroll position.
  */
 export function getScrollPosition(axis, el) {
@@ -180,6 +188,34 @@ export function getScrollPosition(axis, el) {
   }
 
   return el./*OK*/ scrollTop;
+}
+
+/**
+ * Gets the scroll capacity for an element along a given axis.
+ * @param {!Axis} axis The axis to get the scroll capacity for.
+ * @param {!Element} el The Element to get the scroll capacity for.
+ * @return {number} The scroll capacity.
+ */
+export function getScrollEnd(axis, el) {
+  if (axis == Axis.X) {
+    return el./*OK*/ scrollWidth;
+  }
+
+  return el./*OK*/ scrollHeight;
+}
+
+/**
+ * Gets the offset position for an element along a given axis.
+ * @param {!Axis} axis The axis to get the offset position for.
+ * @param {!Element} el The Element to get the offset position for.
+ * @return {number} The offset position.
+ */
+export function getOffsetPosition(axis, el) {
+  if (axis == Axis.X) {
+    return el./*OK*/ offsetLeft;
+  }
+
+  return el./*OK*/ offetTop;
 }
 
 /**
@@ -231,7 +267,11 @@ export function scrollContainerToElement(
     ? getStart(axis, container)
     : getCenter(axis, container);
   const delta = Math.round(snapOffset - scrollOffset - offset * length);
-
   updateScrollPosition(axis, container, delta);
-  return !!delta;
+
+  const {length: containerLength} = getDimension(axis, container);
+  const canScroll =
+    containerLength + getScrollPosition(axis, container) + delta <
+    getScrollEnd(axis, container);
+  return !!delta && canScroll;
 }

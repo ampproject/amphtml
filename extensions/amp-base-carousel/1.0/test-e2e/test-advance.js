@@ -27,11 +27,11 @@ const pageWidth = 500;
 const pageHeight = 800;
 
 describes.endtoend(
-  'AMP carousel advance',
+  'amp-base-carousel:1.0 - advance',
   {
     testUrl:
       'http://localhost:8000/test/manual/amp-base-carousel/1.0/advance.amp.html',
-    experiments: ['amp-base-carousel-bento'],
+    experiments: ['bento-carousel'],
     environments: ['single'],
     initialRect: {width: pageWidth, height: pageHeight},
   },
@@ -58,7 +58,8 @@ describes.endtoend(
       prevArrow = await getPrevArrow(styles, controller);
     });
 
-    it('should move forwards once', async () => {
+    // TODO(carolineliu, #24195): This test is flaky during CI.
+    it.skip('should move forwards once', async () => {
       await controller.click(nextArrow);
 
       // Wait for render with updated active slide.

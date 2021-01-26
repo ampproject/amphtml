@@ -25,6 +25,7 @@ import {
   useContext,
   useEffect,
   useImperativeHandle,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -69,13 +70,11 @@ function SelectorWithRef(
   },
   ref
 ) {
-  const [selectedState, setSelectedState] = useState(
-    value ? value : defaultValue
-  );
+  const [selectedState, setSelectedState] = useState(value ?? defaultValue);
   const optionsRef = useRef([]);
   const focusRef = useRef({active: null, focusMap: {}});
 
-  const selected = value ? value : selectedState;
+  const selected = value ?? selectedState;
   const selectOption = useCallback(
     (option) => {
       if (!option) {
@@ -114,9 +113,13 @@ function SelectorWithRef(
 
   useEffect(() => {
     if (!multiple && selected.length > 1) {
-      setSelectedState([selected[0]]);
+      const newOption = selected.pop();
+      setSelectedState([newOption]);
+      if (onChange) {
+        onChange({value: [newOption], option: newOption});
+      }
     }
-  }, [multiple, selected]);
+  }, [onChange, multiple, selected]);
 
   const clear = useCallback(() => setSelectedState([]), []);
 
@@ -130,10 +133,16 @@ function SelectorWithRef(
       if (shouldSelect) {
         selectOption(option);
       } else {
-        setSelectedState((selected) => selected.filter((v) => v != option));
+        setSelectedState((selected) => {
+          const newSelected = selected.filter((v) => v != option);
+          if (onChange) {
+            onChange({value: newSelected, option});
+          }
+          return newSelected;
+        });
       }
     },
-    [setSelectedState, selectOption, selected]
+    [onChange, setSelectedState, selectOption, selected]
   );
 
   /**
@@ -309,7 +318,8 @@ export function Option({
     [customOnFocus]
   );
 
-  useEffect(() => {
+  // Element should be "registered" before it is visible.
+  useLayoutEffect(() => {
     const refFromContext = optionsRef;
     if (!refFromContext || !refFromContext.current) {
       return;
@@ -320,7 +330,8 @@ export function Option({
     return () => delete refFromContext.current[index];
   }, [disabled, index, option, optionsRef]);
 
-  useEffect(() => {
+  // Element should be focusable before it is visible.
+  useLayoutEffect(() => {
     if (!focusRef) {
       return;
     }

@@ -52,9 +52,9 @@ For semantics of configuration, please see [PulsePoint's documentation](https://
 
 Supported parameters:
 
-- `pid`: Publisher Id
-- `tagid`: Tag Id
-- `tagtype`: Tag Type. "hb" represents Header bidding, otherwise treated as regular tag.
-- `size`: Ad Size represented 'widthxheight'
-- `slot`: DFP slot id, required for header bidding tag
-- `timeout`: optional timeout for header bidding, default is 1000ms.
+-   `pid`: Publisher Id
+-   `tagid`: Tag Id
+-   `tagtype`: Tag Type. "hb" represents Header bidding, otherwise treated as regular tag.
+-   `size`: Ad Size represented 'widthxheight'
+-   `slot`: DFP slot id, required for header bidding tag
+-   `timeout`: optional timeout for header bidding, default is 1000ms.

@@ -184,8 +184,8 @@ export class AmpStoryConsent extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @const @private {!../../../src/service/action-impl.ActionService} */
-    this.actions_ = Services.actionServiceForDoc(this.element);
+    /** @private {?../../../src/service/action-impl.ActionService} */
+    this.actions_ = null;
 
     /** @private {?Object} */
     this.consentConfig_ = null;
@@ -202,6 +202,8 @@ export class AmpStoryConsent extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.actions_ = Services.actionServiceForDoc(this.element);
+
     this.assertAndParseConfig_();
 
     const storyEl = dev().assertElement(

@@ -128,7 +128,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
     expect(storyIframe.getAttribute('src')).to.equals(
       DEFAULT_CACHE_URL +
-        '?amp_js_v=0.1#visibilityState=visible&origin=http%3A%2F%2Flocalhost%3A9876' +
+        '?amp_js_v=0.1#visibilityState=prerender&origin=http%3A%2F%2Flocalhost%3A9876' +
         '&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe'
     );
   });
@@ -148,20 +148,21 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
         existingQuery +
         '&amp_js_v=0.1' +
         existingHash +
-        '&visibilityState=visible&origin=http%3A%2F%2Flocalhost%3A9876' +
+        '&visibilityState=prerender&origin=http%3A%2F%2Flocalhost%3A9876' +
         '&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe'
     );
   });
 
   it('should set first story as visible', async () => {
+    const sendRequestSpy = env.sandbox.spy(fakeMessaging, 'sendRequest');
+
     buildStoryPlayer(3);
     await manager.loadPlayers();
     await nextTick();
 
-    const storyIframes = playerEl.querySelectorAll('iframe');
-    expect(storyIframes[0].getAttribute('src')).to.include(
-      '#visibilityState=visible'
-    );
+    expect(sendRequestSpy).to.have.been.calledWith('visibilitychange', {
+      'state': 'visible',
+    });
   });
 
   it('should prerender next story after first one is loaded', async () => {
@@ -202,8 +203,8 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   });
 
   it(
-    'should remove iframe from a story with distance > 1 from current story ' +
-      'and give it to a new story that is distance <= 1 when navigating',
+    'should remove iframe from a story with distance > 1 from the DOM ' +
+      'and append a new story to the DOM that is distance <= 1 when navigating',
     async () => {
       buildStoryPlayer(4);
       await manager.loadPlayers();
@@ -212,18 +213,20 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       const stories = playerEl.getStories();
 
       swipeLeft();
-      expect(stories[0].iframeIdx).to.eql(0);
-      expect(stories[3].iframeIdx).to.eql(-1);
+
+      expect(playerEl.contains(stories[0].iframe)).to.be.true;
+      expect(playerEl.contains(stories[3].iframe)).to.be.false;
 
       swipeLeft();
-      expect(stories[0].iframeIdx).to.eql(-1);
-      expect(stories[3].iframeIdx).to.eql(0);
+
+      expect(playerEl.contains(stories[0].iframe)).to.be.false;
+      expect(playerEl.contains(stories[3].iframe)).to.be.true;
     }
   );
 
   it(
-    'should remove iframe from a story with distance > 1 from current story ' +
-      'and give it to a new story that is distance <= 1 when navigating backwards',
+    'should remove iframe from a story with distance > 1 from DOM ' +
+      'and append new story to the DOM which distance <= 1 when navigating backwards',
     async () => {
       buildStoryPlayer(4);
       await manager.loadPlayers();
@@ -235,8 +238,8 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       swipeLeft();
       swipeRight();
 
-      expect(stories[0].iframeIdx).to.eql(0);
-      expect(stories[3].iframeIdx).to.eql(-1);
+      expect(playerEl.contains(stories[0].iframe)).to.be.true;
+      expect(playerEl.contains(stories[3].iframe)).to.be.false;
     }
   );
 
@@ -425,7 +428,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       expect(storyIframe.getAttribute('src')).to.equals(
         DEFAULT_CACHE_URL +
-          '?amp_js_v=0.1#visibilityState=visible&origin=http%3A%2F%2Flocalhost%3A9876' +
+          '?amp_js_v=0.1#visibilityState=prerender&origin=http%3A%2F%2Flocalhost%3A9876' +
           '&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe'
       );
     });
@@ -440,7 +443,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       expect(storyIframe.getAttribute('src')).to.equals(
         DEFAULT_ORIGIN_URL +
-          '#visibilityState=visible&origin=http%3A%2F%2Flocalhost%3A9876' +
+          '#visibilityState=prerender&origin=http%3A%2F%2Flocalhost%3A9876' +
           '&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe'
       );
     });
@@ -525,11 +528,11 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       const stories = playerEl.getStories();
 
-      expect(stories[0].iframeIdx).to.eql(-1);
-      expect(stories[1].iframeIdx).to.eql(-1);
-      expect(stories[2].iframeIdx).to.eql(2);
-      expect(stories[3].iframeIdx).to.eql(0);
-      expect(stories[4].iframeIdx).to.eql(1);
+      expect(playerEl.contains(stories[0].iframe)).to.be.false;
+      expect(playerEl.contains(stories[1].iframe)).to.be.false;
+      expect(playerEl.contains(stories[2].iframe)).to.be.true;
+      expect(playerEl.contains(stories[3].iframe)).to.be.true;
+      expect(playerEl.contains(stories[4].iframe)).to.be.true;
     });
 
     // TODO(proyectoramirez): delete once add() is implemented.
@@ -593,8 +596,8 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     });
 
     it(
-      'creates and assigns iframes to added stories when there are ' +
-        'less than the maximum iframes set up',
+      'creates and assigns iframes to added stories when they have a ' +
+        'distance of 1',
       async () => {
         buildStoryPlayer();
         await manager.loadPlayers();
@@ -604,15 +607,14 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
         const stories = playerEl.getStories();
 
-        expect(stories[0].iframeIdx).to.eql(0);
-        expect(stories[1].iframeIdx).to.eql(1);
-        expect(stories[2].iframeIdx).to.eql(2);
+        expect(playerEl.contains(stories[0].iframe)).to.be.true;
+        expect(playerEl.contains(stories[1].iframe)).to.be.true;
       }
     );
 
     it(
       'assigns an existing iframe to the first added story when the current ' +
-        'story is the last one, and the maximum number of iframes has been set up',
+        'story is the last one, and the new story has a distance of 1',
       async () => {
         buildStoryPlayer(3);
         await manager.loadPlayers();
@@ -626,8 +628,8 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
         const stories = playerEl.getStories();
 
-        expect(stories[3].iframeIdx).to.eql(0);
-        expect(stories[4].iframeIdx).to.eql(-1);
+        expect(playerEl.contains(stories[3].iframe)).to.be.true;
+        expect(playerEl.contains(stories[4].iframe)).to.be.false;
       }
     );
 

@@ -146,24 +146,51 @@ describes.realWin('video-iframe-integration', {amp: false}, (env) => {
       });
     });
 
-    describe('#getIntersection', () => {
-      it('should request and receive intersection', () => {
-        const integration = new AmpVideoIntegration();
-        const postToParent = env.sandbox.spy(integration, 'postToParent_');
+    describe('get async value from host document', () => {
+      let integration;
+      let postToParent;
+      let callback;
 
-        const callback = env.sandbox.spy();
+      beforeEach(() => {
+        integration = new AmpVideoIntegration();
+        postToParent = env.sandbox.spy(integration, 'postToParent_');
+        callback = env.sandbox.spy();
 
-        const id = integration.getIntersectionForTesting_(callback);
+        integration.listenToOnce_ = env.sandbox.spy();
+      });
+
+      it('getIntersection should request and receive intersection', () => {
+        const id = integration.getFromHostForTesting_(
+          'getIntersection',
+          callback
+        );
 
         expect(
           postToParent.withArgs(env.sandbox.match({method: 'getIntersection'}))
         ).to.have.been.calledOnce;
 
-        const mockedIntersection = {tacos: 'al pastor'};
+        expect(integration.listenToOnce_).to.have.been.calledOnce;
 
-        integration.onMessage_({id, args: mockedIntersection});
+        const response = {tacos: 'al pastor'};
+        integration.onMessage_({id, args: response});
+        expect(callback.withArgs(response)).to.have.been.calledOnce;
+      });
 
-        expect(callback.withArgs(mockedIntersection)).to.have.been.calledOnce;
+      it('getConsentData should request and receive consent data', () => {
+        const id = integration.getFromHostForTesting_(
+          'getConsentData',
+          callback
+        );
+
+        expect(
+          postToParent.withArgs(env.sandbox.match({method: 'getConsentData'}))
+        ).to.have.been.calledOnce;
+
+        expect(integration.listenToOnce_).to.have.been.calledOnce;
+
+        const response = {tacos: 'al pastor'};
+        integration.onMessage_({id, args: response});
+        expect(callback.withArgs(response)).to.have.been.calledOnce;
       });
     });
 

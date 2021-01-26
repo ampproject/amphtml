@@ -16,7 +16,8 @@
 
 import {ActionTrust} from '../../../src/action-constants';
 import {BaseCarousel} from './base-carousel';
-import {CSS} from './base-carousel.jss';
+import {CSS as COMPONENT_CSS} from './base-carousel.jss';
+import {CSS} from '../../../build/amp-base-carousel-1.0.css';
 import {CarouselContextProp} from './carousel-props';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
@@ -30,6 +31,14 @@ const TAG = 'amp-base-carousel';
 
 /** @extends {PreactBaseElement<BaseCarouselDef.CarouselApi>} */
 class AmpBaseCarousel extends PreactBaseElement {
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {?number} */
+    this.slide_ = null;
+  }
+
   /** @override */
   init() {
     const {element} = this;
@@ -43,7 +52,10 @@ class AmpBaseCarousel extends PreactBaseElement {
       },
       ActionTrust.LOW
     );
+
+    this.slide_ = parseInt(element.getAttribute('slide'), 10);
     return dict({
+      'defaultSlide': this.slide_ || 0,
       'onSlideChange': (index) => {
         fireSlideChangeEvent(this.win, element, index, ActionTrust.HIGH);
       },
@@ -53,10 +65,23 @@ class AmpBaseCarousel extends PreactBaseElement {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(
-      isExperimentOn(this.win, 'amp-base-carousel-bento'),
-      'expected amp-base-carousel-bento experiment to be enabled'
+      isExperimentOn(this.win, 'bento') ||
+        isExperimentOn(this.win, 'bento-carousel'),
+      'expected global "bento" or specific "bento-carousel" experiment to be enabled'
     );
     return super.isLayoutSupported(layout);
+  }
+
+  /** @override */
+  mutationObserverCallback() {
+    const slide = parseInt(this.element.getAttribute('slide'), 10);
+    if (slide === this.slide_) {
+      return;
+    }
+    this.slide_ = slide;
+    if (!isNaN(slide)) {
+      this.api().goToSlide(slide);
+    }
   }
 }
 
@@ -100,6 +125,12 @@ AmpBaseCarousel['props'] = {
   },
   'autoAdvanceLoops': {attr: 'auto-advance-loops', type: 'number', media: true},
   'controls': {attr: 'controls', type: 'string', media: true},
+  'orientation': {
+    attr: 'orientation',
+    type: 'string',
+    media: true,
+    default: 'horizontal',
+  },
   'loop': {attr: 'loop', type: 'boolean', media: true},
   'mixedLength': {attr: 'mixed-length', type: 'boolean', media: true},
   'outsetArrows': {attr: 'outset-arrows', type: 'boolean', media: true},
@@ -110,7 +141,7 @@ AmpBaseCarousel['props'] = {
 };
 
 /** @override */
-AmpBaseCarousel['shadowCss'] = CSS;
+AmpBaseCarousel['shadowCss'] = COMPONENT_CSS;
 
 /** @override */
 AmpBaseCarousel['useContexts'] = [CarouselContextProp];
@@ -135,5 +166,5 @@ function fireSlideChangeEvent(win, el, index, trust) {
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpBaseCarousel);
+  AMP.registerElement(TAG, AmpBaseCarousel, CSS);
 });

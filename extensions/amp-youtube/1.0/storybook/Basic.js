@@ -15,6 +15,12 @@
  */
 
 import * as Preact from '../../../../src/preact';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionHeader,
+  AccordionSection,
+} from '../../../amp-accordion/1.0/accordion';
 import {Youtube} from '../youtube';
 import {boolean, number, object, text, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
@@ -62,5 +68,43 @@ export const liveChannelId = () => {
       style={{width, height}}
       credentials={credentials}
     />
+  );
+};
+
+export const InsideAccordion = () => {
+  const width = text('width', '320px');
+  const height = text('height', '180px');
+  const videoid = text('videoid', 'IAvf-rkzNck');
+  const params = object('params', {});
+  return (
+    <Accordion expandSingleSection>
+      <AccordionSection key={1} expanded>
+        <AccordionHeader>
+          <h2>Controls</h2>
+        </AccordionHeader>
+        <AccordionContent>
+          <Youtube
+            loop={true}
+            videoid={videoid}
+            params={params}
+            style={{width, height}}
+          />
+        </AccordionContent>
+      </AccordionSection>
+      <AccordionSection key={2}>
+        <AccordionHeader>
+          <h2>Autoplay</h2>
+        </AccordionHeader>
+        <AccordionContent>
+          <Youtube
+            autoplay={true}
+            loop={true}
+            videoid={videoid}
+            params={params}
+            style={{width, height}}
+          />
+        </AccordionContent>
+      </AccordionSection>
+    </Accordion>
   );
 };

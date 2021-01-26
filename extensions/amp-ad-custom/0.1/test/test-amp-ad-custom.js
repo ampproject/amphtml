@@ -49,19 +49,17 @@ describes.realWin('TemplateRenderer', realWinConfig, (env) => {
       whenSignal: () => Promise.resolve(),
     });
     containerElement.renderStarted = () => {};
-    containerElement.getPageLayoutBox = () => ({
-      left: 0,
-      top: 0,
-      width: 0,
-      height: 0,
-    });
     containerElement.getLayoutBox = () => ({
       left: 0,
       top: 0,
       width: 0,
       height: 0,
     });
-    containerElement.getIntersectionChangeEntry = () => ({});
+    containerElement.getIntersectionChangeEntry = () => ({
+      rootBounds: {},
+      intersectionRect: {},
+      boundingClientRect: {},
+    });
     containerElement.isInViewport = () => true;
     containerElement.getAmpDoc = () => env.ampdoc;
     doc.body.appendChild(containerElement);

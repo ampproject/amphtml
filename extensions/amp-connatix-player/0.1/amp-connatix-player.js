@@ -271,6 +271,7 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
     const urlParams = dict({
       'playerId': this.playerId_ || undefined,
       'mediaId': this.mediaId_ || undefined,
+      'url': Services.documentInfoForDoc(element).sourceUrl,
     });
     const iframeUrl = this.iframeDomain_ + '/amp-embed/index.html';
     const src = addParamsToUrl(iframeUrl, urlParams);
@@ -305,7 +306,7 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
     if (!this.iframe_) {
       return;
     }
-    const {width, height} = this.getLayoutBox();
+    const {width, height} = this.getLayoutSize();
     this.sendCommand_('ampResize', {'width': width, 'height': height});
   }
 

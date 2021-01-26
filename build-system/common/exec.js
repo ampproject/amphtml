@@ -20,7 +20,7 @@
  */
 
 const childProcess = require('child_process');
-const log = require('fancy-log');
+const {log} = require('./logging');
 const {spawnProcess, getOutput, getStdout, getStderr} = require('./process');
 const {yellow} = require('ansi-colors');
 

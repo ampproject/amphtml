@@ -34,5 +34,5 @@ limitations under the License.
 
 Supported parameters:
 
-- `data-id`
-- `data-fluid`
+-   `data-id`
+-   `data-fluid`

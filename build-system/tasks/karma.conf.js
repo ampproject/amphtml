@@ -20,29 +20,25 @@ const browserifyPersistFs = require('browserify-persist-fs');
 const crypto = require('crypto');
 const fs = require('fs');
 const globby = require('globby');
-
-const {isGithubActionsBuild} = require('../common/github-actions');
-const {isTravisBuild} = require('../common/travis');
+const {isCiBuild} = require('../common/ci');
 
 const TEST_SERVER_PORT = 8081;
-
+const DOT_WRAPPING_WIDTH = 150;
 const COMMON_CHROME_FLAGS = [
   // Dramatically speeds up iframe creation time.
   '--disable-extensions',
   // Allows simulating user actions (e.g unmute) which otherwise will be denied.
   '--autoplay-policy=no-user-gesture-required',
-];
-
-if (argv.debug) {
-  COMMON_CHROME_FLAGS.push('--auto-open-devtools-for-tabs');
-}
+  // Makes debugging easy by auto-opening devtools.
+  argv.debug ? '--auto-open-devtools-for-tabs' : null,
+].filter(Boolean);
 
 // Used by persistent browserify caching to further salt hashes with our
 // environment state. Eg, when updating a babel-plugin, the environment hash
 // must change somehow so that the cache busts and the file is retransformed.
 const createHash = (input) =>
   crypto.createHash('sha1').update(input).digest('hex');
-
+let wrapCounter = 0;
 const persistentCache = browserifyPersistFs(
   '.karma-cache',
   {
@@ -59,6 +55,10 @@ const persistentCache = browserifyPersistFs(
   },
   () => {
     process.stdout.write('.');
+    if (++wrapCounter >= DOT_WRAPPING_WIDTH) {
+      wrapCounter = 0;
+      process.stdout.write('\n');
+    }
   }
 );
 
@@ -107,19 +107,16 @@ module.exports = {
     fast: true,
     basedir: __dirname + '/../../',
     transform: [['babelify', {caller: {name: 'test'}, global: true}]],
-    // Prevent "cannot find module" errors on Travis. See #14166.
-    bundleDelay: isTravisBuild() ? 5000 : 1200,
+    // Prevent "cannot find module" errors during CI. See #14166.
+    bundleDelay: isCiBuild() ? 5000 : 1200,
 
     persistentCache,
   },
 
-  reporters: [
-    isGithubActionsBuild() ? 'dots' : 'super-dots',
-    'karmaSimpleReporter',
-  ],
+  reporters: ['super-dots', 'karmaSimpleReporter'],
 
   superDotsReporter: {
-    nbDotsPerLine: 100000,
+    nbDotsPerLine: DOT_WRAPPING_WIDTH,
     color: {
       success: 'green',
       failure: 'red',
@@ -176,7 +173,7 @@ module.exports = {
 
   customLaunchers: {
     /* eslint "google-camelcase/google-camelcase": 0*/
-    Chrome_travis_ci: {
+    Chrome_ci: {
       base: 'Chrome',
       flags: ['--no-sandbox'].concat(COMMON_CHROME_FLAGS),
     },
@@ -200,10 +197,10 @@ module.exports = {
   client: {
     mocha: {
       reporter: 'html',
-      // Longer timeout on Travis; fail quickly during local runs.
-      timeout: isTravisBuild() ? 10000 : 2000,
-      // Run tests up to 3 times before failing them on Travis / GH Actions.
-      retries: isGithubActionsBuild() || isTravisBuild() ? 2 : 0,
+      // Longer timeout during CI; fail quickly during local runs.
+      timeout: isCiBuild() ? 10000 : 2000,
+      // Run tests up to 3 times before failing them during CI.
+      retries: isCiBuild() ? 2 : 0,
     },
     captureConsole: false,
     verboseLogging: false,
@@ -216,7 +213,7 @@ module.exports = {
 
   // Give a disconnected browser 2 minutes to reconnect with Karma.
   // This allows a browser to retry 2 times per `browserDisconnectTolerance`
-  // on Travis before stalling out after 10 minutes.
+  // during CI before stalling out after 10 minutes.
   browserDisconnectTimeout: 2 * 60 * 1000,
 
   // If there's no message from the browser, make Karma wait 2 minutes
@@ -224,7 +221,7 @@ module.exports = {
   browserNoActivityTimeout: 2 * 60 * 1000,
 
   // IF YOU CHANGE THIS, DEBUGGING WILL RANDOMLY KILL THE BROWSER
-  browserDisconnectTolerance: isTravisBuild() ? 2 : 0,
+  browserDisconnectTolerance: isCiBuild() ? 2 : 0,
 
   // Import our gulp webserver as a Karma server middleware
   // So we instantly have all the custom server endpoints available

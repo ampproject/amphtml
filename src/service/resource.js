@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Deferred, tryResolve} from '../utils/promise';
+import {Deferred} from '../utils/promise';
 import {Layout} from '../layout';
 import {Services} from '../services';
 import {cancellation, isBlockedByConsent, reportError} from '../error';
@@ -23,6 +23,7 @@ import {dev, devAssert} from '../log';
 import {
   layoutRectLtwh,
   layoutRectSizeEquals,
+  layoutSizeFromRect,
   moveLayoutRect,
   rectsOverlap,
 } from '../layout-rect';
@@ -380,13 +381,6 @@ export class Resource {
   }
 
   /**
-   * Optionally hides or shows the element depending on the media query.
-   */
-  applySizesAndMediaQuery() {
-    this.element.applySizesAndMediaQuery();
-  }
-
-  /**
    * Instructs the element to change its size and transitions to the state
    * awaiting the measure and possibly layout.
    * @param {number|undefined} newHeight
@@ -541,6 +535,17 @@ export class Resource {
   }
 
   /**
+   * Yields when the resource has been measured.
+   * @return {!Promise}
+   */
+  ensureMeasured() {
+    if (this.hasBeenMeasured()) {
+      return Promise.resolve();
+    }
+    return Services.vsyncFor(this.hostWin).measure(() => this.measure());
+  }
+
+  /**
    * Computes the current layout box and position-fixed state of the element.
    * @param {!ClientRect=} opt_premeasuredRect
    * @private
@@ -642,6 +647,14 @@ export class Resource {
   }
 
   /**
+   * Returns a previously measured layout size.
+   * @return {!../layout-rect.LayoutSizeDef}
+   */
+  getLayoutSize() {
+    return layoutSizeFromRect(this.layoutBox_);
+  }
+
+  /**
    * Returns a previously measured layout box adjusted to the viewport. This
    * mainly affects fixed-position elements that are adjusted to be always
    * relative to the document position in the viewport.
@@ -661,31 +674,6 @@ export class Resource {
       viewport.getScrollLeft(),
       viewport.getScrollTop()
     );
-  }
-
-  /**
-   * Returns a previously measured layout box relative to the page. The
-   * fixed-position elements are relative to the top of the document.
-   * @return {!../layout-rect.LayoutRectDef}
-   */
-  getPageLayoutBox() {
-    return this.layoutBox_;
-  }
-
-  /**
-   * Returns the resource's layout box relative to the page. It will be
-   * measured if the resource hasn't ever be measured.
-   *
-   * @return {!Promise<!../layout-rect.LayoutRectDef>}
-   */
-  getPageLayoutBoxAsync() {
-    if (this.hasBeenMeasured()) {
-      return tryResolve(() => this.getPageLayoutBox());
-    }
-    return Services.vsyncFor(this.hostWin).measurePromise(() => {
-      this.measure();
-      return this.getPageLayoutBox();
-    });
   }
 
   /**
@@ -958,12 +946,15 @@ export class Resource {
 
     const promise = new Promise((resolve, reject) => {
       Services.vsyncFor(this.hostWin).mutate(() => {
+        let callbackResult;
         try {
-          resolve(this.element.layoutCallback(signal));
+          callbackResult = this.element.layoutCallback(signal);
         } catch (e) {
           reject(e);
         }
+        Promise.resolve(callbackResult).then(resolve, reject);
       });
+      signal.onabort = () => reject(cancellation());
     }).then(
       () => this.layoutComplete_(true, signal),
       (reason) => this.layoutComplete_(false, signal, reason)

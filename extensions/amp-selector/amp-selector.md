@@ -2,13 +2,14 @@
 $category@: dynamic-content
 formats:
   - websites
-  - email
 teaser:
   text: Represents a control that presents a menu of options and lets the user choose from it.
+experimental: true
+bento: true
 ---
 
 <!---
-Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+Copyright 2021 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -29,14 +30,14 @@ limitations under the License.
 
 The AMP selector is a control that presents a list of options and lets the user choose one or many options; the contents of the options aren't just limited to text.
 
-- An `amp-selector` can contain any arbitrary HTML elements or AMP components (e.g., `amp-carousel`, `amp-img`, etc.).
-- An `amp-selector` cannot contain any nested `amp-selector` controls.
-- Selectable options can be set by adding the `option` attribute to the element and assigning a value to the attribute (e.g., `<li option='value'></li>`).
-- Disabled options can be set by adding the `disabled` attribute to the element (e.g., `<li option='d' disabled></li>`).
-- Preselected options can be set by adding the `selected` attribute to the element (e.g., `<li option='b' selected></li>`).
-- To allow for multiple selections, add the `multiple` attribute to the `amp-selector` element. By default, the `amp-selector` allows for one selection at a time.
-- To disable the entire `amp-selector`, add the `disabled` attribute to the `amp-selector` element.
-- When an `amp-selector` contains a `name` attribute and the `amp-selector` is inside a `form` tag, if a submit event occurs on the form, the `amp-selector`behaves like a radio-button/checkbox group and submits the selected values (the ones assigned to the option) against the name of the `amp-selector`.
+-   An `amp-selector` can contain any arbitrary HTML elements or AMP components (e.g., `amp-carousel`, `amp-img`, etc.).
+-   An `amp-selector` cannot contain any nested `amp-selector` controls.
+-   Selectable options can be set by adding the `option` attribute to the element and assigning a value to the attribute (e.g., `<li option='value'></li>`).
+-   Disabled options can be set by adding the `disabled` attribute to the element (e.g., `<li option='d' disabled></li>`).
+-   Preselected options can be set by adding the `selected` attribute to the element (e.g., `<li option='b' selected></li>`).
+-   To allow for multiple selections, add the `multiple` attribute to the `amp-selector` element. By default, the `amp-selector` allows for one selection at a time.
+-   To disable the entire `amp-selector`, add the `disabled` attribute to the `amp-selector` element.
+-   When an `amp-selector` contains a `name` attribute and the `amp-selector` is inside a `form` tag, if a submit event occurs on the form, the `amp-selector`behaves like a radio-button/checkbox group and submits the selected values (the ones assigned to the option) against the name of the `amp-selector`.
 
 Example:
 
@@ -115,10 +116,6 @@ Example:
 </amp-selector>
 ```
 
-{% call callout('Tip', type='success') %}
-See live demos at [AMP By Example](https://amp.dev/documentation/examples/components/amp-selector/).
-{% endcall %}
-
 ## Attributes
 
 ### Attributes on `<amp-selector>`
@@ -173,7 +170,3 @@ Tapping disabled options does not trigger the `select` event.
   `event.selectedOptions` contains an array of the `option` attribute values of all selected elements.
   </li>
 </ul>
-
-## Validation
-
-See [amp-selector rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-selector/validator-amp-selector.protoascii) in the AMP validator specification.

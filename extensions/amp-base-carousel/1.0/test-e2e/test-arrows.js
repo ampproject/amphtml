@@ -26,11 +26,11 @@ import {useStyles} from '../base-carousel.jss';
 const SLIDE_COUNT = 7;
 
 describes.endtoend(
-  'AMP carousel arrows with custom arrows',
+  'amp-base-carousel:1.0 - arrows with custom arrows',
   {
     testUrl:
       'http://localhost:8000/test/manual/amp-base-carousel/1.0/custom-arrows.amp.html',
-    experiments: ['amp-base-carousel-bento'],
+    experiments: ['bento-carousel'],
     environments: ['single', 'viewer-demo'],
   },
   async function (env) {
