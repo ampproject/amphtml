@@ -357,7 +357,7 @@ export class AmpAdNetworkValueimpressionImpl extends AmpA4A {
         'scr_y': Math.round(viewport.getScrollTop()),
         'bc': getBrowserCapabilitiesBitmap(win) || null,
         'url': canonicalUrl || null,
-        'top': win != win.top ? topWindowUrlOrDomain(win) : null,
+        'top': win != win.top ? topWindowUrlOrDomain(win, referrer) : null,
         'loc': win.location.href == canonicalUrl ? null : win.location.href,
         'ref': referrer || null,
         'bdt': domLoading ? startTime - domLoading : null,
@@ -603,9 +603,10 @@ function extractHost(url) {
 
 /**
  * @param {!Window} win
+ * @param {string} referrer
  * @return {?string}
  */
-function topWindowUrlOrDomain(win) {
+function topWindowUrlOrDomain(win, referrer) {
   const {ancestorOrigins} = win.location;
   if (ancestorOrigins) {
     const {origin} = win.location;
@@ -618,16 +619,15 @@ function topWindowUrlOrDomain(win) {
       secondFromTop == win ||
       origin == ancestorOrigins[ancestorOrigins.length - 2]
     ) {
-      return extractHost(secondFromTop./*OK*/ document.referrer);
+      return extractHost(referrer);
     }
     return extractHost(topOrigin);
   } else {
     try {
       return win.top.location.hostname;
     } catch (e) {}
-    const secondFromTop = secondWindowFromTop(win);
     try {
-      return extractHost(secondFromTop./*OK*/ document.referrer);
+      return extractHost(referrer);
     } catch (e) {}
     return null;
   }
