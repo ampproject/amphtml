@@ -50,6 +50,8 @@ Bento AMP allows you to use AMP components in non-AMP pages without needing to c
 
 The example below demonstrates `amp-base-carousel` component in standalone use.
 
+[example preview="top-frame" playground="false"]
+
 ```
 <head>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
@@ -101,6 +103,8 @@ The example below demonstrates `amp-base-carousel` component in standalone use.
 </script>
 ```
 
+[/example]
+
 #### Interactivity and API usage
 
 Bento enabled components in standalone use are highly interactive through their API. In Bento standalone use, the element's API replaces AMP Actions and events and [`amp-bind`](https://amp.dev/documentation/components/amp-bind/?format=websites).
@@ -132,6 +136,7 @@ api.prev();
 
 **goToSlide(index: number)**
 Moves the carousel to the slide specified by the `index` argument.
+Note: `index` will be normalized to a number greater than or equal to `0` and less than the number of slides given.
 
 ```
 api.goToSlide(0); // Advance to first slide.
@@ -163,7 +168,7 @@ Fully valid AMP pages use the AMP layout system to infer sizing of elements to c
 
 **Container type**
 
-The `amp-base-carousel` component has a defined layout size type. To ensure the component renders correctly, be sure to apply a size to the component and its immediate children (slides) via `height` and `width` or `aspect-ratio`:
+The `amp-base-carousel` component has a defined layout size type. To ensure the component renders correctly, be sure to apply a size to the component and its immediate children (slides) via a desired CSS layout (such as one defined with `height`, `width`, `aspect-ratio`, or other such properties):
 
 ```css
 amp-base-carousel {
