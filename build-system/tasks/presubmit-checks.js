@@ -317,6 +317,7 @@ const forbiddenTerms = {
       'src/service/cid-impl.js',
       'src/service/origin-experiments-impl.js',
       'src/services.js',
+      'src/utils/display-observer.js',
       'testing/test-helper.js',
     ],
   },
@@ -1162,7 +1163,7 @@ const forbiddenTermsSrcInclusive = {
     message: 'Unsupported on IE; use trim() or a helper instead.',
     allowlist: ['validator/js/engine/validator.js'],
   },
-  "process\\.env(\\.|\\[\\')(TRAVIS|GITHUB_ACTIONS|CIRCLECI)": {
+  "process\\.env(\\.|\\[\\')(GITHUB_ACTIONS|CIRCLECI)": {
     message:
       'Do not directly use CI-specific environment vars. Instead, add a ' +
       'function to build-system/common/ci.js',

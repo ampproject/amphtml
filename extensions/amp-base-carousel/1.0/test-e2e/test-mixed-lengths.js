@@ -21,7 +21,7 @@ const pageWidth = 800;
 const pageHeight = 600;
 
 describes.endtoend(
-  'AMP carousel mixed length slides',
+  'amp-base-carousel:1.0 - mixed length slides',
   {
     testUrl:
       'http://localhost:8000/test/manual/amp-base-carousel/1.0/' +
@@ -48,7 +48,7 @@ describes.endtoend(
     describe('snap', () => {
       const slideWidth = pageWidth * 0.75;
 
-      it('should have the correct initial slide positions', async () => {
+      it('should have the correct initial slide positions', async function () {
         const slideOne = await getSlide(styles, controller, 0);
         const slideTwo = await getSlide(styles, controller, 1);
 
@@ -63,7 +63,8 @@ describes.endtoend(
         });
       });
 
-      it('should snap on the center point', async () => {
+      // TODO(wg-bento): getScrollingElement does not always find element in time.
+      it.skip('should snap on the center point', async function () {
         const el = await getScrollingElement(styles, controller);
         const slideTwo = await getSlide(styles, controller, 1);
         const scrollAmount = 1;

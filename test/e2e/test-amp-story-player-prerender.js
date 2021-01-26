@@ -156,29 +156,5 @@ describes.endtoend(
         'http://localhost:8000/examples/amp-story/amp-story-animation.html#visibilityState=prerender&origin=http%3A%2F%2Flocalhost%3A8000&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe'
       );
     });
-
-    it('when player becomes visible and first story finishes loading, third story starts preloading', async () => {
-      const doc = await controller.getDocumentElement();
-      const playerRect = await controller.getElementRect(player);
-
-      await controller./*OK*/ scrollTo(doc, {top: playerRect.top});
-      const shadowHost = await controller.findElement(
-        'div.i-amphtml-story-player-shadow-root-intermediary'
-      );
-
-      await controller.switchToShadowRoot(shadowHost);
-
-      // Wait for first story iframe to load.
-      await timeout(5000);
-
-      const iframes = await controller.findElements(
-        'iframe.story-player-iframe'
-      );
-      const iframeSrc = await controller.getElementAttribute(iframes[2], 'src');
-
-      await expect(iframeSrc).to.eql(
-        'http://localhost:8000/examples/amp-story/attachment.html#visibilityState=prerender&origin=http%3A%2F%2Flocalhost%3A8000&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe'
-      );
-    });
   }
 );
