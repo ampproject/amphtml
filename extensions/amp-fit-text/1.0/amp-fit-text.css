@@ -32,6 +32,6 @@ amp-fit-text:not(.i-amphtml-built) {
 
 /* Pre-upgrade: size-defining element - hide children. */
 amp-fit-text:not(.i-amphtml-built) > :not([placeholder]) {
-  display: none !important;
-  content-visibility: hidden !important;
+  display: none;
+  content-visibility: hidden;
 }

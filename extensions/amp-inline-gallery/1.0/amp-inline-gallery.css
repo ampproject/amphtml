@@ -36,6 +36,6 @@ amp-inline-gallery-thumbnails {
 /* Pre-upgrade: size-defining element - hide children. */
 amp-inline-gallery-pagination:not(.i-amphtml-built) > :not([placeholder]),
 amp-inline-gallery-thumbnails:not(.i-amphtml-built) > :not([placeholder]) {
-  display: none !important;
-  content-visibility: hidden !important;
+  display: none;
+  content-visibility: hidden;
 }
