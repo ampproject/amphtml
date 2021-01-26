@@ -20,7 +20,7 @@ describes.endtoend(
   'AMP carousel 0.2 with responsive slides',
   {
     testUrl:
-      'http://localhost:8000/test/manual/amp-carousel/0.2/responsive-slides.amp.html',
+      'http://localhost:8000/test/fixtures/e2e/amp-carousel/0.2/responsive-slides.amp.html',
     experiments: ['amp-carousel'],
     environments: ['single'],
   },
