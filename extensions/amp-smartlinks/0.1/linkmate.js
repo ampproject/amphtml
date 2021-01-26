@@ -165,8 +165,8 @@ export class Linkmate {
    */
   getEditInfo_() {
     return dict({
-      'name': this.rootNode_.title || null,
-      'url': this.ampDoc_.getUrl(),
+      'name': document.getElementsByTagName("title")[0].text || null,
+      'url': window.location.href,
     });
   }
 
