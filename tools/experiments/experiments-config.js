@@ -211,11 +211,6 @@ export const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/30385',
   },
   {
-    id: 'fie-resources',
-    name: 'Separate FIE resource manager from the main doc',
-    spec: 'https://github.com/ampproject/amphtml/issues/31246',
-  },
-  {
     id: 'dfp-render-on-idle-cwv-exp',
     name: 'To measure the CWV impact of ads idle rendering',
     spec: 'https://github.com/ampproject/amphtml/issues/31436',
