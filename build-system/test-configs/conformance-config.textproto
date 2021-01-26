@@ -383,13 +383,13 @@ requirement: {
   type: BANNED_NAME
   error_message: 'Use parseJson instead. Usage in 3p ads can be whitelisted for now.'
   value: 'JSON.parse'
-  whitelist: 'ads/adfox.js'
-  whitelist: 'ads/adincube.js'
-  whitelist: 'ads/imedia.js'
-  whitelist: 'ads/kargo.js'
-  whitelist: 'ads/mads.js'
+  whitelist: 'ads/vendors/adfox.js'
+  whitelist: 'ads/vendors/adincube.js'
+  whitelist: 'ads/vendors/imedia.js'
+  whitelist: 'ads/vendors/kargo.js'
+  whitelist: 'ads/vendors/mads.js'
   whitelist: 'ads/google/imaVideo.js'
-  whitelist: 'ads/zen.js'
+  whitelist: 'ads/vendors/zen.js'
   whitelist: 'extensions/amp-viewer-integration/0.1/messaging/messaging.js' # published as standalone library
   whitelist: 'src/json.js' # Where parseJson itself is implemented.
   whitelist_regexp: '.*\\.jss\\.js'
@@ -405,10 +405,10 @@ requirement: {
   whitelist: 'src/web-worker/web-worker.js' # OK to use in version bound worker
 
   # 3p ads are OK
-  whitelist: 'ads/adfox.js'
-  whitelist: 'ads/google/imaVideo.js'
-  whitelist: 'ads/netletix.js'
-  whitelist: 'ads/yandex.js'
+  whitelist: 'ads/vendors/adfox.js'
+  whitelist: 'ads/vendors/google/imaVideo.js'
+  whitelist: 'ads/vendors/netletix.js'
+  whitelist: 'ads/vendors/yandex.js'
   whitelist: 'extensions/amp-access/0.1/amp-access-iframe.js' # False-positive
   whitelist: 'extensions/amp-access/0.1/iframe-api/messenger.js' # 3p-intent
   whitelist: 'src/service/history-impl.js' # False-positive
@@ -423,10 +423,10 @@ requirement: {
   whitelist: 'src/event-helper.js' # getDetail is implemented here
 
   # 3p ads are OK
-  whitelist: 'ads/adhese.js'
-  whitelist: 'ads/loka.js'
-  whitelist: 'ads/nativery.js'
-  whitelist: 'ads/xlift.js'
+  whitelist: 'ads/vendors/adhese.js'
+  whitelist: 'ads/vendors/loka.js'
+  whitelist: 'ads/vendors/nativery.js'
+  whitelist: 'ads/vendors/xlift.js'
 }
 
 requirement: {

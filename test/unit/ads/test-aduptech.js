@@ -18,7 +18,7 @@ import {
   ADUPTECH_API_URL,
   ADUPTECH_ELEMENT_ID,
   aduptech,
-} from '../../../ads/aduptech';
+} from '../../../ads/vendors/aduptech';
 import {createIframePromise} from '../../../testing/iframe';
 
 describes.fakeWin('amp-ad-aduptech-impl', {}, (env) => {

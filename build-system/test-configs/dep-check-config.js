@@ -534,12 +534,12 @@ exports.rules = [
     mustNotDependOn: ['ads/google/doubleclick.js'],
     allowlist: [
       /** DO NOT ADD TO ALLOWLIST */
-      'ads/ix.js->ads/google/doubleclick.js',
-      'ads/imonomy.js->ads/google/doubleclick.js',
-      'ads/navegg.js->ads/google/doubleclick.js',
+      'ads/vendors/ix.js->ads/google/doubleclick.js',
+      'ads/vendors/imonomy.js->ads/google/doubleclick.js',
+      'ads/vendors/navegg.js->ads/google/doubleclick.js',
       /** DO NOT ADD TO ALLOWLIST */
-      'ads/openx.js->ads/google/doubleclick.js',
-      'ads/pulsepoint.js->ads/google/doubleclick.js',
+      'ads/vendors/openx.js->ads/google/doubleclick.js',
+      'ads/vendors/pulsepoint.js->ads/google/doubleclick.js',
       /** DO NOT ADD TO ALLOWLIST */
     ],
   },

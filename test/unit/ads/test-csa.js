@@ -21,7 +21,7 @@ import {
   callbackWithNoBackfill,
   csa,
   resizeIframe,
-} from '../../../ads/google/csa';
+} from '../../../ads/vendors/csa';
 import {createIframePromise} from '../../../testing/iframe';
 
 function getAds(type) {
