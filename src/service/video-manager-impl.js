@@ -189,9 +189,8 @@ export class VideoManager {
       return;
     }
 
-    this.entries_ = this.entries_ || [];
-
     if (this.getEntryOrNull_(video)) {
+      // already registered
       return;
     }
 
@@ -213,6 +212,7 @@ export class VideoManager {
     this.viewportObserver_.observe(videoBE.element);
     listen(videoBE.element, VideoEvents.RELOAD, () => entry.videoLoaded());
 
+    this.entries_ = this.entries_ || [];
     const entry = new VideoEntry(this, video);
     this.entries_.push(entry);
 
@@ -285,7 +285,7 @@ export class VideoManager {
       return this.lastFoundEntry_;
     }
 
-    for (let i = 0; i < this.entries_.length; i++) {
+    for (let i = 0; this.entries_ && i < this.entries_.length; i++) {
       const entry = this.entries_[i];
       if (isEntryFor(entry, videoOrElement)) {
         this.lastFoundEntry_ = entry;
