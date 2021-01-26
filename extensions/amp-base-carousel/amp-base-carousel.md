@@ -96,7 +96,7 @@ The example below demonstrates `amp-base-carousel` component in standalone use.
     // set up button actions
     document.querySelector('#prev-button').onclick = () => api.prev();
     document.querySelector('#next-button').onclick = () => api.next();
-    document.querySelector('#go-to-slide').onclick = () => api.goToSlide(2);
+    document.querySelector('#go-to-button').onclick = () => api.goToSlide(2);
   })();
 </script>
 ```
