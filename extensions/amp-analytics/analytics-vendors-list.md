@@ -20,7 +20,7 @@ This document lists analytics vendors that have built-in configurations for use 
 
 Vendors that wish to integrate their service with [`<amp-analytics>`](https://amp.dev/documentation/components/amp-analytics/) should refer to the details in [Integrate your analytics tools with AMP](https://amp.dev/documentation/guides-and-tutorials/contribute/integrate-your-analytics-tools).
 
-### SensorsData Analytics
+### SensorsData
 
 Type attribute value: `sensorsanalytics`
 
