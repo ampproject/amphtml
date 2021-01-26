@@ -148,14 +148,14 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     const easeInOutQuad = (val) =>
       val < 0.5 ? 2 * val * val : 1 - Math.pow(-2 * val + 2, 2) / 2;
 
-    let start;
-    const nextFrame = (timestamp) => {
-      if (!start) {
-        start = timestamp;
+    let startTime;
+    const nextFrame = (currTime) => {
+      if (!startTime) {
+        startTime = currTime;
       }
-      const elapsed = timestamp - start;
-      if (elapsed < DURATION_MS) {
-        const easing = easeInOutQuad(elapsed / DURATION_MS);
+      const elapsedTime = currTime - startTime;
+      if (elapsedTime < DURATION_MS) {
+        const easing = easeInOutQuad(elapsedTime / DURATION_MS);
         this.storeService_.dispatch(Action.SET_PANNING_MEDIA_STATE, {
           x: startPos.x + (this.x_ - startPos.x) * easing,
           y: startPos.y + (this.y_ - startPos.y) * easing,
