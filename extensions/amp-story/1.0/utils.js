@@ -26,7 +26,7 @@ import {
   isProxyOrigin,
   resolveRelativeUrl,
 } from '../../../src/url';
-import {setImportantStyles, setStyle, toggle} from '../../../src/style';
+import {setStyle, toggle} from '../../../src/style';
 import {user, userAssert} from '../../../src/log';
 
 /**
