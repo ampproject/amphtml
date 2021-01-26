@@ -95,7 +95,7 @@ This table provides examples of formatted values specified in a Mustache templat
 
 ### Migrating from 0.1
 
-The experimental `1.0` version of `amp-date-countdown` uses the attribute name `count-up` instead of `data-count-up` as in `0.1` to support the `count up` feature. See the `count-up` section under `Attributes` below for more details.
+The experimental `1.0` version of `amp-date-countdown` uses the attribute name `count-up` instead of `data-count-up` as in `0.1` to support the "count up" feature. See the `count-up` section under `Attributes` below for more details.
 
 ## Attributes
 
