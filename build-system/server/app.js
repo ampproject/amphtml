@@ -979,7 +979,7 @@ app.get(
         }
         file = file.replace(/__TEST_SERVER_PORT__/g, TEST_SERVER_PORT);
         if (componentVersion) {
-          file = file.replace(/__component_version__/g, componentVersion);
+          file = file.replace(/-latest.js/g, `-${componentVersion}.js`);
         }
 
         if (inabox && req.headers.origin) {
