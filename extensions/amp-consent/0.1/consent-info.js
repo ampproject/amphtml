@@ -65,6 +65,17 @@ export const CONSENT_ITEM_STATE = {
 };
 
 /**
+ * @enum {string}
+ * @visibleForTesting
+ */
+export const TCF_POST_MESSAGE_API_COMMANDS = {
+  GET_TC_DATA: 'getTCData',
+  PING: 'ping',
+  ADD_EVENT_LISTENER: 'addEventListener',
+  REMOVE_EVENT_LISTENER: 'removeEventListener',
+};
+
+/**
  * @typedef {{
  *  consentState: CONSENT_ITEM_STATE,
  *  consentString: (string|undefined),

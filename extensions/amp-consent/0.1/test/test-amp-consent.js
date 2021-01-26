@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as TcfApiCommands from '../tcf-api-commands';
 import {ACTION_TYPE, AmpConsent} from '../amp-consent';
 import {
   CONSENT_ITEM_STATE,
@@ -31,6 +32,7 @@ import {
   resetServiceForTesting,
 } from '../../../../src/service';
 import {removeSearch} from '../../../../src/url';
+import {toggleExperiment} from '../../../../src/experiments';
 import {user} from '../../../../src/log';
 import {xhrServiceForTesting} from '../../../../src/service/xhr-impl';
 
@@ -841,6 +843,102 @@ describes.realWin(
           /Consent metadata value "%s" is invalid./
         );
         expect(spy.args[0][2]).to.match(/purposeOne/);
+      });
+    });
+
+    describe('exposes api', () => {
+      let ampConsent;
+      let consentElement;
+
+      beforeEach(() => {
+        toggleExperiment(win, 'tcf-post-message-proxy-api', true);
+      });
+
+      afterEach(() => {
+        toggleExperiment(win, 'tcf-post-message-proxy-api', false);
+      });
+
+      describe('config', () => {
+        it('shoud expose if in config', async () => {
+          consentElement = createConsentElement(
+            doc,
+            dict({
+              'consentInstanceId': 'abc',
+              'checkConsentHref': 'https://response1',
+              'exposesTcfApi': true,
+            })
+          );
+          doc.body.appendChild(consentElement);
+          ampConsent = new AmpConsent(consentElement);
+          await ampConsent.buildCallback();
+          await macroTask();
+          const {frames} = win;
+          expect(frames[0].name).to.be.equal('__tcfapiLocator');
+        });
+      });
+
+      describe('tcfPostMessageApi', () => {
+        let iframe;
+        let ampVideoIframe;
+        let event;
+        let listenerSpy;
+        let msg;
+
+        beforeEach(() => {
+          jsonMockResponses = {
+            'https://server-test-2/':
+              '{"consentRequired": true, "consentStateValue": "accepted", "consentString": "mystring"}',
+          };
+          consentElement = createConsentElement(
+            doc,
+            dict({
+              'consentInstanceId': 'abc',
+              'checkConsentHref': 'https://server-test-2/',
+              'exposesTcfApi': true,
+            })
+          );
+          doc.body.appendChild(consentElement);
+          ampConsent = new AmpConsent(consentElement);
+          ampVideoIframe = document.createElement('amp-video-iframe');
+          iframe = doc.createElement('iframe');
+          ampVideoIframe.appendChild(iframe);
+          doc.body.appendChild(ampVideoIframe);
+          event = new Event('message');
+          msg = {
+            __tcfapiCall: {
+              command: 'ping',
+              version: 2,
+              callId: 1,
+            },
+          };
+        });
+
+        it('installs __tcfapiLocator & 3p iframe can locate after amp-consent unblocks', async () => {
+          await ampConsent.buildCallback();
+          await macroTask();
+          expect(iframe.contentWindow.parent.frames['__tcfapiLocator']).to.not
+            .be.undefined;
+          expect(win.frames['__tcfapiLocator']).to.deep.equals(
+            iframe.contentWindow.parent.frames['__tcfapiLocator']
+          );
+          const frames = doc.querySelectorAll('iframe');
+          for (let i = 0; i < frames.length; i++) {
+            if (frames[i].name === '__tcfapiLocator') {
+              expect(frames[i].hasAttribute('aria-hidden')).to.be.true;
+              expect(frames[i].hasAttribute('hidden')).to.be.true;
+            }
+          }
+        });
+
+        it('installs window level event listener', async () => {
+          listenerSpy = env.sandbox.stub(TcfApiCommands, 'isValidTcfApiCall');
+          event.data = msg;
+          await ampConsent.buildCallback();
+          await macroTask();
+          win.dispatchEvent(event);
+          expect(listenerSpy).to.be.calledOnce;
+          expect(listenerSpy.args[0][0]).to.deep.equals(msg.__tcfapiCall);
+        });
       });
     });
 
