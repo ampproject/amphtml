@@ -54,8 +54,8 @@ export function shouldLoadPolyfill(win) {
  * @return {boolean}
  */
 function isWebkit(win) {
-  const ua = win.navigator && win.navigator.userAgent;
-  return /WebKit/.test(ua);
+  const platform = Services.platformFor(win);
+  return platform.isIos() || platform.isSafari();
 }
 
 /**

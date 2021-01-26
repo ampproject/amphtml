@@ -21,6 +21,7 @@ import {
   shouldLoadPolyfill,
   upgradePolyfill,
 } from '../../../src/polyfillstub/intersection-observer-stub';
+import {Services} from '../../../src/services';
 import {
   install,
   installForChildWin,
@@ -59,22 +60,41 @@ class NativeIntersectionObserverEntry {
   get isIntersecting() {}
 }
 
-describes.sandboxed('shouldLoadPolyfill', {}, () => {
+describes.sandboxed('shouldLoadPolyfill', {}, (env) => {
+  let isIos;
+  let isSafari;
+  beforeEach(() => {
+    isIos = false;
+    isSafari = false;
+    const platform = {isIos: () => isIos, isSafari: () => isSafari};
+    env.sandbox.stub(Services, 'platformFor').returns(platform);
+  });
+
   it('should not load with native', () => {
     const win = {
       IntersectionObserver: NativeIntersectionObserver,
       IntersectionObserverEntry: NativeIntersectionObserverEntry,
-      navigator: {userAgent: 'Mozilla'},
     };
     expect(shouldLoadPolyfill(win)).to.be.false;
   });
 
-  it('should always load in WebKit', () => {
+  it('should always load in WebKit/Safari', () => {
     const win = {
       IntersectionObserver: NativeIntersectionObserver,
       IntersectionObserverEntry: NativeIntersectionObserverEntry,
-      navigator: {userAgent: 'WebKit'},
     };
+    expect(shouldLoadPolyfill(win)).to.be.false;
+
+    isIos = true;
+    isSafari = false;
+    expect(shouldLoadPolyfill(win)).to.be.true;
+
+    isIos = false;
+    isSafari = true;
+    expect(shouldLoadPolyfill(win)).to.be.true;
+
+    isIos = true;
+    isSafari = true;
     expect(shouldLoadPolyfill(win)).to.be.true;
   });
 
