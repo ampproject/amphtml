@@ -116,6 +116,8 @@ export class AmpStoryEducation extends AMP.BaseElement {
         : Screen.ONBOARDING_NAVIGATION_TAP;
       this.maybeShowScreen_(screen, State.NAVIGATION_TAP);
     }
+
+    this.setState_(State.NAVIGATION_TAP);
   }
 
   /** @override */
