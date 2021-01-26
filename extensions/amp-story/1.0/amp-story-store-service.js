@@ -255,12 +255,7 @@ const stateComparisonFunctions = {
     curr === null ||
     old.width !== curr.width ||
     old.height !== curr.height,
-  [StateProperty.PANNING_MEDIA_STATE]: (old, curr) =>
-    old === null ||
-    curr === null ||
-    old.x !== curr.x ||
-    old.y !== curr.y ||
-    old.zoom !== curr.zoom,
+  [StateProperty.PANNING_MEDIA_STATE]: (old, curr) => !deepEquals(old, curr, 2),
   [StateProperty.INTERACTIVE_REACT_STATE]: (old, curr) =>
     !deepEquals(old, curr, 3),
 };
@@ -622,7 +617,7 @@ export class AmpStoryStoreService {
       [StateProperty.PAGE_ATTACHMENT_STATE]: false,
       [StateProperty.PAGE_HAS_AUDIO_STATE]: false,
       [StateProperty.PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE]: false,
-      [StateProperty.PANNING_MEDIA_STATE]: null,
+      [StateProperty.PANNING_MEDIA_STATE]: {},
       [StateProperty.PAUSED_STATE]: false,
       [StateProperty.RTL_STATE]: false,
       [StateProperty.SHARE_MENU_STATE]: false,
