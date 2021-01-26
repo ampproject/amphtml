@@ -41,6 +41,16 @@ amp-social-share:not(.i-amphtml-built) > :not([placeholder]) {
   * See https://github.com/ampproject/amphtml/issues/4277 for more details.
   */
 
+amp-social-share:focus {
+  outline: #0389ff solid 2px;
+  outline-offset: 2px;
+}
+
+amp-social-share::part(button):focus {
+  outline: none !important;
+  outline-offset: 0 !important;
+}
+
 /* Twitter Styling */
 .amp-social-share-twitter {
   color: #fff;

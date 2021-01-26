@@ -42,4 +42,12 @@ describes.sandboxed('SocialShare 1.0 preact component', {}, () => {
       );
     }
   );
+
+  it('should include the button class for focus styling', () => {
+    const jsx = <SocialShare {...dict({'type': 'email'})} />;
+    const wrapper = mount(jsx);
+
+    const button = wrapper.getDOMNode();
+    expect(button.className.includes('button')).to.be.true;
+  });
 });

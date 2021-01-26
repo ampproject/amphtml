@@ -234,6 +234,9 @@ AmpSocialShare['layoutSizeDefined'] = true;
 AmpSocialShare['passthroughNonEmpty'] = true;
 
 /** @override */
+AmpSocialShare['delegatesFocus'] = true;
+
+/** @override */
 AmpSocialShare['props'] = {
   'tabIndex': {attr: 'tabindex'},
   'type': {attr: 'type'},
