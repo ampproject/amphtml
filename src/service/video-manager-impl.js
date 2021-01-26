@@ -188,6 +188,13 @@ export class VideoManager {
     if (!video.supportsPlatform()) {
       return;
     }
+
+    this.entries_ = this.entries_ || [];
+
+    if (this.getEntryOrNull_(video)) {
+      return;
+    }
+
     if (!this.viewportObserver_) {
       const viewportCallback = (
         /** @type {!Array<!IntersectionObserverEntry>} */ records
@@ -205,12 +212,6 @@ export class VideoManager {
     }
     this.viewportObserver_.observe(videoBE.element);
     listen(videoBE.element, VideoEvents.RELOAD, () => entry.videoLoaded());
-
-    this.entries_ = this.entries_ || [];
-
-    if (this.getEntryOrNull_(video)) {
-      return;
-    }
 
     const entry = new VideoEntry(this, video);
     this.entries_.push(entry);
