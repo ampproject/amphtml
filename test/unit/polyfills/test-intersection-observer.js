@@ -60,6 +60,9 @@ class NativeIntersectionObserverEntry {
   get isIntersecting() {}
 }
 
+const APPLE_NAVIGATOR = {vendor: 'Apple Computer, Inc.'};
+const CHROME_NAVIGATOR = {vendor: 'Google Inc.'};
+
 describes.sandboxed('shouldLoadPolyfill', {}, (env) => {
   let isIos;
   let isSafari;
@@ -74,6 +77,7 @@ describes.sandboxed('shouldLoadPolyfill', {}, (env) => {
     const win = {
       IntersectionObserver: NativeIntersectionObserver,
       IntersectionObserverEntry: NativeIntersectionObserverEntry,
+      navigator: CHROME_NAVIGATOR,
     };
     expect(shouldLoadPolyfill(win)).to.be.false;
   });
@@ -82,19 +86,11 @@ describes.sandboxed('shouldLoadPolyfill', {}, (env) => {
     const win = {
       IntersectionObserver: NativeIntersectionObserver,
       IntersectionObserverEntry: NativeIntersectionObserverEntry,
+      navigator: CHROME_NAVIGATOR,
     };
     expect(shouldLoadPolyfill(win)).to.be.false;
 
-    isIos = true;
-    isSafari = false;
-    expect(shouldLoadPolyfill(win)).to.be.true;
-
-    isIos = false;
-    isSafari = true;
-    expect(shouldLoadPolyfill(win)).to.be.true;
-
-    isIos = true;
-    isSafari = true;
+    win.navigator = APPLE_NAVIGATOR;
     expect(shouldLoadPolyfill(win)).to.be.true;
   });
 
@@ -110,6 +106,7 @@ describes.sandboxed('shouldLoadPolyfill', {}, (env) => {
       IntersectionObserver: NativeNoDocumentRoot,
       IntersectionObserverEntry: NativeIntersectionObserverEntry,
       document: {nodeType: 9},
+      navigator: CHROME_NAVIGATOR,
     };
     expect(shouldLoadPolyfill(win)).to.be.true;
   });
@@ -123,6 +120,7 @@ describes.sandboxed('shouldLoadPolyfill', {}, (env) => {
     const win = {
       IntersectionObserver: IntersectionObserverStub,
       IntersectionObserverEntry: NativeIntersectionObserverEntry,
+      navigator: CHROME_NAVIGATOR,
     };
     installStub(win);
     expect(shouldLoadPolyfill(win)).to.be.true;
@@ -131,6 +129,7 @@ describes.sandboxed('shouldLoadPolyfill', {}, (env) => {
   it('should load when no native entry', () => {
     const win = {
       IntersectionObserver: NativeIntersectionObserver,
+      navigator: CHROME_NAVIGATOR,
     };
     expect(shouldLoadPolyfill(win)).to.be.true;
   });
