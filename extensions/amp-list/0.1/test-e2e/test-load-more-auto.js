@@ -21,7 +21,7 @@ describes.endtoend(
   'AMP list load-more=auto',
   {
     testUrl:
-      'http://localhost:8000/test/manual/amp-list/load-more-auto.amp.html',
+      'http://localhost:8000/test/fixtures/e2e/amp-list/load-more-auto.amp.html',
     initialRect: {width: pageWidth, height: pageHeight},
     // TODO(cathyxz, cvializ): figure out why 'viewer' only shows 'FALLBACK'
     // TODO(cathyxz): figure out why shadow-demo doesn't work

@@ -21,7 +21,7 @@ describes.endtoend(
   'AMP Lightbox Gallery Open/Close',
   {
     testUrl:
-      'http://localhost:8000/test/manual/amp-lightbox-gallery-launch.amp.html',
+      'http://localhost:8000/test/fixtures/e2e/amp-lightbox/amp-lightbox-gallery-launch.amp.html',
     initialRect: {width: pageWidth, height: pageHeight},
     // TODO(sparhami) Get this working in other environments.
     environments: ['single'],
