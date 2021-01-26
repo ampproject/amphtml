@@ -64,7 +64,6 @@
 #include "validator.pb.h"
 #include "re2/re2.h"  // NOLINT(build/deprecated)
 
-
 using absl::AsciiStrToLower;
 using absl::AsciiStrToUpper;
 using absl::ByAnyChar;
@@ -830,6 +829,7 @@ CssParsingConfig GenCssParsingConfig() {
   config.at_rule_spec["media"] = BlockType::PARSE_AS_RULES;
   config.at_rule_spec["page"] = BlockType::PARSE_AS_DECLARATIONS;
   config.at_rule_spec["supports"] = BlockType::PARSE_AS_RULES;
+  config.at_rule_spec["-moz-document"] = BlockType::PARSE_AS_RULES;
   // Note that ignoring still generates an error.
   config.default_spec = BlockType::PARSE_AS_IGNORE;
   return config;
@@ -884,8 +884,15 @@ class ParsedCdataSpec {
                   << at_rule_name;
       return false;
     }
-    return allowed_at_rules_.find(
-               std::string(htmlparser::css::StripVendorPrefix(at_rule_name))) !=
+    // "-moz-document" is specified in the list of allowed rules with an
+    // explicit vendor prefix. The idea here is that only this specific vendor
+    // prefix is allowed, not "-ms-document" or even "document". We first search
+    // the allowed list for the seen `at_rule_name` with stripped vendor prefix,
+    // then if not found, we search again without sripping the vendor prefix.
+    if (allowed_at_rules_.find(std::string(htmlparser::css::StripVendorPrefix(
+            at_rule_name))) != allowed_at_rules_.end())
+      return true;
+    return allowed_at_rules_.find(std::string(at_rule_name)) !=
            allowed_at_rules_.end();
   }
 
@@ -1287,8 +1294,8 @@ class TagSpecDispatch {
   // corresponding tag_spec_ids which are ordered by their specificity of match
   // (e.g. Name/Value/Parent, then Name/Value, and then Name).
   vector<int32_t> MatchingDispatchKey(const std::string& attr_name,
-                                    const std::string& attr_value,
-                                    const std::string& parent) const {
+                                      const std::string& attr_value,
+                                      const std::string& parent) const {
     if (!HasDispatchKeys()) return {};
 
     vector<int32_t> tag_spec_ids;
@@ -1333,7 +1340,7 @@ class TagSpecDispatch {
 
  private:
   unordered_map<std::string /*dispatch key*/,
-      vector<int32_t> /* tag_spec_ids */>
+                vector<int32_t> /* tag_spec_ids */>
       tagspecs_by_dispatch_;
   vector<int32_t> all_tag_specs_;
 };
@@ -1464,7 +1471,8 @@ class ParsedValidatorRules {
   HtmlFormat::Code html_format_;
   vector<ParsedTagSpec> tagspec_by_id_;
   absl::node_hash_map<std::string, TagSpecDispatch> tagspecs_by_tagname_;
-  absl::node_hash_map<std::string, vector<int32_t>> ext_tag_spec_ids_by_ext_name_;
+  absl::node_hash_map<std::string, vector<int32_t>>
+      ext_tag_spec_ids_by_ext_name_;
   TagSpecDispatch empty_dispatch_;
   vector<int32_t> mandatory_tagspecs_;
   vector<ErrorCodeMetaData> error_codes_;
@@ -4889,8 +4897,8 @@ void ParsedValidatorRules::ValidateTypeIdentifiers(
         if (type_identifier == TypeIdentifier::kTransformed) {
           std::string name;
           std::string version;
-          if (RE2::FullMatch(attr.value(), *transformed_value_regex,
-                             &name, &version)) {
+          if (RE2::FullMatch(attr.value(), *transformed_value_regex, &name,
+                             &version)) {
             int32_t transformer_version;
             if (absl::SimpleAtoi(version, &transformer_version)) {
               result->set_transformer_version(transformer_version);
@@ -5604,8 +5612,8 @@ class Validator {
     // NOTE: If htmlparser starts returning null document for other reasons, we
     // must add new error types here.
     if (doc == nullptr) {
-      context_.AddError(ValidationError::DOCUMENT_TOO_COMPLEX,
-                        LineCol(1, 0), {}, "", &result_);
+      context_.AddError(ValidationError::DOCUMENT_TOO_COMPLEX, LineCol(1, 0),
+                        {}, "", &result_);
       return result_;
     }
 
@@ -5909,12 +5917,12 @@ class Validator {
 
     // As some errors can be inserted out of order, sort errors at the
     // end based on their line/col numbers.
-    std::stable_sort(result_.mutable_errors()->begin(),
-              result_.mutable_errors()->end(),
-              [](const ValidationError& lhs, const ValidationError& rhs) {
-                if (lhs.line() != rhs.line()) return lhs.line() < rhs.line();
-                return lhs.col() < rhs.col();
-              });
+    std::stable_sort(
+        result_.mutable_errors()->begin(), result_.mutable_errors()->end(),
+        [](const ValidationError& lhs, const ValidationError& rhs) {
+          if (lhs.line() != rhs.line()) return lhs.line() < rhs.line();
+          return lhs.col() < rhs.col();
+        });
   }
 
  private:
