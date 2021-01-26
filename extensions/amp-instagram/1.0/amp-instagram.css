@@ -17,11 +17,10 @@
 /*
  * Pre-upgrade:
  * - display:block element
- * - contain:strict element
+ * - size-defined element
  */
 amp-instagram {
   display: block;
-  contain: strict;
   overflow: hidden;
   position: relative;
 }

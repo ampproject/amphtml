@@ -17,12 +17,11 @@
 /*
  * Pre-upgrade:
  * - display:inline-block element
- * - contain:strict element
+ * - size-defined element
  * - predefined default size
  */
 amp-social-share {
   display: inline-block;
-  contain: strict;
   overflow: hidden;
   position: relative;
   box-sizing: border-box;

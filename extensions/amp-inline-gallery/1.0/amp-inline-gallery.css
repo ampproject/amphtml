@@ -26,10 +26,9 @@ amp-inline-gallery {
   contain: layout;
 }
 
-/* Pre-upgrade: contain:strict element */
+/* Pre-upgrade: size-defined element */
 amp-inline-gallery-pagination,
 amp-inline-gallery-thumbnails {
-  contain: strict;
   overflow: hidden;
   position: relative;
 }
