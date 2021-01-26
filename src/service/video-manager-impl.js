@@ -275,9 +275,9 @@ export class VideoManager {
 
   /**
    * Returns the entry in the video manager corresponding to the video or
-   * element provided
+   * element provided, or null if unavailable.
    * @param {!../video-interface.VideoOrBaseElementDef|!Element} videoOrElement
-   * @return {VideoEntry} entry
+   * @return {?VideoEntry} entry
    */
   getEntryOrNull_(videoOrElement) {
     if (isEntryFor(this.lastFoundEntry_, videoOrElement)) {
