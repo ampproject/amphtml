@@ -16,7 +16,8 @@
 
 import {ActionTrust} from '../../../src/action-constants';
 import {BaseCarousel} from './base-carousel';
-import {CSS} from './base-carousel.jss';
+import {CSS as COMPONENT_CSS} from './base-carousel.jss';
+import {CSS} from '../../../build/amp-base-carousel-1.0.css';
 import {CarouselContextProp} from './carousel-props';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
@@ -140,7 +141,7 @@ AmpBaseCarousel['props'] = {
 };
 
 /** @override */
-AmpBaseCarousel['shadowCss'] = CSS;
+AmpBaseCarousel['shadowCss'] = COMPONENT_CSS;
 
 /** @override */
 AmpBaseCarousel['useContexts'] = [CarouselContextProp];
@@ -165,5 +166,5 @@ function fireSlideChangeEvent(win, el, index, trust) {
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpBaseCarousel);
+  AMP.registerElement(TAG, AmpBaseCarousel, CSS);
 });
