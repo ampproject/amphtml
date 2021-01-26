@@ -207,6 +207,11 @@ export class VideoManager {
     listen(videoBE.element, VideoEvents.RELOAD, () => entry.videoLoaded());
 
     this.entries_ = this.entries_ || [];
+
+    if (this.getEntryOrNull_(video)) {
+      return;
+    }
+
     const entry = new VideoEntry(this, video);
     this.entries_.push(entry);
 
@@ -274,7 +279,7 @@ export class VideoManager {
    * @param {!../video-interface.VideoOrBaseElementDef|!Element} videoOrElement
    * @return {VideoEntry} entry
    */
-  getEntry_(videoOrElement) {
+  getEntryOrNull_(videoOrElement) {
     if (isEntryFor(this.lastFoundEntry_, videoOrElement)) {
       return this.lastFoundEntry_;
     }
@@ -287,8 +292,18 @@ export class VideoManager {
       }
     }
 
+    return null;
+  }
+
+  /**
+   * Returns the entry in the video manager corresponding to the video or
+   * element provided
+   * @param {!../video-interface.VideoOrBaseElementDef|!Element} videoOrElement
+   * @return {VideoEntry} entry
+   */
+  getEntry_(videoOrElement) {
     return devAssert(
-      null,
+      this.getEntryOrNull_(videoOrElement),
       '%s not registered to VideoManager',
       videoOrElement.element || videoOrElement
     );
