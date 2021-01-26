@@ -16,6 +16,7 @@
 
 import {ActionTrust} from '../../../src/action-constants';
 import {CSS as CAROUSEL_CSS} from '../../amp-base-carousel/1.0/base-carousel.jss';
+import {CSS} from '../../../build/amp-stream-gallery-1.0.css';
 import {CSS as GALLERY_CSS} from './stream-gallery.jss';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
@@ -123,5 +124,5 @@ AmpStreamGallery['props'] = {
 AmpStreamGallery['shadowCss'] = GALLERY_CSS + CAROUSEL_CSS;
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpStreamGallery);
+  AMP.registerElement(TAG, AmpStreamGallery, CSS);
 });
