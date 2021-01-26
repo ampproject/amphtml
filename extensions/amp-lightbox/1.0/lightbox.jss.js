@@ -55,10 +55,22 @@ const defaultStyles = {
   color: '#fff',
 };
 
+/* 
+  overflow: hidden does not trigger overscrollBehavior, so 
+  overflow: auto is applied even though the lightbox should not scroll.
+  We rely instead on the overflow: hidden in ContainWrapper to prevent 
+  scrolling inside the lightbox.
+*/
+const containScroll = {
+  overflow: 'auto', // Prevent scrolling inside lightbox.
+  overscrollBehavior: 'none', // Prevent scrolling outside lightbox.
+};
+
 const JSS = {
   closeButton,
   wrapper,
   defaultStyles,
+  containScroll,
 };
 
 // useStyles gets replaced for AMP builds via `babel-plugin-transform-jss`.
