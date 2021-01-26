@@ -26,7 +26,6 @@ Type attribute value: `sensorsanalytics`
 
 Adds support for Sensors Analytics. More details for adding Sensors Analytics support can be found at [sensorsdata.com](https://manual.sensorsdata.cn/sa/latest/web-js-sdk-7548149.html).
 
-
 ### Acquia Lift
 
 Type attribute value: `acquialift`
