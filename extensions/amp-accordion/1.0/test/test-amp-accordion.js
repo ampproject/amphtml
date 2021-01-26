@@ -506,12 +506,6 @@ describes.realWin(
         section1.addEventListener('expand', () => api.expand('section3'));
         section1.addEventListener('collapse', () => api.collapse('section3'));
 
-        // Also add spy functions for expand and collapse
-        const spyE = env.sandbox.spy();
-        const spyC = env.sandbox.spy();
-        section1.addEventListener('expand', spyE);
-        section1.addEventListener('collapse', spyC);
-
         // initally both section 1 and 3 are collapsed
         expect(section1).to.not.have.attribute('expanded');
         expect(section3).to.not.have.attribute('expanded');
@@ -519,9 +513,6 @@ describes.realWin(
         // expand section 1
         section1.firstElementChild.click();
         await waitForExpanded(section1, true);
-
-        expect(spyE).to.be.calledOnce;
-        expect(spyC).to.not.be.called;
 
         // both section 1 and 3 are expanded
         expect(section1).to.have.attribute('expanded');
@@ -531,12 +522,36 @@ describes.realWin(
         section1.firstElementChild.click();
         await waitForExpanded(section1, false);
 
-        expect(spyE).to.be.calledOnce;
-        expect(spyC).to.be.calledOnce;
-
         // both section 1 and 3 are collapsed
         expect(section1).to.not.have.attribute('expanded');
         expect(section3).to.not.have.attribute('expanded');
+      });
+
+      it('should fire and listen for "expand" and "collapse" events', async () => {
+        const section1 = element.children[0];
+
+        // Add spy functions for expand and collapse
+        const spyE = env.sandbox.spy();
+        const spyC = env.sandbox.spy();
+        section1.addEventListener('expand', spyE);
+        section1.addEventListener('collapse', spyC);
+
+        expect(spyE).to.not.be.called;
+        expect(spyC).to.not.be.called;
+
+        // expand section 1
+        section1.firstElementChild.click();
+        await waitForExpanded(section1, true);
+
+        expect(spyE).to.be.calledOnce;
+        expect(spyC).to.not.be.called;
+
+        // collapse section 1
+        section1.firstElementChild.click();
+        await waitForExpanded(section1, false);
+
+        expect(spyE).to.be.calledOnce;
+        expect(spyC).to.be.calledOnce;
       });
     });
 
