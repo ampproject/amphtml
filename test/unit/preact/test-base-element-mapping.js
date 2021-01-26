@@ -964,4 +964,36 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       expect(component).to.be.calledTwice;
     });
   });
+
+  describe('delegatesFocus mapping', () => {
+    let element;
+
+    beforeEach(async () => {
+      Impl['delegatesFocus'] = true;
+      Impl['passthroughNonEmpty'] = true;
+      element = html`
+        <amp-preact layout="fixed" width="100" height="100"></amp-preact>
+      `;
+      doc.body.appendChild(element);
+      await element.build();
+      await waitFor(() => component.callCount > 0, 'component rendered');
+    });
+
+    it('should focus on the host when an element in the shadow DOM receives focus', async () => {
+      // expect the shadowRoot to have delegatesFocus property set to true
+      expect(element.shadowRoot.delegatesFocus).to.be.true;
+
+      // initial focus is not on host
+      expect(doc.activeElement).to.not.equal(element);
+
+      // focus an element within the shadow DOM
+      const inner = element.shadowRoot.querySelector('#component');
+      // required to receive focus
+      inner.setAttribute('tabIndex', 0);
+      inner.focus();
+
+      // host receives focus and custom style for outline
+      expect(doc.activeElement).to.equal(element);
+    });
+  });
 });

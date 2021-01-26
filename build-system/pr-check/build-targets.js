@@ -20,12 +20,42 @@
  * This script sets the build targets for our PR check, where the build targets
  * determine which tasks are required to run for pull request builds.
  */
-const colors = require('ansi-colors');
 const config = require('../test-configs/config');
 const minimatch = require('minimatch');
 const path = require('path');
+const {cyan} = require('ansi-colors');
+const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
 const {gitDiffNameOnlyMaster} = require('../common/git');
 const {isCiBuild} = require('../common/ci');
+
+/**
+ * Used to prevent the repeated recomputing of build targets during PR jobs.
+ */
+const buildTargets = new Set();
+
+/***
+ * All of AMP's build targets that can be tested during CI.
+ *
+ * @enum {string}
+ */
+const Targets = {
+  AVA: 'AVA',
+  BABEL_PLUGIN: 'BABEL_PLUGIN',
+  CACHES_JSON: 'CACHES_JSON',
+  DEV_DASHBOARD: 'DEV_DASHBOARD',
+  E2E_TEST: 'E2E_TEST',
+  FLAG_CONFIG: 'FLAG_CONFIG',
+  INTEGRATION_TEST: 'INTEGRATION_TEST',
+  OWNERS: 'OWNERS',
+  PACKAGE_UPGRADE: 'PACKAGE_UPGRADE',
+  RENOVATE_CONFIG: 'RENOVATE_CONFIG',
+  RUNTIME: 'RUNTIME',
+  SERVER: 'SERVER',
+  UNIT_TEST: 'UNIT_TEST',
+  VALIDATOR: 'VALIDATOR',
+  VALIDATOR_WEBUI: 'VALIDATOR_WEBUI',
+  VISUAL_DIFF: 'VISUAL_DIFF',
+};
 
 /**
  * Checks if the given file is an OWNERS file.
@@ -57,7 +87,7 @@ function isValidatorFile(file) {
  * A dictionary of functions that match a given file to a given build target.
  */
 const targetMatchers = {
-  'AVA': (file) => {
+  [Targets.AVA]: (file) => {
     if (isOwnersFile(file)) {
       return false;
     }
@@ -68,7 +98,7 @@ const targetMatchers = {
       file.startsWith('build-system/tasks/prepend-global/')
     );
   },
-  'BABEL_PLUGIN': (file) => {
+  [Targets.BABEL_PLUGIN]: (file) => {
     if (isOwnersFile(file)) {
       return false;
     }
@@ -83,7 +113,7 @@ const targetMatchers = {
       file.startsWith('build-system/babel-config/')
     );
   },
-  'CACHES_JSON': (file) => {
+  [Targets.CACHES_JSON]: (file) => {
     if (isOwnersFile(file)) {
       return false;
     }
@@ -92,7 +122,7 @@ const targetMatchers = {
       file == 'build-system/global-configs/caches.json'
     );
   },
-  'DEV_DASHBOARD': (file) => {
+  [Targets.DEV_DASHBOARD]: (file) => {
     if (isOwnersFile(file)) {
       return false;
     }
@@ -102,7 +132,7 @@ const targetMatchers = {
       file.startsWith('build-system/server/app-index/')
     );
   },
-  'DOCS': (file) => {
+  [Targets.DOCS]: (file) => {
     if (isOwnersFile(file)) {
       return false;
     }
@@ -111,7 +141,7 @@ const targetMatchers = {
       (path.extname(file) == '.md' && !file.startsWith('examples/'))
     );
   },
-  'E2E_TEST': (file) => {
+  [Targets.E2E_TEST]: (file) => {
     if (isOwnersFile(file)) {
       return false;
     }
@@ -122,13 +152,13 @@ const targetMatchers = {
       })
     );
   },
-  'FLAG_CONFIG': (file) => {
+  [Targets.FLAG_CONFIG]: (file) => {
     if (isOwnersFile(file)) {
       return false;
     }
     return file.startsWith('build-system/global-configs/');
   },
-  'INTEGRATION_TEST': (file) => {
+  [Targets.INTEGRATION_TEST]: (file) => {
     if (isOwnersFile(file)) {
       return false;
     }
@@ -141,25 +171,25 @@ const targetMatchers = {
       })
     );
   },
-  'OWNERS': (file) => {
+  [Targets.OWNERS]: (file) => {
     return isOwnersFile(file) || file == 'build-system/tasks/check-owners.js';
   },
-  'PACKAGE_UPGRADE': (file) => {
+  [Targets.PACKAGE_UPGRADE]: (file) => {
     return file == 'package.json' || file == 'package-lock.json';
   },
-  'RENOVATE_CONFIG': (file) => {
+  [Targets.RENOVATE_CONFIG]: (file) => {
     return (
       file == '.renovaterc.json' ||
       file == 'build-system/tasks/check-renovate-config.js'
     );
   },
-  'RUNTIME': (file) => {
+  [Targets.RUNTIME]: (file) => {
     if (isOwnersFile(file)) {
       return false;
     }
     return file.startsWith('src/');
   },
-  'SERVER': (file) => {
+  [Targets.SERVER]: (file) => {
     if (isOwnersFile(file)) {
       return false;
     }
@@ -169,7 +199,7 @@ const targetMatchers = {
       file.startsWith('build-system/server/')
     );
   },
-  'UNIT_TEST': (file) => {
+  [Targets.UNIT_TEST]: (file) => {
     if (isOwnersFile(file)) {
       return false;
     }
@@ -181,7 +211,7 @@ const targetMatchers = {
       })
     );
   },
-  'VALIDATOR': (file) => {
+  [Targets.VALIDATOR]: (file) => {
     if (isOwnersFile(file) || file.startsWith('validator/js/webui/')) {
       return false;
     }
@@ -191,7 +221,7 @@ const targetMatchers = {
       isValidatorFile(file)
     );
   },
-  'VALIDATOR_WEBUI': (file) => {
+  [Targets.VALIDATOR_WEBUI]: (file) => {
     if (isOwnersFile(file)) {
       return false;
     }
@@ -200,7 +230,7 @@ const targetMatchers = {
       file === 'build-system/tasks/validator.js'
     );
   },
-  'VISUAL_DIFF': (file) => {
+  [Targets.VISUAL_DIFF]: (file) => {
     if (isOwnersFile(file)) {
       return false;
     }
@@ -213,15 +243,16 @@ const targetMatchers = {
 };
 
 /**
- * Populates buildTargets with a set of build targets contained in a PR after
- * making sure they are valid. Used to determine which checks to perform / tests
- * to run during PR builds.
- * @param {string} fileName
- * @return {boolean}
+ * Returns the set of build targets affected by a PR after making sure they are
+ * valid. Used to determine which checks to perform / tests to run during PR
+ * builds. Exits early if targets have already been populated.
+ * @return {Set<string>}
  */
-function determineBuildTargets(fileName = 'build-targets.js') {
+function determineBuildTargets() {
+  if (buildTargets.size > 0) {
+    return buildTargets;
+  }
   const filesChanged = gitDiffNameOnlyMaster();
-  const buildTargets = new Set();
   for (const file of filesChanged) {
     let matched = false;
     Object.keys(targetMatchers).forEach((target) => {
@@ -232,26 +263,44 @@ function determineBuildTargets(fileName = 'build-targets.js') {
       }
     });
     if (!matched) {
-      buildTargets.add('RUNTIME'); // Default to RUNTIME for files that don't match a target.
+      buildTargets.add(Targets.RUNTIME); // Default to RUNTIME for files that don't match a target.
     }
   }
-  const fileLogPrefix = colors.bold(colors.yellow(`${fileName}:`));
-  console.log(
-    `${fileLogPrefix} Detected build targets:`,
-    colors.cyan(Array.from(buildTargets).sort().join(', '))
+  const loggingPrefix = getLoggingPrefix();
+  logWithoutTimestamp(
+    `${loggingPrefix} Detected build targets:`,
+    cyan(Array.from(buildTargets).sort().join(', '))
   );
   // Test the runtime for babel plugin and server changes.
-  if (buildTargets.has('BABEL_PLUGIN') || buildTargets.has('SERVER')) {
-    buildTargets.add('RUNTIME');
+  if (
+    buildTargets.has(Targets.BABEL_PLUGIN) ||
+    buildTargets.has(Targets.SERVER)
+  ) {
+    buildTargets.add(Targets.RUNTIME);
   }
   // Test all targets during CI builds for package upgrades.
-  if (isCiBuild() && buildTargets.has('PACKAGE_UPGRADE')) {
+  if (isCiBuild() && buildTargets.has(Targets.PACKAGE_UPGRADE)) {
     const allTargets = Object.keys(targetMatchers);
     allTargets.forEach((target) => buildTargets.add(target));
   }
   return buildTargets;
 }
 
+/**
+ * Returns true if a PR affects one or more of the given build targets.
+ *
+ * @param {...string} targets
+ * @return {boolean}
+ */
+function buildTargetsInclude(...targets) {
+  if (buildTargets.size == 0) {
+    determineBuildTargets();
+  }
+  return Array.from(targets).some((target) => buildTargets.has(target));
+}
+
 module.exports = {
+  buildTargetsInclude,
   determineBuildTargets,
+  Targets,
 };

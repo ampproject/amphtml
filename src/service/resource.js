@@ -381,13 +381,6 @@ export class Resource {
   }
 
   /**
-   * Optionally hides or shows the element depending on the media query.
-   */
-  applySizesAndMediaQuery() {
-    this.element.applySizesAndMediaQuery();
-  }
-
-  /**
    * Instructs the element to change its size and transitions to the state
    * awaiting the measure and possibly layout.
    * @param {number|undefined} newHeight
@@ -953,12 +946,15 @@ export class Resource {
 
     const promise = new Promise((resolve, reject) => {
       Services.vsyncFor(this.hostWin).mutate(() => {
+        let callbackResult;
         try {
-          resolve(this.element.layoutCallback(signal));
+          callbackResult = this.element.layoutCallback(signal);
         } catch (e) {
           reject(e);
         }
+        Promise.resolve(callbackResult).then(resolve, reject);
       });
+      signal.onabort = () => reject(cancellation());
     }).then(
       () => this.layoutComplete_(true, signal),
       (reason) => this.layoutComplete_(false, signal, reason)

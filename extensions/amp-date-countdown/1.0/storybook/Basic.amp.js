@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {date, select, text, withKnobs} from '@storybook/addon-knobs';
+import {boolean, date, select, text, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
@@ -99,6 +99,7 @@ export const Default = () => {
     BIGGEST_UNIT_CONFIGURATIONS,
     BIGGEST_UNIT_CONFIGURATIONS[0]
   );
+  const countUp = boolean('data-count-up', false);
 
   return (
     <amp-date-countdown
@@ -112,6 +113,7 @@ export const Default = () => {
       locale={locale}
       when-ended={whenEnded}
       biggest-unit={biggestUnit}
+      data-count-up={countUp}
       layout="fixed-height"
       height="100"
     >
@@ -164,6 +166,7 @@ export const DefaultRenderer = () => {
     BIGGEST_UNIT_CONFIGURATIONS,
     BIGGEST_UNIT_CONFIGURATIONS[0]
   );
+  const countUp = boolean('data-count-up', false);
 
   return (
     <amp-date-countdown
@@ -177,6 +180,7 @@ export const DefaultRenderer = () => {
       locale={locale}
       when-ended={whenEnded}
       biggest-unit={biggestUnit}
+      data-count-up={countUp}
       layout="fixed-height"
       height="100"
     ></amp-date-countdown>
@@ -218,6 +222,7 @@ export const ExternalTemplate = () => {
     BIGGEST_UNIT_CONFIGURATIONS,
     BIGGEST_UNIT_CONFIGURATIONS[0]
   );
+  const countUp = boolean('data-count-up', false);
 
   return (
     <div>
@@ -246,6 +251,7 @@ export const ExternalTemplate = () => {
         locale={locale}
         when-ended={whenEnded}
         biggest-unit={biggestUnit}
+        data-count-up={countUp}
         template={template}
         layout="fixed-height"
         height="100"

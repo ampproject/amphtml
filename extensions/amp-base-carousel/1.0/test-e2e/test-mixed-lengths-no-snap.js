@@ -21,7 +21,7 @@ const pageWidth = 800;
 const pageHeight = 600;
 
 describes.endtoend(
-  'AMP carousel mixed length slides',
+  'amp-base-carousel:1.0 - mixed length slides without snapping',
   {
     testUrl:
       'http://localhost:8000/test/manual/amp-base-carousel/1.0/' +
