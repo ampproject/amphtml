@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+/* Pre-upgrade: not displayed */
+amp-lightbox[hidden] {
+  display: none !important;
+}
+
 amp-lightbox {
   width: 100%;
   height: 100%;
@@ -21,7 +26,7 @@ amp-lightbox {
   box-sizing: border-box;
   background-color: rgba(0, 0, 0, 0.9);
   color: white;
-  /* Note: visibility: hidden is applied to this layer to allow the 
+  /* Note: visibility: hidden is applied to this layer to allow the
      Preact layer to fully control animation transitions. */
   visibility: hidden;
 }
@@ -30,7 +35,7 @@ amp-lightbox::part(lightbox) {
   /* Note: background should be applied/inherited by all elements
     in amp-lightbox > c > [part=lightbox] because:
      - amp-lightbox does not show a background due to visibility: hidden
-     - c does not paint a background due to display: contents 
+     - c does not paint a background due to display: contents
      - therefore only [part] visibly applies the background value */
   background: inherit;
   color: inherit;

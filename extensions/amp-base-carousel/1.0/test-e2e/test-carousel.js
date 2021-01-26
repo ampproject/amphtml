@@ -18,7 +18,7 @@ import {getCarousel, getScrollingElement, getSlide, getSlides} from './helpers';
 import {useStyles} from '../base-carousel.jss';
 
 const pageWidth = 800;
-const pageHeight = 600;
+const pageHeight = 800;
 
 /** Increase timeout for running on CircleCI **/
 const testTimeout = 40000;

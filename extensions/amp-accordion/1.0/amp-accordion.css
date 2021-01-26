@@ -14,6 +14,41 @@
  * limitations under the License.
  */
 
+/*
+ * Pre-upgrade:
+ * - display:block element
+ * - contain:layout element
+ */
+amp-accordion {
+  display: block;
+  contain: layout;
+}
+
+amp-accordion,
+amp-accordion > section,
+amp-accordion > section > :first-child {
+  margin: 0;
+}
+
+/* Display the first 2 elements (heading and content) */
+amp-accordion > section > * {
+  display: block;
+  float: none;
+  overflow: hidden; /* clearfix */
+  position: relative;
+}
+
+/*
+ * Lowest-specificity UI styles. Mostly duplicated by the
+ * i-amphtml-accordion-header for cross-browser compatibility.
+ */
+:where(amp-accordion > section) > :first-child {
+  cursor: pointer;
+  background-color: #efefef;
+  padding-right: 20px;
+  border: 1px solid #dfdfdf;
+}
+
 /* heading
  * TODO(#30445): update these styles after team agrees on styling
  */
@@ -21,14 +56,10 @@
   cursor: pointer;
   background-color: #efefef;
   padding-right: 20px;
-  border: solid 1px #dfdfdf;
-  margin: 0;
+  border: 1px solid #dfdfdf;
 }
 
-.i-amphtml-accordion-content {
-  margin: 0;
-}
-
+/* Collapse content by default. */
 amp-accordion > section:not([expanded]) > :last-child:not(.i-amphtml-animating),
 amp-accordion
   > section:not([expanded])
