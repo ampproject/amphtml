@@ -168,6 +168,7 @@ describes.realWin(
 
     // TODO(wg-bento): This test fails?
     it.skip('should fire DOM event', async () => {
+      element.setAttribute('max-visible-count', '1');
       win.document.body.appendChild(element);
       await element.build();
 
@@ -176,6 +177,7 @@ describes.realWin(
 
       const api = await element.getApi();
       api.next();
+      await waitFor(() => eventSpy.callCount > 0, 'event fired');
 
       expect(eventSpy).to.be.calledOnce;
       expect(eventSpy.firstCall).calledWithMatch({
