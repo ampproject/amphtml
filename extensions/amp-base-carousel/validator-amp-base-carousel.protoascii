@@ -58,9 +58,8 @@ attr_lists: {
   }
   attrs: {
     name: "controls"
-    value: "always"
-    value: "auto"
-    value: "never"
+    # Media query / (always|auto|never)
+    value_regex: "([^,]+\\s+(always|auto|never),\\s*)*(always|auto|never)"
   }
   attrs: {
     name: "horizontal"
