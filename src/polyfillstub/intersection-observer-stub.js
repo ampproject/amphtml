@@ -45,7 +45,7 @@ export function shouldLoadPolyfill(win) {
 }
 
 /**
- * All current WebIKit (as of Safari 14.x) {root:document} IntersectionObservers
+ * All current WebKit (as of Safari 14.x) {root:document} IntersectionObservers
  * will report incorrect rootBounds, intersectionRect, and intersectionRatios
  * and therefore we force the polyfill in this case.
  * See: https://bugs.webkit.org/show_bug.cgi?id=219495.
