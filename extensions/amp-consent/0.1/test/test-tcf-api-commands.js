@@ -15,6 +15,9 @@
  */
 
 import * as TcfApiCommands from '../tcf-api-commands';
+import {handleTcfCommand} from '../tcf-api-commands';
+import {macroTask} from '../../../../testing/yield';
+import {mockWindowInterface} from '../../../../testing/test-helper';
 import {user} from '../../../../src/log';
 
 describes.realWin(
@@ -27,7 +30,22 @@ describes.realWin(
   },
   (env) => {
     describe('tcf Commands', () => {
+      let mockWin;
+      let mockPolicyManager;
+      let mockMetadata;
+      let payload;
       let msg;
+
+      beforeEach(() => {
+        mockWin = mockWindowInterface(window.sandbox);
+        mockWin.postMessage = window.sandbox.spy();
+        mockMetadata = {};
+        mockPolicyManager = {
+          getConsentMetadataInfo: (opt_policy) => {
+            return Promise.resolve(mockMetadata);
+          },
+        };
+      });
 
       describe('isValidTcfApiCall', () => {
         it('validates __tcfapiCall post message', async () => {
@@ -72,6 +90,34 @@ describes.realWin(
           msg.__tcfapiCall.version = 2;
           expect(TcfApiCommands.isValidTcfApiCall(msg.__tcfapiCall)).to.be.true;
           expect(errorSpy).to.not.be.called;
+        });
+      });
+
+      describe('handlePingEvent', () => {
+        it('sends a minimal PingReturn via PostMessage', async () => {
+          const callId = 'pingCallId';
+          payload = {
+            'command': 'ping',
+            callId,
+          };
+          mockMetadata = {
+            gdprApplies: true,
+          };
+          handleTcfCommand(payload, mockWin, mockPolicyManager);
+          await macroTask();
+
+          // No 'success' sent for ping
+          const postMessageArgs = mockWin.postMessage.args[0];
+          expect(postMessageArgs[0]).to.deep.equals({
+            __tcfapiReturn: {
+              returnValue: {
+                cmpLoaded: true,
+                gdprApplies: mockMetadata.gdprApplies,
+              },
+              callId,
+              success: undefined,
+            },
+          });
         });
       });
     });
