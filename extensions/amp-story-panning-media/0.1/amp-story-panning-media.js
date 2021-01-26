@@ -112,7 +112,8 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     );
     this.storeService_.subscribe(
       StateProperty.PANNING_MEDIA_STATE,
-      (panningMediaState) => this.onPanningMediaStateChange_(panningMediaState)
+      (panningMediaState) => this.onPanningMediaStateChange_(panningMediaState),
+      true /** callToInitialize */
     );
     // Mutation observer for distance attribute
     const config = {attributes: true, attributeFilter: ['distance']};
