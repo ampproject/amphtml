@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,29 +17,21 @@
 /*
  * Pre-upgrade:
  * - display:block element
+ * - size-defined element
  */
-amp-selector {
+amp-fit-text {
   display: block;
+  overflow: hidden;
+  position: relative;
 }
 
-amp-selector [option] {
-  cursor: pointer;
+/* Pre-upgrade: size-defining element - hide text. */
+amp-fit-text:not(.i-amphtml-built) {
+  color: transparent !important;
 }
 
-amp-selector[multiple] [option][selected] {
-  cursor: pointer;
-  outline: solid 1px rgba(0, 0, 0, 0.7);
-}
-
-amp-selector [option][selected] {
-  cursor: auto;
-  outline: solid 1px rgba(0, 0, 0, 0.7);
-}
-
-amp-selector [disabled][option],
-amp-selector[disabled] [option],
-amp-selector [selected][disabled],
-amp-selector[disabled] [selected] {
-  cursor: auto;
-  outline: none;
+/* Pre-upgrade: size-defining element - hide children. */
+amp-fit-text:not(.i-amphtml-built) > :not([placeholder]) {
+  display: none;
+  content-visibility: hidden;
 }
