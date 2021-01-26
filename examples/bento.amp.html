@@ -1,0 +1,79 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>Basic Bento example</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" type="text/css" href="/build/css/amp-base-carousel-1.0.css">
+  <link rel="stylesheet" type="text/css" href="/build/css/amp-social-share-1.0.css">
+  <link rel="stylesheet" type="text/css" href="/build/css/amp-accordion-1.0.css">
+  <script async custom-element="amp-base-carousel" src="https://cdn.ampproject.org/v0/amp-base-carousel-1.0.js"></script>
+  <script async custom-element="amp-accordion" src="https://cdn.ampproject.org/v0/amp-accordion-1.0.js"></script>
+  <script async custom-element="amp-social-share" src="https://cdn.ampproject.org/v0/amp-social-share-1.0.js"></script>
+  <style amp-custom>
+    body {
+      margin: 0;
+    }
+
+    amp-base-carousel img {
+      object-fit: cover;
+    }
+
+    amp-base-carousel {
+      width: 100%;
+      aspect-ratio: 4/3;
+      border: 1px dotted;
+    }
+
+    img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <button onclick="runAmp()">Run</button>
+    <input>
+  </nav>
+
+  <div>
+    <amp-social-share
+      type=twitter
+    ></amp-social-share>
+  </div>
+
+  <amp-base-carousel id="carousel-1" width="400" height="300" layout="responsive" loop="true">
+    <img src="img/hero@1x.jpg">
+    <img src="img/sea@1x.jpg">
+  </amp-base-carousel>
+
+  <amp-accordion>
+    <section id="section1" expanded>
+      <h2>Hero</h2>
+      <div>
+        <img src="img/hero@1x.jpg">
+      </div>
+    </section>
+    <section>
+      <h2>Sea</h2>
+      <div>
+        <img src="img/sea@1x.jpg">
+      </div>
+    </section>
+  </amp-accordion>
+
+  <script>
+    function runAmp() {
+      var s = document.createElement('script');
+      s.src = '/dist/amp.js';
+      document.head.appendChild(s);
+    }
+  </script>
+
+</body>
+</html>

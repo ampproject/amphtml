@@ -14,6 +14,27 @@
  * limitations under the License.
  */
 
+/*
+ * Pre-upgrade:
+ * - display:inline-block element
+ * - size-defined element
+ * - predefined default size
+ */
+amp-social-share {
+  display: inline-block;
+  overflow: hidden;
+  position: relative;
+  box-sizing: border-box;
+  width: 60px;
+  height: 44px;
+}
+
+/* Pre-upgrade: size-defining element - hide children until build. */
+amp-social-share:not(.i-amphtml-built) > :not([placeholder]) {
+  display: none;
+  content-visibility: hidden;
+}
+
 /**
   * Note: Attribute selectors were used initially here but we switched to using
   * class-based selector to style each type because of a bug on iOS Safari 8.

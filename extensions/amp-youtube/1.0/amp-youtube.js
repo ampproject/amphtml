@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {CSS} from '../../../build/amp-youtube-1.0.css';
 import {VideoBaseElement} from '../../amp-video/1.0/base-element';
 import {Youtube} from './youtube';
 import {isExperimentOn} from '../../../src/experiments';
@@ -50,5 +51,5 @@ AmpYoutube['props'] = {
 };
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpYoutube);
+  AMP.registerElement(TAG, AmpYoutube, CSS);
 });

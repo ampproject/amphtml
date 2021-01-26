@@ -89,11 +89,10 @@
   },
   {
     "name": "amp-base-carousel",
-    "version": "0.1",
+    "version": ["0.1", "1.0"],
     "latestVersion": "0.1",
     "options": {"hasCss": true}
   },
-  {"name": "amp-base-carousel", "version": "1.0", "latestVersion": "0.1"},
   {"name": "amp-beopinion", "version": "0.1", "latestVersion": "0.1"},
   {"name": "amp-bind", "version": "0.1", "latestVersion": "0.1"},
   {"name": "amp-bodymovin-animation", "version": "0.1", "latestVersion": "0.1"},
@@ -153,11 +152,10 @@
   {"name": "amp-facebook-page", "version": "0.1", "latestVersion": "0.1"},
   {
     "name": "amp-fit-text",
-    "version": "0.1",
+    "version": ["0.1", "1.0"],
     "latestVersion": "0.1",
     "options": {"hasCss": true}
   },
-  {"name": "amp-fit-text", "version": "1.0", "latestVersion": "0.1"},
   {"name": "amp-font", "version": "0.1", "latestVersion": "0.1"},
   {
     "name": "amp-form",
@@ -238,11 +236,10 @@
   },
   {
     "name": "amp-instagram",
-    "version": "0.1",
+    "version": ["0.1", "1.0"],
     "latestVersion": "0.1",
     "options": {"hasCss": true}
   },
-  {"name": "amp-instagram", "version": "1.0", "latestVersion": "0.1"},
   {
     "name": "amp-install-serviceworker",
     "version": "0.1",
@@ -258,13 +255,7 @@
   {"name": "amp-kaltura-player", "version": "0.1", "latestVersion": "0.1"},
   {
     "name": "amp-lightbox",
-    "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {"hasCss": true}
-  },
-  {
-    "name": "amp-lightbox",
-    "version": "1.0",
+    "version": ["0.1", "1.0"],
     "latestVersion": "0.1",
     "options": {"hasCss": true}
   },
@@ -500,11 +491,10 @@
   },
   {
     "name": "amp-stream-gallery",
-    "version": "0.1",
+    "version": ["0.1", "1.0"],
     "latestVersion": "0.1",
     "options": {"hasCss": true}
   },
-  {"name": "amp-stream-gallery", "version": "1.0", "latestVersion": "0.1"},
   {
     "name": "amp-subscriptions",
     "version": "0.1",
@@ -535,7 +525,12 @@
     "options": {"hasCss": true}
   },
   {"name": "amp-video", "version": "0.1", "latestVersion": "0.1"},
-  {"name": "amp-video", "version": "1.0", "latestVersion": "0.1"},
+  {
+    "name": "amp-video",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {"hasCss": true}
+  },
   {
     "name": "amp-video-docking",
     "version": "0.1",
@@ -578,6 +573,11 @@
   },
   {"name": "amp-wistia-player", "version": "0.1", "latestVersion": "0.1"},
   {"name": "amp-yotpo", "version": "0.1", "latestVersion": "0.1"},
-  {"name": "amp-youtube", "version": "1.0", "latestVersion": "0.1"},
-  {"name": "amp-youtube", "version": "0.1", "latestVersion": "0.1"}
+  {"name": "amp-youtube", "version": "0.1", "latestVersion": "0.1"},
+  {
+    "name": "amp-youtube",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {"hasCss": true}
+  }
 ]
