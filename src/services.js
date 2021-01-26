@@ -806,4 +806,16 @@ export class Services {
   static xhrFor(window) {
     return /** @type {!./service/xhr-impl.Xhr} */ (getService(window, 'xhr'));
   }
+
+  /**
+   * @param {!Element|!ShadowRoot} element
+   * @return {!Promise<?../extensions/amp-assistant-assistjs/0.1/assistjs-frame-service.AssistjsFrameService>}
+   */
+  static assistjsFrameServiceForDocOrNull(element) {
+    return /** @type {!Promise<?../extensions/amp-assistant-assistjs/0.1/assistjs-frame-service.AssistjsFrameService>} */ (getElementServiceIfAvailableForDocInEmbedScope(
+      element,
+      'assistjs-frame-service',
+      'amp-assistant-assistjs'
+    ));
+  }
 }
