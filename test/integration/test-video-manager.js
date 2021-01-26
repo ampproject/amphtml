@@ -61,6 +61,13 @@ describe
         let video;
         let impl;
 
+        it('should not duplicate entries if laid out twice', async () => {
+          videoManager.register(impl);
+          expect(videoManager.entries_).to.have.length(1);
+          videoManager.register(impl);
+          expect(videoManager.entries_).to.have.length(1);
+        });
+
         it('should receive i-amphtml-video-interface class when registered', () => {
           const expectedClass = 'i-amphtml-video-interface';
           expect(toArray(video.classList)).to.not.contain(expectedClass);
