@@ -161,7 +161,10 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
           y: startPos.y + (this.y_ - startPos.y) * easing,
           zoom: startPos.zoom + (this.zoom_ - startPos.zoom) * easing,
         });
-        this.isOnActivePage_ && requestAnimationFrame(nextFrame);
+        // Only call loop again if on active page.
+        if (this.isOnActivePage_) {
+          requestAnimationFrame(nextFrame);
+        }
       } else {
         this.storeService_.dispatch(Action.SET_PANNING_MEDIA_STATE, {
           x: this.x_,
