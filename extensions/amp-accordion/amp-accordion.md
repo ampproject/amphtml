@@ -147,7 +147,7 @@ The example below demonstrates `amp-accordion` component in standalone use.
 
 #### Interactivity and API usage
 
-Bento enabled components in standalone use are highly interactive through their API. In Bento standalone use, the element's API replaces AMP Actions and events and [`amp-bind`](https://amp.dev/documentation/components/amp-bind/?format=websites).
+Bento enabled components in standalone use are highly interactive through their API. In Bento standalone use, the element's API replaces AMP Actions and Events and [`amp-bind`](https://amp.dev/documentation/components/amp-bind/?format=websites).
 
 The `amp-accordion` component API is accessible by including the following script tag in your document:
 
