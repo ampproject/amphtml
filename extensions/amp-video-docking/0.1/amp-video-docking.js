@@ -1050,10 +1050,7 @@ export class VideoDocking {
       // Since the AMP element container is position: relative, the media
       // element is relative to AMP element corner when position: absolute, so
       // we need to offset it by outer contianer's position.
-      let offset = {left: 0, top: 0};
-      if (position === 'absolute') {
-        offset = clientRect;
-      }
+      const offset = position === 'absolute' ? clientRect : {left: 0, top: 0};
 
       this.getElementsOnDockArea_(video).forEach((el) => {
         setImportantStyles(el, {
