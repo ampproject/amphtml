@@ -95,7 +95,7 @@ This table provides examples of formatted values specified in a Mustache templat
 
 ### Migrating from 0.1
 
-The experimental `1.0` version of `amp-date-countdown` does not support the `data-count-up` attribute. This means the `1.0` component is unable to count in the opposite direction.
+The experimental `1.0` version of `amp-date-countdown` uses the attribute name `count-up` instead of `data-count-up` as in `0.1` to support the "count up" feature. See the `count-up` section under `Attributes` below for more details.
 
 ## Attributes
 
@@ -169,9 +169,13 @@ on the specified `biggest-unit` value. For example, assume there are `50 days 10
 -   Supported values: `days`, `hours`, `minutes`, `seconds`
 -   Default: `days`
 
-### data-count-up (optional)
+### count-up (optional)
 
 Include this attribute to reverse the direction of the countdown to count up instead. This is useful to display the time elapsed since a target date in the past. To continue the countdown when the target date is in the past, be sure to include the `when-ended` attribute with the `continue` value. If the target date is in the future, `amp-date-countdown` will display a decrementing (toward 0) negative value.
+
+[tip type="important"]
+Please note that the attribute name is different than `0.1` which uses the `data-count-up` attribute to toggle this feature. The behavior of the feature is otherwise identical to `0.1`.
+[/tip]
 
 ## Events
 

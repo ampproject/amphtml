@@ -99,7 +99,7 @@ export const Default = () => {
     BIGGEST_UNIT_CONFIGURATIONS,
     BIGGEST_UNIT_CONFIGURATIONS[0]
   );
-  const countUp = boolean('data-count-up', false);
+  const countUp = boolean('count-up', false);
 
   return (
     <amp-date-countdown
@@ -113,7 +113,7 @@ export const Default = () => {
       locale={locale}
       when-ended={whenEnded}
       biggest-unit={biggestUnit}
-      data-count-up={countUp}
+      count-up={countUp}
       layout="fixed-height"
       height="100"
     >
@@ -166,7 +166,7 @@ export const DefaultRenderer = () => {
     BIGGEST_UNIT_CONFIGURATIONS,
     BIGGEST_UNIT_CONFIGURATIONS[0]
   );
-  const countUp = boolean('data-count-up', false);
+  const countUp = boolean('count-up', false);
 
   return (
     <amp-date-countdown
@@ -180,7 +180,7 @@ export const DefaultRenderer = () => {
       locale={locale}
       when-ended={whenEnded}
       biggest-unit={biggestUnit}
-      data-count-up={countUp}
+      count-up={countUp}
       layout="fixed-height"
       height="100"
     ></amp-date-countdown>
@@ -222,7 +222,7 @@ export const ExternalTemplate = () => {
     BIGGEST_UNIT_CONFIGURATIONS,
     BIGGEST_UNIT_CONFIGURATIONS[0]
   );
-  const countUp = boolean('data-count-up', false);
+  const countUp = boolean('count-up', false);
 
   return (
     <div>
@@ -251,7 +251,7 @@ export const ExternalTemplate = () => {
         locale={locale}
         when-ended={whenEnded}
         biggest-unit={biggestUnit}
-        data-count-up={countUp}
+        count-up={countUp}
         template={template}
         layout="fixed-height"
         height="100"
