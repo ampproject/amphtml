@@ -21,6 +21,7 @@
  * determine which tasks are required to run for pull request builds.
  */
 const config = require('../test-configs/config');
+const globby = require('globby');
 const minimatch = require('minimatch');
 const path = require('path');
 const {cyan} = require('ansi-colors');
@@ -32,6 +33,13 @@ const {isCiBuild} = require('../common/ci');
  * Used to prevent the repeated recomputing of build targets during PR jobs.
  */
 let buildTargets;
+
+/**
+ * Used to prevent the repeated expansion of globs during PR jobs.
+ */
+let lintFiles;
+let presubmitFiles;
+let prettifyFiles;
 
 /***
  * All of AMP's build targets that can be tested during CI.
@@ -47,8 +55,11 @@ const Targets = {
   E2E_TEST: 'E2E_TEST',
   FLAG_CONFIG: 'FLAG_CONFIG',
   INTEGRATION_TEST: 'INTEGRATION_TEST',
+  LINT: 'LINT',
   OWNERS: 'OWNERS',
   PACKAGE_UPGRADE: 'PACKAGE_UPGRADE',
+  PRESUBMIT: 'PRESUBMIT',
+  PRETTIFY: 'PRETTIFY',
   RENOVATE_CONFIG: 'RENOVATE_CONFIG',
   RUNTIME: 'RUNTIME',
   SERVER: 'SERVER',
@@ -172,11 +183,20 @@ const targetMatchers = {
       })
     );
   },
+  [Targets.LINT]: (file) => {
+    return lintFiles.includes(file);
+  },
   [Targets.OWNERS]: (file) => {
     return isOwnersFile(file) || file == 'build-system/tasks/check-owners.js';
   },
   [Targets.PACKAGE_UPGRADE]: (file) => {
     return file.endsWith('package.json') || file.endsWith('package-lock.json');
+  },
+  [Targets.PRESUBMIT]: (file) => {
+    return presubmitFiles.includes(file);
+  },
+  [Targets.PRETTIFY]: (file) => {
+    return prettifyFiles.includes(file);
   },
   [Targets.RENOVATE_CONFIG]: (file) => {
     return (
@@ -254,6 +274,9 @@ function determineBuildTargets() {
     return buildTargets;
   }
   buildTargets = new Set();
+  lintFiles = globby.sync(config.lintGlobs);
+  presubmitFiles = globby.sync(config.presubmitGlobs);
+  prettifyFiles = globby.sync(config.prettifyGlobs);
   const filesChanged = gitDiffNameOnlyMaster();
   for (const file of filesChanged) {
     let matched = false;
@@ -282,6 +305,9 @@ function determineBuildTargets() {
   }
   // Test all targets during CI builds for package upgrades.
   if (isCiBuild() && buildTargets.has(Targets.PACKAGE_UPGRADE)) {
+    logWithoutTimestamp(
+      `${loggingPrefix} Running all tests since this PR contains package upgrades...`
+    );
     const allTargets = Object.keys(targetMatchers);
     allTargets.forEach((target) => buildTargets.add(target));
   }

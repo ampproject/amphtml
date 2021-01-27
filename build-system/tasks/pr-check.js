@@ -17,17 +17,17 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const {
-  buildTargetsInclude,
-  determineBuildTargets,
-  Targets,
-} = require('../pr-check/build-targets');
-const {
-  stopTimedJob,
+  abortTimedJob,
   printChangeSummary,
   startTimer,
   stopTimer,
   timedExec,
 } = require('../pr-check/utils');
+const {
+  buildTargetsInclude,
+  determineBuildTargets,
+  Targets,
+} = require('../pr-check/build-targets');
 const {runNpmChecks} = require('../pr-check/npm-checks');
 const {setLoggingPrefix} = require('../common/logging');
 
@@ -57,16 +57,24 @@ async function prCheck(cb) {
 
   const startTime = startTimer(jobName);
   if (!runNpmChecks()) {
-    stopTimedJob(jobName, startTime);
+    abortTimedJob(jobName, startTime);
     failTask();
   }
 
   printChangeSummary();
   determineBuildTargets();
-  runCheck('gulp lint --local_changes');
-  runCheck('gulp prettify --local_changes');
-  runCheck('gulp presubmit');
-  runCheck('gulp check-exact-versions');
+
+  if (buildTargetsInclude(Targets.PRESUBMIT)) {
+    runCheck('gulp presubmit');
+  }
+
+  if (buildTargetsInclude(Targets.LINT)) {
+    runCheck('gulp lint --local_changes');
+  }
+
+  if (buildTargetsInclude(Targets.PRETTIFY)) {
+    runCheck('gulp prettify --local_changes');
+  }
 
   if (buildTargetsInclude(Targets.AVA)) {
     runCheck('gulp ava');
@@ -90,6 +98,10 @@ async function prCheck(cb) {
 
   if (buildTargetsInclude(Targets.OWNERS)) {
     runCheck('gulp check-owners');
+  }
+
+  if (buildTargetsInclude(Targets.PACKAGE_UPGRADE)) {
+    runCheck('gulp check-exact-versions');
   }
 
   if (buildTargetsInclude(Targets.RENOVATE_CONFIG)) {
