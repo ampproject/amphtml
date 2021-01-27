@@ -284,7 +284,10 @@ function determineBuildTargets() {
       const matcher = targetMatchers[target];
       if (matcher(file)) {
         buildTargets.add(target);
-        matched = true;
+        // Files that affect these three targets may also affect the runtime.
+        if (!target in [Targets.LINT, Targets.PRESUBMIT, Targets.PRETTIFY]) {
+          matched = true;
+        }
       }
     });
     if (!matched) {
