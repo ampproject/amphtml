@@ -353,7 +353,6 @@ function getAmpdocService(win) {
  * @param {!Object} holder Object holding the service instance.
  * @param {string} id of the service.
  * @return {Object}
- * @template T
  */
 function getServiceInternal(holder, id) {
   devAssert(
