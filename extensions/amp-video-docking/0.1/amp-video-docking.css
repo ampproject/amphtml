@@ -179,9 +179,8 @@
 .amp-video-docked-controls,
 .i-amphtml-video-docked,
 .i-amphtml-video-docked-overlay {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
+  top: 0;
+  left: 0;
   right: auto !important;
   bottom: auto !important;
   padding: 0 !important;
@@ -194,6 +193,10 @@
   transform-origin: left top !important;
 
   will-change: width, height, transition, transform, opacity;
+}
+
+.amp-video-docked-controls {
+  position: fixed !important;
 }
 
 .i-amphtml-video-docked-overlay {

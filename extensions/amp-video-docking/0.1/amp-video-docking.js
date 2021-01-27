@@ -663,8 +663,8 @@ export class VideoDocking {
         return;
       }
       const video = this.getDockedVideo_();
-      if (this.isVisible_(video, REVERT_TO_INLINE_RATIO)) {
-        this.undock_(video);
+      if (this.isVisible_(video, REVERT_TO_INLINE_RATIO, opt_clientRect)) {
+        this.undock_(video, /* opt_reconciled */ false, opt_clientRect);
       }
     }
   }
@@ -856,6 +856,7 @@ export class VideoDocking {
     if (this.lastDismissed_ != video) {
       return false;
     }
+    // TODO: Reuse a ClientRect
     if (this.isVisible_(video.element, FLOAT_TOLERANCE)) {
       this.resetDismissed_();
     }
@@ -865,27 +866,6 @@ export class VideoDocking {
   /** @private */
   resetDismissed_() {
     this.lastDismissed_ = null;
-  }
-
-  /**
-   * @param {!AmpElement|!VideoOrBaseElementDef} element
-   * @return {number}
-   * @private
-   */
-  calculateIntersectionRatio_(element) {
-    const inlineRect = this.getScrollAdjustedRect_(element);
-
-    // If the component's box is way out of view, the runtime might have
-    // discarded its size values.
-    if (!isSizedRect(inlineRect)) {
-      return 0;
-    }
-
-    const intersectionHeight =
-      Math.min(inlineRect.bottom, this.viewportRect_.bottom) -
-      Math.max(inlineRect.top, this.viewportRect_.top);
-
-    return Math.max(0, intersectionHeight / inlineRect.height);
   }
 
   /**
@@ -927,6 +907,7 @@ export class VideoDocking {
    * @param {number} transitionDurationMs
    * @param {DirectionX=} opt_relativeX
    * @param {!LayoutRectDef=} opt_clientRect
+   * @param {string=} position
    * @return {!Promise}
    * @private
    */
@@ -938,7 +919,8 @@ export class VideoDocking {
     step,
     transitionDurationMs,
     opt_relativeX,
-    opt_clientRect
+    opt_clientRect,
+    position = 'fixed'
   ) {
     if (this.alreadyPlacedAt_(x, y, scale)) {
       return Promise.resolve();
@@ -947,8 +929,10 @@ export class VideoDocking {
     this.isTransitioning_ = true;
 
     const {element} = video;
-    const {width, height} =
+    const clientRect =
       opt_clientRect || video.element./*OK*/ getBoundingClientRect();
+
+    const {width, height} = clientRect;
 
     this.placedAt_ = {x, y, scale};
 
@@ -1063,9 +1047,20 @@ export class VideoDocking {
         });
       });
 
+      // Since the AMP element container is position: relative, the media
+      // element is relative to AMP element corner when position: absolute, so
+      // we need to offset it by outer contianer's position.
+      let offset = {left: 0, top: 0};
+      if (position === 'absolute') {
+        offset = clientRect;
+      }
+
       this.getElementsOnDockArea_(video).forEach((el) => {
         setImportantStyles(el, {
           'transform': transform(x, y, scale),
+          'left': px(-offset.left),
+          'top': px(-offset.top),
+          'position': position,
         });
         setTransitionTiming(el);
         maybeSetSizing(el);
@@ -1089,41 +1084,6 @@ export class VideoDocking {
    */
   getTimer_() {
     return Services.timerFor(this.ampdoc_.win);
-  }
-
-  /**
-   * @param {!VideoOrBaseElementDef} video
-   * @return {!Promise|undefined}
-   * @private
-   */
-  maybeUpdateStaleYAfterScroll_(video) {
-    if (!this.placedAt_) {
-      return;
-    }
-
-    const {x, y, scale} = this.placedAt_;
-    const {top: fixedScrollTop} = this.getScrollAdjustedRect_(video);
-
-    if (y == fixedScrollTop) {
-      return;
-    }
-
-    const maxTransitionDurationMs = 150;
-    const tentativeTransitionDurationMs = Math.abs(y - fixedScrollTop) / 2;
-
-    const transitionDurationMs = Math.min(
-      maxTransitionDurationMs,
-      tentativeTransitionDurationMs
-    );
-
-    return this.placeAt_(
-      video,
-      x,
-      fixedScrollTop,
-      scale,
-      /* step */ 0,
-      transitionDurationMs
-    );
   }
 
   /**
@@ -1234,10 +1194,27 @@ export class VideoDocking {
   /**
    * @param {!AmpElement|!VideoOrBaseElementDef} element
    * @param {number=} minRatio
+   * @param {!LayoutRectDef=} opt_clientRect
    * @return {boolean}
    */
-  isVisible_(element, minRatio = 1) {
-    const intersectionRatio = this.calculateIntersectionRatio_(element);
+  isVisible_(element, minRatio = 1, opt_clientRect) {
+    const inlineRect = opt_clientRect || this.getScrollAdjustedRect_(element);
+
+    // If the component's box is way out of view, the runtime might have
+    // discarded its size values.
+    if (!isSizedRect(inlineRect)) {
+      return 0;
+    }
+
+    const intersectionHeight =
+      Math.min(inlineRect.bottom, this.viewportRect_.bottom) -
+      Math.max(inlineRect.top, this.viewportRect_.top);
+
+    const intersectionRatio = Math.max(
+      0,
+      intersectionHeight / inlineRect.height
+    );
+
     return intersectionRatio > minRatio - FLOAT_TOLERANCE;
   }
 
@@ -1403,6 +1380,7 @@ export class VideoDocking {
 
     video.pause();
 
+    // TODO: Reuse a ClientRect
     if (this.isVisible_(video, 0.2)) {
       this.bounceToDismiss_(video, offsetX, direction);
       return;
@@ -1562,11 +1540,16 @@ export class VideoDocking {
   /**
    * @param {!VideoOrBaseElementDef} video
    * @param {boolean=} opt_reconciled
+   * @param {!LayoutRectDef=} opt_clientRect
    * @return {!Promise}
    * @private
    */
-  undock_(video, opt_reconciled) {
-    const isMostlyInView = this.isVisible_(video, REVERT_TO_INLINE_RATIO);
+  undock_(video, opt_reconciled, opt_clientRect) {
+    const isMostlyInView = this.isVisible_(
+      video,
+      REVERT_TO_INLINE_RATIO,
+      opt_clientRect
+    );
 
     if (!isMostlyInView) {
       video.pause();
@@ -1602,13 +1585,13 @@ export class VideoDocking {
       scale,
       step,
       transitionDurationMs,
-      relativeX
-    )
-      .then(() => this.maybeUpdateStaleYAfterScroll_(video))
-      .then(() => {
-        video.showControls();
-        this.resetOnUndock_(video);
-      });
+      relativeX,
+      opt_clientRect,
+      /* position */ 'absolute'
+    ).then(() => {
+      video.showControls();
+      this.resetOnUndock_(video);
+    });
   }
 
   /** @private */
@@ -1655,6 +1638,9 @@ export class VideoDocking {
           'height',
           'opacity',
           'overflow',
+          'position',
+          'left',
+          'top',
         ]);
       });
 
