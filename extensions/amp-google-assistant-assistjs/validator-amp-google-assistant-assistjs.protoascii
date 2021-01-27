@@ -1,5 +1,5 @@
 #
-# Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+# Copyright 2021 The AMP HTML Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,22 +14,69 @@
 # limitations under the license.
 #
 
-tags: {  # amp-assistant-assistjs
+tags: {  # amp-google-assistant-assistjs
   html_format: AMP
   tag_name: "SCRIPT"
   extension_spec: {
-    name: "amp-assistant-assistjs"
+    name: "amp-google-assistant-assistjs"
     version: "0.1"
     version: "latest"
   }
   attr_lists: "common-extension-attrs"
 }
-tags: {  # <amp-assistant-assistjs>
+tags: {  # <amp-google-assistant-voice-button>
   html_format: AMP
-  tag_name: "AMP-ASSISTANT-ASSISTJS"
+  tag_name: "AMP-GOOGLE-ASSISTANT-VOICE-BUTTON"
   requires_extension: "amp-google-assistant-assistjs"
+  attrs: {
+    name: 'project';
+    mandatory: true;
+  }
+  attrs: {
+    name: 'dev';
+  }
+  attrs: {
+    name: 'server'
+  }
   attr_lists: "extended-amp-global"
-  spec_url: "https://amp.dev/documentation/components/amp-assistant-assistjs"
+  amp_layout: {
+    supported_layouts: RESPONSIVE
+  }
+}
+tags: {  # <amp-google-assistant-voice-bar>
+  html_format: AMP
+  tag_name: "AMP-GOOGLE-ASSISTANT-VOICE-BAR"
+  requires_extension: "amp-google-assistant-assistjs"
+  attrs: {
+    name: 'project';
+    mandatory: true;
+  }
+  attrs: {
+    name: 'dev';
+  }
+  attrs: {
+    name: 'server'
+  }
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: RESPONSIVE
+  }
+}
+tags: {  # <amp-google-assistant-inline-suggestion-bar>
+  html_format: AMP
+  tag_name: "AMP-GOOGLE-ASSISTANT-INLINE-SUGGESTION-BAR"
+  requires_extension: "amp-google-assistant-assistjs"
+  attrs: {
+    name: 'project';
+    mandatory: true;
+  }
+  attrs: {
+    name: 'dev';
+  }
+  attrs: {
+    name: 'server'
+  }
+  attr_lists: "extended-amp-global"
   amp_layout: {
     supported_layouts: RESPONSIVE
   }

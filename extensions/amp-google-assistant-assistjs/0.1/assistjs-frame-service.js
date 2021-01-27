@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,6 @@
  * @fileoverview The shared service used by all custom elements to talk to Assistant services. It loads an iframe that exports
  * endpoints to handle requests from custom elements.
  */
-
-import "regenerator-runtime/runtime";
 
 export class AssistjsFrameService {
   /**
@@ -48,7 +46,7 @@ export class AssistjsFrameService {
   }
 
   /** @private */
-  async createAssistantIframe() {
+  createAssistantIframe() {
     const iframe = this.ampdoc.win.document.createElement('iframe');
     const frameUrl = `${this.assistjsServer_}/assist/frame?origin=${origin}&projectId=${this.projectId_}&dev=${this.devMode_}`;
     iframe.src = frameUrl;
