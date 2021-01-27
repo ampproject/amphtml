@@ -46,7 +46,7 @@
     "@polymer/polymer": "1.2.5-npm-test.2",
     "codemirror": "5.15.2",
     "vulcanize": "1.14.8",
-    "webcomponents.js": "^0.7.22",
+    "webcomponents.js": "0.7.22",
     "web-animations-js": "2.2.2"
   }
 }
