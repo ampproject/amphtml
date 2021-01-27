@@ -114,7 +114,7 @@ Bento enabled components in standalone use are highly interactive through their 
 The `amp-video` component API is accessible by including the following script tag in your document:
 
 ```
-await customElements.whenDefined('amp-youtube');
+await customElements.whenDefined('amp-video');
 const videoHandle = await video.getApi();
 ```
 
