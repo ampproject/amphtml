@@ -15,17 +15,11 @@
  */
 'use strict';
 
+const globby = require('globby');
 const {cyan, green, red} = require('ansi-colors');
 const {getStderr} = require('../common/exec');
 const {gitDiffFileMaster} = require('../common/git');
 const {log, logLocalDev, logWithoutTimestamp} = require('../common/logging');
-
-const PACKAGE_JSON_PATHS = [
-  'package.json',
-  'build-system/tasks/e2e/package.json',
-  'build-system/tasks/visual-diff/package.json',
-  'build-system/tasks/storybook/package.json',
-];
 
 const checkerExecutable = 'npx npm-exact-versions';
 
@@ -35,7 +29,8 @@ const checkerExecutable = 'npx npm-exact-versions';
  */
 async function checkExactVersions() {
   let success = true;
-  PACKAGE_JSON_PATHS.forEach((file) => {
+  const packageJsonFiles = globby.sync(['**/package.json', '!**/node_modules']);
+  packageJsonFiles.forEach((file) => {
     const checkerCmd = `${checkerExecutable} --path ${file}`;
     const err = getStderr(checkerCmd);
     if (err) {
@@ -70,4 +65,4 @@ module.exports = {
 };
 
 checkExactVersions.description =
-  'Checks that all packages in package.json use exact versions.';
+  'Checks that all package.json files in the repo use exact versions.';
