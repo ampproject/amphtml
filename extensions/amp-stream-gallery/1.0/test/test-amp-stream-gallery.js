@@ -21,6 +21,7 @@ import {
   createElementWithAttributes,
   waitForChildPromise,
 } from '../../../../src/dom';
+import {poll} from '../../../../testing/iframe';
 import {setStyles} from '../../../../src/style';
 import {toArray} from '../../../../src/types';
 import {toggleExperiment} from '../../../../src/experiments';
@@ -166,44 +167,15 @@ describes.realWin(
       ).to.deep.equal([userSuppliedChildren[1]]);
     });
 
-    // TODO(wg-bento): This test fails?
-    it.skip('should fire DOM event', async () => {
-      element.setAttribute('max-visible-count', '1');
-      win.document.body.appendChild(element);
-      await element.build();
-
-      const eventSpy = env.sandbox.spy();
-      element.addEventListener('slideChange', eventSpy);
-
-      const api = await element.getApi();
-      api.next();
-      await waitFor(() => eventSpy.callCount > 0, 'event fired');
-
-      expect(eventSpy).to.be.calledOnce;
-      expect(eventSpy.firstCall).calledWithMatch({
-        'data': {
-          'index': 1,
-        },
-      });
-    });
-
     describe('imperative api', () => {
-      let scroller;
-      let slides;
-
       beforeEach(async () => {
         element.setAttribute('max-visible-count', '1');
         win.document.body.appendChild(element);
-        slides = await getSlidesFromShadow();
-
-        scroller = element.shadowRoot.querySelector(
-          `[class*=${styles.scrollContainer}]`
-        );
+        await element.build();
       });
 
       afterEach(() => {
         win.document.body.removeChild(element);
-        scroller = null;
       });
 
       function invocation(method, args = {}) {
@@ -227,27 +199,60 @@ describes.realWin(
         element.addEventListener('slideChange', eventSpy);
 
         element.enqueAction(invocation('next'));
-        await waitFor(
-          () => scroller.scrollLeft === slides[1].offsetLeft,
-          'advanced to next slide'
+        // These must wait longer than `waitFor` because of
+        // the render on debounced scrolling.
+        await poll(
+          'advanced to next slide',
+          () => eventSpy.callCount > 0,
+          null,
+          1000
         );
 
+        expect(eventSpy).to.be.calledOnce;
+        expect(eventSpy.firstCall).calledWithMatch({
+          'data': {
+            'index': 1,
+          },
+        });
+
         element.enqueAction(invocation('prev'));
-        await waitFor(
-          () => scroller.scrollLeft === slides[0].offsetLeft,
-          'returned to prev slide'
+        // These must wait longer than `waitFor` because of
+        // the render on debounced scrolling.
+        await poll(
+          'returned to prev slide',
+          () => eventSpy.callCount > 1,
+          null,
+          1000
         );
+        expect(eventSpy).to.be.calledTwice;
+        expect(eventSpy.secondCall).calledWithMatch({
+          'data': {
+            'index': 0,
+          },
+        });
       });
 
       it('should execute goToSlide action', async () => {
+        const eventSpy = env.sandbox.spy();
+        element.addEventListener('slideChange', eventSpy);
+
         element.enqueAction(invocation('goToSlide', {index: 1}));
-        await waitFor(() => scroller.scrollLeft > 0, 'go to slide 1');
+        await waitFor(() => eventSpy.callCount > 0, 'go to slide 1');
+        expect(eventSpy).to.be.calledOnce;
+        expect(eventSpy.firstCall).calledWithMatch({
+          'data': {
+            'index': 1,
+          },
+        });
 
         element.enqueAction(invocation('goToSlide', {index: 0}));
-        await waitFor(
-          () => scroller.scrollLeft == 0,
-          'returned to first slide'
-        );
+        await waitFor(() => eventSpy.callCount > 1, 'returned to first slide');
+        expect(eventSpy).to.be.calledTwice;
+        expect(eventSpy.secondCall).calledWithMatch({
+          'data': {
+            'index': 0,
+          },
+        });
       });
     });
   }
