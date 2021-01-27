@@ -1,5 +1,4 @@
-
-  {
+{
     "transport": {
       "xhrpost": true,
       "useBody":true
@@ -28,5 +27,4 @@
         "event": "${event}",
         "time": "${timestamp}"
       }
-  }
-  
+}
