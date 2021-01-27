@@ -14,7 +14,7 @@
       "$lib_version": "1.0.0"
     },
     "properties": {
-      "$lib":"amp",
+      "$lib": "amp",
       "$lib_version": "1.0.0",
       "$url": "${ampdocUrl}",
       "$title": "${title}",
@@ -22,9 +22,9 @@
       "$screen_width": "${screenWidth}",
       "$screen_height": "${screenHeight}",
       "amp_properties": "${amp_properties}"
-     },
-     "type": "track",
-     "event": "${event}",
-     "time": "${timestamp}"
+    },
+    "type": "track",
+    "event": "${event}",
+    "time": "${timestamp}"
   }
 }
