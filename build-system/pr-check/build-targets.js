@@ -31,7 +31,7 @@ const {isCiBuild} = require('../common/ci');
 /**
  * Used to prevent the repeated recomputing of build targets during PR jobs.
  */
-const buildTargets = new Set();
+let buildTargets;
 
 /***
  * All of AMP's build targets that can be tested during CI.
@@ -43,6 +43,7 @@ const Targets = {
   BABEL_PLUGIN: 'BABEL_PLUGIN',
   CACHES_JSON: 'CACHES_JSON',
   DEV_DASHBOARD: 'DEV_DASHBOARD',
+  DOCS: 'DOCS',
   E2E_TEST: 'E2E_TEST',
   FLAG_CONFIG: 'FLAG_CONFIG',
   INTEGRATION_TEST: 'INTEGRATION_TEST',
@@ -249,9 +250,10 @@ const targetMatchers = {
  * @return {Set<string>}
  */
 function determineBuildTargets() {
-  if (buildTargets.size > 0) {
+  if (buildTargets != undefined) {
     return buildTargets;
   }
+  buildTargets = new Set();
   const filesChanged = gitDiffNameOnlyMaster();
   for (const file of filesChanged) {
     let matched = false;
