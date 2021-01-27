@@ -70,16 +70,16 @@ export class ConsentStateManager {
    * @param {!Object} config
    */
   registerConsentInstance(instanceId, config) {
-    if (this.instance_) {
-      dev().error(
-        TAG,
-        'Cannot register consent instance %s, ' +
-          'instance %s has already been registered.',
-        instanceId,
-        this.instanceId_
-      );
-      return;
-    }
+    // if (this.instance_) {
+    //   dev().error(
+    //     TAG,
+    //     'Cannot register consent instance %s, ' +
+    //       'instance %s has already been registered.',
+    //     instanceId,
+    //     this.instanceId_
+    //   );
+    //   return;
+    // }
 
     this.instanceId_ = instanceId;
 
@@ -216,23 +216,23 @@ export class ConsentStateManager {
  */
 export class ConsentInstance {
   /**
-   *
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param window
    * @param {string} id
    * @param {!Object} config
    */
-  constructor(ampdoc, id, config) {
+  constructor(window, id, config) {
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampdoc_ = ampdoc;
+    this.ampdoc_ = window.AMP.ampdoc;
 
     /** @private {string} */
     this.id_ = id;
 
     /** @public {?Promise<Object>} */
     this.sharedDataPromise = null;
-
+    console.log(this.ampdoc_);
     /** @private {Promise<!../../../src/service/storage-impl.Storage>} */
-    this.storagePromise_ = Services.storageForDoc(ampdoc);
+    this.storagePromise_ = Services.storageForDoc(this.ampdoc_);
 
     /** @private {?ConsentInfoDef}*/
     this.localConsentInfo_ = null;
@@ -424,6 +424,7 @@ export class ConsentInstance {
     let storage;
     return this.storagePromise_
       .then((s) => {
+        console.log(s, '****');
         storage = s;
         return storage.get(this.storageKey_);
       })

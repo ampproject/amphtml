@@ -18,7 +18,7 @@ import {CONSENT_ITEM_STATE, ConsentInfoDef} from './consent-info';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {Deferred} from '../../../src/utils/promise';
 import {Observable} from '../../../src/observable';
-import {getServicePromiseForDoc} from '../../../src/service';
+import {getService} from '../../../src/service';
 import {isFiniteNumber, isObject} from '../../../src/types';
 import {map} from '../../../src/utils/object';
 import {user, userAssert} from '../../../src/log';
@@ -49,10 +49,14 @@ export class ConsentPolicyManager {
     this.instances_ = map();
 
     /** @private {!Promise} */
-    this.ConsentStateManagerPromise_ = getServicePromiseForDoc(
+    this.ConsentStateManagerPromise_ = Promise.resolve(
+      getService(ampdoc.win, CONSENT_STATE_MANAGER)
+    );
+
+    /*getServicePromiseForDoc(
       this.ampdoc_,
       CONSENT_STATE_MANAGER
-    );
+    );*/
 
     /** @private {!Deferred} */
     this.consentPromptInitiated_ = new Deferred();

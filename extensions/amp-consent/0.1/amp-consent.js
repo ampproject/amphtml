@@ -46,7 +46,11 @@ import {
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
-import {getServicePromiseForDoc} from '../../../src/service';
+import {
+  getService,
+  getServicePromiseForDoc,
+  registerServiceBuilder,
+} from '../../../src/service';
 import {isEnumValue, isObject} from '../../../src/types';
 import {toggle} from '../../../src/style';
 
@@ -205,13 +209,18 @@ export class AmpConsent extends AMP.BaseElement {
       }
     });
 
-    const consentStateManagerPromise = getServicePromiseForDoc(
-      this.getAmpDoc(),
-      CONSENT_STATE_MANAGER
-    ).then((manager) => {
-      manager.registerConsentInstance(this.consentId_, this.consentConfig_);
-      this.consentStateManager_ = /** @type {!ConsentStateManager} */ (manager);
-    });
+    // const consentStateManagerPromise = getServicePromiseForDoc(
+    //   this.getAmpDoc(),
+    //   CONSENT_STATE_MANAGER
+    // ).then((manager) => {
+    this.consentStateManager_ = getService(this.win, CONSENT_STATE_MANAGER);
+    this.consentStateManager_.registerConsentInstance(
+      this.consentId_,
+      this.consentConfig_
+    );
+
+    ///** @type {!ConsentStateManager} */ (manager);
+    // });
 
     const notificationUiManagerPromise = getServicePromiseForDoc(
       this.getAmpDoc(),
@@ -221,10 +230,10 @@ export class AmpConsent extends AMP.BaseElement {
     });
 
     Promise.all([
-      consentStateManagerPromise,
       notificationUiManagerPromise,
       consentPolicyManagerPromise,
     ]).then(() => {
+      console.log(this.consentStateManager_);
       this.init_();
     });
   }
@@ -729,6 +738,6 @@ export class AmpConsent extends AMP.BaseElement {
 AMP.extension('amp-consent', '0.1', (AMP) => {
   AMP.registerElement('amp-consent', AmpConsent, CSS);
   AMP.registerServiceForDoc(NOTIFICATION_UI_MANAGER, NotificationUiManager);
-  AMP.registerServiceForDoc(CONSENT_STATE_MANAGER, ConsentStateManager);
+  registerServiceBuilder(AMP.win, CONSENT_STATE_MANAGER, ConsentStateManager);
   AMP.registerServiceForDoc(CONSENT_POLICY_MANAGER, ConsentPolicyManager);
 });
