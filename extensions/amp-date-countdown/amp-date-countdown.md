@@ -109,11 +109,15 @@ The example below demonstrates `amp-date-countdown` component in standalone use.
 [example preview="top-frame" playground="false"]
 ```
 <head>
-...
-<script async src="https://cdn.ampproject.org/v0.js"></script>
-<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-date-countdown.css">
-<script async custom-element="amp-date-countdown" src="https://cdn.ampproject.org/v0/amp-date-countdown-1.0.js"></script>
-...
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-date-countdown.css">
+  <script async custom-element="amp-date-countdown" src="https://cdn.ampproject.org/v0/amp-date-countdown-1.0.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
+  <style>
+    amp-date-countdown {
+      height: 50px;
+    }
+  </style>
 </head>
 <amp-date-countdown
   id="my-date-countdown"
@@ -122,7 +126,7 @@ The example below demonstrates `amp-date-countdown` component in standalone use.
   height="50">
   <template type="amp-mustache">
     <p class="p1">
-      {{d}} days, {{h}} hours, {{m}} minutes and {{s}} seconds until
+      {{d}} {{days}}, {{h}} {{hours}}, {{m}} {{minutes}} and {{s}} {{seconds}} until
       <a href="https://en.wikipedia.org/wiki/Year_2038_problem">Y2K38</a>.
     </p>
   </template>
