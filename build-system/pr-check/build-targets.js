@@ -176,7 +176,7 @@ const targetMatchers = {
     return isOwnersFile(file) || file == 'build-system/tasks/check-owners.js';
   },
   [Targets.PACKAGE_UPGRADE]: (file) => {
-    return file == 'package.json' || file == 'package-lock.json';
+    return file.endsWith('package.json') || file.endsWith('package-lock.json');
   },
   [Targets.RENOVATE_CONFIG]: (file) => {
     return (
