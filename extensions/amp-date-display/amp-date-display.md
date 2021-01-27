@@ -96,6 +96,7 @@ The example below demonstrates `amp-date-display` component in standalone use.
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-date-display-1.0.css">
   <script async custom-element="amp-date-display" src="https://cdn.ampproject.org/v0/amp-date-display-1.0.js"></script>
+   <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
   <style>
     amp-date-display {
       display: block;
