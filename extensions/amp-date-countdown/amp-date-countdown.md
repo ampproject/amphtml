@@ -99,7 +99,6 @@ The experimental `1.0` version of `amp-date-countdown` uses the attribute name `
 
 ### Standalone use outside valid AMP documents
 
-
 Bento AMP allows you to use AMP components in non-AMP pages without needing to commit to fully valid AMP. You can take these components and place them in implementations with frameworks and CMSs that don't support AMP. Read more in our guide `[Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/)`.
 
 #### Example
@@ -107,6 +106,7 @@ Bento AMP allows you to use AMP components in non-AMP pages without needing to c
 The example below demonstrates `amp-date-countdown` component in standalone use.
 
 [example preview="top-frame" playground="false"]
+
 ```
 <head>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
@@ -145,6 +145,7 @@ The example below demonstrates `amp-date-countdown` component in standalone use.
   })();
 </script>
 ```
+
 [/example]
 
 #### Layout and style
