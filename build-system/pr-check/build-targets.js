@@ -69,15 +69,23 @@ const Targets = {
 };
 
 /**
- * Files matching these targets could also affect the runtime, so we run all
- * the RUNTIME tests. Files matching other targets do not affect the runtime.
+ * Files matching these targets are known not to affect the runtime. For all
+ * other targets, we play safe and default to adding the RUNTIME target, which
+ * will trigger all the runtime tests.
  */
-const targetsThatAffectRuntime = [
-  Targets.BABEL_PLUGIN,
-  Targets.LINT,
-  Targets.PRESUBMIT,
-  Targets.PRETTIFY,
-  Targets.SERVER,
+const nonRuntimeTargets = [
+  Targets.AVA,
+  Targets.CACHES_JSON,
+  Targets.DEV_DASHBOARD,
+  Targets.DOCS,
+  Targets.E2E_TEST,
+  Targets.INTEGRATION_TEST,
+  Targets.OWNERS,
+  Targets.RENOVATE_CONFIG,
+  Targets.UNIT_TEST,
+  Targets.VALIDATOR,
+  Targets.VALIDATOR_WEBUI,
+  Targets.VISUAL_DIFF,
 ];
 
 /**
@@ -284,17 +292,17 @@ function determineBuildTargets() {
   prettifyFiles = globby.sync(config.prettifyGlobs);
   const filesChanged = gitDiffNameOnlyMaster();
   for (const file of filesChanged) {
-    let fileMayAffectRuntime = true;
+    let isRuntimeFile = true;
     Object.keys(targetMatchers).forEach((target) => {
       const matcher = targetMatchers[target];
       if (matcher(file)) {
         buildTargets.add(target);
-        if (!target in targetsThatAffectRuntime) {
-          fileMayAffectRuntime = false;
+        if (target in nonRuntimeTargets) {
+          isRuntimeFile = false;
         }
       }
     });
-    if (fileMayAffectRuntime) {
+    if (isRuntimeFile) {
       buildTargets.add(Targets.RUNTIME);
     }
   }

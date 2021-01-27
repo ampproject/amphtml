@@ -122,13 +122,7 @@ async function prCheck(cb) {
     runCheck('gulp unit --local_changes --headless');
   }
 
-  if (
-    buildTargetsInclude(
-      Targets.RUNTIME,
-      Targets.FLAG_CONFIG,
-      Targets.INTEGRATION_TEST
-    )
-  ) {
+  if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
     if (!argv.nobuild) {
       runCheck('gulp clean');
       runCheck('gulp dist --fortesting');
