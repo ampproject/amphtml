@@ -19,6 +19,8 @@ amp-story-panning-media {
   display: flex !important;
   justify-content: center !important;
   align-items: center !important;
+  /* For the translate3d z calculation. */
+  perspective: 1px;
 }
 
 amp-story-panning-media amp-img {
