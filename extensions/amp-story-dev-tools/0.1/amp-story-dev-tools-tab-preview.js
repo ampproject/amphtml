@@ -387,9 +387,6 @@ const PREVIEW_ACTIONS = {
   TOGGLE_DEVICE_CHIP: 'toggleDeviceChip',
 };
 
-/** @private {number} navigation events in this threshold are programmatic if coming from a different player */
-const NAVIGATION_BETWEEN_PLAYERS_THRESHOLD_MS = 100;
-
 export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
   /** @param {!Element} element */
   constructor(element) {
@@ -409,8 +406,8 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
 
     this.onResize_ = this.onResize_.bind(this);
 
-    /** @private {!{player: ?Element, timestamp: number}} the last player that navigated and the timestamp */
-    this.lastNavigationData_ = {player: null, timestamp: 0};
+    /** @private {Map<!Element, !Array<string>>} navigation events expected to be received on each player */
+    this.expectedNavigationEvents_ = {};
   }
 
   /** @override */
@@ -558,31 +555,43 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
     }).then(() => {
       deviceSpecs.player
         .getElement()
-        .addEventListener('storyNavigation', (event) => {
-          const currTimestamp = Date.now();
-          // Skip sending navigation if it came from a player that's not the latest, and it's within the threshold.
-          // This avoids triggering navigation on programmatic advancements.
-          if (
-            this.lastNavigationData_.player != deviceSpecs.player &&
-            currTimestamp - this.lastNavigationData_.timestamp <
-              NAVIGATION_BETWEEN_PLAYERS_THRESHOLD_MS
-          ) {
-            return;
-          }
-          this.lastNavigationData_ = {
-            player: deviceSpecs.player,
-            timestamp: currTimestamp,
-          };
-          this.devices_.forEach((d) => {
-            if (d != deviceSpecs) {
-              d.player.show(null, event.detail.pageId);
-            }
-          });
-        });
+        .addEventListener('storyNavigation', (event) =>
+          this.onPlayerNavigation_(event, deviceSpecs)
+        );
       deviceSpecs.player.load();
     });
+    this.expectedNavigationEvents_[deviceSpecs.name] = [];
     this.devices_.push(deviceSpecs);
     this.updateDevicesInHash_();
+  }
+
+  /**
+   * Triggered when a player emits a storyNavigationEvent.
+   *
+   * A navigation event from a player can come from a user interaction or a previous programmatic call.
+   * Expected navigation events from programmatic calls are stored in `this.expectedNavigationEvents_`,
+   * so they should not be propagated (but deleted from the list of expected events). If an event was not
+   * expected, it means it was user navigation and should be propagated to other players. Context #32189
+   * @param {!Event} event
+   * @param {!DeviceInfo} deviceSpecs
+   * @private
+   */
+  onPlayerNavigation_(event, deviceSpecs) {
+    const {pageId} = event.detail;
+    const pageIndex = this.expectedNavigationEvents_[
+      deviceSpecs.name
+    ].lastIndexOf(pageId);
+    if (pageIndex > -1) {
+      // Remove the expected events up to the most recently received event if it was in the list.
+      this.expectedNavigationEvents_[deviceSpecs.name].splice(0, pageIndex + 1);
+      return;
+    }
+    this.devices_.forEach((d) => {
+      if (d != deviceSpecs) {
+        d.player.show(null, event.detail.pageId);
+        this.expectedNavigationEvents_[d.name].push(pageId);
+      }
+    });
   }
 
   /**
@@ -599,6 +608,7 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
         device.element.remove();
       });
       this.devices_ = this.devices_.filter((d) => d != device);
+      delete this.expectedNavigationEvents_[device.name];
       this.updateDevicesInHash_();
       return true;
     }
