@@ -155,7 +155,7 @@ Each Bento component has a small CSS library you must include to guarantee prope
 <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-date-countdown-1.0.css">
 ```
 
-Fully valid AMP pages use the AMP layout system to infer sizing of elements to create a page structure before downloading any remote resources. However, Bento use imports components into less controlled environments and AMP's layout system is inaccessible. 
+Fully valid AMP pages use the AMP layout system to infer sizing of elements to create a page structure before downloading any remote resources. However, Bento use imports components into less controlled environments and AMP's layout system is inaccessible.
 
 **Container type**
 
