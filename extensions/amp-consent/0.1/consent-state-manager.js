@@ -46,7 +46,7 @@ export class ConsentStateManager {
    */
   constructor(ampdoc) {
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampdoc_ = ampdoc;
+    this.ampdoc_ = ampdoc; // THIS IS WINDOW!!!!
 
     /** @private {?string} */
     this.instanceId_ = null;
@@ -84,6 +84,7 @@ export class ConsentStateManager {
     this.instanceId_ = instanceId;
 
     this.instance_ = new ConsentInstance(this.ampdoc_, instanceId, config);
+    // this.instance_ = new ConsentInstance(this.ampdoc_.win, instanceId, config);
 
     if (this.consentReadyResolver_) {
       this.consentReadyResolver_();
@@ -216,7 +217,6 @@ export class ConsentStateManager {
  */
 export class ConsentInstance {
   /**
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param window
    * @param {string} id
    * @param {!Object} config
@@ -230,7 +230,7 @@ export class ConsentInstance {
 
     /** @public {?Promise<Object>} */
     this.sharedDataPromise = null;
-    console.log(this.ampdoc_);
+
     /** @private {Promise<!../../../src/service/storage-impl.Storage>} */
     this.storagePromise_ = Services.storageForDoc(this.ampdoc_);
 
