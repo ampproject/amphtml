@@ -122,7 +122,7 @@ const videoHandle = await video.getApi();
 
 The `amp-video` API allows you to perform the following actions:
 
-#### `play()`
+##### `play()`
 
 Plays the video.
 
@@ -130,7 +130,7 @@ Plays the video.
 videoHandle.play();
 ```
 
-#### `pause()`
+##### `pause()`
 
 Pauses the video.
 
@@ -138,7 +138,7 @@ Pauses the video.
 videoHandle.pause();
 ```
 
-#### `mute()`
+##### `mute()`
 
 Mutes the video.
 
@@ -146,7 +146,7 @@ Mutes the video.
 videoHandle.mute();
 ```
 
-#### `unmute()`
+##### `unmute()`
 
 Unmutes the video.
 
@@ -154,9 +154,19 @@ Unmutes the video.
 videoHandle.unmute();
 ```
 
+##### `requestFullscreen()`
+
+Expands the video to fullscreen when possible.
+
+```
+videoHandle.requestFullscreen();
+```
+
+#### Properties
+
 It also exposes the following read-only properties:
 
-#### `currentTime`
+##### `currentTime` (`number`)
 
 The current playback time in seconds.
 
@@ -164,15 +174,15 @@ The current playback time in seconds.
 console.log(videoHandle.currentTime);
 ```
 
-#### `duration`
+##### `duration` (`number`)
 
-The video's duration in seconds.
+The video's duration in seconds, when it's known (e.g. is not a livestream).
 
 ```
 console.log(videoHandle.duration);
 ```
 
-#### `autoplay`
+##### `autoplay` (`boolean`)
 
 Whether the video autoplays.
 
@@ -180,7 +190,7 @@ Whether the video autoplays.
 console.log(videoHandle.autoplay);
 ```
 
-#### `controls`
+##### `controls` (`boolean`)
 
 Whether the video shows controls.
 
@@ -188,7 +198,7 @@ Whether the video shows controls.
 console.log(videoHandle.controls);
 ```
 
-#### `loop`
+##### `loop` (`boolean`)
 
 Whether the video loops.
 
