@@ -32,9 +32,9 @@ The AMP selector is a control that presents a list of options and lets the user 
 
 -   An `amp-selector` can contain any arbitrary HTML elements or AMP components (e.g., `amp-carousel`, `amp-img`, etc.).
 -   An `amp-selector` cannot contain any nested `amp-selector` controls.
--   Selectable options can be set by adding the `option` attribute to the element and assigning a value to the attribute (e.g., `<li option='value'></li>`).
--   Disabled options can be set by adding the `disabled` attribute to the element (e.g., `<li option='d' disabled></li>`).
--   Preselected options can be set by adding the `selected` attribute to the element (e.g., `<li option='b' selected></li>`).
+-   Selectable options can be set by adding the `option` attribute to the element and assigning a value to the attribute (e.g., `<li option="value"></li>`).
+-   Disabled options can be set by adding the `disabled` attribute to the element (e.g., `<li option="d" disabled></li>`).
+-   Preselected options can be set by adding the `selected` attribute to the element (e.g., `<li option="b" selected></li>`).
 -   To allow for multiple selections, add the `multiple` attribute to the `amp-selector` element. By default, the `amp-selector` allows for one selection at a time.
 -   To disable the entire `amp-selector`, add the `disabled` attribute to the `amp-selector` element.
 -   When an `amp-selector` contains a `name` attribute and the `amp-selector` is inside a `form` tag, if a submit event occurs on the form, the `amp-selector`behaves like a radio-button/checkbox group and submits the selected values (the ones assigned to the option) against the name of the `amp-selector`.
@@ -127,19 +127,19 @@ The example below demonstrates `amp-selector` component in standalone use.
     <li option="6">Option 6</li>
   </ul>
 </amp-selector>
-<button id='select-down-button'>Select next item</button>
-<button id='select-up-button'>Select previous item</button>
-<button id='toggle-button'>Toggle Option 3</button>
+<button id="select-down-button">Select next item</button>
+<button id="select-up-button">Select previous item</button>
+<button id="toggle-button">Toggle Option 3</button>
 <script>
   (async () => {
-    const selector = document.querySelector('#my-selector');
-    await customElements.whenDefined('amp-selector');
+    const selector = document.querySelector("#my-selector");
+    await customElements.whenDefined("amp-selector");
     const api = await selector.getApi();
 
     // set up button actions
-    document.querySelector('#select-down-button').onclick = () => api.selectBy(1);
-    document.querySelector('#select-up-button').onclick = () => api.selectBy(-1);
-    document.querySelector('#toggle-button').onclick = () => api.toggle("3");
+    document.querySelector("#select-down-button").onclick = () => api.selectBy(1);
+    document.querySelector("#select-up-button").onclick = () => api.selectBy(-1);
+    document.querySelector("#toggle-button").onclick = () => api.toggle("3");
   })();
 </script>
 ```
@@ -153,7 +153,7 @@ Bento enabled components in standalone use are highly interactive through their 
 The `amp-selector` component API is accessible by including the following script tag in your document:
 
 ```
-await customElements.whenDefined('amp-selector');
+await customElements.whenDefined("amp-selector");
 const api = await selector.getApi();
 ```
 
@@ -196,7 +196,7 @@ Tapping disabled options does not trigger the `select` event.
 </ul>
 
 ```
-selector.addEventListener('close', (e) => console.log(e.data.targetOption))
+selector.addEventListener("select", (e) => console.log(e.data.targetOption))
 ```
 
 #### Layout and style
