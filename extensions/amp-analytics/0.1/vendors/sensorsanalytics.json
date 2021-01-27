@@ -1,7 +1,7 @@
 {
   "transport": {
     "xhrpost": true,
-    "useBody":true
+    "useBody": true
   },
   "vars": {
     "distinctId": "${clientId(sensors_amp_id)}"
@@ -13,15 +13,15 @@
       "$lib_method": "code",
       "$lib_version": "1.0.0"
     },
-    "properties":{
+    "properties": {
       "$lib":"amp",
-      "$lib_version":"1.0.0",
-      "$url":"${ampdocUrl}",
-      "$title":"${title}",
-      "$referrer":"${documentReferrer}",
-      "$screen_width":"${screenWidth}",
-      "$screen_height":"${screenHeight}",
-      "amp_properties":"${amp_properties}"
+      "$lib_version": "1.0.0",
+      "$url": "${ampdocUrl}",
+      "$title": "${title}",
+      "$referrer": "${documentReferrer}",
+      "$screen_width": "${screenWidth}",
+      "$screen_height": "${screenHeight}",
+      "amp_properties": "${amp_properties}"
      },
      "type": "track",
      "event": "${event}",
