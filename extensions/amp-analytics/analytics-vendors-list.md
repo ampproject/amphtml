@@ -434,7 +434,6 @@ Type attribute value: `segment`
 Adds support for segment page views and events.
 To see the full list of fields that you can send, see [Segment Spec](https://segment.com/docs/spec/).
 
-
 ### SensorsData
 
 Type attribute value: `sensorsanalytics`
