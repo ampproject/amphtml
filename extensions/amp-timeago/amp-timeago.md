@@ -52,6 +52,71 @@ Example:
 
 The `amp-timeago` component requires a placeholder in the text node. The calculated timestamp replaces the placeholder once ready. Use the placeholder as a fallback to display to users if `amp-timeago` is unable to process the fuzzy timestamp.
 
+### Standalone use outside valid AMP documents
+
+Bento AMP allows you to use AMP components in non-AMP pages without needing to commit to fully valid AMP. You can take these components and place them in implementations with frameworks and CMSs that don't support AMP. Read more in our guide `[Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/)`.
+
+#### Example
+
+The example below demonstrates `amp-timeago` component in standalone use.
+
+[example preview="top-frame" playground="false"]
+
+```
+<head>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-timeago-1.0.css">
+  <script async custom-element="amp-timeago" src="https://cdn.ampproject.org/v0/amp-timeago-1.0.js"></script>
+  <style>
+    amp-timeago {
+      height: 20px;
+    }
+  </style>
+</head>
+<amp-timeago id="my-timeago" datetime="2017-04-11T00:37:33.809Z" locale="en">
+  Saturday 11 April 2017 00.37
+</amp-timeago>
+<div class="buttons" style="margin-top: 8px;">
+  <button id='ar-button'>Change locale to Arabic</button>
+  <button id='en-button'>Change locale to English</button>
+  <button id='now-button'>Change time to now</button>
+</div>
+
+<script>
+  (async () => {
+    const timeago = document.querySelector('#my-timeago');
+    await customElements.whenDefined('amp-timeago');
+
+    // set up button actions
+    document.querySelector('#ar-button').onclick = () => timeago.setAttribute('locale', 'ar');
+    document.querySelector('#en-button').onclick = () => timeago.setAttribute('locale', 'en');
+    document.querySelector('#now-button').onclick = () => timeago.setAttribute('datetime', 'now');
+  })();
+</script>
+```
+
+[/example]
+
+#### Layout and style
+
+Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
+
+```
+<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-timeago-1.0.css">
+```
+
+Fully valid AMP pages use the AMP layout system to infer sizing of elements to create a page structure before downloading any remote resources. However, Bento use imports components into less controlled environments and AMP's layout system is inaccessible.
+
+**Container type**
+
+The `amp-timeago` component has a defined layout size type. To ensure the component renders correctly, apply the following styles:
+
+```css
+amp-timeago {
+  height: 20px;
+}
+```
+
 ## Attributes
 
 ### `datetime`
