@@ -20,7 +20,7 @@ amp-story-panning-media {
   justify-content: center !important;
   align-items: center !important;
   /* For the translate3d z calculation. */
-  perspective: 1px;
+  perspective: 1px !important;
 }
 
 amp-story-panning-media amp-img {
