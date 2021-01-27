@@ -366,6 +366,23 @@ amp-story-grid-layer {
   pointer-events: none !important;
 }
 
+amp-story-grid-layer[anchor*="left"] {
+  margin-left: 0 !important;
+}
+
+amp-story-grid-layer[anchor*="top"] {
+  margin-top: 0 !important;
+}
+
+amp-story-grid-layer[anchor*="bottom"] {
+  margin-bottom: 0 !important;
+}
+
+amp-story-grid-layer[anchor*="right"] {
+  margin-right: 0 !important;
+  margin-left: auto !important;
+}
+
 /**
  * Click shield to make sure click events are never swallowed by videos on
  * Safari iOS 11.2, which would prevent the user from navigating through the

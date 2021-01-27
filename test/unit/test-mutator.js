@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {LayoutPriority} from '../../src/layout';
 import {MutatorImpl} from '../../src/service/mutator-impl';
@@ -42,7 +42,7 @@ describes.realWin('mutator changeSize', {amp: true}, (env) => {
     document = window.document;
     delete window.requestIdleCallback;
     delete window.cancelIdleCallback;
-    clock = lolex.install({target: window});
+    clock = fakeTimers.withGlobal(window).install();
     const ampdoc = new AmpDocSingle(window);
     resources = new ResourcesImpl(ampdoc);
     resources.isRuntimeOn_ = false;
@@ -94,7 +94,6 @@ describes.realWin('mutator changeSize', {amp: true}, (env) => {
       },
       hasAttribute: () => false,
       getBoundingClientRect: () => rect,
-      applySizesAndMediaQuery: () => {},
       layoutCallback: () => Promise.resolve(),
       prerenderAllowed: () => true,
       renderOutsideViewport: () => false,
@@ -976,7 +975,7 @@ describes.realWin('mutator changeSize', {amp: true}, (env) => {
       expect(overflowCallbackSpy).to.not.been.called;
     });
 
-    // TODO(#25518): investigate failure on Travis Safari
+    // TODO(#25518): investigate failure on Safari
     it.configure().skipSafari(
       'in viewport should change size if in the last 15% and ' +
         'in the last 1000px',
@@ -1401,7 +1400,6 @@ describes.realWin('mutator mutateElement and collapse', {amp: true}, (env) => {
     element.getAttribute = () => null;
     element.hasAttribute = () => false;
     element.getBoundingClientRect = () => rect;
-    element.applySizesAndMediaQuery = () => {};
     element.layoutCallback = () => Promise.resolve();
     element.prerenderAllowed = () => true;
     element.renderOutsideViewport = () => true;

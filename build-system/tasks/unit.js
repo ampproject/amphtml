@@ -34,11 +34,8 @@ class Runner extends RuntimeTestRunner {
   /** @override */
   async maybeBuild() {
     await vendorConfigs();
-
-    if (!argv.nobuild) {
-      await css();
-      await compileJison();
-    }
+    await css();
+    await compileJison();
   }
 }
 
@@ -74,7 +71,6 @@ unit.flags = {
   'ie': '  Runs tests on IE',
   'local_changes':
     '  Run unit tests directly affected by the files changed in the local branch',
-  'nobuild': '  Skips build step',
   'nohelp': '  Silence help messages that are printed prior to test run',
   'report': '  Write test result report to a local file',
   'safari': '  Runs tests on Safari',

@@ -20,6 +20,7 @@ import {OwnersImpl} from '../../src/service/owners-impl';
 import {Resource, ResourceState} from '../../src/service/resource';
 import {ResourcesImpl} from '../../src/service/resources-impl';
 import {Services} from '../../src/services';
+import {isCancellation} from '../../src/error';
 import {layoutRectLtwh} from '../../src/layout-rect';
 
 describes.realWin('Resource', {amp: true}, (env) => {
@@ -619,6 +620,27 @@ describes.realWin('Resource', {amp: true}, (env) => {
     resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 10};
     resource.startLayout();
     expect(resource.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
+  });
+
+  it('should abort startLayout with unload', async () => {
+    const neverEndingPromise = new Promise(() => {});
+    elementMock.expects('layoutCallback').returns(neverEndingPromise).once();
+
+    resource.state_ = ResourceState.LAYOUT_SCHEDULED;
+    resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 10};
+    const layoutPromise = resource.startLayout();
+    expect(resource.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
+
+    resource.unload();
+
+    let error;
+    try {
+      await layoutPromise;
+    } catch (e) {
+      error = e;
+    }
+    expect(error).to.exist;
+    expect(isCancellation(error)).to.be.true;
   });
 
   it('should ignore startLayout for re-layout when not opt-in', () => {

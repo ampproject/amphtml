@@ -39,6 +39,10 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
 import {mutedOrUnmutedEvent} from '../../../src/iframe-video';
 import {
+  observeDisplay,
+  unobserveDisplay,
+} from '../../../src/utils/display-observer';
+import {
   propagateObjectFitStyles,
   setImportantStyles,
   setInitialDisplay,
@@ -98,6 +102,11 @@ class AmpVideo extends AMP.BaseElement {
 
     /** @visibleForTesting {?Element} */
     this.posterDummyImageForTesting_ = null;
+
+    /** @private {boolean} */
+    this.isPlaying_ = false;
+
+    this.onDisplay_ = this.onDisplay_.bind(this);
   }
 
   /**
@@ -236,6 +245,11 @@ class AmpVideo extends AMP.BaseElement {
     installVideoManagerForDoc(element);
 
     Services.videoManagerForDoc(element).register(this);
+  }
+
+  /** @override */
+  detachedCallback() {
+    this.updateIsPlaying_(false);
   }
 
   /** @private */
@@ -565,32 +579,41 @@ class AmpVideo extends AMP.BaseElement {
     const video = dev().assertElement(this.video_);
     video.addEventListener('error', (e) => this.handleMediaError_(e));
 
-    const forwardEventsUnlisten = this.forwardEvents(
-      [
-        VideoEvents.ENDED,
-        VideoEvents.LOADEDMETADATA,
-        VideoEvents.LOADEDDATA,
-        VideoEvents.PAUSE,
-        VideoEvents.PLAYING,
-        VideoEvents.PLAY,
-      ],
-      video
+    this.unlisteners_.push(
+      this.forwardEvents(
+        [
+          VideoEvents.ENDED,
+          VideoEvents.LOADEDMETADATA,
+          VideoEvents.LOADEDDATA,
+          VideoEvents.PAUSE,
+          VideoEvents.PLAYING,
+          VideoEvents.PLAY,
+        ],
+        video
+      )
     );
 
-    const mutedOrUnmutedEventUnlisten = listen(video, 'volumechange', () => {
-      const {muted} = this.video_;
-      if (this.muted_ == muted) {
-        return;
-      }
-      this.muted_ = muted;
-      dispatchCustomEvent(this.element, mutedOrUnmutedEvent(this.muted_));
-    });
+    this.unlisteners_.push(
+      listen(video, 'volumechange', () => {
+        const {muted} = this.video_;
+        if (this.muted_ == muted) {
+          return;
+        }
+        this.muted_ = muted;
+        dispatchCustomEvent(this.element, mutedOrUnmutedEvent(this.muted_));
+      })
+    );
 
-    this.unlisteners_.push(forwardEventsUnlisten, mutedOrUnmutedEventUnlisten);
+    ['play', 'pause', 'ended'].forEach((type) => {
+      this.unlisteners_.push(
+        listen(video, type, () => this.updateIsPlaying_(type == 'play'))
+      );
+    });
   }
 
   /** @private */
   uninstallEventHandlers_() {
+    this.updateIsPlaying_(false);
     while (this.unlisteners_.length) {
       this.unlisteners_.pop().call();
     }
@@ -618,9 +641,22 @@ class AmpVideo extends AMP.BaseElement {
     dispatchCustomEvent(this.element, VideoEvents.LOAD);
   }
 
-  /** @override */
-  pauseCallback() {
-    if (this.video_) {
+  /** @private */
+  updateIsPlaying_(isPlaying) {
+    if (isPlaying === this.isPlaying_) {
+      return;
+    }
+    this.isPlaying_ = isPlaying;
+    if (isPlaying) {
+      observeDisplay(this.element, this.onDisplay_);
+    } else {
+      unobserveDisplay(this.element, this.onDisplay_);
+    }
+  }
+
+  /** @private */
+  onDisplay_(isDisplayed) {
+    if (!isDisplayed && this.video_) {
       this.video_.pause();
     }
   }

@@ -20,7 +20,7 @@ const pageWidth = 600;
 const pageHeight = 600;
 
 describes.endtoend(
-  'AMP carousel',
+  'amp-base-carousel:0.1 - initial slide',
   {
     testUrl:
       'http://localhost:8000/test/manual/amp-base-carousel/' +

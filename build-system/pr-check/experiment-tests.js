@@ -16,20 +16,13 @@
 'use strict';
 
 /**
- * @fileoverview
- * This script builds an experiment binary and runs local tests.
- * This is run during the CI stage = test; job = experiments tests.
+ * @fileoverview Script that runs the experiment A/B/C tests during CI.
  */
 
 const experimentsConfig = require('../global-configs/experiments-config.json');
-const {
-  printSkipMessage,
-  startTimer,
-  stopTimer,
-  timedExecOrDie,
-} = require('./utils');
 const {experiment} = require('minimist')(process.argv.slice(2));
-const {setLoggingPrefix} = require('../common/logging');
+const {printSkipMessage, timedExecOrDie} = require('./utils');
+const {runCiJob} = require('./ci-job');
 
 const jobName = `${experiment}-tests.js`;
 
@@ -59,9 +52,7 @@ function test_() {
   timedExecOrDie('gulp e2e --nobuild --compiled --headless');
 }
 
-function main() {
-  setLoggingPrefix(jobName);
-  const startTime = startTimer(jobName);
+function pushBuildWorkflow() {
   const config = getConfig_();
   if (config) {
     build_(config);
@@ -72,7 +63,6 @@ function main() {
       `${experiment} is expired, misconfigured, or does not exist`
     );
   }
-  stopTimer(jobName, startTime);
 }
 
-main();
+runCiJob(jobName, pushBuildWorkflow, () => {});

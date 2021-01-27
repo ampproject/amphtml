@@ -19,6 +19,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const gulp = require('gulp-help')(require('gulp'));
 const {cyan, red} = require('ansi-colors');
+const {isCiBuild} = require('./build-system/common/ci');
 const {log} = require('./build-system/common/logging');
 
 const {
@@ -100,6 +101,9 @@ function checkFlags(name, taskFunc) {
     return; // This isn't the task being run.
   }
   const validFlags = taskFunc.flags ? Object.keys(taskFunc.flags) : [];
+  if (isCiBuild()) {
+    validFlags.push('color'); // Used to enable log coloring during CI.
+  }
   const usedFlags = Object.keys(argv).slice(1); // Skip the '_' argument
   const invalidFlags = [];
   usedFlags.forEach((flag) => {
