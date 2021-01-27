@@ -202,7 +202,9 @@ amp-inline-gallery-thumbnails {
 }
 ```
 
-Note: Because this component composes with `amp-base-carousel`, be sure to also follow [`amp-base-carousel` styling recommendations](https://amp.dev/documentation/components/amp-base-carousel-v1.0/?format=websites#usage).
+[tip type="note"]
+Because this component composes with `amp-base-carousel`, be sure to also follow [`amp-base-carousel` styling recommendations](https://amp.dev/documentation/components/amp-base-carousel-v1.0/?format=websites#usage).
+[/tip]
 
 ### Include pagination indicators
 
