@@ -32,7 +32,7 @@ CMP used through AppConsent platform in order to handle and enforce user consent
   </script>
   <div id="postPromptUI">
     Post Prompt UI
-    <button on="tap:ABC.prompt(consent=appconsent)" role="button">
+    <button on="tap:ABC.prompt(consent=appconsent)">
       Manage
     </button>
   </div>

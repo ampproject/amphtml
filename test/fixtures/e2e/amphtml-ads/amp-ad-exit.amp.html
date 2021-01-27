@@ -93,8 +93,8 @@
   </div>
 </div>
 <div class="ad">
-  <button id="prev-btn" role="button" tabindex="1" on="tap:exit-selector.selectUp">Previous product</button>
-  <button id="next-btn" role="button" tabindex="1" on="tap:exit-selector.selectDown">Next product</button>
+  <button id="prev-btn" tabindex="1" on="tap:exit-selector.selectUp">Previous product</button>
+  <button id="next-btn" tabindex="1" on="tap:exit-selector.selectDown">Next product</button>
   <amp-selector id="exit-selector"
       on="select:exit-api.setVariable(name='current', target=event.targetOption)">
     <option option="target1" selected>product 1</option>

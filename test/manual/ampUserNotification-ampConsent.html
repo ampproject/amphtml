@@ -240,17 +240,17 @@
     }</script>
     <div id="ui2">
       Learn more V2.
-      <button on="tap:ABC.accept" role="button">Accept</button>
-      <button on="tap:ABC.reject" role="button">Reject</button>
-      <button on="tap:ABC.dismiss" role="button">Dismiss</button>
+      <button on="tap:ABC.accept">Accept</button>
+      <button on="tap:ABC.reject">Reject</button>
+      <button on="tap:ABC.dismiss">Dismiss</button>
     </div>
     <div id="revoke">
       Revoke.
-      <button role="button">Ahahaha</button>
+      <button>Ahahaha</button>
     </div>
     <div id="postPromptUI">
       Post Prompt UI
-      <button on="tap:ABC.prompt(consent=_config_)" role="button">Manage</button>
+      <button on="tap:ABC.prompt(consent=_config_)">Manage</button>
     </div>
   </amp-consent>
 
@@ -262,7 +262,7 @@
       data-dismiss-href="https://example.com/api/echo/post">
       notify 2
       <a href="#learn-more">Learn more.</a>
-     <button on="tap:amp-user-notification2.dismiss" role="button" tabindex="1">I accept</button>
+     <button on="tap:amp-user-notification2.dismiss" tabindex="1">I accept</button>
   </amp-user-notification>
 
   <amp-user-notification
@@ -270,7 +270,7 @@
       data-persist-dismissal="false"
       id="amp-user-notification3">
       This notification doesn't need remote endpoints.
-     <button on="tap:amp-user-notification3.dismiss" role="button" tabindex="2">I accept</button>
+     <button on="tap:amp-user-notification3.dismiss" tabindex="2">I accept</button>
   </amp-user-notification>
 
   <amp-user-notification
@@ -279,7 +279,7 @@
           data-persist-dismissal="false"
     This notification should ALWAYS show.
     <a href="#learn-more">user notification Learn more.</a>
-    <button on="tap:amp-user-notification4.dismiss" role="button" tabindex="3">Dismiss</button>
+    <button on="tap:amp-user-notification4.dismiss" tabindex="3">Dismiss</button>
   </amp-user-notification>
 
   <amp-user-notification
@@ -288,7 +288,7 @@
           data-persist-dismissal="false">
     This notification should ALSO ALWAYS show.
     <a href="#learn-more">Learn more.</a>
-    <button on="tap:amp-user-notification6.dismiss" role="button" tabindex="5">Dismiss</button>
+    <button on="tap:amp-user-notification6.dismiss" tabindex="5">Dismiss</button>
   </amp-user-notification>
 
   <header>
