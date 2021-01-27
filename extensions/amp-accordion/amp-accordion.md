@@ -291,12 +291,6 @@ Each Bento component has a small CSS library you must include to guarantee prope
 
 Fully valid AMP pages use the AMP layout system to infer sizing of elements to create a page structure before downloading any remote resources. However, Bento use imports components into less controlled environments and AMP's layout system is inaccessible.
 
-## Version notes
-
-The experimental `1.0` version of `amp-accordion` does not support session states. It behaves as if the `disable-session-states` attribute is always applied.
-
-Version `0.1` and `1.0` are compatible with `amp-bind`, but some binding syntax is different. You may bind directly with the `expanded` attribute in version `1.0`. The `[data-expanded]` is not supported in version `1.0`. See the `expanded` attribute below for further information.
-
 ## Attributes
 
 ### animate
@@ -426,3 +420,9 @@ Keep the following points in mind when you style an amp-accordion:
 -   `tabindex`: Applied to the header element of each `amp-accordion` section.
 -   `role=button`: Applied to the header element of each `amp-accordion` section.
 -   `role=region`: Applied to the content element of each `amp-accordion` section.
+
+## Version notes
+
+The experimental `1.0` version of `amp-accordion` does not support session states. It behaves as if the `disable-session-states` attribute is always applied.
+
+Version `0.1` and `1.0` are compatible with `amp-bind`, but some binding syntax is different. You may bind directly with the `expanded` attribute in version `1.0`. The `[data-expanded]` is not supported in version `1.0`. See the `expanded` attribute below for further information.
