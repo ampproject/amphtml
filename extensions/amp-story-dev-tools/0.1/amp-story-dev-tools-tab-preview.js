@@ -571,7 +571,7 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
    * A navigation event from a player can come from a user interaction or a previous programmatic call.
    * Expected navigation events from programmatic calls are stored in `this.expectedNavigationEvents_`,
    * so they should not be propagated (but deleted from the list of expected events). If an event was not
-   * expected, it means it was user navigation and should be propagated to other players. Context #32189
+   * expected, it means it was user navigation and should be propagated to other players.
    * @param {!Event} event
    * @param {!DeviceInfo} deviceSpecs
    * @private
