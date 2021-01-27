@@ -42,6 +42,7 @@ import {getMode} from '../../src/mode';
 import {parseJson} from '../json';
 import {resetStyles, setStyle, setStyles} from '../style';
 import {toArray} from '../types';
+import {urls} from '../config';
 
 /** @enum {string} */
 const LoadStateClass = {
@@ -619,7 +620,9 @@ export class AmpStoryPlayer {
       return Messaging.waitForHandshakeFromDocument(
         this.win_,
         iframeEl.contentWindow,
-        this.getEncodedLocation_(url).origin
+        this.getEncodedLocation_(url).origin,
+        /*opt_token*/ null,
+        urls.cdnProxyRegex
       );
     });
   }
