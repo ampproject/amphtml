@@ -26,7 +26,7 @@ import {
   isProxyOrigin,
   resolveRelativeUrl,
 } from '../../../src/url';
-import {setStyle} from '../../../src/style';
+import {setStyle, toggle} from '../../../src/style';
 import {user, userAssert} from '../../../src/log';
 
 /**
@@ -284,4 +284,18 @@ export function setTextBackgroundColor(element) {
     const color = el.getAttribute(TEXT_BACKGROUND_COLOR_ATTRIBUTE_NAME);
     setStyle(el, 'background-color', color);
   });
+}
+
+/**
+ * Click a clone of the anchor in the context of the light dom.
+ * Used to apply linker logic on shadow-dom anchors.
+ * @param {!Element} anchorElement
+ * @param {!Element} domElement element from the light dom
+ */
+export function triggerClickFromLightDom(anchorElement, domElement) {
+  const outerAnchor = anchorElement.cloneNode();
+  toggle(outerAnchor, false);
+  domElement.appendChild(outerAnchor);
+  outerAnchor.click();
+  outerAnchor.remove();
 }
