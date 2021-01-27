@@ -75,7 +75,6 @@ Bento AMP allows you to use AMP components in non-AMP pages without needing to c
   <amp-video
     style="aspect-ratio: 16/9"
     id="my-video"
-    data-videoid="mGENRKrdoGY"
   >
     <source src="my-video.webm" type="video/webm" />
     <source src="my-video.mp4" type="video/mp4" />
