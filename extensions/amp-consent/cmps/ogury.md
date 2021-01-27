@@ -35,7 +35,7 @@ limitations under the License.
   </script>
   <div id="custom-prompt-ui">
     Post Prompt UI
-    <button on="tap:ogury.prompt(consent=Ogury)" role="button">
+    <button on="tap:ogury.prompt(consent=Ogury)">
       Privacy Settings
     </button>
   </div>

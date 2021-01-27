@@ -33,7 +33,7 @@ Collect and enforce user consent with the ConsentManager CMP. Login to your Cons
   </script>
   <div id="postPromptUI">
     Post Prompt UI
-    <button on="tap:consent.prompt(consent=ConsentManager)" role="button">
+    <button on="tap:consent.prompt(consent=ConsentManager)">
       Manage
     </button>
   </div>

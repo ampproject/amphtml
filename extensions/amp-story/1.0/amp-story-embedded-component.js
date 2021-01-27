@@ -1378,7 +1378,6 @@ export class AmpStoryEmbeddedComponent {
               i-amphtml-story-tooltip-nav-button-left"
         >
           <button
-            role="button"
             ref="buttonLeft"
             class="i-amphtml-story-focused-state-layer-nav-button
                 i-amphtml-story-tooltip-nav-button-left"
@@ -1389,7 +1388,6 @@ export class AmpStoryEmbeddedComponent {
               i-amphtml-story-tooltip-nav-button-right"
         >
           <button
-            role="button"
             ref="buttonRight"
             class="i-amphtml-story-focused-state-layer-nav-button
                     i-amphtml-story-tooltip-nav-button-right"

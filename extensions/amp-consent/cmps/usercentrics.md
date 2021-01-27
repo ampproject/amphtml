@@ -32,7 +32,7 @@ Collect user consent with Usercentrics CMP.
   </script>
   <div id="postPromptUI">
     Post Prompt UI
-    <button on="tap:consent.prompt(consent=Usercentrics)" role="button">
+    <button on="tap:consent.prompt(consent=Usercentrics)">
       Manage
     </button>
   </div>
