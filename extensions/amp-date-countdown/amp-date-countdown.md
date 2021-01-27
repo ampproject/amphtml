@@ -132,16 +132,16 @@ The example below demonstrates `amp-date-countdown` component in standalone use.
   </template>
 </amp-date-countdown>
 <div class="buttons" style="margin-top: 8px;">
-  <button id="ar-button">Change locale to Arabic</button>
+  <button id="de-button">Change locale to German</button>
   <button id="en-button">Change locale to English</button>
 </div>
 <script>
   (async () => {
-    const dateDisplay = document.querySelector('#my-date-countdown');
+    const dateCountdown = document.querySelector('#my-date-countdown');
     await customElements.whenDefined('amp-date-countdown');
     // set up button actions
-    document.querySelector('#ar-button').onclick = () => dateDisplay.setAttribute('locale', 'ar');
-    document.querySelector('#en-button').onclick = () => dateDisplay.setAttribute('locale', 'en');
+    document.querySelector('#de-button').onclick = () => dateCountdown.setAttribute('locale', 'de');
+    document.querySelector('#en-button').onclick = () => dateCountdown.setAttribute('locale', 'en');
   })();
 </script>
 ```
