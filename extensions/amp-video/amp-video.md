@@ -120,7 +120,7 @@ const videoHandle = await video.getApi();
 
 ##### Actions
 
-The `amp-youtube` API allows you to perform the following actions:
+The `amp-video` API allows you to perform the following actions:
 
 #### `play()`
 
