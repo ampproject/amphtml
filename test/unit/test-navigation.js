@@ -818,6 +818,22 @@ describes.sandboxed('Navigation', {}, () => {
           expect(sendMessageStub).to.not.be.called;
           expect(event.defaultPrevented).to.be.false;
         });
+
+        it('should not error when ampdoc is not single doc', () => {
+          // catches use case where ampdoc is a shadowRoot interface
+          // ampdoc.isSingleDoc() return false in this case
+          const ampdocStub = env.sandbox.stub(handler.ampdoc, 'isSingleDoc');
+          ampdocStub.returns(false);
+
+          // exit early, return false, do not called message stub
+          expect(
+            handler.viewerInterceptsNavigation(
+              'https://www.google.com/other',
+              'intercept_click'
+            )
+          ).to.be.false;
+          expect(sendMessageStub).to.not.be.called;
+        });
       });
     }
   );
