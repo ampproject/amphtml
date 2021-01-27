@@ -23,16 +23,16 @@ const TAG = 'amp-consent';
 
 /**
  * @param {!Object} payload
- * @param {!Window} source
+ * @param {!Window} win
  * @param {!ConsentPolicyManager} policyManager
  */
-export function handleTcfCommand(payload, source, policyManager) {
+export function handleTcfCommand(payload, win, policyManager) {
   const {command} = payload;
 
   switch (command) {
     case TCF_POST_MESSAGE_API_COMMANDS.GET_TC_DATA:
     case TCF_POST_MESSAGE_API_COMMANDS.PING:
-      handlePingEvent(payload, source, policyManager);
+      handlePingEvent(payload, win, policyManager);
       break;
     case TCF_POST_MESSAGE_API_COMMANDS.ADD_EVENT_LISTENER:
     case TCF_POST_MESSAGE_API_COMMANDS.REMOVE_EVENT_LISTENER:
@@ -40,40 +40,39 @@ export function handleTcfCommand(payload, source, policyManager) {
       return;
   }
 }
+
 /**
- * Create minimal PingReturn object. Send to original source
+ * Create minimal PingReturn object. Send to original iframe
  * once object has been filled.
  * @param {!Object} payload
- * @param {!Window} source
+ * @param {!Window} win
  * @param {!ConsentPolicyManager} policyManager
  */
-export function handlePingEvent(payload, source, policyManager) {
+function handlePingEvent(payload, win, policyManager) {
   const cmpLoaded = true;
-  const metadataPromise = policyManager.getConsentMetadataInfo('default');
-
-  metadataPromise.then((metadata) => {
+  policyManager.getConsentMetadataInfo('default').then((metadata) => {
     const gdprApplies = metadata ? metadata['gdprApplies'] : undefined;
     const returnValue = {cmpLoaded, gdprApplies};
     const {callId} = payload;
 
-    sendTcfApiReturn(source, returnValue, callId);
+    sendTcfApiReturn(win, returnValue, callId);
   });
 }
 
 /**
  *
- * @param {!Window} source
+ * @param {!Window} win
  * @param {!JsonObject} returnValue
  * @param {string} callId
  * @param {boolean=} success
  */
-function sendTcfApiReturn(source, returnValue, callId, success) {
-  if (!source) {
+function sendTcfApiReturn(win, returnValue, callId, success) {
+  if (!win) {
     return;
   }
 
   const __tcfapiReturn = {returnValue, callId, success};
-  source./*OK*/ postMessage(
+  win./*OK*/ postMessage(
     /** @type {!JsonObject} */ ({
       __tcfapiReturn,
     }),
