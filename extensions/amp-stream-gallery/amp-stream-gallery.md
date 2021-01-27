@@ -30,7 +30,7 @@ limitations under the License.
 
 A stream gallery for displaying multiple similar pieces of content at a time along a
 horizontal axis. To implement a more customized UX, see
-[`amp-stream-gallery`](https://amp.dev/documentation/components/amp-stream-gallery/).
+[`amp-base-carousel`](https://amp.dev/documentation/components/amp-base-carousel/).
 
 _Example:_
 
