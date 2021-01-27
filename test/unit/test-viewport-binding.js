@@ -69,8 +69,8 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, (env) => {
     binding = new ViewportBindingNatural_(ampdoc);
     const bodyStyles = win.getComputedStyle(win.document.body);
     expect(bodyStyles.position).to.equal('relative');
-    expect(bodyStyles.overflowX).to.equal('hidden');
-    expect(bodyStyles.overflowY).to.not.equal('hidden');
+    expect(bodyStyles.overflowX).to.equal('visible');
+    expect(bodyStyles.overflowY).to.equal('visible');
   });
 
   it('should NOT require fixed layer transferring', () => {
