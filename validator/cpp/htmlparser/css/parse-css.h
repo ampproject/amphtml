@@ -33,13 +33,6 @@
 // Token, which in a sane world would be in a distinct
 // hierarchy. However the parsing routines sometimes instantiate a
 // temporary TokenStream and put some AST nodes into there.
-//
-// TODO:
-// - Sufficient accessor methods to make this useful (for now, using
-//   JSON only tests).
-// - Parsing numbers (right now unlike the Javascript this library leaves
-//   numbers as strings).
-// - Higher level concepts e.g. selectors?
 
 #ifndef HTMLPARSER__CSS_PARSE_CSS_H_
 #define HTMLPARSER__CSS_PARSE_CSS_H_
