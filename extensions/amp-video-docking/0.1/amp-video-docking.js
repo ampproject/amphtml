@@ -32,11 +32,6 @@ import {
   VideoOrBaseElementDef,
   isDockable,
 } from '../../../src/video-interface';
-import {
-  PositionObserver, // eslint-disable-line no-unused-vars
-  installPositionObserverServiceForDoc,
-} from '../../../src/service/position-observer/position-observer-impl';
-import {PositionObserverFidelity} from '../../../src/service/position-observer/position-observer-worker';
 import {Services} from '../../../src/services';
 import {VideoDockingEvents, pointerCoords} from './events';
 import {applyBreakpointClassname} from './breakpoints';
@@ -249,9 +244,8 @@ const PlaceholderBackground = (html) =>
 export class VideoDocking {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {!PositionObserver=} opt_injectedPositionObserver
    */
-  constructor(ampdoc, opt_injectedPositionObserver) {
+  constructor(ampdoc) {
     /** @private @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
@@ -349,8 +343,8 @@ export class VideoDocking {
     /** @private @const {function():?Element} */
     this.findSlotOnce_ = once(() => this.findSlot_());
 
-    /** @private @const {?PositionObserver} */
-    this.injectedPositionObserver_ = opt_injectedPositionObserver || null;
+    /** @private @const {?IntersectionObserver} */
+    this.intersectionObserver_ = null;
 
     /** @private {boolean} */
     this.isTransitioning_ = false;
@@ -461,11 +455,23 @@ export class VideoDocking {
   register(video) {
     this.install_();
 
-    const {element} = video;
-    const fidelity = PositionObserverFidelity.HIGH;
-    this.getPositionObserver_().observe(element, fidelity, ({positionRect}) =>
-      this.updateOnPositionChange_(video, positionRect)
-    );
+    if (!this.intersectionObserver_) {
+      this.intersectionObserver_ = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            entry.target.getImpl().then((video) => {
+              this.updateOnPositionChange_(video, entry.boundingClientRect);
+            });
+          });
+        },
+        {
+          root: this.doc_,
+          threshold: [0, 0.1, 0.2, 0.8, 0.9, 1],
+        }
+      );
+    }
+
+    this.intersectionObserver_.observe(video.element);
     this.observed_.push(video);
   }
 
@@ -563,20 +569,6 @@ export class VideoDocking {
    */
   getDockedVideo_() {
     return devAssert(this.currentlyDocked_).video;
-  }
-
-  /**
-   * @return {!PositionObserver}
-   * @private
-   */
-  getPositionObserver_() {
-    // for testing
-    if (this.injectedPositionObserver_) {
-      return this.injectedPositionObserver_;
-    }
-
-    installPositionObserverServiceForDoc(this.ampdoc_);
-    return Services.positionObserverForDoc(this.ampdoc_.getHeadNode());
   }
 
   /**
@@ -1050,7 +1042,6 @@ export class VideoDocking {
       // Since the AMP element container is position: relative, the media
       // element is relative to AMP element corner when position: absolute, so
       // we need to offset it by outer container's position.
-      // TODO: DO NOT SUBMIT. This is buggy
       const offset = position === 'absolute' ? clientRect : {left: 0, top: 0};
 
       this.getElementsOnDockArea_(video).forEach((el) => {

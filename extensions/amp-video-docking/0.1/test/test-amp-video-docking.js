@@ -188,9 +188,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
     env.sandbox.stub(Services, 'viewportForDoc').returns(viewport);
     env.sandbox.stub(Services, 'videoManagerForDoc').returns(manager);
 
-    const positionObserverMock = {};
-
-    docking = new VideoDocking(ampdoc, positionObserverMock);
+    docking = new VideoDocking(ampdoc);
 
     env.sandbox.stub(docking, 'getTimer_').returns({
       promise: () => Promise.resolve(),
