@@ -53,7 +53,6 @@ const Targets = {
   DEV_DASHBOARD: 'DEV_DASHBOARD',
   DOCS: 'DOCS',
   E2E_TEST: 'E2E_TEST',
-  FLAG_CONFIG: 'FLAG_CONFIG',
   INTEGRATION_TEST: 'INTEGRATION_TEST',
   LINT: 'LINT',
   OWNERS: 'OWNERS',
@@ -68,6 +67,18 @@ const Targets = {
   VALIDATOR_WEBUI: 'VALIDATOR_WEBUI',
   VISUAL_DIFF: 'VISUAL_DIFF',
 };
+
+/**
+ * Files matching these targets could also affect the runtime, so we run all
+ * the RUNTIME tests. Files matching other targets do not affect the runtime.
+ */
+const targetsThatAffectRuntime = [
+  Targets.BABEL_PLUGIN,
+  Targets.LINT,
+  Targets.PRESUBMIT,
+  Targets.PRETTIFY,
+  Targets.SERVER,
+];
 
 /**
  * Checks if the given file is an OWNERS file.
@@ -163,12 +174,6 @@ const targetMatchers = {
         return minimatch(file, pattern);
       })
     );
-  },
-  [Targets.FLAG_CONFIG]: (file) => {
-    if (isOwnersFile(file)) {
-      return false;
-    }
-    return file.startsWith('build-system/global-configs/');
   },
   [Targets.INTEGRATION_TEST]: (file) => {
     if (isOwnersFile(file)) {
@@ -279,19 +284,18 @@ function determineBuildTargets() {
   prettifyFiles = globby.sync(config.prettifyGlobs);
   const filesChanged = gitDiffNameOnlyMaster();
   for (const file of filesChanged) {
-    let matched = false;
+    let fileMayAffectRuntime = true;
     Object.keys(targetMatchers).forEach((target) => {
       const matcher = targetMatchers[target];
       if (matcher(file)) {
         buildTargets.add(target);
-        // Files that affect these three targets may also affect the runtime.
-        if (!target in [Targets.LINT, Targets.PRESUBMIT, Targets.PRETTIFY]) {
-          matched = true;
+        if (!target in targetsThatAffectRuntime) {
+          fileMayAffectRuntime = false;
         }
       }
     });
-    if (!matched) {
-      buildTargets.add(Targets.RUNTIME); // Default to RUNTIME for files that don't match a target.
+    if (fileMayAffectRuntime) {
+      buildTargets.add(Targets.RUNTIME);
     }
   }
   const loggingPrefix = getLoggingPrefix();
@@ -299,13 +303,6 @@ function determineBuildTargets() {
     `${loggingPrefix} Detected build targets:`,
     cyan(Array.from(buildTargets).sort().join(', '))
   );
-  // Test the runtime for babel plugin and server changes.
-  if (
-    buildTargets.has(Targets.BABEL_PLUGIN) ||
-    buildTargets.has(Targets.SERVER)
-  ) {
-    buildTargets.add(Targets.RUNTIME);
-  }
   // Test all targets during CI builds for package upgrades.
   if (isCiBuild() && buildTargets.has(Targets.PACKAGE_UPGRADE)) {
     logWithoutTimestamp(
