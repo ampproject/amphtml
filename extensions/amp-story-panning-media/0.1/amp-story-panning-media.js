@@ -134,9 +134,6 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
   /** @private */
   onPageNavigation_() {
     if (this.isOnActivePage_) {
-      // TODO(#31932): A key could be sent here to update elements of the same group.
-      // Note, this will not work when there are 2 or more panning components on the same page.
-      // It might need to dynamic to hold more than 1 set of positions.
       this.animate_();
     }
   }
@@ -146,11 +143,10 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
    * @private
    */
   animate_() {
-    const panningMediaState = this.storeService_.get(
-      StateProperty.PANNING_MEDIA_STATE
-    );
+    const getPanningMediaState = () =>
+      this.storeService_.get(StateProperty.PANNING_MEDIA_STATE);
 
-    const startPos = panningMediaState[this.groupId_] || {
+    const startPos = getPanningMediaState()[this.groupId_] || {
       x: this.x_,
       y: this.y_,
       zoom: this.zoom_,
@@ -168,7 +164,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       if (elapsedTime < DURATION_MS) {
         const easing = easeInOutQuad(elapsedTime / DURATION_MS);
         this.storeService_.dispatch(Action.SET_PANNING_MEDIA_STATE, {
-          ...panningMediaState,
+          ...getPanningMediaState(),
           [this.groupId_]: {
             x: startPos.x + (this.x_ - startPos.x) * easing,
             y: startPos.y + (this.y_ - startPos.y) * easing,
@@ -181,7 +177,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
         }
       } else {
         this.storeService_.dispatch(Action.SET_PANNING_MEDIA_STATE, {
-          ...panningMediaState,
+          ...getPanningMediaState(),
           [this.groupId_]: {x: this.x_, y: this.y_, zoom: this.zoom_},
         });
       }
@@ -195,7 +191,6 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
    */
   onPanningMediaStateChange_(panningMediaState) {
     if (panningMediaState[this.groupId_] && this.distance_ <= 1) {
-      // TODO(#31932): Update siblings that are part of the same group.
       this.updateTransform_(panningMediaState);
     }
   }
