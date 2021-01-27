@@ -103,6 +103,8 @@ Bento AMP allows you to use AMP components in non-AMP pages without needing to c
 
 The example below demonstrates `amp-accordion` component in standalone use.
 
+[example preview="top-frame" playground="false"]
+
 ```html
 <head>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
@@ -145,6 +147,8 @@ The example below demonstrates `amp-accordion` component in standalone use.
 </script>
 ```
 
+[/example]
+
 #### Interactivity and API usage
 
 Bento enabled components in standalone use are highly interactive through their API. In Bento standalone use, the element's API replaces AMP Actions and Events and [`amp-bind`](https://amp.dev/documentation/components/amp-bind/?format=websites).
@@ -156,45 +160,9 @@ await customElements.whenDefined('amp-accordion');
 const api = await accordion.getApi();
 ```
 
-The `amp-accordion` API allows you to register and respond to the following events:
+##### Actions
 
-**expand**
-This event is triggered when an accordion section is expanded and is dispatched from the expanded section.
-
-**collapse**
-This event is triggered when an accordion section is collapsed and is dispatched from the collapsed section.
-
-In the example below, `section 1` listens for the `expand` event and expands `section 2` when it is expanded. `section 2` listens for the `collapse` event and collapses `section 1` when it is collapsed.
-
-```html
-<amp-accordion id="eventsAccordion" animate='true'>
-  <section id="section1">
-    <h2>Section 1</h2>
-    <div>Puppies are cute.</div>
-  </section>
-  <section id="section2">
-    <h2>Section 2</h2>
-    <div>Kittens are furry.</div>
-  </section>
-</amp-accordion>
-
-<script>
-  (async () => {
-    const accordion = document.querySelector('#eventsAccordion');
-    await customElements.whenDefined('amp-accordion');
-    const api = await accordion.getApi();
-
-    // when section 1 expands, section 2 also expands
-    // when section 2 collapses, section 1 also collapses
-    const section1 = document.querySelector('#section1');
-    const section2 = document.querySelector('#section2');
-    section1.addEventListener('expand', () => api.expand('section2'));
-    section2.addEventListener('collapse', () => api.collapse('section1'));
-  })();
-</script>
-```
-
-**toggle**
+**toggle()**
 The `toggle` action switches the `expanded` and `collapsed` states of
 `amp-accordion` sections. When called with no arguments, it toggles all sections
 of the accordion. To specify a specific section, add the `section` argument and
@@ -230,7 +198,7 @@ use its corresponding `id` as the value.
 </script>
 ```
 
-**expand**
+**expand()**
 The `expand` action expands the sections of the `amp-accordion`. If a section
 is already expanded, it stays expanded. When called with no arguments, it
 expands all sections of the accordion. To specify a section, add the `section` argument, and use its corresponding `id` as the value.
@@ -251,7 +219,7 @@ expands all sections of the accordion. To specify a section, add the `section` a
 </script>
 ```
 
-**collapse**
+**collapse()**
 The `collapse` action collapses the sections of the `amp-accordion`. If a
 section is already collapsed, it stays collapsed. When called with no arguments,
 it collapses all sections of the accordion. To specify a section, add the
@@ -269,6 +237,46 @@ it collapses all sections of the accordion. To specify a section, add the
     // set up button actions
     document.querySelector('#button1').onclick = () => api.collapse();
     document.querySelector('#button2').onclick = () => api.collapse('section1');
+  })();
+</script>
+```
+
+##### Events
+
+The `amp-accordion` API allows you to register and respond to the following events:
+
+**expand**
+This event is triggered when an accordion section is expanded and is dispatched from the expanded section.
+
+**collapse**
+This event is triggered when an accordion section is collapsed and is dispatched from the collapsed section.
+
+In the example below, `section 1` listens for the `expand` event and expands `section 2` when it is expanded. `section 2` listens for the `collapse` event and collapses `section 1` when it is collapsed.
+
+```html
+<amp-accordion id="eventsAccordion" animate='true'>
+  <section id="section1">
+    <h2>Section 1</h2>
+    <div>Puppies are cute.</div>
+  </section>
+  <section id="section2">
+    <h2>Section 2</h2>
+    <div>Kittens are furry.</div>
+  </section>
+</amp-accordion>
+
+<script>
+  (async () => {
+    const accordion = document.querySelector('#eventsAccordion');
+    await customElements.whenDefined('amp-accordion');
+    const api = await accordion.getApi();
+
+    // when section 1 expands, section 2 also expands
+    // when section 2 collapses, section 1 also collapses
+    const section1 = document.querySelector('#section1');
+    const section2 = document.querySelector('#section2');
+    section1.addEventListener('expand', () => api.expand('section2'));
+    section2.addEventListener('collapse', () => api.collapse('section1'));
   })();
 </script>
 ```
