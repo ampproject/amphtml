@@ -20,12 +20,6 @@ This document lists analytics vendors that have built-in configurations for use 
 
 Vendors that wish to integrate their service with [`<amp-analytics>`](https://amp.dev/documentation/components/amp-analytics/) should refer to the details in [Integrate your analytics tools with AMP](https://amp.dev/documentation/guides-and-tutorials/contribute/integrate-your-analytics-tools).
 
-### SensorsData
-
-Type attribute value: `sensorsanalytics`
-
-Adds support for Sensors Data. More details for adding Sensors Data support can be found at [sensorsdata.com](https://manual.sensorsdata.cn/sa/latest/web-js-sdk-7548149.html).
-
 ### Acquia Lift
 
 Type attribute value: `acquialift`
@@ -439,6 +433,13 @@ Type attribute value: `segment`
 
 Adds support for segment page views and events.
 To see the full list of fields that you can send, see [Segment Spec](https://segment.com/docs/spec/).
+
+
+### SensorsData
+
+Type attribute value: `sensorsanalytics`
+
+Adds support for Sensors Data. More details for adding Sensors Data support can be found at [sensorsdata.com](https://manual.sensorsdata.cn/sa/latest/web-js-sdk-7548149.html).
 
 ### ShinyStat
 
