@@ -16,7 +16,7 @@
 
 import * as _3p from '../../../3p/3p';
 import {createIframePromise} from '../../../testing/iframe';
-import {ssp} from '../../../ads/ssp';
+import {ssp} from '../../../ads/vendors/ssp';
 
 describes.fakeWin('amp-ad-ssp', {}, () => {
   let sandbox;
