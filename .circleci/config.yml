@@ -6,10 +6,8 @@ orbs:
 push_and_pr_builds: &push_and_pr_builds
   filters:
     branches:
-      only:
-        - master
-        - /^amp-release-.*$/
-        - /^pull\/.*$/
+      ignore:
+        - nightly
 
 push_builds_only: &push_builds_only
   filters:
@@ -197,7 +195,7 @@ jobs:
           command: node build-system/pr-check/experiment-tests.js --experiment=experimentC
 
 workflows:
-  'CircleCI PR Check':
+  'CircleCI':
     jobs:
       - 'Checks':
           <<: *push_and_pr_builds

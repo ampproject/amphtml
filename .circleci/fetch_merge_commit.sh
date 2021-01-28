@@ -16,12 +16,13 @@
 #
 # This script fetches the merge commit of a PR branch with master to make sure
 # PRs are tested against all the latest changes.
+#
+# Reference: https://circleci.com/docs/2.0/env-vars/#built-in-environment-variables.
 
 set -e
 err=0
 
 # CIRCLE_PULL_REQUEST is present for PR builds, and absent for push builds.
-# See https://circleci.com/docs/2.0/env-vars/#built-in-environment-variables.
 if [[ -z "$CIRCLE_PULL_REQUEST" ]]; then
   echo -e "Nothing to do because this is not a PR build."
   exit 0
@@ -33,12 +34,24 @@ if [[ ! "$CIRCLE_PULL_REQUEST" =~ ^https://github.com/ampproject/amphtml* ]]; th
   exit 1
 fi
 
+# CIRCLE_PR_NUMBER is present for PRs originating from forks, but absent for PRs
+# originating from a branch on the main repo. In such cases, extract the PR
+# number from CIRCLE_PULL_REQUEST.
+if [[ "$CIRCLE_PR_NUMBER" ]]; then
+  PR_NUMBER=$CIRCLE_PR_NUMBER
+else
+  PR_NUMBER=${CIRCLE_PULL_REQUEST#"https://github.com/ampproject/amphtml/pull/"}
+fi
+
 # GitHub provides refs/pull/<PR_NUMBER>/merge, an up-to-date merge branch for
 # every PR branch that can be cleanly merged to master. For more details, see:
 # https://discuss.circleci.com/t/show-test-results-for-prospective-merge-of-a-github-pr/1662
-MERGE_BRANCH="refs/pull/$CIRCLE_PR_NUMBER/merge"
+MERGE_BRANCH="refs/pull/$PR_NUMBER/merge"
 (set -x && git pull --ff-only origin "$MERGE_BRANCH") || err=$?
 
+
+# If a clean merge is not possible, do not proceed with the build. GitHub's UI
+# will show an error indicating there was a merge conflict.
 if [[ "$err" -ne "0" ]]; then
   echo
   echo -e "ERROR: Detected a merge conflict between $CIRCLE_BRANCH and master."
