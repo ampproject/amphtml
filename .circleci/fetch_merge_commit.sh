@@ -16,12 +16,13 @@
 #
 # This script fetches the merge commit of a PR branch with master to make sure
 # PRs are tested against all the latest changes.
+#
+# Reference: https://circleci.com/docs/2.0/env-vars/#built-in-environment-variables.
 
 set -e
 err=0
 
 # CIRCLE_PULL_REQUEST is present for PR builds, and absent for push builds.
-# See https://circleci.com/docs/2.0/env-vars/#built-in-environment-variables.
 if [[ -z "$CIRCLE_PULL_REQUEST" ]]; then
   echo -e "Nothing to do because this is not a PR build."
   exit 0
@@ -34,8 +35,8 @@ if [[ ! "$CIRCLE_PULL_REQUEST" =~ ^https://github.com/ampproject/amphtml* ]]; th
 fi
 
 # CIRCLE_PR_NUMBER is present for PRs originating from forks, but absent for PRs
-# originating from a branch on the main repo. In such cases, extract it from
-# $CIRCLE_PULL_REQUEST
+# originating from a branch on the main repo. In such cases, extract the PR
+# number from CIRCLE_PULL_REQUEST.
 if [[ -z "$CIRCLE_PR_NUMBER" ]]; then
   CIRCLE_PR_NUMBER=${CIRCLE_PULL_REQUEST#"https://github.com/ampproject/amphtml/pull/"}
 fi
