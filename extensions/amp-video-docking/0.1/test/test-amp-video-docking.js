@@ -188,9 +188,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
     env.sandbox.stub(Services, 'viewportForDoc').returns(viewport);
     env.sandbox.stub(Services, 'videoManagerForDoc').returns(manager);
 
-    const positionObserverMock = {};
-
-    docking = new VideoDocking(ampdoc, positionObserverMock);
+    docking = new VideoDocking(ampdoc);
 
     env.sandbox.stub(docking, 'getTimer_').returns({
       promise: () => Promise.resolve(),
@@ -521,6 +519,85 @@ describes.realWin('video docking', {amp: true}, (env) => {
 
           expect(computedStyle['transform']).to.equal(expectedTransformMatrix);
         });
+      });
+
+      it('sets position', async () => {
+        stubControls();
+        enableComputedStyle(video.element);
+
+        const offsetLeft = 12;
+        const offsetTop = 24;
+
+        placeElementLtwh(video, offsetLeft, offsetTop, width, 200);
+
+        await docking.placeAt_(
+          video,
+          /* x */ 52,
+          /* y */ 10,
+          /* scale */ 0.5,
+          /* step */ 0,
+          /* transitionDurationMs */ 300,
+          DirectionX.RIGHT,
+          /* opt_clientRect */ undefined,
+          'sticky'
+        );
+
+        const computedStyle = getComputedStyle(internalElement);
+        expect(computedStyle['position']).to.equal('sticky');
+      });
+
+      it('offsets position: absolute elements', async () => {
+        stubControls();
+        enableComputedStyle(video.element);
+
+        const offsetLeft = 12;
+        const offsetTop = 24;
+
+        placeElementLtwh(video, offsetLeft, offsetTop, width, 200);
+
+        await docking.placeAt_(
+          video,
+          /* x */ 52,
+          /* y */ 10,
+          /* scale */ 0.5,
+          /* step */ 0,
+          /* transitionDurationMs */ 300,
+          DirectionX.RIGHT,
+          /* opt_clientRect */ undefined,
+          'absolute'
+        );
+
+        const computedStyle = getComputedStyle(internalElement);
+        expect(computedStyle['position']).to.equal('absolute');
+        expect(computedStyle['left']).to.equal(`${-offsetLeft}px`);
+        expect(computedStyle['top']).to.equal(`${-offsetTop}px`);
+      });
+
+      it('does not offset position: fixed elements', async () => {
+        stubControls();
+        enableComputedStyle(video.element);
+
+        const offsetLeft = 12;
+        const offsetTop = 24;
+
+        placeElementLtwh(video, offsetLeft, offsetTop, width, 200);
+
+        await docking.placeAt_(
+          video,
+          /* x */ 52,
+          /* y */ 10,
+          /* scale */ 0.5,
+          /* step */ 0,
+          /* transitionDurationMs */ 300,
+          DirectionX.RIGHT,
+          /* opt_clientRect */ undefined,
+          'fixed'
+        );
+
+        const computedStyle = getComputedStyle(internalElement);
+        expect(computedStyle['position']).to.equal('fixed');
+        expect(computedStyle['left']).to.equal('0px');
+        expect(computedStyle['top']).to.equal('0px');
       });
     });
 
@@ -1102,7 +1179,6 @@ describes.realWin('video docking', {amp: true}, (env) => {
     let trigger;
     let resetOnUndock;
     let placeAt;
-    let maybeUpdateStaleYAfterScroll;
 
     const targetDims = {x: 20, y: 10, scale: 0.5, relativeX: DirectionX.RIGHT};
 
@@ -1113,9 +1189,6 @@ describes.realWin('video docking', {amp: true}, (env) => {
 
       trigger = env.sandbox.stub(docking, 'trigger_');
       resetOnUndock = env.sandbox.stub(docking, 'resetOnUndock_');
-      maybeUpdateStaleYAfterScroll = env.sandbox
-        .stub(docking, 'maybeUpdateStaleYAfterScroll_')
-        .returns(Promise.resolve());
 
       placeAt = env.sandbox
         .stub(docking, 'placeAt_')
@@ -1137,22 +1210,21 @@ describes.realWin('video docking', {amp: true}, (env) => {
       expect(trigger.withArgs(Actions.UNDOCK)).to.have.been.calledOnce;
     });
 
-    it('updates stale Y after undock', async () => {
-      const {promise, resolve} = new Deferred();
-
-      placeAt.returns(promise);
-
-      const done = docking.undock_(video);
-
-      expect(maybeUpdateStaleYAfterScroll.withArgs(video)).to.not.have.been
-        .called;
-
-      resolve();
-
-      await done;
-
-      expect(maybeUpdateStaleYAfterScroll.withArgs(video)).to.have.been
-        .calledOnce;
+    it('sets position: absolute on undock', async () => {
+      await docking.undock_(video);
+      expect(
+        placeAt.withArgs(
+          video,
+          env.sandbox.match.any,
+          env.sandbox.match.any,
+          env.sandbox.match.any,
+          env.sandbox.match.any,
+          env.sandbox.match.any,
+          env.sandbox.match.any,
+          env.sandbox.match.any,
+          'absolute'
+        )
+      ).to.have.been.calledOnce;
     });
 
     it('resets after undock', async () => {
