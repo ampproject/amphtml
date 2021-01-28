@@ -206,6 +206,11 @@ export const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/30291',
   },
   {
+    id: 'tcf-post-message-proxy-api',
+    name: 'Proxy for TCF PostMessageAPI to send TCData to 3p iframes',
+    spec: 'https://github.com/ampproject/amphtml/issues/30385',
+  },
+  {
     id: 'fie-resources',
     name: 'Separate FIE resource manager from the main doc',
     spec: 'https://github.com/ampproject/amphtml/issues/31246',

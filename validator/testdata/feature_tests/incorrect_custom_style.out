@@ -44,6 +44,8 @@ feature_tests/incorrect_custom_style.html:33:17 Usage of the !important CSS qual
 >>     ^~~~~~~~~
 feature_tests/incorrect_custom_style.html:36:4 CSS syntax error in tag 'style amp-custom' - saw invalid at rule '@viewport'.
 |      @media (whatever) { @notallowednested }
+>>             ^~~~~~~~~
+feature_tests/incorrect_custom_style.html:37:12 CSS syntax error in tag 'style amp-custom' - disallowed media feature 'whatever'.
 >>                         ^~~~~~~~~
 feature_tests/incorrect_custom_style.html:37:24 CSS syntax error in tag 'style amp-custom' - saw invalid at rule '@notallowednested'.
 |

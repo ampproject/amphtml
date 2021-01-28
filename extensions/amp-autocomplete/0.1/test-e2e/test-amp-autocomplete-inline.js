@@ -18,7 +18,7 @@ describes.endtoend(
   'amp-autocomplete',
   {
     testUrl:
-      'http://localhost:8000/test/manual/amp-autocomplete/amp-autocomplete-inline.amp.html',
+      'http://localhost:8000/test/fixtures/e2e/amp-autocomplete/amp-autocomplete-inline.amp.html',
     // TODO: Restore 'environments' to default after supporting fourth test in
     // shadow environment.
     environments: ['single', 'viewer-demo'],
