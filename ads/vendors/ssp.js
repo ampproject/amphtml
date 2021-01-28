@@ -16,6 +16,7 @@
 
 import {computeInMasterFrame, loadScript, validateData} from '../../3p/3p';
 import {parseJson} from '../../src/json';
+import {setStyles} from '../../src/style';
 
 /*
  * How to develop:
@@ -28,11 +29,59 @@ import {parseJson} from '../../src/json';
  *
  * @return {Object}
  */
-function keyBy(array, iteratee) {
+export function keyBy(array, iteratee) {
   return array.reduce(
     (itemById, item) => Object.assign(itemById, {[iteratee(item)]: item}),
     {}
   );
+}
+
+/**
+ * @param {!Object} fetchingSSPs
+ * @param {!Function} cb
+ */
+export function runWhenFetchingSettled(fetchingSSPs, cb) {
+  const sspCleanupInterval = setInterval(() => {
+    if (!Object.keys(fetchingSSPs).length) {
+      clearInterval(sspCleanupInterval);
+      cb();
+    }
+  }, 100);
+}
+
+/**
+ * @param {!Element} element
+ * @param {boolean} center
+ * @param {Object} dimensions
+ */
+export function handlePosition(element, center, dimensions) {
+  const styles = {
+    ...(center
+      ? {
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          'max-width': '100%',
+          transform: 'translate(-50%, -50%)',
+          '-ms-transform': 'translate(-50%, -50%)',
+        }
+      : {}),
+    ...(dimensions || {}),
+  };
+  setStyles(element, styles);
+}
+
+/**
+ * @param {number} availableWidth
+ * @param {!Object} data
+ * @return {?Object}
+ */
+export function sizeAgainstWindow(availableWidth, data) {
+  if (data.width > availableWidth) {
+    const newWidth = availableWidth;
+    const newHeight = data.height / (data.width / availableWidth);
+    return {width: newWidth, height: newHeight};
+  }
 }
 
 /**
@@ -70,6 +119,9 @@ export function ssp(global, data) {
   // https://github.com/ampproject/amphtml/tree/master/ads#the-iframe-sandbox
   global.document.getElementById('c').appendChild(parentElement);
 
+  // validate dimensions against available space (window)
+  const sizing = sizeAgainstWindow(parentElement./*OK*/ clientWidth, data);
+
   // https://github.com/ampproject/amphtml/blob/master/3p/3p.js#L186
   computeInMasterFrame(
     global,
@@ -85,13 +137,15 @@ export function ssp(global, data) {
         }
 
         /** @type {{config: Function, getAds: Function, writeAd: Function}} */
-        const ssp = global['sssp'];
+        const sssp = global['sssp'];
 
-        ssp.config({
+        sssp.config({
           site: data.site || global.context.canonicalUrl,
         });
 
-        mW.ssp = ssp;
+        // propagate SSP and running XHR across all ad units
+        mW.sssp = sssp;
+        mW.fetchingSSPs = {};
 
         done(true);
       });
@@ -103,36 +157,38 @@ export function ssp(global, data) {
         return;
       }
 
-      mW.ssp.getAds([position], {
-        requestErrorCallback: () => global.context.noContentAvailable(),
+      // perform cleanup only after all SSP XHRs are settled
+      const noContent = () => {
+        runWhenFetchingSettled(mW.fetchingSSPs, () =>
+          global.context.noContentAvailable()
+        );
+      };
+
+      // register XHR and start fetching
+      mW.fetchingSSPs[position.zoneId] = true;
+
+      mW.sssp.getAds([position], {
+        // todo on SSP side (option to register error callback)
+        // requestErrorCallback: () => {},
         AMPcallback: (ads) => {
           /** @suppress {checkTypes} */
           const adById = keyBy(ads, (item) => item.id);
           const ad = adById[position['id']];
 
           if (!ad || ['error', 'empty'].includes(ad.type)) {
-            global.context.noContentAvailable();
+            noContent();
+          } else {
+            // SSP need parentElement as value in "position.id"
+            mW.sssp.writeAd(ad, {...position, id: parentElement});
 
-            return;
+            // init dimensions / centering
+            const d = ad.responsive ? {width: '100%', height: 'auto'} : null;
+            handlePosition(parentElement, true, d);
+            global.context.renderStart(sizing);
           }
 
-          // SSP need parentElement as value in "position.id"
-          mW.ssp.writeAd(ad, {...position, id: parentElement});
-
-          parentElement.setAttribute(
-            'style',
-            [
-              'position: absolute',
-              'top: 50%',
-              'left: 50%',
-              'transform: translate(-50%, -50%)',
-              '-ms-transform: translate(-50%, -50%)',
-            ].join('; ')
-          );
-
-          const {width, height} = ad;
-
-          global.context.renderStart({width, height});
+          // unregister XHR
+          delete mW.fetchingSSPs[position.zoneId];
         },
       });
     }
