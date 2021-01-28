@@ -33,6 +33,13 @@ if [[ ! "$CIRCLE_PULL_REQUEST" =~ ^https://github.com/ampproject/amphtml* ]]; th
   exit 1
 fi
 
+# CIRCLE_PR_NUMBER is present for PRs originating from forks, but absent for PRs
+# originating from a branch on the main repo.
+if [[ -z "$CIRCLE_PR_NUMBER" ]]; then
+  echo -e "Nothing to do because this is not a PR from a fork."
+  exit 0
+fi
+
 # GitHub provides refs/pull/<PR_NUMBER>/merge, an up-to-date merge branch for
 # every PR branch that can be cleanly merged to master. For more details, see:
 # https://discuss.circleci.com/t/show-test-results-for-prospective-merge-of-a-github-pr/1662
