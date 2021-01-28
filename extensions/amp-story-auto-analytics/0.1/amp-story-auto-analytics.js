@@ -16,7 +16,7 @@
 
 import {Services} from '../../../src/services';
 import {buildGtagConfig} from './auto-analytics-configs.js';
-import {dev} from '../../../src/log';
+import {devAssert} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
 
 const buildAutoAnalyticsTemplate = (element) => {
@@ -40,7 +40,7 @@ export class AmpStoryAutoAnalytics extends AMP.BaseElement {
     );
     const analyticsEl = buildAutoAnalyticsTemplate(this.element);
     const configEl = analyticsEl.querySelector('script');
-    const gtagId = dev().assert(this.element.getAttribute('gtag-id'));
+    const gtagId = devAssert(this.element.getAttribute('gtag-id'));
     const analyticsJson = buildGtagConfig(gtagId);
     configEl.textContent = JSON.stringify(analyticsJson);
     this.element.appendChild(analyticsEl);
