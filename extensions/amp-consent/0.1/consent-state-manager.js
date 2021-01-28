@@ -83,8 +83,8 @@ export class ConsentStateManager {
 
     this.instanceId_ = instanceId;
 
-    // this.instance_ = new ConsentInstance(this.ampdoc_, instanceId, config);
-    this.instance_ = new ConsentInstance(this.ampdoc_.win, instanceId, config);
+    this.instance_ = new ConsentInstance(this.ampdoc_, instanceId, config);
+    // this.instance_ = new ConsentInstance(this.ampdoc_.win, instanceId, config);
 
     if (this.consentReadyResolver_) {
       this.consentReadyResolver_();
@@ -217,13 +217,13 @@ export class ConsentStateManager {
  */
 export class ConsentInstance {
   /**
-   * @param window
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {string} id
    * @param {!Object} config
    */
-  constructor(window, id, config) {
+  constructor(ampdoc, id, config) {
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampdoc_ = window.AMP.ampdoc;
+    this.ampdoc_ = ampdoc;
 
     /** @private {string} */
     this.id_ = id;
