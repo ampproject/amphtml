@@ -38,13 +38,7 @@ function pushBuildWorkflow() {
 }
 
 function prBuildWorkflow() {
-  if (
-    buildTargetsInclude(
-      Targets.RUNTIME,
-      Targets.FLAG_CONFIG,
-      Targets.INTEGRATION_TEST
-    )
-  ) {
+  if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
     downloadNomoduleOutput();
     downloadModuleOutput();
     timedExecOrDie('gulp update-packages');
@@ -52,7 +46,7 @@ function prBuildWorkflow() {
   } else {
     printSkipMessage(
       jobName,
-      'this PR does not affect the runtime, flag configs, or integration tests'
+      'this PR does not affect the runtime or integration tests'
     );
   }
 }

@@ -39,13 +39,7 @@ function pushBuildWorkflow() {
 
 function prBuildWorkflow() {
   process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
-  if (
-    buildTargetsInclude(
-      Targets.RUNTIME,
-      Targets.FLAG_CONFIG,
-      Targets.VISUAL_DIFF
-    )
-  ) {
+  if (buildTargetsInclude(Targets.RUNTIME, Targets.VISUAL_DIFF)) {
     downloadNomoduleOutput();
     timedExecOrDie('gulp update-packages');
     timedExecOrDie('gulp visual-diff --nobuild');
@@ -53,7 +47,7 @@ function prBuildWorkflow() {
     timedExecOrDie('gulp visual-diff --empty');
     printSkipMessage(
       jobName,
-      'this PR does not affect the runtime, flag configs, or visual diff tests'
+      'this PR does not affect the runtime or visual diff tests'
     );
   }
 }

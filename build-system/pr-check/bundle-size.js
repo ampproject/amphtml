@@ -38,7 +38,7 @@ function pushBuildWorkflow() {
 }
 
 function prBuildWorkflow() {
-  if (buildTargetsInclude(Targets.RUNTIME, Targets.FLAG_CONFIG)) {
+  if (buildTargetsInclude(Targets.RUNTIME)) {
     downloadNomoduleOutput();
     downloadModuleOutput();
     timedExecOrDie('gulp bundle-size --on_pr_build');
