@@ -30,5 +30,6 @@ tags: {  # <amp-story-auto-analytics>
   requires_extension: "amp-story-auto-analytics"
   attrs: {
     name: "gtag-id"
+    mandatory: true
   }
 }
