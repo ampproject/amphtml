@@ -146,7 +146,7 @@ const VIDEO_PREVIEW_AUTO_ADVANCE_DURATION = '5s';
  */
 const buildPlayMessageElement = (element) =>
   htmlFor(element)`
-      <button class="i-amphtml-story-page-play-button i-amphtml-story-system-reset">
+      <button role="button" class="i-amphtml-story-page-play-button i-amphtml-story-system-reset">
         <span class="i-amphtml-story-page-play-label"></span>
         <span class='i-amphtml-story-page-play-icon'></span>
       </button>`;
