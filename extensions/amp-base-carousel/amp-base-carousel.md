@@ -50,7 +50,7 @@ The example below demonstrates `amp-base-carousel` component in standalone use.
 
 [example preview="top-frame" playground="false"]
 
-```
+```html
 <head>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-base-carousel-1.0.css">
