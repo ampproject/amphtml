@@ -589,7 +589,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     expect(actions[0]).to.be.equal('pageId');
   });
 
-  it('play message should have role="button"', async () => {
+  it('play message should have role="button" to prevent story page navigation', async () => {
     env.sandbox.stub(page, 'loadPromise').returns(Promise.resolve());
     env.sandbox
       .stub(VideoUtils, 'isAutoplaySupported')

@@ -103,7 +103,7 @@ describes.realWin(
       }).to.not.throw();
     });
 
-    it('should contain role="button" for activating', async () => {
+    it('activation button should contain role="button" to prevent story page navigation', async () => {
       win.DeviceOrientationEvent.requestPermission = () => Promise.reject();
 
       await createAmpStory360(
