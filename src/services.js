@@ -690,11 +690,7 @@ export class Services {
   static consentPolicyServiceForDocOrNull(element) {
     return (
       /** @type {!Promise<?../extensions/amp-consent/0.1/consent-policy-manager.ConsentPolicyManager>} */
-      (getElementServiceIfAvailableForDoc(
-        element,
-        'consentPolicyManager',
-        'amp-consent'
-      ))
+      (getService(element, 'consentPolicyManager', 'amp-consent'))
     );
   }
 

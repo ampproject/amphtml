@@ -42,11 +42,11 @@ export const CONSENT_STORAGE_MAX = 1200;
 export class ConsentStateManager {
   /**
    * Creates an instance of ConsentStateManager.
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!Window} window
    */
-  constructor(ampdoc) {
+  constructor(window) {
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampdoc_ = ampdoc; // THIS IS WINDOW!!!!
+    this.ampdoc_ = window.AMP.ampdoc;
 
     /** @private {?string} */
     this.instanceId_ = null;
@@ -83,8 +83,8 @@ export class ConsentStateManager {
 
     this.instanceId_ = instanceId;
 
-    this.instance_ = new ConsentInstance(this.ampdoc_, instanceId, config);
-    // this.instance_ = new ConsentInstance(this.ampdoc_.win, instanceId, config);
+    // this.instance_ = new ConsentInstance(this.ampdoc_, instanceId, config);
+    this.instance_ = new ConsentInstance(this.ampdoc_.win, instanceId, config);
 
     if (this.consentReadyResolver_) {
       this.consentReadyResolver_();

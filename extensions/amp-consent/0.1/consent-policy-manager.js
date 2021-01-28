@@ -36,11 +36,11 @@ const ALLOWLIST_POLICY = {
 export class ConsentPolicyManager {
   /**
    * Creates an instance of ConsentPolicyManager.
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!Window} window
    */
-  constructor(ampdoc) {
+  constructor(window) {
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampdoc_ = ampdoc;
+    this.ampdoc_ = window.AMP.ampdoc;
 
     /** @private {!Object<string, ?Deferred>} */
     this.policyInstancesDeferred_ = map();
@@ -49,8 +49,9 @@ export class ConsentPolicyManager {
     this.instances_ = map();
 
     /** @private {!Promise} */
+    // TODO
     this.ConsentStateManagerPromise_ = Promise.resolve(
-      getService(ampdoc.win, CONSENT_STATE_MANAGER)
+      getService(window, CONSENT_STATE_MANAGER)
     );
 
     /*getServicePromiseForDoc(

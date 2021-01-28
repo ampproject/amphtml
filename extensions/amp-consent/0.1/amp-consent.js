@@ -50,6 +50,7 @@ import {
   getService,
   getServicePromiseForDoc,
   registerServiceBuilder,
+  registerServiceBuilderForDoc,
 } from '../../../src/service';
 import {isEnumValue, isObject} from '../../../src/types';
 import {toggle} from '../../../src/style';
@@ -739,5 +740,6 @@ AMP.extension('amp-consent', '0.1', (AMP) => {
   AMP.registerElement('amp-consent', AmpConsent, CSS);
   AMP.registerServiceForDoc(NOTIFICATION_UI_MANAGER, NotificationUiManager);
   registerServiceBuilder(AMP.win, CONSENT_STATE_MANAGER, ConsentStateManager);
-  AMP.registerServiceForDoc(CONSENT_POLICY_MANAGER, ConsentPolicyManager);
+  // AMP.registerServiceForDoc(CONSENT_POLICY_MANAGER, ConsentPolicyManager);
+  registerServiceBuilder(AMP.win, CONSENT_POLICY_MANAGER, ConsentPolicyManager);
 });
