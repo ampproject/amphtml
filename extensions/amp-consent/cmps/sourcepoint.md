@@ -38,7 +38,7 @@ limitations under the License.
   </script>
   <div id="my-consent-prompt-ui">
     Post Prompt UI
-    <button on="tap:consent.prompt(consent=SourcePoint)" role="button">
+    <button on="tap:consent.prompt(consent=SourcePoint)">
       Privacy Settings
     </button>
   </div>

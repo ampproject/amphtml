@@ -95,7 +95,79 @@ This table provides examples of formatted values specified in a Mustache templat
 
 ### Migrating from 0.1
 
-The experimental `1.0` version of `amp-date-countdown` does not support the `data-count-up` attribute. This means the `1.0` component is unable to count in the opposite direction.
+The experimental `1.0` version of `amp-date-countdown` uses the attribute name `count-up` instead of `data-count-up` as in `0.1` to support the "count up" feature. See the `count-up` section under `Attributes` below for more details.
+
+### Standalone use outside valid AMP documents
+
+Bento AMP allows you to use AMP components in non-AMP pages without needing to commit to fully valid AMP. You can take these components and place them in implementations with frameworks and CMSs that don't support AMP. Read more in our guide `[Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/)`.
+
+#### Example
+
+The example below demonstrates `amp-date-countdown` component in standalone use.
+
+[example preview="top-frame" playground="false"]
+
+```
+<head>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-date-countdown.css">
+  <script async custom-element="amp-date-countdown" src="https://cdn.ampproject.org/v0/amp-date-countdown-1.0.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
+  <style>
+    amp-date-countdown {
+      height: 50px;
+    }
+  </style>
+</head>
+<amp-date-countdown
+  id="my-date-countdown"
+  timestamp-seconds="2147483648"
+  layout="fixed-height"
+  height="50">
+  <template type="amp-mustache">
+    <p class="p1">
+      {{d}} {{days}}, {{h}} {{hours}}, {{m}} {{minutes}} and {{s}} {{seconds}} until
+      <a href="https://en.wikipedia.org/wiki/Year_2038_problem">Y2K38</a>.
+    </p>
+  </template>
+</amp-date-countdown>
+<div class="buttons" style="margin-top: 8px;">
+  <button id="de-button">Change locale to German</button>
+  <button id="en-button">Change locale to English</button>
+</div>
+<script>
+  (async () => {
+    const dateCountdown = document.querySelector('#my-date-countdown');
+    await customElements.whenDefined('amp-date-countdown');
+    // set up button actions
+    document.querySelector('#de-button').onclick = () => dateCountdown.setAttribute('locale', 'de');
+    document.querySelector('#en-button').onclick = () => dateCountdown.setAttribute('locale', 'en');
+  })();
+</script>
+```
+
+[/example]
+
+#### Layout and style
+
+Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
+
+```
+<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-date-countdown-1.0.css">
+```
+
+Fully valid AMP pages use the AMP layout system to infer sizing of elements to create a page structure before downloading any remote resources. However, Bento use imports components into less controlled environments and AMP's layout system is inaccessible.
+
+**Container type**
+
+The `amp-date-countdown` component has a defined layout size type. To ensure the component renders correctly, apply the following styles:
+
+```css
+amp-date-countdown {
+  display: block;
+  height: 20px;
+}
+```
 
 ## Attributes
 
@@ -169,9 +241,13 @@ on the specified `biggest-unit` value. For example, assume there are `50 days 10
 -   Supported values: `days`, `hours`, `minutes`, `seconds`
 -   Default: `days`
 
-### data-count-up (optional)
+### count-up (optional)
 
 Include this attribute to reverse the direction of the countdown to count up instead. This is useful to display the time elapsed since a target date in the past. To continue the countdown when the target date is in the past, be sure to include the `when-ended` attribute with the `continue` value. If the target date is in the future, `amp-date-countdown` will display a decrementing (toward 0) negative value.
+
+[tip type="important"]
+Please note that the attribute name is different than `0.1` which uses the `data-count-up` attribute to toggle this feature. The behavior of the feature is otherwise identical to `0.1`.
+[/tip]
 
 ## Events
 

@@ -42,6 +42,7 @@ import {
   useState,
 } from '../../../src/preact';
 import {toWin} from '../../../src/types';
+import {useStyles} from './base-carousel.jss';
 
 /**
  * @enum {string}
@@ -109,6 +110,7 @@ function BaseCarouselWithRef(
   },
   ref
 ) {
+  const classes = useStyles();
   const childrenArray = useMemo(() => toChildArray(children), [children]);
   const {length} = childrenArray;
   const carouselContext = useContext(CarouselContext);
@@ -314,6 +316,7 @@ function BaseCarouselWithRef(
         interaction.current = Interaction.TOUCH;
       }}
       tabIndex="0"
+      wrapperClassName={classes.carousel}
       {...rest}
     >
       {!hideControls && (

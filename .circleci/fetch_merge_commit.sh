@@ -14,23 +14,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the license.
 #
-# This script fetches the merge commit of a PR branch with master.
+# This script fetches the merge commit of a PR branch with master to make sure
+# PRs are tested against all the latest changes.
 
 set -e
 err=0
 
-if [ -z "$CIRCLE_PR_NUMBER" ]; then
+# CIRCLE_PULL_REQUEST is present for PR builds, and absent for push builds.
+# See https://circleci.com/docs/2.0/env-vars/#built-in-environment-variables.
+if [[ -z "$CIRCLE_PULL_REQUEST" ]]; then
   echo -e "Nothing to do because this is not a PR build."
-  exit
+  exit 0
 fi
 
-# GitHub provides refs/pull/<PR_NUMBER>/merge for every PR branch that can be
-# cleanly merged to `master`. See this discussion for more details:
+# Make sure the PR is on ampproject/amphtml and not on a fork.
+if [[ ! "$CIRCLE_PULL_REQUEST" =~ ^https://github.com/ampproject/amphtml* ]]; then
+  echo -e "This is a PR build, but on a repo other than ampproject/amphtml."
+  exit 1
+fi
+
+# GitHub provides refs/pull/<PR_NUMBER>/merge, an up-to-date merge branch for
+# every PR branch that can be cleanly merged to master. For more details, see:
 # https://discuss.circleci.com/t/show-test-results-for-prospective-merge-of-a-github-pr/1662
 MERGE_BRANCH="refs/pull/$CIRCLE_PR_NUMBER/merge"
 (set -x && git pull --ff-only origin "$MERGE_BRANCH") || err=$?
 
-if [ "$err" -ne "0" ]; then
+if [[ "$err" -ne "0" ]]; then
   echo
   echo -e "ERROR: Detected a merge conflict between $CIRCLE_BRANCH and master."
   echo -e "Please rebase your PR branch."

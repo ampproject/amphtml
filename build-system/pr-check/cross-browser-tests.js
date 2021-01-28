@@ -19,7 +19,7 @@
  * @fileoverview Script that builds and tests on Linux, macOS, and Windows during CI.
  */
 
-const {determineBuildTargets} = require('./build-targets');
+const {buildTargetsInclude, Targets} = require('./build-targets');
 const {log} = require('../common/logging');
 const {printSkipMessage, timedExecOrDie} = require('./utils');
 const {red, cyan} = require('ansi-colors');
@@ -85,15 +85,16 @@ function pushBuildWorkflow() {
 }
 
 async function prBuildWorkflow() {
-  const buildTargets = determineBuildTargets();
   if (process.platform == 'linux') {
-    await reportAllExpectedTests(buildTargets); // Only once is sufficient.
+    await reportAllExpectedTests(); // Only once is sufficient.
   }
   if (
-    !buildTargets.has('RUNTIME') &&
-    !buildTargets.has('FLAG_CONFIG') &&
-    !buildTargets.has('UNIT_TEST') &&
-    !buildTargets.has('INTEGRATION_TEST')
+    !buildTargetsInclude(
+      Targets.RUNTIME,
+      Targets.FLAG_CONFIG,
+      Targets.UNIT_TEST,
+      Targets.INTEGRATION_TEST
+    )
   ) {
     printSkipMessage(
       jobName,
@@ -103,14 +104,16 @@ async function prBuildWorkflow() {
   }
   timedExecOrDie('gulp update-packages');
   if (
-    buildTargets.has('RUNTIME') ||
-    buildTargets.has('FLAG_CONFIG') ||
-    buildTargets.has('INTEGRATION_TEST')
+    buildTargetsInclude(
+      Targets.RUNTIME,
+      Targets.FLAG_CONFIG,
+      Targets.INTEGRATION_TEST
+    )
   ) {
     timedExecOrDie('gulp dist --fortesting');
     runIntegrationTestsForPlatform();
   }
-  if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {
+  if (buildTargetsInclude(Targets.RUNTIME, Targets.UNIT_TEST)) {
     runUnitTestsForPlatform();
   }
 }
