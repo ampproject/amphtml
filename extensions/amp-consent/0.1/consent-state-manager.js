@@ -231,10 +231,16 @@ export class ConsentInstance {
     /** @public {?Promise<Object>} */
     this.sharedDataPromise = null;
 
-    /** @private {Promise<!../../../src/service/storage-impl.Storage>} */
-    this.storagePromise_ = Services.storageForDoc(ampdoc);
+    const topLevelDoc = ampdoc.isSingleDoc()
+      ? ampdoc
+      : ampdoc.getTopLevelParent();
 
-    /** @private {?ConsentInfoDef}*/
+    console.log('topleveldoc', topLevelDoc);
+
+    /** @private {Promise<!../../../src/service/storage-impl.Storage>} */
+    this.storagePromise_ = Services.storageForDoc(topLevelDoc);
+
+    /** @private {?ConsentInfoDef} */
     this.localConsentInfo_ = null;
 
     /** @private {?ConsentInfoDef} */

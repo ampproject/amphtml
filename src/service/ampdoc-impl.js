@@ -336,6 +336,11 @@ export class AmpDoc {
     return this.parent_;
   }
 
+  getTopLevelParent() {
+    dev().error('dont');
+    return this.getParent();
+  }
+
   /**
    * DO NOT CALL. Retained for backward compat during rollout.
    * @return {!Window}
@@ -791,8 +796,11 @@ export class AmpDocShadow extends AmpDoc {
    */
   constructor(win, url, shadowRoot, opt_options) {
     super(win, /* parent */ null, opt_options);
+    // super(win, shadowRoot.host, opt_options);
+
     /** @private @const {string} */
     this.url_ = url;
+
     /** @private @const {!ShadowRoot} */
     this.shadowRoot_ = shadowRoot;
 
@@ -899,6 +907,12 @@ export class AmpDocShadow extends AmpDoc {
       this.meta_ = map();
     }
     this.meta_[name] = content;
+  }
+
+  /** @override */
+  getTopLevelParent() {
+    console.log('^^^^^^^', this.getRootNode().host.ownerDocument);
+    return this.getRootNode().host.ownerDocument;
   }
 }
 
