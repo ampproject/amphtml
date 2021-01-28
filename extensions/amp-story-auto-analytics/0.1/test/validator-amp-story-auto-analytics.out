@@ -32,7 +32,8 @@ PASS
 |  </head>
 |  <body>
 |    <amp-story standalone title="My Story" publisher="Me" publisher-logo-src="http://me.com/logo.png" poster-portrait-src="http://me.com/poster.jpg">
-|      <amp-story-auto-analytics gtag-id="ANALYTICS-ID"></amp-story-auto-analytics>
+|      <!-- Valid: has correct gtag attribute and value -->
+|      <amp-story-auto-analytics gtag-id="UA-ANALYTICS"></amp-story-auto-analytics>
 |      <amp-story-page id="cover" auto-advance-after="1s">
 |        <amp-story-grid-layer template="fill">
 |          <h1>Title</h1>

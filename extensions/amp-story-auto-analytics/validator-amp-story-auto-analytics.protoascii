@@ -31,5 +31,6 @@ tags: {  # <amp-story-auto-analytics>
   attrs: {
     name: "gtag-id"
     mandatory: true
+    value_regex: "[A-Z]{1,2}-[A-Z0-9-]+"
   }
 }
