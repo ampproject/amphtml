@@ -197,7 +197,7 @@ jobs:
           command: node build-system/pr-check/experiment-tests.js --experiment=experimentC
 
 workflows:
-  'CircleCI PR Check':
+  'CircleCI':
     jobs:
       - 'Checks':
           <<: *push_and_pr_builds
