@@ -443,6 +443,9 @@
     "page": "https://api.segment.io/v1/pixel/page?writeKey=!writeKey&context.library.name=amp&anonymousId=_client_id(AMP_ECID_GOOGLE%2C%2C_ga)_&context.locale=_browser_language_&context.page.path=_canonical_path_&context.page.url=_canonical_url_&context.page.referrer=_document_referrer_&context.page.title=_title_&context.screen.width=_screen_width_&context.screen.height=_screen_height_&name=!name",
     "track": "https://api.segment.io/v1/pixel/track?writeKey=!writeKey&context.library.name=amp&anonymousId=_client_id(AMP_ECID_GOOGLE%2C%2C_ga)_&context.locale=_browser_language_&context.page.path=_canonical_path_&context.page.url=_canonical_url_&context.page.referrer=_document_referrer_&context.page.title=_title_&context.screen.width=_screen_width_&context.screen.height=_screen_height_&event=!event"
   },
+  "sensorsanalytics": {
+    "trackTest": "https://jssdkdata.debugbox.sensorsdata.cn/sa?project=liangshuang&distinct_id=_client_id(sensors_amp_id)_&lib=%5Bobject%20Object%5D&properties=%5Bobject%20Object%5D&type=track&event=!event&time=_timestamp_"
+  },
   "shinystat": {
     "base": "https://amp.shinystat.com/cgi-bin/shinyamp.cgi",
     "commpar": "AMP=1&RM=_random_&USER=!account&PAG=!page&HR=_source_url_&REFER=_document_referrer_&RES=_screen_width_X_screen_height_&COLOR=_screen_color_depth_&CID=_client_id(AMP_CID)_&PAGID=_page_view_id_&TITL=_title_&RQC=1",
