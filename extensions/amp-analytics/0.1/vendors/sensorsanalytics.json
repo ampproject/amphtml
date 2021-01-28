@@ -3,6 +3,9 @@
     "xhrpost": true,
     "useBody": true
   },
+  "requests": {
+    "trackTest": "https://jssdkdata.debugbox.sensorsdata.cn/sa?project=liangshuang"
+  },
   "vars": {
     "distinctId": "${clientId(sensors_amp_id)}"
   },
