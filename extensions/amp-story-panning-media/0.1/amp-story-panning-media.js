@@ -33,6 +33,18 @@ const TAG = 'AMP_STORY_PANNING_MEDIA';
 /** @const {string}  */
 const DURATION_MS = 1000;
 
+/**
+ * x: (optional) Percentage between [-50; 50]
+ * y: (optional) Percentage between [-50; 50]
+ * zoom: 0 is not visible. 1 fills the viewport vertically.
+ * @typedef {{
+ *   x: float,
+ *   y: float,
+ *   zoom: float,
+ * }}
+ */
+export let panningMediaPositionDef;
+
 export class AmpStoryPanningMedia extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -44,14 +56,14 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     /** @private {?Element} The element that is transitioned. */
     this.ampImgEl_ = null;
 
-    /** @private {?{x: float, y: float, zoom: float}} Position to animate to. */
+    /** @private {?panningMediaPositionDef} Position to animate to. */
     this.animateTo_ = {
       x: null, // Percentage between [-50; 50]
       y: null, // Percentage between [-50; 50]
       zoom: null, // 0 is not visible. 1 fills the viewport vertically.
     };
 
-    /** @private {?{x: float, y: float, zoom: float}} Current animation state. */
+    /** @private {?panningMediaPositionDef} Current animation state. */
     this.animationState_ = {};
 
     /** @private {?../../../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */

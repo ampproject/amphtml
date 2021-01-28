@@ -111,7 +111,7 @@ export let InteractiveReactData;
  *    mutedState: boolean,
  *    pageAudioState: boolean,
  *    pageHasElementsWithPlaybackState: boolean,
- *    panningMediaState: !Map<string, {x: float, y: float, zoom: float}> ,
+ *    panningMediaState: !Map<string, ../../amp-story-panning-media/0.1/amp-story-panning-media.panningMediaPositionDef> ,
  *    pausedState: boolean,
  *    previewState: boolean,
  *    rtlState: boolean,
