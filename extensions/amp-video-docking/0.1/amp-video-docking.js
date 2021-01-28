@@ -454,11 +454,18 @@ export class VideoDocking {
     if (!this.intersectionObserver_) {
       this.intersectionObserver_ = new IntersectionObserver(
         (entries) => {
-          entries.forEach((entry) => {
-            entry.target.getImpl().then((video) => {
-              this.updateOnPositionChange_(video, entry.boundingClientRect);
-            });
-          });
+          // Multiple entries could belong to the same element, use only the
+          // most recent.
+          const handled = [];
+          for (let i = entries.length - 1; i >= 0; i--) {
+            const {target, boundingClientRect} = entries[i];
+            if (handled.indexOf(target) < 0) {
+              target.getImpl().then((video) => {
+                this.updateOnPositionChange_(video, boundingClientRect);
+              });
+              handled.push(target);
+            }
+          }
         },
         {threshold: [0, 0.1, 0.2, 0.8, 0.9, 1]}
       );
