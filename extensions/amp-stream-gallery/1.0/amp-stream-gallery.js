@@ -23,6 +23,7 @@ import {Services} from '../../../src/services';
 import {StreamGallery} from './stream-gallery';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/utils/object';
+import {dispatchCustomEvent} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
 import {userAssert} from '../../../src/log';
 
@@ -54,7 +55,8 @@ class AmpStreamGallery extends PreactBaseElement {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(
-      isExperimentOn(this.win, 'bento-stream-gallery'),
+      isExperimentOn(this.win, 'bento-stream-gallery') ||
+        isExperimentOn(this.win, 'bento'),
       'expected global "bento" or specific "bento-stream-gallery" experiment to be enabled'
     );
     return super.isLayoutSupported(layout);
@@ -71,13 +73,20 @@ class AmpStreamGallery extends PreactBaseElement {
  * @private
  */
 function fireSlideChangeEvent(win, el, index, trust) {
-  const name = 'slideChange';
+  const eventName = 'slideChange';
+  const data = dict({'index': index});
   const slideChangeEvent = createCustomEvent(
     win,
-    `amp-stream-gallery.${name}`,
-    dict({'index': index})
+    `amp-stream-gallery.${eventName}`,
+    data
   );
-  Services.actionServiceForDoc(el).trigger(el, name, slideChangeEvent, trust);
+  Services.actionServiceForDoc(el).trigger(
+    el,
+    eventName,
+    slideChangeEvent,
+    trust
+  );
+  dispatchCustomEvent(el, eventName, data);
 }
 
 /** @override */

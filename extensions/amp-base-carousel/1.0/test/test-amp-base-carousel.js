@@ -244,6 +244,25 @@ describes.realWin(
       });
     });
 
+    it('should fire DOM event', async () => {
+      const userSuppliedChildren = setSlides(3);
+      userSuppliedChildren.forEach((child) => element.appendChild(child));
+      win.document.body.appendChild(element);
+      await getSlidesFromShadow();
+
+      const eventSpy = env.sandbox.spy();
+      element.addEventListener('slideChange', eventSpy);
+      element.setAttribute('slide', '1');
+
+      await waitFor(() => eventSpy.callCount > 0, 'event fired');
+      expect(eventSpy).to.be.calledOnce;
+      expect(eventSpy.firstCall).calledWithMatch({
+        'data': {
+          'index': 1,
+        },
+      });
+    });
+
     describe('imperative api', () => {
       let scroller;
       let slides;
