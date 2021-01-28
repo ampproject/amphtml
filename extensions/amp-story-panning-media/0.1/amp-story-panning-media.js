@@ -143,10 +143,9 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
    * @private
    */
   animate_() {
-    const getPanningMediaState = () =>
-      this.storeService_.get(StateProperty.PANNING_MEDIA_STATE);
-
-    const startPos = getPanningMediaState()[this.groupId_] || {
+    const startPos = this.storeService_.get(StateProperty.PANNING_MEDIA_STATE)[
+      this.groupId_
+    ] || {
       x: this.x_,
       y: this.y_,
       zoom: this.zoom_,
@@ -164,7 +163,6 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       if (elapsedTime < DURATION_MS) {
         const easing = easeInOutQuad(elapsedTime / DURATION_MS);
         this.storeService_.dispatch(Action.SET_PANNING_MEDIA_STATE, {
-          ...getPanningMediaState(),
           [this.groupId_]: {
             x: startPos.x + (this.x_ - startPos.x) * easing,
             y: startPos.y + (this.y_ - startPos.y) * easing,
@@ -177,7 +175,6 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
         }
       } else {
         this.storeService_.dispatch(Action.SET_PANNING_MEDIA_STATE, {
-          ...getPanningMediaState(),
           [this.groupId_]: {x: this.x_, y: this.y_, zoom: this.zoom_},
         });
       }

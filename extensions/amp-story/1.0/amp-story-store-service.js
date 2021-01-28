@@ -488,9 +488,13 @@ const actions = (state, action, data) => {
         [StateProperty.PAGE_SIZE]: data,
       });
     case Action.SET_PANNING_MEDIA_STATE:
+      const updatedState = {
+        ...state[StateProperty.PANNING_MEDIA_STATE],
+        ...data,
+      };
       return /** @type {!State} */ ({
         ...state,
-        [StateProperty.PANNING_MEDIA_STATE]: data,
+        [StateProperty.PANNING_MEDIA_STATE]: updatedState,
       });
     case Action.SET_VIEWER_CUSTOM_CONTROLS:
       return /** @type {!State} */ ({
