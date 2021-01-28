@@ -255,7 +255,8 @@ const stateComparisonFunctions = {
     curr === null ||
     old.width !== curr.width ||
     old.height !== curr.height,
-  [StateProperty.PANNING_MEDIA_STATE]: (old, curr) => !deepEquals(old, curr, 2),
+  [StateProperty.PANNING_MEDIA_STATE]: (old, curr) =>
+    old === null || curr === null || !deepEquals(old, curr, 2),
   [StateProperty.INTERACTIVE_REACT_STATE]: (old, curr) =>
     !deepEquals(old, curr, 3),
 };
