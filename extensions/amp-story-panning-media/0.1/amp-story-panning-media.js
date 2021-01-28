@@ -73,7 +73,6 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     this.x_ = parseFloat(this.element_.getAttribute('x')) || 0;
     this.y_ = parseFloat(this.element_.getAttribute('y')) || 0;
     this.zoom_ = parseFloat(this.element_.getAttribute('zoom')) || 1;
-    this.groupId_ = this.element_.getAttribute('group-id');
 
     return Services.storyStoreServiceForOrNull(this.win).then(
       (storeService) => {
@@ -87,6 +86,10 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     this.ampImgEl_ = dev().assertElement(
       this.element_.querySelector('amp-img')
     );
+    this.groupId_ =
+      this.element_.getAttribute('group-id') ||
+      this.ampImgEl_.getAttribute('src');
+
     this.initializeListeners_();
     return whenUpgradedToCustomElement(this.ampImgEl_)
       .then(() => this.ampImgEl_.signals().whenSignal(CommonSignals.LOAD_END))
