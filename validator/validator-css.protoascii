@@ -29,6 +29,7 @@ declaration_list {
   declaration: { name: "animation-name" }
   declaration: { name: "animation-play-state" }
   declaration: { name: "animation-timing-function" }
+  declaration: { name: "aspect-ratio" }
   declaration: { name: "backface-visibility" }
   declaration: { name: "background" }
   declaration: { name: "background-attachment" }
