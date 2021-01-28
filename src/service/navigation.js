@@ -752,9 +752,11 @@ export class Navigation {
     const viewerHasCapability = this.viewer_.hasCapability(
       'interceptNavigation'
     );
-    const docOptedIn = this.ampdoc
-      .getRootNode()
-      .documentElement.hasAttribute('allow-navigation-interception');
+    const docOptedIn =
+      this.ampdoc.isSingleDoc() &&
+      this.ampdoc
+        .getRootNode()
+        .documentElement.hasAttribute('allow-navigation-interception');
 
     if (
       !viewerHasCapability ||
