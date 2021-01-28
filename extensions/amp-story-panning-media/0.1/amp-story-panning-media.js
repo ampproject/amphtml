@@ -68,7 +68,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     /** @private {?string} */
     this.groupId_ = null;
 
-    /** @private{!Object<string, string>} Current animation state. */
+    /** @private {!Object<string, string>} Current animation state. */
     this.animationState_ = {};
   }
 
