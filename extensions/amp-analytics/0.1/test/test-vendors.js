@@ -137,7 +137,7 @@ describes.realWin(
                 'Request for ' +
                   vendor +
                   ' not found. Please make sure you run ' +
-                  '"gulp vendor-configs" or build amp-analytics ' +
+                  '"gulp analytics-vendor-configs" or build amp-analytics ' +
                   'before running the test'
               );
             }

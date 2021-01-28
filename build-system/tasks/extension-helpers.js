@@ -23,12 +23,12 @@ const {
   extensionBundles,
   verifyExtensionBundles,
 } = require('../compile/bundles.config');
+const {analyticsVendorConfigs} = require('./analytics-vendor-configs');
 const {endBuildStep, watchDebounceDelay} = require('./helpers');
 const {isCiBuild} = require('../common/ci');
 const {jsifyCssAsync} = require('./jsify-css');
 const {log} = require('../common/logging');
 const {maybeToEsmName, compileJs, mkdirSync} = require('./helpers');
-const {vendorConfigs} = require('./vendor-configs');
 const {watch} = require('gulp');
 
 const {green, red, cyan} = colors;
@@ -453,7 +453,7 @@ async function buildExtension(
     }
   }
   if (name === 'amp-analytics') {
-    await vendorConfigs(options);
+    await analyticsVendorConfigs(options);
   }
   await buildExtensionJs(path, name, version, latestVersion, options);
 }
