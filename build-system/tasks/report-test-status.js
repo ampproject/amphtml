@@ -49,12 +49,9 @@ const TEST_TYPE_SUBTYPES = isGithubActionsBuild()
     ])
   : new Map([]);
 const TEST_TYPE_BUILD_TARGETS = new Map([
-  [
-    'integration',
-    [Targets.RUNTIME, Targets.FLAG_CONFIG, Targets.INTEGRATION_TEST],
-  ],
+  ['integration', [Targets.RUNTIME, Targets.INTEGRATION_TEST]],
   ['unit', [Targets.RUNTIME, Targets.UNIT_TEST]],
-  ['e2e', [Targets.RUNTIME, Targets.FLAG_CONFIG, Targets.E2E_TEST]],
+  ['e2e', [Targets.RUNTIME, Targets.E2E_TEST]],
 ]);
 
 function inferTestType() {

@@ -48,16 +48,14 @@ function pushBuildWorkflow() {
 }
 
 function prBuildWorkflow() {
-  if (
-    buildTargetsInclude(Targets.RUNTIME, Targets.FLAG_CONFIG, Targets.E2E_TEST)
-  ) {
+  if (buildTargetsInclude(Targets.RUNTIME, Targets.E2E_TEST)) {
     downloadNomoduleOutput();
     timedExecOrDie('gulp update-packages');
     timedExecOrDie('gulp e2e --nobuild --headless --compiled');
   } else {
     printSkipMessage(
       jobName,
-      'this PR does not affect the runtime, flag configs, or end-to-end tests'
+      'this PR does not affect the runtime or end-to-end tests'
     );
   }
 }

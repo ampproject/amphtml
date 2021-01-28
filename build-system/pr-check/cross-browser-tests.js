@@ -91,25 +91,18 @@ async function prBuildWorkflow() {
   if (
     !buildTargetsInclude(
       Targets.RUNTIME,
-      Targets.FLAG_CONFIG,
       Targets.UNIT_TEST,
       Targets.INTEGRATION_TEST
     )
   ) {
     printSkipMessage(
       jobName,
-      'this PR does not affect the runtime, flag configs, unit tests, or integration tests'
+      'this PR does not affect the runtime, unit tests, or integration tests'
     );
     return;
   }
   timedExecOrDie('gulp update-packages');
-  if (
-    buildTargetsInclude(
-      Targets.RUNTIME,
-      Targets.FLAG_CONFIG,
-      Targets.INTEGRATION_TEST
-    )
-  ) {
+  if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
     timedExecOrDie('gulp dist --fortesting');
     runIntegrationTestsForPlatform();
   }
