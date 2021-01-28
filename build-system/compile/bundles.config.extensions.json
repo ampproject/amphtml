@@ -454,7 +454,6 @@
   {
     "name": "amp-story-auto-analytics",
     "version": "0.1",
-    "options": {"hasCss": true},
     "latestVersion": "0.1"
   },
   {

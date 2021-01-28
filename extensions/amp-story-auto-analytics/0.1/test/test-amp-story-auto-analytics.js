@@ -27,23 +27,25 @@ describes.realWin(
   },
   (env) => {
     let win;
-    let element;
+    let autoAnalyticsEl;
 
     beforeEach(() => {
       win = env.win;
-      element = createElementWithAttributes(
+      autoAnalyticsEl = createElementWithAttributes(
         win.document,
         'amp-story-auto-analytics',
         {
-          layout: 'responsive',
+          'gtag-id': 'ANALYTICS-ID',
         }
       );
-      win.document.body.appendChild(element);
+      win.document.body.appendChild(autoAnalyticsEl);
     });
 
-    it('should contain "hello world" when built', async () => {
-      await element.whenBuilt();
-      expect(element.querySelector('div').textContent).to.equal('hello world');
+    it('should contain the analytics ID in the script when built', async () => {
+      await autoAnalyticsEl.whenBuilt();
+      expect(autoAnalyticsEl.querySelector('script').textContent).to.contain(
+        'ANALYTICS-ID'
+      );
     });
   }
 );
