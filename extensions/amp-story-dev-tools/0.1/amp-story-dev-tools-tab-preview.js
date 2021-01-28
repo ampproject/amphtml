@@ -578,17 +578,20 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
    */
   onPlayerNavigation_(event, deviceSpecs) {
     const {pageId} = event.detail;
-    const pageIndex = this.expectedNavigationEvents_[
+    const pageIndexInExpectedList = this.expectedNavigationEvents_[
       deviceSpecs.name
     ].lastIndexOf(pageId);
-    if (pageIndex > -1) {
+    if (pageIndexInExpectedList > -1) {
       // Remove the expected events up to the most recently received event if it was in the list.
-      this.expectedNavigationEvents_[deviceSpecs.name].splice(0, pageIndex + 1);
+      this.expectedNavigationEvents_[deviceSpecs.name].splice(
+        0,
+        pageIndexInExpectedList + 1
+      );
       return;
     }
     this.devices_.forEach((d) => {
       if (d != deviceSpecs) {
-        d.player.show(null, event.detail.pageId);
+        d.player.show(/* storyUrl */ null, event.detail.pageId);
         this.expectedNavigationEvents_[d.name].push(pageId);
       }
     });
