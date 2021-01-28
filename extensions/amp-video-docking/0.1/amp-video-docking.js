@@ -648,9 +648,10 @@ export class VideoDocking {
       if (!this.currentlyDocked_) {
         return;
       }
-      const video = this.getDockedVideo_();
-      if (this.isVisible_(video, REVERT_TO_INLINE_RATIO, opt_clientRect)) {
-        this.undock_(video, /* opt_reconciled */ false, opt_clientRect);
+      if (video === this.getDockedVideo_()) {
+        if (this.isVisible_(video, REVERT_TO_INLINE_RATIO, opt_inlineRect)) {
+          this.undock_(video, /* opt_reconciled */ false, opt_inlineRect);
+        }
       }
     }
   }
