@@ -22,7 +22,7 @@ import {
   runWhenFetchingSettled,
   sizeAgainstWindow,
   ssp,
-} from '../../../ads/ssp';
+} from '../../../ads/vendors/ssp';
 
 describes.fakeWin('amp-ad-ssp', {}, () => {
   let sandbox;

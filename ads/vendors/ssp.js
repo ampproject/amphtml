@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {computeInMasterFrame, loadScript, validateData} from '../3p/3p';
-import {parseJson} from '../src/json';
-import {setStyles} from '../src/style';
+import {computeInMasterFrame, loadScript, validateData} from '../../3p/3p';
+import {parseJson} from '../../src/json';
+import {setStyles} from '../../src/style';
 
 /*
  * How to develop:
@@ -120,7 +120,7 @@ export function ssp(global, data) {
   global.document.getElementById('c').appendChild(parentElement);
 
   // validate dimensions against available space (window)
-  const sizing = sizeAgainstWindow(parentElement /*OK*/.clientWidth, data);
+  const sizing = sizeAgainstWindow(parentElement./*OK*/ clientWidth, data);
 
   // https://github.com/ampproject/amphtml/blob/master/3p/3p.js#L186
   computeInMasterFrame(
