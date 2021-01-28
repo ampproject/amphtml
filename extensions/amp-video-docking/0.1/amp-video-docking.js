@@ -460,10 +460,7 @@ export class VideoDocking {
             });
           });
         },
-        {
-          root: this.doc_,
-          threshold: [0, 0.1, 0.2, 0.8, 0.9, 1],
-        }
+        {threshold: [0, 0.1, 0.2, 0.8, 0.9, 1]}
       );
     }
 
