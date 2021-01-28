@@ -740,7 +740,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!VideoOrBasezElementDef} video
+   * @param {!VideoOrBaseElementDef} video
    * @param {!DockTargetDef} target
    * @param {number} step
    * @param {!LayoutRectDef=} opt_clientRect
