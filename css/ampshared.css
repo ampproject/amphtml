@@ -322,9 +322,12 @@ amp-img:not(.i-amphtml-element)[i-amphtml-ssr] > img.i-amphtml-fill-content
 .i-amphtml-element > [placeholder],
 [layout]:not(.i-amphtml-element) > [placeholder],
 [width][height][sizes]:not([layout]):not(.i-amphtml-element) > [placeholder],
-[width][height][heights]:not([layout]):not(.i-amphtml-element) > [placeholder]
-{
+[width][height][heights]:not([layout]):not(.i-amphtml-element) > [placeholder] {
   display: block;
+  /* line-height:normal overrides line-height:0 from the "hide all children of
+     non-container text node children" rule. This avoids a minor content jump during
+     element build since placeholders should be fully visible. */
+  line-height: normal;
 }
 
 .i-amphtml-element > [placeholder].hidden,
