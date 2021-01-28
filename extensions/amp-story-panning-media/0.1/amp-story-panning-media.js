@@ -23,6 +23,7 @@ import {CommonSignals} from '../../../src/common-signals';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {closest, whenUpgradedToCustomElement} from '../../../src/dom';
+import {deepEquals} from '../../../src/json';
 import {dev, user} from '../../../src/log';
 import {setImportantStyles} from '../../../src/style';
 
@@ -66,6 +67,9 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
 
     /** @private {?string} */
     this.groupId_ = null;
+
+    /** @private{!Object<string, string>} Current animation state. */
+    this.animationState_ = {};
   }
 
   /** @override */
@@ -190,18 +194,24 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
    * @param {!Object<string, string>} panningMediaState
    */
   onPanningMediaStateChange_(panningMediaState) {
-    if (panningMediaState[this.groupId_] && this.distance_ <= 1) {
-      this.updateTransform_(panningMediaState);
+    if (
+      this.distance_ <= 1 &&
+      panningMediaState[this.groupId_] &&
+      // Prevent update if value is same as previous value.
+      // This happens when 2 or more components are on the same page.
+      !deepEquals(this.animationState_, panningMediaState[this.groupId_])
+    ) {
+      this.animationState_ = panningMediaState[this.groupId_];
+      this.updateTransform_();
     }
   }
 
   /**
    * @private
-   * @param {!Object<string, string>} panningMediaState
    * @return {!Promise}
    */
-  updateTransform_(panningMediaState) {
-    const {x, y, zoom} = panningMediaState[this.groupId_];
+  updateTransform_() {
+    const {x, y, zoom} = this.animationState_;
     return this.mutateElement(() => {
       setImportantStyles(this.ampImgEl_, {
         transform: `translate3d(${x}%, ${y}%, ${(zoom - 1) / zoom}px)`,
