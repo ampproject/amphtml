@@ -34,20 +34,18 @@ if [[ ! "$CIRCLE_PULL_REQUEST" =~ ^https://github.com/ampproject/amphtml* ]]; th
 fi
 
 # CIRCLE_PR_NUMBER is present for PRs originating from forks, but absent for PRs
-# originating from a branch on the main repo.
-if [[ "$CIRCLE_PR_NUMBER" ]]; then
-  # For PRs originating from forks, GitHub provides refs/pull/<PR_NUMBER>/merge,
-  # an up-to-date merge branch for every PR branch that can be cleanly merged to
-  # master. For more details, see:
-  # https://discuss.circleci.com/t/show-test-results-for-prospective-merge-of-a-github-pr/1662
-  MERGE_BRANCH="refs/pull/$CIRCLE_PR_NUMBER/merge"
-  (set -x && git pull --ff-only origin "$MERGE_BRANCH") || err=$?
-else
-  # For PRs originating from a branch on the main repo, we attempt to merge
-  # the PR branch into master.
-  (set -x && git checkout master) || err=$?
-  (set -x && git merge --commit --no-edit "$CIRCLE_BRANCH") || err=$?
+# originating from a branch on the main repo. In such cases, extract it from
+# $CIRCLE_PULL_REQUEST
+if [[ -z "$CIRCLE_PR_NUMBER" ]]; then
+  CIRCLE_PR_NUMBER=${CIRCLE_PULL_REQUEST#"https://github.com/ampproject/amphtml/pull/"}
 fi
+
+# GitHub provides refs/pull/<PR_NUMBER>/merge, an up-to-date merge branch for
+# every PR branch that can be cleanly merged to master. For more details, see:
+# https://discuss.circleci.com/t/show-test-results-for-prospective-merge-of-a-github-pr/1662
+MERGE_BRANCH="refs/pull/$CIRCLE_PR_NUMBER/merge"
+(set -x && git pull --ff-only origin "$MERGE_BRANCH") || err=$?
+
 
 # If a clean merge is not possible, do not proceed with the build. GitHub's UI
 # will show an error indicating there was a merge conflict.
