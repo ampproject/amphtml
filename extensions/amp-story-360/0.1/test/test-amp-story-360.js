@@ -39,6 +39,9 @@ describes.realWin(
     let element;
     let threesixty;
     let storeService;
+    let pageEl;
+
+    const nextTick = () => new Promise((resolve) => win.setTimeout(resolve, 0));
 
     function appendAmpImg(parent, path) {
       const ampImg = createElementWithAttributes(win.document, 'amp-img', {
@@ -49,15 +52,25 @@ describes.realWin(
       parent.appendChild(ampImg);
     }
 
-    async function createAmpStory360(imagePath) {
-      const pageEl = win.document.createElement('amp-story-page');
+    async function createAmpStory360(imagePath, opt_gyroscope) {
+      pageEl = win.document.createElement('amp-story-page');
       pageEl.id = 'page1';
-      element = createElementWithAttributes(win.document, 'amp-story-360', {
+      const attrs = {
         'layout': 'fill',
         'duration': '1s',
         'heading-end': '95',
         'style': 'height: 100px',
-      });
+      };
+
+      if (opt_gyroscope) {
+        attrs['controls'] = 'gyroscope';
+      }
+
+      element = createElementWithAttributes(
+        win.document,
+        'amp-story-360',
+        attrs
+      );
       if (imagePath) {
         appendAmpImg(element, imagePath);
       }
@@ -88,6 +101,23 @@ describes.realWin(
       expect(() => {
         threesixty.layoutCallback();
       }).to.not.throw();
+    });
+
+    it('activation button should contain role="button" to prevent story page navigation', async () => {
+      win.DeviceOrientationEvent.requestPermission = () => Promise.reject();
+
+      await createAmpStory360(
+        '/examples/amp-story/img/SeanDoran-Quela-sol1462-edited_ver2-sm.jpg',
+        /* opt_gyroscope */ true
+      );
+      await threesixty.layoutCallback();
+      const activationEl = pageEl.querySelector(
+        '.i-amphtml-story-360-activate-button'
+      );
+
+      await nextTick();
+
+      expect(activationEl.getAttribute('role')).to.eql('button');
     });
 
     it('should throw if nested amp-img is missing', async () => {
