@@ -35,13 +35,13 @@ const IS_GULP_INTEGRATION = argv._[0] === 'integration';
 const IS_GULP_UNIT = argv._[0] === 'unit';
 const IS_GULP_E2E = argv._[0] === 'e2e';
 
+// TODO(rsimha): Consolidate once Travis and GH Actions are shut off.
 const TEST_TYPE_SUBTYPES = isGithubActionsBuild()
   ? new Map([
       ['integration', ['firefox', 'safari', 'edge', 'ie']],
       ['unit', ['firefox', 'safari', 'edge']],
     ])
-  : // TODO(rsimha): Remove `isTravisBuild()` condition once Travis is shut off.
-  isCircleciBuild() || isTravisBuild()
+  : isTravisBuild()
   ? new Map([
       ['integration', ['unminified', 'nomodule', 'module']],
       ['unit', ['unminified', 'local-changes']],
@@ -91,8 +91,8 @@ function inferTestType() {
 }
 
 async function postReport(type, action) {
-  // TODO(rsimha): Remove `isTravisBuild()` condition once Travis is shut off.
-  if (type && isPullRequestBuild() && isTravisBuild()) {
+  // TODO(rsimha): Remove `!isCircleciBuild()` condition once Travis and GH Actions are shut off.
+  if (type && isPullRequestBuild() && !isCircleciBuild()) {
     const commitHash = gitCommitHash();
 
     try {

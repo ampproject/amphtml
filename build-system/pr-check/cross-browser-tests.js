@@ -19,9 +19,14 @@
  * @fileoverview Script that builds and tests on Linux, macOS, and Windows during CI.
  */
 
+const {
+  downloadNomoduleOutput,
+  printSkipMessage,
+  timedExecOrDie,
+} = require('./utils');
 const {buildTargetsInclude, Targets} = require('./build-targets');
+const {isCircleciBuild} = require('../common/ci');
 const {log} = require('../common/logging');
-const {printSkipMessage, timedExecOrDie} = require('./utils');
 const {red, cyan} = require('ansi-colors');
 const {reportAllExpectedTests} = require('../tasks/report-test-status');
 const {runCiJob} = require('./ci-job');
@@ -79,9 +84,9 @@ function runUnitTestsForPlatform() {
 
 function pushBuildWorkflow() {
   timedExecOrDie('gulp update-packages');
+  runUnitTestsForPlatform();
   timedExecOrDie('gulp dist --fortesting');
   runIntegrationTestsForPlatform();
-  runUnitTestsForPlatform();
 }
 
 async function prBuildWorkflow() {
@@ -103,6 +108,9 @@ async function prBuildWorkflow() {
     return;
   }
   timedExecOrDie('gulp update-packages');
+  if (buildTargetsInclude(Targets.RUNTIME, Targets.UNIT_TEST)) {
+    runUnitTestsForPlatform();
+  }
   if (
     buildTargetsInclude(
       Targets.RUNTIME,
@@ -110,11 +118,13 @@ async function prBuildWorkflow() {
       Targets.INTEGRATION_TEST
     )
   ) {
-    timedExecOrDie('gulp dist --fortesting');
+    // TODO(rsimha): Remove isCircleciBuild once Github Actions is shut down.
+    if (process.platform == 'linux' && isCircleciBuild()) {
+      downloadNomoduleOutput();
+    } else {
+      timedExecOrDie('gulp dist --fortesting');
+    }
     runIntegrationTestsForPlatform();
-  }
-  if (buildTargetsInclude(Targets.RUNTIME, Targets.UNIT_TEST)) {
-    runUnitTestsForPlatform();
   }
 }
 

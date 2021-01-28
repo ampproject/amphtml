@@ -2,6 +2,7 @@ version: 2.1
 
 orbs:
   browser-tools: circleci/browser-tools@1.1.1
+  win: circleci/windows@2.4.0
 
 push_and_pr_builds: &push_and_pr_builds
   filters:
@@ -19,22 +20,28 @@ push_builds_only: &push_builds_only
         - /^amp-release-.*$/
 
 executors:
-  amphtml-large-executor:
+  linux-large:
     machine:
       image: ubuntu-2004:202010-01
     resource_class: large
-  amphtml-xlarge-executor:
+  linux-xlarge:
     machine:
       image: ubuntu-2004:202010-01
     resource_class: xlarge
+  macos-large:
+    macos:
+      xcode: 12.3.0
+    resource_class: large
 
 commands:
-  setup_vm:
+  checkout_repo:
     steps:
       - checkout
       - run:
           name: 'Fetch Merge Commit'
           command: ./.circleci/fetch_merge_commit.sh
+  linux_setup:
+    steps:
       - browser-tools/install-chrome:
           replace-existing: true
       - run:
@@ -57,58 +64,76 @@ commands:
           command: |
             nvm install 'lts/*'
             echo "export PATH=`which node`:$PATH" >> $BASH_ENV
+  install_dependencies:
+    steps:
       - run:
           name: 'Install Dependencies'
           command: |
             npm install --global gulp-cli
             npm ci
+  install_firefox:
+    steps:
+      - browser-tools/install-firefox:
+          version: latest
 
 jobs:
   'Checks':
     executor:
-      name: amphtml-large-executor
+      name: linux-large
     steps:
-      - setup_vm
+      - checkout_repo
+      - linux_setup
+      - install_dependencies
       - run:
           name: 'Checks'
           command: node build-system/pr-check/checks.js
   'Unminified Build':
     executor:
-      name: amphtml-xlarge-executor
+      name: linux-xlarge
     steps:
-      - setup_vm
+      - checkout_repo
+      - linux_setup
+      - install_dependencies
       - run:
           name: 'Unminified Build'
           command: node build-system/pr-check/unminified-build.js
   'Nomodule Build':
     executor:
-      name: amphtml-xlarge-executor
+      name: linux-xlarge
     steps:
-      - setup_vm
+      - checkout_repo
+      - linux_setup
+      - install_dependencies
       - run:
           name: 'Nomodule Build'
           command: node build-system/pr-check/nomodule-build.js
   'Module Build':
     executor:
-      name: amphtml-xlarge-executor
+      name: linux-xlarge
     steps:
-      - setup_vm
+      - checkout_repo
+      - linux_setup
+      - install_dependencies
       - run:
           name: 'Module Build'
           command: node build-system/pr-check/module-build.js
   'Bundle Size':
     executor:
-      name: amphtml-large-executor
+      name: linux-large
     steps:
-      - setup_vm
+      - checkout_repo
+      - linux_setup
+      - install_dependencies
       - run:
           name: 'Bundle Size'
           command: node build-system/pr-check/bundle-size.js
   'Validator Tests':
     executor:
-      name: amphtml-large-executor
+      name: linux-large
     steps:
-      - setup_vm
+      - checkout_repo
+      - linux_setup
+      - install_dependencies
       - run:
           name: 'Install Protobuf'
           command: pip3 install --user protobuf
@@ -117,81 +142,131 @@ jobs:
           command: node build-system/pr-check/validator-tests.js
   'Visual Diff Tests':
     executor:
-      name: amphtml-large-executor
+      name: linux-large
     steps:
-      - setup_vm
+      - checkout_repo
+      - linux_setup
+      - install_dependencies
       - run:
           name: 'Visual Diff Tests'
           command: node build-system/pr-check/visual-diff-tests.js
   'Unit Tests':
     executor:
-      name: amphtml-large-executor
+      name: linux-large
     steps:
-      - setup_vm
+      - checkout_repo
+      - linux_setup
+      - install_dependencies
       - run:
           name: 'Unit Tests'
           command: node build-system/pr-check/unit-tests.js
   'Unminified Tests':
     executor:
-      name: amphtml-large-executor
+      name: linux-large
     steps:
-      - setup_vm
+      - checkout_repo
+      - linux_setup
+      - install_dependencies
       - run:
           name: 'Unminified Tests'
           command: node build-system/pr-check/unminified-tests.js
   'Nomodule Tests':
     executor:
-      name: amphtml-large-executor
+      name: linux-large
     steps:
-      - setup_vm
+      - checkout_repo
+      - linux_setup
+      - install_dependencies
       - run:
           name: 'Nomodule Tests'
           command: node build-system/pr-check/nomodule-tests.js
   'Module Tests':
     executor:
-      name: amphtml-large-executor
+      name: linux-large
     steps:
-      - setup_vm
+      - checkout_repo
+      - linux_setup
+      - install_dependencies
       - run:
           name: 'Module Tests'
           command: node build-system/pr-check/module-tests.js
   'End-to-End Tests':
     executor:
-      name: amphtml-large-executor
+      name: linux-large
     steps:
-      - setup_vm
+      - checkout_repo
+      - linux_setup
+      - install_dependencies
       - run:
           name: 'End-to-End Tests'
           command: node build-system/pr-check/e2e-tests.js
+  'Firefox Tests':
+    executor:
+      name: linux-large
+    steps:
+      - checkout_repo
+      - linux_setup
+      - install_dependencies
+      - install_firefox
+      - run:
+          name: 'Firefox Tests'
+          command: node build-system/pr-check/cross-browser-tests.js
+  'Safari Tests':
+    executor:
+      name: macos-large
+    steps:
+      - checkout_repo
+      - install_dependencies
+      - run:
+          name: 'Safari Tests'
+          command: node build-system/pr-check/cross-browser-tests.js
+  'Edge and IE Tests':
+    executor:
+      name: win/default
+      size: large
+    steps:
+      - checkout_repo
+      - install_dependencies
+      - run:
+          name: 'Edge and IE Tests'
+          command: node build-system/pr-check/cross-browser-tests.js
   'Performance Tests':
     executor:
-      name: amphtml-xlarge-executor
+      name: linux-xlarge
     steps:
-      - setup_vm
+      - checkout_repo
+      - linux_setup
+      - install_dependencies
       - run:
           name: 'Performance Tests'
           command: node build-system/pr-check/performance-tests.js
   'Experiment A Tests':
     executor:
-      name: amphtml-xlarge-executor
+      name: linux-xlarge
     steps:
-      - setup_vm
+      - checkout_repo
+      - linux_setup
+      - install_dependencies
       - run:
           name: 'Experiment A Tests'
           command: node build-system/pr-check/experiment-tests.js --experiment=experimentA
   'Experiment B Tests':
     executor:
-      name: amphtml-xlarge-executor
+      name: linux-xlarge
     steps:
-      - setup_vm
+      - checkout_repo
+      - linux_setup
+      - install_dependencies
       - run:
           name: 'Experiment B Tests'
           command: node build-system/pr-check/experiment-tests.js --experiment=experimentB
   'Experiment C Tests':
     executor:
-      name: amphtml-xlarge-executor
+      name: linux-xlarge
     steps:
-      - setup_vm
+      - checkout_repo
+      - linux_setup
+      - install_dependencies
       - run:
           name: 'Experiment C Tests'
           command: node build-system/pr-check/experiment-tests.js --experiment=experimentC
@@ -237,6 +312,14 @@ workflows:
           <<: *push_and_pr_builds
           requires:
             - 'Nomodule Build'
+      - 'Firefox Tests':
+          <<: *push_and_pr_builds
+          requires:
+            - 'Nomodule Build'
+      - 'Safari Tests':
+          <<: *push_and_pr_builds
+      - 'Edge and IE Tests':
+          <<: *push_and_pr_builds
       # TODO(wg-performance, #12128): This takes 30 mins and fails regularly.
       # - 'Performance Tests':
       #     <<: *push_builds_only
