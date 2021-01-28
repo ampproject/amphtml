@@ -1036,20 +1036,38 @@ export class VideoDocking {
         });
       });
 
-      // Since the AMP element container is position: relative, the media
-      // element is relative to AMP element corner when position: absolute, so
-      // we need to offset it by outer container's position.
-      const offset = position === 'absolute' ? clientRect : {left: 0, top: 0};
+      // To re-orient position: absolute elements since they're no longer
+      // relative to viewport rect.
+      let offsetLeft = 0;
+      let offsetTop = 0;
 
-      this.getElementsOnDockArea_(video).forEach((el) => {
-        setImportantStyles(el, {
-          'transform': transform(x, y, scale),
-          'left': px(-offset.left),
-          'top': px(-offset.top),
+      // Detached body-level elements, like the shadow layer, need to be offset
+      // in addition by the inline element's position relative to the body.
+      let detachedOffsetLeft = 0;
+      let detachedOffsetTop = 0;
+
+      if (position === 'absolute') {
+        offsetLeft = inlineRect.left;
+        offsetTop = inlineRect.top;
+        detachedOffsetLeft = element./*OK*/ offsetLeft;
+        detachedOffsetTop = element./*OK*/ offsetTop;
+      }
+
+      this.getElementsOnDockArea_(video).forEach((element) => {
+        const detachedOffsetFactor = Number(element !== internalElement);
+
+        const left = detachedOffsetFactor * detachedOffsetLeft - offsetLeft;
+        const top = detachedOffsetFactor * detachedOffsetTop - offsetTop;
+
+        setImportantStyles(element, {
           'position': position,
+          'left': px(left),
+          'top': px(top),
+          'transform': transform(x, y, scale),
         });
-        setTransitionTiming(el);
-        maybeSetSizing(el);
+
+        setTransitionTiming(element);
+        maybeSetSizing(element);
       });
 
       setOpacity(shadowLayer);
