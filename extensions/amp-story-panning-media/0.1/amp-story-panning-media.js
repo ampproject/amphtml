@@ -44,14 +44,15 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     /** @private {?Element} The element that is transitioned. */
     this.ampImgEl_ = null;
 
-    /** @private {?float} Percentage between [-50; 50] */
-    this.x_ = null;
+    /** @private {?{x: float, y: float, zoom: float}} Position to animate to. */
+    this.animateTo_ = {
+      x: null, // Percentage between [-50; 50]
+      y: null, // Percentage between [-50; 50]
+      zoom: null, // 0 is not visible. 1 fills the viewport vertically.
+    };
 
-    /** @private {?float} Percentage between [-50; 50] */
-    this.y_ = null;
-
-    /** @private {?float} 0 is not visible. 1 fills the viewport vertically. */
-    this.zoom_ = null;
+    /** @private {?{x: float, y: float, zoom: float}} Current animation state. */
+    this.animationState_ = {};
 
     /** @private {?../../../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
@@ -67,17 +68,15 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
 
     /** @private {?string} */
     this.groupId_ = null;
-
-    /** @private {?{x: float, y: float, zoom: float}} Current animation state. */
-    this.animationState_ = {};
   }
 
   /** @override */
   buildCallback() {
-    this.x_ = parseFloat(this.element_.getAttribute('x')) || 0;
-    this.y_ = parseFloat(this.element_.getAttribute('y')) || 0;
-    this.zoom_ = parseFloat(this.element_.getAttribute('zoom')) || 1;
-
+    this.animateTo_ = {
+      x: parseFloat(this.element_.getAttribute('x')) || 0,
+      y: parseFloat(this.element_.getAttribute('y')) || 0,
+      zoom: parseFloat(this.element_.getAttribute('zoom')) || 1,
+    };
     return Services.storyStoreServiceForOrNull(this.win).then(
       (storeService) => {
         this.storeService_ = storeService;
@@ -150,13 +149,10 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
    * @private
    */
   animate_() {
-    const startPos = this.storeService_.get(StateProperty.PANNING_MEDIA_STATE)[
-      this.groupId_
-    ] || {
-      x: this.x_,
-      y: this.y_,
-      zoom: this.zoom_,
-    };
+    const startPos =
+      this.storeService_.get(StateProperty.PANNING_MEDIA_STATE)[
+        this.groupId_
+      ] || this.animateTo_;
 
     const easeInOutQuad = (val) =>
       val < 0.5 ? 2 * val * val : 1 - Math.pow(-2 * val + 2, 2) / 2;
@@ -168,12 +164,13 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       }
       const elapsedTime = currTime - startTime;
       if (elapsedTime < DURATION_MS) {
+        const {x, y, zoom} = this.animateTo_;
         const easing = easeInOutQuad(elapsedTime / DURATION_MS);
         this.storeService_.dispatch(Action.SET_PANNING_MEDIA_STATE, {
           [this.groupId_]: {
-            x: startPos.x + (this.x_ - startPos.x) * easing,
-            y: startPos.y + (this.y_ - startPos.y) * easing,
-            zoom: startPos.zoom + (this.zoom_ - startPos.zoom) * easing,
+            x: startPos.x + (x - startPos.x) * easing,
+            y: startPos.y + (y - startPos.y) * easing,
+            zoom: startPos.zoom + (zoom - startPos.zoom) * easing,
           },
         });
         // Only call loop again if on active page.
@@ -182,7 +179,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
         }
       } else {
         this.storeService_.dispatch(Action.SET_PANNING_MEDIA_STATE, {
-          [this.groupId_]: {x: this.x_, y: this.y_, zoom: this.zoom_},
+          [this.groupId_]: this.animateTo_,
         });
       }
     };
