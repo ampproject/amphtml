@@ -33,7 +33,7 @@ const {watch} = require('gulp');
  * @param {Object=} opt_options
  * @return {!Promise}
  */
-async function vendorConfigs(opt_options) {
+async function analyticsVendorConfigs(opt_options) {
   const options = opt_options || {};
 
   const srcPath = ['extensions/amp-analytics/0.1/vendors/*.json'];
@@ -48,7 +48,7 @@ async function vendorConfigs(opt_options) {
     // Do not set watchers again when we get called by the watcher.
     const copyOptions = {...options, watch: false, calledByWatcher: true};
     const watchFunc = () => {
-      vendorConfigs(copyOptions);
+      analyticsVendorConfigs(copyOptions);
     };
     watch(srcPath).on('change', debounce(watchFunc, watchDebounceDelay));
   }
@@ -86,7 +86,7 @@ async function vendorConfigs(opt_options) {
 }
 
 module.exports = {
-  vendorConfigs,
+  analyticsVendorConfigs,
 };
 
-vendorConfigs.description = 'Compile analytics vendor configs to dist';
+analyticsVendorConfigs.description = 'Compile analytics vendor configs to dist';
