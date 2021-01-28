@@ -316,6 +316,7 @@ declaration_list {
   declaration: { name: "align-items" }
   declaration: { name: "align-self" }
   declaration: { name: "appearance" }
+  declaration: { name: "aspect-ratio" }
   declaration: { name: "azimuth" }
   declaration: { name: "background" }
   declaration: { name: "background-attachment" }
