@@ -37,14 +37,16 @@ fi
 # CIRCLE_PR_NUMBER is present for PRs originating from forks, but absent for PRs
 # originating from a branch on the main repo. In such cases, extract the PR
 # number from CIRCLE_PULL_REQUEST.
-if [[ -z "$CIRCLE_PR_NUMBER" ]]; then
-  CIRCLE_PR_NUMBER=${CIRCLE_PULL_REQUEST#"https://github.com/ampproject/amphtml/pull/"}
+if [[ "$CIRCLE_PR_NUMBER" ]]; then
+  PR_NUMBER=$CIRCLE_PR_NUMBER
+else
+  PR_NUMBER=${CIRCLE_PULL_REQUEST#"https://github.com/ampproject/amphtml/pull/"}
 fi
 
 # GitHub provides refs/pull/<PR_NUMBER>/merge, an up-to-date merge branch for
 # every PR branch that can be cleanly merged to master. For more details, see:
 # https://discuss.circleci.com/t/show-test-results-for-prospective-merge-of-a-github-pr/1662
-MERGE_BRANCH="refs/pull/$CIRCLE_PR_NUMBER/merge"
+MERGE_BRANCH="refs/pull/$PR_NUMBER/merge"
 (set -x && git pull --ff-only origin "$MERGE_BRANCH") || err=$?
 
 
