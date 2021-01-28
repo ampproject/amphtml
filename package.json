@@ -196,6 +196,6 @@
     "vinyl-buffer": "1.0.1",
     "vinyl-source-stream": "2.0.0",
     "vinyl-sourcemaps-apply": "0.2.1",
-    "watchify": "3.11.1"
+    "watchify": "4.0.0"
   }
 }
