@@ -116,6 +116,7 @@
 
 .amp-video-docked-shadow {
   box-shadow: 0px 0 20px 6px rgba(0, 0, 0, 0.2);
+  transition-property: opacity, transition !important;
 }
 
 .amp-video-docked-controls-bg {
