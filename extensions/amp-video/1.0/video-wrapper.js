@@ -15,8 +15,8 @@
  */
 
 import * as Preact from '../../../src/preact';
-import {ContainWrapper} from '../../../src/preact/component';
 import {Deferred} from '../../../src/utils/promise';
+import {Dockable} from '../../amp-video-docking/1.0/dockable';
 import {MIN_VISIBILITY_RATIO_FOR_AUTOPLAY} from '../../../src/video-interface';
 import {
   MetadataDef,
@@ -84,6 +84,7 @@ function VideoWrapperWithRef(
     loop = false,
     noaudio = false,
     mediasession = true,
+    dock = false,
     className,
     style,
     src,
@@ -191,65 +192,68 @@ function VideoWrapperWithRef(
       pause,
       requestFullscreen,
       userInteracted,
-      hasUserInteracted,
       autoplay,
       controls,
       loop,
+      hasUserInteracted,
     ]
   );
 
   return (
-    <ContainWrapper
-      contentRef={wrapperRef}
-      className={className}
-      style={style}
-      size
-      layout
-      paint
-    >
-      {load && (
-        <Component
-          {...rest}
-          ref={playerRef}
-          loading={loading}
-          muted={muted}
-          loop={loop}
-          controls={controls && (!autoplay || hasUserInteracted)}
-          onCanPlay={() => {
-            readyDeferred.resolve();
-            if (onLoad) {
-              onLoad();
-            }
-          }}
-          onLoadedMetadata={() => {
-            if (mediasession) {
-              readyDeferred.promise.then(() => {
-                setMetadata(getMetadata(playerRef.current, rest));
-              });
-            }
-          }}
-          onPlaying={() => setPlaying(true)}
-          onPause={() => setPlaying(false)}
-          style={fillStretch}
-          src={src}
-          poster={poster}
-        >
-          {sources}
-        </Component>
-      )}
-      {autoplay && !hasUserInteracted && (
-        <Autoplay
-          metadata={metadata}
-          playing={playing}
-          displayIcon={!noaudio && muted}
-          wrapperRef={wrapperRef}
-          play={play}
-          pause={pause}
-          displayOverlay={controls}
-          onOverlayClick={userInteracted}
-        />
-      )}
-    </ContainWrapper>
+    load && (
+      <Dockable
+        handle={playerRef}
+        contentRef={wrapperRef}
+        className={className}
+        style={style}
+        docks={dock && playing && hasUserInteracted}
+        render={(isDocked, dockedStyle) => (
+          <>
+            <Component
+              {...rest}
+              ref={playerRef}
+              loading={loading}
+              muted={muted}
+              loop={loop}
+              controls={
+                controls && (!autoplay || hasUserInteracted) && !isDocked
+              }
+              onCanPlay={() => {
+                readyDeferred.resolve();
+                if (onLoad) {
+                  onLoad();
+                }
+              }}
+              onLoadedMetadata={() => {
+                if (mediasession) {
+                  readyDeferred.promise.then(() => {
+                    setMetadata(getMetadata(playerRef.current, rest));
+                  });
+                }
+              }}
+              onPlaying={() => setPlaying(true)}
+              onPause={() => setPlaying(false)}
+              style={{...fillStretch, ...dockedStyle}}
+              src={src}
+              poster={poster}
+            >
+              {sources}
+            </Component>
+            {autoplay && !hasUserInteracted && (
+              <Autoplay
+                playing={playing}
+                displayIcon={!noaudio && muted}
+                wrapperRef={wrapperRef}
+                play={play}
+                pause={pause}
+                displayOverlay={controls}
+                onOverlayClick={userInteracted}
+              />
+            )}
+          </>
+        )}
+      />
+    )
   );
 }
 
