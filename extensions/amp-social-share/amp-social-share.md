@@ -61,6 +61,40 @@ When you want to pass parameters to the share endpoint, you can specify `data-pa
 
 Linkedin is one of the pre-configured providers, so you do not need to provide the `data-share-endpoint` attribute.
 
+### Standalone use outside valid AMP documents
+
+Bento AMP allows you to use AMP components in non-AMP pages without needing to commit to fully valid AMP. You can take these components and place them in implementations with frameworks and CMSs that don't support AMP. Read more in our guide [Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/).
+
+#### Example
+
+The example below demonstrates `amp-social-share` component in standalone use.
+
+[example preview="top-frame" playground="false"]
+
+```html
+<head>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-social-share-1.0.css">
+  <script async custom-element="amp-social-share" src="https://cdn.ampproject.org/v0/amp-social-share-1.0.js"></script>
+</head>
+<amp-social-share type="email"></amp-social-share>
+<amp-social-share type="twitter"></amp-social-share>
+<amp-social-share type="tumblr"></amp-social-share>
+<amp-bento-component>
+```
+
+[/example]
+
+#### Layout and style
+
+Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
+
+```html
+<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-social-share-1.0.css">
+```
+
+Fully valid AMP pages use the AMP layout system to infer sizing of elements to create a page structure before downloading any remote resources. However, Bento use imports components into less controlled environments and AMP's layout system is inaccessible.
+
 ### Pre-configured providers
 
 The `amp-social-share` component provides [some pre-configured providers](0.1/amp-social-share-config.js) that know their sharing endpoints as well as some default parameters.
@@ -206,20 +240,6 @@ You can use [global AMP variables substitution](https://github.com/ampproject/am
 </amp-social-share>
 ```
 
-### Migrating from 0.1
-
-The `1.0` version of `amp-social-share` has a few additional features that differentiate it from the `0.1` version.
-
-1. The default icons for pre-configured providers have been updated to reflect the
-   most up-to-date logos and colors from their associated companies so expect a new
-   set of logos when migrating to `1.0`.
-2. Both the foreground and background colors of the default icons can now be styled
-   with CSS. See the `Styling` section below for more information.
-3. Support for custom logos or text on the default icons is now included. If the
-   `amp-social-share` component has any children elements, they will now be displayed
-   instead of the default icon. (In `0.1` they would be overlaid on the existing
-   icon.)
-
 ## Attributes
 
 ### type (required)
@@ -304,3 +324,17 @@ With these CSS rules, `amp-social-share` elements would not show the visible foc
 Note that `amp-social-share` with a `type` value of `twitter`, `whatsapp`, or `line` will display a button with a foreground/background color combination that falls below the 3:1 threshold recommended for non-text content defined in [WCAG 2.1 SC 1.4.11 Non-text Contrast](https://www.w3.org/WAI/WCAG21/Understanding/non-text-contrast.html).
 
 Without sufficient contrast, content can be difficult to perceive and therefore difficult to identify. In extreme cases, content with low contrast may not be visible at all to people with colour perception impairments. In the case of the above share buttons, users may not be able to appropriately perceive/understand what the share controls are, what service they relate to.
+
+## Version notes
+
+The `1.0` version of `amp-social-share` has a few additional features that differentiate it from the `0.1` version.
+
+1. The default icons for pre-configured providers have been updated to reflect the
+   most up-to-date logos and colors from their associated companies so expect a new
+   set of logos when migrating to `1.0`.
+2. Both the foreground and background colors of the default icons can now be styled
+   with CSS. See the `Styling` section above for more information.
+3. Support for custom logos or text on the default icons is now included. If the
+   `amp-social-share` component has any children elements, they will now be displayed
+   instead of the default icon. (In `0.1` they would be overlaid on the existing
+   icon.)
