@@ -200,10 +200,6 @@
   transition: 0.05s transform;
 }
 
-.amp-video-docked-controls {
-  position: fixed !important;
-}
-
 .i-amphtml-video-docked-overlay {
   opacity: 0;
   transition: 0.3s opacity ease;
