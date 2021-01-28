@@ -34,6 +34,7 @@ const TAG = 'AMP_STORY_PANNING_MEDIA';
 const DURATION_MS = 1000;
 
 /**
+ * Position values used to animate between components.
  * x: (optional) Percentage between [-50; 50]
  * y: (optional) Percentage between [-50; 50]
  * zoom: 0 is not visible. 1 fills the viewport vertically.
@@ -57,11 +58,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     this.ampImgEl_ = null;
 
     /** @private {?panningMediaPositionDef} Position to animate to. */
-    this.animateTo_ = {
-      x: null, // Percentage between [-50; 50]
-      y: null, // Percentage between [-50; 50]
-      zoom: null, // 0 is not visible. 1 fills the viewport vertically.
-    };
+    this.animateTo_ = {};
 
     /** @private {?panningMediaPositionDef} Current animation state. */
     this.animationState_ = {};
