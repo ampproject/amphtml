@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.142 */
+/** Version: 0.1.22.143 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -749,6 +749,12 @@ class EntitlementsRequest {
       data[1 + base] == null || data[1 + base] == undefined
         ? null
         : new Timestamp(data[1 + base], includesLabel);
+
+    /** @private {?EntitlementSource} */
+    this.entitlementSource_ = data[2 + base] == null ? null : data[2 + base];
+
+    /** @private {?EntitlementResult} */
+    this.entitlementResult_ = data[3 + base] == null ? null : data[3 + base];
   }
 
   /**
@@ -780,14 +786,46 @@ class EntitlementsRequest {
   }
 
   /**
+   * @return {?EntitlementSource}
+   */
+  getEntitlementSource() {
+    return this.entitlementSource_;
+  }
+
+  /**
+   * @param {!EntitlementSource} value
+   */
+  setEntitlementSource(value) {
+    this.entitlementSource_ = value;
+  }
+
+  /**
+   * @return {?EntitlementResult}
+   */
+  getEntitlementResult() {
+    return this.entitlementResult_;
+  }
+
+  /**
+   * @param {!EntitlementResult} value
+   */
+  setEntitlementResult(value) {
+    this.entitlementResult_ = value;
+  }
+
+  /**
    * @param {boolean} includeLabel
    * @return {!Array<?>}
    * @override
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.usedEntitlement_ ? this.usedEntitlement_.toArray(includeLabel) : [], // field 1 - used_entitlement
-        this.clientEventTime_ ? this.clientEventTime_.toArray(includeLabel) : [], // field 2 - client_event_time
+      this.usedEntitlement_ ? this.usedEntitlement_.toArray(includeLabel) :
+                              [],  // field 1 - used_entitlement
+      this.clientEventTime_ ? this.clientEventTime_.toArray(includeLabel) :
+                              [],  // field 2 - client_event_time
+      this.entitlementSource_,     // field 3 - entitlement_source
+      this.entitlementResult_,     // field 4 - entitlement_result
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -5817,7 +5855,6 @@ const SubscriptionFlows = {
   COMPLETE_DEFERRED_ACCOUNT_CREATION: 'completeDeferredAccountCreation',
   LINK_ACCOUNT: 'linkAccount',
   SHOW_LOGIN_PROMPT: 'showLoginPrompt',
-  SHOW_METER_REGWALL: 'showMeterRegwall',
   SHOW_LOGIN_NOTIFICATION: 'showLoginNotification',
   SHOW_METER_TOAST: 'showMeterToast',
 };
@@ -6163,7 +6200,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.142',
+    '_client': 'SwG 0.1.22.143',
   });
 }
 
@@ -7282,7 +7319,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.142',
+        '_client': 'SwG 0.1.22.143',
         'supportsEventManager': true,
       },
       args || {}
@@ -8124,7 +8161,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl$1(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.142');
+    context.setClientVersion('SwG 0.1.22.143');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString$1(this.getQueryString_());
@@ -8685,6 +8722,34 @@ class ButtonApi {
     this.logSwgEvent_(AnalyticsEvent.IMPRESSION_SWG_BUTTON);
 
     return button;
+  }
+
+  /**
+   * Attaches all buttons with the specified attribute set to any of the
+   * attribute values.
+   * @param {string} attribute
+   * @param {!Array<string>} attributeValues
+   * @param {../api/subscriptions.ButtonOptions} options
+   * @param {!Object<string, function()>} attributeValueToCallback
+   */
+  attachButtonsWithAttribute(
+    attribute,
+    attributeValues,
+    options,
+    attributeValueToCallback
+  ) {
+    attributeValues.forEach((attributeValue) => {
+      const elements = this.doc_
+        .getRootNode()
+        .querySelectorAll(`button[${attribute}="${attributeValue}"]`);
+      for (let i = 0; i < elements.length; i++) {
+        this.attach(
+          elements[i],
+          options,
+          attributeValueToCallback[attributeValue]
+        );
+      }
+    });
   }
 
   /**
@@ -12931,75 +12996,6 @@ class LoginPromptApi {
 }
 
 /**
- * Copyright 2020 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-class MeterRegwallApi {
-  /**
-   * @param {!./deps.DepsDef} deps
-   * @param {{ gsiUrl: string, alreadyRegisteredUrl: string}} params
-   */
-  constructor(deps, params) {
-    /** @private @const {!./deps.DepsDef} */
-    this.deps_ = deps;
-
-    /** @private @const {!Window} */
-    this.win_ = deps.win();
-
-    /** @private @const {!../components/activities.ActivityPorts} */
-    this.activityPorts_ = deps.activities();
-
-    /** @private @const {!../components/dialog-manager.DialogManager} */
-    this.dialogManager_ = deps.dialogManager();
-
-    /** @private @const {!ActivityIframeView} */
-    this.activityIframeView_ = new ActivityIframeView(
-      this.win_,
-      this.activityPorts_,
-      feUrl('/meterregwalliframe'),
-      feArgs({
-        publicationId: deps.pageConfig().getPublicationId(),
-        productId: deps.pageConfig().getProductId(),
-        gsiUrl: params.gsiUrl,
-        alreadyRegisteredUrl: params.alreadyRegisteredUrl,
-      }),
-      /* shouldFadeBody */ true
-    );
-  }
-
-  /**
-   * Prompts the user to register to the meter.
-   * @return {!Promise}
-   */
-  start() {
-    this.deps_
-      .callbacks()
-      .triggerFlowStarted(SubscriptionFlows.SHOW_METER_REGWALL);
-    return this.dialogManager_.openView(this.activityIframeView_).then(() => {
-      // Log that we showed a regwall.
-      this.deps_.eventManager().logSwgEvent(AnalyticsEvent.IMPRESSION_REGWALL);
-
-      // Log that we showed a showcase regwall.
-      this.deps_
-        .eventManager()
-        .logSwgEvent(AnalyticsEvent.IMPRESSION_SHOWCASE_REGWALL);
-    });
-  }
-}
-
-/**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15930,16 +15926,13 @@ class PaymentsAsyncClient {
       return;
     }
 
-    const isReadyToPayResult = window.sessionStorage.getItem(
-      Constants.IS_READY_TO_PAY_RESULT_KEY
-    );
     this.loadPaymentDataApiStartTimeMs_ = Date.now();
     this.assignInternalParams_(paymentDataRequest);
     // We want to fall back to the web delegate if payment handler is supported
     // and isReadyToPay bit is not explicitly set to true (fallback to web if
     // isReadyToPay wasn't called for PH)
     if (
-      (chromeSupportsPaymentHandler() && isReadyToPayResult !== 'true') ||
+      chromeSupportsPaymentHandler() ||
       isNativeDisabledInRequest(paymentDataRequest)
     ) {
       this.webActivityDelegate_.loadPaymentData(paymentDataRequest);
@@ -17190,6 +17183,10 @@ const REGWALL_DIALOG_ID = 'swg-regwall-dialog';
 /** ID for the Regwall title element. */
 const REGWALL_TITLE_ID = 'swg-regwall-title';
 
+/** Class the Regwall uses to disable scrolling. */
+const REGWALL_DISABLE_SCROLLING_CLASS =
+  'gaa-metering-regwall--disable-scrolling';
+
 /**
  * HTML for the metering regwall dialog, where users can sign in with Google.
  * The script creates a dialog based on this HTML.
@@ -17199,6 +17196,10 @@ const REGWALL_TITLE_ID = 'swg-regwall-title';
  */
 const REGWALL_HTML = `
 <style>
+  .${REGWALL_DISABLE_SCROLLING_CLASS} {
+    overflow: hidden;
+  }
+
   .gaa-metering-regwall--dialog-spacer,
   .gaa-metering-regwall--dialog,
   .gaa-metering-regwall--logo,
@@ -17513,6 +17514,9 @@ class GaaMeteringRegwall {
     setImportantStyles(containerEl, {'opacity': 1});
     GaaMeteringRegwall.addClickListenerOnPublisherSignInButton_();
 
+    // Disable scrolling on the body element.
+    self.document.body.classList.add(REGWALL_DISABLE_SCROLLING_CLASS);
+
     // Focus on the title after the dialog animates in.
     // This helps people using screenreaders.
     const dialogEl = self.document.getElementById(REGWALL_DIALOG_ID);
@@ -17618,6 +17622,9 @@ class GaaMeteringRegwall {
     if (regwallContainer) {
       regwallContainer.remove();
     }
+
+    // Re-enable scrolling on the body element.
+    self.document.body.classList.remove(REGWALL_DISABLE_SCROLLING_CLASS);
   }
 }
 
@@ -18104,14 +18111,6 @@ class ConfiguredRuntime {
   waitForSubscriptionLookup(accountPromise) {
     return this.documentParsed_.then(() => {
       const wait = new WaitForSubscriptionLookupApi(this, accountPromise);
-      return wait.start();
-    });
-  }
-
-  /** @override */
-  showMeterRegwall(meterRegwallArgs) {
-    return this.documentParsed_.then(() => {
-      const wait = new MeterRegwallApi(this, meterRegwallArgs);
       return wait.start();
     });
   }
