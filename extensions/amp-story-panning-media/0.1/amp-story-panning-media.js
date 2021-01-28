@@ -197,7 +197,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     const {x, y, zoom} = panningMediaState;
     return this.mutateElement(() => {
       setImportantStyles(this.ampImgEl_, {
-        transform: `scale(${zoom}) translate(${x}%, ${y}%)`,
+        transform: `translate3d(${x}%, ${y}%, ${(zoom - 1) / zoom}px)`,
       });
     });
   }
