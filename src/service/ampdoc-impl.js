@@ -337,7 +337,6 @@ export class AmpDoc {
   }
 
   getTopLevelParent() {
-    dev().error('dont');
     return this.getParent();
   }
 
@@ -798,6 +797,8 @@ export class AmpDocShadow extends AmpDoc {
     super(win, /* parent */ null, opt_options);
     // super(win, shadowRoot.host, opt_options);
 
+    this.win_ = win;
+
     /** @private @const {string} */
     this.url_ = url;
 
@@ -913,6 +914,11 @@ export class AmpDocShadow extends AmpDoc {
   getTopLevelParent() {
     console.log('^^^^^^^', this.getRootNode().host.ownerDocument);
     return this.getRootNode().host.ownerDocument;
+    // let parent = this.getRootNode().host.ownerDocument;
+    // while (parent !== this.win_.document) {
+    //   parent = parent.getRootNode().host.ownerDocument; // assuming shadow in nested in another shadow
+    // }
+    // return parent;
   }
 }
 
