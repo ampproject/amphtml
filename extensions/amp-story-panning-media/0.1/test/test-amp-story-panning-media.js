@@ -111,7 +111,7 @@ describes.realWin(
       await storeService.dispatch(Action.CHANGE_PAGE, {id: 'page1', index: 0});
       await afterRenderPromise();
       expect(panningMedia.ampImgEl_.style.transform).to.equal(
-        `translate3d(${positionValues.x}%, ${positionValues.y}%, ${
+        `translate3d(${positionValues.x}, ${positionValues.y}, ${
           (positionValues.zoom - 1) / positionValues.zoom
         }px)`
       );
