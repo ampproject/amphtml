@@ -90,6 +90,9 @@ describes.realWin(
         expect(element.hasAttribute('open')).to.be.false;
         expect(element.hasAttribute('hidden')).to.be.true;
 
+        const eventSpy = env.sandbox.spy();
+        element.addEventListener('open', eventSpy);
+
         element.enqueAction(invocation(DEFAULT_ACTION));
         await waitForOpen(element, true);
         expect(element.hasAttribute('hidden')).to.be.false;
@@ -100,11 +103,18 @@ describes.realWin(
         expect(contentEls).to.have.lengthOf(1);
         expect(contentEls[0].tagName).to.equal('P');
         expect(contentEls[0].textContent).to.equal('Hello World');
+
+        expect(eventSpy).to.be.calledOnce;
       });
 
       it('should open and close', async () => {
         expect(element.hasAttribute('open')).to.be.false;
         expect(element.hasAttribute('hidden')).to.be.true;
+
+        const openSpy = env.sandbox.spy();
+        const closeSpy = env.sandbox.spy();
+        element.addEventListener('open', openSpy);
+        element.addEventListener('close', closeSpy);
 
         element.enqueAction(invocation('open'));
         await waitForOpen(element, true);
@@ -117,12 +127,18 @@ describes.realWin(
         expect(contentEls[0].tagName).to.equal('P');
         expect(contentEls[0].textContent).to.equal('Hello World');
 
+        expect(openSpy).to.be.calledOnce;
+        expect(closeSpy).not.to.have.been.called;
+
         element.enqueAction(invocation('close'));
         await waitForOpen(element, false);
         expect(element.hasAttribute('hidden')).to.be.true;
         content = getContent();
         expect(content.tagName).to.equal('C');
         expect(content.children).to.have.lengthOf(0);
+
+        expect(openSpy).to.be.calledOnce;
+        expect(closeSpy).to.be.calledOnce;
       });
     });
   }

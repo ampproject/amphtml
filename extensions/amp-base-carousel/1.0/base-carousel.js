@@ -185,9 +185,11 @@ function BaseCarouselWithRef(
       }
       index = Math.min(Math.max(index, 0), length - 1);
       setCurrentSlide(index);
-      currentSlideRef.current = index;
-      if (onSlideChange) {
-        onSlideChange(index);
+      if (currentSlideRef.current !== index) {
+        currentSlideRef.current = index;
+        if (onSlideChange) {
+          onSlideChange(index);
+        }
       }
     },
     [length, setCurrentSlide, onSlideChange]
