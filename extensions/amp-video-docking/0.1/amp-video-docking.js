@@ -1048,23 +1048,24 @@ export class VideoDocking {
       let offsetLeft = 0;
       let offsetTop = 0;
 
-      // Detached body-level elements, like the shadow layer, need to be offset
-      // in addition by the inline element's position relative to the body.
-      let detachedOffsetLeft = 0;
-      let detachedOffsetTop = 0;
+      // Body-level elements that do not descend from the <amp-video> element,
+      // like the shadow layer, need to be additionally offset by the inline
+      // element's position relative to the body.
+      let bodyLevelOffsetLeft = 0;
+      let bodyLevelOffsetTop = 0;
 
       if (position === 'absolute') {
         offsetLeft = inlineRect.left;
         offsetTop = inlineRect.top;
-        detachedOffsetLeft = element./*OK*/ offsetLeft;
-        detachedOffsetTop = element./*OK*/ offsetTop;
+        bodyLevelOffsetLeft = element./*OK*/ offsetLeft;
+        bodyLevelOffsetTop = element./*OK*/ offsetTop;
       }
 
       this.getElementsOnDockArea_(video).forEach((element) => {
-        const detachedOffsetFactor = Number(element !== internalElement);
+        const bodyLevelOffsetFactor = Number(element !== internalElement);
 
-        const left = detachedOffsetFactor * detachedOffsetLeft - offsetLeft;
-        const top = detachedOffsetFactor * detachedOffsetTop - offsetTop;
+        const left = bodyLevelOffsetFactor * bodyLevelOffsetLeft - offsetLeft;
+        const top = bodyLevelOffsetFactor * bodyLevelOffsetTop - offsetTop;
 
         setImportantStyles(element, {
           'position': position,
