@@ -180,8 +180,8 @@
 .amp-video-docked-controls,
 .i-amphtml-video-docked,
 .i-amphtml-video-docked-overlay {
-  top: 0;
-  left: 0;
+  top: 0 !important;
+  left: 0 !important;
   right: auto !important;
   bottom: auto !important;
   padding: 0 !important;
