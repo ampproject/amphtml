@@ -101,9 +101,9 @@ Custom positioning will be rejected when the element target is not visible. This
 The component's element may or may not be resized when docked, according to the [calculated
 target area](#docking-target).
 
--   If the element **doesn't shrink**, its controls aren't replaced.
+-   If the element **doesn't shrink**, its controls are **not** replaced.
 
--   If the element **has to shrink** when docked, its drawn controls are also resized due to its [resizing CSS transform,](https://developer.mozilla.org/en-US/docs/Web/CSS/transform) potentially making them unusable due to their size In this case, `amp-video-docking` replaces the video's controls with its own set, [which can be styled](#styling). These controls are shown when hovered or tapped.
+-   If the element **has to shrink** when docked, its drawn controls are also resized due to its [resizing CSS transform,](https://developer.mozilla.org/en-US/docs/Web/CSS/transform) potentially making them unusable due to their size. In this case, `amp-video-docking` replaces the video's controls with its own set, [which can be styled](#styling). These controls are shown when hovered or tapped.
 
 <center>
   <figure>

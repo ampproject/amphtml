@@ -16,6 +16,7 @@
 import {
   Actions,
   BASE_CLASS_NAME,
+  CORNER_AREA_RATIO,
   DOCKED_TO_CORNER_SIZING_RATIO,
   DockTargetType,
   MARGIN_AREA_WIDTH_PERC,
@@ -230,6 +231,8 @@ describes.realWin('video docking', {amp: true}, (env) => {
 
       bodyLayerElement = (s) => elementExists(env.win.document.body, s);
       videoLayerElement = (s) => elementExists(video.element, s);
+
+      docking.currentlyDocked_ = {target: {respectControls: false}};
     });
 
     it('delegates controls positioning', async () => {
@@ -261,7 +264,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
         .be.ok;
     });
 
-    it('fills component area with placeholder elemenets', async () => {
+    it('fills component area with placeholder elements', async () => {
       stubControls();
 
       const x = 30;
@@ -1008,6 +1011,14 @@ describes.realWin('video docking', {amp: true}, (env) => {
       expect(video.hideControls).to.have.been.calledOnce;
     });
 
+    it("doesn't hide component controls when respected", async () => {
+      const target = {respectControls: true};
+
+      await docking.dock_(video, target, step);
+
+      expect(video.hideControls).to.not.have.been.called;
+    });
+
     it('enables docked controls', async () => {
       const {enable} = stubControls();
 
@@ -1389,6 +1400,46 @@ describes.realWin('video docking', {amp: true}, (env) => {
             expect(target.type).to.equal(DockTargetType.CORNER);
             expect(target.directionX).to.not.be.undefined;
           }
+        });
+
+        it('replaces controls of elements that shrink', () => {
+          const width = 400;
+          const height = 300;
+
+          maybeCreateSlotElementLtwh(10, 10, width / 2, height / 2);
+
+          const video = createVideo();
+          placeElementLtwh(video, 0, -20, width, height);
+
+          setScrollDirection(DirectionY.TOP);
+
+          mockAreaWidth(width);
+          mockAreaHeight(height * 2);
+
+          const target = docking.getTargetFor_(video);
+
+          expect(target).to.not.be.null;
+          expect(target.respectControls).to.be.false;
+        });
+
+        it("respects controls of elements that don't shrink", () => {
+          const width = 180;
+          const height = 50;
+
+          maybeCreateSlotElementLtwh(10, 10, width, height);
+
+          const video = createVideo();
+          placeElementLtwh(video, 0, -20, width, height);
+
+          setScrollDirection(DirectionY.TOP);
+
+          mockAreaWidth(Math.ceil(width / CORNER_AREA_RATIO));
+          mockAreaHeight(Math.ceil(height / CORNER_AREA_RATIO));
+
+          const target = docking.getTargetFor_(video);
+
+          expect(target).to.not.be.null;
+          expect(target.respectControls).to.be.true;
         });
       });
 

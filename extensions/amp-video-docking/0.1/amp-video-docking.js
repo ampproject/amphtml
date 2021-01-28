@@ -1489,7 +1489,9 @@ export class VideoDocking {
       transitionDurationMs
     ).then(() => {
       this.undock_(video, /* reconciled */ true);
-      video.showControls();
+      if (!target.respectControls) {
+        video.showControls();
+      }
     });
   }
 
@@ -1579,22 +1581,24 @@ export class VideoDocking {
   undock_(video, opt_reconciled) {
     const isMostlyInView = this.isVisible_(video, REVERT_TO_INLINE_RATIO);
 
+    const step = 0;
+
+    const {target} = devAssert(this.currentlyDocked_);
+
     if (!isMostlyInView) {
       video.pause();
 
       // Show controls immediately rather than after transition to work around a
       // weird Chrome bug where controls never reappear if enabled on a paused,
       // out-of-view video.
-      video.showControls();
+      if (!target.respectControls) {
+        video.showControls();
+      }
     }
 
     if (!opt_reconciled) {
       this.reconcileUndocked_();
     }
-
-    const step = 0;
-
-    const {target} = devAssert(this.currentlyDocked_);
 
     const {x, y, scale, relativeX} = this.getDims_(video, target, step);
 
@@ -1617,7 +1621,9 @@ export class VideoDocking {
     )
       .then(() => this.maybeUpdateStaleYAfterScroll_(video))
       .then(() => {
-        video.showControls();
+        if (!target.respectControls) {
+          video.showControls();
+        }
         this.resetOnUndock_(video);
       });
   }
