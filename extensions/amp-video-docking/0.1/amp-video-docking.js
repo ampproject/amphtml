@@ -16,14 +16,8 @@
 import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-video-docking-0.1.css';
 import {Controls} from './controls';
-import {DirectionX, DirectionY, FLOAT_TOLERANCE} from './def.js';
+import {DirectionX, DirectionY, FLOAT_TOLERANCE, RectDef} from './def';
 import {HtmlLiteralTagDef} from './html';
-import {
-  LayoutRectDef,
-  layoutRectEquals,
-  layoutRectFromDomRect,
-  rectIntersection,
-} from '../../../src/layout-rect';
 import {
   PlayingStates,
   VideoAttributes,
@@ -53,6 +47,7 @@ import {getInternalVideoElementFor} from '../../../src/utils/video';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isRTL, removeElement, scopedQuerySelector} from '../../../src/dom';
+import {layoutRectEquals, rectIntersection} from '../../../src/layout-rect';
 import {once} from '../../../src/utils/function';
 import {
   px,
@@ -135,7 +130,7 @@ let DockedDef;
 /**
  * @struct @typedef {{
  *   type: DockTargetType,
- *   rect: !LayoutRectDef,
+ *   rect: !RectDef,
  *   slot: (!Element|undefined),
  * }}
  */
@@ -255,7 +250,7 @@ export class VideoDocking {
     /** @private @const {!../../../src/service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = Services.viewportForDoc(ampdoc);
 
-    /** @private @const {!LayoutRectDef} */
+    /** @private @const {!RectDef} */
     this.viewportRect_ = createViewportRect(this.viewport_);
 
     /** @private {?DockedDef} */
@@ -446,6 +441,7 @@ export class VideoDocking {
     const slot = this.getSlot_();
     if (slot) {
       // Match slot's top edge to tie transition to element.
+      // TODO: Reuse a inlineRect
       return slot./*OK*/ getBoundingClientRect().top;
     }
     return 0;
@@ -574,13 +570,14 @@ export class VideoDocking {
   /**
    * Returns the area's target when a video should be docked.
    * @param {!VideoOrBaseElementDef} video
+   * @param {!RectDef=} opt_inlineRect
    * @return {?DockTargetDef}
    * @private
    */
-  getTargetFor_(video) {
+  getTargetFor_(video, opt_inlineRect) {
     if (
       this.isDragging_ ||
-      !this.isValidSize_(video) ||
+      !this.isValidSize_(video, opt_inlineRect) ||
       this.ignoreBecauseAnotherDocked_(video) ||
       this.ignoreDueToNotPlayingManually_(video)
     ) {
@@ -588,25 +585,25 @@ export class VideoDocking {
     }
 
     const {element} = video;
-    const clientRect = element./*OK*/ getBoundingClientRect();
-    const intersectionRect = rectIntersection(clientRect, this.viewportRect_);
+    const inlineRect = opt_inlineRect || element./*OK*/ getBoundingClientRect();
+    const intersectionRect = rectIntersection(inlineRect, this.viewportRect_);
     if (!intersectionRect || !isSizedRect(intersectionRect)) {
       return null;
     }
     if (intersectionRect.top > this.getTopBoundary_()) {
       return null;
     }
-    return this.getUsableTarget_(video);
+    return this.getUsableTarget_(video, opt_inlineRect);
   }
 
   /**
    * @param {!AmpElement|!VideoOrBaseElementDef} element
-   * @return {!LayoutRectDef}
+   * @return {!inlineRect}
    * @private
    */
   getScrollAdjustedRect_(element) {
     element = element.element || element;
-    return layoutRectFromDomRect(element./*OK*/ getBoundingClientRect());
+    return element./*OK*/ getBoundingClientRect();
   }
 
   /**
@@ -638,17 +635,17 @@ export class VideoDocking {
 
   /**
    * @param {!VideoOrBaseElementDef} video
-   * @param {!LayoutRectDef=} opt_clientRect
+   * @param {!RectDef=} opt_inlineRect
    * @private
    */
-  updateOnPositionChange_(video, opt_clientRect) {
+  updateOnPositionChange_(video, opt_inlineRect) {
     if (this.isTransitioning_) {
       return;
     }
     if (this.scrollDirection_ == DirectionY.TOP) {
-      const target = this.getTargetFor_(video);
+      const target = this.getTargetFor_(video, opt_inlineRect);
       if (target) {
-        this.dockOnPositionChange_(video, target, opt_clientRect);
+        this.dockOnPositionChange_(video, target, opt_inlineRect);
       }
     } else if (this.scrollDirection_ == DirectionY.BOTTOM) {
       if (!this.currentlyDocked_) {
@@ -679,11 +676,13 @@ export class VideoDocking {
 
   /**
    * @param  {!VideoOrBaseElementDef} video
+   * @param {!RectDef=} opt_inlineRect
    * @return {boolean}
    * @private
    */
-  isValidSize_(video) {
-    const {width, height} = video.element./*OK*/ getBoundingClientRect();
+  isValidSize_(video, opt_inlineRect) {
+    const {width, height} =
+      opt_inlineRect || video.element./*OK*/ getBoundingClientRect();
     if (width / height < 1 - FLOAT_TOLERANCE) {
       complainAboutPortrait(video.element);
       return false;
@@ -710,10 +709,10 @@ export class VideoDocking {
   /**
    * @param {!VideoOrBaseElementDef} video
    * @param {!DockTargetDef} target
-   * @param {!LayoutRectDef=} opt_clientRect
+   * @param {!RectDef=} opt_inlineRect
    * @private
    */
-  dockOnPositionChange_(video, target, opt_clientRect) {
+  dockOnPositionChange_(video, target, opt_inlineRect) {
     if (this.ignoreDueToDismissal_(video)) {
       return;
     }
@@ -726,7 +725,7 @@ export class VideoDocking {
       video,
       target,
       /* step */ 0.1,
-      opt_clientRect
+      opt_inlineRect
     );
   }
 
@@ -734,23 +733,23 @@ export class VideoDocking {
    * @param {!VideoOrBaseElementDef} video
    * @param {!DockTargetDef} target
    * @param {number} step
-   * @param {!LayoutRectDef=} opt_clientRect
+   * @param {!RectDef=} opt_inlineRect
    * @return {!Promise}
    * @private
    */
-  dockInTransferLayerStep_(video, target, step, opt_clientRect) {
+  dockInTransferLayerStep_(video, target, step, opt_inlineRect) {
     // Do this in a multi-step process due to a browser quirk in transferring
     // layers to GPU.
     // This cutoff is arbitrary and may be dependant on performance.
     if (step > 0.3) {
-      return this.dock_(video, target, /* step */ 1, opt_clientRect);
+      return this.dock_(video, target, /* step */ 1, opt_inlineRect);
     }
     const isTransferLayerStep = true;
     return this.dock_(
       video,
       target,
       step,
-      opt_clientRect,
+      opt_inlineRect,
       isTransferLayerStep
     ).then(
       () =>
@@ -760,7 +759,7 @@ export class VideoDocking {
               video,
               target,
               step + 0.1,
-              opt_clientRect
+              opt_inlineRect
             ).then(resolve);
           });
         })
@@ -771,12 +770,12 @@ export class VideoDocking {
    * @param {!VideoOrBaseElementDef} video
    * @param {!DockTargetDef} target
    * @param {number} step
-   * @param {!LayoutRectDef=} opt_clientRect
+   * @param {!RectDef=} opt_inlineRect
    * @param {boolean=} opt_isTransferLayerStep
    * @return {!Promise}
    * @private
    */
-  dock_(video, target, step, opt_clientRect, opt_isTransferLayerStep) {
+  dock_(video, target, step, opt_inlineRect, opt_isTransferLayerStep) {
     const {element} = video;
 
     // Component background is now visible, so hide the poster for the Android
@@ -789,7 +788,7 @@ export class VideoDocking {
       video,
       target,
       step,
-      opt_clientRect
+      opt_inlineRect
     );
 
     video.hideControls();
@@ -806,7 +805,7 @@ export class VideoDocking {
       step,
       transitionDurationMs,
       relativeX,
-      opt_clientRect
+      opt_inlineRect
     ).then(() => {
       if (opt_isTransferLayerStep) {
         // Do not enable controls during transfer layer steps, which would
@@ -848,7 +847,7 @@ export class VideoDocking {
     if (this.lastDismissed_ != video) {
       return false;
     }
-    // TODO: Reuse a ClientRect
+    // TODO: Reuse a inlineRect
     if (this.isVisible_(video.element, FLOAT_TOLERANCE)) {
       this.resetDismissed_();
     }
@@ -898,7 +897,7 @@ export class VideoDocking {
    * @param {number} step in [0..1]
    * @param {number} transitionDurationMs
    * @param {DirectionX=} opt_relativeX
-   * @param {!LayoutRectDef=} opt_clientRect
+   * @param {!RectDef=} opt_inlineRect
    * @param {string=} position
    * @return {!Promise}
    * @private
@@ -911,7 +910,7 @@ export class VideoDocking {
     step,
     transitionDurationMs,
     opt_relativeX,
-    opt_clientRect,
+    opt_inlineRect,
     position = 'fixed'
   ) {
     if (this.alreadyPlacedAt_(x, y, scale)) {
@@ -921,10 +920,10 @@ export class VideoDocking {
     this.isTransitioning_ = true;
 
     const {element} = video;
-    const clientRect =
-      opt_clientRect || video.element./*OK*/ getBoundingClientRect();
+    const inlineRect =
+      opt_inlineRect || video.element./*OK*/ getBoundingClientRect();
 
-    const {width, height} = clientRect;
+    const {width, height} = inlineRect;
 
     this.placedAt_ = {x, y, scale};
 
@@ -1183,11 +1182,11 @@ export class VideoDocking {
   /**
    * @param {!AmpElement|!VideoOrBaseElementDef} element
    * @param {number=} minRatio
-   * @param {!LayoutRectDef=} opt_clientRect
+   * @param {!RectDef=} opt_inlineRect
    * @return {boolean}
    */
-  isVisible_(element, minRatio = 1, opt_clientRect) {
-    const inlineRect = opt_clientRect || this.getScrollAdjustedRect_(element);
+  isVisible_(element, minRatio = 1, opt_inlineRect) {
+    const inlineRect = opt_inlineRect || this.getScrollAdjustedRect_(element);
 
     // If the component's box is way out of view, the runtime might have
     // discarded its size values.
@@ -1369,7 +1368,7 @@ export class VideoDocking {
 
     video.pause();
 
-    // TODO: Reuse a ClientRect
+    // TODO: Reuse a inlineRect
     if (this.isVisible_(video, 0.2)) {
       this.bounceToDismiss_(video, offsetX, direction);
       return;
@@ -1444,6 +1443,7 @@ export class VideoDocking {
       /* step */ 0,
       transitionDurationMs
     ).then(() => {
+      // TODO: Reuse a inlineRect
       this.undock_(video, /* reconciled */ true);
       video.showControls();
     });
@@ -1483,6 +1483,7 @@ export class VideoDocking {
     const directionX = this.calculateDirectionX_(offsetX);
     this.cornerDirectionX_ = directionX;
 
+    // TODO: Reuse inlineRect
     const target = this.getUsableTarget_(video);
 
     this.currentlyDocked_.target = target;
@@ -1515,12 +1516,12 @@ export class VideoDocking {
    * @param {!VideoOrBaseElementDef} video
    * @param {!DockTargetDef} target
    * @param {number} step in [0..1]
-   * @param {!LayoutRectDef} opt_clientRect
+   * @param {!RectDef} opt_inlineRect
    * @return {{x: number, y: number, scale: number, relativeX: !DirectionX}}
    */
-  getDims_(video, target, step, opt_clientRect) {
+  getDims_(video, target, step, opt_inlineRect) {
     return interpolatedBoxesTransform(
-      opt_clientRect || this.getScrollAdjustedRect_(video),
+      opt_inlineRect || this.getScrollAdjustedRect_(video),
       target.rect,
       step
     );
@@ -1529,15 +1530,15 @@ export class VideoDocking {
   /**
    * @param {!VideoOrBaseElementDef} video
    * @param {boolean=} opt_reconciled
-   * @param {!LayoutRectDef=} opt_clientRect
+   * @param {!RectDef=} opt_inlineRect
    * @return {!Promise}
    * @private
    */
-  undock_(video, opt_reconciled, opt_clientRect) {
+  undock_(video, opt_reconciled, opt_inlineRect) {
     const isMostlyInView = this.isVisible_(
       video,
       REVERT_TO_INLINE_RATIO,
-      opt_clientRect
+      opt_inlineRect
     );
 
     if (!isMostlyInView) {
@@ -1575,7 +1576,7 @@ export class VideoDocking {
       step,
       transitionDurationMs,
       relativeX,
-      opt_clientRect,
+      opt_inlineRect,
       /* position */ 'absolute'
     ).then(() => {
       video.showControls();
@@ -1671,22 +1672,19 @@ export class VideoDocking {
    * Otherwise returns a rectangle calculated relative to viewport and sticking
    * to the horizontal `directionX`.
    * @param {!AmpElement|!VideoOrBaseElementDef} video
+   * @param {!RectDef=} opt_inlineRect
    * @return {!DockTargetDef}
    * @private
    */
-  getUsableTarget_(video) {
+  getUsableTarget_(video, opt_inlineRect) {
     const slot = this.getSlot_();
-    const inlineRect = layoutRectFromDomRect(
-      video.element./*OK*/ getBoundingClientRect()
-    );
+    const inlineRect =
+      opt_inlineRect || video.element./*OK*/ getBoundingClientRect();
 
     if (slot) {
       return {
         type: DockTargetType.SLOT,
-        rect: letterboxRect(
-          inlineRect,
-          layoutRectFromDomRect(slot./*OK*/ getBoundingClientRect())
-        ),
+        rect: letterboxRect(inlineRect, slot./*OK*/ getBoundingClientRect()),
         slot,
       };
     }
