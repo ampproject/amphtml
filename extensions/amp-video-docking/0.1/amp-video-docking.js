@@ -726,46 +726,33 @@ export class VideoDocking {
       return;
     }
 
-    this.dockInTransferLayerStep_(
-      video,
-      target,
-      /* step */ 0.1,
-      opt_inlineRect
-    );
+    this.dockInTransferLayerStep_(video, target, opt_inlineRect);
   }
 
   /**
+   * Dock this in a two-step process due to a browser quirk in transferring
+   * layers to GPU.
    * @param {!VideoOrBaseElementDef} video
    * @param {!DockTargetDef} target
-   * @param {number} step
    * @param {!RectDef=} opt_inlineRect
    * @return {!Promise}
    * @private
    */
-  dockInTransferLayerStep_(video, target, step, opt_inlineRect) {
-    // Do this in a multi-step process due to a browser quirk in transferring
-    // layers to GPU.
-    // This cutoff is arbitrary and may be dependant on performance.
-    if (step > 0.3) {
-      return this.dock_(video, target, /* step */ 1, opt_inlineRect);
-    }
+  dockInTransferLayerStep_(video, target, opt_inlineRect) {
     const isTransferLayerStep = true;
     return this.dock_(
       video,
       target,
-      step,
+      /* step */ 0.05,
       opt_inlineRect,
       isTransferLayerStep
     ).then(
       () =>
         new Promise((resolve) => {
           this.raf_(() => {
-            this.dockInTransferLayerStep_(
-              video,
-              target,
-              step + 0.1,
-              opt_inlineRect
-            ).then(resolve);
+            this.dock_(video, target, /* step */ 1, opt_inlineRect).then(
+              resolve
+            );
           });
         })
     );
