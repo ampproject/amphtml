@@ -116,6 +116,8 @@ function isValidatorFile(file) {
 
 /**
  * A dictionary of functions that match a given file to a given build target.
+ * Owners files are special because they live all over the repo, so most target
+ * matchers must first make sure they're not matching an owners file.
  */
 const targetMatchers = {
   [Targets.AVA]: (file) => {
@@ -197,6 +199,9 @@ const targetMatchers = {
     );
   },
   [Targets.LINT]: (file) => {
+    if (isOwnersFile(file)) {
+      return false;
+    }
     return lintFiles.includes(file);
   },
   [Targets.OWNERS]: (file) => {
@@ -206,9 +211,13 @@ const targetMatchers = {
     return file.endsWith('package.json') || file.endsWith('package-lock.json');
   },
   [Targets.PRESUBMIT]: (file) => {
+    if (isOwnersFile(file)) {
+      return false;
+    }
     return presubmitFiles.includes(file);
   },
   [Targets.PRETTIFY]: (file) => {
+    // OWNERS files can be prettified.
     return prettifyFiles.includes(file);
   },
   [Targets.RENOVATE_CONFIG]: (file) => {
