@@ -47,5 +47,11 @@ describes.realWin(
         'ANALYTICS-ID'
       );
     });
+
+    it('should set the type to gtag', async () => {
+      await autoAnalyticsEl.whenBuilt();
+      expect(autoAnalyticsEl.querySelector('amp-analytics[type="gtag"]')).to
+        .exist;
+    });
   }
 );
