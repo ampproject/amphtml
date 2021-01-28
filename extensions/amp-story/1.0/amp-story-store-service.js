@@ -231,7 +231,7 @@ export const Action = {
   TOGGLE_VIEWPORT_WARNING: 'toggleViewportWarning',
   ADD_NEW_PAGE_ID: 'addNewPageId',
   SET_PAGE_SIZE: 'updatePageSize',
-  SET_PANNING_MEDIA_STATE: 'setPanningMediaState',
+  ADD_PANNING_MEDIA_STATE: 'addPanningMediaState',
   SET_VIEWER_CUSTOM_CONTROLS: 'setCustomControls',
 };
 
@@ -282,6 +282,15 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ ({
         ...state,
         [StateProperty.NEW_PAGE_AVAILABLE_ID]: data,
+      });
+    case Action.ADD_PANNING_MEDIA_STATE:
+      const updatedState = {
+        ...state[StateProperty.PANNING_MEDIA_STATE],
+        ...data,
+      };
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.PANNING_MEDIA_STATE]: updatedState,
       });
     case Action.ADD_TO_ACTIONS_ALLOWLIST:
       const newActionsAllowlist = [].concat(
@@ -487,15 +496,6 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ ({
         ...state,
         [StateProperty.PAGE_SIZE]: data,
-      });
-    case Action.SET_PANNING_MEDIA_STATE:
-      const updatedState = {
-        ...state[StateProperty.PANNING_MEDIA_STATE],
-        ...data,
-      };
-      return /** @type {!State} */ ({
-        ...state,
-        [StateProperty.PANNING_MEDIA_STATE]: updatedState,
       });
     case Action.SET_VIEWER_CUSTOM_CONTROLS:
       return /** @type {!State} */ ({

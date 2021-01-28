@@ -178,7 +178,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       if (elapsedTime < DURATION_MS) {
         const {x, y, zoom} = this.animateTo_;
         const easing = easeInOutQuad(elapsedTime / DURATION_MS);
-        this.storeService_.dispatch(Action.SET_PANNING_MEDIA_STATE, {
+        this.storeService_.dispatch(Action.ADD_PANNING_MEDIA_STATE, {
           [this.groupId_]: {
             x: startPos.x + (x - startPos.x) * easing,
             y: startPos.y + (y - startPos.y) * easing,
@@ -190,7 +190,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
           requestAnimationFrame(nextFrame);
         }
       } else {
-        this.storeService_.dispatch(Action.SET_PANNING_MEDIA_STATE, {
+        this.storeService_.dispatch(Action.ADD_PANNING_MEDIA_STATE, {
           [this.groupId_]: this.animateTo_,
         });
       }
