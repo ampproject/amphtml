@@ -4520,6 +4520,10 @@ tags: {
     }
     css_declaration: { name: "padding-top" }
   }
+  attrs: {
+    name: "i-amphtml-disable-ar"
+    value: ""
+  }
 }
 
 tags: {
@@ -4533,6 +4537,10 @@ tags: {
     value: "i-amphtml-sizer"
     mandatory: true
     dispatch_key: NAME_DISPATCH
+  }
+  attrs: {
+    name: "i-amphtml-disable-ar"
+    value: ""
   }
 }
 
