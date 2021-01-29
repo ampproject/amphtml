@@ -19,7 +19,20 @@ import {TCF_POST_MESSAGE_API_COMMANDS} from './consent-info';
 import {isEnumValue, isObject} from '../../../src/types';
 import {user} from '../../../src/log';
 
+/**
+ * @typedef {{
+ *  gdprApplies: (boolean|undefined),
+ *  cmpLoaded: (boolean),
+ *  cmpStatus: (string|undefined),
+ *  tcfPolicyVersion: number,
+ * }}
+ */
+export let MinimalPingReturn;
+
 const TAG = 'amp-consent';
+const TCF_POLICY_VERSION = 2;
+const CMP_STATUS = 'loaded';
+const CMP_LOADED = true;
 
 /**
  * @param {!Object} payload
@@ -49,14 +62,27 @@ export function handleTcfCommand(payload, win, policyManager) {
  * @param {!ConsentPolicyManager} policyManager
  */
 function handlePingEvent(payload, win, policyManager) {
-  const cmpLoaded = true;
   policyManager.getConsentMetadataInfo('default').then((metadata) => {
-    const gdprApplies = metadata ? metadata['gdprApplies'] : undefined;
-    const returnValue = {cmpLoaded, gdprApplies};
+    const returnValue = getMinimalPingReturn(metadata);
     const {callId} = payload;
 
     sendTcfApiReturn(win, returnValue, callId);
   });
+}
+
+/**
+ * Create minimal PingReturn object.
+ * @param {?Object} metadata
+ * @return {!MinimalPingReturn}
+ */
+function getMinimalPingReturn(metadata) {
+  const gdprApplies = metadata ? metadata['gdprApplies'] : undefined;
+  return {
+    gdprApplies,
+    cmpLoaded: CMP_LOADED,
+    cmpStatus: CMP_STATUS,
+    tcfPolicyVersion: TCF_POLICY_VERSION,
+  };
 }
 
 /**
@@ -107,4 +133,13 @@ export function isValidTcfApiCall(payload) {
     return false;
   }
   return true;
+}
+
+/**
+ * @param {?Object} metadata
+ * @return {!MinimalPingReturn}
+ * @visibleForTesting
+ */
+export function getMinimalPingReturnForTesting(metadata) {
+  return getMinimalPingReturn(metadata);
 }

@@ -793,7 +793,11 @@ export class AmpConsent extends AMP.BaseElement {
     ) {
       return;
     }
-    handleTcfCommand(data.__tcfapiCall);
+    handleTcfCommand(
+      data.__tcfapiCall,
+      event.source,
+      this.consentPolicyManager_
+    );
   }
 }
 

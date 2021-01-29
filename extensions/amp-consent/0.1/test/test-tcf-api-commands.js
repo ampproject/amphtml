@@ -94,6 +94,45 @@ describes.realWin(
       });
 
       describe('handlePingEvent', () => {
+        it('creates a minimal ping object', async () => {
+          mockMetadata = {
+            gdprApplies: false,
+          };
+          expect(
+            TcfApiCommands.getMinimalPingReturnForTesting(mockMetadata)
+          ).to.deep.equals({
+            gdprApplies: false,
+            cmpLoaded: true,
+            cmpStatus: 'loaded',
+            tcfPolicyVersion: 2,
+          });
+        });
+
+        it('creates a minimal ping object with no gdprApplies', async () => {
+          mockMetadata = {
+            gdprApplies: undefined,
+          };
+          expect(
+            TcfApiCommands.getMinimalPingReturnForTesting(mockMetadata)
+          ).to.deep.equals({
+            gdprApplies: undefined,
+            cmpLoaded: true,
+            cmpStatus: 'loaded',
+            tcfPolicyVersion: 2,
+          });
+        });
+
+        it('creates a minimal ping object with no metadata', async () => {
+          expect(
+            TcfApiCommands.getMinimalPingReturnForTesting()
+          ).to.deep.equals({
+            gdprApplies: undefined,
+            cmpLoaded: true,
+            cmpStatus: 'loaded',
+            tcfPolicyVersion: 2,
+          });
+        });
+
         it('sends a minimal PingReturn via PostMessage', async () => {
           const callId = 'pingCallId';
           payload = {
@@ -113,6 +152,8 @@ describes.realWin(
               returnValue: {
                 cmpLoaded: true,
                 gdprApplies: mockMetadata.gdprApplies,
+                cmpStatus: 'loaded',
+                tcfPolicyVersion: 2,
               },
               callId,
               success: undefined,
