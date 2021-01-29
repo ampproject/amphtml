@@ -336,7 +336,11 @@ export class AmpDoc {
     return this.parent_;
   }
 
-  getTopLevelParent() {
+  /**
+   * Returns the parent for this AMP doc. Primarily used for retrieving the parent of shadow-doc.
+   * @return {?AmpDoc}
+   */
+  getTopLevelDoc() {
     return this.getParent();
   }
 
@@ -795,9 +799,6 @@ export class AmpDocShadow extends AmpDoc {
    */
   constructor(win, url, shadowRoot, opt_options) {
     super(win, /* parent */ null, opt_options);
-    // super(win, shadowRoot.host, opt_options);
-
-    this.win_ = win;
 
     /** @private @const {string} */
     this.url_ = url;
@@ -836,6 +837,19 @@ export class AmpDocShadow extends AmpDoc {
   /** @override */
   getRootNode() {
     return this.shadowRoot_;
+  }
+
+  /** @override */
+  getTopLevelDoc() {
+    const topLevelDoc = this.getRootNode().host.ownerDocument;
+    // We just verify that the shadow-doc's parent is the top level doc
+    // because even for recursive amp-next-page's we create distinct
+    // shadow-docs.
+    devAssert(
+      topLevelDoc === this.win.document,
+      'Nested shadow-doc is not supported'
+    );
+    return topLevelDoc;
   }
 
   /** @override */
@@ -909,17 +923,6 @@ export class AmpDocShadow extends AmpDoc {
     }
     this.meta_[name] = content;
   }
-
-  /** @override */
-  getTopLevelParent() {
-    console.log('^^^^^^^', this.getRootNode().host.ownerDocument);
-    return this.getRootNode().host.ownerDocument;
-    // let parent = this.getRootNode().host.ownerDocument;
-    // while (parent !== this.win_.document) {
-    //   parent = parent.getRootNode().host.ownerDocument; // assuming shadow in nested in another shadow
-    // }
-    // return parent;
-  }
 }
 
 /**
@@ -962,6 +965,11 @@ export class AmpDocFie extends AmpDoc {
   /** @override */
   getRootNode() {
     return this.win.document;
+  }
+
+  /** @override */
+  getTopLevelDoc() {
+    return this.getRootNode();
   }
 
   /** @override */
