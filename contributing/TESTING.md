@@ -30,12 +30,18 @@ This document provides details for testing and building your AMP code.
     -   [Chrome extension](#chrome-extension)
 -   [Visual Diff Tests](#visual-diff-tests)
     -   [Failing Tests](#failing-tests)
-    -   [Running Visual Diff Tests Locally](#running-visual-diff-tests-locally)
+    -   [Flaky Tests](#flaky-tests)
+    -   [How Are Tests Executed](#how-are-tests-executed)
+    -   [Adding and Modifying Visual Diff Tests](#adding-and-modifying-visual-diff-tests)
+        -   [One-time Setup](#one-time-setup)
+        -   [Writing the Test](#writing-the-test)
 -   [Isolated Component Testing](#isolated-component-testing)
 -   [Testing on devices](#testing-on-devices)
     -   [Testing with ngrok](#testing-with-ngrok)
     -   [Testing with Firebase](#testing-with-firebase)
--   [End-to-end Tests](#end-to-end-tests)
+        -   [Testing Ads](#testing-ads)
+-   [End-to-End Tests](#end-to-end-tests)
+-   [Performance Testing Node Build Tools](#performance-testing-node-build-tools)
 
 ## Testing commands
 
