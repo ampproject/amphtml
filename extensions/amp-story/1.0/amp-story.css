@@ -1002,8 +1002,6 @@ amp-story-page.i-amphtml-story-desktop-panels .i-amphtml-story-interactive-compo
   pointer-events: none;
   position: absolute;
   z-index: 10;
-  opacity: 0;
-  animation: fade 1s forwards;
 }
 .tap-hint:before {
   content: '';
@@ -1014,7 +1012,6 @@ amp-story-page.i-amphtml-story-desktop-panels .i-amphtml-story-interactive-compo
   height: 1.7em;
   transform: translate(-50%, -50%);
   border-radius: 50%;
-  animation: grow 1s forwards;
 }
 .tap-hint:after {
   content: '';
@@ -1026,16 +1023,4 @@ amp-story-page.i-amphtml-story-desktop-panels .i-amphtml-story-interactive-compo
   transform: translate(-50%, -50%);
   border-radius: 50%;
   filter: drop-shadow(0px 0px 0.3em rgba(0,0,0,.4));
-}
-
-@keyframes fade {
-  0% {
-    opacity: 0;
-  }
-  20%, 90% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-  }
 }
