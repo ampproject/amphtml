@@ -52,11 +52,8 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
     usesViewer = true;
 
     resetServiceForTesting(win, 'storage');
-    registerServiceBuilder(win, 'storage', function (ampdoc) {
+    registerServiceBuilder(win, 'storage', function () {
       return Promise.resolve({
-        getAmpDocForTesting: () => {
-          return ampdoc;
-        },
         get: (name) => {
           storageGetSpy(name);
           return Promise.resolve(storageValue[name]);
@@ -269,7 +266,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
       instance = new ConsentInstance(ampdoc, 'test', {});
     });
 
-    it('instantiates storage with the top level document', async () => {
+    it('instantiates storage with the top level document', () => {
       const fakeDoc = {'key': 'value'};
       env.sandbox.stub(ampdoc, 'isSingleDoc').returns(false);
       env.sandbox.stub(ampdoc, 'getTopLevelDoc').returns(fakeDoc);
