@@ -50,6 +50,9 @@ export const buildGtagConfig = (gtagId) => ({
         'event_label': '${title}',
         'send_to': [gtagId],
       },
+      'storySpec': {
+        'repeat': false,
+      },
     },
     'storyPageIndex': {
       'on': 'story-page-visible',
