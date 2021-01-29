@@ -797,17 +797,24 @@
       "loading_complete_selectors": [".i-amphtml-video-interface"]
     },
     {
-      "url": "examples/visual-tests/amp-video-docking/respect-controls-on-short-wide-player.html",
-      "name": "amp-video-docking (respects player's controls when short and wide)",
+      "url": "examples/visual-tests/amp-video-docking/respect-small-player-controls.html",
+      "name": "amp-video-docking (respects small player's controls)",
       "viewport": {"width": 800, "height": 600},
-      "interactive_tests": "examples/visual-tests/amp-video-docking/amp-video-docking.js",
+      "interactive_tests": "examples/visual-tests/amp-video-docking/respect-small-player-controls.js",
       "loading_complete_selectors": [".i-amphtml-video-interface"]
     },
     {
-      "url": "examples/visual-tests/amp-video-docking/respect-controls-on-short-wide-player.html",
-      "name": "amp-video-docking (respects player's controls when short and wide—small viewport)",
+      "url": "examples/visual-tests/amp-video-docking/respect-small-player-controls-slot.html",
+      "name": "amp-video-docking (respects small player's controls: slot)",
+      "viewport": {"width": 800, "height": 600},
+      "interactive_tests": "examples/visual-tests/amp-video-docking/respect-small-player-controls.js",
+      "loading_complete_selectors": [".i-amphtml-video-interface"]
+    },
+    {
+      "url": "examples/visual-tests/amp-video-docking/respect-small-player-controls.html",
+      "name": "amp-video-docking (respects small player's controls: small viewport)",
       "viewport": {"width": 375, "height": 600},
-      "interactive_tests": "examples/visual-tests/amp-video-docking/amp-video-docking.js",
+      "interactive_tests": "examples/visual-tests/amp-video-docking/respect-small-player-controls.js",
       "loading_complete_selectors": [".i-amphtml-video-interface"]
     },
     {

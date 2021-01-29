@@ -10,6 +10,9 @@
   <script async custom-element="amp-video-iframe" src="https://cdn.ampproject.org/v0/amp-video-iframe-0.1.js"></script>
   <script async custom-element="amp-video-docking" src="https://cdn.ampproject.org/v0/amp-video-docking-0.1.js"></script>
   <style amp-custom>
+    body {
+      padding-top: 40px;
+    }
     [placeholder],
     [fallback] {
       font-size: 4em;
@@ -18,7 +21,7 @@
   </style>
 </head>
 <!--
-  Short, wide players should not be shrunk and should keep their own controls.
+  Short, wide players should not shrink and should keep their own controls.
 -->
 <body>
   <amp-video-iframe
