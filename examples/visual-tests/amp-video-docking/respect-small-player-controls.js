@@ -25,7 +25,7 @@ module.exports = {
 
   'docks when playing': dock,
 
-  "doesn't replace player's controls": async (page, name) => {
+  "doesn't draw replacement controls": async (page, name) => {
     await dock(page);
     await verifySelectorsInvisible(page, name, [
       '.amp-video-docked-controls',
