@@ -235,6 +235,53 @@ Example:
 </amp-story-grid-layer>
 ```
 
+### preset [optional]
+
+Specifies a responsiveness preset that configures the layer with an aspect-ratio and scaling-factor. The presets reflect optimal values for grid-layers to behave responsively across devices, keeping a background layer that will cover all modern phone sizes and a foreground layer that will keep the content uncropped.
+
+The presets are:
+
+-   **2021-background**: this layer should contain only the background asset (image or video), which is similar to an aspect-ratio layer but is scaled up to cover letterboxed margins.
+-   **2021-foreground**: this layer should contain all the foreground assets, which is an aspect-ratio layer.
+
+Values are:
+
+<table>
+  <tr>
+    <th>Preset</th>
+    <th>Aspect ratio</th>
+    <th>Scaling factor</th>
+  </tr>
+  <tr>
+    <td>2021-background</td>
+    <td>69:116</td>
+    <td>1.142</td>
+  </tr>
+  <tr>
+    <td>2021-foreground</td>
+    <td>69:116</td>
+    <td>1</td>
+  </tr>
+</table>
+
+Example:
+
+```html
+<amp-story-grid-layer preset="2021-background" template="fill">
+    <amp-img src="cat.jpg">
+</amp-story-grid-layer>
+<amp-story-grid-layer preset="2021-foreground">
+    <h1>This will stay consistent with the bg</h1>
+</amp-story-grid-layer>
+```
+
+### anchor [optional]
+
+On grid-layers that contain the attribute `aspect-ratio` or `preset`, it aligns the layer with the border or corner specified.
+Values are: `top`, `left`, `bottom`, `right` or any valid combination of them (`top-left`, `right-bottom`, etc).
+
+This can be used in order to position elements relative to borders or corners while maintaining the scaling consistency between layers.
+
 ## Styling
 
 ### Templates
@@ -357,4 +404,27 @@ Example:
     <h2>Cat ipsum dolor sit amet...</h2>
   </amp-story-grid-layer>
 </amp-story-page>
+```
+
+#### Aspect ratio presets
+
+Aspect ratio layers rarely cover the whole page, and background layers that are fullpage do not behave consistently with the foreground elements.
+
+To mitigate both issues, stories can configure grid-layers with responsiveness presets, that configure a scaling factor for the background layer allowing background assets to cover the screen on all mobile devices while staying consistent with regular aspect-ratio grid-layers.
+
+Anchoring allows layers to position on a corner or border so items in these layers can be placed relative to these.
+
+Example:
+
+```html
+<amp-story-grid-layer preset="2021-background" template="fill">
+    <amp-img src="cat.jpg">
+</amp-story-grid-layer>
+<amp-story-grid-layer preset="2021-foreground">
+    <h1>This will stay consistent with the bg</h1>
+</amp-story-grid-layer>
+<amp-story-grid-layer preset="2021-foreground" anchor="bottom left"">
+    <!-- Position the icon close to the corner on all screens -->
+    <amp-img src="icon.jpg" style="bottom: 1em; left: 1em">
+</amp-story-grid-layer>
 ```
