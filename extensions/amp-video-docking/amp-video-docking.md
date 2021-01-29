@@ -60,7 +60,7 @@ Note that the video won't be docked unless it's playing _manually_. This means:
 -   If the video does not have `autoplay`, the feature will not be triggered unless the user plays the video.
 -   If the video is paused while scrolling, it will not be docked.
 
-### <a id="docking-target"></a> Docking target
+### Docking target
 
 On scroll, the video will minimize to an automatically calculated corner or to a custom defined position.
 
