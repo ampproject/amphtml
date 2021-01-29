@@ -122,6 +122,7 @@ tags: {  # <amp-story>
     child_tag_name_oneof: "AMP-PIXEL"
     child_tag_name_oneof: "AMP-SIDEBAR"
     child_tag_name_oneof: "AMP-STORY-AUTO-ADS"
+    child_tag_name_oneof: "AMP-STORY-AUTO-ANALYTICS"
     child_tag_name_oneof: "AMP-STORY-BOOKEND"
     child_tag_name_oneof: "AMP-STORY-PAGE"
   }
@@ -146,6 +147,7 @@ tags: {  # <amp-story-page>
     child_tag_name_oneof: "AMP-ANALYTICS"
     child_tag_name_oneof: "AMP-PIXEL"
     child_tag_name_oneof: "AMP-STORY-ANIMATION"
+    child_tag_name_oneof: "AMP-STORY-AUTO-ANALYTICS"
     child_tag_name_oneof: "AMP-STORY-CTA-LAYER"
     child_tag_name_oneof: "AMP-STORY-GRID-LAYER"
     child_tag_name_oneof: "AMP-STORY-PAGE-ATTACHMENT"
@@ -671,6 +673,7 @@ descendant_tag_list: {
   tag: "AMP-PIXEL"
   tag: "AMP-STATE"
   tag: "AMP-STORY-360"
+  tag: "AMP-STORY-AUTO-ANALYTICS"
   tag: "AMP-STORY-INTERACTIVE-BINARY-POLL"
   tag: "AMP-STORY-INTERACTIVE-POLL"
   tag: "AMP-STORY-INTERACTIVE-QUIZ"
