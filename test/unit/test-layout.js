@@ -632,7 +632,7 @@ describes.realWin('Layout: aspect-ratio CSS', {amp: true}, function (env) {
     doc.body.appendChild(element);
 
     ssrSizer = doc.createElement('i-amphtml-sizer');
-    ssrSizer.classList.add('i-amphtml-disable-for-ar');
+    ssrSizer.classList.add('i-amphtml-disable-ar');
   });
 
   afterEach(() => {

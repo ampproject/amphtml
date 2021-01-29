@@ -160,7 +160,7 @@ i-amphtml-sizer {
  * borwser and the optimizer.
  */
 @supports (aspect-ratio: 1 / 1) {
-  i-amphtml-sizer.i-amphtml-disable-for-ar {
+  i-amphtml-sizer.i-amphtml-disable-ar {
     display: none !important;
   }
 }

@@ -29,6 +29,7 @@ declaration_list {
   declaration: { name: "animation-name" }
   declaration: { name: "animation-play-state" }
   declaration: { name: "animation-timing-function" }
+  declaration: { name: "aspect-ratio" }
   declaration: { name: "backface-visibility" }
   declaration: { name: "background" }
   declaration: { name: "background-attachment" }
@@ -315,6 +316,7 @@ declaration_list {
   declaration: { name: "align-items" }
   declaration: { name: "align-self" }
   declaration: { name: "appearance" }
+  declaration: { name: "aspect-ratio" }
   declaration: { name: "azimuth" }
   declaration: { name: "background" }
   declaration: { name: "background-attachment" }
