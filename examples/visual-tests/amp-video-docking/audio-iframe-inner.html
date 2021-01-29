@@ -9,15 +9,19 @@
     ></script>
     <style>
       body {
+        margin: 0;
+        height: 100vh;
+        background: #77f;
+      }
+      div {
         font-family: sans-serif;
         font-size: 16px;
         font-weight: bold;
-        margin: 0;
         height: 100vh;
         line-height: 100vh;
         text-align: center;
         box-sizing: border-box;
-        background: #77f;
+        background: mediumorchid;
         color: white;
       }
       [hidden] {
@@ -26,8 +30,12 @@
     </style>
   </head>
   <body>
-    This text should never be covered
+    <div hidden>player's own controls</div>
     <script>
+      document.body.addEventListener('click', function () {
+        document.querySelector('div').removeAttribute('hidden');
+      });
+
       // Mock audio playback without actual audio.
       // https://go.amp.dev/c/amp-video-iframe#custom-integrations
       (window.AmpVideoIframe = window.AmpVideoIframe || []).push(function (

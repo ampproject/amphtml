@@ -11,7 +11,7 @@
   <script async custom-element="amp-video-docking" src="https://cdn.ampproject.org/v0/amp-video-docking-0.1.js"></script>
   <style amp-custom>
     body {
-      padding-top: 40px;
+      padding: 80px 20px;
     }
     [placeholder],
     [fallback] {
@@ -20,7 +20,7 @@
     }
     .fixed {
       position: fixed;
-      width: 360px;
+      width: 320px;
       height: 60px;
       right: 6px;
       top: 6px;
@@ -39,7 +39,7 @@
   <amp-video-iframe
     id="video"
     src="./audio-iframe-inner.html"
-    width="360"
+    width="320"
     height="60"
     dock="#slot"
   >
@@ -47,19 +47,21 @@
     <div placeholder>🖼</div>
     <div fallback>😵</div>
   </amp-video-iframe>
-  <button on="tap: video.play" id="play-button">play</button>
-  <button
-    on="tap: bottom.scrollTo(pos='bottom')"
-    id="scroll-bottom-button"
-  >
-    scroll to bottom
-  </button>
-  <button
-    on="tap: video.scrollTo(pos='top')"
-    id="scroll-video-button"
-  >
-    scroll to video
-  </button>
+  <div>
+    <button on="tap: video.play" id="play-button">play</button>
+    <button
+      on="tap: bottom.scrollTo(pos='bottom')"
+      id="scroll-bottom-button"
+    >
+      scroll to bottom
+    </button>
+    <button
+      on="tap: video.scrollTo(pos='top')"
+      id="scroll-video-button"
+    >
+      scroll to video
+    </button>
+  </div>
   <div id="bottom" style="height: 200vh"></div>
   <div class="fixed">
     <amp-layout layout="fill" id="slot"></amp-layout>

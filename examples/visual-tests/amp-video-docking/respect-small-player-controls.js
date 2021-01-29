@@ -32,4 +32,9 @@ module.exports = {
       '.i-amphtml-video-docked-overlay',
     ]);
   },
+
+  "allows clickthrough to player": async (page, name) => {
+    await dock(page);
+    await page.tap('iframe');
+  },
 };
