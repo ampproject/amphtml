@@ -17,6 +17,10 @@ push_builds_only: &push_builds_only
         - /^amp-release-.*$/
 
 executors:
+  amphtml-medium-executor:
+    machine:
+      image: ubuntu-2004:202010-01
+    resource_class: medium
   amphtml-large-executor:
     machine:
       image: ubuntu-2004:202010-01
@@ -51,8 +55,6 @@ commands:
       - run:
           name: 'Fetch Merge Commit'
           command: ./.circleci/fetch_merge_commit.sh
-      - browser-tools/install-chrome:
-          replace-existing: true
       - run:
           name: 'Setup Google Cloud Storage'
           command: ./.circleci/setup_storage.sh
@@ -62,11 +64,15 @@ commands:
       - run:
           name: 'Install Dependencies'
           command: ./.circleci/install_dependencies.sh
+  install_chrome:
+    steps:
+      - browser-tools/install-chrome:
+          replace-existing: true
 
 jobs:
   'Checks':
     executor:
-      name: amphtml-large-executor
+      name: amphtml-medium-executor
     steps:
       - setup_vm
       - run:
@@ -98,7 +104,7 @@ jobs:
           command: node build-system/pr-check/module-build.js
   'Bundle Size':
     executor:
-      name: amphtml-large-executor
+      name: amphtml-medium-executor
     steps:
       - setup_vm
       - run:
@@ -106,7 +112,7 @@ jobs:
           command: node build-system/pr-check/bundle-size.js
   'Validator Tests':
     executor:
-      name: amphtml-large-executor
+      name: amphtml-medium-executor
     steps:
       - setup_vm
       - run:
@@ -120,6 +126,7 @@ jobs:
       name: amphtml-large-executor
     steps:
       - setup_vm
+      - install_chrome
       - run:
           name: 'Visual Diff Tests'
           command: node build-system/pr-check/visual-diff-tests.js
@@ -128,6 +135,7 @@ jobs:
       name: amphtml-large-executor
     steps:
       - setup_vm
+      - install_chrome
       - restore_karma_cache:
           cache_name: unit
       - run:
@@ -140,6 +148,7 @@ jobs:
       name: amphtml-large-executor
     steps:
       - setup_vm
+      - install_chrome
       - restore_karma_cache:
           cache_name: unminified
       - run:
@@ -152,6 +161,7 @@ jobs:
       name: amphtml-large-executor
     steps:
       - setup_vm
+      - install_chrome
       - restore_karma_cache:
           cache_name: nomodule
       - run:
@@ -164,6 +174,7 @@ jobs:
       name: amphtml-large-executor
     steps:
       - setup_vm
+      - install_chrome
       - restore_karma_cache:
           cache_name: module
       - run:
@@ -176,6 +187,7 @@ jobs:
       name: amphtml-large-executor
     steps:
       - setup_vm
+      - install_chrome
       - run:
           name: 'End-to-End Tests'
           command: node build-system/pr-check/e2e-tests.js
@@ -184,6 +196,7 @@ jobs:
       name: amphtml-xlarge-executor
     steps:
       - setup_vm
+      - install_chrome
       - run:
           name: 'Performance Tests'
           command: node build-system/pr-check/performance-tests.js
@@ -192,6 +205,7 @@ jobs:
       name: amphtml-xlarge-executor
     steps:
       - setup_vm
+      - install_chrome
       - run:
           name: 'Experiment A Tests'
           command: node build-system/pr-check/experiment-tests.js --experiment=experimentA
@@ -200,6 +214,7 @@ jobs:
       name: amphtml-xlarge-executor
     steps:
       - setup_vm
+      - install_chrome
       - run:
           name: 'Experiment B Tests'
           command: node build-system/pr-check/experiment-tests.js --experiment=experimentB
@@ -208,6 +223,7 @@ jobs:
       name: amphtml-xlarge-executor
     steps:
       - setup_vm
+      - install_chrome
       - run:
           name: 'Experiment C Tests'
           command: node build-system/pr-check/experiment-tests.js --experiment=experimentC
