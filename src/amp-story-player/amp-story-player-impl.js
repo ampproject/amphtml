@@ -620,17 +620,11 @@ export class AmpStoryPlayer {
       Messaging.waitForHandshakeFromDocument(
         this.win_,
         iframeEl.contentWindow,
-<<<<<<< HEAD
         this.getEncodedLocation_(url).origin,
         /*opt_token*/ null,
         urls.cdnProxyRegex
-      );
-    });
-=======
-        this.getEncodedLocation_(url).origin
       )
     );
->>>>>>> 10ef1c670 (reduce args in render(), fix names, fix errors logs)
   }
 
   /**
