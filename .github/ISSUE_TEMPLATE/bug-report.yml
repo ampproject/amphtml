@@ -5,7 +5,7 @@ issue_body: true
 inputs:
 - type: description
   attributes:
-    value: **Please only file reports about bugs in AMP here.**
+    value: Please only file reports about bugs in AMP here.
 - type: description
   attributes:
     value: If you have questions about how to use AMP or other general questions about AMP please ask them on Stack Overflow under the AMP HTML tag instead of filing an issue here: http://stackoverflow.com/questions/tagged/amp-html
