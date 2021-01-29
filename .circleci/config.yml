@@ -27,6 +27,24 @@ executors:
     resource_class: xlarge
 
 commands:
+  save_karma_cache:
+    parameters:
+      cache_name:
+        type: string
+    steps:
+      - save_cache:
+          name: 'Save Karma Cache'
+          key: karma-cache-<<parameters.cache_name>>-{{ checksum "package-lock.json" }}
+          paths:
+            - .karma-cache
+  restore_karma_cache:
+    parameters:
+      cache_name:
+        type: string
+    steps:
+      - restore_cache:
+          name: 'Restore Karma Cache'
+          key: karma-cache-<<parameters.cache_name>>-{{ checksum "package-lock.json" }}
   setup_vm:
     steps:
       - checkout
@@ -126,33 +144,49 @@ jobs:
       name: amphtml-large-executor
     steps:
       - setup_vm
+      - restore_karma_cache:
+          cache_name: unit
       - run:
           name: 'Unit Tests'
           command: node build-system/pr-check/unit-tests.js
+      - save_karma_cache:
+          cache_name: unit
   'Unminified Tests':
     executor:
       name: amphtml-large-executor
     steps:
       - setup_vm
+      - restore_karma_cache:
+          cache_name: unminified
       - run:
           name: 'Unminified Tests'
           command: node build-system/pr-check/unminified-tests.js
+      - save_karma_cache:
+          cache_name: unminified
   'Nomodule Tests':
     executor:
       name: amphtml-large-executor
     steps:
       - setup_vm
+      - restore_karma_cache:
+          cache_name: nomodule
       - run:
           name: 'Nomodule Tests'
           command: node build-system/pr-check/nomodule-tests.js
+      - save_karma_cache:
+          cache_name: nomodule
   'Module Tests':
     executor:
       name: amphtml-large-executor
     steps:
       - setup_vm
+      - restore_karma_cache:
+          cache_name: module
       - run:
           name: 'Module Tests'
           command: node build-system/pr-check/module-tests.js
+      - save_karma_cache:
+          cache_name: module
   'End-to-End Tests':
     executor:
       name: amphtml-large-executor
