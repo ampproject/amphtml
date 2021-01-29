@@ -19,7 +19,23 @@ import {TCF_POST_MESSAGE_API_COMMANDS} from './consent-info';
 import {isEnumValue, isObject} from '../../../src/types';
 import {user} from '../../../src/log';
 
+/**
+ * Event status is only defined for addEventListener command.
+ * @typedef {{
+  *  tcfPolicyVersion: number,
+  *  gdprApplies: (boolean|undefined),
+  *  tcString: (string|undefined),
+  *  listenerId: (string|undefined),
+  *  cmpStatus: (boolean|undefined),
+  *  eventStatus: (string|undefined),
+  *  additionalData: (Object),
+  * }}
+  */
+ export let MinimalTcData;
+
 const TAG = 'amp-consent';
+const tcfPolicyVersion = '2';
+const cmpStatus = 'loaded';
 
 /**
  * @param {!Object} payload
@@ -31,6 +47,8 @@ export function handleTcfCommand(payload, win, policyManager) {
 
   switch (command) {
     case TCF_POST_MESSAGE_API_COMMANDS.GET_TC_DATA:
+      handleGetTcData(payload, win, policyManager);
+      break;
     case TCF_POST_MESSAGE_API_COMMANDS.PING:
       handlePingEvent(payload, win, policyManager);
       break;
@@ -40,6 +58,56 @@ export function handleTcfCommand(payload, win, policyManager) {
       return;
   }
 }
+
+/**
+ * Create minimal PingReturn object. Send to original iframe
+ * once object has been filled.
+ * @param {!Object} payload
+ * @param {!Window} win
+ * @param {!ConsentPolicyManager} policyManager
+ */
+function handleGetTcData(payload, win, policyManager) {
+  const consentStringInfoPromise = policyManager.getConsentStringInfo('default');
+  const metadataPromise = policyManager.getConsentMetadataInfo('default');
+  const sharedDataPromise = policyManager.getMergedSharedData('default');
+  
+  
+  Promise.all([metadataPromise, sharedDataPromise, consentStringInfoPromise]).then((arr) => {
+    const returnValue = getMinimalTcData(arr[0], arr[1], arr[2]);
+    const {callId} = payload;
+
+    sendTcfApiReturn(win, returnValue, callId);
+  });
+}
+
+/**
+ * Create MinimalTCData object. Fill in fields dependent on
+ * command.
+ * @param {?Object} metadata
+ * @param {?Object} sharedData
+ * @param {string=} tcString
+ * @param {string=} eventStatus
+ * @param {string=} listenerId
+ * @return {!MinimalTcData} policyManager
+ */
+function getMinimalTcData(metadata, sharedData, tcString, eventStatus, listenerId) {
+  const purposeOneTreatment = metadata ? metadata['purposeOne'] : undefined;
+  const gdprApplies = metadata ? metadata['gdprApplies'] : undefined;
+  const additionalConsent = metadata ? metadata['additionalConsent'] : undefined;
+  const additionalData = {...sharedData, additionalConsent}
+  
+  return {
+    tcfPolicyVersion,
+    gdprApplies,
+    tcString,
+    listenerId,
+    cmpStatus,
+    eventStatus,
+    purposeOneTreatment,
+    additionalData,
+  };
+}
+
 /**
  * Create minimal PingReturn object. Send to original iframe
  * once object has been filled.
