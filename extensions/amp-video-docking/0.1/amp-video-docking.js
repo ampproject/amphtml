@@ -1602,6 +1602,7 @@ export class VideoDocking {
       step,
       transitionDurationMs,
       relativeX,
+      opt_inlineRect,
       /* position */ 'absolute'
     ).then(() => {
       if (!target.respectControls) {
