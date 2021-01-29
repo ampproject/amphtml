@@ -33,8 +33,11 @@ module.exports = {
     ]);
   },
 
-  "allows clickthrough to player": async (page, name) => {
+  'allows clickthrough to player': async (page, name) => {
     await dock(page);
-    await page.tap('iframe');
+
+    const elementHandle = await page.$('iframe');
+    const frame = await elementHandle.contentFrame();
+    await frame.tap('body');
   },
 };
