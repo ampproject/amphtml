@@ -35,4 +35,4 @@ async function dock(page, name) {
 module.exports = {
   dock,
   scroll,
-}
+};
