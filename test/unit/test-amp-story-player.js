@@ -112,6 +112,10 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       .resolves(fakeMessaging);
   });
 
+  afterEach(() => {
+    console.error.restore();
+  });
+
   it('should build an iframe for each story', async () => {
     buildStoryPlayer();
     await manager.loadPlayers();
@@ -449,10 +453,17 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     });
 
     it('should throw error when invalid url is provided', async () => {
-      buildStoryPlayer(1, DEFAULT_ORIGIN_URL, 'www.invalid.org');
+      console.error.restore();
+      env.sandbox.spy(console, 'error');
 
-      return expect(() => manager.loadPlayers()).to.throw(
-        /Unsupported cache, use one of following: cdn.ampproject.org,www.bing-amp.com/
+      buildStoryPlayer(1, DEFAULT_ORIGIN_URL, 'www.tacos.org');
+
+      await manager.loadPlayers();
+      await nextTick();
+
+      expect(console.error).to.be.calledWithMatch(
+        /\[amp-story-player\]/,
+        /Unsupported cache specified, use one of following: cdn.ampproject.org,www.bing-amp.com/
       );
     });
   });
