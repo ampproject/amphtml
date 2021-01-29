@@ -443,7 +443,6 @@ export function installStorageServiceForDoc(ampdoc) {
       const binding = overrideStorage
         ? new ViewerStorageBinding(viewer)
         : new LocalStorageBinding(ampdoc.win);
-      // console.log(ampdoc, viewer.getParam('storage'), viewer, binding, '***');
       return new Storage(ampdoc, viewer, binding).start_();
     },
     /* opt_instantiate */ true
