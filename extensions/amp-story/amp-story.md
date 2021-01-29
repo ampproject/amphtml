@@ -462,10 +462,45 @@ Example:
 
 We support inline links `<a>` as a descendant of `amp-story-grid-layer`. Whenever a link is tapped a tooltip will be shown - deferring the corresponding action until the user taps again in the tooltip.
 
+**Note:** The story format determines whether a tooltip should be displayed. The format currently specifies that links in the bottom 20% of a page do not show a tooltip by default, but this calculation could change over time. To show a tooltip for links in the bottom 20% of a page, see the `show-tooltip` section below.
+
 Please note the following guidelines for including links in your amp-story:
 
 -   Parts of links that are too far to the left or right edge of a story page will yield to navigation.
 -   Links that occupy too much of the page area will be ignored for navigation.
+
+### show-tooltip Attribute
+
+Tooltips allow users a second-click confirmation before navigating to linked content that takes them away from the current AMP story page. `show-tooltip` is an attribute that can be added to any link on an AMP story page.
+
+Links with `show-tooltip` attribute can have the following values:
+<ul>
+  <li><code>show-tooltip="true"</code> [default]: No matter where on the screen it is, the link should trigger a tooltip.</li>
+  <li><code>show-tooltip="auto"</code>: The story format determines whether a tooltip should be displayed. The story format currently calculates that links in the bottom 20% of a page do not show a tooltip, but this calculation could change over time.</li>
+  <li>Note: <code>show-tooltip="false"</code> is **not** supported. Instances where the story format enforces tooltip display for links cannot be overriden.</li>
+</ul>
+
+<amp-img alt="AMP Story tooltip" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-tooltip.gif" width="240" height="480">
+  <noscript>
+    <img alt="AMP Story tooltip" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-tooltip.gif" />
+  </noscript>
+</amp-img>
+
+```html
+<amp-story-page id="fill-template-title">
+    <amp-story-grid-layer template="vertical">
+        <h1>fill</h1>
+        <div style="position: absolute; top:50%; left: 0; right: 0; height: 200px; background-color: aqua">
+            <a href="https://www.google.com"  show-tooltip="auto" style="height:100px; position:absolute;">
+                <span>span inside div > a[show-tooltip="auto"]</span>
+            </a>
+        </div>
+        <a href="https://www.google.com"  show-tooltip="auto" style="position:absolute; bottom:15px">
+            <span>This is a link in the bottom 20% of grid-layer using [show-tooltip]="auto"</span>
+        </a>
+    </amp-story-grid-layer>
+</amp-story-page>
+```
 
 #### Customizing tooltip for links or interactive components
 
