@@ -12,5 +12,6 @@
   "intersect-resources": 0,
   "ios-fixed-no-transfer": 0,
   "fie-resources": 1,
-  "visibility-trigger-improvements": 1
+  "visibility-trigger-improvements": 1,
+  "layout-aspect-ratio-css": 0.01
 }

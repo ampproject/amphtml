@@ -39,14 +39,20 @@ amp-accordion > section > * {
 }
 
 /*
- * Lowest-specificity UI styles. Mostly duplicated by the
- * i-amphtml-accordion-header for cross-browser compatibility.
+ * Note! This is a new CSS incompatible with older browsers. It provides
+ * low-specificity UI styles. The same styles are later set for older browsers
+ * via the `i-amphtml-accordion-header` class.
+ *
+ * TODO(#32155): Use instead `supports selector(:where(A))` when the
+ * https://github.com/postcss/postcss/issues/1520 is fixed.
  */
-:where(amp-accordion > section) > :first-child {
-  cursor: pointer;
-  background-color: #efefef;
-  padding-right: 20px;
-  border: 1px solid #dfdfdf;
+@media (min-width: 1px) {
+  :where(amp-accordion > section) > :first-child {
+    cursor: pointer;
+    background-color: #efefef;
+    padding-right: 20px;
+    border: 1px solid #dfdfdf;
+  }
 }
 
 /* heading
