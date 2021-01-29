@@ -23,8 +23,10 @@ module.exports = {
     ];
     for (const selector of forbiddenSelectors) {
       if ((await page.$(selector)) !== null) {
-        throw new Error(`${colors.cyan(testName)} | The forbidden CSS ` +
-            `element ${colors.cyan(selector)} exists in the page`);
+        throw new Error(
+          `${colors.cyan(testName)} | The forbidden CSS ` +
+            `element ${colors.cyan(selector)} exists in the page`
+        );
       }
     }
   },
