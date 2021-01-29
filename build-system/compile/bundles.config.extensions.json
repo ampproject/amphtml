@@ -452,6 +452,11 @@
     }
   },
   {
+    "name": "amp-story-auto-analytics",
+    "version": "0.1",
+    "latestVersion": "0.1"
+  },
+  {
     "name": "amp-story-dev-tools",
     "version": "0.1",
     "latestVersion": "0.1",
