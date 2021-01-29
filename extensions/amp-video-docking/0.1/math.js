@@ -140,8 +140,6 @@ export function topCornerRect(
   marginRatio,
   marginMax
 ) {
-  const widthUnit = container.width;
-
   const originalArea = original.width * original.height;
   const containerArea = container.width * container.height;
 
@@ -160,7 +158,7 @@ export function topCornerRect(
   // e.g. if the scaled original fills the container's width exactly, there's no
   // margin.
   const marginMin = (container.width - width) / 2;
-  const margin = Math.min(marginMin, marginMax, marginRatio * widthUnit);
+  const margin = Math.min(marginMin, marginMax, marginRatio * container.width);
 
   const x =
     horizontalEdge == DirectionX.RIGHT
