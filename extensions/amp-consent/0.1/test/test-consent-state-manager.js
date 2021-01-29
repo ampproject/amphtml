@@ -25,6 +25,7 @@ import {
   ConsentStateManager,
 } from '../consent-state-manager';
 import {CONSENT_STRING_TYPE} from '../../../../src/consent-state';
+import {Services} from '../../../../src/services';
 import {dev} from '../../../../src/log';
 import {macroTask} from '../../../../testing/yield';
 import {
@@ -51,8 +52,11 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
     usesViewer = true;
 
     resetServiceForTesting(win, 'storage');
-    registerServiceBuilder(win, 'storage', function () {
+    registerServiceBuilder(win, 'storage', function (ampdoc) {
       return Promise.resolve({
+        getAmpDocForTesting: () => {
+          return ampdoc;
+        },
         get: (name) => {
           storageGetSpy(name);
           return Promise.resolve(storageValue[name]);
@@ -262,7 +266,16 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
     let instance;
 
     beforeEach(() => {
-      instance = new ConsentInstance(ampdoc, 'test', {});
+      // instance = new ConsentInstance(ampdoc, 'test', {});
+    });
+
+    it.only('topLevelDoc', async () => {
+      const fakeDoc = {'foo': 'bar'};
+      env.sandbox.stub(ampdoc, 'isSingleDoc').returns(false);
+      env.sandbox.stub(ampdoc, 'getTopLevelDoc').returns(fakeDoc);
+      const spy = env.sandbox.stub(Services, 'storageForDoc');
+      new ConsentInstance(ampdoc, 'test', {});
+      expect(spy.args[0][0]).to.equal(fakeDoc);
     });
 
     describe('update', () => {
