@@ -266,16 +266,16 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
     let instance;
 
     beforeEach(() => {
-      // instance = new ConsentInstance(ampdoc, 'test', {});
+      instance = new ConsentInstance(ampdoc, 'test', {});
     });
 
-    it.only('topLevelDoc', async () => {
-      const fakeDoc = {'foo': 'bar'};
+    it('instantiates storage with the top level document', async () => {
+      const fakeDoc = {'key': 'value'};
       env.sandbox.stub(ampdoc, 'isSingleDoc').returns(false);
       env.sandbox.stub(ampdoc, 'getTopLevelDoc').returns(fakeDoc);
       const spy = env.sandbox.stub(Services, 'storageForDoc');
       new ConsentInstance(ampdoc, 'test', {});
-      expect(spy.args[0][0]).to.equal(fakeDoc);
+      expect(spy.args[0][0]).to.deep.equal(fakeDoc);
     });
 
     describe('update', () => {
