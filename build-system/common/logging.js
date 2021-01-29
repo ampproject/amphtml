@@ -20,7 +20,7 @@ const {bold, yellow} = require('ansi-colors');
 const {isCiBuild} = require('./ci');
 
 /**
- * Used by tests to wrap progres dots.
+ * Used by tests to wrap progress dots.
  */
 const dotWrappingWidth = 150;
 
