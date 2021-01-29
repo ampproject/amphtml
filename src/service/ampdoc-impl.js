@@ -968,11 +968,6 @@ export class AmpDocFie extends AmpDoc {
   }
 
   /** @override */
-  getTopLevelDoc() {
-    return this.getRootNode();
-  }
-
-  /** @override */
   getUrl() {
     return this.url_;
   }

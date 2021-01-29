@@ -837,6 +837,10 @@ describes.realWin('AmpDocSingle', {}, (env) => {
     expect(ampdoc.isSingleDoc()).to.be.true;
   });
 
+  it('should return top level document as null', () => {
+    expect(ampdoc.getTopLevelDoc()).to.be.null;
+  });
+
   it('should find element by id', () => {
     const id = 'ampdoc_test_element_' + Date.now();
     const element = doc.createElement('div');
@@ -957,6 +961,10 @@ describes.realWin('AmpDocShadow', {}, (env) => {
     expect(ampdoc.win).to.equal(win);
     expect(ampdoc.isSingleDoc()).to.be.false;
     expect(ampdoc.getUrl()).to.equal(URL);
+  });
+
+  it('should return top level document', () => {
+    expect(ampdoc.getTopLevelDoc()).to.deep.equal(doc);
   });
 
   it('should return document as root', () => {
