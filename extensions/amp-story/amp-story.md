@@ -460,16 +460,14 @@ Example:
 
 #### Links in amp-story-grid-layer
 
-We support inline links `<a>` as a descendant of `amp-story-grid-layer`. Whenever a link is tapped a tooltip will be shown - deferring the corresponding action until the user taps again in the tooltip.
-
-**Note:** The story format determines whether a tooltip should be displayed. The format currently specifies that links in the bottom 20% of a page do not show a tooltip by default, but this calculation could change over time. To show a tooltip for links in the bottom 20% of a page, see the `show-tooltip` section below.
+We support inline links `<a>` as a descendant of `amp-story-grid-layer`. Whenever a link is tapped a tooltip will be shown - deferring the corresponding action until the user taps again in the tooltip. Tooltips can be disabled for links in the bottom 20% of the page (for more details, see `show-tooltip` section below).
 
 Please note the following guidelines for including links in your amp-story:
 
 -   Parts of links that are too far to the left or right edge of a story page will yield to navigation.
 -   Links that occupy too much of the page area will be ignored for navigation.
 
-### show-tooltip Attribute
+### Show-Tooltip Attribute
 
 Tooltips allow users a second-click confirmation before navigating to linked content that takes them away from the current AMP story page. `show-tooltip` is an attribute that can be added to any link on an AMP story page.
 
