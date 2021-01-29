@@ -112,7 +112,9 @@ target area](#docking-target).
   </figure>
 </center>
 
-You may try out the differences in resizing and controls [on this demo page.](TODODOODODODOD)
+<!-- TODO(alanorozco): Serve following demo from amp.dev -->
+
+You may try out the differences in resizing and controls [on this demo page.](https://amp-docking-controls.glitch.me/)
 
 ## Attributes
 
