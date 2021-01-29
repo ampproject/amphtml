@@ -54,30 +54,14 @@ commands:
       - browser-tools/install-chrome:
           replace-existing: true
       - run:
-          name: 'Install Google Cloud SDK'
-          command: |
-            cd ~/
-            curl -Ss --retry 5 https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-323.0.0-linux-x86_64.tar.gz | tar xz
-            echo 'source ~/google-cloud-sdk/path.bash.inc' >> $BASH_ENV
-      - run:
-          name: 'Setup Storage'
-          command: ./.circleci/setup-storage.sh
+          name: 'Setup Google Cloud Storage'
+          command: ./.circleci/setup_storage.sh
       - run:
           name: 'Configure Hosts'
           command: cat ./build-system/test-configs/hosts | sudo tee -a /etc/hosts
       - run:
-          name: 'Install NVM'
-          command: curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
-      - run:
-          name: 'Install Node LTS'
-          command: |
-            nvm install 'lts/*'
-            echo "export PATH=`which node`:$PATH" >> $BASH_ENV
-      - run:
           name: 'Install Dependencies'
-          command: |
-            npm install --global gulp-cli
-            npm ci
+          command: ./.circleci/install_dependencies.sh
 
 jobs:
   'Checks':
