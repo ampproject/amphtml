@@ -478,11 +478,7 @@ Links with `show-tooltip` attribute can have the following values:
   <li>Note: <code>show-tooltip="false"</code> is **not** supported. Instances where the story format enforces tooltip display for links cannot be overriden.</li>
 </ul>
 
-<amp-img alt="AMP Story tooltip" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-tooltip.gif" width="240" height="480">
-  <noscript>
-    <img alt="AMP Story tooltip" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-tooltip.gif" />
-  </noscript>
-</amp-img>
+Example:
 
 ```html
 <amp-story-page id="fill-template-title">
