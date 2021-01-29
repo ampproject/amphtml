@@ -6,10 +6,8 @@ orbs:
 push_and_pr_builds: &push_and_pr_builds
   filters:
     branches:
-      only:
-        - master
-        - /^amp-release-.*$/
-        - /^pull\/.*$/
+      ignore:
+        - nightly
 
 push_builds_only: &push_builds_only
   filters:
@@ -29,6 +27,24 @@ executors:
     resource_class: xlarge
 
 commands:
+  save_karma_cache:
+    parameters:
+      cache_name:
+        type: string
+    steps:
+      - save_cache:
+          name: 'Save Karma Cache'
+          key: karma-cache-<<parameters.cache_name>>-{{ checksum "package-lock.json" }}
+          paths:
+            - .karma-cache
+  restore_karma_cache:
+    parameters:
+      cache_name:
+        type: string
+    steps:
+      - restore_cache:
+          name: 'Restore Karma Cache'
+          key: karma-cache-<<parameters.cache_name>>-{{ checksum "package-lock.json" }}
   setup_vm:
     steps:
       - checkout
@@ -38,30 +54,14 @@ commands:
       - browser-tools/install-chrome:
           replace-existing: true
       - run:
-          name: 'Install Google Cloud SDK'
-          command: |
-            cd ~/
-            curl -Ss --retry 5 https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-323.0.0-linux-x86_64.tar.gz | tar xz
-            echo 'source ~/google-cloud-sdk/path.bash.inc' >> $BASH_ENV
-      - run:
-          name: 'Setup Storage'
-          command: ./.circleci/setup-storage.sh
+          name: 'Setup Google Cloud Storage'
+          command: ./.circleci/setup_storage.sh
       - run:
           name: 'Configure Hosts'
           command: cat ./build-system/test-configs/hosts | sudo tee -a /etc/hosts
       - run:
-          name: 'Install NVM'
-          command: curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
-      - run:
-          name: 'Install Node LTS'
-          command: |
-            nvm install 'lts/*'
-            echo "export PATH=`which node`:$PATH" >> $BASH_ENV
-      - run:
           name: 'Install Dependencies'
-          command: |
-            npm install --global gulp-cli
-            npm ci
+          command: ./.circleci/install_dependencies.sh
 
 jobs:
   'Checks':
@@ -128,33 +128,49 @@ jobs:
       name: amphtml-large-executor
     steps:
       - setup_vm
+      - restore_karma_cache:
+          cache_name: unit
       - run:
           name: 'Unit Tests'
           command: node build-system/pr-check/unit-tests.js
+      - save_karma_cache:
+          cache_name: unit
   'Unminified Tests':
     executor:
       name: amphtml-large-executor
     steps:
       - setup_vm
+      - restore_karma_cache:
+          cache_name: unminified
       - run:
           name: 'Unminified Tests'
           command: node build-system/pr-check/unminified-tests.js
+      - save_karma_cache:
+          cache_name: unminified
   'Nomodule Tests':
     executor:
       name: amphtml-large-executor
     steps:
       - setup_vm
+      - restore_karma_cache:
+          cache_name: nomodule
       - run:
           name: 'Nomodule Tests'
           command: node build-system/pr-check/nomodule-tests.js
+      - save_karma_cache:
+          cache_name: nomodule
   'Module Tests':
     executor:
       name: amphtml-large-executor
     steps:
       - setup_vm
+      - restore_karma_cache:
+          cache_name: module
       - run:
           name: 'Module Tests'
           command: node build-system/pr-check/module-tests.js
+      - save_karma_cache:
+          cache_name: module
   'End-to-End Tests':
     executor:
       name: amphtml-large-executor
@@ -197,7 +213,7 @@ jobs:
           command: node build-system/pr-check/experiment-tests.js --experiment=experimentC
 
 workflows:
-  'CircleCI PR Check':
+  'CircleCI':
     jobs:
       - 'Checks':
           <<: *push_and_pr_builds
