@@ -127,7 +127,7 @@ let DocumentStateTypeDef;
  *   iframe: ?Element,
  *   messagingPromise: ?Promise,
  *   title: (?string),
- *   poster: (?string),
+ *   posterImage: (?string),
  *   storyContentLoaded: ?boolean
  * }}
  */
@@ -164,6 +164,11 @@ export let ViewerControlDef;
 
 /** @type {string} */
 const TAG = 'amp-story-player';
+
+/** @enum {string} */
+const LOG_TYPE = {
+  DEV: 'amp-story-player-dev',
+};
 
 /**
  * Note that this is a vanilla JavaScript class and should not depend on AMP
@@ -286,11 +291,7 @@ export class AmpStoryPlayer {
       this.build_(story);
     }
 
-    this.render_(
-      /* addingStories */ true,
-      /* startingIdx */ renderStartingIdx,
-      /* limit */ newStories.length
-    );
+    this.render_(renderStartingIdx);
   }
 
   /**
@@ -367,7 +368,7 @@ export class AmpStoryPlayer {
           href: anchorEl.href,
           distance: idx,
           title: (anchorEl.textContent && anchorEl.textContent.trim()) || null,
-          poster: anchorEl.getAttribute('data-poster-portrait-src'),
+          posterImage: anchorEl.getAttribute('data-poster-portrait-src'),
           idx,
         })
     );
@@ -449,6 +450,15 @@ export class AmpStoryPlayer {
       return this.playerConfig_;
     }
 
+    const ampCache = this.element_.getAttribute('amp-cache');
+    if (ampCache && !SUPPORTED_CACHES.includes(ampCache)) {
+      console /*OK*/
+        .error(
+          `[${TAG}]`,
+          `Unsupported cache specified, use one of following: ${SUPPORTED_CACHES}`
+        );
+    }
+
     const scriptTag = this.element_.querySelector('script');
     if (!scriptTag) {
       return null;
@@ -476,8 +486,8 @@ export class AmpStoryPlayer {
    */
   build_(story) {
     const iframeEl = this.doc_.createElement('iframe');
-    if (story.poster) {
-      setStyle(iframeEl, 'backgroundImage', story.poster);
+    if (story.posterImage) {
+      setStyle(iframeEl, 'backgroundImage', story.posterImage);
     }
     iframeEl.classList.add('story-player-iframe');
     iframeEl.setAttribute('allow', 'autoplay');
@@ -574,7 +584,7 @@ export class AmpStoryPlayer {
         },
         (err) => {
           console /*OK*/
-            .log({err});
+            .error(`[${TAG}]`, err);
         }
       );
     });
@@ -606,15 +616,21 @@ export class AmpStoryPlayer {
    * @private
    */
   initializeHandshake_(story, iframeEl) {
-    return this.maybeGetCacheUrl_(story.href).then((url) => {
-      return Messaging.waitForHandshakeFromDocument(
+    return this.maybeGetCacheUrl_(story.href).then((url) =>
+      Messaging.waitForHandshakeFromDocument(
         this.win_,
         iframeEl.contentWindow,
+<<<<<<< HEAD
         this.getEncodedLocation_(url).origin,
         /*opt_token*/ null,
         urls.cdnProxyRegex
       );
     });
+=======
+        this.getEncodedLocation_(url).origin
+      )
+    );
+>>>>>>> 10ef1c670 (reduce args in render(), fix names, fix errors logs)
   }
 
   /**
@@ -648,7 +664,7 @@ export class AmpStoryPlayer {
       this.visibleDeferred_.resolve()
     );
 
-    this.render_(/* addingStories */ true);
+    this.render_();
 
     this.isLaidOut_ = true;
   }
@@ -678,7 +694,7 @@ export class AmpStoryPlayer {
       .then((response) => response.json())
       .catch((reason) => {
         console /*OK*/
-          .error(`[${TAG}] `, reason);
+          .error(`[${TAG}]`, reason);
       });
   }
 
@@ -811,7 +827,7 @@ export class AmpStoryPlayer {
         })
         .catch((reason) => {
           console /*OK*/
-            .error(`[${TAG}] `, reason);
+            .error(`[${TAG}]`, reason);
         });
     }
   }
@@ -973,7 +989,7 @@ export class AmpStoryPlayer {
     if (this.currentStoryLoadDeferred_) {
       // Cancel previous story load promise.
       this.currentStoryLoadDeferred_.reject(
-        'Cancelling previous story load promise.'
+        `[${LOG_TYPE.DEV}] Cancelling previous story load promise.`
       );
     }
 
@@ -987,19 +1003,14 @@ export class AmpStoryPlayer {
    * - Sets visibility state.
    * - Loads story N+1 when N is ready.
    * - Positions iframes depending on distance.
-   * @param {boolean=} addingStories Whether new stories are being added or not.
    * @param {number=} startingIdx
-   * @param {number=} limit
    * @return {!Promise}
    * @private
    */
-  render_(
-    addingStories = false,
-    startingIdx = this.currentIdx_,
-    limit = this.stories_.length
-  ) {
+  render_(startingIdx = this.currentIdx_) {
     const renderPromises = [];
-    for (let i = 0; i < limit; i++) {
+
+    for (let i = 0; i < this.stories_.length; i++) {
       const story = this.stories_[(i + startingIdx) % this.stories_.length];
 
       const oldDistance = story.distance;
@@ -1010,38 +1021,30 @@ export class AmpStoryPlayer {
         this.removeFromDom_(story);
       }
 
-      if ((oldDistance > 1 || addingStories) && story.distance <= 1) {
+      if (story.distance <= 1 && !story.iframe.isConnected) {
         this.appendToDom_(story);
       }
 
+      // Only create renderPromises for neighbor stories.
+      if (story.distance > 1) {
+        continue;
+      }
+
       renderPromises.push(
-        // 1. Wait for current story to load before moving on.
+        // 1. Wait for current story to load before evaluating neighbor stories.
         this.currentStoryPromise_(story)
-          .then(() => {
-            if (story.distance <= 1) {
-              return this.maybeGetCacheUrl_(story.href);
-            }
-          })
+          .then(() => this.maybeGetCacheUrl_(story.href))
           // 2. Set iframe src when appropiate
           .then((storyUrl) => {
-            if (!storyUrl) {
-              return;
-            }
-            const urlsAreEqual = this.sanitizedUrlsAreEquals_(
-              storyUrl,
-              story.iframe.src
-            );
-            if (story.distance <= 1 && !urlsAreEqual) {
+            if (!this.sanitizedUrlsAreEquals_(storyUrl, story.iframe.src)) {
               this.setSrc_(story, storyUrl);
             }
           })
+          // 3. Waits for player to be visible before updating visibility
+          // state.
+          .then(() => this.visibleDeferred_.promise)
+          // 4. Update the visibility state of the story.
           .then(() => {
-            // 3. Waits for player to be visible before updating visibility
-            // state.
-            return this.visibleDeferred_.promise;
-          })
-          .then(() => {
-            // 4. Update the visibility state of the story.
             if (story.distance === 0) {
               this.updateVisibilityState_(story, VisibilityState.VISIBLE);
             }
@@ -1050,22 +1053,24 @@ export class AmpStoryPlayer {
               this.updateVisibilityState_(story, VisibilityState.INACTIVE);
             }
           })
+          // 5. Finally update the story position.
           .then(() => {
-            // 5. Finally update the story position.
-            if (story.distance <= 1) {
-              this.updatePosition_(story);
-            }
+            this.updatePosition_(story);
 
             if (story.distance === 0) {
               tryFocus(story.iframe);
             }
           })
-          .catch((reason) => {
+          .catch((err) => {
+            if (err.includes(LOG_TYPE.DEV)) {
+              return;
+            }
             console /*OK*/
-              .log({reason});
+              .error(`[${TAG}]`, err);
           })
       );
     }
+
     return Promise.all(renderPromises);
   }
 
@@ -1085,23 +1090,6 @@ export class AmpStoryPlayer {
   removeFromDom_(story) {
     story.storyContentLoaded = false;
     story.iframe.setAttribute('src', '');
-    story.iframe.remove();
-  }
-
-  /**
-   * @param {!StoryDef} story
-   * @private
-   */
-  appendToDom_(story) {
-    this.rootEl_.appendChild(story.iframe);
-    this.setUpMessagingForStory_(story);
-  }
-
-  /**
-   * @param {!StoryDef} story
-   * @private
-   */
-  removeFromDom_(story) {
     story.iframe.remove();
   }
 
@@ -1149,14 +1137,12 @@ export class AmpStoryPlayer {
   maybeGetCacheUrl_(url) {
     const ampCache = this.element_.getAttribute('amp-cache');
 
-    if (!ampCache || isProxyOrigin(url)) {
+    if (
+      !ampCache ||
+      isProxyOrigin(url) ||
+      !SUPPORTED_CACHES.includes(ampCache)
+    ) {
       return Promise.resolve(url);
-    }
-
-    if (!SUPPORTED_CACHES.includes(ampCache)) {
-      throw new Error(
-        `Unsupported cache, use one of following: ${SUPPORTED_CACHES}`
-      );
     }
 
     return ampToolboxCacheUrl
