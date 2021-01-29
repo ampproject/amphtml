@@ -38,7 +38,7 @@ commands:
     steps:
       - save_cache:
           name: 'Save Karma Cache'
-          key: karma-cache-<<parameters.cache_name>>-{{ checksum "package-lock.json" }}
+          key: karma-cache-<<parameters.cache_name>>-{{ .Environment.KARMA_CACHE_HASH }}
           paths:
             - .karma-cache
   restore_karma_cache:
@@ -46,9 +46,12 @@ commands:
       cache_name:
         type: string
     steps:
+      - run:
+          name: 'Compute Karma Cache Hash'
+          command: echo "export KARMA_CACHE_HASH=`node ./build-system/common/browserify-cache.js`" >> $BASH_ENV
       - restore_cache:
           name: 'Restore Karma Cache'
-          key: karma-cache-<<parameters.cache_name>>-{{ checksum "package-lock.json" }}
+          key: karma-cache-<<parameters.cache_name>>-{{ .Environment.KARMA_CACHE_HASH }}
   setup_vm:
     steps:
       - checkout
