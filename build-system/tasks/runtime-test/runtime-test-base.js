@@ -16,7 +16,7 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const karmaConfig = require('../karma.conf');
+const karmaConfig = require('../../test-configs/karma.conf');
 const testConfig = require('../../test-configs/config');
 const {
   createCtrlcHandler,
