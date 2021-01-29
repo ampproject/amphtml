@@ -16,14 +16,11 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const browserifyPersistFs = require('browserify-persist-fs');
-const crypto = require('crypto');
-const fs = require('fs');
-const globby = require('globby');
+const {dotWrappingWidth} = require('../common/logging');
+const {getPersistentBrowserifyCache} = require('../common/browserify-cache');
 const {isCiBuild} = require('../common/ci');
 
 const TEST_SERVER_PORT = 8081;
-const DOT_WRAPPING_WIDTH = 150;
 const COMMON_CHROME_FLAGS = [
   // Dramatically speeds up iframe creation time.
   '--disable-extensions',
@@ -32,44 +29,6 @@ const COMMON_CHROME_FLAGS = [
   // Makes debugging easy by auto-opening devtools.
   argv.debug ? '--auto-open-devtools-for-tabs' : null,
 ].filter(Boolean);
-
-// Used by persistent browserify caching to further salt hashes with our
-// environment state. Eg, when updating a babel-plugin, the environment hash
-// must change somehow so that the cache busts and the file is retransformed.
-const createHash = (input) =>
-  crypto.createHash('sha1').update(input).digest('hex');
-let wrapCounter = 0;
-const persistentCache = browserifyPersistFs(
-  '.karma-cache',
-  {
-    deps: createHash(fs.readFileSync('./package-lock.json')),
-    build: globby
-      .sync([
-        'build-system/**/*.js',
-        '!build-system/eslint-rules',
-        '!**/test/**',
-      ])
-      .map((f) => {
-        return createHash(fs.readFileSync(f));
-      }),
-  },
-  () => {
-    process.stdout.write('.');
-    if (++wrapCounter >= DOT_WRAPPING_WIDTH) {
-      wrapCounter = 0;
-      process.stdout.write('\n');
-    }
-  }
-);
-
-persistentCache.gc(
-  {
-    maxAge: 1000 * 60 * 60 * 24 * 7,
-  },
-  () => {
-    // swallow errors
-  }
-);
 
 /**
  * @param {!Object} config
@@ -109,14 +68,13 @@ module.exports = {
     transform: [['babelify', {caller: {name: 'test'}, global: true}]],
     // Prevent "cannot find module" errors during CI. See #14166.
     bundleDelay: isCiBuild() ? 5000 : 1200,
-
-    persistentCache,
+    persistentCache: getPersistentBrowserifyCache(),
   },
 
   reporters: ['super-dots', 'karmaSimpleReporter'],
 
   superDotsReporter: {
-    nbDotsPerLine: DOT_WRAPPING_WIDTH,
+    nbDotsPerLine: dotWrappingWidth,
     color: {
       success: 'green',
       failure: 'red',
