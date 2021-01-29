@@ -306,7 +306,7 @@ function determineBuildTargets() {
       const matcher = targetMatchers[target];
       if (matcher(file)) {
         buildTargets.add(target);
-        if (target in nonRuntimeTargets) {
+        if (nonRuntimeTargets.includes(target)) {
           isRuntimeFile = false;
         }
       }
