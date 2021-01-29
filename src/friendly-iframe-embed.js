@@ -17,7 +17,6 @@
 import {CommonSignals} from './common-signals';
 import {Deferred} from './utils/promise';
 import {FIE_EMBED_PROP} from './iframe-helper';
-import {FIE_RESOURCES_EXP} from './experiments/fie-resources-exp';
 import {Services} from './services';
 import {Signals} from './utils/signals';
 import {VisibilityState} from './visibility-state';
@@ -29,7 +28,6 @@ import {
   setParentWindow,
 } from './service';
 import {escapeHtml} from './dom';
-import {getExperimentBranch} from './experiments';
 import {install as installAbortController} from './polyfills/abort-controller';
 import {installAmpdocServicesForEmbed} from './service/core-services';
 import {install as installCustomElements} from './polyfills/custom-elements';
@@ -390,8 +388,6 @@ export class FriendlyIframeEmbed {
    * Ensures that all resources from this iframe have been released.
    */
   destroy() {
-    // TODO(#31246): remove when the fie-resources experiment is cleaned up.
-    this.removeResources_();
     disposeServicesForEmbed(this.win);
     if (this.ampdoc) {
       this.ampdoc.dispose();
@@ -521,18 +517,9 @@ export class FriendlyIframeEmbed {
         this.win./*OK*/ innerHeight
       );
     }
-    const fieResourcesOn =
-      this.ampdoc &&
-      this.ampdoc.getParent() &&
-      getExperimentBranch(this.ampdoc.getParent().win, FIE_RESOURCES_EXP.id) ===
-        FIE_RESOURCES_EXP.experiment;
     Promise.all([
       this.whenRenderComplete(),
-      whenContentIniLoad(
-        fieResourcesOn ? this.ampdoc : this.iframe,
-        this.win,
-        rect
-      ),
+      whenContentIniLoad(this.ampdoc, this.win, rect),
     ]).then(() => {
       this.signals_.signal(CommonSignals.INI_LOAD);
     });
@@ -560,16 +547,6 @@ export class FriendlyIframeEmbed {
   }
 
   /**
-   * @return {!./service/resources-interface.ResourcesInterface}
-   * @private
-   */
-  getResources_() {
-    const host =
-      this.host && !this.iframe.isConnected ? this.host : this.iframe;
-    return Services.resourcesForDoc(host);
-  }
-
-  /**
    * @return {!./service/mutator-interface.MutatorInterface}
    * @private
    */
@@ -590,21 +567,6 @@ export class FriendlyIframeEmbed {
       task.measure || null,
       task.mutate
     );
-  }
-
-  /**
-   * Removes all resources belonging to the FIE window.
-   * @private
-   */
-  removeResources_() {
-    const resources = this.getResources_();
-    const toRemove = resources
-      .get()
-      .filter((resource) => resource.hostWin == this.win);
-    toRemove.forEach((resource) => {
-      resources.remove(resource.element);
-      resource.disconnect();
-    });
   }
 
   /**
