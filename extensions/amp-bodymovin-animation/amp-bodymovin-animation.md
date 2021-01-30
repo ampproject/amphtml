@@ -61,14 +61,11 @@ for an action to start playing.
 
 ### `renderer` (optional)
 
-By default, this component uses the SVG renderer, this uses a light version of
-the Bodymovin animation player. However, if developers feel that they need the
-full player and want to use an HTML renderer they may do so by specifying the
-`renderer` attribute to be `html`.
+Bodymovin animation player supports multiple renderers. By default, the SVG
+renderer is used. Renderer can be changed to HTML or Canvas by setting this
+property to `html` and `canvas` respectively.
 
-This attribute only accepts the values `html` and `svg`.
-
-### title (optional)
+### `title` (optional)
 
 Define a `title` attribute for the component to propagate to the underlying `<iframe>` element. The default value is `"Airbnb BodyMovin animation"`.
 
