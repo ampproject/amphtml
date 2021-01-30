@@ -38,7 +38,7 @@ commands:
     steps:
       - save_cache:
           name: 'Save Karma Cache'
-          key: karma-cache-<<parameters.cache_name>>-{{ checksum "package-lock.json" }}
+          key: karma-cache-<<parameters.cache_name>>-{{ checksum ".karma-cache-hash" }}
           paths:
             - .karma-cache
   restore_karma_cache:
@@ -46,9 +46,12 @@ commands:
       cache_name:
         type: string
     steps:
+      - run:
+          name: 'Compute Karma Cache Hash'
+          command: node ./build-system/common/compute-karma-cache-hash.js
       - restore_cache:
           name: 'Restore Karma Cache'
-          key: karma-cache-<<parameters.cache_name>>-{{ checksum "package-lock.json" }}
+          key: karma-cache-<<parameters.cache_name>>-{{ checksum ".karma-cache-hash" }}
   setup_vm:
     steps:
       - checkout
