@@ -21,14 +21,12 @@ const globby = require('globby');
 const {dotWrappingWidth} = require('./logging');
 
 /**
- * Used for persistent babel caching during tests. Created using a hash object
- * that includes the repo package lockfile and various parts of the build-system
- * so that the cache is invalidated if any of them changes, and files are
- * retransformed.
- * @return {function}
+ * The hash object includes the repo package lockfile and various parts of the
+ * build-system so that the cache is invalidated if any of them changes, and
+ * files are retransformed.
+ * @return {!Object}
  */
-function getPersistentBrowserifyCache() {
-  let wrapCounter = 0;
+function getHashObject() {
   const createHash = (input) =>
     crypto.createHash('sha1').update(input).digest('hex');
   const hashObject = {
@@ -41,6 +39,15 @@ function getPersistentBrowserifyCache() {
       ])
       .map((f) => createHash(fs.readFileSync(f))),
   };
+  return hashObject;
+}
+
+/**
+ * Used for persistent babel caching during tests.
+ * @return {function}
+ */
+function getPersistentBrowserifyCache() {
+  let wrapCounter = 0;
   const logger = () => {
     process.stdout.write('.');
     if (++wrapCounter >= dotWrappingWidth) {
@@ -48,7 +55,7 @@ function getPersistentBrowserifyCache() {
       process.stdout.write('\n');
     }
   };
-  const cache = browserifyPersistFs('.karma-cache', hashObject, logger);
+  const cache = browserifyPersistFs('.karma-cache', getHashObject(), logger);
   cache.gc(
     {maxAge: 1000 * 60 * 60 * 24 * 7}, // Refresh cache if more than a week old
     () => {} // swallow errors
@@ -57,5 +64,6 @@ function getPersistentBrowserifyCache() {
 }
 
 module.exports = {
+  getHashObject,
   getPersistentBrowserifyCache,
 };
