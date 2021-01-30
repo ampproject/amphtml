@@ -164,7 +164,6 @@
     "multer": "1.4.2",
     "node-fetch": "2.6.1",
     "npm-exact-versions": "0.0.5",
-    "object-hash": "2.1.1",
     "plugin-error": "1.0.1",
     "postcss": "8.2.4",
     "postcss-import": "14.0.0",

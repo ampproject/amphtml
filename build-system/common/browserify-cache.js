@@ -18,8 +18,7 @@ const browserifyPersistFs = require('browserify-persist-fs');
 const crypto = require('crypto');
 const fs = require('fs-extra');
 const globby = require('globby');
-const objectHash = require('object-hash');
-const {dotWrappingWidth, logWithoutTimestamp} = require('./logging');
+const {dotWrappingWidth} = require('./logging');
 
 /**
  * The hash object includes the repo package lockfile and various parts of the
@@ -65,13 +64,6 @@ function getPersistentBrowserifyCache() {
 }
 
 module.exports = {
+  getHashObject,
   getPersistentBrowserifyCache,
 };
-
-/**
- * Prints the object-hash of the hashObject representing all the files we care
- * about. Used during CI to determine when to refresh .karma-cache.
- */
-if (require.main === module) {
-  logWithoutTimestamp(objectHash(getHashObject()));
-}
