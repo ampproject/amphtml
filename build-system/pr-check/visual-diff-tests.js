@@ -25,7 +25,7 @@ const {
   printSkipMessage,
   timedExecOrDie,
 } = require('./utils');
-const {determineBuildTargets} = require('./build-targets');
+const {buildTargetsInclude, Targets} = require('./build-targets');
 const {runCiJob} = require('./ci-job');
 
 const jobName = 'visual-diff-tests.js';
@@ -38,13 +38,8 @@ function pushBuildWorkflow() {
 }
 
 function prBuildWorkflow() {
-  const buildTargets = determineBuildTargets();
   process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
-  if (
-    buildTargets.has('RUNTIME') ||
-    buildTargets.has('FLAG_CONFIG') ||
-    buildTargets.has('VISUAL_DIFF')
-  ) {
+  if (buildTargetsInclude(Targets.RUNTIME, Targets.VISUAL_DIFF)) {
     downloadNomoduleOutput();
     timedExecOrDie('gulp update-packages');
     timedExecOrDie('gulp visual-diff --nobuild');
@@ -52,7 +47,7 @@ function prBuildWorkflow() {
     timedExecOrDie('gulp visual-diff --empty');
     printSkipMessage(
       jobName,
-      'this PR does not affect the runtime, flag configs, or visual diff tests'
+      'this PR does not affect the runtime or visual diff tests'
     );
   }
 }

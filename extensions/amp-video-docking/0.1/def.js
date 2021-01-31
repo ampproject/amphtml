@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+/**
+ * These are interchangeable.
+ * @typedef {!ClientRect|!../../../src/layout-rect.LayoutRectDef}
+ */
+export let RectDef;
+
 /** @enum {string} */
 export const DirectionX = {LEFT: 'left', RIGHT: 'right'};
 

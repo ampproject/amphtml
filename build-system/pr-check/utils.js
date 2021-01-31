@@ -35,7 +35,8 @@ const NOMODULE_OUTPUT_FILE = `amp_nomodule_${ciBuildSha()}.zip`;
 const MODULE_OUTPUT_FILE = `amp_module_${ciBuildSha()}.zip`;
 
 const BUILD_OUTPUT_DIRS = 'build/ dist/ dist.3p/';
-const APP_SERVING_DIRS = 'dist.tools/ examples/ test/manual/';
+const APP_SERVING_DIRS =
+  'dist.tools/ examples/ test/manual/ texst/fixtures/e2e/';
 
 // TODO(rsimha, ampproject/amp-github-apps#1110): Update storage details.
 const GCLOUD_STORAGE_BUCKET = 'gs://amp-travis-builds';
@@ -167,7 +168,9 @@ function abortTimedJob(jobName, startTime) {
 function timedExecFn(execFn) {
   return (cmd, ...rest) => {
     const startTime = startTimer(cmd);
-    const p = execFn(cmd, ...rest);
+    const cmdToRun =
+      isCiBuild() && cmd.startsWith('gulp ') ? cmd.concat(' --color') : cmd;
+    const p = execFn(cmdToRun, ...rest);
     stopTimer(cmd, startTime);
     return p;
   };

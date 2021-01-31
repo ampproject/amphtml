@@ -25,7 +25,7 @@ const {
   timedExecOrDie,
   timedExecOrThrow,
 } = require('./utils');
-const {determineBuildTargets} = require('./build-targets');
+const {buildTargetsInclude, Targets} = require('./build-targets');
 const {runCiJob} = require('./ci-job');
 
 const jobName = 'e2e-tests.js';
@@ -48,21 +48,15 @@ function pushBuildWorkflow() {
 }
 
 function prBuildWorkflow() {
-  const buildTargets = determineBuildTargets();
-  if (
-    buildTargets.has('RUNTIME') ||
-    buildTargets.has('FLAG_CONFIG') ||
-    buildTargets.has('E2E_TEST')
-  ) {
+  if (buildTargetsInclude(Targets.RUNTIME, Targets.E2E_TEST)) {
     downloadNomoduleOutput();
     timedExecOrDie('gulp update-packages');
     timedExecOrDie('gulp e2e --nobuild --headless --compiled');
   } else {
     printSkipMessage(
       jobName,
-      'this PR does not affect the runtime, flag configs, or end-to-end tests'
+      'this PR does not affect the runtime or end-to-end tests'
     );
   }
 }
-
 runCiJob(jobName, pushBuildWorkflow, prBuildWorkflow);

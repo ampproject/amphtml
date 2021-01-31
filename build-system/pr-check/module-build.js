@@ -24,7 +24,7 @@ const {
   timedExecOrDie,
   uploadModuleOutput,
 } = require('./utils');
-const {determineBuildTargets} = require('./build-targets');
+const {buildTargetsInclude, Targets} = require('./build-targets');
 const {runCiJob} = require('./ci-job');
 
 const jobName = 'module-build.js';
@@ -36,22 +36,17 @@ function pushBuildWorkflow() {
 }
 
 function prBuildWorkflow() {
-  const buildTargets = determineBuildTargets();
   // TODO(#31102): This list must eventually match the same buildTargets check
   // found in pr-check/nomodule-build.js as we turn on the systems that
   // run against the module build. (ex. visual diffs, e2e, etc.)
-  if (
-    buildTargets.has('RUNTIME') ||
-    buildTargets.has('FLAG_CONFIG') ||
-    buildTargets.has('INTEGRATION_TEST')
-  ) {
+  if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
     timedExecOrDie('gulp update-packages');
     timedExecOrDie('gulp dist --esm --fortesting');
     uploadModuleOutput();
   } else {
     printSkipMessage(
       jobName,
-      'this PR does not affect the runtime, flag configs, or integration tests'
+      'this PR does not affect the runtime or integration tests'
     );
   }
 }

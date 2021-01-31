@@ -28,8 +28,8 @@ import {CSS} from '../../../build/amp-story-info-dialog-1.0.css';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {Services} from '../../../src/services';
 import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
-import {closest} from '../../../src/dom';
-import {createShadowRootWithStyle} from './utils';
+import {closest, matches} from '../../../src/dom';
+import {createShadowRootWithStyle, triggerClickFromLightDom} from './utils';
 import {dev} from '../../../src/log';
 import {getAmpdoc} from '../../../src/service';
 import {getLocalizationService} from './amp-story-localization-service';
@@ -181,6 +181,11 @@ export class InfoDialog {
     // Closes the dialog if click happened outside of the dialog main container.
     if (!closest(el, (el) => el === this.innerContainerEl_, this.element_)) {
       this.close_();
+    }
+    const anchorClicked = closest(event.target, (e) => matches(e, 'a[href]'));
+    if (anchorClicked) {
+      triggerClickFromLightDom(anchorClicked, this.element);
+      event.preventDefault();
     }
   }
 
