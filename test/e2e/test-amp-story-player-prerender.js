@@ -70,11 +70,10 @@ describes.endtoend(
       await expect(count).to.eql(0);
     });
 
-    it('when player comes close to the viewport, iframe loads first story in prerender', async () => {
+    it('when user scrolls and player is not in viewport, iframe loads first story in prerender', async () => {
       const doc = await controller.getDocumentElement();
-      const playerRect = await controller.getElementRect(player);
 
-      await controller./*OK*/ scrollTo(doc, {top: playerRect.top - 1000});
+      await controller./*OK*/ scrollTo(doc, {top: 1});
 
       const shadowHost = await controller.findElement(
         'div.i-amphtml-story-player-shadow-root-intermediary'
@@ -90,7 +89,7 @@ describes.endtoend(
       );
     });
 
-    it('when player comes close to the viewport, only one iframe is loaded', async () => {
+    it('when user scrolls and player is not in viewport, only one iframe is loaded', async () => {
       const doc = await controller.getDocumentElement();
       const playerRect = await controller.getElementRect(player);
 
