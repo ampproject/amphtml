@@ -361,10 +361,6 @@ exports.rules = [
         'src/service/position-observer/position-observer-impl.js',
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js->' +
         'src/service/position-observer/position-observer-worker.js',
-      'extensions/amp-video-docking/0.1/amp-video-docking.js->' +
-        'src/service/position-observer/position-observer-impl.js',
-      'extensions/amp-video-docking/0.1/amp-video-docking.js->' +
-        'src/service/position-observer/position-observer-worker.js',
       'extensions/amp-analytics/0.1/cookie-writer.js->' +
         'src/service/cid-impl.js',
       'extensions/amp-next-page/0.1/next-page-service.js->' +
@@ -534,12 +530,12 @@ exports.rules = [
     mustNotDependOn: ['ads/google/doubleclick.js'],
     allowlist: [
       /** DO NOT ADD TO ALLOWLIST */
-      'ads/ix.js->ads/google/doubleclick.js',
-      'ads/imonomy.js->ads/google/doubleclick.js',
-      'ads/navegg.js->ads/google/doubleclick.js',
+      'ads/vendors/ix.js->ads/google/doubleclick.js',
+      'ads/vendors/imonomy.js->ads/google/doubleclick.js',
+      'ads/vendors/navegg.js->ads/google/doubleclick.js',
       /** DO NOT ADD TO ALLOWLIST */
-      'ads/openx.js->ads/google/doubleclick.js',
-      'ads/pulsepoint.js->ads/google/doubleclick.js',
+      'ads/vendors/openx.js->ads/google/doubleclick.js',
+      'ads/vendors/pulsepoint.js->ads/google/doubleclick.js',
       /** DO NOT ADD TO ALLOWLIST */
     ],
   },

@@ -28,6 +28,7 @@
     },
     {
       "files": [
+        ".circleci/config.yml",
         ".codecov.yml",
         ".github/workflows/continuous-integration-workflow.yml",
         ".lando.yml",

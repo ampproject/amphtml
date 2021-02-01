@@ -31,6 +31,10 @@ const {
   toPromise,
 } = require('./helpers');
 const {
+  cleanupBuildDir,
+  printClosureConcurrency,
+} = require('../compile/compile');
+const {
   createCtrlcHandler,
   exitCtrlcHandler,
 } = require('../common/ctrlcHandler');
@@ -38,7 +42,6 @@ const {
   displayLifecycleDebugging,
 } = require('../compile/debug-compilation-lifecycle');
 const {buildExtensions, parseExtensionFlags} = require('./extension-helpers');
-const {cleanupBuildDir} = require('../compile/compile');
 const {compileCss, cssEntryPoints} = require('./css');
 const {compileJison} = require('./compile-jison');
 const {formatExtractedMessages} = require('../compile/log-messages');
@@ -130,6 +133,7 @@ async function doDist(extraArgs = {}) {
     minify: true,
     watch: argv.watch,
   };
+  printClosureConcurrency();
   printNobuildHelp();
   printDistHelp(options);
   await runPreDistSteps(options);

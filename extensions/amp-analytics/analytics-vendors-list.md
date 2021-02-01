@@ -434,6 +434,12 @@ Type attribute value: `segment`
 Adds support for segment page views and events.
 To see the full list of fields that you can send, see [Segment Spec](https://segment.com/docs/spec/).
 
+### SensorsData
+
+Type attribute value: `sensorsanalytics`
+
+Adds support for Sensors Data. More details for adding Sensors Data support can be found at [sensorsdata.com](https://manual.sensorsdata.cn/sa/latest/web-js-sdk-7548149.html).
+
 ### ShinyStat
 
 Type attribute value: `shinystat`

@@ -39,8 +39,23 @@ export function shouldLoadPolyfill(win) {
     !win.IntersectionObserver ||
     !win.IntersectionObserverEntry ||
     !!win.IntersectionObserver[STUB] ||
-    !supportsDocumentRoot(win)
+    !supportsDocumentRoot(win) ||
+    isWebkit(win)
   );
+}
+
+/**
+ * All current WebKit (as of Safari 14.x) {root:document} IntersectionObservers
+ * will report incorrect rootBounds, intersectionRect, and intersectionRatios
+ * and therefore we force the polyfill in this case.
+ * See: https://bugs.webkit.org/show_bug.cgi?id=219495.
+ *
+ * @param {!Window} win
+ * @return {boolean}
+ */
+function isWebkit(win) {
+  // navigator.vendor is always "Apple Computer, Inc." for all iOS browsers and Mac OS Safari.
+  return /apple/i.test(win.navigator.vendor);
 }
 
 /**

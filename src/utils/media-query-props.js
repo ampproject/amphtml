@@ -17,7 +17,6 @@
 /** @typedef {!Array<{query: ?MediaQueryList, value: string}>} */
 let ExprDef;
 
-const MEDIA_QUERY_VALUE_RE = /[A-Za-z0-9.%]+$/;
 const TRUE_VALUE = '1';
 
 export class MediaQueryProps {
@@ -135,18 +134,92 @@ function parseMediaQueryListExpr(win, exprString) {
     exprString
       .split(',')
       .map((part) => {
-        // Find the value portion by looking at the end.
-        const result = MEDIA_QUERY_VALUE_RE.exec(part);
-        if (!result) {
+        part = part.replace(/\s+/g, ' ').trim();
+        if (part.length == 0) {
+          return;
+        }
+
+        let queryString;
+        let value;
+
+        // Process the expression from the end.
+        const lastChar = part.charAt(part.length - 1);
+        let div;
+        if (lastChar == ')') {
+          // Value is the CSS function, e.g. `calc(50vw + 10px)`.
+
+          // First, skip to the opening paren.
+          let parens = 1;
+          div = part.length - 2;
+          for (; div >= 0; div--) {
+            const c = part.charAt(div);
+            if (c == '(') {
+              parens--;
+            } else if (c == ')') {
+              parens++;
+            }
+            if (parens == 0) {
+              break;
+            }
+          }
+
+          // Then, skip to the begining to the function's name.
+          const funcEnd = div - 1;
+          if (div > 0) {
+            div--;
+            for (; div >= 0; div--) {
+              const c = part.charAt(div);
+              if (
+                !(
+                  c == '%' ||
+                  c == '-' ||
+                  c == '_' ||
+                  (c >= 'a' && c <= 'z') ||
+                  (c >= 'A' && c <= 'Z') ||
+                  (c >= '0' && c <= '9')
+                )
+              ) {
+                break;
+              }
+            }
+          }
+          if (div >= funcEnd) {
+            // Invalid condition.
+            return null;
+          }
+        } else {
+          // Value is the length or a percent: accept a wide range of values,
+          // including invalid values - they will be later asserted to conform
+          // to exact CSS length or percent value.
+          div = part.length - 2;
+          for (; div >= 0; div--) {
+            const c = part.charAt(div);
+            if (
+              !(
+                c == '%' ||
+                c == '.' ||
+                (c >= 'a' && c <= 'z') ||
+                (c >= 'A' && c <= 'Z') ||
+                (c >= '0' && c <= '9')
+              )
+            ) {
+              break;
+            }
+          }
+        }
+        if (div >= 0) {
+          queryString = part.substring(0, div + 1).trim();
+          value = part.substring(div + 1).trim();
+        } else {
+          value = part;
+          queryString = undefined;
+        }
+
+        if (!value) {
           return null;
         }
 
-        const {index} = result;
-        const value = part.slice(index);
-        // The media query is everything before the value.
-        const queryString = part.slice(0, index).trim();
         const query = queryString ? win.matchMedia(queryString) : null;
-
         return {query, value};
       })
       // Remove any items that did not match the regex above and are

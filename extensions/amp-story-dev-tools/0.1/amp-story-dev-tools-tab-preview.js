@@ -23,10 +23,7 @@ import {
 import {closest} from '../../../src/dom';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {htmlFor} from '../../../src/static-template';
-import {
-  observeContentSize,
-  unobserveContentSize,
-} from '../../../src/utils/size-observer';
+import {observeContentSize} from '../../../src/utils/size-observer';
 import {setStyles} from '../../../src/style';
 
 /**
@@ -430,24 +427,18 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
     chipListContainer.appendChild(chipList);
     chipListContainer.appendChild(this.buildAddDeviceButton_());
     chipListContainer.appendChild(this.buildHelpButton_());
+  }
 
+  /** @override */
+  layoutCallback() {
     parseDevices(
       this.element.getAttribute('data-devices') || DEFAULT_DEVICES
     ).forEach((device) => {
       this.addDevice_(device.name);
     });
     this.repositionDevices_();
-  }
-
-  /** @override */
-  layoutCallback() {
     this.element.addEventListener('click', (e) => this.handleTap_(e.target));
     observeContentSize(this.element, this.onResize_);
-  }
-
-  /** @override */
-  unlayoutCallback() {
-    unobserveContentSize(this.element, this.onResize_);
   }
 
   /**
@@ -521,25 +512,23 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
       (el) => el.hasAttribute('data-action'),
       this.element
     );
-    if (actionElement.hasAttribute('disabled')) {
+    if (!actionElement || actionElement.hasAttribute('disabled')) {
       return;
     }
-    if (actionElement) {
-      switch (actionElement.getAttribute('data-action')) {
-        case PREVIEW_ACTIONS.SHOW_HELP_DIALOG:
-          this.showHelpDialog_();
-          break;
-        case PREVIEW_ACTIONS.SHOW_ADD_DEVICE_DIALIG:
-          this.showAddDeviceDialog_();
-          break;
-        case PREVIEW_ACTIONS.CLOSE_DIALOG:
-          this.hideCurrentDialog_();
-          break;
-        case PREVIEW_ACTIONS.REMOVE_DEVICE:
-        case PREVIEW_ACTIONS.TOGGLE_DEVICE_CHIP:
-          this.onDeviceChipToggled_(actionElement);
-          break;
-      }
+    switch (actionElement.getAttribute('data-action')) {
+      case PREVIEW_ACTIONS.SHOW_HELP_DIALOG:
+        this.showHelpDialog_();
+        break;
+      case PREVIEW_ACTIONS.SHOW_ADD_DEVICE_DIALIG:
+        this.showAddDeviceDialog_();
+        break;
+      case PREVIEW_ACTIONS.CLOSE_DIALOG:
+        this.hideCurrentDialog_();
+        break;
+      case PREVIEW_ACTIONS.REMOVE_DEVICE:
+      case PREVIEW_ACTIONS.TOGGLE_DEVICE_CHIP:
+        this.onDeviceChipToggled_(actionElement);
+        break;
     }
   }
 
@@ -656,8 +645,12 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
    * @private
    * */
   repositionDevices_() {
-    const {width: layoutWidth, height} = this.getLayoutSize();
-    const width = layoutWidth * 0.8; // To account for 10% horizontal padding.
+    const {
+      offsetWidth: width,
+      offsetHeight: height,
+    } = this.element.querySelector(
+      '.i-amphtml-story-dev-tools-devices-container'
+    );
     let sumDeviceWidths = 0;
     let maxDeviceHeights = 0;
     // Find the sum of the device widths and max of heights since they are horizontally laid out.
