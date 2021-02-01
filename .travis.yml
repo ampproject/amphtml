@@ -9,9 +9,6 @@ notifications:
     on_success: change
     on_failure: change
 before_install:
-  # Override Xenial's default Java version (github.com/travis-ci/travis-ci/issues/10290)
-  - export PATH=$(echo "$PATH" | sed -e 's/:\/usr\/local\/lib\/jvm\/openjdk11\/bin//')
-  - export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64
   # Ensure python v2 and v3 are available, and "python" defaults to v3 (docs.travis-ci.com/user/reference/xenial/#python-support)
   - pyenv global 3.6.7 2.7.15
   - python3 --version
@@ -19,6 +16,12 @@ before_install:
   - python --version
   # Xenial's version of python-protobuf is outdated (github.com/ampproject/amphtml/pull/22528)
   - pip3 install --user protobuf
+  # Setup Google Cloud Storage
+  - openssl aes-256-cbc -md sha256 -k $GCP_TOKEN -in build-system/common/sa-travis-key.json.enc -out sa-travis-key.json -d
+  - gcloud auth activate-service-account --key-file=sa-travis-key.json
+  - gcloud config set account sa-travis@amp-travis-build-storage.iam.gserviceaccount.com
+  - gcloud config set pass_credentials_to_gsutil true
+  - gcloud config set project amp-travis-build-storage
 branches:
   only:
     - master
@@ -49,17 +52,13 @@ stages:
 jobs:
   include:
     - stage: build
-      name: 'Unminified Build'
-      script:
-        - unbuffer node build-system/pr-check/unminified-build.js
-    - stage: build
       name: 'Checks'
       script:
         - unbuffer node build-system/pr-check/checks.js
     - stage: build
-      name: 'Validator Tests'
+      name: 'Unminified Build'
       script:
-        - unbuffer node build-system/pr-check/validator-tests.js
+        - unbuffer node build-system/pr-check/unminified-build.js
     - stage: build
       name: 'Nomodule Build'
       script:
@@ -68,6 +67,10 @@ jobs:
       name: 'Module Build'
       script:
         - unbuffer node build-system/pr-check/module-build.js
+    - stage: build
+      name: 'Validator Tests'
+      script:
+        - unbuffer node build-system/pr-check/validator-tests.js
     - stage: test
       name: 'Bundle Size'
       script:
@@ -77,21 +80,25 @@ jobs:
       script:
         - unbuffer node build-system/pr-check/visual-diff-tests.js
     - stage: test
-      name: 'Local Tests'
+      name: 'Unit Tests'
       script:
-        - unbuffer node build-system/pr-check/local-tests.js
+        - unbuffer node build-system/pr-check/unit-tests.js
     - stage: test
-      name: 'Dist Tests'
+      name: 'Unminified Tests'
       script:
-        - unbuffer node build-system/pr-check/dist-tests.js
+        - unbuffer node build-system/pr-check/unminified-tests.js
+    - stage: test
+      name: 'Nomodule Tests'
+      script:
+        - unbuffer node build-system/pr-check/nomodule-tests.js
+    - stage: test
+      name: 'Module Tests'
+      script:
+        - unbuffer node build-system/pr-check/module-tests.js
     - stage: test
       name: 'End to End Tests'
       script:
         - unbuffer node build-system/pr-check/e2e-tests.js
-    - stage: test
-      name: 'ESM Tests'
-      script:
-        - unbuffer node build-system/pr-check/esm-tests.js
     - stage: experiment
       name: 'Experiment A Tests'
       script:

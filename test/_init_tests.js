@@ -117,6 +117,8 @@ class TestConfig {
 
     this.platform = Services.platformFor(window);
 
+    this.isModuleBuild = () => !!window.ampTestRuntimeConfig.isModuleBuild;
+
     /**
      * Predicate functions that determine whether to run tests on a platform.
      */
@@ -131,6 +133,10 @@ class TestConfig {
      * By default, IE is skipped. Individual tests may opt in.
      */
     this.skip(this.runOnIe);
+  }
+
+  skipModuleBuild() {
+    return this.skip(this.isModuleBuild);
   }
 
   skipChrome() {
@@ -170,6 +176,10 @@ class TestConfig {
   skip(fn) {
     this.skipMatchers.push(fn);
     return this;
+  }
+
+  ifModuleBuild() {
+    return this.if(this.isModuleBuild);
   }
 
   ifChrome() {

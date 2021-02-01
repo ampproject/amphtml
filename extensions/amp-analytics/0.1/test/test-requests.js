@@ -15,9 +15,11 @@
  */
 
 import * as ResourceTiming from '../resource-timing';
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
+import * as log from '../../../../src/log';
 import {ExpansionOptions, installVariableServiceForTesting} from '../variables';
 import {RequestHandler, expandPostMessage} from '../requests';
+import {Services} from '../../../../src/services';
 import {installLinkerReaderService} from '../linker-reader';
 import {macroTask} from '../../../../testing/yield';
 
@@ -33,7 +35,7 @@ describes.realWin('Requests', {amp: 1}, (env) => {
     installLinkerReaderService(env.win);
     installVariableServiceForTesting(ampdoc);
     ampdoc.defaultView = env.win;
-    clock = lolex.install({target: ampdoc.win});
+    clock = fakeTimers.withGlobal(ampdoc.win).install();
     preconnectSpy = env.sandbox.spy();
     preconnect = {
       url: preconnectSpy,
@@ -62,6 +64,32 @@ describes.realWin('Requests', {amp: 1}, (env) => {
       let spy;
       beforeEach(() => {
         spy = env.sandbox.spy();
+      });
+
+      it('should convert expandUrlAsync(baseUrl) errors into user errors', async () => {
+        env.sandbox.stub(Services, 'urlReplacementsForDoc').returns({
+          expandUrlAsync: async () => {
+            throw new Error('Invalid URL');
+          },
+        });
+
+        env.sandbox.stub(log, 'userAssert');
+
+        const baseUrl = 'https://?';
+        const r = {baseUrl, 'origin': 'http://example.test'};
+        const handler = createRequestHandler(r, spy);
+        const expansionOptions = new ExpansionOptions({});
+
+        handler.send({}, {}, expansionOptions, {});
+
+        await macroTask();
+
+        expect(
+          log.userAssert.withArgs(
+            false,
+            env.sandbox.match(new RegExp(`${baseUrl}.+Invalid URL`))
+          )
+        ).to.have.been.calledOnce;
       });
 
       it('should prepend request origin', function* () {
@@ -217,7 +245,7 @@ describes.realWin('Requests', {amp: 1}, (env) => {
         yield macroTask();
         expect(preconnectSpy).to.be.calledWith(
           env.sandbox.match.object, // AmpDoc
-          'r2?cid=CLIENT_ID(scope)&var=expanded'
+          env.sandbox.match(/^r2\?cid=amp-[^&]+&var=expanded$/)
         );
       });
     });

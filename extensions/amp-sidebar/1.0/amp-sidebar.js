@@ -47,6 +47,21 @@ class AmpSidebar extends PreactBaseElement {
     });
   }
 
+  /** @override */
+  attachedCallback() {
+    super.attachedCallback();
+    if (
+      this.element.parentNode != this.element.ownerDocument.body &&
+      this.element.parentNode != this.getAmpDoc().getBody()
+    ) {
+      this.user().warn(
+        TAG,
+        `${TAG} is recommended to be a direct child of the <body>` +
+          ` element to preserve a logical DOM order.`
+      );
+    }
+  }
+
   /**
    * Setting hidden to false
    * @private

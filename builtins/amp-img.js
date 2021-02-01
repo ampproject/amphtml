@@ -108,11 +108,6 @@ export class AmpImg extends BaseElement {
   }
 
   /** @override */
-  onMeasureChanged() {
-    this.maybeGenerateSizes_(/* sync */ false);
-  }
-
-  /** @override */
   preconnectCallback(onLayout) {
     // NOTE(@wassgha): since parseSrcset is computationally expensive and can
     // not be inside the `buildCallback`, we went with preconnecting to the

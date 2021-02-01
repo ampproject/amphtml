@@ -24,7 +24,7 @@ import {Layout, LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
 import {
   STICKY_AD_TRANSITION_EXP,
   divertStickyAdTransition,
-} from '../../../src/experiments/sticky-ad-transition-exp';
+} from '../../../ads/google/a4a/sticky-ad-transition-exp';
 import {Services} from '../../../src/services';
 import {SignatureVerifier, VerificationStatus} from './signature-verifier';
 import {
@@ -55,7 +55,7 @@ import {
   getConsentPolicyState,
 } from '../../../src/consent';
 import {getContextMetadata} from '../../../src/iframe-attributes';
-import {getExperimentBranch} from '../../../src/experiments';
+import {getExperimentBranch, isExperimentOn} from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {
@@ -63,6 +63,10 @@ import {
   isSrcdocSupported,
 } from '../../../src/friendly-iframe-embed';
 import {installUrlReplacementsForEmbed} from '../../../src/service/url-replacements-impl';
+import {
+  intersectionEntryToJson,
+  measureIntersection,
+} from '../../../src/utils/intersection';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isArray, isEnumValue, isObject} from '../../../src/types';
 import {listenOnce} from '../../../src/event-helper';
@@ -1764,6 +1768,7 @@ export class AmpA4A extends AMP.BaseElement {
       height,
       width
     );
+    this.applyFillContent(this.iframe);
 
     let body = '';
     const transferComplete = new Deferred();
@@ -1804,7 +1809,8 @@ export class AmpA4A extends AMP.BaseElement {
     Promise.all([fieInstallPromise, transferComplete.promise]).then(
       (values) => {
         const friendlyIframeEmbed = values[0];
-        friendlyIframeEmbed.renderCompleted();
+        // #installFriendlyIframeEmbed will return null if removed before install is complete.
+        friendlyIframeEmbed && friendlyIframeEmbed.renderCompleted();
       }
     );
 
@@ -2041,14 +2047,30 @@ export class AmpA4A extends AMP.BaseElement {
    */
   renderViaIframeGet_(adUrl) {
     this.maybeTriggerAnalyticsEvent_('renderCrossDomainStart');
-    return this.iframeRenderHelper_(
-      dict({
-        'src': Services.xhrFor(this.win).getCorsUrl(this.win, adUrl),
-        'name': JSON.stringify(
-          getContextMetadata(this.win, this.element, this.sentinel)
-        ),
-      })
+    const contextMetadata = getContextMetadata(
+      this.win,
+      this.element,
+      this.sentinel
     );
+    const asyncIntersection = isExperimentOn(
+      this.win,
+      'ads-initialIntersection'
+    );
+    const intersectionPromise = asyncIntersection
+      ? measureIntersection(this.element)
+      : Promise.resolve(this.element.getIntersectionChangeEntry());
+
+    return intersectionPromise.then((intersection) => {
+      contextMetadata['_context'][
+        'initialIntersection'
+      ] = intersectionEntryToJson(intersection);
+      return this.iframeRenderHelper_(
+        dict({
+          'src': Services.xhrFor(this.win).getCorsUrl(this.win, adUrl),
+          'name': JSON.stringify(contextMetadata),
+        })
+      );
+    });
   }
 
   /**
@@ -2114,17 +2136,30 @@ export class AmpA4A extends AMP.BaseElement {
         this.sentinel,
         this.getAdditionalContextMetadata(method == XORIGIN_MODE.SAFEFRAME)
       );
-      // TODO(bradfrizzell) Clean up name assigning.
-      if (method == XORIGIN_MODE.NAMEFRAME) {
-        contextMetadata['creative'] = creative;
-        name = JSON.stringify(contextMetadata);
-      } else if (method == XORIGIN_MODE.SAFEFRAME) {
-        contextMetadata = JSON.stringify(contextMetadata);
-        name =
-          `${this.safeframeVersion};${creative.length};${creative}` +
-          `${contextMetadata}`;
-      }
-      return this.iframeRenderHelper_(dict({'src': srcPath, 'name': name}));
+
+      const asyncIntersection = isExperimentOn(
+        this.win,
+        'ads-initialIntersection'
+      );
+      const intersectionPromise = asyncIntersection
+        ? measureIntersection(this.element)
+        : Promise.resolve(this.element.getIntersectionChangeEntry());
+      return intersectionPromise.then((intersection) => {
+        contextMetadata['initialIntersection'] = intersectionEntryToJson(
+          intersection
+        );
+        if (method == XORIGIN_MODE.NAMEFRAME) {
+          contextMetadata['creative'] = creative;
+          name = JSON.stringify(contextMetadata);
+        } else if (method == XORIGIN_MODE.SAFEFRAME) {
+          contextMetadata = JSON.stringify(contextMetadata);
+          name =
+            `${this.safeframeVersion};${creative.length};${creative}` +
+            `${contextMetadata}`;
+        }
+
+        return this.iframeRenderHelper_(dict({'src': srcPath, 'name': name}));
+      });
     });
   }
 

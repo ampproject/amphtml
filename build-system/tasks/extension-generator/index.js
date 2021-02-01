@@ -16,9 +16,15 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const colors = require('ansi-colors');
 const fs = require('fs-extra');
-const log = require('fancy-log');
+const path = require('path');
+const {
+  insertExtensionBundlesConfig,
+} = require('./insert-extension-bundles-config');
+const {cyan, green, red} = require('ansi-colors');
+const {execOrThrow} = require('../../common/exec');
+const {log} = require('../../common/logging');
+const {makeBentoExtension} = require('./bento');
 
 const year = new Date().getFullYear();
 
@@ -73,12 +79,33 @@ tags: {  # <${name}>
 `;
 }
 
-const getMarkdownDocFile = async (name) =>
-  (await fs.readFile(`${__dirname}/extension-doc.template.md`))
+const getMarkdownDocFile = async (name) => {
+  const nameWithoutPrefix = name.replace(/^amp-/, '');
+  const templatePath = path.join(
+    __dirname,
+    '/bento/amp-__component_name_hyphenated__/amp-__component_name_hyphenated__.md'
+  );
+
+  return (await fs.readFile(templatePath))
     .toString('utf-8')
-    .replace(/\\\$category/g, '$category')
-    .replace(/\\?\${name}/g, name)
-    .replace(/\\?\${year}/g, year);
+    .replace(/__component_name_hyphenated__/g, nameWithoutPrefix)
+    .replace(/__current_year__/g, year);
+};
+
+const getAmpCssFile = async (name) => {
+  const nameWithoutPrefix = name.replace(/^amp-/, '');
+  const templatePath = path.join(
+    __dirname,
+    '/bento/amp-__component_name_hyphenated__/__component_version__/amp-__component_name_hyphenated__.css'
+  );
+  const dns = 'DO_NOT_SUBMIT'.replace(/_/g, ' ');
+
+  return (await fs.readFile(templatePath))
+    .toString('utf-8')
+    .replace(/__component_name_hyphenated__/g, nameWithoutPrefix)
+    .replace(/__current_year__/g, year)
+    .replace(/__do_not_submit__/g, dns);
+};
 
 function getJsTestExtensionFile(name) {
   return `/**
@@ -147,10 +174,10 @@ function getJsExtensionFile(name) {
  * limitations under the License.
  */
 
+import {CSS} from '../../../build/${name}.css';
 import {Layout} from '../../../src/layout';
 
 export class ${className} extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -177,7 +204,7 @@ export class ${className} extends AMP.BaseElement {
 }
 
 AMP.extension('${name}', '0.1', AMP => {
-  AMP.registerElement('${name}', ${className});
+  AMP.registerElement('${name}', ${className}, CSS);
 });
 `;
 }
@@ -206,54 +233,73 @@ function getExamplesFile(name) {
 `;
 }
 
-async function makeExtension() {
+async function makeAmpExtension() {
   if (!argv.name) {
-    log(colors.red('Error! Please pass in the "--name" flag with a value'));
+    log(red('Error! Please pass in the "--name" flag with a value'));
   }
-  const {name} = argv;
+  const {name, version = '0.1'} = argv;
+
   const examplesFile = getExamplesFile(name);
 
-  fs.mkdirpSync(`extensions/${name}/0.1/test`);
-  fs.writeFileSync(
-    `extensions/${name}/${name}.md`,
-    await getMarkdownDocFile(name)
-  );
-  fs.writeFileSync(
-    `extensions/${name}/validator-${name}.protoascii`,
-    getValidatorFile(name)
-  );
-  fs.writeFileSync(
-    `extensions/${name}/0.1/${name}.js`,
-    getJsExtensionFile(name)
-  );
-  fs.writeFileSync(
-    `extensions/${name}/0.1/test/test-${name}.js`,
-    getJsTestExtensionFile(name)
-  );
-  fs.writeFileSync(
-    `extensions/${name}/0.1/test/validator-${name}.html`,
+  const examplesFileValidatorOut =
+    'PASS\n' +
     examplesFile
-  );
+      .trim()
+      .split('\n')
+      .map((line) => `|  ${line}`)
+      .join('\n');
 
-  const examplesFileValidatorOut = examplesFile
-    .trim()
-    .split('\n')
-    .map((line) => `|  ${line}`)
-    .join('\n');
+  const fileContent = {
+    [`extensions/${name}/${name}.md`]: getMarkdownDocFile(name),
+    [`extensions/${name}/validator-${name}.protoascii`]: getValidatorFile(name),
+    [`extensions/${name}/${version}/${name}.js`]: getJsExtensionFile(name),
+    [`extensions/${name}/${version}/${name}.css`]: getAmpCssFile(name),
+    [`extensions/${name}/${version}/test/test-${name}.js`]: getJsTestExtensionFile(
+      name
+    ),
+    [`extensions/${name}/${version}/test/validator-${name}.html`]: examplesFile,
+    [`extensions/${name}/${version}/test/validator-${name}.out`]: examplesFileValidatorOut,
+    [`examples/${name}.amp.html`]: examplesFile,
+  };
 
-  fs.writeFileSync(
-    `extensions/${name}/0.1/test/validator-${name}.out`,
-    ['PASS', examplesFileValidatorOut].join('\n')
-  );
+  for (const filename in fileContent) {
+    fs.ensureDirSync(path.dirname(filename));
+    fs.writeFileSync(filename, await fileContent[filename]);
+  }
 
-  fs.writeFileSync(`examples/${name}.amp.html`, examplesFile);
+  const filenames = Object.keys(fileContent)
+    // Don't format .html because AMP boilerplate would expand into multiple lines.
+    .filter((filename) => !filename.endsWith('.html'));
+  execOrThrow(`npx prettier --ignore-unknown --write ${filenames.join(' ')}`);
+
+  // Return the resulting extension bundle config.
+  return {
+    name,
+    version: typeof version === 'string' ? version : version.toFixed(1),
+    options: {hasCss: true},
+  };
+}
+
+async function makeExtension() {
+  const bundleConfig = await (argv.bento
+    ? makeBentoExtension()
+    : makeAmpExtension());
+
+  // Update bundles.config.js with an entry for the new component
+  insertExtensionBundlesConfig(bundleConfig);
+  log(green('SUCCESS:'), 'Wrote', cyan('bundles.config.js'));
 }
 
 module.exports = {
   makeExtension,
+  insertExtensionBundlesConfig,
 };
 
 makeExtension.description = 'Create an extension skeleton';
 makeExtension.flags = {
-  name: '  The name of the extension. Preferable prefixed with `amp-*`',
+  name: '  The name of the extension. Preferably prefixed with `amp-*`',
+  bento: '  Generate a Bento component',
+  version: '  Sets the version number (default: 0.1; or 1.0 with --bento)',
+  overwrite:
+    '  Overwrites existing files at the destination, if present; --bento only',
 };

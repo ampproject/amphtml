@@ -21,7 +21,7 @@ const pageWidth = 800;
 const pageHeight = 600;
 
 describes.endtoend(
-  'AMP carousel rtl',
+  'amp-base-carousel:1.0 - rtl',
   {
     testUrl:
       'http://localhost:8000/test/manual/amp-base-carousel/1.0/basic-rtl.amp.html',

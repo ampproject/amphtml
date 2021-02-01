@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,29 @@
  * limitations under the License.
  */
 
-amp-story-panning-media amp-img {
+amp-story-panning-media {
   /* Child img gets 100% height. This centers the image. */
   display: flex !important;
   justify-content: center !important;
   align-items: center !important;
+  /* 
+  This gives a 3d reference point for the translate3d z value on the child.
+  A reference point is necessary for the effect of 3d space.
+  The calculation to convert scale to zoom is: 
+  perspective * (zoom - 1) / zoom
+  1 is used here to simplify the calculation in updateTransform_ to be: 
+  (zoom - 1) / zoom
+  */
+  perspective: 1px !important;
+}
+
+amp-story-panning-media amp-img {
+backface-visibility: hidden !important;
+}
+
+.i-amphtml-story-grid-template-fill amp-story-panning-media amp-img img {
+  /* override for layout=fill. This centers the image without clipping it */
+  position: relative !important;
+  display: block !important;
+  height: 100% !important;
 }

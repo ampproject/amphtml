@@ -51,7 +51,6 @@ import {
 } from '../../../ads/google/a4a/utils';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {Deferred} from '../../../src/utils/promise';
-import {FIE_RESOURCES_EXP} from '../../../src/experiments/fie-resources-exp';
 import {
   FlexibleAdSlotDataTypeDef,
   getFlexibleAdSlotData,
@@ -64,7 +63,7 @@ import {
   RefreshManager, // eslint-disable-line no-unused-vars
   getRefreshManager,
 } from '../../amp-a4a/0.1/refresh-manager';
-import {STICKY_AD_TRANSITION_EXP} from '../../../src/experiments/sticky-ad-transition-exp';
+import {STICKY_AD_TRANSITION_EXP} from '../../../ads/google/a4a/sticky-ad-transition-exp';
 import {SafeframeHostApi} from './safeframe-host';
 import {Services} from '../../../src/services';
 import {
@@ -509,14 +508,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     );
     if (intersectResourcesExpId) {
       this.experimentIds.push(intersectResourcesExpId);
-    }
-
-    const fieResourcesExpId = getExperimentBranch(
-      this.win,
-      FIE_RESOURCES_EXP.id
-    );
-    if (fieResourcesExpId) {
-      this.experimentIds.push(fieResourcesExpId);
     }
 
     const ssrExpIds = this.getSsrExpIds_();

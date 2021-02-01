@@ -146,8 +146,7 @@ const VIDEO_PREVIEW_AUTO_ADVANCE_DURATION = '5s';
  */
 const buildPlayMessageElement = (element) =>
   htmlFor(element)`
-      <button role="button"
-          class="i-amphtml-story-page-play-button i-amphtml-story-system-reset">
+      <button role="button" class="i-amphtml-story-page-play-button i-amphtml-story-system-reset">
         <span class="i-amphtml-story-page-play-label"></span>
         <span class='i-amphtml-story-page-play-icon'></span>
       </button>`;
@@ -535,10 +534,12 @@ export class AmpStoryPage extends AMP.BaseElement {
         this.preloadAllMedia_().then(() => {
           this.startMeasuringAllVideoPerformance_();
           this.startListeningToVideoEvents_();
-          this.playAllMedia_();
-          if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
-            this.unmuteAllMedia();
-          }
+          // iOS 14.2 and 14.3 requires play to be called before unmute
+          this.playAllMedia_().then(() => {
+            if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
+              this.unmuteAllMedia();
+            }
+          });
         });
       });
       this.prefersReducedMotion_()

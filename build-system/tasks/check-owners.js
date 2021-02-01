@@ -24,12 +24,11 @@
 
 const fs = require('fs-extra');
 const JSON5 = require('json5');
-const log = require('fancy-log');
 const request = require('request');
 const util = require('util');
 const {cyan, red, green} = require('ansi-colors');
 const {getFilesToCheck, usesFilesOrLocalChanges} = require('../common/utils');
-const {isCiBuild} = require('../common/ci');
+const {log, logLocalDev} = require('../common/logging');
 
 const requestPost = util.promisify(request.post);
 
@@ -65,9 +64,7 @@ async function checkFile(file) {
   const contents = fs.readFileSync(file, 'utf8').toString();
   try {
     JSON5.parse(contents);
-    if (!isCiBuild()) {
-      log(green('SUCCESS:'), 'No errors in', cyan(file));
-    }
+    logLocalDev(green('SUCCESS:'), 'No errors in', cyan(file));
   } catch {
     log(red('FAILURE:'), 'Found errors in', cyan(file));
     process.exitCode = 1;

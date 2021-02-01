@@ -632,7 +632,7 @@ export class AmpSidebar extends AMP.BaseElement {
   getMaskElement_() {
     if (!this.maskElement_) {
       const mask = this.document_.createElement('div');
-      mask.classList.add('i-amphtml-sidebar-mask');
+      mask.classList.add('amp-sidebar-mask', 'i-amphtml-sidebar-mask');
       mask.addEventListener('click', () => {
         // Click gesture is high trust.
         this.close_(ActionTrust.HIGH);

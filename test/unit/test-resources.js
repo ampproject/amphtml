@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {LayoutPriority} from '../../src/layout';
 import {Resource, ResourceState} from '../../src/service/resource';
@@ -25,12 +26,17 @@ import {layoutRectLtwh} from '../../src/layout-rect';
 import {loadPromise} from '../../src/event-helper';
 
 /*eslint "google-camelcase/google-camelcase": 0*/
-describe('Resources', () => {
+describes.realWin('Resources', {amp: true}, (env) => {
+  let window, document;
   let clock;
   let resources;
 
   beforeEach(() => {
-    clock = window.sandbox.useFakeTimers();
+    window = env.win;
+    document = window.document;
+    delete window.requestIdleCallback;
+    delete window.cancelIdleCallback;
+    clock = fakeTimers.withGlobal(window).install();
     resources = new ResourcesImpl(new AmpDocSingle(window));
     resources.isRuntimeOn_ = false;
   });
@@ -41,7 +47,7 @@ describe('Resources', () => {
 
   it('should calculate correct calcTaskScore', () => {
     const viewportRect = layoutRectLtwh(0, 100, 300, 400);
-    window.sandbox.stub(resources.viewport_, 'getRect').returns(viewportRect);
+    env.sandbox.stub(resources.viewport_, 'getRect').returns(viewportRect);
 
     // Task 1 is right in the middle of the viewport and priority 0
     const task_in_viewport_p0 = {
@@ -269,10 +275,9 @@ describe('Resources', () => {
         prerenderAllowed: () => false,
         renderOutsideViewport: () => false,
         startLayout: () => {},
-        applySizesAndMediaQuery: () => {},
       };
       resources.visible_ = false;
-      window.sandbox
+      env.sandbox
         .stub(resources.ampdoc, 'getVisibilityState')
         .returns(VisibilityState.PRERENDER);
       resources.scheduleLayoutOrPreload(resource, true);
@@ -292,10 +297,9 @@ describe('Resources', () => {
       startLayout: () => {},
       layoutScheduled: () => {},
       getTaskId: () => 'resource#P',
-      applySizesAndMediaQuery: () => {},
     };
     resources.visible_ = false;
-    window.sandbox
+    env.sandbox
       .stub(resources.ampdoc, 'getVisibilityState')
       .returns(VisibilityState.PRERENDER);
     resources.scheduleLayoutOrPreload(resource, true);
@@ -315,10 +319,9 @@ describe('Resources', () => {
       startLayout: () => {},
       layoutScheduled: () => {},
       getTaskId: () => 'resource#P',
-      applySizesAndMediaQuery: () => {},
     };
     resources.visible_ = false;
-    window.sandbox
+    env.sandbox
       .stub(resources.ampdoc, 'getVisibilityState')
       .returns(VisibilityState.HIDDEN);
     resources.scheduleLayoutOrPreload(resource, true);
@@ -338,7 +341,6 @@ describe('Resources', () => {
         renderOutsideViewport: () => false,
         idleRenderOutsideViewport: () => false,
         startLayout: () => {},
-        applySizesAndMediaQuery: () => {},
       };
       resources.scheduleLayoutOrPreload(resource, true);
       expect(resources.queue_.getSize()).to.equal(0);
@@ -361,7 +363,6 @@ describe('Resources', () => {
         startLayout: () => {},
         layoutScheduled: () => {},
         getTaskId: () => 'resource#L',
-        applySizesAndMediaQuery: () => {},
       };
       resources.scheduleLayoutOrPreload(
         resource,
@@ -390,7 +391,6 @@ describe('Resources', () => {
         startLayout: () => {},
         layoutScheduled: () => {},
         getTaskId: () => 'resource#L',
-        applySizesAndMediaQuery: () => {},
       };
       resources.scheduleLayoutOrPreload(resource, true);
       expect(resources.queue_.getSize()).to.equal(1);
@@ -414,7 +414,6 @@ describe('Resources', () => {
         startLayout: () => {},
         layoutScheduled: () => {},
         getTaskId: () => 'resource#L',
-        applySizesAndMediaQuery: () => {},
       };
       resources.scheduleLayoutOrPreload(resource, true);
       expect(resources.queue_.getSize()).to.equal(1);
@@ -617,7 +616,6 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     element.getAttribute = () => null;
     element.hasAttribute = () => false;
     element.getBoundingClientRect = () => rect;
-    element.applySizesAndMediaQuery = () => {};
     element.layoutCallback = () => Promise.resolve();
     element.viewportCallback = sandbox.spy();
     element.prerenderAllowed = () => true;
@@ -699,14 +697,12 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
       .returns(VisibilityState.VISIBLE);
     viewportMock.expects('getRect').returns(layoutRectLtwh(0, 0, 300, 400));
     resource1.isBuilt = () => false;
-    const mediaSpy = sandbox.stub(resource1.element, 'applySizesAndMediaQuery');
     expect(resource1.hasBeenMeasured()).to.be.false;
     resource1.isBuilt = () => false;
 
     resources.discoverWork_();
 
     expect(resource1.hasBeenMeasured()).to.be.true;
-    expect(mediaSpy).to.be.calledOnce;
   });
 
   describe('intersect-resources', () => {
@@ -716,25 +712,19 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
       resource1.intersect_ = resource2.intersect_ = true;
     });
 
-    it('should not applySizesAndMediaQuery after build', () => {
+    it('should not force relayout after build', () => {
       resources.relayoutAll_ = false;
 
       // Unmeasured elements.
-      env.sandbox.stub(resource1, 'applySizesAndMediaQuery');
       env.sandbox.stub(resource1, 'hasBeenMeasured').returns(false);
 
       // Measured elements that need relayout.
-      env.sandbox.stub(resource2, 'applySizesAndMediaQuery');
       env.sandbox.stub(resource2, 'hasBeenMeasured').returns(true);
       env.sandbox
         .stub(resource2, 'getState')
         .returns(ResourceState.NOT_LAID_OUT);
 
       resources.discoverWork_();
-
-      // Neither should have applySizesOrMediaQuery() called.
-      expect(resource1.applySizesAndMediaQuery).to.not.be.called;
-      expect(resource2.applySizesAndMediaQuery).to.not.be.called;
     });
 
     it('should invalidate premeasurements after resize event', () => {
@@ -750,18 +740,6 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
       const schedulePassStub = sandbox.stub(resources, 'schedulePass');
       resources.viewport_.changeObservable_.fire({relayoutAll_: false});
       expect(schedulePassStub).calledOnce;
-    });
-
-    it('should applySizesAndMediaQuery on relayout', () => {
-      resources.relayoutAll_ = true;
-
-      env.sandbox.stub(resource1, 'applySizesAndMediaQuery');
-      env.sandbox.stub(resource2, 'applySizesAndMediaQuery');
-
-      resources.discoverWork_();
-
-      expect(resource1.applySizesAndMediaQuery).to.be.called;
-      expect(resource2.applySizesAndMediaQuery).to.be.called;
     });
   });
 
@@ -1386,7 +1364,6 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
       },
       pauseCallback() {},
       resumeCallback() {},
-      applySizesAndMediaQuery() {},
       updateLayoutBox() {},
       getBoundingClientRect() {
         return layoutRectLtwh(0, 0, 0, 0);

@@ -23,6 +23,7 @@ import {Services} from '../services';
 import {VisibilityState} from '../visibility-state';
 import {dev} from '../log';
 import {getMode} from '../mode';
+import {hasNextNodeInDocumentOrder} from '../dom';
 import {registerServiceBuilderForDoc} from '../service';
 
 const TAG = 'inabox-resources';
@@ -80,7 +81,23 @@ export class InaboxResources {
       });
     }
 
-    this.ampdoc_.whenReady().then(() => this./*OK*/ schedulePass(1));
+    /** @private {!Array<Resource>} */
+    this.pendingBuildResources_ = [];
+
+    /** @private {boolean} */
+    this.documentReady_ = false;
+
+    // TODO(#31776): cleanup when launched.
+    // eslint-disable-next-line no-undef
+    if (INABOX_RESOURCES_EAGER) {
+      this.ampdoc_.whenReady().then(() => {
+        this.documentReady_ = true;
+        this.buildReadyResources_();
+        this./*OK*/ schedulePass(1);
+      });
+    } else {
+      this.ampdoc_.whenReady().then(() => this./*OK*/ schedulePass(1));
+    }
   }
 
   /** @override */
@@ -128,11 +145,18 @@ export class InaboxResources {
   /** @override */
   upgraded(element) {
     const resource = Resource.forElement(element);
-    this.ampdoc_
-      .whenReady()
-      .then(resource.build.bind(resource))
-      .then(this.schedulePass.bind(this));
-    dev().fine(TAG, 'resource upgraded:', resource.debugid);
+    // TODO(#31776): cleanup when launched.
+    // eslint-disable-next-line no-undef
+    if (INABOX_RESOURCES_EAGER) {
+      this.pendingBuildResources_.push(resource);
+      this.buildReadyResources_();
+    } else {
+      this.ampdoc_
+        .whenReady()
+        .then(resource.build.bind(resource))
+        .then(this.schedulePass.bind(this));
+      dev().fine(TAG, 'resource upgraded:', resource.debugid);
+    }
   }
 
   /** @override */
@@ -225,6 +249,25 @@ export class InaboxResources {
     this.ampdoc_.signals().signal(READY_SCAN_SIGNAL);
     this.passObservable_.fire();
     this.firstPassDone_.resolve();
+  }
+
+  /**
+   * Builds any pending resouces if document is ready, or next element has been
+   * added to DOM.
+   * @private
+   */
+  buildReadyResources_() {
+    for (let i = this.pendingBuildResources_.length - 1; i >= 0; i--) {
+      const resource = this.pendingBuildResources_[i];
+      if (
+        this.documentReady_ ||
+        hasNextNodeInDocumentOrder(resource.element, this.ampdoc_.getRootNode())
+      ) {
+        this.pendingBuildResources_.splice(i, 1);
+        resource.build().then(() => this./*OK*/ schedulePass());
+        dev().fine(TAG, 'resource upgraded:', resource.debugid);
+      }
+    }
   }
 }
 

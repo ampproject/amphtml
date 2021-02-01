@@ -23,6 +23,7 @@ import {
 import {closest} from '../../../src/dom';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {htmlFor} from '../../../src/static-template';
+import {observeContentSize} from '../../../src/utils/size-observer';
 import {setStyles} from '../../../src/style';
 
 /**
@@ -49,9 +50,27 @@ const buildDeviceTemplate = (element) => {
   return html`
     <div class="i-amphtml-story-dev-tools-device">
       <div class="i-amphtml-story-dev-tools-device-screen">
+        <div class="i-amphtml-story-dev-tools-device-statusbar">
+          <div class="i-amphtml-story-dev-tools-device-statusbar-clock"></div>
+          <div class="i-amphtml-story-dev-tools-device-statusbar-icons"></div>
+        </div>
+        <div class="i-amphtml-story-dev-tools-device-appbar">
+          <div class="i-amphtml-story-dev-tools-device-appbar-icon"></div>
+          <div class="i-amphtml-story-dev-tools-device-appbar-urlbar"></div>
+          <div class="i-amphtml-story-dev-tools-device-appbar-icon"></div>
+          <div class="i-amphtml-story-dev-tools-device-appbar-icon"></div>
+        </div>
         <amp-story-player width="1" height="1" layout="container">
           <a></a>
         </amp-story-player>
+        <div class="i-amphtml-story-dev-tools-device-bottombar">
+          <div class="i-amphtml-story-dev-tools-device-appbar-icon"></div>
+          <div class="i-amphtml-story-dev-tools-device-appbar-icon"></div>
+          <div class="i-amphtml-story-dev-tools-device-appbar-icon"></div>
+          <div class="i-amphtml-story-dev-tools-device-appbar-icon"></div>
+          <div class="i-amphtml-story-dev-tools-device-appbar-icon"></div>
+        </div>
+        <div class="i-amphtml-story-dev-tools-device-navigation"></div>
       </div>
     </div>
   `;
@@ -225,6 +244,7 @@ const ALL_DEVICES = [
     'height': 605,
     'deviceHeight': 731,
     'deviceSpaces': 1,
+    'details': ['pixel2', 'browser', 'android'],
   },
   {
     'name': 'Pixel 3',
@@ -232,6 +252,7 @@ const ALL_DEVICES = [
     'height': 686,
     'deviceHeight': 823,
     'deviceSpaces': 1,
+    'details': ['pixel3', 'browser', 'android'],
   },
   {
     'name': 'iPhone 8 (Browser)',
@@ -239,13 +260,15 @@ const ALL_DEVICES = [
     'height': 554,
     'deviceHeight': 667,
     'deviceSpaces': 1,
+    'details': ['iphone8', 'browser', 'ios'],
   },
   {
     'name': 'iPhone 8 (Native)',
     'width': 375,
-    'height': 632,
+    'height': 596,
     'deviceHeight': 667,
     'deviceSpaces': 1,
+    'details': ['iphone8', 'native', 'ios'],
   },
   {
     'name': 'iPhone 11 (Browser)',
@@ -253,6 +276,7 @@ const ALL_DEVICES = [
     'height': 724,
     'deviceHeight': 896,
     'deviceSpaces': 1,
+    'details': ['iphone11', 'browser', 'ios'],
   },
   {
     'name': 'iPhone 11 (Native)',
@@ -260,6 +284,7 @@ const ALL_DEVICES = [
     'height': 795,
     'deviceHeight': 896,
     'deviceSpaces': 1,
+    'details': ['iphone11', 'native', 'ios'],
   },
   {
     'name': 'iPhone 11 Pro (Browser)',
@@ -267,6 +292,7 @@ const ALL_DEVICES = [
     'height': 635,
     'deviceHeight': 812,
     'deviceSpaces': 1,
+    'details': ['iphone11pro', 'browser', 'ios'],
   },
   {
     'name': 'iPhone 11 Pro (Native)',
@@ -274,6 +300,7 @@ const ALL_DEVICES = [
     'height': 713,
     'deviceHeight': 812,
     'deviceSpaces': 1,
+    'details': ['iphone11pro', 'native', 'ios'],
   },
   {
     'name': 'iPad (Browser)',
@@ -281,6 +308,7 @@ const ALL_DEVICES = [
     'height': 1010,
     'deviceHeight': 1080,
     'deviceSpaces': 2,
+    'details': ['ipad', 'browser', 'ios'],
   },
   {
     'name': 'OnePlus 5T',
@@ -288,20 +316,23 @@ const ALL_DEVICES = [
     'height': 820,
     'deviceHeight': 910,
     'deviceSpaces': 1,
+    'details': ['oneplus5t', 'browser', 'android'],
   },
   {
     'name': 'OnePlus 7 Pro',
     'width': 412,
-    'height': 743,
+    'height': 782,
     'deviceHeight': 892,
     'deviceSpaces': 1,
+    'details': ['oneplus7pro', 'browser', 'android'],
   },
   {
     'name': 'Desktop 1080p',
     'width': 1920,
-    'height': 1080,
+    'height': 1000,
     'deviceHeight': 1080,
     'deviceSpaces': 2,
+    'details': ['desktop1080', 'browser', 'desktop'],
   },
 ];
 
@@ -372,6 +403,8 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
 
     /** @private {!Element} container for the device previews */
     this.devicesContainer_ = null;
+
+    this.onResize_ = this.onResize_.bind(this);
   }
 
   /** @override */
@@ -394,18 +427,18 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
     chipListContainer.appendChild(chipList);
     chipListContainer.appendChild(this.buildAddDeviceButton_());
     chipListContainer.appendChild(this.buildHelpButton_());
+  }
 
+  /** @override */
+  layoutCallback() {
     parseDevices(
       this.element.getAttribute('data-devices') || DEFAULT_DEVICES
     ).forEach((device) => {
       this.addDevice_(device.name);
     });
     this.repositionDevices_();
-  }
-
-  /** @override */
-  layoutCallback() {
     this.element.addEventListener('click', (e) => this.handleTap_(e.target));
+    observeContentSize(this.element, this.onResize_);
   }
 
   /**
@@ -446,6 +479,7 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
    */
   buildDeviceLayout_(device) {
     const deviceLayout = buildDeviceTemplate(this.element);
+    device.details.forEach((detail) => deviceLayout.setAttribute(detail, ''));
     const devicePlayer = deviceLayout.querySelector('amp-story-player');
     devicePlayer.setAttribute('width', device.width);
     devicePlayer.setAttribute('height', device.height);
@@ -478,25 +512,23 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
       (el) => el.hasAttribute('data-action'),
       this.element
     );
-    if (actionElement.hasAttribute('disabled')) {
+    if (!actionElement || actionElement.hasAttribute('disabled')) {
       return;
     }
-    if (actionElement) {
-      switch (actionElement.getAttribute('data-action')) {
-        case PREVIEW_ACTIONS.SHOW_HELP_DIALOG:
-          this.showHelpDialog_();
-          break;
-        case PREVIEW_ACTIONS.SHOW_ADD_DEVICE_DIALIG:
-          this.showAddDeviceDialog_();
-          break;
-        case PREVIEW_ACTIONS.CLOSE_DIALOG:
-          this.hideCurrentDialog_();
-          break;
-        case PREVIEW_ACTIONS.REMOVE_DEVICE:
-        case PREVIEW_ACTIONS.TOGGLE_DEVICE_CHIP:
-          this.onDeviceChipToggled_(actionElement);
-          break;
-      }
+    switch (actionElement.getAttribute('data-action')) {
+      case PREVIEW_ACTIONS.SHOW_HELP_DIALOG:
+        this.showHelpDialog_();
+        break;
+      case PREVIEW_ACTIONS.SHOW_ADD_DEVICE_DIALIG:
+        this.showAddDeviceDialog_();
+        break;
+      case PREVIEW_ACTIONS.CLOSE_DIALOG:
+        this.hideCurrentDialog_();
+        break;
+      case PREVIEW_ACTIONS.REMOVE_DEVICE:
+      case PREVIEW_ACTIONS.TOGGLE_DEVICE_CHIP:
+        this.onDeviceChipToggled_(actionElement);
+        break;
     }
   }
 
@@ -613,8 +645,12 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
    * @private
    * */
   repositionDevices_() {
-    const {width: layoutWidth, height} = this.getLayoutSize();
-    const width = layoutWidth * 0.8; // To account for 10% horizontal padding.
+    const {
+      offsetWidth: width,
+      offsetHeight: height,
+    } = this.element.querySelector(
+      '.i-amphtml-story-dev-tools-devices-container'
+    );
     let sumDeviceWidths = 0;
     let maxDeviceHeights = 0;
     // Find the sum of the device widths and max of heights since they are horizontally laid out.
@@ -647,8 +683,8 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
     });
   }
 
-  /** @override */
-  onMeasureChanged() {
+  /** @private */
+  onResize_() {
     this.repositionDevices_();
   }
 

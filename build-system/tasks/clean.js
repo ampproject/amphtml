@@ -17,9 +17,9 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const del = require('del');
-const log = require('fancy-log');
 const path = require('path');
 const {cyan} = require('ansi-colors');
+const {log} = require('../common/logging');
 
 const ROOT_DIR = path.resolve(__dirname, '../../');
 
@@ -29,7 +29,7 @@ const ROOT_DIR = path.resolve(__dirname, '../../');
 async function clean() {
   const pathsToDelete = [
     '.amp-build',
-    '.karma-cache',
+    '.karma-cache*',
     'build',
     'build-system/server/new-server/transforms/dist',
     'deps.txt',
@@ -37,6 +37,8 @@ async function clean() {
     'dist.3p',
     'dist.tools',
     'test-bin',
+    'validator/**/dist',
+    'examples/storybook',
   ];
   if (argv.include_subpackages) {
     pathsToDelete.push('**/node_modules', '!node_modules');

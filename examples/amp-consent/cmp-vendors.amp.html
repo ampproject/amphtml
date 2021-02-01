@@ -103,6 +103,7 @@
           <option>Marfeel</option>
           <option>Ogury</option>
           <option>opencmp</option>
+          <option>pubtech</option>
           <option>quantcast</option>
           <option>sirdata</option>
           <option>SourcePoint</option>
@@ -141,7 +142,7 @@
         </script>
         <div id="postPromptUI">
           Post Prompt UI
-          <button on="tap:ABC.prompt(consent=_ping_)" role="button">Manage</button>
+          <button on="tap:ABC.prompt(consent=_ping_)">Manage</button>
         </div>
       </amp-consent>
       <!-- End _ping_ example -->
@@ -158,7 +159,7 @@
         </script>
         <div id="postPromptUI">
           Post Prompt UI
-          <button on="tap:ABC.prompt(consent=appconsent)" role="button">Manage</button>
+          <button on="tap:ABC.prompt(consent=appconsent)">Manage</button>
         </div>
       </amp-consent>
       <!-- End appconsent example -->
@@ -174,7 +175,7 @@
         </script>
         <div id="postPromptUI">
           Post Prompt UI
-          <button on="tap:consent.prompt(consent=ConsentManager)" role="button">Manage</button>
+          <button on="tap:consent.prompt(consent=ConsentManager)">Manage</button>
         </div>
       </amp-consent>
       <!-- End appconsent example -->
@@ -202,7 +203,7 @@
           </script>
           <div id="postPromptUI">
             Post Prompt UI
-            <button on="tap:didomi.prompt(consent=didomi)" role="button">Manage</button>
+            <button on="tap:didomi.prompt(consent=didomi)">Manage</button>
           </div>
         </amp-consent>
         <!-- End didomi example -->
@@ -217,7 +218,7 @@
         </script>
         <div id="iubendaPostPromptUI">
           Post Prompt UI
-          <button on="tap:iubenda.prompt(consent=iubenda)" role="button">Manage</button>
+          <button on="tap:iubenda.prompt(consent=iubenda)">Manage</button>
         </div>
       </amp-consent>
       <!-- End iubenda example -->
@@ -245,7 +246,7 @@
         </div>
       </amp-consent>
       <!-- End LiveRamp example-->
-      
+
       <!-- Marfeel example -->
       <amp-consent id='marfeelConsent' layout='nodisplay' type='Marfeel'>
         <script type="application/json">
@@ -259,7 +260,7 @@
         </script>
         <div id="postPromptUI">
           Post Prompt UI
-          <button on="tap:marfeelConsent.prompt(consent=Marfeel)" role="button">Manage</button>
+          <button on="tap:marfeelConsent.prompt(consent=Marfeel)">Manage</button>
         </div>
       </amp-consent>
       <!-- End Marfeel example -->
@@ -279,7 +280,7 @@
         </script>
         <div id="custom-prompt-ui">
           Post Prompt UI
-          <button on="tap:ogury.prompt(consent=Ogury)" role="button">
+          <button on="tap:ogury.prompt(consent=Ogury)">
             Privacy Settings
           </button>
         </div>
@@ -300,7 +301,7 @@
         </script>
         <div id="onetrust-consent-prompt-ui">
           Post Prompt UI
-          <button on="tap:consent.prompt(consent=onetrust)" role="button">Privacy Settings</button>
+          <button on="tap:consent.prompt(consent=onetrust)">Privacy Settings</button>
         </div>
       </amp-consent>
       <!-- End OneTrust example -->
@@ -315,10 +316,28 @@
         </script>
         <div id="opencmp-consent-prompt-ui">
           Post Prompt UI
-          <button on="tap:consent.prompt(consent=opencmp)" role="button">Privacy Settings</button>
+          <button on="tap:consent.prompt(consent=opencmp)">Privacy Settings</button>
         </div>
       </amp-consent>
       <!-- End opencmp example -->
+
+      <!-- Pubtech Example -->
+      <amp-consent id="pubtech" layout="nodisplay" type="pubtech">
+        <script type="application/json">
+              {
+                "postPromptUI": "pubtech-post-prompt",
+                "clientConfig": {
+                  "privacyUrl": "",
+                  "isAmp": true,
+                  "websiteName": "Pubtech"
+                }
+              }
+            </script>
+        <div id="pubtech-post-prompt">
+          <button on="tap:pubtech.prompt(consent=pubtech)">Privacy settings</button>
+        </div>
+      </amp-consent>
+      <!-- End Pubtech example -->
 
       <!-- Quantcast Example -->
       <amp-consent id="quantcast" layout="nodisplay" type="quantcast">
@@ -333,7 +352,7 @@
             }
           </script>
           <div id="quantcast-post-prompt">
-            <button on="tap:conset.prompt(consent=quantcast)" role="button">Privacy settings</button>
+            <button on="tap:consent.prompt(consent=quantcast)">Privacy settings</button>
           </div>
       </amp-consent>
       <!-- End Quantcast example -->
@@ -354,11 +373,11 @@
         </script>
         <div id="promptConsentUI">
           Post Prompt UI
-          <button on="tap:consent.prompt(consent=sirdata)" role="button">Privacy settings</button>
+          <button on="tap:consent.prompt(consent=sirdata)">Privacy settings</button>
         </div>
       </amp-consent>
       <!-- End sirdata example -->
-      
+
       <!-- SourcePoint example -->
       <amp-consent id='consent' layout='nodisplay' type='SourcePoint'>
         <script type="application/json">
@@ -379,7 +398,7 @@
         </script>
         <div id="my-consent-prompt-ui">
           Post Prompt UI
-          <button on="tap:consent.prompt(consent=SourcePoint)" role="button">Privacy Settings</button>
+          <button on="tap:consent.prompt(consent=SourcePoint)">Privacy Settings</button>
         </div>
       </amp-consent>
       <!-- End SourcePoint example -->
@@ -417,7 +436,7 @@
         </script>
         <div id="my-consent-prompt-ui">
           Post Prompt UI
-          <button on="tap:consent.prompt(consent=Usercentrics)" role="button">Privacy Settings</button>
+          <button on="tap:consent.prompt(consent=Usercentrics)">Privacy Settings</button>
         </div>
       </amp-consent>
       <!-- End Usercentrics example -->

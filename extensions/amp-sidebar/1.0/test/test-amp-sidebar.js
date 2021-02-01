@@ -43,6 +43,8 @@ describes.realWin(
       let closeButton;
       let toggleButton;
       let animateFunction;
+      let consoleWarnSpy;
+      let consoleWarn;
 
       function invocation(method, args = {}) {
         const source = null;
@@ -67,6 +69,11 @@ describes.realWin(
         // disable animations for synchronous testing
         animateFunction = Element.prototype.animate;
         Element.prototype.animate = null;
+        // disable warnings and check against spy when needed
+        consoleWarn = console.warn;
+        console.warn = () => true;
+        consoleWarnSpy = env.sandbox.spy(console, 'warn');
+
         fullHtml = html`
           <div>
             <amp-sidebar id="sidebar" side="left">
@@ -101,6 +108,7 @@ describes.realWin(
 
       afterEach(() => {
         Element.prototype.animate = animateFunction;
+        console.warn = consoleWarn;
       });
 
       it('open attribute is synced with component mounted', async () => {
@@ -139,13 +147,13 @@ describes.realWin(
         expect(container.children.length).to.equal(0);
       });
 
-      it('should close when the mask is clicked', async () => {
+      it('should close when the backdrop is clicked', async () => {
         element.enqueAction(invocation('open'));
         await waitForOpen(element, true);
 
         expect(container.children.length).to.equal(2);
-        const mask = container.children[1];
-        mask.click();
+        const backdrop = container.children[1];
+        backdrop.click();
 
         await waitForOpen(element, false);
 
@@ -181,6 +189,216 @@ describes.realWin(
           'Lorem ipsum dolor sit amet'
         );
         expect(sidebarChildren.lastElementChild.children.length).to.equal(3);
+      });
+
+      it('should render with default colors', async () => {
+        // open the sidebar
+        openButton.click();
+        await waitForOpen(element, true);
+        expect(element).to.have.attribute('open');
+
+        const {
+          firstElementChild: sidebarElement,
+          lastElementChild: backdropElement,
+        } = container;
+
+        expect(win.getComputedStyle(sidebarElement).color).to.equal(
+          'rgb(0, 0, 0)'
+        );
+        expect(win.getComputedStyle(sidebarElement).backgroundColor).to.equal(
+          'rgb(239, 239, 239)'
+        );
+        expect(win.getComputedStyle(backdropElement).backgroundColor).to.equal(
+          'rgba(0, 0, 0, 0.5)'
+        );
+      });
+
+      it('should reflect user supplied CSS for various properties', async () => {
+        const style = html`
+          <style>
+            amp-sidebar {
+              color: rgb(1, 1, 1);
+              background-color: rgb(2, 2, 2);
+              height: 300px;
+              width: 301px;
+              padding: 15px;
+              border: solid 1px black;
+              top: 10px;
+              max-height: 500px !important;
+              max-width: 600px !important;
+              min-width: 200px !important;
+              outline: solid 1px red;
+              z-index: 15;
+            }
+            amp-sidebar::part(backdrop) {
+              background-color: rgb(3, 3, 3);
+            }
+          </style>
+        `;
+        fullHtml.appendChild(style);
+
+        // open the sidebar
+        openButton.click();
+        await waitForOpen(element, true);
+        expect(element).to.have.attribute('open');
+
+        const {
+          firstElementChild: sidebarElement,
+          lastElementChild: backdropElement,
+        } = container;
+
+        expect(win.getComputedStyle(sidebarElement).color).to.equal(
+          'rgb(1, 1, 1)'
+        );
+        expect(win.getComputedStyle(sidebarElement).backgroundColor).to.equal(
+          'rgb(2, 2, 2)'
+        );
+        expect(win.getComputedStyle(sidebarElement).height).to.equal('300px');
+        expect(win.getComputedStyle(sidebarElement).width).to.equal('301px');
+        expect(win.getComputedStyle(sidebarElement).padding).to.equal('15px');
+        expect(win.getComputedStyle(sidebarElement).border).to.equal(
+          '1px solid rgb(0, 0, 0)'
+        );
+        expect(win.getComputedStyle(sidebarElement).top).to.equal('10px');
+        expect(win.getComputedStyle(sidebarElement).maxHeight).to.equal(
+          '500px'
+        );
+        expect(win.getComputedStyle(sidebarElement).maxWidth).to.equal('600px');
+        expect(win.getComputedStyle(sidebarElement).minWidth).to.equal('200px');
+        expect(win.getComputedStyle(sidebarElement).outline).to.equal(
+          'rgb(255, 0, 0) solid 1px'
+        );
+        expect(win.getComputedStyle(sidebarElement).zIndex).to.equal('15');
+
+        expect(win.getComputedStyle(backdropElement).backgroundColor).to.equal(
+          'rgb(3, 3, 3)'
+        );
+      });
+
+      it('should not update some CSS properties w/o !important', async () => {
+        const style = html`
+          <style>
+            amp-sidebar {
+              max-height: 500px;
+              max-width: 600px;
+              min-width: 200px;
+            }
+          </style>
+        `;
+        fullHtml.appendChild(style);
+
+        // open the sidebar
+        openButton.click();
+        await waitForOpen(element, true);
+        expect(element).to.have.attribute('open');
+
+        const {firstElementChild: sidebarElement} = container;
+
+        // maxHeight defaults to 100vh, so should be the same height as viewport
+        expect(win.getComputedStyle(sidebarElement).maxHeight).to.equal(
+          `${win.innerHeight}px`
+        );
+
+        // maxWidth is not set as !important so is overridable
+        expect(win.getComputedStyle(sidebarElement).maxWidth).to.equal(`600px`);
+
+        // 45px is default, user supplied 200px does not overwrite w/o !important
+        expect(win.getComputedStyle(sidebarElement).minWidth).to.equal('45px');
+      });
+
+      it('should display a warning when sidebar is not child of body', async () => {
+        // sidebar is wrapped in a div so not direct child of body
+        // warning should be calledOnce
+        expect(consoleWarnSpy).to.be.calledOnce;
+
+        const noWarnSidebar = html`
+          <amp-sidebar id="sidebar" side="left">
+            <div>
+              <span>
+                Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at
+                aeque inermis reprehendunt.
+              </span>
+              <ul>
+                <li>1</li>
+                <li>2</li>
+                <li>3</li>
+              </ul>
+            </div>
+          </amp-sidebar>
+        `;
+        win.document.body.appendChild(noWarnSidebar);
+        await noWarnSidebar.build();
+
+        // the 'noWarnSidebar' above is appended directly to the body and
+        // should not throw a warning
+        // the stub should still only have been called once
+        expect(consoleWarnSpy).to.be.calledOnce;
+      });
+
+      it('should default "left" or "right" based on document.dir when side not provided', async () => {
+        const documentDir = win.document.dir;
+
+        /**
+         * document.dir is not 'rtl' and side is not provided to the element
+         * so we should default to 'left'
+         */
+        win.document.dir = 'blah';
+        fullHtml = html`
+          <div>
+            <amp-sidebar id="sidebar2">
+              <div>Hello World!</div>
+            </amp-sidebar>
+            <div id="buttons">
+              <button id="open" on="tap:sidebar2.open()">open</button>
+            </div>
+          </div>
+        `;
+        element = fullHtml.firstElementChild;
+        win.document.body.appendChild(fullHtml);
+        await element.build();
+        container = element.shadowRoot.firstElementChild;
+        openButton = fullHtml.querySelector('#open');
+
+        // open the sidebar
+        openButton.click();
+        await waitForOpen(element, true);
+        expect(element).to.have.attribute('open');
+        let sidebarElement = container.firstElementChild;
+
+        // defaults to left if document is not 'ltr'
+        expect(sidebarElement.className.includes('left')).to.be.true;
+
+        /**
+         * document.dir is 'rtl' and side is not provided to the element
+         * so we should default to 'right'
+         */
+        win.document.dir = 'rtl';
+        fullHtml = html`
+          <div>
+            <amp-sidebar id="sidebar3">
+              <div>Hello World!</div>
+            </amp-sidebar>
+            <div id="buttons">
+              <button id="open" on="tap:sidebar3.open()">open</button>
+            </div>
+          </div>
+        `;
+        element = fullHtml.firstElementChild;
+        win.document.body.appendChild(fullHtml);
+        await element.build();
+        container = element.shadowRoot.firstElementChild;
+        openButton = fullHtml.querySelector('#open');
+
+        // open the sidebar
+        openButton.click();
+        await waitForOpen(element, true);
+        expect(element).to.have.attribute('open');
+        sidebarElement = container.firstElementChild;
+
+        // defaults to right if document is 'rtl'
+        expect(sidebarElement.className.includes('right')).to.be.true;
+
+        win.document.dir = documentDir;
       });
 
       describe('programatic access to imperative API', () => {
@@ -293,11 +511,18 @@ describes.realWin(
       let openButton;
       let closeButton;
       let animateStub;
+      let consoleWarn;
 
       beforeEach(async () => {
         win = env.win;
         html = htmlFor(win.document);
         toggleExperiment(win, 'bento-sidebar', true, true);
+
+        // disable warnings since sidebar is child of a div container
+        // (and not body)
+        consoleWarn = console.warn;
+        console.warn = () => true;
+
         fullHtml = html`
           <div>
             <amp-sidebar id="sidebar" side="left">
@@ -329,6 +554,10 @@ describes.realWin(
         closeButton = fullHtml.querySelector('#close');
       });
 
+      afterEach(() => {
+        console.warn = consoleWarn;
+      });
+
       it('should not animate on build', () => {
         animateStub = env.sandbox.stub(Element.prototype, 'animate');
         expect(animateStub).to.not.be.called;
@@ -346,7 +575,7 @@ describes.realWin(
         openButton.click();
         await waitForOpen(element, true);
 
-        // once for mask, once for sidebar
+        // once for backdrop, once for sidebar
         expect(animateStub).to.be.calledTwice;
         animation.onfinish();
 
@@ -375,7 +604,7 @@ describes.realWin(
         closeButton.click();
         await waitFor(() => animateStub.callCount > 0, 'animation started');
 
-        // once for mask, once for sidebar
+        // once for backdrop, once for sidebar
         expect(animateStub).to.be.calledTwice;
 
         // still displayed while animating
