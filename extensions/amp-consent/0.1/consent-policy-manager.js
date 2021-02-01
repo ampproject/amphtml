@@ -79,6 +79,9 @@ export class ConsentPolicyManager {
 
     /** @private {?Object|undefined} */
     this.consentMetadata_ = null;
+
+    /** @private {?function()} */
+    this.tcfConsentChangeHandler_ = null;
   }
 
   /**
@@ -215,6 +218,13 @@ export class ConsentPolicyManager {
       this.consentState_ = state;
     }
     this.consentStateChangeObservables_.fire(this.consentState_);
+    this.tcfConsentChangeHandler_(this.consentString_, this.consentMetadata_);
+  }
+
+  setOnPolicyChange(callback) {
+    if (!this.tcfConsentChangeHandler_) {
+      this.tcfConsentChangeHandler_ = callback;
+    }
   }
 
   /**

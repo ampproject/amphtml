@@ -34,112 +34,155 @@ const TCF_POLICY_VERSION = 2;
 const CMP_STATUS = 'loaded';
 const CMP_LOADED = true;
 
-/**
- * @param {!Object} payload
- * @param {!Window} win
- * @param {!ConsentPolicyManager} policyManager
- */
-export function handleTcfCommand(payload, win, policyManager) {
-  const {command} = payload;
+export class TcfApiCommandManager {
+  /**
+   * Creates an instance of TcfApiCommandManager.
+   * @param {!./consent-policy-manager.ConsentPolicyManager} policyManager
+   */
+  constructor(policyManager) {
+    this.policyManager_ = policyManager;
 
-  switch (command) {
-    case TCF_POST_MESSAGE_API_COMMANDS.GET_TC_DATA:
-    case TCF_POST_MESSAGE_API_COMMANDS.PING:
-      handlePingEvent(payload, win, policyManager);
-      break;
-    case TCF_POST_MESSAGE_API_COMMANDS.ADD_EVENT_LISTENER:
-    case TCF_POST_MESSAGE_API_COMMANDS.REMOVE_EVENT_LISTENER:
-    default:
+    // this.changeListeners = [];
+
+    // No shared data for now
+    // policyManager.setOnPolicyChange(() => {
+    //   this.handleTcDataChange_();
+    // });
+
+    // this.currentTcData = null;
+  }
+
+  /**
+   * @param {!Object} data
+   * @param {!Window} win
+   */
+  handleTcfCommand(data, win) {
+    if (!this.isValidTcfApiCall_(data['__tcfapiCall'])) {
       return;
-  }
-}
+    }
 
-/**
- * Create minimal PingReturn object. Send to original iframe
- * once object has been filled.
- * @param {!Object} payload
- * @param {!Window} win
- * @param {!ConsentPolicyManager} policyManager
- */
-function handlePingEvent(payload, win, policyManager) {
-  policyManager.getConsentMetadataInfo('default').then((metadata) => {
-    const returnValue = getMinimalPingReturn(metadata);
-    const {callId} = payload;
-
-    sendTcfApiReturn(win, returnValue, callId);
-  });
-}
-
-/**
- * Create minimal PingReturn object.
- * @param {?Object} metadata
- * @return {!MinimalPingReturn}
- */
-function getMinimalPingReturn(metadata) {
-  const gdprApplies = metadata ? metadata['gdprApplies'] : undefined;
-  return {
-    gdprApplies,
-    cmpLoaded: CMP_LOADED,
-    cmpStatus: CMP_STATUS,
-    tcfPolicyVersion: TCF_POLICY_VERSION,
-  };
-}
-
-/**
- *
- * @param {!Window} win
- * @param {!JsonObject} returnValue
- * @param {string} callId
- * @param {boolean=} success
- */
-function sendTcfApiReturn(win, returnValue, callId, success) {
-  if (!win) {
-    return;
+    const payload = data['__tcfapiCall'];
+    const {command} = payload;
+    switch (command) {
+      case TCF_POST_MESSAGE_API_COMMANDS.GET_TC_DATA:
+      case TCF_POST_MESSAGE_API_COMMANDS.PING:
+        this.handlePingEvent_(payload, win);
+        break;
+      case TCF_POST_MESSAGE_API_COMMANDS.ADD_EVENT_LISTENER:
+      case TCF_POST_MESSAGE_API_COMMANDS.REMOVE_EVENT_LISTENER:
+        this.handleAddEventListner_(payload, win);
+      default:
+        return;
+    }
   }
 
-  const __tcfapiReturn = {returnValue, callId, success};
-  win./*OK*/ postMessage(
-    /** @type {!JsonObject} */ ({
-      __tcfapiReturn,
-    }),
-    '*'
-  );
-}
+  /**
+   * Create minimal PingReturn object. Send to original iframe
+   * once object has been filled.
+   * @param {!Object} payload
+   * @param {!Window} win
+   */
+  handlePingEvent_(payload, win) {
+    // Why are we using these methods here when we're just getting the values above?
+    // Justification is that for AddEventListner, we're only looking for changes
+    this.policyManager_.getConsentMetadataInfo('default').then((metadata) => {
+      const returnValue = this.getMinimalPingReturn_(metadata);
+      const {callId} = payload;
 
-/**
- * Checks if the payload from the `tcfapiCall` is valid.
- * @param {JsonObject} payload
- * @return {boolean}
- */
-export function isValidTcfApiCall(payload) {
-  if (!isObject(payload)) {
-    user().error(TAG, `"tcfapiCall" is not an object: ${payload}`);
-    return false;
+      this.sendTcfApiReturn_(win, returnValue, callId);
+    });
   }
-  const {command, parameter, version} = payload;
-  if (!isEnumValue(TCF_POST_MESSAGE_API_COMMANDS, command)) {
-    user().error(TAG, `Unsupported command found in "tcfapiCall": ${command}`);
-    return false;
+
+  /**
+   * Create minimal PingReturn object.
+   * @param {?Object} metadata
+   * @return {!MinimalPingReturn}
+   */
+  getMinimalPingReturn_(metadata) {
+    const gdprApplies = metadata ? metadata['gdprApplies'] : undefined;
+    return {
+      gdprApplies,
+      cmpLoaded: CMP_LOADED,
+      cmpStatus: CMP_STATUS,
+      tcfPolicyVersion: TCF_POLICY_VERSION,
+    };
   }
-  if (parameter !== undefined) {
-    user().error(
-      TAG,
-      `Unsupported parameter found in "tcfapiCall": ${parameter}`
+
+  handleAddEventListner_(payload) {
+    this.changeListeners_.push(payload);
+  }
+
+  // How will this work in conjunciton with getTcData?
+  // Read up on this
+  handleTcDataChange_() {
+    // Get the data using promises
+    // Create the TCData object
+    // Check if its changed
+    // If it has changed then iterate
+    for (let i = 0; i < this.changeListeners.length; i++) {
+      // send post message
+    }
+  }
+
+  /**
+   *
+   * @param {!Window} win
+   * @param {!JsonObject} returnValue
+   * @param {string} callId
+   * @param {boolean=} success
+   */
+  sendTcfApiReturn_(win, returnValue, callId, success) {
+    if (!win) {
+      return;
+    }
+
+    const __tcfapiReturn = {returnValue, callId, success};
+    win./*OK*/ postMessage(
+      /** @type {!JsonObject} */ ({
+        __tcfapiReturn,
+      }),
+      '*'
     );
-    return false;
   }
-  if (version != '2') {
-    user().error(TAG, `Found incorrect version in "tcfapiCall": ${version}`);
-    return false;
-  }
-  return true;
-}
 
-/**
- * @param {?Object} metadata
- * @return {!MinimalPingReturn}
- * @visibleForTesting
- */
-export function getMinimalPingReturnForTesting(metadata) {
-  return getMinimalPingReturn(metadata);
+  /**
+   * Checks if the payload from the `tcfapiCall` is valid.
+   * @param {JsonObject} payload
+   * @return {boolean}
+   */
+  isValidTcfApiCall_(payload) {
+    if (!isObject(payload)) {
+      user().error(TAG, `"tcfapiCall" is not an object: ${payload}`);
+      return false;
+    }
+    const {command, parameter, version} = payload;
+    if (!isEnumValue(TCF_POST_MESSAGE_API_COMMANDS, command)) {
+      user().error(
+        TAG,
+        `Unsupported command found in "tcfapiCall": ${command}`
+      );
+      return false;
+    }
+    if (parameter !== undefined) {
+      user().error(
+        TAG,
+        `Unsupported parameter found in "tcfapiCall": ${parameter}`
+      );
+      return false;
+    }
+    if (version != '2') {
+      user().error(TAG, `Found incorrect version in "tcfapiCall": ${version}`);
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * @param {?Object} metadata
+   * @return {!MinimalPingReturn}
+   * @visibleForTesting
+   */
+  getMinimalPingReturnForTesting(metadata) {
+    return this.getMinimalPingReturn_(metadata);
+  }
 }
