@@ -531,7 +531,12 @@ function describeEnv(factory) {
     if (!versions) {
       // If a version is provided, add a prefix to the test suite name.
       const {version} = spec;
-      templateFunc(version ? `[v{version} ${name}` : name, spec, fn, describe);
+      templateFunc(
+        version ? `[v${version}] ${name}` : name,
+        spec,
+        fn,
+        describe
+      );
     } else {
       // A root `describes.endtoend` spec may contain a `versions` object, where
       // the key represents the version number and the value is an object with
@@ -587,6 +592,7 @@ class EndToEndFixture {
     const ampDriver = new AmpDriver(controller);
     env.controller = controller;
     env.ampDriver = ampDriver;
+    env.version = this.spec.version;
 
     installBrowserAssertions(controller.networkLogger);
 
