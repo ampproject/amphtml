@@ -57,7 +57,7 @@ function LightboxGallery({children}) {
       </Lightbox>
       <LightboxGalleryContext.Provider value={context}>
         {Preact.toChildArray(children).map((child) =>
-          child.props.lightbox ? <WithLightbox>{child}</WithLightbox> : child
+          child.props?.lightbox ? <WithLightbox>{child}</WithLightbox> : child
         )}
       </LightboxGalleryContext.Provider>
     </>
@@ -73,6 +73,7 @@ export const _default = () => {
           height: 160px;
         }
       `}</style>
+      Top level children can use `lightbox` prop.
       <img
         lightbox
         src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1498&q=80"
@@ -87,6 +88,16 @@ export const _default = () => {
         lightbox
         src="https://images.unsplash.com/photo-1599839575945-a9e5af0c3fa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjQwMzA0fQ&auto=format&fit=crop&w=1498&q=80"
       />
+      <div>
+        <div>
+          <div>
+            This one uses `WithLightbox` because it is deeply nested.
+            <WithLightbox>
+              <img src="https://images.unsplash.com/photo-1603123853880-a92fafb7809f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1498&q=80" />
+            </WithLightbox>
+          </div>
+        </div>
+      </div>
     </LightboxGallery>
   );
 };
