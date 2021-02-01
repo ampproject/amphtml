@@ -50,7 +50,7 @@ export const _default = () => {
           src="https://images.unsplash.com/photo-1599839575945-a9e5af0c3fa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjQwMzA0fQ&auto=format&fit=crop&w=1498&q=80"
         />
         <div>
-          <div>
+          <div data-prop-should-be-preserved>
             <div>
               <img
                 lightbox

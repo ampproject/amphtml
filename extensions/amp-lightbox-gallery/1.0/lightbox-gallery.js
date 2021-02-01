@@ -95,9 +95,11 @@ function WithDeepLightbox({children}) {
     child.props?.lightbox ? (
       <WithLightbox>{child}</WithLightbox>
     ) : child.props?.children ? (
-      cloneElement(child, {
-        children: <WithDeepLightbox>{child.props.children}</WithDeepLightbox>,
-      })
+      cloneElement(
+        child,
+        null,
+        <WithDeepLightbox>{child.props.children}</WithDeepLightbox>
+      )
     ) : (
       child
     )
