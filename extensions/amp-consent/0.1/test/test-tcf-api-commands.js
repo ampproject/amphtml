@@ -35,6 +35,8 @@ describes.realWin(
       let data;
       let msg;
       let tcfApiCommandManager;
+      let mockTcString;
+      let mockSharedData;
 
       beforeEach(() => {
         mockWin = mockWindowInterface(window.sandbox);
@@ -43,6 +45,12 @@ describes.realWin(
         mockPolicyManager = {
           getConsentMetadataInfo: (opt_policy) => {
             return Promise.resolve(mockMetadata);
+          },
+          getConsentStringInfo: (opt_policy) => {
+            return Promise.resolve(mockTcString);
+          },
+          getMergedSharedData: (opt_policy) => {
+            return Promise.resolve(mockSharedData);
           },
         };
       });
@@ -166,6 +174,97 @@ describes.realWin(
               },
               callId,
               success: undefined,
+            },
+          });
+        });
+      });
+
+      describe('handleGetTcData', () => {
+        it('creates a minimal TcData object', async () => {
+          mockMetadata = {
+            gdprApplies: false,
+            additionalConsent: 'xyz987',
+            purposeOne: false,
+          };
+
+          tcfApiCommandManager = new TcfApiCommandManager(mockPolicyManager);
+          expect(
+            tcfApiCommandManager.getMinimalTcDataForTesting(
+              mockMetadata,
+              mockSharedData,
+              mockTcString
+            )
+          ).to.deep.equals({
+            tcfPolicyVersion: 2,
+            gdprApplies: false,
+            tcString: mockTcString,
+            listenerId: undefined,
+            cmpStatus: 'loaded',
+            eventStatus: undefined,
+            purposeOneTreatment: false,
+            additionalData: {'additionalConsent': 'xyz987'},
+          });
+
+          mockTcString = 'abc123';
+          mockSharedData = {'data': 'data1'};
+
+          expect(
+            tcfApiCommandManager.getMinimalTcDataForTesting(
+              mockMetadata,
+              mockSharedData,
+              mockTcString
+            )
+          ).to.deep.equals({
+            tcfPolicyVersion: 2,
+            gdprApplies: false,
+            tcString: mockTcString,
+            listenerId: undefined,
+            cmpStatus: 'loaded',
+            eventStatus: undefined,
+            purposeOneTreatment: false,
+            additionalData: {'data': 'data1', 'additionalConsent': 'xyz987'},
+          });
+        });
+
+        it('sends a minimal TcData via PostMessage', async () => {
+          const callId = 'getTcDataId';
+          data = {
+            __tcfapiCall: {
+              'command': 'getTCData',
+              callId,
+              version: 2,
+            },
+          };
+          mockMetadata = {
+            gdprApplies: false,
+            additionalConsent: 'xyz987',
+            purposeOne: false,
+          };
+          mockTcString = 'abc123';
+          mockSharedData = {'data': 'data1'};
+          tcfApiCommandManager = new TcfApiCommandManager(mockPolicyManager);
+          tcfApiCommandManager.handleTcfCommand(data, mockWin);
+          await macroTask();
+
+          const postMessageArgs = mockWin.postMessage.args[0];
+          console.log(postMessageArgs[0]);
+          expect(postMessageArgs[0]).to.deep.equals({
+            __tcfapiReturn: {
+              returnValue: {
+                tcfPolicyVersion: 2,
+                gdprApplies: mockMetadata.gdprApplies,
+                tcString: mockTcString,
+                listenerId: undefined,
+                cmpStatus: 'loaded',
+                eventStatus: undefined,
+                purposeOneTreatment: mockMetadata.purposeOne,
+                additionalData: {
+                  'data': 'data1',
+                  'additionalConsent': mockMetadata.additionalConsent,
+                },
+              },
+              callId,
+              success: true,
             },
           });
         });
