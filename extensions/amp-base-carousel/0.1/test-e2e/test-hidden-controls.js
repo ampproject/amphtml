@@ -19,7 +19,7 @@ import {getNextArrow} from './helpers';
 describes.endtoend(
   'amp-base-carousel:0.1 - arrows with hidden controls',
   {
-    manualFixture: 'amp-base-carousel/hidden-controls.amp.html',
+    fixture: 'amp-base-carousel/hidden-controls.amp.html',
     experiments: ['amp-base-carousel'],
     environments: ['single'],
   },
