@@ -47,11 +47,14 @@ import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
+import {handleTcfCommand, isValidTcfApiCall} from './tcf-api-commands';
 import {isEnumValue, isObject} from '../../../src/types';
+import {isExperimentOn} from '../../../src/experiments';
 import {toggle} from '../../../src/style';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const CONSENT_POLICY_MANAGER = 'consentPolicyManager';
+const TCF_API_LOCATOR = '__tcfapiLocator';
 const TAG = 'amp-consent';
 
 /**
@@ -113,6 +116,17 @@ export class AmpConsent extends AMP.BaseElement {
 
     /** @private {?string} */
     this.matchedGeoGroup_ = null;
+
+    /** @private {?boolean} */
+    this.isTcfPostMessageProxyExperimentOn_ = isExperimentOn(
+      this.win,
+      'tcf-post-message-proxy-api'
+    );
+
+    /** @private @const {?Function} */
+    this.boundHandleIframeMessages_ = this.isTcfPostMessageProxyExperimentOn_
+      ? this.handleIframeMessages_.bind(this)
+      : null;
   }
 
   /** @override */
@@ -448,6 +462,7 @@ export class AmpConsent extends AMP.BaseElement {
   init_() {
     this.passSharedData_();
     this.syncRemoteConsentState_();
+    this.maybeSetUpTcfPostMessageProxy_();
 
     this.getConsentRequiredPromise_()
       .then((isConsentRequired) => {
@@ -723,6 +738,62 @@ export class AmpConsent extends AMP.BaseElement {
       opt_metadata['gdprApplies'],
       opt_metadata['purposeOne']
     );
+  }
+
+  /**
+   * Maybe set up the __tfcApiLocator window and listeners.
+   *
+   * The window is a dummy iframe that signals to 3p iframes
+   * that the document supports the tcfPostMessage API.
+   */
+  maybeSetUpTcfPostMessageProxy_() {
+    if (
+      !this.isTcfPostMessageProxyExperimentOn_ ||
+      !this.consentConfig_['exposesTcfApi']
+    ) {
+      return;
+    }
+    // Check if __tcfApiLocator API already exists (dirty AMP)
+    if (!this.win.frames[TCF_API_LOCATOR]) {
+      // Add window listener for 3p iframe PostMessages
+      this.win.addEventListener('message', this.boundHandleIframeMessages_);
+
+      // Set up the __tcfApiLocator window to singal PostMessage support
+      const iframe = this.element.ownerDocument.createElement('iframe');
+      iframe.setAttribute('name', TCF_API_LOCATOR);
+      toggle(iframe, false);
+      iframe.setAttribute('aria-hidden', true);
+      this.element.appendChild(dev().assertElement(iframe));
+    }
+  }
+
+  /**
+   * Listen to iframe messages and handle events.
+   *
+   * The listeners will listen for post messages from 3p
+   * iframes that have the following structure:
+   * {
+   *  "__tcfapiCall": {
+   *    "command": cmd,
+   *    "parameter": arg,
+   *    "version": v,
+   *    "callId": id,
+   *  }
+   * }
+   *
+   * @param {!Event} event
+   */
+  handleIframeMessages_(event) {
+    const data = getData(event);
+
+    if (
+      !data ||
+      !data['__tcfapiCall'] ||
+      !isValidTcfApiCall(data['__tcfapiCall'])
+    ) {
+      return;
+    }
+    handleTcfCommand(data.__tcfapiCall);
   }
 }
 

@@ -17,7 +17,7 @@
 import {
   STICKY_AD_TRANSITION_EXP,
   divertStickyAdTransition,
-} from '../../../src/experiments/sticky-ad-transition-exp';
+} from '../../../ads/google/a4a/sticky-ad-transition-exp';
 import {Services} from '../../../src/services';
 import {
   ancestorElementsByTag,

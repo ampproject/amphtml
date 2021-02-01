@@ -16,7 +16,7 @@
 
 import '../amp-image-lightbox';
 import * as dom from '../../../../src/dom';
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {ActionService} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/action-constants';
 import {ImageViewer} from '../amp-image-lightbox';
@@ -324,7 +324,7 @@ describes.realWin(
     beforeEach(() => {
       win = env.win;
       doc = win.document;
-      clock = lolex.install();
+      clock = fakeTimers.withGlobal(win).install();
 
       env.sandbox.stub(WindowInterface, 'getDevicePixelRatio').returns(1);
       lightbox = {

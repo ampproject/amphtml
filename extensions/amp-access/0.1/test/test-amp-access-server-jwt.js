@@ -15,7 +15,7 @@
  */
 
 import * as DocumentFetcher from '../../../../src/document-fetcher';
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {AccessServerJwtAdapter} from '../amp-access-server-jwt';
 import {isUserErrorMessage} from '../../../../src/log';
 import {removeFragment, serializeQueryString} from '../../../../src/url';
@@ -32,7 +32,7 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, (env) => {
   beforeEach(() => {
     win = env.win;
     ampdoc = env.ampdoc;
-    clock = lolex.install({target: win});
+    clock = fakeTimers.withGlobal(win).install();
 
     validConfig = {
       'authorization': 'https://acme.com/a?rid=READER_ID',

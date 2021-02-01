@@ -23,6 +23,7 @@ import {Services} from '../../../src/services';
 import {
   closestAncestorElementBySelector,
   createElementWithAttributes,
+  dispatchCustomEvent,
   toggleAttribute,
   tryFocus,
 } from '../../../src/dom';
@@ -181,13 +182,11 @@ function getOptions(element, mu) {
  * @private
  */
 function fireSelectEvent(win, action, el, option, value, trust) {
-  const name = 'select';
-  const selectEvent = createCustomEvent(
-    win,
-    `amp-selector.${name}`,
-    dict({'targetOption': option, 'selectedOptions': value})
-  );
-  action.trigger(el, name, selectEvent, trust);
+  const eventName = 'select';
+  const data = dict({'targetOption': option, 'selectedOptions': value});
+  const selectEvent = createCustomEvent(win, `amp-selector.${eventName}`, data);
+  action.trigger(el, eventName, selectEvent, trust);
+  dispatchCustomEvent(el, eventName, data);
 }
 
 /**

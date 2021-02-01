@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-const log = require('fancy-log');
 const {
   bootstrapThirdPartyFrames,
   compileAllJs,
@@ -30,6 +29,7 @@ const {buildExtensions} = require('./extension-helpers');
 const {compileCss} = require('./css');
 const {compileJison} = require('./compile-jison');
 const {cyan, green, yellow} = require('ansi-colors');
+const {log} = require('../common/logging');
 const {maybeUpdatePackages} = require('./update-packages');
 const {parseExtensionFlags} = require('./extension-helpers');
 

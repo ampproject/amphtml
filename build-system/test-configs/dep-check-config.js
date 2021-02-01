@@ -261,6 +261,8 @@ exports.rules = [
       // AMP Story 360
       'extensions/amp-story-360/0.1/amp-story-360.js->extensions/amp-story/1.0/amp-story-store-service.js',
       'extensions/amp-story-360/0.1/amp-story-360.js->extensions/amp-story/1.0/utils.js',
+      // AMP Story Panning Media
+      'extensions/amp-story-panning-media/0.1/amp-story-panning-media.js->extensions/amp-story/1.0/amp-story-store-service.js',
       // Story ads
       'extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js->extensions/amp-story/1.0/amp-story-store-service.js',
       'extensions/amp-story-auto-ads/0.1/story-ad-page.js->extensions/amp-story/1.0/amp-story-store-service.js',
@@ -358,10 +360,6 @@ exports.rules = [
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js->' +
         'src/service/position-observer/position-observer-impl.js',
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js->' +
-        'src/service/position-observer/position-observer-worker.js',
-      'extensions/amp-video-docking/0.1/amp-video-docking.js->' +
-        'src/service/position-observer/position-observer-impl.js',
-      'extensions/amp-video-docking/0.1/amp-video-docking.js->' +
         'src/service/position-observer/position-observer-worker.js',
       'extensions/amp-analytics/0.1/cookie-writer.js->' +
         'src/service/cid-impl.js',
@@ -468,6 +466,7 @@ exports.rules = [
       'src/polyfills.js->src/polyfills/map-set.js',
       'src/polyfills.js->src/polyfills/set-add.js',
       'src/polyfills.js->src/polyfills/weakmap-set.js',
+      'src/friendly-iframe-embed.js->src/polyfills/abort-controller.js',
       'src/friendly-iframe-embed.js->src/polyfills/custom-elements.js',
       'src/friendly-iframe-embed.js->src/polyfills/document-contains.js',
       'src/friendly-iframe-embed.js->src/polyfills/domtokenlist.js',
@@ -531,12 +530,12 @@ exports.rules = [
     mustNotDependOn: ['ads/google/doubleclick.js'],
     allowlist: [
       /** DO NOT ADD TO ALLOWLIST */
-      'ads/ix.js->ads/google/doubleclick.js',
-      'ads/imonomy.js->ads/google/doubleclick.js',
-      'ads/navegg.js->ads/google/doubleclick.js',
+      'ads/vendors/ix.js->ads/google/doubleclick.js',
+      'ads/vendors/imonomy.js->ads/google/doubleclick.js',
+      'ads/vendors/navegg.js->ads/google/doubleclick.js',
       /** DO NOT ADD TO ALLOWLIST */
-      'ads/openx.js->ads/google/doubleclick.js',
-      'ads/pulsepoint.js->ads/google/doubleclick.js',
+      'ads/vendors/openx.js->ads/google/doubleclick.js',
+      'ads/vendors/pulsepoint.js->ads/google/doubleclick.js',
       /** DO NOT ADD TO ALLOWLIST */
     ],
   },

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {CSS} from '../../../build/amp-fit-text-1.0.css';
 import {FitText} from './fit-text';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {isExperimentOn} from '../../../src/experiments';
@@ -50,5 +51,5 @@ AmpFitText['passthrough'] = true;
 AmpFitText['layoutSizeDefined'] = true;
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpFitText);
+  AMP.registerElement(TAG, AmpFitText, CSS);
 });

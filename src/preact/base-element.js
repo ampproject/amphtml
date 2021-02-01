@@ -21,7 +21,7 @@ import {CanPlay, CanRender, LoadingProp} from '../contextprops';
 import {Deferred} from '../utils/promise';
 import {Layout, isLayoutSizeDefined} from '../layout';
 import {Loading} from '../loading';
-import {MediaQueryProps} from './media-query-props';
+import {MediaQueryProps} from '../utils/media-query-props';
 import {Slot, createSlot} from './slot';
 import {WithAmpContext} from './context';
 import {
@@ -513,7 +513,10 @@ export class PreactBaseElement extends AMP.BaseElement {
           this.hydrationPending_ = true;
         } else {
           // Create new shadow root.
-          shadowRoot = this.element.attachShadow({mode: 'open'});
+          shadowRoot = this.element.attachShadow({
+            mode: 'open',
+            delegatesFocus: Ctor['delegatesFocus'],
+          });
 
           // The pre-constructed shadow root is required to have the stylesheet
           // inline. Thus, only the new shadow roots share the stylesheets.
@@ -863,6 +866,14 @@ PreactBaseElement['shadowCss'] = null;
 PreactBaseElement['detached'] = false;
 
 /**
+ * This enables the 'delegatesFocus' option when creating the shadow DOM for
+ * this component.  A key feature of 'delegatesFocus' set to true is that
+ * when elements within the shadow DOM gain focus, the focus is also applied
+ * to the host element.
+ */
+PreactBaseElement['delegatesFocus'] = false;
+
+/**
  * Provides a mapping of Preact prop to AmpElement DOM attributes.
  *
  * @protected {!Object<string, !AmpElementPropDef>}
@@ -1033,7 +1044,7 @@ function parsePropDefs(props, propDefs, element, mediaQueryProps) {
     if (def.attr) {
       value = element.getAttribute(def.attr);
       if (def.media && value != null) {
-        value = mediaQueryProps.resolve(String(value));
+        value = mediaQueryProps.resolveListQuery(String(value));
       }
     } else if (def.parseAttrs) {
       devAssert(def.attrs);

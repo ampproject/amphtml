@@ -58,8 +58,7 @@ export default class GltfViewer {
     this.ampPlay_ = true;
 
     /** @private */
-    this.ampInViewport_ =
-      options['initialIntersection']['intersectionRatio'] > 0;
+    this.ampInViewport_ = false;
 
     /** @private */
     this.setSize_ = this.setupSize_();

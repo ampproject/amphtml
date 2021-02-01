@@ -18,7 +18,6 @@
 const fs = require('fs');
 const globby = require('globby');
 const listImportsExports = require('list-imports-exports');
-const log = require('fancy-log');
 const minimatch = require('minimatch');
 const path = require('path');
 const testConfig = require('../../test-configs/config');
@@ -27,6 +26,7 @@ const {extensions, maybeInitializeExtensions} = require('../extension-helpers');
 const {gitDiffNameOnlyMaster} = require('../../common/git');
 const {green, cyan} = require('ansi-colors');
 const {isCiBuild} = require('../../common/ci');
+const {log, logLocalDev} = require('../../common/logging');
 const {reportTestSkipped} = require('../report-test-status');
 
 const LARGE_REFACTOR_THRESHOLD = 50;
@@ -206,9 +206,12 @@ function unitTestsToRun() {
 
   filesChanged.forEach((file) => {
     if (!fs.existsSync(file)) {
-      if (!isCiBuild()) {
-        log(green('INFO:'), 'Skipping', cyan(file), 'because it was deleted');
-      }
+      logLocalDev(
+        green('INFO:'),
+        'Skipping',
+        cyan(file),
+        'because it was deleted'
+      );
     } else if (isUnitTest(file)) {
       testsToRun.push(file);
     } else if (path.extname(file) == '.js') {
