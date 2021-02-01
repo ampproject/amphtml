@@ -1286,7 +1286,9 @@ describes.realWin(
             },
           });
           return allowConsoleError(() => {
-            return expect(ampSelector.buildInternal()).to.eventually.be.rejectedWith(
+            return expect(
+              ampSelector.buildInternal()
+            ).to.eventually.be.rejectedWith(
               /not supported for multiple selection amp-selector​​​/
             );
           });
