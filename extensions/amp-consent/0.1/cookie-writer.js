@@ -144,10 +144,10 @@ export class CookieWriter {
       return BASE_CID_MAX_AGE_MILLIS;
     }
 
-    const cookieMaxAgeNumber = Number(inputConfig['cookieMaxAge']);
+    const cookieMaxAge = Number(inputConfig['cookieMaxAge']);
 
     // 0 is a special case which we allow
-    if (!cookieMaxAgeNumber && cookieMaxAgeNumber !== 0) {
+    if (!cookieMaxAge && cookieMaxAge !== 0) {
       user().error(
         TAG,
         'invalid cookieMaxAge %s, falling back to default value (1 year)',
@@ -156,7 +156,7 @@ export class CookieWriter {
       return BASE_CID_MAX_AGE_MILLIS;
     }
 
-    if (cookieMaxAgeNumber <= 0) {
+    if (cookieMaxAge <= 0) {
       user().warn(
         TAG,
         'cookieMaxAge %s less than or equal to 0, cookie will immediately expire',
@@ -165,7 +165,7 @@ export class CookieWriter {
     }
 
     // convert cookieMaxAge (sec) to milliseconds
-    return cookieMaxAgeNumber * 1000;
+    return cookieMaxAge * 1000;
   }
 
   /**

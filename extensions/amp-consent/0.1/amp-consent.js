@@ -221,17 +221,15 @@ export class AmpConsent extends AMP.BaseElement {
       this.notificationUiManager_ = /** @type {!NotificationUiManager} */ (manager);
     });
 
-    const configRewritterPromise = new CookieWriter(
-      this.win,
-      this.element,
-      this.consentConfig_
-    ).write();
+    const cookieWriterPromise = this.consentConfig_['cookies']
+      ? new CookieWriter(this.win, this.element, this.consentConfig_).write()
+      : Promise.resolve();
 
     Promise.all([
       consentStateManagerPromise,
       notificationUiManagerPromise,
       consentPolicyManagerPromise,
-      configRewritterPromise,
+      cookieWriterPromise,
     ]).then(() => {
       this.init_();
     });
