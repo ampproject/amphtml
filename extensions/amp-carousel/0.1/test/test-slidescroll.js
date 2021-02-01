@@ -86,7 +86,7 @@ describes.realWin(
       if (opt_attachToDom) {
         doc.body.appendChild(ampSlideScroll);
         return ampSlideScroll
-          .build()
+          .buildInternal()
           .then(() => {
             ampSlideScroll.updateLayoutBox({
               top: 0,
@@ -1267,7 +1267,7 @@ describes.realWin(
         // Layout happens asynchronously after attaching to DOM, so we can
         // test pre-layoutCallback logic now.
         doc.body.appendChild(ampSlideScroll);
-        await ampSlideScroll.build();
+        await ampSlideScroll.buildInternal();
 
         const impl = await ampSlideScroll.getImpl();
         const showSlideSpy = env.sandbox.spy(impl, 'showSlide_');
@@ -1291,7 +1291,7 @@ describes.realWin(
       it('should NOT call showSlide_ before re-layout', async () => {
         const ampSlideScroll = await getAmpSlideScroll(false, 5, false);
         doc.body.appendChild(ampSlideScroll);
-        await ampSlideScroll.build();
+        await ampSlideScroll.buildInternal();
 
         const impl = await ampSlideScroll.getImpl();
         const showSlideSpy = env.sandbox.spy(impl, 'showSlide_');

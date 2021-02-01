@@ -40,7 +40,7 @@ describes.realWin(
       ampTwitter.setAttribute('width', '111');
       ampTwitter.setAttribute('height', '222');
       doc.body.appendChild(ampTwitter);
-      await ampTwitter.build();
+      await ampTwitter.buildInternal();
       await ampTwitter.layoutCallback();
       return ampTwitter;
     }

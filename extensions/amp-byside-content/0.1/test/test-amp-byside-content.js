@@ -51,7 +51,7 @@ describes.realWin(
 
       doc.body.appendChild(elem);
       return elem
-        .build()
+        .buildInternal()
         .then(() => elem.getImpl())
         .then((impl) => {
           urlMock.expandUrlAsync

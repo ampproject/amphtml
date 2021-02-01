@@ -54,7 +54,7 @@ describes.realWin(
         });
         ampStickyAd.appendChild(ampAd);
         win.document.body.appendChild(ampStickyAd);
-        ampStickyAd.build();
+        ampStickyAd.buildInternal();
         impl = await ampStickyAd.getImpl(false);
         addToFixedLayerPromise = Promise.resolve();
         addToFixedLayerStub = env.sandbox
@@ -348,7 +348,7 @@ describes.realWin(
       });
       ampStickyAd.appendChild(ampAd);
       win.document.body.appendChild(ampStickyAd);
-      ampStickyAd.build();
+      ampStickyAd.buildInternal();
       impl = await ampStickyAd.getImpl(false);
       addToFixedLayerPromise = Promise.resolve();
       env.sandbox

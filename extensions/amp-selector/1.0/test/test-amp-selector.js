@@ -51,7 +51,7 @@ describes.realWin(
         </amp-selector>
       `;
       win.document.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
     });
 
     it('should render with options', () => {
@@ -352,7 +352,7 @@ describes.realWin(
             </amp-selector>
           `;
           win.document.body.appendChild(element);
-          await element.build();
+          await element.buildInternal();
 
           const options = element.querySelectorAll('[option]');
 
