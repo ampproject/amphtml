@@ -43,9 +43,6 @@ export class Linkmate {
     /** @private {string} */
     this.linkAttribute_ = linkmateOptions.linkAttribute;
 
-    /** @private {!Document|!ShadowRoot} */
-    this.rootNode_ = this.ampDoc_.getRootNode();
-
     /** @private {?Array<!HTMLElement>} */
     this.anchorList_ = null;
 
@@ -165,7 +162,7 @@ export class Linkmate {
    */
   getEditInfo_() {
     return dict({
-      'name': document.getElementsByTagName("title")[0].text || null,
+      'name': document.getElementsByTagName('title')[0].text || null,
       'url': window.location.href,
     });
   }
