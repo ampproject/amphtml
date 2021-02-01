@@ -88,8 +88,8 @@ function inferTestType() {
 }
 
 async function postReport(type, action) {
-  // TODO(rsimha): Remove `isTravisBuild()` condition once Travis is shut off.
-  if (type && isPullRequestBuild() && isTravisBuild()) {
+  // TODO(rsimha): Remove `!isCircleciBuild()` condition once Travis is shut off.
+  if (type && isPullRequestBuild() && !isCircleciBuild()) {
     const commitHash = gitCommitHash();
 
     try {
