@@ -17,8 +17,8 @@
 describes.endtoend(
   'amp-lightbox with amp-autocomplete',
   {
-    testUrl:
-      'http://localhost:8000/test/fixtures/e2e/amp-lightbox/amp-lightbox-autocomplete.html',
+    version: '0.1',
+    fixture: 'amp-lightbox/amp-lightbox-autocomplete.html',
     environments: 'ampdoc-preset',
   },
   async (env) => {

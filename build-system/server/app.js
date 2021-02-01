@@ -951,6 +951,7 @@ app.get(
     const mode = SERVE_MODE;
     const inabox = req.query['inabox'];
     const stream = Number(req.query['stream']);
+    const componentVersion = req.query['componentVersion'];
     const urlPrefix = getUrlPrefix(req);
     fs.promises
       .readFile(pc.cwd() + filePath, 'utf8')
@@ -977,6 +978,9 @@ app.get(
             );
         }
         file = file.replace(/__TEST_SERVER_PORT__/g, TEST_SERVER_PORT);
+        if (componentVersion) {
+          file = file.replace(/-latest.js/g, `-${componentVersion}.js`);
+        }
 
         if (inabox && req.headers.origin) {
           // Allow CORS requests for A4A.

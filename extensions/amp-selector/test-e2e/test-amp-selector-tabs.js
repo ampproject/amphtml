@@ -17,10 +17,17 @@
 describes.endtoend(
   'amp-selector',
   {
-    testUrl:
-      'http://localhost:8000/test/fixtures/e2e/amp-selector/1.0/amp-selector-tabs.html',
-    environments: ['single', 'viewer-demo'],
-    experiments: ['bento-selector'],
+    fixture: 'amp-selector/amp-selector-tabs.html',
+
+    versions: {
+      '0.1': {
+        environments: ['single', 'viewer-demo'],
+      },
+      '1.0': {
+        environments: ['single', 'viewer-demo'],
+        experiments: ['bento-selector'],
+      },
+    },
   },
   async (env) => {
     let controller;
