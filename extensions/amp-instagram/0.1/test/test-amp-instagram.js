@@ -126,57 +126,14 @@ describes.realWin(
       testImage(ins.querySelector('img'));
     });
 
-    it('only sets src on placeholder after prerender', async () => {
-      let becomeVisible;
-      const visible = new Promise((resolve) => (becomeVisible = resolve));
-      const ins = await getIns(
-        'fBwFP',
-        undefined,
-        undefined,
-        undefined,
-        visible
-      );
-      expect(ins.querySelector('img').getAttribute('src')).to.be.null;
-      becomeVisible();
-      await visible;
-      expect(ins.querySelector('img').getAttribute('src')).to.equal(
-        'https://www.instagram.com/p/fBwFP/media/?size=l'
-      );
-    });
-
-    it('builds a placeholder image without inserting iframe', async () => {
-      return getIns('fBwFP', true, (ins) => {
-        const placeholder = ins.querySelector('[placeholder]');
-        const iframe = ins.querySelector('iframe');
-        expect(iframe).to.be.null;
-        expect(placeholder).to.not.have.display('');
-        testImage(placeholder.querySelector('img'));
-      }).then((ins) => {
-        const placeholder = ins.querySelector('[placeholder]');
-        const iframe = ins.querySelector('iframe');
-        ins.getVsync = () => {
-          return {
-            mutate: (fn) => fn(),
-          };
-        };
-        testIframe(iframe);
-        testImage(placeholder.querySelector('img'));
-        ins.implementation_.iframePromise_.then(() => {
-          expect(placeholder).to.be.have.display('none');
-        });
-      });
-    });
-
     it('removes iframe after unlayoutCallback', async () => {
       const ins = await getIns('fBwFP');
-      const placeholder = ins.querySelector('[placeholder]');
       testIframe(ins.querySelector('iframe'));
       const obj = ins.implementation_;
       obj.unlayoutCallback();
       expect(ins.querySelector('iframe')).to.be.null;
       expect(obj.iframe_).to.be.null;
       expect(obj.iframePromise_).to.be.null;
-      expect(placeholder).to.not.have.display('none');
     });
 
     it('renders responsively', async () => {
