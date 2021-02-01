@@ -79,9 +79,9 @@ function runUnitTestsForPlatform() {
 
 function pushBuildWorkflow() {
   timedExecOrDie('gulp update-packages');
+  runUnitTestsForPlatform();
   timedExecOrDie('gulp dist --fortesting');
   runIntegrationTestsForPlatform();
-  runUnitTestsForPlatform();
 }
 
 async function prBuildWorkflow() {
@@ -102,12 +102,12 @@ async function prBuildWorkflow() {
     return;
   }
   timedExecOrDie('gulp update-packages');
+  if (buildTargetsInclude(Targets.RUNTIME, Targets.UNIT_TEST)) {
+    runUnitTestsForPlatform();
+  }
   if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
     timedExecOrDie('gulp dist --fortesting');
     runIntegrationTestsForPlatform();
-  }
-  if (buildTargetsInclude(Targets.RUNTIME, Targets.UNIT_TEST)) {
-    runUnitTestsForPlatform();
   }
 }
 
