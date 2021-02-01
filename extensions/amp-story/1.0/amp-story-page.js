@@ -1255,9 +1255,26 @@ export class AmpStoryPage extends AMP.BaseElement {
       registerAllPromise.then(() => this.preloadAllMedia_());
     }
 
-    if (distance === 0) {
-      const allLinks = this.element.querySelectorAll('a');
+    this.displayTapHints(distance);
+  }
 
+  buildTooltip() {
+    const html = htmlFor(this.win.document);
+    return html`
+      <div class="i-amphtml-story-tooltip-wrapper">
+        <a class="i-amphtml-story-tooltip" target="_blank" role="tooltip">
+          <div
+            class="i-amphtml-tooltip-action-icon i-amphtml-tooltip-action-icon-launch"
+          ></div>
+          <div class="i-amphtml-story-tooltip-arrow" ref="arrow"></div>
+        </a>
+      </div>
+    `;
+  }
+
+  displayTapHints(distance) {
+    const allLinks = this.element.querySelectorAll('a');
+    if (distance === 0) {
       allLinks.forEach((link) => {
         const left = link.offsetLeft;
         const width = link.offsetWidth;
@@ -1267,17 +1284,27 @@ export class AmpStoryPage extends AMP.BaseElement {
         const posX = left + width / 2;
         const posY = top + height / 2;
 
-        const tapHint = document.createElement('div');
-        tapHint.classList.add('tap-hint');
+        let tapHint;
+
+        if (this.element.hasAttribute('tooltip-page')) {
+          tapHint = this.buildTooltip();
+        } else {
+          tapHint = document.createElement('div');
+          tapHint.classList.add('tap-hint');
+        }
         this.element.appendChild(tapHint);
         setImportantStyles(tapHint, {
           left: `${posX}px`,
           top: `${posY}px`,
         });
+
+        setTimeout(() => {
+          tapHint.classList.add('fade-out');
+        }, 1200);
       });
     } else {
-      const tapHints = this.element.querySelectorAll('.tap-hint');
-      tapHints.forEach((tapHint) => tapHint.remove());
+      // const tapHints = this.win.document.querySelectorAll('.tap-hint');
+      // tapHints.forEach((tapHint) => tapHint.remove());
     }
   }
 
