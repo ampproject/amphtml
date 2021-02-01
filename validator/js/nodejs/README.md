@@ -51,9 +51,10 @@ line 1, col 0: The parent tag of tag 'html ⚡ for top-level html' is '$root', b
 
 As expected, this emits errors because the provided string in the example, `<html>Hello, world.</html>` is not a valid AMP HTML document.
 
-The method `validateString` also takes an `htmlFormat` parameter which would allow applying the validator rules for `AMP4ADS` or `AMP4EMAIL` as well:
+The method `validateString` also takes a `htmlFormat` parameter which
+would allow applying the validator rules for `AMP4ADS` or `AMP4EMAIL` as well:
 
-```
+```js
 /**
  * Validates the provided inputString; the htmlFormat can be 'AMP' or
  * 'AMP4ADS'; it defaults to 'AMP' if not specified.
@@ -62,8 +63,8 @@ The method `validateString` also takes an `htmlFormat` parameter which would all
  * @return {!ValidationResult}
  * @export
  */
- Validator.prototype.validateString = function(inputString, htmlFormat)
- ```
+Validator.prototype.validateString = function(inputString, htmlFormat)
+```
  
 ## Release Notes
 
