@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import * as TcfApiCommands from '../tcf-api-commands';
-import {handleTcfCommand} from '../tcf-api-commands';
+import {TcfApiCommandManager} from '../tcf-api-commands';
 import {macroTask} from '../../../../testing/yield';
 import {mockWindowInterface} from '../../../../testing/test-helper';
 import {user} from '../../../../src/log';
@@ -33,8 +32,11 @@ describes.realWin(
       let mockWin;
       let mockPolicyManager;
       let mockMetadata;
-      let payload;
+      let data;
       let msg;
+      let tcfApiCommandManager;
+      let mockTcString;
+      let mockSharedData;
 
       beforeEach(() => {
         mockWin = mockWindowInterface(window.sandbox);
@@ -44,16 +46,23 @@ describes.realWin(
           getConsentMetadataInfo: (opt_policy) => {
             return Promise.resolve(mockMetadata);
           },
+          getConsentStringInfo: (opt_policy) => {
+            return Promise.resolve(mockTcString);
+          },
+          getMergedSharedData: (opt_policy) => {
+            return Promise.resolve(mockSharedData);
+          },
         };
       });
 
       describe('isValidTcfApiCall', () => {
         it('validates __tcfapiCall post message', async () => {
+          tcfApiCommandManager = new TcfApiCommandManager(mockPolicyManager);
           msg = {};
           const errorSpy = env.sandbox.stub(user(), 'error');
           msg.__tcfapiCall = 'bad';
-          expect(TcfApiCommands.isValidTcfApiCall(msg.__tcfapiCall)).to.be
-            .false;
+          expect(tcfApiCommandManager.isValidTcfApiCall_(msg.__tcfapiCall)).to
+            .be.false;
           expect(errorSpy.args[0][1]).to.match(
             /"tcfapiCall" is not an object: bad/
           );
@@ -62,8 +71,8 @@ describes.realWin(
           msg.__tcfapiCall = {
             'command': 'bad',
           };
-          expect(TcfApiCommands.isValidTcfApiCall(msg.__tcfapiCall)).to.be
-            .false;
+          expect(tcfApiCommandManager.isValidTcfApiCall_(msg.__tcfapiCall)).to
+            .be.false;
           expect(errorSpy.args[0][1]).to.match(
             /Unsupported command found in "tcfapiCall": bad/
           );
@@ -71,8 +80,8 @@ describes.realWin(
 
           msg.__tcfapiCall.command = 'ping';
           msg.__tcfapiCall.parameter = [1, 2, 3];
-          expect(TcfApiCommands.isValidTcfApiCall(msg.__tcfapiCall)).to.be
-            .false;
+          expect(tcfApiCommandManager.isValidTcfApiCall_(msg.__tcfapiCall)).to
+            .be.false;
           expect(errorSpy.args[0][1]).to.match(
             /Unsupported parameter found in "tcfapiCall": [1,2,3]/
           );
@@ -80,30 +89,77 @@ describes.realWin(
 
           msg.__tcfapiCall.parameter = undefined;
           msg.__tcfapiCall.version = 1;
-          expect(TcfApiCommands.isValidTcfApiCall(msg.__tcfapiCall)).to.be
-            .false;
+          expect(tcfApiCommandManager.isValidTcfApiCall_(msg.__tcfapiCall)).to
+            .be.false;
           expect(errorSpy.args[0][1]).to.match(
             /Found incorrect version in "tcfapiCall": 1/
           );
           errorSpy.resetHistory();
 
           msg.__tcfapiCall.version = 2;
-          expect(TcfApiCommands.isValidTcfApiCall(msg.__tcfapiCall)).to.be.true;
+          expect(tcfApiCommandManager.isValidTcfApiCall_(msg.__tcfapiCall)).to
+            .be.true;
           expect(errorSpy).to.not.be.called;
         });
       });
 
       describe('handlePingEvent', () => {
+        it('creates a minimal ping object', async () => {
+          mockMetadata = {
+            gdprApplies: false,
+          };
+          tcfApiCommandManager = new TcfApiCommandManager(mockPolicyManager);
+          expect(
+            tcfApiCommandManager.getMinimalPingReturnForTesting(mockMetadata)
+          ).to.deep.equals({
+            gdprApplies: false,
+            cmpLoaded: true,
+            cmpStatus: 'loaded',
+            tcfPolicyVersion: 2,
+          });
+        });
+
+        it('creates a minimal ping object with no gdprApplies', async () => {
+          mockMetadata = {
+            gdprApplies: undefined,
+          };
+          tcfApiCommandManager = new TcfApiCommandManager(mockPolicyManager);
+          expect(
+            tcfApiCommandManager.getMinimalPingReturnForTesting(mockMetadata)
+          ).to.deep.equals({
+            gdprApplies: undefined,
+            cmpLoaded: true,
+            cmpStatus: 'loaded',
+            tcfPolicyVersion: 2,
+          });
+        });
+
+        it('creates a minimal ping object with no metadata', async () => {
+          tcfApiCommandManager = new TcfApiCommandManager(mockPolicyManager);
+          expect(
+            tcfApiCommandManager.getMinimalPingReturnForTesting()
+          ).to.deep.equals({
+            gdprApplies: undefined,
+            cmpLoaded: true,
+            cmpStatus: 'loaded',
+            tcfPolicyVersion: 2,
+          });
+        });
+
         it('sends a minimal PingReturn via PostMessage', async () => {
           const callId = 'pingCallId';
-          payload = {
-            'command': 'ping',
-            callId,
+          data = {
+            __tcfapiCall: {
+              'command': 'ping',
+              callId,
+              version: 2,
+            },
           };
           mockMetadata = {
             gdprApplies: true,
           };
-          handleTcfCommand(payload, mockWin, mockPolicyManager);
+          tcfApiCommandManager = new TcfApiCommandManager(mockPolicyManager);
+          tcfApiCommandManager.handleTcfCommand(data, mockWin);
           await macroTask();
 
           // No 'success' sent for ping
@@ -113,9 +169,102 @@ describes.realWin(
               returnValue: {
                 cmpLoaded: true,
                 gdprApplies: mockMetadata.gdprApplies,
+                cmpStatus: 'loaded',
+                tcfPolicyVersion: 2,
               },
               callId,
               success: undefined,
+            },
+          });
+        });
+      });
+
+      describe('handleGetTcData', () => {
+        it('creates a minimal TcData object', async () => {
+          mockMetadata = {
+            gdprApplies: false,
+            additionalConsent: 'xyz987',
+            purposeOne: false,
+          };
+
+          tcfApiCommandManager = new TcfApiCommandManager(mockPolicyManager);
+          expect(
+            tcfApiCommandManager.getMinimalTcDataForTesting(
+              mockMetadata,
+              mockSharedData,
+              mockTcString
+            )
+          ).to.deep.equals({
+            tcfPolicyVersion: 2,
+            gdprApplies: false,
+            tcString: mockTcString,
+            listenerId: undefined,
+            cmpStatus: 'loaded',
+            eventStatus: undefined,
+            purposeOneTreatment: false,
+            additionalData: {'additionalConsent': 'xyz987'},
+          });
+
+          mockTcString = 'abc123';
+          mockSharedData = {'data': 'data1'};
+
+          expect(
+            tcfApiCommandManager.getMinimalTcDataForTesting(
+              mockMetadata,
+              mockSharedData,
+              mockTcString
+            )
+          ).to.deep.equals({
+            tcfPolicyVersion: 2,
+            gdprApplies: false,
+            tcString: mockTcString,
+            listenerId: undefined,
+            cmpStatus: 'loaded',
+            eventStatus: undefined,
+            purposeOneTreatment: false,
+            additionalData: {'data': 'data1', 'additionalConsent': 'xyz987'},
+          });
+        });
+
+        it('sends a minimal TcData via PostMessage', async () => {
+          const callId = 'getTcDataId';
+          data = {
+            __tcfapiCall: {
+              'command': 'getTCData',
+              callId,
+              version: 2,
+            },
+          };
+          mockMetadata = {
+            gdprApplies: false,
+            additionalConsent: 'xyz987',
+            purposeOne: false,
+          };
+          mockTcString = 'abc123';
+          mockSharedData = {'data': 'data1'};
+          tcfApiCommandManager = new TcfApiCommandManager(mockPolicyManager);
+          tcfApiCommandManager.handleTcfCommand(data, mockWin);
+          await macroTask();
+
+          const postMessageArgs = mockWin.postMessage.args[0];
+          console.log(postMessageArgs[0]);
+          expect(postMessageArgs[0]).to.deep.equals({
+            __tcfapiReturn: {
+              returnValue: {
+                tcfPolicyVersion: 2,
+                gdprApplies: mockMetadata.gdprApplies,
+                tcString: mockTcString,
+                listenerId: undefined,
+                cmpStatus: 'loaded',
+                eventStatus: undefined,
+                purposeOneTreatment: mockMetadata.purposeOne,
+                additionalData: {
+                  'data': 'data1',
+                  'additionalConsent': mockMetadata.additionalConsent,
+                },
+              },
+              callId,
+              success: true,
             },
           });
         });
