@@ -1708,7 +1708,7 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
     });
   });
 
-  it('remove should remove all of its resources tasks', () => {
+  it("remove should remove all of a resource's tasks", () => {
     const states = [
       ResourceState.NOT_LAID_OUT,
       ResourceState.READY_FOR_LAYOUT,
