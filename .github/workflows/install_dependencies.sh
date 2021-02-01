@@ -14,31 +14,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the license.
 #
-# Script used by AMP's CI builds to install project dependencies on CircleCI.
+# Script used by AMP's CI builds to install project dependencies on GH Actions.
 
 set -e
 
 GREEN() { echo -e "\033[0;32m$1\033[0m"; }
 
-echo $(GREEN "Installing NVM...")
-curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
+if [[ "$OSTYPE" == "linux-gnu"* || "$OSTYPE" == "darwin"* ]]; then
+  echo $(GREEN "Updating npm prefix...")
+  npm config set prefix "$HOME/.npm"
 
-echo $(GREEN "Setting up NVM environment...")
-export NVM_DIR="/opt/circleci/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-
-echo $(GREEN "Installing Node LTS...")
-nvm install 'lts/*'
+  echo $(GREEN "Updating PATH...")
+  echo "export PATH=$HOME/.npm/bin:$PATH" >> $GITHUB_ENV && source $GITHUB_ENV # For now
+  echo "$HOME/.npm/bin" >> $GITHUB_PATH # For later
+fi
 
 echo $(GREEN "Installing gulp-cli...")
 npm install --global gulp-cli
 
 echo $(GREEN "Installing dependencies...")
 npm ci
-
-echo $(GREEN "Setting up environment...")
-NPM_BIN_DIR="`npm config get prefix`/bin"
-(set -x && echo "export PATH=$NPM_BIN_DIR:$PATH" >> $BASH_ENV)
 
 echo $(GREEN "Successfully installed all project dependencies.")
