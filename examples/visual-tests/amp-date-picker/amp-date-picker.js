@@ -34,7 +34,7 @@ module.exports = {
       '.i-amphtml-date-picker-container button.DayPickerNavigation_button:nth-child(1)'
     );
     await verifySelectorsVisible(page, name, [
-      '.i-amphtml-date-picker-container button[aria-label=Thursday\\,\\ November\\ 1\\,\\ 2018]',
+      '.i-amphtml-date-picker-container button[aria-label="Thursday, November 1, 2018"]',
     ]);
   },
   'select next month': async (page, name) => {
@@ -42,7 +42,7 @@ module.exports = {
       '.i-amphtml-date-picker-container button.DayPickerNavigation_button:nth-child(2)'
     );
     await verifySelectorsVisible(page, name, [
-      '.i-amphtml-date-picker-container button[aria-label=Tuesday\\,\\ January\\ 1\\,\\ 2019]',
+      '.i-amphtml-date-picker-container button[aria-label="Tuesday, January 1, 2019"]',
     ]);
   },
 };
