@@ -203,7 +203,7 @@ export class AmpSmartlinks extends AMP.BaseElement {
       'organization_type': 'publisher',
       'user': {
         'page_session_uuid': this.generateUUID_(),
-        'source_url': this.ampDoc_.getUrl(),
+        'source_url': window.location.href,
         'previous_url': this.referrer_,
         'user_agent': this.ampDoc_.win.navigator.userAgent,
       },
