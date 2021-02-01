@@ -34,112 +34,127 @@ const TCF_POLICY_VERSION = 2;
 const CMP_STATUS = 'loaded';
 const CMP_LOADED = true;
 
-/**
- * @param {!Object} payload
- * @param {!Window} win
- * @param {!ConsentPolicyManager} policyManager
- */
-export function handleTcfCommand(payload, win, policyManager) {
-  const {command} = payload;
+export class TcfApiCommandManager {
+  /**
+   * Creates an instance of TcfApiCommandManager.
+   * @param {!./consent-policy-manager.ConsentPolicyManager} policyManager
+   */
+  constructor(policyManager) {
+    this.policyManager_ = policyManager;
+  }
 
-  switch (command) {
-    case TCF_POST_MESSAGE_API_COMMANDS.GET_TC_DATA:
-    case TCF_POST_MESSAGE_API_COMMANDS.PING:
-      handlePingEvent(payload, win, policyManager);
-      break;
-    case TCF_POST_MESSAGE_API_COMMANDS.ADD_EVENT_LISTENER:
-    case TCF_POST_MESSAGE_API_COMMANDS.REMOVE_EVENT_LISTENER:
-    default:
+  /**
+   * @param {!Object} data
+   * @param {!Window} win
+   */
+  handleTcfCommand(data, win) {
+    if (!this.isValidTcfApiCall_(data['__tcfapiCall'])) {
       return;
-  }
-}
+    }
 
-/**
- * Create minimal PingReturn object. Send to original iframe
- * once object has been filled.
- * @param {!Object} payload
- * @param {!Window} win
- * @param {!ConsentPolicyManager} policyManager
- */
-function handlePingEvent(payload, win, policyManager) {
-  policyManager.getConsentMetadataInfo('default').then((metadata) => {
-    const returnValue = getMinimalPingReturn(metadata);
-    const {callId} = payload;
-
-    sendTcfApiReturn(win, returnValue, callId);
-  });
-}
-
-/**
- * Create minimal PingReturn object.
- * @param {?Object} metadata
- * @return {!MinimalPingReturn}
- */
-function getMinimalPingReturn(metadata) {
-  const gdprApplies = metadata ? metadata['gdprApplies'] : undefined;
-  return {
-    gdprApplies,
-    cmpLoaded: CMP_LOADED,
-    cmpStatus: CMP_STATUS,
-    tcfPolicyVersion: TCF_POLICY_VERSION,
-  };
-}
-
-/**
- *
- * @param {!Window} win
- * @param {!JsonObject} returnValue
- * @param {string} callId
- * @param {boolean=} success
- */
-function sendTcfApiReturn(win, returnValue, callId, success) {
-  if (!win) {
-    return;
+    const payload = data['__tcfapiCall'];
+    const {command} = payload;
+    switch (command) {
+      case TCF_POST_MESSAGE_API_COMMANDS.PING:
+        this.handlePingEvent_(payload, win);
+        break;
+      case TCF_POST_MESSAGE_API_COMMANDS.GET_TC_DATA:
+      case TCF_POST_MESSAGE_API_COMMANDS.ADD_EVENT_LISTENER:
+      case TCF_POST_MESSAGE_API_COMMANDS.REMOVE_EVENT_LISTENER:
+      default:
+        return;
+    }
   }
 
-  const __tcfapiReturn = {returnValue, callId, success};
-  win./*OK*/ postMessage(
-    /** @type {!JsonObject} */ ({
-      __tcfapiReturn,
-    }),
-    '*'
-  );
-}
+  /**
+   * Create minimal PingReturn object. Send to original iframe
+   * once object has been filled.
+   * @param {!Object} payload
+   * @param {!Window} win
+   */
+  handlePingEvent_(payload, win) {
+    this.policyManager_.getConsentMetadataInfo('default').then((metadata) => {
+      const returnValue = this.getMinimalPingReturn_(metadata);
+      const {callId} = payload;
 
-/**
- * Checks if the payload from the `tcfapiCall` is valid.
- * @param {JsonObject} payload
- * @return {boolean}
- */
-export function isValidTcfApiCall(payload) {
-  if (!isObject(payload)) {
-    user().error(TAG, `"tcfapiCall" is not an object: ${payload}`);
-    return false;
+      this.sendTcfApiReturn_(win, returnValue, callId);
+    });
   }
-  const {command, parameter, version} = payload;
-  if (!isEnumValue(TCF_POST_MESSAGE_API_COMMANDS, command)) {
-    user().error(TAG, `Unsupported command found in "tcfapiCall": ${command}`);
-    return false;
+
+  /**
+   * Create minimal PingReturn object.
+   * @param {?Object} metadata
+   * @return {!MinimalPingReturn}
+   */
+  getMinimalPingReturn_(metadata) {
+    const gdprApplies = metadata ? metadata['gdprApplies'] : undefined;
+    return {
+      gdprApplies,
+      cmpLoaded: CMP_LOADED,
+      cmpStatus: CMP_STATUS,
+      tcfPolicyVersion: TCF_POLICY_VERSION,
+    };
   }
-  if (parameter !== undefined) {
-    user().error(
-      TAG,
-      `Unsupported parameter found in "tcfapiCall": ${parameter}`
+
+  /**
+   *
+   * @param {!Window} win
+   * @param {!JsonObject} returnValue
+   * @param {string} callId
+   * @param {boolean=} success
+   */
+  sendTcfApiReturn_(win, returnValue, callId, success) {
+    if (!win) {
+      return;
+    }
+
+    const __tcfapiReturn = {returnValue, callId, success};
+    win./*OK*/ postMessage(
+      /** @type {!JsonObject} */ ({
+        __tcfapiReturn,
+      }),
+      '*'
     );
-    return false;
   }
-  if (version != '2') {
-    user().error(TAG, `Found incorrect version in "tcfapiCall": ${version}`);
-    return false;
-  }
-  return true;
-}
 
-/**
- * @param {?Object} metadata
- * @return {!MinimalPingReturn}
- * @visibleForTesting
- */
-export function getMinimalPingReturnForTesting(metadata) {
-  return getMinimalPingReturn(metadata);
+  /**
+   * Checks if the payload from the `tcfapiCall` is valid.
+   * @param {JsonObject} payload
+   * @return {boolean}
+   */
+  isValidTcfApiCall_(payload) {
+    if (!isObject(payload)) {
+      user().error(TAG, `"tcfapiCall" is not an object: ${payload}`);
+      return false;
+    }
+    const {command, parameter, version} = payload;
+    if (!isEnumValue(TCF_POST_MESSAGE_API_COMMANDS, command)) {
+      user().error(
+        TAG,
+        `Unsupported command found in "tcfapiCall": ${command}`
+      );
+      return false;
+    }
+    if (parameter !== undefined) {
+      user().error(
+        TAG,
+        `Unsupported parameter found in "tcfapiCall": ${parameter}`
+      );
+      return false;
+    }
+    if (version != '2') {
+      user().error(TAG, `Found incorrect version in "tcfapiCall": ${version}`);
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * @param {?Object} metadata
+   * @return {!MinimalPingReturn}
+   * @visibleForTesting
+   */
+  getMinimalPingReturnForTesting(metadata) {
+    return this.getMinimalPingReturn_(metadata);
+  }
 }

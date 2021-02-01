@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import * as TcfApiCommands from '../tcf-api-commands';
-import {handleTcfCommand} from '../tcf-api-commands';
+import {TcfApiCommandManager} from '../tcf-api-commands';
 import {macroTask} from '../../../../testing/yield';
 import {mockWindowInterface} from '../../../../testing/test-helper';
 import {user} from '../../../../src/log';
@@ -33,8 +32,9 @@ describes.realWin(
       let mockWin;
       let mockPolicyManager;
       let mockMetadata;
-      let payload;
+      let data;
       let msg;
+      let tcfApiCommandManager;
 
       beforeEach(() => {
         mockWin = mockWindowInterface(window.sandbox);
@@ -49,11 +49,12 @@ describes.realWin(
 
       describe('isValidTcfApiCall', () => {
         it('validates __tcfapiCall post message', async () => {
+          tcfApiCommandManager = new TcfApiCommandManager(mockPolicyManager);
           msg = {};
           const errorSpy = env.sandbox.stub(user(), 'error');
           msg.__tcfapiCall = 'bad';
-          expect(TcfApiCommands.isValidTcfApiCall(msg.__tcfapiCall)).to.be
-            .false;
+          expect(tcfApiCommandManager.isValidTcfApiCall_(msg.__tcfapiCall)).to
+            .be.false;
           expect(errorSpy.args[0][1]).to.match(
             /"tcfapiCall" is not an object: bad/
           );
@@ -62,8 +63,8 @@ describes.realWin(
           msg.__tcfapiCall = {
             'command': 'bad',
           };
-          expect(TcfApiCommands.isValidTcfApiCall(msg.__tcfapiCall)).to.be
-            .false;
+          expect(tcfApiCommandManager.isValidTcfApiCall_(msg.__tcfapiCall)).to
+            .be.false;
           expect(errorSpy.args[0][1]).to.match(
             /Unsupported command found in "tcfapiCall": bad/
           );
@@ -71,8 +72,8 @@ describes.realWin(
 
           msg.__tcfapiCall.command = 'ping';
           msg.__tcfapiCall.parameter = [1, 2, 3];
-          expect(TcfApiCommands.isValidTcfApiCall(msg.__tcfapiCall)).to.be
-            .false;
+          expect(tcfApiCommandManager.isValidTcfApiCall_(msg.__tcfapiCall)).to
+            .be.false;
           expect(errorSpy.args[0][1]).to.match(
             /Unsupported parameter found in "tcfapiCall": [1,2,3]/
           );
@@ -80,15 +81,16 @@ describes.realWin(
 
           msg.__tcfapiCall.parameter = undefined;
           msg.__tcfapiCall.version = 1;
-          expect(TcfApiCommands.isValidTcfApiCall(msg.__tcfapiCall)).to.be
-            .false;
+          expect(tcfApiCommandManager.isValidTcfApiCall_(msg.__tcfapiCall)).to
+            .be.false;
           expect(errorSpy.args[0][1]).to.match(
             /Found incorrect version in "tcfapiCall": 1/
           );
           errorSpy.resetHistory();
 
           msg.__tcfapiCall.version = 2;
-          expect(TcfApiCommands.isValidTcfApiCall(msg.__tcfapiCall)).to.be.true;
+          expect(tcfApiCommandManager.isValidTcfApiCall_(msg.__tcfapiCall)).to
+            .be.true;
           expect(errorSpy).to.not.be.called;
         });
       });
@@ -98,8 +100,9 @@ describes.realWin(
           mockMetadata = {
             gdprApplies: false,
           };
+          tcfApiCommandManager = new TcfApiCommandManager(mockPolicyManager);
           expect(
-            TcfApiCommands.getMinimalPingReturnForTesting(mockMetadata)
+            tcfApiCommandManager.getMinimalPingReturnForTesting(mockMetadata)
           ).to.deep.equals({
             gdprApplies: false,
             cmpLoaded: true,
@@ -112,8 +115,9 @@ describes.realWin(
           mockMetadata = {
             gdprApplies: undefined,
           };
+          tcfApiCommandManager = new TcfApiCommandManager(mockPolicyManager);
           expect(
-            TcfApiCommands.getMinimalPingReturnForTesting(mockMetadata)
+            tcfApiCommandManager.getMinimalPingReturnForTesting(mockMetadata)
           ).to.deep.equals({
             gdprApplies: undefined,
             cmpLoaded: true,
@@ -123,8 +127,9 @@ describes.realWin(
         });
 
         it('creates a minimal ping object with no metadata', async () => {
+          tcfApiCommandManager = new TcfApiCommandManager(mockPolicyManager);
           expect(
-            TcfApiCommands.getMinimalPingReturnForTesting()
+            tcfApiCommandManager.getMinimalPingReturnForTesting()
           ).to.deep.equals({
             gdprApplies: undefined,
             cmpLoaded: true,
@@ -135,14 +140,18 @@ describes.realWin(
 
         it('sends a minimal PingReturn via PostMessage', async () => {
           const callId = 'pingCallId';
-          payload = {
-            'command': 'ping',
-            callId,
+          data = {
+            __tcfapiCall: {
+              'command': 'ping',
+              callId,
+              version: 2,
+            },
           };
           mockMetadata = {
             gdprApplies: true,
           };
-          handleTcfCommand(payload, mockWin, mockPolicyManager);
+          tcfApiCommandManager = new TcfApiCommandManager(mockPolicyManager);
+          tcfApiCommandManager.handleTcfCommand(data, mockWin);
           await macroTask();
 
           // No 'success' sent for ping
