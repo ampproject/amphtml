@@ -230,7 +230,7 @@ function getFirefoxArgs(config) {
  * @typedef {{
  *  browsers: (!Array<string>|undefined),
  *  environments: (!Array<!AmpdocEnvironment>|undefined),
- *  testUrl: string,
+ *  testUrl: string|undefined,
  *  fixture: string,
  *  manualFixture: string,
  *  initialRect: ({{width: number, height:number}}|undefined),
@@ -244,7 +244,7 @@ let TestSpec;
  * @typedef {{
  *  browsers: (!Array<string>|undefined),
  *  environments: (!Array<!AmpdocEnvironment>|undefined),
- *  testUrl: string,
+ *  testUrl: string|undefined,
  *  fixture: string,
  *  manualFixture: string,
  *  initialRect: ({{width: number, height:number}}|undefined),
@@ -628,10 +628,13 @@ class EndToEndFixture {
     // eventually be removed entirely.
     let {testUrl} = spec;
     const {fixture, manualFixture} = spec;
-    if (!!testUrl + !!fixture + !!manualFixture > 1) {
+    if (testUrl) {
       throw new Error(
-        'Only one of [testUrl, fixture, manualFixture] may be specified'
+        'Setting `testUrl` directly is no longer permitted in e2e tests; please use `fixture` instead'
       );
+    }
+    if (fixture && manualFixture) {
+      throw new Error('Only one of [fixture, manualFixture] may be specified');
     }
 
     if (fixture) {
