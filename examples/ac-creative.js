@@ -29,13 +29,21 @@ function intersectionCallback(changes) {
   // Code below is simply an example.
   var latestChange = changes[changes.length - 1];
 
-  // Amp-ad width and height.
-  var {width: w, height: h, x: vx, y: vy} = latestChange.boundingClientRect;
+  var {
+    // Amp-ad width and height.
+    width: w,
+    height: h,
 
-  // Visible width and height.
-  var {width: vw, height: vh} = latestChange.intersectionRect;
+    // Position in the viewport.
+    x: vx,
+    y: vy,
+  } = latestChange.boundingClientRect;
 
-  // Position in the viewport.
+  var {
+    // Visible width and height.
+    width: vw,
+    height: vh,
+  } = latestChange.intersectionRect;
 
   // Viewable percentage.
   var viewablePerc = ((vw * vh) / (w * h)) * 100;
