@@ -556,7 +556,7 @@ export class GoogleSubscriptionsPlatform {
         (parsedReferrer.protocol !== 'https:' ||
           !GOOGLE_DOMAIN_RE.test(parsedReferrer.hostname)) &&
         // Note we don't use the more generic this.isDev_ flag because that can be
-        // triggered by a hash value which would allow non gooogle hostnames to
+        // triggered by a hash value which would allow non google hostnames to
         // construct LAA urls.
         !getMode(this.ampdoc_.win).localDev
       ) {
@@ -579,7 +579,7 @@ export class GoogleSubscriptionsPlatform {
       // Determine Google metering strategy.
       if (urlParams[`gaa_at`] === 'la') {
         return GoogleMeteringStrategy.LEAD_ARTICLE;
-      } else if (urlParams[`gaa_at`] === 'gaa') {
+      } else if (urlParams[`gaa_at`] === 'g') {
         return GoogleMeteringStrategy.EXTENDED_ACCESS;
       } else {
         return GoogleMeteringStrategy.NONE;
