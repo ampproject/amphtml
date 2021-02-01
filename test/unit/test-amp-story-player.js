@@ -112,6 +112,10 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       .resolves(fakeMessaging);
   });
 
+  afterEach(() => {
+    console.error.restore();
+  });
+
   it('should build an iframe for each story', async () => {
     buildStoryPlayer();
     await manager.loadPlayers();
@@ -449,10 +453,17 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     });
 
     it('should throw error when invalid url is provided', async () => {
-      buildStoryPlayer(1, DEFAULT_ORIGIN_URL, 'www.invalid.org');
+      console.error.restore();
+      env.sandbox.spy(console, 'error');
 
-      return expect(() => manager.loadPlayers()).to.throw(
-        /Unsupported cache, use one of following: cdn.ampproject.org,www.bing-amp.com/
+      buildStoryPlayer(1, DEFAULT_ORIGIN_URL, 'www.tacos.org');
+
+      await manager.loadPlayers();
+      await nextTick();
+
+      expect(console.error).to.be.calledWithMatch(
+        /\[amp-story-player\]/,
+        /Unsupported cache specified, use one of following: cdn.ampproject.org,www.bing-amp.com/
       );
     });
   });
@@ -524,7 +535,11 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       await player.load();
 
-      await player.show('https://example.com/story3.html');
+      player.show('https://example.com/story3.html');
+      await nextTick();
+
+      fireHandler['storyContentLoaded']('storyContentLoaded', {});
+      await nextTick();
 
       const stories = playerEl.getStories();
 
@@ -533,6 +548,33 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       expect(playerEl.contains(stories[2].iframe)).to.be.true;
       expect(playerEl.contains(stories[3].iframe)).to.be.true;
       expect(playerEl.contains(stories[4].iframe)).to.be.true;
+    });
+
+    it('show() callback should prerender next story after current one is loaded', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      appendStoriesToPlayer(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+
+      player.show('https://example.com/story3.html');
+      await nextTick();
+
+      fireHandler['storyContentLoaded']('storyContentLoaded', {});
+      await nextTick();
+
+      const storyIframes = playerEl.querySelectorAll('iframe');
+
+      expect(storyIframes[0].getAttribute('src')).to.include(
+        'https://example.com/story3.html#visibilityState=prerender'
+      );
+      expect(storyIframes[1].getAttribute('src')).to.include(
+        'https://example.com/story4.html#visibilityState=prerender'
+      );
+      expect(storyIframes[2].getAttribute('src')).to.include(
+        'https://example.com/story2.html#visibilityState=prerender'
+      );
     });
 
     // TODO(proyectoramirez): delete once add() is implemented.
