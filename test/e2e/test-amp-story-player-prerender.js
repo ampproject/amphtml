@@ -41,35 +41,34 @@ describes.endtoend(
 
     beforeEach(async () => {
       controller = env.controller;
-      player = await controller.findElement(
-        'amp-story-player.i-amphtml-story-player-loaded'
-      );
+      player = await controller.findElement('amp-story-player');
       await expect(player);
     });
 
-    it('player builds the iframe when below the fold', async () => {
+    it('player builds the shadow DOM container when far from the viewport', async () => {
       const shadowHost = await controller.findElement(
         'div.i-amphtml-story-player-shadow-root-intermediary'
       );
 
-      await controller.switchToShadowRoot(shadowHost);
-
-      const iframe = await controller.findElement('iframe');
-
-      await expect(iframe);
+      await expect(shadowHost);
     });
 
-    it('when player is far from viewport, no stories are loaded in the iframes', async () => {
+    it('when player is far from viewport and user has not scrolled, no stories are loaded in the iframes', async () => {
       const shadowHost = await controller.findElement(
         'div.i-amphtml-story-player-shadow-root-intermediary'
       );
 
       await controller.switchToShadowRoot(shadowHost);
+      const iframeContainer = await controller.findElement(
+        '.i-amphtml-story-player-main-container'
+      );
 
-      const iframe = await controller.findElement('iframe');
-      const iframeSrc = await controller.getElementAttribute(iframe, 'src');
+      const count = await controller.getElementProperty(
+        iframeContainer,
+        'childElementCount'
+      );
 
-      await expect(iframeSrc).to.not.exist;
+      await expect(count).to.eql(0);
     });
 
     it('when player comes close to the viewport, iframe loads first story in prerender', async () => {
