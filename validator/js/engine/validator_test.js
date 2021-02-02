@@ -1747,7 +1747,7 @@ describe('ValidatorRulesMakeSense', () => {
            // it's sufficiently wrapped in private context inside the validator
            // that I don't see a way to call it.  For now just gold the current
            // index.
-           expect(tagSpec.attrLists[0]).toEqual(22);
+           expect(tagSpec.attrLists[0]).toEqual(15);
          });
     }
 
