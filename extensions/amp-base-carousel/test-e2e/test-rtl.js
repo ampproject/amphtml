@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,52 +14,63 @@
  * limitations under the License.
  */
 
-import {getNextArrow, getPrevArrow, getSlide} from './helpers';
+import ctrlHelpers from './helpers';
 
 const pageWidth = 800;
 const pageHeight = 600;
-const arrowMargin = 12;
 
 describes.endtoend(
   'amp-base-carousel:0.1 - rtl',
   {
     fixture: 'amp-base-carousel/basic-rtl.amp.html',
-    experiments: ['amp-base-carousel', 'layers'],
     initialRect: {width: pageWidth, height: pageHeight},
-    // TODO(sparhami) Make other environments work too
     environments: ['single'],
+
+    versions: {
+      '0.1': {
+        experiments: ['amp-base-carousel', 'layers'],
+      },
+      '1.0': {
+        experiments: ['bento-carousel'],
+      },
+    },
   },
   async (env) => {
+    let ctrl;
+    let arrowMargin;
+
     /** The total number of slides in the carousel */
     const SLIDE_COUNT = 7;
-    let controller;
-    beforeEach(async () => {
-      controller = env.controller;
+
+    beforeEach(() => {
+      arrowMargin = env.version == '0.1' ? 12 : 0;
+
+      ctrl = ctrlHelpers(env);
+      ctrl.maybeSwitchToShadow();
     });
 
     it('should place the second slide to the left', async () => {
-      const secondSlide = await getSlide(controller, 1);
-      await expect(controller.getElementRect(secondSlide)).to.include({
+      const secondSlide = await ctrl.getSlide(1);
+      await expect(ctrl.rect(secondSlide)).to.include({
         left: -pageWidth,
       });
     });
 
     it('should place the last slide to the right', async () => {
-      const lastSlide = await getSlide(controller, SLIDE_COUNT - 1);
-      await expect(controller.getElementRect(lastSlide)).to.include({
+      const lastSlide = await ctrl.getSlide(SLIDE_COUNT - 1);
+      await expect(ctrl.rect(lastSlide)).to.include({
         left: pageWidth,
       });
     });
 
     it('should place the arrows correctly', async () => {
-      const prevArrow = await getPrevArrow(controller);
-      const nextArrow = await getNextArrow(controller);
-      // TODO(sparhami) seems like it would be better to modify getElementRect
-      // to return us the right coordinate as well like DomRect.
-      await expect(controller.getElementRect(prevArrow)).to.include({
+      const prevArrow = await ctrl.getPrevArrow();
+      const nextArrow = await ctrl.getNextArrow();
+
+      await expect(ctrl.rect(prevArrow)).to.include({
         right: pageWidth - arrowMargin,
       });
-      await expect(controller.getElementRect(nextArrow)).to.include({
+      await expect(ctrl.rect(nextArrow)).to.include({
         left: arrowMargin,
       });
     });
