@@ -120,6 +120,11 @@ async function storeBundleSize() {
       throw new Error(
         `${response.statusCode} ${response.statusMessage}: ` + response.body
       );
+    } else {
+      log(
+        'Successfully stored bundle sizes for commit',
+        cyan(commitHash) + '.'
+      );
     }
   } catch (error) {
     log(red('Could not store the bundle size'));
@@ -146,6 +151,8 @@ async function skipBundleSize() {
         throw new Error(
           `${response.statusCode} ${response.statusMessage}: ` + response.body
         );
+      } else {
+        log('Skipped bundle size reporting for commit', cyan(commitHash) + '.');
       }
     } catch (error) {
       log(red('Could not report a skipped pull request'));
@@ -180,6 +187,13 @@ async function reportBundleSize() {
       if (response.statusCode < 200 || response.statusCode >= 300) {
         throw new Error(
           `${response.statusCode} ${response.statusMessage}: ` + response.body
+        );
+      } else {
+        log(
+          'Successfully reported bundle sizes for commit',
+          cyan(commitHash),
+          'using baseline commit',
+          cyan(baseSha) + '.'
         );
       }
     } catch (error) {
