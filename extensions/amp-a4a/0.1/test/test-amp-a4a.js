@@ -291,6 +291,7 @@ describe('amp-a4a', () => {
     element.isBuilt = () => {
       return true;
     };
+    element.getLayout = () => 'fixed';
     element.getLayoutBox = () => layoutBox;
     element.getLayoutSize = () => layoutSizeFromRect(layoutBox);
     element.getIntersectionChangeEntry = () => {
