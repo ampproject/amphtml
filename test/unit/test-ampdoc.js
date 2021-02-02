@@ -17,6 +17,7 @@
 import * as docready from '../../src/document-ready';
 import * as dom from '../../src/dom';
 import {
+  AmpDoc,
   AmpDocFie,
   AmpDocService,
   AmpDocShadow,
@@ -942,7 +943,7 @@ describes.realWin('AmpDocShadow', {}, (env) => {
 
   let win, doc;
   let content, host, shadowRoot;
-  let ampdoc;
+  let ampdoc, parentDoc;
 
   beforeEach(() => {
     win = env.win;
@@ -951,7 +952,8 @@ describes.realWin('AmpDocShadow', {}, (env) => {
     host = doc.createElement('div');
     shadowRoot = createShadowRoot(host);
     shadowRoot.appendChild(content);
-    ampdoc = new AmpDocShadow(win, URL, shadowRoot);
+    parentDoc = new AmpDoc(win, null);
+    ampdoc = new AmpDocShadow(win, URL, shadowRoot, parentDoc);
   });
 
   it('should return window', () => {
@@ -964,7 +966,7 @@ describes.realWin('AmpDocShadow', {}, (env) => {
   });
 
   it('should return top level document', () => {
-    expect(ampdoc.getTopLevelDoc()).to.deep.equal(doc);
+    expect(ampdoc.getTopLevelDoc()).to.equal(parentDoc);
   });
 
   it('should return document as root', () => {

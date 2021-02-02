@@ -26,6 +26,7 @@ import {
 import {dev, user} from './log';
 import {disposeServicesForDoc, getServicePromiseOrNullForDoc} from './service';
 import {getMode} from './mode';
+import {installAmpdocServicesForEmbed} from './service/core-services';
 import {installStylesForDoc} from './style-installer';
 import {isArray, isObject} from './types';
 import {parseExtensionUrl} from './service/extension-location';
@@ -88,10 +89,15 @@ export class MultidocManager {
     shadowRoot.AMP = amp;
     amp.url = url;
     const {origin} = parseUrlDeprecated(url);
-
-    const ampdoc = this.ampdocService_.installShadowDoc(url, shadowRoot, {
-      params,
-    });
+    const parentDoc = AMP.ampdoc;
+    const ampdoc = this.ampdocService_.installShadowDoc(
+      url,
+      shadowRoot,
+      parentDoc,
+      {
+        params,
+      }
+    );
     /** @const {!./service/ampdoc-impl.AmpDocShadow} */
     amp.ampdoc = ampdoc;
     dev().fine(TAG, 'Attach to shadow root:', shadowRoot, ampdoc);
@@ -104,7 +110,8 @@ export class MultidocManager {
       /* opt_isRuntimeCss */ true
     );
     // Instal doc services.
-    AMP.installAmpdocServices(ampdoc);
+    // AMP.installAmpdocServices(ampdoc);
+    installAmpdocServicesForEmbed(ampdoc); // should be this?
 
     const viewer = Services.viewerForDoc(ampdoc);
 

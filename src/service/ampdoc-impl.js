@@ -194,16 +194,23 @@ export class AmpDocService {
    * Creates and installs the ampdoc for the shadow root.
    * @param {string} url
    * @param {!ShadowRoot} shadowRoot
+   * @param {!AmpDoc} parentDoc
    * @param {!AmpDocOptions=} opt_options
    * @return {!AmpDocShadow}
    * @restricted
    */
-  installShadowDoc(url, shadowRoot, opt_options) {
+  installShadowDoc(url, shadowRoot, parentDoc, opt_options) {
     devAssert(
       !shadowRoot[AMPDOC_PROP],
       'The shadow root already contains ampdoc'
     );
-    const ampdoc = new AmpDocShadow(this.win, url, shadowRoot, opt_options);
+    const ampdoc = new AmpDocShadow(
+      this.win,
+      url,
+      shadowRoot,
+      parentDoc,
+      opt_options
+    );
     shadowRoot[AMPDOC_PROP] = ampdoc;
     return ampdoc;
   }
@@ -795,10 +802,12 @@ export class AmpDocShadow extends AmpDoc {
    * @param {!Window} win
    * @param {string} url
    * @param {!ShadowRoot} shadowRoot
+   * @param {!AmpDoc} parentDoc
    * @param {!AmpDocOptions=} opt_options
    */
-  constructor(win, url, shadowRoot, opt_options) {
-    super(win, /* parent */ null, opt_options);
+  constructor(win, url, shadowRoot, parentDoc, opt_options) {
+    // super(win, /* parent */ null, opt_options);
+    super(win, parentDoc, opt_options);
 
     /** @private @const {string} */
     this.url_ = url;
@@ -841,15 +850,11 @@ export class AmpDocShadow extends AmpDoc {
 
   /** @override */
   getTopLevelDoc() {
-    const topLevelDoc = this.getRootNode().host.ownerDocument;
-    // We just verify that the shadow-doc's parent is the top level doc
-    // because even for recursive amp-next-page's we create distinct
-    // shadow-docs.
-    devAssert(
-      topLevelDoc === this.win.document,
-      'Nested shadow-doc is not supported'
-    );
-    return topLevelDoc;
+    let ampdoc = this;
+    while (ampdoc.getParent() !== null) {
+      ampdoc = ampdoc.getParent();
+    }
+    return ampdoc;
   }
 
   /** @override */
