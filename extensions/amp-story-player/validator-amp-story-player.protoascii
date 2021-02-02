@@ -42,7 +42,7 @@ descendant_tag_list {
   name: "amp-story-player-allowed-descendants"
   tag: "A"
   tag: "SPAN"
-  tag: "I-AMPHTML-SIZER" # Only allowed when document is transformed AMP
+  tag: "I-AMPHTML-SIZER"  # Only allowed when document is transformed AMP
   tag: "IMG" # Only allowed when document is transformed AMP
 }
 tags: {
