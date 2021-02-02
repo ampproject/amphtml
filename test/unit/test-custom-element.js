@@ -179,7 +179,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         expect(element.upgradeState_).to.equal(/* NOT_UPGRADED */ 1);
         expect(element.readyState).to.equal('loading');
         expect(element.everAttached).to.equal(false);
-        expect(element.layout_).to.equal(Layout.NODISPLAY);
+        expect(element.getLayout()).to.equal(Layout.NODISPLAY);
 
         container.appendChild(element);
         expect(element).to.have.class('i-amphtml-element');
@@ -204,7 +204,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         expect(element.isUpgraded()).to.equal(false);
         expect(element.readyState).to.equal('loading');
         expect(element.everAttached).to.equal(false);
-        expect(element.layout_).to.equal(Layout.NODISPLAY);
+        expect(element.getLayout()).to.equal(Layout.NODISPLAY);
 
         container.appendChild(element);
         expect(element).to.have.class('i-amphtml-element');
@@ -373,7 +373,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
 
         expect(element.isUpgraded()).to.equal(true);
         expect(element.implementation_).to.be.instanceOf(TestElement);
-        expect(element.implementation_.layout_).to.equal(Layout.FILL);
+        expect(element.implementation_.getLayout()).to.equal(Layout.FILL);
         expect(element.isBuilt()).to.equal(false);
       });
 
@@ -739,28 +739,28 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         const element = new ElementClass();
         element.setAttribute('layout', 'fill');
         expect(element.everAttached).to.equal(false);
-        expect(element.layout_).to.equal(Layout.NODISPLAY);
+        expect(element.getLayout()).to.equal(Layout.NODISPLAY);
 
         resourcesMock.expects('add').withExactArgs(element).atLeast(1);
         resourcesMock.expects('upgraded').withExactArgs(element).atLeast(1);
         container.appendChild(element);
 
         expect(element.everAttached).to.equal(true);
-        expect(element.layout_).to.equal(Layout.FILL);
-        expect(element.implementation_.layout_).to.equal(Layout.FILL);
+        expect(element.getLayout()).to.equal(Layout.FILL);
+        expect(element.implementation_.getLayout()).to.equal(Layout.FILL);
       });
 
       it('StubElement - attachedCallback', () => {
         const element = new StubElementClass();
         element.setAttribute('layout', 'fill');
         expect(element.everAttached).to.equal(false);
-        expect(element.layout_).to.equal(Layout.NODISPLAY);
+        expect(element.getLayout()).to.equal(Layout.NODISPLAY);
 
         resourcesMock.expects('add').withExactArgs(element).atLeast(1);
         container.appendChild(element);
 
         expect(element.everAttached).to.equal(true);
-        expect(element.layout_).to.equal(Layout.FILL);
+        expect(element.getLayout()).to.equal(Layout.FILL);
         // Not upgraded yet!
         expect(element).to.have.class('amp-unresolved');
         expect(element).to.have.class('i-amphtml-unresolved');
@@ -769,8 +769,8 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         resourcesMock.expects('upgraded').withExactArgs(element).once();
         element.upgrade(TestElement);
 
-        expect(element.layout_).to.equal(Layout.FILL);
-        expect(element.implementation_.layout_).to.equal(Layout.FILL);
+        expect(element.getLayout()).to.equal(Layout.FILL);
+        expect(element.implementation_.getLayout()).to.equal(Layout.FILL);
         // Now it's called.
         expect(element).to.not.have.class('amp-unresolved');
         expect(element).to.not.have.class('i-amphtml-unresolved');
@@ -780,7 +780,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         const element = new ElementClass();
         element.setAttribute('layout', 'fill');
         expect(element.everAttached).to.equal(false);
-        expect(element.layout_).to.equal(Layout.NODISPLAY);
+        expect(element.getLayout()).to.equal(Layout.NODISPLAY);
 
         resourcesMock.expects('add').withExactArgs(element).atLeast(1);
         resourcesMock.expects('upgraded').withExactArgs(element).atLeast(1);
@@ -790,15 +790,15 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         container.removeChild(element);
 
         expect(element.everAttached).to.equal(true);
-        expect(element.layout_).to.equal(Layout.FILL);
-        expect(element.implementation_.layout_).to.equal(Layout.FILL);
+        expect(element.getLayout()).to.equal(Layout.FILL);
+        expect(element.implementation_.getLayout()).to.equal(Layout.FILL);
       });
 
       it('Element - handles async detachedCallback when connected', () => {
         const element = new ElementClass();
         element.setAttribute('layout', 'fill');
         expect(element.everAttached).to.equal(false);
-        expect(element.layout_).to.equal(Layout.NODISPLAY);
+        expect(element.getLayout()).to.equal(Layout.NODISPLAY);
 
         resourcesMock.expects('add').withExactArgs(element).atLeast(1);
         resourcesMock.expects('upgraded').withExactArgs(element).atLeast(1);
@@ -811,8 +811,8 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         container.removeChild(element);
 
         expect(element.everAttached).to.equal(true);
-        expect(element.layout_).to.equal(Layout.FILL);
-        expect(element.implementation_.layout_).to.equal(Layout.FILL);
+        expect(element.getLayout()).to.equal(Layout.FILL);
+        expect(element.implementation_.getLayout()).to.equal(Layout.FILL);
       });
 
       it('Element - layoutCallback before build', () => {
