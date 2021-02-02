@@ -1715,7 +1715,7 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
       ResourceState.LAYOUT_SCHEDULED,
     ];
 
-    for (const state of states) {
+    states.forEach((state) => {
       resource1.state_ = state;
       resources.exec_.enqueue({id: 1, resource: resource1});
       resources.queue_.enqueue({id: 1, resource: resource1});
@@ -1725,7 +1725,7 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
       resources.remove(child1);
       expect(resources.exec_.getSize()).to.equal(0);
       expect(resources.queue_.getSize()).to.equal(0);
-    }
+    });
   });
 
   describe('reparent', () => {
