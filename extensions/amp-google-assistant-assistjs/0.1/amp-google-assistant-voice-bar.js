@@ -15,46 +15,28 @@
  */
 
 /**
-* @fileoverview This custom element displays a horizontal bar that consists of a Google Assisant voice button and a series of 
-* suggestion chips that enable 3P site users to interact with Google Assistant.
-*/
-
-import { isLayoutSizeDefined } from '../../../src/layout';
+ * @fileoverview This custom element displays a horizontal bar that consists of a Google Assisant voice button and a series of
+ * suggestion chips that enable 3P site users to interact with Google Assistant.
+ */
 
 import {Services} from '../../../src/services';
+import {isLayoutSizeDefined} from '../../../src/layout';
+import {createElementWithAttributes} from '../../../src/dom';
 
 export class AmpGoogleAssistantVoiceBar extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
 
-    /** @private {string} */
-    this.assistjsServer_ = "https://actions.google.com";
-
-    /** @private {boolean} */
-    this.devMode_ = false;
-
-    /** @private {?string} */
-    this.projectId_ = null;
-
-    /** @private */
-    this.assistjsFrameService_ = null;
+    /** @private {?AssistjsConfigService} */
+    this.configService_ = null;
   }
 
   /** @override */
-  buildCallback() {
-    // Gets all Assist.js attributes
-    if (this.element.hasAttribute('dev')) {
-      this.devMode_ = this.element.getAttribute('dev');
-    }
-    // TODO: Aborts if project does not present.
-    if (this.element.hasAttribute('project')) {
-      this.projectId_ = this.element.getAttribute('project');
-    }
-    if (this.element.hasAttribute('server')) {
-      this.assistjsServer_ = this.element.getAttribute('server');
-    }
+  async buildCallback() {
+    this.configService_ = await Services.assistjsConfigServiceForDoc(
+      this.element
+    );
   }
 
   /** @override */
@@ -64,14 +46,9 @@ export class AmpGoogleAssistantVoiceBar extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    Services.assistjsFrameServiceForDocOrNull(this.element).then((assistjsFrameService) => {
-      this.assistjsFrameService_ = assistjsFrameService;
-    });
-    
     // Set frame URL to an embed endpoint.
-    const frameUrl = `${this.assistjsServer_}/assist/voicebar?origin=${origin}&projectId=${this.projectId_}&dev=${this.devMode_}&hostUrl=https://toidemo2.web.app`;
-    const iframe = this.element.ownerDocument.createElement('iframe');
-    iframe.src = frameUrl;
+    const frameUrl = `${this.configService_.getAssistjsServer()}/assist/voicebar?origin=${origin}&projectId=${this.configService_.getProjectId()}&dev=${this.configService_.getDevMode()}&hostUrl=${this.configService_.getHostUrl()}`;
+    const iframe = createElementWithAttributes(this.win.document, 'iframe', {src: frameUrl});
 
     // applyFillContent so that frame covers the entire component.
     this.applyFillContent(iframe, /* replacedContent */ true);

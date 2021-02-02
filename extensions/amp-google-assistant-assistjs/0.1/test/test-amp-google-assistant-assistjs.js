@@ -14,25 +14,34 @@
  * limitations under the License.
  */
 
-import '../amp-assistant-assistjs';
+import '../amp-google-assistant-assistjs';
 
-describes.realWin('amp-assistant-assistjs', {
-  amp: {
-    extensions: ['amp-assistant-assistjs'],
+describes.realWin(
+  'amp-google-assistant-assistjs',
+  {
+    amp: {
+      extensions: ['amp-google-assistant-assistjs'],
+    },
   },
-}, env => {
+  (env) => {
+    var win = env.win;
 
-  let win;
-  let element;
+    let configElement = win.document.createElement('amp-google-assistant-assistjs-config');
+    configElement.textContent = '{"devMode": true, "projectId": "aog-assistjs-demos", "hostUrl": "https://toidemo2.web.app"}';
+    win.document.body.appendChild(configElement);
 
-  beforeEach(() => {
-    win = env.win;
-    element = win.document.createElement('amp-assistant-assistjs');
-    win.document.body.appendChild(element);
-  });
+    let voiceButtonelement;
 
-  it('should have hello world when built', () => {
-    element.build();
-    expect(element.querySelector('div').textContent).to.equal('hello world');
-  });
-});
+    beforeEach(() => {
+      voiceButtonElement = win.document.createElement('amp-google-assistant-assistjs-voice-button');
+      voiceButtonElement.setAttribute('id', 'voice-button');
+      win.document.body.appendChild(voiceButtonElement);
+    });
+
+    it('should have hello world when built', () => {
+      configElement.build()
+      voiceButtonelement.build();
+      expect(voiceButtonelement.getAttribute('id')).to.equal('voice button');
+    });
+  }
+);

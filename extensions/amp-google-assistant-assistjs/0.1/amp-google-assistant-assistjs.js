@@ -19,15 +19,44 @@
  * shared Assistant Frame service.
  */
 
-import { AssistjsFrameService } from './assistjs-frame-service'
-import { AmpGoogleAssistantVoiceButton } from './amp-google-assistant-voice-button'
-import { AmpGoogleAssistantVoiceBar } from './amp-google-assistant-voice-bar'
-import { AmpGoogleAssistantInlineSuggestionBar } from './amp-google-assistant-inline-suggestion-bar'
-import { CSS } from '../../../build/amp-google-assistant-assistjs-0.1.css';
+import 'regenerator-runtime/runtime';
 
-AMP.extension('amp-google-assistant-assistjs', '0.1', AMP => {
+import {AmpGoogleAssistantInlineSuggestionBar} from './amp-google-assistant-inline-suggestion-bar';
+import {AmpGoogleAssistantVoiceBar} from './amp-google-assistant-voice-bar';
+import {AmpGoogleAssistantVoiceButton} from './amp-google-assistant-voice-button';
+import {AssistjsConfigService} from './assistjs-config-service';
+import {AssistjsFrameService} from './assistjs-frame-service';
+import {CSS} from '../../../build/amp-google-assistant-assistjs-0.1.css';
+import {isLayoutSizeDefined} from '../../../src/layout';
+
+export class AmpGoogleAssistantAssistjsConfig extends AMP.BaseElement {
+  /** @override */
+  isLayoutSupported(layout) {
+    return isLayoutSizeDefined(layout);
+  }
+}
+
+AMP.extension('amp-google-assistant-assistjs', '0.1', (AMP) => {
+  AMP.registerServiceForDoc('assistjs-config-service', AssistjsConfigService);
   AMP.registerServiceForDoc('assistjs-frame-service', AssistjsFrameService);
-  AMP.registerElement('amp-google-assistant-voice-button', AmpGoogleAssistantVoiceButton, CSS);
-  AMP.registerElement('amp-google-assistant-voice-bar', AmpGoogleAssistantVoiceBar, CSS);
-  AMP.registerElement('amp-google-assistant-inline-suggestion-bar', AmpGoogleAssistantInlineSuggestionBar, CSS);
+  AMP.registerElement(
+    'amp-google-assistant-assistjs-config',
+    AmpGoogleAssistantAssistjsConfig,
+    CSS
+  );
+  AMP.registerElement(
+    'amp-google-assistant-voice-button',
+    AmpGoogleAssistantVoiceButton,
+    CSS
+  );
+  AMP.registerElement(
+    'amp-google-assistant-voice-bar',
+    AmpGoogleAssistantVoiceBar,
+    CSS
+  );
+  AMP.registerElement(
+    'amp-google-assistant-inline-suggestion-bar',
+    AmpGoogleAssistantInlineSuggestionBar,
+    CSS
+  );
 });

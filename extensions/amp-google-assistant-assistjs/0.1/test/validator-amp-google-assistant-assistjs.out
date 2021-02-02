@@ -1,4 +1,4 @@
-PASS
+FAIL
 |  <!--
 |    Copyright 2021 The AMP HTML Authors. All Rights Reserved.
 |    Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,8 +34,16 @@ PASS
 |  </head>
 |  <body>
 |    <amp-google-assistant-voice-button layout="responsive" width="150" height="40" project="aog-assistjs-demos" dev=true>
+>>   ^~~~~~~~~
+amp-google-assistant-assistjs/0.1/test/validator-amp-google-assistant-assistjs.html:35:2 The attribute 'dev' may not appear in tag 'amp-google-assistant-voice-button'. (see https://amp.dev/documentation/components/amp-google-assistant-assistjs)
+>>   ^~~~~~~~~
+amp-google-assistant-assistjs/0.1/test/validator-amp-google-assistant-assistjs.html:35:2 The attribute 'project' may not appear in tag 'amp-google-assistant-voice-button'. (see https://amp.dev/documentation/components/amp-google-assistant-assistjs)
 |    </amp-google-assistant-voice-button>
 |    <amp-google-assistant-voice-bar layout="responsive" width="150" height="40" project="aog-assistjs-demos" dev=true>
+>>   ^~~~~~~~~
+amp-google-assistant-assistjs/0.1/test/validator-amp-google-assistant-assistjs.html:37:2 The attribute 'dev' may not appear in tag 'amp-google-assistant-voice-bar'. (see https://amp.dev/documentation/components/amp-google-assistant-assistjs)
+>>   ^~~~~~~~~
+amp-google-assistant-assistjs/0.1/test/validator-amp-google-assistant-assistjs.html:37:2 The attribute 'project' may not appear in tag 'amp-google-assistant-voice-bar'. (see https://amp.dev/documentation/components/amp-google-assistant-assistjs)
 |    </amp-google-assistant-voice-bar>
 |    <amp-google-assistant-inline-suggestion-bar layout="responsive" width="150" height="40" project="aog-assistjs-demos" dev=true>
 |    </amp-google-assistant-inline-suggestion-bar>

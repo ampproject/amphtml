@@ -28,16 +28,6 @@ tags: {  # <amp-google-assistant-voice-button>
   html_format: AMP
   tag_name: "AMP-GOOGLE-ASSISTANT-VOICE-BUTTON"
   requires_extension: "amp-google-assistant-assistjs"
-  attrs: {
-    name: 'project';
-    mandatory: true;
-  }
-  attrs: {
-    name: 'dev';
-  }
-  attrs: {
-    name: 'server'
-  }
   attr_lists: "extended-amp-global"
   amp_layout: {
     supported_layouts: RESPONSIVE
@@ -47,16 +37,6 @@ tags: {  # <amp-google-assistant-voice-bar>
   html_format: AMP
   tag_name: "AMP-GOOGLE-ASSISTANT-VOICE-BAR"
   requires_extension: "amp-google-assistant-assistjs"
-  attrs: {
-    name: 'project';
-    mandatory: true;
-  }
-  attrs: {
-    name: 'dev';
-  }
-  attrs: {
-    name: 'server'
-  }
   attr_lists: "extended-amp-global"
   amp_layout: {
     supported_layouts: RESPONSIVE
@@ -66,16 +46,6 @@ tags: {  # <amp-google-assistant-inline-suggestion-bar>
   html_format: AMP
   tag_name: "AMP-GOOGLE-ASSISTANT-INLINE-SUGGESTION-BAR"
   requires_extension: "amp-google-assistant-assistjs"
-  attrs: {
-    name: 'project';
-    mandatory: true;
-  }
-  attrs: {
-    name: 'dev';
-  }
-  attrs: {
-    name: 'server'
-  }
   attr_lists: "extended-amp-global"
   amp_layout: {
     supported_layouts: RESPONSIVE

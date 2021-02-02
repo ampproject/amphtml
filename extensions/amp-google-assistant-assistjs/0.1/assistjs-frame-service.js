@@ -18,42 +18,37 @@
  * @fileoverview The shared service used by all custom elements to talk to Assistant services. It loads an iframe that exports
  * endpoints to handle requests from custom elements.
  */
+import 'regenerator-runtime/runtime';
+import {Services} from '../../../src/services';
+import {createElementWithAttributes} from '../../../src/dom';
 
 export class AssistjsFrameService {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
-    /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampdoc = ampdoc;
+    /** @private @const {!../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampDoc_ = ampdoc;
 
-    /** @private {string} */
-    this.assistjsServer_ = "https://actions.google.com";
+    /** @private {?AssistjsConfigService} */
+    this.configService_ = null;
 
-    /** @private {boolean} */
-    this.devMode_ = true;
-
-    /** @private {?string} */
-    this.projectId_ = null;
-
-    /** @private */
-    this.channel_ = null;
-
-    /** @private */
-    this.assistantIframe_ = ampdoc.whenReady().then(() => {
-      return this.createAssistantIframe();
-    });
+    /** Create Assistant iframe and append it to the main AMP document. */
+    this.createAssistantIframe_();
   }
 
   /** @private */
-  createAssistantIframe() {
-    const iframe = this.ampdoc.win.document.createElement('iframe');
-    const frameUrl = `${this.assistjsServer_}/assist/frame?origin=${origin}&projectId=${this.projectId_}&dev=${this.devMode_}`;
-    iframe.src = frameUrl;
-    iframe.setAttribute('allow', 'microphone');
-    iframe.style.display = 'none';
-    
-    document.body.appendChild(iframe);
-    return iframe;
+  createAssistantIframe_() {
+    // const promise = Services.assistjsConfigServiceForDoc(this.ampDoc_);
+    // promise.then((configService) => {
+    //   this.configService_ = configService;
+
+    //   const frameUrl = `${this.configService_.getAssistjsServer()}/assist/voicebar?origin=${origin}&projectId=${this.configService_.getProjectId()}&dev=${this.configService_.getDevMode()}&hostUrl=${this.configService_.getHostUrl()}`;
+    // const iframe = createElementWithAttributes(this.win.document, 'iframe', {src: frameUrl, allow: 'microphone'});
+    //   iframe.setAttribute('allow', 'microphone');
+    //   iframe.setStyle({display: 'none'});
+
+    //   document.body.appendChild(iframe);
+    // });
   }
 }

@@ -808,14 +808,24 @@ export class Services {
   }
 
   /**
-   * @param {!Element|!ShadowRoot} element
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!Promise<?../extensions/amp-assistant-assistjs/0.1/assistjs-frame-service.AssistjsFrameService>}
    */
-  static assistjsFrameServiceForDocOrNull(element) {
-    return /** @type {!Promise<?../extensions/amp-assistant-assistjs/0.1/assistjs-frame-service.AssistjsFrameService>} */ (getElementServiceIfAvailableForDocInEmbedScope(
-      element,
-      'assistjs-frame-service',
-      'amp-assistant-assistjs'
+  static assistjsFrameServiceForDoc(elementOrAmpDoc) {
+    return /** @type {!Promise<?../extensions/amp-assistant-assistjs/0.1/assistjs-frame-service.AssistjsFrameService>} */ (getServiceForDoc(
+      elementOrAmpDoc,
+      'assistjs-frame-service'
+    ));
+  }
+
+  /**
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @return {!Promise<?../extensions/amp-assistant-assistjs/0.1/assistjs-config-service.AssistjsConfigService>}
+   */
+  static assistjsConfigServiceForDoc(elementOrAmpDoc) {
+    return /** @type {!Promise<?../extensions/amp-assistant-assistjs/0.1/assistjs-config-service.AssistjsConfigService>} */ (getServiceForDoc(
+      elementOrAmpDoc,
+      'assistjs-config-service'
     ));
   }
 }
