@@ -215,7 +215,7 @@ describes.realWin(
         height: 100,
       });
       await waitForAmpIframeLayoutPromise(doc, ampIframe);
-      const impl = ampIframe.implementation_;
+      const impl = await ampIframe.getImpl(false);
       const iframe = ampIframe.querySelector('iframe');
       expect(iframe.src).to.equal(iframeSrc + '#amp=1');
       expect(iframe.getAttribute('sandbox')).to.equal('');
@@ -287,7 +287,7 @@ describes.realWin(
       expect(iframe.getAttribute('frameborder')).to.equal('0');
     });
 
-    it('should allow JS and propagate scrolling and have lower priority', function* () {
+    it('should allow JS and propagate scrolling and have lower priority', async () => {
       const ampIframe = createAmpIframe(env, {
         src: iframeSrc,
         sandbox: 'allow-scripts',
@@ -295,10 +295,9 @@ describes.realWin(
         height: 250,
         scrolling: 'no',
       });
-      yield waitForAmpIframeLayoutPromise(doc, ampIframe);
-      expect(ampIframe.implementation_.getLayoutPriority()).to.equal(
-        LayoutPriority.ADS
-      );
+      await waitForAmpIframeLayoutPromise(doc, ampIframe);
+      const impl = await ampIframe.getImpl(false);
+      expect(impl.getLayoutPriority()).to.equal(LayoutPriority.ADS);
       expect(ampIframe.getAttribute('sandbox')).to.equal('allow-scripts');
       return waitForJsInIframe().then(() => {
         expect(ranJs).to.equal(1);
@@ -463,9 +462,9 @@ describes.realWin(
         expect(asserts).to.throw(/amp-iframe-origin-policy.md/);
       });
 
-      it('should deny same origin', () => {
+      it('should deny same origin', async () => {
         const ampIframe = createAmpIframe(env);
-        const impl = ampIframe.implementation_;
+        const impl = await ampIframe.getImpl(false);
         allowConsoleError(() => {
           expect(() => {
             impl.assertSource_(
@@ -555,9 +554,9 @@ describes.realWin(
       });
     });
 
-    it('should transform source', () => {
+    it('should transform source', async () => {
       const ampIframe = createAmpIframe(env);
-      const impl = ampIframe.implementation_;
+      const impl = await ampIframe.getImpl(false);
 
       // null -> undefined
       expect(impl.transformSrc_(null)).to.be.undefined;
@@ -581,7 +580,7 @@ describes.realWin(
       );
     });
 
-    it('should listen for resize events', function* () {
+    it('should listen for resize events', async () => {
       const ampIframe = createAmpIframe(env, {
         src: iframeSrc,
         sandbox: 'allow-scripts allow-same-origin',
@@ -589,8 +588,8 @@ describes.realWin(
         height: 100,
         resizable: '',
       });
-      yield waitForAmpIframeLayoutPromise(doc, ampIframe);
-      const impl = ampIframe.implementation_;
+      await waitForAmpIframeLayoutPromise(doc, ampIframe);
+      const impl = await ampIframe.getImpl(false);
       return new Promise((resolve, unusedReject) => {
         impl.updateSize_ = (height, width) => {
           resolve({height, width});
@@ -611,7 +610,7 @@ describes.realWin(
       });
     });
 
-    it('should allow resize events w/o allow-same-origin', function* () {
+    it('should allow resize events w/o allow-same-origin', async () => {
       const ampIframe = createAmpIframe(env, {
         src: iframeSrc,
         sandbox: 'allow-scripts',
@@ -619,8 +618,8 @@ describes.realWin(
         height: 100,
         resizable: '',
       });
-      yield waitForAmpIframeLayoutPromise(doc, ampIframe);
-      const impl = ampIframe.implementation_;
+      await waitForAmpIframeLayoutPromise(doc, ampIframe);
+      const impl = await ampIframe.getImpl(false);
       return new Promise((resolve, unusedReject) => {
         impl.updateSize_ = (height, width) => {
           resolve({height, width});
@@ -641,7 +640,7 @@ describes.realWin(
       });
     });
 
-    it('should allow resize events w/ srcdoc', function* () {
+    it('should allow resize events w/ srcdoc', async () => {
       const srcdoc = `
       <!doctype html>
       <html>
@@ -666,8 +665,8 @@ describes.realWin(
         height: 100,
         resizable: '',
       });
-      yield waitForAmpIframeLayoutPromise(doc, ampIframe);
-      const impl = ampIframe.implementation_;
+      await waitForAmpIframeLayoutPromise(doc, ampIframe);
+      const impl = await ampIframe.getImpl(false);
       return new Promise((resolve, unusedReject) => {
         impl.updateSize_ = (height, width) => {
           resolve({height, width});
@@ -678,7 +677,7 @@ describes.realWin(
       });
     });
 
-    it('should only error once for embed-size requests when non-resizable', function* () {
+    it('should only error once for embed-size requests when non-resizable', async () => {
       expectAsyncConsoleError(/Ignoring embed-size request/);
       const ampIframe = createAmpIframe(env, {
         src: iframeSrc,
@@ -686,11 +685,11 @@ describes.realWin(
         width: 100,
         height: 100,
       });
-      yield waitForAmpIframeLayoutPromise(doc, ampIframe);
+      await waitForAmpIframeLayoutPromise(doc, ampIframe);
       console.error.restore();
       const userError = env.sandbox.spy(console, 'error');
 
-      const impl = ampIframe.implementation_;
+      const impl = await ampIframe.getImpl(false);
       impl.updateSize_(217, 114);
       expect(impl.hasErroredEmbedSize_).to.be.true;
       impl.updateSize_(328, 225);
@@ -698,7 +697,7 @@ describes.realWin(
       expect(userError).to.have.callCount(1);
     });
 
-    it('should resize amp-iframe', function* () {
+    it('should resize amp-iframe', async () => {
       const ampIframe = createAmpIframe(env, {
         src: iframeSrc,
         sandbox: 'allow-scripts',
@@ -706,8 +705,8 @@ describes.realWin(
         height: 100,
         resizable: '',
       });
-      yield waitForAmpIframeLayoutPromise(doc, ampIframe);
-      const impl = ampIframe.implementation_;
+      await waitForAmpIframeLayoutPromise(doc, ampIframe);
+      const impl = await ampIframe.getImpl(false);
       const attemptChangeSize = env.sandbox.spy(impl, 'attemptChangeSize');
       impl.updateSize_(217, '114' /* be tolerant to string number */);
       expect(attemptChangeSize).to.be.calledWith(217, 114);
@@ -730,7 +729,7 @@ describes.realWin(
       expect(overflowElement.classList.contains('amp-visible')).to.be.false;
     });
 
-    it('should resize amp-iframe when only height is provided', function* () {
+    it('should resize amp-iframe when only height is provided', async () => {
       const ampIframe = createAmpIframe(env, {
         src: iframeSrc,
         sandbox: 'allow-scripts',
@@ -738,8 +737,8 @@ describes.realWin(
         height: 100,
         resizable: '',
       });
-      yield waitForAmpIframeLayoutPromise(doc, ampIframe);
-      const impl = ampIframe.implementation_;
+      await waitForAmpIframeLayoutPromise(doc, ampIframe);
+      const impl = await ampIframe.getImpl(false);
       const attemptChangeSize = env.sandbox.spy(impl, 'attemptChangeSize');
       impl.updateSize_(217);
       expect(attemptChangeSize).to.be.calledOnce;
@@ -747,7 +746,7 @@ describes.realWin(
       expect(attemptChangeSize.firstCall.args[1]).to.be.undefined;
     });
 
-    it('should not resize amp-iframe if request height is small', function* () {
+    it('should not resize amp-iframe if request height is small', async () => {
       expectAsyncConsoleError(/resize height is less than 100px/);
       const ampIframe = createAmpIframe(env, {
         src: iframeSrc,
@@ -756,14 +755,14 @@ describes.realWin(
         height: 100,
         resizable: '',
       });
-      yield waitForAmpIframeLayoutPromise(doc, ampIframe);
-      const impl = ampIframe.implementation_;
+      await waitForAmpIframeLayoutPromise(doc, ampIframe);
+      const impl = await ampIframe.getImpl(false);
       const attemptChangeSize = env.sandbox.spy(impl, 'attemptChangeSize');
       impl.updateSize_(50, 114);
       expect(attemptChangeSize).to.have.not.been.called;
     });
 
-    it('should not resize amp-iframe if it is non-resizable', function* () {
+    it('should not resize amp-iframe if it is non-resizable', async () => {
       expectAsyncConsoleError(/iframe is not resizable/);
       const ampIframe = createAmpIframe(env, {
         src: iframeSrc,
@@ -771,8 +770,8 @@ describes.realWin(
         width: 100,
         height: 100,
       });
-      yield waitForAmpIframeLayoutPromise(doc, ampIframe);
-      const impl = ampIframe.implementation_;
+      await waitForAmpIframeLayoutPromise(doc, ampIframe);
+      const impl = await ampIframe.getImpl(false);
       const attemptChangeSize = env.sandbox.spy(impl, 'attemptChangeSize');
       impl.updateSize_(217, 114);
       expect(attemptChangeSize).to.have.not.been.called;
@@ -797,7 +796,7 @@ describes.realWin(
       expect(activateIframeSpy_).to.have.callCount(2);
     });
 
-    it('should detect non-tracking iframe', function* () {
+    it('should detect non-tracking iframe', async () => {
       const ampIframe = createAmpIframe(env, {
         src: clickableIframeSrc,
         sandbox: 'allow-scripts allow-same-origin',
@@ -805,12 +804,12 @@ describes.realWin(
         height: 11,
         poster: 'https://i.ytimg.com/vi/cMcCTVAFBWM/hqdefault.jpg',
       });
-      yield waitForAmpIframeLayoutPromise(doc, ampIframe);
-      const impl = ampIframe.implementation_;
+      await waitForAmpIframeLayoutPromise(doc, ampIframe);
+      const impl = await ampIframe.getImpl(false);
       expect(impl.looksLikeTrackingIframe_()).to.be.false;
     });
 
-    it('should detect tracking iframes', function* () {
+    it('should detect tracking iframes', async () => {
       expectAsyncConsoleError(/Only 1 analytics\/tracking iframe allowed/);
       const ampIframe1 = createAmpIframe(env, {
         src: clickableIframeSrc,
@@ -833,15 +832,15 @@ describes.realWin(
         height: 100,
         poster: 'https://i.ytimg.com/vi/cMcCTVAFBWM/hqdefault.jpg',
       });
-      yield waitForAmpIframeLayoutPromise(doc, ampIframe1);
-      yield waitForAmpIframeLayoutPromise(doc, ampIframe2);
-      yield waitForAmpIframeLayoutPromise(doc, ampIframe3);
+      await waitForAmpIframeLayoutPromise(doc, ampIframe1);
+      await waitForAmpIframeLayoutPromise(doc, ampIframe2);
+      await waitForAmpIframeLayoutPromise(doc, ampIframe3);
       // 5*5
-      const impl1 = ampIframe1.implementation_;
+      const impl1 = await ampIframe1.getImpl(false);
       // 10*10
-      const impl2 = ampIframe2.implementation_;
+      const impl2 = await ampIframe2.getImpl(false);
       // 100*100
-      const impl3 = ampIframe3.implementation_;
+      const impl3 = await ampIframe3.getImpl(false);
       // appended amp-iframe 5x5
       expect(impl1.looksLikeTrackingIframe_()).to.be.true;
       // appended amp-iframe 10x10
@@ -850,13 +849,13 @@ describes.realWin(
       // appended amp-iframe 100x100
       expect(impl3.looksLikeTrackingIframe_()).to.be.false;
       expect(impl3.getLayoutPriority()).to.equal(LayoutPriority.CONTENT);
-      yield Services.timerFor(env.win).promise(21);
+      await Services.timerFor(env.win).promise(21);
       expect(doc.querySelectorAll('[amp-removed]')).to.have.length(1);
       expect(doc.querySelectorAll('iframe')).to.have.length(1);
       expect(ampIframe3.querySelector('iframe')).to.not.be.null;
     });
 
-    it('should not detect traking iframe in amp container', function* () {
+    it('should not detect traking iframe in amp container', async () => {
       expectAsyncConsoleError(/Only 1 analytics\/tracking iframe allowed/);
       const ampIframeRealTracking = createAmpIframe(env, {
         src: iframeSrc,
@@ -876,15 +875,16 @@ describes.realWin(
         true
       );
       const ampIframe = createAmpIframe(env);
-      yield waitForAmpIframeLayoutPromise(doc, ampIframeRealTracking);
-      yield waitForAmpIframeLayoutPromise(doc, ampIframeInLightbox);
-      yield waitForAmpIframeLayoutPromise(doc, ampIframe);
+      await waitForAmpIframeLayoutPromise(doc, ampIframeRealTracking);
+      await waitForAmpIframeLayoutPromise(doc, ampIframeInLightbox);
+      await waitForAmpIframeLayoutPromise(doc, ampIframe);
+      const implIframe = await ampIframe.getImpl(false);
+      const implIframeRealTracking = await ampIframeRealTracking.getImpl(false);
+      const implIframeInLightbox = await ampIframeInLightbox.getImpl(false);
 
-      expect(ampIframeRealTracking.implementation_.looksLikeTrackingIframe_())
-        .to.be.true;
-      expect(ampIframe.implementation_.looksLikeTrackingIframe_()).to.be.false;
-      expect(ampIframeInLightbox.implementation_.looksLikeTrackingIframe_()).to
-        .be.false;
+      expect(implIframe.looksLikeTrackingIframe_()).to.be.false;
+      expect(implIframeRealTracking.looksLikeTrackingIframe_()).to.be.true;
+      expect(implIframeInLightbox.looksLikeTrackingIframe_()).to.be.false;
     });
 
     it('should correctly classify ads', () => {
@@ -920,15 +920,15 @@ describes.realWin(
       yield ampIframe.signals().whenSignal(CommonSignals.LOAD_START);
     });
 
-    it('should not cache intersection box', function* () {
+    it('should not cache intersection box', async () => {
       const ampIframe = createAmpIframe(env, {
         src: iframeSrc,
         sandbox: 'allow-scripts allow-same-origin',
         width: 300,
         height: 250,
       });
-      yield waitForAmpIframeLayoutPromise(doc, ampIframe);
-      const impl = ampIframe.implementation_;
+      await waitForAmpIframeLayoutPromise(doc, ampIframe);
+      const impl = await ampIframe.getImpl(false);
       const stub = env.sandbox.stub(impl, 'getLayoutBox');
       const box = {
         top: 100,
@@ -953,14 +953,14 @@ describes.realWin(
       expect(newIntersection.height).to.equal(250);
     });
 
-    it('should propagate `src` when container attribute is mutated', function* () {
+    it('should propagate `src` when container attribute is mutated', async () => {
       const ampIframe = createAmpIframe(env, {
         src: iframeSrc,
         width: 100,
         height: 100,
       });
-      yield waitForAmpIframeLayoutPromise(doc, ampIframe);
-      const impl = ampIframe.implementation_;
+      await waitForAmpIframeLayoutPromise(doc, ampIframe);
+      const impl = await ampIframe.getImpl(false);
       const iframe = ampIframe.querySelector('iframe');
       const newSrc = 'https://foo.bar';
       ampIframe.setAttribute('src', newSrc);
@@ -1063,15 +1063,15 @@ describes.realWin(
       });
     });
 
-    it('should propagate `title` when container attribute is mutated', function* () {
+    it('should propagate `title` when container attribute is mutated', async () => {
       const ampIframe = createAmpIframe(env, {
         src: iframeSrc,
         width: 100,
         height: 100,
         title: 'foo',
       });
-      yield waitForAmpIframeLayoutPromise(doc, ampIframe);
-      const impl = ampIframe.implementation_;
+      await waitForAmpIframeLayoutPromise(doc, ampIframe);
+      const impl = await ampIframe.getImpl(false);
       const iframe = ampIframe.querySelector('iframe');
       const newTitle = 'bar';
       ampIframe.setAttribute('title', newTitle);
@@ -1086,7 +1086,7 @@ describes.realWin(
         width: 100,
         height: 100,
       });
-      const impl = ampIframe.implementation_;
+      const impl = await ampIframe.getImpl(false);
       await waitForAmpIframeLayoutPromise(doc, ampIframe);
       expect(ampIframe.querySelector('iframe')).to.exist;
       expect(ampIframe.unlayoutOnPause()).to.be.false;
@@ -1107,7 +1107,7 @@ describes.realWin(
         width: 100,
         height: 100,
       });
-      const impl = ampIframe.implementation_;
+      const impl = await ampIframe.getImpl(false);
       await waitForAmpIframeLayoutPromise(doc, ampIframe);
       expect(ampIframe.querySelector('iframe')).to.exist;
       expect(ampIframe.unlayoutOnPause()).to.be.false;
@@ -1116,7 +1116,7 @@ describes.realWin(
       env.sandbox./*OK*/ stub(impl, 'unload');
       setDisplay(ampIframe, false);
 
-      await ampIframe.implementation_.getVsync().mutate(() => {});
+      await impl.getVsync().mutate(() => {});
       expect(impl.unload).to.not.be.called;
     });
 
@@ -1126,7 +1126,7 @@ describes.realWin(
         width: 100,
         height: 100,
       });
-      const impl = ampIframe.implementation_;
+      const impl = await ampIframe.getImpl(false);
       expect(ampIframe.querySelector('iframe')).to.not.exist;
       expect(ampIframe.unlayoutOnPause()).to.be.false;
 
@@ -1134,33 +1134,33 @@ describes.realWin(
       setDisplay(ampIframe, true);
       setDisplay(ampIframe, false);
 
-      await ampIframe.implementation_.getVsync().mutate(() => {});
+      await impl.getVsync().mutate(() => {});
       expect(impl.unload).to.not.be.called;
     });
 
     describe('throwIfCannotNavigate()', () => {
-      it('should do nothing if top navigation is allowed', function* () {
+      it('should do nothing if top navigation is allowed', async () => {
         const ampIframe = createAmpIframe(env, {
           src: iframeSrc,
           sandbox: 'allow-scripts allow-same-origin allow-top-navigation',
           width: 300,
           height: 250,
         });
-        yield waitForAmpIframeLayoutPromise(doc, ampIframe);
-        const impl = ampIframe.implementation_;
+        await waitForAmpIframeLayoutPromise(doc, ampIframe);
+        const impl = await ampIframe.getImpl(false);
         // Should be allowed if `allow-top-navigation` is set.
         expect(() => impl.throwIfCannotNavigate()).to.not.throw();
       });
 
-      it('should throw error if top navigation is not allowed', function* () {
+      it('should throw error if top navigation is not allowed', async () => {
         const ampIframe = createAmpIframe(env, {
           src: iframeSrc,
           sandbox: 'allow-scripts allow-same-origin',
           width: 300,
           height: 250,
         });
-        yield waitForAmpIframeLayoutPromise(doc, ampIframe);
-        const impl = ampIframe.implementation_;
+        await waitForAmpIframeLayoutPromise(doc, ampIframe);
+        const impl = await ampIframe.getImpl(false);
         // Should be allowed if `allow-top-navigation` is set.
         expect(() => impl.throwIfCannotNavigate()).to.throw(
           /allow-top-navigation/
@@ -1183,27 +1183,27 @@ describes.realWin(
         toggleExperiment(win, 'iframe-messaging', false, true);
       });
 
-      it('should support "postMessage" action', function* () {
+      it('should support "postMessage" action', async () => {
         const ampIframe = createAmpIframe(env, {
           src: messagingSrc,
           sandbox: 'allow-scripts allow-same-origin',
           width: 100,
           height: 100,
         });
-        yield waitForAmpIframeLayoutPromise(doc, ampIframe);
+        await waitForAmpIframeLayoutPromise(doc, ampIframe);
 
-        const impl = ampIframe.implementation_;
+        const impl = await ampIframe.getImpl(false);
         impl.executeAction({
           method: 'postMessage',
           args: 'foo-123',
           satisfiesTrust: () => true,
         });
 
-        yield waitForJsInIframe(1);
+        await waitForJsInIframe(1);
         expect(content).to.equal('foo-123');
       });
 
-      it('should not allow "postMessage" on srcdoc amp-iframe', function* () {
+      it('should not allow "postMessage" on srcdoc amp-iframe', async () => {
         const ampIframe = createAmpIframe(env, {
           srcdoc:
             '<script>addEventListener("message", e => {' +
@@ -1214,11 +1214,12 @@ describes.realWin(
           width: 100,
           height: 100,
         });
-        yield waitForAmpIframeLayoutPromise(doc, ampIframe);
+        await waitForAmpIframeLayoutPromise(doc, ampIframe);
+        const impl = await ampIframe.getImpl(false);
 
         const userError = env.sandbox.stub(user(), 'error');
         const addEventListener = env.sandbox.stub(win, 'addEventListener');
-        ampIframe.implementation_.executeAction({
+        impl.executeAction({
           method: 'postMessage',
           args: 'foo-123',
           satisfiesTrust: () => true,
@@ -1229,7 +1230,7 @@ describes.realWin(
           /"postMessage" action is only allowed with "src"/
         );
 
-        yield timer.promise(IFRAME_MESSAGE_TIMEOUT);
+        await timer.promise(IFRAME_MESSAGE_TIMEOUT);
         // The iframe's <script> will only post 'loaded-frame' on receipt of
         // a message from the parent, which should be disallowed above.
         expect(ranJs).to.equal(0);
@@ -1238,27 +1239,27 @@ describes.realWin(
         expect(addEventListener).to.not.be.called;
       });
 
-      it('should receive "message" events from <iframe>', function* () {
+      it('should receive "message" events from <iframe>', async () => {
         const ampIframe = createAmpIframe(env, {
           src: messagingSrc,
           sandbox: 'allow-scripts allow-same-origin',
           width: 100,
           height: 100,
         });
-        yield waitForAmpIframeLayoutPromise(doc, ampIframe);
+        await waitForAmpIframeLayoutPromise(doc, ampIframe);
+        const impl = await ampIframe.getImpl(false);
 
         const userError = env.sandbox.stub(user(), 'error');
         const actions = {trigger: env.sandbox.spy()};
         env.sandbox.stub(Services, 'actionServiceForDoc').returns(actions);
 
-        const impl = ampIframe.implementation_;
         impl.executeAction({
           method: 'postMessage',
           args: 'foo-123',
           satisfiesTrust: () => true,
         });
 
-        yield waitForJsInIframe(1);
+        await waitForJsInIframe(1);
         expect(actions.trigger).to.not.be.called;
         expect(userError).calledWithMatch(
           'amp-iframe',
@@ -1272,7 +1273,7 @@ describes.realWin(
           satisfiesTrust: () => true,
         });
 
-        yield waitForJsInIframe(2);
+        await waitForJsInIframe(2);
         // Once for 'loaded-iframe' and once for 'content-iframe'.
         expect(actions.trigger).to.be.calledTwice;
         const eventMatcher = env.sandbox.match({
@@ -1287,7 +1288,7 @@ describes.realWin(
         );
       });
 
-      it('should listen for Pym.js height event', function* () {
+      it('should listen for Pym.js height event', async () => {
         const ampIframe = createAmpIframe(env, {
           src: iframeSrc,
           sandbox: 'allow-scripts allow-same-origin',
@@ -1295,8 +1296,8 @@ describes.realWin(
           height: 200,
           resizable: '',
         });
-        yield waitForAmpIframeLayoutPromise(doc, ampIframe);
-        const impl = ampIframe.implementation_;
+        await waitForAmpIframeLayoutPromise(doc, ampIframe);
+        const impl = await ampIframe.getImpl(false);
         return new Promise((resolve, unusedReject) => {
           impl.updateSize_ = (height, width) => {
             resolve({height, width});
@@ -1316,7 +1317,7 @@ describes.realWin(
         });
       });
 
-      it('should listen for Pym.js width event', function* () {
+      it('should listen for Pym.js width event', async () => {
         const ampIframe = createAmpIframe(env, {
           src: iframeSrc,
           sandbox: 'allow-scripts allow-same-origin',
@@ -1324,8 +1325,8 @@ describes.realWin(
           height: 200,
           resizable: '',
         });
-        yield waitForAmpIframeLayoutPromise(doc, ampIframe);
-        const impl = ampIframe.implementation_;
+        await waitForAmpIframeLayoutPromise(doc, ampIframe);
+        const impl = await ampIframe.getImpl(false);
         return new Promise((resolve, unusedReject) => {
           impl.updateSize_ = (height, width) => {
             resolve({height, width});

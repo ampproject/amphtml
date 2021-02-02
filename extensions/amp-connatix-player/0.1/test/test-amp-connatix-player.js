@@ -88,9 +88,9 @@ describes.realWin(
       const cnx = await getConnatixPlayer({
         'data-player-id': 'f721b0d8-7a79-42b6-b637-fa4e86138ed9',
       });
+      const obj = await cnx.getImpl();
       const iframe = cnx.querySelector('iframe');
       expect(iframe).to.not.be.null;
-      const obj = cnx.implementation_;
       obj.unlayoutCallback();
       expect(cnx.querySelector('iframe')).to.be.null;
       expect(obj.iframe_).to.be.null;

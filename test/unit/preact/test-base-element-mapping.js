@@ -399,7 +399,8 @@ describes.realWin('PreactBaseElement', spec, (env) => {
 
       it('should rerender after SSR hydration', async () => {
         // Only rendering updates attributes.
-        element.implementation_.mutateProps({name: 'A'});
+        const impl = await element.getImpl();
+        impl.mutateProps({name: 'A'});
         await waitFor(() => component.callCount > 1, 'component rendered');
         expect(component).to.be.calledTwice;
         expect(componentEl.getAttribute('data-name')).to.equal('A');

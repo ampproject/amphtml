@@ -285,10 +285,11 @@ describes.realWin(
       }
     );
 
-    it('should be ok without service worker.', () => {
+    it('should be ok without service worker.', async () => {
       const install = doc.createElement('amp-install-serviceworker');
-      const implementation = install.implementation_;
-      expect(implementation).to.exist;
+      install.setAttribute('layout', 'nodisplay');
+      doc.body.appendChild(install);
+      const implementation = await install.getImpl(false);
       install.setAttribute('src', 'https://example.com/sw.js');
       implementation.win = {
         location: {
@@ -300,10 +301,11 @@ describes.realWin(
       expect(maybeInstallUrlRewriteStub).to.be.calledOnce;
     });
 
-    it('should do nothing with non-matching origins', () => {
+    it('should do nothing with non-matching origins', async () => {
       const install = doc.createElement('amp-install-serviceworker');
-      const implementation = install.implementation_;
-      expect(implementation).to.exist;
+      install.setAttribute('layout', 'nodisplay');
+      doc.body.appendChild(install);
+      const implementation = await install.getImpl(false);
       install.setAttribute('src', 'https://other-origin.com/sw.js');
       const p = new Promise(() => {});
       implementation.win = {
@@ -324,10 +326,11 @@ describes.realWin(
       expect(install.children).to.have.length(0);
     });
 
-    it('should do nothing on proxy without iframe URL', () => {
+    it('should do nothing on proxy without iframe URL', async () => {
       const install = doc.createElement('amp-install-serviceworker');
-      const implementation = install.implementation_;
-      expect(implementation).to.exist;
+      install.setAttribute('layout', 'nodisplay');
+      doc.body.appendChild(install);
+      const implementation = await install.getImpl(false);
       install.setAttribute('src', 'https://cdn.ampproject.org/sw.js');
       let calledSrc;
       const p = new Promise(() => {});

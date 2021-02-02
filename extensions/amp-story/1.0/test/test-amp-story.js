@@ -253,12 +253,11 @@ describes.realWin(
       expect(pages[1].hasAttribute('active')).to.be.false;
 
       // Stubbing because we need to assert synchronously
-      env.sandbox
-        .stub(element.implementation_, 'mutateElement')
-        .callsFake((mutator) => {
-          mutator();
-          return Promise.resolve();
-        });
+      const impl = await element.getImpl(false);
+      env.sandbox.stub(impl, 'mutateElement').callsFake((mutator) => {
+        mutator();
+        return Promise.resolve();
+      });
 
       const eventObj = createEvent('keydown');
       eventObj.key = Keys.RIGHT_ARROW;

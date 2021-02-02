@@ -34,7 +34,7 @@ describes.realWin(
       );
     }
 
-    function getPin(
+    async function getPin(
       pinDo,
       pinUrl,
       pinMedia,
@@ -54,13 +54,13 @@ describes.realWin(
       pin.setAttribute('width', width);
       pin.setAttribute('height', height);
       div.appendChild(pin);
-      pin.implementation_.buildCallback();
-      return pin.implementation_.layoutCallback().then(() => {
-        return pin;
-      });
+      const impl = await pin.getImpl(false);
+      impl.buildCallback();
+      await impl.layoutCallback();
+      return pin;
     }
 
-    function getEmbedPin(pinID, pinAlt, mockResponse) {
+    async function getEmbedPin(pinID, pinAlt, mockResponse) {
       const div = document.createElement('div');
       env.win.document.body.appendChild(div);
 
@@ -77,10 +77,10 @@ describes.realWin(
         pin.setAttribute('alt', pinAlt);
       }
       div.appendChild(pin);
-      pin.implementation_.buildCallback();
-      return pin.implementation_.layoutCallback().then(() => {
-        return pin;
-      });
+      const impl = await pin.getImpl(false);
+      impl.buildCallback();
+      await impl.layoutCallback();
+      return pin;
     }
 
     it('renders', () => {

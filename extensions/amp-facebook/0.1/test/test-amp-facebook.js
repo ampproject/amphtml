@@ -101,7 +101,8 @@ describes.realWin(
 
     it('adds loading element correctly', async () => {
       const ampFB = await getAmpFacebook(fbVideoHref, 'post');
-      expect(ampFB.implementation_.toggleLoadingCounter_).to.equal(1);
+      const impl = await ampFB.getImpl(false);
+      expect(impl.toggleLoadingCounter_).to.equal(1);
     });
 
     it('adds fb-post element correctly', () => {
@@ -229,9 +230,9 @@ describes.realWin(
 
     it('removes iframe after unlayoutCallback', async () => {
       const ampFB = await getAmpFacebook(fbPostHref);
+      const obj = await ampFB.getImpl(false);
       const iframe = ampFB.querySelector('iframe');
       expect(iframe).to.not.be.null;
-      const obj = ampFB.implementation_;
       obj.unlayoutCallback();
       expect(ampFB.querySelector('iframe')).to.be.null;
       expect(obj.iframe_).to.be.null;

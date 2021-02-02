@@ -32,14 +32,14 @@ describes.realWin(
     const endDate = new Date(ISOEndDate);
     const twoDaysBeforeEndDate = new Date(endDate - 86400000 * 2); //substract 2 days
 
-    beforeEach(() => {
+    beforeEach(async () => {
       ({win /*, sandbox*/} = env);
 
       element = win.document.createElement('amp-date-countdown');
       element.setAttribute('end-date', ISOEndDate);
       element.setAttribute('layout', 'responsive');
       win.document.body.appendChild(element);
-      impl = element.implementation_;
+      impl = await element.getImpl(false);
     });
 
     it(

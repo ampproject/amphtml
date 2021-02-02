@@ -111,9 +111,9 @@ describes.realWin(
       });
     });
 
-    it('should close on ESC', () => {
+    it('should close on ESC', async () => {
       const lightbox = createLightbox();
-      const impl = lightbox.implementation_;
+      const impl = await lightbox.getImpl(false);
       impl.getHistory_ = () => {
         return {
           pop: () => {},
@@ -130,14 +130,14 @@ describes.realWin(
       expect(setupCloseSpy).to.be.calledOnce;
     });
 
-    it('should not change focus or create a button if a focus has been made in the modal', () => {
+    it('should not change focus or create a button if a focus has been made in the modal', async () => {
       const openButton = createOpeningButton('openingButton');
       const lightbox = createLightbox();
       const myLink = createLink('randomLink');
       myLink.setAttribute('autofocus', '');
       lightbox.appendChild(myLink);
 
-      const impl = lightbox.implementation_;
+      const impl = await lightbox.getImpl(false);
       impl.getHistory_ = () => {
         return {
           pop: () => {},
@@ -160,11 +160,11 @@ describes.realWin(
       });
     });
 
-    it('should focus on close button if no handmade focus but has close button', () => {
+    it('should focus on close button if no handmade focus but has close button', async () => {
       const lightbox = createLightbox();
       const closeButton = createCloseButton();
       lightbox.appendChild(closeButton);
-      const impl = lightbox.implementation_;
+      const impl = await lightbox.getImpl(false);
 
       const tryFocusSpy = env.sandbox.spy(dom, 'tryFocus');
       const finalizeSpy = env.sandbox.spy(impl, 'finalizeOpen_');
@@ -193,10 +193,10 @@ describes.realWin(
       });
     });
 
-    it('should create close button and focus on it if no handmade focus and no close button', () => {
+    it('should create close button and focus on it if no handmade focus and no close button', async () => {
       const lightbox = createLightbox();
+      const impl = await lightbox.getImpl(false);
 
-      const impl = lightbox.implementation_;
       const tryFocusSpy = env.sandbox.spy(dom, 'tryFocus');
       const finalizeSpy = env.sandbox.spy(impl, 'finalizeOpen_');
       const createCloseButtonSpy = env.sandbox.spy(
@@ -224,11 +224,11 @@ describes.realWin(
       });
     });
 
-    it('should stay in modal if focus stays in modal and close if outside', () => {
+    it('should stay in modal if focus stays in modal and close if outside', async () => {
       const lightbox = createLightbox();
       const insideLink = createLink('insideLink');
       lightbox.appendChild(insideLink);
-      const impl = lightbox.implementation_;
+      const impl = await lightbox.getImpl(false);
 
       const outsideLink = createLink('outsideLink');
       doc.body.appendChild(outsideLink);
@@ -264,12 +264,12 @@ describes.realWin(
       });
     });
 
-    it('should return focus to source element after close', () => {
+    it('should return focus to source element after close', async () => {
       const openButton = createOpeningButton('openingButton');
       const lightbox = createLightbox();
       const closeButton = createCloseButton();
       lightbox.appendChild(closeButton);
-      const impl = lightbox.implementation_;
+      const impl = await lightbox.getImpl(false);
 
       const openSpy = env.sandbox.spy(impl, 'finalizeOpen_');
       const closeSpy = env.sandbox.spy(impl, 'finalizeClose_');
@@ -289,10 +289,10 @@ describes.realWin(
       });
     });
 
-    it('should create `i-amphtml-ad-close-header` but no close button if param then focus on it', () => {
+    it('should create `i-amphtml-ad-close-header` but no close button if param then focus on it', async () => {
       const lightbox = createLightbox();
       lightbox.setAttribute('close-button', '');
-      const impl = lightbox.implementation_;
+      const impl = await lightbox.getImpl(false);
 
       const tryFocusSpy = env.sandbox.spy(dom, 'tryFocus');
       const finalizeSpy = env.sandbox.spy(impl, 'finalizeOpen_');

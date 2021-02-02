@@ -76,12 +76,13 @@ describes.realWin(
       }
       doc.body.appendChild(v);
       await v.build();
+      const impl = await v.getImpl(false);
 
       if (opt_noLayout) {
         return;
       }
       if (opt_beforeLayoutCallback) {
-        opt_beforeLayoutCallback(v);
+        opt_beforeLayoutCallback(v, impl);
       }
       try {
         await v.layoutCallback();
@@ -102,9 +103,10 @@ describes.realWin(
         width: 160,
         height: 90,
       });
+      const impl = await v.getImpl(false);
       const preconnect = Services.preconnectFor(win);
       env.sandbox.spy(preconnect, 'url');
-      v.implementation_.preconnectCallback();
+      impl.preconnectCallback();
       expect(preconnect.url).to.have.been.calledWithExactly(
         env.sandbox.match.object, // AmpDoc
         'video.mp4',
@@ -282,11 +284,12 @@ describes.realWin(
           'autoplay': '',
           'muted': '',
           'loop': '',
-        }).catch((e) => {
+        }).catch(async (e) => {
           const v = doc.querySelector('amp-video');
+          const impl = await v.getImpl(false);
           // preconnectCallback could get called again after this test is done, and
           // trigger an other "start with https://" error that would crash mocha.
-          env.sandbox.stub(v.implementation_, 'preconnectCallback');
+          env.sandbox.stub(impl, 'preconnectCallback');
           throw e;
         })
       ).to.be.rejectedWith(/start with/);
@@ -481,13 +484,12 @@ describes.realWin(
           height: 90,
         },
         null,
-        function (element) {
-          const impl = element.implementation_;
+        function (element, impl) {
           env.sandbox.stub(impl, 'isVideoSupported_').returns(false);
           env.sandbox.spy(impl, 'toggleFallback');
         }
       );
-      const impl = v.implementation_;
+      const impl = await v.getImpl(false);
       expect(impl.toggleFallback.called).to.be.true;
       expect(impl.toggleFallback).to.have.been.calledWith(true);
     });
@@ -502,8 +504,7 @@ describes.realWin(
           height: 90,
         },
         null,
-        function (element) {
-          const impl = element.implementation_;
+        function (element, impl) {
           env.sandbox.stub(impl.video_, 'play').returns(playPromise);
           impl.play();
         }
@@ -523,7 +524,8 @@ describes.realWin(
         },
         [s0, s1]
       );
-      const ele = video.implementation_.video_;
+      const impl = await video.getImpl(false);
+      const ele = impl.video_;
       ele.play = env.sandbox.stub();
       ele.load = env.sandbox.stub();
       Object.defineProperty(ele, 'error', {
@@ -553,7 +555,8 @@ describes.realWin(
         },
         [s0, s1]
       );
-      const ele = video.implementation_.video_;
+      const impl = await video.getImpl(false);
+      const ele = impl.video_;
       ele.play = env.sandbox.stub();
       ele.load = env.sandbox.stub();
       Object.defineProperty(ele, 'error', {
@@ -661,7 +664,7 @@ describes.realWin(
         width: 160,
         height: 90,
       });
-      const impl = v.implementation_;
+      const impl = await v.getImpl(false);
       await Promise.resolve();
       impl.mute();
       await listenOncePromise(v, VideoEvents.MUTED);
@@ -697,9 +700,9 @@ describes.realWin(
        *     placeholder attribute.
        * @param {boolean} addBlurClass Whether the child should have the
        *     class that allows it to be a blurred placeholder.
-       * @return {AmpImg} An amp-video potentially with a blurry placeholder
+       * @return {!Promise<AmpImg>} An amp-video potentially with a blurry placeholder
        */
-      function getVideoWithBlur(addPlaceholder, addBlurClass) {
+      async function getVideoWithBlur(addPlaceholder, addBlurClass) {
         const v = doc.createElement('amp-video');
         v.setAttribute('layout', 'fixed');
         v.setAttribute('width', '300px');
@@ -718,13 +721,13 @@ describes.realWin(
         doc.body.appendChild(v);
         v.appendChild(img);
         v.build();
-        const impl = v.implementation_;
+        const impl = await v.getImpl(false);
         impl.togglePlaceholder = env.sandbox.stub();
         return impl;
       }
 
-      it('should only fade out blurry image placeholders', () => {
-        let impl = getVideoWithBlur(true, true);
+      it('should only fade out blurry image placeholders', async () => {
+        let impl = await getVideoWithBlur(true, true);
         impl.buildCallback();
         impl.layoutCallback();
         impl.firstLayoutCompleted();
@@ -733,7 +736,7 @@ describes.realWin(
         expect(img.style.opacity).to.equal('0');
         expect(impl.togglePlaceholder).to.not.be.called;
 
-        impl = getVideoWithBlur(true, false);
+        impl = await getVideoWithBlur(true, false);
         impl.buildCallback();
         impl.layoutCallback();
         impl.firstLayoutCompleted();
@@ -742,7 +745,7 @@ describes.realWin(
         expect(img.style.opacity).to.be.equal('');
         expect(impl.togglePlaceholder).to.have.been.calledWith(false);
 
-        impl = getVideoWithBlur(false, true);
+        impl = await getVideoWithBlur(false, true);
         impl.buildCallback();
         impl.layoutCallback();
         impl.firstLayoutCompleted();
@@ -751,7 +754,7 @@ describes.realWin(
         expect(img.style.opacity).to.be.equal('');
         expect(impl.togglePlaceholder).to.have.been.calledWith(false);
 
-        impl = getVideoWithBlur(false, false);
+        impl = await getVideoWithBlur(false, false);
         impl.buildCallback();
         impl.layoutCallback();
         impl.firstLayoutCompleted();
@@ -760,8 +763,8 @@ describes.realWin(
         expect(impl.togglePlaceholder).to.have.been.calledWith(false);
       });
 
-      it('should fade out the blurry image placeholder on video load', () => {
-        const impl = getVideoWithBlur(true, true);
+      it('should fade out the blurry image placeholder on video load', async () => {
+        const impl = await getVideoWithBlur(true, true);
         impl.buildCallback();
         impl.layoutCallback();
         impl.firstLayoutCompleted();
@@ -771,8 +774,8 @@ describes.realWin(
         expect(impl.togglePlaceholder).to.not.be.called;
       });
 
-      it('should fade out the blurry image placeholder on poster load', () => {
-        const impl = getVideoWithBlur(true, true);
+      it('should fade out the blurry image placeholder on poster load', async () => {
+        const impl = await getVideoWithBlur(true, true);
         impl.buildCallback();
         impl.layoutCallback();
         const el = impl.element;
@@ -814,8 +817,8 @@ describes.realWin(
                 height: 90,
               },
               null,
-              (element) => {
-                expect(element.implementation_.prerenderAllowed()).to.be.false;
+              (element, impl) => {
+                expect(impl.prerenderAllowed()).to.be.false;
                 resolve();
               }
             );
@@ -832,8 +835,8 @@ describes.realWin(
                 height: 90,
               },
               null,
-              (element) => {
-                expect(element.implementation_.prerenderAllowed()).to.be.false;
+              (element, impl) => {
+                expect(impl.prerenderAllowed()).to.be.false;
                 resolve();
               }
             );
@@ -851,8 +854,8 @@ describes.realWin(
                 height: 90,
               },
               [source],
-              (element) => {
-                expect(element.implementation_.prerenderAllowed()).to.be.false;
+              (element, impl) => {
+                expect(impl.prerenderAllowed()).to.be.false;
                 resolve();
               }
             );
@@ -871,8 +874,8 @@ describes.realWin(
                 height: 90,
               },
               null,
-              (element) => {
-                expect(element.implementation_.prerenderAllowed()).to.be.true;
+              (element, impl) => {
+                expect(impl.prerenderAllowed()).to.be.true;
                 resolve();
               }
             );
@@ -896,8 +899,8 @@ describes.realWin(
                 height: 90,
               },
               [source],
-              (element) => {
-                expect(element.implementation_.prerenderAllowed()).to.be.true;
+              (element, impl) => {
+                expect(impl.prerenderAllowed()).to.be.true;
                 resolve();
               }
             );
@@ -926,8 +929,8 @@ describes.realWin(
                 height: 90,
               },
               [source, cachedSource],
-              (element) => {
-                expect(element.implementation_.prerenderAllowed()).to.be.true;
+              (element, impl) => {
+                expect(impl.prerenderAllowed()).to.be.true;
                 resolve();
               }
             );
@@ -946,8 +949,8 @@ describes.realWin(
                 height: 90,
               },
               null,
-              (element) => {
-                expect(element.implementation_.prerenderAllowed()).to.be.true;
+              (element, impl) => {
+                expect(impl.prerenderAllowed()).to.be.true;
                 resolve();
               }
             );
@@ -1230,9 +1233,8 @@ describes.realWin(
                 height: 90,
               },
               null,
-              (element) => {
-                expect(element.implementation_.isCachedByCDN_(element)).to.be
-                  .false;
+              (element, impl) => {
+                expect(impl.isCachedByCDN_(element)).to.be.false;
                 resolve();
               }
             );
@@ -1250,9 +1252,8 @@ describes.realWin(
                 height: 90,
               },
               null,
-              (element) => {
-                expect(element.implementation_.isCachedByCDN_(element)).to.be
-                  .false;
+              (element, impl) => {
+                expect(impl.isCachedByCDN_(element)).to.be.false;
                 resolve();
               }
             );
