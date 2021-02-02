@@ -17,7 +17,7 @@
 /* global require, process */
 
 const argv = require('minimist')(process.argv.slice(2));
-const gulp = require('./third_party/gulp-help-4')(require('gulp'));
+const gulp = require('gulp');
 const {cyan, red} = require('ansi-colors');
 const {isCiBuild} = require('./build-system/common/ci');
 const {log} = require('./build-system/common/logging');
@@ -120,7 +120,7 @@ function checkFlags(name, taskFunc) {
       cyan(`gulp ${name}`) + ':',
       cyan(invalidFlags.join(', '))
     );
-    log('For detailed usage information, run', cyan('gulp help') + '.');
+    log('For detailed usage information, run', cyan('gulp --tasks') + '.');
     if (validFlags.length > 0) {
       log('Valid flags for', cyan(`gulp ${name}`) + ':');
       validFlags.forEach((key) => {
