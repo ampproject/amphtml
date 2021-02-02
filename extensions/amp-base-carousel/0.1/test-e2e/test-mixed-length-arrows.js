@@ -19,8 +19,7 @@ import {getNextArrow, getPrevArrow} from './helpers';
 describes.endtoend(
   'amp-base-carousel:0.1 - mixed length carousel arrows',
   {
-    testUrl:
-      'http://localhost:8000/test/manual/amp-base-carousel/no-arrows.amp.html',
+    manualFixture: 'amp-base-carousel/no-arrows.amp.html',
     environments: ['single'],
   },
   async function (env) {

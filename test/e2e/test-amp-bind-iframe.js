@@ -17,8 +17,7 @@
 describes.endtoend(
   'amp-bind',
   {
-    testUrl:
-      'http://localhost:8000/test/fixtures/e2e/amp-bind/bind-iframe.html',
+    fixture: 'amp-bind/bind-iframe.html',
   },
   async (env) => {
     let controller;

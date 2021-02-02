@@ -28,8 +28,7 @@ const SLIDE_COUNT = 7;
 describes.endtoend(
   'amp-base-carousel:1.0 - arrows with custom arrows',
   {
-    testUrl:
-      'http://localhost:8000/test/manual/amp-base-carousel/1.0/custom-arrows.amp.html',
+    manualFixture: 'amp-base-carousel/1.0/custom-arrows.amp.html',
     experiments: ['bento-carousel'],
     environments: ['single', 'viewer-demo'],
   },

@@ -17,8 +17,7 @@
 describes.endtoend(
   'amp-position-observer target in AMPHTML ad',
   {
-    testUrl:
-      'http://localhost:8000/test/fixtures/e2e/amp-position-observer/target-id.html',
+    fixture: 'amp-position-observer/target-id.html',
     environments: 'amp4ads-preset',
     initialRect: {width: 800, height: 600},
   },

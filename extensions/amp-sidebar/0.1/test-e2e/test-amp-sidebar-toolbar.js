@@ -17,8 +17,7 @@
 describes.endtoend(
   'amp-sidebar with toolbar',
   {
-    testUrl:
-      'http://localhost:8000/test/fixtures/e2e/amp-sidebar/amp-sidebar-toolbar.html',
+    fixture: 'amp-sidebar/amp-sidebar-toolbar.html',
     environments: ['single', 'viewer-demo'],
   },
   async (env) => {

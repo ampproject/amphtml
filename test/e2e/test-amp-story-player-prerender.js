@@ -30,8 +30,7 @@ function timeout(ms) {
 describes.endtoend(
   'player prerendering',
   {
-    testUrl:
-      'http://localhost:8000/test/fixtures/e2e/amp-story-player/pre-rendering.html',
+    fixture: 'amp-story-player/pre-rendering.html',
     initialRect: {width: VIEWPORT.WIDTH, height: VIEWPORT.HEIGHT},
     environments: ['single'],
   },
