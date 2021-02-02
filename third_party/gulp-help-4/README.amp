@@ -1,0 +1,11 @@
+URL: https://github.com/chmontgomery/gulp-help/tree/gulp4
+License: MIT
+License File: https://github.com/chmontgomery/gulp-help/blob/gulp4/license
+
+Description:
+Copy of index.js, lib/, and themes/default.js from the gulp4 branch.
+This version is not going to be published to npm. See this link:
+https://github.com/chmontgomery/gulp-help/issues/31#issuecomment-449979322
+
+Local Modifications:
+- Use `ansi-colors` instead of `chalk` in themes/default.js

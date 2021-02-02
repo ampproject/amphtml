@@ -115,7 +115,6 @@
     "gulp-eslint": "6.0.0",
     "gulp-eslint-if-fixed": "1.0.0",
     "gulp-file": "0.4.0",
-    "gulp-help": "chmontgomery/gulp-help#gulp4",
     "gulp-if": "3.0.0",
     "gulp-jsonlint": "1.3.2",
     "gulp-jsonminify": "1.1.0",
