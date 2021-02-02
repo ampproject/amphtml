@@ -47,7 +47,6 @@ async function prBuildWorkflow() {
   if (
     buildTargetsInclude(
       Targets.RUNTIME,
-      Targets.FLAG_CONFIG,
       Targets.INTEGRATION_TEST,
       Targets.E2E_TEST,
       Targets.VISUAL_DIFF
@@ -70,8 +69,7 @@ async function prBuildWorkflow() {
     await signalPrDeployUpload('skipped');
     printSkipMessage(
       jobName,
-      'this PR does not affect the runtime, flag configs, integration ' +
-        'tests, end-to-end tests, or visual diff tests'
+      'this PR does not affect the runtime, integration tests, end-to-end tests, or visual diff tests'
     );
   }
 }

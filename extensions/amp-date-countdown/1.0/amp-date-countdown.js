@@ -120,7 +120,7 @@ AmpDateCountdown['props'] = {
   'whenEnded': {attr: 'when-ended', type: 'string'},
   'locale': {attr: 'locale', type: 'string'},
   'biggestUnit': {attr: 'biggest-unit', type: 'string'},
-  'countUp': {attr: 'data-count-up', type: 'boolean'},
+  'countUp': {attr: 'count-up', type: 'boolean'},
 };
 
 /**
