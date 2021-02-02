@@ -109,7 +109,7 @@ Bento enabled components in standalone use are highly interactive through their 
 
 The `amp-youtube` component API is accessible by including the following script tag in your document:
 
-```
+```js
 await customElements.whenDefined('amp-youtube');
 const videoHandle = await video.getApi();
 ```
@@ -122,7 +122,7 @@ The `amp-youtube` API allows you to perform the following actions:
 
 Plays the video.
 
-```
+```js
 videoHandle.play();
 ```
 
@@ -130,7 +130,7 @@ videoHandle.play();
 
 Pauses the video.
 
-```
+```js
 videoHandle.pause();
 ```
 
@@ -138,7 +138,7 @@ videoHandle.pause();
 
 Mutes the video.
 
-```
+```js
 videoHandle.mute();
 ```
 
@@ -146,7 +146,7 @@ videoHandle.mute();
 
 Unmutes the video.
 
-```
+```js
 videoHandle.unmute();
 ```
 
@@ -154,7 +154,7 @@ videoHandle.unmute();
 
 Expands the video to fullscreen when possible.
 
-```
+```js
 videoHandle.requestFullscreen();
 ```
 
@@ -166,7 +166,7 @@ It also exposes the following read-only properties:
 
 The current playback time in seconds.
 
-```
+```js
 console.log(videoHandle.currentTime);
 ```
 
@@ -174,7 +174,7 @@ console.log(videoHandle.currentTime);
 
 The video's duration in seconds, when it's known (e.g. is not a livestream).
 
-```
+```js
 console.log(videoHandle.duration);
 ```
 
@@ -182,7 +182,7 @@ console.log(videoHandle.duration);
 
 Whether the video autoplays.
 
-```
+```js
 console.log(videoHandle.autoplay);
 ```
 
@@ -190,7 +190,7 @@ console.log(videoHandle.autoplay);
 
 Whether the video shows controls.
 
-```
+```js
 console.log(videoHandle.controls);
 ```
 
@@ -198,7 +198,7 @@ console.log(videoHandle.controls);
 
 Whether the video loops.
 
-```
+```js
 console.log(videoHandle.loop);
 ```
 

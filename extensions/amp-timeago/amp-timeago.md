@@ -62,7 +62,7 @@ The example below demonstrates `amp-timeago` component in standalone use.
 
 [example preview="top-frame" playground="false"]
 
-```
+```html
 <head>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-timeago-1.0.css">
@@ -101,7 +101,7 @@ The example below demonstrates `amp-timeago` component in standalone use.
 
 Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
 
-```
+```html
 <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-timeago-1.0.css">
 ```
 
