@@ -66,7 +66,8 @@ describes.realWin(
       return el
         .build()
         .then(() => el.getImpl(false))
-        .then((impl) => {
+        .then((aImpl) => {
+          impl = aImpl;
           env.sandbox
             .stub(impl, 'measureMutateElement')
             .callsFake(measureMutateElementStub);
