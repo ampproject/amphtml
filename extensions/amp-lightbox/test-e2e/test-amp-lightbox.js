@@ -14,17 +14,22 @@
  * limitations under the License.
  */
 
-const pageWidth = 800;
-const pageHeight = 600;
-
 describes.endtoend(
   'amp-lightbox',
   {
-    testUrl:
-      'http://localhost:8000/test/fixtures/e2e/amp-lightbox/1.0/amp-lightbox.html',
-    environments: ['single', 'viewer-demo'],
-    experiments: ['bento'],
-    initialRect: {width: pageWidth, height: pageHeight},
+    fixture: 'amp-lightbox/amp-lightbox.html',
+
+    versions: {
+      '0.1': {
+        environments: 'ampdoc-amp4ads-preset',
+        experiments: ['amp-lightbox-a4a-proto'],
+      },
+      '1.0': {
+        environments: ['single', 'viewer-demo'],
+        experiments: ['bento'],
+        initialRect: {width: 800, height: 800},
+      },
+    },
   },
   async (env) => {
     let controller;

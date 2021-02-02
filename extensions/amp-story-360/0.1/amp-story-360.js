@@ -63,7 +63,7 @@ const MIN_WEBGL_DISTANCE = 2;
  * @return {!Element}
  */
 const buildActivateButtonTemplate = (element) => htmlFor(element)`
-    <button class="i-amphtml-story-360-activate-button">
+    <button class="i-amphtml-story-360-activate-button" role="button">
       <span class="i-amphtml-story-360-activate-text"></span>
       <span class="i-amphtml-story-360-activate-button-icon"
         >360°

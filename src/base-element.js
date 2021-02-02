@@ -121,9 +121,6 @@ export class BaseElement {
     properties.
     */
 
-    /** @package {!Layout} */
-    this.layout_ = Layout.NODISPLAY;
-
     /** @public @const {!Window} */
     this.win = toWin(element.ownerDocument.defaultView);
 
@@ -189,7 +186,7 @@ export class BaseElement {
 
   /** @return {!Layout} */
   getLayout() {
-    return this.layout_;
+    return this.element.getLayout();
   }
 
   /**
