@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import {getCarousel, getScrollingElement, getSlide} from './helpers';
-import {useStyles} from '../base-carousel.jss';
+import ctrlHelpers from './helpers';
 
 const pageWidth = 800;
 const pageHeight = 600;
@@ -23,70 +22,79 @@ const pageHeight = 600;
 describes.endtoend(
   'amp-base-carousel:1.0 - non-looping',
   {
+<<<<<<< HEAD:extensions/amp-base-carousel/1.0/test-e2e/test-non-looping.js
     fixture: 'amp-base-carousel/1.0/non-looping.amp.html',
     experiments: ['bento-carousel'],
     environments: ['single', 'viewer-demo'],
+=======
+    fixture: 'amp-base-carousel/non-looping.amp.html',
+>>>>>>> 97be090e6 (Unify test-non-looping):extensions/amp-base-carousel/test-e2e/test-non-looping.js
     initialRect: {width: pageWidth, height: pageHeight},
+    environments: ['single', 'viewer-demo'],
+    versions: {
+      '0.1': {
+        experiments: ['amp-base-carousel', 'layers'],
+      },
+      '1.0': {
+        experiments: ['bento-carousel'],
+      },
+    },
   },
   async (env) => {
     /** The total number of slides in the carousel */
     const SLIDE_COUNT = 4;
-    const styles = useStyles();
-    let controller;
+    let ctrl;
 
-    function prop(el, name) {
-      return controller.getElementProperty(el, name);
-    }
-
-    beforeEach(async () => {
-      controller = env.controller;
-      const carousel = await getCarousel(controller);
-      await controller.switchToShadowRoot(carousel);
+    beforeEach(() => {
+      ctrl = ctrlHelpers(env);
+      ctrl.maybeSwitchToShadow();
     });
 
     it('should render correctly', async () => {
-      const el = await getScrollingElement(styles, controller);
-
-      await expect(prop(el, 'scrollWidth')).to.equal(pageWidth * SLIDE_COUNT);
+      const el = await ctrl.getScrollingElement();
+      await expect(ctrl.prop(el, 'scrollWidth')).to.equal(
+        pageWidth * SLIDE_COUNT
+      );
+      await ctrl.expectSlideImgLoaded(0);
     });
 
     it('should snap when scrolling', async () => {
-      const el = await getScrollingElement(styles, controller);
-      const firstSlide = await getSlide(styles, controller, 0);
+      const el = await ctrl.getScrollingElement();
+      const firstSlide = await ctrl.getSlide(0);
 
-      const slideWidth = await prop(firstSlide, 'offsetWidth');
-      const scrollLeft = await prop(el, 'scrollLeft');
+      // Ensure the first two slides' imgs loaded
+      await ctrl.expectSlideImgLoaded(0);
+      await ctrl.expectSlideImgLoaded(1);
+
+      const slideWidth = await ctrl.prop(firstSlide, 'offsetWidth');
+      const scrollLeft = await ctrl.prop(el, 'scrollLeft');
       const snappedScrollLeft = scrollLeft + slideWidth;
       const requestedScrollLeft = snappedScrollLeft + 1;
 
-      await controller.scrollTo(el, {left: requestedScrollLeft});
+      await ctrl.scrollTo(el, {left: requestedScrollLeft});
       // We should have snapped to the edge of the slide rather than the
       // requested scroll position.
-      await expect(prop(el, 'scrollLeft')).to.equal(snappedScrollLeft);
+      await expect(ctrl.prop(el, 'scrollLeft')).to.equal(snappedScrollLeft);
     });
 
     it('should have the correct scroll position when resizing', async () => {
       // Note: 513 seems to be the smallest settable width.
-      await controller.setWindowRect({
-        width: 800,
-        height: 600,
-      });
+      await ctrl.setWin(800, 600);
+      const firstSlide = await ctrl.getSlide(0);
 
-      const firstSlide = await getSlide(styles, controller, 0);
+      // Ensure the first two slides' imgs loaded
+      await ctrl.expectSlideImgLoaded(0);
+      await ctrl.expectSlideImgLoaded(1);
 
-      await expect(controller.getElementRect(firstSlide)).to.include({
+      await expect(ctrl.rect(firstSlide)).to.include({
         'x': 0,
         'width': 800,
       });
 
-      await controller.setWindowRect({
-        width: 900,
-        height: 600,
-      });
-
+      await ctrl.setWin(900, 600);
       // Normally, resizing would cause the position to change. We're testing
       // that the carousel moves this to the correct position again.
-      await expect(controller.getElementRect(firstSlide)).to.include({
+      await expect(ctrl.rect(firstSlide)).to.include({
         'x': 0,
         'width': 900,
       });
