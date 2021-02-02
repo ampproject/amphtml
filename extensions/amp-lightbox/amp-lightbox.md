@@ -85,7 +85,7 @@ Bento enabled components in standalone use are highly interactive through their 
 
 The `amp-lightbox` component API is accessible by including the following script tag in your document:
 
-```
+```js
 await customElements.whenDefined('amp-lightbox');
 const api = await lightbox.getApi();
 ```
@@ -97,14 +97,14 @@ The `amp-lightbox` API allows you to perform the following actions:
 **open()**
 Opens the lightbox.
 
-```
+```js
 api.open();
 ```
 
 **close()**
 Closes the lightbox.
 
-```
+```js
 api.close();
 ```
 
@@ -116,7 +116,7 @@ The `amp-lightbox` API allows you to register and respond to the following event
 
 This event is triggered when the lightbox is opened.
 
-```
+```js
 lightbox.addEventListener('open', (e) => console.log(e))
 ```
 
@@ -124,7 +124,7 @@ lightbox.addEventListener('open', (e) => console.log(e))
 
 This event is triggered when the lightbox is closed.
 
-```
+```js
 lightbox.addEventListener('close', (e) => console.log(e))
 ```
 
@@ -132,7 +132,7 @@ lightbox.addEventListener('close', (e) => console.log(e))
 
 Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
 
-```
+```html
 <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-lightbox-1.0.css">
 ```
 
