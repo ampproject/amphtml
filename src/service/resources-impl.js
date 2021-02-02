@@ -629,6 +629,14 @@ export class ResourcesImpl {
       // TODO(willchou): Fix observe/unobserve/remeasure churn in reparenting.
       this.intersectionObserver_.unobserve(resource.element);
     }
+
+    if (resource.getState() === ResourceState.LAYOUT_SCHEDULED) {
+      // TODO: should we call resource.unload() instead?
+      // Has the same effect but much stranger codepath.
+      resource.state_ = this.intersectionObserver_
+        ? ResourceState.READY_FOR_LAYOUT
+        : ResourceState.NOT_LAID_OUT;
+    }
     this.cleanupTasks_(resource, /* opt_removePending */ true);
     dev().fine(TAG_, 'resource removed:', resource.debugid);
   }
@@ -1913,8 +1921,7 @@ export class ResourcesImpl {
   cleanupTasks_(resource, opt_removePending) {
     if (
       resource.getState() == ResourceState.NOT_LAID_OUT ||
-      resource.getState() == ResourceState.READY_FOR_LAYOUT ||
-      resource.getState() == ResourceState.LAYOUT_SCHEDULED
+      resource.getState() == ResourceState.READY_FOR_LAYOUT
     ) {
       // If the layout promise for this resource has not resolved yet, remove
       // it from the task queues to make sure this resource can be rescheduled
