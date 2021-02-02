@@ -30,8 +30,7 @@ function timeout(ms) {
 describes.endtoend(
   'story player navigation',
   {
-    testUrl:
-      'http://localhost:8000/test/fixtures/e2e/amp-story-player/navigation.html',
+    fixture: 'amp-story-player/navigation.html',
     initialRect: {width: VIEWPORT.WIDTH, height: VIEWPORT.HEIGHT},
     environments: ['single'],
   },

@@ -17,8 +17,7 @@
 describes.endtoend(
   'amp-subscriptions-google',
   {
-    testUrl:
-      'http://localhost:8000/test/fixtures/e2e/amp-subscriptions-google/swg.amp.html',
+    fixture: 'amp-subscriptions-google/swg.amp.html',
     environments: ['single'],
   },
   (env) => {

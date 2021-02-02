@@ -17,8 +17,7 @@
 describes.endtoend(
   'amp-ad-exit',
   {
-    testUrl:
-      'http://localhost:8000/test/fixtures/e2e/amphtml-ads/amp-ad-exit.amp.html',
+    fixture: 'amphtml-ads/amp-ad-exit.amp.html',
     environments: 'amp4ads-preset',
   },
   (env) => {

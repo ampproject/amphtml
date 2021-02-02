@@ -42,7 +42,7 @@ arrow buttons.
 
 ### Standalone use outside valid AMP documents
 
-Bento AMP allows you to use AMP components in non-AMP pages without needing to commit to fully valid AMP. You can take these components and place them in implementations with frameworks and CMSs that don't support AMP. Read more in our guide `[Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/)`.
+Bento AMP allows you to use AMP components in non-AMP pages without needing to commit to fully valid AMP. You can take these components and place them in implementations with frameworks and CMSs that don't support AMP. Read more in our guide [Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/).
 
 #### Example
 
@@ -50,7 +50,7 @@ The example below demonstrates `amp-base-carousel` component in standalone use.
 
 [example preview="top-frame" playground="false"]
 
-```
+```html
 <head>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-base-carousel-1.0.css">

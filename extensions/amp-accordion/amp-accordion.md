@@ -2,8 +2,6 @@
 $category@: layout
 formats:
   - websites
-  - ads
-  - email
 teaser:
   text: A stacked list of headers that collapse or expand content sections with user interaction.
 experimental: true
@@ -97,7 +95,7 @@ The example below contains an `amp-accordion` with three sections. The
 
 ### Standalone use outside valid AMP documents
 
-Bento AMP allows you to use AMP components in non-AMP pages without needing to commit to fully valid AMP. You can take these components and place them in implementations with frameworks and CMSs that don't support AMP. Read more in our guide `[Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/)`.
+Bento AMP allows you to use AMP components in non-AMP pages without needing to commit to fully valid AMP. You can take these components and place them in implementations with frameworks and CMSs that don't support AMP. Read more in our guide [Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/).
 
 #### Example
 
