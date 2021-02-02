@@ -110,8 +110,8 @@ export class MultidocManager {
       /* opt_isRuntimeCss */ true
     );
     // Instal doc services.
-    // AMP.installAmpdocServices(ampdoc);
-    installAmpdocServicesForEmbed(ampdoc); // should be this?
+    AMP.installAmpdocServices(ampdoc);
+    // installAmpdocServicesForEmbed(ampdoc); // should be this?
 
     const viewer = Services.viewerForDoc(ampdoc);
 
