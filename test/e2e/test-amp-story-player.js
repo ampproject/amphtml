@@ -22,8 +22,7 @@ const VIEWPORT = {
 describes.endtoend(
   'player prerendering',
   {
-    testUrl:
-      'http://localhost:8000/test/fixtures/e2e/amp-story-player/basic.html',
+    fixture: 'amp-story-player/basic.html',
     initialRect: {width: VIEWPORT.WIDTH, height: VIEWPORT.HEIGHT},
     environments: ['single'],
   },

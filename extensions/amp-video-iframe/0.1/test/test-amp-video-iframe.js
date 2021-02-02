@@ -77,14 +77,14 @@ describes.realWin(
       return el;
     }
 
-    function acceptMockedMessages(videoIframe) {
-      env.sandbox
-        ./*OK*/ stub(videoIframe.implementation_, 'originMatches_')
-        .returns(true);
+    async function acceptMockedMessages(videoIframe) {
+      const impl = await videoIframe.getImpl(false);
+      env.sandbox./*OK*/ stub(impl, 'originMatches_').returns(true);
     }
 
     async function layoutAndLoad(element) {
       await whenUpgradedToCustomElement(element);
+      const impl = await element.getImpl(false);
       // getLayoutSize() affects looksLikeTrackingIframe().
       // Use default width/height of 100 since element is not sized
       // as expected in test fixture.
@@ -92,15 +92,13 @@ describes.realWin(
         width: Number(element.getAttribute('width')) || 100,
         height: Number(element.getAttribute('height')) || 100,
       });
-      element.implementation_.layoutCallback();
+      impl.layoutCallback();
       return listenOncePromise(element, VideoEvents.LOAD);
     }
 
-    function stubPostMessage(videoIframe) {
-      return env.sandbox./*OK*/ stub(
-        videoIframe.implementation_,
-        'postMessage_'
-      );
+    async function stubPostMessage(videoIframe) {
+      const impl = await videoIframe.getImpl(false);
+      return env.sandbox./*OK*/ stub(impl, 'postMessage_');
     }
 
     function stubMeasureIntersection(target, time, intersectionRatio) {
@@ -225,10 +223,9 @@ describes.realWin(
         // Fixture inside frame triggers `canplay`.
         const videoIframe = createVideoIframe();
         await layoutAndLoad(videoIframe);
+        const impl = await videoIframe.getImpl(false);
 
-        const register = videoManagerStub.register.withArgs(
-          videoIframe.implementation_
-        );
+        const register = videoManagerStub.register.withArgs(impl);
 
         expect(register).to.have.been.calledOnce;
       });
@@ -237,13 +234,14 @@ describes.realWin(
         const videoIframe = createVideoIframe();
 
         await layoutAndLoad(videoIframe);
+        const impl = await videoIframe.getImpl(false);
 
         const invalidEvents = 'tacos al pastor'.split(' ');
 
         invalidEvents.forEach((event) => {
           const spy = env.sandbox.spy();
           videoIframe.addEventListener(event, spy);
-          videoIframe.implementation_.onMessage_({data: {event}});
+          impl.onMessage_({data: {event}});
           expect(spy).to.not.have.been.called;
         });
       });
@@ -253,7 +251,9 @@ describes.realWin(
 
         await layoutAndLoad(videoIframe);
 
-        acceptMockedMessages(videoIframe);
+        await acceptMockedMessages(videoIframe);
+
+        const impl = await videoIframe.getImpl(false);
 
         const validEvents = [
           VideoEvents.PLAYING,
@@ -269,7 +269,7 @@ describes.realWin(
           const event = validEvents[i];
           const spy = env.sandbox.spy();
           videoIframe.addEventListener(event, spy);
-          videoIframe.implementation_.onMessage_({data: {event}});
+          impl.onMessage_({data: {event}});
           expect(spy).to.have.been.calledOnce;
         }
       });
@@ -295,11 +295,12 @@ describes.realWin(
 
         await layoutAndLoad(videoIframe);
 
-        const postMessage = stubPostMessage(videoIframe);
+        const postMessage = await stubPostMessage(videoIframe);
 
-        acceptMockedMessages(videoIframe);
+        await acceptMockedMessages(videoIframe);
 
-        videoIframe.implementation_.onMessage_({
+        const impl = await videoIframe.getImpl(false);
+        impl.onMessage_({
           data: {id, method: 'getConsentData'},
         });
 
@@ -327,16 +328,17 @@ describes.realWin(
 
         await layoutAndLoad(videoIframe);
 
-        const postMessage = stubPostMessage(videoIframe);
+        const postMessage = await stubPostMessage(videoIframe);
 
-        acceptMockedMessages(videoIframe);
+        await acceptMockedMessages(videoIframe);
 
         const message = {data: {id, method: 'getIntersection'}};
 
         stubMeasureIntersection(videoIframe, time, intersectionRatio);
         const expectedResponseMessage = {id, args: {time, intersectionRatio}};
 
-        await videoIframe.implementation_.onMessage_(message);
+        const impl = await videoIframe.getImpl(false);
+        await impl.onMessage_(message);
 
         expect(postMessage.withArgs(env.sandbox.match(expectedResponseMessage)))
           .to.have.been.calledOnce;
@@ -352,11 +354,11 @@ describes.realWin(
 
         await layoutAndLoad(videoIframe);
 
-        const postMessage = stubPostMessage(videoIframe);
+        const postMessage = await stubPostMessage(videoIframe);
 
         stubMeasureIntersection(videoIframe, time, intersectionRatio);
 
-        acceptMockedMessages(videoIframe);
+        await acceptMockedMessages(videoIframe);
 
         const message = {data: {id, method: 'getIntersection'}};
 
@@ -368,7 +370,8 @@ describes.realWin(
           },
         };
 
-        await videoIframe.implementation_.onMessage_(message);
+        const impl = await videoIframe.getImpl(false);
+        await impl.onMessage_(message);
 
         expect(postMessage.withArgs(env.sandbox.match(expectedResponseMessage)))
           .to.have.been.calledOnce;
@@ -403,7 +406,7 @@ describes.realWin(
 
           await layoutAndLoad(videoIframe);
 
-          acceptMockedMessages(videoIframe);
+          await acceptMockedMessages(videoIframe);
 
           const data = {
             event: 'analytics',
@@ -477,9 +480,10 @@ describes.realWin(
 
           await layoutAndLoad(videoIframe);
 
-          const postMessage = stubPostMessage(videoIframe);
+          const postMessage = await stubPostMessage(videoIframe);
 
-          videoIframe.implementation_[method]();
+          const impl = await videoIframe.getImpl(false);
+          impl[method]();
 
           await macroTask();
 

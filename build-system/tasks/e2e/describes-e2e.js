@@ -230,7 +230,7 @@ function getFirefoxArgs(config) {
  * @typedef {{
  *  browsers: (!Array<string>|undefined),
  *  environments: (!Array<!AmpdocEnvironment>|undefined),
- *  testUrl: string,
+ *  testUrl: string|undefined,
  *  fixture: string,
  *  manualFixture: string,
  *  initialRect: ({{width: number, height:number}}|undefined),
@@ -244,7 +244,7 @@ let TestSpec;
  * @typedef {{
  *  browsers: (!Array<string>|undefined),
  *  environments: (!Array<!AmpdocEnvironment>|undefined),
- *  testUrl: string,
+ *  testUrl: string|undefined,
  *  fixture: string,
  *  manualFixture: string,
  *  initialRect: ({{width: number, height:number}}|undefined),
@@ -531,7 +531,12 @@ function describeEnv(factory) {
     if (!versions) {
       // If a version is provided, add a prefix to the test suite name.
       const {version} = spec;
-      templateFunc(version ? `[v{version} ${name}` : name, spec, fn, describe);
+      templateFunc(
+        version ? `[v${version}] ${name}` : name,
+        spec,
+        fn,
+        describe
+      );
     } else {
       // A root `describes.endtoend` spec may contain a `versions` object, where
       // the key represents the version number and the value is an object with
@@ -587,6 +592,7 @@ class EndToEndFixture {
     const ampDriver = new AmpDriver(controller);
     env.controller = controller;
     env.ampDriver = ampDriver;
+    env.version = this.spec.version;
 
     installBrowserAssertions(controller.networkLogger);
 
@@ -628,10 +634,13 @@ class EndToEndFixture {
     // eventually be removed entirely.
     let {testUrl} = spec;
     const {fixture, manualFixture} = spec;
-    if (!!testUrl + !!fixture + !!manualFixture > 1) {
+    if (testUrl) {
       throw new Error(
-        'Only one of [testUrl, fixture, manualFixture] may be specified'
+        'Setting `testUrl` directly is no longer permitted in e2e tests; please use `fixture` instead'
       );
+    }
+    if (fixture && manualFixture) {
+      throw new Error('Only one of [fixture, manualFixture] may be specified');
     }
 
     if (fixture) {
