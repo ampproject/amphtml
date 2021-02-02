@@ -2,6 +2,7 @@
 $category@: media
 formats:
   - websites
+  - bento
 teaser:
   text: Displays a YouTube video.
 experimental: true

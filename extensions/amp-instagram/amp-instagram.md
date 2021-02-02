@@ -2,6 +2,7 @@
 $category@: social
 formats:
   - websites
+  - bento
 teaser:
   text: Displays an Instagram embed.
 experimental: true

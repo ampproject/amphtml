@@ -2,6 +2,7 @@
 $category@: media
 formats:
   - websites
+  - bento
 teaser:
   text: Replaces the HTML5 video tag.
 experimental: true

@@ -2,6 +2,7 @@
 $category@: layout
 formats:
   - websites
+  - bento
 teaser:
   text: Displays multiple similar pieces of content at a time along a horizontal axis, for features like related products or articles.
 experimental: true

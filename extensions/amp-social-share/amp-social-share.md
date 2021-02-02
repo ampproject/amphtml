@@ -2,6 +2,7 @@
 $category@: ads-analytics
 formats:
   - websites
+  - bento
 experimental: true
 bento: true
 ---

@@ -2,6 +2,7 @@
 $category@: layout
 formats:
   - websites
+  - bento
 teaser:
   text: Displays elements in a full-viewport “lightbox” modal.
 experimental: true

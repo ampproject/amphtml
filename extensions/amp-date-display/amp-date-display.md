@@ -2,6 +2,7 @@
 $category@: presentation
 formats:
   - websites
+  - bento
 teaser:
   text: The amp-date-display component displays time data that you can render in your AMP page.
 experiental: true

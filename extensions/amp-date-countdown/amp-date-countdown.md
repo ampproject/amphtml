@@ -2,6 +2,7 @@
 $category@: presentation
 formats:
   - websites
+  - bento
 teaser:
   text: Displays a countdown sequence to a specified date.
 experimental: true

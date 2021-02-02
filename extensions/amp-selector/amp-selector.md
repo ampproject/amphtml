@@ -2,6 +2,7 @@
 $category@: dynamic-content
 formats:
   - websites
+  - bento
 teaser:
   text: Represents a control that presents a menu of options and lets the user choose from it.
 experimental: true

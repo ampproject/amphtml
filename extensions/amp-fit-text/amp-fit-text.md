@@ -2,6 +2,7 @@
 $category@: presentation
 formats:
   - websites
+  - bento
 teaser:
   text: Expands or shrinks font size to fit the content within the space given.
 experimental: true
