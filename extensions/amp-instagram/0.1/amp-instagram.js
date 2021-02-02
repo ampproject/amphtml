@@ -45,7 +45,7 @@ import {setStyles} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
 import {userAssert} from '../../../src/log';
 
-class AmpInstagram extends AMP.BaseElement {
+export class AmpInstagram extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);

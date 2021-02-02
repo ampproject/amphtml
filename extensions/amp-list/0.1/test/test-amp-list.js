@@ -1523,7 +1523,8 @@ describes.realWin(
       env.sandbox.spy(element, 'enqueAction');
       env.sandbox.stub(element, 'getDefaultActionAlias').returns({'items': []});
       await whenUpgradedToCustomElement(element);
-      env.sandbox.stub(element.implementation_, 'fetchList_');
+      const impl = await element.getImpl(false);
+      env.sandbox.stub(impl, 'fetchList_');
 
       ['changeToLayoutContainer', 'refresh'].forEach((method) => {
         action.execute(

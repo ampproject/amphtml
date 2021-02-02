@@ -130,7 +130,7 @@ describes.realWin(
           'data-media-id': 'BZ6tc0gy',
           'data-player-id': 'uoIbMPm3',
         });
-        impl = jwp.implementation_;
+        impl = await jwp.getImpl(false);
       });
 
       it('supports platform', () => {
@@ -407,7 +407,7 @@ describes.realWin(
       jwp.setAttribute('layout', 'responsive');
 
       doc.body.appendChild(jwp);
-      const imp = jwp.implementation_;
+      const imp = await jwp.getImpl(false);
 
       await jwp.build();
       expect(imp['contentid_']).to.equal(attributes['data-media-id']);

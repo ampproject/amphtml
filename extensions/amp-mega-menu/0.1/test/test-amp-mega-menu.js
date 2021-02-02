@@ -95,8 +95,9 @@ describes.realWin(
     it('should collapse when heading of a expanded menu item is clicked', async () => {
       await element.build();
       await element.layoutCallback();
+      const impl = await element.getImpl(false);
       const heading = doc.getElementById('heading1');
-      element.implementation_.expand_(heading.parentNode);
+      impl.expand_(heading.parentNode);
       expect(heading.parentNode.hasAttribute('open')).to.be.true;
       expect(heading.getAttribute('aria-expanded')).to.equal('true');
       const clickEvent = new Event('click');
@@ -108,9 +109,10 @@ describes.realWin(
     it('should collapse an expanded menu item when another heading is clicked', async () => {
       await element.build();
       await element.layoutCallback();
+      const impl = await element.getImpl(false);
       const heading1 = doc.getElementById('heading1');
       const heading2 = doc.getElementById('heading2');
-      element.implementation_.expand_(heading1.parentNode);
+      impl.expand_(heading1.parentNode);
       expect(heading1.parentNode.hasAttribute('open')).to.be.true;
       expect(heading1.getAttribute('aria-expanded')).to.equal('true');
       const clickEvent = new Event('click');
@@ -124,8 +126,9 @@ describes.realWin(
     it('should collapse any expanded item after clicking outside the component', async () => {
       await element.build();
       await element.layoutCallback();
+      const impl = await element.getImpl(false);
       const heading = doc.getElementById('heading1');
-      element.implementation_.expand_(heading.parentNode);
+      impl.expand_(heading.parentNode);
       expect(heading.parentNode.hasAttribute('open')).to.be.true;
       expect(heading.getAttribute('aria-expanded')).to.equal('true');
       const clickEvent = new Event('click');
@@ -137,9 +140,10 @@ describes.realWin(
     it('should not collapse when click is inside the expanded content', async () => {
       await element.build();
       await element.layoutCallback();
+      const impl = await element.getImpl(false);
       const heading = doc.getElementById('heading1');
       const content = doc.getElementById('content1');
-      element.implementation_.expand_(heading.parentNode);
+      impl.expand_(heading.parentNode);
       expect(heading.parentNode.hasAttribute('open')).to.be.true;
       expect(heading.getAttribute('aria-expanded')).to.equal('true');
       const clickEvent = new Event('click');
@@ -151,8 +155,9 @@ describes.realWin(
     it('should collapse any expanded item on component unlayout', async () => {
       await element.build();
       await element.layoutCallback();
+      const impl = await element.getImpl(false);
       const heading = doc.getElementById('heading1');
-      element.implementation_.expand_(heading.parentNode);
+      impl.expand_(heading.parentNode);
       expect(heading.parentNode.hasAttribute('open')).to.be.true;
       expect(heading.getAttribute('aria-expanded')).to.equal('true');
       await element.unlayoutCallback();
@@ -163,8 +168,9 @@ describes.realWin(
     it('should collapse when ESC key is pressed', async () => {
       await element.build();
       await element.layoutCallback();
+      const impl = await element.getImpl(false);
       const heading = doc.getElementById('heading1');
-      element.implementation_.expand_(heading.parentNode);
+      impl.expand_(heading.parentNode);
       expect(heading.parentNode.hasAttribute('open')).to.be.true;
       expect(heading.getAttribute('aria-expanded')).to.equal('true');
       const escKey = new KeyboardEvent('keydown', {key: Keys.ESCAPE});
@@ -197,7 +203,7 @@ describes.realWin(
       await element.build();
       await element.layoutCallback();
       await element.unlayoutCallback();
-      const impl = element.implementation_;
+      const impl = await element.getImpl(false);
       const clickEvent = new Event('click');
       const rootClickSpy = env.sandbox.spy(impl, 'handleRootClick_');
       doc.documentElement.dispatchEvent(clickEvent);
