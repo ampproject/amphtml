@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../src/preact';
-import * as styles from './fit-text.css';
+import * as styles from './component.css';
 import {ContainWrapper} from '../../../src/preact/component';
 import {px, resetStyles, setStyle, setStyles} from '../../../src/style';
 import {toWin} from '../../../src/types';
