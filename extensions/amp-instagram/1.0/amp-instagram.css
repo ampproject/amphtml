@@ -26,7 +26,7 @@ amp-instagram {
 }
 
 /* Pre-upgrade: size-defining element - hide children. */
-amp-instagram:not(.i-amphtml-built) > :not([placeholder]) {
+amp-instagram:not(.i-amphtml-built) > :not([placeholder]):not(.i-amphtml-svc) {
   display: none;
   content-visibility: hidden;
 }
