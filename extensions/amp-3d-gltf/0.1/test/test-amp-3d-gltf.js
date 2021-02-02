@@ -59,7 +59,7 @@ describes.realWin(
       doc.body.appendChild(amp3dGltfEl);
       await amp3dGltfEl.build();
 
-      const amp3dGltf = amp3dGltfEl.implementation_;
+      const amp3dGltf = await amp3dGltfEl.getImpl();
       env.sandbox
         .stub(amp3dGltf, 'iframe_')
         .get(() => iframe)

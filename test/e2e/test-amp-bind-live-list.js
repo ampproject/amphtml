@@ -65,7 +65,7 @@ describes.endtoend(
         );
 
         // The test server should handle this
-        // const impl = liveList.implementation_;
+        // const impl = await liveList.getImpl(false);
         // const update = document.createElement('div');
         // update.innerHTML =
         //     '<div items>' +

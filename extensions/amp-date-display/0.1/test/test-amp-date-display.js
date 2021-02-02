@@ -31,7 +31,7 @@ describes.realWin(
     let impl;
     let clock;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       win = env.win;
       clock = fakeTimers.withGlobal(win).install({
         now: new Date('2018-01-01T08:00:00Z'),
@@ -39,8 +39,11 @@ describes.realWin(
 
       toggleExperiment(win, 'amp-date-display', true);
       element = win.document.createElement('amp-date-display');
+      element.setAttribute('layout', 'fixed');
+      element.setAttribute('width', '300');
+      element.setAttribute('height', '100');
       win.document.body.appendChild(element);
-      impl = element.implementation_;
+      impl = await element.getImpl(false);
       env.sandbox.stub(impl.templates_, 'findAndRenderTemplate').resolves();
       env.sandbox.stub(impl, 'boundRendered_');
     });
