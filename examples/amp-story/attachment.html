@@ -7,6 +7,7 @@
     <script async custom-element="amp-social-share" src="https://cdn.ampproject.org/v0/amp-social-share-0.1.js"></script>
     <link href='https://fonts.googleapis.com/css?family=Georgia|Open+Sans|Roboto' rel='stylesheet' type='text/css'>
     <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Spectral:wght@300&display=swap" rel="stylesheet">
     <title>Attachments</title>
     <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
     <link rel="canonical" href="index.html">
@@ -31,6 +32,22 @@
       amp-story-page-attachment {
         color: rgba(0, 0, 0, 0.93);
       }
+
+      .i-amphtml-story-draggable-drawer-container {
+        font-family: 'Spectral', serif;
+        padding: 0 36px;
+      }
+
+      .i-amphtml-story-draggable-drawer-container .title {
+        text-align: center;
+        margin-top: 10px;
+        font-size: 38px;
+      }
+
+      .i-amphtml-story-draggable-drawer-container amp-img {
+        border-radius: 20px;
+        margin: 20px 0 30px;
+      }
     </style>
   </head>
 
@@ -51,12 +68,11 @@
             <span data-text-background-color="#00A3DB">Relentlessly pursues moth annoy owner until he gives you food say meow repeatedly until belly rubs, feels good drool that box?</span>
           </p>
         </amp-story-grid-layer>
-        <amp-story-page-attachment data-title="Lorem ipsum" layout="nodisplay">
-          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ultricies integer quis auctor elit. Quis eleifend quam adipiscing vitae proin. Id faucibus nisl tincidunt eget nullam. Est pellentesque elit ullamcorper dignissim cras tincidunt lobortis feugiat. Sodales ut etiam sit amet nisl purus. Non enim praesent elementum facilisis leo vel fringilla. Sagittis vitae et leo duis ut diam quam nulla. Id diam maecenas ultricies mi eget mauris pharetra et. Sodales neque sodales ut etiam sit amet. Eu sem integer vitae justo eget magna fermentum iaculis eu. Faucibus interdum posuere lorem ipsum dolor sit amet consectetur. Bibendum est ultricies integer quis auctor elit sed vulputate.</p>
-
-          <p>In nisl nisi scelerisque eu ultrices vitae auctor eu. Tristique magna sit amet purus gravida. Tincidunt id aliquet risus feugiat in ante metus dictum. Mattis nunc sed blandit libero volutpat sed. Imperdiet massa tincidunt nunc pulvinar sapien et ligula ullamcorper malesuada. Sit amet mattis vulputate enim nulla aliquet porttitor lacus luctus. Proin sagittis nisl rhoncus mattis rhoncus. Pulvinar neque laoreet suspendisse interdum consectetur libero. Nibh tellus molestie nunc non blandit massa enim nec dui. Sagittis eu volutpat odio facilisis. Tristique senectus et netus et malesuada fames ac. Molestie a iaculis at erat. Sit amet cursus sit amet. Suscipit tellus mauris a diam maecenas sed enim ut. Gravida quis blandit turpis cursus in. Tincidunt vitae semper quis lectus nulla at volutpat diam ut. Morbi tempus iaculis urna id. Faucibus et molestie ac feugiat sed lectus vestibulum. Mauris augue neque gravida in. Ac turpis egestas sed tempus.</p>
-
-          <p>Ut tristique et egestas quis ipsum. Aliquam malesuada bibendum arcu vitae elementum curabitur vitae nunc sed. Elementum curabitur vitae nunc sed velit dignissim. Tristique et egestas quis ipsum suspendisse ultrices gravida dictum fusce. At elementum eu facilisis sed odio morbi. Imperdiet proin fermentum leo vel orci porta non. Quam lacus suspendisse faucibus interdum. Eu non diam phasellus vestibulum lorem sed risus. Commodo viverra maecenas accumsan lacus vel facilisis volutpat est velit. Sagittis aliquam malesuada bibendum arcu vitae elementum. Ut sem viverra aliquet eget sit amet. Nulla facilisi morbi tempus iaculis. Sed odio morbi quis commodo odio aenean sed adipiscing diam. Donec ultrices tincidunt arcu non sodales. Amet venenatis urna cursus eget. Sapien et ligula ullamcorper malesuada proin. Tristique sollicitudin nibh sit amet commodo nulla facilisi. Venenatis tellus in metus vulputate eu scelerisque felis.</p>
+        <amp-story-page-attachment data-title="About" layout="nodisplay">
+          <div class="title">About</div>
+          <amp-img layout="responsive" width=690 height=418 src="/examples/visual-tests/amp-story/img/about_large.jpg"></amp-img>
+          <p>Gopi Shah Ceramics features a collection of unique handmade ceramics and pottery in Long Beach, California. Inspired by Mesoamerican and Andean art, California natural landscapes, and textiles and prints, Gopi Shah Ceramics combines youthful creativity with craftsmanship to create stoneware pottery that bridges ancient traditions and techniques with the modern world.</p>
+          <p>Gopi Shah is the Owner and Creative Director of Gopi Shah Ceramics, a one-woman handcrafted pottery design studio in Long Beach, California. Gopi began working with clay at the age of 14 and continued her education in ceramics at the Museum of Fine Arts and Santa Monica College. Since starting her business in 2014, her work has been featured in Curbed and The Jungalow, displayed at the Craft Contemporary, and sold in West Elm and Anthropology. Her business has also been featured in international commercials for Quickbooks and FedEx. She currently resides in Long Beach with her catahoula, Hanz.</p>
         </amp-story-page-attachment>
       </amp-story-page>
 
