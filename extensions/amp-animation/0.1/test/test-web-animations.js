@@ -1064,8 +1064,9 @@ describes.realWin('MeasureScanner', {amp: 1}, (env) => {
     beforeEach(() => {
       animation2Spec = {};
       animation2 = env.createAmpElement('amp-animation');
-      animation2.implementation_.getAnimationSpec = () => animation2Spec;
-      animation2.signals().signal('built');
+      env.sandbox.stub(animation2, 'getImpl').resolves({
+        getAnimationSpec: () => animation2Spec,
+      });
       animation2.id = 'animation2';
       doc.body.appendChild(animation2);
 

@@ -18,7 +18,7 @@ import {getCarousel, getScrollingElement, getSlide, getSlides} from './helpers';
 import {useStyles} from '../base-carousel.jss';
 
 const pageWidth = 800;
-const pageHeight = 600;
+const pageHeight = 800;
 
 /** Increase timeout for running on CircleCI **/
 const testTimeout = 40000;
@@ -26,8 +26,7 @@ const testTimeout = 40000;
 describes.endtoend(
   'amp-base-carousel:1.0 - basic functionality',
   {
-    testUrl:
-      'http://localhost:8000/test/manual/amp-base-carousel/1.0/basic.amp.html',
+    manualFixture: 'amp-base-carousel/1.0/basic.amp.html',
     experiments: ['bento-carousel'],
     initialRect: {width: pageWidth, height: pageHeight},
     environments: ['single', 'viewer-demo'],

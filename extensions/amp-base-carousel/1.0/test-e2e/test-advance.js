@@ -29,8 +29,7 @@ const pageHeight = 800;
 describes.endtoend(
   'amp-base-carousel:1.0 - advance',
   {
-    testUrl:
-      'http://localhost:8000/test/manual/amp-base-carousel/1.0/advance.amp.html',
+    manualFixture: 'amp-base-carousel/1.0/advance.amp.html',
     experiments: ['bento-carousel'],
     environments: ['single'],
     initialRect: {width: pageWidth, height: pageHeight},

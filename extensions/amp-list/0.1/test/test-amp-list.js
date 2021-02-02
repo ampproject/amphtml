@@ -822,14 +822,14 @@ describes.repeated(
             it('should error if proxied fetch fails', () => {
               env.sandbox
                 .stub(ssrTemplateHelper, 'ssr')
-                .returns(Promise.reject());
+                .returns(Promise.reject(new Error('error')));
 
               listMock.expects('toggleLoading').withExactArgs(false).once();
 
               return expect(
                 list.layoutCallback()
               ).to.eventually.be.rejectedWith(
-                /Error proxying amp-list templates/
+                /XHR Failed fetching \(https:\/\/data.com.+?\): error/
               );
             });
 
@@ -853,7 +853,7 @@ describes.repeated(
               return expect(
                 list.layoutCallback()
               ).to.eventually.be.rejectedWith(
-                /Error proxying amp-list templates with status/
+                /fetching JSON data \(https:\/\/data.com.+?\): HTTP error 400/
               );
             });
 
@@ -1523,7 +1523,8 @@ describes.realWin(
       env.sandbox.spy(element, 'enqueAction');
       env.sandbox.stub(element, 'getDefaultActionAlias').returns({'items': []});
       await whenUpgradedToCustomElement(element);
-      env.sandbox.stub(element.implementation_, 'fetchList_');
+      const impl = await element.getImpl(false);
+      env.sandbox.stub(impl, 'fetchList_');
 
       ['changeToLayoutContainer', 'refresh'].forEach((method) => {
         action.execute(

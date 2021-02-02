@@ -17,8 +17,7 @@
 describes.endtoend(
   'AMP carousel 0.1 buttons with hidden controls',
   {
-    testUrl:
-      'http://localhost:8000/test/manual/amp-carousel/0.1/hidden-controls.amp.html',
+    fixture: 'amp-carousel/0.1/hidden-controls.amp.html',
     experiments: ['amp-carousel'],
     environments: ['single'],
   },

@@ -92,10 +92,8 @@ describes.realWin(
       doc.body.appendChild(element);
       await waitForRender();
 
-      const forceChangeHeightStub = env.sandbox.stub(
-        element.implementation_,
-        'forceChangeHeight'
-      );
+      const impl = await element.getImpl(false);
+      const forceChangeHeightStub = env.sandbox.stub(impl, 'forceChangeHeight');
 
       const mockEvent = new CustomEvent('message');
       mockEvent.origin = 'https://www.instagram.com';
