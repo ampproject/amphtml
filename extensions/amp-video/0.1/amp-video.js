@@ -476,6 +476,7 @@ class AmpVideo extends AMP.BaseElement {
             AMP_QUALITY_BITRATES[quality]
           );
           if (quality !== 'low') {
+            // Keep amp-orig-src only in last one so it adds the orig source after it.
             currSource.removeAttribute('amp-orig-src');
           }
           this.video_.appendChild(currSource);
