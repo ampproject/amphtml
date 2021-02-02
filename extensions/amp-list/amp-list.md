@@ -87,7 +87,7 @@ Here is the JSON file that we used:
     },
     {
       "title": "AMP By Example",
-      "url": "https://ampbyexample.com/"
+      "url": "https://amp.dev/"
     },
     {
       "title": "AMP Start",
