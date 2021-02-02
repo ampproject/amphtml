@@ -510,7 +510,6 @@ class AmpVideo extends AMP.BaseElement {
       // Cached sources should have been moved from <amp-video> to <video>.
       devAssert(!this.isCachedByCDN_(source));
       urlService.assertHttpsUrl(source.getAttribute('src'), source);
-      console.log('propagateLayoutChildren', source);
       this.video_.appendChild(source);
     });
 
