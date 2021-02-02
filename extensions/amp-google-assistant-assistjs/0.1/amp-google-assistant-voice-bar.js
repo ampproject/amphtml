@@ -20,8 +20,8 @@
  */
 
 import {Services} from '../../../src/services';
-import {isLayoutSizeDefined} from '../../../src/layout';
 import {createElementWithAttributes} from '../../../src/dom';
+import {isLayoutSizeDefined} from '../../../src/layout';
 
 export class AmpGoogleAssistantVoiceBar extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -48,7 +48,9 @@ export class AmpGoogleAssistantVoiceBar extends AMP.BaseElement {
   layoutCallback() {
     // Set frame URL to an embed endpoint.
     const frameUrl = `${this.configService_.getAssistjsServer()}/assist/voicebar?origin=${origin}&projectId=${this.configService_.getProjectId()}&dev=${this.configService_.getDevMode()}&hostUrl=${this.configService_.getHostUrl()}`;
-    const iframe = createElementWithAttributes(this.win.document, 'iframe', {src: frameUrl});
+    const iframe = createElementWithAttributes(this.win.document, 'iframe', {
+      src: frameUrl,
+    });
 
     // applyFillContent so that frame covers the entire component.
     this.applyFillContent(iframe, /* replacedContent */ true);

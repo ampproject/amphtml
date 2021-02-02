@@ -39,16 +39,17 @@ export class AssistjsFrameService {
 
   /** @private */
   createAssistantIframe_() {
-    // const promise = Services.assistjsConfigServiceForDoc(this.ampDoc_);
-    // promise.then((configService) => {
-    //   this.configService_ = configService;
+    Services.assistjsConfigServiceForDoc(this.ampDoc_).then((configService) => {
+      this.configService_ = configService;
 
-    //   const frameUrl = `${this.configService_.getAssistjsServer()}/assist/voicebar?origin=${origin}&projectId=${this.configService_.getProjectId()}&dev=${this.configService_.getDevMode()}&hostUrl=${this.configService_.getHostUrl()}`;
-    // const iframe = createElementWithAttributes(this.win.document, 'iframe', {src: frameUrl, allow: 'microphone'});
-    //   iframe.setAttribute('allow', 'microphone');
-    //   iframe.setStyle({display: 'none'});
+      const frameUrl = `${this.configService_.getAssistjsServer()}/assist/voicebar?origin=${origin}&projectId=${this.configService_.getProjectId()}&dev=${this.configService_.getDevMode()}&hostUrl=${this.configService_.getHostUrl()}`;
+      const iframe = createElementWithAttributes(this.win.document, 'iframe', {
+        src: frameUrl,
+        allow: 'microphone',
+        style: {display: 'none'},
+      });
 
-    //   document.body.appendChild(iframe);
-    // });
+      document.body.appendChild(iframe);
+    });
   }
 }

@@ -20,40 +20,49 @@
  */
 
 export class AssistjsConfigService {
-  /**
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   */
+  /** */
   constructor() {
-    const config = JSON.parse(document.getElementsByTagName('amp-google-assistant-assistjs-config')[0].textContent);
- 
-    if (!config.hasOwnProperty('projectId')) {
+    const config = JSON.parse(
+      document.getElementsByTagName('amp-google-assistant-assistjs-config')[0]
+        .textContent
+    );
+
+    if (!config.hasOwn('projectId')) {
       throw new Error('Project id is required to embed assist.js.');
     }
     /** @private {string} */
     this.projectId_ = config.projectId;
 
     /** @private {string} */
-    this.assistjsServer_ = config.hasOwnProperty('assistjsServer') ? config.assistjsServer : 'https://actions.google.com';
+    this.assistjsServer_ = config.hasOwn('assistjsServer')
+      ? config.assistjsServer
+      : 'https://actions.google.com';
 
     /** @private {boolean} */
-    this.devMode_ = config.hasOwnProperty('devMode') ? config.devMode : false;
+    this.devMode_ = config.hasOwn('devMode') ? config.devMode : false;
 
     /** @private {string} */
-    this.hostUrl_ = config.hasOwnProperty('hostUrl') ? config.hostUrl : window.location.href;
+    this.hostUrl_ = config.hasOwn('hostUrl')
+      ? config.hostUrl
+      : window.location.href;
   }
 
+  /** @return {string} */
   getAssistjsServer() {
     return this.assistjsServer_;
   }
 
+  /** @return {string} */
   getProjectId() {
     return this.projectId_;
   }
 
+  /** @return {boolean} */
   getDevMode() {
     return this.devMode_;
   }
 
+  /** @return {string} */
   getHostUrl() {
     return this.hostUrl_;
   }

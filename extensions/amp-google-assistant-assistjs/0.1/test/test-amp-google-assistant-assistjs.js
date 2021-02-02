@@ -24,24 +24,29 @@ describes.realWin(
     },
   },
   (env) => {
-    var win = env.win;
+    const {win} = env;
 
-    let configElement = win.document.createElement('amp-google-assistant-assistjs-config');
-    configElement.textContent = '{"devMode": true, "projectId": "aog-assistjs-demos", "hostUrl": "https://toidemo2.web.app"}';
+    const configElement = win.document.createElement(
+      'amp-google-assistant-assistjs-config'
+    );
+    configElement.textContent =
+      '{"devMode": true, "projectId": "aog-assistjs-demos", "hostUrl": "https://toidemo2.web.app"}';
     win.document.body.appendChild(configElement);
 
-    let voiceButtonelement;
+    let voiceButtonElement;
 
     beforeEach(() => {
-      voiceButtonElement = win.document.createElement('amp-google-assistant-assistjs-voice-button');
+      voiceButtonElement = win.document.createElement(
+        'amp-google-assistant-assistjs-voice-button'
+      );
       voiceButtonElement.setAttribute('id', 'voice-button');
       win.document.body.appendChild(voiceButtonElement);
     });
 
     it('should have hello world when built', () => {
-      configElement.build()
-      voiceButtonelement.build();
-      expect(voiceButtonelement.getAttribute('id')).to.equal('voice button');
+      configElement.build();
+      voiceButtonElement.build();
+      expect(voiceButtonElement.getAttribute('id')).to.equal('voice button');
     });
   }
 );
