@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {FitText} from '../fit-text';
+import {FitText} from '../component';
 import {number, text, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 
