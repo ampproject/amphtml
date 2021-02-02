@@ -79,6 +79,22 @@ async function getBrotliBundleSizes() {
 }
 
 /**
+ * Checks the response of an operation. Throws if there's an error, and prints
+ * success messages if not.
+ * @param {!Object} response
+ * @param {...string} successMessages
+ */
+function checkResponse(response, ...successMessages) {
+  if (response.statusCode < 200 || response.statusCode >= 300) {
+    throw new Error(
+      `${response.statusCode} ${response.statusMessage}: ` + response.body
+    );
+  } else {
+    log(...successMessages);
+  }
+}
+
+/**
  * Store the bundle size of a commit hash in the build artifacts storage
  * repository to the passed value.
  */
@@ -116,16 +132,11 @@ async function storeBundleSize() {
         bundleSizes: await getBrotliBundleSizes(),
       },
     });
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw new Error(
-        `${response.statusCode} ${response.statusMessage}: ` + response.body
-      );
-    } else {
-      log(
-        'Successfully stored bundle sizes for commit',
-        cyan(commitHash) + '.'
-      );
-    }
+    checkResponse(
+      response,
+      'Successfully stored bundle sizes for commit',
+      cyan(shortSha(commitHash)) + '.'
+    );
   } catch (error) {
     log(red('Could not store the bundle size'));
     log(red(error));
@@ -147,13 +158,11 @@ async function skipBundleSize() {
           path.join('commit', commitHash, 'skip')
         )
       );
-      if (response.statusCode < 200 || response.statusCode >= 300) {
-        throw new Error(
-          `${response.statusCode} ${response.statusMessage}: ` + response.body
-        );
-      } else {
-        log('Skipped bundle size reporting for commit', cyan(commitHash) + '.');
-      }
+      checkResponse(
+        response,
+        'Skipped bundle size reporting for commit',
+        cyan(shortSha(commitHash)) + '.'
+      );
     } catch (error) {
       log(red('Could not report a skipped pull request'));
       log(red(error));
@@ -184,18 +193,13 @@ async function reportBundleSize() {
           bundleSizes: await getBrotliBundleSizes(),
         },
       });
-      if (response.statusCode < 200 || response.statusCode >= 300) {
-        throw new Error(
-          `${response.statusCode} ${response.statusMessage}: ` + response.body
-        );
-      } else {
-        log(
-          'Successfully reported bundle sizes for commit',
-          cyan(commitHash),
-          'using baseline commit',
-          cyan(baseSha) + '.'
-        );
-      }
+      checkResponse(
+        response,
+        'Successfully reported bundle sizes for commit',
+        cyan(shortSha(commitHash)),
+        'using baseline commit',
+        cyan(shortSha(baseSha)) + '.'
+      );
     } catch (error) {
       log(red('Could not report the bundle size of this pull request'));
       log(red(error));
