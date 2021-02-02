@@ -47,7 +47,7 @@ describes.realWin(
       return el;
     }
 
-    beforeEach(() => {
+    beforeEach(async () => {
       ({win, ampdoc} = env);
 
       whenFirstVisiblePromise = new Promise((resolve, reject) => {
@@ -60,7 +60,7 @@ describes.realWin(
       env.sandbox.stub(ampdoc, 'hasBeenVisible').returns(false);
 
       element = getAmpState();
-      ampState = element.implementation_;
+      ampState = await element.getImpl(false);
 
       // TODO(choumx): Remove stubbing of private function fetch_() once
       // batchFetchJsonFor() is easily stub-able.
