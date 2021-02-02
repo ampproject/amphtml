@@ -20,7 +20,7 @@ const pageWidth = 800;
 const pageHeight = 600;
 
 describes.endtoend(
-  'amp-base-carousel:0.1 - rtl',
+  'amp-base-carousel - rtl',
   {
     fixture: 'amp-base-carousel/basic-rtl.amp.html',
     initialRect: {width: pageWidth, height: pageHeight},

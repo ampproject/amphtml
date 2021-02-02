@@ -20,7 +20,7 @@ import ctrlHelpers from './helpers';
 const SLIDE_COUNT = 7;
 
 describes.endtoend(
-  'amp-base-carousel:0.1 - arrows with custom arrows',
+  'amp-base-carousel - arrows with custom arrows',
   {
     fixture: 'amp-base-carousel/custom-arrows.amp.html',
     environments: ['single', 'viewer-demo'],

@@ -20,15 +20,9 @@ const pageWidth = 800;
 const pageHeight = 600;
 
 describes.endtoend(
-  'amp-base-carousel:1.0 - non-looping',
+  'amp-base-carousel - non-looping',
   {
-<<<<<<< HEAD:extensions/amp-base-carousel/1.0/test-e2e/test-non-looping.js
-    fixture: 'amp-base-carousel/1.0/non-looping.amp.html',
-    experiments: ['bento-carousel'],
-    environments: ['single', 'viewer-demo'],
-=======
     fixture: 'amp-base-carousel/non-looping.amp.html',
->>>>>>> 97be090e6 (Unify test-non-looping):extensions/amp-base-carousel/test-e2e/test-non-looping.js
     initialRect: {width: pageWidth, height: pageHeight},
     environments: ['single', 'viewer-demo'],
     versions: {
