@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getNextArrow, getPrevArrow, getSlides, sleep} from './helpers';
+import ctrlHelpers from './helpers';
 
 const pageWidth = 500;
 const pageHeight = 800;
@@ -26,37 +26,36 @@ describes.endtoend(
     experiments: ['amp-base-carousel'],
     environments: ['single'],
     initialRect: {width: pageWidth, height: pageHeight},
+
+    versions: {
+      '0.1': {},
+      '1.0': {},
+    },
   },
   async (env) => {
-    let controller;
-    let nextArrow;
-    let prevArrow;
+    let ctrl;
 
-    function css(handle, name) {
-      return controller.getElementCssValue(handle, name);
-    }
-
-    function rect(el) {
-      return controller.getElementRect(el);
-    }
-
-    beforeEach(async () => {
-      controller = env.controller;
-
-      nextArrow = await getNextArrow(controller);
+    beforeEach(() => {
+      ctrl = ctrlHelpers(env);
+      ctrl.maybeSwitchToShadow();
     });
 
     // TODO(micajuine-ho, #24195): This test is flaky during CI.
     it.skip('should move forwards once', async () => {
-      await controller.click(nextArrow);
-      await sleep(500);
-      prevArrow = await getPrevArrow(controller);
-      await expect(css(prevArrow, 'opacity')).to.equal('1');
-      await expect(css(nextArrow, 'opacity')).to.equal('1');
+      const nextArrow = await ctrl.getNextArrow();
+      const prevArrow = await ctrl.getPrevArrow();
 
-      const slides = await getSlides(controller);
-      const slideOne = await rect(slides[0]);
-      const slideTwo = await rect(slides[1]);
+      await ctrl.click(nextArrow);
+
+      // Wait for render with updated active slide.
+      await ctrl.sleep(500);
+
+      await expect(ctrl.css(prevArrow, 'opacity')).to.equal('1');
+      await expect(ctrl.css(nextArrow, 'opacity')).to.equal('1');
+
+      const slides = await ctrl.getSlides();
+      const slideOne = await ctrl.rect(slides[0]);
+      const slideTwo = await ctrl.rect(slides[1]);
 
       await expect(slideOne['x']).to.be.lessThan(0);
       await expect(slideTwo['x']).to.be.at.least(0);
