@@ -25,8 +25,7 @@ const testTimeout = 20000;
 describes.endtoend(
   'amp-base-carousel:0.1 - basic functionality',
   {
-    testUrl:
-      'http://localhost:8000/test/manual/amp-base-carousel/basic.amp.html',
+    manualFixture: 'amp-base-carousel/basic.amp.html',
     experiments: [
       'amp-base-carousel',
       'amp-lightbox-gallery-base-carousel',
