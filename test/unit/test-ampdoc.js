@@ -17,7 +17,6 @@
 import * as docready from '../../src/document-ready';
 import * as dom from '../../src/dom';
 import {
-  AmpDoc,
   AmpDocFie,
   AmpDocService,
   AmpDocShadow,
@@ -838,10 +837,6 @@ describes.realWin('AmpDocSingle', {}, (env) => {
     expect(ampdoc.isSingleDoc()).to.be.true;
   });
 
-  it('should return top level document as null', () => {
-    expect(ampdoc.getTopLevelDoc()).to.be.null;
-  });
-
   it('should find element by id', () => {
     const id = 'ampdoc_test_element_' + Date.now();
     const element = doc.createElement('div');
@@ -943,7 +938,7 @@ describes.realWin('AmpDocShadow', {}, (env) => {
 
   let win, doc;
   let content, host, shadowRoot;
-  let ampdoc, parentDoc;
+  let ampdoc;
 
   beforeEach(() => {
     win = env.win;
@@ -952,8 +947,7 @@ describes.realWin('AmpDocShadow', {}, (env) => {
     host = doc.createElement('div');
     shadowRoot = createShadowRoot(host);
     shadowRoot.appendChild(content);
-    parentDoc = new AmpDoc(win, null);
-    ampdoc = new AmpDocShadow(win, URL, shadowRoot, parentDoc);
+    ampdoc = new AmpDocShadow(win, URL, shadowRoot);
   });
 
   it('should return window', () => {
@@ -963,10 +957,6 @@ describes.realWin('AmpDocShadow', {}, (env) => {
     expect(ampdoc.win).to.equal(win);
     expect(ampdoc.isSingleDoc()).to.be.false;
     expect(ampdoc.getUrl()).to.equal(URL);
-  });
-
-  it('should return top level document', () => {
-    expect(ampdoc.getTopLevelDoc()).to.equal(parentDoc);
   });
 
   it('should return document as root', () => {
