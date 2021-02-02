@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {CSS} from './component.jss';
 import {FitText} from './component';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 
@@ -33,3 +34,6 @@ BaseElement['passthrough'] = true;
 
 /** @override */
 BaseElement['layoutSizeDefined'] = true;
+
+/** @override */
+BaseElement['shadowCss'] = CSS;
