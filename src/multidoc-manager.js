@@ -146,18 +146,21 @@ export class MultidocManager {
       onMessage = callback;
     };
 
-    viewer.setMessageDeliverer((eventType, data, awaitResponse) => {
-      // Special messages.
-      if (eventType == 'broadcast') {
-        this.broadcast_(data, shadowRoot);
-        return awaitResponse ? Promise.resolve() : undefined;
-      }
+    // Only do this if ampdoc is not embedded
+    if (ampdoc.getParent() === null) {
+      viewer.setMessageDeliverer((eventType, data, awaitResponse) => {
+        // Special messages.
+        if (eventType == 'broadcast') {
+          this.broadcast_(data, shadowRoot);
+          return awaitResponse ? Promise.resolve() : undefined;
+        }
 
-      // All other messages.
-      if (onMessage) {
-        return onMessage(eventType, data, awaitResponse);
-      }
-    }, origin);
+        // All other messages.
+        if (onMessage) {
+          return onMessage(eventType, data, awaitResponse);
+        }
+      }, origin);
+    }
 
     /**
      * Closes the document, resolving when visibility changes and services have
