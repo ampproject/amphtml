@@ -233,6 +233,9 @@ jobs:
 
 workflows:
   'CircleCI':
+    when:
+      equal:
+        [https://github.com/ampproject/amphtml, << pipeline.project.git_url >>]
     jobs:
       - 'Checks':
           <<: *push_and_pr_builds
