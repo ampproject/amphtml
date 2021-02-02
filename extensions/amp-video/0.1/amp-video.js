@@ -248,9 +248,9 @@ class AmpVideo extends AMP.BaseElement {
   }
 
   /** @override */
-  detachedCallback() {
-    this.updateIsPlaying_(false);
-  }
+  // detachedCallback() {
+  //   this.updateIsPlaying_(false);
+  // }
 
   /** @private */
   configure_() {
@@ -604,16 +604,16 @@ class AmpVideo extends AMP.BaseElement {
       })
     );
 
-    ['play', 'pause', 'ended'].forEach((type) => {
-      this.unlisteners_.push(
-        listen(video, type, () => this.updateIsPlaying_(type == 'play'))
-      );
-    });
+    // ['play', 'pause', 'ended'].forEach((type) => {
+    //   this.unlisteners_.push(
+    //     listen(video, type, () => this.updateIsPlaying_(type == 'play'))
+    //   );
+    // });
   }
 
   /** @private */
   uninstallEventHandlers_() {
-    this.updateIsPlaying_(false);
+    // this.updateIsPlaying_(false);
     while (this.unlisteners_.length) {
       this.unlisteners_.pop().call();
     }
