@@ -27,8 +27,7 @@ const viewport = {
 describes.endtoend(
   'amp-story-auto-ads:basic',
   {
-    testUrl:
-      'http://localhost:8000/test/fixtures/e2e/amp-story-auto-ads/basic.html',
+    fixture: 'amp-story-auto-ads/basic.html',
     initialRect: {width: viewport.WIDTH, height: viewport.HEIGHT},
     // TODO(ccordry): reenable shadow demo? fails while waiting for
     // .amp-doc-host[style="visibility: visible;"]
@@ -72,8 +71,7 @@ describes.endtoend(
 describes.endtoend(
   'amp-story-auto-ads:dv3',
   {
-    testUrl:
-      'http://localhost:8000/test/fixtures/e2e/amp-story-auto-ads/dv3-request.html',
+    fixture: 'amp-story-auto-ads/dv3-request.html',
     initialRect: {width: viewport.WIDTH, height: viewport.HEIGHT},
     // TODO(ccordry): re-enable viewer-demo that should handle the 64px
     // offset set by the viewer header.

@@ -19,8 +19,7 @@ import {sleep} from './common';
 describes.endtoend(
   'amp-consent',
   {
-    testUrl:
-      'http://localhost:8000/test/fixtures/e2e/amp-consent/cmp-interaction.html',
+    fixture: 'amp-consent/cmp-interaction.html',
     environments: ['single'],
   },
   (env) => {

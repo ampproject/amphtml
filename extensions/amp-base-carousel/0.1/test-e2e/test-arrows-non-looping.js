@@ -24,8 +24,7 @@ const pageHeight = 600;
 describes.endtoend(
   'amp-base-carousel:0.1 - arrows when non-looping',
   {
-    testUrl:
-      'http://localhost:8000/test/manual/amp-base-carousel/non-looping.amp.html',
+    manualFixture: 'amp-base-carousel/non-looping.amp.html',
     experiments: ['amp-base-carousel', 'layers'],
     initialRect: {width: pageWidth, height: pageHeight},
     //TODO(spaharmi): fails on shadow demo

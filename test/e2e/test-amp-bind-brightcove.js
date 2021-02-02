@@ -17,9 +17,7 @@
 describes.endtoend(
   'amp-bind',
   {
-    testUrl:
-      'http://localhost:8000/test/fixtures/e2e/amp-bind/' +
-      'bind-brightcove.html',
+    fixture: 'amp-bind/bind-brightcove.html',
   },
   async (env) => {
     let controller;

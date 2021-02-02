@@ -17,8 +17,7 @@
 describes.endtoend(
   'amp-video with video analytics',
   {
-    testUrl:
-      'http://localhost:8000/test/fixtures/e2e/amp-video/analytics-triggers.html',
+    fixture: 'amp-video/analytics-triggers.html',
     environments: ['single'],
   },
   (env) => {
