@@ -643,6 +643,9 @@ class AmpVideo extends AMP.BaseElement {
 
   /** @private */
   updateIsPlaying_(isPlaying) {
+    if (this.isManagedByPool_()) {
+      return;
+    }
     if (isPlaying === this.isPlaying_) {
       return;
     }
