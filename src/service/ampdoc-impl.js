@@ -347,9 +347,9 @@ export class AmpDoc {
    * Returns the parent for this AMP doc. Primarily used for retrieving the parent of shadow-doc.
    * @return {?AmpDoc}
    */
-  getTopLevelDoc() {
-    return this.getParent();
-  }
+  // getTopLevelDoc() {
+  //   return this.getParent();
+  // }
 
   /**
    * DO NOT CALL. Retained for backward compat during rollout.
@@ -849,13 +849,13 @@ export class AmpDocShadow extends AmpDoc {
   }
 
   /** @override */
-  getTopLevelDoc() {
-    let ampdoc = this;
-    while (ampdoc.getParent() !== null) {
-      ampdoc = ampdoc.getParent();
-    }
-    return ampdoc;
-  }
+  // getTopLevelDoc() {
+  //   let ampdoc = this;
+  //   while (ampdoc.getParent() !== null) {
+  //     ampdoc = ampdoc.getParent();
+  //   }
+  //   return ampdoc;
+  // }
 
   /** @override */
   getUrl() {

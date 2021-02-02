@@ -96,10 +96,25 @@ export function installAmpdocServicesForEmbed(ampdoc) {
 }
 
 /**
+ * Install ampdoc-level services for a shadow doc.
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @restricted
+ */
+export function installAmpdocServicesForShadowEmbed(ampdoc) {
+  devAssert(!!ampdoc.getParent());
+  installAmpdocServicesInternal(
+    ampdoc,
+    /* isEmbedded */ true,
+    /* isShadow */ true
+  );
+}
+
+/**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @param {boolean} isEmbedded
+ * @param {boolean} isShadow Whether the doc is a shadow doc.
  */
-function installAmpdocServicesInternal(ampdoc, isEmbedded) {
+function installAmpdocServicesInternal(ampdoc, isEmbedded, isShadow = false) {
   // This function is constructed to DCE embedded-vs-non-embedded path when
   // a constant value passed in the `isEmbedded` arg.
 
@@ -125,12 +140,16 @@ function installAmpdocServicesInternal(ampdoc, isEmbedded) {
     ? adoptServiceForEmbedDoc(ampdoc, 'history')
     : installHistoryServiceForDoc(ampdoc);
 
-  isEmbedded
-    ? installInaboxResourcesServiceForDoc(ampdoc)
-    : installResourcesServiceForDoc(ampdoc);
+  if (isShadow) {
+    adoptServiceForEmbedDoc(ampdoc, 'resources');
+  } else {
+    isEmbedded
+      ? installInaboxResourcesServiceForDoc(ampdoc)
+      : installResourcesServiceForDoc(ampdoc);
+  }
+
   installOwnersServiceForDoc(ampdoc);
   installMutatorServiceForDoc(ampdoc);
-
   isEmbedded
     ? adoptServiceForEmbedDoc(ampdoc, 'url-replace')
     : installUrlReplacementsServiceForDoc(ampdoc);
@@ -141,6 +160,7 @@ function installAmpdocServicesInternal(ampdoc, isEmbedded) {
     : installStorageServiceForDoc(ampdoc);
   installGlobalNavigationHandlerForDoc(ampdoc);
   installGlobalSubmitListenerForDoc(ampdoc);
+
   if (!isEmbedded) {
     // Embeds do not show loading indicators, since the whole embed is
     // usually behind a parent loading indicator.

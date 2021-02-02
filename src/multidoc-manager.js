@@ -26,7 +26,7 @@ import {
 import {dev, user} from './log';
 import {disposeServicesForDoc, getServicePromiseOrNullForDoc} from './service';
 import {getMode} from './mode';
-import {installAmpdocServicesForEmbed} from './service/core-services';
+import {installAmpdocServicesForShadowEmbed} from './service/core-services';
 import {installStylesForDoc} from './style-installer';
 import {isArray, isObject} from './types';
 import {parseExtensionUrl} from './service/extension-location';
@@ -111,7 +111,8 @@ export class MultidocManager {
     );
     // Instal doc services.
     // AMP.installAmpdocServices(ampdoc);
-    installAmpdocServicesForEmbed(ampdoc); // should be this?
+    // installAmpdocServicesForEmbed(ampdoc); // should be this?
+    installAmpdocServicesForShadowEmbed(ampdoc);
 
     const viewer = Services.viewerForDoc(ampdoc);
 
