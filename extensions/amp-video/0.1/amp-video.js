@@ -18,6 +18,7 @@ import {EMPTY_METADATA} from '../../../src/mediasession-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {VisibilityState} from '../../../src/visibility-state';
+import {addParamsToUrl} from '../../../src/url';
 import {
   childElement,
   childElementByTag,
@@ -62,6 +63,13 @@ const ATTRS_TO_PROPAGATE_ON_BUILD = [
   'disableremoteplayback',
   'controlsList',
 ];
+
+/** @private {!Map<string, number>} the bitrate in Kb/s of amp_quality */
+const AMP_QUALITY_BITRATES = {
+  high: 2000,
+  medium: 720,
+  low: 400,
+};
 
 /**
  * Do not propagate `autoplay`. Autoplay behavior is managed by
@@ -455,10 +463,23 @@ class AmpVideo extends AMP.BaseElement {
     }
 
     // Only cached sources are added during prerender.
+    // Add 3 qualities for each cached src: high, medium, low.
     // Origin sources will only be added when document becomes visible.
     sources.forEach((source) => {
       if (this.isCachedByCDN_(source)) {
-        this.video_.appendChild(source);
+        source.remove();
+        Object.keys(AMP_QUALITY_BITRATES).forEach((quality) => {
+          const currSource = source.cloneNode();
+          currSource.src = addParamsToUrl(source.src, {'amp_quality': quality});
+          currSource.setAttribute(
+            'data-bitrate',
+            AMP_QUALITY_BITRATES[quality]
+          );
+          if (quality !== 'low') {
+            currSource.removeAttribute('amp-orig-src');
+          }
+          this.video_.appendChild(currSource);
+        });
       }
     });
 
@@ -489,6 +510,7 @@ class AmpVideo extends AMP.BaseElement {
       // Cached sources should have been moved from <amp-video> to <video>.
       devAssert(!this.isCachedByCDN_(source));
       urlService.assertHttpsUrl(source.getAttribute('src'), source);
+      console.log('propagateLayoutChildren', source);
       this.video_.appendChild(source);
     });
 
@@ -499,10 +521,6 @@ class AmpVideo extends AMP.BaseElement {
       const origSrc = cachedSource.getAttribute('amp-orig-src');
       const origType = cachedSource.getAttribute('type');
       const origSource = this.createSourceElement_(origSrc, origType);
-      const bitrate = cachedSource.getAttribute('data-bitrate');
-      if (bitrate) {
-        origSource.setAttribute('data-bitrate', bitrate);
-      }
       insertAfterOrAtStart(
         dev().assertElement(this.video_),
         origSource,

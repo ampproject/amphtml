@@ -134,11 +134,17 @@ describes.realWin(
       const video = v.querySelector('video');
       expect(video.getAttribute('src')).to.be.null;
       const sources = video.querySelectorAll('source');
-      expect(sources.length).to.equal(2);
+      expect(sources.length).to.equal(4);
       expect(sources[0].getAttribute('src')).to.equal(
-        'https://example-com.cdn.ampproject.org/m/s/video.mp4'
+        'https://example-com.cdn.ampproject.org/m/s/video.mp4?amp_quality=high'
       );
       expect(sources[1].getAttribute('src')).to.equal(
+        'https://example-com.cdn.ampproject.org/m/s/video.mp4?amp_quality=medium'
+      );
+      expect(sources[2].getAttribute('src')).to.equal(
+        'https://example-com.cdn.ampproject.org/m/s/video.mp4?amp_quality=low'
+      );
+      expect(sources[3].getAttribute('src')).to.equal(
         'https://example.com/video.mp4'
       );
     });
@@ -161,15 +167,11 @@ describes.realWin(
       const video = v.querySelector('video');
       expect(video.getAttribute('src')).to.be.null;
       const sources = video.querySelectorAll('source');
-      expect(sources.length).to.equal(2);
-      expect(sources[0].getAttribute('src')).to.equal(
-        'https://example-com.cdn.ampproject.org/m/s/video.mp4'
-      );
-      expect(sources[1].getAttribute('src')).to.equal(
-        'https://example.com/video.mp4'
-      );
-      expect(sources[0].getAttribute('data-bitrate')).to.equal('1000');
-      expect(sources[1].getAttribute('data-bitrate')).to.equal('1000');
+      expect(sources.length).to.equal(4);
+      expect(sources[0].getAttribute('data-bitrate')).to.equal('2000');
+      expect(sources[1].getAttribute('data-bitrate')).to.equal('720');
+      expect(sources[2].getAttribute('data-bitrate')).to.equal('400');
+      expect(sources[3].hasAttribute('data-bitrate')).to.be.false;
     });
 
     it('should load a video', async () => {
