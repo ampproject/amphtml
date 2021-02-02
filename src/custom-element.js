@@ -20,6 +20,7 @@ import {CommonSignals} from './common-signals';
 import {ElementStub} from './element-stub';
 import {
   Layout,
+  LayoutPriority,
   applyStaticLayout,
   isInternalElement,
   isLoadingAllowed,
@@ -358,9 +359,9 @@ function createBaseCustomElementClass(win) {
      * @final @private
      */
     completeUpgrade_(newImpl, upgradeStartTime) {
+      this.impl_ = newImpl;
       this.upgradeDelayMs_ = win.Date.now() - upgradeStartTime;
       this.upgradeState_ = UpgradeState.UPGRADED;
-      this.impl_ = newImpl;
       this.classList.remove('amp-unresolved');
       this.classList.remove('i-amphtml-unresolved');
       this.assertLayout_();
@@ -411,8 +412,9 @@ function createBaseCustomElementClass(win) {
      * @return {number}
      */
     getLayoutPriority() {
-      devAssert(this.isUpgraded(), 'Cannot get priority of unupgraded element');
-      return this.impl_.getLayoutPriority();
+      return this.impl_
+        ? this.impl_.getLayoutPriority()
+        : LayoutPriority.BACKGROUND;
     }
 
     /**
