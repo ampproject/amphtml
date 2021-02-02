@@ -17,7 +17,7 @@
 /* global require, process */
 
 const argv = require('minimist')(process.argv.slice(2));
-const gulp = require('gulp-help')(require('gulp'));
+const gulp = require('gulp');
 const {cyan, red} = require('ansi-colors');
 const {isCiBuild} = require('./build-system/common/ci');
 const {log} = require('./build-system/common/logging');
@@ -37,7 +37,7 @@ const {
 const {a4a} = require('./build-system/tasks/a4a');
 const {ava} = require('./build-system/tasks/ava');
 const {babelPluginTests} = require('./build-system/tasks/babel-plugin-tests');
-const {build, watch} = require('./build-system/tasks/build');
+const {build} = require('./build-system/tasks/build');
 const {bundleSize} = require('./build-system/tasks/bundle-size');
 const {cachesJson} = require('./build-system/tasks/caches-json');
 const {checkLinks} = require('./build-system/tasks/check-links');
@@ -120,7 +120,7 @@ function checkFlags(name, taskFunc) {
       cyan(`gulp ${name}`) + ':',
       cyan(invalidFlags.join(', '))
     );
-    log('For detailed usage information, run', cyan('gulp help') + '.');
+    log('For detailed usage information, run', cyan('gulp --tasks') + '.');
     if (validFlags.length > 0) {
       log('Valid flags for', cyan(`gulp ${name}`) + ':');
       validFlags.forEach((key) => {
@@ -185,4 +185,3 @@ createTask('validator', validator);
 createTask('validator-webui', validatorWebui);
 createTask('analytics-vendor-configs', analyticsVendorConfigs);
 createTask('visual-diff', visualDiff);
-createTask('watch', watch);

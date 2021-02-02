@@ -47,7 +47,7 @@ This document provides details for testing and building your AMP code.
 
 Before running these commands, make sure you have Node.js and Gulp installed. For installation instructions, see the [One-time setup](getting-started-quick.md#one-time-setup) section in the Quick Start guide.
 
-**Pro tip:** To see a full listing of `gulp` commands and their flags, run `gulp help`.
+**Pro tip:** To see a full listing of `gulp` commands and their flags, run `gulp --tasks`.
 
 | Command                                                   | Description                                                                                                                                                                                                                                            |
 | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
