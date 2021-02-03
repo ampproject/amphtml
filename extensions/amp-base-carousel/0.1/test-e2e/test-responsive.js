@@ -20,8 +20,9 @@ const pageWidth = 1000;
 const pageHeight = 600;
 
 describes.endtoend(
-  'amp-base-carousel:0.1 - responsive attributes',
+  'amp-base-carousel - responsive attributes',
   {
+    version: '0.1',
     fixture: 'amp-base-carousel/responsive.amp.html',
     experiments: ['amp-base-carousel', 'layers'],
     initialRect: {width: pageWidth, height: pageHeight},

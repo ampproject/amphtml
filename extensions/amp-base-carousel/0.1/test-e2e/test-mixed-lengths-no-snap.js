@@ -20,8 +20,9 @@ const pageWidth = 800;
 const pageHeight = 600;
 
 describes.endtoend(
-  'amp-base-carousel:0.1 - mixed length slides without snapping',
+  'amp-base-carousel - mixed length slides without snapping',
   {
+    version: '0.1',
     fixture: 'amp-base-carousel/mixed-lengths-no-snap.amp.html',
     experiments: ['amp-base-carousel', 'layers'],
     initialRect: {width: pageWidth, height: pageHeight},

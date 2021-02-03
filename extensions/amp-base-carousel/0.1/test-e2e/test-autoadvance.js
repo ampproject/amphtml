@@ -20,8 +20,9 @@ const pageWidth = 800;
 const pageHeight = 600;
 
 describes.endtoend(
-  'amp-base-carousel:0.1 - autoadvance',
+  'amp-base-carousel - autoadvance',
   {
+    version: '0.1',
     fixture: 'amp-base-carousel/autoadvance.amp.html',
     experiments: ['amp-base-carousel', 'layers'],
     initialRect: {width: pageWidth, height: pageHeight},

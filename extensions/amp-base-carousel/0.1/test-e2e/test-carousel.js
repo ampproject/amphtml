@@ -23,8 +23,9 @@ const pageHeight = 600;
 const testTimeout = 20000;
 
 describes.endtoend(
-  'amp-base-carousel:0.1 - basic functionality',
+  'amp-base-carousel - basic functionality',
   {
+    version: '0.1',
     fixture: 'amp-base-carousel/basic.amp.html',
     experiments: [
       'amp-base-carousel',

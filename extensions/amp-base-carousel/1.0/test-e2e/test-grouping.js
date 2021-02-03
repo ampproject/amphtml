@@ -25,8 +25,9 @@ const pivotIndex = Math.floor(slideCount / 2);
 const expectedScrollPosition = (pageWidth / advanceCount) * pivotIndex;
 
 describes.endtoend(
-  'amp-base-carousel:1.0 - grouping',
+  'amp-base-carousel - grouping',
   {
+    version: '1.0',
     fixture: 'amp-base-carousel/1.0/grouping-move-by-2.amp.html',
     experiments: ['bento-carousel'],
     initialRect: {width: pageWidth, height: pageHeight},
