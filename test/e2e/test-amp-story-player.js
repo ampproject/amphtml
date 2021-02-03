@@ -38,7 +38,7 @@ describes.endtoend(
       await expect(player);
     });
 
-    it('loads first story in page load', async () => {
+    it('loads and displays first story on page load when player is visible in viewport', async () => {
       const shadowHost = await controller.findElement(
         'div.i-amphtml-story-player-shadow-root-intermediary'
       );
