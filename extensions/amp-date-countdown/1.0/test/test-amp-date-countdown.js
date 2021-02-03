@@ -33,7 +33,7 @@ describes.realWin(
 
     async function waitRendered() {
       await whenUpgradedToCustomElement(element);
-      await element.build();
+      await element.buildInternal();
       await waitFor(() => {
         // The rendered container inserts a <div> element.
         const div = element.querySelector('div');

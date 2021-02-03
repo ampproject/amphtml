@@ -86,7 +86,7 @@ describes.realWin(
       }
       doc.body.appendChild(ins);
       return ins
-        .build()
+        .buildInternal()
         .then(() => {
           if (opt_beforeLayoutCallback) {
             opt_beforeLayoutCallback(ins);

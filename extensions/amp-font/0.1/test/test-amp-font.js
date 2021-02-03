@@ -58,7 +58,7 @@ describes.repeated(
           font.setAttribute('on-load-remove-class', 'comic-amp-font-loading');
           body.appendChild(font);
           return font
-            .build()
+            .buildInternal()
             .then(() => font.layoutCallback())
             .then(() => font);
         }

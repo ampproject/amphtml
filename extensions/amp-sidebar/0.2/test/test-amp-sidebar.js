@@ -90,7 +90,7 @@ describes.realWin(
       ampSidebar.setAttribute('layout', 'nodisplay');
       doc.body.appendChild(ampSidebar);
       return ampSidebar
-        .build()
+        .buildInternal()
         .then(() => {
           return ampSidebar.layoutCallback();
         })

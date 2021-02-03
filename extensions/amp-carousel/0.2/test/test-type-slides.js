@@ -130,7 +130,7 @@ describes.realWin(
       }
 
       container.appendChild(carousel);
-      await carousel.build();
+      await carousel.buildInternal();
       carousel.updateLayoutBox({
         top: 0,
         left: 0,

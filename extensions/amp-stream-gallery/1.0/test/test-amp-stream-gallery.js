@@ -80,7 +80,7 @@ describes.realWin(
     }
 
     async function getSlideWrappersFromShadow() {
-      await element.build();
+      await element.buildInternal();
       const shadow = element.shadowRoot;
       await waitForChildPromise(shadow, (shadow) => {
         return shadow.querySelectorAll('[class*=hideScrollbar]');
@@ -109,7 +109,7 @@ describes.realWin(
 
     it('should render slides and arrows when built', async () => {
       win.document.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
 
       const renderedSlides = await getSlidesFromShadow();
       expect(renderedSlides).to.have.ordered.members(userSuppliedChildren);
@@ -127,7 +127,7 @@ describes.realWin(
       element.appendChild(customPrev);
       element.appendChild(customNext);
       win.document.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
 
       const renderedSlides = await getSlidesFromShadow();
       expect(renderedSlides).to.have.ordered.members(userSuppliedChildren);
@@ -150,7 +150,7 @@ describes.realWin(
     it('should render in preparation for looping with loop prop', async () => {
       element.setAttribute('loop', '');
       win.document.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
 
       const renderedSlideWrappers = await getSlideWrappersFromShadow();
       // Given slides [0][1][2] should be rendered as [2][0][1]. But [2] is
@@ -171,7 +171,7 @@ describes.realWin(
       beforeEach(async () => {
         element.setAttribute('max-visible-count', '1');
         win.document.body.appendChild(element);
-        await element.build();
+        await element.buildInternal();
       });
 
       afterEach(() => {

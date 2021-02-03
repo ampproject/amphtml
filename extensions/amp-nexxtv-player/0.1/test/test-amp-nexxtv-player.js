@@ -44,7 +44,7 @@ describes.realWin(
         'data-origin': `http://localhost:${location.port}/test/fixtures/served/blank.html#`,
       });
       doc.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
       await element.layoutCallback();
       const impl = await element.getImpl(false);
       const iframe = element.querySelector('iframe');

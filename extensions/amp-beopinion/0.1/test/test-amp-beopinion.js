@@ -43,7 +43,7 @@ describes.realWin(
       ampBeOpinion.setAttribute('height', '222');
       doc.body.appendChild(ampBeOpinion);
       return ampBeOpinion
-        .build()
+        .buildInternal()
         .then(() => ampBeOpinion.layoutCallback())
         .then(() => ampBeOpinion);
     }

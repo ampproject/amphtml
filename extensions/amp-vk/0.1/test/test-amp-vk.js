@@ -62,7 +62,7 @@ describes.realWin(
 
       doc.body.appendChild(element);
 
-      await element.build();
+      await element.buildInternal();
       const resource = Resource.forElement(element);
       resource.measure();
       await element.layoutCallback();

@@ -70,7 +70,7 @@ describes.sandboxed('AmpAnimation', {}, (env) => {
     }
 
     win.document.body.appendChild(element);
-    return element.build().then(() => element.getImpl());
+    return element.buildInternal().then(() => element.getImpl());
   }
 
   function updateIntersection(target, intersectionRatio) {

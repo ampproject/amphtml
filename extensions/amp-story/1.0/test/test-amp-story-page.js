@@ -325,7 +325,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     page.element.querySelector('amp-story-grid-layer').appendChild(ampAudioEl);
 
     new AmpAudio(ampAudioEl);
-    ampAudioEl.build();
+    ampAudioEl.buildInternal();
     page.buildCallback();
 
     const mediaPool = await page.mediaPoolPromise_;

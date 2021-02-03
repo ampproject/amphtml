@@ -43,7 +43,7 @@ describes.realWin(
       }
       doc.body.appendChild(reach);
       return reach
-        .build()
+        .buildInternal()
         .then(() => {
           reach.layoutCallback();
         })

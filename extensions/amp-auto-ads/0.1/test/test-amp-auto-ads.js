@@ -179,7 +179,7 @@ describes.realWin(
         ampAutoAds.setAttribute('type', type || '_ping_');
       }
       doc.body.appendChild(ampAutoAds);
-      return ampAutoAds.build().then(() => {
+      return ampAutoAds.buildInternal().then(() => {
         return ampAutoAds.layoutCallback();
       });
     }

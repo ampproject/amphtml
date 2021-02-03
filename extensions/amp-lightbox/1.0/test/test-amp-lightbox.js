@@ -54,7 +54,7 @@ describes.realWin(
         </amp-lightbox>
       `;
       win.document.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
     });
 
     afterEach(() => {

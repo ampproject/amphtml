@@ -40,7 +40,7 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
       element.setAttribute(attr, attrs[attr]);
     }
     root.body.appendChild(element);
-    return element.build().then(() => element);
+    return element.buildInternal().then(() => element);
   }
 
   /**

@@ -267,7 +267,7 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
               const iWin = iframe.contentWindow;
               const p = onInsert(iWin)
                 .then(() => {
-                  return element.build();
+                  return element.buildInternal();
                 })
                 .then(() => {
                   if (!element.getPlaceholder()) {

@@ -46,7 +46,7 @@ describes.realWin(
       }
       doc.body.appendChild(bc);
       return bc
-        .build()
+        .buildInternal()
         .then(() => bc.getImpl(false))
         .then((impl) => {
           impl.playerReadyResolver_(impl.iframe_);

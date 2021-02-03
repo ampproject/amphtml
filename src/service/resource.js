@@ -341,7 +341,7 @@ export class Resource {
       return null;
     }
     this.isBuilding_ = true;
-    return this.element.build().then(
+    return this.element.buildInternal().then(
       () => {
         this.isBuilding_ = false;
         // With IntersectionObserver, measure can happen before build

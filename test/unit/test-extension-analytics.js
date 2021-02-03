@@ -265,7 +265,7 @@ describes.realWin(
         parentEle = env.win.document.createElement('amp-test');
         parentEle.setAttribute('layout', 'nodisplay');
         env.win.document.body.appendChild(parentEle);
-        const buildPromise = parentEle.build();
+        const buildPromise = parentEle.buildInternal();
         builder = new CustomEventReporterBuilder(parentEle);
         reporter = builder.track('test', 'fake.test').build();
         return buildPromise;
@@ -352,7 +352,7 @@ describes.realWin(
           parentEle = env.win.document.createElement('amp-test');
           parentEle.setAttribute('layout', 'nodisplay');
           env.win.document.body.appendChild(parentEle);
-          return parentEle.build();
+          return parentEle.buildInternal();
         });
 
         it('should insert analytics after LOAD_START', function* () {
@@ -410,7 +410,7 @@ describes.realWin(
           parentEle = env.win.document.createElement('amp-test');
           parentEle.setAttribute('layout', 'nodisplay');
           env.win.document.body.appendChild(parentEle);
-          return parentEle.build();
+          return parentEle.buildInternal();
         });
 
         it('should insert and remove analytics', function* () {
@@ -444,7 +444,7 @@ describes.realWin(
           parentEle = env.win.document.createElement('amp-test');
           parentEle.setAttribute('layout', 'nodisplay');
           env.win.document.body.appendChild(parentEle);
-          return parentEle.build();
+          return parentEle.buildInternal();
         });
 
         it('should NOT insert analytics when relayout', function* () {
@@ -491,7 +491,7 @@ describes.realWin(
           parentEle = env.win.document.createElement('amp-test');
           parentEle.setAttribute('layout', 'nodisplay');
           env.win.document.body.appendChild(parentEle);
-          return parentEle.build();
+          return parentEle.buildInternal();
         });
 
         it('should insert analytics when relayout', function* () {

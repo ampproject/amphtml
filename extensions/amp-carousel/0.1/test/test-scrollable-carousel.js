@@ -74,7 +74,7 @@ describes.realWin(
 
       doc.body.appendChild(carouselElement);
       return carouselElement
-        .build()
+        .buildInternal()
         .then(() => {
           carouselElement.updateLayoutBox({
             top: 0,

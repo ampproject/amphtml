@@ -104,7 +104,7 @@ describes.realWin(
         media.setAttribute('layout', 'responsive');
       }
       doc.body.appendChild(media);
-      await media.build();
+      await media.buildInternal();
 
       const impl = await media.getImpl();
       changeSizeSpy = env.sandbox.spy(impl, 'forceChangeHeight');

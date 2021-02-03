@@ -169,7 +169,7 @@ describes.realWin(
 
       container.appendChild(el);
 
-      await el.build();
+      await el.buildInternal();
       await el.layoutCallback();
       await afterIndexUpdate(el);
 

@@ -75,7 +75,7 @@ describes.realWin(
         }
       }
       doc.body.appendChild(v);
-      await v.build();
+      await v.buildInternal();
       const impl = await v.getImpl(false);
 
       if (opt_noLayout) {
@@ -720,7 +720,7 @@ describes.realWin(
         v.setAttribute('poster', 'img.png');
         doc.body.appendChild(v);
         v.appendChild(img);
-        v.build();
+        v.buildInternal();
         const impl = await v.getImpl(false);
         impl.togglePlaceholder = env.sandbox.stub();
         return impl;
