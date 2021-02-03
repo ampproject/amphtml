@@ -138,7 +138,9 @@ function SidebarWithRef(
             classes.defaultBackdropStyles
           }`}
           hidden={!side}
-        ></div>
+        >
+          <div className={classes.sidebarChildClass}></div>
+        </div>
       </>
     )
   );
