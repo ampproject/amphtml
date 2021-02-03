@@ -27,9 +27,6 @@ export class AmpStoryComponentManager {
   constructor(win) {
     /** @private {!Window} */
     this.win_ = win;
-
-    /** @private {?function} */
-    this.scrollHandler_ = null;
   }
 
   /**
@@ -44,12 +41,12 @@ export class AmpStoryComponentManager {
       elImpl.layoutCallback.bind(elImpl)
     );
 
-    this.scrollHandler_ = () => {
+    const scrollHandler = () => {
       elImpl.layoutCallback();
-      this.win_.removeEventListener('scroll', this.scrollHandler_);
+      this.win_.removeEventListener('scroll', scrollHandler);
     };
 
-    this.win_.addEventListener('scroll', this.scrollHandler_);
+    this.win_.addEventListener('scroll', scrollHandler);
   }
 
   /**
