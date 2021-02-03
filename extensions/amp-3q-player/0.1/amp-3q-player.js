@@ -113,7 +113,7 @@ class Amp3QPlayer extends AMP.BaseElement {
       }
     });
 
-    return iframeSrc;
+    return encodeURIComponent(iframeSrc);
   }
 
   /** @override */
