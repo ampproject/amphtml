@@ -1710,6 +1710,26 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
     });
   });
 
+  it("remove should remove all of a resource's tasks", () => {
+    const states = [
+      ResourceState.NOT_LAID_OUT,
+      ResourceState.READY_FOR_LAYOUT,
+      ResourceState.LAYOUT_SCHEDULED,
+    ];
+
+    states.forEach((state) => {
+      resource1.state_ = state;
+      resources.exec_.enqueue({id: 1, resource: resource1});
+      resources.queue_.enqueue({id: 1, resource: resource1});
+
+      expect(resources.exec_.getSize()).to.equal(1);
+      expect(resources.queue_.getSize()).to.equal(1);
+      resources.remove(child1);
+      expect(resources.exec_.getSize()).to.equal(0);
+      expect(resources.queue_.getSize()).to.equal(0);
+    });
+  });
+
   describe('reparent', () => {
     let scheduleBuildStub;
     let resource;
