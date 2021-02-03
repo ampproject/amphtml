@@ -1154,6 +1154,18 @@ app.use('/subscription/:id/entitlements', (req, res) => {
     data: {
       login: true,
     },
+    metering: {
+      state: {
+        id: 'ppid264605',
+        standardAttributes: {
+          // Returns a timestamp for 5 minutes ago, for demo purposes.
+          // eslint-disable-next-line google-camelcase/google-camelcase
+          registered_user: {
+            timestamp: Math.floor(Date.now() / 1000) - 60 * 5 * 1000,
+          },
+        },
+      },
+    },
     decryptedDocumentKey: decryptDocumentKey(req.query.crypt),
   });
 });
