@@ -14,58 +14,41 @@
  * limitations under the License.
  */
 
+import ctrlHelpers from '../../test-e2e/helpers';
+
+const bentoHelper = (controller) => ctrlHelpers({controller, version: '1.0'});
+
 const TAG_NAME = 'amp-base-carousel';
-const SLIDE_CLASS = 'slideElement';
-const SCROLLER_CLASS = 'hideScrollbar';
-const PREV_ARROW_CLASS = 'arrowPrev';
-const NEXT_ARROW_CLASS = 'arrowNext';
-const PREV_ARROW_SLOT_SELECTOR = '[slot="prev-arrow"]';
-const NEXT_ARROW_SLOT_SELECTOR = '[slot="next-arrow"]';
 
-/** Increase element wait timeout for Selenium controller */
-const ELEMENT_WAIT_TIMEOUT = 10000;
+// This is only used for switching to the shadow root
+const getCarousel = (controller) => controller.findElement(TAG_NAME);
 
-export function getCarousel(controller) {
-  return controller.findElement(TAG_NAME);
-}
+const getSlides = (styles, controller) => bentoHelper(controller).getSlides();
+const getSlide = async (styles, controller, n) =>
+  bentoHelper(controller).getSlide(n);
 
-export function getSlides(styles, controller) {
-  return controller.findElements(`.${styles[SLIDE_CLASS]}`);
-}
+const getScrollingElement = async (styles, controller) =>
+  bentoHelper(controller).getScrollingElement();
 
-export async function getSlide(styles, controller, n) {
-  return controller.findElement(`.${styles[SLIDE_CLASS]}[data-slide="${n}"]`);
-}
+const getPrevArrowSlot = async (controller) =>
+  bentoHelper(controller).getPrevArrowSlot();
+const getNextArrowSlot = async (controller) =>
+  bentoHelper(controller).getNextArrowSlot();
+const getPrevArrow = async (styles, controller) =>
+  bentoHelper(controller).getPrevArrow();
+const getNextArrow = async (styles, controller) =>
+  bentoHelper(controller).getNextArrow();
 
-export async function getScrollingElement(styles, controller) {
-  return controller.findElement(
-    `.${styles[SCROLLER_CLASS]}`,
-    ELEMENT_WAIT_TIMEOUT
-  );
-}
+const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
 
-export async function getPrevArrowSlot(controller) {
-  return controller.findElement(PREV_ARROW_SLOT_SELECTOR);
-}
-
-export async function getNextArrowSlot(controller) {
-  return controller.findElement(NEXT_ARROW_SLOT_SELECTOR);
-}
-
-export async function getPrevArrow(styles, controller) {
-  return controller.findElement(
-    `.${styles[PREV_ARROW_CLASS]}`,
-    ELEMENT_WAIT_TIMEOUT
-  );
-}
-
-export async function getNextArrow(styles, controller) {
-  return controller.findElement(
-    `.${styles[NEXT_ARROW_CLASS]}`,
-    ELEMENT_WAIT_TIMEOUT
-  );
-}
-
-export function sleep(ms) {
-  return new Promise((res) => setTimeout(res, ms));
-}
+export {
+  getCarousel,
+  getSlides,
+  getSlide,
+  getScrollingElement,
+  getPrevArrowSlot,
+  getNextArrowSlot,
+  getPrevArrow,
+  getNextArrow,
+  sleep,
+};
