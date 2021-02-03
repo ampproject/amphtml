@@ -219,6 +219,7 @@ amp-story-page .i-amphtml-story-page-open-attachment-label {
   background: white;
   height: 38px;
   z-index: 10;
+  border-radius: 8px;
 }
 
 .hit-top .i-amphtml-inner-header-el {
