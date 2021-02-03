@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+import {createUseStyles} from 'react-jss';
+
 export const LINE_HEIGHT_EM_ = 1.15;
 
-export const fitTextContentWrapper = {
+const fitTextContentWrapper = {
   'display': 'flex',
   'flexDirection': 'column',
   'flexWrap': 'nowrap',
@@ -25,7 +27,7 @@ export const fitTextContentWrapper = {
 
 /* Legacy comment: We have to use the old-style flex box with line clamping. It will only
     work in WebKit, but unfortunately there's no alternative. */
-export const fitTextContent = {
+const fitTextContent = {
   lineHeight: `${LINE_HEIGHT_EM_}em`,
   'display': '-webkit-box',
   '-webkit-box-orient': 'vertical',
@@ -33,6 +35,16 @@ export const fitTextContent = {
   'textOverflow': 'ellipsis',
 };
 
-export const minContentHeight = {
+const minContentHeight = {
   'height': 'min-content',
 };
+
+const JSS = {
+  fitTextContentWrapper,
+  fitTextContent,
+  minContentHeight,
+};
+
+// useStyles gets replaced for AMP builds via `babel-plugin-transform-jss`.
+// eslint-disable-next-line local/no-export-side-effect
+export const useStyles = createUseStyles(JSS);
