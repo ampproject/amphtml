@@ -38,6 +38,8 @@
 
 .i-amphtml-story-draggable-drawer {
   height: 100% !important;
+  border-radius: 8px 8px 0px 0px !important;
+  overflow: hidden !important;
 }
 
 .i-amphtml-story-draggable-drawer-container {
@@ -51,10 +53,10 @@
 }
 
 .i-amphtml-story-bookend-handle {
-  margin: 12px !important;
+  /* margin: 12px !important; */
   height: 3px !important;
   width: 46px !important;
-  margin: 12px auto 24px !important;
+  /* margin: 12px auto 24px !important; */
   background-color: rgba(0,0,0,.2);
   border-radius: 3px !important;
 }
@@ -78,6 +80,8 @@
   opacity: 1 !important;
   transition: opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
   border-radius: 8px !important;
+  position: relative;
+  padding-top: 20px !important;
 }
 
 
