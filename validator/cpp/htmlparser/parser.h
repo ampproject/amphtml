@@ -29,8 +29,8 @@
 
 namespace htmlparser {
 
-using OnNodeCallback = std::function<void(Node* parsed_node,
-                                          Token original_token)>;
+using OnNodeCallback =
+    std::function<void(Node* parsed_node, Token original_token)>;
 
 struct ParseOptions {
  public:
@@ -96,15 +96,12 @@ struct ParseAccounting {
   bool duplicate_html_elements = false;
   bool duplicate_body_elements = false;
   // Set only if above duplicate bits are true.
-  std::optional <LineCol> duplicate_html_element_location = std::nullopt;
-  std::optional <LineCol> duplicate_body_element_location = std::nullopt;
+  std::optional<LineCol> duplicate_html_element_location = std::nullopt;
+  std::optional<LineCol> duplicate_body_element_location = std::nullopt;
 
   // If true, parsed src is missing required <!doctype html> declaration or is
   // invalid syntax or is XHTML 4 or legacy doctype.
   bool quirks_mode = false;
-
-  // TODO: Implemnent this.
-  int total_nodes;
 };
 
 // Parse returns the parse tree for the HTML from the given html.
@@ -126,14 +123,12 @@ struct ParseAccounting {
     std::string_view html, Node* fragment_parent = nullptr);
 
 [[nodiscard]] std::unique_ptr<Document> ParseFragmentWithOptions(
-    const std::string_view html,
-    const ParseOptions& options,
+    const std::string_view html, const ParseOptions& options,
     Node* fragment_parent = nullptr);
 
 class Parser {
  public:
-  Parser(std::string_view html,
-         const ParseOptions& options = {},
+  Parser(std::string_view html, const ParseOptions& options = {},
          Node* fragment_parent = nullptr);
 
   [[nodiscard]] std::unique_ptr<Document> Parse();
@@ -157,8 +152,7 @@ class Parser {
                                                  Node* fragment_parent);
 
   friend std::unique_ptr<Document> ParseFragmentWithOptions(
-      const std::string_view html,
-      const ParseOptions& options,
+      const std::string_view html, const ParseOptions& options,
       Node* fragment_parent);
 
  private:
@@ -181,7 +175,7 @@ class Parser {
 
   // Parses a token as though it had appeared in the parser's input.
   void ParseImpliedToken(TokenType token_type, Atom atom,
-      const std::string& data);
+                         const std::string& data);
 
   // Runs the current token through the parsing routines until it is consumed.
   void ParseCurrentToken();
@@ -282,17 +276,17 @@ class Parser {
   // higher element in the stack that was also in the stop tags). For example,
   // popUntil(tableScope, "table") returns true and leaves:
   // ["html", "body", "font"]
-  template<typename... Args>
+  template <typename... Args>
   bool PopUntil(Scope scope, Args... match_tags);
 
   // indexOfElementInScope returns the index in p.oe of the highest element
   // whose tag is in matchTags that is in scope. If no matching element is in
   // scope, it returns -1.
-  int IndexOfElementInScope(Scope scope, const std::vector<Atom>& match_tags)
-    const;
+  int IndexOfElementInScope(Scope scope,
+                            const std::vector<Atom>& match_tags) const;
 
   // Is like popUntil, except that it doesn't modify the stack of open elements.
-  template<typename... Args>
+  template <typename... Args>
   bool ElementInScope(Scope scope, Args... match_tags) const;
 
   // Pops elements off the stack of open elements until a scope-defined element
@@ -378,7 +372,6 @@ class Parser {
   // The context element when parsing an HTML fragment (section 12.4).
   Node* fragment_parent_node_;
 
-
   // Whether new elements should be inserted according to
   // the foster parenting rules (section 12.2.6.1).
   bool foster_parenting_ = false;
@@ -397,23 +390,21 @@ class Parser {
 
   // Stop tags for use in popUntil. These come from section 12.2.4.2.
   static constexpr std::pair<std::string_view, std::array<Atom, 9>>
-    kDefaultScopeStopTags[] {
-      {
-        "",  // Empty namespace.
-        {
-          Atom::APPLET, Atom::CAPTION, Atom::HTML, Atom::TABLE, Atom::TD,
-          Atom::TH, Atom::MARQUEE, Atom::OBJECT, Atom::TEMPLATE},
-      },
-      {
-        "math",
-        {Atom::ANNOTATION_XML, Atom::MI, Atom::MN, Atom::MO, Atom::MS,
-         Atom::MTEXT},
-      },
-      {
-        "svg",
-        {Atom::DESC, Atom::FOREIGN_OBJECT, Atom::TITLE},
-      }
-    };
+      kDefaultScopeStopTags[]{
+          {
+              "",  // Empty namespace.
+              {Atom::APPLET, Atom::CAPTION, Atom::HTML, Atom::TABLE, Atom::TD,
+               Atom::TH, Atom::MARQUEE, Atom::OBJECT, Atom::TEMPLATE},
+          },
+          {
+              "math",
+              {Atom::ANNOTATION_XML, Atom::MI, Atom::MN, Atom::MO, Atom::MS,
+               Atom::MTEXT},
+          },
+          {
+              "svg",
+              {Atom::DESC, Atom::FOREIGN_OBJECT, Atom::TITLE},
+          }};
 
   // Internal tracking.
   int num_html_tags_ = 0;

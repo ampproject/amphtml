@@ -19,7 +19,7 @@
 #include <tuple>
 #ifdef DUMP_NODES
 #include <iostream>  // For DumpDocument
-#endif  // DUMP_NODES
+#endif               // DUMP_NODES
 
 #include "glog/logging.h"
 #include "absl/flags/flag.h"
@@ -53,9 +53,7 @@ void DumpNode(Node* root_node) {
   }
 }
 // Dumps the nodes in the DOM in their final order after parsing.
-void DumpDocument(Document* doc) {
-  DumpNode(doc->RootNode());
-}
+void DumpDocument(Document* doc) { DumpNode(doc->RootNode()); }
 
 /
 #endif  // DUMP_NODES
@@ -63,23 +61,23 @@ void DumpDocument(Document* doc) {
 }  // namespace.
 
 std::unique_ptr<Document> Parse(std::string_view html) {
-  Parser parser(html, {
-    .scripting = true,
-    .frameset_ok = true,
-    .record_node_offsets = true,
-    .record_attribute_offsets = true,
-    .allow_deprecated_tags = false});
+  Parser parser(html, {.scripting = true,
+                       .frameset_ok = true,
+                       .record_node_offsets = true,
+                       .record_attribute_offsets = true,
+                       .allow_deprecated_tags = false});
   return parser.Parse();
 }
 
-std::unique_ptr<Document> ParseWithOptions(
-    std::string_view html, const ParseOptions& options) {
+std::unique_ptr<Document> ParseWithOptions(std::string_view html,
+                                           const ParseOptions& options) {
   Parser parser(html, options);
   return parser.Parse();
 }
 
-std::unique_ptr<Document> ParseFragmentWithOptions(
-    std::string_view html, const ParseOptions& options, Node* fragment_parent) {
+std::unique_ptr<Document> ParseFragmentWithOptions(std::string_view html,
+                                                   const ParseOptions& options,
+                                                   Node* fragment_parent) {
   Parser parser(html, options, fragment_parent);
   Node* root = parser.document_->NewNode(NodeType::ELEMENT_NODE, Atom::HTML);
   parser.document_->root_node_->AppendChild(root);
@@ -115,32 +113,29 @@ std::unique_ptr<Document> ParseFragment(std::string_view html,
                                         Node* fragment_parent) {
   // Expects clients to update the offsets relative to the parent which
   // this fragment belongs.
-  ParseOptions options = {
-    .scripting = true,
-    .frameset_ok = true,
-    .record_node_offsets = true,
-    .record_attribute_offsets = true,
-    .allow_deprecated_tags = false
-  };
+  ParseOptions options = {.scripting = true,
+                          .frameset_ok = true,
+                          .record_node_offsets = true,
+                          .record_attribute_offsets = true,
+                          .allow_deprecated_tags = false};
   return ParseFragmentWithOptions(html, options, fragment_parent);
 }
 
-Parser::Parser(std::string_view html,
-               const ParseOptions& options,
-               Node* fragment_parent) :
-    tokenizer_(std::make_unique<Tokenizer>(html,
-        fragment_parent ?
-        AtomUtil::ToString(fragment_parent->atom_) : "")),
-    on_node_callback_(options.on_node_callback),
-    document_(new Document),
-    scope_marker_(document_->NewNode(NodeType::SCOPE_MARKER_NODE)),
-    scripting_(options.scripting),
-    frameset_ok_(options.frameset_ok),
-    record_node_offsets_(options.record_node_offsets),
-    record_attribute_offsets_(options.record_attribute_offsets),
-    allow_deprecated_tags_(options.allow_deprecated_tags),
-    fragment_(fragment_parent != nullptr),
-    fragment_parent_node_(fragment_parent) {
+Parser::Parser(std::string_view html, const ParseOptions& options,
+               Node* fragment_parent)
+    : tokenizer_(std::make_unique<Tokenizer>(
+          html,
+          fragment_parent ? AtomUtil::ToString(fragment_parent->atom_) : "")),
+      on_node_callback_(options.on_node_callback),
+      document_(new Document),
+      scope_marker_(document_->NewNode(NodeType::SCOPE_MARKER_NODE)),
+      scripting_(options.scripting),
+      frameset_ok_(options.frameset_ok),
+      record_node_offsets_(options.record_node_offsets),
+      record_attribute_offsets_(options.record_attribute_offsets),
+      allow_deprecated_tags_(options.allow_deprecated_tags),
+      fragment_(fragment_parent != nullptr),
+      fragment_parent_node_(fragment_parent) {
   insertion_mode_ = std::bind(&Parser::InitialIM, this);
 }
 
@@ -150,8 +145,7 @@ std::unique_ptr<Document> Parser::Parse() {
     if (open_elements_stack_.size() >
         ::absl::GetFlag(FLAGS_htmlparser_max_nodes_depth_count)) {
       LOG(WARNING) << "Skipped parsing. Document too complex: "
-                   << open_elements_stack_.size()
-                   << " vs. Max allowed: ("
+                   << open_elements_stack_.size() << " vs. Max allowed: ("
                    << ::absl::GetFlag(FLAGS_htmlparser_max_nodes_depth_count)
                    << ")";
       delete document_.release();
@@ -190,7 +184,7 @@ Node* Parser::top() {
   return document_->root_node_;
 }  // End Parser::Top.
 
-template<typename... Args>
+template <typename... Args>
 bool Parser::PopUntil(Scope scope, Args... match_tags) {
   std::vector<Atom> argsList{match_tags...};
   int i = IndexOfElementInScope(scope, argsList);
@@ -202,7 +196,7 @@ bool Parser::PopUntil(Scope scope, Args... match_tags) {
 }  // End Parser::PopUntil.
 
 int Parser::IndexOfElementInScope(Scope scope,
-    const std::vector<Atom>& match_tags) const {
+                                  const std::vector<Atom>& match_tags) const {
   for (int i = open_elements_stack_.size() - 1; i >= 0; --i) {
     Node* node = open_elements_stack_.at(i);
     if (node->name_space_.empty()) {
@@ -222,8 +216,7 @@ int Parser::IndexOfElementInScope(Scope scope,
           if (node->atom_ == Atom::BUTTON) return -1;
           break;
         case Scope::TableScope:
-          if (node->atom_ == Atom::HTML ||
-              node->atom_ == Atom::TABLE ||
+          if (node->atom_ == Atom::HTML || node->atom_ == Atom::TABLE ||
               node->atom_ == Atom::TEMPLATE) {
             return -1;
           }
@@ -259,7 +252,7 @@ int Parser::IndexOfElementInScope(Scope scope,
   return -1;
 }  // Parser::IndexOfElementInScope.
 
-template<typename... Args>
+template <typename... Args>
 bool Parser::ElementInScope(Scope scope, Args... tags) const {
   std::vector<Atom> argsList{tags...};
   return IndexOfElementInScope(scope, argsList) != -1;
@@ -284,8 +277,8 @@ void Parser::ClearStackToContext(Scope scope) {
         }
         break;
       case Scope::TableBodyScope:
-        if (atom == Atom::HTML || atom == Atom::TBODY || atom == Atom::TFOOT
-            || atom == Atom::THEAD || atom == Atom::TEMPLATE) {
+        if (atom == Atom::HTML || atom == Atom::TBODY || atom == Atom::TFOOT ||
+            atom == Atom::THEAD || atom == Atom::TEMPLATE) {
           open_elements_stack_.Pop(open_elements_stack_.size() - i - 1);
           return;
         }
@@ -345,11 +338,8 @@ void Parser::AddChild(Node* node) {
 bool Parser::ShouldFosterParent() {
   if (!foster_parenting_) return false;
   Atom a = top()->atom_;
-  return (a == Atom::TABLE ||
-          a == Atom::TBODY ||
-          a == Atom::TFOOT ||
-          a == Atom::THEAD ||
-          a == Atom::TR);
+  return (a == Atom::TABLE || a == Atom::TBODY || a == Atom::TFOOT ||
+          a == Atom::THEAD || a == Atom::TR);
 }  // Parser::ShouldFosterParent.
 
 void Parser::FosterParent(Node* node) {
@@ -455,19 +445,17 @@ void Parser::AddElement() {
     element_node->position_in_html_src_ = token_.position_in_html_src;
   }
 
-  std::copy(token_.attributes.begin(),
-            token_.attributes.end(),
+  std::copy(token_.attributes.begin(), token_.attributes.end(),
             std::back_inserter(element_node->attributes_));
   AddChild(element_node);
 
   if (!record_attribute_offsets_ && !element_node->attributes_.empty()) {
-    std::transform(element_node->attributes_.begin(),
-                   element_node->attributes_.end(),
-                   element_node->attributes_.begin(),
-                   [](Attribute attr) -> Attribute {
-                     attr.position_in_html_src = std::nullopt;
-                     return attr;
-                   });
+    std::transform(
+        element_node->attributes_.begin(), element_node->attributes_.end(),
+        element_node->attributes_.begin(), [](Attribute attr) -> Attribute {
+          attr.position_in_html_src = std::nullopt;
+          return attr;
+        });
   }
 
   if (on_node_callback_) {
@@ -581,8 +569,8 @@ void Parser::ResetInsertionMode() {
           Node* ancestor = node;
           Node* first = open_elements_stack_.at(0);
           while (ancestor != first) {
-            ancestor = open_elements_stack_.at(open_elements_stack_.Index(
-                  ancestor) - 1);
+            ancestor = open_elements_stack_.at(
+                open_elements_stack_.Index(ancestor) - 1);
             switch (ancestor->atom_) {
               case Atom::TEMPLATE:
                 insertion_mode_ = std::bind(&Parser::InSelectIM, this);
@@ -599,8 +587,6 @@ void Parser::ResetInsertionMode() {
         break;
       case Atom::TD:
       case Atom::TH:
-        // TODO: Remove this divergence from the HTML5 spec.
-        //
         // https://bugs.chromium.org/p/chromium/issues/detail?id=829668
         insertion_mode_ = std::bind(&Parser::InCellIM, this);
         break;
@@ -629,8 +615,6 @@ void Parser::ResetInsertionMode() {
         insertion_mode_ = template_stack_.back();
         break;
       case Atom::HEAD:
-        // TODO: remove this divergence from the HTML5 spec.
-        //
         // https://bugs.chromium.org/p/chromium/issues/detail?id=829668
         insertion_mode_ = std::bind(&Parser::InHeadIM, this);
         break;
@@ -730,13 +714,13 @@ bool Parser::BeforeHTMLIM() {
       break;
     }
     case TokenType::END_TAG_TOKEN: {
-      switch ((Atom) token_.atom) {
+      switch ((Atom)token_.atom) {
         case Atom::HEAD:
         case Atom::BODY:
         case Atom::HTML:
         case Atom::BR:
           ParseImpliedToken(TokenType::START_TAG_TOKEN, Atom::HTML,
-              AtomUtil::ToString(Atom::HTML));
+                            AtomUtil::ToString(Atom::HTML));
           return false;
         default:
           // Ignore the token.
@@ -756,7 +740,7 @@ bool Parser::BeforeHTMLIM() {
       break;
   }
   ParseImpliedToken(TokenType::START_TAG_TOKEN, Atom::HTML,
-      AtomUtil::ToString(Atom::HTML));
+                    AtomUtil::ToString(Atom::HTML));
   return false;
 }  // Parser::BeforeHTMLIM.
 
@@ -793,7 +777,7 @@ bool Parser::BeforeHeadIM() {
         case Atom::HTML:
         case Atom::BR:
           ParseImpliedToken(TokenType::START_TAG_TOKEN, Atom::HEAD,
-              AtomUtil::ToString(Atom::HEAD));
+                            AtomUtil::ToString(Atom::HEAD));
           return false;
         default:
           // Ignore the token.
@@ -817,8 +801,7 @@ bool Parser::BeforeHeadIM() {
       break;
   }
 
-  ParseImpliedToken(TokenType::START_TAG_TOKEN,
-                    Atom::HEAD,
+  ParseImpliedToken(TokenType::START_TAG_TOKEN, Atom::HEAD,
                     AtomUtil::ToString(Atom::HEAD));
   return false;
 }  // Parser::BeforeHeadIM.
@@ -904,14 +887,12 @@ bool Parser::InHeadIM() {
         case Atom::HTML:
         case Atom::BR: {
           ParseImpliedToken(TokenType::END_TAG_TOKEN, Atom::HEAD,
-              AtomUtil::ToString(Atom::HEAD));
+                            AtomUtil::ToString(Atom::HEAD));
           return false;
         }
         case Atom::TEMPLATE: {
           if (!open_elements_stack_.Contains(Atom::TEMPLATE)) return true;
 
-          // TODO: Remove this divergence from the HTML5 spec.
-          //
           // See https://bugs.chromium.org/p/chromium/issues/detail?id=829668
           GenerateImpliedEndTags();
           for (int i = open_elements_stack_.size() - 1; i >= 0; --i) {
@@ -950,7 +931,7 @@ bool Parser::InHeadIM() {
   }
 
   ParseImpliedToken(TokenType::END_TAG_TOKEN, Atom::HEAD,
-      AtomUtil::ToString(Atom::HEAD));
+                    AtomUtil::ToString(Atom::HEAD));
   return false;
 }  // Parser::InHeadIM.
 
@@ -1109,7 +1090,7 @@ bool Parser::AfterHeadIM() {
   }
 
   ParseImpliedToken(TokenType::START_TAG_TOKEN, Atom::BODY,
-      AtomUtil::ToString(Atom::BODY));
+                    AtomUtil::ToString(Atom::BODY));
   frameset_ok_ = true;
   return false;
 }  // Parser::AfterHeadIM.
@@ -1160,8 +1141,7 @@ bool Parser::InBodyIM() {
             return true;
           }
           CopyAttributes(open_elements_stack_.at(0), token_);
-          if (!accounting_.has_manufactured_html ||
-              num_html_tags_ > 1) {
+          if (!accounting_.has_manufactured_html || num_html_tags_ > 1) {
             accounting_.duplicate_html_elements = true;
             accounting_.duplicate_html_element_location =
                 token_.position_in_html_src;
@@ -1192,8 +1172,7 @@ bool Parser::InBodyIM() {
                 body->atom_ == Atom::BODY) {
               frameset_ok_ = false;
               CopyAttributes(body, token_);
-              if (!accounting_.has_manufactured_body ||
-                  num_body_tags_ > 1) {
+              if (!accounting_.has_manufactured_body || num_body_tags_ > 1) {
                 accounting_.duplicate_body_elements = true;
                 accounting_.duplicate_body_element_location =
                     token_.position_in_html_src;
@@ -1349,8 +1328,8 @@ bool Parser::InBodyIM() {
           break;
         }
         case Atom::A: {
-          for (int i = active_formatting_elements_stack_.size() - 1;
-               i >= 0; --i) {
+          for (int i = active_formatting_elements_stack_.size() - 1; i >= 0;
+               --i) {
             Node* node = active_formatting_elements_stack_.at(i);
             if (node->node_type_ == NodeType::SCOPE_MARKER_NODE) break;
             if (node->node_type_ == NodeType::ELEMENT_NODE &&
@@ -1470,8 +1449,9 @@ bool Parser::InBodyIM() {
               return true;
             }
             std::string action = "";
-            std::string prompt = "This is a searchable index. "
-              "Enter search keywords: ";
+            std::string prompt =
+                "This is a searchable index. "
+                "Enter search keywords: ";
             std::vector<Attribute> attributes;
             attributes.push_back({"", "name", "isindex"});
             for (auto& a : token_.attributes) {
@@ -1488,7 +1468,7 @@ bool Parser::InBodyIM() {
             AcknowledgeSelfClosingTag();
             PopUntil(Scope::ButtonScope, Atom::P);
             ParseImpliedToken(TokenType::START_TAG_TOKEN, Atom::FORM,
-                AtomUtil::ToString(Atom::FORM));
+                              AtomUtil::ToString(Atom::FORM));
             if (!form_) {
               // NOTE: The 'isindex' element has been removed,
               // and the 'template' element has not been designed to be
@@ -1502,22 +1482,22 @@ bool Parser::InBodyIM() {
               form_->attributes_.push_back({"", "action", action});
             }
             ParseImpliedToken(TokenType::START_TAG_TOKEN, Atom::HR,
-                AtomUtil::ToString(Atom::HR));
+                              AtomUtil::ToString(Atom::HR));
             ParseImpliedToken(TokenType::START_TAG_TOKEN, Atom::LABEL,
-                AtomUtil::ToString(Atom::LABEL));
+                              AtomUtil::ToString(Atom::LABEL));
             AddText(prompt);
             Node* node =
                 document_->NewNode(NodeType::ELEMENT_NODE, Atom::INPUT);
             std::copy(attributes.begin(), attributes.end(),
-                std::back_inserter(node->attributes_));
+                      std::back_inserter(node->attributes_));
             AddChild(node);
             open_elements_stack_.Pop();
             ParseImpliedToken(TokenType::END_TAG_TOKEN, Atom::LABEL,
-                AtomUtil::ToString(Atom::LABEL));
+                              AtomUtil::ToString(Atom::LABEL));
             ParseImpliedToken(TokenType::START_TAG_TOKEN, Atom::HR,
-                AtomUtil::ToString(Atom::HR));
+                              AtomUtil::ToString(Atom::HR));
             ParseImpliedToken(TokenType::END_TAG_TOKEN, Atom::FORM,
-                AtomUtil::ToString(Atom::FORM));
+                              AtomUtil::ToString(Atom::FORM));
           }
           break;
         }
@@ -1632,7 +1612,7 @@ bool Parser::InBodyIM() {
         case Atom::HTML: {
           if (ElementInScope(Scope::DefaultScope, Atom::BODY)) {
             ParseImpliedToken(TokenType::END_TAG_TOKEN, Atom::BODY,
-                AtomUtil::ToString(Atom::BODY));
+                              AtomUtil::ToString(Atom::BODY));
             return false;
           }
           return true;
@@ -1669,8 +1649,7 @@ bool Parser::InBodyIM() {
         }
         case Atom::FORM: {
           if (open_elements_stack_.Contains(Atom::TEMPLATE)) {
-            int i = IndexOfElementInScope(Scope::DefaultScope,
-                {Atom::FORM});
+            int i = IndexOfElementInScope(Scope::DefaultScope, {Atom::FORM});
             if (i == -1) {
               // Ignore the token.
               return true;
@@ -1684,8 +1663,7 @@ bool Parser::InBodyIM() {
           } else {
             Node* node = form_;
             form_ = nullptr;
-            int i = IndexOfElementInScope(Scope::DefaultScope,
-                {Atom::FORM});
+            int i = IndexOfElementInScope(Scope::DefaultScope, {Atom::FORM});
             if (!node || i == -1 || open_elements_stack_.at(i) != node) {
               // Ignore the token.
               return true;
@@ -1698,7 +1676,7 @@ bool Parser::InBodyIM() {
         case Atom::P: {
           if (!ElementInScope(Scope::ButtonScope, Atom::P)) {
             ParseImpliedToken(TokenType::START_TAG_TOKEN, Atom::P,
-                AtomUtil::ToString(Atom::P));
+                              AtomUtil::ToString(Atom::P));
           }
           PopUntil(Scope::ButtonScope, Atom::P);
           break;
@@ -1718,8 +1696,8 @@ bool Parser::InBodyIM() {
         case Atom::H4:
         case Atom::H5:
         case Atom::H6: {
-          PopUntil(Scope::DefaultScope, Atom::H1, Atom::H2, Atom::H3,
-              Atom::H4, Atom::H5, Atom::H6);
+          PopUntil(Scope::DefaultScope, Atom::H1, Atom::H2, Atom::H3, Atom::H4,
+                   Atom::H5, Atom::H6);
           break;
         }
         case Atom::A:
@@ -1737,9 +1715,9 @@ bool Parser::InBodyIM() {
         case Atom::TT:
         case Atom::U: {
           InBodyEndTagFormatting(token_.atom,
-                                 token_.atom != Atom::UNKNOWN ?
-                                 AtomUtil::ToString(token_.atom) :
-                                 token_.data);
+                                 token_.atom != Atom::UNKNOWN
+                                     ? AtomUtil::ToString(token_.atom)
+                                     : token_.data);
           break;
         }
         case Atom::APPLET:
@@ -1773,7 +1751,6 @@ bool Parser::InBodyIM() {
       break;
     }
     case TokenType::ERROR_TOKEN: {
-      // TODO: Remove this divergence from the HTML5 spec.
       if (template_stack_.size() > 0) {
         insertion_mode_ = std::bind(&Parser::InTemplateIM, this);
         return false;
@@ -1896,8 +1873,7 @@ void Parser::InBodyEndTagFormatting(Atom tag_atom, std::string_view tag_name) {
       Node* clone = document_->CloneNode(node);
       active_formatting_elements_stack_.Replace(
           active_formatting_elements_stack_.Index(node), clone);
-      open_elements_stack_.Replace(
-          open_elements_stack_.Index(node), clone);
+      open_elements_stack_.Replace(open_elements_stack_.Index(node), clone);
       node = clone;
       // Step 13.8.
       if (last_node == furthest_block) {
@@ -1949,7 +1925,7 @@ void Parser::InBodyEndTagFormatting(Atom tag_atom, std::string_view tag_name) {
     // Step 19. Fix up the stack of open elements.
     open_elements_stack_.Remove(formatting_element);
     open_elements_stack_.Insert(open_elements_stack_.Index(furthest_block) + 1,
-        clone);
+                                clone);
   }
 }  // Parser::InBodyEndTagFormatting.
 
@@ -2048,7 +2024,7 @@ bool Parser::InTableIM() {
         }
         case Atom::COL: {
           ParseImpliedToken(TokenType::START_TAG_TOKEN, Atom::COLGROUP,
-              AtomUtil::ToString(Atom::COLGROUP));
+                            AtomUtil::ToString(Atom::COLGROUP));
           return false;
         }
         case Atom::TBODY:
@@ -2063,7 +2039,7 @@ bool Parser::InTableIM() {
         case Atom::TH:
         case Atom::TR: {
           ParseImpliedToken(TokenType::START_TAG_TOKEN, Atom::TBODY,
-              AtomUtil::ToString(Atom::TBODY));
+                            AtomUtil::ToString(Atom::TBODY));
           return false;
         }
         case Atom::TABLE: {
@@ -2176,7 +2152,7 @@ bool Parser::InTableIM() {
   }
 
   foster_parenting_ = true;
-  defer({foster_parenting_ = false;});
+  defer({ foster_parenting_ = false; });
   return InBodyIM();
 }  // Parser::InTableIM.
 
@@ -2309,7 +2285,7 @@ bool Parser::InColumnGroupIM() {
             insertion_mode_ = std::bind(&Parser::InTableIM, this);
           }
           return true;
-        case  Atom::COL:
+        case Atom::COL:
           // Ignore the token.
           return true;
         case Atom::TEMPLATE:
@@ -2348,7 +2324,7 @@ bool Parser::InTableBodyIM() {
         case Atom::TD:
         case Atom::TH: {
           ParseImpliedToken(TokenType::START_TAG_TOKEN, Atom::TR,
-              AtomUtil::ToString(Atom::TR));
+                            AtomUtil::ToString(Atom::TR));
           return false;
         }
         case Atom::CAPTION:
@@ -2357,8 +2333,8 @@ bool Parser::InTableBodyIM() {
         case Atom::TBODY:
         case Atom::TFOOT:
         case Atom::THEAD: {
-          if (PopUntil(Scope::TableScope,
-              Atom::TBODY, Atom::THEAD, Atom::TFOOT)) {
+          if (PopUntil(Scope::TableScope, Atom::TBODY, Atom::THEAD,
+                       Atom::TFOOT)) {
             insertion_mode_ = std::bind(&Parser::InTableIM, this);
             return false;
           }
@@ -2383,8 +2359,8 @@ bool Parser::InTableBodyIM() {
           return true;
         }
         case Atom::TABLE: {
-          if (PopUntil(Scope::TableScope,
-              Atom::TBODY, Atom::THEAD, Atom::TFOOT)) {
+          if (PopUntil(Scope::TableScope, Atom::TBODY, Atom::THEAD,
+                       Atom::TFOOT)) {
             insertion_mode_ = std::bind(&Parser::InTableIM, this);
             return false;
           }
@@ -2428,7 +2404,7 @@ bool Parser::InRowIM() {
     case TokenType::START_TAG_TOKEN: {
       switch (token_.atom) {
         case Atom::TD:
-        case Atom::TH:  {
+        case Atom::TH: {
           ClearStackToContext(Scope::TableRowScope);
           AddElement();
           active_formatting_elements_stack_.Push(scope_marker_);
@@ -2478,7 +2454,7 @@ bool Parser::InRowIM() {
         case Atom::THEAD: {
           if (ElementInScope(Scope::TableScope, token_.atom)) {
             ParseImpliedToken(TokenType::END_TAG_TOKEN, Atom::TR,
-                AtomUtil::ToString(Atom::TR));
+                              AtomUtil::ToString(Atom::TR));
             return false;
           }
           // Ignore the token.
@@ -2632,7 +2608,7 @@ bool Parser::InSelectIM() {
         case Atom::TEXTAREA: {
           if (ElementInScope(Scope::SelectScope, Atom::SELECT)) {
             ParseImpliedToken(TokenType::END_TAG_TOKEN, Atom::SELECT,
-                AtomUtil::ToString(Atom::SELECT));
+                              AtomUtil::ToString(Atom::SELECT));
             return false;
           }
           // In order to properly ignore <textarea>, we need to change the
@@ -2715,35 +2691,35 @@ bool Parser::InSelectInTableIM() {
     case TokenType::START_TAG_TOKEN:
     case TokenType::END_TAG_TOKEN: {
       switch (token_.atom) {
-       case Atom::CAPTION:
-       case Atom::TABLE:
-       case Atom::TBODY:
-       case Atom::TFOOT:
-       case Atom::THEAD:
-       case Atom::TR:
-       case Atom::TD:
-       case Atom::TH: {
-         if (token_.token_type == TokenType::END_TAG_TOKEN &&
-             !ElementInScope(Scope::TableScope, token_.atom)) {
-           // Ignore the token.
-           return true;
-         }
-         // This is like p.popUntil(selectScope, a.Select), but it also
-         // matches <math select>, not just <select>. Matching the MathML
-         // tag is arguably incorrect (conceptually), but it mimics what
-         // Chromium does.
-         for (int i = open_elements_stack_.size() - 1; i >= 0; --i) {
-           Node* node = open_elements_stack_.at(i);
-           if (node->atom_ == Atom::SELECT) {
-             open_elements_stack_.Pop(open_elements_stack_.size() - i);
-             break;
-           }
-         }
-         ResetInsertionMode();
-         return false;
-       }
-       default:
-         break;
+        case Atom::CAPTION:
+        case Atom::TABLE:
+        case Atom::TBODY:
+        case Atom::TFOOT:
+        case Atom::THEAD:
+        case Atom::TR:
+        case Atom::TD:
+        case Atom::TH: {
+          if (token_.token_type == TokenType::END_TAG_TOKEN &&
+              !ElementInScope(Scope::TableScope, token_.atom)) {
+            // Ignore the token.
+            return true;
+          }
+          // This is like p.popUntil(selectScope, a.Select), but it also
+          // matches <math select>, not just <select>. Matching the MathML
+          // tag is arguably incorrect (conceptually), but it mimics what
+          // Chromium does.
+          for (int i = open_elements_stack_.size() - 1; i >= 0; --i) {
+            Node* node = open_elements_stack_.at(i);
+            if (node->atom_ == Atom::SELECT) {
+              open_elements_stack_.Pop(open_elements_stack_.size() - i);
+              break;
+            }
+          }
+          ResetInsertionMode();
+          return false;
+        }
+        default:
+          break;
       }
       break;
     }
@@ -3070,13 +3046,11 @@ bool Parser::ParseForeignContent() {
   switch (token_.token_type) {
     case TokenType::TEXT_TOKEN:
       if (frameset_ok_) {
-        frameset_ok_ =
-            (token_.data.find_first_not_of(Strings::kWhitespaceOrNull) ==
-             std::string::npos);
+        frameset_ok_ = (token_.data.find_first_not_of(
+                            Strings::kWhitespaceOrNull) == std::string::npos);
       }
       // Replaces null char with \ufffd replacement character.
-      Strings::ReplaceAny(&token_.data,
-                          Strings::kNullChar,
+      Strings::ReplaceAny(&token_.data, Strings::kNullChar,
                           Strings::kNullReplacementChar);
       AddText(token_.data);
       break;
@@ -3088,10 +3062,8 @@ bool Parser::ParseForeignContent() {
       break;
     }
     case TokenType::START_TAG_TOKEN: {
-      auto breaktout_tag = std::find(
-          std::begin(kBreakoutTags),
-          std::end(kBreakoutTags),
-          token_.atom);
+      auto breaktout_tag = std::find(std::begin(kBreakoutTags),
+                                     std::end(kBreakoutTags), token_.atom);
       bool is_breakout_tag = breaktout_tag != std::end(kBreakoutTags);
 
       if (token_.atom == Atom::FONT) {
@@ -3106,8 +3078,7 @@ bool Parser::ParseForeignContent() {
       if (is_breakout_tag) {
         for (int i = open_elements_stack_.size() - 1; i >= 0; --i) {
           Node* node = open_elements_stack_.at(i);
-          if (node->name_space_.empty() ||
-              HtmlIntegrationPoint(*node) ||
+          if (node->name_space_.empty() || HtmlIntegrationPoint(*node) ||
               MathMLTextIntegrationPoint(*node)) {
             open_elements_stack_.Pop(open_elements_stack_.size() - i - 1);
             break;
@@ -3151,10 +3122,12 @@ bool Parser::ParseForeignContent() {
         }
 
         auto sn = open_elements_stack_.at(i);
-        auto node_data = sn->atom_ != Atom::UNKNOWN ?
-            AtomUtil::ToString(sn->atom_) : sn->data_;
-        auto token_data = token_.atom != Atom::UNKNOWN ?
-            AtomUtil::ToString(token_.atom) : token_.data;
+        auto node_data = sn->atom_ != Atom::UNKNOWN
+                             ? AtomUtil::ToString(sn->atom_)
+                             : sn->data_;
+        auto token_data = token_.atom != Atom::UNKNOWN
+                              ? AtomUtil::ToString(token_.atom)
+                              : token_.data;
 
         if (Strings::EqualFold(node_data, token_data)) {
           open_elements_stack_.Pop(open_elements_stack_.size() - i);
@@ -3179,8 +3152,7 @@ bool Parser::InForeignContent() {
   TokenType token_type = token_.token_type;
   if (MathMLTextIntegrationPoint(*node)) {
     if (token_type == TokenType::START_TAG_TOKEN &&
-        token_atom != Atom::MGLYPH &&
-        token_atom != Atom::MALIGNMARK) {
+        token_atom != Atom::MGLYPH && token_atom != Atom::MALIGNMARK) {
       return false;
     }
     if (token_type == TokenType::TEXT_TOKEN) {
@@ -3189,8 +3161,7 @@ bool Parser::InForeignContent() {
   }
 
   if (node->name_space_ == "math" && node->atom_ == Atom::ANNOTATION_XML &&
-      token_type == TokenType::START_TAG_TOKEN &&
-      token_atom == Atom::SVG) {
+      token_type == TokenType::START_TAG_TOKEN && token_atom == Atom::SVG) {
     return false;
   }
 
@@ -3210,22 +3181,20 @@ bool Parser::InForeignContent() {
 void Parser::ParseImpliedToken(TokenType token_type, Atom atom,
                                const std::string& data) {
   // Copy original token.
-  Token real_token = {
-    .token_type = token_.token_type,
-    .atom = token_.atom,
-    .data = token_.data,
-    .position_in_html_src = token_.position_in_html_src,
-    .attributes = token_.attributes};
+  Token real_token = {.token_type = token_.token_type,
+                      .atom = token_.atom,
+                      .data = token_.data,
+                      .position_in_html_src = token_.position_in_html_src,
+                      .attributes = token_.attributes};
   bool self_closing = has_self_closing_token_;
   // Create implied tokens.
-  token_ = {
-    .token_type = token_type,
-    .atom = atom,
-    .data = data,
-    // For reporting purposes implied tokens are assumed to be parsed at the
-    // current tag location.
-    .position_in_html_src = token_.position_in_html_src,
-    .attributes = {}};
+  token_ = {.token_type = token_type,
+            .atom = atom,
+            .data = data,
+            // For reporting purposes implied tokens are assumed to be parsed at
+            // the current tag location.
+            .position_in_html_src = token_.position_in_html_src,
+            .attributes = {}};
   has_self_closing_token_ = false;
 
   // Accounting for manufactured tags.
@@ -3247,12 +3216,11 @@ void Parser::ParseImpliedToken(TokenType token_type, Atom atom,
 
   ParseCurrentToken();
   // Restore original token.
-  token_ = {
-    .token_type = real_token.token_type,
-    .atom = real_token.atom,
-    .data = real_token.data,
-    .position_in_html_src = token_.position_in_html_src,
-    .attributes = real_token.attributes};
+  token_ = {.token_type = real_token.token_type,
+            .atom = real_token.atom,
+            .data = real_token.data,
+            .position_in_html_src = token_.position_in_html_src,
+            .attributes = real_token.attributes};
   has_self_closing_token_ = self_closing;
 }  // Parser::ParseImpliedToken.
 
@@ -3281,10 +3249,9 @@ void Parser::ParseCurrentToken() {
 void Parser::CopyAttributes(Node* node, Token token) const {
   if (token.attributes.empty()) return;
   std::set<std::string> attr_keys;
-  std::transform(node->attributes_.begin(),
-                 node->attributes_.end(),
-      std::inserter(attr_keys, attr_keys.begin()),
-      [](const Attribute& attr) -> std::string { return attr.key; });
+  std::transform(node->attributes_.begin(), node->attributes_.end(),
+                 std::inserter(attr_keys, attr_keys.begin()),
+                 [](const Attribute& attr) -> std::string { return attr.key; });
   for (const Attribute& attr : token.attributes) {
     if (attr_keys.find(attr.key) == attr_keys.end()) {
       node->attributes_.push_back(attr);
@@ -3298,14 +3265,15 @@ namespace {
 // <space><space>foo<space>bar<space> returns 4 spaces.
 std::string ExtractWhitespace(const std::string& s) {
   std::string only_whitespaces;
-  std::copy_if(s.begin(), s.end(),
+  std::copy_if(
+      s.begin(), s.end(),
       only_whitespaces.begin(),  // Unused, populated directly in predicate.
       [&only_whitespaces](char c) -> bool {
-      if (Strings::kWhitespace.find(c) != std::string::npos) {
-        only_whitespaces.push_back(c);
-      }
-      return false;
-  });
+        if (Strings::kWhitespace.find(c) != std::string::npos) {
+          only_whitespaces.push_back(c);
+        }
+        return false;
+      });
   return only_whitespaces;
 }
 

@@ -136,10 +136,7 @@ class Node {
 
   // True, if this node is manufactured by parser as per HTML5 specification.
   // Currently, this applies only to HTML, HEAD and BODY tags.
-  // TODO: Implement this for all manufactured tags.
-  bool IsManufactured() const {
-    return is_manufactured_;
-  }
+  bool IsManufactured() const { return is_manufactured_; }
 
   // Debug/Logging utils.
   // Outputs node debug info.
@@ -189,17 +186,13 @@ class NodeStack {
 
   // Allows iterator like access to elements in stack_.
   // Since this is a stack. It returns reverse iterator.
-  std::deque<Node*>::const_reverse_iterator begin() {
-    return stack_.rbegin();
-  }
+  std::deque<Node*>::const_reverse_iterator begin() { return stack_.rbegin(); }
 
   std::deque<Node*>::const_reverse_iterator begin() const {
     return stack_.rbegin();
   }
 
-  std::deque<Node*>::const_reverse_iterator end() {
-    return stack_.rend();
-  }
+  std::deque<Node*>::const_reverse_iterator end() { return stack_.rend(); }
 
   std::deque<Node*>::const_reverse_iterator end() const {
     return stack_.rend();
