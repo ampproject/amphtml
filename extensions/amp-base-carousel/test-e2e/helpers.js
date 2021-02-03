@@ -39,7 +39,7 @@ export default ({version, controller}) => {
 
       // Shared helpers
       sleep: async (ms) => new Promise((res) => setTimeout(res, ms)),
-      expectSlideImgLoaded: async (n) => {
+      waitForCarouselImg: async (n) => {
         const el = await helpers.getSlideImg(n);
         await expect(
           controller.getElementProperty(el, 'naturalWidth')

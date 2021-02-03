@@ -46,7 +46,7 @@ describes.endtoend(
     it('should layout correctly initially', async () => {
       const firstSlide = await ctrl.getSlide(0);
 
-      ctrl.expectSlideImgLoaded(0);
+      ctrl.waitForCarouselImg(0);
       // 3 slides width width 1000 = 333 width per slide.
       await expect(ctrl.rect(firstSlide)).to.include({
         width: 333,
@@ -57,7 +57,7 @@ describes.endtoend(
     it('should layout correctly after resize', async () => {
       const firstSlide = await ctrl.getSlide(0);
 
-      ctrl.expectSlideImgLoaded(0);
+      ctrl.waitForCarouselImg(0);
       await ctrl.setWin(600, 600);
       // 2 slides width width 600 = 300 width per slide.
       await expect(ctrl.rect(firstSlide)).to.include({

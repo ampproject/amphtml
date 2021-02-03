@@ -49,7 +49,7 @@ describes.endtoend(
       await expect(ctrl.prop(el, 'scrollWidth')).to.equal(
         pageWidth * SLIDE_COUNT
       );
-      await ctrl.expectSlideImgLoaded(0);
+      await ctrl.waitForCarouselImg(0);
     });
 
     it('should snap when scrolling', async () => {
@@ -57,8 +57,8 @@ describes.endtoend(
       const firstSlide = await ctrl.getSlide(0);
 
       // Ensure the first two slides' imgs loaded
-      await ctrl.expectSlideImgLoaded(0);
-      await ctrl.expectSlideImgLoaded(1);
+      await ctrl.waitForCarouselImg(0);
+      await ctrl.waitForCarouselImg(1);
 
       const slideWidth = await ctrl.prop(firstSlide, 'offsetWidth');
       const scrollLeft = await ctrl.prop(el, 'scrollLeft');
@@ -77,8 +77,8 @@ describes.endtoend(
       const firstSlide = await ctrl.getSlide(0);
 
       // Ensure the first two slides' imgs loaded
-      await ctrl.expectSlideImgLoaded(0);
-      await ctrl.expectSlideImgLoaded(1);
+      await ctrl.waitForCarouselImg(0);
+      await ctrl.waitForCarouselImg(1);
 
       await expect(ctrl.rect(firstSlide)).to.include({
         'x': 0,
