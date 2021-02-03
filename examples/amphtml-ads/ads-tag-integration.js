@@ -24,7 +24,9 @@ initInaboxHost(win);
 // Enable amp-inabox APIs for all iframes. Normally, the actualy bootstrap
 // script would be more specific about which iframes to support.
 Array.prototype.push.apply(
-    win.ampInaboxIframes, document.querySelectorAll('iframe'));
+  win.ampInaboxIframes,
+  document.querySelectorAll('iframe')
+);
 
 /**
  * A sample bootstrap script that is to be run in ads tag.
@@ -43,7 +45,7 @@ function initInaboxHost(win) {
 
   let hostScriptRequested = false;
 
-  const listener = function(event) {
+  const listener = function (event) {
     if (!isInaboxMessage(event.data)) {
       return;
     }
@@ -55,7 +57,7 @@ function initInaboxHost(win) {
     }
     hostScriptRequested = true;
     // Load inabox-host.js when the 1st inabox message is received.
-    loadScript(win, hostScriptUrl, function() {
+    loadScript(win, hostScriptUrl, function () {
       win.removeEventListener('message', listener);
       console.log('a4a-host.js loaded.');
     });

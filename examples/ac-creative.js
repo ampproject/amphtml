@@ -1,3 +1,18 @@
+/**
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 if (!window.context) {
   // window.context doesn't exist yet, must perform steps to create it
   // before using it
@@ -14,17 +29,21 @@ function intersectionCallback(changes) {
   // Code below is simply an example.
   var latestChange = changes[changes.length - 1];
 
-  // Amp-ad width and height.
-  var w = latestChange.boundingClientRect.width;
-  var h = latestChange.boundingClientRect.height;
+  var {
+    // Amp-ad width and height.
+    width: w,
+    height: h,
 
-  // Visible width and height.
-  var vw = latestChange.intersectionRect.width;
-  var vh = latestChange.intersectionRect.height;
+    // Position in the viewport.
+    x: vx,
+    y: vy,
+  } = latestChange.boundingClientRect;
 
-  // Position in the viewport.
-  var vx = latestChange.boundingClientRect.x;
-  var vy = latestChange.boundingClientRect.y;
+  var {
+    // Visible width and height.
+    width: vw,
+    height: vh,
+  } = latestChange.intersectionRect;
 
   // Viewable percentage.
   var viewablePerc = ((vw * vh) / (w * h)) * 100;
