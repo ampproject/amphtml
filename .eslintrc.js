@@ -262,11 +262,10 @@ module.exports = {
   'overrides': [
     {
       'files': [
-        'ads/**/test/**/*.js',
-        'examples/visual-tests/**/*.js',
-        'extensions/**/test-e2e/*.js',
-        'extensions/**/test/**/*.js',
         'test/**/*.js',
+        'extensions/**/test/**/*.js',
+        'extensions/**/test-e2e/*.js',
+        'ads/**/test/**/*.js',
         'testing/**/*.js',
       ],
       'rules': {
@@ -274,7 +273,6 @@ module.exports = {
         'local/always-call-chai-methods': 2,
         'local/no-bigint': 0,
         'local/no-dynamic-import': 0,
-        'local/no-for-of-statement': 0,
         'local/no-function-async': 0,
         'local/no-function-generator': 0,
         'local/no-import-meta': 0,
