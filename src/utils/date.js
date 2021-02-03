@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {UserError} from '../user-error';
+import {UserError, userAssert} from '../user-error';
 
 /**
  * Parses the date using the `Date.parse()` rules. Additionally supports the
@@ -54,17 +54,27 @@ export function getDate(value) {
   return value.getTime();
 }
 
+/** Map from attribute names to their parsers. */
+const dateAttrParsers = {
+  'datetime': (datetime) =>
+    userAssert(parseDate(datetime), `Invalid date: ${datetime}`),
+  'end-date': (datetime) =>
+    userAssert(parseDate(datetime), `Invalid date: ${datetime}`),
+  'timeleft-ms': (timeleftMs) => Date.now() + Number(timeleftMs),
+  'timestamp-ms': Number,
+  'timestamp-seconds': (timestampSeconds) => 1000 * Number(timestampSeconds),
+};
+
 /**
  * @param {!Element} element
+ * @param {!Array<string>} dateAttrs list of attribute names
  * @return {?number}
  */
-export function parseDateAttrs(element) {
-  const epoch = parseEpoch(element);
-  if (!epoch) {
-    throw new UserError(
-      'One of datetime, timestamp-ms, or timestamp-seconds is required'
-    );
-  }
+export function parseDateAttrs(element, dateAttrs) {
+  const epoch = userAssert(
+    parseEpoch(element, dateAttrs),
+    `One of [${dateAttrs.join(', ')}] is required`
+  );
 
   const offsetSeconds =
     (Number(element.getAttribute('offset-seconds')) || 0) * 1000;
@@ -72,27 +82,19 @@ export function parseDateAttrs(element) {
 }
 
 /**
+ * Parse epoch from list of possible element attributes, returning the first one
+ * that is truthy.
  * @param {!Element} element
+ * @param {!Array<string>} dateAttrs list of attribute names
  * @return {?number}
  */
-function parseEpoch(element) {
-  const datetime = element.getAttribute('datetime');
-  if (datetime) {
-    const parsedDate = parseDate(datetime);
-    if (!parsedDate) {
-      throw new UserError('Invalid date: %s', datetime);
+export function parseEpoch(element, dateAttrs) {
+  for (let i = 0; i < dateAttrs.length; ++i) {
+    const attrName = dateAttrs[i];
+    const attrVal = element.getAttribute(attrName);
+    if (attrVal) {
+      return dateAttrParsers[attrName](attrVal);
     }
-    return parsedDate;
-  }
-
-  const timestampMs = element.getAttribute('timestamp-ms');
-  if (timestampMs) {
-    return Number(timestampMs);
-  }
-
-  const timestampSeconds = element.getAttribute('timestamp-seconds');
-  if (timestampSeconds) {
-    return Number(timestampSeconds) * 1000;
   }
 
   return null;
