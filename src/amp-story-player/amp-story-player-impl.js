@@ -492,6 +492,8 @@ export class AmpStoryPlayer {
     iframeEl.classList.add('story-player-iframe');
     iframeEl.setAttribute('allow', 'autoplay');
 
+    iframeEl.loadDeferred = new Deferred();
+
     applySandbox(iframeEl);
     this.addSandboxFlags_(iframeEl);
     this.initializeLoadingListeners_(iframeEl);
@@ -616,15 +618,17 @@ export class AmpStoryPlayer {
    * @private
    */
   initializeHandshake_(story, iframeEl) {
-    return this.maybeGetCacheUrl_(story.href).then((url) =>
-      Messaging.waitForHandshakeFromDocument(
-        this.win_,
-        iframeEl.contentWindow,
-        this.getEncodedLocation_(url).origin,
-        /*opt_token*/ null,
-        urls.cdnProxyRegex
-      )
-    );
+    return iframeEl.loadDeferred.promise
+      .then(() => this.maybeGetCacheUrl_(story.href))
+      .then((url) =>
+        Messaging.waitForHandshakeFromDocument(
+          this.win_,
+          iframeEl.contentWindow,
+          this.getEncodedLocation_(url).origin,
+          /*opt_token*/ null,
+          urls.cdnProxyRegex
+        )
+      );
   }
 
   /**
@@ -638,11 +642,13 @@ export class AmpStoryPlayer {
       this.rootEl_.classList.remove(LoadStateClass.LOADING);
       this.rootEl_.classList.add(LoadStateClass.LOADED);
       this.element_.classList.add(LoadStateClass.LOADED);
+      iframeEl.loadDeferred.resolve();
     };
     iframeEl.onerror = () => {
       this.rootEl_.classList.remove(LoadStateClass.LOADING);
       this.rootEl_.classList.add(LoadStateClass.ERROR);
       this.element_.classList.add(LoadStateClass.ERROR);
+      iframeEl.loadDeferred.reject();
     };
   }
 
