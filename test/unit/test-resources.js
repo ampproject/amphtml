@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {LayoutPriority} from '../../src/layout';
 import {Resource, ResourceState} from '../../src/service/resource';
@@ -25,12 +26,17 @@ import {layoutRectLtwh} from '../../src/layout-rect';
 import {loadPromise} from '../../src/event-helper';
 
 /*eslint "google-camelcase/google-camelcase": 0*/
-describe('Resources', () => {
+describes.realWin('Resources', {amp: true}, (env) => {
+  let window, document;
   let clock;
   let resources;
 
   beforeEach(() => {
-    clock = window.sandbox.useFakeTimers();
+    window = env.win;
+    document = window.document;
+    delete window.requestIdleCallback;
+    delete window.cancelIdleCallback;
+    clock = fakeTimers.withGlobal(window).install();
     resources = new ResourcesImpl(new AmpDocSingle(window));
     resources.isRuntimeOn_ = false;
   });
@@ -41,7 +47,7 @@ describe('Resources', () => {
 
   it('should calculate correct calcTaskScore', () => {
     const viewportRect = layoutRectLtwh(0, 100, 300, 400);
-    window.sandbox.stub(resources.viewport_, 'getRect').returns(viewportRect);
+    env.sandbox.stub(resources.viewport_, 'getRect').returns(viewportRect);
 
     // Task 1 is right in the middle of the viewport and priority 0
     const task_in_viewport_p0 = {
@@ -269,10 +275,9 @@ describe('Resources', () => {
         prerenderAllowed: () => false,
         renderOutsideViewport: () => false,
         startLayout: () => {},
-        applySizesAndMediaQuery: () => {},
       };
       resources.visible_ = false;
-      window.sandbox
+      env.sandbox
         .stub(resources.ampdoc, 'getVisibilityState')
         .returns(VisibilityState.PRERENDER);
       resources.scheduleLayoutOrPreload(resource, true);
@@ -292,10 +297,9 @@ describe('Resources', () => {
       startLayout: () => {},
       layoutScheduled: () => {},
       getTaskId: () => 'resource#P',
-      applySizesAndMediaQuery: () => {},
     };
     resources.visible_ = false;
-    window.sandbox
+    env.sandbox
       .stub(resources.ampdoc, 'getVisibilityState')
       .returns(VisibilityState.PRERENDER);
     resources.scheduleLayoutOrPreload(resource, true);
@@ -315,10 +319,9 @@ describe('Resources', () => {
       startLayout: () => {},
       layoutScheduled: () => {},
       getTaskId: () => 'resource#P',
-      applySizesAndMediaQuery: () => {},
     };
     resources.visible_ = false;
-    window.sandbox
+    env.sandbox
       .stub(resources.ampdoc, 'getVisibilityState')
       .returns(VisibilityState.HIDDEN);
     resources.scheduleLayoutOrPreload(resource, true);
@@ -338,7 +341,6 @@ describe('Resources', () => {
         renderOutsideViewport: () => false,
         idleRenderOutsideViewport: () => false,
         startLayout: () => {},
-        applySizesAndMediaQuery: () => {},
       };
       resources.scheduleLayoutOrPreload(resource, true);
       expect(resources.queue_.getSize()).to.equal(0);
@@ -361,7 +363,6 @@ describe('Resources', () => {
         startLayout: () => {},
         layoutScheduled: () => {},
         getTaskId: () => 'resource#L',
-        applySizesAndMediaQuery: () => {},
       };
       resources.scheduleLayoutOrPreload(
         resource,
@@ -390,7 +391,6 @@ describe('Resources', () => {
         startLayout: () => {},
         layoutScheduled: () => {},
         getTaskId: () => 'resource#L',
-        applySizesAndMediaQuery: () => {},
       };
       resources.scheduleLayoutOrPreload(resource, true);
       expect(resources.queue_.getSize()).to.equal(1);
@@ -414,7 +414,6 @@ describe('Resources', () => {
         startLayout: () => {},
         layoutScheduled: () => {},
         getTaskId: () => 'resource#L',
-        applySizesAndMediaQuery: () => {},
       };
       resources.scheduleLayoutOrPreload(resource, true);
       expect(resources.queue_.getSize()).to.equal(1);
@@ -605,7 +604,7 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     element.signals = () => new Signals();
     element.whenBuilt = () => Promise.resolve();
     element.isBuilt = () => true;
-    element.build = () => Promise.resolve();
+    element.buildInternal = () => Promise.resolve();
     element.isUpgraded = () => true;
     element.updateLayoutBox = () => {};
     element.getPlaceholder = () => null;
@@ -617,7 +616,6 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     element.getAttribute = () => null;
     element.hasAttribute = () => false;
     element.getBoundingClientRect = () => rect;
-    element.applySizesAndMediaQuery = () => {};
     element.layoutCallback = () => Promise.resolve();
     element.viewportCallback = sandbox.spy();
     element.prerenderAllowed = () => true;
@@ -699,14 +697,12 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
       .returns(VisibilityState.VISIBLE);
     viewportMock.expects('getRect').returns(layoutRectLtwh(0, 0, 300, 400));
     resource1.isBuilt = () => false;
-    const mediaSpy = sandbox.stub(resource1.element, 'applySizesAndMediaQuery');
     expect(resource1.hasBeenMeasured()).to.be.false;
     resource1.isBuilt = () => false;
 
     resources.discoverWork_();
 
     expect(resource1.hasBeenMeasured()).to.be.true;
-    expect(mediaSpy).to.be.calledOnce;
   });
 
   describe('intersect-resources', () => {
@@ -716,25 +712,19 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
       resource1.intersect_ = resource2.intersect_ = true;
     });
 
-    it('should not applySizesAndMediaQuery after build', () => {
+    it('should not force relayout after build', () => {
       resources.relayoutAll_ = false;
 
       // Unmeasured elements.
-      env.sandbox.stub(resource1, 'applySizesAndMediaQuery');
       env.sandbox.stub(resource1, 'hasBeenMeasured').returns(false);
 
       // Measured elements that need relayout.
-      env.sandbox.stub(resource2, 'applySizesAndMediaQuery');
       env.sandbox.stub(resource2, 'hasBeenMeasured').returns(true);
       env.sandbox
         .stub(resource2, 'getState')
         .returns(ResourceState.NOT_LAID_OUT);
 
       resources.discoverWork_();
-
-      // Neither should have applySizesOrMediaQuery() called.
-      expect(resource1.applySizesAndMediaQuery).to.not.be.called;
-      expect(resource2.applySizesAndMediaQuery).to.not.be.called;
     });
 
     it('should invalidate premeasurements after resize event', () => {
@@ -750,18 +740,6 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
       const schedulePassStub = sandbox.stub(resources, 'schedulePass');
       resources.viewport_.changeObservable_.fire({relayoutAll_: false});
       expect(schedulePassStub).calledOnce;
-    });
-
-    it('should applySizesAndMediaQuery on relayout', () => {
-      resources.relayoutAll_ = true;
-
-      env.sandbox.stub(resource1, 'applySizesAndMediaQuery');
-      env.sandbox.stub(resource2, 'applySizesAndMediaQuery');
-
-      resources.discoverWork_();
-
-      expect(resource1.applySizesAndMediaQuery).to.be.called;
-      expect(resource2.applySizesAndMediaQuery).to.be.called;
     });
   });
 
@@ -910,6 +888,7 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     expect(resources.exec_.getSize()).to.equal(2);
 
     // Remove unloaded resources from exec queue.
+    resource2.abortController_ = null;
     resource2.unload();
     resources.cleanupTasks_(resource2);
     expect(resources.exec_.getSize()).to.equal(1);
@@ -924,6 +903,7 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     expect(resources.queue_.tasks_[0].resource).to.equal(resource2);
 
     // Removes them even from scheduling queue.
+    resource2.abortController_ = null;
     resource2.unload();
     resources.cleanupTasks_(resource2, /* opt_removePending */ true);
     expect(resources.queue_.getSize()).to.equal(0);
@@ -1386,7 +1366,6 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
       },
       pauseCallback() {},
       resumeCallback() {},
-      applySizesAndMediaQuery() {},
       updateLayoutBox() {},
       getBoundingClientRect() {
         return layoutRectLtwh(0, 0, 0, 0);
@@ -1395,7 +1374,7 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
         return signals;
       },
     };
-    element.build = sandbox.stub().returns(Promise.resolve());
+    element.buildInternal = sandbox.stub().returns(Promise.resolve());
     return element;
   }
 
@@ -1451,12 +1430,12 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
     resources.documentReady_ = false;
     resources.add(child1);
     resources.upgraded(child1);
-    expect(child1.build).to.not.be.called;
+    expect(child1.buildInternal).to.not.be.called;
     resources.documentReady_ = true;
     resources.add(child2);
     const resource2 = stubBuild(Resource.forElementOptional(child2));
     resources.upgraded(child2);
-    expect(child2.build).to.be.calledOnce;
+    expect(child2.buildInternal).to.be.calledOnce;
     expect(schedulePassStub).to.not.be.called;
     return resource2.buildPromise.then(() => {
       expect(schedulePassStub).to.be.calledOnce;
@@ -1470,7 +1449,7 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
       const schedulePassStub = sandbox.stub(resources, 'schedulePass');
       child1.isBuilt = () => false;
       const child1BuildSpy = sandbox.spy();
-      child1.build = () => {
+      child1.buildInternal = () => {
         // Emulate an error happening during an element build.
         child1BuildSpy();
         return Promise.reject(new Error('child1-build-error'));
@@ -1503,11 +1482,11 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
       resources.documentReady_ = false;
       resources.add(child1);
       resources.upgraded(child1);
-      expect(child1.build.called).to.be.false;
+      expect(child1.buildInternal.called).to.be.false;
       expect(resources.pendingBuildResources_.length).to.be.equal(1);
       resources.add(child2);
       resources.upgraded(child2);
-      expect(child2.build.called).to.be.false;
+      expect(child2.buildInternal.called).to.be.false;
       expect(resources.pendingBuildResources_.length).to.be.equal(2);
       expect(resources.buildReadyResources_.calledTwice).to.be.true;
       const resource1 = Resource.forElementOptional(child1);
@@ -1554,15 +1533,15 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
       () => {
         resources.pendingBuildResources_ = [resource1, resource2];
         resources.buildReadyResources_();
-        expect(child1.build.called).to.be.false;
-        expect(child2.build.called).to.be.false;
+        expect(child1.buildInternal.called).to.be.false;
+        expect(child2.buildInternal.called).to.be.false;
         expect(resources.pendingBuildResources_.length).to.be.equal(2);
         expect(resources.schedulePass.called).to.be.false;
 
         child1.nextSibling = child2;
         resources.buildReadyResources_();
-        expect(child1.build.called).to.be.true;
-        expect(child2.build.called).to.be.false;
+        expect(child1.buildInternal.called).to.be.true;
+        expect(child2.buildInternal.called).to.be.false;
         expect(resources.pendingBuildResources_.length).to.be.equal(1);
         expect(resources.pendingBuildResources_[0]).to.be.equal(resource2);
         expect(resource1.isBuilding()).to.be.true;
@@ -1574,8 +1553,8 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
             child2.parentNode = parent;
             parent.nextSibling = true;
             resources.buildReadyResources_();
-            expect(child1.build).to.be.calledOnce;
-            expect(child2.build.called).to.be.true;
+            expect(child1.buildInternal).to.be.calledOnce;
+            expect(child2.buildInternal.called).to.be.true;
             expect(resources.pendingBuildResources_.length).to.be.equal(0);
             expect(resource2.isBuilding()).to.be.true;
             return resource2.buildPromise;
@@ -1593,7 +1572,7 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
     it('should NOT build past the root node when pending', () => {
       resources.pendingBuildResources_ = [resource1];
       resources.buildReadyResources_();
-      expect(child1.build.called).to.be.false;
+      expect(child1.buildInternal.called).to.be.false;
       expect(resources.pendingBuildResources_.length).to.be.equal(1);
       expect(resources.schedulePass.called).to.be.false;
 
@@ -1601,7 +1580,7 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
       parent.nextSibling = true;
       sandbox.stub(resources.ampdoc, 'getRootNode').returns(parent);
       resources.buildReadyResources_();
-      expect(child1.build.called).to.be.false;
+      expect(child1.buildInternal.called).to.be.false;
       expect(resources.pendingBuildResources_.length).to.be.equal(1);
       expect(resources.schedulePass.called).to.be.false;
     });
@@ -1609,8 +1588,8 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
     it('should not try to build resources already being built', () => {
       resources.pendingBuildResources_ = [resource1, resource2];
       resources.buildReadyResources_();
-      expect(child1.build.called).to.be.false;
-      expect(child2.build.called).to.be.false;
+      expect(child1.buildInternal.called).to.be.false;
+      expect(child2.buildInternal.called).to.be.false;
       expect(resources.pendingBuildResources_.length).to.be.equal(2);
 
       const newChild = createElementWithResource(3)[0];
@@ -1618,7 +1597,7 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
       const newResource = newChild['__AMP__RESOURCE'];
       const child1BuildSpy = sandbox.spy();
       child1.nextSibling = child2;
-      child1.build = () => {
+      child1.buildInternal = () => {
         // Simulate parent elements adding children elements to simulate
         // the infinite loop of building pending resources and make sure
         // that we're handling it well.
@@ -1629,8 +1608,8 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
       };
       resources.buildReadyResources_();
       expect(child1BuildSpy.called).to.be.true;
-      expect(child2.build.called).to.be.false;
-      expect(newChild.build.called).to.be.true;
+      expect(child2.buildInternal.called).to.be.false;
+      expect(newChild.buildInternal.called).to.be.true;
       expect(resources.pendingBuildResources_.length).to.be.equal(1);
       expect(resources.pendingBuildResources_[0]).to.be.equal(resource2);
 
@@ -1638,8 +1617,8 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
       parent.nextSibling = true;
       resources.buildReadyResources_();
       expect(child1BuildSpy.calledTwice).to.be.false;
-      expect(child2.build.called).to.be.true;
-      expect(newChild.build.calledTwice).to.be.false;
+      expect(child2.buildInternal.called).to.be.true;
+      expect(newChild.buildInternal.calledTwice).to.be.false;
       expect(resources.pendingBuildResources_.length).to.be.equal(0);
     });
 
@@ -1654,15 +1633,15 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
           resource2,
         ];
         const child1BuildSpy = sandbox.spy();
-        child1.build = () => {
+        child1.buildInternal = () => {
           // Emulate an error happening during an element build.
           child1BuildSpy();
           return Promise.reject(new Error('child1-build-error'));
         };
         resources.buildReadyResources_();
         expect(child1BuildSpy.called).to.be.true;
-        expect(child2.build.called).to.be.true;
-        expect(parent.build.called).to.be.true;
+        expect(child2.buildInternal.called).to.be.true;
+        expect(parent.buildInternal.called).to.be.true;
         expect(resources.pendingBuildResources_.length).to.be.equal(0);
         return Promise.all([
           parentResource.buildPromise,
@@ -1694,7 +1673,7 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
         resources.documentReady_ = true;
         resources.pendingBuildResources_ = [resource1];
         const child1BuildSpy = sandbox.spy();
-        child1.build = () => {
+        child1.buildInternal = () => {
           // Emulate an error happening during an element build.
           child1BuildSpy();
           return Promise.reject(new Error('child1-build-error'));

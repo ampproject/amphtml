@@ -18,10 +18,9 @@ const pageWidth = 800;
 const pageHeight = 800;
 
 describes.endtoend(
-  'AMP carousel test default attributes',
+  'amp-base-carousel:0.1 - default attributes',
   {
-    testUrl:
-      'http://localhost:8000/test/manual/amp-base-carousel/default-attributes.amp.html',
+    manualFixture: 'amp-base-carousel/default-attributes.amp.html',
     // TODO (micajuineho): Add viewer-demo support.
     environments: ['single'],
     initialRect: {width: pageWidth, height: pageHeight},

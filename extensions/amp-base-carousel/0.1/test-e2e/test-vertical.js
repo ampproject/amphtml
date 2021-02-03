@@ -20,11 +20,9 @@ const pageWidth = 800;
 const pageHeight = 600;
 
 describes.endtoend(
-  'Vertical AMP carousel',
+  'amp-base-carousel:0.1 - vertical orientation',
   {
-    testUrl:
-      'http://localhost:8000/test/manual/amp-base-carousel/' +
-      'vertical.amp.html',
+    manualFixture: 'amp-base-carousel/vertical.amp.html',
     experiments: ['amp-base-carousel', 'layers'],
     initialRect: {width: pageWidth, height: pageHeight},
   },

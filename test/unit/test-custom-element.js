@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {AmpEvents} from '../../src/amp-events';
 import {BaseElement} from '../../src/base-element';
 import {CommonSignals} from '../../src/common-signals';
 import {ElementStub} from '../../src/element-stub';
 import {LOADING_ELEMENTS_, Layout} from '../../src/layout';
-import {ResourceState} from '../../src/service/resource';
+import {Resource, ResourceState} from '../../src/service/resource';
 import {Services} from '../../src/services';
 import {chunkInstanceForTesting} from '../../src/chunk';
 import {createAmpElementForTesting} from '../../src/custom-element';
@@ -109,7 +109,9 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         win = env.win;
         doc = win.document;
         ampdoc = env.ampdoc;
-        clock = lolex.install({target: win});
+        clock = fakeTimers.withGlobal(win).install();
+        delete win.requestIdleCallback;
+        delete win.cancelIdleCallback;
         resources = Services.resourcesForDoc(doc);
         resources.isBuildOn_ = true;
         resourcesMock = env.sandbox.mock(resources);
@@ -168,7 +170,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
       it('Element - createdCallback', () => {
         const element = new ElementClass();
         const build = env.sandbox
-          .stub(element, 'build')
+          .stub(element, 'buildInternal')
           .returns(Promise.resolve());
 
         expect(element.isBuilt()).to.equal(false);
@@ -177,7 +179,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         expect(element.upgradeState_).to.equal(/* NOT_UPGRADED */ 1);
         expect(element.readyState).to.equal('loading');
         expect(element.everAttached).to.equal(false);
-        expect(element.layout_).to.equal(Layout.NODISPLAY);
+        expect(element.getLayout()).to.equal(Layout.NODISPLAY);
 
         container.appendChild(element);
         expect(element).to.have.class('i-amphtml-element');
@@ -195,14 +197,14 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
 
       it('StubElement - createdCallback', () => {
         const element = new StubElementClass();
-        env.sandbox.stub(element, 'build');
+        env.sandbox.stub(element, 'buildInternal');
 
         expect(element.isBuilt()).to.equal(false);
         expect(element.hasAttributes()).to.equal(false);
         expect(element.isUpgraded()).to.equal(false);
         expect(element.readyState).to.equal('loading');
         expect(element.everAttached).to.equal(false);
-        expect(element.layout_).to.equal(Layout.NODISPLAY);
+        expect(element.getLayout()).to.equal(Layout.NODISPLAY);
 
         container.appendChild(element);
         expect(element).to.have.class('i-amphtml-element');
@@ -212,7 +214,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         expect(element.everAttached).to.equal(true);
         expect(element.isUpgraded()).to.equal(false);
         // TODO(jeffkaufman, #13422): this test was silently failing.  `build` was
-        // the return value from `env.sandbox.stub(element, 'build')`.
+        // the return value from `env.sandbox.stub(element, 'buildInternal')`.
         //
         // expect(build.calledOnce).to.equal(true);
       });
@@ -221,7 +223,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         const element = new ElementClass();
         const buildPromise = Promise.resolve();
         const buildStub = env.sandbox
-          .stub(element, 'build')
+          .stub(element, 'buildInternal')
           .returns(buildPromise);
 
         expect(element).to.not.have.class('i-amphtml-element');
@@ -271,7 +273,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         const element = new ElementClass();
         const buildPromise = Promise.resolve();
         const buildStub = env.sandbox
-          .stub(element, 'build')
+          .stub(element, 'buildInternal')
           .returns(buildPromise);
         container.appendChild(element);
         container.removeChild(element);
@@ -296,7 +298,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
       it('Element - should NOT reset on 2nd attachedCallback w/o request', () => {
         clock.tick(1);
         const element = new ElementClass();
-        env.sandbox.stub(element, 'build').returns(Promise.resolve());
+        env.sandbox.stub(element, 'buildInternal').returns(Promise.resolve());
         container.appendChild(element);
         container.removeChild(element);
 
@@ -371,7 +373,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
 
         expect(element.isUpgraded()).to.equal(true);
         expect(element.implementation_).to.be.instanceOf(TestElement);
-        expect(element.implementation_.layout_).to.equal(Layout.FILL);
+        expect(element.implementation_.getLayout()).to.equal(Layout.FILL);
         expect(element.isBuilt()).to.equal(false);
       });
 
@@ -507,7 +509,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         const element = new ElementClass();
         allowConsoleError(() => {
           expect(() => {
-            element.build();
+            element.buildInternal();
           }).to.throw(/upgrade/);
         });
       });
@@ -675,7 +677,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
           expect(testElementBuildCallback).to.be.calledOnce;
 
           // Call again.
-          return element.build().then(() => {
+          return element.buildInternal().then(() => {
             expect(element.isBuilt()).to.equal(true);
             expect(testElementBuildCallback).to.be.calledOnce;
             setTimeout(() => {
@@ -692,7 +694,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
 
         container.appendChild(element);
         const buildingPromise = element.buildingPromise_;
-        expect(element.build()).to.equal(buildingPromise);
+        expect(element.buildInternal()).to.equal(buildingPromise);
         expect(testElementBuildCallback).to.be.calledOnce;
       });
 
@@ -704,7 +706,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         element.isInTemplate_ = true;
         allowConsoleError(() => {
           expect(() => {
-            element.build();
+            element.buildInternal();
           }).to.throw(/Must never be called in template/);
         });
 
@@ -719,7 +721,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
 
         allowConsoleError(() => {
           expect(() => {
-            element.build();
+            element.buildInternal();
           }).to.throw(/Cannot build unupgraded element/);
         });
 
@@ -737,28 +739,28 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         const element = new ElementClass();
         element.setAttribute('layout', 'fill');
         expect(element.everAttached).to.equal(false);
-        expect(element.layout_).to.equal(Layout.NODISPLAY);
+        expect(element.getLayout()).to.equal(Layout.NODISPLAY);
 
         resourcesMock.expects('add').withExactArgs(element).atLeast(1);
         resourcesMock.expects('upgraded').withExactArgs(element).atLeast(1);
         container.appendChild(element);
 
         expect(element.everAttached).to.equal(true);
-        expect(element.layout_).to.equal(Layout.FILL);
-        expect(element.implementation_.layout_).to.equal(Layout.FILL);
+        expect(element.getLayout()).to.equal(Layout.FILL);
+        expect(element.implementation_.getLayout()).to.equal(Layout.FILL);
       });
 
       it('StubElement - attachedCallback', () => {
         const element = new StubElementClass();
         element.setAttribute('layout', 'fill');
         expect(element.everAttached).to.equal(false);
-        expect(element.layout_).to.equal(Layout.NODISPLAY);
+        expect(element.getLayout()).to.equal(Layout.NODISPLAY);
 
         resourcesMock.expects('add').withExactArgs(element).atLeast(1);
         container.appendChild(element);
 
         expect(element.everAttached).to.equal(true);
-        expect(element.layout_).to.equal(Layout.FILL);
+        expect(element.getLayout()).to.equal(Layout.FILL);
         // Not upgraded yet!
         expect(element).to.have.class('amp-unresolved');
         expect(element).to.have.class('i-amphtml-unresolved');
@@ -767,8 +769,8 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         resourcesMock.expects('upgraded').withExactArgs(element).once();
         element.upgrade(TestElement);
 
-        expect(element.layout_).to.equal(Layout.FILL);
-        expect(element.implementation_.layout_).to.equal(Layout.FILL);
+        expect(element.getLayout()).to.equal(Layout.FILL);
+        expect(element.implementation_.getLayout()).to.equal(Layout.FILL);
         // Now it's called.
         expect(element).to.not.have.class('amp-unresolved');
         expect(element).to.not.have.class('i-amphtml-unresolved');
@@ -778,7 +780,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         const element = new ElementClass();
         element.setAttribute('layout', 'fill');
         expect(element.everAttached).to.equal(false);
-        expect(element.layout_).to.equal(Layout.NODISPLAY);
+        expect(element.getLayout()).to.equal(Layout.NODISPLAY);
 
         resourcesMock.expects('add').withExactArgs(element).atLeast(1);
         resourcesMock.expects('upgraded').withExactArgs(element).atLeast(1);
@@ -788,15 +790,15 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         container.removeChild(element);
 
         expect(element.everAttached).to.equal(true);
-        expect(element.layout_).to.equal(Layout.FILL);
-        expect(element.implementation_.layout_).to.equal(Layout.FILL);
+        expect(element.getLayout()).to.equal(Layout.FILL);
+        expect(element.implementation_.getLayout()).to.equal(Layout.FILL);
       });
 
       it('Element - handles async detachedCallback when connected', () => {
         const element = new ElementClass();
         element.setAttribute('layout', 'fill');
         expect(element.everAttached).to.equal(false);
-        expect(element.layout_).to.equal(Layout.NODISPLAY);
+        expect(element.getLayout()).to.equal(Layout.NODISPLAY);
 
         resourcesMock.expects('add').withExactArgs(element).atLeast(1);
         resourcesMock.expects('upgraded').withExactArgs(element).atLeast(1);
@@ -809,8 +811,8 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         container.removeChild(element);
 
         expect(element.everAttached).to.equal(true);
-        expect(element.layout_).to.equal(Layout.FILL);
-        expect(element.implementation_.layout_).to.equal(Layout.FILL);
+        expect(element.getLayout()).to.equal(Layout.FILL);
+        expect(element.implementation_.getLayout()).to.equal(Layout.FILL);
       });
 
       it('Element - layoutCallback before build', () => {
@@ -859,7 +861,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         const element = new ElementClass();
         element.setAttribute('layout', 'fill');
         container.appendChild(element);
-        return element.build().then(() => {
+        return element.buildInternal().then(() => {
           expect(element.isBuilt()).to.equal(true);
           expect(testElementLayoutCallback).to.have.not.been.called;
 
@@ -882,7 +884,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         const element = new ElementClass();
         element.setAttribute('layout', 'fill');
         container.appendChild(element);
-        return element.build().then(() => {
+        return element.buildInternal().then(() => {
           expect(element.isBuilt()).to.equal(true);
           expect(testElementLayoutCallback).to.have.not.been.called;
 
@@ -906,7 +908,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         const element = new ElementClass();
         element.setAttribute('layout', 'fill');
         container.appendChild(element);
-        return element.build().then(() => {
+        return element.buildInternal().then(() => {
           expect(element.isBuilt()).to.equal(true);
           expect(testElementLayoutCallback).to.have.not.been.called;
 
@@ -935,7 +937,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         const element = new ElementClass();
         element.setAttribute('layout', 'fill');
         container.appendChild(element);
-        return element.build().then(() => {
+        return element.buildInternal().then(() => {
           expect(element.isBuilt()).to.equal(true);
           expect(testElementLayoutCallback).to.have.not.been.called;
 
@@ -990,7 +992,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         const element = new ElementClass();
         element.setAttribute('layout', 'fill');
         container.appendChild(element);
-        return element.build().then(() => {
+        return element.buildInternal().then(() => {
           expect(element.isBuilt()).to.equal(true);
           expect(testElementLayoutCallback).to.have.not.been.called;
 
@@ -1009,7 +1011,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         resourcesMock.expects('upgraded').withExactArgs(element).never();
         element.upgrade(TestElement);
         allowConsoleError(() => {
-          expect(() => element.build()).to.throw(
+          expect(() => element.buildInternal()).to.throw(
             /Cannot build unupgraded element/
           );
         });
@@ -1027,7 +1029,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         resourcesMock.expects('upgraded').withExactArgs(element).once();
         element.upgrade(TestElement);
         return element
-          .build()
+          .buildInternal()
           .then(() => {
             expect(element.isUpgraded()).to.equal(true);
             expect(element.isBuilt()).to.equal(true);
@@ -1060,7 +1062,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         const handler = env.sandbox.spy();
         element.implementation_.executeAction = handler;
         container.appendChild(element);
-        return element.build().then(() => {
+        return element.buildInternal().then(() => {
           const inv = {};
           element.enqueAction(inv);
           expect(handler).to.be.calledOnce;
@@ -1114,51 +1116,81 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         let element1;
         let element2;
         let matchMedia;
+        let matchMinWidth1px;
+        let requestMeasureStub;
 
         beforeEach(() => {
           element1 = new ElementClass();
 
-          // Fixes #19752. The window.matchMedia call in the code
-          // path of element.applySizesAndMediaQuery is not behaving consistently
-          // in headless mode, thus we mock the calls here. This is fine as we are
-          // not testing window behavior.
           matchMedia = env.sandbox.stub(
             element1.ownerDocument.defaultView,
             'matchMedia'
           );
-          matchMedia.withArgs('(min-width: 1px)').returns({matches: true});
+          matchMinWidth1px = {
+            matches: true,
+            onchange: null,
+          };
+          matchMedia.withArgs('(min-width: 1px)').returns(matchMinWidth1px);
           matchMedia
             .withArgs('(min-width: 1111111px)')
-            .returns({matches: false});
+            .returns({matches: false, onchange: null});
+
           element2 = new ElementClass();
           element2.ampdoc_ = env.ampdoc;
+
+          requestMeasureStub = env.sandbox.stub(
+            Resource.prototype,
+            'requestMeasure'
+          );
+        });
+
+        it('should not request remeasure when no media attributes', () => {
+          doc.body.appendChild(element1);
+          expect(requestMeasureStub).to.not.be.called;
         });
 
         it('should not apply sizes when "disable-inline-width" is present', () => {
           element1.setAttribute('disable-inline-width', null);
           element1.setAttribute('sizes', '(min-width: 1px) 200px, 50vw');
-          element1.applySizesAndMediaQuery();
+          doc.body.appendChild(element1);
           expect(element1.style.width).not.to.equal('200px');
+          expect(requestMeasureStub).to.not.be.called;
         });
 
         it('should apply media condition', () => {
           element1.setAttribute('media', '(min-width: 1px)');
-          element1.applySizesAndMediaQuery();
+          doc.body.appendChild(element1);
           expect(element1).to.not.have.class('i-amphtml-hidden-by-media-query');
+          expect(requestMeasureStub).to.be.calledOnce;
 
           element2.setAttribute('media', '(min-width: 1111111px)');
-          element2.applySizesAndMediaQuery();
+          doc.body.appendChild(element2);
           expect(element2).to.have.class('i-amphtml-hidden-by-media-query');
+          expect(requestMeasureStub).to.be.calledTwice;
+        });
+
+        it('should re-apply media condition', () => {
+          element1.setAttribute('media', '(min-width: 1px)');
+          doc.body.appendChild(element1);
+          expect(element1).to.not.have.class('i-amphtml-hidden-by-media-query');
+          expect(requestMeasureStub).to.be.calledOnce;
+
+          matchMinWidth1px.matches = false;
+          matchMinWidth1px.onchange();
+          expect(element1).to.have.class('i-amphtml-hidden-by-media-query');
+          expect(requestMeasureStub).to.be.calledTwice;
         });
 
         it('should apply sizes condition', () => {
           element1.setAttribute('sizes', '(min-width: 1px) 200px, 50vw');
-          element1.applySizesAndMediaQuery();
+          doc.body.appendChild(element1);
           expect(element1.style.width).to.equal('200px');
+          expect(requestMeasureStub).to.be.calledOnce;
 
           element2.setAttribute('sizes', '(min-width: 1111111px) 200px, 50vw');
-          element2.applySizesAndMediaQuery();
+          doc.body.appendChild(element2);
           expect(element2.style.width).to.equal('50vw');
+          expect(requestMeasureStub).to.be.calledTwice;
         });
 
         it('should apply heights condition', () => {
@@ -1168,8 +1200,9 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
           element1.setAttribute('height', '200px');
           element1.setAttribute('heights', '(min-width: 1px) 99%, 1%');
           container.appendChild(element1);
-          element1.applySizesAndMediaQuery();
+          doc.body.appendChild(element1);
           expect(element1.sizerElement.style.paddingTop).to.equal('99%');
+          expect(requestMeasureStub).to.be.calledOnce;
 
           element2.sizerElement = doc.createElement('div');
           element2.setAttribute('layout', 'responsive');
@@ -1177,40 +1210,9 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
           element2.setAttribute('height', '200px');
           element2.setAttribute('heights', '(min-width: 1111111px) 99%, 1%');
           container.appendChild(element2);
-          element2.applySizesAndMediaQuery();
+          doc.body.appendChild(element2);
           expect(element2.sizerElement.style.paddingTop).to.equal('1%');
-        });
-
-        it('should rediscover sizer to apply heights in SSR', () => {
-          element1.setAttribute('i-amphtml-layout', 'responsive');
-          element1.setAttribute('layout', 'responsive');
-          element1.setAttribute('width', '200px');
-          element1.setAttribute('height', '200px');
-          element1.setAttribute('heights', '(min-width: 1px) 99%, 1%');
-          container.appendChild(element1);
-
-          const sizer = doc.createElement('i-amphtml-sizer');
-          expect(element1.sizerElement).to.be.undefined;
-          element1.appendChild(sizer);
-          element1.applySizesAndMediaQuery();
-          expect(element1.sizerElement).to.equal(sizer);
-          expect(sizer.style.paddingTop).to.equal('99%');
-        });
-
-        it('should NOT rediscover sizer after reset in SSR', () => {
-          element1.setAttribute('i-amphtml-layout', 'responsive');
-          element1.setAttribute('layout', 'responsive');
-          element1.setAttribute('width', '200px');
-          element1.setAttribute('height', '200px');
-          element1.setAttribute('heights', '(min-width: 1px) 99%, 1%');
-          container.appendChild(element1);
-
-          const sizer = doc.createElement('i-amphtml-sizer');
-          element1.appendChild(sizer);
-          element1.sizerElement = null;
-          element1.applySizesAndMediaQuery();
-          expect(element1.sizerElement).to.be.null;
-          expect(sizer.style.paddingTop).to.equal('');
+          expect(requestMeasureStub).to.be.calledTwice;
         });
       });
 
@@ -1316,17 +1318,6 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         element.appendChild(sizer);
         element.applySize(111);
         expect(intrinsicSizer.getAttribute('src')).to.equal('');
-      });
-
-      it('should NOT apply media condition in template', () => {
-        const element1 = new ElementClass();
-        element1.setAttribute('media', '(min-width: 1px)');
-        element1.isInTemplate_ = true;
-        allowConsoleError(() => {
-          expect(() => {
-            element1.applySizesAndMediaQuery();
-          }).to.throw(/Must never be called in template/);
-        });
       });
 
       it('should change size to zero', () => {
@@ -1669,7 +1660,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
       beforeEach(() => {
         win = env.win;
         doc = win.document;
-        clock = lolex.install({target: win, now: 42});
+        clock = fakeTimers.withGlobal(win).install({now: 42});
         ElementClass = createAmpElementForTesting(win, TestElement);
         win.customElements.define('amp-test-loader', ElementClass);
         win.__AMP_EXTENDED_ELEMENTS['amp-test-loader'] = TestElement;

@@ -18,13 +18,16 @@ const assert = require('assert');
 const fs = require('fs');
 const globby = require('globby');
 const gulp = require('gulp');
-const log = require('fancy-log');
 const path = require('path');
 const posthtml = require('posthtml');
 const through = require('through2');
+const {
+  log,
+  logWithoutTimestamp,
+  logWithoutTimestampLocalDev,
+} = require('../common/logging');
 const {buildNewServer} = require('../server/typescript-compile');
 const {cyan, green, red} = require('ansi-colors');
-const {isCiBuild} = require('../common/ci');
 
 const transformsDir = path.resolve('build-system/server/new-server/transforms');
 const inputPaths = [`${transformsDir}/**/input.html`];
@@ -145,10 +148,12 @@ function loadOptions(inputFile) {
  */
 function logError(testName, err) {
   const {message} = err;
-  console.log(red('✖'), 'Failed', cyan(testName));
-  console.group();
-  console.log(message.split('\n').splice(3).join('\n'));
-  console.groupEnd();
+  logWithoutTimestamp(red('✖'), 'Failed', cyan(testName));
+  console /*OK*/
+    .group();
+  logWithoutTimestamp(message.split('\n').splice(3).join('\n'));
+  console /*OK*/
+    .groupEnd();
 }
 
 /**
@@ -191,9 +196,7 @@ function runTest() {
       return;
     }
     ++passed;
-    if (!isCiBuild()) {
-      console.log(green('✔'), 'Passed', cyan(testName));
-    }
+    logWithoutTimestampLocalDev(green('✔'), 'Passed', cyan(testName));
     cb();
   });
 }

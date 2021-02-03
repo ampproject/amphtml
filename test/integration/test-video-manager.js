@@ -61,6 +61,26 @@ describe
         let video;
         let impl;
 
+        beforeEach(async () => {
+          klass = createFakeVideoPlayerClass(env.win);
+          video = env.createAmpElement('amp-test-fake-videoplayer', klass);
+          video.setAttribute('layout', 'fixed');
+          video.setAttribute('width', '400');
+          video.setAttribute('height', '300');
+          env.win.document.body.appendChild(video);
+          video.connectedCallback();
+          impl = await video.getImpl(false);
+          installVideoManagerForDoc(env.ampdoc);
+          videoManager = Services.videoManagerForDoc(env.ampdoc);
+        });
+
+        it('should not duplicate entries if laid out twice', async () => {
+          videoManager.register(impl);
+          expect(videoManager.entries_).to.have.length(1);
+          videoManager.register(impl);
+          expect(videoManager.entries_).to.have.length(1);
+        });
+
         it('should receive i-amphtml-video-interface class when registered', () => {
           const expectedClass = 'i-amphtml-video-interface';
           expect(toArray(video.classList)).to.not.contain(expectedClass);
@@ -253,15 +273,6 @@ describe
             const curState = videoManager.getPlayingState(impl);
             expect(curState).to.equal(PlayingStates.PLAYING_MANUAL);
           });
-        });
-
-        beforeEach(() => {
-          klass = createFakeVideoPlayerClass(env.win);
-          video = env.createAmpElement('amp-test-fake-videoplayer', klass);
-          env.win.document.body.appendChild(video);
-          impl = video.implementation_;
-          installVideoManagerForDoc(env.ampdoc);
-          videoManager = Services.videoManagerForDoc(env.ampdoc);
         });
       }
     );

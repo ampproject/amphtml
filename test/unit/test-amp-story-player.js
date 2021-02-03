@@ -112,6 +112,10 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       .resolves(fakeMessaging);
   });
 
+  afterEach(() => {
+    console.error.restore();
+  });
+
   it('should build an iframe for each story', async () => {
     buildStoryPlayer();
     await manager.loadPlayers();
@@ -203,8 +207,8 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   });
 
   it(
-    'should remove iframe from a story with distance > 1 from current story ' +
-      'and give it to a new story that is distance <= 1 when navigating',
+    'should remove iframe from a story with distance > 1 from the DOM ' +
+      'and append a new story to the DOM that is distance <= 1 when navigating',
     async () => {
       buildStoryPlayer(4);
       await manager.loadPlayers();
@@ -213,18 +217,20 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       const stories = playerEl.getStories();
 
       swipeLeft();
-      expect(stories[0].iframeIdx).to.eql(0);
-      expect(stories[3].iframeIdx).to.eql(-1);
+
+      expect(playerEl.contains(stories[0].iframe)).to.be.true;
+      expect(playerEl.contains(stories[3].iframe)).to.be.false;
 
       swipeLeft();
-      expect(stories[0].iframeIdx).to.eql(-1);
-      expect(stories[3].iframeIdx).to.eql(0);
+
+      expect(playerEl.contains(stories[0].iframe)).to.be.false;
+      expect(playerEl.contains(stories[3].iframe)).to.be.true;
     }
   );
 
   it(
-    'should remove iframe from a story with distance > 1 from current story ' +
-      'and give it to a new story that is distance <= 1 when navigating backwards',
+    'should remove iframe from a story with distance > 1 from DOM ' +
+      'and append new story to the DOM which distance <= 1 when navigating backwards',
     async () => {
       buildStoryPlayer(4);
       await manager.loadPlayers();
@@ -236,8 +242,8 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       swipeLeft();
       swipeRight();
 
-      expect(stories[0].iframeIdx).to.eql(0);
-      expect(stories[3].iframeIdx).to.eql(-1);
+      expect(playerEl.contains(stories[0].iframe)).to.be.true;
+      expect(playerEl.contains(stories[3].iframe)).to.be.false;
     }
   );
 
@@ -447,10 +453,17 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     });
 
     it('should throw error when invalid url is provided', async () => {
-      buildStoryPlayer(1, DEFAULT_ORIGIN_URL, 'www.invalid.org');
+      console.error.restore();
+      env.sandbox.spy(console, 'error');
 
-      return expect(() => manager.loadPlayers()).to.throw(
-        /Unsupported cache, use one of following: cdn.ampproject.org,www.bing-amp.com/
+      buildStoryPlayer(1, DEFAULT_ORIGIN_URL, 'www.tacos.org');
+
+      await manager.loadPlayers();
+      await nextTick();
+
+      expect(console.error).to.be.calledWithMatch(
+        /\[amp-story-player\]/,
+        /Unsupported cache specified, use one of following: cdn.ampproject.org,www.bing-amp.com/
       );
     });
   });
@@ -522,15 +535,46 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       await player.load();
 
-      await player.show('https://example.com/story3.html');
+      player.show('https://example.com/story3.html');
+      await nextTick();
+
+      fireHandler['storyContentLoaded']('storyContentLoaded', {});
+      await nextTick();
 
       const stories = playerEl.getStories();
 
-      expect(stories[0].iframeIdx).to.eql(-1);
-      expect(stories[1].iframeIdx).to.eql(-1);
-      expect(stories[2].iframeIdx).to.eql(2);
-      expect(stories[3].iframeIdx).to.eql(0);
-      expect(stories[4].iframeIdx).to.eql(1);
+      expect(playerEl.contains(stories[0].iframe)).to.be.false;
+      expect(playerEl.contains(stories[1].iframe)).to.be.false;
+      expect(playerEl.contains(stories[2].iframe)).to.be.true;
+      expect(playerEl.contains(stories[3].iframe)).to.be.true;
+      expect(playerEl.contains(stories[4].iframe)).to.be.true;
+    });
+
+    it('show() callback should prerender next story after current one is loaded', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      appendStoriesToPlayer(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+
+      player.show('https://example.com/story3.html');
+      await nextTick();
+
+      fireHandler['storyContentLoaded']('storyContentLoaded', {});
+      await nextTick();
+
+      const storyIframes = playerEl.querySelectorAll('iframe');
+
+      expect(storyIframes[0].getAttribute('src')).to.include(
+        'https://example.com/story3.html#visibilityState=prerender'
+      );
+      expect(storyIframes[1].getAttribute('src')).to.include(
+        'https://example.com/story4.html#visibilityState=prerender'
+      );
+      expect(storyIframes[2].getAttribute('src')).to.include(
+        'https://example.com/story2.html#visibilityState=prerender'
+      );
     });
 
     // TODO(proyectoramirez): delete once add() is implemented.
@@ -594,8 +638,8 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     });
 
     it(
-      'creates and assigns iframes to added stories when there are ' +
-        'less than the maximum iframes set up',
+      'creates and assigns iframes to added stories when they have a ' +
+        'distance of 1',
       async () => {
         buildStoryPlayer();
         await manager.loadPlayers();
@@ -605,15 +649,14 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
         const stories = playerEl.getStories();
 
-        expect(stories[0].iframeIdx).to.eql(0);
-        expect(stories[1].iframeIdx).to.eql(1);
-        expect(stories[2].iframeIdx).to.eql(2);
+        expect(playerEl.contains(stories[0].iframe)).to.be.true;
+        expect(playerEl.contains(stories[1].iframe)).to.be.true;
       }
     );
 
     it(
       'assigns an existing iframe to the first added story when the current ' +
-        'story is the last one, and the maximum number of iframes has been set up',
+        'story is the last one, and the new story has a distance of 1',
       async () => {
         buildStoryPlayer(3);
         await manager.loadPlayers();
@@ -627,8 +670,8 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
         const stories = playerEl.getStories();
 
-        expect(stories[3].iframeIdx).to.eql(0);
-        expect(stories[4].iframeIdx).to.eql(-1);
+        expect(playerEl.contains(stories[3].iframe)).to.be.true;
+        expect(playerEl.contains(stories[4].iframe)).to.be.false;
       }
     );
 

@@ -57,6 +57,151 @@ With the responsive layout, the width and height from the example should yield c
 </amp-youtube>
 ```
 
+#### Standalone use outside valid AMP documents
+
+Bento AMP allows you to use AMP components in non-AMP pages without needing to commit to fully valid AMP. You can take these components and place them in implementations with frameworks and CMSs that don't support AMP. Read more in our guide [Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/).
+
+[example preview="top-frame" playground="false"]
+
+```html
+<head>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-youtube-1.0.css">
+  <script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-1.0.js"></script>
+</head>
+<body>
+  <amp-youtube
+    style="aspect-ratio: 16/9"
+    id="my-youtube-video"
+    data-videoid="mGENRKrdoGY"
+  ></amp-youtube>
+  <script>
+    (async () => {
+      const video = document.querySelector('#my-youtube-video');
+      await customElements.whenDefined('amp-youtube');
+      const videoHandle = await video.getApi();
+
+      // programatically call playback actions
+      videoHandle.play();
+      videoHandle.pause();
+      videoHandle.requestFullscreen();
+      videoHandle.mute();
+      videoHandle.unmute();
+
+      // get video state
+      console.log({
+        autoplay: videoHandle.autoplay,
+        controls: videoHandle.controls,
+        duration: videoHandle.duration,
+        currentTime: videoHandle.currentTime,
+        loop: videoHandle.loop,
+      })
+    })();
+  </script>
+</body>
+```
+
+[/example]
+
+#### Interactivity and API usage
+
+Bento enabled components in standalone use are highly interactive through their API. In Bento standalone use, the element's API replaces AMP Actions and events and [`amp-bind`](https://amp.dev/documentation/components/amp-bind/?format=websites).
+
+The `amp-youtube` component API is accessible by including the following script tag in your document:
+
+```js
+await customElements.whenDefined('amp-youtube');
+const videoHandle = await video.getApi();
+```
+
+##### Actions
+
+The `amp-youtube` API allows you to perform the following actions:
+
+##### `play()`
+
+Plays the video.
+
+```js
+videoHandle.play();
+```
+
+##### `pause()`
+
+Pauses the video.
+
+```js
+videoHandle.pause();
+```
+
+##### `mute()`
+
+Mutes the video.
+
+```js
+videoHandle.mute();
+```
+
+##### `unmute()`
+
+Unmutes the video.
+
+```js
+videoHandle.unmute();
+```
+
+##### `requestFullscreen()`
+
+Expands the video to fullscreen when possible.
+
+```js
+videoHandle.requestFullscreen();
+```
+
+#### Properties
+
+It also exposes the following read-only properties:
+
+##### `currentTime` (`number`)
+
+The current playback time in seconds.
+
+```js
+console.log(videoHandle.currentTime);
+```
+
+##### `duration` (`number`)
+
+The video's duration in seconds, when it's known (e.g. is not a livestream).
+
+```js
+console.log(videoHandle.duration);
+```
+
+##### `autoplay` (`boolean`)
+
+Whether the video autoplays.
+
+```js
+console.log(videoHandle.autoplay);
+```
+
+##### `controls` (`boolean`)
+
+Whether the video shows controls.
+
+```js
+console.log(videoHandle.controls);
+```
+
+##### `loop` (`boolean`)
+
+Whether the video loops.
+
+```js
+console.log(videoHandle.loop);
+```
+
 ### Migrating from 0.1
 
 The experimental `1.0` version of `amp-youtube` does not automatically convert `data-param-controls` to `controls`. Instead it takes `controls` directly as an attribute.

@@ -34,6 +34,21 @@ export function createTabLogsElement(win, storyUrl) {
 }
 
 /**
+ * Creates the success message when there are no errors.
+ * @param {!ELement} element
+ * @return {!Element} the layout
+ */
+const buildSuccessMessageTemplate = (element) => {
+  const html = htmlFor(element);
+  return html`<div class="i-amphtml-story-dev-tools-logs-success">
+    <div class="i-amphtml-story-dev-tools-logs-success-image"></div>
+    <h1 class="i-amphtml-story-dev-tools-logs-success-message">
+      Great Job!<br />No issues found
+    </h1>
+  </div>`;
+};
+
+/**
  * Returns a "failed" or "passed" icon from the status
  * @param {!Element} element
  * @param {boolean} statusPassed
@@ -96,7 +111,7 @@ export class AmpStoryDevToolsTabLogs extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    return this.buildLogsList_(this.errorList_);
+    return this.buildLogsContent_();
   }
 
   /** @override */
@@ -135,39 +150,13 @@ export class AmpStoryDevToolsTabLogs extends AMP.BaseElement {
 
   /**
    * @private
-   * @param {Array<Object>} errorList
    * @return {!Promise}
    */
-  buildLogsList_(errorList) {
-    const logsContainer = this.element.ownerDocument.createElement('div');
-    logsContainer.appendChild(this.buildLogsTitle_(errorList.length));
-    errorList.forEach((content) => {
-      const logEl = buildLogMessageTemplate(this.element);
-      logEl.querySelector('.i-amphtml-story-dev-tools-log-type').textContent =
-        content.code;
-      const codeEl = logEl.querySelector('.i-amphtml-story-dev-tools-log-code');
-      content.htmlLines.forEach((l, i) => {
-        const lineEl = this.element.ownerDocument.createElement('span');
-        lineEl.classList.add('i-amphtml-story-dev-tools-log-code-line');
-        lineEl.textContent = (i + content.line - 1).toString() + '|' + l;
-        codeEl.appendChild(lineEl);
-      });
-      logEl.querySelector(
-        '.i-amphtml-story-dev-tools-log-position'
-      ).textContent = `${content.line}:${content.col}`;
-      logEl.querySelector(
-        '.i-amphtml-story-dev-tools-log-description'
-      ).textContent = content.message;
-      const specUrlElement = logEl.querySelector(
-        '.i-amphtml-story-dev-tools-log-spec'
-      );
-      if (content.specUrl) {
-        specUrlElement.href = content.specUrl;
-      } else {
-        specUrlElement.remove();
-      }
-      logsContainer.appendChild(logEl);
-    });
+  buildLogsContent_() {
+    const logsContainer = this.errorList_.length
+      ? this.createErrorsList_()
+      : buildSuccessMessageTemplate(this.element);
+    logsContainer.prepend(this.buildLogsTitle_(this.errorList_.length));
     this.mutateElement(() => {
       this.element.textContent = '';
       this.element.appendChild(logsContainer);
@@ -220,5 +209,41 @@ export class AmpStoryDevToolsTabLogs extends AMP.BaseElement {
       statusIcon = buildStatusIcon(this.element, true);
     }
     this.mutateElement(() => logsTabSelector.appendChild(statusIcon));
+  }
+
+  /**
+   * @private
+   * @return {!Element}
+   */
+  createErrorsList_() {
+    const logsContainer = this.element.ownerDocument.createElement('div');
+    this.errorList_.forEach((content) => {
+      const logEl = buildLogMessageTemplate(this.element);
+      logEl.querySelector('.i-amphtml-story-dev-tools-log-type').textContent =
+        content.code;
+      const codeEl = logEl.querySelector('.i-amphtml-story-dev-tools-log-code');
+      content.htmlLines.forEach((l, i) => {
+        const lineEl = this.element.ownerDocument.createElement('span');
+        lineEl.classList.add('i-amphtml-story-dev-tools-log-code-line');
+        lineEl.textContent = (i + content.line - 1).toString() + '|' + l;
+        codeEl.appendChild(lineEl);
+      });
+      logEl.querySelector(
+        '.i-amphtml-story-dev-tools-log-position'
+      ).textContent = `${content.line}:${content.col}`;
+      logEl.querySelector(
+        '.i-amphtml-story-dev-tools-log-description'
+      ).textContent = content.message;
+      const specUrlElement = logEl.querySelector(
+        '.i-amphtml-story-dev-tools-log-spec'
+      );
+      if (content.specUrl) {
+        specUrlElement.href = content.specUrl;
+      } else {
+        specUrlElement.remove();
+      }
+      logsContainer.appendChild(logEl);
+    });
+    return logsContainer;
   }
 }

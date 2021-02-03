@@ -21,10 +21,9 @@ const pageHeight = 600;
 const arrowMargin = 12;
 
 describes.endtoend(
-  'AMP carousel rtl',
+  'amp-base-carousel:0.1 - rtl',
   {
-    testUrl:
-      'http://localhost:8000/test/manual/amp-base-carousel/basic-rtl.amp.html',
+    manualFixture: 'amp-base-carousel/basic-rtl.amp.html',
     experiments: ['amp-base-carousel', 'layers'],
     initialRect: {width: pageWidth, height: pageHeight},
     // TODO(sparhami) Make other environments work too

@@ -147,9 +147,6 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     /** @protected {?Promise<?InteractiveResponseType|?JsonObject|undefined>} */
     this.backendDataPromise_ = null;
 
-    /** @protected {?Promise<!../../../src/service/cid-impl.CidDef>} */
-    this.clientIdService_ = Services.cidForDoc(this.element);
-
     /** @protected {?Promise<JsonObject>} */
     this.clientIdPromise_ = null;
 
@@ -183,8 +180,8 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     /** @protected {?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
 
-    /** @protected {../../../src/service/url-impl.Url} */
-    this.urlService_ = Services.urlForDoc(this.element);
+    /** @protected {?../../../src/service/url-impl.Url} */
+    this.urlService_ = null;
 
     /** @protected {?../../amp-story/1.0/variable-service.AmpStoryVariableService} */
     this.variableService_ = null;
@@ -250,6 +247,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     devAssert(this.element.children.length == 0, 'Too many children');
 
     // Initialize all the services before proceeding, and update store with state
+    this.urlService_ = Services.urlForDoc(this.element);
     return Promise.all([
       Services.storyVariableServiceForOrNull(this.win).then((service) => {
         this.variableService_ = service;
@@ -395,7 +393,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    */
   getClientId_() {
     if (!this.clientIdPromise_) {
-      this.clientIdPromise_ = this.clientIdService_.then((data) => {
+      this.clientIdPromise_ = Services.cidForDoc(this.element).then((data) => {
         return data.get(
           {scope: 'amp-story', createCookieIfNotPresent: true},
           /* consent */ Promise.resolve()

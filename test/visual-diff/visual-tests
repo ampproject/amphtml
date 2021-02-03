@@ -298,6 +298,24 @@
       ]
     },
     {
+      "url": "examples/visual-tests/amp-story/amp-story-grid-layer-presets.html",
+      "name": "amp-story: Grid layer anchoring with preset (vertically)",
+      "viewport": {"width": 250, "height": 500},
+      "loading_complete_selectors": [
+        ".i-amphtml-story-loaded",
+        ".i-amphtml-story-grid-template-aspect"
+      ]
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-grid-layer-presets.html",
+      "name": "amp-story: Grid layer anchoring with preset (horizontally)",
+      "viewport": {"width": 400, "height": 500},
+      "loading_complete_selectors": [
+        ".i-amphtml-story-loaded",
+        ".i-amphtml-story-grid-template-aspect"
+      ]
+    },
+    {
       "url": "examples/visual-tests/amp-story/amp-story-cta-layer.html",
       "name": "amp-story: CTA layer",
       "viewport": {"width": 320, "height": 480},
@@ -724,6 +742,8 @@
       "no_base_test": true
     },
     {
+      // TODO(#28975, @ampproject/wg-monetization): see https://percy.io/ampproject/amphtml/builds-next/8494289/changed/482844300
+      "flaky": true,
       "url": "examples/visual-tests/amphtml-ads/amp-fie-static.html",
       "name": "amphtml-ads: friendly iframe static",
       "interactive_tests": "examples/visual-tests/amphtml-ads/static.js",

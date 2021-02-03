@@ -18,7 +18,6 @@ const colors = require('ansi-colors');
 const file = require('gulp-file');
 const fs = require('fs-extra');
 const gulp = require('gulp');
-const log = require('fancy-log');
 const {
   bootstrapThirdPartyFrames,
   compileAllJs,
@@ -32,6 +31,10 @@ const {
   toPromise,
 } = require('./helpers');
 const {
+  cleanupBuildDir,
+  printClosureConcurrency,
+} = require('../compile/compile');
+const {
   createCtrlcHandler,
   exitCtrlcHandler,
 } = require('../common/ctrlcHandler');
@@ -39,10 +42,10 @@ const {
   displayLifecycleDebugging,
 } = require('../compile/debug-compilation-lifecycle');
 const {buildExtensions, parseExtensionFlags} = require('./extension-helpers');
-const {cleanupBuildDir} = require('../compile/compile');
 const {compileCss, cssEntryPoints} = require('./css');
 const {compileJison} = require('./compile-jison');
 const {formatExtractedMessages} = require('../compile/log-messages');
+const {log} = require('../common/logging');
 const {maybeUpdatePackages} = require('./update-packages');
 const {VERSION} = require('../compile/internal-version');
 
@@ -130,6 +133,7 @@ async function doDist(extraArgs = {}) {
     minify: true,
     watch: argv.watch,
   };
+  printClosureConcurrency();
   printNobuildHelp();
   printDistHelp(options);
   await runPreDistSteps(options);

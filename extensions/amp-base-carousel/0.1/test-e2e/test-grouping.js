@@ -20,11 +20,9 @@ const pageWidth = 800;
 const pageHeight = 600;
 
 describes.endtoend(
-  'AMP carousel grouping',
+  'amp-base-carousel:0.1 - grouping',
   {
-    testUrl:
-      'http://localhost:8000/test/manual/amp-base-carousel/' +
-      'grouping-move-by-2.amp.html',
+    manualFixture: 'amp-base-carousel/grouping-move-by-2.amp.html',
     experiments: ['amp-base-carousel', 'layers'],
     initialRect: {width: pageWidth, height: pageHeight},
   },

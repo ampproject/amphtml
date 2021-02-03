@@ -24,7 +24,7 @@ import {Layout, LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
 import {
   STICKY_AD_TRANSITION_EXP,
   divertStickyAdTransition,
-} from '../../../src/experiments/sticky-ad-transition-exp';
+} from '../../../ads/google/a4a/sticky-ad-transition-exp';
 import {Services} from '../../../src/services';
 import {SignatureVerifier, VerificationStatus} from './signature-verifier';
 import {
@@ -1768,6 +1768,7 @@ export class AmpA4A extends AMP.BaseElement {
       height,
       width
     );
+    this.applyFillContent(this.iframe);
 
     let body = '';
     const transferComplete = new Deferred();

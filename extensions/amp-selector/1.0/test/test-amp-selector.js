@@ -51,7 +51,7 @@ describes.realWin(
         </amp-selector>
       `;
       win.document.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
     });
 
     it('should render with options', () => {
@@ -126,6 +126,22 @@ describes.realWin(
       expect(options[0]).to.not.have.attribute('selected');
       expect(options[1]).to.not.have.attribute('selected');
       expect(options[2]).to.not.have.attribute('selected');
+    });
+
+    it('should fire DOM event on select', async () => {
+      const options = element.querySelectorAll('[option]');
+      const eventSpy = env.sandbox.spy();
+      element.addEventListener('select', eventSpy);
+
+      options[0].click();
+
+      expect(eventSpy).to.be.calledOnce;
+      expect(eventSpy.firstCall).calledWithMatch({
+        'data': {
+          'targetOption': '1',
+          'selectedOptions': ['2', '1'],
+        },
+      });
     });
 
     describe('imperative api', () => {
@@ -336,7 +352,7 @@ describes.realWin(
             </amp-selector>
           `;
           win.document.body.appendChild(element);
-          await element.build();
+          await element.buildInternal();
 
           const options = element.querySelectorAll('[option]');
 
