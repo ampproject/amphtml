@@ -34,14 +34,15 @@ describes.realWin(
       doc = win.document;
     });
 
-    function fakePostMessage(delightElement, info) {
-      delightElement.implementation_.handleDelightMessage_({
+    async function fakePostMessage(delightElement, info) {
+      const impl = await delightElement.getImpl(false);
+      impl.handleDelightMessage_({
         source: delightElement.querySelector('iframe').contentWindow,
         data: {source: 'DelightPlayer', ...info},
       });
     }
 
-    function getDelightPlayer(attributes) {
+    async function getDelightPlayer(attributes) {
       const delight = doc.createElement('amp-delight-player');
       for (const key in attributes) {
         delight.setAttribute(key, attributes[key]);
@@ -50,12 +51,13 @@ describes.realWin(
       delight.setAttribute('height', '360');
       delight.setAttribute('layout', 'responsive');
       doc.body.appendChild(delight);
-      delight.implementation_.baseURL_ =
+      const impl = await delight.getImpl(false);
+      impl.baseURL_ =
         // Serve a blank page, since these tests don't require an actual page.
         // hash # at the end so path is not affected by param concat
         `http://localhost:${location.port}/test/fixtures/served/blank.html#`;
       return delight
-        .build()
+        .buildInternal()
         .then(() => delight.layoutCallback())
         .then(() => delight);
     }
@@ -63,12 +65,13 @@ describes.realWin(
     it('renders', () => {
       return getDelightPlayer({
         'data-content-id': '-LLoCCZqWi18O73b6M0w',
-      }).then((delight) => {
+      }).then(async (delight) => {
+        const impl = await delight.getImpl(false);
         const iframe = delight.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.tagName).to.equal('IFRAME');
         expect(iframe.src).to.equal(
-          `${delight.implementation_.baseURL_}/player/-LLoCCZqWi18O73b6M0w?amp=1`
+          `${impl.baseURL_}/player/-LLoCCZqWi18O73b6M0w?amp=1`
         );
         expect(iframe.allow).to.equal('vr');
         expect(iframe.className).to.match(/i-amphtml-fill-content/);
@@ -90,65 +93,65 @@ describes.realWin(
         'data-content-id': '-LLoCCZqWi18O73b6M0w',
       }).then((delight) => {
         return Promise.resolve()
-          .then(() => {
+          .then(async () => {
             const p = listenOncePromise(delight, VideoEvents.LOAD);
-            fakePostMessage(delight, {
+            await fakePostMessage(delight, {
               type: 'x-dl8-to-parent-ready',
               payload: {},
             });
             return p;
           })
-          .then(() => {
+          .then(async () => {
             const p = listenOncePromise(delight, VideoEvents.PLAYING);
-            fakePostMessage(delight, {
+            await fakePostMessage(delight, {
               type: 'x-dl8-to-parent-playing',
               payload: {},
             });
             return p;
           })
-          .then(() => {
+          .then(async () => {
             const p = listenOncePromise(delight, VideoEvents.PAUSE);
-            fakePostMessage(delight, {
+            await fakePostMessage(delight, {
               type: 'x-dl8-to-parent-paused',
               payload: {},
             });
             return p;
           })
-          .then(() => {
+          .then(async () => {
             const p = listenOncePromise(delight, VideoEvents.MUTED);
-            fakePostMessage(delight, {
+            await fakePostMessage(delight, {
               type: 'x-dl8-to-parent-muted',
               payload: {},
             });
             return p;
           })
-          .then(() => {
+          .then(async () => {
             const p = listenOncePromise(delight, VideoEvents.UNMUTED);
-            fakePostMessage(delight, {
+            await fakePostMessage(delight, {
               type: 'x-dl8-to-parent-unmuted',
               payload: {},
             });
             return p;
           })
-          .then(() => {
+          .then(async () => {
             const p = listenOncePromise(delight, VideoEvents.ENDED);
-            fakePostMessage(delight, {
+            await fakePostMessage(delight, {
               type: 'x-dl8-to-parent-ended',
               payload: {},
             });
             return p;
           })
-          .then(() => {
+          .then(async () => {
             const p = listenOncePromise(delight, VideoEvents.AD_START);
-            fakePostMessage(delight, {
+            await fakePostMessage(delight, {
               type: 'x-dl8-to-parent-amp-ad-start',
               payload: {},
             });
             return p;
           })
-          .then(() => {
+          .then(async () => {
             const p = listenOncePromise(delight, VideoEvents.AD_END);
-            fakePostMessage(delight, {
+            await fakePostMessage(delight, {
               type: 'x-dl8-to-parent-amp-ad-end',
               payload: {},
             });
@@ -156,7 +159,7 @@ describes.realWin(
           })
           .then(async () => {
             const p = listenOncePromise(delight, VideoEvents.CUSTOM_TICK);
-            fakePostMessage(delight, {
+            await fakePostMessage(delight, {
               type: 'x-dl8-to-parent-amp-custom-tick',
               payload: {
                 type: 'delight-test-event',

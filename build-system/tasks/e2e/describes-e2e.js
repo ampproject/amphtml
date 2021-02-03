@@ -230,9 +230,8 @@ function getFirefoxArgs(config) {
  * @typedef {{
  *  browsers: (!Array<string>|undefined),
  *  environments: (!Array<!AmpdocEnvironment>|undefined),
- *  testUrl: string,
+ *  testUrl: string|undefined,
  *  fixture: string,
- *  manualFixture: string,
  *  initialRect: ({{width: number, height:number}}|undefined),
  *  deviceName: string|undefined,
  *  version: string|undefined,
@@ -244,9 +243,8 @@ let TestSpec;
  * @typedef {{
  *  browsers: (!Array<string>|undefined),
  *  environments: (!Array<!AmpdocEnvironment>|undefined),
- *  testUrl: string,
+ *  testUrl: string|undefined,
  *  fixture: string,
- *  manualFixture: string,
  *  initialRect: ({{width: number, height:number}}|undefined),
  *  deviceName: string|undefined,
  *  versions: {{[version: string]: TestSpec}}
@@ -531,7 +529,12 @@ function describeEnv(factory) {
     if (!versions) {
       // If a version is provided, add a prefix to the test suite name.
       const {version} = spec;
-      templateFunc(version ? `[v{version} ${name}` : name, spec, fn, describe);
+      templateFunc(
+        version ? `[v${version}] ${name}` : name,
+        spec,
+        fn,
+        describe
+      );
     } else {
       // A root `describes.endtoend` spec may contain a `versions` object, where
       // the key represents the version number and the value is an object with
@@ -587,6 +590,7 @@ class EndToEndFixture {
     const ampDriver = new AmpDriver(controller);
     env.controller = controller;
     env.ampDriver = ampDriver;
+    env.version = this.spec.version;
 
     installBrowserAssertions(controller.networkLogger);
 
@@ -621,26 +625,18 @@ class EndToEndFixture {
    * @return {!TestSpec}
    */
   setTestUrl(spec) {
-    // TODO(rcebulko): See if it's possible to condense/reorg some test fixtures
-    // and have all e2e fixtures in one folder. Allowing this split for now so
-    // that, if fixtures under `manual` are moved, tests using normal e2e fixture
-    // directory don't need to be updated. Support for `testUrl` should
-    // eventually be removed entirely.
-    let {testUrl} = spec;
-    const {fixture, manualFixture} = spec;
-    if (!!testUrl + !!fixture + !!manualFixture > 1) {
+    const {testUrl, fixture} = spec;
+
+    if (testUrl) {
       throw new Error(
-        'Only one of [testUrl, fixture, manualFixture] may be specified'
+        'Setting `testUrl` directly is no longer permitted in e2e tests; please use `fixture` instead'
       );
     }
 
-    if (fixture) {
-      testUrl = `http://localhost:8000/test/fixtures/e2e/${fixture}`;
-    } else if (manualFixture) {
-      testUrl = `http://localhost:8000/test/manual/${manualFixture}`;
-    }
-
-    return {...spec, testUrl};
+    return {
+      ...spec,
+      testUrl: `http://localhost:8000/test/fixtures/e2e/${fixture}`,
+    };
   }
 }
 

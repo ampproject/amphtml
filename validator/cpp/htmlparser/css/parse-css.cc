@@ -68,7 +68,6 @@ void AppendValue(htmlparser::json::JsonDict* dict, const std::string& key,
 //
 // Token implementations.
 //
-// TODO: Use either StringValue or ToString, not both.
 const std::string& Token::StringValue() const {
   static const std::string* empty = new std::string;
   return *empty;
@@ -1060,8 +1059,11 @@ class Canonicalizer {
 
     while (true) {
       s->Consume();
-      if (s->Current().Type() == TokenType::SEMICOLON ||
-          s->Current().Type() == TokenType::EOF_TOKEN) {
+      if (s->Current().Type() == TokenType::SEMICOLON) {
+        rule->mutable_prelude()->emplace_back(CreateEOFTokenAt(s->Current()));
+        return rule;
+      }
+      if (s->Current().Type() == TokenType::EOF_TOKEN) {
         rule->mutable_prelude()->emplace_back(s->ReleaseCurrentOrCreateEof());
         return rule;
       }
@@ -2236,7 +2238,7 @@ ErrorTokenOr<AttrSelector> ParseAnAttrSelector(TokenStream* token_stream) {
   start.CopyStartPositionTo(selector.get());
   selector->set_value_start_pos(value_start_pos);
   selector->set_value_end_pos(value_end_pos);
-  return std::move(selector);
+  return selector;
 }
 
 //
@@ -2292,13 +2294,13 @@ ErrorTokenOr<PseudoSelector> ParseAPseudoSelector(TokenStream* token_stream) {
         ValidationError::CSS_SYNTAX_ERROR_IN_PSEUDO_SELECTOR,
         vector<std::string>{"style"});
     first_colon.CopyStartPositionTo(error.get());
-    return std::move(error);
+    return error;
   }
   htmlparser::json::JsonArray func_json;
   for (const unique_ptr<Token>& t : func) func_json.Append(t->ToJson());
   auto selector = make_unique<PseudoSelector>(is_class, name, func_json);
   first_colon.CopyStartPositionTo(selector.get());
-  return std::move(selector);
+  return selector;
 }
 
 //
@@ -2403,7 +2405,7 @@ ErrorTokenOr<SimpleSelectorSequence> ParseASimpleSelectorSequence(
               ValidationError::CSS_SYNTAX_MISSING_SELECTOR,
               vector<std::string>{"style"});
           start.CopyStartPositionTo(error.get());
-          return std::move(error);
+          return error;
         }
         // If no type selector is given then the universal selector is implied.
         type_selector = make_unique<TypeSelector>(
@@ -2416,7 +2418,7 @@ ErrorTokenOr<SimpleSelectorSequence> ParseASimpleSelectorSequence(
       auto sequence = make_unique<SimpleSelectorSequence>(
           std::move(type_selector), std::move(other_selectors));
       start.CopyStartPositionTo(sequence.get());
-      return std::move(sequence);
+      return sequence;
     }
   }
 }
@@ -2493,7 +2495,7 @@ ErrorTokenOr<Selector> ParseASelector(TokenStream* token_stream) {
         ValidationError::CSS_SYNTAX_NOT_A_SELECTOR_START,
         vector<std::string>{"style"});
     token_stream->Current().CopyStartPositionTo(error.get());
-    return std::move(error);
+    return error;
   }
   ErrorTokenOr<SimpleSelectorSequence> parsed =
       ParseASimpleSelectorSequence(token_stream);
@@ -2563,7 +2565,7 @@ ErrorTokenOr<Selector> ParseASelectorsGroup(TokenStream* token_stream) {
         ValidationError::CSS_SYNTAX_NOT_A_SELECTOR_START,
         vector<std::string>{"style"});
     token_stream->Current().CopyStartPositionTo(error.get());
-    return std::move(error);
+    return error;
   }
   const Token& start = token_stream->Current();
   ErrorTokenOr<Selector> maybe_selector = ParseASelector(token_stream);
@@ -2593,7 +2595,7 @@ ErrorTokenOr<Selector> ParseASelectorsGroup(TokenStream* token_stream) {
           ValidationError::CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR,
           vector<std::string>{"style"});
       token_stream->Current().CopyStartPositionTo(error.get());
-      return std::move(error);
+      return error;
     }
     if (elements.size() == 1) return std::move(elements.back());
     auto group = make_unique<SelectorsGroup>(std::move(elements));

@@ -1,3 +1,8 @@
+/** @enum {string}*/
+var _classes = {
+  floatLeft: "float-left-07984bd"
+};
+
 /**
  * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
@@ -13,26 +18,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+export const useStyles = () => _classes; // These next lines should be unaffected by jss transform.
 
-export const LINE_HEIGHT_EM_ = 1.15;
-
-export const fitTextContentWrapper = {
-  'display': 'flex',
-  'flexDirection': 'column',
-  'flexWrap': 'nowrap',
-  'justifyContent': 'center',
-};
-
-/* Legacy comment: We have to use the old-style flex box with line clamping. It will only
-    work in WebKit, but unfortunately there's no alternative. */
-export const fitTextContent = {
-  lineHeight: `${LINE_HEIGHT_EM_}em`,
-  'display': '-webkit-box',
-  '-webkit-box-orient': 'vertical',
-  'overflow': 'hidden',
-  'textOverflow': 'ellipsis',
-};
-
-export const minContentHeight = {
-  'height': 'min-content',
-};
+export const CSS = ".float-left-07984bd{float:left}\n";
+export const unrelated = 5;
+unrelated + unrelated == unrelated * 2;
