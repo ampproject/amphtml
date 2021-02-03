@@ -1,7 +1,7 @@
 /**
  * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
- * Licensed under the  Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -32,6 +32,7 @@ const DARK_THEME_CLASS = 'i-amphtml-story-draggable-drawer-theme-dark';
  * @enum {string}
  */
 const AttachmentTheme = {
+  // TODO(raxsha): modify this for the new CTA UI dark/light theme specifications.
   LIGHT: 'light', // default
   DARK: 'dark',
 };
