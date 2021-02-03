@@ -106,8 +106,6 @@ class JsonObject;
 
 class JsonDict {
  public:
-  // TODO: Add support for vararg:
-  // my_dict.Insert({"foo", "bar"}, {"hello", 1}, {"bar": false});
   template <typename V>
   void Insert(std::string key, V value) {
     values_.emplace_back(std::pair<std::string, V>{key, value});
@@ -120,7 +118,7 @@ class JsonDict {
   std::string ToString(int indent_columns = 0) const;
   void ToString(std::stringbuf*, int indent_columns = 0) const;
 
-  template<typename T>
+  template <typename T>
   T* Get(const std::string& key);
 
   // Facilitates range based iterator directly on JsonDict object.
@@ -181,21 +179,16 @@ class NullValue {
   std::string ToString(int indent_columns = 0) const;
 };
 
-template<typename JsonType>
+template <typename JsonType>
 class Any {
  public:
-  template<typename T>  // Erased by Wrapper.
-  Any(const T* object,
-      std::function<JsonType(const T& object)> apply) :
-    wrapper_(new Wrapper<T>(object, apply)) {}
+  template <typename T>  // Erased by Wrapper.
+  Any(const T* object, std::function<JsonType(const T& object)> apply)
+      : wrapper_(new Wrapper<T>(object, apply)) {}
 
-  Any(const Any& from) {
-    wrapper_ = from.wrapper_->Clone();
-  }
+  Any(const Any& from) { wrapper_ = from.wrapper_->Clone(); }
 
-  Any(Any&& from) {
-    wrapper_ = std::move(from.wrapper_);
-  }
+  Any(Any&& from) { wrapper_ = std::move(from.wrapper_); }
 
   Any& operator=(const Any& from) {
     wrapper_ = from.wrapper_->Clone();
@@ -218,16 +211,13 @@ class Any {
     virtual ~WrapperBase() {}
   };
 
-  template<typename O>
+  template <typename O>
   class Wrapper : public WrapperBase {
    public:
-    Wrapper(const O* obj,
-            std::function<JsonType(const O& obj)> apply) :
-      obj_(obj), apply_(apply) {}
+    Wrapper(const O* obj, std::function<JsonType(const O& obj)> apply)
+        : obj_(obj), apply_(apply) {}
 
-    virtual JsonType ToJson() {
-      return apply_(*obj_);
-    }
+    virtual JsonType ToJson() { return apply_(*obj_); }
 
     virtual std::unique_ptr<WrapperBase> Clone() {
       return std::make_unique<Wrapper>(obj_, apply_);
@@ -247,9 +237,7 @@ class JsonObject {
   explicit JsonObject(int64_t i) : v_(i) {}
   explicit JsonObject(double d) : v_(d) {}
   explicit JsonObject(float f) : v_(f) {}
-  explicit JsonObject(const char* s) {
-    v_.emplace<std::string>(s);
-  }
+  explicit JsonObject(const char* s) { v_.emplace<std::string>(s); }
   explicit JsonObject(const std::string& s) : v_(s) {}
   explicit JsonObject(bool b) : v_(b) {}
   explicit JsonObject(std::nullptr_t n) : v_(NullValue()) {}
@@ -264,13 +252,9 @@ class JsonObject {
   explicit JsonObject(Any<JsonDict>&& a) : v_(std::move(a)) {}
   explicit JsonObject(Any<JsonObject>&& j) : v_(std::move(j)) {}
 
-  JsonObject(JsonObject&& from) {
-    v_ = std::move(from.v_);
-  }
+  JsonObject(JsonObject&& from) { v_ = std::move(from.v_); }
 
-  JsonObject(const JsonObject& from) {
-    v_ = from.v_;
-  }
+  JsonObject(const JsonObject& from) { v_ = from.v_; }
 
   JsonObject& operator=(const JsonObject& from) {
     v_ = from.v_;
@@ -285,7 +269,7 @@ class JsonObject {
 
   // Gets the underlying value inside this JsonObject.
   // Returns nullopt if JsonObject doesn't hold this type.
-  template<typename T>
+  template <typename T>
   T* Get() {
     if (!std::holds_alternative<T>(v_)) {
       return nullptr;
@@ -293,7 +277,7 @@ class JsonObject {
     return &std::get<T>(v_);
   }
 
-  template<typename... Types>
+  template <typename... Types>
   constexpr bool Has() const {
     return (std::holds_alternative<Types>(v_) || ...);
   }
@@ -302,12 +286,13 @@ class JsonObject {
   void ToString(std::stringbuf* buf, int indent_columns = 0) const;
 
  private:
-  std::variant<bool, int32_t, int64_t, double, float, std::string,
-               NullValue, JsonArray, JsonDict,
-               Any<JsonArray>, Any<JsonDict>, Any<JsonObject>> v_;
+  std::variant<bool, int32_t, int64_t, double, float, std::string, NullValue,
+               JsonArray, JsonDict, Any<JsonArray>, Any<JsonDict>,
+               Any<JsonObject>>
+      v_;
 };
 
-template<typename T>
+template <typename T>
 T* JsonDict::Get(const std::string& key) {
   for (auto& [k, v] : values_) {
     if (k == key) {
