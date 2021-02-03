@@ -237,12 +237,12 @@ Example:
 
 ### preset [optional]
 
-Specifies a responsiveness preset that configures the layer with an aspect-ratio and scaling-factor. The presets reflect optimal values for grid-layers to behave responsively across devices, keeping a background layer that will cover all modern phone sizes and a foreground layer that will keep the content uncropped.
+Specifies a responsiveness preset that configures the layer with an aspect-ratio and scaling-factor.
 
 The presets are:
 
--   **2021-background**: this layer should contain only the background asset (image or video), which is similar to an aspect-ratio layer but is scaled up to cover letterboxed margins.
--   **2021-foreground**: this layer should contain all the foreground assets, which is an aspect-ratio layer.
+-   **2021-background**: An aspect-ratio layer scaled up to cover letterboxed margins. May only contain the background asset (image or video).
+-   **2021-foreground**: An aspect-ratio layer containing all the foreground assets.
 
 Values are:
 
@@ -264,23 +264,14 @@ Values are:
   </tr>
 </table>
 
-Example:
-
-```html
-<amp-story-grid-layer preset="2021-background" template="fill">
-    <amp-img src="cat.jpg">
-</amp-story-grid-layer>
-<amp-story-grid-layer preset="2021-foreground">
-    <h1>This will stay consistent with the bg</h1>
-</amp-story-grid-layer>
-```
+{% call callout('Tip', type='success') %}
+These presets are optimized for mobile screens in 2021. Keep an eye out for new presets as technology evolves and follow the [Web Stories roadmap](https://amp.dev/community/roadmap/?category=stories#status-updates).
+{% endcall %}
 
 ### anchor [optional]
 
-On grid-layers that contain the attribute `aspect-ratio` or `preset`, it aligns the layer with the border or corner specified.
-Values are: `top`, `left`, `bottom`, `right` or any valid combination of them (`top-left`, `right-bottom`, etc).
-
-This can be used in order to position elements relative to borders or corners while maintaining the scaling consistency between layers.
+Aligns aspect-ratio layers (including presets) to the border or corner specified. Use this attribute to maintain scaling across layers when position elements relative to borders or corners.
+Options: `top`, `left`, `bottom`, `right`, `top-left`, `top-right`, `bottom-left`, `bottom-right`.
 
 ## Styling
 
@@ -406,15 +397,9 @@ Example:
 </amp-story-page>
 ```
 
-#### Aspect ratio presets
+#### Modern aspect-ratio
 
-Aspect ratio layers rarely cover the whole page, and background layers that are fullpage do not behave consistently with the foreground elements.
-
-To mitigate both issues, stories can configure grid-layers with responsiveness presets, that configure a scaling factor for the background layer allowing background assets to cover the screen on all mobile devices while staying consistent with regular aspect-ratio grid-layers.
-
-Anchoring allows layers to position on a corner or border so items in these layers can be placed relative to these.
-
-Example:
+Responsive presets on grid-layers maximize usable screen space and scale assets consistently.
 
 ```html
 <amp-story-grid-layer preset="2021-background" template="fill">
@@ -428,3 +413,21 @@ Example:
     <amp-img src="icon.jpg" style="bottom: 1em; left: 1em">
 </amp-story-grid-layer>
 ```
+
+{% call callout('Tip', type='success') %}
+The background preset is mostly useful for designing layouts with both background and foreground elements. If a page only contains an image or video in the background, consider using regular grid-layers for that scenario.
+{% endcall %}
+
+##### Foreground
+
+Use the `2021-foreground` preset for foreground elements. This anchors foreground layers to pin items, such as logos or footnotes, to the page corners or borders.
+
+##### Background
+
+Use the `2021-background` preset for the background layer. This preset covers the entire screen on all mobile devices with the background asset. It does so without letterboxing and keeps scaling consistent with the foreground elements.
+While this technique provides the most consistent user experience, it may crop up to 7% of one or all borders of your background. Keep this in mind when designing and picking your assets.
+
+<div layout="container" width="2" height="1">
+<div style="width:50%;display:inline-block"><amp-img src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/quiz-art.png" layout="responsive" width="200" height="350"/></div>
+<div style="width:50%;display:inline-block"><amp-img src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/animal-poll.png" layout="responsive" width="200" height="350"/></div>
+</div>
