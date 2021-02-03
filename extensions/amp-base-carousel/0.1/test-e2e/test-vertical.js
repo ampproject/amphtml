@@ -22,7 +22,7 @@ const pageHeight = 600;
 describes.endtoend(
   'amp-base-carousel:0.1 - vertical orientation',
   {
-    manualFixture: 'amp-base-carousel/vertical.amp.html',
+    fixture: 'amp-base-carousel/vertical.amp.html',
     experiments: ['amp-base-carousel', 'layers'],
     initialRect: {width: pageWidth, height: pageHeight},
   },
