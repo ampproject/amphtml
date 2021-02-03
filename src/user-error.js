@@ -36,7 +36,7 @@ const USER_ERROR_SENTINEL = '\u200B\u200B\u200B';
 export class UserError extends Error {
   /**
    * Builds the error, adding the user sentinel if not present.
-   * @param message
+   * @param {string} message
    */
   constructor(message) {
     if (!message) {
