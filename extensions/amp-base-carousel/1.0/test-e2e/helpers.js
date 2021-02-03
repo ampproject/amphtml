@@ -21,24 +21,15 @@ const bentoHelper = (controller) => ctrlHelpers({controller, version: '1.0'});
 const TAG_NAME = 'amp-base-carousel';
 
 // This is only used for switching to the shadow root
-const getCarousel = (controller) => controller.findElement(TAG_NAME);
-
-const getSlides = (styles, controller) => bentoHelper(controller).getSlides();
-const getSlide = async (styles, controller, n) =>
-  bentoHelper(controller).getSlide(n);
-
-const getScrollingElement = async (styles, controller) =>
-  bentoHelper(controller).getScrollingElement();
-
-const getPrevArrowSlot = async (controller) =>
-  bentoHelper(controller).getPrevArrowSlot();
-const getNextArrowSlot = async (controller) =>
-  bentoHelper(controller).getNextArrowSlot();
-const getPrevArrow = async (styles, controller) =>
-  bentoHelper(controller).getPrevArrow();
-const getNextArrow = async (styles, controller) =>
-  bentoHelper(controller).getNextArrow();
-
+const getCarousel = (ctrl) => ctrl.findElement(TAG_NAME);
+const getSlides = (_, ctrl) => bentoHelper(ctrl).getSlides();
+const getSlide = async (_, ctrl, n) => bentoHelper(ctrl).getSlide(n);
+const getScrollingElement = async (_, ctrl) =>
+  bentoHelper(ctrl).getScrollingElement();
+const getPrevArrowSlot = async (ctrl) => bentoHelper(ctrl).getPrevArrowSlot();
+const getNextArrowSlot = async (ctrl) => bentoHelper(ctrl).getNextArrowSlot();
+const getPrevArrow = async (_, ctrl) => bentoHelper(ctrl).getPrevArrow();
+const getNextArrow = async (_, ctrl) => bentoHelper(ctrl).getNextArrow();
 const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
 
 export {
