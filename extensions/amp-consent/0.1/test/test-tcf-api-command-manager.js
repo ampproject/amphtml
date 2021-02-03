@@ -55,7 +55,6 @@ describes.realWin(
           getMergedSharedData: (opt_policy) => {
             return Promise.resolve(mockSharedData);
           },
-          setOnPolicyChange: window.sandbox.spy(),
         };
       });
 

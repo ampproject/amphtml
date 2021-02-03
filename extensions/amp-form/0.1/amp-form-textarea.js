@@ -295,7 +295,15 @@ export function maybeResizeTextarea(element) {
         // Prevent the textarea from shrinking if it has not yet expanded.
         const hasExpanded =
           AMP_FORM_TEXTAREA_HAS_EXPANDED_DATA in element.dataset;
-        const shouldResize = hasExpanded || scrollHeight <= minScrollHeight;
+
+        // There is super specific a bug in Chrome affecting scrollHeight calculation
+        // for textareas with padding when the document is zoomed in.
+        // It makes the scrollHeight calculation off by ~1px.
+        // This is why we have a small error margin.
+        // TODO: Remove error margin when chrome bug is resolved (https://bugs.chromium.org/p/chromium/issues/detail?id=1171989).
+        const errorMargin = /google/i.test(win.navigator.vendor) ? 3 : 0;
+        const shouldResize =
+          hasExpanded || scrollHeight <= minScrollHeight + errorMargin;
 
         if (shouldResize) {
           element.dataset[AMP_FORM_TEXTAREA_HAS_EXPANDED_DATA] = '';

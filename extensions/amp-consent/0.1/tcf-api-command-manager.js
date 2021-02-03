@@ -56,7 +56,7 @@ export class TcfApiCommandManager {
    * @param {!./consent-policy-manager.ConsentPolicyManager} policyManager
    */
   constructor(policyManager) {
-    /** @param {!./consent-policy-manager.ConsentPolicyManager} */
+    /** @private {!./consent-policy-manager.ConsentPolicyManager} */
     this.policyManager_ = policyManager;
   }
 

@@ -28,14 +28,14 @@ const jobName = 'checks.js';
 
 function pushBuildWorkflow() {
   timedExecOrDie('gulp update-packages');
-  timedExecOrDie('gulp check-exact-versions');
+  timedExecOrDie('gulp presubmit');
   timedExecOrDie('gulp lint');
   timedExecOrDie('gulp prettify');
-  timedExecOrDie('gulp presubmit');
   timedExecOrDie('gulp ava');
   timedExecOrDie('gulp babel-plugin-tests');
   timedExecOrDie('gulp caches-json');
   timedExecOrDie('gulp dev-dashboard-tests');
+  timedExecOrDie('gulp check-exact-versions');
   timedExecOrDie('gulp check-renovate-config');
   timedExecOrDie('gulp server-tests');
   timedExecOrDie('gulp dep-check');
@@ -48,11 +48,17 @@ async function prBuildWorkflow() {
   await reportAllExpectedTests();
   timedExecOrDie('gulp update-packages');
 
-  timedExecOrDie('gulp check-exact-versions');
-  timedExecOrDie('gulp lint');
-  timedExecOrDie('gulp prettify');
-  timedExecOrDie('gulp presubmit');
-  timedExecOrDie('gulp performance-urls');
+  if (buildTargetsInclude(Targets.PRESUBMIT)) {
+    timedExecOrDie('gulp presubmit');
+  }
+
+  if (buildTargetsInclude(Targets.LINT)) {
+    timedExecOrDie('gulp lint');
+  }
+
+  if (buildTargetsInclude(Targets.PRETTIFY)) {
+    timedExecOrDie('gulp prettify');
+  }
 
   if (buildTargetsInclude(Targets.AVA)) {
     timedExecOrDie('gulp ava');
@@ -80,6 +86,10 @@ async function prBuildWorkflow() {
     timedExecOrDie('gulp check-owners --local_changes');
   }
 
+  if (buildTargetsInclude(Targets.PACKAGE_UPGRADE)) {
+    timedExecOrDie('gulp check-exact-versions');
+  }
+
   if (buildTargetsInclude(Targets.RENOVATE_CONFIG)) {
     timedExecOrDie('gulp check-renovate-config');
   }
@@ -92,6 +102,7 @@ async function prBuildWorkflow() {
     timedExecOrDie('gulp dep-check');
     timedExecOrDie('gulp check-types');
     timedExecOrDie('gulp check-sourcemaps');
+    timedExecOrDie('gulp performance-urls');
   }
 }
 
