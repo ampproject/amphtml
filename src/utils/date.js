@@ -88,7 +88,7 @@ export function parseDateAttrs(element, dateAttrs) {
  * @param {!Array<string>} dateAttrs list of attribute names
  * @return {?number}
  */
-export function parseEpoch(element, dateAttrs) {
+function parseEpoch(element, dateAttrs) {
   for (let i = 0; i < dateAttrs.length; ++i) {
     const attrName = dateAttrs[i];
     const attrVal = element.getAttribute(attrName);
