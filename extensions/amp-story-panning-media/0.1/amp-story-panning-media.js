@@ -158,10 +158,17 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
    * @private
    */
   animate_() {
-    const startPos =
-      this.storeService_.get(StateProperty.PANNING_MEDIA_STATE)[
-        this.groupId_
-      ] || this.animateTo_;
+    const startPos = this.storeService_.get(StateProperty.PANNING_MEDIA_STATE)[
+      this.groupId_
+    ];
+
+    // Don't animate if first instance of group or prefers-reduced-motion.
+    if (!startPos || this.prefersReducedMotion_()) {
+      this.storeService_.dispatch(Action.ADD_PANNING_MEDIA_STATE, {
+        [this.groupId_]: this.animateTo_,
+      });
+      return;
+    }
 
     const easeInOutQuad = (val) =>
       val < 0.5 ? 2 * val * val : 1 - Math.pow(-2 * val + 2, 2) / 2;
@@ -245,6 +252,15 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       dev().assertElement(this.element),
       (el) => el.tagName.toLowerCase() === 'amp-story-page'
     );
+  }
+
+  /**
+   * Whether the device opted in prefers-reduced-motion.
+   * @return {boolean}
+   * @private
+   */
+  prefersReducedMotion_() {
+    return this.win.matchMedia('(prefers-reduced-motion: reduce)').matches;
   }
 
   /** @override */
