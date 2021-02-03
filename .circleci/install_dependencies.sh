@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the license.
 #
-# Script used by AMP's CI builds to install project dependencies.
+# Script used by AMP's CI builds to install project dependencies on CircleCI.
 
 set -e
 
@@ -38,7 +38,7 @@ echo $(GREEN "Installing dependencies...")
 npm ci
 
 echo $(GREEN "Setting up environment...")
-NODE_BIN=`which node`
-(set -x && echo "export PATH=`dirname $NODE_BIN`:$PATH" >> $BASH_ENV)
+NPM_BIN_DIR="`npm config get prefix`/bin"
+(set -x && echo "export PATH=$NPM_BIN_DIR:$PATH" >> $BASH_ENV)
 
 echo $(GREEN "Successfully installed all project dependencies.")

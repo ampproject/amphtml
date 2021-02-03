@@ -29,7 +29,7 @@ const ROOT_DIR = path.resolve(__dirname, '../../');
 async function clean() {
   const pathsToDelete = [
     '.amp-build',
-    '.karma-cache',
+    '.karma-cache*',
     'build',
     'build-system/server/new-server/transforms/dist',
     'deps.txt',
