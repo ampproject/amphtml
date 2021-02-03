@@ -48,3 +48,18 @@ export class UserError extends Error {
     super(message);
   }
 }
+
+/**
+ * Throws a user error if the first argument isn't trueish. Mirrors userAssert
+ * in src/log.js.
+ * @param {T} shouldBeTruthy
+ * @return {T}
+ * @throws {UserError} when attribute values are missing or invalid.
+ * @template {T}
+ */
+export function userAssert(shouldBeTruthy) {
+  if (!shouldBeTruthy) {
+    throw new UserError(Array.prototype.slice.call(arguments, 1));
+  }
+  return shouldBeTruthy;
+}
