@@ -631,11 +631,7 @@ export class ResourcesImpl {
     }
 
     if (resource.getState() === ResourceState.LAYOUT_SCHEDULED) {
-      // TODO: should we call resource.unload() instead?
-      // Has the same effect but much stranger codepath.
-      resource.state_ = this.intersectionObserver_
-        ? ResourceState.READY_FOR_LAYOUT
-        : ResourceState.NOT_LAID_OUT;
+      resource.layoutCanceled();
     }
     this.cleanupTasks_(resource, /* opt_removePending */ true);
     dev().fine(TAG_, 'resource removed:', resource.debugid);
