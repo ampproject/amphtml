@@ -82,7 +82,7 @@ function isPullRequestBuild() {
     : isGithubActions
     ? env('GITHUB_EVENT_NAME') === 'pull_request'
     : isCircleci
-    ? !!env('CIRCLE_PULL_REQUEST')
+    ? !!env('CIRCLE_PR_NUMBER')
     : false;
 }
 
@@ -96,7 +96,7 @@ function isPushBuild() {
     : isGithubActions
     ? env('GITHUB_EVENT_NAME') === 'push'
     : isCircleci
-    ? !env('CIRCLE_PULL_REQUEST')
+    ? !env('CIRCLE_PR_NUMBER')
     : false;
 }
 
