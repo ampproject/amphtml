@@ -25,6 +25,7 @@ import {Dialog} from './dialog';
 import {DocImpl} from './doc-impl';
 import {ENTITLEMENTS_REQUEST_TIMEOUT} from './constants';
 import {Entitlement, GrantReason} from './entitlement';
+import {MeteringStore} from './metering-store';
 import {
   PageConfig as PageConfigInterface,
   PageConfigResolver,
@@ -57,6 +58,9 @@ export class SubscriptionService {
    */
   constructor(ampdoc) {
     const configElement = ampdoc.getElementById(TAG);
+
+    /** @type {!MeteringStore} */
+    this.meteringStore_ = new MeteringStore(ampdoc);
 
     /** @type {?PlatformStore} */
     this.platformStore = null;
@@ -137,6 +141,15 @@ export class SubscriptionService {
    * @return {SubscriptionService}
    */
   start() {
+    // Testing metering state store...
+    this.meteringStore_.loadMeteringState().then((res) => {
+      console.log(res);
+      res.counter = res.counter + 1 || 1;
+      this.meteringStore_.saveMeteringState(res).then(() => {
+        console.log('Big saves all around yall');
+      });
+    });
+
     this.initialize_().then(() => {
       this.subscriptionAnalytics_.event(SubscriptionAnalyticsEvents.STARTED);
       this.renderer_.toggleLoading(true);
