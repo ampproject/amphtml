@@ -56,6 +56,8 @@ const UpgradeState = {
   UPGRADE_IN_PROGRESS: 4,
 };
 
+const EMPTY_FUNC = () => {};
+
 /**
  * Caches whether the template tag is supported to avoid memory allocations.
  * @type {boolean|undefined}
@@ -508,6 +510,46 @@ function createBaseCustomElementClass(win) {
           throw reason;
         }
       ));
+    }
+
+    /**
+     * @return {!Promise}
+     * @final
+     */
+    whenLoaded() {
+      return this.signals_.whenSignal(CommonSignals.LOAD_END).then(EMPTY_FUNC);
+    }
+
+    /**
+     * Ensure that element is eagerly loaded.
+     *
+     * @param {number=} opt_parentPriority
+     * @return {!Promise}
+     * @final
+     */
+    ensureLoaded(opt_parentPriority) {
+      return this.whenBuilt().then(() => {
+        const resource = this.getResource_();
+        if (this.signals_.get(CommonSignals.LOAD_END)) {
+          return this.whenLoaded();
+        }
+        if (
+          resource.getState() != ResourceState.LAYOUT_SCHEDULED ||
+          resource.isMeasureRequested()
+        ) {
+          resource.measure();
+        }
+        if (!resource.isDisplayed()) {
+          return;
+        }
+        this.getResources().scheduleLayoutOrPreload(
+          resource,
+          /* layout */ true,
+          opt_parentPriority,
+          /* forceOutsideViewport */ true
+        );
+        return this.whenLoaded();
+      });
     }
 
     /**
