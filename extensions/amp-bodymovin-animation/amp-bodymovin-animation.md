@@ -61,9 +61,12 @@ for an action to start playing.
 
 ### `renderer` (optional)
 
-Bodymovin animation player supports multiple renderers. By default, the SVG
-renderer is used. Renderer can be changed to HTML or Canvas by setting this
-property to `html` and `canvas` respectively.
+Multiple [renderers](https://airbnb.io/lottie/#/web?id=usage) are supported and
+can be specified:
+
+-   `canvas`
+-   `html`
+-   `svg` (default)
 
 ### `title` (optional)
 
