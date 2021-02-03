@@ -59,6 +59,9 @@ commands:
           name: 'Fetch Merge Commit'
           command: ./.circleci/fetch_merge_commit.sh
       - run:
+          name: 'Check Config'
+          command: ./.circleci/check_config.sh
+      - run:
           name: 'Setup Google Cloud Storage'
           command: ./.circleci/setup_storage.sh
       - run:
