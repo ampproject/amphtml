@@ -20,7 +20,7 @@ const pageHeight = 800;
 describes.endtoend(
   'amp-base-carousel:0.1 - default attributes',
   {
-    manualFixture: 'amp-base-carousel/default-attributes.amp.html',
+    fixture: 'amp-base-carousel/default-attributes.amp.html',
     // TODO (micajuineho): Add viewer-demo support.
     environments: ['single'],
     initialRect: {width: pageWidth, height: pageHeight},

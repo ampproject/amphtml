@@ -232,7 +232,6 @@ function getFirefoxArgs(config) {
  *  environments: (!Array<!AmpdocEnvironment>|undefined),
  *  testUrl: string|undefined,
  *  fixture: string,
- *  manualFixture: string,
  *  initialRect: ({{width: number, height:number}}|undefined),
  *  deviceName: string|undefined,
  *  version: string|undefined,
@@ -246,7 +245,6 @@ let TestSpec;
  *  environments: (!Array<!AmpdocEnvironment>|undefined),
  *  testUrl: string|undefined,
  *  fixture: string,
- *  manualFixture: string,
  *  initialRect: ({{width: number, height:number}}|undefined),
  *  deviceName: string|undefined,
  *  versions: {{[version: string]: TestSpec}}
@@ -627,29 +625,18 @@ class EndToEndFixture {
    * @return {!TestSpec}
    */
   setTestUrl(spec) {
-    // TODO(rcebulko): See if it's possible to condense/reorg some test fixtures
-    // and have all e2e fixtures in one folder. Allowing this split for now so
-    // that, if fixtures under `manual` are moved, tests using normal e2e fixture
-    // directory don't need to be updated. Support for `testUrl` should
-    // eventually be removed entirely.
-    let {testUrl} = spec;
-    const {fixture, manualFixture} = spec;
+    const {testUrl, fixture} = spec;
+
     if (testUrl) {
       throw new Error(
         'Setting `testUrl` directly is no longer permitted in e2e tests; please use `fixture` instead'
       );
     }
-    if (fixture && manualFixture) {
-      throw new Error('Only one of [fixture, manualFixture] may be specified');
-    }
 
-    if (fixture) {
-      testUrl = `http://localhost:8000/test/fixtures/e2e/${fixture}`;
-    } else if (manualFixture) {
-      testUrl = `http://localhost:8000/test/manual/${manualFixture}`;
-    }
-
-    return {...spec, testUrl};
+    return {
+      ...spec,
+      testUrl: `http://localhost:8000/test/fixtures/e2e/${fixture}`,
+    };
   }
 }
 

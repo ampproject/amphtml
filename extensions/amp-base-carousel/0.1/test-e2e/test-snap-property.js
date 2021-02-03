@@ -19,7 +19,7 @@ import {getSlides, getSpacers} from './helpers';
 describes.endtoend(
   'amp-base-carousel:0.1 - snap property',
   {
-    manualFixture: 'amp-base-carousel/snap-property.amp.html',
+    fixture: 'amp-base-carousel/snap-property.amp.html',
     environments: ['single'],
   },
   async function (env) {

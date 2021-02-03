@@ -22,7 +22,7 @@ const SLIDE_COUNT = 7;
 describes.endtoend(
   'amp-base-carousel:0.1 - arrows with custom arrows',
   {
-    manualFixture: 'amp-base-carousel/custom-arrows.amp.html',
+    fixture: 'amp-base-carousel/custom-arrows.amp.html',
     experiments: [
       'amp-base-carousel',
       'layers',
