@@ -21,8 +21,9 @@ const pageHeight = 600;
 const arrowMargin = 12;
 
 describes.endtoend(
-  'amp-base-carousel:0.1 - rtl',
+  'amp-base-carousel - rtl',
   {
+    version: '0.1',
     fixture: 'amp-base-carousel/basic-rtl.amp.html',
     experiments: ['amp-base-carousel', 'layers'],
     initialRect: {width: pageWidth, height: pageHeight},
