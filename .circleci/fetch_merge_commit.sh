@@ -23,7 +23,7 @@ set -e
 err=0
 
 GREEN() { echo -e "\n\033[0;32m$1\033[0m"; }
-YELLOW() { echo -e "\033[0;33m$1\033[0m"; }
+YELLOW() { echo -e "\n\033[0;33m$1\033[0m"; }
 RED() { echo -e "\n\033[0;31m$1\033[0m"; }
 
 # CIRCLE_PR_NUMBER is present for PR builds, and absent for push builds.
