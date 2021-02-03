@@ -127,25 +127,20 @@ export class AmpIframely extends AMP.BaseElement {
      * or when requested via `data-img` attribute
      */
     const layout = this.getLayout();
-    const resizable = this.element.getAttribute('resizable') !== null;
-    const isImg = this.element.getAttribute('data-img') !== null;
-
-    if (isImg || (layout === 'responsive' && !resizable)) {
+    if (
+      this.element.hasAttribute("data-img") ||
+      (layout === "responsive" && !this.element.hasAttribute("resizable"))
+    ) {
       /** using Iframely placeholder image */
-      let src = this.constructPlaceholderSrc_();
-      src = addParamsToUrl(src, this.options_);
-      return createElementWithAttributes(
-        this.element.ownerDocument,
-        'amp-img',
-        {
-          'src': src,
-          'layout': 'fill',
-          'placeholder': '',
-        }
+      const src = addParamsToUrl(
+        this.constructPlaceholderSrc_(),
+        this.options_
       );
-    } else {
-      return null;
-    }
+      return createElementWithAttributes(this.element.ownerDocument, 'img', {
+        'src': src,
+        'placeholder': '',
+      });
+    return null;
   }
 
   /** @override */
@@ -167,17 +162,11 @@ export class AmpIframely extends AMP.BaseElement {
     this.applyFillContent(this.iframe_);
     this.element.appendChild(this.iframe_);
 
-    /**
-     * Handling Iframely messages
-     * @param {window.event.source} event - event to check
-     * */
-    function receiveMessage(event) {
-      const iframes = me.element.getElementsByTagName('iframe');
-      if (findIframeByContentWindow(iframes, event.source)) {
-        me.handleEvent(me, event);
+    this.unlistener_ = listen(this.win, 'message', (event) => {
+      if (event.source === this.iframe_.contentWindow) {
+        this.handleEvent_(event);
       }
-    }
-    window.addEventListener('message', receiveMessage, false);
+    });
     return this.loadPromise(this.iframe_);
   }
 
@@ -187,13 +176,10 @@ export class AmpIframely extends AMP.BaseElement {
    * @param {window.event} event - Iframely message with a method to apply
    * */
   handleEvent(me, event) {
-    let data = null;
-    try {
-      data = JSON.parse(event.data);
-    } catch (e) {
-      // Do nothing - likely not Iframely message if JSON errs
+    const data = tryParseJson(getData(event));
+    if (!data) {
+      return;
     }
-    if (data) {
       if (data.method === 'resize') {
         /** Set the size of the card according to the message from Iframely */
         const height = this.addBorderHeight_(me, data['height']);
@@ -256,18 +242,14 @@ export class AmpIframely extends AMP.BaseElement {
    * @private
    * */
   constructPlaceholderSrc_() {
-    let src = null;
     if (this.widgetId_) {
-      const url = this.base_ + this.widgetId_ + '/thumbnail';
-      src = addParamToUrl(url, 'amp', '1');
-    } else {
-      src = addParamsToUrl(this.base_ + 'api/thumbnail', {
-        'url': this.url_,
-        'key': this.key_,
-        'amp': '1',
-      });
+      return `${this.base_}${this.widgetId_}/thumbnail?amp=1`;
     }
-    return src;
+    return addParamsToUrl(`${this.base_}api/thumbnail`, {
+      'url': this.url_,
+      'key': this.key_,
+      'amp': '1',
+    });
   }
 
   /**
@@ -279,7 +261,7 @@ export class AmpIframely extends AMP.BaseElement {
     userAssert(
       this.element.getAttribute('data-id') ||
         this.element.getAttribute('data-url'),
-      'Iframely requires either "data-id" or a pair of "data-url" and "data-key" parameters for <%s> %s',
+      '<%s> requires either "data-id" or a pair of "data-url" and "data-key" attributes for %s',
       TAG,
       this.element
     );
@@ -340,23 +322,8 @@ export class AmpIframely extends AMP.BaseElement {
    * @private
    * */
   parseOptions_() {
-    const options = {};
-    const exclude = [
-      'data-id',
-      'data-domain',
-      'data-key',
-      'data-url',
-      'data-img',
-    ];
-    let data = this.element
-      .getAttributeNames()
-      .filter(name => name.startsWith('data-'));
-    data = data.filter(name => !exclude.includes(name));
-    data.forEach(
-      item =>
-        (options[item.split('data-').pop()] = this.element.getAttribute(item))
-    );
-    return options;
+    // FYI: These are camelCased from data-some-attr to someAttr, map if needed.
+    return omit(this.element.dataset, ['id', 'domain', 'key', 'url', 'img']);
   }
 
   /** @override */
@@ -364,6 +331,10 @@ export class AmpIframely extends AMP.BaseElement {
     if (this.iframe_) {
       removeElement(this.iframe_);
       this.iframe_ = null;
+    }
+    if (this.unlisten_) {
+      this.unlisten_();
+      this.unlisten_ = null;
     }
     return true; // Request layoutCallback again.
   }
@@ -375,19 +346,17 @@ export class AmpIframely extends AMP.BaseElement {
    * @private
    * */
   isValidDomain_(domainName) {
-    const whitelistedDomains = [
+    const allowedDomains = [
       /^(?:[^\.\/]+\.)?iframe\.ly$/i,
       /^if\-cdn\.com$/i,
       /^iframely\.net$/i,
       /^oembed\.vice\.com$/i,
       /^iframe\.nbcnews\.com$/i,
     ];
-    for (const i in whitelistedDomains) {
-      if (whitelistedDomains[i].test(domainName)) {
-        return true;
-      }
-    }
-    return false;
+    return allowedDomains.reduce(
+      (allowed, re) => allowed || re.test(domainName),
+      false
+    );
   }
 
   /**
