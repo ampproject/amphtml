@@ -657,7 +657,7 @@ export class GoogleSubscriptionsPlatform {
                   // TODO: We must request this from a URL the serviceConfig defines.
                   // eslint-disable-next-line google-camelcase/google-camelcase
                   registered_user: {
-                    timestamp: Math.floor(Date.now() / 1000),
+                    timestamp: Math.floor(Date.now() / 1000) - 60 * 5 * 1000,
                   },
                 },
               },
@@ -721,7 +721,7 @@ export class GoogleSubscriptionsPlatform {
               }).then((result) => {
                 // TODO: Tell the server about this!
                 console.log(result);
-                // location.search = location.search + '&registered=1';
+                location.search = location.search + '&registered=1';
               });
             }
           });
