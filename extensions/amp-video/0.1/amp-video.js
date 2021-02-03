@@ -64,11 +64,11 @@ const ATTRS_TO_PROPAGATE_ON_BUILD = [
   'controlsList',
 ];
 
-/** @private {!Map<string, number>} the bitrate in Kb/s of amp_quality */
+/** @private {!Map<string, number>} the bitrate in Kb/s of amp_quality for videos in the ampproject cdn */
 const AMP_QUALITY_BITRATES = {
-  high: 2000,
-  medium: 720,
-  low: 400,
+  'high': 2000,
+  'medium': 720,
+  'low': 400,
 };
 
 /**
@@ -462,22 +462,27 @@ class AmpVideo extends AMP.BaseElement {
       sources.unshift(srcSource);
     }
 
-    // Only cached sources are added during prerender.
-    // Add 3 qualities for each cached src: high, medium, low.
+    // Only cached sources are added during prerender, with all qualities supported.
     // Origin sources will only be added when document becomes visible.
     sources.forEach((source) => {
       if (this.isCachedByCDN_(source)) {
         source.remove();
-        Object.keys(AMP_QUALITY_BITRATES).forEach((quality) => {
-          const currSource = source.cloneNode();
-          currSource.src = addParamsToUrl(source.src, {'amp_quality': quality});
-          currSource.setAttribute(
-            'data-bitrate',
+        const qualities = Object.keys(AMP_QUALITY_BITRATES);
+        const origType = source.getAttribute('type');
+        const origSrc = source.getAttribute('amp-orig-src');
+        qualities.forEach((quality) => {
+          const cachedSource = addParamsToUrl(source.src, {
+            'amp_quality': quality,
+          });
+          const currSource = this.createSourceElement_(
+            cachedSource,
+            origType,
             AMP_QUALITY_BITRATES[quality]
           );
-          if (quality !== 'low') {
-            // Keep amp-orig-src only in last one so it adds the orig source after it.
-            currSource.removeAttribute('amp-orig-src');
+          if (qualities.indexOf(quality) == qualities.length - 1) {
+            // Keep src of amp-orig only in last one so it adds the orig source after it.
+            // TODO: Propagate data-bitrate of source.
+            currSource.setAttribute('amp-orig-src', origSrc);
           }
           this.video_.appendChild(currSource);
         });
@@ -552,16 +557,20 @@ class AmpVideo extends AMP.BaseElement {
   /**
    * @param {string} src
    * @param {?string} type
+   * @param {?string} bitrate
    * @return {!Element} source element
    * @private
    */
-  createSourceElement_(src, type) {
+  createSourceElement_(src, type, bitrate = null) {
     const {element} = this;
     this.getUrlService_().assertHttpsUrl(src, element);
     const source = element.ownerDocument.createElement('source');
     source.setAttribute('src', src);
     if (type) {
       source.setAttribute('type', type);
+    }
+    if (bitrate) {
+      source.setAttribute('data-bitrate', bitrate);
     }
     return source;
   }

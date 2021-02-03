@@ -174,6 +174,9 @@ describes.realWin(
       expect(sources[1].getAttribute('data-bitrate')).to.equal('720');
       expect(sources[2].getAttribute('data-bitrate')).to.equal('400');
       expect(sources[3].hasAttribute('data-bitrate')).to.be.false;
+      expect(sources[3].getAttribute('src')).to.equal(
+        'https://example.com/video.mp4'
+      );
     });
 
     it('should load a video', async () => {
