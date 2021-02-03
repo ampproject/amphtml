@@ -16,7 +16,6 @@
 
 import {ConsentPolicyManager} from './consent-policy-manager'; // eslint-disable-line no-unused-vars
 import {TCF_POST_MESSAGE_API_COMMANDS} from './consent-info';
-import {hasOwn, map} from '../../../src/utils/object';
 import {isEnumValue, isObject} from '../../../src/types';
 import {user} from '../../../src/log';
 
@@ -27,8 +26,8 @@ import {user} from '../../../src/log';
  *  gdprApplies: (boolean|undefined),
  *  tcString: (string|undefined),
  *  listenerId: (string|undefined),
- *  cmpStatus: (boolean|undefined),
- *  eventStatus: (string|undefined),
+ *  cmpStatus: (string),
+ *  eventStatus: (string),
  *  additionalData: (Object),
  * }}
  */
@@ -126,12 +125,11 @@ export class TcfApiCommandManager {
    * command.
    * @param {?Object} metadata
    * @param {?Object} sharedData
-   * @param {string=} tcString
-   * @param {string=} eventStatus
-   * @param {number=} listenerId
+   * @param {?string} tcString
+   * @param {number=} opt_listenerId
    * @return {!MinimalTcData} policyManager
    */
-  getMinimalTcData_(metadata, sharedData, tcString, eventStatus, listenerId) {
+  getMinimalTcData_(metadata, sharedData, tcString, opt_listenerId) {
     const purposeOneTreatment = metadata ? metadata['purposeOne'] : undefined;
     const gdprApplies = metadata ? metadata['gdprApplies'] : undefined;
     const additionalConsent = metadata
@@ -143,7 +141,7 @@ export class TcfApiCommandManager {
       tcfPolicyVersion: TCF_POLICY_VERSION,
       gdprApplies,
       tcString,
-      listenerId,
+      listenerId: opt_listenerId,
       cmpStatus: CMP_STATUS,
       eventStatus: EVENT_STATUS,
       purposeOneTreatment,
@@ -246,25 +244,11 @@ export class TcfApiCommandManager {
   /**
    * @param {?Object} metadata
    * @param {?Object} sharedData
-   * @param {string=} tcString
-   * @param {string=} eventStatus
-   * @param {number=} listenerId
+   * @param {?string} tcString
    * @return {!MinimalPingReturn}
    * @visibleForTesting
    */
-  getMinimalTcDataForTesting(
-    metadata,
-    sharedData,
-    tcString,
-    eventStatus,
-    listenerId
-  ) {
-    return this.getMinimalTcData_(
-      metadata,
-      sharedData,
-      tcString,
-      eventStatus,
-      listenerId
-    );
+  getMinimalTcDataForTesting(metadata, sharedData, tcString) {
+    return this.getMinimalTcData_(metadata, sharedData, tcString);
   }
 }

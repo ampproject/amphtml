@@ -158,14 +158,14 @@ describes.realWin(
           expect(postMessageArgs[0]).to.deep.equals(
             getTcfApiReturn(
               callId,
-              tcfApiCommandManager.getMinimalPingReturnForTesting(mockMetadata),
+              tcfApiCommandManager.getMinimalPingReturnForTesting(mockMetadata)
             )
           );
         });
       });
 
       describe('handleGetTcData', () => {
-        it.only('creates a minimal TcData object', async () => {
+        it('creates a minimal TcData object', async () => {
           mockMetadata = getMetadata(false, 'xyz987', false);
           tcfApiCommandManager = new TcfApiCommandManager(mockPolicyManager);
           expect(
@@ -217,7 +217,6 @@ describes.realWin(
           await macroTask();
 
           const postMessageArgs = mockWin.postMessage.args[0];
-          console.log(JSON.stringify(postMessageArgs[0]));
           expect(postMessageArgs[0]).to.deep.equals(
             getTcfApiReturn(
               callId,
