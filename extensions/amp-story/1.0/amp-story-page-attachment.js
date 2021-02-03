@@ -32,6 +32,7 @@ const DARK_THEME_CLASS = 'i-amphtml-story-draggable-drawer-theme-dark';
  * @enum {string}
  */
 const AttachmentTheme = {
+  // TODO(raxsha): modify this for the new CTA UI dark/light theme specifications.
   LIGHT: 'light', // default
   DARK: 'dark',
 };

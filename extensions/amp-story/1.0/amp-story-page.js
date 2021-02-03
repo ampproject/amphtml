@@ -1774,6 +1774,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   renderOpenAttachmentUI_() {
+    // TODO(raxsha): modify this for the new CTA UI. Note: do not change the UI for the in-line page attachments, only the outlinks.
     const attachmentEl = this.element.querySelector(
       'amp-story-page-attachment'
     );
