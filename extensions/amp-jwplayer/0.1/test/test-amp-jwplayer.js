@@ -51,7 +51,7 @@ describes.realWin(
       jwp.setAttribute('layout', 'responsive');
 
       doc.body.appendChild(jwp);
-      await jwp.build();
+      await jwp.buildInternal();
       await jwp.layoutCallback();
 
       return jwp;
@@ -409,7 +409,7 @@ describes.realWin(
       doc.body.appendChild(jwp);
       const imp = await jwp.getImpl(false);
 
-      await jwp.build();
+      await jwp.buildInternal();
       expect(imp['contentid_']).to.equal(attributes['data-media-id']);
       expect(imp['playerid_']).to.equal(attributes['data-player-id']);
       expect(imp['contentSearch_']).to.equal('');

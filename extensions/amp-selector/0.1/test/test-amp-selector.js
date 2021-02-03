@@ -118,7 +118,7 @@ describes.realWin(
         let ampSelector = getSelector({});
         let impl = await ampSelector.getImpl(false);
         let initSpy = env.sandbox.spy(impl, 'init_');
-        await ampSelector.build();
+        await ampSelector.buildInternal();
         expect(impl.isMultiple_).to.be.false;
         expect(initSpy).to.be.calledOnce;
 
@@ -133,7 +133,7 @@ describes.realWin(
         });
         impl = await ampSelector.getImpl(false);
         initSpy = env.sandbox.spy(impl, 'init_');
-        await ampSelector.build();
+        await ampSelector.buildInternal();
         expect(impl.isMultiple_).to.be.true;
         expect(initSpy).to.be.calledOnce;
 
@@ -149,7 +149,7 @@ describes.realWin(
         });
         impl = await ampSelector.getImpl(false);
         initSpy = env.sandbox.spy(impl, 'init_');
-        await ampSelector.build();
+        await ampSelector.buildInternal();
         expect(impl.isMultiple_).to.be.true;
         expect(initSpy).to.be.calledOnce;
       });
@@ -168,7 +168,7 @@ describes.realWin(
           },
         });
         const impl = await ampSelector.getImpl(false);
-        await ampSelector.build();
+        await ampSelector.buildInternal();
         expect(impl.element.getAttribute('role')).to.equal('tablist');
         const options = impl.getElementsForTesting();
         expect(options[0].getAttribute('role')).to.equal('tab');
@@ -180,7 +180,7 @@ describes.realWin(
         impl.mutateElement = (fn) => fn();
         let setInputsSpy = env.sandbox.spy(impl, 'setInputs_');
         let initSpy = env.sandbox.spy(impl, 'init_');
-        await ampSelector.build();
+        await ampSelector.buildInternal();
         expect(impl.isMultiple_).to.be.false;
         expect(initSpy).to.have.been.calledOnce;
         expect(impl.getSelectedElementsForTesting().length).to.equal(0);
@@ -195,7 +195,7 @@ describes.realWin(
         impl = await ampSelector.getImpl(false);
         setInputsSpy = env.sandbox.spy(impl, 'setInputs_');
         initSpy = env.sandbox.spy(impl, 'init_');
-        await ampSelector.build();
+        await ampSelector.buildInternal();
         expect(impl.isMultiple_).to.be.false;
         expect(initSpy).to.have.been.calledOnce;
         expect(impl.getSelectedElementsForTesting().length).to.equal(1);
@@ -218,7 +218,7 @@ describes.realWin(
         const impl = await ampSelector.getImpl(false);
         const initSpy = env.sandbox.spy(impl, 'init_');
         const setInputsSpy = env.sandbox.spy(impl, 'setInputs_');
-        await ampSelector.build();
+        await ampSelector.buildInternal();
         expect(impl.isMultiple_).to.be.true;
         expect(initSpy).to.have.been.calledOnce;
         expect(impl.getSelectedElementsForTesting().length).to.equal(2);
@@ -239,7 +239,7 @@ describes.realWin(
         const impl = await ampSelector.getImpl(false);
         const initSpy = env.sandbox.spy(impl, 'init_');
         const setInputsSpy = env.sandbox.spy(impl, 'setInputs_');
-        await ampSelector.build();
+        await ampSelector.buildInternal();
 
         expect(impl.isMultiple_).to.be.true;
         expect(initSpy).to.have.been.calledOnce;
@@ -260,7 +260,7 @@ describes.realWin(
         const initSpy = env.sandbox.spy(impl, 'init_');
         const setInputsSpy = env.sandbox.spy(impl, 'setInputs_');
         const clearSelectionSpy = env.sandbox.spy(impl, 'clearSelection_');
-        await ampSelector.build();
+        await ampSelector.buildInternal();
 
         const options = impl.getElementsForTesting();
         expect(impl.isMultiple_).to.be.false;
@@ -291,7 +291,7 @@ describes.realWin(
         const impl = await ampSelector.getImpl(false);
         const initSpy = env.sandbox.spy(impl, 'init_');
         const setInputsSpy = env.sandbox.spy(impl, 'setInputs_');
-        await ampSelector.build();
+        await ampSelector.buildInternal();
 
         const options = impl.getElementsForTesting();
         expect(impl.isMultiple_).to.be.true;
@@ -323,7 +323,7 @@ describes.realWin(
         const impl = await ampSelector.getImpl(false);
         const initSpy = env.sandbox.spy(impl, 'init_');
         const setInputsSpy = env.sandbox.spy(impl, 'setInputs_');
-        await ampSelector.build();
+        await ampSelector.buildInternal();
 
         const options = impl.getElementsForTesting();
         expect(impl.isMultiple_).to.be.true;
@@ -344,7 +344,7 @@ describes.realWin(
       it('should setInputs properly', async () => {
         let ampSelector = getSelector({});
         let impl = await ampSelector.getImpl(false);
-        await ampSelector.build();
+        await ampSelector.buildInternal();
         expect(impl.inputs_.length).to.equal(0);
 
         ampSelector = getSelector({
@@ -354,7 +354,7 @@ describes.realWin(
         });
 
         impl = await ampSelector.getImpl(false);
-        await ampSelector.build();
+        await ampSelector.buildInternal();
         expect(impl.inputs_.length).to.equal(0);
 
         ampSelector = getSelector({
@@ -367,7 +367,7 @@ describes.realWin(
           },
         });
         impl = await ampSelector.getImpl(false);
-        await ampSelector.build();
+        await ampSelector.buildInternal();
         expect(impl.inputs_.length).to.equal(0);
 
         ampSelector = getSelector({
@@ -380,7 +380,7 @@ describes.realWin(
           },
         });
         impl = await ampSelector.getImpl(false);
-        await ampSelector.build();
+        await ampSelector.buildInternal();
 
         let options = impl.getElementsForTesting();
         expect(impl.inputs_.length).to.equal(1);
@@ -425,7 +425,7 @@ describes.realWin(
         });
         impl = await ampSelector.getImpl(false);
 
-        await ampSelector.build();
+        await ampSelector.buildInternal();
         options = impl.getElementsForTesting();
         expect(impl.inputs_.length).to.equal(2);
         expect(impl.getSelectedElementsForTesting()).to.include.members([
@@ -456,7 +456,7 @@ describes.realWin(
           },
         });
         const impl = await ampSelector.getImpl(false);
-        await ampSelector.build();
+        await ampSelector.buildInternal();
 
         const options = impl.getElementsForTesting();
         expect(impl.inputs_.length).to.equal(0);
@@ -477,7 +477,7 @@ describes.realWin(
         });
         let impl = await ampSelector.getImpl(false);
         impl.mutateElement = (fn) => fn();
-        await ampSelector.build();
+        await ampSelector.buildInternal();
 
         let options = impl.getElementsForTesting();
         let clearSelectionSpy = env.sandbox.spy(impl, 'clearSelection_');
@@ -521,7 +521,7 @@ describes.realWin(
 
         impl = await ampSelector.getImpl(false);
         impl.mutateElement = (fn) => fn();
-        await ampSelector.build();
+        await ampSelector.buildInternal();
 
         options = impl.getElementsForTesting();
         clearSelectionSpy = env.sandbox.spy(impl, 'clearSelection_');
@@ -565,7 +565,7 @@ describes.realWin(
 
         impl = await ampSelector.getImpl(false);
         impl.mutateElement = (fn) => fn();
-        await ampSelector.build();
+        await ampSelector.buildInternal();
         clearSelectionSpy = env.sandbox.spy(impl, 'clearSelection_');
         setSelectionSpy = env.sandbox.spy(impl, 'setSelection_');
 
@@ -590,7 +590,7 @@ describes.realWin(
         });
         let impl = await ampSelector.getImpl(false);
         impl.mutateElement = (fn) => fn();
-        await ampSelector.build();
+        await ampSelector.buildInternal();
 
         let options = impl.getElementsForTesting();
         let clearSelectionSpy = env.sandbox.spy(impl, 'clearSelection_');
@@ -620,7 +620,7 @@ describes.realWin(
 
         impl = await ampSelector.getImpl(false);
         impl.mutateElement = (fn) => fn();
-        await ampSelector.build();
+        await ampSelector.buildInternal();
 
         options = impl.getElementsForTesting();
         clearSelectionSpy = env.sandbox.spy(impl, 'clearSelection_');
@@ -657,7 +657,7 @@ describes.realWin(
 
         impl = await ampSelector.getImpl(false);
         impl.mutateElement = (fn) => fn();
-        await ampSelector.build();
+        await ampSelector.buildInternal();
         clearSelectionSpy = env.sandbox.spy(impl, 'clearSelection_');
         setSelectionSpy = env.sandbox.spy(impl, 'setSelection_');
 
@@ -675,7 +675,7 @@ describes.realWin(
         });
 
         const impl = await ampSelector.getImpl(false);
-        ampSelector.build();
+        ampSelector.buildInternal();
 
         const options = impl.getElementsForTesting();
         const setInputsSpy = env.sandbox.spy(impl, 'setInputs_');
@@ -707,7 +707,7 @@ describes.realWin(
 
         const impl = await ampSelector.getImpl(false);
         impl.mutateElement = (fn) => fn();
-        ampSelector.build();
+        ampSelector.buildInternal();
 
         const options = impl.getElementsForTesting();
         expect(options[0].hasAttribute('selected')).to.be.true;
@@ -743,7 +743,7 @@ describes.realWin(
               selectedCount: 1,
             },
           });
-          ampSelector.build();
+          ampSelector.buildInternal();
           const impl = await ampSelector.getImpl(false);
 
           expect(ampSelector.hasAttribute('multiple')).to.be.false;
@@ -784,7 +784,7 @@ describes.realWin(
               selectedCount: 1,
             },
           });
-          ampSelector.build();
+          ampSelector.buildInternal();
           const impl = await ampSelector.getImpl(false);
 
           expect(ampSelector.hasAttribute('multiple')).to.be.false;
@@ -844,7 +844,7 @@ describes.realWin(
             selectedCount: 2,
           },
         });
-        ampSelector.build();
+        ampSelector.buildInternal();
         const impl = await ampSelector.getImpl(false);
         impl.mutateElement = (fn) => fn();
 
@@ -871,7 +871,7 @@ describes.realWin(
             selectedCount: 1,
           },
         });
-        ampSelector.build();
+        ampSelector.buildInternal();
         const impl = await ampSelector.getImpl(false);
         impl.mutateElement = (fn) => fn();
 
@@ -908,7 +908,7 @@ describes.realWin(
         ampSelector.children[0].setAttribute('selected', '');
         ampSelector.children[1].setAttribute('selected', '');
 
-        ampSelector.build();
+        ampSelector.buildInternal();
         const impl = await ampSelector.getImpl(false);
         impl.mutateElement = (fn) => fn();
 
@@ -945,7 +945,7 @@ describes.realWin(
             },
           });
           ampSelector.children[0].setAttribute('selected', '');
-          ampSelector.build();
+          ampSelector.buildInternal();
           const impl = await ampSelector.getImpl(false);
           const triggerSpy = env.sandbox.spy(impl.action_, 'trigger');
 
@@ -986,7 +986,7 @@ describes.realWin(
             },
           });
           ampSelector.children[0].setAttribute('selected', '');
-          ampSelector.build();
+          ampSelector.buildInternal();
           const impl = await ampSelector.getImpl(false);
           const triggerSpy = env.sandbox.spy(impl.action_, 'trigger');
 
@@ -1028,7 +1028,7 @@ describes.realWin(
             },
           });
           ampSelector.children[0].setAttribute('selected', '');
-          ampSelector.build();
+          ampSelector.buildInternal();
           const impl = await ampSelector.getImpl(false);
 
           expect(ampSelector.hasAttribute('multiple')).to.be.false;
@@ -1068,7 +1068,7 @@ describes.realWin(
             },
           });
           ampSelector.children[1].setAttribute('selected', '');
-          ampSelector.build();
+          ampSelector.buildInternal();
           const impl = await ampSelector.getImpl(false);
 
           expect(ampSelector.hasAttribute('multiple')).to.be.false;
@@ -1097,7 +1097,7 @@ describes.realWin(
       describe('keyboard-select-mode', () => {
         it('should have `none` mode by default', async () => {
           const ampSelector = getSelector({});
-          ampSelector.build();
+          ampSelector.buildInternal();
           const impl = await ampSelector.getImpl(false);
           expect(impl.kbSelectMode_).to.equal('none');
         });
@@ -1111,7 +1111,7 @@ describes.realWin(
                 'keyboard-select-mode': 'focus',
               },
             });
-            selectorWithNoSelection.build();
+            selectorWithNoSelection.buildInternal();
             expect(selectorWithNoSelection.children[0].tabIndex).to.equal(0);
             for (let i = 1; i < selectorWithNoSelection.children.length; i++) {
               // No other options should be reachable by
@@ -1127,7 +1127,7 @@ describes.realWin(
               },
             });
             selectorWithSelection.children[1].setAttribute('selected', '');
-            selectorWithSelection.build();
+            selectorWithSelection.buildInternal();
             expect(selectorWithSelection.children[0].tabIndex).to.equal(-1);
             expect(selectorWithSelection.children[1].tabIndex).to.equal(0);
             expect(selectorWithSelection.children[2].tabIndex).to.equal(-1);
@@ -1145,7 +1145,7 @@ describes.realWin(
             },
           });
           ampSelector.children[1].setAttribute('selected', '');
-          ampSelector.build();
+          ampSelector.buildInternal();
           expect(ampSelector.children[0].tabIndex).to.equal(0);
           expect(ampSelector.children[1].tabIndex).to.equal(-1);
           expect(ampSelector.children[2].tabIndex).to.equal(-1);
@@ -1162,7 +1162,7 @@ describes.realWin(
           });
           const impl = await ampSelector.getImpl(false);
           const spy = env.sandbox.spy(impl, 'navigationKeyDownHandler_');
-          ampSelector.build();
+          ampSelector.buildInternal();
           await keyPress(ampSelector, Keys.RIGHT_ARROW);
           expect(spy).to.not.have.been.called;
         });
@@ -1179,7 +1179,7 @@ describes.realWin(
                 count: 3,
               },
             });
-            ampSelector.build();
+            ampSelector.buildInternal();
             expect(ampSelector.children[0].tabIndex).to.equal(0);
             expect(ampSelector.children[1].tabIndex).to.equal(-1);
             expect(ampSelector.children[2].tabIndex).to.equal(-1);
@@ -1212,7 +1212,7 @@ describes.realWin(
             });
             ampSelector.children[2].setAttribute('selected', '');
             ampSelector.children[0].setAttribute('hidden', '');
-            ampSelector.build();
+            ampSelector.buildInternal();
             expect(ampSelector.children[0].tabIndex).to.equal(-1);
             expect(ampSelector.children[1].tabIndex).to.equal(-1);
             expect(ampSelector.children[2].tabIndex).to.equal(0);
@@ -1237,7 +1237,7 @@ describes.realWin(
               },
             });
             ampSelector.children[2].setAttribute('hidden', '');
-            ampSelector.build();
+            ampSelector.buildInternal();
             expect(ampSelector.children[0].tabIndex).to.equal(0);
             expect(ampSelector.children[1].tabIndex).to.equal(-1);
             expect(ampSelector.children[2].tabIndex).to.equal(-1);
@@ -1262,7 +1262,7 @@ describes.realWin(
               },
             });
             ampSelector.children[1].setAttribute('selected', '');
-            ampSelector.build();
+            ampSelector.buildInternal();
             const impl = await ampSelector.getImpl(false);
 
             expect(ampSelector.children[0].tabIndex).to.equal(-1);
@@ -1286,7 +1286,9 @@ describes.realWin(
             },
           });
           return allowConsoleError(() => {
-            return expect(ampSelector.build()).to.eventually.be.rejectedWith(
+            return expect(
+              ampSelector.buildInternal()
+            ).to.eventually.be.rejectedWith(
               /not supported for multiple selection amp-selector​​​/
             );
           });
@@ -1301,7 +1303,7 @@ describes.realWin(
               count: 3,
             },
           });
-          ampSelector.build();
+          ampSelector.buildInternal();
           const impl = await ampSelector.getImpl(false);
           impl.mutateElement = (fn) => fn();
           expect(ampSelector.children[0].hasAttribute('selected')).to.be.false;
@@ -1340,7 +1342,7 @@ describes.realWin(
             },
           });
           ampSelector.children[1].setAttribute('selected', '');
-          await ampSelector.build();
+          await ampSelector.buildInternal();
           await ampSelector.layoutCallback();
 
           const button = win.document.createElement('button');
@@ -1367,7 +1369,7 @@ describes.realWin(
           });
           ampSelector.children[0].setAttribute('selected', '');
           ampSelector.children[3].setAttribute('selected', '');
-          await ampSelector.build();
+          await ampSelector.buildInternal();
           await ampSelector.layoutCallback();
 
           const button = win.document.createElement('button');
@@ -1394,7 +1396,7 @@ describes.realWin(
               count: 2,
             },
           });
-          ampSelector.build();
+          ampSelector.buildInternal();
           const impl = await ampSelector.getImpl(false);
           impl.mutateElement = (fn) => fn();
 

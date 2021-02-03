@@ -52,7 +52,7 @@ describes.realWin(
       }
       doc.body.appendChild(gfycat);
       return gfycat
-        .build()
+        .buildInternal()
         .then(() => {
           return gfycat.layoutCallback();
         })

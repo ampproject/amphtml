@@ -57,7 +57,7 @@ describes.realWin(
       amp3dGltfEl.setAttribute('height', '240');
 
       doc.body.appendChild(amp3dGltfEl);
-      await amp3dGltfEl.build();
+      await amp3dGltfEl.buildInternal();
 
       const amp3dGltf = await amp3dGltfEl.getImpl();
       env.sandbox

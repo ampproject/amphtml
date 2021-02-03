@@ -74,7 +74,7 @@ describes.realWin(
       );
       form.appendChild(ampAutocomplete);
       doc.body.appendChild(form);
-      return ampAutocomplete.build().then(() => ampAutocomplete);
+      return ampAutocomplete.buildInternal().then(() => ampAutocomplete);
     }
 
     it('should build with "inline" and "query" when specified', async () => {
@@ -347,7 +347,7 @@ describes.realWin(
     it('should not require a form ancestor', () => {
       const autocomplete = setupAutocomplete({'filter': 'substring'});
       doc.body.appendChild(autocomplete);
-      return expect(autocomplete.build()).to.be.fulfilled;
+      return expect(autocomplete.buildInternal()).to.be.fulfilled;
     });
 
     it('should read the autocomplete attribute on the form as null', async () => {
