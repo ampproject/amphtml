@@ -1154,19 +1154,20 @@ app.use('/subscription/:id/entitlements', (req, res) => {
     data: {
       login: true,
     },
+    decryptedDocumentKey: decryptDocumentKey(req.query.crypt),
+
+    // Showcase metering information.
     metering: {
       state: {
         id: 'ppid264605',
         standardAttributes: {
-          // Returns a timestamp for 5 minutes ago, for demo purposes.
           // eslint-disable-next-line google-camelcase/google-camelcase
           registered_user: {
-            timestamp: Math.floor(Date.now() / 1000) - 60 * 5 * 1000,
+            timestamp: '1612044738', // In seconds.
           },
         },
       },
     },
-    decryptedDocumentKey: decryptDocumentKey(req.query.crypt),
   });
 });
 
