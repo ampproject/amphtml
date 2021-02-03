@@ -58,7 +58,7 @@ export class AmpTimeAgo extends AMP.BaseElement {
     this.title_ = this.element.textContent.trim();
 
     this.element.textContent = '';
-    this.timeElement_.setAttribute('role', 'text');
+    this.element.setAttribute('role', 'text');
 
     this.timeElement_ = document.createElement('time');
     this.timeElement_.setAttribute('datetime', this.datetime_);
