@@ -57,22 +57,6 @@
   white-space: nowrap !important;
 }
 
-/* .i-amphtml-story-page-attachment-draggable {
-  position: absolute;
-  top: 8px;
-  width: 40px;
-  height: 3px;
-  background-color: rgba(0,0,0,.2);
-  border-radius: 3px;
-  opacity: 0;
-  transition: opacity .3s;
-} */
-
-/* .i-amphtml-story-draggable-drawer-header:not([open]) .i-amphtml-story-page-attachment-draggable,
-.i-amphtml-story-draggable-drawer-header[dragging] .i-amphtml-story-page-attachment-draggable {
-  opacity: 1
-} */
-
 /** Overrides. */
 
 .i-amphtml-story-draggable-drawer-theme-dark .i-amphtml-story-page-attachment-title,

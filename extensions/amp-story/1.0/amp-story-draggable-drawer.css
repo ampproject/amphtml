@@ -41,11 +41,22 @@
 }
 
 .i-amphtml-story-draggable-drawer-container {
-  height: calc(100% - 40px) !important;
-  background: rgba(255, 255, 255, 1) !important;
+  height: 100% !important;
+  padding-top: 20% !important;
+  box-sizing: border-box !important;
+  height: 100% !important;
   overflow-y: auto !important;
   -webkit-overflow-scrolling: touch !important;
   transition: background 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
+}
+
+.i-amphtml-story-bookend-handle {
+  margin: 12px !important;
+  height: 3px !important;
+  width: 46px !important;
+  margin: 12px auto 24px !important;
+  background-color: rgba(0,0,0,.2);
+  border-radius: 3px !important;
 }
 
 .i-amphtml-story-draggable-drawer-theme-dark .i-amphtml-story-draggable-drawer-container {
@@ -62,8 +73,11 @@
 }
 
 .i-amphtml-story-draggable-drawer-content {
+  overflow: auto !important;
+  background: white !important;
   opacity: 1 !important;
   transition: opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+  border-radius: 8px !important;
 }
 
 
