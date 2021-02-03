@@ -62,9 +62,10 @@ describes.realWin('AmpStoryPlayerViewportObserver', {amp: false}, (env) => {
     const noop = () => {};
     new AmpStoryPlayerViewportObserver(win, el, noop);
 
-    expect(inOb).to.have.been.calledWith(env.sandbox.match.any, {
-      rootMargin: '0%',
-    });
+    const inObCallback = env.sandbox.match.any;
+
+    // Initializing InOb with only 1 argument defaults to implicit root.
+    expect(inOb).to.have.been.calledOnceWithExactly(inObCallback);
   });
 
   it('fires callback when element is visible in viewport.', () => {
