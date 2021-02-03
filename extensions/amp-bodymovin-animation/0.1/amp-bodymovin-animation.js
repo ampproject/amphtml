@@ -31,15 +31,6 @@ import {userAssert} from '../../../src/log';
 
 const TAG = 'amp-bodymovin-animation';
 
-const libSourceUrl = {
-  'canvas':
-    'https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.7.6/lottie_canvas.min.js',
-  'html':
-    'https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.7.6/lottie_html.min.js',
-  'svg':
-    'https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.7.6/lottie_svg.min.js',
-};
-
 export class AmpBodymovinAnimation extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -81,9 +72,14 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
    */
   preconnectCallback(opt_onLayout) {
     const preconnect = Services.preconnectFor(this.win);
-    const scriptToLoad = libSourceUrl[this.renderer_] ?? libSourceUrl.svg;
     preloadBootstrap(this.win, this.getAmpDoc(), preconnect);
-    preconnect.url(this.getAmpDoc(), scriptToLoad, opt_onLayout);
+    // Different scripts are loaded based on `renderer` but their origin is the
+    // same. See 3p/bodymovinanimation.js#libSourceUrl.
+    preconnect.url(
+      this.getAmpDoc(),
+      'https://cdnjs.cloudflare.com',
+      opt_onLayout
+    );
   }
 
   /** @override */
