@@ -20,10 +20,7 @@ import {Services} from '../../../src/services';
 import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
-import {
-  parseDateAttrs as parseDateAttrsBase,
-  parseEpoch as parseEpochBase,
-} from '../../../src/utils/date';
+import {parseDateAttrs as parseDateAttrsBase} from '../../../src/utils/date';
 
 /** @const {string} */
 const TAG = 'amp-date-display';
