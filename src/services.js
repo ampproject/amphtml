@@ -627,7 +627,8 @@ export class Services {
    */
   static storageForDoc(elementOrAmpDoc) {
     return /** @type {!Promise<!./service/storage-impl.Storage>} */ (getServicePromiseForDoc(
-      elementOrAmpDoc,
+      // elementOrAmpDoc,
+      window.document,
       'storage'
     ));
   }
