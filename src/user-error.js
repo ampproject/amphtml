@@ -55,7 +55,6 @@ export class UserError extends Error {
  * @param {T} shouldBeTruthy
  * @return {T}
  * @throws {UserError} when attribute values are missing or invalid.
- * @template {T}
  */
 export function userAssert(shouldBeTruthy) {
   if (!shouldBeTruthy) {
