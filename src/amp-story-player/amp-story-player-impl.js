@@ -237,6 +237,9 @@ export class AmpStoryPlayer {
 
     /** @private {!PageScroller} */
     this.pageScroller_ = new PageScroller(win);
+
+    /** @private {boolean} */
+    this.autoplay_ = true;
   }
 
   /**
@@ -353,6 +356,7 @@ export class AmpStoryPlayer {
     this.initializeButton_();
     this.readPlayerConfig_();
     this.maybeFetchMoreStories_(this.stories_.length - this.currentIdx_ - 1);
+    this.initializeAutoplay_();
     this.initializeCircularWrapping_();
     this.signalReady_();
     this.isBuilt_ = true;
@@ -1039,7 +1043,7 @@ export class AmpStoryPlayer {
           .then(() => this.visibleDeferred_.promise)
           // 4. Update the visibility state of the story.
           .then(() => {
-            if (story.distance === 0) {
+            if (story.distance === 0 && this.autoplay_) {
               this.updateVisibilityState_(story, VisibilityState.VISIBLE);
             }
 
@@ -1589,6 +1593,19 @@ export class AmpStoryPlayer {
    */
   isIndexOutofBounds_(index) {
     return index >= this.stories_.length || index < 0;
+  }
+
+  /** @private */
+  initializeAutoplay_() {
+    if (!this.playerConfig_) {
+      return;
+    }
+
+    const {behavior} = this.playerConfig_;
+
+    if (behavior && behavior.autoplay === 'false') {
+      this.autoplay_ = false;
+    }
   }
 
   /**
