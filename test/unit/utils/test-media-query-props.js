@@ -69,6 +69,43 @@ describes.realWin('MediaQueryProps', {frameStyle: {width: '300px'}}, (env) => {
       );
     });
 
+    it('should allow unit expressions', () => {
+      resolver.start();
+      expect(resolver.resolveListQuery('1.1px')).to.equal('1.1px');
+      expect(
+        resolver.resolveListQuery('(min-width: 301px) 1.1px, 2.2px')
+      ).to.equal('2.2px');
+      expect(
+        resolver.resolveListQuery('(min-width: 299px) 1.1px, 2.2px')
+      ).to.equal('1.1px');
+    });
+
+    it('should allow calc() expressions', () => {
+      resolver.start();
+      expect(resolver.resolveListQuery('calc(25px * 10)')).to.equal(
+        'calc(25px * 10)'
+      );
+      expect(
+        resolver.resolveListQuery(
+          '(min-width: 301px) calc(25px * 10), calc(25px * 20)'
+        )
+      ).to.equal('calc(25px * 20)');
+      expect(
+        resolver.resolveListQuery(
+          '(min-width: 299px) calc(25px * 10), calc(25px * 20)'
+        )
+      ).to.equal('calc(25px * 10)');
+    });
+
+    it('should allow complex media expressions', () => {
+      resolver.start();
+      expect(
+        resolver.resolveListQuery(
+          '(min-width: 299px) and (max-width: 300px) a, b'
+        )
+      ).to.equal('a');
+    });
+
     it('should resolve a first matching expression', () => {
       resolver.start();
       expect(

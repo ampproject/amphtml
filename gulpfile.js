@@ -17,11 +17,14 @@
 /* global require, process */
 
 const argv = require('minimist')(process.argv.slice(2));
-const gulp = require('gulp-help')(require('gulp'));
+const gulp = require('gulp');
 const {cyan, red} = require('ansi-colors');
 const {isCiBuild} = require('./build-system/common/ci');
 const {log} = require('./build-system/common/logging');
 
+const {
+  analyticsVendorConfigs,
+} = require('./build-system/tasks/analytics-vendor-configs');
 const {
   checkExactVersions,
 } = require('./build-system/tasks/check-exact-versions');
@@ -34,7 +37,7 @@ const {
 const {a4a} = require('./build-system/tasks/a4a');
 const {ava} = require('./build-system/tasks/ava');
 const {babelPluginTests} = require('./build-system/tasks/babel-plugin-tests');
-const {build, watch} = require('./build-system/tasks/build');
+const {build} = require('./build-system/tasks/build');
 const {bundleSize} = require('./build-system/tasks/bundle-size');
 const {cachesJson} = require('./build-system/tasks/caches-json');
 const {checkLinks} = require('./build-system/tasks/check-links');
@@ -76,7 +79,6 @@ const {todosFindClosed} = require('./build-system/tasks/todos');
 const {unit} = require('./build-system/tasks/unit');
 const {updatePackages} = require('./build-system/tasks/update-packages');
 const {validator, validatorWebui} = require('./build-system/tasks/validator');
-const {vendorConfigs} = require('./build-system/tasks/vendor-configs');
 const {visualDiff} = require('./build-system/tasks/visual-diff');
 
 /**
@@ -118,7 +120,7 @@ function checkFlags(name, taskFunc) {
       cyan(`gulp ${name}`) + ':',
       cyan(invalidFlags.join(', '))
     );
-    log('For detailed usage information, run', cyan('gulp help') + '.');
+    log('For detailed usage information, run', cyan('gulp --tasks') + '.');
     if (validFlags.length > 0) {
       log('Valid flags for', cyan(`gulp ${name}`) + ':');
       validFlags.forEach((key) => {
@@ -181,6 +183,5 @@ createTask('unit', unit);
 createTask('update-packages', updatePackages);
 createTask('validator', validator);
 createTask('validator-webui', validatorWebui);
-createTask('vendor-configs', vendorConfigs);
+createTask('analytics-vendor-configs', analyticsVendorConfigs);
 createTask('visual-diff', visualDiff);
-createTask('watch', watch);

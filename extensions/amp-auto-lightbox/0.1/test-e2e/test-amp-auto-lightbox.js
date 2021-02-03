@@ -17,8 +17,7 @@
 describes.endtoend(
   'amp-auto-lightbox e2e',
   {
-    testUrl:
-      'http://localhost:8000/test/fixtures/e2e/amp-auto-lightbox/amp-auto-lightbox.html',
+    fixture: 'amp-auto-lightbox/amp-auto-lightbox.html',
     initialRect: {width: 600, height: 600},
     environments: ['single'],
     browsers: ['chrome'],

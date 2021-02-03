@@ -33,7 +33,7 @@ CMP used through Marfeel platform in order to handle and enforce user consent.
   </script>
   <div id="postPromptUI">
     Post Prompt UI
-    <button on="tap:consent.prompt(consent=Marfeel)" role="button">
+    <button on="tap:consent.prompt(consent=Marfeel)">
       Manage
     </button>
   </div>

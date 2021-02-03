@@ -30,8 +30,6 @@ using std::unique_ptr;
 using std::vector;
 
 // Helper routine for implementing json serialization.
-// TODO: Replace with something better, it's only used
-// for serializing lists of errors at this point.
 template <class T>
 std::string JsonFromList(const vector<unique_ptr<T>>& list) {
   htmlparser::json::JsonArray array;
@@ -2146,7 +2144,6 @@ TEST(ParseCssTest, ParseAStyleSheet_NastyEscaping) {
   // after the string http://esc.com/'\\ there are some stray tokens. This is
   // difficult to read in the C++ source due to the double escaping, but the
   // parser deals with it OK.
-  // TODO: Should we verify the parameters for the function token?
   vector<char32_t> css = htmlparser::Strings::Utf8ToCodepoints(
       ".a { background-image:url(\"http://esc.com/'\\\\\"/c.png\") } ");
   vector<unique_ptr<ErrorToken>> errors;
@@ -2442,6 +2439,21 @@ TEST(ParseCssTest, ExtractUrls_InvalidArgumentsInsideUrlFunctionYieldsError) {
   }
 ])"");
   EXPECT_EQ(JsonFromList(parsed_urls), "[\n\n]");
+}
+
+TEST(ParseCssTest, ParseMediaQueries_SemicolonTerminatedQuery) {
+  vector<char32_t> css = htmlparser::Strings::Utf8ToCodepoints("@media ;");
+  vector<unique_ptr<ErrorToken>> parse_errors;
+  vector<unique_ptr<Token>> tokens =
+      Tokenize(&css, /*line=*/1, /*col=*/0, &parse_errors);
+  unique_ptr<Stylesheet> stylesheet =
+      ParseAStylesheet(&tokens, AmpCssParsingConfig(), &parse_errors);
+  EXPECT_EQ(JsonFromList(parse_errors), "[\n\n]");
+
+  std::vector<unique_ptr<ErrorToken>> media_errors;
+  std::vector<unique_ptr<Token>> media_types, media_features;
+  ParseMediaQueries(*stylesheet, &media_types, &media_features, &media_errors);
+  EXPECT_EQ(media_errors.size(), 0);
 }
 
 unique_ptr<Stylesheet> MediaQueryStyleSheet(const std::string& media_query) {
@@ -3914,7 +3926,7 @@ TEST(ParseCssTest, ExtractBodySelectorPositions) {
       "a[body=foo].body "    // no match
       "body[bar] "           // pos: 50 end_pos: 54
       "a,body,div "          // pos: 62 end_pos: 66
-      ":not(body) "          // no match (todo?)
+      ":not(body) "          // no match
       "body > div "          // pos: 82 end_pos: 86
       "svg|body {}");        // no match due to filtering in VisitTypeSelector
   vector<char32_t> css = htmlparser::Strings::Utf8ToCodepoints(selector_str);

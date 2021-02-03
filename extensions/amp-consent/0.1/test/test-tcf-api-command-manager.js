@@ -55,7 +55,6 @@ describes.realWin(
           getMergedSharedData: (opt_policy) => {
             return Promise.resolve(mockSharedData);
           },
-          setOnPolicyChange: window.sandbox.spy(),
         };
       });
 
@@ -166,7 +165,7 @@ describes.realWin(
       });
 
       describe('handleGetTcData', () => {
-        it('creates a minimal TcData object', async () => {
+        it.only('creates a minimal TcData object', async () => {
           mockMetadata = getMetadata(false, 'xyz987', false);
           tcfApiCommandManager = new TcfApiCommandManager(mockPolicyManager);
           expect(
@@ -181,7 +180,7 @@ describes.realWin(
             tcString: mockTcString,
             listenerId: undefined,
             cmpStatus: 'loaded',
-            eventStatus: undefined,
+            eventStatus: 'tcloaded',
             purposeOneTreatment: false,
             additionalData: {'additionalConsent': 'xyz987'},
           });
@@ -201,7 +200,7 @@ describes.realWin(
             tcString: mockTcString,
             listenerId: undefined,
             cmpStatus: 'loaded',
-            eventStatus: undefined,
+            eventStatus: 'tcloaded',
             purposeOneTreatment: false,
             additionalData: {'data': 'data1', 'additionalConsent': 'xyz987'},
           });

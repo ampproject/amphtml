@@ -38,7 +38,7 @@ import {
   NotificationUiManager,
 } from '../../../src/service/notification-ui-manager';
 import {Services} from '../../../src/services';
-import {TcfApiCommandManager} from './tcf-api-commands';
+import {TcfApiCommandManager} from './tcf-api-command-manager';
 import {
   assertHttpsUrl,
   getSourceUrl,

@@ -1,7 +1,7 @@
 .DS_Store
 .g4ignore
 build/
-.karma-cache
+.karma-cache*
 .amp-build
 c
 /dist

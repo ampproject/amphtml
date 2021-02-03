@@ -43,4 +43,38 @@ descendant_tag_list {
   tag: "A"
   tag: "SPAN"
   tag: "I-AMPHTML-SIZER"  # Only allowed when document is transformed AMP
+  tag: "IMG"  # Only allowed when document is transformed AMP
+}
+tags: {
+  html_format: AMP
+  enabled_by: "transformed"
+  tag_name: "IMG"
+  spec_name: "IMG-I-AMPHTML-INTRINSIC-SIZER-AMP-STORY-PLAYER"
+  mandatory_parent: "I-AMPHTML-SIZER-INTRINSIC"
+  mandatory_ancestor: "AMP-STORY-PLAYER"
+  attrs: {
+    name: "alt"
+    value: ""
+    mandatory: true
+  }
+  attrs: {
+    name: "aria-hidden"
+    value: "true"
+    mandatory: true
+  }
+  attrs: {
+    name: "class"
+    value: "i-amphtml-intrinsic-sizer"
+    mandatory: true
+  }
+  attrs: {
+    name: "role"
+    value: "presentation"
+    mandatory: true
+  }
+  attrs: {
+    name: "src"
+    value_regex: "data:image\\/svg\\+xml;charset=utf-8,\\s*<svg height=\"\\d+(\\.\\d+)?\" width=\"\\d+(\\.\\d+)?\" xmlns=\"http:\\/\\/www\\.w3\\.org\\/2000\\/svg\" version=\"1\\.1\"\\/>|data:image\\/svg\\+xml;charset=utf-8,\\s*<svg height='\\d+(\\.\\d+)?\' width='\\d+(\\.\\d+)?\' xmlns='http:\\/\\/www\\.w3\\.org\\/2000\\/svg' version='1\\.1'\\/>|data:image\\/svg\\+xml;base64,[a-zA-Z0-9+\\/=]+"
+    mandatory: true
+  }
 }
