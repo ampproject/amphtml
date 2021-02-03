@@ -22,7 +22,7 @@ const pageHeight = 600;
 describes.endtoend(
   'amp-base-carousel:0.1 - non-looping',
   {
-    manualFixture: 'amp-base-carousel/non-looping.amp.html',
+    fixture: 'amp-base-carousel/non-looping.amp.html',
     experiments: ['amp-base-carousel', 'layers'],
     initialRect: {width: pageWidth, height: pageHeight},
   },

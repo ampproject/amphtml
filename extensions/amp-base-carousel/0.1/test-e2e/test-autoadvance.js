@@ -22,7 +22,7 @@ const pageHeight = 600;
 describes.endtoend(
   'amp-base-carousel:0.1 - autoadvance',
   {
-    manualFixture: 'amp-base-carousel/autoadvance.amp.html',
+    fixture: 'amp-base-carousel/autoadvance.amp.html',
     experiments: ['amp-base-carousel', 'layers'],
     initialRect: {width: pageWidth, height: pageHeight},
   },

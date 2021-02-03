@@ -23,7 +23,7 @@ const pageHeight = 600;
 describes.endtoend(
   'amp-base-carousel:1.0 - mixed length slides without snapping',
   {
-    manualFixture: 'amp-base-carousel/1.0/mixed-lengths-no-snap.amp.html',
+    fixture: 'amp-base-carousel/1.0/mixed-lengths-no-snap.amp.html',
     experiments: ['bento-carousel'],
     initialRect: {width: pageWidth, height: pageHeight},
     environments: ['single', 'viewer-demo'],

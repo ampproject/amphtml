@@ -23,7 +23,7 @@ const pageHeight = 600;
 describes.endtoend(
   'amp-base-carousel:1.0 - mixed length slides',
   {
-    manualFixture: 'amp-base-carousel/1.0/mixed-lengths.amp.html',
+    fixture: 'amp-base-carousel/1.0/mixed-lengths.amp.html',
     experiments: ['bento-carousel'],
     environments: ['single', 'viewer-demo'],
     initialRect: {width: pageWidth, height: pageHeight},

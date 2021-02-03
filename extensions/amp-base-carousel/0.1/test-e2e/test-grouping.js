@@ -22,7 +22,7 @@ const pageHeight = 600;
 describes.endtoend(
   'amp-base-carousel:0.1 - grouping',
   {
-    manualFixture: 'amp-base-carousel/grouping-move-by-2.amp.html',
+    fixture: 'amp-base-carousel/grouping-move-by-2.amp.html',
     experiments: ['amp-base-carousel', 'layers'],
     initialRect: {width: pageWidth, height: pageHeight},
   },

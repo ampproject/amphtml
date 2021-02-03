@@ -23,7 +23,7 @@ const pageHeight = 600;
 describes.endtoend(
   'amp-base-carousel:1.0 - vertical orientation',
   {
-    manualFixture: 'amp-base-carousel/1.0/vertical.amp.html',
+    fixture: 'amp-base-carousel/1.0/vertical.amp.html',
     experiments: ['bento-carousel'],
     initialRect: {width: pageWidth, height: pageHeight},
     environments: ['single', 'viewer-demo'],
