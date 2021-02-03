@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as TcfApiCommands from '../tcf-api-commands';
 import {ACTION_TYPE, AmpConsent} from '../amp-consent';
 import {
   CONSENT_ITEM_STATE,
@@ -874,6 +873,7 @@ describes.realWin(
           await macroTask();
           const {frames} = win;
           expect(frames[0].name).to.be.equal('__tcfapiLocator');
+          expect(ampConsent.tcfApiCommandsManager_).to.not.be.null;
         });
       });
 
@@ -931,13 +931,16 @@ describes.realWin(
         });
 
         it('installs window level event listener', async () => {
-          listenerSpy = env.sandbox.stub(TcfApiCommands, 'isValidTcfApiCall');
           event.data = msg;
           await ampConsent.buildCallback();
           await macroTask();
+          listenerSpy = env.sandbox.stub(
+            ampConsent.tcfApiCommandManager_,
+            'handleTcfCommand'
+          );
           win.dispatchEvent(event);
           expect(listenerSpy).to.be.calledOnce;
-          expect(listenerSpy.args[0][0]).to.deep.equals(msg.__tcfapiCall);
+          expect(listenerSpy.args[0][0]).to.deep.equals(msg);
         });
       });
     });
