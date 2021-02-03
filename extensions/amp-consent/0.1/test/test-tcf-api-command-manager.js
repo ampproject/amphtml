@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {TcfApiCommandManager} from '../tcf-api-commands';
+import {TcfApiCommandManager} from '../tcf-api-command-manager';
 import {macroTask} from '../../../../testing/yield';
 import {mockWindowInterface} from '../../../../testing/test-helper';
 import {user} from '../../../../src/log';
@@ -37,11 +37,14 @@ describes.realWin(
       let tcfApiCommandManager;
       let mockTcString;
       let mockSharedData;
+      let callId;
 
       beforeEach(() => {
         mockWin = mockWindowInterface(window.sandbox);
         mockWin.postMessage = window.sandbox.spy();
         mockMetadata = {};
+        mockSharedData = {};
+        mockTcString = '';
         mockPolicyManager = {
           getConsentMetadataInfo: (opt_policy) => {
             return Promise.resolve(mockMetadata);
@@ -52,6 +55,7 @@ describes.realWin(
           getMergedSharedData: (opt_policy) => {
             return Promise.resolve(mockSharedData);
           },
+          setOnPolicyChange: window.sandbox.spy(),
         };
       });
 
@@ -105,9 +109,7 @@ describes.realWin(
 
       describe('handlePingEvent', () => {
         it('creates a minimal ping object', async () => {
-          mockMetadata = {
-            gdprApplies: false,
-          };
+          mockMetadata = getMetadata(false);
           tcfApiCommandManager = new TcfApiCommandManager(mockPolicyManager);
           expect(
             tcfApiCommandManager.getMinimalPingReturnForTesting(mockMetadata)
@@ -120,9 +122,7 @@ describes.realWin(
         });
 
         it('creates a minimal ping object with no gdprApplies', async () => {
-          mockMetadata = {
-            gdprApplies: undefined,
-          };
+          mockMetadata = getMetadata();
           tcfApiCommandManager = new TcfApiCommandManager(mockPolicyManager);
           expect(
             tcfApiCommandManager.getMinimalPingReturnForTesting(mockMetadata)
@@ -147,46 +147,27 @@ describes.realWin(
         });
 
         it('sends a minimal PingReturn via PostMessage', async () => {
-          const callId = 'pingCallId';
-          data = {
-            __tcfapiCall: {
-              'command': 'ping',
-              callId,
-              version: 2,
-            },
-          };
-          mockMetadata = {
-            gdprApplies: true,
-          };
+          callId = 'pingCallId';
+          data = getData('ping', callId);
+          mockMetadata = getMetadata(true);
           tcfApiCommandManager = new TcfApiCommandManager(mockPolicyManager);
           tcfApiCommandManager.handleTcfCommand(data, mockWin);
           await macroTask();
 
           // No 'success' sent for ping
           const postMessageArgs = mockWin.postMessage.args[0];
-          expect(postMessageArgs[0]).to.deep.equals({
-            __tcfapiReturn: {
-              returnValue: {
-                cmpLoaded: true,
-                gdprApplies: mockMetadata.gdprApplies,
-                cmpStatus: 'loaded',
-                tcfPolicyVersion: 2,
-              },
+          expect(postMessageArgs[0]).to.deep.equals(
+            getTcfApiReturn(
               callId,
-              success: undefined,
-            },
-          });
+              tcfApiCommandManager.getMinimalPingReturnForTesting(mockMetadata),
+            )
+          );
         });
       });
 
       describe('handleGetTcData', () => {
         it('creates a minimal TcData object', async () => {
-          mockMetadata = {
-            gdprApplies: false,
-            additionalConsent: 'xyz987',
-            purposeOne: false,
-          };
-
+          mockMetadata = getMetadata(false, 'xyz987', false);
           tcfApiCommandManager = new TcfApiCommandManager(mockPolicyManager);
           expect(
             tcfApiCommandManager.getMinimalTcDataForTesting(
@@ -227,19 +208,9 @@ describes.realWin(
         });
 
         it('sends a minimal TcData via PostMessage', async () => {
-          const callId = 'getTcDataId';
-          data = {
-            __tcfapiCall: {
-              'command': 'getTCData',
-              callId,
-              version: 2,
-            },
-          };
-          mockMetadata = {
-            gdprApplies: false,
-            additionalConsent: 'xyz987',
-            purposeOne: false,
-          };
+          callId = 'getTcDataId';
+          data = getData('getTCData', callId);
+          mockMetadata = getMetadata(false, 'xyz987', false);
           mockTcString = 'abc123';
           mockSharedData = {'data': 'data1'};
           tcfApiCommandManager = new TcfApiCommandManager(mockPolicyManager);
@@ -247,28 +218,64 @@ describes.realWin(
           await macroTask();
 
           const postMessageArgs = mockWin.postMessage.args[0];
-          console.log(postMessageArgs[0]);
-          expect(postMessageArgs[0]).to.deep.equals({
-            __tcfapiReturn: {
-              returnValue: {
-                tcfPolicyVersion: 2,
-                gdprApplies: mockMetadata.gdprApplies,
-                tcString: mockTcString,
-                listenerId: undefined,
-                cmpStatus: 'loaded',
-                eventStatus: undefined,
-                purposeOneTreatment: mockMetadata.purposeOne,
-                additionalData: {
-                  'data': 'data1',
-                  'additionalConsent': mockMetadata.additionalConsent,
-                },
-              },
+          console.log(JSON.stringify(postMessageArgs[0]));
+          expect(postMessageArgs[0]).to.deep.equals(
+            getTcfApiReturn(
               callId,
-              success: true,
-            },
-          });
+              tcfApiCommandManager.getMinimalTcDataForTesting(
+                mockMetadata,
+                mockSharedData,
+                mockTcString
+              ),
+              true
+            )
+          );
         });
       });
     });
   }
 );
+
+/**
+ * @param {string} command
+ * @param {string} callId
+ * @param {string=} opt_parameter
+ */
+function getData(command, callId, opt_parameter) {
+  return {
+    __tcfapiCall: {
+      command,
+      callId,
+      version: 2,
+      parameter: opt_parameter,
+    },
+  };
+}
+
+/**
+ * @param {string=} opt_gdprApplies
+ * @param {string=} opt_addtlConsent
+ * @param {boolean=} opt_purposeOne
+ */
+function getMetadata(opt_gdprApplies, opt_addtlConsent, opt_purposeOne) {
+  return {
+    gdprApplies: opt_gdprApplies,
+    additionalConsent: opt_addtlConsent,
+    purposeOne: opt_purposeOne,
+  };
+}
+
+/**
+ * @param {string} callId
+ * @param {Object=} opt_returnValue
+ * @param {boolean=} opt_success
+ */
+function getTcfApiReturn(callId, opt_returnValue, opt_success) {
+  return {
+    __tcfapiReturn: {
+      callId,
+      returnValue: opt_returnValue,
+      success: opt_success,
+    },
+  };
+}

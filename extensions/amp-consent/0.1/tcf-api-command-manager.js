@@ -16,6 +16,7 @@
 
 import {ConsentPolicyManager} from './consent-policy-manager'; // eslint-disable-line no-unused-vars
 import {TCF_POST_MESSAGE_API_COMMANDS} from './consent-info';
+import {hasOwn, map} from '../../../src/utils/object';
 import {isEnumValue, isObject} from '../../../src/types';
 import {user} from '../../../src/log';
 
@@ -47,6 +48,7 @@ const TAG = 'amp-consent';
 const TCF_POLICY_VERSION = 2;
 const CMP_STATUS = 'loaded';
 const CMP_LOADED = true;
+const EVENT_STATUS = 'tcloaded';
 
 export class TcfApiCommandManager {
   /**
@@ -54,32 +56,8 @@ export class TcfApiCommandManager {
    * @param {!./consent-policy-manager.ConsentPolicyManager} policyManager
    */
   constructor(policyManager) {
+    /** @param {!./consent-policy-manager.ConsentPolicyManager} */
     this.policyManager_ = policyManager;
-
-    // this.changeListeners = [];
-
-    // No shared data for now
-    // policyManager.setOnPolicyChange(() => {
-    //   this.handleTcDataChange_();
-    // });
-
-    // this.currentTcData = null;
-  }
-
-  handleAddEventListner_(payload) {
-    this.changeListeners_.push(payload);
-  }
-
-  // How will this work in conjunciton with getTcData?
-  // Read up on this
-  handleTcDataChange_() {
-    // Get the data using promises
-    // Create the TCData object
-    // Check if its changed
-    // If it has changed then iterate
-    for (let i = 0; i < this.changeListeners.length; i++) {
-      // send post message
-    }
   }
 
   /**
@@ -101,8 +79,6 @@ export class TcfApiCommandManager {
         this.handleGetTcData_(payload, win);
         break;
       case TCF_POST_MESSAGE_API_COMMANDS.ADD_EVENT_LISTENER:
-        this.handleAddEventListner_(payload, win);
-        break;
       case TCF_POST_MESSAGE_API_COMMANDS.REMOVE_EVENT_LISTENER:
       default:
         return;
@@ -110,12 +86,9 @@ export class TcfApiCommandManager {
   }
 
   /**
-   * Create minimal PingReturn object. Send to original iframe
-   * once object has been filled.
-   * @param {!Object} payload
-   * @param {!Window} win
+   * @return {!Promise<Array>}
    */
-  handleGetTcData_(payload, win) {
+  getTcDataPromises_() {
     const consentStringInfoPromise = this.policyManager_.getConsentStringInfo(
       'default'
     );
@@ -126,11 +99,21 @@ export class TcfApiCommandManager {
       'default'
     );
 
-    Promise.all([
+    return Promise.all([
       metadataPromise,
       sharedDataPromise,
       consentStringInfoPromise,
-    ]).then((arr) => {
+    ]);
+  }
+
+  /**
+   * Create minimal PingReturn object. Send to original iframe
+   * once object has been filled.
+   * @param {!Object} payload
+   * @param {!Window} win
+   */
+  handleGetTcData_(payload, win) {
+    this.getTcDataPromises_().then((arr) => {
       const returnValue = this.getMinimalTcData_(arr[0], arr[1], arr[2]);
       const {callId} = payload;
 
@@ -145,7 +128,7 @@ export class TcfApiCommandManager {
    * @param {?Object} sharedData
    * @param {string=} tcString
    * @param {string=} eventStatus
-   * @param {string=} listenerId
+   * @param {number=} listenerId
    * @return {!MinimalTcData} policyManager
    */
   getMinimalTcData_(metadata, sharedData, tcString, eventStatus, listenerId) {
@@ -175,8 +158,6 @@ export class TcfApiCommandManager {
    * @param {!Window} win
    */
   handlePingEvent_(payload, win) {
-    // Why are we using these methods here when we're just getting the values above?
-    // Justification is that for AddEventListner, we're only looking for changes
     this.policyManager_.getConsentMetadataInfo('default').then((metadata) => {
       const returnValue = this.getMinimalPingReturn_(metadata);
       const {callId} = payload;
@@ -239,14 +220,14 @@ export class TcfApiCommandManager {
       );
       return false;
     }
-    if (parameter !== undefined) {
+    if (parameter) {
       user().error(
         TAG,
         `Unsupported parameter found in "tcfapiCall": ${parameter}`
       );
       return false;
     }
-    if (version != '2') {
+    if (version !== 2) {
       user().error(TAG, `Found incorrect version in "tcfapiCall": ${version}`);
       return false;
     }
@@ -266,10 +247,24 @@ export class TcfApiCommandManager {
    * @param {?Object} metadata
    * @param {?Object} sharedData
    * @param {string=} tcString
+   * @param {string=} eventStatus
+   * @param {number=} listenerId
    * @return {!MinimalPingReturn}
    * @visibleForTesting
    */
-  getMinimalTcDataForTesting(metadata, sharedData, tcString) {
-    return this.getMinimalTcData_(metadata, sharedData, tcString);
+  getMinimalTcDataForTesting(
+    metadata,
+    sharedData,
+    tcString,
+    eventStatus,
+    listenerId
+  ) {
+    return this.getMinimalTcData_(
+      metadata,
+      sharedData,
+      tcString,
+      eventStatus,
+      listenerId
+    );
   }
 }
