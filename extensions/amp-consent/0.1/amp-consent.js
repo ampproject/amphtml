@@ -38,6 +38,7 @@ import {
   NotificationUiManager,
 } from '../../../src/service/notification-ui-manager';
 import {Services} from '../../../src/services';
+import {TcfApiCommandManager} from './tcf-api-command-manager';
 import {
   assertHttpsUrl,
   getSourceUrl,
@@ -47,7 +48,6 @@ import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
-import {handleTcfCommand, isValidTcfApiCall} from './tcf-api-commands';
 import {isEnumValue, isObject} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {toggle} from '../../../src/style';
@@ -77,6 +77,9 @@ export class AmpConsent extends AMP.BaseElement {
 
     /** @private {?ConsentPolicyManager} */
     this.consentPolicyManager_ = null;
+
+    /** @private {?TcfApiCommandManager} */
+    this.tcfApiCommandManager_ = null;
 
     /** @private {?NotificationUiManager} */
     this.notificationUiManager_ = null;
@@ -755,6 +758,9 @@ export class AmpConsent extends AMP.BaseElement {
     }
     // Check if __tcfApiLocator API already exists (dirty AMP)
     if (!this.win.frames[TCF_API_LOCATOR]) {
+      this.tcfApiCommandManager_ = new TcfApiCommandManager(
+        this.consentPolicyManager_
+      );
       // Add window listener for 3p iframe PostMessages
       this.win.addEventListener('message', this.boundHandleIframeMessages_);
 
@@ -786,14 +792,10 @@ export class AmpConsent extends AMP.BaseElement {
   handleIframeMessages_(event) {
     const data = getData(event);
 
-    if (
-      !data ||
-      !data['__tcfapiCall'] ||
-      !isValidTcfApiCall(data['__tcfapiCall'])
-    ) {
+    if (!data || !data['__tcfapiCall']) {
       return;
     }
-    handleTcfCommand(data.__tcfapiCall);
+    this.tcfApiCommandManager_.handleTcfCommand(data, event.source);
   }
 }
 
