@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {UserError, userAssert} from '../user-error';
+import {userAssert} from '../user-error';
 
 /**
  * Parses the date using the `Date.parse()` rules. Additionally supports the
