@@ -77,7 +77,7 @@ describes.realWin(
         },
       });
       doc.body.appendChild(ins);
-      await ins.build();
+      await ins.buildInternal();
       if (opt_beforeLayoutCallback) {
         opt_beforeLayoutCallback(ins);
       }

@@ -48,7 +48,7 @@ describes.realWin(
       ft.textContent = text;
       doc.body.appendChild(ft);
       return ft
-        .build()
+        .buildInternal()
         .then(() => ft.layoutCallback())
         .then(() => ft);
     }

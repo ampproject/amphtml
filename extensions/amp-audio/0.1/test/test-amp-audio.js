@@ -62,7 +62,7 @@ describes.realWin(
       naturalDimensions_['AMP-AUDIO'] = {width: '300px', height: '30px'};
       const ampAudio = getAmpAudio(attributes, opt_childNodesAttrs);
       return ampAudio
-        .build()
+        .buildInternal()
         .then(() => ampAudio.layoutCallback())
         .then(() => ampAudio)
         .catch((error) => {
@@ -86,7 +86,7 @@ describes.realWin(
       doc.body.appendChild(ampStory);
 
       return ampAudio
-        .build()
+        .buildInternal()
         .then(() => ampAudio.layoutCallback())
         .then(() => ampAudio)
         .catch((error) => {

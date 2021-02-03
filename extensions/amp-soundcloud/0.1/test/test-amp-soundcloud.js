@@ -53,7 +53,7 @@ describes.realWin(
 
       doc.body.appendChild(scplayer);
       return scplayer
-        .build()
+        .buildInternal()
         .then(() => scplayer.layoutCallback())
         .then(() => scplayer);
     }

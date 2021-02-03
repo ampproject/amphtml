@@ -33,7 +33,7 @@ describes.realWin(
     let element;
 
     const waitForRender = async () => {
-      await element.build();
+      await element.buildInternal();
       const loadPromise = element.layoutCallback();
       const shadow = element.shadowRoot;
       await waitFor(() => shadow.querySelector('iframe'), 'iframe mounted');

@@ -87,7 +87,7 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
     });
 
     it('should render with default context', async () => {
-      await element.build();
+      await element.buildInternal();
       await waitFor(() => component.callCount > 0, 'component rendered');
       expect(lastContext).to.contain({
         renderable: true,
@@ -99,7 +99,7 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
     });
 
     it('should propagate context to children', async () => {
-      await element.build();
+      await element.buildInternal();
       await waitFor(() => component.callCount > 0, 'component rendered');
 
       const child1 = element.querySelector('#child1');
@@ -116,7 +116,7 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
         );
       }
 
-      await element.build();
+      await element.buildInternal();
       const child1 = element.querySelector('#child1');
 
       await waitFor(() => getSlot(), 'slot rendered');
@@ -139,7 +139,7 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
         }
       });
 
-      await element.build();
+      await element.buildInternal();
       await element.layoutCallback();
       expect(lastLoad).to.be.true;
       expect(loader).to.be.calledWith(true);
@@ -159,7 +159,7 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
         }
       });
 
-      await element.build();
+      await element.buildInternal();
       await expect(element.layoutCallback()).to.be.eventually.rejected;
       expect(lastLoad).to.be.true;
       expect(loader).to.be.calledWith(true);
@@ -190,7 +190,7 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
     }
 
     it('should unrender component on disconnect', async () => {
-      await element.build();
+      await element.buildInternal();
       await waitFor(() => getSlot(), 'content rendered');
 
       // Disconnect.
@@ -199,7 +199,7 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
     });
 
     it('should rerender component on reconnect', async () => {
-      await element.build();
+      await element.buildInternal();
       await waitFor(() => getSlot(), 'content rendered');
       removeElement(element);
       await waitFor(() => getSlot() === null, 'content unrendered');
@@ -241,7 +241,7 @@ describes.realWin('whenUpgraded', {amp: true}, (env) => {
     doc.body.appendChild(el);
     const p = whenUpgraded(el);
     upgradeOrRegisterElement(win, 'amp-preact', Impl);
-    el.build();
+    el.buildInternal();
 
     const api = await p;
     expect(api.key).to.be.true;
@@ -252,7 +252,7 @@ describes.realWin('whenUpgraded', {amp: true}, (env) => {
     doc.body.appendChild(el);
     upgradeOrRegisterElement(win, 'amp-preact', Impl);
     const p = whenUpgraded(el);
-    el.build();
+    el.buildInternal();
 
     const api = await p;
     expect(api.key).to.be.true;
@@ -262,7 +262,7 @@ describes.realWin('whenUpgraded', {amp: true}, (env) => {
     const el = doc.createElement('amp-preact');
     doc.body.appendChild(el);
     upgradeOrRegisterElement(win, 'amp-preact', Impl);
-    await el.build();
+    await el.buildInternal();
     const p = whenUpgraded(el);
 
     const api = await p;
@@ -284,7 +284,7 @@ describes.realWin('whenUpgraded', {amp: true}, (env) => {
     doc.body.appendChild(el);
     upgradeOrRegisterElement(win, 'amp-preact', Impl);
     const p = whenUpgraded(el);
-    el.build();
+    el.buildInternal();
 
     const api = await p;
     expect(api).not.to.equal(imperativeApi);
@@ -318,7 +318,7 @@ describes.realWin('whenUpgraded', {amp: true}, (env) => {
     doc.body.appendChild(el);
     upgradeOrRegisterElement(win, 'amp-preact', Impl);
     const p = whenUpgraded(el);
-    el.build();
+    el.buildInternal();
 
     const api = await p;
     expect(api.first).to.be.true;

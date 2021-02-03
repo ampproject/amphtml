@@ -204,7 +204,7 @@ describes.realWin(
 
       doc.body.appendChild(viqeoElement);
       return viqeoElement
-        .build()
+        .buildInternal()
         .then(() => viqeoElement.layoutCallback())
         .then(() => {
           const videoManager = Services.videoManagerForDoc(doc);

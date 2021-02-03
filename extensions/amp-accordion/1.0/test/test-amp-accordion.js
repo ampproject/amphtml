@@ -73,7 +73,7 @@ describes.realWin(
         </amp-accordion>
       `;
       win.document.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
     });
 
     it('should render expanded and collapsed sections', () => {
@@ -323,7 +323,7 @@ describes.realWin(
         </amp-accordion>
       `;
       win.document.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
 
       const sections = element.children;
       const {
@@ -407,7 +407,7 @@ describes.realWin(
           </amp-accordion>
         `;
         win.document.body.appendChild(element);
-        await element.build();
+        await element.buildInternal();
       });
 
       function invocation(method, args = {}) {
@@ -573,7 +573,7 @@ describes.realWin(
           </amp-accordion>
         `;
         win.document.body.appendChild(element);
-        await element.build();
+        await element.buildInternal();
       });
 
       it('should not animate on build', () => {
@@ -652,7 +652,7 @@ describes.realWin(
         win.document.body.appendChild(element);
         win.CSS.supports = () => true;
         win.document.body.onbeforematch = null;
-        await element.build();
+        await element.buildInternal();
 
         const section1 = element.children[0];
         const content1 = section1.lastElementChild;
@@ -667,7 +667,7 @@ describes.realWin(
         win.document.body.appendChild(element);
         win.CSS.supports = () => true;
         win.document.body.onbeforematch = null;
-        await element.build();
+        await element.buildInternal();
 
         const section2 = element.children[1];
         const content2 = section2.lastElementChild;
@@ -684,7 +684,7 @@ describes.realWin(
         win.document.body.appendChild(element);
         win.CSS.supports = () => true;
         win.document.body.onbeforematch = null;
-        await element.build();
+        await element.buildInternal();
 
         const section1 = element.children[0];
         const content1 = section1.lastElementChild;
@@ -817,7 +817,7 @@ describes.realWin(
             </amp-accordion>
           `;
           win.document.body.appendChild(element);
-          await element.build();
+          await element.buildInternal();
 
           section1 = element.children[0];
           section2 = element.children[1];

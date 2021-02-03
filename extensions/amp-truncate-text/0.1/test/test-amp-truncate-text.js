@@ -83,7 +83,7 @@ describes.realWin(
         });
         element.innerHTML = content;
         container.appendChild(element);
-        await element.build();
+        await element.buildInternal();
         await element.layoutCallback();
         await afterMutationAndClamp();
 

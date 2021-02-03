@@ -39,7 +39,7 @@ describes.realWin(
       imgur.setAttribute('layout', 'responsive');
       doc.body.appendChild(imgur);
       return imgur
-        .build()
+        .buildInternal()
         .then(() => imgur.layoutCallback())
         .then(() => imgur);
     }

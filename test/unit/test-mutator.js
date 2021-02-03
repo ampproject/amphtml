@@ -1389,7 +1389,7 @@ describes.realWin('mutator mutateElement and collapse', {amp: true}, (env) => {
     element.signals = () => new Signals();
     element.whenBuilt = () => Promise.resolve();
     element.isBuilt = () => true;
-    element.build = () => Promise.resolve();
+    element.buildInternal = () => Promise.resolve();
     element.isUpgraded = () => true;
     element.updateLayoutBox = () => {};
     element.getPlaceholder = () => null;

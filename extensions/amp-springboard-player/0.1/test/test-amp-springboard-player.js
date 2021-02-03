@@ -41,7 +41,7 @@ describes.realWin(
       sp.setAttribute('layout', 'responsive');
       doc.body.appendChild(sp);
       return sp
-        .build()
+        .buildInternal()
         .then(() => {
           sp.layoutCallback();
         })

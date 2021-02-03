@@ -55,7 +55,7 @@ describes.realWin(
 
       doc.body.appendChild(minuteMediaPlayerElement);
       return minuteMediaPlayerElement
-        .build()
+        .buildInternal()
         .then(() => {
           minuteMediaPlayerElement.layoutCallback();
         })

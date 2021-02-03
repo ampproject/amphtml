@@ -79,7 +79,7 @@ describes.realWin(
         }
       });
 
-      await element.build();
+      await element.buildInternal();
       await element.layoutCallback();
       return element;
     }

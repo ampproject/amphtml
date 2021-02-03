@@ -79,7 +79,7 @@ describes.realWin(
 
     function loaded(element) {
       return element
-        .build()
+        .buildInternal()
         .then(() => element.layoutCallback())
         .then(() => element);
     }

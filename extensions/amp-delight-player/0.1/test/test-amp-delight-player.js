@@ -57,7 +57,7 @@ describes.realWin(
         // hash # at the end so path is not affected by param concat
         `http://localhost:${location.port}/test/fixtures/served/blank.html#`;
       return delight
-        .build()
+        .buildInternal()
         .then(() => delight.layoutCallback())
         .then(() => delight);
     }

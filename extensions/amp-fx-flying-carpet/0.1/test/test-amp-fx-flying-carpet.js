@@ -61,7 +61,7 @@ describes.realWin(
 
       parent.appendChild(flyingCarpet);
       return flyingCarpet
-        .build()
+        .buildInternal()
         .then(() => {
           const resource = Resource.forElement(flyingCarpet);
           resource.measure();

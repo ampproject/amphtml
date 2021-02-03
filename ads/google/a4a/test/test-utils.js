@@ -79,7 +79,7 @@ function noopMethods(
   }
 ) {
   const noop = () => {};
-  impl.element.build = noop;
+  impl.element.buildInternal = noop;
   impl.element.getPlaceholder = noop;
   impl.element.createPlaceholder = noop;
   sandbox.stub(impl, 'getAmpDoc').returns(ampdoc);

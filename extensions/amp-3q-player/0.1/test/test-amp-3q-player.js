@@ -47,7 +47,7 @@ describes.realWin(
         player.setAttribute('data-id', playoutId);
       }
       doc.body.appendChild(player);
-      await player.build();
+      await player.buildInternal();
       player.layoutCallback();
       const iframe = player.querySelector('iframe');
       const impl = await player.getImpl();

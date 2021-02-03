@@ -160,7 +160,7 @@ describes.realWin(
       json.setAttribute('type', 'application/json');
       el.appendChild(json);
       win.document.body.appendChild(el);
-      return el.build().then(() => el);
+      return el.buildInternal().then(() => el);
     }
 
     // Ad ad div or the relativeTo element cannot be found.
@@ -220,7 +220,7 @@ describes.realWin(
       el.appendChild(win.document.createElement('p'));
       win.document.body.appendChild(el);
       let promise;
-      allowConsoleError(() => (promise = el.build()));
+      allowConsoleError(() => (promise = el.buildInternal()));
       return promise.should.be.rejectedWith(/application\/json/);
     });
 

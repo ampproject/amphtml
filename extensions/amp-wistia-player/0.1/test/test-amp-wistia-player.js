@@ -38,7 +38,7 @@ describes.realWin(
       wistiaEmbed.setAttribute('height', '360');
       doc.body.appendChild(wistiaEmbed);
       return wistiaEmbed
-        .build()
+        .buildInternal()
         .then(() => wistiaEmbed.layoutCallback())
         .then(() => wistiaEmbed);
     }

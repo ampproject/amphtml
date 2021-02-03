@@ -41,7 +41,7 @@ describes.realWin(
       }
       doc.body.appendChild(vine);
       return vine
-        .build()
+        .buildInternal()
         .then(() => vine.layoutCallback())
         .then(() => vine);
     }

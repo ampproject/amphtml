@@ -247,7 +247,7 @@ describes.realWin(
       await createStoryWithPages();
       const pages = story.element.querySelectorAll('amp-story-page');
 
-      element.build();
+      element.buildInternal();
 
       expect(pages[0].hasAttribute('active')).to.be.true;
       expect(pages[1].hasAttribute('active')).to.be.false;

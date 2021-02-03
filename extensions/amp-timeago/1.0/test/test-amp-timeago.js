@@ -29,7 +29,7 @@ describes.realWin(
     let element;
 
     const getTimeFromShadow = async () => {
-      await element.build();
+      await element.buildInternal();
       const getTimeContent = () =>
         element.shadowRoot &&
         element.shadowRoot.querySelector('time') &&
@@ -39,7 +39,7 @@ describes.realWin(
     };
 
     const getTimeFromSlot = async () => {
-      await element.build();
+      await element.buildInternal();
       const getTimeContent = () => {
         const slot =
           element.shadowRoot && element.shadowRoot.querySelector('slot');

@@ -54,7 +54,7 @@ describes.realWin(
         yt.setAttribute('layout', 'responsive');
       }
       doc.body.appendChild(yt);
-      await yt.build();
+      await yt.buildInternal();
       if (opt_beforeLayoutCallback) {
         opt_beforeLayoutCallback(yt);
       }

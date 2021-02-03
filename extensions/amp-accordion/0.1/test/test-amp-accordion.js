@@ -64,7 +64,7 @@ describes.realWin(
       }
       doc.body.appendChild(ampAccordion);
       return ampAccordion
-        .build()
+        .buildInternal()
         .then(() => ampAccordion.getImpl())
         .then((impl) => {
           impl.mutateElement = (fn) =>
@@ -697,7 +697,7 @@ describes.realWin(
         ampAccordion2.appendChild(section);
       }
       doc.body.appendChild(ampAccordion2);
-      await ampAccordion2.build();
+      await ampAccordion2.buildInternal();
 
       impl.mutateElement = (fn) => fn();
       await ampAccordion.layoutCallback();

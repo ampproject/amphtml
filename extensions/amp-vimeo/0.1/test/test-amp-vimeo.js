@@ -43,7 +43,7 @@ describes.realWin(
         vimeo.setAttribute('do-not-track', '');
       }
       doc.body.appendChild(vimeo);
-      await vimeo.build();
+      await vimeo.buildInternal();
       await vimeo.layoutCallback();
       return vimeo;
     }

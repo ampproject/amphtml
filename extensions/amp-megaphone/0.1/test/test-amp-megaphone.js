@@ -56,7 +56,7 @@ describes.realWin(
       }
 
       container.appendChild(mpplayer);
-      await mpplayer.build();
+      await mpplayer.buildInternal();
       await mpplayer.layoutCallback();
       return mpplayer;
     }

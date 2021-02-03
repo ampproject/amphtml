@@ -40,7 +40,7 @@ describes.realWin(
       win.document.body.appendChild(element);
 
       return element
-        .build()
+        .buildInternal()
         .then(() => element.layoutCallback())
         .then(() => element);
     }

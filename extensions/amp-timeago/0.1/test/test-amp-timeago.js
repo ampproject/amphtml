@@ -42,7 +42,7 @@ describes.realWin(
       date.setDate(date.getDate() - 2);
       element.setAttribute('datetime', date.toISOString());
       element.textContent = date.toString();
-      element.build();
+      element.buildInternal();
       const timeElement = element.querySelector('time');
       expect(timeElement.textContent).to.equal('2 days ago');
     });
@@ -52,7 +52,7 @@ describes.realWin(
       element.setAttribute('datetime', date.toISOString());
       element.textContent = 'Sunday 1 January 2017';
       element.setAttribute('cutoff', '8640000');
-      element.build();
+      element.buildInternal();
       const timeElement = element.querySelector('time');
       expect(timeElement.textContent).to.equal('Sunday 1 January 2017');
     });
@@ -62,7 +62,7 @@ describes.realWin(
       date.setSeconds(date.getSeconds() - 10);
       element.setAttribute('datetime', date.toISOString());
       element.textContent = date.toString();
-      element.build();
+      element.buildInternal();
       await timeout(1000);
       (await element.getImpl(true)).viewportCallback_(true);
       const timeElement = element.querySelector('time');
@@ -74,7 +74,7 @@ describes.realWin(
       date.setDate(date.getDate() - 2);
       element.setAttribute('datetime', date.toISOString());
       element.textContent = date.toString();
-      element.build();
+      element.buildInternal();
       date.setDate(date.getDate() + 1);
       element.setAttribute('datetime', date.toString());
       element.mutatedAttributesCallback({

@@ -51,7 +51,7 @@ describes.realWin(
       if (implExtends) {
         implExtends(o2, impl);
       }
-      await o2.build();
+      await o2.buildInternal();
       await o2.layoutCallback();
       return o2;
     }

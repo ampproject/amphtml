@@ -51,7 +51,7 @@ describes.realWin(
       doc.body.appendChild(ampRecaptchaInput);
 
       return ampRecaptchaInput
-        .build()
+        .buildInternal()
         .then(() => {
           return ampRecaptchaInput.layoutCallback();
         })

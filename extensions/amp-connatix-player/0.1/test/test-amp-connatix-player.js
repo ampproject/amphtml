@@ -42,7 +42,7 @@ describes.realWin(
       cnx.setAttribute('layout', 'responsive');
 
       doc.body.appendChild(cnx);
-      return cnx.build().then(() => {
+      return cnx.buildInternal().then(() => {
         cnx.layoutCallback();
         return cnx;
       });

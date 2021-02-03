@@ -64,7 +64,7 @@ describes.realWin(
       el.appendChild(svg);
       doc.body.appendChild(el);
       return el
-        .build()
+        .buildInternal()
         .then(() => el.getImpl(false))
         .then((aImpl) => {
           impl = aImpl;
