@@ -13,5 +13,11 @@
     "expiration_date_utc": "2021-06-30",
     "define_experiment_constant": "INABOX_RESOURCES_EAGER"
   },
-  "experimentC": {}
+  "experimentC": {
+    "name": "whenContentLoaded via IntersectionObserver",
+    "environment": "AMP",
+    "issue": "https://github.com/ampproject/amphtml/issues/31915",
+    "expiration_date_utc": "2021-03-31",
+    "define_experiment_constant": "INI_LOAD_INOB"
+  }
 }
