@@ -648,7 +648,7 @@ export class AmpStoryPlayer {
       this.rootEl_.classList.remove(LoadStateClass.LOADING);
       this.rootEl_.classList.add(LoadStateClass.ERROR);
       this.element_.classList.add(LoadStateClass.ERROR);
-      iframeEl.loadDeferred.reject();
+      iframeEl.loadDeferred.reject('Error loading iframe.');
     };
   }
 
