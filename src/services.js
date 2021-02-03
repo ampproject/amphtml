@@ -634,6 +634,17 @@ export class Services {
   }
 
   /**
+   * @return {!Promise<!./service/storage-impl.Storage>}
+   */
+  static storageForTopLevelDoc() {
+    return /** @type {!Promise<!./service/storage-impl.Storage>} */ (getServicePromiseForDoc(
+      // elementOrAmpDoc,
+      window.document,
+      'storage'
+    ));
+  }
+
+  /**
    * @param {!Window} window
    * @return {!./service/template-impl.Templates}
    */
