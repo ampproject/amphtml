@@ -254,6 +254,9 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     if (this.state_ === DrawerState.OPEN) {
       return;
     }
+    document
+      .querySelector('amp-story')
+      .classList.add('i-amphtml-story-bookend-active');
 
     super.open(shouldAnimate);
 
@@ -317,6 +320,16 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @override
    */
   close_() {
+    document
+      .querySelector('amp-story')
+      .classList.remove('i-amphtml-story-bookend-active');
+
+    // setTimeout(() => {
+    //   this.element.querySelector(
+    //     '.i-amphtml-story-draggable-drawer-container'
+    //   ).scrollTop = 0;
+    // }, 1000);
+
     switch (this.state_) {
       // If the drawer was open, pop the history entry that was added, which
       // will close the drawer through the onPop callback.
