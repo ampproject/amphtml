@@ -429,7 +429,7 @@ While this technique provides the most consistent user experience, it may crop u
 
 <div layout="container" width="3" height="2">
   <div style="width:33%;display:inline-block">
-    <amp-img src="https://github.com/ampprojject/amphtml/raw/master/extensions/amp-story/img/preset_story_scaled.gif" layout="responsive" width="200" height="350"/>
+    <amp-img src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/preset_story_scaled.gif" layout="responsive" width="200" height="350"/>
   </div>
   <div style="width:66%;display:inline-block">
     <amp-img src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/preset_story_anchor.gif" layout="responsive" width="500" height="400"/>
