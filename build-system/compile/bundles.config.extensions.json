@@ -495,6 +495,12 @@
     "options": {"hasCss": true}
   },
   {
+    "name": "amp-story-primary-cta",
+    "version": "0.1",
+    "options": {"hasCss": true},
+    "latestVersion": "0.1"
+  },
+  {
     "name": "amp-stream-gallery",
     "version": ["0.1", "1.0"],
     "latestVersion": "0.1",
