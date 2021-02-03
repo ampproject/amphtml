@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {UserError} from '../user-error';
+
 /**
  * Parses the date using the `Date.parse()` rules. Additionally supports the
  * keyword "now" that indicates the "current date/time". Returns either a
@@ -50,4 +52,48 @@ export function getDate(value) {
   }
   // Must be a `Date` object.
   return value.getTime();
+}
+
+/**
+ * @param {!Element} element
+ * @return {?number}
+ */
+export function parseDateAttrs(element) {
+  const epoch = parseEpoch(element);
+  if (!epoch) {
+    throw new UserError(
+      'One of datetime, timestamp-ms, or timestamp-seconds is required'
+    );
+  }
+
+  const offsetSeconds =
+    (Number(element.getAttribute('offset-seconds')) || 0) * 1000;
+  return epoch + offsetSeconds;
+}
+
+/**
+ * @param {!Element} element
+ * @return {?number}
+ */
+function parseEpoch(element) {
+  const datetime = element.getAttribute('datetime');
+  if (datetime) {
+    const parsedDate = parseDate(datetime);
+    if (!parsedDate) {
+      throw new UserError('Invalid date: %s', datetime);
+    }
+    return parsedDate;
+  }
+
+  const timestampMs = element.getAttribute('timestamp-ms');
+  if (timestampMs) {
+    return Number(timestampMs);
+  }
+
+  const timestampSeconds = element.getAttribute('timestamp-seconds');
+  if (timestampSeconds) {
+    return Number(timestampSeconds) * 1000;
+  }
+
+  return null;
 }

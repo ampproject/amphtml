@@ -34,14 +34,17 @@ const USER_ERROR_SENTINEL = '\u200B\u200B\u200B';
  * @public
  */
 export class UserError extends Error {
-  /** Builds the error, adding the user sentinel if not present. */
-  constructor() {
-    super(arguments);
-
-    if (!this.message) {
-      this.message = USER_ERROR_SENTINEL;
-    } else if (this.message.indexOf(USER_ERROR_SENTINEL) == -1) {
-      this.message += USER_ERROR_SENTINEL;
+  /**
+   * Builds the error, adding the user sentinel if not present.
+   * @param message
+   */
+  constructor(message) {
+    if (!message) {
+      message = USER_ERROR_SENTINEL;
+    } else if (message.indexOf(USER_ERROR_SENTINEL) == -1) {
+      message += USER_ERROR_SENTINEL;
     }
+
+    super(message);
   }
 }
