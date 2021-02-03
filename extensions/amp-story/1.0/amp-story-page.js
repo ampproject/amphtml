@@ -90,7 +90,7 @@ const PAGE_LOADED_CLASS_NAME = 'i-amphtml-story-page-loaded';
 /**
  * Selectors for media elements.
  * Only get the page media: direct children of amp-story-page (ie:
- * background-audio), or descendant of amp-story-grid-layer. That excludes media
+ * background-audio), or  descendant of amp-story-grid-layer. That excludes media
  * contained in amp-story-page-attachment.
  * @enum {string}
  */
