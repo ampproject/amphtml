@@ -83,5 +83,23 @@ describes.realWin(
       const timeElement = element.querySelector('time');
       expect(timeElement.textContent).to.equal('1 day ago');
     });
+
+    it('should have a role of text on the custom element by default', () => {
+      const date = new Date();
+      date.setDate(date.getDate() - 2);
+      element.setAttribute('datetime', date.toISOString());
+      element.textContent = date.toString();
+      element.build();
+      expect(element.getAttribute('role')).to.equal('text');
+    });
+
+    it('should not have a title attribute', () => {
+      const date = new Date();
+      date.setDate(date.getDate() - 2);
+      element.setAttribute('datetime', date.toISOString());
+      element.textContent = date.toString();
+      element.build();
+      expect(element.hasAttribute('title')).to.be.false;
+    });
   }
 );
