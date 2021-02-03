@@ -63,7 +63,7 @@ describes.realWin(
         });
       doc.body.appendChild(bc);
       return bc
-        .build()
+        .buildInternal()
         .then(() => {
           bc.layoutCallback();
         })

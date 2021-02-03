@@ -23,7 +23,7 @@ const pageHeight = 600;
 describes.endtoend(
   'amp-base-carousel:1.0 - non-looping',
   {
-    manualFixture: 'amp-base-carousel/1.0/non-looping.amp.html',
+    fixture: 'amp-base-carousel/1.0/non-looping.amp.html',
     experiments: ['bento-carousel'],
     environments: ['single', 'viewer-demo'],
     initialRect: {width: pageWidth, height: pageHeight},

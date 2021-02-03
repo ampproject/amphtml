@@ -54,7 +54,7 @@ describes.realWin(
         // hash # at the end so path is not affected by param concat
         `http://localhost:${location.port}/test/fixtures/served/blank.html#`;
       return element
-        .build()
+        .buildInternal()
         .then(() => element.layoutCallback())
         .then(() => {
           const iframe = element.querySelector('iframe');

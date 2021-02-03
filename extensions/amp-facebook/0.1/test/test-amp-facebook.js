@@ -55,7 +55,7 @@ describes.realWin(
         ampFB.setAttribute('data-locale', 'en_US');
       }
       doc.body.appendChild(ampFB);
-      await ampFB.build();
+      await ampFB.buildInternal();
       await ampFB.layoutCallback();
       return ampFB;
     }

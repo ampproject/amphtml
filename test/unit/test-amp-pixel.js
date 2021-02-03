@@ -42,7 +42,7 @@ describes.realWin('amp-pixel', {amp: true}, (env) => {
       pixel.setAttribute('referrerpolicy', referrerPolicy);
     }
     win.document.body.appendChild(pixel);
-    return pixel.build();
+    return pixel.buildInternal();
   }
 
   /**
@@ -188,7 +188,7 @@ describes.realWin(
         'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?'
       );
       win.document.body.appendChild(pixel);
-      await pixel.build();
+      await pixel.buildInternal();
       implementation = await pixel.getImpl();
     });
 

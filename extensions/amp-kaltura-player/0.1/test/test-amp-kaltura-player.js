@@ -43,7 +43,7 @@ describes.realWin(
       }
       doc.body.appendChild(kalturaPlayer);
       return kalturaPlayer
-        .build()
+        .buildInternal()
         .then(() => {
           return kalturaPlayer.layoutCallback();
         })
@@ -100,7 +100,7 @@ describes.realWin(
       return allowConsoleError(() => {
         return getKaltura({})
           .then((kp) => {
-            kp.build();
+            kp.buildInternal();
           })
           .should.eventually.be.rejectedWith(
             /The data-partner attribute is required for/

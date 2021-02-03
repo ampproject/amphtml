@@ -106,7 +106,7 @@ describes.realWin(
 
       banner.id = 'banner0';
       doc.body.appendChild(banner);
-      await banner.build();
+      await banner.buildInternal();
       await banner.layoutCallback();
       return banner;
     }

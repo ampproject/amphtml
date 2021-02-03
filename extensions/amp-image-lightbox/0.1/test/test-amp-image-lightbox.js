@@ -46,7 +46,7 @@ describes.realWin(
       el.setAttribute('layout', 'nodisplay');
       doc.body.appendChild(el);
       return el
-        .build()
+        .buildInternal()
         .then(() => el.layoutCallback())
         .then(() => el);
     }

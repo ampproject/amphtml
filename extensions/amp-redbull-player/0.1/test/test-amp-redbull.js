@@ -42,7 +42,7 @@ describes.realWin(
       player.setAttribute('layout', 'responsive');
 
       doc.body.appendChild(player);
-      return player.build().then(() => {
+      return player.buildInternal().then(() => {
         player.layoutCallback();
         return player;
       });

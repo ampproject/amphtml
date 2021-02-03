@@ -424,7 +424,7 @@ function createBaseCustomElementClass(win) {
      * @return {?Promise}
      * @final
      */
-    build() {
+    buildInternal() {
       assertNotTemplate(this);
       devAssert(this.isUpgraded(), 'Cannot build unupgraded element');
       if (this.buildingPromise_) {
