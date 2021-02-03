@@ -115,10 +115,6 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       htmlFor(this.element)`
           <span class="i-amphtml-story-page-attachment-title"></span>`
     );
-    this.headerEl_.appendChild(
-      htmlFor(this.element)`
-          <span class="i-amphtml-story-page-attachment-draggable"></span>`
-    );
 
     if (this.element.hasAttribute('data-title')) {
       this.headerEl_.querySelector(

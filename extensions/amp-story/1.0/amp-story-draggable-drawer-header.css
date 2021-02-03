@@ -41,11 +41,10 @@
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" fill="none" opacity=".4" viewBox="0 0 24 24"><path fill="#000" d="M18.295 7.115a.997.997 0 10-1.41-1.41L12 10.59 7.115 5.705a.997.997 0 00-1.41 1.41L10.59 12l-4.885 4.885a.997.997 0 001.41 1.41L12 13.41l4.885 4.885a.997.997 0 101.41-1.41L13.41 12l4.885-4.885z"/></svg>') !important;
   background-repeat: no-repeat !important;
   cursor: pointer !important;
-  transition: opacity .3s;
 }
 
 .i-amphtml-story-draggable-drawer-theme-dark .i-amphtml-story-page-attachment-close-button {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" fill="rgba(0, 0, 0, 0.40)" viewBox="0 0 36 36"><path d="M28.5 9.62L26.38 7.5 18 15.88 9.62 7.5 7.5 9.62 15.88 18 7.5 26.38l2.12 2.12L18 20.12l8.38 8.38 2.12-2.12L20.12 18z"/><path fill="none" d="M0 0h36v36H0z"/></svg>') !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 36 36" fill="rgba(255, 255, 255, 0.54)"><path d="M28.5 9.62L26.38 7.5 18 15.88 9.62 7.5 7.5 9.62 15.88 18 7.5 26.38l2.12 2.12L18 20.12l8.38 8.38 2.12-2.12L20.12 18z"/><path d="M0 0h36v36H0z" fill="none"/></svg>') !important;
 }
 
 .i-amphtml-story-page-attachment-title {
@@ -56,18 +55,9 @@
   text-align: center !important;
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
-  transition: opacity .3s;
 }
 
-.i-amphtml-story-draggable-drawer-header:not([open]) .i-amphtml-story-page-attachment-title,
-.i-amphtml-story-draggable-drawer-header:not([open]) .i-amphtml-story-page-attachment-close-button,
-.i-amphtml-story-draggable-drawer-header[dragging] .i-amphtml-story-page-attachment-title,
-.i-amphtml-story-draggable-drawer-header[dragging] .i-amphtml-story-page-attachment-close-button {
-  opacity: 0;
-}
-
-
-.i-amphtml-story-page-attachment-draggable {
+/* .i-amphtml-story-page-attachment-draggable {
   position: absolute;
   top: 8px;
   width: 40px;
@@ -76,12 +66,12 @@
   border-radius: 3px;
   opacity: 0;
   transition: opacity .3s;
-}
+} */
 
-.i-amphtml-story-draggable-drawer-header:not([open]) .i-amphtml-story-page-attachment-draggable,
+/* .i-amphtml-story-draggable-drawer-header:not([open]) .i-amphtml-story-page-attachment-draggable,
 .i-amphtml-story-draggable-drawer-header[dragging] .i-amphtml-story-page-attachment-draggable {
   opacity: 1
-}
+} */
 
 /** Overrides. */
 

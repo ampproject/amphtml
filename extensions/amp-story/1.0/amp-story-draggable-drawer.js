@@ -254,7 +254,6 @@ export class DraggableDrawer extends AMP.BaseElement {
    * @private
    */
   onTouchStart_(event) {
-    this.headerEl_.setAttribute('dragging', true);
     const coordinates = this.getClientTouchCoordinates_(event);
     if (!coordinates) {
       return;
@@ -332,7 +331,6 @@ export class DraggableDrawer extends AMP.BaseElement {
    * @private
    */
   onTouchEnd_(event) {
-    this.headerEl_.removeAttribute('dragging');
     if (this.touchEventState_.isSwipeY === true) {
       this.onSwipeY_({
         event,
@@ -504,7 +502,6 @@ export class DraggableDrawer extends AMP.BaseElement {
     this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
 
     this.mutateElement(() => {
-      this.headerEl_.setAttribute('open', true);
       this.element.setAttribute('aria-hidden', false);
       resetStyles(this.element, ['transform', 'transition']);
 
@@ -548,7 +545,6 @@ export class DraggableDrawer extends AMP.BaseElement {
     this.storeService_.dispatch(Action.TOGGLE_PAUSED, false);
 
     this.mutateElement(() => {
-      this.headerEl_.removeAttribute('open');
       this.element.setAttribute('aria-hidden', true);
       resetStyles(this.element, ['transform', 'transition']);
 
