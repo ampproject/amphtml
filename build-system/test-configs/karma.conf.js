@@ -71,7 +71,7 @@ module.exports = {
     persistentCache: getPersistentBrowserifyCache(),
   },
 
-  reporters: ['super-dots', 'karmaSimpleReporter'],
+  reporters: ['super-dots', 'spec'],
 
   superDotsReporter: {
     nbDotsPerLine: dotWrappingWidth,
@@ -197,9 +197,9 @@ module.exports = {
     'karma-mocha',
     'karma-mocha-reporter',
     'karma-safarinative-launcher',
-    'karma-simple-reporter',
     'karma-sinon-chai',
     'karma-source-map-support',
+    'karma-spec-reporter',
     'karma-super-dots-reporter',
     {
       'middleware:custom': [
