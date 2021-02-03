@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import ampHelpers from '../0.1/test-e2e/ctrl-helpers';
-import bentoHelpers from '../1.0/test-e2e/ctrl-helpers';
+import ampHelpers from './helpers-amp';
+import bentoHelpers from './helpers-bento';
 
 const testHelpers = {
   '0.1': ampHelpers,

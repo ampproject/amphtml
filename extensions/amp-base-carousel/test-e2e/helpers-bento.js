@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {useStyles} from '../base-carousel.jss';
+import {useStyles} from '../1.0/base-carousel.jss';
 
 const TAG_NAME = 'amp-base-carousel';
 const SLIDE_CLASS = 'slideElement';
