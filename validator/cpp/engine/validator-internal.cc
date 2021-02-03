@@ -1407,7 +1407,7 @@ class ParsedValidatorRules {
                                   const ValidationResult& resultB) const;
 
   bool HasValidatedAlternativeTagSpec(Context* context,
-                                      const string& ext_name) const;
+                                      const std::string& ext_name) const;
 
   void MaybeEmitMandatoryTagValidationErrors(Context* context,
                                              ValidationResult* result) const;
@@ -5089,7 +5089,7 @@ void ParsedValidatorRules::MaybeEmitMandatoryTagValidationErrors(
 
 // Returns true if one of the alternative_tag_spec_ids has been validated.
 bool ParsedValidatorRules::HasValidatedAlternativeTagSpec(
-    Context* context, const string& ext_name) const {
+    Context* context, const std::string& ext_name) const {
   auto it = ext_tag_spec_ids_by_ext_name_.find(ext_name);
   if (it != ext_tag_spec_ids_by_ext_name_.end()) {
     for (int32_t alternative_tag_spec_id : it->second) {
