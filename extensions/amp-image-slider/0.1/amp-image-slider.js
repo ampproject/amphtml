@@ -224,15 +224,17 @@ export class AmpImageSlider extends AMP.BaseElement {
       this.leftMask_.appendChild(this.leftLabelWrapper_);
     }
 
-    this.rightMask_.classList.add('i-amphtml-image-slider-right-mask');
-    this.rightMask_.classList.add('i-amphtml-image-slider-push-right');
+    this.rightMask_.classList.add(
+      'i-amphtml-image-slider-right-mask',
+      'i-amphtml-image-slider-push-right'
+    );
     this.rightAmpImage_.classList.add('i-amphtml-image-slider-push-left');
     if (this.rightLabel_) {
       this.rightLabelWrapper_ = this.doc_.createElement('div');
       this.rightLabelWrapper_.classList.add(
-        'i-amphtml-image-slider-label-wrapper'
+        'i-amphtml-image-slider-label-wrapper',
+        'i-amphtml-image-slider-push-left'
       );
-      this.rightLabelWrapper_.classList.add('i-amphtml-image-slider-push-left');
       this.rightLabelWrapper_.appendChild(this.rightLabel_);
       this.rightMask_.appendChild(this.rightLabelWrapper_);
     }
@@ -247,10 +249,14 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.barStick_ = this.doc_.createElement('div');
     this.bar_.appendChild(this.barStick_);
 
-    this.bar_.classList.add('i-amphtml-image-slider-bar');
-    this.bar_.classList.add('i-amphtml-image-slider-push-right');
-    this.barStick_.classList.add('i-amphtml-image-slider-bar-stick');
-    this.barStick_.classList.add('i-amphtml-image-slider-push-left');
+    this.bar_.classList.add(
+      'i-amphtml-image-slider-bar',
+      'i-amphtml-image-slider-push-right'
+    );
+    this.barStick_.classList.add(
+      'i-amphtml-image-slider-bar-stick',
+      'i-amphtml-image-slider-push-left'
+    );
 
     this.container_.appendChild(this.bar_);
   }

@@ -122,6 +122,7 @@ module.exports = {
     'jsdoc/require-returns': 2,
     'jsdoc/require-returns-type': 2,
     'local/await-expect': 2,
+    'local/classlist-add-remove-single': 2,
     'local/closure-type-primitives': 2,
     'local/dict-string-keys': 2,
     'local/get-mode-usage': 2,
@@ -271,6 +272,7 @@ module.exports = {
       'rules': {
         'require-jsdoc': 0,
         'local/always-call-chai-methods': 2,
+        'local/classlist-add-remove-single': 0,
         'local/no-bigint': 0,
         'local/no-dynamic-import': 0,
         'local/no-function-async': 0,

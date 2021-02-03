@@ -639,8 +639,7 @@ export class AmpLiveList extends AMP.BaseElement {
     // to insert new items between old items.
     // Order matters as this is how it will be appended into the DOM.
     items.sort(this.comparator_).forEach((elem) => {
-      elem.classList.add(classes.ITEM);
-      elem.classList.add(classes.NEW_ITEM);
+      elem.classList.add(classes.ITEM, classes.NEW_ITEM);
     });
     this.pendingItemsInsert_.push.apply(this.pendingItemsInsert_, items);
   }

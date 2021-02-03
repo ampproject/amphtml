@@ -815,8 +815,10 @@ export class SystemLayer {
     this.vsync_.mutate(() => {
       const shadowRoot = this.getShadowRoot();
 
-      shadowRoot.classList.remove('i-amphtml-story-desktop-fullbleed');
-      shadowRoot.classList.remove('i-amphtml-story-desktop-panels');
+      shadowRoot.classList.remove(
+        'i-amphtml-story-desktop-fullbleed',
+        'i-amphtml-story-desktop-panels'
+      );
       shadowRoot.removeAttribute('desktop');
 
       switch (uiState) {

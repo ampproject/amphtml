@@ -819,8 +819,10 @@ class AmpImageLightbox extends AMP.BaseElement {
       this.element.getAttribute('id') + '-caption'
     );
 
-    this.captionElement_.classList.add('amp-image-lightbox-caption');
-    this.captionElement_.classList.add('i-amphtml-image-lightbox-caption');
+    this.captionElement_.classList.add(
+      'amp-image-lightbox-caption',
+      'i-amphtml-image-lightbox-caption'
+    );
     this.container_.appendChild(this.captionElement_);
 
     // Invisible close button at the end of lightbox for screen-readers.

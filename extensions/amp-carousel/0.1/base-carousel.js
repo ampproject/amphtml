@@ -92,8 +92,7 @@ export class BaseCarousel extends AMP.BaseElement {
   buildButton(className, onInteraction) {
     const button = this.element.ownerDocument.createElement('div');
     button.tabIndex = 0;
-    button.classList.add('amp-carousel-button');
-    button.classList.add(className);
+    button.classList.add('amp-carousel-button', className);
     button.setAttribute('role', this.buttonsAriaRole());
     button.onkeydown = (event) => {
       if (event.key == Keys.ENTER || event.key == Keys.SPACE) {

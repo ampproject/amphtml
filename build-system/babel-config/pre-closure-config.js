@@ -82,6 +82,9 @@ function getPreClosureConfig() {
     !(isFortesting || isCheckTypes)
       ? './build-system/babel-plugins/babel-plugin-is_dev-constant-transformer'
       : null,
+    !argv.esm
+      ? './build-system/babel-plugins/babel-plugin-classlist-add-remove-multiple-args'
+      : null,
   ].filter(Boolean);
   const presetEnv = [
     '@babel/preset-env',
