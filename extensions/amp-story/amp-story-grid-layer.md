@@ -380,9 +380,9 @@ Note: your story needs to enable the `supports-landscape` mode to use this templ
 
 Example:
 
-<amp-img alt="Landscape half-half UI template" layout="fixed" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/amp-story-img-video-object-fit-position.png" width="600" height="287">
+<amp-img alt="Landscape half-half UI template" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-img-video-object-fit-position.png" width="600" height="287">
   <noscript>
-    <img alt="Landscape half-half UI template" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/amp-story-img-video-object-fit-position.png" />
+    <img alt="Landscape half-half UI template" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-img-video-object-fit-position.png" />
   </noscript>
 </amp-img>
 
@@ -408,7 +408,7 @@ Responsive presets on grid-layers maximize usable screen space and scale assets 
 <amp-story-grid-layer preset="2021-foreground">
     <h1>This will stay consistent with the bg</h1>
 </amp-story-grid-layer>
-<amp-story-grid-layer preset="2021-foreground" anchor="bottom left"">
+<amp-story-grid-layer preset="2021-foreground" anchor="bottom-left">
     <!-- Position the icon close to the corner on all screens -->
     <amp-img src="icon.jpg" style="bottom: 1em; left: 1em">
 </amp-story-grid-layer>
@@ -427,7 +427,11 @@ Use the `2021-foreground` preset for foreground elements. This anchors foregroun
 Use the `2021-background` preset for the background layer. This preset covers the entire screen on all mobile devices with the background asset. It does so without letterboxing and keeps scaling consistent with the foreground elements.
 While this technique provides the most consistent user experience, it may crop up to 7% of one or all borders of your background. Keep this in mind when designing and picking your assets.
 
-<div layout="container" width="2" height="1">
-<div style="width:50%;display:inline-block"><amp-img src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/quiz-art.png" layout="responsive" width="200" height="350"/></div>
-<div style="width:50%;display:inline-block"><amp-img src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/animal-poll.png" layout="responsive" width="200" height="350"/></div>
+<div layout="container" width="3" height="2">
+  <div style="width:33%;display:inline-block">
+    <amp-img src="https://github.com/ampprojject/amphtml/raw/master/extensions/amp-story/img/preset_story_scaled.gif" layout="responsive" width="200" height="350"/>
+  </div>
+  <div style="width:66%;display:inline-block">
+    <amp-img src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/preset_story_anchor.gif" layout="responsive" width="500" height="400"/>
+  </div>
 </div>
