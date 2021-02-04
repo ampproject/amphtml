@@ -1081,6 +1081,7 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-analytics/0.1/cookie-writer.js',
       'extensions/amp-analytics/0.1/requests.js',
       'extensions/amp-analytics/0.1/variables.js',
+      'extensions/amp-consent/0.1/cookie-writer.js',
     ],
   },
   '\\.expandInputValueSync\\(': {
