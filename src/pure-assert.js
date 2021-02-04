@@ -57,7 +57,7 @@ export class UserError extends Error {
  * @param {T} shouldBeTruthy
  * @param {string} message
  * @return {T}
- * @throws {UserError} when attribute values are missing or invalid.
+ * @throws {Error} when attribute values are missing or invalid.
  * @closurePrimitive {asserts.truthy}
  */
 function pureAssertion(errorCls, shouldBeTruthy, message) {
@@ -87,7 +87,7 @@ export function pureUserAssert(shouldBeTruthy, message) {
  * @param {T} shouldBeTruthy
  * @param {string} message
  * @return {T}
- * @throws {UserError} when attribute values are missing or invalid.
+ * @throws {Error} when attribute values are missing or invalid.
  * @closurePrimitive {asserts.truthy}
  */
 export function pureDevAssert(shouldBeTruthy, message) {
