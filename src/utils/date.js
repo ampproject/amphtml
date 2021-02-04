@@ -61,7 +61,7 @@ const dateAttrParsers = {
   'end-date': (datetime) =>
     userAssert(parseDate(datetime), `Invalid date: ${datetime}`),
   'timeleft-ms': (timeleftMs) => Date.now() + Number(timeleftMs),
-  'timestamp-ms': Number,
+  'timestamp-ms': (ms) => Number(ms),
   'timestamp-seconds': (timestampSeconds) => 1000 * Number(timestampSeconds),
 };
 
