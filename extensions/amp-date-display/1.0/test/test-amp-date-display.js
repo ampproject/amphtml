@@ -15,6 +15,7 @@
  */
 
 import '../../../amp-mustache/0.2/amp-mustache';
+import '../amp-date-display';
 import {waitFor} from '../../../../testing/test-helper.js';
 import {whenUpgradedToCustomElement} from '../../../../src/dom';
 
