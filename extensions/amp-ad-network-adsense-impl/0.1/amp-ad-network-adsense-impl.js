@@ -21,6 +21,7 @@
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
 import {AMP_SIGNATURE_HEADER} from '../../amp-a4a/0.1/signature-verifier';
+import {ADS_INITIAL_INTERSECTION_EXP} from '../../../src/experiments/ads-initial-intersection-exp';
 import {AdsenseSharedState} from './adsense-shared-state';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
@@ -234,6 +235,14 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         branches: [
           STICKY_AD_TRANSITION_EXP.control,
           STICKY_AD_TRANSITION_EXP.experiment,
+        ],
+      },
+      {
+        experimentId: ADS_INITIAL_INTERSECTION_EXP.id,
+        isTrafficEligible: () => true,
+        branches: [
+          ADS_INITIAL_INTERSECTION_EXP.control,
+          ADS_INITIAL_INTERSECTION_EXP.experiment,
         ],
       },
     ]);
