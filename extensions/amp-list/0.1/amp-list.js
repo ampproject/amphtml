@@ -1106,7 +1106,6 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   render_(elements, opt_append = false) {
-    dev().info(TAG, 'render:', this.element, elements);
     const container = dev().assertElement(this.container_);
 
     const renderAndResize = () => {
