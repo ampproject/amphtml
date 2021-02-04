@@ -738,11 +738,13 @@ export class GoogleSubscriptionsPlatform {
     // Offers or abbreviated offers may need to be shown depending on
     // whether the access has been granted and whether user is a subscriber.
     if (!best.granted) {
-      if (this.enableMetering_) {
-        this.showMeteringRegwall_();
-      } else {
-        this.runtime_.showOffers({list: 'amp'});
-      }
+      this.getGoogleMeteringStrategy_().then((meteringStrategy) => {
+        if (meteringStrategy === GoogleMeteringStrategy.EXTENDED_ACCESS) {
+          this.showMeteringRegwall_();
+        } else {
+          this.runtime_.showOffers({list: 'amp'});
+        }
+      });
     } else if (!best.isSubscriber()) {
       this.runtime_.showAbbrvOffer({list: 'amp'});
     }
