@@ -220,7 +220,9 @@ player.getStoryState('page-attachment');
 
 ## Autoplay
 
-You can opt-out of the default autoplaying experience by using the configuration below. This will prevent the first story in the player to start playing until you call `play()` on the player.
+By default, the first story in the player will automatically start playing when the player becomes visible in the user's viewport.
+
+You can opt-out of the default behavior by using the configuration below. This will prevent the first story in the player to start playing until you call [play()](#play/pause) on the player.
 
 ### JSON Configuration
 
