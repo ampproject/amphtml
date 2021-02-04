@@ -32,6 +32,7 @@ import {
 import {ConsentPolicyManager} from './consent-policy-manager';
 import {ConsentStateManager} from './consent-state-manager';
 import {ConsentUI} from './consent-ui';
+import {CookieWriter} from './cookie-writer';
 import {Deferred} from '../../../src/utils/promise';
 import {
   NOTIFICATION_UI_MANAGER,
@@ -237,10 +238,15 @@ export class AmpConsent extends AMP.BaseElement {
       this.notificationUiManager_ = /** @type {!NotificationUiManager} */ (manager);
     });
 
+    const cookieWriterPromise = this.consentConfig_['cookies']
+      ? new CookieWriter(this.win, this.element, this.consentConfig_).write()
+      : Promise.resolve();
+
     Promise.all([
       consentStateManagerPromise,
       notificationUiManagerPromise,
       consentPolicyManagerPromise,
+      cookieWriterPromise,
     ]).then(() => {
       this.init_();
     });
