@@ -181,19 +181,27 @@ function unitTestsToRun() {
   let srcFiles = [];
 
   function isUnitTest(file) {
-    return unitTestPaths.some((pattern) => minimatch(file, pattern));
+    return unitTestPaths.some((pattern) => {
+      return minimatch(file, pattern);
+    });
   }
 
   function shouldRunTest(testFile, srcFiles) {
     const filesImported = getImports(testFile);
-    return filesImported.filter((file) => srcFiles.includes(file)).length > 0;
+    return (
+      filesImported.filter(function (file) {
+        return srcFiles.includes(file);
+      }).length > 0
+    );
   }
 
   // Retrieves the set of unit tests that should be run
   // for a set of source files.
   function getTestsFor(srcFiles) {
     const allUnitTests = globby.sync(unitTestPaths);
-    return allUnitTests.filter((testFile) => shouldRunTest(testFile, srcFiles));
+    return allUnitTests.filter((testFile) => {
+      return shouldRunTest(testFile, srcFiles);
+    });
   }
 
   filesChanged.forEach((file) => {
@@ -212,8 +220,6 @@ function unitTestsToRun() {
       srcFiles = srcFiles.concat(getJsFilesFor(file, cssJsFileMap));
     }
   });
-
-  console.log({srcFiles});
 
   if (srcFiles.length > 0) {
     const moreTestsToRun = getTestsFor(srcFiles);
