@@ -15,6 +15,7 @@
  */
 import {devAssert} from '../src/log';
 import {getMode} from './mode';
+import {isIframed} from './dom';
 import {toWin} from './types';
 
 /**
@@ -29,7 +30,7 @@ import {toWin} from './types';
 export function createViewportObserver(
   ioCallback,
   win,
-  {threshold, needsRootBounds = false}
+  {threshold, needsRootBounds = false} = {}
 ) {
   return new win.IntersectionObserver(ioCallback, {
     threshold,
