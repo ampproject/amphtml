@@ -56,8 +56,6 @@ const UpgradeState = {
   UPGRADE_IN_PROGRESS: 4,
 };
 
-const EMPTY_FUNC = () => {};
-
 /**
  * Caches whether the template tag is supported to avoid memory allocations.
  * @type {boolean|undefined}
@@ -517,7 +515,7 @@ function createBaseCustomElementClass(win) {
      * @final
      */
     whenLoaded() {
-      return this.signals_.whenSignal(CommonSignals.LOAD_END).then(EMPTY_FUNC);
+      return this.signals_.whenSignal(CommonSignals.LOAD_END);
     }
 
     /**
