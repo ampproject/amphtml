@@ -35,7 +35,7 @@ echo $(GREEN "Installing gulp-cli...")
 npm install --global gulp-cli
 
 echo $(GREEN "Installing dependencies...")
-npm ci
+npm install
 
 echo $(GREEN "Setting up environment...")
 NPM_BIN_DIR="`npm config get prefix`/bin"
