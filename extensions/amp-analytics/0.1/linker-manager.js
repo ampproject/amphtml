@@ -412,8 +412,8 @@ export class LinkerManager {
 
       const url =
         form.getAttribute('action-xhr') || form.getAttribute('action');
-
-      if (this.isDomainMatch_(url, linkerName, domains)) {
+      const location = this.urlService_.parse(url);
+      if (this.isDomainMatch_(location, linkerName, domains)) {
         this.addDataToForm_(form, actionXhrMutator, linkerName);
       }
     }
