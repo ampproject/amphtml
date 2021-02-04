@@ -261,7 +261,7 @@ export class AmpStoryPlayer {
    * @public
    */
   load() {
-    if (!this.doc_.querySelector('amp-story-player')) {
+    if (!this.doc_.querySelector(TAG)) {
       throw new Error(
         `[${TAG}] element must be appended to the DOM before calling load().`
       );
