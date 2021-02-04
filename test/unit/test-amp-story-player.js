@@ -97,6 +97,17 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     return configEl;
   }
 
+  function buildAutoplayConfig(autoplay) {
+    const configEl = document.createElement('script');
+    configEl.textContent = JSON.stringify({
+      'behavior': {
+        'autoplay': autoplay,
+      },
+    });
+    configEl.setAttribute('type', 'application/json');
+    return configEl;
+  }
+
   beforeEach(() => {
     win = env.win;
     fakeMessaging = {
@@ -342,6 +353,50 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     fireHandler['selectDocument']('selectDocument', {next: true});
 
     expect(noNextSpy).to.not.have.been.called;
+  });
+
+  it('should not play first story when autoplay is off', async () => {
+    buildStoryPlayer(1);
+    playerEl.appendChild(buildAutoplayConfig(/* autoplay */ false));
+
+    const sendRequestSpy = env.sandbox.spy(fakeMessaging, 'sendRequest');
+
+    await manager.loadPlayers();
+    await nextTick();
+
+    expect(sendRequestSpy).to.not.have.been.calledWith('visibilitychange', {
+      'state': 'visible',
+    });
+  });
+
+  it('should play first story when autoplay is off and play() is called', async () => {
+    const sendRequestSpy = env.sandbox.spy(fakeMessaging, 'sendRequest');
+    buildStoryPlayer(1);
+    playerEl.appendChild(buildAutoplayConfig(/* autoplay */ false));
+
+    await manager.loadPlayers();
+    await nextTick();
+
+    playerEl.play();
+    await nextTick();
+
+    expect(sendRequestSpy).to.have.been.calledWith('visibilitychange', {
+      'state': 'visible',
+    });
+  });
+
+  it('should ignore autoplay if it contains invalid value', async () => {
+    buildStoryPlayer(1);
+    playerEl.appendChild(buildAutoplayConfig(/* autoplay */ 'flour tortillas'));
+
+    const sendRequestSpy = env.sandbox.spy(fakeMessaging, 'sendRequest');
+
+    await manager.loadPlayers();
+    await nextTick();
+
+    expect(sendRequestSpy).to.have.been.calledWith('visibilitychange', {
+      'state': 'visible',
+    });
   });
 
   it('should dispatch noPreviousStory when in first story', async () => {
