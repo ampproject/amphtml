@@ -113,6 +113,7 @@ attr_lists: {
   attrs: { name: "slope" }
   attrs: { name: "table" }
   attrs: { name: "tablevalues" }
+  attrs: { name: "type" }
 }
 attr_lists: {
   name: "svg-xlink-attributes"
@@ -730,11 +731,36 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
+  tag_name: "FEBLEND"
+  mandatory_ancestor: "SVG"
+  attrs: { name: "in" }
+  attrs: { name: "in2" }
+  attrs: { name: "mode" }
+  attr_lists: "svg-core-attributes"
+  attr_lists: "svg-filter-primitive-attributes"
+  attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
+}
+tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "FECOLORMATRIX"
   mandatory_ancestor: "SVG"
   attrs: { name: "in" }
   attrs: { name: "type" }
   attrs: { name: "values" }
+  attr_lists: "svg-core-attributes"
+  attr_lists: "svg-filter-primitive-attributes"
+  attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
+}
+tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  tag_name: "FECOMPONENTTRANSFER"
+  mandatory_ancestor: "SVG"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-filter-primitive-attributes"
   attr_lists: "svg-presentation-attributes"
@@ -762,12 +788,129 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
+  tag_name: "FECONVOLVEMATRIX"
+  mandatory_ancestor: "SVG"
+  attrs: { name: "bias" }
+  attrs: { name: "divisor" }
+  attrs: { name: "edgemode" }
+  attrs: { name: "in" }
+  attrs: { name: "kernelmatrix" }
+  attrs: { name: "kernelunitlength" }
+  attrs: { name: "order" }
+  attrs: { name: "preservealpha" }
+  attrs: { name: "targetx" }
+  attrs: { name: "targety" }
+  attr_lists: "svg-core-attributes"
+  attr_lists: "svg-filter-primitive-attributes"
+  attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
+}
+tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  tag_name: "FEDIFFUSELIGHTING"
+  mandatory_ancestor: "SVG"
+  attrs: { name: "diffuseconstant" }
+  attrs: { name: "in" }
+  attrs: { name: "kernelunitlength" }
+  attrs: { name: "surfacescale" }
+  attr_lists: "svg-core-attributes"
+  attr_lists: "svg-filter-primitive-attributes"
+  attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
+}
+tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  tag_name: "FEDISPLACEMENTMAP"
+  mandatory_ancestor: "SVG"
+  attrs: { name: "in" }
+  attrs: { name: "in2" }
+  attrs: { name: "scale" }
+  attrs: { name: "xchannelselector" }
+  attrs: { name: "ychannelselector" }
+  attr_lists: "svg-core-attributes"
+  attr_lists: "svg-filter-primitive-attributes"
+  attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
+}
+tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  tag_name: "FEDISTANTLIGHT"
+  mandatory_ancestor: "SVG"
+  attrs: { name: "azimuth" }
+  attrs: { name: "elevation" }
+  attr_lists: "svg-core-attributes"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
+}
+tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  tag_name: "FEDROPSHADOW"
+  mandatory_ancestor: "SVG"
+  mandatory_parent: "FILTER"
+  attrs: { name: "dx" }
+  attrs: { name: "dy" }
+  attrs: { name: "stddeviation" }
+  attr_lists: "svg-core-attributes"
+  attr_lists: "svg-filter-primitive-attributes"
+  attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
+}
+tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "FEFLOOD"
   mandatory_ancestor: "SVG"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-filter-primitive-attributes"
   attr_lists: "svg-presentation-attributes"
   attr_lists: "svg-style-attr"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
+}
+tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  tag_name: "FEFUNCA"
+  mandatory_ancestor: "SVG"
+  mandatory_parent: "FECOMPONENTTRANSFER"
+  attr_lists: "svg-core-attributes"
+  attr_lists: "svg-transfer-function-attributes"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
+}
+tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  tag_name: "FEFUNCB"
+  mandatory_ancestor: "SVG"
+  mandatory_parent: "FECOMPONENTTRANSFER"
+  attr_lists: "svg-core-attributes"
+  attr_lists: "svg-transfer-function-attributes"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
+}
+tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  tag_name: "FEFUNCG"
+  mandatory_ancestor: "SVG"
+  mandatory_parent: "FECOMPONENTTRANSFER"
+  attr_lists: "svg-core-attributes"
+  attr_lists: "svg-transfer-function-attributes"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
+}
+tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  tag_name: "FEFUNCR"
+  mandatory_ancestor: "SVG"
+  mandatory_parent: "FECOMPONENTTRANSFER"
+  attr_lists: "svg-core-attributes"
+  attr_lists: "svg-transfer-function-attributes"
   spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
 }
 tags: {
@@ -808,11 +951,96 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
+  tag_name: "FEMORPHOLOGY"
+  mandatory_ancestor: "SVG"
+  attrs: { name: "in" }
+  attrs: { name: "operator" }
+  attrs: { name: "radius" }
+  attr_lists: "svg-core-attributes"
+  attr_lists: "svg-filter-primitive-attributes"
+  attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
+}
+tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "FEOFFSET"
   mandatory_ancestor: "SVG"
   attrs: { name: "dx" }
   attrs: { name: "dy" }
   attrs: { name: "in" }
+  attr_lists: "svg-core-attributes"
+  attr_lists: "svg-filter-primitive-attributes"
+  attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
+}
+tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  tag_name: "FEPOINTLIGHT"
+  mandatory_ancestor: "SVG"
+  attrs: { name: "x" }
+  attrs: { name: "y" }
+  attrs: { name: "z" }
+  attr_lists: "svg-core-attributes"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
+}
+tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  tag_name: "FESPECULARLIGHTING"
+  mandatory_ancestor: "SVG"
+  attrs: { name: "in" }
+  attrs: { name: "kernelunitlength" }
+  attrs: { name: "specularconstant" }
+  attrs: { name: "specularexponent" }
+  attrs: { name: "surfacescale" }
+  attr_lists: "svg-core-attributes"
+  attr_lists: "svg-filter-primitive-attributes"
+  attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
+}
+tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  tag_name: "FESPOTLIGHT"
+  mandatory_ancestor: "SVG"
+  attrs: { name: "limitingconeangle" }
+  attrs: { name: "pointsatx" }
+  attrs: { name: "pointsaty" }
+  attrs: { name: "pointsatz" }
+  attrs: { name: "specularexponent" }
+  attrs: { name: "x" }
+  attrs: { name: "y" }
+  attrs: { name: "z" }
+  attr_lists: "svg-core-attributes"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
+}
+tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  tag_name: "FETILE"
+  mandatory_ancestor: "SVG"
+  attrs: { name: "in" }
+  attr_lists: "svg-core-attributes"
+  attr_lists: "svg-filter-primitive-attributes"
+  attr_lists: "svg-presentation-attributes"
+  attr_lists: "svg-style-attr"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
+}
+tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  tag_name: "FETURBULENCE"
+  mandatory_ancestor: "SVG"
+  attrs: { name: "basefrequency" }
+  attrs: { name: "numoctaves" }
+  attrs: { name: "seed" }
+  attrs: { name: "stitchtiles" }
+  attrs: { name: "type" }
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-filter-primitive-attributes"
   attr_lists: "svg-presentation-attributes"

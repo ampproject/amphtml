@@ -21,9 +21,10 @@ const pageWidth = 800;
 const pageHeight = 600;
 
 describes.endtoend(
-  'amp-base-carousel:1.0 - rtl',
+  'amp-base-carousel - rtl',
   {
-    manualFixture: 'amp-base-carousel/1.0/basic-rtl.amp.html',
+    version: '1.0',
+    fixture: 'amp-base-carousel/1.0/basic-rtl.amp.html',
     experiments: ['bento-carousel'],
     initialRect: {width: pageWidth, height: pageHeight},
     environments: ['single'],

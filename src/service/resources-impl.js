@@ -629,6 +629,10 @@ export class ResourcesImpl {
       // TODO(willchou): Fix observe/unobserve/remeasure churn in reparenting.
       this.intersectionObserver_.unobserve(resource.element);
     }
+
+    if (resource.getState() === ResourceState.LAYOUT_SCHEDULED) {
+      resource.layoutCanceled();
+    }
     this.cleanupTasks_(resource, /* opt_removePending */ true);
     dev().fine(TAG_, 'resource removed:', resource.debugid);
   }

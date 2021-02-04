@@ -885,9 +885,13 @@ export class Resource {
    * Undoes `layoutScheduled`.
    */
   layoutCanceled() {
-    this.state_ = this.hasBeenMeasured()
-      ? ResourceState.READY_FOR_LAYOUT
-      : ResourceState.NOT_LAID_OUT;
+    if (this.intersect_) {
+      this.state_ = ResourceState.READY_FOR_LAYOUT;
+    } else {
+      this.state_ = this.hasBeenMeasured()
+        ? ResourceState.READY_FOR_LAYOUT
+        : ResourceState.NOT_LAID_OUT;
+    }
   }
 
   /**

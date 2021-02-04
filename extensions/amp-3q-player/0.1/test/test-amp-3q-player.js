@@ -62,9 +62,9 @@ describes.realWin(
       const player = await get3QElement('c8dbe7f4-7f7f-11e6-a407-0cc47a188158');
       const iframe = player.querySelector('iframe');
       expect(iframe).to.not.be.null;
-      /*expect(iframe.src).to.equal(
-        encodeURIComponent('https://playout.3qsdn.com/c8dbe7f4-7f7f-11e6-a407-0cc47a188158?autoplay=false&amp=true')
-      );*/
+      expect(iframe.src).to.equal(
+        'https://playout.3qsdn.com/c8dbe7f4-7f7f-11e6-a407-0cc47a188158?autoplay=false&amp=true'
+      );
     });
 
     it('requires data-id', () => {
