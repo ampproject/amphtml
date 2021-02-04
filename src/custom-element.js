@@ -528,7 +528,7 @@ function createBaseCustomElementClass(win) {
     ensureLoaded(opt_parentPriority) {
       return this.whenBuilt().then(() => {
         const resource = this.getResource_();
-        if (this.signals_.get(CommonSignals.LOAD_END)) {
+        if (resource.getState() == ResourceState.LAYOUT_COMPLETE) {
           return this.whenLoaded();
         }
         if (
