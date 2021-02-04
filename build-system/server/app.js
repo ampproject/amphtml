@@ -1147,7 +1147,7 @@ app.use('/bind/ecommerce/sizes', (req, res) => {
 // Simulated subscription entitlement
 app.use('/subscription/:id/entitlements', (req, res) => {
   cors.assertCors(req, res, ['GET']);
-  res.json({
+  const json = {
     source: 'local' + req.params.id,
     granted: req.params.id > 0 ? true : false,
     grantedReason: 'NOT_SUBSCRIBED',
@@ -1155,9 +1155,10 @@ app.use('/subscription/:id/entitlements', (req, res) => {
       login: true,
     },
     decryptedDocumentKey: decryptDocumentKey(req.query.crypt),
-
+  };
+  if (req.query.includeMeteringState) {
     // Showcase metering information.
-    metering: {
+    json.metering = {
       state: {
         id: 'ppid264605',
         standardAttributes: {
@@ -1167,8 +1168,9 @@ app.use('/subscription/:id/entitlements', (req, res) => {
           },
         },
       },
-    },
-  });
+    };
+  }
+  res.json(json);
 });
 
 app.use('/subscriptions/skumap', (req, res) => {

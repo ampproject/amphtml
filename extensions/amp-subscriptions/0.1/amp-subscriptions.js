@@ -25,7 +25,7 @@ import {Dialog} from './dialog';
 import {DocImpl} from './doc-impl';
 import {ENTITLEMENTS_REQUEST_TIMEOUT} from './constants';
 import {Entitlement, GrantReason} from './entitlement';
-import {MeteringStore} from './metering-store';
+import {Metering} from './metering';
 import {
   PageConfig as PageConfigInterface,
   PageConfigResolver,
@@ -59,11 +59,11 @@ export class SubscriptionService {
   constructor(ampdoc) {
     const configElement = ampdoc.getElementById(TAG);
 
-    /** @type {!MeteringStore} */
-    this.meteringStore_ = new MeteringStore(ampdoc);
-
     /** @type {?PlatformStore} */
     this.platformStore = null;
+
+    /** @type {!Metering} */
+    this.metering_ = new Metering(ampdoc);
 
     /** @const @private */
     this.ampdoc_ = ampdoc;
@@ -141,15 +141,6 @@ export class SubscriptionService {
    * @return {SubscriptionService}
    */
   start() {
-    // Testing metering state store...
-    this.meteringStore_.loadMeteringState().then((res) => {
-      console.log(res);
-      res.counter = res.counter + 1 || 1;
-      this.meteringStore_.saveMeteringState(res).then(() => {
-        console.log('Big saves all around yall');
-      });
-    });
-
     this.initialize_().then(() => {
       this.subscriptionAnalytics_.event(SubscriptionAnalyticsEvents.STARTED);
       this.renderer_.toggleLoading(true);
@@ -186,8 +177,11 @@ export class SubscriptionService {
         });
 
       isStoryDocument(this.ampdoc_).then((isStory) => {
-        // Delegates the platform selection and activation call if is story.
-        this.startAuthorizationFlow_(!isStory /** doPlatformSelection */);
+        // Delegates the platform selection and activation call if is story,
+        // or if metering is enabled.
+        // const doPlatformSelection = !isStory && !this.metering_.enabled;
+        const doPlatformSelection = !isStory;
+        this.startAuthorizationFlow_(doPlatformSelection);
       });
     });
     return this;
@@ -315,6 +309,23 @@ export class SubscriptionService {
       );
       console.log('registerPlatform', subscriptionPlatform.getServiceId());
       this.fetchEntitlements_(subscriptionPlatform);
+
+      if (matchedServiceConfig.enableMetering) {
+        const grantPromise = this.platformStore.getGrantStatus();
+
+        // Re-fetch entitlements when metering state changes,
+        // but only if a grant is still needed.
+        this.metering_.setOnSaveMeteringState(() => {
+          grantPromise.then((grant) => {
+            if (!grant) {
+              this.resetPlatforms({
+                serviceIdsToFetch: [serviceId],
+                // doPlatformSelection: false,
+              });
+            }
+          });
+        });
+      }
     });
   }
 
@@ -338,12 +349,16 @@ export class SubscriptionService {
       this.initialized_ = Promise.all([
         this.getPlatformConfig_(),
         pageConfigResolver.resolveConfig(),
-      ]).then((promiseValues) => {
-        /** @type {!JsonObject} */
-        this.platformConfig_ = promiseValues[0];
-        /** @type {!PageConfigInterface} */
-        this.pageConfig_ = promiseValues[1];
-      });
+      ])
+        .then((promiseValues) => {
+          /** @type {!JsonObject} */
+          this.platformConfig_ = promiseValues[0];
+          /** @type {!PageConfigInterface} */
+          this.pageConfig_ = promiseValues[1];
+        })
+        .then(() => {
+          this.maybeEnableMetering_();
+        });
     }
     return this.initialized_;
   }
@@ -646,14 +661,26 @@ export class SubscriptionService {
   /**
    * Reset all platforms and re-fetch entitlements after an
    * external event (for example a login)
+   * @param {{
+   *   serviceIdsToFetch: !Array<string>=,
+   *   doPlatformSelection: boolean=
+   * }} params
    */
-  resetPlatforms() {
+  resetPlatforms({serviceIdsToFetch, doPlatformSelection = true}) {
     this.platformStore = this.platformStore.resetPlatformStore();
     this.renderer_.toggleLoading(true);
 
     this.platformStore
       .getAvailablePlatforms()
       .forEach((subscriptionPlatform) => {
+        // Optionally, only fetch from selected platforms.
+        if (
+          serviceIdsToFetch &&
+          serviceIdsToFetch.indexOf(subscriptionPlatform.getServiceId()) === -1
+        ) {
+          return;
+        }
+
         this.fetchEntitlements_(subscriptionPlatform);
       });
     this.subscriptionAnalytics_.serviceEvent(
@@ -665,7 +692,7 @@ export class SubscriptionService {
       SubscriptionAnalyticsEvents.PLATFORM_REAUTHORIZED_DEPRECATED,
       ''
     );
-    this.startAuthorizationFlow_();
+    this.startAuthorizationFlow_(doPlatformSelection);
   }
 
   /**
@@ -748,6 +775,19 @@ export class SubscriptionService {
    */
   isPageFree_() {
     return !this.pageConfig_.isLocked() || this.platformConfig_['alwaysGrant'];
+  }
+
+  /**
+   * Enables metering, if a platform needs it.
+   * @private
+   */
+  maybeEnableMetering_() {
+    const isEnabled = !!this.platformConfig_.services.find(
+      (service) => service['enableMetering']
+    );
+    if (isEnabled) {
+      this.metering_.enabled = true;
+    }
   }
 }
 

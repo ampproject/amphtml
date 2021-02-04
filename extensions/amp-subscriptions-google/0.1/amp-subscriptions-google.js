@@ -316,6 +316,9 @@ export class GoogleSubscriptionsPlatform {
 
     /** @private {!Promise} */
     this.rtcPromise_ = this.maybeFetchRealTimeConfig();
+
+    /** @private {boolean} */
+    this.hasFetchedEntitlements_ = false;
   }
 
   /**
@@ -625,145 +628,102 @@ export class GoogleSubscriptionsPlatform {
       }
 
       const googleMeteringStrategyPromise = this.getGoogleMeteringStrategy_();
+      const meteringStatePromise = this.serviceAdapter_.loadMeteringState();
 
-      // Assemble params for the getEntitlements API.
-      const getEntitlementsParamsPromise = Promise.all([
-        this.serviceAdapter_.getReaderId('local'),
+      return Promise.all([
         googleMeteringStrategyPromise,
+        meteringStatePromise,
       ]).then((results) => {
-        const params = {};
+        const googleMeteringStrategy = results[0];
+        const meteringState = results[1];
+
+        // Show Regwall if we already fetched entitlements and we're
+        // back here without a necessary metering state.
+        if (
+          googleMeteringStrategy === GoogleMeteringStrategy.EXTENDED_ACCESS &&
+          this.hasFetchedEntitlements_ &&
+          !meteringState
+        ) {
+          // TODO: Release gaa.js so it's compatible with AMP.
+          return GaaMeteringRegwall.show({
+            // Specify a URL that renders a Google Sign-In button.
+            iframeUrl: this.serviceConfig_['googleSignInHelperUrl'],
+          }).then((result) => {
+            console.warn('TODO: Define and save metering state');
+            console.log('GSI info', {result});
+          });
+        }
+
+        const entitlementsParams = {};
 
         // Add encryption param.
         if (encryptedDocumentKey) {
-          params.encryption = {encryptedDocumentKey};
+          entitlementsParams.encryption = {encryptedDocumentKey};
         }
 
         // Add metering param.
-        const googleMeteringStrategy = results[1];
-        if (googleMeteringStrategy === GoogleMeteringStrategy.EXTENDED_ACCESS) {
-          const ampReaderId = results[0];
-          if (/registered=1/.test(location.search)) {
-            console.log('ASG: I am adding metering params!');
-            params.metering = {
-              state: {
-                id: ampReaderId,
-                // Standard attributes which affect your meters.
-                // Each attribute has a corresponding timestamp, which
-                // allows meters to do things like granting access
-                // for up to 30 days after a certain action.
-                //
-                // TODO: Describe standard attributes, once they're defined.
-                standardAttributes: {
-                  // TODO: We must request this from a URL the serviceConfig defines.
-                  // eslint-disable-next-line google-camelcase/google-camelcase
-                  registered_user: {
-                    timestamp: Math.floor(Date.now() / 1000) - 60 * 5 * 1000,
-                  },
-                },
-              },
-            };
-          }
-        }
-        return params;
-      });
-
-      const swgEntitlementsPromise = getEntitlementsParamsPromise.then(
-        (params) => this.runtime_.getEntitlements(params)
-      );
-
-      // Respond to all entitlements when they return.
-      console.log(
-        'ASG: I am waiting for all platform entitlements to come back.'
-      );
-      Promise.all([
-        this.serviceAdapter_.getAllPlatformsEntitlements(),
-        swgEntitlementsPromise,
-        googleMeteringStrategyPromise,
-      ]).then((results) => {
-        const allEntitlements = results[0];
-        const swgEntitlements = results[1];
-        const googleMeteringStrategy = results[2];
-        console.log(
-          'ASG: Now I want to determine whether to show regwall, toast, or nothing.'
-        );
-        if (googleMeteringStrategy === GoogleMeteringStrategy.NONE) {
-          console.log('ASG: Metering is not even enabled my dude.');
-          return;
-        }
-        const grantedWithoutSwg =
-          allEntitlements.filter((entitlement) => {
-            console.log(entitlement);
-            return entitlement.granted && entitlement.service !== PLATFORM_ID;
-          }).length > 0;
-
-        if (grantedWithoutSwg) {
-          console.log(
-            'We are good! The SwG plugin does not need to do metering stuff.'
-          );
-          return;
-        }
-
-        console.log(swgEntitlements);
-        if (swgEntitlements.enablesThisWithGoogleMetering()) {
-          console.log('ASG: Page is unlocked with Google Metering!');
-          swgEntitlements.consume(() => {
-            console.log('Consumed!!!');
-          });
-        } else {
-          getEntitlementsParamsPromise.then((params) => {
-            console.log(
-              'ASG: I will show the Regwall. Only if the metering params were missing though!'
-            );
-            if (!params.metering) {
-              GaaMeteringRegwall.show({
-                // Specify a URL that renders a Google Sign-In button.
-                iframeUrl: this.serviceConfig_['googleSignInHelperUrl'],
-              }).then((result) => {
-                // TODO: Tell the server about this!
-                console.log(result);
-                location.search = location.search + '&registered=1';
-              });
-            }
-          });
-        }
-      });
-
-      return swgEntitlementsPromise.then((swgEntitlements) => {
-        // Get and store the isReadyToPay signal which is independent of
-        // any entitlments existing.
-        if (swgEntitlements.isReadyToPay) {
-          this.isReadyToPay_ = true;
-        }
-
-        let swgEntitlement = swgEntitlements.getEntitlementForThis();
-        let granted = false;
-        if (swgEntitlement && swgEntitlement.source) {
-          granted = true;
-        } else if (
-          swgEntitlements.entitlements.length &&
-          swgEntitlements.entitlements[0].products.length
+        if (
+          googleMeteringStrategy === GoogleMeteringStrategy.EXTENDED_ACCESS &&
+          meteringState
         ) {
-          // We didn't find a grant so see if there is a non granting
-          // and return that. Note if we start returning multiple non
-          // granting we'll need to refactor to handle returning an
-          // array of Entitlement objects.
-          // #TODO(jpettitt) - refactor to handle multi entitlement case
-          swgEntitlement = swgEntitlements.entitlements[0];
-        } else {
-          return null;
+          // Clear SwG's entitlements cache.
+          this.runtime_.clear();
+
+          entitlementsParams.metering = {state: meteringState};
         }
-        swgEntitlements.ack();
-        return new Entitlement({
-          source: swgEntitlement.source,
-          raw: swgEntitlements.raw,
-          service: PLATFORM_ID,
-          granted,
-          // if it's granted it must be a subscriber
-          grantReason: granted ? GrantReason.SUBSCRIBER : null,
-          dataObject: swgEntitlement.json(),
-          decryptedDocumentKey: swgEntitlements.decryptedDocumentKey,
-        });
+
+        return this.runtime_
+          .getEntitlements(entitlementsParams)
+          .then((swgEntitlements) => {
+            this.hasFetchedEntitlements_ = true;
+
+            return this.createAmpEntitlementFromSwgEntitlements_(
+              swgEntitlements
+            );
+          });
       });
+    });
+  }
+
+  /**
+   * Returns an Entitlement from a SwG response.
+   * @param {!Entitlements} swgEntitlements
+   * @return {Entitlement}
+   */
+  createAmpEntitlementFromSwgEntitlements_(swgEntitlements) {
+    // Get and store the isReadyToPay signal which is independent of
+    // any entitlments existing.
+    if (swgEntitlements.isReadyToPay) {
+      this.isReadyToPay_ = true;
+    }
+
+    let swgEntitlement = swgEntitlements.getEntitlementForThis();
+    let granted = false;
+    if (swgEntitlement && swgEntitlement.source) {
+      granted = true;
+    } else if (
+      swgEntitlements.entitlements.length &&
+      swgEntitlements.entitlements[0].products.length
+    ) {
+      // We didn't find a grant so see if there is a non granting
+      // and return that. Note if we start returning multiple non
+      // granting we'll need to refactor to handle returning an
+      // array of Entitlement objects.
+      // #TODO(jpettitt) - refactor to handle multi entitlement case
+      swgEntitlement = swgEntitlements.entitlements[0];
+    } else {
+      return null;
+    }
+    swgEntitlements.ack();
+    return new Entitlement({
+      source: swgEntitlement.source,
+      raw: swgEntitlements.raw,
+      service: PLATFORM_ID,
+      granted,
+      // if it's granted it must be a subscriber
+      grantReason: granted ? GrantReason.SUBSCRIBER : null,
+      dataObject: swgEntitlement.json(),
+      decryptedDocumentKey: swgEntitlements.decryptedDocumentKey,
     });
   }
 
@@ -778,14 +738,42 @@ export class GoogleSubscriptionsPlatform {
     // Offers or abbreviated offers may need to be shown depending on
     // whether the access has been granted and whether user is a subscriber.
     if (!best.granted) {
-      this.runtime_.showOffers({list: 'amp'});
+      if (this.enableMetering_) {
+        this.showMeteringRegwall_();
+      } else {
+        this.runtime_.showOffers({list: 'amp'});
+      }
     } else if (!best.isSubscriber()) {
       this.runtime_.showAbbrvOffer({list: 'amp'});
     }
   }
 
+  /**
+   * Shows the metering regwall.
+   * @return {!Promise}
+   */
+  showMeteringRegwall_() {
+    // TODO: Release gaa.js so it's compatible with AMP.
+    return GaaMeteringRegwall.show({
+      // Specify a URL that renders a Google Sign-In button.
+      iframeUrl: this.serviceConfig_['googleSignInHelperUrl'],
+    }).then((unusedResponse) =>
+      // TODO: Should publisher generate this?
+      this.serviceAdapter_.saveMeteringState({
+        id: 'ppid264605',
+        standardAttributes: {
+          // eslint-disable-next-line google-camelcase/google-camelcase
+          registered_user: {
+            timestamp: '1612044738', // In seconds.
+          },
+        },
+      })
+    );
+  }
+
   /** @override */
   reset() {
+    this.hasFetchedEntitlements_ = false;
     this.runtime_.reset();
   }
 

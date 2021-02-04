@@ -485,14 +485,25 @@ export class PlatformStore {
       'All platforms are not resolved yet'
     );
 
+    let availablePlatforms;
+
     // Subscriber wins immediately.
-    const availablePlatforms = this.getAvailablePlatforms();
+    availablePlatforms = this.getAvailablePlatforms();
     while (availablePlatforms.length) {
       const platform = availablePlatforms.pop();
       const entitlement = this.getResolvedEntitlementFor(
         platform.getServiceId()
       );
       if (entitlement.isSubscriber()) {
+        return platform;
+      }
+    }
+
+    // Metering platform wins next.
+    availablePlatforms = this.getAvailablePlatforms();
+    while (availablePlatforms.length) {
+      const platform = availablePlatforms.pop();
+      if (platform.enableMetering_) {
         return platform;
       }
     }
