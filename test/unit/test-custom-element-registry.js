@@ -27,6 +27,7 @@ import {
   upgradeOrRegisterElement,
 } from '../../src/service/custom-element-registry';
 import {createElementWithAttributes} from '../../src/dom';
+import {getImplSyncForTesting} from '../../src/custom-element';
 
 describes.realWin('CustomElement register', {amp: true}, (env) => {
   class ConcreteElement extends BaseElement {}
@@ -63,19 +64,20 @@ describes.realWin('CustomElement register', {amp: true}, (env) => {
     const element1 = doc.createElement('amp-element1');
     element1.setAttribute('layout', 'nodisplay');
     doc.body.appendChild(element1);
-    expect(element1.implementation_).to.be.instanceOf(ElementStub);
+    expect(getImplSyncForTesting(element1)).to.be.null;
 
     // Post-download, elements are upgraded.
     upgradeOrRegisterElement(win, 'amp-element1', ConcreteElement);
     expect(getElementClassForTesting(win, 'amp-element1')).to.equal(
       ConcreteElement
     );
-    expect(element1.implementation_).to.be.instanceOf(ConcreteElement);
+    expect(getImplSyncForTesting(element1)).to.be.instanceOf(ConcreteElement);
 
     // Elements created post-download and immediately upgraded.
     const element2 = doc.createElement('amp-element1');
-    doc.body.appendChild(element1);
-    expect(element2.implementation_).to.be.instanceOf(ConcreteElement);
+    element2.setAttribute('layout', 'nodisplay');
+    doc.body.appendChild(element2);
+    expect(getImplSyncForTesting(element2)).to.be.instanceOf(ConcreteElement);
   });
 
   it('should mark stubbed element as declared', () => {

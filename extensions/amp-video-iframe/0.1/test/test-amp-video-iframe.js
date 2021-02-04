@@ -187,12 +187,15 @@ describes.realWin(
           [1, 1],
         ];
 
-        trackingSizes.forEach((size) => {
-          const {implementation_} = createVideoIframe({}, size);
-          allowConsoleError(() => {
-            expect(() => implementation_.layoutCallback()).to.throw();
-          });
-        });
+        return Promise.all(
+          trackingSizes.map(async (size) => {
+            const videoIframe = createVideoIframe({}, size);
+            const impl = await videoIframe.getImpl(false);
+            allowConsoleError(() => {
+              expect(() => impl.layoutCallback()).to.throw();
+            });
+          })
+        );
       });
     });
 
@@ -419,18 +422,18 @@ describes.realWin(
             Object.assign(data.analytics, {vars});
           }
 
-          const {implementation_} = videoIframe;
+          const impl = await videoIframe.getImpl(false);
 
           if (accept) {
             const expectedEventVars = {eventType, vars: vars || {}};
-            implementation_.onMessage_({data});
+            impl.onMessage_({data});
             expect(eventSpy).to.be.calledOnce;
             const eventData = eventSpy.firstCall.firstArg.data;
             expect(eventData.eventType).to.equal(expectedEventVars.eventType);
             expect(eventData.vars).to.deep.equal(expectedEventVars.vars);
           } else {
             allowConsoleError(() => {
-              expect(() => implementation_.onMessage_({data})).to.throw();
+              expect(() => impl.onMessage_({data})).to.throw();
             });
             expect(eventSpy).to.not.have.been.called;
           }
@@ -442,11 +445,11 @@ describes.realWin(
       it('updates src', async () => {
         const defaultSrc = getIframeSrc(defaultFixture);
         const videoIframe = createVideoIframe({src: defaultSrc});
-        const {implementation_} = videoIframe;
+        const impl = await videoIframe.getImpl(false);
 
         await layoutAndLoad(videoIframe);
 
-        const {iframe_} = implementation_;
+        const {iframe_} = impl;
 
         expect(iframe_.src).to.match(new RegExp(`^${defaultSrc}#`));
 
@@ -454,7 +457,7 @@ describes.realWin(
 
         videoIframe.setAttribute('src', newSrc);
 
-        implementation_.mutatedAttributesCallback({'src': true});
+        impl.mutatedAttributesCallback({'src': true});
 
         expect(iframe_.src).to.match(new RegExp(`^${newSrc}#`));
       });

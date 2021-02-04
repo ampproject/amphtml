@@ -1277,14 +1277,13 @@ describes.realWin(
               height: 90,
             },
             /* children */ null,
-            (element) => {
-              const {implementation_} = element;
-              const {video_} = implementation_;
+            (element, impl) => {
+              const {video_} = impl;
 
               expect(video_.currentTime).to.equal(0);
 
               [20, 100, 0, 50, 22].forEach((timeSeconds) => {
-                implementation_.seekTo(timeSeconds);
+                impl.seekTo(timeSeconds);
                 expect(video_.currentTime).to.equal(timeSeconds);
               });
 

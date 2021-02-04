@@ -1294,9 +1294,7 @@ describes.realWin('installExtensionsInEmbed', {amp: true}, (env) => {
 
     // Must be stubbed already.
     expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-test']).to.equal(ElementStub);
-    expect(
-      iframeWin.document.createElement('amp-test').implementation_
-    ).to.be.instanceOf(ElementStub);
+    expect(iframeWin.document.createElement('amp-test').implClass_).to.be.null;
     expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-test-sub']).to.be.undefined;
     // Resolve the promise.
     extensions.registerExtension(
@@ -1318,9 +1316,9 @@ describes.realWin('installExtensionsInEmbed', {amp: true}, (env) => {
     expect(iframeWin.document.querySelector('style[amp-extension=amp-test]')).to
       .exist;
     // Must be upgraded already.
-    expect(
-      iframeWin.document.createElement('amp-test').implementation_
-    ).to.be.instanceOf(AmpTest);
+    expect(iframeWin.document.createElement('amp-test').implClass_).to.equal(
+      AmpTest
+    );
 
     // Secondary extension.
     expect(parentWin.__AMP_EXTENDED_ELEMENTS['amp-test-sub']).to.be.undefined;
@@ -1332,8 +1330,8 @@ describes.realWin('installExtensionsInEmbed', {amp: true}, (env) => {
     ).to.not.exist;
     // Must be upgraded already.
     expect(
-      iframeWin.document.createElement('amp-test-sub').implementation_
-    ).to.be.instanceOf(AmpTestSub);
+      iframeWin.document.createElement('amp-test-sub').implClass_
+    ).to.equal(AmpTestSub);
   });
 
   it('should adopt extension services', async () => {
