@@ -52,16 +52,18 @@ export class UserError extends Error {
 }
 
 /**
- * Throws a user error if the first argument isn't trueish. Mirrors userAssert
- * in src/log.js.
+ * Throws a provided error if the second argument isn't trueish.
+ * @param {Object} errorCls
  * @param {T} shouldBeTruthy
+ * @param {string} message
  * @return {T}
  * @throws {UserError} when attribute values are missing or invalid.
  * @closurePrimitive {asserts.truthy}
  */
-export function pureUserAssert(shouldBeTruthy) {
+function pureAssertion(errorCls, shouldBeTruthy, message) {
+  // TODO: Support format strings.
   if (!shouldBeTruthy) {
-    throw new UserError(Array.prototype.slice.call(arguments, 1));
+    throw new errorCls(message);
   }
   return shouldBeTruthy;
 }
@@ -70,13 +72,24 @@ export function pureUserAssert(shouldBeTruthy) {
  * Throws a user error if the first argument isn't trueish. Mirrors userAssert
  * in src/log.js.
  * @param {T} shouldBeTruthy
+ * @param {string} message
  * @return {T}
  * @throws {UserError} when attribute values are missing or invalid.
  * @closurePrimitive {asserts.truthy}
  */
-export function pureDevAssert(shouldBeTruthy) {
-  if (!shouldBeTruthy) {
-    throw new Error(Array.prototype.slice.call(arguments, 1));
-  }
-  return shouldBeTruthy;
+export function pureUserAssert(shouldBeTruthy, message) {
+  return pureAssertion(UserError, shouldBeTruthy, message);
+}
+
+/**
+ * Throws an error if the first argument isn't trueish. Mirrors devAssert in
+ * src/log.js.
+ * @param {T} shouldBeTruthy
+ * @param {string} message
+ * @return {T}
+ * @throws {UserError} when attribute values are missing or invalid.
+ * @closurePrimitive {asserts.truthy}
+ */
+export function pureDevAssert(shouldBeTruthy, message) {
+  return pureAssertion(Error, shouldBeTruthy, message);
 }
