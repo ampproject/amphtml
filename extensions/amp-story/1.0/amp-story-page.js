@@ -56,6 +56,7 @@ import {
   addAttributesToElement,
   closestAncestorElementBySelector,
   iterateCursor,
+  matches,
   scopedQuerySelectorAll,
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
@@ -244,6 +245,9 @@ export class AmpStoryPage extends AMP.BaseElement {
     );
 
     /** @private {?boolean}  */
+    this.isLastStoryPage_ = null;
+
+    /** @private {?boolean}  */
     this.isPrerenderActivePage_ = null;
 
     /** @private {?LoadingSpinner} */
@@ -340,6 +344,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.initializeMediaPool_();
     this.maybeCreateAnimationManager_();
     this.maybeSetPreviewDuration_();
+    this.maybeSetStoryNextUp_();
     this.advancement_ = AdvancementConfig.forElement(this.win, this.element);
     this.advancement_.addPreviousListener(() => this.previous());
     this.advancement_.addAdvanceListener(() =>
@@ -379,6 +384,28 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
+   * Reads the storyNextUp param and sets it as the auto-advance-after attribute
+   * if this is the last page and there isn't a value set by the publisher.
+   * @private
+   */
+  maybeSetStoryNextUp_() {
+    const autoAdvanceAttr = this.element.getAttribute('auto-advance-after');
+    const storyNextUpParam = Services.viewerForDoc(this.element).getParam(
+      'storyNextUp'
+    );
+    if (
+      autoAdvanceAttr === null &&
+      storyNextUpParam !== null &&
+      this.isLastPage_()
+    ) {
+      addAttributesToElement(
+        this.element,
+        dict({'auto-advance-after': storyNextUpParam})
+      );
+    }
+  }
+
+  /**
    * Returns true if the page should be prerendered (for being an active page or first page)
    * @return {boolean}
    */
@@ -395,6 +422,21 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.isPrerenderActivePage_ =
       selectorNodes[selectorNodes.length - 1] === this.element;
     return this.isPrerenderActivePage_;
+  }
+
+  /**
+   * Returns true if the page is the last amp-story-page in the amp-story.
+   * @return {boolean}
+   * @private
+   */
+  isLastPage_() {
+    if (this.isLastStoryPage_ === null) {
+      this.isLastStoryPage_ = matches(
+        this.element,
+        'amp-story-page:last-of-type'
+      );
+    }
+    return this.isLastStoryPage_;
   }
 
   /**

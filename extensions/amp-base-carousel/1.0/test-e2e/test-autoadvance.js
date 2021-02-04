@@ -21,10 +21,10 @@ const pageWidth = 800;
 const pageHeight = 600;
 
 describes.endtoend(
-  'amp-base-carousel:1.0 - autoadvance',
+  'amp-base-carousel - autoadvance',
   {
-    testUrl:
-      'http://localhost:8000/test/manual/amp-base-carousel/1.0/autoadvance.amp.html',
+    version: '1.0',
+    fixture: 'amp-base-carousel/1.0/autoadvance.amp.html',
     experiments: ['bento-carousel'],
     initialRect: {width: pageWidth, height: pageHeight},
     environments: ['single', 'viewer-demo'],

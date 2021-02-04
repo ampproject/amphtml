@@ -51,7 +51,7 @@ describes.realWin(
       jwp.setAttribute('layout', 'responsive');
 
       doc.body.appendChild(jwp);
-      await jwp.build();
+      await jwp.buildInternal();
       await jwp.layoutCallback();
 
       return jwp;
@@ -130,7 +130,7 @@ describes.realWin(
           'data-media-id': 'BZ6tc0gy',
           'data-player-id': 'uoIbMPm3',
         });
-        impl = jwp.implementation_;
+        impl = await jwp.getImpl(false);
       });
 
       it('supports platform', () => {
@@ -407,9 +407,9 @@ describes.realWin(
       jwp.setAttribute('layout', 'responsive');
 
       doc.body.appendChild(jwp);
-      const imp = jwp.implementation_;
+      const imp = await jwp.getImpl(false);
 
-      await jwp.build();
+      await jwp.buildInternal();
       expect(imp['contentid_']).to.equal(attributes['data-media-id']);
       expect(imp['playerid_']).to.equal(attributes['data-player-id']);
       expect(imp['contentSearch_']).to.equal('');
