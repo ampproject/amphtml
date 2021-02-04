@@ -325,8 +325,8 @@ class AmpBridPlayer extends AMP.BaseElement {
   }
 
   /** @override */
-  play(unusedIsAutoplay) {
-    this.sendCommand_('play');
+  play(isAutoplay) {
+    this.sendCommand_('play', isAutoplay ? 'auto' : '');
   }
 
   /** @override */
