@@ -16,12 +16,7 @@
 'use strict';
 
 const minimist = require('minimist');
-const {
-  gitBranchContains,
-  gitCherryMaster,
-  gitCommitMessage,
-  gitCommitFormattedTime,
-} = require('../common/git');
+const {gitCherryMaster, gitCommitFormattedTime} = require('../common/git');
 
 // Allow leading zeros in --version_override, e.g. 0000000000001
 const argv = minimist(process.argv.slice(2), {
