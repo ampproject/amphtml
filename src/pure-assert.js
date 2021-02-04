@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+/** @fileoverview Dependency-free assertion helpers for use in Preact. */
+
 /**
  * Triple zero width space.
  *
@@ -57,9 +59,24 @@ export class UserError extends Error {
  * @throws {UserError} when attribute values are missing or invalid.
  * @closurePrimitive {asserts.truthy}
  */
-export function userAssert(shouldBeTruthy) {
+export function pureUserAssert(shouldBeTruthy) {
   if (!shouldBeTruthy) {
     throw new UserError(Array.prototype.slice.call(arguments, 1));
+  }
+  return shouldBeTruthy;
+}
+
+/**
+ * Throws a user error if the first argument isn't trueish. Mirrors userAssert
+ * in src/log.js.
+ * @param {T} shouldBeTruthy
+ * @return {T}
+ * @throws {UserError} when attribute values are missing or invalid.
+ * @closurePrimitive {asserts.truthy}
+ */
+export function pureDevAssert(shouldBeTruthy) {
+  if (!shouldBeTruthy) {
+    throw new Error(Array.prototype.slice.call(arguments, 1));
   }
   return shouldBeTruthy;
 }

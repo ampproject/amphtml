@@ -26,9 +26,6 @@ import {parseDateAttrs as parseDateAttrsBase} from '../../../src/utils/date';
 /** @const {string} */
 const TAG = 'amp-date-countdown';
 
-/** @const {number} */
-const MILLISECONDS_IN_SECOND = 1000;
-
 class AmpDateCountdown extends PreactBaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {

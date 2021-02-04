@@ -83,8 +83,9 @@ describes.sandboxed('utils/date', {}, (env) => {
     function parseDateAttrs(element) {
       return parseDateAttrsBase(element, [
         'datetime',
-        'enddate',
+        'end-date',
         'timestamp-ms',
+        'timeleft-ms',
         'timestamp-seconds',
       ]);
     }
@@ -197,6 +198,12 @@ describes.sandboxed('utils/date', {}, (env) => {
     it('should throw when invalid "timestamp-seconds" is specified', () => {
       element.setAttribute('timestamp-seconds', 'invalid');
       expect(() => parseDateAttrs(element)).to.throw(/required/);
+    });
+
+    it('should throw when an invalid attribute is specified', () => {
+      expect(() => parseDateAttrsBase(element, ['unknown-attr'])).to.throw(
+        'Invalid date attribute'
+      );
     });
   });
 });

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {userAssert} from '../user-error';
+import {pureDevAssert, pureUserAssert} from '../pure-assert';
 
 /**
  * Parses the date using the `Date.parse()` rules. Additionally supports the
@@ -57,9 +57,9 @@ export function getDate(value) {
 /** Map from attribute names to their parsers. */
 const dateAttrParsers = {
   'datetime': (datetime) =>
-    userAssert(parseDate(datetime), `Invalid date: ${datetime}`),
+    pureUserAssert(parseDate(datetime), `Invalid date: ${datetime}`),
   'end-date': (datetime) =>
-    userAssert(parseDate(datetime), `Invalid date: ${datetime}`),
+    pureUserAssert(parseDate(datetime), `Invalid date: ${datetime}`),
   'timeleft-ms': (timeleftMs) => Date.now() + Number(timeleftMs),
   'timestamp-ms': (ms) => Number(ms),
   'timestamp-seconds': (timestampSeconds) => 1000 * Number(timestampSeconds),
@@ -71,7 +71,7 @@ const dateAttrParsers = {
  * @return {?number}
  */
 export function parseDateAttrs(element, dateAttrs) {
-  const epoch = userAssert(
+  const epoch = pureUserAssert(
     parseEpoch(element, dateAttrs),
     `One of [${dateAttrs.join(', ')}] is required`
   );
@@ -89,11 +89,20 @@ export function parseDateAttrs(element, dateAttrs) {
  * @return {?number}
  */
 function parseEpoch(element, dateAttrs) {
+  // Validate provided dateAttrs outside the loop so it will fail when an
+  // invalid attr is provided, even if that attribute isn't present on the
+  // element.
+  const parsers = dateAttrs.map((attrName) =>
+    pureDevAssert(
+      dateAttrParsers[attrName],
+      `Invalid date attribute "${attrName}"`
+    )
+  );
+
   for (let i = 0; i < dateAttrs.length; ++i) {
-    const attrName = dateAttrs[i];
-    const attrVal = element.getAttribute(attrName);
+    const attrVal = element.getAttribute(dateAttrs[i]);
     if (attrVal) {
-      return dateAttrParsers[attrName](attrVal);
+      return parsers[i](attrVal);
     }
   }
 
