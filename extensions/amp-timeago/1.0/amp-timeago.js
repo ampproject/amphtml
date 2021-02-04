@@ -17,7 +17,7 @@
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Timeago} from './timeago';
 import {isExperimentOn} from '../../../src/experiments';
-import {parseDate} from '../../../src/utils/date';
+import {parseDateAttrs as parseDateAttrsBase} from '../../../src/utils/date';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
@@ -62,39 +62,15 @@ AmpTimeago['props'] = {
 /**
  * @param {!Element} element
  * @return {?number}
+ * @throws {UserError} when attribute values are missing or invalid.
  * @visibleForTesting
  */
 export function parseDateAttrs(element) {
-  // TODO(#29246): Is this a coincidence that timeago would have the same format
-  // as date-display? E.g. the format for date-countdown is somewhat different.
-  const epoch = userAssert(
-    parseEpoch(element),
-    'One of datetime, timestamp-ms, or timestamp-seconds is required'
-  );
-
-  const offsetSeconds =
-    (Number(element.getAttribute('offset-seconds')) || 0) * 1000;
-  return epoch + offsetSeconds;
-}
-
-/**
- * @param {!Element} element
- * @return {?number}
- */
-function parseEpoch(element) {
-  const datetime = element.getAttribute('datetime');
-  if (datetime) {
-    return userAssert(parseDate(datetime), 'Invalid date: %s', datetime);
-  }
-  const timestampMs = element.getAttribute('timestamp-ms');
-  if (timestampMs) {
-    return Number(timestampMs);
-  }
-  const timestampSeconds = element.getAttribute('timestamp-seconds');
-  if (timestampSeconds) {
-    return Number(timestampSeconds) * 1000;
-  }
-  return null;
+  return parseDateAttrsBase(element, [
+    'datetime',
+    'timestamp-ms',
+    'timestamp-seconds',
+  ]);
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {
