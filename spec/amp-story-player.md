@@ -129,6 +129,8 @@ Call the player's various methods to programmatically control the player. These 
 
 Will initialize the player manually. This can be useful when the player is dynamically.
 
+Note that the element must be connected to the DOM before calling `load()`.
+
 ```javascript
 const playerEl = document.body.querySelector('amp-story-player');
 const player = new AmpStoryPlayer(window, playerEl);
