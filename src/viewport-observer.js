@@ -27,11 +27,8 @@ import {toWin} from './types';
  *
  * @return {!IntersectionObserver}
  */
-export function createViewportObserver(
-  ioCallback,
-  win,
-  {threshold, needsRootBounds = false} = {}
-) {
+export function createViewportObserver(ioCallback, win, opts = {}) {
+  const {threshold, needsRootBounds} = opts;
   return new win.IntersectionObserver(ioCallback, {
     threshold,
     root: isIframed(win) && needsRootBounds ? win.document : undefined,
