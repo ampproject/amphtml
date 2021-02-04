@@ -42,9 +42,12 @@
   overflow: hidden !important;
 }
 
+[inline-attachment] .i-amphtml-story-draggable-drawer-container {
+  padding-top: 20% !important;
+}
+
 .i-amphtml-story-draggable-drawer-container {
   height: 100% !important;
-  padding-top: 20% !important;
   box-sizing: border-box !important;
   height: 100% !important;
   overflow-y: auto !important;
@@ -84,6 +87,21 @@
   padding-top: 20px !important;
 }
 
+[outlink-attachment] .i-amphtml-story-draggable-drawer-content { 
+  padding-top: 0px !important;  
+  border-radius: 8px 8px 0px 0 !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+[outlink-attachment] .i-amphtml-story-page-attachment-remote-title {
+  padding: 0 !important;
+}
+
+[outlink-attachment] .i-amphtml-story-page-attachment-remote-content {
+  width: 100% !important;
+}
 
 .i-amphtml-story-draggable-drawer-container[hidden] .i-amphtml-story-draggable-drawer-content {
   opacity: 0 !important;

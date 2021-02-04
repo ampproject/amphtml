@@ -161,7 +161,8 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @private
    */
   buildRemote_() {
-    this.setDragCap_(48 /* pixels */);
+    this.headerEl_.remove();
+    this.setDragCap_(43 /* pixels */);
     this.setOpenThreshold_(150 /* pixels */);
 
     // this.headerEl_.classList.add(
@@ -254,7 +255,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   /**
    * @override
    */
-  open(shouldAnimate = true) {
+  open(shouldAnimate = true, delay) {
     if (this.state_ === DrawerState.OPEN) {
       return;
     }
@@ -288,7 +289,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     );
 
     if (this.type_ === AttachmentType.REMOTE) {
-      this.openRemote_();
+      this.openRemote_(delay);
     }
   }
 
@@ -297,25 +298,33 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * specified URL.
    * @private
    */
-  openRemote_() {
+  openRemote_(delay = 0) {
+    console.log(delay);
     const animationEl = this.win.document.createElement('div');
     animationEl.classList.add('i-amphtml-story-page-attachment-expand');
     const storyEl = closest(this.element, (el) => el.tagName === 'AMP-STORY');
 
-    this.mutateElement(() => {
-      storyEl.appendChild(animationEl);
-    }).then(() => {
-      // Give some time for the 120ms CSS animation to run (cf
-      // amp-story-page-attachment.css). The navigation itself will take some
-      // time, depending on the target and network conditions.
-      this.win.setTimeout(() => {
+    const remoteTitle = this.element.querySelector(
+      '.i-amphtml-story-page-attachment-remote-title'
+    );
+    remoteTitle.style.whiteSpace = 'nowrap';
+    remoteTitle.innerHTML = `<span style="padding: 0">Opening</span> ${this.element.getAttribute(
+      'href'
+    )}`;
+
+    this.win.setTimeout(() => {
+      this.mutateElement(() => {}).then(() => {
+        storyEl.appendChild(animationEl);
+        // Give some time for the 120ms CSS animation to run (cf
+        // amp-story-page-attachment.css). The navigation itself will take some
+        // time, depending on the target and network conditions.
         const navigationService = Services.navigationForDoc(this.getAmpDoc());
         navigationService.navigateTo(
           this.win,
           this.element.getAttribute('href')
         );
-      }, 50);
-    });
+      });
+    }, 50 + delay);
   }
 
   /**

@@ -1843,9 +1843,18 @@ export class AmpStoryPage extends AMP.BaseElement {
       if (attachmentHref) {
         this.openAttachmentEl_.setAttribute('href', attachmentHref);
       }
-      this.openAttachmentEl_.addEventListener('click', () =>
-        this.openAttachment()
-      );
+
+      this.openAttachmentEl_.addEventListener('click', (e) => {
+        e.preventDefault();
+        const openIcon = this.element.querySelector(
+          '.i-amphtml-story-page-open-attachment-icon'
+        );
+        openIcon.style.opacity = '0';
+        openIcon.style.transition = 'opacity .3s';
+        // setTimeout(() => {
+        this.openAttachment(true, 1000);
+        // }, 1000);
+      });
 
       const textEl = this.openAttachmentEl_.querySelector(
         '.i-amphtml-story-page-open-attachment-label'
@@ -1869,7 +1878,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * Opens the attachment, if any.
    * @param {boolean=} shouldAnimate
    */
-  openAttachment(shouldAnimate = true) {
+  openAttachment(shouldAnimate = true, delay) {
     const attachmentEl = this.element.querySelector(
       'amp-story-page-attachment'
     );
@@ -1878,7 +1887,9 @@ export class AmpStoryPage extends AMP.BaseElement {
       return;
     }
 
-    attachmentEl.getImpl().then((attachment) => attachment.open(shouldAnimate));
+    attachmentEl.getImpl().then((attachment) => {
+      attachment.open(shouldAnimate, delay);
+    });
   }
 
   /**
