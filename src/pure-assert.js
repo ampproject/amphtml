@@ -25,7 +25,7 @@
  *
  * @const {string}
  */
-const USER_ERROR_SENTINEL = '\u200B\u200B\u200B';
+export const USER_ERROR_SENTINEL = '\u200B\u200B\u200B';
 
 /**
  * User error class for use in Preact. Use of sentinel string instead of a
