@@ -1272,17 +1272,20 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   displayTapHints(distance) {
-    const allLinks = this.element.querySelectorAll('a');
+    const allLinks = Array.from(this.element.querySelectorAll('a')).filter(
+      (link) => {
+        const isAttachment = Array.from(link.classList).some((item) =>
+          item.includes('attachment')
+        );
+        return !isAttachment;
+      }
+    );
     if (distance === 0) {
       allLinks.forEach((link) => {
-        const left = link.offsetLeft;
-        const width = link.offsetWidth;
-        const top = link.offsetTop;
-        const height = link.offsetHeight;
+        const {left, top, width, height} = link.getBoundingClientRect();
 
         const posX = left + width / 2;
         const posY = top + height / 2;
-
         let tapHint;
 
         if (this.element.hasAttribute('tooltip-page')) {
