@@ -75,7 +75,7 @@ import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {listen} from '../../../src/event-helper';
 import {parseQueryString} from '../../../src/url';
-import {px, toggle} from '../../../src/style';
+import {px, setImportantStyles, toggle} from '../../../src/style';
 import {renderPageDescription} from './semantic-render';
 import {setTextBackgroundColor} from './utils';
 import {toArray} from '../../../src/types';
@@ -1854,11 +1854,15 @@ export class AmpStoryPage extends AMP.BaseElement {
             'data-cta-accent-color'
           );
           if (theme && AttachmentTheme.DARK === theme.toLowerCase()) {
-            textEl.style.color = 'white';
-            textEl.style.background = ctaAccentColor ? ctaAccentColor : 'black';
+            setImportantStyles(textEl, {
+              color: 'white',
+              background: ctaAccentColor ? ctaAccentColor : 'black',
+            });
           } else {
-            textEl.style.background = 'white';
-            textEl.style.color = ctaAccentColor ? ctaAccentColor : 'black';
+            setImportantStyles(textEl, {
+              color: ctaAccentColor ? ctaAccentColor : 'black',
+              background: 'white',
+            });
           }
         }
 
