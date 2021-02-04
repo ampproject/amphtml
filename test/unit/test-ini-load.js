@@ -87,7 +87,7 @@ describes.realWin('whenContentIniLoad', {amp: true}, (env) => {
     });
   });
 
-  describe.only('whenContentIniLoadInOb', () => {
+  describe('whenContentIniLoadInOb', () => {
     let content1;
     let content2;
     let observer;
