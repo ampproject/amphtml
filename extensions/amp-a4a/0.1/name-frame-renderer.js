@@ -59,7 +59,7 @@ export class NameFrameRenderer extends Renderer {
 
     const asyncIntersection =
       getExperimentBranch(
-        this.ownerDocument.defaultView,
+        element.ownerDocument.defaultView,
         'ads-initialIntersection'
       ) === ADS_INITIAL_INTERSECTION_EXP.experiment;
     const intersectionPromise = asyncIntersection
