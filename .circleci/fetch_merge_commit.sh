@@ -23,18 +23,18 @@ set -e
 err=0
 
 GREEN() { echo -e "\n\033[0;32m$1\033[0m"; }
+YELLOW() { echo -e "\n\033[0;33m$1\033[0m"; }
 RED() { echo -e "\n\033[0;31m$1\033[0m"; }
 
-# CIRCLE_PULL_REQUEST is present for PR builds, and absent for push builds.
-if [[ -z "$CIRCLE_PULL_REQUEST" ]]; then
+# CIRCLE_PR_NUMBER is present for PR builds, and absent for push builds.
+if [[ -z "$CIRCLE_PR_NUMBER" ]]; then
   echo $(GREEN "Nothing to do because this is not a PR build.")
+  # Warn if the build is linked to a PR on a different repo (known CircleCI bug).
+  if [[ -n "$CIRCLE_PULL_REQUEST" && ! "$CIRCLE_PULL_REQUEST" =~ ^https://github.com/ampproject/amphtml* ]]; then
+    echo $(YELLOW "WARNING: Build is incorrectly linked to a PR outside ampproject/amphtml:")
+    echo $(YELLOW "$CIRCLE_PULL_REQUEST")
+  fi
   exit 0
-fi
-
-# Make sure the PR is on ampproject/amphtml and not on a fork.
-if [[ ! "$CIRCLE_PULL_REQUEST" =~ ^https://github.com/ampproject/amphtml* ]]; then
-  echo $(RED "This is a PR build, but on a repo other than ampproject/amphtml.")
-  exit 1
 fi
 
 # CIRCLE_PR_NUMBER is present for PRs originating from forks, but absent for PRs
