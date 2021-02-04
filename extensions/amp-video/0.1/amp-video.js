@@ -470,7 +470,7 @@ class AmpVideo extends AMP.BaseElement {
         const qualities = Object.keys(AMP_QUALITY_BITRATES);
         const origType = source.getAttribute('type');
         const origSrc = source.getAttribute('amp-orig-src');
-        qualities.forEach((quality) => {
+        qualities.forEach((quality, index) => {
           const cachedSource = addParamsToUrl(source.src, {
             'amp_quality': quality,
           });
@@ -479,9 +479,8 @@ class AmpVideo extends AMP.BaseElement {
             origType,
             AMP_QUALITY_BITRATES[quality]
           );
-          if (qualities.indexOf(quality) == qualities.length - 1) {
+          if (index === qualities.length - 1) {
             // Keep src of amp-orig only in last one so it adds the orig source after it.
-            // TODO: Propagate data-bitrate of source.
             currSource.setAttribute('amp-orig-src', origSrc);
           }
           this.video_.appendChild(currSource);
@@ -557,7 +556,7 @@ class AmpVideo extends AMP.BaseElement {
   /**
    * @param {string} src
    * @param {?string} type
-   * @param {?string} bitrate
+   * @param {string|number=} bitrate
    * @return {!Element} source element
    * @private
    */
@@ -569,7 +568,7 @@ class AmpVideo extends AMP.BaseElement {
     if (type) {
       source.setAttribute('type', type);
     }
-    if (bitrate) {
+    if (bitrate !== null) {
       source.setAttribute('data-bitrate', bitrate);
     }
     return source;
