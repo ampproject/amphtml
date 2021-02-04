@@ -87,6 +87,10 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       this.buildRemote_();
     }
 
+    this.dataTitle_ =
+      this.element.hasAttribute('data-title') &&
+      this.element.getAttribute('data-title');
+
     this.win.addEventListener('pageshow', (event) => {
       // On browser back, Safari does not reload the page but resumes its cached
       // version. This event's parameter lets us know when this happens so we
