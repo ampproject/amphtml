@@ -658,6 +658,19 @@ describes.realWin('Linker Manager', {amp: true}, (env) => {
       });
     });
 
+    it('should not add linker if protocol is not http/https', () => {
+      const lm = new LinkerManager(ampdoc, config, /* type */ null, element);
+      return lm.init().then(() => {
+        const a = {
+          href: '123132111',
+          protocol: 'tel:',
+          hostname: 'amp.source.test',
+        };
+        anchorClickHandlers.forEach((handler) => handler(a, {type: 'click'}));
+        expect(a.href).to.not.contain('testLinker');
+      });
+    });
+
     it('should not add linker if href is relative', () => {
       const lm = new LinkerManager(ampdoc, config, /* type */ null, element);
       return lm.init().then(() => {
