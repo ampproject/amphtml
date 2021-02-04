@@ -232,7 +232,7 @@ export class ConsentInstance {
     this.sharedDataPromise = null;
 
     /** @private {Promise<!../../../src/service/storage-impl.Storage>} */
-    this.storagePromise_ = Services.storageForDoc(ampdoc);
+    this.storagePromise_ = Services.storageForTopLevelDoc(ampdoc);
 
     /** @private {?ConsentInfoDef}*/
     this.localConsentInfo_ = null;
