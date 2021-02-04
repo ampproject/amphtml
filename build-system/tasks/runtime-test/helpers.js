@@ -113,7 +113,7 @@ function maybePrintArgvMessages() {
 
   log(
     green('Run'),
-    cyan('gulp help'),
+    cyan('gulp --tasks'),
     green('to see a list of all test flags.')
   );
   log(green('⤷ Use'), cyan('--nohelp'), green('to silence these messages.'));

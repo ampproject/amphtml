@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import '../amp-instagram';
+import {AmpInstagram} from '../amp-instagram';
 
 describes.realWin(
   'amp-instagram',
@@ -59,27 +59,25 @@ describes.realWin(
             resolve();
           })
       );
-      ins.implementation_.getVsync = () => {
-        return {
-          mutate(cb) {
-            cb();
-          },
-          measure(cb) {
-            cb();
-          },
-          runPromise(task, state = {}) {
-            if (task.measure) {
-              task.measure(state);
-            }
-            if (task.mutate) {
-              task.mutate(state);
-            }
-            return Promise.resolve();
-          },
-        };
-      };
+      env.sandbox.stub(AmpInstagram.prototype, 'getVsync').returns({
+        mutate(cb) {
+          cb();
+        },
+        measure(cb) {
+          cb();
+        },
+        runPromise(task, state = {}) {
+          if (task.measure) {
+            task.measure(state);
+          }
+          if (task.mutate) {
+            task.mutate(state);
+          }
+          return Promise.resolve();
+        },
+      });
       doc.body.appendChild(ins);
-      await ins.build();
+      await ins.buildInternal();
       if (opt_beforeLayoutCallback) {
         opt_beforeLayoutCallback(ins);
       }
@@ -128,8 +126,8 @@ describes.realWin(
 
     it('removes iframe after unlayoutCallback', async () => {
       const ins = await getIns('fBwFP');
+      const obj = await ins.getImpl(false);
       testIframe(ins.querySelector('iframe'));
-      const obj = ins.implementation_;
       obj.unlayoutCallback();
       expect(ins.querySelector('iframe')).to.be.null;
       expect(obj.iframe_).to.be.null;
@@ -151,12 +149,12 @@ describes.realWin(
 
     it('resizes in response to messages from Instagram iframe', async () => {
       const ins = await getIns('fBwFP', true);
-      const impl = ins.implementation_;
+      const impl = await ins.getImpl(false);
       const iframe = ins.querySelector('iframe');
       const forceChangeHeight = env.sandbox.spy(impl, 'forceChangeHeight');
       const newHeight = 977;
       expect(iframe).to.not.be.null;
-      sendFakeMessage(ins, iframe, 'MEASURE', {
+      await sendFakeMessage(ins, iframe, 'MEASURE', {
         height: newHeight,
       });
       expect(forceChangeHeight).to.be.calledOnce;
@@ -164,8 +162,9 @@ describes.realWin(
       expect(forceChangeHeight.firstCall.args[0]).to.equal(newHeight);
     });
 
-    function sendFakeMessage(ins, iframe, type, details) {
-      ins.implementation_.handleInstagramMessages_({
+    async function sendFakeMessage(ins, iframe, type, details) {
+      const impl = await ins.getImpl(false);
+      impl.handleInstagramMessages_({
         origin: 'https://www.instagram.com',
         source: iframe.contentWindow,
         data: JSON.stringify({

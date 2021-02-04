@@ -152,7 +152,7 @@ Bento enabled components in standalone use are highly interactive through their 
 
 The `amp-selector` component API is accessible by including the following script tag in your document:
 
-```
+```js
 await customElements.whenDefined("amp-selector");
 const api = await selector.getApi();
 ```
@@ -164,7 +164,7 @@ The `amp-selector` API allows you to perform the following actions:
 **selectBy(delta: number)**
 Closes the selector.
 
-```
+```js
 api.selectBy(1); // Select next option in DOM sequence.
 api.selectBy(-2); // Select the option that is two previous in DOM sequence.
 ```
@@ -172,7 +172,7 @@ api.selectBy(-2); // Select the option that is two previous in DOM sequence.
 **toggle(optionValue: string, opt_select: boolean|undefined)**
 Toggles the option with the given `optionValue` to be selected or deselected based on `opt_select`. If `opt_select` is not present, then the option will be selected if currently not selected, and deselected if currently selected.
 
-```
+```js
 api.toggle("a"); // Toggle the item with the attribute `option="a"`.
 api.toggle("1", true); // Select the item with the attribute `option="1"`.
 ```
@@ -195,7 +195,7 @@ Tapping disabled options does not trigger the `select` event.
   </li>
 </ul>
 
-```
+```js
 selector.addEventListener("select", (e) => console.log(e.data.targetOption))
 ```
 
@@ -203,7 +203,7 @@ selector.addEventListener("select", (e) => console.log(e.data.targetOption))
 
 Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
 
-```
+```html
 <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-selector-1.0.css">
 ```
 

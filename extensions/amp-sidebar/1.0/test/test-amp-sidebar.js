@@ -98,7 +98,7 @@ describes.realWin(
         `;
         element = fullHtml.firstElementChild;
         win.document.body.appendChild(fullHtml);
-        await element.build();
+        await element.buildInternal();
 
         container = element.shadowRoot.firstElementChild;
         openButton = fullHtml.querySelector('#open');
@@ -327,7 +327,7 @@ describes.realWin(
           </amp-sidebar>
         `;
         win.document.body.appendChild(noWarnSidebar);
-        await noWarnSidebar.build();
+        await noWarnSidebar.buildInternal();
 
         // the 'noWarnSidebar' above is appended directly to the body and
         // should not throw a warning
@@ -355,7 +355,7 @@ describes.realWin(
         `;
         element = fullHtml.firstElementChild;
         win.document.body.appendChild(fullHtml);
-        await element.build();
+        await element.buildInternal();
         container = element.shadowRoot.firstElementChild;
         openButton = fullHtml.querySelector('#open');
 
@@ -385,7 +385,7 @@ describes.realWin(
         `;
         element = fullHtml.firstElementChild;
         win.document.body.appendChild(fullHtml);
-        await element.build();
+        await element.buildInternal();
         container = element.shadowRoot.firstElementChild;
         openButton = fullHtml.querySelector('#open');
 
@@ -547,7 +547,7 @@ describes.realWin(
         `;
         element = fullHtml.firstElementChild;
         win.document.body.appendChild(fullHtml);
-        await element.build();
+        await element.buildInternal();
 
         container = element.shadowRoot.firstElementChild;
         openButton = fullHtml.querySelector('#open');
