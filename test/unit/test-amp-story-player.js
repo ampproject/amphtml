@@ -525,7 +525,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       const player = new AmpStoryPlayer(win, playerEl);
 
       return expect(() => player.load()).to.throw(
-        `[${TAG}] element must be appended to the DOM before calling load().`
+        `[${TAG}] element must be connected to the DOM before calling load().`
       );
     });
 
