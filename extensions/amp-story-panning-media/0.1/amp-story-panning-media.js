@@ -16,6 +16,7 @@
 
 import {
   Action,
+  UIType,
   StateProperty,
 } from '../../../extensions/amp-story/1.0/amp-story-store-service';
 import {CSS} from '../../../build/amp-story-panning-media-0.1.css';
@@ -77,6 +78,9 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
 
     /** @private {?string} */
     this.groupId_ = null;
+
+    /** @private {boolean} */
+    this.isDesktopPanelsMode_ = false;
   }
 
   /** @override */
@@ -132,6 +136,11 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     this.storeService_.subscribe(
       StateProperty.PANNING_MEDIA_STATE,
       (panningMediaState) => this.onPanningMediaStateChange_(panningMediaState),
+      true /** callToInitialize */
+    );
+    this.storeService_.subscribe(
+      StateProperty.UI_STATE,
+      (uiState) => this.onUIStateUpdate_(uiState),
       true /** callToInitialize */
     );
     // Mutation observer for distance attribute
@@ -208,7 +217,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
    */
   onPanningMediaStateChange_(panningMediaState) {
     if (
-      this.distance_ <= 1 &&
+      this.distance_ <= (this.isDesktopPanelsMode_ ? 0 : 1) &&
       panningMediaState[this.groupId_] &&
       // Prevent update if value is same as previous value.
       // This happens when 2 or more components are on the same page.
@@ -261,6 +270,15 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
    */
   prefersReducedMotion_() {
     return this.win.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  /**
+   * Reacts to UI state updates and triggers the expected UI.
+   * @param {!UIType} uiState
+   * @private
+   */
+  onUIStateUpdate_(uiState) {
+    this.isDesktopPanelsMode_ = uiState === UIType.DESKTOP_PANELS;
   }
 
   /** @override */
