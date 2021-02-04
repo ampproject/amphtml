@@ -627,19 +627,27 @@ export class Services {
    */
   static storageForDoc(elementOrAmpDoc) {
     return /** @type {!Promise<!./service/storage-impl.Storage>} */ (getServicePromiseForDoc(
-      // elementOrAmpDoc,
-      window.document,
+      elementOrAmpDoc,
       'storage'
     ));
   }
 
   /**
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!Promise<!./service/storage-impl.Storage>}
    */
-  static storageForTopLevelDoc() {
+  static storageForTopLevelDoc(elementOrAmpDoc) {
+    const thisAmpdoc = Services.ampdoc(elementOrAmpDoc);
+    const ampdocService = Services.ampdocServiceFor(thisAmpdoc.win);
+    const topAmpdoc = ampdocService.isSingleDoc()
+      ? ampdocService.getSingleDoc()
+      : null;
+    // We need to verify that ampdocs are on the same origin, therefore
+    // we compare the windows of both.
+    const ampdoc =
+      topAmpdoc && topAmpdoc.win == thisAmpdoc.win ? topAmpdoc : thisAmpdoc;
     return /** @type {!Promise<!./service/storage-impl.Storage>} */ (getServicePromiseForDoc(
-      // elementOrAmpDoc,
-      window.document,
+      ampdoc,
       'storage'
     ));
   }
