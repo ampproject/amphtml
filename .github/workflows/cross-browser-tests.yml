@@ -22,8 +22,10 @@ jobs:
       - name: Cache Packages
         uses: actions/cache@v2
         with:
-          path: node_modules
-          key: node_modules-${{ matrix.platform }}-${{ hashFiles('package-lock.json') }}
+          path: ~/.npm
+          key: npm-cache-${{ matrix.platform }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            npm-cache-${{ matrix.platform }}-
       - name: Install Dependencies
         run: bash ./.github/workflows/install_dependencies.sh
       - name: Build and Test

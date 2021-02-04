@@ -79,7 +79,7 @@ commands:
           name: 'Save NPM Cache'
           key: npm-cache-{{ checksum "package-lock.json" }}
           paths:
-            - node_modules
+            - ~/.npm
   install_chrome:
     steps:
       - browser-tools/install-chrome:
