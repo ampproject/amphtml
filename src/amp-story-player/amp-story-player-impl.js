@@ -261,9 +261,9 @@ export class AmpStoryPlayer {
    * @public
    */
   load() {
-    if (!this.doc_.querySelector(TAG)) {
+    if (!this.element_.isConnected) {
       throw new Error(
-        `[${TAG}] element must be appended to the DOM before calling load().`
+        `[${TAG}] element must be connected to the DOM before calling load().`
       );
     }
     this.buildCallback();
