@@ -22,12 +22,19 @@ import {toWin} from './types';
  *
  * @param {function(!Array<!IntersectionObserverEntry>)} ioCallback
  * @param {!Window} win
- * @param {(number|!Array<number>)=} threshold
+ * @param {{threshold: (number|!Array<number>)=, needsRootBounds: boolean=}=} opts
  *
  * @return {!IntersectionObserver}
  */
-export function createViewportObserver(ioCallback, win, threshold) {
-  return new win.IntersectionObserver(ioCallback, {threshold});
+export function createViewportObserver(
+  ioCallback,
+  win,
+  {threshold, needsRootBounds = false}
+) {
+  return new win.IntersectionObserver(ioCallback, {
+    threshold,
+    root: isIframed(win) && needsRootBounds ? win.document : undefined,
+  });
 }
 
 /** @type {!WeakMap<!Window, !IntersectionObserver>} */
