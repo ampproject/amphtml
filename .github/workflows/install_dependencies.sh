@@ -29,6 +29,9 @@ if [[ "$OSTYPE" == "linux-gnu"* || "$OSTYPE" == "darwin"* ]]; then
   echo "$HOME/.npm/bin" >> $GITHUB_PATH # For later
 fi
 
+echo $(GREEN "Updating NPM...")
+npm install --global npm
+
 echo $(GREEN "Installing gulp-cli...")
 npm install --global gulp-cli
 
