@@ -426,11 +426,14 @@ async function release() {
         log(`- ${yellow(sha)}`);
       }
       log(red('Aborting...'));
-      process.exit(1);
+      throw new Error('Found unknown commit during release');
     }
+  } else if (!argv.version_override) {
+    throw new Error(
+      'Skipping commit verification requires an explicit version_override'
+    );
   }
 
-  log('Preparing environment for release build in', `${cyan(outputDir)}...`);
   await prepareEnvironment_(outputDir, tempDir);
 
   log('Discovering release', `${green('flavors')}...`);
@@ -482,5 +485,6 @@ release.flags = {
   'flavor':
     '  Limit this release build to a single flavor. Can be used to split the release work between multiple build machines.',
   'skip_commits_verification':
-    '  Skip verifying that every commit exists on master (or is a cherry-pick of a commit on master).',
+    '  Skip verifying that every commit exists on master (or is a cherry-pick of a commit on master). If this is set, then you must provide version_override.',
+  'version_override': '  Overrides the version written to AMP_CONFIG',
 };
