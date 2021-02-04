@@ -1629,7 +1629,6 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
 
           const promise = element.ensureLoaded(parentPriority);
           await element.layoutCallback();
-
           await promise;
         });
 
@@ -1639,13 +1638,54 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
           element.setAttribute('width', '10');
           element.setAttribute('height', '10');
           container.appendChild(element);
+          const resource = element.getResource_();
 
           await element.buildInternal();
-          await element.layoutCallback();
+          resource.measure();
+          resource.layoutScheduled(Date.now());
+          await resource.startLayout();
 
           resourcesMock.expects('scheduleLayoutOrPreload').never();
 
           await element.ensureLoaded();
+        });
+
+        it('should reload a previously failed element', async () => {
+          const element = new ElementClass();
+          element.setAttribute('layout', 'fixed');
+          element.setAttribute('width', '10');
+          element.setAttribute('height', '10');
+          container.appendChild(element);
+          const resource = element.getResource_();
+
+          await element.buildInternal();
+          resource.measure();
+          resource.layoutScheduled(Date.now());
+          const layoutCallbackStub = env.sandbox.stub(
+            element,
+            'layoutCallback'
+          );
+          layoutCallbackStub.returns(Promise.reject(new Error('intentional')));
+          try {
+            await resource.startLayout();
+          } catch (e) {
+            // Expected.
+          }
+
+          layoutCallbackStub./*OK*/ restore();
+          resourcesMock
+            .expects('scheduleLayoutOrPreload')
+            .withExactArgs(
+              resource,
+              /* layout */ true,
+              /* parentPriority */ undefined,
+              /* forceOutsideViewport */ true
+            )
+            .once();
+
+          const promise = element.ensureLoaded();
+          await element.layoutCallback();
+          await promise;
         });
 
         it('should do nothing for a non-displayed element', async () => {

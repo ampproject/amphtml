@@ -529,7 +529,7 @@ function createBaseCustomElementClass(win) {
       return this.whenBuilt().then(() => {
         const resource = this.getResource_();
         if (resource.getState() == ResourceState.LAYOUT_COMPLETE) {
-          return this.whenLoaded();
+          return;
         }
         if (
           resource.getState() != ResourceState.LAYOUT_SCHEDULED ||
