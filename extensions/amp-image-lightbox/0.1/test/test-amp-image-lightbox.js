@@ -318,7 +318,7 @@ describes.realWin(
         return undefined;
       },
       hasAttribute: () => undefined,
-      getImpl: () => Promise.resolve(sourceElement.implementation_),
+      getImpl: () => Promise.resolve({}),
     };
 
     beforeEach(() => {

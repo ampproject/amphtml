@@ -30,4 +30,4 @@ SomeBaseElementLikeClass.prototype.defaultActionAlias_;
 
 // Externed explicitly because this private property is read across
 // binaries.
-Element.prototype.implementation_ = {};
+Element.prototype.impl_ = {};

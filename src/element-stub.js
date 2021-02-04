@@ -15,33 +15,6 @@
  */
 
 import {BaseElement} from './base-element';
-import {devAssert} from './log';
 
-/** @type {!Array} */
-export const stubbedElements = [];
-
-export class ElementStub extends BaseElement {
-  /** @param {!AmpElement} element */
-  constructor(element) {
-    super(element);
-    stubbedElements.push(this);
-  }
-
-  /** @override */
-  getLayoutPriority() {
-    return devAssert(0, 'Cannot get priority of stubbed element');
-  }
-
-  /** @override */
-  isLayoutSupported(unusedLayout) {
-    // Always returns true and will eventually call this method on the actual
-    // element.
-    return true;
-  }
-
-  /** @override */
-  reconstructWhenReparented() {
-    // No real state so no reason to reconstruct.
-    return false;
-  }
-}
+// TODO(#31915): completely eliminate this class.
+export class ElementStub extends BaseElement {}

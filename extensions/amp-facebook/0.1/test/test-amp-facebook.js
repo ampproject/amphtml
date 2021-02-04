@@ -262,8 +262,9 @@ describes.realWin(
           resetServiceForTesting(win, 'bootstrapBaseUrl');
           setDefaultBootstrapBaseUrlForTesting(iframeSrc);
           const ampFB = await getAmpFacebook(fbPostHref);
+          const impl = await ampFB.getImpl(false);
           return new Promise((resolve, unusedReject) => {
-            const {firstChild: iframe, implementation_: impl} = ampFB;
+            const {firstChild: iframe} = ampFB;
             impl.forceChangeHeight = (newHeight) => {
               expect(newHeight).to.equal(666);
               resolve(ampFB);
