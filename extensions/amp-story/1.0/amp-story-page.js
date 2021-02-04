@@ -77,16 +77,9 @@ import {listen} from '../../../src/event-helper';
 import {parseQueryString} from '../../../src/url';
 import {px, toggle} from '../../../src/style';
 import {renderPageDescription} from './semantic-render';
-import {setStyle} from '../../src/style';
 import {setTextBackgroundColor} from './utils';
 import {toArray} from '../../../src/types';
 import {upgradeBackgroundAudio} from './audio';
-
-/** @const {string} */
-const PRIMARY_CTA_DARK_THEME_CLASS = 'i-amphtml-story-primary-cta-theme-dark';
-
-/** @const {string} */
-const PRIMARY_CTA_LIGHT_THEME_CLASS = 'i-amphtml-story-primary-cta-theme-light';
 
 /**
  * @enum {string}
@@ -1838,19 +1831,11 @@ export class AmpStoryPage extends AMP.BaseElement {
             'data-cta-accent-color'
           );
           if (theme && AttachmentTheme.DARK === theme.toLowerCase()) {
-            textEl.classList.add(PRIMARY_CTA_DARK_THEME_CLASS);
-            setStyle(
-              textEl,
-              'background',
-              ctaAccentColor ? ctaAccentColor : 'black'
-            );
+            textEl.style.color = 'white';
+            textEl.style.background = ctaAccentColor ? ctaAccentColor : 'black';
           } else {
-            textEl.classList.add(PRIMARY_CTA_LIGHT_THEME_CLASS);
-            setStyle(
-              textEl,
-              'color',
-              ctaAccentColor ? ctaAccentColor : 'black'
-            );
+            textEl.style.background = 'white';
+            textEl.style.color = ctaAccentColor ? ctaAccentColor : 'black';
           }
         }
 

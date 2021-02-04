@@ -181,6 +181,7 @@ amp-story-page .i-amphtml-story-page-open-attachment-bar-right {
 amp-story-page .i-amphtml-story-page-open-attachment-label {
   position: relative !important;
   padding: 12px 32px 20px 32px !important;
+  margin: 0 0 20px 0 !important;
   height: 16px !important;
   max-width: 243px !important;
   font-family: 'Roboto', sans-serif !important;
