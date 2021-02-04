@@ -635,6 +635,7 @@ export class Services {
   /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!Promise<!./service/storage-impl.Storage>}
+   * TODO(dmanek): Add tests for this method.
    */
   static storageForTopLevelDoc(elementOrAmpDoc) {
     const thisAmpdoc = Services.ampdoc(elementOrAmpDoc);
