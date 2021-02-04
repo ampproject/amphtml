@@ -24,9 +24,9 @@ err=0
 GREEN() { echo -e "\n\033[0;32m$1\033[0m"; }
 RED() { echo -e "\n\033[0;31m$1\033[0m"; }
 
-# CIRCLE_PULL_REQUEST is present for PR builds, and absent for push builds.
-if [[ -z "$CIRCLE_PULL_REQUEST" ]]; then
-  echo $(GREEN "Nothing to do because this is not a PR build.")
+# Push builds are only run against master and amp-release branches.
+if [[ "$CIRCLE_BRANCH" == "master" || "$CIRCLE_BRANCH" =~ ^amp-release-* ]]; then
+  echo $(GREEN "Nothing to do because $CIRCLE_BRANCH is not a PR branch.")
   exit 0
 fi
 
