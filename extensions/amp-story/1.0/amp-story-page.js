@@ -176,7 +176,6 @@ const buildOpenAttachmentElement = (element) =>
           <span class="i-amphtml-story-page-open-attachment-bar-left"></span>
           <span class="i-amphtml-story-page-open-attachment-bar-right"></span>
         </span>
-        
         <span class="i-amphtml-story-page-open-attachment-label"></span>
       </a>`;
 
@@ -1798,9 +1797,12 @@ export class AmpStoryPage extends AMP.BaseElement {
         '.i-amphtml-story-page-open-attachment-label'
       );
 
-      const defaultCtaImg = '<img src="/extensions/amp-story/img/light-link-icon.svg"></img>'; // TODO(raxsha): based on theme.
-      const ctaImgAttr = attachmentEl.getAttribute('data-cta-img');
-      const ctaImg = (ctaImgAttr && ctaImgAttr.trim()) || defaultCtaImg;
+      let ctaImg = "";
+      if (attachmentHref) {
+        const defaultCtaImg = '<img src="/extensions/amp-story/img/light-link-icon.svg"></img>'; // TODO(raxsha): based on theme.
+        const ctaImgAttr = attachmentEl.getAttribute('data-cta-img');
+        ctaImg = (ctaImgAttr && ctaImgAttr.trim()) || defaultCtaImg;
+      }
 
       const openLabelAttr = attachmentEl.getAttribute('data-cta-text');
       const openLabel = ctaImg + (
