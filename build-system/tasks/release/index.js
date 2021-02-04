@@ -22,8 +22,9 @@ const fs = require('fs-extra');
 const klaw = require('klaw');
 const path = require('path');
 const tar = require('tar');
-const {cyan, green} = require('ansi-colors');
+const {cyan, green, red, yellow} = require('ansi-colors');
 const {execOrDie} = require('../../common/exec');
+const {gitCherryMaster} = require('../../common/git');
 const {log} = require('../../common/logging');
 const {MINIFIED_TARGETS} = require('../helpers');
 const {VERSION} = require('../../compile/internal-version');
@@ -412,6 +413,23 @@ async function release() {
   const outputDir = path.resolve(argv.output_dir || './release');
   const tempDir = path.join(outputDir, 'tmp');
 
+  if (!argv.skip_commits_verification) {
+    log(
+      'Checking if branch contains commits not on master (exluding cherry-picks)'
+    );
+    const unknownCommits = gitCherryMaster().filter(
+      ({isCherryPick}) => !isCherryPick
+    );
+    if (unknownCommits.length > 0) {
+      log(red('Unknown commits found!'));
+      for (const {sha} of unknownCommits) {
+        log(`- ${yellow(sha)}`);
+      }
+      log(red('Aborting...'));
+      process.exit(1);
+    }
+  }
+
   log('Preparing environment for release build in', `${cyan(outputDir)}...`);
   await prepareEnvironment_(outputDir, tempDir);
 
@@ -463,4 +481,6 @@ release.flags = {
     '  Directory path to emplace release files (defaults to "./release")',
   'flavor':
     '  Limit this release build to a single flavor. Can be used to split the release work between multiple build machines.',
+  'skip_commits_verification':
+    '  Skip verifying that every commit exists on master (or is a cherry-pick of a commit on master).',
 };

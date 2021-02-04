@@ -182,10 +182,26 @@ function gitCherryMaster() {
   return getStdout('git cherry master')
     .trim()
     .split('\n')
-    .map((line) => ({
-      isCherryPick: line.substring(0, 2) == '- ',
-      sha: line.substring(2),
-    }));
+    .filter(Boolean)
+    .map((line) => {
+      const sha = line.slice(2);
+      let isCherryPick = line.startsWith('- ');
+
+      if (!isCherryPick) {
+        // Sometimes cherry-picks are mistaken for new commits. Double-check here
+        // by looking for the hard-coded message at the end of the commit that
+        // indicates that it was a cherry-pick. Requires that the cherry-pick was
+        // performed with the `-x` flag.
+        const commitMessage = gitCommitMessage(sha);
+        const cherryPickedMatch = /\(cherry picked from commit ([0-9a-f]{40})\)/.exec(
+          commitMessage
+        );
+        if (cherryPickedMatch && gitBranchContains(cherryPickedMatch[1])) {
+          isCherryPick = true;
+        }
+      }
+      return {isCherryPick, sha};
+    });
 }
 
 /**
