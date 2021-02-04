@@ -48,7 +48,7 @@ import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
-import {isEnumValue, isObject} from '../../../src/types';
+import {isArray, isEnumValue, isObject} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {toggle} from '../../../src/style';
 
@@ -124,6 +124,12 @@ export class AmpConsent extends AMP.BaseElement {
     this.isTcfPostMessageProxyExperimentOn_ = isExperimentOn(
       this.win,
       'tcf-post-message-proxy-api'
+    );
+
+    /** @private {?boolean} */
+    this.isGranularConsentExperimentOn_ = isExperimentOn(
+      this.win,
+      'amp-consent-granular-consent'
     );
 
     /** @private @const {?Function} */
@@ -638,6 +644,63 @@ export class AmpConsent extends AMP.BaseElement {
   }
 
   /**
+   * TODO (micajuineho): Use our stored info to check if we have the
+   * necessary granular consents.
+   * @param {ConsentInfoDef} opt_consentInfo
+   * @return {!Promise<boolean>}
+   */
+  checkGranularConsentRequired_(opt_consentInfo) {
+    if (!this.isGranularConsentExperimentOn_) {
+      return Promise.resolve(true);
+    }
+    return this.getPurposeConsentRequired_().then((purposeConsentRequired) => {
+      if (!purposeConsentRequired) {
+        return true;
+      } else if (!isArray(purposeConsentRequired)) {
+        user().error(
+          TAG,
+          `'purposeConsentRequired' requires an array of strings`
+        );
+        return true;
+      }
+      // TODO: add check here.
+      return true;
+    });
+  }
+
+  /**
+   * Get `purposeConsentRequired` from consent config,
+   * or from `checkConsentHref` response.
+   * @return {!Promise}
+   */
+  getPurposeConsentRequired_() {
+    const inlinePurposes = this.consentConfig_['purposeConsentRequired'];
+    if (inlinePurposes) {
+      return Promise.resolve(inlinePurposes);
+    }
+    return this.getConsentRemote_().then((response) => {
+      if (!response) {
+        return null;
+      }
+      return response['purposeConsentRequired'];
+    });
+  }
+
+  /**
+   * Determines if we should show UI based on our stored consent values.
+   * @return {!Promise<boolean>}
+   */
+  hasRequiredConsents_() {
+    return this.consentStateManager_.getConsentInstanceInfo().then((info) => {
+      // Global consent
+      if (hasStoredValue(info)) {
+        return this.checkGranularConsentRequired_(info);
+      }
+      return Promise.resolve(false);
+    });
+  }
+
+  /**
    * Handle Prompt UI.
    * @param {boolean} isConsentRequired
    * @return {Promise<boolean>}
@@ -652,8 +715,8 @@ export class AmpConsent extends AMP.BaseElement {
     );
 
     // Get current consent state
-    return this.consentStateManager_.getConsentInstanceInfo().then((info) => {
-      if (hasStoredValue(info)) {
+    return this.hasRequiredConsents_().then((hasConsents) => {
+      if (hasConsents) {
         // Has user stored value, no need to prompt
         return true;
       }

@@ -1341,6 +1341,101 @@ describes.realWin(
         });
       });
     });
+
+    describe('granular consent experiment', () => {
+      let defaultConfig;
+      let ampConsent;
+      let consentElement;
+
+      beforeEach(() => {
+        toggleExperiment(win, 'amp-consent-granular-consent', true);
+        jsonMockResponses = {
+          'https://server-test-1/':
+            '{"consentRequired": true, "purposeConsentRequired": ["abc", "bcd"]}',
+          'https://server-test-2/': '{"consentRequired": true}',
+        };
+        defaultConfig = dict({
+          'consentInstanceId': 'abc',
+        });
+      });
+
+      afterEach(() => {
+        toggleExperiment(win, 'amp-consent-granular-consent', false);
+      });
+
+      it('uses inline purposeConsentRequired', async () => {
+        defaultConfig['purposeConsentRequired'] = ['zyx', 'yxw'];
+        defaultConfig['consentRequired'] = true;
+        consentElement = createConsentElement(doc, defaultConfig);
+        doc.body.appendChild(consentElement);
+        ampConsent = new AmpConsent(consentElement);
+        await ampConsent.buildCallback();
+        expect(await ampConsent.getPurposeConsentRequired_()).to.deep.equal(
+          defaultConfig['purposeConsentRequired']
+        );
+      });
+
+      it('uses purposeConsentRequired from remote if not inlined', async () => {
+        defaultConfig['consentRequired'] = 'remote';
+        defaultConfig['checkConsentHref'] = 'https://server-test-1/';
+        consentElement = createConsentElement(doc, defaultConfig);
+        doc.body.appendChild(consentElement);
+        ampConsent = new AmpConsent(consentElement);
+        await ampConsent.buildCallback();
+        expect(await ampConsent.getPurposeConsentRequired_()).to.deep.equal([
+          'abc',
+          'bcd',
+        ]);
+      });
+
+      it('returns null if no purposeConsentsRequired are found', async () => {
+        defaultConfig['consentRequired'] = 'remote';
+        defaultConfig['checkConsentHref'] = 'https://server-test-2/';
+        consentElement = createConsentElement(doc, defaultConfig);
+        doc.body.appendChild(consentElement);
+        ampConsent = new AmpConsent(consentElement);
+        await ampConsent.buildCallback();
+        expect(await ampConsent.getPurposeConsentRequired_()).to.undefined;
+      });
+
+      it(
+        'will only look at purposeConsentRequired if we have ' +
+          'global consent (state or tcString)',
+        async () => {
+          defaultConfig['purposeConsentRequired'] = ['zyx', 'yxw'];
+          defaultConfig['consentRequired'] = true;
+          consentElement = createConsentElement(doc, defaultConfig);
+          doc.body.appendChild(consentElement);
+          ampConsent = new AmpConsent(consentElement);
+          await ampConsent.buildCallback();
+          window.sandbox
+            .stub(ampConsent.consentStateManager_, 'getConsentInstanceInfo')
+            .returns(Promise.resolve({}));
+          const spy = window.sandbox.spy(
+            ampConsent,
+            'checkGranularConsentRequired_'
+          );
+
+          expect(await ampConsent.hasRequiredConsents_()).to.be.false;
+          expect(spy).to.not.be.called;
+        }
+      );
+
+      it('validates purposeConsentRequired', async () => {
+        const userSpy = window.sandbox.spy(user(), 'error');
+        defaultConfig['purposeConsentRequired'] = 'badPurposeRequired';
+        defaultConfig['consentRequired'] = true;
+        consentElement = createConsentElement(doc, defaultConfig);
+        doc.body.appendChild(consentElement);
+        ampConsent = new AmpConsent(consentElement);
+        await ampConsent.buildCallback();
+        await ampConsent.checkGranularConsentRequired_();
+        expect(userSpy).to.be.calledOnce;
+        expect(userSpy.args[0][1]).to.match(
+          /purposeConsentRequired' requires an array of strings/
+        );
+      });
+    });
   }
 );
 

@@ -220,4 +220,9 @@ export const EXPERIMENTS = [
     name: 'Determine impact of building inabox/fie amp elements ASAP',
     spec: 'https://github.com/ampproject/amphtml/issues/31776',
   },
+  {
+    id: 'amp-consent-granular-consent',
+    name: 'Client-side granular consent',
+    spec: 'https://github.com/ampproject/amphtml/issues/31607',
+  },
 ];
