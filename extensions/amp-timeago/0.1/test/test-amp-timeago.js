@@ -84,31 +84,34 @@ describes.realWin(
       expect(timeElement.textContent).to.equal('1 day ago');
     });
 
-    it('should have a role of text on the custom element by default', () => {
+    it('should have a role of text on the custom element by default', async () => {
       const date = new Date();
       date.setDate(date.getDate() - 2);
       element.setAttribute('datetime', date.toISOString());
       element.textContent = date.toString();
-      element.build();
+      element.buildInternal();
+      await timeout(1000);
       expect(element.getAttribute('role')).to.equal('text');
     });
 
-    it('should not override the role attribute if set', () => {
+    it('should not override the role attribute if set', async () => {
       const date = new Date();
       date.setDate(date.getDate() - 2);
       element.setAttribute('datetime', date.toISOString());
       element.textContent = date.toString();
       element.setAttribute('role', 'button');
-      element.build();
+      element.buildInternal();
+      await timeout(1000);
       expect(element.getAttribute('role')).to.equal('button');
     });
 
-    it('should not have a title attribute', () => {
+    it('should not have a title attribute', async () => {
       const date = new Date();
       date.setDate(date.getDate() - 2);
       element.setAttribute('datetime', date.toISOString());
       element.textContent = date.toString();
-      element.build();
+      element.buildInternal();
+      await timeout(1000);
       expect(element.hasAttribute('title')).to.be.false;
     });
   }
