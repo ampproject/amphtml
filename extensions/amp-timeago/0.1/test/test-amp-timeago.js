@@ -93,6 +93,16 @@ describes.realWin(
       expect(element.getAttribute('role')).to.equal('text');
     });
 
+    it('should not override the role attribute if set', () => {
+      const date = new Date();
+      date.setDate(date.getDate() - 2);
+      element.setAttribute('datetime', date.toISOString());
+      element.textContent = date.toString();
+      element.setAttribute('role', 'button');
+      element.build();
+      expect(element.getAttribute('role')).to.equal('button');
+    });
+
     it('should not have a title attribute', () => {
       const date = new Date();
       date.setDate(date.getDate() - 2);
