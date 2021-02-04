@@ -178,13 +178,21 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     link.setAttribute('href', this.element.getAttribute('href'));
     this.contentEl_.appendChild(link);
 
-    this.contentEl_.querySelector(
+    // this.contentEl_.querySelector(
+    //   '.i-amphtml-story-page-attachment-remote-title'
+    // ).textContent =
+    //   this.element.getAttribute('data-title') ||
+    //   Services.urlForDoc(this.element).getSourceOrigin(
+    //     this.element.getAttribute('href')
+    //   );
+
+    const remoteTitle = this.element.querySelector(
       '.i-amphtml-story-page-attachment-remote-title'
-    ).textContent =
-      this.element.getAttribute('data-title') ||
-      Services.urlForDoc(this.element).getSourceOrigin(
-        this.element.getAttribute('href')
-      );
+    );
+    remoteTitle.style.whiteSpace = 'nowrap';
+    remoteTitle.innerHTML = `<span style="padding: 0; font-weight: bold;">Opening</span> ${this.element.getAttribute(
+      'href'
+    )}`;
   }
 
   /**
@@ -304,13 +312,13 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     animationEl.classList.add('i-amphtml-story-page-attachment-expand');
     const storyEl = closest(this.element, (el) => el.tagName === 'AMP-STORY');
 
-    const remoteTitle = this.element.querySelector(
-      '.i-amphtml-story-page-attachment-remote-title'
-    );
-    remoteTitle.style.whiteSpace = 'nowrap';
-    remoteTitle.innerHTML = `<span style="padding: 0">Opening</span> ${this.element.getAttribute(
-      'href'
-    )}`;
+    // const remoteTitle = this.element.querySelector(
+    //   '.i-amphtml-story-page-attachment-remote-title'
+    // );
+    // remoteTitle.style.whiteSpace = 'nowrap';
+    // remoteTitle.innerHTML = `<span style="padding: 0">Opening</span> ${this.element.getAttribute(
+    //   'href'
+    // )}`;
 
     this.win.setTimeout(() => {
       this.mutateElement(() => {}).then(() => {

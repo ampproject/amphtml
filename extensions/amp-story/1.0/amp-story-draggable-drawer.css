@@ -95,14 +95,6 @@
   align-items: center !important;
 }
 
-[outlink-attachment] .i-amphtml-story-page-attachment-remote-title {
-  padding: 0 !important;
-}
-
-[outlink-attachment] .i-amphtml-story-page-attachment-remote-content {
-  width: 100% !important;
-}
-
 .i-amphtml-story-draggable-drawer-container[hidden] .i-amphtml-story-draggable-drawer-content {
   opacity: 0 !important;
 }
