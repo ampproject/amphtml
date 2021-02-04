@@ -77,9 +77,24 @@ import {listen} from '../../../src/event-helper';
 import {parseQueryString} from '../../../src/url';
 import {px, toggle} from '../../../src/style';
 import {renderPageDescription} from './semantic-render';
+import {setStyle} from '../../src/style';
 import {setTextBackgroundColor} from './utils';
 import {toArray} from '../../../src/types';
 import {upgradeBackgroundAudio} from './audio';
+
+/** @const {string} */
+const PRIMARY_CTA_DARK_THEME_CLASS = 'i-amphtml-story-primary-cta-theme-dark';
+
+/** @const {string} */
+const PRIMARY_CTA_LIGHT_THEME_CLASS = 'i-amphtml-story-primary-cta-theme-light';
+
+/**
+ * @enum {string}
+ */
+const AttachmentTheme = {
+  LIGHT: 'light', // default
+  DARK: 'dark',
+};
 
 /**
  * CSS class for an amp-story-page that indicates the entire page is loaded.
@@ -169,8 +184,7 @@ const buildErrorMessageElement = (element) =>
  */
 const buildOpenAttachmentElement = (element) =>
   htmlFor(element)`
-      <a class="
-          i-amphtml-story-page-open-attachment i-amphtml-story-system-reset"
+      <a class="i-amphtml-story-page-open-attachment"
           role="button">
         <span class="i-amphtml-story-page-open-attachment-icon">
           <span class="i-amphtml-story-page-open-attachment-bar-left"></span>
@@ -1793,25 +1807,53 @@ export class AmpStoryPage extends AMP.BaseElement {
         this.openAttachment()
       );
 
-      const textEl = this.openAttachmentEl_.querySelector(
-        '.i-amphtml-story-page-open-attachment-label'
-      );
-
-      let ctaImg = "";
+      let ctaImg = '';
+      const theme = attachmentEl.getAttribute('theme');
       if (attachmentHref) {
-        const defaultCtaImg = '<img src="/extensions/amp-story/img/light-link-icon.svg"></img>'; // TODO(raxsha): based on theme.
+        let defaultCtaImg =
+          '<img src="/extensions/amp-story/img/light-link-icon.svg"></img>';
+        if (theme && AttachmentTheme.DARK === theme.toLowerCase()) {
+          defaultCtaImg =
+            '<img src="/extensions/amp-story/img/dark-link-icon.svg"></img>';
+        }
         const ctaImgAttr = attachmentEl.getAttribute('data-cta-img');
         ctaImg = (ctaImgAttr && ctaImgAttr.trim()) || defaultCtaImg;
       }
 
       const openLabelAttr = attachmentEl.getAttribute('data-cta-text');
-      const openLabel = ctaImg + (
-        (openLabelAttr && openLabelAttr.trim()) ||
-        getLocalizationService(this.element).getLocalizedString(
-          LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
-        ));
+      const openLabel =
+        ctaImg +
+        ((openLabelAttr && openLabelAttr.trim()) ||
+          getLocalizationService(this.element).getLocalizedString(
+            LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
+          ));
+
+      const textEl = this.openAttachmentEl_.querySelector(
+        '.i-amphtml-story-page-open-attachment-label'
+      );
 
       this.mutateElement(() => {
+        if (attachmentHref) {
+          const ctaAccentColor = attachmentEl.getAttribute(
+            'data-cta-accent-color'
+          );
+          if (theme && AttachmentTheme.DARK === theme.toLowerCase()) {
+            textEl.classList.add(PRIMARY_CTA_DARK_THEME_CLASS);
+            setStyle(
+              textEl,
+              'background',
+              ctaAccentColor ? ctaAccentColor : 'black'
+            );
+          } else {
+            textEl.classList.add(PRIMARY_CTA_LIGHT_THEME_CLASS);
+            setStyle(
+              textEl,
+              'color',
+              ctaAccentColor ? ctaAccentColor : 'black'
+            );
+          }
+        }
+
         textEl.innerHTML = openLabel;
         this.element.appendChild(this.openAttachmentEl_);
       });
