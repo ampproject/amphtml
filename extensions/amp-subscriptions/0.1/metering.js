@@ -123,11 +123,4 @@ export class Metering {
   setOnSaveMeteringState(callback) {
     this.onSaveMeteringStateCallbacks_.push(callback);
   }
-
-  /**
-   * Clears callbacks for handling metering state saves.
-   */
-  clearOnSaveMeteringStateCallbacks() {
-    this.onSaveMeteringStateCallbacks_ = [];
-  }
 }
