@@ -264,7 +264,7 @@ These guidelines apply to the publisher logo image:
           width="103" height="102"
           src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/publisher-logo-3.png" >
         <noscript>
-          <img alt="Logo with blue text on blue  background" src="img/publisher-logo-3.png" />
+          <img alt="Logo with blue text on blue background" src="img/publisher-logo-3.png" />
         </noscript>
       </amp-img>
       Avoid this

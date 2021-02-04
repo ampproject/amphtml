@@ -187,6 +187,21 @@ const buildOpenAttachmentElement = (element) =>
       </a>`;
 
 /**
+ * @param {!Element} element
+ * @return {!Element}
+ */
+const buildOpenOutlinkAttachmentElement = (element) =>
+  htmlFor(element)`
+      <a class="i-amphtml-story-page-open-attachment"
+          role="button">
+        <span class="i-amphtml-story-page-open-attachment-icon">
+          <span class="i-amphtml-story-page-open-attachment-bar-left"></span>
+          <span class="i-amphtml-story-page-open-attachment-bar-right"></span>
+        </span>
+        <span class="i-amphtml-story-page-attachment-outlink-label"></span>
+      </a>`;
+
+/**
  * amp-story-page states.
  * @enum {number}
  */
@@ -1781,7 +1796,6 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   renderOpenAttachmentUI_() {
-    // TODO(raxsha): modify this for the new CTA UI. Note: do not change the UI for the in-line page attachments, only the outlinks.
     const attachmentEl = this.element.querySelector(
       'amp-story-page-attachment'
     );
@@ -1790,9 +1804,22 @@ export class AmpStoryPage extends AMP.BaseElement {
     }
 
     if (!this.openAttachmentEl_) {
-      this.openAttachmentEl_ = buildOpenAttachmentElement(this.element);
-      // If the attachment is a link, copy href to the element so it can be previewed on hover and long press.
       const attachmentHref = attachmentEl.getAttribute('href');
+      let textEl;
+      if (attachmentHref) {
+        this.openAttachmentEl_ = buildOpenOutlinkAttachmentElement(
+          this.element
+        );
+        textEl = this.openAttachmentEl_.querySelector(
+          '.i-amphtml-story-page-attachment-outlink-label'
+        );
+      } else {
+        this.openAttachmentEl_ = buildOpenAttachmentElement(this.element);
+        textEl = this.openAttachmentEl_.querySelector(
+          '.i-amphtml-story-page-open-attachment-label'
+        );
+      }
+      // If the attachment is a link, copy href to the element so it can be previewed on hover and long press.
       if (attachmentHref) {
         this.openAttachmentEl_.setAttribute('href', attachmentHref);
       }
@@ -1820,10 +1847,6 @@ export class AmpStoryPage extends AMP.BaseElement {
           getLocalizationService(this.element).getLocalizedString(
             LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
           ));
-
-      const textEl = this.openAttachmentEl_.querySelector(
-        '.i-amphtml-story-page-open-attachment-label'
-      );
 
       this.mutateElement(() => {
         if (attachmentHref) {
