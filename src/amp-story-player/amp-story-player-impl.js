@@ -261,6 +261,11 @@ export class AmpStoryPlayer {
    * @public
    */
   load() {
+    if (!this.element_.isConnected) {
+      throw new Error(
+        `[${TAG}] element must be connected to the DOM before calling load().`
+      );
+    }
     this.buildCallback();
     this.layoutCallback();
   }
