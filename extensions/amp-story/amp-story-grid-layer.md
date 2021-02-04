@@ -235,6 +235,44 @@ Example:
 </amp-story-grid-layer>
 ```
 
+### preset [optional]
+
+Specifies a responsiveness preset that configures the layer with an aspect-ratio and scaling-factor.
+
+The presets are:
+
+-   **2021-background**: An aspect-ratio layer scaled up to cover letterboxed margins. May only contain the background asset (image or video).
+-   **2021-foreground**: An aspect-ratio layer containing all the foreground assets.
+
+Values are:
+
+<table>
+  <tr>
+    <th>Preset</th>
+    <th>Aspect ratio</th>
+    <th>Scaling factor</th>
+  </tr>
+  <tr>
+    <td>2021-background</td>
+    <td>69:116</td>
+    <td>1.142</td>
+  </tr>
+  <tr>
+    <td>2021-foreground</td>
+    <td>69:116</td>
+    <td>1</td>
+  </tr>
+</table>
+
+{% call callout('Tip', type='success') %}
+These presets are optimized for mobile screens in 2021. Keep an eye out for new presets as technology evolves and follow the [Web Stories roadmap](https://amp.dev/community/roadmap/?category=stories#status-updates).
+{% endcall %}
+
+### anchor [optional]
+
+Aligns aspect-ratio layers (including presets) to the border or corner specified. Use this attribute to maintain scaling across layers when position elements relative to borders or corners.
+Options: `top`, `left`, `bottom`, `right`, `top-left`, `top-right`, `bottom-left`, `bottom-right`.
+
 ## Styling
 
 ### Templates
@@ -342,9 +380,9 @@ Note: your story needs to enable the `supports-landscape` mode to use this templ
 
 Example:
 
-<amp-img alt="Landscape half-half UI template" layout="fixed" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/amp-story-img-video-object-fit-position.png" width="600" height="287">
+<amp-img alt="Landscape half-half UI template" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-img-video-object-fit-position.png" width="600" height="287">
   <noscript>
-    <img alt="Landscape half-half UI template" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/amp-story-img-video-object-fit-position.png" />
+    <img alt="Landscape half-half UI template" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-img-video-object-fit-position.png" />
   </noscript>
 </amp-img>
 
@@ -358,3 +396,42 @@ Example:
   </amp-story-grid-layer>
 </amp-story-page>
 ```
+
+#### Modern aspect-ratio
+
+Responsive presets on grid-layers maximize usable screen space and scale assets consistently.
+
+```html
+<amp-story-grid-layer preset="2021-background" template="fill">
+    <amp-img src="cat.jpg">
+</amp-story-grid-layer>
+<amp-story-grid-layer preset="2021-foreground">
+    <h1>This will stay consistent with the bg</h1>
+</amp-story-grid-layer>
+<amp-story-grid-layer preset="2021-foreground" anchor="bottom-left">
+    <!-- Position the icon close to the corner on all screens -->
+    <amp-img src="icon.jpg" style="bottom: 1em; left: 1em">
+</amp-story-grid-layer>
+```
+
+{% call callout('Tip', type='success') %}
+The background preset is mostly useful for designing layouts with both background and foreground elements. If a page only contains an image or video in the background, consider using regular grid-layers for that scenario.
+{% endcall %}
+
+##### Foreground
+
+Use the `2021-foreground` preset for foreground elements. This anchors foreground layers to pin items, such as logos or footnotes, to the page corners or borders.
+
+##### Background
+
+Use the `2021-background` preset for the background layer. This preset covers the entire screen on all mobile devices with the background asset. It does so without letterboxing and keeps scaling consistent with the foreground elements.
+While this technique provides the most consistent user experience, it may crop up to 7% of one or all borders of your background. Keep this in mind when designing and picking your assets.
+
+<div layout="container" width="3" height="2">
+  <div style="width:33%;display:inline-block">
+    <amp-img src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/preset_story_scaled.gif" layout="responsive" width="200" height="350"/>
+  </div>
+  <div style="width:66%;display:inline-block">
+    <amp-img src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/preset_story_anchor.gif" layout="responsive" width="500" height="400"/>
+  </div>
+</div>
