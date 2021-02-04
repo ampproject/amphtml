@@ -468,7 +468,7 @@ export class DraggableDrawer extends AMP.BaseElement {
         }
         this.state_ = DrawerState.DRAGGING_TO_OPEN;
         const drag = Math.max(deltaY, -this.dragCap_);
-        translate = `translate3d(0, calc(100% + ${drag}px), 0)`;
+        translate = `translate3d(0, calc(90% + ${drag}px), 0)`;
         break;
       case DrawerState.OPEN:
       case DrawerState.DRAGGING_TO_CLOSE:
