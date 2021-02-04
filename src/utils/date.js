@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {pureDevAssert, pureUserAssert} from '../pure-assert';
+
 /**
  * Parses the date using the `Date.parse()` rules. Additionally supports the
  * keyword "now" that indicates the "current date/time". Returns either a
@@ -50,4 +52,59 @@ export function getDate(value) {
   }
   // Must be a `Date` object.
   return value.getTime();
+}
+
+/** Map from attribute names to their parsers. */
+const dateAttrParsers = {
+  'datetime': (datetime) =>
+    pureUserAssert(parseDate(datetime), `Invalid date: ${datetime}`),
+  'end-date': (datetime) =>
+    pureUserAssert(parseDate(datetime), `Invalid date: ${datetime}`),
+  'timeleft-ms': (timeleftMs) => Date.now() + Number(timeleftMs),
+  'timestamp-ms': (ms) => Number(ms),
+  'timestamp-seconds': (timestampSeconds) => 1000 * Number(timestampSeconds),
+};
+
+/**
+ * @param {!Element} element
+ * @param {!Array<string>} dateAttrs list of attribute names
+ * @return {?number}
+ */
+export function parseDateAttrs(element, dateAttrs) {
+  const epoch = pureUserAssert(
+    parseEpoch(element, dateAttrs),
+    `One of [${dateAttrs.join(', ')}] is required`
+  );
+
+  const offsetSeconds =
+    (Number(element.getAttribute('offset-seconds')) || 0) * 1000;
+  return epoch + offsetSeconds;
+}
+
+/**
+ * Parse epoch from list of possible element attributes, returning the first one
+ * that is truthy.
+ * @param {!Element} element
+ * @param {!Array<string>} dateAttrs list of attribute names
+ * @return {?number}
+ */
+function parseEpoch(element, dateAttrs) {
+  // Validate provided dateAttrs outside the loop so it will fail when an
+  // invalid attr is provided, even if that attribute isn't present on the
+  // element.
+  const parsers = dateAttrs.map((attrName) =>
+    pureDevAssert(
+      dateAttrParsers[attrName],
+      `Invalid date attribute "${attrName}"`
+    )
+  );
+
+  for (let i = 0; i < dateAttrs.length; ++i) {
+    const attrVal = element.getAttribute(dateAttrs[i]);
+    if (attrVal) {
+      return parsers[i](attrVal);
+    }
+  }
+
+  return null;
 }

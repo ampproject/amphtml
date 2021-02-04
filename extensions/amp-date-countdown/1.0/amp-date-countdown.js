@@ -21,13 +21,10 @@ import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {parseDate} from '../../../src/utils/date';
+import {parseDateAttrs as parseDateAttrsBase} from '../../../src/utils/date';
 
 /** @const {string} */
 const TAG = 'amp-date-countdown';
-
-/** @const {number} */
-const MILLISECONDS_IN_SECOND = 1000;
 
 class AmpDateCountdown extends PreactBaseElement {
   /** @param {!AmpElement} element */
@@ -126,43 +123,16 @@ AmpDateCountdown['props'] = {
 /**
  * @param {!Element} element
  * @return {?number}
+ * @throws {UserError} when attribute values are missing or invalid.
  * @visibleForTesting
  */
 export function parseDateAttrs(element) {
-  const epoch = userAssert(
-    parseEpoch(element),
-    `One of end-date, timeleft-ms, timestamp-ms, timestamp-seconds ` +
-      `is required. ${TAG}`
-  );
-
-  const offsetMs =
-    (Number(element.getAttribute('offset-seconds')) || 0) *
-    MILLISECONDS_IN_SECOND;
-  return epoch + offsetMs;
-}
-
-/**
- * @param {!Element} element
- * @return {?number}
- */
-function parseEpoch(element) {
-  const endDate = element.getAttribute('end-date');
-  if (endDate) {
-    return userAssert(parseDate(endDate), 'Invalid date: %s', endDate);
-  }
-  const timeleftMs = element.getAttribute('timeleft-ms');
-  if (timeleftMs) {
-    return Date.now() + Number(timeleftMs);
-  }
-  const timestampMs = element.getAttribute('timestamp-ms');
-  if (timestampMs) {
-    return Number(timestampMs);
-  }
-  const timestampSeconds = element.getAttribute('timestamp-seconds');
-  if (timestampSeconds) {
-    return Number(timestampSeconds) * 1000;
-  }
-  return null;
+  return parseDateAttrsBase(element, [
+    'end-date',
+    'timeleft-ms',
+    'timestamp-ms',
+    'timestamp-seconds',
+  ]);
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {

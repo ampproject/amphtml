@@ -20,7 +20,7 @@ import {Services} from '../../../src/services';
 import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
-import {parseDate} from '../../../src/utils/date';
+import {parseDateAttrs as parseDateAttrsBase} from '../../../src/utils/date';
 
 /** @const {string} */
 const TAG = 'amp-date-display';
@@ -112,37 +112,15 @@ AmpDateDisplay['usesTemplate'] = true;
 /**
  * @param {!Element} element
  * @return {?number}
+ * @throws {UserError} when attribute values are missing or invalid.
  * @visibleForTesting
  */
 export function parseDateAttrs(element) {
-  const epoch = userAssert(
-    parseEpoch(element),
-    'One of datetime, timestamp-ms, or timestamp-seconds is required'
-  );
-
-  const offsetSeconds =
-    (Number(element.getAttribute('offset-seconds')) || 0) * 1000;
-  return epoch + offsetSeconds;
-}
-
-/**
- * @param {!Element} element
- * @return {?number}
- */
-function parseEpoch(element) {
-  const datetime = element.getAttribute('datetime');
-  if (datetime) {
-    return userAssert(parseDate(datetime), 'Invalid date: %s', datetime);
-  }
-  const timestampMs = element.getAttribute('timestamp-ms');
-  if (timestampMs) {
-    return Number(timestampMs);
-  }
-  const timestampSeconds = element.getAttribute('timestamp-seconds');
-  if (timestampSeconds) {
-    return Number(timestampSeconds) * 1000;
-  }
-  return null;
+  return parseDateAttrsBase(element, [
+    'datetime',
+    'timestamp-ms',
+    'timestamp-seconds',
+  ]);
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {
