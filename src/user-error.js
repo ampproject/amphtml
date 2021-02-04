@@ -55,6 +55,7 @@ export class UserError extends Error {
  * @param {T} shouldBeTruthy
  * @return {T}
  * @throws {UserError} when attribute values are missing or invalid.
+ * @closurePrimitive {asserts.truthy}
  */
 export function userAssert(shouldBeTruthy) {
   if (!shouldBeTruthy) {
