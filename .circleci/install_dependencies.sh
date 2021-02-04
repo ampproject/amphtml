@@ -31,6 +31,9 @@ export NVM_DIR="/opt/circleci/.nvm"
 echo $(GREEN "Installing Node LTS...")
 nvm install 'lts/*'
 
+echo $(GREEN "Updating NPM registry URL for faster installs...")
+npm config set registry http://registry.npmjs.org/ --global
+
 echo $(GREEN "Using NPM cache directory:")
 npm config get cache
 

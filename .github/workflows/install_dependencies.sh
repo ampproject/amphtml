@@ -29,6 +29,9 @@ if [[ "$OSTYPE" == "linux-gnu"* || "$OSTYPE" == "darwin"* ]]; then
   echo "$HOME/.npm/bin" >> $GITHUB_PATH # For later
 fi
 
+echo $(GREEN "Updating NPM registry URL for faster installs...")
+npm config set registry http://registry.npmjs.org/ --global
+
 echo $(GREEN "Using NPM cache directory:")
 npm config get cache
 
