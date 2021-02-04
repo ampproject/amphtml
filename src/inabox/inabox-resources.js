@@ -87,17 +87,11 @@ export class InaboxResources {
     /** @private {boolean} */
     this.documentReady_ = false;
 
-    // TODO(#31776): cleanup when launched.
-    // eslint-disable-next-line no-undef
-    if (INABOX_RESOURCES_EAGER) {
-      this.ampdoc_.whenReady().then(() => {
-        this.documentReady_ = true;
-        this.buildReadyResources_();
-        this./*OK*/ schedulePass(1);
-      });
-    } else {
-      this.ampdoc_.whenReady().then(() => this./*OK*/ schedulePass(1));
-    }
+    this.ampdoc_.whenReady().then(() => {
+      this.documentReady_ = true;
+      this.buildReadyResources_();
+      this./*OK*/ schedulePass(1);
+    });
   }
 
   /** @override */
@@ -145,18 +139,8 @@ export class InaboxResources {
   /** @override */
   upgraded(element) {
     const resource = Resource.forElement(element);
-    // TODO(#31776): cleanup when launched.
-    // eslint-disable-next-line no-undef
-    if (INABOX_RESOURCES_EAGER) {
-      this.pendingBuildResources_.push(resource);
-      this.buildReadyResources_();
-    } else {
-      this.ampdoc_
-        .whenReady()
-        .then(resource.build.bind(resource))
-        .then(this.schedulePass.bind(this));
-      dev().fine(TAG, 'resource upgraded:', resource.debugid);
-    }
+    this.pendingBuildResources_.push(resource);
+    this.buildReadyResources_();
   }
 
   /** @override */
