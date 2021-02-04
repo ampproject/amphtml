@@ -19,10 +19,13 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - name: Cache Packages
+      - name: Compute NPM Cache Directory
+        id: npm-cache
+        run: echo "::set-output name=dir::$(npm config get cache)"
+      - name: Cache NPM Packages
         uses: actions/cache@v2
         with:
-          path: ~/.npm
+          path: ${{ steps.npm-cache.outputs.dir }}
           key: npm-cache-${{ matrix.platform }}-${{ hashFiles('package-lock.json') }}
           restore-keys: |
             npm-cache-${{ matrix.platform }}-

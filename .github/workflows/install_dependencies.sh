@@ -32,6 +32,9 @@ fi
 echo $(GREEN "Updating NPM...")
 npm install --global npm
 
+echo $(GREEN "Using NPM cache directory:")
+npm config get cache
+
 echo $(GREEN "Installing gulp-cli...")
 npm install --global gulp-cli
 
