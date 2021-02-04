@@ -476,6 +476,13 @@ In addition, all of the variables supported by
 [AMP HTML Substitutions Guide](../../spec/amp-var-substitutions.md)
 are also supported.
 
+Variables are resolved asynchronously and can delay the request until they are
+fulfilled. For example, some metrics such as Cumulative Layout Shift and
+Largest Contentful Paint are calculated after the page is hidden. For First
+Input Delay, it is resolved after the user interacts with the page. For this
+reason these metrics might not be suitable for use with all triggers (for
+example, on timer or visible).
+
 The `vars` configuration object can be used to define new key-value pairs or
 override existing variables that can be referenced in `request` values. New
 variables are commonly used to specify publisher specific information. Arrays
