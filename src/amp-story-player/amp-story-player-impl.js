@@ -1603,8 +1603,8 @@ export class AmpStoryPlayer {
 
     const {behavior} = this.playerConfig_;
 
-    if (behavior && behavior.autoplay === 'false') {
-      this.autoplay_ = false;
+    if (behavior && typeof behavior.autoplay === 'boolean') {
+      this.autoplay_ = behavior.autoplay;
     }
   }
 
