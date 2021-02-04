@@ -29,7 +29,7 @@
     "@babel/core": "7.8.3",
     "@babel/helper-plugin-test-runner": "7.8.3",
     "@babel/plugin-proposal-class-properties": "7.8.3",
-    "@babel/preset-env": "7.8.3",
+    "@babel/preset-env": "7.12.13",
     "@jridgewell/resorcery": "0.0.3",
     "acorn-globals": "4.3.4",
     "amphtml-validator": "1.0.29",

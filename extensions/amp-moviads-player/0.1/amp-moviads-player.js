@@ -20,7 +20,7 @@ import {ImaPlayerData} from '../../../ads/google/ima-player-data';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {addUnsafeAllowAutoplay} from '../../../src/iframe-video';
-import {assertHttpsUrl} from '../../../src/url';
+
 import {
   childElementsByTag,
   isJsonScriptTag,
@@ -33,9 +33,6 @@ import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isEnumValue, isObject, toArray} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
-
-/** @const */
-const EXPERIMENT = 'amp-moviads-player';
 
 /** @const */
 const TAG = 'amp-moviads-player';
@@ -84,9 +81,6 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
     /** @private {boolean} */
     this.isAdStart_ = false;
 
-    /** @private {boolean} */
-    this.showLogoMovie_ = false;
-
     /**
      * Maps events to their unlisteners.
      * @private {!Object<string, function()>}
@@ -101,99 +95,81 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
 
     /** @private {?string} */
     this.recommendedPoster_ = '';
-
-    /** @private {string} */
-    this.gaUser_ = 'user';
-
-    /** @private {string} */
-    this.gaMoviads_ = 'moviads';
-
-    /** @private {?string} */
-    this.gaUserUA_ = null;
-
-    /** @private {?string} */
-    this.gaMoviadsUA_ = null;
-
-    /** @private {?boolean} */
-    this.adblockDetected_ = false;
   }
 
   /** @override */
   buildCallback() {
-    this.detectedAdBlock();
     if (this.element.getAttribute('data-video-custom-conf')) {
       this.config_ = new Function(
         'return (' + this.element.getAttribute('data-video-custom-conf') + ')'
       )();
     }
     this.mapConfig();
-    const script = document.createElement('script');
-    script.src =
-      this.config_.masterDomain +
-      '/config/' +
-      this.config_.playerIdConf +
-      '_conf.js?' +
-      Math.floor(Date.now() / 1000);
-    document.head.appendChild(script);
     const _this = this;
-    script.onload = function() {
-      if (typeof mapLocalConfig !== 'undefined') {
-        _this.configLocal_ = mapLocalConfig;
-      }
-      if (_this.configLocal_.keyPrivate !== _this.config_.playerIdConf) {
-        return;
-      }
-      _this.element.setAttribute('data-tag', _this.configLocal_.vastUrl);
-      _this.viewport_ = _this.getViewport();
-      _this.mapExternalConfig();
-      if (_this.element.getAttribute('data-delay-ad-request') === 'true') {
-        _this.unlisteners_['onFirstScroll'] = _this.viewport_.onScroll(() => {
-          _this.sendCommand_('onFirstScroll');
-        });
-        // Request ads after 3 seconds, if something else doesn't trigger an ad
-        // request before that.
-        Services.timerFor(_this.win).delay(() => {
-          _this.sendCommand_('onAdRequestDelayTimeout');
-        }, 3000);
-      }
-      //Handle <source> and <track> children
-      const sourceElements = childElementsByTag(_this.element, 'SOURCE');
-      const trackElements = childElementsByTag(_this.element, 'TRACK');
-      const childElements = toArray(sourceElements).concat(
-        toArray(trackElements)
-      );
-      if (childElements.length > 0) {
-        const children = [];
-        childElements.forEach(child => {
-          // Save the first source and first track to preconnect.
-          if (child.tagName == 'SOURCE' && !this.preconnectSource_) {
-            this.preconnectSource_ = child.src;
-          } else if (child.tagName == 'TRACK' && !this.preconnectTrack_) {
-            this.preconnectTrack_ = child.src;
-          }
-          children.push(child./*OK*/ outerHTML);
-        });
-        _this.element.setAttribute(
-          'data-child-elements',
-          JSON.stringify(children)
+    fetch(
+      this.config_.masterDomain +
+        'config/' +
+        this.config_.playerIdConf +
+        '_conf.json'
+    )
+      .then(response => response.json())
+      .then(response => {
+        _this.configLocal_ = response;
+        if (_this.configLocal_.keyPrivate !== _this.config_.playerIdConf) {
+          return;
+        }
+        _this.element.setAttribute('data-tag', _this.configLocal_.vastUrl);
+        _this.viewport_ = _this.getViewport();
+        _this.mapExternalConfig();
+        _this.setRandMovieSrc();
+        if (_this.element.getAttribute('data-delay-ad-request') === 'true') {
+          _this.unlisteners_['onFirstScroll'] = _this.viewport_.onScroll(() => {
+            _this.sendCommand_('onFirstScroll');
+          });
+          // Request ads after 3 seconds, if something else doesn't trigger an ad
+          // request before that.
+          Services.timerFor(_this.win).delay(() => {
+            _this.sendCommand_('onAdRequestDelayTimeout');
+          }, 3000);
+        }
+        //Handle <source> and <track> children
+        const sourceElements = childElementsByTag(_this.element, 'SOURCE');
+        const trackElements = childElementsByTag(_this.element, 'TRACK');
+        const childElements = toArray(sourceElements).concat(
+          toArray(trackElements)
         );
-      }
-      // Handle IMASetting JSON
-      const scriptElement = childElementsByTag(_this.element, 'SCRIPT')[0];
-      if (scriptElement && isJsonScriptTag(scriptElement)) {
-        _this.element.setAttribute(
-          'data-ima-settings',
-          scriptElement./*OK*/ innerHTML
-        );
-      }
-      _this.loadMethod();
-      _this.mute();
-    };
+        if (childElements.length > 0) {
+          const children = [];
+          childElements.forEach(child => {
+            // Save the first source and first track to preconnect.
+            if (child.tagName == 'SOURCE' && !this.preconnectSource_) {
+              this.preconnectSource_ = child.src;
+            } else if (child.tagName == 'TRACK' && !this.preconnectTrack_) {
+              this.preconnectTrack_ = child.src;
+            }
+            children.push(child./*OK*/ outerHTML);
+          });
+          _this.element.setAttribute(
+            'data-child-elements',
+            JSON.stringify(children)
+          );
+        }
+        // Handle IMASetting JSON
+        const scriptElement = childElementsByTag(_this.element, 'SCRIPT')[0];
+        if (scriptElement && isJsonScriptTag(scriptElement)) {
+          _this.element.setAttribute(
+            'data-ima-settings',
+            scriptElement./*OK*/ innerHTML
+          );
+        }
+        _this.loadMethod();
+        _this.mute();
+      });
   }
 
   /** @override */
   preconnectAds() {
-    const {element, preconnect} = this;
+    const {preconnect} = this;
     if (typeof preconnect !== 'undefined') {
       preconnect.preload(
         'https://imasdk.googleapis.com/js/sdkloader/ima3.js',
@@ -245,10 +221,8 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
     );
     element.setAttribute(
       'data-ad-label',
-      this.config_['langText']['advertisement'] + ' (%s / %s)'
+      this.config_.langText.advertisement + ' (%s / %s)'
     );
-
-    this.resizeContainerPlayer();
 
     if (true === this.config_.autoplay) {
       element.setAttribute('autoplay', true);
@@ -363,23 +337,8 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
     const videoEvent = eventData['event'];
 
     if (videoEvent === VideoEvents.AD_START) {
-      this.sendCommand_('gaParams', {
-        UA: this.gaUserUA_,
-        name: this.gaUser_,
-        id: this.config_.movieContenerId,
-      });
-
       this.isAdStart_ = true;
-      this.eventGA('AD_START', this.gaUser_, this.gaUserUA_);
-      this.eventGA('AD_START', this.gaMoviads_, this.gaMoviadsUA_);
     }
-    if (videoEvent === VideoEvents.UNMUTED) {
-      this.eventGA('UNMUTED', this.gaUser_, this.gaUserUA_);
-    }
-    if (videoEvent === VideoEvents.MUTED) {
-      this.eventGA('MUTED', this.gaUser_, this.gaUserUA_);
-    }
-
     if (videoEvent === VideoEvents.PLAYING) {
       if (document.getElementById('amp-ima-player-recommended') !== null) {
         document.getElementById('amp-ima-player-recommended').remove();
@@ -387,17 +346,13 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
     }
 
     if (videoEvent === VideoEvents.PLAYING && this.isAdStart_ === false) {
-      this.showLogoMovie_ = true;
-      this.eventGA('AD_EMPTY', this.gaUser_, this.gaUserUA_);
       this.hideWhenNoAd();
+      this.createLogoMovieAds();
     }
     if (videoEvent === VideoEvents.AD_END) {
-      this.showLogoMovie_ = true;
-      this.eventGA('AD_END', this.gaUser_, this.gaUserUA_);
-      this.eventGA('AD_END', this.gaMoviads_, this.gaMoviadsUA_);
+      this.createLogoMovieAds();
     }
     if (videoEvent === VideoEvents.ENDED) {
-      this.eventGA('ENDED', this.gaUser_, this.gaUserUA_);
       this.LoadRecommendedVideo();
       this.hideWhenEnd();
       this.functionAfterEnded();
@@ -417,7 +372,6 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
       return;
     }
     if (videoEvent == 'fullscreenchange') {
-      this.resizeContainerPlayer();
       this.isFullscreen_ = !!eventData['isFullscreen'];
       return;
     }
@@ -521,16 +475,34 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
   /** @override */
   mapConfig() {
     const mapConfIndex = {
+      'movieSrc': null,
+      'moviePosterSrc': null,
+      'playerIdConf': null,
+      'masterDomain': null,
+    };
+    Object.keys(mapConfIndex).forEach(key => {
+      if (this.configMap_[key] !== undefined) {
+        this.config_[key] = this.configMap_[key];
+      } else if (this.config_[key] === undefined) {
+        this.config_[key] = mapConfIndex[key];
+      }
+    });
+  }
+
+  /** @override */
+  mapExternalConfig() {
+    const mapConfIndex = {
+      'cssPuiblisher': null,
+      'showLogo': false,
+      'watermark': null,
+      'vastUrl': null,
+      'keyPrivate': null,
       'movieContenerId': null,
       'movieSrcs': null,
       'movieSrc': null,
       'moviePosterSrc': null,
       'playerIdConf': null,
       'masterDomain': null,
-      'maxWidth': null,
-      'maxHeight': null,
-      'watermark': null,
-      'UA': null,
       'lang': 'pl',
       'autoplay': false,
       'scrollOnlyDownPlayer': null,
@@ -544,7 +516,6 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
       'functionAfterEnded': null,
       'videoWall': null,
       'timeToSaveCloseChoice': 2,
-      'adBlockInfo': false,
       'langText': {
         'advertisement': 'Reklama',
         'Seconds': 'sekund',
@@ -553,46 +524,12 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
       'fixedOnMobile': false,
     };
     Object.keys(mapConfIndex).forEach(key => {
-      if (this.configMap_[key] !== undefined) {
-        this.config_[key] = this.configMap_[key];
+      if (this.configLocal_[key] !== undefined) {
+        this.config_[key] = this.configLocal_[key];
       } else if (this.config_[key] === undefined) {
         this.config_[key] = mapConfIndex[key];
       }
     });
-
-    if (
-      this.configMap_['UA'] !== undefined &&
-      this.configMap_['UA'].length > 0
-    ) {
-      this.gaUserUA_ = this.configMap_['UA'];
-    }
-    this.setRandMovieSrc();
-  }
-
-  /** @override */
-  mapExternalConfig() {
-    const mapConfIndex = {
-      'cssPuiblisher': null,
-      'apv': 100,
-      'UA': null,
-      'showLogo': false,
-      'watermark': null,
-      'vastUrl': null,
-      'keyPrivate': null,
-      'adBlockInfo': false,
-    };
-    Object.keys(mapConfIndex).forEach(key => {
-      if (this.configLocal_[key] !== undefined) {
-        this.config_[key] = this.configLocal_[key];
-      }
-    });
-
-    if (
-      this.configLocal_['UA'] !== undefined &&
-      this.configLocal_['UA'].length > 0
-    ) {
-      this.gaMoviadsUA_ = this.configLocal_['UA'];
-    }
   }
 
   /** @override */
@@ -600,7 +537,7 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
     if (null !== this.config_.movieSrcs && this.config_.movieSrcs.length > 0) {
       this.config_['dataSrc'] = this.config_.movieSrcs[
         Math.floor(Math.random() * this.config_.movieSrcs.length)
-        ];
+      ];
     } else {
       this.config_['dataSrc'] = this.config_.movieSrc;
     }
@@ -621,29 +558,6 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
   }
 
   /** @override */
-  resizeContainerPlayer() {
-    if (
-      (this.element.parentElement &&
-        parseInt(this.config_.maxHeight, 10) >
-        this.element.parentElement.offsetHeight) ||
-      this.config_.maxHeight === null
-    ) {
-      this.config_.maxHeight = this.element.parentElement.offsetHeight;
-    }
-
-    if (
-      (this.element.parentElement &&
-        parseInt(this.config_.maxWidth, 10) >
-        this.element.parentElement.offsetWidth) ||
-      this.config_.maxWidth === null
-    ) {
-      this.config_.maxWidth = this.element.parentElement.offsetWidth;
-    }
-    this.element.setAttribute('width', parseInt(this.config_.maxWidth, 10));
-    this.element.setAttribute('height', parseInt(this.config_.maxHeight, 10));
-  }
-
-  /** @override */
   embedWatermark() {
     if (this.config_.watermark !== null) {
       const img = document.createElement('IMG');
@@ -655,37 +569,9 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
 
   /** @override */
   loadMethod() {
-
     this.embedWatermark();
     this.layoutLoad();
     this.preconnectAds();
-    const _this = this;
-    document.addEventListener(
-      'visibilitychange',
-      function() {
-        if (document.hidden) {
-          _this.pause();
-        } else {
-          _this.play();
-        }
-      },
-      false
-    );
-    if (this.gaMoviadsUA_) {
-      this.initGA(this.gaMoviadsUA_, this.gaMoviads_);
-    }
-
-    if (this.gaUserUA_) {
-      this.initGA(this.gaUserUA_, this.gaUser_);
-    }
-
-    this.element.addEventListener('mouseout', function() {
-      _this.embedLogoMovieAds(false);
-    });
-
-    this.element.addEventListener('mouseover', function() {
-      _this.embedLogoMovieAds(true);
-    });
   }
 
   /** @override */
@@ -717,50 +603,6 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
   }
 
   /** @override */
-  initGA(ua, name) {
-    (function(i, s, o, g, r, a, m) {
-      i['GoogleAnalyticsObject'] = r;
-      (i[r] =
-        i[r] ||
-        function() {
-          (i[r].q = i[r].q || []).push(arguments);
-        }),
-        (i[r].l = Number(new Date()));
-      (a = s.createElement(o)), (m = s.getElementsByTagName(o)[0]);
-      a.async = 1;
-      a.src = g;
-      m.parentNode.insertBefore(a, m);
-    })(
-      window,
-      document,
-      'script',
-      'https://www.google-analytics.com/analytics.js',
-      'ga'
-    );
-    ga('create', ua, 'auto', name);
-    ga(name + '.send', 'pageview');
-  }
-
-  /** @override */
-  eventGA(event, name, UA) {
-    if (typeof ga !== 'undefined') {
-      if (UA && event !== 'pause') {
-        // eslint-disable-next-line no-undef
-        ga(
-          name + '.send',
-          'event',
-          'Videos',
-          event,
-          this.config_.movieContenerId,
-          {
-            nonInteraction: true,
-          }
-        );
-      }
-    }
-  }
-
-  /** @override */
   functionAfterEnded() {
     if (
       this.config_.hideWhenEnd === false &&
@@ -770,44 +612,6 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
       typeof window[this.config_.functionAfterEnded] === 'function'
     ) {
       window[this.config_.functionAfterEnded]();
-    }
-  }
-
-  /** @override */
-  detectedAdBlock() {
-    const _this = this;
-    const testURLAdBlock = 'https://imasdk.googleapis.com/js/sdkloader/ima3.js';
-    const myInitHead = {
-      method: 'HEAD',
-      mode: 'no-cors',
-    };
-    const myRequest = new Request(testURLAdBlock, myInitHead);
-    fetch(myRequest)
-      .then(function() {
-        _this.adblockDetected_ = false;
-      })
-      .then(function() {
-        _this.adblockDetected_ = false;
-      })
-      .catch(function() {
-        _this.adblockDetected_ = true;
-        _this.infoAdblock();
-      });
-  }
-
-  /** @override */
-  infoAdblock() {
-    if (
-      this.adblockDetected_ === true &&
-      this.config_.adBlockInfo !== false &&
-      this.config_.adBlockInfo !== ''
-    ) {
-      this.element.className = 'amp-ima-payer-adblock';
-      const para = document.createElement('p');
-      para.className = 'amp-ima-payer-p-adblock';
-      const node = document.createTextNode(this.config_.adBlockInfo);
-      para.appendChild(node);
-      this.element.appendChild(para);
     }
   }
 
@@ -828,34 +632,10 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
   }
 
   /** @override */
-  isInViewport() {
-    const el = this.element;
-    const scroll = window.scrollY || window.pageYOffset;
-    const boundsTop = el.getBoundingClientRect().top + scroll;
-    const viewport = {
-      top: scroll,
-      bottom: scroll + window.innerHeight,
-    };
-
-    const bounds = {
-      top: boundsTop,
-      bottom: boundsTop + el.clientHeight,
-    };
-
-    return (
-      (bounds.bottom >= viewport.top && bounds.bottom <= viewport.bottom) ||
-      (bounds.top <= viewport.bottom && bounds.top >= viewport.top)
-    );
-  }
-
-  /** @override */
-  embedLogoMovieAds(param) {
-    const _this = this;
+  createLogoMovieAds() {
     if (
       this.config_.showLogo &&
-      param === true &&
-      document.getElementById('amp-ima-player-movie-ads') === null &&
-      this.showLogoMovie_ === true
+      document.getElementById('amp-ima-player-movie-ads') === null
     ) {
       const embedLogoMovieAds = document.createElement('div');
       embedLogoMovieAds.className = 'amp-ima-player-movie-ads';
@@ -869,18 +649,6 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
       embedLogoMovieAdsA.appendChild(embedLogoMovieAdsImg);
       embedLogoMovieAds.appendChild(embedLogoMovieAdsA);
       this.element.appendChild(embedLogoMovieAds);
-
-      document
-        .getElementById('amp-ima-player-movie-ads')
-        .addEventListener('mouseover', function() {
-          _this.embedLogoMovieAds(true);
-        });
-    } else if (
-      param === false &&
-      this.showLogoMovie_ === true &&
-      document.getElementById('amp-ima-player-movie-ads') !== null
-    ) {
-      document.getElementById('amp-ima-player-movie-ads').remove();
     }
   }
 }
