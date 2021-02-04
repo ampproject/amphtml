@@ -85,15 +85,6 @@ describes.realWin(
       return ins;
     }
 
-    function testImage(image) {
-      expect(image).to.not.be.null;
-      expect(image.getAttribute('src')).to.equal(
-        'https://www.instagram.com/p/fBwFP/media/?size=l'
-      );
-      expect(image.getAttribute('alt')).to.equal('Testing');
-      expect(image.getAttribute('referrerpolicy')).to.equal('origin');
-    }
-
     function testIframe(iframe) {
       expect(iframe).to.not.be.null;
       expect(iframe.src).to.equal(
@@ -115,13 +106,11 @@ describes.realWin(
     it('renders', async () => {
       const ins = await getIns('fBwFP');
       testIframe(ins.querySelector('iframe'));
-      testImage(ins.querySelector('img'));
     });
 
     it('renders captioned', async () => {
       const ins = await getIns('fBwFP', undefined, undefined, true);
       testIframeCaptioned(ins.querySelector('iframe'));
-      testImage(ins.querySelector('img'));
     });
 
     it('removes iframe after unlayoutCallback', async () => {
