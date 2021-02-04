@@ -58,7 +58,6 @@ export class UserError extends Error {
  * @param {string} message
  * @return {T}
  * @throws {Error} when attribute values are missing or invalid.
- * @closurePrimitive {asserts.truthy}
  */
 function pureAssertion(errorCls, shouldBeTruthy, message) {
   // TODO: Support format strings.
