@@ -439,7 +439,7 @@ const forbiddenTerms = {
     message: shouldNeverBeUsed,
     allowlist: ['extension/amp-bind/0.1/test/test-bind-expr.js'],
   },
-  'storageForDoc': {
+  'storageForDoc|storageForTopLevelDoc': {
     message:
       requiresReviewPrivacy +
       ' Please refer to spec/amp-localstorage.md for more information on' +
