@@ -78,6 +78,15 @@ describes.fakeWin('amp-video flexible-bitrate', {}, (env) => {
       expect(currentBitrates(v1)[0]).to.equal(1000);
       expect(v1.currentSrc).to.equal('http://localhost:9876/1000.mp4');
     });
+
+    it('should reduce bitrate on slow initial load', () => {
+      const m = getManager('4g');
+      const v = getVideo([4000, 1000, 3000, 2000]);
+      m.manage(v);
+      v.changedSources();
+      v.load();
+      expect(currentBitrates(v)[0]).to.equal(2000);
+    });
   });
 
   describe('sorting', () => {
