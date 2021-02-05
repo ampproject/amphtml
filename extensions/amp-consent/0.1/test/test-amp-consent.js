@@ -1163,6 +1163,7 @@ describes.realWin(
         expect(ampConsent.isPromptUIOn_).to.be.true;
         await macroTask();
         ampConsent.handleAction_(ACTION_TYPE.ACCEPT);
+        await macroTask();
         expect(updateConsentInstanceStateSpy).to.be.calledWith(
           CONSENT_ITEM_STATE.ACCEPTED
         );
@@ -1363,77 +1364,197 @@ describes.realWin(
         toggleExperiment(win, 'amp-consent-granular-consent', false);
       });
 
-      it('uses inline purposeConsentRequired', async () => {
-        defaultConfig['purposeConsentRequired'] = ['zyx', 'yxw'];
-        defaultConfig['consentRequired'] = true;
-        consentElement = createConsentElement(doc, defaultConfig);
-        doc.body.appendChild(consentElement);
-        ampConsent = new AmpConsent(consentElement);
-        await ampConsent.buildCallback();
-        expect(await ampConsent.getPurposeConsentRequired_()).to.deep.equal(
-          defaultConfig['purposeConsentRequired']
-        );
-      });
-
-      it('uses purposeConsentRequired from remote if not inlined', async () => {
-        defaultConfig['consentRequired'] = 'remote';
-        defaultConfig['checkConsentHref'] = 'https://server-test-1/';
-        consentElement = createConsentElement(doc, defaultConfig);
-        doc.body.appendChild(consentElement);
-        ampConsent = new AmpConsent(consentElement);
-        await ampConsent.buildCallback();
-        expect(await ampConsent.getPurposeConsentRequired_()).to.deep.equal([
-          'abc',
-          'bcd',
-        ]);
-      });
-
-      it('returns null if no purposeConsentsRequired are found', async () => {
-        defaultConfig['consentRequired'] = 'remote';
-        defaultConfig['checkConsentHref'] = 'https://server-test-2/';
-        consentElement = createConsentElement(doc, defaultConfig);
-        doc.body.appendChild(consentElement);
-        ampConsent = new AmpConsent(consentElement);
-        await ampConsent.buildCallback();
-        expect(await ampConsent.getPurposeConsentRequired_()).to.undefined;
-      });
-
-      it(
-        'will only look at purposeConsentRequired if we have ' +
-          'global consent (state or tcString)',
-        async () => {
+      describe('purposeConsentRequired', () => {
+        it('uses inline purposeConsentRequired', async () => {
           defaultConfig['purposeConsentRequired'] = ['zyx', 'yxw'];
           defaultConfig['consentRequired'] = true;
           consentElement = createConsentElement(doc, defaultConfig);
           doc.body.appendChild(consentElement);
           ampConsent = new AmpConsent(consentElement);
           await ampConsent.buildCallback();
-          window.sandbox
-            .stub(ampConsent.consentStateManager_, 'getConsentInstanceInfo')
-            .returns(Promise.resolve({}));
-          const spy = window.sandbox.spy(
-            ampConsent,
-            'checkGranularConsentRequired_'
+          expect(await ampConsent.getPurposeConsentRequired_()).to.deep.equal(
+            defaultConfig['purposeConsentRequired']
+          );
+        });
+
+        it('uses purposeConsentRequired from remote if not inlined', async () => {
+          defaultConfig['consentRequired'] = 'remote';
+          defaultConfig['checkConsentHref'] = 'https://server-test-1/';
+          consentElement = createConsentElement(doc, defaultConfig);
+          doc.body.appendChild(consentElement);
+          ampConsent = new AmpConsent(consentElement);
+          await ampConsent.buildCallback();
+          expect(await ampConsent.getPurposeConsentRequired_()).to.deep.equal([
+            'abc',
+            'bcd',
+          ]);
+        });
+
+        it('returns null if no purposeConsentsRequired are found', async () => {
+          defaultConfig['consentRequired'] = 'remote';
+          defaultConfig['checkConsentHref'] = 'https://server-test-2/';
+          consentElement = createConsentElement(doc, defaultConfig);
+          doc.body.appendChild(consentElement);
+          ampConsent = new AmpConsent(consentElement);
+          await ampConsent.buildCallback();
+          expect(await ampConsent.getPurposeConsentRequired_()).to.undefined;
+        });
+
+        it(
+          'will only look at purposeConsentRequired if we have ' +
+            'global consent (state or tcString)',
+          async () => {
+            defaultConfig['purposeConsentRequired'] = ['zyx', 'yxw'];
+            defaultConfig['consentRequired'] = true;
+            consentElement = createConsentElement(doc, defaultConfig);
+            doc.body.appendChild(consentElement);
+            ampConsent = new AmpConsent(consentElement);
+            await ampConsent.buildCallback();
+            window.sandbox
+              .stub(ampConsent.consentStateManager_, 'getConsentInstanceInfo')
+              .returns(Promise.resolve({}));
+            const spy = window.sandbox.spy(
+              ampConsent,
+              'checkGranularConsentRequired_'
+            );
+
+            expect(await ampConsent.hasRequiredConsents_()).to.be.false;
+            expect(spy).to.not.be.called;
+          }
+        );
+
+        it('validates purposeConsentRequired', async () => {
+          const userSpy = window.sandbox.spy(user(), 'error');
+          defaultConfig['purposeConsentRequired'] = 'badPurposeRequired';
+          defaultConfig['consentRequired'] = true;
+          consentElement = createConsentElement(doc, defaultConfig);
+          doc.body.appendChild(consentElement);
+          ampConsent = new AmpConsent(consentElement);
+          await ampConsent.buildCallback();
+          await ampConsent.checkGranularConsentRequired_();
+          expect(userSpy).to.be.calledOnce;
+          expect(userSpy.args[0][1]).to.match(
+            /purposeConsentRequired' requires an array of strings/
+          );
+        });
+      });
+
+      describe('promptUI', () => {
+        let updateConsentInstancePurposeSpy;
+
+        beforeEach(() => {
+          defaultConfig['purposeConsentRequired'] = ['zyx', 'yxw'];
+          defaultConfig['consentRequired'] = true;
+          consentElement = createConsentElement(doc, defaultConfig);
+          doc.body.appendChild(consentElement);
+          ampConsent = new AmpConsent(consentElement);
+          env.sandbox.stub(ampConsent.vsync_, 'mutate').callsFake((fn) => {
+            fn();
+          });
+          env.sandbox.stub(ampConsent, 'mutateElement').callsFake((fn) => {
+            fn();
+          });
+        });
+
+        it('generates default map from purposeConsentDefault', async () => {
+          const mockInvocation = {args: {purposeConsentDefault: true}};
+          await ampConsent.buildCallback();
+          await macroTask();
+          updateConsentInstancePurposeSpy = env.sandbox.spy(
+            ampConsent.consentStateManager_,
+            'updateConsentInstancePurposes'
+          );
+          ampConsent.handleAction_(
+            ACTION_TYPE.ACCEPT,
+            undefined,
+            undefined,
+            mockInvocation
+          );
+          await macroTask();
+          expect(updateConsentInstancePurposeSpy).to.be.calledWith(
+            {
+              'zyx': true,
+              'yxw': true,
+            },
+            true
+          );
+          expect(ampConsent.isPromptUIOn_).to.be.false;
+        });
+
+        it('purposeConsentDefault handles empty and null purposeConsentRequired', async () => {
+          const mockInvocation = {args: {purposeConsentDefault: true}};
+          ampConsent.purposeConsentRequired_ = Promise.resolve();
+          window.sandbox.stub(ampConsent, 'hide_').callsFake(() => {});
+          await ampConsent.buildCallback();
+          await macroTask();
+          updateConsentInstancePurposeSpy = env.sandbox.spy(
+            ampConsent.consentStateManager_,
+            'updateConsentInstancePurposes'
           );
 
-          expect(await ampConsent.hasRequiredConsents_()).to.be.false;
-          expect(spy).to.not.be.called;
-        }
-      );
+          ampConsent.handleAction_(
+            ACTION_TYPE.ACCEPT,
+            undefined,
+            undefined,
+            mockInvocation
+          );
+          await macroTask();
+          expect(updateConsentInstancePurposeSpy).to.not.be.called;
+          // reset
+          ampConsent.purposeConsentRequired_ = Promise.resolve([]);
+          ampConsent.handleAction_(
+            ACTION_TYPE.REJECT,
+            undefined,
+            undefined,
+            mockInvocation
+          );
+          await macroTask();
+          expect(updateConsentInstancePurposeSpy).to.not.be.called;
+        });
 
-      it('validates purposeConsentRequired', async () => {
-        const userSpy = window.sandbox.spy(user(), 'error');
-        defaultConfig['purposeConsentRequired'] = 'badPurposeRequired';
-        defaultConfig['consentRequired'] = true;
-        consentElement = createConsentElement(doc, defaultConfig);
-        doc.body.appendChild(consentElement);
-        ampConsent = new AmpConsent(consentElement);
-        await ampConsent.buildCallback();
-        await ampConsent.checkGranularConsentRequired_();
-        expect(userSpy).to.be.calledOnce;
-        expect(userSpy.args[0][1]).to.match(
-          /purposeConsentRequired' requires an array of strings/
-        );
+        it('ACTION_TYPE.SET_PURPOSE is accepted', async () => {
+          const mockInvocation = {
+            args: {'purpose-foo': true, 'purpose-bar': false},
+          };
+          await ampConsent.buildCallback();
+          await macroTask();
+          const hideSpy = env.sandbox.spy(ampConsent, 'hide_');
+          updateConsentInstancePurposeSpy = env.sandbox.spy(
+            ampConsent.consentStateManager_,
+            'updateConsentInstancePurposes'
+          );
+
+          ampConsent.handleAction_(
+            ACTION_TYPE.SET_PURPOSE,
+            undefined,
+            undefined,
+            mockInvocation
+          );
+          await macroTask();
+          expect(updateConsentInstancePurposeSpy).to.be.calledWith(
+            mockInvocation.args
+          );
+          expect(hideSpy).to.not.be.called;
+        });
+
+        it('handles setPurpose with no args', async () => {
+          const mockInvocation = {args: null};
+          await ampConsent.buildCallback();
+          await macroTask();
+          updateConsentInstancePurposeSpy = env.sandbox.spy(
+            ampConsent.consentStateManager_,
+            'updateConsentInstancePurposes'
+          );
+
+          ampConsent.handleAction_(
+            ACTION_TYPE.SET_PURPOSE,
+            undefined,
+            undefined,
+            mockInvocation
+          );
+          await macroTask();
+          expect(updateConsentInstancePurposeSpy).not.be.called;
+        });
       });
     });
   }

@@ -15,6 +15,7 @@
  */
 import {
   CONSENT_ITEM_STATE,
+  PURPOSE_CONSENT_STATE,
   composeStoreValue,
   constructConsentInfo,
   constructMetadata,
@@ -863,6 +864,50 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
             )
           );
         });
+      });
+    });
+
+    describe('updatePurposes', () => {
+      it('updates purpose consents', () => {
+        instance.updatePurposes({'a': true, 'b': false});
+        expect(instance.purposeConsents_).to.deep.equal({
+          'a': PURPOSE_CONSENT_STATE.ACCEPTED,
+          'b': PURPOSE_CONSENT_STATE.REJECTED,
+        });
+
+        // new values
+        instance.updatePurposes({'c': true});
+        expect(instance.purposeConsents_).to.deep.equal({
+          'a': PURPOSE_CONSENT_STATE.ACCEPTED,
+          'b': PURPOSE_CONSENT_STATE.REJECTED,
+          'c': PURPOSE_CONSENT_STATE.ACCEPTED,
+        });
+
+        // overrides
+        instance.updatePurposes({'c': false, 'd': true});
+        expect(instance.purposeConsents_).to.deep.equal({
+          'a': PURPOSE_CONSENT_STATE.ACCEPTED,
+          'b': PURPOSE_CONSENT_STATE.REJECTED,
+          'c': PURPOSE_CONSENT_STATE.REJECTED,
+          'd': PURPOSE_CONSENT_STATE.ACCEPTED,
+        });
+      });
+
+      it('opt_defaultsOnly', () => {
+        instance.updatePurposes({'a': true, 'b': true});
+        expect(instance.purposeConsents_).to.deep.equal({
+          'a': PURPOSE_CONSENT_STATE.ACCEPTED,
+          'b': PURPOSE_CONSENT_STATE.ACCEPTED,
+        });
+
+        instance.updatePurposes({'a': false, 'b': false, 'c': false}, true);
+        expect(instance.purposeConsents_).to.deep.equal({
+          'a': PURPOSE_CONSENT_STATE.ACCEPTED,
+          'b': PURPOSE_CONSENT_STATE.ACCEPTED,
+          'c': PURPOSE_CONSENT_STATE.REJECTED,
+        });
+
+        // set w/ overrides
       });
     });
   });
