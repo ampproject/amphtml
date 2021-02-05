@@ -43,14 +43,7 @@ export function whenContentIniLoad(
 ) {
   // eslint-disable-next-line no-undef
   if (INI_LOAD_INOB) {
-    // QQQQQ
-    // return whenContentIniLoadInOb(elementOrAmpDoc, opt_prerenderableOnly);
-    return whenContentIniLoadMeasure(
-      elementOrAmpDoc,
-      hostWin,
-      rect,
-      opt_prerenderableOnly
-    );
+    return whenContentIniLoadInOb(elementOrAmpDoc, opt_prerenderableOnly);
   }
   return whenContentIniLoadMeasure(
     elementOrAmpDoc,
