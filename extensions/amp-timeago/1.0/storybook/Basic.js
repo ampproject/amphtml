@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {Timeago} from '../timeago';
+import {Timeago} from '../component';
 import {date, number, select, text, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 

@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {Timeago} from '../timeago';
+import {Timeago} from '../component';
 import {mount} from 'enzyme';
 import {waitFor} from '../../../../testing/test-helper';
 

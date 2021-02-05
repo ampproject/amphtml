@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {DateCountdown} from '../date-countdown';
+import {DateCountdown} from '../component';
 import {mount} from 'enzyme';
 
 describes.sandboxed('DateCountdown 1.0 preact component', {}, (env) => {

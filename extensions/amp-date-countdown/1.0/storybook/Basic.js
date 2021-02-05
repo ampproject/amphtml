@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {DateCountdown} from '../date-countdown';
+import {DateCountdown} from '../component';
 import {boolean, date, select, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 

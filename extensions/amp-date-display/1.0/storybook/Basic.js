@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {DateDisplay} from '../date-display';
+import {DateDisplay} from '../component';
 import {date, select, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 
