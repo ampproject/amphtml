@@ -149,7 +149,7 @@ BaseElement['props'] = {  // Map DOM attributes to Preact Component props.
   'propName1': {attr: 'attr-name-1'},
   'propName2': {attr: 'attr-name-2', type: 'number'},
 };
-````
+```
 
 The following shows the corresponding overall structure of your Preact functional component implementation file (extensions/amp-my-element/0.1/component.js).
 
