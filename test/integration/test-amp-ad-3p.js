@@ -36,7 +36,7 @@ describe('amp-ad 3P', () => {
   });
 
   it('create an iframe with APIs', async function () {
-    toggleExperiment(window, 'ads-initialIntersection');
+    toggleExperiment(window, 'ads-initialIntersection', )
     this.timeout(20000);
     let iframe;
     let lastIO = null;
@@ -96,8 +96,24 @@ describe('amp-ad 3P', () => {
           width: 300,
         });
         const {initialIntersection} = context;
+        console.error(JSON.stringify(initialIntersection.rootBounds));
+        console.error(
+          JSON.stringify(
+            layoutRectLtwh(
+              0,
+              0,
+              window.document.body.clientWidth,
+              window.document.body.clientHeight,
+            )
+          )
+        );
         expect(initialIntersection.rootBounds).to.deep.equal(
-          layoutRectLtwh(0, 0, window.innerWidth, window.innerHeight)
+          layoutRectLtwh(
+            0,
+            0,
+            iframe.contentWindow.innerWidth,
+            iframe.contentWindow.innerHeight
+          )
         );
 
         expect(initialIntersection.boundingClientRect).to.deep.equal(
