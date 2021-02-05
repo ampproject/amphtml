@@ -25,6 +25,7 @@ const {
 const {app} = require('../../server/test-server');
 const {createKarmaServer, getAdTypes} = require('./helpers');
 const {getFilesFromArgv} = require('../../common/utils');
+const {getPersistentBrowserifyCache} = require('../../common/browserify-cache');
 const {green, yellow, cyan, red} = require('ansi-colors');
 const {isCiBuild} = require('../../common/ci');
 const {log} = require('../../common/logging');
@@ -184,6 +185,7 @@ class RuntimeTestConfig {
     this.client.mocha.grep = !!argv.grep;
     this.client.verboseLogging = !!argv.verbose || !!argv.v;
     this.client.captureConsole = !!argv.verbose || !!argv.v || !!argv.files;
+    this.browserify.persistentCache = getPersistentBrowserifyCache();
     this.browserify.configure = function (bundle) {
       bundle.on('prebundle', function () {
         log(
