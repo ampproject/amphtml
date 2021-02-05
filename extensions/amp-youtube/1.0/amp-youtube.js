@@ -16,19 +16,12 @@
 
 import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-youtube-1.0.css';
-import {assertBentoExperiment} from '../../../src/experiments';
 
 /** @const {string} */
 const TAG = 'amp-youtube';
 
-class AmpYoutube extends BaseElement {
-  /** @override */
-  isLayoutSupported(layout) {
-    assertBentoExperiment('youtube');
-    return super.isLayoutSupported(layout);
-  }
-}
+class AmpYoutube extends BaseElement {}
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpYoutube, CSS);
+  AMP.registerBentoElement(TAG, AmpYoutube, CSS);
 });

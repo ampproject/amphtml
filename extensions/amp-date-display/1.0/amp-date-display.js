@@ -16,7 +16,6 @@
 
 import {BaseElement} from './base-element';
 import {Services} from '../../../src/services';
-import {assertBentoExperiment} from '../../../src/experiments';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 
@@ -33,12 +32,6 @@ class AmpDateDisplay extends BaseElement {
 
     /** @private {?Element} */
     this.template_ = null;
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    assertBentoExperiment('date-display');
-    return super.isLayoutSupported(layout);
   }
 
   /** @override */
@@ -82,5 +75,5 @@ class AmpDateDisplay extends BaseElement {
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpDateDisplay);
+  AMP.registerBentoElement(TAG, AmpDateDisplay);
 });

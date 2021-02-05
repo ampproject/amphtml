@@ -25,7 +25,6 @@ import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-accordion-1.0.css';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
-import {assertBentoExperiment, isExperimentOn} from '../../../src/experiments';
 import {
   childElementsByTag,
   dispatchCustomEvent,
@@ -35,6 +34,7 @@ import {createCustomEvent} from '../../../src/event-helper';
 import {devAssert} from '../../../src/log';
 import {dict, memo} from '../../../src/utils/object';
 import {forwardRef} from '../../../src/preact/compat';
+import {isExperimentOn} from '../../../src/experiments';
 import {toArray, toWin} from '../../../src/types';
 import {
   useImperativeHandle,
@@ -96,7 +96,6 @@ class AmpAccordion extends PreactBaseElement {
 
   /** @override */
   isLayoutSupported(unusedLayout) {
-    assertBentoExperiment('accordion');
     return true;
   }
 }
@@ -306,5 +305,5 @@ AmpAccordion['props'] = {
 };
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpAccordion, CSS);
+  AMP.registerBentoElement(TAG, AmpAccordion, CSS);
 });

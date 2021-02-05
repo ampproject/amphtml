@@ -28,7 +28,6 @@ import {InlineGallery} from './inline-gallery';
 import {Layout} from '../../../src/layout';
 import {CSS as PAGINATION_CSS} from '../../../build/amp-inline-gallery-pagination-1.0.css';
 import {PreactBaseElement} from '../../../src/preact/base-element';
-import {assertBentoExperiment} from '../../../src/experiments';
 import {dict} from '../../../src/utils/object';
 import {setProp} from '../../../src/context';
 import {useContext, useLayoutEffect} from '../../../src/preact';
@@ -46,7 +45,6 @@ class AmpInlineGallery extends PreactBaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    assertBentoExperiment('inline-gallery');
     return layout == Layout.CONTAINER;
   }
 }
@@ -63,7 +61,7 @@ AmpInlineGallery['props'] = {
 };
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpInlineGallery);
+  AMP.registerBentoElement(TAG, AmpInlineGallery);
   AMP.registerElement(
     PAGINATION_TAG,
     AmpInlineGalleryPagination,

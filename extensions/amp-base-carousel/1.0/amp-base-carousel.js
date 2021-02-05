@@ -21,7 +21,6 @@ import {CSS} from '../../../build/amp-base-carousel-1.0.css';
 import {CarouselContextProp} from './carousel-props';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
-import {assertBentoExperiment} from '../../../src/experiments';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/utils/object';
 import {dispatchCustomEvent} from '../../../src/dom';
@@ -60,12 +59,6 @@ class AmpBaseCarousel extends PreactBaseElement {
         fireSlideChangeEvent(this.win, element, index, ActionTrust.HIGH);
       },
     });
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    assertBentoExperiment('carousel');
-    return super.isLayoutSupported(layout);
   }
 
   /** @override */
@@ -169,5 +162,5 @@ function fireSlideChangeEvent(win, el, index, trust) {
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpBaseCarousel, CSS);
+  AMP.registerBentoElement(TAG, AmpBaseCarousel, CSS);
 });

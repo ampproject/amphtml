@@ -20,7 +20,6 @@ import {CSS} from '../../../build/amp-lightbox-1.0.css';
 import {Lightbox} from './lightbox';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
-import {assertBentoExperiment} from '../../../src/experiments';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/utils/object';
 import {dispatchCustomEvent} from '../../../src/dom';
@@ -85,12 +84,6 @@ class AmpLightbox extends PreactBaseElement {
     this.open_ = open;
     open ? this.api().open() : this.api().close();
   }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    assertBentoExperiment('lightbox');
-    return super.isLayoutSupported(layout);
-  }
 }
 
 /**
@@ -125,5 +118,5 @@ AmpLightbox['passthrough'] = true;
 AmpLightbox['shadowCss'] = COMPONENT_CSS;
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpLightbox, CSS);
+  AMP.registerBentoElement(TAG, AmpLightbox, CSS);
 });

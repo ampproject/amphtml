@@ -15,19 +15,51 @@
  */
 
 import {BaseElement} from './base-element';
-import {assertBentoExperiment} from '../../../src/experiments';
+import {parseDateAttrs as parseDateAttrsBase} from '../../../src/utils/date';
 
 /** @const {string} */
 const TAG = 'amp-timeago';
 
 class AmpTimeago extends BaseElement {
   /** @override */
-  isLayoutSupported(layout) {
-    assertBentoExperiment('timeago');
-    return super.isLayoutSupported(layout);
+  updatePropsForRendering(props) {
+    props['placeholder'] = props['children'];
   }
 }
 
+/** @override */
+AmpTimeago['Component'] = Timeago;
+
+/** @override */
+AmpTimeago['passthroughNonEmpty'] = true;
+
+/** @override */
+AmpTimeago['layoutSizeDefined'] = true;
+
+/** @override */
+AmpTimeago['props'] = {
+  'datetime': {
+    attrs: ['datetime', 'timestamp-ms', 'timestamp-seconds', 'offset-seconds'],
+    parseAttrs: parseDateAttrs,
+  },
+  'cutoff': {attr: 'cutoff', type: 'number'},
+  'locale': {attr: 'locale'},
+};
+
+/**
+ * @param {!Element} element
+ * @return {?number}
+ * @throws {UserError} when attribute values are missing or invalid.
+ * @visibleForTesting
+ */
+export function parseDateAttrs(element) {
+  return parseDateAttrsBase(element, [
+    'datetime',
+    'timestamp-ms',
+    'timestamp-seconds',
+  ]);
+}
+
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpTimeago);
+  AMP.registerBentoElement(TAG, AmpTimeago);
 });

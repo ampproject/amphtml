@@ -16,7 +16,6 @@
 
 import {BaseElement} from './base-element';
 import {Services} from '../../../src/services';
-import {assertBentoExperiment} from '../../../src/experiments';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -38,7 +37,6 @@ class AmpDateCountdown extends BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    assertBentoExperiment('date-countdown');
     return isLayoutSizeDefined(layout);
   }
 
@@ -84,5 +82,5 @@ class AmpDateCountdown extends BaseElement {
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpDateCountdown);
+  AMP.registerBentoElement(TAG, AmpDateCountdown);
 });

@@ -19,19 +19,13 @@ import {CarouselContextProp} from '../../amp-base-carousel/1.0/carousel-props';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {CSS as THUMBNAIL_CSS} from './thumbnails.jss';
 import {Thumbnails} from './thumbnails';
-import {assertBentoExperiment} from '../../../src/experiments';
 /** @const {string} */
 export const TAG = 'amp-inline-gallery-thumbnails';
 
 /** @extends {PreactBaseElement<BaseCarouselDef.CarouselApi>} */
 export class AmpInlineGalleryThumbnails extends PreactBaseElement {
-  /** @override */
-  isLayoutSupported(layout) {
-    assertBentoExperiment('inline-gallery');
-    // Any layout is allowed for Bento, but "fixed-height" is the recommend
-    // layout for AMP.
-    return super.isLayoutSupported(layout);
-  }
+  // Any layout is allowed for Bento, but "fixed-height" is the recommend layout
+  // for AMP.
 }
 
 /** @override */

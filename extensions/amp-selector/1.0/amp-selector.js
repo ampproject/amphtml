@@ -20,7 +20,6 @@ import {CSS} from '../../../build/amp-selector-1.0.css';
 import {Option, Selector} from './selector';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
-import {assertBentoExperiment} from '../../../src/experiments';
 import {
   closestAncestorElementBySelector,
   createElementWithAttributes,
@@ -108,7 +107,6 @@ class AmpSelector extends PreactBaseElement {
 
   /** @override */
   isLayoutSupported(unusedLayout) {
-    assertBentoExperiment('selector');
     return true;
   }
 }
@@ -334,5 +332,5 @@ AmpSelector['props'] = {
 };
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpSelector, CSS);
+  AMP.registerBentoElement(TAG, AmpSelector, CSS);
 });
