@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {Instagram} from '../instagram';
+import {Instagram} from '../component';
 import {mount} from 'enzyme';
 import {waitFor} from '../../../../testing/test-helper';
 
