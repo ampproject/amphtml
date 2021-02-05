@@ -40,7 +40,7 @@ describes.realWin(
         hulu.setAttribute('layout', 'responsive');
       }
       doc.body.appendChild(hulu);
-      return hulu.build().then(() => {
+      return hulu.buildInternal().then(() => {
         hulu.layoutCallback();
         return hulu;
       });

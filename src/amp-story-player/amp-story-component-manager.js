@@ -19,12 +19,6 @@ import {AmpStoryPlayer} from './amp-story-player-impl';
 import {AmpStoryPlayerViewportObserver} from './amp-story-player-viewport-observer';
 import {initLogConstructor} from '../log';
 
-/**
- * Minimum amount of viewports away from the player to start prerendering.
- * @const {number}
- */
-const MIN_VIEWPORT_PRERENDER_DISTANCE = 2;
-
 export class AmpStoryComponentManager {
   /**
    * @param {!Window} win
@@ -44,9 +38,15 @@ export class AmpStoryComponentManager {
     new AmpStoryPlayerViewportObserver(
       this.win_,
       elImpl.getElement(),
-      elImpl.layoutCallback.bind(elImpl),
-      MIN_VIEWPORT_PRERENDER_DISTANCE
+      elImpl.layoutCallback.bind(elImpl)
     );
+
+    const scrollHandler = () => {
+      elImpl.layoutCallback();
+      this.win_.removeEventListener('scroll', scrollHandler);
+    };
+
+    this.win_.addEventListener('scroll', scrollHandler);
   }
 
   /**

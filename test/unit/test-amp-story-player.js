@@ -23,6 +23,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   let playerEl;
   let manager;
   let fakeResponse;
+  const TAG = 'amp-story-player';
 
   const fireHandler = [];
   const DEFAULT_CACHE_URL =
@@ -90,6 +91,17 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       'behavior': {
         'on': 'end',
         'action': 'circular-wrapping',
+      },
+    });
+    configEl.setAttribute('type', 'application/json');
+    return configEl;
+  }
+
+  function buildAutoplayConfig(autoplay) {
+    const configEl = document.createElement('script');
+    configEl.textContent = JSON.stringify({
+      'behavior': {
+        'autoplay': autoplay,
       },
     });
     configEl.setAttribute('type', 'application/json');
@@ -343,6 +355,50 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     expect(noNextSpy).to.not.have.been.called;
   });
 
+  it('should not play first story when autoplay is off', async () => {
+    buildStoryPlayer(1);
+    playerEl.appendChild(buildAutoplayConfig(/* autoplay */ false));
+
+    const sendRequestSpy = env.sandbox.spy(fakeMessaging, 'sendRequest');
+
+    await manager.loadPlayers();
+    await nextTick();
+
+    expect(sendRequestSpy).to.not.have.been.calledWith('visibilitychange', {
+      'state': 'visible',
+    });
+  });
+
+  it('should play first story when autoplay is off and play() is called', async () => {
+    const sendRequestSpy = env.sandbox.spy(fakeMessaging, 'sendRequest');
+    buildStoryPlayer(1);
+    playerEl.appendChild(buildAutoplayConfig(/* autoplay */ false));
+
+    await manager.loadPlayers();
+    await nextTick();
+
+    playerEl.play();
+    await nextTick();
+
+    expect(sendRequestSpy).to.have.been.calledWith('visibilitychange', {
+      'state': 'visible',
+    });
+  });
+
+  it('should ignore autoplay if it contains invalid value', async () => {
+    buildStoryPlayer(1);
+    playerEl.appendChild(buildAutoplayConfig(/* autoplay */ 'flour tortillas'));
+
+    const sendRequestSpy = env.sandbox.spy(fakeMessaging, 'sendRequest');
+
+    await manager.loadPlayers();
+    await nextTick();
+
+    expect(sendRequestSpy).to.have.been.calledWith('visibilitychange', {
+      'state': 'visible',
+    });
+  });
+
   it('should dispatch noPreviousStory when in first story', async () => {
     buildStoryPlayer(1);
 
@@ -469,12 +525,13 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   });
 
   describe('Player API', () => {
-    function appendStoriesToPlayer(playerEl, numStories) {
+    function attachPlayerWithStories(playerEl, numStories) {
       for (let i = 0; i < numStories; i++) {
         const story = win.document.createElement('a');
         story.setAttribute('href', `https://example.com/story${i}.html`);
         playerEl.appendChild(story);
       }
+      win.document.body.appendChild(playerEl);
     }
 
     // Creates an array of story objects with a unique random URL.
@@ -514,11 +571,22 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       expect(playerEl.isReady).to.be.true;
     });
 
-    it('load callback builds iframe inside the player', async () => {
+    it('load callback throws if player is not appended to the DOM', async () => {
       const playerEl = win.document.createElement('amp-story-player');
       const story = win.document.createElement('a');
       story.setAttribute('href', DEFAULT_CACHE_URL);
       playerEl.appendChild(story);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      return expect(() => player.load()).to.throw(
+        `[${TAG}] element must be connected to the DOM before calling load().`
+      );
+    });
+
+    it('load callback builds iframe inside the player', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      attachPlayerWithStories(playerEl, 1);
 
       const player = new AmpStoryPlayer(win, playerEl);
 
@@ -529,7 +597,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
     it('show callback builds corresponding adjacent iframes', async () => {
       const playerEl = win.document.createElement('amp-story-player');
-      appendStoriesToPlayer(playerEl, 5);
+      attachPlayerWithStories(playerEl, 5);
 
       const player = new AmpStoryPlayer(win, playerEl);
 
@@ -552,7 +620,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
     it('show() callback should prerender next story after current one is loaded', async () => {
       const playerEl = win.document.createElement('amp-story-player');
-      appendStoriesToPlayer(playerEl, 5);
+      attachPlayerWithStories(playerEl, 5);
 
       const player = new AmpStoryPlayer(win, playerEl);
 
@@ -580,7 +648,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     // TODO(proyectoramirez): delete once add() is implemented.
     it('show callback should throw when story is not found', async () => {
       const playerEl = win.document.createElement('amp-story-player');
-      appendStoriesToPlayer(playerEl, 5);
+      attachPlayerWithStories(playerEl, 5);
 
       const player = new AmpStoryPlayer(win, playerEl);
 
@@ -732,7 +800,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     it('back button should be created and close button should not', async () => {
       const playerEl = win.document.createElement('amp-story-player');
       playerEl.setAttribute('exit-control', 'back-button');
-      appendStoriesToPlayer(playerEl, 5);
+      attachPlayerWithStories(playerEl, 5);
 
       const player = new AmpStoryPlayer(win, playerEl);
 
@@ -747,7 +815,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     it('close button should be created and back button should not', async () => {
       const playerEl = win.document.createElement('amp-story-player');
       playerEl.setAttribute('exit-control', 'close-button');
-      appendStoriesToPlayer(playerEl, 5);
+      attachPlayerWithStories(playerEl, 5);
 
       const player = new AmpStoryPlayer(win, playerEl);
 
@@ -761,7 +829,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     it('no button should be created', async () => {
       const playerEl = win.document.createElement('amp-story-player');
       playerEl.setAttribute('exit-control', 'brokenattribute');
-      appendStoriesToPlayer(playerEl, 5);
+      attachPlayerWithStories(playerEl, 5);
 
       const player = new AmpStoryPlayer(win, playerEl);
 
@@ -776,7 +844,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     it('back button should fire back event once', async () => {
       const playerEl = win.document.createElement('amp-story-player');
       playerEl.setAttribute('exit-control', 'back-button');
-      appendStoriesToPlayer(playerEl, 5);
+      attachPlayerWithStories(playerEl, 5);
 
       const player = new AmpStoryPlayer(win, playerEl);
 
@@ -793,7 +861,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     it('close button should fire close event once', async () => {
       const playerEl = win.document.createElement('amp-story-player');
       playerEl.setAttribute('exit-control', 'close-button');
-      appendStoriesToPlayer(playerEl, 5);
+      attachPlayerWithStories(playerEl, 5);
 
       const player = new AmpStoryPlayer(win, playerEl);
       await player.load();
@@ -824,7 +892,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     it('should display button when page attachment is closed', async () => {
       const playerEl = win.document.createElement('amp-story-player');
       playerEl.setAttribute('exit-control', 'back-button');
-      appendStoriesToPlayer(playerEl, 1);
+      attachPlayerWithStories(playerEl, 1);
 
       const player = new AmpStoryPlayer(win, playerEl);
       await player.load();
@@ -873,7 +941,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
     it('navigate forward given a positive number in range', async () => {
       const playerEl = win.document.createElement('amp-story-player');
-      appendStoriesToPlayer(playerEl, 5);
+      attachPlayerWithStories(playerEl, 5);
 
       const player = new AmpStoryPlayer(win, playerEl);
 
@@ -896,7 +964,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
     it('navigate backward given a negative number in range', async () => {
       const playerEl = win.document.createElement('amp-story-player');
-      appendStoriesToPlayer(playerEl, 5);
+      attachPlayerWithStories(playerEl, 5);
 
       const player = new AmpStoryPlayer(win, playerEl);
 
@@ -920,7 +988,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
     it('not navigate given zero', async () => {
       const playerEl = win.document.createElement('amp-story-player');
-      appendStoriesToPlayer(playerEl, 5);
+      attachPlayerWithStories(playerEl, 5);
 
       const player = new AmpStoryPlayer(win, playerEl);
 
@@ -935,7 +1003,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
     it('go should throw when positive number is out of story range', async () => {
       const playerEl = win.document.createElement('amp-story-player');
-      appendStoriesToPlayer(playerEl, 5);
+      attachPlayerWithStories(playerEl, 5);
 
       const player = new AmpStoryPlayer(win, playerEl);
 
@@ -946,7 +1014,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
     it('go should throw when negative number is out of story range', async () => {
       const playerEl = win.document.createElement('amp-story-player');
-      appendStoriesToPlayer(playerEl, 5);
+      attachPlayerWithStories(playerEl, 5);
 
       const player = new AmpStoryPlayer(win, playerEl);
 
@@ -957,7 +1025,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
     it('go with page delta should change current story page', async () => {
       const playerEl = win.document.createElement('amp-story-player');
-      appendStoriesToPlayer(playerEl, 1);
+      attachPlayerWithStories(playerEl, 1);
 
       const player = new AmpStoryPlayer(win, playerEl);
 
@@ -975,7 +1043,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
     it('navigate to id when calling gotToPageId', async () => {
       const playerEl = win.document.createElement('amp-story-player');
-      appendStoriesToPlayer(playerEl, 1);
+      attachPlayerWithStories(playerEl, 1);
 
       const player = new AmpStoryPlayer(win, playerEl);
 
@@ -995,7 +1063,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
     it('takes to first story when swiping on the last one with circular wrapping', async () => {
       const playerEl = win.document.createElement('amp-story-player');
-      appendStoriesToPlayer(playerEl, 5);
+      attachPlayerWithStories(playerEl, 5);
       playerEl.appendChild(buildCircularWrappingConfig());
 
       const player = new AmpStoryPlayer(win, playerEl);
@@ -1020,7 +1088,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
     it('takes to last story when swiping on the first one with circular wrapping', async () => {
       const playerEl = win.document.createElement('amp-story-player');
-      appendStoriesToPlayer(playerEl, 5);
+      attachPlayerWithStories(playerEl, 5);
       playerEl.appendChild(buildCircularWrappingConfig());
 
       const player = new AmpStoryPlayer(win, playerEl);
@@ -1044,7 +1112,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
     it('navigate to first story when last story is finished', async () => {
       const playerEl = win.document.createElement('amp-story-player');
-      appendStoriesToPlayer(playerEl, 5);
+      attachPlayerWithStories(playerEl, 5);
       playerEl.appendChild(buildCircularWrappingConfig());
 
       const player = new AmpStoryPlayer(win, playerEl);
@@ -1069,7 +1137,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
     it('navigate to last story when first story is requested to go back', async () => {
       const playerEl = win.document.createElement('amp-story-player');
-      appendStoriesToPlayer(playerEl, 5);
+      attachPlayerWithStories(playerEl, 5);
       playerEl.appendChild(buildCircularWrappingConfig());
 
       const player = new AmpStoryPlayer(win, playerEl);
@@ -1093,7 +1161,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
     it('should react to CURRENT_PAGE_ID events', async () => {
       const playerEl = win.document.createElement('amp-story-player');
-      appendStoriesToPlayer(playerEl, 1);
+      attachPlayerWithStories(playerEl, 1);
 
       const player = new AmpStoryPlayer(win, playerEl);
 
