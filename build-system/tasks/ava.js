@@ -25,7 +25,6 @@ const gulpAva = require('gulp-ava');
 function ava() {
   return gulp
     .src([
-      require.resolve('./csvify-size/test.js'),
       require.resolve('./get-zindex/test.js'),
       require.resolve('./prepend-global/test.js'),
     ])

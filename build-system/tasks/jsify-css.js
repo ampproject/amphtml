@@ -115,5 +115,4 @@ function jsifyCssAsync(filename) {
 module.exports = {
   jsifyCssAsync,
   transformCss,
-  transformCssFile,
 };

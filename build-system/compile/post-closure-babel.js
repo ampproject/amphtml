@@ -23,13 +23,7 @@ const through = require('through2');
 const {debug, CompilationLifecycles} = require('./debug-compilation-lifecycle');
 const {jsBundles} = require('./bundles.config.js');
 
-const mainBundles = Object.keys(jsBundles).map((key) => {
-  const bundle = jsBundles[key];
-  if (bundle.options && bundle.options.minifiedName) {
-    return path.basename(bundle.options.minifiedName, '.js');
-  }
-  return path.basename(key, '.js');
-});
+let mainBundles;
 
 /**
  * Minify passed string.
@@ -54,6 +48,15 @@ async function terserMinify(code, filename) {
     sourceMap: true,
   };
   const basename = path.basename(filename, argv.esm ? '.mjs' : '.js');
+  if (!mainBundles) {
+    mainBundles = Object.keys(jsBundles).map((key) => {
+      const bundle = jsBundles[key];
+      if (bundle.options && bundle.options.minifiedName) {
+        return path.basename(bundle.options.minifiedName, '.js');
+      }
+      return path.basename(key, '.js');
+    });
+  }
   if (mainBundles.includes(basename)) {
     options.output.preamble = ';';
   }

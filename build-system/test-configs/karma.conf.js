@@ -17,7 +17,6 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const {dotWrappingWidth} = require('../common/logging');
-const {getPersistentBrowserifyCache} = require('../common/browserify-cache');
 const {isCiBuild} = require('../common/ci');
 
 const TEST_SERVER_PORT = 8081;
@@ -68,7 +67,6 @@ module.exports = {
     transform: [['babelify', {caller: {name: 'test'}, global: true}]],
     // Prevent "cannot find module" errors during CI. See #14166.
     bundleDelay: isCiBuild() ? 5000 : 1200,
-    persistentCache: getPersistentBrowserifyCache(),
   },
 
   reporters: ['super-dots', 'spec'],
