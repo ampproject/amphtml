@@ -1054,6 +1054,63 @@ describes.realWin(
         );
       });
 
+      describe('granularConsentExp', () => {
+        let managerSpy;
+
+        beforeEach(async () => {
+          ampConsent.buildCallback();
+          await macroTask();
+          managerSpy = window.sandbox.spy(
+            ampConsent.consentStateManager_,
+            'updateConsentInstancePurposes'
+          );
+          event.data = {
+            'type': 'consent-response',
+            'action': 'accept',
+            'info': 'accept-string',
+            'purposeConsentMap': {
+              'purpose-foo': true,
+              'purpose-bar': false,
+            },
+          };
+          toggleExperiment(win, 'amp-consent-granular-consent', true);
+        });
+
+        afterEach(() => {
+          toggleExperiment(win, 'amp-consent-granular-consent', false);
+        });
+
+        it('handles purposeConsentMap w/ accept', () => {
+          event.source = iframe.contentWindow;
+          win.dispatchEvent(event);
+
+          expect(managerSpy).to.be.calledWith(event.data.purposeConsentMap);
+          expect(actionSpy).to.be.calledWith(
+            ACTION_TYPE.ACCEPT,
+            'accept-string'
+          );
+        });
+
+        it('handles purposeConsentMap w/ reject', () => {
+          event.data.action = 'reject';
+          delete event.data.info;
+          event.source = iframe.contentWindow;
+          win.dispatchEvent(event);
+
+          expect(managerSpy).to.be.calledWith(event.data.purposeConsentMap);
+          expect(actionSpy).to.be.calledWith(ACTION_TYPE.REJECT);
+        });
+
+        it('does not set purposeConsentMap with dismiss', () => {
+          event.data.action = 'dismiss';
+          event.source = iframe.contentWindow;
+          win.dispatchEvent(event);
+
+          expect(managerSpy).to.not.be.called;
+          expect(actionSpy).to.be.calledWith(ACTION_TYPE.DISMISS);
+        });
+      });
+
       it('ignore info when prompt UI is not displayed', () => {
         ampConsent.isPromptUIOn_ = false;
         event.data = {
@@ -1399,7 +1456,7 @@ describes.realWin(
           doc.body.appendChild(consentElement);
           ampConsent = new AmpConsent(consentElement);
           await ampConsent.buildCallback();
-          expect(await ampConsent.getPurposeConsentRequired_()).to.undefined;
+          expect(await ampConsent.getPurposeConsentRequired_()).to.null;
         });
 
         it(
@@ -1425,21 +1482,6 @@ describes.realWin(
           }
         );
 
-        it('validates purposeConsentRequired', async () => {
-          const userSpy = window.sandbox.spy(user(), 'error');
-          defaultConfig['purposeConsentRequired'] = 'badPurposeRequired';
-          defaultConfig['consentRequired'] = true;
-          consentElement = createConsentElement(doc, defaultConfig);
-          doc.body.appendChild(consentElement);
-          ampConsent = new AmpConsent(consentElement);
-          await ampConsent.buildCallback();
-          await ampConsent.checkGranularConsentRequired_();
-          expect(userSpy).to.be.calledOnce;
-          expect(userSpy.args[0][1]).to.match(
-            /purposeConsentRequired' requires an array of strings/
-          );
-        });
-        
         it('returns null if no purposeConsentsRequired are found', async () => {
           defaultConfig['consentRequired'] = 'remote';
           defaultConfig['checkConsentHref'] = 'https://server-test-2/';
@@ -1449,7 +1491,7 @@ describes.realWin(
           await ampConsent.buildCallback();
           expect(await ampConsent.getPurposeConsentRequired_()).to.be.null;
         });
-  
+
         it('handles non-array purposeConsentsRequired', async () => {
           defaultConfig['purposeConsentRequired'] = 'BAD';
           defaultConfig['consentRequired'] = 'remote';

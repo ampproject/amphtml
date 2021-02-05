@@ -360,6 +360,13 @@ export class AmpConsent extends AMP.BaseElement {
       for (let i = 0; i < iframes.length; i++) {
         if (iframes[i].contentWindow === event.source) {
           const action = data['action'];
+          const purposeConsentMap = data['purposeConsentMap'];
+          if (purposeConsentMap && action !== ACTION_TYPE.DISMISS) {
+            this.validatePurposes_(purposeConsentMap);
+            this.consentStateManager_.updateConsentInstancePurposes(
+              purposeConsentMap
+            );
+          }
           this.handleAction_(action, consentString, metadata);
           return;
         }
@@ -465,7 +472,7 @@ export class AmpConsent extends AMP.BaseElement {
         return;
       }
       const {args} = opt_invocation;
-      this.validateSetPurposeArgs_(args);
+      this.validatePurposes_(args);
       this.consentStateManager_.updateConsentInstancePurposes(args);
       return;
     }
@@ -835,7 +842,9 @@ export class AmpConsent extends AMP.BaseElement {
       /** @type {!JsonObject} */ (devAssert(
         this.consentConfig_,
         'consent config not found'
-      ))
+      )),
+      undefined,
+      this.isGranularConsentExperimentOn_
     );
 
     // Get current consent state
@@ -909,15 +918,16 @@ export class AmpConsent extends AMP.BaseElement {
   }
 
   /**
-   * Ensure args in setPurpose action are booleans.
+   * Validate purpose maps values.
    * @param {!Object} purposeObj
    */
-  validateSetPurposeArgs_(purposeObj) {
+  validatePurposes_(purposeObj) {
     const purposeKeys = Object.keys(purposeObj);
     for (let i = 0; i < purposeKeys.length; i++) {
       user().assertBoolean(
         purposeObj[purposeKeys[i]],
-        '`setPurpose` values must be booleans.'
+        'Purpose values must be booleans. Got %s.',
+        purposeObj[purposeKeys[i]]
       );
     }
   }
