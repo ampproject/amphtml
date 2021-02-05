@@ -793,6 +793,7 @@ app.post('/get-consent-v1/', (req, res) => {
   cors.assertCors(req, res, ['POST']);
   const body = {
     'promptIfUnknown': true,
+    'purposeConsentRequired': ['purpose-foo', 'purpose-bar'],
     'forcePromptOnNext': forcePromptOnNext,
     'sharedData': {
       'tfua': true,
