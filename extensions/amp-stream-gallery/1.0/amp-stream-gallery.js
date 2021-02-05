@@ -21,11 +21,10 @@ import {CSS as GALLERY_CSS} from './stream-gallery.jss';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
 import {StreamGallery} from './stream-gallery';
+import {assertBentoExperiment} from '../../../src/experiments';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/utils/object';
 import {dispatchCustomEvent} from '../../../src/dom';
-import {isExperimentOn} from '../../../src/experiments';
-import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-stream-gallery';
@@ -54,11 +53,7 @@ class AmpStreamGallery extends PreactBaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    userAssert(
-      isExperimentOn(this.win, 'bento-stream-gallery') ||
-        isExperimentOn(this.win, 'bento'),
-      'expected global "bento" or specific "bento-stream-gallery" experiment to be enabled'
-    );
+    assertBentoExperiment('stream-gallery');
     return super.isLayoutSupported(layout);
   }
 }

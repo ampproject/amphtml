@@ -21,11 +21,10 @@ import {CSS} from '../../../build/amp-base-carousel-1.0.css';
 import {CarouselContextProp} from './carousel-props';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
+import {assertBentoExperiment} from '../../../src/experiments';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/utils/object';
 import {dispatchCustomEvent} from '../../../src/dom';
-import {isExperimentOn} from '../../../src/experiments';
-import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-base-carousel';
@@ -65,11 +64,7 @@ class AmpBaseCarousel extends PreactBaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    userAssert(
-      isExperimentOn(this.win, 'bento') ||
-        isExperimentOn(this.win, 'bento-carousel'),
-      'expected global "bento" or specific "bento-carousel" experiment to be enabled'
-    );
+    assertBentoExperiment('carousel');
     return super.isLayoutSupported(layout);
   }
 

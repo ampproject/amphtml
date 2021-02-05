@@ -15,8 +15,7 @@
  */
 
 import {BaseElement} from './base-element';
-import {isExperimentOn} from '../../../src/experiments';
-import {userAssert} from '../../../src/log';
+import {assertBentoExperiment} from '../../../src/experiments';
 
 /** @const {string} */
 const TAG = 'amp-timeago';
@@ -24,11 +23,7 @@ const TAG = 'amp-timeago';
 class AmpTimeago extends BaseElement {
   /** @override */
   isLayoutSupported(layout) {
-    userAssert(
-      isExperimentOn(this.win, 'bento') ||
-        isExperimentOn(this.win, 'bento-timeago'),
-      'expected global "bento" or specific "bento-timeago" experiment to be enabled'
-    );
+    assertBentoExperiment('timeago');
     return super.isLayoutSupported(layout);
   }
 }

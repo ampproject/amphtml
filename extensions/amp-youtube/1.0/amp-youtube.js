@@ -16,8 +16,7 @@
 
 import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-youtube-1.0.css';
-import {isExperimentOn} from '../../../src/experiments';
-import {userAssert} from '../../../src/log';
+import {assertBentoExperiment} from '../../../src/experiments';
 
 /** @const {string} */
 const TAG = 'amp-youtube';
@@ -25,11 +24,7 @@ const TAG = 'amp-youtube';
 class AmpYoutube extends BaseElement {
   /** @override */
   isLayoutSupported(layout) {
-    userAssert(
-      isExperimentOn(this.win, 'bento') ||
-        isExperimentOn(this.win, 'bento-youtube'),
-      'expected global "bento" or specific "bento-youtube" experiment to be enabled'
-    );
+    assertBentoExperiment('youtube');
     return super.isLayoutSupported(layout);
   }
 }

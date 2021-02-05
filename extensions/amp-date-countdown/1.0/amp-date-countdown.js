@@ -16,9 +16,9 @@
 
 import {BaseElement} from './base-element';
 import {Services} from '../../../src/services';
-import {dev, userAssert} from '../../../src/log';
+import {assertBentoExperiment} from '../../../src/experiments';
+import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 
 /** @const {string} */
@@ -38,11 +38,7 @@ class AmpDateCountdown extends BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    userAssert(
-      isExperimentOn(this.win, 'bento') ||
-        isExperimentOn(this.win, 'bento-date-countdown'),
-      'expected global "bento" or specific "bento-date-countdown" experiment to be enabled'
-    );
+    assertBentoExperiment('date-countdown');
     return isLayoutSizeDefined(layout);
   }
 

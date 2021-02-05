@@ -20,6 +20,7 @@ import {CSS} from '../../../build/amp-selector-1.0.css';
 import {Option, Selector} from './selector';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
+import {assertBentoExperiment} from '../../../src/experiments';
 import {
   closestAncestorElementBySelector,
   createElementWithAttributes,
@@ -30,7 +31,6 @@ import {
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {isExperimentOn} from '../../../src/experiments';
 import {toArray} from '../../../src/types';
 import {useCallback, useLayoutEffect, useRef} from '../../../src/preact';
 
@@ -108,11 +108,7 @@ class AmpSelector extends PreactBaseElement {
 
   /** @override */
   isLayoutSupported(unusedLayout) {
-    userAssert(
-      isExperimentOn(this.win, 'bento') ||
-        isExperimentOn(this.win, 'bento-selector'),
-      'expected global "bento" or specific "bento-selector" experiment to be enabled'
-    );
+    assertBentoExperiment('selector');
     return true;
   }
 }

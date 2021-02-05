@@ -23,7 +23,7 @@ import {addParamsToUrl, parseQueryString} from '../../../src/url';
 import {dict} from '../../../src/utils/object';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {getSocialConfig} from './social-share-config';
-import {isExperimentOn} from '../../../src/experiments';
+import {assertBentoExperiment} from '../../../src/experiments';
 import {toWin} from '../../../src/types';
 import {toggle} from '../../../src/style';
 import {userAssert} from '../../../src/log';
@@ -167,12 +167,8 @@ class AmpSocialShare extends PreactBaseElement {
   }
 
   /** @override */
-  isLayoutSupported() {
-    userAssert(
-      isExperimentOn(this.win, 'bento') ||
-        isExperimentOn(this.win, 'bento-social-share'),
-      'expected global "bento" or specific "bento-social-share" experiment to be enabled'
-    );
+  isLayoutSupported() {(
+    assertBentoExperiment('social-share');
     return true;
   }
 

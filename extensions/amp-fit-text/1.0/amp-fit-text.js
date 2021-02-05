@@ -16,8 +16,7 @@
 
 import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-fit-text-1.0.css';
-import {isExperimentOn} from '../../../src/experiments';
-import {userAssert} from '../../../src/log';
+import {assertBentoExperiment} from '../../../src/experiments';
 
 /** @const {string} */
 const TAG = 'amp-fit-text';
@@ -25,11 +24,7 @@ const TAG = 'amp-fit-text';
 class AmpFitText extends BaseElement {
   /** @override */
   isLayoutSupported(layout) {
-    userAssert(
-      isExperimentOn(this.win, 'bento') ||
-        isExperimentOn(this.win, 'bento-fit-text'),
-      'expected global "bento" or specific "bento-fit-text" experiment to be enabled'
-    );
+    assertBentoExperiment('fit-text');
     return super.isLayoutSupported(layout);
   }
 }

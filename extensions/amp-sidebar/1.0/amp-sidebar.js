@@ -18,10 +18,9 @@ import {CSS as COMPONENT_CSS} from './sidebar.jss';
 import {CSS} from '../../../build/amp-sidebar-1.0.css';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Sidebar} from './sidebar';
+import {assertBentoExperiment} from '../../../src/experiments';
 import {dict} from '../../../src/utils/object';
-import {isExperimentOn} from '../../../src/experiments';
 import {toggle} from '../../../src/style';
-import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-sidebar';
@@ -94,11 +93,7 @@ class AmpSidebar extends PreactBaseElement {
 
   /** @override */
   isLayoutSupported(unusedLayout) {
-    userAssert(
-      isExperimentOn(this.win, 'bento') ||
-        isExperimentOn(this.win, 'bento-sidebar'),
-      'expected global "bento" or specific "bento-sidbar" experiment to be enabled'
-    );
+    assertBentoExperiment('sidebar');
     return true;
   }
 }

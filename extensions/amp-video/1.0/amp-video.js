@@ -16,8 +16,7 @@
 
 import {CSS} from '../../../build/amp-video-1.0.css';
 import {VideoBaseElement} from './base-element';
-import {isExperimentOn} from '../../../src/experiments';
-import {userAssert} from '../../../src/log';
+import {assertBentoExperiment} from '../../../src/experiments';
 
 /** @const {string} */
 const TAG = 'amp-video';
@@ -25,11 +24,7 @@ const TAG = 'amp-video';
 class AmpVideo extends VideoBaseElement {
   /** @override */
   isLayoutSupported(layout) {
-    userAssert(
-      isExperimentOn(this.win, 'bento') ||
-        isExperimentOn(this.win, 'bento-video'),
-      'expected global "bento" or specific "bento-video" experiment to be enabled'
-    );
+    assertBentoExperiment('video');
     return super.isLayoutSupported(layout);
   }
 }

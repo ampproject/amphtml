@@ -16,9 +16,9 @@
 
 import {BaseElement} from './base-element';
 import {Services} from '../../../src/services';
-import {dev, userAssert} from '../../../src/log';
+import {assertBentoExperiment} from '../../../src/experiments';
+import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {isExperimentOn} from '../../../src/experiments';
 
 /** @const {string} */
 const TAG = 'amp-date-display';
@@ -37,11 +37,7 @@ class AmpDateDisplay extends BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    userAssert(
-      isExperimentOn(this.win, 'bento') ||
-        isExperimentOn(this.win, 'bento-date-display'),
-      'expected global "bento" or specific "bento-date-display" experiment to be enabled'
-    );
+    assertBentoExperiment('date-display');
     return super.isLayoutSupported(layout);
   }
 

@@ -20,12 +20,11 @@ import {CSS} from '../../../build/amp-lightbox-1.0.css';
 import {Lightbox} from './lightbox';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
+import {assertBentoExperiment} from '../../../src/experiments';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/utils/object';
 import {dispatchCustomEvent} from '../../../src/dom';
-import {isExperimentOn} from '../../../src/experiments';
 import {toggle} from '../../../src/style';
-import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-lightbox';
@@ -89,11 +88,7 @@ class AmpLightbox extends PreactBaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    userAssert(
-      isExperimentOn(this.win, 'bento') ||
-        isExperimentOn(this.win, 'bento-lightbox'),
-      'expected global "bento" or specific "bento-lightbox" experiment to be enabled'
-    );
+    assertBentoExperiment('lightbox');
     return super.isLayoutSupported(layout);
   }
 }

@@ -28,11 +28,10 @@ import {InlineGallery} from './inline-gallery';
 import {Layout} from '../../../src/layout';
 import {CSS as PAGINATION_CSS} from '../../../build/amp-inline-gallery-pagination-1.0.css';
 import {PreactBaseElement} from '../../../src/preact/base-element';
+import {assertBentoExperiment} from '../../../src/experiments';
 import {dict} from '../../../src/utils/object';
-import {isExperimentOn} from '../../../src/experiments';
 import {setProp} from '../../../src/context';
 import {useContext, useLayoutEffect} from '../../../src/preact';
-import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-inline-gallery';
@@ -47,11 +46,7 @@ class AmpInlineGallery extends PreactBaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    userAssert(
-      isExperimentOn(this.win, 'bento') ||
-        isExperimentOn(this.win, 'bento-inline-gallery'),
-      'expected global "bento" or specific "bento-inline-gallery" experiment to be enabled'
-    );
+    assertBentoExperiment('inline-gallery');
     return layout == Layout.CONTAINER;
   }
 }
