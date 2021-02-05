@@ -631,6 +631,11 @@ export class AmpIframe extends AMP.BaseElement {
     }
   }
 
+  /** @override */
+  unlayoutOnPause() {
+    return true;
+  }
+
   /**
    * @param {boolean} isDisplayed
    * @private
