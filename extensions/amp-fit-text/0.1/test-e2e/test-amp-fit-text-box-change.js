@@ -43,7 +43,7 @@ describes.endtoend(
         await new Promise((resolve) => {
           setTimeout(() => {
             resolve();
-          }, 5000);
+          }, 10000);
         });
         const updatedFontSize = await getFontSize(controller, contentDiv);
         await expect(updatedFontSize).to.be.greaterThan(originalFontSize);
@@ -59,7 +59,7 @@ describes.endtoend(
         await new Promise((resolve) => {
           setTimeout(() => {
             resolve();
-          }, 5000);
+          }, 10000);
         });
         const updatedFontSize = await getFontSize(controller, contentDiv);
         await expect(updatedFontSize).to.be.lessThan(originalFontSize);
