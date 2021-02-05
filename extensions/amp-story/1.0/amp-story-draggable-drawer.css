@@ -93,6 +93,15 @@
   height: 100% !important;
   display: flex !important;
   align-items: center !important;
+  padding: 0 12px !important;
+}
+
+[outlink-attachment] .i-amphtml-story-page-attachment-remote-image {
+  width: 32px !important;
+  height: 32px !important;
+  border: 1px solid rgba(0,0,0,.2) !important;
+  border-radius: 30px !important;
+  margin-right: 12px !important;
 }
 
 .i-amphtml-story-draggable-drawer-container[hidden] .i-amphtml-story-draggable-drawer-content {

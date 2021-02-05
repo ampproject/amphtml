@@ -162,29 +162,25 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    */
   buildRemote_() {
     this.headerEl_.remove();
-    this.setDragCap_(43 /* pixels */);
+    this.setDragCap_(52 /* pixels */);
     this.setOpenThreshold_(150 /* pixels */);
 
-    // this.headerEl_.classList.add(
-    //   'i-amphtml-story-draggable-drawer-header-attachment-remote'
-    // );
     this.element.classList.add('i-amphtml-story-page-attachment-remote');
+
     // Use an anchor element to make this a real link in vertical rendering.
     const link = htmlFor(this.element)`
     <a class="i-amphtml-story-page-attachment-remote-content" target="_blank">
+      <img class="i-amphtml-story-page-attachment-remote-image">
       <span class="i-amphtml-story-page-attachment-remote-title"></span>
       <span class="i-amphtml-story-page-attachment-remote-icon"></span>
     </a>`;
     link.setAttribute('href', this.element.getAttribute('href'));
     this.contentEl_.appendChild(link);
 
-    // this.contentEl_.querySelector(
-    //   '.i-amphtml-story-page-attachment-remote-title'
-    // ).textContent =
-    //   this.element.getAttribute('data-title') ||
-    //   Services.urlForDoc(this.element).getSourceOrigin(
-    //     this.element.getAttribute('href')
-    //   );
+    const favImage = this.element.querySelector(
+      '.i-amphtml-story-page-attachment-remote-image'
+    );
+    favImage.src = this.element.getAttribute('fav-img');
 
     const remoteTitle = this.element.querySelector(
       '.i-amphtml-story-page-attachment-remote-title'

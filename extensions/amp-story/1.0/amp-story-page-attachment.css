@@ -22,6 +22,10 @@
   top: auto !important;
 }
 
+.i-amphtml-story-page-attachment-remote[outlink-attachment] {
+  height: 58px !important;
+}
+
 .i-amphtml-story-page-attachment-remote .i-amphtml-story-draggable-drawer-container {
   height: 100% !important;
   border-radius: 8px 8px 0 0 !important;
@@ -31,9 +35,8 @@
 .i-amphtml-story-page-attachment-remote-content {
   display: flex !important;
   width: 100% !important;
-  /* padding: 0 24px !important; */
   align-items: center !important;
-  color: rgba(0, 0, 0, 0.87) !important;
+  color: black !important;
   font-family: 'Roboto', sans-serif !important;
   font-size: 15px !important;
   justify-content: space-between !important;
@@ -52,12 +55,14 @@
   color: #9AA0A6 !important;
 }
 
-.i-amphtml-story-page-attachment-remote-icon {
+[outlink-attachment] .i-amphtml-story-page-attachment-remote-icon {
   display: block !important;
-  height: 24px !important;
-  width: 24px !important;
+  height: 20px !important;
+  width: 20px !important;
   padding: 0px !important;
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 48 48" fill="#9AA0A6"><path d="M0 0h48v48H0z" fill="none"/><path d="M38 38H10V10h14V6H10c-2.21 0-4 1.79-4 4v28c0 2.21 1.79 4 4 4h28c2.21 0 4-1.79 4-4V24h-4v14zM28 6v4h7.17L15.51 29.66l2.83 2.83L38 12.83V20h4V6H28z"/></svg>') !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="#000000"><path d="M0 0h48v48H0z" fill="none"/><path d="M38 38H10V10h14V6H10c-2.21 0-4 1.79-4 4v28c0 2.21 1.79 4 4 4h28c2.21 0 4-1.79 4-4V24h-4v14zM28 6v4h7.17L15.51 29.66l2.83 2.83L38 12.83V20h4V6H28z"/></svg>') !important;
+  flex-shrink: 0 !important;
+  margin-left: 12px !important;
 }
 
 /** amp-story-page open attachment message. */
@@ -274,8 +279,6 @@ amp-story-page [outlink-attachment] .i-amphtml-story-page-open-attachment-label 
   text-shadow: none !important;
 }
 
-
-
 amp-story-page [outlink-attachment][dark-theme] .i-amphtml-story-page-open-attachment-label {
   background-color: black !important;
   color: white !important;
@@ -286,16 +289,15 @@ amp-story-page [outlink-attachment] .i-amphtml-story-page-open-attachment-label 
   width: 24px !important;
   height: 24px !important;
   margin-right: 6px !important;
+  border: 1px solid rgba(0,0,0,6%) !important;
 }
 
 amp-story-page [outlink-attachment][dark-theme] .i-amphtml-story-page-open-attachment-label img {
   box-sizing: border-box !important;
-  border: 1px solid rgba(0,0,0,6%) !important;
 }
 
 .i-amphtml-inner-header-el {
   display: flex;
-  /* align-items: center; */
   justify-content: center;
   width: 100% !important;
   position: absolute;
