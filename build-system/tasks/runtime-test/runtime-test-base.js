@@ -142,9 +142,6 @@ function getFiles(testType) {
       }
       return files.concat(testConfig.integrationTestPaths);
 
-    case 'a4a':
-      return testConfig.a4aTestPaths;
-
     default:
       throw new Error(`Test type ${testType} was not recognized`);
   }
@@ -207,7 +204,7 @@ class RuntimeTestConfig {
       isModuleBuild: !!argv.esm,
     };
 
-    if (argv.coverage && this.testType != 'a4a') {
+    if (argv.coverage) {
       this.plugins.push('karma-coverage-istanbul-reporter');
       this.coverageIstanbulReporter = {
         dir: 'test/coverage',

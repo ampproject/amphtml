@@ -34,7 +34,6 @@ const {
 const {
   process3pGithubPr,
 } = require('./build-system/tasks/process-3p-github-pr');
-const {a4a} = require('./build-system/tasks/a4a');
 const {ava} = require('./build-system/tasks/ava');
 const {babelPluginTests} = require('./build-system/tasks/babel-plugin-tests');
 const {build} = require('./build-system/tasks/build');
@@ -134,7 +133,6 @@ function checkFlags(name, taskFunc) {
 /**
  * All the gulp tasks. Keep this list alphabetized.
  */
-createTask('a4a', a4a);
 createTask('ava', ava);
 createTask('babel-plugin-tests', babelPluginTests);
 createTask('build', build);
