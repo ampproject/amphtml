@@ -40,12 +40,13 @@ import {
   parseBooleanAttribute,
 } from '../dom';
 import {dashToCamelCase} from '../string';
-import {devAssert} from '../log';
+import {devAssert, userAssert} from '../log';
 import {dict, hasOwn, map} from '../utils/object';
 import {getDate} from '../utils/date';
 import {getMode} from '../mode';
 import {hydrate, render} from './index';
 import {installShadowStyle} from '../shadow-embed';
+import {isExperimentOn} from '../experiments';
 import {sequentialIdGenerator} from '../utils/id-generator';
 
 /**
@@ -224,8 +225,21 @@ export class PreactBaseElement extends AMP.BaseElement {
    */
   init() {}
 
+  /**
+   * Test if specific experiments are enabled.
+   * @return {boolean}
+   */
+  isComponentExperimentOn() {
+    return false;
+  }
+
   /** @override */
   isLayoutSupported(layout) {
+    userAssert(
+      isExperimentOn(this.win, 'bento') || this.isComponentExperimentOn(),
+      `expected global "bento" or specific "bento-[component-name]" experiment to be enabled`
+    );
+
     const Ctor = this.constructor;
     if (Ctor['layoutSizeDefined']) {
       return (

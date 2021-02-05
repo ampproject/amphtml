@@ -18,6 +18,7 @@ import {BaseElement} from './base-element';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {isExperimentOn} from '../../../src/experiments';
 
 /** @const {string} */
 const TAG = 'amp-date-display';
@@ -32,6 +33,11 @@ class AmpDateDisplay extends BaseElement {
 
     /** @private {?Element} */
     this.template_ = null;
+  }
+
+  /** @override */
+  isComponentExperimentOn() {
+    return isExperimentOn(this.win, 'bento-date-display');
   }
 
   /** @override */
@@ -75,5 +81,5 @@ class AmpDateDisplay extends BaseElement {
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerBentoElement(TAG, AmpDateDisplay);
+  AMP.registerElement(TAG, AmpDateDisplay);
 });

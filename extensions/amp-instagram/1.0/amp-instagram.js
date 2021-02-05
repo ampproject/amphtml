@@ -17,11 +17,17 @@
 import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-instagram-1.0.css';
 import {dict} from '../../../src/utils/object';
+import {isExperimentOn} from '../experiments';
 
 /** @const {string} */
 const TAG = 'amp-instagram';
 
 class AmpInstagram extends BaseElement {
+  /** @override */
+  isComponentExperimentOn() {
+    return isExperimentOn(this.win, 'bento-instagram');
+  }
+
   /** @override */
   init() {
     return dict({
@@ -33,5 +39,5 @@ class AmpInstagram extends BaseElement {
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerBentoElement(TAG, AmpInstagram, CSS);
+  AMP.registerElement(TAG, AmpInstagram, CSS);
 });

@@ -30,6 +30,7 @@ import {
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {isExperimentOn} from '../experiments';
 import {toArray} from '../../../src/types';
 import {useCallback, useLayoutEffect, useRef} from '../../../src/preact';
 
@@ -37,6 +38,11 @@ import {useCallback, useLayoutEffect, useRef} from '../../../src/preact';
 const TAG = 'amp-selector';
 
 class AmpSelector extends PreactBaseElement {
+  /** @override */
+  isComponentExperimentOn() {
+    return isExperimentOn(this.win, 'bento-selector');
+  }
+
   /** @override */
   init() {
     const {element} = this;
@@ -332,5 +338,5 @@ AmpSelector['props'] = {
 };
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerBentoElement(TAG, AmpSelector, CSS);
+  AMP.registerElement(TAG, AmpSelector, CSS);
 });

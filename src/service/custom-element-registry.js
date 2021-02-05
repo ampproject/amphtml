@@ -15,7 +15,6 @@
  */
 
 import {ElementStub} from '../element-stub';
-import {assertBentoExperiment} from '../experiments';
 import {createCustomElementClass, stubbedElements} from '../custom-element';
 import {extensionScriptsInNode} from '../element-service';
 import {reportError} from '../error';
@@ -141,18 +140,6 @@ export function registerElement(win, name, implementationClass) {
   knownElements[name] = implementationClass;
   const klass = createCustomElementClass(win);
   win['customElements'].define(name, klass);
-}
-
-/**
- * Registers a new Bento-based custom element with its implementation class.
- * @param {!Window} win The window in which to register the elements.
- * @param {string} name Name of the custom element
- * @param {typeof ../base-element.BaseElement} implementationClass
- * @throws {UserError} if the required Bento experiment is not enabled
- */
-export function registerBentoElement(win, name, implementationClass) {
-  assertBentoExperiment(name.replace(/^amp-/, ''));
-  registerElement(win, name, implementationClass);
 }
 
 /**

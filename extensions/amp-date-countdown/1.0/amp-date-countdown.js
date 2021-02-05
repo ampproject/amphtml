@@ -18,6 +18,7 @@ import {BaseElement} from './base-element';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 
 /** @const {string} */
@@ -33,6 +34,11 @@ class AmpDateCountdown extends BaseElement {
 
     /** @private {?Element} */
     this.template_ = null;
+  }
+
+  /** @override */
+  isComponentExperimentOn() {
+    return isExperimentOn(this.win, 'bento-date-countdown');
   }
 
   /** @override */
@@ -82,5 +88,5 @@ class AmpDateCountdown extends BaseElement {
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerBentoElement(TAG, AmpDateCountdown);
+  AMP.registerElement(TAG, AmpDateCountdown);
 });

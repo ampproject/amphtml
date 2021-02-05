@@ -215,7 +215,6 @@ window.AMP.config;
 window.AMP.config.urls;
 window.AMP.BaseElement;
 window.AMP.registerElement;
-window.AMP.registerBentoElement;
 window.AMP.registerTemplate;
 window.AMP.registerServiceForDoc;
 window.AMP.isExperimentOn;

@@ -18,6 +18,7 @@ import {CSS} from './pagination.jss';
 import {CarouselContextProp} from '../../amp-base-carousel/1.0/carousel-props';
 import {Pagination} from './pagination';
 import {PreactBaseElement} from '../../../src/preact/base-element';
+import {isExperimentOn} from '../../../src/experiments';
 
 /** @const {string} */
 export const TAG = 'amp-inline-gallery-pagination';
@@ -26,6 +27,11 @@ export const TAG = 'amp-inline-gallery-pagination';
 export class AmpInlineGalleryPagination extends PreactBaseElement {
   // Any layout is allowed for Bento, but "fixed-height" is the recommend
   // layout for AMP.
+
+  /** @override */
+  isComponentExperimentOn() {
+    return isExperimentOn(this.win, 'bento-inline-gallery');
+  }
 }
 
 /** @override */

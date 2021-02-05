@@ -17,12 +17,17 @@
 import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-__component_name_hyphenated__-__component_version__.css';
 import {dict} from '../../../src/utils/object';
-import {assertBentoExperiment} from '../../../src/experiments';
+import {isExperimentOn} from '../../../src/experiments';
 
 /** @const {string} */
 const TAG = 'amp-__component_name_hyphenated__';
 
 class Amp__component_name_pascalcase__ extends BaseElement {
+  /** @override */
+  isComponentExperimentOn() {
+    return isExperimentOn(this.win, 'bento-__component_name_hyphenated__');
+  }
+
   /** @override */
   init() {
     // __do_not_submit__: This is example code only.
@@ -32,12 +37,6 @@ class Amp__component_name_pascalcase__ extends BaseElement {
       // Extra props passed by wrapper AMP component
       'exampleTagNameProp': this.element.tagName,
     });
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    assertBentoExperiment('__component_name_hyphenated__');
-    return super.isLayoutSupported(layout);
   }
 }
 

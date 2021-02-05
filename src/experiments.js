@@ -77,20 +77,6 @@ export function isExperimentOn(win, experimentId) {
 }
 
 /**
- * Assert that either the global or component Bento experiment is on.
- * @param {!Window} win
- * @param {string} componentName
- * @throws {UserError} if neither experiment is enabled
- */
-export function assertBentoExperiment(win, componentName) {
-  userAssert(
-    isExperimentOn(win, 'bento') ||
-      isExperimentOn(win, /*OK*/ `bento-${componentName}`),
-    `expected global "bento" or specific "bento-${componentName}" experiment to be enabled`
-  );
-}
-
-/**
  * Toggles the experiment on or off. Returns the actual value of the experiment
  * after toggling is done.
  * @param {!Window} win

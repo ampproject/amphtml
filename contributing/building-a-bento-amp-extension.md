@@ -483,16 +483,15 @@ Then protect your code with a check for the component-specific flag `isExperimen
 
 ```javascript
 import {CSS} from '../../../build/amp-my-element-0.1.css';
-import {assertBentoExperiment} from '../../../src/experiments';
+import {isExperimentOn} from '../../../src/experiments';
 
 /** @const */
 const TAG = 'amp-my-element';
 
 class AmpMyElement extends AMP.PreactBaseElement {
   /** @override */
-  isLayoutSupported(layout) {
-    assertBentoExperiment('my-element');
-    return layout == LAYOUT.FIXED;
+  isComponentExperimentOn() {
+    return isExperimentOn(this.win, 'bento-my-element');
   }
 }
 

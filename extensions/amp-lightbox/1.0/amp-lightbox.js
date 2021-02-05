@@ -23,6 +23,7 @@ import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/utils/object';
 import {dispatchCustomEvent} from '../../../src/dom';
+import {isExperimentOn} from '../experiments';
 import {toggle} from '../../../src/style';
 
 /** @const {string} */
@@ -36,6 +37,11 @@ class AmpLightbox extends PreactBaseElement {
 
     /** @private {boolean} */
     this.open_ = false;
+  }
+
+  /** @override */
+  isComponentExperimentOn() {
+    return isExperimentOn(this.win, 'bento-lightbox');
   }
 
   /** @override */
@@ -118,5 +124,5 @@ AmpLightbox['passthrough'] = true;
 AmpLightbox['shadowCss'] = COMPONENT_CSS;
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerBentoElement(TAG, AmpLightbox, CSS);
+  AMP.registerElement(TAG, AmpLightbox, CSS);
 });

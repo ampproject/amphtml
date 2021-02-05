@@ -130,7 +130,6 @@ function adoptShared(global, callback) {
    * @param {?string|undefined} css
    */
   global.AMP.registerElement = extensions.addElement.bind(extensions);
-  global.AMP.registerBentoElement = extensions.addElement.bind(extensions);
 
   /**
    * Registers an extended template.

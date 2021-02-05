@@ -15,7 +15,7 @@
  */
 
 import {BaseElement} from './base-element';
-import {parseDateAttrs as parseDateAttrsBase} from '../../../src/utils/date';
+import {isExperimentOn} from '../experiments';
 
 /** @const {string} */
 const TAG = 'amp-timeago';
@@ -25,41 +25,13 @@ class AmpTimeago extends BaseElement {
   updatePropsForRendering(props) {
     props['placeholder'] = props['children'];
   }
-}
 
-/** @override */
-AmpTimeago['Component'] = Timeago;
-
-/** @override */
-AmpTimeago['passthroughNonEmpty'] = true;
-
-/** @override */
-AmpTimeago['layoutSizeDefined'] = true;
-
-/** @override */
-AmpTimeago['props'] = {
-  'datetime': {
-    attrs: ['datetime', 'timestamp-ms', 'timestamp-seconds', 'offset-seconds'],
-    parseAttrs: parseDateAttrs,
-  },
-  'cutoff': {attr: 'cutoff', type: 'number'},
-  'locale': {attr: 'locale'},
-};
-
-/**
- * @param {!Element} element
- * @return {?number}
- * @throws {UserError} when attribute values are missing or invalid.
- * @visibleForTesting
- */
-export function parseDateAttrs(element) {
-  return parseDateAttrsBase(element, [
-    'datetime',
-    'timestamp-ms',
-    'timestamp-seconds',
-  ]);
+  /** @override */
+  isComponentExperimentOn() {
+    return isExperimentOn(this.win, 'bento-timeago');
+  }
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerBentoElement(TAG, AmpTimeago);
+  AMP.registerElement(TAG, AmpTimeago);
 });

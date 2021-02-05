@@ -16,12 +16,18 @@
 
 import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-fit-text-1.0.css';
+import {isExperimentOn} from '../experiments';
 
 /** @const {string} */
 const TAG = 'amp-fit-text';
 
-class AmpFitText extends BaseElement {}
+class AmpFitText extends BaseElement {
+  /** @override */
+  isComponentExperimentOn() {
+    return isExperimentOn(this.win, 'bento-fit-text');
+  }
+}
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerBentoElement(TAG, AmpFitText, CSS);
+  AMP.registerElement(TAG, AmpFitText, CSS);
 });

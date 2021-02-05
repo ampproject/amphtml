@@ -16,12 +16,18 @@
 
 import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-youtube-1.0.css';
+import {isExperimentOn} from '../../../src/experiments';
 
 /** @const {string} */
 const TAG = 'amp-youtube';
 
-class AmpYoutube extends BaseElement {}
+class AmpYoutube extends BaseElement {
+  /** @override */
+  isComponentExperimentOn() {
+    return isExperimentOn(this.win, 'bento-youtube');
+  }
+}
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerBentoElement(TAG, AmpYoutube, CSS);
+  AMP.registerElement(TAG, AmpYoutube, CSS);
 });

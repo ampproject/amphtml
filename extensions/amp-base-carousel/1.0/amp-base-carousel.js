@@ -24,6 +24,7 @@ import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/utils/object';
 import {dispatchCustomEvent} from '../../../src/dom';
+import {isExperimentOn} from '../../../src/experiments';
 
 /** @const {string} */
 const TAG = 'amp-base-carousel';
@@ -36,6 +37,10 @@ class AmpBaseCarousel extends PreactBaseElement {
 
     /** @private {?number} */
     this.slide_ = null;
+  }
+  /** @override */
+  isComponentExperimentOn() {
+    return isExperimentOn(this.win, 'bento-carousel');
   }
 
   /** @override */
@@ -162,5 +167,5 @@ function fireSlideChangeEvent(win, el, index, trust) {
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerBentoElement(TAG, AmpBaseCarousel, CSS);
+  AMP.registerElement(TAG, AmpBaseCarousel, CSS);
 });

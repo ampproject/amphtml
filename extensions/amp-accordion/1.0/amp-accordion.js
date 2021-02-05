@@ -59,6 +59,11 @@ const isDisplayLockingEnabledForAccordion = (win) =>
 /** @extends {PreactBaseElement<AccordionDef.AccordionApi>} */
 class AmpAccordion extends PreactBaseElement {
   /** @override */
+  isComponentExperimentOn() {
+    return isExperimentOn(this.win, 'bento-accordion');
+  }
+
+  /** @override */
   init() {
     this.registerApiAction('toggle', (api, invocation) =>
       api./*OK*/ toggle(invocation.args && invocation.args['section'])
@@ -305,5 +310,5 @@ AmpAccordion['props'] = {
 };
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerBentoElement(TAG, AmpAccordion, CSS);
+  AMP.registerElement(TAG, AmpAccordion, CSS);
 });

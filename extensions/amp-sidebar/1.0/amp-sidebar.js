@@ -19,6 +19,7 @@ import {CSS} from '../../../build/amp-sidebar-1.0.css';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Sidebar} from './sidebar';
 import {dict} from '../../../src/utils/object';
+import {isExperimentOn} from '../experiments';
 import {toggle} from '../../../src/style';
 
 /** @const {string} */
@@ -31,6 +32,11 @@ class AmpSidebar extends PreactBaseElement {
 
     /** @private {boolean} */
     this.open_ = false;
+  }
+
+  /** @override */
+  isComponentExperimentOn() {
+    return isExperimentOn(this.win, 'bento-sidebar');
   }
 
   /** @override */
@@ -111,5 +117,5 @@ AmpSidebar['props'] = {
 };
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerBentoElement(TAG, AmpSidebar, CSS);
+  AMP.registerElement(TAG, AmpSidebar, CSS);
 });
