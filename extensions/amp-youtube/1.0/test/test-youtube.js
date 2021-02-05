@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {Youtube} from '../youtube';
+import {Youtube} from '../component';
 import {dispatchCustomEvent} from '../../../../src/dom';
 import {mount} from 'enzyme';
 
