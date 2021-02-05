@@ -35,6 +35,7 @@ To use RTC, you must meet the following requirements:
 -   Kargo
 -   Lotame
 -   Media.net
+-   OpenX
 -   PubMatic OpenWrap
 -   Purch
 -   Rubicon

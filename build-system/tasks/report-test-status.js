@@ -40,8 +40,7 @@ const TEST_TYPE_SUBTYPES = isGithubActionsBuild()
       ['integration', ['firefox', 'safari', 'edge', 'ie']],
       ['unit', ['firefox', 'safari', 'edge']],
     ])
-  : // TODO(rsimha): Remove `isTravisBuild()` condition once Travis is shut off.
-  isCircleciBuild() || isTravisBuild()
+  : isCircleciBuild()
   ? new Map([
       ['integration', ['unminified', 'nomodule', 'module']],
       ['unit', ['unminified', 'local-changes']],
@@ -88,8 +87,8 @@ function inferTestType() {
 }
 
 async function postReport(type, action) {
-  // TODO(rsimha): Remove `!isCircleciBuild()` condition once Travis is shut off.
-  if (type && isPullRequestBuild() && !isCircleciBuild()) {
+  // TODO(rsimha): Clean up `!isTravisaBuild()` condition once Travis is shut off.
+  if (type && isPullRequestBuild() && !isTravisBuild()) {
     const commitHash = gitCommitHash();
 
     try {
