@@ -17,8 +17,7 @@
 import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-__component_name_hyphenated__-__component_version__.css';
 import {dict} from '../../../src/utils/object';
-import {isExperimentOn} from '../../../src/experiments';
-import {userAssert} from '../../../src/log';
+import {assertBentoExperiment} from '../../../src/experiments';
 
 /** @const {string} */
 const TAG = 'amp-__component_name_hyphenated__';
@@ -37,11 +36,7 @@ class Amp__component_name_pascalcase__ extends BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    userAssert(
-      isExperimentOn(this.win, 'bento') ||
-        isExperimentOn(this.win, 'bento-__component_name_hyphenated__'),
-      'expected global "bento" or specific "bento-__component_name_hyphenated__" experiment to be enabled'
-    );
+    assertBentoExperiment('__component_name_hyphenated__');
     return super.isLayoutSupported(layout);
   }
 }
