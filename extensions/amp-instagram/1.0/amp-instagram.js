@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
+import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-instagram-1.0.css';
-import {Instagram} from './instagram';
-import {PreactBaseElement} from '../../../src/preact/base-element';
-import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-instagram';
 
-class AmpInstagram extends PreactBaseElement {
+class AmpInstagram extends BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(
@@ -34,35 +32,7 @@ class AmpInstagram extends PreactBaseElement {
     );
     return super.isLayoutSupported(layout);
   }
-
-  /** @override */
-  init() {
-    return dict({
-      'requestResize': (height) => {
-        this.forceChangeHeight(height);
-      },
-    });
-  }
 }
-
-/** @override */
-AmpInstagram['Component'] = Instagram;
-
-/** @override */
-AmpInstagram['children'] = {};
-
-/** @override */
-AmpInstagram['loadable'] = true;
-
-/** @override */
-AmpInstagram['props'] = {
-  'shortcode': {attr: 'data-shortcode'},
-  'captioned': {attr: 'data-captioned'},
-  'title': {attr: 'title'},
-};
-
-/** @override */
-AmpInstagram['layoutSizeDefined'] = true;
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpInstagram, CSS);
