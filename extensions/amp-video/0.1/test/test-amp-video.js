@@ -791,7 +791,7 @@ describes.realWin(
       });
     });
 
-    describe.only('in prerender mode', () => {
+    describe('in prerender mode', () => {
       let makeVisible;
       let visiblePromise;
       let video;
