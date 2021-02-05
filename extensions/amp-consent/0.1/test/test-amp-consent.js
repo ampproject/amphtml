@@ -1353,6 +1353,8 @@ describes.realWin(
           'https://server-test-1/':
             '{"consentRequired": true, "purposeConsentRequired": ["abc", "bcd"]}',
           'https://server-test-2/': '{"consentRequired": true}',
+          'https://server-test-3/':
+            '{"consentRequired": true, "purposeConsentRequired": "verybad"}',
         };
         defaultConfig = dict({
           'consentInstanceId': 'abc',
@@ -1395,7 +1397,19 @@ describes.realWin(
         doc.body.appendChild(consentElement);
         ampConsent = new AmpConsent(consentElement);
         await ampConsent.buildCallback();
-        expect(await ampConsent.getPurposeConsentRequired_()).to.undefined;
+        expect(await ampConsent.getPurposeConsentRequired_()).to.be.null;
+      });
+
+      it('handles non-array purposeConsentsRequired', async () => {
+        defaultConfig['purposeConsentRequired'] = 'BAD';
+        defaultConfig['consentRequired'] = 'remote';
+        defaultConfig['checkConsentHref'] = 'https://server-test-3/';
+        consentElement = createConsentElement(doc, defaultConfig);
+        doc.body.appendChild(consentElement);
+        ampConsent = new AmpConsent(consentElement);
+        await ampConsent.buildCallback();
+        // Returned null so must've failed both inline and remote
+        expect(await ampConsent.getPurposeConsentRequired_()).to.be.null;
       });
 
       it(
@@ -1420,21 +1434,6 @@ describes.realWin(
           expect(spy).to.not.be.called;
         }
       );
-
-      it('validates purposeConsentRequired', async () => {
-        const userSpy = window.sandbox.spy(user(), 'error');
-        defaultConfig['purposeConsentRequired'] = 'badPurposeRequired';
-        defaultConfig['consentRequired'] = true;
-        consentElement = createConsentElement(doc, defaultConfig);
-        doc.body.appendChild(consentElement);
-        ampConsent = new AmpConsent(consentElement);
-        await ampConsent.buildCallback();
-        await ampConsent.checkGranularConsentRequired_();
-        expect(userSpy).to.be.calledOnce;
-        expect(userSpy.args[0][1]).to.match(
-          /purposeConsentRequired' requires an array of strings/
-        );
-      });
     });
   }
 );

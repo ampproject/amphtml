@@ -646,21 +646,15 @@ export class AmpConsent extends AMP.BaseElement {
   /**
    * TODO (micajuineho): Use our stored info to check if we have the
    * necessary granular consents.
-   * @param {ConsentInfoDef} opt_consentInfo
+   * @param {ConsentInfoDef} unusedConsentInfo
    * @return {!Promise<boolean>}
    */
-  checkGranularConsentRequired_(opt_consentInfo) {
+  checkGranularConsentRequired_(unusedConsentInfo) {
     if (!this.isGranularConsentExperimentOn_) {
       return Promise.resolve(true);
     }
     return this.getPurposeConsentRequired_().then((purposeConsentRequired) => {
       if (!purposeConsentRequired) {
-        return true;
-      } else if (!isArray(purposeConsentRequired)) {
-        user().error(
-          TAG,
-          `'purposeConsentRequired' requires an array of strings`
-        );
         return true;
       }
       // TODO: add check here.
@@ -671,15 +665,15 @@ export class AmpConsent extends AMP.BaseElement {
   /**
    * Get `purposeConsentRequired` from consent config,
    * or from `checkConsentHref` response.
-   * @return {!Promise}
+   * @return {!Promise<?Array>}
    */
   getPurposeConsentRequired_() {
     const inlinePurposes = this.consentConfig_['purposeConsentRequired'];
-    if (inlinePurposes) {
+    if (isArray(inlinePurposes)) {
       return Promise.resolve(inlinePurposes);
     }
     return this.getConsentRemote_().then((response) => {
-      if (!response) {
+      if (!response || !isArray(response['purposeConsentRequired'])) {
         return null;
       }
       return response['purposeConsentRequired'];
