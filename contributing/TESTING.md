@@ -169,6 +169,8 @@ To switch serving mode during runtime, go to http://localhost:8000/serve_mode=MO
 
 The content in the `examples` directory can be reached at: http://localhost:8000/examples/
 
+TESTING: Change a doc file
+
 ### Document proxy
 
 AMP ships with a local proxy for testing production AMP documents with the local JS version.
