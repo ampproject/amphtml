@@ -160,7 +160,7 @@ const buildHelpDialogTemplate = (element) => {
           class="i-amphtml-story-dev-tools-device-dialog-link i-amphtml-story-dev-tools-help-page-experience-link"
           target="_blank"
           href="https://amp.dev/page-experience/?url="
-          ><span>Analyze the page experience</span>
+          ><span>Analyze the Page Experience</span>
           <div class="i-amphtml-story-dev-tools-device-dialog-arrow"></div
         ></a>
         <a
