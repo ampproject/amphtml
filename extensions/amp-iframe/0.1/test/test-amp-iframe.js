@@ -1101,6 +1101,26 @@ describes.realWin(
       expect(impl.unload).to.be.calledOnce;
     });
 
+    it('should not unlayout on pause if has owner', async () => {
+      const ampIframe = createAmpIframe(env, {
+        src: iframeSrc,
+        width: 100,
+        height: 100,
+      });
+      const impl = await ampIframe.getImpl(false);
+      impl.element.getOwner = () => ({});
+      await waitForAmpIframeLayoutPromise(doc, ampIframe);
+      expect(ampIframe.querySelector('iframe')).to.exist;
+      expect(ampIframe.unlayoutOnPause()).to.be.false;
+
+      setDisplay(ampIframe, true);
+      setDisplay(ampIframe, false);
+      env.sandbox.stub(impl, 'unload');
+
+      await new Promise(setTimeout);
+      expect(impl.unload).not.called;
+    });
+
     it('should now need pausing before displayed', async () => {
       const ampIframe = createAmpIframe(env, {
         src: iframeSrc,
