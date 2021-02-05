@@ -19,8 +19,8 @@ import {randomlySelectUnsetExperiments} from '../../../src/experiments';
 /** @const @enum{string} */
 export const STICKY_AD_TRANSITION_EXP = {
   id: 'sticky-ad-transition',
-  control: '21069722',
-  experiment: '21069723',
+  control: '31060071',
+  experiment: '31060072',
 };
 
 /**
