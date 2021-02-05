@@ -11,6 +11,7 @@
     "url": "https://github.com/ampproject/amphtml.git"
   },
   "scripts": {
+    "filesize": "filesize -c=build-system/tasks/bundle-size/filesize.json",
     "preinstall": "node build-system/common/check-package-manager.js"
   },
   "dependencies": {
