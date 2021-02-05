@@ -78,7 +78,7 @@ export function isExperimentOn(win, experimentId) {
 
 /**
  * Assert that either the global or component Bento experiment is on.
- * @param win
+ * @param {!Window} win
  * @param {string} componentName
  * @throws {UserError} if neither experiment is enabled
  */
