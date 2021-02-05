@@ -16,18 +16,8 @@
 
 import {Instagram} from './component';
 import {PreactBaseElement} from '../../../src/preact/base-element';
-import {dict} from '../../../src/utils/object';
 
-export class BaseElement extends PreactBaseElement {
-  /** @override */
-  init() {
-    return dict({
-      'requestResize': (height) => {
-        this.forceChangeHeight(height);
-      },
-    });
-  }
-}
+export class BaseElement extends PreactBaseElement {}
 
 /** @override */
 BaseElement['Component'] = Instagram;

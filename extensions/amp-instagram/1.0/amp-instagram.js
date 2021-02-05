@@ -16,6 +16,7 @@
 
 import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-instagram-1.0.css';
+import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {userAssert} from '../../../src/log';
 
@@ -31,6 +32,15 @@ class AmpInstagram extends BaseElement {
       'expected global "bento" or specific "bento-instagram" experiment to be enabled'
     );
     return super.isLayoutSupported(layout);
+  }
+
+  /** @override */
+  init() {
+    return dict({
+      'requestResize': (height) => {
+        this.forceChangeHeight(height);
+      },
+    });
   }
 }
 
