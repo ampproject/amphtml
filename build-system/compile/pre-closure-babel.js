@@ -30,7 +30,7 @@ const {red, cyan} = require('ansi-colors');
  *
  * @private @const {!Array<string>}
  */
-const filesToTransform = getFilesToTransform();
+let filesToTransform;
 
 /**
  * Used to cache babel transforms.
@@ -64,6 +64,9 @@ function preClosureBabel() {
   const babel = gulpBabel({caller: {name: 'pre-closure'}});
 
   return through.obj((file, enc, next) => {
+    if (!filesToTransform) {
+      filesToTransform = getFilesToTransform();
+    }
     if (!filesToTransform.includes(file.relative)) {
       return next(null, file);
     }
