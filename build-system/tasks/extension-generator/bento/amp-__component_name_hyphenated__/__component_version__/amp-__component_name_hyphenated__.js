@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-import {CSS as COMPONENT_CSS} from './__component_name_hyphenated__.jss';
+import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-__component_name_hyphenated__-__component_version__.css';
-import {__component_name_pascalcase__} from './__component_name_hyphenated__';
-import {PreactBaseElement} from '../../../src/preact/base-element';
 import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {userAssert} from '../../../src/log';
@@ -25,7 +23,7 @@ import {userAssert} from '../../../src/log';
 /** @const {string} */
 const TAG = 'amp-__component_name_hyphenated__';
 
-class Amp__component_name_pascalcase__ extends PreactBaseElement {
+class Amp__component_name_pascalcase__ extends BaseElement {
   /** @override */
   init() {
     // __do_not_submit__: This is example code only.
@@ -47,23 +45,6 @@ class Amp__component_name_pascalcase__ extends PreactBaseElement {
     return super.isLayoutSupported(layout);
   }
 }
-
-/** @override */
-Amp__component_name_pascalcase__['Component'] = __component_name_pascalcase__;
-
-/** @override */
-Amp__component_name_pascalcase__['props'] = {};
-
-/** @override */
-Amp__component_name_pascalcase__['passthrough'] = true;
-// Amp__component_name_pascalcase__['passthroughNonEmpty'] = true;
-// Amp__component_name_pascalcase__['children'] = {};
-
-/** @override */
-Amp__component_name_pascalcase__['layoutSizeDefined'] = true;
-
-/** @override */
-Amp__component_name_pascalcase__['shadowCss'] = COMPONENT_CSS;
 
 AMP.extension(TAG, '__component_version__', (AMP) => {
   AMP.registerElement(TAG, Amp__component_name_pascalcase__, CSS);
