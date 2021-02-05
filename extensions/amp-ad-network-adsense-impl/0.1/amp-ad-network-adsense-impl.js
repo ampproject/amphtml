@@ -20,6 +20,7 @@
 // Most other ad networks will want to put their A4A code entirely in the
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
+import {AMP_SIGNATURE_HEADER} from '../../amp-a4a/0.1/signature-verifier';
 import {AdsenseSharedState} from './adsense-shared-state';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
@@ -451,6 +452,13 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       );
     }
     return this.size_;
+  }
+
+  /**
+   * @override
+   */
+  skipClientSideValidation(headers) {
+    return headers && !headers.has(AMP_SIGNATURE_HEADER);
   }
 
   /**
