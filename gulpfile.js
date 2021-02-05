@@ -31,9 +31,6 @@ const {
 const {
   checkRenovateConfig,
 } = require('./build-system/tasks/check-renovate-config');
-const {
-  process3pGithubPr,
-} = require('./build-system/tasks/process-3p-github-pr');
 const {ava} = require('./build-system/tasks/ava');
 const {babelPluginTests} = require('./build-system/tasks/babel-plugin-tests');
 const {build} = require('./build-system/tasks/build');
@@ -163,7 +160,6 @@ createTask('pr-check', prCheck);
 createTask('prepend-global', prependGlobal);
 createTask('presubmit', presubmit);
 createTask('prettify', prettify);
-createTask('process-3p-github-pr', process3pGithubPr);
 createTask('release', release);
 createTask('test-report-upload', testReportUpload);
 createTask('serve', serve);
