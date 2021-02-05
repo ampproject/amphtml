@@ -197,14 +197,6 @@ describes.fakeWin('amp-video flexible-bitrate', {}, (env) => {
         })
       ).to.jsonEqual([null, null, null, null, null, null, 'CACHE', null, null]);
     });
-
-    it('should re-sort sources when video is replaced', () => {
-      const m = getManager('4g');
-      const v1 = getVideo([4000, 1000, 3000, 2000]);
-      const v2 = getVideo([4000, 1000, 3000, 2000]);
-      m.videoReplaced(v1, v2);
-      expect(currentBitrates(v2)).to.jsonEqual([2000, 1000, 3000, 4000]);
-    });
   });
 
   function currentBitrates(video) {

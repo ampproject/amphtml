@@ -91,6 +91,7 @@ export class BitrateManager {
    * @param {!Element} video
    */
   manage(video) {
+    video.isBitrateManaged = true;
     video.waitUnlisten_ = onNontrivialWait(video, () => {
       const current = currentSource(video);
       this.acceptableBitrate_ = current.bitrate_ - 1;
@@ -244,16 +245,19 @@ export class BitrateManager {
 
   /**
    * Called when a video is replaced.
-   * @param {!Element} oldVideo
-   * @param {!Element} newVideo
+   * @param {!Element} video
    */
-  videoReplaced(oldVideo, newVideo) {
-    if (oldVideo.waitUnlisten_) {
-      oldVideo.waitUnlisten_();
+  unmanage(video) {
+    if (!video.isBitrateManaged) {
+      return;
     }
-    this.videos_ = this.videos_.filter((v) => v.deref() !== oldVideo);
-    this.manage(newVideo);
-    this.sortSources_(newVideo);
+    if (video.waitUnlisten_) {
+      video.waitUnlisten_();
+      video.waitUnlisten_ = null;
+    }
+    video.changedSources = null;
+    video.isBitrateManaged = null;
+    this.videos_ = this.videos_.filter((v) => v.deref() !== video);
   }
 }
 
@@ -262,10 +266,11 @@ export class BitrateManager {
  * emerge from it within a short amount of time.
  * @param {!Element} video
  * @param {function()} callback
+ * @return {function()} unlisten
  */
 function onNontrivialWait(video, callback) {
-  listen(video, 'waiting', () => {
-    let timer = null;
+  let timer = null;
+  const waitUnlisten = listen(video, 'waiting', () => {
     const unlisten = listenOnce(video, 'playing', () => {
       clearTimeout(timer);
     });
@@ -274,6 +279,10 @@ function onNontrivialWait(video, callback) {
       callback();
     }, 100);
   });
+  return () => {
+    waitUnlisten();
+    clearTimeout(timer);
+  };
 }
 
 /**
@@ -297,6 +306,7 @@ function sources(video, fn) {
  * @return {!HTMLSourceElement}
  */
 function currentSource(video) {
+  console.log(video);
   return devAssert(
     sources(video, (source) => {
       return source.src == video.currentSrc;

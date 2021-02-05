@@ -33,6 +33,7 @@ import {Sources} from './sources';
 import {ampMediaElementFor} from './utils';
 import {dev, devAssert} from '../../../src/log';
 import {findIndex} from '../../../src/utils/array';
+import {getBitrateManager} from '../../amp-video/0.1/flexible-bitrate';
 import {isConnectedNode, matches} from '../../../src/dom';
 import {toWin} from '../../../src/types';
 import {userInteractedWith} from '../../../src/video-interface';
@@ -516,6 +517,11 @@ export class MediaPool {
       new SwapIntoDomTask(placeholderEl)
     ).then(
       () => {
+        if (placeholderEl.isBitrateManaged) {
+          const bitrateManager = getBitrateManager(this.win_);
+          bitrateManager.unmanage(placeholderEl);
+          bitrateManager.manage(poolMediaEl);
+        }
         this.enqueueMediaElementTask_(
           poolMediaEl,
           new UpdateSourcesTask(this.win_, sources)

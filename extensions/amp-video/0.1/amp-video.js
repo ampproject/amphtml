@@ -660,14 +660,10 @@ class AmpVideo extends AMP.BaseElement {
    * this element's DOM.
    */
   resetOnDomChange() {
-    const newVideo = dev().assertElement(
+    this.video_ = dev().assertElement(
       childElementByTag(this.element, 'video'),
       'Tried to reset amp-video without an underlying <video>.'
     );
-    if (this.hasAnyBitrateSources_()) {
-      getBitrateManager(this.win).videoReplaced(this.video_, newVideo);
-    }
-    this.video_ = newVideo;
 
     this.uninstallEventHandlers_();
     this.installEventHandlers_();
