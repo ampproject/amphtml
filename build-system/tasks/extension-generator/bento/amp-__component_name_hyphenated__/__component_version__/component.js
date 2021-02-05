@@ -24,7 +24,7 @@ import {
   useRef,
   useState,
 } from '../../../src/preact';
-import {useStyles} from './__component_name_hyphenated__.jss';
+import {useStyles} from './component.jss';
 
 /**
  * @param {!__component_name_pascalcase__Def.Props} props
@@ -35,7 +35,7 @@ export function __component_name_pascalcase__({exampleTagNameProp, ...rest}) {
   // __do_not_submit__: This is example code only.
   const [exampleValue, setExampleValue] = useState(0);
   const exampleRef = useRef(null);
-  const classes = useStyles();
+  const styles = useStyles();
 
   useCallback(() => {/* Do things */}, [])
   useEffect(() => {/* Do things */}, [])
@@ -45,7 +45,7 @@ export function __component_name_pascalcase__({exampleTagNameProp, ...rest}) {
   return (
     <ContainWrapper layout size paint {...rest} >
       {{exampleTagNameProp}}
-      <div className={`${classes.exampleContentHidden}`}>
+      <div className={`${styles.exampleContentHidden}`}>
         This is hidden
       </div>
     </ContainWrapper>
