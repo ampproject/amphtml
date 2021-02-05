@@ -213,9 +213,7 @@ class AmpVideo extends AMP.BaseElement {
 
     this.video_ = element.ownerDocument.createElement('video');
     // Manage video if the sources contain bitrate or amp-orig-src will be expanded to multiple bitrates.
-    if (
-      this.element.querySelector('source[data-bitrate], source[amp-orig-src]')
-    ) {
+    if (this.hasAnyCachedSources_() || this.hasAnyBitrateSources_()) {
       getBitrateManager(this.win).manage(this.video_);
     }
 
@@ -587,6 +585,14 @@ class AmpVideo extends AMP.BaseElement {
 
   /**
    * @private
+   * @return {boolean}
+   */
+  hasAnyBitrateSources_() {
+    return !!this.element.querySelector('source[data-bitrate]');
+  }
+
+  /**
+   * @private
    * @return {?Element}
    */
   getFirstCachedSource_() {
@@ -654,10 +660,14 @@ class AmpVideo extends AMP.BaseElement {
    * this element's DOM.
    */
   resetOnDomChange() {
-    this.video_ = dev().assertElement(
+    const newVideo = dev().assertElement(
       childElementByTag(this.element, 'video'),
       'Tried to reset amp-video without an underlying <video>.'
     );
+    if (this.hasAnyBitrateSources_()) {
+      getBitrateManager(this.win).videoReplaced(this.video_, newVideo);
+    }
+    this.video_ = newVideo;
 
     this.uninstallEventHandlers_();
     this.installEventHandlers_();

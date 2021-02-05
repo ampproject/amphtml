@@ -91,7 +91,7 @@ export class BitrateManager {
    * @param {!Element} video
    */
   manage(video) {
-    onNontrivialWait(video, () => {
+    video.waitUnlisten_ = onNontrivialWait(video, () => {
       const current = currentSource(video);
       this.acceptableBitrate_ = current.bitrate_ - 1;
       this.switchToLowerBitrate_(video, current.bitrate_);
@@ -240,6 +240,20 @@ export class BitrateManager {
       this.sortSources_(video);
       video.load();
     }
+  }
+
+  /**
+   * Called when a video is replaced.
+   * @param {!Element} oldVideo
+   * @param {!Element} newVideo
+   */
+  videoReplaced(oldVideo, newVideo) {
+    if (oldVideo.waitUnlisten_) {
+      oldVideo.waitUnlisten_();
+    }
+    this.videos_ = this.videos_.filter((v) => v.deref() !== oldVideo);
+    this.manage(newVideo);
+    this.sortSources_(newVideo);
   }
 }
 
