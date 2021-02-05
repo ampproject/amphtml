@@ -1089,7 +1089,7 @@ describes.realWin(
       const impl = await ampIframe.getImpl(false);
       await waitForAmpIframeLayoutPromise(doc, ampIframe);
       expect(ampIframe.querySelector('iframe')).to.exist;
-      expect(ampIframe.unlayoutOnPause()).to.be.false;
+      expect(ampIframe.unlayoutOnPause()).to.be.true;
 
       // The element should become visible before pause is necessary.
       setDisplay(ampIframe, true);
@@ -1111,7 +1111,7 @@ describes.realWin(
       impl.element.getOwner = () => ({});
       await waitForAmpIframeLayoutPromise(doc, ampIframe);
       expect(ampIframe.querySelector('iframe')).to.exist;
-      expect(ampIframe.unlayoutOnPause()).to.be.false;
+      expect(ampIframe.unlayoutOnPause()).to.be.true;
 
       setDisplay(ampIframe, true);
       setDisplay(ampIframe, false);
@@ -1130,7 +1130,7 @@ describes.realWin(
       const impl = await ampIframe.getImpl(false);
       await waitForAmpIframeLayoutPromise(doc, ampIframe);
       expect(ampIframe.querySelector('iframe')).to.exist;
-      expect(ampIframe.unlayoutOnPause()).to.be.false;
+      expect(ampIframe.unlayoutOnPause()).to.be.true;
 
       // The element was never visible.
       env.sandbox./*OK*/ stub(impl, 'unload');
@@ -1148,7 +1148,7 @@ describes.realWin(
       });
       const impl = await ampIframe.getImpl(false);
       expect(ampIframe.querySelector('iframe')).to.not.exist;
-      expect(ampIframe.unlayoutOnPause()).to.be.false;
+      expect(ampIframe.unlayoutOnPause()).to.be.true;
 
       env.sandbox./*OK*/ stub(impl, 'unload');
       setDisplay(ampIframe, true);
