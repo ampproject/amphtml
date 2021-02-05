@@ -19,11 +19,6 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - name: Cache Packages
-        uses: actions/cache@v2
-        with:
-          path: node_modules
-          key: node_modules-${{ matrix.platform }}-${{ hashFiles('package-lock.json') }}
       - name: Install Dependencies
         run: bash ./.github/workflows/install_dependencies.sh
       - name: Build and Test
