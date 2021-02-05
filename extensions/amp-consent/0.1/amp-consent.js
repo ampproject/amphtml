@@ -65,6 +65,7 @@ export const ACTION_TYPE = {
   ACCEPT: 'accept',
   REJECT: 'reject',
   DISMISS: 'dismiss',
+  SET_PURPOSE: 'setPurpose',
 };
 
 export class AmpConsent extends AMP.BaseElement {
@@ -131,6 +132,11 @@ export class AmpConsent extends AMP.BaseElement {
       this.win,
       'amp-consent-granular-consent'
     );
+
+    /** @private {?Promise<Array>} */
+    this.purposeConsentRequired_ = this.isGranularConsentExperimentOn_
+      ? null
+      : Promise.resolve();
 
     /** @private @const {?Function} */
     this.boundHandleIframeMessages_ = this.isTcfPostMessageProxyExperimentOn_
@@ -256,17 +262,38 @@ export class AmpConsent extends AMP.BaseElement {
    * Register a list of user action functions
    */
   enableInteractions_() {
-    this.registerAction('accept', () => {
-      this.handleAction_(ACTION_TYPE.ACCEPT);
+    this.registerAction('accept', (invocation) => {
+      this.handleAction_(
+        ACTION_TYPE.ACCEPT,
+        undefined /** consentString */,
+        undefined /** opt_metadata */,
+        invocation
+      );
     });
 
-    this.registerAction('reject', () => {
-      this.handleAction_(ACTION_TYPE.REJECT);
+    this.registerAction('reject', (invocation) => {
+      this.handleAction_(
+        ACTION_TYPE.REJECT,
+        undefined /** consentString */,
+        undefined /** opt_metadata */,
+        invocation
+      );
     });
 
     this.registerAction('dismiss', () => {
       this.handleAction_(ACTION_TYPE.DISMISS);
     });
+
+    if (this.isGranularConsentExperimentOn_) {
+      this.registerAction('setPurpose', (invocation) => {
+        this.handleAction_(
+          ACTION_TYPE.SET_PURPOSE,
+          undefined /** consentString */,
+          undefined /** opt_metadata */,
+          invocation
+        );
+      });
+    }
 
     this.registerAction('prompt', (invocation) =>
       this.handleReprompt_(invocation)
@@ -409,8 +436,9 @@ export class AmpConsent extends AMP.BaseElement {
    * @param {string} action
    * @param {string=} consentString
    * @param {!ConsentMetadataDef=} opt_consentMetadata
+   * @param {!../../../src/service/action-impl.ActionInvocation=} opt_invocation
    */
-  handleAction_(action, consentString, opt_consentMetadata) {
+  handleAction_(action, consentString, opt_consentMetadata, opt_invocation) {
     if (!isEnumValue(ACTION_TYPE, action)) {
       // Unrecognized action
       return;
@@ -426,30 +454,88 @@ export class AmpConsent extends AMP.BaseElement {
       return;
     }
 
+    if (action == ACTION_TYPE.SET_PURPOSE) {
+      if (!opt_invocation || !opt_invocation['args']) {
+        return;
+      }
+      const {args} = opt_invocation;
+      this.validateSetPurposeArgs_(args);
+      this.consentStateManager_.updateConsentInstancePurposes(args);
+      return;
+    }
+
     this.consentStateChangedViaPromptUI_ = true;
 
+    // At this point, this.getPurposeConsentRequired_()
+    // should always be resolved, so no need to worry about
+    // a race here.
     if (action == ACTION_TYPE.ACCEPT) {
       //accept
-      this.consentStateManager_.updateConsentInstanceState(
-        CONSENT_ITEM_STATE.ACCEPTED,
-        consentString,
-        opt_consentMetadata
-      );
+      this.getPurposeConsentRequired_().then((purposeConsentRequired) => {
+        // Set default for purpose map
+        this.maybeSetConsentPurposeDefaults_(
+          purposeConsentRequired,
+          opt_invocation
+        );
+        this.consentStateManager_.updateConsentInstanceState(
+          CONSENT_ITEM_STATE.ACCEPTED,
+          consentString,
+          opt_consentMetadata
+        );
+        this.hide_();
+      });
     } else if (action == ACTION_TYPE.REJECT) {
       // reject
-      this.consentStateManager_.updateConsentInstanceState(
-        CONSENT_ITEM_STATE.REJECTED,
-        consentString,
-        opt_consentMetadata
-      );
+      this.getPurposeConsentRequired_().then((purposeConsentRequired) => {
+        // Set default for purpose map
+        this.maybeSetConsentPurposeDefaults_(
+          purposeConsentRequired,
+          opt_invocation
+        );
+        this.consentStateManager_.updateConsentInstanceState(
+          CONSENT_ITEM_STATE.REJECTED,
+          consentString,
+          opt_consentMetadata
+        );
+        this.hide_();
+      });
     } else if (action == ACTION_TYPE.DISMISS) {
       this.consentStateManager_.updateConsentInstanceState(
         CONSENT_ITEM_STATE.DISMISSED
       );
+      this.hide_();
     }
+  }
 
-    // Hide current dialog
-    this.hide_();
+  /**
+   * Maybe set the state manager's consent purpose map with default values.
+   * @param {!Array} purposeConsentRequired
+   * @param {!../../../src/service/action-impl.ActionInvocation=} opt_invocation
+   */
+  maybeSetConsentPurposeDefaults_(purposeConsentRequired, opt_invocation) {
+    if (
+      !this.isGranularConsentExperimentOn_ ||
+      !opt_invocation ||
+      !purposeConsentRequired ||
+      !purposeConsentRequired.length
+    ) {
+      return;
+    }
+    const {args} = opt_invocation;
+    if (args && args['purposeConsentDefault']) {
+      const defaultPurposeMap = {};
+      const purposeValue = user().assertBoolean(
+        args['purposeConsentDefault'],
+        '`purposeConsentDefault` must be a boolean.'
+      );
+      for (let i = 0; i < purposeConsentRequired.length; i++) {
+        defaultPurposeMap[purposeConsentRequired[i]] = purposeValue;
+      }
+      this.consentStateManager_.updateConsentInstancePurposes(
+        defaultPurposeMap,
+        true
+      );
+    }
   }
 
   /**
@@ -671,19 +757,26 @@ export class AmpConsent extends AMP.BaseElement {
   /**
    * Get `purposeConsentRequired` from consent config,
    * or from `checkConsentHref` response.
-   * @return {!Promise}
+   * @return {?Promise<Array>}
    */
   getPurposeConsentRequired_() {
-    const inlinePurposes = this.consentConfig_['purposeConsentRequired'];
-    if (inlinePurposes) {
-      return Promise.resolve(inlinePurposes);
+    if (this.purposeConsentRequired_) {
+      return this.purposeConsentRequired_;
     }
-    return this.getConsentRemote_().then((response) => {
-      if (!response) {
-        return null;
-      }
-      return response['purposeConsentRequired'];
-    });
+    const inlinePurposes = this.consentConfig_['purposeConsentRequired'];
+    if (isArray(inlinePurposes)) {
+      this.purposeConsentRequired_ = Promise.resolve(inlinePurposes);
+    } else {
+      this.purposeConsentRequired_ = this.getConsentRemote_().then(
+        (response) => {
+          if (!response || !isArray(response['purposeConsentRequired'])) {
+            return null;
+          }
+          return response['purposeConsentRequired'];
+        }
+      );
+    }
+    return this.purposeConsentRequired_;
   }
 
   /**
@@ -782,6 +875,20 @@ export class AmpConsent extends AMP.BaseElement {
    */
   getIsPromptUiOnForTesting() {
     return this.isPromptUIOn_;
+  }
+
+  /**
+   * Ensure args in setPurpose action are booleans.
+   * @param {!Object} purposeObj
+   */
+  validateSetPurposeArgs_(purposeObj) {
+    const purposeKeys = Object.keys(purposeObj);
+    for (let i = 0; i < purposeKeys.length; i++) {
+      user().assertBoolean(
+        purposeObj[purposeKeys[i]],
+        '`setPurpose` values must be booleans.'
+      );
+    }
   }
 
   /**
