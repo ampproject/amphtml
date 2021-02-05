@@ -32,6 +32,7 @@ import {
 import {ConsentPolicyManager} from './consent-policy-manager';
 import {ConsentStateManager} from './consent-state-manager';
 import {ConsentUI} from './consent-ui';
+import {CookieWriter} from './cookie-writer';
 import {Deferred} from '../../../src/utils/promise';
 import {
   NOTIFICATION_UI_MANAGER,
@@ -249,10 +250,15 @@ export class AmpConsent extends AMP.BaseElement {
       this.notificationUiManager_ = /** @type {!NotificationUiManager} */ (manager);
     });
 
+    const cookieWriterPromise = this.consentConfig_['cookies']
+      ? new CookieWriter(this.win, this.element, this.consentConfig_).write()
+      : Promise.resolve();
+
     Promise.all([
       consentStateManagerPromise,
       notificationUiManagerPromise,
       consentPolicyManagerPromise,
+      cookieWriterPromise,
     ]).then(() => {
       this.init_();
     });
@@ -763,21 +769,15 @@ export class AmpConsent extends AMP.BaseElement {
   /**
    * TODO (micajuineho): Use our stored info to check if we have the
    * necessary granular consents.
-   * @param {ConsentInfoDef} opt_consentInfo
+   * @param {ConsentInfoDef} unusedConsentInfo
    * @return {!Promise<boolean>}
    */
-  checkGranularConsentRequired_(opt_consentInfo) {
+  checkGranularConsentRequired_(unusedConsentInfo) {
     if (!this.isGranularConsentExperimentOn_) {
       return Promise.resolve(true);
     }
     return this.getPurposeConsentRequired_().then((purposeConsentRequired) => {
       if (!purposeConsentRequired) {
-        return true;
-      } else if (!isArray(purposeConsentRequired)) {
-        user().error(
-          TAG,
-          `'purposeConsentRequired' requires an array of strings`
-        );
         return true;
       }
       // TODO: add check here.
@@ -788,7 +788,7 @@ export class AmpConsent extends AMP.BaseElement {
   /**
    * Get `purposeConsentRequired` from consent config,
    * or from `checkConsentHref` response.
-   * @return {?Promise<!Array>}
+   * @return {!Promise<?Array>}
    */
   getPurposeConsentRequired_() {
     if (this.purposeConsentRequired_) {

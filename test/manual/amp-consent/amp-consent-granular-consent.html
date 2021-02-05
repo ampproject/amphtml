@@ -71,10 +71,10 @@
       }</script>
       <div id="ui1">
           Explictly set `purpose-foo`: 
-          <button on="tap:ABC.setPurpose()">ACCEPT FOO</button>
+          <button on="tap:ABC.setPurpose(purpose-foo=true)">ACCEPT FOO</button>
           <br>
           Explictly set multiple purposes: 
-          <button on="tap:ABC.setPurpose(purpose-foo=poop,purpose-bar=true)">ACCEPT FOO & BAR</button>
+          <button on="tap:ABC.setPurpose(purpose-foo=false,purpose-bar=true)">ACCEPT FOO & BAR</button>
           <br>
           Toggle `purpose-bar`:
           <label for="consent-purpose-xyz">

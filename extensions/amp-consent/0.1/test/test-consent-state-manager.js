@@ -26,6 +26,7 @@ import {
   ConsentStateManager,
 } from '../consent-state-manager';
 import {CONSENT_STRING_TYPE} from '../../../../src/consent-state';
+import {Services} from '../../../../src/services';
 import {dev} from '../../../../src/log';
 import {macroTask} from '../../../../testing/yield';
 import {
@@ -264,6 +265,12 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
 
     beforeEach(() => {
       instance = new ConsentInstance(ampdoc, 'test', {});
+    });
+
+    it('instantiates storage with the top level document', async () => {
+      const spy = env.sandbox.stub(Services, 'storageForTopLevelDoc');
+      new ConsentInstance(ampdoc, 'test', {});
+      expect(spy.calledOnceWith(ampdoc)).to.be.true;
     });
 
     describe('update', () => {

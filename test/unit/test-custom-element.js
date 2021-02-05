@@ -23,7 +23,10 @@ import {LOADING_ELEMENTS_, Layout} from '../../src/layout';
 import {Resource, ResourceState} from '../../src/service/resource';
 import {Services} from '../../src/services';
 import {chunkInstanceForTesting} from '../../src/chunk';
-import {createAmpElementForTesting} from '../../src/custom-element';
+import {
+  createAmpElementForTesting,
+  getImplSyncForTesting,
+} from '../../src/custom-element';
 
 describes.realWin('CustomElement', {amp: true}, (env) => {
   // TODO(dvoytenko, #11827): Make this test work on Safari.
@@ -37,7 +40,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
       let clock;
       let testElementGetInsersectionElementLayoutBox;
       let container;
-      let ElementClass, StubElementClass;
+      let ElementClass, StubElementClass, ElementClassWithReUpgrade;
 
       let testElementPreconnectCallback;
       let testElementBuildCallback;
@@ -52,6 +55,11 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
       let testOnLayoutMeasureCallback;
 
       class TestElement extends BaseElement {
+        constructor(element, source) {
+          super(element);
+          this.source = source;
+        }
+
         isLayoutSupported(unusedLayout) {
           return true;
         }
@@ -101,7 +109,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
           return true;
         }
         upgradeCallback() {
-          return new TestElement(this.element);
+          return new TestElement(this.element, 're-upgrade');
         }
       }
 
@@ -121,12 +129,23 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
 
         ElementClass = createAmpElementForTesting(win, TestElement);
         StubElementClass = createAmpElementForTesting(win, ElementStub);
+        ElementClassWithReUpgrade = createAmpElementForTesting(
+          win,
+          TestElementWithReUpgrade
+        );
 
         win.customElements.define('amp-test', ElementClass);
         win.customElements.define('amp-stub', StubElementClass);
+        win.customElements.define(
+          'amp-test-with-re-upgrade',
+          ElementClassWithReUpgrade
+        );
 
         win.__AMP_EXTENDED_ELEMENTS['amp-test'] = TestElement;
         win.__AMP_EXTENDED_ELEMENTS['amp-stub'] = ElementStub;
+        win.__AMP_EXTENDED_ELEMENTS[
+          'amp-test-with-re-upgrade'
+        ] = TestElementWithReUpgrade;
         ampdoc.declareExtension('amp-stub');
 
         testElementPreconnectCallback = env.sandbox.spy();
@@ -147,6 +166,10 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         clock.uninstall();
         resourcesMock.verify();
       });
+
+      function skipMicroTask() {
+        return new Promise((resolve) => resolve(Promise.resolve()));
+      }
 
       it('should initialize ampdoc and resources on attach only', () => {
         const element = new ElementClass();
@@ -342,7 +365,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
       it('should tolerate errors in onLayoutMeasure', () => {
         const element = new ElementClass();
         env.sandbox
-          .stub(element.implementation_, 'onLayoutMeasure')
+          .stub(TestElement.prototype, 'onLayoutMeasure')
           .callsFake(() => {
             throw new Error('intentional');
           });
@@ -363,6 +386,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
       it('StubElement - upgrade after attached', () => {
         const element = new StubElementClass();
         expect(element.isUpgraded()).to.equal(false);
+        expect(getImplSyncForTesting(element)).to.be.null;
 
         element.setAttribute('layout', 'fill');
         element.updateLayoutBox({top: 0, left: 0, width: 111, height: 51});
@@ -372,14 +396,16 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         element.upgrade(TestElement);
 
         expect(element.isUpgraded()).to.equal(true);
-        expect(element.implementation_).to.be.instanceOf(TestElement);
-        expect(element.implementation_.getLayout()).to.equal(Layout.FILL);
+        const impl = getImplSyncForTesting(element);
+        expect(impl).to.be.instanceOf(TestElement);
+        expect(impl.getLayout()).to.equal(Layout.FILL);
         expect(element.isBuilt()).to.equal(false);
       });
 
-      it('StubElement - upgrade before attached', () => {
+      it('StubElement - should not upgrade before attached', () => {
         const element = new StubElementClass();
         expect(element.isUpgraded()).to.equal(false);
+        expect(getImplSyncForTesting(element)).to.be.null;
 
         element.setAttribute('layout', 'fill');
         element.updateLayoutBox({top: 0, left: 0, width: 111, height: 51});
@@ -388,7 +414,28 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         element.upgrade(TestElement);
 
         expect(element.isUpgraded()).to.equal(false);
-        expect(element.implementation_).to.be.instanceOf(TestElement);
+        expect(getImplSyncForTesting(element)).to.be.null;
+        expect(element.isBuilt()).to.equal(false);
+      });
+
+      it('StubElement - upgrade if ever attached', () => {
+        const element = new StubElementClass();
+        expect(element.isUpgraded()).to.equal(false);
+        expect(getImplSyncForTesting(element)).to.be.null;
+
+        element.setAttribute('layout', 'fill');
+        element.updateLayoutBox({top: 0, left: 0, width: 111, height: 51});
+
+        // Attach once and remove.
+        container.appendChild(element);
+        container.removeChild(element);
+
+        resourcesMock.expects('upgraded').withExactArgs(element).once();
+
+        element.upgrade(TestElement);
+
+        expect(element.isUpgraded()).to.equal(true);
+        expect(getImplSyncForTesting(element)).to.be.instanceOf(TestElement);
         expect(element.isBuilt()).to.equal(false);
       });
 
@@ -405,94 +452,74 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
       });
 
       it('Element - re-upgrade to new direct instance', () => {
-        const element = new ElementClass();
+        const element = new ElementClassWithReUpgrade();
         expect(element.isUpgraded()).to.equal(false);
-        const newImpl = new TestElement(element);
-        element.implementation_.upgradeCallback = () => newImpl;
 
         container.appendChild(element);
         expect(element.isUpgraded()).to.equal(true);
-        expect(element.implementation_).to.equal(newImpl);
+
+        const impl = getImplSyncForTesting(element);
+        expect(impl).to.be.instanceOf(TestElement);
+        expect(impl.source).to.equal('re-upgrade');
         expect(element.upgradeDelayMs_).to.equal(0);
       });
 
-      it('Element - re-upgrade to new promised instance', () => {
-        const element = new ElementClass();
-        expect(element.isUpgraded()).to.equal(false);
-        const oldImpl = element.implementation_;
-        const newImpl = new TestElement(element);
-        const promise = Services.timerFor(win)
-          .promise(10)
-          .then(() => newImpl);
-        oldImpl.upgradeCallback = () => promise;
+      it('Element - re-upgrade to new promised instance', async () => {
+        let promise;
+        env.sandbox
+          .stub(TestElementWithReUpgrade.prototype, 'upgradeCallback')
+          .callsFake(function () {
+            promise = Promise.resolve(
+              new TestElement(this.element, 're-upgrade-with-promise')
+            );
+            return promise;
+          });
 
+        const element = new ElementClassWithReUpgrade();
+        expect(element.isUpgraded()).to.equal(false);
         container.appendChild(element);
-        expect(element.implementation_).to.equal(oldImpl);
+
+        expect(getImplSyncForTesting(element)).to.be.null;
         expect(element.isUpgraded()).to.equal(false);
         expect(element.upgradeState_).to.equal(/* UPGRADE_IN_PROGRESS */ 4);
-        clock.tick(10);
-        return promise
-          .then(() => {
-            // Skip a microtask.
-          })
-          .then(() => {
-            expect(element.implementation_).to.equal(newImpl);
-            expect(element.isUpgraded()).to.equal(true);
-            expect(element.upgradeState_).to.equal(/* UPGRADED */ 2);
-            expect(element.upgradeDelayMs_).to.be.equal(10);
-          });
+        expect(promise).to.exist;
+
+        await promise;
+        await skipMicroTask();
+        expect(element.isUpgraded()).to.equal(true);
+        expect(element.upgradeState_).to.equal(/* UPGRADED */ 2);
+
+        const impl = getImplSyncForTesting(element);
+        expect(impl).to.be.instanceOf(TestElement);
+        expect(impl.source).to.equal('re-upgrade-with-promise');
       });
 
-      it('Element - re-upgrade to new promised null', () => {
-        const element = new ElementClass();
-        expect(element.isUpgraded()).to.equal(false);
-        const oldImpl = element.implementation_;
-        const promise = Promise.resolve(null);
-        oldImpl.upgradeCallback = () => promise;
-
-        container.appendChild(element);
-        expect(element.implementation_).to.equal(oldImpl);
-        expect(element.isUpgraded()).to.equal(false);
-        expect(element.upgradeState_).to.equal(/* UPGRADE_IN_PROGRESS */ 4);
-        return promise
-          .then(() => {
-            // Skip a microtask.
-          })
-          .then(() => {
-            expect(element.implementation_).to.equal(oldImpl);
-            expect(element.isUpgraded()).to.equal(true);
-            expect(element.upgradeState_).to.equal(/* UPGRADED */ 2);
+      it('Element - re-upgrade to new promised null', async () => {
+        let promise;
+        env.sandbox
+          .stub(TestElementWithReUpgrade.prototype, 'upgradeCallback')
+          .callsFake(function () {
+            promise = Promise.resolve(null);
+            return promise;
           });
-      });
 
-      it('Element - can only re-upgrade once', () => {
-        const element = new ElementClass();
+        const element = new ElementClassWithReUpgrade();
         expect(element.isUpgraded()).to.equal(false);
-        const oldImpl = element.implementation_;
-        const newImpl = new TestElement(element);
-        const newImpl2 = new TestElement(element);
-        const promise = Promise.resolve(newImpl);
-        oldImpl.upgradeCallback = () => promise;
-
         container.appendChild(element);
-        expect(element.implementation_).to.equal(oldImpl);
+
+        expect(getImplSyncForTesting(element)).to.be.null;
         expect(element.isUpgraded()).to.equal(false);
         expect(element.upgradeState_).to.equal(/* UPGRADE_IN_PROGRESS */ 4);
+        expect(promise).to.exist;
 
-        oldImpl.upgradeCallback = () => newImpl2;
-        container.appendChild(element);
-        expect(element.implementation_).to.equal(oldImpl);
-        expect(element.isUpgraded()).to.equal(false);
-        expect(element.upgradeState_).to.equal(/* UPGRADE_IN_PROGRESS */ 4);
-        return promise
-          .then(() => {
-            // Skip a microtask.
-          })
-          .then(() => {
-            expect(element.implementation_).to.equal(newImpl);
-            expect(element.isUpgraded()).to.equal(true);
-            expect(element.upgradeState_).to.equal(/* UPGRADED */ 2);
-          });
+        await promise;
+        await skipMicroTask();
+
+        expect(element.isUpgraded()).to.equal(true);
+        expect(element.upgradeState_).to.equal(/* UPGRADED */ 2);
+
+        const impl = getImplSyncForTesting(element);
+        expect(impl).to.be.instanceOf(TestElementWithReUpgrade);
       });
 
       it('StubElement - re-upgrade', () => {
@@ -598,9 +625,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
 
       it('should respect user specified consent policy', () => {
         const element = new ElementClass();
-        element.getAmpDoc = () => {
-          return env.ampdoc;
-        };
+        container.appendChild(element);
         expect(element.getConsentPolicy_()).to.equal(null);
         element.setAttribute('data-block-on-consent', '');
         expect(element.getConsentPolicy_()).to.equal('default');
@@ -614,20 +639,18 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         meta.setAttribute('content', 'amp-test');
         doc.head.appendChild(meta);
         const element = new ElementClass();
-        element.getAmpDoc = () => {
-          return env.ampdoc;
-        };
+        container.appendChild(element);
         expect(element.getConsentPolicy_()).to.equal('default');
         expect(element.getAttribute('data-block-on-consent')).to.equal(
           'default'
         );
       });
 
-      it('should anticipate build errors', () => {
+      it('should anticipate sync build errors', () => {
         expectAsyncConsoleError(/intentional/, 2);
         const element = new ElementClass();
         env.sandbox
-          .stub(element.implementation_, 'buildCallback')
+          .stub(TestElement.prototype, 'buildCallback')
           .callsFake(() => {
             throw new Error('intentional');
           });
@@ -731,6 +754,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
 
       it('Element - createPlaceholder', () => {
         const element = new ElementClass();
+        container.appendChild(element);
         element.createPlaceholder();
         expect(testElementCreatePlaceholderCallback).to.be.calledOnce;
       });
@@ -747,7 +771,10 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
 
         expect(element.everAttached).to.equal(true);
         expect(element.getLayout()).to.equal(Layout.FILL);
-        expect(element.implementation_.getLayout()).to.equal(Layout.FILL);
+        expect(element.getLayout()).to.equal(Layout.FILL);
+        expect(getImplSyncForTesting(element).getLayout()).to.equal(
+          Layout.FILL
+        );
       });
 
       it('StubElement - attachedCallback', () => {
@@ -770,7 +797,11 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         element.upgrade(TestElement);
 
         expect(element.getLayout()).to.equal(Layout.FILL);
-        expect(element.implementation_.getLayout()).to.equal(Layout.FILL);
+        expect(element.getLayout()).to.equal(Layout.FILL);
+        expect(getImplSyncForTesting(element).getLayout()).to.equal(
+          Layout.FILL
+        );
+
         // Now it's called.
         expect(element).to.not.have.class('amp-unresolved');
         expect(element).to.not.have.class('i-amphtml-unresolved');
@@ -791,7 +822,9 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
 
         expect(element.everAttached).to.equal(true);
         expect(element.getLayout()).to.equal(Layout.FILL);
-        expect(element.implementation_.getLayout()).to.equal(Layout.FILL);
+        expect(getImplSyncForTesting(element).getLayout()).to.equal(
+          Layout.FILL
+        );
       });
 
       it('Element - handles async detachedCallback when connected', () => {
@@ -812,7 +845,9 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
 
         expect(element.everAttached).to.equal(true);
         expect(element.getLayout()).to.equal(Layout.FILL);
-        expect(element.implementation_.getLayout()).to.equal(Layout.FILL);
+        expect(getImplSyncForTesting(element).getLayout()).to.equal(
+          Layout.FILL
+        );
       });
 
       it('Element - layoutCallback before build', () => {
@@ -914,7 +949,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
 
           const controller = new AbortController();
           const stub = env.sandbox
-            .stub(element.implementation_, 'layoutCallback')
+            .stub(TestElement.prototype, 'layoutCallback')
             .callsFake(() => {
               controller.abort();
             });
@@ -943,7 +978,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
 
           const controller = new AbortController();
           const stub = env.sandbox
-            .stub(element.implementation_, 'layoutCallback')
+            .stub(TestElement.prototype, 'layoutCallback')
             .callsFake(() => {
               controller.abort();
               throw new Error('throwaway');
@@ -1046,8 +1081,12 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
 
       it('should enqueue actions until built', () => {
         const element = new ElementClass();
-        const handler = env.sandbox.spy();
-        element.implementation_.executeAction = handler;
+        const handler = env.sandbox.stub(
+          TestElement.prototype,
+          'executeAction'
+        );
+
+        container.appendChild(element);
         expect(element.actionQueue_).to.not.equal(null);
 
         const inv = {};
@@ -1059,8 +1098,10 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
 
       it('should execute action immediately after built', () => {
         const element = new ElementClass();
-        const handler = env.sandbox.spy();
-        element.implementation_.executeAction = handler;
+        const handler = env.sandbox.stub(
+          TestElement.prototype,
+          'executeAction'
+        );
         container.appendChild(element);
         return element.buildInternal().then(() => {
           const inv = {};
@@ -1073,8 +1114,10 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
 
       it('should dequeue all actions after build', () => {
         const element = new ElementClass();
-        const handler = env.sandbox.spy();
-        element.implementation_.executeAction = handler;
+        const handler = env.sandbox.stub(
+          TestElement.prototype,
+          'executeAction'
+        );
 
         const inv1 = {};
         const inv2 = {};
@@ -1099,8 +1142,6 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
 
       it('should NOT enqueue actions when in template', () => {
         const element = new ElementClass();
-        const handler = env.sandbox.spy();
-        element.implementation_.executeAction = handler;
         expect(element.actionQueue_).to.not.equal(null);
 
         const inv = {};
@@ -1362,16 +1403,20 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
           element.unlayoutCallback();
           expect(testElementUnlayoutCallback).to.have.not.been.called;
 
-          element.implementation_.layoutCallback = () => {
-            testElementLayoutCallback();
-            element.layoutCount_++;
-            return Promise.resolve();
-          };
+          env.sandbox
+            .stub(TestElement.prototype, 'layoutCallback')
+            .callsFake(() => {
+              testElementLayoutCallback();
+              element.layoutCount_++;
+              return Promise.resolve();
+            });
 
-          element.implementation_.unlayoutCallback = () => {
-            testElementUnlayoutCallback();
-            return true;
-          };
+          env.sandbox
+            .stub(TestElement.prototype, 'unlayoutCallback')
+            .callsFake(() => {
+              testElementUnlayoutCallback();
+              return true;
+            });
 
           // Built element receives unlayoutCallback.
           container.appendChild(element);
@@ -1384,15 +1429,22 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
 
         it('should not reset layoutCount if relayout not requested', () => {
           const element = new ElementClass();
-          element.implementation_.layoutCallback = () => {
-            testElementLayoutCallback();
-            element.layoutCount_++;
-            return Promise.resolve();
-          };
-          element.implementation_.unlayoutCallback = () => {
-            testElementUnlayoutCallback();
-            return false;
-          };
+
+          env.sandbox
+            .stub(TestElement.prototype, 'layoutCallback')
+            .callsFake(() => {
+              testElementLayoutCallback();
+              element.layoutCount_++;
+              return Promise.resolve();
+            });
+
+          env.sandbox
+            .stub(TestElement.prototype, 'unlayoutCallback')
+            .callsFake(() => {
+              testElementUnlayoutCallback();
+              return false;
+            });
+
           container.appendChild(element);
           return element.buildingPromise_.then(() => {
             element.layoutCallback();
@@ -1802,7 +1854,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
 
         it('should toggle loading off after layout failed', () => {
           env.sandbox
-            .stub(element.implementation_, 'layoutCallback')
+            .stub(TestElement.prototype, 'layoutCallback')
             .returns(Promise.reject());
           element.setAttribute('height', '10');
           element.setAttribute('width', '10');
@@ -1826,7 +1878,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
 
         it('should disable toggle loading on after layout failed', () => {
           env.sandbox
-            .stub(element.implementation_, 'layoutCallback')
+            .stub(TestElement.prototype, 'layoutCallback')
             .returns(Promise.reject());
           element.setAttribute('height', '10');
           element.setAttribute('width', '10');
