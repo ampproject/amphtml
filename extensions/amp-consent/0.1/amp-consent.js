@@ -133,7 +133,7 @@ export class AmpConsent extends AMP.BaseElement {
       'amp-consent-granular-consent'
     );
 
-    /** @private {?Promise<Array>} */
+    /** @private {?Promise<!Array>} */
     this.purposeConsentRequired_ = this.isGranularConsentExperimentOn_
       ? null
       : Promise.resolve();
@@ -539,6 +539,37 @@ export class AmpConsent extends AMP.BaseElement {
   }
 
   /**
+   * Maybe set the consent purpose map with default values.
+   * @param {!Array} purposeConsentRequired
+   * @param {!../../../src/service/action-impl.ActionInvocation=} opt_invocation
+   */
+  maybeSetConsentPurposeDefaults_(purposeConsentRequired, opt_invocation) {
+    if (
+      !this.isGranularConsentExperimentOn_ ||
+      !opt_invocation ||
+      !purposeConsentRequired ||
+      !purposeConsentRequired.length
+    ) {
+      return;
+    }
+    const {args} = opt_invocation;
+    if (args && args['purposeConsentDefault']) {
+      const defaultPurposeMap = {};
+      const purposeValue = dev().assertBoolean(
+        args['purposeConsentDefault'],
+        '`purposeConsentDefault` must be a boolean.'
+      );
+      for (let i = 0; i < purposeConsentRequired.length; i++) {
+        defaultPurposeMap[purposeConsentRequired[i]] = purposeValue;
+      }
+      this.consentStateManager_.updateConsentInstancePurposes(
+        defaultPurposeMap,
+        true
+      );
+    }
+  }
+
+  /**
    * Handle the prompt action to re-prompt.
    * Accpet arg expireCache=true
    * @param {!../../../src/service/action-impl.ActionInvocation} invocation
@@ -757,7 +788,7 @@ export class AmpConsent extends AMP.BaseElement {
   /**
    * Get `purposeConsentRequired` from consent config,
    * or from `checkConsentHref` response.
-   * @return {?Promise<Array>}
+   * @return {?Promise<!Array>}
    */
   getPurposeConsentRequired_() {
     if (this.purposeConsentRequired_) {
