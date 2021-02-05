@@ -257,6 +257,7 @@ export class AmpStoryPlayer {
     this.element_.mute = this.mute.bind(this);
     this.element_.unmute = this.unmute.bind(this);
     this.element_.getStoryState = this.getStoryState.bind(this);
+    this.element_.prerender = this.prerender.bind(this);
   }
 
   /**
@@ -300,6 +301,16 @@ export class AmpStoryPlayer {
     }
 
     this.render_(renderStartingIdx);
+  }
+
+  /**
+   * Prerenders the provided story in the player.
+   * @param {string} storyUrl
+   * @public
+   */
+  prerender(storyUrl) {
+    this.autoplay_ = false;
+    this.show(storyUrl).then(() => (this.autoplay_ = true));
   }
 
   /**
@@ -728,13 +739,13 @@ export class AmpStoryPlayer {
    */
   show(storyUrl, pageId = null) {
     // TODO(enriqe): sanitize URLs for matching.
-    const storyIdx = storyUrl
+    let storyIdx = storyUrl
       ? findIndex(this.stories_, ({href}) => href === storyUrl)
       : this.currentIdx_;
 
-    // TODO(#28987): replace for add() once implemented.
     if (!this.stories_[storyIdx]) {
-      throw new Error(`Story URL not found in the player: ${storyUrl}`);
+      this.add([{href: storyUrl}]);
+      storyIdx = this.stories_.length - 1;
     }
 
     let renderPromise = Promise.resolve();
