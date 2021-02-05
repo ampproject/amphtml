@@ -15,7 +15,7 @@
  */
 
 import {BaseElement} from './base-element';
-import {isExperimentOn} from '../experiments';
+import {isExperimentOn} from '../../../src/experiments';
 
 /** @const {string} */
 const TAG = 'amp-timeago';

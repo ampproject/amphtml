@@ -30,7 +30,7 @@ import {
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {isExperimentOn} from '../experiments';
+import {isExperimentOn} from '../../../src/experiments';
 import {toArray} from '../../../src/types';
 import {useCallback, useLayoutEffect, useRef} from '../../../src/preact';
 

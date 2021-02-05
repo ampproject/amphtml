@@ -16,7 +16,7 @@
 
 import {CSS} from '../../../build/amp-video-1.0.css';
 import {VideoBaseElement} from './base-element';
-import {isExperimentOn} from '../experiments';
+import {isExperimentOn} from '../../../src/experiments';
 
 /** @const {string} */
 const TAG = 'amp-video';

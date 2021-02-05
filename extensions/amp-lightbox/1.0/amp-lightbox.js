@@ -23,7 +23,7 @@ import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/utils/object';
 import {dispatchCustomEvent} from '../../../src/dom';
-import {isExperimentOn} from '../experiments';
+import {isExperimentOn} from '../../../src/experiments';
 import {toggle} from '../../../src/style';
 
 /** @const {string} */

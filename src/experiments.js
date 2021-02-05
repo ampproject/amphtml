@@ -21,7 +21,7 @@
  * Experiments page: https://cdn.ampproject.org/experiments.html *
  */
 
-import {dev, user, userAssert} from './log';
+import {dev, user} from './log';
 import {getMode} from './mode';
 import {getTopWindow} from './service';
 import {hasOwn} from './utils/object';

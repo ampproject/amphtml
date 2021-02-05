@@ -19,7 +19,7 @@ import {CSS} from '../../../build/amp-sidebar-1.0.css';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Sidebar} from './sidebar';
 import {dict} from '../../../src/utils/object';
-import {isExperimentOn} from '../experiments';
+import {isExperimentOn} from '../../../src/experiments';
 import {toggle} from '../../../src/style';
 
 /** @const {string} */
