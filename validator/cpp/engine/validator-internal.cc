@@ -108,7 +108,7 @@ ABSL_FLAG(bool, duplicate_html_body_elements_is_error, false,
           "If true, duplicate <html>,<body> elements is considered error for "
           "validation purposes. (Default is to allow, leaving it to HTML5 "
           "user-agent to treat them as per the spec).");
-ABSL_FLAG(bool, allow_module_nomodule, false,
+ABSL_FLAG(bool, allow_module_nomodule, true,
           "If true, then script versions for module and nomdule are allowed "
           "in AMP documents. This gating should be temporary and removed "
           "after necessary transformers are in place. See b/173803451.");
