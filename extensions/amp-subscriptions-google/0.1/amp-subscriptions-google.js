@@ -715,13 +715,26 @@ export class GoogleSubscriptionsPlatform {
       return null;
     }
     swgEntitlements.ack();
+
+    // Determine grant reason.
+    let grantReason;
+    if (granted) {
+      if (swgEntitlement.source === 'google:metering') {
+        grantReason = GrantReason.METERING;
+      } else {
+        grantReason = GrantReason.SUBSCRIBER;
+      }
+    } else {
+      grantReason = null;
+    }
+
     return new Entitlement({
       source: swgEntitlement.source,
       raw: swgEntitlements.raw,
       service: PLATFORM_ID,
       granted,
       // if it's granted it must be a subscriber
-      grantReason: granted ? GrantReason.SUBSCRIBER : null,
+      grantReason,
       dataObject: swgEntitlement.json(),
       decryptedDocumentKey: swgEntitlements.decryptedDocumentKey,
     });
