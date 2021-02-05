@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-import {DateDisplay} from './date-display';
-import {PreactBaseElement} from '../../../src/preact/base-element';
+import {BaseElement} from './base-element';
 import {Services} from '../../../src/services';
 import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
-import {parseDateAttrs as parseDateAttrsBase} from '../../../src/utils/date';
 
 /** @const {string} */
 const TAG = 'amp-date-display';
 
-class AmpDateDisplay extends PreactBaseElement {
+class AmpDateDisplay extends BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -85,42 +83,6 @@ class AmpDateDisplay extends PreactBaseElement {
     }
     return true;
   }
-}
-
-/** @override */
-AmpDateDisplay['Component'] = DateDisplay;
-
-/** @override */
-AmpDateDisplay['props'] = {
-  'datetime': {
-    attrs: ['datetime', 'timestamp-ms', 'timestamp-seconds', 'offset-seconds'],
-    parseAttrs: parseDateAttrs,
-  },
-  'displayIn': {attr: 'display-in'},
-  'locale': {attr: 'locale'},
-};
-
-/** @override */
-AmpDateDisplay['layoutSizeDefined'] = true;
-
-/** @override */
-AmpDateDisplay['lightDomTag'] = 'div';
-
-/** @override */
-AmpDateDisplay['usesTemplate'] = true;
-
-/**
- * @param {!Element} element
- * @return {?number}
- * @throws {UserError} when attribute values are missing or invalid.
- * @visibleForTesting
- */
-export function parseDateAttrs(element) {
-  return parseDateAttrsBase(element, [
-    'datetime',
-    'timestamp-ms',
-    'timestamp-seconds',
-  ]);
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {
