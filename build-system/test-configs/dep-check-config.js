@@ -247,9 +247,9 @@ exports.rules = [
       'extensions/amp-facebook-comments/0.1/amp-facebook-comments.js->extensions/amp-facebook/0.1/facebook-loader.js',
 
       // Bento AMP Youtube
-      'extensions/amp-youtube/1.0/amp-youtube.js->extensions/amp-video/1.0/base-element.js',
-      'extensions/amp-youtube/1.0/youtube.js->extensions/amp-video/1.0/video-iframe.js',
-      'extensions/amp-youtube/1.0/youtube.js->extensions/amp-video/1.0/video-wrapper.js',
+      'extensions/amp-youtube/1.0/base-element.js->extensions/amp-video/1.0/base-element.js',
+      'extensions/amp-youtube/1.0/component.js->extensions/amp-video/1.0/video-iframe.js',
+      'extensions/amp-youtube/1.0/component.js->extensions/amp-video/1.0/video-wrapper.js',
 
       // Amp geo in group enum
       'extensions/amp-a4a/0.1/amp-a4a.js->extensions/amp-geo/0.1/amp-geo-in-group.js',
