@@ -21,7 +21,7 @@
  * Experiments page: https://cdn.ampproject.org/experiments.html *
  */
 
-import {dev, user} from './log';
+import {dev, user, userAssert} from './log';
 import {getMode} from './mode';
 import {getTopWindow} from './service';
 import {hasOwn} from './utils/object';
@@ -74,6 +74,20 @@ export function getBinaryType(win) {
 export function isExperimentOn(win, experimentId) {
   const toggles = experimentToggles(win);
   return !!toggles[experimentId];
+}
+
+/**
+ * Assert that either the global or component Bento experiment is on.
+ * @param win
+ * @param {string} componentName
+ * @throws {UserError} if neither experiment is enabled
+ */
+export function assertBentoExperiment(win, componentName) {
+  userAssert(
+    isExperimentOn(win, 'bento') ||
+      isExperimentOn(win, `bento-${componentName}`),
+    `expected global "bento" or specific "bento-${componentName}" experiment to be enabled`
+  );
 }
 
 /**
