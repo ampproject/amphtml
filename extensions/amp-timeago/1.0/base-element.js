@@ -18,7 +18,12 @@ import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Timeago} from './component';
 import {parseDateAttrs as parseDateAttrsBase} from '../../../src/utils/date';
 
-export class BaseElement extends PreactBaseElement {}
+export class BaseElement extends PreactBaseElement {
+  /** @override */
+  updatePropsForRendering(props) {
+    props['placeholder'] = props['children'];
+  }
+}
 
 /** @override */
 BaseElement['Component'] = Timeago;

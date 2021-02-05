@@ -31,11 +31,6 @@ class AmpTimeago extends BaseElement {
     );
     return super.isLayoutSupported(layout);
   }
-
-  /** @override */
-  updatePropsForRendering(props) {
-    props['placeholder'] = props['children'];
-  }
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {
