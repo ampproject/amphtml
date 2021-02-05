@@ -41,23 +41,24 @@ describes.realWin(
       timer = Services.timerFor(win);
     });
 
-    function getMowPlayer(attributes) {
+    async function getMowPlayer(attributes) {
       const element = createElementWithAttributes(doc, 'amp-mowplayer', {
         width: 250,
         height: 180,
         ...attributes,
       });
       doc.body.appendChild(element);
-      element.implementation_.baseURL_ =
+      const impl = await element.getImpl(false);
+      impl.baseURL_ =
         // Use a blank page, since these tests don't require an actual page.
         // hash # at the end so path is not affected by param concat
         `http://localhost:${location.port}/test/fixtures/served/blank.html#`;
       return element
-        .build()
+        .buildInternal()
         .then(() => element.layoutCallback())
         .then(() => {
           const iframe = element.querySelector('iframe');
-          element.implementation_.handleMowMessage_({
+          impl.handleMowMessage_({
             origin: 'https://mowplayer.com',
             source: iframe.contentWindow,
             data: JSON.stringify({event: 'onReady'}),
@@ -96,48 +97,49 @@ describes.realWin(
           const iframe = mp.querySelector('iframe');
 
           return Promise.resolve()
-            .then(() => {
+            .then(async () => {
               const p = listenOncePromise(mp, VideoEvents.MUTED);
-              sendFakeInfoDeliveryMessage(mp, iframe, {muted: true});
+              await sendFakeInfoDeliveryMessage(mp, iframe, {muted: true});
               return p;
             })
-            .then(() => {
+            .then(async () => {
               const p = listenOncePromise(mp, VideoEvents.PLAYING);
-              sendFakeInfoDeliveryMessage(mp, iframe, {playerState: 1});
+              await sendFakeInfoDeliveryMessage(mp, iframe, {playerState: 1});
               return p;
             })
-            .then(() => {
+            .then(async () => {
               const p = listenOncePromise(mp, VideoEvents.PAUSE);
-              sendFakeInfoDeliveryMessage(mp, iframe, {playerState: 2});
+              await sendFakeInfoDeliveryMessage(mp, iframe, {playerState: 2});
               return p;
             })
-            .then(() => {
+            .then(async () => {
               const p = listenOncePromise(mp, VideoEvents.UNMUTED);
-              sendFakeInfoDeliveryMessage(mp, iframe, {muted: false});
+              await sendFakeInfoDeliveryMessage(mp, iframe, {muted: false});
               return p;
             })
-            .then(() => {
+            .then(async () => {
               // Should not send the unmute event twice if already sent once.
               const p = listenOncePromise(mp, VideoEvents.UNMUTED).then(() => {
                 assert.fail('Should not have dispatch unmute message twice');
               });
-              sendFakeInfoDeliveryMessage(mp, iframe, {muted: false});
+              await sendFakeInfoDeliveryMessage(mp, iframe, {muted: false});
               const successTimeout = timer.promise(10);
               return Promise.race([p, successTimeout]);
             })
-            .then(() => {
+            .then(async () => {
               // Make sure pause and end are triggered when video ends.
               const pEnded = listenOncePromise(mp, VideoEvents.ENDED);
               const pPause = listenOncePromise(mp, VideoEvents.PAUSE);
-              sendFakeInfoDeliveryMessage(mp, iframe, {playerState: 0});
+              await sendFakeInfoDeliveryMessage(mp, iframe, {playerState: 0});
               return Promise.all([pEnded, pPause]);
             });
         });
       });
     }
 
-    function sendFakeInfoDeliveryMessage(mp, iframe, info) {
-      mp.implementation_.handleMowMessage_({
+    async function sendFakeInfoDeliveryMessage(mp, iframe, info) {
+      const impl = await mp.getImpl(false);
+      impl.handleMowMessage_({
         origin: 'https://mowplayer.com',
         source: iframe.contentWindow,
         data: JSON.stringify({

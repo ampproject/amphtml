@@ -22,8 +22,7 @@ const VIEWPORT = {
 describes.endtoend(
   'player prerendering',
   {
-    testUrl:
-      'http://localhost:8000/test/fixtures/e2e/amp-story-player/basic.html',
+    fixture: 'amp-story-player/basic.html',
     initialRect: {width: VIEWPORT.WIDTH, height: VIEWPORT.HEIGHT},
     environments: ['single'],
   },
@@ -39,7 +38,7 @@ describes.endtoend(
       await expect(player);
     });
 
-    it('loads first story in page load', async () => {
+    it('loads and displays first story on page load when player is visible in viewport', async () => {
       const shadowHost = await controller.findElement(
         'div.i-amphtml-story-player-shadow-root-intermediary'
       );

@@ -89,12 +89,6 @@ const forbiddenTerms = {
   '[^.]user\\(\\)\\.assert\\(': 'Use the userAssert function instead.',
   'it\\.only': '',
   'Math.random[^;()]*=': 'Use Sinon to stub!!!',
-  'gulp-util': {
-    message:
-      '`gulp-util` will be deprecated soon. See ' +
-      'https://medium.com/gulpjs/gulp-util-ca3b1f9f9ac5 ' +
-      'for a list of alternatives.',
-  },
   'sinon\\.(spy|stub|mock)\\(': {
     message: 'Use a sandbox instead to avoid repeated `#restore` calls',
   },
@@ -317,6 +311,7 @@ const forbiddenTerms = {
       'src/service/cid-impl.js',
       'src/service/origin-experiments-impl.js',
       'src/services.js',
+      'src/utils/display-observer.js',
       'testing/test-helper.js',
     ],
   },
@@ -444,7 +439,7 @@ const forbiddenTerms = {
     message: shouldNeverBeUsed,
     allowlist: ['extension/amp-bind/0.1/test/test-bind-expr.js'],
   },
-  'storageForDoc': {
+  'storageForDoc|storageForTopLevelDoc': {
     message:
       requiresReviewPrivacy +
       ' Please refer to spec/amp-localstorage.md for more information on' +
@@ -1086,6 +1081,7 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-analytics/0.1/cookie-writer.js',
       'extensions/amp-analytics/0.1/requests.js',
       'extensions/amp-analytics/0.1/variables.js',
+      'extensions/amp-consent/0.1/cookie-writer.js',
     ],
   },
   '\\.expandInputValueSync\\(': {
@@ -1162,7 +1158,7 @@ const forbiddenTermsSrcInclusive = {
     message: 'Unsupported on IE; use trim() or a helper instead.',
     allowlist: ['validator/js/engine/validator.js'],
   },
-  "process\\.env(\\.|\\[\\')(TRAVIS|GITHUB_ACTIONS|CIRCLECI)": {
+  "process\\.env(\\.|\\[\\')(GITHUB_ACTIONS|CIRCLECI)": {
     message:
       'Do not directly use CI-specific environment vars. Instead, add a ' +
       'function to build-system/common/ci.js',

@@ -189,6 +189,8 @@ function createDriver(browserName, args, deviceName) {
       //which is also when `Server terminated early with status 1` began appearing. Coincidence? Maybe.
       driver.onQuit = null;
       return driver;
+    case 'safari':
+      return new Builder().forBrowser(browserName).build();
   }
 }
 
@@ -230,12 +232,27 @@ function getFirefoxArgs(config) {
  * @typedef {{
  *  browsers: (!Array<string>|undefined),
  *  environments: (!Array<!AmpdocEnvironment>|undefined),
- *  testUrl: string,
+ *  testUrl: string|undefined,
+ *  fixture: string,
  *  initialRect: ({{width: number, height:number}}|undefined),
  *  deviceName: string|undefined,
+ *  version: string|undefined,
  * }}
  */
 let TestSpec;
+
+/**
+ * @typedef {{
+ *  browsers: (!Array<string>|undefined),
+ *  environments: (!Array<!AmpdocEnvironment>|undefined),
+ *  testUrl: string|undefined,
+ *  fixture: string,
+ *  initialRect: ({{width: number, height:number}}|undefined),
+ *  deviceName: string|undefined,
+ *  versions: {{[version: string]: TestSpec}}
+ * }}
+ */
+let RootSpec;
 
 /**
  * An end2end test using Selenium Web Driver or Puppeteer
@@ -505,12 +522,35 @@ function describeEnv(factory) {
 
   /**
    * @param {string} name
-   * @param {!Object} spec
+   * @param {!RootSpec} spec
    * @param {function(!Object)} fn
    * @return {function()}
    */
   const mainFunc = function (name, spec, fn) {
-    return templateFunc(name, spec, fn, describe);
+    const {versions, ...baseSpec} = spec;
+    if (!versions) {
+      // If a version is provided, add a prefix to the test suite name.
+      const {version} = spec;
+      templateFunc(
+        version ? `[v${version}] ${name}` : name,
+        spec,
+        fn,
+        describe
+      );
+    } else {
+      // A root `describes.endtoend` spec may contain a `versions` object, where
+      // the key represents the version number and the value is an object with
+      // test specs for that version. This allows specs to share test fixtures,
+      // browsers, and other settings.
+      Object.entries(versions).forEach(([version, versionSpec]) => {
+        const fullSpec = {
+          ...baseSpec,
+          ...versionSpec,
+          version,
+        };
+        templateFunc(`[v${version}] ${name}`, fullSpec, fn, describe);
+      });
+    }
   };
 
   /**
@@ -534,7 +574,7 @@ class EndToEndFixture {
   /** @param {!TestSpec} spec */
   constructor(spec) {
     /** @const */
-    this.spec = spec;
+    this.spec = this.setTestUrl(spec);
   }
 
   /**
@@ -552,6 +592,7 @@ class EndToEndFixture {
     const ampDriver = new AmpDriver(controller);
     env.controller = controller;
     env.ampDriver = ampDriver;
+    env.version = this.spec.version;
 
     installBrowserAssertions(controller.networkLogger);
 
@@ -579,6 +620,26 @@ class EndToEndFixture {
       await controller.dispose();
     }
   }
+
+  /**
+   * Translate relative fixture specs into localhost test URL.
+   * @param {!TestSpec} spec
+   * @return {!TestSpec}
+   */
+  setTestUrl(spec) {
+    const {testUrl, fixture} = spec;
+
+    if (testUrl) {
+      throw new Error(
+        'Setting `testUrl` directly is no longer permitted in e2e tests; please use `fixture` instead'
+      );
+    }
+
+    return {
+      ...spec,
+      testUrl: `http://localhost:8000/test/fixtures/e2e/${fixture}`,
+    };
+  }
 }
 
 /**
@@ -604,9 +665,16 @@ function getDriver(
 
 async function setUpTest(
   {environment, ampDriver, controller},
-  {testUrl, experiments = [], initialRect}
+  {testUrl, version, experiments = [], initialRect}
 ) {
   const url = new URL(testUrl);
+
+  // When a component version is specified in the e2e spec, provide it as a
+  // request param.
+  if (version) {
+    url.searchParams.set('componentVersion', version);
+  }
+
   if (experiments.length > 0) {
     if (environment.includes('inabox')) {
       // inabox experiments are toggled at server side using <meta> tag
@@ -652,6 +720,7 @@ function intersect(a, b) {
 }
 
 module.exports = {
+  RootSpec,
   TestSpec,
   endtoend,
   configure,

@@ -175,7 +175,7 @@ function getExpandStateTrigger(section) {
       dict()
     );
     action.trigger(section, eventName, event, ActionTrust.HIGH);
-    dispatchCustomEvent(section, name);
+    dispatchCustomEvent(section, eventName);
   };
   return triggerEvent;
 }

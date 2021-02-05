@@ -14,11 +14,42 @@
  * limitations under the License.
  */
 
+/*
+ * Pre-upgrade:
+ * - display:inline-block element
+ * - size-defined element
+ * - predefined default size
+ */
+amp-social-share {
+  display: inline-block;
+  overflow: hidden;
+  position: relative;
+  box-sizing: border-box;
+  width: 60px;
+  height: 44px;
+}
+
+/* Pre-upgrade: size-defining element - hide children until build. */
+amp-social-share:not(.i-amphtml-built) > :not([placeholder]):not(.i-amphtml-svc) {
+  display: none;
+  content-visibility: hidden;
+}
+
 /**
   * Note: Attribute selectors were used initially here but we switched to using
   * class-based selector to style each type because of a bug on iOS Safari 8.
   * See https://github.com/ampproject/amphtml/issues/4277 for more details.
   */
+
+amp-social-share:focus {
+  outline: #0389ff solid 2px;
+  outline-offset: 2px;
+}
+
+amp-social-share::part(button):focus {
+  outline: none !important;
+  outline-offset: 0 !important;
+}
 
 /* Twitter Styling */
 .amp-social-share-twitter {
