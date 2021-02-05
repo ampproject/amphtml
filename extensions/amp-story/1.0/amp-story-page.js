@@ -1842,23 +1842,32 @@ export class AmpStoryPage extends AMP.BaseElement {
       const attachmentHref = attachmentEl.getAttribute('href');
       if (attachmentHref) {
         this.openAttachmentEl_.setAttribute('href', attachmentHref);
+        this.openAttachmentEl_.setAttribute('outlink-attachment', '');
+      }
+
+      const isDarkTheme = attachmentEl.hasAttribute('dark-theme');
+      if (isDarkTheme) {
+        this.openAttachmentEl_.setAttribute('dark-theme', '');
       }
 
       this.openAttachmentEl_.addEventListener('click', (e) => {
         e.preventDefault();
-        const openIcon = this.element.querySelector(
-          '.i-amphtml-story-page-open-attachment-icon'
+        const openAttachmentWrapper = this.element.querySelector(
+          '.i-amphtml-story-page-open-attachment'
         );
-        openIcon.style.opacity = '0';
-        openIcon.style.transition = 'opacity .3s';
-        // setTimeout(() => {
+        openAttachmentWrapper.classList.add('opening');
         this.openAttachment(true, 1000);
-        // }, 1000);
       });
 
       const textEl = this.openAttachmentEl_.querySelector(
         '.i-amphtml-story-page-open-attachment-label'
       );
+
+      // const faviconImg = document.createElement('img');
+      // const faviconBaseURL =
+      //   'https://s2.googleusercontent.com/s2/favicons?domain_url=';
+      // faviconImg.src = faviconBaseURL + attachmentHref;
+      // console.log(faviconBaseURL + attachmentHref);
 
       const openLabelAttr = attachmentEl.getAttribute('data-cta-text');
       const openLabel =
@@ -1867,8 +1876,14 @@ export class AmpStoryPage extends AMP.BaseElement {
           LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
         );
 
+      const favImgLink = attachmentEl.getAttribute('fav-img');
+      const favImg = favImgLink ? `<img src=${favImgLink}></img>` : '';
+      const textElContent = favImg + openLabel;
+
       this.mutateElement(() => {
-        textEl.textContent = openLabel;
+        textEl.innerHTML = textElContent;
+        // textEl.appendChild(faviconImg);
+        // textEl.textContent = openLabel;
         this.element.appendChild(this.openAttachmentEl_);
       });
     }

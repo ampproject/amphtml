@@ -73,6 +73,15 @@
   }
 }
 
+@keyframes open-attachment-opacity-fade {
+  0% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
 @keyframes open-attachment-icon {
   0% {
     transform: translateY(14px);
@@ -80,6 +89,15 @@
   to {
     transform: translateY(0);
   }
+}
+
+@keyframes open-outlink-attachment-icon {
+  0% {
+    transform: translateY(18px);
+  }
+  100% {
+    transform: translateY(14px);
+  } 
 }
 
 @keyframes open-attachment-icon-explode {
@@ -145,6 +163,10 @@ amp-story-page[active] .i-amphtml-story-page-open-attachment {
   text-decoration: none !important;
 }
 
+amp-story-page [outlink-attachment].i-amphtml-story-page-open-attachment.opening {
+  animation: open-attachment-opacity-fade 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) both !important;
+}
+
 amp-story-page .i-amphtml-story-page-open-attachment > * {
   cursor: pointer !important;
   pointer-events: auto !important;
@@ -158,6 +180,10 @@ amp-story-page .i-amphtml-story-page-open-attachment-icon {
   animation: open-attachment-icon 0.2s cubic-bezier(0.4, 0.0, 0.2, 1) 2s both !important;
 }
 
+amp-story-page [outlink-attachment] .i-amphtml-story-page-open-attachment-icon {
+  animation: open-outlink-attachment-icon 0.2s cubic-bezier(0.4, 0.0, 0.2, 1) 2s both !important;
+}
+
 amp-story-page .i-amphtml-story-page-open-attachment-icon::after {
   content: "" !important;
   position: absolute !important;
@@ -169,6 +195,11 @@ amp-story-page .i-amphtml-story-page-open-attachment-icon::after {
   border-radius: 100% !important;
   z-index: -1 !important;
   animation: open-attachment-icon-explode 0.25s cubic-bezier(0.4, 0.0, 0.2, 1) 2s both !important;
+}
+
+amp-story-page [outlink-attachment] .i-amphtml-story-page-open-attachment-icon::after  {
+  content: none !important;
+  animation: none !important;
 }
 
 amp-story-page .i-amphtml-story-page-open-attachment-bar-left,
@@ -187,10 +218,29 @@ amp-story-page .i-amphtml-story-page-open-attachment-bar-left {
              open-attachment-bar-left 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) both !important;
 }
 
+
+amp-story-page [outlink-attachment] .i-amphtml-story-page-open-attachment-bar-left  {
+  background: #fff;
+  animation: open-attachment-bar-left 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) both !important;
+}
+
+amp-story-page [outlink-attachment][dark-theme] .i-amphtml-story-page-open-attachment-bar-left  {
+  background: black;
+}
+
 amp-story-page .i-amphtml-story-page-open-attachment-bar-right {
   right: 6px !important;
   animation: open-attachment-icon-color 0.25s cubic-bezier(0.4, 0.0, 0.2, 1) 2s both,
              open-attachment-bar-right 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) both !important;
+}
+
+amp-story-page [outlink-attachment] .i-amphtml-story-page-open-attachment-bar-right {
+  background: #fff;
+  animation: open-attachment-bar-right 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) both !important;
+}
+
+amp-story-page [outlink-attachment][dark-theme] .i-amphtml-story-page-open-attachment-bar-right  {
+  background: black;
 }
 
 amp-story-page .i-amphtml-story-page-open-attachment-label {
@@ -208,6 +258,39 @@ amp-story-page .i-amphtml-story-page-open-attachment-label {
   text-overflow: ellipsis !important;
   text-shadow: 0px 0px 6px rgba(0, 0, 0, 0.36) !important;
   white-space: nowrap !important;
+}
+
+amp-story-page [outlink-attachment] .i-amphtml-story-page-open-attachment-label {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: auto !important;
+  padding: 7px 14px 7px 7px !important;
+  border-radius: 24px !important;
+  background-color: white;
+  color: black !important;
+  margin: 12px 32px 20px!important;
+  font-size: 14px !important;
+  text-shadow: none !important;
+}
+
+
+
+amp-story-page [outlink-attachment][dark-theme] .i-amphtml-story-page-open-attachment-label {
+  background-color: black !important;
+  color: white !important;
+}
+
+amp-story-page [outlink-attachment] .i-amphtml-story-page-open-attachment-label img {
+  border-radius: 20px !important;
+  width: 24px !important;
+  height: 24px !important;
+  margin-right: 6px !important;
+}
+
+amp-story-page [outlink-attachment][dark-theme] .i-amphtml-story-page-open-attachment-label img {
+  box-sizing: border-box !important;
+  border: 1px solid rgba(0,0,0,6%) !important;
 }
 
 .i-amphtml-inner-header-el {
