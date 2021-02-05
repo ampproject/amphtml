@@ -1855,7 +1855,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         const openAttachmentWrapper = this.element.querySelector(
           '.i-amphtml-story-page-open-attachment'
         );
-        openAttachmentWrapper.classList.add('opening');
+        // openAttachmentWrapper.classList.add('opening');
         this.openAttachment(true, 1000);
       });
 

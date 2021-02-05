@@ -263,6 +263,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     if (this.state_ === DrawerState.OPEN) {
       return;
     }
+
     document
       .querySelector('amp-story')
       .classList.add('i-amphtml-story-bookend-active');
@@ -293,6 +294,16 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     );
 
     if (this.type_ === AttachmentType.REMOTE) {
+      // this.mutateElement(() => {
+      //   const checkClose = (e) => {
+      //     console.log(e.target);
+      //     this.close_();
+      //     this.win.removeEventListener('click', checkClose);
+      //   };
+      //   this.win.addEventListener('click', checkClose);
+      // });
+
+      // this.close_();
       this.openRemote_(delay);
     }
   }
@@ -308,14 +319,6 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     animationEl.classList.add('i-amphtml-story-page-attachment-expand');
     const storyEl = closest(this.element, (el) => el.tagName === 'AMP-STORY');
 
-    // const remoteTitle = this.element.querySelector(
-    //   '.i-amphtml-story-page-attachment-remote-title'
-    // );
-    // remoteTitle.style.whiteSpace = 'nowrap';
-    // remoteTitle.innerHTML = `<span style="padding: 0">Opening</span> ${this.element.getAttribute(
-    //   'href'
-    // )}`;
-
     this.win.setTimeout(() => {
       this.mutateElement(() => {}).then(() => {
         storyEl.appendChild(animationEl);
@@ -327,6 +330,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
           this.win,
           this.element.getAttribute('href')
         );
+        this.close_();
       });
     }, 50 + delay);
   }

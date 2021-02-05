@@ -26,6 +26,30 @@
   height: 58px !important;
 }
 
+.i-amphtml-story-page-attachment-remote[outlink-attachment].i-amphtml-story-draggable-drawer-open:before {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  color: black;
+  bottom: 0;
+  left: 0;
+  background-color: rgba(0,0,0,.6);
+  /* background-color: rgba(0,0,0,.4); */
+  z-index: 1;
+  transform-origin: left;
+  animation: animate-progress 1s;
+}
+
+@keyframes animate-progress {
+  0% {
+    transform: scaleX(0)
+  }
+  100% {
+    transform: scaleX(1)
+  }
+}
+
 .i-amphtml-story-page-attachment-remote .i-amphtml-story-draggable-drawer-container {
   height: 100% !important;
   border-radius: 8px 8px 0 0 !important;
@@ -168,7 +192,7 @@ amp-story-page[active] .i-amphtml-story-page-open-attachment {
   text-decoration: none !important;
 }
 
-amp-story-page [outlink-attachment].i-amphtml-story-page-open-attachment.opening {
+.i-amphtml-story-bookend-active amp-story-page [outlink-attachment].i-amphtml-story-page-open-attachment {
   animation: open-attachment-opacity-fade 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) both !important;
 }
 
@@ -365,7 +389,8 @@ amp-story-page [outlink-attachment][dark-theme] .i-amphtml-story-page-open-attac
 /** Remote attachment opening animation */
 
 .i-amphtml-story-page-attachment-expand {
-  position: relative !important;
+  position: fixed !important;
+  top: 0 !important;
   width: 100% !important;
   height: 100% !important;
   background: #FFF !important;
