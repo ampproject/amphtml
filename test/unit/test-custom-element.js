@@ -1546,7 +1546,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         });
       });
 
-      describe.only('prerenderAllowed', () => {
+      describe('prerenderAllowed', () => {
         it('should NOT be allowed for an upgraded element', () => {
           const element = new StubElementClass();
           expect(element.prerenderAllowed()).to.be.false;
