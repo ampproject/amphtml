@@ -27,12 +27,12 @@ import {AmpGoogleAssistantVoiceButton} from './amp-google-assistant-voice-button
 import {AssistjsConfigService} from './assistjs-config-service';
 import {AssistjsFrameService} from './assistjs-frame-service';
 import {CSS} from '../../../build/amp-google-assistant-assistjs-0.1.css';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {Services} from '../../../src/services';
 
 export class AmpGoogleAssistantAssistjsConfig extends AMP.BaseElement {
   /** @override */
-  isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout);
+  buildCallback() {
+    Services.assistjsConfigServiceForDoc(this.element).initializeConfigs();
   }
 }
 

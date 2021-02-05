@@ -19,51 +19,62 @@
  * and provides config parameters to other assist.js components.
  */
 
+import {Deferred} from '../../../src/utils/promise';
+import {hasOwn} from '../../../src/utils/object';
+
 export class AssistjsConfigService {
   /** */
   constructor() {
-    const config = JSON.parse(
-      document.getElementsByTagName('amp-google-assistant-assistjs-config')[0]
-        .textContent
-    );
-
-    if (!config.hasOwn('projectId')) {
-      throw new Error('Project id is required to embed assist.js.');
-    }
     /** @private {string} */
-    this.projectId_ = config.projectId;
+    this.projectId_ = '';
 
     /** @private {string} */
-    this.assistjsServer_ = config.hasOwn('assistjsServer')
-      ? config.assistjsServer
-      : 'https://actions.google.com';
+    this.assistjsServer_ = 'https://actions.google.com';
 
     /** @private {boolean} */
-    this.devMode_ = config.hasOwn('devMode') ? config.devMode : false;
+    this.devMode_ = false;
 
     /** @private {string} */
-    this.hostUrl_ = config.hasOwn('hostUrl')
-      ? config.hostUrl
-      : window.location.href;
+    this.hostUrl_ = window.location.href;
+
+    /** @private {Deferred} */
+    this.initializedDeferred_ = new Deferred();
   }
 
   /** @return {string} */
-  getAssistjsServer() {
-    return this.assistjsServer_;
+  initializeConfigs() {
+    const configElements = document.getElementsByTagName(
+      'amp-google-assistant-assistjs-config'
+    );
+    if (configElements.length != 1) {
+      throw new Error('No assist.js config or more than one is provided.');
+    }
+    const config = JSON.parse(configElements[0].textContent);
+
+    if (!hasOwn(config, 'projectId')) {
+      throw new Error('Project id is required to embed assist.js.');
+    }
+    this.projectId_ = config.projectId;
+
+    if (hasOwn(config, 'assistjsServer')) {
+      this.assistjsServer_ = config.assistjsServer;
+    }
+    if (hasOwn(config, 'devMode')) {
+      this.devMode_ = config.devMode;
+    }
+    if (hasOwn(config, 'hostUrl')) {
+      this.hostUrl_ = config.hostUrl;
+    }
+    this.initializedDeferred_.resolve();
   }
 
-  /** @return {string} */
-  getProjectId() {
-    return this.projectId_;
-  }
-
-  /** @return {boolean} */
-  getDevMode() {
-    return this.devMode_;
-  }
-
-  /** @return {string} */
-  getHostUrl() {
-    return this.hostUrl_;
+  /**
+   * @param {string} widgetName
+   * @return {Promise<string>}
+   */
+  getWidgetIframeUrl(widgetName) {
+    return this.initializedDeferred_.promise.then(() => {
+      return `${this.assistjsServer_}/assist/${widgetName}?origin=${origin}&projectId=${this.projectId_}&dev=${this.devMode_}&hostUrl=${this.hostUrl_}`;
+    });
   }
 }

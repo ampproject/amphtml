@@ -32,11 +32,14 @@
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
-  <amp-google-assistant-voice-button layout="responsive" width="150" height="40" project="aog-assistjs-demos" dev=true>
+  <amp-google-assistant-assistjs-config layout="nodisplay">
+    <script type="application/json">{"devMode": true, "projectId": "aog-assistjs-demos", "hostUrl": "https://toidemo2.web.app"}</script>
+  </amp-google-assistant-assistjs-config>
+  <amp-google-assistant-voice-button layout="responsive" width="150" height="40">
   </amp-google-assistant-voice-button>
-  <amp-google-assistant-voice-bar layout="responsive" width="150" height="40" project="aog-assistjs-demos" dev=true>
+  <amp-google-assistant-voice-bar layout="responsive" width="150" height="40">
   </amp-google-assistant-voice-bar>
-  <amp-google-assistant-inline-suggestion-bar layout="responsive" width="150" height="40" project="aog-assistjs-demos" dev=true>
+  <amp-google-assistant-inline-suggestion-bar layout="responsive" width="150" height="40">
   </amp-google-assistant-inline-suggestion-bar>
 </body>
 </html>

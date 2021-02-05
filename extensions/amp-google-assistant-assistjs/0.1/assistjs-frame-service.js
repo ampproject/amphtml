@@ -18,9 +18,11 @@
  * @fileoverview The shared service used by all custom elements to talk to Assistant services. It loads an iframe that exports
  * endpoints to handle requests from custom elements.
  */
+
 import 'regenerator-runtime/runtime';
 import {Services} from '../../../src/services';
-import {createElementWithAttributes} from '../../../src/dom';
+import {addAttributesToElement} from '../../../src/dom';
+import {toggle} from '../../../src/style';
 
 export class AssistjsFrameService {
   /**
@@ -39,16 +41,14 @@ export class AssistjsFrameService {
 
   /** @private */
   createAssistantIframe_() {
-    Services.assistjsConfigServiceForDoc(this.ampDoc_).then((configService) => {
-      this.configService_ = configService;
-
-      const frameUrl = `${this.configService_.getAssistjsServer()}/assist/voicebar?origin=${origin}&projectId=${this.configService_.getProjectId()}&dev=${this.configService_.getDevMode()}&hostUrl=${this.configService_.getHostUrl()}`;
-      const iframe = createElementWithAttributes(this.win.document, 'iframe', {
-        src: frameUrl,
+    this.configService_ = Services.assistjsConfigServiceForDoc(this.ampDoc_);
+    const iframe = this.ampDoc_.getRootNode().createElement('iframe');
+    this.configService_.getWidgetIframeUrl('frame').then((iframeUrl) => {
+      addAttributesToElement(iframe, {
+        src: iframeUrl,
         allow: 'microphone',
-        style: {display: 'none'},
       });
-
+      toggle(iframe, false);
       document.body.appendChild(iframe);
     });
   }

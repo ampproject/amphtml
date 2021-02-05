@@ -24,6 +24,14 @@ tags: {  # amp-google-assistant-assistjs
   }
   attr_lists: "common-extension-attrs"
 }
+tags: {  # <amp-google-assistant-assistjs-config>
+  html_format: AMP
+  tag_name: "AMP-GOOGLE-ASSISTANT-ASSISTJS-CONFIG"
+  requires_extension: "amp-google-assistant-assistjs"
+  amp_layout: {
+    supported_layouts: NODISPLAY
+  }
+}
 tags: {  # <amp-google-assistant-voice-button>
   html_format: AMP
   tag_name: "AMP-GOOGLE-ASSISTANT-VOICE-BUTTON"

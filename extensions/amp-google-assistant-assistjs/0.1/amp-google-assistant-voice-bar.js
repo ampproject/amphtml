@@ -20,7 +20,7 @@
  */
 
 import {Services} from '../../../src/services';
-import {createElementWithAttributes} from '../../../src/dom';
+import {addAttributesToElement} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
 
 export class AmpGoogleAssistantVoiceBar extends AMP.BaseElement {
@@ -33,10 +33,8 @@ export class AmpGoogleAssistantVoiceBar extends AMP.BaseElement {
   }
 
   /** @override */
-  async buildCallback() {
-    this.configService_ = await Services.assistjsConfigServiceForDoc(
-      this.element
-    );
+  buildCallback() {
+    this.configService_ = Services.assistjsConfigServiceForDoc(this.element);
   }
 
   /** @override */
@@ -47,9 +45,11 @@ export class AmpGoogleAssistantVoiceBar extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     // Set frame URL to an embed endpoint.
-    const frameUrl = `${this.configService_.getAssistjsServer()}/assist/voicebar?origin=${origin}&projectId=${this.configService_.getProjectId()}&dev=${this.configService_.getDevMode()}&hostUrl=${this.configService_.getHostUrl()}`;
-    const iframe = createElementWithAttributes(this.win.document, 'iframe', {
-      src: frameUrl,
+    const iframe = this.win.document.createElement('iframe');
+    this.configService_.getWidgetIframeUrl('voicebar').then((iframeUrl) => {
+      addAttributesToElement(iframe, {
+        src: iframeUrl,
+      });
     });
 
     // applyFillContent so that frame covers the entire component.
