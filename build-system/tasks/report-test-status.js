@@ -39,6 +39,7 @@ const TEST_TYPE_SUBTYPES = isGithubActionsBuild()
   ? new Map([
       ['integration', ['firefox', 'safari', 'edge', 'ie']],
       ['unit', ['firefox', 'safari', 'edge']],
+      ['e2e', ['firefox', 'safari']],
     ])
   : isCircleciBuild()
   ? new Map([
@@ -79,6 +80,10 @@ function inferTestType() {
     ? 'edge'
     : argv.ie
     ? 'ie'
+    : argv.browsers == 'safari'
+    ? 'safari'
+    : argv.browsers == 'firefox'
+    ? 'firefox'
     : argv.compiled
     ? 'nomodule'
     : 'unminified';
