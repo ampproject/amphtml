@@ -444,9 +444,7 @@ export class Expander {
     if (!argsArray) {
       return argsArray;
     }
-    return argsArray.map((argArray) => {
-      return argArray.join('');
-    });
+    return argsArray.map((argArray) => argArray.join(''));
   }
 
   /**

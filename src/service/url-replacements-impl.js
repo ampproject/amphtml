@@ -115,9 +115,10 @@ export class GlobalVariableSource extends VariableSource {
 
     // Provides a counter starting at 1 per given scope.
     const counterStore = Object.create(null);
-    this.set('COUNTER', (scope) => {
-      return (counterStore[scope] = (counterStore[scope] | 0) + 1);
-    });
+    this.set(
+      'COUNTER',
+      (scope) => (counterStore[scope] = (counterStore[scope] | 0) + 1)
+    );
 
     // Returns the canonical URL for this AMP document.
     this.set('CANONICAL_URL', () => this.getDocInfo_().canonicalUrl);
@@ -176,9 +177,9 @@ export class GlobalVariableSource extends VariableSource {
     });
 
     // Returns the URL for this AMP document.
-    this.set('AMPDOC_URL', () => {
-      return removeFragment(this.addReplaceParamsIfMissing_(win.location.href));
-    });
+    this.set('AMPDOC_URL', () =>
+      removeFragment(this.addReplaceParamsIfMissing_(win.location.href))
+    );
 
     // Returns the host of the URL for this AMP document.
     this.set('AMPDOC_HOST', () => {
@@ -247,9 +248,9 @@ export class GlobalVariableSource extends VariableSource {
     // Second parameter is an optional default value.
     // For example, if location is 'pub.com/amp.html?x=1#y=2' then
     // FRAGMENT_PARAM(y) returns '2' and FRAGMENT_PARAM(z, 3) returns 3.
-    this.set('FRAGMENT_PARAM', (param, defaultValue = '') => {
-      return this.getFragmentParamData_(param, defaultValue);
-    });
+    this.set('FRAGMENT_PARAM', (param, defaultValue = '') =>
+      this.getFragmentParamData_(param, defaultValue)
+    );
 
     /**
      * Stores client ids that were generated during this page view
@@ -435,9 +436,7 @@ export class GlobalVariableSource extends VariableSource {
     });
 
     // Returns the user agent.
-    this.set('USER_AGENT', () => {
-      return win.navigator.userAgent;
-    });
+    this.set('USER_AGENT', () => win.navigator.userAgent);
 
     // Returns the time it took to load the whole page. (excludes amp-* elements
     // that are not rendered by the system yet.)
@@ -514,31 +513,31 @@ export class GlobalVariableSource extends VariableSource {
     );
 
     // Returns an identifier for the viewer.
-    this.setAsync('VIEWER', () => {
-      return Services.viewerForDoc(this.ampdoc)
+    this.setAsync('VIEWER', () =>
+      Services.viewerForDoc(this.ampdoc)
         .getViewerOrigin()
         .then((viewer) => {
           return viewer == undefined ? '' : viewer;
-        });
-    });
+        })
+    );
 
     // Returns the total engaged time since the content became viewable.
-    this.setAsync('TOTAL_ENGAGED_TIME', () => {
-      return Services.activityForDoc(element).then((activity) => {
-        return activity.getTotalEngagedTime();
-      });
-    });
+    this.setAsync('TOTAL_ENGAGED_TIME', () =>
+      Services.activityForDoc(element).then((activity) =>
+        activity.getTotalEngagedTime()
+      )
+    );
 
     // Returns the incremental engaged time since the last push under the
     // same name.
-    this.setAsync('INCREMENTAL_ENGAGED_TIME', (name, reset) => {
-      return Services.activityForDoc(element).then((activity) => {
-        return activity.getIncrementalEngagedTime(
+    this.setAsync('INCREMENTAL_ENGAGED_TIME', (name, reset) =>
+      Services.activityForDoc(element).then((activity) =>
+        activity.getIncrementalEngagedTime(
           /** @type {string} */ (name),
           reset !== 'false'
-        );
-      });
-    });
+        )
+      )
+    );
 
     this.set('NAV_TIMING', (startAttribute, endAttribute) => {
       userAssert(
@@ -565,27 +564,23 @@ export class GlobalVariableSource extends VariableSource {
       );
     });
 
-    this.set('NAV_TYPE', () => {
-      return getNavigationData(win, 'type');
-    });
+    this.set('NAV_TYPE', () => getNavigationData(win, 'type'));
 
-    this.set('NAV_REDIRECT_COUNT', () => {
-      return getNavigationData(win, 'redirectCount');
-    });
+    this.set('NAV_REDIRECT_COUNT', () =>
+      getNavigationData(win, 'redirectCount')
+    );
 
     // returns the AMP version number
     this.set('AMP_VERSION', () => internalRuntimeVersion());
 
-    this.set('BACKGROUND_STATE', () => {
-      return this.ampdoc.isVisible() ? '0' : '1';
-    });
+    this.set('BACKGROUND_STATE', () => (this.ampdoc.isVisible() ? '0' : '1'));
 
-    this.setAsync('VIDEO_STATE', (id, property) => {
-      return Services.videoManagerForDoc(this.ampdoc).getVideoStateProperty(
+    this.setAsync('VIDEO_STATE', (id, property) =>
+      Services.videoManagerForDoc(this.ampdoc).getVideoStateProperty(
         id,
         property
-      );
-    });
+      )
+    );
 
     this.setAsync('AMP_STATE', (key) => {
       // This is safe since AMP_STATE is not an A4A allowlisted variable.

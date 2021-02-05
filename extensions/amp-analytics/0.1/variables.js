@@ -268,9 +268,11 @@ export class VariableService {
     );
 
     // Returns the content of a meta tag in the ampdoc
-    this.register_('AMPDOC_META', (meta, defaultValue = '') => {
-      return this.ampdoc_.getMetaByName(meta) ?? defaultValue;
-    });
+    this.register_(
+      'AMPDOC_META',
+      (meta, defaultValue = '') =>
+        this.ampdoc_.getMetaByName(meta) ?? defaultValue
+    );
   }
 
   /**

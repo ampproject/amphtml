@@ -309,9 +309,9 @@ export class ProgressBar {
    * @private
    */
   getBarWidth_() {
-    return this.mutator_.measureElement(() => {
-      return this.getRoot()./*OK*/ getBoundingClientRect().width;
-    });
+    return this.mutator_.measureElement(
+      () => this.getRoot()./*OK*/ getBoundingClientRect().width
+    );
   }
 
   /**

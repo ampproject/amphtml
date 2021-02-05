@@ -204,9 +204,7 @@ export function makeBodyVisible(doc) {
   devAssert(doc.defaultView, 'Passed in document must have a defaultView');
   const win = /** @type {!Window} */ (doc.defaultView);
   waitForBodyOpenPromise(doc)
-    .then(() => {
-      return waitForServices(win);
-    })
+    .then(() => waitForServices(win))
     .catch((reason) => {
       rethrowAsync(reason);
       return [];

@@ -67,13 +67,12 @@ describes.realWin(
       );
     });
 
-    it('requires data-id', () => {
-      return allowConsoleError(() => {
-        return get3QElement('').should.eventually.be.rejectedWith(
+    it('requires data-id', () =>
+      allowConsoleError(() =>
+        get3QElement('').should.eventually.be.rejectedWith(
           /The data-id attribute is required/
-        );
-      });
-    });
+        )
+      ));
 
     it('should forward events from amp-3q-player to the amp element', async () => {
       const player = await get3QElement('c8dbe7f4-7f7f-11e6-a407-0cc47a188158');

@@ -167,13 +167,13 @@ export class RequestHandler {
       bindings,
       this.element_,
       this.allowlist_
-    ).then((params) => {
-      return dict({
+    ).then((params) =>
+      dict({
         'trigger': trigger['on'],
         'timestamp': timestamp,
         'extraUrlParams': params,
-      });
-    });
+      })
+    );
     this.batchSegmentPromises_.push(batchSegmentPromise);
     this.trigger_(isImportant || !this.batchInterval_);
   }
@@ -418,9 +418,7 @@ export function expandPostMessage(
 
   const basePromise = variableService
     .expandTemplate(msg, expansionOption, element)
-    .then((base) => {
-      return urlReplacementService.expandStringAsync(base, bindings);
-    });
+    .then((base) => urlReplacementService.expandStringAsync(base, bindings));
   if (msg.indexOf('${extraUrlParams}') < 0) {
     // No need to append extraUrlParams
     return basePromise;
@@ -436,11 +434,9 @@ export function expandPostMessage(
       expansionOption,
       bindings,
       element
-    ).then((extraUrlParams) => {
-      return defaultSerializer(expandedMsg, [
-        dict({'extraUrlParams': extraUrlParams}),
-      ]);
-    });
+    ).then((extraUrlParams) =>
+      defaultSerializer(expandedMsg, [dict({'extraUrlParams': extraUrlParams})])
+    );
   });
 }
 

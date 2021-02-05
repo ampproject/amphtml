@@ -138,8 +138,8 @@ export class JwtHelper {
    * @return {!Promise<!webCrypto.CryptoKey>}
    */
   importKey_(pemPromise) {
-    return pemPromise.then((pem) => {
-      return this.subtle_.importKey(
+    return pemPromise.then((pem) =>
+      this.subtle_.importKey(
         /* format */ 'spki',
         pemToBytes(pem),
         /* algo options */ {
@@ -148,7 +148,7 @@ export class JwtHelper {
         },
         /* extractable */ false,
         /* uses */ ['verify']
-      );
-    });
+      )
+    );
   }
 }

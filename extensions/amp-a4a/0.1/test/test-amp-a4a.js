@@ -288,20 +288,16 @@ describe('amp-a4a', () => {
       const ampdocService = Services.ampdocServiceFor(doc.defaultView);
       return ampdocService.getAmpDoc(element);
     };
-    element.isBuilt = () => {
-      return true;
-    };
+    element.isBuilt = () => true;
     element.getLayout = () => 'fixed';
     element.getLayoutBox = () => layoutBox;
     element.getLayoutSize = () => layoutSizeFromRect(layoutBox);
-    element.getIntersectionChangeEntry = () => {
-      return {
-        time: null,
-        boundingClientRect: {},
-        rootBounds: {},
-        intersectionRect: {},
-      };
-    };
+    element.getIntersectionChangeEntry = () => ({
+      time: null,
+      boundingClientRect: {},
+      rootBounds: {},
+      intersectionRect: {},
+    });
     const signals = new Signals();
     element.signals = () => signals;
     element.renderStarted = () => {
@@ -1723,15 +1719,10 @@ describe('amp-a4a', () => {
         }
       }
     }
-    it('#layoutCallback valid AMP', () => {
-      return executeLayoutCallbackTest(true);
-    });
-    it('#layoutCallback not valid AMP', () => {
-      return executeLayoutCallbackTest(false);
-    });
-    it('#layoutCallback AMP render fail, recover non-AMP', () => {
-      return executeLayoutCallbackTest(true, true);
-    });
+    it('#layoutCallback valid AMP', () => executeLayoutCallbackTest(true));
+    it('#layoutCallback not valid AMP', () => executeLayoutCallbackTest(false));
+    it('#layoutCallback AMP render fail, recover non-AMP', () =>
+      executeLayoutCallbackTest(true, true));
     it('should run end-to-end in the presence of an XHR error', async () => {
       const fixture = await createIframePromise();
       setupForAdTesting(fixture);

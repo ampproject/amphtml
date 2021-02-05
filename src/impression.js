@@ -215,9 +215,7 @@ function handleClickUrl(win) {
   // TODO(@zhouyx) need test with a real response.
   return ampdoc
     .whenFirstVisible()
-    .then(() => {
-      return invoke(win, dev().assertString(clickUrl));
-    })
+    .then(() => invoke(win, dev().assertString(clickUrl)))
     .then((response) => {
       applyResponse(win, response);
     })

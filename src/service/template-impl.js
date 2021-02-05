@@ -72,9 +72,9 @@ export class Templates {
    * @return {!Promise<(!Element|!Array<!Element>)>}
    */
   setHtmlForTemplate(templateElement, html) {
-    return this.getImplementation_(templateElement).then((impl) => {
-      return this.setHtml_(impl, html);
-    });
+    return this.getImplementation_(templateElement).then((impl) =>
+      this.setHtml_(impl, html)
+    );
   }
 
   /**
@@ -84,9 +84,9 @@ export class Templates {
    * @return {!Promise<!Element>}
    */
   renderTemplate(templateElement, data) {
-    return this.getImplementation_(templateElement).then((impl) => {
-      return this.render_(impl, data);
-    });
+    return this.getImplementation_(templateElement).then((impl) =>
+      this.render_(impl, data)
+    );
   }
 
   /**
@@ -96,9 +96,9 @@ export class Templates {
    * @return {!Promise<!Element>}
    */
   renderTemplateAsString(templateElement, data) {
-    return this.getImplementation_(templateElement).then((impl) => {
-      return impl.renderAsString(data);
-    });
+    return this.getImplementation_(templateElement).then((impl) =>
+      impl.renderAsString(data)
+    );
   }
 
   /**
@@ -112,11 +112,9 @@ export class Templates {
     if (array.length == 0) {
       return Promise.resolve([]);
     }
-    return this.getImplementation_(templateElement).then((impl) => {
-      return array.map((item) => {
-        return this.render_(impl, item);
-      });
-    });
+    return this.getImplementation_(templateElement).then((impl) =>
+      array.map((item) => this.render_(impl, item))
+    );
   }
 
   /**

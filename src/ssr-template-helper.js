@@ -96,8 +96,8 @@ export class SsrTemplateHelper {
     if (!opt_templates) {
       mustacheTemplate = this.templates_.maybeFindTemplate(element);
     }
-    return this.assertTrustedViewer(element).then(() => {
-      return this.viewer_.sendMessageAwaitResponse(
+    return this.assertTrustedViewer(element).then(() =>
+      this.viewer_.sendMessageAwaitResponse(
         'viewerRenderTemplate',
         this.buildPayload_(
           request,
@@ -105,8 +105,8 @@ export class SsrTemplateHelper {
           opt_templates,
           opt_attributes
         )
-      );
-    });
+      )
+    );
   }
 
   /**

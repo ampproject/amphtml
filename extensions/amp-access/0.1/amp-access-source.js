@@ -301,9 +301,9 @@ export class AccessSource {
    * @return {!Promise<string>}
    */
   buildUrl(url, useAuthData) {
-    return this.prepareUrlVars_(useAuthData).then((vars) => {
-      return this.urlReplacements_.expandUrlAsync(url, vars);
-    });
+    return this.prepareUrlVars_(useAuthData).then((vars) =>
+      this.urlReplacements_.expandUrlAsync(url, vars)
+    );
   }
 
   /**
@@ -312,9 +312,9 @@ export class AccessSource {
    * @return {!Promise<!Object<string, *>>}
    */
   collectUrlVars(url, useAuthData) {
-    return this.prepareUrlVars_(useAuthData).then((vars) => {
-      return this.urlReplacements_.collectVars(url, vars);
-    });
+    return this.prepareUrlVars_(useAuthData).then((vars) =>
+      this.urlReplacements_.collectVars(url, vars)
+    );
   }
 
   /**

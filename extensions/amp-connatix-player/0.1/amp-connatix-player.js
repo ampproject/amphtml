@@ -60,9 +60,7 @@ export function allSettled(promises) {
     return {status: 'rejected', reason};
   }
   return Promise.all(
-    promises.map((promise) => {
-      return promise.then(onFulfilled, onRejected);
-    })
+    promises.map((promise) => promise.then(onFulfilled, onRejected))
   );
 }
 

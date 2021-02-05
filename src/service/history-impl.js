@@ -95,15 +95,17 @@ export class History {
    * @return {!Promise<!HistoryIdDef>}
    */
   push(opt_onPop, opt_stateUpdate) {
-    return this.enque_(() => {
-      return this.binding_.push(opt_stateUpdate).then((historyState) => {
-        this.onStateUpdated_(historyState);
-        if (opt_onPop) {
-          this.stackOnPop_[historyState.stackIndex] = opt_onPop;
-        }
-        return historyState.stackIndex;
-      });
-    }, 'push');
+    return this.enque_(
+      () =>
+        this.binding_.push(opt_stateUpdate).then((historyState) => {
+          this.onStateUpdated_(historyState);
+          if (opt_onPop) {
+            this.stackOnPop_[historyState.stackIndex] = opt_onPop;
+          }
+          return historyState.stackIndex;
+        }),
+      'push'
+    );
   }
 
   /**
@@ -116,11 +118,13 @@ export class History {
    * @return {!Promise}
    */
   pop(stateId) {
-    return this.enque_(() => {
-      return this.binding_.pop(stateId).then((historyState) => {
-        this.onStateUpdated_(historyState);
-      });
-    }, 'pop');
+    return this.enque_(
+      () =>
+        this.binding_.pop(stateId).then((historyState) => {
+          this.onStateUpdated_(historyState);
+        }),
+      'pop'
+    );
   }
 
   /**
@@ -541,13 +545,13 @@ export class HistoryBindingNatural_ {
   pop(stackIndex) {
     // On pop, stack is not allowed to go prior to the starting point.
     stackIndex = Math.max(stackIndex, this.startIndex_);
-    return this.whenReady_(() => {
-      return this.back_(this.stackIndex_ - stackIndex + 1);
-    }).then((newStackIndex) => {
-      return this.mergeStateUpdate_(this.getState_(), {
+    return this.whenReady_(() =>
+      this.back_(this.stackIndex_ - stackIndex + 1)
+    ).then((newStackIndex) =>
+      this.mergeStateUpdate_(this.getState_(), {
         stackIndex: newStackIndex,
-      });
-    });
+      })
+    );
   }
 
   /** @override */
@@ -586,9 +590,7 @@ export class HistoryBindingNatural_ {
   backTo(stackIndex) {
     // On pop, stack is not allowed to go prior to the starting point.
     stackIndex = Math.max(stackIndex, this.startIndex_);
-    return this.whenReady_(() => {
-      return this.back_(this.stackIndex_ - stackIndex);
-    });
+    return this.whenReady_(() => this.back_(this.stackIndex_ - stackIndex));
   }
 
   /** @private */
@@ -702,9 +704,7 @@ export class HistoryBindingNatural_ {
     this.unsupportedState_ = this.historyState_(this.stackIndex_ - steps);
     const promise = this.wait_();
     this.win.history.go(-steps);
-    return promise.then(() => {
-      return Promise.resolve(this.stackIndex_);
-    });
+    return promise.then(() => Promise.resolve(this.stackIndex_));
   }
 
   /**

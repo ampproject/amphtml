@@ -190,13 +190,13 @@ export class Page {
     if (!this.shadowDoc_) {
       return Promise.resolve();
     }
-    return this.shadowDoc_.close().then(() => {
-      return this.manager_.closeDocument(this /** page */).then(() => {
+    return this.shadowDoc_.close().then(() =>
+      this.manager_.closeDocument(this /** page */).then(() => {
         this.shadowDoc_ = null;
         this.visibilityState_ = VisibilityState.HIDDEN;
         this.state_ = PageState.PAUSED;
-      });
-    });
+      })
+    );
   }
 
   /**

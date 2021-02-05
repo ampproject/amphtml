@@ -86,15 +86,15 @@ export class LocalSubscriptionIframePlatform extends LocalSubscriptionBasePlatfo
 
   /** @override */
   getEntitlements() {
-    return this.connect().then(() => {
-      return this.messenger_
+    return this.connect().then(() =>
+      this.messenger_
         .sendCommandRsvp('authorize', {})
         .then((res) => {
           res.source = 'local-iframe';
           return res;
         })
-        .then((resJson) => Entitlement.parseFromJson(resJson));
-    });
+        .then((resJson) => Entitlement.parseFromJson(resJson))
+    );
   }
 
   /** @override */
@@ -104,11 +104,11 @@ export class LocalSubscriptionIframePlatform extends LocalSubscriptionBasePlatfo
 
   /** @override */
   pingback(selectedEntitlement) {
-    return this.connect().then(() => {
-      return this.messenger_.sendCommandRsvp('pingback', {
+    return this.connect().then(() =>
+      this.messenger_.sendCommandRsvp('pingback', {
         entitlement: selectedEntitlement,
-      });
-    });
+      })
+    );
   }
 
   /**

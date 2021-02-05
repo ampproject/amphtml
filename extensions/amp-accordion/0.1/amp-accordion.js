@@ -492,16 +492,16 @@ class AmpAccordion extends AMP.BaseElement {
           'overflow': 'hidden',
         });
       }
-    ).then(() => {
-      return Animation.animate(
+    ).then(() =>
+      Animation.animate(
         section,
         setStylesTransition(section, {
           'height': px(numeric(sectionHeight, headerHeight)),
         }),
         duration,
         COLLAPSE_CURVE_
-      ).thenAlways(() => {
-        return this.mutateElement(() => {
+      ).thenAlways(() =>
+        this.mutateElement(() => {
           if (section.hasAttribute('expanded')) {
             this.triggerEvent_('collapse', section, trust);
             section.removeAttribute('expanded');
@@ -510,9 +510,9 @@ class AmpAccordion extends AMP.BaseElement {
             'height': '',
             'overflow': '',
           });
-        });
-      });
-    });
+        })
+      )
+    );
   }
 
   /**

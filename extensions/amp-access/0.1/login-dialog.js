@@ -91,9 +91,7 @@ class ViewerLoginDialog {
     } else {
       urlPromise = this.urlOrPromise;
     }
-    return urlPromise.then((url) => {
-      return buildLoginUrl(url, 'RETURN_URL');
-    });
+    return urlPromise.then((url) => buildLoginUrl(url, 'RETURN_URL'));
   }
 
   /**
@@ -213,9 +211,7 @@ export class WebLoginDialog {
     } else {
       urlPromise = this.urlOrPromise;
     }
-    return urlPromise.then((url) => {
-      return buildLoginUrl(url, this.getReturnUrl_());
-    });
+    return urlPromise.then((url) => buildLoginUrl(url, this.getReturnUrl_()));
   }
 
   /** @private */

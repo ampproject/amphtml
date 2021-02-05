@@ -428,9 +428,10 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    * @private
    */
   adjustGridLayer_() {
-    const gridLayer = closest(dev().assertElement(this.element), (el) => {
-      return el.tagName.toLowerCase() === 'amp-story-grid-layer';
-    });
+    const gridLayer = closest(
+      dev().assertElement(this.element),
+      (el) => el.tagName.toLowerCase() === 'amp-story-grid-layer'
+    );
 
     gridLayer.classList.add('i-amphtml-story-has-interactive');
 
@@ -583,13 +584,11 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     // preserving order and ties and adding to 100 (if possible given ties and ordering).
     let remainder = 100 - total;
 
-    let preserveOriginal = percentages.map((percentage, index) => {
-      return {
-        originalIndex: index,
-        value: percentage,
-        remainder: (percentage - Math.floor(percentage)).toFixed(2),
-      };
-    });
+    let preserveOriginal = percentages.map((percentage, index) => ({
+      originalIndex: index,
+      value: percentage,
+      remainder: (percentage - Math.floor(percentage)).toFixed(2),
+    }));
     preserveOriginal.sort(
       (left, right) =>
         // Break remainder ties using the higher value.

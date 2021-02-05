@@ -417,9 +417,9 @@ export class MeasureScanner extends Scanner {
       animationElement.tagName == 'AMP-ANIMATION',
       `Element is not an animation: "${spec.animation}"`
     );
-    const otherSpecPromise = animationElement.getImpl().then((impl) => {
-      return impl.getAnimationSpec();
-    });
+    const otherSpecPromise = animationElement
+      .getImpl()
+      .then((impl) => impl.getAnimationSpec());
     this.with_(spec, () => {
       const {
         target_: target,

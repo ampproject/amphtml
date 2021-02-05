@@ -133,9 +133,9 @@ export class LiveListManager {
    * @private
    */
   hasActiveLiveLists_() {
-    return Object.keys(this.liveLists_).some((key) => {
-      return this.liveLists_[key].isEnabled();
-    });
+    return Object.keys(this.liveLists_).some((key) =>
+      this.liveLists_[key].isEnabled()
+    );
   }
 
   /**

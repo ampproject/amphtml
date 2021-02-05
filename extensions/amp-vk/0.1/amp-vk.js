@@ -90,9 +90,9 @@ export class AmpVk extends AMP.BaseElement {
       iframeSrcPromise = this.getVkPollIFrameSrc_();
     }
 
-    return iframeSrcPromise.then((iframeSrc) => {
-      return appendEncodedParamStringToUrl(iframeSrc, createdTime);
-    });
+    return iframeSrcPromise.then((iframeSrc) =>
+      appendEncodedParamStringToUrl(iframeSrc, createdTime)
+    );
   }
 
   /**

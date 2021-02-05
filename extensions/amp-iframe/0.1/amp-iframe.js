@@ -475,9 +475,9 @@ export class AmpIframe extends AMP.BaseElement {
     );
 
     // Listen for resize messages sent by Pym.js.
-    this.unlistenPym_ = listen(this.win, 'message', (event) => {
-      return this.listenForPymMessage_(/** @type {!MessageEvent} */ (event));
-    });
+    this.unlistenPym_ = listen(this.win, 'message', (event) =>
+      this.listenForPymMessage_(/** @type {!MessageEvent} */ (event))
+    );
 
     if (this.isClickToPlay_) {
       listenFor(iframe, 'embed-ready', this.activateIframe_.bind(this));

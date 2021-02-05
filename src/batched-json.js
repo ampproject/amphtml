@@ -56,9 +56,7 @@ export function batchFetchJsonFor(ampdoc, element, options = {}) {
   assertHttpsUrl(element.getAttribute('src'), element);
   const xhr = Services.batchedXhrFor(ampdoc.win);
   return requestForBatchFetch(element, urlReplacement, refresh)
-    .then((data) => {
-      return xhr.fetchJson(data.xhrUrl, data.fetchOpt);
-    })
+    .then((data) => xhr.fetchJson(data.xhrUrl, data.fetchOpt))
     .then((res) => Services.xhrFor(ampdoc.win).xssiJson(res, xssiPrefix))
     .then((data) => {
       if (data == null) {

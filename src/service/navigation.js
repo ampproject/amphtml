@@ -799,12 +799,8 @@ function maybeExpandUrlParams(ampdoc, e) {
     return;
   }
   const vars = {
-    'CLICK_X': () => {
-      return e.pageX;
-    },
-    'CLICK_Y': () => {
-      return e.pageY;
-    },
+    'CLICK_X': () => e.pageX,
+    'CLICK_Y': () => e.pageY,
   };
   const newHref = Services.urlReplacementsForDoc(target).expandUrlSync(
     hrefToExpand,

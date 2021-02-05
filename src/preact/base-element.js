@@ -279,18 +279,16 @@ export class PreactBaseElement extends AMP.BaseElement {
     this.checkPropsPostMutations();
 
     // Unmount callback.
-    subscribe(this.element, [], () => {
-      return () => {
-        this.mounted_ = false;
-        if (this.container_) {
-          // We have to unmount the component to run all cleanup functions and
-          // release handlers. The only way to unmount right now is by
-          // unrendering the DOM. If the new `unmount` API becomes available, this
-          // code can be changed to `unmount` and the follow up render would
-          // have to execute the fast `hydrate` API.
-          render(null, this.container_);
-        }
-      };
+    subscribe(this.element, [], () => () => {
+      this.mounted_ = false;
+      if (this.container_) {
+        // We have to unmount the component to run all cleanup functions and
+        // release handlers. The only way to unmount right now is by
+        // unrendering the DOM. If the new `unmount` API becomes available, this
+        // code can be changed to `unmount` and the follow up render would
+        // have to execute the fast `hydrate` API.
+        render(null, this.container_);
+      }
     });
 
     // Unblock rendering on first `CanRender` response. And keep the context

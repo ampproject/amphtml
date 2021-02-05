@@ -76,9 +76,9 @@ export class ConfigManager {
     const source = data['source'];
     // Check that the configuration event is coming from an iframe that
     // should be providing configuration information.
-    const isProviderIframe = this.configProviderIframes_.some((iframe) => {
-      return iframe.contentWindow === source;
-    });
+    const isProviderIframe = this.configProviderIframes_.some(
+      (iframe) => iframe.contentWindow === source
+    );
 
     if (!isProviderIframe) {
       return;

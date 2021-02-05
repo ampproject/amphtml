@@ -284,11 +284,11 @@ class Cid {
    * @return {*}
    */
   scopeBaseCid_(persistenceConsent, scope, url) {
-    return getBaseCid(this, persistenceConsent).then((baseCid) => {
-      return Services.cryptoFor(this.ampdoc.win).sha384Base64(
+    return getBaseCid(this, persistenceConsent).then((baseCid) =>
+      Services.cryptoFor(this.ampdoc.win).sha384Base64(
         baseCid + getProxySourceOrigin(url) + scope
-      );
-    });
+      )
+    );
   }
 
   /**
@@ -369,13 +369,10 @@ export function optOutOfCid(ampdoc) {
  */
 export function isOptedOutOfCid(ampdoc) {
   return Services.storageForDoc(ampdoc)
-    .then((storage) => {
-      return storage.get(CID_OPTOUT_STORAGE_KEY).then((val) => !!val);
-    })
-    .catch(() => {
-      // If we fail to read the flag, assume not opted out.
-      return false;
-    });
+    .then((storage) => storage.get(CID_OPTOUT_STORAGE_KEY).then((val) => !!val))
+    .catch(
+      () => /* If we fail to read the flag, assume not opted out. */ false
+    );
 }
 
 /**

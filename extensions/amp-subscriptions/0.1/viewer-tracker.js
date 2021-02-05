@@ -45,8 +45,8 @@ export class ViewerTracker {
    */
   scheduleView(timeToView) {
     this.reportViewPromise_ = null;
-    return this.ampdoc_.whenReady().then(() => {
-      return new Promise((resolve) => {
+    return this.ampdoc_.whenReady().then(() =>
+      new Promise((resolve) => {
         if (this.ampdoc_.isVisible()) {
           resolve();
         }
@@ -55,8 +55,8 @@ export class ViewerTracker {
             resolve();
           }
         });
-      }).then(() => this.reportWhenViewed_(timeToView));
-    });
+      }).then(() => this.reportWhenViewed_(timeToView))
+    );
   }
 
   /**

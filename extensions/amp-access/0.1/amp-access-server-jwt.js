@@ -301,9 +301,7 @@ export class AccessServerJwtAdapter {
       'Proceed via client protocol via ',
       this.clientAdapter_.getAuthorizationUrl()
     );
-    return this.fetchJwt_().then((resp) => {
-      return resp.jwt['amp_authdata'];
-    });
+    return this.fetchJwt_().then((resp) => resp.jwt['amp_authdata']);
   }
 
   /**

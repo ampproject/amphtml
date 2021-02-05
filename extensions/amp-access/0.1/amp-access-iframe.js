@@ -125,9 +125,9 @@ export class AccessIframeAdapter {
 
   /** @override */
   pingback() {
-    return this.connect().then(() => {
-      return this.messenger_.sendCommandRsvp('pingback', {});
-    });
+    return this.connect().then(() =>
+      this.messenger_.sendCommandRsvp('pingback', {})
+    );
   }
 
   /** @override */
@@ -186,9 +186,9 @@ export class AccessIframeAdapter {
    */
   authorizeLocal_() {
     const timeout = AUTHORIZATION_TIMEOUT * (getMode().development ? 2 : 1);
-    return this.timer_.promise(timeout).then(() => {
-      return this.restore_() || this.defaultResponse_;
-    });
+    return this.timer_
+      .promise(timeout)
+      .then(() => this.restore_() || this.defaultResponse_);
   }
 
   /**
@@ -197,9 +197,7 @@ export class AccessIframeAdapter {
    */
   authorizeRemote_() {
     return this.connect()
-      .then(() => {
-        return this.messenger_.sendCommandRsvp('authorize', {});
-      })
+      .then(() => this.messenger_.sendCommandRsvp('authorize', {}))
       .then((data) => {
         if (data) {
           // Store the value in a non-blocking microtask.

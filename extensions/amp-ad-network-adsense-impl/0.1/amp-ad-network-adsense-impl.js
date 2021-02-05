@@ -396,12 +396,12 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const experimentIds = [];
     const identityPromise = Services.timerFor(this.win)
       .timeoutPromise(1000, this.identityTokenPromise_)
-      .catch((unusedErr) => {
-        // On error/timeout, proceed.
-        return /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/ ({});
-      });
-    return identityPromise.then((identity) => {
-      return googleAdUrl(
+      .catch(
+        (unusedErr) =>
+          /* On error/timeout, proceed */ /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/ ({})
+      );
+    return identityPromise.then((identity) =>
+      googleAdUrl(
         this,
         ADSENSE_BASE_URL,
         startTime,
@@ -412,8 +412,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
           ...parameters,
         },
         experimentIds
-      );
-    });
+      )
+    );
   }
 
   /** @override */

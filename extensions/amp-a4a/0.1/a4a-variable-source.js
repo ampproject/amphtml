@@ -116,13 +116,11 @@ export class A4AVariableSource extends VariableSource {
       );
     });
 
-    this.set('NAV_TYPE', () => {
-      return getNavigationData(this.win_, 'type');
-    });
+    this.set('NAV_TYPE', () => getNavigationData(this.win_, 'type'));
 
-    this.set('NAV_REDIRECT_COUNT', () => {
-      return getNavigationData(this.win_, 'redirectCount');
-    });
+    this.set('NAV_REDIRECT_COUNT', () =>
+      getNavigationData(this.win_, 'redirectCount')
+    );
 
     this.set(
       'HTML_ATTR',

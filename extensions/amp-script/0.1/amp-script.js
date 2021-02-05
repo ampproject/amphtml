@@ -204,9 +204,9 @@ export class AmpScript extends AMP.BaseElement {
    * @return {!Promise<*>}
    */
   callFunction(functionIdentifier) {
-    return this.initialize_.promise.then(() => {
-      return this.workerDom_.callFunction(functionIdentifier);
-    });
+    return this.initialize_.promise.then(() =>
+      this.workerDom_.callFunction(functionIdentifier)
+    );
   }
 
   /** @override */

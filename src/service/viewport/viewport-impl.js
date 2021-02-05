@@ -380,9 +380,9 @@ export class ViewportImpl {
 
   /** @override */
   getClientRectAsync(el) {
-    const local = this.vsync_.measurePromise(() => {
-      return el./*OK*/ getBoundingClientRect();
-    });
+    const local = this.vsync_.measurePromise(() =>
+      el./*OK*/ getBoundingClientRect()
+    );
 
     let root = this.binding_.getRootClientRectAsync();
     const frameElement = getParentWindowFrameElement(el, this.ampdoc.win);

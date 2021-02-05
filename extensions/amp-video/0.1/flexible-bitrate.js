@@ -190,9 +190,10 @@ export class BitrateManager {
    * @private
    */
   hasLowerBitrate_(video, bitrate) {
-    const lowerBitrateSource = sources(video, (source) => {
-      return source.bitrate_ < bitrate;
-    });
+    const lowerBitrateSource = sources(
+      video,
+      (source) => source.bitrate_ < bitrate
+    );
     return !!lowerBitrateSource;
   }
 
@@ -283,9 +284,5 @@ function sources(video, fn) {
  * @return {!HTMLSourceElement}
  */
 function currentSource(video) {
-  return devAssert(
-    sources(video, (source) => {
-      return source.src == video.currentSrc;
-    })
-  );
+  return devAssert(sources(video, (source) => source.src == video.currentSrc));
 }

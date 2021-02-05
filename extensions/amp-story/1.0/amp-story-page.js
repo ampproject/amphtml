@@ -712,37 +712,42 @@ export class AmpStoryPage extends AMP.BaseElement {
   waitForMediaLayout_() {
     const mediaSet = toArray(this.getMediaBySelector_(Selectors.ALL_AMP_MEDIA));
 
-    const mediaPromises = mediaSet.map((mediaEl) => {
-      return new Promise((resolve) => {
-        switch (mediaEl.tagName.toLowerCase()) {
-          case 'amp-anim':
-          case 'amp-img':
-          case 'amp-story-360':
-            whenUpgradedToCustomElement(mediaEl)
-              .then((el) => el.signals().whenSignal(CommonSignals.LOAD_END))
-              .then(resolve, resolve);
-            break;
-          case 'amp-audio':
-          case 'amp-video':
-            if (mediaEl.readyState >= 2) {
+    const mediaPromises = mediaSet.map(
+      (mediaEl) =>
+        new Promise((resolve) => {
+          switch (mediaEl.tagName.toLowerCase()) {
+            case 'amp-anim':
+            case 'amp-img':
+            case 'amp-story-360':
+              whenUpgradedToCustomElement(mediaEl)
+                .then((el) => el.signals().whenSignal(CommonSignals.LOAD_END))
+                .then(resolve, resolve);
+              break;
+            case 'amp-audio':
+            case 'amp-video':
+              if (mediaEl.readyState >= 2) {
+                resolve();
+                return;
+              }
+
+              mediaEl.addEventListener(
+                'canplay',
+                resolve,
+                true /* useCapture */
+              );
+              break;
+            default:
+              // Any other tags should not block loading.
               resolve();
-              return;
-            }
+          }
 
-            mediaEl.addEventListener('canplay', resolve, true /* useCapture */);
-            break;
-          default:
-            // Any other tags should not block loading.
-            resolve();
-        }
-
-        // We suppress errors so that Promise.all will still wait for all
-        // promises to complete, even if one has failed.  We do nothing with the
-        // error, as the resource itself and/or code that loads it should handle
-        // the error.
-        mediaEl.addEventListener('error', resolve, true /* useCapture */);
-      });
-    });
+          // We suppress errors so that Promise.all will still wait for all
+          // promises to complete, even if one has failed.  We do nothing with the
+          // error, as the resource itself and/or code that loads it should handle
+          // the error.
+          mediaEl.addEventListener('error', resolve, true /* useCapture */);
+        })
+    );
     return Promise.all(mediaPromises).then(() => this.markPageAsLoaded_());
   }
 
@@ -755,27 +760,28 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.getMediaBySelector_(Selectors.ALL_PLAYBACK_AMP_MEDIA)
     );
 
-    const mediaPromises = mediaSet.map((mediaEl) => {
-      return new Promise((resolve) => {
-        switch (mediaEl.tagName.toLowerCase()) {
-          case 'amp-audio':
-          case 'amp-video':
-            const signal =
-              mediaEl.getAttribute('layout') === Layout.NODISPLAY
-                ? CommonSignals.BUILT
-                : CommonSignals.LOAD_END;
+    const mediaPromises = mediaSet.map(
+      (mediaEl) =>
+        new Promise((resolve) => {
+          switch (mediaEl.tagName.toLowerCase()) {
+            case 'amp-audio':
+            case 'amp-video':
+              const signal =
+                mediaEl.getAttribute('layout') === Layout.NODISPLAY
+                  ? CommonSignals.BUILT
+                  : CommonSignals.LOAD_END;
 
-            whenUpgradedToCustomElement(mediaEl)
-              .then((el) => el.signals().whenSignal(signal))
-              .then(resolve, resolve);
-            break;
-          case 'audio': // Already laid out as built from background-audio attr.
-          default:
-            // Any other tags should not block loading.
-            resolve();
-        }
-      });
-    });
+              whenUpgradedToCustomElement(mediaEl)
+                .then((el) => el.signals().whenSignal(signal))
+                .then(resolve, resolve);
+              break;
+            case 'audio': // Already laid out as built from background-audio attr.
+            default:
+              // Any other tags should not block loading.
+              resolve();
+          }
+        })
+    );
 
     if (this.element.hasAttribute('background-audio')) {
       mediaPromises.push(this.backgroundAudioDeferred_.promise);
@@ -966,13 +972,13 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   pauseAllMedia_(rewindToBeginning = false) {
-    return this.whenAllMediaElements_((mediaPool, mediaEl) => {
-      return this.pauseMedia_(
+    return this.whenAllMediaElements_((mediaPool, mediaEl) =>
+      this.pauseMedia_(
         mediaPool,
         mediaEl,
         /** @type {boolean} */ (rewindToBeginning)
-      );
-    });
+      )
+    );
   }
 
   /**
@@ -1002,9 +1008,9 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   playAllMedia_() {
-    return this.whenAllMediaElements_((mediaPool, mediaEl) => {
-      return this.playMedia_(mediaPool, mediaEl);
-    });
+    return this.whenAllMediaElements_((mediaPool, mediaEl) =>
+      this.playMedia_(mediaPool, mediaEl)
+    );
   }
 
   /**
@@ -1020,8 +1026,8 @@ export class AmpStoryPage extends AMP.BaseElement {
       return Promise.resolve();
     } else {
       return this.loadPromise(mediaEl).then(
-        () => {
-          return mediaPool
+        () =>
+          mediaPool
             .play(/** @type {!./media-pool.DomElementDef} */ (mediaEl))
             .catch((unusedError) => {
               // Auto playing the media failed, which could be caused by a data
@@ -1049,8 +1055,7 @@ export class AmpStoryPage extends AMP.BaseElement {
               if (mediaEl.tagName === 'AUDIO') {
                 this.playAudioElementFromTimestamp_ = Date.now();
               }
-            });
-        },
+            }),
         () => {
           this.debounceToggleLoadingSpinner_(false);
           this.toggleErrorMessage_(true);

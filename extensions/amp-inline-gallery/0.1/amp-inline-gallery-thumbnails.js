@@ -85,9 +85,9 @@ export class AmpInlineGalleryThumbnails extends AMP.BaseElement {
    * @param {!Array<!Element>} slides The slides to create thumbnails for.
    */
   setSlides(slides) {
-    const thumbnails = slides.map((slide, index) => {
-      return this.createThumbnailForElement_(slide, index);
-    });
+    const thumbnails = slides.map((slide, index) =>
+      this.createThumbnailForElement_(slide, index)
+    );
 
     this.mutateElement(() => {
       this.createCarousel_(thumbnails);

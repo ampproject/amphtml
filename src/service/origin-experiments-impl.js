@@ -158,9 +158,9 @@ export class TokenMaster {
   generateToken(version, json, privateKey) {
     const config = stringToBytes(JSON.stringify(json));
     const data = this.prepend_(version, config);
-    return this.sign_(data, privateKey).then((signature) => {
-      return this.append_(data, new Uint8Array(signature));
-    });
+    return this.sign_(data, privateKey).then((signature) =>
+      this.append_(data, new Uint8Array(signature))
+    );
   }
 
   /**

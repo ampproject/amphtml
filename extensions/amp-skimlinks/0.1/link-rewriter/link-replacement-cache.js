@@ -91,11 +91,12 @@ export class LinkReplacementCache {
    * @public
    */
   getAnchorReplacementList() {
-    return this.anchorList_.map((anchor) => {
-      return /** @type {!{anchor: !HTMLElement, replacementUrl: ?string}} */ ({
-        anchor,
-        replacementUrl: this.getReplacementUrlForAnchor(anchor),
-      });
-    });
+    return this.anchorList_.map(
+      (anchor) =>
+        /** @type {!{anchor: !HTMLElement, replacementUrl: ?string}} */ ({
+          anchor,
+          replacementUrl: this.getReplacementUrlForAnchor(anchor),
+        })
+    );
   }
 }

@@ -796,9 +796,9 @@ export class WebPushService {
    * @return {*} TODO(#23582): Specify return type
    */
   onPermissionGrantedSubscribe_() {
-    return this.subscribeForPushRemotely().then(() => {
-      return this.updateWidgetVisibilities();
-    });
+    return this.subscribeForPushRemotely().then(() =>
+      this.updateWidgetVisibilities()
+    );
   }
 
   /**
@@ -810,9 +810,9 @@ export class WebPushService {
    * @return {Promise}
    */
   unsubscribe() {
-    return this.unsubscribeFromPushRemotely().then(() => {
-      return this.updateWidgetVisibilities();
-    });
+    return this.unsubscribeFromPushRemotely().then(() =>
+      this.updateWidgetVisibilities()
+    );
   }
 
   /**

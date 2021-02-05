@@ -71,12 +71,11 @@ describes.realWin('TemplateValidator', realWinConfig, (env) => {
 
     afterEach(() => env.sandbox.restore());
 
-    it('should have AMP validator result', () => {
-      return validatorPromise.then((validatorOutput) => {
+    it('should have AMP validator result', () =>
+      validatorPromise.then((validatorOutput) => {
         expect(validatorOutput).to.be.ok;
         expect(validatorOutput.type).to.equal(ValidatorResult.AMP);
-      });
-    });
+      }));
 
     it('should have AMP validator result w/ deprecated header name', () => {
       validator

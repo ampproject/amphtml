@@ -415,9 +415,9 @@ export class Bind {
     }
     // Only pass state for history updates to trusted viewers, since they
     // may contain user data e.g. form input.
-    return this.viewer_.isTrustedViewer().then((trusted) => {
-      return trusted ? data : null;
-    });
+    return this.viewer_
+      .isTrustedViewer()
+      .then((trusted) => (trusted ? data : null));
   }
 
   /**
@@ -641,9 +641,10 @@ export class Bind {
    * @visibleForTesting
    */
   numberOfBindings() {
-    return this.boundElements_.reduce((number, boundElement) => {
-      return number + boundElement.boundProperties.length;
-    }, 0);
+    return this.boundElements_.reduce(
+      (number, boundElement) => number + boundElement.boundProperties.length,
+      0
+    );
   }
 
   /**
@@ -1741,9 +1742,10 @@ export class Bind {
    * @private
    */
   debugPrintElement_(element) {
-    const index = findIndex(this.boundElements_, (boundElement) => {
-      return boundElement.element == element;
-    });
+    const index = findIndex(
+      this.boundElements_,
+      (boundElement) => boundElement.element == element
+    );
     if (index < 0) {
       user().info(TAG, 'Element has no bindings:', element);
       return;

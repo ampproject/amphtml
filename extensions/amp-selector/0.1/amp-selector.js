@@ -704,11 +704,9 @@ export class AmpSelector extends AMP.BaseElement {
    * @private
    */
   getElementsSizes_() {
-    return this.measureElement(() => {
-      return this.elements_.map((element) =>
-        element./*OK*/ getBoundingClientRect()
-      );
-    });
+    return this.measureElement(() =>
+      this.elements_.map((element) => element./*OK*/ getBoundingClientRect())
+    );
   }
 }
 

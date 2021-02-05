@@ -2351,11 +2351,11 @@ export class AmpStory extends AMP.BaseElement {
       this.element.appendChild(bookendEl);
     }
 
-    return whenUpgradedToCustomElement(bookendEl).then(() => {
-      return bookendEl.getImpl().then((bookendImpl) => {
+    return whenUpgradedToCustomElement(bookendEl).then(() =>
+      bookendEl.getImpl().then((bookendImpl) => {
         this.bookend_ = bookendImpl;
-      });
-    });
+      })
+    );
   }
 
   /**

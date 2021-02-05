@@ -232,11 +232,11 @@ export class ConsentPolicyManager {
       );
       return Promise.resolve(CONSENT_POLICY_STATE.UNKNOWN);
     }
-    return this.whenPolicyInstanceRegistered_(policyId).then(() => {
-      return this.instances_[policyId].getReadyPromise().then(() => {
-        return this.instances_[policyId].getCurrentPolicyStatus();
-      });
-    });
+    return this.whenPolicyInstanceRegistered_(policyId).then(() =>
+      this.instances_[policyId]
+        .getReadyPromise()
+        .then(() => this.instances_[policyId].getCurrentPolicyStatus())
+    );
   }
 
   /**
@@ -254,11 +254,11 @@ export class ConsentPolicyManager {
       );
       return Promise.resolve(false);
     }
-    return this.whenPolicyInstanceRegistered_(policyId).then(() => {
-      return this.instances_[policyId].getReadyPromise().then(() => {
-        return this.instances_[policyId].shouldUnblock();
-      });
-    });
+    return this.whenPolicyInstanceRegistered_(policyId).then(() =>
+      this.instances_[policyId]
+        .getReadyPromise()
+        .then(() => this.instances_[policyId].shouldUnblock())
+    );
   }
 
   /**
@@ -273,9 +273,7 @@ export class ConsentPolicyManager {
   getMergedSharedData(policyId) {
     return this.whenPolicyResolved(policyId)
       .then(() => this.ConsentStateManagerPromise_)
-      .then((manager) => {
-        return manager.getConsentInstanceSharedData();
-      });
+      .then((manager) => manager.getConsentInstanceSharedData());
   }
 
   /**
@@ -285,9 +283,7 @@ export class ConsentPolicyManager {
    * @return {!Promise<?string>}
    */
   getConsentStringInfo(policyId) {
-    return this.whenPolicyResolved(policyId).then(() => {
-      return this.consentString_;
-    });
+    return this.whenPolicyResolved(policyId).then(() => this.consentString_);
   }
 
   /**
@@ -297,9 +293,7 @@ export class ConsentPolicyManager {
    * @return {!Promise<?Object|undefined>}
    */
   getConsentMetadataInfo(policyId) {
-    return this.whenPolicyResolved(policyId).then(() => {
-      return this.consentMetadata_;
-    });
+    return this.whenPolicyResolved(policyId).then(() => this.consentMetadata_);
   }
 
   /**

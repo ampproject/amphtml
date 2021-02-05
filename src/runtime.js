@@ -285,9 +285,9 @@ function preloadDeps(extensions, fnOrStruct) {
   // for an array if intermediate dependencies that needs to be
   // resolved first before executing this current extension.
   if (Array.isArray(fnOrStruct.i)) {
-    const promises = fnOrStruct.i.map((dep) => {
-      return extensions.preloadExtension(dep);
-    });
+    const promises = fnOrStruct.i.map((dep) =>
+      extensions.preloadExtension(dep)
+    );
     return Promise.all(promises);
   } else if (typeof fnOrStruct.i == 'string') {
     return extensions.preloadExtension(fnOrStruct.i);

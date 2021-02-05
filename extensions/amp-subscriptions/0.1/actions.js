@@ -74,9 +74,7 @@ export class Actions {
           })
       );
     }
-    return Promise.all(promises).then(() => {
-      return this.builtActionUrlMap_;
-    });
+    return Promise.all(promises).then(() => this.builtActionUrlMap_);
   }
 
   /**

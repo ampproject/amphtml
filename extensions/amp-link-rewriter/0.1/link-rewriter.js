@@ -112,10 +112,7 @@ export class LinkRewriter {
       return true;
     }
 
-    const filtered = this.listElements_.filter((element) => {
-      return element === anchor;
-    });
-
+    const filtered = this.listElements_.filter((element) => element === anchor);
     if (filtered.length > 0) {
       return true;
     }
@@ -215,9 +212,10 @@ export class LinkRewriter {
      * Finally to clean up we leave empty all placeholders that
      * were not replace in previous steps
      */
-    this.rewrittenUrl_ = this.rewrittenUrl_.replace(/\${[A-Za-z0-9]+}+/, () => {
-      return '';
-    });
+    this.rewrittenUrl_ = this.rewrittenUrl_.replace(
+      /\${[A-Za-z0-9]+}+/,
+      () => ''
+    );
     return this.rewrittenUrl_;
   }
 }

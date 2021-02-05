@@ -193,8 +193,8 @@ export class Placement {
    * @return {!Promise<!PlacementState>}
    */
   placeAd(baseAttributes, sizing, adTracker, isResponsiveEnabled) {
-    return this.getEstimatedPosition().then((yPosition) => {
-      return adTracker.isTooNearAnAd(yPosition).then((tooNear) => {
+    return this.getEstimatedPosition().then((yPosition) =>
+      adTracker.isTooNearAnAd(yPosition).then((tooNear) => {
         if (tooNear) {
           this.state_ = PlacementState.TOO_NEAR_EXISTING_AD;
           return this.state_;
@@ -226,33 +226,27 @@ export class Placement {
           );
         }
 
-        return this.getPlacementSizing_(sizing).then((placement) => {
-          // CustomElement polyfill does not call connectedCallback
-          // synchronously. So we explicitly wait for CustomElement to be
-          // ready.
-          return whenUpgradedToCustomElement(this.getAdElement())
+        // CustomElement polyfill does not call connectedCallback
+        // synchronously. So we explicitly wait for CustomElement to be
+        // ready.
+        return this.getPlacementSizing_(sizing).then((placement) =>
+          whenUpgradedToCustomElement(this.getAdElement())
             .then(() => this.getAdElement().whenBuilt())
-            .then(() => {
-              return this.mutator_.requestChangeSize(
+            .then(() =>
+              this.mutator_.requestChangeSize(
                 this.getAdElement(),
                 placement.height,
                 placement.width,
                 placement.margins
-              );
-            })
+              )
+            )
             .then(
-              () => {
-                this.state_ = PlacementState.PLACED;
-                return this.state_;
-              },
-              () => {
-                this.state_ = PlacementState.RESIZE_FAILED;
-                return this.state_;
-              }
-            );
-        });
-      });
-    });
+              () => (this.state_ = PlacementState.PLACED),
+              () => (this.state_ = PlacementState.RESIZE_FAILED)
+            )
+        );
+      })
+    );
   }
 
   /**

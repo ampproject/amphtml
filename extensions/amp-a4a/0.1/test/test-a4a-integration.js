@@ -86,9 +86,7 @@ describe('integration test: a4a', () => {
   let a4aRegistry;
   beforeEach(async () => {
     a4aRegistry = getA4ARegistry();
-    a4aRegistry['mock'] = () => {
-      return true;
-    };
+    a4aRegistry['mock'] = () => true;
     fixture = await createIframePromise();
     fetchMock = new FetchMock(fixture.win);
     for (const serviceName in signingServerURLs) {

@@ -150,22 +150,23 @@ class AmpWorker {
    * @restricted
    */
   sendMessage_(method, args, opt_localWin) {
-    return this.fetchPromise_.then(() => {
-      return new Promise((resolve, reject) => {
-        const id = this.counter_++;
-        this.messages_[id] = {method, resolve, reject};
+    return this.fetchPromise_.then(
+      () =>
+        new Promise((resolve, reject) => {
+          const id = this.counter_++;
+          this.messages_[id] = {method, resolve, reject};
 
-        const scope = this.idForWindow_(opt_localWin || this.win_);
+          const scope = this.idForWindow_(opt_localWin || this.win_);
 
-        const message = /** @type {ToWorkerMessageDef} */ ({
-          method,
-          args,
-          scope,
-          id,
-        });
-        this.worker_./*OK*/ postMessage(message);
-      });
-    });
+          const message = /** @type {ToWorkerMessageDef} */ ({
+            method,
+            args,
+            scope,
+            id,
+          });
+          this.worker_./*OK*/ postMessage(message);
+        })
+    );
   }
 
   /**

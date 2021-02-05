@@ -395,11 +395,13 @@ export class AccessService {
   runAuthorization_(opt_disableFallback) {
     this.toggleTopClass_('amp-access-loading', true);
 
-    const authorizations = this.ampdoc.whenFirstVisible().then(() => {
-      return Promise.all(
-        this.sources_.map((source) => this.runOneAuthorization_(source))
+    const authorizations = this.ampdoc
+      .whenFirstVisible()
+      .then(() =>
+        Promise.all(
+          this.sources_.map((source) => this.runOneAuthorization_(source))
+        )
       );
-    });
 
     const rendered = authorizations.then(() => {
       this.toggleTopClass_('amp-access-loading', false);
@@ -556,8 +558,8 @@ export class AccessService {
     }
 
     const rendered = this.templates_.renderTemplate(template, response);
-    return rendered.then((element) => {
-      return this.vsync_.mutatePromise(() => {
+    return rendered.then((element) =>
+      this.vsync_.mutatePromise(() => {
         element.setAttribute('amp-access-template', '');
         element[TEMPLATE_PROP] = template;
         if (template.parentElement) {
@@ -565,8 +567,8 @@ export class AccessService {
         } else if (prev && prev.parentElement) {
           prev.parentElement.replaceChild(element, prev);
         }
-      });
-    });
+      })
+    );
   }
 
   /**

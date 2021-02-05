@@ -156,9 +156,7 @@ export class MultidocManager {
      * been cleand up. The document can no longer be activated again.
      * @return {Promise}
      */
-    amp['close'] = () => {
-      return this.closeShadowRoot_(shadowRoot);
-    };
+    amp['close'] = () => this.closeShadowRoot_(shadowRoot);
 
     if (getMode().development) {
       amp.toggleRuntime = viewer.toggleRuntime.bind(viewer);
@@ -170,22 +168,21 @@ export class MultidocManager {
      * @param {string} name - Name of state or deep state
      * @return {Promise<*>} - Resolves to a copy of the value of a state
      */
-    amp['getState'] = (name) => {
-      return Services.bindForDocOrNull(shadowRoot).then((bind) => {
+    amp['getState'] = (name) =>
+      Services.bindForDocOrNull(shadowRoot).then((bind) => {
         if (!bind) {
           return Promise.reject('amp-bind is not available in this document');
         }
         return bind.getState(name);
       });
-    };
 
     /**
      * Expose amp-bind setState
      * @param {(!JsonObject|string)} state - State to be set
      * @return {Promise} - Resolves after state and history have been updated
      */
-    amp['setState'] = (state) => {
-      return Services.bindForDocOrNull(shadowRoot).then((bind) => {
+    amp['setState'] = (state) =>
+      Services.bindForDocOrNull(shadowRoot).then((bind) => {
         if (!bind) {
           return Promise.reject('amp-bind is not available in this document');
         }
@@ -199,7 +196,6 @@ export class MultidocManager {
         }
         return Promise.reject('Invalid state');
       });
-    };
 
     // Start building the shadow doc DOM.
     builder(amp, shadowRoot, ampdoc).then(() => {

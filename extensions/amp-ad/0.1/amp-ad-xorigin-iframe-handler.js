@@ -154,11 +154,11 @@ export class AmpAdXOriginIframeHandler {
       return Promise.resolve(content);
     });
 
-    this.handleOneTimeRequest_(MessageType.GET_CONSENT_STATE, () => {
-      return this.baseInstance_.getConsentState().then((consentState) => {
-        return {consentState};
-      });
-    });
+    this.handleOneTimeRequest_(MessageType.GET_CONSENT_STATE, () =>
+      this.baseInstance_
+        .getConsentState()
+        .then((consentState) => ({consentState}))
+    );
 
     // Install iframe resize API.
     this.unlisteners_.push(

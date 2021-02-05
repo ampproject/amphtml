@@ -285,11 +285,11 @@ export class PlatformStore {
    */
   getScoreFactorPromiseFor_(serviceId, scoreFactor) {
     // Make sure the platform is ready
-    return this.getEntitlementPromiseFor(serviceId).then(() => {
-      return this.subscriptionPlatforms_[serviceId].getSupportedScoreFactor(
+    return this.getEntitlementPromiseFor(serviceId).then(() =>
+      this.subscriptionPlatforms_[serviceId].getSupportedScoreFactor(
         scoreFactor
-      );
-    });
+      )
+    );
   }
 
   /**
@@ -507,12 +507,10 @@ export class PlatformStore {
    */
   getAllPlatformWeights_() {
     // Get weights for all of the platforms.
-    return this.getAvailablePlatforms().map((platform) => {
-      return {
-        platform,
-        weight: this.calculatePlatformWeight_(platform),
-      };
-    });
+    return this.getAvailablePlatforms().map((platform) => ({
+      platform,
+      weight: this.calculatePlatformWeight_(platform),
+    }));
   }
 
   /**

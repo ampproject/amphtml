@@ -331,9 +331,8 @@ export class Vsync {
    * @return {function(!VsyncStateDef=):boolean}
    */
   createAnimTask(contextNode, task) {
-    return /** @type {function(!VsyncStateDef=):boolean} */ ((opt_state) => {
-      return this.runAnim(contextNode, task, opt_state);
-    });
+    return /** @type {function(!VsyncStateDef=):boolean} */ ((opt_state) =>
+      this.runAnim(contextNode, task, opt_state));
   }
 
   /**

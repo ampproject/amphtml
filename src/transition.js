@@ -112,9 +112,7 @@ export function numeric(start, end) {
  */
 export function spring(start, end, extended, threshold) {
   if (end == extended) {
-    return (time) => {
-      return numeric(start, end)(time);
-    };
+    return (time) => numeric(start, end)(time);
   }
   return (time) => {
     if (time < threshold) {

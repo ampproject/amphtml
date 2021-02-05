@@ -63,9 +63,7 @@ export class AdsenseSharedState {
    * @param {string} id The ID of the slot to be removed.
    */
   removeSlot(id) {
-    this.previousSlots_ = this.previousSlots_.filter((slot) => {
-      return slot.id != id;
-    });
+    this.previousSlots_ = this.previousSlots_.filter((slot) => slot.id != id);
   }
 
   /**

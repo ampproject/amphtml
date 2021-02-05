@@ -220,9 +220,7 @@ export class SwipeToDismiss {
         opacity: '',
         transition: `${duration}ms opacity ease-out`,
       });
-    }).then(() => {
-      return delayAfterDeferringToEventLoop(this.win_, duration);
-    });
+    }).then(() => delayAfterDeferringToEventLoop(this.win_, duration));
   }
 
   /**

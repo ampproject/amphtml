@@ -511,24 +511,22 @@ export class ConsentUI {
       this.ampdoc_,
       CONSENT_STATE_MANAGER
     );
-    return consentStatePromise.then((consentStateManager) => {
-      return consentStateManager
-        .getLastConsentInstanceInfo()
-        .then((consentInfo) => {
-          return dict({
-            'clientConfig': this.clientConfig_,
-            // consentState to be deprecated
-            'consentState': getConsentStateValue(consentInfo['consentState']),
-            'consentStateValue': getConsentStateValue(
-              consentInfo['consentState']
-            ),
-            'consentMetadata': consentInfo['consentMetadata'],
-            'consentString': consentInfo['consentString'],
-            'promptTrigger': this.isActionPromptTrigger_ ? 'action' : 'load',
-            'isDirty': !!consentInfo['isDirty'],
-          });
-        });
-    });
+    return consentStatePromise.then((consentStateManager) =>
+      consentStateManager.getLastConsentInstanceInfo().then((consentInfo) =>
+        dict({
+          'clientConfig': this.clientConfig_,
+          // consentState to be deprecated
+          'consentState': getConsentStateValue(consentInfo['consentState']),
+          'consentStateValue': getConsentStateValue(
+            consentInfo['consentState']
+          ),
+          'consentMetadata': consentInfo['consentMetadata'],
+          'consentString': consentInfo['consentString'],
+          'promptTrigger': this.isActionPromptTrigger_ ? 'action' : 'load',
+          'isDirty': !!consentInfo['isDirty'],
+        })
+      )
+    );
   }
 
   /**

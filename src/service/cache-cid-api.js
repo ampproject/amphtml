@@ -85,9 +85,9 @@ export class CacheCidApi {
       this.publisherCidPromise_ = this.fetchCid_(url);
     }
 
-    return this.publisherCidPromise_.then((publisherCid) => {
-      return publisherCid ? this.scopeCid_(publisherCid, scope) : null;
-    });
+    return this.publisherCidPromise_.then((publisherCid) =>
+      publisherCid ? this.scopeCid_(publisherCid, scope) : null
+    );
   }
 
   /**

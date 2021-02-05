@@ -778,9 +778,9 @@ export class FixedLayer {
    * @private
    */
   sortInDomOrder_() {
-    this.elements_.sort((fe1, fe2) => {
-      return domOrderComparator(fe1.element, fe2.element);
-    });
+    this.elements_.sort((fe1, fe2) =>
+      domOrderComparator(fe1.element, fe2.element)
+    );
   }
 
   /**
@@ -899,9 +899,8 @@ export class FixedLayer {
       return Promise.resolve();
     }
     // Add transit effect on position fixed element
-    const tr = (time) => {
-      return lastPaddingTop - paddingTop + (paddingTop - lastPaddingTop) * time;
-    };
+    const tr = (time) =>
+      lastPaddingTop - paddingTop + (paddingTop - lastPaddingTop) * time;
     return Animation.animate(
       this.ampdoc.getRootNode(),
       (time) => {

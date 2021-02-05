@@ -86,9 +86,9 @@ export function createShadowRoot(hostElement) {
     shadowRoot.host.classList.add(rootId);
 
     // CSS isolation.
-    installCssTransformer(shadowRoot, (css) => {
-      return transformShadowCss(shadowRoot, css);
-    });
+    installCssTransformer(shadowRoot, (css) =>
+      transformShadowCss(shadowRoot, css)
+    );
   }
 
   return shadowRoot;

@@ -313,9 +313,8 @@ export class AmpStory360 extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     const attr = (name) => this.element.getAttribute(name);
-    const attrAsFloat = (name, fallbackValue = 0) => {
-      return parseFloat(attr(name) || fallbackValue);
-    };
+    const attrAsFloat = (name, fallbackValue = 0) =>
+      parseFloat(attr(name) || fallbackValue);
 
     if (attr('duration')) {
       this.duration_ = timeStrToMillis(attr('duration')) || 0;

@@ -67,14 +67,14 @@ export class NotificationUiManager {
       this.queueNotEmptyHandler_();
     }
     this.queueSize_++;
-    const promise = this.queuePromise_.then(() => {
-      return show().then(() => {
+    const promise = this.queuePromise_.then(() =>
+      show().then(() => {
         this.queueSize_--;
         if (this.queueSize_ == 0) {
           this.queueEmptyHandler_();
         }
-      });
-    });
+      })
+    );
     this.queuePromise_ = promise;
     return promise;
   }

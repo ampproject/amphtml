@@ -158,13 +158,11 @@ function extractTextContentWebVtt(text) {
       // Filter comments.
       return !/^NOTE\s+/.test(line);
     })
-    .map((line) => {
-      return (
-        line
-          // Strip multiline indicators.
-          .replace(/^- /, '')
-      );
-    })
+    .map((line) =>
+      line
+        // Strip multiline indicators.
+        .replace(/^- /, '')
+    )
     .join(' ');
   // Super loose HTML parsing to get HTML entity parsing and removal
   // of WebVTT elements.

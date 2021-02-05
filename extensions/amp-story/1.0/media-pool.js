@@ -374,9 +374,11 @@ export class MediaPool {
     }
 
     const allocatedEls = this.allocated[mediaType];
-    const index = findIndex(allocatedEls, (poolMediaEl) => {
-      return poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME] === domMediaEl.id;
-    });
+    const index = findIndex(
+      allocatedEls,
+      (poolMediaEl) =>
+        poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME] === domMediaEl.id
+    );
 
     return allocatedEls[index];
   }
