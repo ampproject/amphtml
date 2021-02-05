@@ -85,7 +85,7 @@ export function isExperimentOn(win, experimentId) {
 export function assertBentoExperiment(win, componentName) {
   userAssert(
     isExperimentOn(win, 'bento') ||
-      isExperimentOn(win, `bento-${componentName}`),
+      isExperimentOn(win, /*OK*/ `bento-${componentName}`),
     `expected global "bento" or specific "bento-${componentName}" experiment to be enabled`
   );
 }
