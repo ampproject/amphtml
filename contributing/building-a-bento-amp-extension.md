@@ -137,6 +137,7 @@ AMP.extension('amp-my-element', '0.1', (AMP) => {
 ```
 
 The following shows the corresponding overall structure of your Preact base element implementation file (extensions/amp-my-element/0.1/base-element.js).
+
 ```js
 import {MyElement} from './component'; // Preact component.
 import {PreactBaseElement} from '../../../src/preact/base-element'; // Preact component.
