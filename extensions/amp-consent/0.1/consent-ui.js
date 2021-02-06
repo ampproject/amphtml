@@ -285,10 +285,7 @@ export class ConsentUI {
           this.elementWithFocusBeforeShowing_ = this.document_.activeElement;
 
           this.maybeShowOverlay_();
-
-          console.log('QQQQQQQQQQQQ: scheduleLayout soon');
           this.resume();
-
           this.ui_./*OK*/ focus();
         }
       };
