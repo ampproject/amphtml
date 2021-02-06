@@ -914,6 +914,17 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
+   * Allow subclasses to skip client side validation of non-amp creatives
+   * based on http headers for perfomance. When true, ads will fall back to
+   * x-domain earlier.
+   * @param {!Headers} unusedHeaders
+   * @return {boolean}
+   */
+  skipClientSideValidation(unusedHeaders) {
+    return false;
+  }
+
+  /**
    * Start streaming response into the detached document.
    * @param {!Response} httpResponse
    * @param {function()} checkStillCurrent
@@ -923,6 +934,10 @@ export class AmpA4A extends AMP.BaseElement {
     if (httpResponse.status === 204) {
       this.forceCollapse();
       return Promise.reject(NO_CONTENT_RESPONSE);
+    }
+
+    if (this.skipClientSideValidation(httpResponse.headers)) {
+      return this.handleFallback_(httpResponse, checkStillCurrent);
     }
 
     // Duplicating httpResponse stream as safeframe/nameframe rending will need the
