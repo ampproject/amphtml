@@ -190,6 +190,24 @@ if (NO_SIGNING_RTV) {
       await a4a.layoutCallback();
       expect(iframe3pInit).to.be.called;
     });
+
+    it('should not try to validate if #skipClientSideValidation', async () => {
+      const fallbackSpy = env.sandbox.spy(a4a, 'handleFallback_');
+      env.sandbox.stub(a4a, 'skipClientSideValidation').returns(true);
+      await a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      await a4a.adPromise_;
+      expect(fallbackSpy).to.be.called;
+    });
+
+    it('should validate if #skipClientSideValidation == false', async () => {
+      const fallbackSpy = env.sandbox.spy(a4a, 'handleFallback_');
+      env.sandbox.stub(a4a, 'skipClientSideValidation').returns(false);
+      await a4a.buildCallback();
+      await a4a.onLayoutMeasure();
+      await a4a.adPromise_;
+      expect(fallbackSpy).not.to.be.called;
+    });
   });
 }
 
