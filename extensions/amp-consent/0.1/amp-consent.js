@@ -156,12 +156,16 @@ export class AmpConsent extends AMP.BaseElement {
 
   /** @override */
   pauseCallback() {
-    this.consentUI_.pause();
+    if (this.consentUI_) {
+      this.consentUI_.pause();
+    }
   }
 
   /** @override */
   resumeCallback() {
-    this.consentUI_.resume();
+    if (this.consentUI_) {
+      this.consentUI_.resume();
+    }
   }
 
   /**
