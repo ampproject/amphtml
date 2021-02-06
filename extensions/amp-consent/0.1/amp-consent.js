@@ -154,6 +154,16 @@ export class AmpConsent extends AMP.BaseElement {
     });
   }
 
+  /** @override */
+  pauseCallback() {
+    this.consentUI_.pause();
+  }
+
+  /** @override */
+  resumeCallback() {
+    this.consentUI_.resume();
+  }
+
   /**
    *
    * @param {!JsonObject} validatedConfig
