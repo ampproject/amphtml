@@ -26,11 +26,9 @@ export class Linkmate {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampDoc
    * @param {!../../../src/service/xhr-impl.Xhr} xhr
    * @param {!Object} linkmateOptions
+   * @param {!Object} win
    */
-  constructor(ampDoc, xhr, linkmateOptions) {
-    /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampDoc_ = ampDoc;
-
+  constructor(ampDoc, xhr, linkmateOptions, win) {
     /** @private {!../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = xhr;
 
@@ -43,14 +41,14 @@ export class Linkmate {
     /** @private {string} */
     this.linkAttribute_ = linkmateOptions.linkAttribute;
 
-    /** @private {!Document|!ShadowRoot} */
-    this.rootNode_ = this.ampDoc_.getRootNode();
-
     /** @private {?Array<!HTMLElement>} */
     this.anchorList_ = null;
 
     /** @private {?Array<JsonObject>}*/
     this.linkmateResponse_ = null;
+
+    /** @private {?Array<JsonObject>}*/
+    this.win_ = win;
   }
 
   /**
@@ -165,9 +163,31 @@ export class Linkmate {
    */
   getEditInfo_() {
     return dict({
-      'name': this.rootNode_.title || null,
-      'url': this.ampDoc_.getUrl(),
+      'name': this.getEditName_(),
+      'url': this.getLocationHref_(),
     });
+  }
+
+  /**
+   * Retrieve edit name.
+   * @return {string}
+   * @private
+   */
+  getEditName_() {
+    let editName = null;
+    if (this.win_.document.getElementsByTagName('title').length > 0) {
+      editName = this.win_.document.getElementsByTagName('title')[0].text;
+    }
+    return editName;
+  }
+
+  /**
+   * Retrieve url of the current doc.
+   * @return {string}
+   * @private
+   */
+  getLocationHref_() {
+    return this.win_.location.href;
   }
 
   /**
