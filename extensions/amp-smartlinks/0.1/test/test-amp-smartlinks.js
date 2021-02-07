@@ -187,7 +187,6 @@ describes.fakeWin(
           'linkmate': '',
           'exclusive-links': '',
         };
-
         ampSmartlinks = helpers.createAmpSmartlinks(options);
       });
 
@@ -198,7 +197,7 @@ describes.fakeWin(
           .stub(ampSmartlinks, 'generateUUID_')
           .returns('acbacc4b-e171-4869-b32a-921f48659624');
         env.sandbox
-          .stub(env.ampdoc, 'getUrl')
+          .stub(ampSmartlinks, 'getLocationHref_')
           .returns('http://fakewebsite.example/');
 
         const mockPub = 999;
