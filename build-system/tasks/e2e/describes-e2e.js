@@ -28,10 +28,6 @@ const {
   installBrowserAssertions,
 } = require('./expect');
 const {
-  getCoverageObject,
-  mergeClientCoverage,
-} = require('istanbul-middleware/lib/core');
-const {
   SeleniumWebDriverController,
 } = require('./selenium-webdriver-controller');
 const {AmpDriver, AmpdocEnvironment} = require('./amp-driver');
@@ -49,6 +45,12 @@ const SETUP_RETRIES = 3;
 const DEFAULT_E2E_INITIAL_RECT = {width: 800, height: 600};
 const COV_REPORT_PATH = '/coverage/client';
 const supportedBrowsers = new Set(['chrome', 'firefox', 'safari']);
+
+/**
+ * Used to lazily load coverage middleware.
+ */
+let istanbulMiddleware;
+
 /**
  * TODO(cvializ): Firefox now experimentally supports puppeteer.
  * When it's more mature we might want to support it.
@@ -367,7 +369,7 @@ class ItConfig {
 async function updateCoverage(env) {
   const coverage = await env.controller.evaluate(() => window.__coverage__);
   if (coverage) {
-    mergeClientCoverage(coverage);
+    istanbulMiddleware.mergeClientCoverage(coverage);
   }
 }
 
@@ -376,7 +378,7 @@ async function updateCoverage(env) {
  * @return {Promise<void>}
  */
 async function reportCoverage() {
-  const coverage = getCoverageObject();
+  const coverage = istanbulMiddleware.getCoverageObject();
   await fetch(`https://${HOST}:${PORT}${COV_REPORT_PATH}`, {
     method: 'POST',
     body: JSON.stringify(coverage),
@@ -483,6 +485,12 @@ function describeEnv(factory) {
         // don't install for CI
         if (!isCiBuild()) {
           installRepl(global, env);
+        }
+      });
+
+      before(() => {
+        if (argv.coverage) {
+          istanbulMiddleware = require('istanbul-middleware/lib/core');
         }
       });
 
