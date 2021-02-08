@@ -160,6 +160,20 @@ export class AmpConsent extends AMP.BaseElement {
     });
   }
 
+  /** @override */
+  pauseCallback() {
+    if (this.consentUI_) {
+      this.consentUI_.pause();
+    }
+  }
+
+  /** @override */
+  resumeCallback() {
+    if (this.consentUI_) {
+      this.consentUI_.resume();
+    }
+  }
+
   /**
    *
    * @param {!JsonObject} validatedConfig
