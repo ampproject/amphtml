@@ -34,10 +34,6 @@ import {descendsFromStory} from '../../../src/utils/story';
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {handleAutoscroll} from './autoscroll';
-import {
-  observeContentSize,
-  unobserveContentSize,
-} from '../../../src/utils/size-observer';
 import {removeFragment} from '../../../src/url';
 import {setModalAsClosed, setModalAsOpen} from '../../../src/modal';
 import {setStyles, toggle} from '../../../src/style';
@@ -145,8 +141,6 @@ export class AmpSidebar extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.disableSwipeClose_ = false;
-
-    this.onResized_ = this.onResized_.bind(this);
   }
 
   /** @override */
@@ -380,8 +374,8 @@ export class AmpSidebar extends AMP.BaseElement {
     return screenReaderCloseButton;
   }
 
-  /** @private */
-  onResized_() {
+  /** @override */
+  onLayoutMeasure() {
     this.getAmpDoc()
       .whenReady()
       .then(() => {
@@ -530,8 +524,6 @@ export class AmpSidebar extends AMP.BaseElement {
       this.openerElement_ = openerElement;
       this.initialScrollTop_ = this.viewport_.getScrollTop();
     }
-
-    observeContentSize(this.element, this.onResized_);
   }
 
   /**
@@ -579,7 +571,6 @@ export class AmpSidebar extends AMP.BaseElement {
         tryFocus(this.openerElement_);
       }
     }
-    unobserveContentSize(this.element, this.onResized_);
     return true;
   }
 

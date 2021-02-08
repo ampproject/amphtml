@@ -1214,6 +1214,8 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',
       'extensions/amp-iframe/0.1/amp-iframe.js',
       'extensions/amp-script/0.1/amp-script.js',
+      'extensions/amp-sidebar/0.1/amp-sidebar.js',
+      'extensions/amp-sidebar/0.2/amp-sidebar.js',
       'extensions/amp-story/1.0/amp-story-page.js',
     ],
   },
