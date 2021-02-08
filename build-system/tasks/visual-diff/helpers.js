@@ -191,8 +191,13 @@ async function waitForElementVisibility(page, selector, options) {
 
     for (const elementHandle of await page.$$(selector)) {
       const boundingBox = await elementHandle.boundingBox();
+      const fullyOpaque = await (
+        await page.evaluateHandle(element =>
+          window.getComputedStyle(element).opacity === '1'
+        , elementHandle)
+        ).jsonValue();
       const elementIsVisible =
-        boundingBox != null && boundingBox.height > 0 && boundingBox.width > 0;
+        boundingBox != null && boundingBox.height > 0 && boundingBox.width > 0 && fullyOpaque;
       elementsAreVisible.push(elementIsVisible);
     }
 
