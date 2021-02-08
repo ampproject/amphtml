@@ -15,6 +15,7 @@
  */
 
 import '../amp-google-assistant-assistjs';
+import { addAttributesToElement } from '../../../../src/dom';
 
 describes.realWin(
   'amp-google-assistant-assistjs',
@@ -24,18 +25,21 @@ describes.realWin(
     },
   },
   (env) => {
-    const {win} = env;
-
-    const configElement = win.document.createElement(
-      'amp-google-assistant-assistjs-config'
-    );
-    configElement.textContent =
-      '{"devMode": true, "projectId": "aog-assistjs-demos", "hostUrl": "https://toidemo2.web.app"}';
-    win.document.body.appendChild(configElement);
-
+    let win;
+    let configElement;
     let voiceButtonElement;
 
     beforeEach(() => {
+      win = env.win;
+
+      configElement = win.document.createElement(
+        'amp-google-assistant-assistjs-config'
+      );
+      configElement.innerHTML =
+        '<script type="application/json">{"devMode": true, "projectId": "aog-assistjs-demos", "hostUrl": "https://toidemo2.web.app"}</script>';
+      addAttributesToElement(configElement, { layout: 'nodisplay' });
+      win.document.body.appendChild(configElement);
+
       voiceButtonElement = win.document.createElement(
         'amp-google-assistant-assistjs-voice-button'
       );
@@ -43,10 +47,9 @@ describes.realWin(
       win.document.body.appendChild(voiceButtonElement);
     });
 
-    it('should have hello world when built', () => {
-      configElement.build();
-      voiceButtonElement.build();
-      expect(voiceButtonElement.getAttribute('id')).to.equal('voice button');
+    it('should have id "voice button" when built', () => {
+      expect(configElement.getAttribute('layout')).to.equal('nodisplay');;
+      expect(voiceButtonElement.getAttribute('id')).to.equal('voice-button');
     });
   }
 );

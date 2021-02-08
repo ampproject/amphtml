@@ -830,10 +830,10 @@ export class Services {
 
   /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!Promise<?../extensions/amp-assistant-assistjs/0.1/assistjs-frame-service.AssistjsFrameService>}
+   * @return {!../extensions/amp-assistant-assistjs/0.1/assistjs-frame-service.AssistjsFrameService}
    */
   static assistjsFrameServiceForDoc(elementOrAmpDoc) {
-    return /** @type {!Promise<?../extensions/amp-assistant-assistjs/0.1/assistjs-frame-service.AssistjsFrameService>} */ (getServiceForDoc(
+    return /** @type {!../extensions/amp-assistant-assistjs/0.1/assistjs-frame-service.AssistjsFrameService} */ (getServiceForDoc(
       elementOrAmpDoc,
       'assistjs-frame-service'
     ));
@@ -841,10 +841,10 @@ export class Services {
 
   /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!Promise<?../extensions/amp-assistant-assistjs/0.1/assistjs-config-service.AssistjsConfigService>}
+   * @return {!../extensions/amp-assistant-assistjs/0.1/assistjs-config-service.AssistjsConfigService}
    */
   static assistjsConfigServiceForDoc(elementOrAmpDoc) {
-    return /** @type {!Promise<?../extensions/amp-assistant-assistjs/0.1/assistjs-config-service.AssistjsConfigService>} */ (getServiceForDoc(
+    return /** @type {!../extensions/amp-assistant-assistjs/0.1/assistjs-config-service.AssistjsConfigService} */ (getServiceForDoc(
       elementOrAmpDoc,
       'assistjs-config-service'
     ));

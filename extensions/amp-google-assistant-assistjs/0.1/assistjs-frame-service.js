@@ -19,7 +19,6 @@
  * endpoints to handle requests from custom elements.
  */
 
-import 'regenerator-runtime/runtime';
 import {Services} from '../../../src/services';
 import {addAttributesToElement} from '../../../src/dom';
 import {toggle} from '../../../src/style';
