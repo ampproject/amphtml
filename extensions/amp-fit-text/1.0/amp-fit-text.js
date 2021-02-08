@@ -22,7 +22,7 @@ import {userAssert} from '../../../src/log';
 /** @const {string} */
 const TAG = 'amp-fit-text';
 
-class AmpFitText extends BaseElement {
+export class AmpFitText extends BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(
