@@ -486,6 +486,15 @@ Substitutions will happen on every subsequent submission. Read more about [varia
 
 [/filter]<!-- formats="websites, ads" -->
 
+### Autoexpand
+
+AMP Form provides an `autoexpand` attribute to `<textarea>` elements. This allows the textarea
+to expand and shrink to accomodate the user's rows of input, up to the field's maximum size. If the user manually resizes the field, the autoexpand behavior will be removed.
+
+```html
+<textarea autoexpand></textarea>
+```
+
 ### Polyfills
 
 The `amp-form` extension provide polyfills for behaviors and functionality missing from some browsers or being implemented in the next version of CSS.
@@ -505,13 +514,6 @@ The `amp-form` extension provides [classes](#classes-and-css-hooks) to polyfill 
 #### `<textarea>` validation
 
 Regular expression matching is a common validation feature supported natively on most input elements, except for `<textarea>`. We polyfill this functionality and support the `pattern` attribute on `<textarea>` elements.
-
-AMP Form provides an `autoexpand` attribute to `<textarea>` elements. This allows the textarea
-to expand and shrink to accomodate the user's rows of input, up to the field's maximum size. If the user manually resizes the field, the autoexpand behavior will be removed.
-
-```html
-<textarea autoexpand></textarea>
-```
 
 ### Security considerations
 
