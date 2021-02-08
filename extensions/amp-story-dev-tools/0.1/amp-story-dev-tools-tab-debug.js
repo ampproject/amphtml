@@ -27,8 +27,8 @@ import {user, userAssert} from '../../../src/log';
  * @param {string} storyUrl
  * @return {!Element} the layout
  */
-export function createTabLogsElement(win, storyUrl) {
-  const element = win.document.createElement('amp-story-dev-tools-tab-logs');
+export function createTabDebugElement(win, storyUrl) {
+  const element = win.document.createElement('amp-story-dev-tools-tab-debug');
   element.setAttribute('data-story-url', storyUrl);
   return element;
 }
@@ -40,9 +40,9 @@ export function createTabLogsElement(win, storyUrl) {
  */
 const buildSuccessMessageTemplate = (element) => {
   const html = htmlFor(element);
-  return html`<div class="i-amphtml-story-dev-tools-logs-success">
-    <div class="i-amphtml-story-dev-tools-logs-success-image"></div>
-    <h1 class="i-amphtml-story-dev-tools-logs-success-message">
+  return html`<div class="i-amphtml-story-dev-tools-debug-success">
+    <div class="i-amphtml-story-dev-tools-debug-success-image"></div>
+    <h1 class="i-amphtml-story-dev-tools-debug-success-message">
       Great Job!<br />No issues found
     </h1>
   </div>`;
@@ -81,9 +81,9 @@ const buildLogMessageTemplate = (element) => {
 };
 
 /** @const {string} */
-const TAG = 'AMP_STORY_DEV_TOOLS_LOGS';
+const TAG = 'AMP_STORY_DEV_TOOLS_DEBUG';
 
-export class AmpStoryDevToolsTabLogs extends AMP.BaseElement {
+export class AmpStoryDevToolsTabDebug extends AMP.BaseElement {
   /** @param {!Element} element */
   constructor(element) {
     super(element);
@@ -105,13 +105,13 @@ export class AmpStoryDevToolsTabLogs extends AMP.BaseElement {
       )
       .then((errorList) => {
         this.errorList_ = errorList;
-        this.updateLogsTabIcon(errorList);
+        this.updateDebugTabIcon(errorList);
       });
   }
 
   /** @override */
   layoutCallback() {
-    return this.buildLogsContent_();
+    return this.buildDebugContent_();
   }
 
   /** @override */
@@ -152,14 +152,14 @@ export class AmpStoryDevToolsTabLogs extends AMP.BaseElement {
    * @private
    * @return {!Promise}
    */
-  buildLogsContent_() {
-    const logsContainer = this.errorList_.length
+  buildDebugContent_() {
+    const debugContainer = this.errorList_.length
       ? this.createErrorsList_()
       : buildSuccessMessageTemplate(this.element);
-    logsContainer.prepend(this.buildLogsTitle_(this.errorList_.length));
+    debugContainer.prepend(this.buildDebugTitle_(this.errorList_.length));
     this.mutateElement(() => {
       this.element.textContent = '';
-      this.element.appendChild(logsContainer);
+      this.element.appendChild(debugContainer);
     });
   }
 
@@ -169,7 +169,7 @@ export class AmpStoryDevToolsTabLogs extends AMP.BaseElement {
    * @param {number} errorCount
    * @return {!Element}
    */
-  buildLogsTitle_(errorCount) {
+  buildDebugTitle_(errorCount) {
     const statusIcon = buildStatusIcon(this.element, errorCount == 0);
     statusIcon.classList.add('i-amphtml-story-dev-tools-log-status-icon');
     const title = htmlFor(
@@ -185,14 +185,14 @@ export class AmpStoryDevToolsTabLogs extends AMP.BaseElement {
   }
 
   /**
-   * Updates the icon (passed / failed) next to the logs tab selector.
+   * Updates the icon (passed / failed) next to the debug tab selector.
    * @param {!Array} errorList
    */
-  updateLogsTabIcon(errorList) {
-    const logsTabSelector = this.win.document.querySelector(
-      '[data-tab="Logs"]'
+  updateDebugTabIcon(errorList) {
+    const debugTabSelector = this.win.document.querySelector(
+      '[data-tab="Debug"]'
     );
-    if (!logsTabSelector) {
+    if (!debugTabSelector) {
       return;
     }
     let statusIcon;
@@ -208,7 +208,7 @@ export class AmpStoryDevToolsTabLogs extends AMP.BaseElement {
     } else {
       statusIcon = buildStatusIcon(this.element, true);
     }
-    this.mutateElement(() => logsTabSelector.appendChild(statusIcon));
+    this.mutateElement(() => debugTabSelector.appendChild(statusIcon));
   }
 
   /**
@@ -216,7 +216,7 @@ export class AmpStoryDevToolsTabLogs extends AMP.BaseElement {
    * @return {!Element}
    */
   createErrorsList_() {
-    const logsContainer = this.element.ownerDocument.createElement('div');
+    const debugContainer = this.element.ownerDocument.createElement('div');
     this.errorList_.forEach((content) => {
       const logEl = buildLogMessageTemplate(this.element);
       logEl.querySelector('.i-amphtml-story-dev-tools-log-type').textContent =
@@ -242,8 +242,8 @@ export class AmpStoryDevToolsTabLogs extends AMP.BaseElement {
       } else {
         specUrlElement.remove();
       }
-      logsContainer.appendChild(logEl);
+      debugContainer.appendChild(logEl);
     });
-    return logsContainer;
+    return debugContainer;
   }
 }
