@@ -99,6 +99,10 @@ void SkipLangAttribute(std::string_view* s) {
       }
     }
 
+    // Nothing after quote start.
+    // <!doctype lang='> or <!doctype lang=">
+    if (s->empty()) return;
+
     std::string value(s->substr(0, i));
     Attribute lang_attr{"", "lang", value};
     s->remove_prefix(i + 1);
