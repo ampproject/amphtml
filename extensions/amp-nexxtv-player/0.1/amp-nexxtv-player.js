@@ -32,6 +32,11 @@ import {
   isFullscreenElement,
   removeElement,
 } from '../../../src/dom';
+import {
+  getConsentPolicyInfo,
+  getConsentPolicySharedData,
+  getConsentPolicyState,
+} from '../../../src/consent';
 import {getData, listen} from '../../../src/event-helper';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -59,6 +64,15 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
 
     /** @private {?Function} */
     this.playerReadyResolver_ = null;
+
+    /**@private {?number} */
+    this.consentState_ = null;
+
+    /**@private {?object} */
+    this.consentSharedData_ = null;
+
+    /**@private {?string} */
+    this.consentString_ = null;
   }
 
   /**
@@ -86,6 +100,21 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
 
     installVideoManagerForDoc(this.element);
     Services.videoManagerForDoc(this.element).register(this);
+  }
+
+  /**
+   * @param {!JsonObject} data
+   * @private 
+   */
+  playerReady_(data){
+
+    this.playerReadyResolver_(this.iframe_);
+
+    dev().info(
+      TAG,
+      'nexx player ready',
+      data
+    );
   }
 
   /**
@@ -137,22 +166,42 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     return assertAbsoluteHttpOrHttpsUrl(src);
   }
 
+  /**
+   * @return {Promise[]}
+   */
+  getConsents_() {
+    const consentPolicy = super.getConsentPolicy();
+    const consentPromise = consentPolicy
+      ? getConsentPolicyState(this.element, consentPolicy)
+      : Promise.resolve(null);
+    const consentStringPromise = consentPolicy
+      ? getConsentPolicyInfo(this.element, consentPolicy)
+      : Promise.resolve(null);
+    const sharedDataPromise = consentPolicy
+      ? getConsentPolicySharedData(this.element, consentPolicy)
+      : Promise.resolve(null);
+    return Promise.all([
+      consentPromise,
+      sharedDataPromise,
+      consentStringPromise,
+    ]).then((arr) => {
+      this.consentState_ = arr[0];
+      this.consentSharedData_ = arr[1];
+      this.consentString_ = arr[2];
+    });
+  }
+
   /** @override */
   layoutCallback() {
-    const iframe = createFrameFor(this, this.getVideoIframeSrc_());
-
-    this.iframe_ = iframe;
-
-    this.unlistenMessage_ = listen(this.win, 'message', (event) => {
-      this.handleNexxMessage_(event);
+    return this.getConsents_().then(() => {
+      this.iframe_ = createFrameFor(this, this.getVideoIframeSrc_());
+      this.unlistenMessage_ = listen(this.win, 'message', (event) => {
+        this.handleNexxMessage_(event);
+      });
+      return this.loadPromise(this.iframe_).then(
+        () => this.playerReadyPromise_
+      );
     });
-
-    this.element.appendChild(this.iframe_);
-    const loaded = this.loadPromise(this.iframe_).then(() => {
-      dispatchCustomEvent(this.element, VideoEvents.LOAD);
-    });
-    this.playerReadyResolver_(loaded);
-    return loaded;
   }
 
   /** @override */
@@ -217,7 +266,17 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
       return;
     }
 
+    const eventType = data['event'];
+    if (!eventType) {
+      return;
+    }
+
+    if (eventType === 'playerready') {
+      this.playerReady_(data);
+    }
+
     redispatch(this.element, data['event'], {
+      'ready': VideoEvents.LOAD,
       'play': VideoEvents.PLAYING,
       'pause': VideoEvents.PAUSE,
       'mute': VideoEvents.MUTED,
