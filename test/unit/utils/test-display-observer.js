@@ -23,13 +23,14 @@ import {
 import {removeItem} from '../../../src/utils/array';
 
 describes.realWin('display-observer', {amp: true}, (env) => {
-  let win, doc;
+  let win, doc, ampdoc;
   let element;
   let docObserver, viewportObserver;
 
   beforeEach(() => {
     win = env.win;
     doc = win.document;
+    ampdoc = env.ampdoc;
     element = doc.createElement('div');
     element.id = 'element1';
     doc.body.appendChild(element);
@@ -246,6 +247,48 @@ describes.realWin('display-observer', {amp: true}, (env) => {
       unobserveDisplay(element, callbackCaller1);
       expect(docObserver.elements).to.not.include(element);
       expect(viewportObserver.elements).to.not.include(element);
+    });
+
+    it('should observe document visibility', async () => {
+      const callbackCaller = createCallbackCaller();
+      observeDisplay(element, callbackCaller);
+
+      // First response.
+      docObserver.notify([{target: element, isIntersecting: true}]);
+      viewportObserver.notify([{target: element, isIntersecting: false}]);
+      const display1 = await callbackCaller.next();
+      expect(display1).to.be.true;
+
+      // Paused visibility.
+      ampdoc.overrideVisibilityState('paused');
+      const display2 = await callbackCaller.next();
+      expect(display2).to.be.false;
+
+      // Visibile visibility.
+      ampdoc.overrideVisibilityState('visible');
+      const display3 = await callbackCaller.next();
+      expect(display3).to.be.true;
+    });
+
+    it('should treat hidden document visibility as displayed', async () => {
+      const callbackCaller = createCallbackCaller();
+      observeDisplay(element, callbackCaller);
+
+      // First response.
+      docObserver.notify([{target: element, isIntersecting: true}]);
+      viewportObserver.notify([{target: element, isIntersecting: false}]);
+      const display1 = await callbackCaller.next();
+      expect(display1).to.be.true;
+
+      // Paused visibility.
+      ampdoc.overrideVisibilityState('paused');
+      const display2 = await callbackCaller.next();
+      expect(display2).to.be.false;
+
+      // Hidden visibility.
+      ampdoc.overrideVisibilityState('hidden');
+      const display3 = await callbackCaller.next();
+      expect(display3).to.be.true;
     });
   });
 });
