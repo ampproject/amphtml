@@ -48,7 +48,7 @@ std::string ReadUntil(std::string_view* s, const std::string& stop_chars) {
 }
 
 void StripSelfClosingSlash(std::string_view* s) {
-  while (s->back() == '/') {
+  while (!s->empty() && s->back() == '/') {
     s->remove_suffix(1);
   }
 }
