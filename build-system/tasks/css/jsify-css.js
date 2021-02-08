@@ -20,7 +20,7 @@ const cssnano = require('cssnano');
 const fs = require('fs-extra');
 const postcss = require('postcss');
 const postcssImport = require('postcss-import');
-const {log} = require('../common/logging');
+const {log} = require('../../common/logging');
 const {red} = require('ansi-colors');
 
 // NOTE: see https://github.com/ai/browserslist#queries for `browsers` list
