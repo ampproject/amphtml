@@ -22,17 +22,17 @@ import {user} from '../../../../src/log';
 
 describes.realWin('Platform store', {}, (env) => {
   let platformStore;
-  const serviceIds = ['service1', 'service2'];
+  const platformKeys = ['platform1', 'platform2'];
   const entitlementsForService1 = new Entitlement({
-    source: serviceIds[0],
+    source: platformKeys[0],
     raw: '',
-    service: serviceIds[0],
+    service: platformKeys[0],
     granted: true,
   });
   const entitlementsForService2 = new Entitlement({
-    source: serviceIds[1],
+    source: platformKeys[1],
     raw: '',
-    service: serviceIds[1],
+    service: platformKeys[1],
     granted: false,
   });
   const fallbackEntitlement = new Entitlement({
@@ -55,7 +55,7 @@ describes.realWin('Platform store', {}, (env) => {
 
   beforeEach(() => {
     platformStore = new PlatformStore(
-      serviceIds,
+      platformKeys,
       {
         supportsViewer: 9,
         testFactor1: 10,
@@ -65,32 +65,32 @@ describes.realWin('Platform store', {}, (env) => {
     );
   });
 
-  it('should instantiate with the service ids', () => {
-    expect(platformStore.serviceIds_).to.be.equal(serviceIds);
+  it('should instantiate with the platform keys', () => {
+    expect(platformStore.platformKeys_).to.be.equal(platformKeys);
   });
 
   it('should resolve entitlement', async () => {
     // Request entitlement promise even before it's resolved.
-    const p = platformStore.getEntitlementPromiseFor('service2');
+    const p = platformStore.getEntitlementPromiseFor('platform2');
 
     // Resolve once.
     const ent = new Entitlement({
-      service: 'service2',
+      service: 'platform2',
       granted: false,
     });
-    platformStore.resolveEntitlement('service2', ent);
-    expect(platformStore.getResolvedEntitlementFor('service2')).to.equal(ent);
-    expect(platformStore.getEntitlementPromiseFor('service2')).to.equal(p);
+    platformStore.resolveEntitlement('platform2', ent);
+    expect(platformStore.getResolvedEntitlementFor('platform2')).to.equal(ent);
+    expect(platformStore.getEntitlementPromiseFor('platform2')).to.equal(p);
 
     // Additional resolution doesn't change anything without reset.
     platformStore.resolveEntitlement(
-      'service2',
+      'platform2',
       new Entitlement({
-        service: 'service2',
+        service: 'platform2',
         granted: true,
       })
     );
-    expect(platformStore.getEntitlementPromiseFor('service2')).to.equal(p);
+    expect(platformStore.getEntitlementPromiseFor('platform2')).to.equal(p);
     await expect(p).to.eventually.equal(ent);
   });
 
@@ -101,9 +101,9 @@ describes.realWin('Platform store', {}, (env) => {
     );
     platformStore.onChange(cb);
     platformStore.resolveEntitlement(
-      'service2',
+      'platform2',
       new Entitlement({
-        service: 'service2',
+        service: 'platform2',
         granted: false,
       })
     );
@@ -119,13 +119,19 @@ describes.realWin('Platform store', {}, (env) => {
           throw new Error('Incorrect entitlement resolved');
         }
       });
-      platformStore.resolveEntitlement(serviceIds[1], entitlementsForService2);
-      platformStore.resolveEntitlement(serviceIds[0], entitlementsForService1);
+      platformStore.resolveEntitlement(
+        platformKeys[1],
+        entitlementsForService2
+      );
+      platformStore.resolveEntitlement(
+        platformKeys[0],
+        entitlementsForService1
+      );
     });
 
     it('should resolve true for existing positive entitlement', (done) => {
-      platformStore.entitlements_[serviceIds[0]] = entitlementsForService1;
-      platformStore.entitlements_[serviceIds[1]] = entitlementsForService2;
+      platformStore.entitlements_[platformKeys[0]] = entitlementsForService1;
+      platformStore.entitlements_[platformKeys[1]] = entitlementsForService2;
       platformStore.getGrantStatus().then((entitlements) => {
         if (entitlements === true) {
           done();
@@ -137,12 +143,12 @@ describes.realWin('Platform store', {}, (env) => {
 
     it('should resolve false for negative entitlement', (done) => {
       const negativeEntitlements = new Entitlement({
-        source: serviceIds[0],
+        source: platformKeys[0],
         raw: '',
-        service: serviceIds[0],
+        service: platformKeys[0],
       });
-      platformStore.entitlements_[serviceIds[0]] = negativeEntitlements;
-      platformStore.entitlements_[serviceIds[1]] = entitlementsForService2;
+      platformStore.entitlements_[platformKeys[0]] = negativeEntitlements;
+      platformStore.entitlements_[platformKeys[1]] = entitlementsForService2;
       platformStore.getGrantStatus().then((entitlements) => {
         if (entitlements === false) {
           done();
@@ -154,11 +160,11 @@ describes.realWin('Platform store', {}, (env) => {
 
     it('should resolve false if all future entitlement are also negative ', (done) => {
       const negativeEntitlements = new Entitlement({
-        source: serviceIds[0],
+        source: platformKeys[0],
         raw: '',
-        service: serviceIds[0],
+        service: platformKeys[0],
       });
-      platformStore.entitlements_[serviceIds[0]] = negativeEntitlements;
+      platformStore.entitlements_[platformKeys[0]] = negativeEntitlements;
       platformStore.getGrantStatus().then((entitlements) => {
         if (entitlements === false) {
           done();
@@ -166,26 +172,41 @@ describes.realWin('Platform store', {}, (env) => {
           throw new Error('Incorrect entitlement resolved');
         }
       });
-      platformStore.resolveEntitlement(serviceIds[1], entitlementsForService2);
+      platformStore.resolveEntitlement(
+        platformKeys[1],
+        entitlementsForService2
+      );
     });
   });
 
   describe('areAllPlatformsResolved_', () => {
     it('should return true if all entitlements are present', () => {
-      platformStore.resolveEntitlement(serviceIds[1], entitlementsForService2);
+      platformStore.resolveEntitlement(
+        platformKeys[1],
+        entitlementsForService2
+      );
       expect(platformStore.areAllPlatformsResolved_()).to.be.equal(false);
-      platformStore.resolveEntitlement(serviceIds[0], entitlementsForService1);
+      platformStore.resolveEntitlement(
+        platformKeys[0],
+        entitlementsForService1
+      );
       expect(platformStore.areAllPlatformsResolved_()).to.be.equal(true);
     });
   });
 
   describe('getAvailablePlatformsEntitlements_', () => {
     it('should return all available entitlements', () => {
-      platformStore.resolveEntitlement(serviceIds[1], entitlementsForService2);
+      platformStore.resolveEntitlement(
+        platformKeys[1],
+        entitlementsForService2
+      );
       expect(platformStore.getAvailablePlatformsEntitlements_()).to.deep.equal([
         entitlementsForService2,
       ]);
-      platformStore.resolveEntitlement(serviceIds[0], entitlementsForService1);
+      platformStore.resolveEntitlement(
+        platformKeys[0],
+        entitlementsForService1
+      );
       expect(platformStore.getAvailablePlatformsEntitlements_()).to.deep.equal([
         entitlementsForService2,
         entitlementsForService1,
@@ -641,9 +662,9 @@ describes.realWin('Platform store', {}, (env) => {
         const platform = new SubscriptionPlatform();
         env.sandbox.stub(platform, 'getServiceId').callsFake(() => 'local');
         env.sandbox
-          .stub(platformStore, 'getLocalPlatform')
+          .stub(platformStore, 'getLocalPlatform_')
           .callsFake(() => platform);
-        platformStore.reportPlatformFailureAndFallback('service1');
+        platformStore.reportPlatformFailureAndFallback('platform1');
         expect(errorSpy).to.not.be.called;
         platformStore.reportPlatformFailureAndFallback('local');
         expect(errorSpy).to.be.calledOnce;
@@ -661,17 +682,17 @@ describes.realWin('Platform store', {}, (env) => {
         const anotherPlatform = new SubscriptionPlatform();
         env.sandbox.stub(platform, 'getServiceId').callsFake(() => 'local');
         env.sandbox
-          .stub(platformStore, 'getLocalPlatform')
+          .stub(platformStore, 'getLocalPlatform_')
           .callsFake(() => platform);
         env.sandbox
           .stub(anotherPlatform, 'getServiceId')
-          .callsFake(() => serviceIds[0]);
+          .callsFake(() => platformKeys[0]);
         env.sandbox.stub(anotherPlatform, 'getBaseScore').callsFake(() => 10);
-        platformStore.resolvePlatform(serviceIds[0], anotherPlatform);
+        platformStore.resolvePlatform(platformKeys[0], anotherPlatform);
         platformStore.resolvePlatform('local', platform);
         platformStore.reportPlatformFailureAndFallback('local');
         platformStore.resolveEntitlement(
-          serviceIds[0],
+          platformKeys[0],
           entitlementsForService1
         );
 
@@ -692,18 +713,18 @@ describes.realWin('Platform store', {}, (env) => {
         const anotherPlatform = new SubscriptionPlatform();
         env.sandbox.stub(platform, 'getServiceId').callsFake(() => 'local');
         env.sandbox
-          .stub(platformStore, 'getLocalPlatform')
+          .stub(platformStore, 'getLocalPlatform_')
           .callsFake(() => platform);
         env.sandbox
           .stub(anotherPlatform, 'getServiceId')
-          .callsFake(() => serviceIds[0]);
+          .callsFake(() => platformKeys[0]);
         env.sandbox.stub(anotherPlatform, 'getBaseScore').callsFake(() => 10);
-        platformStore.resolvePlatform(serviceIds[0], anotherPlatform);
+        platformStore.resolvePlatform(platformKeys[0], anotherPlatform);
         platformStore.resolvePlatform('local', platform);
         fallbackEntitlement.grantReason = GrantReason.METERING;
         platformStore.reportPlatformFailureAndFallback('local');
         platformStore.resolveEntitlement(
-          serviceIds[0],
+          platformKeys[0],
           entitlementsForService1
         );
 
@@ -712,13 +733,13 @@ describes.realWin('Platform store', {}, (env) => {
           fallbackEntitlement
         );
         // falbackEntitlement has Reason as SUBSCRIBER so it should win
-        expect(selectedPlatform.getServiceId()).to.equal(serviceIds[0]);
+        expect(selectedPlatform.getServiceId()).to.equal(platformKeys[0]);
       }
     );
   });
 
   describe('getPlatform', () => {
-    it('should return the platform for the serviceId', () => {
+    it('should return the platform for a given platform key', () => {
       const platform = new SubscriptionPlatform();
       platform.getServiceId = () => 'test';
       platformStore.subscriptionPlatforms_['test'] = platform;
@@ -754,7 +775,7 @@ describes.realWin('Platform store', {}, (env) => {
     });
 
     it('should resolve with first entitlement with subscriptions', async () => {
-      platformStore.resolveEntitlement('service1', subscribedEntitlement);
+      platformStore.resolveEntitlement('platform1', subscribedEntitlement);
       const entitlement = await platformStore.getGrantEntitlement();
       expect(entitlement).to.equal(subscribedEntitlement);
     });
@@ -763,23 +784,23 @@ describes.realWin('Platform store', {}, (env) => {
       'should resolve with metered entitlement when no ' +
         'platform is subscribed',
       async () => {
-        platformStore.resolveEntitlement('service1', noEntitlement);
-        platformStore.resolveEntitlement('service2', meteringEntitlement);
+        platformStore.resolveEntitlement('platform1', noEntitlement);
+        platformStore.resolveEntitlement('platform2', meteringEntitlement);
         const entitlement = await platformStore.getGrantEntitlement();
         expect(entitlement).to.equal(meteringEntitlement);
       }
     );
 
     it('should override metering with subscription', async () => {
-      platformStore.resolveEntitlement('service1', meteringEntitlement);
-      platformStore.resolveEntitlement('service2', subscribedEntitlement);
+      platformStore.resolveEntitlement('platform1', meteringEntitlement);
+      platformStore.resolveEntitlement('platform2', subscribedEntitlement);
       const entitlement = await platformStore.getGrantEntitlement();
       expect(entitlement).to.equal(subscribedEntitlement);
     });
 
     it('should resolve to null if nothing matched', async () => {
-      platformStore.resolveEntitlement('service1', noEntitlement);
-      platformStore.resolveEntitlement('service2', noEntitlement);
+      platformStore.resolveEntitlement('platform1', noEntitlement);
+      platformStore.resolveEntitlement('platform2', noEntitlement);
       const entitlement = await platformStore.getGrantEntitlement();
       expect(entitlement).to.be.null;
     });
@@ -852,14 +873,14 @@ describes.realWin('Platform store', {}, (env) => {
       'should return a promise resolving the requested platform ' +
         'if it is already registered',
       () => {
-        let serviceId;
+        let platformKey;
 
         platformStore.resolvePlatform('local', localPlatform);
         platformStore.onPlatformResolves('local', (platform) => {
-          serviceId = platform.getServiceId();
+          platformKey = platform.getServiceId();
         });
 
-        expect(serviceId).to.be.equal('local');
+        expect(platformKey).to.be.equal('local');
       }
     );
 
@@ -867,14 +888,14 @@ describes.realWin('Platform store', {}, (env) => {
       'should return a promise resolving when the requested platform ' +
         'gets registered',
       () => {
-        let serviceId;
+        let platformKey;
 
         platformStore.onPlatformResolves('local', (platform) => {
-          serviceId = platform.getServiceId();
+          platformKey = platform.getServiceId();
         });
         platformStore.resolvePlatform('local', localPlatform);
 
-        expect(serviceId).to.be.equal('local');
+        expect(platformKey).to.be.equal('local');
       }
     );
   });
