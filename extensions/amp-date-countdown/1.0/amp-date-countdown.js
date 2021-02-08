@@ -14,19 +14,17 @@
  * limitations under the License.
  */
 
-import {DateCountdown} from './date-countdown';
-import {PreactBaseElement} from '../../../src/preact/base-element';
+import {BaseElement} from './base-element';
 import {Services} from '../../../src/services';
 import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {parseDateAttrs as parseDateAttrsBase} from '../../../src/utils/date';
 
 /** @const {string} */
 const TAG = 'amp-date-countdown';
 
-class AmpDateCountdown extends PreactBaseElement {
+class AmpDateCountdown extends BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -87,52 +85,6 @@ class AmpDateCountdown extends PreactBaseElement {
     }
     return true;
   }
-}
-
-/** @override */
-AmpDateCountdown['Component'] = DateCountdown;
-
-/** @override */
-AmpDateCountdown['layoutSizeDefined'] = true;
-
-/** @override */
-AmpDateCountdown['lightDomTag'] = 'div';
-
-/** @override */
-AmpDateCountdown['usesTemplate'] = true;
-
-/** @override */
-AmpDateCountdown['props'] = {
-  'datetime': {
-    attrs: [
-      'end-date',
-      'timeleft-ms',
-      'timestamp-ms',
-      'timestamp-seconds',
-      'offset-seconds',
-    ],
-    parseAttrs: parseDateAttrs,
-  },
-
-  'whenEnded': {attr: 'when-ended', type: 'string'},
-  'locale': {attr: 'locale', type: 'string'},
-  'biggestUnit': {attr: 'biggest-unit', type: 'string'},
-  'countUp': {attr: 'count-up', type: 'boolean'},
-};
-
-/**
- * @param {!Element} element
- * @return {?number}
- * @throws {UserError} when attribute values are missing or invalid.
- * @visibleForTesting
- */
-export function parseDateAttrs(element) {
-  return parseDateAttrsBase(element, [
-    'end-date',
-    'timeleft-ms',
-    'timestamp-ms',
-    'timestamp-seconds',
-  ]);
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {
