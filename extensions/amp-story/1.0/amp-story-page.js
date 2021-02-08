@@ -177,7 +177,7 @@ const buildErrorMessageElement = (element) =>
  */
 const buildOpenAttachmentElement = (element) =>
   htmlFor(element)`
-      <a class="i-amphtml-story-page-open-attachment"
+      <a class="i-amphtml-story-page-open-attachment i-amphtml-story-system-reset"
           role="button">
         <span class="i-amphtml-story-page-open-attachment-icon">
           <span class="i-amphtml-story-page-open-attachment-bar-left"></span>
@@ -199,7 +199,7 @@ const buildOpenOutlinkAttachmentElement = (element) =>
           <span class="i-amphtml-story-page-open-attachment-bar-right"></span>
         </span>
         <span>
-          <div class="i-amphtml-story-light-link-icon"></div>
+          <div class="i-amphtml-story-link-icon"></div>
           <span class="i-amphtml-story-page-attachment-outlink-label"></span>
         </span>
       </a>`;
@@ -615,6 +615,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.checkPageHasAudio_();
       this.checkPageHasElementWithPlayback_();
       this.renderOpenAttachmentUI_();
+      this.renderOpenOutlinkAttachmentUI_();
       this.findAndPrepareEmbeddedComponents_();
     }
 
@@ -1808,21 +1809,56 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     if (!this.openAttachmentEl_) {
       const attachmentHref = attachmentEl.getAttribute('href');
-      let textEl;
-      if (attachmentHref) {
-        this.openAttachmentEl_ = buildOpenOutlinkAttachmentElement(
-          this.element
-        );
-        textEl = this.openAttachmentEl_.querySelector(
-          '.i-amphtml-story-page-attachment-outlink-label'
-        );
-      } else {
+      if (!attachmentHref) {
         this.openAttachmentEl_ = buildOpenAttachmentElement(this.element);
-        textEl = this.openAttachmentEl_.querySelector(
+        this.openAttachmentEl_.addEventListener('click', () =>
+          this.openAttachment()
+        );
+
+        const textEl = this.openAttachmentEl_.querySelector(
           '.i-amphtml-story-page-open-attachment-label'
         );
+
+        const openLabelAttr = attachmentEl.getAttribute('data-cta-text');
+        const openLabel =
+          (openLabelAttr && openLabelAttr.trim()) ||
+          getLocalizationService(this.element).getLocalizedString(
+            LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
+          );
+
+        this.mutateElement(() => {
+          textEl.textContent = openLabel;
+          this.element.appendChild(this.openAttachmentEl_);
+        });
       }
-      // If the attachment is a link, copy href to the element so it can be previewed on hover and long press.
+    }
+  }
+
+  /**
+   * Renders the open attachment UI affordance for outlinks.
+   * @private
+   */
+  renderOpenOutlinkAttachmentUI_() {
+    const attachmentEl = this.element.querySelector(
+      'amp-story-page-attachment'
+    );
+    if (!attachmentEl) {
+      return;
+    }
+
+    if (!this.openAttachmentEl_) {
+      const attachmentHref = attachmentEl.getAttribute('href');
+      this.openAttachmentEl_ = buildOpenOutlinkAttachmentElement(
+        this.element
+      );
+      const textEl = this.openAttachmentEl_.querySelector(
+        '.i-amphtml-story-page-attachment-outlink-label'
+      );
+      const ctaImgEl = this.openAttachmentEl_.querySelector(
+        '.i-amphtml-story-link-icon'
+      );
+
+      // Copy href to the element so it can be previewed on hover and long press.
       if (attachmentHref) {
         this.openAttachmentEl_.setAttribute('href', attachmentHref);
       }
@@ -1830,46 +1866,43 @@ export class AmpStoryPage extends AMP.BaseElement {
         this.openAttachment()
       );
 
-      let ctaImg = '';
-      const theme = attachmentEl.getAttribute('theme');
-      if (attachmentHref) {
-        let defaultCtaImg =
-          '<img src="/extensions/amp-story/img/light-link-icon.svg"></img>';
-        if (theme && AttachmentTheme.DARK === theme.toLowerCase()) {
-          defaultCtaImg =
-            '<img src="/extensions/amp-story/img/dark-link-icon.svg"></img>';
-        }
-        const ctaImgAttr = attachmentEl.getAttribute('cta-img');
-        ctaImg = (ctaImgAttr && ctaImgAttr.trim()) || defaultCtaImg;
-      }
-
       const openLabelAttr = attachmentEl.getAttribute('cta-text');
       const openLabel =
-        // ctaImg +
         ((openLabelAttr && openLabelAttr.trim()) ||
           getLocalizationService(this.element).getLocalizedString(
             LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
           ));
 
       this.mutateElement(() => {
-        if (attachmentHref) {
-          const ctaAccentColor = attachmentEl.getAttribute(
-            'cta-accent-color'
-          );
+        const theme = attachmentEl.getAttribute('theme');
+        const ctaImgAttr = attachmentEl.getAttribute('cta-img');
+        if (!ctaImgAttr) {
           if (theme && AttachmentTheme.DARK === theme.toLowerCase()) {
-            setImportantStyles(textEl, {
-              color: 'white',
-              background: ctaAccentColor ? ctaAccentColor : 'black',
-            });
+            ctaImgEl.classList.add('i-amphtml-story-dark-link-icon');
           } else {
-            setImportantStyles(textEl, {
-              color: ctaAccentColor ? ctaAccentColor : 'black',
-              background: 'white',
-            });
+            ctaImgEl.classList.add('i-amphtml-story-light-link-icon');
           }
+        } else {
+          setImportantStyles(ctaImgEl, {
+            'background-image': url(ctaImgAttr),
+          });
         }
 
-        // textEl.classList.add('i-amphtml-story-light-link-icon');
+        const ctaAccentColor = attachmentEl.getAttribute(
+          'cta-accent-color'
+        );
+        if (theme && AttachmentTheme.DARK === theme.toLowerCase()) {
+          setImportantStyles(textEl, {
+            color: 'white',
+            background: ctaAccentColor ? ctaAccentColor : 'black',
+          });
+        } else {
+          setImportantStyles(textEl, {
+            color: ctaAccentColor ? ctaAccentColor : 'black',
+            background: 'white',
+          });
+        }
+
         textEl.innerHTML = openLabel;
         this.element.appendChild(this.openAttachmentEl_);
       });
