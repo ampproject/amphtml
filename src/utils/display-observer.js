@@ -97,11 +97,11 @@ export class DisplayObserver {
     );
 
     /** @private {boolean} */
-    this.isDocDisplay_ = computeDocDisplay(ampdoc.getVisibilityState());
+    this.isDocDisplay_ = computeDocIsDisplayed(ampdoc.getVisibilityState());
 
     /** @private {?UnlistenDef} */
     this.visibilityUnlisten_ = ampdoc.onVisibilityChanged(() => {
-      const display = computeDocDisplay(ampdoc.getVisibilityState());
+      const display = computeDocIsDisplayed(ampdoc.getVisibilityState());
       if (display !== this.isDocDisplay_) {
         this.isDocDisplay_ = display;
         this.docVisibilityChanged_();
@@ -254,7 +254,7 @@ function computeDisplay(observations, isDocDisplay) {
  * @param {!VisibilityState} visibilityState
  * @return {boolean}
  */
-function computeDocDisplay(visibilityState) {
+function computeDocIsDisplayed(visibilityState) {
   return (
     visibilityState == VisibilityState.VISIBLE ||
     // The document is still considered "displayed" or at least "displayable"
