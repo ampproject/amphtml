@@ -147,6 +147,9 @@ export class AmpSidebar extends AMP.BaseElement {
     this.disableSwipeClose_ = false;
 
     this.onResized_ = this.onResized_.bind(this);
+
+    /** @private {?UnlistenDef} */
+    this.onViewportResizeUnlisten_ = null;
   }
 
   /** @override */
@@ -202,20 +205,6 @@ export class AmpSidebar extends AMP.BaseElement {
             this.user().error(TAG, 'Failed to instantiate toolbar', e);
           }
         });
-
-        if (toolbarElements.length) {
-          this.getViewport().onResize(
-            debounce(
-              this.win,
-              () => {
-                this.toolbars_.forEach((toolbar) => {
-                  toolbar.onLayoutChange();
-                });
-              },
-              100
-            )
-          );
-        }
       });
 
     if (this.isIos_) {
@@ -301,6 +290,21 @@ export class AmpSidebar extends AMP.BaseElement {
     );
 
     this.setupGestures_(this.element);
+  }
+
+  /** @override */
+  attachedCallback() {
+    this.onViewportResizeUnlisten_ = this.viewport_.onResize(
+      debounce(this.win, this.onResized_, 100)
+    );
+  }
+
+  /** @override */
+  detachedCallback() {
+    if (this.onViewportResizeUnlisten_) {
+      this.onViewportResizeUnlisten_();
+      this.onViewportResizeUnlisten_ = null;
+    }
   }
 
   /**
