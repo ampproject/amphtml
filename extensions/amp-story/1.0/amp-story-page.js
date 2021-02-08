@@ -194,11 +194,14 @@ const buildOpenOutlinkAttachmentElement = (element) =>
   htmlFor(element)`
       <a class="i-amphtml-story-page-open-attachment"
           role="button">
-        <span class="i-amphtml-story-page-open-attachment-icon">
+        <span class="i-amphtml-story-page-open-attachment-outlink-icon">
           <span class="i-amphtml-story-page-open-attachment-bar-left"></span>
           <span class="i-amphtml-story-page-open-attachment-bar-right"></span>
         </span>
-        <span class="i-amphtml-story-page-attachment-outlink-label"></span>
+        <span>
+          <div class="i-amphtml-story-light-link-icon"></div>
+          <span class="i-amphtml-story-page-attachment-outlink-label"></span>
+        </span>
       </a>`;
 
 /**
@@ -1836,13 +1839,13 @@ export class AmpStoryPage extends AMP.BaseElement {
           defaultCtaImg =
             '<img src="/extensions/amp-story/img/dark-link-icon.svg"></img>';
         }
-        const ctaImgAttr = attachmentEl.getAttribute('data-cta-img');
+        const ctaImgAttr = attachmentEl.getAttribute('cta-img');
         ctaImg = (ctaImgAttr && ctaImgAttr.trim()) || defaultCtaImg;
       }
 
-      const openLabelAttr = attachmentEl.getAttribute('data-cta-text');
+      const openLabelAttr = attachmentEl.getAttribute('cta-text');
       const openLabel =
-        ctaImg +
+        // ctaImg +
         ((openLabelAttr && openLabelAttr.trim()) ||
           getLocalizationService(this.element).getLocalizedString(
             LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
@@ -1851,7 +1854,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.mutateElement(() => {
         if (attachmentHref) {
           const ctaAccentColor = attachmentEl.getAttribute(
-            'data-cta-accent-color'
+            'cta-accent-color'
           );
           if (theme && AttachmentTheme.DARK === theme.toLowerCase()) {
             setImportantStyles(textEl, {
@@ -1866,6 +1869,7 @@ export class AmpStoryPage extends AMP.BaseElement {
           }
         }
 
+        // textEl.classList.add('i-amphtml-story-light-link-icon');
         textEl.innerHTML = openLabel;
         this.element.appendChild(this.openAttachmentEl_);
       });

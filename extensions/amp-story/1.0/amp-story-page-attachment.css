@@ -92,7 +92,7 @@
 
 @keyframes open-attachment-icon-color {
   0% {
-    background: #fff;
+    background: #fff; /*TODO*/
   }
   to {
     background: rgba(0, 0, 0, 0.87);
@@ -154,6 +154,14 @@ amp-story-page .i-amphtml-story-page-open-attachment-icon {
   width: 32px !important;
   cursor: pointer !important;
   animation: open-attachment-icon 0.2s cubic-bezier(0.4, 0.0, 0.2, 1) 2s both !important;
+}
+
+amp-story-page .i-amphtml-story-page-open-attachment-outlink-icon {
+  display: block !important;
+  height: 32px !important;
+  width: 32px !important;
+  cursor: pointer !important;
+  position: relative;
 }
 
 amp-story-page .i-amphtml-story-page-open-attachment-icon::after {
