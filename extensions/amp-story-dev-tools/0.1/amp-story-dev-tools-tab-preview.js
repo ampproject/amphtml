@@ -791,7 +791,9 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
     ).href += this.storyUrl_;
     dialog.querySelector(
       '.i-amphtml-story-dev-tools-help-page-experience-link'
-    ).href = 'https://amp.dev/page-experience/?url=' + encodeURIComponent(this.storyUrl_);
+    ).href =
+      'https://amp.dev/page-experience/?url=' +
+      encodeURIComponent(this.storyUrl_);
 
     this.mutateElement(() => this.element.appendChild(dialog));
     addAttributeAfterTimeout(this, dialog, 1, 'active');
