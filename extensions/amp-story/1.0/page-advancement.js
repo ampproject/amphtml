@@ -708,7 +708,8 @@ export class ManualAdvancement extends AdvancementConfig {
     if (
       !this.isRunning() ||
       !this.isNavigationalClick_(event) ||
-      this.isProtectedTarget_(event) ||
+      (this.isProtectedTarget_(event) &&
+        this.isInScreenBottom_(event.target, pageRect)) ||
       !this.shouldHandleEvent_(event)
     ) {
       // If the system doesn't need to handle this click, then we can simply
@@ -717,6 +718,7 @@ export class ManualAdvancement extends AdvancementConfig {
     }
 
     event.stopPropagation();
+    event.preventDefault();
 
     this.storeService_.dispatch(
       Action.SET_ADVANCEMENT_MODE,
