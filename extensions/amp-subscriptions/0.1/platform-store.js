@@ -119,13 +119,35 @@ export class PlatformStore {
     for (const platformKey in this.subscriptionPlatforms_) {
       this.subscriptionPlatforms_[platformKey].reset();
     }
-    // Then create new platform store withe the newply reset platforms in it.
+
+    // Then create new platform store with the newly reset platforms in it.
     return new PlatformStore(
       this.serviceIds_,
       this.scoreConfig_,
       this.fallbackEntitlement_,
       this.subscriptionPlatforms_
     );
+  }
+
+  /**
+   * Resets a given platform.
+   * @param {string} platformKey
+   */
+  resetPlatform(platformKey) {
+    /** @private @const {!Object<string, !./entitlement.Entitlement>} */
+    this.entitlements_ = {};
+
+    // Reset platform's deferred entitlement map entry.
+    this.entitlementDeferredMap_[platformKey] = new Deferred();
+
+    // Reset platform's UX.
+    this.subscriptionPlatforms_[platformKey].reset();
+
+    // Reset summary promises.
+    this.grantStatusPromise_ = null;
+    this.grantStatusEntitlement_ = null;
+    this.grantStatusEntitlementPromise_ = null;
+    this.allResolvedPromise_ = null;
   }
 
   /**

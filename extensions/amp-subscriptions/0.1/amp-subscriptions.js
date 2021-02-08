@@ -311,19 +311,20 @@ export class SubscriptionService {
       this.fetchEntitlements_(subscriptionPlatform);
 
       if (matchedServiceConfig.enableMetering) {
-        const grantPromise = this.platformStore.getGrantStatus();
-
         // Re-fetch entitlements when metering state changes,
         // but only if a grant is still needed.
         this.metering_.setOnSaveMeteringState(() => {
-          grantPromise.then((grant) => {
-            if (!grant) {
-              this.resetPlatforms({
-                serviceIdsToFetch: [serviceId],
-                // doPlatformSelection: false,
-              });
-            }
-          });
+          this.platformStore
+            // We must wait until all platforms return entitlements.
+            .getAllPlatformsEntitlements()
+            .then(() => this.platformStore.getGrantStatus())
+            .then((grant) => {
+              if (grant) {
+                return;
+              }
+
+              this.resetPlatform(serviceId);
+            });
         });
       }
     });
@@ -578,11 +579,22 @@ export class SubscriptionService {
    * @private
    */
   selectAndActivatePlatform_() {
+    console.log('selectAndActivatePlatform_');
     const requireValuesPromise = Promise.all([
       this.platformStore.getGrantStatus(),
       this.platformStore.selectPlatform(),
       this.platformStore.getGrantEntitlement(),
     ]);
+
+    this.platformStore
+      .getGrantStatus()
+      .then(() => console.log('getGrantStatus'));
+    this.platformStore
+      .selectPlatform()
+      .then(() => console.log('selectPlatform'));
+    this.platformStore
+      .getGrantEntitlement()
+      .then(() => console.log('getGrantEntitlement'));
 
     return requireValuesPromise.then((resolvedValues) => {
       const selectedPlatform = resolvedValues[1];
@@ -661,26 +673,14 @@ export class SubscriptionService {
   /**
    * Reset all platforms and re-fetch entitlements after an
    * external event (for example a login)
-   * @param {{
-   *   serviceIdsToFetch: !Array<string>=,
-   *   doPlatformSelection: boolean=
-   * }} params
    */
-  resetPlatforms({serviceIdsToFetch, doPlatformSelection = true}) {
+  resetPlatforms() {
     this.platformStore = this.platformStore.resetPlatformStore();
     this.renderer_.toggleLoading(true);
 
     this.platformStore
       .getAvailablePlatforms()
       .forEach((subscriptionPlatform) => {
-        // Optionally, only fetch from selected platforms.
-        if (
-          serviceIdsToFetch &&
-          serviceIdsToFetch.indexOf(subscriptionPlatform.getServiceId()) === -1
-        ) {
-          return;
-        }
-
         this.fetchEntitlements_(subscriptionPlatform);
       });
     this.subscriptionAnalytics_.serviceEvent(
@@ -692,7 +692,26 @@ export class SubscriptionService {
       SubscriptionAnalyticsEvents.PLATFORM_REAUTHORIZED_DEPRECATED,
       ''
     );
-    this.startAuthorizationFlow_(doPlatformSelection);
+    this.startAuthorizationFlow_();
+  }
+
+  /**
+   * Resets a platform and re-fetches its entitlements.
+   * @param {string} platformId
+   */
+  resetPlatform(platformId) {
+    console.log('resetPlatform', platformId);
+
+    // Show loading UX.
+    this.renderer_.toggleLoading(true);
+    this.platformStore.resetPlatform(platformId);
+
+    // Re-fetch entitlements.
+    const platform = this.platformStore.getPlatform(platformId);
+    this.fetchEntitlements_(platform);
+
+    // Start auth flow.
+    this.startAuthorizationFlow_();
   }
 
   /**

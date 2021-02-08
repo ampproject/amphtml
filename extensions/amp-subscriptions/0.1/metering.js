@@ -75,20 +75,23 @@ export class Metering {
       return Promise.resolve(null);
     }
 
-    this.storagePromise_
-      .then((storage) =>
-        storage.setNonBoolean(STORAGE_KEY, JSON.stringify(meteringState))
-      )
-      .then(() => {
-        // Execute callbacks
-        this.onSaveMeteringStateCallbacks_.forEach((callback) =>
-          callback(meteringState)
-        );
-      })
-      // Do nothing if we fail to write to localstorage.
-      .catch(() => {
-        dev().warn(TAG, 'Failed to save metering state.');
-      });
+    return (
+      this.storagePromise_
+        .then((storage) =>
+          storage.setNonBoolean(STORAGE_KEY, JSON.stringify(meteringState))
+        )
+        .then(() => {
+          // Execute callbacks
+          this.onSaveMeteringStateCallbacks_.forEach((callback) =>
+            callback(meteringState)
+          );
+        })
+        // Do nothing if we fail to write to localstorage.
+        .catch((err) => {
+          console.log(err);
+          dev().warn(TAG, 'Failed to save metering state.');
+        })
+    );
   }
 
   /**

@@ -1165,7 +1165,7 @@ app.use('/subscription/:id/entitlements', (req, res) => {
         standardAttributes: {
           // eslint-disable-next-line google-camelcase/google-camelcase
           registered_user: {
-            timestamp: '1612044738', // In seconds.
+            timestamp: '1', // In seconds.
           },
         },
       },

@@ -637,23 +637,6 @@ export class GoogleSubscriptionsPlatform {
         const googleMeteringStrategy = results[0];
         const meteringState = results[1];
 
-        // Show Regwall if we already fetched entitlements and we're
-        // back here without a necessary metering state.
-        if (
-          googleMeteringStrategy === GoogleMeteringStrategy.EXTENDED_ACCESS &&
-          this.hasFetchedEntitlements_ &&
-          !meteringState
-        ) {
-          // TODO: Release gaa.js so it's compatible with AMP.
-          return GaaMeteringRegwall.show({
-            // Specify a URL that renders a Google Sign-In button.
-            iframeUrl: this.serviceConfig_['googleSignInHelperUrl'],
-          }).then((result) => {
-            console.warn('TODO: Define and save metering state');
-            console.log('GSI info', {result});
-          });
-        }
-
         const entitlementsParams = {};
 
         // Add encryption param.
@@ -748,19 +731,43 @@ export class GoogleSubscriptionsPlatform {
   /** @override */
   activate(entitlement, grantEntitlement) {
     const best = grantEntitlement || entitlement;
-    // Offers or abbreviated offers may need to be shown depending on
-    // whether the access has been granted and whether user is a subscriber.
-    if (!best.granted) {
-      this.getGoogleMeteringStrategy_().then((meteringStrategy) => {
-        if (meteringStrategy === GoogleMeteringStrategy.EXTENDED_ACCESS) {
-          this.showMeteringRegwall_();
-        } else {
-          this.runtime_.showOffers({list: 'amp'});
-        }
+
+    Promise.all([
+      this.getGoogleMeteringStrategy_(),
+      this.serviceAdapter_.loadMeteringState(),
+    ]).then((results) => {
+      const meteringStrategy = results[0];
+      const meteringState = results[1];
+
+      console.log('SWG ACTIVATE', {
+        best,
+        meteringState,
+        meteringStrategy,
       });
-    } else if (!best.isSubscriber()) {
-      this.runtime_.showAbbrvOffer({list: 'amp'});
-    }
+      if (meteringStrategy === GoogleMeteringStrategy.EXTENDED_ACCESS) {
+        // Show the Regwall, so the user can get
+        // a metering state that leads to a
+        // granting entitlement.
+        if (!best.granted && !meteringState) {
+          this.showMeteringRegwall_();
+          return;
+        }
+
+        // Consume the metering entitlement.
+        if (best.granted && !best.isSubscriber()) {
+          this.runtime_.consumeShowcaseEntitlementJwt(best.raw);
+          return;
+        }
+      }
+
+      // Offers or abbreviated offers may need to be shown depending on
+      // whether the access has been granted and whether user is a subscriber.
+      if (!best.granted) {
+        this.runtime_.showOffers({list: 'amp'});
+      } else if (!best.isSubscriber()) {
+        this.runtime_.showAbbrvOffer({list: 'amp'});
+      }
+    });
   }
 
   /**
@@ -779,7 +786,8 @@ export class GoogleSubscriptionsPlatform {
         standardAttributes: {
           // eslint-disable-next-line google-camelcase/google-camelcase
           registered_user: {
-            timestamp: '1612044738', // In seconds.
+            // timestamp: '1612044738', // In seconds.
+            timestamp: '1', // In seconds.
           },
         },
       })
