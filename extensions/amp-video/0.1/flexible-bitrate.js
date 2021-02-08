@@ -306,7 +306,6 @@ function sources(video, fn) {
  * @return {!HTMLSourceElement}
  */
 function currentSource(video) {
-  console.log(video);
   return devAssert(
     sources(video, (source) => {
       return source.src == video.currentSrc;
