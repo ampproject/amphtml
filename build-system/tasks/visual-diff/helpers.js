@@ -191,11 +191,7 @@ async function waitForElementVisibility(page, selector, options) {
 
     for (const elementHandle of await page.$$(selector)) {
       const boundingBox = await elementHandle.boundingBox();
-      const fullyOpaque = await (
-        await page.evaluateHandle(element =>
-          window.getComputedStyle(element).opacity === '1'
-        , elementHandle)
-        ).jsonValue();
+      const fullyOpaque = (await getElementOpacity(elementHandle)) === '1';
       const elementIsVisible =
         boundingBox != null && boundingBox.height > 0 && boundingBox.width > 0 && fullyOpaque;
       elementsAreVisible.push(elementIsVisible);
@@ -265,6 +261,19 @@ async function waitForSelectorExistence(page, selector) {
  */
 async function sleep(ms) {
   return new Promise((res) => setTimeout(res, ms));
+}
+
+/**
+ *
+ * @param {ElementHandle} elementHandle
+ * @return {Promise<string>}
+ */
+async function getElementOpacity(elementHandle) {
+  return await (
+    await page.evaluateHandle(element =>
+      window.getComputedStyle(element).opacity
+    , elementHandle)
+    ).jsonValue();
 }
 
 module.exports = {
