@@ -178,7 +178,9 @@ amp-story-page .i-amphtml-story-page-open-attachment-icon::after {
 }
 
 amp-story-page .i-amphtml-story-page-open-attachment-bar-left,
-amp-story-page .i-amphtml-story-page-open-attachment-bar-right {
+amp-story-page .i-amphtml-story-page-open-attachment-bar-right,
+amp-story-page .i-amphtml-story-page-open-attachment-outlink-bar-left,
+amp-story-page .i-amphtml-story-page-open-attachment-outlink-bar-right {
   position: absolute !important;
   display: block !important;
   height: 3px !important;
@@ -197,6 +199,16 @@ amp-story-page .i-amphtml-story-page-open-attachment-bar-right {
   right: 6px !important;
   animation: open-attachment-icon-color 0.25s cubic-bezier(0.4, 0.0, 0.2, 1) 2s both,
              open-attachment-bar-right 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) both !important;
+}
+
+amp-story-page .i-amphtml-story-page-open-attachment-outlink-bar-left {
+  left: 6px !important;
+  animation: open-attachment-bar-left 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) both !important;
+}
+
+amp-story-page .i-amphtml-story-page-open-attachment-outlink-bar-right {
+  right: 6px !important;
+  animation: open-attachment-bar-right 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) both !important;
 }
 
 amp-story-page .i-amphtml-story-page-open-attachment-label {

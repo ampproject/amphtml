@@ -195,8 +195,8 @@ const buildOpenOutlinkAttachmentElement = (element) =>
       <a class="i-amphtml-story-page-open-attachment"
           role="button">
         <span class="i-amphtml-story-page-open-attachment-outlink-icon">
-          <span class="i-amphtml-story-page-open-attachment-bar-left"></span>
-          <span class="i-amphtml-story-page-open-attachment-bar-right"></span>
+          <span class="i-amphtml-story-page-open-attachment-outlink-bar-left"></span>
+          <span class="i-amphtml-story-page-open-attachment-outlink-bar-right"></span>
         </span>
         <span>
           <div class="i-amphtml-story-link-icon"></div>
@@ -1848,14 +1848,18 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     if (!this.openAttachmentEl_) {
       const attachmentHref = attachmentEl.getAttribute('href');
-      this.openAttachmentEl_ = buildOpenOutlinkAttachmentElement(
-        this.element
-      );
+      this.openAttachmentEl_ = buildOpenOutlinkAttachmentElement(this.element);
       const textEl = this.openAttachmentEl_.querySelector(
         '.i-amphtml-story-page-attachment-outlink-label'
       );
       const ctaImgEl = this.openAttachmentEl_.querySelector(
         '.i-amphtml-story-link-icon'
+      );
+      const barLeftEl = this.openAttachmentEl_.querySelector(
+        '.i-amphtml-story-page-open-attachment-outlink-bar-left'
+      );
+      const barRightEl = this.openAttachmentEl_.querySelector(
+        '.i-amphtml-story-page-open-attachment-outlink-bar-right'
       );
 
       // Copy href to the element so it can be previewed on hover and long press.
@@ -1868,10 +1872,10 @@ export class AmpStoryPage extends AMP.BaseElement {
 
       const openLabelAttr = attachmentEl.getAttribute('cta-text');
       const openLabel =
-        ((openLabelAttr && openLabelAttr.trim()) ||
-          getLocalizationService(this.element).getLocalizedString(
-            LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
-          ));
+        (openLabelAttr && openLabelAttr.trim()) ||
+        getLocalizationService(this.element).getLocalizedString(
+          LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
+        );
 
       this.mutateElement(() => {
         const theme = attachmentEl.getAttribute('theme');
@@ -1884,21 +1888,31 @@ export class AmpStoryPage extends AMP.BaseElement {
           }
         } else {
           setImportantStyles(ctaImgEl, {
-            'background-image': url(ctaImgAttr),
+            'background-image': 'url(ctaImgAttr)',
           });
         }
 
-        const ctaAccentColor = attachmentEl.getAttribute(
-          'cta-accent-color'
-        );
+        const ctaAccentColor = attachmentEl.getAttribute('cta-accent-color');
         if (theme && AttachmentTheme.DARK === theme.toLowerCase()) {
           setImportantStyles(textEl, {
             color: 'white',
             background: ctaAccentColor ? ctaAccentColor : 'black',
           });
+          setImportantStyles(barRightEl, {
+            background: ctaAccentColor ? ctaAccentColor : 'black',
+          });
+          setImportantStyles(barLeftEl, {
+            background: ctaAccentColor ? ctaAccentColor : 'black',
+          });
         } else {
           setImportantStyles(textEl, {
             color: ctaAccentColor ? ctaAccentColor : 'black',
+            background: 'white',
+          });
+          setImportantStyles(barRightEl, {
+            background: 'white',
+          });
+          setImportantStyles(barLeftEl, {
             background: 'white',
           });
         }
