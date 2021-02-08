@@ -306,7 +306,7 @@ module.exports = {
       },
     },
     {
-      'files': ['babel.config.js', '**/.eslintrc.js'],
+      'files': ['babel.config.js', '**/.eslintrc.js', 'package-scripts.js'],
       'globals': {
         'module': false,
         'process': false,
