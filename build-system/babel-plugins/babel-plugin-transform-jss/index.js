@@ -41,7 +41,7 @@ const hash = require('./create-hash');
 const {create} = require('jss');
 const {default: preset} = require('jss-preset-default');
 const {relative, join} = require('path');
-const {spawnSync} = require('child_process');
+const {transformCssSync} = require('../../tasks/css/jsify-css-sync');
 
 module.exports = function ({template, types: t}) {
   function isJssFile(filename) {
@@ -122,9 +122,9 @@ module.exports = function ({template, types: t}) {
         path.replaceWith(template.expression.ast`(() => ${t.cloneNode(id)})`);
 
         // Export a variable named CSS with the compiled CSS.
-        const cssExport = template.ast`export const CSS = ${t.stringLiteral(
-          transformCssSync(sheet.toString())
-        )}`;
+        const {css} = transformCssSync(sheet.toString());
+        const cssStr = t.stringLiteral(css);
+        const cssExport = template.ast`export const CSS = ${cssStr}`;
         path
           .findParent((p) => p.type === 'ExportNamedDeclaration')
           .insertAfter(cssExport);
@@ -144,26 +144,3 @@ module.exports = function ({template, types: t}) {
     },
   };
 };
-
-// Abuses spawnSync to let us run an async function sync.
-function transformCssSync(cssText) {
-  const programText = `
-    const {transformCss} = require('../../../build-system/tasks/jsify-css');
-    transformCss(\`${cssText}\`).then((css) => console./* OK */log(css.toString()));
-  `;
-
-  // TODO: migrate to the helpers in build-system exec.js
-  // after adding args support.
-  const spawnedProcess = spawnSync('node', ['-e', programText], {
-    cwd: __dirname,
-    env: process.env,
-    encoding: 'utf-8',
-    stdio: 'pipe',
-  });
-  if (spawnedProcess.status !== 0) {
-    throw new Error(
-      `Transforming CSS returned status code: ${spawnedProcess.status}. stderr: "${spawnedProcess.stderr}".`
-    );
-  }
-  return spawnedProcess.stdout;
-}

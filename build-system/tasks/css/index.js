@@ -23,10 +23,10 @@ const {
   mkdirSync,
   toPromise,
   watchDebounceDelay,
-} = require('./helpers');
-const {buildExtensions} = require('./extension-helpers');
+} = require('../helpers');
+const {buildExtensions} = require('../extension-helpers');
 const {jsifyCssAsync} = require('./jsify-css');
-const {maybeUpdatePackages} = require('./update-packages');
+const {maybeUpdatePackages} = require('../update-packages');
 const {watch} = require('gulp');
 
 /**
