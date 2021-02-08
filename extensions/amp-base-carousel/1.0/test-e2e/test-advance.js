@@ -30,7 +30,7 @@ describes.endtoend(
   'amp-base-carousel - advance',
   {
     version: '1.0',
-    fixture: 'amp-base-carousel/1.0/advance.amp.html',
+    fixture: 'amp-base-carousel/advance.amp.html',
     experiments: ['bento-carousel'],
     environments: ['single'],
     initialRect: {width: pageWidth, height: pageHeight},

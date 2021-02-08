@@ -24,7 +24,7 @@ describes.endtoend(
   'amp-base-carousel - responsive attributes',
   {
     version: '1.0',
-    fixture: 'amp-base-carousel/1.0/responsive.amp.html',
+    fixture: 'amp-base-carousel/responsive.amp.html',
     experiments: ['bento-carousel'],
     initialRect: {width: pageWidth, height: pageHeight},
     environments: ['single', 'viewer-demo'],
