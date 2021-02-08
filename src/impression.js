@@ -40,7 +40,7 @@ const DEFAULT_APPEND_URL_PARAM = ['gclid', 'gclsrc'];
  * (but somewhat more stringent) to the one described in the [3p/README.md](
  * https://github.com/ampproject/amphtml/blob/master/3p/README.md)
  *
- * @export {!Array<!RegExp>}
+ * @type {!Array<!RegExp>}
  */
 const TRUSTED_REFERRER_HOSTS = [
   /**
