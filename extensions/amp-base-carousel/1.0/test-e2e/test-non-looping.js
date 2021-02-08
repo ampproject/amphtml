@@ -24,7 +24,7 @@ describes.endtoend(
   'amp-base-carousel - non-looping',
   {
     version: '1.0',
-    fixture: 'amp-base-carousel/1.0/non-looping.amp.html',
+    fixture: 'amp-base-carousel/non-looping.amp.html',
     experiments: ['bento-carousel'],
     environments: ['single', 'viewer-demo'],
     initialRect: {width: pageWidth, height: pageHeight},

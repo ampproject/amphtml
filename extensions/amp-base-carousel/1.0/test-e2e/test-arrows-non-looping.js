@@ -31,7 +31,7 @@ describes.endtoend(
   'amp-base-carousel - arrows when non-looping',
   {
     version: '1.0',
-    fixture: 'amp-base-carousel/1.0/non-looping.amp.html',
+    fixture: 'amp-base-carousel/non-looping.amp.html',
     experiments: ['bento-carousel'],
     initialRect: {width: pageWidth, height: pageHeight},
     environments: ['single', 'viewer-demo'],
