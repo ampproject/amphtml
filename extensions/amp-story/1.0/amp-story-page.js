@@ -177,7 +177,8 @@ const buildErrorMessageElement = (element) =>
  */
 const buildOpenAttachmentElement = (element) =>
   htmlFor(element)`
-      <a class="i-amphtml-story-page-open-attachment i-amphtml-story-system-reset"
+      <a class="
+          i-amphtml-story-page-open-attachment i-amphtml-story-system-reset"
           role="button">
         <span class="i-amphtml-story-page-open-attachment-icon">
           <span class="i-amphtml-story-page-open-attachment-bar-left"></span>
@@ -1845,9 +1846,12 @@ export class AmpStoryPage extends AMP.BaseElement {
     if (!attachmentEl) {
       return;
     }
+    const attachmentHref = attachmentEl.getAttribute('href');
+    if (!attachmentHref) {
+      return;
+    }
 
     if (!this.openAttachmentEl_) {
-      const attachmentHref = attachmentEl.getAttribute('href');
       this.openAttachmentEl_ = buildOpenOutlinkAttachmentElement(this.element);
       const textEl = this.openAttachmentEl_.querySelector(
         '.i-amphtml-story-page-attachment-outlink-label'

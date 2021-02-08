@@ -92,7 +92,7 @@
 
 @keyframes open-attachment-icon-color {
   0% {
-    background: #fff; /*TODO*/
+    background: #fff;
   }
   to {
     background: rgba(0, 0, 0, 0.87);
