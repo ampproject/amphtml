@@ -119,7 +119,7 @@ async function prBuildWorkflow() {
   ) {
     printSkipMessage(
       jobName,
-      'this PR does not affect the runtime, unit tests, or integration tests'
+      'this PR does not affect the runtime, unit tests, integration tests, or end-to-end tests'
     );
     return;
   }
