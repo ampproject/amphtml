@@ -137,10 +137,10 @@ export class Resource {
     /** @private {number} */
     this.id_ = id;
 
-    /** @export @const {!AmpElement} */
+    /** @const {!AmpElement} */
     this.element = element;
 
-    /** @export @const {string} */
+    /** @const {string} */
     this.debugid = element.tagName.toLowerCase() + '#' + id;
 
     /** @const {!Window} */

@@ -48,7 +48,6 @@ export class ResourcesInterface {
   /**
    * Returns a list of resources.
    * @return {!Array<!./resource.Resource>}
-   * @export
    */
   get() {}
 

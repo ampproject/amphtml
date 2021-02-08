@@ -35,7 +35,6 @@ const TAG = 'amp-user-notification';
 const SERVICE_ID = 'userNotificationManager';
 
 /**
- * @export
  * @typedef {{
  *   showNotification: boolean
  * }}
