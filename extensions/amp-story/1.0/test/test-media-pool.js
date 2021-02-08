@@ -15,6 +15,7 @@
  */
 import {MediaPool, MediaType} from '../media-pool';
 import {Services} from '../../../../src/services';
+import {elementType} from 'prop-types';
 import {findIndex} from '../../../../src/utils/array';
 
 const NOOP = () => {};
@@ -169,5 +170,24 @@ describes.realWin('media-pool', {}, (env) => {
 
     // Call play() to ensure it doesn't throw.
     elements.forEach((element) => mediaPool.play(element));
+  });
+
+  it('should manage bitrate on replaced video', async () => {
+    mediaPool = new MediaPool(win, {'video': 2}, (unusedEl) => 0);
+
+    env.sandbox
+      .stub(mediaPool, 'enqueueMediaElementTask_')
+      .returns(Promise.resolve());
+
+    const videoEl = createMediaElement('video');
+    videoEl.isBitrateManaged = true;
+    mediaPool.register(videoEl);
+
+    expect(mediaPool.allocated['video'].length).to.equal(0);
+    expect(mediaPool.unallocated['video'].length).to.equal(2);
+
+    await mediaPool.play(videoEl);
+
+    expect(mediaPool.allocated['video'][0].isBitrateManaged).to.be.true;
   });
 });
