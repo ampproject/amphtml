@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpFitText as BentoFitText} from '../../amp-fit-text/1.0/amp-fit-text';
+import {BaseElement as BentoFitText} from '../../amp-fit-text/1.0/base-element';
 import {CSS} from '../../../build/amp-fit-text-0.1.css';
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import {px, setStyle, setStyles} from '../../../src/style';
