@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-@import './amp-story-dev-tools-tab-logs.css';
-@import './amp-story-dev-tools-tab-page-experience.css';
+@import './amp-story-dev-tools-tab-debug.css';
 @import './amp-story-dev-tools-tab-preview.css';
 
 amp-story-dev-tools {
