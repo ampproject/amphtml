@@ -314,7 +314,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
     platform.getEntitlements = env.sandbox
       .stub()
       .callsFake(() => Promise.resolve(entitlement));
-    platform.getServiceId = env.sandbox.stub().callsFake(() => 'local');
+    platform.getPlatformKey = env.sandbox.stub().callsFake(() => 'local');
 
     subscriptionService.platformConfig_ = platformConfig;
     subscriptionService.registerPlatform(serviceData.serviceId, factoryStub);
@@ -814,7 +814,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
   describe('registerPlatform', () => {
     it('should work on free pages', async () => {
       const platformFactoryStub = env.sandbox.stub().callsFake(() => ({
-        getServiceId: () => 'platform1',
+        getPlatformKey: () => 'platform1',
       }));
       env.sandbox.stub(subscriptionService, 'initialize_').callsFake(() => {
         subscriptionService.platformConfig_ = freePlatformConfig;
@@ -1132,7 +1132,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
       const element = document.createElement('div');
       element.setAttribute('subscriptions-service', 'swg-google');
       const platform = new SubscriptionPlatform();
-      platform.getServiceId = () => 'swg-google';
+      platform.getPlatformKey = () => 'swg-google';
       subscriptionService.platformStore_ = new PlatformStore([
         'local',
         'swg-google',
@@ -1142,7 +1142,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
         .callsFake((platformKey, callback) => callback(platform));
       const decorateUIStub = env.sandbox.stub(platform, 'decorateUI');
       subscriptionService.decorateServiceAction(element, 'swg-google', 'login');
-      expect(whenResolveStub).to.be.calledWith(platform.getServiceId());
+      expect(whenResolveStub).to.be.calledWith(platform.getPlatformKey());
       expect(decorateUIStub).to.be.calledWith(element);
     });
   });

@@ -288,17 +288,17 @@ export class SubscriptionService {
       );
 
       this.platformStore_.resolvePlatform(
-        subscriptionPlatform.getServiceId(),
+        subscriptionPlatform.getPlatformKey(),
         subscriptionPlatform
       );
       this.subscriptionAnalytics_.serviceEvent(
         SubscriptionAnalyticsEvents.PLATFORM_REGISTERED,
-        subscriptionPlatform.getServiceId()
+        subscriptionPlatform.getPlatformKey()
       );
       // Deprecated event fired for backward compatibility
       this.subscriptionAnalytics_.serviceEvent(
         SubscriptionAnalyticsEvents.PLATFORM_REGISTERED_DEPRECATED,
-        subscriptionPlatform.getServiceId()
+        subscriptionPlatform.getPlatformKey()
       );
       this.fetchEntitlements_(subscriptionPlatform);
     });
@@ -421,10 +421,11 @@ export class SubscriptionService {
         this.cryptoHandler_.isDocumentEncrypted() &&
         !entitlements.decryptedDocumentKey
       ) {
-        const logChannel = platform.getServiceId() == 'local' ? user() : dev();
+        const logChannel =
+          platform.getPlatformKey() == 'local' ? user() : dev();
         logChannel.error(
           TAG,
-          `${platform.getServiceId()}: Subscription granted and encryption enabled, ` +
+          `${platform.getPlatformKey()}: Subscription granted and encryption enabled, ` +
             'but no decrypted document key returned.'
         );
         return null;
@@ -458,15 +459,15 @@ export class SubscriptionService {
         .then((entitlement) => {
           entitlement =
             entitlement ||
-            Entitlement.empty(subscriptionPlatform.getServiceId());
+            Entitlement.empty(subscriptionPlatform.getPlatformKey());
           this.resolveEntitlementsToStore_(
-            subscriptionPlatform.getServiceId(),
+            subscriptionPlatform.getPlatformKey(),
             entitlement
           );
           return entitlement;
         })
         .catch((reason) => {
-          const platformKey = subscriptionPlatform.getServiceId();
+          const platformKey = subscriptionPlatform.getPlatformKey();
           this.platformStore_.reportPlatformFailureAndFallback(platformKey);
           throw user().createError(
             `fetch entitlements failed for ${platformKey}`,
@@ -559,7 +560,7 @@ export class SubscriptionService {
       const selectedPlatform = resolvedValues[1];
       const grantEntitlement = resolvedValues[2];
       const selectedEntitlement = this.platformStore_.getResolvedEntitlementFor(
-        selectedPlatform.getServiceId()
+        selectedPlatform.getPlatformKey()
       );
       const bestEntitlement = grantEntitlement || selectedEntitlement;
 
@@ -567,12 +568,12 @@ export class SubscriptionService {
 
       this.subscriptionAnalytics_.serviceEvent(
         SubscriptionAnalyticsEvents.PLATFORM_ACTIVATED,
-        selectedPlatform.getServiceId()
+        selectedPlatform.getPlatformKey()
       );
       // Deprecated events are fire for backwards compatibility
       this.subscriptionAnalytics_.serviceEvent(
         SubscriptionAnalyticsEvents.PLATFORM_ACTIVATED_DEPRECATED,
-        selectedPlatform.getServiceId()
+        selectedPlatform.getPlatformKey()
       );
       if (bestEntitlement.granted) {
         this.subscriptionAnalytics_.serviceEvent(
@@ -582,11 +583,11 @@ export class SubscriptionService {
       } else {
         this.subscriptionAnalytics_.serviceEvent(
           SubscriptionAnalyticsEvents.PAYWALL_ACTIVATED,
-          selectedPlatform.getServiceId()
+          selectedPlatform.getPlatformKey()
         );
         this.subscriptionAnalytics_.serviceEvent(
           SubscriptionAnalyticsEvents.ACCESS_DENIED,
-          selectedPlatform.getServiceId()
+          selectedPlatform.getPlatformKey()
         );
       }
     });

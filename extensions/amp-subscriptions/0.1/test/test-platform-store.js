@@ -221,13 +221,15 @@ describes.realWin('Platform store', {}, (env) => {
     const anotherPlatformBaseScore = 0;
     beforeEach(() => {
       localPlatform = new SubscriptionPlatform();
-      env.sandbox.stub(localPlatform, 'getServiceId').callsFake(() => 'local');
+      env.sandbox
+        .stub(localPlatform, 'getPlatformKey')
+        .callsFake(() => 'local');
       env.sandbox
         .stub(localPlatform, 'getBaseScore')
         .callsFake(() => localPlatformBaseScore);
       anotherPlatform = new SubscriptionPlatform();
       env.sandbox
-        .stub(anotherPlatform, 'getServiceId')
+        .stub(anotherPlatform, 'getPlatformKey')
         .callsFake(() => 'another');
       env.sandbox
         .stub(anotherPlatform, 'getBaseScore')
@@ -293,13 +295,15 @@ describes.realWin('Platform store', {}, (env) => {
     let anotherPlatformBaseScore = 0;
     beforeEach(() => {
       localPlatform = new SubscriptionPlatform();
-      env.sandbox.stub(localPlatform, 'getServiceId').callsFake(() => 'local');
+      env.sandbox
+        .stub(localPlatform, 'getPlatformKey')
+        .callsFake(() => 'local');
       env.sandbox
         .stub(localPlatform, 'getBaseScore')
         .callsFake(() => localPlatformBaseScore);
       anotherPlatform = new SubscriptionPlatform();
       env.sandbox
-        .stub(anotherPlatform, 'getServiceId')
+        .stub(anotherPlatform, 'getPlatformKey')
         .callsFake(() => 'another');
       env.sandbox
         .stub(anotherPlatform, 'getBaseScore')
@@ -334,9 +338,9 @@ describes.realWin('Platform store', {}, (env) => {
           service: 'another',
         })
       );
-      expect(platformStore.selectApplicablePlatform_().getServiceId()).to.equal(
-        localPlatform.getServiceId()
-      );
+      expect(
+        platformStore.selectApplicablePlatform_().getPlatformKey()
+      ).to.equal(localPlatform.getPlatformKey());
       platformStore.resolveEntitlement(
         'local',
         new Entitlement({
@@ -355,9 +359,9 @@ describes.realWin('Platform store', {}, (env) => {
           grantReason: GrantReason.SUBSCRIBER,
         })
       );
-      expect(platformStore.selectApplicablePlatform_().getServiceId()).to.equal(
-        anotherPlatform.getServiceId()
-      );
+      expect(
+        platformStore.selectApplicablePlatform_().getPlatformKey()
+      ).to.equal(anotherPlatform.getPlatformKey());
     });
 
     it('should choose local platform if all other conditions are same', () => {
@@ -384,9 +388,9 @@ describes.realWin('Platform store', {}, (env) => {
           service: 'another',
         })
       );
-      expect(platformStore.selectApplicablePlatform_().getServiceId()).to.equal(
-        localPlatform.getServiceId()
-      );
+      expect(
+        platformStore.selectApplicablePlatform_().getPlatformKey()
+      ).to.equal(localPlatform.getPlatformKey());
     });
 
     it('should chose platform based on score weight', () => {
@@ -416,9 +420,9 @@ describes.realWin('Platform store', {}, (env) => {
           service: 'another',
         })
       );
-      expect(platformStore.selectApplicablePlatform_().getServiceId()).to.equal(
-        anotherPlatform.getServiceId()
-      );
+      expect(
+        platformStore.selectApplicablePlatform_().getPlatformKey()
+      ).to.equal(anotherPlatform.getPlatformKey());
     });
 
     it('should chose platform based on multiple factors', () => {
@@ -451,9 +455,9 @@ describes.realWin('Platform store', {}, (env) => {
           service: 'another',
         })
       );
-      expect(platformStore.selectApplicablePlatform_().getServiceId()).to.equal(
-        localPlatform.getServiceId()
-      );
+      expect(
+        platformStore.selectApplicablePlatform_().getPlatformKey()
+      ).to.equal(localPlatform.getPlatformKey());
     });
 
     it('should chose platform specified factors', () => {
@@ -487,8 +491,10 @@ describes.realWin('Platform store', {}, (env) => {
         })
       );
       expect(
-        platformStore.selectApplicablePlatform_('supporsViewer').getServiceId()
-      ).to.equal(localPlatform.getServiceId());
+        platformStore
+          .selectApplicablePlatform_('supporsViewer')
+          .getPlatformKey()
+      ).to.equal(localPlatform.getPlatformKey());
     });
 
     it('should chose platform handle negative factor values', () => {
@@ -521,9 +527,9 @@ describes.realWin('Platform store', {}, (env) => {
           service: 'another',
         })
       );
-      expect(platformStore.selectApplicablePlatform_().getServiceId()).to.equal(
-        anotherPlatform.getServiceId()
-      );
+      expect(
+        platformStore.selectApplicablePlatform_().getPlatformKey()
+      ).to.equal(anotherPlatform.getPlatformKey());
     });
 
     it('should use baseScore', () => {
@@ -551,9 +557,9 @@ describes.realWin('Platform store', {}, (env) => {
           service: 'another',
         })
       );
-      expect(platformStore.selectApplicablePlatform_().getServiceId()).to.equal(
-        anotherPlatform.getServiceId()
-      );
+      expect(
+        platformStore.selectApplicablePlatform_().getPlatformKey()
+      ).to.equal(anotherPlatform.getPlatformKey());
     });
     it('getScoreFactorStates should return promised score', async () => {
       env.sandbox
@@ -608,7 +614,9 @@ describes.realWin('Platform store', {}, (env) => {
     beforeEach(() => {
       localFactors = {};
       localPlatform = new SubscriptionPlatform();
-      env.sandbox.stub(localPlatform, 'getServiceId').callsFake(() => 'local');
+      env.sandbox
+        .stub(localPlatform, 'getPlatformKey')
+        .callsFake(() => 'local');
       // Base score does not matter.
       env.sandbox.stub(localPlatform, 'getBaseScore').callsFake(() => 10000);
       env.sandbox
@@ -617,7 +625,7 @@ describes.realWin('Platform store', {}, (env) => {
       anotherFactors = {};
       anotherPlatform = new SubscriptionPlatform();
       env.sandbox
-        .stub(anotherPlatform, 'getServiceId')
+        .stub(anotherPlatform, 'getPlatformKey')
         .callsFake(() => 'another');
       env.sandbox.stub(anotherPlatform, 'getBaseScore').callsFake(() => 0);
       env.sandbox
@@ -660,7 +668,7 @@ describes.realWin('Platform store', {}, (env) => {
         'local with fallbackEntitlement',
       () => {
         const platform = new SubscriptionPlatform();
-        env.sandbox.stub(platform, 'getServiceId').callsFake(() => 'local');
+        env.sandbox.stub(platform, 'getPlatformKey').callsFake(() => 'local');
         env.sandbox
           .stub(platformStore, 'getLocalPlatform_')
           .callsFake(() => platform);
@@ -680,12 +688,12 @@ describes.realWin('Platform store', {}, (env) => {
       async () => {
         const platform = new SubscriptionPlatform();
         const anotherPlatform = new SubscriptionPlatform();
-        env.sandbox.stub(platform, 'getServiceId').callsFake(() => 'local');
+        env.sandbox.stub(platform, 'getPlatformKey').callsFake(() => 'local');
         env.sandbox
           .stub(platformStore, 'getLocalPlatform_')
           .callsFake(() => platform);
         env.sandbox
-          .stub(anotherPlatform, 'getServiceId')
+          .stub(anotherPlatform, 'getPlatformKey')
           .callsFake(() => platformKeys[0]);
         env.sandbox.stub(anotherPlatform, 'getBaseScore').callsFake(() => 10);
         platformStore.resolvePlatform(platformKeys[0], anotherPlatform);
@@ -701,7 +709,7 @@ describes.realWin('Platform store', {}, (env) => {
           fallbackEntitlement
         );
         // falbackEntitlement has Reason as SUBSCRIBER so it should win
-        expect(selectedPlatform.getServiceId()).to.equal('local');
+        expect(selectedPlatform.getPlatformKey()).to.equal('local');
       }
     );
 
@@ -711,12 +719,12 @@ describes.realWin('Platform store', {}, (env) => {
       async () => {
         const platform = new SubscriptionPlatform();
         const anotherPlatform = new SubscriptionPlatform();
-        env.sandbox.stub(platform, 'getServiceId').callsFake(() => 'local');
+        env.sandbox.stub(platform, 'getPlatformKey').callsFake(() => 'local');
         env.sandbox
           .stub(platformStore, 'getLocalPlatform_')
           .callsFake(() => platform);
         env.sandbox
-          .stub(anotherPlatform, 'getServiceId')
+          .stub(anotherPlatform, 'getPlatformKey')
           .callsFake(() => platformKeys[0]);
         env.sandbox.stub(anotherPlatform, 'getBaseScore').callsFake(() => 10);
         platformStore.resolvePlatform(platformKeys[0], anotherPlatform);
@@ -733,7 +741,7 @@ describes.realWin('Platform store', {}, (env) => {
           fallbackEntitlement
         );
         // falbackEntitlement has Reason as SUBSCRIBER so it should win
-        expect(selectedPlatform.getServiceId()).to.equal(platformKeys[0]);
+        expect(selectedPlatform.getPlatformKey()).to.equal(platformKeys[0]);
       }
     );
   });
@@ -741,9 +749,9 @@ describes.realWin('Platform store', {}, (env) => {
   describe('getPlatform', () => {
     it('should return the platform for a given platform key', () => {
       const platform = new SubscriptionPlatform();
-      platform.getServiceId = () => 'test';
+      platform.getPlatformKey = () => 'test';
       platformStore.subscriptionPlatforms_['test'] = platform;
-      expect(platformStore.getPlatform('test').getServiceId()).to.be.equal(
+      expect(platformStore.getPlatform('test').getPlatformKey()).to.be.equal(
         'test'
       );
     });
@@ -866,7 +874,9 @@ describes.realWin('Platform store', {}, (env) => {
 
     beforeEach(() => {
       localPlatform = new SubscriptionPlatform();
-      env.sandbox.stub(localPlatform, 'getServiceId').callsFake(() => 'local');
+      env.sandbox
+        .stub(localPlatform, 'getPlatformKey')
+        .callsFake(() => 'local');
     });
 
     it(
@@ -877,7 +887,7 @@ describes.realWin('Platform store', {}, (env) => {
 
         platformStore.resolvePlatform('local', localPlatform);
         platformStore.onPlatformResolves('local', (platform) => {
-          platformKey = platform.getServiceId();
+          platformKey = platform.getPlatformKey();
         });
 
         expect(platformKey).to.be.equal('local');
@@ -891,7 +901,7 @@ describes.realWin('Platform store', {}, (env) => {
         let platformKey;
 
         platformStore.onPlatformResolves('local', (platform) => {
-          platformKey = platform.getServiceId();
+          platformKey = platform.getPlatformKey();
         });
         platformStore.resolvePlatform('local', localPlatform);
 

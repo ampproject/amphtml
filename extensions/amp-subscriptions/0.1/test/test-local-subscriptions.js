@@ -308,7 +308,9 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, (env) => {
         element.removeAttribute('subscriptions-service');
         const platform = {};
         const platformKey = 'platformKey';
-        platform.getServiceId = env.sandbox.stub().callsFake(() => platformKey);
+        platform.getPlatformKey = env.sandbox
+          .stub()
+          .callsFake(() => platformKey);
         const loginStub = env.sandbox
           .stub(
             localSubscriptionPlatform.serviceAdapter_,
@@ -343,7 +345,9 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, (env) => {
         );
         const platform = {};
         const platformKey = 'platformKey';
-        platform.getServiceId = env.sandbox.stub().callsFake(() => platformKey);
+        platform.getPlatformKey = env.sandbox
+          .stub()
+          .callsFake(() => platformKey);
         localSubscriptionPlatform.handleClick_(element);
         expect(loginStub).to.be.called;
         expect(delegateStub).to.be.calledWith(Action.LOGIN, platformKey);
@@ -367,7 +371,7 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, (env) => {
       );
       const platform = {};
       const platformKey = 'platformKey';
-      platform.getServiceId = env.sandbox.stub().callsFake(() => platformKey);
+      platform.getPlatformKey = env.sandbox.stub().callsFake(() => platformKey);
       localSubscriptionPlatform.handleClick_(element);
       expect(loginStub).to.not.be.called;
       expect(delegateStub).to.not.be.called;

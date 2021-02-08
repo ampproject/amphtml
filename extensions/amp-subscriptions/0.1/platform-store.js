@@ -489,7 +489,7 @@ export class PlatformStore {
     while (availablePlatforms.length) {
       const platform = availablePlatforms.pop();
       const entitlement = this.getResolvedEntitlementFor(
-        platform.getServiceId()
+        platform.getPlatformKey()
       );
       if (entitlement.isSubscriber()) {
         return platform;
@@ -588,11 +588,11 @@ export class PlatformStore {
    */
   reportPlatformFailureAndFallback(platformKey) {
     if (
-      platformKey === this.getLocalPlatform_().getServiceId() &&
+      platformKey === this.getLocalPlatform_().getPlatformKey() &&
       this.fallbackEntitlement_
     ) {
       this.resolveEntitlement(
-        this.getLocalPlatform_().getServiceId(),
+        this.getLocalPlatform_().getPlatformKey(),
         this.fallbackEntitlement_
       );
       user().warn(
