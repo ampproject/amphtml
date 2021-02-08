@@ -351,7 +351,6 @@ describes.realWin(
     });
 
     it('handles ads manager loaded and muted', () => {
-      // QQQQ
       const div = doc.createElement('div');
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
