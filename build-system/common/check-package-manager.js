@@ -247,15 +247,20 @@ function runGulpChecks() {
     );
     updatesNeeded.add('gulp');
   } else if (!globalGulpCli) {
-    console.log(
-      yellow('WARNING: Could not find a global install of'),
-      cyan('gulp-cli') + yellow('.')
-    );
-    console.log(
-      yellow('⤷ To fix this, run'),
-      cyan('"npm install --global gulp-cli"') + yellow('.')
-    );
-    updatesNeeded.add('gulp-cli');
+    const whichGulp = getStdout('which gulp').trim();
+    if (!whichGulp.match(/\/gulp/)) {
+      // User is missing a global gulp install on a terminal supporting `which`.
+      // Or they do not have it installed via NPM.
+      console.log(
+        yellow('WARNING: Could not find a global install of'),
+        cyan('gulp-cli') + yellow('.')
+      );
+      console.log(
+        yellow('⤷ To fix this, run'),
+        cyan('"npm install --global gulp-cli"') + yellow('.')
+      );
+      updatesNeeded.add('gulp-cli');
+    }
   } else {
     printGulpVersion('gulp-cli');
   }
