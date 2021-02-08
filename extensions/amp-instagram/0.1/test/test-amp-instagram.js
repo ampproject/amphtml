@@ -85,15 +85,6 @@ describes.realWin(
       return ins;
     }
 
-    function testImage(image) {
-      expect(image).to.not.be.null;
-      expect(image.getAttribute('src')).to.equal(
-        'https://www.instagram.com/p/fBwFP/media/?size=l'
-      );
-      expect(image.getAttribute('alt')).to.equal('Testing');
-      expect(image.getAttribute('referrerpolicy')).to.equal('origin');
-    }
-
     function testIframe(iframe) {
       expect(iframe).to.not.be.null;
       expect(iframe.src).to.equal(
@@ -115,66 +106,21 @@ describes.realWin(
     it('renders', async () => {
       const ins = await getIns('fBwFP');
       testIframe(ins.querySelector('iframe'));
-      testImage(ins.querySelector('img'));
     });
 
     it('renders captioned', async () => {
       const ins = await getIns('fBwFP', undefined, undefined, true);
       testIframeCaptioned(ins.querySelector('iframe'));
-      testImage(ins.querySelector('img'));
-    });
-
-    it('only sets src on placeholder after prerender', async () => {
-      let becomeVisible;
-      const visible = new Promise((resolve) => (becomeVisible = resolve));
-      const ins = await getIns(
-        'fBwFP',
-        undefined,
-        undefined,
-        undefined,
-        visible
-      );
-      expect(ins.querySelector('img').getAttribute('src')).to.be.null;
-      becomeVisible();
-      await visible;
-      expect(ins.querySelector('img').getAttribute('src')).to.equal(
-        'https://www.instagram.com/p/fBwFP/media/?size=l'
-      );
-    });
-
-    it('builds a placeholder image without inserting iframe', async () => {
-      const ins = await getIns('fBwFP', true, (ins) => {
-        const placeholder = ins.querySelector('[placeholder]');
-        const iframe = ins.querySelector('iframe');
-        expect(iframe).to.be.null;
-        expect(placeholder).to.not.have.display('');
-        testImage(placeholder.querySelector('img'));
-      });
-      const impl = await ins.getImpl(false);
-      const placeholder = ins.querySelector('[placeholder]');
-      const iframe = ins.querySelector('iframe');
-      ins.getVsync = () => {
-        return {
-          mutate: (fn) => fn(),
-        };
-      };
-      testIframe(iframe);
-      testImage(placeholder.querySelector('img'));
-      impl.iframePromise_.then(() => {
-        expect(placeholder).to.be.have.display('none');
-      });
     });
 
     it('removes iframe after unlayoutCallback', async () => {
       const ins = await getIns('fBwFP');
       const obj = await ins.getImpl(false);
-      const placeholder = ins.querySelector('[placeholder]');
       testIframe(ins.querySelector('iframe'));
       obj.unlayoutCallback();
       expect(ins.querySelector('iframe')).to.be.null;
       expect(obj.iframe_).to.be.null;
       expect(obj.iframePromise_).to.be.null;
-      expect(placeholder).to.not.have.display('none');
     });
 
     it('renders responsively', async () => {
