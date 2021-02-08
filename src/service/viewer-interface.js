@@ -36,7 +36,6 @@ export class ViewerInterface {
    * exported. Need to make sure it's not used externally.
    * @param {string} name
    * @return {?string}
-   * @export
    */
   getParam(name) {}
 
@@ -168,7 +167,6 @@ export class ViewerInterface {
    * @param {!JsonObject} data
    * @param {boolean} unusedAwaitResponse
    * @return {(!Promise<*>|undefined)}
-   * @export
    */
   receiveMessage(eventType, data, unusedAwaitResponse) {}
 
@@ -177,7 +175,6 @@ export class ViewerInterface {
    * messages to the viewer.
    * @param {function(string, (?JsonObject|string|undefined), boolean):(!Promise<*>|undefined)} deliverer
    * @param {string} origin
-   * @export
    */
   setMessageDeliverer(deliverer, origin) {}
 

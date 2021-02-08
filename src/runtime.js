@@ -171,7 +171,6 @@ function adoptShared(global, callback) {
    * @param {function(string,?string=,number=)} unusedFn
    * @param {function()=} opt_flush
    * @deprecated
-   * @export
    */
   global.AMP.setTickFunction = (unusedFn, opt_flush) => {};
 
