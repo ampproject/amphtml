@@ -1,11 +1,5 @@
-/** @enum {string}*/
-var _classes = {
-  floatLeft: "float-left-a6c6677",
-  fill: "fill-a6c6677"
-};
-
 /**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,5 +13,18 @@ var _classes = {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export const useStyles = () => _classes;
-export const CSS = ".float-left-a6c6677{float:left;border:1px solid #000}.fill-a6c6677{-ms-flex:1 1 auto;flex:1 1 auto;display:block;position:relative}";
+'use strict';
+
+const {transformCss} = require('./jsify-css');
+
+/**
+ * Wrapper for the asynchronous transformCss that is used by transformCssSync()
+ * in build-system/tasks/css/jsify-css-sync.js.
+ * @return {!Promise}
+ */
+function init() {
+  return function (cssStr, opt_cssnano, opt_filename) {
+    return Promise.resolve(transformCss(cssStr, opt_cssnano, opt_filename));
+  };
+}
+module.exports = init;
