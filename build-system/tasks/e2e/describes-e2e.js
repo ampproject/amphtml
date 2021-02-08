@@ -47,9 +47,12 @@ const COV_REPORT_PATH = '/coverage/client';
 const supportedBrowsers = new Set(['chrome', 'firefox', 'safari']);
 
 /**
- * Used to lazily load coverage middleware.
+ * Load coverage middleware only if needed.
  */
 let istanbulMiddleware;
+if (argv.coverage) {
+  istanbulMiddleware = require('istanbul-middleware/lib/core');
+}
 
 /**
  * TODO(cvializ): Firefox now experimentally supports puppeteer.
@@ -485,12 +488,6 @@ function describeEnv(factory) {
         // don't install for CI
         if (!isCiBuild()) {
           installRepl(global, env);
-        }
-      });
-
-      before(() => {
-        if (argv.coverage) {
-          istanbulMiddleware = require('istanbul-middleware/lib/core');
         }
       });
 
