@@ -60,42 +60,45 @@ void DumpDocument(Document* doc) { DumpNode(doc->RootNode()); }
 }  // namespace.
 
 std::unique_ptr<Document> Parse(std::string_view html) {
-  Parser parser(html, {.scripting = true,
-                       .frameset_ok = true,
-                       .record_node_offsets = true,
-                       .record_attribute_offsets = true});
-  return parser.Parse();
+  std::unique_ptr<Parser> parser = std::make_unique<Parser>(
+      html,
+      ParseOptions{.scripting = true,
+                   .frameset_ok = true,
+                   .record_node_offsets = true,
+                   .record_attribute_offsets = true});
+  return parser->Parse();
 }
 
 std::unique_ptr<Document> ParseWithOptions(std::string_view html,
                                            const ParseOptions& options) {
-  Parser parser(html, options);
-  return parser.Parse();
+  return std::make_unique<Parser>(html, options)->Parse();
 }
 
 std::unique_ptr<Document> ParseFragmentWithOptions(std::string_view html,
                                                    const ParseOptions& options,
                                                    Node* fragment_parent) {
-  Parser parser(html, options, fragment_parent);
-  Node* root = parser.document_->NewNode(NodeType::ELEMENT_NODE, Atom::HTML);
-  parser.document_->root_node_->AppendChild(root);
-  parser.open_elements_stack_.Push(root);
+  std::unique_ptr<Parser> parser = std::make_unique<Parser>(
+      html, options, fragment_parent);
+  Node* root = parser->document_->NewNode(NodeType::ELEMENT_NODE, Atom::HTML);
+  parser->document_->root_node_->AppendChild(root);
+  parser->open_elements_stack_.Push(root);
 
   if (fragment_parent && fragment_parent->DataAtom() == Atom::TEMPLATE) {
-    parser.template_stack_.push_back(std::bind(&Parser::InTemplateIM, &parser));
+    parser->template_stack_.push_back(std::bind(&Parser::InTemplateIM,
+                                                parser.get()));
   }
 
-  parser.ResetInsertionMode();
+  parser->ResetInsertionMode();
 
   for (Node* node = fragment_parent; node; node = node->Parent()) {
     if (node->Type() == NodeType::ELEMENT_NODE &&
         node->DataAtom() == Atom::FORM) {
-      parser.form_ = node;
+      parser->form_ = node;
       break;
     }
   }
 
-  auto doc = parser.Parse();
+  auto doc = parser->Parse();
   Node* parent = fragment_parent ? root : doc->root_node_;
   for (Node* c = parent->FirstChild(); c;) {
     Node* next = c->NextSibling();
