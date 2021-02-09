@@ -33,14 +33,6 @@ export class ServiceAdapter {
   }
 
   /**
-   * Returns a promise for all platform entitlements.
-   * @return {!Promise<!Array<!./entitlement.Entitlement>>}
-   */
-  getAllPlatformsEntitlements() {
-    return this.subscriptionService_.platformStore.getAllPlatformsEntitlements();
-  }
-
-  /**
    * Returns the singleton Dialog instance
    * @return {!./dialog.Dialog}
    */
