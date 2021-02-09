@@ -20,10 +20,10 @@
 // Most other ad networks will want to put their A4A code entirely in the
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
+import {AMP_SIGNATURE_HEADER} from '../../amp-a4a/0.1/signature-verifier';
 import {AdsenseSharedState} from './adsense-shared-state';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
-import {FIE_RESOURCES_EXP} from '../../../src/experiments/fie-resources-exp';
 import {INTERSECT_RESOURCES_EXP} from '../../../src/experiments/intersect-resources-exp';
 import {Navigation} from '../../../src/service/navigation';
 import {
@@ -255,13 +255,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     if (intersectResourcesExpId) {
       addExperimentIdToElement(intersectResourcesExpId, this.element);
     }
-    const fieResourcesExpId = getExperimentBranch(
-      this.win,
-      FIE_RESOURCES_EXP.id
-    );
-    if (fieResourcesExpId) {
-      addExperimentIdToElement(fieResourcesExpId, this.element);
-    }
     const ssrExpIds = this.getSsrExpIds_();
     for (let i = 0; i < ssrExpIds.length; i++) {
       addAmpExperimentIdToElement(ssrExpIds[i], this.element);
@@ -459,6 +452,13 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       );
     }
     return this.size_;
+  }
+
+  /**
+   * @override
+   */
+  skipClientSideValidation(headers) {
+    return headers && !headers.has(AMP_SIGNATURE_HEADER);
   }
 
   /**

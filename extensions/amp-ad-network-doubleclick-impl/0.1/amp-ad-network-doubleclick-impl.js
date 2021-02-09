@@ -51,7 +51,6 @@ import {
 } from '../../../ads/google/a4a/utils';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {Deferred} from '../../../src/utils/promise';
-import {FIE_RESOURCES_EXP} from '../../../src/experiments/fie-resources-exp';
 import {
   FlexibleAdSlotDataTypeDef,
   getFlexibleAdSlotData,
@@ -110,6 +109,7 @@ import {getMultiSizeDimensions} from '../../../ads/google/utils';
 
 import {getOrCreateAdCid} from '../../../src/ad-cid';
 
+import {AMP_SIGNATURE_HEADER} from '../../amp-a4a/0.1/signature-verifier';
 import {getPageLayoutBoxBlocking} from '../../../src/utils/page-layout-box';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {isArray} from '../../../src/types';
@@ -511,14 +511,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.experimentIds.push(intersectResourcesExpId);
     }
 
-    const fieResourcesExpId = getExperimentBranch(
-      this.win,
-      FIE_RESOURCES_EXP.id
-    );
-    if (fieResourcesExpId) {
-      this.experimentIds.push(fieResourcesExpId);
-    }
-
     const ssrExpIds = this.getSsrExpIds_();
     for (let i = 0; i < ssrExpIds.length; i++) {
       addAmpExperimentIdToElement(ssrExpIds[i], this.element);
@@ -654,6 +646,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'gdpr': gdprApplies === true ? '1' : gdprApplies === false ? '0' : null,
       'gdpr_consent': consentString,
     };
+  }
+
+  /**
+   * @override
+   */
+  skipClientSideValidation(headers) {
+    return headers && !headers.has(AMP_SIGNATURE_HEADER);
   }
 
   /**

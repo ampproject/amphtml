@@ -21,10 +21,10 @@ Run `gulp get-zindex` to generate this file.
 | .i-amphtml-lbg                                                                                          | 2147483642 | extensions/amp-lightbox-gallery/0.1/amp-lightbox-gallery.css         |
 | amp-lightbox-gallery[i-amphtml-lbg-fade]                                                                | 2147483642 | extensions/amp-lightbox-gallery/0.1/amp-lightbox-gallery.css         |
 | amp-subscriptions-dialog                                                                                | 2147483641 | extensions/amp-subscriptions/0.1/amp-subscriptions.css               |
+| .i-amphtml-story-unsupported-browser-overlay                                                            | 20000001   | extensions/amp-story/1.0/amp-story-unsupported-browser-layer.css     |
+| .i-amphtml-story-no-rotation-overlay                                                                    | 20000000   | extensions/amp-story/1.0/amp-story-viewport-warning-layer.css        |
 | amp-story-education                                                                                     | 9999999    | extensions/amp-story-education/0.1/amp-story-education.css           |
 | [i-amphtml-vertical] .i-amphtml-story-page-description                                                  | 9999999    | extensions/amp-story/1.0/amp-story-vertical.css                      |
-| .i-amphtml-story-unsupported-browser-overlay                                                            | 200001     | extensions/amp-story/1.0/amp-story-unsupported-browser-layer.css     |
-| .i-amphtml-story-no-rotation-overlay                                                                    | 200000     | extensions/amp-story/1.0/amp-story-viewport-warning-layer.css        |
 | .i-amphtml-story-consent                                                                                | 100005     | extensions/amp-story/1.0/amp-story-consent.css                       |
 | amp-story-access[type=blocking]                                                                         | 100004     | extensions/amp-story/1.0/amp-story-access.css                        |
 | .i-amphtml-story-toast                                                                                  | 100004     | extensions/amp-story/1.0/amp-story.css                               |

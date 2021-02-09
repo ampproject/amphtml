@@ -41,7 +41,7 @@ describes.realWin(
       }
       doc.body.appendChild(izlesene);
       return izlesene
-        .build()
+        .buildInternal()
         .then(() => {
           return izlesene.layoutCallback();
         })

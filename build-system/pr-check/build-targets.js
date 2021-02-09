@@ -24,7 +24,7 @@ const config = require('../test-configs/config');
 const globby = require('globby');
 const minimatch = require('minimatch');
 const path = require('path');
-const {cyan} = require('ansi-colors');
+const {cyan} = require('kleur/colors');
 const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
 const {gitDiffNameOnlyMaster} = require('../common/git');
 const {isCiBuild} = require('../common/ci');
@@ -126,7 +126,6 @@ const targetMatchers = {
     }
     return (
       file == 'build-system/tasks/ava.js' ||
-      file.startsWith('build-system/tasks/csvify-size/') ||
       file.startsWith('build-system/tasks/get-zindex/') ||
       file.startsWith('build-system/tasks/prepend-global/')
     );
@@ -306,7 +305,7 @@ function determineBuildTargets() {
       const matcher = targetMatchers[target];
       if (matcher(file)) {
         buildTargets.add(target);
-        if (target in nonRuntimeTargets) {
+        if (nonRuntimeTargets.includes(target)) {
           isRuntimeFile = false;
         }
       }

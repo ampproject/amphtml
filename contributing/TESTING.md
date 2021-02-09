@@ -30,18 +30,24 @@ This document provides details for testing and building your AMP code.
     -   [Chrome extension](#chrome-extension)
 -   [Visual Diff Tests](#visual-diff-tests)
     -   [Failing Tests](#failing-tests)
-    -   [Running Visual Diff Tests Locally](#running-visual-diff-tests-locally)
+    -   [Flaky Tests](#flaky-tests)
+    -   [How Are Tests Executed](#how-are-tests-executed)
+    -   [Adding and Modifying Visual Diff Tests](#adding-and-modifying-visual-diff-tests)
+        -   [One-time Setup](#one-time-setup)
+        -   [Writing the Test](#writing-the-test)
 -   [Isolated Component Testing](#isolated-component-testing)
 -   [Testing on devices](#testing-on-devices)
     -   [Testing with ngrok](#testing-with-ngrok)
     -   [Testing with Firebase](#testing-with-firebase)
--   [End-to-end Tests](#end-to-end-tests)
+        -   [Testing Ads](#testing-ads)
+-   [End-to-End Tests](#end-to-end-tests)
+-   [Performance Testing Node Build Tools](#performance-testing-node-build-tools)
 
 ## Testing commands
 
 Before running these commands, make sure you have Node.js and Gulp installed. For installation instructions, see the [One-time setup](getting-started-quick.md#one-time-setup) section in the Quick Start guide.
 
-**Pro tip:** To see a full listing of `gulp` commands and their flags, run `gulp help`.
+**Pro tip:** To see a full listing of `gulp` commands and their flags, run `gulp --tasks`.
 
 | Command                                                   | Description                                                                                                                                                                                                                                            |
 | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -92,7 +98,6 @@ Before running these commands, make sure you have Node.js and Gulp installed. Fo
 | `gulp integration --config=<config>`                      | Same as above, but `config` can be `prod` or `canary`. (Defaults to `prod`.)                                                                                                                                                                           |
 | `gulp integration --nobuild`                              | Same as above, but skips building the runtime.                                                                                                                                                                                                         |
 | `gulp [unit\|integration] --verbose`                      | Runs tests in Chrome with logging enabled.                                                                                                                                                                                                             |
-| `gulp [unit\|integration] --nobuild`                      | Runs tests without re-build.                                                                                                                                                                                                                           |
 | `gulp [unit\|integration] --coverage`                     | Runs code coverage tests. After running, the report will be available at test/coverage/index.html                                                                                                                                                      |
 | `gulp [unit\|integration] --watch`                        | Watches for changes in files, runs corresponding test(s) in Chrome.                                                                                                                                                                                    |
 | `gulp [unit\|integration] --watch --verbose`              | Same as `watch`, with logging enabled.                                                                                                                                                                                                                 |

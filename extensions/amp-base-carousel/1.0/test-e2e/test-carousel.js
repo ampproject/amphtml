@@ -24,10 +24,10 @@ const pageHeight = 800;
 const testTimeout = 40000;
 
 describes.endtoend(
-  'amp-base-carousel:1.0 - basic functionality',
+  'amp-base-carousel - basic functionality',
   {
-    testUrl:
-      'http://localhost:8000/test/manual/amp-base-carousel/1.0/basic.amp.html',
+    version: '1.0',
+    fixture: 'amp-base-carousel/1.0/basic.amp.html',
     experiments: ['bento-carousel'],
     initialRect: {width: pageWidth, height: pageHeight},
     environments: ['single', 'viewer-demo'],

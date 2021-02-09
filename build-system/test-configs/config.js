@@ -79,12 +79,6 @@ const testPaths = commonIntegrationTestPaths.concat([
   'extensions/**/test/**/*.js',
 ]);
 
-const a4aTestPaths = initTestsPath.concat([
-  'extensions/amp-a4a/**/test/**/*.js',
-  'extensions/amp-ad-network-*/**/test/**/*.js',
-  'ads/google/a4a/test/*.js',
-]);
-
 const unitTestPaths = [
   'test/unit/**/*.js',
   'ads/**/test/test-*.js',
@@ -211,7 +205,6 @@ const changelogIgnoreFileTypes = /\.md|\.json|\.yaml|LICENSE|CONTRIBUTORS$/;
 
 /** @const  */
 module.exports = {
-  a4aTestPaths,
   changelogIgnoreFileTypes,
   commonIntegrationTestPaths,
   commonUnitTestPaths,
