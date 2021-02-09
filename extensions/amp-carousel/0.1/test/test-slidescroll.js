@@ -30,7 +30,6 @@ describes.realWin(
   {
     amp: {
       extensions: ['amp-carousel'],
-      runtimeOn: false,
     },
   },
   (env) => {

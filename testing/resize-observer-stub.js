@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import {pushIfNotExist, removeItem} from '../src/utils/array';
-
 /**
  * @param {!Object} sandbox
  * @param {!Window} window
@@ -27,14 +25,14 @@ export function installResizeObserverStub(sandbox, win) {
 
 class ResizeObservers {
   constructor(sandbox, win) {
-    const observers = [];
+    const observers = new Set();
     this.observers = observers;
 
     sandbox.stub(win, 'ResizeObserver').value(function (callback) {
       const observer = new ResizeObserverStub(callback, () => {
-        removeItem(observers, observer);
+        observers.delete(observer);
       });
-      observers.push(observer);
+      observers.add(observer);
       return observer;
     });
   }
@@ -45,7 +43,7 @@ class ResizeObservers {
       : [entryOrEntries];
     this.observers.forEach((observer) => {
       const subEntries = entries.filter(({target}) =>
-        observer.elements.includes(target)
+        observer.elements.has(target)
       );
       if (subEntries.length > 0) {
         observer.callback(subEntries);
@@ -58,7 +56,7 @@ class ResizeObserverStub {
   constructor(callback, onDisconnect) {
     this.onDisconnect_ = onDisconnect;
     this.callback = callback;
-    this.elements = [];
+    this.elements = new Set();
   }
 
   disconnect() {
@@ -67,10 +65,10 @@ class ResizeObserverStub {
   }
 
   observe(element) {
-    pushIfNotExist(this.elements, element);
+    this.elements.add(element);
   }
 
   unobserve(element) {
-    removeItem(this.elements, element);
+    this.elements.delete(element);
   }
 }
