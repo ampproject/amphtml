@@ -28,6 +28,10 @@ describes.endtoend(
     });
 
     it('should render in correct font-size', async () => {
+      if (BENTO_AUTO_UPGRADE) {
+        this.skipTest();
+      }
+
       await verifyElementStyles(await selectContentDiv('test1'), {
         'font-size': '32px',
       });
