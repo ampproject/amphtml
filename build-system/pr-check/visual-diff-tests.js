@@ -26,6 +26,7 @@ const {
   timedExecOrDie,
 } = require('./utils');
 const {buildTargetsInclude, Targets} = require('./build-targets');
+const {isTravisBuild} = require('../common/ci');
 const {runCiJob} = require('./ci-job');
 
 const jobName = 'visual-diff-tests.js';
@@ -52,4 +53,12 @@ function prBuildWorkflow() {
   }
 }
 
+// TODO(rsimha): Remove this block once Travis is shut off.
+if (isTravisBuild()) {
+  printSkipMessage(
+    jobName,
+    'this is a Travis build. Visual diff tests will be run on CircleCI'
+  );
+  return;
+}
 runCiJob(jobName, pushBuildWorkflow, prBuildWorkflow);
