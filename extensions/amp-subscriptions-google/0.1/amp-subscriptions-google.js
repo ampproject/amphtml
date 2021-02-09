@@ -316,9 +316,6 @@ export class GoogleSubscriptionsPlatform {
 
     /** @private {!Promise} */
     this.rtcPromise_ = this.maybeFetchRealTimeConfig();
-
-    /** @private {boolean} */
-    this.hasFetchedEntitlements_ = false;
   }
 
   /**
