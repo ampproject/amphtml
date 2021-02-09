@@ -19,7 +19,6 @@ import {CSS} from '../../../build/amp-fit-text-0.1.css';
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import {px, setStyle, setStyles} from '../../../src/style';
 import {throttle} from '../../../src/utils/rate-limit';
-import {toggleExperiment} from '../../../src/experiments';
 
 const TAG = 'amp-fit-text';
 const LINE_HEIGHT_EM_ = 1.15;
@@ -63,7 +62,6 @@ class AmpFitText extends AMP.BaseElement {
       BENTO_AUTO_UPGRADE &&
       typeof Element.prototype.attachShadow == 'function'
     ) {
-      toggleExperiment(this.win, 'bento', true, false);
       return new BentoFitText(this.element);
     }
     return null;
