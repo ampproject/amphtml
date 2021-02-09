@@ -66,6 +66,7 @@ function runLinter(stream) {
   const options = {
     fix: argv.fix,
     quiet: argv.quiet,
+    reportUnusedDisableDirectives: true,
   };
   const fixedFiles = {};
   return stream
