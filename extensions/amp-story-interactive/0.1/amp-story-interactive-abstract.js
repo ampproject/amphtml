@@ -663,6 +663,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
         this.hasUserSelection_ = true;
         this.mutateElement(() => {
           this.updateToPostSelectionState_(optionEl);
+          this.updateOptionPercentages_();
         });
       });
   }
@@ -790,10 +791,10 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       );
     }
 
-    if (this.optionsData_) {
-      this.rootEl_.classList.add('i-amphtml-story-interactive-has-data');
-      this.updateOptionPercentages_(this.optionsData_);
-    }
+    // if (this.optionsData_) {
+    this.rootEl_.classList.add('i-amphtml-story-interactive-has-data');
+    this.updateOptionPercentages_(this.optionsData_);
+    // }
   }
 
   /**

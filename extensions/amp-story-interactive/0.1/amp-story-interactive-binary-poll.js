@@ -220,13 +220,13 @@ export class AmpStoryInteractiveBinaryPoll extends AmpStoryInteractive {
   /**
    * @override
    */
-  updateOptionPercentages_(responseData) {
-    if (!responseData) {
-      return;
-    }
+  updateOptionPercentages_() {
+    // if (!responseData) {
+    //   return;
+    // }
 
-    const percentages = this.preprocessPercentages_(responseData);
-
+    // let percentages = this.preprocessPercentages_(responseData);
+    const percentages = ['30', '70'];
     percentages.forEach((percentage, index) => {
       // TODO(jackbsteinberg): Add i18n support for various ways of displaying percentages.
       const currOption = this.getOptionElements()[index];
