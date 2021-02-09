@@ -22,8 +22,9 @@ const pageWidth = 600;
 const pageHeight = 600;
 
 describes.endtoend(
-  'amp-base-carousel:0.1 - arrows when non-looping',
+  'amp-base-carousel - arrows when non-looping',
   {
+    version: '0.1',
     fixture: 'amp-base-carousel/non-looping.amp.html',
     experiments: ['amp-base-carousel', 'layers'],
     initialRect: {width: pageWidth, height: pageHeight},

@@ -285,15 +285,7 @@ export class ConsentUI {
           this.elementWithFocusBeforeShowing_ = this.document_.activeElement;
 
           this.maybeShowOverlay_();
-
-          // scheduleLayout is required everytime because some AMP element may
-          // get un laid out after toggle display (#unlayoutOnPause)
-          // for example <amp-iframe>
-          Services.ownersForDoc(this.baseInstance_.element).scheduleLayout(
-            this.baseInstance_.element,
-            this.ui_
-          );
-
+          this.resume();
           this.ui_./*OK*/ focus();
         }
       };
@@ -321,6 +313,8 @@ export class ConsentUI {
       // Nothing to hide from;
       return;
     }
+
+    this.pause();
 
     this.baseInstance_.mutateElement(() => {
       if (this.isCreatedIframe_) {
@@ -361,6 +355,33 @@ export class ConsentUI {
         this.win_.document.body.children[0]./*OK*/ focus();
       }
     });
+  }
+
+  /** */
+  pause() {
+    if (this.ui_) {
+      Services.ownersForDoc(this.baseInstance_.element).schedulePause(
+        this.baseInstance_.element,
+        this.ui_
+      );
+    }
+  }
+
+  /** */
+  resume() {
+    if (this.ui_) {
+      // scheduleLayout is required everytime because some AMP element may
+      // get un laid out after toggle display (#unlayoutOnPause)
+      // for example <amp-iframe>
+      Services.ownersForDoc(this.baseInstance_.element).scheduleLayout(
+        this.baseInstance_.element,
+        this.ui_
+      );
+      Services.ownersForDoc(this.baseInstance_.element).scheduleResume(
+        this.baseInstance_.element,
+        this.ui_
+      );
+    }
   }
 
   /**

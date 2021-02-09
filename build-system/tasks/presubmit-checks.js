@@ -439,7 +439,7 @@ const forbiddenTerms = {
     message: shouldNeverBeUsed,
     allowlist: ['extension/amp-bind/0.1/test/test-bind-expr.js'],
   },
-  'storageForDoc': {
+  'storageForDoc|storageForTopLevelDoc': {
     message:
       requiresReviewPrivacy +
       ' Please refer to spec/amp-localstorage.md for more information on' +
@@ -1061,7 +1061,7 @@ const forbiddenTermsSrcInclusive = {
     message: 'Unless you do weird date math (allowlist), use Date.now().',
     allowlist: [
       'extensions/amp-timeago/0.1/amp-timeago.js',
-      'extensions/amp-timeago/1.0/timeago.js',
+      'extensions/amp-timeago/1.0/component.js',
       'src/utils/date.js',
     ],
   },
@@ -1081,6 +1081,7 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-analytics/0.1/cookie-writer.js',
       'extensions/amp-analytics/0.1/requests.js',
       'extensions/amp-analytics/0.1/variables.js',
+      'extensions/amp-consent/0.1/cookie-writer.js',
     ],
   },
   '\\.expandInputValueSync\\(': {

@@ -55,6 +55,28 @@ function runIntegrationTestsForPlatform() {
 }
 
 /**
+ * Helper that runs platform-specific E2E tests
+ */
+function runE2eTestsForPlatform() {
+  switch (process.platform) {
+    case 'linux':
+      timedExecOrDie('gulp e2e --nobuild --compiled --browsers=firefox');
+      break;
+    case 'darwin':
+      timedExecOrDie('gulp e2e --nobuild --compiled --browsers=safari');
+      break;
+    case 'win32':
+      break;
+    default:
+      log(
+        red('ERROR:'),
+        'Cannot run cross-browser E2E tests on',
+        cyan(process.platform) + '.'
+      );
+  }
+}
+
+/**
  * Helper that runs platform-specific unit tests
  */
 function runUnitTestsForPlatform() {
@@ -97,7 +119,7 @@ async function prBuildWorkflow() {
   ) {
     printSkipMessage(
       jobName,
-      'this PR does not affect the runtime, unit tests, or integration tests'
+      'this PR does not affect the runtime, unit tests, integration tests, or end-to-end tests'
     );
     return;
   }
@@ -105,9 +127,20 @@ async function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.UNIT_TEST)) {
     runUnitTestsForPlatform();
   }
-  if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
+  if (
+    buildTargetsInclude(
+      Targets.RUNTIME,
+      Targets.INTEGRATION_TEST,
+      Targets.E2E_TEST
+    )
+  ) {
     timedExecOrDie('gulp dist --fortesting');
+  }
+  if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
     runIntegrationTestsForPlatform();
+  }
+  if (buildTargetsInclude(Targets.RUNTIME, Targets.E2E_TEST)) {
+    runE2eTestsForPlatform();
   }
 }
 
