@@ -452,7 +452,8 @@ TokenType Tokenizer::ReadMarkupDeclaration() {
     return TokenType::COMMENT_TOKEN;
   }
 
-  raw_.end = raw_.end - 2;
+  UnreadByte();
+  UnreadByte();
   if (ReadDoctype()) {
     return TokenType::DOCTYPE_TOKEN;
   }
@@ -471,14 +472,14 @@ bool Tokenizer::ReadDoctype() {
   token_line_col_ = {current_line_col_.first,
                      current_line_col_.second - 2 /* <! */};
 
-  static const std::string kDoctype = "DOCTYPE";
+  static constexpr std::string_view kDoctype = "DOCTYPE";
   for (std::size_t i = 0; i < kDoctype.size(); ++i) {
     char c = ReadByte();
     if (eof_) {
       data_.end = raw_.end;
       return false;
     }
-    if (c != kDoctype.at(i) && c != kDoctype.at(i)+('a'-'A')) {
+    if (c != kDoctype.at(i) && c != (kDoctype.at(i) + ('a' - 'A'))) {
       // Back up to read the fragment of "DOCTYPE" again.
       raw_.end = data_.start;
       return false;
@@ -497,7 +498,7 @@ bool Tokenizer::ReadDoctype() {
 }
 
 bool Tokenizer::ReadCDATA() {
-  static const std::string kCData = "[CDATA[";
+  static constexpr std::string_view kCData = "[CDATA[";
   for (std::size_t i = 0; i < kCData.size(); ++i) {
     char c = ReadByte();
     if (eof_) {
@@ -519,16 +520,18 @@ bool Tokenizer::ReadCDATA() {
       return true;
     }
     switch (c) {
-      case ']':
+      case ']': {
         brackets++;
         break;
-      case '>':
+      }
+      case '>': {
         if (brackets >= 2) {
-          data_.end = raw_.end - 3 /* "]]>".size() */;
+          data_.end = raw_.end - 3 /* "]]>" */;
           return true;
         }
         brackets = 0;
         break;
+      }
       default:
         brackets = 0;
     }
@@ -622,6 +625,7 @@ void Tokenizer::ReadTag(bool save_attr, bool template_mode) {
   if (eof_) {
     return;
   }
+
   while (!eof_) {
     char c = ReadByte();
     if (eof_ || c == '>') {
@@ -870,19 +874,6 @@ TokenType Tokenizer::Next(bool template_mode) {
       continue;
     }
 
-    // We have a non-text token, but we might have accumulated some text
-    // before that. If so, we return the text first, and return the non text
-    // token on the subsequent call to Next.
-    //
-    // <space><space><mytag>, returns two spaces before processing the mytag
-    // token in the next call.
-    if (data_.start < raw_.end - 1) {
-      current_line_col_.second--;
-      data_.end = --raw_.end;
-      token_type_ = TokenType::TEXT_TOKEN;
-      return token_type_;
-    }
-
     c = ReadByte();
     if (eof_) break;
 
@@ -898,6 +889,21 @@ TokenType Tokenizer::Next(bool template_mode) {
     } else {
       UnreadByte();
       continue;
+    }
+
+    // We have a non-text token, but we might have accumulated some text
+    // before that. If so, we return the text first, and return the non text
+    // token on the subsequent call to Next.
+    //
+    // <space><space><mytag>, returns two spaces before processing the mytag
+    // token in the next call.
+    if (int x = raw_.end - 2 /* "<a" */; raw_.start < x) {
+      raw_.end = x;
+      data_.end = x;
+      // We know there is no \n so no line adjustment needed.
+      current_line_col_.second -= 2;
+      token_type_ = TokenType::TEXT_TOKEN;
+      return token_type_;
     }
 
     switch (token_type) {
@@ -923,6 +929,7 @@ TokenType Tokenizer::Next(bool template_mode) {
           }
           return token_type_;
         }
+        UnreadByte();
         ReadUntilCloseAngle();
         token_type_ = TokenType::COMMENT_TOKEN;
         return token_type_;
@@ -933,7 +940,6 @@ TokenType Tokenizer::Next(bool template_mode) {
         }
         is_token_manufactured_ = true;
         // <? is part of the comment text.
-        UnreadByte();
         UnreadByte();
         ReadUntilCloseAngle();
         token_type_ = TokenType::COMMENT_TOKEN;
