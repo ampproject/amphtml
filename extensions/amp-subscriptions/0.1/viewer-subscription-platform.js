@@ -232,8 +232,8 @@ export class ViewerSubscriptionPlatform {
   }
 
   /** @override */
-  getServiceId() {
-    return this.platform_.getServiceId();
+  getPlatformKey() {
+    return this.platform_.getPlatformKey();
   }
 
   /** @override */
