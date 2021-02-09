@@ -28,6 +28,7 @@ import {
 } from '../linker-reader';
 import {installVariableServiceForTesting} from '../variables';
 import {mockWindowInterface} from '../../../../testing/test-helper';
+import { WindowInterface } from '../../../../src/window-interface';
 
 // TODO(ccordry): Refactor all these tests with async/await.
 describes.realWin('Linker Manager', {amp: true}, (env) => {
@@ -318,7 +319,7 @@ describes.realWin('Linker Manager', {amp: true}, (env) => {
             ids: {
               id: '222',
             },
-            destinationDomains: ['foo.com', 'bar.com'],
+            destinationDomains: ['foo.com', 'bar.com', 'window.com'],
           },
         },
       };
@@ -346,6 +347,13 @@ describes.realWin('Linker Manager', {amp: true}, (env) => {
         const barDomainUrl = clickAnchor('https://bar.com/path');
         expect(barDomainUrl).to.not.contain('testLinker1=');
         expect(barDomainUrl).to.contain('testLinker2=');
+
+        // When the window host name matches the target,
+        // the linker should not be applied.
+        win.location.hostname = 'window.com'
+        const localDomainUrl = clickAnchor('https://window.com/path');
+        expect(localDomainUrl).to.not.contain('testLinker1=');
+        expect(localDomainUrl).to.not.contain('testLinker2=');
       });
     });
 
