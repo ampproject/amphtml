@@ -639,8 +639,9 @@ export class GlobalVariableSource extends VariableSource {
       Services.accessServiceForDocOrNull(element),
       Services.subscriptionsServiceForDocOrNull(element),
     ]).then((services) => {
-      const service = /** @type {?../../extensions/amp-access/0.1/access-vars.AccessVars} */ (services[0] ||
-        services[1]);
+      const accessService = /** @type {?../../extensions/amp-access/0.1/access-vars.AccessVars} */ (services[0]);
+      const subscriptionService = /** @type {?../../extensions/amp-access/0.1/access-vars.AccessVars} */ (services[1]);
+      const service = accessService || subscriptionService;
       if (!service) {
         // Access/subscriptions service is not installed.
         user().error(
@@ -650,6 +651,13 @@ export class GlobalVariableSource extends VariableSource {
         );
         return null;
       }
+
+      // If both an access and subscription service are present, prefer
+      // subscription then fall back to access because access can be namespaced.
+      if (accessService && subscriptionService) {
+        return getter(subscriptionService) || getter(accessService);
+      }
+
       return getter(service);
     });
   }
