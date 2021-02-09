@@ -19,8 +19,6 @@ import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-selector-1.0.css';
 import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dict} from '../../../src/utils/object';
-import {dispatchCustomEvent} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
 import {toWin} from '../../../src/types';
 import {userAssert} from '../../../src/log';
