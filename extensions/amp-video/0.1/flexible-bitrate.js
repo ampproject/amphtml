@@ -22,6 +22,12 @@ import {toArray} from '../../../src/types';
 
 const TAG = 'amp-video';
 
+/** @private {number} time it needs to pass without loading to downgrade bitrate. */
+const INITIAL_LOAD_DOWNGRADE_DELAY_MS = 1000;
+
+/** @private {number} time it needs to pass while buffering (waiting for frames) to downgrade bitrate. */
+const BUFFERING_DELAY_MS = 100;
+
 /** @const {!Object<string, number>} */
 const BITRATE_BY_EFFECTIVE_TYPE = {
   // We assign low values to 2G in general. None of these will likely be able
@@ -91,15 +97,22 @@ export class BitrateManager {
    * @param {!Element} video
    */
   manage(video) {
-    onNontrivialWait(video, () => {
+    const downgradeVideoCallback = () => {
       const current = currentSource(video);
       this.acceptableBitrate_ = current.bitrate_ - 1;
       this.switchToLowerBitrate_(video, current.bitrate_);
       this.updateOtherManagedAndPausedVideos_();
-    });
+    };
+    video.waitUnlistener = onNontrivialWait(video, downgradeVideoCallback);
     video.changedSources = () => {
       this.sortSources_(video);
+      // Reset slow loading listener when sources changed.
+      if (video.initialUnlistener) {
+        video.initialUnlistener();
+      }
+      video.initialUnlistener = onSlowLoad(video, downgradeVideoCallback);
     };
+    video.initialUnlistener = onSlowLoad(video, downgradeVideoCallback);
     this.videos_.push(DomBasedWeakRef.make(this.win, video));
   }
 
@@ -241,6 +254,19 @@ export class BitrateManager {
       video.load();
     }
   }
+
+  /**
+   * Called when the mediapool changes a video.
+   * @param {!Element} oldVideo
+   * @param {!Element} newVideo
+   */
+  videoChanged(oldVideo, newVideo) {
+    if (oldVideo.waitUnlistener) {
+      oldVideo.waitUnlistener();
+    }
+    this.videos_ = this.videos_.filter((v) => v.deref() !== oldVideo);
+    this.manage(newVideo);
+  }
 }
 
 /**
@@ -248,9 +274,10 @@ export class BitrateManager {
  * emerge from it within a short amount of time.
  * @param {!Element} video
  * @param {function()} callback
+ * @return {function()} unlistener
  */
 function onNontrivialWait(video, callback) {
-  listen(video, 'waiting', () => {
+  return listen(video, 'waiting', () => {
     let timer = null;
     const unlisten = listenOnce(video, 'playing', () => {
       clearTimeout(timer);
@@ -258,7 +285,34 @@ function onNontrivialWait(video, callback) {
     timer = setTimeout(() => {
       unlisten();
       callback();
-    }, 100);
+    }, BUFFERING_DELAY_MS);
+  });
+}
+
+/**
+ * Calls the callback if the video takes time to load.
+ * @param {!Element} video
+ * @param {function()} callback
+ * @return {?function()} unlistener
+ */
+function onSlowLoad(video, callback) {
+  console.log(video.querySelector('source'));
+  if (!video.querySelector('source')) {
+    console.log('video doesnt have sources');
+    return;
+  }
+  // Run callback if video takes to load first frame.
+  return listen(video, 'loadstart', () => {
+    console.log('load start');
+    let initialTimer = null;
+    const unlisten = listenOnce(video, 'loadeddata', () => {
+      console.log('loaded data');
+      clearTimeout(initialTimer);
+    });
+    initialTimer = setTimeout(() => {
+      unlisten();
+      callback();
+    }, INITIAL_LOAD_DOWNGRADE_DELAY_MS);
   });
 }
 
