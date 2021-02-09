@@ -350,7 +350,7 @@ describes.realWin('Linker Manager', {amp: true}, (env) => {
 
         // When the window host name matches the target,
         // the linker should not be applied.
-        win.location.hostname = 'window.com'
+        win.location.hostname = 'window.com';
         const localDomainUrl = clickAnchor('https://window.com/path');
         expect(localDomainUrl).to.not.contain('testLinker1=');
         expect(localDomainUrl).to.not.contain('testLinker2=');
