@@ -1025,7 +1025,9 @@ function createBaseCustomElementClass(win) {
      * @final
      */
     createLoaderLogo() {
-      return this.impl_ ? this.impl_.createLoaderLogoCallback() : {};
+      return this.implClass_
+        ? this.implClass_.createLoaderLogoCallback(this)
+        : {};
     }
 
     /**
