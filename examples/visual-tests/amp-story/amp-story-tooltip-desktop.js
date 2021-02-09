@@ -41,7 +41,7 @@ module.exports = {
     await page.waitForTimeout(300); // For animations to finish.
     await page.tap('.i-amphtml-story-focused-state-layer');
     await page.waitForTimeout(800); // For animations to finish.
-    await verifySelectorsVisible(page, name, [
+    await verifySelectorsInvisible(page, name, [
       '.i-amphtml-story-focused-state-layer.i-amphtml-hidden',
     ]);
   },
