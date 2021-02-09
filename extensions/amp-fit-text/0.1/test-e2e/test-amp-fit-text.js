@@ -28,7 +28,6 @@ describes.endtoend(
     });
 
     it('should render in correct font-size', async () => {
-      // eslint-disable-next-line no-undef
       if (BENTO_AUTO_UPGRADE) {
         this.skipTest();
       }
