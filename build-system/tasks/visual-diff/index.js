@@ -57,6 +57,12 @@ const percyCss = [
   '.i-amphtml-new-loader * { animation: none !important; }',
 ].join('\n');
 
+// Pin the version of Chromium to 78.0.3904.0, same as the one running on Percy.
+// Use https://omahaproxy.appspot.com/ to convert version<->revision numbers.
+// REPEATING TODO(@ampproject/wg-infra): keep this pinned with Percy whenever we
+// update the version of Chrome in the project settings.
+const INSTALL_PACKAGE_OPTIONS = {'PUPPETEER_CHROMIUM_REVISION': '693954'};
+
 const SNAPSHOT_SINGLE_BUILD_OPTIONS = {
   widths: [375],
 };
@@ -789,7 +795,7 @@ async function ensureOrBuildAmpRuntimeInTestMode_() {
 
 function installPercy_() {
   if (!argv.noinstall) {
-    installPackages(__dirname);
+    installPackages(__dirname, INSTALL_PACKAGE_OPTIONS);
   }
 
   puppeteer = require('puppeteer');
