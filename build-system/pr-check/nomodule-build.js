@@ -30,7 +30,7 @@ const {
 } = require('./utils');
 const {buildTargetsInclude, Targets} = require('./build-targets');
 const {log} = require('../common/logging');
-const {red, yellow} = require('ansi-colors');
+const {red, yellow} = require('kleur/colors');
 const {runCiJob} = require('./ci-job');
 const {signalPrDeployUpload} = require('../tasks/pr-deploy-bot-utils');
 

@@ -23,7 +23,7 @@ const {BABEL_SRC_GLOBS, THIRD_PARTY_TRANSFORM_GLOBS} = require('./sources');
 const {debug, CompilationLifecycles} = require('./debug-compilation-lifecycle');
 const {EventEmitter} = require('events');
 const {log} = require('../common/logging');
-const {red, cyan} = require('ansi-colors');
+const {red, cyan} = require('kleur/colors');
 
 /**
  * Files on which to run pre-closure babel transforms.

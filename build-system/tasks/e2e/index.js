@@ -30,7 +30,7 @@ const {
   getFilesFromArgv,
   installPackages,
 } = require('../../common/utils');
-const {cyan} = require('ansi-colors');
+const {cyan} = require('kleur/colors');
 const {execOrDie} = require('../../common/exec');
 const {HOST, PORT, startServer, stopServer} = require('../serve');
 const {isCiBuild} = require('../../common/ci');

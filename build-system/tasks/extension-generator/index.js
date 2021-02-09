@@ -21,7 +21,7 @@ const path = require('path');
 const {
   insertExtensionBundlesConfig,
 } = require('./insert-extension-bundles-config');
-const {cyan, green, red} = require('ansi-colors');
+const {cyan, green, red} = require('kleur/colors');
 const {execOrThrow} = require('../../common/exec');
 const {log} = require('../../common/logging');
 const {makeBentoExtension} = require('./bento');

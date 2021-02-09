@@ -18,7 +18,7 @@ const fs = require('fs');
 const gulp = require('gulp');
 const path = require('path');
 const through2 = require('through2');
-const {green, red, yellow} = require('ansi-colors');
+const {green, red, yellow} = require('kleur/colors');
 const {log} = require('../common/logging');
 
 const CONFIG_PATH = 'build-system/tasks/performance/config.json';

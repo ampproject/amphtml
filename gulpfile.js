@@ -18,7 +18,7 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const gulp = require('gulp');
-const {cyan, red} = require('ansi-colors');
+const {cyan, red} = require('kleur/colors');
 const {isCiBuild} = require('./build-system/common/ci');
 const {log} = require('./build-system/common/logging');
 

@@ -19,7 +19,7 @@ const gulp = require('gulp');
 const path = require('path');
 const srcGlobs = require('../test-configs/config').presubmitGlobs;
 const through2 = require('through2');
-const {blue, red} = require('ansi-colors');
+const {blue, red} = require('kleur/colors');
 const {log} = require('../common/logging');
 
 const dedicatedCopyrightNoteSources = /(\.js|\.css|\.go)$/;

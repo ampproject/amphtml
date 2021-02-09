@@ -23,7 +23,7 @@ const {doBuild} = require('../tasks/build');
 const {doDist} = require('../tasks/dist');
 const {execOrDie} = require('./exec');
 const {gitDiffNameOnlyMaster} = require('./git');
-const {green, cyan, yellow} = require('ansi-colors');
+const {green, cyan, yellow} = require('kleur/colors');
 const {log, logLocalDev} = require('./logging');
 
 const ROOT_DIR = path.resolve(__dirname, '../../');

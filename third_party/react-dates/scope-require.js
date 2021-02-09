@@ -20,7 +20,7 @@ const detectGlobals = require('acorn-globals');
 const escodegen = require('escodegen');
 const rocambole = require('rocambole');
 
-const colors = require('ansi-colors');
+const colors = require('kleur/colors');
 const es = require('event-stream');
 const fs = require('fs');
 const program = require('commander');

@@ -24,7 +24,7 @@ const {
   isTravisBuild,
 } = require('../common/ci');
 const {ciJobUrl} = require('../common/ci');
-const {cyan, green, yellow} = require('ansi-colors');
+const {cyan, green, yellow} = require('kleur/colors');
 const {determineBuildTargets, Targets} = require('../pr-check/build-targets');
 const {gitCommitHash} = require('../common/git');
 const {log} = require('../common/logging');
