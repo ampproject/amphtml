@@ -42,6 +42,9 @@ function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.VISUAL_DIFF)) {
     downloadNomoduleOutput();
     timedExecOrDie('gulp update-packages');
+    // TODO(#30291): switch to prod config once FF launches aspect-ratio.
+    // See #32536 for more info.
+    // See https://bugzilla.mozilla.org/show_bug.cgi?id=1528375.
     timedExecOrDie('gulp visual-diff --nobuild --config=no');
   } else {
     timedExecOrDie('gulp visual-diff --empty');
