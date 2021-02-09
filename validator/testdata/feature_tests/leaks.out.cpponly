@@ -23,10 +23,10 @@ FAIL
 |    All of these test cases should produce errors.
 |  -->
 |  <!doctype html SYSTEM "https://leaking.via/doctype">
->>             ^~~~~~~~~
-feature_tests/leaks.html:24:12 Invalid or missing doctype declaration. Should be '!doctype html'. (see https://amp.dev/documentation/guides-and-tutorials/start/create/basic_markup/)
->>             ^~~~~~~~~
-feature_tests/leaks.html:24:12 The attribute 'system' may not appear in tag 'html !doctype'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
+>>           ^~~~~~~~~
+feature_tests/leaks.html:24:10 Invalid or missing doctype declaration. Should be '!doctype html'. (see https://amp.dev/documentation/guides-and-tutorials/start/create/basic_markup/)
+>>           ^~~~~~~~~
+feature_tests/leaks.html:24:10 The attribute 'system' may not appear in tag 'html !doctype'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
 |
 |  <html ⚡ manifest="https://leaking.via/html-manifest">
 >> ^~~~~~~~~
@@ -343,8 +343,8 @@ feature_tests/leaks.html:193:4 The tag 'feimage' is disallowed.
 |  -->
 |  <?xml-stylesheet type="text/xsl" href="https://leaking.via/xslt-stylesheet" ?>
 |
->>  ^~~~~~~~~
-feature_tests/leaks.html:200:1 The tag '<?' is disallowed.
+>>   ^~~~~~~~~
+feature_tests/leaks.html:200:2 The tag '<?' is disallowed.
 |  <!--
 |  %Data Islands
 |  -->
