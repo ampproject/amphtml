@@ -955,6 +955,7 @@ const forbiddenTermsSrcInclusive = {
       'src/style.js',
       'dist.3p/current/integration.js',
       'build-system/tasks/coverage-map/index.js',
+      'build-system/tasks/visual-diff/helpers.js',
     ],
   },
   'decodeURIComponent\\(': {
