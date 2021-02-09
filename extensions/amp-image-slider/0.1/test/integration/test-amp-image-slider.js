@@ -28,8 +28,8 @@ t.run('amp-image-slider', function () {
   const sliderBody = `
     <amp-image-slider tabindex="0" id="s1"
         layout="responsive" width="1000" height="500">
-      <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
-      <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
+      <amp-img src="/examples/img/sea@2x.jpg" layout="fill"></amp-img>
+      <amp-img src="/examples/img/hero@2x.jpg" layout="fill"></amp-img>
       <div first class="label">BEFORE</div>
       <div second class="label">AFTER</div>
     </amp-image-slider>
@@ -37,8 +37,8 @@ t.run('amp-image-slider', function () {
     <amp-image-slider tabindex="0" id="s2"
         layout="responsive" width="1000" height="500" disable-hint-reappear
         initial-slider-position="0.6" step-size="0.2">
-      <amp-img src="https://unsplash.it/1080/720?image=1037" layout="fill"></amp-img>
-      <amp-img src="https://unsplash.it/1080/720?image=1038" layout="fill"></amp-img>
+      <amp-img src="/examples/img/sea@2x.jpg" layout="fill"></amp-img>
+      <amp-img src="/examples/img/hero@2x.jpg" layout="fill"></amp-img>
       <div first class="label">BEFORE</div>
       <div second class="label">AFTER</div>
     </amp-image-slider>

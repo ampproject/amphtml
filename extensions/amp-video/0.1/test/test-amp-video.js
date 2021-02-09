@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import '../amp-video';
+import {AmpVideo, isCachedByCdn} from '../amp-video';
 import {DisplayObserver} from '../../../../src/utils/display-observer';
 import {Services} from '../../../../src/services';
 import {VideoEvents} from '../../../../src/video-interface';
@@ -810,156 +810,80 @@ describes.realWin(
           makeVisible = resolve;
         });
         visibilityStubs.whenFirstVisible.returns(visiblePromise);
+
+        video = doc.createElement('amp-video');
+        video.setAttribute('layout', 'nodisplay');
+        doc.body.appendChild(video);
       });
 
       describe('should not prerender if no cached sources', () => {
         it('with just src', () => {
-          return new Promise((resolve) => {
-            getVideo(
-              {
-                src: 'video.mp4',
-                width: 160,
-                height: 90,
-              },
-              null,
-              (element, impl) => {
-                expect(impl.prerenderAllowed()).to.be.false;
-                resolve();
-              }
-            );
-          });
+          video.setAttribute('src', 'video.mp4');
+          expect(AmpVideo.prerenderAllowed(video)).to.be.false;
         });
 
         it('with just source', () => {
-          return new Promise((resolve) => {
-            const source = doc.createElement('source');
-            source.setAttribute('src', 'video.mp4');
-            getVideo(
-              {
-                width: 160,
-                height: 90,
-              },
-              null,
-              (element, impl) => {
-                expect(impl.prerenderAllowed()).to.be.false;
-                resolve();
-              }
-            );
-          });
+          const source = doc.createElement('source');
+          source.setAttribute('src', 'video.mp4');
+          video.appendChild(source);
+          expect(AmpVideo.prerenderAllowed(video)).to.be.false;
         });
 
         it('with both src and source', () => {
-          return new Promise((resolve) => {
-            const source = doc.createElement('source');
-            source.setAttribute('src', 'video.mp4');
-            getVideo(
-              {
-                src: 'video.mp4',
-                width: 160,
-                height: 90,
-              },
-              [source],
-              (element, impl) => {
-                expect(impl.prerenderAllowed()).to.be.false;
-                resolve();
-              }
-            );
-          });
+          video.setAttribute('src', 'video.mp4');
+          const source = doc.createElement('source');
+          source.setAttribute('src', 'video.mp4');
+          video.appendChild(source);
+          expect(AmpVideo.prerenderAllowed(video)).to.be.false;
         });
       });
 
       describe('should prerender cached sources', () => {
         it('with just cached src', () => {
-          return new Promise((resolve) => {
-            getVideo(
-              {
-                'src': 'https://example-com.cdn.ampproject.org/m/s/video.mp4',
-                'amp-orig-src': 'https://example.com/video.mp4',
-                width: 160,
-                height: 90,
-              },
-              null,
-              (element, impl) => {
-                expect(impl.prerenderAllowed()).to.be.true;
-                resolve();
-              }
-            );
-          });
+          video.setAttribute(
+            'src',
+            'https://example-com.cdn.ampproject.org/m/s/video.mp4'
+          );
+          video.setAttribute('amp-orig-src', 'https://example.com/video.mp4');
+          expect(AmpVideo.prerenderAllowed(video)).to.be.true;
         });
 
         it('with just cached source', () => {
-          return new Promise((resolve) => {
-            const source = doc.createElement('source');
-            source.setAttribute(
-              'src',
-              'https://example-com.cdn.ampproject.org/m/s/video.mp4'
-            );
-            source.setAttribute(
-              'amp-orig-src',
-              'https://example.com/video.mp4'
-            );
-            getVideo(
-              {
-                width: 160,
-                height: 90,
-              },
-              [source],
-              (element, impl) => {
-                expect(impl.prerenderAllowed()).to.be.true;
-                resolve();
-              }
-            );
-          });
+          const source = doc.createElement('source');
+          source.setAttribute(
+            'src',
+            'https://example-com.cdn.ampproject.org/m/s/video.mp4'
+          );
+          source.setAttribute('amp-orig-src', 'https://example.com/video.mp4');
+          video.appendChild(source);
+          expect(AmpVideo.prerenderAllowed(video)).to.be.true;
         });
 
         it('with a mix or cached and non-cached', () => {
-          return new Promise((resolve) => {
-            const source = doc.createElement('source');
-            source.setAttribute('src', 'video.mp4');
+          const source = doc.createElement('source');
+          source.setAttribute('src', 'video.mp4');
+          video.appendChild(source);
 
-            const cachedSource = doc.createElement('source');
-            cachedSource.setAttribute(
-              'src',
-              'https://example-com.cdn.ampproject.org/m/s/video.mp4'
-            );
-            cachedSource.setAttribute(
-              'amp-orig-src',
-              'https://example.com/video.mp4'
-            );
+          const cachedSource = doc.createElement('source');
+          cachedSource.setAttribute(
+            'src',
+            'https://example-com.cdn.ampproject.org/m/s/video.mp4'
+          );
+          cachedSource.setAttribute(
+            'amp-orig-src',
+            'https://example.com/video.mp4'
+          );
+          video.appendChild(cachedSource);
 
-            getVideo(
-              {
-                src: 'video.mp4',
-                width: 160,
-                height: 90,
-              },
-              [source, cachedSource],
-              (element, impl) => {
-                expect(impl.prerenderAllowed()).to.be.true;
-                resolve();
-              }
-            );
-          });
+          expect(AmpVideo.prerenderAllowed(video)).to.be.true;
         });
       });
 
       describe('should prerender poster image', () => {
         it('with just cached src', () => {
-          return new Promise((resolve) => {
-            getVideo(
-              {
-                src: 'https://example.com/video.mp4',
-                poster: 'https://example.com/poster.jpg',
-                width: 160,
-                height: 90,
-              },
-              null,
-              (element, impl) => {
-                expect(impl.prerenderAllowed()).to.be.true;
-                resolve();
-              }
-            );
-          });
+          video.setAttribute('src', 'https://example.com/video.mp4');
+          video.setAttribute('poster', 'https://example.com/poster.jpg');
+          expect(AmpVideo.prerenderAllowed(video)).to.be.true;
         });
       });
 
@@ -1238,8 +1162,8 @@ describes.realWin(
                 height: 90,
               },
               null,
-              (element, impl) => {
-                expect(impl.isCachedByCDN_(element)).to.be.false;
+              (element) => {
+                expect(isCachedByCdn(element)).to.be.false;
                 resolve();
               }
             );
@@ -1257,8 +1181,8 @@ describes.realWin(
                 height: 90,
               },
               null,
-              (element, impl) => {
-                expect(impl.isCachedByCDN_(element)).to.be.false;
+              (element) => {
+                expect(isCachedByCdn(element)).to.be.false;
                 resolve();
               }
             );

@@ -38,6 +38,11 @@ import {setStyle} from '../../../src/style';
  * the next arrow works properly for that case.
  */
 export class AmpInlineGalleryThumbnails extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    return true;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -52,11 +57,6 @@ export class AmpInlineGalleryThumbnails extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
-  }
-
-  /** @override */
-  prerenderAllowed() {
-    return true;
   }
 
   /** @override */

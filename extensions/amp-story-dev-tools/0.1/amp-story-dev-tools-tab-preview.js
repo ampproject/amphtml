@@ -157,6 +157,13 @@ const buildHelpDialogTemplate = (element) => {
         </div>
         <h1>Helpful links</h1>
         <a
+          class="i-amphtml-story-dev-tools-device-dialog-link i-amphtml-story-dev-tools-help-page-experience-link"
+          target="_blank"
+          href="https://amp.dev/page-experience/"
+          ><span>Analyze the Page Experience</span>
+          <div class="i-amphtml-story-dev-tools-device-dialog-arrow"></div
+        ></a>
+        <a
           class="i-amphtml-story-dev-tools-device-dialog-link"
           target="_blank"
           href="https://amp.dev/documentation/guides-and-tutorials/start/create_successful_stories/"
@@ -782,6 +789,11 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
     dialog.querySelector(
       '.i-amphtml-story-dev-tools-help-search-preview-link'
     ).href += this.storyUrl_;
+    dialog.querySelector(
+      '.i-amphtml-story-dev-tools-help-page-experience-link'
+    ).href =
+      'https://amp.dev/page-experience/?url=' +
+      encodeURIComponent(this.storyUrl_);
 
     this.mutateElement(() => this.element.appendChild(dialog));
     addAttributeAfterTimeout(this, dialog, 1, 'active');

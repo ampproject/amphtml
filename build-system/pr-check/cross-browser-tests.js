@@ -114,12 +114,13 @@ async function prBuildWorkflow() {
     !buildTargetsInclude(
       Targets.RUNTIME,
       Targets.UNIT_TEST,
+      Targets.E2E_TEST,
       Targets.INTEGRATION_TEST
     )
   ) {
     printSkipMessage(
       jobName,
-      'this PR does not affect the runtime, unit tests, or integration tests'
+      'this PR does not affect the runtime, unit tests, integration tests, or end-to-end tests'
     );
     return;
   }

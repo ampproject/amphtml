@@ -24,7 +24,7 @@ describes.endtoend(
   'amp-base-carousel - rtl',
   {
     version: '1.0',
-    fixture: 'amp-base-carousel/1.0/basic-rtl.amp.html',
+    fixture: 'amp-base-carousel/basic-rtl.amp.html',
     experiments: ['bento-carousel'],
     initialRect: {width: pageWidth, height: pageHeight},
     environments: ['single'],
