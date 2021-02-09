@@ -44,16 +44,6 @@ const EXPAND_STATE_SHIM_PROP = '__AMP_EXPAND_STATE_SHIM';
 export class BaseElement extends PreactBaseElement {
   /** @override */
   init() {
-    this.registerApiAction('toggle', (api, invocation) =>
-      api./*OK*/ toggle(invocation.args && invocation.args['section'])
-    );
-    this.registerApiAction('expand', (api, invocation) =>
-      api./*OK*/ expand(invocation.args && invocation.args['section'])
-    );
-    this.registerApiAction('collapse', (api, invocation) =>
-      api./*OK*/ collapse(invocation.args && invocation.args['section'])
-    );
-
     const getExpandStateTrigger = (section) => (expanded) =>
       this.triggerEvent(section, expanded ? 'expand' : 'collapse');
 

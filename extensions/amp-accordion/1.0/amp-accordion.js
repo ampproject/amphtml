@@ -19,11 +19,9 @@ import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-accordion-1.0.css';
 import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
-import {devAssert, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {dispatchCustomEvent} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
-import {toArray, toWin} from '../../../src/types';
+import {toWin} from '../../../src/types';
+import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-accordion';
@@ -34,7 +32,17 @@ class AmpAccordion extends BaseElement {
   init() {
     const props = super.init();
 
-    const {win, element} = this;
+    this.registerApiAction('toggle', (api, invocation) =>
+      api./*OK*/ toggle(invocation.args && invocation.args['section'])
+    );
+    this.registerApiAction('expand', (api, invocation) =>
+      api./*OK*/ expand(invocation.args && invocation.args['section'])
+    );
+    this.registerApiAction('collapse', (api, invocation) =>
+      api./*OK*/ collapse(invocation.args && invocation.args['section'])
+    );
+
+    const {win} = this;
     const displayLockingExperimentEnabled =
       isExperimentOn(win, 'amp-accordion-display-locking') &&
       win.document.body.onbeforematch !== undefined;

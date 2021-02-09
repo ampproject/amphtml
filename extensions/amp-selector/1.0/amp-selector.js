@@ -19,6 +19,7 @@ import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-selector-1.0.css';
 import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
+import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {toWin} from '../../../src/types';
 import {userAssert} from '../../../src/log';
@@ -27,6 +28,38 @@ import {userAssert} from '../../../src/log';
 const TAG = 'amp-selector';
 
 class AmpSelector extends BaseElement {
+  /** @override */
+  init() {
+    // Set up API
+    this.registerApiAction('clear', (api) => {
+      api./*OK*/ clear();
+      this.mutateProps(dict({'value': []}));
+    });
+
+    this.registerApiAction('selectUp', (api, invocation) => {
+      const {args} = invocation;
+      const delta = args && args['delta'] !== undefined ? -args['delta'] : -1;
+      api./*OK*/ selectBy(delta);
+    });
+    this.registerApiAction('selectDown', (api, invocation) => {
+      const {args} = invocation;
+      const delta = args && args['delta'] !== undefined ? args['delta'] : 1;
+      api./*OK*/ selectBy(delta);
+    });
+
+    this.registerApiAction('toggle', (api, invocation) => {
+      const {args} = invocation;
+      const {'index': index, 'value': opt_select} = args;
+      userAssert(typeof index === 'number', "'index' must be specified");
+      const option = this.optionState[index];
+      if (option) {
+        api./*OK */ toggle(option, opt_select);
+      }
+    });
+
+    return super.init();
+  }
+
   /** @override */
   triggerEvent(element, eventName, detail) {
     const event = createCustomEvent(

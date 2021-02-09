@@ -23,8 +23,8 @@ import {
   toggleAttribute,
   tryFocus,
 } from '../../../src/dom';
-import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {pureDevAssert, pureUserAssert} from '../../../src/pure-assert';
 import {toArray} from '../../../src/types';
 import {useCallback, useLayoutEffect, useRef} from '../../../src/preact';
 
@@ -33,33 +33,6 @@ export class BaseElement extends PreactBaseElement {
   init() {
     const {element} = this;
     this.optionState = [];
-
-    // Set up API
-    this.registerApiAction('clear', (api) => {
-      api./*OK*/ clear();
-      this.mutateProps(dict({'value': []}));
-    });
-
-    this.registerApiAction('selectUp', (api, invocation) => {
-      const {args} = invocation;
-      const delta = args && args['delta'] !== undefined ? -args['delta'] : -1;
-      api./*OK*/ selectBy(delta);
-    });
-    this.registerApiAction('selectDown', (api, invocation) => {
-      const {args} = invocation;
-      const delta = args && args['delta'] !== undefined ? args['delta'] : 1;
-      api./*OK*/ selectBy(delta);
-    });
-
-    this.registerApiAction('toggle', (api, invocation) => {
-      const {args} = invocation;
-      const {'index': index, 'value': opt_select} = args;
-      userAssert(typeof index === 'number', "'index' must be specified");
-      const option = this.optionState[index];
-      if (option) {
-        api./*OK */ toggle(option, opt_select);
-      }
-    });
 
     // Listen for mutations
     const mu = new MutationObserver(() => {
@@ -123,7 +96,10 @@ function getOptions(element, mu) {
     .filter(
       (el) =>
         !closestAncestorElementBySelector(
-          dev().assertElement(el.parentElement),
+          pureDevAssert(
+            el.parentElement?.nodeType == 1 && el.parentElement,
+            'Expected an element'
+          ),
           '[option]'
         )
     )
@@ -179,7 +155,8 @@ export function OptionShim({
         return;
       }
       shimDomElement.addEventListener(type, handler);
-      return () => shimDomElement.removeEventListener(name, devAssert(handler));
+      return () =>
+        shimDomElement.removeEventListener(name, pureDevAssert(handler));
     },
     [shimDomElement]
   );
@@ -264,7 +241,7 @@ function SelectorShim({
     }
     shimDomElement.addEventListener('keydown', onKeyDown);
     return () =>
-      shimDomElement.removeEventListener('keydown', devAssert(onKeyDown));
+      shimDomElement.removeEventListener('keydown', pureDevAssert(onKeyDown));
   }, [shimDomElement, onKeyDown]);
 
   useLayoutEffect(() => {
