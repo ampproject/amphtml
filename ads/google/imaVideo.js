@@ -1180,11 +1180,6 @@ export function playVideo() {
     setStyle(adContainerDiv, 'display', 'none');
     // Kick off the hide controls timer.
     showControls();
-    console./*OK*/ log(
-      'QQQQ: playVideo:',
-      !!videoPlayer,
-      typeof (videoPlayer && videoPlayer.play)
-    );
     videoPlayer.play();
   }
   playerState = PlayerStates.PLAYING;
