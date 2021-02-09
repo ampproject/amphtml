@@ -57,7 +57,7 @@ function prBuildWorkflow() {
 if (isTravisBuild()) {
   printSkipMessage(
     jobName,
-    'this is a Travis build. Sizes will be reported from CircleCI'
+    'this is a Travis build. Visual diff tests will be run on CircleCI'
   );
   return;
 }
