@@ -56,19 +56,11 @@ class AmpFitText extends AMP.BaseElement {
     this.textContent_ = '';
   }
 
-  /**
-   * @visibleForTesting
-   * @return {boolean}
-   */
-  isInBentoUpgradeExp() {
-    // eslint-disable-next-line no-undef
-    return !!BENTO_AUTO_UPGRADE;
-  }
-
   /** @override */
   upgradeCallback() {
     if (
-      this.isInBentoUpgradeExp() &&
+      // eslint-disable-next-line no-undef
+      BENTO_AUTO_UPGRADE &&
       typeof Element.prototype.attachShadow == 'function'
     ) {
       toggleExperiment(this.win, 'bento', true, false);
