@@ -38,7 +38,7 @@ export const buildGtagConfig = (gtagId) => ({
         'send_to': [gtagId],
       },
       'storySpec': {
-        'repeat': true,
+        'repeat': false,
       },
     },
     'storyEnd': {
