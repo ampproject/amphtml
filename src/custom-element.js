@@ -511,6 +511,46 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * @return {!Promise}
+     * @final
+     */
+    whenLoaded() {
+      return this.signals_.whenSignal(CommonSignals.LOAD_END);
+    }
+
+    /**
+     * Ensure that element is eagerly loaded.
+     *
+     * @param {number=} opt_parentPriority
+     * @return {!Promise}
+     * @final
+     */
+    ensureLoaded(opt_parentPriority) {
+      return this.whenBuilt().then(() => {
+        const resource = this.getResource_();
+        if (resource.getState() == ResourceState.LAYOUT_COMPLETE) {
+          return;
+        }
+        if (
+          resource.getState() != ResourceState.LAYOUT_SCHEDULED ||
+          resource.isMeasureRequested()
+        ) {
+          resource.measure();
+        }
+        if (!resource.isDisplayed()) {
+          return;
+        }
+        this.getResources().scheduleLayoutOrPreload(
+          resource,
+          /* layout */ true,
+          opt_parentPriority,
+          /* forceOutsideViewport */ true
+        );
+        return this.whenLoaded();
+      });
+    }
+
+    /**
      * Called to instruct the element to preconnect to hosts it uses during
      * layout.
      * @param {boolean} onLayout Whether this was called after a layout.
