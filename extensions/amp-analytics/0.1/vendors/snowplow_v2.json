@@ -17,7 +17,7 @@
     }
   },
   "vars": {
-    "aaVersion": "amp-1.0.2",
+    "trackerVersion": "amp-1.0.2",
     "ampVistorId": "CLIENT_ID(_sp_id)",
     "duid": "$IF($SUBSTR(QUERY_PARAM(_sp),0,36), $SUBSTR(QUERY_PARAM(_sp),0,36), $IF(COOKIE(_sp_duid), COOKIE(_sp_duid), LINKER_PARAM(linker,_sp_duid)))",
     "nullString": "null",
@@ -27,7 +27,7 @@
     "ampPagePingTemplate": "{\"schema\":\"iglu:com.snowplowanalytics.snowplow/unstruct_event/jsonschema/1-0-0\",\"data\":{\"schema\":\"iglu:dev.amp.snowplow/amp_page_ping/jsonschema/1-0-0\",\"data\":{\"scrollLeft\":${scrollLeft},\"scrollWidth\":${scrollWidth},\"viewportWidth\":${viewportWidth},\"scrollTop\":${scrollTop},\"scrollHeight\":${scrollHeight},\"viewportHeight\":${viewportHeight},\"totalEngagedTime\":${totalEngagedTime}}}}"
   },
   "requests": {
-    "basePrefix": "https://${collectorHost}/i?p=web&tv=${aaVersion}",
+    "basePrefix": "https://${collectorHost}/i?p=web&tv=${trackerVersion}",
     "pageView": "${basePrefix}&e=pv",
     "structEvent": "${basePrefix}&e=se&se_ca=${structEventCategory}&se_ac=${structEventAction}&se_la=${structEventLabel}&se_pr=${structEventProperty}&se_va=$IF(${structEventValue}, ${structEventValue}, ${nullString})",
     "pagePing": "${basePrefix}&e=pp&pp_mix=${scrollLeft}&pp_miy=${scrollTop}",
