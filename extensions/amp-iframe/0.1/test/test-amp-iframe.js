@@ -1089,7 +1089,7 @@ describes.realWin(
       const impl = await ampIframe.getImpl(false);
       await waitForAmpIframeLayoutPromise(doc, ampIframe);
       expect(ampIframe.querySelector('iframe')).to.exist;
-      expect(ampIframe.unlayoutOnPause()).to.be.true;
+      expect(ampIframe.unlayoutOnPause()).to.be.false;
 
       // The element should become visible before pause is necessary.
       setDisplay(ampIframe, true);
@@ -1110,7 +1110,7 @@ describes.realWin(
       const impl = await ampIframe.getImpl(false);
       await waitForAmpIframeLayoutPromise(doc, ampIframe);
       expect(ampIframe.querySelector('iframe')).to.exist;
-      expect(ampIframe.unlayoutOnPause()).to.be.true;
+      expect(ampIframe.unlayoutOnPause()).to.be.false;
 
       // The element was never visible.
       env.sandbox./*OK*/ stub(impl, 'unload');
@@ -1128,7 +1128,7 @@ describes.realWin(
       });
       const impl = await ampIframe.getImpl(false);
       expect(ampIframe.querySelector('iframe')).to.not.exist;
-      expect(ampIframe.unlayoutOnPause()).to.be.true;
+      expect(ampIframe.unlayoutOnPause()).to.be.false;
 
       env.sandbox./*OK*/ stub(impl, 'unload');
       setDisplay(ampIframe, true);
