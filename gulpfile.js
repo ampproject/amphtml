@@ -17,91 +17,45 @@
 /* global require, process */
 
 const argv = require('minimist')(process.argv.slice(2));
-const gulp = require('gulp-help')(require('gulp'));
-const {cyan, red} = require('ansi-colors');
+const gulp = require('gulp');
+const {cyan, red} = require('kleur/colors');
 const {isCiBuild} = require('./build-system/common/ci');
 const {log} = require('./build-system/common/logging');
 
-const {
-  analyticsVendorConfigs,
-} = require('./build-system/tasks/analytics-vendor-configs');
-const {
-  checkExactVersions,
-} = require('./build-system/tasks/check-exact-versions');
-const {
-  checkRenovateConfig,
-} = require('./build-system/tasks/check-renovate-config');
-const {
-  process3pGithubPr,
-} = require('./build-system/tasks/process-3p-github-pr');
-const {a4a} = require('./build-system/tasks/a4a');
-const {ava} = require('./build-system/tasks/ava');
-const {babelPluginTests} = require('./build-system/tasks/babel-plugin-tests');
-const {build, watch} = require('./build-system/tasks/build');
-const {bundleSize} = require('./build-system/tasks/bundle-size');
-const {cachesJson} = require('./build-system/tasks/caches-json');
-const {checkLinks} = require('./build-system/tasks/check-links');
-const {checkOwners} = require('./build-system/tasks/check-owners');
-const {checkSourcemaps} = require('./build-system/tasks/check-sourcemaps');
-const {checkTypes} = require('./build-system/tasks/check-types');
-const {cherryPick} = require('./build-system/tasks/cherry-pick');
-const {clean} = require('./build-system/tasks/clean');
-const {codecovUpload} = require('./build-system/tasks/codecov-upload');
-const {compileJison} = require('./build-system/tasks/compile-jison');
-const {coverageMap} = require('./build-system/tasks/coverage-map');
-const {createGoldenCss} = require('./build-system/tasks/create-golden-css');
-const {css} = require('./build-system/tasks/css');
-const {csvifySize} = require('./build-system/tasks/csvify-size');
-const {defaultTask} = require('./build-system/tasks/default-task');
-const {depCheck} = require('./build-system/tasks/dep-check');
-const {devDashboardTests} = require('./build-system/tasks/dev-dashboard-tests');
-const {dist} = require('./build-system/tasks/dist');
-const {e2e} = require('./build-system/tasks/e2e');
-const {firebase} = require('./build-system/tasks/firebase');
-const {getZindex} = require('./build-system/tasks/get-zindex');
-const {integration} = require('./build-system/tasks/integration');
-const {lint} = require('./build-system/tasks/lint');
-const {makeExtension} = require('./build-system/tasks/extension-generator');
-const {performanceUrls} = require('./build-system/tasks/performance-urls');
-const {performance} = require('./build-system/tasks/performance');
-const {prCheck} = require('./build-system/tasks/pr-check');
-const {prependGlobal} = require('./build-system/tasks/prepend-global');
-const {presubmit} = require('./build-system/tasks/presubmit-checks');
-const {prettify} = require('./build-system/tasks/prettify');
-const {release} = require('./build-system/tasks/release');
-const {serverTests} = require('./build-system/tasks/server-tests');
-const {serve} = require('./build-system/tasks/serve.js');
-const {size} = require('./build-system/tasks/size');
-const {storybook} = require('./build-system/tasks/storybook');
-const {sweepExperiments} = require('./build-system/tasks/sweep-experiments');
-const {testReportUpload} = require('./build-system/tasks/test-report-upload');
-const {todosFindClosed} = require('./build-system/tasks/todos');
-const {unit} = require('./build-system/tasks/unit');
-const {updatePackages} = require('./build-system/tasks/update-packages');
-const {validator, validatorWebui} = require('./build-system/tasks/validator');
-const {visualDiff} = require('./build-system/tasks/visual-diff');
-
 /**
- * Creates a gulp task using the given name and task function.
- *
- * @param {string} name
- * @param {function} taskFunc
+ * Helper that creates the tasks in AMP's toolchain based on what's being done:
+ * - If `gulp --tasks` has been invoked, eagerly load all task functions so we
+ *   can print detailed information about their names, flags, usage, etc.
+ * - If a single gulp task has been invoked, create a wrapper that lazily loads
+ *   individual task functions from their source files. After that, check the
+ *   flag usage for the current task and load only those source file(s) used by
+ *   the task that was invoked.
+ * @param {string} taskName
+ * @param {string} taskFuncName
+ * @param {string} taskSourceFileName
  */
-function createTask(name, taskFunc) {
-  checkFlags(name, taskFunc);
-  gulp.task(name, taskFunc);
+function createTask(taskName, taskFuncName, taskSourceFileName) {
+  const isGulpTasks = argv._.length == 0 && argv.tasks == true; // gulp --tasks
+  const taskSourceFilePath = `./build-system/tasks/${taskSourceFileName}`;
+  if (isGulpTasks) {
+    const taskFunc = require(taskSourceFilePath)[taskFuncName];
+    gulp.task(taskName, taskFunc);
+  } else {
+    gulp.task(taskName, (callback) => {
+      const taskFunc = require(taskSourceFilePath)[taskFuncName];
+      checkFlags(taskName, taskFunc, callback);
+      return taskFunc(callback);
+    });
+  }
 }
 
 /**
  * Checks if the flags passed in to a task are valid.
  * @param {string} name
  * @param {function} taskFunc
+ * @param {function} callback
  */
-function checkFlags(name, taskFunc) {
-  const isDefaultTask = name == 'default' && argv._.length == 0;
-  if (!argv._.includes(name) && !isDefaultTask) {
-    return; // This isn't the task being run.
-  }
+function checkFlags(name, taskFunc, callback) {
   const validFlags = taskFunc.flags ? Object.keys(taskFunc.flags) : [];
   if (isCiBuild()) {
     validFlags.push('color'); // Used to enable log coloring during CI.
@@ -120,69 +74,70 @@ function checkFlags(name, taskFunc) {
       cyan(`gulp ${name}`) + ':',
       cyan(invalidFlags.join(', '))
     );
-    log('For detailed usage information, run', cyan('gulp help') + '.');
+    log('For detailed usage information, run', cyan('gulp --tasks') + '.');
     if (validFlags.length > 0) {
       log('Valid flags for', cyan(`gulp ${name}`) + ':');
       validFlags.forEach((key) => {
         log(cyan(`\t--${key}`) + `: ${taskFunc.flags[key]}`);
       });
     }
-    process.exit(1);
+    const reason = new Error('Found invalid flags');
+    reason.showStack = false;
+    callback(reason);
   }
 }
 
 /**
  * All the gulp tasks. Keep this list alphabetized.
+ *
+ * The three params used below are:
+ * 1. Name of the gulp task to be invoked E.g. gulp default
+ * 2. Name of the function in the source file. E.g. defaultTask()
+ * 3. Basename of the source file in build-system/tasks/. E.g. build-system/tasks/default-task.js
  */
-createTask('a4a', a4a);
-createTask('ava', ava);
-createTask('babel-plugin-tests', babelPluginTests);
-createTask('build', build);
-createTask('bundle-size', bundleSize);
-createTask('caches-json', cachesJson);
-createTask('check-exact-versions', checkExactVersions);
-createTask('check-links', checkLinks);
-createTask('check-owners', checkOwners);
-createTask('check-renovate-config', checkRenovateConfig);
-createTask('check-sourcemaps', checkSourcemaps);
-createTask('check-types', checkTypes);
-createTask('cherry-pick', cherryPick);
-createTask('clean', clean);
-createTask('codecov-upload', codecovUpload);
-createTask('compile-jison', compileJison);
-createTask('coverage-map', coverageMap);
-createTask('create-golden-css', createGoldenCss);
-createTask('css', css);
-createTask('csvify-size', csvifySize);
-createTask('default', defaultTask);
-createTask('dep-check', depCheck);
-createTask('dev-dashboard-tests', devDashboardTests);
-createTask('dist', dist);
-createTask('e2e', e2e);
-createTask('firebase', firebase);
-createTask('get-zindex', getZindex);
-createTask('integration', integration);
-createTask('lint', lint);
-createTask('make-extension', makeExtension);
-createTask('performance', performance);
-createTask('performance-urls', performanceUrls);
-createTask('pr-check', prCheck);
-createTask('prepend-global', prependGlobal);
-createTask('presubmit', presubmit);
-createTask('prettify', prettify);
-createTask('process-3p-github-pr', process3pGithubPr);
-createTask('release', release);
-createTask('test-report-upload', testReportUpload);
-createTask('serve', serve);
-createTask('server-tests', serverTests);
-createTask('size', size);
-createTask('storybook', storybook);
-createTask('sweep-experiments', sweepExperiments);
-createTask('todos:find-closed', todosFindClosed);
-createTask('unit', unit);
-createTask('update-packages', updatePackages);
-createTask('validator', validator);
-createTask('validator-webui', validatorWebui);
-createTask('analytics-vendor-configs', analyticsVendorConfigs);
-createTask('visual-diff', visualDiff);
-createTask('watch', watch);
+
+createTask('analytics-vendor-configs','analyticsVendorConfigs','analytics-vendor-configs'); // prettier-ignore
+createTask('ava', 'ava', 'ava');
+createTask('babel-plugin-tests', 'babelPluginTests', 'babel-plugin-tests');
+createTask('build', 'build', 'build');
+createTask('bundle-size', 'bundleSize', 'bundle-size');
+createTask('caches-json', 'cachesJson', 'caches-json');
+createTask('check-exact-versions', 'checkExactVersions','check-exact-versions'); // prettier-ignore
+createTask('check-links', 'checkLinks', 'check-links');
+createTask('check-owners', 'checkOwners', 'check-owners');
+createTask('check-renovate-config','checkRenovateConfig','check-renovate-config'); // prettier-ignore
+createTask('check-sourcemaps', 'checkSourcemaps', 'check-sourcemaps');
+createTask('check-types', 'checkTypes', 'check-types');
+createTask('cherry-pick', 'cherryPick', 'cherry-pick');
+createTask('clean', 'clean', 'clean');
+createTask('codecov-upload', 'codecovUpload', 'codecov-upload');
+createTask('compile-jison', 'compileJison', 'compile-jison');
+createTask('coverage-map', 'coverageMap', 'coverage-map');
+createTask('css', 'css', 'css');
+createTask('default', 'defaultTask', 'default-task');
+createTask('dep-check', 'depCheck', 'dep-check');
+createTask('dev-dashboard-tests', 'devDashboardTests', 'dev-dashboard-tests');
+createTask('dist', 'dist', 'dist');
+createTask('e2e', 'e2e', 'e2e');
+createTask('firebase', 'firebase', 'firebase');
+createTask('get-zindex', 'getZindex', 'get-zindex');
+createTask('integration', 'integration', 'integration');
+createTask('lint', 'lint', 'lint');
+createTask('make-extension', 'makeExtension', 'extension-generator');
+createTask('performance', 'performance', 'performance');
+createTask('performance-urls', 'performanceUrls', 'performance-urls');
+createTask('pr-check', 'prCheck', 'pr-check');
+createTask('prepend-global', 'prependGlobal', 'prepend-global');
+createTask('presubmit', 'presubmit', 'presubmit-checks');
+createTask('prettify', 'prettify', 'prettify');
+createTask('release', 'release', 'release');
+createTask('serve', 'serve', 'serve');
+createTask('server-tests', 'serverTests', 'server-tests');
+createTask('storybook', 'storybook', 'storybook');
+createTask('sweep-experiments', 'sweepExperiments', 'sweep-experiments');
+createTask('test-report-upload', 'testReportUpload', 'test-report-upload');
+createTask('unit', 'unit', 'unit');
+createTask('update-packages', 'updatePackages', 'update-packages');
+createTask('validator', 'validator', 'validator');
+createTask('validator-webui', 'validatorWebui', 'validator');
+createTask('visual-diff', 'visualDiff', 'visual-diff');

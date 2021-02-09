@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {VisibilityState} from '../visibility-state';
 import {getServiceForDoc, registerServiceBuilderForDoc} from '../service';
 import {pushIfNotExist, removeItem} from './array';
 import {rethrowAsync} from '../log';
@@ -96,12 +97,13 @@ export class DisplayObserver {
     );
 
     /** @private {boolean} */
-    this.isDocVisible_ = ampdoc.isVisible();
+    this.isDocDisplay_ = computeDocIsDisplayed(ampdoc.getVisibilityState());
 
     /** @private {?UnlistenDef} */
     this.visibilityUnlisten_ = ampdoc.onVisibilityChanged(() => {
-      if (ampdoc.isVisible() !== this.isDocVisible_) {
-        this.isDocVisible_ = ampdoc.isVisible();
+      const display = computeDocIsDisplayed(ampdoc.getVisibilityState());
+      if (display !== this.isDocDisplay_) {
+        this.isDocDisplay_ = display;
         this.docVisibilityChanged_();
       }
     });
@@ -141,7 +143,7 @@ export class DisplayObserver {
         setTimeout(() => {
           const display = computeDisplay(
             this.targetObservations_.get(target),
-            this.isDocVisible_
+            this.isDocDisplay_
           );
           if (display != null) {
             callCallbackNoInline(callback, display);
@@ -174,8 +176,8 @@ export class DisplayObserver {
   docVisibilityChanged_() {
     this.targetObserverCallbacks_.forEach((callbacks, target) => {
       const observations = this.targetObservations_.get(target);
-      const oldDisplay = computeDisplay(observations, !this.isDocVisible_);
-      const newDisplay = computeDisplay(observations, this.isDocVisible_);
+      const oldDisplay = computeDisplay(observations, !this.isDocDisplay_);
+      const newDisplay = computeDisplay(observations, this.isDocDisplay_);
       notifyIfChanged(callbacks, newDisplay, oldDisplay);
     });
   }
@@ -202,10 +204,10 @@ export class DisplayObserver {
         observations = emptyObservations(this.observers_.length);
         this.targetObservations_.set(target, observations);
       }
-      const oldDisplay = computeDisplay(observations, this.isDocVisible_);
+      const oldDisplay = computeDisplay(observations, this.isDocDisplay_);
       const index = this.observers_.indexOf(observer);
       observations[index] = isIntersecting;
-      const newDisplay = computeDisplay(observations, this.isDocVisible_);
+      const newDisplay = computeDisplay(observations, this.isDocDisplay_);
       notifyIfChanged(callbacks, newDisplay, oldDisplay);
     }
   }
@@ -234,11 +236,11 @@ function emptyObservations(length) {
 
 /**
  * @param {?Array<boolean>} observations
- * @param {boolean} isDocVisible
+ * @param {boolean} isDocDisplay
  * @return {?boolean}
  */
-function computeDisplay(observations, isDocVisible) {
-  if (!isDocVisible) {
+function computeDisplay(observations, isDocDisplay) {
+  if (!isDocDisplay) {
     return false;
   }
   if (!observations) {
@@ -246,6 +248,20 @@ function computeDisplay(observations, isDocVisible) {
     return null;
   }
   return observations.reduce(displayReducer);
+}
+
+/**
+ * @param {!VisibilityState} visibilityState
+ * @return {boolean}
+ */
+function computeDocIsDisplayed(visibilityState) {
+  return (
+    visibilityState == VisibilityState.VISIBLE ||
+    // The document is still considered "displayed" or at least "displayable"
+    // when it's hidden (tab is switched). Only prerender/paused/inactive
+    // states require pause of resources.
+    visibilityState == VisibilityState.HIDDEN
+  );
 }
 
 /**

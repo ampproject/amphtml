@@ -631,6 +631,11 @@ export class AmpIframe extends AMP.BaseElement {
     }
   }
 
+  /** @override */
+  unlayoutOnPause() {
+    return true;
+  }
+
   /**
    * @param {boolean} isDisplayed
    * @private
@@ -640,7 +645,8 @@ export class AmpIframe extends AMP.BaseElement {
       return;
     }
     this.isDisplayed_ = isDisplayed;
-    if (!isDisplayed && this.iframe_) {
+    const hasOwner = !!this.element.getOwner();
+    if (!isDisplayed && !hasOwner && this.iframe_) {
       this.getVsync().mutate(() => this.unload());
     }
   }

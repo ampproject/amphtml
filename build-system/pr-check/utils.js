@@ -25,7 +25,7 @@ const {
   shortSha,
 } = require('../common/git');
 const {ciBuildSha, ciPullRequestSha, isCiBuild} = require('../common/ci');
-const {cyan, green, yellow} = require('ansi-colors');
+const {cyan, green, yellow} = require('kleur/colors');
 const {execOrDie, execOrThrow, execWithError, exec} = require('../common/exec');
 const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
 const {replaceUrls} = require('../tasks/pr-deploy-bot-utils');
@@ -36,7 +36,7 @@ const MODULE_OUTPUT_FILE = `amp_module_${ciBuildSha()}.zip`;
 
 const BUILD_OUTPUT_DIRS = 'build/ dist/ dist.3p/';
 const APP_SERVING_DIRS =
-  'dist.tools/ examples/ test/manual/ texst/fixtures/e2e/';
+  'dist.tools/ examples/ test/manual/ test/fixtures/e2e/';
 
 // TODO(rsimha, ampproject/amp-github-apps#1110): Update storage details.
 const GCLOUD_STORAGE_BUCKET = 'gs://amp-travis-builds';

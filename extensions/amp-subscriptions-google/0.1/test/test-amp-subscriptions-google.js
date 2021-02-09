@@ -640,7 +640,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
   describe('should reauthorize on complete subscribe', () => {
     let productId;
     let entitlements;
-    const serviceId = 'serviceId';
+    const platformKey = 'platformKey';
 
     afterEach(() => {
       analyticsMock
@@ -678,7 +678,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     it('should work with poorly formatted entitlements', () => {
       productId = 'unknown subscriptionToken';
       entitlements = new Entitlements(
-        serviceId,
+        platformKey,
         null,
         [new SwgEntitlement(null, [productId], null)],
         productId
@@ -691,7 +691,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
         productId,
       });
       entitlements = new Entitlements(
-        serviceId,
+        platformKey,
         null,
         [new SwgEntitlement('google', [productId], token)],
         productId
