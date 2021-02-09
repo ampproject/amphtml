@@ -283,10 +283,10 @@ amp-story-page [data-text-background-color] {
   -webkit-box-decoration-break: clone !important;
 }
 
-[desktop].i-amphtml-story-bookend-active amp-story-page[active] {
+/* [desktop].i-amphtml-story-bookend-active amp-story-page[active] {
   filter: blur(3px) !important;
   transition: filter 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
-}
+} */
 
 /* TODO(gmajoulet): move the overlay to the bookend styles. */
 .i-amphtml-story-bookend-active amp-story-page[active]::after {
