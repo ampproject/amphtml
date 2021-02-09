@@ -174,8 +174,6 @@ math ms
 51: Self-closing syntax (“/>”) used on a non-void HTML element. Ignoring the slash and treating as a start tag.
 52: End of file seen and there were open elements.
 51: Unclosed element “ms”.
-#new-errors
-(1:44-1:49) non-void-html-element-start-tag-with-trailing-solidus
 #document-fragment
 math ms
 #document
@@ -217,8 +215,6 @@ math ms
 51: Self-closing syntax (“/>”) used on a non-void HTML element. Ignoring the slash and treating as a start tag.
 52: End of file seen and there were open elements.
 51: Unclosed element “mn”.
-#new-errors
-(1:44-1:49) non-void-html-element-start-tag-with-trailing-solidus
 #document-fragment
 math mn
 #document
@@ -260,8 +256,6 @@ math mn
 51: Self-closing syntax (“/>”) used on a non-void HTML element. Ignoring the slash and treating as a start tag.
 52: End of file seen and there were open elements.
 51: Unclosed element “mo”.
-#new-errors
-(1:44-1:49) non-void-html-element-start-tag-with-trailing-solidus
 #document-fragment
 math mo
 #document
@@ -303,8 +297,6 @@ math mo
 51: Self-closing syntax (“/>”) used on a non-void HTML element. Ignoring the slash and treating as a start tag.
 52: End of file seen and there were open elements.
 51: Unclosed element “mi”.
-#new-errors
-(1:44-1:49) non-void-html-element-start-tag-with-trailing-solidus
 #document-fragment
 math mi
 #document
@@ -346,8 +338,6 @@ math mi
 51: Self-closing syntax (“/>”) used on a non-void HTML element. Ignoring the slash and treating as a start tag.
 52: End of file seen and there were open elements.
 51: Unclosed element “mtext”.
-#new-errors
-(1:44-1:52) non-void-html-element-start-tag-with-trailing-solidus
 #document-fragment
 math mtext
 #document
@@ -497,7 +487,8 @@ svg desc
 #data
 <plaintext><foo>
 #errors
-(1,16): expected-closing-tag-but-got-eof
+16: End of file seen and there were open elements.
+11: Unclosed element “plaintext”.
 #document-fragment
 svg desc
 #document

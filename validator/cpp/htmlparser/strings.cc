@@ -841,10 +841,21 @@ std::pair<int, int> UnescapeEntity(std::string* b, int dst, int src,
       s.size() > i && s.at(i) == '=') {
     // No-op.
   } else if (!encoded_bytes.empty()) {
+    int overflow = encoded_bytes.size() - entityName.size() - 1 /* & */;
+    if (overflow > 0) {
+      // Insert some dummy chars which will get occupied by overflow entity
+      // chars.
+      // Suppose &xy; = \x1\x2\x3\x4\x5 (5 bytes char)
+      // abc&xy;def (10 bytes) after this statement is:
+      // abc&xy; def (11 bytes).
+      // After unescape: abc\x1\x2\x3\x4\x5def (11 bytes).
+      b->insert(src + encoded_bytes.size() - 1, " ", overflow);
+    }
     // Copies the unescaped bytes to the destination,
     std::transform(encoded_bytes.begin(), encoded_bytes.end(), b->begin() + dst,
         [](uint8_t c) -> char { return static_cast<char>(c); });
-    return std::pair<int, int>(dst + encoded_bytes.size(), src + i);
+    return std::pair<int, int>(
+        dst + encoded_bytes.size() - (overflow > 0 ? overflow : 0), src + i);
   } else if (!attribute) {
     int max_length = entityName.size() - 1;
     if (max_length > kLongestEntityWithoutSemiColon) {

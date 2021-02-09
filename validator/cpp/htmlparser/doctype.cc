@@ -48,7 +48,7 @@ std::string ReadUntil(std::string_view* s, const std::string& stop_chars) {
 }
 
 void StripSelfClosingSlash(std::string_view* s) {
-  while (s->back() == '/') {
+  while (!s->empty() && s->back() == '/') {
     s->remove_suffix(1);
   }
 }
@@ -92,12 +92,17 @@ void SkipLangAttribute(std::string_view* s) {
     while (!s->empty()) {
       i = s->find(quote, i);
       if (i != std::string_view::npos) {
-        if (s->at(i - 1) == '\\') {
+        if (i > 0 && s->at(i - 1) == '\\') {
           continue;
         }
         break;
       }
     }
+
+    // Nothing after quote start.
+    // <!doctype lang='> or <!doctype lang=">
+    if (s->empty()) return;
+
     std::string value(s->substr(0, i));
     Attribute lang_attr{"", "lang", value};
     s->remove_prefix(i + 1);

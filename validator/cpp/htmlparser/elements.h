@@ -38,14 +38,14 @@ inline constexpr std::array<Atom, 8> kRawTextNodes{
 
 // Section 12.1.2, "Elements", gives this list of void elements. Void elements
 // are those that can't have any contents.
-inline constexpr std::array<Atom, 16> kVoidElements{
+inline constexpr std::array<Atom, 15> kVoidElements{
     Atom::AREA,    Atom::BASE,   Atom::BR,    Atom::COL,
-    Atom::COMMAND, Atom::EMBED,  Atom::HR,    Atom::IMG,
+    Atom::EMBED,  Atom::HR,    Atom::IMG,
     Atom::INPUT,   Atom::KEYGEN, Atom::LINK,  Atom::META,
     Atom::PARAM,   Atom::SOURCE, Atom::TRACK, Atom::WBR,
 };
 
-inline constexpr std::array<Atom, 83> kSpecialElements{
+inline constexpr std::array<Atom, 82> kSpecialElements{
     Atom::ADDRESS,
     Atom::APPLET,
     Atom::AREA,
@@ -90,9 +90,6 @@ inline constexpr std::array<Atom, 83> kSpecialElements{
     Atom::IFRAME,
     Atom::IMG,
     Atom::INPUT,
-    // The 'isindex' element has been removed, but keep it for backwards
-    // compatibility.
-    Atom::ISINDEX,
     Atom::KEYGEN,
     Atom::LI,
     Atom::LINK,
