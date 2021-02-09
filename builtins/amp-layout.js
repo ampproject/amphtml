@@ -19,7 +19,7 @@ import {Layout, isLayoutSizeDefined} from '../src/layout';
 import {registerElement} from '../src/service/custom-element-registry';
 
 class AmpLayout extends BaseElement {
-  /** @override */
+  /** @override @nocollapse */
   static prerenderAllowed() {
     return true;
   }

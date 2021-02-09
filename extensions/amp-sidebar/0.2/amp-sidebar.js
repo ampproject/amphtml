@@ -72,7 +72,7 @@ const SidebarEvents = {
  * @extends {AMP.BaseElement}
  */
 export class AmpSidebar extends AMP.BaseElement {
-  /** @override */
+  /** @override @nocollapse */
   static prerenderAllowed() {
     return true;
   }

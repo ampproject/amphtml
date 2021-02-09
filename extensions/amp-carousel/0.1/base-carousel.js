@@ -28,7 +28,7 @@ const _HAS_CONTROL_CLASS = 'i-amphtml-carousel-has-controls';
  * @abstract
  */
 export class BaseCarousel extends AMP.BaseElement {
-  /** @override */
+  /** @override @nocollapse */
   static prerenderAllowed() {
     return true;
   }

@@ -38,7 +38,7 @@ import {setStyle} from '../../../src/style';
  * the next arrow works properly for that case.
  */
 export class AmpInlineGalleryThumbnails extends AMP.BaseElement {
-  /** @override */
+  /** @override @nocollapse */
   static prerenderAllowed() {
     return true;
   }

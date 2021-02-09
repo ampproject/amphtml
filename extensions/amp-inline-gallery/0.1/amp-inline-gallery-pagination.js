@@ -45,7 +45,7 @@ export function exponentialFalloff(percentage, power) {
 }
 
 export class AmpInlineGalleryPagination extends AMP.BaseElement {
-  /** @override */
+  /** @override @nocollapse */
   static prerenderAllowed() {
     return true;
   }

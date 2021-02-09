@@ -24,7 +24,7 @@ const TAG = 'amp-experiment';
 const ATTR_PREFIX = 'amp-x-';
 
 export class AmpExperiment extends AMP.BaseElement {
-  /** @override */
+  /** @override @nocollapse */
   static prerenderAllowed() {
     /*
      * Prerender is allowed because the client_id is only used to calculate

@@ -108,7 +108,7 @@ const GRID_LAYER_PRESET_DETAILS = {
  * Grid layer template templating system.
  */
 export class AmpStoryGridLayer extends AmpStoryBaseLayer {
-  /** @override */
+  /** @override @nocollapse */
   static prerenderAllowed(element) {
     return isPrerenderActivePage(element.parentElement);
   }

@@ -58,7 +58,7 @@ function isSizer(el) {
 }
 
 class AmpCarousel extends AMP.BaseElement {
-  /** @override */
+  /** @override @nocollapse */
   static prerenderAllowed() {
     return true;
   }

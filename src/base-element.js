@@ -101,6 +101,7 @@ import {isArray, toWin} from './types';
  *
  * Each method is called exactly once and overriding them in subclasses
  * is optional.
+ * @implements {BaseElementInterface}
  */
 export class BaseElement {
   /**
@@ -113,6 +114,7 @@ export class BaseElement {
    *
    * @param {!AmpElement} unusedElement
    * @return {boolean}
+   * @nocollapse
    */
   static prerenderAllowed(unusedElement) {
     return false;

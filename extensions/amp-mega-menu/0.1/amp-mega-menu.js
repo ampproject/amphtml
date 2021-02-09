@@ -45,7 +45,7 @@ const ARIA_LABEL_CLOSE = 'Close the menu';
  * template rendering via dynamically fetched data.
  */
 export class AmpMegaMenu extends AMP.BaseElement {
-  /** @override */
+  /** @override @nocollapse */
   static prerenderAllowed() {
     return true;
   }

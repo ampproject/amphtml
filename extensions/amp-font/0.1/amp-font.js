@@ -69,7 +69,7 @@ const DEFAULT_SIZE_ = 'medium';
 const CACHED_FONT_LOAD_TIME_ = 100;
 
 export class AmpFont extends AMP.BaseElement {
-  /** @override */
+  /** @override @nocollapse */
   static prerenderAllowed() {
     return true;
   }

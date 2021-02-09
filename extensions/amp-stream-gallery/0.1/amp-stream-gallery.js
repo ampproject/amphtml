@@ -78,7 +78,7 @@ const TAG = 'amp-stream-gallery';
  * - Does not support autoplay
  */
 class AmpStreamGallery extends AMP.BaseElement {
-  /** @override */
+  /** @override @nocollapse */
   static prerenderAllowed() {
     return true;
   }

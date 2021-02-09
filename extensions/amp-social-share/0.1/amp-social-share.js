@@ -27,7 +27,7 @@ import {toggle} from '../../../src/style';
 const TAG = 'amp-social-share';
 
 class AmpSocialShare extends AMP.BaseElement {
-  /** @override */
+  /** @override @nocollapse */
   static prerenderAllowed() {
     return true;
   }

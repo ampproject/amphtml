@@ -40,7 +40,7 @@ const Side = {
 const ANIMATION_TIMEOUT = 350;
 
 export class AmpNestedMenu extends AMP.BaseElement {
-  /** @override */
+  /** @override @nocollapse */
   static prerenderAllowed() {
     return true;
   }

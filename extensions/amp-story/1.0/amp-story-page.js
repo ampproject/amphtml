@@ -226,7 +226,7 @@ function debounceEmbedResize(win, page, mutator) {
  * an <amp-story>.
  */
 export class AmpStoryPage extends AMP.BaseElement {
-  /** @override */
+  /** @override @nocollapse */
   static prerenderAllowed(element) {
     return isPrerenderActivePage(element);
   }

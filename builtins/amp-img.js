@@ -45,7 +45,7 @@ const ATTRIBUTES_TO_PROPAGATE = [
 ];
 
 export class AmpImg extends BaseElement {
-  /** @override */
+  /** @override @nocollapse */
   static prerenderAllowed() {
     return true;
   }

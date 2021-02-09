@@ -233,7 +233,7 @@ const SIDEBAR_OBSERVER_OPTIONS = {
  * @implements {./media-pool.MediaPoolRoot}
  */
 export class AmpStory extends AMP.BaseElement {
-  /** @override */
+  /** @override @nocollapse */
   static prerenderAllowed() {
     return true;
   }
