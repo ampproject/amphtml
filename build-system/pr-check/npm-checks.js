@@ -22,7 +22,7 @@
  */
 
 const checkDependencies = require('check-dependencies');
-const {cyan, red, yellow} = require('ansi-colors');
+const {cyan, red, yellow} = require('kleur/colors');
 const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
 const {gitDiffColor, gitDiffNameOnly} = require('../common/git');
 

@@ -25,7 +25,7 @@ const {
 } = require('./runtime-test/runtime-test-base');
 const {buildNewServer} = require('../server/typescript-compile');
 const {buildRuntime} = require('../common/utils');
-const {cyan, yellow} = require('ansi-colors');
+const {cyan, yellow} = require('kleur/colors');
 const {log} = require('../common/logging');
 const {maybePrintArgvMessages} = require('./runtime-test/helpers');
 

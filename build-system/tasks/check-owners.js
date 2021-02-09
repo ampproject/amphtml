@@ -26,7 +26,7 @@ const fs = require('fs-extra');
 const JSON5 = require('json5');
 const request = require('request');
 const util = require('util');
-const {cyan, red, green} = require('ansi-colors');
+const {cyan, red, green} = require('kleur/colors');
 const {getFilesToCheck, usesFilesOrLocalChanges} = require('../common/utils');
 const {log, logLocalDev} = require('../common/logging');
 

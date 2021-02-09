@@ -38,7 +38,7 @@ const {
   shortSha,
 } = require('../../common/git');
 const {buildRuntime, installPackages} = require('../../common/utils');
-const {cyan, yellow} = require('ansi-colors');
+const {cyan, yellow} = require('kleur/colors');
 const {execScriptAsync} = require('../../common/exec');
 const {isCiBuild} = require('../../common/ci');
 const {startServer, stopServer} = require('../serve');

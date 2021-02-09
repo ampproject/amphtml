@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 const pathModule = require('path');
-const {cyan, green} = require('ansi-colors');
+const {cyan, green} = require('kleur/colors');
 const {exec} = require('../common/exec');
 const {log} = require('../common/logging');
 

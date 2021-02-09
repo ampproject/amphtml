@@ -18,7 +18,7 @@
 'use strict';
 
 const amphtmlValidator = require('amphtml-validator');
-const colors = require('ansi-colors');
+const colors = require('kleur/colors');
 const log = require('fancy-log');
 const through = require('through2');
 

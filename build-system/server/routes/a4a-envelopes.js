@@ -19,7 +19,7 @@ const fs = require('fs');
 const request = require('request');
 const {getServeMode, replaceUrls} = require('../app-utils');
 const {log} = require('../../common/logging');
-const {red} = require('ansi-colors');
+const {red} = require('kleur/colors');
 
 // In-a-box envelope.
 // Examples:

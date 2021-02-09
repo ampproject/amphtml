@@ -19,7 +19,7 @@ const path = require('path');
 const {clean} = require('./clean');
 const {doBuild} = require('./build');
 const {doDist} = require('./dist');
-const {green} = require('ansi-colors');
+const {green} = require('kleur/colors');
 const {log} = require('../common/logging');
 
 async function walk(dest) {

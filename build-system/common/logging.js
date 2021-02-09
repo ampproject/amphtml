@@ -16,7 +16,7 @@
 'use strict';
 
 const log = require('fancy-log');
-const {bold, yellow} = require('ansi-colors');
+const {bold, yellow} = require('kleur/colors');
 const {isCiBuild} = require('./ci');
 
 /**

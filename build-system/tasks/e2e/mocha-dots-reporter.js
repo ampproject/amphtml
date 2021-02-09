@@ -29,7 +29,7 @@ const {
   icon,
   nbDotsPerLine,
 } = require('../../test-configs/karma.conf').superDotsReporter;
-const {green, red, yellow} = require('ansi-colors');
+const {green, red, yellow} = require('kleur/colors');
 const {reportTestFinished} = require('../report-test-status');
 
 /**

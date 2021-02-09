@@ -18,7 +18,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const del = require('del');
 const path = require('path');
-const {cyan} = require('ansi-colors');
+const {cyan} = require('kleur/colors');
 const {log} = require('../common/logging');
 
 const ROOT_DIR = path.resolve(__dirname, '../../');

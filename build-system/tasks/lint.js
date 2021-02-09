@@ -31,7 +31,7 @@ const {
   logOnSameLine,
   logOnSameLineLocalDev,
 } = require('../common/logging');
-const {cyan, green, red, yellow} = require('ansi-colors');
+const {cyan, green, red, yellow} = require('kleur/colors');
 const {getFilesChanged, getFilesFromArgv} = require('../common/utils');
 const {gitDiffNameOnlyMaster} = require('../common/git');
 const {maybeUpdatePackages} = require('./update-packages');

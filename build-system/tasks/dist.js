@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const colors = require('ansi-colors');
+const colors = require('kleur/colors');
 const file = require('gulp-file');
 const fs = require('fs-extra');
 const gulp = require('gulp');

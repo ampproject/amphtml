@@ -17,7 +17,7 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const fancyLog = require('fancy-log');
-const {cyan, green, red, yellow} = require('ansi-colors');
+const {cyan, green, red, yellow} = require('kleur/colors');
 
 const CSS_SELECTOR_RETRY_MS = 200;
 const CSS_SELECTOR_RETRY_ATTEMPTS = 50;

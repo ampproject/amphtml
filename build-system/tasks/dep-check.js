@@ -30,7 +30,7 @@ const {
 } = require('../common/ctrlcHandler');
 const {compileJison} = require('./compile-jison');
 const {css} = require('./css');
-const {cyan, red, yellow} = require('ansi-colors');
+const {cyan, red, yellow} = require('kleur/colors');
 const {log, logLocalDev} = require('../common/logging');
 
 const root = process.cwd();

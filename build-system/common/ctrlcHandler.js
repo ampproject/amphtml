@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const colors = require('ansi-colors');
+const colors = require('kleur/colors');
 const {execScriptAsync, exec} = require('./exec');
 const {logLocalDev} = require('./logging');
 

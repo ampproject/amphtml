@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const colors = require('ansi-colors');
+const colors = require('kleur/colors');
 const debounce = require('debounce');
 const fs = require('fs-extra');
 const wrappers = require('../compile/compile-wrappers');
