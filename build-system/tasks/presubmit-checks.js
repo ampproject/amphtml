@@ -589,7 +589,7 @@ const forbiddenTerms = {
   },
   '\\.scheduleLayoutOrPreload\\(': {
     message: 'scheduleLayoutOrPreload is a restricted API.',
-    allowlist: ['src/service/owners-impl.js', 'src/service/resources-impl.js'],
+    allowlist: ['src/custom-element.js', 'src/service/resources-impl.js'],
   },
   '(win|Win)(dow)?(\\(\\))?\\.open\\W': {
     message: 'Use dom.openWindowDialog',
