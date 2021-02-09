@@ -83,7 +83,7 @@ export function Controls({dismissOnTap, scrollBack, styles, state, handle}) {
     if (!handle) {
       return;
     }
-    setIsPlaying(!handle?.paused);
+    setIsPlaying(!handle.paused);
     const unlisteners = [
       listen(handle, VideoEvents.PLAYING, () => {
         setIsPlaying(true);
