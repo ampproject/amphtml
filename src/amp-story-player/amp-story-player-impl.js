@@ -309,8 +309,11 @@ export class AmpStoryPlayer {
    * @public
    */
   prerender(storyUrl) {
+    const storedAutoplay = this.autoplay_;
+
+    // Turning off autoplay will prevent story from being set as visible.
     this.autoplay_ = false;
-    this.show(storyUrl).then(() => (this.autoplay_ = true));
+    this.show(storyUrl).then(() => (this.autoplay_ = storedAutoplay));
   }
 
   /**
