@@ -344,6 +344,8 @@ amp-story-page [outlink-attachment][dark-theme] .i-amphtml-story-page-open-attac
 .i-amphtml-story-title-and-close-el {
   opacity: 0;
   transition: opacity .3s;
+  display: flex;
+  align-items: center;
 }
 
 .hit-top .i-amphtml-inner-header-el .i-amphtml-story-bookend-handle {
@@ -380,9 +382,7 @@ amp-story-page [outlink-attachment][dark-theme] .i-amphtml-story-page-open-attac
   text-align: center !important;
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
-
   padding: 0;
-  top: 8px;
   position: relative;
 }
 
