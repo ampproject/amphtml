@@ -43,6 +43,7 @@ describes.realWin('whenContentIniLoad', {amp: true}, (env) => {
       load: () => {
         deferred.resolve();
       },
+      loadedOnce: () => deferred.promise,
       isDisplayed: () => displayed,
       overlaps: () => overlaps,
       isFixed: () => false,

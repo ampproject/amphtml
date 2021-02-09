@@ -86,7 +86,7 @@ export function whenContentIniLoadMeasure(
     const promises = [];
     resources.forEach((r) => {
       if (!EXCLUDE_INI_LOAD.includes(r.element.tagName)) {
-        promises.push(r.element.whenLoaded());
+        promises.push(r.loadedOnce());
       }
     });
     return Promise.all(promises);
