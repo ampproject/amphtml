@@ -205,6 +205,7 @@ export class AmpSidebar extends AMP.BaseElement {
             this.user().error(TAG, 'Failed to instantiate toolbar', e);
           }
         });
+        this.onResized_();
       });
 
     if (this.isIos_) {
@@ -297,6 +298,7 @@ export class AmpSidebar extends AMP.BaseElement {
     this.onViewportResizeUnlisten_ = this.viewport_.onResize(
       debounce(this.win, this.onResized_, 100)
     );
+    this.onResized_();
   }
 
   /** @override */
