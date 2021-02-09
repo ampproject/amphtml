@@ -31,7 +31,7 @@ const shellCmd = process.platform == 'win32' ? 'cmd' : '/bin/bash';
  * object.
  *
  * @param {string} cmd
- * @param {?Object} options
+ * @param {?Object=} options
  * @return {!Object}
  */
 function exec(cmd, options) {
@@ -44,7 +44,7 @@ function exec(cmd, options) {
  *
  * @param {string} script
  * @param {?Object} options
- * @return {!ChildProcess}
+ * @return {!childProcess.ChildProcessWithoutNullStreams}
  */
 function execScriptAsync(script, options) {
   return childProcess.spawn(script, {shell: shellCmd, ...options});
@@ -54,7 +54,7 @@ function execScriptAsync(script, options) {
  * Executes the provided command, and terminates the program in case of failure.
  *
  * @param {string} cmd
- * @param {?Object} options
+ * @param {?Object=} options
  */
 function execOrDie(cmd, options) {
   const p = exec(cmd, options);

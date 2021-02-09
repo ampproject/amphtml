@@ -54,7 +54,7 @@ function getOutput(cmd, options = {}) {
 /**
  * Executes the provided command, returning its stdout.
  * @param {string} cmd
- * @param {?Object} options
+ * @param {?Object=} options
  * @return {string}
  */
 function getStdout(cmd, options) {

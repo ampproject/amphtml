@@ -140,7 +140,7 @@ function compileCss(options = {}) {
   cssEntryPoints.forEach((entryPoint) => {
     const {path, outJs, outCss, append} = entryPoint;
     promise = promise.then(() =>
-      writeCssEntryPoint(path, outJs, outCss, append)
+      writeCssEntryPoint(path, outJs, outCss, Boolean(append))
     );
   });
 

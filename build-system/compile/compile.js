@@ -46,9 +46,13 @@ let inProgress = 0;
 const MAX_PARALLEL_CLOSURE_INVOCATIONS =
   parseInt(argv.closure_concurrency, 10) || cpus().length;
 
-// Compiles AMP with the closure compiler. This is intended only for
-// production use. During development we intend to continue using
-// babel, as it has much faster incremental compilation.
+/**
+ * Compiles AMP with the closure compiler. This is intended only for
+ * production use. During development we intend to continue using
+ * babel, as it has much faster incremental compilation.
+ *
+ * @return {Promise<void>}
+ */
 async function closureCompile(
   entryModuleFilename,
   outputDir,
@@ -211,6 +215,10 @@ function compile(
     }
     externs.push('build-system/externs/amp.multipass.extern.js');
 
+    /**
+     * TODO(#28387) write a type for this.
+     * @type {*}
+     */
     /* eslint "google-camelcase/google-camelcase": 0*/
     const compilerOptions = {
       compilation_level: options.compilationLevel || 'SIMPLE_OPTIMIZATIONS',
@@ -377,7 +385,7 @@ function compile(
 function printClosureConcurrency() {
   log(
     green('Using up to'),
-    cyan(MAX_PARALLEL_CLOSURE_INVOCATIONS),
+    cyan(MAX_PARALLEL_CLOSURE_INVOCATIONS.toString()),
     green('concurrent invocations of closure compiler.')
   );
   if (!argv.closure_concurrency) {

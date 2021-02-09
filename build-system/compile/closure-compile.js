@@ -18,6 +18,7 @@
 const closureCompiler = require('@ampproject/google-closure-compiler');
 const path = require('path');
 const pumpify = require('pumpify');
+const { default: Stream, Writable } = require('stream');
 const sourcemaps = require('gulp-sourcemaps');
 const {cyan, red, yellow} = require('kleur/colors');
 const {EventEmitter} = require('events');
@@ -114,7 +115,7 @@ function makeSourcemapsRelative(closureStream) {
 
 /**
  * @param {Array<string>} compilerOptions
- * @return {stream.Writable}
+ * @return {Writable}
  */
 function gulpClosureCompile(compilerOptions) {
   const pluginOptions = {

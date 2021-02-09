@@ -17,7 +17,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const babel = require('@babel/core');
 const path = require('path');
-const remapping = require('@ampproject/remapping');
+const remapping = require('@ampproject/remapping').default;
 const terser = require('terser');
 const through = require('through2');
 const {debug, CompilationLifecycles} = require('./debug-compilation-lifecycle');
@@ -75,7 +75,7 @@ async function terserMinify(code, filename) {
  * @return {!Promise}
  */
 exports.postClosureBabel = function () {
-  return through.obj(async function (file, enc, next) {
+  return through.obj(async function (file, _enc, next) {
     if ((!argv.esm && !argv.sxg) || path.extname(file.path) === '.map') {
       debug(
         CompilationLifecycles['complete'],
