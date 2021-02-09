@@ -27,6 +27,11 @@ import {removeElement} from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';
 
 class AmpFacebook extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static createLoaderLogoCallback(element) {
+    return createLoaderLogo(element);
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -131,11 +136,6 @@ class AmpFacebook extends AMP.BaseElement {
         this.toggleLoadingCounter_++;
       }
     }
-  }
-
-  /** @override */
-  createLoaderLogoCallback() {
-    return createLoaderLogo(this.element);
   }
 
   /** @override */
