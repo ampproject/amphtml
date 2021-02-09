@@ -109,7 +109,6 @@ export class ResourcesInterface {
    * @param {boolean} layout
    * @param {number=} opt_parentPriority
    * @param {boolean=} opt_forceOutsideViewport
-   * @package
    */
   scheduleLayoutOrPreload(
     resource,

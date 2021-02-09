@@ -157,7 +157,7 @@ export class TcfApiCommandManager {
       this.currentTcString_ = newTcString;
       const listenerIds = Object.keys(this.changeListeners_);
       for (let i = 0; i < listenerIds.length; i++) {
-        const listenerId = listenerIds[i];
+        const listenerId = parseInt(listenerIds[i], 10);
         if (!hasOwn(this.changeListeners_, listenerId)) {
           continue;
         }
