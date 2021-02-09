@@ -63,11 +63,11 @@ export function Controls({dismissOnTap, scrollBack, styles, state, handle}) {
   const classes = useStyles();
 
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isShown, setIsShown] = useState(false);
+  const [isActive, setIsActive] = useState(false);
 
   const hideTimeout = useMemo(
     () =>
-      new Timeout(window, () => setIsShown(false), {
+      new Timeout(window, () => setIsActive(false), {
         setTimeout: setTimeout.bind(window),
         clearTimeout: clearTimeout.bind(window),
       }),
@@ -101,7 +101,7 @@ export function Controls({dismissOnTap, scrollBack, styles, state, handle}) {
   // appear intermittently.
   const isInTransition = state?.isInTransition;
 
-  const show = useCallback(() => {
+  const activate = useCallback(() => {
     if (isInTransition) {
       return;
     }
@@ -110,28 +110,28 @@ export function Controls({dismissOnTap, scrollBack, styles, state, handle}) {
     // See https://jsbin.com/rohesijowi/1/edit?output on Chrome (Blink) on a
     // touch device/device mode.
     requestAnimationFrame(() => {
-      setIsShown(true);
+      setIsActive(true);
       hideAfterTimeout();
     });
   }, [hideAfterTimeout, isInTransition]);
 
-  const actuallyShown = !isInTransition && (isShown || !isPlaying); // ??
+  const isDisplayed = !isInTransition && (isActive || !isPlaying);
 
   return [
     <ActiveArea
-      show={show}
+      activate={activate}
       style={styles?.transformToAreaStyle}
       className={objstr({
         [classes.overlay]: true,
-        [classes.overlayControlsBg]: actuallyShown,
+        [classes.overlayControlsBg]: isDisplayed,
       })}
     />,
     <ActiveArea
-      show={show}
+      activate={activate}
       style={styles?.controls}
       className={objstr({
         [classes.controls]: true,
-        [classes.controlsShown]: actuallyShown,
+        [classes.controlsShown]: isDisplayed,
       })}
       onMouseUp={() => {
         hideAfterTimeout(TIMEOUT_AFTER_INTERACTION);
@@ -216,11 +216,11 @@ function Button({childClassName, onClick, ...rest}) {
  * @param {*} props
  * @return {!PreactDef.Renderable}
  */
-function ActiveArea({show, ...rest}) {
+function ActiveArea({activate, ...rest}) {
   return (
     <div
-      onClick={show}
-      onMouseOver={show}
+      onClick={activate}
+      onMouseOver={activate}
       // This rule is for DOM elements, not prop objects.
       // eslint-disable-next-line local/no-style-property-setting
       hidden={!rest.style}
