@@ -80,7 +80,7 @@ Example
 }
 ```
 
-You start with the `false` value at first. Note that the `experiment-config.json` instructions override the values set in the `experiment-const.json` file.
+You start with the `false` value at first. Note that the `experiment-config.json` constants override the values set in the `experiment-const.json` file.
 
 #### More on Experiment Config
 
