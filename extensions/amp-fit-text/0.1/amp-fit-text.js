@@ -58,7 +58,6 @@ class AmpFitText extends AMP.BaseElement {
   /** @override */
   upgradeCallback() {
     if (
-      // eslint-disable-next-line no-undef
       BENTO_AUTO_UPGRADE &&
       typeof Element.prototype.attachShadow == 'function'
     ) {
