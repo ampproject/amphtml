@@ -331,7 +331,9 @@ describes.realWin(
         mockAdsManager,
         'addEventListener'
       );
-      const mockVideoPlayer = {};
+      const mockVideoPlayer = {
+        play() {},
+      };
       imaVideoObj.setVideoPlayerForTesting(mockVideoPlayer);
       imaVideoObj.setMuteAdsManagerOnLoadedForTesting(false);
 
