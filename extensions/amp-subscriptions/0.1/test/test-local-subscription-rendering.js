@@ -38,9 +38,9 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, (env) => {
       dialog,
       serviceAdapter
     );
-    const serviceIds = ['service1', 'service2'];
+    const platformKeys = ['platformKey1', 'platformKey2'];
     entitlementsForService1 = new Entitlement({
-      service: serviceIds[0],
+      service: platformKeys[0],
       granted: false,
       grantReason: null,
     });

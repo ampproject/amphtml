@@ -37,7 +37,7 @@ const {
 } = require('../common/logging');
 const {exec} = require('../common/exec');
 const {getFilesToCheck} = require('../common/utils');
-const {green, cyan, red, yellow} = require('ansi-colors');
+const {green, cyan, red, yellow} = require('kleur/colors');
 const {maybeUpdatePackages} = require('./update-packages');
 const {prettifyGlobs} = require('../test-configs/config');
 

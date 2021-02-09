@@ -304,8 +304,6 @@ export class Response extends FetchResponse {
 
 /**
  * Installs fetch and Response polyfill
- *
- * @export
  * @param {Window} win
  */
 export function install(win) {

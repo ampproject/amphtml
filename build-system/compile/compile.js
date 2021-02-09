@@ -32,7 +32,7 @@ const {
 const {checkForUnknownDeps} = require('./check-for-unknown-deps');
 const {CLOSURE_SRC_GLOBS} = require('./sources');
 const {cpus} = require('os');
-const {green, cyan} = require('ansi-colors');
+const {green, cyan} = require('kleur/colors');
 const {log, logLocalDev} = require('../common/logging');
 const {postClosureBabel} = require('./post-closure-babel');
 const {preClosureBabel, handlePreClosureError} = require('./pre-closure-babel');

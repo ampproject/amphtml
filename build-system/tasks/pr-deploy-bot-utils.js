@@ -19,7 +19,7 @@ const fs = require('fs-extra');
 const path = require('path');
 const request = require('request-promise');
 const {ciBuildSha, isTravisBuild} = require('../common/ci');
-const {cyan} = require('ansi-colors');
+const {cyan} = require('kleur/colors');
 const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
 const {replaceUrls: replaceUrlsAppUtil} = require('../server/app-utils');
 
