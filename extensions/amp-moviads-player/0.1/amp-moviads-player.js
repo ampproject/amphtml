@@ -81,6 +81,15 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
     /** @private {boolean} */
     this.isAdStart_ = false;
 
+    /** @private {boolean} */
+    this.isStat25_ = false;
+
+    /** @private {boolean} */
+    this.isStat50_ = false;
+
+    /** @private {boolean} */
+    this.isStat75_ = false;
+
     /**
      * Maps events to their unlisteners.
      * @private {!Object<string, function()>}
@@ -110,7 +119,8 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
       this.config_.masterDomain +
         'config/' +
         this.config_.playerIdConf +
-        '_conf.json'
+        '_conf.json?v=' +
+        Date.now()
     )
       .then(response => response.json())
       .then(response => {
@@ -118,9 +128,13 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
         if (_this.configLocal_.keyPrivate !== _this.config_.playerIdConf) {
           return;
         }
-        _this.element.setAttribute('data-tag', _this.configLocal_.vastUrl);
+        _this.element.setAttribute(
+          'data-tag',
+          _this.replaceUrl(_this.configLocal_.vastUrl)
+        );
         _this.viewport_ = _this.getViewport();
         _this.mapExternalConfig();
+        _this.trackByPixel('movi_stat_init');
         _this.setRandMovieSrc();
         if (_this.element.getAttribute('data-delay-ad-request') === 'true') {
           _this.unlisteners_['onFirstScroll'] = _this.viewport_.onScroll(() => {
@@ -335,7 +349,30 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
     }
 
     const videoEvent = eventData['event'];
-
+    if (
+      eventData.data &&
+      this.isStat25_ === false &&
+      eventData.data.duration * 0.25 < eventData.data.currentTime
+    ) {
+      this.isStat25_ = true;
+      this.trackByPixel('movi_stat_25_proc');
+    }
+    if (
+      eventData.data &&
+      this.isStat50_ === false &&
+      eventData.data.duration * 0.5 < eventData.data.currentTime
+    ) {
+      this.isStat50_ = true;
+      this.trackByPixel('movi_stat_50_proc');
+    }
+    if (
+      eventData.data &&
+      this.isStat75_ === false &&
+      eventData.data.duration * 0.75 < eventData.data.currentTime
+    ) {
+      this.isStat75_ = true;
+      this.trackByPixel('movi_stat_75_proc');
+    }
     if (videoEvent === VideoEvents.AD_START) {
       this.isAdStart_ = true;
     }
@@ -357,6 +394,7 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
       this.hideWhenEnd();
       this.functionAfterEnded();
       this.config_.functionAfterEnded = null;
+      this.trackByPixel('movi_stat_100_proc');
     }
 
     if (isEnumValue(VideoEvents, videoEvent)) {
@@ -494,6 +532,7 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
     const mapConfIndex = {
       'cssPuiblisher': null,
       'showLogo': false,
+      'logoUrl': null,
       'watermark': null,
       'vastUrl': null,
       'keyPrivate': null,
@@ -522,6 +561,10 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
         'close': 'zamknij',
       },
       'fixedOnMobile': false,
+      'mid': null,
+      'license': null,
+      'pid': null,
+      'stat': null,
     };
     Object.keys(mapConfIndex).forEach(key => {
       if (this.configLocal_[key] !== undefined) {
@@ -554,6 +597,8 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
   hideWhenNoAd() {
     if (this.config_.hideWhenNoAd === true) {
       this.element.remove();
+    } else {
+      this.trackByPixel('movi_stat_start');
     }
   }
 
@@ -572,6 +617,33 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
     this.embedWatermark();
     this.layoutLoad();
     this.preconnectAds();
+  }
+
+  /** @override */
+  trackByPixel(event) {
+    const _this = this;
+    if (this.config_.stat.length) {
+      this.config_.stat.forEach(function(item) {
+        if (item.event === event && item.track.trim() != '') {
+          const img = document.createElement('IMG');
+          img.src = _this.replaceUrl(item.track);
+          img.className = 'pixel-none';
+          _this.element.appendChild(img);
+        }
+      });
+    }
+  }
+
+  /** @override
+   * @param {string} url
+   * @return {string}
+   * */
+  replaceUrl(url) {
+    return url
+      .replace(/__MID__/i, this.config_.mid)
+      .replace(/__LICENSE__/i, this.config_.license)
+      .replace(/__CONFIG__/i, this.config_.playerIdConf)
+      .replace(/__PID__/i, this.config_.pid);
   }
 
   /** @override */
@@ -616,22 +688,6 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
   }
 
   /** @override */
-  getDurationTime() {
-    const _this = this;
-    const period = 100;
-    const endTime = 1500;
-    let counter = 0;
-    let adsDuration = 0;
-    const sleepyAlert = setInterval(function() {
-      adsDuration = _this.playerData_.duration;
-      if (counter === endTime || adsDuration > 0) {
-        clearInterval(sleepyAlert);
-      }
-      counter += period;
-    }, period);
-  }
-
-  /** @override */
   createLogoMovieAds() {
     if (
       this.config_.showLogo &&
@@ -644,8 +700,7 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
       embedLogoMovieAdsA.href = 'https://moviads.pl/';
       embedLogoMovieAdsA.target = '_blank';
       const embedLogoMovieAdsImg = document.createElement('img');
-      embedLogoMovieAdsImg.src =
-        'https://player1.platform.moviads.pl/img/logoMoviads.png';
+      embedLogoMovieAdsImg.src = this.config_.logoUrl;
       embedLogoMovieAdsA.appendChild(embedLogoMovieAdsImg);
       embedLogoMovieAds.appendChild(embedLogoMovieAdsA);
       this.element.appendChild(embedLogoMovieAds);

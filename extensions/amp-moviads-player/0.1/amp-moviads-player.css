@@ -12,7 +12,7 @@ amp-moviads-player:hover .amp-ima-player-movie-ads{display: block !important;}
 .amp-ima-player-fixed{position:fixed;bottom:0;right:0;width:auto !important;height:160px!important;min-height:auto !important;min-width:auto !important;top:auto !important; left:auto !important}
 #ima-ad-container{position:initial !important; color:#d40000}#amp-close{position:fixed;right:0;bottom:160px;color:#d40000;display:none}
 #amp-close{cursor:pointer}
-
+.pixel-none{display: none}
 @media only screen and (max-width: 600px) {
   .amp-ima-player-recommended div.title {font-size:10px}
   .amp-ima-player-recommended{
