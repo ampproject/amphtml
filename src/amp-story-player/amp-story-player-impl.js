@@ -278,6 +278,7 @@ export class AmpStoryPlayer {
    * Adds stories to the player. Additionally, creates or assigns
    * iframes to those that are close to the current playing story.
    * @param {!Array<!{href: string, title: ?string, posterImage: ?string}>} newStories
+   * @return {!Promise}
    * @public
    */
   add(newStories) {
@@ -300,7 +301,7 @@ export class AmpStoryPlayer {
       this.build_(story);
     }
 
-    this.render_(renderStartingIdx);
+    return this.render_(renderStartingIdx);
   }
 
   /**
@@ -746,12 +747,12 @@ export class AmpStoryPlayer {
       ? findIndex(this.stories_, ({href}) => href === storyUrl)
       : this.currentIdx_;
 
+    let renderPromise = Promise.resolve();
     if (!this.stories_[storyIdx]) {
-      this.add([{href: storyUrl}]);
+      renderPromise = this.add([{href: storyUrl}]);
       storyIdx = this.stories_.length - 1;
     }
 
-    let renderPromise = Promise.resolve();
     if (storyIdx !== this.currentIdx_) {
       this.currentIdx_ = storyIdx;
 
