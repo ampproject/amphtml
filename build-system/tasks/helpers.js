@@ -592,7 +592,8 @@ async function maybePrintCoverageMessage(covPath) {
  * @return {!Promise}
  */
 async function applyAmpConfig(targetFile, localDev, fortesting) {
-  const config = argv.config === 'canary' ? 'canary' : 'prod';
+  const config =
+    argv.config === 'canary' ? 'canary' : argv.config === 'no' ? 'no' : 'prod';
   const baseConfigFile =
     'build-system/global-configs/' + config + '-config.json';
 

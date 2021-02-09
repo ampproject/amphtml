@@ -42,7 +42,7 @@ function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.VISUAL_DIFF)) {
     downloadNomoduleOutput();
     timedExecOrDie('gulp update-packages');
-    timedExecOrDie('gulp visual-diff --nobuild');
+    timedExecOrDie('gulp visual-diff --nobuild --config=no');
   } else {
     timedExecOrDie('gulp visual-diff --empty');
     printSkipMessage(

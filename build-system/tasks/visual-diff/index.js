@@ -835,7 +835,7 @@ visualDiff.flags = {
   'master': '  Includes a blank snapshot (baseline for skipped builds)',
   'empty': '  Creates a dummy Percy build with only a blank snapshot',
   'config':
-    '  Sets the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',
+    '  Sets the runtime\'s AMP_CONFIG to one of "prod" (default), "canary" or "no"',
   'chrome_debug': '  Prints debug info from Chrome',
   'webserver_debug': '  Prints debug info from the local gulp webserver',
   'percy_agent_debug': '  Prints debug info from the @percy/agent instance',
