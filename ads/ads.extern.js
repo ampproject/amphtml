@@ -309,6 +309,16 @@ data.s;
 // adpicker.js
 data.ph;
 
+// adpushup.js
+window.adpushupDisplayAd = function (
+  global,
+  width,
+  height,
+  siteid,
+  slotpath,
+  totalampslots
+) {};
+
 // adreactor.js
 data.zid;
 data.pid;
