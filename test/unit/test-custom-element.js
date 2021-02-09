@@ -1574,6 +1574,146 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
           expect(element.prerenderAllowed()).to.be.false;
         });
       });
+
+      describe('ensureLoaded', () => {
+        it('should build and load', async () => {
+          const element = new ElementClass();
+          element.setAttribute('layout', 'fixed');
+          element.setAttribute('width', '10');
+          element.setAttribute('height', '10');
+          container.appendChild(element);
+          const resource = element.getResource_();
+
+          expect(element.isBuilt()).to.be.false;
+
+          const parentPriority = 1;
+          resourcesMock
+            .expects('scheduleLayoutOrPreload')
+            .withExactArgs(
+              resource,
+              /* layout */ true,
+              parentPriority,
+              /* forceOutsideViewport */ true
+            )
+            .once();
+
+          const promise = element.ensureLoaded(parentPriority);
+          await element.buildInternal();
+          await element.layoutCallback();
+
+          await promise;
+          expect(element.isBuilt()).to.be.true;
+        });
+
+        it('should load pre-built element', async () => {
+          const element = new ElementClass();
+          element.setAttribute('layout', 'fixed');
+          element.setAttribute('width', '10');
+          element.setAttribute('height', '10');
+          container.appendChild(element);
+          const resource = element.getResource_();
+
+          await element.buildInternal();
+          expect(element.isBuilt()).to.be.true;
+
+          const parentPriority = 1;
+          resourcesMock
+            .expects('scheduleLayoutOrPreload')
+            .withExactArgs(
+              resource,
+              /* layout */ true,
+              parentPriority,
+              /* forceOutsideViewport */ true
+            )
+            .once();
+
+          const promise = element.ensureLoaded(parentPriority);
+          await element.layoutCallback();
+          await promise;
+        });
+
+        it('should do nothing for already-loaded element', async () => {
+          const element = new ElementClass();
+          element.setAttribute('layout', 'fixed');
+          element.setAttribute('width', '10');
+          element.setAttribute('height', '10');
+          container.appendChild(element);
+          const resource = element.getResource_();
+
+          await element.buildInternal();
+          resource.measure();
+          resource.layoutScheduled(Date.now());
+          await resource.startLayout();
+
+          resourcesMock.expects('scheduleLayoutOrPreload').never();
+
+          await element.ensureLoaded();
+        });
+
+        it('should reload a previously failed element', async () => {
+          const element = new ElementClass();
+          element.setAttribute('layout', 'fixed');
+          element.setAttribute('width', '10');
+          element.setAttribute('height', '10');
+          container.appendChild(element);
+          const resource = element.getResource_();
+
+          await element.buildInternal();
+          resource.measure();
+          resource.layoutScheduled(Date.now());
+          const layoutCallbackStub = env.sandbox.stub(
+            element,
+            'layoutCallback'
+          );
+          layoutCallbackStub.returns(Promise.reject(new Error('intentional')));
+          try {
+            await resource.startLayout();
+          } catch (e) {
+            // Expected.
+          }
+
+          layoutCallbackStub./*OK*/ restore();
+          resourcesMock
+            .expects('scheduleLayoutOrPreload')
+            .withExactArgs(
+              resource,
+              /* layout */ true,
+              /* parentPriority */ undefined,
+              /* forceOutsideViewport */ true
+            )
+            .once();
+
+          const promise = element.ensureLoaded();
+          await element.layoutCallback();
+          await promise;
+        });
+
+        it('should do nothing for a non-displayed element', async () => {
+          const element = new ElementClass();
+          element.setAttribute('layout', 'nodisplay');
+          container.appendChild(element);
+          await element.buildInternal();
+
+          resourcesMock.expects('scheduleLayoutOrPreload').never();
+
+          await element.ensureLoaded();
+        });
+
+        it('should remeasure if needed', async () => {
+          const element = new ElementClass();
+          element.setAttribute('layout', 'nodisplay');
+          container.appendChild(element);
+          const resource = element.getResource_();
+          await element.buildInternal();
+
+          const measureSpy = env.sandbox.spy(resource, 'measure');
+          resourcesMock.expects('scheduleLayoutOrPreload').never();
+
+          resource.requestMeasure();
+          await element.ensureLoaded();
+          expect(measureSpy).to.be.calledOnce;
+        });
+      });
     });
 });
 
