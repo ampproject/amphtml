@@ -202,8 +202,11 @@ export class PlatformStore {
       deferred.resolve(entitlement);
     }
     // Remove this platformKey from the failed platforms list
-    if (this.failedPlatforms_.indexOf(platformKey) != -1) {
-      this.failedPlatforms_.splice(this.failedPlatforms_.indexOf(platformKey));
+    if (this.failedPlatforms_.indexOf(platformKey) !== -1) {
+      this.failedPlatforms_.splice(
+        this.failedPlatforms_.indexOf(platformKey),
+        1
+      );
     }
     // Call all onChange callbacks.
     if (entitlement.granted) {
@@ -551,8 +554,8 @@ export class PlatformStore {
     platformWeights.sort((platform1, platform2) => {
       // Force local platform to win ties
       if (
-        platform2.weight == platform1.weight &&
-        platform1.platform == localPlatform
+        platform2.weight === platform1.weight &&
+        platform1.platform === localPlatform
       ) {
         return -1;
       }
@@ -574,7 +577,7 @@ export class PlatformStore {
   selectApplicablePlatformForFactor_(factor) {
     const platformWeights = this.getAvailablePlatforms().map((platform) => {
       const factorValue = platform.getSupportedScoreFactor(factor);
-      const weight = typeof factorValue == 'number' ? factorValue : 0;
+      const weight = typeof factorValue === 'number' ? factorValue : 0;
       return {platform, weight};
     });
     return this.rankPlatformsByWeight_(platformWeights);
@@ -600,7 +603,7 @@ export class PlatformStore {
         'Local platform has failed to resolve,  ' +
           'using fallback entitlement.'
       );
-    } else if (this.failedPlatforms_.indexOf(platformKey) == -1) {
+    } else if (this.failedPlatforms_.indexOf(platformKey) === -1) {
       const entitlement = Entitlement.empty(platformKey);
       this.resolveEntitlement(platformKey, entitlement);
       this.failedPlatforms_.push(platformKey);
