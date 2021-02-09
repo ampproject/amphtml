@@ -75,7 +75,7 @@ import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {listen} from '../../../src/event-helper';
 import {parseQueryString} from '../../../src/url';
-import {px, toggle} from '../../../src/style';
+import {px, setImportantStyles, toggle} from '../../../src/style';
 import {renderPageDescription} from './semantic-render';
 import {setTextBackgroundColor} from './utils';
 import {toArray} from '../../../src/types';
@@ -1295,6 +1295,61 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.findAndPrepareEmbeddedComponents_();
       registerAllPromise.then(() => this.preloadAllMedia_());
     }
+
+    this.displayTapHints(distance);
+  }
+
+  buildTooltip() {
+    const html = htmlFor(this.win.document);
+    return html`
+      <div class="i-amphtml-story-tooltip-wrapper">
+        <a class="i-amphtml-story-tooltip" target="_blank" role="tooltip">
+          <div
+            class="i-amphtml-tooltip-action-icon i-amphtml-tooltip-action-icon-launch"
+          ></div>
+          <div class="i-amphtml-story-tooltip-arrow" ref="arrow"></div>
+        </a>
+      </div>
+    `;
+  }
+
+  displayTapHints(distance) {
+    const allLinks = Array.from(this.element.querySelectorAll('a')).filter(
+      (link) => {
+        const isAttachment = Array.from(link.classList).some((item) =>
+          item.includes('attachment')
+        );
+        return !isAttachment;
+      }
+    );
+    if (distance === 0) {
+      allLinks.forEach((link) => {
+        const {left, top, width, height} = link.getBoundingClientRect();
+
+        const posX = left + width / 2;
+        const posY = top + height / 2;
+        let tapHint;
+
+        if (this.element.hasAttribute('tooltip-page')) {
+          tapHint = this.buildTooltip();
+        } else {
+          tapHint = document.createElement('div');
+          tapHint.classList.add('tap-hint');
+        }
+        this.element.appendChild(tapHint);
+        setImportantStyles(tapHint, {
+          left: `${posX}px`,
+          top: `${posY}px`,
+        });
+
+        setTimeout(() => {
+          tapHint.classList.add('fade-out');
+        }, 1200);
+      });
+    } else {
+      // const tapHints = this.win.document.querySelectorAll('.tap-hint');
+      // tapHints.forEach((tapHint) => tapHint.remove());
+    }
   }
 
   /**
@@ -1787,14 +1842,32 @@ export class AmpStoryPage extends AMP.BaseElement {
       const attachmentHref = attachmentEl.getAttribute('href');
       if (attachmentHref) {
         this.openAttachmentEl_.setAttribute('href', attachmentHref);
+        this.openAttachmentEl_.setAttribute('outlink-attachment', '');
       }
-      this.openAttachmentEl_.addEventListener('click', () =>
-        this.openAttachment()
-      );
+
+      const isDarkTheme = attachmentEl.hasAttribute('dark-theme');
+      if (isDarkTheme) {
+        this.openAttachmentEl_.setAttribute('dark-theme', '');
+      }
+
+      this.openAttachmentEl_.addEventListener('click', (e) => {
+        e.preventDefault();
+        const openAttachmentWrapper = this.element.querySelector(
+          '.i-amphtml-story-page-open-attachment'
+        );
+        // openAttachmentWrapper.classList.add('opening');
+        this.openAttachment(true, 1000);
+      });
 
       const textEl = this.openAttachmentEl_.querySelector(
         '.i-amphtml-story-page-open-attachment-label'
       );
+
+      // const faviconImg = document.createElement('img');
+      // const faviconBaseURL =
+      //   'https://s2.googleusercontent.com/s2/favicons?domain_url=';
+      // faviconImg.src = faviconBaseURL + attachmentHref;
+      // console.log(faviconBaseURL + attachmentHref);
 
       const openLabelAttr = attachmentEl.getAttribute('data-cta-text');
       const openLabel =
@@ -1803,8 +1876,14 @@ export class AmpStoryPage extends AMP.BaseElement {
           LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
         );
 
+      const favImgLink = attachmentEl.getAttribute('fav-img');
+      const favImg = favImgLink ? `<img src=${favImgLink}></img>` : '';
+      const textElContent = favImg + openLabel;
+
       this.mutateElement(() => {
-        textEl.textContent = openLabel;
+        textEl.innerHTML = textElContent;
+        // textEl.appendChild(faviconImg);
+        // textEl.textContent = openLabel;
         this.element.appendChild(this.openAttachmentEl_);
       });
     }
@@ -1814,7 +1893,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * Opens the attachment, if any.
    * @param {boolean=} shouldAnimate
    */
-  openAttachment(shouldAnimate = true) {
+  openAttachment(shouldAnimate = true, delay) {
     const attachmentEl = this.element.querySelector(
       'amp-story-page-attachment'
     );
@@ -1823,7 +1902,9 @@ export class AmpStoryPage extends AMP.BaseElement {
       return;
     }
 
-    attachmentEl.getImpl().then((attachment) => attachment.open(shouldAnimate));
+    attachmentEl.getImpl().then((attachment) => {
+      attachment.open(shouldAnimate, delay);
+    });
   }
 
   /**

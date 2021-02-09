@@ -38,14 +38,30 @@
 
 .i-amphtml-story-draggable-drawer {
   height: 100% !important;
+  border-radius: 8px 8px 0px 0px !important;
+  overflow: hidden !important;
+}
+
+[inline-attachment] .i-amphtml-story-draggable-drawer-container {
+  padding-top: 20% !important;
 }
 
 .i-amphtml-story-draggable-drawer-container {
-  height: calc(100% - 40px) !important;
-  background: rgba(255, 255, 255, 1) !important;
+  height: 100% !important;
+  box-sizing: border-box !important;
+  height: 100% !important;
   overflow-y: auto !important;
   -webkit-overflow-scrolling: touch !important;
   transition: background 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
+}
+
+.i-amphtml-story-bookend-handle {
+  /* margin: 12px !important; */
+  height: 3px !important;
+  width: 46px !important;
+  /* margin: 12px auto 24px !important; */
+  background-color: rgba(0,0,0,.2);
+  border-radius: 3px !important;
 }
 
 .i-amphtml-story-draggable-drawer-theme-dark .i-amphtml-story-draggable-drawer-container {
@@ -62,10 +78,31 @@
 }
 
 .i-amphtml-story-draggable-drawer-content {
+  overflow: auto !important;
+  background: white !important;
   opacity: 1 !important;
   transition: opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+  border-radius: 8px !important;
+  position: relative;
+  padding-top: 20px !important;
 }
 
+[outlink-attachment] .i-amphtml-story-draggable-drawer-content { 
+  padding-top: 0px !important;  
+  border-radius: 8px 8px 0px 0 !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  padding: 0 12px !important;
+}
+
+[outlink-attachment] .i-amphtml-story-page-attachment-remote-image {
+  width: 32px !important;
+  height: 32px !important;
+  border: 1px solid rgba(0,0,0,.2) !important;
+  border-radius: 30px !important;
+  margin-right: 12px !important;
+}
 
 .i-amphtml-story-draggable-drawer-container[hidden] .i-amphtml-story-draggable-drawer-content {
   opacity: 0 !important;

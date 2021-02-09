@@ -87,6 +87,10 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       this.buildRemote_();
     }
 
+    this.dataTitle_ =
+      this.element.hasAttribute('data-title') &&
+      this.element.getAttribute('data-title');
+
     this.win.addEventListener('pageshow', (event) => {
       // On browser back, Safari does not reload the page but resumes its cached
       // version. This event's parameter lets us know when this happens so we
@@ -105,19 +109,36 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @private
    */
   buildInline_() {
-    this.headerEl_.appendChild(
+    this.headerEl_.classList.add(
+      'i-amphtml-story-draggable-drawer-header-bookend'
+    );
+    // this.element.classList.add('i-amphtml-story-draggable-drawer-bookend');
+
+    const innerHeaderEl = this.win.document.createElement('div');
+    innerHeaderEl.classList.add('i-amphtml-inner-header-el');
+    this.element.prepend(innerHeaderEl);
+
+    const handleEl = this.win.document.createElement('div');
+    handleEl.classList.add('i-amphtml-story-bookend-handle');
+    innerHeaderEl.prepend(handleEl);
+
+    const titleAndCloseEl = this.win.document.createElement('div');
+    titleAndCloseEl.classList.add('i-amphtml-story-title-and-close-el');
+    innerHeaderEl.appendChild(titleAndCloseEl);
+
+    titleAndCloseEl.appendChild(
       htmlFor(this.element)`
-          <span class="i-amphtml-story-page-attachment-close-button" aria-label="X"
+          <span class="i-amphtml-story-page-attachment-close-button" aria-label="close"
               role="button">
           </span>`
     );
-    this.headerEl_.appendChild(
+    titleAndCloseEl.appendChild(
       htmlFor(this.element)`
           <span class="i-amphtml-story-page-attachment-title"></span>`
     );
 
     if (this.element.hasAttribute('data-title')) {
-      this.headerEl_.querySelector(
+      titleAndCloseEl.querySelector(
         '.i-amphtml-story-page-attachment-title'
       ).textContent = this.element.getAttribute('data-title');
     }
@@ -140,29 +161,34 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @private
    */
   buildRemote_() {
-    this.setDragCap_(48 /* pixels */);
+    this.headerEl_.remove();
+    this.setDragCap_(52 /* pixels */);
     this.setOpenThreshold_(150 /* pixels */);
 
-    this.headerEl_.classList.add(
-      'i-amphtml-story-draggable-drawer-header-attachment-remote'
-    );
     this.element.classList.add('i-amphtml-story-page-attachment-remote');
+
     // Use an anchor element to make this a real link in vertical rendering.
     const link = htmlFor(this.element)`
     <a class="i-amphtml-story-page-attachment-remote-content" target="_blank">
+      <img class="i-amphtml-story-page-attachment-remote-image">
       <span class="i-amphtml-story-page-attachment-remote-title"></span>
       <span class="i-amphtml-story-page-attachment-remote-icon"></span>
     </a>`;
     link.setAttribute('href', this.element.getAttribute('href'));
     this.contentEl_.appendChild(link);
 
-    this.contentEl_.querySelector(
+    const favImage = this.element.querySelector(
+      '.i-amphtml-story-page-attachment-remote-image'
+    );
+    favImage.src = this.element.getAttribute('fav-img');
+
+    const remoteTitle = this.element.querySelector(
       '.i-amphtml-story-page-attachment-remote-title'
-    ).textContent =
-      this.element.getAttribute('data-title') ||
-      Services.urlForDoc(this.element).getSourceOrigin(
-        this.element.getAttribute('href')
-      );
+    );
+    remoteTitle.style.whiteSpace = 'nowrap';
+    remoteTitle.innerHTML = `<span style="padding: 0; font-weight: bold;">Opening</span> ${this.element.getAttribute(
+      'href'
+    )}`;
   }
 
   /**
@@ -171,7 +197,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   initializeListeners_() {
     super.initializeListeners_();
 
-    const closeButtonEl = this.headerEl_.querySelector(
+    const closeButtonEl = this.element.querySelector(
       '.i-amphtml-story-page-attachment-close-button'
     );
     if (closeButtonEl) {
@@ -199,13 +225,25 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       'click',
       (event) => {
         if (
-          event.target.tagName.toLowerCase() === 'amp-story-page-attachment'
+          event.target.classList.contains(
+            'i-amphtml-story-draggable-drawer-container'
+          )
         ) {
           this.close_();
         }
       },
       true /** useCapture */
     );
+
+    const content = this.element.querySelector(
+      '.i-amphtml-story-draggable-drawer-content'
+    );
+    this.element
+      .querySelector('.i-amphtml-story-draggable-drawer-container')
+      .addEventListener('scroll', (e) => {
+        const atTop = content.getBoundingClientRect().top <= 0;
+        this.element.classList.toggle('hit-top', atTop);
+      });
 
     // Closes the remote attachment drawer when navigation deeplinked to an app.
     if (this.type_ === AttachmentType.REMOTE) {
@@ -221,10 +259,14 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   /**
    * @override
    */
-  open(shouldAnimate = true) {
+  open(shouldAnimate = true, delay) {
     if (this.state_ === DrawerState.OPEN) {
       return;
     }
+
+    document
+      .querySelector('amp-story')
+      .classList.add('i-amphtml-story-bookend-active');
 
     super.open(shouldAnimate);
 
@@ -252,7 +294,17 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     );
 
     if (this.type_ === AttachmentType.REMOTE) {
-      this.openRemote_();
+      // this.mutateElement(() => {
+      //   const checkClose = (e) => {
+      //     console.log(e.target);
+      //     this.close_();
+      //     this.win.removeEventListener('click', checkClose);
+      //   };
+      //   this.win.addEventListener('click', checkClose);
+      // });
+
+      // this.close_();
+      this.openRemote_(delay);
     }
   }
 
@@ -261,25 +313,26 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * specified URL.
    * @private
    */
-  openRemote_() {
+  openRemote_(delay = 0) {
+    console.log(delay);
     const animationEl = this.win.document.createElement('div');
     animationEl.classList.add('i-amphtml-story-page-attachment-expand');
     const storyEl = closest(this.element, (el) => el.tagName === 'AMP-STORY');
 
-    this.mutateElement(() => {
-      storyEl.appendChild(animationEl);
-    }).then(() => {
-      // Give some time for the 120ms CSS animation to run (cf
-      // amp-story-page-attachment.css). The navigation itself will take some
-      // time, depending on the target and network conditions.
-      this.win.setTimeout(() => {
+    this.win.setTimeout(() => {
+      this.mutateElement(() => {}).then(() => {
+        storyEl.appendChild(animationEl);
+        // Give some time for the 120ms CSS animation to run (cf
+        // amp-story-page-attachment.css). The navigation itself will take some
+        // time, depending on the target and network conditions.
         const navigationService = Services.navigationForDoc(this.getAmpDoc());
         navigationService.navigateTo(
           this.win,
           this.element.getAttribute('href')
         );
-      }, 50);
-    });
+        this.close_();
+      });
+    }, 50 + delay);
   }
 
   /**
@@ -288,6 +341,16 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @override
    */
   close_() {
+    document
+      .querySelector('amp-story')
+      .classList.remove('i-amphtml-story-bookend-active');
+
+    // setTimeout(() => {
+    //   this.element.querySelector(
+    //     '.i-amphtml-story-draggable-drawer-container'
+    //   ).scrollTop = 0;
+    // }, 1000);
+
     switch (this.state_) {
       // If the drawer was open, pop the history entry that was added, which
       // will close the drawer through the onPop callback.

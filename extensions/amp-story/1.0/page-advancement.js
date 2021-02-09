@@ -227,7 +227,8 @@ export class AdvancementConfig {
       return manualAdvancement;
     }
 
-    const autoAdvanceStr = element.getAttribute('auto-advance-after');
+    const autoAdvanceStr = null;
+    // const autoAdvanceStr = element.getAttribute('auto-advance-after');
 
     if (autoAdvanceStr) {
       const timeBasedAdvancement = TimeBasedAdvancement.fromAutoAdvanceString(
