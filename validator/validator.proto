@@ -761,11 +761,9 @@ message DocCssSpec {
   // If provided, a URL linking to a section / sentence in the AMP HTML spec.
   optional string max_bytes_spec_url = 8;
 
-  // Declaration allow-lists were added when style attribute validation was
-  // implementented. Therefore older style tags do not enforce an allowlist
-  // of declarations. If true, all declarations are allowed in style tags,
-  // regardless of the contents of the `declaration` list.
-  optional bool allow_all_declaration_in_style_tag = 10 [default = false];
+  // If true, all declarations are allowed in style tags and inline style
+  // attributes, regardless of the contents of the `declaration` list.
+  optional bool allow_all_declaration_in_style = 10 [default = false];
   // If true, all variants of declarations that are vendor prefixes are allowed.
   // for example, if `gradient` is an allowed declaration and this is true, then
   // `-webkit-gradient` is also an allowed declaration.

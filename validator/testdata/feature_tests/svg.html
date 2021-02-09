@@ -93,11 +93,15 @@
     <g style="display: block; position: relative; -webkit-box-shadow: 4px 6px 6px 4px #ccc"/>
   </svg>
 
-  <!-- Invalid: these declarations are not allowed in style attributes. -->
+  <!-- Valid: these declarations are allowed since they are allowed in the style tag -->
   <svg>
     <g style="display: block; position: sticky;"/>
     <g style="DISPLAY:BLOCK;POSITION:STICKY;"/>
     <g style="foo:bar;"/>
+  </svg>
+
+  <!-- Invalid: these media queries are not allowed in style attributes. -->
+  <svg>
     <g style="@media only screen and (max-width: 600px)"/>
   </svg>
 
