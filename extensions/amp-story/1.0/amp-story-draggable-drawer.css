@@ -148,6 +148,7 @@
 .i-amphtml-story-draggable-drawer-bookend .i-amphtml-story-draggable-drawer-content {
   margin-top: auto !important;
   padding-top: 88px !important;
+  background: none!important;
 }
 
 .i-amphtml-story-draggable-drawer-bookend .i-amphtml-story-draggable-drawer-container[hidden] .i-amphtml-story-draggable-drawer-content {
