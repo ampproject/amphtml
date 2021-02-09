@@ -5612,8 +5612,6 @@ class Validator {
         .frameset_ok = true,
         .record_node_offsets = true,
         .record_attribute_offsets = true,
-        // Validator need disallwed/deprecated elements for error reporting.
-        .allow_deprecated_tags = true,
     };
     // The validation check for document size can't be done here since
     // the Type Identifiers on the html tag have not been parsed yet and
