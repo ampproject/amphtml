@@ -333,12 +333,14 @@ t.run('A more real AMPHTML image ad', () => {
         Array.prototype.push.apply(env.win.ampInaboxIframes, [iframe]);
       });
 
-      it('should properly render ad in a friendly iframe with viewability pings', () => {
+      // TODO(wg-monetization, #24421): Make this test less flaky.
+      it.skip('should properly render ad in a friendly iframe with viewability pings', () => {
         writeFriendlyFrame(doc, iframe, adBody);
         return testVisibilityPings(0, 1000);
       });
 
-      it('should properly render ad in a safe frame with viewability pings', () => {
+      // TODO(wg-monetization, #24421): Make this test less flaky.
+      it.skip('should properly render ad in a safe frame with viewability pings', () => {
         writeSafeFrame(doc, iframe, adBody);
         return testVisibilityPings(0, 1000);
       });
