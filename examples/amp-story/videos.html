@@ -5,7 +5,7 @@
   <link rel="canonical" href="ampconf.html">
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <script async src="https://cdn.ampproject.org/v0.js"></script>
-  <title>German/American Waffles [test]</title>
+  <title>Example story with 10 videos</title>
 
   <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
   <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
@@ -29,7 +29,7 @@
     <amp-story standalone id="cats"
         title="Key Highlights of AMP Conf 2018" publisher="The AMP team">
 
-      <amp-story-page id="page-1" auto-advance-after="video1">
+      <amp-story-page id="page-1">
         <amp-story-grid-layer template="fill">
 					<amp-video autoplay loop
 						id="video1"
@@ -37,7 +37,7 @@
             height="750"
             poster="img-city1.jpeg#1"
             layout="fill">
-            <source src="./video/stamp.mp4" type="video/mp4">
+            <source src="./video/stamp.mp4#cache" amp-orig-src="./video/stamp.mp4#origin" type="video/mp4">
           </amp-video>
 				</amp-story-grid-layer>
 				<amp-story-grid-layer><span class="page-num">1</span></amp-story-grid-layer>

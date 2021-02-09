@@ -56,6 +56,9 @@ class AmpPinterest extends AMP.BaseElement {
 
     /** @private {string} */
     this.type_ = '';
+
+    /** @private {*} */
+    this.renderClass_ = null;
   }
   /**
    * @param {boolean=} onLayout
@@ -82,29 +85,38 @@ class AmpPinterest extends AMP.BaseElement {
       'The data-do attribute is required for <amp-pinterest> %s',
       this.element
     );
+
+    switch (this.type_) {
+      case 'embedPin':
+        this.renderClass_ = new PinWidget(this.element);
+        break;
+      case 'buttonPin':
+        this.renderClass_ = new SaveButton(this.element);
+        break;
+      case 'buttonFollow':
+        this.renderClass_ = new FollowButton(this.element);
+        break;
+      default:
+        return Promise.reject(
+          user().createError('Invalid type: %s', this.type_)
+        );
+    }
   }
 
   /** @override */
   layoutCallback() {
-    return this.render().then((node) => {
-      return this.element.appendChild(node);
-    });
+    return this.renderClass_
+      .render()
+      .then((node) => this.element.appendChild(node));
   }
 
-  /**
-   * Renders the component
-   * @return {*} TODO(#23582): Specify return type
-   */
-  render() {
-    switch (this.type_) {
-      case 'embedPin':
-        return new PinWidget(this.element).render();
-      case 'buttonPin':
-        return new SaveButton(this.element).render();
-      case 'buttonFollow':
-        return new FollowButton(this.element).render();
-    }
-    return Promise.reject(user().createError('Invalid type: %s', this.type_));
+  /** @override */
+  firstLayoutCompleted() {
+    this.renderClass_.height().then((renderedHeight) => {
+      if (renderedHeight !== null) {
+        this.attemptChangeHeight(renderedHeight);
+      }
+    });
   }
 
   /** @override */

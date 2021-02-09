@@ -1993,7 +1993,13 @@ class TagStack {
  */
 function isAtRuleValid(cssSpec, atRuleName) {
   for (const atRuleSpec of cssSpec.atRuleSpec) {
-    if (atRuleSpec.name === parse_css.stripVendorPrefix(atRuleName)) {
+    // "-moz-document" is specified in the list of allowed rules with an
+    // explicit vendor prefix. The idea here is that only this specific vendor
+    // prefix is allowed, not "-ms-document" or even "document". We first search
+    // the allowed list for the seen `at_rule_name` with stripped vendor prefix,
+    // then if not found, we search again without sripping the vendor prefix.
+    if (atRuleSpec.name === parse_css.stripVendorPrefix(atRuleName) ||
+        atRuleSpec.name === atRuleName) {
       return true;
     }
   }
@@ -2165,6 +2171,7 @@ function GenCssParsingConfig() {
   ampAtRuleParsingSpec['media'] = parse_css.BlockType.PARSE_AS_RULES;
   ampAtRuleParsingSpec['page'] = parse_css.BlockType.PARSE_AS_DECLARATIONS;
   ampAtRuleParsingSpec['supports'] = parse_css.BlockType.PARSE_AS_RULES;
+  ampAtRuleParsingSpec['-moz-document'] = parse_css.BlockType.PARSE_AS_RULES;
   const config = {
     atRuleSpec: ampAtRuleParsingSpec,
     defaultSpec: parse_css.BlockType.PARSE_AS_IGNORE,
@@ -2512,7 +2519,7 @@ class CdataMatcher {
       const {params} = errorToken;
       // Override the first parameter with the name of this style tag.
       params[0] = getTagDescriptiveName(this.tagSpec_);
-      context.addError(
+      context.addWarning(
           errorToken.code, new LineCol(errorToken.line, errorToken.col), params,
           /* url */ '', validationResult);
     }
@@ -2556,7 +2563,7 @@ class CdataMatcher {
 
     // Validate the allowed CSS declarations (eg: `background-color`)
     if (maybeDocCssSpec !== null &&
-        !maybeDocCssSpec.spec().allowAllDeclarationInStyleTag) {
+        !maybeDocCssSpec.spec().allowAllDeclarationInStyle) {
       const invalidDeclVisitor = new InvalidDeclVisitor(
           maybeDocCssSpec, context, getTagDescriptiveName(this.tagSpec_),
           validationResult);
@@ -4896,30 +4903,30 @@ function validateAttrCss(
   }
 
   /** @type {?ParsedDocCssSpec} */
-  const maybeSpec = context.matchingDocCssSpec();
-  if (maybeSpec) {
+  const maybeDocCssSpec = context.matchingDocCssSpec();
+  if (maybeDocCssSpec !== null) {
     // Determine if we've exceeded the maximum bytes per inline style
     // requirements.
-    if (maybeSpec.spec().maxBytesPerInlineStyle >= 0 &&
-        attrByteLen > maybeSpec.spec().maxBytesPerInlineStyle) {
-      if (maybeSpec.spec().maxBytesIsWarning) {
+    if (maybeDocCssSpec.spec().maxBytesPerInlineStyle >= 0 &&
+        attrByteLen > maybeDocCssSpec.spec().maxBytesPerInlineStyle) {
+      if (maybeDocCssSpec.spec().maxBytesIsWarning) {
         context.addWarning(
             generated.ValidationError.Code.INLINE_STYLE_TOO_LONG,
             context.getLineCol(), /* params */
             [
               getTagDescriptiveName(tagSpec), attrByteLen.toString(),
-              maybeSpec.spec().maxBytesPerInlineStyle.toString()
+              maybeDocCssSpec.spec().maxBytesPerInlineStyle.toString()
             ],
-            maybeSpec.spec().maxBytesSpecUrl, result.validationResult);
+            maybeDocCssSpec.spec().maxBytesSpecUrl, result.validationResult);
       } else {
         context.addError(
             generated.ValidationError.Code.INLINE_STYLE_TOO_LONG,
             context.getLineCol(), /* params */
             [
               getTagDescriptiveName(tagSpec), attrByteLen.toString(),
-              maybeSpec.spec().maxBytesPerInlineStyle.toString()
+              maybeDocCssSpec.spec().maxBytesPerInlineStyle.toString()
             ],
-            maybeSpec.spec().maxBytesSpecUrl, result.validationResult);
+            maybeDocCssSpec.spec().maxBytesSpecUrl, result.validationResult);
       }
     }
 
@@ -4928,14 +4935,55 @@ function validateAttrCss(
     // relevant.
     for (const declaration of declarations) {
       const firstIdent = declaration.firstIdent();
-      // Allowed declarations vary by context. SVG has its own set of CSS
-      // declarations not supported generally in HTML.
-      const cssDeclaration = parsedAttrSpec.getSpec().valueDocSvgCss === true ?
-          maybeSpec.cssDeclarationSvgByName(declaration.name) :
-          maybeSpec.cssDeclarationByName(declaration.name);
-      // If there is no matching declaration in the rules, then this
-      // declaration is not allowed.
-      if (cssDeclaration === null) {
+      // Validate declarations only when they are not all allowed.
+      if (!maybeDocCssSpec.spec().allowAllDeclarationInStyle) {
+        // Allowed declarations vary by context. SVG has its own set of CSS
+        // declarations not supported generally in HTML.
+        const cssDeclaration =
+            parsedAttrSpec.getSpec().valueDocSvgCss === true ?
+            maybeDocCssSpec.cssDeclarationSvgByName(declaration.name) :
+            maybeDocCssSpec.cssDeclarationByName(declaration.name);
+        // If there is no matching declaration in the rules, then this
+        // declaration is not allowed.
+        if (cssDeclaration === null) {
+          context.addError(
+              generated.ValidationError.Code.DISALLOWED_PROPERTY_IN_ATTR_VALUE,
+              context.getLineCol(), /* params */
+              [declaration.name, attrName, getTagDescriptiveName(tagSpec)],
+              context.getRules().getStylesSpecUrl(), result.validationResult);
+          // Don't emit additional errors for this declaration.
+          continue;
+        } else if (cssDeclaration.valueCasei.length > 0) {
+          let hasValidValue = false;
+          for (const value of cssDeclaration.valueCasei) {
+            if (firstIdent.toLowerCase() == value) {
+              hasValidValue = true;
+              break;
+            }
+          }
+          if (!hasValidValue) {
+            // Declaration value not allowed.
+            context.addError(
+                generated.ValidationError.Code
+                    .CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
+                context.getLineCol(), /* params */
+                [getTagDescriptiveName(tagSpec), declaration.name, firstIdent],
+                context.getRules().getStylesSpecUrl(), result.validationResult);
+          }
+        } else if (cssDeclaration.valueRegexCasei != null) {
+          const valueRegex = context.getRules().getFullMatchCaseiRegex(
+              /** @type {number} */ (cssDeclaration.valueRegexCasei));
+          if (!valueRegex.test(firstIdent)) {
+            context.addError(
+                generated.ValidationError.Code
+                    .CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
+                context.getLineCol(), /* params */
+                [getTagDescriptiveName(tagSpec), declaration.name, firstIdent],
+                context.getRules().getStylesSpecUrl(), result.validationResult);
+          }
+        }
+      }
+      if (declaration.name.indexOf('i-amphtml-') > -1) {
         context.addError(
             generated.ValidationError.Code.DISALLOWED_PROPERTY_IN_ATTR_VALUE,
             context.getLineCol(), /* params */
@@ -4943,36 +4991,8 @@ function validateAttrCss(
             context.getRules().getStylesSpecUrl(), result.validationResult);
         // Don't emit additional errors for this declaration.
         continue;
-      } else if (cssDeclaration.valueCasei.length > 0) {
-        let hasValidValue = false;
-        for (const value of cssDeclaration.valueCasei) {
-          if (firstIdent.toLowerCase() == value) {
-            hasValidValue = true;
-            break;
-          }
-        }
-        if (!hasValidValue) {
-          // Declaration value not allowed.
-          context.addError(
-              generated.ValidationError.Code
-                  .CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
-              context.getLineCol(), /* params */
-              [getTagDescriptiveName(tagSpec), declaration.name, firstIdent],
-              context.getRules().getStylesSpecUrl(), result.validationResult);
-        }
-      } else if (cssDeclaration.valueRegexCasei != null) {
-        const valueRegex = context.getRules().getFullMatchCaseiRegex(
-            /** @type {number} */ (cssDeclaration.valueRegexCasei));
-        if (!valueRegex.test(firstIdent)) {
-          context.addError(
-              generated.ValidationError.Code
-                  .CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
-              context.getLineCol(), /* params */
-              [getTagDescriptiveName(tagSpec), declaration.name, firstIdent],
-              context.getRules().getStylesSpecUrl(), result.validationResult);
-        }
       }
-      if (!maybeSpec.spec().allowImportant) {
+      if (!maybeDocCssSpec.spec().allowImportant) {
         if (declaration.important)
           context.addError(
               generated.ValidationError.Code.CSS_SYNTAX_DISALLOWED_IMPORTANT,
@@ -4998,16 +5018,16 @@ function validateAttrCss(
         // Validate that the URL itself matches the spec.
         // Only image specs apply to inline styles. Fonts are only defined in
         // @font-face rules which we require a full stylesheet to define.
-        if (maybeSpec.spec().imageUrlSpec !== null) {
+        if (maybeDocCssSpec.spec().imageUrlSpec !== null) {
           const adapter = new UrlErrorInStylesheetAdapter(
               context.getLineCol().getLine(), context.getLineCol().getCol());
           validateUrlAndProtocol(
-              maybeSpec.imageUrlSpec(), adapter, context, url.utf8Url, tagSpec,
-              result.validationResult);
+              maybeDocCssSpec.imageUrlSpec(), adapter, context, url.utf8Url,
+              tagSpec, result.validationResult);
         }
         // Subtract off URL lengths from doc-level inline style bytes, if
         // specified by the DocCssSpec.
-        if (!maybeSpec.spec().urlBytesIncluded && !isDataUrl(url.utf8Url))
+        if (!maybeDocCssSpec.spec().urlBytesIncluded && !isDataUrl(url.utf8Url))
           result.inlineStyleCssBytes -= htmlparser.byteLength(url.utf8Url);
       }
     }
@@ -5917,8 +5937,7 @@ class ParsedValidatorRules {
         let tagSpec = this.rules_.tags[tagSpecId];
         if (tagSpec.extensionSpec == null) continue;
         if (tagSpec.specName === null)
-          tagSpec.specName =
-              tagSpec.extensionSpec.name + ' extension script';
+          tagSpec.specName = tagSpec.extensionSpec.name + ' extension script';
         if (tagSpec.descriptiveName === null)
           tagSpec.descriptiveName = tagSpec.specName;
         tagSpec.mandatoryParent = 'HEAD';

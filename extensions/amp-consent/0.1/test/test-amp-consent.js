@@ -31,6 +31,7 @@ import {
   resetServiceForTesting,
 } from '../../../../src/service';
 import {removeSearch} from '../../../../src/url';
+import {toggleExperiment} from '../../../../src/experiments';
 import {user} from '../../../../src/log';
 import {xhrServiceForTesting} from '../../../../src/service/xhr-impl';
 
@@ -844,6 +845,106 @@ describes.realWin(
       });
     });
 
+    describe('exposes api', () => {
+      let ampConsent;
+      let consentElement;
+
+      beforeEach(() => {
+        toggleExperiment(win, 'tcf-post-message-proxy-api', true);
+      });
+
+      afterEach(() => {
+        toggleExperiment(win, 'tcf-post-message-proxy-api', false);
+      });
+
+      describe('config', () => {
+        it('shoud expose if in config', async () => {
+          consentElement = createConsentElement(
+            doc,
+            dict({
+              'consentInstanceId': 'abc',
+              'checkConsentHref': 'https://response1',
+              'exposesTcfApi': true,
+            })
+          );
+          doc.body.appendChild(consentElement);
+          ampConsent = new AmpConsent(consentElement);
+          await ampConsent.buildCallback();
+          await macroTask();
+          const {frames} = win;
+          expect(frames[0].name).to.be.equal('__tcfapiLocator');
+          expect(ampConsent.tcfApiCommandsManager_).to.not.be.null;
+        });
+      });
+
+      describe('tcfPostMessageApi', () => {
+        let iframe;
+        let ampVideoIframe;
+        let event;
+        let listenerSpy;
+        let msg;
+
+        beforeEach(() => {
+          jsonMockResponses = {
+            'https://server-test-2/':
+              '{"consentRequired": true, "consentStateValue": "accepted", "consentString": "mystring"}',
+          };
+          consentElement = createConsentElement(
+            doc,
+            dict({
+              'consentInstanceId': 'abc',
+              'checkConsentHref': 'https://server-test-2/',
+              'exposesTcfApi': true,
+            })
+          );
+          doc.body.appendChild(consentElement);
+          ampConsent = new AmpConsent(consentElement);
+          ampVideoIframe = document.createElement('amp-video-iframe');
+          iframe = doc.createElement('iframe');
+          ampVideoIframe.appendChild(iframe);
+          doc.body.appendChild(ampVideoIframe);
+          event = new Event('message');
+          msg = {
+            __tcfapiCall: {
+              command: 'ping',
+              version: 2,
+              callId: 1,
+            },
+          };
+        });
+
+        it('installs __tcfapiLocator & 3p iframe can locate after amp-consent unblocks', async () => {
+          await ampConsent.buildCallback();
+          await macroTask();
+          expect(iframe.contentWindow.parent.frames['__tcfapiLocator']).to.not
+            .be.undefined;
+          expect(win.frames['__tcfapiLocator']).to.deep.equals(
+            iframe.contentWindow.parent.frames['__tcfapiLocator']
+          );
+          const frames = doc.querySelectorAll('iframe');
+          for (let i = 0; i < frames.length; i++) {
+            if (frames[i].name === '__tcfapiLocator') {
+              expect(frames[i].hasAttribute('aria-hidden')).to.be.true;
+              expect(frames[i].hasAttribute('hidden')).to.be.true;
+            }
+          }
+        });
+
+        it('installs window level event listener', async () => {
+          event.data = msg;
+          await ampConsent.buildCallback();
+          await macroTask();
+          listenerSpy = env.sandbox.stub(
+            ampConsent.tcfApiCommandManager_,
+            'handleTcfCommand'
+          );
+          win.dispatchEvent(event);
+          expect(listenerSpy).to.be.calledOnce;
+          expect(listenerSpy.args[0][0]).to.deep.equals(msg);
+        });
+      });
+    });
+
     describe('amp-geo integration', () => {
       let defaultConfig;
       let ampConsent;
@@ -1239,6 +1340,100 @@ describes.realWin(
           });
         });
       });
+    });
+
+    describe('granular consent experiment', () => {
+      let defaultConfig;
+      let ampConsent;
+      let consentElement;
+
+      beforeEach(() => {
+        toggleExperiment(win, 'amp-consent-granular-consent', true);
+        jsonMockResponses = {
+          'https://server-test-1/':
+            '{"consentRequired": true, "purposeConsentRequired": ["abc", "bcd"]}',
+          'https://server-test-2/': '{"consentRequired": true}',
+          'https://server-test-3/':
+            '{"consentRequired": true, "purposeConsentRequired": "verybad"}',
+        };
+        defaultConfig = dict({
+          'consentInstanceId': 'abc',
+        });
+      });
+
+      afterEach(() => {
+        toggleExperiment(win, 'amp-consent-granular-consent', false);
+      });
+
+      it('uses inline purposeConsentRequired', async () => {
+        defaultConfig['purposeConsentRequired'] = ['zyx', 'yxw'];
+        defaultConfig['consentRequired'] = true;
+        consentElement = createConsentElement(doc, defaultConfig);
+        doc.body.appendChild(consentElement);
+        ampConsent = new AmpConsent(consentElement);
+        await ampConsent.buildCallback();
+        expect(await ampConsent.getPurposeConsentRequired_()).to.deep.equal(
+          defaultConfig['purposeConsentRequired']
+        );
+      });
+
+      it('uses purposeConsentRequired from remote if not inlined', async () => {
+        defaultConfig['consentRequired'] = 'remote';
+        defaultConfig['checkConsentHref'] = 'https://server-test-1/';
+        consentElement = createConsentElement(doc, defaultConfig);
+        doc.body.appendChild(consentElement);
+        ampConsent = new AmpConsent(consentElement);
+        await ampConsent.buildCallback();
+        expect(await ampConsent.getPurposeConsentRequired_()).to.deep.equal([
+          'abc',
+          'bcd',
+        ]);
+      });
+
+      it('returns null if no purposeConsentsRequired are found', async () => {
+        defaultConfig['consentRequired'] = 'remote';
+        defaultConfig['checkConsentHref'] = 'https://server-test-2/';
+        consentElement = createConsentElement(doc, defaultConfig);
+        doc.body.appendChild(consentElement);
+        ampConsent = new AmpConsent(consentElement);
+        await ampConsent.buildCallback();
+        expect(await ampConsent.getPurposeConsentRequired_()).to.be.null;
+      });
+
+      it('handles non-array purposeConsentsRequired', async () => {
+        defaultConfig['purposeConsentRequired'] = 'BAD';
+        defaultConfig['consentRequired'] = 'remote';
+        defaultConfig['checkConsentHref'] = 'https://server-test-3/';
+        consentElement = createConsentElement(doc, defaultConfig);
+        doc.body.appendChild(consentElement);
+        ampConsent = new AmpConsent(consentElement);
+        await ampConsent.buildCallback();
+        // Returned null so must've failed both inline and remote
+        expect(await ampConsent.getPurposeConsentRequired_()).to.be.null;
+      });
+
+      it(
+        'will only look at purposeConsentRequired if we have ' +
+          'global consent (state or tcString)',
+        async () => {
+          defaultConfig['purposeConsentRequired'] = ['zyx', 'yxw'];
+          defaultConfig['consentRequired'] = true;
+          consentElement = createConsentElement(doc, defaultConfig);
+          doc.body.appendChild(consentElement);
+          ampConsent = new AmpConsent(consentElement);
+          await ampConsent.buildCallback();
+          window.sandbox
+            .stub(ampConsent.consentStateManager_, 'getConsentInstanceInfo')
+            .returns(Promise.resolve({}));
+          const spy = window.sandbox.spy(
+            ampConsent,
+            'checkGranularConsentRequired_'
+          );
+
+          expect(await ampConsent.hasRequiredConsents_()).to.be.false;
+          expect(spy).to.not.be.called;
+        }
+      );
     });
   }
 );

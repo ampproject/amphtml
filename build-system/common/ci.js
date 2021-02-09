@@ -73,6 +73,17 @@ const isGithubActions = isGithubActionsBuild();
 const isCircleci = isCircleciBuild();
 
 /**
+ * Used to filter CircleCI PR branches created directly on the amphtml repo
+ * (e.g.) PRs created from the GitHub web UI. Must match `push_builds_only`
+ * in .circleci/config.yml.
+ * @param {string} branchName
+ * @return {boolean}
+ */
+function isCircleciPushBranch(branchName) {
+  return branchName == 'master' || /^amp-release-.*$/.test(branchName);
+}
+
+/**
  * Returns true if this is a PR build.
  * @return {boolean}
  */
@@ -82,7 +93,7 @@ function isPullRequestBuild() {
     : isGithubActions
     ? env('GITHUB_EVENT_NAME') === 'pull_request'
     : isCircleci
-    ? !!env('CIRCLE_PULL_REQUEST')
+    ? !isCircleciPushBranch(env('CIRCLE_BRANCH'))
     : false;
 }
 
@@ -96,7 +107,7 @@ function isPushBuild() {
     : isGithubActions
     ? env('GITHUB_EVENT_NAME') === 'push'
     : isCircleci
-    ? !env('CIRCLE_PULL_REQUEST')
+    ? isCircleciPushBranch(env('CIRCLE_BRANCH'))
     : false;
 }
 
@@ -227,8 +238,17 @@ function ciRepoSlug() {
     : '';
 }
 
+/**
+ * Returns the commit SHA being tested by a push or PR build.
+ * @return {string}
+ */
+function ciBuildSha() {
+  return isPullRequestBuild() ? ciPullRequestSha() : ciCommitSha();
+}
+
 module.exports = {
   ciBuildId,
+  ciBuildSha,
   ciBuildUrl,
   ciCommitSha,
   ciJobId,

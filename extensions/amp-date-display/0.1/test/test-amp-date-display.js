@@ -15,7 +15,7 @@
  */
 
 import '../amp-date-display';
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin(
@@ -31,17 +31,19 @@ describes.realWin(
     let impl;
     let clock;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       win = env.win;
-      clock = lolex.install({
-        target: win,
+      clock = fakeTimers.withGlobal(win).install({
         now: new Date('2018-01-01T08:00:00Z'),
       });
 
       toggleExperiment(win, 'amp-date-display', true);
       element = win.document.createElement('amp-date-display');
+      element.setAttribute('layout', 'fixed');
+      element.setAttribute('width', '300');
+      element.setAttribute('height', '100');
       win.document.body.appendChild(element);
-      impl = element.implementation_;
+      impl = await element.getImpl(false);
       env.sandbox.stub(impl.templates_, 'findAndRenderTemplate').resolves();
       env.sandbox.stub(impl, 'boundRendered_');
     });
@@ -56,7 +58,7 @@ describes.realWin(
     it('provides all variables in UTC and English (default)', () => {
       element.setAttribute('datetime', '2001-02-03T04:05:06.007Z');
       element.setAttribute('display-in', 'UTC');
-      element.build();
+      element.buildInternal();
 
       const data = impl.getDataForTemplate_();
 
@@ -83,7 +85,7 @@ describes.realWin(
 
     it('provides all variables in local and English (default)', () => {
       element.setAttribute('datetime', '2001-02-03T04:05:06.007');
-      element.build();
+      element.buildInternal();
 
       const data = impl.getDataForTemplate_();
 
@@ -111,7 +113,7 @@ describes.realWin(
     describe('correctly parses', () => {
       it('now keyword', () => {
         element.setAttribute('datetime', 'now');
-        element.build();
+        element.buildInternal();
 
         const {iso} = impl.getDataForTemplate_();
         const dateFromParsed = new win.Date(iso);
@@ -122,7 +124,7 @@ describes.realWin(
 
       it('day only ISO 8601 date', () => {
         element.setAttribute('datetime', '2001-02-03');
-        element.build();
+        element.buildInternal();
         expect(impl.getDataForTemplate_().iso).to.equal(
           '2001-02-03T00:00:00.000Z'
         );
@@ -130,7 +132,7 @@ describes.realWin(
 
       it('full ISO 8601 date in UTC time zone', () => {
         element.setAttribute('datetime', '2001-02-03T04:05:06.007Z');
-        element.build();
+        element.buildInternal();
         expect(impl.getDataForTemplate_().iso).to.equal(
           '2001-02-03T04:05:06.007Z'
         );
@@ -138,7 +140,7 @@ describes.realWin(
 
       it('full ISO 8601 date without time zone (interpreted as local)', () => {
         element.setAttribute('datetime', '2001-02-03T04:05:06.007');
-        element.build();
+        element.buildInternal();
 
         const data = impl.getDataForTemplate_();
         const result =
@@ -150,7 +152,7 @@ describes.realWin(
 
       it('full ISO 8601 date in a custom time zone', () => {
         element.setAttribute('datetime', '2001-02-03T04:05:06.007+08:00');
-        element.build();
+        element.buildInternal();
         expect(impl.getDataForTemplate_().iso).to.equal(
           '2001-02-02T20:05:06.007Z'
         );
@@ -158,7 +160,7 @@ describes.realWin(
 
       it('seconds since the UNIX epoch', () => {
         element.setAttribute('timestamp-seconds', '981173106');
-        element.build();
+        element.buildInternal();
         expect(impl.getDataForTemplate_().iso).to.equal(
           '2001-02-03T04:05:06.000Z'
         );
@@ -166,7 +168,7 @@ describes.realWin(
 
       it('miliseconds since the UNIX epoch', () => {
         element.setAttribute('timestamp-ms', '981173106007');
-        element.build();
+        element.buildInternal();
         expect(impl.getDataForTemplate_().iso).to.equal(
           '2001-02-03T04:05:06.007Z'
         );
@@ -176,7 +178,7 @@ describes.realWin(
     it('adds offset seconds', () => {
       element.setAttribute('datetime', '2001-02-03T04:05:06.007Z');
       element.setAttribute('offset-seconds', '1234567');
-      element.build();
+      element.buildInternal();
       expect(impl.getDataForTemplate_().iso).to.equal(
         '2001-02-17T11:01:13.007Z'
       );
@@ -185,7 +187,7 @@ describes.realWin(
     it('subtracts offset seconds', () => {
       element.setAttribute('datetime', '2001-02-03T04:05:06.007Z');
       element.setAttribute('offset-seconds', '-1234567');
-      element.build();
+      element.buildInternal();
       expect(impl.getDataForTemplate_().iso).to.equal(
         '2001-01-19T21:08:59.007Z'
       );
@@ -195,7 +197,7 @@ describes.realWin(
       element.setAttribute('datetime', '2001-02-03T04:05:06.007Z');
       element.setAttribute('display-in', 'UTC');
       element.setAttribute('locale', 'cs');
-      element.build();
+      element.buildInternal();
 
       const data = impl.getDataForTemplate_();
 

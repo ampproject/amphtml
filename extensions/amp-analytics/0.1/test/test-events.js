@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {
   AmpStoryEventTracker,
   AnalyticsEvent,
@@ -1169,7 +1169,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
     let tracker;
 
     beforeEach(() => {
-      clock = lolex.install({target: root.ampdoc.win});
+      clock = fakeTimers.withGlobal(root.ampdoc.win).install();
       tracker = root.getTracker(AnalyticsEventType.TIMER, TimerEventTracker);
     });
 

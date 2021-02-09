@@ -32,12 +32,14 @@ import {
 import {ConsentPolicyManager} from './consent-policy-manager';
 import {ConsentStateManager} from './consent-state-manager';
 import {ConsentUI} from './consent-ui';
+import {CookieWriter} from './cookie-writer';
 import {Deferred} from '../../../src/utils/promise';
 import {
   NOTIFICATION_UI_MANAGER,
   NotificationUiManager,
 } from '../../../src/service/notification-ui-manager';
 import {Services} from '../../../src/services';
+import {TcfApiCommandManager} from './tcf-api-command-manager';
 import {
   assertHttpsUrl,
   getSourceUrl,
@@ -47,11 +49,13 @@ import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
-import {isEnumValue, isObject} from '../../../src/types';
+import {isArray, isEnumValue, isObject} from '../../../src/types';
+import {isExperimentOn} from '../../../src/experiments';
 import {toggle} from '../../../src/style';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const CONSENT_POLICY_MANAGER = 'consentPolicyManager';
+const TCF_API_LOCATOR = '__tcfapiLocator';
 const TAG = 'amp-consent';
 
 /**
@@ -74,6 +78,9 @@ export class AmpConsent extends AMP.BaseElement {
 
     /** @private {?ConsentPolicyManager} */
     this.consentPolicyManager_ = null;
+
+    /** @private {?TcfApiCommandManager} */
+    this.tcfApiCommandManager_ = null;
 
     /** @private {?NotificationUiManager} */
     this.notificationUiManager_ = null;
@@ -113,6 +120,23 @@ export class AmpConsent extends AMP.BaseElement {
 
     /** @private {?string} */
     this.matchedGeoGroup_ = null;
+
+    /** @private {?boolean} */
+    this.isTcfPostMessageProxyExperimentOn_ = isExperimentOn(
+      this.win,
+      'tcf-post-message-proxy-api'
+    );
+
+    /** @private {?boolean} */
+    this.isGranularConsentExperimentOn_ = isExperimentOn(
+      this.win,
+      'amp-consent-granular-consent'
+    );
+
+    /** @private @const {?Function} */
+    this.boundHandleIframeMessages_ = this.isTcfPostMessageProxyExperimentOn_
+      ? this.handleIframeMessages_.bind(this)
+      : null;
   }
 
   /** @override */
@@ -134,6 +158,20 @@ export class AmpConsent extends AMP.BaseElement {
       this.matchedGeoGroup_ = configManager.getMatchedGeoGroup();
       this.initialize_(validatedConfig);
     });
+  }
+
+  /** @override */
+  pauseCallback() {
+    if (this.consentUI_) {
+      this.consentUI_.pause();
+    }
+  }
+
+  /** @override */
+  resumeCallback() {
+    if (this.consentUI_) {
+      this.consentUI_.resume();
+    }
   }
 
   /**
@@ -220,10 +258,15 @@ export class AmpConsent extends AMP.BaseElement {
       this.notificationUiManager_ = /** @type {!NotificationUiManager} */ (manager);
     });
 
+    const cookieWriterPromise = this.consentConfig_['cookies']
+      ? new CookieWriter(this.win, this.element, this.consentConfig_).write()
+      : Promise.resolve();
+
     Promise.all([
       consentStateManagerPromise,
       notificationUiManagerPromise,
       consentPolicyManagerPromise,
+      cookieWriterPromise,
     ]).then(() => {
       this.init_();
     });
@@ -448,6 +491,7 @@ export class AmpConsent extends AMP.BaseElement {
   init_() {
     this.passSharedData_();
     this.syncRemoteConsentState_();
+    this.maybeSetUpTcfPostMessageProxy_();
 
     this.getConsentRequiredPromise_()
       .then((isConsentRequired) => {
@@ -620,6 +664,57 @@ export class AmpConsent extends AMP.BaseElement {
   }
 
   /**
+   * TODO (micajuineho): Use our stored info to check if we have the
+   * necessary granular consents.
+   * @param {ConsentInfoDef} unusedConsentInfo
+   * @return {!Promise<boolean>}
+   */
+  checkGranularConsentRequired_(unusedConsentInfo) {
+    if (!this.isGranularConsentExperimentOn_) {
+      return Promise.resolve(true);
+    }
+    return this.getPurposeConsentRequired_().then((purposeConsentRequired) => {
+      if (!purposeConsentRequired) {
+        return true;
+      }
+      // TODO: add check here.
+      return true;
+    });
+  }
+
+  /**
+   * Get `purposeConsentRequired` from consent config,
+   * or from `checkConsentHref` response.
+   * @return {!Promise<?Array>}
+   */
+  getPurposeConsentRequired_() {
+    const inlinePurposes = this.consentConfig_['purposeConsentRequired'];
+    if (isArray(inlinePurposes)) {
+      return Promise.resolve(inlinePurposes);
+    }
+    return this.getConsentRemote_().then((response) => {
+      if (!response || !isArray(response['purposeConsentRequired'])) {
+        return null;
+      }
+      return response['purposeConsentRequired'];
+    });
+  }
+
+  /**
+   * Determines if we should show UI based on our stored consent values.
+   * @return {!Promise<boolean>}
+   */
+  hasRequiredConsents_() {
+    return this.consentStateManager_.getConsentInstanceInfo().then((info) => {
+      // Global consent
+      if (hasStoredValue(info)) {
+        return this.checkGranularConsentRequired_(info);
+      }
+      return Promise.resolve(false);
+    });
+  }
+
+  /**
    * Handle Prompt UI.
    * @param {boolean} isConsentRequired
    * @return {Promise<boolean>}
@@ -634,8 +729,8 @@ export class AmpConsent extends AMP.BaseElement {
     );
 
     // Get current consent state
-    return this.consentStateManager_.getConsentInstanceInfo().then((info) => {
-      if (hasStoredValue(info)) {
+    return this.hasRequiredConsents_().then((hasConsents) => {
+      if (hasConsents) {
         // Has user stored value, no need to prompt
         return true;
       }
@@ -723,6 +818,61 @@ export class AmpConsent extends AMP.BaseElement {
       opt_metadata['gdprApplies'],
       opt_metadata['purposeOne']
     );
+  }
+
+  /**
+   * Maybe set up the __tfcApiLocator window and listeners.
+   *
+   * The window is a dummy iframe that signals to 3p iframes
+   * that the document supports the tcfPostMessage API.
+   */
+  maybeSetUpTcfPostMessageProxy_() {
+    if (
+      !this.isTcfPostMessageProxyExperimentOn_ ||
+      !this.consentConfig_['exposesTcfApi']
+    ) {
+      return;
+    }
+    // Check if __tcfApiLocator API already exists (dirty AMP)
+    if (!this.win.frames[TCF_API_LOCATOR]) {
+      this.tcfApiCommandManager_ = new TcfApiCommandManager(
+        this.consentPolicyManager_
+      );
+      // Add window listener for 3p iframe PostMessages
+      this.win.addEventListener('message', this.boundHandleIframeMessages_);
+
+      // Set up the __tcfApiLocator window to singal PostMessage support
+      const iframe = this.element.ownerDocument.createElement('iframe');
+      iframe.setAttribute('name', TCF_API_LOCATOR);
+      toggle(iframe, false);
+      iframe.setAttribute('aria-hidden', true);
+      this.element.appendChild(dev().assertElement(iframe));
+    }
+  }
+
+  /**
+   * Listen to iframe messages and handle events.
+   *
+   * The listeners will listen for post messages from 3p
+   * iframes that have the following structure:
+   * {
+   *  "__tcfapiCall": {
+   *    "command": cmd,
+   *    "parameter": arg,
+   *    "version": v,
+   *    "callId": id,
+   *  }
+   * }
+   *
+   * @param {!Event} event
+   */
+  handleIframeMessages_(event) {
+    const data = getData(event);
+
+    if (!data || !data['__tcfapiCall']) {
+      return;
+    }
+    this.tcfApiCommandManager_.handleTcfCommand(data, event.source);
   }
 }
 

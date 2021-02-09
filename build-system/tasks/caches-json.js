@@ -18,7 +18,7 @@
 const gulp = require('gulp');
 const through2 = require('through2');
 const {log} = require('../common/logging');
-const {red, yellow} = require('ansi-colors');
+const {red, yellow} = require('kleur/colors');
 
 const expectedCaches = ['google'];
 

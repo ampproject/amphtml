@@ -89,7 +89,14 @@ class Amp3QPlayer extends AMP.BaseElement {
 
   /** @private */
   generateIframeSrc_() {
-    const explicitParamsAttributes = ['key', 'timestamp', 'controls'];
+    const explicitParamsAttributes = [
+      'key',
+      'timestamp',
+      'controls',
+      'userToken',
+      'userGroup',
+      'player',
+    ];
 
     let iframeSrc = 'https://playout.3qsdn.com/';
     if (this.element.getAttribute(`data-datasource`)) {
@@ -113,7 +120,7 @@ class Amp3QPlayer extends AMP.BaseElement {
       }
     });
 
-    return encodeURIComponent(iframeSrc);
+    return iframeSrc;
   }
 
   /** @override */

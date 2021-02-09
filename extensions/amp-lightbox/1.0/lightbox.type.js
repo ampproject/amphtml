@@ -21,13 +21,12 @@ var LightboxDef = {};
 /**
  * @typedef {{
  *   id: (string),
- *   animateIn: (string|undefined),
+ *   animation: (string|undefined),
  *   closeButtonAriaLabel: (string|undefined),
  *   scrollable: (boolean),
  *   initialOpen: (boolean),
  *   onBeforeOpen: (function|undefined),
  *   onAfterClose: (function|undefined),
- *   enableAnimation: (boolean)
  * }}
  */
 LightboxDef.Props;
