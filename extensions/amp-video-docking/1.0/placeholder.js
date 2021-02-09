@@ -1,4 +1,3 @@
-import * as Preact from '../../../src/preact';
 /**
  * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
@@ -14,6 +13,7 @@ import * as Preact from '../../../src/preact';
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import * as Preact from '../../../src/preact';
 import {fillStretch} from '../../amp-video/1.0/video-wrapper.css';
 import {useMemo} from '../../../src/preact';
 import {useStyles} from './dock.jss';
