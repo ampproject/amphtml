@@ -112,6 +112,8 @@ const CLOSURE_SRC_GLOBS = [
   'extensions/amp-bind/**/*.js',
   // Needed to access to Variant interface from other extensions
   'extensions/amp-experiment/**/*.js',
+  // Needed to access across versions
+  'extensions/amp-fit-text/1.0/base-element.js',
   // Needed to access form impl from other extensions
   'extensions/amp-form/**/*.js',
   // Needed by amp-facebook-* for the loader logo
