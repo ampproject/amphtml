@@ -15,7 +15,7 @@
   },
   "experimentC": {
     "name": "Bento performance analysis experiment",
-    "environment": "WEB",
+    "environment": "AMP",
     "issue": "https://github.com/ampproject/amphtml/issues/32523",
     "expiration_date_utc": "2021-12-31",
     "define_experiment_constant": "BENTO_AUTO_UPGRADE"
