@@ -1111,6 +1111,7 @@ amp-story-page.i-amphtml-story-desktop-panels .i-amphtml-story-interactive-compo
   box-shadow: 0px 6px 16px rgba(0,0,0,0.26) !important;
   transform: translate3d(0, -16px, 0) !important;
   transition: transform 0.2s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+  pointer-events: none;
 }
 
 .i-amphtml-tooltip-action-icon.i-amphtml-tooltip-custom-icon {

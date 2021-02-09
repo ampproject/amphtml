@@ -1314,6 +1314,9 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   displayTapHints(distance) {
+    if (document.querySelector('amp-story').hasAttribute('no-dots')) {
+      return;
+    }
     const allLinks = Array.from(this.element.querySelectorAll('a')).filter(
       (link) => {
         const isAttachment = Array.from(link.classList).some((item) =>
