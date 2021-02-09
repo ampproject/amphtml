@@ -23,6 +23,10 @@ import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor, postMessage} from '../../../src/iframe-helper';
 import {
+  observeContentSize,
+  unobserveContentSize,
+} from '../../../src/utils/size-observer';
+import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
 } from '../../../src/viewport-observer';
@@ -56,6 +60,8 @@ export class Amp3dGltf extends AMP.BaseElement {
 
     /** @private {?Function} */
     this.unlistenMessage_ = null;
+
+    this.onResized_ = this.onResized_.bind(this);
   }
 
   /**
@@ -97,6 +103,7 @@ export class Amp3dGltf extends AMP.BaseElement {
     this.willBeReady_ = new Deferred();
     this.willBeLoaded_ = new Deferred();
 
+    unobserveContentSize(this.element, this.onResized_);
     return true;
   }
 
@@ -166,6 +173,8 @@ export class Amp3dGltf extends AMP.BaseElement {
     this.unlistenMessage_ = devAssert(this.listenGltfViewerMessages_());
 
     this.element.appendChild(this.iframe_);
+
+    observeContentSize(this.element, this.onResized_);
 
     return this.willBeLoaded_.promise;
   }
@@ -242,10 +251,10 @@ export class Amp3dGltf extends AMP.BaseElement {
 
   /**
    * Sends `setSize` command when ready
-   *
+   * @param {!../layout-rect.LayoutSizeDef} size
+   * @private
    */
-  onLayoutMeasure() {
-    const {width, height} = this.getLayoutSize();
+  onResized_({width, height}) {
     this.sendCommandWhenReady_(
       'setSize',
       dict({'width': width, 'height': height})

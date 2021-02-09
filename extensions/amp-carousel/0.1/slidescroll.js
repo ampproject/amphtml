@@ -33,6 +33,10 @@ import {isFiniteNumber} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {numeric} from '../../../src/transition';
 import {
+  observeContentSize,
+  unobserveContentSize,
+} from '../../../src/utils/size-observer';
+import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
 } from '../../../src/viewport-observer';
@@ -141,6 +145,8 @@ export class AmpSlideScroll extends BaseSlides {
       : this.isIos_
       ? false
       : !isExperimentOn(this.win, 'amp-carousel-chrome-scroll-snap');
+
+    this.onResized_ = this.onResized_.bind(this);
   }
 
   /** @override */
@@ -247,6 +253,16 @@ export class AmpSlideScroll extends BaseSlides {
   }
 
   /** @override */
+  attachedCallback() {
+    observeContentSize(this.element, this.onResized_);
+  }
+
+  /** @override */
+  detachedCallback() {
+    unobserveContentSize(this.element, this.onResized_);
+  }
+
+  /** @override */
   isLoopingEligible() {
     return this.noOfSlides_ > 1;
   }
@@ -309,9 +325,12 @@ export class AmpSlideScroll extends BaseSlides {
     this.waitForScrollSettled_(timeout);
   }
 
-  /** @override */
-  onLayoutMeasure() {
-    this.slideWidth_ = this.element./*OK*/ offsetWidth;
+  /**
+   * @param {!../layout-rect.LayoutSizeDef} size
+   * @private
+   */
+  onResized_(size) {
+    this.slideWidth_ = size.width;
   }
 
   /** @override */
