@@ -20,13 +20,9 @@ final newline (on the last line) removed.
 Then there must be a line that says "\#errors". It must be followed by
 one line per parse error that a conformant checker would return. It
 doesn't matter what those lines are, although they can't be
-"\#new-errors", "\#document-fragment", "\#document", "\#script-off",
-"\#script-on", or empty, the only thing that matters is that there be
-the right number of parse errors.
-
-Then there \*may\* be a line that says "\#new-errors", which works like
-the "\#errors" section adding more errors to the expected number of
-errors.
+"\#document-fragment", "\#document", "\#script-off", "\#script-on", or
+empty, the only thing that matters is that there be the right number
+of parse errors.
 
 Then there \*may\* be a line that says "\#document-fragment", which must
 be followed by a newline (LF), followed by a string of characters that
@@ -60,8 +56,8 @@ per parent node that the node has before the root document node.
     sign, then the attribute value in double quotes (").
 -   Text nodes must be the string, in double quotes. Newlines aren't
     escaped.
--   Comments must be "`<`" then "`!--`" then the data then "`-->`".
--   DOCTYPEs must be "`<!DOCTYPE`" then the name then if either of the
+-   Comments must be "`<`" then "`!-- `" then the data then "` -->`".
+-   DOCTYPEs must be "`<!DOCTYPE `" then the name then if either of the
     system id or public id is non-empty a space, public id in
     double-quotes, another space an the system id in double-quotes, and
     then in any case "`>`".

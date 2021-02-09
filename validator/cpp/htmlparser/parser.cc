@@ -55,49 +55,50 @@ void DumpNode(Node* root_node) {
 // Dumps the nodes in the DOM in their final order after parsing.
 void DumpDocument(Document* doc) { DumpNode(doc->RootNode()); }
 
-/
 #endif  // DUMP_NODES
 
 }  // namespace.
 
 std::unique_ptr<Document> Parse(std::string_view html) {
-  Parser parser(html, {.scripting = true,
-                       .frameset_ok = true,
-                       .record_node_offsets = true,
-                       .record_attribute_offsets = true,
-                       .allow_deprecated_tags = false});
-  return parser.Parse();
+  std::unique_ptr<Parser> parser = std::make_unique<Parser>(
+      html,
+      ParseOptions{.scripting = true,
+                   .frameset_ok = true,
+                   .record_node_offsets = true,
+                   .record_attribute_offsets = true});
+  return parser->Parse();
 }
 
 std::unique_ptr<Document> ParseWithOptions(std::string_view html,
                                            const ParseOptions& options) {
-  Parser parser(html, options);
-  return parser.Parse();
+  return std::make_unique<Parser>(html, options)->Parse();
 }
 
 std::unique_ptr<Document> ParseFragmentWithOptions(std::string_view html,
                                                    const ParseOptions& options,
                                                    Node* fragment_parent) {
-  Parser parser(html, options, fragment_parent);
-  Node* root = parser.document_->NewNode(NodeType::ELEMENT_NODE, Atom::HTML);
-  parser.document_->root_node_->AppendChild(root);
-  parser.open_elements_stack_.Push(root);
+  std::unique_ptr<Parser> parser = std::make_unique<Parser>(
+      html, options, fragment_parent);
+  Node* root = parser->document_->NewNode(NodeType::ELEMENT_NODE, Atom::HTML);
+  parser->document_->root_node_->AppendChild(root);
+  parser->open_elements_stack_.Push(root);
 
   if (fragment_parent && fragment_parent->DataAtom() == Atom::TEMPLATE) {
-    parser.template_stack_.push_back(std::bind(&Parser::InTemplateIM, &parser));
+    parser->template_stack_.push_back(std::bind(&Parser::InTemplateIM,
+                                                parser.get()));
   }
 
-  parser.ResetInsertionMode();
+  parser->ResetInsertionMode();
 
   for (Node* node = fragment_parent; node; node = node->Parent()) {
     if (node->Type() == NodeType::ELEMENT_NODE &&
         node->DataAtom() == Atom::FORM) {
-      parser.form_ = node;
+      parser->form_ = node;
       break;
     }
   }
 
-  auto doc = parser.Parse();
+  auto doc = parser->Parse();
   Node* parent = fragment_parent ? root : doc->root_node_;
   for (Node* c = parent->FirstChild(); c;) {
     Node* next = c->NextSibling();
@@ -116,8 +117,7 @@ std::unique_ptr<Document> ParseFragment(std::string_view html,
   ParseOptions options = {.scripting = true,
                           .frameset_ok = true,
                           .record_node_offsets = true,
-                          .record_attribute_offsets = true,
-                          .allow_deprecated_tags = false};
+                          .record_attribute_offsets = true};
   return ParseFragmentWithOptions(html, options, fragment_parent);
 }
 
@@ -133,9 +133,8 @@ Parser::Parser(std::string_view html, const ParseOptions& options,
       frameset_ok_(options.frameset_ok),
       record_node_offsets_(options.record_node_offsets),
       record_attribute_offsets_(options.record_attribute_offsets),
-      allow_deprecated_tags_(options.allow_deprecated_tags),
       fragment_(fragment_parent != nullptr),
-      fragment_parent_node_(fragment_parent) {
+      context_node_(fragment_parent) {
   insertion_mode_ = std::bind(&Parser::InitialIM, this);
 }
 
@@ -169,7 +168,7 @@ std::unique_ptr<Document> Parser::Parse() {
   }
 
 #ifdef DUMP_NODES
-  DumpDocument(document_->RootNode());
+  DumpDocument(document_.get());
 #endif
 
   return std::move(document_);
@@ -559,8 +558,8 @@ void Parser::ResetInsertionMode() {
   for (int i = open_elements_stack_.size() - 1; i >= 0; --i) {
     Node* node = open_elements_stack_.at(i);
     bool last = (i == 0);
-    if (last && fragment_parent_node_) {
-      node = fragment_parent_node_;
+    if (last && context_node_) {
+      node = context_node_;
     }
 
     switch (node->atom_) {
@@ -732,7 +731,7 @@ bool Parser::BeforeHTMLIM() {
       Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
       node->position_in_html_src_ = token_.position_in_html_src;
-      node->data_ = std::data(token_.data);
+      node->data_ = std::move(token_.data);
       document_->root_node_->AppendChild(node);
       return true;
     }
@@ -830,7 +829,6 @@ bool Parser::InHeadIM() {
         case Atom::BASE:
         case Atom::BASEFONT:
         case Atom::BGSOUND:
-        case Atom::COMMAND:
         case Atom::LINK:
         case Atom::META: {
           AddElement();
@@ -839,22 +837,27 @@ bool Parser::InHeadIM() {
           return true;
         }
         case Atom::NOSCRIPT: {
-          AddElement();
           if (scripting_) {
-            SetOriginalIM();
-            insertion_mode_ = std::bind(&Parser::TextIM, this);
-          } else {
-            insertion_mode_ = std::bind(&Parser::InHeadNoscriptIM, this);
+            ParseGenericRawTextElement();
+            return true;
           }
+          AddElement();
+          insertion_mode_ = std::bind(&Parser::InHeadNoscriptIM, this);
+          // Don't let the tokenizer go into raw text mode when scripting is
+          // disabled.
+          tokenizer_->NextIsNotRawText();
           return true;
         }
         case Atom::SCRIPT:
-        case Atom::TITLE:
-        case Atom::NOFRAMES:
-        case Atom::STYLE: {
+        case Atom::TITLE: {
           AddElement();
           SetOriginalIM();
           insertion_mode_ = std::bind(&Parser::TextIM, this);
+          return true;
+        }
+        case Atom::NOFRAMES:
+        case Atom::STYLE: {
+          ParseGenericRawTextElement();
           return true;
         }
         case Atom::HEAD: {
@@ -868,7 +871,6 @@ bool Parser::InHeadIM() {
           insertion_mode_ = std::bind(&Parser::InTemplateIM, this);
           template_stack_.push_back(std::bind(&Parser::InTemplateIM, this));
           return true;
-          break;
         }
         default:
           // Ignore remaining tags.
@@ -958,7 +960,12 @@ bool Parser::InHeadNoscriptIM() {
           break;
         }
         case Atom::HEAD:
+          // Ignore the token.
+          return true;
         case Atom::NOSCRIPT: {
+          // Don't let the tokenizer go into raw text mode even when a
+          // <noscript> tag is in "in head noscript" insertion mode.
+          tokenizer_->NextIsNotRawText();
           // Ignore the token.
           return true;
         }
@@ -980,8 +987,7 @@ bool Parser::InHeadNoscriptIM() {
       break;
     }
     case TokenType::TEXT_TOKEN: {
-      std::string_view data_view = std::move(token_.data);
-      if (Strings::IsAllWhitespaceChars(data_view)) {
+      if (Strings::IsAllWhitespaceChars(token_.data)) {
         // It was all whitespace.
         return InHeadIM();
       }
@@ -1078,7 +1084,7 @@ bool Parser::AfterHeadIM() {
       Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
       node->position_in_html_src_ = token_.position_in_html_src;
-      node->data_ = token_.data;
+      node->data_ = std::move(token_.data);
       AddChild(node);
       return true;
     }
@@ -1151,7 +1157,6 @@ bool Parser::InBodyIM() {
         case Atom::BASE:
         case Atom::BASEFONT:
         case Atom::BGSOUND:
-        case Atom::COMMAND:
         case Atom::LINK:
         case Atom::META:
         case Atom::NOFRAMES:
@@ -1277,6 +1282,7 @@ bool Parser::InBodyIM() {
             Node* node = open_elements_stack_.at(i);
             switch (node->atom_) {
               case Atom::LI:
+                // Remove all except last in stack.
                 open_elements_stack_.Pop(open_elements_stack_.size() - i);
                 break;
               case Atom::ADDRESS:
@@ -1300,6 +1306,7 @@ bool Parser::InBodyIM() {
             switch (node->atom_) {
               case Atom::DD:
               case Atom::DT:
+                // Remove all except last in stack.
                 open_elements_stack_.Pop(open_elements_stack_.size() - i);
                 break;
               case Atom::ADDRESS:
@@ -1321,7 +1328,7 @@ bool Parser::InBodyIM() {
           break;
         }
         case Atom::BUTTON: {
-          PopUntil(Scope::ButtonScope, Atom::BUTTON);
+          PopUntil(Scope::DefaultScope, Atom::BUTTON);
           ReconstructActiveFormattingElements();
           AddElement();
           frameset_ok_ = false;
@@ -1400,13 +1407,10 @@ bool Parser::InBodyIM() {
           AcknowledgeSelfClosingTag();
           if (token_.atom == Atom::INPUT) {
             for (auto& attr : token_.attributes) {
-              if (attr.key == "type") {
-                std::string val = attr.value;
-                Strings::ToLower(&val);
-                if (val == "hidden") {
+              if (attr.key == "type" &&
+                  Strings::EqualFold(attr.value, "hidden")) {
                   // Skip setting frameset_ok_ = false;
                   return true;
-                }
               }
             }
           }
@@ -1430,76 +1434,9 @@ bool Parser::InBodyIM() {
           break;
         }
         case Atom::IMAGE: {
-          if (top()->name_space_ == "svg") {
-            AddElement();
-          } else {
-            token_.atom = Atom::IMG;
-            token_.data = AtomUtil::ToString(Atom::IMG);
-            return false;
-          }
-          break;
-        }
-        case Atom::ISINDEX: {
-          if (allow_deprecated_tags_) {
-            AddElement();
-            break;
-          } else {
-            if (form_) {
-              // Ignore the token.
-              return true;
-            }
-            std::string action = "";
-            std::string prompt =
-                "This is a searchable index. "
-                "Enter search keywords: ";
-            std::vector<Attribute> attributes;
-            attributes.push_back({"", "name", "isindex"});
-            for (auto& a : token_.attributes) {
-              if (a.key == "action") {
-                action = a.value;
-              } else if (a.key == "name") {
-                // Ignore the attribute.
-              } else if (a.key == "prompt") {
-                prompt = a.value;
-              } else {
-                attributes.push_back(a);
-              }
-            }
-            AcknowledgeSelfClosingTag();
-            PopUntil(Scope::ButtonScope, Atom::P);
-            ParseImpliedToken(TokenType::START_TAG_TOKEN, Atom::FORM,
-                              AtomUtil::ToString(Atom::FORM));
-            if (!form_) {
-              // NOTE: The 'isindex' element has been removed,
-              // and the 'template' element has not been designed to be
-              // collaborative with the index element.
-              //
-              // Ignore the token.
-              return true;
-            }
-            if (!action.empty()) {
-              form_->attributes_.clear();
-              form_->attributes_.push_back({"", "action", action});
-            }
-            ParseImpliedToken(TokenType::START_TAG_TOKEN, Atom::HR,
-                              AtomUtil::ToString(Atom::HR));
-            ParseImpliedToken(TokenType::START_TAG_TOKEN, Atom::LABEL,
-                              AtomUtil::ToString(Atom::LABEL));
-            AddText(prompt);
-            Node* node =
-                document_->NewNode(NodeType::ELEMENT_NODE, Atom::INPUT);
-            std::copy(attributes.begin(), attributes.end(),
-                      std::back_inserter(node->attributes_));
-            AddChild(node);
-            open_elements_stack_.Pop();
-            ParseImpliedToken(TokenType::END_TAG_TOKEN, Atom::LABEL,
-                              AtomUtil::ToString(Atom::LABEL));
-            ParseImpliedToken(TokenType::START_TAG_TOKEN, Atom::HR,
-                              AtomUtil::ToString(Atom::HR));
-            ParseImpliedToken(TokenType::END_TAG_TOKEN, Atom::FORM,
-                              AtomUtil::ToString(Atom::FORM));
-          }
-          break;
+          token_.atom = Atom::IMG;
+          token_.data = AtomUtil::ToString(Atom::IMG);
+          return false;
         }
         case Atom::TEXTAREA: {
           AddElement();
@@ -1512,23 +1449,28 @@ bool Parser::InBodyIM() {
           PopUntil(Scope::ButtonScope, Atom::P);
           ReconstructActiveFormattingElements();
           frameset_ok_ = false;
-          AddElement();
-          SetOriginalIM();
-          insertion_mode_ = std::bind(&Parser::TextIM, this);
+          ParseGenericRawTextElement();
           break;
         }
         case Atom::IFRAME: {
           frameset_ok_ = false;
-          AddElement();
-          SetOriginalIM();
-          insertion_mode_ = std::bind(&Parser::TextIM, this);
+          ParseGenericRawTextElement();
           break;
         }
-        case Atom::NOEMBED:
+        case Atom::NOEMBED: {
+          ParseGenericRawTextElement();
+          break;
+        }
         case Atom::NOSCRIPT: {
+          if (scripting_) {
+            ParseGenericRawTextElement();
+            return true;
+          }
+          ReconstructActiveFormattingElements();
           AddElement();
-          SetOriginalIM();
-          insertion_mode_ = std::bind(&Parser::TextIM, this);
+          // Don't let the tokenizer go into raw text mode when scripting is
+          // disabled.
+          tokenizer_->NextIsNotRawText();
           break;
         }
         case Atom::SELECT: {
@@ -1798,9 +1740,17 @@ void Parser::InBodyEndTagFormatting(Atom tag_atom, std::string_view tag_name) {
   // Once the code successfully parses the comprehensive test suite, we should
   // refactor this code to be more idiomatic.
 
-  // Steps 1-4. The outer loop.
+  // Steps 1-2
+  if (auto current = open_elements_stack_.Top();
+      current->data_ == tag_name &&
+      active_formatting_elements_stack_.Index(current) == -1) {
+    open_elements_stack_.Pop();
+    return;
+  }
+
+  // Steps 3-5. The outer loop.
   for (int i = 0; i < 8; ++i) {
-    // Step 5. Find the formatting element.
+    // Step 6. Find the formatting element.
     Node* formatting_element = nullptr;
     for (int j = active_formatting_elements_stack_.size() - 1; j >= 0; --j) {
       if (active_formatting_elements_stack_.at(j)->node_type_ ==
@@ -1818,18 +1768,24 @@ void Parser::InBodyEndTagFormatting(Atom tag_atom, std::string_view tag_name) {
       return;
     }
 
+    // Step 7. Ignore the tag if formatting element is not in the stack of open
+    // elements.
     int fe_index = open_elements_stack_.Index(formatting_element);
     if (fe_index == -1) {
       active_formatting_elements_stack_.Remove(formatting_element);
       return;
     }
 
+    // Step 8. Ignore the tag if formatting element is not in the scope.
     if (!ElementInScope(Scope::DefaultScope, tag_atom)) {
       // Ignore the tag.
       return;
     }
 
-    // Steps 9-10. Find the furthest block.
+    // Step 9. This step is omitted because it's just a parse error but no
+    // need to return.
+
+    // Steps 10-11. Find the furthest block.
     Node* furthest_block = nullptr;
     for (int k = fe_index; k < open_elements_stack_.size(); ++k) {
       if (open_elements_stack_.at(k)->IsSpecialElement()) {
@@ -1847,48 +1803,70 @@ void Parser::InBodyEndTagFormatting(Atom tag_atom, std::string_view tag_name) {
       return;
     }
 
-    // Steps 11-12. Find the common ancestor and bookmark node.
+    // Steps 12-13. Find the common ancestor and bookmark node.
     Node* common_ancestor = open_elements_stack_.at(fe_index - 1);
     auto bookmark = active_formatting_elements_stack_.Index(formatting_element);
 
-    // Step 13. The inner loop. Find the last_node to reparent.
+    // Step 14. The inner loop. Find the last_node to reparent.
     Node* last_node = furthest_block;
     Node* node = furthest_block;
     int x = open_elements_stack_.Index(node);
-    // Steps 13.1-12.2
-    for (int j = 0; j < 3; ++j) {
-      // Step 13.3.
+    // Step 14.1.
+    int j = 0;
+    while (true) {
+      // Step 14.2.
+      j++;
+      // Step 14.3.
       x--;
       node = open_elements_stack_.at(x);
-      // Step 13.4 - 13.5.
+      // Step 14.4. Go to the next step if node is formatting element.
+      if (node == formatting_element) break;
+
+      // Step 14.5. Remove node from the list of active formatting elements if
+      // inner loop counter is greater than three and node is in the list of
+      // active formatting elements.
+      if (int ni = active_formatting_elements_stack_.Index(node);
+          j > 3 && ni > -1) {
+        active_formatting_elements_stack_.Remove(node);
+        // If any element of the list of active formatting elements is removed,
+        // we need to take care whether bookmark should be decremented or not.
+        // This is because the value of bookmark may exceed the size of the
+        // list by removing elements from the list.
+        if (ni <= bookmark) {
+          bookmark--;
+        }
+        continue;
+      }
+
+      // Step 14.6. Continue the next inner loop if node is not in the list of
+      // active formatting elements.
       if (active_formatting_elements_stack_.Index(node) == -1) {
         open_elements_stack_.Remove(node);
         continue;
       }
-      // Step 13.6.
-      if (node == formatting_element) {
-        break;
-      }
-      // Step 13.7.
+
+      // Step 14.7.
       Node* clone = document_->CloneNode(node);
       active_formatting_elements_stack_.Replace(
           active_formatting_elements_stack_.Index(node), clone);
       open_elements_stack_.Replace(open_elements_stack_.Index(node), clone);
       node = clone;
-      // Step 13.8.
+
+      // Step 14.8.
       if (last_node == furthest_block) {
         bookmark = active_formatting_elements_stack_.Index(node) + 1;
       }
-      // Step 13.9.
+      // Step 14.9.
       if (last_node->Parent()) {
         last_node = last_node->Parent()->RemoveChild(last_node);
       }
       node->AppendChild(last_node);
-      // Step 13.10.
+
+      // Step 14.10.
       last_node = node;
     }
 
-    // Step 14. Reparent lastNode to the common ancestor,
+    // Step 15. Reparent lastNode to the common ancestor,
     // or for misnested table nodes, to the foster parent.
     if (last_node->Parent()) {
       last_node = last_node->Parent()->RemoveChild(last_node);
@@ -1906,13 +1884,13 @@ void Parser::InBodyEndTagFormatting(Atom tag_atom, std::string_view tag_name) {
         common_ancestor->AppendChild(last_node);
     }
 
-    // Steps 15-17. Reparent nodes from the furthest block's children
+    // Steps 16-18. Reparent nodes from the furthest block's children
     // to a clone of the formatting element.
     Node* clone = document_->CloneNode(formatting_element);
     furthest_block->ReparentChildrenTo(clone);
     furthest_block->AppendChild(clone);
 
-    // Step 18. Fix up the list of active formatting elements.
+    // Step 19. Fix up the list of active formatting elements.
     int old_loc = active_formatting_elements_stack_.Index(formatting_element);
     if (old_loc != -1 && old_loc < bookmark) {
       // Move the bookmark with the rest of the list.
@@ -1922,7 +1900,7 @@ void Parser::InBodyEndTagFormatting(Atom tag_atom, std::string_view tag_name) {
     active_formatting_elements_stack_.Remove(formatting_element);
     active_formatting_elements_stack_.Insert(bookmark, clone);
 
-    // Step 19. Fix up the stack of open elements.
+    // Step 20. Fix up the stack of open elements.
     open_elements_stack_.Remove(formatting_element);
     open_elements_stack_.Insert(open_elements_stack_.Index(furthest_block) + 1,
                                 clone);
@@ -1956,7 +1934,7 @@ bool Parser::TextIM() {
       open_elements_stack_.Pop();
       break;
     case TokenType::TEXT_TOKEN: {
-      std::string_view data_view = token_.data;
+      std::string_view data_view(token_.data);
       Node* node = open_elements_stack_.Top();
       if ((node->atom_ == Atom::TEXTAREA) && !node->FirstChild()) {
         // Ignore a newline at the start of a <textarea> block.
@@ -1970,7 +1948,6 @@ bool Parser::TextIM() {
       if (data_view.empty()) return true;
       AddText(data_view.data());
       return true;
-      break;
     }
     case TokenType::END_TAG_TOKEN:
       open_elements_stack_.Pop();
@@ -2152,7 +2129,7 @@ bool Parser::InTableIM() {
   }
 
   foster_parenting_ = true;
-  defer({ foster_parenting_ = false; });
+  defer(foster_parenting_ = false;);
   return InBodyIM();
 }  // Parser::InTableIM.
 
@@ -2436,7 +2413,6 @@ bool Parser::InRowIM() {
         case Atom::TR: {
           if (PopUntil(Scope::TableScope, Atom::TR)) {
             insertion_mode_ = std::bind(&Parser::InTableBodyIM, this);
-            return true;
           }
           // Ignore the token.
           return true;
@@ -2597,11 +2573,9 @@ bool Parser::InSelectIM() {
         case Atom::SELECT: {
           if (PopUntil(Scope::SelectScope, Atom::SELECT)) {
             ResetInsertionMode();
-          } else {
-            // Ignore the token.
-            return true;
           }
-          break;
+          // Ignore the token.
+          return true;
         }
         case Atom::INPUT:
         case Atom::KEYGEN:
@@ -2620,6 +2594,21 @@ bool Parser::InSelectIM() {
         case Atom::SCRIPT:
         case Atom::TEMPLATE: {
           return InHeadIM();
+        }
+        case Atom::IFRAME:
+        case Atom::NOEMBED:
+        case Atom::NOFRAMES:
+        case Atom::NOSCRIPT:
+        case Atom::PLAINTEXT:
+        case Atom::STYLE:
+        case Atom::TITLE:
+        case Atom::XMP: {
+          // Don't let the tokenizer go into raw text mode when there are raw
+          // tags to be ignored. These tags should be ignored from the tokenizer
+          // properly.
+          tokenizer_->NextIsNotRawText();
+          // Ignore the token.
+          return true;
         }
         default:
           break;
@@ -2647,12 +2636,11 @@ bool Parser::InSelectIM() {
           break;
         }
         case Atom::SELECT: {
-          if (PopUntil(Scope::SelectScope, Atom::SELECT)) {
-            ResetInsertionMode();
-          } else {
+          if (!PopUntil(Scope::SelectScope, Atom::SELECT)) {
             // Ignore the token.
             return true;
           }
+          ResetInsertionMode();
           break;
         }
         case Atom::TEMPLATE: {
@@ -2709,8 +2697,7 @@ bool Parser::InSelectInTableIM() {
           // tag is arguably incorrect (conceptually), but it mimics what
           // Chromium does.
           for (int i = open_elements_stack_.size() - 1; i >= 0; --i) {
-            Node* node = open_elements_stack_.at(i);
-            if (node->atom_ == Atom::SELECT) {
+            if (open_elements_stack_.at(i)->atom_ == Atom::SELECT) {
               open_elements_stack_.Pop(open_elements_stack_.size() - i);
               break;
             }
@@ -2882,8 +2869,8 @@ bool Parser::InFramesetIM() {
       break;
     }
     case TokenType::TEXT_TOKEN: {
-      std::string whitespace_chars = ExtractWhitespace(token_.data);
-      if (!whitespace_chars.empty()) AddText(whitespace_chars);
+      std::string whitespace_only = ExtractWhitespace(token_.data);
+      if (!whitespace_only.empty()) AddText(whitespace_only);
       break;
     }
     case TokenType::START_TAG_TOKEN:
@@ -2938,8 +2925,8 @@ bool Parser::AfterFramesetIM() {
       break;
     }
     case TokenType::TEXT_TOKEN: {
-      std::string whitespace_chars = ExtractWhitespace(token_.data);
-      if (!whitespace_chars.empty()) AddText(whitespace_chars);
+      std::string whitespace_only = ExtractWhitespace(token_.data);
+      if (!whitespace_only.empty()) AddText(whitespace_only);
       break;
     }
     case TokenType::START_TAG_TOKEN:
@@ -3016,9 +3003,9 @@ bool Parser::AfterAfterFramesetIM() {
       break;
     }
     case TokenType::TEXT_TOKEN: {
-      std::string whitespace_chars = ExtractWhitespace(token_.data);
-      if (!whitespace_chars.empty()) {
-        token_.data = whitespace_chars;
+      std::string whitespace_only = ExtractWhitespace(token_.data);
+      if (!whitespace_only.empty()) {
+        token_.data = whitespace_only;
         return InBodyIM();
       }
       break;
@@ -3041,10 +3028,16 @@ bool Parser::AfterAfterFramesetIM() {
   return true;
 }  // Parser::AfterAfterFramesetIM.
 
+Node* Parser::AdjustedCurrentNode() {
+  if (open_elements_stack_.size() == 1 && fragment_ && context_node_)
+    return context_node_;
+  return open_elements_stack_.Top();
+}
+
 // Section 12.2.6.5.
 bool Parser::ParseForeignContent() {
   switch (token_.token_type) {
-    case TokenType::TEXT_TOKEN:
+    case TokenType::TEXT_TOKEN: {
       if (frameset_ok_) {
         frameset_ok_ = (token_.data.find_first_not_of(
                             Strings::kWhitespaceOrNull) == std::string::npos);
@@ -3054,6 +3047,7 @@ bool Parser::ParseForeignContent() {
                           Strings::kNullReplacementChar);
       AddText(token_.data);
       break;
+    }
     case TokenType::COMMENT_TOKEN: {
       Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
@@ -3062,33 +3056,37 @@ bool Parser::ParseForeignContent() {
       break;
     }
     case TokenType::START_TAG_TOKEN: {
-      auto breaktout_tag = std::find(std::begin(kBreakoutTags),
-                                     std::end(kBreakoutTags), token_.atom);
-      bool is_breakout_tag = breaktout_tag != std::end(kBreakoutTags);
+      if (!fragment_) {
+        auto breaktout_tag = std::find(std::begin(kBreakoutTags),
+                                       std::end(kBreakoutTags), token_.atom);
+        bool is_breakout_tag = breaktout_tag != std::end(kBreakoutTags);
 
-      if (token_.atom == Atom::FONT) {
-        for (auto& attr : token_.attributes) {
-          std::string key = attr.key;
-          if (key == "color" || key == "face" || key == "size") {
-            is_breakout_tag = true;
-            break;
+        if (token_.atom == Atom::FONT) {
+          for (auto& attr : token_.attributes) {
+            std::string key = attr.key;
+            if (key == "color" || key == "face" || key == "size") {
+              is_breakout_tag = true;
+              break;
+            }
           }
         }
-      }
-      if (is_breakout_tag) {
-        for (int i = open_elements_stack_.size() - 1; i >= 0; --i) {
-          Node* node = open_elements_stack_.at(i);
-          if (node->name_space_.empty() || HtmlIntegrationPoint(*node) ||
-              MathMLTextIntegrationPoint(*node)) {
-            open_elements_stack_.Pop(open_elements_stack_.size() - i - 1);
-            break;
+        if (is_breakout_tag) {
+          for (int i = open_elements_stack_.size() - 1; i >= 0; --i) {
+            Node* node = open_elements_stack_.at(i);
+            if (node->name_space_.empty() || HtmlIntegrationPoint(*node) ||
+                MathMLTextIntegrationPoint(*node)) {
+              open_elements_stack_.Pop(open_elements_stack_.size() - i - 1);
+              break;
+            }
           }
+          return false;
         }
-        return false;
       }
-      if (top()->name_space_ == "math") {
+
+      Node* current = AdjustedCurrentNode();
+      if (current->name_space_ == "math") {
         AdjustMathMLAttributeNames(&token_.attributes);
-      } else if (top()->name_space_ == "svg") {
+      } else if (current->name_space_ == "svg") {
         for (auto [name, adjusted] : kSvgTagNameAdjustments) {
           if (name == token_.atom) {
             token_.atom = adjusted;
@@ -3101,7 +3099,7 @@ bool Parser::ParseForeignContent() {
       }
 
       AdjustForeignAttributes(&token_.attributes);
-      auto& ns = top()->name_space_;
+      auto& ns = current->name_space_;
       AddElement();
       top()->name_space_ = ns;
       if (!ns.empty()) {
@@ -3146,7 +3144,7 @@ bool Parser::ParseForeignContent() {
 bool Parser::InForeignContent() {
   if (open_elements_stack_.size() == 0) return false;
 
-  Node* node = open_elements_stack_.Top();
+  Node* node = AdjustedCurrentNode();
   if (node->name_space_.empty()) return false;
   Atom token_atom = token_.atom;
   TokenType token_type = token_.token_type;
@@ -3177,6 +3175,13 @@ bool Parser::InForeignContent() {
 
   return true;
 }  // Parser::InForeignContent.
+
+// Section 12.2.6.2.
+void Parser::ParseGenericRawTextElement() {
+  AddElement();
+  original_insertion_mode_ = insertion_mode_;
+  insertion_mode_ = std::bind(&Parser::TextIM, this);
+}
 
 void Parser::ParseImpliedToken(TokenType token_type, Atom atom,
                                const std::string& data) {

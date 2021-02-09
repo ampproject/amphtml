@@ -55,16 +55,6 @@ struct ParseOptions {
   // Records attributes position in the html string.
   bool record_attribute_offsets = false;
 
-  // Allow deprecated tags.
-  // Following deprecated tags are parsed and added to the tree as if they are
-  // allowed. If false, the deprecated tags are processed as per html5
-  // algorithm.
-  //
-  // 1: <isindex> is deprecated and not supported by any browser.
-  // The HTML5 spec treatment is messy and chrome diverge from it.
-  // https://www.w3.org/TR/2011/WD-html5-20110113/Overview.html#isindex
-  bool allow_deprecated_tags = false;
-
   OnNodeCallback on_node_callback = nullptr;
 };
 
@@ -180,12 +170,18 @@ class Parser {
   // Runs the current token through the parsing routines until it is consumed.
   void ParseCurrentToken();
 
+  // Section 12.2.4.2.
+  Node* AdjustedCurrentNode();
+
   // Section 12.2.4.3.
   void ReconstructActiveFormattingElements();
   void AddFormattingElement();
 
   // Section 12.2.6.
   bool InForeignContent();
+
+  // Section 12.2.6.2.
+  void ParseGenericRawTextElement();
 
   // Section 12.2.6.5
   bool ParseForeignContent();
@@ -259,7 +255,7 @@ class Parser {
   // Section 12.2.4.1, "using the rules for".
   void SetOriginalIM();
 
-  // popUntil pops the stack of open elements at the highest element whose tag
+  // Pops the stack of open elements at the highest element whose tag
   // is in matchTags, provided there is no higher element in the scope's stop
   // tags (as defined in section 12.2.4.2). It returns whether or not there was
   // such an element. If there was not, popUntil leaves the stack unchanged.
@@ -279,7 +275,7 @@ class Parser {
   template <typename... Args>
   bool PopUntil(Scope scope, Args... match_tags);
 
-  // indexOfElementInScope returns the index in p.oe of the highest element
+  // Returns the index in p.oe of the highest element
   // whose tag is in matchTags that is in scope. If no matching element is in
   // scope, it returns -1.
   int IndexOfElementInScope(Scope scope,
@@ -370,7 +366,7 @@ class Parser {
   // in parent_node.
   bool fragment_ = false;
   // The context element when parsing an HTML fragment (section 12.4).
-  Node* fragment_parent_node_;
+  Node* context_node_;
 
   // Whether new elements should be inserted according to
   // the foster parenting rules (section 12.2.6.1).

@@ -51,8 +51,6 @@
 (1,9): need-space-after-doctype
 (1,10): expected-doctype-name-but-got-right-bracket
 (1,10): unknown-doctype
-#new-errors
-(1:10) missing-doctype-name
 #document
 | <!DOCTYPE >
 | <html>
@@ -64,8 +62,6 @@
 #errors
 (1,6): eof-in-comment
 (1,6): expected-doctype-but-got-eof
-#new-errors
-(1:7) eof-in-comment
 #document
 | <!-- -x -->
 | <html>

@@ -34,8 +34,6 @@ Test
 #errors
 (1,3): eof-in-tag-name
 (1,3): expected-doctype-but-got-eof
-#new-errors
-(1:4) eof-in-tag
 #document
 | <html>
 |   <head>
@@ -135,9 +133,6 @@ console.log("FOO<span>BAR</span>BAZ");
 (1,5): expected-doctype-but-got-start-tag
 (1,21): attributes-in-end-tag
 (1,51): attributes-in-end-tag
-#new-errors
-(1:21) end-tag-with-attributes
-(1:51) end-tag-with-attributes
 #document
 | <html>
 |   <head>
@@ -150,8 +145,6 @@ console.log("FOO<span>BAR</span>BAZ");
 #errors
 (1,2): expected-closing-tag-but-got-char
 (1,8): expected-doctype-but-got-eof
-#new-errors
-(1:3) invalid-first-character-of-tag-name
 #document
 | <!--  tttt -->
 | <html>
@@ -191,10 +184,6 @@ console.log("FOO<span>BAR</span>BAZ");
 (1,16): unexpected-character-after-solidus-in-tag
 (1,24): expected-doctype-but-got-start-tag
 (1,24): expected-closing-tag-but-got-eof
-#new-errors
-(1:8) unexpected-solidus-in-tag
-(1:9) unexpected-solidus-in-tag
-(1:17) unexpected-solidus-in-tag
 #document
 | <html>
 |   <head>
@@ -209,8 +198,6 @@ console.log("FOO<span>BAR</span>BAZ");
 (1,3): expected-doctype-but-got-start-tag
 (1,8): expected-tag-name
 (1,12): expected-closing-tag-but-got-eof
-#new-errors
-(1:9) invalid-first-character-of-tag-name
 #document
 | <html>
 |   <head>
@@ -246,8 +233,6 @@ console.log("FOO<span>BAR</span>BAZ");
 (1,6): expected-doctype-but-got-start-tag
 (1,21): attributes-in-end-tag
 (1,21): unexpected-end-tag-treated-as
-#new-errors
-(1:21) end-tag-with-attributes
 #document
 | <html>
 |   <head>
@@ -274,8 +259,6 @@ console.log("FOO<span>BAR</span>BAZ");
 (1,28): attributes-in-end-tag
 (1,28): unexpected-end-tag-after-body
 (1,28): unexpected-end-tag-treated-as
-#new-errors
-(1:28) end-tag-with-attributes
 #document
 | <html>
 |   <head>
@@ -402,6 +385,7 @@ console.log("FOO<span>BAR</span>BAZ");
 (1,59): unexpected-select-in-select
 (1,93): unexpected-select-in-select
 (1,127): unexpected-select-in-select
+(1,127): expected-closing-tag-but-got-eof
 #document
 | <html>
 |   <head>
@@ -624,8 +608,6 @@ console.log("FOO<span>BAR</span>BAZ");
 #errors
 (1,6): invalid-character-in-attribute-name
 (1,15): expected-doctype-but-got-start-tag
-#new-errors
-(1:6) unexpected-character-in-attribute-name
 #document
 | <html>
 |   <head>
@@ -640,8 +622,6 @@ console.log("FOO<span>BAR</span>BAZ");
 (1,4): expected-doctype-but-got-start-tag
 (1,23): non-void-element-with-trailing-solidus
 (1,29): end-tag-too-early
-#new-errors
-(1:9-1:24) non-void-html-element-start-tag-with-trailing-solidus
 #document
 | <html>
 |   <head>
