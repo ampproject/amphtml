@@ -787,7 +787,7 @@ export class GoogleSubscriptionsPlatform {
           // eslint-disable-next-line google-camelcase/google-camelcase
           registered_user: {
             // timestamp: '1612044738', // In seconds.
-            timestamp: '1', // In seconds.
+            timestamp: Math.round(Date.now() / 1000) - 30000, // In seconds.
           },
         },
       })
