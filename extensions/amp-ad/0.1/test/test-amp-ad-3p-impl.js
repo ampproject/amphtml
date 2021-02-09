@@ -47,7 +47,11 @@ function createAmpAd(win, attachToAmpdoc = false, ampdoc) {
     return true;
   };
 
-  return new AmpAd3PImpl(ampAdElement);
+  const impl = new AmpAd3PImpl(ampAdElement);
+  // Initialize internal implementation structure since `isBuilt` is forced
+  // to return `true` above.
+  ampAdElement.impl_ = impl;
+  return impl;
 }
 
 describes.realWin(
