@@ -65,8 +65,11 @@ inline char Tokenizer::ReadByte() {
 
 inline void Tokenizer::UnreadByte() {
   raw_.end--;
+
   if (current_line_col_.second == 0) {
-    lines_cols_.pop_back();
+    if (lines_cols_.size() > 1) {
+      lines_cols_.pop_back();
+    }
     current_line_col_ = lines_cols_.back();
     return;
   }
