@@ -314,7 +314,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
     platform.getEntitlements = env.sandbox
       .stub()
       .callsFake(() => Promise.resolve(entitlement));
-    platform.getServiceId = env.sandbox.stub().callsFake(() => 'local');
+    platform.getPlatformKey = env.sandbox.stub().callsFake(() => 'local');
 
     subscriptionService.platformConfig_ = platformConfig;
     subscriptionService.registerPlatform(serviceData.serviceId, factoryStub);
@@ -407,7 +407,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
         ? new Entitlement(grantEntitlementSpec)
         : null;
       const granted = !!grantEntitlementSpec;
-      const localPlatform = subscriptionService.platformStore_.getLocalPlatform();
+      const localPlatform = subscriptionService.platformStore_.getLocalPlatform_();
       env.sandbox
         .stub(subscriptionService.platformStore_, 'getGrantStatus')
         .callsFake(() => Promise.resolve(granted));
@@ -433,7 +433,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
         granted: true,
         grantReason: GrantReason.SUBSCRIBER,
       });
-      const localPlatform = subscriptionService.platformStore_.getLocalPlatform();
+      const localPlatform = subscriptionService.platformStore_.getLocalPlatform_();
       const selectPlatformStub =
         subscriptionService.platformStore_.selectPlatform;
       const activateStub = env.sandbox.stub(localPlatform, 'activate');
@@ -478,7 +478,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
           grantReason: GrantReason.SUBSCRIBER,
         }
       );
-      const localPlatform = subscriptionService.platformStore_.getLocalPlatform();
+      const localPlatform = subscriptionService.platformStore_.getLocalPlatform_();
       const selectPlatformStub =
         subscriptionService.platformStore_.selectPlatform;
       const activateStub = env.sandbox.stub(localPlatform, 'activate');
@@ -531,7 +531,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
 
       await subscriptionService.initialize_();
       resolveRequiredPromises({granted: false});
-      const localPlatform = subscriptionService.platformStore_.getLocalPlatform();
+      const localPlatform = subscriptionService.platformStore_.getLocalPlatform_();
       env.sandbox.stub(localPlatform, 'activate');
 
       await subscriptionService.selectAndActivatePlatform_();
@@ -692,10 +692,10 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
         'resetPlatformStore'
       );
       env.sandbox.stub(subscriptionService, 'startAuthorizationFlow_');
-      const origPlatforms = subscriptionService.platformStore_.serviceIds_;
+      const origPlatforms = subscriptionService.platformStore_.platformKeys_;
       await subscriptionService.resetPlatforms();
       expect(resetSubscriptionPlatformSpy).to.be.calledOnce;
-      expect(subscriptionService.platformStore_.serviceIds_).to.equal(
+      expect(subscriptionService.platformStore_.platformKeys_).to.equal(
         origPlatforms
       );
     });
@@ -814,7 +814,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
   describe('registerPlatform', () => {
     it('should work on free pages', async () => {
       const platformFactoryStub = env.sandbox.stub().callsFake(() => ({
-        getServiceId: () => 'platform1',
+        getPlatformKey: () => 'platform1',
       }));
       env.sandbox.stub(subscriptionService, 'initialize_').callsFake(() => {
         subscriptionService.platformConfig_ = freePlatformConfig;
@@ -861,7 +861,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
 
         await subscriptionService.initialize_();
         expect(
-          subscriptionService.platformStore_.getLocalPlatform()
+          subscriptionService.platformStore_.getLocalPlatform_()
         ).to.be.instanceOf(LocalSubscriptionRemotePlatform);
       }
     );
@@ -874,7 +874,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
 
         await subscriptionService.initialize_();
         expect(
-          subscriptionService.platformStore_.getLocalPlatform()
+          subscriptionService.platformStore_.getLocalPlatform_()
         ).to.be.instanceOf(ViewerSubscriptionPlatform);
       }
     );
@@ -1088,9 +1088,9 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
         platformConfig.fallbackEntitlement
       );
       subscriptionService.initializePlatformStore_(['local']);
-      expect(subscriptionService.platformStore_.serviceIds_).to.be.deep.equal([
-        'local',
-      ]);
+      expect(
+        subscriptionService.platformStore_.platformKeys_
+      ).to.be.deep.equal(['local']);
       expect(
         subscriptionService.platformStore_.fallbackEntitlement_.json()
       ).to.be.deep.equal(entitlement.json());
@@ -1098,7 +1098,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
   });
 
   describe('action delegation', () => {
-    it('should call delegateActionToService with serviceId local', () => {
+    it('should call delegateActionToService with "local" platformKey', () => {
       const delegateStub = env.sandbox.stub(
         subscriptionService,
         'delegateActionToService'
@@ -1118,7 +1118,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
       const executeActionStub = env.sandbox.stub(platform, 'executeAction');
       const getPlatformStub = env.sandbox
         .stub(subscriptionService.platformStore_, 'onPlatformResolves')
-        .callsFake((serviceId, callback) => callback(platform));
+        .callsFake((platformKey, callback) => callback(platform));
       const action = action;
 
       await subscriptionService.delegateActionToService(action, 'local');
@@ -1128,21 +1128,21 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
   });
 
   describe('decorateServiceAction', () => {
-    it('should delegate element to platform of given serviceId', () => {
+    it('should delegate element to platform of given platformKey', () => {
       const element = document.createElement('div');
       element.setAttribute('subscriptions-service', 'swg-google');
       const platform = new SubscriptionPlatform();
-      platform.getServiceId = () => 'swg-google';
+      platform.getPlatformKey = () => 'swg-google';
       subscriptionService.platformStore_ = new PlatformStore([
         'local',
         'swg-google',
       ]);
       const whenResolveStub = env.sandbox
         .stub(subscriptionService.platformStore_, 'onPlatformResolves')
-        .callsFake((serviceId, callback) => callback(platform));
+        .callsFake((platformKey, callback) => callback(platform));
       const decorateUIStub = env.sandbox.stub(platform, 'decorateUI');
       subscriptionService.decorateServiceAction(element, 'swg-google', 'login');
-      expect(whenResolveStub).to.be.calledWith(platform.getServiceId());
+      expect(whenResolveStub).to.be.calledWith(platform.getPlatformKey());
       expect(decorateUIStub).to.be.calledWith(element);
     });
   });
@@ -1188,7 +1188,10 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
         subscriptionService.cryptoHandler_,
         'tryToDecryptDocument'
       );
-      subscriptionService.resolveEntitlementsToStore_('serviceId', entitlement);
+      subscriptionService.resolveEntitlementsToStore_(
+        'platformKey',
+        entitlement
+      );
       expect(stub).to.be.calledWith(decryptedDocumentKey);
     });
 
@@ -1206,7 +1209,10 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
         subscriptionService.cryptoHandler_,
         'tryToDecryptDocument'
       );
-      subscriptionService.resolveEntitlementsToStore_('serviceId', entitlement);
+      subscriptionService.resolveEntitlementsToStore_(
+        'platformKey',
+        entitlement
+      );
       expect(stub).to.not.be.called;
     });
   });

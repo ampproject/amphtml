@@ -42,11 +42,11 @@ export class ServiceAdapter {
 
   /**
    * Returns the encrypted document key for the specified service.
-   * @param {string} serviceId
+   * @param {string} platformKey
    * @return {?string}
    */
-  getEncryptedDocumentKey(serviceId) {
-    return this.subscriptionService_.getEncryptedDocumentKey(serviceId);
+  getEncryptedDocumentKey(platformKey) {
+    return this.subscriptionService_.getEncryptedDocumentKey(platformKey);
   }
 
   /**
@@ -59,11 +59,11 @@ export class ServiceAdapter {
 
   /**
    * Returns the reader ID for the specified service.
-   * @param {string} serviceId
+   * @param {string} platformKey
    * @return {!Promise<string>}
    */
-  getReaderId(serviceId) {
-    return this.subscriptionService_.getReaderId(serviceId);
+  getReaderId(platformKey) {
+    return this.subscriptionService_.getReaderId(platformKey);
   }
 
   /**
@@ -87,14 +87,14 @@ export class ServiceAdapter {
   /**
    * Delegates actions to a given service.
    * @param {string} action
-   * @param {string} serviceId
+   * @param {string} platformKey
    * @param {?string} sourceId
    * @return {!Promise<boolean>}
    */
-  delegateActionToService(action, serviceId, sourceId) {
+  delegateActionToService(action, platformKey, sourceId) {
     return this.subscriptionService_.delegateActionToService(
       action,
-      serviceId,
+      platformKey,
       sourceId
     );
   }
@@ -102,14 +102,14 @@ export class ServiceAdapter {
   /**
    * Delegate UI decoration to another service.
    * @param {!Element} element
-   * @param {string} serviceId
+   * @param {string} platformKey
    * @param {string} action
    * @param {?JsonObject} options
    */
-  decorateServiceAction(element, serviceId, action, options) {
+  decorateServiceAction(element, platformKey, action, options) {
     this.subscriptionService_.decorateServiceAction(
       element,
-      serviceId,
+      platformKey,
       action,
       options
     );

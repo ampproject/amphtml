@@ -22,10 +22,10 @@
  */
 export class SubscriptionPlatform {
   /**
-   * Returns the service Id.
+   * Returns the platform key.
    * @return {string}
    */
-  getServiceId() {}
+  getPlatformKey() {}
 
   /**
    * Requests entitlement for a subscription platform.

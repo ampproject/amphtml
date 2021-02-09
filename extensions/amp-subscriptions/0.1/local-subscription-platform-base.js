@@ -89,7 +89,7 @@ export class LocalSubscriptionBasePlatform {
   /**
    * @override
    */
-  getServiceId() {
+  getPlatformKey() {
     return 'local';
   }
 
@@ -154,7 +154,7 @@ export class LocalSubscriptionBasePlatform {
           const platform = this.serviceAdapter_.selectPlatformForLogin();
           this.serviceAdapter_.delegateActionToService(
             action,
-            platform.getServiceId(),
+            platform.getPlatformKey(),
             element.id
           );
         } else {

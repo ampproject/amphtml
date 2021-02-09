@@ -126,7 +126,7 @@ export class SubscriptionService {
     this.cid_ = Services.cidForDoc(ampdoc);
 
     /** @private {!Object<string, ?Promise<string>>} */
-    this.serviceIdToReaderIdPromiseMap_ = {};
+    this.platformKeyToReaderIdPromiseMap_ = {};
 
     /** @private {!CryptoHandler} */
     this.cryptoHandler_ = new CryptoHandler(ampdoc);
@@ -154,11 +154,11 @@ export class SubscriptionService {
         'Services not configured in service config'
       );
 
-      const serviceIds = this.platformConfig_['services'].map(
+      const platformKeys = this.platformConfig_['services'].map(
         (service) => service['serviceId'] || 'local'
       );
 
-      this.initializePlatformStore_(serviceIds);
+      this.initializePlatformStore_(platformKeys);
 
       /** @type {!Array} */ (this.platformConfig_['services']).forEach(
         (service) => {
@@ -212,12 +212,12 @@ export class SubscriptionService {
    * Returns encrypted document key if it exists.
    * This key is needed for requesting a different key
    * that decrypts locked content on the page.
-   * @param {string} serviceId Who you want to decrypt the key.
-   *                           For example: 'google.com'
+   * @param {string} platformKey Who you want to decrypt the key.
+   *                             For example: 'google.com'
    * @return {?string}
    */
-  getEncryptedDocumentKey(serviceId) {
-    return this.cryptoHandler_.getEncryptedDocumentKey(serviceId);
+  getEncryptedDocumentKey(platformKey) {
+    return this.cryptoHandler_.getEncryptedDocumentKey(platformKey);
   }
 
   /**
@@ -233,21 +233,21 @@ export class SubscriptionService {
   }
 
   /**
-   * @param {string} serviceId
+   * @param {string} platformKey
    * @return {!Promise<string>}
    */
-  getReaderId(serviceId) {
-    let readerIdPromise = this.serviceIdToReaderIdPromiseMap_[serviceId];
+  getReaderId(platformKey) {
+    let readerIdPromise = this.platformKeyToReaderIdPromiseMap_[platformKey];
     if (!readerIdPromise) {
       const consent = Promise.resolve();
       // Scope is kept "amp-access" by default to avoid unnecessary CID
       // rotation.
       const scope =
-        'amp-access' + (serviceId == 'local' ? '' : '-' + serviceId);
+        'amp-access' + (platformKey == 'local' ? '' : '-' + platformKey);
       readerIdPromise = this.cid_.then((cid) =>
         cid.get({scope, createCookieIfNotPresent: true}, consent)
       );
-      this.serviceIdToReaderIdPromiseMap_[serviceId] = readerIdPromise;
+      this.platformKeyToReaderIdPromiseMap_[platformKey] = readerIdPromise;
     }
     return readerIdPromise;
   }
@@ -264,17 +264,17 @@ export class SubscriptionService {
    * This method registers an auto initialized subcription platform with this
    * service.
    *
-   * @param {string} serviceId
+   * @param {string} platformKey
    * @param {function(!JsonObject, !ServiceAdapter):!SubscriptionPlatformInterface} subscriptionPlatformFactory
    * @return {!Promise}
    */
-  registerPlatform(serviceId, subscriptionPlatformFactory) {
+  registerPlatform(platformKey, subscriptionPlatformFactory) {
     return this.initialize_().then(() => {
       if (this.doesViewerProvideAuth_) {
         return; // External platforms should not register if viewer provides auth
       }
       const matchedServices = this.platformConfig_['services'].filter(
-        (service) => (service.serviceId || 'local') === serviceId
+        (service) => (service.serviceId || 'local') === platformKey
       );
 
       const matchedServiceConfig = userAssert(
@@ -288,17 +288,17 @@ export class SubscriptionService {
       );
 
       this.platformStore_.resolvePlatform(
-        subscriptionPlatform.getServiceId(),
+        subscriptionPlatform.getPlatformKey(),
         subscriptionPlatform
       );
       this.subscriptionAnalytics_.serviceEvent(
         SubscriptionAnalyticsEvents.PLATFORM_REGISTERED,
-        subscriptionPlatform.getServiceId()
+        subscriptionPlatform.getPlatformKey()
       );
       // Deprecated event fired for backward compatibility
       this.subscriptionAnalytics_.serviceEvent(
         SubscriptionAnalyticsEvents.PLATFORM_REGISTERED_DEPRECATED,
-        subscriptionPlatform.getServiceId()
+        subscriptionPlatform.getPlatformKey()
       );
       this.fetchEntitlements_(subscriptionPlatform);
     });
@@ -390,12 +390,12 @@ export class SubscriptionService {
   }
 
   /**
-   * @param {string} serviceId
+   * @param {string} platformKey
    * @param {!./entitlement.Entitlement} entitlement
    * @private
    */
-  resolveEntitlementsToStore_(serviceId, entitlement) {
-    this.platformStore_.resolveEntitlement(serviceId, entitlement);
+  resolveEntitlementsToStore_(platformKey, entitlement) {
+    this.platformStore_.resolveEntitlement(platformKey, entitlement);
     if (entitlement.decryptedDocumentKey) {
       this.cryptoHandler_.tryToDecryptDocument(
         entitlement.decryptedDocumentKey
@@ -403,7 +403,7 @@ export class SubscriptionService {
     }
     this.subscriptionAnalytics_.serviceEvent(
       SubscriptionAnalyticsEvents.ENTITLEMENT_RESOLVED,
-      serviceId
+      platformKey
     );
   }
 
@@ -421,10 +421,11 @@ export class SubscriptionService {
         this.cryptoHandler_.isDocumentEncrypted() &&
         !entitlements.decryptedDocumentKey
       ) {
-        const logChannel = platform.getServiceId() == 'local' ? user() : dev();
+        const logChannel =
+          platform.getPlatformKey() == 'local' ? user() : dev();
         logChannel.error(
           TAG,
-          `${platform.getServiceId()}: Subscription granted and encryption enabled, ` +
+          `${platform.getPlatformKey()}: Subscription granted and encryption enabled, ` +
             'but no decrypted document key returned.'
         );
         return null;
@@ -458,18 +459,18 @@ export class SubscriptionService {
         .then((entitlement) => {
           entitlement =
             entitlement ||
-            Entitlement.empty(subscriptionPlatform.getServiceId());
+            Entitlement.empty(subscriptionPlatform.getPlatformKey());
           this.resolveEntitlementsToStore_(
-            subscriptionPlatform.getServiceId(),
+            subscriptionPlatform.getPlatformKey(),
             entitlement
           );
           return entitlement;
         })
         .catch((reason) => {
-          const serviceId = subscriptionPlatform.getServiceId();
-          this.platformStore_.reportPlatformFailureAndFallback(serviceId);
+          const platformKey = subscriptionPlatform.getPlatformKey();
+          this.platformStore_.reportPlatformFailureAndFallback(platformKey);
           throw user().createError(
-            `fetch entitlements failed for ${serviceId}`,
+            `fetch entitlements failed for ${platformKey}`,
             reason
           );
         })
@@ -477,15 +478,15 @@ export class SubscriptionService {
   }
 
   /**
-   * Initializes the PlatformStore with the service ids.
-   * @param {!Array<string>} serviceIds
+   * Initializes the PlatformStore with a list of platform keys.
+   * @param {!Array<string>} platformKeys
    */
-  initializePlatformStore_(serviceIds) {
+  initializePlatformStore_(platformKeys) {
     const fallbackEntitlement = this.platformConfig_['fallbackEntitlement']
       ? Entitlement.parseFromJson(this.platformConfig_['fallbackEntitlement'])
       : Entitlement.empty('local');
     this.platformStore_ = new PlatformStore(
-      serviceIds,
+      platformKeys,
       this.platformConfig_['score'],
       fallbackEntitlement
     );
@@ -496,9 +497,9 @@ export class SubscriptionService {
    * Delegates authentication to viewer
    */
   delegateAuthToViewer_() {
-    const serviceIds = ['local'];
+    const platformKeys = ['local'];
     const origin = getWinOrigin(this.ampdoc_.win);
-    this.initializePlatformStore_(serviceIds);
+    this.initializePlatformStore_(platformKeys);
 
     /** @type {!Array} */ (this.platformConfig_['services']).forEach(
       (service) => {
@@ -559,7 +560,7 @@ export class SubscriptionService {
       const selectedPlatform = resolvedValues[1];
       const grantEntitlement = resolvedValues[2];
       const selectedEntitlement = this.platformStore_.getResolvedEntitlementFor(
-        selectedPlatform.getServiceId()
+        selectedPlatform.getPlatformKey()
       );
       const bestEntitlement = grantEntitlement || selectedEntitlement;
 
@@ -567,12 +568,12 @@ export class SubscriptionService {
 
       this.subscriptionAnalytics_.serviceEvent(
         SubscriptionAnalyticsEvents.PLATFORM_ACTIVATED,
-        selectedPlatform.getServiceId()
+        selectedPlatform.getPlatformKey()
       );
       // Deprecated events are fire for backwards compatibility
       this.subscriptionAnalytics_.serviceEvent(
         SubscriptionAnalyticsEvents.PLATFORM_ACTIVATED_DEPRECATED,
-        selectedPlatform.getServiceId()
+        selectedPlatform.getPlatformKey()
       );
       if (bestEntitlement.granted) {
         this.subscriptionAnalytics_.serviceEvent(
@@ -582,11 +583,11 @@ export class SubscriptionService {
       } else {
         this.subscriptionAnalytics_.serviceEvent(
           SubscriptionAnalyticsEvents.PAYWALL_ACTIVATED,
-          selectedPlatform.getServiceId()
+          selectedPlatform.getPlatformKey()
         );
         this.subscriptionAnalytics_.serviceEvent(
           SubscriptionAnalyticsEvents.ACCESS_DENIED,
-          selectedPlatform.getServiceId()
+          selectedPlatform.getPlatformKey()
         );
       }
     });
@@ -667,19 +668,19 @@ export class SubscriptionService {
   /**
    * Delegates an action to specified platform.
    * @param {string} action
-   * @param {string} serviceId
+   * @param {string} platformKey
    * @param {?string} sourceId
    * @return {!Promise<boolean>}
    */
-  delegateActionToService(action, serviceId, sourceId = null) {
+  delegateActionToService(action, platformKey, sourceId = null) {
     return new Promise((resolve) => {
-      this.platformStore_.onPlatformResolves(serviceId, (platform) => {
+      this.platformStore_.onPlatformResolves(platformKey, (platform) => {
         devAssert(platform, 'Platform is not registered');
         this.subscriptionAnalytics_.event(
           SubscriptionAnalyticsEvents.ACTION_DELEGATED,
           dict({
             'action': action,
-            'serviceId': serviceId,
+            'serviceId': platformKey,
           }),
           dict({
             'action': action,
@@ -694,12 +695,12 @@ export class SubscriptionService {
   /**
    * Delegate UI decoration to another service.
    * @param {!Element} element
-   * @param {string} serviceId
+   * @param {string} platformKey
    * @param {string} action
    * @param {?JsonObject} options
    */
-  decorateServiceAction(element, serviceId, action, options) {
-    this.platformStore_.onPlatformResolves(serviceId, (platform) => {
+  decorateServiceAction(element, platformKey, action, options) {
+    this.platformStore_.onPlatformResolves(platformKey, (platform) => {
       devAssert(platform, 'Platform is not registered');
       platform.decorateUI(element, action, options);
     });

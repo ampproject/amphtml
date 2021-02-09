@@ -60,9 +60,9 @@ describes.realWin(
           subscriptionService,
           'getEncryptedDocumentKey'
         );
-        serviceAdapter.getEncryptedDocumentKey('serviceId');
+        serviceAdapter.getEncryptedDocumentKey('platformKey');
         expect(stub).to.be.calledOnce;
-        expect(stub).to.be.calledWith('serviceId');
+        expect(stub).to.be.calledWith('platformKey');
       });
     });
 
@@ -119,13 +119,13 @@ describes.realWin(
     describe('decorateServiceAction', () => {
       it('should call decorateServiceAction of subscription service', () => {
         const element = win.document.createElement('div');
-        const serviceId = 'local';
+        const platformKey = 'local';
         const stub = env.sandbox.stub(
           subscriptionService,
           'decorateServiceAction'
         );
-        serviceAdapter.decorateServiceAction(element, serviceId, 'action');
-        expect(stub).to.be.calledWith(element, serviceId, 'action');
+        serviceAdapter.decorateServiceAction(element, platformKey, 'action');
+        expect(stub).to.be.calledWith(element, platformKey, 'action');
       });
     });
 

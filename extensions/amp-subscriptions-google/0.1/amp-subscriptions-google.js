@@ -185,14 +185,14 @@ export class GoogleSubscriptionsPlatform {
     this.runtime_.setOnLinkComplete(() => {
       this.onLinkComplete_();
       this.subscriptionAnalytics_.actionEvent(
-        this.getServiceId(),
+        this.getPlatformKey(),
         Action.LINK,
         ActionStatus.SUCCESS
       );
       // TODO(dvoytenko): deprecate separate "link" events.
       this.subscriptionAnalytics_.serviceEvent(
         SubscriptionAnalyticsEvents.LINK_COMPLETE,
-        this.getServiceId()
+        this.getPlatformKey()
       );
     });
     this.runtime_.setOnFlowStarted((e) => {
@@ -218,7 +218,7 @@ export class GoogleSubscriptionsPlatform {
         e.flow == Action.SHOW_OFFERS
       ) {
         this.subscriptionAnalytics_.actionEvent(
-          this.getServiceId(),
+          this.getPlatformKey(),
           e.flow,
           ActionStatus.STARTED,
           params
@@ -229,14 +229,14 @@ export class GoogleSubscriptionsPlatform {
       if (e.flow == 'linkAccount') {
         this.onLinkComplete_();
         this.subscriptionAnalytics_.actionEvent(
-          this.getServiceId(),
+          this.getPlatformKey(),
           Action.LINK,
           ActionStatus.REJECTED
         );
         // TODO(dvoytenko): deprecate separate "link" events.
         this.subscriptionAnalytics_.serviceEvent(
           SubscriptionAnalyticsEvents.LINK_CANCELED,
-          this.getServiceId()
+          this.getPlatformKey()
         );
       } else if (
         e.flow == Action.SUBSCRIBE ||
@@ -245,7 +245,7 @@ export class GoogleSubscriptionsPlatform {
         e.flow == Action.SHOW_OFFERS
       ) {
         this.subscriptionAnalytics_.actionEvent(
-          this.getServiceId(),
+          this.getPlatformKey(),
           e.flow,
           ActionStatus.REJECTED
         );
@@ -360,14 +360,14 @@ export class GoogleSubscriptionsPlatform {
     if (linkRequested && this.isGoogleViewer_) {
       this.loginWithAmpReaderId_();
       this.subscriptionAnalytics_.actionEvent(
-        this.getServiceId(),
+        this.getPlatformKey(),
         Action.LINK,
         ActionStatus.STARTED
       );
       // TODO(dvoytenko): deprecate separate "link" events.
       this.subscriptionAnalytics_.serviceEvent(
         SubscriptionAnalyticsEvents.LINK_REQUESTED,
-        this.getServiceId()
+        this.getPlatformKey()
       );
     } else {
       this.maybeComplete_(
@@ -488,7 +488,7 @@ export class GoogleSubscriptionsPlatform {
     });
 
     this.subscriptionAnalytics_.actionEvent(
-      this.getServiceId(),
+      this.getPlatformKey(),
       eventType,
       ActionStatus.SUCCESS,
       params
@@ -621,7 +621,7 @@ export class GoogleSubscriptionsPlatform {
   }
 
   /** @override */
-  getServiceId() {
+  getPlatformKey() {
     return PLATFORM_ID;
   }
 
