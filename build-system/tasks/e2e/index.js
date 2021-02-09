@@ -30,6 +30,10 @@ const {
   getFilesFromArgv,
   installPackages,
 } = require('../../common/utils');
+const {
+  createCtrlcHandler,
+  exitCtrlcHandler,
+} = require('../../common/ctrlcHandler');
 const {cyan} = require('kleur/colors');
 const {execOrDie} = require('../../common/exec');
 const {HOST, PORT, startServer, stopServer} = require('../serve');
@@ -200,11 +204,12 @@ async function runWatch_() {
 
 /**
  * Entry-point to run e2e tests.
- * @return {!Promise}
  */
 async function e2e() {
+  const handlerProcess = createCtrlcHandler('e2e');
   await setUpTesting_();
-  return argv.watch ? runWatch_() : runTests_();
+  argv.watch ? await runWatch_() : await runTests_();
+  exitCtrlcHandler(handlerProcess);
 }
 
 module.exports = {
