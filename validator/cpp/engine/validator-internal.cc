@@ -83,6 +83,7 @@ using absl::StartsWith;
 using absl::Status;
 using absl::StrAppend;
 using absl::StrCat;
+using absl::StrContains;
 using absl::string_view;
 using absl::StrJoin;
 using absl::StrSplit;
@@ -107,7 +108,7 @@ ABSL_FLAG(bool, duplicate_html_body_elements_is_error, false,
           "If true, duplicate <html>,<body> elements is considered error for "
           "validation purposes. (Default is to allow, leaving it to HTML5 "
           "user-agent to treat them as per the spec).");
-ABSL_FLAG(bool, allow_module_nomodule, false,
+ABSL_FLAG(bool, allow_module_nomodule, true,
           "If true, then script versions for module and nomdule are allowed "
           "in AMP documents. This gating should be temporary and removed "
           "after necessary transformers are in place. See b/173803451.");
@@ -3154,7 +3155,7 @@ void CdataMatcher::MatchCss(string_view cdata, const CssSpec& css_spec,
 
   // Validate the allowed CSS declarations (eg: `background-color`)
   if (maybe_doc_css_spec &&
-      !(**maybe_doc_css_spec).spec().allow_all_declaration_in_style_tag()) {
+      !(**maybe_doc_css_spec).spec().allow_all_declaration_in_style()) {
     InvalidDeclVisitor visitor(
         **maybe_doc_css_spec, context,
         TagDescriptiveName(parsed_cdata_spec_->ParentTagSpec()), result);
@@ -4103,11 +4104,55 @@ void ValidateAttrCss(const ParsedAttrSpec& parsed_attr_spec,
     // in the allowed list for this DocCssSpec, and have allowed values if
     // relevant.
     for (auto& declaration : declarations) {
-      const CssDeclaration* css_declaration =
-          CssDeclarationByName(declaration->name());
-      // If there is no matching declaration in the rules, then this
-      // declaration is not allowed.
-      if (!css_declaration) {
+      // Validate declarations only when they are not all allowed.
+      if (!spec.spec().allow_all_declaration_in_style()) {
+        const CssDeclaration* css_declaration =
+            CssDeclarationByName(declaration->name());
+        // If there is no matching declaration in the rules, then this
+        // declaration is not allowed.
+        if (!css_declaration) {
+          context.AddError(
+              ValidationError::DISALLOWED_PROPERTY_IN_ATTR_VALUE,
+              context.line_col(),
+              /*params=*/{declaration->name(), attr_name, tag_description},
+              /*spec_url=*/context.rules().styles_spec_url(),
+              &result->validation_result);
+          // Don't emit additional errors for this declaration.
+          continue;
+        } else if (css_declaration->value_casei_size() > 0) {
+          bool has_valid_value = false;
+          const std::string first_ident = declaration->FirstIdent();
+          for (auto& value : css_declaration->value_casei()) {
+            if (EqualsIgnoreCase(first_ident, value)) {
+              has_valid_value = true;
+              break;
+            }
+          }
+          if (!has_valid_value) {
+            // Declaration value not allowed.
+            context.AddError(
+                ValidationError::CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
+                context.line_col(),
+                /*params=*/{tag_description, declaration->name(), first_ident},
+                /*spec_url=*/context.rules().styles_spec_url(),
+                &result->validation_result);
+          }
+        } else if (css_declaration->has_value_regex_casei()) {
+          RE2::Options options;
+          options.set_case_sensitive(false);
+          RE2 pattern(css_declaration->value_regex_casei(), options);
+          const std::string first_ident = declaration->FirstIdent();
+          if (!RE2::FullMatch(first_ident, pattern)) {
+            context.AddError(
+                ValidationError::CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
+                context.line_col(),
+                /*params=*/{tag_description, declaration->name(), first_ident},
+                /*spec_url=*/context.rules().styles_spec_url(),
+                &result->validation_result);
+          }
+        }
+      }
+      if (StrContains(declaration->name(), "i-amphtml-")) {
         context.AddError(
             ValidationError::DISALLOWED_PROPERTY_IN_ATTR_VALUE,
             context.line_col(),
@@ -4116,37 +4161,6 @@ void ValidateAttrCss(const ParsedAttrSpec& parsed_attr_spec,
             &result->validation_result);
         // Don't emit additional errors for this declaration.
         continue;
-      } else if (css_declaration->value_casei_size() > 0) {
-        bool has_valid_value = false;
-        const std::string first_ident = declaration->FirstIdent();
-        for (auto& value : css_declaration->value_casei()) {
-          if (EqualsIgnoreCase(first_ident, value)) {
-            has_valid_value = true;
-            break;
-          }
-        }
-        if (!has_valid_value) {
-          // Declaration value not allowed.
-          context.AddError(
-              ValidationError::CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
-              context.line_col(),
-              /*params=*/{tag_description, declaration->name(), first_ident},
-              /*spec_url=*/context.rules().styles_spec_url(),
-              &result->validation_result);
-        }
-      } else if (css_declaration->has_value_regex_casei()) {
-        RE2::Options options;
-        options.set_case_sensitive(false);
-        RE2 pattern(css_declaration->value_regex_casei(), options);
-        const std::string first_ident = declaration->FirstIdent();
-        if (!RE2::FullMatch(first_ident, pattern)) {
-          context.AddError(
-              ValidationError::CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
-              context.line_col(),
-              /*params=*/{tag_description, declaration->name(), first_ident},
-              /*spec_url=*/context.rules().styles_spec_url(),
-              &result->validation_result);
-        }
       }
       if (!spec.spec().allow_important()) {
         if (declaration->important()) {
@@ -5598,8 +5612,6 @@ class Validator {
         .frameset_ok = true,
         .record_node_offsets = true,
         .record_attribute_offsets = true,
-        // Validator need disallwed/deprecated elements for error reporting.
-        .allow_deprecated_tags = true,
     };
     // The validation check for document size can't be done here since
     // the Type Identifiers on the html tag have not been parsed yet and
