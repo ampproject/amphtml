@@ -215,4 +215,9 @@ export const EXPERIMENTS = [
     name: 'To measure the CWV impact of ads idle rendering',
     spec: 'https://github.com/ampproject/amphtml/issues/31436',
   },
+  {
+    id: 'amp-consent-granular-consent',
+    name: 'Client-side granular consent',
+    spec: 'https://github.com/ampproject/amphtml/issues/31607',
+  },
 ];

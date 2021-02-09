@@ -19,7 +19,7 @@ const gulp = require('gulp');
 const path = require('path');
 const srcGlobs = require('../test-configs/config').presubmitGlobs;
 const through2 = require('through2');
-const {blue, red} = require('ansi-colors');
+const {blue, red} = require('kleur/colors');
 const {log} = require('../common/logging');
 
 const dedicatedCopyrightNoteSources = /(\.js|\.css|\.go)$/;
@@ -589,7 +589,7 @@ const forbiddenTerms = {
   },
   '\\.scheduleLayoutOrPreload\\(': {
     message: 'scheduleLayoutOrPreload is a restricted API.',
-    allowlist: ['src/service/owners-impl.js', 'src/service/resources-impl.js'],
+    allowlist: ['src/custom-element.js', 'src/service/resources-impl.js'],
   },
   '(win|Win)(dow)?(\\(\\))?\\.open\\W': {
     message: 'Use dom.openWindowDialog',
@@ -1061,7 +1061,7 @@ const forbiddenTermsSrcInclusive = {
     message: 'Unless you do weird date math (allowlist), use Date.now().',
     allowlist: [
       'extensions/amp-timeago/0.1/amp-timeago.js',
-      'extensions/amp-timeago/1.0/timeago.js',
+      'extensions/amp-timeago/1.0/component.js',
       'src/utils/date.js',
     ],
   },

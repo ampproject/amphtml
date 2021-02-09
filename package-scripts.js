@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,20 @@
  * limitations under the License.
  */
 'use strict';
-const fs = require('fs-extra');
-const {transformCssFile} = require('../jsify-css');
 
-async function createGoldenCss() {
-  const result = await transformCssFile(
-    './build-system/tasks/create-golden-css/css/main.css',
-    {
-      normalizeWhitespace: false,
-      discardComments: false,
-    }
-  );
-
-  fs.writeFileSync('./test/golden-files/main.css', result);
-}
+/**
+ * @fileoverview
+ *
+ * - Use this file to store NPM scripts that aid in development but
+ *   are not available via AMP's gulp tasks in build-system/tasks/.
+ * - To use these scripts, first install npm-package-scripts by running
+ *   "npm install --global nps" (or for short, "npm i -g nps").
+ * - Once installed, run any script by calling "nps <scriptname>".
+ * - For more info, see https://www.npmjs.com/package/nps#scripts-1
+ */
 
 module.exports = {
-  createGoldenCss,
+  scripts: {
+    filesize: 'filesize -c=build-system/tasks/bundle-size/filesize.json',
+  },
 };
-
-createGoldenCss.description = 'Creates a golden file for untransformed css';
