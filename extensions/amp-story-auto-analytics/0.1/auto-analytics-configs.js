@@ -37,6 +37,9 @@ export const buildGtagConfig = (gtagId) => ({
         'event_label': '${storyPageCount}',
         'send_to': [gtagId],
       },
+      'storySpec': {
+        'repeat': false,
+      },
     },
     'storyEnd': {
       'on': 'story-last-page-visible',
@@ -47,6 +50,9 @@ export const buildGtagConfig = (gtagId) => ({
         'event_label': '${title}',
         'send_to': [gtagId],
       },
+      'storySpec': {
+        'repeat': false,
+      },
     },
     'storyPageIndex': {
       'on': 'story-page-visible',
@@ -56,6 +62,9 @@ export const buildGtagConfig = (gtagId) => ({
         'event_category': '${title}',
         'event_label': '${storyPageIndex}',
         'send_to': [gtagId],
+      },
+      'storySpec': {
+        'repeat': false,
       },
     },
   },
