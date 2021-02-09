@@ -39,7 +39,7 @@ import os
 # If true, then script versions for module and nomdule are allowed
 # in AMP documents. This gating should be temporary and removed
 # after necessary transformers are in place. See b/173803451.
-ALLOW_MODULE_NOMODULE = False
+ALLOW_MODULE_NOMODULE = True
 
 
 def UnderscoreToCamelCase(under_score):

@@ -18,10 +18,6 @@ FAIL
 |    Test Description:
 |    This test demonstrates that all LTS scripts must have a module and nomodule
 |    pairing when the first script is nomodule.
-|
-|    TODO(b/173803451) some of the test comments below may be incorrect due
-|    to module/nomodule not being allowed yet. They will be correct once
-|    module/nomodule is allowed.
 |  -->
 |  <!doctype html>
 |  <html ⚡ transformed="google;v=1">
@@ -32,13 +28,9 @@ FAIL
 |
 |    <!-- Invalid: missing module pair for AMP runtime LTS script -->
 |    <script async nomodule src=https://cdn.ampproject.org/lts/v0.js></script>
->>   ^~~~~~~~~
-transformed_feature_tests/module_nomodule_lts_no_paired_module.html:33:2 The attribute 'nomodule' may not appear in tag 'amphtml engine script'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
 |
 |    <!-- Invalid: missing module pair for AMP extension LTS script -->
 |    <script async custom-element=amp-ad nomodule src=https://cdn.ampproject.org/lts/v0/amp-ad-0.1.js></script>
->>   ^~~~~~~~~
-transformed_feature_tests/module_nomodule_lts_no_paired_module.html:36:2 The attribute 'nomodule' may not appear in tag 'amp-ad extension script'. (see https://amp.dev/documentation/components/amp-ad)
 |
 |    <link rel=canonical href="./regular-html-version.html">
 |  </head>
@@ -47,3 +39,7 @@ transformed_feature_tests/module_nomodule_lts_no_paired_module.html:36:2 The att
 |    <amp-ad layout=nodisplay type></amp-ad>
 |  </body>
 |  </html>
+>>       ^~~~~~~~~
+transformed_feature_tests/module_nomodule_lts_no_paired_module.html:40:6 The tag 'amphtml module LTS engine script' is missing or incorrect, but required by 'amphtml nomdule LTS engine script'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
+>>       ^~~~~~~~~
+transformed_feature_tests/module_nomodule_lts_no_paired_module.html:40:6 The tag 'amp-ad module extension script' is missing or incorrect, but required by 'amp-ad nomodule extension script'. (see https://amp.dev/documentation/components/amp-ad)

@@ -18,10 +18,6 @@ FAIL
 |    Test Description:
 |    This test demonstrates that all LTS scripts must have a module and nomodule
 |    pairing when the first script is module.
-|
-|    TODO(b/173803451) some of the test comments below may be incorrect due
-|    to module/nomodule not being allowed yet. They will be correct once
-|    module/nomodule is allowed.
 |  -->
 |  <!doctype html>
 |  <html ⚡ transformed="google;v=1">
@@ -32,13 +28,9 @@ FAIL
 |
 |    <!-- Invalid: missing nomodule pair for AMP runtime LTS script -->
 |    <script async crossorigin=anonymous src=https://cdn.ampproject.org/lts/v0.mjs type=module></script>
->>   ^~~~~~~~~
-transformed_feature_tests/module_nomodule_lts_no_paired_nomodule.html:33:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
 |
 |    <!-- Invalid: missing nomodule pair for AMP extension LTS script -->
 |    <script async crossorigin=anonymous custom-element=amp-ad src=https://cdn.ampproject.org/lts/v0/amp-ad-0.1.mjs type=module></script>
->>   ^~~~~~~~~
-transformed_feature_tests/module_nomodule_lts_no_paired_nomodule.html:36:2 The attribute 'type' in tag 'amp-ad extension script' is set to the invalid value 'module'. (see https://amp.dev/documentation/components/amp-ad)
 |
 |    <link rel=canonical href="./regular-html-version.html">
 |  </head>
@@ -48,4 +40,6 @@ transformed_feature_tests/module_nomodule_lts_no_paired_nomodule.html:36:2 The a
 |  </body>
 |  </html>
 >>       ^~~~~~~~~
-transformed_feature_tests/module_nomodule_lts_no_paired_nomodule.html:44:6 The mandatory tag 'amphtml engine script' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
+transformed_feature_tests/module_nomodule_lts_no_paired_nomodule.html:40:6 The tag 'amphtml nomodule LTS engine script' is missing or incorrect, but required by 'amphtml module LTS engine script'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
+>>       ^~~~~~~~~
+transformed_feature_tests/module_nomodule_lts_no_paired_nomodule.html:40:6 The tag 'amp-ad nomodule extension script' is missing or incorrect, but required by 'amp-ad module extension script'. (see https://amp.dev/documentation/components/amp-ad)
