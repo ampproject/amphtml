@@ -72,6 +72,11 @@ const getHeaderEl = (element) => {
  * @abstract
  */
 export class DraggableDrawer extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    return false;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -119,11 +124,6 @@ export class DraggableDrawer extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return layout === Layout.NODISPLAY;
-  }
-
-  /** @override */
-  prerenderAllowed() {
-    return false;
   }
 
   /** @override */

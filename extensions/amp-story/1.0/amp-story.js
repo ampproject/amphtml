@@ -233,6 +233,11 @@ const SIDEBAR_OBSERVER_OPTIONS = {
  * @implements {./media-pool.MediaPoolRoot}
  */
 export class AmpStory extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    return true;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -1276,11 +1281,6 @@ export class AmpStory extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return layout == Layout.CONTAINER;
-  }
-
-  /** @override */
-  prerenderAllowed() {
-    return true;
   }
 
   /** @private */

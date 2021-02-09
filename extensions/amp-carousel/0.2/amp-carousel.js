@@ -42,6 +42,11 @@ const CarouselType = {
 };
 
 class AmpCarousel extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    return true;
+  }
+
   /**
    * @private
    */
@@ -129,11 +134,6 @@ class AmpCarousel extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
-  }
-
-  /** @override */
-  prerenderAllowed() {
-    return true;
   }
 
   /** @override */

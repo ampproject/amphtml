@@ -1545,6 +1545,35 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
           expect(testElementResumeCallback).to.have.not.been.called;
         });
       });
+
+      describe('prerenderAllowed', () => {
+        it('should NOT be allowed for an upgraded element', () => {
+          const element = new StubElementClass();
+          expect(element.prerenderAllowed()).to.be.false;
+        });
+
+        it('should be allowed base on the upgraded class', () => {
+          const stub = env.sandbox.stub(TestElement, 'prerenderAllowed');
+          const element = new StubElementClass();
+          element.upgrade(TestElement);
+
+          stub.returns(false);
+          expect(element.prerenderAllowed()).to.be.false;
+
+          stub.returns(true);
+          expect(element.prerenderAllowed()).to.be.true;
+        });
+
+        it('should NOT be allowed with noprerender attribute', () => {
+          env.sandbox.stub(TestElement, 'prerenderAllowed').returns(true);
+          const element = new StubElementClass();
+          element.upgrade(TestElement);
+          expect(element.prerenderAllowed()).to.be.true;
+
+          element.setAttribute('noprerender', '');
+          expect(element.prerenderAllowed()).to.be.false;
+        });
+      });
     });
 });
 

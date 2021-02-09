@@ -153,6 +153,8 @@ t.run('Viewer Visibility State', () => {
             return whenUpgradedToCustomElement(img);
           })
           .then((img) => {
+            prerenderAllowed = env.sandbox.stub(img, 'prerenderAllowed');
+            prerenderAllowed.returns(false);
             return img.getImpl(false);
           })
           .then((impl) => {
@@ -160,13 +162,11 @@ t.run('Viewer Visibility State', () => {
             unlayoutCallback = env.sandbox.stub(impl, 'unlayoutCallback');
             pauseCallback = env.sandbox.stub(impl, 'pauseCallback');
             resumeCallback = env.sandbox.stub(impl, 'resumeCallback');
-            prerenderAllowed = env.sandbox.stub(impl, 'prerenderAllowed');
             env.sandbox.stub(impl, 'isRelayoutNeeded').callsFake(() => true);
             env.sandbox.stub(impl, 'isLayoutSupported').callsFake(() => true);
 
             layoutCallback.returns(Promise.resolve());
             unlayoutCallback.returns(true);
-            prerenderAllowed.returns(false);
           });
       });
 

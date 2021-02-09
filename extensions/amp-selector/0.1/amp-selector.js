@@ -45,6 +45,11 @@ const KEYBOARD_SELECT_MODES = {
 };
 
 export class AmpSelector extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    return true;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -78,11 +83,6 @@ export class AmpSelector extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported() {
-    return true;
-  }
-
-  /** @override */
-  prerenderAllowed() {
     return true;
   }
 
