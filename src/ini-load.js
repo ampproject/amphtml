@@ -41,7 +41,6 @@ export function whenContentIniLoad(
   rect,
   opt_prerenderableOnly
 ) {
-  // eslint-disable-next-line no-undef
   if (INI_LOAD_INOB) {
     return whenContentIniLoadInOb(elementOrAmpDoc, opt_prerenderableOnly);
   }
