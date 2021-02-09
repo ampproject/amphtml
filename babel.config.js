@@ -33,7 +33,7 @@ const {
   getUnminifiedConfig,
   getEslintConfig,
 } = require('./build-system/babel-config');
-const {cyan, yellow} = require('ansi-colors');
+const {cyan, yellow} = require('kleur/colors');
 const {log} = require('./build-system/common/logging');
 
 /**
