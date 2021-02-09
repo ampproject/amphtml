@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {DateDisplay} from '../date-display';
+import {DateDisplay} from '../component';
 import {mount} from 'enzyme';
 
 describes.sandboxed('DateDisplay 1.0 preact component', {}, (env) => {

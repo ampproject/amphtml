@@ -2458,7 +2458,6 @@ const defaultStyles = {
 };
 
 /**
- * @export
  * @param {string} camelCase camel cased string
  * @return {string} title cased string
  */
@@ -2488,7 +2487,6 @@ function getVendorJsPropertyName_(style, titleCase) {
  * Returns the possibly prefixed JavaScript property name of a style property
  * (ex. WebkitTransitionDuration) given a camelCase'd version of the property
  * (ex. transitionDuration).
- * @export
  * @param {!Object} style
  * @param {string} camelCase the camel cased version of a css property name
  * @param {boolean=} bypassCache bypass the memoized cache of property
@@ -15090,7 +15088,7 @@ class PaymentsWebActivityDelegate {
    */
   isVerticalCenterExperimentEnabled_(paymentDataRequest) {
     return (
-      null  
+      null
     );
   }
 
@@ -15276,7 +15274,7 @@ class UpiHandler {
   loadPaymentData(paymentDataRequest, upiPaymentMethod, onResultCallback) {
     const parameters = upiPaymentMethod['parameters'];
     const transactionInfo = paymentDataRequest['transactionInfo'];
-    const supportedInstruments = 
+    const supportedInstruments =
         [{
           'supportedMethods': ['https://tez.google.com/pay'],
           'data': {
@@ -15720,7 +15718,6 @@ class PaymentsAsyncClient {
    * @param {!IsReadyToPayRequest} isReadyToPayRequest
    * @return {!Promise} The promise will contain the boolean result and error
    *     message when possible.
-   * @export
    */
   isReadyToPay(isReadyToPayRequest) {
     // Merge with paymentOptions, preferring values from isReadyToPayRequest
@@ -15888,7 +15885,6 @@ class PaymentsAsyncClient {
    *
    * @param {!PaymentDataRequest} paymentDataRequest Provides necessary
    *     information to support a payment.
-   * @export
    */
   prefetchPaymentData(paymentDataRequest) {
     /** @type {?string} */
@@ -15919,7 +15915,6 @@ class PaymentsAsyncClient {
    *
    * @param {!PaymentDataRequest} paymentDataRequest Provides necessary
    *     information to support a payment.
-   * @export
    */
   loadPaymentData(paymentDataRequest) {
     PayFrameHelper.postMessage({
@@ -15996,7 +15991,6 @@ class PaymentsAsyncClient {
    *
    * @param {!ButtonOptions=} options
    * @return {!Element}
-   * @export
    */
   createButton(options = {}) {
     const button = null;
@@ -17287,7 +17281,7 @@ const REGWALL_HTML = `
     font-size: 16px;
     margin: 0 0 8px;
   }
-  
+
   .gaa-metering-regwall--description {
     color: #646464;
     display: block;

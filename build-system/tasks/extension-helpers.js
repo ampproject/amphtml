@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const colors = require('ansi-colors');
+const colors = require('kleur/colors');
 const debounce = require('debounce');
 const fs = require('fs-extra');
 const wrappers = require('../compile/compile-wrappers');
@@ -26,7 +26,7 @@ const {
 const {analyticsVendorConfigs} = require('./analytics-vendor-configs');
 const {endBuildStep, watchDebounceDelay} = require('./helpers');
 const {isCiBuild} = require('../common/ci');
-const {jsifyCssAsync} = require('./jsify-css');
+const {jsifyCssAsync} = require('./css/jsify-css');
 const {log} = require('../common/logging');
 const {maybeToEsmName, compileJs, mkdirSync} = require('./helpers');
 const {watch} = require('gulp');
