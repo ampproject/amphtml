@@ -577,32 +577,24 @@ export class AmpVideo extends AMP.BaseElement {
    * @private
    * @return {boolean}
    */
-  hasAnyCachedSources_() {
-    return !!this.getFirstCachedSource_();
-  }
-
-  /**
-   * @private
-   * @return {boolean}
-   */
   hasAnyBitrateSources_() {
     return !!this.element.querySelector('source[data-bitrate]');
   }
 
   /**
    * @private
-   * @return {?Element}
+   * @return {boolean}
    */
-  getFirstCachedSource_() {
+  hasAnyCachedSources_() {
     const {element} = this;
     const sources = toArray(childElementsByTag(element, 'source'));
     sources.push(element);
     for (let i = 0; i < sources.length; i++) {
       if (this.isCachedByCDN_(sources[i])) {
-        return sources[i];
+        return true;
       }
     }
-    return null;
+    return false;
   }
 
   /**
