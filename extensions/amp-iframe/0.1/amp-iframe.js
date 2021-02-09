@@ -645,8 +645,7 @@ export class AmpIframe extends AMP.BaseElement {
       return;
     }
     this.isDisplayed_ = isDisplayed;
-    const hasOwner = !!this.element.getOwner();
-    if (!isDisplayed && !hasOwner && this.iframe_) {
+    if (!isDisplayed && this.iframe_) {
       this.getVsync().mutate(() => this.unload());
     }
   }
