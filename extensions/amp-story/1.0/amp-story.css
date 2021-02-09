@@ -1098,8 +1098,6 @@ amp-story-page.i-amphtml-story-desktop-panels .i-amphtml-story-interactive-compo
 }
 
 .i-amphtml-story-tooltip {
-  /* max-width: 248px !important; */
-  /* height: 40px !important; */
   border-radius: 6px !important;
   padding: 8px !important;
   position: absolute !important;
@@ -1110,9 +1108,21 @@ amp-story-page.i-amphtml-story-desktop-panels .i-amphtml-story-interactive-compo
   display: flex !important;
   align-items: center !important;
   background: white !important;
-  box-shadow: 0px 6px 16px rgba(0,0,0,0.16) !important;
+  box-shadow: 0px 6px 16px rgba(0,0,0,0.26) !important;
   transform: translate3d(0, -16px, 0) !important;
   transition: transform 0.2s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+}
+
+.i-amphtml-tooltip-action-icon.i-amphtml-tooltip-custom-icon {
+  background-size: cover !important;
+  width: 24px !important;
+  height: 24px !important;
+  border: 1px solid #E8EAED !important;
+  box-sizing: border-box !important;
+  border-radius: 50% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
 }
 
 .i-amphtml-story-tooltip-theme-dark {

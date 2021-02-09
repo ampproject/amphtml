@@ -1302,7 +1302,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   buildTooltip() {
     const html = htmlFor(this.win.document);
     return html`
-      <div class="i-amphtml-story-tooltip-wrapper">
+      <div class="i-amphtml-story-tooltip-wrapper tap-hint-selector">
         <a class="i-amphtml-story-tooltip" target="_blank" role="tooltip">
           <div
             class="i-amphtml-tooltip-action-icon i-amphtml-tooltip-action-icon-launch"
@@ -1330,11 +1330,25 @@ export class AmpStoryPage extends AMP.BaseElement {
         const posY = top + height / 2;
         let tapHint;
 
-        if (this.element.hasAttribute('tooltip-page')) {
+        if (
+          document.querySelector('amp-story').hasAttribute('tap-hint-tooltip')
+        ) {
           tapHint = this.buildTooltip();
+          const iconUrl = link.getAttribute('data-tooltip-icon');
+          if (iconUrl) {
+            const customIcon = tapHint.querySelector(
+              '.i-amphtml-tooltip-action-icon'
+            );
+            customIcon.classList.remove('i-amphtml-tooltip-action-icon-launch');
+            customIcon.classList.add('i-amphtml-tooltip-custom-icon');
+            setImportantStyles(customIcon, {
+              'background-image': `url(${iconUrl})`,
+            });
+          }
         } else {
           tapHint = document.createElement('div');
           tapHint.classList.add('tap-hint');
+          tapHint.classList.add('tap-hint-selector');
         }
         this.element.appendChild(tapHint);
         setImportantStyles(tapHint, {
@@ -1347,8 +1361,8 @@ export class AmpStoryPage extends AMP.BaseElement {
         }, 1200);
       });
     } else {
-      // const tapHints = this.win.document.querySelectorAll('.tap-hint');
-      // tapHints.forEach((tapHint) => tapHint.remove());
+      const tapHints = this.element.querySelectorAll('.tap-hint-selector');
+      tapHints.forEach((tapHint) => tapHint.remove());
     }
   }
 
