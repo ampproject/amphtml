@@ -22,22 +22,17 @@ import {
   AccordionSection,
 } from './component';
 import {PreactBaseElement} from '../../../src/preact/base-element';
-import {
-  childElementsByTag,
-  dispatchCustomEvent,
-  toggleAttribute,
-} from '../../../src/dom';
+import {childElementsByTag, toggleAttribute} from '../../../src/dom';
 import {dict, memo} from '../../../src/utils/object';
 import {forwardRef} from '../../../src/preact/compat';
-import {getExpandStateTrigger} from './amp-accordion';
 import {pureDevAssert} from '../../../src/pure-assert';
-import {toArray, toWin} from '../../../src/types';
+import {toArray} from '../../../src/types';
 import {
   useImperativeHandle,
   useLayoutEffect,
   useRef,
 } from '../../../src/preact';
-import {useSlotContext} from '../../../src/preact/slot'; // DO NOT SUBMIT
+import {useSlotContext} from '../../../src/preact/slot';
 
 const SECTION_SHIM_PROP = '__AMP_S_SHIM';
 const HEADER_SHIM_PROP = '__AMP_H_SHIM';
@@ -82,8 +77,7 @@ export class BaseElement extends PreactBaseElement {
 /**
  * @param {!Element} element
  * @param {MutationObserver} mu
- * @param {!Function<boolean>:} mu
- * @param getExpandStateTrigger
+ * @param {!Function} getExpandStateTrigger
  * @return {!JsonObject}
  */
 function getState(element, mu, getExpandStateTrigger) {

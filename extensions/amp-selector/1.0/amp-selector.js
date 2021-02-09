@@ -29,8 +29,6 @@ const TAG = 'amp-selector';
 class AmpSelector extends BaseElement {
   /** @override */
   triggerEvent(element, eventName, detail) {
-    // TODO(wg-bento): This hack is in place to prevent doubly rendering.
-    // See https://github.com/ampproject/amp-react-prototype/issues/40.
     const event = createCustomEvent(
       toWin(element.ownerDocument.defaultView),
       `amp-selector.${eventName}`,
