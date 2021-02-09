@@ -193,7 +193,10 @@ async function waitForElementVisibility(page, selector, options) {
       const boundingBox = await elementHandle.boundingBox();
       const fullyOpaque = (await getElementOpacity(elementHandle)) === '1';
       const elementIsVisible =
-        boundingBox != null && boundingBox.height > 0 && boundingBox.width > 0 && fullyOpaque;
+        boundingBox != null &&
+        boundingBox.height > 0 &&
+        boundingBox.width > 0 &&
+        fullyOpaque;
       elementsAreVisible.push(elementIsVisible);
     }
 
@@ -265,15 +268,17 @@ async function sleep(ms) {
 
 /**
  *
- * @param {ElementHandle} elementHandle
+ * @param {!puppeteer.Page} page
+ * @param {!ElementHandle} elementHandle
  * @return {Promise<string>}
  */
-async function getElementOpacity(elementHandle) {
+async function getElementOpacity(page, elementHandle) {
   return await (
-    await page.evaluateHandle(element =>
-      window.getComputedStyle(element).opacity
-    , elementHandle)
-    ).jsonValue();
+    await page.evaluateHandle(
+      (element) => window.getComputedStyle(element).opacity,
+      elementHandle
+    )
+  ).jsonValue();
 }
 
 module.exports = {
