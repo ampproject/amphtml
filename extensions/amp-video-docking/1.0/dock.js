@@ -439,6 +439,14 @@ class DockManager {
       directionX: this.cornerDirectionX_,
     };
   }
+
+  dismissOnTap() {
+    // TODO
+  }
+
+  scrollBack() {
+    // TODO
+  }
 }
 
 export const DockContext = createContext({});
@@ -482,7 +490,17 @@ export function Dock({children}) {
       {children}
       <Placeholder styles={styles} state={state} />
       <ShadowLayer styles={styles} state={state} />
-      <Controls styles={styles} state={state} handle={handle} />
+      <Controls
+        styles={styles}
+        state={state}
+        handle={handle}
+        dismissOnTap={() => {
+          manager.dismissOnTap();
+        }}
+        scrollBack={() => {
+          manager.scrollBack();
+        }}
+      />
     </DockContext.Provider>
   );
 }

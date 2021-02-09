@@ -17,6 +17,7 @@
 import * as Preact from '../../../src/preact';
 import {Timeout} from '../0.1/timeout';
 import {VideoEvents} from '../../../src/video-interface';
+import {dict} from '../../../src/utils/object';
 import {listen} from '../../../src/event-helper';
 import {useCallback, useEffect, useMemo, useState} from '../../../src/preact';
 import {useStyles} from './dock.jss';
@@ -58,7 +59,7 @@ const TIMEOUT_AFTER_INTERACTION = 800;
  * @param {*} styles
  * @return {!PreactDef.Renderable}
  */
-export function Controls({styles, state, handle}) {
+export function Controls({dismissOnTap, scrollBack, styles, state, handle}) {
   const classes = useStyles();
 
   const [isPlaying, setIsPlaying] = useState(false);
@@ -114,87 +115,116 @@ export function Controls({styles, state, handle}) {
     });
   }, [hideAfterTimeout, isInTransition]);
 
-  return (
-    <>
-      <div
-        className={objstr({
-          [classes.overlay]: true,
-          [classes.overlayControlsBg]: !isInTransition && isShown,
-        })}
-        style={styles?.transformToAreaStyle}
-        onClick={show}
-        onMouseOver={show}
-        onMouseUp={() => {
-          hideAfterTimeout(TIMEOUT_AFTER_INTERACTION);
-        }}
-        hidden={!styles}
-      ></div>
-      <div
-        className={objstr({
-          'amp-video-docked-controls': true,
-          [classes.controls]: true,
-          [classes.controlsShown]: !isInTransition && isShown,
-        })}
-        style={styles?.controls}
-        hidden={!styles}
-      >
-        <div
-          className={`amp-video-docked-control-set-playback ${classes.controlsGroup}`}
-        >
-          <div className={classes.controlsToggleButton}>
-            <div
-              role="button"
-              className={classes.playButton}
-              hidden={isPlaying}
-              onClick={() => {
-                handle?.play();
-              }}
-            ></div>
-            <div
-              role="button"
-              className={classes.pauseButton}
-              hidden={!isPlaying}
-              onClick={() => {
-                handle?.pause();
-              }}
-            ></div>
-          </div>
-          <div className={classes.controlsToggleButton}>
-            <div
-              role="button"
-              className={classes.muteButton}
-              hidden={handle?.volume <= 0}
-              onClick={() => {
-                // This doesn't work since handle is a <video>.
-                handle?.mute();
-              }}
-            ></div>
-            <div
-              role="button"
-              className={classes.unmuteButton}
-              hidden={handle?.volume > 0}
-              onClick={() => {
-                // This doesn't work since handle is a <video>.
-                handle?.unmute();
-              }}
-            ></div>
-          </div>
-          <div className={classes.controlsToggleButton}>
-            <div role="button" className={classes.fullscreenButton}></div>
-          </div>
-        </div>
-        <div
-          className={`amp-video-docked-control-set-scroll-back ${classes.controlsGroup}`}
-          hidden
-        >
-          <div className={classes.controlsToggleButton}>
-            <div role="button" className={classes.scrollBackButton}></div>
-          </div>
-        </div>
-        <div className="amp-video-docked-button-dismiss-group">
-          <div role="button" className="amp-video-docked-dismiss"></div>
-        </div>
+  const actuallyShown = !isInTransition && (isShown || !isPlaying); // ??
+
+  return [
+    <ActiveArea
+      show={show}
+      style={styles?.transformToAreaStyle}
+      className={objstr({
+        [classes.overlay]: true,
+        [classes.overlayControlsBg]: actuallyShown,
+      })}
+    />,
+    <ActiveArea
+      show={show}
+      style={styles?.controls}
+      className={objstr({
+        [classes.controls]: true,
+        [classes.controlsShown]: actuallyShown,
+      })}
+      onMouseUp={() => {
+        hideAfterTimeout(TIMEOUT_AFTER_INTERACTION);
+      }}
+    >
+      <div className={classes.controlsGroup}>
+        <Button
+          {...(isPlaying
+            ? dict({
+                'aria-label': 'Pause',
+                'childClassName': classes.pauseButton,
+                'onClick': () => handle?.pause(),
+              })
+            : dict({
+                'aria-label': 'Play',
+                'childClassName': classes.playButton,
+                'onClick': () => handle?.play(),
+              }))}
+        />
+        <Button
+          {...(handle?.volume <= 0
+            ? dict({
+                'aria-label': 'Unmute',
+                'childClassName': classes.unmuteButton,
+                'onClick': () => handle?.unmute(),
+              })
+            : dict({
+                'aria-label': 'Mute',
+                'childClassName': classes.muteButton,
+                'onClick': () => handle?.mute(),
+              }))}
+        />
+        <Button
+          aria-label="Fullscreen"
+          childClassName={classes.fullscreenButton}
+          onClick={() => handle?.requestFullscreen()}
+        />
       </div>
-    </>
+      <div
+        className={classes.controlsGroup}
+        hidden // TODO
+      >
+        <Button
+          aria-label="Scroll back to inline video"
+          childClassName={classes.scrollBackButton}
+          onClick={scrollBack}
+        />
+      </div>
+      <Button
+        className={classes.dismissButtonGroup}
+        aria-label="Dismiss"
+        onClick={dismissOnTap}
+        childClassName={classes.dismissButton}
+      />
+    </ActiveArea>,
+  ];
+}
+
+/**
+ * @param {*} props
+ * @return {!PreactDef.Renderable}
+ */
+function Button({childClassName, onClick, ...rest}) {
+  const classes = useStyles();
+  return (
+    <div
+      className={classes.controlsToggleButton}
+      role="button"
+      tabindex="0"
+      onClick={() => {
+        // wrap to dismiss returned result
+        onClick();
+      }}
+      {...rest}
+    >
+      <div className={childClassName} />
+    </div>
+  );
+}
+
+/**
+ * @param {*} props
+ * @return {!PreactDef.Renderable}
+ */
+function ActiveArea({show, ...rest}) {
+  return (
+    <div
+      onClick={show}
+      onMouseOver={show}
+      // This rule is for DOM elements, not prop objects.
+      // eslint-disable-next-line local/no-style-property-setting
+      hidden={!rest.style}
+      {...rest}
+    />
   );
 }
