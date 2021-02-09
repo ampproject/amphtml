@@ -16,11 +16,13 @@
 
 import * as Preact from '../../../src/preact';
 import {ContainWrapper} from '../../../src/preact/component';
+import {Keys} from '../../../src/utils/key-codes';
 import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
 import {forwardRef} from '../../../src/preact/compat';
 import {isRTL} from '../../../src/dom';
 import {
   useCallback,
+  useEffect,
   useImperativeHandle,
   useLayoutEffect,
   useRef,
@@ -34,7 +36,7 @@ const Side = {
   RIGHT: 'right',
 };
 
-const ANIMATION_DURATION = 350;
+const ANIMATION_DURATION = 3500;
 const ANIMATION_EASE_IN = 'cubic-bezier(0,0,.21,1)';
 
 const ANIMATION_KEYFRAMES_FADE_IN = [{'opacity': '0'}, {'opacity': '1'}];
@@ -72,6 +74,44 @@ function safelySetStyles(element, styles) {
 }
 
 /**
+ * @param {!Element} element
+ * @return {boolean}
+ */
+function elementIsAnimating(element) {
+  /* This works!
+  const returnVal = element.classList.contains('i-amphtml-animating');
+  console.log('elementIsAnimating', returnVal);
+  return returnVal;
+  */
+
+  if (!element.getAnimations) {
+    return false;
+  }
+  const animations = element.getAnimations();
+  let returnVal;
+  animations.forEach(
+    (a) => (returnVal = a.playState == 'running' ? a : returnVal)
+  );
+  //const returnVal = animations.length && animations[0].playState == 'running';
+  console.log(animations);
+  console.log('elementIsAnimating', returnVal);
+  return returnVal;
+}
+
+/**
+ * @param {!Element} element
+ * @return {boolean}
+ */
+/*
+function elementIsClosing(element) {
+  if (!element.getAnimations) {
+    return false;
+  }
+  const animations = element.getAnimations();
+  return animations.length == 2 && animations[0].playState == 'running';
+}*/
+
+/**
  * @param {!SidebarDef.Props} props
  * @param {{current: (!SidebarDef.SidebarApi|null)}} ref
  * @return {PreactDef.Renderable}
@@ -96,6 +136,12 @@ function SidebarWithRef(
   const [mounted, setMounted] = useState(false);
   const [opened, setOpened] = useState(false);
   const [side, setSide] = useState(sideProp);
+
+  const [sidebarAnimation, setSidebarAnimation] = useState(null);
+  const [backdropAnimation, setBackdropAnimation] = useState(null);
+  const [animatingOpen, setAnimatingOpen] = useState(false);
+
+  console.log('render mounted-opened', mounted, opened);
 
   const classes = useStyles();
   const sidebarRef = useRef();
@@ -146,92 +192,167 @@ function SidebarWithRef(
   useLayoutEffect(() => {
     const sidebarElement = sidebarRef.current;
     const backdropElement = backdropRef.current;
-    if (!sidebarElement || !backdropElement) {
-      return;
-    }
-
-    if (!side) {
+    if (!sidebarElement || !backdropElement || !side) {
       return;
     }
 
     let sidebarAnimation;
     let backdropAnimation;
-    // "Make Visible" Animation
-    if (opened) {
-      const postVisibleAnim = () => {
-        safelySetStyles(sidebarElement, ANIMATION_STYLES_SIDEBAR_FINAL);
-        safelySetStyles(backdropElement, ANIMATION_STYLES_BACKDROP_FINAL);
-      };
-      if (!sidebarElement.animate || !backdropElement.animate) {
-        postVisibleAnim();
-        return;
-      }
+    const postVisibleAnim = () => {
+      safelySetStyles(sidebarElement, ANIMATION_STYLES_SIDEBAR_FINAL);
+      safelySetStyles(backdropElement, ANIMATION_STYLES_BACKDROP_FINAL);
+      console.log('finished open');
+      sidebarAnimation = null;
+      backdropAnimation = null;
+      //sidebarElement.classList.remove('i-amphtml-animating');
+      //backdropElement.classList.remove('i-amphtml-animating');
+    };
 
-      safelySetStyles(
-        sidebarElement,
-        side === Side.LEFT
-          ? ANIMATION_STYLES_SIDEBAR_LEFT_INIT
-          : ANIMATION_STYLES_SIDEBAR_RIGHT_INIT
-      );
-      safelySetStyles(backdropElement, ANIMATION_STYLES_BACKDROP_INIT);
-      sidebarAnimation = sidebarElement.animate(
-        side === Side.LEFT
-          ? ANIMATION_KEYFRAMES_SLIDE_IN_LEFT
-          : ANIMATION_KEYFRAMES_SLIDE_IN_RIGHT,
-        {
-          duration: ANIMATION_DURATION,
-          fill: 'both',
-          easing: ANIMATION_EASE_IN,
-        }
-      );
-      sidebarAnimation.onfinish = postVisibleAnim;
-      backdropAnimation = backdropElement.animate(ANIMATION_KEYFRAMES_FADE_IN, {
-        duration: ANIMATION_DURATION,
-        fill: 'both',
-        easing: ANIMATION_EASE_IN,
-      });
-    } else {
-      // "Make Invisible" Animation
-      const postInvisibleAnim = () => {
-        if (onAfterCloseRef.current) {
-          onAfterCloseRef.current();
-        }
-        sidebarAnimation = null;
-        backdropAnimation = null;
-        setMounted(false);
-      };
-      if (!sidebarElement.animate || !backdropElement.animate) {
-        postInvisibleAnim();
-        return;
+    const postInvisibleAnim = () => {
+      if (onAfterCloseRef.current) {
+        onAfterCloseRef.current();
       }
-      sidebarAnimation = sidebarElement.animate(
-        side === Side.LEFT
-          ? ANIMATION_KEYFRAMES_SLIDE_IN_LEFT
-          : ANIMATION_KEYFRAMES_SLIDE_IN_RIGHT,
-        {
-          duration: ANIMATION_DURATION,
-          direction: 'reverse',
-          fill: 'both',
-          easing: ANIMATION_EASE_IN,
-        }
+      sidebarAnimation = null;
+      backdropAnimation = null;
+      setMounted(false);
+      console.log('finished close');
+      //sidebarElement.classList.remove('i-amphtml-animating');
+      //backdropElement.classList.remove('i-amphtml-animating');
+    };
+
+    // "Make Visible" Animation
+    console.log('animatinos', sidebarElement.getAnimations());
+    sidebarElement
+      .getAnimations()
+      .forEach((a) =>
+        console.log('a', a.playState, a.playbackRate, a.startTime)
       );
-      sidebarAnimation.onfinish = postInvisibleAnim;
-      backdropAnimation = backdropElement.animate(ANIMATION_KEYFRAMES_FADE_IN, {
-        duration: ANIMATION_DURATION,
-        direction: 'reverse',
-        fill: 'both',
-        easing: ANIMATION_EASE_IN,
-      });
+    if (elementIsAnimating(sidebarElement)) {
+      let anim = sidebarElement.getAnimations();
+      anim.forEach(
+        (a) =>
+          (sidebarAnimation = a.playState == 'running' ? a : sidebarAnimation)
+      );
+      anim = backdropElement.getAnimations();
+      anim.forEach(
+        (a) =>
+          (backdropAnimation = a.playState == 'running' ? a : sidebarAnimation)
+      );
+
+      //sidebarAnimation.onfinish = opened ? postInvisibleAnim : postVisibleAnim;
+    } else {
+      if (opened) {
+        if (!sidebarElement.animate || !backdropElement.animate) {
+          postVisibleAnim();
+          return;
+        }
+
+        safelySetStyles(
+          sidebarElement,
+          side === Side.LEFT
+            ? ANIMATION_STYLES_SIDEBAR_LEFT_INIT
+            : ANIMATION_STYLES_SIDEBAR_RIGHT_INIT
+        );
+        safelySetStyles(backdropElement, ANIMATION_STYLES_BACKDROP_INIT);
+        //sidebarElement.classList.add('i-amphtml-animating');
+        //backdropElement.classList.add('i-amphtml-animating');
+        sidebarAnimation = sidebarElement.animate(
+          side === Side.LEFT
+            ? ANIMATION_KEYFRAMES_SLIDE_IN_LEFT
+            : ANIMATION_KEYFRAMES_SLIDE_IN_RIGHT,
+          {
+            duration: ANIMATION_DURATION,
+            fill: 'both',
+            easing: ANIMATION_EASE_IN,
+          }
+        );
+        sidebarAnimation.onfinish = postVisibleAnim;
+        backdropAnimation = backdropElement.animate(
+          ANIMATION_KEYFRAMES_FADE_IN,
+          {
+            duration: ANIMATION_DURATION,
+            fill: 'both',
+            easing: ANIMATION_EASE_IN,
+          }
+        );
+      } else {
+        // "Make Invisible" Animation
+        if (!sidebarElement.animate || !backdropElement.animate) {
+          postInvisibleAnim();
+          return;
+        }
+        //sidebarElement.classList.add('i-amphtml-animating');
+        //backdropElement.classList.add('i-amphtml-animating');
+        sidebarAnimation = sidebarElement.animate(
+          side === Side.LEFT
+            ? ANIMATION_KEYFRAMES_SLIDE_IN_LEFT
+            : ANIMATION_KEYFRAMES_SLIDE_IN_RIGHT,
+          {
+            duration: ANIMATION_DURATION,
+            direction: 'reverse',
+            fill: 'both',
+            easing: ANIMATION_EASE_IN,
+          }
+        );
+        sidebarAnimation.onfinish = postInvisibleAnim;
+        backdropAnimation = backdropElement.animate(
+          ANIMATION_KEYFRAMES_FADE_IN,
+          {
+            duration: ANIMATION_DURATION,
+            direction: 'reverse',
+            fill: 'both',
+            easing: ANIMATION_EASE_IN,
+          }
+        );
+      }
     }
     return () => {
+      console.log('begin reverse cb');
       if (sidebarAnimation) {
-        sidebarAnimation.cancel();
+        console.log('reverse! opened =', opened);
+        sidebarAnimation.reverse();
+
+        sidebarAnimation.onfinish = opened
+          ? postInvisibleAnim
+          : postVisibleAnim;
       }
       if (backdropAnimation) {
-        backdropAnimation.cancel();
+        backdropAnimation.reverse();
       }
     };
-  }, [opened, onAfterCloseRef, side]);
+  }, [
+    opened,
+    onAfterCloseRef,
+    side,
+    sidebarAnimation,
+    backdropAnimation,
+    animatingOpen,
+  ]);
+
+  useEffect(() => {
+    const sidebarElement = sidebarRef.current;
+    const backdropElement = backdropRef.current;
+    if (!sidebarElement || !sidebarElement.ownerDocument || !backdropElement) {
+      return;
+    }
+
+    const document = sidebarElement.ownerDocument;
+    let keydownCallback;
+    if (opened) {
+      keydownCallback = (event) => {
+        if (event.key == Keys.ESCAPE) {
+          event.preventDefault();
+          close();
+        }
+      };
+      document.addEventListener('keydown', keydownCallback);
+    }
+    return () => {
+      if (keydownCallback) {
+        document.removeEventListener('keydown', keydownCallback);
+      }
+    };
+  }, [opened, onAfterCloseRef, close]);
 
   return (
     mounted && (
