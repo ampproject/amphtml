@@ -21,17 +21,17 @@ import {
 import {createUseStyles} from 'react-jss';
 
 const docked = {
-  position: 'fixed !important',
-  top: '0 !important',
-  left: '0 !important',
-  right: 'auto !important',
-  bottom: 'auto !important',
-  padding: '0 !important',
-  minWidth: '0 !important',
-  minHeight: '0 !important',
-  maxWidth: 'auto !important',
-  maxHeight: 'auto !important',
-  transformOrigin: 'left top !important',
+  position: 'fixed',
+  top: 0,
+  left: 0,
+  right: 'auto',
+  bottom: 'auto',
+  padding: 0,
+  minWidth: 0,
+  minHeight: 0,
+  maxWidth: 'auto',
+  maxHeight: 'auto',
+  transformOrigin: 'left top',
   willChange: 'width, height, transition, transform, opacity',
 };
 
@@ -74,8 +74,8 @@ const shadowLayer = {
 const overlay = {
   opacity: 0,
   transition: '0.3s opacity ease',
-  contain: 'strict !important',
-  zIndex: '2147483645 !important',
+  contain: 'strict',
+  zIndex: 2147483645,
 };
 
 const overlayControlsBg = {
@@ -84,19 +84,19 @@ const overlayControlsBg = {
 };
 
 const controls = {
-  direction: 'ltr !important',
+  direction: 'ltr',
   opacity: 0,
-  pointerEvents: 'none !important',
+  pointerEvents: 'none',
   transition: '0.3s opacity ease',
   position: 'fixed',
-  zIndex: '2147483646 !important',
+  zIndex: 2147483646,
   display: 'flex',
   flexDirection: 'column',
 };
 
 const controlsShown = {
   opacity: 1,
-  pointerEvents: 'initial !important',
+  pointerEvents: 'initial',
 };
 
 const controlsGroup = {
@@ -110,7 +110,7 @@ const controlsGroup = {
 };
 
 const controlsToggleButton = {
-  margin: '0',
+  margin: 0,
   minWidth: 40,
   height: 40,
   borderRadius: 40,
@@ -120,7 +120,7 @@ const controlsToggleButton = {
   },
 
   '& > div[role=button]': {
-    WebkitTapHighlightColor: 'rgba(0, 0, 0, 0) !important',
+    WebkitTapHighlightColor: 'rgba(0, 0, 0, 0)',
     backgroundRepeat: 'no-repeat',
     backgroundPosition: 'center center',
     width: '100%',
@@ -146,15 +146,15 @@ const playButton = {
 };
 const fullscreenButton = {
   backgroundImage:
-    "url(\"data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M0 0h24v24H0z' fill='none'/%3E%3Cpath d='M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z'/%3E%3C/svg%3E\")",
+    "url(\"data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width=24 height=24 viewBox='0 0 24 24'%3E%3Cpath d='M0 0h24v24H0z' fill='none'/%3E%3Cpath d='M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z'/%3E%3C/svg%3E\")",
 };
 const dismissButton = {
   backgroundImage:
-    "url(\"data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cpath d='M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z'/%3E%3Cpath d='M0 0h24v24H0z' fill='none'/%3E%3C/svg%3E\")",
+    "url(\"data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width=24 height=24%3E%3Cpath d='M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z'/%3E%3Cpath d='M0 0h24v24H0z' fill='none'/%3E%3C/svg%3E\")",
 };
 const scrollBackButton = {
   backgroundImage:
-    "url(\"data:image/svg+xml;charset=utf-8,%3Csvg width='40' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cpath d='M-4-4h48v48H-4z'/%3E%3Cpath d='M36 0c2.2 0 4 1.8 4 4v24c0 2.2-1.8 4-4 4H12c-2.2 0-4-1.8-4-4V4c0-2.2 1.8-4 4-4h24zM16 11.868l12.618 12.618 2.829-2.828L18.789 9H27V5H12v15h4v-8.132zM4 8H0v28c0 2.2 1.8 4 4 4h28v-4H4V8z' fill='%23000' fill-rule='nonzero'/%3E%3C/g%3E%3C/svg%3E\")",
+    "url(\"data:image/svg+xml;charset=utf-8,%3Csvg width=40 height=40 xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cpath d='M-4-4h48v48H-4z'/%3E%3Cpath d='M36 0c2.2 0 4 1.8 4 4v24c0 2.2-1.8 4-4 4H12c-2.2 0-4-1.8-4-4V4c0-2.2 1.8-4 4-4h24zM16 11.868l12.618 12.618 2.829-2.828L18.789 9H27V5H12v15h4v-8.132zM4 8H0v28c0 2.2 1.8 4 4 4h28v-4H4V8z' fill='%23000' fill-rule='nonzero'/%3E%3C/g%3E%3C/svg%3E\")",
   backgroundSize: '50%',
 };
 
