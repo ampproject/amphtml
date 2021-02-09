@@ -24,8 +24,10 @@
 namespace htmlparser {
 
 Tokenizer::Tokenizer(std::string_view html, std::string context_tag) :
-    buffer_(html), lines_cols_{{1, 0}}, current_line_col_{1, 0},
-    token_line_col_{1, 0} {
+    buffer_(html) {
+  lines_cols_.push_back(std::make_pair(1, 0));
+  current_line_col_ = std::make_pair(1, 0);
+  token_line_col_ = std::make_pair(1, 0);
   if (!context_tag.empty()) {
     Strings::ToLower(&context_tag);
     if (std::find(kAllowedFragmentContainers.begin(),
@@ -65,8 +67,7 @@ inline char Tokenizer::ReadByte() {
 
 inline void Tokenizer::UnreadByte() {
   raw_.end--;
-
-  if (current_line_col_.second == 0) {
+  if (current_line_col_.first > 1 && current_line_col_.second == 0) {
     if (lines_cols_.size() > 1) {
       lines_cols_.pop_back();
     }
