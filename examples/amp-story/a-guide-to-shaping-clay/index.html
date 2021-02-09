@@ -9,6 +9,7 @@
       as="script"
       href="https://cdn.ampproject.org/v0/amp-story-1.0.js"
     />
+    <script async custom-element="amp-story-interactive" src="https://cdn.ampproject.org/v0/amp-story-interactive-0.1.js"></script>    
     <style amp-runtime i-amphtml-version="012101230412003">
       html {
 				overflow-x: hidden !important;
@@ -147,6 +148,7 @@
         background-color: #202125 !important;
         position: relative !important;
       }
+
       amp-story-page {
         background-color: #757575;
       }
@@ -1480,7 +1482,7 @@
         position: absolute;
         pointer-events: none;
         left: 0%;
-        top: 5.98706%;
+        top: 18.98706%;
         width: 100.24272%;
         height: 20.87379%;
         opacity: 1;
@@ -1501,7 +1503,7 @@
         position: absolute;
         pointer-events: none;
         left: 28.15534%;
-        top: 70.38835%;
+        top: 60.38835%;
         width: 62.37864%;
         height: 4.36893%;
         opacity: 1;
@@ -1513,6 +1515,7 @@
         position: absolute;
         top: 0;
         left: 0;
+        z-index: 1;
       }
       :root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-b7ab8e1 {
         margin: 1.12762645914% 0;
@@ -1531,7 +1534,7 @@
         position: absolute;
         pointer-events: none;
         left: 18.93204%;
-        top: 70.06472%;
+        top: 60.06472%;
         width: 7.28155%;
         height: 4.85437%;
         opacity: 1;
@@ -1584,11 +1587,17 @@
         border-radius: 20px;
         margin: 20px 0 30px;
       }
+      .interactive-component {
+        --interactive-accent-color: #953B28!important;
+        left: 50%;
+        transform: translate(-50%, 50%);
+        top: 37%;
+        position: absolute;
+      }
       /*# sourceURL=amp-custom.css */
     </style>
     <title>
-      (Philip test) A Guide to Shaping Clay - With Gopi Shah - Google Web
-      Creators
+      A Guide to Shaping Clay
     </title>
     <script type="application/ld+json">
       {
@@ -4194,7 +4203,7 @@
           ><div class="page-fullbleed-area">
             <div class="page-safe-area">
               <div
-                data-amp-original-style="position:absolute;pointer-events:none;left:0%;top:5.98706%;width:100.24272%;height:20.87379%;opacity:1"
+                data-amp-original-style="position:absolute;pointer-events:none;left:0%;top:18.98706%;width:100.24272%;height:20.87379%;opacity:1"
                 class="amp-wp-a373c7f"
               >
                 <div
@@ -4211,16 +4220,27 @@
                       class="amp-wp-0689675"
                       >How Do You</span
                     >
+                    <br>
                     <span
                       data-amp-original-style="font-weight: 300"
                       class="amp-wp-0689675"
-                      >Like The Story</span
+                      >Like The Story?</span
                     >
                   </p>
                 </div>
               </div>
+              <amp-story-interactive-binary-poll
+                class="interactive-component"
+                id="pizza-binary-poll"
+                endpoint="https://backend.com/v1/interactives"
+                option-1-text="👍"
+                option-1-confetti="👍"
+                option-2-text="👎"
+                option-2-confetti="👎"
+              >
+              </amp-story-interactive-binary-poll>
               <div
-                data-amp-original-style="position:absolute;pointer-events:none;left:28.15534%;top:70.38835%;width:62.37864%;height:4.36893%;opacity:1"
+                data-amp-original-style="position:absolute;pointer-events:none;left:28.15534%;top:60.38835%;width:62.37864%;height:4.36893%;opacity:1"
                 class="amp-wp-c735775"
               >
                 <div
@@ -4248,7 +4268,7 @@
                 </div>
               </div>
               <div
-                data-amp-original-style="position:absolute;pointer-events:none;left:18.93204%;top:70.06472%;width:7.28155%;height:4.85437%;opacity:1"
+                data-amp-original-style="position:absolute;pointer-events:none;left:18.93204%;top:60.06472%;width:7.28155%;height:4.85437%;opacity:1"
                 class="amp-wp-e3b3245"
               >
                 <div
