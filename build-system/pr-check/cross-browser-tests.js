@@ -114,6 +114,7 @@ async function prBuildWorkflow() {
     !buildTargetsInclude(
       Targets.RUNTIME,
       Targets.UNIT_TEST,
+      Targets.E2E_TEST,
       Targets.INTEGRATION_TEST
     )
   ) {
