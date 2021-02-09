@@ -77,6 +77,8 @@ export class BaseElement extends PreactBaseElement {
       subtree: true,
     });
 
+    // TODO(wg-bento): This hack is in place to prevent doubly rendering.
+    // See https://github.com/ampproject/amp-react-prototype/issues/40.
     const onChangeHandler = (event) => {
       const {option, value} = event;
       this.triggerEvent(
