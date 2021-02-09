@@ -695,8 +695,13 @@ describes.realWin('Layout: aspect-ratio CSS', {amp: true}, function (env) {
         expect(element.style.height).to.equal('');
         expect(element).to.have.class('i-amphtml-layout-responsive');
         expect(element).to.have.class('i-amphtml-layout-size-defined');
-        // No sizer added.
-        expect(element.querySelector('i-amphtml-sizer')).to.be.null;
+        // TODO(#30291): do not output <i-amphtml-sizer> at all once FF launches
+        // the aspect-ratio support. This is mainly to avoid flakes with visual
+        // tests. See https://bugzilla.mozilla.org/show_bug.cgi?id=1528375.
+        const sizer = element.querySelector('i-amphtml-sizer');
+        expect(sizer).to.exist;
+        expect(sizer).to.have.class('i-amphtml-disable-ar');
+        expect(getComputedStyle(sizer).display).to.equal('none');
       });
 
       it('should disable SSR sizer for responsive layout', () => {

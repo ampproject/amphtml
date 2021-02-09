@@ -516,21 +516,24 @@ export function applyStaticLayout(element, fixIeIntrinsic = false) {
   } else if (layout == Layout.FIXED_HEIGHT) {
     setStyle(element, 'height', dev().assertString(height));
   } else if (layout == Layout.RESPONSIVE) {
+    // TODO(#30291): do not output <i-amphtml-sizer> at all once FF launches
+    // the aspect-ratio support. This is mainly to avoid flakes with visual
+    // tests. See https://bugzilla.mozilla.org/show_bug.cgi?id=1528375.
+    const sizer = element.ownerDocument.createElement('i-amphtml-sizer');
+    sizer.setAttribute('slot', 'i-amphtml-svc');
+    setStyles(sizer, {
+      paddingTop:
+        (getLengthNumeral(height) / getLengthNumeral(width)) * 100 + '%',
+    });
+    element.insertBefore(sizer, element.firstChild);
+    element.sizerElement = sizer;
     if (shouldUseAspectRatioCss(toWin(element.ownerDocument.defaultView))) {
       setStyle(
         element,
         'aspect-ratio',
         `${getLengthNumeral(width)}/${getLengthNumeral(height)}`
       );
-    } else {
-      const sizer = element.ownerDocument.createElement('i-amphtml-sizer');
-      sizer.setAttribute('slot', 'i-amphtml-svc');
-      setStyles(sizer, {
-        paddingTop:
-          (getLengthNumeral(height) / getLengthNumeral(width)) * 100 + '%',
-      });
-      element.insertBefore(sizer, element.firstChild);
-      element.sizerElement = sizer;
+      sizer.classList.add('i-amphtml-disable-ar');
     }
   } else if (layout == Layout.INTRINSIC) {
     // Intrinsic uses an svg inside the sizer element rather than the padding
