@@ -146,7 +146,7 @@ function usesFilesOrLocalChanges(taskName) {
  * Runs 'npm install' to install packages in a given directory.
  *
  * @param {string} dir
- * @param {NodeJS.ProcessEnv} options
+ * @param {?NodeJS.ProcessEnv} options
  */
 function installPackages(dir, options = {}) {
   log(
