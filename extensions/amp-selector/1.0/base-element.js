@@ -77,6 +77,21 @@ export class BaseElement extends PreactBaseElement {
       subtree: true,
     });
 
+    const onChangeHandler = (event) => {
+      const {option, value} = event;
+      this.triggerEvent(
+        this.element,
+        'select',
+        dict({
+          'targetOption': option,
+          'selectedOptions': value,
+        })
+      );
+
+      this.isExpectedMutation = true;
+      this.mutateProps(dict({'value': value}));
+    };
+
     // Return props
     const {children, value, options} = getOptions(element, mu);
     this.optionState = options;
@@ -86,6 +101,7 @@ export class BaseElement extends PreactBaseElement {
       'children': children,
       'value': value,
       'options': options,
+      'onChange': onChangeHandler,
     });
   }
 }

@@ -22,6 +22,7 @@ import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/utils/object';
 import {dispatchCustomEvent} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
+import {toWin} from '../../../src/types';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
@@ -29,26 +30,22 @@ const TAG = 'amp-selector';
 
 class AmpSelector extends BaseElement {
   /** @override */
-  init() {
-    const props = super.init();
-
+  triggerEvent(element, eventName, detail) {
     // TODO(wg-bento): This hack is in place to prevent doubly rendering.
     // See https://github.com/ampproject/amp-react-prototype/issues/40.
-    const action = Services.actionServiceForDoc(this.element);
-    props['onChange'] = (e) => {
-      fireSelectEvent(
-        this.win,
-        action,
-        this.element,
-        e['option'],
-        e['value'],
-        ActionTrust.HIGH
-      );
-      this.isExpectedMutation = true;
-      this.mutateProps(dict({'value': e['value']}));
-    };
+    const event = createCustomEvent(
+      toWin(element.ownerDocument.defaultView),
+      `amp-selector.${eventName}`,
+      detail
+    );
+    Services.actionServiceForDoc(element).trigger(
+      element,
+      eventName,
+      event,
+      ActionTrust.HIGH
+    );
 
-    return props;
+    super.triggerEvent(element, eventName, detail);
   }
 
   /** @override */
@@ -60,27 +57,6 @@ class AmpSelector extends BaseElement {
     );
     return true;
   }
-}
-
-/**
- * Triggers a 'select' event with two data params:
- * 'targetOption' - option value of the selected or deselected element.
- * 'selectedOptions' - array of option values of selected elements.
- *
- * @param {!Window} win
- * @param {!../../../src/service/action-impl.ActionService} action
- * @param {!Element} el The element that was selected or deslected.
- * @param {string} option
- * @param {Array<string>} value
- * @param {!ActionTrust} trust
- * @private
- */
-function fireSelectEvent(win, action, el, option, value, trust) {
-  const eventName = 'select';
-  const data = dict({'targetOption': option, 'selectedOptions': value});
-  const selectEvent = createCustomEvent(win, `amp-selector.${eventName}`, data);
-  action.trigger(el, eventName, selectEvent, trust);
-  dispatchCustomEvent(el, eventName, data);
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {
