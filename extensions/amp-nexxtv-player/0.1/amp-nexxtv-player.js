@@ -53,8 +53,8 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     /** @private {?Element} */
     this.iframe_ = null;
 
-    /** @private {function():string} */
-    this.getVideoIframeSrc_ = once(() => this.resolveVideoIframeSrc_());
+    /**@private {?string} */
+    this.origin_ = '';
 
     /** @private {?Function} */
     this.unlistenMessage_ = null;
@@ -82,7 +82,7 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
   preconnectCallback(opt_onLayout) {
     Services.preconnectFor(this.win).url(
       this.getAmpDoc(),
-      this.getVideoIframeSrc_(),
+      this.origin_,
       opt_onLayout
     );
   }
@@ -121,7 +121,7 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
    * @return {string}
    * @private
    */
-  resolveVideoIframeSrc_() {
+  getVideoIframeSrc_() {
     const {element: el} = this;
 
     const mediaId = userAssert(
@@ -163,31 +163,37 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
       src += `&streamingFilter=${encodeURIComponent(streamingFilter)}`;
     }
 
+    if (this.consentString_ !== '' && this.consentString_ !== null){
+      src += `&consentString=${encodeURIComponent(this.consentString_)}`;
+    }
+
     return assertAbsoluteHttpOrHttpsUrl(src);
   }
 
   /**
+   * Get consent data from consent module
    * @return {Promise[]}
    */
   getConsents_() {
-    const consentPolicy = super.getConsentPolicy();
+    const consentPolicy = super.getConsentPolicy() || 'default';
     const consentPromise = consentPolicy
       ? getConsentPolicyState(this.element, consentPolicy)
-      : Promise.resolve(null);
-    const consentStringPromise = consentPolicy
-      ? getConsentPolicyInfo(this.element, consentPolicy)
       : Promise.resolve(null);
     const sharedDataPromise = consentPolicy
       ? getConsentPolicySharedData(this.element, consentPolicy)
       : Promise.resolve(null);
+    const consentStringPromise = consentPolicy
+      ? getConsentPolicyInfo(this.element, consentPolicy)
+      : Promise.resolve(null);
+
     return Promise.all([
       consentPromise,
       sharedDataPromise,
       consentStringPromise,
-    ]).then((arr) => {
-      this.consentState_ = arr[0];
-      this.consentSharedData_ = arr[1];
-      this.consentString_ = arr[2];
+    ]).then((consentData) => {
+      this.consentState_ = consentData[0];
+      this.consentSharedData_ = consentData[1];
+      this.consentString_ = consentData[2];
     });
   }
 
