@@ -25,16 +25,14 @@ describes.realWin(
   },
   (env) => {
     let win;
-    let element;
 
     beforeEach(() => {
       win = env.win;
-      element = win.document.createElement('amp-embedly-card');
-      win.document.body.appendChild(element);
     });
 
     function createEmbedlyCard(dataUrl) {
       const element = win.document.createElement('amp-embedly-card');
+      element.setAttribute('layout', 'nodisplay');
 
       element.setAttribute('data-url', dataUrl);
       element.setAttribute('height', '100');
@@ -42,7 +40,7 @@ describes.realWin(
       win.document.body.appendChild(element);
 
       return element
-        .build()
+        .buildInternal()
         .then(() => element.layoutCallback())
         .then(() => element);
     }
@@ -66,21 +64,17 @@ describes.realWin(
       );
     });
 
-    it('removes iframe after unlayoutCallback', () => {
-      return createEmbedlyCard('https://twitter.com/AMPhtml').then(
-        (element) => {
-          const iframe = element.querySelector('iframe');
+    it('removes iframe after unlayoutCallback', async () => {
+      const element = await createEmbedlyCard('https://twitter.com/AMPhtml');
+      const instance = await element.getImpl();
 
-          expect(iframe).to.not.be.null;
+      const iframe = element.querySelector('iframe');
+      expect(iframe).to.not.be.null;
 
-          const instance = element.implementation_;
+      instance.unlayoutCallback();
 
-          instance.unlayoutCallback();
-
-          expect(element.querySelector('iframe')).to.be.null;
-          expect(instance.iframe_).to.be.null;
-        }
-      );
+      expect(element.querySelector('iframe')).to.be.null;
+      expect(instance.iframe_).to.be.null;
     });
   }
 );

@@ -38,7 +38,7 @@ function pushBuildWorkflow() {
 }
 
 function prBuildWorkflow() {
-  if (buildTargetsInclude(Targets.RUNTIME, Targets.FLAG_CONFIG)) {
+  if (buildTargetsInclude(Targets.RUNTIME)) {
     downloadNomoduleOutput();
     downloadModuleOutput();
     timedExecOrDie('gulp bundle-size --on_pr_build');
@@ -52,10 +52,10 @@ function prBuildWorkflow() {
 }
 
 // TODO(rsimha): Remove this block once Travis is shut off.
-if (!isTravisBuild()) {
+if (isTravisBuild()) {
   printSkipMessage(
     jobName,
-    'this is a CircleCI build. Sizes will be reported from Travis'
+    'this is a Travis build. Sizes will be reported from CircleCI'
   );
   return;
 }

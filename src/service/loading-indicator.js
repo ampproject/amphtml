@@ -134,7 +134,7 @@ export class LoadingIndicatorImpl {
     );
 
     const container = htmlFor(this.ampdoc_.win.document)`
-        <div class="i-amphtml-loading-container i-amphtml-fill-content
+        <div slot="i-amphtml-svc" class="i-amphtml-svc i-amphtml-loading-container i-amphtml-fill-content
             amp-hidden"></div>
       `;
     container.appendChild(loader);

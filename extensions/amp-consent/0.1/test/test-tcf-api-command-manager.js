@@ -109,12 +109,12 @@ describes.realWin(
         it('allows parameter value in removeEventListener command', () => {
           tcfApiCommandManager = new TcfApiCommandManager(mockPolicyManager);
           msg = {
-            __tcfapiCall:{
+            __tcfapiCall: {
               'command': 'removeEventListener',
               'parameter': '30',
               'version': 2,
               'callId': 'callId',
-            }
+            },
           };
           const errorSpy = env.sandbox.stub(user(), 'error');
           expect(tcfApiCommandManager.isValidTcfApiCall_(msg.__tcfapiCall)).to
@@ -175,8 +175,7 @@ describes.realWin(
           expect(postMessageArgs[0]).to.deep.equals(
             getTcfApiReturn(
               callId,
-              tcfApiCommandManager.getMinimalPingReturnForTesting(mockMetadata),
-              undefined
+              tcfApiCommandManager.getMinimalPingReturnForTesting(mockMetadata)
             )
           );
         });
@@ -198,7 +197,7 @@ describes.realWin(
             tcString: mockTcString,
             listenerId: undefined,
             cmpStatus: 'loaded',
-            eventStatus: undefined,
+            eventStatus: 'tcloaded',
             purposeOneTreatment: false,
             additionalData: {'additionalConsent': 'xyz987'},
           });
@@ -218,7 +217,7 @@ describes.realWin(
             tcString: mockTcString,
             listenerId: undefined,
             cmpStatus: 'loaded',
-            eventStatus: undefined,
+            eventStatus: 'tcloaded',
             purposeOneTreatment: false,
             additionalData: {'data': 'data1', 'additionalConsent': 'xyz987'},
           });
@@ -299,7 +298,6 @@ describes.realWin(
                 mockMetadata,
                 mockSharedData,
                 mockTcString,
-                'tcloaded',
                 0
               ),
               true
@@ -318,7 +316,7 @@ describes.realWin(
           tcfApiCommandManager.handleTcDataChange_();
           await macroTask();
           expect(mockWin.postMessage).to.not.be.called;
-          
+
           // No TcString case
           mockTcString = undefined;
           tcfApiCommandManager = new TcfApiCommandManager(mockPolicyManager);
@@ -338,7 +336,8 @@ describes.realWin(
           for (let listenerId = 0; listenerId < 4; listenerId++) {
             data = getData('addEventListener', `${callId}${listenerId}`);
             tcfApiCommandManager.handleTcfCommand(data, mockWin);
-            expect(tcfApiCommandManager.changeListeners_[listenerId]).to.not.be.null;
+            expect(tcfApiCommandManager.changeListeners_[listenerId]).to.not.be
+              .null;
           }
 
           // Fake a TcData change
@@ -354,7 +353,6 @@ describes.realWin(
                   mockMetadata,
                   mockSharedData,
                   mockTcString,
-                  'tcloaded',
                   listenerId
                 ),
                 true
@@ -373,7 +371,9 @@ describes.realWin(
           // Register listener
           data = getData('addEventListener', `${callId}`);
           tcfApiCommandManager.handleTcfCommand(data, mockWin);
-          expect(Object.keys(tcfApiCommandManager.changeListeners_).length).to.equal(1);
+          expect(
+            Object.keys(tcfApiCommandManager.changeListeners_).length
+          ).to.equal(1);
           tcfApiCommandManager.handleTcDataChange_();
           await macroTask();
           expect(mockWin.postMessage).to.be.calledOnce;
@@ -381,7 +381,9 @@ describes.realWin(
           // Remove listener
           data = getData('removeEventListener', `${callId}`, '0');
           tcfApiCommandManager.handleTcfCommand(data, mockWin);
-          expect(Object.keys(tcfApiCommandManager.changeListeners_).length).to.equal(0);
+          expect(
+            Object.keys(tcfApiCommandManager.changeListeners_).length
+          ).to.equal(0);
         });
 
         it('sends undefined returnValue', async () => {
@@ -400,8 +402,6 @@ describes.realWin(
           data = getData('removeEventListener', `${callId}`, '0');
           tcfApiCommandManager.handleTcfCommand(data, mockWin);
           const postMessageArgs = mockWin.postMessage.args[0];
-          console.log(postMessageArgs[0]);
-          console.log(getTcfApiReturn(callId, {}, true));
           expect(postMessageArgs[0]).to.deep.equal(
             getTcfApiReturn(callId, undefined, true)
           );
@@ -423,7 +423,9 @@ describes.realWin(
           data = getData('removeEventListener', `${callId}`, '1');
           tcfApiCommandManager.handleTcfCommand(data, mockWin);
           const postMessageArgs = mockWin.postMessage.args[0];
-          expect(Object.keys(tcfApiCommandManager.changeListeners_).length).to.equal(1);
+          expect(
+            Object.keys(tcfApiCommandManager.changeListeners_).length
+          ).to.equal(1);
           expect(postMessageArgs[0]).to.deep.equal(
             getTcfApiReturn(callId, undefined, false)
           );

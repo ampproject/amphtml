@@ -21,6 +21,10 @@ import {DetachedDomStream} from '../../../src/utils/detached-dom-stream';
 import {DomTransformStream} from '../../../src/utils/dom-tranform-stream';
 import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
 import {Layout, LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
+import {
+  STICKY_AD_TRANSITION_EXP,
+  divertStickyAdTransition,
+} from '../../../ads/google/a4a/sticky-ad-transition-exp';
 import {Services} from '../../../src/services';
 import {SignatureVerifier, VerificationStatus} from './signature-verifier';
 import {
@@ -51,12 +55,14 @@ import {
   getConsentPolicyState,
 } from '../../../src/consent';
 import {getContextMetadata} from '../../../src/iframe-attributes';
+import {getExperimentBranch, isExperimentOn} from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {
   installFriendlyIframeEmbed,
   isSrcdocSupported,
 } from '../../../src/friendly-iframe-embed';
+import {installRealTimeConfigServiceForDoc} from '../../../src/service/real-time-config/real-time-config-impl';
 import {installUrlReplacementsForEmbed} from '../../../src/service/url-replacements-impl';
 import {
   intersectionEntryToJson,
@@ -64,7 +70,6 @@ import {
 } from '../../../src/utils/intersection';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isArray, isEnumValue, isObject} from '../../../src/types';
-import {isExperimentOn} from '../../../src/experiments';
 import {listenOnce} from '../../../src/event-helper';
 import {
   observeWithSharedInOb,
@@ -909,6 +914,17 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
+   * Allow subclasses to skip client side validation of non-amp creatives
+   * based on http headers for perfomance. When true, ads will fall back to
+   * x-domain earlier.
+   * @param {!Headers} unusedHeaders
+   * @return {boolean}
+   */
+  skipClientSideValidation(unusedHeaders) {
+    return false;
+  }
+
+  /**
    * Start streaming response into the detached document.
    * @param {!Response} httpResponse
    * @param {function()} checkStillCurrent
@@ -918,6 +934,10 @@ export class AmpA4A extends AMP.BaseElement {
     if (httpResponse.status === 204) {
       this.forceCollapse();
       return Promise.reject(NO_CONTENT_RESPONSE);
+    }
+
+    if (this.skipClientSideValidation(httpResponse.headers)) {
+      return this.handleFallback_(httpResponse, checkStillCurrent);
     }
 
     // Duplicating httpResponse stream as safeframe/nameframe rending will need the
@@ -1854,7 +1874,13 @@ export class AmpA4A extends AMP.BaseElement {
         'title': this.getIframeTitle(),
       })
     ));
-    this.applyFillContent(this.iframe);
+    divertStickyAdTransition(this.win);
+    if (
+      getExperimentBranch(this.win, STICKY_AD_TRANSITION_EXP.id) !==
+      STICKY_AD_TRANSITION_EXP.experiment
+    ) {
+      this.applyFillContent(this.iframe);
+    }
     const fontsArray = [];
     if (creativeMetaData.customStylesheets) {
       creativeMetaData.customStylesheets.forEach((s) => {
@@ -2351,31 +2377,23 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {Promise<!Array<!rtcResponseDef>>|undefined}
    */
   tryExecuteRealTimeConfig_(consentState, consentString, consentMetadata) {
-    if (!!AMP.RealTimeConfigManager) {
-      return this.getBlockRtc_().then((shouldBlock) => {
-        if (shouldBlock) {
-          return;
-        }
-        try {
-          return new AMP.RealTimeConfigManager(
-            this.getAmpDoc()
-          ).maybeExecuteRealTimeConfig(
-            this.element,
-            this.getCustomRealTimeConfigMacros_(),
-            consentState,
-            consentString,
-            consentMetadata,
-            this.verifyStillCurrent()
-          );
-        } catch (err) {
-          user().error(TAG, 'Could not perform Real Time Config.', err);
-        }
-      });
-    } else if (this.element.getAttribute('rtc-config')) {
-      user().error(
-        TAG,
-        'RTC not supported for ad network ' +
-          `${this.element.getAttribute('type')}`
+    if (this.element.getAttribute('rtc-config')) {
+      installRealTimeConfigServiceForDoc(this.getAmpDoc());
+      return this.getBlockRtc_().then((shouldBlock) =>
+        shouldBlock
+          ? undefined
+          : Services.realTimeConfigForDoc(
+              this.getAmpDoc()
+            ).then((realTimeConfig) =>
+              realTimeConfig.maybeExecuteRealTimeConfig(
+                this.element,
+                this.getCustomRealTimeConfigMacros_(),
+                consentState,
+                consentString,
+                consentMetadata,
+                this.verifyStillCurrent()
+              )
+            )
       );
     }
   }

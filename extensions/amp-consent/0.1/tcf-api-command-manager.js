@@ -27,8 +27,8 @@ import {user} from '../../../src/log';
  *  gdprApplies: (boolean|undefined),
  *  tcString: (string|undefined),
  *  listenerId: (string|undefined),
- *  cmpStatus: (boolean|undefined),
- *  eventStatus: (string|undefined),
+ *  cmpStatus: (string),
+ *  eventStatus: (string),
  *  additionalData: (Object),
  * }}
  */
@@ -56,10 +56,10 @@ export class TcfApiCommandManager {
    * @param {!./consent-policy-manager.ConsentPolicyManager} policyManager
    */
   constructor(policyManager) {
-    /** @param {!./consent-policy-manager.ConsentPolicyManager} */
+    /** @private {!./consent-policy-manager.ConsentPolicyManager} */
     this.policyManager_ = policyManager;
 
-    /** @private {!Object<string, Object>} */
+    /** @private {!Object<number, Object>} */
     this.changeListeners_ = map();
 
     /** @private {?string} */
@@ -68,6 +68,8 @@ export class TcfApiCommandManager {
     /** @private {number} */
     this.listenerId_ = 0;
 
+    // Set the policy manager to signal to us
+    // when a new TC has potentially been stored.
     policyManager.setOnPolicyChange(() => {
       this.handleTcDataChange_();
     });
@@ -103,6 +105,11 @@ export class TcfApiCommandManager {
   }
 
   /**
+   * Add a entry to our changeListeners to signify that there
+   * is another iframe intrested in listening for TCData changes.
+   *
+   * Each entry has a unique `listenerId` that will be sent
+   * back to the 3p iframe.
    * @param {!Object} payload
    * @param {!Window} win
    */
@@ -123,18 +130,18 @@ export class TcfApiCommandManager {
    */
   handleRemoveEventListner_(payload, win) {
     const {callId, parameter} = payload;
-    const success = this.changeListeners_[parameter] != undefined;
+    const success = !!this.changeListeners_[parameter];
     if (success) {
       delete this.changeListeners_[parameter];
     }
 
-    this.sendTcfApiReturn_(win, undefined, callId, success);
+    this.sendTcfApiReturn_(win, /** returnValue */ undefined, callId, success);
   }
 
-  // How will this work in conjunciton with getTcData?
-  // Read up on this
   /**
-   *
+   * Handler for when policy manager signal potential TCData
+   * change. Only triggers new TCData to be sent if TC String
+   * has been change and is non-null.
    */
   handleTcDataChange_() {
     if (!Object.keys(this.changeListeners_).length) {
@@ -156,13 +163,11 @@ export class TcfApiCommandManager {
         }
         const {payload, win} = this.changeListeners_[listenerId];
         const {callId} = payload;
-        const listenerIdNumber = parseInt(listenerId, 10);
         const returnValue = this.getMinimalTcData_(
           consentPromises[0],
           consentPromises[1],
           newTcString,
-          EVENT_STATUS,
-          listenerIdNumber
+          listenerId
         );
 
         this.sendTcfApiReturn_(win, returnValue, callId, true);
@@ -211,12 +216,11 @@ export class TcfApiCommandManager {
    * command.
    * @param {?Object} metadata
    * @param {?Object} sharedData
-   * @param {string=} tcString
-   * @param {string=} eventStatus
-   * @param {number=} listenerId
+   * @param {?string} tcString
+   * @param {number=} opt_listenerId
    * @return {!MinimalTcData} policyManager
    */
-  getMinimalTcData_(metadata, sharedData, tcString, eventStatus, listenerId) {
+  getMinimalTcData_(metadata, sharedData, tcString, opt_listenerId) {
     const purposeOneTreatment = metadata ? metadata['purposeOne'] : undefined;
     const gdprApplies = metadata ? metadata['gdprApplies'] : undefined;
     const additionalConsent = metadata
@@ -228,9 +232,9 @@ export class TcfApiCommandManager {
       tcfPolicyVersion: TCF_POLICY_VERSION,
       gdprApplies,
       tcString,
-      listenerId,
+      listenerId: opt_listenerId,
       cmpStatus: CMP_STATUS,
-      eventStatus,
+      eventStatus: EVENT_STATUS,
       purposeOneTreatment,
       additionalData,
     };
@@ -306,7 +310,7 @@ export class TcfApiCommandManager {
       return false;
     }
     if (
-      parameter !== undefined &&
+      parameter &&
       command != TCF_POST_MESSAGE_API_COMMANDS.REMOVE_EVENT_LISTENER
     ) {
       user().error(
@@ -334,25 +338,12 @@ export class TcfApiCommandManager {
   /**
    * @param {?Object} metadata
    * @param {?Object} sharedData
-   * @param {string=} tcString
-   * @param {string=} eventStatus
+   * @param {?string} tcString
    * @param {number=} listenerId
    * @return {!MinimalPingReturn}
    * @visibleForTesting
    */
-  getMinimalTcDataForTesting(
-    metadata,
-    sharedData,
-    tcString,
-    eventStatus,
-    listenerId
-  ) {
-    return this.getMinimalTcData_(
-      metadata,
-      sharedData,
-      tcString,
-      eventStatus,
-      listenerId
-    );
+  getMinimalTcDataForTesting(metadata, sharedData, tcString, listenerId) {
+    return this.getMinimalTcData_(metadata, sharedData, tcString, listenerId);
   }
 }

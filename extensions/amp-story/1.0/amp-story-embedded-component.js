@@ -38,7 +38,11 @@ import {
   matches,
   tryFocus,
 } from '../../../src/dom';
-import {createShadowRootWithStyle, getSourceOriginForElement} from './utils';
+import {
+  createShadowRootWithStyle,
+  getSourceOriginForElement,
+  triggerClickFromLightDom,
+} from './utils';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getAmpdoc} from '../../../src/service';
@@ -724,6 +728,7 @@ export class AmpStoryEmbeddedComponent {
           StoryAnalyticsEvent.CLICK_THROUGH,
           this.triggeringTarget_
         );
+        this.tooltip_.href && this.onAnchorClick_(event);
       },
       true /** capture */
     );
@@ -1373,7 +1378,6 @@ export class AmpStoryEmbeddedComponent {
               i-amphtml-story-tooltip-nav-button-left"
         >
           <button
-            role="button"
             ref="buttonLeft"
             class="i-amphtml-story-focused-state-layer-nav-button
                 i-amphtml-story-tooltip-nav-button-left"
@@ -1384,7 +1388,6 @@ export class AmpStoryEmbeddedComponent {
               i-amphtml-story-tooltip-nav-button-right"
         >
           <button
-            role="button"
             ref="buttonRight"
             class="i-amphtml-story-focused-state-layer-nav-button
                     i-amphtml-story-tooltip-nav-button-right"
@@ -1453,6 +1456,16 @@ export class AmpStoryEmbeddedComponent {
       undefined,
       {bubbles: true}
     );
+  }
+
+  /**
+   * Linkers don't work on shadow root elements so we click a clone of the anchor on the root dom.
+   * @param {!Event} event
+   * @private
+   */
+  onAnchorClick_(event) {
+    event.preventDefault();
+    triggerClickFromLightDom(this.tooltip_, this.storyEl_);
   }
 
   /**

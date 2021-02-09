@@ -21,6 +21,7 @@
  * determine which tasks are required to run for pull request builds.
  */
 const config = require('../test-configs/config');
+const globby = require('globby');
 const minimatch = require('minimatch');
 const path = require('path');
 const {cyan} = require('ansi-colors');
@@ -31,7 +32,14 @@ const {isCiBuild} = require('../common/ci');
 /**
  * Used to prevent the repeated recomputing of build targets during PR jobs.
  */
-const buildTargets = new Set();
+let buildTargets;
+
+/**
+ * Used to prevent the repeated expansion of globs during PR jobs.
+ */
+let lintFiles;
+let presubmitFiles;
+let prettifyFiles;
 
 /***
  * All of AMP's build targets that can be tested during CI.
@@ -43,11 +51,14 @@ const Targets = {
   BABEL_PLUGIN: 'BABEL_PLUGIN',
   CACHES_JSON: 'CACHES_JSON',
   DEV_DASHBOARD: 'DEV_DASHBOARD',
+  DOCS: 'DOCS',
   E2E_TEST: 'E2E_TEST',
-  FLAG_CONFIG: 'FLAG_CONFIG',
   INTEGRATION_TEST: 'INTEGRATION_TEST',
+  LINT: 'LINT',
   OWNERS: 'OWNERS',
   PACKAGE_UPGRADE: 'PACKAGE_UPGRADE',
+  PRESUBMIT: 'PRESUBMIT',
+  PRETTIFY: 'PRETTIFY',
   RENOVATE_CONFIG: 'RENOVATE_CONFIG',
   RUNTIME: 'RUNTIME',
   SERVER: 'SERVER',
@@ -56,6 +67,26 @@ const Targets = {
   VALIDATOR_WEBUI: 'VALIDATOR_WEBUI',
   VISUAL_DIFF: 'VISUAL_DIFF',
 };
+
+/**
+ * Files matching these targets are known not to affect the runtime. For all
+ * other targets, we play safe and default to adding the RUNTIME target, which
+ * will trigger all the runtime tests.
+ */
+const nonRuntimeTargets = [
+  Targets.AVA,
+  Targets.CACHES_JSON,
+  Targets.DEV_DASHBOARD,
+  Targets.DOCS,
+  Targets.E2E_TEST,
+  Targets.INTEGRATION_TEST,
+  Targets.OWNERS,
+  Targets.RENOVATE_CONFIG,
+  Targets.UNIT_TEST,
+  Targets.VALIDATOR,
+  Targets.VALIDATOR_WEBUI,
+  Targets.VISUAL_DIFF,
+];
 
 /**
  * Checks if the given file is an OWNERS file.
@@ -85,6 +116,8 @@ function isValidatorFile(file) {
 
 /**
  * A dictionary of functions that match a given file to a given build target.
+ * Owners files are special because they live all over the repo, so most target
+ * matchers must first make sure they're not matching an owners file.
  */
 const targetMatchers = {
   [Targets.AVA]: (file) => {
@@ -93,7 +126,6 @@ const targetMatchers = {
     }
     return (
       file == 'build-system/tasks/ava.js' ||
-      file.startsWith('build-system/tasks/csvify-size/') ||
       file.startsWith('build-system/tasks/get-zindex/') ||
       file.startsWith('build-system/tasks/prepend-global/')
     );
@@ -152,12 +184,6 @@ const targetMatchers = {
       })
     );
   },
-  [Targets.FLAG_CONFIG]: (file) => {
-    if (isOwnersFile(file)) {
-      return false;
-    }
-    return file.startsWith('build-system/global-configs/');
-  },
   [Targets.INTEGRATION_TEST]: (file) => {
     if (isOwnersFile(file)) {
       return false;
@@ -171,11 +197,27 @@ const targetMatchers = {
       })
     );
   },
+  [Targets.LINT]: (file) => {
+    if (isOwnersFile(file)) {
+      return false;
+    }
+    return lintFiles.includes(file);
+  },
   [Targets.OWNERS]: (file) => {
     return isOwnersFile(file) || file == 'build-system/tasks/check-owners.js';
   },
   [Targets.PACKAGE_UPGRADE]: (file) => {
-    return file == 'package.json' || file == 'package-lock.json';
+    return file.endsWith('package.json') || file.endsWith('package-lock.json');
+  },
+  [Targets.PRESUBMIT]: (file) => {
+    if (isOwnersFile(file)) {
+      return false;
+    }
+    return presubmitFiles.includes(file);
+  },
+  [Targets.PRETTIFY]: (file) => {
+    // OWNERS files can be prettified.
+    return prettifyFiles.includes(file);
   },
   [Targets.RENOVATE_CONFIG]: (file) => {
     return (
@@ -249,21 +291,27 @@ const targetMatchers = {
  * @return {Set<string>}
  */
 function determineBuildTargets() {
-  if (buildTargets.size > 0) {
+  if (buildTargets != undefined) {
     return buildTargets;
   }
+  buildTargets = new Set();
+  lintFiles = globby.sync(config.lintGlobs);
+  presubmitFiles = globby.sync(config.presubmitGlobs);
+  prettifyFiles = globby.sync(config.prettifyGlobs);
   const filesChanged = gitDiffNameOnlyMaster();
   for (const file of filesChanged) {
-    let matched = false;
+    let isRuntimeFile = true;
     Object.keys(targetMatchers).forEach((target) => {
       const matcher = targetMatchers[target];
       if (matcher(file)) {
         buildTargets.add(target);
-        matched = true;
+        if (nonRuntimeTargets.includes(target)) {
+          isRuntimeFile = false;
+        }
       }
     });
-    if (!matched) {
-      buildTargets.add(Targets.RUNTIME); // Default to RUNTIME for files that don't match a target.
+    if (isRuntimeFile) {
+      buildTargets.add(Targets.RUNTIME);
     }
   }
   const loggingPrefix = getLoggingPrefix();
@@ -271,15 +319,11 @@ function determineBuildTargets() {
     `${loggingPrefix} Detected build targets:`,
     cyan(Array.from(buildTargets).sort().join(', '))
   );
-  // Test the runtime for babel plugin and server changes.
-  if (
-    buildTargets.has(Targets.BABEL_PLUGIN) ||
-    buildTargets.has(Targets.SERVER)
-  ) {
-    buildTargets.add(Targets.RUNTIME);
-  }
   // Test all targets during CI builds for package upgrades.
   if (isCiBuild() && buildTargets.has(Targets.PACKAGE_UPGRADE)) {
+    logWithoutTimestamp(
+      `${loggingPrefix} Running all tests since this PR contains package upgrades...`
+    );
     const allTargets = Object.keys(targetMatchers);
     allTargets.forEach((target) => buildTargets.add(target));
   }

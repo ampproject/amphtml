@@ -6,10 +6,8 @@ orbs:
 push_and_pr_builds: &push_and_pr_builds
   filters:
     branches:
-      only:
-        - master
-        - /^amp-release-.*$/
-        - /^pull\/.*$/
+      ignore:
+        - nightly
 
 push_builds_only: &push_builds_only
   filters:
@@ -19,6 +17,10 @@ push_builds_only: &push_builds_only
         - /^amp-release-.*$/
 
 executors:
+  amphtml-medium-executor:
+    machine:
+      image: ubuntu-2004:202010-01
+    resource_class: medium
   amphtml-large-executor:
     machine:
       image: ubuntu-2004:202010-01
@@ -29,44 +31,54 @@ executors:
     resource_class: xlarge
 
 commands:
+  save_karma_cache:
+    parameters:
+      cache_name:
+        type: string
+    steps:
+      - save_cache:
+          name: 'Save Karma Cache'
+          key: karma-cache-<<parameters.cache_name>>-{{ checksum ".karma-cache-hash" }}
+          paths:
+            - .karma-cache
+  restore_karma_cache:
+    parameters:
+      cache_name:
+        type: string
+    steps:
+      - run:
+          name: 'Compute Karma Cache Hash'
+          command: node ./build-system/common/compute-karma-cache-hash.js
+      - restore_cache:
+          name: 'Restore Karma Cache'
+          key: karma-cache-<<parameters.cache_name>>-{{ checksum ".karma-cache-hash" }}
   setup_vm:
     steps:
       - checkout
       - run:
           name: 'Fetch Merge Commit'
           command: ./.circleci/fetch_merge_commit.sh
-      - browser-tools/install-chrome:
-          replace-existing: true
       - run:
-          name: 'Install Google Cloud SDK'
-          command: |
-            cd ~/
-            curl -Ss --retry 5 https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-323.0.0-linux-x86_64.tar.gz | tar xz
-            echo 'source ~/google-cloud-sdk/path.bash.inc' >> $BASH_ENV
+          name: 'Check Config'
+          command: ./.circleci/check_config.sh
       - run:
-          name: 'Setup Storage'
-          command: ./.circleci/setup-storage.sh
+          name: 'Setup Google Cloud Storage'
+          command: ./.circleci/setup_storage.sh
       - run:
           name: 'Configure Hosts'
           command: cat ./build-system/test-configs/hosts | sudo tee -a /etc/hosts
       - run:
-          name: 'Install NVM'
-          command: curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
-      - run:
-          name: 'Install Node LTS'
-          command: |
-            nvm install 'lts/*'
-            echo "export PATH=`which node`:$PATH" >> $BASH_ENV
-      - run:
           name: 'Install Dependencies'
-          command: |
-            npm install --global gulp-cli
-            npm ci
+          command: ./.circleci/install_dependencies.sh
+  install_chrome:
+    steps:
+      - browser-tools/install-chrome:
+          replace-existing: true
 
 jobs:
   'Checks':
     executor:
-      name: amphtml-large-executor
+      name: amphtml-medium-executor
     steps:
       - setup_vm
       - run:
@@ -98,7 +110,7 @@ jobs:
           command: node build-system/pr-check/module-build.js
   'Bundle Size':
     executor:
-      name: amphtml-large-executor
+      name: amphtml-medium-executor
     steps:
       - setup_vm
       - run:
@@ -106,7 +118,7 @@ jobs:
           command: node build-system/pr-check/bundle-size.js
   'Validator Tests':
     executor:
-      name: amphtml-large-executor
+      name: amphtml-medium-executor
     steps:
       - setup_vm
       - run:
@@ -120,6 +132,7 @@ jobs:
       name: amphtml-large-executor
     steps:
       - setup_vm
+      - install_chrome
       - run:
           name: 'Visual Diff Tests'
           command: node build-system/pr-check/visual-diff-tests.js
@@ -128,38 +141,59 @@ jobs:
       name: amphtml-large-executor
     steps:
       - setup_vm
+      - install_chrome
+      - restore_karma_cache:
+          cache_name: unit
       - run:
           name: 'Unit Tests'
           command: node build-system/pr-check/unit-tests.js
+      - save_karma_cache:
+          cache_name: unit
   'Unminified Tests':
     executor:
       name: amphtml-large-executor
     steps:
       - setup_vm
+      - install_chrome
+      - restore_karma_cache:
+          cache_name: unminified
       - run:
           name: 'Unminified Tests'
           command: node build-system/pr-check/unminified-tests.js
+      - save_karma_cache:
+          cache_name: unminified
   'Nomodule Tests':
     executor:
       name: amphtml-large-executor
     steps:
       - setup_vm
+      - install_chrome
+      - restore_karma_cache:
+          cache_name: nomodule
       - run:
           name: 'Nomodule Tests'
           command: node build-system/pr-check/nomodule-tests.js
+      - save_karma_cache:
+          cache_name: nomodule
   'Module Tests':
     executor:
       name: amphtml-large-executor
     steps:
       - setup_vm
+      - install_chrome
+      - restore_karma_cache:
+          cache_name: module
       - run:
           name: 'Module Tests'
           command: node build-system/pr-check/module-tests.js
+      - save_karma_cache:
+          cache_name: module
   'End-to-End Tests':
     executor:
       name: amphtml-large-executor
     steps:
       - setup_vm
+      - install_chrome
       - run:
           name: 'End-to-End Tests'
           command: node build-system/pr-check/e2e-tests.js
@@ -168,6 +202,7 @@ jobs:
       name: amphtml-xlarge-executor
     steps:
       - setup_vm
+      - install_chrome
       - run:
           name: 'Performance Tests'
           command: node build-system/pr-check/performance-tests.js
@@ -176,6 +211,7 @@ jobs:
       name: amphtml-xlarge-executor
     steps:
       - setup_vm
+      - install_chrome
       - run:
           name: 'Experiment A Tests'
           command: node build-system/pr-check/experiment-tests.js --experiment=experimentA
@@ -184,6 +220,7 @@ jobs:
       name: amphtml-xlarge-executor
     steps:
       - setup_vm
+      - install_chrome
       - run:
           name: 'Experiment B Tests'
           command: node build-system/pr-check/experiment-tests.js --experiment=experimentB
@@ -192,12 +229,13 @@ jobs:
       name: amphtml-xlarge-executor
     steps:
       - setup_vm
+      - install_chrome
       - run:
           name: 'Experiment C Tests'
           command: node build-system/pr-check/experiment-tests.js --experiment=experimentC
 
 workflows:
-  'CircleCI PR Check':
+  'CircleCI':
     jobs:
       - 'Checks':
           <<: *push_and_pr_builds
