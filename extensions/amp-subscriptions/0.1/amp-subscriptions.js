@@ -307,7 +307,6 @@ export class SubscriptionService {
         SubscriptionAnalyticsEvents.PLATFORM_REGISTERED_DEPRECATED,
         subscriptionPlatform.getPlatformKey()
       );
-      console.log('registerPlatform', subscriptionPlatform.getServiceId());
       this.fetchEntitlements_(subscriptionPlatform);
 
       if (matchedServiceConfig.enableMetering) {
@@ -323,7 +322,7 @@ export class SubscriptionService {
                 return;
               }
 
-              this.resetPlatform(serviceId);
+              this.resetPlatform(platformKey);
             });
         });
       }
