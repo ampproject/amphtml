@@ -72,6 +72,11 @@ const SidebarEvents = {
  * @extends {AMP.BaseElement}
  */
 export class AmpSidebar extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    return true;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -136,11 +141,6 @@ export class AmpSidebar extends AMP.BaseElement {
       // The sidebar is already animated by swipe to dismiss, so skip animation.
       () => this.dismiss_(true, ActionTrust.HIGH)
     );
-  }
-
-  /** @override */
-  prerenderAllowed() {
-    return true;
   }
 
   /** @override */

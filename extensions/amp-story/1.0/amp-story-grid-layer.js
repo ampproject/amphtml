@@ -29,8 +29,7 @@
 import {AmpStoryBaseLayer} from './amp-story-base-layer';
 import {StateProperty, getStoreService} from './amp-story-store-service';
 import {assertDoesNotContainDisplay, px, setStyles} from '../../../src/style';
-import {escapeCssSelectorIdent} from '../../../src/css';
-import {parseQueryString} from '../../../src/url';
+import {isPrerenderActivePage} from './prerender-active-page';
 import {scopedQuerySelectorAll} from '../../../src/dom';
 
 /**
@@ -109,37 +108,20 @@ const GRID_LAYER_PRESET_DETAILS = {
  * Grid layer template templating system.
  */
 export class AmpStoryGridLayer extends AmpStoryBaseLayer {
+  /** @override @nocollapse */
+  static prerenderAllowed(element) {
+    return isPrerenderActivePage(element.parentElement);
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-
-    /** @private {?boolean} */
-    this.isPrerenderActivePage_ = null;
 
     /** @private {?{horiz: number, vert: number}} */
     this.aspectRatio_ = null;
 
     /** @private {number} */
     this.scalingFactor_ = 1;
-  }
-
-  /**
-   * Returns true if the page should be prerendered (for being an active page or first page)
-   * @return {boolean}
-   */
-  isPrerenderActivePage() {
-    if (this.isPrerenderActivePage_ != null) {
-      return this.isPrerenderActivePage_;
-    }
-    const hashId = parseQueryString(this.win.location.href)['page'];
-    let selector = 'amp-story-page:first-of-type';
-    if (hashId) {
-      selector += `, amp-story-page#${escapeCssSelectorIdent(hashId)}`;
-    }
-    const selectorNodes = this.win.document.querySelectorAll(selector);
-    this.isPrerenderActivePage_ =
-      selectorNodes[selectorNodes.length - 1] === this.element.parentElement;
-    return this.isPrerenderActivePage_;
   }
 
   /** @override */
@@ -150,11 +132,6 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
     this.setOwnCssGridStyles_();
     this.setDescendentCssGridStyles_();
     this.initializeListeners_();
-  }
-
-  /** @override */
-  prerenderAllowed() {
-    return this.isPrerenderActivePage();
   }
 
   /**

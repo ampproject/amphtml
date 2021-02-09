@@ -47,6 +47,11 @@ const isDisplayLockingEnabledForAccordion = (win) =>
   win.document.body.onbeforematch !== undefined;
 
 class AmpAccordion extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    return true;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -76,11 +81,6 @@ class AmpAccordion extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return layout == Layout.CONTAINER;
-  }
-
-  /** @override */
-  prerenderAllowed() {
-    return true;
   }
 
   /** @override */

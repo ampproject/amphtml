@@ -19,6 +19,11 @@ import {Layout, isLayoutSizeDefined} from '../src/layout';
 import {registerElement} from '../src/service/custom-element-registry';
 
 class AmpLayout extends BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    return true;
+  }
+
   /** @override */
   isLayoutSupported(layout) {
     return layout == Layout.CONTAINER || isLayoutSizeDefined(layout);
@@ -35,12 +40,6 @@ class AmpLayout extends BaseElement {
       container.appendChild(child);
     });
     this.element.appendChild(container);
-  }
-
-  /** @override */
-  prerenderAllowed() {
-    // Allow amp-layout to be built in prerender mode.
-    return true;
   }
 }
 

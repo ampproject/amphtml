@@ -952,7 +952,10 @@ function createBaseCustomElementClass(win) {
      * @final
      */
     prerenderAllowed() {
-      return this.impl_ ? this.impl_.prerenderAllowed() : false;
+      if (this.hasAttribute('noprerender')) {
+        return false;
+      }
+      return this.implClass_ ? this.implClass_.prerenderAllowed(this) : false;
     }
 
     /**

@@ -45,6 +45,11 @@ const ARIA_LABEL_CLOSE = 'Close the menu';
  * template rendering via dynamically fetched data.
  */
 export class AmpMegaMenu extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    return true;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -86,11 +91,6 @@ export class AmpMegaMenu extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return layout === Layout.FIXED_HEIGHT;
-  }
-
-  /** @override */
-  prerenderAllowed() {
-    return true;
   }
 
   /** @override */

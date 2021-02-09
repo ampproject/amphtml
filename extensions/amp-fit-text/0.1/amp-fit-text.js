@@ -24,6 +24,11 @@ const LINE_HEIGHT_EM_ = 1.15;
 const RESIZE_THROTTLE_MS = 100;
 
 class AmpFitText extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    return true;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -109,11 +114,6 @@ class AmpFitText extends AMP.BaseElement {
         return this.textContent_ || this.contentWrapper_.textContent;
       },
     });
-  }
-
-  /** @override */
-  prerenderAllowed() {
-    return true;
   }
 
   /** @override */

@@ -101,8 +101,25 @@ import {isArray, toWin} from './types';
  *
  * Each method is called exactly once and overriding them in subclasses
  * is optional.
+ * @implements {BaseElementInterface}
  */
 export class BaseElement {
+  /**
+   * Subclasses can override this method to opt-in into being called to
+   * prerender when document itself is not yet visible (pre-render mode).
+   *
+   * The return value of this function is used to determine whether or not the
+   * element will be built _and_ laid out during prerender mode. Therefore, any
+   * changes to the return value _after_ buildCallback() will have no affect.
+   *
+   * @param {!AmpElement} unusedElement
+   * @return {boolean}
+   * @nocollapse
+   */
+  static prerenderAllowed(unusedElement) {
+    return false;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     /** @public @const {!Element} */
@@ -333,19 +350,6 @@ export class BaseElement {
    */
   detachedCallback() {
     // Subclasses may override.
-  }
-
-  /**
-   * Subclasses can override this method to opt-in into being called to
-   * prerender when document itself is not yet visible (pre-render mode).
-   *
-   * The return value of this function is used to determine whether or not the
-   * element will be built _and_ laid out during prerender mode. Therefore, any
-   * changes to the return value _after_ buildCallback() will have no affect.
-   * @return {boolean}
-   */
-  prerenderAllowed() {
-    return false;
   }
 
   /**

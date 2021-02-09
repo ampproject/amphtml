@@ -84,6 +84,11 @@ const buildLogMessageTemplate = (element) => {
 const TAG = 'AMP_STORY_DEV_TOOLS_DEBUG';
 
 export class AmpStoryDevToolsTabDebug extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    return false;
+  }
+
   /** @param {!Element} element */
   constructor(element) {
     super(element);
@@ -112,11 +117,6 @@ export class AmpStoryDevToolsTabDebug extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     return this.buildDebugContent_();
-  }
-
-  /** @override */
-  prerenderAllowed() {
-    return false;
   }
 
   /**
