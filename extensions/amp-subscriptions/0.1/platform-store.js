@@ -129,8 +129,8 @@ export class PlatformStore {
    * @param {string} platformKey
    */
   resetPlatform(platformKey) {
-    /** @private @const {!Object<string, !./entitlement.Entitlement>} */
-    this.entitlements_ = {};
+    // Remove platform's entitlement.
+    delete this.entitlements_[platformKey];
 
     // Reset platform's deferred entitlement map entry.
     this.entitlementDeferredMap_[platformKey] = new Deferred();
