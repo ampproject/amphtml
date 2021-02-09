@@ -660,25 +660,124 @@ describes.realWin('Platform store', {}, (env) => {
 
   describe('reportPlatformFailureAndFallback', () => {
     let errorSpy;
+
     beforeEach(() => {
       errorSpy = env.sandbox.spy(user(), 'warn');
     });
+
+    it('should report warning and use fallback entitlement, when local platform fails', () => {
+      const platform = new SubscriptionPlatform();
+      env.sandbox.stub(platform, 'getPlatformKey').returns('local');
+      env.sandbox.stub(platformStore, 'getLocalPlatform_').returns(platform);
+
+      platformStore.reportPlatformFailureAndFallback('local');
+      expect(errorSpy).to.be.calledOnce;
+      expect(platformStore.entitlements_['local'].json()).to.deep.equal(
+        fallbackEntitlement.json()
+      );
+    });
+
+    it('should use empty entitlement and call onChange callback, when non-local platform fails', () => {
+      env.sandbox
+        .stub(platformStore, 'getLocalPlatform_')
+        .returns(new SubscriptionPlatform());
+
+      platformStore.reportPlatformFailureAndFallback('service1');
+
+      expect(errorSpy).to.not.be.called;
+      expect(platformStore.entitlements_['service1'].json()).to.deep.equal(
+        Entitlement.empty('service1').json()
+      );
+    });
+
+    it('should only call onChange callback once, when non-local platform fails multiple times in a row', () => {
+      env.sandbox
+        .stub(platformStore, 'getLocalPlatform_')
+        .returns(new SubscriptionPlatform());
+      const onChangeSpy = env.sandbox.spy();
+      platformStore.onChange(onChangeSpy);
+
+      // Report failure for the first time.
+      // The onChange callback should be called.
+      onChangeSpy.resetHistory();
+      platformStore.reportPlatformFailureAndFallback('service1');
+      expect(onChangeSpy).to.be.calledOnce;
+
+      // Report failure for the second time.
+      // The onChange callback should NOT be called.
+      onChangeSpy.resetHistory();
+      platformStore.reportPlatformFailureAndFallback('service1');
+      expect(onChangeSpy).not.to.be.called;
+    });
+
     it(
-      'should report warning if all platforms fail and resolve ' +
-        'local with fallbackEntitlement',
+      'should call onChange callback again, when non-local platform fails multiple times ' +
+        'but with a success in between',
       () => {
-        const platform = new SubscriptionPlatform();
-        env.sandbox.stub(platform, 'getPlatformKey').callsFake(() => 'local');
         env.sandbox
           .stub(platformStore, 'getLocalPlatform_')
-          .callsFake(() => platform);
-        platformStore.reportPlatformFailureAndFallback('platform1');
-        expect(errorSpy).to.not.be.called;
-        platformStore.reportPlatformFailureAndFallback('local');
-        expect(errorSpy).to.be.calledOnce;
-        expect(platformStore.entitlements_['local'].json()).to.deep.equal(
-          fallbackEntitlement.json()
+          .returns(new SubscriptionPlatform());
+        const onChangeSpy = env.sandbox.spy();
+        platformStore.onChange(onChangeSpy);
+
+        // Report failure for the first time.
+        // The onChange callback should be called.
+        onChangeSpy.resetHistory();
+        platformStore.reportPlatformFailureAndFallback('service1');
+        expect(onChangeSpy).to.be.calledOnce;
+
+        // Succeed.
+        // This will reset the platform's failed flag.
+        platformStore.resolveEntitlement(
+          'service1',
+          Entitlement.empty('service1')
         );
+
+        // Report failure for the second time.
+        // The onChange callback should be called again.
+        onChangeSpy.resetHistory();
+        platformStore.reportPlatformFailureAndFallback('service1');
+        expect(onChangeSpy).to.be.calledOnce;
+
+        // Report failure for the third time.
+        // The onChange callback should NOT be called again.
+        onChangeSpy.resetHistory();
+        platformStore.reportPlatformFailureAndFallback('service1');
+        expect(onChangeSpy).not.to.be.called;
+      }
+    );
+
+    it(
+      'should call onChange callback once, when non-local platform fails multiple times ' +
+        "but with a different platform's success in between",
+      () => {
+        env.sandbox
+          .stub(platformStore, 'getLocalPlatform_')
+          .returns(new SubscriptionPlatform());
+        const onChangeSpy = env.sandbox.spy();
+        platformStore.onChange(onChangeSpy);
+
+        // Report the other platform's failure first.
+        platformStore.reportPlatformFailureAndFallback('otherPlatform');
+
+        // Report failure for the first time.
+        // The onChange callback should be called.
+        onChangeSpy.resetHistory();
+        platformStore.reportPlatformFailureAndFallback('service1');
+        expect(onChangeSpy).to.be.calledOnce;
+
+        // Succeed with a different platform.
+        // This should not reset the "service1" platform's failed flag.
+        platformStore.resolveEntitlement(
+          'otherPlatform',
+          Entitlement.empty('otherPlatform')
+        );
+
+        // Report failure for the second time.
+        // The onChange callback should be called again.
+        onChangeSpy.resetHistory();
+        platformStore.reportPlatformFailureAndFallback('service1');
+        expect(onChangeSpy).to.not.be.called;
       }
     );
 
