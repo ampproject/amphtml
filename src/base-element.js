@@ -120,6 +120,21 @@ export class BaseElement {
     return false;
   }
 
+  /**
+   * Subclasses can override this method to provide a svg logo that will be
+   * displayed as the loader.
+   *
+   * @param {!AmpElement} unusedElement
+   * @return {{
+   *  content: (!Element|undefined),
+   *  color: (string|undefined),
+   * }}
+   * @nocollapse
+   */
+  static createLoaderLogoCallback(unusedElement) {
+    return {};
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     /** @public @const {!Element} */
@@ -372,18 +387,6 @@ export class BaseElement {
    */
   createPlaceholderCallback() {
     return null;
-  }
-
-  /**
-   * Subclasses can override this method to provide a svg logo that will be
-   * displayed as the loader.
-   * @return {{
-   *  content: (!Element|undefined),
-   *  color: (string|undefined),
-   * }}
-   */
-  createLoaderLogoCallback() {
-    return {};
   }
 
   /**
