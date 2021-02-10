@@ -42,7 +42,7 @@ function checkNode(node, context) {
     node.properties.forEach(function (prop) {
       if (!prop.key || (!prop.key.raw && !prop.computed)) {
         const {name = `[${prop.type}]`} = prop.key || prop.argument || {};
-        const reportId = context.report({
+        context.report({
           node: prop,
           message:
             `Found: ${name}.` +
