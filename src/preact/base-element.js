@@ -734,7 +734,7 @@ export class PreactBaseElement extends AMP.BaseElement {
   /**
    * Dispatches an error event. Provided as a method so Preact components can
    * call into it, while AMP components can override to trigger action services.
-   * @param element
+   * @param {!Element} element
    * @param {string} eventName
    * @param {!JSONObject|string|undefined|null} detail
    * @return {!Object}
