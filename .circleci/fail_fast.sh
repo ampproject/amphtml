@@ -14,14 +14,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the license.
 
-# This script early-exits the CircleCI workflow when a single job fails.
+# This script early-exits CircleCI PR builds when one of its jobs fails.
 # Reference: https://support.circleci.com/hc/en-us/articles/360052058811-Exit-build-early-if-any-test-fails
 
 set -e
 
 RED() { echo -e "\n\033[0;31m$1\033[0m"; }
+YELLOW() { echo -e "\n\033[0;33m$1\033[0m"; }
 
-echo $(RED "Exiting workflow because a job failed.")
+# For push builds, continue in spite of failures so baselines are established.
+if [[ "$CIRCLE_BRANCH" == "master" || "$CIRCLE_BRANCH" =~ ^amp-release-* ]]; then
+  echo $(YELLOW "Not canceling build in spite of failures because $CIRCLE_BRANCH is not a PR branch.")
+  exit 0
+fi
+
+# For PR builds, cancel when the first job fails.
+echo $(RED "Canceling PR build because a job failed.")
 curl -X POST \
 --header "Content-Type: application/json" \
 "https://circleci.com/api/v2/workflow/${CIRCLE_WORKFLOW_ID}/cancel?circle-token=${CIRCLE_TOKEN}"
