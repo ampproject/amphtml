@@ -36,6 +36,13 @@ const Side = {
   RIGHT: 'right',
 };
 
+/** @private @enum {string} */
+const Direction = {
+  OPENING: 0,
+  CLOSING: 1,
+  HAS_NOT_ANIMATED: 2,
+};
+
 const ANIMATION_DURATION = 3500;
 const ANIMATION_EASE_IN = 'cubic-bezier(0,0,.21,1)';
 
@@ -74,44 +81,6 @@ function safelySetStyles(element, styles) {
 }
 
 /**
- * @param {!Element} element
- * @return {boolean}
- */
-function elementIsAnimating(element) {
-  /* This works!
-  const returnVal = element.classList.contains('i-amphtml-animating');
-  console.log('elementIsAnimating', returnVal);
-  return returnVal;
-  */
-
-  if (!element.getAnimations) {
-    return false;
-  }
-  const animations = element.getAnimations();
-  let returnVal;
-  animations.forEach(
-    (a) => (returnVal = a.playState == 'running' ? a : returnVal)
-  );
-  //const returnVal = animations.length && animations[0].playState == 'running';
-  console.log(animations);
-  console.log('elementIsAnimating', returnVal);
-  return returnVal;
-}
-
-/**
- * @param {!Element} element
- * @return {boolean}
- */
-/*
-function elementIsClosing(element) {
-  if (!element.getAnimations) {
-    return false;
-  }
-  const animations = element.getAnimations();
-  return animations.length == 2 && animations[0].playState == 'running';
-}*/
-
-/**
  * @param {!SidebarDef.Props} props
  * @param {{current: (!SidebarDef.SidebarApi|null)}} ref
  * @return {PreactDef.Renderable}
@@ -139,9 +108,9 @@ function SidebarWithRef(
 
   const [sidebarAnimation, setSidebarAnimation] = useState(null);
   const [backdropAnimation, setBackdropAnimation] = useState(null);
-  const [animatingOpen, setAnimatingOpen] = useState(false);
-
-  console.log('render mounted-opened', mounted, opened);
+  const [lastAnimationDirection, setLastAnimationDirection] = useState(
+    Direction.HAS_NOT_ANIMATED
+  );
 
   const classes = useStyles();
   const sidebarRef = useRef();
@@ -196,57 +165,45 @@ function SidebarWithRef(
       return;
     }
 
-    let sidebarAnimation;
-    let backdropAnimation;
     const postVisibleAnim = () => {
       safelySetStyles(sidebarElement, ANIMATION_STYLES_SIDEBAR_FINAL);
       safelySetStyles(backdropElement, ANIMATION_STYLES_BACKDROP_FINAL);
-      console.log('finished open');
-      sidebarAnimation = null;
-      backdropAnimation = null;
-      //sidebarElement.classList.remove('i-amphtml-animating');
-      //backdropElement.classList.remove('i-amphtml-animating');
+      setSidebarAnimation(null);
+      setBackdropAnimation(null);
     };
-
     const postInvisibleAnim = () => {
       if (onAfterCloseRef.current) {
         onAfterCloseRef.current();
       }
-      sidebarAnimation = null;
-      backdropAnimation = null;
+      setSidebarAnimation(null);
+      setBackdropAnimation(null);
       setMounted(false);
-      console.log('finished close');
-      //sidebarElement.classList.remove('i-amphtml-animating');
-      //backdropElement.classList.remove('i-amphtml-animating');
     };
 
-    // "Make Visible" Animation
-    console.log('animatinos', sidebarElement.getAnimations());
-    sidebarElement
-      .getAnimations()
-      .forEach((a) =>
-        console.log('a', a.playState, a.playbackRate, a.startTime)
-      );
-    if (elementIsAnimating(sidebarElement)) {
-      let anim = sidebarElement.getAnimations();
-      anim.forEach(
-        (a) =>
-          (sidebarAnimation = a.playState == 'running' ? a : sidebarAnimation)
-      );
-      anim = backdropElement.getAnimations();
-      anim.forEach(
-        (a) =>
-          (backdropAnimation = a.playState == 'running' ? a : sidebarAnimation)
-      );
-
-      //sidebarAnimation.onfinish = opened ? postInvisibleAnim : postVisibleAnim;
+    // currently animating
+    if (sidebarAnimation) {
+      if (
+        (opened && lastAnimationDirection == Direction.CLOSING) ||
+        (!opened && lastAnimationDirection == Direction.OPENING)
+      ) {
+        // reverse the current animation
+        sidebarAnimation.reverse();
+        backdropAnimation.reverse();
+        sidebarAnimation.onfinish = opened
+          ? postVisibleAnim
+          : postInvisibleAnim;
+        setLastAnimationDirection(
+          opened ? Direction.OPENING : Direction.CLOSING
+        );
+      }
     } else {
-      if (opened) {
+      // currently in fully opened or closed state
+      if (opened && lastAnimationDirection != Direction.OPENING) {
+        // make visible animation
         if (!sidebarElement.animate || !backdropElement.animate) {
           postVisibleAnim();
           return;
         }
-
         safelySetStyles(
           sidebarElement,
           side === Side.LEFT
@@ -254,9 +211,7 @@ function SidebarWithRef(
             : ANIMATION_STYLES_SIDEBAR_RIGHT_INIT
         );
         safelySetStyles(backdropElement, ANIMATION_STYLES_BACKDROP_INIT);
-        //sidebarElement.classList.add('i-amphtml-animating');
-        //backdropElement.classList.add('i-amphtml-animating');
-        sidebarAnimation = sidebarElement.animate(
+        const newSidebarAnimation = sidebarElement.animate(
           side === Side.LEFT
             ? ANIMATION_KEYFRAMES_SLIDE_IN_LEFT
             : ANIMATION_KEYFRAMES_SLIDE_IN_RIGHT,
@@ -266,8 +221,8 @@ function SidebarWithRef(
             easing: ANIMATION_EASE_IN,
           }
         );
-        sidebarAnimation.onfinish = postVisibleAnim;
-        backdropAnimation = backdropElement.animate(
+        newSidebarAnimation.onfinish = postVisibleAnim;
+        const newBackdropAnimation = backdropElement.animate(
           ANIMATION_KEYFRAMES_FADE_IN,
           {
             duration: ANIMATION_DURATION,
@@ -275,15 +230,16 @@ function SidebarWithRef(
             easing: ANIMATION_EASE_IN,
           }
         );
-      } else {
-        // "Make Invisible" Animation
+        setSidebarAnimation(newSidebarAnimation);
+        setBackdropAnimation(newBackdropAnimation);
+        setLastAnimationDirection(Direction.OPENING);
+      } else if (!opened && lastAnimationDirection != Direction.CLOSING) {
+        // make invisible animation
         if (!sidebarElement.animate || !backdropElement.animate) {
           postInvisibleAnim();
           return;
         }
-        //sidebarElement.classList.add('i-amphtml-animating');
-        //backdropElement.classList.add('i-amphtml-animating');
-        sidebarAnimation = sidebarElement.animate(
+        const newSidebarAnimation = sidebarElement.animate(
           side === Side.LEFT
             ? ANIMATION_KEYFRAMES_SLIDE_IN_LEFT
             : ANIMATION_KEYFRAMES_SLIDE_IN_RIGHT,
@@ -294,8 +250,8 @@ function SidebarWithRef(
             easing: ANIMATION_EASE_IN,
           }
         );
-        sidebarAnimation.onfinish = postInvisibleAnim;
-        backdropAnimation = backdropElement.animate(
+        newSidebarAnimation.onfinish = postInvisibleAnim;
+        const newBackdropAnimation = backdropElement.animate(
           ANIMATION_KEYFRAMES_FADE_IN,
           {
             duration: ANIMATION_DURATION,
@@ -304,55 +260,19 @@ function SidebarWithRef(
             easing: ANIMATION_EASE_IN,
           }
         );
+        setSidebarAnimation(newSidebarAnimation);
+        setBackdropAnimation(newBackdropAnimation);
+        setLastAnimationDirection(Direction.CLOSING);
       }
     }
-    return () => {
-      console.log('begin reverse cb');
-      if (sidebarAnimation) {
-        console.log('reverse! opened =', opened);
-        sidebarAnimation.reverse();
-
-        sidebarAnimation.onfinish = opened
-          ? postInvisibleAnim
-          : postVisibleAnim;
-      }
-      if (backdropAnimation) {
-        backdropAnimation.reverse();
-      }
-    };
   }, [
     opened,
     onAfterCloseRef,
     side,
     sidebarAnimation,
     backdropAnimation,
-    animatingOpen,
+    lastAnimationDirection,
   ]);
-
-  useEffect(() => {
-    const sidebarElement = sidebarRef.current;
-    const backdropElement = backdropRef.current;
-    if (!sidebarElement || !sidebarElement.ownerDocument || !backdropElement) {
-      return;
-    }
-
-    const document = sidebarElement.ownerDocument;
-    let keydownCallback;
-    if (opened) {
-      keydownCallback = (event) => {
-        if (event.key == Keys.ESCAPE) {
-          event.preventDefault();
-          close();
-        }
-      };
-      document.addEventListener('keydown', keydownCallback);
-    }
-    return () => {
-      if (keydownCallback) {
-        document.removeEventListener('keydown', keydownCallback);
-      }
-    };
-  }, [opened, onAfterCloseRef, close]);
 
   return (
     mounted && (
