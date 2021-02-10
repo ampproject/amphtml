@@ -74,14 +74,14 @@ export function FitText({
       size={true}
       layout={true}
       paint={true}
-      ref={containerRef}
-      wrapperClassName={classes.fitTextContentWrapper}
-      contentRef={measurerRef}
-      contentClassName={classes.fitTextContent}
+      contentRef={containerRef}
+      contentClassName={classes.fitTextContentWrapper}
       {...rest}
     >
-      <div ref={heightRef} className={classes.minContentHeight}>
-        {children}
+      <div ref={measurerRef} className={classes.fitTextContent}>
+        <div ref={heightRef} className={classes.minContentHeight}>
+          {children}
+        </div>
       </div>
     </ContainWrapper>
   );
@@ -134,7 +134,12 @@ function setOverflowStyle(measurer, maxHeight, fontSize) {
       '-webkit-line-clamp': numberOfLines,
       'maxHeight': px(lineHeight * numberOfLines),
     });
+    // Cannot use setInitialDisplay which calls devAssert.
+    // eslint-disable-next-line local/no-style-display
+    resetStyles(measurer, ['display']);
   } else {
+    // eslint-disable-next-line local/no-style-display
+    setStyle(measurer, 'display', 'flex');
     resetStyles(measurer, ['lineClamp', '-webkit-line-clamp', 'maxHeight']);
   }
 }
