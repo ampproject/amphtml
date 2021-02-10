@@ -24,6 +24,7 @@ import {
 } from '../consent-info';
 import {CONSENT_STRING_TYPE} from '../../../../src/consent-state';
 import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
+import {dev, user} from '../../../../src/log';
 import {dict} from '../../../../src/utils/object';
 import {macroTask} from '../../../../testing/yield';
 import {
@@ -32,7 +33,6 @@ import {
 } from '../../../../src/service';
 import {removeSearch} from '../../../../src/url';
 import {toggleExperiment} from '../../../../src/experiments';
-import {user} from '../../../../src/log';
 import {xhrServiceForTesting} from '../../../../src/service/xhr-impl';
 
 describes.realWin(
@@ -1019,6 +1019,7 @@ describes.realWin(
         doc.body.appendChild(consentElement);
         ampConsent = new AmpConsent(consentElement);
         actionSpy = env.sandbox.stub(ampConsent, 'handleAction_');
+        window.sandbox.stub(ampConsent, 'isReadyToHandleAction_').returns(true);
         ampConsent.enableInteractions_();
         ampIframe = document.createElement('amp-iframe');
         iframe = doc.createElement('iframe');
@@ -1178,12 +1179,14 @@ describes.realWin(
           ampConsent.consentStateManager_,
           'updateConsentInstanceState'
         );
+        // Hide gets called
         ampConsent.handleAction_(ACTION_TYPE.DISMISS);
         await macroTask();
         expect(updateConsentInstanceStateSpy).to.be.calledOnce;
         updateConsentInstanceStateSpy.resetHistory();
         expect(ampConsent.isPromptUIOn_).to.be.false;
-        ampConsent.handleAction_(ACTION_TYPE.DISMISS);
+        // isReadyToHandleAction_() should return false
+        ampConsent.handleClosingUIAction_(ACTION_TYPE.DISMISS);
         await macroTask();
         expect(updateConsentInstanceStateSpy).to.not.be.called;
       });
@@ -1473,12 +1476,7 @@ describes.realWin(
             ampConsent.consentStateManager_,
             'updateConsentInstancePurposes'
           );
-          ampConsent.handleAction_(
-            ACTION_TYPE.ACCEPT,
-            undefined,
-            undefined,
-            mockInvocation
-          );
+          ampConsent.handleClosingUIAction_(ACTION_TYPE.ACCEPT, mockInvocation);
           await macroTask();
           expect(updateConsentInstancePurposeSpy).to.be.calledWith(
             {
@@ -1501,22 +1499,12 @@ describes.realWin(
             'updateConsentInstancePurposes'
           );
 
-          ampConsent.handleAction_(
-            ACTION_TYPE.ACCEPT,
-            undefined,
-            undefined,
-            mockInvocation
-          );
+          ampConsent.handleClosingUIAction_(ACTION_TYPE.ACCEPT, mockInvocation);
           await macroTask();
           expect(updateConsentInstancePurposeSpy).to.not.be.called;
           // reset
           ampConsent.purposeConsentRequired_ = Promise.resolve([]);
-          ampConsent.handleAction_(
-            ACTION_TYPE.REJECT,
-            undefined,
-            undefined,
-            mockInvocation
-          );
+          ampConsent.handleClosingUIAction_(ACTION_TYPE.REJECT, mockInvocation);
           await macroTask();
           expect(updateConsentInstancePurposeSpy).to.not.be.called;
         });
@@ -1527,27 +1515,21 @@ describes.realWin(
           };
           await ampConsent.buildCallback();
           await macroTask();
-          const hideSpy = env.sandbox.spy(ampConsent, 'hide_');
           updateConsentInstancePurposeSpy = env.sandbox.spy(
             ampConsent.consentStateManager_,
             'updateConsentInstancePurposes'
           );
 
-          ampConsent.handleAction_(
-            ACTION_TYPE.SET_PURPOSE,
-            undefined,
-            undefined,
-            mockInvocation
-          );
+          ampConsent.handleSetPurpose_(mockInvocation);
           await macroTask();
           expect(updateConsentInstancePurposeSpy).to.be.calledWith(
             mockInvocation.args
           );
-          expect(hideSpy).to.not.be.called;
         });
 
         it('handles setPurpose with no args', async () => {
           const mockInvocation = {args: null};
+          const devSpy = window.sandbox.spy(dev(), 'error');
           await ampConsent.buildCallback();
           await macroTask();
           updateConsentInstancePurposeSpy = env.sandbox.spy(
@@ -1555,13 +1537,12 @@ describes.realWin(
             'updateConsentInstancePurposes'
           );
 
-          ampConsent.handleAction_(
-            ACTION_TYPE.SET_PURPOSE,
-            undefined,
-            undefined,
-            mockInvocation
-          );
+          ampConsent.handleSetPurpose_(mockInvocation);
           await macroTask();
+          expect(devSpy.args[0][1]).to.match(
+            /Must have arugments for `setPurpose`./
+          );
+          expect(devSpy).to.be.calledOnce;
           expect(updateConsentInstancePurposeSpy).not.be.called;
         });
       });
