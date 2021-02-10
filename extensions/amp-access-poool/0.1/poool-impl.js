@@ -15,13 +15,11 @@
  */
 import {Services} from '../../../src/services';
 import {addParamToUrl, addParamsToUrl} from '../../../src/url';
-import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {listenFor} from '../../../src/iframe-helper';
 import {resetStyles, setStyle, setStyles} from '../../../src/style';
-
-const TAG = 'amp-access-poool';
+import {user, userAssert} from '../../../src/log';
 
 const ACCESS_CONFIG = {
   'authorization': 'https://api.poool.fr/api/v3/amp/access?rid=READER_ID',
@@ -169,7 +167,6 @@ export class PooolVendor {
         return this.accessSource_.getLoginUrl(url);
       })
       .then((url) => {
-        dev().info(TAG, 'Authorization URL: ', url);
         return this.timer_
           .timeoutPromise(AUTHORIZATION_TIMEOUT, this.xhr_.fetchJson(url))
           .then((res) => res.json());

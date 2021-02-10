@@ -512,7 +512,6 @@ export class AmpList extends AMP.BaseElement {
 
   /** @override */
   mutatedAttributesCallback(mutations) {
-    dev().info(TAG, 'mutate:', this.element, mutations);
     let promise;
 
     /**

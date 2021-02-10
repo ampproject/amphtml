@@ -16,9 +16,9 @@
 
 import {Services} from '../services';
 import {TickLabel} from '../enums';
-import {dev, user} from '../log';
 import {htmlFor} from '../static-template';
 import {isExperimentOn} from '../experiments';
+import {user} from '../log';
 
 /** @const {number} */
 const NTH_FRAME = 200;
@@ -79,7 +79,6 @@ export class JankMeter {
     this.totalFrameCnt_++;
     if (paintLatency > 16) {
       this.badFrameCnt_++;
-      dev().info('JANK', 'Paint latency: ' + paintLatency + 'ms');
     }
 
     // Report metrics on Nth frame, so we have sort of normalized numbers.
@@ -173,7 +172,6 @@ export class JankMeter {
             );
           } else {
             this.longTaskSelf_ += span;
-            dev().info('LONGTASK', `from self frame ${entries[i].duration}ms`);
           }
         }
       }

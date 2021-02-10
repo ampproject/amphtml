@@ -1042,7 +1042,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   onNetworkFailure(error, adUrl) {
-    dev().info(TAG, 'network error, attempt adding of error parameter', error);
     return {adUrl: maybeAppendErrorParameter(adUrl, 'n')};
   }
 
@@ -1690,14 +1689,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               const typeInstances = /** @type {!Array<!AmpAdNetworkDoubleclickImpl>}*/ (instances).filter(
                 (instance) => {
                   const isValid = instance.hasAdPromise();
-                  if (!isValid) {
-                    dev().info(
-                      TAG,
-                      'Ignoring instance without ad promise as ' +
-                        'likely invalid',
-                      instance.element
-                    );
-                  }
                   return isValid;
                 }
               );
@@ -1710,7 +1701,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               // promise which results in sending as non-SRA request (benefit
               // is it allows direct cache method).
               if (!noFallbackExp && typeInstances.length == 1) {
-                dev().info(TAG, `single block in network ${networkId}`);
                 // Ensure deferred exists, may not if getAdUrl did not yet
                 // execute.
                 typeInstances[0].sraDeferred =

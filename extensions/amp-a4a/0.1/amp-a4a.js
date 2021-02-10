@@ -418,12 +418,6 @@ export class AmpA4A extends AMP.BaseElement {
       width: this.element.getAttribute('width'),
       height: this.element.getAttribute('height'),
     };
-    const upgradeDelayMs = Math.round(this.getResource().getUpgradeDelayMs());
-    dev().info(
-      TAG,
-      `upgradeDelay ${this.element.getAttribute('type')}: ${upgradeDelayMs}`
-    );
-
     this.uiHandler = new AMP.AmpAdUIHandler(this);
 
     const verifier = signatureVerifierFor(this.win);
@@ -836,7 +830,6 @@ export class AmpA4A extends AMP.BaseElement {
             this.win.location.search
           );
           if (match && match[1]) {
-            dev().info(TAG, `Using debug exp features: ${match[1]}`);
             this.populatePostAdResponseExperimentFeatures_(
               tryDecodeUriComponent(match[1])
             );
@@ -1622,19 +1615,6 @@ export class AmpA4A extends AMP.BaseElement {
     );
   }
 
-  /**
-   * @param {!Element} iframe that was just created.  To be overridden for
-   * testing.
-   * @visibleForTesting
-   */
-  onCrossDomainIframeCreated(iframe) {
-    dev().info(
-      TAG,
-      this.element.getAttribute('type'),
-      `onCrossDomainIframeCreated ${iframe}`
-    );
-  }
-
   /** @return {boolean} whether html creatives should be sandboxed. */
   sandboxHTMLCreativeFrame() {
     return true;
@@ -1672,10 +1652,6 @@ export class AmpA4A extends AMP.BaseElement {
         if (networkFailureHandlerResult.frameGetDisabled) {
           // Reset adUrl to null which will cause layoutCallback to not
           // fetch via frame GET.
-          dev().info(
-            TAG,
-            'frame get disabled as part of network failure handler'
-          );
           this.resetAdUrl();
         } else {
           this.adUrl_ = networkFailureHandlerResult.adUrl || this.adUrl_;

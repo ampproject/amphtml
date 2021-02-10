@@ -572,11 +572,6 @@ export class Navigation {
    * @private
    */
   removeViewerQueryBeforeNavigation_(win, fromLocation, target) {
-    dev().info(
-      TAG,
-      'Removing iframe query string before navigation:',
-      fromLocation.search
-    );
     const original = fromLocation.href;
     const noQuery = `${fromLocation.origin}${fromLocation.pathname}${fromLocation.hash}`;
     win.history.replaceState(null, '', noQuery);
@@ -584,7 +579,6 @@ export class Navigation {
     const restoreQuery = () => {
       const currentHref = win.location.href;
       if (currentHref == noQuery) {
-        dev().info(TAG, 'Restored iframe URL with query string:', original);
         win.history.replaceState(null, '', original);
       } else {
         dev().error(TAG, 'Unexpected iframe URL change:', currentHref, noQuery);

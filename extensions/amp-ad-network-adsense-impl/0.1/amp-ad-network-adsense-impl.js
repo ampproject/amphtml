@@ -424,7 +424,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   onNetworkFailure(error, adUrl) {
-    dev().info(TAG, 'network error, attempt adding of error parameter', error);
     return {adUrl: maybeAppendErrorParameter(adUrl, 'n')};
   }
 

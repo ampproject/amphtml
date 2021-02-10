@@ -85,7 +85,6 @@ export class Transport {
    */
   sendRequest(url, segments, inBatch) {
     if (!url || segments.length === 0) {
-      dev().info(TAG_, 'Empty request not sent: ', url);
       return;
     }
     const serializer = this.getSerializer_();

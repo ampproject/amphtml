@@ -15,7 +15,7 @@
  */
 
 import {assertHttpsUrl, parseUrlDeprecated} from './url';
-import {dev, devAssert, user, userAssert} from './log';
+import {devAssert, user, userAssert} from './log';
 import {dict} from './utils/object';
 import {getContextMetadata} from '../src/iframe-attributes';
 import {getMode} from './mode';
@@ -29,9 +29,6 @@ let count = {};
 
 /** @type {string} */
 let overrideBootstrapBaseUrl;
-
-/** @const {string} */
-const TAG = '3p-frame';
 
 /**
  * Produces the attributes for the ad template.
@@ -425,7 +422,6 @@ export function applySandbox(iframe) {
   for (let i = 0; i < requiredFlags.length; i++) {
     const flag = requiredFlags[i];
     if (!iframe.sandbox.supports(flag)) {
-      dev().info(TAG, "Iframe doesn't support %s", flag);
       return;
     }
   }

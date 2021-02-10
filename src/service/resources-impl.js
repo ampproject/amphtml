@@ -45,7 +45,6 @@ import {remove} from '../utils/array';
 import {startupChunk} from '../chunk';
 import {throttle} from '../utils/rate-limit';
 
-const TAG_ = 'Resources';
 const LAYOUT_TASK_ID_ = 'L';
 const LAYOUT_TASK_OFFSET_ = 0;
 const PRELOAD_TASK_ID_ = 'P';
@@ -1600,13 +1599,6 @@ export class ResourcesImpl {
     this.exec_.dequeue(task);
     this.schedulePass(POST_TASK_PASS_DELAY_);
     if (!success) {
-      dev().info(
-        TAG_,
-        'task failed:',
-        task.id,
-        task.resource.debugid,
-        opt_reason
-      );
       return Promise.reject(opt_reason);
     }
   }

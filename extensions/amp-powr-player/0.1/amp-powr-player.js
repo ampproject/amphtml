@@ -172,7 +172,7 @@ class AmpPowrPlayer extends AMP.BaseElement {
     }
 
     if (eventType === 'ready') {
-      this.onReady_(data);
+      this.onReady_();
     }
 
     if (eventType === 'playing') {
@@ -197,11 +197,8 @@ class AmpPowrPlayer extends AMP.BaseElement {
     }
   }
 
-  /**
-   * @param {!JsonObject} data
-   * @private
-   */
-  onReady_(data) {
+  /** @private */
+  onReady_() {
     this.frameHasAmpSupport_ = true;
 
     const {element} = this;
@@ -210,15 +207,6 @@ class AmpPowrPlayer extends AMP.BaseElement {
     Services.videoManagerForDoc(element).register(this);
 
     this.playerReadyResolver_(this.iframe_);
-
-    dev().info(
-      TAG,
-      'Player %s ready. ' +
-        'Powr Player version: %s IFrame Support version: %s',
-      this.playerId_,
-      data['powrVersion'],
-      data['iframeVersion']
-    );
   }
 
   /**

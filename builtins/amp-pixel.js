@@ -61,7 +61,6 @@ export class AmpPixel extends BaseElement {
       this.element.hasAttribute('i-amphtml-ssr') &&
       this.element.querySelector('img')
     ) {
-      dev().info(TAG, 'inabox img already present');
       return;
     }
     // Trigger, but only when visible.
@@ -95,7 +94,6 @@ export class AmpPixel extends BaseElement {
               return;
             }
             const pixel = createPixel(this.win, src, this.referrerPolicy_);
-            dev().info(TAG, 'pixel triggered: ', src);
             return pixel;
           });
       });

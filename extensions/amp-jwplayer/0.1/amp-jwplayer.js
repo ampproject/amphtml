@@ -405,9 +405,6 @@ class AmpJWPlayer extends AMP.BaseElement {
     const event = data['event'];
     const detail = data['detail'];
 
-    // Log any valid events
-    dev().info('JWPLAYER', 'EVENT:', event || 'anon event', detail || data);
-
     if (event === 'ready') {
       detail && this.onReadyOnce_(detail);
       return;
@@ -471,8 +468,6 @@ class AmpJWPlayer extends AMP.BaseElement {
       if (!this.iframe_ || !this.iframe_.contentWindow) {
         return;
       }
-
-      dev().info('JWPLAYER', 'COMMAND:', method, optParams);
 
       this.iframe_.contentWindow./*OK*/ postMessage(
         JSON.stringify(

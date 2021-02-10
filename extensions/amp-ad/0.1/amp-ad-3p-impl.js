@@ -32,7 +32,7 @@ import {Services} from '../../../src/services';
 import {adConfig} from '../../../ads/_config';
 import {clamp} from '../../../src/utils/math';
 import {computedStyle, setStyle} from '../../../src/style';
-import {dev, devAssert, userAssert} from '../../../src/log';
+import {devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getAdCid} from '../../../src/ad-cid';
 import {getAdContainer, isAdPositionAllowed} from '../../../src/ad-helper';
@@ -198,9 +198,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.type_ = this.element.getAttribute('type');
-    const upgradeDelayMs = Math.round(this.getResource().getUpgradeDelayMs());
-    dev().info(TAG_3P_IMPL, `upgradeDelay ${this.type_}: ${upgradeDelayMs}`);
-
     this.placeholder_ = this.getPlaceholder();
     this.fallback_ = this.getFallback();
 
@@ -232,10 +229,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     userAssert(
       !!this.config.fullWidthHeightRatio,
       'Ad network does not support full width ads.'
-    );
-    dev().info(
-      TAG_3P_IMPL,
-      '#${this.getResource().getId()} Full width requested'
     );
     return true;
   }
@@ -503,12 +496,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     // affect it.
 
     return this.attemptChangeSize(height, width).then(
-      () => {
-        dev().info(TAG_3P_IMPL, `Size change accepted: ${width}x${height}`);
-      },
-      () => {
-        dev().info(TAG_3P_IMPL, `Size change rejected: ${width}x${height}`);
-      }
+      () => {},
+      () => {}
     );
   }
 
