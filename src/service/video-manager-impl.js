@@ -206,7 +206,7 @@ export class VideoManager {
       this.viewportObserver_ = createViewportObserver(
         viewportCallback,
         this.ampdoc.win,
-        /* threshold */ MIN_VISIBILITY_RATIO_FOR_AUTOPLAY
+        {threshold: MIN_VISIBILITY_RATIO_FOR_AUTOPLAY}
       );
     }
     this.viewportObserver_.observe(videoBE.element);
