@@ -23,8 +23,6 @@ const fitTextContentWrapper = {
   'flexDirection': 'column',
   'flexWrap': 'nowrap',
   'justifyContent': 'center',
-  'width': '100%',
-  'height': '100%',
 };
 
 /* Legacy comment: We have to use the old-style flex box with line clamping. It will only

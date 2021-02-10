@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../src/preact';
-import {ContainWrapper, Wrapper} from '../../../src/preact/component';
+import {ContainWrapper} from '../../../src/preact/component';
 import {LINE_HEIGHT_EM_, useStyles} from './component.jss';
 import {px, resetStyles, setStyle, setStyles} from '../../../src/style';
 import {toWin} from '../../../src/types';
@@ -70,21 +70,20 @@ export function FitText({
   }, [resize]);
 
   return (
-    <Wrapper {...rest}>
-      <ContainWrapper
-        size={true}
-        layout={true}
-        paint={true}
-        ref={containerRef}
-        wrapperClassName={classes.fitTextContentWrapper}
-        contentRef={measurerRef}
-        contentClassName={classes.fitTextContent}
-      >
+    <ContainWrapper
+      size={true}
+      layout={true}
+      paint={true}
+      contentRef={containerRef}
+      contentClassName={classes.fitTextContentWrapper}
+      {...rest}
+    >
+      <div ref={measurerRef} className={classes.fitTextContent}>
         <div ref={heightRef} className={classes.minContentHeight}>
           {children}
         </div>
-      </ContainWrapper>
-    </Wrapper>
+      </div>
+    </ContainWrapper>
   );
 }
 
