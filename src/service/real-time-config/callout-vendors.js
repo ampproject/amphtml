@@ -180,8 +180,9 @@ const RTC_VENDORS = jsonConfiguration({
     disableKeyAppend: true,
   },
   yieldlab: {
-    url: 'https://ad.yieldlab.net/yp/ADSLOT_ID?content=amp&t=amp%3D1',
-    macros: ['ADSLOT_ID'],
+    url:
+      'https://ad.yieldlab.net/yp/ADSLOT_ID?content=amp&consent=CONSENT_STRING&t=amp%3D1',
+    macros: ['ADSLOT_ID', 'CONSENT_STRING'],
     disableKeyAppend: true,
   },
   automatad: {
