@@ -590,7 +590,7 @@ export class AmpVideo extends AMP.BaseElement {
     const sources = toArray(childElementsByTag(element, 'source'));
     sources.push(element);
     for (let i = 0; i < sources.length; i++) {
-      if (this.isCachedByCDN_(sources[i])) {
+      if (isCachedByCdn(sources[i])) {
         return true;
       }
     }
