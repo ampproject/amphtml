@@ -15,7 +15,7 @@
  */
 
 import {ActionTrust} from '../../../src/action-constants';
-import {BaseCarousel} from './base-carousel';
+import {BaseCarousel} from './component';
 import {Services} from '../../../src/services';
 import {isFiniteNumber} from '../../../src/types';
 import {userAssert} from '../../../src/log';

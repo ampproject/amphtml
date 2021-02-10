@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../src/preact';
-import {BaseCarousel} from '../../amp-base-carousel/1.0/base-carousel';
+import {BaseCarousel} from '../../amp-base-carousel/1.0/component';
 import {CarouselContext} from '../../amp-base-carousel/1.0/carousel-context';
 import {px} from '../../../src/style';
 import {

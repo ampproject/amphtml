@@ -43,7 +43,7 @@ import {
   useState,
 } from '../../../src/preact';
 import {toWin} from '../../../src/types';
-import {useStyles} from './base-carousel.jss';
+import {useStyles} from './component.jss';
 
 /**
  * @enum {string}
@@ -363,7 +363,7 @@ function BaseCarouselWithRef(
 
           Note: We naively display all slides for mixedLength as multiple
           can be visible within the carousel viewport - eventually these can also
-          be optimized to only display the minimum necessary for the current 
+          be optimized to only display the minimum necessary for the current
           and next viewport.
         */}
         {childrenArray.map((child, index) =>

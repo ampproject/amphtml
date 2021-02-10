@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../src/preact';
-import {BaseCarousel} from '../../amp-base-carousel/1.0/base-carousel';
+import {BaseCarousel} from '../../amp-base-carousel/1.0/component';
 import {forwardRef} from '../../../src/preact/compat';
 import {setStyle} from '../../../src/style';
 import {toWin} from '../../../src/types';

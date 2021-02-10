@@ -15,7 +15,7 @@
  */
 
 import {ActionTrust} from '../../../src/action-constants';
-import {CSS as CAROUSEL_CSS} from '../../amp-base-carousel/1.0/base-carousel.jss';
+import {CSS as CAROUSEL_CSS} from '../../amp-base-carousel/1.0/component.jss';
 import {CSS} from '../../../build/amp-stream-gallery-1.0.css';
 import {CSS as GALLERY_CSS} from './stream-gallery.jss';
 import {PreactBaseElement} from '../../../src/preact/base-element';
