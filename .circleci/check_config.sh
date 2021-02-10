@@ -16,7 +16,7 @@
 #
 # This script checks if a PR branch is using the most recent CircleCI config.
 #
-# Reference: https://circleci.com/docs/2.0/env-vars/#built-in-environment-variables.
+# Reference: https://circleci.com/docs/2.0/env-vars/#built-in-environment-variables
 
 set -e
 err=0

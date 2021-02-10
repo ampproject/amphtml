@@ -17,7 +17,7 @@
 # This script fetches the merge commit of a PR branch with master to make sure
 # PRs are tested against all the latest changes on CircleCI.
 #
-# Reference: https://circleci.com/docs/2.0/env-vars/#built-in-environment-variables.
+# Reference: https://circleci.com/docs/2.0/env-vars/#built-in-environment-variables
 
 set -e
 err=0
