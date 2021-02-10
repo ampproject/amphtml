@@ -74,6 +74,12 @@ commands:
     steps:
       - browser-tools/install-chrome:
           replace-existing: true
+  fail_fast:
+    steps:
+      - run:
+          name: 'Fail Fast'
+          when: on_fail
+          command: ./.circleci/fail_fast.sh
 
 jobs:
   'Checks':
@@ -84,6 +90,7 @@ jobs:
       - run:
           name: 'Checks'
           command: node build-system/pr-check/checks.js
+      - fail_fast
   'Unminified Build':
     executor:
       name: amphtml-xlarge-executor
@@ -92,6 +99,7 @@ jobs:
       - run:
           name: 'Unminified Build'
           command: node build-system/pr-check/unminified-build.js
+      - fail_fast
   'Nomodule Build':
     executor:
       name: amphtml-xlarge-executor
@@ -100,6 +108,7 @@ jobs:
       - run:
           name: 'Nomodule Build'
           command: node build-system/pr-check/nomodule-build.js
+      - fail_fast
   'Module Build':
     executor:
       name: amphtml-xlarge-executor
@@ -108,6 +117,7 @@ jobs:
       - run:
           name: 'Module Build'
           command: node build-system/pr-check/module-build.js
+      - fail_fast
   'Bundle Size':
     executor:
       name: amphtml-medium-executor
@@ -116,6 +126,7 @@ jobs:
       - run:
           name: 'Bundle Size'
           command: node build-system/pr-check/bundle-size.js
+      - fail_fast
   'Validator Tests':
     executor:
       name: amphtml-medium-executor
@@ -127,6 +138,7 @@ jobs:
       - run:
           name: 'Validator Tests'
           command: node build-system/pr-check/validator-tests.js
+      - fail_fast
   'Visual Diff Tests':
     executor:
       name: amphtml-large-executor
@@ -136,6 +148,7 @@ jobs:
       - run:
           name: 'Visual Diff Tests'
           command: node build-system/pr-check/visual-diff-tests.js
+      - fail_fast
   'Unit Tests':
     executor:
       name: amphtml-large-executor
@@ -149,6 +162,7 @@ jobs:
           command: node build-system/pr-check/unit-tests.js
       - save_karma_cache:
           cache_name: unit
+      - fail_fast
   'Unminified Tests':
     executor:
       name: amphtml-large-executor
@@ -162,6 +176,7 @@ jobs:
           command: node build-system/pr-check/unminified-tests.js
       - save_karma_cache:
           cache_name: unminified
+      - fail_fast
   'Nomodule Tests':
     executor:
       name: amphtml-large-executor
@@ -175,6 +190,7 @@ jobs:
           command: node build-system/pr-check/nomodule-tests.js
       - save_karma_cache:
           cache_name: nomodule
+      - fail_fast
   'Module Tests':
     executor:
       name: amphtml-large-executor
@@ -188,6 +204,7 @@ jobs:
           command: node build-system/pr-check/module-tests.js
       - save_karma_cache:
           cache_name: module
+      - fail_fast
   'End-to-End Tests':
     executor:
       name: amphtml-large-executor
@@ -197,6 +214,7 @@ jobs:
       - run:
           name: 'End-to-End Tests'
           command: node build-system/pr-check/e2e-tests.js
+      - fail_fast
   'Performance Tests':
     executor:
       name: amphtml-xlarge-executor
@@ -206,6 +224,7 @@ jobs:
       - run:
           name: 'Performance Tests'
           command: node build-system/pr-check/performance-tests.js
+      - fail_fast
   'Experiment A Tests':
     executor:
       name: amphtml-xlarge-executor
@@ -215,6 +234,7 @@ jobs:
       - run:
           name: 'Experiment A Tests'
           command: node build-system/pr-check/experiment-tests.js --experiment=experimentA
+      - fail_fast
   'Experiment B Tests':
     executor:
       name: amphtml-xlarge-executor
@@ -224,6 +244,7 @@ jobs:
       - run:
           name: 'Experiment B Tests'
           command: node build-system/pr-check/experiment-tests.js --experiment=experimentB
+      - fail_fast
   'Experiment C Tests':
     executor:
       name: amphtml-xlarge-executor
@@ -233,6 +254,7 @@ jobs:
       - run:
           name: 'Experiment C Tests'
           command: node build-system/pr-check/experiment-tests.js --experiment=experimentC
+      - fail_fast
 
 workflows:
   'CircleCI':
