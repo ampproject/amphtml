@@ -41,11 +41,11 @@ function checkNode(node, context) {
   if (node.type === 'ObjectExpression') {
     node.properties.forEach(function (prop) {
       if (!prop.key || (!prop.key.raw && !prop.computed)) {
-        const propNameNode = prop.key || prop.argument;
-        context.report({
+        const {name = `[${prop.type}]`} = prop.key || prop.argument || {};
+        const reportId = context.report({
           node: prop,
           message:
-            `Found: ${propNameNode ? propNameNode.name : `[${prop.type}]`}.` +
+            `Found: ${name}.` +
             'The Object Literal Expression passed into `dict` must only contain string keyed properties.',
         });
       }
