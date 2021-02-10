@@ -41,7 +41,7 @@ const Direction = {
   HAS_NOT_ANIMATED: 2,
 };
 
-const ANIMATION_DURATION = 3500;
+const ANIMATION_DURATION = 350;
 const ANIMATION_EASE_IN = 'cubic-bezier(0,0,.21,1)';
 
 const ANIMATION_KEYFRAMES_FADE_IN = [{'opacity': '0'}, {'opacity': '1'}];
