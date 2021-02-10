@@ -226,6 +226,9 @@ e2e.flags = {
   'core_runtime_only': '  Builds only the core runtime.',
   'nobuild':
     '  Skips building the runtime via `gulp (build|dist) --fortesting`',
+  'define_experiment_constant':
+    '  Transforms tests with the EXPERIMENT constant set to true',
+  'experiment': '  Experiment being tested (used for status reporting)',
   'extensions': '  Builds only the listed extensions.',
   'compiled': '  Runs tests against minified JS',
   'files': '  Run tests found in a specific path (ex: **/test-e2e/*.js)',
