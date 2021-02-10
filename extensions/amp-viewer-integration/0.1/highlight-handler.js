@@ -92,7 +92,12 @@ const PAGE_TOP_MARGIN = 80;
  * @return {?HighlightInfoDef}
  */
 export function getHighlightParam(ampdoc) {
-  const param = parseQueryString(ampdoc.win.location.hash)['highlight'];
+  const hash =
+    ampdoc.win.location.hash +
+    '&highlight=%7B%22s%22%3A%5B%22dolor%20sit%22%5D%7D';
+  const param = parseQueryString(hash)['highlight'];
+  console.log('*** ', parseQueryString(hash));
+  // const param = parseQueryString(ampdoc.win.location.hash)['highlight'];
   if (!param || param.length > HIGHLIGHT_PARAM_LENGTH_LIMIT) {
     return null;
   }
@@ -205,6 +210,70 @@ export class HighlightHandler {
   }
 
   /**
+   * Verify that the regex match is a valid color.
+   *
+   * @param {string} color - regex match to be validated
+   * @return {bool} - true iff the regex match is a valid color.
+   */
+  isValidColor_(color) {
+    if (!color || color.length < 2) {
+      return false;
+    }
+
+    const optionElement = new Option().style;
+    optionElement.color = color[1].replace('!important', '');
+
+    return optionElement.color === null ? false : true;
+  }
+
+  /**
+   * Extract color and background-color from ::target-text in the document.
+   *
+   * @return {Object<string, *>} - color and background-color from ::target-text
+   * @private
+   */
+  getHighlightStyle_() {
+    const styles = this.ampdoc_.win.document.getElementsByTagName('style');
+    if (!styles) {
+      return {
+        // TODO: replace these with new colors from Chrome
+        'backgroundColor': '#fcff00',
+        'color': '#000',
+      };
+    }
+
+    for (let i = 0; i < styles.length; i++) {
+      const cssRules = styles[i].innerHTML;
+      const targetTextRules = cssRules.match(
+        /::target-text\s*{\s*((.|\n)*?)\s*}/g
+      );
+      if (!targetTextRules) {
+        continue;
+      }
+
+      const backgroundColor = targetTextRules[0].match(
+        /background-color\s*:\s*(.*?)\s*;/
+      );
+      const color = targetTextRules[0].match(/[^-]color\s*:\s*(.*?)\s*;/);
+
+      const highlightStyle = {
+        'backgroundColor': this.isValidColor_(backgroundColor)
+          ? backgroundColor[1]
+          : null,
+        'color': this.isValidColor_(color) ? color[1] : null,
+      };
+
+      return highlightStyle;
+    }
+
+    return {
+      // TODO: replace these with new colors from Chrome
+      'backgroundColor': '#fcff00',
+      'color': '#000',
+    };
+  }
+
+  /**
    * @param {!HighlightInfoDef} highlightInfo
    * @private
    */
@@ -228,13 +297,16 @@ export class HighlightHandler {
       return;
     }
 
+    const highlightStyle = this.getHighlightStyle_();
+    console.log({highlightStyle});
     for (let i = 0; i < this.highlightedNodes_.length; i++) {
       const n = this.highlightedNodes_[i];
       // The background color is same as Android Chrome text finding (yellow).
-      setStyles(n, {
-        backgroundColor: '#fcff00',
-        color: '#000',
-      });
+      setStyles(n, highlightStyle);
+      // {
+      //   backgroundColor: '#fcff00',
+      //   color: '#000',
+      // });
     }
 
     const visibility = this.ampdoc_.getVisibilityState();
