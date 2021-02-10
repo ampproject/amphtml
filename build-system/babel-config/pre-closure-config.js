@@ -58,6 +58,7 @@ function getPreClosureConfig() {
       {freeze: false},
     ],
     './build-system/babel-plugins/babel-plugin-is_minified-constant-transformer',
+    './build-system/babel-plugins/babel-plugin-optimize-objstr',
     './build-system/babel-plugins/babel-plugin-transform-amp-extension-call',
     './build-system/babel-plugins/babel-plugin-transform-html-template',
     './build-system/babel-plugins/babel-plugin-transform-jss',
