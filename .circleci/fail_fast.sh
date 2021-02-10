@@ -13,9 +13,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the license.
-#
+
 # This script early-exits the CircleCI workflow when a single job fails.
-#
 # Reference: https://support.circleci.com/hc/en-us/articles/360052058811-Exit-build-early-if-any-test-fails
 
 set -e

@@ -13,10 +13,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the license.
-#
+
 # This script fetches the merge commit of a PR branch with master to make sure
 # PRs are tested against all the latest changes on CircleCI.
-#
 # Reference: https://circleci.com/docs/2.0/env-vars/#built-in-environment-variables
 
 set -e
