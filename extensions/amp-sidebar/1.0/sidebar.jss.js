@@ -63,6 +63,8 @@ const defaultBackdropStyles = {
   backgroundColor: 'rgba(0, 0, 0, 0.5)',
 };
 
+//TODO(#32400): See PR description.  This is a workaround dependent on a
+// a browser bug fix and should be removed when the browser bug is fixed.
 const sidebarChildClass = {
   height: '101vh !important',
   width: '0 !important',
