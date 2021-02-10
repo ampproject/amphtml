@@ -514,30 +514,32 @@ export class MediaPool {
     const ampMediaForDomEl = ampMediaElementFor(placeholderEl);
     poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME] = placeholderEl.id;
 
+    if (placeholderEl.isBitrateManaged) {
+      const bitrateManager = getBitrateManager(this.win_);
+      this.enqueueMediaElementTask_(
+        placeholderEl,
+        new UnmanageBitrateTask(bitrateManager)
+      );
+      this.enqueueMediaElementTask_(
+        poolMediaEl,
+        new ManageBitrateTask(bitrateManager)
+      );
+    }
     return this.enqueueMediaElementTask_(
       poolMediaEl,
       new SwapIntoDomTask(placeholderEl)
     ).then(
       () => {
-        if (placeholderEl.isBitrateManaged) {
-          const bitrateManager = getBitrateManager(this.win_);
-          this.enqueueMediaElementTask_(
-            placeholderEl,
-            new UnmanageBitrateTask(bitrateManager)
-          );
-          this.enqueueMediaElementTask_(
-            poolMediaEl,
-            new ManageBitrateTask(bitrateManager)
-          );
-        }
         this.enqueueMediaElementTask_(
           poolMediaEl,
           new UpdateSourcesTask(this.win_, sources)
         );
-        this.enqueueMediaElementTask_(poolMediaEl, new LoadTask()).then(() => {
-          this.maybeResetAmpMedia_(ampMediaForPoolEl);
-          this.maybeResetAmpMedia_(ampMediaForDomEl);
-        });
+        return this.enqueueMediaElementTask_(poolMediaEl, new LoadTask()).then(
+          () => {
+            this.maybeResetAmpMedia_(ampMediaForPoolEl);
+            this.maybeResetAmpMedia_(ampMediaForDomEl);
+          }
+        );
       },
       () => {
         this.forceDeallocateMediaElement_(poolMediaEl);
@@ -780,6 +782,7 @@ export class MediaPool {
    *     element has successfully started preloading.
    */
   preload(domMediaEl) {
+    console.log('preload!');
     // Empty then() invocation hides the value yielded by the loadInternal_
     // promise, so that we do not leak the pool media element outside of the
     // scope of the media pool.
@@ -795,6 +798,7 @@ export class MediaPool {
    */
   play(domMediaEl) {
     return this.loadInternal_(domMediaEl).then((poolMediaEl) => {
+      console.log(poolMediaEl);
       if (!poolMediaEl) {
         return Promise.resolve();
       }
@@ -950,6 +954,7 @@ export class MediaPool {
     if (queue.length === 0) {
       return;
     }
+    console.log(queue);
 
     const task = queue[0];
 

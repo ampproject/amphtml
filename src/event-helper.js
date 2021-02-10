@@ -219,7 +219,8 @@ export function loadPromise(eleOrWindow) {
       }
       return eleOrWindow;
     },
-    () => {
+    (error) => {
+      console.log(error);
       if (unlistenLoad) {
         unlistenLoad();
       }

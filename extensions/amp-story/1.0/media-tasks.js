@@ -171,6 +171,7 @@ export class MediaTask {
    *     execution.
    */
   execute(mediaEl) {
+    console.log('exacuting', this.name_, 'for', mediaEl.id);
     return this.executeInternal(mediaEl).then(this.resolve_, this.reject_);
   }
 
@@ -465,11 +466,6 @@ export class ManageBitrateTask extends MediaTask {
     this.bitrateManager_.manage(mediaEl);
     return Promise.resolve();
   }
-
-  /** @override */
-  requiresSynchronousExecution() {
-    return true;
-  }
 }
 
 /**
@@ -490,10 +486,5 @@ export class UnmanageBitrateTask extends MediaTask {
   executeInternal(mediaEl) {
     this.bitrateManager_.unmanage(mediaEl);
     return Promise.resolve();
-  }
-
-  /** @override */
-  requiresSynchronousExecution() {
-    return true;
   }
 }

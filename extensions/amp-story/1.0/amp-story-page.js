@@ -977,6 +977,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   playAllMedia_() {
+    console.log('playAllMedia');
     return this.whenAllMediaElements_((mediaPool, mediaEl) => {
       return this.playMedia_(mediaPool, mediaEl);
     });
@@ -990,15 +991,18 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   playMedia_(mediaPool, mediaEl) {
+    console.log('play media', mediaEl);
     if (this.isBotUserAgent_) {
       mediaEl.play();
       return Promise.resolve();
     } else {
       return this.loadPromise(mediaEl).then(
         () => {
+          console.log('inside load promise');
           return mediaPool
             .play(/** @type {!./media-pool.DomElementDef} */ (mediaEl))
             .catch((unusedError) => {
+              console.warn('ERROR!', unusedError);
               // Auto playing the media failed, which could be caused by a data
               // saver, or a battery saving mode. Display a message so we can
               // get a user gesture to bless the media elements, and play them.
@@ -1026,7 +1030,8 @@ export class AmpStoryPage extends AMP.BaseElement {
               }
             });
         },
-        () => {
+        (error) => {
+          console.warn('ERROR2!', error);
           this.debounceToggleLoadingSpinner_(false);
           this.toggleErrorMessage_(true);
         }
