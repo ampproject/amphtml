@@ -48,9 +48,14 @@ function testLoadOrderFixture(fixtureName, testElements) {
         const testElement = fixture.doc.querySelectorAll(testElements[i])[0];
         checkElementUpgrade(testElement);
         if (testElement.tagName == 'AMP-FIT-TEXT') {
-          expect(
-            fixture.doc.getElementsByClassName('i-amphtml-fit-text-content')
-          ).to.have.length(1);
+          // TODO(#32523) Remove this when Bento experiment is done.
+          if (BENTO_AUTO_UPGRADE) {
+            expect(testElement.shadowRoot).to.be.defined;
+          } else {
+            expect(
+              fixture.doc.getElementsByClassName('i-amphtml-fit-text-content')
+            ).to.have.length(1);
+          }
         }
       }
     });
