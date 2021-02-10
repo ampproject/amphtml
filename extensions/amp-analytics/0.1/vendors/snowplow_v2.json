@@ -1,6 +1,6 @@
 {
   "linkers": {
-    "splinker": {
+    "sp_amp_linker": {
       "ids": {
         "_sp_duid": "${duid}",
         "amp_id": "${ampVistorId}"
@@ -10,16 +10,16 @@
   "cookies": {
     "enabled": true,
     "_sp_duid": {
-      "value": "$IF($SUBSTR(QUERY_PARAM(_sp),0,36), $SUBSTR(QUERY_PARAM(_sp),0,36), $IF(COOKIE(_sp_duid), COOKIE(_sp_duid), LINKER_PARAM(splinker,_sp_duid)))"
+      "value": "$IF($SUBSTR(QUERY_PARAM(_sp),0,36), $SUBSTR(QUERY_PARAM(_sp),0,36), $IF(COOKIE(_sp_duid), COOKIE(_sp_duid), LINKER_PARAM(sp_amp_linker,_sp_duid)))"
     },
     "_sp_ampid": {
-      "value": "$IF(COOKIE(_sp_id), COOKIE(_sp_id), LINKER_PARAM(splinker, amp_id))"
+      "value": "$IF(COOKIE(_sp_id), COOKIE(_sp_id), LINKER_PARAM(sp_amp_linker, amp_id))"
     }
   },
   "vars": {
     "trackerVersion": "amp-1.0.2",
     "ampVistorId": "CLIENT_ID(_sp_ampid)",
-    "duid": "$IF($SUBSTR(QUERY_PARAM(_sp),0,36), $SUBSTR(QUERY_PARAM(_sp),0,36), $IF(COOKIE(_sp_duid), COOKIE(_sp_duid), LINKER_PARAM(splinker,_sp_duid)))",
+    "duid": "$IF($SUBSTR(QUERY_PARAM(_sp),0,36), $SUBSTR(QUERY_PARAM(_sp),0,36), $IF(COOKIE(_sp_duid), COOKIE(_sp_duid), LINKER_PARAM(sp_amp_linker,_sp_duid)))",
     "nullString": "null",
     "customEventTemplate": "{\"schema\":\"iglu:com.snowplowanalytics.snowplow/unstruct_event/jsonschema/1-0-0\",\"data\":{\"schema\":\"iglu:${customEventSchemaVendor}/${customEventSchemaName}/jsonschema/${customEventSchemaVersion}\",\"data\":${customEventSchemaData}}}",
     "contextsHead": "{\"schema\":\"iglu:com.snowplowanalytics.snowplow/contexts/jsonschema/1-0-0\",\"data\":[{\"schema\":\"iglu:dev.amp.snowplow/amp_id/jsonschema/1-0-0\",\"data\":{\"ampClientId\":\"${ampVistorId}\", \"domainUserid\": \"${duid}\", \"userId\": \"${userId}\"}},$REPLACE(`${customContexts}`, `^,*(.+?),*$`, `$1,`)",
