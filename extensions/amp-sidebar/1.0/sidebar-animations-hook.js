@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Side} from './sidebar-config';
+import {Side, useValueRef} from './sidebar-config';
 import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
 import {useLayoutEffect, useRef} from '../../../src/preact';
 
@@ -54,7 +54,7 @@ function safelySetStyles(element, styles) {
 
 /**
  * @param {boolean} opened
- * @param {{current: function|undefined}} onAfterCloseRef
+ * @param {{current: function|undefined}} onAfterClose
  * @param {string|undefined} side
  * @param {{current: Element|null}} sidebarRef
  * @param {{current: Element|null}} backdropRef
@@ -62,12 +62,13 @@ function safelySetStyles(element, styles) {
  */
 export function useSidebarAnimation(
   opened,
-  onAfterCloseRef,
+  onAfterClose,
   side,
   sidebarRef,
   backdropRef,
   setMounted
 ) {
+  const onAfterCloseRef = useValueRef(onAfterClose);
   const sidebarAnimationRef = useRef(null);
   const backdropAnimationRef = useRef(null);
   const animationDirectionRef = useRef(Direction.NOT_ANIMATING);
@@ -109,7 +110,10 @@ export function useSidebarAnimation(
             ? postVisibleAnim
             : postInvisibleAnim;
         }
-        backdropAnimationRef.current && backdropAnimationRef.current.reverse();
+        const backdropAnimation = backdropAnimationRef.current;
+        if (backdropAnimation) {
+          backdropAnimation.reverse();
+        }
         animationDirectionRef.current = opened
           ? Direction.OPENING
           : Direction.CLOSING;
@@ -184,15 +188,5 @@ export function useSidebarAnimation(
       backdropAnimationRef.current = backdropAnimation;
       animationDirectionRef.current = Direction.CLOSING;
     }
-  }, [
-    opened,
-    onAfterCloseRef,
-    side,
-    sidebarRef,
-    backdropRef,
-    setMounted,
-    sidebarAnimationRef,
-    backdropAnimationRef,
-    animationDirectionRef,
-  ]);
+  }, [opened, onAfterCloseRef, side, sidebarRef, backdropRef, setMounted]);
 }

@@ -14,8 +14,21 @@
  * limitations under the License.
  */
 
+import {useRef} from '../../../src/preact';
+
 /** @protected @enum {string} */
 export const Side = {
   LEFT: 'left',
   RIGHT: 'right',
 };
+
+/**
+ * @param {T} current
+ * @return {{current: T}}
+ * @template T
+ */
+export function useValueRef(current) {
+  const valueRef = useRef(null);
+  valueRef.current = current;
+  return valueRef;
+}

@@ -16,7 +16,7 @@
 
 import * as Preact from '../../../src/preact';
 import {ContainWrapper} from '../../../src/preact/component';
-import {Side} from './sidebar-config';
+import {Side, useValueRef} from './sidebar-config';
 import {forwardRef} from '../../../src/preact/compat';
 import {isRTL} from '../../../src/dom';
 import {
@@ -26,19 +26,8 @@ import {
   useRef,
   useState,
 } from '../../../src/preact';
-import {useSidebarAnimation} from './sidebar-hooks';
+import {useSidebarAnimation} from './sidebar-animations-hook';
 import {useStyles} from './sidebar.jss';
-
-/**
- * @param {T} current
- * @return {{current: T}}
- * @template T
- */
-function useValueRef(current) {
-  const valueRef = useRef(null);
-  valueRef.current = current;
-  return valueRef;
-}
 
 /**
  * @param {!SidebarDef.Props} props
@@ -74,7 +63,6 @@ function SidebarWithRef(
   // This is because they are needed within `useEffect` calls below (but are not depended for triggering)
   // We use `useValueRef` for props that might change (user-controlled)
   const onBeforeOpenRef = useValueRef(onBeforeOpen);
-  const onAfterCloseRef = useValueRef(onAfterClose);
 
   const open = useCallback(() => {
     if (onBeforeOpenRef.current) {
@@ -114,7 +102,7 @@ function SidebarWithRef(
 
   useSidebarAnimation(
     opened,
-    onAfterCloseRef,
+    onAfterClose,
     side,
     sidebarRef,
     backdropRef,
