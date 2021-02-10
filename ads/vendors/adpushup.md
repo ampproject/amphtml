@@ -28,6 +28,7 @@ limitations under the License.
 ```
 
 ## Configuration
-- `data-slot`: The GAM ad unit path corresponding to the ad position
-- `siteid`: Adpushup Site ID
-- `totalAmpSlots`: Total adpushup amp-ad slots on the page 
+
+-   `data-slot`: The GAM ad unit path corresponding to the ad position
+-   `siteid`: Adpushup Site ID
+-   `totalAmpSlots`: Total adpushup amp-ad slots on the page

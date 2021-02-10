@@ -279,7 +279,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [AdPicker](../../ads/vendors/adpicker.md)
 -   [AdPlugg](../../ads/vendors/adplugg.md)
 -   [Adpon](../../ads/vendors/adpon.md)
--   [Adpushup](../../ads/adpushup.md)
+-   [Adpushup](../../ads/vendors/adpushup.md)
 -   [AdReactor](../../ads/vendors/adreactor.md)
 -   [AdSense](../../ads/vendors/google/adsense.md)
 -   [AdSensor](../../ads/vendors/adsensor.md)
