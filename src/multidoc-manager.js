@@ -359,7 +359,6 @@ export class MultidocManager {
               ampdoc.setMetaByName(name, n.getAttribute('content') || '');
             } else {
               // TODO(dvoytenko): copy other meta tags.
-              dev().warn(TAG, 'meta ignored: ', n);
             }
             break;
           case 'LINK':

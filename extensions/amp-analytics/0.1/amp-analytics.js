@@ -618,11 +618,6 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @private
    */
   handleRequestForEvent_(requestName, trigger, event) {
-    if (!this.element.ownerDocument.defaultView) {
-      const TAG = this.getName_();
-      dev().warn(TAG, 'request against destroyed embed: ', trigger['on']);
-    }
-
     const request = this.requests_[requestName];
     const hasPostMessage =
       this.allowParentPostMessage_() && trigger['parentPostMessage'];

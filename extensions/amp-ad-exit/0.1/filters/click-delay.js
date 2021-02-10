@@ -15,10 +15,7 @@
  */
 
 import {Filter, FilterType} from './filter';
-import {dev, userAssert} from '../../../../src/log';
-
-/** @type {string} */
-const TAG = 'amp-ad-exit';
+import {userAssert} from '../../../../src/log';
 
 export class ClickDelayFilter extends Filter {
   /**
@@ -49,19 +46,9 @@ export class ClickDelayFilter extends Filter {
 
     if (spec.startTimingEvent) {
       if (!win['performance'] || !win['performance']['timing']) {
-        dev().warn(
-          TAG,
-          'Browser does not support performance timing, ' +
-            'falling back to now'
-        );
       } else if (
         win['performance']['timing'][spec.startTimingEvent] == undefined
       ) {
-        dev().warn(
-          TAG,
-          `Invalid performance timing event type ${spec.startTimingEvent}` +
-            ', falling back to now'
-        );
       } else {
         this.intervalStart =
           win['performance']['timing'][spec.startTimingEvent];

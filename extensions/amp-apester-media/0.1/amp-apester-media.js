@@ -280,7 +280,6 @@ class AmpApesterMedia extends AMP.BaseElement {
     return this.queryMedia_().then(
       (response) => {
         if (!response || response['status'] === 204) {
-          dev().warn(TAG, 'Display', 'No Content for provided tag');
           return this.unlayoutCallback();
         }
         const payload = response['payload'];

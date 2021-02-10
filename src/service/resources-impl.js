@@ -249,9 +249,7 @@ export class ResourcesImpl {
         // Wait for intersection callback instead of measuring all elements
         // during the first pass.
         this.relayoutAll_ = false;
-      } catch (e) {
-        dev().warn(TAG_, 'Falling back to classic Resources:', e);
-      }
+      } catch (e) {}
     }
 
     // When user scrolling stops, run pass to check newly in-viewport elements.

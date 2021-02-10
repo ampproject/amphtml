@@ -464,7 +464,6 @@ export class NextPageService {
    */
   setTitlePage(page = this.hostPage_) {
     if (!page) {
-      dev().warn(TAG, 'setTitlePage called before next-page-service is built');
       return;
     }
     const {title, url} = page;

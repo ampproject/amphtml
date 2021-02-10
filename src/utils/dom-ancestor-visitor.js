@@ -120,12 +120,7 @@ class Visitor {
     let result;
     try {
       result = this.callback_(element, style);
-    } catch (e) {
-      dev().warn(
-        'DOM-ANCESTOR-VISITOR',
-        `Visitor encountered error during callback execution: "${e}".`
-      );
-    }
+    } catch (e) {}
     if (!--this.maxAncestorsToVisit_ || result != undefined) {
       this.complete = true;
     }

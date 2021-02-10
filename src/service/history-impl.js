@@ -878,20 +878,12 @@ export class HistoryBindingVirtual_ {
    * otherwise.
    * @param {*} maybeHistoryState
    * @param {!HistoryStateDef} fallbackState
-   * @param {string} debugId
    * @return {!HistoryStateDef}
    * @private
    */
-  toHistoryState_(maybeHistoryState, fallbackState, debugId) {
+  toHistoryState_(maybeHistoryState, fallbackState) {
     if (this.isHistoryState_(maybeHistoryState)) {
       return /** @type {!HistoryStateDef} */ (maybeHistoryState);
-    } else {
-      dev().warn(
-        TAG_,
-        'Ignored unexpected "%s" data:',
-        debugId,
-        maybeHistoryState
-      );
     }
     return fallbackState;
   }
@@ -1024,8 +1016,6 @@ export class HistoryBindingVirtual_ {
     }
     if (this.isHistoryState_(data)) {
       this.updateHistoryState_(/** @type {!HistoryStateDef} */ (data));
-    } else {
-      dev().warn(TAG_, 'Ignored unexpected "historyPopped" data:', data);
     }
   }
 

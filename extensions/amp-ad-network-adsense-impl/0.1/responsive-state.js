@@ -137,7 +137,6 @@ export class ResponsiveState {
         })
         // Do nothing if we fail to read localstorage.
         .catch(() => {
-          dev().warn(TAG, 'Failed to look up publisher ad size settings.');
           return null;
         })
     );
@@ -262,9 +261,7 @@ export class ResponsiveState {
             })
         )
         // Do nothing if we fail to write to localstorage.
-        .catch(() => {
-          dev().warn(TAG, 'Failed to persist publisher auto ad size setting.');
-        });
+        .catch(() => {});
     };
     win.addEventListener('message', listener);
     return savePromise;

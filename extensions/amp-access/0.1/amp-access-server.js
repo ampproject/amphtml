@@ -16,16 +16,13 @@
 
 import {AccessClientAdapter} from './amp-access-client';
 import {Services} from '../../../src/services';
-import {dev, devAssert} from '../../../src/log';
+import {devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {fetchDocument} from '../../../src/document-fetcher';
 import {isExperimentOn} from '../../../src/experiments';
 import {isProxyOrigin, removeFragment} from '../../../src/url';
 import {parseJson} from '../../../src/json';
-
-/** @const {string} */
-const TAG = 'amp-access-server';
 
 /**
  * This class implements server-side authorization protocol. In this approach
@@ -192,7 +189,6 @@ export class AccessServerAdapter {
             `[i-amphtml-access-id="${escapeCssSelectorIdent(sectionId)}"]`
           );
         if (!target) {
-          dev().warn(TAG, 'Section not found: ', sectionId);
           continue;
         }
         target.parentElement.replaceChild(

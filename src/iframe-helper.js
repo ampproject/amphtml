@@ -16,7 +16,7 @@
 
 import {addAttributesToElement, closestAncestorElementBySelector} from './dom';
 import {deserializeMessage, isAmpMessage} from './3p-frame-messaging';
-import {dev, devAssert} from './log';
+import {devAssert} from './log';
 import {dict} from './utils/object';
 import {getData} from './event-helper';
 import {parseUrlDeprecated} from './url';
@@ -423,15 +423,7 @@ function getSentinel_(iframe, opt_is3P) {
 export function parseIfNeeded(data) {
   if (typeof data == 'string') {
     if (data.charAt(0) == '{') {
-      data =
-        tryParseJson(data, (e) => {
-          dev().warn(
-            'IFRAME-HELPER',
-            'Postmessage could not be parsed. ' +
-              'Is it in a valid JSON format?',
-            e
-          );
-        }) || null;
+      data = tryParseJson(data, () => {}) || null;
     } else if (isAmpMessage(data)) {
       data = deserializeMessage(data);
     } else {

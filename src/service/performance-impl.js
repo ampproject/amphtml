@@ -39,8 +39,6 @@ const QUEUE_LIMIT = 50;
 /** @const {string} */
 const VISIBILITY_CHANGE_EVENT = 'visibilitychange';
 
-const TAG = 'Performance';
-
 /**
  * Fields:
  * {{
@@ -445,9 +443,7 @@ export class Performance {
         this.flush();
       });
       obs.observe(init);
-    } catch (err) {
-      dev().warn(TAG, err);
-    }
+    } catch (err) {}
   }
 
   /**

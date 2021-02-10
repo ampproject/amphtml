@@ -201,7 +201,6 @@ class AnimationPlayer {
     if (this.vsync_.canAnimate(this.contextNode_)) {
       this.task_(this.state_);
     } else {
-      dev().warn(TAG_, 'cannot animate');
       this.complete_(/* success */ false, /* dir */ 0);
     }
   }
@@ -323,7 +322,6 @@ class AnimationPlayer {
       if (this.vsync_.canAnimate(this.contextNode_)) {
         this.task_(this.state_);
       } else {
-        dev().warn(TAG_, 'cancel animation');
         this.complete_(/* success */ false, /* dir */ 0);
       }
     }

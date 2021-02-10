@@ -604,7 +604,6 @@ describes.realWin('Doubleclick SRA', config, (env) => {
             doubleclickInstances.push(impl);
             env.sandbox.stub(impl, 'isValidElement').returns(!invalid);
             env.sandbox.stub(impl, 'promiseErrorHandler_');
-            env.sandbox.stub(impl, 'warnOnError');
             if (invalid) {
               impl.element.setAttribute('data-test-invalid', 'true');
             }

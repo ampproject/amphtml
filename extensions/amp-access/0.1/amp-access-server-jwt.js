@@ -344,7 +344,6 @@ export class AccessServerJwtAdapter {
             `[i-amphtml-access-id="${escapeCssSelectorIdent(sectionId)}"]`
           );
         if (!target) {
-          dev().warn(TAG, 'Section not found: ', sectionId);
           continue;
         }
         target.parentElement.replaceChild(

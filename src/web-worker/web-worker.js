@@ -77,9 +77,6 @@ self.addEventListener('message', function (event) {
 
   switch (method) {
     case 'bind.init':
-      if (evaluator) {
-        dev().warn(TAG, 'Overwriting existing evaluator for scope:', scope);
-      }
       const allowUrlProperties = args[0];
       evaluators_[scope] = new BindEvaluator(allowUrlProperties);
       returnValue = true;

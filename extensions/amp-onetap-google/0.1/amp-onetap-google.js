@@ -31,7 +31,7 @@ import {CSS} from '../../../build/amp-onetap-google-0.1.css';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
-import {dev, devAssert, user} from '../../../src/log';
+import {devAssert, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getData, listen} from '../../../src/event-helper';
 import {isObject} from '../../../src/types';
@@ -148,8 +148,6 @@ export class AmpOnetapGoogle extends AMP.BaseElement {
       case ACTIONS.SET_TAP_OUTSIDE_MODE:
         this.shouldCancelOnTapOutside_ = !!data['cancel'];
         break;
-      default:
-        dev().warn(TAG, `Unknown action type: ${data['command']}`);
     }
   }
 
