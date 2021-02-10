@@ -176,7 +176,10 @@ describes.realWin('media-pool', {}, (env) => {
 
     env.sandbox
       .stub(mediaPool, 'enqueueMediaElementTask_')
-      .returns(Promise.resolve());
+      .callsFake((el, task) => {
+        task.execute(el);
+        return Promise.resolve();
+      });
 
     const videoEl = createMediaElement('video');
     videoEl.isBitrateManaged = true;

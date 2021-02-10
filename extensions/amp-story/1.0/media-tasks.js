@@ -463,6 +463,7 @@ export class ManageBitrateTask extends MediaTask {
   /** @override */
   executeInternal(mediaEl) {
     this.bitrateManager_.manage(mediaEl);
+    return Promise.resolve();
   }
 
   /** @override */
@@ -488,6 +489,7 @@ export class UnmanageBitrateTask extends MediaTask {
   /** @override */
   executeInternal(mediaEl) {
     this.bitrateManager_.unmanage(mediaEl);
+    return Promise.resolve();
   }
 
   /** @override */
