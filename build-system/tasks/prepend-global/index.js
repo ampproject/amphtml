@@ -17,11 +17,11 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const childProcess = require('child_process');
-const colors = require('ansi-colors');
+const colors = require('kleur/colors');
 const fs = require('fs');
-const log = require('fancy-log');
 const path = require('path');
 const util = require('util');
+const {log} = require('../../common/logging');
 
 const exec = util.promisify(childProcess.exec);
 

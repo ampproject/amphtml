@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {Services} from '../../src/services';
-import {createLoaderElement} from '../../src/loader';
+import {createLoaderElement} from '../../src/service/loader-element';
 
 describes.fakeWin('Loader', {amp: true}, (env) => {
   let clock;
@@ -28,7 +28,7 @@ describes.fakeWin('Loader', {amp: true}, (env) => {
   beforeEach(() => {
     ampdoc = env.ampdoc;
     el = document.createElement('div');
-    clock = lolex.install({target: env.win, now: 50});
+    clock = fakeTimers.withGlobal(env.win).install({now: 50});
 
     env.sandbox
       .stub(Services, 'extensionsFor')

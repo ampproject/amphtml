@@ -51,6 +51,12 @@ played as soon as it becomes visible. There are some conditions that the compone
 to be played, <a href="https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md#autoplay">which are outlined in the Video in AMP spec</a>.</td>
   </tr>
   <tr>
+    <td width="40%"><strong>do-not-track</strong></td>
+    <td>If this attribute is present the player will be blocked from tracking any session data, including all cookies and
+    <a href="https://vimeo.com/stats">stats</a>. (It has the same effect as enabling a Do Not Track setting in your browser).
+    See the 'dnt' parameter in the <a href="https://developer.vimeo.com/api/oembed/videos">Vimeo oEmbed Documentation</a></td>
+  </tr>
+  <tr>
     <td width="40%"><strong>common attributes</strong></td>
     <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>

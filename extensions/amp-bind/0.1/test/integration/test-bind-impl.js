@@ -19,7 +19,7 @@
  * because it requires building web-worker binary.
  */
 
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {AmpEvents} from '../../../../../src/amp-events';
 import {Bind} from '../../bind-impl';
 import {BindEvents} from '../../bind-events';
@@ -216,20 +216,19 @@ describe
       },
       (env) => {
         let fieBind;
-        let fieBody;
-        let fieWindow;
-
-        let hostWindow;
+        let fieWindow, fieBody;
+        let hostWindow, hostBody;
 
         beforeEach(() => {
           // Make sure we have a chunk instance for testing.
           chunkInstanceForTesting(env.ampdoc);
 
-          fieWindow = env.embed.win;
-          fieBind = new Bind(env.ampdoc, fieWindow);
-          fieBody = env.embed.getBodyElement();
+          fieBind = new Bind(env.ampdoc);
+          fieWindow = env.ampdoc.win;
+          fieBody = env.ampdoc.getBody();
 
-          hostWindow = env.ampdoc.win;
+          hostWindow = env.parentWin;
+          hostBody = env.parentAmpdoc.getBody();
         });
 
         it('should scan for bindings when ampdoc is ready', () => {
@@ -260,11 +259,9 @@ describe
 
         describe('with Bind in host window', () => {
           let hostBind;
-          let hostBody;
 
           beforeEach(() => {
-            hostBind = new Bind(env.ampdoc);
-            hostBody = env.ampdoc.getBody();
+            hostBind = new Bind(env.parentAmpdoc);
           });
 
           it('should only scan elements in provided window', () => {
@@ -379,7 +376,9 @@ describe
 
           history = bind.historyForTesting();
 
-          clock = lolex.install({target: win, toFake: ['Date', 'setTimeout']});
+          clock = fakeTimers.withGlobal(win).install({
+            toFake: ['Date', 'setTimeout'],
+          });
         });
 
         afterEach(() => {

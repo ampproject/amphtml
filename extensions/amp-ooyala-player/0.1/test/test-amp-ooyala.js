@@ -40,6 +40,7 @@ describes.realWin(
       opt_placeholder
     ) {
       const player = doc.createElement('amp-ooyala-player');
+      player.setAttribute('layout', 'fixed');
       if (embedCode) {
         player.setAttribute('data-embedcode', embedCode);
       }
@@ -63,7 +64,7 @@ describes.realWin(
       }
 
       doc.body.appendChild(player);
-      return player.build().then(() => {
+      return player.buildInternal().then(() => {
         player.layoutCallback();
         return player;
       });

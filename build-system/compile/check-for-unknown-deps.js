@@ -15,9 +15,9 @@
  */
 'use strict';
 
-const log = require('fancy-log');
 const through = require('through2');
-const {red, cyan, yellow} = require('ansi-colors');
+const {log} = require('../common/logging');
+const {red, cyan, yellow} = require('kleur/colors');
 
 /**
  * Searches for the identifier "module$", which Closure uses to uniquely

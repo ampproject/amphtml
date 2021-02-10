@@ -62,6 +62,10 @@ export const MessageType = {
 
   // For user-error-in-iframe
   USER_ERROR_IN_IFRAME: 'user-error-in-iframe',
+
+  // For amp-iframe
+  SEND_CONSENT_DATA: 'send-consent-data',
+  CONSENT_DATA: 'consent-data',
 };
 
 /**

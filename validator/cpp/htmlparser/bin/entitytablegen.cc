@@ -90,8 +90,8 @@ inline std::string_view EntityLookup(std::string_view entity_name) {
 
 // Extracts the entity name from it's line in entities.json.
 std::string GetHtmlEntityTag(const std::string& s) {
-  int x = s.find_first_of("\"");
-  int y = s.find_first_of("\"", x + 1);
+  int x = s.find_first_of('\"');
+  int y = s.find_first_of('\"', x + 1);
   return s.substr(x + 2 /* Ignore '"' and '&' */, y - x - 2);
 }
 
@@ -104,8 +104,8 @@ int to_int(std::string* s) {
 
 // Extracts the characters codepoint from it's line in entity.json.
 std::vector<int> GetCodepoint(const std::string& s) {
-  int x = s.find_first_of("[");
-  int y = s.find_first_of("]");
+  int x = s.find_first_of('[');
+  int y = s.find_first_of(']');
   std::string cp = s.substr(x + 1, y - x - 1);
   auto comma = cp.find_first_of(',');
   if (comma == std::string::npos) {

@@ -31,29 +31,61 @@
  * Out:
  * ```
  * const jss = { button: { fontSize: 12 }}
- * const _classes = {button: 'button-1', CSS: 'button-1 { font-size: 12 }'}
+ * const _classes = {button: 'button-1'}
  * export const useStyles = () => _classes;
+ * export const CSS = 'button-1 { font-size: 12px }'
  * ```
  */
 
+const hash = require('./create-hash');
 const {create} = require('jss');
 const {default: preset} = require('jss-preset-default');
+const {relative, join} = require('path');
+const {transformCssSync} = require('../../tasks/css/jsify-css-sync');
 
-module.exports = function ({types: t, template}) {
+module.exports = function ({template, types: t}) {
   function isJssFile(filename) {
     return filename.endsWith('.jss.js');
   }
 
-  function compileJss(JSS) {
-    const jss = create();
-    jss.setup(preset());
+  const seen = new Map();
+  function compileJss(JSS, filename) {
+    const relativeFilepath = relative(join(__dirname, '../../..'), filename);
+    const filehash = hash.createHash(relativeFilepath);
+    const jss = create({
+      ...preset(),
+      createGenerateId: () => {
+        return (rule) => {
+          const dashCaseKey = rule.key.replace(
+            /([A-Z])/g,
+            (c) => `-${c.toLowerCase()}`
+          );
+          const className = `${dashCaseKey}-${filehash}`;
+          if (seen.has(className)) {
+            throw new Error(
+              `Classnames must be unique across all files. Found a duplicate: ${className}`
+            );
+          }
+          seen.set(className, filename);
+          return className;
+        };
+      },
+    });
     return jss.createStyleSheet(JSS);
   }
 
   return {
     visitor: {
+      Program(path, state) {
+        const {filename} = state.file.opts;
+        seen.forEach((file, key) => {
+          if (file === filename) {
+            seen.delete(key);
+          }
+        });
+      },
+
       CallExpression(path, state) {
-        // TODO: Can I skip the whole file if not jss?
         const {filename} = state.file.opts;
         if (!isJssFile(filename)) {
           return;
@@ -70,25 +102,32 @@ module.exports = function ({types: t, template}) {
             `First argument to createUseStyles must be statically evaluatable.`
           );
         }
-        const sheet = compileJss(JSS);
+        const sheet = compileJss(JSS, filename);
         if ('CSS' in sheet.classes) {
           throw path.buildCodeFrameError(
             'Cannot have class named CSS in your JSS object.'
           );
         }
 
+        // Create the classes var.
         const id = path.scope.generateUidIdentifier('classes');
-        path.scope.push({
-          id,
-          init: template.expression.ast`JSON.parse(${t.stringLiteral(
-            JSON.stringify({
-              ...sheet.classes,
-              'CSS': sheet.toString(),
-            })
-          )})`,
-        });
+        const init = t.valueToNode(sheet.classes);
+        path.scope.push({id, init});
+        path.scope.bindings[id.name].path.parentPath.addComment(
+          'leading',
+          '* @enum {string}'
+        );
 
-        path.replaceWith(template.expression.ast`(() => ${id})`);
+        // Replace useStyles with a getter for the new `classes` var.
+        path.replaceWith(template.expression.ast`(() => ${t.cloneNode(id)})`);
+
+        // Export a variable named CSS with the compiled CSS.
+        const {css} = transformCssSync(sheet.toString());
+        const cssStr = t.stringLiteral(css);
+        const cssExport = template.ast`export const CSS = ${cssStr}`;
+        path
+          .findParent((p) => p.type === 'ExportNamedDeclaration')
+          .insertAfter(cssExport);
       },
 
       // Remove the import for react-jss

@@ -117,6 +117,8 @@ class TestConfig {
 
     this.platform = Services.platformFor(window);
 
+    this.isModuleBuild = () => !!window.ampTestRuntimeConfig.isModuleBuild;
+
     /**
      * Predicate functions that determine whether to run tests on a platform.
      */
@@ -131,6 +133,10 @@ class TestConfig {
      * By default, IE is skipped. Individual tests may opt in.
      */
     this.skip(this.runOnIe);
+  }
+
+  skipModuleBuild() {
+    return this.skip(this.isModuleBuild);
   }
 
   skipChrome() {
@@ -170,6 +176,10 @@ class TestConfig {
   skip(fn) {
     this.skipMatchers.push(fn);
     return this;
+  }
+
+  ifModuleBuild() {
+    return this.if(this.isModuleBuild);
   }
 
   ifChrome() {
@@ -402,9 +412,8 @@ function beforeTest() {
   activateChunkingForTesting();
   window.__AMP_MODE = undefined;
   window.context = undefined;
-  window.AMP_CONFIG = {
-    canary: 'testSentinel',
-  };
+  // eslint-disable-next-line no-undef
+  window.AMP_CONFIG = require('../build-system/global-configs/prod-config.json');
   window.__AMP_TEST = true;
   installDocService(window, /* isSingleDoc */ true);
   const ampdoc = Services.ampdocServiceFor(window).getSingleDoc();

@@ -43,7 +43,7 @@ describes.realWin(
       ampBeOpinion.setAttribute('height', '222');
       doc.body.appendChild(ampBeOpinion);
       return ampBeOpinion
-        .build()
+        .buildInternal()
         .then(() => ampBeOpinion.layoutCallback())
         .then(() => ampBeOpinion);
     }
@@ -77,16 +77,16 @@ describes.realWin(
       expect(content).not.to.be.undefined;
     });
 
-    it('removes iframe after unlayoutCallback', () => {
-      return getAmpBeOpinion(accountId).then((ampBeOpinion) => {
-        const iframe = ampBeOpinion.querySelector('iframe');
-        expect(iframe).to.not.be.null;
-        const obj = ampBeOpinion.implementation_;
-        obj.unlayoutCallback();
-        expect(ampBeOpinion.querySelector('iframe')).to.be.null;
-        expect(obj.iframe_).to.be.null;
-        expect(obj.unlayoutOnPause()).to.be.true;
-      });
+    it('removes iframe after unlayoutCallback', async () => {
+      const ampBeOpinion = await getAmpBeOpinion(accountId);
+      const obj = await ampBeOpinion.getImpl();
+
+      const iframe = ampBeOpinion.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      obj.unlayoutCallback();
+      expect(ampBeOpinion.querySelector('iframe')).to.be.null;
+      expect(obj.iframe_).to.be.null;
+      expect(obj.unlayoutOnPause()).to.be.true;
     });
   }
 );

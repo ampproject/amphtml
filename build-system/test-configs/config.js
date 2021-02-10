@@ -41,6 +41,12 @@ const builtRuntimePaths = [
     watched: true,
   },
   {
+    pattern: 'dist/**/*.mjs',
+    included: false,
+    nocache: false,
+    watched: true,
+  },
+  {
     pattern: 'dist.3p/**/*',
     included: false,
     nocache: false,
@@ -48,6 +54,12 @@ const builtRuntimePaths = [
   },
   {
     pattern: 'dist.tools/**/*.js',
+    included: false,
+    nocache: false,
+    watched: true,
+  },
+  {
+    pattern: 'dist.tools/**/*.mjs',
     included: false,
     nocache: false,
     watched: true,
@@ -65,12 +77,6 @@ const testPaths = commonIntegrationTestPaths.concat([
   'test/*/!(e2e)/**/*.js',
   'ads/**/test/test-*.js',
   'extensions/**/test/**/*.js',
-]);
-
-const a4aTestPaths = initTestsPath.concat([
-  'extensions/amp-a4a/**/test/**/*.js',
-  'extensions/amp-ad-network-*/**/test/**/*.js',
-  'ads/google/a4a/test/*.js',
 ]);
 
 const unitTestPaths = [
@@ -140,17 +146,20 @@ const presubmitGlobs = [
  * 2. Make sure it is listed in .vscode/settings.json (for auto-fix-on-save)
  */
 const prettifyGlobs = [
+  '.circleci/config.yml',
   '.codecov.yml',
   '.lando.yml',
   '.lgtm.yml',
   '.travis.yml',
   '.prettierrc',
   '.renovaterc.json',
+  '.circleci/config.yml',
   '.vscode/settings.json',
   '.github/workflows/continuous-integration-workflow.yml',
   '**/*.json',
   '**/OWNERS',
   '**/*.md',
+  '!**/package*.json',
   '!.github/ISSUE_TEMPLATE/**',
   '!**/{node_modules,build,dist,dist.3p,dist.tools,.karma-cache}/**',
 ];
@@ -196,7 +205,6 @@ const changelogIgnoreFileTypes = /\.md|\.json|\.yaml|LICENSE|CONTRIBUTORS$/;
 
 /** @const  */
 module.exports = {
-  a4aTestPaths,
   changelogIgnoreFileTypes,
   commonIntegrationTestPaths,
   commonUnitTestPaths,

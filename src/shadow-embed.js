@@ -21,20 +21,13 @@ import {
   ShadowDomVersion,
   getShadowDomSupportedVersion,
   isShadowCssSupported,
-  isShadowDomSupported,
 } from './web-components';
-import {closestNode, isShadowRoot, iterateCursor} from './dom';
 import {dev, devAssert} from './log';
 import {escapeCssSelectorIdent} from './css';
 import {installCssTransformer} from './style-installer';
+import {iterateCursor} from './dom';
 import {setInitialDisplay, setStyle} from './style';
 import {toArray, toWin} from './types';
-
-/**
- * Used for non-composed root-node search. See `getRootNode`.
- * @const {!GetRootNodeOptions}
- */
-const UNCOMPOSED_SEARCH = {composed: false};
 
 /** @const {!RegExp} */
 const CSS_SELECTOR_BEG_REGEX = /[^\.\-\_0-9a-zA-Z]/;
@@ -155,20 +148,6 @@ function createShadowRootPolyfill(hostElement) {
   });
 
   return shadowRoot;
-}
-
-/**
- * Return shadow root for the specified node.
- * @param {!Node} node
- * @return {?ShadowRoot}
- */
-export function getShadowRootNode(node) {
-  // TODO(#22733): remove in preference to dom's `rootNodeFor`.
-  if (isShadowDomSupported() && Node.prototype.getRootNode) {
-    return /** @type {?ShadowRoot} */ (node.getRootNode(UNCOMPOSED_SEARCH));
-  }
-  // Polyfill shadow root lookup.
-  return /** @type {?ShadowRoot} */ (closestNode(node, (n) => isShadowRoot(n)));
 }
 
 /**

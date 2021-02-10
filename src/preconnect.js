@@ -24,7 +24,6 @@ import {dev} from './log';
 import {htmlFor} from './static-template';
 import {parseUrlDeprecated} from './url';
 import {registerServiceBuilder} from './service';
-import {startsWith} from './string';
 import {whenDocumentComplete} from './document-ready';
 
 const ACTIVE_CONNECTION_TIMEOUT_MS = 180 * 1000;
@@ -267,7 +266,7 @@ export class PreconnectService {
    * @return {boolean}
    */
   isInterestingUrl_(url) {
-    if (startsWith(url, 'https:') || startsWith(url, 'http:')) {
+    if (url.startsWith('https:') || url.startsWith('http:')) {
       return true;
     }
     return false;

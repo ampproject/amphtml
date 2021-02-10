@@ -24,7 +24,9 @@ limitations under the License.
 
 # amp-connatix-player
 
-## Example
+## Usage
+
+Displays a cloud-hosted [Connatix Player](https://www.connatix.com/).
 
 The `width` and `height` attributes determine the aspect ratio of the player embedded in responsive layouts.
 
@@ -42,21 +44,21 @@ Example:
 
 ## Attributes
 
-<table>
-  <tr>
-    <td width="40%"><strong>data-player-id</strong></td>
-    <td>Connatix player id. This can be found at the Video Players section in the Connatix management dashboard</a>. (<strong>Required</strong>)</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>data-media-id</strong></td>
-    <td>Connatix media id. This represents the unique ID of any media in your Library. This can be found at the Library section in the <a>Connatix management dashboard</a>. (<strong>Optional</strong>)</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
-  </tr>
-</table>
+### `data-player-id`
+
+Connatix player id. This can be found at the Video Players section in the
+Connatix management dashboard.
+
+### `data-media-id` (optional)
+
+Connatix media id. This represents the unique ID of any media in your Library.
+This can be found at the Library section in the Connatix management dashboard.
+
+### Common attributes
+
+This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes)
+extended to AMP components.
 
 ## Validation
 
-See [amp-connatix-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-connatix-player/validator-amp-connatix-player.protoascii) in the AMP validator specification.
+See [amp-connatix-player rules](validator-amp-connatix-player.protoascii) in the AMP validator specification.

@@ -73,7 +73,6 @@ const ParsedAttr = class {
 };
 exports.ParsedAttr = ParsedAttr;
 
-
 /**
  * An Html parser makes method calls with ParsedHtmlTags as arguments.
  */
@@ -209,10 +208,157 @@ const ParsedHtmlTag = class {
   }
 
   /**
+   * Returns the value of a given attribute name. If it does not exist then
+   * returns null.
+   * @param {string} name
+   * @return {?string}
+   * @private
+   */
+  getAttrValueOrNull_(name) {
+    return this.attrsByKey()[name] || null;
+  }
+
+  /**
    * @return {boolean}
    */
   isEmpty() {
     return this.tagName_.length === 0;
+  }
+
+  /**
+   * Gets the name attribute for an extension script tag.
+   * @return {string}
+   * @private
+   */
+  extensionScriptNameAttribute_() {
+    if (this.upperName() == 'SCRIPT') {
+      for (const attribute
+               of ['custom-element', 'custom-template', 'host-service']) {
+        if (attribute in this.attrsByKey()) {
+          return attribute;
+        }
+      }
+    }
+    return '';
+  }
+
+  /**
+   * Tests if this is an extension script tag.
+   * @return {boolean}
+   */
+  isExtensionScript() {
+    return !!this.extensionScriptNameAttribute_();
+  }
+
+  /**
+   * Tests if this is an async script tag.
+   * @return {boolean}
+   * @private
+   */
+  isAsyncScriptTag_() {
+    return this.upperName() == 'SCRIPT' && 'async' in this.attrsByKey() &&
+        'src' in this.attrsByKey();
+  }
+
+  /**
+   * Tests if this is the AMP runtime script tag.
+   * @return {boolean}
+   */
+  isAmpRuntimeScript() {
+    const src = this.getAttrValueOrNull_('src');
+    if (src === null) return false;
+    return this.isAsyncScriptTag_() && !this.isExtensionScript() &&
+        src.startsWith('https://cdn.ampproject.org/') &&
+        (src.endsWith('/v0.js') || src.endsWith('/v0.mjs') ||
+         src.endsWith('/v0.mjs?f=sxg'));
+  }
+
+  /**
+   * Tests if this is the LTS version script tag.
+   * @return {boolean}
+   */
+  isLtsScriptTag() {
+    // Examples:
+    // https://cdn.ampproject.org/lts/v0.js
+    // https://cdn.ampproject.org/lts/v0/amp-ad-0.1.js
+    const src = this.getAttrValueOrNull_('src');
+    if (src === null) return false;
+    const ltsScriptSrcRegex = new RegExp(
+        '^https://cdn\\.ampproject\\.org/lts/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\\.js$',
+        'i');
+    return this.isAsyncScriptTag_() && ltsScriptSrcRegex.test(src);
+  }
+
+  /**
+   * Tests if this is the module version script tag.
+   * @return {boolean}
+   */
+  isModuleScriptTag() {
+    // Examples:
+    // https://cdn.ampproject.org/v0.mjs
+    // https://cdn.ampproject.org/v0/amp-ad-0.1.mjs
+    const type = this.getAttrValueOrNull_('type');
+    if (type === null) return false;
+    const src = this.getAttrValueOrNull_('src');
+    if (src === null) return false;
+    const moduleScriptSrcRegex = new RegExp(
+        '^https://cdn\\.ampproject\\.org/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\\.mjs$',
+        'i');
+    return this.isAsyncScriptTag_() && (type == 'module') &&
+        moduleScriptSrcRegex.test(src);
+  }
+
+  /**
+   * Tests if this is the nomodule version script tag.
+   * @return {boolean}
+   */
+  isNomoduleScriptTag() {
+    // Examples:
+    // https://cdn.ampproject.org/v0.js
+    // https://cdn.ampproject.org/v0/amp-ad-0.1.js
+    const src = this.getAttrValueOrNull_('src');
+    if (src === null) return false;
+    const nomoduleScriptSrcRegex = new RegExp(
+        '^https://cdn\\.ampproject\\.org/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\\.js$',
+        'i');
+    return this.isAsyncScriptTag_() && 'nomodule' in this.attrsByKey() &&
+        nomoduleScriptSrcRegex.test(src);
+  }
+
+  /**
+   * Tests if this is the module LTS version script tag.
+   * @return {boolean}
+   */
+  isModuleLtsScriptTag() {
+    // Examples:
+    // https://cdn.ampproject.org/lts/v0.mjs
+    // https://cdn.ampproject.org/lts/v0/amp-ad-0.1.mjs
+    const type = this.getAttrValueOrNull_('type');
+    if (type === null) return false;
+    const src = this.getAttrValueOrNull_('src');
+    if (src === null) return false;
+    const moduleLtsScriptSrcRegex = new RegExp(
+        '^https://cdn\\.ampproject\\.org/lts/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\\.mjs$',
+        'i');
+    return this.isAsyncScriptTag_() && (type == 'module') &&
+        moduleLtsScriptSrcRegex.test(src);
+  }
+
+  /**
+   * Tests if this is the nomodule LTS version script tag.
+   * @return {boolean}
+   */
+  isNomoduleLtsScriptTag() {
+    // Examples:
+    // https://cdn.ampproject.org/lts/v0.js
+    // https://cdn.ampproject.org/lts/v0/amp-ad-0.1.js
+    const src = this.getAttrValueOrNull_('src');
+    if (src === null) return false;
+    const nomoduleLtsScriptSrcRegex = new RegExp(
+        '^https://cdn\\.ampproject\\.org/lts/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\\.js$',
+        'i');
+    return this.isAsyncScriptTag_() && 'nomodule' in this.attrsByKey() &&
+        nomoduleLtsScriptSrcRegex.test(src);
   }
 };
 exports.ParsedHtmlTag = ParsedHtmlTag;

@@ -38,7 +38,11 @@ import {
   matches,
   tryFocus,
 } from '../../../src/dom';
-import {createShadowRootWithStyle, getSourceOriginForElement} from './utils';
+import {
+  createShadowRootWithStyle,
+  getSourceOriginForElement,
+  triggerClickFromLightDom,
+} from './utils';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getAmpdoc} from '../../../src/service';
@@ -257,7 +261,9 @@ function buildStringStyleForTweet(embedData) {
   return `{
     width: ${px(embedData.width)} !important;
     transform: ${embedData.transform} !important;
-    margin: 0 ${embedData.horizontalMargin}px !important;
+    margin: ${embedData.verticalMargin}px ${
+    embedData.horizontalMargin
+  }px !important;
     }`;
 }
 
@@ -311,6 +317,9 @@ function measureStylesForTwitter(state, pageRect, elRect) {
   state.scaleFactor =
     Math.min(elRect.width, MAX_TWEET_WIDTH_PX) / state.newWidth;
 
+  const shrinkedSize = elRect.height * state.scaleFactor;
+
+  state.verticalMargin = -1 * ((elRect.height - shrinkedSize) / 2);
   state.horizontalMargin = -1 * ((state.newWidth - elRect.width) / 2);
 
   return state;
@@ -395,6 +404,7 @@ function updateStylesForTwitter(elId, state) {
     scaleFactor: state.scaleFactor,
     transform: `scale(${state.scaleFactor})`,
     horizontalMargin: state.horizontalMargin,
+    verticalMargin: state.verticalMargin,
   };
 }
 
@@ -718,6 +728,7 @@ export class AmpStoryEmbeddedComponent {
           StoryAnalyticsEvent.CLICK_THROUGH,
           this.triggeringTarget_
         );
+        this.tooltip_.href && this.onAnchorClick_(event);
       },
       true /** capture */
     );
@@ -736,11 +747,12 @@ export class AmpStoryEmbeddedComponent {
       this.clearTooltip_();
     }, TOOLTIP_CLOSE_ANIMATION_MS);
 
+    if (this.state_ === EmbeddedComponentState.EXPANDED) {
+      this.toggleExpandedView_(null);
+    }
     this.storeService_.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, {
       state: EmbeddedComponentState.HIDDEN,
     });
-
-    this.toggleExpandedView_(null);
     this.tooltip_.removeEventListener(
       'click',
       this.expandComponentHandler_,
@@ -1366,7 +1378,6 @@ export class AmpStoryEmbeddedComponent {
               i-amphtml-story-tooltip-nav-button-left"
         >
           <button
-            role="button"
             ref="buttonLeft"
             class="i-amphtml-story-focused-state-layer-nav-button
                 i-amphtml-story-tooltip-nav-button-left"
@@ -1377,7 +1388,6 @@ export class AmpStoryEmbeddedComponent {
               i-amphtml-story-tooltip-nav-button-right"
         >
           <button
-            role="button"
             ref="buttonRight"
             class="i-amphtml-story-focused-state-layer-nav-button
                     i-amphtml-story-tooltip-nav-button-right"
@@ -1446,6 +1456,16 @@ export class AmpStoryEmbeddedComponent {
       undefined,
       {bubbles: true}
     );
+  }
+
+  /**
+   * Linkers don't work on shadow root elements so we click a clone of the anchor on the root dom.
+   * @param {!Event} event
+   * @private
+   */
+  onAnchorClick_(event) {
+    event.preventDefault();
+    triggerClickFromLightDom(this.tooltip_, this.storyEl_);
   }
 
   /**

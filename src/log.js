@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {USER_ERROR_SENTINEL} from './pure-assert';
 import {getMode} from './mode';
 import {internalRuntimeVersion} from './internal-version';
 import {isArray, isEnumValue} from './types';
@@ -22,16 +23,7 @@ import {urls} from './config';
 
 const noop = () => {};
 
-/**
- * Triple zero width space.
- *
- * This is added to user error messages, so that we can later identify
- * them, when the only thing that we have is the message. This is the
- * case in many browsers when the global exception handler is invoked.
- *
- * @const {string}
- */
-export const USER_ERROR_SENTINEL = '\u200B\u200B\u200B';
+export {USER_ERROR_SENTINEL};
 
 /**
  * Four zero width space.

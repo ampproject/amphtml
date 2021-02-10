@@ -16,7 +16,6 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs');
-const log = require('fancy-log');
 const {
   CDN_URL,
   CONTROL,
@@ -32,10 +31,11 @@ const {
   setupAnalyticsHandler,
   getAnalyticsMetrics,
 } = require('./analytics-handler');
-const {cyan, green} = require('ansi-colors');
+const {cyan, green} = require('kleur/colors');
+const {log} = require('../../common/logging');
 const {setupAdRequestHandler} = require('./ads-handler');
 
-// Require Puppeteer dynamically to prevent throwing error in Travis
+// Require Puppeteer dynamically to prevent throwing error during CI
 let puppeteer;
 
 function requirePuppeteer_() {
@@ -147,7 +147,6 @@ const readMetrics = (page) =>
       return entry ? entry.startTime : 0;
     }
 
-    const firstPaint = getMetric('first-paint');
     const firstContentfulPaint = getMetric('first-contentful-paint');
 
     function getMaxFirstInputDelay() {
@@ -165,16 +164,8 @@ const readMetrics = (page) =>
       return longest;
     }
 
-    function getTimeToInteractive() {
-      return Date.now() - window.measureStarted;
-    }
-
     return {
-      visible: getMetric('visible'),
-      firstPaint,
-      firstContentfulPaint,
       largestContentfulPaint: window.largestContentfulPaint,
-      timeToInteractive: getTimeToInteractive(),
       maxFirstInputDelay: getMaxFirstInputDelay(),
       cumulativeLayoutShift: window.cumulativeLayoutShift * 100,
     };

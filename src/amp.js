@@ -19,7 +19,7 @@
  */
 
 // src/polyfills.js must be the first import.
-import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
+import './polyfills';
 
 import {Services} from './services';
 import {TickLabel} from './enums';
@@ -150,7 +150,7 @@ if (shouldMainBootstrapRun) {
     ) {
       perf.addEnabledExperiment('no-boilerplate');
     }
-    if (getMode().esm) {
+    if (IS_ESM) {
       perf.addEnabledExperiment('esm');
     }
     fontStylesheetTimeout(self);
@@ -177,6 +177,10 @@ if (shouldMainBootstrapRun) {
       `Powered by AMP ⚡ HTML – Version ${internalRuntimeVersion()}`,
       self.location.href
     );
+  }
+  // This code is eleminated in prod build through a babel transformer.
+  if (getMode().localDev) {
+    self.document.documentElement.setAttribute('esm', IS_ESM ? 1 : 0);
   }
   self.document.documentElement.setAttribute(
     'amp-version',

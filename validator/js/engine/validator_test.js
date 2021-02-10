@@ -1492,7 +1492,7 @@ describe('ValidatorRulesMakeSense', () => {
         expect(specNameIsUnique.hasOwnProperty(tagSpec.specName)).toBe(false);
         specNameIsUnique[tagSpec.specName] = 0;
       } else if (tagSpec.extensionSpec !== null) {
-        const specName = tagSpec.extensionSpec.name + ' extension .js script';
+        const specName = tagSpec.extensionSpec.name + ' extension script';
 
         expect(specNameIsUnique.hasOwnProperty(specName)).toBe(false);
         specNameIsUnique[specName] = 0;
@@ -1524,7 +1524,7 @@ describe('ValidatorRulesMakeSense', () => {
       // AMP4ADS format lists approved extensions.
       // https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md#amp-extensions-and-builtins
       // Changes to the following map must be approved by the Ads Working
-      // Group, @wg-ads.
+      // Group, @wg-monetization.
       const approvedAmp4AdsExtensions = {
         'amp-accordion': ['0.1', 'latest'],
         'amp-ad-exit': ['0.1', 'latest'],
@@ -1564,7 +1564,7 @@ describe('ValidatorRulesMakeSense', () => {
           it(extension + ' has html_format either explicitly or implicitly' +
                  ' set for AMP4ADS but ' + extension + ' version ' + version +
                  ' is not approved for AMP4ADS. If this version is intended' +
-                 ' for AMP4ADS please get approval from @wg-ads and then' +
+                 ' for AMP4ADS please get approval from @wg-monetization and then' +
                  ' update this test. Otherwise remove the version for' +
                  ' AMP4ADS from the tagspec',
              () => {
@@ -1747,7 +1747,7 @@ describe('ValidatorRulesMakeSense', () => {
            // it's sufficiently wrapped in private context inside the validator
            // that I don't see a way to call it.  For now just gold the current
            // index.
-           expect(tagSpec.attrLists[0]).toEqual(20);
+           expect(tagSpec.attrLists[0]).toEqual(15);
          });
     }
 
@@ -1816,6 +1816,7 @@ describe('ValidatorRulesMakeSense', () => {
               tagSpec.cdata.cdataRegex !== null ||
               tagSpec.cdata.mandatoryCdata !== null ||
               tagSpec.cdata.maxBytes === -1 ||
+              tagSpec.cdata.whitespaceOnly !== null ||
               tagSpec.cdata.cssSpec.validateKeyframes)
               .toBe(true);
         });

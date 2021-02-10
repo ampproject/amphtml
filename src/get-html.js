@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import {startsWith} from './string';
-
 /** @type {!Array<string>} */
 const excludedTags = ['script', 'style'];
 
@@ -106,7 +104,7 @@ function appendToResult(node, attrs, result) {
 function isApplicableNode(node) {
   const tagName = node.tagName.toLowerCase();
 
-  if (startsWith(tagName, 'amp-')) {
+  if (tagName.startsWith('amp-')) {
     return !!(allowedAmpTags.includes(tagName) && node.textContent);
   } else {
     return !!(!excludedTags.includes(tagName) && node.textContent);

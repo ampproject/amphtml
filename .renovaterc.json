@@ -1,22 +1,21 @@
 {
   "extends": ["config:base"],
   "node": {
-    "supportPolicy": ["lts_active"]
+    "supportPolicy": ["lts_latest"]
   },
-  "statusCheckVerify": true,
   "ignorePaths": [],
 
   "commitMessagePrefix": "📦",
   "timezone": "America/Los_Angeles",
   "schedule": "after 12am every weekday",
 
-  "masterIssue": true,
+  "dependencyDashboard": true,
   "prBodyColumns": ["Package", "Update", "Type", "Change", "Package file"],
   "separateMinorPatch": true,
   "prBodyNotes": [
     "<details>",
     "<summary>How to resolve breaking changes</summary>",
-    "This PR may introduce breaking changes that require manual intervention. In such cases, you will need to check out this branch, fix the cause of the breakage, and commit the fix to ensure a green Travis build. To check out and update this PR, follow the steps below:",
+    "This PR may introduce breaking changes that require manual intervention. In such cases, you will need to check out this branch, fix the cause of the breakage, and commit the fix to ensure a green CI build. To check out and update this PR, follow the steps below:",
     "```sh\n# Check out the PR branch (these steps are from GitHub)\ngit checkout -b renovate-bot-{{{branchName}}} master\ngit pull https://github.com/renovate-bot/amphtml.git {{{branchName}}}\n\n# Directly make fixes and commit them\ngulp lint --fix # For lint errors in JS files\ngulp prettify --fix # For prettier errors in non-JS files\n# Edit source code in case of new compiler warnings / errors\n\n# Push the changes to the branch\ngit push git@github.com:renovate-bot/amphtml.git renovate-bot-{{{branchName}}}:{{{branchName}}}\n```",
     "</details>"
   ],
@@ -27,17 +26,7 @@
       "groupName": "subpackage devDependencies",
       "major": {
         "groupName": null,
-        "managerBranchPrefix": "subpackage-"
-      }
-    },
-    {
-      "paths": ["src/**"],
-      "labels": ["WG: runtime"],
-
-      "groupName": "runtime devDependencies",
-      "major": {
-        "groupName": null,
-        "managerBranchPrefix": "runtime-"
+        "additionalBranchPrefix": "subpackage-"
       }
     },
 
@@ -48,7 +37,7 @@
       "groupName": "build system devDependencies",
       "major": {
         "groupName": null,
-        "managerBranchPrefix": "build-system-"
+        "additionalBranchPrefix": "build-system-"
       }
     },
 
@@ -59,7 +48,7 @@
       "groupName": "validator devDependencies",
       "major": {
         "groupName": null,
-        "managerBranchPrefix": "validator-"
+        "additionalBranchPrefix": "validator-"
       }
     },
 
@@ -69,7 +58,7 @@
       "groupName": "core devDependencies",
       "major": {
         "groupName": null,
-        "managerBranchPrefix": "core-"
+        "additionalBranchPrefix": "core-"
       }
     },
 
@@ -79,7 +68,7 @@
       "groupName": "linting devDependencies",
       "major": {
         "groupName": null,
-        "managerBranchPrefix": "linting-"
+        "additionalBranchPrefix": "linting-"
       }
     },
 
@@ -89,14 +78,16 @@
       "groupName": "babel devDependencies",
       "major": {
         "groupName": null,
-        "managerBranchPrefix": "babel-"
+        "additionalBranchPrefix": "babel-"
       }
     },
 
     {
       "packagePatterns": ["renovate"],
       "depTypeList": ["devDependencies"],
-      "groupName": "Renovate Bot"
+      "groupName": "Renovate Bot",
+      "updateTypes": ["major", "minor"],
+      "extends": ["schedule:weekly"]
     },
 
     {
@@ -112,7 +103,7 @@
       "groupName": "ampproject devDependencies",
       "major": {
         "groupName": null,
-        "managerBranchPrefix": "ampproject-"
+        "additionalBranchPrefix": "ampproject-"
       }
     },
 
@@ -123,7 +114,7 @@
       "groupName": "ampproject dependencies",
       "major": {
         "groupName": null,
-        "managerBranchPrefix": "ampproject-"
+        "additionalBranchPrefix": "ampproject-"
       }
     }
   ]

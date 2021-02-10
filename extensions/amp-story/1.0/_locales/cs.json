@@ -1,0 +1,41 @@
+{
+  "2": {"string": "Klepněte na Další"},
+  "3": {"string": "Klepněte na Zpět"},
+  "4": {"string": "Odkaz se nepodařilo zkopírovat do schránky :("},
+  "5": {"string": "Odkaz byl zkopírován."},
+  "6": {"string": "E-mail"},
+  "7": {"string": "Facebook"},
+  "8": {"string": "Google+"},
+  "9": {"string": "Získat odkaz"},
+  "10": {"string": "LinkedIn"},
+  "11": {"string": "Pinterest"},
+  "12": {"string": "SMS"},
+  "14": {"string": "Tumblr"},
+  "15": {"string": "Twitter"},
+  "16": {"string": "WhatsApp"},
+  "18": {
+    "string": "Chcete-li tento prvek zobrazit, zvětšete výšku i šířku okna"
+  },
+  "19": {
+    "string": "Chcete-li tento obsah zobrazit, musíte povolit experiment s příběhem AMP"
+  },
+  "20": {"string": "Stránku je nejlepší zobrazit na výšku"},
+  "21": {"string": "Je nám líto, váš prohlížeč tento prvek zřejmě nepodporuje"},
+  "22": {"string": "Přijmout"},
+  "23": {"string": "Zamítnout"},
+  "25": {"string": "Zobrazit v původní doméně:"},
+  "26": {"string": "Další informace o výsledcích AMP"},
+  "27": {"string": "Přesto pokračovat"},
+  "28": {"string": "Změnit nastavení ochrany dat"},
+  "29": {"string": "Nastavení ochrany soukromí"},
+  "30": {"string": "Další ke čtení"},
+  "31": {"string": "Zvuk je vypnutý"},
+  "32": {"string": "Zvuk je zapnutý"},
+  "33": {"string": "Tato stránka nemá zvuk"},
+  "34": {"string": "Přehrát video"},
+  "35": {"string": "Přejet nahoru"},
+  "36": {"string": "Rozbalit Tweet"},
+  "37": {"string": "Chcete-li tuto položku zobrazit, zvětšete výšku okna"},
+  "38": {"string": "Chcete-li tento prvek zobrazit, zvětšete šířku okna"},
+  "63": {"string": "Line"}
+}

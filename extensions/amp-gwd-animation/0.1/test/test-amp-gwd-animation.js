@@ -25,7 +25,7 @@ import {
 import {GWD_PAGEDECK_ID, TAG, addAction} from '../amp-gwd-animation';
 import {Services} from '../../../../src/services';
 import {createCustomEvent} from '../../../../src/event-helper';
-import {getExistingServiceForDocInEmbedScope} from '../../../../src/service';
+import {getServiceForDocOrNull} from '../../../../src/service';
 
 describes.sandboxed('AMP GWD Animation', {}, () => {
   /**
@@ -40,7 +40,7 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
       element.setAttribute(attr, attrs[attr]);
     }
     root.body.appendChild(element);
-    return element.build().then(() => element);
+    return element.buildInternal().then(() => element);
   }
 
   /**
@@ -83,19 +83,14 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
           let element;
           let impl;
           let page1Elem;
-          let embed;
           let win;
           let doc;
           let runtime;
 
           beforeEach(() => {
             ampdoc = env.ampdoc;
-            embed = env.embed;
-            win = variant.ampdoc == 'fie' ? embed.win : ampdoc.win;
-            doc =
-              variant.ampdoc == 'fie'
-                ? embed.win.document
-                : ampdoc.getRootNode();
+            win = ampdoc.win;
+            doc = ampdoc.getRootNode();
 
             // Create a test amp-carousel GWD page deck.
             doc.body.innerHTML = `<amp-carousel id="pagedeck"
@@ -117,15 +112,16 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
               'timeline-event-prefix': 'tl_',
               'layout': 'nodisplay',
             };
-            return createGwdAnimationElement(doc, config).then((el) => {
-              element = el;
-              impl = element.implementation_;
-              runtime = getExistingServiceForDocInEmbedScope(
-                element,
-                GWD_SERVICE_NAME
-              );
-              page1Elem = doc.getElementById('page1');
-            });
+            return createGwdAnimationElement(doc, config)
+              .then((el) => {
+                element = el;
+                runtime = getServiceForDocOrNull(element, GWD_SERVICE_NAME);
+                page1Elem = doc.getElementById('page1');
+                return element.getImpl(false);
+              })
+              .then((aImpl) => {
+                impl = aImpl;
+              });
           });
 
           afterEach(() => {

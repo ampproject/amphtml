@@ -26,7 +26,7 @@ limitations under the License.
 
 # amp-form
 
-## Useage
+## Usage
 
 The `amp-form` extension allows you to create forms (`<form>`) to submit input fields in an AMP document. The `amp-form` extension also provides [polyfills](#polyfills) for some missing behaviors in browsers.
 
@@ -81,14 +81,37 @@ Before creating a `<form>`, you must include the required script for the `<amp-f
 
 #### Allowed
 
-- Other form-related elements, including: `<textarea>`, `<select>`, `<option>`, `<fieldset>`, `<label>`, `<input type=text>`, `<input type=submit>`, and so on.
-- `<input type=password>` and `<input type=file>` inside of `<form method=POST action-xhr>`.
-- [`amp-selector`](https://amp.dev/documentation/components/amp-selector)
+[filter formats="websites, ads"]
+
+-   Other form-related elements, including: `<textarea>`, `<select>`, `<option>`, `<fieldset>`, `<label>`, `<input type=text>`, `<input type=submit>`, and so on.
+-   `<input type=password>` and `<input type=file>` inside of `<form method=POST action-xhr>`.
+-   [`amp-selector`](https://amp.dev/documentation/components/amp-selector)
+
+[/filter]<!-- formats="websites, ads" -->
+
+[filter formats="email"]
+
+-   Other form-related elements, including: `<textarea>`, `<select>`, `<option>`, `<fieldset>`, `<label>`, `<input type=text>`, `<input type=submit>`, and so on.
+-   [`amp-selector`](https://amp.dev/documentation/components/amp-selector)
+
+[/filter]<!-- formats="email" -->
 
 #### Not Allowed
 
-- `<input type=button>`, `<input type=image>`
-- Most of the form-related attributes on inputs including: `form`, `formaction`, `formtarget`, `formmethod` and others.
+[filter formats="websites, ads"]
+
+-   `<input type=button>`, `<input type=image>`
+-   Most of the form-related attributes on inputs including: `form`, `formaction`, `formtarget`, `formmethod` and others.
+
+[/filter]<!-- formats="websites, ads" -->
+
+[filter formats="email"]
+
+-   `<input type=button>`, `<input type=image>`
+-   `<input type=password>` and `<input type=file>`
+-   Most of the form-related attributes on inputs including: `form`, `formaction`, `formtarget`, `formmethod` and others.
+
+[/filter]<!-- formats="email" -->
 
 (Relaxing some of these rules might be reconsidered in the future - [please let us know](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#suggestions-and-feature-requests) if you require these and provide use cases).
 
@@ -106,9 +129,9 @@ You can render success or error responses in your form by using [amp-mustache](.
 
 #### To render responses with templating:
 
-- Apply a response attribute to any descendent of the `<form>` element.
-- Render the response in the child element by including a template via `<template></template>` or `<script type="text/plain"></script>` tag inside it or by referencing a template with a `template="id_of_other_template"` attribute.
-- Provide a valid JSON object for responses to `submit-success` and `submit-error`. Both success and error responses should have a `Content-Type: application/json` header.
+-   Apply a response attribute to any descendant of the `<form>` element.
+-   Render the response in the child element by including a template via `<template></template>` or `<script type="text/plain"></script>` tag inside it or by referencing a template with a `template="id_of_other_template"` attribute.
+-   Provide a valid JSON object for responses to `submit-success` and `submit-error`. Both success and error responses should have a `Content-Type: application/json` header.
 
 [tip type="note"]
 When using `<amp-form>` in tandem with another templating AMP component, such as `<amp-list>`, note that templates may not nest in valid AMP documents. In this case a valid workaround is to provide the template by `id` via the `template` attribute. Learn more about [nested templates in `<amp-mustache>`](https://amp.dev/documentation/components/amp-mustache/#nested-templates).
@@ -194,9 +217,9 @@ See the [full example here](../../examples/forms.amp.html).
 
 ### To render a successful response with data binding
 
-- Use the [on attribute](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events) to bind the form _submit-success_ attribute to [`AMP.setState()`](<https://amp.dev/documentation/components/amp-bind#updating-state-with-amp.setstate()>).
-- Use the `event` property to capture the response data.
-- Add the state attribute to the desired element to bind the form response.
+-   Use the [on attribute](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events) to bind the form _submit-success_ attribute to [`AMP.setState()`](<https://amp.dev/documentation/components/amp-bind#updating-state-with-amp.setstate()>).
+-   Use the `event` property to capture the response data.
+-   Add the state attribute to the desired element to bind the form response.
 
 The following example demonstrates a form `submit-success` response with [`amp-bind`](../amp-bind/amp-bind.md):
 
@@ -463,6 +486,15 @@ Substitutions will happen on every subsequent submission. Read more about [varia
 
 [/filter]<!-- formats="websites, ads" -->
 
+### Autoexpand
+
+AMP Form provides an `autoexpand` attribute to `<textarea>` elements. This allows the textarea
+to expand and shrink to accomodate the user's rows of input, up to the field's maximum size. If the user manually resizes the field, the autoexpand behavior will be removed.
+
+```html
+<textarea autoexpand></textarea>
+```
+
 ### Polyfills
 
 The `amp-form` extension provide polyfills for behaviors and functionality missing from some browsers or being implemented in the next version of CSS.
@@ -483,13 +515,6 @@ The `amp-form` extension provides [classes](#classes-and-css-hooks) to polyfill 
 
 Regular expression matching is a common validation feature supported natively on most input elements, except for `<textarea>`. We polyfill this functionality and support the `pattern` attribute on `<textarea>` elements.
 
-AMP Form provides an `autoexpand` attribute to `<textarea>` elements. This allows the textarea
-to expand and shrink to accomodate the user's rows of input, up to the field's maximum size. If the user manually resizes the field, the autoexpand behavior will be removed.
-
-```html
-<textarea autoexpand></textarea>
-```
-
 ### Security considerations
 
 #### Protecting against XSRF
@@ -498,11 +523,11 @@ In addition to following the details in the [AMP CORS spec](https://amp.dev/docu
 
 In general, keep in mind the following points when accepting input from the user:
 
-- Only use POST for state changing requests.
-- Use non-XHR GET for navigational purposes only (e.g. search).
-  - Non-XHR GET requests are will not receive accurate origin/headers and backends won't be able to protect against XSRF with the above mechanism.
-  - In general, use XHR/non-XHR GET requests for navigational or information retrieval only.
-- Non-XHR POST requests are not allowed in AMP documents. This is due to inconsistencies of setting `Origin` header on these requests across browsers, and the complications supporting it would introduce in protecting against XSRF. This might be reconsidered and introduced later &mdash; please file an issue if you think this is needed.
+-   Only use POST for state changing requests.
+-   Use non-XHR GET for navigational purposes only (e.g. search).
+    -   Non-XHR GET requests are will not receive accurate origin/headers and backends won't be able to protect against XSRF with the above mechanism.
+    -   In general, use XHR/non-XHR GET requests for navigational or information retrieval only.
+-   Non-XHR POST requests are not allowed in AMP documents. This is due to inconsistencies of setting `Origin` header on these requests across browsers, and the complications supporting it would introduce in protecting against XSRF. This might be reconsidered and introduced later &mdash; please file an issue if you think this is needed.
 
 ## Attributes
 
@@ -516,16 +541,16 @@ Indicates where to display the form response after submitting the form. The valu
 
 Specifies a server endpoint to handle the form input. The value must be an `https` URL (absolute or relative) and must not be a link to a CDN.
 
-- For `method=GET`: use this attribute or [`action-xhr`](#action-xhr).
-- For `method=POST`: use the [`action-xhr`](#action-xhr) attribute.
+-   For `method=GET`: use this attribute or [`action-xhr`](#action-xhr).
+-   For `method=POST`: use the [`action-xhr`](#action-xhr) attribute.
 
 [tip type="note"]
-The `target` and `action` attributes are only used for non-xhr GET requests. The AMP runtime will use `action-xhr` to make the request and will ignore `action` and `target`. When `action-xhr` is not provided, AMP makes a GET request to the `action` endpoint and uses `target` to open a new window (if `_blank`). The AMP runtime might also fallback to using `action` and `target` in cases where the `amp-form` extension fails to load.
+The `target` and `action` attributes are only used for non-xhr GET requests. The AMP runtime will use `action-xhr` to make the request and will ignore `action` and `target`. When `action-xhr` is not provided, AMP makes a GET request to the `action` endpoint and uses `target` to open a new window (if `_blank`). The AMP runtime might also fall back to using `action` and `target` in cases where the `amp-form` extension fails to load.
 [/tip][/filter] <!-- formats="websites, ads" -->
 
 ### `action-xhr`
 
-Specifies a server endpoint to handle the form input and submit the form via XMLHttpRequest (XHR). An XHR request (sometimes called an AJAX request) is where the browser would make the request without a full load of the page or opening a new page. Browsers will send the request in the background using the [Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) when available and fallback to [XMLHttpRequest API](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest) for older browsers.
+Specifies a server endpoint to handle the form input and submit the form via XMLHttpRequest (XHR). An XHR request (sometimes called an AJAX request) is where the browser would make the request without a full load of the page or opening a new page. Browsers will send the request in the background using the [Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) when available and fall back to [XMLHttpRequest API](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest) for older browsers.
 
 {% call callout('Important', type='caution') %}
 Your XHR endpoint must implement the requirements for [CORS security](https://www.ampproject.org/docs/fundamentals/amp-cors-requests#cors-security-in-amp).
@@ -545,9 +570,9 @@ The enctype attribute specifies how form-data should be encoded before sending i
 
 Summary of enctype values:
 
-- `application/x-www-form-urlencoded` - Sets the encoding type to `application/x-www-form-urlencoded`.
-- `multipart/form-data` - Sets the encoding type to `multipart/form-data`.
-- `any value` or unspecified - Setting the `enctype` attribute to a value not specified above or not setting the attribute at all will result in the default encoding type of `multipart/form-data`.
+-   `application/x-www-form-urlencoded` - Sets the encoding type to `application/x-www-form-urlencoded`.
+-   `multipart/form-data` - Sets the encoding type to `multipart/form-data`.
+-   `any value` or unspecified - Setting the `enctype` attribute to a value not specified above or not setting the attribute at all will result in the default encoding type of `multipart/form-data`.
 
 ### `data-initialize-from-url`
 
@@ -569,9 +594,9 @@ Sample:
 
 Limitations:
 
-- Supported `<input>` types include `checkbox`, `color`, `date`, `datetime-local`, `email`, `hidden`, `month`, `number`, `radio`, `range`, `search`, `tel`, `text`, `time`, `url`, and `week`.
-- Fields that take advantage of [variable substitutions](#variable-substitutions) (fields with attribute `data-amp-replace`) are not supported.
-- This feature is not supported on AMP pages delivered by an [AMP cache](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/how_amp_pages_are_cached/). The `data-initialize-from-url` and `data-allow-initialization` attributes will not cause AMP validation failures, but the form fields will not be initialized from the URL.
+-   Supported `<input>` types include `checkbox`, `color`, `date`, `datetime-local`, `email`, `hidden`, `month`, `number`, `radio`, `range`, `search`, `tel`, `text`, `time`, `url`, and `week`.
+-   Fields that take advantage of [variable substitutions](#variable-substitutions) (fields with attribute `data-amp-replace`) are not supported.
+-   This feature is not supported on AMP pages delivered by an [AMP cache](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/how_amp_pages_are_cached/). The `data-initialize-from-url` and `data-allow-initialization` attributes will not cause AMP validation failures, but the form fields will not be initialized from the URL.
 
 ### `xssi-prefix`
 
@@ -600,10 +625,10 @@ See the [Custom Validation](#custom-validations) section for more details.
 
 The AMP for Email spec disallows the use of the following attributes on the AMP email format.
 
-- `action`
-- `name`
-- `target`
-- `verify-xhr`
+-   `action`
+-   `name`
+-   `target`
+-   `verify-xhr`
 
 [/filter]<!-- formats="email" -->
 
@@ -758,8 +783,8 @@ For example, the following form has one field:
 
 When the `amp-form-submit`, `amp-form-submit-success`, or `amp-form-submit-error` event fires, it generates the following variables containing the values that were specified in the form:
 
-- `formId`
-- `formFields[comment]`
+-   `formId`
+-   `formFields[comment]`
 
 [/filter]<!-- formats="websites, ads" -->
 
@@ -771,17 +796,17 @@ The `amp-form` extension provides classes and CSS hooks for publishers to style 
 
 The following classes can be used to indicate the state of the form submission:
 
-- `.amp-form-initial`
-- `.amp-form-verify`
-- `.amp-form-verify-error`
-- `.amp-form-submitting`
-- `.amp-form-submit-success`
-- `.amp-form-submit-error`
+-   `.amp-form-initial`
+-   `.amp-form-verify`
+-   `.amp-form-verify-error`
+-   `.amp-form-submitting`
+-   `.amp-form-submit-success`
+-   `.amp-form-submit-error`
 
 The following classes are a [polyfill for the user interaction pseudo classes](#user-interaction-pseudo-classes):
 
-- `.user-valid`
-- `.user-invalid`
+-   `.user-valid`
+-   `.user-invalid`
 
 Publishers can use these classes to style their inputs and fieldsets to be responsive to user actions (e.g., highlighting an invalid input with a red border after user blurs from it).
 

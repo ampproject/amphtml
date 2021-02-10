@@ -302,6 +302,11 @@ describe('BindValidator (allowUrlProperties=true)', () => {
         )
       ).to.be.false;
     });
+
+    it('should support <section> elements (from <amp-accordion>)', () => {
+      expect(val.canBind('SECTION', 'data-expand')).to.be.true;
+      expect(val.canBind('SECTION', 'expanded')).to.be.true;
+    });
   });
 });
 

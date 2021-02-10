@@ -21,10 +21,10 @@ Run `gulp get-zindex` to generate this file.
 | .i-amphtml-lbg                                                                                          | 2147483642 | extensions/amp-lightbox-gallery/0.1/amp-lightbox-gallery.css         |
 | amp-lightbox-gallery[i-amphtml-lbg-fade]                                                                | 2147483642 | extensions/amp-lightbox-gallery/0.1/amp-lightbox-gallery.css         |
 | amp-subscriptions-dialog                                                                                | 2147483641 | extensions/amp-subscriptions/0.1/amp-subscriptions.css               |
+| .i-amphtml-story-unsupported-browser-overlay                                                            | 20000001   | extensions/amp-story/1.0/amp-story-unsupported-browser-layer.css     |
+| .i-amphtml-story-no-rotation-overlay                                                                    | 20000000   | extensions/amp-story/1.0/amp-story-viewport-warning-layer.css        |
 | amp-story-education                                                                                     | 9999999    | extensions/amp-story-education/0.1/amp-story-education.css           |
 | [i-amphtml-vertical] .i-amphtml-story-page-description                                                  | 9999999    | extensions/amp-story/1.0/amp-story-vertical.css                      |
-| .i-amphtml-story-unsupported-browser-overlay                                                            | 200001     | extensions/amp-story/1.0/amp-story-unsupported-browser-layer.css     |
-| .i-amphtml-story-no-rotation-overlay                                                                    | 200000     | extensions/amp-story/1.0/amp-story-viewport-warning-layer.css        |
 | .i-amphtml-story-consent                                                                                | 100005     | extensions/amp-story/1.0/amp-story-consent.css                       |
 | amp-story-access[type=blocking]                                                                         | 100004     | extensions/amp-story/1.0/amp-story-access.css                        |
 | .i-amphtml-story-toast                                                                                  | 100004     | extensions/amp-story/1.0/amp-story.css                               |
@@ -33,10 +33,7 @@ Run `gulp get-zindex` to generate this file.
 | .i-amphtml-story-opacity-mask                                                                           | 100003     | extensions/amp-story/1.0/amp-story.css                               |
 | .i-amphtml-story-has-new-page-notification-container                                                    | 100002     | extensions/amp-story/1.0/amp-story-system-layer.css                  |
 | amp-story[standalone] .i-amphtml-story-developer-log                                                    | 100002     | extensions/amp-story/1.0/amp-story.css                               |
-| .i-amphtml-story-button-move                                                                            | 100002     | extensions/amp-story/1.0/pagination-buttons.css                      |
-| .i-amphtml-story-desktop-fullbleed .i-amphtml-story-button-container                                    | 100002     | extensions/amp-story/1.0/pagination-buttons.css                      |
-| .i-amphtml-story-desktop-panels .i-amphtml-story-button-container                                       | 100002     | extensions/amp-story/1.0/pagination-buttons.css                      |
-| .i-amphtml-story-page-sentinel                                                                          | 100002     | extensions/amp-story/1.0/pagination-buttons.css                      |
+| .i-amphtml-story-button-container                                                                       | 100002     | extensions/amp-story/1.0/pagination-buttons.css                      |
 | .i-amphtml-ad-overlay-container                                                                         | 100001     | extensions/amp-story-auto-ads/0.1/amp-story-auto-ads-ad-badge.css    |
 | .i-amphtml-story-bookend                                                                                | 100001     | extensions/amp-story/1.0/amp-story-bookend.css                       |
 | .i-amphtml-story-info-dialog                                                                            | 100001     | extensions/amp-story/1.0/amp-story-info-dialog.css                   |
@@ -44,6 +41,8 @@ Run `gulp get-zindex` to generate this file.
 | .i-amphtml-story-focused-state-layer                                                                    | 100001     | extensions/amp-story/1.0/amp-story-tooltip.css                       |
 | .i-amphtml-story-page-attachment-expand                                                                 | 100000     | extensions/amp-story/1.0/amp-story-page-attachment.css               |
 | .i-amphtml-story-system-layer                                                                           | 100000     | extensions/amp-story/1.0/amp-story-system-layer.css                  |
+| .i-amphtml-story-360-activate-button                                                                    | 100000     | extensions/amp-story-360.css                                         |
+| .i-amphtml-story-360-discovery                                                                          | 100000     | extensions/amp-story-360.css                                         |
 | .i-amphtml-story-page-error                                                                             | 10000      | extensions/amp-story/1.0/amp-story.css                               |
 | .i-amphtml-story-page-play-button                                                                       | 10000      | extensions/amp-story/1.0/amp-story.css                               |
 | .i-amphtml-image-lightbox-trans                                                                         | 1001       | extensions/amp-image-lightbox/0.1/amp-image-lightbox.css             |

@@ -4,7 +4,17 @@
 {
   rules: [
     {
-      owners: [{name: 'ampproject/wg-ui-and-a11y'}],
+      owners: [
+        {
+          name: 'ampproject/wg-components',
+        },
+        {
+          name: 'alanorozco',
+        },
+        {
+          name: 'gmajoulet',
+        },
+      ],
     },
   ],
 }

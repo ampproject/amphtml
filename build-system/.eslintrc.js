@@ -44,6 +44,7 @@ module.exports = {
     'local/no-function-generator': 0,
     'local/no-has-own-property-method': 0,
     'local/no-import-meta': 0,
+    'local/no-invalid-this': 0,
     'local/no-module-exports': 0,
     'local/no-rest': 0,
     'local/no-spread': 0,

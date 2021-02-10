@@ -25,6 +25,7 @@ import {
   ConsentStateManager,
 } from '../consent-state-manager';
 import {CONSENT_STRING_TYPE} from '../../../../src/consent-state';
+import {Services} from '../../../../src/services';
 import {dev} from '../../../../src/log';
 import {macroTask} from '../../../../testing/yield';
 import {
@@ -39,6 +40,8 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
   let storageGetSpy;
   let storageSetSpy;
   let storageRemoveSpy;
+  let usesViewer;
+
   beforeEach(() => {
     win = env.win;
     ampdoc = env.ampdoc;
@@ -46,6 +49,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
     storageGetSpy = env.sandbox.spy();
     storageSetSpy = env.sandbox.spy();
     storageRemoveSpy = env.sandbox.spy();
+    usesViewer = true;
 
     resetServiceForTesting(win, 'storage');
     registerServiceBuilder(win, 'storage', function () {
@@ -63,6 +67,9 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
           storageValue[name] = null;
           storageRemoveSpy(name);
           return Promise.resolve();
+        },
+        isViewerStorage: () => {
+          return usesViewer;
         },
       });
     });
@@ -259,6 +266,12 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
       instance = new ConsentInstance(ampdoc, 'test', {});
     });
 
+    it('instantiates storage with the top level document', async () => {
+      const spy = env.sandbox.stub(Services, 'storageForTopLevelDoc');
+      new ConsentInstance(ampdoc, 'test', {});
+      expect(spy.calledOnceWith(ampdoc)).to.be.true;
+    });
+
     describe('update', () => {
       describe('update value', () => {
         it('invalid consent state', function* () {
@@ -375,6 +388,22 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
           yield macroTask();
           expect(storageSetSpy).to.not.be.called;
           expect(storageRemoveSpy).to.be.calledOnce;
+        });
+
+        it('allows large consentInfo when not using viewer storage API', async () => {
+          usesViewer = false;
+          let testStr = 'a';
+          for (let i = 0; i < CONSENT_STORAGE_MAX - 62; i++) {
+            testStr += 'a';
+          }
+          instance.update(
+            CONSENT_ITEM_STATE.ACCEPTED,
+            testStr,
+            constructMetadata(CONSENT_STRING_TYPE.TCF_V1, '12345')
+          );
+          await macroTask();
+          expect(storageSetSpy).to.be.calledOnce;
+          expect(storageRemoveSpy).to.not.be.called;
         });
       });
 

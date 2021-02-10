@@ -237,10 +237,6 @@ event.index</pre></td>
     <th width="40%">Data</th>
   </tr>
   <tr>
-    <td><code>changeToLayoutContainer</code></td>
-    <td>Update's <code>amp-list</code>'s layout to <code>layout="CONTAINTER"</code> to allow <a href="../extensions/amp-list/amp-list.md#dynamic-resizing">dynamic resizing</a>.</td>
-  </tr>
-  <tr>
     <td><code>fetch-error</code>(low-trust)</td>
     <td>Fired when fetching data fails.</td>
     <td>None</td>
@@ -396,7 +392,8 @@ event.response</pre></td>
     <code>position</code> is optional. One of <code>top</code>, <code>center</code>
     or <code>bottom</code> (default <code>top</code>).
     Specifies the position of the element relative to the viewport after
-    scrolling.</td>
+    scrolling.<br>
+    As an accessibility best practice, pair this with a call to <code>focus()</code> to focus on the element being scrolled to.</td>
   </tr>
   <tr>
     <td><code>focus</code></td>
@@ -540,6 +537,10 @@ event.response</pre></td>
   <tr>
     <th>Action</th>
     <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>changeToLayoutContainer</code></td>
+    <td>Update's <code>amp-list</code>'s layout to <code>layout="CONTAINTER"</code> to allow <a href="../extensions/amp-list/amp-list.md#dynamic-resizing">dynamic resizing</a>.</td>
   </tr>
   <tr>
     <td><code>refresh</code></td>

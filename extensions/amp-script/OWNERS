@@ -4,10 +4,7 @@
 {
   rules: [
     {
-      owners: [
-        {name: 'ampproject/wg-runtime'},
-        {name: 'ampproject/wg-performance'},
-      ],
+      owners: [{name: 'ampproject/wg-performance'}],
     },
   ],
 }

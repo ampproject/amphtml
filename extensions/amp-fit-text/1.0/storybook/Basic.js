@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {FitText} from '../fit-text';
+import {FitText} from '../component';
 import {number, text, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 
@@ -26,7 +26,7 @@ export default {
 };
 
 export const _default = () => {
-  const minFontSize = number('minFontSize', 6);
+  const minFontSize = number('minFontSize', 35);
   const maxFontSize = number('maxFontSize', 72);
   const width = number('width', 300);
   const height = number('height', 200);

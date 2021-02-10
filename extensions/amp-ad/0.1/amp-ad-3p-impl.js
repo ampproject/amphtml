@@ -31,7 +31,7 @@ import {
 import {Services} from '../../../src/services';
 import {adConfig} from '../../../ads/_config';
 import {clamp} from '../../../src/utils/math';
-import {computedStyle, setStyle, setStyles} from '../../../src/style';
+import {computedStyle, setStyle} from '../../../src/style';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getAdCid} from '../../../src/ad-cid';
@@ -42,12 +42,22 @@ import {
   is3pThrottled,
 } from './concurrent-load';
 import {
+  getConsentMetadata,
   getConsentPolicyInfo,
   getConsentPolicySharedData,
   getConsentPolicyState,
 } from '../../../src/consent';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
+import {
+  intersectionEntryToJson,
+  measureIntersection,
+} from '../../../src/utils/intersection';
+import {isExperimentOn} from '../../../src/experiments';
 import {moveLayoutRect} from '../../../src/layout-rect';
+import {
+  observeWithSharedInOb,
+  unobserveWithSharedInOb,
+} from '../../../src/viewport-observer';
 import {toWin} from '../../../src/types';
 
 /** @const {string} Tag name for 3P AD implementation. */
@@ -108,6 +118,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
      * @visibleForTesting
      */
     this.unlistenViewportChanges_ = null;
+
+    /** @private {Array<Function>} */
+    this.unlisteners_ = [];
 
     /**
      * @private {IntersectionObserver}
@@ -201,8 +214,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     if (this.isFullWidthRequested_) {
       return this.attemptFullWidthSizeChange_();
     }
-
-    this.maybeSetStyleForSticky_();
   }
 
   /**
@@ -227,19 +238,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       '#${this.getResource().getId()} Full width requested'
     );
     return true;
-  }
-
-  /**
-   * Set sidekick ads
-   */
-  maybeSetStyleForSticky_() {
-    if (this.element.hasAttribute('sticky')) {
-      setStyles(this.element, {
-        position: 'fixed',
-        bottom: '0',
-        right: '0',
-      });
-    }
   }
 
   /**
@@ -361,7 +359,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       return this.layoutPromise_;
     }
     userAssert(
-      !this.isInFixedContainer_ || this.element.hasAttribute('sticky'),
+      !this.isInFixedContainer_ || this.uiHandler.isStickyAd(),
       '<amp-ad> is not allowed to be placed in elements with ' +
         'position:fixed: %s unless it has sticky attribute',
       this.element
@@ -372,55 +370,85 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     const consentStringPromise = consentPolicyId
       ? getConsentPolicyInfo(this.element, consentPolicyId)
       : Promise.resolve(null);
+    const consentMetadataPromise = consentPolicyId
+      ? getConsentMetadata(this.element, consentPolicyId)
+      : Promise.resolve(null);
     const sharedDataPromise = consentPolicyId
       ? getConsentPolicySharedData(this.element, consentPolicyId)
       : Promise.resolve(null);
+
+    // For sticky ad only: must wait for scrolling event before loading the ad
+    const scrollPromise = this.uiHandler.getScrollPromiseForStickyAd();
 
     this.layoutPromise_ = Promise.all([
       getAdCid(this),
       consentPromise,
       sharedDataPromise,
       consentStringPromise,
-    ]).then((consents) => {
-      // Use JsonObject to preserve field names so that ampContext can access
-      // values with name
-      // ampcontext.js and this file are compiled in different compilation unit
+      consentMetadataPromise,
+      scrollPromise,
+    ])
+      .then((consents) => {
+        this.uiHandler.maybeInitStickyAd();
 
-      // Note: Field names can by perserved by using JsonObject, or by adding
-      // perserved name to extern. We are doing both right now.
-      // Please also add new introduced variable
-      // name to the extern list.
-      const opt_context = dict({
-        'clientId': consents[0] || null,
-        'container': this.container_,
-        'initialConsentState': consents[1],
-        'consentSharedData': consents[2],
+        // Use JsonObject to preserve field names so that ampContext can access
+        // values with name
+        // ampcontext.js and this file are compiled in different compilation unit
+
+        // Note: Field names can by perserved by using JsonObject, or by adding
+        // perserved name to extern. We are doing both right now.
+        // Please also add new introduced variable
+        // name to the extern list.
+        const opt_context = dict({
+          'clientId': consents[0] || null,
+          'container': this.container_,
+          'initialConsentState': consents[1],
+          'consentSharedData': consents[2],
+          'initialConsentValue': consents[3],
+          'initialConsentMetadata': consents[4],
+        });
+
+        // In this path, the request and render start events are entangled,
+        // because both happen inside a cross-domain iframe.  Separating them
+        // here, though, allows us to measure the impact of ad throttling via
+        // incrementLoadingAds().
+        const asyncIntersection = isExperimentOn(
+          this.win,
+          'ads-initialIntersection'
+        );
+        const intersectionPromise = asyncIntersection
+          ? measureIntersection(this.element)
+          : Promise.resolve(this.element.getIntersectionChangeEntry());
+        return intersectionPromise.then((intersection) => {
+          const iframe = getIframe(
+            toWin(this.element.ownerDocument.defaultView),
+            this.element,
+            this.type_,
+            opt_context,
+            {
+              disallowCustom: this.config.remoteHTMLDisabled,
+              initialIntersection: intersectionEntryToJson(intersection),
+            }
+          );
+          iframe.title = this.element.title || 'Advertisement';
+          this.xOriginIframeHandler_ = new AmpAdXOriginIframeHandler(this);
+          return this.xOriginIframeHandler_.init(iframe);
+        });
+      })
+      .then(() => {
+        observeWithSharedInOb(this.element, (inViewport) =>
+          this.viewportCallback_(inViewport)
+        );
       });
-      opt_context['initialConsentValue'] = consents[3];
-
-      // In this path, the request and render start events are entangled,
-      // because both happen inside a cross-domain iframe.  Separating them
-      // here, though, allows us to measure the impact of ad throttling via
-      // incrementLoadingAds().
-      const iframe = getIframe(
-        toWin(this.element.ownerDocument.defaultView),
-        this.element,
-        this.type_,
-        opt_context,
-        {disallowCustom: this.config.remoteHTMLDisabled}
-      );
-      this.xOriginIframeHandler_ = new AmpAdXOriginIframeHandler(this);
-      return this.xOriginIframeHandler_.init(iframe);
-    });
     incrementLoadingAds(this.win, this.layoutPromise_);
     return this.layoutPromise_;
   }
 
   /**
    * @param {boolean} inViewport
-   * @override
+   * @private
    */
-  viewportCallback(inViewport) {
+  viewportCallback_(inViewport) {
     if (this.xOriginIframeHandler_) {
       this.xOriginIframeHandler_.viewportCallback(inViewport);
     }
@@ -428,32 +456,23 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /** @override */
   unlayoutOnPause() {
-    return (
-      !this.xOriginIframeHandler_ || !this.xOriginIframeHandler_.isPausable()
-    );
-  }
-
-  /** @override  */
-  pauseCallback() {
-    if (this.xOriginIframeHandler_) {
-      this.xOriginIframeHandler_.setPaused(true);
-    }
-  }
-
-  /** @override  */
-  resumeCallback() {
-    if (this.xOriginIframeHandler_) {
-      this.xOriginIframeHandler_.setPaused(false);
-    }
+    return true;
   }
 
   /** @override  */
   unlayoutCallback() {
+    this.unlisteners_.forEach((unlisten) => unlisten());
+    this.unlisteners_.length = 0;
+    unobserveWithSharedInOb(this.element);
+
     this.layoutPromise_ = null;
     this.uiHandler.applyUnlayoutUI();
     if (this.xOriginIframeHandler_) {
       this.xOriginIframeHandler_.freeXOriginIframe();
       this.xOriginIframeHandler_ = null;
+    }
+    if (this.uiHandler) {
+      this.uiHandler.cleanup();
     }
     return true;
   }

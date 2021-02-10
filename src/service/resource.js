@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import {Deferred, tryResolve} from '../utils/promise';
+import {Deferred} from '../utils/promise';
 import {Layout} from '../layout';
 import {Services} from '../services';
+import {cancellation, isBlockedByConsent, reportError} from '../error';
 import {computedStyle, toggle} from '../style';
 import {dev, devAssert} from '../log';
-import {isBlockedByConsent, reportError} from '../error';
 import {
   layoutRectLtwh,
   layoutRectSizeEquals,
+  layoutSizeFromRect,
   moveLayoutRect,
   rectsOverlap,
 } from '../layout-rect';
-import {startsWith} from '../string';
 import {toWin} from '../types';
 
 const TAG = 'Resource';
@@ -137,10 +137,10 @@ export class Resource {
     /** @private {number} */
     this.id_ = id;
 
-    /** @export @const {!AmpElement} */
+    /** @const {!AmpElement} */
     this.element = element;
 
-    /** @export @const {string} */
+    /** @const {string} */
     this.debugid = element.tagName.toLowerCase() + '#' + id;
 
     /** @const {!Window} */
@@ -176,6 +176,13 @@ export class Resource {
     /** @private {number} */
     this.layoutCount_ = 0;
 
+    /**
+     * Used to signal that the current layoutCallback has been aborted by an
+     * unlayoutCallback.
+     * @private {?AbortController}
+     */
+    this.abortController_ = null;
+
     /** @private {*} */
     this.lastLayoutError_ = null;
 
@@ -207,9 +214,6 @@ export class Resource {
      */
     this.pendingChangeSize_ = undefined;
 
-    /** @private {boolean} */
-    this.loadedOnce_ = false;
-
     const deferred = new Deferred();
 
     /** @private @const {!Promise} */
@@ -220,6 +224,10 @@ export class Resource {
 
     /** @const @private {boolean} */
     this.intersect_ = resources.isIntersectionExperimentOn();
+
+    // TODO(#30620): remove isInViewport_ and whenWithinViewport.
+    /** @const @private {boolean} */
+    this.isInViewport_ = false;
 
     /**
      * A client rect that was "premeasured" by an IntersectionObserver.
@@ -333,13 +341,19 @@ export class Resource {
       return null;
     }
     this.isBuilding_ = true;
-    return this.element.build().then(
+    return this.element.buildInternal().then(
       () => {
         this.isBuilding_ = false;
         // With IntersectionObserver, measure can happen before build
         // so check if we're "ready for layout" (measured and built) here.
         if (this.intersect_ && this.hasBeenMeasured()) {
           this.state_ = ResourceState.READY_FOR_LAYOUT;
+          // The InOb premeasurement couldn't account for fixed position since
+          // implementation wasn't loaded yet. Perform a remeasure now that we know it
+          // is fixed.
+          if (this.element.isAlwaysFixed() && !this.isFixed_) {
+            this.requestMeasure();
+          }
           this.element.onMeasure(/* sizeChanged */ true);
         } else {
           this.state_ = ResourceState.NOT_LAID_OUT;
@@ -364,13 +378,6 @@ export class Resource {
     if (!isBlockedByConsent(reason)) {
       dev().error(TAG, 'failed to build:', this.debugid, reason);
     }
-  }
-
-  /**
-   * Optionally hides or shows the element depending on the media query.
-   */
-  applySizesAndMediaQuery() {
-    this.element.applySizesAndMediaQuery();
   }
 
   /**
@@ -446,6 +453,12 @@ export class Resource {
     this.premeasuredRect_ = clientRect;
   }
 
+  /** Removes the premeasured rect, likely forcing a manual measure. */
+  invalidatePremeasurementAndRequestMeasure() {
+    this.premeasuredRect_ = null;
+    this.requestMeasure();
+  }
+
   /**
    * Measures the resource's boundaries. An upgraded element will be
    * transitioned to the "ready for layout" state.
@@ -464,7 +477,7 @@ export class Resource {
       this.element.parentElement &&
       // Use prefix to recognize AMP element. This is necessary because stub
       // may not be attached yet.
-      startsWith(this.element.parentElement.tagName, 'AMP-') &&
+      this.element.parentElement.tagName.startsWith('AMP-') &&
       !(RESOURCE_PROP_ in this.element.parentElement)
     ) {
       return;
@@ -485,10 +498,10 @@ export class Resource {
     const oldBox = this.layoutBox_;
     if (usePremeasuredRect) {
       this.computeMeasurements_(devAssert(this.premeasuredRect_));
-      this.premeasuredRect_ = null;
     } else {
       this.computeMeasurements_();
     }
+    this.premeasuredRect_ = null;
     const newBox = this.layoutBox_;
 
     // Note that "left" doesn't affect readiness for the layout.
@@ -519,6 +532,17 @@ export class Resource {
     }
 
     this.element.updateLayoutBox(newBox, sizeChanges);
+  }
+
+  /**
+   * Yields when the resource has been measured.
+   * @return {!Promise}
+   */
+  ensureMeasured() {
+    if (this.hasBeenMeasured()) {
+      return Promise.resolve();
+    }
+    return Services.vsyncFor(this.hostWin).measure(() => this.measure());
   }
 
   /**
@@ -623,6 +647,14 @@ export class Resource {
   }
 
   /**
+   * Returns a previously measured layout size.
+   * @return {!../layout-rect.LayoutSizeDef}
+   */
+  getLayoutSize() {
+    return layoutSizeFromRect(this.layoutBox_);
+  }
+
+  /**
    * Returns a previously measured layout box adjusted to the viewport. This
    * mainly affects fixed-position elements that are adjusted to be always
    * relative to the document position in the viewport.
@@ -642,31 +674,6 @@ export class Resource {
       viewport.getScrollLeft(),
       viewport.getScrollTop()
     );
-  }
-
-  /**
-   * Returns a previously measured layout box relative to the page. The
-   * fixed-position elements are relative to the top of the document.
-   * @return {!../layout-rect.LayoutRectDef}
-   */
-  getPageLayoutBox() {
-    return this.layoutBox_;
-  }
-
-  /**
-   * Returns the resource's layout box relative to the page. It will be
-   * measured if the resource hasn't ever be measured.
-   *
-   * @return {!Promise<!../layout-rect.LayoutRectDef>}
-   */
-  getPageLayoutBoxAsync() {
-    if (this.hasBeenMeasured()) {
-      return tryResolve(() => this.getPageLayoutBox());
-    }
-    return Services.vsyncFor(this.hostWin).measurePromise(() => {
-      this.measure();
-      return this.getPageLayoutBox();
-    });
   }
 
   /**
@@ -740,6 +747,8 @@ export class Resource {
    *    viewport range given.
    */
   whenWithinViewport(viewport) {
+    // TODO(#30620): remove this method once IntersectionObserver{root:doc} is
+    // polyfilled.
     devAssert(viewport !== false);
     // Resolve is already laid out or viewport is true.
     if (!this.isLayoutPending() || viewport === true) {
@@ -876,9 +885,13 @@ export class Resource {
    * Undoes `layoutScheduled`.
    */
   layoutCanceled() {
-    this.state_ = this.hasBeenMeasured()
-      ? ResourceState.READY_FOR_LAYOUT
-      : ResourceState.NOT_LAID_OUT;
+    if (this.intersect_) {
+      this.state_ = ResourceState.READY_FOR_LAYOUT;
+    } else {
+      this.state_ = this.hasBeenMeasured()
+        ? ResourceState.READY_FOR_LAYOUT
+        : ResourceState.NOT_LAID_OUT;
+    }
   }
 
   /**
@@ -932,36 +945,50 @@ export class Resource {
     dev().fine(TAG, 'start layout:', this.debugid, 'count:', this.layoutCount_);
     this.layoutCount_++;
     this.state_ = ResourceState.LAYOUT_SCHEDULED;
+    this.abortController_ = new AbortController();
+    const {signal} = this.abortController_;
 
     const promise = new Promise((resolve, reject) => {
       Services.vsyncFor(this.hostWin).mutate(() => {
+        let callbackResult;
         try {
-          resolve(this.element.layoutCallback());
+          callbackResult = this.element.layoutCallback(signal);
         } catch (e) {
           reject(e);
         }
+        Promise.resolve(callbackResult).then(resolve, reject);
       });
-    });
-
-    this.layoutPromise_ = promise.then(
-      () => this.layoutComplete_(true),
-      (reason) => this.layoutComplete_(false, reason)
+      signal.onabort = () => reject(cancellation());
+    }).then(
+      () => this.layoutComplete_(true, signal),
+      (reason) => this.layoutComplete_(false, signal, reason)
     );
-    return this.layoutPromise_;
+
+    return (this.layoutPromise_ = promise);
   }
 
   /**
    * @param {boolean} success
+   * @param {!AbortSignal} signal
    * @param {*=} opt_reason
    * @return {!Promise|undefined}
    */
-  layoutComplete_(success, opt_reason) {
+  layoutComplete_(success, signal, opt_reason) {
+    this.abortController_ = null;
+    if (signal.aborted) {
+      // We hit a race condition, where `layoutCallback` -> `unlayoutCallback`
+      // was called in quick succession. Since the unlayout was called before
+      // the layout completed, we want to remain in the unlayout state.
+      const err = dev().createError('layoutComplete race');
+      err.associatedElement = this.element;
+      dev().expectedError(TAG, err);
+      throw cancellation();
+    }
     if (this.loadPromiseResolve_) {
       this.loadPromiseResolve_();
       this.loadPromiseResolve_ = null;
     }
     this.layoutPromise_ = null;
-    this.loadedOnce_ = true;
     this.state_ = success
       ? ResourceState.LAYOUT_COMPLETE
       : ResourceState.LAYOUT_FAILED;
@@ -977,7 +1004,7 @@ export class Resource {
   /**
    * Returns true if the resource layout has not completed or failed.
    * @return {boolean}
-   * */
+   */
   isLayoutPending() {
     return (
       this.state_ != ResourceState.LAYOUT_COMPLETE &&
@@ -997,22 +1024,14 @@ export class Resource {
   }
 
   /**
-   * @return {boolean} true if the resource has been loaded at least once.
-   */
-  hasLoadedOnce() {
-    return this.loadedOnce_;
-  }
-
-  /**
    * Whether the resource is currently visible in the viewport.
    * @return {boolean}
    */
   isInViewport() {
-    const isInViewport = this.element.isInViewport();
-    if (isInViewport) {
+    if (this.isInViewport_) {
       this.resolveDeferredsWhenWithinViewports_();
     }
-    return isInViewport;
+    return this.isInViewport_;
   }
 
   /**
@@ -1020,7 +1039,7 @@ export class Resource {
    * @param {boolean} inViewport
    */
   setInViewport(inViewport) {
-    this.element.viewportCallback(inViewport);
+    this.isInViewport_ = inViewport;
   }
 
   /**
@@ -1030,9 +1049,14 @@ export class Resource {
   unlayout() {
     if (
       this.state_ == ResourceState.NOT_BUILT ||
-      this.state_ == ResourceState.NOT_LAID_OUT
+      this.state_ == ResourceState.NOT_LAID_OUT ||
+      this.state_ == ResourceState.READY_FOR_LAYOUT
     ) {
       return;
+    }
+    if (this.abortController_) {
+      this.abortController_.abort();
+      this.abortController_ = null;
     }
     this.setInViewport(false);
     if (this.element.unlayoutCallback()) {

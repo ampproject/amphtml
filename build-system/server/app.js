@@ -45,6 +45,7 @@ const {
   recaptchaRouter,
 } = require('./recaptcha-router');
 const {getServeMode} = require('./app-utils');
+const {logWithoutTimestamp} = require('../common/logging');
 const {renderShadowViewer} = require('./shadow-viewer');
 const {replaceUrls, isRtvMode} = require('./app-utils');
 
@@ -65,6 +66,9 @@ app.use('/amp4test', require('./amp4test').app);
 app.use('/analytics', require('./routes/analytics'));
 app.use('/list/', require('./routes/list'));
 app.use('/test', require('./routes/test'));
+if (argv.coverage) {
+  app.use('/coverage', require('istanbul-middleware').createHandler());
+}
 
 // Append ?csp=1 to the URL to turn on the CSP header.
 // TODO: shall we turn on CSP all the time?
@@ -153,7 +157,7 @@ app.get('/proxy', async (req, res, next) => {
     const proxyUrl = `${modePrefix}/proxy/s/${ampdocUrlSuffix}`;
     res.redirect(proxyUrl);
   } catch ({message}) {
-    console.log(`ERROR: ${message}`);
+    logWithoutTimestamp(`ERROR: ${message}`);
     next();
   }
 });
@@ -167,7 +171,7 @@ app.get('/proxy', async (req, res, next) => {
  */
 function requestAmphtmlDocUrl(urlSuffix, protocol = 'https') {
   const defaultUrl = `${protocol}://${urlSuffix}`;
-  console.log(`Fetching URL: ${defaultUrl}`);
+  logWithoutTimestamp(`Fetching URL: ${defaultUrl}`);
   return new Promise((resolve, reject) => {
     request(defaultUrl, (error, response, body) => {
       if (
@@ -486,7 +490,7 @@ function proxyToAmpProxy(req, res, mode) {
     'https://cdn.ampproject.org/' +
     (req.query['amp_js_v'] ? 'v' : 'c') +
     req.url;
-  console.log('Fetching URL: ' + url);
+  logWithoutTimestamp('Fetching URL: ' + url);
   request(url, function (error, response, body) {
     body = body
       // Unversion URLs.
@@ -552,7 +556,7 @@ app.use('/examples/live-list-update(-reverse)?.amp.html', (req, res, next) => {
   }
   if (!liveListDoc) {
     const liveListUpdateFullPath = `${pc.cwd()}${req.baseUrl}`;
-    console.log('liveListUpdateFullPath', liveListUpdateFullPath);
+    logWithoutTimestamp('liveListUpdateFullPath', liveListUpdateFullPath);
     const liveListFile = fs.readFileSync(liveListUpdateFullPath);
     liveListDoc = liveListDocs[req.baseUrl] = new jsdom.JSDOM(
       liveListFile
@@ -611,7 +615,7 @@ function liveListReplace(item) {
 
 function liveListInsert(liveList, node) {
   const iterCount = Math.floor(Math.random() * 2) + 1;
-  console.log(`inserting ${iterCount} item(s)`);
+  logWithoutTimestamp(`inserting ${iterCount} item(s)`);
   for (let i = 0; i < iterCount; i++) {
     const child = node.cloneNode(true);
     child.setAttribute('id', `list-item-${itemCtr++}`);
@@ -622,7 +626,7 @@ function liveListInsert(liveList, node) {
 
 function liveListTombstone(liveList) {
   const tombstoneId = Math.floor(Math.random() * itemCtr);
-  console.log(`trying to tombstone #list-item-${tombstoneId}`);
+  logWithoutTimestamp(`trying to tombstone #list-item-${tombstoneId}`);
   // We can tombstone any list item except item-1 since we always do a
   // replace example on item-1.
   if (tombstoneId != 1) {
@@ -789,6 +793,7 @@ app.post('/get-consent-v1/', (req, res) => {
   cors.assertCors(req, res, ['POST']);
   const body = {
     'promptIfUnknown': true,
+    'purposeConsentRequired': ['purpose-foo', 'purpose-bar'],
     'forcePromptOnNext': forcePromptOnNext,
     'sharedData': {
       'tfua': true,
@@ -818,11 +823,18 @@ app.post('/get-consent-no-prompt/', (req, res) => {
 
 app.post('/check-consent', (req, res) => {
   cors.assertCors(req, res, ['POST']);
-  res.json({
+  const response = {
     'consentRequired': req.query.consentRequired === 'true',
     'consentStateValue': req.query.consentStateValue,
+    'consentString': req.query.consentString,
     'expireCache': req.query.expireCache === 'true',
-  });
+  };
+  if (req.query.consentMetadata) {
+    response['consentMetadata'] = JSON.parse(
+      req.query.consentMetadata.replace(/'/g, '"')
+    );
+  }
+  res.json(response);
 });
 
 // Proxy with local JS.
@@ -908,7 +920,7 @@ app.get('/iframe-echo-message', (req, res) => {
  * <script async custom-element="amp-form"
  *    src="https://cdn.ampproject.org/v0/amp-form-0.1.js?sleep=5"></script>
  */
-app.use(['/dist/v0/amp-*.js', '/dist/amp*.js'], (req, res, next) => {
+app.use(['/dist/v0/amp-*.(m?js)', '/dist/amp*.(m?js)'], (req, res, next) => {
   const sleep = parseInt(req.query.sleep || 0, 10) * 1000;
   setTimeout(next, sleep);
 });
@@ -916,7 +928,7 @@ app.use(['/dist/v0/amp-*.js', '/dist/amp*.js'], (req, res, next) => {
 /**
  * Disable caching for extensions if the --no_caching_extensions flag is used.
  */
-app.get(['/dist/v0/amp-*.js'], (req, res, next) => {
+app.get(['/dist/v0/amp-*.(m?js)'], (req, res, next) => {
   if (argv.no_caching_extensions) {
     res.header('Cache-Control', 'no-store');
   }
@@ -940,6 +952,7 @@ app.get(
     const mode = SERVE_MODE;
     const inabox = req.query['inabox'];
     const stream = Number(req.query['stream']);
+    const componentVersion = req.query['componentVersion'];
     const urlPrefix = getUrlPrefix(req);
     fs.promises
       .readFile(pc.cwd() + filePath, 'utf8')
@@ -966,6 +979,9 @@ app.get(
             );
         }
         file = file.replace(/__TEST_SERVER_PORT__/g, TEST_SERVER_PORT);
+        if (componentVersion) {
+          file = file.replace(/-latest.js/g, `-${componentVersion}.js`);
+        }
 
         if (inabox && req.headers.origin) {
           // Allow CORS requests for A4A.
@@ -1195,11 +1211,17 @@ app.get('/adzerk/*', (req, res) => {
     });
 });
 
+app.get('/dist/*.mjs', (req, res, next) => {
+  // Allow CORS access control explicitly for mjs files
+  cors.enableCors(req, res);
+  next();
+});
+
 /*
  * Serve extension scripts and their source maps.
  */
 app.get(
-  ['/dist/rtv/*/v0/*.js', '/dist/rtv/*/v0/*.js.map'],
+  ['/dist/rtv/*/v0/*.(m?js)', '/dist/rtv/*/v0/*.(m?js).map'],
   (req, res, next) => {
     const mode = SERVE_MODE;
     const fileName = path.basename(req.path).replace('.max.', '.');
@@ -1219,7 +1241,7 @@ app.get(
     }
     const isJsMap = filePath.endsWith('.map');
     if (isJsMap) {
-      filePath = filePath.replace(/\.js\.map$/, '.js');
+      filePath = filePath.replace(/\.(m?js)\.map$/, '.$1');
     }
     filePath = replaceUrls(mode, filePath);
     req.url = filePath + (isJsMap ? '.map' : '');
@@ -1227,11 +1249,35 @@ app.get(
   }
 );
 
+if (argv.coverage === 'live') {
+  app.get('/dist/amp.js', async (req, res) => {
+    const ampJs = await fs.promises.readFile(`${pc.cwd()}${req.path}`);
+    res.setHeader('Content-Type', 'text/javascript');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    // Append an unload handler that reports coverage information each time you
+    // leave a page.
+    res.end(`${ampJs};
+window.addEventListener('beforeunload', (evt) => {
+  const COV_REPORT_URL = 'http://localhost:${TEST_SERVER_PORT}/coverage/client';
+  console.info('POSTing code coverage to', COV_REPORT_URL);
+
+  const xhr = new XMLHttpRequest();
+  xhr.open('POST', COV_REPORT_URL, true);
+  xhr.setRequestHeader('Content-type', 'application/json');
+  xhr.send(JSON.stringify(window.__coverage__));
+
+  // Required by Chrome
+  evt.returnValue = '';
+  return null;
+});`);
+  });
+}
+
 /**
  * Serve entry point script url
  */
 app.get(
-  ['/dist/sw.js', '/dist/sw-kill.js', '/dist/ww.js'],
+  ['/dist/sw.(m?js)', '/dist/sw-kill.(m?js)', '/dist/ww.(m?js)'],
   (req, res, next) => {
     // Special case for entry point script url. Use compiled for testing
     const mode = SERVE_MODE;
@@ -1251,18 +1297,18 @@ app.get(
       return;
     }
     if (mode == 'default') {
-      req.url = req.url.replace(/\.js$/, '.max.js');
+      req.url = req.url.replace(/\.(m?js)$/, '.max.$1');
     }
     next();
   }
 );
 
-app.get('/dist/iframe-transport-client-lib.js', (req, res, next) => {
+app.get('/dist/iframe-transport-client-lib.(m?js)', (req, res, next) => {
   req.url = req.url.replace(/dist/, 'dist.3p/current');
   next();
 });
 
-app.get('/dist/amp-inabox-host.js', (req, res, next) => {
+app.get('/dist/amp-inabox-host.(m?js)', (req, res, next) => {
   const mode = SERVE_MODE;
   if (mode != 'default') {
     req.url = req.url.replace('amp-inabox-host', 'amp4ads-host-v0');
@@ -1273,7 +1319,7 @@ app.get('/dist/amp-inabox-host.js', (req, res, next) => {
 /*
  * Start Cache SW LOCALDEV section
  */
-app.get('/dist/sw(.max)?.js', (req, res, next) => {
+app.get('/dist/sw(.max)?.(m?js)', (req, res, next) => {
   const filePath = req.path;
   fs.promises
     .readFile(pc.cwd() + filePath, 'utf8')
@@ -1298,14 +1344,14 @@ app.get('/dist/sw(.max)?.js', (req, res, next) => {
     .catch(next);
 });
 
-app.get('/dist/rtv/9[89]*/*.js', (req, res, next) => {
+app.get('/dist/rtv/9[89]*/*.(m?js)', (req, res, next) => {
   res.setHeader('Content-Type', 'application/javascript');
   res.setHeader('Date', new Date().toUTCString());
   res.setHeader('Cache-Control', 'no-cache;max-age=31536000');
 
   setTimeout(() => {
     // Cause a delay, to show the "stale-while-revalidate"
-    if (req.path.includes('v0.js')) {
+    if (req.path.includes('v0.js') || req.path.includes('v0.mjs')) {
       const path = req.path.replace(/rtv\/\d+/, '');
       return fs.promises
         .readFile(pc.cwd() + path, 'utf8')
@@ -1370,7 +1416,7 @@ app.get('/dist/diversions', (req, res) => {
 /**
  * Web worker binary.
  */
-app.get('/dist/ww(.max)?.js', (req, res) => {
+app.get('/dist/ww(.max)?.(m?js)', (req, res) => {
   fs.promises.readFile(pc.cwd() + req.path).then((file) => {
     res.setHeader('Content-Type', 'text/javascript');
     res.setHeader('Access-Control-Allow-Origin', '*');

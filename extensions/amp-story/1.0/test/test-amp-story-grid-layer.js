@@ -58,6 +58,8 @@ describes.realWin('amp-story-grid-layer', {amp: true}, (env) => {
 
     const story = win.document.createElement('amp-story');
     story.getImpl = () => Promise.resolve(mediaPoolRoot);
+    // Makes whenUpgradedToCustomElement() resolve immediately.
+    story.createdCallback = Promise.resolve();
 
     element = win.document.createElement('amp-story-page');
     gridLayerEl = win.document.createElement('amp-story-grid-layer');
@@ -123,5 +125,52 @@ describes.realWin('amp-story-grid-layer', {amp: true}, (env) => {
         10
       )
     ).to.equal(562);
+  });
+
+  it('should use the scaling factor to set the size of the layer', async () => {
+    gridLayerEl.setAttribute('aspect-ratio', '1:2');
+    gridLayerEl.setAttribute('scaling-factor', '1.5');
+    await buildGridLayer();
+
+    storeService.dispatch(Action.SET_PAGE_SIZE, {width: 1000, height: 1000});
+
+    expect(gridLayerEl).to.have.class('i-amphtml-story-grid-template-aspect');
+    expect(
+      parseInt(
+        gridLayerEl.style.getPropertyValue('--i-amphtml-story-layer-width'),
+        10
+      )
+    ).to.equal(750);
+    expect(
+      parseInt(
+        gridLayerEl.style.getPropertyValue('--i-amphtml-story-layer-height'),
+        10
+      )
+    ).to.equal(1500);
+  });
+
+  it('should apply the aspect-ratio attribute from the responsiveness preset', async () => {
+    gridLayerEl.setAttribute('preset', '2021-foreground');
+    await buildGridLayer();
+
+    storeService.dispatch(Action.SET_PAGE_SIZE, {width: 1000, height: 1000});
+
+    expect(gridLayerEl.getAttribute('aspect-ratio')).to.equal('69:116');
+  });
+
+  it('should use the responsiveness preset to change the layer aspect', async () => {
+    gridLayerEl.setAttribute('preset', '2021-foreground');
+    await buildGridLayer();
+
+    storeService.dispatch(Action.SET_PAGE_SIZE, {width: 1000, height: 1000});
+
+    expect(gridLayerEl).to.have.class('i-amphtml-story-grid-template-aspect');
+  });
+
+  it('should not add aspect-ratio attribute if preset passed is incorrect', async () => {
+    gridLayerEl.setAttribute('preset', 'wrong-preset');
+    await buildGridLayer();
+
+    expect(gridLayerEl.hasAttribute('aspect-ratio')).to.be.false;
   });
 });

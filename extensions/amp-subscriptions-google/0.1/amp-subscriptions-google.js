@@ -49,7 +49,6 @@ import {getValueForExpr} from '../../../src/json';
 import {installStylesForDoc} from '../../../src/style-installer';
 
 import {devAssert, user, userAssert} from '../../../src/log';
-import {startsWith} from '../../../src/string';
 
 const TAG = 'amp-subscriptions-google';
 const PLATFORM_ID = 'subscribe.google.com';
@@ -149,7 +148,7 @@ export class GoogleSubscriptionsPlatform {
     const ampExperimentsForSwg = Object.keys(experimentToggles(ampdoc.win))
       .filter(
         (exp) =>
-          startsWith(exp, 'swg-') && isExperimentOn(ampdoc.win, /*OK*/ exp)
+          exp.startsWith('swg-') && isExperimentOn(ampdoc.win, /*OK*/ exp)
       )
       .map((exp) => exp.substring(4));
 
@@ -186,14 +185,14 @@ export class GoogleSubscriptionsPlatform {
     this.runtime_.setOnLinkComplete(() => {
       this.onLinkComplete_();
       this.subscriptionAnalytics_.actionEvent(
-        this.getServiceId(),
+        this.getPlatformKey(),
         Action.LINK,
         ActionStatus.SUCCESS
       );
       // TODO(dvoytenko): deprecate separate "link" events.
       this.subscriptionAnalytics_.serviceEvent(
         SubscriptionAnalyticsEvents.LINK_COMPLETE,
-        this.getServiceId()
+        this.getPlatformKey()
       );
     });
     this.runtime_.setOnFlowStarted((e) => {
@@ -219,7 +218,7 @@ export class GoogleSubscriptionsPlatform {
         e.flow == Action.SHOW_OFFERS
       ) {
         this.subscriptionAnalytics_.actionEvent(
-          this.getServiceId(),
+          this.getPlatformKey(),
           e.flow,
           ActionStatus.STARTED,
           params
@@ -230,14 +229,14 @@ export class GoogleSubscriptionsPlatform {
       if (e.flow == 'linkAccount') {
         this.onLinkComplete_();
         this.subscriptionAnalytics_.actionEvent(
-          this.getServiceId(),
+          this.getPlatformKey(),
           Action.LINK,
           ActionStatus.REJECTED
         );
         // TODO(dvoytenko): deprecate separate "link" events.
         this.subscriptionAnalytics_.serviceEvent(
           SubscriptionAnalyticsEvents.LINK_CANCELED,
-          this.getServiceId()
+          this.getPlatformKey()
         );
       } else if (
         e.flow == Action.SUBSCRIBE ||
@@ -246,7 +245,7 @@ export class GoogleSubscriptionsPlatform {
         e.flow == Action.SHOW_OFFERS
       ) {
         this.subscriptionAnalytics_.actionEvent(
-          this.getServiceId(),
+          this.getPlatformKey(),
           e.flow,
           ActionStatus.REJECTED
         );
@@ -361,14 +360,14 @@ export class GoogleSubscriptionsPlatform {
     if (linkRequested && this.isGoogleViewer_) {
       this.loginWithAmpReaderId_();
       this.subscriptionAnalytics_.actionEvent(
-        this.getServiceId(),
+        this.getPlatformKey(),
         Action.LINK,
         ActionStatus.STARTED
       );
       // TODO(dvoytenko): deprecate separate "link" events.
       this.subscriptionAnalytics_.serviceEvent(
         SubscriptionAnalyticsEvents.LINK_REQUESTED,
-        this.getServiceId()
+        this.getPlatformKey()
       );
     } else {
       this.maybeComplete_(
@@ -489,7 +488,7 @@ export class GoogleSubscriptionsPlatform {
     });
 
     this.subscriptionAnalytics_.actionEvent(
-      this.getServiceId(),
+      this.getPlatformKey(),
       eventType,
       ActionStatus.SUCCESS,
       params
@@ -515,16 +514,18 @@ export class GoogleSubscriptionsPlatform {
     if (this.enableLAA_) {
       return this.viewerPromise_.getReferrerUrl().then((referrer) => {
         const parsedQuery = this.getLAAParams_();
+        const parsedReferrer = parseUrlDeprecated(referrer);
         if (
-          // Note we don't use the more generic this.isDev_ flag becuase that can ber triggered
-          // by a hash value which would allow non gooogle origins to construst LAA urls.
-          (GOOGLE_DOMAIN_RE.test(parseUrlDeprecated(referrer).origin) ||
+          // Note we don't use the more generic this.isDev_ flag because that can be triggered
+          // by a hash value which would allow non gooogle hostnames to construct LAA urls.
+          ((parsedReferrer.protocol === 'https:' &&
+            GOOGLE_DOMAIN_RE.test(parsedReferrer.hostname)) ||
             getMode(this.ampdoc_.win).localDev) &&
-          parsedQuery[`glaa_at`] == 'laa' &&
-          parsedQuery[`glaa_n`] &&
-          parsedQuery[`glaa_sig`] &&
-          parsedQuery[`glaa_ts`] &&
-          parseInt(parsedQuery[`glaa_ts`], 16) > Date.now() / 1000
+          parsedQuery[`gaa_at`] == 'la' &&
+          parsedQuery[`gaa_n`] &&
+          parsedQuery[`gaa_sig`] &&
+          parsedQuery[`gaa_ts`] &&
+          parseInt(parsedQuery[`gaa_ts`], 16) > Date.now() / 1000
         ) {
           // All the criteria are met to return an LAA entitlement
           return Promise.resolve(
@@ -573,50 +574,54 @@ export class GoogleSubscriptionsPlatform {
       if (!this.enableEntitlements_) {
         return null;
       }
-      return this.runtime_
-        .getEntitlements(encryptedDocumentKey)
-        .then((swgEntitlements) => {
-          // Get and store the isReadyToPay signal which is independent of
-          // any entitlments existing.
-          if (swgEntitlements.isReadyToPay) {
-            this.isReadyToPay_ = true;
-          }
+      let params = {};
+      if (encryptedDocumentKey) {
+        params = {
+          encryption: {encryptedDocumentKey},
+        };
+      }
+      return this.runtime_.getEntitlements(params).then((swgEntitlements) => {
+        // Get and store the isReadyToPay signal which is independent of
+        // any entitlments existing.
+        if (swgEntitlements.isReadyToPay) {
+          this.isReadyToPay_ = true;
+        }
 
-          // Get the specifc entitlement we're looking for
-          let swgEntitlement = swgEntitlements.getEntitlementForThis();
-          let granted = false;
-          if (swgEntitlement && swgEntitlement.source) {
-            granted = true;
-          } else if (
-            swgEntitlements.entitlements.length &&
-            swgEntitlements.entitlements[0].products.length
-          ) {
-            // We didn't find a grant so see if there is a non granting
-            // and return that. Note if we start returning multiple non
-            // granting we'll need to refactor to handle returning an
-            // array of Entitlement objects.
-            // #TODO(jpettitt) - refactor to handle multi entitlement case
-            swgEntitlement = swgEntitlements.entitlements[0];
-          } else {
-            return null;
-          }
-          swgEntitlements.ack();
-          return new Entitlement({
-            source: swgEntitlement.source,
-            raw: swgEntitlements.raw,
-            service: PLATFORM_ID,
-            granted,
-            // if it's granted it must be a subscriber
-            grantReason: granted ? GrantReason.SUBSCRIBER : null,
-            dataObject: swgEntitlement.json(),
-            decryptedDocumentKey: swgEntitlements.decryptedDocumentKey,
-          });
+        // Get the specifc entitlement we're looking for
+        let swgEntitlement = swgEntitlements.getEntitlementForThis();
+        let granted = false;
+        if (swgEntitlement && swgEntitlement.source) {
+          granted = true;
+        } else if (
+          swgEntitlements.entitlements.length &&
+          swgEntitlements.entitlements[0].products.length
+        ) {
+          // We didn't find a grant so see if there is a non granting
+          // and return that. Note if we start returning multiple non
+          // granting we'll need to refactor to handle returning an
+          // array of Entitlement objects.
+          // #TODO(jpettitt) - refactor to handle multi entitlement case
+          swgEntitlement = swgEntitlements.entitlements[0];
+        } else {
+          return null;
+        }
+        swgEntitlements.ack();
+        return new Entitlement({
+          source: swgEntitlement.source,
+          raw: swgEntitlements.raw,
+          service: PLATFORM_ID,
+          granted,
+          // if it's granted it must be a subscriber
+          grantReason: granted ? GrantReason.SUBSCRIBER : null,
+          dataObject: swgEntitlement.json(),
+          decryptedDocumentKey: swgEntitlements.decryptedDocumentKey,
         });
+      });
     });
   }
 
   /** @override */
-  getServiceId() {
+  getPlatformKey() {
     return PLATFORM_ID;
   }
 

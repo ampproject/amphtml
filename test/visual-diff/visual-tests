@@ -64,7 +64,7 @@
    *   "loading_complete_delay_ms": 1000,
    *
    *   // [optional, EXPERIMENTAL] Allow running "dirty" JavaScript code on
-   *   // on Percy in this AMP page. The code being executed *must* be inlined
+   *   // Percy in this AMP page. The code being executed *must* be inlined
    *   // inside a <script> tag, not be an externally loaded script via a
    *   // <script src="..."> tag.
    *   // The code *WILL BE EXECUTED TWICE*! Once locally, before the DOM is
@@ -236,7 +236,7 @@
       "loading_incomplete_selectors": ["amp-sidebar.i-amphtml-element"]
     },
     {
-      // TODO(#27455, @ampproject/wg-ads): see https://percy.io/ampproject/amphtml/builds/4672752
+      // TODO(#27455, @ampproject/wg-monetization): see https://percy.io/ampproject/amphtml/builds/4672752
       "flaky": true,
       "url": "examples/visual-tests/amp-sticky-ad/amp-sticky-ad.amp.html",
       "name": "AMP Sticky Ad",
@@ -295,6 +295,24 @@
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
         ".i-amphtml-story-grid-template-thirds"
+      ]
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-grid-layer-presets.html",
+      "name": "amp-story: Grid layer anchoring with preset (vertically)",
+      "viewport": {"width": 250, "height": 500},
+      "loading_complete_selectors": [
+        ".i-amphtml-story-loaded",
+        ".i-amphtml-story-grid-template-aspect"
+      ]
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-grid-layer-presets.html",
+      "name": "amp-story: Grid layer anchoring with preset (horizontally)",
+      "viewport": {"width": 400, "height": 500},
+      "loading_complete_selectors": [
+        ".i-amphtml-story-loaded",
+        ".i-amphtml-story-grid-template-aspect"
       ]
     },
     {
@@ -562,7 +580,7 @@
       ]
     },
     {
-      // TODO(#27453, @ampproject/wg-ads): disabled in #21935 because this test is not hermetic.
+      // TODO(#27453, @ampproject/wg-monetization): disabled in #21935 because this test is not hermetic.
       "flaky": true,
       "url": "examples/visual-tests/amp-inabox/amp-inabox-gpt.html",
       "name": "AMP Inabox GPT Ad",
@@ -724,6 +742,8 @@
       "no_base_test": true
     },
     {
+      // TODO(#28975, @ampproject/wg-monetization): see https://percy.io/ampproject/amphtml/builds-next/8494289/changed/482844300
+      "flaky": true,
       "url": "examples/visual-tests/amphtml-ads/amp-fie-static.html",
       "name": "amphtml-ads: friendly iframe static",
       "interactive_tests": "examples/visual-tests/amphtml-ads/static.js",
@@ -738,9 +758,6 @@
     {
       "url": "examples/visual-tests/amphtml-ads/amp-inabox-static.html",
       "name": "amphtml-ads: inabox static",
-      "loading_complete_selectors": [
-        ".view", ".activeview"
-      ],
       "interactive_tests": "examples/visual-tests/amphtml-ads/static.js",
       "no_base_test": true
     },
@@ -751,7 +768,7 @@
       "interactive_tests": "examples/visual-tests/amp-mega-menu/amp-mega-menu.js"
     },
     {
-      // TODO(#27454, @ampproject/wg-ui-and-a11y): see https://percy.io/ampproject/amphtml/builds/4672992/view/274790617/375?mode=diff&browser=firefox&snapshot=274790617
+      // TODO(#27454, @ampproject/wg-components): see https://percy.io/ampproject/amphtml/builds/4672992/view/274790617/375?mode=diff&browser=firefox&snapshot=274790617
       "flaky": true,
       "url": "examples/visual-tests/amp-mega-menu/amp-mega-menu-with-list.amp.html",
       "name": "amp-mega-menu: template render",
@@ -801,6 +818,28 @@
       "interactive_tests": "examples/visual-tests/amp-story-player/story-loaded.js",
       "loading_incomplete_selectors": [".i-amphtml-story-player-loading"],
       "no_base_test": true
+    },
+    {
+      "url": "examples/visual-tests/amp-carousel/amp-carousel.html",
+      "name": "amp-carousel",
+      "loading_complete_delay_ms": 2000,
+    },
+    {
+      "url": "examples/visual-tests/amp-carousel/amp-carousel-slides.html",
+      "name": "amp-carousel-slides",
+      "loading_complete_delay_ms": 2000,
+    },
+    {
+      "url": "examples/visual-tests/amp-story/basic-transformed.html",
+      "name": "amp-story: basic example transformed with toolbox-optimizer",
+      "viewport": {"width": 320, "height": 480},
+      "loading_complete_selectors": [".i-amphtml-story-loaded"]
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-360-image.html",
+      "name": "amp-story-360: 360 image rendering",
+      "viewport": {"width": 320, "height": 480},
+      "loading_complete_selectors": [".i-amphtml-story-360-loaded"]
     }
   ]
 }

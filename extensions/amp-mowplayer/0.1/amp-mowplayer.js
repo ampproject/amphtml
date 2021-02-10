@@ -28,6 +28,7 @@ import {
 import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
+  dispatchCustomEvent,
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
@@ -76,6 +77,12 @@ class AmpMowplayer extends AMP.BaseElement {
 
     /** @private {?Function} */
     this.unlistenMessage_ = null;
+
+    /**
+     * Prefix to embed URLs. Overridden on tests.
+     * @private @const {string}
+     */
+    this.baseUrl_ = 'https://mowplayer.com/watch/';
   }
 
   /**
@@ -92,11 +99,6 @@ class AmpMowplayer extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
-  }
-
-  /** @override */
-  viewportCallback(visible) {
-    this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
   }
 
   /** @override */
@@ -125,7 +127,7 @@ class AmpMowplayer extends AMP.BaseElement {
     }
 
     return (this.videoIframeSrc_ =
-      'https://mowplayer.com/watch/' + this.mediaid_);
+      this.baseUrl_ + encodeURIComponent(this.mediaid_));
   }
 
   /** @override */
@@ -140,7 +142,7 @@ class AmpMowplayer extends AMP.BaseElement {
     const loaded = this.loadPromise(this.iframe_).then(() => {
       // Tell mowplayer that we want to receive messages
       this.listenToFrame_();
-      this.element.dispatchCustomEvent(VideoEvents.LOAD);
+      dispatchCustomEvent(this.element, VideoEvents.LOAD);
     });
     this.playerReadyResolver_(loaded);
     return loaded;
@@ -249,7 +251,7 @@ class AmpMowplayer extends AMP.BaseElement {
         return;
       }
       this.muted_ = muted;
-      element.dispatchCustomEvent(mutedOrUnmutedEvent(this.muted_));
+      dispatchCustomEvent(element, mutedOrUnmutedEvent(this.muted_));
       return;
     }
   }

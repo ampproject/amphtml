@@ -17,16 +17,15 @@
 import {
   findElements,
   resetAllElements,
+  sleep,
   verifyElementsBuilt,
   verifyPromptsHidden,
 } from './common';
-import sleep from 'sleep-promise';
 
 describes.endtoend(
   'amp-consent',
   {
-    testUrl:
-      'http://localhost:8000/test/manual/amp-consent/amp-consent-basic-uses.amp.html#amp-geo=de',
+    fixture: 'amp-consent/amp-consent-basic-uses.amp.html#amp-geo=de',
     // TODO (micajuineho): Add shadow-demo after #25985 is fixed and viewer-demo when...
     environments: ['single'],
   },

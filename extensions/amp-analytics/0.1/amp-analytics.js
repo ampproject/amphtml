@@ -40,11 +40,9 @@ import {dict, hasOwn} from '../../../src/utils/object';
 import {expandTemplate} from '../../../src/string';
 import {getMode} from '../../../src/mode';
 import {installLinkerReaderService} from './linker-reader';
-import {isAnalyticsChunksExperimentOn} from './analytics-group';
 import {isArray, isEnumValue} from '../../../src/types';
 import {isIframed} from '../../../src/dom';
 import {isInFie} from '../../../src/iframe-helper';
-import {toggle} from '../../../src/style';
 
 const TAG = 'amp-analytics';
 
@@ -210,7 +208,6 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (this.iniPromise_) {
       return this.iniPromise_;
     }
-    toggle(this.element, false);
 
     this.iniPromise_ = this.getAmpDoc()
       .whenFirstVisible()
@@ -233,10 +230,11 @@ export class AmpAnalytics extends AMP.BaseElement {
           const configPromise = new AnalyticsConfig(this.element).loadConfig();
           loadConfigDeferred.resolve(configPromise);
         };
-        if (isAnalyticsChunksExperimentOn(this.win)) {
-          chunk(this.element, loadConfigTask, ChunkPriority.HIGH);
-        } else {
+        if (this.isInabox_) {
+          // Chunk in inabox ad leads to activeview regression, handle seperately
           loadConfigTask();
+        } else {
+          chunk(this.element, loadConfigTask, ChunkPriority.HIGH);
         }
         return loadConfigDeferred.promise;
       })
@@ -253,6 +251,9 @@ export class AmpAnalytics extends AMP.BaseElement {
       })
       .then(this.registerTriggers_.bind(this))
       .then(this.initializeLinker_.bind(this));
+    this.iniPromise_.then(() => {
+      this./*OK*/ collapse();
+    });
     return this.iniPromise_;
   }
 
@@ -416,7 +417,6 @@ export class AmpAnalytics extends AMP.BaseElement {
    * Calls `AnalyticsGroup.addTrigger` and reports any errors.
    * @param {!JsonObject} config
    * @private
-   * @noinline
    * @return {!Promise}
    */
   addTrigger_(config) {
@@ -585,10 +585,11 @@ export class AmpAnalytics extends AMP.BaseElement {
     const linkerTask = () => {
       this.linkerManager_.init();
     };
-    if (isAnalyticsChunksExperimentOn(this.win)) {
-      chunk(this.element, linkerTask, ChunkPriority.LOW);
-    } else {
+    if (this.isInabox_) {
+      // Chunk in inabox ad leads to activeview regression, handle seperately
       linkerTask();
+    } else {
+      chunk(this.element, linkerTask, ChunkPriority.LOW);
     }
   }
 
@@ -724,10 +725,11 @@ export class AmpAnalytics extends AMP.BaseElement {
           .then((digest) => digest * 100 < threshold);
         sampleDeferred.resolve(samplePromise);
       };
-      if (isAnalyticsChunksExperimentOn(this.win)) {
-        chunk(this.element, sampleInTask, ChunkPriority.LOW);
-      } else {
+      if (this.isInabox_) {
+        // Chunk in inabox ad leads to activeview regression, handle seperately
         sampleInTask();
+      } else {
+        chunk(this.element, sampleInTask, ChunkPriority.LOW);
       }
       return sampleDeferred.promise;
     }

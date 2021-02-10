@@ -20,21 +20,18 @@
 // Most other ad networks will want to put their A4A code entirely in the
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
-import '../../amp-a4a/0.1/real-time-config-manager';
+import '../../../src/service/real-time-config/real-time-config-impl';
 import {
   AmpA4A,
   ConsentTupleDef,
   DEFAULT_SAFEFRAME_VERSION,
-  NO_SIGNING_EXP,
   XORIGIN_MODE,
   assignAdUrlToError,
 } from '../../amp-a4a/0.1/amp-a4a';
 import {
   AmpAnalyticsConfigDef,
   QQID_HEADER,
-  RENDER_ON_IDLE_FIX_EXP,
   SANDBOX_HEADER,
-  STICKY_AD_PADDING_BOTTOM_EXP,
   ValidAdContainerTypes,
   addCsiSignalsToAmpAnalyticsConfig,
   extractAmpAnalyticsConfig,
@@ -42,6 +39,7 @@ import {
   getCsiAmpAnalyticsVariables,
   getEnclosingContainerTypes,
   getIdentityToken,
+  getServeNpaPromise,
   googleAdUrl,
   googleBlockParameters,
   googlePageParameters,
@@ -57,13 +55,15 @@ import {
   FlexibleAdSlotDataTypeDef,
   getFlexibleAdSlotData,
 } from './flexible-ad-slot-utils';
+import {INTERSECT_RESOURCES_EXP} from '../../../src/experiments/intersect-resources-exp';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Navigation} from '../../../src/service/navigation';
-import {RTC_VENDORS} from '../../amp-a4a/0.1/callout-vendors';
+import {RTC_VENDORS} from '../../../src/service/real-time-config/callout-vendors';
 import {
   RefreshManager, // eslint-disable-line no-unused-vars
   getRefreshManager,
 } from '../../amp-a4a/0.1/refresh-manager';
+import {STICKY_AD_TRANSITION_EXP} from '../../../ads/google/a4a/sticky-ad-transition-exp';
 import {SafeframeHostApi} from './safeframe-host';
 import {Services} from '../../../src/services';
 import {
@@ -73,6 +73,11 @@ import {
   sraBlockCallbackHandler,
 } from './sra-utils';
 import {WindowInterface} from '../../../src/window-interface';
+import {
+  addAmpExperimentIdToElement,
+  extractUrlExperimentId,
+  isInManualExperiment,
+} from '../../../ads/google/a4a/traffic-experiments';
 import {
   assertDoesNotContainDisplay,
   setImportantStyles,
@@ -88,24 +93,24 @@ import {dev, devAssert, user} from '../../../src/log';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {
-  extractUrlExperimentId,
-  isInManualExperiment,
-} from '../../../ads/google/a4a/traffic-experiments';
-import {
   getAmpAdRenderOutsideViewport,
   incrementLoadingAds,
   is3pThrottled,
   waitFor3pThrottle,
 } from '../../amp-ad/0.1/concurrent-load';
 import {getCryptoRandomBytesArray, utf8Decode} from '../../../src/utils/bytes';
-import {getMode} from '../../../src/mode';
-import {getMultiSizeDimensions} from '../../../ads/google/utils';
-import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {
+  getExperimentBranch,
   isExperimentOn,
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
+import {getMode} from '../../../src/mode';
+import {getMultiSizeDimensions} from '../../../ads/google/utils';
 
+import {getOrCreateAdCid} from '../../../src/ad-cid';
+
+import {AMP_SIGNATURE_HEADER} from '../../amp-a4a/0.1/signature-verifier';
+import {getPageLayoutBoxBlocking} from '../../../src/utils/page-layout-box';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {isArray} from '../../../src/types';
 import {isCancellation} from '../../../src/error';
@@ -144,6 +149,15 @@ const ZINDEX_EXP = 'zIndexExp';
 const ZINDEX_EXP_BRANCHES = {
   NO_ZINDEX: '21065356',
   HOLDBACK: '21065357',
+};
+
+/** @const {string} */
+const IDLE_CWV_EXP = 'dfp-render-on-idle-cwv-exp';
+
+/** @const @enum{string} */
+const IDLE_CWV_EXP_BRANCHES = {
+  CONTROL: '20208860',
+  EXPERIMENT: '20208859',
 };
 
 /**
@@ -215,6 +229,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @private {!../../../src/service/extensions-impl.Extensions} */
     this.extensions_ = Services.extensionsFor(this.win);
 
+    /** @private @const {?../../../src/service/performance-impl.Performance} */
+    this.performance_ = Services.performanceForOrNull(this.win);
+
     /** @private {?string} */
     this.qqid_ = null;
 
@@ -238,6 +255,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @type {!Array<string>} */
     this.experimentIds = [];
+
+    /** @type {!Array<string>} */
+    this.ampExperimentIds = [];
 
     /** @protected {boolean} */
     this.useSra = false;
@@ -332,6 +352,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
      * @private {boolean}
      */
     this.inZIndexHoldBack_ = false;
+
+    /**
+     * A signal from publishers to serve NPA through ad url.
+     * @private {boolean}
+     */
+    this.serveNpaSignal_ = false;
   }
 
   /**
@@ -353,7 +379,27 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       // holdback branch sends non-numeric value.
       return false;
     }
-    return vpRange || 12;
+
+    if (vpRange) {
+      return vpRange;
+    }
+
+    let fallbackRange = 12;
+    if (!this.performance_) {
+      return fallbackRange;
+    }
+
+    const idleCwvExpSelectedBranch = getExperimentBranch(
+      this.win,
+      IDLE_CWV_EXP
+    );
+    if (idleCwvExpSelectedBranch === IDLE_CWV_EXP_BRANCHES.CONTROL) {
+      this.performance_.addEnabledExperiment('dfp-idle-cwv-control');
+    } else if (idleCwvExpSelectedBranch === IDLE_CWV_EXP_BRANCHES.EXPERIMENT) {
+      fallbackRange = 3;
+      this.performance_.addEnabledExperiment('dfp-idle-cwv-exp');
+    }
+    return fallbackRange;
   }
 
   /** @override */
@@ -373,9 +419,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // being schedule due to being beyond viewport max offset.  If slot
     // comes within standard outside viewport range, then ensure throttling
     // will not be applied.
-    this.getResource()
-      .whenWithinViewport(renderOutsideViewport)
-      .then(() => (this.isIdleRender_ = false));
+    this.whenWithinViewport(renderOutsideViewport).then(
+      () => (this.isIdleRender_ = false)
+    );
     return vpRange;
   }
 
@@ -430,24 +476,21 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         branches: Object.values(ZINDEX_EXP_BRANCHES),
       },
       {
-        experimentId: RENDER_ON_IDLE_FIX_EXP.id,
-        isTrafficEligible: () => true,
-        branches: [
-          RENDER_ON_IDLE_FIX_EXP.control,
-          RENDER_ON_IDLE_FIX_EXP.experiment,
-        ],
+        experimentId: IDLE_CWV_EXP,
+        isTrafficEligible: () => {
+          return (
+            !!this.performance_ &&
+            !this.element.getAttribute('data-loading-strategy')
+          );
+        },
+        branches: Object.values(IDLE_CWV_EXP_BRANCHES),
       },
       {
-        experimentId: NO_SIGNING_EXP.id,
-        isTrafficEligible: () => true,
-        branches: [NO_SIGNING_EXP.control, NO_SIGNING_EXP.experiment],
-      },
-      {
-        experimentId: STICKY_AD_PADDING_BOTTOM_EXP.id,
+        experimentId: STICKY_AD_TRANSITION_EXP.id,
         isTrafficEligible: () => true,
         branches: [
-          STICKY_AD_PADDING_BOTTOM_EXP.control,
-          STICKY_AD_PADDING_BOTTOM_EXP.experiment,
+          STICKY_AD_TRANSITION_EXP.control,
+          STICKY_AD_TRANSITION_EXP.experiment,
         ],
       },
     ]);
@@ -458,6 +501,19 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const moduleNomoduleExpId = this.getModuleNomoduleExpIds_();
     if (moduleNomoduleExpId) {
       this.experimentIds.push(moduleNomoduleExpId);
+    }
+
+    const intersectResourcesExpId = getExperimentBranch(
+      this.win,
+      INTERSECT_RESOURCES_EXP.id
+    );
+    if (intersectResourcesExpId) {
+      this.experimentIds.push(intersectResourcesExpId);
+    }
+
+    const ssrExpIds = this.getSsrExpIds_();
+    for (let i = 0; i < ssrExpIds.length; i++) {
+      addAmpExperimentIdToElement(ssrExpIds[i], this.element);
     }
     if (setExps[ZINDEX_EXP] == ZINDEX_EXP_BRANCHES.HOLDBACK) {
       this.inZIndexHoldBack_ = true;
@@ -575,9 +631,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const {consentString, gdprApplies} = consentTuple;
 
     return {
+      'ptt': 13,
       'npa':
         consentTuple.consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
-        consentTuple.consentState == CONSENT_POLICY_STATE.UNKNOWN
+        consentTuple.consentState == CONSENT_POLICY_STATE.UNKNOWN ||
+        this.serveNpaSignal_
           ? 1
           : null,
       'gdfp_req': '1',
@@ -588,6 +646,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'gdpr': gdprApplies === true ? '1' : gdprApplies === false ? '0' : null,
       'gdpr_consent': consentString,
     };
+  }
+
+  /**
+   * @override
+   */
+  skipClientSideValidation(headers) {
+    return headers && !headers.has(AMP_SIGNATURE_HEADER);
   }
 
   /**
@@ -602,7 +667,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.ifi_ =
       (this.isRefreshing && this.ifi_) || this.win['ampAdGoogleIfiCounter']++;
     const pageLayoutBox = this.isSinglePageStoryAd
-      ? this.element.getPageLayoutBox()
+      ? getPageLayoutBoxBlocking(this.element)
       : null;
     let msz = null;
     let psz = null;
@@ -629,7 +694,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'adtest': isInManualExperiment(this.element) ? 'on' : null,
       'ifi': this.ifi_,
       'rc': this.refreshCount_ || null,
-      'frc': Number(this.fromResumeCallback) || null,
       'fluid': this.isFluidRequest_ ? 'height' : null,
       'fsf': this.forceSafeframe ? '1' : null,
       'msz': msz,
@@ -684,10 +748,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  getAdUrl(opt_consentTuple, opt_rtcResponsesPromise) {
+  getAdUrl(opt_consentTuple, opt_rtcResponsesPromise, opt_serveNpaSignal) {
     if (this.useSra) {
       this.sraDeferred = this.sraDeferred || new Deferred();
     }
+    this.serveNpaSignal_ = !!opt_serveNpaSignal;
     const consentTuple = opt_consentTuple || {};
     if (
       consentTuple.consentState == CONSENT_POLICY_STATE.UNKNOWN &&
@@ -726,19 +791,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       return this.mergeRtcResponses_(results);
     });
 
-    // TODO(#28555): Delete extra logic when 'expand-json-targeting' exp launches.
-    const isJsonTargetingExpOn = isExperimentOn(
-      this.win,
-      'expand-json-targeting'
-    );
-
-    const targetingExpansionPromise = isJsonTargetingExpOn
-      ? timerService
-          .timeoutPromise(1000, this.expandJsonTargeting_(rtcParamsPromise))
-          .catch(() => {
-            dev().warn(TAG, 'JSON Targeting expansion failed/timed out.');
-          })
-      : Promise.resolve();
+    const targetingExpansionPromise = timerService
+      .timeoutPromise(1000, this.expandJsonTargeting_(rtcParamsPromise))
+      .catch(() => {
+        dev().warn(TAG, 'JSON Targeting expansion failed/timed out.');
+      });
 
     Promise.all([
       rtcParamsPromise,
@@ -763,6 +820,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     });
     this.troubleshootData_.adUrl = this.getAdUrlDeferred.promise;
     return this.getAdUrlDeferred.promise;
+  }
+
+  /** @override */
+  getServeNpaSignal() {
+    return getServeNpaPromise(this.element);
   }
 
   /**
@@ -930,7 +992,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           return this.element.getAttribute(name);
         }
       },
-      ELEMENT_POS: () => this.element.getPageLayoutBox().top,
+      ELEMENT_POS: () => getPageLayoutBoxBlocking(this.element).top,
       SCROLL_TOP: () =>
         Services.viewportForDoc(this.getAmpDoc()).getScrollTop(),
       PAGE_HEIGHT: () =>
@@ -1158,8 +1220,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  viewportCallback(inViewport) {
-    super.viewportCallback(inViewport);
+  viewportCallbackTemp(inViewport) {
+    super.viewportCallbackTemp(inViewport);
     if (this.reattemptToExpandFluidCreative_ && !inViewport) {
       // If the initial expansion attempt failed (e.g., the slot was within the
       // viewport), then we will re-attempt to expand it here whenever the slot
@@ -1489,7 +1551,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       } else {
         // Must center creative within the viewport
         const viewportWidth = this.getViewport().getRect().width;
-        const pageLayoutBox = this.element.getPageLayoutBox();
+        const pageLayoutBox = getPageLayoutBoxBlocking(this.element);
         const whitespace = (viewportWidth - newWidth) / 2;
         if (isRtl) {
           style['margin-right'] = getMarginStr(

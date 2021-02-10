@@ -1105,13 +1105,13 @@ describes.sandboxed('DOM', {}, (env) => {
   describe('matches', () => {
     let div, img1, iframe, ampEl;
     beforeEach(() => {
-      ampEl = document.createElement('amp-ad');
+      ampEl = document.createElement('x-ad');
       ampEl.className = 'i-amphtml-element';
       ampEl.id = 'ampEl';
       iframe = document.createElement('iframe');
       div = document.createElement('div');
       div.id = 'div';
-      img1 = document.createElement('amp-img');
+      img1 = document.createElement('x-img');
       img1.id = 'img1';
       div.appendChild(img1);
       iframe.srcdoc = div.outerHTML;
@@ -1331,6 +1331,29 @@ describes.realWin(
         el.setAttribute('foo', 'asdf');
         dom.toggleAttribute(el, 'foo', true);
         expect(el.getAttribute('foo')).to.equal('asdf');
+      });
+    });
+
+    describe('parseBooleanAttribute', () => {
+      it('should return null for null/undefined', () => {
+        expect(dom.parseBooleanAttribute(null)).to.be.undefined;
+        expect(dom.parseBooleanAttribute(undefined)).to.be.undefined;
+      });
+
+      it('should return true for empty string', () => {
+        expect(dom.parseBooleanAttribute('')).to.be.true;
+      });
+
+      it('should return true for "true" string', () => {
+        expect(dom.parseBooleanAttribute('true')).to.be.true;
+      });
+
+      it('should return false for "false" string', () => {
+        expect(dom.parseBooleanAttribute('false')).to.be.false;
+      });
+
+      it('should return true for a random string', () => {
+        expect(dom.parseBooleanAttribute('a')).to.be.true;
       });
     });
   }

@@ -38,7 +38,6 @@ describes.sandboxed('amp-img', {}, (env) => {
 
     screenWidth = 320;
     windowWidth = 320;
-    sandbox.stub(BaseElement.prototype, 'isInViewport').returns(true);
     sandbox.stub(BaseElement.prototype, 'getViewport').callsFake(() => {
       return {
         getWidth: () => windowWidth,
@@ -69,60 +68,57 @@ describes.sandboxed('amp-img', {}, (env) => {
     return Promise.resolve(fixture.addElement(img));
   }
 
-  it('should load an img with more attributes', () => {
-    return getImg({
+  it('should load an img with more attributes', async () => {
+    const ampImg = await getImg({
       src: '/examples/img/sample.jpg',
       width: 300,
       height: 200,
       alt: 'An image',
       title: 'Image title',
       referrerpolicy: 'origin',
-    }).then((ampImg) => {
-      const img = ampImg.querySelector('img');
-      expect(img.tagName).to.equal('IMG');
-      expect(img.getAttribute('src')).to.equal('/examples/img/sample.jpg');
-      expect(ampImg.implementation_.getLayoutPriority()).to.equal(
-        LayoutPriority.CONTENT
-      );
-      expect(img.getAttribute('alt')).to.equal('An image');
-      expect(img.getAttribute('title')).to.equal('Image title');
-      expect(img.getAttribute('referrerpolicy')).to.equal('origin');
-      expect(img.getAttribute('decoding')).to.equal('async');
     });
+    const impl = await ampImg.getImpl(false);
+    expect(impl.getLayoutPriority()).to.equal(LayoutPriority.CONTENT);
+
+    const img = ampImg.querySelector('img');
+    expect(img.tagName).to.equal('IMG');
+    expect(img.getAttribute('src')).to.equal('/examples/img/sample.jpg');
+    expect(img.getAttribute('alt')).to.equal('An image');
+    expect(img.getAttribute('title')).to.equal('Image title');
+    expect(img.getAttribute('referrerpolicy')).to.equal('origin');
+    expect(img.getAttribute('decoding')).to.equal('async');
   });
 
-  it('should load an img', () => {
-    return getImg({
+  it('should load an img', async () => {
+    const ampImg = await getImg({
       src: '/examples/img/sample.jpg',
       width: 300,
       height: 200,
-    }).then((ampImg) => {
-      const img = ampImg.querySelector('img');
-      expect(img.tagName).to.equal('IMG');
-      expect(img.getAttribute('src')).to.equal('/examples/img/sample.jpg');
-      expect(ampImg.implementation_.getLayoutPriority()).to.equal(
-        LayoutPriority.CONTENT
-      );
     });
+    const impl = await ampImg.getImpl(false);
+    expect(impl.getLayoutPriority()).to.equal(LayoutPriority.CONTENT);
+
+    const img = ampImg.querySelector('img');
+    expect(img.tagName).to.equal('IMG');
+    expect(img.getAttribute('src')).to.equal('/examples/img/sample.jpg');
   });
 
-  it('should preconnect the src url', () => {
+  it('should preconnect the src url', async () => {
     const preconnect = {url: sandbox.stub()};
     sandbox.stub(Services, 'preconnectFor').returns(preconnect);
 
-    return getImg({
+    const ampImg = await getImg({
       src: '/examples/img/sample.jpg',
       width: 300,
       height: 200,
-    }).then((ampImg) => {
-      const impl = ampImg.implementation_;
-      impl.preconnectCallback(true);
-      expect(preconnect.url).to.be.called;
-      expect(preconnect.url).to.have.been.calledWith(
-        sandbox.match.object,
-        '/examples/img/sample.jpg'
-      );
     });
+    const impl = await ampImg.getImpl(false);
+    impl.preconnectCallback(true);
+    expect(preconnect.url).to.be.called;
+    expect(preconnect.url).to.have.been.calledWith(
+      sandbox.match.object,
+      '/examples/img/sample.jpg'
+    );
   });
 
   it('should load an img with srcset', () => {
@@ -140,23 +136,22 @@ describes.sandboxed('amp-img', {}, (env) => {
     });
   });
 
-  it('should preconnect to the the first srcset url if src is not set', () => {
+  it('should preconnect to the the first srcset url if src is not set', async () => {
     const preconnect = {url: sandbox.stub()};
     sandbox.stub(Services, 'preconnectFor').returns(preconnect);
 
-    return getImg({
+    const ampImg = await getImg({
       srcset: SRCSET_STRING,
       width: 300,
       height: 200,
-    }).then((ampImg) => {
-      const impl = ampImg.implementation_;
-      impl.preconnectCallback(true);
-      expect(preconnect.url).to.be.called;
-      expect(preconnect.url).to.have.been.calledWith(
-        sandbox.match.object,
-        '/examples/img/hero@1x.jpg'
-      );
     });
+    const impl = await ampImg.getImpl(false);
+    impl.preconnectCallback(true);
+    expect(preconnect.url).to.be.called;
+    expect(preconnect.url).to.have.been.calledWith(
+      sandbox.match.object,
+      '/examples/img/hero@1x.jpg'
+    );
   });
 
   it('should handle attribute mutations', async () => {
@@ -166,7 +161,7 @@ describes.sandboxed('amp-img', {}, (env) => {
       width: 300,
       height: 200,
     });
-    const impl = ampImg.implementation_;
+    const impl = await ampImg.getImpl(false);
 
     expect(impl.img_.hasAttribute('srcset')).to.be.true;
 
@@ -203,6 +198,20 @@ describes.sandboxed('amp-img', {}, (env) => {
     }).then((ampImg) => {
       const img = ampImg.querySelector('img');
       expect(img.getAttribute('data-foo')).to.equal('abc');
+    });
+  });
+
+  it('should not propagate bind attributes', () => {
+    return getImg({
+      src: '/examples/img/sample.jpg',
+      width: 320,
+      height: 240,
+      'data-amp-bind': 'abc',
+      'data-amp-bind-foo': '123',
+    }).then((ampImg) => {
+      const img = ampImg.querySelector('img');
+      expect(img.getAttribute('data-amp-bind')).to.equal('abc');
+      expect(img.getAttribute('data-amp-bind-foo')).to.be.null;
     });
   });
 
@@ -249,9 +258,8 @@ describes.sandboxed('amp-img', {}, (env) => {
       el.setAttribute('height', 100);
       el.getResources = () => Services.resourcesForDoc(document);
       el.getPlaceholder = sandbox.stub();
-      el.getLayoutWidth = () => 100;
+      el.getLayoutSize = () => ({width: 100, height: 100});
       impl = new AmpImg(el);
-      impl.createdCallback();
       el.toggleFallback = function () {};
       el.togglePlaceholder = function () {};
       toggleFallbackSpy = sandbox.spy(el, 'toggleFallback');
@@ -376,25 +384,12 @@ describes.sandboxed('amp-img', {}, (env) => {
     });
   });
 
-  it('should respect noprerender attribute', () => {
-    const el = document.createElement('amp-img');
-    el.setAttribute('src', 'test.jpg');
-    el.setAttribute('width', 100);
-    el.setAttribute('height', 100);
-    el.setAttribute('noprerender', '');
-    const impl = new AmpImg(el);
-    impl.firstAttachedCallback();
-    expect(impl.prerenderAllowed()).to.equal(false);
-  });
-
   it('should allow prerender by default', () => {
     const el = document.createElement('amp-img');
     el.setAttribute('src', 'test.jpg');
     el.setAttribute('width', 100);
     el.setAttribute('height', 100);
-    const impl = new AmpImg(el);
-    impl.buildCallback();
-    expect(impl.prerenderAllowed()).to.equal(true);
+    expect(AmpImg.prerenderAllowed(el)).to.equal(true);
   });
 
   it('should propagate ARIA attributes', () => {
@@ -405,7 +400,7 @@ describes.sandboxed('amp-img', {}, (env) => {
     el.setAttribute('aria-label', 'Hello');
     el.setAttribute('aria-labelledby', 'id2');
     el.setAttribute('aria-describedby', 'id3');
-    el.getLayoutWidth = () => -1;
+    el.getLayoutSize = () => ({width: 0, height: 0});
 
     el.getPlaceholder = sandbox.stub();
     const impl = new AmpImg(el);
@@ -504,7 +499,7 @@ describes.sandboxed('amp-img', {}, (env) => {
       if (addBlurClass) {
         img.classList.add('i-amphtml-blurry-placeholder');
       }
-      el.getLayoutWidth = () => 200;
+      el.getLayoutSize = () => ({width: 200, height: 100});
       el.appendChild(img);
       el.getResources = () => Services.resourcesForDoc(document);
       const impl = new AmpImg(el);
@@ -601,9 +596,8 @@ describes.sandboxed('amp-img', {}, (env) => {
       }
       el.getResources = () => Services.resourcesForDoc(document);
       el.getPlaceholder = sandbox.stub();
-      el.getLayoutWidth = () => layoutWidth;
+      el.getLayoutSize = () => ({width: layoutWidth, height: 100});
       const impl = new AmpImg(el);
-      impl.createdCallback();
       sandbox.stub(impl, 'getLayout').returns(attributes['layout']);
       el.toggleFallback = function () {};
       el.togglePlaceholder = function () {};
@@ -616,60 +610,45 @@ describes.sandboxed('amp-img', {}, (env) => {
       return impl;
     }
 
-    it('should not generate sizes for amp-imgs that already have sizes', () => {
-      let impl;
-      return getImg({
+    it('should not generate sizes for amp-imgs that already have sizes', async () => {
+      const ampImg = await getImg({
         src: '/examples/img/sample.jpg',
         srcset: SRCSET_STRING,
         sizes: '50vw',
         width: 300,
         height: 200,
-      })
-        .then((ampImg) => {
-          impl = ampImg.implementation_;
-          impl.buildCallback();
-          return impl.layoutCallback();
-        })
-        .then(() => {
-          const img = impl.img_;
-          expect(img.getAttribute('sizes')).to.equal('50vw');
-        });
+      });
+      const impl = await ampImg.getImpl(false);
+      impl.buildCallback();
+      await impl.layoutCallback();
+      const img = impl.img_;
+      expect(img.getAttribute('sizes')).to.equal('50vw');
     });
 
-    it('should not generate sizes for amp-imgs without srcset', () => {
-      let impl;
-      return getImg({
+    it('should not generate sizes for amp-imgs without srcset', async () => {
+      const ampImg = await getImg({
         src: '/examples/img/sample.jpg',
         width: 300,
         height: 200,
-      })
-        .then((ampImg) => {
-          impl = ampImg.implementation_;
-          impl.buildCallback();
-          return impl.layoutCallback();
-        })
-        .then(() => {
-          const img = impl.img_;
-          expect(img.getAttribute('sizes')).to.be.null;
-        });
+      });
+      const impl = await ampImg.getImpl(false);
+      impl.buildCallback();
+      await impl.layoutCallback();
+      const img = impl.img_;
+      expect(img.getAttribute('sizes')).to.be.null;
     });
 
-    it('should not generate sizes for amp-imgs with x descriptors', () => {
-      let impl;
-      return getImg({
+    it('should not generate sizes for amp-imgs with x descriptors', async () => {
+      const ampImg = await getImg({
         srcset: '/examples/img/hero@1x.jpg, /examples/img/hero@2x.jpg 2x',
         width: 300,
         height: 200,
-      })
-        .then((ampImg) => {
-          impl = ampImg.implementation_;
-          impl.buildCallback();
-          return impl.layoutCallback();
-        })
-        .then(() => {
-          const img = impl.img_;
-          expect(img.getAttribute('sizes')).to.be.null;
-        });
+      });
+      const impl = await ampImg.getImpl(false);
+      impl.buildCallback();
+      await impl.layoutCallback();
+      const img = impl.img_;
+      expect(img.getAttribute('sizes')).to.be.null;
     });
 
     it('should generate correct sizes for layout fixed', () => {

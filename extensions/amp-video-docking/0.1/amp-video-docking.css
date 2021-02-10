@@ -116,6 +116,7 @@
 
 .amp-video-docked-shadow {
   box-shadow: 0px 0 20px 6px rgba(0, 0, 0, 0.2);
+  transition-property: transform, opacity !important;
 }
 
 .amp-video-docked-controls-bg {
@@ -194,6 +195,9 @@
   transform-origin: left top !important;
 
   will-change: width, height, transition, transform, opacity;
+
+  /* Needs an arbitrary transition by default so browser won't glitch/jump. */
+  transition: 0.05s transform;
 }
 
 .i-amphtml-video-docked-overlay {

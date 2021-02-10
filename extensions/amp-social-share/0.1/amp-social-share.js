@@ -27,6 +27,11 @@ import {toggle} from '../../../src/style';
 const TAG = 'amp-social-share';
 
 class AmpSocialShare extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    return true;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -51,11 +56,6 @@ class AmpSocialShare extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported() {
-    return true;
-  }
-
-  /** @override */
-  prerenderAllowed() {
     return true;
   }
 
@@ -117,6 +117,9 @@ class AmpSocialShare extends AMP.BaseElement {
     element.setAttribute('role', 'button');
     if (!element.hasAttribute('tabindex')) {
       element.setAttribute('tabindex', '0');
+    }
+    if (!element.getAttribute('aria-label')) {
+      element.setAttribute('aria-label', `Share by ${typeAttr}`);
     }
     element.addEventListener('click', () => this.handleClick_());
     element.addEventListener('keydown', this.handleKeyPress_.bind(this));
@@ -197,7 +200,9 @@ class AmpSocialShare extends AMP.BaseElement {
       devAssert(navigator.share);
       const dataStr = href.substr(href.indexOf('?'));
       const data = parseQueryString(dataStr);
-      navigator.share(data).catch((e) => {
+      // Spreading data into an Object since Chrome uses the Object prototype.
+      // TODO:(crbug.com/1123689): Remove this workaround once WebKit fix is released.
+      navigator.share({...data}).catch((e) => {
         user().warn(TAG, e.message, dataStr);
       });
     } else {

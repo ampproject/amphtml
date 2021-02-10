@@ -1,4 +1,7 @@
-var _classes = JSON.parse("{\"button\":\"button-0-2-1\",\"CSS\":\".button-0-2-1 {\\n  font-size: 12px;\\n}\"}");
+/** @enum {string}*/
+var _classes = {
+  button: "button-21aa4a8"
+};
 
 /**
  * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
@@ -21,3 +24,4 @@ const JSS = {
   }
 };
 export const useStyles = () => _classes;
+export const CSS = ".button-21aa4a8{font-size:12px}";

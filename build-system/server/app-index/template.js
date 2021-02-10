@@ -15,7 +15,6 @@
  */
 
 /* eslint-disable local/html-template */
-/* eslint-disable indent */
 
 'use strict';
 
@@ -28,9 +27,7 @@ const {SettingsModal, SettingsOpenButton} = require('./settings');
 
 const HeaderLink = ({name, href, divider}) => html`
   <li class="${divider ? 'divider' : ''}">
-    <a target="_blank" rel="noopener noreferrer" href="${href}">
-      ${name}
-    </a>
+    <a target="_blank" rel="noopener noreferrer" href="${href}"> ${name} </a>
   </li>
 `;
 

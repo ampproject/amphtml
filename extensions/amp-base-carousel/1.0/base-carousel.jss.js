@@ -16,12 +16,12 @@
 
 import {createUseStyles} from 'react-jss';
 
+const carousel = {
+  overscrollBehavior: 'contain',
+};
+
 const scrollContainer = {
-  position: 'absolute',
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
+  position: 'relative',
   boxSizing: 'content-box !important',
   width: '100%',
   height: '100%',
@@ -29,6 +29,7 @@ const scrollContainer = {
 
   display: 'flex',
   flexWrap: 'nowrap',
+  flexGrow: 1,
 
   scrollBehavior: 'smooth',
   WebkitOverflowScrolling: 'touch',
@@ -40,10 +41,19 @@ const horizontalScroll = {
   scrollSnapType: 'x mandatory',
   overflowX: 'auto',
   overflowY: 'hidden',
+  touchAction: 'pan-x pinch-zoom',
   // Hide scrollbar.
-  '&.$hideScrollbar': {
+  '&$hideScrollbar': {
     paddingBottom: '20px',
   },
+};
+
+const verticalScroll = {
+  flexDirection: 'column',
+  scrollSnapTypeY: 'mandatory', // Firefox/IE
+  scrollSnapType: 'y mandatory',
+  overflowX: 'hidden',
+  touchAction: 'pan-y pinch-zoom',
 };
 
 /*
@@ -64,8 +74,6 @@ const hideScrollbar = {
   scrollbarWidth: 'none',
 
   boxSizing: '',
-  height: '100%',
-  paddingBottom: '20px',
 
   // Chrome, Safari
   '&::-webkit-scrollbar': {
@@ -75,16 +83,32 @@ const hideScrollbar = {
 };
 
 const slideElement = {
-  flex: '0 0 100%',
-  height: '100%',
   position: 'relative',
   overflow: 'hidden',
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
   justifyContent: 'center',
-  scrollSnapAlign: 'start',
+};
+
+const startAlign = {};
+
+const centerAlign = {};
+
+const enableSnap = {
   scrollSnapStop: 'always',
+  '&$startAlign': {
+    scrollSnapAlign: 'start',
+  },
+  '&$centerAlign': {
+    scrollSnapAlign: 'center',
+  },
+};
+
+const disableSnap = {
+  scrollSnapStop: 'none',
+  scrollSnapAlign: 'none',
+  scrollSnapCoordinate: 'none',
 };
 
 /** Slides only have one child */
@@ -99,25 +123,78 @@ const slideSizing = {
   '& > ::slotted(*)': {
     width: '100%',
   },
+  '&$thumbnails': {
+    padding: '0px 4px',
+  },
 };
 
-const arrowPlacement = {
-  position: 'absolute',
+const thumbnails = {};
+
+const arrow = {
   zIndex: 1,
   display: 'flex',
   flexDirection: 'row',
   justifyContent: 'space-between',
   // Center the button vertically.
   top: '50%',
+  alignItems: 'center',
+  pointerEvents: 'auto',
+  '&$ltr': {
+    transform: 'translateY(-50%)',
+  },
+  '&$rtl': {
+    transform: 'scaleX(-1) translateY(-50%)',
+  },
+  '&$arrowPrev$ltr, &$arrowNext$rtl': {
+    left: 0,
+  },
+  '&$arrowNext$ltr, &$arrowPrev$rtl': {
+    right: 0,
+  },
+};
+
+const rtl = {};
+
+const ltr = {};
+
+const arrowPrev = {};
+
+const arrowNext = {};
+
+const arrowDisabled = {
+  pointerEvents: 'none',
+  '&$insetArrow': {
+    opacity: 0,
+  },
+  '&$outsetArrow': {
+    opacity: 0.5,
+  },
+};
+
+const insetArrow = {
+  position: 'absolute',
+  padding: '12px',
+};
+
+const outsetArrow = {
+  position: 'relative',
+  flexShrink: 0,
+  height: '100%',
+  borderRadius: '50%',
+  backgroundSize: '24px 24px',
+  // Center the button vertically.
+  top: '50%',
   transform: 'translateY(-50%)',
   alignItems: 'center',
   pointerEvents: 'auto',
-};
-const arrowPrev = {left: 0};
-const arrowNext = {right: 0};
-const arrowDisabled = {
-  opacity: 0,
-  pointerEvents: 'none',
+  '&$arrowPrev': {
+    marginInlineStart: '4px',
+    marginInlineEnd: '10px',
+  },
+  '&$arrowNext': {
+    marginInlineStart: '10px',
+    marginInlineEnd: '4px',
+  },
 };
 
 const defaultArrowButton = {
@@ -128,25 +205,29 @@ const defaultArrowButton = {
   width: '36px',
   height: '36px',
   padding: 0,
-  margin: '12px',
   backgroundColor: 'transparent',
   border: 'none',
   outline: 'none',
   stroke: 'currentColor',
   transition: '200ms stroke',
   color: '#FFF',
-  '&:hover': {
+  '&:hover:not([disabled])': {
     color: '#222',
   },
-  '&:active': {
+  '&:active:not([disabled])': {
     transitionDuration: '0ms',
   },
-  '&:hover $arrowBackground': {
+  '&:hover:not([disabled]) $arrowBackground': {
     backgroundColor: 'rgba(255, 255, 255, 0.8)',
   },
-  '&:active $arrowBackground': {
+  '&:active:not([disabled]) $arrowBackground': {
     backgroundColor: 'rgba(255, 255, 255, 1.0)',
     transitionDuration: '0ms',
+  },
+  '&:focus': {
+    border: '1px black solid',
+    borderRadius: '50%',
+    boxShadow: '0 0 0 1pt white',
   },
 };
 
@@ -182,15 +263,26 @@ const arrowIcon = {
 };
 
 const JSS = {
+  carousel,
   scrollContainer,
   hideScrollbar,
   horizontalScroll,
+  verticalScroll,
   slideElement,
+  thumbnails,
+  startAlign,
+  centerAlign,
+  enableSnap,
+  disableSnap,
   slideSizing,
-  arrowPlacement,
+  arrow,
+  ltr,
+  rtl,
   arrowPrev,
   arrowNext,
   arrowDisabled,
+  insetArrow,
+  outsetArrow,
   defaultArrowButton,
   arrowBaseStyle,
   arrowFrosting,

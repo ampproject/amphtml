@@ -148,12 +148,12 @@ function getSrMacros(interactionModel, campaignId, apesterElement, consentObj) {
     'param1': interactionId,
     'param2': publisherId,
     'param6': campaignId,
-    'page_url': pageUrl, // eslint-disable-line google-camelcase/google-camelcase
+    'page_url': pageUrl,
   });
 
   if (consentObj['gdpr']) {
     macros['gdpr'] = consentObj['gdpr'];
-    macros['user_consent'] = consentObj['user_consent']; // eslint-disable-line google-camelcase/google-camelcase
+    macros['user_consent'] = consentObj['user_consent'];
     macros['param4'] = consentObj['gdprString'];
   }
 

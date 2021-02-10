@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {adplugg} from '../../../ads/adplugg';
+import {adplugg} from '../../../ads/vendors/adplugg';
 import {createIframePromise} from '../../../testing/iframe';
 
 describes.fakeWin('amp-ad-adplugg-impl', {}, (env) => {
@@ -36,8 +36,6 @@ describes.fakeWin('amp-ad-adplugg-impl', {}, (env) => {
           },
         },
         requestResize() {},
-        onResizeSuccess() {},
-        onResizeDenied() {},
         renderStart() {},
         noContentAvailable() {},
         referrer: null,

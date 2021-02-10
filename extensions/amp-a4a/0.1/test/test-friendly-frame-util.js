@@ -25,12 +25,18 @@ const realWinConfig = {
 describes.realWin('FriendlyFrameUtil', realWinConfig, (env) => {
   const minifiedCreative = '<p>Hello, World!</p>';
 
+  let window, document;
   let containerElement;
   let renderPromise;
 
   beforeEach(() => {
+    window = env.win;
+    document = window.document;
+
     containerElement = document.createElement('div');
     containerElement.signals = () => ({
+      signal: () => {},
+      reset: () => {},
       whenSignal: () => Promise.resolve(),
     });
     containerElement.renderStarted = () => {};

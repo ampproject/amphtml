@@ -18,7 +18,7 @@
 'use strict';
 
 const amphtmlValidator = require('amphtml-validator');
-const colors = require('ansi-colors');
+const colors = require('kleur/colors');
 const log = require('fancy-log');
 const through = require('through2');
 
@@ -94,7 +94,7 @@ module.exports.format = function(logger) {
   }
 
   function formatResults(callback) {
-    logger.log('AMP Validation results:\n\n' +
+    logger.info('AMP Validation results:\n\n' +
         results.map(printResult).join('\n'));
     return callback();
   }

@@ -15,13 +15,13 @@
  */
 'use strict';
 
-const colors = require('ansi-colors');
+const checkDependencies = require('check-dependencies');
+const del = require('del');
 const fs = require('fs-extra');
-const log = require('fancy-log');
-const {exec, execOrDie, getStderr} = require('../common/exec');
-const {isTravisBuild} = require('../common/travis');
-
-const yarnExecutable = 'npx yarn';
+const {cyan, green, yellow} = require('kleur/colors');
+const {execOrDie} = require('../common/exec');
+const {isCiBuild} = require('../common/ci');
+const {log, logLocalDev} = require('../common/logging');
 
 /**
  * Writes the given contents to the patched file if updated
@@ -31,9 +31,7 @@ const yarnExecutable = 'npx yarn';
 function writeIfUpdated(patchedName, file) {
   if (!fs.existsSync(patchedName) || fs.readFileSync(patchedName) != file) {
     fs.writeFileSync(patchedName, file);
-    if (!isTravisBuild()) {
-      log(colors.green('Patched'), colors.cyan(patchedName));
-    }
+    logLocalDev(green('Patched'), cyan(patchedName));
   }
 }
 
@@ -96,55 +94,73 @@ function patchIntersectionObserver() {
 }
 
 /**
- * TODO(samouri): remove this patch when a better fix is upstreamed (https://github.com/jakubroztocil/rrule/pull/410).
- *
- * Patches rrule to remove references to luxon. Even though rrule marks luxon as an optional dependency,
- * it is used as if it's a required one (static import). rrule relies on its consumers either
- * installing luxon or adding it as a webpack-style external. We don't want the former and
- * can't yet do the latter.
- *
- * This function replaces the reference to luxon with a mock that throws (which the code handles well).
+ * Patches Resize Observer polyfill by wrapping its body into `install`
+ * function.
+ * This gives us an option to control when and how the polyfill is installed.
+ * The polyfill can only be installed on the root context.
  */
-function patchRRule() {
-  const path = 'node_modules/rrule/dist/es5/rrule.min.js';
-  const patchedContents = fs
-    .readFileSync(path)
-    .toString()
-    .replace(
-      /require\("luxon"\)/g,
-      `{ DateTime: { fromJSDate() { throw TypeError() } } }`
-    );
+function patchResizeObserver() {
+  // Copies intersection-observer into a new file that has an export.
+  const patchedName =
+    'node_modules/resize-observer-polyfill/ResizeObserver.install.js';
+  let file = fs
+    .readFileSync(
+      'node_modules/resize-observer-polyfill/dist/ResizeObserver.js'
+    )
+    .toString();
 
-  writeIfUpdated(path, patchedContents);
+  // Wrap the contents inside the install function.
+  file = `export function installResizeObserver(global) {\n${file}\n}\n`
+    // For some reason Closure fails on this three lines. Babel is fine.
+    .replace(
+      "typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :",
+      ''
+    )
+    .replace(
+      "typeof define === 'function' && define.amd ? define(factory) :",
+      ''
+    )
+    .replace('}(this, (function () {', '}(global, (function () {');
+  writeIfUpdated(patchedName, file);
 }
 
 /**
- * Does a yarn check on node_modules, and if it is outdated, runs yarn.
+ * Deletes the map file for rrule, which breaks closure compiler.
+ * TODO(rsimha): Remove this workaround after a fix is merged for
+ * https://github.com/google/closure-compiler/issues/3720.
  */
-function runYarnCheck() {
-  const integrityCmd = yarnExecutable + ' check --integrity';
-  if (getStderr(integrityCmd).trim() != '') {
+function removeRruleSourcemap() {
+  const rruleMapFile = 'node_modules/rrule/dist/es5/rrule.js.map';
+  if (fs.existsSync(rruleMapFile)) {
+    del.sync(rruleMapFile);
+    logLocalDev(green('Deleted'), cyan(rruleMapFile));
+  }
+}
+
+/**
+ * Checks if all packages are current, and if not, runs `npm install`.
+ */
+function runNpmCheck() {
+  const results = checkDependencies.sync({
+    verbose: true,
+    log: () => {},
+    error: console.log,
+  });
+  if (!results.depsWereOk) {
     log(
-      colors.yellow('WARNING:'),
+      yellow('WARNING:'),
       'The packages in',
-      colors.cyan('node_modules'),
+      cyan('node_modules'),
       'do not match',
-      colors.cyan('package.json.')
+      cyan('package.json') + '.'
     );
-    const verifyTreeCmd = yarnExecutable + ' check --verify-tree';
-    exec(verifyTreeCmd);
-    log('Running', colors.cyan('yarn'), 'to update packages...');
-    /**
-     * NOTE: executing yarn with --production=false prevents having
-     * NODE_ENV=production variable set which forces yarn to not install
-     * devDependencies. This usually breaks gulp for example.
-     */
-    execOrDie(`${yarnExecutable} install --production=false`); // Stop execution when Ctrl + C is detected.
+    log('Running', cyan('npm install'), 'to update packages...');
+    execOrDie('npm install');
   } else {
     log(
-      colors.green('All packages in'),
-      colors.cyan('node_modules'),
-      colors.green('are up to date.')
+      green('All packages in'),
+      cyan('node_modules'),
+      green('are up to date.')
     );
   }
 }
@@ -153,7 +169,7 @@ function runYarnCheck() {
  * Used as a pre-requisite by several gulp tasks.
  */
 function maybeUpdatePackages() {
-  if (!isTravisBuild()) {
+  if (!isCiBuild()) {
     updatePackages();
   }
 }
@@ -163,12 +179,13 @@ function maybeUpdatePackages() {
  * polyfills if necessary.
  */
 async function updatePackages() {
-  if (!isTravisBuild()) {
-    runYarnCheck();
+  if (!isCiBuild()) {
+    runNpmCheck();
   }
   patchWebAnimations();
   patchIntersectionObserver();
-  patchRRule();
+  patchResizeObserver();
+  removeRruleSourcemap();
 }
 
 module.exports = {
@@ -177,4 +194,4 @@ module.exports = {
 };
 
 updatePackages.description =
-  'Runs yarn if node_modules is out of date, and applies custom patches';
+  'Runs npm install if node_modules is out of date, and applies custom patches';

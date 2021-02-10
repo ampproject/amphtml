@@ -9,6 +9,7 @@
         {name: 'cramforce', requestReviews: false},
         {name: 'dvoytenko', requestReviews: false},
         {name: 'jridgewell', requestReviews: false},
+        {name: 'kristoferbaxter', requestReviews: false},
       ],
     },
     {
@@ -24,10 +25,9 @@
       owners: [{name: 'ampproject/wg-infra'}],
     },
     {
-      pattern: '{babel.config.js,package.json,yarn.lock}',
+      pattern: '{babel.config.js,package.json,package-lock.json,package-scripts.js}',
       owners: [
         {name: 'ampproject/wg-infra'},
-        {name: 'ampproject/wg-runtime'},
         {name: 'ampproject/wg-performance'},
       ],
     },

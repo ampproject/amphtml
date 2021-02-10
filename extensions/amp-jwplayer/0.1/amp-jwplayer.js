@@ -30,6 +30,7 @@ import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {disableScrollingOnIframe} from '../../../src/iframe-helper';
 import {
+  dispatchCustomEvent,
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
@@ -375,10 +376,10 @@ class AmpJWPlayer extends AMP.BaseElement {
 
     // Inform Video Manager that the video is pre-muted from persisted options.
     if (detail.muted) {
-      element.dispatchCustomEvent(VideoEvents.MUTED);
+      dispatchCustomEvent(element, VideoEvents.MUTED);
     }
 
-    element.dispatchCustomEvent(VideoEvents.LOAD);
+    dispatchCustomEvent(element, VideoEvents.LOAD);
   }
 
   /**
@@ -435,7 +436,7 @@ class AmpJWPlayer extends AMP.BaseElement {
         case 'mute':
           const {mute} = detail;
           const {element} = this;
-          element.dispatchCustomEvent(mutedOrUnmutedEvent(mute));
+          dispatchCustomEvent(element, mutedOrUnmutedEvent(mute));
           break;
         case 'playedRanges':
           const {ranges} = detail;

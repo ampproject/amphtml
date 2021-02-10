@@ -81,6 +81,13 @@ export class AmpTruncateText extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.mutationObserver_.observe(this.element, {
+      attributes: true,
+      characterData: true,
+      childList: true,
+      subtree: true,
+    });
+
     this.useShadow_ =
       !!this.element.attachShadow &&
       isExperimentOn(this.win, 'amp-truncate-text-shadow');
@@ -176,16 +183,6 @@ export class AmpTruncateText extends AMP.BaseElement {
   layoutCallback() {
     return this.mutateElement(() => {
       this.truncate_();
-    });
-  }
-
-  /** @override */
-  firstAttachedCallback() {
-    this.mutationObserver_.observe(this.element, {
-      attributes: true,
-      characterData: true,
-      childList: true,
-      subtree: true,
     });
   }
 

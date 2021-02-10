@@ -16,10 +16,11 @@
 
 import {
   getAmpdoc,
-  getExistingServiceForDocInEmbedScope,
   getExistingServiceOrNull,
   getService,
   getServiceForDoc,
+  getServiceForDocOrNull,
+  getServiceInEmbedWin,
   getServicePromiseForDoc,
 } from './service';
 import {
@@ -96,7 +97,7 @@ export class Services {
    * @return {!./service/action-impl.ActionService}
    */
   static actionServiceForDoc(element) {
-    return /** @type {!./service/action-impl.ActionService} */ (getExistingServiceForDocInEmbedScope(
+    return /** @type {!./service/action-impl.ActionService} */ (getServiceForDocOrNull(
       element,
       'action'
     ));
@@ -107,7 +108,7 @@ export class Services {
    * @return {!./service/standard-actions-impl.StandardActions}
    */
   static standardActionsForDoc(element) {
-    return /** @type {!./service/standard-actions-impl.StandardActions} */ (getExistingServiceForDocInEmbedScope(
+    return /** @type {!./service/standard-actions-impl.StandardActions} */ (getServiceForDocOrNull(
       element,
       'standard-actions'
     ));
@@ -314,7 +315,7 @@ export class Services {
    * @return {!./service/hidden-observer-impl.HiddenObserver}
    */
   static hiddenObserverForDoc(element) {
-    return /** @type {!./service/hidden-observer-impl.HiddenObserver} */ (getExistingServiceForDocInEmbedScope(
+    return /** @type {!./service/hidden-observer-impl.HiddenObserver} */ (getServiceForDocOrNull(
       element,
       'hidden-observer'
     ));
@@ -350,6 +351,17 @@ export class Services {
       element,
       'inputmask',
       'amp-inputmask'
+    ));
+  }
+
+  /**
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @return {?./service/loading-indicator.LoadingIndicatorImpl}
+   */
+  static loadingIndicatorOrNull(elementOrAmpDoc) {
+    return /** @type {?./service/loading-indicator.LoadingIndicatorImpl} */ (getServiceForDocOrNull(
+      elementOrAmpDoc,
+      'loadingIndicator'
     ));
   }
 
@@ -569,7 +581,7 @@ export class Services {
    * @return {?./service/localization.LocalizationService}
    */
   static localizationForDoc(element) {
-    return /** @type {?./service/localization.LocalizationService} */ (getExistingServiceForDocInEmbedScope(
+    return /** @type {?./service/localization.LocalizationService} */ (getServiceForDocOrNull(
       element,
       'localization'
     ));
@@ -610,12 +622,44 @@ export class Services {
   }
 
   /**
+   * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @return {!Promise<RealTimeConfigManager>}
+   */
+  static realTimeConfigForDoc(elementOrAmpDoc) {
+    return /** @type {!Promise<RealTimeConfigManager>} */ (getServicePromiseForDoc(
+      elementOrAmpDoc,
+      'real-time-config'
+    ));
+  }
+
+  /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!Promise<!./service/storage-impl.Storage>}
    */
   static storageForDoc(elementOrAmpDoc) {
     return /** @type {!Promise<!./service/storage-impl.Storage>} */ (getServicePromiseForDoc(
       elementOrAmpDoc,
+      'storage'
+    ));
+  }
+
+  /**
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @return {!Promise<!./service/storage-impl.Storage>}
+   * TODO(dmanek): Add tests for this method.
+   */
+  static storageForTopLevelDoc(elementOrAmpDoc) {
+    const thisAmpdoc = Services.ampdoc(elementOrAmpDoc);
+    const ampdocService = Services.ampdocServiceFor(thisAmpdoc.win);
+    const topAmpdoc = ampdocService.isSingleDoc()
+      ? ampdocService.getSingleDoc()
+      : null;
+    // We need to verify that ampdocs are on the same origin, therefore
+    // we compare the windows of both.
+    const ampdoc =
+      topAmpdoc && topAmpdoc.win == thisAmpdoc.win ? topAmpdoc : thisAmpdoc;
+    return /** @type {!Promise<!./service/storage-impl.Storage>} */ (getServicePromiseForDoc(
+      ampdoc,
       'storage'
     ));
   }
@@ -637,7 +681,7 @@ export class Services {
    */
   static timerFor(window) {
     // TODO(alabiaga): This will always return the top window's Timer service.
-    return /** @type {!./service/timer-impl.Timer} */ (getService(
+    return /** @type {!./service/timer-impl.Timer} */ (getServiceInEmbedWin(
       window,
       'timer'
     ));
@@ -648,7 +692,7 @@ export class Services {
    * @return {!./service/url-replacements-impl.UrlReplacements}
    */
   static urlReplacementsForDoc(element) {
-    return /** @type {!./service/url-replacements-impl.UrlReplacements} */ (getExistingServiceForDocInEmbedScope(
+    return /** @type {!./service/url-replacements-impl.UrlReplacements} */ (getServiceForDocOrNull(
       element,
       'url-replace'
     ));
@@ -708,7 +752,7 @@ export class Services {
    * @return {!./service/url-impl.Url}
    */
   static urlForDoc(element) {
-    return /** @type {!./service/url-impl.Url} */ (getExistingServiceForDocInEmbedScope(
+    return /** @type {!./service/url-impl.Url} */ (getServiceForDocOrNull(
       element,
       'url'
     ));

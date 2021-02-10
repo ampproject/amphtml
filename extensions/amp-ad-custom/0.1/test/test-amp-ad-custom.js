@@ -44,22 +44,22 @@ describes.realWin('TemplateRenderer', realWinConfig, (env) => {
     containerElement.setAttribute('width', 320);
     containerElement.setAttribute('src', templateUrl);
     containerElement.signals = () => ({
+      signal: () => {},
+      reset: () => {},
       whenSignal: () => Promise.resolve(),
     });
     containerElement.renderStarted = () => {};
-    containerElement.getPageLayoutBox = () => ({
-      left: 0,
-      top: 0,
-      width: 0,
-      height: 0,
-    });
     containerElement.getLayoutBox = () => ({
       left: 0,
       top: 0,
       width: 0,
       height: 0,
     });
-    containerElement.getIntersectionChangeEntry = () => ({});
+    containerElement.getIntersectionChangeEntry = () => ({
+      rootBounds: {},
+      intersectionRect: {},
+      boundingClientRect: {},
+    });
     containerElement.isInViewport = () => true;
     containerElement.getAmpDoc = () => env.ampdoc;
     doc.body.appendChild(containerElement);

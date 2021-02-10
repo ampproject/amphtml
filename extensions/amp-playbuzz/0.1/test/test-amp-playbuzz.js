@@ -15,11 +15,6 @@
  */
 
 import '../amp-playbuzz';
-import {toggleExperiment} from '../../../../src/experiments';
-
-function startsWith(string, searchString) {
-  return string.substr(0, searchString.length) === searchString;
-}
 
 describes.realWin(
   'amp-playbuzz',
@@ -34,7 +29,6 @@ describes.realWin(
     beforeEach(() => {
       win = env.win;
       doc = win.document;
-      toggleExperiment(win, 'amp-playbuzz', true);
     });
 
     function createOptionalParams(
@@ -70,11 +64,13 @@ describes.realWin(
       if (itemSrc.itemId) {
         ins.setAttribute('data-item', itemSrc.itemId);
       }
-      ins.setAttribute('width', '111');
       ins.setAttribute('height', '222');
       ins.setAttribute('alt', 'Testing');
       if (opt_responsive) {
+        ins.setAttribute('width', '111');
         ins.setAttribute('layout', 'responsive');
+      } else {
+        ins.setAttribute('layout', 'fixed-height');
       }
       if (params && typeof params.displayItemInfo === 'boolean') {
         ins.setAttribute('data-item-info', params.displayItemInfo);
@@ -90,7 +86,7 @@ describes.realWin(
       }
       doc.body.appendChild(ins);
       return ins
-        .build()
+        .buildInternal()
         .then(() => {
           if (opt_beforeLayoutCallback) {
             opt_beforeLayoutCallback(ins);
@@ -102,7 +98,7 @@ describes.realWin(
 
     function testIframe(iframe, itemSrcUrl) {
       expect(iframe).to.not.be.null;
-      expect(startsWith(iframe.src, itemSrcUrl)).to.be.true;
+      expect(iframe.src.startsWith(itemSrcUrl)).to.be.true;
       expect(iframe.className).to.match(/i-amphtml-fill-content/);
       // This is important to avoid sizing issues.
       expect(iframe.getAttribute('scrolling')).to.equal('no');
@@ -110,22 +106,32 @@ describes.realWin(
 
     it('renders', () => {
       const src = createItemSrc().withUrl(
-        'https://www.playbuzz.com/bob/bobs-life'
+        'https://app.ex.co/stories/bob/bobs-life'
       );
       return getIns(src).then((ins) => {
         const iframe = ins.querySelector('iframe');
-        testIframe(iframe, '//www.playbuzz.com/bob/bobs-life');
+        testIframe(iframe, '//app.ex.co/stories/bob/bobs-life');
         // TODO: test playbuzz placeholder loader
       });
     });
 
-    it('renders with false for each optional param', () => {
+    it('renders with old url', () => {
       const src = createItemSrc().withUrl(
         'https://www.playbuzz.com/bob/bobs-life'
       );
       return getIns(src).then((ins) => {
         const iframe = ins.querySelector('iframe');
-        testIframe(iframe, '//www.playbuzz.com/bob/bobs-life');
+        testIframe(iframe, '//app.ex.co/stories/bob/bobs-life');
+      });
+    });
+
+    it('renders with false for each optional param', () => {
+      const src = createItemSrc().withUrl(
+        'https://app.ex.co/stories/bob/bobs-life'
+      );
+      return getIns(src).then((ins) => {
+        const iframe = ins.querySelector('iframe');
+        testIframe(iframe, '//app.ex.co/stories/bob/bobs-life');
         expect(iframe.src)
           .to.contain('&useComments=false')
           .and.to.contain('&gameInfo=false')
@@ -137,28 +143,28 @@ describes.realWin(
       const src = createItemSrc().withItemId('some-item-id');
       return getIns(src).then((ins) => {
         const iframe = ins.querySelector('iframe');
-        testIframe(iframe, '//www.playbuzz.com/item/some-item-id');
+        testIframe(iframe, '//app.ex.co/stories/item/some-item-id');
       });
     });
 
     it('renders with item id when submitted both with item url & item id', () => {
       const src = createItemSrc()
-        .withUrl('https://www.playbuzz.com/bob/bobs-life')
+        .withUrl('https://app.ex.co/stories/bob/bobs-life')
         .withItemId('some-item-id');
 
       return getIns(src).then((ins) => {
         const iframe = ins.querySelector('iframe');
-        testIframe(iframe, '//www.playbuzz.com/item/some-item-id');
+        testIframe(iframe, '//app.ex.co/stories/item/some-item-id');
       });
     });
 
     it('renders with true for each true optional param', () => {
       const src = createItemSrc().withUrl(
-        'https://www.playbuzz.com/bob/bobs-life'
+        'https:///app.ex.co/stories/bob/bobs-life'
       );
       return getIns(src, createOptionalParams(true, true, true)).then((ins) => {
         const iframe = ins.querySelector('iframe');
-        testIframe(iframe, '//www.playbuzz.com/bob/bobs-life');
+        testIframe(iframe, '//app.ex.co/stories/bob/bobs-life');
         expect(iframe.src)
           .to.contain('&useComments=true')
           .and.to.contain('&gameInfo=true')
@@ -166,38 +172,9 @@ describes.realWin(
       });
     });
 
-    it('builds a placeholder image without inserting iframe', () => {
-      const src = createItemSrc().withUrl(
-        'https://www.playbuzz.com/bob/bobs-life'
-      );
-      return getIns(src, createOptionalParams(), true, (ins) => {
-        // console.log(ins);
-        const placeholder = ins.querySelector('[placeholder]');
-        const iframe = ins.querySelector('iframe');
-        expect(iframe).to.be.null;
-        expect(placeholder).to.not.have.display('');
-        expect(placeholder.getAttribute('aria-label')).to.equal(
-          'Loading interactive element'
-        );
-      }).then((ins) => {
-        const placeholder = ins.querySelector('[placeholder]');
-
-        const iframe = ins.querySelector('iframe');
-        ins.getVsync = () => {
-          return {
-            mutate: (fn) => fn(),
-          };
-        };
-        testIframe(iframe, '//www.playbuzz.com/bob/bobs-life');
-        //Should test placeholder too
-        ins.implementation_.iframePromise_.then(() => {
-          expect(placeholder).to.have.display('none');
-        });
-      });
-    });
     it('propagates aria label to placeholder', () => {
       const src = createItemSrc().withUrl(
-        'https://www.playbuzz.com/bob/bobs-life'
+        'https://app.ex.co/stories/bob/bobs-life'
       );
       return getIns(src, {'arialabel': 'captivating quiz'}, true, (ins) => {
         // console.log(ins);

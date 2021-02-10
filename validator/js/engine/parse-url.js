@@ -160,8 +160,6 @@ const URL = class {
     this.protocol = '';  // Guaranteed to be lower case.
     /** @type {string} */
     this.defaultProtocol = 'https';  // Must be set to a lower case value.
-    /** @type {string} */
-    this.schemeSpecificPart = '';
     /** @type {boolean} */
     this./*OK*/ startsWithDoubleSlash = false;
     // The hostname will be hex-unescaped and isValid will be set to false if
@@ -258,9 +256,6 @@ const URL = class {
 
     if (this.protocol != 'http' && this.protocol != 'https' &&
         this.protocol != 'ftp' && this.protocol != 'sftp') {
-      // For protocols like "foo:bar", we don't parse up the part after the
-      // protocol, we just record it, eg "bar".
-      this.schemeSpecificPart = unparsed;
       unparsed = '';
     }
     return unparsed;

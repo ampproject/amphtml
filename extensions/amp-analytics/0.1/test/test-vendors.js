@@ -51,6 +51,8 @@ describes.realWin(
       elementMacros = {
         'COOKIE': null,
         'CONSENT_STATE': null,
+        'CONSENT_STRING': null,
+        'CONSENT_METADATA': null,
       };
     });
 
@@ -135,7 +137,7 @@ describes.realWin(
                 'Request for ' +
                   vendor +
                   ' not found. Please make sure you run ' +
-                  '"gulp vendor-configs" or build amp-analytics ' +
+                  '"gulp analytics-vendor-configs" or build amp-analytics ' +
                   'before running the test'
               );
             }
@@ -218,7 +220,6 @@ function getAnalyticsTag(doc, vendor) {
   doc.body.appendChild(el);
   el.connectedCallback();
   const analytics = new AmpAnalytics(el);
-  analytics.createdCallback();
   analytics.buildCallback();
   return analytics;
 }

@@ -34,13 +34,11 @@ describe
     describes.integration(
       'basic',
       {
-        /* eslint-disable max-len */
         body: `
       <button on="tap:AMP.setState({t: 'after_text'})" id="changeText"></button>
       <button on="tap:AMP.setState({c: 'after_class'})" id="changeClass"></button>
       <p class="before_class" [class]="c" [text]="t">before_text</p>
     `,
-        /* eslint-enable max-len */
         extensions: ['amp-bind'],
       },
       (env) => {
@@ -129,7 +127,6 @@ describe
     describes.integration(
       '+ forms',
       {
-        /* eslint-disable max-len */
         body: `
       <input type="range" min=0 max=100 value=0 on="change:AMP.setState({rangeChange: event})">
       <p id="range" [text]="rangeChange.min + ' <= ' + rangeChange.value + ' <= ' + rangeChange.max">before_range</p>
@@ -141,7 +138,6 @@ describe
       <input type="radio" on="change:AMP.setState({radioChange: event})">
       <p id="radio" [text]="'checked: ' + radioChange.checked" id="radioText">before_radio</p>
     `,
-        /* eslint-enable max-len */
         extensions: ['amp-bind'],
       },
       (env) => {
@@ -202,7 +198,6 @@ describe
     describes.integration(
       '+ amp-carousel',
       {
-        /* eslint-disable max-len */
         body: `
       <button on="tap:AMP.setState({slide: 1})" id="goToSlideOne"></button>
       <p [text]="slide">0</p>
@@ -212,7 +207,6 @@ describe
         <amp-img src="http://example.com/bar.jpg" width=10 height=10></amp-img>
       </amp-carousel>
     `,
-        /* eslint-enable max-len */
         extensions: ['amp-bind', 'amp-carousel'],
       },
       (env) => {
@@ -262,7 +256,6 @@ describe
       }
     );
 
-    /* eslint-disable max-len */
     const list = `
     <amp-state id="foo">
       <script type="application/json">
@@ -276,7 +269,6 @@ describe
       <p [text]="foo.bar"></p>
     </template>
   `;
-    /* eslint-enable max-len */
 
     const listTests = (env) => {
       let doc;
@@ -331,7 +323,6 @@ describe
     describes.integration(
       '+ amp-selector',
       {
-        /* eslint-disable max-len */
         body: `
       <button on="tap:AMP.setState({selected: 2})"></button>
       <p [text]="selected"></p>
@@ -341,7 +332,6 @@ describe
         <amp-img src="/2.jpg" width=10 height=10 option=2></amp-img>
       </amp-selector>
     `,
-        /* eslint-enable max-len */
         extensions: ['amp-bind', 'amp-selector'],
       },
       (env) => {

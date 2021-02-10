@@ -64,10 +64,6 @@ import {InfoDialog} from './amp-story-info-dialog';
 import {Keys} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {LiveStoryManager} from './live-story-manager';
-import {
-  LocalizedStringId,
-  createPseudoLocale,
-} from '../../../src/localized-strings';
 import {MediaPool, MediaType} from './media-pool';
 import {PaginationButtons} from './pagination-buttons';
 import {Services} from '../../../src/services';
@@ -85,6 +81,7 @@ import {
   closest,
   createElementWithAttributes,
   isRTL,
+  matches,
   scopedQuerySelector,
   scopedQuerySelectorAll,
   whenUpgradedToCustomElement,
@@ -95,6 +92,7 @@ import {
   setImportantStyles,
   toggle,
 } from '../../../src/style';
+import {createPseudoLocale} from '../../../src/localized-strings';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev, devAssert, user} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
@@ -116,28 +114,28 @@ import {
 } from './utils';
 import {toArray} from '../../../src/types';
 import {upgradeBackgroundAudio} from './audio';
-import LocalizedStringsAr from './_locales/ar';
-import LocalizedStringsDe from './_locales/de';
-import LocalizedStringsDefault from './_locales/default';
-import LocalizedStringsEn from './_locales/en';
-import LocalizedStringsEnGb from './_locales/en-GB';
-import LocalizedStringsEs from './_locales/es';
-import LocalizedStringsEs419 from './_locales/es-419';
-import LocalizedStringsFr from './_locales/fr';
-import LocalizedStringsHi from './_locales/hi';
-import LocalizedStringsId from './_locales/id';
-import LocalizedStringsIt from './_locales/it';
-import LocalizedStringsJa from './_locales/ja';
-import LocalizedStringsKo from './_locales/ko';
-import LocalizedStringsNl from './_locales/nl';
-import LocalizedStringsNo from './_locales/no';
-import LocalizedStringsPtBr from './_locales/pt-BR';
-import LocalizedStringsPtPt from './_locales/pt-PT';
-import LocalizedStringsRu from './_locales/ru';
-import LocalizedStringsTr from './_locales/tr';
-import LocalizedStringsVi from './_locales/vi';
-import LocalizedStringsZhCn from './_locales/zh-CN';
-import LocalizedStringsZhTw from './_locales/zh-TW';
+import LocalizedStringsAr from './_locales/ar.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import LocalizedStringsDe from './_locales/de.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import LocalizedStringsDefault from './_locales/default.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import LocalizedStringsEn from './_locales/en.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import LocalizedStringsEnGb from './_locales/en-GB.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import LocalizedStringsEs from './_locales/es.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import LocalizedStringsEs419 from './_locales/es-419.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import LocalizedStringsFr from './_locales/fr.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import LocalizedStringsHi from './_locales/hi.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import LocalizedStringsId from './_locales/id.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import LocalizedStringsIt from './_locales/it.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import LocalizedStringsJa from './_locales/ja.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import LocalizedStringsKo from './_locales/ko.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import LocalizedStringsNl from './_locales/nl.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import LocalizedStringsNo from './_locales/no.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import LocalizedStringsPtBr from './_locales/pt-BR.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import LocalizedStringsPtPt from './_locales/pt-PT.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import LocalizedStringsRu from './_locales/ru.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import LocalizedStringsTr from './_locales/tr.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import LocalizedStringsVi from './_locales/vi.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import LocalizedStringsZhCn from './_locales/zh-CN.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import LocalizedStringsZhTw from './_locales/zh-TW.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 
 /** @private @const {number} */
 const DESKTOP_WIDTH_THRESHOLD = 1024;
@@ -166,11 +164,11 @@ const Attributes = {
 };
 
 /**
- * The duration of time (in milliseconds) to wait for a page to be loaded,
- * before the story becomes visible.
+ * The duration of time (in milliseconds) to wait for the Story initial content
+ * to be loaded before marking the story as loaded.
  * @const {number}
  */
-const PAGE_LOAD_TIMEOUT_MS = 5000;
+const INITIAL_CONTENT_LOAD_TIMEOUT_MS = 8000;
 
 /**
  * Single page ads may be injected later. If the original story contains 0 media
@@ -235,6 +233,11 @@ const SIDEBAR_OBSERVER_OPTIONS = {
  * @implements {./media-pool.MediaPoolRoot}
  */
 export class AmpStory extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    return true;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -312,9 +315,6 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {?HTMLMediaElement} */
     this.backgroundAudioEl_ = null;
 
-    /** @private {?./pagination-buttons.PaginationButtons} */
-    this.paginationButtons_ = null;
-
     /** @private {!AmpStoryHint} */
     this.ampStoryHint_ = new AmpStoryHint(this.win, this.element);
 
@@ -333,13 +333,14 @@ export class AmpStory extends AMP.BaseElement {
     /** @private @const {!../../../src/service/platform-impl.Platform} */
     this.platform_ = Services.platformFor(this.win);
 
-    /** @private @const {!../../../src/service/viewer-interface.ViewerInterface} */
-    this.viewer_ = Services.viewerForDoc(this.element);
+    /** @private {?../../../src/service/viewer-interface.ViewerInterface} */
+    this.viewer_ = null;
 
-    /** @private @const {?AmpStoryViewerMessagingHandler} */
-    this.viewerMessagingHandler_ = this.viewer_.isEmbedded()
-      ? new AmpStoryViewerMessagingHandler(this.win, this.viewer_)
-      : null;
+    /** @private {?AmpStoryViewerMessagingHandler} */
+    this.viewerMessagingHandler_ = null;
+
+    /** @private {?../../../src/service/localization.LocalizationService} */
+    this.localizationService_ = null;
 
     /**
      * Store the current paused state, to make sure the story does not play on
@@ -359,8 +360,16 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private {?LiveStoryManager} */
     this.liveStoryManager_ = null;
+  }
 
-    /** @private @const {!../../../src/service/localization.LocalizationService} */
+  /** @override */
+  buildCallback() {
+    this.viewer_ = Services.viewerForDoc(this.element);
+
+    this.viewerMessagingHandler_ = this.viewer_.isEmbedded()
+      ? new AmpStoryViewerMessagingHandler(this.win, this.viewer_)
+      : null;
+
     this.localizationService_ = getLocalizationService(this.element);
 
     this.localizationService_
@@ -395,10 +404,7 @@ export class AmpStory extends AMP.BaseElement {
       'en-xa',
       enXaPseudoLocaleBundle
     );
-  }
 
-  /** @override */
-  buildCallback() {
     if (this.isStandalone_()) {
       this.initializeStandaloneStory_();
     }
@@ -410,8 +416,13 @@ export class AmpStory extends AMP.BaseElement {
     // prerendering, because of a height incorrectly set to 0.
     this.mutateElement(() => {});
 
-    const pageEl = this.element.querySelector('amp-story-page');
-    pageEl && pageEl.setAttribute('active', '');
+    const pageId = this.getInitialPageId_();
+    if (pageId) {
+      const page = this.element.querySelector(
+        `amp-story-page#${escapeCssSelectorIdent(pageId)}`
+      );
+      page.setAttribute('active', '');
+    }
 
     this.initializeStyles_();
     this.initializeListeners_();
@@ -459,6 +470,10 @@ export class AmpStory extends AMP.BaseElement {
           this.switchTo_(args['id'], NavigationDirection.NEXT)
         );
       });
+    }
+
+    if (this.maybeLoadStoryDevTools_()) {
+      return;
     }
   }
 
@@ -582,10 +597,6 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   rewriteStyles_(styleEl) {
-    if (!isExperimentOn(this.win, 'amp-story-responsive-units')) {
-      return;
-    }
-
     // TODO(#15955): Update this to use CssContext from
     // ../../../extensions/amp-animation/0.1/web-animations.js
     this.mutateElement(() => {
@@ -682,6 +693,14 @@ export class AmpStory extends AMP.BaseElement {
         mode
       );
     });
+
+    this.storeService_.subscribe(
+      StateProperty.CAN_SHOW_AUDIO_UI,
+      (show) => {
+        this.element.classList.toggle('i-amphtml-story-no-audio-ui', !show);
+      },
+      true /** callToInitialize */
+    );
 
     this.element.addEventListener(EventType.SWITCH_PAGE, (e) => {
       if (this.storeService_.get(StateProperty.BOOKEND_STATE)) {
@@ -783,7 +802,9 @@ export class AmpStory extends AMP.BaseElement {
     this.win.document.addEventListener('contextmenu', (e) => {
       const uiState = this.storeService_.get(StateProperty.UI_STATE);
       if (uiState === UIType.MOBILE) {
-        e.preventDefault();
+        if (!this.allowContextMenuOnMobile_(e.target)) {
+          e.preventDefault();
+        }
         e.stopPropagation();
       }
     });
@@ -928,28 +949,6 @@ export class AmpStory extends AMP.BaseElement {
     }
   }
 
-  /** @private */
-  buildPaginationButtons_() {
-    if (
-      this.paginationButtons_ ||
-      !this.storeService_.get(StateProperty.CAN_SHOW_PAGINATION_BUTTONS)
-    ) {
-      return;
-    }
-
-    // TODO(#19768): Avoid passing a private function here.
-    this.paginationButtons_ = PaginationButtons.create(this, () =>
-      this.hasBookend_()
-    );
-
-    this.paginationButtons_.attach(this.element);
-  }
-
-  /** @visibleForTesting */
-  buildPaginationButtonsForTesting() {
-    this.buildPaginationButtons_();
-  }
-
   /** @override */
   layoutCallback() {
     if (!AmpStory.isBrowserSupported(this.win) && !this.platform_.isBot()) {
@@ -966,11 +965,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   layoutStory_() {
-    const firstPageEl = user().assertElement(
-      this.element.querySelector('amp-story-page'),
-      'Story must have at least one page.'
-    );
-    const initialPageId = this.getInitialPageId_(firstPageEl);
+    const initialPageId = this.getInitialPageId_();
 
     this.buildSystemLayer_(initialPageId);
     this.initializeSidebar_();
@@ -989,6 +984,11 @@ export class AmpStory extends AMP.BaseElement {
           this.upgradeCtaAnchorTagsForTracking_(page, index);
         });
         this.initializeStoryNavigationPath_();
+
+        // Build pagination buttons if they can be displayed.
+        if (this.storeService_.get(StateProperty.CAN_SHOW_PAGINATION_BUTTONS)) {
+          new PaginationButtons(this);
+        }
       })
       .then(() => this.initializeBookend_())
       .then(() => {
@@ -997,7 +997,7 @@ export class AmpStory extends AMP.BaseElement {
           HistoryState.BOOKEND_ACTIVE
         );
         if (bookendInHistory) {
-          return this.hasBookend_().then((hasBookend) => {
+          return this.hasBookend().then((hasBookend) => {
             if (hasBookend) {
               return this.showBookend_();
             }
@@ -1018,7 +1018,7 @@ export class AmpStory extends AMP.BaseElement {
         // Preloads and prerenders the share menu.
         this.shareMenu_.build();
 
-        const infoDialog = shouldShowStoryUrlInfo(this.viewer_)
+        const infoDialog = shouldShowStoryUrlInfo(devAssert(this.viewer_))
           ? new InfoDialog(this.win, this.element)
           : null;
         if (infoDialog) {
@@ -1029,7 +1029,9 @@ export class AmpStory extends AMP.BaseElement {
     // Do not block the layout callback on the completion of these promises, as
     // that prevents descendents from being laid out (and therefore loaded).
     storyLayoutPromise
-      .then(() => this.whenPagesLoaded_(PAGE_LOAD_TIMEOUT_MS))
+      .then(() =>
+        this.whenInitialContentLoaded_(INITIAL_CONTENT_LOAD_TIMEOUT_MS)
+      )
       .then(() => {
         this.markStoryAsLoaded_();
         this.initializeLiveStory_();
@@ -1037,50 +1039,20 @@ export class AmpStory extends AMP.BaseElement {
 
     this.maybeLoadStoryEducation_();
 
-    // Story is being prerendered: resolve the layoutCallback when the first
+    // Story is being prerendered: resolve the layoutCallback when the active
     // page is built. Other pages will only build if the document becomes
     // visible.
+    const initialPageEl = this.element.querySelector(
+      `amp-story-page#${escapeCssSelectorIdent(initialPageId)}`
+    );
     if (!this.getAmpDoc().hasBeenVisible()) {
-      return whenUpgradedToCustomElement(firstPageEl).then(() => {
-        return firstPageEl.whenBuilt();
+      return whenUpgradedToCustomElement(initialPageEl).then(() => {
+        return initialPageEl.whenBuilt();
       });
     }
 
-    this.buildScreenReaderBackButton_();
-
     // Will resolve when all pages are built.
     return storyLayoutPromise;
-  }
-
-  /**
-   * Creates a focusable button for screen readers to navigate back.
-   * @private
-   */
-  buildScreenReaderBackButton_() {
-    const backButton = document.createElement('button');
-
-    const label = this.localizationService_.getLocalizedString(
-      LocalizedStringId.AMP_STORY_PAGINATION_BUTTON_PREVIOUS_PAGE_LABEL
-    );
-
-    backButton.classList.add('i-amphtml-story-screen-reader-back-button');
-    label && backButton.setAttribute('aria-label', label);
-    this.mutateElement(() => {
-      this.element.appendChild(backButton);
-    });
-
-    // Append class to hide button if on first page.
-    this.storeService_.subscribe(
-      StateProperty.CURRENT_PAGE_INDEX,
-      (pageIndex) =>
-        this.mutateElement(() =>
-          backButton.classList.toggle(
-            'i-amphtml-story-screen-reader-back-button-hidden',
-            pageIndex === 0 && !this.viewer_.hasCapability('swipe')
-          )
-        ),
-      true /** callToInitialize */
-    );
   }
 
   /**
@@ -1115,11 +1087,10 @@ export class AmpStory extends AMP.BaseElement {
    * Retrieves the initial pageId to begin the story with. In order, the
    * initial page for a story should be either a valid page ID in the URL
    * fragment, the page ID in the history, or the first page of the story.
-   * @param {!Element} firstPageEl
-   * @return {string}
+   * @return {?string}
    * @private
    */
-  getInitialPageId_(firstPageEl) {
+  getInitialPageId_() {
     const maybePageId = parseQueryString(this.win.location.hash)['page'];
     if (maybePageId && this.isActualPage_(maybePageId)) {
       return maybePageId;
@@ -1134,7 +1105,8 @@ export class AmpStory extends AMP.BaseElement {
       return historyPage;
     }
 
-    return firstPageEl.id;
+    const firstPageEl = this.element.querySelector('amp-story-page');
+    return firstPageEl ? firstPageEl.id : null;
   }
 
   /**
@@ -1145,19 +1117,20 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   isActualPage_(pageId) {
-    // TODO(gmajoulet): check from the cached pages array if available, and use
-    // the querySelector as a fallback.
+    if (this.pages_.length > 0) {
+      return this.pages_.some((page) => page.element.id === pageId);
+    }
     return !!this.element.querySelector(`#${escapeCssSelectorIdent(pageId)}`);
   }
 
   /**
    * @param {number} timeoutMs The maximum amount of time to wait, in
    *     milliseconds.
-   * @return {!Promise} A promise that is resolved when the page is loaded or
-   *     the timeout has been exceeded, whichever happens first.
+   * @return {!Promise} A promise that is resolved when the initial content is
+   *     loaded or the timeout has been exceeded, whichever happens first.
    * @private
    */
-  whenPagesLoaded_(timeoutMs = 0) {
+  whenInitialContentLoaded_(timeoutMs = 0) {
     const pagesToWaitFor =
       this.storeService_.get(StateProperty.UI_STATE) === UIType.DESKTOP_PANELS
         ? [this.pages_[0], this.pages_[1]]
@@ -1310,11 +1283,6 @@ export class AmpStory extends AMP.BaseElement {
     return layout == Layout.CONTAINER;
   }
 
-  /** @override */
-  prerenderAllowed() {
-    return true;
-  }
-
   /** @private */
   initializePages_() {
     const pageImplPromises = Array.prototype.map.call(
@@ -1377,7 +1345,7 @@ export class AmpStory extends AMP.BaseElement {
       return;
     }
 
-    this.hasBookend_().then((hasBookend) => {
+    this.hasBookend().then((hasBookend) => {
       if (hasBookend) {
         this.showBookend_();
       }
@@ -1869,7 +1837,6 @@ export class AmpStory extends AMP.BaseElement {
         break;
       case UIType.DESKTOP_PANELS:
         this.setDesktopPositionAttributes_(this.activePage_);
-        this.buildPaginationButtons_();
         this.vsync_.mutate(() => {
           this.element.setAttribute('desktop', '');
           this.element.classList.add('i-amphtml-story-desktop-panels');
@@ -1877,7 +1844,6 @@ export class AmpStory extends AMP.BaseElement {
         });
         break;
       case UIType.DESKTOP_FULLBLEED:
-        this.buildPaginationButtons_();
         this.vsync_.mutate(() => {
           this.element.setAttribute('desktop', '');
           this.element.classList.add('i-amphtml-story-desktop-fullbleed');
@@ -2423,9 +2389,8 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * @return {!Promise<boolean>}
-   * @private
    */
-  hasBookend_() {
+  hasBookend() {
     if (!this.storeService_.get(StateProperty.CAN_SHOW_BOOKEND)) {
       return Promise.resolve(false);
     }
@@ -2678,7 +2643,48 @@ export class AmpStory extends AMP.BaseElement {
       this.next_();
     } else if (data['previous']) {
       this.previous_();
+    } else if (data['delta']) {
+      this.switchDelta_(data['delta']);
+    } else if (data['id']) {
+      this.switchTo_(
+        data['id'],
+        this.getPageIndexById(data['id']) > this.getPageIndex(this.activePage_)
+          ? NavigationDirection.NEXT
+          : NavigationDirection.PREVIOUS
+      );
     }
+  }
+
+  /**
+   * Switches to a page in the story given a delta. If new index is out of
+   * bounds, it will go to the last or first page (depending on direction).
+   * @param {number} delta
+   * @private
+   */
+  switchDelta_(delta) {
+    const currentPageIdx = this.storeService_.get(
+      StateProperty.CURRENT_PAGE_INDEX
+    );
+
+    const newPageIdx =
+      delta > 0
+        ? Math.min(this.pages_.length - 1, currentPageIdx + delta)
+        : Math.max(0, currentPageIdx + delta);
+    const targetPage = this.pages_[newPageIdx];
+
+    if (
+      !this.isActualPage_(targetPage && targetPage.element.id) ||
+      newPageIdx === currentPageIdx
+    ) {
+      return;
+    }
+
+    const direction =
+      newPageIdx > currentPageIdx
+        ? NavigationDirection.NEXT
+        : NavigationDirection.PREVIOUS;
+
+    this.switchTo_(targetPage.element.id, direction);
   }
 
   /**
@@ -2712,10 +2718,17 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   initializeStoryNavigationPath_() {
-    this.storeService_.dispatch(
-      Action.SET_NAVIGATION_PATH,
-      getHistoryState(this.win, HistoryState.NAVIGATION_PATH) || []
+    let navigationPath = getHistoryState(
+      this.win,
+      HistoryState.NAVIGATION_PATH
     );
+    if (
+      !navigationPath ||
+      !navigationPath.every((pageId) => this.isActualPage_(pageId))
+    ) {
+      navigationPath = [];
+    }
+    this.storeService_.dispatch(Action.SET_NAVIGATION_PATH, navigationPath);
   }
 
   /** @private */
@@ -2851,6 +2864,46 @@ export class AmpStory extends AMP.BaseElement {
         win.CSS.supports &&
         win.CSS.supports('display', 'grid') &&
         win.CSS.supports('color', 'var(--test)')
+    );
+  }
+
+  /**
+   * Loads amp-story-dev-tools if it is enabled.
+   * @private
+   */
+  maybeLoadStoryDevTools_() {
+    if (
+      !getMode().development ||
+      this.element.getAttribute('mode') === 'inspect'
+    ) {
+      return false;
+    }
+
+    this.element.setAttribute('mode', 'inspect');
+
+    const devToolsEl = this.win.document.createElement('amp-story-dev-tools');
+    this.win.document.body.appendChild(devToolsEl);
+    this.element.setAttribute('hide', '');
+
+    Services.extensionsFor(this.win).installExtensionForDoc(
+      this.getAmpDoc(),
+      'amp-story-dev-tools'
+    );
+    return true;
+  }
+
+  /**
+   * Should enable the context menu (long press) on the element passed.
+   * @private
+   * @param {!Element} element
+   * @return {boolean}
+   */
+  allowContextMenuOnMobile_(element) {
+    // Match page attachments with links.
+    return !!closest(
+      element,
+      (e) => matches(e, 'a.i-amphtml-story-page-open-attachment[href]'),
+      this.element
     );
   }
 }

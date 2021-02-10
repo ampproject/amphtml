@@ -24,7 +24,6 @@ import {
 import {
   createShadowDomWriter,
   createShadowRoot,
-  getShadowRootNode,
   importShadowBody,
   installShadowStyle,
   resetShadowStyleCacheForTesting,
@@ -262,30 +261,6 @@ describes.sandboxed('shadow-embed', {}, () => {
       });
     }
   );
-
-  describe('getShadowRootNode', () => {
-    let content, host, shadowRoot;
-
-    beforeEach(() => {
-      host = document.createElement('div');
-      shadowRoot = createShadowRoot(host);
-      content = document.createElement('span');
-      shadowRoot.appendChild(content);
-    });
-
-    it('should find itself as the root node', () => {
-      expect(getShadowRootNode(shadowRoot)).to.equal(shadowRoot);
-    });
-
-    it('should find the root node from ancestors', () => {
-      expect(getShadowRootNode(content)).to.equal(shadowRoot);
-    });
-
-    it('should find the root node via polyfill', () => {
-      setShadowDomSupportedVersionForTesting(ShadowDomVersion.NONE);
-      expect(getShadowRootNode(content)).to.equal(shadowRoot);
-    });
-  });
 
   describe('scopeShadowCss', () => {
     let shadowRoot;

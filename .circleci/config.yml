@@ -1,0 +1,288 @@
+version: 2.1
+
+orbs:
+  browser-tools: circleci/browser-tools@1.1.1
+
+push_and_pr_builds: &push_and_pr_builds
+  filters:
+    branches:
+      ignore:
+        - nightly
+
+push_builds_only: &push_builds_only
+  filters:
+    branches:
+      only:
+        - master
+        - /^amp-release-.*$/
+
+executors:
+  amphtml-medium-executor:
+    machine:
+      image: ubuntu-2004:202010-01
+    resource_class: medium
+  amphtml-large-executor:
+    machine:
+      image: ubuntu-2004:202010-01
+    resource_class: large
+  amphtml-xlarge-executor:
+    machine:
+      image: ubuntu-2004:202010-01
+    resource_class: xlarge
+
+commands:
+  save_karma_cache:
+    parameters:
+      cache_name:
+        type: string
+    steps:
+      - save_cache:
+          name: 'Save Karma Cache'
+          key: karma-cache-<<parameters.cache_name>>-{{ checksum ".karma-cache-hash" }}
+          paths:
+            - .karma-cache
+  restore_karma_cache:
+    parameters:
+      cache_name:
+        type: string
+    steps:
+      - run:
+          name: 'Compute Karma Cache Hash'
+          command: node ./build-system/common/compute-karma-cache-hash.js
+      - restore_cache:
+          name: 'Restore Karma Cache'
+          key: karma-cache-<<parameters.cache_name>>-{{ checksum ".karma-cache-hash" }}
+  setup_vm:
+    steps:
+      - checkout
+      - run:
+          name: 'Fetch Merge Commit'
+          command: ./.circleci/fetch_merge_commit.sh
+      - run:
+          name: 'Check Config'
+          command: ./.circleci/check_config.sh
+      - run:
+          name: 'Setup Google Cloud Storage'
+          command: ./.circleci/setup_storage.sh
+      - run:
+          name: 'Configure Hosts'
+          command: cat ./build-system/test-configs/hosts | sudo tee -a /etc/hosts
+      - run:
+          name: 'Install Dependencies'
+          command: ./.circleci/install_dependencies.sh
+  install_chrome:
+    steps:
+      - browser-tools/install-chrome:
+          replace-existing: true
+
+jobs:
+  'Checks':
+    executor:
+      name: amphtml-medium-executor
+    steps:
+      - setup_vm
+      - run:
+          name: 'Checks'
+          command: node build-system/pr-check/checks.js
+  'Unminified Build':
+    executor:
+      name: amphtml-xlarge-executor
+    steps:
+      - setup_vm
+      - run:
+          name: 'Unminified Build'
+          command: node build-system/pr-check/unminified-build.js
+  'Nomodule Build':
+    executor:
+      name: amphtml-xlarge-executor
+    steps:
+      - setup_vm
+      - run:
+          name: 'Nomodule Build'
+          command: node build-system/pr-check/nomodule-build.js
+  'Module Build':
+    executor:
+      name: amphtml-xlarge-executor
+    steps:
+      - setup_vm
+      - run:
+          name: 'Module Build'
+          command: node build-system/pr-check/module-build.js
+  'Bundle Size':
+    executor:
+      name: amphtml-medium-executor
+    steps:
+      - setup_vm
+      - run:
+          name: 'Bundle Size'
+          command: node build-system/pr-check/bundle-size.js
+  'Validator Tests':
+    executor:
+      name: amphtml-medium-executor
+    steps:
+      - setup_vm
+      - run:
+          name: 'Install Protobuf'
+          command: pip3 install --user protobuf
+      - run:
+          name: 'Validator Tests'
+          command: node build-system/pr-check/validator-tests.js
+  'Visual Diff Tests':
+    executor:
+      name: amphtml-large-executor
+    steps:
+      - setup_vm
+      - install_chrome
+      - run:
+          name: 'Visual Diff Tests'
+          command: node build-system/pr-check/visual-diff-tests.js
+  'Unit Tests':
+    executor:
+      name: amphtml-large-executor
+    steps:
+      - setup_vm
+      - install_chrome
+      - restore_karma_cache:
+          cache_name: unit
+      - run:
+          name: 'Unit Tests'
+          command: node build-system/pr-check/unit-tests.js
+      - save_karma_cache:
+          cache_name: unit
+  'Unminified Tests':
+    executor:
+      name: amphtml-large-executor
+    steps:
+      - setup_vm
+      - install_chrome
+      - restore_karma_cache:
+          cache_name: unminified
+      - run:
+          name: 'Unminified Tests'
+          command: node build-system/pr-check/unminified-tests.js
+      - save_karma_cache:
+          cache_name: unminified
+  'Nomodule Tests':
+    executor:
+      name: amphtml-large-executor
+    steps:
+      - setup_vm
+      - install_chrome
+      - restore_karma_cache:
+          cache_name: nomodule
+      - run:
+          name: 'Nomodule Tests'
+          command: node build-system/pr-check/nomodule-tests.js
+      - save_karma_cache:
+          cache_name: nomodule
+  'Module Tests':
+    executor:
+      name: amphtml-large-executor
+    steps:
+      - setup_vm
+      - install_chrome
+      - restore_karma_cache:
+          cache_name: module
+      - run:
+          name: 'Module Tests'
+          command: node build-system/pr-check/module-tests.js
+      - save_karma_cache:
+          cache_name: module
+  'End-to-End Tests':
+    executor:
+      name: amphtml-large-executor
+    steps:
+      - setup_vm
+      - install_chrome
+      - run:
+          name: 'End-to-End Tests'
+          command: node build-system/pr-check/e2e-tests.js
+  'Performance Tests':
+    executor:
+      name: amphtml-xlarge-executor
+    steps:
+      - setup_vm
+      - install_chrome
+      - run:
+          name: 'Performance Tests'
+          command: node build-system/pr-check/performance-tests.js
+  'Experiment A Tests':
+    executor:
+      name: amphtml-xlarge-executor
+    steps:
+      - setup_vm
+      - install_chrome
+      - run:
+          name: 'Experiment A Tests'
+          command: node build-system/pr-check/experiment-tests.js --experiment=experimentA
+  'Experiment B Tests':
+    executor:
+      name: amphtml-xlarge-executor
+    steps:
+      - setup_vm
+      - install_chrome
+      - run:
+          name: 'Experiment B Tests'
+          command: node build-system/pr-check/experiment-tests.js --experiment=experimentB
+  'Experiment C Tests':
+    executor:
+      name: amphtml-xlarge-executor
+    steps:
+      - setup_vm
+      - install_chrome
+      - run:
+          name: 'Experiment C Tests'
+          command: node build-system/pr-check/experiment-tests.js --experiment=experimentC
+
+workflows:
+  'CircleCI':
+    jobs:
+      - 'Checks':
+          <<: *push_and_pr_builds
+      - 'Unminified Build':
+          <<: *push_and_pr_builds
+      - 'Nomodule Build':
+          <<: *push_and_pr_builds
+      - 'Module Build':
+          <<: *push_and_pr_builds
+      - 'Bundle Size':
+          <<: *push_and_pr_builds
+          requires:
+            - 'Nomodule Build'
+            - 'Module Build'
+      - 'Validator Tests':
+          <<: *push_and_pr_builds
+      - 'Visual Diff Tests':
+          <<: *push_and_pr_builds
+          requires:
+            - 'Nomodule Build'
+      - 'Unit Tests':
+          <<: *push_and_pr_builds
+      - 'Unminified Tests':
+          <<: *push_and_pr_builds
+          requires:
+            - 'Unminified Build'
+      - 'Nomodule Tests':
+          <<: *push_and_pr_builds
+          requires:
+            - 'Nomodule Build'
+      - 'Module Tests':
+          <<: *push_and_pr_builds
+          requires:
+            - 'Nomodule Build'
+            - 'Module Build'
+      - 'End-to-End Tests':
+          <<: *push_and_pr_builds
+          requires:
+            - 'Nomodule Build'
+      # TODO(wg-performance, #12128): This takes 30 mins and fails regularly.
+      # - 'Performance Tests':
+      #     <<: *push_builds_only
+      #     requires:
+      #       - 'Nomodule Build'
+      - 'Experiment A Tests':
+          <<: *push_builds_only
+      - 'Experiment B Tests':
+          <<: *push_builds_only
+      - 'Experiment C Tests':
+          <<: *push_builds_only

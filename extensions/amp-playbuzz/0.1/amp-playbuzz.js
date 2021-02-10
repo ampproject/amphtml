@@ -49,8 +49,11 @@ import {
 } from '../../../src/url';
 import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {isExperimentOn} from '../../../src/experiments';
 import {logo, showMoreArrow} from './images';
+import {
+  observeWithSharedInOb,
+  unobserveWithSharedInOb,
+} from '../../../src/viewport-observer';
 import {removeElement} from '../../../src/dom';
 
 class AmpPlaybuzz extends AMP.BaseElement {
@@ -79,6 +82,9 @@ class AmpPlaybuzz extends AMP.BaseElement {
     /** @private {?boolean} */
     this.iframeLoaded_ = false;
 
+    /** @private {?boolean} */
+    this.inViewport_ = false;
+
     /** @private {Array<Function>} */
     this.unlisteners_ = [];
 
@@ -99,13 +105,6 @@ class AmpPlaybuzz extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    // EXPERIMENT
-    // AMP.toggleExperiment(EXPERIMENT, true); //for dev
-    userAssert(
-      isExperimentOn(this.win, 'amp-playbuzz'),
-      'Enable amp-playbuzz experiment'
-    );
-
     const e = this.element;
     const src = e.getAttribute('src');
     const itemId = e.getAttribute('data-item');
@@ -181,6 +180,10 @@ class AmpPlaybuzz extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    observeWithSharedInOb(
+      this.element,
+      (inViewport) => (this.inViewport_ = inViewport)
+    );
     const iframe = this.element.ownerDocument.createElement('iframe');
     this.iframe_ = iframe;
     iframe.setAttribute('scrolling', 'no');
@@ -199,21 +202,19 @@ class AmpPlaybuzz extends AMP.BaseElement {
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
 
-    return (this.iframePromise_ = this.loadPromise(iframe).then(
-      function () {
-        this.iframeLoaded_ = true;
-        this.attemptChangeHeight(dev().assertNumber(this.itemHeight_)).catch(
-          () => {
-            /* die */
-          }
-        );
+    return (this.iframePromise_ = this.loadPromise(iframe).then(() => {
+      this.iframeLoaded_ = true;
+      this.attemptChangeHeight(dev().assertNumber(this.itemHeight_)).catch(
+        () => {
+          /* die */
+        }
+      );
 
-        const unlisten = this.getViewport().onChanged(
-          this.sendScrollDataToItem_.bind(this)
-        );
-        this.unlisteners_.push(unlisten);
-      }.bind(this)
-    ));
+      const unlisten = this.getViewport().onChanged(
+        this.sendScrollDataToItem_.bind(this)
+      );
+      this.unlisteners_.push(unlisten);
+    }));
   }
 
   /** @return {!Element} @private */
@@ -298,7 +299,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
    * @param {{height: number, left: number, relayoutAll: boolean, top: number, velocity: number, width: number }} changeEvent
    */
   sendScrollDataToItem_(changeEvent) {
-    if (!this.isInViewport()) {
+    if (!this.inViewport_) {
       return;
     }
 
@@ -321,6 +322,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
+    unobserveWithSharedInOb(this.element);
     this.unlisteners_.forEach((unlisten) => unlisten());
     this.unlisteners_.length = 0;
 

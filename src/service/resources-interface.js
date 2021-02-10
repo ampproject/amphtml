@@ -48,7 +48,6 @@ export class ResourcesInterface {
   /**
    * Returns a list of resources.
    * @return {!Array<!./resource.Resource>}
-   * @export
    */
   get() {}
 
@@ -110,7 +109,6 @@ export class ResourcesInterface {
    * @param {boolean} layout
    * @param {number=} opt_parentPriority
    * @param {boolean=} opt_forceOutsideViewport
-   * @package
    */
   scheduleLayoutOrPreload(
     resource,
@@ -183,11 +181,5 @@ export class ResourcesInterface {
    * @return {boolean}
    */
   isIntersectionExperimentOn() {}
-
-  /**
-   * Returns the percent of resources that were laid out after entering viewport.
-   * @return {number}
-   */
-  getSlowElementRatio() {}
 }
 /* eslint-enable no-unused-vars */

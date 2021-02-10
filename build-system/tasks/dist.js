@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-const colors = require('ansi-colors');
+const colors = require('kleur/colors');
 const file = require('gulp-file');
 const fs = require('fs-extra');
 const gulp = require('gulp');
-const log = require('fancy-log');
 const {
   bootstrapThirdPartyFrames,
   compileAllJs,
@@ -32,6 +31,10 @@ const {
   toPromise,
 } = require('./helpers');
 const {
+  cleanupBuildDir,
+  printClosureConcurrency,
+} = require('../compile/compile');
+const {
   createCtrlcHandler,
   exitCtrlcHandler,
 } = require('../common/ctrlcHandler');
@@ -39,10 +42,10 @@ const {
   displayLifecycleDebugging,
 } = require('../compile/debug-compilation-lifecycle');
 const {buildExtensions, parseExtensionFlags} = require('./extension-helpers');
-const {cleanupBuildDir} = require('../compile/compile');
 const {compileCss, cssEntryPoints} = require('./css');
 const {compileJison} = require('./compile-jison');
 const {formatExtractedMessages} = require('../compile/log-messages');
+const {log} = require('../common/logging');
 const {maybeUpdatePackages} = require('./update-packages');
 const {VERSION} = require('../compile/internal-version');
 
@@ -130,6 +133,7 @@ async function doDist(extraArgs = {}) {
     minify: true,
     watch: argv.watch,
   };
+  printClosureConcurrency();
   printNobuildHelp();
   printDistHelp(options);
   await runPreDistSteps(options);
@@ -142,8 +146,8 @@ async function doDist(extraArgs = {}) {
     await buildLoginDone('0.1');
     await buildWebPushPublisherFiles();
     await compileAllJs(options);
-    await buildExtensions(options);
   }
+  await buildExtensions(options);
 
   if (!argv.core_runtime_only) {
     await formatExtractedMessages();
@@ -420,6 +424,7 @@ dist.flags = {
   fortesting: '  Compiles production binaries for local testing',
   noconfig: '  Compiles production binaries without applying AMP_CONFIG',
   config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
+  coverage: '  Instruments compiled code for collecting coverage information',
   extensions: '  Builds only the listed extensions.',
   extensions_from: '  Builds only the extensions from the listed AMP(s).',
   noextensions: '  Builds with no extensions.',

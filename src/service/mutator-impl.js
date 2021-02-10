@@ -101,12 +101,6 @@ export class MutatorImpl {
   expandElement(element) {
     const resource = Resource.forElement(element);
     resource.completeExpand();
-
-    const owner = resource.getOwner();
-    if (owner) {
-      owner.expandedCallback(element);
-    }
-
     this.resources_.schedulePass(FOUR_FRAME_DELAY_);
   }
 
@@ -403,10 +397,10 @@ export class MutatorImpl {
     opt_callback
   ) {
     resource.resetPendingChangeSize();
-    const layoutBox = resource.getPageLayoutBox();
+    const layoutSize = resource.getLayoutSize();
     if (
-      (newHeight === undefined || newHeight == layoutBox.height) &&
-      (newWidth === undefined || newWidth == layoutBox.width) &&
+      (newHeight === undefined || newHeight == layoutSize.height) &&
+      (newWidth === undefined || newWidth == layoutSize.width) &&
       (marginChange === undefined ||
         !areMarginsChanged(
           marginChange.currentMargins,

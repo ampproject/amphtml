@@ -34,7 +34,7 @@ function getExperimentGlobals() {
 
 module.exports = {
   'root': true,
-  'parser': 'babel-eslint',
+  'parser': '@babel/eslint-parser',
   'plugins': [
     'chai-expect',
     'google-camelcase',
@@ -80,6 +80,7 @@ module.exports = {
       'pragma': 'Preact',
     },
   },
+  'reportUnusedDisableDirectives': true,
   'rules': {
     'chai-expect/missing-assertion': 2,
     'chai-expect/no-inner-compare': 2,
@@ -97,7 +98,6 @@ module.exports = {
           'export',
           'final',
           'nocollapse',
-          'noinline',
           'package',
           'record',
           'restricted',
@@ -128,6 +128,7 @@ module.exports = {
     'local/html-template': 2,
     'local/is-experiment-on': 2,
     'local/json-configuration': 2,
+    'local/jss-animation-name': 2,
     'local/no-array-destructuring': 2,
     'local/no-arrow-on-register-functions': 2,
     'local/no-bigint': 2,
@@ -145,6 +146,7 @@ module.exports = {
     'local/no-import': 2,
     'local/no-import-meta': 2,
     'local/no-import-rename': 2,
+    'local/no-invalid-this': 2,
     'local/no-is-amp-alt': 2,
     'local/no-log-array': 2,
     'local/no-mixed-interpolation': 2,
@@ -187,7 +189,7 @@ module.exports = {
     'no-lone-blocks': 2,
     'no-native-reassign': 2,
     'no-redeclare': 2,
-    'no-restricted-globals': [2, 'error', 'event'],
+    'no-restricted-globals': [2, 'error', 'event', 'Animation'],
     'no-script-url': 2,
     'no-self-compare': 2,
     'no-sequences': 2,
@@ -271,9 +273,11 @@ module.exports = {
         'local/always-call-chai-methods': 2,
         'local/no-bigint': 0,
         'local/no-dynamic-import': 0,
+        'local/no-for-of-statement': 0,
         'local/no-function-async': 0,
         'local/no-function-generator': 0,
         'local/no-import-meta': 0,
+        'local/no-invalid-this': 0,
         'jsdoc/check-param-names': 0,
         'jsdoc/check-tag-names': 0,
         'jsdoc/check-types': 0,
@@ -302,7 +306,7 @@ module.exports = {
       },
     },
     {
-      'files': ['babel.config.js', '**/.eslintrc.js'],
+      'files': ['babel.config.js', '**/.eslintrc.js', 'package-scripts.js'],
       'globals': {
         'module': false,
         'process': false,

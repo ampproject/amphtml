@@ -42,7 +42,7 @@ export function setScopeSelectorSupportedForTesting(val) {
 
 /**
  * Test that the :scope selector is supported and behaves correctly.
- * @param {!Element} el
+ * @param {!Element|!ShadowRoot} el
  * @return {boolean}
  */
 export function isScopeSelectorSupported(el) {
@@ -55,7 +55,7 @@ export function isScopeSelectorSupported(el) {
 
 /**
  * Test that the :scope selector is supported and behaves correctly.
- * @param {!Element} el
+ * @param {!Element|!ShadowRoot} el
  * @return {boolean}
  */
 function testScopeSelector(el) {

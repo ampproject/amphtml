@@ -16,7 +16,6 @@
 
 import {Services} from '../../../src/services';
 import {dev, devAssert} from '../../../src/log';
-import {startsWith} from '../../../src/string';
 import {toWin} from '../../../src/types';
 
 /**
@@ -110,7 +109,7 @@ function createFormProxyConstr(win) {
         // Exclude constants.
         name.toUpperCase() == name ||
         // Exclude on-events.
-        startsWith(name, 'on') ||
+        name.startsWith('on') ||
         // Exclude properties that already been created.
         ObjectProto.hasOwnProperty.call(FormProxyProto, name) ||
         // Exclude some properties. Currently only used for testing.
@@ -171,7 +170,7 @@ function setupLegacyProxy(form, proxy) {
       // Exclude constants.
       name.toUpperCase() == name ||
       // Exclude on-events.
-      startsWith(name, 'on')
+      name.startsWith('on')
     ) {
       continue;
     }

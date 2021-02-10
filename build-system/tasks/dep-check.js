@@ -20,7 +20,6 @@ const browserify = require('browserify');
 const depCheckConfig = require('../test-configs/dep-check-config');
 const fs = require('fs-extra');
 const gulp = require('gulp');
-const log = require('fancy-log');
 const minimatch = require('minimatch');
 const path = require('path');
 const source = require('vinyl-source-stream');
@@ -31,8 +30,8 @@ const {
 } = require('../common/ctrlcHandler');
 const {compileJison} = require('./compile-jison');
 const {css} = require('./css');
-const {cyan, red, yellow} = require('ansi-colors');
-const {isTravisBuild} = require('../common/travis');
+const {cyan, red, yellow} = require('kleur/colors');
+const {log, logLocalDev} = require('../common/logging');
 
 const root = process.cwd();
 const absPathRegExp = new RegExp(`^${root}/`);
@@ -208,7 +207,7 @@ function getGraph(entryModule) {
   module.deps = [];
 
   // TODO(erwinm): Try and work this in with `gulp build` so that
-  // we're not running browserify twice on travis.
+  // we're not running browserify twice during CI.
   const bundler = browserify(entryModule, {
     debug: true,
     fast: true,
@@ -306,9 +305,7 @@ async function depCheck() {
   const handlerProcess = createCtrlcHandler('dep-check');
   await css();
   await compileJison();
-  if (!isTravisBuild()) {
-    log('Checking dependencies...');
-  }
+  logLocalDev('Checking dependencies...');
   return getSrcs()
     .then((entryPoints) => {
       // This check is for extension folders that actually dont have

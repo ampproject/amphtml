@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-// TODO(powerivq)
-// Resource.setOwner, Resource.getOwner should be moved here.
-// ResourceState.NOT_BUILT might not be needed here.
 import {OwnersInterface} from './owners-interface';
-import {Resource, ResourceState} from './resource';
+import {Resource} from './resource';
 import {Services} from '../services';
 import {devAssert} from '../log';
 import {isArray} from '../types';
@@ -101,40 +98,10 @@ export class OwnersImpl {
   }
 
   /** @override */
-  updateInViewport(parentElement, subElements, inLocalViewport) {
-    this.updateInViewportForSubresources_(
-      this.resources_.getResourceForElement(parentElement),
-      elements(subElements),
-      inLocalViewport
-    );
-  }
-
-  /** @override */
   requireLayout(element, opt_parentPriority) {
     const promises = [];
     this.discoverResourcesForElement_(element, (resource) => {
-      if (resource.getState() == ResourceState.LAYOUT_COMPLETE) {
-        return;
-      }
-      if (resource.getState() != ResourceState.LAYOUT_SCHEDULED) {
-        promises.push(
-          resource.whenBuilt().then(() => {
-            resource.measure();
-            if (!resource.isDisplayed()) {
-              return;
-            }
-            this.resources_.scheduleLayoutOrPreload(
-              resource,
-              /* layout */ true,
-              opt_parentPriority,
-              /* forceOutsideViewport */ true
-            );
-            return resource.loadedOnce();
-          })
-        );
-      } else if (resource.isDisplayed()) {
-        promises.push(resource.loadedOnce());
-      }
+      promises.push(resource.element.ensureLoaded());
     });
     return Promise.all(promises);
   }
@@ -196,59 +163,7 @@ export class OwnersImpl {
    */
   scheduleLayoutOrPreloadForSubresources_(parentResource, layout, subElements) {
     this.findResourcesInElements_(parentResource, subElements, (resource) => {
-      if (resource.getState() === ResourceState.NOT_BUILT) {
-        resource.whenBuilt().then(() => {
-          this.measureAndTryScheduleLayout_(
-            resource,
-            /* isPreload */ !layout,
-            parentResource.getLayoutPriority()
-          );
-        });
-      } else {
-        this.measureAndTryScheduleLayout_(
-          resource,
-          /* isPreload */ !layout,
-          parentResource.getLayoutPriority()
-        );
-      }
-    });
-  }
-
-  /**
-   * @param {!Resource} resource
-   * @param {boolean} isPreload
-   * @param {number=} opt_parentPriority
-   * @private
-   */
-  measureAndTryScheduleLayout_(resource, isPreload, opt_parentPriority) {
-    resource.measure();
-    if (
-      resource.getState() === ResourceState.READY_FOR_LAYOUT &&
-      resource.isDisplayed()
-    ) {
-      this.resources_.scheduleLayoutOrPreload(
-        resource,
-        /* layout */ !isPreload,
-        opt_parentPriority
-      );
-    }
-  }
-
-  /**
-   * Updates inViewport state for the specified sub-resources of a resource.
-   * @param {!Resource} parentResource
-   * @param {!Array<!Element>} subElements
-   * @param {boolean} inLocalViewport
-   * @private
-   */
-  updateInViewportForSubresources_(
-    parentResource,
-    subElements,
-    inLocalViewport
-  ) {
-    const inViewport = parentResource.isInViewport() && inLocalViewport;
-    this.findResourcesInElements_(parentResource, subElements, (resource) => {
-      resource.setInViewport(inViewport);
+      resource.element.ensureLoaded(parentResource.getLayoutPriority());
     });
   }
 }

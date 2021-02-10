@@ -14,53 +14,59 @@
  * limitations under the License.
  */
 
-.i-amphtml-story-desktop-fullbleed .i-amphtml-story-button-container,
-.i-amphtml-story-desktop-panels .i-amphtml-story-button-container {
+/*
+ * In desktop panel mode i-amphtml-story-button-container acts as a sentinel
+ * and covers the previous and next pages.
+ * In mobile it is focusable for screen readers and the buttons are hidden.
+ * In desktop full bleed it is not focusable since the buttons are visible.
+ */
+.i-amphtml-story-button-container {
+  cursor: pointer !important;
   position: absolute !important;
+  width: 30px !important;
   top: 0 !important;
   bottom: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
+  height: calc(100vh - 150px) !important;
+  margin: auto 0 !important;
+  background: none !important;
+  transition: 150ms opacity linear, 150ms visibility linear !important;
+  outline: none !important;
   z-index: 100002 !important;
+}
+
+/* Hide pointer events on mobile so only visible to screenreaders like TalkBack */
+amp-story:not([desktop]) .i-amphtml-story-button-container {
   pointer-events: none !important;
-  display: block !important;
 }
 
-.i-amphtml-story-button-move,
-.i-amphtml-story-fwd-next > .i-amphtml-story-page-sentinel,
-.i-amphtml-story-back-prev > .i-amphtml-story-page-sentinel {
-  pointer-events: all !important;
-}
-
+.next-container,
 .i-amphtml-story-button-container.next-container > .i-amphtml-story-button-move {
   left: auto !important;
   right: 0 !important;
 }
 
-/** This is needed to overwrite position of replay and read more button at the end of the the story. */
+[dir=rtl] .next-container,
 [dir=rtl] .i-amphtml-story-button-container.next-container > .i-amphtml-story-button-move {
-  right: auto !important;
   left: 0 !important;
+  right: auto !important;
 }
 
-.i-amphtml-story-page-sentinel {
-  position: absolute !important;
-  width: 100vw !important;
-  height: 100vh !important;
-  top: 0 !important;
-  bottom: 0 !important;
-  margin-left: -32px !important;
-  z-index: 100002 !important;
-  cursor: pointer;
+.i-amphtml-story-desktop-fullbleed .i-amphtml-story-button-container {
+  pointer-events: none !important;
 }
 
-.i-amphtml-story-desktop-fullbleed .i-amphtml-story-page-sentinel {
+.i-amphtml-story-button-container.prev-container.i-amphtml-story-back-close-bookend {
+  pointer-events: none !important;
+}
+
+/* Navigation buttons. These are only displayed on desktop. */
+.i-amphtml-story-button-move {
   display: none !important;
 }
 
-/* Navigation buttons */
-.i-amphtml-story-button-move {
-  position: absolute!important;
+[desktop] .i-amphtml-story-button-move {
+  display: flex !important;
+  position: fixed!important;
   top: 0!important;
   bottom: 0!important;
   margin: auto 40px!important;
@@ -71,13 +77,12 @@
   background-color: #fff!important;
   background-repeat: no-repeat!important;
   background-size: 12px 17px!important;
-  display: flex!important;
   justify-content: center!important;
   align-items: center!important;
   opacity: .5!important;
   transition: 150ms opacity linear, 350ms transform linear!important;
   cursor: pointer!important;
-  z-index: 100002!important;
+  pointer-events: all!important;
 }
 
 .i-amphtml-story-desktop-fullbleed .i-amphtml-story-button-move {
@@ -117,6 +122,10 @@
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="48px" height="48px" viewBox="0 0 48 48" fill="#FFFFFF"><path d="M11.76 8.24L27.51 24 11.76 39.76 16 44l20-20L16 4z"/><path fill="none" d="M0 0h48v48H0z"/></svg>') !important;
 }
 
+.i-amphtml-story-fwd-replay {
+  pointer-events: none !important;
+}
+
 .i-amphtml-story-fwd-replay > .i-amphtml-story-button-move {
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="32px" height="32px" viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/><path d="M0 0h24v24H0z" fill="none"/></svg>') !important;
   background-position: center center;
@@ -139,35 +148,25 @@
   background-size: auto !important;
 }
 
-/* On forward button mouseover */
-.i-amphtml-story-desktop-panels.i-amphtml-story-next-hover > .next-container > .i-amphtml-story-button-move,
-.i-amphtml-story-desktop-panels.i-amphtml-story-prev-hover > .prev-container > .i-amphtml-story-button-move {
-  transform: scale(1.1) !important;
-  opacity: 1!important;
-}
-
 /* Do not display when hidden. */
-.i-amphtml-story-prev-hover > .i-amphtml-story-button-hidden >
-    .i-amphtml-story-button-move,
-.i-amphtml-story-next-hover > .i-amphtml-story-button-hidden >
-    .i-amphtml-story-button-move {
+.i-amphtml-story-button-hidden {
+  visibility: hidden !important;
   opacity: 0 !important;
-}
-
-.i-amphtml-story-button-hidden > .i-amphtml-story-button-move {
-  cursor: default !important;
   pointer-events: none !important;
-  opacity: 0 !important;
 }
 
-/* On forward (next) button mouseover */
+/* Mouseover states */
 .i-amphtml-story-desktop-panels.i-amphtml-story-next-hover > .i-amphtml-story-fwd-next >
     .i-amphtml-story-button-move {
   transform: translateX(8px)!important;
   opacity: 1!important;
 }
 
-/* On back button mouseover */
+.i-amphtml-story-desktop-panels.i-amphtml-story-next-hover > .i-amphtml-story-fwd-replay >
+    .i-amphtml-story-button-move {
+  opacity: 1 !important;
+}
+
 .i-amphtml-story-desktop-panels.i-amphtml-story-prev-hover > .i-amphtml-story-back-prev >
     .i-amphtml-story-button-move,
 .i-amphtml-story-desktop-panels.i-amphtml-story-prev-hover > .i-amphtml-story-back-close-bookend  >

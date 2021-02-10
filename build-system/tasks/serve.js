@@ -19,9 +19,10 @@ const connect = require('gulp-connect');
 const debounce = require('debounce');
 const globby = require('globby');
 const header = require('connect-header');
-const log = require('fancy-log');
 const minimist = require('minimist');
 const morgan = require('morgan');
+const open = require('opn');
+const os = require('os');
 const path = require('path');
 const {
   buildNewServer,
@@ -34,12 +35,16 @@ const {
   preBuildExtensions,
 } = require('../server/lazy-build');
 const {createCtrlcHandler} = require('../common/ctrlcHandler');
-const {cyan, green, red} = require('ansi-colors');
+const {cyan, green, red} = require('kleur/colors');
 const {logServeMode, setServeMode} = require('../server/app-utils');
+const {log} = require('../common/logging');
 const {watchDebounceDelay} = require('./helpers');
 const {watch} = require('gulp');
 
 const argv = minimist(process.argv.slice(2), {string: ['rtv']});
+
+const HOST = argv.host || '0.0.0.0';
+const PORT = argv.port || 8000;
 
 // Used for logging.
 let url = null;
@@ -100,8 +105,8 @@ async function startServer(
   const options = {
     name: 'AMP Dev Server',
     root: process.cwd(),
-    host: argv.host || 'localhost',
-    port: argv.port || 8000,
+    host: HOST,
+    port: PORT,
     https: argv.https,
     preferHttp1: true,
     silent: true,
@@ -110,8 +115,26 @@ async function startServer(
   };
   connect.server(options, started);
   await startedPromise;
-  url = `http${options.https ? 's' : ''}://${options.host}:${options.port}`;
-  log(green('Started'), cyan(options.name), green('at'), cyan(url));
+
+  function makeUrl(host) {
+    return `http${options.https ? 's' : ''}://${host}:${options.port}`;
+  }
+
+  url = makeUrl(options.host);
+  log(green('Started'), cyan(options.name), green('at:'));
+  log('\t', cyan(url));
+  for (const device of Object.entries(os.networkInterfaces())) {
+    for (const detail of device[1]) {
+      if (detail.family === 'IPv4') {
+        log('\t', cyan(makeUrl(detail.address)));
+      }
+    }
+  }
+  if (argv.coverage == 'live') {
+    const covUrl = `${url}/coverage`;
+    log(green('Collecting live code coverage at'), cyan(covUrl));
+    await Promise.all([open(covUrl), open(url)]);
+  }
   logServeMode();
 }
 
@@ -191,6 +214,8 @@ module.exports = {
   doServe,
   startServer,
   stopServer,
+  HOST,
+  PORT,
 };
 
 /* eslint "google-camelcase/google-camelcase": 0 */
@@ -208,4 +233,7 @@ serve.flags = {
   esm: '  Serve ESM JS (requires the use of --new_server)',
   cdn: '  Serve current prod JS',
   rtv: '  Serve JS from the RTV provided',
+  coverage:
+    '  Serve instrumented code to collect coverage info; use ' +
+    '--coverage=live to auto-report coverage on page unload',
 };

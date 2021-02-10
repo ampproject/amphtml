@@ -30,7 +30,6 @@ import {getMode} from '../mode';
 import {installStylesForDoc} from '../style-installer';
 import {map} from '../utils/object';
 import {registerServiceBuilder, registerServiceBuilderForDoc} from '../service';
-import {startsWith} from '../string';
 
 export const LEGACY_ELEMENTS = ['amp-ad', 'amp-embed', 'amp-video'];
 const TAG = 'extensions';
@@ -104,7 +103,7 @@ export function isTemplateExtension(extensionId) {
  * @return {boolean}
  */
 function isIntermediateExtension(extensionId) {
-  return startsWith(extensionId, '_');
+  return extensionId.startsWith('_');
 }
 
 /**
@@ -607,6 +606,9 @@ export class Extensions {
     }
     scriptElement.setAttribute('data-script', extensionId);
     scriptElement.setAttribute('i-amphtml-inserted', '');
+    if (getMode().esm) {
+      scriptElement.setAttribute('type', 'module');
+    }
 
     // Propagate nonce to all generated script tags.
     const currentScript = this.win.document.head.querySelector('script[nonce]');

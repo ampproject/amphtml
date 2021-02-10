@@ -117,6 +117,7 @@
 }
 
 .i-amphtml-layout-fill,
+.i-amphtml-layout-fill.i-amphtml-notbuilt,
 [layout=fill]:not(.i-amphtml-layout-fill)
 {
   display: block;
@@ -152,6 +153,16 @@
 
 i-amphtml-sizer {
   display: block !important;
+}
+
+/*
+ * Disable `i-amphtml-sizer` when aspect ratio is supported by both the
+ * borwser and the optimizer.
+ */
+@supports (aspect-ratio: 1 / 1) {
+  i-amphtml-sizer.i-amphtml-disable-ar {
+    display: none !important;
+  }
 }
 
 .i-amphtml-fill-content,
@@ -311,9 +322,12 @@ amp-img:not(.i-amphtml-element)[i-amphtml-ssr] > img.i-amphtml-fill-content
 .i-amphtml-element > [placeholder],
 [layout]:not(.i-amphtml-element) > [placeholder],
 [width][height][sizes]:not([layout]):not(.i-amphtml-element) > [placeholder],
-[width][height][heights]:not([layout]):not(.i-amphtml-element) > [placeholder]
-{
+[width][height][heights]:not([layout]):not(.i-amphtml-element) > [placeholder] {
   display: block;
+  /* line-height:normal overrides line-height:0 from the "hide all children of
+     non-container text node children" rule. This avoids a minor content jump during
+     element build since placeholders should be fully visible. */
+  line-height: normal;
 }
 
 .i-amphtml-element > [placeholder].hidden,
@@ -509,11 +523,11 @@ amp-accordion > section {
 }
 
 /* Collapse content by default. */
-amp-accordion > section > :last-child {
+amp-accordion:not(.i-amphtml-built) > section > :last-child {
   display: none !important;
 }
 
 /* Expand content when needed. */
-amp-accordion > section[expanded] > :last-child {
+amp-accordion:not(.i-amphtml-built) > section[expanded] > :last-child {
   display: block !important;
 }
