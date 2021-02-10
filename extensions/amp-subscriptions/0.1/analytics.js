@@ -16,9 +16,6 @@
 
 import {dict} from '../../../src/utils/object';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {user} from '../../../src/log';
-
-const TAG = 'amp-subscriptions';
 
 /**
  * subscriptions-platform-* event names are deprecated in favor
@@ -125,8 +122,6 @@ export class SubscriptionAnalytics {
       eventType !== SubscriptionAnalyticsEvents.SUBSCRIPTIONS_ACTION
         ? eventType
         : eventType + `-${internalVars['action']}-${internalVars['status']}`;
-
-    user().info(TAG, loggedString, opt_vars || '');
 
     opt_vars = opt_vars || dict({});
     triggerAnalyticsEvent(

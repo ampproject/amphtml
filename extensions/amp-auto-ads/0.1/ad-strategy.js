@@ -17,10 +17,6 @@
 import {PlacementState} from './placement';
 import {SizeInfoDef} from './ad-network-config';
 import {tryResolve} from '../../../src/utils/promise';
-import {user} from '../../../src/log';
-
-/** @const */
-const TAG = 'amp-auto-ads';
 
 /**
  * @typedef {{
@@ -101,7 +97,6 @@ export class AdStrategy {
   placeNextAd_() {
     const nextPlacement = this.availablePlacements_.shift();
     if (!nextPlacement) {
-      user().info(TAG, 'unable to fulfill ad strategy');
       return Promise.resolve(false);
     }
     return nextPlacement

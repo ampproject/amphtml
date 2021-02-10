@@ -224,7 +224,6 @@ export class AccessSource {
       type = AccessType.CLIENT;
     }
     if (type == AccessType.CLIENT && this.isServerEnabled_) {
-      user().info(TAG, 'Forcing access type: SERVER');
       type = AccessType.SERVER;
     }
     return type;

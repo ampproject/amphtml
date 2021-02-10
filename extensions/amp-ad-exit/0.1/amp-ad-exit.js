@@ -305,7 +305,6 @@ export class AmpAdExit extends AMP.BaseElement {
   filter_(filters, event) {
     return filters.every((filter) => {
       const result = filter.filter(event);
-      user().info(TAG, `Filter '${filter.name}': ${result ? 'pass' : 'fail'}`);
       return result;
     });
   }

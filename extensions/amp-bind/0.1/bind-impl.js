@@ -1687,21 +1687,10 @@ export class Bind {
   debugPrintState_(opt_elementOrExpr) {
     if (opt_elementOrExpr) {
       if (typeof opt_elementOrExpr == 'string') {
-        const value = getValueForExpr(this.state_, opt_elementOrExpr);
-        user().info(TAG, value);
       } else if (opt_elementOrExpr.nodeType == Node.ELEMENT_NODE) {
         const element = user().assertElement(opt_elementOrExpr);
         this.debugPrintElement_(element);
-      } else {
-        user().info(
-          TAG,
-          'Invalid argument. Pass a JSON expression or an ' +
-            'element instead e.g. AMP.printState("foo.bar") or ' +
-            'AMP.printState($0) after selecting an element.'
-        );
       }
-    } else {
-      user().info(TAG, this.state_);
     }
   }
 
@@ -1715,7 +1704,6 @@ export class Bind {
       return boundElement.element == element;
     });
     if (index < 0) {
-      user().info(TAG, 'Element has no bindings:', element);
       return;
     }
     // Evaluate expressions in bindings in `element`.
@@ -1725,24 +1713,13 @@ export class Bind {
       const {expressionString} = boundProperty;
       promises.push(this.evaluateExpression_(expressionString, this.state_));
     });
-    // Print the map of attribute to expression value for `element`.
-    Promise.all(promises).then((results) => {
-      const output = map();
-      boundProperties.forEach((boundProperty, i) => {
-        const {property} = boundProperty;
-        output[property] = results[i];
-      });
-      user().info(TAG, output);
-    });
   }
 
   /**
    * @param {string} expression
    */
   debugEvaluate_(expression) {
-    this.evaluateExpression_(expression, this.state_).then((result) => {
-      user().info(TAG, result);
-    });
+    this.evaluateExpression_(expression, this.state_);
   }
 
   /**

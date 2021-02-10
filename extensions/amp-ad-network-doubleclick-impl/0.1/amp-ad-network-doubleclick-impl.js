@@ -758,7 +758,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       consentTuple.consentState == CONSENT_POLICY_STATE.UNKNOWN &&
       this.element.getAttribute('data-npa-on-unknown-consent') != 'true'
     ) {
-      user().info(TAG, 'Ad request suppressed due to unknown consent');
       this.getAdUrlDeferred.resolve('');
       return Promise.resolve('');
     }

@@ -518,9 +518,7 @@ export class MultidocManager {
         }),
         'Timeout reached waiting for visibility state change callback'
       )
-      .catch((error) => {
-        user().info(TAG, error);
-      });
+      .catch(() => {});
   }
 
   /**

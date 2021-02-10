@@ -18,7 +18,6 @@ import {Services} from '../services';
 import {TickLabel} from '../enums';
 import {htmlFor} from '../static-template';
 import {isExperimentOn} from '../experiments';
-import {user} from '../log';
 
 /** @const {number} */
 const NTH_FRAME = 200;
@@ -166,10 +165,6 @@ export class JankMeter {
           const span = this.win_.Math.floor(entries[i].duration / 50);
           if (entries[i].name == 'cross-origin-descendant') {
             this.longTaskChild_ += span;
-            user().info(
-              'LONGTASK',
-              `from child frame ${entries[i].duration}ms`
-            );
           } else {
             this.longTaskSelf_ += span;
           }

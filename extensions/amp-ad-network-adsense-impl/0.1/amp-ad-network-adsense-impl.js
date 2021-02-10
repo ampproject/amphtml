@@ -52,7 +52,7 @@ import {
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
 import {computedStyle, setStyles} from '../../../src/style';
-import {dev, devAssert, user} from '../../../src/log';
+import {dev, devAssert} from '../../../src/log';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {getAmpAdRenderOutsideViewport} from '../../amp-ad/0.1/concurrent-load';
 import {getData} from '../../../src/event-helper';
@@ -289,7 +289,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       consentState == CONSENT_POLICY_STATE.UNKNOWN &&
       this.element.getAttribute('data-npa-on-unknown-consent') != 'true'
     ) {
-      user().info(TAG, 'Ad request suppressed due to unknown consent');
       return Promise.resolve('');
     }
     // TODO: Check for required and allowed parameters. Probably use

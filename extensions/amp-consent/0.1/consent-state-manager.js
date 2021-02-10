@@ -397,13 +397,6 @@ export class ConsentInstance {
           // TODO: Good to have a way to inform CMP service in this case
           return;
         }
-        user().info(
-          TAG,
-          'Current consent information length exceeds %s ' +
-            'and will not be stored when the page is served ' +
-            'from a viewer that supports the Local Storage API.',
-          CONSENT_STORAGE_MAX
-        );
       }
       this.savedConsentInfo_ = consentInfo;
       storage.setNonBoolean(this.storageKey_, value);

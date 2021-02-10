@@ -312,7 +312,6 @@ export class AccessService {
    */
   start_() {
     if (!this.enabled_) {
-      user().info(TAG, 'Access is disabled - no "id=amp-access" element');
       return this;
     }
     this.startInternal_();

@@ -173,11 +173,6 @@ export class LinkerManager {
       const mergedConfig = {...defaultConfig, ...config[name]};
 
       if (mergedConfig['enabled'] !== true) {
-        user().info(
-          TAG,
-          'linker config for %s is not enabled and will be ignored.',
-          name
-        );
         return;
       }
 

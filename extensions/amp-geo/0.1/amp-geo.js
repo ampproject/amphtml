@@ -326,11 +326,6 @@ export class AmpGeo extends AMP.BaseElement {
       return Promise.resolve(null);
     }
 
-    user().info(
-      TAG,
-      'API request is being used for country, this may result in FOUC'
-    );
-
     return Services.timerFor(this.win)
       .timeoutPromise(
         API_TIMEOUT * 1000,

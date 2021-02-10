@@ -196,7 +196,6 @@ export class AmpAppBanner extends AbstractAppBanner {
 
   /** @override */
   layoutCallback() {
-    user().info(TAG, 'Only iOS or Android platforms are currently supported.');
     return this.hide_();
   }
 }
@@ -241,10 +240,6 @@ export class AmpIosAppBanner extends AbstractAppBanner {
     this.canShowBuiltinBanner_ =
       !this.viewer_.isEmbedded() && platform.isSafari();
     if (this.canShowBuiltinBanner_) {
-      user().info(
-        TAG,
-        'Browser supports builtin banners. Not rendering amp-app-banner.'
-      );
       this.hide_();
       return;
     }
@@ -401,10 +396,6 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
       !isProxyOrigin && !viewer.isEmbedded() && isChromeAndroid;
 
     if (this.canShowBuiltinBanner_) {
-      user().info(
-        TAG,
-        'Browser supports builtin banners. Not rendering amp-app-banner.'
-      );
       this.hide_();
       return;
     }
