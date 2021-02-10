@@ -17,7 +17,6 @@
 import {Deferred, tryResolve} from '../../../src/utils/promise';
 import {Sources} from './sources';
 import {isConnectedNode} from '../../../src/dom';
-import { BitrateManager } from '../../amp-video/0.1/flexible-bitrate';
 
 /**
  * The name for a boolean property on an element indicating whether that element

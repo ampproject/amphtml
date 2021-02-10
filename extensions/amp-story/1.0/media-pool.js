@@ -521,8 +521,14 @@ export class MediaPool {
       () => {
         if (placeholderEl.isBitrateManaged) {
           const bitrateManager = getBitrateManager(this.win_);
-          this.enqueueMediaElementTask_(placeholderEl, new UnmanageBitrateTask(bitrateManager));
-          this.enqueueMediaElementTask_(poolMediaEl, new ManageBitrateTask(bitrateManager));
+          this.enqueueMediaElementTask_(
+            placeholderEl,
+            new UnmanageBitrateTask(bitrateManager)
+          );
+          this.enqueueMediaElementTask_(
+            poolMediaEl,
+            new ManageBitrateTask(bitrateManager)
+          );
         }
         this.enqueueMediaElementTask_(
           poolMediaEl,
@@ -599,8 +605,14 @@ export class MediaPool {
     );
     if (poolMediaEl.isBitrateManaged) {
       const bitrateManager = getBitrateManager(this.win_);
-      this.enqueueMediaElementTask_(poolMediaEl, new UnmanageBitrateTask(bitrateManager));
-      this.enqueueMediaElementTask_(placeholderEl, new ManageBitrateTask(bitrateManager));
+      this.enqueueMediaElementTask_(
+        poolMediaEl,
+        new UnmanageBitrateTask(bitrateManager)
+      );
+      this.enqueueMediaElementTask_(
+        placeholderEl,
+        new ManageBitrateTask(bitrateManager)
+      );
     }
 
     this.resetPoolMediaElementSource_(poolMediaEl);
