@@ -659,10 +659,6 @@ export class AmpVideo extends AMP.BaseElement {
     this.installEventHandlers_();
     // When source changes, video needs to trigger loaded again.
     this.loadPromise(this.video_).then(() => this.onVideoLoaded_());
-
-    this.video_.addEventListener('progress', () =>
-      console.log(this.video_.buffered)
-    );
   }
 
   /** @private */

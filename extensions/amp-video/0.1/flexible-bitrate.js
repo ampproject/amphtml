@@ -35,6 +35,9 @@ const BITRATE_BY_EFFECTIVE_TYPE = {
   '5g': 5000,
 };
 
+/** @const {number} The percentage that videos need to be buffered to not downgrade them */
+const BUFFERED_THRESHOLD_PERCENTAGE = 0.8;
+
 /** @type {!BitrateManager|undefined} */
 let instance;
 /**
@@ -235,11 +238,17 @@ export class BitrateManager {
         this.videos_.splice(i, 1);
         return;
       }
-      if (!video.paused) {
+      if (
+        !video.paused ||
+        getBufferedPercentage(video) > BUFFERED_THRESHOLD_PERCENTAGE
+      ) {
         return;
       }
       this.sortSources_(video);
-      video.load();
+      // If video has metadata, load again. Avoid loading videos that are far or were unloaded.
+      if (video.readyState > 0) {
+        video.load();
+      }
     }
   }
 
@@ -311,4 +320,17 @@ function currentSource(video) {
       return source.src == video.currentSrc;
     })
   );
+}
+
+/**
+ * @private
+ * @param {!Element} videoEl
+ * @return {number}
+ */
+function getBufferedPercentage(videoEl) {
+  let bufferedSum = 0;
+  for (let i = 0; i < videoEl.buffered.length; i++) {
+    bufferedSum += videoEl.buffered.end(i) - videoEl.buffered.start(i);
+  }
+  return bufferedSum / videoEl.duration;
 }
