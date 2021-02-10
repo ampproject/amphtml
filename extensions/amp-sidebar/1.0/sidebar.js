@@ -16,13 +16,11 @@
 
 import * as Preact from '../../../src/preact';
 import {ContainWrapper} from '../../../src/preact/component';
-import {Keys} from '../../../src/utils/key-codes';
 import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
 import {forwardRef} from '../../../src/preact/compat';
 import {isRTL} from '../../../src/dom';
 import {
   useCallback,
-  useEffect,
   useImperativeHandle,
   useLayoutEffect,
   useRef,
@@ -36,7 +34,7 @@ const Side = {
   RIGHT: 'right',
 };
 
-/** @private @enum {string} */
+/** @private @enum {number} */
 const Direction = {
   OPENING: 0,
   CLOSING: 1,
