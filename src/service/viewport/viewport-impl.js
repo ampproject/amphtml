@@ -850,7 +850,6 @@ export class ViewportImpl {
   setViewportMetaString_(viewportMetaString) {
     const viewportMeta = this.getViewportMeta_();
     if (viewportMeta && viewportMeta.content != viewportMetaString) {
-      dev().fine(TAG_, 'changed viewport meta to:', viewportMetaString);
       viewportMeta.content = viewportMetaString;
       return true;
     }
@@ -943,20 +942,6 @@ export class ViewportImpl {
     const size = this.getSize();
     const scrollTop = this.getScrollTop();
     const scrollLeft = this.getScrollLeft();
-    dev().fine(
-      TAG_,
-      'changed event:',
-      'relayoutAll=',
-      relayoutAll,
-      'top=',
-      scrollTop,
-      'left=',
-      scrollLeft,
-      'bottom=',
-      scrollTop + size.height,
-      'velocity=',
-      velocity
-    );
     this.changeObservable_.fire({
       relayoutAll,
       top: scrollTop,
@@ -1010,10 +995,6 @@ export class ViewportImpl {
     if (now != referenceTime) {
       velocity = (newScrollTop - referenceTop) / (now - referenceTime);
     }
-    dev().fine(
-      TAG_,
-      'scroll: scrollTop=' + newScrollTop + '; velocity=' + velocity
-    );
     if (Math.abs(velocity) < 0.03) {
       this.changed_(/* relayoutAll */ false, velocity);
       this.scrollTracking_ = false;

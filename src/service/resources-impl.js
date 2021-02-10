@@ -287,7 +287,6 @@ export class ResourcesImpl {
     });
 
     this.viewer_.onRuntimeState((state) => {
-      dev().fine(TAG_, 'Runtime state:', state);
       this.isRuntimeOn_ = state;
       this.schedulePass(1);
     });
@@ -331,7 +330,6 @@ export class ResourcesImpl {
         const r = Resource.forElement(e.target);
         (e.isIntersecting ? inside : outside).push({e, id: r.debugid});
       });
-      dev().fine(TAG_, 'intersection', inside, outside);
     }
 
     this.intersectionObserverCallbackFired_ = true;
@@ -442,11 +440,9 @@ export class ResourcesImpl {
       !element.reconstructWhenReparented()
     ) {
       resource.requestMeasure();
-      dev().fine(TAG_, 'resource reused:', resource.debugid);
     } else {
       // Create and add a new resource.
       resource = new Resource(++this.resourceIdCounter_, element, this);
-      dev().fine(TAG_, 'resource added:', resource.debugid);
     }
     this.resources_.push(resource);
 
@@ -588,7 +584,6 @@ export class ResourcesImpl {
     if (!promise) {
       return null;
     }
-    dev().fine(TAG_, 'build resource:', resource.debugid);
     this.buildAttemptsCount_++;
     this.buildsThisPass_++;
     return promise.then(
@@ -634,14 +629,12 @@ export class ResourcesImpl {
       resource.layoutCanceled();
     }
     this.cleanupTasks_(resource, /* opt_removePending */ true);
-    dev().fine(TAG_, 'resource removed:', resource.debugid);
   }
 
   /** @override */
   upgraded(element) {
     const resource = Resource.forElement(element);
     this.buildOrScheduleBuildForResource_(resource);
-    dev().fine(TAG_, 'resource upgraded:', resource.debugid);
   }
 
   /** @override */
@@ -698,7 +691,6 @@ export class ResourcesImpl {
   /** @override */
   ampInitComplete() {
     this.ampInitialized_ = true;
-    dev().fine(TAG_, 'ampInitComplete');
     this.schedulePass();
   }
 
@@ -728,7 +720,6 @@ export class ResourcesImpl {
    */
   doPass() {
     if (!this.isRuntimeOn_) {
-      dev().fine(TAG_, 'runtime is off');
       return;
     }
 
@@ -765,22 +756,8 @@ export class ResourcesImpl {
         dict({'height': this.contentHeight_}),
         /* cancelUnsent */ true
       );
-      dev().fine(TAG_, 'document height on load: %s', this.contentHeight_);
     }
 
-    const viewportSize = this.viewport_.getSize();
-    dev().fine(
-      TAG_,
-      'PASS: visible=',
-      this.visible_,
-      ', relayoutAll=',
-      this.relayoutAll_,
-      ', relayoutTop=',
-      this.relayoutTop_,
-      ', viewportSize=',
-      viewportSize.width,
-      viewportSize.height
-    );
     this.pass_.cancel();
     this.vsyncScheduled_ = false;
 
@@ -799,7 +776,6 @@ export class ResourcesImpl {
             /* cancelUnsent */ true
           );
           this.contentHeight_ = measuredContentHeight;
-          dev().fine(TAG_, 'document height changed: %s', this.contentHeight_);
           this.viewport_.contentHeightChanged();
         }
       });
@@ -832,7 +808,6 @@ export class ResourcesImpl {
       // by now. This is mostly used to avoid measuring too many elements
       // individually. May not be called in shadow mode.
       this.ampdoc.signals().signal(READY_SCAN_SIGNAL);
-      dev().fine(TAG_, 'signal: ready-scan');
     }
   }
 
@@ -872,11 +847,6 @@ export class ResourcesImpl {
       now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ * 2;
 
     if (this.requestsChangeSize_.length > 0) {
-      dev().fine(
-        TAG_,
-        'change size requests:',
-        this.requestsChangeSize_.length
-      );
       const requestsChangeSize = this.requestsChangeSize_;
       this.requestsChangeSize_ = [];
 
@@ -1170,7 +1140,6 @@ export class ResourcesImpl {
           r.unload();
           this.cleanupTasks_(r);
         });
-        dev().fine(TAG_, 'unload:', resources);
       });
     }
   }
@@ -1238,9 +1207,6 @@ export class ResourcesImpl {
           continue;
         }
         const premeasured = r.hasBeenPremeasured();
-        if (requested) {
-          dev().fine(TAG_, 'force remeasure:', r.debugid);
-        }
         // Immediately measure (vs. waiting for async premeasure) for certain
         // elements with sensitive time-to-measure.
         const expediteFirstMeasure =
@@ -1397,7 +1363,6 @@ export class ResourcesImpl {
           r.isDisplayed() &&
           r.idleRenderOutsideViewport()
         ) {
-          dev().fine(TAG_, 'idleRenderOutsideViewport layout:', r.debugid);
           this.scheduleLayoutOrPreload(r, /* layout */ false);
           idleScheduledCount++;
         }
@@ -1415,7 +1380,6 @@ export class ResourcesImpl {
           !r.hasOwner() &&
           r.isDisplayed()
         ) {
-          dev().fine(TAG_, 'idle layout:', r.debugid);
           this.scheduleLayoutOrPreload(r, /* layout */ false);
           idleScheduledCount++;
         }
@@ -1462,17 +1426,6 @@ export class ResourcesImpl {
       if (!this.removeTaskTimeout_) {
         timeout = this.calcTaskTimeout_(task);
       }
-      dev().fine(
-        TAG_,
-        'peek from queue:',
-        task.id,
-        'sched at',
-        task.scheduleTime,
-        'score',
-        this.boundTaskScorer_(task),
-        'timeout',
-        timeout
-      );
       if (!this.removeTaskTimeout_) {
         if (timeout > 16) {
           break;
@@ -1513,7 +1466,6 @@ export class ResourcesImpl {
         ) {
           task.promise = task.callback();
           task.startTime = now;
-          dev().fine(TAG_, 'exec:', task.id, 'at', task.startTime);
           this.exec_.enqueue(task);
           task.promise
             .then(
@@ -1522,7 +1474,6 @@ export class ResourcesImpl {
             )
             .catch(/** @type {function (*)} */ (reportError));
         } else {
-          dev().fine(TAG_, 'cancelled', task.id);
           resource.layoutCanceled();
         }
       }
@@ -1530,14 +1481,6 @@ export class ResourcesImpl {
       task = this.queue_.peek(this.boundTaskScorer_);
       timeout = -1;
     }
-
-    dev().fine(
-      TAG_,
-      'queue size:',
-      this.queue_.getSize(),
-      'exec size:',
-      this.exec_.getSize()
-    );
 
     if (!this.removeTaskTimeout_) {
       if (timeout >= 0) {
@@ -1785,7 +1728,6 @@ export class ResourcesImpl {
       startTime: 0,
       promise: null,
     };
-    dev().fine(TAG_, 'schedule:', task.id, 'at', task.scheduleTime);
 
     // Only schedule a new task if there's no one enqueued yet or if this task
     // has a higher priority.
@@ -1841,13 +1783,7 @@ export class ResourcesImpl {
           delay = Math.min(delay, MUTATE_DEFER_DELAY_);
         }
         if (this.visible_) {
-          if (this.schedulePass(delay)) {
-            dev().fine(TAG_, 'next pass:', delay);
-          } else {
-            dev().fine(TAG_, 'pass already scheduled');
-          }
-        } else {
-          dev().fine(TAG_, 'document is not visible: no scheduling');
+          this.schedulePass(delay);
         }
         this.firstPassDone_.resolve();
       }

@@ -15,7 +15,6 @@
  */
 import { dev, user } from '../../../../../../../src/log';
 dev().info;
-user().fine;
 
 function hello() {
   user().error('Should not be removed');

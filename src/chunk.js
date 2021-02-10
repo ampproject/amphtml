@@ -15,16 +15,10 @@
  */
 
 import {Services} from './services';
-import {dev} from './log';
 import {getData} from './event-helper';
 import {getServiceForDoc, registerServiceBuilderForDoc} from './service';
 import {makeBodyVisibleRecovery} from './style-installer';
 import PriorityQueue from './utils/priority-queue';
-
-/**
- * @const {string}
- */
-const TAG = 'CHUNK';
 
 /**
  * @type {boolean}
@@ -434,14 +428,6 @@ class Chunks {
         .then(() => {
           this.scheduledImmediateInvocation_ = false;
           this.durationOfLastExecution_ += Date.now() - before;
-          dev().fine(
-            TAG,
-            t.getName_(),
-            'Chunk duration',
-            Date.now() - before,
-            this.durationOfLastExecution_
-          );
-
           this.schedule_();
         });
     }
@@ -543,19 +529,11 @@ export function onIdle(win, minimumTimeRemaining, timeout, fn) {
     if (info.timeRemaining() < minimumTimeRemaining) {
       const remainingTimeout = timeout - (Date.now() - startTime);
       if (remainingTimeout <= 0 || info.didTimeout) {
-        dev().fine(TAG, 'Timed out', timeout, info.didTimeout);
         fn(info);
       } else {
-        dev().fine(
-          TAG,
-          'Rescheduling with',
-          remainingTimeout,
-          info.timeRemaining()
-        );
         win.requestIdleCallback(rIC, {timeout: remainingTimeout});
       }
     } else {
-      dev().fine(TAG, 'Running idle callback with ', minimumTimeRemaining);
       fn(info);
     }
   }

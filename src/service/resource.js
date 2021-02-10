@@ -932,17 +932,10 @@ export class Resource {
 
     // Unwanted re-layouts are ignored.
     if (this.layoutCount_ > 0 && !this.element.isRelayoutNeeded()) {
-      dev().fine(
-        TAG,
-        "layout canceled since it wasn't requested:",
-        this.debugid,
-        this.state_
-      );
       this.state_ = ResourceState.LAYOUT_COMPLETE;
       return Promise.resolve();
     }
 
-    dev().fine(TAG, 'start layout:', this.debugid, 'count:', this.layoutCount_);
     this.layoutCount_++;
     this.state_ = ResourceState.LAYOUT_SCHEDULED;
     this.abortController_ = new AbortController();
@@ -993,10 +986,7 @@ export class Resource {
       ? ResourceState.LAYOUT_COMPLETE
       : ResourceState.LAYOUT_FAILED;
     this.lastLayoutError_ = opt_reason;
-    if (success) {
-      dev().fine(TAG, 'layout complete:', this.debugid);
-    } else {
-      dev().fine(TAG, 'loading failed:', this.debugid, opt_reason);
+    if (!success) {
       return Promise.reject(opt_reason);
     }
   }

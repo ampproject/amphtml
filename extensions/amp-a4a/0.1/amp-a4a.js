@@ -615,11 +615,6 @@ export class AmpA4A extends AMP.BaseElement {
       // TODO(levitzky): May need additional checks for other display:hidden cases.
       this.element.classList.contains('i-amphtml-hidden-by-media-query')
     ) {
-      dev().fine(
-        TAG,
-        'onLayoutMeasure canceled due height/width 0',
-        this.element
-      );
       return false;
     }
     if (!isAdPositionAllowed(this.element, this.win)) {

@@ -476,16 +476,7 @@ export class HistoryBindingNatural_ {
     history.pushState = this.historyPushState_.bind(this);
     history.replaceState = this.historyReplaceState_.bind(this);
 
-    this.popstateHandler_ = (e) => {
-      const event = /** @type {!PopStateEvent} */ (e);
-      const state = /** @type {!JsonObject} */ (event.state);
-      dev().fine(
-        TAG_,
-        'popstate event: ' +
-          this.win.history.length +
-          ', ' +
-          JSON.stringify(state)
-      );
+    this.popstateHandler_ = () => {
       this.onHistoryEvent_();
     };
     this.win.addEventListener('popstate', this.popstateHandler_);
@@ -594,10 +585,6 @@ export class HistoryBindingNatural_ {
   /** @private */
   onHistoryEvent_() {
     let state = this.getState_();
-    dev().fine(
-      TAG_,
-      'history event: ' + this.win.history.length + ', ' + JSON.stringify(state)
-    );
     const stackIndex = state ? state[HISTORY_PROP_] : undefined;
     let newStackIndex = this.stackIndex_;
     const waitingState = this.waitingState_;
@@ -797,13 +784,6 @@ export class HistoryBindingNatural_ {
       this.win.history.length - 1
     );
     if (this.stackIndex_ != historyState.stackIndex) {
-      dev().fine(
-        TAG_,
-        'stack index changed: ' +
-          this.stackIndex_ +
-          ' -> ' +
-          historyState.stackIndex
-      );
       this.stackIndex_ = historyState.stackIndex;
       if (this.onStateUpdated_) {
         this.onStateUpdated_(historyState);
@@ -1056,7 +1036,6 @@ export class HistoryBindingVirtual_ {
   updateHistoryState_(state) {
     const {stackIndex} = state;
     if (this.stackIndex_ != stackIndex) {
-      dev().fine(TAG_, `stackIndex: ${this.stackIndex_} -> ${stackIndex}`);
       this.stackIndex_ = stackIndex;
       if (this.onStateUpdated_) {
         this.onStateUpdated_(state);

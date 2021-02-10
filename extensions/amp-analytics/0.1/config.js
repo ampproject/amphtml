@@ -19,11 +19,11 @@ import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {calculateScriptBaseUrl} from '../../../src/service/extension-location';
 import {deepMerge, dict, hasOwn} from '../../../src/utils/object';
-import {dev, user, userAssert} from '../../../src/log';
 import {getChildJsonConfig} from '../../../src/json';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject, toWin} from '../../../src/types';
 import {isCanary} from '../../../src/experiments';
+import {user, userAssert} from '../../../src/log';
 import {variableServiceForDoc} from './variables';
 
 const TAG = 'amp-analytics/config';
@@ -111,7 +111,6 @@ export class AnalyticsConfig {
     const vendorUrl = this.getVendorUrl_(type);
 
     const TAG = this.getName_();
-    dev().fine(TAG, 'Fetching vendor config', vendorUrl);
 
     return Services.xhrFor(toWin(this.win_))
       .fetchJson(vendorUrl, {ampCors: false})
@@ -119,7 +118,6 @@ export class AnalyticsConfig {
       .then(
         (jsonValue) => {
           this.vendorConfig_ = jsonValue || dict();
-          dev().fine(TAG, 'Vendor config loaded for ' + type, jsonValue);
         },
         (err) => {
           user().error(TAG, 'Error loading vendor config: ', vendorUrl, err);
@@ -140,7 +138,6 @@ export class AnalyticsConfig {
     }
     assertHttpsUrl(remoteConfigUrl, this.element_);
     const TAG = this.getName_();
-    dev().fine(TAG, 'Fetching remote config', remoteConfigUrl);
     const fetchConfig = {};
     if (this.element_.hasAttribute('data-credentials')) {
       fetchConfig.credentials = this.element_.getAttribute('data-credentials');
@@ -161,7 +158,6 @@ export class AnalyticsConfig {
       .then(
         (jsonValue) => {
           this.remoteConfig_ = jsonValue;
-          dev().fine(TAG, 'Remote config loaded', remoteConfigUrl);
         },
         (err) => {
           user().error(
@@ -207,7 +203,6 @@ export class AnalyticsConfig {
   handleConfigRewriter_(config, configRewriterUrl) {
     assertHttpsUrl(configRewriterUrl, this.element_);
     const TAG = this.getName_();
-    dev().fine(TAG, 'Rewriting config', configRewriterUrl);
 
     return this.handleVarGroups_(config).then(() => {
       const fetchConfig = {
@@ -233,7 +228,6 @@ export class AnalyticsConfig {
           .then(
             (jsonValue) => {
               this.config_ = this.mergeConfigs_(jsonValue);
-              dev().fine(TAG, 'Configuration re-written', configRewriterUrl);
             },
             (err) => {
               user().error(

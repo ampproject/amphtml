@@ -170,7 +170,6 @@ export class Storage {
         message['type'] == 'amp-storage-reset' &&
         message['origin'] == this.origin_
       ) {
-        dev().fine(TAG, 'Received reset message');
         this.storePromise_ = null;
       }
     });
@@ -178,7 +177,6 @@ export class Storage {
 
   /** @private */
   broadcastReset_() {
-    dev().fine(TAG, 'Broadcasted reset message');
     this.viewer_.broadcast(
       /** @type {!JsonObject} */ ({
         'type': 'amp-storage-reset',

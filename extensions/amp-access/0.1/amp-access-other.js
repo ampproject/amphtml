@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-import {dev, devAssert} from '../../../src/log';
+import {devAssert} from '../../../src/log';
 import {isProxyOrigin} from '../../../src/url';
-
-/** @const {string} */
-const TAG = 'amp-access-other';
 
 /** @implements {./amp-access-source.AccessTypeAdapterDef} */
 export class AccessOtherAdapter {
@@ -58,7 +55,6 @@ export class AccessOtherAdapter {
 
   /** @override */
   authorize() {
-    dev().fine(TAG, 'Use the authorization fallback for type=other');
     // Disallow authorization for proxy origin (`cdn.ampproject.org`).
     devAssert(!this.isProxyOrigin_, 'Cannot authorize for proxy origin');
     const response = devAssert(this.authorizationResponse_);
@@ -72,7 +68,6 @@ export class AccessOtherAdapter {
 
   /** @override */
   pingback() {
-    dev().fine(TAG, 'Ignore pingback');
     return Promise.resolve();
   }
 

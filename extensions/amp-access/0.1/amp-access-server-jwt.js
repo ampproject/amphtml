@@ -158,13 +158,6 @@ export class AccessServerJwtAdapter {
 
   /** @override */
   authorize() {
-    dev().fine(
-      TAG,
-      'Start authorization with ',
-      this.isProxyOrigin_ ? 'proxy' : 'non-proxy',
-      this.serverState_,
-      this.clientAdapter_.getAuthorizationUrl()
-    );
     if (!this.isProxyOrigin_ || !this.serverState_) {
       return this.authorizeOnClient_();
     }
@@ -197,7 +190,6 @@ export class AccessServerJwtAdapter {
     );
     let jwtPromise = urlPromise
       .then((url) => {
-        dev().fine(TAG, 'Authorization URL: ', url);
         return this.timer_.timeoutPromise(
           AUTHORIZATION_TIMEOUT,
           this.xhr_.fetchText(url, {
@@ -296,11 +288,6 @@ export class AccessServerJwtAdapter {
    * @private
    */
   authorizeOnClient_() {
-    dev().fine(
-      TAG,
-      'Proceed via client protocol via ',
-      this.clientAdapter_.getAuthorizationUrl()
-    );
     return this.fetchJwt_().then((resp) => {
       return resp.jwt['amp_authdata'];
     });
@@ -311,7 +298,6 @@ export class AccessServerJwtAdapter {
    * @private
    */
   authorizeOnServer_() {
-    dev().fine(TAG, 'Proceed via server protocol');
     return this.fetchJwt_().then((resp) => {
       const {encoded, jwt} = resp;
       const accessData = jwt['amp_authdata'];
@@ -322,8 +308,6 @@ export class AccessServerJwtAdapter {
           'jwt': encoded,
         })
       );
-      dev().fine(TAG, 'Authorization request: ', this.serviceUrl_, request);
-      dev().fine(TAG, '- access data: ', accessData);
       // Note that `application/x-www-form-urlencoded` is used to avoid
       // CORS preflight request.
       return this.timer_
@@ -338,7 +322,6 @@ export class AccessServerJwtAdapter {
           })
         )
         .then((response) => {
-          dev().fine(TAG, 'Authorization response: ', response);
           return this.replaceSections_(response);
         })
         .then(() => accessData);
@@ -351,7 +334,6 @@ export class AccessServerJwtAdapter {
    */
   replaceSections_(doc) {
     const sections = doc.querySelectorAll('[i-amphtml-access-id]');
-    dev().fine(TAG, '- access sections: ', sections);
     return this.vsync_.mutatePromise(() => {
       for (let i = 0; i < sections.length; i++) {
         const section = sections[i];

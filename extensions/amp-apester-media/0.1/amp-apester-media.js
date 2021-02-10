@@ -122,7 +122,6 @@ class AmpApesterMedia extends AMP.BaseElement {
   viewportCallback_(inViewport) {
     if (inViewport && !this.seen_) {
       if (this.iframe_ && this.iframe_.contentWindow) {
-        dev().fine(TAG, 'media seen');
         this.seen_ = true;
         this.iframe_.contentWindow./*OK*/ postMessage('interaction seen', '*');
       }

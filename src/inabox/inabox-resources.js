@@ -21,12 +21,10 @@ import {READY_SCAN_SIGNAL} from '../service/resources-interface';
 import {Resource, ResourceState} from '../service/resource';
 import {Services} from '../services';
 import {VisibilityState} from '../visibility-state';
-import {dev} from '../log';
 import {getMode} from '../mode';
 import {hasNextNodeInDocumentOrder} from '../dom';
 import {registerServiceBuilderForDoc} from '../service';
 
-const TAG = 'inabox-resources';
 const FOUR_FRAME_DELAY = 70;
 
 /**
@@ -133,7 +131,6 @@ export class InaboxResources {
   add(element) {
     const resource = new Resource(++this.resourceIdCounter_, element, this);
     this.resources_.push(resource);
-    dev().fine(TAG, 'resource added:', resource.debugid);
   }
 
   /** @override */
@@ -156,7 +153,6 @@ export class InaboxResources {
     if (index !== -1) {
       this.resources_.splice(index, 1);
     }
-    dev().fine(TAG, 'element removed:', resource.debugid);
   }
 
   /** @override */
@@ -211,7 +207,6 @@ export class InaboxResources {
    */
   doPass_() {
     const now = Date.now();
-    dev().fine(TAG, 'doPass');
     // measure in a batch
     this.resources_.forEach((resource) => {
       if (!resource.isLayoutPending()) {
@@ -249,7 +244,6 @@ export class InaboxResources {
       ) {
         this.pendingBuildResources_.splice(i, 1);
         resource.build().then(() => this./*OK*/ schedulePass());
-        dev().fine(TAG, 'resource upgraded:', resource.debugid);
       }
     }
   }

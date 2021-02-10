@@ -94,7 +94,6 @@ export class MultidocManager {
     });
     /** @const {!./service/ampdoc-impl.AmpDocShadow} */
     amp.ampdoc = ampdoc;
-    dev().fine(TAG, 'Attach to shadow root:', shadowRoot, ampdoc);
 
     // Install runtime CSS.
     installStylesForDoc(
@@ -214,7 +213,6 @@ export class MultidocManager {
       this.shadowRoots_.push(shadowRoot);
     }
 
-    dev().fine(TAG, 'Shadow root initialization is done:', shadowRoot, ampdoc);
     return amp;
   }
 
@@ -229,7 +227,6 @@ export class MultidocManager {
    */
   attachShadowDoc(hostElement, doc, url, opt_initParams) {
     user().assertString(url);
-    dev().fine(TAG, 'Attach shadow doc:', doc);
     // TODO(dvoytenko, #9490): once stable, port full document case to emulated
     // stream.
     return this.attachShadowDoc_(
@@ -272,7 +269,6 @@ export class MultidocManager {
    */
   attachShadowDocAsStream(hostElement, url, opt_initParams) {
     user().assertString(url);
-    dev().fine(TAG, 'Attach shadow doc as stream');
     return this.attachShadowDoc_(
       hostElement,
       url,
@@ -352,7 +348,6 @@ export class MultidocManager {
         switch (tagName) {
           case 'TITLE':
             shadowRoot.AMP.title = n.textContent;
-            dev().fine(TAG, '- set title: ', shadowRoot.AMP.title);
             break;
           case 'META':
             if (n.hasAttribute('charset')) {
@@ -372,11 +367,9 @@ export class MultidocManager {
             const href = n.getAttribute('href');
             if (rel == 'canonical') {
               shadowRoot.AMP.canonicalUrl = href;
-              dev().fine(TAG, '- set canonical: ', shadowRoot.AMP.canonicalUrl);
             } else if (rel == 'stylesheet') {
               // Must be a font definition: no other stylesheets are allowed.
               if (parentLinks[href]) {
-                dev().fine(TAG, '- stylesheet already included: ', href);
                 // To accomodate icon fonts whose stylesheets include
                 // the class definitions in addition to the font definition,
                 // we re-import the stylesheet into the shadow document.
@@ -395,16 +388,12 @@ export class MultidocManager {
                 el.setAttribute('type', 'text/css');
                 el.setAttribute('href', href);
                 this.win.document.head.appendChild(el);
-                dev().fine(TAG, '- import font to parent: ', href, el);
               }
-            } else {
-              dev().fine(TAG, '- ignore link rel=', rel);
             }
             break;
           case 'STYLE':
             if (n.hasAttribute('amp-boilerplate')) {
               // Ignore.
-              dev().fine(TAG, '- ignore boilerplate style: ', n);
             } else if (n.hasAttribute('amp-custom')) {
               installStylesForDoc(
                 ampdoc,
@@ -413,7 +402,6 @@ export class MultidocManager {
                 /* isRuntimeCss */ false,
                 'amp-custom'
               );
-              dev().fine(TAG, '- import style: ', n);
             } else if (n.hasAttribute('amp-keyframes')) {
               installStylesForDoc(
                 ampdoc,
@@ -422,33 +410,21 @@ export class MultidocManager {
                 /* isRuntimeCss */ false,
                 'amp-keyframes'
               );
-              dev().fine(TAG, '- import style: ', n);
             }
             break;
           case 'SCRIPT':
             if (n.hasAttribute('src')) {
-              dev().fine(TAG, '- src script: ', n);
               const src = n.getAttribute('src');
               const urlParts = parseExtensionUrl(src);
-              const isRuntime = !urlParts.extensionId;
               // Note: Some extensions don't have [custom-element] or
               // [custom-template] e.g. amp-viewer-integration.
               const customElement = n.getAttribute('custom-element');
               const customTemplate = n.getAttribute('custom-template');
-              if (isRuntime) {
-                dev().fine(TAG, '- ignore runtime script: ', src);
-              } else if (customElement || customTemplate) {
+              if (customElement || customTemplate) {
                 // This is an extension.
                 this.extensions_.installExtensionForDoc(
                   ampdoc,
                   customElement || customTemplate,
-                  urlParts.extensionVersion
-                );
-                dev().fine(
-                  TAG,
-                  '- load extension: ',
-                  customElement || customTemplate,
-                  ' ',
                   urlParts.extensionVersion
                 );
                 if (customElement) {
@@ -462,7 +438,6 @@ export class MultidocManager {
               const type = n.getAttribute('type') || 'application/javascript';
               if (type.indexOf('javascript') == -1) {
                 shadowRoot.appendChild(this.win.document.importNode(n, true));
-                dev().fine(TAG, '- non-src script: ', n);
               } else if (!n.hasAttribute('amp-onerror')) {
                 // Don't error on amp-onerror script (https://github.com/ampproject/amphtml/issues/31966)
                 user().error(TAG, '- unallowed inline javascript: ', n);

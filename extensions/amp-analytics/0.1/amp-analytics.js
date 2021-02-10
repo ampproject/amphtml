@@ -282,8 +282,6 @@ export class AmpAnalytics extends AMP.BaseElement {
   registerTriggers_() {
     if (this.hasOptedOut_()) {
       // Nothing to do when the user has opted out.
-      const TAG = this.getName_();
-      user().fine(TAG, 'User has opted out. No hits will be sent.');
       return Promise.resolve();
     }
 

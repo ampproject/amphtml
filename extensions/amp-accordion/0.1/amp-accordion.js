@@ -246,12 +246,6 @@ class AmpAccordion extends AMP.BaseElement {
           ))
         : dict();
     } catch (e) {
-      dev().fine(
-        'AMP-ACCORDION',
-        'Error setting session state: %s, %s',
-        e.message,
-        e.stack
-      );
       return dict();
     }
   }
@@ -270,14 +264,7 @@ class AmpAccordion extends AMP.BaseElement {
         dev().assertString(this.sessionId_),
         sessionStr
       );
-    } catch (e) {
-      dev().fine(
-        'AMP-ACCORDION',
-        'Error setting session state: %s, %s',
-        e.message,
-        e.stack
-      );
-    }
+    } catch (e) {}
   }
 
   /**

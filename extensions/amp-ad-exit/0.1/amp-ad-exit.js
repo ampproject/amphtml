@@ -151,7 +151,6 @@ export class AmpAdExit extends AMP.BaseElement {
         .then((exitService) => exitService.openUrl(finalUrl))
         .catch((error) => {
           // TODO: reporting on errors
-          dev().fine(TAG, 'ExitServiceError - fallback=' + error.fallback);
           if (error.fallback) {
             openWindowDialog(this.win, finalUrl, '_blank');
           }
@@ -282,7 +281,6 @@ export class AmpAdExit extends AMP.BaseElement {
    * @param {string} url
    */
   pingTrackingUrl_(url) {
-    user().fine(TAG, `pinging ${url}`);
     if (
       this.transport_.beacon &&
       this.win.navigator.sendBeacon &&

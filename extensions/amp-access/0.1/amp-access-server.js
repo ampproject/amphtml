@@ -114,19 +114,9 @@ export class AccessServerAdapter {
 
   /** @override */
   authorize() {
-    dev().fine(
-      TAG,
-      'Start authorization with ',
-      this.isProxyOrigin_ ? 'proxy' : 'non-proxy',
-      this.serverState_,
-      this.clientAdapter_.getAuthorizationUrl()
-    );
     if (!this.isProxyOrigin_ || !this.serverState_) {
-      dev().fine(TAG, 'Proceed via client protocol');
       return this.clientAdapter_.authorize();
     }
-
-    dev().fine(TAG, 'Proceed via server protocol');
 
     const varsPromise = this.context_.collectUrlVars(
       this.clientAdapter_.getAuthorizationUrl(),
@@ -145,7 +135,6 @@ export class AccessServerAdapter {
           'state': this.serverState_,
           'vars': requestVars,
         });
-        dev().fine(TAG, 'Authorization request: ', this.serviceUrl_, request);
         // Note that `application/x-www-form-urlencoded` is used to avoid
         // CORS preflight request.
         return this.timer_.timeoutPromise(
@@ -160,13 +149,11 @@ export class AccessServerAdapter {
         );
       })
       .then((responseDoc) => {
-        dev().fine(TAG, 'Authorization response: ', responseDoc);
         const accessDataString = devAssert(
           responseDoc.querySelector('script[id="amp-access-data"]'),
           'No authorization data available'
         ).textContent;
         const accessData = parseJson(accessDataString);
-        dev().fine(TAG, '- access data: ', accessData);
 
         return this.replaceSections_(responseDoc).then(() => {
           return accessData;
@@ -195,7 +182,6 @@ export class AccessServerAdapter {
    */
   replaceSections_(doc) {
     const sections = doc.querySelectorAll('[i-amphtml-access-id]');
-    dev().fine(TAG, '- access sections: ', sections);
     return this.vsync_.mutatePromise(() => {
       for (let i = 0; i < sections.length; i++) {
         const section = sections[i];

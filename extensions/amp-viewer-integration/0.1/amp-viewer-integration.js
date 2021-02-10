@@ -29,7 +29,6 @@ import {
 } from './messaging/messaging';
 import {Services} from '../../../src/services';
 import {TouchHandler} from './touch-handler';
-import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getAmpdoc} from '../../../src/service';
 import {getData, listen, listenOnce} from '../../../src/event-helper';
@@ -78,7 +77,6 @@ export class AmpViewerIntegration {
    * @return {!Promise<undefined>}
    */
   init() {
-    dev().fine(TAG, 'handshake init()');
     const ampdoc = getAmpdoc(this.win.document);
     const viewer = Services.viewerForDoc(ampdoc);
     this.isWebView_ = viewer.getParam('webview') == '1';
@@ -139,12 +137,6 @@ export class AmpViewerIntegration {
   webviewPreHandshakePromise_(source, origin) {
     return new Promise((resolve) => {
       const unlisten = listen(this.win, 'message', (e) => {
-        dev().fine(
-          TAG,
-          'AMPDOC got a pre-handshake message:',
-          e.type,
-          getData(e)
-        );
         const data = parseMessage(getData(e));
         if (!data) {
           return;
@@ -181,7 +173,6 @@ export class AmpViewerIntegration {
    * @private
    */
   openChannelAndStart_(viewer, ampdoc, origin, messaging) {
-    dev().fine(TAG, 'Send a handshake request');
     const ampdocUrl = ampdoc.getUrl();
     const srcUrl = getSourceUrl(ampdocUrl);
     return messaging
@@ -194,7 +185,6 @@ export class AmpViewerIntegration {
         true /* awaitResponse */
       )
       .then(() => {
-        dev().fine(TAG, 'Channel has been opened!');
         this.setup_(messaging, viewer, origin);
       });
   }

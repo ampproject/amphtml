@@ -26,13 +26,13 @@ import {
 import {Services} from '../../../src/services';
 import {WebPushWidgetVisibilities} from './amp-web-push-widget';
 import {WindowMessenger} from './window-messenger';
-import {dev, user} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {getMode} from '../../../src/mode';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {openWindowDialog} from '../../../src/dom';
 import {parseQueryString, parseUrlDeprecated} from '../../../src/url';
+import {user} from '../../../src/log';
 
 /** @typedef {{
  *    isControllingFrame: boolean,
@@ -162,8 +162,6 @@ export class WebPushService {
    * @return {!Promise}
    */
   start(configJson) {
-    dev().fine(TAG, 'amp-web-push extension starting up.');
-
     // Exit early if web push isn't supported
     if (!this.environmentSupportsWebPush()) {
       user().warn(TAG, 'Web push is not supported.');
@@ -177,11 +175,6 @@ export class WebPushService {
 
     iframeLoadPromise
       .then(() => {
-        dev().fine(
-          TAG,
-          `Helper frame ${this.config_['helper-iframe-url']} ` +
-            'DOM loaded. Connecting to the frame via postMessage()...'
-        );
         return this.frameMessenger_.connect(
           this.iframe_.getDomElement().contentWindow,
           parseUrlDeprecated(this.config_['helper-iframe-url']).origin

@@ -34,9 +34,6 @@ import {px, resetStyles, setImportantStyles} from '../style';
 import {registerServiceBuilderForDoc} from '../service';
 import {throttle} from '../utils/rate-limit';
 
-/** @const {string} */
-const TAG = 'inabox-viewport';
-
 /** @const {number} */
 const MIN_EVENT_INTERVAL = 100;
 
@@ -496,8 +493,6 @@ export class ViewportBindingInabox {
 
     /** @private {?UnlistenDef} */
     this.unobserveFunction_ = null;
-
-    dev().fine(TAG, 'initialized inabox viewport');
   }
 
   /** @override */
@@ -515,7 +510,6 @@ export class ViewportBindingInabox {
       MessageType.SEND_POSITIONS,
       MessageType.POSITION,
       (data) => {
-        dev().fine(TAG, 'Position changed: ', data);
         this.updateLayoutRects_(data['viewportRect'], data['targetRect']);
       }
     );
@@ -634,8 +628,6 @@ export class ViewportBindingInabox {
     );
 
     if (isChanged(boxRect, this.boxRect_)) {
-      dev().fine(TAG, 'Updating viewport box rect: ', boxRect);
-
       this.boxRect_ = boxRect;
       // Remeasure all AMP elements once iframe position or size are changed.
       // Because all layout boxes are calculated relatively to the

@@ -16,12 +16,9 @@
 
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
-import {dev, devAssert, userAssert} from '../../../src/log';
+import {devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
-
-/** @const {string} */
-const TAG = 'amp-access-client';
 
 /** @const {number} */
 const DEFAULT_AUTHORIZATION_TIMEOUT = 3000;
@@ -120,13 +117,11 @@ export class AccessClientAdapter {
 
   /** @override */
   authorize() {
-    dev().fine(TAG, 'Start authorization via ', this.authorizationUrl_);
     const urlPromise = this.context_.buildUrl(
       this.authorizationUrl_,
       /* useAuthData */ false
     );
     return urlPromise.then((url) => {
-      dev().fine(TAG, 'Authorization URL: ', url);
       return this.timer_
         .timeoutPromise(
           this.authorizationTimeout_,
@@ -150,7 +145,6 @@ export class AccessClientAdapter {
       /* useAuthData */ true
     );
     return promise.then((url) => {
-      dev().fine(TAG, 'Pingback URL: ', url);
       return this.xhr_.sendSignal(url, {
         method: 'POST',
         credentials: 'include',

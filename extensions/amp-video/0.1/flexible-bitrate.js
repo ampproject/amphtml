@@ -16,11 +16,9 @@
 
 import {DomBasedWeakRef} from '../../../src/utils/dom-based-weakref';
 import {childElement, childElementsByTag} from '../../../src/dom';
-import {dev, devAssert} from '../../../src/log';
+import {devAssert} from '../../../src/log';
 import {listen, listenOnce} from '../../../src/event-helper';
 import {toArray} from '../../../src/types';
-
-const TAG = 'amp-video';
 
 /** @const {!Object<string, number>} */
 const BITRATE_BY_EFFECTIVE_TYPE = {
@@ -205,7 +203,6 @@ export class BitrateManager {
    */
   switchToLowerBitrate_(video, currentBitrate) {
     if (!this.hasLowerBitrate_(video, currentBitrate)) {
-      dev().fine(TAG, 'No lower bitrate available');
       return;
     }
     const {currentTime} = video;
@@ -216,7 +213,6 @@ export class BitrateManager {
       // Restore currentTime after loading new source.
       video.currentTime = currentTime;
       video.play();
-      dev().fine(TAG, 'Playing at lower bitrate %s', video.currentSrc);
     });
   }
 

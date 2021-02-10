@@ -557,7 +557,6 @@ export class LaterpayVendor {
       /* useAuthData */ false
     );
     return urlPromise.then((url) => {
-      dev().fine(TAG, 'Authorization URL: ', url);
       this.accessSource_.loginWithUrl(url, purchaseType);
     });
   }

@@ -283,14 +283,6 @@ export class AccessSource {
    * Do some initial setup.
    */
   start() {
-    dev().fine(
-      TAG,
-      'config:',
-      this.type_,
-      this.loginConfig_,
-      this.adapter_.getConfig()
-    );
-
     // Calculate login URLs right away.
     this.buildLoginUrls_();
   }
@@ -348,7 +340,6 @@ export class AccessSource {
    */
   runAuthorization(opt_disableFallback) {
     if (!this.adapter_.isAuthorizationEnabled()) {
-      dev().fine(TAG, 'Ignore authorization for type=', this.type_);
       this.firstAuthorizationResolver_();
       return Promise.resolve();
     }
@@ -367,7 +358,6 @@ export class AccessSource {
 
     const promise = responsePromise
       .then((response) => {
-        dev().fine(TAG, 'Authorization response: ', response);
         this.setAuthResponse_(response);
         this.buildLoginUrls_();
         return response;
@@ -397,7 +387,6 @@ export class AccessSource {
     return this.adapter_
       .pingback()
       .then(() => {
-        dev().fine(TAG, 'Pingback complete');
         this.analyticsEvent_('access-pingback-sent');
       })
       .catch((error) => {
@@ -472,13 +461,10 @@ export class AccessSource {
       return this.loginPromise_;
     }
 
-    dev().fine(TAG, 'Start login: ', loginUrl, eventLabel);
-
     this.loginAnalyticsEvent_(eventLabel, 'started');
     const dialogPromise = this.openLoginDialog_(loginUrl);
     const loginPromise = dialogPromise
       .then((result) => {
-        dev().fine(TAG, 'Login dialog completed: ', eventLabel, result);
         this.loginPromise_ = null;
         const query = parseQueryString(result);
         const s = query['success'];
@@ -504,7 +490,6 @@ export class AccessSource {
         }
       })
       .catch((reason) => {
-        dev().fine(TAG, 'Login dialog failed: ', eventLabel, reason);
         this.loginAnalyticsEvent_(eventLabel, 'failed');
         if (this.loginPromise_ == loginPromise) {
           this.loginPromise_ = null;
