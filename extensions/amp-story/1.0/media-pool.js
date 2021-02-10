@@ -534,13 +534,10 @@ export class MediaPool {
             new ManageBitrateTask(bitrateManager)
           );
         }
-        return this.enqueueMediaElementTask_(poolMediaEl, new LoadTask()).then(
-          () => {
-            this.maybeResetAmpMedia_(ampMediaForPoolEl);
-            this.maybeResetAmpMedia_(ampMediaForDomEl);
-          }
-        );
-        // return updateSourcesPromise;
+        this.enqueueMediaElementTask_(poolMediaEl, new LoadTask()).then(() => {
+          this.maybeResetAmpMedia_(ampMediaForPoolEl);
+          this.maybeResetAmpMedia_(ampMediaForDomEl);
+        });
       },
       () => {
         this.forceDeallocateMediaElement_(poolMediaEl);
