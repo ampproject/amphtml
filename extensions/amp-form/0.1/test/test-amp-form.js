@@ -1144,7 +1144,7 @@ describes.repeated(
             env.sandbox.stub(ampForm.xhr_, 'fetch').rejects({
               response: {
                 json: () => {
-                  return Promise.resolve({'name': 'Tim Apple'});
+                  return Promise.resolve({'name': 'John Doe'});
                 },
               },
             });
@@ -1152,7 +1152,7 @@ describes.repeated(
               .stub(ampForm, 'analyticsEvent_')
               .throws('Test.');
             const renderedTemplate = createElement('div');
-            renderedTemplate.innerText = 'Hello, Tim Apple';
+            renderedTemplate.innerText = 'Hello, John Doe';
             env.sandbox
               .stub(ampForm.templates_, 'findAndRenderTemplate')
               .resolves(renderedTemplate);
@@ -1172,7 +1172,7 @@ describes.repeated(
                 expect(ampForm.templates_.findAndRenderTemplate).to.be.called;
                 expect(
                   ampForm.templates_.findAndRenderTemplate
-                ).calledWith(messageContainer, {'name': 'Tim Apple'});
+                ).calledWith(messageContainer, {'name': 'John Doe'});
                 expect(mutateElementStub).to.have.been.calledOnce;
                 expect(messageContainer.firstChild).to.equal(renderedTemplate);
 
