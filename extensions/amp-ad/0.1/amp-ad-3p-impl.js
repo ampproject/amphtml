@@ -415,7 +415,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         // incrementLoadingAds().
 
         const asyncIntersection =
-          getExperimentBranch(this.win, 'ads-initialIntersection') ===
+          getExperimentBranch(this.win, ADS_INITIAL_INTERSECTION_EXP.id) ===
           ADS_INITIAL_INTERSECTION_EXP.experiment;
         const intersectionPromise = asyncIntersection
           ? measureIntersection(this.element)

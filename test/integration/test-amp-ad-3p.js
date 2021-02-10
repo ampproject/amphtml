@@ -38,15 +38,15 @@ describe('amp-ad 3P', () => {
     return createFixture().then((f) => {
       fixture = f;
       installPlatformService(fixture.win);
+      forceExperimentBranch(
+        fixture.win,
+        ADS_INITIAL_INTERSECTION_EXP.id,
+        ADS_INITIAL_INTERSECTION_EXP.experiment
+      );
     });
   });
 
   it('create an iframe with APIs', async function () {
-    forceExperimentBranch(
-      window,
-      'ads-initialIntersection',
-      ADS_INITIAL_INTERSECTION_EXP.experiment
-    );
     this.timeout(20000);
     let iframe;
     let lastIO = null;

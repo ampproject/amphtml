@@ -2071,7 +2071,7 @@ export class AmpA4A extends AMP.BaseElement {
     );
 
     const asyncIntersection =
-      getExperimentBranch(this.win, 'ads-initialIntersection') ===
+      getExperimentBranch(this.win, ADS_INITIAL_INTERSECTION_EXP.id) ===
       ADS_INITIAL_INTERSECTION_EXP.experiment;
     const intersectionPromise = asyncIntersection
       ? measureIntersection(this.element)
@@ -2155,7 +2155,7 @@ export class AmpA4A extends AMP.BaseElement {
       );
 
       const asyncIntersection =
-        getExperimentBranch(this.win, 'ads-initialIntersection') ===
+        getExperimentBranch(this.win, ADS_INITIAL_INTERSECTION_EXP.id) ===
         ADS_INITIAL_INTERSECTION_EXP.experiment;
       const intersectionPromise = asyncIntersection
         ? measureIntersection(this.element)
