@@ -16,7 +16,7 @@
 
 import * as Preact from '../../../src/preact';
 import {ContainWrapper} from '../../../src/preact/component';
-import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
+import {Side} from './sidebar-config';
 import {forwardRef} from '../../../src/preact/compat';
 import {isRTL} from '../../../src/dom';
 import {
@@ -26,39 +26,8 @@ import {
   useRef,
   useState,
 } from '../../../src/preact';
+import {useSidebarAnimation} from './sidebar-hooks';
 import {useStyles} from './sidebar.jss';
-
-/** @private @enum {string} */
-const Side = {
-  LEFT: 'left',
-  RIGHT: 'right',
-};
-
-/** @private @enum {number} */
-const Direction = {
-  OPENING: 0,
-  CLOSING: 1,
-  HAS_NOT_ANIMATED: 2,
-};
-
-const ANIMATION_DURATION = 350;
-const ANIMATION_EASE_IN = 'cubic-bezier(0,0,.21,1)';
-
-const ANIMATION_KEYFRAMES_FADE_IN = [{'opacity': '0'}, {'opacity': '1'}];
-const ANIMATION_KEYFRAMES_SLIDE_IN_LEFT = [
-  {'transform': 'translateX(-100%)'},
-  {'transform': 'translateX(0)'},
-];
-const ANIMATION_KEYFRAMES_SLIDE_IN_RIGHT = [
-  {'transform': 'translateX(100%)'},
-  {'transform': 'translateX(0)'},
-];
-
-const ANIMATION_STYLES_SIDEBAR_LEFT_INIT = {'transform': 'translateX(-100%)'};
-const ANIMATION_STYLES_SIDEBAR_RIGHT_INIT = {'transform': 'translateX(100%)'};
-const ANIMATION_STYLES_BACKDROP_INIT = {'opacity': '0'};
-const ANIMATION_STYLES_SIDEBAR_FINAL = {'transform': ''};
-const ANIMATION_STYLES_BACKDROP_FINAL = {'opacity': ''};
 
 /**
  * @param {T} current
@@ -69,13 +38,6 @@ function useValueRef(current) {
   const valueRef = useRef(null);
   valueRef.current = current;
   return valueRef;
-}
-/**
- * @param {!Element} element
- * @param {!Object<string, *>} styles
- */
-function safelySetStyles(element, styles) {
-  setStyles(element, assertDoesNotContainDisplay(styles));
 }
 
 /**
@@ -103,12 +65,6 @@ function SidebarWithRef(
   const [mounted, setMounted] = useState(false);
   const [opened, setOpened] = useState(false);
   const [side, setSide] = useState(sideProp);
-
-  const [sidebarAnimation, setSidebarAnimation] = useState(null);
-  const [backdropAnimation, setBackdropAnimation] = useState(null);
-  const [lastAnimationDirection, setLastAnimationDirection] = useState(
-    Direction.HAS_NOT_ANIMATED
-  );
 
   const classes = useStyles();
   const sidebarRef = useRef();
@@ -156,121 +112,14 @@ function SidebarWithRef(
     setSide(isRTL(sidebarElement.ownerDocument) ? Side.RIGHT : Side.LEFT);
   }, [side, mounted]);
 
-  useLayoutEffect(() => {
-    const sidebarElement = sidebarRef.current;
-    const backdropElement = backdropRef.current;
-    if (!sidebarElement || !backdropElement || !side) {
-      return;
-    }
-
-    const postVisibleAnim = () => {
-      safelySetStyles(sidebarElement, ANIMATION_STYLES_SIDEBAR_FINAL);
-      safelySetStyles(backdropElement, ANIMATION_STYLES_BACKDROP_FINAL);
-      setSidebarAnimation(null);
-      setBackdropAnimation(null);
-    };
-    const postInvisibleAnim = () => {
-      if (onAfterCloseRef.current) {
-        onAfterCloseRef.current();
-      }
-      setSidebarAnimation(null);
-      setBackdropAnimation(null);
-      setMounted(false);
-    };
-
-    // currently animating
-    if (sidebarAnimation) {
-      if (
-        (opened && lastAnimationDirection == Direction.CLOSING) ||
-        (!opened && lastAnimationDirection == Direction.OPENING)
-      ) {
-        // reverse the current animation
-        sidebarAnimation.reverse();
-        backdropAnimation.reverse();
-        sidebarAnimation.onfinish = opened
-          ? postVisibleAnim
-          : postInvisibleAnim;
-        setLastAnimationDirection(
-          opened ? Direction.OPENING : Direction.CLOSING
-        );
-      }
-    } else {
-      // currently in fully opened or closed state
-      if (opened && lastAnimationDirection != Direction.OPENING) {
-        // make visible animation
-        if (!sidebarElement.animate || !backdropElement.animate) {
-          postVisibleAnim();
-          return;
-        }
-        safelySetStyles(
-          sidebarElement,
-          side === Side.LEFT
-            ? ANIMATION_STYLES_SIDEBAR_LEFT_INIT
-            : ANIMATION_STYLES_SIDEBAR_RIGHT_INIT
-        );
-        safelySetStyles(backdropElement, ANIMATION_STYLES_BACKDROP_INIT);
-        const newSidebarAnimation = sidebarElement.animate(
-          side === Side.LEFT
-            ? ANIMATION_KEYFRAMES_SLIDE_IN_LEFT
-            : ANIMATION_KEYFRAMES_SLIDE_IN_RIGHT,
-          {
-            duration: ANIMATION_DURATION,
-            fill: 'both',
-            easing: ANIMATION_EASE_IN,
-          }
-        );
-        newSidebarAnimation.onfinish = postVisibleAnim;
-        const newBackdropAnimation = backdropElement.animate(
-          ANIMATION_KEYFRAMES_FADE_IN,
-          {
-            duration: ANIMATION_DURATION,
-            fill: 'both',
-            easing: ANIMATION_EASE_IN,
-          }
-        );
-        setSidebarAnimation(newSidebarAnimation);
-        setBackdropAnimation(newBackdropAnimation);
-        setLastAnimationDirection(Direction.OPENING);
-      } else if (!opened && lastAnimationDirection != Direction.CLOSING) {
-        // make invisible animation
-        if (!sidebarElement.animate || !backdropElement.animate) {
-          postInvisibleAnim();
-          return;
-        }
-        const newSidebarAnimation = sidebarElement.animate(
-          side === Side.LEFT
-            ? ANIMATION_KEYFRAMES_SLIDE_IN_LEFT
-            : ANIMATION_KEYFRAMES_SLIDE_IN_RIGHT,
-          {
-            duration: ANIMATION_DURATION,
-            direction: 'reverse',
-            fill: 'both',
-            easing: ANIMATION_EASE_IN,
-          }
-        );
-        newSidebarAnimation.onfinish = postInvisibleAnim;
-        const newBackdropAnimation = backdropElement.animate(
-          ANIMATION_KEYFRAMES_FADE_IN,
-          {
-            duration: ANIMATION_DURATION,
-            direction: 'reverse',
-            fill: 'both',
-            easing: ANIMATION_EASE_IN,
-          }
-        );
-        setSidebarAnimation(newSidebarAnimation);
-        setBackdropAnimation(newBackdropAnimation);
-        setLastAnimationDirection(Direction.CLOSING);
-      }
-    }
-  }, [
+  useSidebarAnimation(
     opened,
     onAfterCloseRef,
     side,
-    sidebarAnimation,
-    backdropAnimation,
-    lastAnimationDirection,
-  ]);
+    sidebarRef,
+    backdropRef,
+    setMounted
+  );
 
   return (
     mounted && (
