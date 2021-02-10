@@ -17,6 +17,7 @@
 import {Deferred, tryResolve} from '../../../src/utils/promise';
 import {Sources} from './sources';
 import {isConnectedNode} from '../../../src/dom';
+import { BitrateManager } from '../../amp-video/0.1/flexible-bitrate';
 
 /**
  * The name for a boolean property on an element indicating whether that element
@@ -438,6 +439,56 @@ export class SwapOutOfDomTask extends MediaTask {
     copyAttributes(mediaEl, this.placeholderEl_);
     mediaEl.parentElement.replaceChild(this.placeholderEl_, mediaEl);
     return Promise.resolve();
+  }
+
+  /** @override */
+  requiresSynchronousExecution() {
+    return true;
+  }
+}
+
+/**
+ * Swaps a media element into the DOM, in the place of a placeholder element.
+ */
+export class ManageBitrateTask extends MediaTask {
+  /**
+   * @param {!BitrateManager} bitrateManager The manager.
+   */
+  constructor(bitrateManager) {
+    super('manage-bitrate');
+
+    /** @private @const {!Element} */
+    this.bitrateManager_ = bitrateManager;
+  }
+
+  /** @override */
+  executeInternal(mediaEl) {
+    this.bitrateManager_.manage(mediaEl);
+  }
+
+  /** @override */
+  requiresSynchronousExecution() {
+    return true;
+  }
+}
+
+/**
+ * Swaps a media element into the DOM, in the place of a placeholder element.
+ */
+export class UnmanageBitrateTask extends MediaTask {
+  /**
+   * @param {!BitrateManager} bitrateManager The manager.
+   */
+  constructor(bitrateManager) {
+    super('unmanage-bitrate');
+
+    /** @private @const {!Element} */
+    this.bitrateManager_ = bitrateManager;
+  }
+
+  /** @override */
+  executeInternal(mediaEl) {
+    this.bitrateManager_.unmanage(mediaEl);
   }
 
   /** @override */

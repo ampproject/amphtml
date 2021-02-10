@@ -18,12 +18,14 @@ import {
   BlessTask,
   ELEMENT_BLESSED_PROPERTY_NAME,
   LoadTask,
+  ManageBitrateTask,
   MuteTask,
   PauseTask,
   PlayTask,
   SetCurrentTimeTask,
   SwapIntoDomTask,
   SwapOutOfDomTask,
+  UnmanageBitrateTask,
   UnmuteTask,
   UpdateSourcesTask,
 } from './media-tasks';
@@ -519,8 +521,8 @@ export class MediaPool {
       () => {
         if (placeholderEl.isBitrateManaged) {
           const bitrateManager = getBitrateManager(this.win_);
-          bitrateManager.unmanage(placeholderEl);
-          bitrateManager.manage(poolMediaEl);
+          this.enqueueMediaElementTask_(placeholderEl, new UnmanageBitrateTask(bitrateManager));
+          this.enqueueMediaElementTask_(poolMediaEl, new ManageBitrateTask(bitrateManager));
         }
         this.enqueueMediaElementTask_(
           poolMediaEl,
@@ -595,6 +597,11 @@ export class MediaPool {
       poolMediaEl,
       new SwapOutOfDomTask(placeholderEl)
     );
+    if (poolMediaEl.isBitrateManaged) {
+      const bitrateManager = getBitrateManager(this.win_);
+      this.enqueueMediaElementTask_(poolMediaEl, new UnmanageBitrateTask(bitrateManager));
+      this.enqueueMediaElementTask_(placeholderEl, new ManageBitrateTask(bitrateManager));
+    }
 
     this.resetPoolMediaElementSource_(poolMediaEl);
     return swapOutOfDom;
