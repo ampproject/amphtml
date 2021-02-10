@@ -13,7 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the license.
-
+#
 # Script used by AMP's CI builds to authenticate with GCP storage on CircleCI.
 # TODO(rsimha, ampproject/amp-github-apps#1110): Update storage details.
 
