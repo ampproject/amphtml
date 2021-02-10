@@ -15,25 +15,25 @@
  */
 
 import {ActionTrust, DEFAULT_ACTION} from '../../../src/action-constants';
-import {CSS as COMPONENT_CSS} from './lightbox.jss';
+import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-lightbox-1.0.css';
-import {Lightbox} from './lightbox';
-import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/utils/object';
-import {dispatchCustomEvent} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
+import {toWin} from '../../../src/types';
 import {toggle} from '../../../src/style';
+import {toggleAttribute} from '../../../src/dom';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-lightbox';
 
 /** @extends {PreactBaseElement<LightboxDef.Api>} */
-class AmpLightbox extends PreactBaseElement {
+class AmpLightbox extends BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
+    console.error(1);
     super(element);
 
     /** @private {boolean} */
@@ -50,31 +50,36 @@ class AmpLightbox extends PreactBaseElement {
     this.registerApiAction('open', (api) => api.open(), ActionTrust.LOW);
     this.registerApiAction('close', (api) => api.close(), ActionTrust.LOW);
     return dict({
-      'onBeforeOpen': this.beforeOpen_.bind(this),
-      'onAfterClose': this.afterClose_.bind(this),
+      'onBeforeOpen': this.toggle_.bind(this, true),
+      'onAfterClose': this.toggle_.bind(this, false),
     });
   }
 
-  /**
-   * Setting hidden to false
-   * @private
-   */
-  beforeOpen_() {
-    this.open_ = true;
-    toggle(this.element, true);
-    this.element.setAttribute('open', '');
-    fireEvent(this.win, this.element, 'open', ActionTrust.HIGH);
+  /** @override */
+  triggerEvent(element, eventName, detail) {
+    const event = createCustomEvent(
+      toWin(element.ownerDocument.defaultView),
+      `amp-lightbox.${eventName}`,
+      detail
+    );
+    Services.actionServiceForDoc(element).trigger(
+      element,
+      eventName,
+      event,
+      ActionTrust.HIGH
+    );
+
+    super.triggerEvent(element, eventName, detail);
   }
 
   /**
-   * Setting hidden to true
-   * @private
+   * Toggle open/closed attributes.
+   * @param {boolean} opt_state
    */
-  afterClose_() {
-    this.open_ = false;
-    toggle(this.element, false);
-    this.element.removeAttribute('open');
-    fireEvent(this.win, this.element, 'close', ActionTrust.HIGH);
+  toggle_(opt_state) {
+    this.open_ = toggleAttribute(this.element, 'open', opt_state);
+    toggle(this.element, this.open_);
+    this.triggerEvent(this.element, this.open_ ? 'open' : 'close');
   }
 
   /** @override */
@@ -97,37 +102,6 @@ class AmpLightbox extends PreactBaseElement {
     return super.isLayoutSupported(layout);
   }
 }
-
-/**
- * Triggers the given `event`.
- *
- * @param {!Window} win
- * @param {!Element} el The element that was selected or deslected.
- * @param {string} eventName
- * @param {!ActionTrust} trust
- * @private
- */
-function fireEvent(win, el, eventName, trust) {
-  const event = createCustomEvent(win, `amp-lightbox.${eventName}`);
-  Services.actionServiceForDoc(el).trigger(el, eventName, event, trust);
-  dispatchCustomEvent(el, eventName);
-}
-
-/** @override */
-AmpLightbox['Component'] = Lightbox;
-
-/** @override */
-AmpLightbox['props'] = {
-  'animation': {attr: 'animation'},
-  'scrollable': {attr: 'scrollable', type: 'boolean'},
-  'id': {attr: 'id'},
-};
-
-/** @override */
-AmpLightbox['passthrough'] = true;
-
-/** @override */
-AmpLightbox['shadowCss'] = COMPONENT_CSS;
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpLightbox, CSS);
