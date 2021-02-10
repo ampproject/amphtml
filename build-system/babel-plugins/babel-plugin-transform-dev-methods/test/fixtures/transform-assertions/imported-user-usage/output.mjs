@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import { user } from '../../../../../../../src/log';
+user().fine;
 user().error('Should not be removed');
 
 function hello() {
