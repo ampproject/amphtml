@@ -54,7 +54,6 @@ import {Services} from '../../../src/services';
 import {VideoUtils} from '../../../src/utils/video';
 import {
   addAttributesToElement,
-  closest,
   closestAncestorElementBySelector,
   iterateCursor,
   matches,
