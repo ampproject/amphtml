@@ -16,6 +16,6 @@ PASS
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |  </head>
 |  <body>
-|    <amp-moviads-player layout="responsive" width="150" height="80"></amp-moviads-player>
+|    <amp-moviads-player data-video-custom-conf='{"movieSrc":"https://www.videvo.net/videvo_files/converted/2014_02/videos/Clock_Face_2Videvo.mov17947.mp4","moviePosterSrc":"https://img.platform.moviads.pl/9/4/c/c/img_94ccf9798646c9a17dfd8a12f7f7e602_640_360_0_0_0_0_ffffff__fe4a5.jpg","playerIdConf":"test2","masterDomain":"http://player.smidev.pl/mads/"}' height="1" width="2" layout="responsive" responsive></amp-moviads-player>
 |  </body>
 |  </html>
