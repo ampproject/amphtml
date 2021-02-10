@@ -24,7 +24,7 @@ import {
   tryFocus,
 } from '../../../src/dom';
 import {dict} from '../../../src/utils/object';
-import {pureDevAssert, pureUserAssert} from '../../../src/pure-assert';
+import {pureDevAssert} from '../../../src/pure-assert';
 import {toArray} from '../../../src/types';
 import {useCallback, useLayoutEffect, useRef} from '../../../src/preact';
 
