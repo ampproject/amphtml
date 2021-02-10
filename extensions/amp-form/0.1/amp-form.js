@@ -1222,7 +1222,9 @@ export class AmpForm {
    * @private
    */
   analyticsEvent_(eventType, opt_vars) {
-    triggerAnalyticsEvent(this.form_, eventType, opt_vars);
+    // Use cached `this.doc_` to trigger analytics since analytics
+    // may be called after the <form> has been removed from the DOM.
+    triggerAnalyticsEvent(this.doc_, eventType, opt_vars);
   }
 
   /**
