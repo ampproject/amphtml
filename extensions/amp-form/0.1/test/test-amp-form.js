@@ -45,6 +45,7 @@ import {
 } from '../form-validators';
 import {user} from '../../../../src/log';
 import {whenCalled} from '../../../../testing/test-helper.js';
+import {createElementWithAttributes} from '../../../../src/dom';
 
 describes.repeated(
   '',
@@ -73,7 +74,8 @@ describes.repeated(
           document = env.ampdoc.getRootNode();
           timer = Services.timerFor(env.win);
           const ownerDoc = document.ownerDocument || document;
-          createElement = ownerDoc.createElement.bind(ownerDoc);
+          createElement = (tagName, attrs) =>
+            createElementWithAttributes(ownerDoc, tagName, attrs);
           createTextNode = ownerDoc.createTextNode.bind(ownerDoc);
 
           // Force sync mutateElement to make testing easier.
@@ -1110,6 +1112,67 @@ describes.repeated(
                     {'name': 'John Smith'}
                   )
                 ).to.be.true;
+                expect(mutateElementStub).to.have.been.calledOnce;
+                expect(messageContainer.firstChild).to.equal(renderedTemplate);
+
+                return submitEventPromise;
+              });
+          });
+        });
+
+        it('should render responses even if analytics throws', () => {
+          expectAsyncConsoleError(/Form submission failed/);
+
+          return getAmpForm(getForm()).then((ampForm) => {
+            const form = ampForm.form_;
+
+            const errorTemplate = createElement('template', {
+              id: 'errorTemplate',
+              type: 'amp-mustache',
+            });
+            errorTemplate.content.appendChild(
+              createTextNode('Sorry, {{name}}')
+            );
+            form.appendChild(errorTemplate);
+
+            const messageContainer = createElement('div', {
+              id: 'message',
+              'submit-error': '',
+              template: 'errorTemplate',
+            });
+            form.appendChild(messageContainer);
+            env.sandbox.stub(ampForm.xhr_, 'fetch').rejects({
+              response: {
+                json: () => {
+                  return Promise.resolve({'name': 'Tim Apple'});
+                },
+              },
+            });
+            env.sandbox
+              .stub(ampForm, 'analyticsEvent_')
+              .throws('Test.');
+            const renderedTemplate = createElement('div');
+            renderedTemplate.innerText = 'Hello, Tim Apple';
+            env.sandbox
+              .stub(ampForm.templates_, 'findAndRenderTemplate')
+              .resolves(renderedTemplate);
+            const event = {
+              stopImmediatePropagation: env.sandbox.spy(),
+              target: form,
+              preventDefault: env.sandbox.spy(),
+            };
+
+            const submitEventPromise = ampForm.handleSubmitEvent_(event);
+
+            return whenCalled(ampForm.templates_.findAndRenderTemplate)
+              .then(() => {
+                return ampForm.renderTemplatePromiseForTesting();
+              })
+              .then(() => {
+                expect(ampForm.templates_.findAndRenderTemplate).to.be.called;
+                expect(
+                  ampForm.templates_.findAndRenderTemplate
+                ).calledWith(messageContainer, {'name': 'Tim Apple'});
                 expect(mutateElementStub).to.have.been.calledOnce;
                 expect(messageContainer.firstChild).to.equal(renderedTemplate);
 

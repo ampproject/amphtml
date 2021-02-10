@@ -504,7 +504,11 @@ export class AmpForm {
     }
     formDataForAnalytics['formId'] = this.form_.id;
 
-    this.analyticsEvent_(eventType, formDataForAnalytics);
+    try {
+      this.analyticsEvent_(eventType, formDataForAnalytics);
+    } catch (err) {
+      dev().error(TAG, 'Sending analytics failed:', err);
+    }
   }
 
   /**
@@ -1222,9 +1226,9 @@ export class AmpForm {
    * @private
    */
   analyticsEvent_(eventType, opt_vars) {
-    // Use cached `this.doc_` to trigger analytics since analytics
+    // Use cached `this.ampdoc_` to trigger analytics since analytics
     // may be called after the <form> has been removed from the DOM.
-    triggerAnalyticsEvent(this.doc_, eventType, opt_vars);
+    triggerAnalyticsEvent(this.ampdoc_, eventType, opt_vars);
   }
 
   /**
