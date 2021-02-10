@@ -519,6 +519,10 @@ export class MediaPool {
       new SwapIntoDomTask(placeholderEl)
     ).then(
       () => {
+        this.enqueueMediaElementTask_(
+          poolMediaEl,
+          new UpdateSourcesTask(this.win_, sources)
+        );
         if (placeholderEl.isBitrateManaged) {
           const bitrateManager = getBitrateManager(this.win_);
           this.enqueueMediaElementTask_(
@@ -530,10 +534,6 @@ export class MediaPool {
             new ManageBitrateTask(bitrateManager)
           );
         }
-        this.enqueueMediaElementTask_(
-          poolMediaEl,
-          new UpdateSourcesTask(this.win_, sources)
-        );
         this.enqueueMediaElementTask_(poolMediaEl, new LoadTask()).then(() => {
           this.maybeResetAmpMedia_(ampMediaForPoolEl);
           this.maybeResetAmpMedia_(ampMediaForDomEl);
