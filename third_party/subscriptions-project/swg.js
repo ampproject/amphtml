@@ -2521,7 +2521,6 @@ function getVendorJsPropertyName_(style, titleCase) {
  * Returns the possibly prefixed JavaScript property name of a style property
  * (ex. WebkitTransitionDuration) given a camelCase'd version of the property
  * (ex. transitionDuration).
- * @export
  * @param {!Object} style
  * @param {string} camelCase the camel cased version of a css property name
  * @param {boolean=} bypassCache bypass the memoized cache of property
