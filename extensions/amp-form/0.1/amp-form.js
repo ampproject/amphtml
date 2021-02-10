@@ -1042,8 +1042,8 @@ export class AmpForm {
       promise = Promise.resolve(null);
     }
     return promise.then((responseJson) => {
-      this.triggerFormSubmitInAnalytics_('amp-form-submit-error');
       this.handleSubmitFailure_(e, responseJson, incomingTrust);
+      this.triggerFormSubmitInAnalytics_('amp-form-submit-error');
       this.maybeHandleRedirect_(e.response);
     });
   }
