@@ -277,7 +277,8 @@ t.run('AMPHTML ad on non-AMP page (inabox)', () => {
   );
 });
 
-t.run('A more real AMPHTML image ad', () => {
+// TODO(wg-monetization, #24421): Make this test less flaky.
+t.skip('A more real AMPHTML image ad', () => {
   const {testServerPort} = window.ampTestRuntimeConfig;
 
   // The image ad as seen in examples/inabox.gpt.html,
