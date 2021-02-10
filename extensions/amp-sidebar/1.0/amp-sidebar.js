@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-import {CSS as COMPONENT_CSS} from './sidebar.jss';
+import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-sidebar-1.0.css';
-import {PreactBaseElement} from '../../../src/preact/base-element';
-import {Sidebar} from './sidebar';
 import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {toggle} from '../../../src/style';
+import {toggleAttribute} from '../../../src/dom';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-sidebar';
 
-class AmpSidebar extends PreactBaseElement {
+class AmpSidebar extends BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -42,8 +41,8 @@ class AmpSidebar extends PreactBaseElement {
     this.registerApiAction('close', (api) => api./*OK*/ close());
 
     return dict({
-      'onBeforeOpen': this.beforeOpen_.bind(this),
-      'onAfterClose': this.afterClose_.bind(this),
+      'onBeforeOpen': this.toggle_.bind(this, true),
+      'onAfterClose': this.toggle_.bind(this, false),
     });
   }
 
@@ -63,23 +62,12 @@ class AmpSidebar extends PreactBaseElement {
   }
 
   /**
-   * Setting hidden to false
-   * @private
+   * Toggle open/closed attributes.
+   * @param {boolean} opt_state
    */
-  beforeOpen_() {
-    this.open_ = true;
-    toggle(this.element, true);
-    this.element.setAttribute('open', '');
-  }
-
-  /**
-   * Setting hidden to true
-   * @private
-   */
-  afterClose_() {
-    this.open_ = false;
-    toggle(this.element, false);
-    this.element.removeAttribute('open');
+  toggle_(opt_state) {
+    this.open_ = toggleAttribute(this.element, 'open', opt_state);
+    toggle(this.element, this.open_);
   }
 
   /** @override */
@@ -102,20 +90,6 @@ class AmpSidebar extends PreactBaseElement {
     return true;
   }
 }
-
-/** @override */
-AmpSidebar['Component'] = Sidebar;
-
-/** @override */
-AmpSidebar['passthrough'] = true;
-
-/** @override */
-AmpSidebar['shadowCss'] = COMPONENT_CSS;
-
-/** @override */
-AmpSidebar['props'] = {
-  'side': {attr: 'side', type: 'string'},
-};
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpSidebar, CSS);
