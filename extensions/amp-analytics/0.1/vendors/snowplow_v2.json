@@ -13,7 +13,7 @@
       "value": "$IF($SUBSTR(QUERY_PARAM(_sp),0,36), $SUBSTR(QUERY_PARAM(_sp),0,36), $IF(LINKER_PARAM(sp_amp_linker,_sp_duid), LINKER_PARAM(sp_amp_linker,_sp_duid), COOKIE(_sp_duid)))"
     },
     "_sp_ampid": {
-      "value": "$IF(COOKIE(_sp_id), COOKIE(_sp_id), LINKER_PARAM(sp_amp_linker, amp_id))"
+      "value": "$IF(COOKIE(_sp_ampid), LINKER_PARAM(sp_amp_linker, amp_id), COOKIE(_sp_id))"
     }
   },
   "vars": {
