@@ -45,7 +45,7 @@ function checkNode(node, context) {
         context.report({
           node: prop,
           message:
-            `Found: ${propNameNode ? propNameNode.name : '[unknown]'}.` +
+            `Found: ${propNameNode ? propNameNode.name : `[${prop.type}]`}.` +
             'The Object Literal Expression passed into `dict` must only contain string keyed properties.',
         });
       }
