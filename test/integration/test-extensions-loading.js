@@ -59,6 +59,13 @@ function testLoadOrderFixture(fixtureName, testElements) {
 describe('test extensions loading in multiple orders', function () {
   this.timeout(15000);
 
+  before(function () {
+    // TODO(#32523) Remove this when Bento experiment is done.
+    if (BENTO_AUTO_UPGRADE) {
+      this.skipTest();
+    }
+  });
+
   it('one extension, extension loads first, all scripts in header', () => {
     return testLoadOrderFixture(
       'test/fixtures/script-load-extension-head-v0-head.html',
