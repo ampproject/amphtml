@@ -171,7 +171,6 @@ export class MediaTask {
    *     execution.
    */
   execute(mediaEl) {
-    console.log('exacuting', this.name_, 'for', mediaEl.id);
     return this.executeInternal(mediaEl).then(this.resolve_, this.reject_);
   }
 
