@@ -54,7 +54,7 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     this.iframe_ = null;
 
     /**@private {?string} */
-    this.origin_ = '';
+    this.origin_ = 'https://embed.nexx.cloud/';
 
     /** @private {?Function} */
     this.unlistenMessage_ = null;
@@ -130,30 +130,28 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
       el
     );
 
-    const client = userAssert(
-      el.getAttribute('data-client'),
+    const client = 
+      el.getAttribute('data-client') || 
+      el.getAttribute('data-domain-id');
+
+    const clientId = userAssert(
+      client,
       'The data-client attribute is required for <amp-nexxtv-player> %s',
       el
     );
 
-    const delay = el.getAttribute('data-seek-to') || '0';
     const mode = el.getAttribute('data-mode') || 'static';
     const streamtype = el.getAttribute('data-streamtype') || 'video';
-    const origin =
-      el.getAttribute('data-origin') || 'https://embed.nexx.cloud/';
     const disableAds = el.getAttribute('data-disable-ads');
     const streamingFilter = el.getAttribute('data-streaming-filter');
+    const exitMode = el.getAttribute('data-exit-mode');
 
-    let src = origin;
+    let src = this.origin_;
 
-    src += `${encodeURIComponent(client)}/`;
+    src += `${encodeURIComponent(clientId)}/`;
     src += `${encodeURIComponent(streamtype)}/`;
     src += encodeURIComponent(mediaId);
     src += `?dataMode=${encodeURIComponent(mode)}&platform=amp`;
-
-    if (delay > 0) {
-      src += `&delay=${encodeURIComponent(delay)}`;
-    }
 
     if (disableAds === '1') {
       src += '&disableAds=1';
@@ -163,7 +161,11 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
       src += `&streamingFilter=${encodeURIComponent(streamingFilter)}`;
     }
 
-    if (this.consentString_ !== '' && this.consentString_ !== null){
+    if (exitMode !== null && exitMode.length > 0) {
+      src += `&exitMode=${encodeURIComponent(exitMode)}`;
+    }
+
+    if (this.consentString_ !== null){
       src += `&consentString=${encodeURIComponent(this.consentString_)}`;
     }
 
