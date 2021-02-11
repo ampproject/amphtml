@@ -15,7 +15,7 @@
  */
 
 import '../../../amp-mustache/0.2/amp-mustache';
-import {parseDateAttrs} from '../amp-date-countdown';
+import '../amp-date-countdown';
 import {waitFor} from '../../../../testing/test-helper.js';
 import {whenUpgradedToCustomElement} from '../../../../src/dom';
 
@@ -33,7 +33,7 @@ describes.realWin(
 
     async function waitRendered() {
       await whenUpgradedToCustomElement(element);
-      await element.build();
+      await element.buildInternal();
       await waitFor(() => {
         // The rendered container inserts a <div> element.
         const div = element.querySelector('div');
@@ -211,102 +211,3 @@ describes.realWin(
     });
   }
 );
-
-describes.sandboxed('amp-date-countdown 1.0: parseDateAttrs', {}, (env) => {
-  const DATE = new Date(1514793600000);
-  const DATE_STRING = DATE.toISOString();
-
-  let element;
-
-  beforeEach(() => {
-    element = document.createElement('amp-date-countdown');
-  });
-
-  it('should throw when no date is specified', () => {
-    allowConsoleError(() => {
-      expect(() => parseDateAttrs(element)).to.throw(/required/);
-    });
-  });
-
-  it('should throw when invalid date is specified', () => {
-    element.setAttribute('end-date', 'invalid');
-    allowConsoleError(() => {
-      expect(() => parseDateAttrs(element)).to.throw(/Invalid date/);
-    });
-  });
-
-  it('should parse the "end-date" attribute', () => {
-    element.setAttribute('end-date', DATE_STRING);
-    expect(parseDateAttrs(element)).to.equal(DATE.getTime());
-
-    // With offset.
-    element.setAttribute('offset-seconds', '1');
-    expect(parseDateAttrs(element)).to.equal(DATE.getTime() + 1000);
-  });
-
-  it('should accept "end-date=now"', () => {
-    env.sandbox.useFakeTimers(DATE);
-    element.setAttribute('end-date', 'now');
-    expect(parseDateAttrs(element)).to.equal(DATE.getTime());
-
-    // With offset.
-    element.setAttribute('offset-seconds', '1');
-    expect(parseDateAttrs(element)).to.equal(DATE.getTime() + 1000);
-  });
-
-  it('should parse the "timeleft-ms" attribute', () => {
-    // Mock Date.now()
-    const originalDateNow = Date.now;
-    const mockedDateNow = () => DATE.getTime();
-    Date.now = mockedDateNow;
-
-    element.setAttribute('timeleft-ms', 10000);
-    expect(parseDateAttrs(element)).to.equal(DATE.getTime() + 10000);
-
-    // With offset.
-    element.setAttribute('offset-seconds', '1');
-    expect(parseDateAttrs(element)).to.equal(DATE.getTime() + 10000 + 1000);
-
-    // Replace Date.now with its original native function
-    Date.now = originalDateNow;
-  });
-
-  it('should throw when invalid "timeleft-ms" is specified', () => {
-    element.setAttribute('timeleft-ms', 'invalid');
-    allowConsoleError(() => {
-      expect(() => parseDateAttrs(element)).to.throw(/required/);
-    });
-  });
-
-  it('should parse the "timestamp-ms" attribute', () => {
-    element.setAttribute('timestamp-ms', DATE.getTime());
-    expect(parseDateAttrs(element)).to.equal(DATE.getTime());
-
-    // With offset.
-    element.setAttribute('offset-seconds', '1');
-    expect(parseDateAttrs(element)).to.equal(DATE.getTime() + 1000);
-  });
-
-  it('should throw when invalid "timestamp-ms" is specified', () => {
-    element.setAttribute('timestamp-ms', 'invalid');
-    allowConsoleError(() => {
-      expect(() => parseDateAttrs(element)).to.throw(/required/);
-    });
-  });
-
-  it('should parse the "timestamp-seconds" attribute', () => {
-    element.setAttribute('timestamp-seconds', DATE.getTime() / 1000);
-    expect(parseDateAttrs(element)).to.equal(DATE.getTime());
-
-    // With offset.
-    element.setAttribute('offset-seconds', '1');
-    expect(parseDateAttrs(element)).to.equal(DATE.getTime() + 1000);
-  });
-
-  it('should throw when invalid "timestamp-seconds" is specified', () => {
-    element.setAttribute('timestamp-seconds', 'invalid');
-    allowConsoleError(() => {
-      expect(() => parseDateAttrs(element)).to.throw(/required/);
-    });
-  });
-});

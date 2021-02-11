@@ -301,11 +301,6 @@ declaration_list {
 }
 
 declaration_list {
-  name: "AMP_ONLY_DECLARATIONS"
-  declaration: { name: "clip-path" }
-}
-
-declaration_list {
   name: "EMAIL_SPECIFIC_DECLARATIONS"
   # AMP4EMAIL supported properties:
   # https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css/#supported-css-properties
@@ -576,11 +571,7 @@ css {
   "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size"
   url_bytes_included: true
 
-  # This is a legacy requirement. Style tags support all declarations while
-  # style attributes limit the allowed declarations. Support for style
-  # attributes was added at a later date than style tags, and more validation
-  # requirements were able to be enforced at that time.
-  allow_all_declaration_in_style_tag: true
+  allow_all_declaration_in_style: true
   allow_important: false
   image_url_spec: {
     protocol: "https"
@@ -595,9 +586,6 @@ css {
     allow_empty: true
   }
   expand_vendor_prefixes: true
-  declaration_list: "BASIC_DECLARATIONS"
-  declaration_list_svg: "SVG_BASIC_DECLARATIONS"
-  declaration_list: "AMP_ONLY_DECLARATIONS"
 }
 
 # DocCss Rules for AMP transformed documents.
@@ -614,7 +602,7 @@ css {
   "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size"
   url_bytes_included: false
 
-  allow_all_declaration_in_style_tag: true
+  allow_all_declaration_in_style: true
   allow_important: false
   image_url_spec: {
     protocol: "https"
@@ -629,9 +617,6 @@ css {
     allow_empty: true
   }
   expand_vendor_prefixes: true
-  declaration_list: "BASIC_DECLARATIONS"
-  declaration_list_svg: "SVG_BASIC_DECLARATIONS"
-  declaration_list: "AMP_ONLY_DECLARATIONS"
 }
 
 # DocCss rules for AMP4ADS.
@@ -645,7 +630,7 @@ css {
   # max_bytes_per_inline_style: 1000
   max_bytes_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/a4a_spec/#css"
 
-  allow_all_declaration_in_style_tag: true
+  allow_all_declaration_in_style: true
   allow_important: false
   image_url_spec: {
     protocol: "https"
@@ -660,8 +645,6 @@ css {
     allow_empty: true
   }
   expand_vendor_prefixes: true
-  declaration_list: "BASIC_DECLARATIONS"
-  declaration_list_svg: "SVG_BASIC_DECLARATIONS"
 }
 
 # DocCss rules for AMP4EMAIL, not data-css-strict
@@ -681,11 +664,7 @@ css {
   "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size"
   url_bytes_included: true
 
-  # This is a legacy requirement. Style tags support all declarations while
-  # style attributes limit the allowed declarations. Support for style
-  # attributes was added at a later date than style tags, and more validation
-  # requirements were able to be enforced at that time.
-  allow_all_declaration_in_style_tag: true
+  allow_all_declaration_in_style: true
   allow_important: false
   image_url_spec: {
     protocol: "https"
@@ -710,7 +689,7 @@ css {
   "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size"
   url_bytes_included: true
 
-  allow_all_declaration_in_style_tag: false
+  allow_all_declaration_in_style: false
   allow_important: false
   image_url_spec: {
     protocol: "https"

@@ -21,6 +21,7 @@
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
 import '../../../src/service/real-time-config/real-time-config-impl';
+import {ADS_INITIAL_INTERSECTION_EXP} from '../../../src/experiments/ads-initial-intersection-exp';
 import {
   AmpA4A,
   ConsentTupleDef,
@@ -109,6 +110,7 @@ import {getMultiSizeDimensions} from '../../../ads/google/utils';
 
 import {getOrCreateAdCid} from '../../../src/ad-cid';
 
+import {AMP_SIGNATURE_HEADER} from '../../amp-a4a/0.1/signature-verifier';
 import {getPageLayoutBoxBlocking} from '../../../src/utils/page-layout-box';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {isArray} from '../../../src/types';
@@ -475,6 +477,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         branches: Object.values(ZINDEX_EXP_BRANCHES),
       },
       {
+        experimentId: ADS_INITIAL_INTERSECTION_EXP.id,
+        isTrafficEligible: () => true,
+        branches: [
+          ADS_INITIAL_INTERSECTION_EXP.control,
+          ADS_INITIAL_INTERSECTION_EXP.experiment,
+        ],
+      },
+      {
         experimentId: IDLE_CWV_EXP,
         isTrafficEligible: () => {
           return (
@@ -645,6 +655,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'gdpr': gdprApplies === true ? '1' : gdprApplies === false ? '0' : null,
       'gdpr_consent': consentString,
     };
+  }
+
+  /**
+   * @override
+   */
+  skipClientSideValidation(headers) {
+    return headers && !headers.has(AMP_SIGNATURE_HEADER);
   }
 
   /**

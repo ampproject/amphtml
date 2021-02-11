@@ -157,6 +157,13 @@ const buildHelpDialogTemplate = (element) => {
         </div>
         <h1>Helpful links</h1>
         <a
+          class="i-amphtml-story-dev-tools-device-dialog-link i-amphtml-story-dev-tools-help-page-experience-link"
+          target="_blank"
+          href="https://amp.dev/page-experience/"
+          ><span>Analyze the Page Experience</span>
+          <div class="i-amphtml-story-dev-tools-device-dialog-arrow"></div
+        ></a>
+        <a
           class="i-amphtml-story-dev-tools-device-dialog-link"
           target="_blank"
           href="https://amp.dev/documentation/guides-and-tutorials/start/create_successful_stories/"
@@ -405,6 +412,9 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
     this.devicesContainer_ = null;
 
     this.onResize_ = this.onResize_.bind(this);
+
+    /** @private {Map<!Element, !Array<string>>} navigation events expected to be received on each player */
+    this.expectedNavigationEvents_ = {};
   }
 
   /** @override */
@@ -552,17 +562,52 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
     }).then(() => {
       deviceSpecs.player
         .getElement()
-        .addEventListener('storyNavigation', (event) => {
-          this.devices_.forEach((d) => {
-            if (d != deviceSpecs) {
-              d.player.show(null, event.detail.pageId);
-            }
-          });
-        });
+        .addEventListener('storyNavigation', (event) =>
+          this.onPlayerNavigation_(event, deviceSpecs)
+        );
       deviceSpecs.player.load();
     });
+    this.expectedNavigationEvents_[deviceSpecs.name] = [];
     this.devices_.push(deviceSpecs);
     this.updateDevicesInHash_();
+  }
+
+  /**
+   * Triggered when a player emits a storyNavigationEvent.
+   *
+   * A navigation event from a player can come from a user interaction or a previous programmatic call.
+   * Expected navigation events from programmatic calls are stored in `this.expectedNavigationEvents_`,
+   * so they should not be propagated (but deleted from the list of expected events).
+   *
+   * Behavior of expectedNavigationEvents:
+   * - If an event was not expected, it means it was user navigation and should be propagated to other players.
+   * - If an event was expected, sync the expected list up to that page by removing all the pages expected
+   * up to the one received in the navigation event. This clears any events that could be dispatched when the story
+   * was loading and never were executed.
+   *
+   * @param {!Event} event
+   * @param {!DeviceInfo} deviceSpecs
+   * @private
+   */
+  onPlayerNavigation_(event, deviceSpecs) {
+    const {pageId} = event.detail;
+    const pageIndexInExpectedList = this.expectedNavigationEvents_[
+      deviceSpecs.name
+    ].lastIndexOf(pageId);
+    if (pageIndexInExpectedList > -1) {
+      // Remove the expected events up to the most recently received event if it was in the list.
+      this.expectedNavigationEvents_[deviceSpecs.name].splice(
+        0,
+        pageIndexInExpectedList + 1
+      );
+      return;
+    }
+    this.devices_.forEach((d) => {
+      if (d != deviceSpecs) {
+        d.player.show(/* storyUrl */ null, event.detail.pageId);
+        this.expectedNavigationEvents_[d.name].push(pageId);
+      }
+    });
   }
 
   /**
@@ -579,6 +624,7 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
         device.element.remove();
       });
       this.devices_ = this.devices_.filter((d) => d != device);
+      delete this.expectedNavigationEvents_[device.name];
       this.updateDevicesInHash_();
       return true;
     }
@@ -743,6 +789,11 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
     dialog.querySelector(
       '.i-amphtml-story-dev-tools-help-search-preview-link'
     ).href += this.storyUrl_;
+    dialog.querySelector(
+      '.i-amphtml-story-dev-tools-help-page-experience-link'
+    ).href =
+      'https://amp.dev/page-experience/?url=' +
+      encodeURIComponent(this.storyUrl_);
 
     this.mutateElement(() => this.element.appendChild(dialog));
     addAttributeAfterTimeout(this, dialog, 1, 'active');

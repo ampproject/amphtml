@@ -49,18 +49,21 @@ describes.realWin(
       }
 
       // see yt test implementation
-      timer.promise(50).then(() => {
-        const bridTimerIframe = bc.querySelector('iframe');
+      timer
+        .promise(50)
+        .then(() => bc.getImpl())
+        .then((impl) => {
+          const bridTimerIframe = bc.querySelector('iframe');
 
-        bc.implementation_.handleBridMessage_({
-          origin: 'https://services.brid.tv',
-          source: bridTimerIframe.contentWindow,
-          data: 'Brid|0|trigger|ready',
+          impl.handleBridMessage_({
+            origin: 'https://services.brid.tv',
+            source: bridTimerIframe.contentWindow,
+            data: 'Brid|0|trigger|ready',
+          });
         });
-      });
       doc.body.appendChild(bc);
       return bc
-        .build()
+        .buildInternal()
         .then(() => {
           bc.layoutCallback();
         })
@@ -119,43 +122,43 @@ describes.realWin(
       });
     });
 
-    it('should forward events from brid-player to the amp element', () => {
-      return getBridPlayer(
+    it('should forward events from brid-player to the amp element', async () => {
+      const bc = await getBridPlayer(
         {
           'data-partner': '1177',
           'data-player': '979',
           'data-video': '5204',
         },
         true
-      ).then((bc) => {
-        const iframe = bc.querySelector('iframe');
+      );
+      const impl = await bc.getImpl();
 
-        return Promise.resolve()
-          .then(() => {
-            const p = listenOncePromise(bc, VideoEvents.PLAYING);
-            sendFakeMessage(bc, iframe, 'trigger|play');
-            return p;
-          })
-          .then(() => {
-            const p = listenOncePromise(bc, VideoEvents.MUTED);
-            sendFakeMessage(bc, iframe, 'volume|0');
-            return p;
-          })
-          .then(() => {
-            const p = listenOncePromise(bc, VideoEvents.PAUSE);
-            sendFakeMessage(bc, iframe, 'trigger|pause');
-            return p;
-          })
-          .then(() => {
-            const p = listenOncePromise(bc, VideoEvents.UNMUTED);
-            sendFakeMessage(bc, iframe, 'volume|1');
-            return p;
-          });
-      });
+      const iframe = bc.querySelector('iframe');
+      return Promise.resolve()
+        .then(() => {
+          const p = listenOncePromise(bc, VideoEvents.PLAYING);
+          sendFakeMessage(impl, iframe, 'trigger|play');
+          return p;
+        })
+        .then(() => {
+          const p = listenOncePromise(bc, VideoEvents.MUTED);
+          sendFakeMessage(impl, iframe, 'volume|0');
+          return p;
+        })
+        .then(() => {
+          const p = listenOncePromise(bc, VideoEvents.PAUSE);
+          sendFakeMessage(impl, iframe, 'trigger|pause');
+          return p;
+        })
+        .then(() => {
+          const p = listenOncePromise(bc, VideoEvents.UNMUTED);
+          sendFakeMessage(impl, iframe, 'volume|1');
+          return p;
+        });
     });
 
-    function sendFakeMessage(bc, iframe, command) {
-      bc.implementation_.handleBridMessage_({
+    function sendFakeMessage(impl, iframe, command) {
+      impl.handleBridMessage_({
         origin: 'https://services.brid.tv',
         source: iframe.contentWindow,
         data: 'Brid|0|' + command,

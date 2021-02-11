@@ -45,15 +45,17 @@ const ATTRIBUTES_TO_PROPAGATE = [
 ];
 
 export class AmpImg extends BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    return true;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
 
     /** @private {boolean} */
     this.allowImgLoadFallback_ = true;
-
-    /** @private {?boolean} */
-    this.prerenderAllowed_ = null;
 
     /** @private {?Element} */
     this.img_ = null;
@@ -246,14 +248,6 @@ export class AmpImg extends BaseElement {
       return true;
     }
     return newWidth > this.sizesWidth_;
-  }
-
-  /** @override */
-  prerenderAllowed() {
-    if (this.prerenderAllowed_ == null) {
-      this.prerenderAllowed_ = !this.element.hasAttribute('noprerender');
-    }
-    return this.prerenderAllowed_;
   }
 
   /** @override */

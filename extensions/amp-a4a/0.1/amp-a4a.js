@@ -15,6 +15,7 @@
  */
 
 import {A4AVariableSource} from './a4a-variable-source';
+import {ADS_INITIAL_INTERSECTION_EXP} from '../../../src/experiments/ads-initial-intersection-exp';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {Deferred, tryResolve} from '../../../src/utils/promise';
 import {DetachedDomStream} from '../../../src/utils/detached-dom-stream';
@@ -55,13 +56,14 @@ import {
   getConsentPolicyState,
 } from '../../../src/consent';
 import {getContextMetadata} from '../../../src/iframe-attributes';
-import {getExperimentBranch, isExperimentOn} from '../../../src/experiments';
+import {getExperimentBranch} from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {
   installFriendlyIframeEmbed,
   isSrcdocSupported,
 } from '../../../src/friendly-iframe-embed';
+import {installRealTimeConfigServiceForDoc} from '../../../src/service/real-time-config/real-time-config-impl';
 import {installUrlReplacementsForEmbed} from '../../../src/service/url-replacements-impl';
 import {
   intersectionEntryToJson,
@@ -913,6 +915,17 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
+   * Allow subclasses to skip client side validation of non-amp creatives
+   * based on http headers for perfomance. When true, ads will fall back to
+   * x-domain earlier.
+   * @param {!Headers} unusedHeaders
+   * @return {boolean}
+   */
+  skipClientSideValidation(unusedHeaders) {
+    return false;
+  }
+
+  /**
    * Start streaming response into the detached document.
    * @param {!Response} httpResponse
    * @param {function()} checkStillCurrent
@@ -922,6 +935,10 @@ export class AmpA4A extends AMP.BaseElement {
     if (httpResponse.status === 204) {
       this.forceCollapse();
       return Promise.reject(NO_CONTENT_RESPONSE);
+    }
+
+    if (this.skipClientSideValidation(httpResponse.headers)) {
+      return this.handleFallback_(httpResponse, checkStillCurrent);
     }
 
     // Duplicating httpResponse stream as safeframe/nameframe rending will need the
@@ -2052,10 +2069,10 @@ export class AmpA4A extends AMP.BaseElement {
       this.element,
       this.sentinel
     );
-    const asyncIntersection = isExperimentOn(
-      this.win,
-      'ads-initialIntersection'
-    );
+
+    const asyncIntersection =
+      getExperimentBranch(this.win, ADS_INITIAL_INTERSECTION_EXP.id) ===
+      ADS_INITIAL_INTERSECTION_EXP.experiment;
     const intersectionPromise = asyncIntersection
       ? measureIntersection(this.element)
       : Promise.resolve(this.element.getIntersectionChangeEntry());
@@ -2137,10 +2154,9 @@ export class AmpA4A extends AMP.BaseElement {
         this.getAdditionalContextMetadata(method == XORIGIN_MODE.SAFEFRAME)
       );
 
-      const asyncIntersection = isExperimentOn(
-        this.win,
-        'ads-initialIntersection'
-      );
+      const asyncIntersection =
+        getExperimentBranch(this.win, ADS_INITIAL_INTERSECTION_EXP.id) ===
+        ADS_INITIAL_INTERSECTION_EXP.experiment;
       const intersectionPromise = asyncIntersection
         ? measureIntersection(this.element)
         : Promise.resolve(this.element.getIntersectionChangeEntry());
@@ -2361,31 +2377,23 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {Promise<!Array<!rtcResponseDef>>|undefined}
    */
   tryExecuteRealTimeConfig_(consentState, consentString, consentMetadata) {
-    if (!!AMP.RealTimeConfigManager) {
-      return this.getBlockRtc_().then((shouldBlock) => {
-        if (shouldBlock) {
-          return;
-        }
-        try {
-          return new AMP.RealTimeConfigManager(
-            this.getAmpDoc()
-          ).maybeExecuteRealTimeConfig(
-            this.element,
-            this.getCustomRealTimeConfigMacros_(),
-            consentState,
-            consentString,
-            consentMetadata,
-            this.verifyStillCurrent()
-          );
-        } catch (err) {
-          user().error(TAG, 'Could not perform Real Time Config.', err);
-        }
-      });
-    } else if (this.element.getAttribute('rtc-config')) {
-      user().error(
-        TAG,
-        'RTC not supported for ad network ' +
-          `${this.element.getAttribute('type')}`
+    if (this.element.getAttribute('rtc-config')) {
+      installRealTimeConfigServiceForDoc(this.getAmpDoc());
+      return this.getBlockRtc_().then((shouldBlock) =>
+        shouldBlock
+          ? undefined
+          : Services.realTimeConfigForDoc(
+              this.getAmpDoc()
+            ).then((realTimeConfig) =>
+              realTimeConfig.maybeExecuteRealTimeConfig(
+                this.element,
+                this.getCustomRealTimeConfigMacros_(),
+                consentState,
+                consentString,
+                consentMetadata,
+                this.verifyStillCurrent()
+              )
+            )
       );
     }
   }

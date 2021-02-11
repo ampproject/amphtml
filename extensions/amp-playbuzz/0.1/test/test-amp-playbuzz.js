@@ -86,7 +86,7 @@ describes.realWin(
       }
       doc.body.appendChild(ins);
       return ins
-        .build()
+        .buildInternal()
         .then(() => {
           if (opt_beforeLayoutCallback) {
             opt_beforeLayoutCallback(ins);
@@ -172,35 +172,6 @@ describes.realWin(
       });
     });
 
-    it('builds a placeholder image without inserting iframe', () => {
-      const src = createItemSrc().withUrl(
-        'https://app.ex.co/stories/bob/bobs-life'
-      );
-      return getIns(src, createOptionalParams(), true, (ins) => {
-        // console.log(ins);
-        const placeholder = ins.querySelector('[placeholder]');
-        const iframe = ins.querySelector('iframe');
-        expect(iframe).to.be.null;
-        expect(placeholder).to.not.have.display('');
-        expect(placeholder.getAttribute('aria-label')).to.equal(
-          'Loading interactive element'
-        );
-      }).then((ins) => {
-        const placeholder = ins.querySelector('[placeholder]');
-
-        const iframe = ins.querySelector('iframe');
-        ins.getVsync = () => {
-          return {
-            mutate: (fn) => fn(),
-          };
-        };
-        testIframe(iframe, '//app.ex.co/stories/bob/bobs-life');
-        //Should test placeholder too
-        ins.implementation_.iframePromise_.then(() => {
-          expect(placeholder).to.have.display('none');
-        });
-      });
-    });
     it('propagates aria label to placeholder', () => {
       const src = createItemSrc().withUrl(
         'https://app.ex.co/stories/bob/bobs-life'

@@ -137,10 +137,10 @@ export class Resource {
     /** @private {number} */
     this.id_ = id;
 
-    /** @export @const {!AmpElement} */
+    /** @const {!AmpElement} */
     this.element = element;
 
-    /** @export @const {string} */
+    /** @const {string} */
     this.debugid = element.tagName.toLowerCase() + '#' + id;
 
     /** @const {!Window} */
@@ -341,7 +341,7 @@ export class Resource {
       return null;
     }
     this.isBuilding_ = true;
-    return this.element.build().then(
+    return this.element.buildInternal().then(
       () => {
         this.isBuilding_ = false;
         // With IntersectionObserver, measure can happen before build
@@ -885,9 +885,13 @@ export class Resource {
    * Undoes `layoutScheduled`.
    */
   layoutCanceled() {
-    this.state_ = this.hasBeenMeasured()
-      ? ResourceState.READY_FOR_LAYOUT
-      : ResourceState.NOT_LAID_OUT;
+    if (this.intersect_) {
+      this.state_ = ResourceState.READY_FOR_LAYOUT;
+    } else {
+      this.state_ = this.hasBeenMeasured()
+        ? ResourceState.READY_FOR_LAYOUT
+        : ResourceState.NOT_LAID_OUT;
+    }
   }
 
   /**

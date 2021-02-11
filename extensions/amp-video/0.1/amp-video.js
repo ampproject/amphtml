@@ -18,6 +18,7 @@ import {EMPTY_METADATA} from '../../../src/mediasession-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {VisibilityState} from '../../../src/visibility-state';
+import {addParamsToUrl} from '../../../src/url';
 import {
   childElement,
   childElementByTag,
@@ -63,6 +64,13 @@ const ATTRS_TO_PROPAGATE_ON_BUILD = [
   'controlsList',
 ];
 
+/** @private {!Map<string, number>} the bitrate in Kb/s of amp_quality for videos in the ampproject cdn */
+const AMP_QUALITY_BITRATES = {
+  'high': 2000,
+  'medium': 720,
+  'low': 400,
+};
+
 /**
  * Do not propagate `autoplay`. Autoplay behavior is managed by
  *       video manager since amp-video implements the VideoInterface.
@@ -78,51 +86,7 @@ const ATTRS_TO_PROPAGATE = ATTRS_TO_PROPAGATE_ON_BUILD.concat(
 /**
  * @implements {../../../src/video-interface.VideoInterface}
  */
-class AmpVideo extends AMP.BaseElement {
-  /**
-   * @param {!AmpElement} element
-   */
-  constructor(element) {
-    super(element);
-
-    /** @private {?Element} */
-    this.video_ = null;
-
-    /** @private {boolean} */
-    this.muted_ = false;
-
-    /** @private {?boolean} */
-    this.prerenderAllowed_ = null;
-
-    /** @private {!../../../src/mediasession-helper.MetadataDef} */
-    this.metadata_ = EMPTY_METADATA;
-
-    /** @private @const {!Array<!UnlistenDef>} */
-    this.unlisteners_ = [];
-
-    /** @visibleForTesting {?Element} */
-    this.posterDummyImageForTesting_ = null;
-
-    /** @private {boolean} */
-    this.isPlaying_ = false;
-
-    this.onDisplay_ = this.onDisplay_.bind(this);
-  }
-
-  /**
-   * @param {boolean=} opt_onLayout
-   * @override
-   */
-  preconnectCallback(opt_onLayout) {
-    this.getVideoSourcesForPreconnect_().forEach((videoSrc) => {
-      Services.preconnectFor(this.win).url(
-        this.getAmpDoc(),
-        videoSrc,
-        opt_onLayout
-      );
-    });
-  }
-
+export class AmpVideo extends AMP.BaseElement {
   /**
    * AMP Cache may selectively cache certain video sources (based on various
    * heuristics such as video type, extensions, etc...).
@@ -157,15 +121,68 @@ class AmpVideo extends AMP.BaseElement {
    * dependent on the value of `prerenderAllowed()`.
    *
    * @override
+   * @nocollapse
    */
-  prerenderAllowed() {
+  static prerenderAllowed(element) {
     // Only allow prerender if video sources are cached on CDN, or if video has
     // a poster image.
-    if (this.prerenderAllowed_ == null) {
-      const posterAttr = this.element.getAttribute('poster');
-      this.prerenderAllowed_ = !!posterAttr || this.hasAnyCachedSources_();
+
+    // Poster is available.
+    if (element.getAttribute('poster')) {
+      return true;
     }
-    return this.prerenderAllowed_;
+
+    // Look for sources.
+    const sources = toArray(childElementsByTag(element, 'source'));
+    sources.push(element);
+    for (let i = 0; i < sources.length; i++) {
+      if (isCachedByCdn(sources[i], element)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * @param {!AmpElement} element
+   */
+  constructor(element) {
+    super(element);
+
+    /** @private {?Element} */
+    this.video_ = null;
+
+    /** @private {boolean} */
+    this.muted_ = false;
+
+    /** @private {!../../../src/mediasession-helper.MetadataDef} */
+    this.metadata_ = EMPTY_METADATA;
+
+    /** @private @const {!Array<!UnlistenDef>} */
+    this.unlisteners_ = [];
+
+    /** @visibleForTesting {?Element} */
+    this.posterDummyImageForTesting_ = null;
+
+    /** @private {boolean} */
+    this.isPlaying_ = false;
+
+    this.onDisplay_ = this.onDisplay_.bind(this);
+  }
+
+  /**
+   * @param {boolean=} opt_onLayout
+   * @override
+   */
+  preconnectCallback(opt_onLayout) {
+    this.getVideoSourcesForPreconnect_().forEach((videoSrc) => {
+      Services.preconnectFor(this.win).url(
+        this.getAmpDoc(),
+        videoSrc,
+        opt_onLayout
+      );
+    });
   }
 
   /**
@@ -204,7 +221,10 @@ class AmpVideo extends AMP.BaseElement {
     this.configure_();
 
     this.video_ = element.ownerDocument.createElement('video');
-    if (this.element.querySelector('source[data-bitrate]')) {
+    // Manage video if the sources contain bitrate or amp-orig-src will be expanded to multiple bitrates.
+    if (
+      this.element.querySelector('source[data-bitrate], source[amp-orig-src]')
+    ) {
       getBitrateManager(this.win).manage(this.video_);
     }
 
@@ -441,7 +461,7 @@ class AmpVideo extends AMP.BaseElement {
     const sources = toArray(childElementsByTag(this.element, 'source'));
 
     // if the `src` of `amp-video` itself is cached, move it to <source>
-    if (this.element.hasAttribute('src') && this.isCachedByCDN_(this.element)) {
+    if (this.element.hasAttribute('src') && isCachedByCdn(this.element)) {
       const src = this.element.getAttribute('src');
       const type = this.element.getAttribute('type');
       const srcSource = this.createSourceElement_(src, type);
@@ -454,11 +474,29 @@ class AmpVideo extends AMP.BaseElement {
       sources.unshift(srcSource);
     }
 
-    // Only cached sources are added during prerender.
+    // Only cached sources are added during prerender, with all the available transcodes generated by the cache.
     // Origin sources will only be added when document becomes visible.
     sources.forEach((source) => {
-      if (this.isCachedByCDN_(source)) {
-        this.video_.appendChild(source);
+      if (isCachedByCdn(source, this.element)) {
+        source.remove();
+        const qualities = Object.keys(AMP_QUALITY_BITRATES);
+        const origType = source.getAttribute('type');
+        const origSrc = source.getAttribute('amp-orig-src');
+        qualities.forEach((quality, index) => {
+          const cachedSource = addParamsToUrl(source.src, {
+            'amp_quality': quality,
+          });
+          const currSource = this.createSourceElement_(
+            cachedSource,
+            origType,
+            AMP_QUALITY_BITRATES[quality]
+          );
+          // Keep src of amp-orig only in last one so it adds the orig source after it.
+          if (index === qualities.length - 1) {
+            currSource.setAttribute('amp-orig-src', origSrc);
+          }
+          this.video_.appendChild(currSource);
+        });
       }
     });
 
@@ -480,14 +518,14 @@ class AmpVideo extends AMP.BaseElement {
     const urlService = this.getUrlService_();
 
     // If the `src` of `amp-video` itself is NOT cached, set it on video
-    if (element.hasAttribute('src') && !this.isCachedByCDN_(element)) {
+    if (element.hasAttribute('src') && !isCachedByCdn(element)) {
       urlService.assertHttpsUrl(element.getAttribute('src'), element);
       this.propagateAttributes(['src'], dev().assertElement(this.video_));
     }
 
     sources.forEach((source) => {
       // Cached sources should have been moved from <amp-video> to <video>.
-      devAssert(!this.isCachedByCDN_(source));
+      devAssert(!isCachedByCdn(source, element));
       urlService.assertHttpsUrl(source.getAttribute('src'), source);
       this.video_.appendChild(source);
     });
@@ -499,10 +537,6 @@ class AmpVideo extends AMP.BaseElement {
       const origSrc = cachedSource.getAttribute('amp-orig-src');
       const origType = cachedSource.getAttribute('type');
       const origSource = this.createSourceElement_(origSrc, origType);
-      const bitrate = cachedSource.getAttribute('data-bitrate');
-      if (bitrate) {
-        origSource.setAttribute('data-bitrate', bitrate);
-      }
       insertAfterOrAtStart(
         dev().assertElement(this.video_),
         origSource,
@@ -521,23 +555,13 @@ class AmpVideo extends AMP.BaseElement {
   }
 
   /**
-   * @param {!Element} element
-   * @return {boolean}
-   * @private
-   */
-  isCachedByCDN_(element) {
-    const src = element.getAttribute('src');
-    const hasOrigSrcAttr = element.hasAttribute('amp-orig-src');
-    return hasOrigSrcAttr && this.getUrlService_().isProxyOrigin(src);
-  }
-
-  /**
    * @param {string} src
    * @param {?string} type
+   * @param {number=} bitrate
    * @return {!Element} source element
    * @private
    */
-  createSourceElement_(src, type) {
+  createSourceElement_(src, type, bitrate = null) {
     const {element} = this;
     this.getUrlService_().assertHttpsUrl(src, element);
     const source = element.ownerDocument.createElement('source');
@@ -545,31 +569,10 @@ class AmpVideo extends AMP.BaseElement {
     if (type) {
       source.setAttribute('type', type);
     }
-    return source;
-  }
-
-  /**
-   * @private
-   * @return {boolean}
-   */
-  hasAnyCachedSources_() {
-    return !!this.getFirstCachedSource_();
-  }
-
-  /**
-   * @private
-   * @return {?Element}
-   */
-  getFirstCachedSource_() {
-    const {element} = this;
-    const sources = toArray(childElementsByTag(element, 'source'));
-    sources.push(element);
-    for (let i = 0; i < sources.length; i++) {
-      if (this.isCachedByCDN_(sources[i])) {
-        return sources[i];
-      }
+    if (bitrate !== null) {
+      source.setAttribute('data-bitrate', bitrate);
     }
-    return null;
+    return source;
   }
 
   /**
@@ -643,6 +646,9 @@ class AmpVideo extends AMP.BaseElement {
 
   /** @private */
   updateIsPlaying_(isPlaying) {
+    if (this.isManagedByPool_()) {
+      return;
+    }
     if (isPlaying === this.isPlaying_) {
       return;
     }
@@ -901,6 +907,22 @@ class AmpVideo extends AMP.BaseElement {
   seekTo(timeSeconds) {
     this.video_.currentTime = timeSeconds;
   }
+}
+
+/**
+ * @param {!Element} element
+ * @param {!Element=} opt_videoElement
+ * @return {boolean}
+ * @visibleForTesting
+ */
+export function isCachedByCdn(element, opt_videoElement) {
+  const src = element.getAttribute('src');
+  const hasOrigSrcAttr = element.hasAttribute('amp-orig-src');
+  if (!hasOrigSrcAttr) {
+    return false;
+  }
+  const urlService = Services.urlForDoc(opt_videoElement || element);
+  return urlService.isProxyOrigin(src);
 }
 
 AMP.extension(TAG, '0.1', (AMP) => {
