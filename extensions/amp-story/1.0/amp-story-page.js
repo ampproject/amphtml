@@ -198,7 +198,7 @@ const buildOpenOutlinkAttachmentElement = (element) =>
           <span class="i-amphtml-story-page-open-attachment-outlink-bar-left"></span>
           <span class="i-amphtml-story-page-open-attachment-outlink-bar-right"></span>
         </span>
-        <div>
+        <div class="i-amphtml-story-page-attachment-outlink-chip">
           <div class="i-amphtml-story-page-attachment-outlink-image"></div>
           <div class="i-amphtml-story-page-attachment-outlink-label"></div>
         </div>
@@ -1828,6 +1828,9 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     if (!this.openAttachmentEl_) {
       this.openAttachmentEl_ = buildOpenOutlinkAttachmentElement(this.element);
+      const ctaChipEl = this.openAttachmentEl_.querySelector(
+        '.i-amphtml-story-page-attachment-outlink-chip'
+      );
       const textEl = this.openAttachmentEl_.querySelector(
         '.i-amphtml-story-page-attachment-outlink-label'
       );
@@ -1873,7 +1876,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
         const ctaAccentColor = attachmentEl.getAttribute('cta-accent-color');
         if (theme && AttachmentTheme.DARK === theme.toLowerCase()) {
-          setImportantStyles(textEl, {
+          setImportantStyles(ctaChipEl, {
             color: 'white',
             background: ctaAccentColor ? ctaAccentColor : 'black',
           });
@@ -1884,7 +1887,7 @@ export class AmpStoryPage extends AMP.BaseElement {
             background: ctaAccentColor ? ctaAccentColor : 'black',
           });
         } else {
-          setImportantStyles(textEl, {
+          setImportantStyles(ctaChipEl, {
             color: ctaAccentColor ? ctaAccentColor : 'black',
             background: 'white',
           });

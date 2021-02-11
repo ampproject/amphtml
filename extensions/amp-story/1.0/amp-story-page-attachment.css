@@ -229,12 +229,16 @@ amp-story-page .i-amphtml-story-page-open-attachment-outlink-bar-right {
   animation: open-attachment-bar-right 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) both !important;
 }
 
-amp-story-page .i-amphtml-story-page-attachment-outlink-label {
+amp-story-page .i-amphtml-story-page-attachment-outlink-chip {
   position: relative !important;
   padding: 12px 32px 20px 32px !important;
   margin: 0 0 20px 0 !important;
   height: 16px !important;
   max-width: 243px !important;
+  border-radius: 30px !important;
+}
+
+amp-story-page .i-amphtml-story-page-attachment-outlink-label {
   font-family: 'Roboto', sans-serif !important;
   font-size: 16px !important;
   font-weight: bold !important;
@@ -244,7 +248,6 @@ amp-story-page .i-amphtml-story-page-attachment-outlink-label {
   text-overflow: ellipsis !important;
   text-shadow: 0px 0px 6px rgba(0, 0, 0, 0.36) !important;
   white-space: nowrap !important;
-  border-radius: 30px !important;
 }
 
 .i-amphtml-story-page-attachment-outlink-image {
