@@ -1180,12 +1180,15 @@ app.use('/subscription/:id/entitlements', (req, res) => {
   // Store metering state, if possible.
   const ampReaderId = req.query.rid;
   if (ampReaderId && req.query.meteringState) {
+    // Parse metering state from encoded Base64 string.
     const encodedMeteringState = req.query.meteringState;
     const decodedMeteringState = Buffer.from(
       encodedMeteringState,
       'base64'
     ).toString();
     const meteringState = JSON.parse(decodedMeteringState);
+
+    // Store metering state.
     meteringStateStore[ampReaderId] = meteringState;
   }
 
