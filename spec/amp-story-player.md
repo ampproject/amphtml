@@ -214,11 +214,10 @@ player.pause();
 
 -   string: the URL of the story to prerender.
 
-Will start loading and prerendering the story on the player. The story will remain in prerender mode and won't be ready for consumption until you call [play()](#play/pause) on the player.
+Will start loading and prerendering the story on the player.
 
 ```javascript
 player.prerender('cool-story.html'); // Will load and prerender cool-story.html
-player.play(); // play() must be called to start playing the story.
 ```
 
 #### getStoryState
