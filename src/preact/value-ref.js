@@ -14,8 +14,15 @@
  * limitations under the License.
  */
 
-/** @protected @enum {string} */
-export const Side = {
-  LEFT: 'left',
-  RIGHT: 'right',
-};
+import * as hooks from /*OK*/ 'preact/hooks';
+
+/**
+ * @param {T} current
+ * @return {{current: T}}
+ * @template T
+ */
+export function useValueRef(current) {
+  const valueRef = hooks.useRef(null);
+  valueRef.current = current;
+  return valueRef;
+}

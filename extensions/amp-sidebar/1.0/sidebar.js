@@ -16,7 +16,7 @@
 
 import * as Preact from '../../../src/preact';
 import {ContainWrapper} from '../../../src/preact/component';
-import {Side, useValueRef} from './sidebar-config';
+import {Side} from './sidebar-config';
 import {forwardRef} from '../../../src/preact/compat';
 import {isRTL} from '../../../src/dom';
 import {
@@ -25,6 +25,7 @@ import {
   useLayoutEffect,
   useRef,
   useState,
+  useValueRef,
 } from '../../../src/preact';
 import {useSidebarAnimation} from './sidebar-animations-hook';
 import {useStyles} from './sidebar.jss';
@@ -53,7 +54,6 @@ function SidebarWithRef(
   // `mounted` mounts the component. `opened` plays the animation.
   const [mounted, setMounted] = useState(false);
   const [opened, setOpened] = useState(false);
-  const [side, setSide] = useState(sideProp);
 
   const classes = useStyles();
   const sidebarRef = useRef();
@@ -62,6 +62,7 @@ function SidebarWithRef(
   // We are using refs here to refer to common strings, objects, and functions used.
   // This is because they are needed within `useEffect` calls below (but are not depended for triggering)
   // We use `useValueRef` for props that might change (user-controlled)
+  const sideRef = useValueRef(sideProp);
   const onBeforeOpenRef = useValueRef(onBeforeOpen);
 
   const open = useCallback(() => {
@@ -90,20 +91,22 @@ function SidebarWithRef(
   );
 
   useLayoutEffect(() => {
-    if (side) {
+    if (sideRef.current) {
       return;
     }
     const sidebarElement = sidebarRef.current;
     if (!sidebarElement) {
       return;
     }
-    setSide(isRTL(sidebarElement.ownerDocument) ? Side.RIGHT : Side.LEFT);
-  }, [side, mounted]);
+    sideRef.current = isRTL(sidebarElement.ownerDocument)
+      ? Side.RIGHT
+      : Side.LEFT;
+  }, [sideRef, mounted]);
 
   useSidebarAnimation(
     opened,
     onAfterClose,
-    side,
+    sideRef,
     sidebarRef,
     backdropRef,
     setMounted
@@ -121,10 +124,10 @@ function SidebarWithRef(
           part="sidebar"
           wrapperClassName={`${classes.sidebarClass} ${
             classes.defaultSidebarStyles
-          } ${side === Side.LEFT ? classes.left : classes.right}`}
+          } ${sideRef.current === Side.LEFT ? classes.left : classes.right}`}
           role="menu"
           tabindex="-1"
-          hidden={!side}
+          hidden={!sideRef.current}
           {...rest}
         >
           {children}
@@ -137,7 +140,7 @@ function SidebarWithRef(
           className={`${backdropClassName ?? ''} ${classes.backdropClass} ${
             classes.defaultBackdropStyles
           }`}
-          hidden={!side}
+          hidden={!sideRef.current}
         ></div>
       </>
     )

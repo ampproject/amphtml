@@ -16,6 +16,7 @@
 
 import * as hooks from /*OK*/ 'preact/hooks';
 import * as preact from /*OK*/ 'preact';
+import * as valueRef from './value-ref';
 
 // Defines the type interfaces for the approved Preact APIs.
 // TODO: isValidElement, Component
@@ -165,4 +166,13 @@ export function useImperativeHandle(ref, create, opt_deps) {
  */
 export function toChildArray(unusedChildren) {
   return preact.toChildArray.apply(undefined, arguments);
+}
+
+/**
+ * @param {T} current
+ * @return {{current: T}}
+ * @template T
+ */
+export function useValueRef(current) {
+  return valueRef.useValueRef(current);
 }

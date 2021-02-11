@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Side, useValueRef} from './sidebar-config';
+import {Side} from './sidebar-config';
 import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
-import {useLayoutEffect, useRef} from '../../../src/preact';
+import {useLayoutEffect, useRef, useValueRef} from '../../../src/preact';
 
 const ANIMATION_DURATION = 350;
 const ANIMATION_EASE_IN = 'cubic-bezier(0,0,.21,1)';
@@ -55,7 +55,7 @@ function safelySetStyles(element, styles) {
 /**
  * @param {boolean} opened
  * @param {{current: function|undefined}} onAfterClose
- * @param {string|undefined} side
+ * @param {{current: string}} sideRef
  * @param {{current: Element|null}} sidebarRef
  * @param {{current: Element|null}} backdropRef
  * @param {function} setMounted
@@ -63,7 +63,7 @@ function safelySetStyles(element, styles) {
 export function useSidebarAnimation(
   opened,
   onAfterClose,
-  side,
+  sideRef,
   sidebarRef,
   backdropRef,
   setMounted
@@ -75,7 +75,7 @@ export function useSidebarAnimation(
   useLayoutEffect(() => {
     const sidebarElement = sidebarRef.current;
     const backdropElement = backdropRef.current;
-    if (!sidebarElement || !backdropElement || !side) {
+    if (!sidebarElement || !backdropElement || !sideRef.current) {
       return;
     }
 
@@ -130,13 +130,13 @@ export function useSidebarAnimation(
       }
       safelySetStyles(
         sidebarElement,
-        side === Side.LEFT
+        sideRef.current === Side.LEFT
           ? ANIMATION_STYLES_SIDEBAR_LEFT_INIT
           : ANIMATION_STYLES_SIDEBAR_RIGHT_INIT
       );
       safelySetStyles(backdropElement, ANIMATION_STYLES_BACKDROP_INIT);
       const sidebarAnimation = sidebarElement.animate(
-        side === Side.LEFT
+        sideRef.current === Side.LEFT
           ? ANIMATION_KEYFRAMES_SLIDE_IN_LEFT
           : ANIMATION_KEYFRAMES_SLIDE_IN_RIGHT,
         {
@@ -164,7 +164,7 @@ export function useSidebarAnimation(
         return;
       }
       const sidebarAnimation = sidebarElement.animate(
-        side === Side.LEFT
+        sideRef.current === Side.LEFT
           ? ANIMATION_KEYFRAMES_SLIDE_IN_LEFT
           : ANIMATION_KEYFRAMES_SLIDE_IN_RIGHT,
         {
@@ -188,5 +188,5 @@ export function useSidebarAnimation(
       backdropAnimationRef.current = backdropAnimation;
       animationDirectionRef.current = Direction.CLOSING;
     }
-  }, [opened, onAfterCloseRef, side, sidebarRef, backdropRef, setMounted]);
+  }, [opened, onAfterCloseRef, sideRef, sidebarRef, backdropRef, setMounted]);
 }
