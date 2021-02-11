@@ -231,9 +231,13 @@ jobs:
     steps:
       - setup_vm
       - install_chrome
+      - restore_karma_cache:
+          cache_name: experimentA
       - run:
           name: 'Experiment A Tests'
           command: node build-system/pr-check/experiment-tests.js --experiment=experimentA
+      - save_karma_cache:
+          cache_name: experimentA
       - fail_fast
   'Experiment B Tests':
     executor:
@@ -241,9 +245,13 @@ jobs:
     steps:
       - setup_vm
       - install_chrome
+      - restore_karma_cache:
+          cache_name: experimentB
       - run:
           name: 'Experiment B Tests'
           command: node build-system/pr-check/experiment-tests.js --experiment=experimentB
+      - save_karma_cache:
+          cache_name: experimentB
       - fail_fast
   'Experiment C Tests':
     executor:
@@ -251,9 +259,13 @@ jobs:
     steps:
       - setup_vm
       - install_chrome
+      - restore_karma_cache:
+          cache_name: experimentC
       - run:
           name: 'Experiment C Tests'
           command: node build-system/pr-check/experiment-tests.js --experiment=experimentC
+      - save_karma_cache:
+          cache_name: experimentC
       - fail_fast
 
 workflows:
@@ -297,14 +309,14 @@ workflows:
           <<: *push_and_pr_builds
           requires:
             - 'Nomodule Build'
+      - 'Experiment A Tests':
+          <<: *push_and_pr_builds
+      - 'Experiment B Tests':
+          <<: *push_and_pr_builds
+      - 'Experiment C Tests':
+          <<: *push_and_pr_builds
       # TODO(wg-performance, #12128): This takes 30 mins and fails regularly.
       # - 'Performance Tests':
       #     <<: *push_builds_only
       #     requires:
       #       - 'Nomodule Build'
-      - 'Experiment A Tests':
-          <<: *push_builds_only
-      - 'Experiment B Tests':
-          <<: *push_builds_only
-      - 'Experiment C Tests':
-          <<: *push_builds_only
