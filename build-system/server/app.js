@@ -1172,16 +1172,21 @@ app.use('/subscription/:id/entitlements', (req, res) => {
   };
 
   // Store metering state, if possible.
-  if (req.query.rid && req.query.meteringState) {
-    ampSubscriptionsMeteringStateStore[req.query.rid] = JSON.parse(
-      Buffer.from(req.query.meteringState, 'base64').toString()
-    );
+  const ampReaderId = req.query.rid;
+  if (ampReaderId && req.query.meteringState) {
+    const encodedMeteringState = req.query.meteringState;
+    const decodedMeteringState = Buffer.from(
+      encodedMeteringState,
+      'base64'
+    ).toString();
+    const meteringState = JSON.parse(decodedMeteringState);
+    ampSubscriptionsMeteringStateStore[ampReaderId] = meteringState;
   }
 
   // Add metering state to response, if possible.
-  if (ampSubscriptionsMeteringStateStore[req.query.rid]) {
+  if (ampSubscriptionsMeteringStateStore[ampReaderId]) {
     response.metering = {
-      state: ampSubscriptionsMeteringStateStore[req.query.rid],
+      state: ampSubscriptionsMeteringStateStore[ampReaderId],
     };
   }
 
