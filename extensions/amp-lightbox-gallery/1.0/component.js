@@ -17,15 +17,13 @@
 import * as Preact from '../../../src/preact';
 import {Lightbox} from './../../amp-lightbox/1.0/lightbox';
 import {LightboxGalleryContext} from './context';
+import {sequentialIdGenerator} from '../../../src/utils/id-generator';
 import {
-  cloneElement,
-  toChildArray,
   useContext,
   useLayoutEffect,
   useRef,
   useState,
 } from '../../../src/preact';
-import {sequentialIdGenerator} from '../../../src/utils/id-generator';
 
 const generateLightboxItemId = sequentialIdGenerator();
 
@@ -36,8 +34,8 @@ const generateLightboxItemId = sequentialIdGenerator();
 export function LightboxGallery({children}) {
   const lightboxRef = useRef(null);
   const lightboxElements = useRef([]);
-  const register = (id, el) => {
-    lightboxElements.current[id] = el;
+  const register = (id, render) => {
+    lightboxElements.current[id] = render();
   };
   const deregister = (id) => {
     delete lightboxElements.current[id];
@@ -61,7 +59,7 @@ export function LightboxGallery({children}) {
         <div>{lightboxElements.current}</div>
       </Lightbox>
       <LightboxGalleryContext.Provider value={context}>
-        <WithDeepLightbox>{children}</WithDeepLightbox>
+        {children}
       </LightboxGalleryContext.Provider>
     </>
   );
@@ -71,37 +69,22 @@ export function LightboxGallery({children}) {
  * @param {!LightboxGalleryDef.LightboxableProps} props
  * @return {PreactDef.Renderable}
  */
-function WithLightbox({children, id: propId, ...rest}) {
+export function WithLightbox({
+  children,
+  id: propId,
+  render = () => children,
+  ...rest
+}) {
   const [genId] = useState(generateLightboxItemId);
   const id = propId || genId;
   const {open, register, deregister} = useContext(LightboxGalleryContext);
   useLayoutEffect(() => {
-    register(id, children);
+    register(id, render);
     return () => deregister(id);
-  }, [children, id, deregister, register]);
+  }, [id, deregister, register, render]);
   return (
     <div key={id} onClick={() => open()} role="button" tabindex="0" {...rest}>
       {children}
     </div>
-  );
-}
-
-/**
- * @param {!LightboxGalleryDef.LightboxableProps} props
- * @return {PreactDef.Renderable}
- */
-function WithDeepLightbox({children}) {
-  return toChildArray(children).map((child) =>
-    child.props?.lightbox ? (
-      <WithLightbox>{child}</WithLightbox>
-    ) : child.props?.children ? (
-      cloneElement(
-        child,
-        null,
-        <WithDeepLightbox>{child.props.children}</WithDeepLightbox>
-      )
-    ) : (
-      child
-    )
   );
 }
