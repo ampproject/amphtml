@@ -16,7 +16,7 @@
 
 import * as Preact from '../../../src/preact';
 import {Lightbox} from './../../amp-lightbox/1.0/lightbox';
-import {LightboxGalleryContext} from './lightbox-gallery-context';
+import {LightboxGalleryContext} from './context';
 import {
   cloneElement,
   toChildArray,

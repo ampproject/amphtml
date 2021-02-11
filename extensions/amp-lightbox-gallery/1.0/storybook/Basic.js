@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {LightboxGallery} from '../lightbox-gallery';
+import {LightboxGallery} from '../component';
 import {withA11y} from '@storybook/addon-a11y';
 import {withKnobs} from '@storybook/addon-knobs';
 
