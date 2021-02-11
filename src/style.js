@@ -384,7 +384,6 @@ export function isValidCssColor(color) {
     return false;
   }
   const optionElement = new Option();
-  // eslint-disable-next-line local/no-style-property-setting
   const {style} = optionElement;
   style.color = color.replace('!important', '');
   return style.color !== '';
