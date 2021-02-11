@@ -124,6 +124,8 @@ describes.realWin(
   (env) => {
     let root = null;
     let docreadyCb = null;
+    // let document;
+
     beforeEach(() => {
       const {document} = env.win;
       root = document.createElement('div');
@@ -421,6 +423,64 @@ describes.realWin(
       expect(param).to.deep.equal({'nd': 150, 'od': 100});
       expect(setScrollTopStub).to.be.calledOnce;
       expect(setScrollTopStub.firstCall.args[0]).to.equal(350);
+    });
+
+    it('highlights sentences with the specified ::target-text rule', () => {
+      const style = document.createElement('style');
+      style.innerHTML = `
+        ::target-text {
+          background-color: red;
+          color: green;
+        }
+      `;
+      const {ampdoc} = env;
+      ampdoc.win.document.getElementsByTagName('head')[0].appendChild(style);
+
+      const handler = new HighlightHandler(ampdoc, {
+        sentences: ['amp', 'highlight'],
+      });
+
+      // initHighlight_ is not called before document become ready.
+      expect(handler.highlightedNodes_).to.be.null;
+      docreadyCb();
+
+      // initHighlight_ was called in docreadyCb() and highlightedNodes_ is set.
+      expect(handler.highlightedNodes_).not.to.be.null;
+      expect(root.innerHTML).to.equal(
+        '<div>text in <span style="background-color: red; ' +
+          'color: green;">amp</span> doc</div><div>' +
+          '<span style="background-color: red; color: ' +
+          'green;">highlight</span>ed text</div>'
+      );
+    });
+
+    it('defaults to the default color ::target-text has invalid color', () => {
+      const style = document.createElement('style');
+      style.innerHTML = `
+        ::target-text {
+          background-color: gren;
+          color: bule;
+        }
+      `;
+      const {ampdoc} = env;
+      ampdoc.win.document.getElementsByTagName('head')[0].appendChild(style);
+
+      const handler = new HighlightHandler(ampdoc, {
+        sentences: ['amp', 'highlight'],
+      });
+
+      // initHighlight_ is not called before document become ready.
+      expect(handler.highlightedNodes_).to.be.null;
+      docreadyCb();
+
+      // initHighlight_ was called in docreadyCb() and highlightedNodes_ is set.
+      expect(handler.highlightedNodes_).not.to.be.null;
+      expect(root.innerHTML).to.equal(
+        '<div>text in <span style="background-color: rgb(252, 255, 0); ' +
+          'color: rgb(0, 0, 0);">amp</span> doc</div><div>' +
+          '<span style="background-color: rgb(252, 255, 0); color: ' +
+          'rgb(0, 0, 0);">highlight</span>ed text</div>'
+      );
     });
   }
 );

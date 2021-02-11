@@ -17,12 +17,17 @@
 import {Services} from '../../../src/services';
 import {dict} from '../../../src/utils/object';
 import {findSentences, markTextRangeList} from './findtext';
+import {
+  isValidCssColor,
+  resetStyles,
+  setInitialDisplay,
+  setStyles,
+} from '../../../src/style';
 import {listenOnce} from '../../../src/event-helper';
 import {moveLayoutRect} from '../../../src/layout-rect';
 import {once} from '../../../src/utils/function';
 import {parseJson} from '../../../src/json';
 import {parseQueryString} from '../../../src/url';
-import {resetStyles, setInitialDisplay, setStyles} from '../../../src/style';
 import {whenDocumentReady} from '../../../src/document-ready';
 
 /**
@@ -92,12 +97,7 @@ const PAGE_TOP_MARGIN = 80;
  * @return {?HighlightInfoDef}
  */
 export function getHighlightParam(ampdoc) {
-  const hash =
-    ampdoc.win.location.hash +
-    '&highlight=%7B%22s%22%3A%5B%22dolor%20sit%22%5D%7D';
-  const param = parseQueryString(hash)['highlight'];
-  console.log('*** ', parseQueryString(hash));
-  // const param = parseQueryString(ampdoc.win.location.hash)['highlight'];
+  const param = parseQueryString(ampdoc.win.location.hash)['highlight'];
   if (!param || param.length > HIGHLIGHT_PARAM_LENGTH_LIMIT) {
     return null;
   }
@@ -210,39 +210,14 @@ export class HighlightHandler {
   }
 
   /**
-   * Verify that the regex match is a valid color.
-   *
-   * @param {string} color - regex match to be validated
-   * @return {bool} - true iff the regex match is a valid color.
-   */
-  isValidColor_(color) {
-    if (!color || color.length < 2) {
-      return false;
-    }
-
-    const optionElement = new Option().style;
-    optionElement.color = color[1].replace('!important', '');
-
-    return optionElement.color === null ? false : true;
-  }
-
-  /**
    * Extract color and background-color from ::target-text in the document.
-   *
-   * @return {Object<string, *>} - color and background-color from ::target-text
+   * @return {Object<string, string>} color and background-color from ::target-text
    * @private
    */
   getHighlightStyle_() {
     const styles = this.ampdoc_.win.document.getElementsByTagName('style');
-    if (!styles) {
-      return {
-        // TODO: replace these with new colors from Chrome
-        'backgroundColor': '#fcff00',
-        'color': '#000',
-      };
-    }
-
-    for (let i = 0; i < styles.length; i++) {
+    // we want to apply the latest style
+    for (let i = styles.length - 1; i >= 0; i--) {
       const cssRules = styles[i].innerHTML;
       const targetTextRules = cssRules.match(
         /::target-text\s*{\s*((.|\n)*?)\s*}/g
@@ -250,26 +225,22 @@ export class HighlightHandler {
       if (!targetTextRules) {
         continue;
       }
-
-      const backgroundColor = targetTextRules[0].match(
+      const targetTextRule = targetTextRules[0];
+      const backgroundColorMatches = targetTextRule.match(
         /background-color\s*:\s*(.*?)\s*;/
       );
-      const color = targetTextRules[0].match(/[^-]color\s*:\s*(.*?)\s*;/);
-
-      const highlightStyle = {
-        'backgroundColor': this.isValidColor_(backgroundColor)
-          ? backgroundColor[1]
-          : null,
-        'color': this.isValidColor_(color) ? color[1] : null,
+      const colorMatches = targetTextRule.match(/[^-]color\s*:\s*(.*?)\s*;/);
+      return {
+        'backgroundColor': isValidCssColor(backgroundColorMatches[1])
+          ? backgroundColorMatches[1]
+          : '',
+        'color': isValidCssColor(colorMatches[1]) ? colorMatches[1] : '',
       };
-
-      return highlightStyle;
     }
 
     return {
-      // TODO: replace these with new colors from Chrome
-      'backgroundColor': '#fcff00',
-      'color': '#000',
+      // Default highlight color from Chrome 90 (https://chromium-review.googlesource.com/c/chromium/src/+/2637776/9/components/shared_highlighting/core/common/text_fragments_constants.cc)
+      'backgroundColor': '#e9d2fd',
     };
   }
 
@@ -298,7 +269,6 @@ export class HighlightHandler {
     }
 
     const highlightStyle = this.getHighlightStyle_();
-    console.log({highlightStyle});
     for (let i = 0; i < this.highlightedNodes_.length; i++) {
       const n = this.highlightedNodes_[i];
       // The background color is same as Android Chrome text finding (yellow).

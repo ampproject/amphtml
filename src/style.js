@@ -374,3 +374,18 @@ export function propagateObjectFitStyles(fromEl, toEl) {
 function isVar(property) {
   return property.startsWith('--');
 }
+
+/**
+ * @param {string} color color to be validated
+ * @return {bool} true if the string is a valid CSS color
+ */
+export function isValidCssColor(color) {
+  if (!color || !color.length) {
+    return false;
+  }
+  const optionElement = new Option();
+  // eslint-disable-next-line local/no-style-property-setting
+  const {style} = optionElement;
+  style.color = color.replace('!important', '');
+  return style.color !== '';
+}

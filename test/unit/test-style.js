@@ -121,6 +121,29 @@ describe('Style', () => {
     );
   });
 
+  it('isValidCssColor', () => {
+    expect(st.isValidCssColor('red')).to.be.true;
+    expect(st.isValidCssColor('red !important')).to.be.true;
+    expect(st.isValidCssColor('invalid')).to.be.false;
+
+    expect(st.isValidCssColor('#ABCDEF')).to.be.true;
+    expect(st.isValidCssColor('#ABCDEFG')).to.be.false;
+    expect(st.isValidCssColor('#ABC')).to.be.true;
+    // the 4th value is converted to alpha value in rgba(...)
+    expect(st.isValidCssColor('#ABCD')).to.be.true;
+    expect(st.isValidCssColor('#ABCDE')).to.be.false;
+
+    expect(st.isValidCssColor('rgb(255, 200, 150)')).to.be.true;
+    // 300 is converted to 255, hence true
+    expect(st.isValidCssColor('rgb(300, 200, 150)')).to.be.true;
+
+    expect(st.isValidCssColor('rgba(255, 200, 150, 0.5)')).to.be.true;
+    // alpha value >= 1.0 is dropped, hence true
+    expect(st.isValidCssColor('rgba(255, 200, 150, 1.5)')).to.be.true;
+
+    expect(st.isValidCssColor('')).to.be.false;
+  });
+
   describe('getVendorJsPropertyName', () => {
     it('no prefix', () => {
       const element = {style: {transitionDuration: ''}};
