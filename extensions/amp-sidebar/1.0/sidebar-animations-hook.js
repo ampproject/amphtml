@@ -37,13 +37,6 @@ const ANIMATION_STYLES_BACKDROP_INIT = {'opacity': '0'};
 const ANIMATION_STYLES_SIDEBAR_FINAL = {'transform': ''};
 const ANIMATION_STYLES_BACKDROP_FINAL = {'opacity': ''};
 
-/** @private @enum {number} */
-const AnimationState = {
-  OPENING: 0,
-  CLOSING: 1,
-  NOT_ANIMATING: 2,
-};
-
 /**
  * @param {!Element} element
  * @param {!Object<string, *>} styles
@@ -71,7 +64,7 @@ export function useSidebarAnimation(
   const onAfterCloseRef = useValueRef(onAfterClose);
   const sidebarAnimationRef = useRef(null);
   const backdropAnimationRef = useRef(null);
-  const animationDirectionRef = useRef(AnimationState.NOT_ANIMATING);
+  const currentlyAnimatingRef = useRef(false);
   useLayoutEffect(() => {
     const sidebarElement = sidebarRef.current;
     const backdropElement = backdropRef.current;
@@ -84,7 +77,7 @@ export function useSidebarAnimation(
       safelySetStyles(backdropElement, ANIMATION_STYLES_BACKDROP_FINAL);
       sidebarAnimationRef.current = null;
       backdropAnimationRef.current = null;
-      animationDirectionRef.current = AnimationState.NOT_ANIMATING;
+      currentlyAnimatingRef.current = false;
     };
     const postInvisibleAnim = () => {
       if (onAfterCloseRef.current) {
@@ -92,36 +85,27 @@ export function useSidebarAnimation(
       }
       sidebarAnimationRef.current = null;
       backdropAnimationRef.current = null;
-      animationDirectionRef.current = AnimationState.NOT_ANIMATING;
+      currentlyAnimatingRef.current = false;
       setMounted(false);
     };
 
-    // currently animating
-    if (animationDirectionRef.current !== AnimationState.NOT_ANIMATING) {
-      if (
-        (opened && animationDirectionRef.current === AnimationState.CLOSING) ||
-        (!opened && animationDirectionRef.current === AnimationState.OPENING)
-      ) {
-        // reverse the current animation
-        const sidebarAnimation = sidebarAnimationRef.current;
-        if (sidebarAnimation) {
-          sidebarAnimation.reverse();
-          sidebarAnimation.onfinish = opened
-            ? postVisibleAnim
-            : postInvisibleAnim;
-        }
-        const backdropAnimation = backdropAnimationRef.current;
-        if (backdropAnimation) {
-          backdropAnimation.reverse();
-        }
-        animationDirectionRef.current = opened
-          ? AnimationState.OPENING
-          : AnimationState.CLOSING;
+    // reverse animation if currently animating
+    if (currentlyAnimatingRef.current == true) {
+      const sidebarAnimation = sidebarAnimationRef.current;
+      if (sidebarAnimation) {
+        sidebarAnimation.reverse();
+        sidebarAnimation.onfinish = opened
+          ? postVisibleAnim
+          : postInvisibleAnim;
+      }
+      const backdropAnimation = backdropAnimationRef.current;
+      if (backdropAnimation) {
+        backdropAnimation.reverse();
       }
       return;
     }
 
-    // currently in fully opened or closed state
+    // begin animation if fully opened or closed
     if (opened) {
       // make visible animation
       if (!sidebarElement.animate || !backdropElement.animate) {
@@ -156,7 +140,7 @@ export function useSidebarAnimation(
       );
       sidebarAnimationRef.current = sidebarAnimation;
       backdropAnimationRef.current = backdropAnimation;
-      animationDirectionRef.current = AnimationState.OPENING;
+      currentlyAnimatingRef.current = true;
     } else {
       // make invisible animation
       if (!sidebarElement.animate || !backdropElement.animate) {
@@ -186,7 +170,7 @@ export function useSidebarAnimation(
       );
       sidebarAnimationRef.current = sidebarAnimation;
       backdropAnimationRef.current = backdropAnimation;
-      animationDirectionRef.current = AnimationState.CLOSING;
+      currentlyAnimatingRef.current = true;
     }
   }, [opened, onAfterCloseRef, sideRef, sidebarRef, backdropRef, setMounted]);
 }
