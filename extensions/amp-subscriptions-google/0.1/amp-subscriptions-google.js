@@ -652,13 +652,9 @@ export class GoogleSubscriptionsPlatform {
 
           return this.runtime_
             .getEntitlements(entitlementsParams)
-            .then((swgEntitlements) => {
-              this.hasFetchedEntitlements_ = true;
-
-              return this.createAmpEntitlementFromSwgEntitlements_(
-                swgEntitlements
-              );
-            });
+            .then((swgEntitlements) =>
+              this.createAmpEntitlementFromSwgEntitlements_(swgEntitlements)
+            );
         }
       );
     });
@@ -801,7 +797,6 @@ export class GoogleSubscriptionsPlatform {
 
   /** @override */
   reset() {
-    this.hasFetchedEntitlements_ = false;
     this.runtime_.reset();
   }
 
