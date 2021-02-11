@@ -425,7 +425,7 @@ describes.realWin(
       expect(setScrollTopStub.firstCall.args[0]).to.equal(350);
     });
 
-    it('highlights sentences with the specified ::target-text rule', () => {
+    it('applies the specified ::target-text highlight color', () => {
       const style = document.createElement('style');
       style.innerHTML = `
         ::target-text {
@@ -454,12 +454,12 @@ describes.realWin(
       );
     });
 
-    it('defaults to the default color ::target-text has invalid color', () => {
+    it('applies the default highlight color if ::target-text has invalid colors', () => {
       const style = document.createElement('style');
       style.innerHTML = `
         ::target-text {
-          background-color: gren;
-          color: bule;
+          background-color: invalid;
+          color: wrong;
         }
       `;
       const {ampdoc} = env;
@@ -476,10 +476,8 @@ describes.realWin(
       // initHighlight_ was called in docreadyCb() and highlightedNodes_ is set.
       expect(handler.highlightedNodes_).not.to.be.null;
       expect(root.innerHTML).to.equal(
-        '<div>text in <span style="background-color: rgb(252, 255, 0); ' +
-          'color: rgb(0, 0, 0);">amp</span> doc</div><div>' +
-          '<span style="background-color: rgb(252, 255, 0); color: ' +
-          'rgb(0, 0, 0);">highlight</span>ed text</div>'
+        '<div>text in <span>amp</span> doc</div><div>' +
+          '<span>highlight</span>ed text</div>'
       );
     });
   }

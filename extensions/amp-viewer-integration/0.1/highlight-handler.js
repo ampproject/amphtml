@@ -212,7 +212,7 @@ export class HighlightHandler {
 
   /**
    * Extract color and background-color from ::target-text in the document.
-   * @return {Object<string, string>} color and background-color from ::target-text
+   * @return {Object<string, *>} color and background-color from ::target-text
    * @private
    */
   getHighlightStyle_() {
@@ -234,8 +234,8 @@ export class HighlightHandler {
       return {
         'backgroundColor': isValidCssColor(backgroundColorMatches[1])
           ? backgroundColorMatches[1]
-          : '',
-        'color': isValidCssColor(colorMatches[1]) ? colorMatches[1] : '',
+          : null,
+        'color': isValidCssColor(colorMatches[1]) ? colorMatches[1] : null,
       };
     }
 
