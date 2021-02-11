@@ -15,26 +15,18 @@
  */
 'use strict';
 
-const {exec} = require('../common/exec');
+const {execOrDie} = require('../common/exec');
 
 /**
  * Runs ava tests.
- * @param {function} cb
  */
-function ava(cb) {
+async function ava() {
   const avaCli = 'node_modules/ava/cli.js';
   const testFiles = [
-    require.resolve('./get-zindex/get-zindex.test.js'),
-    require.resolve('./prepend-global/prepend-global.test.js'),
+    'build-system/tasks/get-zindex/get-zindex.test.js',
+    'build-system/tasks/prepend-global/prepend-global.test.js',
   ].join(' ');
-  const {status} = exec(`${avaCli} ${testFiles} --color --fail-fast`);
-  if (status) {
-    const reason = new Error('Tests failed');
-    reason.showStack = false;
-    cb(reason);
-  } else {
-    cb();
-  }
+  execOrDie(`${avaCli} ${testFiles} --color --fail-fast`);
 }
 
 module.exports = {
