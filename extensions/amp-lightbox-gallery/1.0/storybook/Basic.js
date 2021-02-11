@@ -39,9 +39,18 @@ export const _default = () => {
           <img src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1498&q=80" />
         </WithLightbox>
         <p>abc</p>
-        <WithLightbox>
-          <img src="https://images.unsplash.com/photo-1583511666407-5f06533f2113?ixlib=rb-1.2.1&auto=format&fit=crop&w=1498&q=80" />
-        </WithLightbox>
+        <WithLightbox
+          as="img"
+          alt="larger img"
+          id="foo"
+          src="https://images.unsplash.com/photo-1583511666407-5f06533f2113?ixlib=rb-1.2.1&auto=format&fit=crop&w=1498&q=80"
+          render={() => (
+            <img
+              alt="smaller img"
+              src="https://images.unsplash.com/photo-1583511666407-5f06533f2113?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80"
+            />
+          )}
+        />
         <p>abc</p>
         <WithLightbox>
           <img src="https://images.unsplash.com/photo-1599839575945-a9e5af0c3fa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjQwMzA0fQ&auto=format&fit=crop&w=1498&q=80" />

@@ -25,7 +25,7 @@ import {
   useState,
 } from '../../../src/preact';
 
-const generateLightboxItemId = sequentialIdGenerator();
+const generateLightboxItemKey = sequentialIdGenerator();
 
 /**
  * @param {!LightboxGalleryDef.Props} props
@@ -34,11 +34,11 @@ const generateLightboxItemId = sequentialIdGenerator();
 export function LightboxGallery({children}) {
   const lightboxRef = useRef(null);
   const lightboxElements = useRef([]);
-  const register = (id, render) => {
-    lightboxElements.current[id] = render();
+  const register = (key, render) => {
+    lightboxElements.current[key] = render();
   };
-  const deregister = (id) => {
-    delete lightboxElements.current[id];
+  const deregister = (key) => {
+    delete lightboxElements.current[key];
   };
   const context = {
     deregister,
@@ -70,21 +70,28 @@ export function LightboxGallery({children}) {
  * @return {PreactDef.Renderable}
  */
 export function WithLightbox({
+  as: Comp = 'div',
   children,
-  id: propId,
   render = () => children,
+  role = 'button',
+  tabindex = '0',
   ...rest
 }) {
-  const [genId] = useState(generateLightboxItemId);
-  const id = propId || genId;
+  const [genKey] = useState(generateLightboxItemKey);
   const {open, register, deregister} = useContext(LightboxGalleryContext);
   useLayoutEffect(() => {
-    register(id, render);
-    return () => deregister(id);
-  }, [id, deregister, register, render]);
+    register(genKey, render);
+    return () => deregister(genKey);
+  }, [genKey, deregister, register, render]);
   return (
-    <div key={id} onClick={() => open()} role="button" tabindex="0" {...rest}>
+    <Comp
+      {...rest}
+      key={genKey}
+      onClick={() => open()}
+      role={role}
+      tabindex={tabindex}
+    >
       {children}
-    </div>
+    </Comp>
   );
 }
