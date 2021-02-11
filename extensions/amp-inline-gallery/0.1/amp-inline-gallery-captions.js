@@ -16,8 +16,10 @@
 
 import {closestAncestorElementBySelector} from '../../../src/dom';
 import {exponentialFalloff} from './amp-inline-gallery-pagination';
+import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {setImportantStyles} from '../../../src/style.js';
+import {userAssert} from '../../../src/log';
 
 export class AmpInlineGalleryCaptions extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -32,6 +34,10 @@ export class AmpInlineGalleryCaptions extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
+    userAssert(
+      isExperimentOn(this.win, 'amp-inline-gallery-captions') ||
+        'expected "amp-inline-gallery-captions" experiment to be enabled'
+    );
     return isLayoutSizeDefined(layout);
   }
 

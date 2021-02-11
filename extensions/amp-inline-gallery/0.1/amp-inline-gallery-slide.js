@@ -17,7 +17,9 @@
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {htmlFor} from '../../../src/static-template';
+import {isExperimentOn} from '../../../src/experiments';
 import {toArray} from '../../../src/types';
+import {userAssert} from '../../../src/log';
 
 export class AmpInlineGallerySlide extends AMP.BaseElement {
   /**
@@ -25,6 +27,10 @@ export class AmpInlineGallerySlide extends AMP.BaseElement {
    * @private
    */
   createDom_() {
+    userAssert(
+      isExperimentOn(this.win, 'amp-inline-gallery-captions') ||
+        'expected "amp-inline-gallery-captions" experiment to be enabled'
+    );
     const html = htmlFor(this.element);
     const content = html`
       <figure class="i-amphtml-inline-gallery-slide-container">
