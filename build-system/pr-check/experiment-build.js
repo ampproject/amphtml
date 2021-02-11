@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,33 +16,28 @@
 'use strict';
 
 /**
- * @fileoverview Script that runs the experiment A/B/C tests during CI.
+ * @fileoverview Script that builds the experiment A/B/C runtime during CI.
  */
 
 const {
   getExperimentConfig,
-  downloadExperimentOutput,
   printSkipMessage,
   timedExecOrDie,
+  uploadExperimentOutput,
 } = require('./utils');
 const {buildTargetsInclude, Targets} = require('./build-targets');
 const {experiment} = require('minimist')(process.argv.slice(2));
 const {runCiJob} = require('./ci-job');
 
-const jobName = `${experiment}-tests.js`;
+const jobName = `${experiment}-build.js`;
 
 function pushBuildWorkflow() {
   const config = getExperimentConfig(experiment);
   if (config) {
     const defineFlag = `--define_experiment_constant ${config.define_experiment_constant}`;
-    const experimentFlag = `--experiment ${experiment}`;
-    downloadExperimentOutput(experiment);
-    timedExecOrDie(
-      `gulp integration --nobuild --compiled --headless ${experimentFlag} ${defineFlag}`
-    );
-    timedExecOrDie(
-      `gulp e2e --nobuild --compiled --headless ${experimentFlag} ${defineFlag}`
-    );
+    timedExecOrDie('gulp update-packages');
+    timedExecOrDie(`gulp dist --fortesting ${defineFlag}`);
+    uploadExperimentOutput(experiment);
   } else {
     printSkipMessage(
       jobName,

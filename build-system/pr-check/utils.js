@@ -15,6 +15,7 @@
  */
 'use strict';
 
+const experimentsConfig = require('../global-configs/experiments-config.json');
 const {
   gitBranchCreationPoint,
   gitBranchName,
@@ -33,6 +34,7 @@ const {replaceUrls} = require('../tasks/pr-deploy-bot-utils');
 const UNMINIFIED_OUTPUT_FILE = `amp_unminified_${ciBuildSha()}.zip`;
 const NOMODULE_OUTPUT_FILE = `amp_nomodule_${ciBuildSha()}.zip`;
 const MODULE_OUTPUT_FILE = `amp_module_${ciBuildSha()}.zip`;
+const EXPERIMENT_OUTPUT_FILE = (exp) => `amp_${exp}_${ciBuildSha()}.zip`;
 
 const BUILD_OUTPUT_DIRS = 'build/ dist/ dist.3p/';
 const APP_SERVING_DIRS =
@@ -286,6 +288,14 @@ function downloadModuleOutput() {
 }
 
 /**
+ * Downloads and unzips output for the given experiment from storage
+ * @param {string} exp
+ */
+function downloadExperimentOutput(exp) {
+  downloadOutput_(EXPERIMENT_OUTPUT_FILE(exp), BUILD_OUTPUT_DIRS);
+}
+
+/**
  * Zips and uploads the build output to a remote storage location
  */
 function uploadUnminifiedOutput() {
@@ -309,6 +319,16 @@ function uploadModuleOutput() {
 }
 
 /**
+ * Zips and uploads the output for the given experiment to a remote storage
+ * location
+ * @param {string} exp
+ */
+function uploadExperimentOutput(exp) {
+  const experimentOutputDirs = `${BUILD_OUTPUT_DIRS} ${APP_SERVING_DIRS}`;
+  uploadOutput_(EXPERIMENT_OUTPUT_FILE(exp), experimentOutputDirs);
+}
+
+/**
  * Replaces URLS in HTML files, zips and uploads nomodule output,
  * and signals to the AMP PR Deploy bot that the upload is complete.
  */
@@ -318,11 +338,28 @@ async function processAndUploadNomoduleOutput() {
   uploadNomoduleOutput();
 }
 
+/**
+ * Extracts and validates the config for the given experiment.
+ * @param {string} experiment
+ * @return {Object|null}
+ */
+function getExperimentConfig(experiment) {
+  const config = experimentsConfig[experiment];
+  const valid =
+    config?.name &&
+    config?.define_experiment_constant &&
+    config?.expiration_date_utc &&
+    new Date(config.expiration_date_utc) >= Date.now();
+  return valid ? config : null;
+}
+
 module.exports = {
   abortTimedJob,
+  downloadExperimentOutput,
   downloadUnminifiedOutput,
   downloadNomoduleOutput,
   downloadModuleOutput,
+  getExperimentConfig,
   printChangeSummary,
   printSkipMessage,
   processAndUploadNomoduleOutput,
@@ -332,6 +369,7 @@ module.exports = {
   timedExecOrDie,
   timedExecWithError,
   timedExecOrThrow,
+  uploadExperimentOutput,
   uploadUnminifiedOutput,
   uploadNomoduleOutput,
   uploadModuleOutput,
