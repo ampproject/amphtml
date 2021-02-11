@@ -55,7 +55,8 @@ enum class NodeType {
 // "svg" is short for "http://www.w3.org/2000/svg".
 class Node {
  public:
-  Node(NodeType node_type, Atom atom = Atom::UNKNOWN);
+  Node(NodeType node_type, Atom atom = Atom::UNKNOWN,
+       std::string name_space = "");
   ~Node() = default;
 
   // Allows move.
