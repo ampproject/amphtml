@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as hooks from /*OK*/ 'preact/hooks';
+import {useRef} from '../';
 
 /**
  * @param {T} current
@@ -22,7 +22,7 @@ import * as hooks from /*OK*/ 'preact/hooks';
  * @template T
  */
 export function useValueRef(current) {
-  const valueRef = hooks.useRef(null);
+  const valueRef = useRef(null);
   valueRef.current = current;
   return valueRef;
 }
