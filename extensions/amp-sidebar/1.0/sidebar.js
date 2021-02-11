@@ -53,9 +53,6 @@ function SidebarWithRef(
   // `mounted` mounts the component. `opened` plays the animation.
   const [mounted, setMounted] = useState(false);
   const [opened, setOpened] = useState(false);
-  const [test, setTest] = useState('cat');
-  const testRef = useRef('dog');
-  console.log(test, testRef);
 
   const classes = useStyles();
   const sidebarRef = useRef();
@@ -96,8 +93,6 @@ function SidebarWithRef(
     if (sideRef.current) {
       return;
     }
-    setTest('horse');
-    testRef.current = 'doggie';
     const sidebarElement = sidebarRef.current;
     if (!sidebarElement) {
       return;
@@ -105,7 +100,7 @@ function SidebarWithRef(
     sideRef.current = isRTL(sidebarElement.ownerDocument)
       ? Side.RIGHT
       : Side.LEFT;
-  }, [sideRef, mounted, testRef]);
+  }, [sideRef, mounted]);
 
   useSidebarAnimation(
     opened,
