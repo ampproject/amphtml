@@ -1150,8 +1150,8 @@ app.use('/bind/ecommerce/sizes', (req, res) => {
   }, 1000); // Simulate network delay.
 });
 
-// Simulate publisher endpoint which returns entitlements.
-// For amp-subscriptions.
+// Simulate a news publisher's entitlements API.
+// (amp-subscriptions)
 const ampSubscriptionsMeteringStateStore = {};
 app.use('/subscription/:id/entitlements', (req, res) => {
   cors.assertCors(req, res, ['GET']);
@@ -1188,8 +1188,8 @@ app.use('/subscription/:id/entitlements', (req, res) => {
   res.json(json);
 });
 
-// Simulate publisher endpoint which returns a SKU map.
-// For amp-subscriptions.
+// Simulate a news publisher's SKU map API.
+// (amp-subscriptions)
 app.use('/subscriptions/skumap', (req, res) => {
   cors.assertCors(req, res, ['GET']);
   res.json({
@@ -1206,8 +1206,8 @@ app.use('/subscriptions/skumap', (req, res) => {
   });
 });
 
-// Simulate publisher endpoint which accepts pingback.
-// For amp-subscriptions.
+// Simulate a news publisher's pingback API.
+// (amp-subscriptions)
 app.use('/subscription/pingback', (req, res) => {
   cors.assertCors(req, res, ['POST']);
   res.json({
@@ -1215,10 +1215,9 @@ app.use('/subscription/pingback', (req, res) => {
   });
 });
 
-// Simulate publisher endpoint which accepts Google Sign-In credentials
-// and returns entitlements params including metering state.
-// For amp-subscriptions-google.
-app.use('/subscription/register-for-metering', (req, res) => {
+// Simulate a news publisher's account registration API.
+// (amp-subscriptions-google)
+app.use('/subscription/register', (req, res) => {
   cors.assertCors(req, res, ['POST']);
 
   // Production systems should use the Google Sign-In details and AMP reader ID to register the user.
