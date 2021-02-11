@@ -63,15 +63,18 @@ describes.realWin(
 
       el.appendChild(svg);
       doc.body.appendChild(el);
-      return el.build().then(() => {
-        impl = el.implementation_;
-        env.sandbox
-          .stub(impl, 'measureMutateElement')
-          .callsFake(measureMutateElementStub);
-        env.sandbox
-          .stub(impl, 'mutateElement')
-          .callsFake((mutate) => measureMutateElementStub(undefined, mutate));
-      });
+      return el
+        .buildInternal()
+        .then(() => el.getImpl(false))
+        .then((aImpl) => {
+          impl = aImpl;
+          env.sandbox
+            .stub(impl, 'measureMutateElement')
+            .callsFake(measureMutateElementStub);
+          env.sandbox
+            .stub(impl, 'mutateElement')
+            .callsFake((mutate) => measureMutateElementStub(undefined, mutate));
+        });
     }
 
     beforeEach(() => {

@@ -16,7 +16,7 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const karmaConfig = require('../karma.conf');
+const karmaConfig = require('../../test-configs/karma.conf');
 const testConfig = require('../../test-configs/config');
 const {
   createCtrlcHandler,
@@ -25,7 +25,8 @@ const {
 const {app} = require('../../server/test-server');
 const {createKarmaServer, getAdTypes} = require('./helpers');
 const {getFilesFromArgv} = require('../../common/utils');
-const {green, yellow, cyan, red} = require('ansi-colors');
+const {getPersistentBrowserifyCache} = require('../../common/browserify-cache');
+const {green, yellow, cyan, red} = require('kleur/colors');
 const {isCiBuild} = require('../../common/ci');
 const {log} = require('../../common/logging');
 const {reportTestStarted} = require('.././report-test-status');
@@ -142,9 +143,6 @@ function getFiles(testType) {
       }
       return files.concat(testConfig.integrationTestPaths);
 
-    case 'a4a':
-      return testConfig.a4aTestPaths;
-
     default:
       throw new Error(`Test type ${testType} was not recognized`);
   }
@@ -187,6 +185,7 @@ class RuntimeTestConfig {
     this.client.mocha.grep = !!argv.grep;
     this.client.verboseLogging = !!argv.verbose || !!argv.v;
     this.client.captureConsole = !!argv.verbose || !!argv.v || !!argv.files;
+    this.browserify.persistentCache = getPersistentBrowserifyCache();
     this.browserify.configure = function (bundle) {
       bundle.on('prebundle', function () {
         log(
@@ -207,7 +206,7 @@ class RuntimeTestConfig {
       isModuleBuild: !!argv.esm,
     };
 
-    if (argv.coverage && this.testType != 'a4a') {
+    if (argv.coverage) {
       this.plugins.push('karma-coverage-istanbul-reporter');
       this.coverageIstanbulReporter = {
         dir: 'test/coverage',

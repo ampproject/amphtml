@@ -16,63 +16,67 @@
 'use strict';
 
 /**
- * @fileoverview
- * This script builds an experiment binary and runs local tests.
- * This is run during the CI stage = test; job = experiments tests.
+ * @fileoverview Script that runs the experiment A/B/C tests during CI.
  */
 
 const experimentsConfig = require('../global-configs/experiments-config.json');
-const {
-  printSkipMessage,
-  startTimer,
-  stopTimer,
-  timedExecOrDie,
-} = require('./utils');
+const {buildTargetsInclude, Targets} = require('./build-targets');
 const {experiment} = require('minimist')(process.argv.slice(2));
-const {setLoggingPrefix} = require('../common/logging');
+const {printSkipMessage, timedExecOrDie} = require('./utils');
+const {runCiJob} = require('./ci-job');
 
 const jobName = `${experiment}-tests.js`;
 
+/**
+ * Extracts and validates the experiment config.
+ * @return {Object|null}
+ */
 function getConfig_() {
   const config = experimentsConfig[experiment];
-
-  if (!config || !config.name || !config.define_experiment_constant) {
-    return;
-  }
-
-  if (new Date(config['expiration_date_utc']) < Date.now()) {
-    return;
-  }
-
-  return config;
+  const valid =
+    config?.name &&
+    config?.define_experiment_constant &&
+    config?.expiration_date_utc &&
+    new Date(config.expiration_date_utc) >= Date.now();
+  return valid ? config : null;
 }
 
-function build_(config) {
-  const command = `gulp dist --fortesting --define_experiment_constant ${config.define_experiment_constant}`;
-  timedExecOrDie('gulp clean');
-  timedExecOrDie('gulp update-packages');
-  timedExecOrDie(command);
-}
-
-function test_() {
-  timedExecOrDie('gulp integration --nobuild --compiled --headless');
-  timedExecOrDie('gulp e2e --nobuild --compiled --headless');
-}
-
-function main() {
-  setLoggingPrefix(jobName);
-  const startTime = startTimer(jobName);
+function pushBuildWorkflow() {
   const config = getConfig_();
   if (config) {
-    build_(config);
-    test_();
+    const defineFlag = `--define_experiment_constant ${config.define_experiment_constant}`;
+    const experimentFlag = `--experiment ${experiment}`;
+    timedExecOrDie('gulp update-packages');
+    timedExecOrDie(`gulp dist --fortesting ${defineFlag}`);
+    timedExecOrDie(
+      `gulp integration --nobuild --compiled --headless ${experimentFlag} ${defineFlag}`
+    );
+    timedExecOrDie(
+      `gulp e2e --nobuild --compiled --headless ${experimentFlag} ${defineFlag}`
+    );
   } else {
     printSkipMessage(
       jobName,
       `${experiment} is expired, misconfigured, or does not exist`
     );
   }
-  stopTimer(jobName, startTime);
 }
 
-main();
+function prBuildWorkflow() {
+  if (
+    buildTargetsInclude(
+      Targets.RUNTIME,
+      Targets.INTEGRATION_TEST,
+      Targets.E2E_TEST
+    )
+  ) {
+    pushBuildWorkflow();
+  } else {
+    printSkipMessage(
+      jobName,
+      'this PR does not affect the runtime, integration tests, or end-to-end tests'
+    );
+  }
+}
+
+runCiJob(jobName, pushBuildWorkflow, prBuildWorkflow);

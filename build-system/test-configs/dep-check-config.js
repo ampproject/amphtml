@@ -88,7 +88,7 @@ exports.rules = [
       'extensions/amp-subscriptions/**/*.js->third_party/subscriptions-project/aes_gcm.js',
       'extensions/amp-subscriptions/**/*.js->third_party/subscriptions-project/config.js',
       'extensions/amp-timeago/0.1/amp-timeago.js->third_party/timeagojs/timeago.js',
-      'extensions/amp-timeago/1.0/timeago.js->third_party/timeagojs/timeago.js',
+      'extensions/amp-timeago/1.0/component.js->third_party/timeagojs/timeago.js',
       'src/css.js->third_party/css-escape/css-escape.js',
       'src/sanitizer.js->third_party/caja/html-sanitizer.js',
       'src/shadow-embed.js->third_party/webcomponentsjs/ShadowCSS.js',
@@ -198,6 +198,10 @@ exports.rules = [
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
       'extensions/amp-ad-network-oblivki-impl/0.1/amp-ad-network-oblivki-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
 
+      // A4A impls importing amp fast fetch header name
+      'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js->extensions/amp-a4a/0.1/signature-verifier.js',
+      'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js->extensions/amp-a4a/0.1/signature-verifier.js',
+
       // And a few mrore things depend on a4a.
       'extensions/amp-ad-custom/0.1/amp-ad-custom.js->extensions/amp-a4a/0.1/amp-ad-network-base.js',
       'extensions/amp-ad-custom/0.1/amp-ad-custom.js->extensions/amp-a4a/0.1/amp-ad-type-defs.js',
@@ -247,9 +251,12 @@ exports.rules = [
       'extensions/amp-facebook-comments/0.1/amp-facebook-comments.js->extensions/amp-facebook/0.1/facebook-loader.js',
 
       // Bento AMP Youtube
-      'extensions/amp-youtube/1.0/amp-youtube.js->extensions/amp-video/1.0/base-element.js',
-      'extensions/amp-youtube/1.0/youtube.js->extensions/amp-video/1.0/video-iframe.js',
-      'extensions/amp-youtube/1.0/youtube.js->extensions/amp-video/1.0/video-wrapper.js',
+      'extensions/amp-youtube/1.0/base-element.js->extensions/amp-video/1.0/base-element.js',
+      'extensions/amp-youtube/1.0/component.js->extensions/amp-video/1.0/video-iframe.js',
+      'extensions/amp-youtube/1.0/component.js->extensions/amp-video/1.0/video-wrapper.js',
+
+      // Bento amp-fit-text
+      'extensions/amp-fit-text/0.1/amp-fit-text.js->extensions/amp-fit-text/1.0/base-element.js',
 
       // Amp geo in group enum
       'extensions/amp-a4a/0.1/amp-a4a.js->extensions/amp-geo/0.1/amp-geo-in-group.js',
@@ -261,6 +268,8 @@ exports.rules = [
       // AMP Story 360
       'extensions/amp-story-360/0.1/amp-story-360.js->extensions/amp-story/1.0/amp-story-store-service.js',
       'extensions/amp-story-360/0.1/amp-story-360.js->extensions/amp-story/1.0/utils.js',
+      // AMP Story Panning Media
+      'extensions/amp-story-panning-media/0.1/amp-story-panning-media.js->extensions/amp-story/1.0/amp-story-store-service.js',
       // Story ads
       'extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js->extensions/amp-story/1.0/amp-story-store-service.js',
       'extensions/amp-story-auto-ads/0.1/story-ad-page.js->extensions/amp-story/1.0/amp-story-store-service.js',
@@ -306,6 +315,9 @@ exports.rules = [
         'src/service/variable-source.js',
       'extensions/amp-a4a/0.1/amp-a4a.js->' +
         'src/service/url-replacements-impl.js',
+      // Real time config.
+      'extensions/amp-a4a/0.1/amp-a4a.js->' +
+        'src/service/real-time-config/real-time-config-impl.js',
       // Parsing extension urls.
       'extensions/amp-a4a/0.1/head-validation.js->' +
         'src/service/extension-location.js',
@@ -359,11 +371,9 @@ exports.rules = [
         'src/service/position-observer/position-observer-impl.js',
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js->' +
         'src/service/position-observer/position-observer-worker.js',
-      'extensions/amp-video-docking/0.1/amp-video-docking.js->' +
-        'src/service/position-observer/position-observer-impl.js',
-      'extensions/amp-video-docking/0.1/amp-video-docking.js->' +
-        'src/service/position-observer/position-observer-worker.js',
       'extensions/amp-analytics/0.1/cookie-writer.js->' +
+        'src/service/cid-impl.js',
+      'extensions/amp-consent/0.1/cookie-writer.js->' +
         'src/service/cid-impl.js',
       'extensions/amp-next-page/0.1/next-page-service.js->' +
         'src/service/position-observer/position-observer-impl.js',
@@ -468,6 +478,7 @@ exports.rules = [
       'src/polyfills.js->src/polyfills/map-set.js',
       'src/polyfills.js->src/polyfills/set-add.js',
       'src/polyfills.js->src/polyfills/weakmap-set.js',
+      'src/friendly-iframe-embed.js->src/polyfills/abort-controller.js',
       'src/friendly-iframe-embed.js->src/polyfills/custom-elements.js',
       'src/friendly-iframe-embed.js->src/polyfills/document-contains.js',
       'src/friendly-iframe-embed.js->src/polyfills/domtokenlist.js',
@@ -531,12 +542,12 @@ exports.rules = [
     mustNotDependOn: ['ads/google/doubleclick.js'],
     allowlist: [
       /** DO NOT ADD TO ALLOWLIST */
-      'ads/ix.js->ads/google/doubleclick.js',
-      'ads/imonomy.js->ads/google/doubleclick.js',
-      'ads/navegg.js->ads/google/doubleclick.js',
+      'ads/vendors/ix.js->ads/google/doubleclick.js',
+      'ads/vendors/imonomy.js->ads/google/doubleclick.js',
+      'ads/vendors/navegg.js->ads/google/doubleclick.js',
       /** DO NOT ADD TO ALLOWLIST */
-      'ads/openx.js->ads/google/doubleclick.js',
-      'ads/pulsepoint.js->ads/google/doubleclick.js',
+      'ads/vendors/openx.js->ads/google/doubleclick.js',
+      'ads/vendors/pulsepoint.js->ads/google/doubleclick.js',
       /** DO NOT ADD TO ALLOWLIST */
     ],
   },

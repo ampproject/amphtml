@@ -83,7 +83,7 @@ describes.realWin(
         });
         element.innerHTML = content;
         container.appendChild(element);
-        await element.build();
+        await element.buildInternal();
         await element.layoutCallback();
         await afterMutationAndClamp();
 
@@ -272,10 +272,11 @@ describes.realWin(
             width: 10,
             height: 13,
           });
+          const impl = await element.getImpl(false);
           const childNodes = getChildNodes(element);
 
           childNodes[0].data = 'Good night and good luck';
-          await element.implementation_.mutateElement(() => {});
+          await impl.mutateElement(() => {});
 
           expect(element.scrollHeight).to.equal(13);
           expect(getTextContent(element)).to.match(/^Good/);

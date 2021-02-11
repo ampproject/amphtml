@@ -57,9 +57,9 @@ describes.realWin(
       amp3dGltfEl.setAttribute('height', '240');
 
       doc.body.appendChild(amp3dGltfEl);
-      await amp3dGltfEl.build();
+      await amp3dGltfEl.buildInternal();
 
-      const amp3dGltf = amp3dGltfEl.implementation_;
+      const amp3dGltf = await amp3dGltfEl.getImpl();
       env.sandbox
         .stub(amp3dGltf, 'iframe_')
         .get(() => iframe)
@@ -80,7 +80,7 @@ describes.realWin(
       expect(!!doc.body.querySelector('amp-3d-gltf > iframe')).to.be.true;
     });
 
-    // TODO (#16080): this test times out on Travis. Re-enable when fixed.
+    // TODO (#16080): this test times out on CI. Re-enable when fixed.
     it.skip('sends toggleAmpViewport(false) when exiting viewport', async () => {
       const amp3dGltf = await createElement();
 
@@ -94,7 +94,7 @@ describes.realWin(
       expect(postMessageSpy.firstCall.args[1].args).to.be.false;
     });
 
-    // TODO (#16080): this test times out on Travis. Re-enable when fixed.
+    // TODO (#16080): this test times out on CI. Re-enable when fixed.
     it.skip('sends toggleAmpViewport(true) when entering viewport', async () => {
       const amp3dGltf = await createElement();
       const postMessageSpy = env.sandbox.spy(amp3dGltf, 'postMessage_');

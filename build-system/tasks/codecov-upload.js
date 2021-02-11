@@ -15,14 +15,9 @@
  */
 'use strict';
 
-const colors = require('ansi-colors');
+const colors = require('kleur/colors');
 const fs = require('fs-extra');
-const {
-  ciCommitSha,
-  ciPullRequestSha,
-  isCiBuild,
-  isPullRequestBuild,
-} = require('../common/ci');
+const {ciBuildSha, isCiBuild} = require('../common/ci');
 const {getStdout} = require('../common/exec');
 const {log} = require('../common/logging');
 const {shortSha} = require('../common/git');
@@ -68,9 +63,7 @@ async function codecovUpload() {
     return;
   }
 
-  const commitSha = shortSha(
-    isPullRequestBuild() ? ciPullRequestSha() : ciCommitSha()
-  );
+  const commitSha = shortSha(ciBuildSha());
   log(
     green('INFO:'),
     'Uploading coverage reports to',

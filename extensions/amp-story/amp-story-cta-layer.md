@@ -31,6 +31,10 @@ The `<amp-story-cta-layer>` component allows the usage of `<a>` and `<button>` e
 -   If specified, the `<amp-story-cta-layer>` element must be the last layer within an `<amp-story-page>`. As a result, effectively every `<amp-story-page>` can have exactly one or exactly zero of the `<amp-story-cta-layer>` element.
 -   Positioning and sizing of this layer cannot be controlled. It is always 100% width of the page, 20% height of the page, and aligned to the bottom of the page.
 
+[tip type="important"]
+Both `amp-story-cta-layer` and `amp-story-page-attachment`(amp-story-page-attachment.md) must be the last child tag of an [`amp-story-page`](amp-story-page.md). Because of this, you may include neither or one, but not both.
+[/tip]
+
 ```html
 <amp-story-page id="vertical-template-thirds">
   <amp-story-grid-layer template="thirds">

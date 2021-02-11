@@ -53,6 +53,11 @@ const CAROUSEL_SELECTOR =
   '> amp-base-carousel, :not(amp-inline-gallery-thumbnails) > amp-base-carousel';
 
 class AmpInlineGallery extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    return true;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -88,11 +93,6 @@ class AmpInlineGallery extends AMP.BaseElement {
 
       toArray(thumbnailsImpls).forEach((impl) => impl.setSlides(slides));
     });
-  }
-
-  /** @override */
-  prerenderAllowed() {
-    return true;
   }
 
   /** @override */

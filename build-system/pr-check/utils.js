@@ -24,18 +24,19 @@ const {
   gitCiMasterBaseline,
   shortSha,
 } = require('../common/git');
-const {cyan, green, yellow} = require('ansi-colors');
+const {ciBuildSha, ciPullRequestSha, isCiBuild} = require('../common/ci');
+const {cyan, green, yellow} = require('kleur/colors');
 const {execOrDie, execOrThrow, execWithError, exec} = require('../common/exec');
 const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
-const {isCiBuild, ciBuildId, ciPullRequestSha} = require('../common/ci');
-const {replaceUrls, signalDistUpload} = require('../tasks/pr-deploy-bot-utils');
+const {replaceUrls} = require('../tasks/pr-deploy-bot-utils');
 
-const UNMINIFIED_OUTPUT_FILE = `amp_unminified_${ciBuildId()}.zip`;
-const NOMODULE_OUTPUT_FILE = `amp_nomodule_${ciBuildId()}.zip`;
-const MODULE_OUTPUT_FILE = `amp_module_${ciBuildId()}.zip`;
+const UNMINIFIED_OUTPUT_FILE = `amp_unminified_${ciBuildSha()}.zip`;
+const NOMODULE_OUTPUT_FILE = `amp_nomodule_${ciBuildSha()}.zip`;
+const MODULE_OUTPUT_FILE = `amp_module_${ciBuildSha()}.zip`;
 
 const BUILD_OUTPUT_DIRS = 'build/ dist/ dist.3p/';
-const APP_SERVING_DIRS = 'dist.tools/ examples/ test/manual/';
+const APP_SERVING_DIRS =
+  'dist.tools/ examples/ test/manual/ test/fixtures/e2e/';
 
 // TODO(rsimha, ampproject/amp-github-apps#1110): Update storage details.
 const GCLOUD_STORAGE_BUCKET = 'gs://amp-travis-builds';
@@ -154,7 +155,7 @@ function stopTimer(jobNameOrCmd, startTime) {
  * @param {string} jobName
  * @param {startTime} startTime
  */
-function stopTimedJob(jobName, startTime) {
+function abortTimedJob(jobName, startTime) {
   stopTimer(jobName, startTime);
   process.exitCode = 1;
 }
@@ -167,7 +168,9 @@ function stopTimedJob(jobName, startTime) {
 function timedExecFn(execFn) {
   return (cmd, ...rest) => {
     const startTime = startTimer(cmd);
-    const p = execFn(cmd, ...rest);
+    const cmdToRun =
+      isCiBuild() && cmd.startsWith('gulp ') ? cmd.concat(' --color') : cmd;
+    const p = execFn(cmdToRun, ...rest);
     stopTimer(cmd, startTime);
     return p;
   };
@@ -313,11 +316,10 @@ async function processAndUploadNomoduleOutput() {
   await replaceUrls('test/manual');
   await replaceUrls('examples');
   uploadNomoduleOutput();
-  await signalDistUpload('success');
 }
 
 module.exports = {
-  stopTimedJob,
+  abortTimedJob,
   downloadUnminifiedOutput,
   downloadNomoduleOutput,
   downloadModuleOutput,

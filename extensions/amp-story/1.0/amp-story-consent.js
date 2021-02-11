@@ -27,14 +27,17 @@ import {Services} from '../../../src/services';
 import {assertAbsoluteHttpOrHttpsUrl, assertHttpsUrl} from '../../../src/url';
 import {
   childElementByTag,
+  closest,
   closestAncestorElementBySelector,
   isJsonScriptTag,
+  matches,
 } from '../../../src/dom';
 import {computedStyle, setImportantStyles} from '../../../src/style';
 import {
   createShadowRootWithStyle,
   getRGBFromCssColorValue,
   getTextColorForRGB,
+  triggerClickFromLightDom,
 } from './utils';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
@@ -283,9 +286,17 @@ export class AmpStoryConsent extends AMP.BaseElement {
    * @private
    */
   onClick_(event) {
-    if (event.target && event.target.hasAttribute('on')) {
+    if (!event.target) {
+      return;
+    }
+    if (event.target.hasAttribute('on')) {
       const targetEl = dev().assertElement(event.target);
       this.actions_.trigger(targetEl, 'tap', event, ActionTrust.HIGH);
+    }
+    const anchorClicked = closest(event.target, (e) => matches(e, 'a[href]'));
+    if (anchorClicked) {
+      triggerClickFromLightDom(anchorClicked, this.element);
+      event.preventDefault();
     }
   }
 

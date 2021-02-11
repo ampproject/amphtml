@@ -19,7 +19,7 @@ import {Key} from '../../../../build-system/tasks/e2e/functional-test-controller
 describes.endtoend(
   'amp story bookend',
   {
-    testUrl: 'http://localhost:8000/test/manual/amp-story/amp-story.amp.html',
+    fixture: 'amp-story/amp-story.amp.html',
     // TODO(estherkim): implement mobile emulation on Firefox when available on geckodriver
     browsers: ['chrome'],
     environments: ['single'],

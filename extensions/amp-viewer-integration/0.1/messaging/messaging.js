@@ -161,9 +161,16 @@ export class Messaging {
    * @param {!Window} target - window containing AMP document to perform handshake with (usually contentWindow of iframe)
    * @param {string} origin - origin of target window (use "null" if opaque)
    * @param {?string=} opt_token - message token to verify on incoming messages (must be provided as viewer parameter)
+   * @param {?RegExp=} opt_cdnProxyRegex
    * @return {!Promise<!Messaging>}
    */
-  static waitForHandshakeFromDocument(source, target, origin, opt_token) {
+  static waitForHandshakeFromDocument(
+    source,
+    target,
+    origin,
+    opt_token,
+    opt_cdnProxyRegex
+  ) {
     return new Promise((resolve) => {
       const listener = (event) => {
         const message = parseMessage(event.data);
@@ -171,13 +178,14 @@ export class Messaging {
           return;
         }
         if (
-          event.origin == origin &&
+          (event.origin == origin ||
+            (opt_cdnProxyRegex && opt_cdnProxyRegex.test(event.origin))) &&
           (!event.source || event.source == target) &&
           message.app === APP &&
           message.name === CHANNEL_OPEN_MSG
         ) {
           source.removeEventListener('message', listener);
-          const port = new WindowPortEmulator(source, origin, target);
+          const port = new WindowPortEmulator(source, event.origin, target);
           const messaging = new Messaging(
             null,
             port,
