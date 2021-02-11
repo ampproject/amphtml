@@ -47,7 +47,7 @@ export function LightboxGallery({children}) {
   };
   return (
     <>
-      <Lightbox ref={lightboxRef}>
+      <Lightbox ref={lightboxRef} scrollable>
         {/* TODO: This needs an actual close button UI */}
         <div
           role="button"
