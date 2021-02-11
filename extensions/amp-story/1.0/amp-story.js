@@ -2926,9 +2926,9 @@ export class AmpStory extends AMP.BaseElement {
    * @param {!Element} pageElement
    * @return {?string} The URL of the background resource
    */
-  getBackgroundUrl_(pageElement) {
+  getBackgroundElement_(pageElement) {
     let fillElement = pageElement.querySelector(
-      '[template="fill"]:not(.i-amphtml-hidden-by-media-query)'
+      '[template="fill"]:not(.i-amphtml-hidden-by-media-query) img'
     );
 
     if (!fillElement) {
@@ -2938,11 +2938,11 @@ export class AmpStory extends AMP.BaseElement {
     fillElement = dev().assertElement(fillElement);
 
     const fillPosterElement = fillElement.querySelector(
-      '[poster]:not(.i-amphtml-hidden-by-media-query)'
+      '[poster]:not(.i-amphtml-hidden-by-media-query) img'
     );
 
     const srcElement = fillElement.querySelector(
-      '[src]:not(.i-amphtml-hidden-by-media-query)'
+      '[src]:not(.i-amphtml-hidden-by-media-query)' 
     );
 
     const fillPoster = fillPosterElement
@@ -2950,7 +2950,8 @@ export class AmpStory extends AMP.BaseElement {
       : '';
     const src = srcElement ? srcElement.getAttribute('src') : '';
 
-    return fillPoster || src;
+    return fillElement || src;
+    // return fillPoster || src;
   }
 
   /**
@@ -2966,13 +2967,13 @@ export class AmpStory extends AMP.BaseElement {
     this.getVsync().run(
       {
         measure: (state) => {
-          state.url = this.getBackgroundUrl_(pageElement);
+          state.element = this.getBackgroundElement_(pageElement);
           state.color = computedStyle(this.win, pageElement).getPropertyValue(
             'background-color'
           );
         },
         mutate: (state) => {
-          this.background_.setBackground(state.color, state.url, initial);
+          this.background_.setBackground(state.color, state.element, initial);
         },
       },
       {}

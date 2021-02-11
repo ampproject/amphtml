@@ -25,7 +25,7 @@ amp-story[standalone].i-amphtml-story-desktop-panels {
 }
 
 amp-story.i-amphtml-story-desktop amp-story-page[active] {
-  box-shadow: 0px 0px 60px !important;
+  box-shadow: 0px 0px 60px black !important;
 }
 
 /**
@@ -147,16 +147,26 @@ amp-story.i-amphtml-story-desktop amp-story-page[active] {
 }
 
 .i-amphtml-story-background-container {
-  opacity: .8!important;
-  position: absolute!important;
-  top: 0!important;
-  right: 0!important;
-  bottom: 0!important;
-  left: 0!important;
+  opacity: .8 !important;
+  position: absolute !important;
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
   overflow: hidden !important;
+  display: flex !important;
+  align-items: center !important;
  }
+
+ .i-amphtml-story-background-canvas {
+  z-index: 10 !important;
+  position: relative !important;
+  width: 100% !important;
+  min-height: 100% !important;
+  /* filter: blur(1px); */
+}
  
- .i-amphtml-story-background-overlay,
+ /* .i-amphtml-story-background-overlay,
  .i-amphtml-story-background-overlay::after {
    position: absolute !important;
    left: 0 !important;
@@ -167,7 +177,6 @@ amp-story.i-amphtml-story-desktop amp-story-page[active] {
    background-color: rgba(0, 0, 0, 0.2) !important;
  }
  
- /* Separate layer so overlay opacity can transition from 20% to 70%. */
  .i-amphtml-story-background-overlay::after {
    content: '' !important;
    display: block !important;
@@ -187,7 +196,6 @@ amp-story.i-amphtml-story-desktop amp-story-page[active] {
    bottom: -150px !important;
    left: -150px !important;
    opacity: 0 !important;
-   /* filter: blur(50px) !important; */
    transform: scale(1.2) !important;
    background-size: cover !important;
    background-color: transparent !important;
@@ -201,4 +209,4 @@ amp-story.i-amphtml-story-desktop amp-story-page[active] {
   opacity: 1 !important;
   z-index: 1 !important;
   transition: opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
-}
+} */
