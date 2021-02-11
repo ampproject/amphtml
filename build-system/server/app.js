@@ -1150,9 +1150,15 @@ app.use('/bind/ecommerce/sizes', (req, res) => {
   }, 1000); // Simulate network delay.
 });
 
+/**
+ * Simulate a publisher's metering state store.
+ * (amp-subscriptions)
+ * @type {{ [ampReaderId: string]: {} }}
+ */
+const meteringStateStore = {};
+
 // Simulate a publisher's entitlements API.
 // (amp-subscriptions)
-const meteringStateStore = {};
 app.use('/subscription/:id/entitlements', (req, res) => {
   cors.assertCors(req, res, ['GET']);
 
