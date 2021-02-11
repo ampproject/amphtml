@@ -230,6 +230,7 @@ amp-story-page .i-amphtml-story-page-open-attachment-outlink-bar-right {
 }
 
 amp-story-page .i-amphtml-story-page-attachment-outlink-chip {
+  display: table !important;
   position: relative !important;
   padding: 12px 32px 20px 32px !important;
   margin: 0 0 20px 0 !important;
@@ -238,7 +239,12 @@ amp-story-page .i-amphtml-story-page-attachment-outlink-chip {
   border-radius: 30px !important;
 }
 
+amp-story-page .i-amphtml-story-page-attachment-outlink-content {
+  display: table-row !important;
+}
+
 amp-story-page .i-amphtml-story-page-attachment-outlink-label {
+  display: table-cell !important;
   font-family: 'Roboto', sans-serif !important;
   font-size: 16px !important;
   font-weight: bold !important;
@@ -251,6 +257,7 @@ amp-story-page .i-amphtml-story-page-attachment-outlink-label {
 }
 
 .i-amphtml-story-page-attachment-outlink-image {
+  display: table-cell !important;
   height: 24px;
   width: 24px;
 }

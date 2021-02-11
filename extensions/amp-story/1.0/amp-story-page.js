@@ -199,8 +199,10 @@ const buildOpenOutlinkAttachmentElement = (element) =>
           <span class="i-amphtml-story-page-open-attachment-outlink-bar-right"></span>
         </span>
         <div class="i-amphtml-story-page-attachment-outlink-chip">
-          <div class="i-amphtml-story-page-attachment-outlink-image"></div>
-          <div class="i-amphtml-story-page-attachment-outlink-label"></div>
+          <div style="display: table-row;">
+            <div class="i-amphtml-story-page-attachment-outlink-image"></div>
+            <div class="i-amphtml-story-page-attachment-outlink-label"></div>
+          </div>
         </div>
       </a>`;
 
