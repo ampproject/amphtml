@@ -74,7 +74,6 @@ import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {isPrerenderActivePage} from './prerender-active-page';
 import {listen} from '../../../src/event-helper';
-import {parseQueryString} from '../../../src/url';
 import {px, setImportantStyles, toggle} from '../../../src/style';
 import {renderPageDescription} from './semantic-render';
 import {setTextBackgroundColor} from './utils';
