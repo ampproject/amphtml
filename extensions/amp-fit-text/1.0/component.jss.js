@@ -33,6 +33,10 @@ const fitTextContent = {
   '-webkit-box-orient': 'vertical',
   'overflow': 'hidden',
   'textOverflow': 'ellipsis',
+
+  'flexDirection': 'column',
+  'flexWrap': 'nowrap',
+  'justifyContent': 'center',
 };
 
 const minContentHeight = {

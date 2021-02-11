@@ -3,7 +3,7 @@
   "node": {
     "supportPolicy": ["lts_latest"]
   },
-  "ignorePaths": [],
+  "ignoreDeps": ["ubuntu-2004"],
 
   "commitMessagePrefix": "📦",
   "timezone": "America/Los_Angeles",
@@ -22,96 +22,80 @@
 
   "packageRules": [
     {
-      "paths": ["**/*"],
       "groupName": "subpackage devDependencies",
+      "matchPaths": ["**/*"],
       "major": {
         "groupName": null,
         "additionalBranchPrefix": "subpackage-"
       }
     },
-
     {
-      "paths": ["build-system/**"],
-      "labels": ["WG: infra"],
-
       "groupName": "build system devDependencies",
+      "matchPaths": ["build-system/**"],
+      "labels": ["WG: infra"],
       "major": {
         "groupName": null,
         "additionalBranchPrefix": "build-system-"
       }
     },
-
     {
-      "paths": ["validator/**"],
-      "labels": ["WG: caching"],
-
       "groupName": "validator devDependencies",
+      "matchPaths": ["validator/**"],
+      "labels": ["WG: caching"],
       "major": {
         "groupName": null,
         "additionalBranchPrefix": "validator-"
       }
     },
-
     {
-      "paths": ["+(package.json)"],
-
       "groupName": "core devDependencies",
+      "matchPaths": ["+(package.json)"],
       "major": {
         "groupName": null,
         "additionalBranchPrefix": "core-"
       }
     },
-
     {
-      "packagePatterns": ["\\b(prettier|eslint)\\b"],
-
       "groupName": "linting devDependencies",
+      "matchPackagePatterns": ["\\b(prettier|eslint)\\b"],
       "major": {
         "groupName": null,
         "additionalBranchPrefix": "linting-"
       }
     },
-
     {
-      "packagePatterns": ["\\bbabel"],
-
       "groupName": "babel devDependencies",
+      "matchPackagePatterns": ["\\bbabel"],
       "major": {
         "groupName": null,
         "additionalBranchPrefix": "babel-"
       }
     },
-
     {
-      "packagePatterns": ["renovate"],
-      "depTypeList": ["devDependencies"],
       "groupName": "Renovate Bot",
-      "updateTypes": ["major", "minor"],
+      "matchPackagePatterns": ["renovate"],
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["major", "minor"],
       "extends": ["schedule:weekly"]
     },
-
     {
       "excludePackagePatterns": ["^@ampproject/"],
-      "depTypeList": ["dependencies"],
+      "matchDepTypes": ["dependencies"],
       "enabled": false
     },
-
     {
-      "packagePatterns": ["^@ampproject/"],
-      "depTypeList": ["devDependencies"],
-
       "groupName": "ampproject devDependencies",
+      "matchPackagePatterns": ["^@ampproject/"],
+      "matchDepTypes": ["devDependencies"],
       "major": {
         "groupName": null,
         "additionalBranchPrefix": "ampproject-"
       }
     },
-
     {
-      "packagePatterns": ["^@ampproject/"],
-      "depTypeList": ["dependencies"],
-
       "groupName": "ampproject dependencies",
+      "matchPackagePatterns": ["^@ampproject/"],
+      "matchDepTypes": ["dependencies"],
       "major": {
         "groupName": null,
         "additionalBranchPrefix": "ampproject-"

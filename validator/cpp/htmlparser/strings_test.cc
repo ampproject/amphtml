@@ -311,6 +311,22 @@ TEST(StringsTest, EscapeUnescapeTest) {
   std::string unescapedquotes("hello\"world\"");
   EXPECT_EQ(htmlparser::Strings::EscapeString(unescapedquotes),
             "hello&#34;world&#34;");
+
+  // The unescaped character size is bigger than the escaped entity name.
+  // Example: "&nGt;" = "\xe2\x89\xab\xe2\x83\x92"
+  // 5 character vs. 6 bytes.
+  std::string str1 = "&nGt;cdef";
+  std::string str2 = "&gt;cdef";
+  std::string str3 = "abc&nGt;cdef";
+  std::string str4 = "&abc;def";
+  htmlparser::Strings::UnescapeString(&str1);
+  htmlparser::Strings::UnescapeString(&str2);
+  htmlparser::Strings::UnescapeString(&str3);
+  htmlparser::Strings::UnescapeString(&str4);
+  EXPECT_EQ(str1, "≫⃒cdef");
+  EXPECT_EQ(str2, ">cdef");
+  EXPECT_EQ(str3, "abc≫⃒cdef");
+  EXPECT_EQ(str4, "&abc;def");
 }
 
 TEST(StringsTest, EncodingTest) {
