@@ -74,6 +74,7 @@ import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {isPrerenderActivePage} from './prerender-active-page';
 import {listen} from '../../../src/event-helper';
+import {parseQueryString} from '../../../src/url';
 import {px, setImportantStyles, toggle} from '../../../src/style';
 import {renderPageDescription} from './semantic-render';
 import {setTextBackgroundColor} from './utils';
@@ -194,14 +195,14 @@ const buildOpenOutlinkAttachmentElement = (element) =>
   htmlFor(element)`
       <a class="i-amphtml-story-page-open-attachment"
           role="button">
-        <span class="i-amphtml-story-page-open-attachment-outlink-icon">
+        <span class="i-amphtml-story-page-attachment-outlink-arrow">
           <span class="i-amphtml-story-page-open-attachment-outlink-bar-left"></span>
           <span class="i-amphtml-story-page-open-attachment-outlink-bar-right"></span>
         </span>
-        <span>
-          <div class="i-amphtml-story-link-icon"></div>
-          <span class="i-amphtml-story-page-attachment-outlink-label"></span>
-        </span>
+        <div>
+          <div class="i-amphtml-story-page-attachment-outlink-image"></div>
+          <div class="i-amphtml-story-page-attachment-outlink-label"></div>
+        </div>
       </a>`;
 
 /**
@@ -878,11 +879,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.mutateElement(() => {
       this.element.classList.add(PAGE_LOADED_CLASS_NAME);
     });
-  }
-
-  /** @override */
-  prerenderAllowed() {
-    return this.isPrerenderActivePage();
   }
 
   /**
@@ -1837,7 +1833,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         '.i-amphtml-story-page-attachment-outlink-label'
       );
       const ctaImgEl = this.openAttachmentEl_.querySelector(
-        '.i-amphtml-story-link-icon'
+        '.i-amphtml-story-page-attachment-outlink-image'
       );
       const barLeftEl = this.openAttachmentEl_.querySelector(
         '.i-amphtml-story-page-open-attachment-outlink-bar-left'
@@ -1866,9 +1862,9 @@ export class AmpStoryPage extends AMP.BaseElement {
         const ctaImgAttr = attachmentEl.getAttribute('cta-img');
         if (!ctaImgAttr) {
           if (theme && AttachmentTheme.DARK === theme.toLowerCase()) {
-            ctaImgEl.classList.add('i-amphtml-story-dark-link-icon');
+            ctaImgEl.classList.add('i-amphtml-story-page-attachment-outlink-dark-link-image');
           } else {
-            ctaImgEl.classList.add('i-amphtml-story-light-link-icon');
+            ctaImgEl.classList.add('i-amphtml-story-page-attachment-outlink-light-link-image');
           }
         } else {
           setImportantStyles(ctaImgEl, {

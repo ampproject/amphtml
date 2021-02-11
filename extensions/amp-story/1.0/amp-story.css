@@ -535,19 +535,6 @@ amp-story-grid-layer .i-amphtml-embedded-component::after {
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#0F9D58"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>') !important;
 }
 
-.i-amphtml-story-link-icon {
-  height: 24px;
-  width: 24px;
-}
-
-.i-amphtml-story-dark-link-icon {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><rect width="24" height="24" rx="12" fill="#333"/><path d="M10 18s0 0 0 0l2-1 2-2s0 0 0 0h-1l-2 1a3 3 0 01-3 0 3 3 0 010-3l1-2v-1s0 0 0 0l-2 2a4 4 0 000 5l3 1zM11 9l2-1a3 3 0 013 0 3 3 0 010 3l-1 2v1a1 1 0 000 0l2-2a4 4 0 000-5l-3-1s0 0 0 0l-2 1-2 2s0 0 0 0h1z" fill="#fff" stroke="#fff" stroke-width=".3"/><path d="M15 9h-1l-5 5a1 1 0 001 1s0 0 0 0l5-5V9z" fill="#fff" stroke="#fff" stroke-width=".3"/></svg>') !important;
-}
-
-.i-amphtml-story-light-link-icon {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><rect width="24" height="24" rx="12" fill="#E8EAED"/><path d="M10 18s0 0 0 0l2-1 2-2s0 0 0 0h-1l-2 1a3 3 0 01-3 0 3 3 0 010-3l1-2v-1s0 0 0 0l-2 2a4 4 0 000 5l3 1zM11 9l2-1a3 3 0 013 0 3 3 0 010 3l-1 2v1a1 1 0 000 0l2-2a4 4 0 000-5l-3-1s0 0 0 0l-2 1-2 2s0 0 0 0h1z" fill="#000" stroke="#000" stroke-width=".3"/><path d="M15 9h-1l-5 5a1 1 0 001 1s0 0 0 0l5-5V9z" fill="#000" stroke="#000" stroke-width=".3"/></svg>') !important;
-}
-
 amp-story[standalone] .i-amphtml-story-developer-log {
   background: rgba(0, 0, 0, 0.85) !important;
   bottom: 0 !important;
