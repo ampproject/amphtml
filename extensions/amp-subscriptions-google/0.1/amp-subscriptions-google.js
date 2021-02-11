@@ -653,7 +653,7 @@ export class GoogleSubscriptionsPlatform {
           return this.runtime_
             .getEntitlements(entitlementsParams)
             .then((swgEntitlements) =>
-              this.createAmpEntitlementFromSwgEntitlements_(swgEntitlements)
+              this.createAmpEntitlement(swgEntitlements)
             );
         }
       );
@@ -661,11 +661,11 @@ export class GoogleSubscriptionsPlatform {
   }
 
   /**
-   * Returns an Entitlement from a SwG response.
+   * Returns an AMP entitlement based on SwG entitlements.
    * @param {!Entitlements} swgEntitlements
    * @return {Entitlement}
    */
-  createAmpEntitlementFromSwgEntitlements_(swgEntitlements) {
+  createAmpEntitlement(swgEntitlements) {
     // Get and store the isReadyToPay signal which is independent of
     // any entitlments existing.
     if (swgEntitlements.isReadyToPay) {
