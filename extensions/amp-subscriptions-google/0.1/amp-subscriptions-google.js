@@ -597,7 +597,7 @@ export class GoogleSubscriptionsPlatform {
      * page was prerendered.
      *
      * If the article enables metering, then it's not prerender safe.
-     * This extension sends publishers a metering state request which
+     * This extension can send publishers a registration request which
      * would reveal to the publisher that the page was prerendered.
      */
     return this.isGoogleViewer_ && !this.enableMetering_;
