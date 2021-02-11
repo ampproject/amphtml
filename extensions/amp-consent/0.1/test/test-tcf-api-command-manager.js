@@ -316,17 +316,6 @@ describes.realWin(
           tcfApiCommandManager.handleTcDataChange_();
           await macroTask();
           expect(mockWin.postMessage).to.not.be.called;
-
-          // No TcString case
-          mockTcString = undefined;
-          tcfApiCommandManager = new TcfApiCommandManager(mockPolicyManager);
-          tcfApiCommandManager.currentTcString_ = 'prevTcString';
-          tcfApiCommandManager.handleTcfCommand(data, mockWin);
-
-          // Fake a TcData change
-          tcfApiCommandManager.handleTcDataChange_();
-          await macroTask();
-          expect(mockWin.postMessage).to.not.be.called;
         });
 
         it('does not send TcData when TcString is null', async () => {
