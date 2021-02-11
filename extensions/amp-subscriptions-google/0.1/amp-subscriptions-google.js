@@ -624,44 +624,43 @@ export class GoogleSubscriptionsPlatform {
         return null;
       }
 
-      const googleMeteringStrategyPromise = this.getGoogleMeteringStrategy_();
+      const meteringStrategyPromise = this.getGoogleMeteringStrategy_();
       const meteringStatePromise = this.serviceAdapter_.loadMeteringState();
 
-      return Promise.all([
-        googleMeteringStrategyPromise,
-        meteringStatePromise,
-      ]).then((results) => {
-        const googleMeteringStrategy = results[0];
-        const meteringState = results[1];
+      return Promise.all([meteringStrategyPromise, meteringStatePromise]).then(
+        (results) => {
+          const googleMeteringStrategy = results[0];
+          const meteringState = results[1];
 
-        const entitlementsParams = {};
+          const entitlementsParams = {};
 
-        // Add encryption param.
-        if (encryptedDocumentKey) {
-          entitlementsParams.encryption = {encryptedDocumentKey};
+          // Add encryption param.
+          if (encryptedDocumentKey) {
+            entitlementsParams.encryption = {encryptedDocumentKey};
+          }
+
+          // Add metering param.
+          if (
+            googleMeteringStrategy === GoogleMeteringStrategy.EXTENDED_ACCESS &&
+            meteringState
+          ) {
+            // Clear SwG's entitlements cache.
+            this.runtime_.clear();
+
+            entitlementsParams.metering = {state: meteringState};
+          }
+
+          return this.runtime_
+            .getEntitlements(entitlementsParams)
+            .then((swgEntitlements) => {
+              this.hasFetchedEntitlements_ = true;
+
+              return this.createAmpEntitlementFromSwgEntitlements_(
+                swgEntitlements
+              );
+            });
         }
-
-        // Add metering param.
-        if (
-          googleMeteringStrategy === GoogleMeteringStrategy.EXTENDED_ACCESS &&
-          meteringState
-        ) {
-          // Clear SwG's entitlements cache.
-          this.runtime_.clear();
-
-          entitlementsParams.metering = {state: meteringState};
-        }
-
-        return this.runtime_
-          .getEntitlements(entitlementsParams)
-          .then((swgEntitlements) => {
-            this.hasFetchedEntitlements_ = true;
-
-            return this.createAmpEntitlementFromSwgEntitlements_(
-              swgEntitlements
-            );
-          });
-      });
+      );
     });
   }
 
