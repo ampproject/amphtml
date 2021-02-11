@@ -129,6 +129,8 @@ Call the player's various methods to programmatically control the player. These 
 
 Will initialize the player manually. This can be useful when the player is dynamically.
 
+Note that the element must be connected to the DOM before calling `load()`.
+
 ```javascript
 const playerEl = document.body.querySelector('amp-story-player');
 const player = new AmpStoryPlayer(window, playerEl);
@@ -216,6 +218,30 @@ Will cause a custom event to be fired, see `page-attachment-open` and `page-atta
 
 ```javascript
 player.getStoryState('page-attachment');
+```
+
+## Autoplay
+
+By default, the first story in the player will automatically start playing when the player becomes visible in the user's viewport.
+
+You can opt-out of the default behavior by using the configuration below. This will prevent the first story in the player to start playing until you call [play()](#play/pause) on the player.
+
+### JSON Configuration
+
+Here's the JSON configuration for opting out of autoplay:
+
+```html
+<amp-story-player>
+  <script type="application/json">
+  {
+    "behavior": {
+      "autoplay": false
+    }
+  }
+</script>
+ <a href="./story1.html"> ... </a>
+ <a href="./story2.html"> ... </a>
+  ...
 ```
 
 ## Programmatically fetching more stories

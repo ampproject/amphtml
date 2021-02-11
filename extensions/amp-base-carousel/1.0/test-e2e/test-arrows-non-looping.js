@@ -28,10 +28,10 @@ const pageWidth = 600;
 const pageHeight = 600;
 
 describes.endtoend(
-  'amp-base-carousel:1.0 - arrows when non-looping',
+  'amp-base-carousel - arrows when non-looping',
   {
-    testUrl:
-      'http://localhost:8000/test/manual/amp-base-carousel/1.0/non-looping.amp.html',
+    version: '1.0',
+    fixture: 'amp-base-carousel/non-looping.amp.html',
     experiments: ['bento-carousel'],
     initialRect: {width: pageWidth, height: pageHeight},
     environments: ['single', 'viewer-demo'],

@@ -24,10 +24,10 @@ const pageHeight = 800;
 const testTimeout = 40000;
 
 describes.endtoend(
-  'amp-base-carousel:1.0 - basic functionality',
+  'amp-base-carousel - basic functionality',
   {
-    testUrl:
-      'http://localhost:8000/test/manual/amp-base-carousel/1.0/basic.amp.html',
+    version: '1.0',
+    fixture: 'amp-base-carousel/1.0/basic.amp.html',
     experiments: ['bento-carousel'],
     initialRect: {width: pageWidth, height: pageHeight},
     environments: ['single', 'viewer-demo'],
@@ -94,7 +94,8 @@ describes.endtoend(
     });
 
     describe('looping', function () {
-      it('should show the last slide when looping', async function () {
+      // TODO(wg-components, #24195): Make this less flaky during CI.
+      it.skip('should show the last slide when looping', async function () {
         this.timeout(testTimeout);
         const el = await getScrollingElement(styles, controller);
         const lastSlide = await getSlide(styles, controller, SLIDE_COUNT - 1);

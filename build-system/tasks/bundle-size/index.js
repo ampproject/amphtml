@@ -34,9 +34,9 @@ const {
 const {
   VERSION: internalRuntimeVersion,
 } = require('../../compile/internal-version');
-const {cyan, green, red, yellow} = require('ansi-colors');
+const {cyan, red, yellow} = require('kleur/colors');
 const {log} = require('../../common/logging');
-const {report, Report} = require('@ampproject/filesize');
+const {report, NoTTYReport} = require('@ampproject/filesize');
 
 const requestPost = util.promisify(require('request').post);
 
@@ -56,30 +56,39 @@ const replacementExpression = new RegExp(internalRuntimeVersion, 'g');
  */
 async function getBrotliBundleSizes() {
   const bundleSizes = {};
-
-  log(cyan('brotli'), 'bundle sizes are:');
-  await report(
+  const sizes = await report(
     filesizeConfigPath,
     (content) => content.replace(replacementExpression, normalizedRtvNumber),
-    class extends Report {
-      update(context) {
-        const completed = super.getUpdated(context);
-        for (const complete of completed) {
-          const [filePath, sizeMap] = complete;
-          const relativePath = path.relative('.', filePath);
-          const reportedSize = parseFloat((sizeMap[0][0] / 1024).toFixed(2));
-          log(' ', cyan(relativePath) + ':', green(reportedSize + 'KB'));
-          bundleSizes[relativePath] = reportedSize;
-        }
-      }
-    }
+    NoTTYReport,
+    /* silent */ false
   );
-
+  for (const size of sizes) {
+    const [filePath, sizeMap] = size;
+    const relativePath = path.relative('.', filePath);
+    const reportedSize = parseFloat((sizeMap[0][0] / 1024).toFixed(2));
+    bundleSizes[relativePath] = reportedSize;
+  }
   return bundleSizes;
 }
 
 /**
- * Store the bundle size of a commit hash in the build artifacts storage
+ * Checks the response of an operation. Throws if there's an error, and prints
+ * success messages if not.
+ * @param {!Object} response
+ * @param {...string} successMessages
+ */
+function checkResponse(response, ...successMessages) {
+  if (response.statusCode < 200 || response.statusCode >= 300) {
+    throw new Error(
+      `${response.statusCode} ${response.statusMessage}: ` + response.body
+    );
+  } else {
+    log(...successMessages);
+  }
+}
+
+/**
+ * Store the bundle sizes for a commit hash in the build artifacts storage
  * repository to the passed value.
  */
 async function storeBundleSize() {
@@ -116,13 +125,13 @@ async function storeBundleSize() {
         bundleSizes: await getBrotliBundleSizes(),
       },
     });
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw new Error(
-        `${response.statusCode} ${response.statusMessage}: ` + response.body
-      );
-    }
+    checkResponse(
+      response,
+      'Successfully stored bundle sizes for commit',
+      cyan(shortSha(commitHash)) + '.'
+    );
   } catch (error) {
-    log(red('Could not store the bundle size'));
+    log(red('Could not store bundle sizes'));
     log(red(error));
     process.exitCode = 1;
     return;
@@ -142,11 +151,11 @@ async function skipBundleSize() {
           path.join('commit', commitHash, 'skip')
         )
       );
-      if (response.statusCode < 200 || response.statusCode >= 300) {
-        throw new Error(
-          `${response.statusCode} ${response.statusMessage}: ` + response.body
-        );
-      }
+      checkResponse(
+        response,
+        'Skipped bundle size reporting for commit',
+        cyan(shortSha(commitHash)) + '.'
+      );
     } catch (error) {
       log(red('Could not report a skipped pull request'));
       log(red(error));
@@ -177,13 +186,15 @@ async function reportBundleSize() {
           bundleSizes: await getBrotliBundleSizes(),
         },
       });
-      if (response.statusCode < 200 || response.statusCode >= 300) {
-        throw new Error(
-          `${response.statusCode} ${response.statusMessage}: ` + response.body
-        );
-      }
+      checkResponse(
+        response,
+        'Successfully reported bundle sizes for commit',
+        cyan(shortSha(commitHash)),
+        'using baseline commit',
+        cyan(shortSha(baseSha)) + '.'
+      );
     } catch (error) {
-      log(red('Could not report the bundle size of this pull request'));
+      log(red('Could not report the bundle sizes for this pull request'));
       log(red(error));
       process.exitCode = 1;
       return;
@@ -205,7 +216,7 @@ async function getLocalBundleSize() {
     return;
   } else {
     log(
-      'Computing bundle size for version',
+      'Computing bundle sizes for version',
       cyan(internalRuntimeVersion),
       'at commit',
       cyan(shortSha(gitCommitHash())) + '.'
@@ -237,11 +248,11 @@ bundleSize.description =
   'Checks if the minified AMP binary has exceeded its size cap';
 bundleSize.flags = {
   'on_push_build':
-    '  Store bundle size in AMP build artifacts repo ' +
+    '  Store bundle sizes in the AMP build artifacts repo ' +
     '(also implies --on_pr_build)',
-  'on_pr_build': '  Report the bundle size of this pull request to GitHub',
+  'on_pr_build': '  Report the bundle sizes for this pull request to GitHub',
   'on_skipped_build':
     "  Set the status of this pull request's bundle " +
     'size check in GitHub to `skipped`',
-  'on_local_build': '  Compute the bundle size of the locally built runtime',
+  'on_local_build': '  Compute bundle sizes for the locally built runtime',
 };

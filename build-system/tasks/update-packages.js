@@ -18,7 +18,7 @@
 const checkDependencies = require('check-dependencies');
 const del = require('del');
 const fs = require('fs-extra');
-const {cyan, green, yellow} = require('ansi-colors');
+const {cyan, green, yellow} = require('kleur/colors');
 const {execOrDie} = require('../common/exec');
 const {isCiBuild} = require('../common/ci');
 const {log, logLocalDev} = require('../common/logging');

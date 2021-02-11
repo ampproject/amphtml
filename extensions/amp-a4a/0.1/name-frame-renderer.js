@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
+import {ADS_INITIAL_INTERSECTION_EXP} from '../../../src/experiments/ads-initial-intersection-exp';
 import {Renderer} from './amp-ad-type-defs';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dict} from '../../../src/utils/object';
 import {getContextMetadata} from '../../../src/iframe-attributes';
 import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
+import {getExperimentBranch} from '../../../src/experiments';
 import {
   intersectionEntryToJson,
   measureIntersection,
 } from '../../../src/utils/intersection';
-import {isExperimentOn} from '../../../src/experiments';
 import {utf8Decode} from '../../../src/utils/bytes';
 
 /**
@@ -55,10 +56,12 @@ export class NameFrameRenderer extends Renderer {
       crossDomainData.additionalContextMetadata
     );
     contextMetadata['creative'] = creative;
-    const asyncIntersection = isExperimentOn(
-      element.ownerDocument.defaultView,
-      'ads-initialIntersection'
-    );
+
+    const asyncIntersection =
+      getExperimentBranch(
+        element.ownerDocument.defaultView,
+        ADS_INITIAL_INTERSECTION_EXP.id
+      ) === ADS_INITIAL_INTERSECTION_EXP.experiment;
     const intersectionPromise = asyncIntersection
       ? measureIntersection(element)
       : Promise.resolve(element.getIntersectionChangeEntry());

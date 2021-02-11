@@ -354,12 +354,12 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, (env) => {
   });
 
   describe('proxy methods', () => {
-    it('should delegate getServiceId', () => {
+    it('should delegate getPlatformKey', () => {
       const proxyStub = env.sandbox.stub(
         viewerPlatform.platform_,
-        'getServiceId'
+        'getPlatformKey'
       );
-      viewerPlatform.getServiceId();
+      viewerPlatform.getPlatformKey();
       expect(proxyStub).to.be.called;
     });
 

@@ -1,6 +1,6 @@
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
+/*
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.143 */
+/** Version: 0.1.22.145 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -100,6 +100,22 @@ const AnalyticsEvent = {
   EVENT_OFFERED_METER: 3011,
   EVENT_UNLOCKED_FREE_PAGE: 3012,
   EVENT_SUBSCRIPTION_STATE: 4000,
+};
+/** @enum {number} */
+const EntitlementResult = {
+  UNKNOWN_ENTITLEMENT_RESULT: 0,
+  UNLOCKED_SUBSCRIBER: 1001,
+  UNLOCKED_FREE: 1002,
+  UNLOCKED_METER: 1003,
+  LOCKED_REGWALL: 2001,
+  LOCKED_PAYWALL: 2002,
+};
+/** @enum {number} */
+const EntitlementSource = {
+  UNKNOWN_ENTITLEMENT_SOURCE: 0,
+  GOOGLE_SUBSCRIBER_ENTITLEMENT: 1001,
+  GOOGLE_SHOWCASE_METERING_SERVICE: 2001,
+  PUBLISHER_ENTITLEMENT: 3001,
 };
 /** @enum {number} */
 const EventOriginator = {
@@ -755,6 +771,9 @@ class EntitlementsRequest {
 
     /** @private {?EntitlementResult} */
     this.entitlementResult_ = data[3 + base] == null ? null : data[3 + base];
+
+    /** @private {?string} */
+    this.nonce_ = data[4 + base] == null ? null : data[4 + base];
   }
 
   /**
@@ -814,6 +833,20 @@ class EntitlementsRequest {
   }
 
   /**
+   * @return {?string}
+   */
+  getNonce() {
+    return this.nonce_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setNonce(value) {
+    this.nonce_ = value;
+  }
+
+  /**
    * @param {boolean} includeLabel
    * @return {!Array<?>}
    * @override
@@ -826,6 +859,7 @@ class EntitlementsRequest {
                               [],  // field 2 - client_event_time
       this.entitlementSource_,     // field 3 - entitlement_source
       this.entitlementResult_,     // field 4 - entitlement_result
+      this.nonce_,                 // field 5 - nonce
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -2458,7 +2492,6 @@ const defaultStyles = {
 };
 
 /**
- * @export
  * @param {string} camelCase camel cased string
  * @return {string} title cased string
  */
@@ -2488,7 +2521,6 @@ function getVendorJsPropertyName_(style, titleCase) {
  * Returns the possibly prefixed JavaScript property name of a style property
  * (ex. WebkitTransitionDuration) given a camelCase'd version of the property
  * (ex. transitionDuration).
- * @export
  * @param {!Object} style
  * @param {string} camelCase the camel cased version of a css property name
  * @param {boolean=} bypassCache bypass the memoized cache of property
@@ -6200,7 +6232,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.143',
+    '_client': 'SwG 0.1.22.145',
   });
 }
 
@@ -7319,7 +7351,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.143',
+        '_client': 'SwG 0.1.22.145',
         'supportsEventManager': true,
       },
       args || {}
@@ -8161,7 +8193,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl$1(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.143');
+    context.setClientVersion('SwG 0.1.22.145');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString$1(this.getQueryString_());
@@ -10689,20 +10721,30 @@ class MeterToastApi {
      */
     this.onConsumeCallback_ = null;
 
+    /**
+     * Boolean indicating whether or not the onConsumeCallback_ has been handled
+     * (either called or ignored). This is used to protect against unexpected
+     * cancellations not consuming a meter.
+     * @private {!boolean}
+     */
+    this.onConsumeCallbackHandled_ = false;
+
     /** @private @const {!function()} */
     this.sendCloseRequestFunction_ = () => {
+      const closeRequest = new ToastCloseRequest();
+      closeRequest.setClose(true);
+      this.activityIframeView_.execute(closeRequest);
+      this.removeCloseEventListener();
+
       this.deps_
         .eventManager()
         .logSwgEvent(
           AnalyticsEvent.ACTION_METER_TOAST_CLOSED_BY_ARTICLE_INTERACTION,
           true
         );
-      const closeRequest = new ToastCloseRequest();
-      closeRequest.setClose(true);
-      this.activityIframeView_.execute(closeRequest);
-      this.removeCloseEventListener();
 
-      if (this.onConsumeCallback_) {
+      if (this.onConsumeCallback_ && !this.onConsumeCallbackHandled_) {
+        this.onConsumeCallbackHandled_ = true;
         this.onConsumeCallback_();
       }
     };
@@ -10732,7 +10774,18 @@ class MeterToastApi {
         'starting metering.';
       log_4(errorMessage);
     }
-    this.dialogManager_.handleCancellations(this.activityIframeView_);
+
+    this.dialogManager_
+      .handleCancellations(this.activityIframeView_)
+      .catch((reason) => {
+        // Possibly call onConsumeCallback on all dialog cancellations to ensure unexpected
+        // dialog closes don't give access without a meter consumed.
+        if (this.onConsumeCallback_ && !this.onConsumeCallbackHandled_) {
+          this.onConsumeCallbackHandled_ = true;
+          this.onConsumeCallback_();
+        }
+        throw reason;
+      });
     return this.dialogManager_.openDialog().then((dialog) => {
       this.setDialogBoxShadow_();
       this.setLoadingViewWidth_();
@@ -10843,6 +10896,8 @@ class MeterToastApi {
   startNativeFlow_(response) {
     if (response.getNative()) {
       this.removeCloseEventListener();
+      // We shouldn't decrement the meter on redirects, so don't call onConsumeCallback.
+      this.onConsumeCallbackHandled_ = true;
       this.deps_.callbacks().triggerSubscribeRequest();
     }
   }
@@ -11029,6 +11084,125 @@ class Toast {
 }
 
 /**
+ * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/** @const {!Object<string,AnalyticsEvent>} */
+const PublisherEventToAnalyticsEvent = {
+  [Event.IMPRESSION_PAYWALL]: AnalyticsEvent.IMPRESSION_PAYWALL,
+  [Event.IMPRESSION_AD]: AnalyticsEvent.IMPRESSION_AD,
+  [Event.IMPRESSION_OFFERS]: AnalyticsEvent.IMPRESSION_OFFERS,
+  [Event.ACTION_SUBSCRIPTIONS_LANDING_PAGE]:
+    AnalyticsEvent.ACTION_SUBSCRIPTIONS_LANDING_PAGE,
+  [Event.ACTION_OFFER_SELECTED]: AnalyticsEvent.ACTION_OFFER_SELECTED,
+  [Event.ACTION_PAYMENT_FLOW_STARTED]:
+    AnalyticsEvent.ACTION_PAYMENT_FLOW_STARTED,
+  [Event.ACTION_PAYMENT_COMPLETED]: AnalyticsEvent.ACTION_PAYMENT_COMPLETE,
+  [Event.EVENT_CUSTOM]: AnalyticsEvent.EVENT_CUSTOM,
+};
+
+/** @const {!Object<number,?Event>} */
+const AnalyticsEventToPublisherEvent = {
+  [AnalyticsEvent.UNKNOWN]: null,
+  [AnalyticsEvent.IMPRESSION_PAYWALL]: Event.IMPRESSION_PAYWALL,
+  [AnalyticsEvent.IMPRESSION_AD]: Event.IMPRESSION_AD,
+  [AnalyticsEvent.IMPRESSION_OFFERS]: Event.IMPRESSION_OFFERS,
+  [AnalyticsEvent.IMPRESSION_SUBSCRIBE_BUTTON]: null,
+  [AnalyticsEvent.IMPRESSION_SMARTBOX]: null,
+  [AnalyticsEvent.ACTION_SUBSCRIBE]: null,
+  [AnalyticsEvent.ACTION_PAYMENT_COMPLETE]: Event.ACTION_PAYMENT_COMPLETED,
+  [AnalyticsEvent.ACTION_ACCOUNT_CREATED]: null,
+  [AnalyticsEvent.ACTION_ACCOUNT_ACKNOWLEDGED]: null,
+  [AnalyticsEvent.ACTION_SUBSCRIPTIONS_LANDING_PAGE]:
+    Event.ACTION_SUBSCRIPTIONS_LANDING_PAGE,
+  [AnalyticsEvent.ACTION_PAYMENT_FLOW_STARTED]:
+    Event.ACTION_PAYMENT_FLOW_STARTED,
+  [AnalyticsEvent.ACTION_OFFER_SELECTED]: Event.ACTION_OFFER_SELECTED,
+  [AnalyticsEvent.EVENT_PAYMENT_FAILED]: null,
+  [AnalyticsEvent.EVENT_CUSTOM]: Event.EVENT_CUSTOM,
+};
+
+/** @const {!Object<string,?Array<AnalyticsEvent>>} */
+const ShowcaseEntitlemenntToAnalyticsEvents = {
+  [PublisherEntitlementEvent.EVENT_SHOWCASE_UNLOCKED_BY_SUBSCRIPTION]: [
+    AnalyticsEvent.EVENT_UNLOCKED_BY_SUBSCRIPTION,
+  ],
+  [PublisherEntitlementEvent.EVENT_SHOWCASE_UNLOCKED_BY_METER]: [
+    AnalyticsEvent.EVENT_HAS_METERING_ENTITLEMENTS,
+    AnalyticsEvent.EVENT_UNLOCKED_BY_METER,
+  ],
+  [PublisherEntitlementEvent.EVENT_SHOWCASE_UNLOCKED_FREE_PAGE]: [
+    AnalyticsEvent.EVENT_UNLOCKED_FREE_PAGE,
+  ],
+  [PublisherEntitlementEvent.EVENT_SHOWCASE_NO_ENTITLEMENTS_REGWALL]: [
+    AnalyticsEvent.EVENT_NO_ENTITLEMENTS,
+    AnalyticsEvent.IMPRESSION_REGWALL,
+    AnalyticsEvent.IMPRESSION_SHOWCASE_REGWALL,
+  ],
+  [PublisherEntitlementEvent.EVENT_SHOWCASE_NO_ENTITLEMENTS_PAYWALL]: [
+    AnalyticsEvent.EVENT_NO_ENTITLEMENTS,
+    AnalyticsEvent.IMPRESSION_PAYWALL,
+  ],
+  [PublisherEntitlementEvent.EVENT_SHOWCASE_METER_OFFERED]: [
+    AnalyticsEvent.EVENT_HAS_METERING_ENTITLEMENTS,
+    AnalyticsEvent.EVENT_OFFERED_METER,
+  ],
+};
+
+/** @const {!Object<number,?Event>} */
+const AnalyticsEventToEntitlementResult = {
+  [AnalyticsEvent.IMPRESSION_REGWALL]: EntitlementResult.LOCKED_REGWALL,
+  [AnalyticsEvent.EVENT_UNLOCKED_BY_METER]: EntitlementResult.UNLOCKED_METER,
+  [AnalyticsEvent.EVENT_UNLOCKED_BY_SUBSCRIPTION]:
+    EntitlementResult.UNLOCKED_SUBSCRIBER,
+  [AnalyticsEvent.EVENT_UNLOCKED_FREE_PAGE]: EntitlementResult.UNLOCKED_FREE,
+  [AnalyticsEvent.IMPRESSION_PAYWALL]: EntitlementResult.LOCKED_PAYWALL,
+};
+
+/**
+ * Converts a propensity event enum into an analytics event enum.
+ * @param {!Event|string} propensityEvent
+ * @returns {!AnalyticsEvent}
+ */
+function publisherEventToAnalyticsEvent(propensityEvent) {
+  return PublisherEventToAnalyticsEvent[propensityEvent];
+}
+
+/**
+ * Converts an analytics event enum into a propensity event enum.
+ * @param {!AnalyticsEvent} analyticsEvent
+ * @returns {?Event}
+ */
+function analyticsEventToPublisherEvent(analyticsEvent) {
+  return AnalyticsEventToPublisherEvent[analyticsEvent];
+}
+
+/**
+ * Converts a publisher entitlement event enum into an array analytics events.
+ * @param {!PublisherEntitlementEvent|string} event
+ * @returns {!Array<AnalyticsEvent>}
+ */
+function publisherEntitlementEventToAnalyticsEvents(event) {
+  return ShowcaseEntitlemenntToAnalyticsEvents[event] || [];
+}
+
+function analyticsEventToEntitlementResult(event) {
+  return AnalyticsEventToEntitlementResult[event];
+}
+
+/**
  * Copyright 2020 The Subscribe with Google Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -11121,6 +11295,10 @@ class EntitlementsManager {
 
     /** @private @const {!../api/subscriptions.Config} */
     this.config_ = deps.config();
+
+    this.deps_
+      .eventManager()
+      .registerEventListener(this.handleClientEvent_.bind(this));
   }
 
   /**
@@ -11205,7 +11383,7 @@ class EntitlementsManager {
    * Sends a pingback that marks a metering entitlement as used.
    * @param {!Entitlements} entitlements
    */
-  sendPingback_(entitlements) {
+  consumeMeter_(entitlements) {
     const entitlement = entitlements.getEntitlementForThis();
     if (!entitlement || entitlement.source !== GOOGLE_METERING_SOURCE) {
       return;
@@ -11218,10 +11396,58 @@ class EntitlementsManager {
     const jwt = new EntitlementJwt();
     jwt.setSource(entitlement.source);
     jwt.setJwt(entitlement.subscriptionToken);
+    return this.postEntitlementsRequest_(
+      jwt,
+      EntitlementResult.UNLOCKED_METER,
+      EntitlementSource.GOOGLE_SHOWCASE_METERING_SERVICE
+    );
+  }
 
+  // Listens for events from the event manager and informs
+  // the server about publisher entitlements and non-
+  // consumable Google entitlements.
+  handleClientEvent_(event) {
+    // A subset of analytics events are also an entitlement result
+    const result = analyticsEventToEntitlementResult(event.eventType);
+    if (!result) {
+      return;
+    }
+    let source = null;
+
+    switch (event.eventOriginator) {
+      // The indicates the publisher reported it via subscriptions.setShowcaseEntitlement
+      case EventOriginator.SHOWCASE_CLIENT:
+        source = EntitlementSource.PUBLISHER_ENTITLEMENT;
+        break;
+      case EventOriginator.SWG_CLIENT: // Fallthrough, these are the same
+      case EventOriginator.SWG_SERVER:
+        if (result == EntitlementResult.UNLOCKED_METER) {
+          // Meters from Google require a valid jwt, which is sent by
+          // an entitlement.
+          return;
+        }
+        source = EntitlementSource.GOOGLE_SUBSCRIBER_ENTITLEMENT;
+        break;
+      // Permission to pingback other sources was not requested
+      default:
+        return;
+    }
+
+    this.postEntitlementsRequest_(new EntitlementJwt(), result, source);
+  }
+
+  // Informs the Entitlements server about the entitlement used
+  // to unlock the page.
+  postEntitlementsRequest_(
+    usedEntitlement,
+    entitlementResult,
+    entitlementSource
+  ) {
     const message = new EntitlementsRequest();
-    message.setUsedEntitlement(jwt);
+    message.setUsedEntitlement(usedEntitlement);
     message.setClientEventTime(toTimestamp(Date.now()));
+    message.setEntitlementResult(entitlementResult);
+    message.setEntitlementSource(entitlementSource);
 
     const url =
       '/publication/' +
@@ -11453,7 +11679,6 @@ class EntitlementsManager {
         .logSwgEvent(AnalyticsEvent.EVENT_NO_ENTITLEMENTS, false);
       return;
     }
-
     this.maybeShowToast_(entitlement);
   }
 
@@ -11482,7 +11707,7 @@ class EntitlementsManager {
       }
 
       // Show toast.
-      const source = entitlement.source || 'google';
+      const source = entitlement.source || GOOGLE_METERING_SOURCE;
       return new Toast(
         this.deps_,
         feUrl('/toastiframe'),
@@ -11515,7 +11740,7 @@ class EntitlementsManager {
         if (onCloseDialog) {
           onCloseDialog();
         }
-        this.sendPingback_(entitlements);
+        this.consumeMeter_(entitlements);
       };
       const showToast = this.getShowToastFromEntitlements_(entitlements);
       if (showToast === false) {
@@ -12632,111 +12857,6 @@ class LinkSaveFlow {
         throw reason;
       });
   }
-}
-
-/**
- * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/** @const {!Object<string,AnalyticsEvent>} */
-const PublisherEventToAnalyticsEvent = {
-  [Event.IMPRESSION_PAYWALL]: AnalyticsEvent.IMPRESSION_PAYWALL,
-  [Event.IMPRESSION_AD]: AnalyticsEvent.IMPRESSION_AD,
-  [Event.IMPRESSION_OFFERS]: AnalyticsEvent.IMPRESSION_OFFERS,
-  [Event.ACTION_SUBSCRIPTIONS_LANDING_PAGE]:
-    AnalyticsEvent.ACTION_SUBSCRIPTIONS_LANDING_PAGE,
-  [Event.ACTION_OFFER_SELECTED]: AnalyticsEvent.ACTION_OFFER_SELECTED,
-  [Event.ACTION_PAYMENT_FLOW_STARTED]:
-    AnalyticsEvent.ACTION_PAYMENT_FLOW_STARTED,
-  [Event.ACTION_PAYMENT_COMPLETED]: AnalyticsEvent.ACTION_PAYMENT_COMPLETE,
-  [Event.EVENT_CUSTOM]: AnalyticsEvent.EVENT_CUSTOM,
-};
-
-/** @const {!Object<number,?Event>} */
-const AnalyticsEventToPublisherEvent = {
-  [AnalyticsEvent.UNKNOWN]: null,
-  [AnalyticsEvent.IMPRESSION_PAYWALL]: Event.IMPRESSION_PAYWALL,
-  [AnalyticsEvent.IMPRESSION_AD]: Event.IMPRESSION_AD,
-  [AnalyticsEvent.IMPRESSION_OFFERS]: Event.IMPRESSION_OFFERS,
-  [AnalyticsEvent.IMPRESSION_SUBSCRIBE_BUTTON]: null,
-  [AnalyticsEvent.IMPRESSION_SMARTBOX]: null,
-  [AnalyticsEvent.ACTION_SUBSCRIBE]: null,
-  [AnalyticsEvent.ACTION_PAYMENT_COMPLETE]: Event.ACTION_PAYMENT_COMPLETED,
-  [AnalyticsEvent.ACTION_ACCOUNT_CREATED]: null,
-  [AnalyticsEvent.ACTION_ACCOUNT_ACKNOWLEDGED]: null,
-  [AnalyticsEvent.ACTION_SUBSCRIPTIONS_LANDING_PAGE]:
-    Event.ACTION_SUBSCRIPTIONS_LANDING_PAGE,
-  [AnalyticsEvent.ACTION_PAYMENT_FLOW_STARTED]:
-    Event.ACTION_PAYMENT_FLOW_STARTED,
-  [AnalyticsEvent.ACTION_OFFER_SELECTED]: Event.ACTION_OFFER_SELECTED,
-  [AnalyticsEvent.EVENT_PAYMENT_FAILED]: null,
-  [AnalyticsEvent.EVENT_CUSTOM]: Event.EVENT_CUSTOM,
-};
-
-/** @const {!Object<string,?Array<AnalyticsEvent>>} */
-const ShowcaseEntitlemenntToAnalyticsEvents = {
-  [PublisherEntitlementEvent.EVENT_SHOWCASE_UNLOCKED_BY_SUBSCRIPTION]: [
-    AnalyticsEvent.EVENT_UNLOCKED_BY_SUBSCRIPTION,
-  ],
-  [PublisherEntitlementEvent.EVENT_SHOWCASE_UNLOCKED_BY_METER]: [
-    AnalyticsEvent.EVENT_HAS_METERING_ENTITLEMENTS,
-    AnalyticsEvent.EVENT_UNLOCKED_BY_METER,
-  ],
-  [PublisherEntitlementEvent.EVENT_SHOWCASE_UNLOCKED_FREE_PAGE]: [
-    AnalyticsEvent.EVENT_UNLOCKED_FREE_PAGE,
-  ],
-  [PublisherEntitlementEvent.EVENT_SHOWCASE_NO_ENTITLEMENTS_REGWALL]: [
-    AnalyticsEvent.EVENT_NO_ENTITLEMENTS,
-    AnalyticsEvent.IMPRESSION_REGWALL,
-    AnalyticsEvent.IMPRESSION_SHOWCASE_REGWALL,
-  ],
-  [PublisherEntitlementEvent.EVENT_SHOWCASE_NO_ENTITLEMENTS_PAYWALL]: [
-    AnalyticsEvent.EVENT_NO_ENTITLEMENTS,
-    AnalyticsEvent.IMPRESSION_PAYWALL,
-  ],
-  [PublisherEntitlementEvent.EVENT_SHOWCASE_METER_OFFERED]: [
-    AnalyticsEvent.EVENT_HAS_METERING_ENTITLEMENTS,
-    AnalyticsEvent.EVENT_OFFERED_METER,
-  ],
-};
-
-/**
- * Converts a propensity event enum into an analytics event enum.
- * @param {!Event|string} propensityEvent
- * @returns {!AnalyticsEvent}
- */
-function publisherEventToAnalyticsEvent(propensityEvent) {
-  return PublisherEventToAnalyticsEvent[propensityEvent];
-}
-
-/**
- * Converts an analytics event enum into a propensity event enum.
- * @param {!AnalyticsEvent} analyticsEvent
- * @returns {?Event}
- */
-function analyticsEventToPublisherEvent(analyticsEvent) {
-  return AnalyticsEventToPublisherEvent[analyticsEvent];
-}
-
-/**
- * Converts a publisher entitlement event enum into an array analytics events.
- * @param {!PublisherEntitlementEvent|string} event
- * @returns {!Array<AnalyticsEvent>}
- */
-function publisherEntitlementEventToAnalyticsEvents(event) {
-  return ShowcaseEntitlemenntToAnalyticsEvents[event] || [];
 }
 
 /**
@@ -15237,8 +15357,7 @@ class UpiHandler {
   loadPaymentData(paymentDataRequest, upiPaymentMethod, onResultCallback) {
     const parameters = upiPaymentMethod['parameters'];
     const transactionInfo = paymentDataRequest['transactionInfo'];
-    const supportedInstruments = 
-        [{
+    const supportedInstruments = [{
           'supportedMethods': ['https://tez.google.com/pay'],
           'data': {
             'pa': parameters['payeeVpa'],
@@ -15350,7 +15469,7 @@ class UpiHandler {
    */
   redirectToGooglePlay_() {
     window.location.replace(
-          // NOLINT
+        // NOLINT
             'https://play.google.com/store/apps/details?id=com.google.android.apps.nbu.paisa.user');  // NOLINT
     return Promise.reject(
         {'errorMessage': 'Cannot redirect to Tez page in Google Play.'});
@@ -15681,7 +15800,6 @@ class PaymentsAsyncClient {
    * @param {!IsReadyToPayRequest} isReadyToPayRequest
    * @return {!Promise} The promise will contain the boolean result and error
    *     message when possible.
-   * @export
    */
   isReadyToPay(isReadyToPayRequest) {
     // Merge with paymentOptions, preferring values from isReadyToPayRequest
@@ -15849,7 +15967,6 @@ class PaymentsAsyncClient {
    *
    * @param {!PaymentDataRequest} paymentDataRequest Provides necessary
    *     information to support a payment.
-   * @export
    */
   prefetchPaymentData(paymentDataRequest) {
     /** @type {?string} */
@@ -15880,7 +15997,6 @@ class PaymentsAsyncClient {
    *
    * @param {!PaymentDataRequest} paymentDataRequest Provides necessary
    *     information to support a payment.
-   * @export
    */
   loadPaymentData(paymentDataRequest) {
     PayFrameHelper.postMessage({
@@ -15957,7 +16073,6 @@ class PaymentsAsyncClient {
    *
    * @param {!ButtonOptions=} options
    * @return {!Element}
-   * @export
    */
   createButton(options = {}) {
     const button = null;
@@ -17395,11 +17510,12 @@ body {
 `;
 
 /**
- * Returns true if the URL contains fresh Google Article Access (GAA) params.
+ * Returns true if the query string contains fresh Google Article Access (GAA) params.
+ * @param {string} queryString
  * @return {boolean}
  */
-function urlContainsFreshGaaParams() {
-  const params = parseQueryString$1(GaaMeteringRegwall.location_.search);
+function queryStringHasFreshGaaParams(queryString) {
+  const params = parseQueryString$1(queryString);
 
   // Verify GAA params exist.
   if (
@@ -17434,7 +17550,8 @@ class GaaMeteringRegwall {
    * @return {!Promise<!GaaUserDef>}
    */
   static show({iframeUrl}) {
-    if (!urlContainsFreshGaaParams()) {
+    const queryString = GaaMeteringRegwall.getQueryString_();
+    if (!queryStringHasFreshGaaParams(queryString)) {
       const errorMessage =
         '[swg-gaa.js:GaaMeteringRegwall.show]: URL needs fresh GAA params.';
       log_4(errorMessage);
@@ -17626,14 +17743,16 @@ class GaaMeteringRegwall {
     // Re-enable scrolling on the body element.
     self.document.body.classList.remove(REGWALL_DISABLE_SCROLLING_CLASS);
   }
-}
 
-/**
- * References window's location object. Tests can override this.
- * @private
- * @type {!Location}
- */
-GaaMeteringRegwall.location_ = self.location;
+  /**
+   * Returns query string from current URL.
+   * @private
+   * @return {string}
+   */
+  static getQueryString_() {
+    return self.location.search;
+  }
+}
 
 self.GaaMeteringRegwall = GaaMeteringRegwall;
 
@@ -18297,7 +18416,7 @@ class ConfiguredRuntime {
       !entitlement ||
       !isSecure(this.win().location) ||
       !wasReferredByGoogle(parseUrl$1(this.win().document.referrer)) ||
-      !urlContainsFreshGaaParams()
+      !queryStringHasFreshGaaParams(this.win().location.search)
     ) {
       return;
     }

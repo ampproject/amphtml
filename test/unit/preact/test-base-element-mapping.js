@@ -85,7 +85,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
     it('should allow container for layoutSizeDefined', async () => {
       Impl['layoutSizeDefined'] = true;
       doc.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
       const impl = await element.getImpl();
       expect(impl.isLayoutSupported('fixed')).to.be.true;
       expect(impl.isLayoutSupported('container')).to.be.true;
@@ -135,7 +135,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       `;
       element.setAttribute('a-date', DATE_STRING);
       doc.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
       await waitFor(() => component.callCount > 0, 'component rendered');
     });
 
@@ -251,7 +251,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
         </amp-preact>
       `;
       doc.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
       await waitFor(() => component.callCount > 0, 'component rendered');
       expect(win.innerWidth).to.equal(300);
     });
@@ -291,7 +291,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
         <amp-preact layout="fixed" width="100" height="100"></amp-preact>
       `;
       doc.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
       await waitFor(() => component.callCount > 0, 'component rendered');
     });
 
@@ -313,7 +313,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
         <amp-preact layout="fixed" width="100" height="100"> </amp-preact>
       `;
       doc.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
       await waitFor(() => component.callCount > 0, 'component rendered');
     });
 
@@ -342,7 +342,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
 
     it('should render from scratch', async () => {
       doc.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
       await waitFor(() => component.callCount > 0, 'component rendered');
       expect(component).to.be.calledOnce;
       const container = element.shadowRoot.querySelector(':scope > c');
@@ -372,7 +372,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
         shadowRoot.appendChild(styleEl);
 
         doc.body.appendChild(element);
-        await element.build();
+        await element.buildInternal();
         await waitFor(() => component.callCount > 0, 'component hydrated');
       });
 
@@ -399,7 +399,8 @@ describes.realWin('PreactBaseElement', spec, (env) => {
 
       it('should rerender after SSR hydration', async () => {
         // Only rendering updates attributes.
-        element.implementation_.mutateProps({name: 'A'});
+        const impl = await element.getImpl();
+        impl.mutateProps({name: 'A'});
         await waitFor(() => component.callCount > 1, 'component rendered');
         expect(component).to.be.calledTwice;
         expect(componentEl.getAttribute('data-name')).to.equal('A');
@@ -451,7 +452,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
 
     it('should render from scratch', async () => {
       doc.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
       await waitFor(
         () => element.querySelector(':scope > time'),
         'lightDom element created'
@@ -471,7 +472,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
     it('should add fill class', async () => {
       Impl['layoutSizeDefined'] = true;
       doc.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
       await waitFor(
         () => element.querySelector(':scope > time'),
         'lightDom element created'
@@ -492,7 +493,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       const existing = document.createElement('time');
       element.appendChild(existing);
       doc.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
       await waitFor(() => component.callCount > 0, 'component rendered');
       expect(element.querySelector(':scope > time')).to.equal(existing);
       expect(existing.querySelector(':scope > #component')).to.be.ok;
@@ -592,7 +593,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       `;
       element.firstElementChild.setAttribute('a-date', DATE_STRING);
       doc.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
       await waitFor(() => component.callCount > 0, 'component rendered');
     });
 
@@ -828,7 +829,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
         </amp-preact>
       `;
       doc.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
       await waitFor(() => component.callCount > 0, 'component rendered');
     });
 
@@ -906,7 +907,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
         <amp-preact layout="fixed" width="100" height="100"> text </amp-preact>
       `;
       doc.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
       await waitFor(() => component.callCount > 0, 'component rendered');
     });
 
@@ -975,7 +976,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
         <amp-preact layout="fixed" width="100" height="100"></amp-preact>
       `;
       doc.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
       await waitFor(() => component.callCount > 0, 'component rendered');
     });
 
