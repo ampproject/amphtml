@@ -49,7 +49,7 @@ function safelySetStyles(element, styles) {
 /**
  * @param {boolean} opened
  * @param {{current: function|undefined}} onAfterClose
- * @param {{current: string}} sideRef
+ * @param {string} side
  * @param {{current: Element|null}} sidebarRef
  * @param {{current: Element|null}} backdropRef
  * @param {function} setMounted
@@ -57,7 +57,7 @@ function safelySetStyles(element, styles) {
 export function useSidebarAnimation(
   opened,
   onAfterClose,
-  sideRef,
+  side,
   sidebarRef,
   backdropRef,
   setMounted
@@ -69,7 +69,7 @@ export function useSidebarAnimation(
   useLayoutEffect(() => {
     const sidebarElement = sidebarRef.current;
     const backdropElement = backdropRef.current;
-    if (!sidebarElement || !backdropElement || !sideRef.current) {
+    if (!sidebarElement || !backdropElement || !side) {
       return;
     }
 
@@ -91,7 +91,7 @@ export function useSidebarAnimation(
     };
 
     // reverse animation if currently animating
-    if (currentlyAnimatingRef.current == true) {
+    if (currentlyAnimatingRef.current) {
       const sidebarAnimation = sidebarAnimationRef.current;
       if (sidebarAnimation) {
         sidebarAnimation.reverse();
@@ -115,13 +115,13 @@ export function useSidebarAnimation(
       }
       safelySetStyles(
         sidebarElement,
-        sideRef.current === Side.LEFT
+        side === Side.LEFT
           ? ANIMATION_STYLES_SIDEBAR_LEFT_INIT
           : ANIMATION_STYLES_SIDEBAR_RIGHT_INIT
       );
       safelySetStyles(backdropElement, ANIMATION_STYLES_BACKDROP_INIT);
       const sidebarAnimation = sidebarElement.animate(
-        sideRef.current === Side.LEFT
+        side === Side.LEFT
           ? ANIMATION_KEYFRAMES_SLIDE_IN_LEFT
           : ANIMATION_KEYFRAMES_SLIDE_IN_RIGHT,
         {
@@ -149,7 +149,7 @@ export function useSidebarAnimation(
         return;
       }
       const sidebarAnimation = sidebarElement.animate(
-        sideRef.current === Side.LEFT
+        side === Side.LEFT
           ? ANIMATION_KEYFRAMES_SLIDE_IN_LEFT
           : ANIMATION_KEYFRAMES_SLIDE_IN_RIGHT,
         {
@@ -173,5 +173,5 @@ export function useSidebarAnimation(
       backdropAnimationRef.current = backdropAnimation;
       currentlyAnimatingRef.current = true;
     }
-  }, [opened, onAfterCloseRef, sideRef, sidebarRef, backdropRef, setMounted]);
+  }, [opened, onAfterCloseRef, side, sidebarRef, backdropRef, setMounted]);
 }

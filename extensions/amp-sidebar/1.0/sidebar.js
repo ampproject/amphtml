@@ -53,6 +53,7 @@ function SidebarWithRef(
   // `mounted` mounts the component. `opened` plays the animation.
   const [mounted, setMounted] = useState(false);
   const [opened, setOpened] = useState(false);
+  const [side, setSide] = useState(sideProp);
 
   const classes = useStyles();
   const sidebarRef = useRef();
@@ -61,7 +62,6 @@ function SidebarWithRef(
   // We are using refs here to refer to common strings, objects, and functions used.
   // This is because they are needed within `useEffect` calls below (but are not depended for triggering)
   // We use `useValueRef` for props that might change (user-controlled)
-  const sideRef = useValueRef(sideProp);
   const onBeforeOpenRef = useValueRef(onBeforeOpen);
 
   const open = useCallback(() => {
@@ -90,22 +90,20 @@ function SidebarWithRef(
   );
 
   useLayoutEffect(() => {
-    if (sideRef.current) {
+    if (side) {
       return;
     }
     const sidebarElement = sidebarRef.current;
     if (!sidebarElement) {
       return;
     }
-    sideRef.current = isRTL(sidebarElement.ownerDocument)
-      ? Side.RIGHT
-      : Side.LEFT;
-  }, [sideRef, mounted]);
+    setSide(isRTL(sidebarElement.ownerDocument) ? Side.RIGHT : Side.LEFT);
+  }, [side, mounted]);
 
   useSidebarAnimation(
     opened,
     onAfterClose,
-    sideRef,
+    side,
     sidebarRef,
     backdropRef,
     setMounted
@@ -123,10 +121,10 @@ function SidebarWithRef(
           part="sidebar"
           wrapperClassName={`${classes.sidebarClass} ${
             classes.defaultSidebarStyles
-          } ${sideRef.current === Side.LEFT ? classes.left : classes.right}`}
+          } ${side === Side.LEFT ? classes.left : classes.right}`}
           role="menu"
           tabindex="-1"
-          hidden={!sideRef.current}
+          hidden={!side}
           {...rest}
         >
           {children}
@@ -139,7 +137,7 @@ function SidebarWithRef(
           className={`${backdropClassName ?? ''} ${classes.backdropClass} ${
             classes.defaultBackdropStyles
           }`}
-          hidden={!sideRef.current}
+          hidden={!side}
         ></div>
       </>
     )
