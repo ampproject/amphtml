@@ -1151,9 +1151,9 @@ app.use('/bind/ecommerce/sizes', (req, res) => {
 });
 
 /**
- * Simulate a publisher's metering state store.
+ * Simulates a publisher's metering state store.
  * (amp-subscriptions)
- * @type {{ [ampReaderId: string]: {} }}
+ * @type {{[ampReaderId: string]: {}}}
  */
 const meteringStateStore = {};
 
