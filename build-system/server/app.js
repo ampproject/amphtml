@@ -52,6 +52,7 @@ const {replaceUrls, isRtvMode} = require('./app-utils');
 const TEST_SERVER_PORT = argv.port || 8000;
 let SERVE_MODE = getServeMode();
 
+app.use(bodyParser.json());
 app.use(bodyParser.text());
 
 // Middleware is executed in order, so this must be at the top.
@@ -1149,36 +1150,46 @@ app.use('/bind/ecommerce/sizes', (req, res) => {
   }, 1000); // Simulate network delay.
 });
 
-// Simulated subscription entitlement
+// Simulate publisher endpoint which returns entitlements.
+// For amp-subscriptions.
+const ampSubscriptionsMeteringStateStore = {};
 app.use('/subscription/:id/entitlements', (req, res) => {
   cors.assertCors(req, res, ['GET']);
-  const subscribed = req.params.id > 0;
+
+  const source = 'local' + req.params.id;
+  const granted = req.params.id > 0;
+  const grantReason = granted ? 'SUBSCRIBER' : 'NOT_SUBSCRIBER';
+  const decryptedDocumentKey = decryptDocumentKey(req.query.crypt);
+
   const json = {
-    source: 'local' + req.params.id,
-    granted: subscribed ? true : false,
-    grantReason: subscribed ? 'SUBSCRIBER' : 'NOT_SUBSCRIBER',
+    source,
+    granted,
+    grantReason,
     data: {
       login: true,
     },
-    decryptedDocumentKey: decryptDocumentKey(req.query.crypt),
+    decryptedDocumentKey,
   };
-  if (req.query.includeMeteringState) {
-    // Showcase metering information.
+
+  // Cache metering state, if possible.
+  if (req.query.rid && req.query.meteringState) {
+    ampSubscriptionsMeteringStateStore[req.query.rid] = JSON.parse(
+      Buffer.from(req.query.meteringState, 'base64').toString()
+    );
+  }
+
+  // Serve metering state from store, if possible.
+  if (ampSubscriptionsMeteringStateStore[req.query.rid]) {
     json.metering = {
-      state: {
-        id: 'ppid264605',
-        standardAttributes: {
-          // eslint-disable-next-line google-camelcase/google-camelcase
-          registered_user: {
-            timestamp: Math.round(Date.now() / 1000) - 30000, // In seconds.
-          },
-        },
-      },
+      state: ampSubscriptionsMeteringStateStore[req.query.rid],
     };
   }
+
   res.json(json);
 });
 
+// Simulate publisher endpoint which returns a SKU map.
+// For amp-subscriptions.
 app.use('/subscriptions/skumap', (req, res) => {
   cors.assertCors(req, res, ['GET']);
   res.json({
@@ -1195,10 +1206,51 @@ app.use('/subscriptions/skumap', (req, res) => {
   });
 });
 
+// Simulate publisher endpoint which accepts pingback.
+// For amp-subscriptions.
 app.use('/subscription/pingback', (req, res) => {
   cors.assertCors(req, res, ['POST']);
   res.json({
     done: true,
+  });
+});
+
+// Simulate publisher endpoint which accepts Google Sign-In credentials
+// and returns entitlements params including metering state.
+// For amp-subscriptions-google.
+app.use('/subscription/register-for-metering', (req, res) => {
+  cors.assertCors(req, res, ['POST']);
+
+  // Production systems should use the Google Sign-In details and AMP reader ID to register the user.
+  console.log(req.body);
+
+  // Generate a new ID for this metering state.
+  const meteringStateId = 'ppid' + Math.round(Math.random() * 99999999);
+
+  // Save registration timestamp.
+  //
+  // For demo purposes, set it to 30 seconds ago. This triggers the Metering Toast immediately,
+  // which helps with testing metering.
+  const registrationTimestamp = Math.round(Date.now() / 1000) - 30000;
+
+  // Save metering state.
+  //
+  // For demo purposes, just save this in memory.
+  // Production systems should probably save this to a database.
+  ampSubscriptionsMeteringStateStore[req.body.ampReaderId] = {
+    id: meteringStateId,
+    standardAttributes: {
+      // eslint-disable-next-line google-camelcase/google-camelcase
+      registered_user: {
+        timestamp: registrationTimestamp, // In seconds.
+      },
+    },
+  };
+
+  res.json({
+    metering: {
+      state: ampSubscriptionsMeteringStateStore[req.body.ampReaderId],
+    },
   });
 });
 

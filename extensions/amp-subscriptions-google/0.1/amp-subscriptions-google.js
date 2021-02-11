@@ -772,22 +772,31 @@ export class GoogleSubscriptionsPlatform {
    * @return {!Promise}
    */
   showMeteringRegwall_() {
-    // TODO: Release gaa.js so it's compatible with AMP.
-    return GaaMeteringRegwall.show({
-      // Specify a URL that renders a Google Sign-In button.
-      iframeUrl: this.serviceConfig_['googleSignInHelperUrl'],
-    }).then((unusedResponse) =>
-      // TODO: Should publisher generate this?
-      this.serviceAdapter_.saveMeteringState({
-        id: 'ppid264605',
-        standardAttributes: {
-          // eslint-disable-next-line google-camelcase/google-camelcase
-          registered_user: {
-            // timestamp: '1612044738', // In seconds.
-            timestamp: Math.round(Date.now() / 1000) - 30000, // In seconds.
-          },
-        },
-      })
+    // TODO: Release/wrap gaa.js so it's compatible with AMP.
+    const showRegwall = GaaMeteringRegwall.show;
+
+    return (
+      Promise.all([
+        showRegwall({
+          // Specify a URL that renders a Google Sign-In button.
+          iframeUrl: this.serviceConfig_['googleSignInHelperUrl'],
+        }),
+        this.serviceAdapter_.getReaderId('local'),
+      ])
+        // Send GSI response to publisher.
+        .then((results) =>
+          this.fetcher_.sendPostToPublisher(
+            this.serviceConfig_['meteringRegistrationUrl'],
+            {
+              googleSignInDetails: results[0],
+              ampReaderId: results[1],
+            }
+          )
+        )
+        // Save metering state from publisher.
+        .then((response) =>
+          this.serviceAdapter_.saveMeteringState(response['metering']['state'])
+        )
     );
   }
 
@@ -1067,6 +1076,28 @@ export class AmpFetcher {
       body,
     };
     this.fetch(url, init);
+  }
+
+  /**
+   * Sends POST request, with a JSON payload, to a publisher URL.
+   * @param {string} url
+   * @param {!JsonObject} payload
+   * @return {!Promise<!JsonObject>}
+   */
+  sendPostToPublisher(url, payload) {
+    console.log(payload);
+    const init = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      ampCors: true,
+      credentials: 'include',
+      body: JSON.stringify(payload),
+    };
+    return this.fetch(url, init).then(
+      (response) => (response && response.json()) || {}
+    );
   }
 }
 

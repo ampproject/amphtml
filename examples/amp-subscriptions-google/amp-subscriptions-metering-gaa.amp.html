@@ -113,7 +113,7 @@
       {
         "services": [
           {
-            "authorizationUrl": "//localhost:8000/subscription/0/entitlements?includeMeteringState=1",
+            "authorizationUrl": "//localhost:8000/subscription/0/entitlements?rid=READER_ID",
             "pingbackUrl": "//localhost:8000/subscription/pingback",
             "actions": {
               "login": "//localhost:8000/subscription/login",
@@ -124,7 +124,7 @@
             "serviceId": "subscribe.google.com",
             "enableMetering": true,
             "googleSignInHelperUrl": "http://localhost:8000/examples/amp-subscriptions-google/amp-subscriptions-metering-registration-shim.html",
-            "meteringStateUrl": "http://localhost:8000/"
+            "meteringRegistrationUrl": "http://localhost:8000/subscription/register-for-metering"
           }
         ]
       }
