@@ -136,3 +136,8 @@ amp-story[standalone].i-amphtml-story-desktop-panels {
   min-width: calc(320px * var(--i-amphtml-story-inactive-page-scale-factor)) !important;
   min-height: calc(533px * var(--i-amphtml-story-inactive-page-scale-factor)) !important;
 }
+
+.i-amphtml-story-desktop amp-story-page {
+  width: 66vh!important;
+  margin: 0 auto !important;
+}

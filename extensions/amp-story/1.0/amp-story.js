@@ -1831,23 +1831,23 @@ export class AmpStory extends AMP.BaseElement {
       case UIType.MOBILE:
         this.vsync_.mutate(() => {
           this.element.removeAttribute('desktop');
-          this.element.classList.remove('i-amphtml-story-desktop-panels');
           this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
+          this.element.classList.remove('i-amphtml-story-desktop');
         });
         break;
       case UIType.DESKTOP_PANELS:
         this.setDesktopPositionAttributes_(this.activePage_);
         this.vsync_.mutate(() => {
           this.element.setAttribute('desktop', '');
-          this.element.classList.add('i-amphtml-story-desktop-panels');
+          this.element.classList.add('i-amphtml-story-desktop');
           this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
         });
         break;
-      case UIType.DESKTOP_FULLBLEED:
+      case UIType.DESKTOP_PANELS:
         this.vsync_.mutate(() => {
           this.element.setAttribute('desktop', '');
           this.element.classList.add('i-amphtml-story-desktop-fullbleed');
-          this.element.classList.remove('i-amphtml-story-desktop-panels');
+          this.element.classList.remove('i-amphtml-story-desktop');
         });
         break;
       // Because of the DOM mutations, switching from this mode to another is
