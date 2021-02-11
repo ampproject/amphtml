@@ -120,7 +120,7 @@ export class ResizeObserverStub {
   }
 
   /**
-   * @export
+   * @return {*}
    */
   disconnect() {
     if (this.inst_) {
@@ -131,7 +131,6 @@ export class ResizeObserverStub {
   }
 
   /**
-   * @export
    * @param {!Element} target
    */
   observe(target) {
@@ -145,7 +144,6 @@ export class ResizeObserverStub {
   }
 
   /**
-   * @export
    * @param {!Element} target
    */
   unobserve(target) {

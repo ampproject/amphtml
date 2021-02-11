@@ -23,7 +23,7 @@ const {doBuild} = require('../tasks/build');
 const {doDist} = require('../tasks/dist');
 const {execOrDie} = require('./exec');
 const {gitDiffNameOnlyMaster} = require('./git');
-const {green, cyan, yellow} = require('ansi-colors');
+const {green, cyan, yellow} = require('kleur/colors');
 const {log, logLocalDev} = require('./logging');
 
 const ROOT_DIR = path.resolve(__dirname, '../../');
@@ -146,15 +146,16 @@ function usesFilesOrLocalChanges(taskName) {
  * Runs 'npm install' to install packages in a given directory.
  *
  * @param {string} dir
+ * @param {?NodeJS.ProcessEnv} options
  */
-function installPackages(dir) {
+function installPackages(dir, options = {}) {
   log(
     'Running',
     cyan('npm install'),
     'to install packages in',
     cyan(path.relative(ROOT_DIR, dir)) + '...'
   );
-  execOrDie(`npm install --prefix ${dir}`, {'stdio': 'ignore'});
+  execOrDie(`npm install --prefix ${dir}`, {'stdio': 'ignore', ...options});
 }
 
 module.exports = {

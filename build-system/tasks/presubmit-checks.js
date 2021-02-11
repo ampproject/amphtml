@@ -19,7 +19,7 @@ const gulp = require('gulp');
 const path = require('path');
 const srcGlobs = require('../test-configs/config').presubmitGlobs;
 const through2 = require('through2');
-const {blue, red} = require('ansi-colors');
+const {blue, red} = require('kleur/colors');
 const {log} = require('../common/logging');
 
 const dedicatedCopyrightNoteSources = /(\.js|\.css|\.go)$/;
@@ -589,7 +589,7 @@ const forbiddenTerms = {
   },
   '\\.scheduleLayoutOrPreload\\(': {
     message: 'scheduleLayoutOrPreload is a restricted API.',
-    allowlist: ['src/service/owners-impl.js', 'src/service/resources-impl.js'],
+    allowlist: ['src/custom-element.js', 'src/service/resources-impl.js'],
   },
   '(win|Win)(dow)?(\\(\\))?\\.open\\W': {
     message: 'Use dom.openWindowDialog',
@@ -1180,6 +1180,43 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-next-page/1.0/visibility-observer.js',
       'extensions/amp-playbuzz/0.1/amp-playbuzz.js',
       'extensions/amp-story/1.0/page-advancement.js',
+    ],
+  },
+  '\\.getLayoutSize': {
+    message: measurementApiDeprecated,
+    allowlist: [
+      'builtins/amp-img.js',
+      'src/base-element.js',
+      'src/custom-element.js',
+      'src/iframe-helper.js',
+      'src/service/mutator-impl.js',
+      'src/service/resources-impl.js',
+      'src/service/video-manager-impl.js',
+      'extensions/amp-a4a/0.1/amp-a4a.js',
+      'extensions/amp-auto-lightbox/0.1/amp-auto-lightbox.js',
+      'extensions/amp-fx-flying-carpet/0.1/amp-fx-flying-carpet.js',
+      'extensions/amp-script/0.1/amp-script.js',
+      'extensions/amp-story/1.0/amp-story-page.js',
+    ],
+  },
+  'onLayoutMeasure': {
+    message: measurementApiDeprecated,
+    allowlist: [
+      'src/base-element.js',
+      'src/custom-element.js',
+      'extensions/amp-a4a/0.1/amp-a4a.js',
+      'extensions/amp-a4a/0.1/amp-ad-network-base.js',
+      'extensions/amp-ad/0.1/amp-ad-3p-impl.js',
+      'extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler.js',
+      'extensions/amp-ad-exit/0.1/amp-ad-exit.js',
+      'extensions/amp-ad-exit/0.1/filters/click-location.js',
+      'extensions/amp-ad-exit/0.1/filters/filter.js',
+      'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',
+      'extensions/amp-iframe/0.1/amp-iframe.js',
+      'extensions/amp-script/0.1/amp-script.js',
+      'extensions/amp-sidebar/0.1/amp-sidebar.js',
+      'extensions/amp-sidebar/0.2/amp-sidebar.js',
+      'extensions/amp-story/1.0/amp-story-page.js',
     ],
   },
   '\\.getIntersectionElementLayoutBox': {
