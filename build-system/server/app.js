@@ -1171,7 +1171,7 @@ app.use('/subscription/:id/entitlements', (req, res) => {
     decryptedDocumentKey,
   };
 
-  // Cache metering state, if possible.
+  // Store metering state, if possible.
   if (req.query.rid && req.query.meteringState) {
     ampSubscriptionsMeteringStateStore[req.query.rid] = JSON.parse(
       Buffer.from(req.query.meteringState, 'base64').toString()
