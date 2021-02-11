@@ -219,7 +219,7 @@ export class HighlightHandler {
     const styles = this.ampdoc_.win.document.getElementsByTagName('style');
     // we want to apply the latest style, so start from last index.
     for (let i = styles.length - 1; i >= 0; i--) {
-      const cssRules = styles[i].innerHTML;
+      const cssRules = styles[i]./*OK*/ innerHTML;
       const targetTextRules = cssRules.match(
         /::target-text\s*{\s*((.|\n)*?)\s*}/g
       );
