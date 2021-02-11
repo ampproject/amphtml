@@ -18,7 +18,7 @@ describes.endtoend(
   'amp-fit-text',
   {
     fixture: 'amp-fit-text/0.1/amp-fit-text-box-change.html',
-    environments: 'ampdoc-amp4ads-preset',
+    environments: 'ampdoc-preset',
   },
   (env) => {
     let controller;
@@ -42,7 +42,7 @@ describes.endtoend(
         await new Promise((resolve) => {
           setTimeout(() => {
             resolve();
-          }, 10000);
+          }, 1000);
         });
         const updatedFontSize = await getFontSize(controller, contentDiv);
         await expect(updatedFontSize).to.be.greaterThan(originalFontSize);
@@ -58,7 +58,7 @@ describes.endtoend(
         await new Promise((resolve) => {
           setTimeout(() => {
             resolve();
-          }, 10000);
+          }, 1000);
         });
         const updatedFontSize = await getFontSize(controller, contentDiv);
         await expect(updatedFontSize).to.be.lessThan(originalFontSize);
