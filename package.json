@@ -66,7 +66,7 @@
     "body-parser": "1.19.0",
     "browserify": "17.0.0",
     "browserify-persist-fs": "1.2.2",
-    "chai": "4.2.0",
+    "chai": "4.3.0",
     "chai-as-promised": "7.1.1",
     "check-dependencies": "1.1.0",
     "cli-highlight": "2.1.10",
