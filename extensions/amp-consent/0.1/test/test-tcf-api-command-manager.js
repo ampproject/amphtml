@@ -305,7 +305,7 @@ describes.realWin(
           );
         });
 
-        it('does not send TcData when TcString is null or the same', async () => {
+        it('does not send TcData when TcString is the same', async () => {
           data = getData('addEventListener', 'callId');
           mockTcString = 'prevTcString';
           tcfApiCommandManager = new TcfApiCommandManager(mockPolicyManager);
@@ -319,6 +319,19 @@ describes.realWin(
 
           // No TcString case
           mockTcString = undefined;
+          tcfApiCommandManager = new TcfApiCommandManager(mockPolicyManager);
+          tcfApiCommandManager.currentTcString_ = 'prevTcString';
+          tcfApiCommandManager.handleTcfCommand(data, mockWin);
+
+          // Fake a TcData change
+          tcfApiCommandManager.handleTcDataChange_();
+          await macroTask();
+          expect(mockWin.postMessage).to.not.be.called;
+        });
+
+        it('does not send TcData when TcString is null', async () => {
+          data = getData('addEventListener', 'callId');
+          mockTcString = null;
           tcfApiCommandManager = new TcfApiCommandManager(mockPolicyManager);
           tcfApiCommandManager.currentTcString_ = 'prevTcString';
           tcfApiCommandManager.handleTcfCommand(data, mockWin);

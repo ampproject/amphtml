@@ -114,13 +114,13 @@ export class TcfApiCommandManager {
    * @param {!Window} win
    */
   handleAddEventListner_(payload, win) {
-    const listenerId = this.listenerId_;
-    if (!this.changeListeners_[listenerId]) {
-      this.changeListeners_[listenerId] = {
-        payload,
-        win,
-      };
+    if (this.changeListeners_[this.listenerId_]) {
+      return;
     }
+    this.changeListeners_[this.listenerId_] = {
+      payload,
+      win,
+    };
     this.listenerId_++;
   }
 
@@ -157,7 +157,7 @@ export class TcfApiCommandManager {
       this.currentTcString_ = newTcString;
       const listenerIds = Object.keys(this.changeListeners_);
       for (let i = 0; i < listenerIds.length; i++) {
-        const listenerId = parseInt(listenerIds[i], 10);
+        const listenerId = Number(listenerIds[i]);
         if (!hasOwn(this.changeListeners_, listenerId)) {
           continue;
         }
