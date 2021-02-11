@@ -1186,7 +1186,7 @@ describes.realWin(
         updateConsentInstanceStateSpy.resetHistory();
         expect(ampConsent.isPromptUIOn_).to.be.false;
         // isReadyToHandleAction_() should return false
-        ampConsent.handleClosingUIAction_(ACTION_TYPE.DISMISS);
+        ampConsent.handleClosingUiAction_(ACTION_TYPE.DISMISS);
         await macroTask();
         expect(updateConsentInstanceStateSpy).to.not.be.called;
       });
@@ -1476,7 +1476,7 @@ describes.realWin(
             ampConsent.consentStateManager_,
             'updateConsentInstancePurposes'
           );
-          ampConsent.handleClosingUIAction_(ACTION_TYPE.ACCEPT, mockInvocation);
+          ampConsent.handleClosingUiAction_(ACTION_TYPE.ACCEPT, mockInvocation);
           await macroTask();
           expect(updateConsentInstancePurposeSpy).to.be.calledWith(
             {
@@ -1499,12 +1499,12 @@ describes.realWin(
             'updateConsentInstancePurposes'
           );
 
-          ampConsent.handleClosingUIAction_(ACTION_TYPE.ACCEPT, mockInvocation);
+          ampConsent.handleClosingUiAction_(ACTION_TYPE.ACCEPT, mockInvocation);
           await macroTask();
           expect(updateConsentInstancePurposeSpy).to.not.be.called;
           // reset
           ampConsent.purposeConsentRequired_ = Promise.resolve([]);
-          ampConsent.handleClosingUIAction_(ACTION_TYPE.REJECT, mockInvocation);
+          ampConsent.handleClosingUiAction_(ACTION_TYPE.REJECT, mockInvocation);
           await macroTask();
           expect(updateConsentInstancePurposeSpy).to.not.be.called;
         });

@@ -268,15 +268,15 @@ export class AmpConsent extends AMP.BaseElement {
    */
   enableInteractions_() {
     this.registerAction('accept', (invocation) => {
-      this.handleClosingUIAction_(ACTION_TYPE.ACCEPT, invocation);
+      this.handleClosingUiAction_(ACTION_TYPE.ACCEPT, invocation);
     });
 
     this.registerAction('reject', (invocation) => {
-      this.handleClosingUIAction_(ACTION_TYPE.REJECT, invocation);
+      this.handleClosingUiAction_(ACTION_TYPE.REJECT, invocation);
     });
 
     this.registerAction('dismiss', () => {
-      this.handleClosingUIAction_(ACTION_TYPE.DISMISS);
+      this.handleClosingUiAction_(ACTION_TYPE.DISMISS);
     });
 
     if (this.isGranularConsentExperimentOn_) {
@@ -298,13 +298,14 @@ export class AmpConsent extends AMP.BaseElement {
    * @param {string} action
    * @param {../../../src/service/action-impl.ActionInvocation=} opt_invocation
    */
-  handleClosingUIAction_(action, opt_invocation) {
-    if (this.isReadyToHandleAction_()) {
-      // Set default for purpose map
-      this.maybeSetConsentPurposeDefaults_(action, opt_invocation).then(() => {
-        this.handleAction_(action);
-      });
+  handleClosingUiAction_(action, opt_invocation) {
+    if (!this.isReadyToHandleAction_()) {
+      return;
     }
+    // Set default for purpose map
+    this.maybeSetConsentPurposeDefaults_(action, opt_invocation).then(() => {
+      this.handleAction_(action);
+    });
   }
 
   /**
@@ -367,7 +368,6 @@ export class AmpConsent extends AMP.BaseElement {
             // TODO(micajuineho): Set purpose consent
             this.handleAction_(action, consentString, metadata);
           }
-          return;
         }
       }
     });
@@ -451,7 +451,7 @@ export class AmpConsent extends AMP.BaseElement {
       dev().error(TAG, 'No consent state manager');
       return false;
     }
-    return this.isPromptUIOn_ ? true : false;
+    return this.isPromptUIOn_;
   }
 
   /**
@@ -498,13 +498,11 @@ export class AmpConsent extends AMP.BaseElement {
   maybeSetConsentPurposeDefaults_(action, opt_invocation) {
     if (
       !this.isGranularConsentExperimentOn_ ||
-      !opt_invocation ||
-      !opt_invocation['args'] ||
-      !opt_invocation['args']['purposeConsentDefault']
+      typeof opt_invocation?.args?.purposeConsentDefault !== 'boolean'
     ) {
       return Promise.resolve();
     }
-    if (action == ACTION_TYPE.DISMISS) {
+    if (action === ACTION_TYPE.DISMISS) {
       dev.warn(TAG, 'Dismiss cannot have a `purposeConsentDefault` parameter.');
       return Promise.resolve();
     }
@@ -516,16 +514,13 @@ export class AmpConsent extends AMP.BaseElement {
       if (!purposeConsentRequired || !purposeConsentRequired.length) {
         return;
       }
-      const defaultPurposeMap = {};
-      const purposeValue = dev().assertBoolean(
-        opt_invocation['args']['purposeConsentDefault'],
-        '`purposeConsentDefault` must be a boolean.'
-      );
+      const defaultPurposes = {};
+      const purposeValue = opt_invocation['args']['purposeConsentDefault'];
       purposeConsentRequired.forEach((purpose) => {
-        defaultPurposeMap[purpose] = purposeValue;
+        defaultPurposes[purpose] = purposeValue;
       });
       this.consentStateManager_.updateConsentInstancePurposes(
-        defaultPurposeMap,
+        defaultPurposes,
         true
       );
     });
