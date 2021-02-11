@@ -1156,12 +1156,12 @@ const ampSubscriptionsMeteringStateStore = {};
 app.use('/subscription/:id/entitlements', (req, res) => {
   cors.assertCors(req, res, ['GET']);
 
+  // Create entitlements response.
   const source = 'local' + req.params.id;
   const granted = req.params.id > 0;
   const grantReason = granted ? 'SUBSCRIBER' : 'NOT_SUBSCRIBER';
   const decryptedDocumentKey = decryptDocumentKey(req.query.crypt);
-
-  const json = {
+  const response = {
     source,
     granted,
     grantReason,
@@ -1178,14 +1178,14 @@ app.use('/subscription/:id/entitlements', (req, res) => {
     );
   }
 
-  // Serve metering state from store, if possible.
+  // Add metering state to response, if possible.
   if (ampSubscriptionsMeteringStateStore[req.query.rid]) {
-    json.metering = {
+    response.metering = {
       state: ampSubscriptionsMeteringStateStore[req.query.rid],
     };
   }
 
-  res.json(json);
+  res.json(response);
 });
 
 // Simulate a publisher's SKU map API.
