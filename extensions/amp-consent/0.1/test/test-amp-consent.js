@@ -1025,7 +1025,7 @@ describes.realWin(
         iframe = doc.createElement('iframe');
         ampIframe.appendChild(iframe);
         ampConsent.element.appendChild(ampIframe);
-        ampConsent.isPromptUIOn_ = true;
+        ampConsent.isPromptUiOn_ = true;
         event = new Event('message');
       });
 
@@ -1056,7 +1056,7 @@ describes.realWin(
       });
 
       it('ignore info when prompt UI is not displayed', () => {
-        ampConsent.isPromptUIOn_ = false;
+        ampConsent.isPromptUiOn_ = false;
         event.data = {
           'type': 'consent-response',
           'action': 'accept',
@@ -1150,7 +1150,7 @@ describes.realWin(
           .getConsentInstanceInfo();
 
         expect(instanceInfo.consentState).to.equal(CONSENT_ITEM_STATE.ACCEPTED);
-        expect(ampConsent.isPromptUIOn_).to.be.false;
+        expect(ampConsent.isPromptUiOn_).to.be.false;
       });
 
       it('update current displaying status', async () => {
@@ -1161,7 +1161,7 @@ describes.realWin(
           'updateConsentInstanceState'
         );
         await macroTask();
-        expect(ampConsent.isPromptUIOn_).to.be.true;
+        expect(ampConsent.isPromptUiOn_).to.be.true;
         await macroTask();
         ampConsent.handleAction_(ACTION_TYPE.ACCEPT);
         await macroTask();
@@ -1169,7 +1169,7 @@ describes.realWin(
           CONSENT_ITEM_STATE.ACCEPTED
         );
         await macroTask();
-        expect(ampConsent.isPromptUIOn_).to.be.false;
+        expect(ampConsent.isPromptUiOn_).to.be.false;
       });
 
       it('ignore action when no consent prompt is displaying', async () => {
@@ -1184,7 +1184,7 @@ describes.realWin(
         await macroTask();
         expect(updateConsentInstanceStateSpy).to.be.calledOnce;
         updateConsentInstanceStateSpy.resetHistory();
-        expect(ampConsent.isPromptUIOn_).to.be.false;
+        expect(ampConsent.isPromptUiOn_).to.be.false;
         // isReadyToHandleAction_() should return false
         ampConsent.handleClosingUiAction_(ACTION_TYPE.DISMISS);
         await macroTask();
@@ -1485,7 +1485,7 @@ describes.realWin(
             },
             true
           );
-          expect(ampConsent.isPromptUIOn_).to.be.false;
+          expect(ampConsent.isPromptUiOn_).to.be.false;
         });
 
         it('purposeConsentDefault handles empty and null purposeConsentRequired', async () => {

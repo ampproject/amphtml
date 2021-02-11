@@ -20,7 +20,7 @@ const path = require('path');
 const ts = require('typescript');
 const tsickle = require('tsickle');
 const {log} = require('../common/logging');
-const {red} = require('ansi-colors');
+const {red} = require('kleur/colors');
 
 /**
  * Given a file path `foo/bar.js`, transpiles the TypeScript entry point of

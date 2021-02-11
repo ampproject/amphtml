@@ -35,20 +35,24 @@ function getInOb(win) {
   }
 
   if (!intersectionObservers.has(win)) {
-    const observer = createViewportObserver((entries) => {
-      const seen = new Set();
-      for (let i = entries.length - 1; i >= 0; i--) {
-        const {target} = entries[i];
-        if (seen.has(target)) {
-          continue;
-        }
-        seen.add(target);
+    const observer = createViewportObserver(
+      (entries) => {
+        const seen = new Set();
+        for (let i = entries.length - 1; i >= 0; i--) {
+          const {target} = entries[i];
+          if (seen.has(target)) {
+            continue;
+          }
+          seen.add(target);
 
-        observer.unobserve(target);
-        intersectionDeferreds.get(target).resolve(entries[i]);
-        intersectionDeferreds.delete(target);
-      }
-    }, win);
+          observer.unobserve(target);
+          intersectionDeferreds.get(target).resolve(entries[i]);
+          intersectionDeferreds.delete(target);
+        }
+      },
+      win,
+      {needsRootBounds: true}
+    );
     intersectionObservers.set(win, observer);
     return observer;
   }

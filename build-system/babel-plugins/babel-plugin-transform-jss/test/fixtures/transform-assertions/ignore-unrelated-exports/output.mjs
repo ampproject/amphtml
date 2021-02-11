@@ -20,6 +20,6 @@ var _classes = {
  */
 export const useStyles = () => _classes; // These next lines should be unaffected by jss transform.
 
-export const CSS = ".float-left-07984bd{float:left}\n";
+export const CSS = ".float-left-07984bd{float:left}";
 export const unrelated = 5;
 unrelated + unrelated == unrelated * 2;

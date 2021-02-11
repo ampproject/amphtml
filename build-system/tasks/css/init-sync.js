@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,15 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
-amp-story-dev-tools-tab-page-experience {
-  margin: 0px 10% !important;
-  padding-bottom: var(--i-amphtml-story-dev-tools-vertical-spacing);
-  flex: 1 !important;
-}
+const {transformCss} = require('./jsify-css');
 
-amp-story-dev-tools-tab-page-experience iframe {
-  width: 100% !important;
-  height: 100% !important;
-  border-radius: 10px !important;
+/**
+ * Wrapper for the asynchronous transformCss that is used by transformCssSync()
+ * in build-system/tasks/css/jsify-css-sync.js.
+ * @return {!Promise}
+ */
+function init() {
+  return function (cssStr, opt_cssnano, opt_filename) {
+    return Promise.resolve(transformCss(cssStr, opt_cssnano, opt_filename));
+  };
 }
+module.exports = init;

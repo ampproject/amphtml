@@ -47,6 +47,7 @@ describes.realWin(
     let consentUI;
     let mockInstance;
     let parent;
+    let ownersStubs;
 
     beforeEach(() => {
       doc = env.win.document;
@@ -84,7 +85,12 @@ describes.realWin(
           return Promise.resolve();
         },
       };
-      Services.ownersForDoc(doc).scheduleLayout = env.sandbox.mock();
+      const owners = Services.ownersForDoc(doc);
+      ownersStubs = {
+        scheduleLayout: env.sandbox.stub(owners, 'scheduleLayout'),
+        schedulePause: env.sandbox.stub(owners, 'schedulePause'),
+        scheduleResume: env.sandbox.stub(owners, 'scheduleResume'),
+      };
       resetServiceForTesting(win, 'consentStateManager');
       registerServiceBuilder(win, 'consentStateManager', function () {
         return Promise.resolve({
@@ -158,9 +164,32 @@ describes.realWin(
         consentUI.show(false);
         expect(parent.classList.contains('amp-active')).to.be.true;
         expect(parent).to.not.have.display('none');
+        expect(ownersStubs.scheduleLayout).to.be.calledOnce;
+        expect(ownersStubs.scheduleResume).to.be.calledOnce;
         consentUI.hide();
         expect(parent.classList.contains('amp-active')).to.be.false;
         expect(parent.classList.contains('amp-hidden')).to.be.true;
+        expect(ownersStubs.schedulePause).to.be.calledOnce;
+      });
+
+      it('should support pause/resume lifecycle', () => {
+        const config = dict({
+          'promptUI': 'test1',
+        });
+        consentUI = new ConsentUI(mockInstance, config);
+        consentUI.show(false);
+        expect(ownersStubs.scheduleLayout).to.be.calledOnce;
+        expect(ownersStubs.scheduleResume).to.be.calledOnce;
+
+        consentUI.pause();
+        expect(ownersStubs.schedulePause).to.be.calledOnce;
+        expect(ownersStubs.scheduleLayout).to.be.calledOnce; // no change.
+        expect(ownersStubs.scheduleResume).to.be.calledOnce; // no change.
+
+        consentUI.resume();
+        expect(ownersStubs.scheduleLayout).to.be.calledTwice;
+        expect(ownersStubs.scheduleResume).to.be.calledTwice;
+        expect(ownersStubs.schedulePause).to.be.calledOnce; // no change.
       });
 
       it('append/remove iframe', async () => {

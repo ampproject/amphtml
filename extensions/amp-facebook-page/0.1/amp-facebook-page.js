@@ -26,6 +26,11 @@ import {removeElement} from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';
 
 class AmpFacebookPage extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static createLoaderLogoCallback(element) {
+    return createLoaderLogo(element);
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -120,11 +125,6 @@ class AmpFacebookPage extends AMP.BaseElement {
     if (eventData['action'] == 'ready') {
       this.toggleLoading(false);
     }
-  }
-
-  /** @override */
-  createLoaderLogoCallback() {
-    return createLoaderLogo(this.element);
   }
 
   /** @override */

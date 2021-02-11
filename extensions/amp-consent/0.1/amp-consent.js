@@ -101,7 +101,7 @@ export class AmpConsent extends AMP.BaseElement {
     this.dialogResolver_ = null;
 
     /** @private {boolean} */
-    this.isPromptUIOn_ = false;
+    this.isPromptUiOn_ = false;
 
     /** @private {boolean} */
     this.consentStateChangedViaPromptUI_ = false;
@@ -163,6 +163,20 @@ export class AmpConsent extends AMP.BaseElement {
       this.matchedGeoGroup_ = configManager.getMatchedGeoGroup();
       this.initialize_(validatedConfig);
     });
+  }
+
+  /** @override */
+  pauseCallback() {
+    if (this.consentUI_) {
+      this.consentUI_.pause();
+    }
+  }
+
+  /** @override */
+  resumeCallback() {
+    if (this.consentUI_) {
+      this.consentUI_.resume();
+    }
   }
 
   /**
@@ -314,7 +328,7 @@ export class AmpConsent extends AMP.BaseElement {
    */
   enableExternalInteractions_() {
     this.win.addEventListener('message', (event) => {
-      if (!this.isPromptUIOn_) {
+      if (!this.isPromptUiOn_) {
         return;
       }
 
@@ -409,13 +423,13 @@ export class AmpConsent extends AMP.BaseElement {
    * @return {!Promise}
    */
   show_(isActionPromptTrigger) {
-    if (this.isPromptUIOn_) {
+    if (this.isPromptUiOn_) {
       dev().error(TAG, 'Attempt to show an already displayed prompt UI');
     }
 
     this.vsync_.mutate(() => {
       this.consentUI_.show(isActionPromptTrigger);
-      this.isPromptUIOn_ = true;
+      this.isPromptUiOn_ = true;
     });
 
     const deferred = new Deferred();
@@ -427,12 +441,12 @@ export class AmpConsent extends AMP.BaseElement {
    * Hide current prompt UI
    */
   hide_() {
-    if (!this.isPromptUIOn_) {
+    if (!this.isPromptUiOn_) {
       dev().error(TAG, '%s no consent ui to hide');
     }
 
     this.consentUI_.hide();
-    this.isPromptUIOn_ = false;
+    this.isPromptUiOn_ = false;
 
     if (this.dialogResolver_) {
       this.dialogResolver_();
@@ -451,7 +465,7 @@ export class AmpConsent extends AMP.BaseElement {
       dev().error(TAG, 'No consent state manager');
       return false;
     }
-    return this.isPromptUIOn_;
+    return this.isPromptUiOn_;
   }
 
   /**
@@ -873,7 +887,7 @@ export class AmpConsent extends AMP.BaseElement {
    * @visibleForTesting
    */
   getIsPromptUiOnForTesting() {
-    return this.isPromptUIOn_;
+    return this.isPromptUiOn_;
   }
 
   /**

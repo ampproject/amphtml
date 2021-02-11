@@ -440,11 +440,12 @@ export class ManualAdvancement extends AdvancementConfig {
    * We want clicks on certain elements to be exempted from normal page
    * navigation
    * @param {!Event} event
+   * @param {!ClientRect} pageRect
    * @return {boolean}
    * @private
    */
-  isProtectedTarget_(event) {
-    return !!closest(
+  isBottomCtaTappableTarget_(event, pageRect) {
+    const target = closest(
       dev().assertElement(event.target),
       (el) => {
         const elementRole = el.getAttribute('role');
@@ -456,6 +457,8 @@ export class ManualAdvancement extends AdvancementConfig {
       },
       /* opt_stopAt */ this.element_
     );
+
+    return !!target && this.isInScreenBottom_(target, pageRect);
   }
 
   /**
@@ -708,7 +711,7 @@ export class ManualAdvancement extends AdvancementConfig {
     if (
       !this.isRunning() ||
       !this.isNavigationalClick_(event) ||
-      this.isProtectedTarget_(event) ||
+      this.isBottomCtaTappableTarget_(event, pageRect) ||
       !this.shouldHandleEvent_(event)
     ) {
       // If the system doesn't need to handle this click, then we can simply
@@ -717,6 +720,7 @@ export class ManualAdvancement extends AdvancementConfig {
     }
 
     event.stopPropagation();
+    event.preventDefault();
 
     this.storeService_.dispatch(
       Action.SET_ADVANCEMENT_MODE,
