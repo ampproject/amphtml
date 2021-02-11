@@ -72,6 +72,7 @@ import {getMediaPerformanceMetricsService} from './media-performance-metrics-ser
 import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
+import {isPrerenderActivePage} from './prerender-active-page';
 import {listen} from '../../../src/event-helper';
 import {px, setImportantStyles, toggle} from '../../../src/style';
 import {renderPageDescription} from './semantic-render';
@@ -251,9 +252,9 @@ function debounceEmbedResize(win, page, mutator) {
  * an <amp-story>.
  */
 export class AmpStoryPage extends AMP.BaseElement {
-  /** @override @nocollapse */	
-  static prerenderAllowed(element) {	
-    return isPrerenderActivePage(element);	
+  /** @override @nocollapse */
+  static prerenderAllowed(element) {
+    return isPrerenderActivePage(element);
   }
 
   /** @param {!AmpElement} element */
@@ -877,6 +878,11 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.mutateElement(() => {
       this.element.classList.add(PAGE_LOADED_CLASS_NAME);
     });
+  }
+
+  /** @override */
+  prerenderAllowed() {
+    return this.isPrerenderActivePage();
   }
 
   /**
