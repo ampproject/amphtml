@@ -278,6 +278,7 @@ export class AmpStoryPlayer {
    * Adds stories to the player. Additionally, creates or assigns
    * iframes to those that are close to the current playing story.
    * @param {!Array<!{href: string, title: ?string, posterImage: ?string}>} newStories
+   * @return {!Promise}
    * @public
    */
   add(newStories) {
@@ -300,7 +301,7 @@ export class AmpStoryPlayer {
       this.build_(story);
     }
 
-    this.render_(renderStartingIdx);
+    return this.render_(renderStartingIdx);
   }
 
   /**
@@ -309,11 +310,31 @@ export class AmpStoryPlayer {
    * @public
    */
   prerender(storyUrl) {
-    const storedAutoplay = this.autoplay_;
+    let storyIdx = storyUrl
+      ? findIndex(this.stories_, ({href}) => href === storyUrl)
+      : this.currentIdx_;
 
-    // Turning off autoplay will prevent story from being set as visible.
-    this.autoplay_ = false;
-    this.show(storyUrl).then(() => (this.autoplay_ = storedAutoplay));
+    // Add story to the player if it isn't there yet.
+    let renderPromise = Promise.resolve();
+    if (!this.stories_[storyIdx]) {
+      renderPromise = this.add([{href: storyUrl}]);
+      storyIdx = this.stories_.length - 1;
+    }
+
+    renderPromise.then(() => {
+      const story = this.stories_[storyIdx];
+
+      if (story.iframe.isConnected) {
+        // If iframe is already in the DOM then there's no need to prerender.
+        return;
+      }
+
+      this.appendToDom_(story);
+      this.maybeGetCacheUrl_(story.href).then((storyUrl) => {
+        this.setSrc_(story, storyUrl);
+        this.updatePosition_(story);
+      });
+    });
   }
 
   /**

@@ -663,8 +663,9 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       );
     });
 
-    it('prerender() callback does NOT set story as visible', async () => {
+    it('prerender() callback does NOT set story as visible when autoplay is off', async () => {
       const playerEl = win.document.createElement('amp-story-player');
+      playerEl.appendChild(buildAutoplayConfig(/* autoplay */ false));
       const sendRequestSpy = env.sandbox.spy(fakeMessaging, 'sendRequest');
       attachPlayerWithStories(playerEl, 0);
 
@@ -678,6 +679,24 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       expect(sendRequestSpy).to.not.have.been.calledWith('visibilitychange', {
         'state': 'visible',
       });
+    });
+
+    it('prerender() callback prerenders a story even if it is not a neighbor of the current story', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      attachPlayerWithStories(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+
+      player.prerender('https://example.com/story4.html');
+      await nextTick();
+
+      const storyIframes = playerEl.querySelectorAll('iframe');
+
+      expect(storyIframes[2].getAttribute('src')).to.include(
+        'https://example.com/story4.html#visibilityState=prerender'
+      );
     });
 
     it('adds stories programmatically', async () => {
