@@ -1234,22 +1234,24 @@ app.use('/subscription/pingback', (req, res) => {
 app.use('/subscription/register', (req, res) => {
   cors.assertCors(req, res, ['POST']);
 
-  // Production systems should use the Google Sign-In details and AMP reader ID to register the user.
+  // For demo purposes, log the AMP reader ID and Google Sign-In user info.
+  // Production systems should register an account with this data.
   console.log(req.body);
 
   // Generate a new ID for this metering state.
   const meteringStateId = 'ppid' + Math.round(Math.random() * 99999999);
 
-  // Save registration timestamp.
+  // Define registration timestamp.
   //
-  // For demo purposes, set it to 30 seconds ago. This triggers the Metering Toast immediately,
-  // which helps with testing metering.
+  // For demo purposes, set timestamp to 30 seconds ago.
+  // This causes Metering Toast to show immediately,
+  // which helps engineers test metering.
   const registrationTimestamp = Math.round(Date.now() / 1000) - 30000;
 
-  // Save metering state.
+  // Store metering state.
   //
   // For demo purposes, just save this in memory.
-  // Production systems should probably save this to a database.
+  // Production systems should persist this.
   meteringStateStore[req.body.ampReaderId] = {
     id: meteringStateId,
     standardAttributes: {
