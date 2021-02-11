@@ -74,6 +74,11 @@ commands:
     steps:
       - browser-tools/install-chrome:
           replace-existing: true
+      - browser-tools/install-chromedriver
+  install_firefox:
+    steps:
+      - browser-tools/install-firefox
+      - browser-tools/install-geckodriver
   fail_fast:
     steps:
       - run:
@@ -211,6 +216,7 @@ jobs:
     steps:
       - setup_vm
       - install_chrome
+      - install_firefox
       - run:
           name: 'End-to-End Tests'
           command: node build-system/pr-check/e2e-tests.js
@@ -231,6 +237,7 @@ jobs:
     steps:
       - setup_vm
       - install_chrome
+      - install_firefox
       - restore_karma_cache:
           cache_name: experimentA
       - run:
@@ -245,6 +252,7 @@ jobs:
     steps:
       - setup_vm
       - install_chrome
+      - install_firefox
       - restore_karma_cache:
           cache_name: experimentB
       - run:
@@ -259,6 +267,7 @@ jobs:
     steps:
       - setup_vm
       - install_chrome
+      - install_firefox
       - restore_karma_cache:
           cache_name: experimentC
       - run:

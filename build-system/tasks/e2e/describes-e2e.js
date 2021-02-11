@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// import to install chromedriver and geckodriver
-require('chromedriver');
-require('geckodriver');
 
 const argv = require('minimist')(process.argv.slice(2));
 const chrome = require('selenium-webdriver/chrome');
@@ -34,7 +31,7 @@ const {AmpDriver, AmpdocEnvironment} = require('./amp-driver');
 const {Builder, Capabilities, logging} = require('selenium-webdriver');
 const {HOST, PORT} = require('../serve');
 const {installRepl, uninstallRepl} = require('./repl');
-const {isCiBuild} = require('../../common/ci');
+const {isCiBuild, isCircleciBuild} = require('../../common/ci');
 const {PuppeteerController} = require('./puppeteer-controller');
 
 /** Should have something in the name, otherwise nothing is shown. */
@@ -52,6 +49,15 @@ const supportedBrowsers = new Set(['chrome', 'firefox', 'safari']);
 let istanbulMiddleware;
 if (argv.coverage) {
   istanbulMiddleware = require('istanbul-middleware/lib/core');
+}
+
+/**
+ * Importing will install chromedriver and geckodriver. On CircleCI, stable
+ * versions of both drivers are natively installed, so do not reinstall here.
+ */
+if (!isCircleciBuild()) {
+  require('chromedriver');
+  require('geckodriver');
 }
 
 /**
