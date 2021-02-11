@@ -51,6 +51,22 @@ const MAX_PARALLEL_CLOSURE_INVOCATIONS =
  * production use. During development we intend to continue using
  * babel, as it has much faster incremental compilation.
  *
+ * @param {string} entryModuleFilename
+ * @param {string} outputDir
+ * @param {string} outputFilename
+ * @param {{
+ *  esmPassCompilation?: string,
+ *  wrapper?: string,
+ *  extraGlobs?: string,
+ *  include3pDirectories?: boolean,
+ *  includePolyfills?: boolean,
+ *  externs?: string[],
+ *  compilationLevel?: string,
+ *  verboseLogging?: boolean,
+ *  typeCheckOnly?: boolean,
+ *  skipUnknownDepsCheck?: boolean,
+ * }} options
+ * @param {{startTime?: number}} timeInfo
  * @return {Promise<void>}
  */
 async function closureCompile(
@@ -102,6 +118,25 @@ function cleanupBuildDir() {
   fs.mkdirsSync('build/fake-polyfills/src/polyfills');
 }
 
+/**
+ * @param {string[]|string} entryModuleFilenames
+ * @param {string} outputDir
+ * @param {string} outputFilename
+ * @param {{
+ *  esmPassCompilation?: string,
+ *  wrapper?: string,
+ *  extraGlobs?: string,
+ *  include3pDirectories?: boolean,
+ *  includePolyfills?: boolean,
+ *  externs?: string[],
+ *  compilationLevel?: string,
+ *  verboseLogging?: boolean,
+ *  typeCheckOnly?: boolean,
+ *  skipUnknownDepsCheck?: boolean,
+ * }} options
+ * @param {{startTime?: number}} timeInfo
+ * @return {Promise<void>}
+ */
 function compile(
   entryModuleFilenames,
   outputDir,
@@ -217,7 +252,7 @@ function compile(
 
     /**
      * TODO(#28387) write a type for this.
-     * @type {*}
+     * @type {Object}
      */
     /* eslint "google-camelcase/google-camelcase": 0*/
     const compilerOptions = {

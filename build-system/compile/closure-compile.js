@@ -18,7 +18,6 @@
 const closureCompiler = require('@ampproject/google-closure-compiler');
 const path = require('path');
 const pumpify = require('pumpify');
-const { default: Stream, Writable } = require('stream');
 const sourcemaps = require('gulp-sourcemaps');
 const {cyan, red, yellow} = require('kleur/colors');
 const {EventEmitter} = require('events');
@@ -101,7 +100,7 @@ function logError(message) {
  * file relative to the sourcemap. Since the sourcemap for `src/foo.js` "lives"
  * in `src/`, it ends up resolving to `src/src/foo.js`.
  *
- * @param {!Stream} closureStream
+ * @param {!Stream} closureStream require('stream')
  * @return {!Stream}
  */
 function makeSourcemapsRelative(closureStream) {
@@ -115,7 +114,7 @@ function makeSourcemapsRelative(closureStream) {
 
 /**
  * @param {Array<string>} compilerOptions
- * @return {Writable}
+ * @return {Writable} require('stream').Writable
  */
 function gulpClosureCompile(compilerOptions) {
   const pluginOptions = {

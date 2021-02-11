@@ -324,7 +324,7 @@ app.use('/form/echo-json/post', (req, res) => {
     }
     fields[realName].push(value);
   });
-  form.parse(req, (_unusedErr) => {
+  form.parse(req, () => {
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
     if (fields['email'] == 'already@subscribed.com') {
       res.statusCode = 500;
@@ -1449,9 +1449,10 @@ app.use('/mraid/', (req, res) => {
  * @return {number}
  */
 function nearestFiveMinutes() {
-  let date = new Date();
+  const date = new Date();
   // Round down to the nearest 5 minutes.
-  let time = Number(date) -
+  const time =
+    Number(date) -
     (date.getMinutes() % 5) * 1000 * 60 +
     date.getSeconds() * 1000 +
     date.getMilliseconds();

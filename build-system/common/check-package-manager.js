@@ -90,7 +90,6 @@ function yellow(text) {
  * package manager being used is determined.
  **/
 function ensureNpm() {
-  // @ts-ignore: Object is possibly 'undefined'.
   if (!process.env.npm_execpath.includes('npm')) {
     console.log(npmInfoMessage);
     process.exit(1);
@@ -100,7 +99,7 @@ function ensureNpm() {
 /**
  * Check the node version and print a warning if it is not the latest LTS.
  *
- * @return {Promise<void>}
+ * @return {Promise}
  **/
 function checkNodeVersion() {
   const nodeVersion = getStdout('node --version').trim();

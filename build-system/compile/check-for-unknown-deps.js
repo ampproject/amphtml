@@ -16,7 +16,6 @@
 'use strict';
 
 const through = require('through2');
-const Stream = require('stream');
 const {log} = require('../common/logging');
 const {red, cyan, yellow} = require('kleur/colors');
 
@@ -25,7 +24,7 @@ const {red, cyan, yellow} = require('kleur/colors');
  * reference module imports. If any are found, that means Closure couldn't
  * import the module correctly.
  *
- * @return {!Stream}
+ * @return {!Stream} require('stream')
  */
 exports.checkForUnknownDeps = function () {
   const regex = /[\w$]*module\$[\w$]+/;

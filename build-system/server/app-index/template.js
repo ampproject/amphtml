@@ -61,7 +61,7 @@ function renderTemplate(opt_params = {}) {
     isMainPage = false,
     fileSet = [],
     serveMode = 'default',
-    selectModePrefix = '/'
+    selectModePrefix = '/',
   } = opt_params;
 
   const body = joinFragments([

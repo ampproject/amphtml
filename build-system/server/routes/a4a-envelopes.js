@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-const { Request, Router } = require('express');
+const express = require('express');
 const fs = require('fs');
 const request = require('request');
 const {getServeMode, replaceUrls} = require('../app-utils');
 const {log} = require('../../common/logging');
 const {red} = require('kleur/colors');
 
-const app = Router();
+const app = express.Router();
 
 // In-a-box envelope.
 // Examples:
@@ -99,7 +99,7 @@ app.use('/a4a(|-3p)/', async (req, res) => {
 });
 
 /**
- * @param {Request} req
+ * @param {express.Request} req
  * @param {string=} extraExperiment
  * @return {!URL}
  */

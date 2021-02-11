@@ -28,7 +28,5 @@
     "./server/**/*.js",
     "./server/**/*.ts"
   ],
-  "exclude": [
-    "**/node_modules"
-  ]
+  "exclude": ["**/node_modules", "common/check-package-manager.js"]
 }

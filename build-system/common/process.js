@@ -38,7 +38,7 @@ function spawnProcess(cmd, options) {
 /**
  * Executes the provided command, returning the process object.
  * @param {string} cmd
- * @param {?Object} options
+ * @param {?Object=} options
  * @return {!Object}
  */
 function getOutput(cmd, options = {}) {
@@ -64,7 +64,7 @@ function getStdout(cmd, options) {
 /**
  * Executes the provided command, returning its stderr.
  * @param {string} cmd
- * @param {?Object} options
+ * @param {?Object=} options
  * @return {string}
  */
 function getStderr(cmd, options) {

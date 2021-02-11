@@ -34,8 +34,7 @@ const shellCmd = process.platform == 'win32' ? 'cmd' : '/bin/bash';
  * @param {?Object=} options
  * @return {!Object}
  */
-function exec(cmd, options) {
-  options = options || {'stdio': 'inherit'};
+function exec(cmd, options = {'stdio': 'inherit'}) {
   return spawnProcess(cmd, options);
 }
 

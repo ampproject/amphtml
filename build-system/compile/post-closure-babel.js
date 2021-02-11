@@ -17,7 +17,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const babel = require('@babel/core');
 const path = require('path');
-const remapping = require('@ampproject/remapping').default;
+const remapping = require('@ampproject/remapping');
 const terser = require('terser');
 const through = require('through2');
 const {debug, CompilationLifecycles} = require('./debug-compilation-lifecycle');
