@@ -645,20 +645,39 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       );
     });
 
-    // TODO(proyectoramirez): delete once add() is implemented.
-    it('show callback should throw when story is not found', async () => {
+    it('show() callback adds story to the player if the story has not been added yet', async () => {
       const playerEl = win.document.createElement('amp-story-player');
-      attachPlayerWithStories(playerEl, 5);
+      attachPlayerWithStories(playerEl, 0);
 
       const player = new AmpStoryPlayer(win, playerEl);
 
       await player.load();
 
-      return expect(() =>
-        player.show('https://example.com/story6.html')
-      ).to.throw(
-        'Story URL not found in the player: https://example.com/story6.html'
+      player.show('https://example.com/new-story.html');
+      await nextTick();
+
+      const storyIframes = playerEl.querySelectorAll('iframe');
+
+      expect(storyIframes[0].getAttribute('src')).to.include(
+        'https://example.com/new-story.html#visibilityState=prerender'
       );
+    });
+
+    it('show() callback adds story to the player if the story has not been added yet and starts playing it', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      const sendRequestSpy = env.sandbox.spy(fakeMessaging, 'sendRequest');
+      attachPlayerWithStories(playerEl, 0);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+
+      player.show('https://example.com/new-story.html');
+      await nextTick();
+
+      expect(sendRequestSpy).to.have.been.calledWith('visibilitychange', {
+        'state': 'visible',
+      });
     });
 
     it('adds stories programmatically', async () => {

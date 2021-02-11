@@ -277,6 +277,7 @@ export class AmpStoryPlayer {
    * Adds stories to the player. Additionally, creates or assigns
    * iframes to those that are close to the current playing story.
    * @param {!Array<!{href: string, title: ?string, posterImage: ?string}>} newStories
+   * @return {!Promise}
    * @public
    */
   add(newStories) {
@@ -296,10 +297,10 @@ export class AmpStoryPlayer {
       story.idx = this.stories_.push(story) - 1;
       story.distance = story.idx - this.currentIdx_;
 
-      this.build_(story);
+      this.buildIframeFor_(story);
     }
 
-    this.render_(renderStartingIdx);
+    return this.render_(renderStartingIdx);
   }
 
   /**
@@ -394,7 +395,7 @@ export class AmpStoryPlayer {
   /** @private */
   buildStories_() {
     this.stories_.forEach((story) => {
-      this.build_(story);
+      this.buildIframeFor_(story);
     });
   }
 
@@ -493,7 +494,7 @@ export class AmpStoryPlayer {
    * @param {!StoryDef} story
    * @private
    */
-  build_(story) {
+  buildIframeFor_(story) {
     const iframeEl = this.doc_.createElement('iframe');
     if (story.posterImage) {
       setStyle(iframeEl, 'backgroundImage', story.posterImage);
@@ -728,16 +729,16 @@ export class AmpStoryPlayer {
    */
   show(storyUrl, pageId = null) {
     // TODO(enriqe): sanitize URLs for matching.
-    const storyIdx = storyUrl
+    let storyIdx = storyUrl
       ? findIndex(this.stories_, ({href}) => href === storyUrl)
       : this.currentIdx_;
 
-    // TODO(#28987): replace for add() once implemented.
+    let renderPromise = Promise.resolve();
     if (!this.stories_[storyIdx]) {
-      throw new Error(`Story URL not found in the player: ${storyUrl}`);
+      renderPromise = this.add([{href: storyUrl}]);
+      storyIdx = this.stories_.length - 1;
     }
 
-    let renderPromise = Promise.resolve();
     if (storyIdx !== this.currentIdx_) {
       this.currentIdx_ = storyIdx;
 
