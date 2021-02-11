@@ -164,6 +164,8 @@ async function waitForPageLoad(page, testName) {
 
 /**
  * Wait until the element is either hidden or visible or until timed out.
+ * Element visibility takes opacity into account so this will fail on elements
+ * whose natural opacity is neither 0 nor 1.
  *
  * Timeout is set to CSS_SELECTOR_RETRY_MS * CSS_SELECTOR_RETRY_ATTEMPTS ms.
  *
@@ -267,7 +269,7 @@ async function sleep(ms) {
 }
 
 /**
- *
+ * Returns the opacity of an element.
  * @param {!puppeteer.Page} page
  * @param {!ElementHandle} elementHandle
  * @return {Promise<string>}

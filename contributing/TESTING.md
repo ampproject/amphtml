@@ -20,28 +20,29 @@ This document provides details for testing and building your AMP code.
 
 **Contents**
 
--   [Testing commands](#testing-commands)
--   [Manual testing](#manual-testing)
-    -   [Serve Mode](#serve-mode)
-    -   [Examples](#examples)
-    -   [Document proxy](#document-proxy)
-    -   [A4A envelope (/a4a/, /a4a-3p/)](#a4a-envelope-a4a-a4a-3p)
-    -   [In-a-box envelope (/inabox/)](#in-a-box-envelope-inabox)
-    -   [Chrome extension](#chrome-extension)
--   [Visual Diff Tests](#visual-diff-tests)
-    -   [Failing Tests](#failing-tests)
-    -   [Flaky Tests](#flaky-tests)
-    -   [How Are Tests Executed](#how-are-tests-executed)
-    -   [Adding and Modifying Visual Diff Tests](#adding-and-modifying-visual-diff-tests)
-        -   [One-time Setup](#one-time-setup)
-        -   [Writing the Test](#writing-the-test)
--   [Isolated Component Testing](#isolated-component-testing)
--   [Testing on devices](#testing-on-devices)
-    -   [Testing with ngrok](#testing-with-ngrok)
-    -   [Testing with Firebase](#testing-with-firebase)
-        -   [Testing Ads](#testing-ads)
--   [End-to-End Tests](#end-to-end-tests)
--   [Performance Testing Node Build Tools](#performance-testing-node-build-tools)
+-   [Testing in AMP HTML](#testing-in-amp-html)
+    -   [Testing commands](#testing-commands)
+    -   [Manual testing](#manual-testing)
+        -   [Serve Mode](#serve-mode)
+        -   [Examples](#examples)
+        -   [Document proxy](#document-proxy)
+        -   [<a name="a4a-envelope"></a>A4A envelope (/a4a/, /a4a-3p/)](#a4a-envelope-a4a-a4a-3p)
+        -   [In-a-box envelope (/inabox/)](#in-a-box-envelope-inabox)
+        -   [Chrome extension](#chrome-extension)
+    -   [Visual Diff Tests](#visual-diff-tests)
+        -   [Failing Tests](#failing-tests)
+        -   [Flaky Tests](#flaky-tests)
+        -   [How Are Tests Executed](#how-are-tests-executed)
+        -   [Adding and Modifying Visual Diff Tests](#adding-and-modifying-visual-diff-tests)
+            -   [One-time Setup](#one-time-setup)
+            -   [Writing the Test](#writing-the-test)
+    -   [Isolated Component Testing](#isolated-component-testing)
+    -   [Testing on devices](#testing-on-devices)
+        -   [Testing with ngrok](#testing-with-ngrok)
+        -   [Testing with Firebase](#testing-with-firebase)
+            -   [Testing Ads](#testing-ads)
+    -   [End-to-End Tests](#end-to-end-tests)
+    -   [Performance Testing Node Build Tools](#performance-testing-node-build-tools)
 
 ## Testing commands
 
@@ -264,6 +265,7 @@ Visual diff tests are defined in the [`visual-tests`](../test/visual-diff/visual
 -   Navgates to the defined page using a headless Chrome browser
 -   Waits for the page to finish loading, both by verifying idle network connections and lack of loader animations
 -   If defined, waits until the appropriate CSS selectors appear/disappear from the page
+    -   Element visisbility is determined by a combination of existence, width, height, and opacity. This is done to account for CSS transitions but it means that elements which naturally have a height or width of 0 or whose opacity is neither 0 nor 1 may result in flakiness
 -   If defined, waits an arbitrary amount of time (e.g., for components that have time-delayed mutations)
 -   If defined, executes any custom interaction test code
 -   Uploads a snapshot of the page's DOM (converted to an HTML string) to the Percy service
