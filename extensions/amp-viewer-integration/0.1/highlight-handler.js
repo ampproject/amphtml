@@ -15,14 +15,15 @@
  */
 
 import {Services} from '../../../src/services';
-import {dict} from '../../../src/utils/object';
-import {findSentences, markTextRangeList} from './findtext';
 import {
+  assertDoesNotContainDisplay,
   isValidCssColor,
   resetStyles,
   setInitialDisplay,
   setStyles,
 } from '../../../src/style';
+import {dict} from '../../../src/utils/object';
+import {findSentences, markTextRangeList} from './findtext';
 import {listenOnce} from '../../../src/event-helper';
 import {moveLayoutRect} from '../../../src/layout-rect';
 import {once} from '../../../src/utils/function';
@@ -216,7 +217,7 @@ export class HighlightHandler {
    */
   getHighlightStyle_() {
     const styles = this.ampdoc_.win.document.getElementsByTagName('style');
-    // we want to apply the latest style
+    // we want to apply the latest style, so start from last index.
     for (let i = styles.length - 1; i >= 0; i--) {
       const cssRules = styles[i].innerHTML;
       const targetTextRules = cssRules.match(
@@ -239,8 +240,8 @@ export class HighlightHandler {
     }
 
     return {
-      // Default highlight color from Chrome 90 (https://chromium-review.googlesource.com/c/chromium/src/+/2637776/9/components/shared_highlighting/core/common/text_fragments_constants.cc)
-      'backgroundColor': '#e9d2fd',
+      backgroundColor: '#fcff00',
+      color: '#000',
     };
   }
 
@@ -272,11 +273,7 @@ export class HighlightHandler {
     for (let i = 0; i < this.highlightedNodes_.length; i++) {
       const n = this.highlightedNodes_[i];
       // The background color is same as Android Chrome text finding (yellow).
-      setStyles(n, highlightStyle);
-      // {
-      //   backgroundColor: '#fcff00',
-      //   color: '#000',
-      // });
+      setStyles(n, assertDoesNotContainDisplay(highlightStyle));
     }
 
     const visibility = this.ampdoc_.getVisibilityState();
