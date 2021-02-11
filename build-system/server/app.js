@@ -1152,7 +1152,7 @@ app.use('/bind/ecommerce/sizes', (req, res) => {
 
 // Simulate a publisher's entitlements API.
 // (amp-subscriptions)
-const ampSubscriptionsMeteringStateStore = {};
+const meteringStateStore = {};
 app.use('/subscription/:id/entitlements', (req, res) => {
   cors.assertCors(req, res, ['GET']);
 
@@ -1180,13 +1180,13 @@ app.use('/subscription/:id/entitlements', (req, res) => {
       'base64'
     ).toString();
     const meteringState = JSON.parse(decodedMeteringState);
-    ampSubscriptionsMeteringStateStore[ampReaderId] = meteringState;
+    meteringStateStore[ampReaderId] = meteringState;
   }
 
   // Add metering state to response, if possible.
-  if (ampSubscriptionsMeteringStateStore[ampReaderId]) {
+  if (meteringStateStore[ampReaderId]) {
     response.metering = {
-      state: ampSubscriptionsMeteringStateStore[ampReaderId],
+      state: meteringStateStore[ampReaderId],
     };
   }
 
@@ -1241,7 +1241,7 @@ app.use('/subscription/register', (req, res) => {
   //
   // For demo purposes, just save this in memory.
   // Production systems should probably save this to a database.
-  ampSubscriptionsMeteringStateStore[req.body.ampReaderId] = {
+  meteringStateStore[req.body.ampReaderId] = {
     id: meteringStateId,
     standardAttributes: {
       // eslint-disable-next-line google-camelcase/google-camelcase
@@ -1253,7 +1253,7 @@ app.use('/subscription/register', (req, res) => {
 
   res.json({
     metering: {
-      state: ampSubscriptionsMeteringStateStore[req.body.ampReaderId],
+      state: meteringStateStore[req.body.ampReaderId],
     },
   });
 });
