@@ -69,6 +69,8 @@ export function useSidebarAnimation(
   useLayoutEffect(() => {
     const sidebarElement = sidebarRef.current;
     const backdropElement = backdropRef.current;
+    // The component might start in a state where `side` is not known
+    // This effect must be restarted when the `side` becomes known
     if (!sidebarElement || !backdropElement || !side) {
       return;
     }
