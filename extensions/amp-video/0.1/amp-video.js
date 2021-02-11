@@ -222,9 +222,7 @@ export class AmpVideo extends AMP.BaseElement {
 
     this.video_ = element.ownerDocument.createElement('video');
     // Manage video if the sources contain bitrate or amp-orig-src will be expanded to multiple bitrates.
-    if (
-      this.element.querySelector('source[data-bitrate], source[amp-orig-src]')
-    ) {
+    if (this.isManagedByBitrate_() && !this.isPlaceholderVideo_(this.video_)) {
       getBitrateManager(this.win).manage(this.video_);
     }
 
@@ -577,6 +575,38 @@ export class AmpVideo extends AMP.BaseElement {
 
   /**
    * @private
+   * @return {boolean}
+   */
+  isManagedByBitrate_() {
+    return this.hasAnyBitrateSources_() || this.hasAnyCachedSources_();
+  }
+
+  /**
+   * @private
+   * @return {boolean}
+   */
+  hasAnyBitrateSources_() {
+    return !!this.element.querySelector('source[data-bitrate]');
+  }
+
+  /**
+   * @private
+   * @return {boolean}
+   */
+  hasAnyCachedSources_() {
+    const {element} = this;
+    const sources = toArray(childElementsByTag(element, 'source'));
+    sources.push(element);
+    for (let i = 0; i < sources.length; i++) {
+      if (isCachedByCdn(sources[i])) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * @private
    */
   installEventHandlers_() {
     const video = dev().assertElement(this.video_);
@@ -635,6 +665,9 @@ export class AmpVideo extends AMP.BaseElement {
 
     this.uninstallEventHandlers_();
     this.installEventHandlers_();
+    if (!this.isPlaceholderVideo_(this.video_)) {
+      getBitrateManager(this.win_).manage(this.video_);
+    }
     // When source changes, video needs to trigger loaded again.
     this.loadPromise(this.video_).then(() => this.onVideoLoaded_());
   }
@@ -766,6 +799,18 @@ export class AmpVideo extends AMP.BaseElement {
    */
   isManagedByPool_() {
     return this.element.classList.contains('i-amphtml-poolbound');
+  }
+
+  /**
+   * Whether the video is just a placeholder and meant to be overriden
+   * @param {!Element} videoEl
+   * @return {boolean}
+   */
+  isPlaceholderVideo_(videoEl) {
+    if (!this.isManagedByPool_()) {
+      return false;
+    }
+    return !videoEl.classList.contains('i-amphtml-pool-media');
   }
 
   /**
