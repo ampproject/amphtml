@@ -238,7 +238,9 @@ export class HighlightHandler {
         'color': isValidCssColor(colorMatches[1]) ? colorMatches[1] : null,
       };
     }
-
+    // We return the current yellow highlight color. In Chrome 90, this color will be light purple (#E9D2FD),
+    // but it's *not* going to be enabled by default and behind an experiment chrome://flags/#text-fragment-color-change.
+    // TODO: update backgroundColor when Chrome rolls out light purple as the default highlight color.
     return {
       backgroundColor: '#fcff00',
       color: '#000',

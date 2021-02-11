@@ -124,7 +124,6 @@ describes.realWin(
   (env) => {
     let root = null;
     let docreadyCb = null;
-    // let document;
 
     beforeEach(() => {
       const {document} = env.win;
