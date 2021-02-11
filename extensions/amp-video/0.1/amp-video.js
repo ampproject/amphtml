@@ -666,8 +666,9 @@ export class AmpVideo extends AMP.BaseElement {
     this.uninstallEventHandlers_();
     this.installEventHandlers_();
     if (!this.isPlaceholderVideo_(this.video_)) {
-      getBitrateManager(this.win_).manage(this.video_);
+      getBitrateManager(this.win).manage(this.video_);
     }
+    console.log('resetOnDomChange');
     // When source changes, video needs to trigger loaded again.
     this.loadPromise(this.video_).then(() => this.onVideoLoaded_());
   }

@@ -507,7 +507,6 @@ export class MediaPool {
    * @private
    */
   swapPoolMediaElementIntoDom_(placeholderEl, poolMediaEl, sources) {
-    const ampMediaForPoolEl = ampMediaElementFor(poolMediaEl);
     const ampMediaForDomEl = ampMediaElementFor(placeholderEl);
     poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME] = placeholderEl.id;
 
@@ -516,14 +515,14 @@ export class MediaPool {
       new SwapIntoDomTask(placeholderEl)
     ).then(
       () => {
+        this.maybeResetAmpMedia_(ampMediaForDomEl);
+        console.log('Calling maybeResetAmpMedia');
+
         this.enqueueMediaElementTask_(
           poolMediaEl,
           new UpdateSourcesTask(this.win_, sources)
-        );
-        this.enqueueMediaElementTask_(poolMediaEl, new LoadTask()).then(() => {
-          this.maybeResetAmpMedia_(ampMediaForPoolEl);
-          this.maybeResetAmpMedia_(ampMediaForDomEl);
-        });
+        ).then(() => console.log('updated source tasks'));
+        this.enqueueMediaElementTask_(poolMediaEl, new LoadTask());
       },
       () => {
         this.forceDeallocateMediaElement_(poolMediaEl);
