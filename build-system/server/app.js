@@ -1150,7 +1150,7 @@ app.use('/bind/ecommerce/sizes', (req, res) => {
   }, 1000); // Simulate network delay.
 });
 
-// Simulate a news publisher's entitlements API.
+// Simulate a publisher's entitlements API.
 // (amp-subscriptions)
 const ampSubscriptionsMeteringStateStore = {};
 app.use('/subscription/:id/entitlements', (req, res) => {
@@ -1188,7 +1188,7 @@ app.use('/subscription/:id/entitlements', (req, res) => {
   res.json(json);
 });
 
-// Simulate a news publisher's SKU map API.
+// Simulate a publisher's SKU map API.
 // (amp-subscriptions)
 app.use('/subscriptions/skumap', (req, res) => {
   cors.assertCors(req, res, ['GET']);
@@ -1206,7 +1206,7 @@ app.use('/subscriptions/skumap', (req, res) => {
   });
 });
 
-// Simulate a news publisher's pingback API.
+// Simulate a publisher's pingback API.
 // (amp-subscriptions)
 app.use('/subscription/pingback', (req, res) => {
   cors.assertCors(req, res, ['POST']);
@@ -1215,7 +1215,7 @@ app.use('/subscription/pingback', (req, res) => {
   });
 });
 
-// Simulate a news publisher's account registration API.
+// Simulate a publisher's account registration API.
 // (amp-subscriptions-google)
 app.use('/subscription/register', (req, res) => {
   cors.assertCors(req, res, ['POST']);
