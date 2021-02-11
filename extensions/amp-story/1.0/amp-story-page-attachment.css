@@ -232,7 +232,7 @@ amp-story-page .i-amphtml-story-page-open-attachment-outlink-bar-right {
 amp-story-page .i-amphtml-story-page-attachment-outlink-chip {
   display: table !important;
   position: relative !important;
-  padding: 12px 32px 20px 32px !important;
+  padding: 7px 10px !important;
   margin: 0 0 20px 0 !important;
   height: 16px !important;
   max-width: 243px !important;
@@ -254,19 +254,24 @@ amp-story-page .i-amphtml-story-page-attachment-outlink-label {
   text-overflow: ellipsis !important;
   text-shadow: 0px 0px 6px rgba(0, 0, 0, 0.36) !important;
   white-space: nowrap !important;
+  max-width: 210px !important;
+  vertical-align: middle;
 }
 
 .i-amphtml-story-page-attachment-outlink-image {
   display: table-cell !important;
-  height: 24px;
-  width: 24px;
+  vertical-align: middle;
 }
 
 .i-amphtml-story-page-attachment-outlink-dark-link-image {
+  height: 24px;
+  width: 24px;
   background-image: url('data:image/svg+xml;charset=utf-8,<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><rect width="24" height="24" rx="12" fill="#333"/><path d="M10 18s0 0 0 0l2-1 2-2s0 0 0 0h-1l-2 1a3 3 0 01-3 0 3 3 0 010-3l1-2v-1s0 0 0 0l-2 2a4 4 0 000 5l3 1zM11 9l2-1a3 3 0 013 0 3 3 0 010 3l-1 2v1a1 1 0 000 0l2-2a4 4 0 000-5l-3-1s0 0 0 0l-2 1-2 2s0 0 0 0h1z" fill="#fff" stroke="#fff" stroke-width=".3"/><path d="M15 9h-1l-5 5a1 1 0 001 1s0 0 0 0l5-5V9z" fill="#fff" stroke="#fff" stroke-width=".3"/></svg>') !important;
 }
 
 .i-amphtml-story-page-attachment-outlink-light-link-image {
+  height: 24px;
+  width: 24px;
   background-image: url('data:image/svg+xml;charset=utf-8,<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><rect width="24" height="24" rx="12" fill="#E8EAED"/><path d="M10 18s0 0 0 0l2-1 2-2s0 0 0 0h-1l-2 1a3 3 0 01-3 0 3 3 0 010-3l1-2v-1s0 0 0 0l-2 2a4 4 0 000 5l3 1zM11 9l2-1a3 3 0 013 0 3 3 0 010 3l-1 2v1a1 1 0 000 0l2-2a4 4 0 000-5l-3-1s0 0 0 0l-2 1-2 2s0 0 0 0h1z" fill="#000" stroke="#000" stroke-width=".3"/><path d="M15 9h-1l-5 5a1 1 0 001 1s0 0 0 0l5-5V9z" fill="#000" stroke="#000" stroke-width=".3"/></svg>') !important;
 }
 

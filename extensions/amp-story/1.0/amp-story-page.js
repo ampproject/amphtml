@@ -199,7 +199,7 @@ const buildOpenOutlinkAttachmentElement = (element) =>
           <span class="i-amphtml-story-page-open-attachment-outlink-bar-right"></span>
         </span>
         <div class="i-amphtml-story-page-attachment-outlink-chip">
-          <div style="display: table-row;">
+          <div class="i-amphtml-story-page-attachment-outlink-content">
             <div class="i-amphtml-story-page-attachment-outlink-image"></div>
             <div class="i-amphtml-story-page-attachment-outlink-label"></div>
           </div>
@@ -1864,16 +1864,21 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.mutateElement(() => {
         const theme = attachmentEl.getAttribute('theme');
         const ctaImgAttr = attachmentEl.getAttribute('cta-img');
-        if (!ctaImgAttr) {
-          if (theme && AttachmentTheme.DARK === theme.toLowerCase()) {
-            ctaImgEl.classList.add('i-amphtml-story-page-attachment-outlink-dark-link-image');
-          } else {
-            ctaImgEl.classList.add('i-amphtml-story-page-attachment-outlink-light-link-image');
-          }
-        } else {
-          setImportantStyles(ctaImgEl, {
-            'background-image': 'url(ctaImgAttr)',
+        if (ctaImgAttr !== "none") {
+          setImportantStyles(textEl, {
+            'padding-left': '10px',
           });
+          if (!ctaImgAttr) {
+            if (theme && AttachmentTheme.DARK === theme.toLowerCase()) {
+              ctaImgEl.classList.add('i-amphtml-story-page-attachment-outlink-dark-link-image');
+            } else {
+              ctaImgEl.classList.add('i-amphtml-story-page-attachment-outlink-light-link-image');
+            }
+          } else {
+            setImportantStyles(ctaImgEl, {
+              'background-image': 'url(ctaImgAttr)',
+            });
+          }
         }
 
         const ctaAccentColor = attachmentEl.getAttribute('cta-accent-color');
