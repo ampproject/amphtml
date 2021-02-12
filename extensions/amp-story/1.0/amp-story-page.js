@@ -1899,9 +1899,6 @@ export class AmpStoryPage extends AMP.BaseElement {
               height: '24px',
               width: '24px',
               'background-image': 'url(' + ctaImgAttr + ')',
-              'background-size': 'contain',
-              'background-repeat': 'no-repeat',
-              'background-position': 'center',
             });
           }
         }

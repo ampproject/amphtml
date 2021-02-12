@@ -259,7 +259,11 @@ amp-story-page .i-amphtml-story-page-attachment-outlink-label {
 
 .i-amphtml-story-page-attachment-outlink-image {
   display: table-cell !important;
-  vertical-align: middle;
+  vertical-align: middle !important;
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  border-radius: 50% !important;
 }
 
 .i-amphtml-story-page-attachment-outlink-dark-link-image {
