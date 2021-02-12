@@ -83,7 +83,7 @@ export class SubscriptionService {
     /** @private {?JsonObject} */
     this.platformConfig_ = null;
 
-    /** @type {?PlatformStore} */
+    /** @private {?PlatformStore} */
     this.platformStore_ = null;
 
     /** @const @private {!Element} */
