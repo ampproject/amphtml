@@ -474,10 +474,10 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       expect(sidebar.getDOMNode()).to.be.null;
     });
 
-    it('should make animations cancelable', () => {
+    it('should reverse animations if closed while opening', () => {
       animateStub = env.sandbox.stub(Element.prototype, 'animate');
       const animation = {
-        cancel: env.sandbox.spy(),
+        reverse: env.sandbox.spy(),
       };
       animateStub.returns(animation);
 
@@ -491,11 +491,107 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
       // One call each for the backdrop and the sidebar
       expect(animateStub).to.be.calledTwice;
 
-      // Click to close the sidebar and cancel the animation
+      // Click to close the sidebar and reverse the animation
       closeButton.simulate('click');
 
-      // Expect cancel to be called twice (once for backdrop and once for sidebar)
-      expect(animation.cancel).to.be.calledTwice;
+      // Expect reverse to be called twice (once for backdrop and once for sidebar)
+      expect(animation.reverse).to.be.calledTwice;
+    });
+
+    it('should not reverse animations if opened while opening', () => {
+      animateStub = env.sandbox.stub(Element.prototype, 'animate');
+      const animation = {
+        reverse: env.sandbox.spy(),
+      };
+      animateStub.returns(animation);
+
+      // Sidebar is closed
+      expect(sidebar.getDOMNode()).to.be.null;
+
+      // Click to open the sidebar
+      openButton.simulate('click');
+
+      // Animation has been started
+      // One call each for the backdrop and the sidebar
+      expect(animateStub).to.be.calledTwice;
+
+      // Click to "open" the sidebar while its already opening
+      openButton.simulate('click');
+
+      // Reverse should not be called, sidebar is already opening
+      expect(animation.reverse).to.not.be.called;
+    });
+
+    it('should reverse animations if opened while closing', () => {
+      animateFunction = Element.prototype.animate;
+      Element.prototype.animate = null;
+
+      // Sidebar is closed
+      expect(sidebar.getDOMNode()).to.be.null;
+
+      // Click to open the sidebar
+      openButton.simulate('click');
+
+      // Synchronously open the sidebar
+      sidebar = wrapper.find(Sidebar);
+      expect(sidebar.getDOMNode()).to.not.be.null;
+
+      // Turn on animations after Sidebar is opened
+      Element.prototype.animate = animateFunction;
+      animateStub = env.sandbox.stub(Element.prototype, 'animate');
+      const animation = {
+        reverse: env.sandbox.spy(),
+      };
+      animateStub.returns(animation);
+
+      // Close the sidebar from fully opened state
+      closeButton.simulate('click');
+
+      // Animation has been started
+      // One call each for the backdrop and the sidebar
+      expect(animateStub).to.be.calledTwice;
+
+      // Click to "open" the sidebar while its already opening
+      openButton.simulate('click');
+
+      // Expect reverse to be called twice (once for backdrop and once for sidebar)
+      expect(animation.reverse).to.be.calledTwice;
+    });
+
+    it('should not reverse animations if closed while closing', () => {
+      animateFunction = Element.prototype.animate;
+      Element.prototype.animate = null;
+
+      // Sidebar is closed
+      expect(sidebar.getDOMNode()).to.be.null;
+
+      // Click to open the sidebar
+      openButton.simulate('click');
+
+      // Synchronously open the sidebar
+      sidebar = wrapper.find(Sidebar);
+      expect(sidebar.getDOMNode()).to.not.be.null;
+
+      // Turn on animations after Sidebar is opened
+      Element.prototype.animate = animateFunction;
+      animateStub = env.sandbox.stub(Element.prototype, 'animate');
+      const animation = {
+        reverse: env.sandbox.spy(),
+      };
+      animateStub.returns(animation);
+
+      // Close the sidebar from fully opened state
+      closeButton.simulate('click');
+
+      // Animation has been started
+      // One call each for the backdrop and the sidebar
+      expect(animateStub).to.be.calledTwice;
+
+      // Click to "close" the sidebar while its already closing
+      closeButton.simulate('click');
+
+      // Reverse should not be called, sidebar is already closing
+      expect(animation.reverse).to.not.be.called;
     });
 
     it('should ignore animations if not available on the platform', () => {
