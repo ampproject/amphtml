@@ -55,12 +55,12 @@ export class AmpInlineGalleryCaptions extends AMP.BaseElement {
   }
 
   /**
-   * @param {!Array<!Element>} slides
-   * @param {number} total
+   * @param {number} unusedTotal
    * @param {number} index
    * @param {number} offset
+   * @param {!Array<!Element>} slides
    */
-  updateProgress(slides, total, index, offset) {
+  updateProgress(unusedTotal, index, offset, slides) {
     this.mutateElement(() => {
       this.updateCaptionOpacities_(slides, index, offset);
     });

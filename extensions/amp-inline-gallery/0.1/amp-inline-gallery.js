@@ -101,18 +101,18 @@ class AmpInlineGallery extends AMP.BaseElement {
   }
 
   /**
-   * @param {!Array<!Element>} slides
    * @param {number} total
    * @param {number} index
    * @param {number} offset
+   * @param {!Array<!Element>} slides
    * @private
    */
-  updateProgress_(slides, total, index, offset) {
+  updateProgress_(total, index, offset, slides) {
     iterateCursor(
       scopedQuerySelectorAll(this.element, CHILDREN_FOR_PROGRESS_SELECTOR),
       (el) => {
         el.getImpl().then((pagination) => {
-          pagination.updateProgress(slides, total, index, offset);
+          pagination.updateProgress(total, index, offset, slides);
         });
       }
     );
@@ -128,7 +128,7 @@ class AmpInlineGallery extends AMP.BaseElement {
     const index = detail['index'];
     const slides = detail['slides'];
 
-    this.updateProgress_(slides, total, index, 0);
+    this.updateProgress_(total, index, 0, slides);
   }
 
   /**
@@ -142,7 +142,7 @@ class AmpInlineGallery extends AMP.BaseElement {
     const offset = detail['offset'];
     const slides = detail['slides'];
 
-    this.updateProgress_(slides, total, index, offset);
+    this.updateProgress_(total, index, offset, slides);
   }
 
   /**
