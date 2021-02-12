@@ -276,16 +276,19 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
                       element.appendChild(placeholder);
                     }
                   }
+                  const resources = Services.resourcesForDoc(ampdoc);
+                  const resource = resources.getResourceForElement(element);
+                  resource.measure();
+                })
+                .then(() => {
                   if (element.layoutCount_ == 0) {
                     if (opt_beforeLayoutCallback) {
                       opt_beforeLayoutCallback(element);
                     }
-                    return element.layoutCallback().then(() => {
-                      return element;
-                    });
+                    return element.layoutCallback();
                   }
-                  return element;
-                });
+                })
+                .then(() => element);
               iWin.document.getElementById('parent').appendChild(element);
               return p;
             },
