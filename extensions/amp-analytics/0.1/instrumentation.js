@@ -32,6 +32,7 @@ import {
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
 } from '../../../src/service';
+import {dev} from '../../../src/log';
 
 const PROP = '__AMP_AN_ROOT';
 
@@ -102,6 +103,14 @@ export class InstrumentationService {
     vars = dict(),
     enableDataVars = true
   ) {
+    if (!target.isConnected) {
+      dev().error(
+        'Attempting to trigger analytics event for detached target: %s',
+        target
+      );
+      return;
+    }
+
     const event = new AnalyticsEvent(target, eventType, vars, enableDataVars);
     const root = this.findRoot_(target);
     const trackerName = getTrackerKeyName(eventType);
