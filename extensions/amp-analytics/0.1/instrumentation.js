@@ -35,6 +35,7 @@ import {
 import {dev} from '../../../src/log';
 
 const PROP = '__AMP_AN_ROOT';
+const TAG = 'ANALYTICS-INSTRUMENTATION',
 
 /**
  * @implements {../../../src/service.Disposable}
@@ -105,7 +106,7 @@ export class InstrumentationService {
   ) {
     if (!target.isConnected) {
       dev().error(
-        'ANALYTICS-INSTRUMENTATION',
+        TAG,
         'Attempting to trigger event for detached target: %s',
         target
       );
