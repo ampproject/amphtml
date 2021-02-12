@@ -177,11 +177,8 @@ export class SubscriptionService {
         });
 
       isStoryDocument(this.ampdoc_).then((isStory) => {
-        // Delegates the platform selection and activation call if is story,
-        // or if metering is enabled.
-        // const doPlatformSelection = !isStory && !this.metering_.enabled;
-        const doPlatformSelection = !isStory;
-        this.startAuthorizationFlow_(doPlatformSelection);
+        // Delegates the platform selection and activation call if is story.
+        this.startAuthorizationFlow_(!isStory /** doPlatformSelection */);
       });
     });
     return this;
