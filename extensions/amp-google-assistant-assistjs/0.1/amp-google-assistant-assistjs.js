@@ -19,8 +19,6 @@
  * shared Assistant Frame service.
  */
 
-import 'regenerator-runtime/runtime';
-
 import {AmpGoogleAssistantInlineSuggestionBar} from './amp-google-assistant-inline-suggestion-bar';
 import {AmpGoogleAssistantVoiceBar} from './amp-google-assistant-voice-bar';
 import {AmpGoogleAssistantVoiceButton} from './amp-google-assistant-voice-button';
