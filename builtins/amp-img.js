@@ -199,6 +199,10 @@ export class AmpImg extends BaseElement {
     if (!this.img_) {
       return;
     }
+    // If the image is server rendered, do not generate sizes.
+    if (this.element.hasAttribute('i-amphtml-ssr')) {
+      return;
+    }
     // No need to generate sizes if already present.
     const sizes =
       this.element.hasAttribute('sizes') || this.img_.hasAttribute('sizes');
