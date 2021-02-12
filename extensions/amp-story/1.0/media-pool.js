@@ -517,36 +517,31 @@ export class MediaPool {
     return this.enqueueMediaElementTask_(
       poolMediaEl,
       new SwapIntoDomTask(placeholderEl)
-    ).then(
-      () => {
-        this.enqueueMediaElementTask_(
-          poolMediaEl,
-          new UpdateSourcesTask(this.win_, sources)
-        );
-        if (placeholderEl.isBitrateManaged) {
-          const bitrateManager = getBitrateManager(this.win_);
-          this.enqueueMediaElementTask_(
-            placeholderEl,
-            new UnmanageBitrateTask(bitrateManager)
-          );
-          this.enqueueMediaElementTask_(
+    )
+      .then(() =>
+        Promise.all([
+          this.maybeResetAmpMedia_(ampMediaForPoolEl),
+          this.maybeResetAmpMedia_(ampMediaForDomEl),
+        ])
+      )
+      .then(
+        () => {
+          const sourcesPromise = this.enqueueMediaElementTask_(
             poolMediaEl,
-            new ManageBitrateTask(bitrateManager)
+            new UpdateSourcesTask(this.win_, sources)
           );
+          this.enqueueMediaElementTask_(poolMediaEl, new LoadTask());
+          return sourcesPromise;
+        },
+        () => {
+          this.forceDeallocateMediaElement_(poolMediaEl);
         }
-        this.enqueueMediaElementTask_(poolMediaEl, new LoadTask()).then(() => {
-          this.maybeResetAmpMedia_(ampMediaForPoolEl);
-          this.maybeResetAmpMedia_(ampMediaForDomEl);
-        });
-      },
-      () => {
-        this.forceDeallocateMediaElement_(poolMediaEl);
-      }
-    );
+      );
   }
 
   /**
    * @param {?Element} componentEl
+   * @return {?Promise}
    * @private
    */
   maybeResetAmpMedia_(componentEl) {
@@ -559,7 +554,7 @@ export class MediaPool {
       return;
     }
 
-    componentEl.getImpl().then((impl) => {
+    return componentEl.getImpl().then((impl) => {
       if (impl.resetOnDomChange) {
         impl.resetOnDomChange();
       }

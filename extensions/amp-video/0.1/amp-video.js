@@ -37,7 +37,7 @@ import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {listen} from '../../../src/event-helper';
+import {listen, listenOncePromise} from '../../../src/event-helper';
 import {mutedOrUnmutedEvent} from '../../../src/iframe-video';
 import {
   observeDisplay,
@@ -168,6 +168,9 @@ export class AmpVideo extends AMP.BaseElement {
     /** @private {boolean} */
     this.isPlaying_ = false;
 
+    /** @private {boolean} */
+    this.isManagedByBitrate_ = this.hasAnyBitrateSources_();
+
     this.onDisplay_ = this.onDisplay_.bind(this);
   }
 
@@ -222,7 +225,7 @@ export class AmpVideo extends AMP.BaseElement {
 
     this.video_ = element.ownerDocument.createElement('video');
     // Manage video if the sources contain bitrate or amp-orig-src will be expanded to multiple bitrates.
-    if (this.hasAnyCachedSources_() || this.hasAnyBitrateSources_()) {
+    if (this.isManagedByBitrate_ && !this.isPlaceholderVideo_(this.video_)) {
       getBitrateManager(this.win).manage(this.video_);
     }
 
@@ -578,7 +581,10 @@ export class AmpVideo extends AMP.BaseElement {
    * @return {boolean}
    */
   hasAnyBitrateSources_() {
-    return !!this.element.querySelector('source[data-bitrate]');
+    return (
+      !!this.element.querySelector('source[data-bitrate]') ||
+      this.hasAnyCachedSources_()
+    );
   }
 
   /**
@@ -654,11 +660,15 @@ export class AmpVideo extends AMP.BaseElement {
       childElementByTag(this.element, 'video'),
       'Tried to reset amp-video without an underlying <video>.'
     );
-
     this.uninstallEventHandlers_();
     this.installEventHandlers_();
+    if (this.isManagedByBitrate_) {
+      getBitrateManager(this.win).manage(this.video_);
+    }
     // When source changes, video needs to trigger loaded again.
-    this.loadPromise(this.video_).then(() => this.onVideoLoaded_());
+    listenOncePromise(this.video_, 'loadedmetadata').then(() =>
+      this.onVideoLoaded_()
+    );
   }
 
   /** @private */
@@ -788,6 +798,18 @@ export class AmpVideo extends AMP.BaseElement {
    */
   isManagedByPool_() {
     return this.element.classList.contains('i-amphtml-poolbound');
+  }
+
+  /**
+   * Whether the video is just a placeholder and meant to be overriden
+   * @param {!Element} videoEl
+   * @return {boolean}
+   */
+  isPlaceholderVideo_(videoEl) {
+    if (!this.isManagedByPool_()) {
+      return false;
+    }
+    return !videoEl.classList.contains('i-amphtml-pool-media');
   }
 
   /**

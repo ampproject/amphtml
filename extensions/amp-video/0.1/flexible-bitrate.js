@@ -94,8 +94,10 @@ export class BitrateManager {
    * @param {!Element} video
    */
   manage(video) {
-    video.isBitrateManaged = true;
-    video.waitUnlisten_ = onNontrivialWait(video, () => {
+    if (video.changedSources) {
+      return;
+    }
+    onNontrivialWait(video, () => {
       const current = currentSource(video);
       this.acceptableBitrate_ = current.bitrate_ - 1;
       this.switchToLowerBitrate_(video, current.bitrate_);

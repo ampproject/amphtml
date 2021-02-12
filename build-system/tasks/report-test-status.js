@@ -43,9 +43,19 @@ const TEST_TYPE_SUBTYPES = isGithubActionsBuild()
     ])
   : isCircleciBuild()
   ? new Map([
-      ['integration', ['unminified', 'nomodule', 'module']],
+      [
+        'integration',
+        [
+          'unminified',
+          'nomodule',
+          'module',
+          'experimentA',
+          'experimentB',
+          'experimentC',
+        ],
+      ],
       ['unit', ['unminified', 'local-changes']],
-      ['e2e', ['nomodule']],
+      ['e2e', ['nomodule', 'experimentA', 'experimentB', 'experimentC']],
     ])
   : new Map([]);
 const TEST_TYPE_BUILD_TARGETS = new Map([
@@ -84,6 +94,8 @@ function inferTestType() {
     ? 'safari'
     : argv.browsers == 'firefox'
     ? 'firefox'
+    : argv.experiment
+    ? argv.experiment
     : argv.compiled
     ? 'nomodule'
     : 'unminified';
