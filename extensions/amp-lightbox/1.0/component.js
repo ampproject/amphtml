@@ -16,8 +16,10 @@
 
 import * as Preact from '../../../src/preact';
 import {ContainWrapper, useValueRef} from '../../../src/preact/component';
+import {Keys} from '../../../src/utils/key-codes';
 import {forwardRef} from '../../../src/preact/compat';
 import {setStyle} from '../../../src/style';
+import {tryFocus} from '../../../src/dom';
 import {
   useImperativeHandle,
   useLayoutEffect,
@@ -86,9 +88,7 @@ function LightboxWithRef(
         setMounted(true);
         setVisible(true);
       },
-      close: () => {
-        setVisible(false);
-      },
+      close: () => setVisible(false),
     }),
     [onBeforeOpenRef]
   );
@@ -107,7 +107,7 @@ function LightboxWithRef(
       const postVisibleAnim = () => {
         setStyle(element, 'opacity', 1);
         setStyle(element, 'visibility', 'visible');
-        element./*REVIEW*/ focus();
+        tryFocus(element);
       };
       if (!element.animate) {
         postVisibleAnim();
@@ -152,9 +152,7 @@ function LightboxWithRef(
   return (
     mounted && (
       <ContainWrapper
-        ref={(r) => {
-          lightboxRef.current = r;
-        }}
+        ref={lightboxRef}
         size={true}
         layout={true}
         paint={true}
@@ -172,7 +170,7 @@ function LightboxWithRef(
         role="dialog"
         tabindex="0"
         onKeyDown={(event) => {
-          if (event.key === 'Escape') {
+          if (event.key === Keys.ESCAPE) {
             setVisible(false);
           }
         }}
@@ -183,9 +181,7 @@ function LightboxWithRef(
           ariaLabel={DEFAULT_CLOSE_LABEL}
           tabIndex={-1}
           className={classes.closeButton}
-          onClick={() => {
-            setVisible(false);
-          }}
+          onClick={() => setVisible(false)}
         />
       </ContainWrapper>
     )
