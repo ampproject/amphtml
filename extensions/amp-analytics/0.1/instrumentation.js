@@ -105,7 +105,8 @@ export class InstrumentationService {
   ) {
     if (!target.isConnected) {
       dev().error(
-        'Attempting to trigger analytics event for detached target: %s',
+        'ANALYTICS-INSTRUMENTATION',
+        'Attempting to trigger event for detached target: %s',
         target
       );
       return;
