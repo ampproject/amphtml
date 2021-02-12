@@ -38,10 +38,10 @@ const ATTRIBUTES_TO_PROPAGATE = [
   'aria-labelledby',
   'crossorigin',
   'referrerpolicy',
-  'sizes',
-  'src',
-  'srcset',
   'title',
+  'sizes',
+  'srcset',
+  'src',
 ];
 
 export class AmpImg extends BaseElement {
