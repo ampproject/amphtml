@@ -113,22 +113,7 @@ The `<amp-story-player>` component contains one or more `<a>` tags. Point the hr
 
 Place the story's title within the `<a>` tag. This provides a better user experience and allows search engines to crawl embedded stories.
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-# <<<<<<< HEAD
-
-# Use a poster image as a placeholder to display to users while the story loads. To do this, add an image tag as a child of the `<a>` tag with the following configuration: `<img src= "" loading="lazy" width="100%" height="100%" amp-story-player-poster-img></img>`.
-
-# Use a poster image as a placeholder to display to users while the story loads. To do this, add an image tag as a child of the `<a>` tag with the following configuration: `<img src= "" loading="lazy" width="100%" height="100%" data-amp-story-player-poster-img></img>`.
-
 Use a poster image as a placeholder to display to users while the story loads. To do this, add an image tag as a child of the `<a>` tag with the following configuration: `<img src= "" loading="lazy" width="360" height="600" data-amp-story-player-poster-img></img>`.
-
-> > > > > > > 670cd6c65 (updates)
-
-> > > > > > > b61ed9ccb (update attr name)
-
-> > > > > > > 817d02d18 (replace poster img CSS variable with img el)
 
 ### Attributes
 
