@@ -168,9 +168,10 @@ export class AmpVideo extends AMP.BaseElement {
     /** @private {boolean} */
     this.isPlaying_ = false;
 
-    this.onDisplay_ = this.onDisplay_.bind(this);
+    /** @private {boolean} */
+    this.isManagedByBitrate_ = this.hasAnyBitrateSources_();
 
-    this.element.resetOnDomChange = this.resetOnDomChange.bind(this);
+    this.onDisplay_ = this.onDisplay_.bind(this);
   }
 
   /**
@@ -224,7 +225,7 @@ export class AmpVideo extends AMP.BaseElement {
 
     this.video_ = element.ownerDocument.createElement('video');
     // Manage video if the sources contain bitrate or amp-orig-src will be expanded to multiple bitrates.
-    if (this.isManagedByBitrate_() && !this.isPlaceholderVideo_(this.video_)) {
+    if (this.isManagedByBitrate_ && !this.isPlaceholderVideo_(this.video_)) {
       getBitrateManager(this.win).manage(this.video_);
     }
 
@@ -579,16 +580,11 @@ export class AmpVideo extends AMP.BaseElement {
    * @private
    * @return {boolean}
    */
-  isManagedByBitrate_() {
-    return this.hasAnyBitrateSources_() || this.hasAnyCachedSources_();
-  }
-
-  /**
-   * @private
-   * @return {boolean}
-   */
   hasAnyBitrateSources_() {
-    return !!this.element.querySelector('source[data-bitrate]');
+    return (
+      !!this.element.querySelector('source[data-bitrate]') ||
+      this.hasAnyCachedSources_()
+    );
   }
 
   /**
@@ -664,15 +660,14 @@ export class AmpVideo extends AMP.BaseElement {
       childElementByTag(this.element, 'video'),
       'Tried to reset amp-video without an underlying <video>.'
     );
-    console.log('resetOnDomChange');
     this.uninstallEventHandlers_();
     this.installEventHandlers_();
-    if (this.isManagedByBitrate_()) {
+    if (this.isManagedByBitrate_) {
       getBitrateManager(this.win).manage(this.video_);
     }
     // When source changes, video needs to trigger loaded again.
-    listenOncePromise(this.video_, 'loadedmetadata').then(
-      () => console.log('loadedmetadata') && this.onVideoLoaded_()
+    listenOncePromise(this.video_, 'loadedmetadata').then(() =>
+      this.onVideoLoaded_()
     );
   }
 

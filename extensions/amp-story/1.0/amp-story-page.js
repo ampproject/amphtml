@@ -475,7 +475,6 @@ export class AmpStoryPage extends AMP.BaseElement {
       case PageState.PLAYING:
         if (this.state_ === PageState.NOT_ACTIVE) {
           this.element.setAttribute('active', '');
-          console.log('resuming');
           this.resume_();
         }
 
@@ -560,7 +559,6 @@ export class AmpStoryPage extends AMP.BaseElement {
           this.startMeasuringAllVideoPerformance_();
           this.startListeningToVideoEvents_();
           // iOS 14.2 and 14.3 requires play to be called before unmute
-          console.log('playing all media after preload');
           this.playAllMedia_().then(() => {
             if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
               this.unmuteAllMedia();
@@ -992,7 +990,6 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   playMedia_(mediaPool, mediaEl) {
-    console.log(mediaEl.outerHTML);
     if (this.isBotUserAgent_) {
       mediaEl.play();
       return Promise.resolve();
@@ -1043,9 +1040,9 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   preloadAllMedia_() {
-    return this.whenAllMediaElements_((mediaPool, mediaEl) => {
-      this.preloadMedia_(mediaPool, mediaEl);
-    });
+    return this.whenAllMediaElements_((mediaPool, mediaEl) =>
+      this.preloadMedia_(mediaPool, mediaEl)
+    );
   }
 
   /**
