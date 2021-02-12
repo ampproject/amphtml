@@ -17,11 +17,9 @@
 import * as Preact from '../../../src/preact';
 import {Lightbox} from './../../amp-lightbox/1.0/lightbox';
 import {LightboxGalleryContext} from './context';
-import {forwardRef} from '../../../src/preact/compat';
 import {sequentialIdGenerator} from '../../../src/utils/id-generator';
 import {
   useContext,
-  useImperativeHandle,
   useLayoutEffect,
   useRef,
   useState,
@@ -69,33 +67,30 @@ export function LightboxGallery({children}) {
 
 /**
  * @param {!LightboxGalleryDef.WithLightboxProps} props
- * @param {{current: (!LightboxGalleryDef.LightboxApi|null)}} ref
  * @return {PreactDef.Renderable}
  */
-function WithLightboxWithRef(
-  {
-    autoLightbox = true,
-    as: Comp = 'div',
-    children,
-    render = () => children,
-    role = 'button',
-    tabindex = '0',
-    ...rest
-  },
-  ref
-) {
+export function WithLightbox({
+  autoLightbox = true,
+  as: Comp = 'div',
+  children,
+  render = () => children,
+  role = 'button',
+  tabindex = '0',
+  ...rest
+}) {
   const [genKey] = useState(generateLightboxItemKey);
+  const lightboxRef = useRef(null);
   const {open, register, deregister} = useContext(LightboxGalleryContext);
   useLayoutEffect(() => {
     register(genKey, render);
     return () => deregister(genKey);
   }, [genKey, deregister, register, render]);
-  useImperativeHandle(ref, () => ({open}), [open]);
   return autoLightbox ? (
     <Comp
       {...rest}
       key={genKey}
       onClick={() => open()}
+      ref={lightboxRef}
       role={role}
       tabindex={tabindex}
     >
@@ -105,7 +100,3 @@ function WithLightboxWithRef(
     children
   );
 }
-
-const WithLightbox = forwardRef(WithLightboxWithRef);
-
-export {WithLightbox};

@@ -21,6 +21,7 @@ import {
   getPercentageOffsetFromAlignment,
   scrollContainerToElement,
 } from './dimensions';
+import {LightboxGalleryContext} from '../../amp-lightbox-gallery/1.0/context';
 import {debounce} from '../../../src/utils/rate-limit';
 import {forwardRef} from '../../../src/preact/compat';
 import {mod} from '../../../src/utils/math';
@@ -28,6 +29,7 @@ import {setStyle} from '../../../src/style';
 import {toWin} from '../../../src/types';
 import {
   useCallback,
+  useContext,
   useImperativeHandle,
   useLayoutEffect,
   useMemo,
@@ -137,14 +139,15 @@ function ScrollerWithRef(
    */
   const scrollOffset = useRef(0);
 
+  const {open: openLightbox} = useContext(LightboxGalleryContext);
   const slides = renderSlides(
     {
       alignment,
       children,
-      lightbox,
       loop,
       mixedLength,
       offsetRef,
+      openLightbox: lightbox && openLightbox,
       pivotIndex,
       restingIndex,
       snap,
@@ -346,11 +349,11 @@ function renderSlides(
   {
     alignment,
     children,
-    lightbox,
     loop,
     mixedLength,
     restingIndex,
     offsetRef,
+    openLightbox,
     pivotIndex,
     snap,
     snapBy,
@@ -360,10 +363,10 @@ function renderSlides(
   classes
 ) {
   const {length} = children;
-  const lightboxProps = lightbox && {
+  const lightboxProps = openLightbox && {
     role: 'button',
     tabindex: '0',
-    onClick: () => lightbox.current?.open(),
+    onClick: () => openLightbox(),
   };
   const slides = children.map((child, index) => {
     const key = `slide-${child.key || index}`;

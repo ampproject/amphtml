@@ -42,12 +42,7 @@ LightboxGalleryDef.WithLightboxProps;
  * @typedef {{
  *   deregister: (function(string):undefined),
  *   register: (function(string, Element):undefined),
+ *   open: (function:undefined),
  * }}
  */
 LightboxGalleryDef.ContextProps;
-
-/** @interface */
-LightboxGalleryDef.LightboxApi = class {
-  /** Open lightbox */
-  open() {}
-};

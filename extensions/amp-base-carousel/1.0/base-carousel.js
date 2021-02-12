@@ -290,7 +290,6 @@ function BaseCarouselWithRef(
     setRtl(isRTL(doc));
   }, [dir, setRtl]);
 
-  const lightboxRef = useRef(null);
   return (
     <ContainWrapper
       size={true}
@@ -301,7 +300,6 @@ function BaseCarouselWithRef(
         direction: rtl ? Direction.RTL : Direction.LTR,
       }}
       ref={containRef}
-      contentRef={contentRef}
       onFocus={(e) => {
         if (onFocus) {
           onFocus(e);
@@ -323,7 +321,7 @@ function BaseCarouselWithRef(
       tabIndex="0"
       wrapperClassName={classes.carousel}
       contentAs={lightbox ? WithLightbox : 'div'}
-      contentRef={lightboxRef}
+      contentRef={contentRef}
       contentProps={{
         autoLightbox: false,
         render: () =>
@@ -352,7 +350,7 @@ function BaseCarouselWithRef(
         alignment={snapAlign}
         autoAdvanceCount={autoAdvanceCount}
         axis={axis}
-        lightbox={lightbox && lightboxRef}
+        lightbox={lightbox}
         loop={loop}
         mixedLength={mixedLength}
         restingIndex={currentSlide}
