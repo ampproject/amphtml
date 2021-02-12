@@ -24,7 +24,7 @@ describes.realWin('amp-pixel', {amp: true}, (env) => {
   let whenFirstVisiblePromise, whenFirstVisibleResolver;
   let pixel;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     win = env.win;
     whenFirstVisiblePromise = new Promise((resolve) => {
       whenFirstVisibleResolver = resolve;
@@ -32,7 +32,9 @@ describes.realWin('amp-pixel', {amp: true}, (env) => {
     env.sandbox
       .stub(env.ampdoc, 'whenFirstVisible')
       .callsFake(() => whenFirstVisiblePromise);
-    createPixel('https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?');
+    await createPixel(
+      'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?'
+    );
   });
 
   function createPixel(src, referrerPolicy) {

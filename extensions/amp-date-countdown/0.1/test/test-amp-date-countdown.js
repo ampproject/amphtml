@@ -45,8 +45,8 @@ describes.realWin(
     it(
       'should display timeleft in the format ' +
         '{d} {days} {h} {hours} {m} {minutes} {s} {seconds}',
-      () => {
-        element.buildInternal();
+      async () => {
+        await element.buildInternal();
         const timeObj = Object.assign(
           impl.getYDHMSFromMs_(endDate - twoDaysBeforeEndDate),
           impl.getLocaleWord_('en')
@@ -78,8 +78,8 @@ describes.realWin(
       'should display timeleft in the format ' +
         '{d} {days} {h} {hours} {m} {minutes} {s} {seconds},' +
         'in i18n Chinese Simplified',
-      () => {
-        element.buildInternal();
+      async () => {
+        await element.buildInternal();
         const timeObj = Object.assign(
           impl.getYDHMSFromMs_(endDate - twoDaysBeforeEndDate),
           impl.getLocaleWord_('zh-cn')
@@ -105,8 +105,8 @@ describes.realWin(
       }
     );
 
-    it('should display timeleft in the format {hh}:{mm}:{ss}', () => {
-      element.buildInternal();
+    it('should display timeleft in the format {hh}:{mm}:{ss}', async () => {
+      await element.buildInternal();
       const timeObj = Object.assign(
         impl.getYDHMSFromMs_(endDate - twoDaysBeforeEndDate),
         impl.getLocaleWord_('en')
@@ -120,8 +120,8 @@ describes.realWin(
     it(
       'should display timeleft in the format ' +
         '{h} {hours} and {m} {minutes} and {s} {seconds}',
-      () => {
-        element.buildInternal();
+      async () => {
+        await element.buildInternal();
         const timeObj = Object.assign(
           impl.getYDHMSFromMs_(endDate - twoDaysBeforeEndDate - 1000),
           impl.getLocaleWord_('en')
@@ -146,8 +146,8 @@ describes.realWin(
       }
     );
 
-    it('should display timeleft in the format {d} {days} {h}:{mm}', () => {
-      element.buildInternal();
+    it('should display timeleft in the format {d} {days} {h}:{mm}', async () => {
+      await element.buildInternal();
       const timeObj = Object.assign(
         impl.getYDHMSFromMs_(endDate - twoDaysBeforeEndDate - 1000),
         impl.getLocaleWord_('en')
@@ -158,8 +158,8 @@ describes.realWin(
       expect(itemElement.textContent).to.equal('1 Days 23:59');
     });
 
-    it('should calculate the timeleft after added offset-seconds', () => {
-      element.buildInternal();
+    it('should calculate the timeleft after added offset-seconds', async () => {
+      await element.buildInternal();
       const timeObj = Object.assign(
         impl.getYDHMSFromMs_(
           endDate - twoDaysBeforeEndDate + 24 * 60 * 60 * 1000
@@ -188,8 +188,8 @@ describes.realWin(
       );
     });
 
-    it('should calculate the timeleft after substracted offset-seconds', () => {
-      element.buildInternal();
+    it('should calculate the timeleft after substracted offset-seconds', async () => {
+      await element.buildInternal();
       const timeObj = Object.assign(
         impl.getYDHMSFromMs_(
           endDate - twoDaysBeforeEndDate + -1 * 24 * 60 * 60 * 1000
@@ -221,11 +221,11 @@ describes.realWin(
     it(
       'should calculate a negative time when target is in future ' +
         'when using the "data-count-up" attribute',
-      () => {
+      async () => {
         const countUp = true;
         element.setAttribute('data-count-up', '');
         element.setAttribute('when-ended', 'continue');
-        element.buildInternal();
+        await element.buildInternal();
         const timeObj = Object.assign(
           impl.getYDHMSFromMs_(
             endDate -
@@ -264,11 +264,11 @@ describes.realWin(
     it(
       'should calculate a positive time when target is in past ' +
         'when using the "data-count-up" attribute',
-      () => {
+      async () => {
         const countUp = true;
         element.setAttribute('data-count-up', '');
         element.setAttribute('when-ended', 'continue');
-        element.buildInternal();
+        await element.buildInternal();
         const timeObj = Object.assign(
           impl.getYDHMSFromMs_(
             twoDaysBeforeEndDate -

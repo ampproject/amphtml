@@ -458,10 +458,10 @@ describes.realWin(
 
       it('awaits first scroll', async () => {
         element.buildInternal();
-        await Promise.resolve();
+        await new Promise(setTimeout);
         expect(service.pages_.length).to.equal(1);
         win.dispatchEvent(new Event('scroll'));
-        await Promise.resolve();
+        await new Promise(setTimeout);
         expect(service.pages_.length).to.equal(3);
       });
     });
