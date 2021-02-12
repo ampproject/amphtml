@@ -24,6 +24,7 @@ import {
 import {AmpdocAnalyticsRoot, EmbedAnalyticsRoot} from './analytics-root';
 import {AnalyticsGroup} from './analytics-group';
 import {Services} from '../../../src/services';
+import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {
@@ -34,6 +35,7 @@ import {
 } from '../../../src/service';
 
 const PROP = '__AMP_AN_ROOT';
+const TAG = 'ANALYTICS-INSTRUMENTATION';
 
 /**
  * @implements {../../../src/service.Disposable}
@@ -102,6 +104,15 @@ export class InstrumentationService {
     vars = dict(),
     enableDataVars = true
   ) {
+    if (!target.isConnected) {
+      dev().error(
+        TAG,
+        'Attempting to trigger event for detached target: %s',
+        target
+      );
+      return;
+    }
+
     const event = new AnalyticsEvent(target, eventType, vars, enableDataVars);
     const root = this.findRoot_(target);
     const trackerName = getTrackerKeyName(eventType);
