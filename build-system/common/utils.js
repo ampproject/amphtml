@@ -146,16 +146,15 @@ function usesFilesOrLocalChanges(taskName) {
  * Runs 'npm install' to install packages in a given directory.
  *
  * @param {string} dir
- * @param {?NodeJS.ProcessEnv} options
  */
-function installPackages(dir, options = {}) {
+function installPackages(dir) {
   log(
     'Running',
     cyan('npm install'),
     'to install packages in',
     cyan(path.relative(ROOT_DIR, dir)) + '...'
   );
-  execOrDie(`npm install --prefix ${dir}`, {'stdio': 'ignore', ...options});
+  execOrDie(`npm install --prefix ${dir}`, {'stdio': 'ignore'});
 }
 
 module.exports = {
