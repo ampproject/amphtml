@@ -277,8 +277,12 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
                     }
                   }
                   const resources = Services.resourcesForDoc(ampdoc);
-                  const resource = resources.getResourceForElement(element);
-                  resource.measure();
+                  const resource = resources.getResourceForElementOptional(
+                    element
+                  );
+                  if (resource) {
+                    resource.measure();
+                  }
                 })
                 .then(() => {
                   if (element.layoutCount_ == 0) {
