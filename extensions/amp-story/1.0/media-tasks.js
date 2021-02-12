@@ -317,11 +317,6 @@ export class LoadTask extends MediaTask {
     mediaEl.load();
     return Promise.resolve();
   }
-
-  /** @override */
-  requiresSynchronousExecution() {
-    return true;
-  }
 }
 
 /**
