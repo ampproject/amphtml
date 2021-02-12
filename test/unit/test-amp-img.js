@@ -641,6 +641,28 @@ describes.sandboxed('amp-img', {}, (env) => {
     }
 
     it('should not generate sizes for amp-imgs that already have sizes', async () => {
+      const serverRenderedImg = document.createElement('img');
+      serverRenderedImg.setAttribute('src', '/examples/img/sample.jpg');
+      serverRenderedImg.setAttribute('srcset', SRCSET_STRING);
+      serverRenderedImg.setAttribute('sizes', '50vw');
+      const ampImg = await getImg(
+        {
+          src: '/examples/img/sample.jpg',
+          srcset: SRCSET_STRING,
+          sizes: '50vw',
+          width: 300,
+          height: 200,
+        },
+        [serverRenderedImg]
+      );
+      const impl = await ampImg.getImpl(false);
+      impl.buildCallback();
+      await impl.layoutCallback();
+      const img = impl.img_;
+      expect(img.getAttribute('sizes')).to.equal('50vw');
+    });
+
+    it('should not generate sizes for amp-imgs, rendered with sizes from the server', async () => {
       const ampImg = await getImg({
         src: '/examples/img/sample.jpg',
         srcset: SRCSET_STRING,

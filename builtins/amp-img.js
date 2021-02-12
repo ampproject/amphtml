@@ -200,7 +200,8 @@ export class AmpImg extends BaseElement {
       return;
     }
     // No need to generate sizes if already present.
-    const sizes = this.element.getAttribute('sizes');
+    const sizes =
+      this.element.hasAttribute('sizes') || this.img_.hasAttribute('sizes');
     if (sizes) {
       return;
     }
