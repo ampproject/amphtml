@@ -1876,7 +1876,9 @@ export class AmpStoryPage extends AMP.BaseElement {
             }
           } else {
             setImportantStyles(ctaImgEl, {
-              'background-image': 'url(ctaImgAttr)',
+              height: '24px',
+              width: '24px',
+              'background-image': 'url(' + ctaImgAttr + ')',
             });
           }
         }
