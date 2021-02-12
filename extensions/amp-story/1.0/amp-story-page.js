@@ -454,7 +454,8 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   isPageAttachmentOutlinkV2ExperimentOn_() {
-    return isExperimentOn(this.win, 'amp-story-page-attachment-outlink-v2');
+    return true;
+    // return isExperimentOn(this.win, 'amp-story-page-attachment-outlink-v2');
   }
 
   /**
@@ -1898,6 +1899,9 @@ export class AmpStoryPage extends AMP.BaseElement {
               height: '24px',
               width: '24px',
               'background-image': 'url(' + ctaImgAttr + ')',
+              'background-size': 'contain',
+              'background-repeat': 'no-repeat',
+              'background-position': 'center',
             });
           }
         }
