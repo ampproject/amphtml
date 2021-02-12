@@ -19,7 +19,7 @@ const gulp = require('gulp');
 const path = require('path');
 const srcGlobs = require('../test-configs/config').presubmitGlobs;
 const through2 = require('through2');
-const {blue, red} = require('ansi-colors');
+const {blue, red} = require('kleur/colors');
 const {log} = require('../common/logging');
 
 const dedicatedCopyrightNoteSources = /(\.js|\.css|\.go)$/;
@@ -318,7 +318,7 @@ const forbiddenTerms = {
   'initLogConstructor|setReportError': {
     message: 'Should only be called from JS binary entry files.',
     allowlist: [
-      '3p/integration.js',
+      '3p/integration-lib.js',
       '3p/ampcontext-lib.js',
       '3p/iframe-transport-client-lib.js',
       '3p/recaptcha.js',
@@ -514,7 +514,7 @@ const forbiddenTerms = {
   '(doc.*)\\.referrer': {
     message: 'Use Viewer.getReferrerUrl() instead.',
     allowlist: [
-      '3p/integration.js',
+      '3p/integration-lib.js',
       'ads/google/a4a/utils.js',
       'dist.3p/current/integration.js',
       'src/inabox/inabox-viewer.js',
@@ -631,7 +631,7 @@ const forbiddenTerms = {
       'build-system/tasks/firebase.js',
       'build-system/tasks/integration.js',
       'build-system/tasks/prepend-global/index.js',
-      'build-system/tasks/prepend-global/test.js',
+      'build-system/tasks/prepend-global/prepend-global.test.js',
       'build-system/tasks/release/index.js',
       'build-system/tasks/visual-diff/index.js',
       'build-system/tasks/build.js',
@@ -962,7 +962,7 @@ const forbiddenTermsSrcInclusive = {
       'decodeURIComponent throws for malformed URL components. Please ' +
       'use tryDecodeUriComponent from src/url.js',
     allowlist: [
-      '3p/integration.js',
+      '3p/integration-lib.js',
       'dist.3p/current/integration.js',
       'examples/pwa/pwa.js',
       'validator/js/engine/parse-url.js',
@@ -1180,6 +1180,43 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-next-page/1.0/visibility-observer.js',
       'extensions/amp-playbuzz/0.1/amp-playbuzz.js',
       'extensions/amp-story/1.0/page-advancement.js',
+    ],
+  },
+  '\\.getLayoutSize': {
+    message: measurementApiDeprecated,
+    allowlist: [
+      'builtins/amp-img.js',
+      'src/base-element.js',
+      'src/custom-element.js',
+      'src/iframe-helper.js',
+      'src/service/mutator-impl.js',
+      'src/service/resources-impl.js',
+      'src/service/video-manager-impl.js',
+      'extensions/amp-a4a/0.1/amp-a4a.js',
+      'extensions/amp-auto-lightbox/0.1/amp-auto-lightbox.js',
+      'extensions/amp-fx-flying-carpet/0.1/amp-fx-flying-carpet.js',
+      'extensions/amp-script/0.1/amp-script.js',
+      'extensions/amp-story/1.0/amp-story-page.js',
+    ],
+  },
+  'onLayoutMeasure': {
+    message: measurementApiDeprecated,
+    allowlist: [
+      'src/base-element.js',
+      'src/custom-element.js',
+      'extensions/amp-a4a/0.1/amp-a4a.js',
+      'extensions/amp-a4a/0.1/amp-ad-network-base.js',
+      'extensions/amp-ad/0.1/amp-ad-3p-impl.js',
+      'extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler.js',
+      'extensions/amp-ad-exit/0.1/amp-ad-exit.js',
+      'extensions/amp-ad-exit/0.1/filters/click-location.js',
+      'extensions/amp-ad-exit/0.1/filters/filter.js',
+      'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',
+      'extensions/amp-iframe/0.1/amp-iframe.js',
+      'extensions/amp-script/0.1/amp-script.js',
+      'extensions/amp-sidebar/0.1/amp-sidebar.js',
+      'extensions/amp-sidebar/0.2/amp-sidebar.js',
+      'extensions/amp-story/1.0/amp-story-page.js',
     ],
   },
   '\\.getIntersectionElementLayoutBox': {
