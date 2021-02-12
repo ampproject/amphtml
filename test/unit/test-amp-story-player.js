@@ -515,14 +515,14 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     expect(noPreviousSpy).to.not.have.been.called;
   });
 
-  it('should dispatch touchstart event', async () => {
+  it('should dispatch amp-story-player-touchstart event', async () => {
     buildStoryPlayer(1);
 
     await manager.loadPlayers();
     await nextTick();
 
     const touchSpy = env.sandbox.spy();
-    playerEl.addEventListener('touchstart', touchSpy);
+    playerEl.addEventListener('amp-story-player-touchstart', touchSpy);
 
     await swipeDown();
     await nextTick();
@@ -530,20 +530,20 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     expect(touchSpy).to.have.been.called;
   });
 
-  it('should dispatch touchmove event with isNavigationalSwipe', async () => {
+  it('should dispatch amp-story-player-touchmove event when navigating', async () => {
     buildStoryPlayer(1);
 
     await manager.loadPlayers();
     await nextTick();
 
     const touchSpy = env.sandbox.spy();
-    playerEl.addEventListener('touchmove', touchSpy);
+    playerEl.addEventListener('amp-story-player-touchmove', touchSpy);
 
     await swipeLeft();
     await nextTick();
 
     expect(touchSpy).to.have.been.calledWithMatch({
-      type: 'touchmove',
+      type: 'amp-story-player-touchmove',
       detail: {
         coordinates: {
           screenX: 95,
@@ -554,20 +554,20 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     });
   });
 
-  it('should dispatch touchmove event with isNavigationalSwipe', async () => {
+  it('should dispatch amp-story-player-touchmove event when not navigating', async () => {
     buildStoryPlayer(1);
 
     await manager.loadPlayers();
     await nextTick();
 
     const touchSpy = env.sandbox.spy();
-    playerEl.addEventListener('touchmove', touchSpy);
+    playerEl.addEventListener('amp-story-player-touchmove', touchSpy);
 
     await swipeDown();
     await nextTick();
 
     expect(touchSpy).to.have.been.calledWithMatch({
-      type: 'touchmove',
+      type: 'amp-story-player-touchmove',
       detail: {
         coordinates: {
           screenX: 200,
@@ -578,14 +578,14 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     });
   });
 
-  it('should dispatch touchend events', async () => {
+  it('should dispatch amp-story-player-touchend events', async () => {
     buildStoryPlayer(1);
 
     await manager.loadPlayers();
     await nextTick();
 
     const touchSpy = env.sandbox.spy();
-    playerEl.addEventListener('touchend', touchSpy);
+    playerEl.addEventListener('amp-story-player-touchend', touchSpy);
 
     await swipeDown();
     await nextTick();

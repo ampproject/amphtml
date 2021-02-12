@@ -1461,7 +1461,7 @@ export class AmpStoryPlayer {
     this.element_.dispatchEvent(
       createCustomEvent(
         this.win_,
-        'touchstart',
+        'amp-story-player-touchstart',
         dict({
           'coordinates': coordinates,
         })
@@ -1483,7 +1483,7 @@ export class AmpStoryPlayer {
     this.element_.dispatchEvent(
       createCustomEvent(
         this.win_,
-        'touchmove',
+        'amp-story-player-touchmove',
         dict({
           'coordinates': coordinates,
           'isNavigationalSwipe': this.touchEventState_.isSwipeX,
@@ -1524,7 +1524,7 @@ export class AmpStoryPlayer {
     this.element_.dispatchEvent(
       createCustomEvent(
         this.win_,
-        'touchend',
+        'amp-story-player-touchend',
         dict({
           'isNavigationalSwipe': this.touchEventState_.isSwipeX,
         })
