@@ -79,7 +79,6 @@ export function WithLightbox({
   ...rest
 }) {
   const [genKey] = useState(generateLightboxItemKey);
-  const lightboxRef = useRef(null);
   const {open, register, deregister} = useContext(LightboxGalleryContext);
   useLayoutEffect(() => {
     register(genKey, render);
@@ -90,7 +89,6 @@ export function WithLightbox({
       {...rest}
       key={genKey}
       onClick={() => open()}
-      ref={lightboxRef}
       role={role}
       tabindex={tabindex}
     >
