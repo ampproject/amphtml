@@ -318,7 +318,7 @@ const forbiddenTerms = {
   'initLogConstructor|setReportError': {
     message: 'Should only be called from JS binary entry files.',
     allowlist: [
-      '3p/integration.js',
+      '3p/integration-lib.js',
       '3p/ampcontext-lib.js',
       '3p/iframe-transport-client-lib.js',
       '3p/recaptcha.js',
@@ -514,7 +514,7 @@ const forbiddenTerms = {
   '(doc.*)\\.referrer': {
     message: 'Use Viewer.getReferrerUrl() instead.',
     allowlist: [
-      '3p/integration.js',
+      '3p/integration-lib.js',
       'ads/google/a4a/utils.js',
       'dist.3p/current/integration.js',
       'src/inabox/inabox-viewer.js',
@@ -962,7 +962,7 @@ const forbiddenTermsSrcInclusive = {
       'decodeURIComponent throws for malformed URL components. Please ' +
       'use tryDecodeUriComponent from src/url.js',
     allowlist: [
-      '3p/integration.js',
+      '3p/integration-lib.js',
       'dist.3p/current/integration.js',
       'examples/pwa/pwa.js',
       'validator/js/engine/parse-url.js',
