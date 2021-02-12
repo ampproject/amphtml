@@ -761,10 +761,14 @@ export class MediaPool {
    *     element has successfully started preloading.
    */
   preload(domMediaEl) {
+    const time = Date.now();
+    console.log('starting preload', time);
     // Empty then() invocation hides the value yielded by the loadInternal_
     // promise, so that we do not leak the pool media element outside of the
     // scope of the media pool.
-    return this.loadInternal_(domMediaEl).then();
+    return this.loadInternal_(domMediaEl).then((a) =>
+      console.log('preloaded', a.outerHTML, time)
+    );
   }
 
   /**
