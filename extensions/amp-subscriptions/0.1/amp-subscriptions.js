@@ -60,7 +60,7 @@ export class SubscriptionService {
     const configElement = ampdoc.getElementById(TAG);
 
     /** @type {?PlatformStore} */
-    this.platformStore = null;
+    this.platformStore_ = null;
 
     /** @type {!Metering} */
     this.metering_ = new Metering(ampdoc);
@@ -170,7 +170,7 @@ export class SubscriptionService {
         }
       );
 
-      this.platformStore
+      this.platformStore_
         .getAvailablePlatforms()
         .forEach((subscriptionPlatform) => {
           this.fetchEntitlements_(subscriptionPlatform);
@@ -203,7 +203,7 @@ export class SubscriptionService {
   /** @override from AccessVars */
   getAuthdataField(field) {
     return this.initialize_()
-      .then(() => this.platformStore.getEntitlementPromiseFor('local'))
+      .then(() => this.platformStore_.getEntitlementPromiseFor('local'))
       .then((entitlement) => getValueForExpr(entitlement.json(), field));
   }
 
@@ -264,7 +264,7 @@ export class SubscriptionService {
    * @return {!Promise<!JsonObject>}
    */
   getScoreFactorStates() {
-    return this.platformStore.getScoreFactorStates();
+    return this.platformStore_.getScoreFactorStates();
   }
 
   /**
@@ -294,7 +294,7 @@ export class SubscriptionService {
         this.serviceAdapter_
       );
 
-      this.platformStore.resolvePlatform(
+      this.platformStore_.resolvePlatform(
         subscriptionPlatform.getPlatformKey(),
         subscriptionPlatform
       );
@@ -313,10 +313,10 @@ export class SubscriptionService {
         // Re-fetch entitlements when metering state changes,
         // but only if a grant is still needed.
         this.metering_.setOnSaveMeteringState(() => {
-          this.platformStore
+          this.platformStore_
             // We must wait until all platforms return entitlements.
             .getAllPlatformsEntitlements()
-            .then(() => this.platformStore.getGrantStatus())
+            .then(() => this.platformStore_.getGrantStatus())
             .then((grant) => {
               if (grant) {
                 return;
@@ -334,7 +334,7 @@ export class SubscriptionService {
    * @return {!./subscription-platform.SubscriptionPlatform}
    */
   selectPlatformForLogin() {
-    return this.platformStore.selectPlatformForLogin();
+    return this.platformStore_.selectPlatformForLogin();
   }
 
   /**
@@ -369,7 +369,7 @@ export class SubscriptionService {
    */
   initializeLocalPlatforms_(serviceConfig) {
     if ((serviceConfig['serviceId'] || 'local') == 'local') {
-      this.platformStore.resolvePlatform(
+      this.platformStore_.resolvePlatform(
         'local',
         localSubscriptionPlatformFactory(
           this.ampdoc_,
@@ -424,7 +424,7 @@ export class SubscriptionService {
    * @private
    */
   resolveEntitlementsToStore_(platformKey, entitlement) {
-    this.platformStore.resolveEntitlement(platformKey, entitlement);
+    this.platformStore_.resolveEntitlement(platformKey, entitlement);
     if (entitlement.decryptedDocumentKey) {
       this.cryptoHandler_.tryToDecryptDocument(
         entitlement.decryptedDocumentKey
@@ -497,7 +497,7 @@ export class SubscriptionService {
         })
         .catch((reason) => {
           const platformKey = subscriptionPlatform.getPlatformKey();
-          this.platformStore.reportPlatformFailureAndFallback(platformKey);
+          this.platformStore_.reportPlatformFailureAndFallback(platformKey);
           throw user().createError(
             `fetch entitlements failed for ${platformKey}`,
             reason
@@ -514,12 +514,12 @@ export class SubscriptionService {
     const fallbackEntitlement = this.platformConfig_['fallbackEntitlement']
       ? Entitlement.parseFromJson(this.platformConfig_['fallbackEntitlement'])
       : Entitlement.empty('local');
-    this.platformStore = new PlatformStore(
+    this.platformStore_ = new PlatformStore(
       platformKeys,
       this.platformConfig_['score'],
       fallbackEntitlement
     );
-    this.maybeAddFreeEntitlement_(this.platformStore);
+    this.maybeAddFreeEntitlement_(this.platformStore_);
   }
 
   /**
@@ -539,7 +539,7 @@ export class SubscriptionService {
             this.serviceAdapter_,
             origin
           );
-          this.platformStore.resolvePlatform('local', viewerPlatform);
+          this.platformStore_.resolvePlatform('local', viewerPlatform);
           this.getEntitlements_(viewerPlatform)
             .then((entitlement) => {
               devAssert(entitlement, 'Entitlement is null');
@@ -550,7 +550,7 @@ export class SubscriptionService {
               );
             })
             .catch((reason) => {
-              this.platformStore.reportPlatformFailureAndFallback('local');
+              this.platformStore_.reportPlatformFailureAndFallback('local');
               dev().error(TAG, 'Viewer auth failed:', reason);
             });
         }
@@ -564,7 +564,7 @@ export class SubscriptionService {
    * @private
    */
   startAuthorizationFlow_(doPlatformSelection = true) {
-    this.platformStore.getGrantStatus().then((grantState) => {
+    this.platformStore_.getGrantStatus().then((grantState) => {
       this.processGrantState_(grantState);
       this.performPingback_();
     });
@@ -581,25 +581,25 @@ export class SubscriptionService {
   selectAndActivatePlatform_() {
     console.log('selectAndActivatePlatform_');
     const requireValuesPromise = Promise.all([
-      this.platformStore.getGrantStatus(),
-      this.platformStore.selectPlatform(),
-      this.platformStore.getGrantEntitlement(),
+      this.platformStore_.getGrantStatus(),
+      this.platformStore_.selectPlatform(),
+      this.platformStore_.getGrantEntitlement(),
     ]);
 
-    this.platformStore
+    this.platformStore_
       .getGrantStatus()
       .then(() => console.log('getGrantStatus'));
-    this.platformStore
+    this.platformStore_
       .selectPlatform()
       .then(() => console.log('selectPlatform'));
-    this.platformStore
+    this.platformStore_
       .getGrantEntitlement()
       .then(() => console.log('getGrantEntitlement'));
 
     return requireValuesPromise.then((resolvedValues) => {
       const selectedPlatform = resolvedValues[1];
       const grantEntitlement = resolvedValues[2];
-      const selectedEntitlement = this.platformStore.getResolvedEntitlementFor(
+      const selectedEntitlement = this.platformStore_.getResolvedEntitlementFor(
         selectedPlatform.getPlatformKey()
       );
       const bestEntitlement = grantEntitlement || selectedEntitlement;
@@ -641,7 +641,7 @@ export class SubscriptionService {
   performPingback_() {
     if (this.viewTrackerPromise_) {
       return this.viewTrackerPromise_.then(() => {
-        this.platformStore
+        this.platformStore_
           .getAvailablePlatforms()
           .forEach((subscriptionPlatform) => {
             // Iterate the platforms and pingback if it's enabled on that platform
@@ -649,13 +649,13 @@ export class SubscriptionService {
               // Platforms can choose if they want all entitlements
               // or just the granting entitlement
               if (subscriptionPlatform.pingbackReturnsAllEntitlements()) {
-                this.platformStore
+                this.platformStore_
                   .getAllPlatformsEntitlements()
                   .then((resolvedEntitlments) =>
                     subscriptionPlatform.pingback(resolvedEntitlments)
                   );
               } else {
-                this.platformStore
+                this.platformStore_
                   .getGrantEntitlement()
                   .then((grantStateEntitlement) =>
                     subscriptionPlatform.pingback(
@@ -675,10 +675,10 @@ export class SubscriptionService {
    * external event (for example a login)
    */
   resetPlatforms() {
-    this.platformStore = this.platformStore.resetPlatformStore();
+    this.platformStore_ = this.platformStore_.resetPlatformStore();
     this.renderer_.toggleLoading(true);
 
-    this.platformStore
+    this.platformStore_
       .getAvailablePlatforms()
       .forEach((subscriptionPlatform) => {
         this.fetchEntitlements_(subscriptionPlatform);
@@ -704,10 +704,10 @@ export class SubscriptionService {
 
     // Show loading UX.
     this.renderer_.toggleLoading(true);
-    this.platformStore.resetPlatform(platformId);
+    this.platformStore_.resetPlatform(platformId);
 
     // Re-fetch entitlements.
-    const platform = this.platformStore.getPlatform(platformId);
+    const platform = this.platformStore_.getPlatform(platformId);
     this.fetchEntitlements_(platform);
 
     // Start auth flow.
@@ -733,7 +733,7 @@ export class SubscriptionService {
    */
   delegateActionToService(action, platformKey, sourceId = null) {
     return new Promise((resolve) => {
-      this.platformStore.onPlatformResolves(platformKey, (platform) => {
+      this.platformStore_.onPlatformResolves(platformKey, (platform) => {
         devAssert(platform, 'Platform is not registered');
         this.subscriptionAnalytics_.event(
           SubscriptionAnalyticsEvents.ACTION_DELEGATED,
@@ -759,7 +759,7 @@ export class SubscriptionService {
    * @param {?JsonObject} options
    */
   decorateServiceAction(element, platformKey, action, options) {
-    this.platformStore.onPlatformResolves(platformKey, (platform) => {
+    this.platformStore_.onPlatformResolves(platformKey, (platform) => {
       devAssert(platform, 'Platform is not registered');
       platform.decorateUI(element, action, options);
     });
