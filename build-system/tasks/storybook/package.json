@@ -5,7 +5,7 @@
   "main": "index.js",
   "devDependencies": {
     "@ampproject/storybook-addon": "1.1.6",
-    "@babel/core": "7.12.13",
+    "@babel/core": "7.12.16",
     "@babel/preset-react": "7.12.13",
     "@babel/runtime-corejs3": "7.12.13",
     "@storybook/addon-a11y": "5.3.21",
