@@ -37,7 +37,7 @@ import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {listen} from '../../../src/event-helper';
+import {listen, listenOncePromise} from '../../../src/event-helper';
 import {mutedOrUnmutedEvent} from '../../../src/iframe-video';
 import {
   observeDisplay,
@@ -169,6 +169,8 @@ export class AmpVideo extends AMP.BaseElement {
     this.isPlaying_ = false;
 
     this.onDisplay_ = this.onDisplay_.bind(this);
+
+    this.element.resetOnDomChange = this.resetOnDomChange.bind(this);
   }
 
   /**
@@ -662,15 +664,16 @@ export class AmpVideo extends AMP.BaseElement {
       childElementByTag(this.element, 'video'),
       'Tried to reset amp-video without an underlying <video>.'
     );
-
+    console.log('resetOnDomChange');
     this.uninstallEventHandlers_();
     this.installEventHandlers_();
-    if (!this.isPlaceholderVideo_(this.video_)) {
+    if (this.isManagedByBitrate_()) {
       getBitrateManager(this.win).manage(this.video_);
     }
-    console.log('resetOnDomChange');
     // When source changes, video needs to trigger loaded again.
-    this.loadPromise(this.video_).then(() => this.onVideoLoaded_());
+    listenOncePromise(this.video_, 'loadedmetadata').then(
+      () => console.log('loadedmetadata') && this.onVideoLoaded_()
+    );
   }
 
   /** @private */
