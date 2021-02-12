@@ -217,7 +217,12 @@ const targetMatchers = {
   },
   [Targets.PRETTIFY]: (file) => {
     // OWNERS files can be prettified.
-    return prettifyFiles.includes(file);
+    return (
+      prettifyFiles.includes(file) ||
+      file == '.prettierrc' ||
+      file == '.prettierignore' ||
+      file == 'build-system/tasks/prettify.js'
+    );
   },
   [Targets.RENOVATE_CONFIG]: (file) => {
     return (
