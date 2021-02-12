@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-// eslint-disable-next-line no-unused-vars
 let cumulativeLayoutShift, largestContentfulPaint, longTasks, measureStarted;
 
 function renderMeasurement(container, label, count) {
@@ -76,7 +75,7 @@ function measureLongTasks() {
 }
 
 function measureTimeToInteractive() {
-  measureStarted = Date.now();
+  measureStarted = Date.now(); // eslint-disable-line no-unused-vars
 }
 
 function getMaxFirstInputDelay(firstContentfulPaint) {
@@ -131,7 +130,7 @@ document.addEventListener('DOMContentLoaded', function () {
             width: 200px;
             overflow: hidden;
         }
-        
+
         .i-amphtml-performance-line {
             display: flex;
             flex-direction: row;
@@ -139,7 +138,7 @@ document.addEventListener('DOMContentLoaded', function () {
             justify-content: space-between;
             font-size: 12px;
         }
-        
+
         .i-amphtml-performance-count {
             margin-left: 8px;
             font-weight: bold;
