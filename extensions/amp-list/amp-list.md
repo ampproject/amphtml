@@ -153,11 +153,11 @@ In `<amp-list>`, you can use the [`items`](#items) attribute to render a subset 
 
 ### Specifying an overflow
 
-Optionally, the `<amp-list>` component can contain an element with the `overflow` attribute. Add an element with the AMP `overflow` attribute to `amp-list` if the AMP framework is unable to size it as requested. If you include a child element of `amp-list` with the `overflow` attribute, it will appear if one of the following conditions are met:
+Optionally, the `<amp-list>` component can contain an element with the `overflow` attribute. AMP will display this element if all of the following conditions are met:
 
--   The bottom of `amp-list` is below the viewport.
-
--   The bottom of `amp-list` is within 15% of the height of the entire page and within 1000px of the end of the page.
+-   The contents rendered into the `amp-list` exceed its specified size.
+-   The bottom of `amp-list` is within the viewport.
+-   The bottom of `amp-list` is not near the bottom of the page (defined as the minimum of either the bottom 15% of the document or the bottom 1000px)
 
 If `amp-list` is outside the viewport, it will be automatically expanded.
 
