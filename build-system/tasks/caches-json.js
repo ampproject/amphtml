@@ -31,7 +31,7 @@ async function cachesJson() {
     const contents = fs.readFileSync(cachesJsonPath).toString();
     obj = JSON.parse(contents);
   } catch (e) {
-    log(red(`Could not parse ${cachesJsonPath}.`));
+    log(red('ERROR:'), 'Could not parse', cyan(cachesJsonPath));
     process.exitCode = 1;
     return;
   }
