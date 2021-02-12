@@ -59,9 +59,6 @@ export class SubscriptionService {
   constructor(ampdoc) {
     const configElement = ampdoc.getElementById(TAG);
 
-    /** @type {?PlatformStore} */
-    this.platformStore_ = null;
-
     /** @type {!Metering} */
     this.metering_ = new Metering(ampdoc);
 
@@ -85,6 +82,9 @@ export class SubscriptionService {
 
     /** @private {?JsonObject} */
     this.platformConfig_ = null;
+
+    /** @type {?PlatformStore} */
+    this.platformStore_ = null;
 
     /** @const @private {!Element} */
     this.configElement_ = user().assertElement(configElement);
