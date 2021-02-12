@@ -15,50 +15,38 @@
  */
 'use strict';
 
-const gulp = require('gulp');
-const through2 = require('through2');
-const {log} = require('../common/logging');
-const {red, yellow} = require('kleur/colors');
+const fs = require('fs');
+const {log, logLocalDev} = require('../common/logging');
+const {red, green, cyan} = require('kleur/colors');
 
-const expectedCaches = ['google'];
-
+const expectedCaches = ['google', 'bing'];
 const cachesJsonPath = 'build-system/global-configs/caches.json';
 
 /**
- * Fail if build-system/global-configs/caches.json is missing some expected
- * caches.
- * @return {!Promise}
+ * Fail if build-system/global-configs/caches.json is missing any expected caches.
  */
 async function cachesJson() {
-  return gulp.src([cachesJsonPath]).pipe(
-    through2.obj(function (file) {
-      let obj;
-      try {
-        obj = JSON.parse(file.contents.toString());
-      } catch (e) {
-        log(
-          yellow(
-            `Could not parse ${cachesJsonPath}. ` +
-              'This is most likely a fatal error that ' +
-              'will be found by checkValidJson'
-          )
-        );
-        return;
-      }
-      const foundCaches = [];
-      for (const foundCache of obj.caches) {
-        foundCaches.push(foundCache.id);
-      }
-      for (const cache of expectedCaches) {
-        if (!foundCaches.includes(cache)) {
-          log(
-            red('Missing expected cache "' + cache + `" in ${cachesJsonPath}`)
-          );
-          process.exitCode = 1;
-        }
-      }
-    })
-  );
+  let obj;
+  try {
+    const contents = fs.readFileSync(cachesJsonPath).toString();
+    obj = JSON.parse(contents);
+  } catch (e) {
+    log(red(`Could not parse ${cachesJsonPath}.`));
+    process.exitCode = 1;
+    return;
+  }
+  const foundCaches = [];
+  for (const foundCache of obj.caches) {
+    foundCaches.push(foundCache.id);
+  }
+  for (const cache of expectedCaches) {
+    if (foundCaches.includes(cache)) {
+      logLocalDev(green('✔'), 'Found', cyan(cache), 'in', cyan(cachesJsonPath));
+    } else {
+      log(red('✖'), 'Missing', cyan(cache), 'in', cyan(cachesJsonPath));
+      process.exitCode = 1;
+    }
+  }
 }
 
 module.exports = {
