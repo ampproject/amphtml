@@ -68,8 +68,8 @@ export function LightboxGallery({children}) {
 }
 
 /**
- * @param {!LightboxGalleryDef.LightboxableProps} props
- * @param {{current: ?Element}} ref
+ * @param {!LightboxGalleryDef.WithLightboxProps} props
+ * @param {{current: (!LightboxGalleryDef.LightboxApi|null)}} ref
  * @return {PreactDef.Renderable}
  */
 function WithLightboxWithRef(

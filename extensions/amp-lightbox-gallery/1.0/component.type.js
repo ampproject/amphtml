@@ -28,11 +28,15 @@ LightboxGalleryDef.Props;
 
 /**
  * @typedef {{
- *   id: (string|undefined),
+ *   as: (string|undefined),
+ *   autoLightbox: (boolean|undefined),
  *   children: (!PreactDef.Renderable),
+ *   render: (function():PreactDef.Renderable),
+ *   role: (string|undefined),
+ *   tabindex: (string|undefined),
  * }}
  */
-LightboxGalleryDef.LightboxableProps;
+LightboxGalleryDef.WithLightboxProps;
 
 /**
  * @typedef {{
@@ -41,3 +45,9 @@ LightboxGalleryDef.LightboxableProps;
  * }}
  */
 LightboxGalleryDef.ContextProps;
+
+/** @interface */
+LightboxGalleryDef.LightboxApi = class {
+  /** Open lightbox */
+  open() {}
+};
