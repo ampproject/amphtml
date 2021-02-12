@@ -686,8 +686,6 @@ export class SubscriptionService {
    * @param {string} platformId
    */
   resetPlatform(platformId) {
-    console.log('resetPlatform', platformId);
-
     // Show loading UX.
     this.renderer_.toggleLoading(true);
     this.platformStore_.resetPlatform(platformId);
