@@ -32,7 +32,9 @@ describes.realWin('amp-pixel', {amp: true}, (env) => {
     env.sandbox
       .stub(env.ampdoc, 'whenFirstVisible')
       .callsFake(() => whenFirstVisiblePromise);
-    await createPixel('https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?');
+    await createPixel(
+      'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?'
+    );
   });
 
   function createPixel(src, referrerPolicy) {

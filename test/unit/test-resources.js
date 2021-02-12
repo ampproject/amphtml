@@ -86,8 +86,12 @@ describes.realWin('Resources', {amp: true}, (env) => {
     env.sandbox.stub(resource, 'isFixed').returns(isFixed);
     env.sandbox.stub(resource, 'isInViewport').returns(isInViewport);
     env.sandbox.stub(resource, 'prerenderAllowed').returns(prerenderAllowed);
-    env.sandbox.stub(resource, 'renderOutsideViewport').returns(renderOutsideViewport);
-    env.sandbox.stub(resource, 'idleRenderOutsideViewport').returns(idleRenderOutsideViewport);
+    env.sandbox
+      .stub(resource, 'renderOutsideViewport')
+      .returns(renderOutsideViewport);
+    env.sandbox
+      .stub(resource, 'idleRenderOutsideViewport')
+      .returns(idleRenderOutsideViewport);
     env.sandbox.stub(resource, 'getLayoutPriority').returns(layoutPriority);
     env.sandbox.stub(resource, 'getTaskId').returns(taskId);
 
