@@ -514,25 +514,31 @@ export class MediaPool {
     return this.enqueueMediaElementTask_(
       poolMediaEl,
       new SwapIntoDomTask(placeholderEl)
-    ).then(
-      () => {
-        this.maybeResetAmpMedia_(ampMediaForPoolEl);
-        this.maybeResetAmpMedia_(ampMediaForDomEl);
-
-        this.enqueueMediaElementTask_(
-          poolMediaEl,
-          new UpdateSourcesTask(this.win_, sources)
-        );
-        this.enqueueMediaElementTask_(poolMediaEl, new LoadTask());
-      },
-      () => {
-        this.forceDeallocateMediaElement_(poolMediaEl);
-      }
-    );
+    )
+      .then(() =>
+        Promise.all([
+          this.maybeResetAmpMedia_(ampMediaForPoolEl),
+          this.maybeResetAmpMedia_(ampMediaForDomEl),
+        ])
+      )
+      .then(
+        () => {
+          const sourcesPromise = this.enqueueMediaElementTask_(
+            poolMediaEl,
+            new UpdateSourcesTask(this.win_, sources)
+          );
+          this.enqueueMediaElementTask_(poolMediaEl, new LoadTask());
+          return sourcesPromise;
+        },
+        () => {
+          this.forceDeallocateMediaElement_(poolMediaEl);
+        }
+      );
   }
 
   /**
    * @param {?Element} componentEl
+   * @return {?Promise}
    * @private
    */
   maybeResetAmpMedia_(componentEl) {
@@ -545,9 +551,11 @@ export class MediaPool {
       return;
     }
 
-    if (componentEl.resetOnDomChange) {
-      componentEl.resetOnDomChange();
-    }
+    return componentEl.getImpl().then((impl) => {
+      if (impl.resetOnDomChange) {
+        impl.resetOnDomChange();
+      }
+    });
   }
 
   /**

@@ -84,6 +84,7 @@ export class Sources {
       element.appendChild(srcEl)
     );
     if (element.changedSources) {
+      console.log('changed sources');
       element.changedSources();
     }
 
