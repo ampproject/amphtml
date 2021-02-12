@@ -114,7 +114,7 @@ function printFixMessages() {
 }
 
 /**
- * Runs prettier on the given list of files with gulp-prettier.
+ * Prettifies on the given list of files.
  * @param {!Array<string>} filesToCheck
  */
 async function runPrettify(filesToCheck) {
