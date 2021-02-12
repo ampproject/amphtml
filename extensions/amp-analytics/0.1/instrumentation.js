@@ -24,6 +24,7 @@ import {
 import {AmpdocAnalyticsRoot, EmbedAnalyticsRoot} from './analytics-root';
 import {AnalyticsGroup} from './analytics-group';
 import {Services} from '../../../src/services';
+import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {
@@ -32,10 +33,9 @@ import {
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
 } from '../../../src/service';
-import {dev} from '../../../src/log';
 
 const PROP = '__AMP_AN_ROOT';
-const TAG = 'ANALYTICS-INSTRUMENTATION',
+const TAG = 'ANALYTICS-INSTRUMENTATION';
 
 /**
  * @implements {../../../src/service.Disposable}
