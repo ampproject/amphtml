@@ -176,11 +176,12 @@ function reportResult() {
  * @param {string} inputFile
  */
 async function runTest(inputFile) {
-  const input = await getInput(inputFile);
   const testName = getTestName(inputFile);
-  const expectedOutput = await getExpectedOutput(inputFile);
-  const extraOptions = loadOptions(inputFile);
-  const transform = await getTransform(inputFile, extraOptions);
+  const [input, expectedOutput, transform] = await Promise.all([
+    getInput(inputFile),
+    getExpectedOutput(inputFile),
+    getTransform(inputFile, loadOptions(inputFile)),
+  ]);
   const output = await getOutput(transform, input);
   try {
     assert.strictEqual(output, expectedOutput);

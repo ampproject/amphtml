@@ -15,35 +15,35 @@
  */
 'use strict';
 
-const fs = require('fs');
+const path = require('path');
 const {log, logLocalDev} = require('../common/logging');
 const {red, green, cyan} = require('kleur/colors');
 
 const expectedCaches = ['google', 'bing'];
-const cachesJsonPath = 'build-system/global-configs/caches.json';
+const cachesJsonPath = '../global-configs/caches.json';
 
 /**
- * Fail if build-system/global-configs/caches.json is missing any expected caches.
+ * Entry point for gulp caches-jason.
  */
 async function cachesJson() {
-  let obj;
+  const filename = path.basename(cachesJsonPath);
+  let jsonContent;
   try {
-    const contents = fs.readFileSync(cachesJsonPath).toString();
-    obj = JSON.parse(contents);
+    jsonContent = require(cachesJsonPath);
   } catch (e) {
-    log(red('ERROR:'), 'Could not parse', cyan(cachesJsonPath));
+    log(red('ERROR:'), 'Could not parse', cyan(filename));
     process.exitCode = 1;
     return;
   }
   const foundCaches = [];
-  for (const foundCache of obj.caches) {
+  for (const foundCache of jsonContent.caches) {
     foundCaches.push(foundCache.id);
   }
   for (const cache of expectedCaches) {
     if (foundCaches.includes(cache)) {
-      logLocalDev(green('✔'), 'Found', cyan(cache), 'in', cyan(cachesJsonPath));
+      logLocalDev(green('✔'), 'Found', cyan(cache), 'in', cyan(filename));
     } else {
-      log(red('✖'), 'Missing', cyan(cache), 'in', cyan(cachesJsonPath));
+      log(red('✖'), 'Missing', cyan(cache), 'in', cyan(filename));
       process.exitCode = 1;
     }
   }
@@ -53,5 +53,4 @@ module.exports = {
   cachesJson,
 };
 
-cachesJson.description =
-  'Check that some expected caches are included in caches.json.';
+cachesJson.description = 'Check that caches.json contains all expected caches.';

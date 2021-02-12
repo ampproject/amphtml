@@ -19,7 +19,7 @@ const path = require('path');
 const {green, red, cyan} = require('kleur/colors');
 const {log} = require('../common/logging');
 
-const CONFIG_PATH = 'build-system/tasks/performance/config.json';
+const CONFIG_PATH = './performance/config.json';
 const LOCAL_HOST_URL = 'http://localhost:8000/';
 
 /**
@@ -27,16 +27,15 @@ const LOCAL_HOST_URL = 'http://localhost:8000/';
  * Check if all localhost urls in performance/config.json exist
  */
 async function performanceUrls() {
-  let obj;
+  let jsonContent;
   try {
-    const contents = fs.readFileSync(CONFIG_PATH).toString();
-    obj = JSON.parse(contents);
+    jsonContent = require(CONFIG_PATH);
   } catch (e) {
     log(red('ERROR:'), 'Could not parse', cyan(CONFIG_PATH));
     process.exitCode = 1;
     return;
   }
-  const filepaths = obj.handlers.flatMap((handler) =>
+  const filepaths = jsonContent.handlers.flatMap((handler) =>
     handler.urls
       .filter((url) => url.startsWith(LOCAL_HOST_URL))
       .map((url) =>
