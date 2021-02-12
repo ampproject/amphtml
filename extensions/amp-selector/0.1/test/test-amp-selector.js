@@ -675,7 +675,7 @@ describes.realWin(
         });
 
         const impl = await ampSelector.getImpl(false);
-        ampSelector.buildInternal();
+        await ampSelector.buildInternal();
 
         const options = impl.getElementsForTesting();
         const setInputsSpy = env.sandbox.spy(impl, 'setInputs_');
@@ -707,7 +707,7 @@ describes.realWin(
 
         const impl = await ampSelector.getImpl(false);
         impl.mutateElement = (fn) => fn();
-        ampSelector.buildInternal();
+        await ampSelector.buildInternal();
 
         const options = impl.getElementsForTesting();
         expect(options[0].hasAttribute('selected')).to.be.true;
@@ -743,7 +743,7 @@ describes.realWin(
               selectedCount: 1,
             },
           });
-          ampSelector.buildInternal();
+          await ampSelector.buildInternal();
           const impl = await ampSelector.getImpl(false);
 
           expect(ampSelector.hasAttribute('multiple')).to.be.false;
@@ -784,7 +784,7 @@ describes.realWin(
               selectedCount: 1,
             },
           });
-          ampSelector.buildInternal();
+          await ampSelector.buildInternal();
           const impl = await ampSelector.getImpl(false);
 
           expect(ampSelector.hasAttribute('multiple')).to.be.false;
@@ -844,7 +844,7 @@ describes.realWin(
             selectedCount: 2,
           },
         });
-        ampSelector.buildInternal();
+        await ampSelector.buildInternal();
         const impl = await ampSelector.getImpl(false);
         impl.mutateElement = (fn) => fn();
 
@@ -871,7 +871,7 @@ describes.realWin(
             selectedCount: 1,
           },
         });
-        ampSelector.buildInternal();
+        await ampSelector.buildInternal();
         const impl = await ampSelector.getImpl(false);
         impl.mutateElement = (fn) => fn();
 
@@ -908,7 +908,7 @@ describes.realWin(
         ampSelector.children[0].setAttribute('selected', '');
         ampSelector.children[1].setAttribute('selected', '');
 
-        ampSelector.buildInternal();
+        await ampSelector.buildInternal();
         const impl = await ampSelector.getImpl(false);
         impl.mutateElement = (fn) => fn();
 
@@ -945,7 +945,7 @@ describes.realWin(
             },
           });
           ampSelector.children[0].setAttribute('selected', '');
-          ampSelector.buildInternal();
+          await ampSelector.buildInternal();
           const impl = await ampSelector.getImpl(false);
           const triggerSpy = env.sandbox.spy(impl.action_, 'trigger');
 
@@ -986,7 +986,7 @@ describes.realWin(
             },
           });
           ampSelector.children[0].setAttribute('selected', '');
-          ampSelector.buildInternal();
+          await ampSelector.buildInternal();
           const impl = await ampSelector.getImpl(false);
           const triggerSpy = env.sandbox.spy(impl.action_, 'trigger');
 
@@ -1028,7 +1028,7 @@ describes.realWin(
             },
           });
           ampSelector.children[0].setAttribute('selected', '');
-          ampSelector.buildInternal();
+          await ampSelector.buildInternal();
           const impl = await ampSelector.getImpl(false);
 
           expect(ampSelector.hasAttribute('multiple')).to.be.false;
@@ -1068,7 +1068,7 @@ describes.realWin(
             },
           });
           ampSelector.children[1].setAttribute('selected', '');
-          ampSelector.buildInternal();
+          await ampSelector.buildInternal();
           const impl = await ampSelector.getImpl(false);
 
           expect(ampSelector.hasAttribute('multiple')).to.be.false;
@@ -1097,7 +1097,7 @@ describes.realWin(
       describe('keyboard-select-mode', () => {
         it('should have `none` mode by default', async () => {
           const ampSelector = getSelector({});
-          ampSelector.buildInternal();
+          await ampSelector.buildInternal();
           const impl = await ampSelector.getImpl(false);
           expect(impl.kbSelectMode_).to.equal('none');
         });
@@ -1105,13 +1105,13 @@ describes.realWin(
         it(
           'should initially focus selected option ONLY if ' +
             'it exists for single-select, otherwise first option',
-          () => {
+          async () => {
             const selectorWithNoSelection = getSelector({
               attributes: {
                 'keyboard-select-mode': 'focus',
               },
             });
-            selectorWithNoSelection.buildInternal();
+            await selectorWithNoSelection.buildInternal();
             expect(selectorWithNoSelection.children[0].tabIndex).to.equal(0);
             for (let i = 1; i < selectorWithNoSelection.children.length; i++) {
               // No other options should be reachable by
@@ -1127,14 +1127,14 @@ describes.realWin(
               },
             });
             selectorWithSelection.children[1].setAttribute('selected', '');
-            selectorWithSelection.buildInternal();
+            await selectorWithSelection.buildInternal();
             expect(selectorWithSelection.children[0].tabIndex).to.equal(-1);
             expect(selectorWithSelection.children[1].tabIndex).to.equal(0);
             expect(selectorWithSelection.children[2].tabIndex).to.equal(-1);
           }
         );
 
-        it('should initially focus first option for multi-select', () => {
+        it('should initially focus first option for multi-select', async () => {
           const ampSelector = getSelector({
             attributes: {
               multiple: true,
@@ -1145,7 +1145,7 @@ describes.realWin(
             },
           });
           ampSelector.children[1].setAttribute('selected', '');
-          ampSelector.buildInternal();
+          await ampSelector.buildInternal();
           expect(ampSelector.children[0].tabIndex).to.equal(0);
           expect(ampSelector.children[1].tabIndex).to.equal(-1);
           expect(ampSelector.children[2].tabIndex).to.equal(-1);
@@ -1162,7 +1162,7 @@ describes.realWin(
           });
           const impl = await ampSelector.getImpl(false);
           const spy = env.sandbox.spy(impl, 'navigationKeyDownHandler_');
-          ampSelector.buildInternal();
+          await ampSelector.buildInternal();
           await keyPress(ampSelector, Keys.RIGHT_ARROW);
           expect(spy).to.not.have.been.called;
         });
@@ -1170,7 +1170,7 @@ describes.realWin(
         it(
           'should update focus when the user presses the arrow keys when ' +
             'keyboard-select-mode is enabled',
-          () => {
+          async () => {
             const ampSelector = getSelector({
               attributes: {
                 'keyboard-select-mode': 'focus',
@@ -1179,7 +1179,7 @@ describes.realWin(
                 count: 3,
               },
             });
-            ampSelector.buildInternal();
+            await ampSelector.buildInternal();
             expect(ampSelector.children[0].tabIndex).to.equal(0);
             expect(ampSelector.children[1].tabIndex).to.equal(-1);
             expect(ampSelector.children[2].tabIndex).to.equal(-1);
@@ -1201,7 +1201,7 @@ describes.realWin(
         it(
           'should update focus when the user presses the home key when ' +
             'keyboard-select-mode is enabled',
-          () => {
+          async () => {
             const ampSelector = getSelector({
               attributes: {
                 'keyboard-select-mode': 'focus',
@@ -1212,7 +1212,7 @@ describes.realWin(
             });
             ampSelector.children[2].setAttribute('selected', '');
             ampSelector.children[0].setAttribute('hidden', '');
-            ampSelector.buildInternal();
+            await ampSelector.buildInternal();
             expect(ampSelector.children[0].tabIndex).to.equal(-1);
             expect(ampSelector.children[1].tabIndex).to.equal(-1);
             expect(ampSelector.children[2].tabIndex).to.equal(0);
@@ -1227,7 +1227,7 @@ describes.realWin(
         it(
           'should update focus when the user presses the end key when ' +
             'keyboard-select-mode is enabled',
-          () => {
+          async () => {
             const ampSelector = getSelector({
               attributes: {
                 'keyboard-select-mode': 'focus',
@@ -1237,7 +1237,7 @@ describes.realWin(
               },
             });
             ampSelector.children[2].setAttribute('hidden', '');
-            ampSelector.buildInternal();
+            await ampSelector.buildInternal();
             expect(ampSelector.children[0].tabIndex).to.equal(0);
             expect(ampSelector.children[1].tabIndex).to.equal(-1);
             expect(ampSelector.children[2].tabIndex).to.equal(-1);
@@ -1262,7 +1262,7 @@ describes.realWin(
               },
             });
             ampSelector.children[1].setAttribute('selected', '');
-            ampSelector.buildInternal();
+            await ampSelector.buildInternal();
             const impl = await ampSelector.getImpl(false);
 
             expect(ampSelector.children[0].tabIndex).to.equal(-1);
@@ -1303,7 +1303,7 @@ describes.realWin(
               count: 3,
             },
           });
-          ampSelector.buildInternal();
+          await ampSelector.buildInternal();
           const impl = await ampSelector.getImpl(false);
           impl.mutateElement = (fn) => fn();
           expect(ampSelector.children[0].hasAttribute('selected')).to.be.false;
@@ -1396,7 +1396,7 @@ describes.realWin(
               count: 2,
             },
           });
-          ampSelector.buildInternal();
+          await ampSelector.buildInternal();
           const impl = await ampSelector.getImpl(false);
           impl.mutateElement = (fn) => fn();
 

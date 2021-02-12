@@ -74,7 +74,7 @@ describes.realWin(
 
     it('should not fetch until doc is visible', async () => {
       element.setAttribute('src', 'https://foo.com/bar?baz=1');
-      element.buildInternal();
+      await element.buildInternal();
 
       whenFirstVisiblePromiseReject();
       await whenFirstVisiblePromise.catch(() => {});
@@ -85,7 +85,7 @@ describes.realWin(
 
     it('should fetch if `src` attribute exists', async () => {
       element.setAttribute('src', 'https://foo.com/bar?baz=1');
-      element.buildInternal();
+      await element.buildInternal();
 
       whenFirstVisiblePromiseResolve();
       await whenFirstVisiblePromise;
@@ -113,7 +113,7 @@ describes.realWin(
       env.sandbox.stub(Services, 'actionServiceForDoc').returns(actions);
 
       element.setAttribute('src', 'https://foo.com/bar?baz=1');
-      element.buildInternal();
+      await element.buildInternal();
 
       expect(actions.trigger).to.not.have.been.called;
 
@@ -135,7 +135,7 @@ describes.realWin(
       env.sandbox.spy(ampState, 'registerAction');
 
       element.setAttribute('src', 'https://foo.com/bar?baz=1');
-      element.buildInternal();
+      await element.buildInternal();
 
       expect(ampState.registerAction).calledWithExactly(
         'refresh',
@@ -147,7 +147,7 @@ describes.realWin(
       env.sandbox.spy(ampState, 'registerAction');
 
       element.setAttribute('src', 'https://foo.com/bar?baz=1');
-      element.buildInternal();
+      await element.buildInternal();
 
       const action = {method: 'refresh', satisfiesTrust: () => true};
       await ampState.executeAction(action);
@@ -207,9 +207,9 @@ describes.realWin(
       );
     });
 
-    it('should not fetch if `src` is mutated and doc is not visible', () => {
+    it('should not fetch if `src` is mutated and doc is not visible', async () => {
       element.setAttribute('src', 'https://foo.com/bar?baz=1');
-      element.buildInternal();
+      await element.buildInternal();
 
       // No fetch should happen until doc is visible.
       expect(ampState.fetch_).to.not.have.been.called;
@@ -224,7 +224,7 @@ describes.realWin(
 
     it('should fetch json if `src` is mutated', async () => {
       element.setAttribute('src', 'https://foo.com/bar?baz=1');
-      element.buildInternal();
+      await element.buildInternal();
 
       // No fetch should happen until doc is visible.
       expect(ampState.fetch_).to.not.have.been.called;
