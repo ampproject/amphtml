@@ -7,6 +7,10 @@ snapshot:
     - 375 # e.g., iPhone
     - 411 # e.g., iPhone X, Pixel
     - 1400 # e.g., common desktop width
+  percy-css: |
+    * {
+      transition-duration: 0ms !important;
+    }
 agent:
   asset-discovery:
     network-idle-timeout: 150 # ms
