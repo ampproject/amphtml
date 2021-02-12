@@ -220,4 +220,9 @@ export const EXPERIMENTS = [
     name: 'Client-side granular consent',
     spec: 'https://github.com/ampproject/amphtml/issues/31607',
   },
+  {
+    id: 'amp-story-page-attachment-outlink-v2',
+    name: 'New UI for all outlinks in stories format',
+    spec: 'https://github.com/ampproject/amphtml/pull/32409/files',
+  },
 ];

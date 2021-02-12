@@ -450,6 +450,14 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
+   * @return {boolean}
+   * @private
+   */
+  isPageAttachmentOutlinkV2ExperimentOn_() {
+    return isExperimentOn(this.win, 'amp-story-page-attachment-outlink-v2');
+  }
+
+  /**
    * Delegates video autoplay so the video manager does not follow the
    * autoplay attribute that may have been set by a publisher, which could
    * play videos from an inactive page.
@@ -1787,8 +1795,15 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     if (!this.openAttachmentEl_) {
       const attachmentHref = attachmentEl.getAttribute('href');
-      if (!attachmentHref) {
+      if (
+        !this.isPageAttachmentOutlinkV2ExperimentOn_() ||
+        (this.isPageAttachmentOutlinkV2ExperimentOn_() && !attachmentHref)
+      ) {
         this.openAttachmentEl_ = buildOpenAttachmentElement(this.element);
+        // If the attachment is a link, copy href to the element so it can be previewed on hover and long press.
+        if (attachmentHref) {
+          this.openAttachmentEl_.setAttribute('href', attachmentHref);
+        }
         this.openAttachmentEl_.addEventListener('click', () =>
           this.openAttachment()
         );
@@ -1817,6 +1832,9 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   renderOpenOutlinkAttachmentUI_() {
+    if (!this.isPageAttachmentOutlinkV2ExperimentOn_()) {
+      return;
+    }
     const attachmentEl = this.element.querySelector(
       'amp-story-page-attachment'
     );
@@ -1830,6 +1848,11 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     if (!this.openAttachmentEl_) {
       this.openAttachmentEl_ = buildOpenOutlinkAttachmentElement(this.element);
+      this.openAttachmentEl_.setAttribute('href', attachmentHref);
+      this.openAttachmentEl_.addEventListener('click', () =>
+        this.openAttachment()
+      );
+
       const ctaChipEl = this.openAttachmentEl_.querySelector(
         '.i-amphtml-story-page-attachment-outlink-chip'
       );
@@ -1846,14 +1869,6 @@ export class AmpStoryPage extends AMP.BaseElement {
         '.i-amphtml-story-page-open-attachment-outlink-bar-right'
       );
 
-      // Copy href to the element so it can be previewed on hover and long press.
-      if (attachmentHref) {
-        this.openAttachmentEl_.setAttribute('href', attachmentHref);
-      }
-      this.openAttachmentEl_.addEventListener('click', () =>
-        this.openAttachment()
-      );
-
       const openLabelAttr = attachmentEl.getAttribute('cta-text');
       const openLabel =
         (openLabelAttr && openLabelAttr.trim()) ||
@@ -1864,15 +1879,19 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.mutateElement(() => {
         const theme = attachmentEl.getAttribute('theme');
         const ctaImgAttr = attachmentEl.getAttribute('cta-img');
-        if (ctaImgAttr !== "none") {
+        if (ctaImgAttr !== 'none') {
           setImportantStyles(textEl, {
             'padding-left': '10px',
           });
           if (!ctaImgAttr) {
             if (theme && AttachmentTheme.DARK === theme.toLowerCase()) {
-              ctaImgEl.classList.add('i-amphtml-story-page-attachment-outlink-dark-link-image');
+              ctaImgEl.classList.add(
+                'i-amphtml-story-page-attachment-outlink-dark-link-image'
+              );
             } else {
-              ctaImgEl.classList.add('i-amphtml-story-page-attachment-outlink-light-link-image');
+              ctaImgEl.classList.add(
+                'i-amphtml-story-page-attachment-outlink-light-link-image'
+              );
             }
           } else {
             setImportantStyles(ctaImgEl, {
