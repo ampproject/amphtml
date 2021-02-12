@@ -150,7 +150,6 @@ const prettifyGlobs = [
   '.codecov.yml',
   '.lando.yml',
   '.lgtm.yml',
-  '.travis.yml',
   '.prettierrc',
   '.renovaterc.json',
   '.circleci/config.yml',

@@ -21,7 +21,6 @@ const {
   isCircleciBuild,
   isPullRequestBuild,
   isGithubActionsBuild,
-  isTravisBuild,
 } = require('../common/ci');
 const {ciJobUrl} = require('../common/ci');
 const {cyan, green, yellow} = require('kleur/colors');
@@ -104,8 +103,7 @@ function inferTestType() {
 }
 
 async function postReport(type, action) {
-  // TODO(rsimha): Clean up `!isTravisaBuild()` condition once Travis is shut off.
-  if (type && isPullRequestBuild() && !isTravisBuild()) {
+  if (type && isPullRequestBuild()) {
     const commitHash = gitCommitHash();
 
     try {

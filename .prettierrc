@@ -32,8 +32,7 @@
         ".codecov.yml",
         ".github/workflows/continuous-integration-workflow.yml",
         ".lando.yml",
-        ".lgtm.yml",
-        ".travis.yml"
+        ".lgtm.yml"
       ],
       "options": {"parser": "yaml"}
     }
