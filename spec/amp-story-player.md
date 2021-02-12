@@ -246,13 +246,13 @@ Here's the JSON configuration for opting out of autoplay:
 
 ## Page Scrolling
 
-By default, the player will scroll the window it's embedded in so that users don't get stuck when scrolling through the player.
+By default, the player will scroll the page it's embedded in so that users don't get stuck when scrolling through the player.
 
-You can opt-out of the default behavior by using the configuration below. This will prevent the player from scrolling the window.
+You can opt-out of the default behavior by using the configuration below. This will prevent the player from scrolling the page.
 
 ### JSON Configuration
 
-Here's the JSON configuration for opting out of window scrolling:
+Here's the JSON configuration for opting out of page scrolling:
 
 ```html
 <amp-story-player>
