@@ -31,17 +31,10 @@ const result = {
   },
 };
 
-test.cb('collects selectors', (t) => {
-  const data = Object.create(null);
+test('collects selectors', async (t) => {
   const testFiles = `${__dirname}/*.css`;
-  m.getZindexStream(testFiles)
-    .on('data', (chunk) => {
-      data[chunk.name] = chunk.selectors;
-    })
-    .on('end', () => {
-      t.deepEqual(data, result);
-      t.end();
-    });
+  const data = await m.getZindexSelectors(testFiles);
+  t.deepEqual(data, result);
 });
 
 test('sync - create array of arrays with z index order', (t) => {
