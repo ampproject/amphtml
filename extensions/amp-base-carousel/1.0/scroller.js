@@ -58,6 +58,7 @@ function ScrollerWithRef(
     autoAdvanceCount,
     axis,
     children,
+    lightbox,
     loop,
     mixedLength,
     restingIndex,
@@ -140,6 +141,7 @@ function ScrollerWithRef(
     {
       alignment,
       children,
+      lightbox,
       loop,
       mixedLength,
       offsetRef,
@@ -344,6 +346,7 @@ function renderSlides(
   {
     alignment,
     children,
+    lightbox,
     loop,
     mixedLength,
     restingIndex,
@@ -357,6 +360,11 @@ function renderSlides(
   classes
 ) {
   const {length} = children;
+  const lightboxProps = lightbox && {
+    role: 'button',
+    tabindex: '0',
+    onClick: () => lightbox.current?.open(),
+  };
   const slides = children.map((child, index) => {
     const key = `slide-${child.key || index}`;
     return (
@@ -376,6 +384,7 @@ function renderSlides(
         style={{
           flex: mixedLength ? '0 0 auto' : `0 0 ${100 / visibleCount}%`,
         }}
+        {...lightboxProps}
       >
         {child}
       </div>

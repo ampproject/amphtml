@@ -27,6 +27,7 @@ import {CarouselContext} from './carousel-context';
 import {ContainWrapper} from '../../../src/preact/component';
 import {Scroller} from './scroller';
 import {WithAmpContext} from '../../../src/preact/context';
+import {WithLightbox} from '../../amp-lightbox-gallery/1.0/component';
 import {forwardRef} from '../../../src/preact/compat';
 import {isRTL} from '../../../src/dom';
 import {mod} from '../../../src/utils/math';
@@ -93,6 +94,7 @@ function BaseCarouselWithRef(
     controls = Controls.AUTO,
     defaultSlide = 0,
     dir = Direction.AUTO,
+    lightbox = false,
     loop,
     mixedLength = false,
     onFocus,
@@ -288,6 +290,7 @@ function BaseCarouselWithRef(
     setRtl(isRTL(doc));
   }, [dir, setRtl]);
 
+  const lightboxRef = useRef(null);
   return (
     <ContainWrapper
       size={true}
@@ -319,6 +322,19 @@ function BaseCarouselWithRef(
       }}
       tabIndex="0"
       wrapperClassName={classes.carousel}
+      contentAs={lightbox ? WithLightbox : 'div'}
+      contentRef={lightboxRef}
+      contentProps={{
+        autoLightbox: false,
+        render: () =>
+          children.map((child) =>
+            child.props?.thumbnailSrc ? (
+              <img src={child.props?.thumbnailSrc} />
+            ) : (
+              child
+            )
+          ),
+      }}
       {...rest}
     >
       {!hideControls && (
@@ -336,6 +352,7 @@ function BaseCarouselWithRef(
         alignment={snapAlign}
         autoAdvanceCount={autoAdvanceCount}
         axis={axis}
+        lightbox={lightbox && lightboxRef}
         loop={loop}
         mixedLength={mixedLength}
         restingIndex={currentSlide}
