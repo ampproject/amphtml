@@ -186,7 +186,7 @@
         parent.postMessage(readyObject, "*");
       }, 2000);
 
-      function registerClickConsentMessage(querySelector, type, action, info, consentMetadata, purposeConsentMap, timeout) {
+      function registerClickConsentMessage(querySelector, type, action, info, consentMetadata, purposeConsents, timeout) {
         document.querySelector(querySelector).onclick = function () {
           // parent.postMessage("message to be sent", "http://the-website-that-will-receive-the-msg.com")
           setTimeout(() => {
@@ -196,7 +196,7 @@
                 action,
                 info,
                 consentMetadata,
-                purposeConsentMap,
+                purposeConsents,
               },
               "*"
             );
@@ -261,7 +261,7 @@
             gdprApplies: true,
             purposeOne: true,
           },
-          purposeConsentMap: {
+          purposeConsents: {
             "purpose-foo": true,
             "purpose-bar": false,
           },
@@ -299,7 +299,7 @@
         },
       ];
       consentObjects.forEach((consentObject) => {
-        registerClickConsentMessage(consentObject.querySelector, consentObject.type, consentObject.action, consentObject.info, consentObject.consentMetadata, consentObject.purposeConsentMap, consentObject.timeout || 0);
+        registerClickConsentMessage(consentObject.querySelector, consentObject.type, consentObject.action, consentObject.info, consentObject.consentMetadata, consentObject.purposeConsents, consentObject.timeout || 0);
 
         if (consentObject.onclick) {
           document.querySelector(consentObject.querySelector).addEventListener("click", () => {

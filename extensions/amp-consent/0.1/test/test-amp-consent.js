@@ -1069,7 +1069,7 @@ describes.realWin(
             'type': 'consent-response',
             'action': 'accept',
             'info': 'accept-string',
-            'purposeConsentMap': {
+            'purposeConsents': {
               'purpose-foo': true,
               'purpose-bar': false,
             },
@@ -1085,7 +1085,7 @@ describes.realWin(
           event.source = iframe.contentWindow;
           win.dispatchEvent(event);
 
-          expect(managerSpy).to.be.calledWith(event.data.purposeConsentMap);
+          expect(managerSpy).to.be.calledWith(event.data.purposeConsents);
           expect(actionSpy).to.be.calledWith(
             ACTION_TYPE.ACCEPT,
             'accept-string'
@@ -1098,7 +1098,7 @@ describes.realWin(
           event.source = iframe.contentWindow;
           win.dispatchEvent(event);
 
-          expect(managerSpy).to.be.calledWith(event.data.purposeConsentMap);
+          expect(managerSpy).to.be.calledWith(event.data.purposeConsents);
           expect(actionSpy).to.be.calledWith(ACTION_TYPE.REJECT);
         });
 

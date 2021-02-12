@@ -373,7 +373,7 @@ export class AmpConsent extends AMP.BaseElement {
 
       for (let i = 0; i < iframes.length; i++) {
         if (iframes[i].contentWindow === event.source) {
-          const {action, purposeConsentMap} = data;
+          const {action, purposeConsents} = data;
           // Check if we have a valid action and valid state
           if (
             !isEnumValue(ACTION_TYPE, action) ||
@@ -381,10 +381,10 @@ export class AmpConsent extends AMP.BaseElement {
           ) {
             continue;
           }
-          if (purposeConsentMap && action !== ACTION_TYPE.DISMISS) {
-            this.validatePurposes_(purposeConsentMap);
+          if (purposeConsents && action !== ACTION_TYPE.DISMISS) {
+            this.validateSetPurposeArgs_(purposeConsents);
             this.consentStateManager_.updateConsentInstancePurposes(
-              purposeConsentMap
+              purposeConsents
             );
           }
           this.handleAction_(action, consentString, metadata);
@@ -571,7 +571,7 @@ export class AmpConsent extends AMP.BaseElement {
     }
     const {args} = invocation;
     if (this.isReadyToHandleAction_()) {
-      this.validatePurposes_(args);
+      this.validateSetPurposeArgs_(args);
       this.consentStateManager_.updateConsentInstancePurposes(args);
     }
   }
@@ -823,9 +823,7 @@ export class AmpConsent extends AMP.BaseElement {
       /** @type {!JsonObject} */ (devAssert(
         this.consentConfig_,
         'consent config not found'
-      )),
-      undefined,
-      this.isGranularConsentExperimentOn_
+      ))
     );
 
     // Get current consent state
@@ -902,7 +900,7 @@ export class AmpConsent extends AMP.BaseElement {
    * Ensure setPurpose argument is valid.
    * @param {!Object} purposeObj
    */
-  validatePurposes_(purposeObj) {
+  validateSetPurposeArgs_(purposeObj) {
     const purposeKeys = Object.keys(purposeObj);
     purposeKeys.forEach((purposeKey) => {
       dev().assertBoolean(
