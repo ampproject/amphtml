@@ -15,7 +15,7 @@
  */
 'use strict';
 
-const m = require('./');
+const m = require('.');
 const test = require('ava');
 
 const result = {

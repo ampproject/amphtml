@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,24 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
 
-const {execOrDie} = require('../common/exec');
+// src/polyfills.js must be the first import.
+import '../polyfills';
 
-/**
- * Runs ava tests.
- */
-async function ava() {
-  const avaCli = 'node_modules/ava/cli.js';
-  const testFiles = [
-    'build-system/tasks/get-zindex/get-zindex.test.js',
-    'build-system/tasks/prepend-global/prepend-global.test.js',
-  ].join(' ');
-  execOrDie(`${avaCli} ${testFiles} --color --fail-fast`);
-}
+import {draw3p, init} from '../integration-lib';
+import {register} from '../3p';
 
-module.exports = {
-  ava,
-};
+import {fakeDelayed} from '../../ads/vendors/_fakedelayed_';
 
-ava.description = "Runs ava tests for AMP's tasks";
+init(window);
+register('fake-delayed', fakeDelayed);
+
+window.draw3p = draw3p;
