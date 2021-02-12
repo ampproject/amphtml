@@ -24,7 +24,7 @@ const {
   isTravisBuild,
 } = require('../common/ci');
 const {ciJobUrl} = require('../common/ci');
-const {cyan, green, yellow} = require('ansi-colors');
+const {cyan, green, yellow} = require('kleur/colors');
 const {determineBuildTargets, Targets} = require('../pr-check/build-targets');
 const {gitCommitHash} = require('../common/git');
 const {log} = require('../common/logging');
@@ -39,12 +39,23 @@ const TEST_TYPE_SUBTYPES = isGithubActionsBuild()
   ? new Map([
       ['integration', ['firefox', 'safari', 'edge', 'ie']],
       ['unit', ['firefox', 'safari', 'edge']],
+      ['e2e', ['firefox', 'safari']],
     ])
   : isCircleciBuild()
   ? new Map([
-      ['integration', ['unminified', 'nomodule', 'module']],
+      [
+        'integration',
+        [
+          'unminified',
+          'nomodule',
+          'module',
+          'experimentA',
+          'experimentB',
+          'experimentC',
+        ],
+      ],
       ['unit', ['unminified', 'local-changes']],
-      ['e2e', ['nomodule']],
+      ['e2e', ['nomodule', 'experimentA', 'experimentB', 'experimentC']],
     ])
   : new Map([]);
 const TEST_TYPE_BUILD_TARGETS = new Map([
@@ -79,6 +90,12 @@ function inferTestType() {
     ? 'edge'
     : argv.ie
     ? 'ie'
+    : argv.browsers == 'safari'
+    ? 'safari'
+    : argv.browsers == 'firefox'
+    ? 'firefox'
+    : argv.experiment
+    ? argv.experiment
     : argv.compiled
     ? 'nomodule'
     : 'unminified';

@@ -63,6 +63,9 @@ export class ConsentStateManager {
 
     /** @private {?function()} */
     this.consentReadyResolver_ = null;
+
+    /** @private {?Object<string, PURPOSE_CONSENT_STATE>} */
+    this.purposeConsents_ = null;
   }
 
   /**
@@ -113,16 +116,26 @@ export class ConsentStateManager {
   }
 
   /**
-   * Update consent instance purposeConsents
-   * @param {!Object<string, boolean>} purposeConsents
-   * @param {boolean=} opt_defaultsOnly
+   * Update our current purposeConsents, that will be
+   * used in subsequent calls to update().
+   * @param {!Object<string, boolean>} purposeMap
+   * @param {boolean} defaultsOnly
    */
-  updateConsentInstancePurposes(purposeConsents, opt_defaultsOnly) {
-    if (!this.instance_) {
-      dev().error(TAG, 'instance not registered');
-      return;
+  updateConsentInstancePurposes(purposeMap, defaultsOnly = false) {
+    if (!this.purposeConsents_) {
+      this.purposeConsents_ = {};
     }
-    this.instance_.updatePurposes(purposeConsents, opt_defaultsOnly);
+    const purposes = Object.keys(purposeMap);
+    purposes.forEach((purpose) => {
+      // If defaults only, then only update if it doesn't exist.
+      if (defaultsOnly && this.purposeConsents_[purpose]) {
+        return;
+      }
+      const value = !!purposeMap[purpose]
+        ? PURPOSE_CONSENT_STATE.ACCEPTED
+        : PURPOSE_CONSENT_STATE.REJECTED;
+      this.purposeConsents_[purpose] = value;
+    });
   }
 
   /**
@@ -265,9 +278,6 @@ export class ConsentInstance {
 
     /** @private {boolean|undefined} */
     this.hasDirtyBitNext_ = undefined;
-
-    /** @private {?Object<string, PURPOSE_CONSENT_STATE>} */
-    this.purposeConsents_ = null;
   }
 
   /**
@@ -292,29 +302,6 @@ export class ConsentInstance {
         true
       );
     });
-  }
-
-  /**
-   * Set the values of the purposes.
-   * @param {!Object<string, boolean>} purposeMap
-   * @param {boolean=} opt_defaultsOnly
-   */
-  updatePurposes(purposeMap, opt_defaultsOnly) {
-    if (!this.purposeConsents_) {
-      this.purposeConsents_ = {};
-    }
-    const purposes = Object.keys(purposeMap);
-    for (let i = 0; i < purposes.length; i++) {
-      const purpose = purposes[i];
-      // If defaults only, then only update if it doesn't exist.
-      if (opt_defaultsOnly && this.purposeConsents_[purpose]) {
-        continue;
-      }
-      const value = !!purposeMap[purpose]
-        ? PURPOSE_CONSENT_STATE.ACCEPTED
-        : PURPOSE_CONSENT_STATE.REJECTED;
-      this.purposeConsents_[purpose] = value;
-    }
   }
 
   /**

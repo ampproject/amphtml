@@ -35,6 +35,8 @@ class Tokenizer {
   // as "div" or "iframe".
   explicit Tokenizer(std::string_view html, std::string context_tag = "");
 
+  Tokenizer() = delete;
+
   // Span is a range of bytes in a Tokenizer's buffer. The start is inclusive,
   // the end is exclusive.
   struct Span {
@@ -228,7 +230,7 @@ class Tokenizer {
   // Attribute key and value currently being tokenized.
   RawAttribute pending_attribute_;
 
-  std::vector<RawAttribute> attributes_;
+  std::vector<RawAttribute> attributes_{};
 
   int n_attributes_returned_ = 0;
 

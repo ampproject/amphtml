@@ -1,3 +1,5 @@
 {
+  "BENTO_AUTO_UPGRADE": false,
+  "INI_LOAD_INOB": false,
   "WITHIN_VIEWPORT_INOB": false
 }

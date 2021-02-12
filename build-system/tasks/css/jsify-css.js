@@ -20,8 +20,8 @@ const cssnano = require('cssnano');
 const fs = require('fs-extra');
 const postcss = require('postcss');
 const postcssImport = require('postcss-import');
-const {log} = require('../common/logging');
-const {red} = require('ansi-colors');
+const {log} = require('../../common/logging');
+const {red} = require('kleur/colors');
 
 // NOTE: see https://github.com/ai/browserslist#queries for `browsers` list
 const cssprefixer = autoprefixer({
@@ -115,5 +115,4 @@ function jsifyCssAsync(filename) {
 module.exports = {
   jsifyCssAsync,
   transformCss,
-  transformCssFile,
 };
