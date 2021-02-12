@@ -63,6 +63,8 @@ The code snippet below demonstrates an embed of `<amp-story-player>` in a AMP we
 </body>
 ```
 
+[/example]
+
 ### Specify embedded stories
 
 The `<amp-story-player>` component contains one or more `<a>` tags. Point the href attribute of each to the story URL.
