@@ -14,6 +14,35 @@
         AMP.toggleExperiment('amp-consent-granular-consent', true);
       });
   </script>
+
+<style amp-custom>
+  amp-consent {
+    min-height: 30px;
+    font-family: 'Roboto';
+    font-weight: 500;
+    line-height: 30px;
+    padding: 8px;
+    background: #46b6ac;
+  }
+
+  amp-consent button {
+    border: none;
+    border-radius: 2px;
+
+    color: #fafafa;
+    height: 26px;
+    min-width: 32px;
+    padding: 0 16px;
+    margin: 0 16px;
+    text-transform: uppercase;
+    letter-spacing: 0;
+    cursor: pointer;
+    vertical-align: middle;
+    line-height: 26px;
+    text-align: center;
+    background: #3f51b5;
+  }
+</style>
   </head>
 
 <body>
@@ -37,13 +66,30 @@
         "promptUI": "ui1",
         "postPromptUI": "postPromptUI",
         "consentRequired": true,
-        "purposeConsentRequired": ["purpose-abc", "purpose-xyz"],
+        "purposeConsentRequired": ["purpose-foo", "purpose-bar", "purpose-xyz"],
         "checkConsentHref": "/check-consent?consentRequired=true&expireCache=false"
       }</script>
       <div id="ui1">
+          Explictly set `purpose-foo`: 
+          <button on="tap:ABC.setPurpose(purpose-foo=true)">ACCEPT FOO</button>
+          <br>
+          Explictly set multiple purposes: 
+          <button on="tap:ABC.setPurpose(purpose-foo=false,purpose-bar=true)">ACCEPT FOO & BAR</button>
+          <br>
+          Toggle `purpose-bar`:
+          <label for="consent-purpose-xyz">
+            <input
+              type="checkbox"
+              on="change:ABC.setPurpose(purpose-xyz=event.checked)"
+              id="consent-purpose-xyz"
+            >
+            Toggle Bar Consent
+          </label>
+          
+          <br>
           CA: Can I load the image??
           <button on="tap:ABC.accept">Accept</button>
-          <button on="tap:ABC.reject">Reject</button>
+          <button on="tap:ABC.reject(purposeConsentDefault=accepted)">Reject</button>
           <button on="tap:ABC.dismiss">Dismiss</button>
         </div>
         <div id="postPromptUI">
