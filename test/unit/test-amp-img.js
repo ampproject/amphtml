@@ -668,7 +668,7 @@ describes.sandboxed('amp-img', {}, (env) => {
         srcset: SRCSET_STRING,
         width: 300,
         height: 200,
-        'i-amphtml-ssr': true,
+        'i-amphtml-ssr': '',
       });
       const impl = await ampImg.getImpl(false);
       impl.buildCallback();
