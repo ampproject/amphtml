@@ -25,7 +25,7 @@ const jsonminify = require('gulp-jsonminify');
 const rename = require('gulp-rename');
 const {endBuildStep, toPromise} = require('./helpers');
 const {watchDebounceDelay} = require('./helpers');
-const {watch} = require('gulp');
+const {watch} = require('chokidar');
 
 /**
  * Entry point for 'gulp vendor-configs'
