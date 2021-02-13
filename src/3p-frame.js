@@ -125,6 +125,7 @@ export function getIframe(
   const name = JSON.stringify(
     dict({
       'host': host,
+      'bootstrap': getBootstrapUrl(),
       'type': attributes['type'],
       // https://github.com/ampproject/amphtml/pull/2955
       'count': count[attributes['type']],
@@ -204,6 +205,17 @@ export function addDataAndJsonAttributes_(element, attributes) {
 }
 
 /**
+ * Get the bootstrap script URL for iframe.
+ * @return {string}
+ */
+export function getBootstrapUrl() {
+  if (getMode().localDev || getMode().test) {
+    return getMode().minified ? './f.js' : './integration.js';
+  }
+  return `${urls.thirdParty}/${internalRuntimeVersion()}/f.js`;
+}
+
+/**
  * Preloads URLs related to the bootstrap iframe.
  * @param {!Window} win
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
@@ -216,10 +228,7 @@ export function preloadBootstrap(win, ampdoc, preconnect, opt_disallowCustom) {
 
   // While the URL may point to a custom domain, this URL will always be
   // fetched by it.
-  const scriptUrl = getMode().localDev
-    ? getAdsLocalhost(win) + '/dist.3p/current/integration.js'
-    : `${urls.thirdParty}/${internalRuntimeVersion()}/f.js`;
-  preconnect.preload(ampdoc, scriptUrl, 'script');
+  preconnect.preload(ampdoc, getBootstrapUrl(), 'script');
 }
 
 /**

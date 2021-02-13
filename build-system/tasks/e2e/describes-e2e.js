@@ -28,10 +28,6 @@ const {
   installBrowserAssertions,
 } = require('./expect');
 const {
-  getCoverageObject,
-  mergeClientCoverage,
-} = require('istanbul-middleware/lib/core');
-const {
   SeleniumWebDriverController,
 } = require('./selenium-webdriver-controller');
 const {AmpDriver, AmpdocEnvironment} = require('./amp-driver');
@@ -49,6 +45,15 @@ const SETUP_RETRIES = 3;
 const DEFAULT_E2E_INITIAL_RECT = {width: 800, height: 600};
 const COV_REPORT_PATH = '/coverage/client';
 const supportedBrowsers = new Set(['chrome', 'firefox', 'safari']);
+
+/**
+ * Load coverage middleware only if needed.
+ */
+let istanbulMiddleware;
+if (argv.coverage) {
+  istanbulMiddleware = require('istanbul-middleware/lib/core');
+}
+
 /**
  * TODO(cvializ): Firefox now experimentally supports puppeteer.
  * When it's more mature we might want to support it.
@@ -189,6 +194,8 @@ function createDriver(browserName, args, deviceName) {
       //which is also when `Server terminated early with status 1` began appearing. Coincidence? Maybe.
       driver.onQuit = null;
       return driver;
+    case 'safari':
+      return new Builder().forBrowser(browserName).build();
   }
 }
 
@@ -230,9 +237,8 @@ function getFirefoxArgs(config) {
  * @typedef {{
  *  browsers: (!Array<string>|undefined),
  *  environments: (!Array<!AmpdocEnvironment>|undefined),
- *  testUrl: string,
+ *  testUrl: string|undefined,
  *  fixture: string,
- *  manualFixture: string,
  *  initialRect: ({{width: number, height:number}}|undefined),
  *  deviceName: string|undefined,
  *  version: string|undefined,
@@ -244,9 +250,8 @@ let TestSpec;
  * @typedef {{
  *  browsers: (!Array<string>|undefined),
  *  environments: (!Array<!AmpdocEnvironment>|undefined),
- *  testUrl: string,
+ *  testUrl: string|undefined,
  *  fixture: string,
- *  manualFixture: string,
  *  initialRect: ({{width: number, height:number}}|undefined),
  *  deviceName: string|undefined,
  *  versions: {{[version: string]: TestSpec}}
@@ -367,7 +372,7 @@ class ItConfig {
 async function updateCoverage(env) {
   const coverage = await env.controller.evaluate(() => window.__coverage__);
   if (coverage) {
-    mergeClientCoverage(coverage);
+    istanbulMiddleware.mergeClientCoverage(coverage);
   }
 }
 
@@ -376,7 +381,7 @@ async function updateCoverage(env) {
  * @return {Promise<void>}
  */
 async function reportCoverage() {
-  const coverage = getCoverageObject();
+  const coverage = istanbulMiddleware.getCoverageObject();
   await fetch(`https://${HOST}:${PORT}${COV_REPORT_PATH}`, {
     method: 'POST',
     body: JSON.stringify(coverage),
@@ -531,7 +536,12 @@ function describeEnv(factory) {
     if (!versions) {
       // If a version is provided, add a prefix to the test suite name.
       const {version} = spec;
-      templateFunc(version ? `[v{version} ${name}` : name, spec, fn, describe);
+      templateFunc(
+        version ? `[v${version}] ${name}` : name,
+        spec,
+        fn,
+        describe
+      );
     } else {
       // A root `describes.endtoend` spec may contain a `versions` object, where
       // the key represents the version number and the value is an object with
@@ -587,6 +597,7 @@ class EndToEndFixture {
     const ampDriver = new AmpDriver(controller);
     env.controller = controller;
     env.ampDriver = ampDriver;
+    env.version = this.spec.version;
 
     installBrowserAssertions(controller.networkLogger);
 
@@ -621,26 +632,18 @@ class EndToEndFixture {
    * @return {!TestSpec}
    */
   setTestUrl(spec) {
-    // TODO(rcebulko): See if it's possible to condense/reorg some test fixtures
-    // and have all e2e fixtures in one folder. Allowing this split for now so
-    // that, if fixtures under `manual` are moved, tests using normal e2e fixture
-    // directory don't need to be updated. Support for `testUrl` should
-    // eventually be removed entirely.
-    let {testUrl} = spec;
-    const {fixture, manualFixture} = spec;
-    if (!!testUrl + !!fixture + !!manualFixture > 1) {
+    const {testUrl, fixture} = spec;
+
+    if (testUrl) {
       throw new Error(
-        'Only one of [testUrl, fixture, manualFixture] may be specified'
+        'Setting `testUrl` directly is no longer permitted in e2e tests; please use `fixture` instead'
       );
     }
 
-    if (fixture) {
-      testUrl = `http://localhost:8000/test/fixtures/e2e/${fixture}`;
-    } else if (manualFixture) {
-      testUrl = `http://localhost:8000/test/manual/${manualFixture}`;
-    }
-
-    return {...spec, testUrl};
+    return {
+      ...spec,
+      testUrl: `http://localhost:8000/test/fixtures/e2e/${fixture}`,
+    };
   }
 }
 

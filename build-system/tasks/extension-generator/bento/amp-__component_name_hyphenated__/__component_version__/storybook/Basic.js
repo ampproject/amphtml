@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {__component_name_pascalcase__} from '../__component_name_hyphenated__'
+import {__component_name_pascalcase__} from '../component'
 import {withA11y} from '@storybook/addon-a11y';
 import {withKnobs} from '@storybook/addon-knobs';
 

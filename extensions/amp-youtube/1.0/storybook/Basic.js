@@ -21,7 +21,7 @@ import {
   AccordionHeader,
   AccordionSection,
 } from '../../../amp-accordion/1.0/accordion';
-import {Youtube} from '../youtube';
+import {Youtube} from '../component';
 import {boolean, number, object, text, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 

@@ -17,8 +17,7 @@
 describes.endtoend(
   'documentHeight',
   {
-    testUrl:
-      'http://localhost:8000/test/fixtures/e2e/amp-carousel/0.1/document-height.html',
+    fixture: 'amp-carousel/0.1/document-height.html',
     environments: ['viewer-demo'],
   },
   async (env) => {

@@ -17,10 +17,10 @@
 import {getNextArrow, getPrevArrow} from './helpers';
 
 describes.endtoend(
-  'amp-base-carousel:0.1 - mixed length carousel arrows',
+  'amp-base-carousel - mixed length carousel arrows',
   {
-    testUrl:
-      'http://localhost:8000/test/manual/amp-base-carousel/no-arrows.amp.html',
+    version: '0.1',
+    fixture: 'amp-base-carousel/no-arrows.amp.html',
     environments: ['single'],
   },
   async function (env) {

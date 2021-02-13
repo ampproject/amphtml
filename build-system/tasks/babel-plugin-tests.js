@@ -27,6 +27,7 @@ async function babelPluginTests() {
   const options = {
     automock: false,
     coveragePathIgnorePatterns: ['/node_modules/'],
+    detectOpenHandles: true,
     modulePathIgnorePatterns: ['/test/fixtures/', '<rootDir>/build/'],
     reporters: [isCiBuild() ? 'jest-silent-reporter' : 'jest-dot-reporter'],
     setupFiles: ['./build-system/babel-plugins/testSetupFile.js'],

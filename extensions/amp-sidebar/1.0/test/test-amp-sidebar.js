@@ -98,7 +98,7 @@ describes.realWin(
         `;
         element = fullHtml.firstElementChild;
         win.document.body.appendChild(fullHtml);
-        await element.build();
+        await element.buildInternal();
 
         container = element.shadowRoot.firstElementChild;
         openButton = fullHtml.querySelector('#open');
@@ -327,7 +327,7 @@ describes.realWin(
           </amp-sidebar>
         `;
         win.document.body.appendChild(noWarnSidebar);
-        await noWarnSidebar.build();
+        await noWarnSidebar.buildInternal();
 
         // the 'noWarnSidebar' above is appended directly to the body and
         // should not throw a warning
@@ -355,7 +355,7 @@ describes.realWin(
         `;
         element = fullHtml.firstElementChild;
         win.document.body.appendChild(fullHtml);
-        await element.build();
+        await element.buildInternal();
         container = element.shadowRoot.firstElementChild;
         openButton = fullHtml.querySelector('#open');
 
@@ -385,7 +385,7 @@ describes.realWin(
         `;
         element = fullHtml.firstElementChild;
         win.document.body.appendChild(fullHtml);
-        await element.build();
+        await element.buildInternal();
         container = element.shadowRoot.firstElementChild;
         openButton = fullHtml.querySelector('#open');
 
@@ -547,7 +547,7 @@ describes.realWin(
         `;
         element = fullHtml.firstElementChild;
         win.document.body.appendChild(fullHtml);
-        await element.build();
+        await element.buildInternal();
 
         container = element.shadowRoot.firstElementChild;
         openButton = fullHtml.querySelector('#open');
@@ -615,6 +615,75 @@ describes.realWin(
         await waitForOpen(element, false);
         expect(element).to.not.have.attribute('open');
         expect(container.children.length).to.equal(0);
+      });
+
+      it('should reverse animations if closed while opening', async () => {
+        const animation = {
+          reverse: env.sandbox.spy(),
+        };
+        animateStub = env.sandbox.stub(Element.prototype, 'animate');
+        animateStub.returns(animation);
+
+        // sidebar is initially closed
+        expect(element).to.not.have.attribute('open');
+        expect(container.children.length).to.equal(0);
+
+        // begin open animation
+        openButton.click();
+        await waitForOpen(element, true);
+
+        // animate stub called once for backdrop, once for sidebar
+        expect(animateStub).to.be.calledTwice;
+
+        // close the sidebar and reverse the animation (mid animation)
+        closeButton.click();
+
+        // animation begins to reverse
+        await waitFor(
+          () => animation.reverse.callCount > 0,
+          'reverse animation has begun'
+        );
+        expect(animation.reverse).to.be.calledTwice;
+      });
+
+      it('should reverse animations if opened while closing', async () => {
+        const animateFunction = Element.prototype.animate;
+        Element.prototype.animate = null;
+
+        // sidebar is initially closed
+        expect(element).to.not.have.attribute('open');
+        expect(container.children.length).to.equal(0);
+
+        // synchronous open
+        openButton.click();
+        await waitForOpen(element, true);
+
+        // turn on animations
+        Element.prototype.animate = animateFunction;
+        const animation = {reverse: env.sandbox.spy()};
+        animateStub = env.sandbox.stub(Element.prototype, 'animate');
+        animateStub.returns(animation);
+
+        // sidebar is initially opened
+        expect(element).to.have.attribute('open');
+        expect(container.children.length).to.not.equal(0);
+
+        // begin close animation
+        closeButton.click();
+        await waitFor(() => animateStub.callCount > 0, 'animation has begun');
+
+        // animate stub called once for backdrop, once for sidebar
+        expect(animateStub).to.be.calledTwice;
+
+        // open the sidebar and reverse the animation (mid animation)
+        openButton.click();
+
+        // animation begins to reverse
+        await waitFor(
+          () => animation.reverse.callCount > 0,
+          'reverse animation has begun'
+        );
+        expect(animation.reverse).to.be.calledTwice;
       });
     });
   }

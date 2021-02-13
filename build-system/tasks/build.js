@@ -26,37 +26,13 @@ const {
   exitCtrlcHandler,
 } = require('../common/ctrlcHandler');
 const {buildExtensions} = require('./extension-helpers');
+const {buildVendorConfigs} = require('./3p-vendor-helpers');
 const {compileCss} = require('./css');
 const {compileJison} = require('./compile-jison');
-const {cyan, green, yellow} = require('ansi-colors');
-const {log} = require('../common/logging');
 const {maybeUpdatePackages} = require('./update-packages');
 const {parseExtensionFlags} = require('./extension-helpers');
 
 const argv = require('minimist')(process.argv.slice(2));
-
-/**
- * Deprecated. Use `gulp build --watch` or `gulp dist --watch`.
- *
- * TODO(rsimha, #27471): Remove this after several weeks.
- */
-async function watch() {
-  log(yellow('WARNING:'), cyan('gulp watch'), 'has been deprecated.');
-  log(
-    green('INFO:'),
-    'Use',
-    cyan('gulp build --watch'),
-    'or',
-    cyan('gulp dist --watch'),
-    'instead.'
-  );
-  log(
-    green('INFO:'),
-    'Run',
-    cyan('gulp help'),
-    'for a full list of commands and flags.'
-  );
-}
 
 /**
  * Perform the prerequisite steps before starting the unminified build.
@@ -101,6 +77,7 @@ async function doBuild(extraArgs = {}) {
     await compileAllJs(options);
   }
   await buildExtensions(options);
+  await buildVendorConfigs(options);
   if (!argv.watch) {
     exitCtrlcHandler(handlerProcess);
   }
@@ -110,7 +87,6 @@ module.exports = {
   build,
   doBuild,
   runPreBuildSteps,
-  watch,
 };
 
 /* eslint "google-camelcase/google-camelcase": 0 */
@@ -129,5 +105,3 @@ build.flags = {
   define_experiment_constant:
     '  Builds runtime with the EXPERIMENT constant set to true',
 };
-
-watch.description = 'Deprecated. Use gulp build --watch or gulp dist --watch';

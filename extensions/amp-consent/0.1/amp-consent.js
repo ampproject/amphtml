@@ -32,12 +32,14 @@ import {
 import {ConsentPolicyManager} from './consent-policy-manager';
 import {ConsentStateManager} from './consent-state-manager';
 import {ConsentUI} from './consent-ui';
+import {CookieWriter} from './cookie-writer';
 import {Deferred} from '../../../src/utils/promise';
 import {
   NOTIFICATION_UI_MANAGER,
   NotificationUiManager,
 } from '../../../src/service/notification-ui-manager';
 import {Services} from '../../../src/services';
+import {TcfApiCommandManager} from './tcf-api-command-manager';
 import {
   assertHttpsUrl,
   getSourceUrl,
@@ -47,8 +49,7 @@ import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
-import {handleTcfCommand, isValidTcfApiCall} from './tcf-api-commands';
-import {isEnumValue, isObject} from '../../../src/types';
+import {isArray, isEnumValue, isObject} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {toggle} from '../../../src/style';
 
@@ -78,6 +79,9 @@ export class AmpConsent extends AMP.BaseElement {
     /** @private {?ConsentPolicyManager} */
     this.consentPolicyManager_ = null;
 
+    /** @private {?TcfApiCommandManager} */
+    this.tcfApiCommandManager_ = null;
+
     /** @private {?NotificationUiManager} */
     this.notificationUiManager_ = null;
 
@@ -97,7 +101,7 @@ export class AmpConsent extends AMP.BaseElement {
     this.dialogResolver_ = null;
 
     /** @private {boolean} */
-    this.isPromptUIOn_ = false;
+    this.isPromptUiOn_ = false;
 
     /** @private {boolean} */
     this.consentStateChangedViaPromptUI_ = false;
@@ -122,6 +126,17 @@ export class AmpConsent extends AMP.BaseElement {
       this.win,
       'tcf-post-message-proxy-api'
     );
+
+    /** @private {?boolean} */
+    this.isGranularConsentExperimentOn_ = isExperimentOn(
+      this.win,
+      'amp-consent-granular-consent'
+    );
+
+    /** @private {?Promise<?Array>} */
+    this.purposeConsentRequired_ = this.isGranularConsentExperimentOn_
+      ? null
+      : Promise.resolve();
 
     /** @private @const {?Function} */
     this.boundHandleIframeMessages_ = this.isTcfPostMessageProxyExperimentOn_
@@ -148,6 +163,20 @@ export class AmpConsent extends AMP.BaseElement {
       this.matchedGeoGroup_ = configManager.getMatchedGeoGroup();
       this.initialize_(validatedConfig);
     });
+  }
+
+  /** @override */
+  pauseCallback() {
+    if (this.consentUI_) {
+      this.consentUI_.pause();
+    }
+  }
+
+  /** @override */
+  resumeCallback() {
+    if (this.consentUI_) {
+      this.consentUI_.resume();
+    }
   }
 
   /**
@@ -234,10 +263,15 @@ export class AmpConsent extends AMP.BaseElement {
       this.notificationUiManager_ = /** @type {!NotificationUiManager} */ (manager);
     });
 
+    const cookieWriterPromise = this.consentConfig_['cookies']
+      ? new CookieWriter(this.win, this.element, this.consentConfig_).write()
+      : Promise.resolve();
+
     Promise.all([
       consentStateManagerPromise,
       notificationUiManagerPromise,
       consentPolicyManagerPromise,
+      cookieWriterPromise,
     ]).then(() => {
       this.init_();
     });
@@ -247,17 +281,23 @@ export class AmpConsent extends AMP.BaseElement {
    * Register a list of user action functions
    */
   enableInteractions_() {
-    this.registerAction('accept', () => {
-      this.handleAction_(ACTION_TYPE.ACCEPT);
+    this.registerAction('accept', (invocation) => {
+      this.handleClosingUiAction_(ACTION_TYPE.ACCEPT, invocation);
     });
 
-    this.registerAction('reject', () => {
-      this.handleAction_(ACTION_TYPE.REJECT);
+    this.registerAction('reject', (invocation) => {
+      this.handleClosingUiAction_(ACTION_TYPE.REJECT, invocation);
     });
 
     this.registerAction('dismiss', () => {
-      this.handleAction_(ACTION_TYPE.DISMISS);
+      this.handleClosingUiAction_(ACTION_TYPE.DISMISS);
     });
+
+    if (this.isGranularConsentExperimentOn_) {
+      this.registerAction('setPurpose', (invocation) => {
+        this.handleSetPurpose_(invocation);
+      });
+    }
 
     this.registerAction('prompt', (invocation) =>
       this.handleReprompt_(invocation)
@@ -267,12 +307,28 @@ export class AmpConsent extends AMP.BaseElement {
   }
 
   /**
+   * For actions that close the PromptUI, validate state
+   * and do some preprocessing, then handle action.
+   * @param {string} action
+   * @param {../../../src/service/action-impl.ActionInvocation=} opt_invocation
+   */
+  handleClosingUiAction_(action, opt_invocation) {
+    if (!this.isReadyToHandleAction_()) {
+      return;
+    }
+    // Set default for purpose map
+    this.maybeSetConsentPurposeDefaults_(action, opt_invocation).then(() => {
+      this.handleAction_(action);
+    });
+  }
+
+  /**
    * Listen to external consent flow iframe's response
    * with consent string and metadata.
    */
   enableExternalInteractions_() {
     this.win.addEventListener('message', (event) => {
-      if (!this.isPromptUIOn_) {
+      if (!this.isPromptUiOn_) {
         return;
       }
 
@@ -318,8 +374,14 @@ export class AmpConsent extends AMP.BaseElement {
       for (let i = 0; i < iframes.length; i++) {
         if (iframes[i].contentWindow === event.source) {
           const action = data['action'];
-          this.handleAction_(action, consentString, metadata);
-          return;
+          // Check if we have a valid action and valid state
+          if (
+            isEnumValue(ACTION_TYPE, action) &&
+            this.isReadyToHandleAction_()
+          ) {
+            // TODO(micajuineho): Set purpose consent
+            this.handleAction_(action, consentString, metadata);
+          }
         }
       }
     });
@@ -361,13 +423,13 @@ export class AmpConsent extends AMP.BaseElement {
    * @return {!Promise}
    */
   show_(isActionPromptTrigger) {
-    if (this.isPromptUIOn_) {
+    if (this.isPromptUiOn_) {
       dev().error(TAG, 'Attempt to show an already displayed prompt UI');
     }
 
     this.vsync_.mutate(() => {
       this.consentUI_.show(isActionPromptTrigger);
-      this.isPromptUIOn_ = true;
+      this.isPromptUiOn_ = true;
     });
 
     const deferred = new Deferred();
@@ -379,12 +441,12 @@ export class AmpConsent extends AMP.BaseElement {
    * Hide current prompt UI
    */
   hide_() {
-    if (!this.isPromptUIOn_) {
+    if (!this.isPromptUiOn_) {
       dev().error(TAG, '%s no consent ui to hide');
     }
 
     this.consentUI_.hide();
-    this.isPromptUIOn_ = false;
+    this.isPromptUiOn_ = false;
 
     if (this.dialogResolver_) {
       this.dialogResolver_();
@@ -395,28 +457,25 @@ export class AmpConsent extends AMP.BaseElement {
   }
 
   /**
-   * Handler User action
+   * Checks if we are in a valid state to handle user actions.
+   * @return {boolean}
+   */
+  isReadyToHandleAction_() {
+    if (!this.consentStateManager_) {
+      dev().error(TAG, 'No consent state manager');
+      return false;
+    }
+    return this.isPromptUiOn_;
+  }
+
+  /**
+   * Handler User action. Should call isReadyToHandleAction_ before.
    *
    * @param {string} action
    * @param {string=} consentString
    * @param {!ConsentMetadataDef=} opt_consentMetadata
    */
   handleAction_(action, consentString, opt_consentMetadata) {
-    if (!isEnumValue(ACTION_TYPE, action)) {
-      // Unrecognized action
-      return;
-    }
-
-    if (!this.isPromptUIOn_) {
-      // No consent prompt to act to
-      return;
-    }
-
-    if (!this.consentStateManager_) {
-      dev().error(TAG, 'No consent state manager');
-      return;
-    }
-
     this.consentStateChangedViaPromptUI_ = true;
 
     if (action == ACTION_TYPE.ACCEPT) {
@@ -444,6 +503,44 @@ export class AmpConsent extends AMP.BaseElement {
   }
 
   /**
+   * Maybe set the consent purpose map with default values.
+   * If not, resolve instantly.
+   * @param {string} action
+   * @param {../../../src/service/action-impl.ActionInvocation=} opt_invocation
+   * @return {!Promise}
+   */
+  maybeSetConsentPurposeDefaults_(action, opt_invocation) {
+    if (
+      !this.isGranularConsentExperimentOn_ ||
+      typeof opt_invocation?.args?.purposeConsentDefault !== 'boolean'
+    ) {
+      return Promise.resolve();
+    }
+    if (action === ACTION_TYPE.DISMISS) {
+      dev.warn(TAG, 'Dismiss cannot have a `purposeConsentDefault` parameter.');
+      return Promise.resolve();
+    }
+
+    // At this point, this.getPurposeConsentRequired_()
+    // should always be resolved, so no need to worry about
+    // a race here.
+    return this.getPurposeConsentRequired_().then((purposeConsentRequired) => {
+      if (!purposeConsentRequired || !purposeConsentRequired.length) {
+        return;
+      }
+      const defaultPurposes = {};
+      const purposeValue = opt_invocation['args']['purposeConsentDefault'];
+      purposeConsentRequired.forEach((purpose) => {
+        defaultPurposes[purpose] = purposeValue;
+      });
+      this.consentStateManager_.updateConsentInstancePurposes(
+        defaultPurposes,
+        true
+      );
+    });
+  }
+
+  /**
    * Handle the prompt action to re-prompt.
    * Accpet arg expireCache=true
    * @param {!../../../src/service/action-impl.ActionInvocation} invocation
@@ -454,6 +551,23 @@ export class AmpConsent extends AMP.BaseElement {
       this.consentStateManager_.setDirtyBit();
     }
     this.scheduleDisplay_(true);
+  }
+
+  /**
+   * Handle the setting a purpose in the state manager.
+   * Accpet all args with booleans as values.
+   * @param {!../../../src/service/action-impl.ActionInvocation} invocation
+   */
+  handleSetPurpose_(invocation) {
+    if (!invocation || !invocation['args']) {
+      dev().error(TAG, 'Must have arugments for `setPurpose`.');
+      return;
+    }
+    const {args} = invocation;
+    if (this.isReadyToHandleAction_()) {
+      this.validateSetPurposeArgs_(args);
+      this.consentStateManager_.updateConsentInstancePurposes(args);
+    }
   }
 
   /**
@@ -635,6 +749,64 @@ export class AmpConsent extends AMP.BaseElement {
   }
 
   /**
+   * TODO (micajuineho): Use our stored info to check if we have the
+   * necessary granular consents.
+   * @param {ConsentInfoDef} unusedConsentInfo
+   * @return {!Promise<boolean>}
+   */
+  checkGranularConsentRequired_(unusedConsentInfo) {
+    if (!this.isGranularConsentExperimentOn_) {
+      return Promise.resolve(true);
+    }
+    return this.getPurposeConsentRequired_().then((purposeConsentRequired) => {
+      if (!purposeConsentRequired) {
+        return true;
+      }
+      // TODO: add check here.
+      return true;
+    });
+  }
+
+  /**
+   * Get `purposeConsentRequired` from consent config,
+   * or from `checkConsentHref` response.
+   * @return {!Promise<?Array>}
+   */
+  getPurposeConsentRequired_() {
+    if (this.purposeConsentRequired_) {
+      return this.purposeConsentRequired_;
+    }
+    const inlinePurposes = this.consentConfig_['purposeConsentRequired'];
+    if (isArray(inlinePurposes)) {
+      this.purposeConsentRequired_ = Promise.resolve(inlinePurposes);
+    } else {
+      this.purposeConsentRequired_ = this.getConsentRemote_().then(
+        (response) => {
+          if (!response || !isArray(response['purposeConsentRequired'])) {
+            return null;
+          }
+          return response['purposeConsentRequired'];
+        }
+      );
+    }
+    return this.purposeConsentRequired_;
+  }
+
+  /**
+   * Determines if we should show UI based on our stored consent values.
+   * @return {!Promise<boolean>}
+   */
+  hasRequiredConsents_() {
+    return this.consentStateManager_.getConsentInstanceInfo().then((info) => {
+      // Global consent
+      if (hasStoredValue(info)) {
+        return this.checkGranularConsentRequired_(info);
+      }
+      return Promise.resolve(false);
+    });
+  }
+
+  /**
    * Handle Prompt UI.
    * @param {boolean} isConsentRequired
    * @return {Promise<boolean>}
@@ -649,8 +821,8 @@ export class AmpConsent extends AMP.BaseElement {
     );
 
     // Get current consent state
-    return this.consentStateManager_.getConsentInstanceInfo().then((info) => {
-      if (hasStoredValue(info)) {
+    return this.hasRequiredConsents_().then((hasConsents) => {
+      if (hasConsents) {
         // Has user stored value, no need to prompt
         return true;
       }
@@ -715,7 +887,21 @@ export class AmpConsent extends AMP.BaseElement {
    * @visibleForTesting
    */
   getIsPromptUiOnForTesting() {
-    return this.isPromptUIOn_;
+    return this.isPromptUiOn_;
+  }
+
+  /**
+   * Ensure setPurpose argument is valid.
+   * @param {!Object} purposeObj
+   */
+  validateSetPurposeArgs_(purposeObj) {
+    const purposeKeys = Object.keys(purposeObj);
+    purposeKeys.forEach((purposeKey) => {
+      dev().assertBoolean(
+        purposeObj[purposeKey],
+        '`setPurpose` values must be booleans.'
+      );
+    });
   }
 
   /**
@@ -755,6 +941,9 @@ export class AmpConsent extends AMP.BaseElement {
     }
     // Check if __tcfApiLocator API already exists (dirty AMP)
     if (!this.win.frames[TCF_API_LOCATOR]) {
+      this.tcfApiCommandManager_ = new TcfApiCommandManager(
+        this.consentPolicyManager_
+      );
       // Add window listener for 3p iframe PostMessages
       this.win.addEventListener('message', this.boundHandleIframeMessages_);
 
@@ -786,14 +975,10 @@ export class AmpConsent extends AMP.BaseElement {
   handleIframeMessages_(event) {
     const data = getData(event);
 
-    if (
-      !data ||
-      !data['__tcfapiCall'] ||
-      !isValidTcfApiCall(data['__tcfapiCall'])
-    ) {
+    if (!data || !data['__tcfapiCall']) {
       return;
     }
-    handleTcfCommand(data.__tcfapiCall);
+    this.tcfApiCommandManager_.handleTcfCommand(data, event.source);
   }
 }
 

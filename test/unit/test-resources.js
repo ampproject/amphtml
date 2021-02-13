@@ -45,6 +45,62 @@ describes.realWin('Resources', {amp: true}, (env) => {
     resources.pass_.cancel();
   });
 
+  function createResource(opts) {
+    const {
+      id,
+      isBuilt,
+      isBuilding,
+      state,
+      isDisplayed,
+      isFixed,
+      isInViewport,
+      prerenderAllowed,
+      renderOutsideViewport,
+      idleRenderOutsideViewport,
+      layoutPriority,
+      taskId,
+    } = {
+      id: '1',
+      isBuilt: false,
+      isBuilding: false,
+      state: ResourceState.NOT_BUILT,
+      isDisplayed: true,
+      isFixed: false,
+      isInViewport: true,
+      prerenderAllowed: false,
+      renderOutsideViewport: false,
+      idleRenderOutsideViewport: false,
+      layoutPriority: LayoutPriority.CONTENT,
+      taskId: 'resource#P',
+      ...opts,
+    };
+
+    const element = document.createElement('amp-el');
+    element.V2 = () => false;
+    element.isBuilt = () => isBuilt;
+    element.isBuilding = () => isBuilding;
+
+    const resource = new Resource(id, element, resources);
+    env.sandbox.stub(resource, 'getState').returns(state);
+    env.sandbox.stub(resource, 'isDisplayed').returns(isDisplayed);
+    env.sandbox.stub(resource, 'isFixed').returns(isFixed);
+    env.sandbox.stub(resource, 'isInViewport').returns(isInViewport);
+    env.sandbox.stub(resource, 'prerenderAllowed').returns(prerenderAllowed);
+    env.sandbox
+      .stub(resource, 'renderOutsideViewport')
+      .returns(renderOutsideViewport);
+    env.sandbox
+      .stub(resource, 'idleRenderOutsideViewport')
+      .returns(idleRenderOutsideViewport);
+    env.sandbox.stub(resource, 'getLayoutPriority').returns(layoutPriority);
+    env.sandbox.stub(resource, 'getTaskId').returns(taskId);
+
+    env.sandbox.stub(resource, 'layoutScheduled');
+    env.sandbox.stub(resource, 'startLayout');
+
+    return resource;
+  }
+
   it('should calculate correct calcTaskScore', () => {
     const viewportRect = layoutRectLtwh(0, 100, 300, 400);
     env.sandbox.stub(resources.viewport_, 'getRect').returns(viewportRect);
@@ -267,15 +323,9 @@ describes.realWin('Resources', {amp: true}, (env) => {
     'should not schedule non-prerenderable resource when' +
       ' document is in prerender',
     () => {
-      const resource = {
-        getState: () => ResourceState.READY_FOR_LAYOUT,
-        isDisplayed: () => true,
-        isFixed: () => false,
-        isInViewport: () => true,
-        prerenderAllowed: () => false,
-        renderOutsideViewport: () => false,
-        startLayout: () => {},
-      };
+      const resource = createResource({
+        state: ResourceState.READY_FOR_LAYOUT,
+      });
       resources.visible_ = false;
       env.sandbox
         .stub(resources.ampdoc, 'getVisibilityState')
@@ -286,18 +336,12 @@ describes.realWin('Resources', {amp: true}, (env) => {
   );
 
   it('should schedule prerenderable resource when document is in prerender', () => {
-    const resource = {
-      getState: () => ResourceState.READY_FOR_LAYOUT,
-      isDisplayed: () => true,
-      isFixed: () => false,
-      isInViewport: () => true,
-      prerenderAllowed: () => true,
-      renderOutsideViewport: () => true,
-      getLayoutPriority: () => LayoutPriority.METADATA,
-      startLayout: () => {},
-      layoutScheduled: () => {},
-      getTaskId: () => 'resource#P',
-    };
+    const resource = createResource({
+      state: ResourceState.READY_FOR_LAYOUT,
+      prerenderAllowed: true,
+      renderOutsideViewport: true,
+      layoutPriority: LayoutPriority.METADATA,
+    });
     resources.visible_ = false;
     env.sandbox
       .stub(resources.ampdoc, 'getVisibilityState')
@@ -308,18 +352,12 @@ describes.realWin('Resources', {amp: true}, (env) => {
   });
 
   it('should not schedule prerenderable resource when document is hidden', () => {
-    const resource = {
-      getState: () => ResourceState.READY_FOR_LAYOUT,
-      isDisplayed: () => true,
-      isFixed: () => false,
-      isInViewport: () => true,
-      prerenderAllowed: () => true,
-      renderOutsideViewport: () => true,
-      getLayoutPriority: () => LayoutPriority.METADATA,
-      startLayout: () => {},
-      layoutScheduled: () => {},
-      getTaskId: () => 'resource#P',
-    };
+    const resource = createResource({
+      state: ResourceState.READY_FOR_LAYOUT,
+      prerenderAllowed: true,
+      renderOutsideViewport: true,
+      layoutPriority: LayoutPriority.METADATA,
+    });
     resources.visible_ = false;
     env.sandbox
       .stub(resources.ampdoc, 'getVisibilityState')
@@ -332,16 +370,11 @@ describes.realWin('Resources', {amp: true}, (env) => {
     'should not schedule non-renderOutsideViewport resource when' +
       ' resource is not visible',
     () => {
-      const resource = {
-        getState: () => ResourceState.READY_FOR_LAYOUT,
-        isDisplayed: () => true,
-        isFixed: () => false,
-        isInViewport: () => false,
-        prerenderAllowed: () => true,
-        renderOutsideViewport: () => false,
-        idleRenderOutsideViewport: () => false,
-        startLayout: () => {},
-      };
+      const resource = createResource({
+        state: ResourceState.READY_FOR_LAYOUT,
+        isInViewport: false,
+        prerenderAllowed: true,
+      });
       resources.scheduleLayoutOrPreload(resource, true);
       expect(resources.queue_.getSize()).to.equal(0);
     }
@@ -351,19 +384,13 @@ describes.realWin('Resources', {amp: true}, (env) => {
     'should force schedule non-renderOutsideViewport resource when' +
       ' resource is not visible',
     () => {
-      const resource = {
-        getState: () => ResourceState.READY_FOR_LAYOUT,
-        isDisplayed: () => true,
-        isFixed: () => false,
-        isInViewport: () => false,
-        prerenderAllowed: () => true,
-        renderOutsideViewport: () => false,
-        idleRenderOutsideViewport: () => false,
-        getLayoutPriority: () => LayoutPriority.METADATA,
-        startLayout: () => {},
-        layoutScheduled: () => {},
-        getTaskId: () => 'resource#L',
-      };
+      const resource = createResource({
+        state: ResourceState.READY_FOR_LAYOUT,
+        isInViewport: false,
+        prerenderAllowed: true,
+        layoutPriority: LayoutPriority.METADATA,
+        taskId: 'resource#L',
+      });
       resources.scheduleLayoutOrPreload(
         resource,
         true,
@@ -379,19 +406,13 @@ describes.realWin('Resources', {amp: true}, (env) => {
     'should schedule renderOutsideViewport resource when' +
       ' resource is not visible',
     () => {
-      const resource = {
-        getState: () => ResourceState.READY_FOR_LAYOUT,
-        isDisplayed: () => true,
-        isFixed: () => false,
-        isInViewport: () => false,
-        prerenderAllowed: () => true,
-        renderOutsideViewport: () => true,
-        idleRenderOutsideViewport: () => false,
-        getLayoutPriority: () => LayoutPriority.METADATA,
-        startLayout: () => {},
-        layoutScheduled: () => {},
-        getTaskId: () => 'resource#L',
-      };
+      const resource = createResource({
+        state: ResourceState.READY_FOR_LAYOUT,
+        prerenderAllowed: true,
+        renderOutsideViewport: true,
+        layoutPriority: LayoutPriority.METADATA,
+        taskId: 'resource#L',
+      });
       resources.scheduleLayoutOrPreload(resource, true);
       expect(resources.queue_.getSize()).to.equal(1);
       expect(resources.queue_.tasks_[0].forceOutsideViewport).to.be.false;
@@ -402,19 +423,14 @@ describes.realWin('Resources', {amp: true}, (env) => {
     'should schedule idleRenderOutsideViewport resource when' +
       ' resource is not visible',
     () => {
-      const resource = {
-        getState: () => ResourceState.READY_FOR_LAYOUT,
-        isDisplayed: () => true,
-        isFixed: () => false,
-        isInViewport: () => false,
-        prerenderAllowed: () => true,
-        renderOutsideViewport: () => false,
-        idleRenderOutsideViewport: () => true,
-        getLayoutPriority: () => LayoutPriority.METADATA,
-        startLayout: () => {},
-        layoutScheduled: () => {},
-        getTaskId: () => 'resource#L',
-      };
+      const resource = createResource({
+        state: ResourceState.READY_FOR_LAYOUT,
+        isInViewport: false,
+        prerenderAllowed: true,
+        idleRenderOutsideViewport: true,
+        layoutPriority: LayoutPriority.METADATA,
+        taskId: 'resource#L',
+      });
       resources.scheduleLayoutOrPreload(resource, true);
       expect(resources.queue_.getSize()).to.equal(1);
       expect(resources.queue_.tasks_[0].forceOutsideViewport).to.be.false;
@@ -601,10 +617,11 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
   function createElement(rect) {
     const element = env.win.document.createElement('amp-test');
     element.classList.add('i-amphtml-element');
+    element.V2 = () => false;
     element.signals = () => new Signals();
     element.whenBuilt = () => Promise.resolve();
     element.isBuilt = () => true;
-    element.build = () => Promise.resolve();
+    element.buildInternal = () => Promise.resolve();
     element.isUpgraded = () => true;
     element.updateLayoutBox = () => {};
     element.getPlaceholder = () => null;
@@ -888,6 +905,7 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     expect(resources.exec_.getSize()).to.equal(2);
 
     // Remove unloaded resources from exec queue.
+    resource2.abortController_ = null;
     resource2.unload();
     resources.cleanupTasks_(resource2);
     expect(resources.exec_.getSize()).to.equal(1);
@@ -902,6 +920,7 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     expect(resources.queue_.tasks_[0].resource).to.equal(resource2);
 
     // Removes them even from scheduling queue.
+    resource2.abortController_ = null;
     resource2.unload();
     resources.cleanupTasks_(resource2, /* opt_removePending */ true);
     expect(resources.queue_.getSize()).to.equal(0);
@@ -1372,7 +1391,7 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
         return signals;
       },
     };
-    element.build = sandbox.stub().returns(Promise.resolve());
+    element.buildInternal = sandbox.stub().returns(Promise.resolve());
     return element;
   }
 
@@ -1428,12 +1447,12 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
     resources.documentReady_ = false;
     resources.add(child1);
     resources.upgraded(child1);
-    expect(child1.build).to.not.be.called;
+    expect(child1.buildInternal).to.not.be.called;
     resources.documentReady_ = true;
     resources.add(child2);
     const resource2 = stubBuild(Resource.forElementOptional(child2));
     resources.upgraded(child2);
-    expect(child2.build).to.be.calledOnce;
+    expect(child2.buildInternal).to.be.calledOnce;
     expect(schedulePassStub).to.not.be.called;
     return resource2.buildPromise.then(() => {
       expect(schedulePassStub).to.be.calledOnce;
@@ -1447,7 +1466,7 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
       const schedulePassStub = sandbox.stub(resources, 'schedulePass');
       child1.isBuilt = () => false;
       const child1BuildSpy = sandbox.spy();
-      child1.build = () => {
+      child1.buildInternal = () => {
         // Emulate an error happening during an element build.
         child1BuildSpy();
         return Promise.reject(new Error('child1-build-error'));
@@ -1480,11 +1499,11 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
       resources.documentReady_ = false;
       resources.add(child1);
       resources.upgraded(child1);
-      expect(child1.build.called).to.be.false;
+      expect(child1.buildInternal.called).to.be.false;
       expect(resources.pendingBuildResources_.length).to.be.equal(1);
       resources.add(child2);
       resources.upgraded(child2);
-      expect(child2.build.called).to.be.false;
+      expect(child2.buildInternal.called).to.be.false;
       expect(resources.pendingBuildResources_.length).to.be.equal(2);
       expect(resources.buildReadyResources_.calledTwice).to.be.true;
       const resource1 = Resource.forElementOptional(child1);
@@ -1531,15 +1550,15 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
       () => {
         resources.pendingBuildResources_ = [resource1, resource2];
         resources.buildReadyResources_();
-        expect(child1.build.called).to.be.false;
-        expect(child2.build.called).to.be.false;
+        expect(child1.buildInternal.called).to.be.false;
+        expect(child2.buildInternal.called).to.be.false;
         expect(resources.pendingBuildResources_.length).to.be.equal(2);
         expect(resources.schedulePass.called).to.be.false;
 
         child1.nextSibling = child2;
         resources.buildReadyResources_();
-        expect(child1.build.called).to.be.true;
-        expect(child2.build.called).to.be.false;
+        expect(child1.buildInternal.called).to.be.true;
+        expect(child2.buildInternal.called).to.be.false;
         expect(resources.pendingBuildResources_.length).to.be.equal(1);
         expect(resources.pendingBuildResources_[0]).to.be.equal(resource2);
         expect(resource1.isBuilding()).to.be.true;
@@ -1551,8 +1570,8 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
             child2.parentNode = parent;
             parent.nextSibling = true;
             resources.buildReadyResources_();
-            expect(child1.build).to.be.calledOnce;
-            expect(child2.build.called).to.be.true;
+            expect(child1.buildInternal).to.be.calledOnce;
+            expect(child2.buildInternal.called).to.be.true;
             expect(resources.pendingBuildResources_.length).to.be.equal(0);
             expect(resource2.isBuilding()).to.be.true;
             return resource2.buildPromise;
@@ -1570,7 +1589,7 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
     it('should NOT build past the root node when pending', () => {
       resources.pendingBuildResources_ = [resource1];
       resources.buildReadyResources_();
-      expect(child1.build.called).to.be.false;
+      expect(child1.buildInternal.called).to.be.false;
       expect(resources.pendingBuildResources_.length).to.be.equal(1);
       expect(resources.schedulePass.called).to.be.false;
 
@@ -1578,7 +1597,7 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
       parent.nextSibling = true;
       sandbox.stub(resources.ampdoc, 'getRootNode').returns(parent);
       resources.buildReadyResources_();
-      expect(child1.build.called).to.be.false;
+      expect(child1.buildInternal.called).to.be.false;
       expect(resources.pendingBuildResources_.length).to.be.equal(1);
       expect(resources.schedulePass.called).to.be.false;
     });
@@ -1586,8 +1605,8 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
     it('should not try to build resources already being built', () => {
       resources.pendingBuildResources_ = [resource1, resource2];
       resources.buildReadyResources_();
-      expect(child1.build.called).to.be.false;
-      expect(child2.build.called).to.be.false;
+      expect(child1.buildInternal.called).to.be.false;
+      expect(child2.buildInternal.called).to.be.false;
       expect(resources.pendingBuildResources_.length).to.be.equal(2);
 
       const newChild = createElementWithResource(3)[0];
@@ -1595,7 +1614,7 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
       const newResource = newChild['__AMP__RESOURCE'];
       const child1BuildSpy = sandbox.spy();
       child1.nextSibling = child2;
-      child1.build = () => {
+      child1.buildInternal = () => {
         // Simulate parent elements adding children elements to simulate
         // the infinite loop of building pending resources and make sure
         // that we're handling it well.
@@ -1606,8 +1625,8 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
       };
       resources.buildReadyResources_();
       expect(child1BuildSpy.called).to.be.true;
-      expect(child2.build.called).to.be.false;
-      expect(newChild.build.called).to.be.true;
+      expect(child2.buildInternal.called).to.be.false;
+      expect(newChild.buildInternal.called).to.be.true;
       expect(resources.pendingBuildResources_.length).to.be.equal(1);
       expect(resources.pendingBuildResources_[0]).to.be.equal(resource2);
 
@@ -1615,8 +1634,8 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
       parent.nextSibling = true;
       resources.buildReadyResources_();
       expect(child1BuildSpy.calledTwice).to.be.false;
-      expect(child2.build.called).to.be.true;
-      expect(newChild.build.calledTwice).to.be.false;
+      expect(child2.buildInternal.called).to.be.true;
+      expect(newChild.buildInternal.calledTwice).to.be.false;
       expect(resources.pendingBuildResources_.length).to.be.equal(0);
     });
 
@@ -1631,15 +1650,15 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
           resource2,
         ];
         const child1BuildSpy = sandbox.spy();
-        child1.build = () => {
+        child1.buildInternal = () => {
           // Emulate an error happening during an element build.
           child1BuildSpy();
           return Promise.reject(new Error('child1-build-error'));
         };
         resources.buildReadyResources_();
         expect(child1BuildSpy.called).to.be.true;
-        expect(child2.build.called).to.be.true;
-        expect(parent.build.called).to.be.true;
+        expect(child2.buildInternal.called).to.be.true;
+        expect(parent.buildInternal.called).to.be.true;
         expect(resources.pendingBuildResources_.length).to.be.equal(0);
         return Promise.all([
           parentResource.buildPromise,
@@ -1671,7 +1690,7 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
         resources.documentReady_ = true;
         resources.pendingBuildResources_ = [resource1];
         const child1BuildSpy = sandbox.spy();
-        child1.build = () => {
+        child1.buildInternal = () => {
           // Emulate an error happening during an element build.
           child1BuildSpy();
           return Promise.reject(new Error('child1-build-error'));
@@ -1705,6 +1724,26 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
       expect(resources.get()).to.not.contain(resource);
       expect(pauseOnRemoveStub).to.be.calledOnce;
       expect(disconnectStub).to.not.be.called;
+    });
+  });
+
+  it("remove should remove all of a resource's tasks", () => {
+    const states = [
+      ResourceState.NOT_LAID_OUT,
+      ResourceState.READY_FOR_LAYOUT,
+      ResourceState.LAYOUT_SCHEDULED,
+    ];
+
+    states.forEach((state) => {
+      resource1.state_ = state;
+      resources.exec_.enqueue({id: 1, resource: resource1});
+      resources.queue_.enqueue({id: 1, resource: resource1});
+
+      expect(resources.exec_.getSize()).to.equal(1);
+      expect(resources.queue_.getSize()).to.equal(1);
+      resources.remove(child1);
+      expect(resources.exec_.getSize()).to.equal(0);
+      expect(resources.queue_.getSize()).to.equal(0);
     });
   });
 

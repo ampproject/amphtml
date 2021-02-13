@@ -101,8 +101,40 @@ import {isArray, toWin} from './types';
  *
  * Each method is called exactly once and overriding them in subclasses
  * is optional.
+ * @implements {BaseElementInterface}
  */
 export class BaseElement {
+  /**
+   * Subclasses can override this method to opt-in into being called to
+   * prerender when document itself is not yet visible (pre-render mode).
+   *
+   * The return value of this function is used to determine whether or not the
+   * element will be built _and_ laid out during prerender mode. Therefore, any
+   * changes to the return value _after_ buildCallback() will have no affect.
+   *
+   * @param {!AmpElement} unusedElement
+   * @return {boolean}
+   * @nocollapse
+   */
+  static prerenderAllowed(unusedElement) {
+    return false;
+  }
+
+  /**
+   * Subclasses can override this method to provide a svg logo that will be
+   * displayed as the loader.
+   *
+   * @param {!AmpElement} unusedElement
+   * @return {{
+   *  content: (!Element|undefined),
+   *  color: (string|undefined),
+   * }}
+   * @nocollapse
+   */
+  static createLoaderLogoCallback(unusedElement) {
+    return {};
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     /** @public @const {!Element} */
@@ -120,9 +152,6 @@ export class BaseElement {
     the private property in the extensions compilation unit's private
     properties.
     */
-
-    /** @package {!Layout} */
-    this.layout_ = Layout.NODISPLAY;
 
     /** @public @const {!Window} */
     this.win = toWin(element.ownerDocument.defaultView);
@@ -189,7 +218,7 @@ export class BaseElement {
 
   /** @return {!Layout} */
   getLayout() {
-    return this.layout_;
+    return this.element.getLayout();
   }
 
   /**
@@ -339,19 +368,6 @@ export class BaseElement {
   }
 
   /**
-   * Subclasses can override this method to opt-in into being called to
-   * prerender when document itself is not yet visible (pre-render mode).
-   *
-   * The return value of this function is used to determine whether or not the
-   * element will be built _and_ laid out during prerender mode. Therefore, any
-   * changes to the return value _after_ buildCallback() will have no affect.
-   * @return {boolean}
-   */
-  prerenderAllowed() {
-    return false;
-  }
-
-  /**
    * Subclasses can override this method to indicate that it is has
    * render-blocking service.
    *
@@ -371,18 +387,6 @@ export class BaseElement {
    */
   createPlaceholderCallback() {
     return null;
-  }
-
-  /**
-   * Subclasses can override this method to provide a svg logo that will be
-   * displayed as the loader.
-   * @return {{
-   *  content: (!Element|undefined),
-   *  color: (string|undefined),
-   * }}
-   */
-  createLoaderLogoCallback() {
-    return {};
   }
 
   /**

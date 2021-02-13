@@ -47,10 +47,11 @@ describes.realWin(
         player.setAttribute('data-id', playoutId);
       }
       doc.body.appendChild(player);
-      await player.build();
+      await player.buildInternal();
       player.layoutCallback();
       const iframe = player.querySelector('iframe');
-      player.implementation_.sdnBridge_({
+      const impl = await player.getImpl();
+      impl.sdnBridge_({
         source: iframe.contentWindow,
         data: JSON.stringify({data: 'ready'}),
       });
@@ -61,9 +62,9 @@ describes.realWin(
       const player = await get3QElement('c8dbe7f4-7f7f-11e6-a407-0cc47a188158');
       const iframe = player.querySelector('iframe');
       expect(iframe).to.not.be.null;
-      /*expect(iframe.src).to.equal(
-        encodeURIComponent('https://playout.3qsdn.com/c8dbe7f4-7f7f-11e6-a407-0cc47a188158?autoplay=false&amp=true')
-      );*/
+      expect(iframe.src).to.equal(
+        'https://playout.3qsdn.com/c8dbe7f4-7f7f-11e6-a407-0cc47a188158?autoplay=false&amp=true'
+      );
     });
 
     it('requires data-id', () => {
@@ -76,25 +77,26 @@ describes.realWin(
 
     it('should forward events from amp-3q-player to the amp element', async () => {
       const player = await get3QElement('c8dbe7f4-7f7f-11e6-a407-0cc47a188158');
+      const impl = await player.getImpl();
       const iframe = player.querySelector('iframe');
       await Promise.resolve();
       const p1 = listenOncePromise(player, VideoEvents.MUTED);
-      sendFakeMessage(player, iframe, 'muted');
+      sendFakeMessage(impl, iframe, 'muted');
       await p1;
       const p2 = listenOncePromise(player, VideoEvents.PLAYING);
-      sendFakeMessage(player, iframe, 'playing');
+      sendFakeMessage(impl, iframe, 'playing');
       await p2;
       const p3 = listenOncePromise(player, VideoEvents.PAUSE);
-      sendFakeMessage(player, iframe, 'paused');
+      sendFakeMessage(impl, iframe, 'paused');
       await p3;
       const p4 = listenOncePromise(player, VideoEvents.UNMUTED);
-      sendFakeMessage(player, iframe, 'unmuted');
+      sendFakeMessage(impl, iframe, 'unmuted');
       const successTimeout = timer.promise(10);
       return Promise.race([p4, successTimeout]);
     });
 
-    function sendFakeMessage(player, iframe, command) {
-      player.implementation_.sdnBridge_({
+    function sendFakeMessage(impl, iframe, command) {
+      impl.sdnBridge_({
         source: iframe.contentWindow,
         data: JSON.stringify({data: command}),
       });
