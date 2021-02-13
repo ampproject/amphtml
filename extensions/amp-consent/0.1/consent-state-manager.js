@@ -32,7 +32,7 @@ import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {dev, devAssert, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict, hasOwn} from '../../../src/utils/object';
 import {expandConsentEndpointUrl, getConsentCID} from './consent-config';
 
 const TAG = 'CONSENT-STATE-MANAGER';
@@ -128,7 +128,7 @@ export class ConsentStateManager {
     const purposes = Object.keys(purposeMap);
     purposes.forEach((purpose) => {
       // If defaults only, then only update if it doesn't exist.
-      if (defaultsOnly && this.purposeConsents_[purpose]) {
+      if (defaultsOnly && hasOwn(this.purposeConsents_, purpose)) {
         return;
       }
       const value = !!purposeMap[purpose]
