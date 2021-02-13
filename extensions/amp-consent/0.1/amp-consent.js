@@ -373,15 +373,21 @@ export class AmpConsent extends AMP.BaseElement {
 
       for (let i = 0; i < iframes.length; i++) {
         if (iframes[i].contentWindow === event.source) {
-          const action = data['action'];
+          const {action, purposeConsents} = data;
           // Check if we have a valid action and valid state
           if (
-            isEnumValue(ACTION_TYPE, action) &&
-            this.isReadyToHandleAction_()
+            !isEnumValue(ACTION_TYPE, action) ||
+            !this.isReadyToHandleAction_()
           ) {
-            // TODO(micajuineho): Set purpose consent
-            this.handleAction_(action, consentString, metadata);
+            continue;
           }
+          if (purposeConsents && action !== ACTION_TYPE.DISMISS) {
+            this.validateSetPurposeArgs_(purposeConsents);
+            this.consentStateManager_.updateConsentInstancePurposes(
+              purposeConsents
+            );
+          }
+          this.handleAction_(action, consentString, metadata);
         }
       }
     });
