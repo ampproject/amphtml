@@ -32,8 +32,7 @@ const result = {
 };
 
 test('collects selectors', async (t) => {
-  const testFiles = `${__dirname}/*.css`;
-  const data = await m.getZindexSelectors(testFiles);
+  const data = await m.getZindexSelectors('*.css', __dirname);
   t.deepEqual(data, result);
 });
 

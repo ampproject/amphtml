@@ -17,6 +17,7 @@
 
 const fs = require('fs');
 const globby = require('globby');
+const path = require('path');
 const postcss = require('postcss');
 const prettier = require('prettier');
 const table = require('text-table');
@@ -94,15 +95,17 @@ function createTable(filesData) {
 }
 
 /**
- * Extract z-index selectors from all files matching the given glob
+ * Extract z-index selectors from all files matching the given glob starting at
+ * the given working directory
  * @param {string} glob
+ * @param {string=} cwd
  * @return {Object}
  */
-async function getZindexSelectors(glob) {
+async function getZindexSelectors(glob, cwd = '.') {
   const filesData = Object.create(null);
-  const files = globby.sync(glob);
+  const files = globby.sync(glob, {cwd});
   for (const file of files) {
-    const contents = await fs.promises.readFile(file, 'utf-8');
+    const contents = await fs.promises.readFile(path.join(cwd, file), 'utf-8');
     const selectors = Object.create(null);
     const plugins = [zIndexCollector.bind(null, selectors)];
     await postcss(plugins).process(contents, {from: file});
