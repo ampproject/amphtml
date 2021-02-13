@@ -1107,7 +1107,9 @@ export class AmpList extends AMP.BaseElement {
    */
   scanForBindings_(addedElements, removedElements) {
     const binding = this.element.getAttribute('binding');
-    devAssert(binding.startsWith('refresh'));
+    if (!binding || !binding.startsWith('refresh')) {
+      return;
+    }
     Services.bindForDocOrNull(this.element).then((bind) => {
       if (bind) {
         // For binding="refresh-evaluate", we scan for bindings, evaluate+cache expressions, but skip DOM update.
