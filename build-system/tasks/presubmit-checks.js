@@ -15,11 +15,11 @@
  */
 'use strict';
 
-const gulp = require('gulp');
+const fs = require('fs');
+const globby = require('globby');
 const path = require('path');
 const srcGlobs = require('../test-configs/config').presubmitGlobs;
-const through2 = require('through2');
-const {blue, red} = require('kleur/colors');
+const {cyan, red, yellow} = require('kleur/colors');
 const {log} = require('../common/logging');
 
 const dedicatedCopyrightNoteSources = /(\.js|\.css|\.go)$/;
@@ -1262,11 +1262,11 @@ function isInTestFolder(path) {
 
 /**
  * Check if file is inside the build-system/babel-plugins test/fixture folder.
- * @param {string} filePath
+ * @param {string} srcFile
  * @return {boolean}
  */
-function isInBuildSystemFixtureFolder(filePath) {
-  const folder = path.dirname(filePath);
+function isInBuildSystemFixtureFolder(srcFile) {
+  const folder = path.dirname(srcFile);
   return (
     folder.startsWith('build-system/babel-plugins') &&
     folder.includes('test/fixtures')
@@ -1300,15 +1300,14 @@ function stripComments(contents) {
  * patterns), and provides any possible fix information for matched terms if
  * possible
  *
- * @param {!File} file a vinyl file object to scan for term matches
+ * @param {string} srcFile a file to scan for term matches
  * @param {!Array<string, string>} terms Pairs of regex patterns and possible
  *   fix messages.
  * @return {boolean} true if any of the terms match the file content,
  *   false otherwise
  */
-function matchTerms(file, terms) {
-  const contents = stripComments(file.contents.toString());
-  const {relative} = file;
+function matchTerms(srcFile, terms) {
+  const contents = stripComments(fs.readFileSync(srcFile, 'utf-8'));
   return Object.keys(terms)
     .map(function (term) {
       let fix;
@@ -1316,10 +1315,10 @@ function matchTerms(file, terms) {
       // NOTE: we could do a glob test instead of exact check in the future
       // if needed but that might be too permissive.
       if (
-        isInBuildSystemFixtureFolder(relative) ||
+        isInBuildSystemFixtureFolder(srcFile) ||
         (Array.isArray(allowlist) &&
-          (allowlist.indexOf(relative) != -1 ||
-            (isInTestFolder(relative) && !checkInTestFolder)))
+          (allowlist.indexOf(srcFile) != -1 ||
+            (isInTestFolder(srcFile) && !checkInTestFolder)))
       ) {
         return false;
       }
@@ -1347,16 +1346,11 @@ function matchTerms(file, terms) {
         }
 
         log(
-          red(
-            'Found forbidden: "' +
-              match[0] +
-              '" in ' +
-              relative +
-              ':' +
-              line +
-              ':' +
-              column
-          )
+          red('ERROR:'),
+          'Found forbidden',
+          cyan(`"${match[0]}"`),
+          'in',
+          cyan(`${srcFile}:${line}:${column}`)
         );
         if (typeof terms[term] === 'string') {
           fix = terms[term];
@@ -1366,9 +1360,8 @@ function matchTerms(file, terms) {
 
         // log the possible fix information if provided for the term.
         if (fix) {
-          log(blue(fix));
+          log('⤷', yellow('To fix:'), fix);
         }
-        log(blue('=========='));
       }
 
       return hasTerm;
@@ -1379,28 +1372,25 @@ function matchTerms(file, terms) {
 }
 
 /**
- * Test if a file's contents match any of the
- * forbidden terms
- *
- * @param {!File} file file is a vinyl file object
+ * Test if a file's contents match any of the forbidden terms
+ * @param {string} srcFile
  * @return {boolean} true if any of the terms match the file content,
  *   false otherwise
  */
-function hasAnyTerms(file) {
-  const pathname = file.path;
-  const basename = path.basename(pathname);
+function hasAnyTerms(srcFile) {
+  const basename = path.basename(srcFile);
   let hasTerms = false;
   let hasSrcInclusiveTerms = false;
 
-  hasTerms = matchTerms(file, forbiddenTerms);
+  hasTerms = matchTerms(srcFile, forbiddenTerms);
 
   const isTestFile =
     /^test-/.test(basename) ||
     /^_init_tests/.test(basename) ||
     /_test\.js$/.test(basename) ||
-    /storybook\/[^/]+\.js$/.test(pathname);
+    /storybook\/[^/]+\.js$/.test(srcFile);
   if (!isTestFile) {
-    hasSrcInclusiveTerms = matchTerms(file, forbiddenTermsSrcInclusive);
+    hasSrcInclusiveTerms = matchTerms(srcFile, forbiddenTermsSrcInclusive);
   }
 
   return hasTerms || hasSrcInclusiveTerms;
@@ -1410,23 +1400,28 @@ function hasAnyTerms(file) {
  * Test if a file's contents fail to match any of the required terms and log
  * any missing terms
  *
- * @param {!File} file file is a vinyl file object
+ * @param {string} srcFile
  * @return {boolean} true if any of the terms are not matched in the file
  *  content, false otherwise
  */
-function isMissingTerms(file) {
-  const contents = file.contents.toString();
+function isMissingTerms(srcFile) {
+  const contents = fs.readFileSync(srcFile, 'utf-8');
   return Object.keys(requiredTerms)
     .map(function (term) {
       const filter = requiredTerms[term];
-      if (!filter.test(file.path) || requiredTermsExcluded.test(file.path)) {
+      if (!filter.test(srcFile) || requiredTermsExcluded.test(srcFile)) {
         return false;
       }
 
       const matches = contents.match(new RegExp(term));
       if (!matches) {
-        log(red('Did not find required: "' + term + '" in ' + file.relative));
-        log(blue('=========='));
+        log(
+          red('ERROR:'),
+          'Did not find required',
+          cyan(`"${term}"`),
+          'in',
+          cyan(srcFile)
+        );
         return true;
       }
       return false;
@@ -1437,43 +1432,35 @@ function isMissingTerms(file) {
 }
 
 /**
- * Check a file for all the required terms and
- * any forbidden terms and log any errors found.
- * @return {!Promise}
+ * Entry point for gulp presubmit.
  */
-function presubmit() {
+async function presubmit() {
   let forbiddenFound = false;
   let missingRequirements = false;
-  return gulp
-    .src(srcGlobs)
-    .pipe(
-      through2.obj(function (file, enc, cb) {
-        forbiddenFound = hasAnyTerms(file) || forbiddenFound;
-        missingRequirements = isMissingTerms(file) || missingRequirements;
-        cb();
-      })
-    )
-    .on('end', function () {
-      if (forbiddenFound) {
-        log(blue('Please remove these usages or consult with the AMP team.'));
-      }
-      if (missingRequirements) {
-        log(
-          blue(
-            'Adding these terms (e.g. by adding a required LICENSE ' +
-              'to the file)'
-          )
-        );
-      }
-      if (forbiddenFound || missingRequirements) {
-        process.exitCode = 1;
-      }
-    });
+  const srcFiles = globby.sync(srcGlobs);
+  for (const srcFile of srcFiles) {
+    forbiddenFound = hasAnyTerms(srcFile) || forbiddenFound;
+    missingRequirements = isMissingTerms(srcFile) || missingRequirements;
+  }
+  if (forbiddenFound) {
+    log(
+      yellow('NOTE:'),
+      'Please remove these usages or consult with the AMP team.'
+    );
+  }
+  if (missingRequirements) {
+    log(
+      yellow('NOTE:'),
+      'Please add these terms (e.g. a required LICENSE) to the files.'
+    );
+  }
+  if (forbiddenFound || missingRequirements) {
+    process.exitCode = 1;
+  }
 }
 
 module.exports = {
   presubmit,
 };
 
-presubmit.description =
-  'Run validation against files to check for forbidden and required terms';
+presubmit.description = 'Check source files for forbidden and required terms';
