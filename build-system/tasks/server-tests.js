@@ -17,10 +17,8 @@
 const assert = require('assert');
 const fs = require('fs');
 const globby = require('globby');
-const gulp = require('gulp');
 const path = require('path');
 const posthtml = require('posthtml');
-const through = require('through2');
 const {
   log,
   logWithoutTimestamp,
@@ -175,39 +173,37 @@ function reportResult() {
 /**
  * Runs the test in a single input file
  *
- * @return {!ReadableStream}
+ * @param {string} inputFile
  */
-function runTest() {
-  return through.obj(async (file, enc, cb) => {
-    const inputFile = file.path;
-    const input = await getInput(inputFile);
-    const testName = getTestName(inputFile);
-    const expectedOutput = await getExpectedOutput(inputFile);
-    const extraOptions = loadOptions(inputFile);
-    const transform = await getTransform(inputFile, extraOptions);
-    const output = await getOutput(transform, input);
-    try {
-      assert.strictEqual(output, expectedOutput);
-    } catch (err) {
-      ++failed;
-      logError(testName, err);
-      cb();
-      return;
-    }
-    ++passed;
-    logWithoutTimestampLocalDev(green('✔'), 'Passed', cyan(testName));
-    cb();
-  });
+async function runTest(inputFile) {
+  const testName = getTestName(inputFile);
+  const [input, expectedOutput, transform] = await Promise.all([
+    getInput(inputFile),
+    getExpectedOutput(inputFile),
+    getTransform(inputFile, loadOptions(inputFile)),
+  ]);
+  const output = await getOutput(transform, input);
+  try {
+    assert.strictEqual(output, expectedOutput);
+  } catch (err) {
+    ++failed;
+    logError(testName, err);
+    return;
+  }
+  ++passed;
+  logWithoutTimestampLocalDev(green('✔'), 'Passed', cyan(testName));
 }
 
 /**
  * Tests for AMP server custom transforms. Entry point for `gulp server-tests`.
- *
- * @return {!Vinyl}
  */
-function serverTests() {
+async function serverTests() {
   buildNewServer();
-  return gulp.src(inputPaths).pipe(runTest()).on('end', reportResult);
+  const inputFiles = globby.sync(inputPaths);
+  for (const inputFile of inputFiles) {
+    await runTest(inputFile);
+  }
+  reportResult();
 }
 
 module.exports = {
