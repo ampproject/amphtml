@@ -1079,7 +1079,7 @@ export class AmpList extends AMP.BaseElement {
         // This must be initial render, so do a non-blocking scan for bindings only.
         // [diffable] is a special case that is handled later in render_(), see comment there.
         if (!this.element.hasAttribute('diffable')) {
-          this.scanForBindings_(elements);
+          this.scanForBindings_(elements, []);
         }
 
         // Don't block render and return synchronously.
