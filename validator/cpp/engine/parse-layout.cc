@@ -114,16 +114,16 @@ CssLength::CssLength(string_view input, bool allow_auto, bool allow_fluid)
 
 AmpLayout::Layout ParseLayout(string_view layout) {
   static unordered_map<std::string, AmpLayout::Layout> layouts_by_attr_val({
-      {"unknown", AmpLayout::UNKNOWN},
-      {"nodisplay", AmpLayout::NODISPLAY},
-      {"fixed", AmpLayout::FIXED},
-      {"fixed-height", AmpLayout::FIXED_HEIGHT},
-      {"responsive", AmpLayout::RESPONSIVE},
       {"container", AmpLayout::CONTAINER},
       {"fill", AmpLayout::FILL},
+      {"fixed", AmpLayout::FIXED},
+      {"fixed-height", AmpLayout::FIXED_HEIGHT},
       {"flex-item", AmpLayout::FLEX_ITEM},
       {"fluid", AmpLayout::FLUID},
       {"intrinsic", AmpLayout::INTRINSIC},
+      {"nodisplay", AmpLayout::NODISPLAY},
+      {"responsive", AmpLayout::RESPONSIVE},
+      {"unknown", AmpLayout::UNKNOWN},
   });
   if (layout.empty()) return AmpLayout::UNKNOWN;
   auto it = layouts_by_attr_val.find(std::string(layout));
@@ -236,16 +236,16 @@ std::string GetCssLengthStyle(const CssLength& length,
 
 std::string GetLayoutClass(AmpLayout::Layout layout) {
   static unordered_map<AmpLayout::Layout, std::string> classes_by_layout({
-      {AmpLayout::UNKNOWN, "i-amphtml-layout-unknown"},
-      {AmpLayout::NODISPLAY, "i-amphtml-layout-nodisplay"},
-      {AmpLayout::FIXED, "i-amphtml-layout-fixed"},
-      {AmpLayout::FIXED_HEIGHT, "i-amphtml-layout-fixed-height"},
-      {AmpLayout::RESPONSIVE, "i-amphtml-layout-responsive"},
       {AmpLayout::CONTAINER, "i-amphtml-layout-container"},
       {AmpLayout::FILL, "i-amphtml-layout-fill"},
+      {AmpLayout::FIXED, "i-amphtml-layout-fixed"},
+      {AmpLayout::FIXED_HEIGHT, "i-amphtml-layout-fixed-height"},
       {AmpLayout::FLEX_ITEM, "i-amphtml-layout-flex-item"},
       {AmpLayout::FLUID, "i-amphtml-layout-fluid"},
       {AmpLayout::INTRINSIC, "i-amphtml-layout-intrinsic"},
+      {AmpLayout::NODISPLAY, "i-amphtml-layout-nodisplay"},
+      {AmpLayout::RESPONSIVE, "i-amphtml-layout-responsive"},
+      {AmpLayout::UNKNOWN, "i-amphtml-layout-unknown"},
   });
   if (layout == AmpLayout::UNKNOWN) return "";
 
@@ -259,16 +259,16 @@ std::string GetLayoutClass(AmpLayout::Layout layout) {
 
 std::string GetLayoutName(AmpLayout::Layout layout) {
   static unordered_map<AmpLayout::Layout, std::string> names_by_layout({
-      {AmpLayout::UNKNOWN, "unknown"},
-      {AmpLayout::NODISPLAY, "nodisplay"},
-      {AmpLayout::FIXED, "fixed"},
-      {AmpLayout::FIXED_HEIGHT, "fixed-height"},
-      {AmpLayout::RESPONSIVE, "responsive"},
       {AmpLayout::CONTAINER, "container"},
       {AmpLayout::FILL, "fill"},
+      {AmpLayout::FIXED, "fixed"},
+      {AmpLayout::FIXED_HEIGHT, "fixed-height"},
       {AmpLayout::FLEX_ITEM, "flex-item"},
       {AmpLayout::FLUID, "fluid"},
       {AmpLayout::INTRINSIC, "intrinsic"},
+      {AmpLayout::NODISPLAY, "nodisplay"},
+      {AmpLayout::RESPONSIVE, "responsive"},
+      {AmpLayout::UNKNOWN, "unknown"},
   });
   if (layout == AmpLayout::UNKNOWN) return "";
 
