@@ -1055,6 +1055,63 @@ describes.realWin(
         );
       });
 
+      describe('granularConsentExp', () => {
+        let managerSpy;
+
+        beforeEach(async () => {
+          ampConsent.buildCallback();
+          await macroTask();
+          managerSpy = window.sandbox.spy(
+            ampConsent.consentStateManager_,
+            'updateConsentInstancePurposes'
+          );
+          event.data = {
+            'type': 'consent-response',
+            'action': 'accept',
+            'info': 'accept-string',
+            'purposeConsents': {
+              'purpose-foo': true,
+              'purpose-bar': false,
+            },
+          };
+          toggleExperiment(win, 'amp-consent-granular-consent', true);
+        });
+
+        afterEach(() => {
+          toggleExperiment(win, 'amp-consent-granular-consent', false);
+        });
+
+        it('handles purposeConsentMap w/ accept', () => {
+          event.source = iframe.contentWindow;
+          win.dispatchEvent(event);
+
+          expect(managerSpy).to.be.calledWith(event.data.purposeConsents);
+          expect(actionSpy).to.be.calledWith(
+            ACTION_TYPE.ACCEPT,
+            'accept-string'
+          );
+        });
+
+        it('handles purposeConsentMap w/ reject', () => {
+          event.data.action = 'reject';
+          delete event.data.info;
+          event.source = iframe.contentWindow;
+          win.dispatchEvent(event);
+
+          expect(managerSpy).to.be.calledWith(event.data.purposeConsents);
+          expect(actionSpy).to.be.calledWith(ACTION_TYPE.REJECT);
+        });
+
+        it('does not set purposeConsentMap with dismiss', () => {
+          event.data.action = 'dismiss';
+          event.source = iframe.contentWindow;
+          win.dispatchEvent(event);
+
+          expect(managerSpy).to.not.be.called;
+          expect(actionSpy).to.be.calledWith(ACTION_TYPE.DISMISS);
+        });
+      });
+
       it('ignore info when prompt UI is not displayed', () => {
         ampConsent.isPromptUiOn_ = false;
         event.data = {
