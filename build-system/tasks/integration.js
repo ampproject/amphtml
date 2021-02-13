@@ -25,7 +25,7 @@ const {
 } = require('./runtime-test/runtime-test-base');
 const {buildNewServer} = require('../server/typescript-compile');
 const {buildRuntime} = require('../common/utils');
-const {cyan, yellow} = require('ansi-colors');
+const {cyan, yellow} = require('kleur/colors');
 const {log} = require('../common/logging');
 const {maybePrintArgvMessages} = require('./runtime-test/helpers');
 
@@ -114,6 +114,9 @@ integration.flags = {
     'works in non headless mode.',
   'edge': '  Runs tests on Edge',
   'esm': '  Runs against module(esm) build',
+  'define_experiment_constant':
+    '  Transforms tests with the EXPERIMENT constant set to true',
+  'experiment': '  Experiment being tested (used for status reporting)',
   'firefox': '  Runs tests on Firefox',
   'files': '  Runs tests for specific files',
   'grep': '  Runs tests that match the pattern',

@@ -3,7 +3,7 @@
   "node": {
     "supportPolicy": ["lts_latest"]
   },
-  "ignorePaths": [],
+  "ignoreDeps": ["ubuntu-2004"],
 
   "commitMessagePrefix": "📦",
   "timezone": "America/Los_Angeles",

@@ -64,7 +64,6 @@ import {debounce} from '../../../src/utils/rate-limit';
 import {delegateAutoplay} from '../../../src/video-interface';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {escapeCssSelectorIdent} from '../../../src/css';
 import {getAmpdoc} from '../../../src/service';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {getLocalizationService} from './amp-story-localization-service';
@@ -73,8 +72,8 @@ import {getMediaPerformanceMetricsService} from './media-performance-metrics-ser
 import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
+import {isPrerenderActivePage} from './prerender-active-page';
 import {listen} from '../../../src/event-helper';
-import {parseQueryString} from '../../../src/url';
 import {px, toggle} from '../../../src/style';
 import {renderPageDescription} from './semantic-render';
 import {setTextBackgroundColor} from './utils';
@@ -227,6 +226,11 @@ function debounceEmbedResize(win, page, mutator) {
  * an <amp-story>.
  */
 export class AmpStoryPage extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed(element) {
+    return isPrerenderActivePage(element);
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -246,9 +250,6 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private {?boolean}  */
     this.isLastStoryPage_ = null;
-
-    /** @private {?boolean}  */
-    this.isPrerenderActivePage_ = null;
 
     /** @private {?LoadingSpinner} */
     this.loadingSpinner_ = null;
@@ -403,25 +404,6 @@ export class AmpStoryPage extends AMP.BaseElement {
         dict({'auto-advance-after': storyNextUpParam})
       );
     }
-  }
-
-  /**
-   * Returns true if the page should be prerendered (for being an active page or first page)
-   * @return {boolean}
-   */
-  isPrerenderActivePage() {
-    if (this.isPrerenderActivePage_ != null) {
-      return this.isPrerenderActivePage_;
-    }
-    const hashId = parseQueryString(this.win.location.href)['page'];
-    let selector = 'amp-story-page:first-of-type';
-    if (hashId) {
-      selector += `, amp-story-page#${escapeCssSelectorIdent(hashId)}`;
-    }
-    const selectorNodes = this.win.document.querySelectorAll(selector);
-    this.isPrerenderActivePage_ =
-      selectorNodes[selectorNodes.length - 1] === this.element;
-    return this.isPrerenderActivePage_;
   }
 
   /**
@@ -616,15 +598,13 @@ export class AmpStoryPage extends AMP.BaseElement {
     ]);
   }
 
-  // TODO(26866): switch back to onMeasuredChange and remove the layoutBox
-  // equality checks.
   /** @override */
   onLayoutMeasure() {
     const layoutBox = this.getLayoutSize();
     // Only measures from the first story page, that always gets built because
     // of the prerendering optimizations in place.
     if (
-      !this.isPrerenderActivePage() ||
+      !isPrerenderActivePage(this.element) ||
       (this.layoutBox_ &&
         this.layoutBox_.width === layoutBox.width &&
         this.layoutBox_.height === layoutBox.height)
@@ -871,11 +851,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.mutateElement(() => {
       this.element.classList.add(PAGE_LOADED_CLASS_NAME);
     });
-  }
-
-  /** @override */
-  prerenderAllowed() {
-    return this.isPrerenderActivePage();
   }
 
   /**

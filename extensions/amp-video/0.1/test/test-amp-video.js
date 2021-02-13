@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import '../amp-video';
+import {AmpVideo, isCachedByCdn} from '../amp-video';
 import {DisplayObserver} from '../../../../src/utils/display-observer';
 import {Services} from '../../../../src/services';
 import {VideoEvents} from '../../../../src/video-interface';
@@ -136,11 +136,17 @@ describes.realWin(
       const video = v.querySelector('video');
       expect(video.getAttribute('src')).to.be.null;
       const sources = video.querySelectorAll('source');
-      expect(sources.length).to.equal(2);
+      expect(sources.length).to.equal(4);
       expect(sources[0].getAttribute('src')).to.equal(
-        'https://example-com.cdn.ampproject.org/m/s/video.mp4'
+        'https://example-com.cdn.ampproject.org/m/s/video.mp4?amp_quality=high'
       );
       expect(sources[1].getAttribute('src')).to.equal(
+        'https://example-com.cdn.ampproject.org/m/s/video.mp4?amp_quality=medium'
+      );
+      expect(sources[2].getAttribute('src')).to.equal(
+        'https://example-com.cdn.ampproject.org/m/s/video.mp4?amp_quality=low'
+      );
+      expect(sources[3].getAttribute('src')).to.equal(
         'https://example.com/video.mp4'
       );
     });
@@ -163,15 +169,14 @@ describes.realWin(
       const video = v.querySelector('video');
       expect(video.getAttribute('src')).to.be.null;
       const sources = video.querySelectorAll('source');
-      expect(sources.length).to.equal(2);
-      expect(sources[0].getAttribute('src')).to.equal(
-        'https://example-com.cdn.ampproject.org/m/s/video.mp4'
-      );
-      expect(sources[1].getAttribute('src')).to.equal(
+      expect(sources.length).to.equal(4);
+      expect(sources[0].getAttribute('data-bitrate')).to.equal('2000');
+      expect(sources[1].getAttribute('data-bitrate')).to.equal('720');
+      expect(sources[2].getAttribute('data-bitrate')).to.equal('400');
+      expect(sources[3].hasAttribute('data-bitrate')).to.be.false;
+      expect(sources[3].getAttribute('src')).to.equal(
         'https://example.com/video.mp4'
       );
-      expect(sources[0].getAttribute('data-bitrate')).to.equal('1000');
-      expect(sources[1].getAttribute('data-bitrate')).to.equal('1000');
     });
 
     it('should load a video', async () => {
@@ -805,156 +810,80 @@ describes.realWin(
           makeVisible = resolve;
         });
         visibilityStubs.whenFirstVisible.returns(visiblePromise);
+
+        video = doc.createElement('amp-video');
+        video.setAttribute('layout', 'nodisplay');
+        doc.body.appendChild(video);
       });
 
       describe('should not prerender if no cached sources', () => {
         it('with just src', () => {
-          return new Promise((resolve) => {
-            getVideo(
-              {
-                src: 'video.mp4',
-                width: 160,
-                height: 90,
-              },
-              null,
-              (element, impl) => {
-                expect(impl.prerenderAllowed()).to.be.false;
-                resolve();
-              }
-            );
-          });
+          video.setAttribute('src', 'video.mp4');
+          expect(AmpVideo.prerenderAllowed(video)).to.be.false;
         });
 
         it('with just source', () => {
-          return new Promise((resolve) => {
-            const source = doc.createElement('source');
-            source.setAttribute('src', 'video.mp4');
-            getVideo(
-              {
-                width: 160,
-                height: 90,
-              },
-              null,
-              (element, impl) => {
-                expect(impl.prerenderAllowed()).to.be.false;
-                resolve();
-              }
-            );
-          });
+          const source = doc.createElement('source');
+          source.setAttribute('src', 'video.mp4');
+          video.appendChild(source);
+          expect(AmpVideo.prerenderAllowed(video)).to.be.false;
         });
 
         it('with both src and source', () => {
-          return new Promise((resolve) => {
-            const source = doc.createElement('source');
-            source.setAttribute('src', 'video.mp4');
-            getVideo(
-              {
-                src: 'video.mp4',
-                width: 160,
-                height: 90,
-              },
-              [source],
-              (element, impl) => {
-                expect(impl.prerenderAllowed()).to.be.false;
-                resolve();
-              }
-            );
-          });
+          video.setAttribute('src', 'video.mp4');
+          const source = doc.createElement('source');
+          source.setAttribute('src', 'video.mp4');
+          video.appendChild(source);
+          expect(AmpVideo.prerenderAllowed(video)).to.be.false;
         });
       });
 
       describe('should prerender cached sources', () => {
         it('with just cached src', () => {
-          return new Promise((resolve) => {
-            getVideo(
-              {
-                'src': 'https://example-com.cdn.ampproject.org/m/s/video.mp4',
-                'amp-orig-src': 'https://example.com/video.mp4',
-                width: 160,
-                height: 90,
-              },
-              null,
-              (element, impl) => {
-                expect(impl.prerenderAllowed()).to.be.true;
-                resolve();
-              }
-            );
-          });
+          video.setAttribute(
+            'src',
+            'https://example-com.cdn.ampproject.org/m/s/video.mp4'
+          );
+          video.setAttribute('amp-orig-src', 'https://example.com/video.mp4');
+          expect(AmpVideo.prerenderAllowed(video)).to.be.true;
         });
 
         it('with just cached source', () => {
-          return new Promise((resolve) => {
-            const source = doc.createElement('source');
-            source.setAttribute(
-              'src',
-              'https://example-com.cdn.ampproject.org/m/s/video.mp4'
-            );
-            source.setAttribute(
-              'amp-orig-src',
-              'https://example.com/video.mp4'
-            );
-            getVideo(
-              {
-                width: 160,
-                height: 90,
-              },
-              [source],
-              (element, impl) => {
-                expect(impl.prerenderAllowed()).to.be.true;
-                resolve();
-              }
-            );
-          });
+          const source = doc.createElement('source');
+          source.setAttribute(
+            'src',
+            'https://example-com.cdn.ampproject.org/m/s/video.mp4'
+          );
+          source.setAttribute('amp-orig-src', 'https://example.com/video.mp4');
+          video.appendChild(source);
+          expect(AmpVideo.prerenderAllowed(video)).to.be.true;
         });
 
         it('with a mix or cached and non-cached', () => {
-          return new Promise((resolve) => {
-            const source = doc.createElement('source');
-            source.setAttribute('src', 'video.mp4');
+          const source = doc.createElement('source');
+          source.setAttribute('src', 'video.mp4');
+          video.appendChild(source);
 
-            const cachedSource = doc.createElement('source');
-            cachedSource.setAttribute(
-              'src',
-              'https://example-com.cdn.ampproject.org/m/s/video.mp4'
-            );
-            cachedSource.setAttribute(
-              'amp-orig-src',
-              'https://example.com/video.mp4'
-            );
+          const cachedSource = doc.createElement('source');
+          cachedSource.setAttribute(
+            'src',
+            'https://example-com.cdn.ampproject.org/m/s/video.mp4'
+          );
+          cachedSource.setAttribute(
+            'amp-orig-src',
+            'https://example.com/video.mp4'
+          );
+          video.appendChild(cachedSource);
 
-            getVideo(
-              {
-                src: 'video.mp4',
-                width: 160,
-                height: 90,
-              },
-              [source, cachedSource],
-              (element, impl) => {
-                expect(impl.prerenderAllowed()).to.be.true;
-                resolve();
-              }
-            );
-          });
+          expect(AmpVideo.prerenderAllowed(video)).to.be.true;
         });
       });
 
       describe('should prerender poster image', () => {
         it('with just cached src', () => {
-          return new Promise((resolve) => {
-            getVideo(
-              {
-                src: 'https://example.com/video.mp4',
-                poster: 'https://example.com/poster.jpg',
-                width: 160,
-                height: 90,
-              },
-              null,
-              (element, impl) => {
-                expect(impl.prerenderAllowed()).to.be.true;
-                resolve();
-              }
-            );
-          });
+          video.setAttribute('src', 'https://example.com/video.mp4');
+          video.setAttribute('poster', 'https://example.com/poster.jpg');
+          expect(AmpVideo.prerenderAllowed(video)).to.be.true;
         });
       });
 
@@ -1233,8 +1162,8 @@ describes.realWin(
                 height: 90,
               },
               null,
-              (element, impl) => {
-                expect(impl.isCachedByCDN_(element)).to.be.false;
+              (element) => {
+                expect(isCachedByCdn(element)).to.be.false;
                 resolve();
               }
             );
@@ -1252,8 +1181,8 @@ describes.realWin(
                 height: 90,
               },
               null,
-              (element, impl) => {
-                expect(impl.isCachedByCDN_(element)).to.be.false;
+              (element) => {
+                expect(isCachedByCdn(element)).to.be.false;
                 resolve();
               }
             );
@@ -1272,14 +1201,13 @@ describes.realWin(
               height: 90,
             },
             /* children */ null,
-            (element) => {
-              const {implementation_} = element;
-              const {video_} = implementation_;
+            (element, impl) => {
+              const {video_} = impl;
 
               expect(video_.currentTime).to.equal(0);
 
               [20, 100, 0, 50, 22].forEach((timeSeconds) => {
-                implementation_.seekTo(timeSeconds);
+                impl.seekTo(timeSeconds);
                 expect(video_.currentTime).to.equal(timeSeconds);
               });
 

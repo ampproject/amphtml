@@ -15,30 +15,22 @@
  */
 'use strict';
 
-const gulp = require('gulp');
-const gulpAva = require('gulp-ava');
+const {execOrDie} = require('../common/exec');
 
 /**
  * Runs ava tests.
- * @return {!Vinyl}
  */
-function ava() {
-  return gulp
-    .src([
-      require.resolve('./csvify-size/test.js'),
-      require.resolve('./get-zindex/test.js'),
-      require.resolve('./prepend-global/test.js'),
-    ])
-    .pipe(
-      gulpAva({
-        'concurrency': 5,
-        'failFast': true,
-      })
-    );
+async function ava() {
+  const avaCli = 'node_modules/ava/cli.js';
+  const testFiles = [
+    'build-system/tasks/get-zindex/get-zindex.test.js',
+    'build-system/tasks/prepend-global/prepend-global.test.js',
+  ].join(' ');
+  execOrDie(`${avaCli} ${testFiles} --color --fail-fast`);
 }
 
 module.exports = {
   ava,
 };
 
-ava.description = 'Runs ava tests for gulp tasks';
+ava.description = "Runs ava tests for AMP's tasks";

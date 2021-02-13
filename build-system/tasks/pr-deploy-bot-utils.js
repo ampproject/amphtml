@@ -18,8 +18,8 @@
 const fs = require('fs-extra');
 const path = require('path');
 const request = require('request-promise');
-const {ciBuildSha, isTravisBuild} = require('../common/ci');
-const {cyan} = require('ansi-colors');
+const {ciBuildSha} = require('../common/ci');
+const {cyan} = require('kleur/colors');
 const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
 const {replaceUrls: replaceUrlsAppUtil} = require('../server/app-utils');
 
@@ -69,10 +69,6 @@ async function replaceUrls(dir) {
 }
 
 async function signalPrDeployUpload(result) {
-  // TODO(rsimha): Remove this check once Travis is shut down.
-  if (!isTravisBuild()) {
-    return;
-  }
   const loggingPrefix = getLoggingPrefix();
   logWithoutTimestamp(
     `${loggingPrefix} Reporting`,
