@@ -357,16 +357,16 @@ message CdataSpec {
 message AmpLayout {
   // NEXT AVAILABLE TAG: 10
   enum Layout {
-    UNKNOWN = 0;
-    NODISPLAY = 1;
-    FIXED = 2;
-    FIXED_HEIGHT = 3;
-    RESPONSIVE = 4;
     CONTAINER = 5;
     FILL = 6;
+    FIXED = 2;
+    FIXED_HEIGHT = 3;
     FLEX_ITEM = 7;
     FLUID = 8;
     INTRINSIC = 9;
+    NODISPLAY = 1;
+    RESPONSIVE = 4;
+    UNKNOWN = 0;
   }
   // Specifies which layouts are supported by this element.
   repeated Layout supported_layouts = 1;
