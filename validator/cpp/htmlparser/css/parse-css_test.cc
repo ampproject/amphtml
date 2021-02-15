@@ -508,9 +508,7 @@ TEST(ParseCssTest, ParseAStylesheet_ParsesAHashReference) {
           "col": 5
         }
       ],
-      "declarations":      [
-
-      ]
+      "declarations":      []
     }
   ],
   "eof":  {
@@ -550,12 +548,8 @@ TEST(ParseCssTest, ParseAStylesheet_ParsesAnAtMediaRule) {
           "col": 7
         }
       ],
-      "rules":      [
-
-      ],
-      "declarations":      [
-
-      ]
+      "rules":      [],
+      "declarations":      []
     }
   ],
   "eof":  {
@@ -1096,14 +1090,10 @@ TEST(ParseCssTest, ParseAStylesheet_ParsesNestedMediaRulesAndDeclarations) {
               ]
             }
           ],
-          "declarations":          [
-
-          ]
+          "declarations":          []
         }
       ],
-      "declarations":      [
-
-      ]
+      "declarations":      []
     },
     {
       "tokentype": "AT_RULE",
@@ -1122,9 +1112,7 @@ TEST(ParseCssTest, ParseAStylesheet_ParsesNestedMediaRulesAndDeclarations) {
           "col": 11
         }
       ],
-      "rules":      [
-
-      ],
+      "rules":      [],
       "declarations":      [
         {
           "tokentype": "DECLARATION",
@@ -1284,12 +1272,8 @@ TEST(ParseCssTest, ParseAStylesheet_GeneratesErrorsBasedOnTheGrammar) {
           "col": 10
         }
       ],
-      "rules":      [
-
-      ],
-      "declarations":      [
-
-      ]
+      "rules":      [],
+      "declarations":      []
     },
     {
       "tokentype": "QUALIFIED_RULE",
@@ -1314,9 +1298,7 @@ TEST(ParseCssTest, ParseAStylesheet_GeneratesErrorsBasedOnTheGrammar) {
           "col": 4
         }
       ],
-      "declarations":      [
-
-      ]
+      "declarations":      []
     }
   ],
   "eof":  {
@@ -1551,14 +1533,10 @@ TEST(ParseCssTest, ParseAStylesheet_HandlesANestedMediaRuleWithDeclarations) {
               ]
             }
           ],
-          "declarations":          [
-
-          ]
+          "declarations":          []
         }
       ],
-      "declarations":      [
-
-      ]
+      "declarations":      []
     }
   ],
   "eof":  {
@@ -1939,9 +1917,7 @@ TEST(ParseCssTest, ParseAStyleSheet_ImagesAndFonts) {
           "col": 119
         }
       ],
-      "rules":      [
-
-      ],
+      "rules":      [],
       "declarations":      [
         {
           "tokentype": "DECLARATION",
@@ -2266,14 +2242,10 @@ TEST(ParseCssTest, ExtractUrls_FindsFontInFontFace) {
       Tokenize(&css, /*line=*/1, /*col=*/0, &errors);
   unique_ptr<Stylesheet> stylesheet =
       ParseAStylesheet(&tokens, AmpCssParsingConfig(), &errors);
-  EXPECT_EQ(JsonFromList(errors), R""([
-
-])"");
+  EXPECT_EQ(JsonFromList(errors), "[]");
   vector<unique_ptr<ParsedCssUrl>> parsed_urls;
   ExtractUrls(*stylesheet, &parsed_urls, &errors);
-  EXPECT_EQ(JsonFromList(errors), R""([
-
-])"");
+  EXPECT_EQ(JsonFromList(errors), "[]");
   EXPECT_EQ(JsonFromList(parsed_urls), R""([
   {
     "tokentype": "PARSED_CSS_URL",
@@ -2296,10 +2268,10 @@ TEST(ParseCssTest, ExtractUrls_SupportsImageUrlWithUnicode) {
       Tokenize(&css, /*line=*/1, /*col=*/0, &errors);
   unique_ptr<Stylesheet> stylesheet =
       ParseAStylesheet(&tokens, AmpCssParsingConfig(), &errors);
-  EXPECT_EQ(JsonFromList(errors), "[\n\n]");
+  EXPECT_EQ(JsonFromList(errors), "[]");
   vector<unique_ptr<ParsedCssUrl>> parsed_urls;
   ExtractUrls(*stylesheet, &parsed_urls, &errors);
-  EXPECT_EQ(JsonFromList(errors), "[\n\n]");
+  EXPECT_EQ(JsonFromList(errors), "[]");
   EXPECT_EQ(JsonFromList(parsed_urls), R""([
   {
     "tokentype": "PARSED_CSS_URL",
@@ -2327,10 +2299,10 @@ TEST(ParseCssTest, ExtractUrls_LongerExample) {
       Tokenize(&css, /*line=*/1, /*col=*/0, &errors);
   unique_ptr<Stylesheet> stylesheet =
       ParseAStylesheet(&tokens, AmpCssParsingConfig(), &errors);
-  EXPECT_EQ(JsonFromList(errors), "[\n\n]");
+  EXPECT_EQ(JsonFromList(errors), "[]");
   vector<unique_ptr<ParsedCssUrl>> parsed_urls;
   ExtractUrls(*stylesheet, &parsed_urls, &errors);
-  EXPECT_EQ(JsonFromList(errors), "[\n\n]");
+  EXPECT_EQ(JsonFromList(errors), "[]");
   EXPECT_EQ(JsonFromList(parsed_urls), R""([
   {
     "tokentype": "PARSED_CSS_URL",
@@ -2385,10 +2357,10 @@ TEST(ParseCssTest, ExtractUrls_WithWindowsNewlines) {
       Tokenize(&css, /*line=*/1, /*col=*/0, &errors);
   unique_ptr<Stylesheet> stylesheet =
       ParseAStylesheet(&tokens, AmpCssParsingConfig(), &errors);
-  EXPECT_EQ(JsonFromList(errors), "[\n\n]");
+  EXPECT_EQ(JsonFromList(errors), "[]");
   vector<unique_ptr<ParsedCssUrl>> parsed_urls;
   ExtractUrls(*stylesheet, &parsed_urls, &errors);
-  EXPECT_EQ(JsonFromList(errors), "[\n\n]");
+  EXPECT_EQ(JsonFromList(errors), "[]");
   EXPECT_EQ(JsonFromList(parsed_urls), R""([
   {
     "tokentype": "PARSED_CSS_URL",
@@ -2424,7 +2396,7 @@ TEST(ParseCssTest, ExtractUrls_InvalidArgumentsInsideUrlFunctionYieldsError) {
       Tokenize(&css, /*line=*/1, /*col=*/0, &errors);
   unique_ptr<Stylesheet> stylesheet =
       ParseAStylesheet(&tokens, AmpCssParsingConfig(), &errors);
-  EXPECT_EQ(JsonFromList(errors), "[\n\n]");
+  EXPECT_EQ(JsonFromList(errors), "[]");
   vector<unique_ptr<ParsedCssUrl>> parsed_urls;
   ExtractUrls(*stylesheet, &parsed_urls, &errors);
   EXPECT_EQ(JsonFromList(errors), R""([
@@ -2438,7 +2410,7 @@ TEST(ParseCssTest, ExtractUrls_InvalidArgumentsInsideUrlFunctionYieldsError) {
     ]
   }
 ])"");
-  EXPECT_EQ(JsonFromList(parsed_urls), "[\n\n]");
+  EXPECT_EQ(JsonFromList(parsed_urls), "[]");
 }
 
 TEST(ParseCssTest, ParseMediaQueries_SemicolonTerminatedQuery) {
@@ -2448,7 +2420,7 @@ TEST(ParseCssTest, ParseMediaQueries_SemicolonTerminatedQuery) {
       Tokenize(&css, /*line=*/1, /*col=*/0, &parse_errors);
   unique_ptr<Stylesheet> stylesheet =
       ParseAStylesheet(&tokens, AmpCssParsingConfig(), &parse_errors);
-  EXPECT_EQ(JsonFromList(parse_errors), "[\n\n]");
+  EXPECT_EQ(JsonFromList(parse_errors), "[]");
 
   std::vector<unique_ptr<ErrorToken>> media_errors;
   std::vector<unique_ptr<Token>> media_types, media_features;
@@ -2464,7 +2436,7 @@ unique_ptr<Stylesheet> MediaQueryStyleSheet(const std::string& media_query) {
       Tokenize(&css, /*line=*/1, /*col=*/0, &errors);
   unique_ptr<Stylesheet> stylesheet =
       ParseAStylesheet(&tokens, AmpCssParsingConfig(), &errors);
-  EXPECT_EQ(JsonFromList(errors), "[\n\n]");
+  EXPECT_EQ(JsonFromList(errors), "[]");
   return stylesheet;
 }
 
@@ -2535,7 +2507,7 @@ TEST(ParseCssTest, ParseMediaQueries_ExtractsTypesAndFeatures) {
   vector<unique_ptr<Token>> media_types, media_features;
   ParseMediaQueries(*MediaQueryStyleSheet("screen and (color)"), &media_types,
                     &media_features, &errors);
-  EXPECT_EQ(JsonFromList(errors), "[\n\n]");
+  EXPECT_EQ(JsonFromList(errors), "[]");
   EXPECT_EQ(JsonFromList(media_types),
             R""([
   {
@@ -2603,7 +2575,7 @@ TEST(ParseCssTest, ParseInlineStyle_EmptySuccessful) {
   vector<unique_ptr<Declaration>> declarations =
       ParseInlineStyle(&tokens, &errors);
   EXPECT_EQ(0, errors.size());
-  EXPECT_EQ(JsonFromList(declarations), "[\n\n]");
+  EXPECT_EQ(JsonFromList(declarations), "[]");
 }
 
 TEST(ParseCssTest, ParseInlineStyle_Successful) {
@@ -2850,7 +2822,7 @@ vector<unique_ptr<Token>> ParseSelectorForTest(const std::string& selector) {
       Tokenize(&css, /*line=*/1, /*col=*/0, &errors);
   unique_ptr<Stylesheet> sheet =
       ParseAStylesheet(&tokens, AmpCssParsingConfig(), &errors);
-  EXPECT_EQ(JsonFromList(errors), "[\n\n]");
+  EXPECT_EQ(JsonFromList(errors), "[]");
   CHECK_EQ(1, sheet->rules().size());
   Rule* rule = (*sheet->mutable_rules()).front().get();
   CHECK_EQ(TokenType::QUALIFIED_RULE, rule->Type());
@@ -3237,9 +3209,7 @@ TEST(ParseCssTest, ParseASelector) {
         "pos": 0,
         "endPos": 3
       },
-      "otherSelectors":      [
-
-      ]
+      "otherSelectors":      []
     },
     "right":    {
       "tokentype": "SIMPLE_SELECTOR_SEQUENCE",
@@ -3253,9 +3223,7 @@ TEST(ParseCssTest, ParseASelector) {
         "pos": 4,
         "endPos": 7
       },
-      "otherSelectors":      [
-
-      ]
+      "otherSelectors":      []
     }
   },
   "right":  {
@@ -3270,9 +3238,7 @@ TEST(ParseCssTest, ParseASelector) {
       "pos": 10,
       "endPos": 13
     },
-    "otherSelectors":    [
-
-    ]
+    "otherSelectors":    []
   }
 })"");
 }
@@ -3352,9 +3318,7 @@ TEST(ParseCssTest, ParsesASelectorsGroup) {
         "pos": 0,
         "endPos": 3
       },
-      "otherSelectors":      [
-
-      ]
+      "otherSelectors":      []
     },
     {
       "tokentype": "SIMPLE_SELECTOR_SEQUENCE",
@@ -3368,9 +3332,7 @@ TEST(ParseCssTest, ParsesASelectorsGroup) {
         "pos": 5,
         "endPos": 8
       },
-      "otherSelectors":      [
-
-      ]
+      "otherSelectors":      []
     },
     {
       "tokentype": "SIMPLE_SELECTOR_SEQUENCE",
@@ -3384,9 +3346,7 @@ TEST(ParseCssTest, ParsesASelectorsGroup) {
         "pos": 12,
         "endPos": 15
       },
-      "otherSelectors":      [
-
-      ]
+      "otherSelectors":      []
     }
   ]
 })"");
@@ -3830,7 +3790,7 @@ TEST(ParseCssTest, SelectorParserImplementsVisitorPattern) {
       Tokenize(&css, /*line=*/1, /*col=*/0, &errors);
   unique_ptr<Stylesheet> stylesheet =
       ParseAStylesheet(&tokens, AmpCssParsingConfig(), &errors);
-  EXPECT_EQ(JsonFromList(errors), "[\n\n]");
+  EXPECT_EQ(JsonFromList(errors), "[]");
   stylesheet->Accept(&visitor);
   EXPECT_EQ(4, visitor.combinators_.size());
   Combinator* combinator =
@@ -3864,9 +3824,7 @@ TEST(ParseCssTest, SelectorParserImplementsVisitorPattern) {
         "pos": 0,
         "endPos": 1
       },
-      "otherSelectors":      [
-
-      ]
+      "otherSelectors":      []
     },
     "right":    {
       "tokentype": "SIMPLE_SELECTOR_SEQUENCE",
@@ -3880,9 +3838,7 @@ TEST(ParseCssTest, SelectorParserImplementsVisitorPattern) {
         "pos": 4,
         "endPos": 5
       },
-      "otherSelectors":      [
-
-      ]
+      "otherSelectors":      []
     }
   },
   "right":  {
@@ -3897,9 +3853,7 @@ TEST(ParseCssTest, SelectorParserImplementsVisitorPattern) {
       "pos": 6,
       "endPos": 7
     },
-    "otherSelectors":    [
-
-    ]
+    "otherSelectors":    []
   }
 })"");
 }
@@ -3936,7 +3890,7 @@ TEST(ParseCssTest, ExtractBodySelectorPositions) {
       Tokenize(&css, /*line=*/1, /*col=*/0, &errors);
   unique_ptr<Stylesheet> stylesheet =
       ParseAStylesheet(&tokens, AmpCssParsingConfig(), &errors);
-  EXPECT_EQ(JsonFromList(errors), "[\n\n]");
+  EXPECT_EQ(JsonFromList(errors), "[]");
   stylesheet->Accept(&visitor);
 
   vector<std::pair<int, int>> positions;
