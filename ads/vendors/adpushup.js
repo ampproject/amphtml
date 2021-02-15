@@ -21,13 +21,11 @@ import {loadScript, validateData} from '../../3p/3p';
  * @param {!Object} data
  */
 export function adpushup(global, data) {
-  validateData(data, [
-    'siteid',
-    'slotpath',
-    'width',
-    'height',
-    'totalampslots',
-  ]);
+  validateData(
+    data,
+    ['siteid', 'slotpath', 'width', 'height'],
+    ['totalampslots']
+  );
   loadScript(
     global,
     'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
