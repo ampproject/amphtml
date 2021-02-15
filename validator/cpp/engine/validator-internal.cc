@@ -4882,6 +4882,8 @@ void ParsedValidatorRules::ValidateTypeIdentifiers(
     ValidationResult* result) const {
   CHECK_NE(0, format_identifiers.size());
   bool has_mandatory_type_identifier = false;
+  bool has_email_type_identifier = false;
+  bool has_css_strict_type_identifier = false;
   // The named values should match up to `self` and AMP caches listed at
   // https://cdn.ampproject.org/caches.json
   static LazyRE2 transformed_value_regex = {"^(bing|google|self);v=(\\d+)$"};
@@ -4934,6 +4936,10 @@ void ParsedValidatorRules::ValidateTypeIdentifiers(
           context->AddError(ValidationError::DEV_MODE_ONLY, context->line_col(),
                             /*params=*/{}, /*url*/ "", result);
         }
+        if (type_identifier == TypeIdentifier::kEmail)
+          has_email_type_identifier = true;
+        if (type_identifier == TypeIdentifier::kCssStrict)
+          has_css_strict_type_identifier = true;
       } else {
         context->AddError(
             ValidationError::DISALLOWED_ATTR, context->line_col(),
@@ -4943,6 +4949,15 @@ void ParsedValidatorRules::ValidateTypeIdentifiers(
             result);
       }
     }
+  }
+  // If AMP Email format and not set to data-css-strict, then issue a warning
+  // that not having data-css-strict is deprecated. See b/179798751.
+  if (has_email_type_identifier && !has_css_strict_type_identifier) {
+    context->AddWarning(
+        ValidationError::AMP_EMAIL_MISSING_STRICT_CSS_ATTR, context->line_col(),
+        /*params=*/{},
+        /*spec_url=*/"https://github.com/ampproject/amphtml/issues/32587",
+        result);
   }
   if (!has_mandatory_type_identifier) {
     // Missing mandatory type identifier (any AMP variant but "transformed").
