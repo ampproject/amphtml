@@ -6189,6 +6189,8 @@ class ParsedValidatorRules {
    */
   validateTypeIdentifiers(attrs, formatIdentifiers, context, validationResult) {
     let hasMandatoryTypeIdentifier = false;
+    let hasEmailTypeIdentifier = false;
+    let hasCssStrictTypeIdentifier = false;
     // The named values should match up to `self` and AMP caches listed at
     // https://cdn.ampproject.org/caches.json
     const transformedValueRe = new RegExp(/^(bing|google|self);v=(\d+)$/);
@@ -6236,6 +6238,12 @@ class ParsedValidatorRules {
                 context.getLineCol(),
                 /*params=*/[], /*url*/ '', validationResult);
           }
+          if (typeIdentifier === 'amp4email') {
+            hasEmailTypeIdentifier = true;
+          }
+          if (typeIdentifier === 'data-css-strict') {
+            hasCssStrictTypeIdentifier = true;
+          }
         } else {
           context.addError(
               generated.ValidationError.Code.DISALLOWED_ATTR,
@@ -6245,6 +6253,15 @@ class ParsedValidatorRules {
               validationResult);
         }
       }
+    }
+    // If AMP Email format and not set to data-css-strict, then issue a warning
+    // that not having data-css-strict is deprecated. See b/179798751.
+    if (hasEmailTypeIdentifier && !hasCssStrictTypeIdentifier) {
+      context.addWarning(
+          generated.ValidationError.Code.AMP_EMAIL_MISSING_STRICT_CSS_ATTR,
+          context.getLineCol(), /*params=*/[],
+          'https://github.com/ampproject/amphtml/issues/32587',
+          validationResult);
     }
     if (!hasMandatoryTypeIdentifier) {
       // Missing mandatory type identifier (any AMP variant but "transformed").
