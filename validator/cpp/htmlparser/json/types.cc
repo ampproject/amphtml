@@ -113,6 +113,11 @@ std::string JsonArray::ToString(int indent_columns) const {
 }
 
 void JsonArray::ToString(std::stringbuf* buf, int indent_columns) const {
+  if (items_.empty()) {
+    buf->sputn("[]", 2);
+    return;
+  }
+
   bool first = true;
   buf->sputc('[');
   buf->sputc('\n');
