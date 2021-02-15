@@ -2563,7 +2563,7 @@ class CdataMatcher {
 
     // Validate the allowed CSS declarations (eg: `background-color`)
     if (maybeDocCssSpec !== null &&
-        !maybeDocCssSpec.spec().allowAllDeclarationInStyleTag) {
+        !maybeDocCssSpec.spec().allowAllDeclarationInStyle) {
       const invalidDeclVisitor = new InvalidDeclVisitor(
           maybeDocCssSpec, context, getTagDescriptiveName(this.tagSpec_),
           validationResult);
@@ -4903,30 +4903,30 @@ function validateAttrCss(
   }
 
   /** @type {?ParsedDocCssSpec} */
-  const maybeSpec = context.matchingDocCssSpec();
-  if (maybeSpec) {
+  const maybeDocCssSpec = context.matchingDocCssSpec();
+  if (maybeDocCssSpec !== null) {
     // Determine if we've exceeded the maximum bytes per inline style
     // requirements.
-    if (maybeSpec.spec().maxBytesPerInlineStyle >= 0 &&
-        attrByteLen > maybeSpec.spec().maxBytesPerInlineStyle) {
-      if (maybeSpec.spec().maxBytesIsWarning) {
+    if (maybeDocCssSpec.spec().maxBytesPerInlineStyle >= 0 &&
+        attrByteLen > maybeDocCssSpec.spec().maxBytesPerInlineStyle) {
+      if (maybeDocCssSpec.spec().maxBytesIsWarning) {
         context.addWarning(
             generated.ValidationError.Code.INLINE_STYLE_TOO_LONG,
             context.getLineCol(), /* params */
             [
               getTagDescriptiveName(tagSpec), attrByteLen.toString(),
-              maybeSpec.spec().maxBytesPerInlineStyle.toString()
+              maybeDocCssSpec.spec().maxBytesPerInlineStyle.toString()
             ],
-            maybeSpec.spec().maxBytesSpecUrl, result.validationResult);
+            maybeDocCssSpec.spec().maxBytesSpecUrl, result.validationResult);
       } else {
         context.addError(
             generated.ValidationError.Code.INLINE_STYLE_TOO_LONG,
             context.getLineCol(), /* params */
             [
               getTagDescriptiveName(tagSpec), attrByteLen.toString(),
-              maybeSpec.spec().maxBytesPerInlineStyle.toString()
+              maybeDocCssSpec.spec().maxBytesPerInlineStyle.toString()
             ],
-            maybeSpec.spec().maxBytesSpecUrl, result.validationResult);
+            maybeDocCssSpec.spec().maxBytesSpecUrl, result.validationResult);
       }
     }
 
@@ -4935,14 +4935,55 @@ function validateAttrCss(
     // relevant.
     for (const declaration of declarations) {
       const firstIdent = declaration.firstIdent();
-      // Allowed declarations vary by context. SVG has its own set of CSS
-      // declarations not supported generally in HTML.
-      const cssDeclaration = parsedAttrSpec.getSpec().valueDocSvgCss === true ?
-          maybeSpec.cssDeclarationSvgByName(declaration.name) :
-          maybeSpec.cssDeclarationByName(declaration.name);
-      // If there is no matching declaration in the rules, then this
-      // declaration is not allowed.
-      if (cssDeclaration === null) {
+      // Validate declarations only when they are not all allowed.
+      if (!maybeDocCssSpec.spec().allowAllDeclarationInStyle) {
+        // Allowed declarations vary by context. SVG has its own set of CSS
+        // declarations not supported generally in HTML.
+        const cssDeclaration =
+            parsedAttrSpec.getSpec().valueDocSvgCss === true ?
+            maybeDocCssSpec.cssDeclarationSvgByName(declaration.name) :
+            maybeDocCssSpec.cssDeclarationByName(declaration.name);
+        // If there is no matching declaration in the rules, then this
+        // declaration is not allowed.
+        if (cssDeclaration === null) {
+          context.addError(
+              generated.ValidationError.Code.DISALLOWED_PROPERTY_IN_ATTR_VALUE,
+              context.getLineCol(), /* params */
+              [declaration.name, attrName, getTagDescriptiveName(tagSpec)],
+              context.getRules().getStylesSpecUrl(), result.validationResult);
+          // Don't emit additional errors for this declaration.
+          continue;
+        } else if (cssDeclaration.valueCasei.length > 0) {
+          let hasValidValue = false;
+          for (const value of cssDeclaration.valueCasei) {
+            if (firstIdent.toLowerCase() == value) {
+              hasValidValue = true;
+              break;
+            }
+          }
+          if (!hasValidValue) {
+            // Declaration value not allowed.
+            context.addError(
+                generated.ValidationError.Code
+                    .CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
+                context.getLineCol(), /* params */
+                [getTagDescriptiveName(tagSpec), declaration.name, firstIdent],
+                context.getRules().getStylesSpecUrl(), result.validationResult);
+          }
+        } else if (cssDeclaration.valueRegexCasei != null) {
+          const valueRegex = context.getRules().getFullMatchCaseiRegex(
+              /** @type {number} */ (cssDeclaration.valueRegexCasei));
+          if (!valueRegex.test(firstIdent)) {
+            context.addError(
+                generated.ValidationError.Code
+                    .CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
+                context.getLineCol(), /* params */
+                [getTagDescriptiveName(tagSpec), declaration.name, firstIdent],
+                context.getRules().getStylesSpecUrl(), result.validationResult);
+          }
+        }
+      }
+      if (declaration.name.indexOf('i-amphtml-') > -1) {
         context.addError(
             generated.ValidationError.Code.DISALLOWED_PROPERTY_IN_ATTR_VALUE,
             context.getLineCol(), /* params */
@@ -4950,36 +4991,8 @@ function validateAttrCss(
             context.getRules().getStylesSpecUrl(), result.validationResult);
         // Don't emit additional errors for this declaration.
         continue;
-      } else if (cssDeclaration.valueCasei.length > 0) {
-        let hasValidValue = false;
-        for (const value of cssDeclaration.valueCasei) {
-          if (firstIdent.toLowerCase() == value) {
-            hasValidValue = true;
-            break;
-          }
-        }
-        if (!hasValidValue) {
-          // Declaration value not allowed.
-          context.addError(
-              generated.ValidationError.Code
-                  .CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
-              context.getLineCol(), /* params */
-              [getTagDescriptiveName(tagSpec), declaration.name, firstIdent],
-              context.getRules().getStylesSpecUrl(), result.validationResult);
-        }
-      } else if (cssDeclaration.valueRegexCasei != null) {
-        const valueRegex = context.getRules().getFullMatchCaseiRegex(
-            /** @type {number} */ (cssDeclaration.valueRegexCasei));
-        if (!valueRegex.test(firstIdent)) {
-          context.addError(
-              generated.ValidationError.Code
-                  .CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
-              context.getLineCol(), /* params */
-              [getTagDescriptiveName(tagSpec), declaration.name, firstIdent],
-              context.getRules().getStylesSpecUrl(), result.validationResult);
-        }
       }
-      if (!maybeSpec.spec().allowImportant) {
+      if (!maybeDocCssSpec.spec().allowImportant) {
         if (declaration.important)
           context.addError(
               generated.ValidationError.Code.CSS_SYNTAX_DISALLOWED_IMPORTANT,
@@ -5005,16 +5018,16 @@ function validateAttrCss(
         // Validate that the URL itself matches the spec.
         // Only image specs apply to inline styles. Fonts are only defined in
         // @font-face rules which we require a full stylesheet to define.
-        if (maybeSpec.spec().imageUrlSpec !== null) {
+        if (maybeDocCssSpec.spec().imageUrlSpec !== null) {
           const adapter = new UrlErrorInStylesheetAdapter(
               context.getLineCol().getLine(), context.getLineCol().getCol());
           validateUrlAndProtocol(
-              maybeSpec.imageUrlSpec(), adapter, context, url.utf8Url, tagSpec,
-              result.validationResult);
+              maybeDocCssSpec.imageUrlSpec(), adapter, context, url.utf8Url,
+              tagSpec, result.validationResult);
         }
         // Subtract off URL lengths from doc-level inline style bytes, if
         // specified by the DocCssSpec.
-        if (!maybeSpec.spec().urlBytesIncluded && !isDataUrl(url.utf8Url))
+        if (!maybeDocCssSpec.spec().urlBytesIncluded && !isDataUrl(url.utf8Url))
           result.inlineStyleCssBytes -= htmlparser.byteLength(url.utf8Url);
       }
     }
@@ -6176,6 +6189,8 @@ class ParsedValidatorRules {
    */
   validateTypeIdentifiers(attrs, formatIdentifiers, context, validationResult) {
     let hasMandatoryTypeIdentifier = false;
+    let hasEmailTypeIdentifier = false;
+    let hasCssStrictTypeIdentifier = false;
     // The named values should match up to `self` and AMP caches listed at
     // https://cdn.ampproject.org/caches.json
     const transformedValueRe = new RegExp(/^(bing|google|self);v=(\d+)$/);
@@ -6223,6 +6238,12 @@ class ParsedValidatorRules {
                 context.getLineCol(),
                 /*params=*/[], /*url*/ '', validationResult);
           }
+          if (typeIdentifier === 'amp4email') {
+            hasEmailTypeIdentifier = true;
+          }
+          if (typeIdentifier === 'data-css-strict') {
+            hasCssStrictTypeIdentifier = true;
+          }
         } else {
           context.addError(
               generated.ValidationError.Code.DISALLOWED_ATTR,
@@ -6232,6 +6253,15 @@ class ParsedValidatorRules {
               validationResult);
         }
       }
+    }
+    // If AMP Email format and not set to data-css-strict, then issue a warning
+    // that not having data-css-strict is deprecated. See b/179798751.
+    if (hasEmailTypeIdentifier && !hasCssStrictTypeIdentifier) {
+      context.addWarning(
+          generated.ValidationError.Code.AMP_EMAIL_MISSING_STRICT_CSS_ATTR,
+          context.getLineCol(), /*params=*/[],
+          'https://github.com/ampproject/amphtml/issues/32587',
+          validationResult);
     }
     if (!hasMandatoryTypeIdentifier) {
       // Missing mandatory type identifier (any AMP variant but "transformed").

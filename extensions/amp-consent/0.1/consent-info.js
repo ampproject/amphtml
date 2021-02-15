@@ -51,6 +51,16 @@ export const METADATA_STORAGE_KEY = {
 };
 
 /**
+ * Unlike the global consent state, only accepted and
+ * rejected values are respected.
+ * @enum {number}
+ */
+export const PURPOSE_CONSENT_STATE = {
+  ACCEPTED: 1,
+  REJECTED: 2,
+};
+
+/**
  * @enum {number}
  */
 export const CONSENT_ITEM_STATE = {

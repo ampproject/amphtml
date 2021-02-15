@@ -384,24 +384,42 @@ describes.sandboxed('amp-img', {}, (env) => {
     });
   });
 
-  it('should respect noprerender attribute', () => {
-    const el = document.createElement('amp-img');
-    el.setAttribute('src', 'test.jpg');
-    el.setAttribute('width', 100);
-    el.setAttribute('height', 100);
-    el.setAttribute('noprerender', '');
-    const impl = new AmpImg(el);
-    expect(impl.prerenderAllowed()).to.equal(false);
-  });
-
   it('should allow prerender by default', () => {
     const el = document.createElement('amp-img');
     el.setAttribute('src', 'test.jpg');
     el.setAttribute('width', 100);
     el.setAttribute('height', 100);
+    expect(AmpImg.prerenderAllowed(el)).to.equal(true);
+  });
+
+  it('should propogate src as the final attribute when provided a srcset', () => {
+    // Providing src before srcset will cause Safari 14.4 to request two src values for the same `img`.
+    const el = document.createElement('amp-img');
+    el.setAttribute('src', 'test.jpg');
+    el.setAttribute('srcset', SRCSET_STRING);
+    el.setAttribute('width', 300);
+    el.setAttribute('height', 200);
+    el.getResources = () => Services.resourcesForDoc(document);
+    el.getPlaceholder = () => {
+      const img = document.createElement('img');
+      img.src = 'data:image/svg+xml;charset=utf-8,%3Csvg%3E%3C/svg%3E';
+      return img;
+    };
+    el.getLayout = () => 'responsive';
+    el.getLayoutSize = () => ({width: 300, height: 200});
+
     const impl = new AmpImg(el);
+    const propagateAttributesSpy = sandbox.spy(impl, 'propagateAttributes');
     impl.buildCallback();
-    expect(impl.prerenderAllowed()).to.equal(true);
+    impl.layoutCallback();
+
+    expect(propagateAttributesSpy).to.be.calledOnce;
+    const spiedAttributesToPropagate = propagateAttributesSpy.getCall(0)
+      .args[0];
+
+    expect(
+      spiedAttributesToPropagate[spiedAttributesToPropagate.length - 1]
+    ).to.equal('src');
   });
 
   it('should propagate ARIA attributes', () => {

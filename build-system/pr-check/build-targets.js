@@ -24,7 +24,7 @@ const config = require('../test-configs/config');
 const globby = require('globby');
 const minimatch = require('minimatch');
 const path = require('path');
-const {cyan} = require('ansi-colors');
+const {cyan} = require('kleur/colors');
 const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
 const {gitDiffNameOnlyMaster} = require('../common/git');
 const {isCiBuild} = require('../common/ci');
@@ -217,7 +217,12 @@ const targetMatchers = {
   },
   [Targets.PRETTIFY]: (file) => {
     // OWNERS files can be prettified.
-    return prettifyFiles.includes(file);
+    return (
+      prettifyFiles.includes(file) ||
+      file == '.prettierrc' ||
+      file == '.prettierignore' ||
+      file == 'build-system/tasks/prettify.js'
+    );
   },
   [Targets.RENOVATE_CONFIG]: (file) => {
     return (

@@ -18,10 +18,6 @@ FAIL
 |    Test Description:
 |    This test demonstrates that if the first script is a LTS version, all
 |    following scripts must also be a LTS version.
-|
-|    TODO(b/173803451) some of the test comments below may be incorrect due
-|    to module/nomodule not being allowed yet. They will be correct once
-|    module/nomodule is allowed.
 |  -->
 |  <!doctype html>
 |  <html ⚡ transformed="google;v=1">
@@ -39,35 +35,27 @@ FAIL
 |    <!-- Invalid: standard version -->
 |    <script async custom-element=amp-analytics src=https://cdn.ampproject.org/v0/amp-analytics-0.1.js></script>
 >>   ^~~~~~~~~
-transformed_feature_tests/first_script_lts.html:39:2 The script version for 'amp-analytics' is a standard version which mismatches with the first script on the page using the LTS version. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup)
+transformed_feature_tests/first_script_lts.html:35:2 The script version for 'amp-analytics' is a standard version which mismatches with the first script on the page using the LTS version. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup)
 |
 |    <!-- Invalid: module version -->
 |    <script async crossorigin=anonymous custom-element=amp-anim src=https://cdn.ampproject.org/v0/amp-anim-0.1.mjs type=module></script>
 >>   ^~~~~~~~~
-transformed_feature_tests/first_script_lts.html:42:2 The script version for 'amp-anim' is a module/nomodule version which mismatches with the first script on the page using the LTS version. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup)
->>   ^~~~~~~~~
-transformed_feature_tests/first_script_lts.html:42:2 The attribute 'type' in tag 'amp-anim extension script' is set to the invalid value 'module'. (see https://amp.dev/documentation/components/amp-anim)
+transformed_feature_tests/first_script_lts.html:38:2 The script version for 'amp-anim' is a module/nomodule version which mismatches with the first script on the page using the LTS version. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup)
 |
 |    <!-- Invalid: nomodule version -->
 |    <script async custom-element=amp-anim nomodule src=https://cdn.ampproject.org/v0/amp-anim-0.1.js></script>
 >>   ^~~~~~~~~
-transformed_feature_tests/first_script_lts.html:45:2 The attribute 'nomodule' may not appear in tag 'amp-anim extension script'. (see https://amp.dev/documentation/components/amp-anim)
->>   ^~~~~~~~~
-transformed_feature_tests/first_script_lts.html:45:2 The script version for 'amp-anim' is a module/nomodule version which mismatches with the first script on the page using the LTS version. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup)
+transformed_feature_tests/first_script_lts.html:41:2 The script version for 'amp-anim' is a module/nomodule version which mismatches with the first script on the page using the LTS version. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup)
 |
 |    <!-- Invalid: module LTS version -->
 |    <script async crossorigin=anonymous custom-element=amp-audio src=https://cdn.ampproject.org/lts/v0/amp-audio-0.1.mjs type=module></script>
 >>   ^~~~~~~~~
-transformed_feature_tests/first_script_lts.html:48:2 The script version for 'amp-audio' is a module/nomodule LTS version which mismatches with the first script on the page using the LTS version. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup)
->>   ^~~~~~~~~
-transformed_feature_tests/first_script_lts.html:48:2 The attribute 'type' in tag 'amp-audio extension script' is set to the invalid value 'module'. (see https://amp.dev/documentation/components/amp-audio)
+transformed_feature_tests/first_script_lts.html:44:2 The script version for 'amp-audio' is a module/nomodule LTS version which mismatches with the first script on the page using the LTS version. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup)
 |
 |    <!-- Invalid: nomodule LTS version -->
 |    <script async custom-element=amp-audio nomodule src=https://cdn.ampproject.org/lts/v0/amp-audio-0.1.js></script>
 >>   ^~~~~~~~~
-transformed_feature_tests/first_script_lts.html:51:2 The attribute 'nomodule' may not appear in tag 'amp-audio extension script'. (see https://amp.dev/documentation/components/amp-audio)
->>   ^~~~~~~~~
-transformed_feature_tests/first_script_lts.html:51:2 The script version for 'amp-audio' is a module/nomodule LTS version which mismatches with the first script on the page using the LTS version. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup)
+transformed_feature_tests/first_script_lts.html:47:2 The script version for 'amp-audio' is a module/nomodule LTS version which mismatches with the first script on the page using the LTS version. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup)
 |
 |    <link rel="canonical" href="./regular-html-version.html">
 |  </head>

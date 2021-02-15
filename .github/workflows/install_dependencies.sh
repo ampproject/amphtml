@@ -13,7 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the license.
-#
+
 # Script used by AMP's CI builds to install project dependencies on GH Actions.
 
 set -e
@@ -28,6 +28,9 @@ if [[ "$OSTYPE" == "linux-gnu"* || "$OSTYPE" == "darwin"* ]]; then
   echo "export PATH=$HOME/.npm/bin:$PATH" >> $GITHUB_ENV && source $GITHUB_ENV # For now
   echo "$HOME/.npm/bin" >> $GITHUB_PATH # For later
 fi
+
+echo $(GREEN "Enabling log coloring...")
+echo "FORCE_COLOR=1" >> $GITHUB_ENV
 
 echo $(GREEN "Installing gulp-cli...")
 npm install --global gulp-cli

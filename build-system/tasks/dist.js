@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const colors = require('ansi-colors');
+const colors = require('kleur/colors');
 const file = require('gulp-file');
 const fs = require('fs-extra');
 const gulp = require('gulp');
@@ -42,6 +42,7 @@ const {
   displayLifecycleDebugging,
 } = require('../compile/debug-compilation-lifecycle');
 const {buildExtensions, parseExtensionFlags} = require('./extension-helpers');
+const {buildVendorConfigs} = require('./3p-vendor-helpers');
 const {compileCss, cssEntryPoints} = require('./css');
 const {compileJison} = require('./compile-jison');
 const {formatExtractedMessages} = require('../compile/log-messages');
@@ -148,6 +149,7 @@ async function doDist(extraArgs = {}) {
     await compileAllJs(options);
   }
   await buildExtensions(options);
+  await buildVendorConfigs(options);
 
   if (!argv.core_runtime_only) {
     await formatExtractedMessages();

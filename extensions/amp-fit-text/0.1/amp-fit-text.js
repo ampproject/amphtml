@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+import {BaseElement as BentoFitText} from '../../amp-fit-text/1.0/base-element';
 import {CSS} from '../../../build/amp-fit-text-0.1.css';
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
+import {isAmphtml} from '../../../src/format';
 import {px, setStyle, setStyles} from '../../../src/style';
 import {throttle} from '../../../src/utils/rate-limit';
 
@@ -24,6 +26,11 @@ const LINE_HEIGHT_EM_ = 1.15;
 const RESIZE_THROTTLE_MS = 100;
 
 class AmpFitText extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    return true;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -52,6 +59,18 @@ class AmpFitText extends AMP.BaseElement {
      * @private {string}
      */
     this.textContent_ = '';
+  }
+
+  /** @override */
+  upgradeCallback() {
+    if (
+      BENTO_AUTO_UPGRADE &&
+      typeof Element.prototype.attachShadow == 'function' &&
+      isAmphtml(this.element.ownerDocument)
+    ) {
+      return new BentoFitText(this.element);
+    }
+    return null;
   }
 
   /** @override */
@@ -109,11 +128,6 @@ class AmpFitText extends AMP.BaseElement {
         return this.textContent_ || this.contentWrapper_.textContent;
       },
     });
-  }
-
-  /** @override */
-  prerenderAllowed() {
-    return true;
   }
 
   /** @override */
