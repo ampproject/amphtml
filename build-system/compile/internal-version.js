@@ -30,9 +30,9 @@ const argv = minimist(process.argv.slice(2), {
  * - Count the number (<X>) of cherry-picked commits on this branch,
  *   including non `master` commits. If this branch only contains new commits
  *   that are not cherry-picked, then <X> is 0).
- * - Find the commit (<C>) before the last cherry-picked commit (if the current
- *   branch is `master`, or otherwise in `master`'s commit history, then the
- *   current commit is <C>).
+ * - Find the commit (<C>) before the last cherry-picked commit from the
+ *   `master` branch (if the current branch is `master`, or otherwise in
+ *   `master`'s commit history, then the current commit is <C>).
  * - Find the commit time of <C> (<C>.time). Note that commit time might be
  *   different from author time! e.g., commit time might be the time that a PR
  *   was merged into `master`, or a commit was cherry-picked onto the branch;
