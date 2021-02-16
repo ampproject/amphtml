@@ -708,7 +708,7 @@
       "name": "amp-story-dev-tools: debug tab loading and running",
       "viewport": {"width": 1080, "height": 720},
       "loading_complete_selectors": [
-        ".i-amphtml-story-dev-tools-log-status-title"
+        ".i-amphtml-story-dev-tools-debug-status-title"
       ],
     },
     {
