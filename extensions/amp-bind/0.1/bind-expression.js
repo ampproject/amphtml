@@ -15,7 +15,7 @@
  */
 
 import {AstNodeType} from './bind-expr-defines';
-import {devAssert, user} from '../../../src/log';
+import {user} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
@@ -183,11 +183,6 @@ function generateFunctionAllowlist() {
     Object.keys(functionsForType).forEach((name) => {
       const func = functionsForType[name];
       if (func) {
-        devAssert(
-          !func.name || name === func.name,
-          'Listed function name ' +
-            `"${name}" doesn't match name property "${func.name}".`
-        );
         out[type][name] = func;
       } else {
         // This can happen if a browser doesn't support a built-in function.
