@@ -20,9 +20,9 @@ import '../polyfills';
 import {draw3p, init} from '../integration-lib';
 import {register} from '../3p';
 
-import {weborama} from '../../ads/vendors/weborama';
+import {weboramaDisplay} from '../../ads/vendors/weborama';
 
 init(window);
-register('weborama-display', weborama);
+register('weborama-display', weboramaDisplay);
 
 window.draw3p = draw3p;
