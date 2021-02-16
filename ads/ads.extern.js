@@ -310,7 +310,8 @@ data.s;
 data.ph;
 
 // adpushup.js
-window.adpushupDisplayAd = function (
+window.adpushup = {};
+window.adpushup.initAmp = function (
   global,
   width,
   height,
