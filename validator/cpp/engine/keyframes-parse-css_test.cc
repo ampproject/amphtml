@@ -97,9 +97,9 @@ TEST(KeyframesParseCssTest, Good) {
       Tokenize(&css, /*line=*/1, /*col=*/0, &errors);
   unique_ptr<Stylesheet> stylesheet =
       ParseAStylesheet(&tokens, KeyframesCssParsingConfig(), &errors);
-  EXPECT_EQ(JsonFromList(errors), "[\n\n]");
+  EXPECT_EQ(JsonFromList(errors), "[]");
   ValidateKeyframesCss(*stylesheet, &errors);
-  EXPECT_EQ(JsonFromList(errors), "[\n\n]");
+  EXPECT_EQ(JsonFromList(errors), "[]");
 }  // Good
 
 TEST(KeyframesParseCssTest, Good_Stylesheet) {
@@ -274,9 +274,7 @@ TEST(KeyframesParseCssTest, Good_Stylesheet) {
           ]
         }
       ],
-      "declarations":      [
-
-      ]
+      "declarations":      []
     }
   ],
   "eof":  {
@@ -300,9 +298,9 @@ TEST(KeyframesParseCssTest, Good_Allowed_At_Rules) {
       Tokenize(&css, /*line=*/1, /*col=*/0, &errors);
   unique_ptr<Stylesheet> stylesheet =
       ParseAStylesheet(&tokens, KeyframesCssParsingConfig(), &errors);
-  EXPECT_EQ(JsonFromList(errors), "[\n\n]");
+  EXPECT_EQ(JsonFromList(errors), "[]");
   ValidateKeyframesCss(*stylesheet, &errors);
-  EXPECT_EQ(JsonFromList(errors), "[\n\n]");
+  EXPECT_EQ(JsonFromList(errors), "[]");
 }  // Good_Allowed_At_Rules
 
 TEST(KeyframesParseCssTest, Bad_NotAtRule) {
@@ -313,7 +311,7 @@ TEST(KeyframesParseCssTest, Bad_NotAtRule) {
       Tokenize(&css, /*line=*/1, /*col=*/0, &errors);
   unique_ptr<Stylesheet> stylesheet =
       ParseAStylesheet(&tokens, KeyframesCssParsingConfig(), &errors);
-  EXPECT_EQ(JsonFromList(errors), "[\n\n]");
+  EXPECT_EQ(JsonFromList(errors), "[]");
 
   EXPECT_EQ(stylesheet->ToJson().ToString(), R""({
   "tokentype": "STYLESHEET",
@@ -342,9 +340,7 @@ TEST(KeyframesParseCssTest, Bad_NotAtRule) {
           "col": 8
         }
       ],
-      "declarations":      [
-
-      ]
+      "declarations":      []
     }
   ],
   "eof":  {
@@ -379,7 +375,7 @@ TEST(KeyframesParseCssTest, Bad_NonKeyFrameWithDeclarations) {
       Tokenize(&css, /*line=*/1, /*col=*/0, &errors);
   unique_ptr<Stylesheet> stylesheet =
       ParseAStylesheet(&tokens, KeyframesCssParsingConfig(), &errors);
-  EXPECT_EQ(JsonFromList(errors), "[\n\n]");
+  EXPECT_EQ(JsonFromList(errors), "[]");
 
   EXPECT_EQ(stylesheet->ToJson().ToString(), R""({
   "tokentype": "STYLESHEET",
@@ -497,9 +493,7 @@ TEST(KeyframesParseCssTest, Bad_NonKeyFrameWithDeclarations) {
           ]
         }
       ],
-      "declarations":      [
-
-      ]
+      "declarations":      []
     }
   ],
   "eof":  {
@@ -571,9 +565,7 @@ TEST(KeyframesParseCssTest, TestCorrectPreludeConcatenation) {
           "col": 13
         }
       ],
-      "declarations":      [
-
-      ]
+      "declarations":      []
     }
   ],
   "eof":  {
@@ -582,7 +574,7 @@ TEST(KeyframesParseCssTest, TestCorrectPreludeConcatenation) {
     "col": 15
   }
 })"");
-  EXPECT_EQ(JsonFromList(errors), "[\n\n]");
+  EXPECT_EQ(JsonFromList(errors), "[]");
   ValidateKeyframesCss(*stylesheet, &errors);
   EXPECT_EQ(JsonFromList(errors), R""([
   {
@@ -606,7 +598,7 @@ TEST(KeyframesParseCssTest, Bad_QualifiedRuleNotInsideAtRule) {
       Tokenize(&css, /*line=*/1, /*col=*/0, &errors);
   unique_ptr<Stylesheet> stylesheet =
       ParseAStylesheet(&tokens, KeyframesCssParsingConfig(), &errors);
-  EXPECT_EQ(JsonFromList(errors), "[\n\n]");
+  EXPECT_EQ(JsonFromList(errors), "[]");
   ValidateKeyframesCss(*stylesheet, &errors);
   EXPECT_EQ(JsonFromList(errors), R""([
   {
@@ -634,7 +626,7 @@ TEST(KeyframesParseCssTest, Bad_QualifiedRuleKeyframeInsideKeyframe) {
       Tokenize(&css, /*line=*/1, /*col=*/0, &errors);
   unique_ptr<Stylesheet> stylesheet =
       ParseAStylesheet(&tokens, KeyframesCssParsingConfig(), &errors);
-  EXPECT_EQ(JsonFromList(errors), "[\n\n]");
+  EXPECT_EQ(JsonFromList(errors), "[]");
   ValidateKeyframesCss(*stylesheet, &errors);
   EXPECT_EQ(JsonFromList(errors), R""([
   {
