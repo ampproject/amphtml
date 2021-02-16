@@ -927,9 +927,10 @@ describes.realWin(
             .stub(ampdoc, 'getMetaByName')
             .withArgs('runtime-type')
             .returns('2');
-          impl.buildCallback();
-          return impl.getAdUrl().then((url) => {
-            expect(url).to.have.string(MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT);
+          return impl.buildCallback().then(() => {
+            impl.getAdUrl().then((url) => {
+              expect(url).to.have.string(MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT);
+            });
           });
         });
 
@@ -938,9 +939,10 @@ describes.realWin(
             .stub(ampdoc, 'getMetaByName')
             .withArgs('runtime-type')
             .returns('10');
-          impl.buildCallback();
-          return impl.getAdUrl().then((url) => {
-            expect(url).to.have.string(MODULE_NOMODULE_PARAMS_EXP.CONTROL);
+          return impl.buildCallback().then(() => {
+            impl.getAdUrl().then((url) => {
+              expect(url).to.have.string(MODULE_NOMODULE_PARAMS_EXP.CONTROL);
+            });
           });
         });
 
@@ -966,9 +968,10 @@ describes.realWin(
             .stub(ampdoc, 'getMetaByName')
             .withArgs('amp-usqp')
             .returns('5798237482=45,3579282=0');
-          impl.buildCallback();
-          return impl.getAdUrl().then((url) => {
-            expect(url).to.have.string('579823748245!357928200');
+          return impl.buildCallback().then(() => {
+            impl.getAdUrl().then((url) => {
+              expect(url).to.have.string('579823748245!357928200');
+            });
           });
         });
 
@@ -977,9 +980,10 @@ describes.realWin(
             .stub(ampdoc, 'getMetaByName')
             .withArgs('amp-usqp')
             .returns('5798237482=1');
-          impl.buildCallback();
-          return impl.getAdUrl().then((url) => {
-            expect(url).to.have.string('579823748201');
+          return impl.buildCallback().then(() => {
+            impl.getAdUrl().then((url) => {
+              expect(url).to.have.string('579823748201');
+            });
           });
         });
 
@@ -1198,25 +1202,6 @@ describes.realWin(
           env.sandbox.stub(storage, 'get').callsFake((key) => {
             return Promise.resolve(storageContent[key]);
           });
-        });
-
-        it('does nothing if experiment is disabled', async () => {
-          forceExperimentBranch(
-            impl.win,
-            AD_SIZE_OPTIMIZATION_EXP.branch,
-            AD_SIZE_OPTIMIZATION_EXP.control
-          );
-          const adsense = constructImpl({
-            width: '320',
-            height: '150',
-          });
-
-          const promise = adsense.buildCallback();
-          expect(promise).to.exist;
-          await promise;
-
-          expect(didAttemptSizeChange).to.be.false;
-          expect(adsense.element.hasAttribute('data-auto-format')).to.be.false;
         });
 
         it('does nothing if ad unit is responsive already', async () => {
