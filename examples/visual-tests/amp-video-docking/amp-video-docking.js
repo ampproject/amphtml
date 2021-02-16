@@ -89,16 +89,18 @@ const testControlsActivatedBy = (tapOrHover) => ({
     await page.tap('.amp-video-docked-unmute');
   },
 
-  [`displays scrollback button on ad (controls on ${tapOrHover})`]: async (
-    page,
-    name
-  ) => {
-    await dock(page, name);
-    await activateControlsBy(page, name, tapOrHover);
-    await verifySelectorsVisible(page, name, [
-      '.amp-video-docked-control-set-scroll-back',
-    ]);
-  },
+  // TODO(#32684, @ampproject/wg-components): fix flaky test.
+  // See https://percy.io/ampproject/amphtml/builds/8876280/changed/503549685
+  // [`displays scrollback button on ad (controls on ${tapOrHover})`]: async (
+  //   page,
+  //   name
+  // ) => {
+  //   await dock(page, name);
+  //   await activateControlsBy(page, name, tapOrHover);
+  //   await verifySelectorsVisible(page, name, [
+  //     '.amp-video-docked-control-set-scroll-back',
+  //   ]);
+  // },
 });
 
 module.exports = {

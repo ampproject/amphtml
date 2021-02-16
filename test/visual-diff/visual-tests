@@ -248,6 +248,8 @@
       "enable_percy_javascript": true
     },
     {
+      // TODO(#32685, @ampproject/wg-stories): see https://percy.io/ampproject/amphtml/builds/8876280/changed/503548953
+      "flaky": true,
       "url": "examples/visual-tests/amp-story/basic.html",
       "name": "amp-story: basic",
       "viewport": {"width": 320, "height": 480},
