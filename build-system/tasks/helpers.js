@@ -19,6 +19,7 @@ const babel = require('@babel/core');
 const debounce = require('debounce');
 const del = require('del');
 const esbuild = require('esbuild');
+const experimentDefines = require('../global-configs/experiments-const.json');
 const file = require('gulp-file');
 const fs = require('fs-extra');
 const gulp = require('gulp');
@@ -382,7 +383,6 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
   const startTime = Date.now();
   const entryPoint = path.join(srcDir, srcFilename);
   const destFilename = options.toName || srcFilename;
-  const wrapper = options.wrapper || wrappers.none;
   const destFile = path.join(destDir, destFilename);
 
   if (options.watch) {
@@ -401,10 +401,11 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
   const esbuildBabelPlugin = {
     name: 'babel',
     async setup(build, {transform} = {}) {
-      const updateContents = (contents) => {
-        return contents
-          .replace(/\$internalRuntimeVersion\$/g, internalRuntimeVersion)
-          .replace(/([^]+)/g, wrapper.replace('<%= contents %>', '$1'));
+      const updateVersion = (contents) => {
+        return contents.replace(
+          /\$internalRuntimeVersion\$/g,
+          internalRuntimeVersion
+        );
       };
 
       const transformContents = async ({file, contents}) => {
@@ -414,7 +415,7 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
           sourceFileName: path.relative(process.cwd(), file.path),
         });
         const result = await babel.transformAsync(contents, babelOptions);
-        return {contents: updateContents(result.code)};
+        return {contents: updateVersion(result.code)};
       };
 
       if (transform) {
@@ -434,17 +435,35 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
   };
 
   /**
+   * Splits up the wrapper to compute the banner and footer
+   * @return {Object}
+   */
+  function processWrapper() {
+    const wrapper = options.wrapper || wrappers.none;
+    const sentinel = '<%= contents %>';
+    const start = wrapper.indexOf(sentinel);
+    return {
+      banner: wrapper.slice(0, start),
+      footer: wrapper.slice(start + sentinel.length),
+    };
+  }
+
+  /**
    * Bundles an entry point with all its imports and applies babel transforms.
    * @param {boolean} continueOnError
    */
   async function performBundle(continueOnError) {
+    const {banner, footer} = processWrapper();
     await esbuild
       .build({
         entryPoints: [entryPoint],
         bundle: true,
         sourcemap: true,
+        define: experimentDefines,
         outfile: destFile,
         plugins: [esbuildBabelPlugin],
+        banner,
+        footer,
       })
       .catch((err) => handleBundleError(err, continueOnError, destFilename));
     finishBundle(srcFilename, destDir, destFilename, options);
