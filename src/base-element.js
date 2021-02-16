@@ -108,10 +108,8 @@ export class BaseElement {
    * Whether this element supports V2 protocol, which includes:
    * 1. Layout/unlayout are not managed by the runtime, but instead are
    *    implemented by the element as needed.
-   * 2. The element will wait until it's fully parsed before building, unless
-   *    it's mutable. See `mutable`.
-   * 3. The element can defer its build until later. See `deferredBuild`.
-   * 4. The construction of the element is delayed until build.
+   * 2. The element can defer its build until later. See `deferredBuild`.
+   * 3. The construction of the element is delayed until build.
    *
    * Notice, in this mode `layoutCallback`, `pauseCallback`, `onLayoutMeasure`,
    * `getLayoutSize`, and other methods are deprecated. The element must
@@ -121,22 +119,6 @@ export class BaseElement {
    * @nocollapse
    */
   static V2() {
-    return false;
-  }
-
-  /**
-   * Whether this element supports mutations. A mutable element can be built
-   * immediately, even before the element has been fully parsed, thus it should
-   * be able to apply additional markup when it's parsed. Normally, however,
-   * the element will wait until it's fully parsed before building to save
-   * resources.
-   *
-   * Only used for V2 elements.
-   *
-   * @return {boolean}
-   * @nocollapse
-   */
-  static mutable() {
     return false;
   }
 

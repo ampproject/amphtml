@@ -645,7 +645,6 @@ function createBaseCustomElementClass(win) {
         return;
       }
 
-      // V2 processing.
       switch (state) {
         case ReadyState.LOADING:
           this.signals_.signal(CommonSignals.LOAD_START);
@@ -704,16 +703,6 @@ function createBaseCustomElementClass(win) {
      */
     V2() {
       return this.implClass_ ? this.implClass_.V2() : false;
-    }
-
-    /**
-     * See `BaseElement.mutable()`.
-     *
-     * @return {boolean}
-     * @final
-     */
-    mutable() {
-      return this.implClass_ ? this.implClass_.mutable() : false;
     }
 
     /**
@@ -1029,33 +1018,37 @@ function createBaseCustomElementClass(win) {
      * @private @final
      */
     upgradeOrSchedule_() {
-      if (this.V2()) {
-        if (!this.buildingPromise_) {
-          this.onReadyStateInternal(ReadyState.BUILDING);
-          const builder = getBuilderForDoc(this.getAmpDoc());
-          builder.schedule(this);
-
-          // Preconnect, since the build scheduling may take a while.
-          const urls = this.implClass_.getPreconnects(this);
-          if (urls && urls.length > 0) {
-            // If we do early preconnects we delay them a bit. This is kind of
-            // an unfortunate trade off, but it seems faster, because the DOM
-            // operations themselves are not free and might delay
-            const ampdoc = this.getAmpDoc();
-            startupChunk(ampdoc, () => {
-              const {win} = ampdoc;
-              if (!win) {
-                return;
-              }
-              const preconnect = Services.preconnectFor(win);
-              urls.forEach((url) =>
-                preconnect.url(ampdoc, url, /* alsoConnecting */ false)
-              );
-            });
-          }
-        }
-      } else {
+      if (!this.V2()) {
         this.tryUpgrade_();
+        return;
+      }
+      if (this.buildingPromise_) {
+        // Already building.
+        return;
+      }
+
+      // Schedule build.
+      this.onReadyStateInternal(ReadyState.BUILDING);
+      const builder = getBuilderForDoc(this.getAmpDoc());
+      builder.schedule(this);
+
+      // Schedule preconnects.
+      const urls = this.implClass_.getPreconnects(this);
+      if (urls && urls.length > 0) {
+        // If we do early preconnects we delay them a bit. This is kind of
+        // an unfortunate trade off, but it seems faster, because the DOM
+        // operations themselves are not free and might delay
+        const ampdoc = this.getAmpDoc();
+        startupChunk(ampdoc, () => {
+          const {win} = ampdoc;
+          if (!win) {
+            return;
+          }
+          const preconnect = Services.preconnectFor(win);
+          urls.forEach((url) =>
+            preconnect.url(ampdoc, url, /* alsoConnecting */ false)
+          );
+        });
       }
     }
 
@@ -1595,6 +1588,8 @@ function createBaseCustomElementClass(win) {
           this.actionQueue_ = [];
         }
         devAssert(this.actionQueue_).push(invocation);
+        // Schedule build sooner.
+        this.build();
       } else {
         this.executionAction_(invocation, false);
       }
@@ -1996,4 +1991,13 @@ export function getImplClassSyncForTesting(element) {
  */
 export function getImplSyncForTesting(element) {
   return element.impl_;
+}
+
+/**
+ * @param {!AmpElement} element
+ * @return {?Array<!./service/action-impl.ActionInvocation>|undefined}
+ * @visibleForTesting
+ */
+export function getActionQueueForTesting(element) {
+  return element.actionQueue_;
 }

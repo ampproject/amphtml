@@ -71,14 +71,7 @@ export class Builder {
    */
   scheduleAsap(target) {
     this.targets_.set(target, {asap: true, isIntersecting: false});
-
-    if (target.mutable() && this.parsingTargets_) {
-      // Don't need to wait until parsing is complete.
-      removeItem(this.parsingTargets_, target);
-      this.maybeBuild_(target);
-    } else {
-      this.waitParsing_(target);
-    }
+    this.waitParsing_(target);
   }
 
   /**
@@ -189,7 +182,7 @@ export class Builder {
         continue;
       }
 
-      this.targets_.set(target, {...current, isIntersecting});
+      this.targets_.set(target, {asap: current.asap, isIntersecting});
       if (isIntersecting) {
         this.maybeBuild_(target);
       }

@@ -70,7 +70,6 @@ describes.realWin('Builder', {amp: true}, (env) => {
     element.prerenderAllowed = () => options.prerenderAllowed || false;
     element.getBuildPriority = () =>
       options.buildPriority || LayoutPriority.CONTENT;
-    element.mutable = () => options.mutable || false;
     element.buildInternal = env.sandbox.stub();
     return element;
   }
@@ -189,14 +188,6 @@ describes.realWin('Builder', {amp: true}, (env) => {
       clock.tick(1);
       expect(element.buildInternal).to.be.calledOnce;
       expect(element2.buildInternal).to.not.be.called;
-    });
-
-    it('should build asap when mutab;e', async () => {
-      const element = createAmpElement({deferredBuild: false, mutable: true});
-      doc.body.appendChild(element);
-      builder.scheduleAsap(element);
-      clock.tick(1);
-      expect(element.buildInternal).to.be.calledOnce;
     });
 
     it('should wait the deferred even when parsed', async () => {

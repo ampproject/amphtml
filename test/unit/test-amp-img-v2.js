@@ -17,7 +17,7 @@
 import {AmpImg} from '../../builtins/amp-img';
 import {BaseElement} from '../../src/base-element';
 import {Layout, LayoutPriority} from '../../src/layout';
-import {dispatchCustomEvent} from '../../src/dom';
+import {createElementWithAttributes, dispatchCustomEvent} from '../../src/dom';
 import {testElementV2} from '../../testing/element-v2';
 
 describes.realWin('amp-img V2', {amp: true}, (env) => {
@@ -44,10 +44,7 @@ describes.realWin('amp-img V2', {amp: true}, (env) => {
   });
 
   function createImg(attributes, children) {
-    const img = doc.createElement('amp-img');
-    for (const key in attributes) {
-      img.setAttribute(key, attributes[key]);
-    }
+    const img = createElementWithAttributes(doc, 'amp-img', attributes);
 
     if (children != null) {
       for (let i = 0; i < children.length; i++) {

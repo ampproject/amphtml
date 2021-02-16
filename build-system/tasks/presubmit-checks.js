@@ -147,7 +147,6 @@ const forbiddenTerms = {
       'extensions/amp-analytics/0.1/requests.js',
     ],
   },
-  // Service factories that should only be installed once.
   '\\.buildInternal': {
     message: 'can only be called by the framework',
     allowlist: [
@@ -160,6 +159,7 @@ const forbiddenTerms = {
     message: 'can only be used by the runtime',
     allowlist: ['src/custom-element.js', 'src/service/builder.js'],
   },
+  // Service factories that should only be installed once.
   'installActionServiceForDoc': {
     message: privateServiceFactory,
     allowlist: [

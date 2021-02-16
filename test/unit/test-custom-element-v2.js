@@ -22,6 +22,7 @@ import {Services} from '../../src/services';
 import {chunkInstanceForTesting} from '../../src/chunk';
 import {
   createAmpElementForTesting,
+  getActionQueueForTesting,
   getImplClassSyncForTesting,
   getImplSyncForTesting,
 } from '../../src/custom-element';
@@ -561,6 +562,67 @@ describes.realWin('CustomElement V2', {amp: true}, (env) => {
       // Repeat.
       element.onReadyStateInternal('complete');
       expect(loadEventSpy).to.be.calledOnce; // no change.
+    });
+  });
+
+  describe('executeAction', () => {
+    beforeEach(async () => {
+      builderMock.expects('schedule').atLeast(0);
+    });
+
+    it('should enqueue actions until built and schedule build', () => {
+      const element = new ElementClass();
+      const handler = env.sandbox.stub(TestElement.prototype, 'executeAction');
+
+      builderMock.expects('scheduleAsap').withExactArgs(element).once();
+
+      doc.body.appendChild(element);
+
+      const inv = {};
+      element.enqueAction(inv);
+      const actionQueue = getActionQueueForTesting(element);
+      expect(actionQueue.length).to.equal(1);
+      expect(actionQueue[0]).to.equal(inv);
+      expect(handler).to.not.be.called;
+    });
+
+    it('should execute action immediately after built', async () => {
+      builderMock.expects('scheduleAsap').never();
+      const element = new ElementClass();
+      const handler = env.sandbox.stub(TestElement.prototype, 'executeAction');
+      doc.body.appendChild(element);
+      await element.buildInternal();
+
+      const inv = {};
+      element.enqueAction(inv);
+      expect(handler).to.be.calledOnce.calledWith(inv, false);
+      expect(getActionQueueForTesting(element)).to.not.exist;
+    });
+
+    it('should dequeue all actions after build', async () => {
+      const element = new ElementClass();
+      builderMock.expects('scheduleAsap').withExactArgs(element).atLeast(1);
+
+      const handler = env.sandbox.stub(TestElement.prototype, 'executeAction');
+
+      const inv1 = {};
+      const inv2 = {};
+      element.enqueAction(inv1);
+      element.enqueAction(inv2);
+      const actionQueue = getActionQueueForTesting(element);
+      expect(actionQueue).to.have.length(2);
+      expect(actionQueue[0]).to.equal(inv1);
+      expect(actionQueue[1]).to.equal(inv2);
+      expect(handler).to.not.be.called;
+
+      doc.body.appendChild(element);
+      await element.buildInternal();
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      expect(getActionQueueForTesting(element)).to.not.exist;
+      expect(handler)
+        .to.be.calledTwice.calledWith(inv1, true)
+        .calledWith(inv2, true);
     });
   });
 });
