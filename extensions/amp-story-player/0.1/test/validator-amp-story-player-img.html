@@ -12,7 +12,7 @@
 -->
 <!--
   Test Description:
-  Tests that should fail for the amp-story-player tag.
+  Tests for the amp-story-player tag using the img tag.
 -->
 <!doctype html>
 <html ⚡>
@@ -28,19 +28,12 @@
 </head>
 <body>
   <amp-story-player width="360" height="600">
-    <!-- <img> should be a child of <a> -->
-    <img data-amp-story-player-poster-img src="https://www.example.com/img" width="360" height="600" loading="lazy">
     <a href="https://www.example.com" class="story">
+      <img data-amp-story-player-poster-img src="https://www.example.com/img" width="360" height="600" loading="lazy">
       <span class="title">A local’s guide to what to eat and do in New York City</span>
     </a>
     <a href="https://www.example.com2" class="story">
-      <!-- <img> should contain src attribute -->
-      <img data-amp-story-player-poster-img width="360" height="600" loading="lazy">
-      <span class="title">A local’s guide to what to eat and do in Mexico City</span>
-    </a>
-    <a href="https://www.example.com2" class="story">
-      <!-- <img> should contain data-amp-story-player-poster-img attribute -->
-      <img src="https://www.example.com/img" width="360" height="600" loading="lazy">
+      <img data-amp-story-player-poster-img src="https://www.example.com/img" width="360" height="600" loading="lazy">
       <span class="title">A local’s guide to what to eat and do in Mexico City</span>
     </a>
 </amp-story-player>
