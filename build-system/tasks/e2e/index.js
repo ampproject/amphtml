@@ -41,7 +41,7 @@ const {isCiBuild} = require('../../common/ci');
 const {log} = require('../../common/logging');
 const {maybePrintCoverageMessage} = require('../helpers');
 const {reportTestStarted} = require('../report-test-status');
-const {watch} = require('gulp');
+const {watch} = require('chokidar');
 
 const SLOW_TEST_THRESHOLD_MS = 2500;
 const TEST_RETRIES = isCiBuild() ? 2 : 0;
