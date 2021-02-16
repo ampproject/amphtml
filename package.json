@@ -23,6 +23,7 @@
     "jss": "10.3.0",
     "jss-preset-default": "10.4.0",
     "moment": "2.24.0",
+    "obj-str": "1.0.3",
     "open": "7.3.0",
     "preact": "10.2.1",
     "promise-pjs": "1.1.4",
