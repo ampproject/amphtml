@@ -40,7 +40,7 @@ const {jsBundles} = require('../compile/bundles.config');
 const {log, logLocalDev} = require('../common/logging');
 const {thirdPartyFrames} = require('../test-configs/config');
 const {transpileTs} = require('../compile/typescript');
-const {watch} = require('chokidar');
+const {watch: fileWatch} = require('chokidar');
 
 /**
  * Tasks that should print the `--nobuild` help text.
@@ -130,7 +130,7 @@ async function bootstrapThirdPartyFrames(options) {
       const watchFunc = () => {
         thirdPartyBootstrap(frameObject.max, frameObject.min, options);
       };
-      watch(frameObject.max).on(
+      fileWatch(frameObject.max).on(
         'change',
         debounce(watchFunc, watchDebounceDelay)
       );
@@ -281,7 +281,7 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
         options.onWatchBuild(compileDone);
       }
     };
-    watch(entryPoint).on('change', debounce(watchFunc, watchDebounceDelay));
+    fileWatch(entryPoint).on('change', debounce(watchFunc, watchDebounceDelay));
   }
 
   async function doCompileMinifiedJs(continueOnError) {
@@ -393,7 +393,7 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
         options.onWatchBuild(bundleDone);
       }
     };
-    watch(entryPoint).on('change', debounce(watchFunc, watchDebounceDelay));
+    fileWatch(entryPoint).on('change', debounce(watchFunc, watchDebounceDelay));
   }
 
   /**
