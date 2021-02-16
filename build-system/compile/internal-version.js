@@ -85,7 +85,7 @@ function getVersion() {
     return version;
   }
 
-  let numberOfCherryPicks = gitCherryMaster().length;
+  const numberOfCherryPicks = gitCherryMaster().length;
   if (numberOfCherryPicks > 999) {
     throw new Error(
       `This branch has ${numberOfCherryPicks} cherry-picks, which is more than 999, the maximum allowed number of cherry-picks!`
@@ -96,8 +96,10 @@ function getVersion() {
     `HEAD~${numberOfCherryPicks}`
   ).slice(0, -2);
 
-  numberOfCherryPicks = String(numberOfCherryPicks).padStart(3, '0');
-  return `${lastCommitFormattedTime}${numberOfCherryPicks}`;
+  return `${lastCommitFormattedTime}${String(numberOfCherryPicks).padStart(
+    3,
+    '0'
+  )}`;
 }
 
 // Used to e.g. references the ads binary from the runtime to get version lock.
