@@ -57,10 +57,6 @@ import {stubElementsForDoc} from './service/custom-element-registry';
  * main v0.js since it is the "main" js.
  * This global boolean is set by alternative binaries like amp-inabox and
  * amp-shadow which has their own bootstrapping sequence.
- * With how single pass works these alternative binaries cannot be generated
- * easily because we can only do a "single pass" so we treat these alternative
- * main binaries as "extensions" and we concatenate their code with the main
- * v0.js code.
  * @type {boolean|undefined}
  */
 const shouldMainBootstrapRun = !self.IS_AMP_ALT;

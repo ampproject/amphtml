@@ -38,10 +38,10 @@ const ATTRIBUTES_TO_PROPAGATE = [
   'aria-labelledby',
   'crossorigin',
   'referrerpolicy',
-  'sizes',
-  'src',
-  'srcset',
   'title',
+  'sizes',
+  'srcset',
+  'src',
 ];
 
 export class AmpImg extends BaseElement {
@@ -199,8 +199,13 @@ export class AmpImg extends BaseElement {
     if (!this.img_) {
       return;
     }
+    // If the image is server rendered, do not generate sizes.
+    if (this.element.hasAttribute('i-amphtml-ssr')) {
+      return;
+    }
     // No need to generate sizes if already present.
-    const sizes = this.element.getAttribute('sizes');
+    const sizes =
+      this.element.hasAttribute('sizes') || this.img_.hasAttribute('sizes');
     if (sizes) {
       return;
     }
