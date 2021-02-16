@@ -285,7 +285,7 @@ These guidelines apply to the story poster image(s):
 -   Provide a raster file, such as `.jpg`, `.png`, or `.gif`. Avoid vector files, such as `.svg` or `.eps`.
 -   The poster image should be in 3x4 aspect ratio for portrait, 4x3 for landscape, and 1x1 for square.
 -   If the poster image is derived from a frame in a video, the thumbnail should be representative of the video. For example, the first frame in a video is often not representative.
--   Each poster image should meet the recommended minimium size:
+-   Each poster image should meet the recommended minimum size:
     -   Portrait: 640px x 853px
     -   Landscape: 853px x 640px
     -   Square: 640px x 640px
