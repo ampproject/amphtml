@@ -15,7 +15,7 @@ rating viewer, you'd do this by building an extension.
 -   [Register element with AMP](#register-element-with-amp)
 -   [Actions and events](#actions-and-events)
 -   [Sub-elements ownership](#sub-elements-ownership)
--   [Allowing proper validations](#allowing-proper-validations)
+-   [Allowing proper validation](#allowing-proper-validation)
 -   [Performance considerations](#performance-considerations)
 -   [Layouts supported in your element](#layouts-supported-in-your-element)
 -   [Experiments](#experiments)
@@ -32,6 +32,12 @@ rating viewer, you'd do this by building an extension.
 This document describes how to create a new AMP extension, which is one of the most common ways of adding a new feature to AMP.
 
 Before diving into the details on creating a new AMP extension, please familiarize yourself with the [general process for contributing code and features to AMP](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md). Since you are adding a new extension you will likely need to follow the [process for making a significant change](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#process-for-significant-changes), including filing an ["Intent to Implement" issue](https://github.com/ampproject/amphtml/labels/INTENT%20TO%20IMPLEMENT) and finding a guide before you start significant development.
+
+To bootstrap the creation of a new component, the following command will create the directory structure and boilerplate code for you:
+
+```shell
+$ gulp make-extension --name=amp-my-element
+```
 
 ## Naming
 
@@ -402,24 +408,15 @@ nested amp-elements that are placeholders.
 ```
 <!-- prettier-ignore-end -->
 
-## Allowing proper validations
+## Allowing proper validation
 
 One of AMP's features is that a document can be checked against
-validation rules to confirm it's AMP-valid. When you implement your
-element, AMP validator needs to be updated to add rules for your element
-to keep documents using your element valid. In order to do that you need
-to file an issue on the GitHub repo select "Related to: Validator" and
-mention what rules the validator needs to validate. This usually
-includes
-
--   Your element tag-name
--   Required attributes for the element
--   Specific values that an attribute accept (e.g. `myattr="TYPE1|TYPE2"`)
--   Layouts your element supports (see [Layout specs](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md) and [Layouts supported in your element](#layouts-supported-in-your-element))
--   If there are restrictions where your element can or can't appear (e.g. disallowed_ancestory, mandatory_parent...)
-
-For more details take a look at [Contributing Component Validator
-Rules](https://github.com/ampproject/amphtml/blob/master/contributing/component-validator-rules.md).
+validation rules to confirm it's valid AMP. When you implement your
+element, the [AMP Validator](https://github.com/ampproject/amphtml/blob/master/validator/README.md)
+needs to be updated to add rules for your element to keep documents
+using your element valid. Create your own rules by following the
+directions at
+[Contributing Component Validator Rules](https://github.com/ampproject/amphtml/blob/master/contributing/component-validator-rules.md).
 
 ## Performance considerations
 
@@ -745,8 +742,8 @@ Also consider contributing an example to
 ## Updating build configs
 
 In order for your element to build correctly you would need to make few
-changes to [`build-system/compile/bundles.config.js`](../build-system/compile/bundles.config.js) to tell it about your
-extension, its files and its examples. You will need to add an entry in the `extensionBundles` array.
+changes to [`build-system/compile/bundles.config.extensions.json`](../build-system/compile/bundles.config.extensions.json) to tell it about your
+extension, its files and its examples. You will need to add an entry in the top-level array.
 
 ```javascript
 exports.extensionBundles = [

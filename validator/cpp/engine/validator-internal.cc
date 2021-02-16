@@ -64,7 +64,6 @@
 #include "validator.pb.h"
 #include "re2/re2.h"  // NOLINT(build/deprecated)
 
-
 using absl::AsciiStrToLower;
 using absl::AsciiStrToUpper;
 using absl::ByAnyChar;
@@ -84,6 +83,7 @@ using absl::StartsWith;
 using absl::Status;
 using absl::StrAppend;
 using absl::StrCat;
+using absl::StrContains;
 using absl::string_view;
 using absl::StrJoin;
 using absl::StrSplit;
@@ -108,7 +108,7 @@ ABSL_FLAG(bool, duplicate_html_body_elements_is_error, false,
           "If true, duplicate <html>,<body> elements is considered error for "
           "validation purposes. (Default is to allow, leaving it to HTML5 "
           "user-agent to treat them as per the spec).");
-ABSL_FLAG(bool, allow_module_nomodule, false,
+ABSL_FLAG(bool, allow_module_nomodule, true,
           "If true, then script versions for module and nomdule are allowed "
           "in AMP documents. This gating should be temporary and removed "
           "after necessary transformers are in place. See b/173803451.");
@@ -830,6 +830,7 @@ CssParsingConfig GenCssParsingConfig() {
   config.at_rule_spec["media"] = BlockType::PARSE_AS_RULES;
   config.at_rule_spec["page"] = BlockType::PARSE_AS_DECLARATIONS;
   config.at_rule_spec["supports"] = BlockType::PARSE_AS_RULES;
+  config.at_rule_spec["-moz-document"] = BlockType::PARSE_AS_RULES;
   // Note that ignoring still generates an error.
   config.default_spec = BlockType::PARSE_AS_IGNORE;
   return config;
@@ -884,8 +885,15 @@ class ParsedCdataSpec {
                   << at_rule_name;
       return false;
     }
-    return allowed_at_rules_.find(
-               std::string(htmlparser::css::StripVendorPrefix(at_rule_name))) !=
+    // "-moz-document" is specified in the list of allowed rules with an
+    // explicit vendor prefix. The idea here is that only this specific vendor
+    // prefix is allowed, not "-ms-document" or even "document". We first search
+    // the allowed list for the seen `at_rule_name` with stripped vendor prefix,
+    // then if not found, we search again without sripping the vendor prefix.
+    if (allowed_at_rules_.find(std::string(htmlparser::css::StripVendorPrefix(
+            at_rule_name))) != allowed_at_rules_.end())
+      return true;
+    return allowed_at_rules_.find(std::string(at_rule_name)) !=
            allowed_at_rules_.end();
   }
 
@@ -1287,8 +1295,8 @@ class TagSpecDispatch {
   // corresponding tag_spec_ids which are ordered by their specificity of match
   // (e.g. Name/Value/Parent, then Name/Value, and then Name).
   vector<int32_t> MatchingDispatchKey(const std::string& attr_name,
-                                    const std::string& attr_value,
-                                    const std::string& parent) const {
+                                      const std::string& attr_value,
+                                      const std::string& parent) const {
     if (!HasDispatchKeys()) return {};
 
     vector<int32_t> tag_spec_ids;
@@ -1333,7 +1341,7 @@ class TagSpecDispatch {
 
  private:
   unordered_map<std::string /*dispatch key*/,
-      vector<int32_t> /* tag_spec_ids */>
+                vector<int32_t> /* tag_spec_ids */>
       tagspecs_by_dispatch_;
   vector<int32_t> all_tag_specs_;
 };
@@ -1400,7 +1408,7 @@ class ParsedValidatorRules {
                                   const ValidationResult& resultB) const;
 
   bool HasValidatedAlternativeTagSpec(Context* context,
-                                      const string& ext_name) const;
+                                      const std::string& ext_name) const;
 
   void MaybeEmitMandatoryTagValidationErrors(Context* context,
                                              ValidationResult* result) const;
@@ -1463,8 +1471,9 @@ class ParsedValidatorRules {
   ValidatorRules rules_;
   HtmlFormat::Code html_format_;
   vector<ParsedTagSpec> tagspec_by_id_;
-  unordered_map<std::string, TagSpecDispatch> tagspecs_by_tagname_;
-  unordered_map<std::string, vector<int32_t>> ext_tag_spec_ids_by_ext_name_;
+  absl::node_hash_map<std::string, TagSpecDispatch> tagspecs_by_tagname_;
+  absl::node_hash_map<std::string, vector<int32_t>>
+      ext_tag_spec_ids_by_ext_name_;
   TagSpecDispatch empty_dispatch_;
   vector<int32_t> mandatory_tagspecs_;
   vector<ErrorCodeMetaData> error_codes_;
@@ -3146,7 +3155,7 @@ void CdataMatcher::MatchCss(string_view cdata, const CssSpec& css_spec,
 
   // Validate the allowed CSS declarations (eg: `background-color`)
   if (maybe_doc_css_spec &&
-      !(**maybe_doc_css_spec).spec().allow_all_declaration_in_style_tag()) {
+      !(**maybe_doc_css_spec).spec().allow_all_declaration_in_style()) {
     InvalidDeclVisitor visitor(
         **maybe_doc_css_spec, context,
         TagDescriptiveName(parsed_cdata_spec_->ParentTagSpec()), result);
@@ -4095,11 +4104,55 @@ void ValidateAttrCss(const ParsedAttrSpec& parsed_attr_spec,
     // in the allowed list for this DocCssSpec, and have allowed values if
     // relevant.
     for (auto& declaration : declarations) {
-      const CssDeclaration* css_declaration =
-          CssDeclarationByName(declaration->name());
-      // If there is no matching declaration in the rules, then this
-      // declaration is not allowed.
-      if (!css_declaration) {
+      // Validate declarations only when they are not all allowed.
+      if (!spec.spec().allow_all_declaration_in_style()) {
+        const CssDeclaration* css_declaration =
+            CssDeclarationByName(declaration->name());
+        // If there is no matching declaration in the rules, then this
+        // declaration is not allowed.
+        if (!css_declaration) {
+          context.AddError(
+              ValidationError::DISALLOWED_PROPERTY_IN_ATTR_VALUE,
+              context.line_col(),
+              /*params=*/{declaration->name(), attr_name, tag_description},
+              /*spec_url=*/context.rules().styles_spec_url(),
+              &result->validation_result);
+          // Don't emit additional errors for this declaration.
+          continue;
+        } else if (css_declaration->value_casei_size() > 0) {
+          bool has_valid_value = false;
+          const std::string first_ident = declaration->FirstIdent();
+          for (auto& value : css_declaration->value_casei()) {
+            if (EqualsIgnoreCase(first_ident, value)) {
+              has_valid_value = true;
+              break;
+            }
+          }
+          if (!has_valid_value) {
+            // Declaration value not allowed.
+            context.AddError(
+                ValidationError::CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
+                context.line_col(),
+                /*params=*/{tag_description, declaration->name(), first_ident},
+                /*spec_url=*/context.rules().styles_spec_url(),
+                &result->validation_result);
+          }
+        } else if (css_declaration->has_value_regex_casei()) {
+          RE2::Options options;
+          options.set_case_sensitive(false);
+          RE2 pattern(css_declaration->value_regex_casei(), options);
+          const std::string first_ident = declaration->FirstIdent();
+          if (!RE2::FullMatch(first_ident, pattern)) {
+            context.AddError(
+                ValidationError::CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
+                context.line_col(),
+                /*params=*/{tag_description, declaration->name(), first_ident},
+                /*spec_url=*/context.rules().styles_spec_url(),
+                &result->validation_result);
+          }
+        }
+      }
+      if (StrContains(declaration->name(), "i-amphtml-")) {
         context.AddError(
             ValidationError::DISALLOWED_PROPERTY_IN_ATTR_VALUE,
             context.line_col(),
@@ -4108,37 +4161,6 @@ void ValidateAttrCss(const ParsedAttrSpec& parsed_attr_spec,
             &result->validation_result);
         // Don't emit additional errors for this declaration.
         continue;
-      } else if (css_declaration->value_casei_size() > 0) {
-        bool has_valid_value = false;
-        const std::string first_ident = declaration->FirstIdent();
-        for (auto& value : css_declaration->value_casei()) {
-          if (EqualsIgnoreCase(first_ident, value)) {
-            has_valid_value = true;
-            break;
-          }
-        }
-        if (!has_valid_value) {
-          // Declaration value not allowed.
-          context.AddError(
-              ValidationError::CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
-              context.line_col(),
-              /*params=*/{tag_description, declaration->name(), first_ident},
-              /*spec_url=*/context.rules().styles_spec_url(),
-              &result->validation_result);
-        }
-      } else if (css_declaration->has_value_regex_casei()) {
-        RE2::Options options;
-        options.set_case_sensitive(false);
-        RE2 pattern(css_declaration->value_regex_casei(), options);
-        const std::string first_ident = declaration->FirstIdent();
-        if (!RE2::FullMatch(first_ident, pattern)) {
-          context.AddError(
-              ValidationError::CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
-              context.line_col(),
-              /*params=*/{tag_description, declaration->name(), first_ident},
-              /*spec_url=*/context.rules().styles_spec_url(),
-              &result->validation_result);
-        }
       }
       if (!spec.spec().allow_important()) {
         if (declaration->important()) {
@@ -4860,6 +4882,8 @@ void ParsedValidatorRules::ValidateTypeIdentifiers(
     ValidationResult* result) const {
   CHECK_NE(0, format_identifiers.size());
   bool has_mandatory_type_identifier = false;
+  bool has_email_type_identifier = false;
+  bool has_css_strict_type_identifier = false;
   // The named values should match up to `self` and AMP caches listed at
   // https://cdn.ampproject.org/caches.json
   static LazyRE2 transformed_value_regex = {"^(bing|google|self);v=(\\d+)$"};
@@ -4889,8 +4913,8 @@ void ParsedValidatorRules::ValidateTypeIdentifiers(
         if (type_identifier == TypeIdentifier::kTransformed) {
           std::string name;
           std::string version;
-          if (RE2::FullMatch(attr.value(), *transformed_value_regex,
-                             &name, &version)) {
+          if (RE2::FullMatch(attr.value(), *transformed_value_regex, &name,
+                             &version)) {
             int32_t transformer_version;
             if (absl::SimpleAtoi(version, &transformer_version)) {
               result->set_transformer_version(transformer_version);
@@ -4912,6 +4936,10 @@ void ParsedValidatorRules::ValidateTypeIdentifiers(
           context->AddError(ValidationError::DEV_MODE_ONLY, context->line_col(),
                             /*params=*/{}, /*url*/ "", result);
         }
+        if (type_identifier == TypeIdentifier::kEmail)
+          has_email_type_identifier = true;
+        if (type_identifier == TypeIdentifier::kCssStrict)
+          has_css_strict_type_identifier = true;
       } else {
         context->AddError(
             ValidationError::DISALLOWED_ATTR, context->line_col(),
@@ -4921,6 +4949,15 @@ void ParsedValidatorRules::ValidateTypeIdentifiers(
             result);
       }
     }
+  }
+  // If AMP Email format and not set to data-css-strict, then issue a warning
+  // that not having data-css-strict is deprecated. See b/179798751.
+  if (has_email_type_identifier && !has_css_strict_type_identifier) {
+    context->AddWarning(
+        ValidationError::AMP_EMAIL_MISSING_STRICT_CSS_ATTR, context->line_col(),
+        /*params=*/{},
+        /*spec_url=*/"https://github.com/ampproject/amphtml/issues/32587",
+        result);
   }
   if (!has_mandatory_type_identifier) {
     // Missing mandatory type identifier (any AMP variant but "transformed").
@@ -5081,7 +5118,7 @@ void ParsedValidatorRules::MaybeEmitMandatoryTagValidationErrors(
 
 // Returns true if one of the alternative_tag_spec_ids has been validated.
 bool ParsedValidatorRules::HasValidatedAlternativeTagSpec(
-    Context* context, const string& ext_name) const {
+    Context* context, const std::string& ext_name) const {
   auto it = ext_tag_spec_ids_by_ext_name_.find(ext_name);
   if (it != ext_tag_spec_ids_by_ext_name_.end()) {
     for (int32_t alternative_tag_spec_id : it->second) {
@@ -5590,8 +5627,6 @@ class Validator {
         .frameset_ok = true,
         .record_node_offsets = true,
         .record_attribute_offsets = true,
-        // Validator need disallwed/deprecated elements for error reporting.
-        .allow_deprecated_tags = true,
     };
     // The validation check for document size can't be done here since
     // the Type Identifiers on the html tag have not been parsed yet and
@@ -5604,8 +5639,8 @@ class Validator {
     // NOTE: If htmlparser starts returning null document for other reasons, we
     // must add new error types here.
     if (doc == nullptr) {
-      context_.AddError(ValidationError::DOCUMENT_TOO_COMPLEX,
-                        LineCol(1, 0), {}, "", &result_);
+      context_.AddError(ValidationError::DOCUMENT_TOO_COMPLEX, LineCol(1, 0),
+                        {}, "", &result_);
       return result_;
     }
 
@@ -5909,12 +5944,12 @@ class Validator {
 
     // As some errors can be inserted out of order, sort errors at the
     // end based on their line/col numbers.
-    std::stable_sort(result_.mutable_errors()->begin(),
-              result_.mutable_errors()->end(),
-              [](const ValidationError& lhs, const ValidationError& rhs) {
-                if (lhs.line() != rhs.line()) return lhs.line() < rhs.line();
-                return lhs.col() < rhs.col();
-              });
+    std::stable_sort(
+        result_.mutable_errors()->begin(), result_.mutable_errors()->end(),
+        [](const ValidationError& lhs, const ValidationError& rhs) {
+          if (lhs.line() != rhs.line()) return lhs.line() < rhs.line();
+          return lhs.col() < rhs.col();
+        });
   }
 
  private:

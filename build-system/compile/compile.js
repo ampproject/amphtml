@@ -32,7 +32,8 @@ const {
 const {checkForUnknownDeps} = require('./check-for-unknown-deps');
 const {CLOSURE_SRC_GLOBS} = require('./sources');
 const {cpus} = require('os');
-const {isCiBuild} = require('../common/ci');
+const {green, cyan} = require('kleur/colors');
+const {log, logLocalDev} = require('../common/logging');
 const {postClosureBabel} = require('./post-closure-babel');
 const {preClosureBabel, handlePreClosureError} = require('./pre-closure-babel');
 const {sanitize} = require('./sanitize');
@@ -42,14 +43,13 @@ const {writeSourcemaps} = require('./helpers');
 const queue = [];
 let inProgress = 0;
 
-const MAX_PARALLEL_CLOSURE_INVOCATIONS = isCiBuild()
-  ? 10
-  : parseInt(argv.closure_concurrency, 10) || cpus().length;
+const MAX_PARALLEL_CLOSURE_INVOCATIONS =
+  parseInt(argv.closure_concurrency, 10) || cpus().length;
 
 // Compiles AMP with the closure compiler. This is intended only for
 // production use. During development we intend to continue using
 // babel, as it has much faster incremental compilation.
-exports.closureCompile = async function (
+async function closureCompile(
   entryModuleFilename,
   outputDir,
   outputFilename,
@@ -87,7 +87,7 @@ exports.closureCompile = async function (
     queue.push(start);
     next();
   });
-};
+}
 
 function cleanupBuildDir() {
   del.sync('build/fake-module');
@@ -97,7 +97,6 @@ function cleanupBuildDir() {
   fs.mkdirsSync('build/fake-module/src/polyfills/');
   fs.mkdirsSync('build/fake-polyfills/src/polyfills');
 }
-exports.cleanupBuildDir = cleanupBuildDir;
 
 function compile(
   entryModuleFilenames,
@@ -171,11 +170,6 @@ function compile(
     }
     if (options.include3pDirectories) {
       srcs.push('3p/**/*.js', 'ads/**/*.js');
-    }
-    // For ESM Builds, exclude ampdoc and ampshared css from inclusion.
-    // These styles are guaranteed to already be present on elgible documents.
-    if (options.esmPassCompilation) {
-      srcs.push('!build/ampdoc.css.js', '!build/ampshared.css.js');
     }
     // Many files include the polyfills, but we only want to deliver them
     // once. Since all files automatically wait for the main binary to load
@@ -379,3 +373,24 @@ function compile(
     }
   });
 }
+
+function printClosureConcurrency() {
+  log(
+    green('Using up to'),
+    cyan(MAX_PARALLEL_CLOSURE_INVOCATIONS),
+    green('concurrent invocations of closure compiler.')
+  );
+  if (!argv.closure_concurrency) {
+    logLocalDev(
+      green('⤷ Use'),
+      cyan('--closure_concurrency=N'),
+      green('to change this number.')
+    );
+  }
+}
+
+module.exports = {
+  cleanupBuildDir,
+  closureCompile,
+  printClosureConcurrency,
+};

@@ -15,9 +15,10 @@
  */
 
 import * as Preact from '../../../src/preact';
-import {ContainWrapper} from '../../../src/preact/component';
-import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
+import {ContainWrapper, useValueRef} from '../../../src/preact/component';
+import {Side} from './sidebar-config';
 import {forwardRef} from '../../../src/preact/compat';
+import {isRTL} from '../../../src/dom';
 import {
   useCallback,
   useImperativeHandle,
@@ -25,44 +26,8 @@ import {
   useRef,
   useState,
 } from '../../../src/preact';
+import {useSidebarAnimation} from './sidebar-animations-hook';
 import {useStyles} from './sidebar.jss';
-
-const ANIMATION_DURATION = 350;
-const ANIMATION_EASE_IN = 'cubic-bezier(0,0,.21,1)';
-
-const ANIMATION_KEYFRAMES_FADE_IN = [{'opacity': '0'}, {'opacity': '1'}];
-const ANIMATION_KEYFRAMES_SLIDE_IN_LEFT = [
-  {'transform': 'translateX(-100%)'},
-  {'transform': 'translateX(0)'},
-];
-const ANIMATION_KEYFRAMES_SLIDE_IN_RIGHT = [
-  {'transform': 'translateX(100%)'},
-  {'transform': 'translateX(0)'},
-];
-
-const ANIMATION_STYLES_SIDEBAR_LEFT_INIT = {'transform': 'translateX(-100%)'};
-const ANIMATION_STYLES_SIDEBAR_RIGHT_INIT = {'transform': 'translateX(100%)'};
-const ANIMATION_STYLES_MASK_INIT = {'opacity': '0'};
-const ANIMATION_STYLES_SIDEBAR_FINAL = {'transform': ''};
-const ANIMATION_STYLES_MASK_FINAL = {'opacity': ''};
-
-/**
- * @param {T} current
- * @return {{current: T}}
- * @template T
- */
-function useValueRef(current) {
-  const valueRef = useRef(null);
-  valueRef.current = current;
-  return valueRef;
-}
-/**
- * @param {!Element} element
- * @param {!Object<string, *>} styles
- */
-function safelySetStyles(element, styles) {
-  setStyles(element, assertDoesNotContainDisplay(styles));
-}
 
 /**
  * @param {!SidebarDef.Props} props
@@ -72,9 +37,11 @@ function safelySetStyles(element, styles) {
 function SidebarWithRef(
   {
     as: Comp = 'div',
-    side = 'left',
+    side: sideProp,
     onBeforeOpen,
     onAfterClose,
+    backdropStyle,
+    backdropClassName,
     children,
     ...rest
   },
@@ -86,15 +53,16 @@ function SidebarWithRef(
   // `mounted` mounts the component. `opened` plays the animation.
   const [mounted, setMounted] = useState(false);
   const [opened, setOpened] = useState(false);
+  const [side, setSide] = useState(sideProp);
+
   const classes = useStyles();
   const sidebarRef = useRef();
-  const maskRef = useRef();
+  const backdropRef = useRef();
 
   // We are using refs here to refer to common strings, objects, and functions used.
   // This is because they are needed within `useEffect` calls below (but are not depended for triggering)
   // We use `useValueRef` for props that might change (user-controlled)
   const onBeforeOpenRef = useValueRef(onBeforeOpen);
-  const onAfterCloseRef = useValueRef(onAfterClose);
 
   const open = useCallback(() => {
     if (onBeforeOpenRef.current) {
@@ -122,90 +90,24 @@ function SidebarWithRef(
   );
 
   useLayoutEffect(() => {
-    const sidebarElement = sidebarRef.current;
-    const maskElement = maskRef.current;
-    if (!sidebarElement || !maskElement) {
+    if (side) {
       return;
     }
-
-    let sidebarAnimation;
-    let maskAnimation;
-    // "Make Visible" Animation
-    if (opened) {
-      const postVisibleAnim = () => {
-        safelySetStyles(sidebarElement, ANIMATION_STYLES_SIDEBAR_FINAL);
-        safelySetStyles(maskElement, ANIMATION_STYLES_MASK_FINAL);
-      };
-      if (!sidebarElement.animate || !maskElement.animate) {
-        postVisibleAnim();
-        return;
-      }
-
-      safelySetStyles(
-        sidebarElement,
-        side === 'left'
-          ? ANIMATION_STYLES_SIDEBAR_LEFT_INIT
-          : ANIMATION_STYLES_SIDEBAR_RIGHT_INIT
-      );
-      safelySetStyles(maskElement, ANIMATION_STYLES_MASK_INIT);
-      sidebarAnimation = sidebarElement.animate(
-        side === 'left'
-          ? ANIMATION_KEYFRAMES_SLIDE_IN_LEFT
-          : ANIMATION_KEYFRAMES_SLIDE_IN_RIGHT,
-        {
-          duration: ANIMATION_DURATION,
-          fill: 'both',
-          easing: ANIMATION_EASE_IN,
-        }
-      );
-      sidebarAnimation.onfinish = postVisibleAnim;
-      maskAnimation = maskElement.animate(ANIMATION_KEYFRAMES_FADE_IN, {
-        duration: ANIMATION_DURATION,
-        fill: 'both',
-        easing: ANIMATION_EASE_IN,
-      });
-    } else {
-      // "Make Invisible" Animation
-      const postInvisibleAnim = () => {
-        if (onAfterCloseRef.current) {
-          onAfterCloseRef.current();
-        }
-        sidebarAnimation = null;
-        maskAnimation = null;
-        setMounted(false);
-      };
-      if (!sidebarElement.animate || !maskElement.animate) {
-        postInvisibleAnim();
-        return;
-      }
-      sidebarAnimation = sidebarElement.animate(
-        side === 'left'
-          ? ANIMATION_KEYFRAMES_SLIDE_IN_LEFT
-          : ANIMATION_KEYFRAMES_SLIDE_IN_RIGHT,
-        {
-          duration: ANIMATION_DURATION,
-          direction: 'reverse',
-          fill: 'both',
-          easing: ANIMATION_EASE_IN,
-        }
-      );
-      sidebarAnimation.onfinish = postInvisibleAnim;
-      maskAnimation = maskElement.animate(ANIMATION_KEYFRAMES_FADE_IN, {
-        duration: ANIMATION_DURATION,
-        direction: 'reverse',
-        fill: 'both',
-        easing: ANIMATION_EASE_IN,
-      });
+    const sidebarElement = sidebarRef.current;
+    if (!sidebarElement) {
+      return;
     }
-    return () => {
-      if (sidebarAnimation) {
-        sidebarAnimation.cancel();
-      }
-      if (maskAnimation) {
-        maskAnimation.cancel();
-      }
-    };
-  }, [opened, onAfterCloseRef, side]);
+    setSide(isRTL(sidebarElement.ownerDocument) ? Side.RIGHT : Side.LEFT);
+  }, [side, mounted]);
+
+  useSidebarAnimation(
+    opened,
+    onAfterClose,
+    side,
+    sidebarRef,
+    backdropRef,
+    setMounted
+  );
 
   return (
     mounted && (
@@ -216,19 +118,26 @@ function SidebarWithRef(
           size={false}
           layout={true}
           paint={true}
-          className={`${classes.sidebarClass} ${
-            side === 'left' ? classes.left : classes.right
-          }`}
+          part="sidebar"
+          wrapperClassName={`${classes.sidebarClass} ${
+            classes.defaultSidebarStyles
+          } ${side === Side.LEFT ? classes.left : classes.right}`}
           role="menu"
           tabindex="-1"
+          hidden={!side}
           {...rest}
         >
           {children}
         </ContainWrapper>
         <div
-          ref={maskRef}
+          ref={backdropRef}
           onClick={() => close()}
-          className={classes.maskClass}
+          part="backdrop"
+          style={backdropStyle}
+          className={`${backdropClassName ?? ''} ${classes.backdropClass} ${
+            classes.defaultBackdropStyles
+          }`}
+          hidden={!side}
         ></div>
       </>
     )

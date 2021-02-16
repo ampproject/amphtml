@@ -51,6 +51,16 @@ export const METADATA_STORAGE_KEY = {
 };
 
 /**
+ * Unlike the global consent state, only accepted and
+ * rejected values are respected.
+ * @enum {number}
+ */
+export const PURPOSE_CONSENT_STATE = {
+  ACCEPTED: 1,
+  REJECTED: 2,
+};
+
+/**
  * @enum {number}
  */
 export const CONSENT_ITEM_STATE = {
@@ -62,6 +72,17 @@ export const CONSENT_ITEM_STATE = {
   // TODO(@zhouyx): Seperate UI state from consent state. Add consent
   // requirement state ui_state = {pending, active, complete} consent_state =
   // {unknown, accepted, rejected}
+};
+
+/**
+ * @enum {string}
+ * @visibleForTesting
+ */
+export const TCF_POST_MESSAGE_API_COMMANDS = {
+  GET_TC_DATA: 'getTCData',
+  PING: 'ping',
+  ADD_EVENT_LISTENER: 'addEventListener',
+  REMOVE_EVENT_LISTENER: 'removeEventListener',
 };
 
 /**

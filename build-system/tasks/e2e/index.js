@@ -23,7 +23,6 @@ const dotsReporter = require('./mocha-dots-reporter');
 const fs = require('fs');
 const glob = require('glob');
 const http = require('http');
-const log = require('fancy-log');
 const Mocha = require('mocha');
 const path = require('path');
 const {
@@ -31,13 +30,18 @@ const {
   getFilesFromArgv,
   installPackages,
 } = require('../../common/utils');
-const {cyan} = require('ansi-colors');
+const {
+  createCtrlcHandler,
+  exitCtrlcHandler,
+} = require('../../common/ctrlcHandler');
+const {cyan} = require('kleur/colors');
 const {execOrDie} = require('../../common/exec');
 const {HOST, PORT, startServer, stopServer} = require('../serve');
 const {isCiBuild} = require('../../common/ci');
+const {log} = require('../../common/logging');
 const {maybePrintCoverageMessage} = require('../helpers');
 const {reportTestStarted} = require('../report-test-status');
-const {watch} = require('gulp');
+const {watch} = require('chokidar');
 
 const SLOW_TEST_THRESHOLD_MS = 2500;
 const TEST_RETRIES = isCiBuild() ? 2 : 0;
@@ -163,7 +167,6 @@ async function runTests_() {
     });
   }
 
-  log('Running tests...');
   await reportTestStarted();
 
   // return promise to gulp that resolves when there's an error.
@@ -190,7 +193,6 @@ async function runWatch_() {
   log('Watching', cyan(filesToWatch), 'for changes...');
   watch(filesToWatch).on('change', (file) => {
     log('Detected a change in', cyan(file));
-    log('Running tests...');
     const mocha = createMocha_();
     addMochaFile_(mocha, file);
     mocha.run();
@@ -202,11 +204,12 @@ async function runWatch_() {
 
 /**
  * Entry-point to run e2e tests.
- * @return {!Promise}
  */
 async function e2e() {
+  const handlerProcess = createCtrlcHandler('e2e');
   await setUpTesting_();
-  return argv.watch ? runWatch_() : runTests_();
+  argv.watch ? await runWatch_() : await runTests_();
+  exitCtrlcHandler(handlerProcess);
 }
 
 module.exports = {
@@ -223,6 +226,9 @@ e2e.flags = {
   'core_runtime_only': '  Builds only the core runtime.',
   'nobuild':
     '  Skips building the runtime via `gulp (build|dist) --fortesting`',
+  'define_experiment_constant':
+    '  Transforms tests with the EXPERIMENT constant set to true',
+  'experiment': '  Experiment being tested (used for status reporting)',
   'extensions': '  Builds only the listed extensions.',
   'compiled': '  Runs tests against minified JS',
   'files': '  Run tests found in a specific path (ex: **/test-e2e/*.js)',

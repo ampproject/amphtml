@@ -20,6 +20,7 @@ import {dev, user, userAssert} from '../../log';
 import {getMode} from '../../mode';
 import {isArray, isObject} from '../../types';
 import {isCancellation} from '../../error';
+import {registerServiceBuilderForDoc} from '../../service';
 import {tryParseJson} from '../../json';
 
 /** @type {string} */
@@ -70,6 +71,9 @@ export const RTC_ERROR_ENUM = {
   // sent.
   MACRO_EXPAND_TIMEOUT: '11',
 };
+
+/** @const {!Object<string, boolean>} */
+const GLOBAL_MACRO_ALLOWLIST = {CLIENT_ID: true};
 
 export class RealTimeConfigManager {
   /**
@@ -438,7 +442,7 @@ export class RealTimeConfigManager {
       );
     };
 
-    const allowlist = {};
+    const allowlist = {...GLOBAL_MACRO_ALLOWLIST};
     Object.keys(macros).forEach((key) => (allowlist[key] = true));
     const urlReplacementStartTime = Date.now();
     this.promiseArray_.push(
@@ -638,4 +642,12 @@ export class RealTimeConfigManager {
     return true;
   }
 }
-AMP.RealTimeConfigManager = RealTimeConfigManager;
+
+/**
+ * @param {!../ampdoc-impl.AmpDoc} ampdoc
+ */
+export function installRealTimeConfigServiceForDoc(ampdoc) {
+  registerServiceBuilderForDoc(ampdoc, 'real-time-config', function (doc) {
+    return new RealTimeConfigManager(doc);
+  });
+}

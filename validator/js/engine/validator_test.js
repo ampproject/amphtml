@@ -384,7 +384,8 @@ describe('ValidatorOutput', () => {
 
   it('validate amp4email format', () => {
     const results = validator.validateString(
-        '<!doctype html><html ⚡4email><head><meta charset="utf-8">' +
+        '<!doctype html><html ⚡4email data-css-strict><head>' +
+            '<meta charset="utf-8">' +
             '<script async src="https://cdn.ampproject.org/v0.js"></script>' +
             '<style amp4email-boilerplate>body{visibility:hidden}</style>' +
             '</head><body>Hello, AMP4EMAIL world.</body></html>',
@@ -394,7 +395,8 @@ describe('ValidatorOutput', () => {
 
   it('validate amp4email format with error', () => {
     const results = validator.validateString(
-        '<!doctype html><html ⚡4email><head><meta charset="utf-8">' +
+        '<!doctype html><html ⚡4email data-css-strict><head>' +
+            '<meta charset="utf-8">' +
             '<script async src="https://cdn.ampproject.org/v0.js"></script>' +
             '</head><body>Hello, AMP4EMAIL world.</body></html>',
         'amp4email');
@@ -448,7 +450,7 @@ describe('Validator.DocSizeAmpEmail', () => {
   assertStrictEqual(20, validBlob.length);
 
   it('accepts 200000 bytes in the test document', () => {
-    const body = Array(9946).join(validBlob);
+    const body = Array(9945).join(validBlob);
     const test = new ValidatorTestCase('amp4email_feature_tests/doc_size.html');
     test.ampHtmlFileContents =
         test.ampHtmlFileContents.replace('replace_body', body);
@@ -459,7 +461,7 @@ describe('Validator.DocSizeAmpEmail', () => {
   });
 
   it('will not accept 200001 bytes in the test document', () => {
-    const body = Array(9946).join(validBlob) + ' ';
+    const body = Array(9945).join(validBlob) + ' ';
     const test = new ValidatorTestCase('amp4email_feature_tests/doc_size.html');
     test.ampHtmlFileContents =
         test.ampHtmlFileContents.replace('replace_body', body);
@@ -467,7 +469,7 @@ describe('Validator.DocSizeAmpEmail', () => {
     test.inlineOutput = false;
     test.expectedOutputFile = null;
     test.expectedOutput = 'FAIL\n' +
-        'amp4email_feature_tests/doc_size.html:9978:6 ' +
+        'amp4email_feature_tests/doc_size.html:9977:6 ' +
         'Document exceeded 200000 bytes limit. Actual size 200001 bytes. ' +
         '(see https://amp.dev/documentation/guides-and-tutorials/learn/' +
         'email-spec/amp-email-format/?format=email)';
@@ -525,7 +527,7 @@ describe('Validator.CssLength', () => {
 
   // We use a blob of length 10 (both bytes and chars) to make it easy to
   // construct stylesheets of any length that we want.
-  const validStyleBlob = 'h1 {a: b}\n';
+  const validStyleBlob = 'h1{top:0}\n';
   assertStrictEqual(10, validStyleBlob.length);
   const validInlineStyleBlob = '<b style=\'width:1px;\'></b>';
 
@@ -640,7 +642,7 @@ describe('Validator.CssLengthAmpEmail', () => {
 
   // We use a blob of length 10 (both bytes and chars) to make it easy to
   // construct stylesheets of any length that we want.
-  const validStyleBlob = 'h1 {a: b}\n';
+  const validStyleBlob = 'h1{top:0}\n';
   assertStrictEqual(10, validStyleBlob.length);
   const validInlineStyleBlob = '<b style="width:1px;"></b>';
 
@@ -655,7 +657,12 @@ describe('Validator.CssLengthAmpEmail', () => {
            test.ampHtmlFileContents
                .replace('.replace_amp_custom {}', stylesheet)
                .replace('replace_inline_style', '');
-       test.expectedOutput = 'PASS';
+       test.expectedOutput = 'PASS\n' +
+           'amp4email_feature_tests/css_length.html:23:0 Tag \'html\' ' +
+           'marked with attribute \'amp4email\' is missing the corresponding ' +
+           'attribute \'data-css-strict\' for enabling strict CSS ' +
+           'validation. This may become an error in the future. ' +
+           '(see https://github.com/ampproject/amphtml/issues/32587)';
        test.run();
      });
 
@@ -673,6 +680,11 @@ describe('Validator.CssLengthAmpEmail', () => {
                .replace('replace_inline_style', '');
        test.expectedOutputFile = null;
        test.expectedOutput = 'FAIL\n' +
+           'amp4email_feature_tests/css_length.html:23:0 Tag \'html\' ' +
+           'marked with attribute \'amp4email\' is missing the corresponding ' +
+           'attribute \'data-css-strict\' for enabling strict CSS ' +
+           'validation. This may become an error in the future. ' +
+           '(see https://github.com/ampproject/amphtml/issues/32587)\n' +
            'amp4email_feature_tests/css_length.html:28:2 The author stylesheet ' +
            'specified in tag \'style amp-custom\' is too long - document ' +
            'contains 75001 bytes whereas the limit is 75000 bytes. ' +
@@ -695,6 +707,11 @@ describe('Validator.CssLengthAmpEmail', () => {
                .replace('replace_inline_style', '');
        test.expectedOutputFile = null;
        test.expectedOutput = 'FAIL\n' +
+           'amp4email_feature_tests/css_length.html:23:0 Tag \'html\' ' +
+           'marked with attribute \'amp4email\' is missing the corresponding ' +
+           'attribute \'data-css-strict\' for enabling strict CSS ' +
+           'validation. This may become an error in the future. ' +
+           '(see https://github.com/ampproject/amphtml/issues/32587)\n' +
            'amp4email_feature_tests/css_length.html:28:2 The author ' +
            'stylesheet specified in tag \'style amp-custom\' is ' +
            'too long - document contains 75002 bytes whereas the limit is ' +
@@ -713,7 +730,12 @@ describe('Validator.CssLengthAmpEmail', () => {
        test.ampHtmlFileContents =
            test.ampHtmlFileContents.replace('.replace_amp_custom {}', '')
                .replace('replace_inline_style', inlineStyle);
-       test.expectedOutput = 'PASS';
+       test.expectedOutput = 'PASS\n' +
+           'amp4email_feature_tests/css_length.html:23:0 Tag \'html\' ' +
+           'marked with attribute \'amp4email\' is missing the corresponding ' +
+           'attribute \'data-css-strict\' for enabling strict CSS ' +
+           'validation. This may become an error in the future. ' +
+           '(see https://github.com/ampproject/amphtml/issues/32587)';
        test.run();
      });
 
@@ -731,6 +753,11 @@ describe('Validator.CssLengthAmpEmail', () => {
        // TODO(gregable): This should not pass for the case when there are more
        // than 75,000 bytes of inline style.
        test.expectedOutput = 'PASS\n' +
+           'amp4email_feature_tests/css_length.html:23:0 Tag \'html\' ' +
+           'marked with attribute \'amp4email\' is missing the corresponding ' +
+           'attribute \'data-css-strict\' for enabling strict CSS ' +
+           'validation. This may become an error in the future. ' +
+           '(see https://github.com/ampproject/amphtml/issues/32587)\n' +
            'amp4email_feature_tests/css_length.html:34:6 The author ' +
            'stylesheet specified in tag \'style amp-custom\' and the ' +
            'combined inline styles is too large - document contains 75010 ' +
@@ -755,6 +782,11 @@ describe('Validator.CssLengthAmpEmail', () => {
        // TODO(gregable): This should not pass, as we have more than 75,000
        // bytes of total style.
        test.expectedOutput = 'PASS\n' +
+           'amp4email_feature_tests/css_length.html:23:0 Tag \'html\' ' +
+           'marked with attribute \'amp4email\' is missing the corresponding ' +
+           'attribute \'data-css-strict\' for enabling strict CSS ' +
+           'validation. This may become an error in the future. ' +
+           '(see https://github.com/ampproject/amphtml/issues/32587)\n' +
            'amp4email_feature_tests/css_length.html:7534:6 The author ' +
            'stylesheet specified in tag \'style amp-custom\' and the ' +
            'combined inline styles is too large - document contains 75014 ' +
@@ -780,7 +812,7 @@ describe('Validator.CssLengthWithUrls', () => {
 
   // We use a blob of length 10 (both bytes and chars) to make it easy to
   // construct stylesheets of any length that we want.
-  const validStyleBlob = 'h1 {a: b}\n';
+  const validStyleBlob = 'h1{top:0}\n';
   assertStrictEqual(10, validStyleBlob.length);
 
   it('will accept 75010 bytes in author stylesheet that includes an URL ' +
@@ -910,7 +942,7 @@ describe('ValidatorTransformedAmp.CssLengthWithUrls', () => {
 
   // We use a blob of length 10 (both bytes and chars) to make it easy to
   // construct stylesheets of any length that we want.
-  const validStyleBlob = 'h1 {a: b}\n';
+  const validStyleBlob = 'h1{top:0}\n';
   assertStrictEqual(10, validStyleBlob.length);
 
   it('will accept 75010 bytes in author stylesheet that includes an URL ' +
@@ -1747,7 +1779,7 @@ describe('ValidatorRulesMakeSense', () => {
            // it's sufficiently wrapped in private context inside the validator
            // that I don't see a way to call it.  For now just gold the current
            // index.
-           expect(tagSpec.attrLists[0]).toEqual(22);
+           expect(tagSpec.attrLists[0]).toEqual(15);
          });
     }
 

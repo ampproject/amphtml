@@ -15,6 +15,7 @@
  */
 
 import {A4AVariableSource} from './a4a-variable-source';
+import {ADS_INITIAL_INTERSECTION_EXP} from '../../../src/experiments/ads-initial-intersection-exp';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {Deferred, tryResolve} from '../../../src/utils/promise';
 import {DetachedDomStream} from '../../../src/utils/detached-dom-stream';
@@ -24,7 +25,7 @@ import {Layout, LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
 import {
   STICKY_AD_TRANSITION_EXP,
   divertStickyAdTransition,
-} from '../../../src/experiments/sticky-ad-transition-exp';
+} from '../../../ads/google/a4a/sticky-ad-transition-exp';
 import {Services} from '../../../src/services';
 import {SignatureVerifier, VerificationStatus} from './signature-verifier';
 import {
@@ -62,7 +63,12 @@ import {
   installFriendlyIframeEmbed,
   isSrcdocSupported,
 } from '../../../src/friendly-iframe-embed';
+import {installRealTimeConfigServiceForDoc} from '../../../src/service/real-time-config/real-time-config-impl';
 import {installUrlReplacementsForEmbed} from '../../../src/service/url-replacements-impl';
+import {
+  intersectionEntryToJson,
+  measureIntersection,
+} from '../../../src/utils/intersection';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isArray, isEnumValue, isObject} from '../../../src/types';
 import {listenOnce} from '../../../src/event-helper';
@@ -909,6 +915,17 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
+   * Allow subclasses to skip client side validation of non-amp creatives
+   * based on http headers for perfomance. When true, ads will fall back to
+   * x-domain earlier.
+   * @param {!Headers} unusedHeaders
+   * @return {boolean}
+   */
+  skipClientSideValidation(unusedHeaders) {
+    return false;
+  }
+
+  /**
    * Start streaming response into the detached document.
    * @param {!Response} httpResponse
    * @param {function()} checkStillCurrent
@@ -918,6 +935,10 @@ export class AmpA4A extends AMP.BaseElement {
     if (httpResponse.status === 204) {
       this.forceCollapse();
       return Promise.reject(NO_CONTENT_RESPONSE);
+    }
+
+    if (this.skipClientSideValidation(httpResponse.headers)) {
+      return this.handleFallback_(httpResponse, checkStillCurrent);
     }
 
     // Duplicating httpResponse stream as safeframe/nameframe rending will need the
@@ -1764,6 +1785,7 @@ export class AmpA4A extends AMP.BaseElement {
       height,
       width
     );
+    this.applyFillContent(this.iframe);
 
     let body = '';
     const transferComplete = new Deferred();
@@ -2042,14 +2064,30 @@ export class AmpA4A extends AMP.BaseElement {
    */
   renderViaIframeGet_(adUrl) {
     this.maybeTriggerAnalyticsEvent_('renderCrossDomainStart');
-    return this.iframeRenderHelper_(
-      dict({
-        'src': Services.xhrFor(this.win).getCorsUrl(this.win, adUrl),
-        'name': JSON.stringify(
-          getContextMetadata(this.win, this.element, this.sentinel)
-        ),
-      })
+    const contextMetadata = getContextMetadata(
+      this.win,
+      this.element,
+      this.sentinel
     );
+
+    const asyncIntersection =
+      getExperimentBranch(this.win, ADS_INITIAL_INTERSECTION_EXP.id) ===
+      ADS_INITIAL_INTERSECTION_EXP.experiment;
+    const intersectionPromise = asyncIntersection
+      ? measureIntersection(this.element)
+      : Promise.resolve(this.element.getIntersectionChangeEntry());
+
+    return intersectionPromise.then((intersection) => {
+      contextMetadata['_context'][
+        'initialIntersection'
+      ] = intersectionEntryToJson(intersection);
+      return this.iframeRenderHelper_(
+        dict({
+          'src': Services.xhrFor(this.win).getCorsUrl(this.win, adUrl),
+          'name': JSON.stringify(contextMetadata),
+        })
+      );
+    });
   }
 
   /**
@@ -2115,17 +2153,29 @@ export class AmpA4A extends AMP.BaseElement {
         this.sentinel,
         this.getAdditionalContextMetadata(method == XORIGIN_MODE.SAFEFRAME)
       );
-      // TODO(bradfrizzell) Clean up name assigning.
-      if (method == XORIGIN_MODE.NAMEFRAME) {
-        contextMetadata['creative'] = creative;
-        name = JSON.stringify(contextMetadata);
-      } else if (method == XORIGIN_MODE.SAFEFRAME) {
-        contextMetadata = JSON.stringify(contextMetadata);
-        name =
-          `${this.safeframeVersion};${creative.length};${creative}` +
-          `${contextMetadata}`;
-      }
-      return this.iframeRenderHelper_(dict({'src': srcPath, 'name': name}));
+
+      const asyncIntersection =
+        getExperimentBranch(this.win, ADS_INITIAL_INTERSECTION_EXP.id) ===
+        ADS_INITIAL_INTERSECTION_EXP.experiment;
+      const intersectionPromise = asyncIntersection
+        ? measureIntersection(this.element)
+        : Promise.resolve(this.element.getIntersectionChangeEntry());
+      return intersectionPromise.then((intersection) => {
+        contextMetadata['initialIntersection'] = intersectionEntryToJson(
+          intersection
+        );
+        if (method == XORIGIN_MODE.NAMEFRAME) {
+          contextMetadata['creative'] = creative;
+          name = JSON.stringify(contextMetadata);
+        } else if (method == XORIGIN_MODE.SAFEFRAME) {
+          contextMetadata = JSON.stringify(contextMetadata);
+          name =
+            `${this.safeframeVersion};${creative.length};${creative}` +
+            `${contextMetadata}`;
+        }
+
+        return this.iframeRenderHelper_(dict({'src': srcPath, 'name': name}));
+      });
     });
   }
 
@@ -2327,31 +2377,23 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {Promise<!Array<!rtcResponseDef>>|undefined}
    */
   tryExecuteRealTimeConfig_(consentState, consentString, consentMetadata) {
-    if (!!AMP.RealTimeConfigManager) {
-      return this.getBlockRtc_().then((shouldBlock) => {
-        if (shouldBlock) {
-          return;
-        }
-        try {
-          return new AMP.RealTimeConfigManager(
-            this.getAmpDoc()
-          ).maybeExecuteRealTimeConfig(
-            this.element,
-            this.getCustomRealTimeConfigMacros_(),
-            consentState,
-            consentString,
-            consentMetadata,
-            this.verifyStillCurrent()
-          );
-        } catch (err) {
-          user().error(TAG, 'Could not perform Real Time Config.', err);
-        }
-      });
-    } else if (this.element.getAttribute('rtc-config')) {
-      user().error(
-        TAG,
-        'RTC not supported for ad network ' +
-          `${this.element.getAttribute('type')}`
+    if (this.element.getAttribute('rtc-config')) {
+      installRealTimeConfigServiceForDoc(this.getAmpDoc());
+      return this.getBlockRtc_().then((shouldBlock) =>
+        shouldBlock
+          ? undefined
+          : Services.realTimeConfigForDoc(
+              this.getAmpDoc()
+            ).then((realTimeConfig) =>
+              realTimeConfig.maybeExecuteRealTimeConfig(
+                this.element,
+                this.getCustomRealTimeConfigMacros_(),
+                consentState,
+                consentString,
+                consentMetadata,
+                this.verifyStillCurrent()
+              )
+            )
       );
     }
   }

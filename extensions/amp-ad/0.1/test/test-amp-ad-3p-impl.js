@@ -18,7 +18,7 @@ import '../../../amp-ad/0.1/amp-ad';
 import '../../../amp-sticky-ad/1.0/amp-sticky-ad';
 import * as adCid from '../../../../src/ad-cid';
 import * as consent from '../../../../src/consent';
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {AmpAd3PImpl} from '../amp-ad-3p-impl';
 import {AmpAdUIHandler} from '../amp-ad-ui';
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
@@ -47,7 +47,11 @@ function createAmpAd(win, attachToAmpdoc = false, ampdoc) {
     return true;
   };
 
-  return new AmpAd3PImpl(ampAdElement);
+  const impl = new AmpAd3PImpl(ampAdElement);
+  // Initialize internal implementation structure since `isBuilt` is forced
+  // to return `true` above.
+  ampAdElement.impl_ = impl;
+  return impl;
 }
 
 describes.realWin(
@@ -64,6 +68,10 @@ describes.realWin(
     let win;
     let registryBackup;
     const whenFirstVisible = Promise.resolve();
+
+    function mockMode(mode) {
+      env.sandbox.stub(win.parent, '__AMP_MODE').value(mode);
+    }
 
     beforeEach(() => {
       registryBackup = Object.create(null);
@@ -319,19 +327,19 @@ describes.realWin(
 
     describe('preconnectCallback', () => {
       it('should add preconnect and prefetch to DOM header', () => {
+        mockMode({});
         ad3p.buildCallback();
         ad3p.preconnectCallback();
         return whenFirstVisible.then(() => {
           const fetches = win.document.querySelectorAll('link[rel=preload]');
           expect(fetches).to.have.length(2);
-          expect(
-            Array.from(fetches)
-              .map((link) => link.href)
-              .sort()
-          ).to.jsonEqual([
-            'http://ads.localhost:9876/dist.3p/current/frame.max.html',
-            'http://ads.localhost:9876/dist.3p/current/integration.js',
-          ]);
+          expect(fetches[0].href).to.match(
+            /^https:\/\/d-\d+\.ampproject\.net\/\$internalRuntimeVersion\$\/frame\.html$/
+          );
+          expect(fetches[1]).to.have.property(
+            'href',
+            'https://3p.ampproject.net/$internalRuntimeVersion$/f.js'
+          );
 
           const preconnects = win.document.querySelectorAll(
             'link[rel=preconnect]'
@@ -403,8 +411,7 @@ describes.realWin(
 
       it('should only allow rendering one ad per second', async () => {
         ad3p.getVsync().runScheduledTasks_();
-        const clock = lolex.install({
-          target: win,
+        const clock = fakeTimers.withGlobal(win).install({
           toFake: ['Date', 'setTimeout', 'clearTimeout'],
         });
         const ad3p2 = createAmpAd(win);

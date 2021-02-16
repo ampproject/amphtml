@@ -168,7 +168,6 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
         div.setAttribute('width', '50');
         div.setAttribute('height', '100');
 
-        const {innerWidth: width, innerHeight: height} = window;
         setupElementFunctions(div);
 
         const viewer = Services.viewerForDoc(window.document);
@@ -190,7 +189,16 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
           .stub(WindowInterface, 'getLocation')
           .returns({href: locationHref});
 
-        const iframe = getIframe(window, div, '_ping_', {clientId: 'cidValue'});
+        const initialIntersection = {test: 'testIntersection'};
+        const iframe = getIframe(
+          window,
+          div,
+          '_ping_',
+          {clientId: 'cidValue'},
+          {
+            initialIntersection,
+          }
+        );
         const {src} = iframe;
         const docInfo = Services.documentInfoForDoc(window.document);
         expect(docInfo.pageViewId).to.not.be.empty;
@@ -230,30 +238,7 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
             'startTime': 1234567888,
             'experimentToggles': {'exp-a': true, 'exp-b': true},
             'sentinel': sentinel,
-            'initialIntersection': {
-              'time': 1234567888,
-              'rootBounds': {
-                'left': 0,
-                'top': 0,
-                'width': width,
-                'height': height,
-                'bottom': height,
-                'right': width,
-                'x': 0,
-                'y': 0,
-              },
-              'boundingClientRect': {'width': 100, 'height': 200},
-              'intersectionRect': {
-                'left': 0,
-                'top': 0,
-                'width': 0,
-                'height': 0,
-                'bottom': 0,
-                'right': 0,
-                'x': 0,
-                'y': 0,
-              },
-            },
+            initialIntersection,
           },
         };
         expect(src).to.equal(
@@ -439,20 +424,19 @@ describes.realWin('3p-frame', {amp: true}, (env) => {
       });
 
       it('should prefetch bootstrap frame and JS', () => {
-        mockMode({localDev: true});
+        mockMode({});
         const ampdoc = Services.ampdoc(window.document);
         preloadBootstrap(window, ampdoc, preconnect);
         // Wait for visible promise.
         return ampdoc.whenFirstVisible().then(() => {
           const fetches = document.querySelectorAll('link[rel=preload]');
           expect(fetches).to.have.length(2);
-          expect(fetches[0]).to.have.property(
-            'href',
-            'http://ads.localhost:9876/dist.3p/current/frame.max.html'
+          expect(fetches[0].href).to.match(
+            /^https:\/\/d-\d+\.ampproject\.net\/\$internalRuntimeVersion\$\/frame\.html$/
           );
           expect(fetches[1]).to.have.property(
             'href',
-            'http://ads.localhost:9876/dist.3p/current/integration.js'
+            'https://3p.ampproject.net/$internalRuntimeVersion$/f.js'
           );
         });
       });

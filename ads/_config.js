@@ -150,6 +150,11 @@ const adConfig = jsonConfiguration({
     preconnect: ['https://inv-nets.admixer.net', 'https://cdn.admixer.net'],
   },
 
+  'adnuntius': {
+    prefetch: 'https://cdn.adnuntius.com/adn.js',
+    renderStartImplemented: true,
+  },
+
   'adocean': {
     consentHandlingOverride: true,
   },
@@ -441,11 +446,6 @@ const adConfig = jsonConfiguration({
       'https://www.eadv.it/track/esr.min.js',
       'https://www.eadv.it/track/ead.min.js',
     ],
-  },
-
-  'eas': {
-    prefetch: 'https://amp.emediate.eu/amp.v0.js',
-    renderStartImplemented: true,
   },
 
   'empower': {
@@ -772,6 +772,15 @@ const adConfig = jsonConfiguration({
   },
 
   'my6sense': {
+    renderStartImplemented: true,
+  },
+
+  'myfinance': {
+    preconnect: [
+      'https://a.myfidevs.io',
+      'https://static.myfinance.com',
+      'https://www.myfinance.com',
+    ],
     renderStartImplemented: true,
   },
 

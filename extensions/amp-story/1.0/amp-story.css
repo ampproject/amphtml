@@ -366,6 +366,23 @@ amp-story-grid-layer {
   pointer-events: none !important;
 }
 
+amp-story-grid-layer[anchor*="left"] {
+  margin-left: 0 !important;
+}
+
+amp-story-grid-layer[anchor*="top"] {
+  margin-top: 0 !important;
+}
+
+amp-story-grid-layer[anchor*="bottom"] {
+  margin-bottom: 0 !important;
+}
+
+amp-story-grid-layer[anchor*="right"] {
+  margin-right: 0 !important;
+  margin-left: auto !important;
+}
+
 /**
  * Click shield to make sure click events are never swallowed by videos on
  * Safari iOS 11.2, which would prevent the user from navigating through the
@@ -472,6 +489,7 @@ amp-story-grid-layer .i-amphtml-embedded-component::after {
   width: var(--i-amphtml-story-layer-width, 100%);
   height: var(--i-amphtml-story-layer-height, 100%);
   font-size: calc(var(--i-amphtml-story-layer-height, 100vh) / 10);
+  margin-left: calc((var(--story-page-vw, 1%) * 100 - var(--i-amphtml-story-layer-width, 100%)) * 0.5); /* Set margin to 1/2 of page-width - layer-width to center layer */
 }
 
 /**

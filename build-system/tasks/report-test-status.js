@@ -16,16 +16,17 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const log = require('fancy-log');
 const requestPromise = require('request-promise');
 const {
+  isCircleciBuild,
   isPullRequestBuild,
   isGithubActionsBuild,
-  isTravisBuild,
 } = require('../common/ci');
 const {ciJobUrl} = require('../common/ci');
-const {cyan, green, yellow} = require('ansi-colors');
+const {cyan, green, yellow} = require('kleur/colors');
+const {determineBuildTargets, Targets} = require('../pr-check/build-targets');
 const {gitCommitHash} = require('../common/git');
+const {log} = require('../common/logging');
 
 const reportBaseUrl = 'https://amp-test-status-bot.appspot.com/v0/tests';
 
@@ -37,18 +38,29 @@ const TEST_TYPE_SUBTYPES = isGithubActionsBuild()
   ? new Map([
       ['integration', ['firefox', 'safari', 'edge', 'ie']],
       ['unit', ['firefox', 'safari', 'edge']],
+      ['e2e', ['firefox', 'safari']],
     ])
-  : isTravisBuild()
+  : isCircleciBuild()
   ? new Map([
-      ['integration', ['unminified', 'minified', 'esm']],
+      [
+        'integration',
+        [
+          'unminified',
+          'nomodule',
+          'module',
+          'experimentA',
+          'experimentB',
+          'experimentC',
+        ],
+      ],
       ['unit', ['unminified', 'local-changes']],
-      ['e2e', ['minified']],
+      ['e2e', ['nomodule', 'experimentA', 'experimentB', 'experimentC']],
     ])
   : new Map([]);
 const TEST_TYPE_BUILD_TARGETS = new Map([
-  ['integration', ['RUNTIME', 'FLAG_CONFIG', 'INTEGRATION_TEST']],
-  ['unit', ['RUNTIME', 'UNIT_TEST']],
-  ['e2e', ['RUNTIME', 'FLAG_CONFIG', 'E2E_TEST']],
+  ['integration', [Targets.RUNTIME, Targets.INTEGRATION_TEST]],
+  ['unit', [Targets.RUNTIME, Targets.UNIT_TEST]],
+  ['e2e', [Targets.RUNTIME, Targets.E2E_TEST]],
 ]);
 
 function inferTestType() {
@@ -68,7 +80,7 @@ function inferTestType() {
   const subtype = argv.local_changes
     ? 'local-changes'
     : argv.esm
-    ? 'esm'
+    ? 'module'
     : argv.firefox
     ? 'firefox'
     : argv.safari
@@ -77,8 +89,14 @@ function inferTestType() {
     ? 'edge'
     : argv.ie
     ? 'ie'
+    : argv.browsers == 'safari'
+    ? 'safari'
+    : argv.browsers == 'firefox'
+    ? 'firefox'
+    : argv.experiment
+    ? argv.experiment
     : argv.compiled
-    ? 'minified'
+    ? 'nomodule'
     : 'unminified';
 
   return `${type}/${subtype}`;
@@ -143,7 +161,8 @@ function reportTestStarted() {
   return postReport(inferTestType(), 'started');
 }
 
-async function reportAllExpectedTests(buildTargets) {
+async function reportAllExpectedTests() {
+  const buildTargets = determineBuildTargets();
   for (const [type, subTypes] of TEST_TYPE_SUBTYPES) {
     const testTypeBuildTargets = TEST_TYPE_BUILD_TARGETS.get(type);
     const action = testTypeBuildTargets.some((target) =>

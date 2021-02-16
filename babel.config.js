@@ -25,7 +25,6 @@
 
 'use strict';
 
-const log = require('fancy-log');
 const {
   getDepCheckConfig,
   getPostClosureConfig,
@@ -34,7 +33,8 @@ const {
   getUnminifiedConfig,
   getEslintConfig,
 } = require('./build-system/babel-config');
-const {cyan, yellow} = require('ansi-colors');
+const {cyan, yellow} = require('kleur/colors');
+const {log} = require('./build-system/common/logging');
 
 /**
  * Mapping of babel transform callers to their corresponding babel configs.

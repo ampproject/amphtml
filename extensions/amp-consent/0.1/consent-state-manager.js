@@ -18,6 +18,7 @@ import {
   CONSENT_ITEM_STATE,
   ConsentInfoDef,
   ConsentMetadataDef,
+  PURPOSE_CONSENT_STATE,
   calculateLegacyStateValue,
   composeStoreValue,
   constructConsentInfo,
@@ -31,7 +32,7 @@ import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {dev, devAssert, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict, hasOwn} from '../../../src/utils/object';
 import {expandConsentEndpointUrl, getConsentCID} from './consent-config';
 
 const TAG = 'CONSENT-STATE-MANAGER';
@@ -62,6 +63,9 @@ export class ConsentStateManager {
 
     /** @private {?function()} */
     this.consentReadyResolver_ = null;
+
+    /** @private {?Object<string, PURPOSE_CONSENT_STATE>} */
+    this.purposeConsents_ = null;
   }
 
   /**
@@ -109,6 +113,29 @@ export class ConsentStateManager {
         constructConsentInfo(state, consentStr, opt_consentMetadata)
       );
     }
+  }
+
+  /**
+   * Update our current purposeConsents, that will be
+   * used in subsequent calls to update().
+   * @param {!Object<string, boolean>} purposeMap
+   * @param {boolean} defaultsOnly
+   */
+  updateConsentInstancePurposes(purposeMap, defaultsOnly = false) {
+    if (!this.purposeConsents_) {
+      this.purposeConsents_ = {};
+    }
+    const purposes = Object.keys(purposeMap);
+    purposes.forEach((purpose) => {
+      // If defaults only, then only update if it doesn't exist.
+      if (defaultsOnly && hasOwn(this.purposeConsents_, purpose)) {
+        return;
+      }
+      const value = !!purposeMap[purpose]
+        ? PURPOSE_CONSENT_STATE.ACCEPTED
+        : PURPOSE_CONSENT_STATE.REJECTED;
+      this.purposeConsents_[purpose] = value;
+    });
   }
 
   /**
@@ -232,7 +259,7 @@ export class ConsentInstance {
     this.sharedDataPromise = null;
 
     /** @private {Promise<!../../../src/service/storage-impl.Storage>} */
-    this.storagePromise_ = Services.storageForDoc(ampdoc);
+    this.storagePromise_ = Services.storageForTopLevelDoc(ampdoc);
 
     /** @private {?ConsentInfoDef}*/
     this.localConsentInfo_ = null;

@@ -20,7 +20,6 @@ const browserify = require('browserify');
 const depCheckConfig = require('../test-configs/dep-check-config');
 const fs = require('fs-extra');
 const gulp = require('gulp');
-const log = require('fancy-log');
 const minimatch = require('minimatch');
 const path = require('path');
 const source = require('vinyl-source-stream');
@@ -31,8 +30,8 @@ const {
 } = require('../common/ctrlcHandler');
 const {compileJison} = require('./compile-jison');
 const {css} = require('./css');
-const {cyan, red, yellow} = require('ansi-colors');
-const {isCiBuild} = require('../common/ci');
+const {cyan, red, yellow} = require('kleur/colors');
+const {log, logLocalDev} = require('../common/logging');
 
 const root = process.cwd();
 const absPathRegExp = new RegExp(`^${root}/`);
@@ -306,9 +305,7 @@ async function depCheck() {
   const handlerProcess = createCtrlcHandler('dep-check');
   await css();
   await compileJison();
-  if (!isCiBuild()) {
-    log('Checking dependencies...');
-  }
+  logLocalDev('Checking dependencies...');
   return getSrcs()
     .then((entryPoints) => {
       // This check is for extension folders that actually dont have

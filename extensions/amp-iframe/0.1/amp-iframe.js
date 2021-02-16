@@ -25,11 +25,7 @@ import {createCustomEvent, getData, listen} from '../../../src/event-helper';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {endsWith} from '../../../src/string';
-import {
-  getConsentMetadata,
-  getConsentPolicyInfo,
-  getConsentPolicyState,
-} from '../../../src/consent';
+import {getConsentDataToForward} from '../../../src/consent';
 import {
   isAdLike,
   listenFor,
@@ -38,6 +34,10 @@ import {
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isExperimentOn} from '../../../src/experiments';
 import {moveLayoutRect} from '../../../src/layout-rect';
+import {
+  observeDisplay,
+  unobserveDisplay,
+} from '../../../src/utils/display-observer';
 import {parseJson} from '../../../src/json';
 import {removeElement} from '../../../src/dom';
 import {removeFragment} from '../../../src/url';
@@ -96,6 +96,9 @@ export class AmpIframe extends AMP.BaseElement {
     /** @private  {?HTMLIFrameElement} */
     this.iframe_ = null;
 
+    /** @private  {boolean} */
+    this.isDisplayed_ = false;
+
     /** @private {boolean} */
     this.isResizable_ = false;
 
@@ -132,6 +135,8 @@ export class AmpIframe extends AMP.BaseElement {
      * @private {boolean}
      */
     this.hasErroredEmbedSize_ = false;
+
+    this.onDisplay_ = this.onDisplay_.bind(this);
   }
 
   /** @override */
@@ -484,6 +489,9 @@ export class AmpIframe extends AMP.BaseElement {
 
     this.container_.appendChild(iframe);
 
+    this.isDisplayed_ = false;
+    observeDisplay(this.element, this.onDisplay_);
+
     return this.loadPromise(iframe).then(() => {
       // On iOS the iframe at times fails to render inside the `overflow:auto`
       // container. To avoid this problem, we set the `overflow:auto` property
@@ -537,30 +545,21 @@ export class AmpIframe extends AMP.BaseElement {
    * @private
    */
   sendConsentData_(source, origin) {
-    const consentPolicyId = super.getConsentPolicy() || 'default';
-    const consentStringPromise = this.getConsentString_(consentPolicyId);
-    const metadataPromise = this.getConsentMetadata_(consentPolicyId);
-    const consentPolicyStatePromise = this.getConsentPolicyState_(
-      consentPolicyId
+    getConsentDataToForward(this.element, this.getConsentPolicy()).then(
+      (consents) => {
+        this.sendConsentDataToIframe_(
+          source,
+          origin,
+          Object.assign(
+            dict({
+              'sentinel': 'amp',
+              'type': MessageType.CONSENT_DATA,
+            }),
+            consents
+          )
+        );
+      }
     );
-
-    Promise.all([
-      metadataPromise,
-      consentStringPromise,
-      consentPolicyStatePromise,
-    ]).then((consents) => {
-      this.sendConsentDataToIframe_(
-        source,
-        origin,
-        dict({
-          'sentinel': 'amp',
-          'type': MessageType.CONSENT_DATA,
-          'consentMetadata': consents[0],
-          'consentString': consents[1],
-          'consentPolicyState': consents[2],
-        })
-      );
-    });
   }
 
   /**
@@ -575,47 +574,13 @@ export class AmpIframe extends AMP.BaseElement {
   }
 
   /**
-   * Get the consent string
-   * @param {string} consentPolicyId
-   * @private
-   * @return {Promise}
-   */
-  getConsentString_(consentPolicyId = 'default') {
-    return getConsentPolicyInfo(this.element, consentPolicyId);
-  }
-
-  /**
-   * Get the consent metadata
-   * @param {string} consentPolicyId
-   * @private
-   * @return {Promise}
-   */
-  getConsentMetadata_(consentPolicyId = 'default') {
-    return getConsentMetadata(this.element, consentPolicyId);
-  }
-
-  /**
-   * Get the consent policy state
-   * @param {string} consentPolicyId
-   * @private
-   * @return {Promise}
-   */
-  getConsentPolicyState_(consentPolicyId = 'default') {
-    return getConsentPolicyState(this.element, consentPolicyId);
-  }
-
-  /** @override */
-  unlayoutOnPause() {
-    return true;
-  }
-
-  /**
    * Removes this iframe from the page, freeing its resources. This is needed
    * to stop the bad eggs who continue to play videos even after the user has
    * swiped away from the doc.
    * @override
    **/
   unlayoutCallback() {
+    unobserveDisplay(this.element, this.onDisplay_);
     if (this.unlistenPym_) {
       this.unlistenPym_();
       this.unlistenPym_ = null;
@@ -662,8 +627,27 @@ export class AmpIframe extends AMP.BaseElement {
     }
     if (this.iframe_ && mutations['title']) {
       // only propagating title because propagating all causes e2e error:
-      // See <https://travis-ci.com/ampproject/amphtml/jobs/657440421>
       this.propagateAttributes(['title'], this.iframe_);
+    }
+  }
+
+  /** @override */
+  unlayoutOnPause() {
+    return true;
+  }
+
+  /**
+   * @param {boolean} isDisplayed
+   * @private
+   */
+  onDisplay_(isDisplayed) {
+    if (isDisplayed === this.isDisplayed_) {
+      return;
+    }
+    this.isDisplayed_ = isDisplayed;
+    const hasOwner = !!this.element.getOwner();
+    if (!isDisplayed && !hasOwner && this.iframe_) {
+      this.getVsync().mutate(() => this.unload());
     }
   }
 

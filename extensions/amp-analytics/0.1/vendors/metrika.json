@@ -4,20 +4,31 @@
     "xhrpost": true,
     "image": false
   },
+  "vars": {
+    "_commonData": "amp:1:z:${timezone}:i:${timestamp}:rn:${random}:la:${browserLanguage}:en:${documentCharset}:rqn:${requestCount}",
+    "_screenData": ":s:${screenWidth}x${screenHeight}x${screenColorDepth}:w:${availableScreenWidth}x${availableScreenHeight}",
+    "_timings": ":ds:${domainLookupTime},${tcpConnectTime},${serverResponseTime},${pageDownloadTime},${navTiming(navigationStart,fetchStart)},${redirectTime},${navRedirectCount},${navTiming(domLoading,domInteractive)},${navTiming(domContentLoadedEventStart,domContentLoadedEventEnd)},${navTiming(navigationStart,domComplete)},${pageLoadTime},${navTiming(loadEventStart,loadEventEnd)},${contentLoadTime}",
+    "_idInfo": ":u:${clientId(_ym_uid)}:hid:${pageViewId}",
+    "_title": ":t:${title}",
+    "_notBounceBrInfo": "ar:1:nb:1:",
+    "_externalLinkBrInfo": "ln:1:",
+    "_reachGoalBrInfo": "ar:1:",
+    "_pageViewBrInfo": "pv:1:",
+    "_pageUrl": "${sourceUrl}",
+    "_goalUrl": "goal://${sourceHost}/${goalId}"
+  },
   "requests": {
-    "pageview": "${_watch}?browser-info=${_brInfo}&${_siteInfo}&${_suffix}",
-    "notBounce": "${_watch}?browser-info=ar%3A1%3Anb%3A1%3A${_brInfo}&${_suffix}",
-    "externalLink": "${_watch}?browser-info=ln%3A1%3A${_brInfo}&${_suffix}",
-    "reachGoal": "${_watch}?browser-info=ar%3A1%3A${_brInfo}&${_siteInfo}&${_goalSuffix}",
-    "_domain": "https://mc.yandex.ru",
+    "pageview": "${_prefix}${_pageViewBrInfo}${_brInfo}&${_siteInfo}&${_suffix}",
+    "notBounce": "${_prefix}${_notBounceBrInfo}${_brInfo}&${_suffix}",
+    "externalLink": "${_prefix}${_externalLinkBrInfo}${_brInfo}&${_suffix}",
+    "reachGoal": "${_prefix}${_reachGoalBrInfo}${_brInfo}&${_siteInfo}&${_goalSuffix}",
+    "_prefix": "${_watch}?browser-info=",
     "_watch": "${_domain}/watch/${counterId}",
-    "_suffix": "page-url=${sourceUrl}&page-ref=${documentReferrer}",
-    "_goalSuffix": "page-url=goal%3A%2F%2F${sourceHost}%2F${goalId}&page-ref=${sourceUrl}",
-    "_techInfo": "amp%3A1%3Az%3A${timezone}%3Ai%3A${timestamp}%3Arn%3A${random}%3Ala%3A${browserLanguage}%3Aen%3A${documentCharset}%3Arqn%3A${requestCount}%3As%3A${screenWidth}x${screenHeight}x${screenColorDepth}%3Aw%3A${availableScreenWidth}x${availableScreenHeight}%3Ads%3A${_timings}%3Auid%3A${clientId(_ym_uid)}%3Apvid%3A${pageViewId}",
-    "_timings": "${domainLookupTime}%2C${tcpConnectTime}%2C${serverResponseTime}%2C${pageDownloadTime}%2C${redirectTime}%2C${navTiming(redirectStart,redirectEnd)}%2C${navRedirectCount}%2C${navTiming(domLoading,domInteractive)}%2C${navTiming(domContentLoadedEventStart,domContentLoadedEventEnd)}%2C${navTiming(navigationStart,domComplete)}%2C${pageLoadTime}%2C${navTiming(loadEventStart,loadEventEnd)}%2C${contentLoadTime}",
-    "_brInfo": "${_techInfo}%3A${_title}",
-    "_title": "t%3A${title}",
-    "_siteInfo": "site-info=${yaParams}"
+    "_domain": "https://mc.yandex.ru",
+    "_brInfo": "${_commonData}${_screenData}${_timings}${_idInfo}${_title}",
+    "_siteInfo": "site-info=${yaParams}",
+    "_suffix": "page-url=${_pageUrl}&page-ref=${externalReferrer}",
+    "_goalSuffix": "page-url=${_goalUrl}&page-ref=${_pageUrl}"
   },
   "triggers": {
     "pageview": {

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {ElementStub, stubbedElements} from '../element-stub';
-import {createCustomElementClass} from '../custom-element';
+import {ElementStub} from '../element-stub';
+import {createCustomElementClass, stubbedElements} from '../custom-element';
 import {extensionScriptsInNode} from '../element-service';
 import {reportError} from '../error';
 import {userAssert} from '../log';
@@ -56,7 +56,7 @@ export function upgradeOrRegisterElement(win, name, toClass) {
   );
   knownElements[name] = toClass;
   for (let i = 0; i < stubbedElements.length; i++) {
-    const stub = stubbedElements[i];
+    const element = stubbedElements[i];
     // There are 3 possible states here:
     // 1. We never made the stub because the extended impl. loaded first.
     //    In that case the element won't be in the array.
@@ -65,7 +65,6 @@ export function upgradeOrRegisterElement(win, name, toClass) {
     //    implementation.
     // 3. A stub was attached. We upgrade which means we replay the
     //    implementation.
-    const {element} = stub;
     if (
       element.tagName.toLowerCase() == name &&
       element.ownerDocument.defaultView == win

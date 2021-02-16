@@ -15,8 +15,8 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {DateCountdown} from '../date-countdown';
-import {date, select, withKnobs} from '@storybook/addon-knobs';
+import {DateCountdown} from '../component';
+import {boolean, date, select, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 
 export default {
@@ -72,6 +72,7 @@ export const _default = () => {
     BIGGEST_UNIT_CONFIGURATIONS,
     BIGGEST_UNIT_CONFIGURATIONS[0]
   );
+  const countUp = boolean('countUp', false);
 
   return (
     <div>
@@ -80,6 +81,7 @@ export const _default = () => {
         locale={locale}
         whenEnded={whenEnded}
         biggestUnit={biggestUnit}
+        countUp={countUp}
         render={(data) => (
           <div>
             <span>{`${data.days} ${data.dd} ${data.d}`}</span>
@@ -113,6 +115,7 @@ export const defaultRenderer = () => {
     BIGGEST_UNIT_CONFIGURATIONS,
     BIGGEST_UNIT_CONFIGURATIONS[0]
   );
+  const countUp = boolean('countUp', false);
 
   return (
     <div>
@@ -121,6 +124,7 @@ export const defaultRenderer = () => {
         locale={locale}
         whenEnded={whenEnded}
         biggestUnit={biggestUnit}
+        countUp={countUp}
       ></DateCountdown>
     </div>
   );

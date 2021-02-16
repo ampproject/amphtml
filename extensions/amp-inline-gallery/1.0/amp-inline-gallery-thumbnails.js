@@ -16,7 +16,6 @@
 
 import {CSS as CAROUSEL_CSS} from '../../amp-base-carousel/1.0/base-carousel.jss';
 import {CarouselContextProp} from '../../amp-base-carousel/1.0/carousel-props';
-import {Layout} from '../../../src/layout';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {CSS as THUMBNAIL_CSS} from './thumbnails.jss';
 import {Thumbnails} from './thumbnails';
@@ -35,7 +34,9 @@ export class AmpInlineGalleryThumbnails extends PreactBaseElement {
         isExperimentOn(this.win, 'bento-inline-gallery'),
       'expected global "bento" or specific "bento-inline-gallery" experiment to be enabled'
     );
-    return layout == Layout.FIXED_HEIGHT;
+    // Any layout is allowed for Bento, but "fixed-height" is the recommend
+    // layout for AMP.
+    return super.isLayoutSupported(layout);
   }
 }
 

@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-const colors = require('ansi-colors');
-const log = require('fancy-log');
+const colors = require('kleur/colors');
 const {execScriptAsync, exec} = require('./exec');
-const {isCiBuild} = require('./ci');
+const {logLocalDev} = require('./logging');
 
 const {green, cyan} = colors;
 
@@ -32,14 +31,12 @@ const killSuffix = process.platform == 'win32' ? '>NUL' : '';
  * @return {number}
  */
 exports.createCtrlcHandler = function (command) {
-  if (!isCiBuild()) {
-    log(
-      green('Running'),
-      cyan(command) + green('. Press'),
-      cyan('Ctrl + C'),
-      green('to cancel...')
-    );
-  }
+  logLocalDev(
+    green('Running'),
+    cyan(command) + green('. Press'),
+    cyan('Ctrl + C'),
+    green('to cancel...')
+  );
   const killMessage =
     green('\nDetected ') +
     cyan('Ctrl + C') +

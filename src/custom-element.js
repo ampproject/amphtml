@@ -20,10 +20,12 @@ import {CommonSignals} from './common-signals';
 import {ElementStub} from './element-stub';
 import {
   Layout,
+  LayoutPriority,
   applyStaticLayout,
   isInternalElement,
   isLoadingAllowed,
 } from './layout';
+import {MediaQueryProps} from './utils/media-query-props';
 import {ResourceState} from './service/resource';
 import {Services} from './services';
 import {Signals} from './utils/signals';
@@ -36,7 +38,6 @@ import {
 import {dev, devAssert, rethrowAsync, user, userAssert} from './log';
 import {getIntersectionChangeEntry} from './utils/intersection-observer-3p-host';
 import {getMode} from './mode';
-import {parseSizeList} from './size-list';
 import {setStyle} from './style';
 import {shouldBlockOnConsentByMeta} from './consent';
 import {startupChunk} from './chunk';
@@ -60,6 +61,9 @@ const UpgradeState = {
  * @type {boolean|undefined}
  */
 let templateTagSupported;
+
+/** @type {!Array} */
+export const stubbedElements = [];
 
 /**
  * Whether this platform supports template tags.
@@ -164,15 +168,6 @@ function createBaseCustomElementClass(win) {
       /** @private {boolean} */
       this.paused_ = false;
 
-      /** @private {string|null|undefined} */
-      this.mediaQuery_ = undefined;
-
-      /** @private {!./size-list.SizeList|null|undefined} */
-      this.sizeList_ = undefined;
-
-      /** @private {!./size-list.SizeList|null|undefined} */
-      this.heightsList_ = undefined;
-
       /** @public {boolean} */
       this.warnOnMissingOverflow = true;
 
@@ -201,15 +196,23 @@ function createBaseCustomElementClass(win) {
       const nonStructThis = /** @type {!Object} */ (this);
 
       // `opt_implementationClass` is only used for tests.
+      /** @type {?(typeof ../base-element.BaseElement)} */
       let Ctor =
         win.__AMP_EXTENDED_ELEMENTS &&
         win.__AMP_EXTENDED_ELEMENTS[this.localName];
       if (getMode().test && nonStructThis['implementationClassForTesting']) {
         Ctor = nonStructThis['implementationClassForTesting'];
       }
-      devAssert(Ctor);
-      /** @private {!./base-element.BaseElement} */
-      this.implementation_ = new Ctor(this);
+
+      /** @private {?(typeof ../base-element.BaseElement)} */
+      this.implClass_ = Ctor === ElementStub ? null : Ctor || null;
+
+      if (!this.implClass_) {
+        stubbedElements.push(this);
+      }
+
+      /** @private {?./base-element.BaseElement} */
+      this.impl_ = null;
 
       /**
        * An element always starts in a unupgraded state until it's added to DOM
@@ -245,9 +248,16 @@ function createBaseCustomElementClass(win) {
       /** @private @const */
       this.signals_ = new Signals();
 
+      if (this.implClass_) {
+        this.signals_.signal(CommonSignals.READY_TO_UPGRADE);
+      }
+
       const perf = Services.performanceForOrNull(win);
       /** @private {boolean} */
       this.perfOn_ = perf && perf.isPerformanceTrackingOn();
+
+      /** @private {?MediaQueryProps} */
+      this.mediaQueryProps_ = null;
 
       if (nonStructThis[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER]) {
         nonStructThis[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER](nonStructThis);
@@ -321,7 +331,9 @@ function createBaseCustomElementClass(win) {
         // Already upgraded or in progress or failed.
         return;
       }
-      this.implementation_ = new newImplClass(this);
+
+      this.implClass_ = newImplClass;
+      this.signals_.signal(CommonSignals.READY_TO_UPGRADE);
       if (this.everAttached) {
         // Usually, we do an implementation upgrade when the element is
         // attached to the DOM. But, if it hadn't yet upgraded from
@@ -347,14 +359,12 @@ function createBaseCustomElementClass(win) {
      * @final @private
      */
     completeUpgrade_(newImpl, upgradeStartTime) {
+      this.impl_ = newImpl;
       this.upgradeDelayMs_ = win.Date.now() - upgradeStartTime;
       this.upgradeState_ = UpgradeState.UPGRADED;
-      this.implementation_ = newImpl;
       this.classList.remove('amp-unresolved');
       this.classList.remove('i-amphtml-unresolved');
       this.assertLayout_();
-      // TODO(wg-performance): Don't set BaseElement ivars externally.
-      this.implementation_.layout_ = this.layout_;
       this.dispatchCustomEventForTesting(AmpEvents.ATTACHED);
       this.getResources().upgraded(this);
       this.signals_.signal(CommonSignals.UPGRADED);
@@ -364,7 +374,8 @@ function createBaseCustomElementClass(win) {
     assertLayout_() {
       if (
         this.layout_ != Layout.NODISPLAY &&
-        !this.implementation_.isLayoutSupported(this.layout_)
+        this.impl_ &&
+        !this.impl_.isLayoutSupported(this.layout_)
       ) {
         userAssert(
           this.getAttribute('layout'),
@@ -401,8 +412,9 @@ function createBaseCustomElementClass(win) {
      * @return {number}
      */
     getLayoutPriority() {
-      devAssert(this.isUpgraded(), 'Cannot get priority of unupgraded element');
-      return this.implementation_.getLayoutPriority();
+      return this.impl_
+        ? this.impl_.getLayoutPriority()
+        : LayoutPriority.BACKGROUND;
     }
 
     /**
@@ -414,7 +426,7 @@ function createBaseCustomElementClass(win) {
         this.isUpgraded(),
         'Cannot get default action alias of unupgraded element'
       );
-      return this.implementation_.getDefaultActionAlias();
+      return this.impl_.getDefaultActionAlias();
     }
 
     /** @return {boolean} */
@@ -432,16 +444,17 @@ function createBaseCustomElementClass(win) {
      * @return {?Promise}
      * @final
      */
-    build() {
+    buildInternal() {
       assertNotTemplate(this);
       devAssert(this.isUpgraded(), 'Cannot build unupgraded element');
       if (this.buildingPromise_) {
         return this.buildingPromise_;
       }
       return (this.buildingPromise_ = new Promise((resolve, reject) => {
+        const impl = this.impl_;
         const policyId = this.getConsentPolicy_();
         if (!policyId) {
-          resolve(this.implementation_.buildCallback());
+          resolve(impl.buildCallback());
         } else {
           Services.consentPolicyServiceForDocOrNull(this)
             .then((policy) => {
@@ -452,7 +465,7 @@ function createBaseCustomElementClass(win) {
             })
             .then((shouldUnblock) => {
               if (shouldUnblock) {
-                resolve(this.implementation_.buildCallback());
+                resolve(impl.buildCallback());
               } else {
                 reject(blockedByConsentError());
               }
@@ -498,27 +511,63 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * @return {!Promise}
+     * @final
+     */
+    whenLoaded() {
+      return this.signals_.whenSignal(CommonSignals.LOAD_END);
+    }
+
+    /**
+     * Ensure that element is eagerly loaded.
+     *
+     * @param {number=} opt_parentPriority
+     * @return {!Promise}
+     * @final
+     */
+    ensureLoaded(opt_parentPriority) {
+      return this.whenBuilt().then(() => {
+        const resource = this.getResource_();
+        if (resource.getState() == ResourceState.LAYOUT_COMPLETE) {
+          return;
+        }
+        if (
+          resource.getState() != ResourceState.LAYOUT_SCHEDULED ||
+          resource.isMeasureRequested()
+        ) {
+          resource.measure();
+        }
+        if (!resource.isDisplayed()) {
+          return;
+        }
+        this.getResources().scheduleLayoutOrPreload(
+          resource,
+          /* layout */ true,
+          opt_parentPriority,
+          /* forceOutsideViewport */ true
+        );
+        return this.whenLoaded();
+      });
+    }
+
+    /**
      * Called to instruct the element to preconnect to hosts it uses during
      * layout.
      * @param {boolean} onLayout Whether this was called after a layout.
      */
     preconnect(onLayout) {
+      devAssert(this.isUpgraded());
       if (onLayout) {
-        this.implementation_.preconnectCallback(onLayout);
+        this.impl_.preconnectCallback(onLayout);
       } else {
         // If we do early preconnects we delay them a bit. This is kind of
         // an unfortunate trade off, but it seems faster, because the DOM
         // operations themselves are not free and might delay
         startupChunk(this.getAmpDoc(), () => {
-          const TAG = this.tagName;
-          if (!this.ownerDocument) {
-            dev().error(TAG, 'preconnect without ownerDocument');
-            return;
-          } else if (!this.ownerDocument.defaultView) {
-            dev().error(TAG, 'preconnect without defaultView');
+          if (!this.ownerDocument || !this.ownerDocument.defaultView) {
             return;
           }
-          this.implementation_.preconnectCallback(onLayout);
+          this.impl_.preconnectCallback(onLayout);
         });
       }
     }
@@ -528,7 +577,7 @@ function createBaseCustomElementClass(win) {
      * @return {boolean}
      */
     isAlwaysFixed() {
-      return this.implementation_.isAlwaysFixed();
+      return this.impl_ ? this.impl_.isAlwaysFixed() : false;
     }
 
     /**
@@ -544,18 +593,13 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
-     * Calls onLayoutMeasure() (and onMeasureChanged() if size changed)
-     * on the BaseElement implementation.
+     * Calls onLayoutMeasure() on the BaseElement implementation.
      * Should only be called by Resources.
-     * @param {boolean} sizeChanged
      */
-    onMeasure(sizeChanged = false) {
+    onMeasure() {
       devAssert(this.isBuilt());
       try {
-        this.implementation_.onLayoutMeasure();
-        if (sizeChanged) {
-          this.implementation_.onMeasureChanged();
-        }
+        this.impl_.onLayoutMeasure();
       } catch (e) {
         reportError(e, this);
       }
@@ -598,68 +642,73 @@ function createBaseCustomElementClass(win) {
       }
     }
 
-    /**
-     * If the element has a media attribute, evaluates the value as a media
-     * query and based on the result adds or removes the class
-     * `i-amphtml-hidden-by-media-query`. The class adds display:none to the
-     * element which in turn prevents any of the resource loading to happen for
-     * the element.
-     *
-     * This method is called by Resources and shouldn't be called by anyone
-     * else.
-     *
-     * @final
-     * @package
-     */
-    applySizesAndMediaQuery() {
-      assertNotTemplate(this);
-
-      // Media query.
-      if (this.mediaQuery_ === undefined) {
-        this.mediaQuery_ = this.getAttribute('media') || null;
-      }
-      if (this.mediaQuery_) {
-        const {defaultView} = this.ownerDocument;
-        this.classList.toggle(
-          'i-amphtml-hidden-by-media-query',
-          !defaultView.matchMedia(this.mediaQuery_).matches
-        );
-      }
-
-      // Sizes.
-      if (this.sizeList_ === undefined) {
-        const sizesAttr = this.getAttribute('sizes');
-        const isDisabled = this.hasAttribute('disable-inline-width');
-        this.sizeList_ =
-          !isDisabled && sizesAttr ? parseSizeList(sizesAttr) : null;
-      }
-      if (this.sizeList_) {
-        setStyle(
-          this,
-          'width',
-          this.sizeList_.select(toWin(this.ownerDocument.defaultView))
-        );
-      }
-      // Heights.
-      if (
-        this.heightsList_ === undefined &&
-        this.layout_ === Layout.RESPONSIVE
-      ) {
-        const heightsAttr = this.getAttribute('heights');
-        this.heightsList_ = heightsAttr
-          ? parseSizeList(heightsAttr, /* allowPercent */ true)
-          : null;
-      }
-      if (this.heightsList_) {
-        const sizer = this.getSizer_();
-        if (sizer) {
-          setStyle(
-            sizer,
-            'paddingTop',
-            this.heightsList_.select(toWin(this.ownerDocument.defaultView))
+    /** @private */
+    initMediaAttrs_() {
+      const hasMediaAttrs =
+        this.hasAttribute('media') ||
+        (this.hasAttribute('sizes') &&
+          !this.hasAttribute('disable-inline-width')) ||
+        this.hasAttribute('heights');
+      const hadMediaAttrs = !!this.mediaQueryProps_;
+      const win = this.ownerDocument.defaultView;
+      if (hasMediaAttrs != hadMediaAttrs && win) {
+        if (hasMediaAttrs) {
+          this.mediaQueryProps_ = new MediaQueryProps(win, () =>
+            this.applyMediaAttrs_()
           );
+          this.applyMediaAttrs_();
+        } else {
+          this.disposeMediaAttrs_();
         }
       }
+    }
+
+    /** @private */
+    disposeMediaAttrs_() {
+      if (this.mediaQueryProps_) {
+        this.mediaQueryProps_.dispose();
+        this.mediaQueryProps_ = null;
+      }
+    }
+
+    /** @private */
+    applyMediaAttrs_() {
+      const props = this.mediaQueryProps_;
+      if (!props) {
+        return;
+      }
+
+      props.start();
+
+      // Media query.
+      const mediaAttr = this.getAttribute('media') || null;
+      const matchesMedia = mediaAttr
+        ? props.resolveMatchQuery(mediaAttr)
+        : true;
+      this.classList.toggle('i-amphtml-hidden-by-media-query', !matchesMedia);
+
+      // Sizes.
+      const sizesAttr = this.hasAttribute('disable-inline-width')
+        ? null
+        : this.getAttribute('sizes');
+      if (sizesAttr) {
+        setStyle(this, 'width', props.resolveListQuery(sizesAttr));
+      }
+
+      // Heights.
+      const heightsAttr =
+        this.layout_ === Layout.RESPONSIVE
+          ? this.getAttribute('heights')
+          : null;
+      if (heightsAttr) {
+        const sizer = this.getSizer_();
+        if (sizer) {
+          setStyle(sizer, 'paddingTop', props.resolveListQuery(heightsAttr));
+        }
+      }
+
+      props.complete();
+      this.getResource_().requestMeasure();
     }
 
     /**
@@ -756,10 +805,7 @@ function createBaseCustomElementClass(win) {
         this.ampdoc_ = ampdoc;
         // Load the pre-stubbed extension if needed.
         const extensionId = this.tagName.toLowerCase();
-        if (
-          isStub(this.implementation_) &&
-          !ampdoc.declaresExtension(extensionId)
-        ) {
+        if (!this.implClass_ && !ampdoc.declaresExtension(extensionId)) {
           Services.extensionsFor(win).installExtensionForDoc(
             ampdoc,
             extensionId
@@ -792,23 +838,17 @@ function createBaseCustomElementClass(win) {
             this,
             Services.platformFor(toWin(this.ownerDocument.defaultView)).isIe()
           );
+          this.initMediaAttrs_();
         } catch (e) {
           reportError(e, this);
         }
-        if (!isStub(this.implementation_)) {
+        if (this.implClass_) {
           this.tryUpgrade_();
         }
         if (!this.isUpgraded()) {
           this.classList.add('amp-unresolved');
           this.classList.add('i-amphtml-unresolved');
           this.dispatchCustomEventForTesting(AmpEvents.STUBBED);
-        }
-        // Classically, sizes/media queries are applied just before
-        // Resource.measure. With IntersectionObserver, observe() is the
-        // equivalent which happens above in Resources.add(). Applying here
-        // also avoids unnecessary reinvocation during reparenting.
-        if (this.getResources().isIntersectionExperimentOn()) {
-          this.applySizesAndMediaQuery();
         }
       }
 
@@ -832,15 +872,23 @@ function createBaseCustomElementClass(win) {
 
     /**
      * Try to upgrade the element with the provided implementation.
+     * @return {!Promise|undefined}
      * @private @final
      */
     tryUpgrade_() {
-      const impl = this.implementation_;
-      devAssert(!isStub(impl), 'Implementation must not be a stub');
+      if (this.isInTemplate_) {
+        return;
+      }
       if (this.upgradeState_ != UpgradeState.NOT_UPGRADED) {
         // Already upgraded or in progress or failed.
         return;
       }
+
+      const Ctor = devAssert(
+        this.implClass_,
+        'Implementation must not be a stub'
+      );
+      const impl = new Ctor(this);
 
       // The `upgradeCallback` only allows redirect once for the top-level
       // non-stub class. We may allow nested upgrades later, but they will
@@ -853,7 +901,7 @@ function createBaseCustomElementClass(win) {
         this.completeUpgrade_(impl, startTime);
       } else if (typeof res.then == 'function') {
         // It's a promise: wait until it's done.
-        res
+        return res
           .then((upgrade) => {
             this.completeUpgrade_(upgrade || impl, startTime);
           })
@@ -882,7 +930,7 @@ function createBaseCustomElementClass(win) {
     /** @private */
     connected_() {
       if (this.built_) {
-        this.implementation_.attachedCallback();
+        this.impl_.attachedCallback();
       }
     }
 
@@ -917,8 +965,11 @@ function createBaseCustomElementClass(win) {
 
       this.isConnected_ = false;
       this.getResources().remove(this);
-      this.implementation_.detachedCallback();
+      if (this.impl_) {
+        this.impl_.detachedCallback();
+      }
       this.toggleLoading(false);
+      this.disposeMediaAttrs_();
     }
 
     /**
@@ -941,7 +992,10 @@ function createBaseCustomElementClass(win) {
      * @final
      */
     prerenderAllowed() {
-      return this.implementation_.prerenderAllowed();
+      if (this.hasAttribute('noprerender')) {
+        return false;
+      }
+      return this.implClass_ ? this.implClass_.prerenderAllowed(this) : false;
     }
 
     /**
@@ -950,7 +1004,7 @@ function createBaseCustomElementClass(win) {
      * @final
      */
     isBuildRenderBlocking() {
-      return this.implementation_.isBuildRenderBlocking();
+      return this.impl_ ? this.impl_.isBuildRenderBlocking() : false;
     }
 
     /**
@@ -959,7 +1013,7 @@ function createBaseCustomElementClass(win) {
      * @final
      */
     createPlaceholder() {
-      return this.implementation_.createPlaceholderCallback();
+      return this.impl_ ? this.impl_.createPlaceholderCallback() : null;
     }
 
     /**
@@ -971,7 +1025,9 @@ function createBaseCustomElementClass(win) {
      * @final
      */
     createLoaderLogo() {
-      return this.implementation_.createLoaderLogoCallback();
+      return this.implClass_
+        ? this.implClass_.createLoaderLogoCallback(this)
+        : {};
     }
 
     /**
@@ -980,7 +1036,7 @@ function createBaseCustomElementClass(win) {
      * @final
      */
     renderOutsideViewport() {
-      return this.implementation_.renderOutsideViewport();
+      return this.impl_ ? this.impl_.renderOutsideViewport() : false;
     }
 
     /**
@@ -990,7 +1046,7 @@ function createBaseCustomElementClass(win) {
      * @final
      */
     idleRenderOutsideViewport() {
-      return this.implementation_.idleRenderOutsideViewport();
+      return this.impl_ ? this.impl_.idleRenderOutsideViewport() : false;
     }
 
     /**
@@ -1024,13 +1080,16 @@ function createBaseCustomElementClass(win) {
     /**
      * Returns a change entry for that should be compatible with
      * IntersectionObserverEntry.
-     * @return {!IntersectionObserverEntry} A change entry.
+     * @return {?IntersectionObserverEntry} A change entry.
      * @final
      */
     getIntersectionChangeEntry() {
-      const box = this.implementation_.getIntersectionElementLayoutBox();
+      const box = this.impl_
+        ? this.impl_.getIntersectionElementLayoutBox()
+        : this.getLayoutBox();
       const owner = this.getOwner();
-      const viewportBox = this.implementation_.getViewport().getRect();
+      const viewport = Services.viewportForDoc(this.getAmpDoc());
+      const viewportBox = viewport.getRect();
       // TODO(jridgewell, #4826): We may need to make this recursive.
       const ownerBox = owner && owner.getLayoutBox();
       return getIntersectionChangeEntry(box, ownerBox, viewportBox);
@@ -1060,7 +1119,7 @@ function createBaseCustomElementClass(win) {
      * @package @final
      */
     isRelayoutNeeded() {
-      return this.implementation_.isRelayoutNeeded();
+      return this.impl_ ? this.impl_.isRelayoutNeeded() : false;
     }
 
     /**
@@ -1071,7 +1130,7 @@ function createBaseCustomElementClass(win) {
      */
     getImpl(waitForBuild = true) {
       const waitFor = waitForBuild ? this.whenBuilt() : this.whenUpgraded();
-      return waitFor.then(() => this.implementation_);
+      return waitFor.then(() => this.impl_);
     }
 
     /**
@@ -1126,7 +1185,7 @@ function createBaseCustomElementClass(win) {
       // Potentially start the loading indicator.
       this.toggleLoading(true);
 
-      const promise = tryResolve(() => this.implementation_.layoutCallback());
+      const promise = tryResolve(() => this.impl_.layoutCallback());
       this.preconnect(/* onLayout */ true);
       this.classList.add('i-amphtml-layout');
 
@@ -1144,7 +1203,7 @@ function createBaseCustomElementClass(win) {
           // Check if this is the first success layout that needs
           // to call firstLayoutCompleted.
           if (!this.isFirstLayoutCompleted_) {
-            this.implementation_.firstLayoutCompleted();
+            this.impl_.firstLayoutCompleted();
             this.isFirstLayoutCompleted_ = true;
             this.dispatchCustomEventForTesting(AmpEvents.LOAD_END);
           }
@@ -1190,7 +1249,7 @@ function createBaseCustomElementClass(win) {
       }
       this.paused_ = true;
       if (this.isBuilt()) {
-        this.implementation_.pauseCallback();
+        this.impl_.pauseCallback();
       }
     }
 
@@ -1209,7 +1268,7 @@ function createBaseCustomElementClass(win) {
       }
       this.paused_ = false;
       if (this.isBuilt()) {
-        this.implementation_.resumeCallback();
+        this.impl_.resumeCallback();
       }
     }
 
@@ -1228,7 +1287,7 @@ function createBaseCustomElementClass(win) {
         return false;
       }
       this.signals_.signal(CommonSignals.UNLOAD);
-      const isReLayoutNeeded = this.implementation_.unlayoutCallback();
+      const isReLayoutNeeded = this.impl_.unlayoutCallback();
       if (isReLayoutNeeded) {
         this.reset_();
       }
@@ -1255,7 +1314,7 @@ function createBaseCustomElementClass(win) {
      * @package @final
      */
     unlayoutOnPause() {
-      return this.implementation_.unlayoutOnPause();
+      return this.impl_ ? this.impl_.unlayoutOnPause() : false;
     }
 
     /**
@@ -1267,7 +1326,7 @@ function createBaseCustomElementClass(win) {
      * @package @final
      */
     reconstructWhenReparented() {
-      return this.implementation_.reconstructWhenReparented();
+      return this.impl_ ? this.impl_.reconstructWhenReparented() : false;
     }
 
     /**
@@ -1275,7 +1334,9 @@ function createBaseCustomElementClass(win) {
      * element is no longer present.
      */
     collapse() {
-      this.implementation_./*OK*/ collapse();
+      if (this.impl_) {
+        this.impl_./*OK*/ collapse();
+      }
     }
 
     /**
@@ -1283,7 +1344,9 @@ function createBaseCustomElementClass(win) {
      * @param {!AmpElement} element
      */
     collapsedCallback(element) {
-      this.implementation_.collapsedCallback(element);
+      if (this.impl_) {
+        this.impl_.collapsedCallback(element);
+      }
     }
 
     /**
@@ -1291,7 +1354,9 @@ function createBaseCustomElementClass(win) {
      * element is now present.
      */
     expand() {
-      this.implementation_./*OK*/ expand();
+      if (this.impl_) {
+        this.impl_./*OK*/ expand();
+      }
     }
 
     /**
@@ -1302,7 +1367,9 @@ function createBaseCustomElementClass(win) {
      * @param {!JsonObject<string, (null|boolean|string|number|Array|Object)>} mutations
      */
     mutatedAttributesCallback(mutations) {
-      this.implementation_.mutatedAttributesCallback(mutations);
+      if (this.impl_) {
+        this.impl_.mutatedAttributesCallback(mutations);
+      }
     }
 
     /**
@@ -1353,7 +1420,7 @@ function createBaseCustomElementClass(win) {
      */
     executionAction_(invocation, deferred) {
       try {
-        this.implementation_.executeAction(invocation, deferred);
+        this.impl_.executeAction(invocation, deferred);
       } catch (e) {
         rethrowAsync(
           'Action execution failed:',
@@ -1379,11 +1446,11 @@ function createBaseCustomElementClass(win) {
           return null;
         }
       }
-      if (policyId == '' || policyId == 'default') {
+      if ((policyId == '' || policyId == 'default') && this.impl_) {
         // data-block-on-consent value not set, up to individual element
         // Note: data-block-on-consent and data-block-on-consent='default' is
         // treated exactly the same
-        return this.implementation_.getConsentPolicy();
+        return this.impl_.getConsentPolicy();
       }
       return policyId;
     }
@@ -1663,15 +1730,6 @@ function assertNotTemplate(element) {
 }
 
 /**
- * Whether the implementation is a stub.
- * @param {?./base-element.BaseElement} impl
- * @return {boolean}
- */
-function isStub(impl) {
-  return impl instanceof ElementStub;
-}
-
-/**
  * Returns "true" for internal AMP nodes or for placeholder elements.
  * @param {!Node} node
  * @return {boolean}
@@ -1697,6 +1755,7 @@ function isInternalOrServiceNode(node) {
  * @param {!Window} win The window in which to register the custom element.
  * @param {(typeof ./base-element.BaseElement)=} opt_implementationClass For testing only.
  * @return {!Object} Prototype of element.
+ * @visibleForTesting
  */
 export function createAmpElementForTesting(win, opt_implementationClass) {
   const Element = createCustomElementClass(win);
@@ -1704,4 +1763,20 @@ export function createAmpElementForTesting(win, opt_implementationClass) {
     Element.prototype.implementationClassForTesting = opt_implementationClass;
   }
   return Element;
+}
+
+/**
+ * @visibleForTesting
+ */
+export function resetStubsForTesting() {
+  stubbedElements.length = 0;
+}
+
+/**
+ * @param {!AmpElement} element
+ * @return {!BaseElement}
+ * @visibleForTesting
+ */
+export function getImplSyncForTesting(element) {
+  return element.impl_;
 }

@@ -30,6 +30,10 @@ import {
 } from '../../../src/consent';
 import {getData} from '../../../src/event-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {
+  observeContentSize,
+  unobserveContentSize,
+} from '../../../src/utils/size-observer';
 import {removeElement} from '../../../src/dom';
 import {setIsMediaComponent} from '../../../src/video-interface';
 import {tryParseJson} from '../../../src/json';
@@ -88,6 +92,8 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
 
     /** @private {?Function} */
     this.playerReadyResolver_ = null;
+
+    this.onResized_ = this.onResized_.bind(this);
   }
 
   /**
@@ -271,6 +277,7 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
     const urlParams = dict({
       'playerId': this.playerId_ || undefined,
       'mediaId': this.mediaId_ || undefined,
+      'url': Services.documentInfoForDoc(element).sourceUrl,
     });
     const iframeUrl = this.iframeDomain_ + '/amp-embed/index.html';
     const src = addParamsToUrl(iframeUrl, urlParams);
@@ -292,6 +299,8 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
     // bind to amp consent and send consent info to the iframe content and propagate to player
     this.bindToAmpConsent_();
 
+    observeContentSize(this.element, this.onResized_);
+
     return this.loadPromise(iframe).then(() => this.playerReadyPromise_);
   }
 
@@ -300,12 +309,14 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
     return isLayoutSizeDefined(layout);
   }
 
-  /** @override */
-  onLayoutMeasure() {
+  /**
+   * @param {!../layout-rect.LayoutSizeDef} size
+   * @private
+   */
+  onResized_({width, height}) {
     if (!this.iframe_) {
       return;
     }
-    const {width, height} = this.getLayoutSize();
     this.sendCommand_('ampResize', {'width': width, 'height': height});
   }
 
@@ -321,6 +332,8 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
+
+    unobserveContentSize(this.element, this.onResized_);
 
     return true;
   }

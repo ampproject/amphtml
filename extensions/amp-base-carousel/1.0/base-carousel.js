@@ -29,6 +29,7 @@ import {Scroller} from './scroller';
 import {WithAmpContext} from '../../../src/preact/context';
 import {forwardRef} from '../../../src/preact/compat';
 import {isRTL} from '../../../src/dom';
+import {mod} from '../../../src/utils/math';
 import {
   toChildArray,
   useCallback,
@@ -41,6 +42,7 @@ import {
   useState,
 } from '../../../src/preact';
 import {toWin} from '../../../src/types';
+import {useStyles} from './base-carousel.jss';
 
 /**
  * @enum {string}
@@ -108,6 +110,7 @@ function BaseCarouselWithRef(
   },
   ref
 ) {
+  const classes = useStyles();
   const childrenArray = useMemo(() => toChildArray(children), [children]);
   const {length} = childrenArray;
   const carouselContext = useContext(CarouselContext);
@@ -182,9 +185,11 @@ function BaseCarouselWithRef(
       }
       index = Math.min(Math.max(index, 0), length - 1);
       setCurrentSlide(index);
-      currentSlideRef.current = index;
-      if (onSlideChange) {
-        onSlideChange(index);
+      if (currentSlideRef.current !== index) {
+        currentSlideRef.current = index;
+        if (onSlideChange) {
+          onSlideChange(index);
+        }
       }
     },
     [length, setCurrentSlide, onSlideChange]
@@ -313,6 +318,7 @@ function BaseCarouselWithRef(
         interaction.current = Interaction.TOUCH;
       }}
       tabIndex="0"
+      wrapperClassName={classes.carousel}
       {...rest}
     >
       {!hideControls && (
@@ -353,7 +359,12 @@ function BaseCarouselWithRef(
           and next viewport.
         */}
         {childrenArray.map((child, index) =>
-          Math.abs(index - currentSlide) < visibleCount * 3 || mixedLength ? (
+          Math.min(
+            // Distance from currentSlide.
+            Math.abs(index - currentSlide),
+            // Account for wraparound when looping.
+            loop ? mod(length + currentSlide - index, length) : length
+          ) < Math.ceil(visibleCount * 3) || mixedLength ? (
             <WithAmpContext
               key={index}
               renderable={index == currentSlide}
