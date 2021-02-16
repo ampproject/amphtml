@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,31 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {addParamToUrl, addParamsToUrl} from '../../../src/url';
+import {addParamsToUrl} from '../../../src/url';
 import {createElementWithAttributes, removeElement} from '../../../src/dom';
+import {getData, listen} from '../../../src/event-helper';
 import {getStyle, setStyle} from '../../../src/style';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {omit} from '../../../src/utils/object';
+import {tryParseJson} from '../../../src/json';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 export const TAG = 'amp-iframely';
-
-/**
- * Finds an iFrame that sent a message by its contentWindow.
- * @param {array} iframes - narrowed set of iFrames to search in
- * @param {document.window} contentWindow - source of a received message
- * @return {iframe} the matched iFrame
- * */
-function findIframeByContentWindow(iframes, contentWindow) {
-  let selectedIframe = false;
-  for (let i = 0; i < iframes.length && !selectedIframe; i++) {
-    const iframe = iframes[i];
-    if (iframe.contentWindow === contentWindow) {
-      selectedIframe = iframe;
-    }
-  }
-  return selectedIframe;
-}
 
 /**
  * Implementation of the amp-iframely component.
@@ -100,6 +86,7 @@ export class AmpIframely extends AMP.BaseElement {
     this.url_ = this.element.getAttribute('data-url');
     this.key_ = this.element.getAttribute('data-key');
     this.options_ = this.parseOptions_();
+    this.border_ = this.element.getAttribute('data-border');
     let domain = 'cdn.iframe.ly';
     const requestedDomain = this.element.getAttribute('data-domain');
     if (requestedDomain && this.isValidDomain_(requestedDomain)) {
@@ -107,7 +94,6 @@ export class AmpIframely extends AMP.BaseElement {
     }
     this.base_ = `https://${domain}/`;
     this.parseAttributes_();
-    setStyle(this.element, 'box-sizing', 'border-box');
   }
 
   /**
@@ -128,27 +114,32 @@ export class AmpIframely extends AMP.BaseElement {
      */
     const layout = this.getLayout();
     if (
-      this.element.hasAttribute("data-img") ||
-      (layout === "responsive" && !this.element.hasAttribute("resizable"))
+      this.element.hasAttribute('data-img') ||
+      (layout === 'responsive' && !this.element.hasAttribute('resizable'))
     ) {
       /** using Iframely placeholder image */
       const src = addParamsToUrl(
-        this.constructPlaceholderSrc_(),
+        this.constructSrc_('/thumbnail'),
         this.options_
       );
       return createElementWithAttributes(this.element.ownerDocument, 'img', {
         'src': src,
         'placeholder': '',
       });
+    }
     return null;
   }
 
   /** @override */
   layoutCallback() {
     /** attach iFrame */
-    const me = this;
     this.iframe_ = this.element.ownerDocument.createElement('iframe');
-    setStyle(this.iframe_, 'border', '0');
+    if (this.border_) {
+      setStyle(this.iframe_, 'box-sizing', 'border-box');
+      setStyle(this.iframe_, 'border', this.border_ + 'px');
+    } else {
+      setStyle(this.iframe_, 'border', '0px');
+    }
     this.iframe_.setAttribute(
       'allow',
       'encrypted-media *; accelerometer *; gyroscope *; picture-in-picture *; camera *; microphone *;'
@@ -162,9 +153,9 @@ export class AmpIframely extends AMP.BaseElement {
     this.applyFillContent(this.iframe_);
     this.element.appendChild(this.iframe_);
 
-    this.unlistener_ = listen(this.win, 'message', (event) => {
+    this.unlistener_ = listen(this.win, 'message', event => {
       if (event.source === this.iframe_.contentWindow) {
-        this.handleEvent_(event);
+        this.handleEvent_(this, event, this.iframe_);
       }
     });
     return this.loadPromise(this.iframe_);
@@ -174,82 +165,88 @@ export class AmpIframely extends AMP.BaseElement {
    * Handles Iframely events: widget sizing, cancel, decorate cards
    * @param {AmpIframely} me - instance of an active component
    * @param {window.event} event - Iframely message with a method to apply
+   * @param {iframe} iframe - instance of an active iframe
    * */
-  handleEvent(me, event) {
+  handleEvent_(me, event, iframe) {
     const data = tryParseJson(getData(event));
     if (!data) {
       return;
     }
-      if (data.method === 'resize') {
-        /** Set the size of the card according to the message from Iframely */
-        const height = this.addBorderHeight_(me, data['height']);
-        me.attemptChangeHeight(height).catch(() => {});
-      }
-      if (data.method === 'setIframelyEmbedData') {
-        /** apply Iframely card styles if present */
-        const media = data['data']['media'] || null;
-        if (media && media['frame_style']) {
-          const styles = media['frame_style'].split(';');
-          styles.forEach(function(style) {
-            const props = style.split(':');
-            if (props.length === 2) {
-              const styleName = props[0].trim(),
-                styleValue = props[1].trim();
-              switch (styleName) {
-                case 'border':
-                  /** Because of the border-box sizing, changing border width doesn't change the size of the box. */
-                  setStyle(me.element, 'border', styleValue);
-                  /** Because Iframely sends border message before even building card's content, no change of iFrame's height is necessary here. */
-                  break;
-                case 'border-radius':
-                  setStyle(me.element, 'border-radius', styleValue);
-                  break;
-                case 'box-shadow':
-                  setStyle(me.element, 'box-shadow', styleValue);
-                  break;
-              }
+    if (data.method === 'resize') {
+      /** Set the size of the card according to the message from Iframely */
+      const height = this.addBorderHeight_(me, data['height']);
+      me.attemptChangeHeight(height).catch(() => {});
+    }
+    if (data.method === 'setIframelyEmbedData') {
+      /** apply Iframely card styles if present */
+      const media = data['data']['media'] || null;
+      if (media && media['frame_style']) {
+        const styles = media['frame_style'].split(';');
+        styles.forEach(function(style) {
+          const props = style.split(':');
+          if (props.length === 2) {
+            const styleName = props[0].trim(),
+              styleValue = props[1].trim();
+            switch (styleName) {
+              case 'border':
+                setStyle(
+                  iframe,
+                  'border',
+                  /** But change color only, do not let to override the border width */
+                  styleValue.replace(/\d+px\s/, `${me.border_}px `)
+                );
+                break;
+              case 'border-radius':
+                setStyle(iframe, 'border-radius', styleValue);
+                break;
+              case 'box-shadow':
+                setStyle(iframe, 'box-shadow', styleValue);
+                break;
             }
-          });
-        }
-        if (media && media['aspect-ratio']) {
-          let height;
-          const box = me.element.getLayoutBox();
-          if (media['padding-bottom']) {
-            /** Apply height for media with updated "aspect-ratio" and "padding-bottom". */
-            height =
-              box.width / media['aspect-ratio'] + media['padding-bottom'];
+          }
+        });
+      }
+      if (media && media['aspect-ratio']) {
+        let height;
+        const box = me.element.getLayoutBox();
+        if (media['padding-bottom']) {
+          /** Apply height for media with updated "aspect-ratio" and "padding-bottom". */
+          height = box.width / media['aspect-ratio'] + media['padding-bottom'];
+          height = this.addBorderHeight_(me, height);
+          me.attemptChangeHeight(height).catch(() => {});
+        } else {
+          height = box.width / media['aspect-ratio'];
+          if (Math.abs(box.height - height) > 1) {
+            /** Apply new height for updated "aspect-ratio". */
             height = this.addBorderHeight_(me, height);
             me.attemptChangeHeight(height).catch(() => {});
-          } else {
-            height = box.width / media['aspect-ratio'];
-            if (Math.abs(box.height - height) > 1) {
-              /** Apply new height for updated "aspect-ratio". */
-              height = this.addBorderHeight_(me, height);
-              me.attemptChangeHeight(height).catch(() => {});
-            }
           }
         }
       }
-      if (data.method === 'cancelWidget') {
-        me.attemptCollapse().catch(() => {});
-      }
+    }
+    if (data.method === 'cancelWidget') {
+      me.attemptCollapse().catch(() => {});
     }
   }
 
   /**
-   * Constructing placeholder image SRC
+   * Constructing url SRC for api calls
+   * @param {boolean} slug src or iframe src in case false
    * @return {string} url of the placeholder
    * @private
    * */
-  constructPlaceholderSrc_() {
+  constructSrc_(slug) {
     if (this.widgetId_) {
-      return `${this.base_}${this.widgetId_}/thumbnail?amp=1`;
+      return `${this.base_}${this.widgetId_}${
+        slug !== '/iframe' ? slug : ''
+      }?amp=1`;
+    } else {
+      return addParamsToUrl(`${this.base_}api${slug}`, {
+        'url': this.url_,
+        'key': this.key_,
+        'amp': '1',
+      });
     }
-    return addParamsToUrl(`${this.base_}api/thumbnail`, {
-      'url': this.url_,
-      'key': this.key_,
-      'amp': '1',
-    });
   }
 
   /**
@@ -281,12 +278,6 @@ export class AmpIframely extends AMP.BaseElement {
           TAG,
           this.element
         );
-        userAssert(
-          16 < this.key_.length || this.key_.length > 256,
-          'Iframely data-key should be between 16 and 256 characters parameter at <%s> %s',
-          TAG,
-          this.element
-        );
       }
       if (this.key_ || this.url_) {
         userAssert(
@@ -305,15 +296,7 @@ export class AmpIframely extends AMP.BaseElement {
         this.element
       );
     }
-    if (this.widgetId_) {
-      this.src_ = addParamToUrl(this.base_ + this.widgetId_, 'amp', '1');
-    } else {
-      this.src_ = addParamsToUrl(this.base_ + 'api/iframe', {
-        'url': this.url_,
-        'key': this.key_,
-        'amp': '1',
-      });
-    }
+    this.src_ = this.constructSrc_('/iframe');
   }
 
   /**
@@ -323,7 +306,14 @@ export class AmpIframely extends AMP.BaseElement {
    * */
   parseOptions_() {
     // FYI: These are camelCased from data-some-attr to someAttr, map if needed.
-    return omit(this.element.dataset, ['id', 'domain', 'key', 'url', 'img']);
+    return omit(this.element.dataset, [
+      'id',
+      'domain',
+      'key',
+      'url',
+      'img',
+      'border',
+    ]);
   }
 
   /** @override */

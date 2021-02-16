@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,7 +75,7 @@ describes.realWin(
       return allowConsoleError(() => {
         return renderIframely({
           'layout': 'fill',
-        }).should.eventually.be.rejectedWith(/Iframely requires either/);
+        }).should.eventually.be.rejectedWith(/<amp-iframely> requires either/);
       });
     });
 

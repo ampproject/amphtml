@@ -1,5 +1,5 @@
 #
-# Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+# Copyright 2021 The AMP HTML Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -42,6 +42,10 @@ tags: {  # <amp-iframely>
   # optional attributes
   attrs: { name: "data-img" value: "" }
   attrs: {
+    name: "data-border" value: ""
+    value_regex: "(\\d+)"
+  }
+  attrs: {
     name: "data-domain"
     value_regex: "^((?:[^\\.\\/]+\\.)?iframe\\.ly|if\\-cdn\\.com|iframely\\.net|oembed\\.vice\\.com|iframe\\.nbcnews\\.com)$"
   }
@@ -54,7 +58,10 @@ tags: {  # <amp-iframely>
     supported_layouts: FILL
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
+    supported_layouts: INTRISTIC
+    supported_layouts: CONTAINER
   }
 }
