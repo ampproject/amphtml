@@ -16,12 +16,7 @@
 'use strict';
 
 const minimist = require('minimist');
-const {
-  gitBranchContains,
-  gitCherryMaster,
-  gitCommitMessage,
-  gitCommitFormattedTime,
-} = require('../common/git');
+const {gitCherryMaster, gitCommitFormattedTime} = require('../common/git');
 
 // Allow leading zeros in --version_override, e.g. 0000000000001
 const argv = minimist(process.argv.slice(2), {
@@ -32,14 +27,12 @@ const argv = minimist(process.argv.slice(2), {
  * Generates the AMP version number.
  *
  * Version numbers are determined using the following algorithm:
- * - Count the number (<X>) of cherry-picked commits on this branch that came
- *   from the `master` branch, until reaching `master` or the first commit that
- *   was added directly on this branch (if the current commit is on `master`'s
- *   commit history, or only contains new commits that are not cherry-picked
- *   from `master`, then <X> is 0).
- * - Find the commit (<C>) before the last cherry-picked commit from the
- *   `master` branch (if the current branch is `master`, or otherwise in
- *   `master`'s commit history, then the current commit is <C>).
+ * - Count the number (<X>) of cherry-picked commits on this branch,
+ *   including non `master` commits. If this branch only contains new commits
+ *   that are not cherry-picked, then <X> is 0).
+ * - Find the commit (<C>) before the last cherry-picked commit (if the current
+ *   branch is `master`, or otherwise in `master`'s commit history, then the
+ *   current commit is <C>).
  * - Find the commit time of <C> (<C>.time). Note that commit time might be
  *   different from author time! e.g., commit time might be the time that a PR
  *   was merged into `master`, or a commit was cherry-picked onto the branch;
@@ -92,28 +85,7 @@ function getVersion() {
     return version;
   }
 
-  let numberOfCherryPicks = 0;
-  const commitCherriesInfo = gitCherryMaster().reverse();
-  for (const {isCherryPick, sha} of commitCherriesInfo) {
-    if (!isCherryPick) {
-      // Sometimes cherry-picks are mistaken for new commits. Double-check here
-      // by looking for the hard-coded message at the end of the commit that
-      // indicates that it was a cherry-pick. Requires that the cherry-pick was
-      // performed with the `-x` flag.
-      const commitMessage = gitCommitMessage(sha);
-      const cherryPickedMatch = /\(cherry picked from commit ([0-9a-f]{40})\)/.exec(
-        commitMessage
-      );
-      if (!cherryPickedMatch) {
-        break;
-      }
-
-      if (!gitBranchContains(cherryPickedMatch[1])) {
-        break;
-      }
-    }
-    numberOfCherryPicks++;
-  }
+  let numberOfCherryPicks = gitCherryMaster().length;
   if (numberOfCherryPicks > 999) {
     throw new Error(
       `This branch has ${numberOfCherryPicks} cherry-picks, which is more than 999, the maximum allowed number of cherry-picks!`
