@@ -19,7 +19,6 @@ const argv = minimist(process.argv.slice(2));
 const debounce = require('debounce');
 const fs = require('fs-extra');
 const globby = require('globby');
-const jsonlint = require('jsonlint');
 const jsonminify = require('jsonminify');
 const {endBuildStep} = require('./helpers');
 const {join, basename, dirname, extname} = require('path');
@@ -62,9 +61,9 @@ async function analyticsVendorConfigs(opt_options) {
     if (options.minify) {
       contents = jsonminify(contents);
     }
-    // Report any linting errors
+    // Report any parsing errors
     try {
-      jsonlint.parse(contents);
+      JSON.parse(contents);
     } catch (err) {
       // Only fail if not in watcher, so watch is not interrupted
       if (!options.calledByWatcher) {

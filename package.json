@@ -126,7 +126,6 @@
     "jsdom": "16.4.0",
     "json-stable-stringify": "1.0.1",
     "json5": "2.2.0",
-    "jsonlint": "1.6.3",
     "jsonminify": "0.4.1",
     "karma": "6.1.0",
     "karma-browserify": "8.0.0",
