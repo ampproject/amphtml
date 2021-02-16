@@ -1,2 +1,0 @@
-interface Stream { }
-interface Writable { }
