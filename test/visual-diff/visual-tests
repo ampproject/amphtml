@@ -696,7 +696,7 @@
       ],
     },
     {
-      "url": "examples/visual-tests/amp-story/amp-story-dev-tools.html#development=1&url=https://amp.dev/documentation/examples/components/amp-story-interactive-poll/story",
+      "url": "examples/visual-tests/amp-story/amp-story-dev-tools.html#development=1&url=https://preview.amp.dev/documentation/examples/introduction/stories_in_amp",
       "name": "amp-story-dev-tools: preview tab loading and running",
       "viewport": {"width": 1080, "height": 720},
       "loading_complete_selectors": [
@@ -704,12 +704,12 @@
       ]
     },
     {
-      "url": "examples/visual-tests/amp-story/amp-story-dev-tools.html#development=1&tab=debug",
-      "name": "amp-story-dev-tools: debug tab loading and running",
+      "url": "examples/visual-tests/amp-story/amp-story-dev-tools.html#development=1&url=https://preview.amp.dev/documentation/examples/introduction/stories_in_amp&devices=desktop;ipad",
+      "name": "amp-story-dev-tools: preview tab loading and running with a desktop and ipad layout",
       "viewport": {"width": 1080, "height": 720},
       "loading_complete_selectors": [
-        ".i-amphtml-story-dev-tools-debug-status-title"
-      ],
+        ".i-amphtml-story-dev-tools-tab.i-amphtml-layout"
+      ]
     },
     {
       "flaky": true,
