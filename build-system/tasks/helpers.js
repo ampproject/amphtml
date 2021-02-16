@@ -434,13 +434,16 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
         incremental: !!options.watch,
         watch: !options.watch ? undefined : watcher,
         plugins: [getBabelPlugin()],
-        format: 'esm',
+        // esm format throws runtime errors.
+        // format: 'esm',
         banner: header,
         footer,
         define: {
+          // TODO: spread env variable.
           IS_ESM: false,
           IS_SXG: false,
           INI_LOAD_INOB: false,
+          WITHIN_VIEWPORT_INOB: false,
         },
       })
       .then(() => {
