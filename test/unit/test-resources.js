@@ -45,6 +45,62 @@ describes.realWin('Resources', {amp: true}, (env) => {
     resources.pass_.cancel();
   });
 
+  function createResource(opts) {
+    const {
+      id,
+      isBuilt,
+      isBuilding,
+      state,
+      isDisplayed,
+      isFixed,
+      isInViewport,
+      prerenderAllowed,
+      renderOutsideViewport,
+      idleRenderOutsideViewport,
+      layoutPriority,
+      taskId,
+    } = {
+      id: '1',
+      isBuilt: false,
+      isBuilding: false,
+      state: ResourceState.NOT_BUILT,
+      isDisplayed: true,
+      isFixed: false,
+      isInViewport: true,
+      prerenderAllowed: false,
+      renderOutsideViewport: false,
+      idleRenderOutsideViewport: false,
+      layoutPriority: LayoutPriority.CONTENT,
+      taskId: 'resource#P',
+      ...opts,
+    };
+
+    const element = document.createElement('amp-el');
+    element.V2 = () => false;
+    element.isBuilt = () => isBuilt;
+    element.isBuilding = () => isBuilding;
+
+    const resource = new Resource(id, element, resources);
+    env.sandbox.stub(resource, 'getState').returns(state);
+    env.sandbox.stub(resource, 'isDisplayed').returns(isDisplayed);
+    env.sandbox.stub(resource, 'isFixed').returns(isFixed);
+    env.sandbox.stub(resource, 'isInViewport').returns(isInViewport);
+    env.sandbox.stub(resource, 'prerenderAllowed').returns(prerenderAllowed);
+    env.sandbox
+      .stub(resource, 'renderOutsideViewport')
+      .returns(renderOutsideViewport);
+    env.sandbox
+      .stub(resource, 'idleRenderOutsideViewport')
+      .returns(idleRenderOutsideViewport);
+    env.sandbox.stub(resource, 'getLayoutPriority').returns(layoutPriority);
+    env.sandbox.stub(resource, 'getTaskId').returns(taskId);
+
+    env.sandbox.stub(resource, 'layoutScheduled');
+    env.sandbox.stub(resource, 'startLayout');
+
+    return resource;
+  }
+
   it('should calculate correct calcTaskScore', () => {
     const viewportRect = layoutRectLtwh(0, 100, 300, 400);
     env.sandbox.stub(resources.viewport_, 'getRect').returns(viewportRect);
@@ -267,15 +323,9 @@ describes.realWin('Resources', {amp: true}, (env) => {
     'should not schedule non-prerenderable resource when' +
       ' document is in prerender',
     () => {
-      const resource = {
-        getState: () => ResourceState.READY_FOR_LAYOUT,
-        isDisplayed: () => true,
-        isFixed: () => false,
-        isInViewport: () => true,
-        prerenderAllowed: () => false,
-        renderOutsideViewport: () => false,
-        startLayout: () => {},
-      };
+      const resource = createResource({
+        state: ResourceState.READY_FOR_LAYOUT,
+      });
       resources.visible_ = false;
       env.sandbox
         .stub(resources.ampdoc, 'getVisibilityState')
@@ -286,18 +336,12 @@ describes.realWin('Resources', {amp: true}, (env) => {
   );
 
   it('should schedule prerenderable resource when document is in prerender', () => {
-    const resource = {
-      getState: () => ResourceState.READY_FOR_LAYOUT,
-      isDisplayed: () => true,
-      isFixed: () => false,
-      isInViewport: () => true,
-      prerenderAllowed: () => true,
-      renderOutsideViewport: () => true,
-      getLayoutPriority: () => LayoutPriority.METADATA,
-      startLayout: () => {},
-      layoutScheduled: () => {},
-      getTaskId: () => 'resource#P',
-    };
+    const resource = createResource({
+      state: ResourceState.READY_FOR_LAYOUT,
+      prerenderAllowed: true,
+      renderOutsideViewport: true,
+      layoutPriority: LayoutPriority.METADATA,
+    });
     resources.visible_ = false;
     env.sandbox
       .stub(resources.ampdoc, 'getVisibilityState')
@@ -308,18 +352,12 @@ describes.realWin('Resources', {amp: true}, (env) => {
   });
 
   it('should not schedule prerenderable resource when document is hidden', () => {
-    const resource = {
-      getState: () => ResourceState.READY_FOR_LAYOUT,
-      isDisplayed: () => true,
-      isFixed: () => false,
-      isInViewport: () => true,
-      prerenderAllowed: () => true,
-      renderOutsideViewport: () => true,
-      getLayoutPriority: () => LayoutPriority.METADATA,
-      startLayout: () => {},
-      layoutScheduled: () => {},
-      getTaskId: () => 'resource#P',
-    };
+    const resource = createResource({
+      state: ResourceState.READY_FOR_LAYOUT,
+      prerenderAllowed: true,
+      renderOutsideViewport: true,
+      layoutPriority: LayoutPriority.METADATA,
+    });
     resources.visible_ = false;
     env.sandbox
       .stub(resources.ampdoc, 'getVisibilityState')
@@ -332,16 +370,11 @@ describes.realWin('Resources', {amp: true}, (env) => {
     'should not schedule non-renderOutsideViewport resource when' +
       ' resource is not visible',
     () => {
-      const resource = {
-        getState: () => ResourceState.READY_FOR_LAYOUT,
-        isDisplayed: () => true,
-        isFixed: () => false,
-        isInViewport: () => false,
-        prerenderAllowed: () => true,
-        renderOutsideViewport: () => false,
-        idleRenderOutsideViewport: () => false,
-        startLayout: () => {},
-      };
+      const resource = createResource({
+        state: ResourceState.READY_FOR_LAYOUT,
+        isInViewport: false,
+        prerenderAllowed: true,
+      });
       resources.scheduleLayoutOrPreload(resource, true);
       expect(resources.queue_.getSize()).to.equal(0);
     }
@@ -351,19 +384,13 @@ describes.realWin('Resources', {amp: true}, (env) => {
     'should force schedule non-renderOutsideViewport resource when' +
       ' resource is not visible',
     () => {
-      const resource = {
-        getState: () => ResourceState.READY_FOR_LAYOUT,
-        isDisplayed: () => true,
-        isFixed: () => false,
-        isInViewport: () => false,
-        prerenderAllowed: () => true,
-        renderOutsideViewport: () => false,
-        idleRenderOutsideViewport: () => false,
-        getLayoutPriority: () => LayoutPriority.METADATA,
-        startLayout: () => {},
-        layoutScheduled: () => {},
-        getTaskId: () => 'resource#L',
-      };
+      const resource = createResource({
+        state: ResourceState.READY_FOR_LAYOUT,
+        isInViewport: false,
+        prerenderAllowed: true,
+        layoutPriority: LayoutPriority.METADATA,
+        taskId: 'resource#L',
+      });
       resources.scheduleLayoutOrPreload(
         resource,
         true,
@@ -379,19 +406,13 @@ describes.realWin('Resources', {amp: true}, (env) => {
     'should schedule renderOutsideViewport resource when' +
       ' resource is not visible',
     () => {
-      const resource = {
-        getState: () => ResourceState.READY_FOR_LAYOUT,
-        isDisplayed: () => true,
-        isFixed: () => false,
-        isInViewport: () => false,
-        prerenderAllowed: () => true,
-        renderOutsideViewport: () => true,
-        idleRenderOutsideViewport: () => false,
-        getLayoutPriority: () => LayoutPriority.METADATA,
-        startLayout: () => {},
-        layoutScheduled: () => {},
-        getTaskId: () => 'resource#L',
-      };
+      const resource = createResource({
+        state: ResourceState.READY_FOR_LAYOUT,
+        prerenderAllowed: true,
+        renderOutsideViewport: true,
+        layoutPriority: LayoutPriority.METADATA,
+        taskId: 'resource#L',
+      });
       resources.scheduleLayoutOrPreload(resource, true);
       expect(resources.queue_.getSize()).to.equal(1);
       expect(resources.queue_.tasks_[0].forceOutsideViewport).to.be.false;
@@ -402,19 +423,14 @@ describes.realWin('Resources', {amp: true}, (env) => {
     'should schedule idleRenderOutsideViewport resource when' +
       ' resource is not visible',
     () => {
-      const resource = {
-        getState: () => ResourceState.READY_FOR_LAYOUT,
-        isDisplayed: () => true,
-        isFixed: () => false,
-        isInViewport: () => false,
-        prerenderAllowed: () => true,
-        renderOutsideViewport: () => false,
-        idleRenderOutsideViewport: () => true,
-        getLayoutPriority: () => LayoutPriority.METADATA,
-        startLayout: () => {},
-        layoutScheduled: () => {},
-        getTaskId: () => 'resource#L',
-      };
+      const resource = createResource({
+        state: ResourceState.READY_FOR_LAYOUT,
+        isInViewport: false,
+        prerenderAllowed: true,
+        idleRenderOutsideViewport: true,
+        layoutPriority: LayoutPriority.METADATA,
+        taskId: 'resource#L',
+      });
       resources.scheduleLayoutOrPreload(resource, true);
       expect(resources.queue_.getSize()).to.equal(1);
       expect(resources.queue_.tasks_[0].forceOutsideViewport).to.be.false;
@@ -601,6 +617,7 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
   function createElement(rect) {
     const element = env.win.document.createElement('amp-test');
     element.classList.add('i-amphtml-element');
+    element.V2 = () => false;
     element.signals = () => new Signals();
     element.whenBuilt = () => Promise.resolve();
     element.isBuilt = () => true;
