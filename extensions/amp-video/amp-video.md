@@ -251,8 +251,11 @@ The `muted` attribute is deprecated and no longer has any effect. The `autoplay`
 
 ### noaudio
 
-Annotates the video as having no audio. This hides the equalizer icon that is displayed
-when the video has autoplay.
+Annotates the video as having no audio. This has the following effects:
+
+-   An equalizer icon will **not** be drawn when setting [`autoplay`](#autoplay).
+
+-   An `<amp-story>` that includes this video will **not** draw an unnecessary mute button.
 
 ### rotate-to-fullscreen
 
