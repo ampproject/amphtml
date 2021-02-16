@@ -61,7 +61,7 @@ const percyCss = [
 // Use https://omahaproxy.appspot.com/ to convert version<->revision numbers.
 // REPEATING TODO(@ampproject/wg-infra): keep this pinned with Percy whenever we
 // update the version of Chrome in the project settings.
-const INSTALL_PACKAGE_OPTIONS = {'PUPPETEER_CHROMIUM_REVISION': '693954'};
+const PUPPETEER_CHROMIUM_REVISION = '693954';
 
 const SNAPSHOT_SINGLE_BUILD_OPTIONS = {
   widths: [375],
@@ -794,8 +794,9 @@ async function ensureOrBuildAmpRuntimeInTestMode_() {
 }
 
 function installPercy_() {
+  process.env['PUPPETEER_CHROMIUM_REVISION'] = PUPPETEER_CHROMIUM_REVISION;
   if (!argv.noinstall) {
-    installPackages(__dirname, INSTALL_PACKAGE_OPTIONS);
+    installPackages(__dirname);
   }
 
   puppeteer = require('puppeteer');
