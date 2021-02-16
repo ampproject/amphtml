@@ -17,18 +17,16 @@
 const minimist = require('minimist');
 const argv = minimist(process.argv.slice(2));
 const debounce = require('debounce');
+const fs = require('fs-extra');
 const globby = require('globby');
-const gulp = require('gulp');
-const gulpif = require('gulp-if');
-const jsonlint = require('gulp-jsonlint');
-const jsonminify = require('gulp-jsonminify');
-const rename = require('gulp-rename');
-const {endBuildStep, toPromise} = require('./helpers');
+const jsonminify = require('jsonminify');
+const {endBuildStep} = require('./helpers');
+const {join, basename, dirname, extname} = require('path');
 const {watchDebounceDelay} = require('./helpers');
-const {watch} = require('gulp');
+const {watch} = require('chokidar');
 
 /**
- * Entry point for 'gulp vendor-configs'
+ * Entry point for 'gulp analytics-vendor-configs'
  * Compile all the vendor configs and drop in the dist folder
  * @param {Object=} opt_options
  * @return {!Promise}
@@ -55,27 +53,32 @@ async function analyticsVendorConfigs(opt_options) {
 
   const startTime = Date.now();
 
-  await toPromise(
-    gulp
-      .src(srcPath)
-      .pipe(gulpif(options.minify, jsonminify()))
-      .pipe(jsonlint())
-      // report any linting errors
-      .pipe(jsonlint.reporter())
-      // only fail if not in watcher, so watch is not interrupted
-      .pipe(gulpif(!options.calledByWatcher, jsonlint.failOnError()))
-      // if not minifying, append .max to filename
-      .pipe(
-        gulpif(
-          !options.minify,
-          rename(function (path) {
-            path.basename += '.max';
-          })
-        )
-      )
-      .pipe(gulp.dest(destPath))
-  );
-
+  const srcFiles = globby.sync(srcPath);
+  await fs.ensureDir(destPath);
+  for (const srcFile of srcFiles) {
+    let destFile = join(destPath, basename(srcFile));
+    let contents = await fs.readFile(srcFile, 'utf-8');
+    if (options.minify) {
+      contents = jsonminify(contents);
+    }
+    // Report any parsing errors
+    try {
+      JSON.parse(contents);
+    } catch (err) {
+      // Only fail if not in watcher, so watch is not interrupted
+      if (!options.calledByWatcher) {
+        throw err;
+      }
+    }
+    // If not minifying, append .max to filename
+    if (!options.minify) {
+      const extension = extname(destFile);
+      const base = basename(destFile, extension);
+      const dir = dirname(destFile);
+      destFile = join(dir, `${base}.max${extension}`);
+    }
+    await fs.writeFile(destFile, contents, 'utf-8');
+  }
   if (globby.sync(srcPath).length > 0) {
     endBuildStep(
       'Compiled all analytics vendor configs into',
