@@ -16,6 +16,7 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const babel = require('@babel/core');
+const crypto = require('crypto');
 const debounce = require('debounce');
 const del = require('del');
 const esbuild = require('esbuild');
@@ -423,12 +424,13 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
       }
 
       build.onLoad({filter: /.*/, namespace: ''}, async (file) => {
-        if (cache.has(file.path)) {
-          return {contents: cache.get(file.path)};
-        }
         const contents = await fs.promises.readFile(file.path, 'utf-8');
+        const hash = crypto.createHash('sha1').update(contents).digest('hex');
+        if (cache.has(hash)) {
+          return {contents: cache.get(hash)};
+        }
         const transformed = await transformContents({file, contents});
-        cache.set(file.path, transformed.contents);
+        cache.set(hash, transformed.contents);
         return transformed;
       });
     },
