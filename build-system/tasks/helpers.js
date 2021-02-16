@@ -15,11 +15,10 @@
  */
 
 const argv = require('minimist')(process.argv.slice(2));
-const babelify = require('babelify');
-const browserify = require('browserify');
-const buffer = require('vinyl-buffer');
+const babel = require('@babel/core');
 const debounce = require('debounce');
 const del = require('del');
+const esbuild = require('esbuild');
 const file = require('gulp-file');
 const fs = require('fs-extra');
 const gulp = require('gulp');
@@ -31,7 +30,6 @@ const remapping = require('@ampproject/remapping');
 const rename = require('gulp-rename');
 const source = require('vinyl-source-stream');
 const sourcemaps = require('gulp-sourcemaps');
-const watchify = require('watchify');
 const wrappers = require('../compile/compile-wrappers');
 const {
   VERSION: internalRuntimeVersion,
@@ -165,7 +163,7 @@ async function compileAllJs(options) {
   if (minify) {
     log('Minifying multi-pass JS with', cyan('closure-compiler') + '...');
   } else {
-    log('Compiling JS with', cyan('browserify') + '...');
+    log('Compiling JS with', cyan('esbuild') + '...');
   }
   const startTime = Date.now();
   await Promise.all([
@@ -326,7 +324,7 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
 }
 
 /**
- * Handles a browserify bundling error
+ * Handles an browserify bundling error
  * @param {Error} err
  * @param {boolean} continueOnError
  * @param {string} destFilename
@@ -386,84 +384,107 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
   const entryPoint = path.join(srcDir, srcFilename);
   const destFilename = options.toName || srcFilename;
   const wrapper = options.wrapper || wrappers.none;
-  const devWrapper = wrapper.replace('<%= contents %>', '$1');
+  // const devWrapper = wrapper.replace('<%= contents %>', '$1');
 
-  // TODO: @jonathantyng remove browserifyOptions #22757
-  const browserifyOptions = {
-    entries: entryPoint,
-    debug: true,
-    fast: true,
-    ...options.browserifyOptions,
+  const watcher = {
+    onRebuild(error, result) {
+      // TODO: fix.
+      // options.onWatchBuild(bundleComplete);
+
+      // Taken from docs
+      if (error) {
+        console.error('watch build failed:', error);
+      } else {
+        console.error('watch build succeeded:', result);
+      }
+    },
   };
 
-  let bundler = browserify(browserifyOptions).transform(babelify, {
-    caller: {name: 'unminified'},
-    global: true,
-  });
+  function bundleComplete(startTime) {
+    finishBundle(srcFilename, destDir, destFilename, options);
+    let name = destFilename;
+    if (options.latestName) {
+      const latestMaxName = options.latestName.split('.js')[0] + '.max.js';
+      name = `${name} → ${latestMaxName}`;
+    }
+    endBuildStep('Compiled', name, startTime);
 
-  if (options.watch) {
-    const watchFunc = () => {
-      const bundleComplete = performBundle(/* continueOnError */ true);
-      if (options.onWatchBuild) {
-        options.onWatchBuild(bundleComplete);
-      }
-    };
-    bundler = watchify(bundler);
-    bundler.on('update', debounce(watchFunc, watchDebounceDelay));
+    const target = path.basename(destFilename, path.extname(destFilename));
+    if (UNMINIFIED_TARGETS.includes(target)) {
+      return applyAmpConfig(
+        path.resolve(destDir, destFilename),
+        /* localDev */ true,
+        /* fortesting */ options.fortesting
+      );
+    }
   }
 
-  /**
-   * @param {boolean} continueOnError
-   * @return {Promise}
-   */
-  function performBundle(continueOnError) {
-    let startTime;
-    return toPromise(
-      bundler
-        .bundle()
-        .once('readable', () => (startTime = Date.now()))
-        .on('error', (err) =>
-          handleBundleError(err, continueOnError, destFilename)
-        )
-        .pipe(source(srcFilename))
-        .pipe(buffer())
-        .pipe(sourcemaps.init({loadMaps: true}))
-        .pipe(
-          regexpSourcemaps(
-            /\$internalRuntimeVersion\$/g,
-            internalRuntimeVersion,
-            'runtime-version'
-          )
-        )
-        .pipe(regexpSourcemaps(/([^]+)/, devWrapper, 'wrapper'))
-        .pipe(rename(destFilename))
-        .pipe(sourcemaps.write('.'))
-        .pipe(gulp.dest(destDir))
-        .on('end', () =>
-          finishBundle(srcFilename, destDir, destFilename, options)
-        )
-    )
-      .then(() => {
-        let name = destFilename;
-        if (options.latestName) {
-          const latestMaxName = options.latestName.split('.js')[0] + '.max.js';
-          name = `${name} → ${latestMaxName}`;
-        }
-        endBuildStep('Compiled', name, startTime);
+  const sentinel = '<%= contents %>';
+  const start = wrapper.indexOf(sentinel);
+  const header = wrapper.slice(0, start);
+  const footer = wrapper.slice(start + sentinel.length);
+
+  const bundle = async () => {
+    let startTime = Date.now();
+    return esbuild
+      .build({
+        entryPoints: [entryPoint],
+        bundle: true,
+        outfile: path.resolve(destDir, destFilename),
+        incremental: !!options.watch,
+        watch: !options.watch ? undefined : watcher,
+        plugins: [getBabelPlugin()],
+        format: 'esm',
+        banner: header,
+        footer,
+        define: {
+          IS_ESM: false,
+          IS_SXG: false,
+          INI_LOAD_INOB: false,
+        },
       })
       .then(() => {
-        const target = path.basename(destFilename, path.extname(destFilename));
-        if (UNMINIFIED_TARGETS.includes(target)) {
-          return applyAmpConfig(
-            `${destDir}/${destFilename}`,
-            /* localDev */ true,
-            /* fortesting */ options.fortesting
-          );
-        }
+        bundleComplete(startTime);
+      })
+      .catch((err) => {
+        console.error(err);
+        handleBundleError(err);
       });
-  }
+  };
 
-  return performBundle(options.continueOnError);
+  // /**
+  //  * @param {boolean} continueOnError
+  //  * @return {Promise}
+  //  */
+  // function performBundle(continueOnError) {
+  //   let startTime;
+  //   return toPromise(
+  //     bundler
+  //       .bundle()
+  //       .once('readable', () => (startTime = Date.now()))
+  //       .on('error', (err) =>
+  //         handleBundleError(err, continueOnError, destFilename)
+  //       )
+  //       .pipe(source(srcFilename))
+  //       .pipe(buffer())
+  //       .pipe(sourcemaps.init({loadMaps: true}))
+  //       .pipe(
+  //         regexpSourcemaps(
+  //           /\$internalRuntimeVersion\$/g,
+  //           internalRuntimeVersion,
+  //           'runtime-version'
+  //         )
+  //       )
+  //       .pipe(regexpSourcemaps(/([^]+)/, devWrapper, 'wrapper'))
+  //       .pipe(rename(destFilename))
+  //       .pipe(sourcemaps.write('.'))
+  //       .pipe(gulp.dest(destDir))
+  //       .on('end', () =>
+  //         finishBundle(srcFilename, destDir, destFilename, options)
+  //       )
+  //   ) }
+
+  return bundle();
 }
 
 /**
@@ -677,6 +698,49 @@ function toPromise(readable) {
   return new Promise(function (resolve, reject) {
     readable.on('error', reject).on('end', resolve);
   });
+}
+
+function getBabelPlugin(options = {}) {
+  return {
+    name: 'babel',
+    async setup(build, {transform} = {}) {
+      const {filter = /.*/, namespace = '', config = {}} = options;
+      const transformContents = ({args, contents}) => {
+        const babelOptions = {
+          ...babel.loadOptions({filename: args.path, ...config}),
+          caller: {name: 'unminified'},
+          // global: true,
+        };
+        if (babelOptions.sourceMaps) {
+          const filename = path.relative(process.cwd(), args.path);
+          babelOptions.sourceFileName = filename;
+        }
+
+        return new Promise((resolve, reject) => {
+          babel.transform(contents, babelOptions, (error, result) => {
+            error ? reject(error) : resolve({contents: result.code});
+          });
+        });
+      };
+
+      if (transform) {
+        return await transformContents(transform);
+      }
+
+      build.onLoad({filter, namespace}, async (args) => {
+        const contents = await fs.promises.readFile(args.path, 'utf8');
+        const transformed = await transformContents({args, contents});
+
+        // Move the runtime version replacement elsewhere.
+        transformed.contents = transformed.contents.replace(
+          /\$internalRuntimeVersion\$/g,
+          internalRuntimeVersion
+        );
+
+        return transformed;
+      });
+    },
+  };
 }
 
 module.exports = {
