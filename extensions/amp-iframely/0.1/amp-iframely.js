@@ -305,7 +305,6 @@ export class AmpIframely extends AMP.BaseElement {
    * @private
    * */
   parseOptions_() {
-    // FYI: These are camelCased from data-some-attr to someAttr, map if needed.
     return omit(this.element.dataset, [
       'id',
       'domain',
