@@ -16,11 +16,13 @@
 
 import * as Preact from '../../../src/preact';
 import {ContainWrapper, useValueRef} from '../../../src/preact/component';
+import {Keys} from '../../../src/utils/key-codes';
 import {Side} from './sidebar-config';
 import {forwardRef} from '../../../src/preact/compat';
 import {isRTL} from '../../../src/dom';
 import {
   useCallback,
+  useEffect,
   useImperativeHandle,
   useLayoutEffect,
   useRef,
@@ -108,6 +110,26 @@ function SidebarWithRef(
     backdropRef,
     setMounted
   );
+
+  useEffect(() => {
+    const sidebarElement = sidebarRef.current;
+    const backdropElement = backdropRef.current;
+    if (!sidebarElement || !sidebarElement.ownerDocument || !backdropElement) {
+      return;
+    }
+
+    const document = sidebarElement.ownerDocument;
+    const keydownCallback = (event) => {
+      if (event.key == Keys.ESCAPE) {
+        event.preventDefault();
+        close();
+      }
+    };
+    document.addEventListener('keydown', keydownCallback);
+    return () => {
+      document.removeEventListener('keydown', keydownCallback);
+    };
+  }, [opened, close]);
 
   return (
     mounted && (
