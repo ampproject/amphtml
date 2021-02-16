@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {adConfig} from '.././_config';
 import {loadScript, validateData} from '../../3p/3p';
 import {setStyle} from '../../src/style';
 
@@ -82,7 +81,7 @@ export function feedad(global, data) {
         global.context.noContentAvailable();
       });
   });
-  loadScript(global, adConfig.feedad.prefetch);
+  loadScript(global, 'https://web.feedad.com/sdk/feedad-async.js');
 }
 
 /**
