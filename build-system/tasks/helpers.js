@@ -438,7 +438,7 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
    * Splits up the wrapper to compute the banner and footer
    * @return {Object}
    */
-  function processWrapper() {
+  function splitWrapper() {
     const wrapper = options.wrapper || wrappers.none;
     const sentinel = '<%= contents %>';
     const start = wrapper.indexOf(sentinel);
@@ -453,7 +453,7 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
    * @param {boolean} continueOnError
    */
   async function performBundle(continueOnError) {
-    const {banner, footer} = processWrapper();
+    const {banner, footer} = splitWrapper();
     await esbuild
       .build({
         entryPoints: [entryPoint],
