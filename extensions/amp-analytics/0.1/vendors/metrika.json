@@ -14,7 +14,7 @@
     "_externalLinkBrInfo": "ln:1:",
     "_reachGoalBrInfo": "ar:1:",
     "_pageViewBrInfo": "pv:1:",
-    "_pageUrl": "${ampdocUrl}",
+    "_pageUrl": "${sourceUrl}",
     "_goalUrl": "goal://${sourceHost}/${goalId}"
   },
   "requests": {
