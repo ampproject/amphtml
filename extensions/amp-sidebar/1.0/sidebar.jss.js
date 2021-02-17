@@ -16,7 +16,7 @@
 
 import {createUseStyles} from 'react-jss';
 
-const sidebarClass = {
+const sidebar = {
   position: 'fixed !important',
   overflowX: 'hidden !important',
   overflowY: 'auto !important',
@@ -45,7 +45,7 @@ const right = {
   right: 0,
 };
 
-const backdropClass = {
+const backdrop = {
   position: 'fixed !important',
   top: '0 !important',
   left: '0 !important',
@@ -65,19 +65,19 @@ const defaultBackdropStyles = {
 
 //TODO(#32400): See PR description.  This is a workaround dependent on a
 // a browser bug fix and should be removed when the browser bug is fixed.
-const sidebarChildClass = {
+const backdropOverscrollBlocker = {
   height: '101vh !important',
   width: '0 !important',
 };
 
 const JSS = {
-  sidebarClass,
+  sidebar,
   defaultSidebarStyles,
   left,
   right,
-  backdropClass,
+  backdrop,
   defaultBackdropStyles,
-  sidebarChildClass,
+  backdropOverscrollBlocker,
 };
 
 // useStyles gets replaced for AMP builds via `babel-plugin-transform-jss`.
