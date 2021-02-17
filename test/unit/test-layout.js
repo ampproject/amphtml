@@ -37,6 +37,11 @@ describe('Layout', () => {
     aspectRatioEnabled =
       isExperimentOn(window, 'layout-aspect-ratio-css') &&
       CSS.supports('aspect-ratio: 1/1');
+    resetShouldUseAspectRatioCssForTesting();
+  });
+
+  afterEach(() => {
+    resetShouldUseAspectRatioCssForTesting();
   });
 
   function removeWhitespace(value) {
