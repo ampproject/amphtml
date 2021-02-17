@@ -24,7 +24,7 @@ const {red, cyan, yellow} = require('kleur/colors');
  * reference module imports. If any are found, that means Closure couldn't
  * import the module correctly.
  *
- * @return {!Stream} require('stream')
+ * @return {!Stream}
  */
 exports.checkForUnknownDeps = function () {
   const regex = /[\w$]*module\$[\w$]+/;

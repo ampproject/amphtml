@@ -59,7 +59,7 @@ exports.transpileTs = async function (srcDir, srcFilename) {
     return fileName;
   };
   // TODO(#28387) fix this typing.
-  /** @type {*} */
+  /** @type {Object} */
   const transformerHost = {
     host: compilerHost,
     options: tsOptions,
