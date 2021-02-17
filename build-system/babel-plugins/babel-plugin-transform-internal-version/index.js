@@ -41,6 +41,21 @@ module.exports = function (babel, options = {}) {
         t.inherits(replacement, node);
         path.replaceWith(replacement);
       },
+
+      TemplateElement(path) {
+        const {node} = path;
+        const {raw, cooked} = node.value;
+        if (!raw.includes('$internalRuntimeVersion$')) {
+          return;
+        }
+
+        const replacement = t.templateElement({
+          cooked: cooked.replace(/\$internalRuntimeVersion\$/g, version),
+          raw: raw.replace(/\$internalRuntimeVersion\$/g, version),
+        });
+        t.inherits(replacement, node);
+        path.replaceWith(replacement);
+      },
     },
   };
 };
