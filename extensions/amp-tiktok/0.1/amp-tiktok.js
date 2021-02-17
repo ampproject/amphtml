@@ -23,8 +23,7 @@ import {
 } from '../../../src/dom';
 import {debounce} from '../../../src/utils/rate-limit';
 import {getData, listen} from '../../../src/event-helper';
-import {measureIntersection} from '../../../src/utils/intersection';
-import {resetStyles, setStyle} from '../../../src/style';
+import {resetStyles, setStyle, setStyles} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
 
 export class AmpTiktok extends AMP.BaseElement {
@@ -44,10 +43,19 @@ export class AmpTiktok extends AMP.BaseElement {
     this.resizeOuter_ = debounce(
       this.win,
       (height) => {
+        resetStyles(this.iframe_, [
+          'width',
+          'height',
+          'position',
+          'opacity',
+          'pointer-event',
+        ]);
+        this.iframe_.removeAttribute('aria-hidden');
+        this.iframe_.setAttribute('aria-title', 'Tiktok');
         this.applyFillContent(this.iframe_);
         this.forceChangeHeight(height);
       },
-      500
+      1000
     );
   }
 
@@ -101,10 +109,14 @@ export class AmpTiktok extends AMP.BaseElement {
 
     this.iframe_.setAttribute('src', src);
     this.iframe_.setAttribute('name', '__tt_embed__v$');
-    this.iframe_.setAttribute('aria-title', 'Tiktok');
+    this.iframe_.setAttribute('aria-hidden', 'true');
     this.iframe_.setAttribute('frameborder', '0');
+    setStyles(this.iframe_, {
+      'position': 'fixed',
+      'opacity': '0',
+      'pointer-events': 'none',
+    });
 
-    this.applyFillContent(iframe);
     this.element.appendChild(iframe);
   }
 
@@ -124,13 +136,6 @@ export class AmpTiktok extends AMP.BaseElement {
       return;
     }
     if (data['height']) {
-      resetStyles(this.iframe_, [
-        'width',
-        'height',
-        'position',
-        'opacity',
-        'pointer-event',
-      ]);
       this.resizeOuter_(data['height']);
       setStyle(this.iframe_, 'width', `${data['width']}px`);
       setStyle(this.iframe_, 'height', `${data['height']}px`);
