@@ -15,8 +15,8 @@
  */
 
 import * as Preact from '../../../src/preact';
-import {ContainWrapper} from '../../../src/preact/component';
-import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
+import {ContainWrapper, useValueRef} from '../../../src/preact/component';
+import {Side} from './sidebar-config';
 import {forwardRef} from '../../../src/preact/compat';
 import {isRTL} from '../../../src/dom';
 import {
@@ -26,50 +26,8 @@ import {
   useRef,
   useState,
 } from '../../../src/preact';
+import {useSidebarAnimation} from './sidebar-animations-hook';
 import {useStyles} from './sidebar.jss';
-
-/** @private @enum {string} */
-const Side = {
-  LEFT: 'left',
-  RIGHT: 'right',
-};
-
-const ANIMATION_DURATION = 350;
-const ANIMATION_EASE_IN = 'cubic-bezier(0,0,.21,1)';
-
-const ANIMATION_KEYFRAMES_FADE_IN = [{'opacity': '0'}, {'opacity': '1'}];
-const ANIMATION_KEYFRAMES_SLIDE_IN_LEFT = [
-  {'transform': 'translateX(-100%)'},
-  {'transform': 'translateX(0)'},
-];
-const ANIMATION_KEYFRAMES_SLIDE_IN_RIGHT = [
-  {'transform': 'translateX(100%)'},
-  {'transform': 'translateX(0)'},
-];
-
-const ANIMATION_STYLES_SIDEBAR_LEFT_INIT = {'transform': 'translateX(-100%)'};
-const ANIMATION_STYLES_SIDEBAR_RIGHT_INIT = {'transform': 'translateX(100%)'};
-const ANIMATION_STYLES_BACKDROP_INIT = {'opacity': '0'};
-const ANIMATION_STYLES_SIDEBAR_FINAL = {'transform': ''};
-const ANIMATION_STYLES_BACKDROP_FINAL = {'opacity': ''};
-
-/**
- * @param {T} current
- * @return {{current: T}}
- * @template T
- */
-function useValueRef(current) {
-  const valueRef = useRef(null);
-  valueRef.current = current;
-  return valueRef;
-}
-/**
- * @param {!Element} element
- * @param {!Object<string, *>} styles
- */
-function safelySetStyles(element, styles) {
-  setStyles(element, assertDoesNotContainDisplay(styles));
-}
 
 /**
  * @param {!SidebarDef.Props} props
@@ -105,7 +63,6 @@ function SidebarWithRef(
   // This is because they are needed within `useEffect` calls below (but are not depended for triggering)
   // We use `useValueRef` for props that might change (user-controlled)
   const onBeforeOpenRef = useValueRef(onBeforeOpen);
-  const onAfterCloseRef = useValueRef(onAfterClose);
 
   const open = useCallback(() => {
     if (onBeforeOpenRef.current) {
@@ -143,95 +100,14 @@ function SidebarWithRef(
     setSide(isRTL(sidebarElement.ownerDocument) ? Side.RIGHT : Side.LEFT);
   }, [side, mounted]);
 
-  useLayoutEffect(() => {
-    const sidebarElement = sidebarRef.current;
-    const backdropElement = backdropRef.current;
-    if (!sidebarElement || !backdropElement) {
-      return;
-    }
-
-    if (!side) {
-      return;
-    }
-
-    let sidebarAnimation;
-    let backdropAnimation;
-    // "Make Visible" Animation
-    if (opened) {
-      const postVisibleAnim = () => {
-        safelySetStyles(sidebarElement, ANIMATION_STYLES_SIDEBAR_FINAL);
-        safelySetStyles(backdropElement, ANIMATION_STYLES_BACKDROP_FINAL);
-      };
-      if (!sidebarElement.animate || !backdropElement.animate) {
-        postVisibleAnim();
-        return;
-      }
-
-      safelySetStyles(
-        sidebarElement,
-        side === Side.LEFT
-          ? ANIMATION_STYLES_SIDEBAR_LEFT_INIT
-          : ANIMATION_STYLES_SIDEBAR_RIGHT_INIT
-      );
-      safelySetStyles(backdropElement, ANIMATION_STYLES_BACKDROP_INIT);
-      sidebarAnimation = sidebarElement.animate(
-        side === Side.LEFT
-          ? ANIMATION_KEYFRAMES_SLIDE_IN_LEFT
-          : ANIMATION_KEYFRAMES_SLIDE_IN_RIGHT,
-        {
-          duration: ANIMATION_DURATION,
-          fill: 'both',
-          easing: ANIMATION_EASE_IN,
-        }
-      );
-      sidebarAnimation.onfinish = postVisibleAnim;
-      backdropAnimation = backdropElement.animate(ANIMATION_KEYFRAMES_FADE_IN, {
-        duration: ANIMATION_DURATION,
-        fill: 'both',
-        easing: ANIMATION_EASE_IN,
-      });
-    } else {
-      // "Make Invisible" Animation
-      const postInvisibleAnim = () => {
-        if (onAfterCloseRef.current) {
-          onAfterCloseRef.current();
-        }
-        sidebarAnimation = null;
-        backdropAnimation = null;
-        setMounted(false);
-      };
-      if (!sidebarElement.animate || !backdropElement.animate) {
-        postInvisibleAnim();
-        return;
-      }
-      sidebarAnimation = sidebarElement.animate(
-        side === Side.LEFT
-          ? ANIMATION_KEYFRAMES_SLIDE_IN_LEFT
-          : ANIMATION_KEYFRAMES_SLIDE_IN_RIGHT,
-        {
-          duration: ANIMATION_DURATION,
-          direction: 'reverse',
-          fill: 'both',
-          easing: ANIMATION_EASE_IN,
-        }
-      );
-      sidebarAnimation.onfinish = postInvisibleAnim;
-      backdropAnimation = backdropElement.animate(ANIMATION_KEYFRAMES_FADE_IN, {
-        duration: ANIMATION_DURATION,
-        direction: 'reverse',
-        fill: 'both',
-        easing: ANIMATION_EASE_IN,
-      });
-    }
-    return () => {
-      if (sidebarAnimation) {
-        sidebarAnimation.cancel();
-      }
-      if (backdropAnimation) {
-        backdropAnimation.cancel();
-      }
-    };
-  }, [opened, onAfterCloseRef, side]);
+  useSidebarAnimation(
+    opened,
+    onAfterClose,
+    side,
+    sidebarRef,
+    backdropRef,
+    setMounted
+  );
 
   return (
     mounted && (
@@ -243,7 +119,7 @@ function SidebarWithRef(
           layout={true}
           paint={true}
           part="sidebar"
-          wrapperClassName={`${classes.sidebarClass} ${
+          wrapperClassName={`${classes.sidebar} ${
             classes.defaultSidebarStyles
           } ${side === Side.LEFT ? classes.left : classes.right}`}
           role="menu"
@@ -258,11 +134,13 @@ function SidebarWithRef(
           onClick={() => close()}
           part="backdrop"
           style={backdropStyle}
-          className={`${backdropClassName ?? ''} ${classes.backdropClass} ${
+          className={`${backdropClassName ?? ''} ${classes.backdrop} ${
             classes.defaultBackdropStyles
           }`}
           hidden={!side}
-        ></div>
+        >
+          <div className={classes.backdropOverscrollBlocker}></div>
+        </div>
       </>
     )
   );
