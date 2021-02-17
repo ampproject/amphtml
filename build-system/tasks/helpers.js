@@ -457,7 +457,6 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
         entryPoints: [entryPoint],
         bundle: true,
         sourcemap: true,
-        format: argv.esm ? 'esm' : 'cjs',
         define: experimentDefines,
         outfile: destFile,
         plugins: [esbuildBabelPlugin],
