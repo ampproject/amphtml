@@ -524,15 +524,14 @@ export class MediaPool {
           this.maybeResetAmpMedia_(ampMediaForDomEl),
         ])
       )
+      .then(() =>
+        this.enqueueMediaElementTask_(
+          poolMediaEl,
+          new UpdateSourcesTask(this.win_, sources)
+        )
+      )
       .then(
-        () => {
-          const sourcesPromise = this.enqueueMediaElementTask_(
-            poolMediaEl,
-            new UpdateSourcesTask(this.win_, sources)
-          );
-          this.enqueueMediaElementTask_(poolMediaEl, new LoadTask());
-          return sourcesPromise;
-        },
+        () => this.enqueueMediaElementTask_(poolMediaEl, new LoadTask()),
         () => {
           this.forceDeallocateMediaElement_(poolMediaEl);
         }
@@ -541,17 +540,17 @@ export class MediaPool {
 
   /**
    * @param {?Element} componentEl
-   * @return {?Promise}
+   * @return {!Promise}
    * @private
    */
   maybeResetAmpMedia_(componentEl) {
     if (!componentEl) {
-      return;
+      return Promise.resolve();
     }
 
     if (componentEl.tagName.toLowerCase() == 'amp-audio') {
       // TODO(alanorozco): Implement reset for amp-audio
-      return;
+      return Promise.resolve();
     }
 
     return componentEl.getImpl().then((impl) => {
