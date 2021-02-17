@@ -168,8 +168,8 @@ export class AmpVideo extends AMP.BaseElement {
     /** @private {boolean} */
     this.isPlaying_ = false;
 
-    /** @private {boolean} */
-    this.isManagedByBitrate_ = this.hasAnyBitrateSources_();
+    /** @private {?boolean} whether there are sources that will use a BitrateManager */
+    this.hasBitrateSources_ = null;
 
     this.onDisplay_ = this.onDisplay_.bind(this);
   }
@@ -224,10 +224,6 @@ export class AmpVideo extends AMP.BaseElement {
     this.configure_();
 
     this.video_ = element.ownerDocument.createElement('video');
-    // Manage video if the sources contain bitrate or amp-orig-src will be expanded to multiple bitrates.
-    if (this.isManagedByBitrate_ && !this.isManagedByPool_()) {
-      getBitrateManager(this.win).manage(this.video_);
-    }
 
     const poster = element.getAttribute('poster');
     if (!poster && getMode().development) {
@@ -262,6 +258,11 @@ export class AmpVideo extends AMP.BaseElement {
       'album': album || '',
       'artwork': [{'src': artwork || poster || ''}],
     };
+
+    // Cached so mediapool operations (eg: swapping sources) don't interfere with this bool.
+    this.hasBitrateSources_ =
+      !!this.element.querySelector('source[data-bitrate]') ||
+      this.hasAnyCachedSources_();
 
     installVideoManagerForDoc(element);
 
@@ -580,17 +581,6 @@ export class AmpVideo extends AMP.BaseElement {
    * @private
    * @return {boolean}
    */
-  hasAnyBitrateSources_() {
-    return (
-      !!this.element.querySelector('source[data-bitrate]') ||
-      this.hasAnyCachedSources_()
-    );
-  }
-
-  /**
-   * @private
-   * @return {boolean}
-   */
   hasAnyCachedSources_() {
     const {element} = this;
     const sources = toArray(childElementsByTag(element, 'source'));
@@ -662,7 +652,7 @@ export class AmpVideo extends AMP.BaseElement {
     );
     this.uninstallEventHandlers_();
     this.installEventHandlers_();
-    if (this.isManagedByBitrate_) {
+    if (this.hasBitrateSources_) {
       getBitrateManager(this.win).manage(this.video_);
     }
     // When source changes, video needs to trigger loaded again.

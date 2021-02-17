@@ -91,6 +91,7 @@ export class BitrateManager {
    * @param {!Element} video
    */
   manage(video) {
+    // Prevent duplicate listeners if already managing this video.
     if (video.changedSources) {
       return;
     }
