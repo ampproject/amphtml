@@ -464,7 +464,7 @@ Adds support for SimpleReach. Configuration details can be found at `http://docs
 
 Type attribute value: `snowplow`, `snowplow_v2`
 
-Adds support for Snowplow Analytics. More details for adding Snowplow Analytics support can be found at [github.com/snowplow/snowplow/wiki](https://github.com/snowplow/snowplow/wiki/Google-AMP-Tracker).
+Adds support for Snowplow Analytics. More details for adding Snowplow Analytics support can be found at [docs.snowplowanalytics.com](https://docs.snowplowanalytics.com/docs/collecting-data/collecting-from-own-applications/google-amp-tracker/).
 
 ### Tail
 
