@@ -146,7 +146,14 @@ export class ProgressBar {
     }
 
     this.root_ = this.win_.document.createElement('ol');
-    this.root_.setAttribute('aria-hidden', true);
+    this.root_.setAttribute('aria-hidden', false);
+    this.root_.setAttribute('role', 'region');
+    this.root_.setAttribute('aria-live', 'polite');
+    // Set the initial aria-label for the current page number and total pages.
+    this.root_.setAttribute(
+      'aria-label',
+      `page ${StateProperty.CURRENT_PAGE_INDEX} of ${this.segmentCount_}`
+    );
     this.root_.classList.add('i-amphtml-story-progress-bar');
     this.storyEl_.addEventListener(EventType.REPLAY, () => {
       this.replay_();
@@ -177,6 +184,14 @@ export class ProgressBar {
             true /** updateAllSegments */
           );
         }
+      },
+      true /** callToInitialize */
+    );
+
+    this.storeService_.subscribe(
+      StateProperty.CURRENT_PAGE_INDEX,
+      (index) => {
+        this.onIndexStateUpdate_(index);
       },
       true /** callToInitialize */
     );
@@ -383,6 +398,21 @@ export class ProgressBar {
   }
 
   /**
+   * Reacts to PAGE_INDEX state updates and sets the `aria-label` attribute
+   * triggering assistive technology to inform user of the current page.
+   * @param {number} index
+   * @private
+   */
+  onIndexStateUpdate_(index) {
+    this.mutator_.mutateElement(this.getRoot(), () => {
+      this.getRoot().setAttribute(
+        'aria-label',
+        `page ${index + 1} of ${this.segmentCount_}`
+      );
+    });
+  }
+
+  /**
    * Handles resize events.
    * @private
    */
@@ -432,6 +462,8 @@ export class ProgressBar {
     segmentProgressBar.classList.add('i-amphtml-story-page-progress-bar');
     const segmentProgressValue = this.win_.document.createElement('div');
     segmentProgressValue.classList.add('i-amphtml-story-page-progress-value');
+    segmentProgressBar.setAttribute('role', 'group');
+    segmentProgressBar.setAttribute('aria-roledescription', 'page');
     segmentProgressBar.appendChild(segmentProgressValue);
     this.getRoot().appendChild(segmentProgressBar);
     this.segments_.push(segmentProgressBar);
