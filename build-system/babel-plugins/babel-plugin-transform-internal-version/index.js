@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-// Reassigns the trailing comments of a statement to be leading comment of its
-// next sibling. This is because JSDoc comments (which should be on the next
-// statement) get erroneously assigned as trailing comments of this statement.
 module.exports = function (babel, options = {}) {
   const {types: t} = babel;
   const {version} = options;
@@ -28,7 +25,8 @@ module.exports = function (babel, options = {}) {
   }
 
   return {
-    name: 'ast-transform', // not required
+    name: 'transform-internal-version',
+
     visitor: {
       StringLiteral(path) {
         const {node} = path;
