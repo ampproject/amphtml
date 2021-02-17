@@ -124,6 +124,7 @@ function SidebarWithRef(
     const keydownCallback = (event) => {
       if (event.key === Keys.ESCAPE) {
         event.stopImmediatePropagation();
+        event.preventDefault();
         close();
       }
     };
