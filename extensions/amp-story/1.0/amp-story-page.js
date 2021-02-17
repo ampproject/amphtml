@@ -609,9 +609,9 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.checkPageHasElementWithPlayback_();
       this.findAndPrepareEmbeddedComponents_();
 
-      const attachmentHref = this.element.querySelector(
-        'amp-story-page-attachment'
-      ).getAttribute('href');
+      const attachmentHref = this.element
+        .querySelector('amp-story-page-attachment')
+        .getAttribute('href');
 
       if (
         !this.isPageAttachmentOutlinkV2ExperimentOn_() ||
