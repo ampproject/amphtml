@@ -16,9 +16,9 @@
 import {addParamsToUrl} from '../../../src/url';
 import {createElementWithAttributes, removeElement} from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
-import {getStyle, setStyle} from '../../../src/style';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {omit} from '../../../src/utils/object';
+import {setStyle} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
 import {userAssert} from '../../../src/log';
 
@@ -86,7 +86,6 @@ export class AmpIframely extends AMP.BaseElement {
     this.url_ = this.element.getAttribute('data-url');
     this.key_ = this.element.getAttribute('data-key');
     this.options_ = this.parseOptions_();
-    this.border_ = this.element.getAttribute('data-border');
     let domain = 'cdn.iframe.ly';
     const requestedDomain = this.element.getAttribute('data-domain');
     if (requestedDomain && this.isValidDomain_(requestedDomain)) {
@@ -134,12 +133,7 @@ export class AmpIframely extends AMP.BaseElement {
   layoutCallback() {
     /** attach iFrame */
     this.iframe_ = this.element.ownerDocument.createElement('iframe');
-    if (this.border_) {
-      setStyle(this.iframe_, 'box-sizing', 'border-box');
-      setStyle(this.iframe_, 'border', this.border_ + 'px');
-    } else {
-      setStyle(this.iframe_, 'border', '0px');
-    }
+    setStyle(this.iframe_, 'border', '0px');
     this.iframe_.setAttribute(
       'allow',
       'encrypted-media *; accelerometer *; gyroscope *; picture-in-picture *; camera *; microphone *;'
@@ -155,7 +149,7 @@ export class AmpIframely extends AMP.BaseElement {
 
     this.unlistener_ = listen(this.win, 'message', event => {
       if (event.source === this.iframe_.contentWindow) {
-        this.handleEvent_(this, event, this.iframe_);
+        this.handleEvent_(this, event);
       }
     });
     return this.loadPromise(this.iframe_);
@@ -165,60 +159,30 @@ export class AmpIframely extends AMP.BaseElement {
    * Handles Iframely events: widget sizing, cancel, decorate cards
    * @param {AmpIframely} me - instance of an active component
    * @param {window.event} event - Iframely message with a method to apply
-   * @param {iframe} iframe - instance of an active iframe
    * */
-  handleEvent_(me, event, iframe) {
+  handleEvent_(me, event) {
     const data = tryParseJson(getData(event));
     if (!data) {
       return;
     }
     if (data.method === 'resize') {
       /** Set the size of the card according to the message from Iframely */
-      const height = this.addBorderHeight_(me, data['height']);
-      me.attemptChangeHeight(height).catch(() => {});
+      me.attemptChangeHeight(data['height']).catch(() => {});
     }
     if (data.method === 'setIframelyEmbedData') {
       /** apply Iframely card styles if present */
       const media = data['data']['media'] || null;
-      if (media && media['frame_style']) {
-        const styles = media['frame_style'].split(';');
-        styles.forEach(function(style) {
-          const props = style.split(':');
-          if (props.length === 2) {
-            const styleName = props[0].trim(),
-              styleValue = props[1].trim();
-            switch (styleName) {
-              case 'border':
-                setStyle(
-                  iframe,
-                  'border',
-                  /** But change color only, do not let to override the border width */
-                  styleValue.replace(/\d+px\s/, `${me.border_}px `)
-                );
-                break;
-              case 'border-radius':
-                setStyle(iframe, 'border-radius', styleValue);
-                break;
-              case 'box-shadow':
-                setStyle(iframe, 'box-shadow', styleValue);
-                break;
-            }
-          }
-        });
-      }
       if (media && media['aspect-ratio']) {
         let height;
         const box = me.element.getLayoutBox();
         if (media['padding-bottom']) {
           /** Apply height for media with updated "aspect-ratio" and "padding-bottom". */
           height = box.width / media['aspect-ratio'] + media['padding-bottom'];
-          height = this.addBorderHeight_(me, height);
           me.attemptChangeHeight(height).catch(() => {});
         } else {
           height = box.width / media['aspect-ratio'];
           if (Math.abs(box.height - height) > 1) {
             /** Apply new height for updated "aspect-ratio". */
-            height = this.addBorderHeight_(me, height);
             me.attemptChangeHeight(height).catch(() => {});
           }
         }
@@ -231,7 +195,7 @@ export class AmpIframely extends AMP.BaseElement {
 
   /**
    * Constructing url SRC for api calls
-   * @param {boolean} slug src or iframe src in case false
+   * @param {string} slug src or iframe src in case false
    * @return {string} url of the placeholder
    * @private
    * */
@@ -239,7 +203,7 @@ export class AmpIframely extends AMP.BaseElement {
     if (this.widgetId_) {
       return `${this.base_}${this.widgetId_}${
         slug !== '/iframe' ? slug : ''
-      }?amp=1`;
+        }?amp=1`;
     } else {
       return addParamsToUrl(`${this.base_}api${slug}`, {
         'url': this.url_,
@@ -257,7 +221,7 @@ export class AmpIframely extends AMP.BaseElement {
   parseAttributes_() {
     userAssert(
       this.element.getAttribute('data-id') ||
-        this.element.getAttribute('data-url'),
+      this.element.getAttribute('data-url'),
       '<%s> requires either "data-id" or a pair of "data-url" and "data-key" attributes for %s',
       TAG,
       this.element
@@ -305,14 +269,7 @@ export class AmpIframely extends AMP.BaseElement {
    * @private
    * */
   parseOptions_() {
-    return omit(this.element.dataset, [
-      'id',
-      'domain',
-      'key',
-      'url',
-      'img',
-      'border',
-    ]);
+    return omit(this.element.dataset, ['id', 'domain', 'key', 'url', 'img']);
   }
 
   /** @override */
@@ -346,27 +303,6 @@ export class AmpIframely extends AMP.BaseElement {
       (allowed, re) => allowed || re.test(domainName),
       false
     );
-  }
-
-  /**
-   * Adds border height, if any, to a given internal iFrame height value.
-   * @param {AmpIframely} me - component instance in the current state
-   * @param {string} currentHeight - required internal height value
-   * @return {number} height value
-   * @private
-   * */
-  addBorderHeight_(me, currentHeight) {
-    const borderValue = getStyle(me.element, 'border');
-    if (borderValue) {
-      let borderWidth = borderValue.match(/(\d+)px/) || 0;
-      if (borderWidth) {
-        borderWidth = parseInt(borderWidth[1], 10);
-        borderWidth = borderWidth * 2;
-      }
-      return currentHeight + borderWidth;
-    } else {
-      return currentHeight;
-    }
   }
 }
 
