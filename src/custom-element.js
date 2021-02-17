@@ -972,6 +972,8 @@ function createBaseCustomElementClass(win) {
           }
           this.connected_();
           this.dispatchCustomEventForTesting(AmpEvents.ATTACHED);
+        } else if (this.implClass_ && this.V2()) {
+          this.upgradeOrSchedule_();
         }
       } else {
         this.everAttached = true;

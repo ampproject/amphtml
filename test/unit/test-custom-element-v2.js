@@ -124,6 +124,22 @@ describes.realWin('CustomElement V2', {amp: true}, (env) => {
       expect(element.isBuilt()).to.be.false;
       expect(element.getBuildPriority()).equal(LayoutPriority.CONTENT);
     });
+
+    it('should reschedule build when re-attached', () => {
+      const element = new ElementClass();
+
+      builderMock.expects('schedule').withExactArgs(element).twice();
+      builderMock.expects('unschedule').withExactArgs(element).once();
+
+      doc.body.appendChild(element);
+      expect(element.readyState).to.equal('building');
+
+      doc.body.removeChild(element);
+      expect(element.readyState).to.equal('building');
+
+      doc.body.appendChild(element);
+      expect(element.readyState).to.equal('building');
+    });
   });
 
   describe('preconnect', () => {
