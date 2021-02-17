@@ -40,6 +40,12 @@ export class AmpTiktok extends AMP.BaseElement {
     /** @private {?Function}*/
     this.unlistenMessage_ = null;
 
+    /** @private {string} */
+    this.oEmbedRequestUrl_ = null;
+
+    /** @private {Promise} */
+    this.oEmbedResponsePromise_ = null;
+
     this.resizeOuter_ = debounce(
       this.win,
       (height) => {
@@ -78,6 +84,7 @@ export class AmpTiktok extends AMP.BaseElement {
     const {src} = this.element.dataset;
     if (src) {
       this.videoId_ = src.replace(/^((.+\/)?)(\d+)\/?$/, (_, _1, _2, id) => id);
+      this.oEmbedRequestUrl_ = this.videoId_ !== src ? src : null;
     } else {
       const blockquoteOrNull = childElementByTag(this.element, 'blockquote');
       if (
@@ -88,6 +95,7 @@ export class AmpTiktok extends AMP.BaseElement {
         return;
       }
       this.videoId_ = blockquoteOrNull.dataset.videoId;
+      this.oEmbedRequestUrl_ = blockquoteOrNull.dataset.cite;
     }
   }
 
@@ -117,6 +125,12 @@ export class AmpTiktok extends AMP.BaseElement {
       'pointer-events': 'none',
     });
 
+    Promise.resolve(this.oEmbedResponsePromise_).then((data) => {
+      if (data && data.title) {
+        iframe.setAttribute('aria-title', `TikTok: ${data.title}`);
+      }
+    });
+
     this.element.appendChild(iframe);
   }
 
@@ -140,6 +154,49 @@ export class AmpTiktok extends AMP.BaseElement {
       setStyle(this.iframe_, 'width', `${data['width']}px`);
       setStyle(this.iframe_, 'height', `${data['height']}px`);
     }
+  }
+
+  /** @override */
+  createPlaceholderCallback() {
+    if (!this.oEmbedRequestUrl_) {
+      return null;
+      console.log('no oembed url');
+    }
+
+    const placeholder = document.createElement('div');
+    placeholder.setAttribute('placeholder', '');
+    placeholder.setAttribute('style', 'background: rgba(220, 220, 220, 0.6');
+
+    const oEmbedRequestUrl = encodeURIComponent(this.oEmbedRequestUrl_);
+    this.oEmbedResponsePromise_ = Services.xhrFor(this.win)
+      .fetchJson(`https://www.tiktok.com/oembed?url=${oEmbedRequestUrl}`)
+      .then((response) => response.json())
+      .then((data) => {
+        const {'thumbnail_url': thumbnailUrl} = data;
+        if (thumbnailUrl) {
+          const img = createElementWithAttributes(
+            this.element.ownerDocument,
+            'img',
+            {
+              'src': thumbnailUrl,
+              'placeholder': thumbnailUrl,
+              'style':
+                'aspect-ratio: 0.5625;' +
+                'left: 1px;' +
+                'top: 1px;' +
+                'width: calc(100% - 2px',
+            }
+          );
+
+          if (placeholder.parentElement) {
+            placeholder.appendChild(img);
+          }
+        }
+        console.log('thumbnail: ' + thumbnailUrl);
+        return data;
+      });
+
+    return placeholder;
   }
 
   /** @override */
