@@ -189,14 +189,6 @@ export class ProgressBar {
     );
 
     this.storeService_.subscribe(
-      StateProperty.CURRENT_PAGE_INDEX,
-      (index) => {
-        this.onIndexStateUpdate_(index);
-      },
-      true /** callToInitialize */
-    );
-
-    this.storeService_.subscribe(
       StateProperty.RTL_STATE,
       (rtlState) => {
         this.onRtlStateUpdate_(rtlState);
@@ -398,12 +390,12 @@ export class ProgressBar {
   }
 
   /**
-   * Reacts to PAGE_INDEX state updates and sets the `aria-label` attribute
+   * Called from updateProgress method to set the `aria-label` attribute
    * triggering assistive technology to inform user of the current page.
-   * @param {number} index
+   * @param {number} index zero-based index of pages in the story.
    * @private
    */
-  onIndexStateUpdate_(index) {
+  setAriaLabelByIndex_(index) {
     this.mutator_.mutateElement(this.getRoot(), () => {
       this.getRoot().setAttribute(
         'aria-label',
@@ -525,6 +517,12 @@ export class ProgressBar {
       const segmentIndex = this.segmentIdMap_[segmentId];
 
       this.updateProgressByIndex_(segmentIndex, progress);
+
+      // Only update aria-label once on change to the current page.
+      // Otherwise, the method will be called repeatedly for pages where 0 < progress < 1.
+      if (progress === 0 || progress === 1) {
+        this.setAriaLabelByIndex_(segmentIndex);
+      }
 
       // If updating progress for a new segment, update all the other progress
       // bar segments.
