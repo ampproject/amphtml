@@ -18,14 +18,16 @@ import {Deferred} from '../../../src/utils/promise';
 import {
   measureDisplay,
   observeDisplay,
+  registerContainer,
   unobserveDisplay,
+  unregisterContainer,
 } from '../../../src/utils/display-observer';
 import {removeItem} from '../../../src/utils/array';
 
 describes.realWin('display-observer', {amp: true}, (env) => {
   let win, doc, ampdoc;
   let element;
-  let docObserver, viewportObserver;
+  let docObserver, viewportObserver, containerObservers;
 
   beforeEach(() => {
     win = env.win;
@@ -42,7 +44,9 @@ describes.realWin('display-observer', {amp: true}, (env) => {
         this.elements = [];
       }
 
-      disconnect() {}
+      disconnect() {
+        this.elements.length = 0;
+      }
 
       observe(element) {
         if (this.elements.includes(element)) {
@@ -53,7 +57,9 @@ describes.realWin('display-observer', {amp: true}, (env) => {
 
       unobserve(element) {
         if (!this.elements.includes(element)) {
-          throw new Error('not observed');
+          throw new Error(
+            'not observed: ' + element.id + ' on ' + this.options?.root?.id
+          );
         }
         removeItem(this.elements, element);
       }
@@ -68,6 +74,7 @@ describes.realWin('display-observer', {amp: true}, (env) => {
 
     docObserver = null;
     viewportObserver = null;
+    containerObservers = new Map();
     env.sandbox
       .stub(win, 'IntersectionObserver')
       .value(function (callback, options) {
@@ -79,6 +86,14 @@ describes.realWin('display-observer', {amp: true}, (env) => {
         if (options.root == doc.body) {
           return (docObserver =
             docObserver || new FakeIntersectionObserver(callback, options));
+        }
+        if (options.root) {
+          const containerObserver = new FakeIntersectionObserver(
+            callback,
+            options
+          );
+          containerObservers.set(options.root, containerObserver);
+          return containerObserver;
         }
         return new FakeIntersectionObserver(callback, options);
       });
@@ -289,6 +304,149 @@ describes.realWin('display-observer', {amp: true}, (env) => {
       ampdoc.overrideVisibilityState('hidden');
       const display3 = await callbackCaller.next();
       expect(display3).to.be.true;
+    });
+  });
+
+  describe.only('registerContainer', () => {
+    let container;
+    let topElement;
+
+    beforeEach(() => {
+      container = doc.createElement('div');
+      container.id = 'container1';
+      doc.body.appendChild(container);
+      container.appendChild(element);
+
+      topElement = doc.createElement('div');
+      topElement.id = 'topElement1';
+      doc.body.appendChild(topElement);
+    });
+
+    it('should create observer only after container display is known', async () => {
+      registerContainer(container);
+      expect(containerObservers.get(container)).to.not.exist;
+
+      await viewportObserver.notify([
+        {target: container, isIntersecting: false},
+      ]);
+      expect(containerObservers.get(container)).to.not.exist;
+
+      await viewportObserver.notify([
+        {target: container, isIntersecting: true},
+      ]);
+      expect(containerObservers.get(container)).to.exist;
+    });
+
+    it('should only observe contained elements', async () => {
+      const elementCallback = createCallbackCaller();
+      observeDisplay(element, elementCallback);
+      const topElementCallback = createCallbackCaller();
+      observeDisplay(topElement, topElementCallback);
+
+      viewportObserver.notify([{target: element, isIntersecting: false}]);
+      docObserver.notify([{target: element, isIntersecting: false}]);
+      viewportObserver.notify([{target: topElement, isIntersecting: false}]);
+      docObserver.notify([{target: topElement, isIntersecting: false}]);
+
+      const display1 = await elementCallback.next();
+      const display2 = await topElementCallback.next();
+      expect(display1).to.be.false;
+      expect(display2).to.be.false;
+
+      registerContainer(container);
+      await viewportObserver.notify([
+        {target: container, isIntersecting: true},
+      ]);
+
+      const containerObserver = containerObservers.get(container);
+      expect(containerObserver.elements).to.include(element);
+      expect(containerObserver.elements).to.not.include(topElement);
+
+      containerObserver.notify([{target: element, isIntersecting: true}]);
+      const display3 = await elementCallback.next();
+      const display4 = await topElementCallback.next();
+      expect(display3).to.be.true;
+      expect(display4).to.be.false; // no change.
+    });
+
+    it('should unregister observer', async () => {
+      const elementCallback = createCallbackCaller();
+      observeDisplay(element, elementCallback);
+
+      viewportObserver.notify([{target: element, isIntersecting: false}]);
+      docObserver.notify([{target: element, isIntersecting: false}]);
+
+      const display1 = await elementCallback.next();
+      expect(display1).to.be.false;
+
+      registerContainer(container);
+      await viewportObserver.notify([
+        {target: container, isIntersecting: true},
+      ]);
+      const containerObserver = containerObservers.get(container);
+      containerObserver.notify([{target: element, isIntersecting: true}]);
+      const display2 = await elementCallback.next();
+      expect(display2).to.be.true;
+
+      unregisterContainer(container);
+      expect(docObserver.elements).to.not.include(container);
+      expect(containerObserver.elements).to.not.include(element);
+
+      const display3 = await elementCallback.next();
+      expect(display3).to.be.false;
+    });
+
+    it('should change display when container observer is notified', async () => {
+      const elementCallback = createCallbackCaller();
+      observeDisplay(element, elementCallback);
+
+      viewportObserver.notify([{target: element, isIntersecting: false}]);
+      docObserver.notify([{target: element, isIntersecting: false}]);
+
+      const display1 = await elementCallback.next();
+      expect(display1).to.be.false;
+
+      registerContainer(container);
+      await viewportObserver.notify([
+        {target: container, isIntersecting: true},
+      ]);
+
+      const containerObserver = containerObservers.get(container);
+      containerObserver.notify([{target: element, isIntersecting: true}]);
+      const display2 = await elementCallback.next();
+      expect(display2).to.be.true;
+
+      containerObserver.notify([{target: element, isIntersecting: false}]);
+      const display3 = await elementCallback.next();
+      expect(display3).to.be.false;
+    });
+
+    it('should change display when container display has changed', async () => {
+      const elementCallback = createCallbackCaller();
+      observeDisplay(element, elementCallback);
+
+      viewportObserver.notify([{target: element, isIntersecting: false}]);
+      docObserver.notify([{target: element, isIntersecting: false}]);
+
+      const display1 = await elementCallback.next();
+      expect(display1).to.be.false;
+
+      registerContainer(container);
+      await docObserver.notify([{target: container, isIntersecting: false}]);
+      await viewportObserver.notify([
+        {target: container, isIntersecting: true},
+      ]);
+
+      const containerObserver = containerObservers.get(container);
+      containerObserver.notify([{target: element, isIntersecting: true}]);
+      const display2 = await elementCallback.next();
+      expect(display2).to.be.true;
+
+      await viewportObserver.notify([
+        {target: container, isIntersecting: false},
+      ]);
+      const display3 = await elementCallback.next();
+      expect(display3).to.be.false;
     });
   });
 });

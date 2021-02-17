@@ -23,6 +23,13 @@ const SERVICE_ID = 'DisplayObserver';
 
 const DISPLAY_THRESHOLD = 0.51;
 
+const CONTAINER_OFFSET = 2;
+
+/**
+ * @typedef {function(boolean, !Element)}
+ */
+let ObserverCallbackDef;
+
 /**
  * Observes whether the specified target is displayable. The initial observation
  * is returned shortly after observing, and subsequent observations are
@@ -38,7 +45,7 @@ const DISPLAY_THRESHOLD = 0.51;
  *    not in the viewport, it's considered to be "displayable".
  *
  * @param {!Element} target
- * @param {function(boolean)} callback
+ * @param {!ObserverCallbackDef} callback
  */
 export function observeDisplay(target, callback) {
   getObserver(target).observe(target, callback);
@@ -68,6 +75,22 @@ export function measureDisplay(target) {
 }
 
 /**
+ * QQQQ
+ * @param {!Element} container
+ * @param {!Element} root
+ */
+export function registerContainer(container, root) {
+  getObserver(container).registerContainer(container, root);
+}
+
+/**
+ * @param {!Element} container
+ */
+export function unregisterContainer(container) {
+  getObserver(container).unregisterContainer(container);
+}
+
+/**
  * @implements {Disposable}
  * @visibleForTesting
  * @package
@@ -77,6 +100,9 @@ export class DisplayObserver {
    * @param {!AmpDoc} ampdoc
    */
   constructor(ampdoc) {
+    /** @private @const */
+    this.ampdoc_ = ampdoc;
+
     const {win} = ampdoc;
 
     /** @private @const {!Array<!IntersectionObserver>} */
@@ -108,11 +134,19 @@ export class DisplayObserver {
       }
     });
 
-    /** @private @const {!Map<!Element, !Array<function(boolean)>>} */
+    /** @private @const {!Map<!Element, !Array<!ObserverCallbackDef>>} */
     this.targetObserverCallbacks_ = new Map();
 
     /** @private @const {!Map<!Element, !Array<boolean>>} */
     this.targetObservations_ = new Map();
+
+    /** @private @const {!Array<!Element>} */
+    this.containers_ = [];
+
+    /** @private @const {!Map<!Element, !Element>} */
+    this.containerRoots_ = new Map();
+
+    this.containerObserved_ = this.containerObserved_.bind(this);
   }
 
   /** @override */
@@ -125,6 +159,58 @@ export class DisplayObserver {
   }
 
   /**
+   * @param {!Element} container
+   * @param {!Element} root
+   */
+  registerContainer(container, root) {
+    if (this.containers_.includes(container)) {
+      return;
+    }
+
+    this.containers_.push(container);
+    this.containerRoots_.set(container, root);
+    // QQQ: externalize callback
+    this.observe(container, this.containerObserved_);
+  }
+
+  /**
+   * @param {!Element} container
+   */
+  unregisterContainer(container) {
+    const index = CONTAINER_OFFSET + this.containers_.indexOf(container);
+    if (index < CONTAINER_OFFSET) {
+      // The container has been unregistered already.
+      return;
+    }
+
+    // Remove container.
+    this.containers_.splice(index - CONTAINER_OFFSET, 1);
+    this.containerRoots_.delete(container);
+
+    // Remove observer.
+    const observer = this.observers_[index];
+    this.observers_.splice(index, 1);
+    if (observer) {
+      observer.disconnect();
+    }
+
+    // Unobserve the container itself.
+    this.unobserve(container, this.containerObserved_);
+
+    // Remove observations.
+    this.targetObserverCallbacks_.forEach((callbacks, target) => {
+      const observations = this.targetObservations_.get(target);
+      if (!observations || observations.length <= index) {
+        return;
+      }
+      const oldDisplay = computeDisplay(observations, this.isDocDisplay_);
+      observations.splice(index, 1);
+      const newDisplay = computeDisplay(observations, this.isDocDisplay_);
+      notifyIfChanged(callbacks, target, newDisplay, oldDisplay);
+    });
+  }
+
+  /**
    * @param {!Element} target
    * @param {function(boolean)} callback
    */
@@ -133,8 +219,19 @@ export class DisplayObserver {
     if (!callbacks) {
       callbacks = [];
       this.targetObserverCallbacks_.set(target, callbacks);
+
+      // Subscribe observers.
       for (let i = 0; i < this.observers_.length; i++) {
-        this.observers_[i].observe(target);
+        if (
+          this.observers_[i] &&
+          (i < CONTAINER_OFFSET ||
+            containsNotSelf(this.containers_[i - CONTAINER_OFFSET], target))
+        ) {
+          this.setObservation_(target, i, null, /* callbacks */ null);
+          this.observers_[i].observe(target);
+        } else {
+          this.setObservation_(target, i, false, /* callbacks */ null);
+        }
       }
     }
     if (pushIfNotExist(callbacks, callback)) {
@@ -146,7 +243,7 @@ export class DisplayObserver {
             this.isDocDisplay_
           );
           if (display != null) {
-            callCallbackNoInline(callback, display);
+            callCallbackNoInline(callback, target, display);
           }
         });
       }
@@ -167,7 +264,9 @@ export class DisplayObserver {
       this.targetObserverCallbacks_.delete(target);
       this.targetObservations_.delete(target);
       for (let i = 0; i < this.observers_.length; i++) {
-        this.observers_[i].unobserve(target);
+        if (this.observers_[i]) {
+          this.observers_[i].unobserve(target);
+        }
       }
     }
   }
@@ -178,7 +277,46 @@ export class DisplayObserver {
       const observations = this.targetObservations_.get(target);
       const oldDisplay = computeDisplay(observations, !this.isDocDisplay_);
       const newDisplay = computeDisplay(observations, this.isDocDisplay_);
-      notifyIfChanged(callbacks, newDisplay, oldDisplay);
+      notifyIfChanged(callbacks, target, newDisplay, oldDisplay);
+    });
+  }
+
+  /**
+   * @param {boolean} isDisplayed
+   * @param {!Element} container
+   * @private
+   */
+  containerObserved_(isDisplayed, container) {
+    const index = CONTAINER_OFFSET + this.containers_.indexOf(container);
+    if (index < CONTAINER_OFFSET) {
+      // The container has been unregistered already.
+      return;
+    }
+
+    if (isDisplayed) {
+      const {win} = this.ampdoc_;
+      const root = this.containerRoots_.get(container) || container;
+      const observer = new win.IntersectionObserver(this.observed_.bind(this), {
+        root,
+        threshold: DISPLAY_THRESHOLD,
+      });
+      this.observers_[index] = observer;
+    } else {
+      const observer = this.observers_[index];
+      this.observers_[index] = null;
+      if (observer) {
+        observer.disconnect();
+      }
+    }
+
+    const observer = this.observers_[index];
+    this.targetObserverCallbacks_.forEach((callbacks, target) => {
+      if (observer && containsNotSelf(container, target)) {
+        this.setObservation_(target, index, null, callbacks);
+        observer.observe(target);
+      } else {
+        this.setObservation_(target, index, false, callbacks);
+      }
     });
   }
 
@@ -196,19 +334,39 @@ export class DisplayObserver {
       }
       seen.add(target);
       const callbacks = this.targetObserverCallbacks_.get(target);
-      if (!callbacks) {
+      const index = this.observers_.indexOf(observer);
+      if (!callbacks || index == -1) {
         continue;
       }
-      let observations = this.targetObservations_.get(target);
-      if (!observations) {
-        observations = emptyObservations(this.observers_.length);
-        this.targetObservations_.set(target, observations);
+      this.setObservation_(target, index, isIntersecting, callbacks);
+    }
+  }
+
+  /**
+   * @param {!Element} target
+   * @param {number} index
+   * @param {?boolean} value
+   * @param {?Array<!ObserverCallbackDef>} callbacks
+   * @private
+   */
+  setObservation_(target, index, value, callbacks) {
+    let observations = this.targetObservations_.get(target);
+    if (!observations) {
+      const observers = this.observers_;
+      observations = new Array(observers.length);
+      for (let i = 0; i < observers.length; i++) {
+        observations[i] = observers[i] ? null : false;
       }
+      this.targetObservations_.set(target, observations);
+    }
+
+    if (callbacks) {
       const oldDisplay = computeDisplay(observations, this.isDocDisplay_);
-      const index = this.observers_.indexOf(observer);
-      observations[index] = isIntersecting;
+      observations[index] = value;
       const newDisplay = computeDisplay(observations, this.isDocDisplay_);
-      notifyIfChanged(callbacks, newDisplay, oldDisplay);
+      notifyIfChanged(callbacks, target, newDisplay, oldDisplay);
+    } else {
+      observations[index] = value;
     }
   }
 }
@@ -223,18 +381,6 @@ function getObserver(target) {
 }
 
 /**
- * @param {number} length
- * @return {!Array<number>}
- */
-function emptyObservations(length) {
-  const result = new Array(length);
-  for (let i = 0; i < length; i++) {
-    result[i] = null;
-  }
-  return result;
-}
-
-/**
  * @param {?Array<boolean>} observations
  * @param {boolean} isDocDisplay
  * @return {?boolean}
@@ -243,7 +389,7 @@ function computeDisplay(observations, isDocDisplay) {
   if (!isDocDisplay) {
     return false;
   }
-  if (!observations) {
+  if (!observations || observations.length == 0) {
     // Unknown yet.
     return null;
   }
@@ -283,25 +429,36 @@ function displayReducer(acc, value) {
 }
 
 /**
+ * @param {!Element} container
+ * @param {!Element} child
+ * @return {boolean}
+ */
+function containsNotSelf(container, child) {
+  return container != null && child !== container && container.contains(child);
+}
+
+/**
  * @param {!Array<function(boolean)>} callbacks
+ * @param {!Element} target
  * @param {boolean} newDisplay
  * @param {boolean} oldDisplay
  */
-function notifyIfChanged(callbacks, newDisplay, oldDisplay) {
+function notifyIfChanged(callbacks, target, newDisplay, oldDisplay) {
   if (newDisplay != null && newDisplay !== oldDisplay) {
     for (let i = 0; i < callbacks.length; i++) {
-      callCallbackNoInline(callbacks[i], newDisplay);
+      callCallbackNoInline(callbacks[i], target, newDisplay);
     }
   }
 }
 
 /**
  * @param {!ObserverCallbackDef} callback
- * @param {../layout-rect.LayoutSizeDef} size
+ * @param {!Element} target
+ * @param {boolean} isDisplayed
  */
-function callCallbackNoInline(callback, size) {
+function callCallbackNoInline(callback, target, isDisplayed) {
   try {
-    callback(size);
+    callback(isDisplayed, target);
   } catch (e) {
     rethrowAsync(e);
   }
