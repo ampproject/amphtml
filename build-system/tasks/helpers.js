@@ -402,13 +402,6 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
   const esbuildBabelPlugin = {
     name: 'babel',
     async setup(build) {
-      const updateVersion = (contents) => {
-        return contents.replace(
-          /\$internalRuntimeVersion\$/g,
-          internalRuntimeVersion
-        );
-      };
-
       const transformContents = async ({file, contents}) => {
         const babelOptions = babel.loadOptions({
           caller: {name: 'unminified'},
@@ -416,7 +409,7 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
           sourceFileName: path.relative(process.cwd(), file.path),
         });
         const result = await babel.transformAsync(contents, babelOptions);
-        return {contents: updateVersion(result.code)};
+        return {contents: result.code};
       };
 
       build.onLoad({filter: /.*/, namespace: ''}, async (file) => {
