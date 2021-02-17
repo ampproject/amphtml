@@ -59,6 +59,7 @@ function getUnminifiedConfig() {
     compact: false,
     plugins: unminifiedPlugins,
     presets: unminifiedPresets,
+    sourceMaps: 'inline',
   };
 }
 
