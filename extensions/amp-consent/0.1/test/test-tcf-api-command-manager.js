@@ -55,6 +55,7 @@ describes.realWin(
           getMergedSharedData: (opt_policy) => {
             return Promise.resolve(mockSharedData);
           },
+          setOnPolicyChange: window.sandbox.spy(),
         };
       });
 
@@ -100,6 +101,22 @@ describes.realWin(
           errorSpy.resetHistory();
 
           msg.__tcfapiCall.version = 2;
+          expect(tcfApiCommandManager.isValidTcfApiCall_(msg.__tcfapiCall)).to
+            .be.true;
+          expect(errorSpy).to.not.be.called;
+        });
+
+        it('allows parameter value in removeEventListener command', () => {
+          tcfApiCommandManager = new TcfApiCommandManager(mockPolicyManager);
+          msg = {
+            __tcfapiCall: {
+              'command': 'removeEventListener',
+              'parameter': '30',
+              'version': 2,
+              'callId': 'callId',
+            },
+          };
+          const errorSpy = env.sandbox.stub(user(), 'error');
           expect(tcfApiCommandManager.isValidTcfApiCall_(msg.__tcfapiCall)).to
             .be.true;
           expect(errorSpy).to.not.be.called;
@@ -227,6 +244,192 @@ describes.realWin(
               ),
               true
             )
+          );
+        });
+      });
+
+      describe('addEventListener', () => {
+        it(
+          'responds to changes in policy manager' +
+            ' only after command has been sent',
+          async () => {
+            data = getData('addEventListener', 'callId');
+            tcfApiCommandManager = new TcfApiCommandManager(mockPolicyManager);
+            const getConsentsSpy = env.sandbox.spy(
+              tcfApiCommandManager,
+              'getTcDataPromises_'
+            );
+
+            // Fake a TcData change
+            tcfApiCommandManager.handleTcDataChange_();
+            await macroTask();
+            expect(getConsentsSpy).to.not.be.called;
+
+            // Fake responding to event
+            tcfApiCommandManager.handleTcfCommand(data, mockWin);
+
+            tcfApiCommandManager.handleTcDataChange_();
+            await macroTask();
+            expect(getConsentsSpy).to.be.calledOnce;
+
+            tcfApiCommandManager.handleTcDataChange_();
+            await macroTask();
+            expect(getConsentsSpy).to.be.calledTwice;
+          }
+        );
+
+        it('sends minimal TcData on TcString change', async () => {
+          callId = 'callId';
+          data = getData('addEventListener', callId);
+          mockTcString = 'newTcString';
+          tcfApiCommandManager = new TcfApiCommandManager(mockPolicyManager);
+
+          // Start listening for changes
+          tcfApiCommandManager.handleTcfCommand(data, mockWin);
+
+          tcfApiCommandManager.handleTcDataChange_();
+          await macroTask();
+
+          const postMessageArgs = mockWin.postMessage.args[0];
+          expect(postMessageArgs[0]).to.deep.equals(
+            getTcfApiReturn(
+              callId,
+              tcfApiCommandManager.getMinimalTcDataForTesting(
+                mockMetadata,
+                mockSharedData,
+                mockTcString,
+                0
+              ),
+              true
+            )
+          );
+        });
+
+        it('does not send TcData when TcString is the same', async () => {
+          data = getData('addEventListener', 'callId');
+          mockTcString = 'prevTcString';
+          tcfApiCommandManager = new TcfApiCommandManager(mockPolicyManager);
+          tcfApiCommandManager.currentTcString_ = 'prevTcString';
+          tcfApiCommandManager.handleTcfCommand(data, mockWin);
+
+          // Fake a TcData change
+          tcfApiCommandManager.handleTcDataChange_();
+          await macroTask();
+          expect(mockWin.postMessage).to.not.be.called;
+        });
+
+        it('does not send TcData when TcString is null', async () => {
+          data = getData('addEventListener', 'callId');
+          mockTcString = null;
+          tcfApiCommandManager = new TcfApiCommandManager(mockPolicyManager);
+          tcfApiCommandManager.currentTcString_ = 'prevTcString';
+          tcfApiCommandManager.handleTcfCommand(data, mockWin);
+
+          // Fake a TcData change
+          tcfApiCommandManager.handleTcDataChange_();
+          await macroTask();
+          expect(mockWin.postMessage).to.not.be.called;
+        });
+
+        it('creates listenerIds for each callback and sends TcData to each', async () => {
+          callId = 'callId';
+          mockTcString = 'tcString';
+          tcfApiCommandManager = new TcfApiCommandManager(mockPolicyManager);
+          for (let listenerId = 0; listenerId < 4; listenerId++) {
+            data = getData('addEventListener', `${callId}${listenerId}`);
+            tcfApiCommandManager.handleTcfCommand(data, mockWin);
+            expect(tcfApiCommandManager.changeListeners_[listenerId]).to.not.be
+              .null;
+          }
+
+          // Fake a TcData change
+          tcfApiCommandManager.handleTcDataChange_();
+          await macroTask();
+
+          for (let listenerId = 0; listenerId < 4; listenerId++) {
+            const postMessageArgs = mockWin.postMessage.args[listenerId];
+            expect(postMessageArgs[0]).to.deep.equals(
+              getTcfApiReturn(
+                `${callId}${listenerId}`,
+                tcfApiCommandManager.getMinimalTcDataForTesting(
+                  mockMetadata,
+                  mockSharedData,
+                  mockTcString,
+                  listenerId
+                ),
+                true
+              )
+            );
+          }
+        });
+      });
+
+      describe('removeEventListener', () => {
+        it('removes listenerId and listener', async () => {
+          callId = 'callId';
+          mockTcString = 'tcString';
+          tcfApiCommandManager = new TcfApiCommandManager(mockPolicyManager);
+
+          // Register listener
+          data = getData('addEventListener', `${callId}`);
+          tcfApiCommandManager.handleTcfCommand(data, mockWin);
+          expect(
+            Object.keys(tcfApiCommandManager.changeListeners_).length
+          ).to.equal(1);
+          tcfApiCommandManager.handleTcDataChange_();
+          await macroTask();
+          expect(mockWin.postMessage).to.be.calledOnce;
+
+          // Remove listener
+          data = getData('removeEventListener', `${callId}`, '0');
+          tcfApiCommandManager.handleTcfCommand(data, mockWin);
+          expect(
+            Object.keys(tcfApiCommandManager.changeListeners_).length
+          ).to.equal(0);
+        });
+
+        it('sends undefined returnValue', async () => {
+          callId = 'callId';
+          mockTcString = 'tcString';
+          tcfApiCommandManager = new TcfApiCommandManager(mockPolicyManager);
+
+          // Register listener
+          data = getData('addEventListener', `${callId}`);
+          tcfApiCommandManager.handleTcfCommand(data, mockWin);
+          tcfApiCommandManager.handleTcDataChange_();
+          await macroTask();
+
+          // Remove listener
+          mockWin.postMessage.resetHistory();
+          data = getData('removeEventListener', `${callId}`, '0');
+          tcfApiCommandManager.handleTcfCommand(data, mockWin);
+          const postMessageArgs = mockWin.postMessage.args[0];
+          expect(postMessageArgs[0]).to.deep.equal(
+            getTcfApiReturn(callId, undefined, true)
+          );
+        });
+
+        it('handles incorrect listnerId', async () => {
+          callId = 'callId';
+          mockTcString = 'tcString';
+          tcfApiCommandManager = new TcfApiCommandManager(mockPolicyManager);
+
+          // Register listener
+          data = getData('addEventListener', `${callId}`);
+          tcfApiCommandManager.handleTcfCommand(data, mockWin);
+          tcfApiCommandManager.handleTcDataChange_();
+          await macroTask();
+
+          // Remove listener
+          mockWin.postMessage.resetHistory();
+          data = getData('removeEventListener', `${callId}`, '1');
+          tcfApiCommandManager.handleTcfCommand(data, mockWin);
+          const postMessageArgs = mockWin.postMessage.args[0];
+          expect(
+            Object.keys(tcfApiCommandManager.changeListeners_).length
+          ).to.equal(1);
+          expect(postMessageArgs[0]).to.deep.equal(
+            getTcfApiReturn(callId, undefined, false)
           );
         });
       });
