@@ -169,7 +169,6 @@ export class DisplayObserver {
 
     this.containers_.push(container);
     this.containerRoots_.set(container, root);
-    // QQQ: externalize callback
     this.observe(container, this.containerObserved_);
   }
 

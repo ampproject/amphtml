@@ -562,7 +562,7 @@ class AmpLightbox extends AMP.BaseElement {
     if (!this.active_) {
       return;
     }
-    unregisterContainer(this.element, this.container_);
+    unregisterContainer(this.element);
     if (this.isScrollable_) {
       setStyle(this.element, 'webkitOverflowScrolling', '');
     }
