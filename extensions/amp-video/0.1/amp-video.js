@@ -225,7 +225,7 @@ export class AmpVideo extends AMP.BaseElement {
 
     this.video_ = element.ownerDocument.createElement('video');
     // Manage video if the sources contain bitrate or amp-orig-src will be expanded to multiple bitrates.
-    if (this.isManagedByBitrate_ && !this.isPlaceholderVideo_(this.video_)) {
+    if (this.isManagedByBitrate_ && !this.isManagedByPool_()) {
       getBitrateManager(this.win).manage(this.video_);
     }
 
@@ -666,6 +666,12 @@ export class AmpVideo extends AMP.BaseElement {
       getBitrateManager(this.win).manage(this.video_);
     }
     // When source changes, video needs to trigger loaded again.
+    if (this.video_.readyState >= 1) {
+      this.onVideoLoaded_();
+      return;
+    }
+    // Video might not have the sources yet, so instead of loadPromise (which would fail),
+    // we listen for loadedmetadata.
     listenOncePromise(this.video_, 'loadedmetadata').then(() =>
       this.onVideoLoaded_()
     );
@@ -798,18 +804,6 @@ export class AmpVideo extends AMP.BaseElement {
    */
   isManagedByPool_() {
     return this.element.classList.contains('i-amphtml-poolbound');
-  }
-
-  /**
-   * Whether the video is just a placeholder and meant to be overriden
-   * @param {!Element} videoEl
-   * @return {boolean}
-   */
-  isPlaceholderVideo_(videoEl) {
-    if (!this.isManagedByPool_()) {
-      return false;
-    }
-    return !videoEl.classList.contains('i-amphtml-pool-media');
   }
 
   /**
