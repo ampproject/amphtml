@@ -38,6 +38,9 @@ const BITRATE_BY_EFFECTIVE_TYPE = {
 /** @const {number} The percentage that videos need to be buffered to not downgrade them */
 const BUFFERED_THRESHOLD_PERCENTAGE = 0.8;
 
+/** @const {number} The time it takes for a slow video to start loading to get downgraded */
+const SLOW_LOADING_THRESHOLD_MS = 1000;
+
 /** @type {!BitrateManager|undefined} */
 let instance;
 /**
@@ -94,15 +97,20 @@ export class BitrateManager {
    * @param {!Element} video
    */
   manage(video) {
+    const downgradeVideo = () => {
+      console.log('downgrade video');
+      const current = currentSource(video);
+      this.acceptableBitrate_ = current.bitrate_ - 1;
+      if (this.switchToLowerBitrate_(video, current.bitrate_)) {
+        this.updateOtherManagedAndPausedVideos_();
+      }
+    };
+    console.log(video);
+    onSlowLoad(video, () => downgradeVideo());
     if (video.changedSources) {
       return;
     }
-    onNontrivialWait(video, () => {
-      const current = currentSource(video);
-      this.acceptableBitrate_ = current.bitrate_ - 1;
-      this.switchToLowerBitrate_(video, current.bitrate_);
-      this.updateOtherManagedAndPausedVideos_();
-    });
+    onNontrivialWait(video, () => downgradeVideo());
     video.changedSources = () => {
       this.sortSources_(video);
     };
@@ -207,12 +215,13 @@ export class BitrateManager {
    * This should be called if the video is currently in waiting mode.
    * @param {!Element} video
    * @param {number} currentBitrate
+   * @return {boolean}
    * @private
    */
   switchToLowerBitrate_(video, currentBitrate) {
     if (!this.hasLowerBitrate_(video, currentBitrate)) {
       dev().fine(TAG, 'No lower bitrate available');
-      return;
+      return false;
     }
     const {currentTime} = video;
     video.pause();
@@ -224,6 +233,7 @@ export class BitrateManager {
       video.play();
       dev().fine(TAG, 'Playing at lower bitrate %s', video.currentSrc);
     });
+    return true;
   }
 
   /**
@@ -271,6 +281,26 @@ function onNontrivialWait(video, callback) {
       unlisten();
       callback();
     }, 100);
+  });
+}
+
+/**
+ * @param {!Element} video
+ * @param {function()} callback
+ */
+function onSlowLoad(video, callback) {
+  console.log('adding onSlowLoad listener');
+  listen(video, 'loadstart', () => {
+    let timer = null;
+    const unlisten = listenOnce(video, 'loadeddata', () => {
+      console.log('loadeddata');
+      clearTimeout(timer);
+    });
+    timer = setTimeout(() => {
+      console.log('ran callback after', SLOW_LOADING_THRESHOLD_MS);
+      unlisten();
+      callback();
+    }, SLOW_LOADING_THRESHOLD_MS);
   });
 }
 
