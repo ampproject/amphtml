@@ -454,7 +454,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   isPageAttachmentOutlinkV2ExperimentOn_() {
-    return true; //TODO isExperimentOn(this.win, 'amp-story-page-attachment-outlink-v2');
+    return isExperimentOn(this.win, 'amp-story-page-attachment-outlink-v2');
   }
 
   /**
