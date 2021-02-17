@@ -121,10 +121,15 @@ export class AmpIframely extends AMP.BaseElement {
         this.constructSrc_('/thumbnail'),
         this.options_
       );
-      return createElementWithAttributes(this.element.ownerDocument, 'img', {
-        'src': src,
-        'placeholder': '',
-      });
+      return createElementWithAttributes(
+        this.element.ownerDocument,
+        'amp-img',
+        {
+          'src': src,
+          'placeholder': '',
+          'layout': 'fill',
+        }
+      );
     }
     return null;
   }
