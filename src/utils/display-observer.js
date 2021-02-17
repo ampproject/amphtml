@@ -216,7 +216,7 @@ export class DisplayObserver {
 
   /**
    * @param {!Element} target
-   * @param {function(boolean)} callback
+   * @param {!ObserverCallbackDef} callback
    */
   observe(target, callback) {
     let callbacks = this.targetObserverCallbacks_.get(target);
@@ -260,7 +260,7 @@ export class DisplayObserver {
 
   /**
    * @param {!Element} target
-   * @param {function()} callback
+   * @param {!ObserverCallbackDef} callback
    */
   unobserve(target, callback) {
     const callbacks = this.targetObserverCallbacks_.get(target);
