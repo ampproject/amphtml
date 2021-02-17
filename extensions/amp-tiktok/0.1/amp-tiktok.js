@@ -21,7 +21,11 @@ import {
   createElementWithAttributes,
   removeElement,
 } from '../../../src/dom';
+import {debounce} from '../../../src/utils/rate-limit';
+import {getData, listen} from '../../../src/event-helper';
 import {measureIntersection} from '../../../src/utils/intersection';
+import {resetStyles, setStyle} from '../../../src/style';
+import {tryParseJson} from '../../../src/json';
 
 export class AmpTiktok extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -34,11 +38,31 @@ export class AmpTiktok extends AMP.BaseElement {
     /** @private {string} */
     this.videoId_ = null;
 
-    /** @private {string} */
-    this.oEmbedRequestUrl_ = null;
+    /** @private {?Function}*/
+    this.unlistenMessage_ = null;
 
-    /** @private {Promise} */
-    this.oEmbedResponsePromise_ = null;
+    this.resizeOuter_ = debounce(
+      this.win,
+      (height) => {
+        this.applyFillContent(this.iframe_);
+        this.forceChangeHeight(height);
+      },
+      500
+    );
+  }
+
+  /**
+   * @param {boolean=} opt_onLayout
+   * @override
+   */
+  preconnectCallback(opt_onLayout) {
+    //See
+    //https://developers.tiktok.com/doc/Embed
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://www.tiktok.com',
+      opt_onLayout
+    );
   }
 
   /** @override */
@@ -46,7 +70,6 @@ export class AmpTiktok extends AMP.BaseElement {
     const {src} = this.element.dataset;
     if (src) {
       this.videoId_ = src.replace(/^((.+\/)?)(\d+)\/?$/, (_, _1, _2, id) => id);
-      this.oEmbedRequestUrl_ = this.videoId_ !== src ? src : null;
     } else {
       const blockquoteOrNull = childElementByTag(this.element, 'blockquote');
       if (
@@ -57,80 +80,61 @@ export class AmpTiktok extends AMP.BaseElement {
         return;
       }
       this.videoId_ = blockquoteOrNull.dataset.videoId;
-      this.oEmbedRequestUrl_ = blockquoteOrNull.dataset.cite;
     }
   }
 
   /** @override */
   layoutCallback() {
-    const {locale} = this.element.dataset;
-    const iframeUrl = `https://www.tiktok.com/embed/v2/${encodeURIComponent(
+    const iframe = this.element.ownerDocument.createElement('iframe');
+    const src = `https://www.tiktok.com/embed/v2/${encodeURIComponent(
       this.videoId_
     )}?lang=${encodeURIComponent(locale)}`;
+    this.iframe_ = iframe;
 
-    const iframe = createElementWithAttributes(
-      this.element.ownerDocument,
-      'iframe',
-      {
-        'src': iframeUrl,
-        'name': '',
-        'aria-title': 'Tiktok',
-        'frameborder': '0',
-      }
+    this.unlistenMessage_ = listen(
+      this.win,
+      'message',
+      this.handleTiktokMessages_.bind(this)
     );
 
-    Promise.resolve(this.oEmbedResponsePromise_).then((data) => {
-      if (data && data.title) {
-        iframe.setAttribute('aria-title', `TikTok: ${data.title}`);
-      }
-    });
+    const {locale} = this.element.dataset;
+
+    this.iframe_.setAttribute('src', src);
+    this.iframe_.setAttribute('name', '__tt_embed__v$');
+    this.iframe_.setAttribute('aria-title', 'Tiktok');
+    this.iframe_.setAttribute('frameborder', '0');
 
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
-    this.iframe_ = iframe;
   }
 
-  /** @override */
-  createPlaceholderCallback() {
-    if (!this.oEmbedRequestUrl_) {
-      return null;
-      console.log('no oembed url');
+  /**
+   * @param {!Event} event
+   * @private
+   */
+  handleTiktokMessages_(event) {
+    if (
+      event.origin != 'https://www.tiktok.com' ||
+      event.source != this.iframe_.contentWindow
+    ) {
+      return;
     }
-
-    const placeholder = document.createElement('div');
-    placeholder.setAttribute('placeholder', '');
-    placeholder.setAttribute('style', 'background: rgba(220, 220, 220, 0.6');
-
-    const oEmbedRequestUrl = encodeURIComponent(this.oEmbedRequestUrl_);
-    this.oEmbedResponsePromise_ = Services.xhrFor(this.win)
-      .fetchJson(`https://www.tiktok.com/oembed?url=${oEmbedRequestUrl}`)
-      .then((response) => response.json())
-      .then((data) => {
-        const {'thumbnail_url': thumbnailUrl} = data;
-        if (thumbnailUrl) {
-          const img = createElementWithAttributes(
-            this.element.ownerDocument,
-            'img',
-            {
-              'src': thumbnailUrl,
-              'placeholder': thumbnailUrl,
-              'style':
-                'aspect-ratio: 0.5625;' +
-                'left: 1px;' +
-                'top: 1px;' +
-                'width: calc(100% - 2px',
-            }
-          );
-
-          if (placeholder.parentElement) {
-            placeholder.appendChild(img);
-          }
-        }
-        console.log('thumbnail: ' + thumbnailUrl);
-        return data;
-      });
-
-    return placeholder;
+    const data = tryParseJson(getData(event));
+    if (data === undefined) {
+      return;
+    }
+    if (data['height']) {
+      resetStyles(this.iframe_, [
+        'width',
+        'height',
+        'position',
+        'opacity',
+        'pointer-event',
+      ]);
+      this.resizeOuter_(data['height']);
+      setStyle(this.iframe_, 'width', `${data['width']}px`);
+      setStyle(this.iframe_, 'height', `${data['height']}px`);
+    }
   }
 
   /** @override */
@@ -138,6 +142,9 @@ export class AmpTiktok extends AMP.BaseElement {
     if (this.iframe_) {
       removeElement(this.iframe_);
       this.iframe_ = null;
+    }
+    if (this.unlistenMessage_) {
+      this.unlistenMessage_();
     }
     return true; // layout again
   }
