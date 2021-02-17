@@ -114,13 +114,15 @@ function SidebarWithRef(
   useEffect(() => {
     const sidebarElement = sidebarRef.current;
     const backdropElement = backdropRef.current;
-    if (!sidebarElement || !sidebarElement.ownerDocument || !backdropElement) {
+    if (!sidebarElement || !backdropElement) {
       return;
     }
-
     const document = sidebarElement.ownerDocument;
+    if (!document) {
+      return;
+    }
     const keydownCallback = (event) => {
-      if (event.key == Keys.ESCAPE) {
+      if (event.key === Keys.ESCAPE) {
         event.preventDefault();
         close();
       }
