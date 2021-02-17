@@ -1226,11 +1226,10 @@ describes.realWin(
             height: 90,
           },
           null,
-          function (element, impl) {
-            impl.isManagedByBitrate_ = true;
-          }
+          null
         );
         const impl = await v.getImpl(false);
+        impl.hasBitrateSources_ = true;
         impl.resetOnDomChange();
 
         expect(impl.video_.changedSources).to.not.be.undefined;

@@ -616,6 +616,54 @@ describe('Layout', () => {
   });
 });
 
+describes.realWin('ampshared.css', {amp: true}, function (env) {
+  let win, doc;
+  let element;
+
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+
+    element = doc.createElement('amp-element');
+    element.classList.add('i-amphtml-element');
+    doc.body.appendChild(element);
+  });
+
+  describe
+    .configure()
+    .enableIe()
+    .run('overflow', function () {
+      let overflow;
+
+      beforeEach(() => {
+        overflow = doc.createElement('div');
+        overflow.setAttribute('overflow', '');
+        overflow.style.height = '20px';
+        element.appendChild(overflow);
+      });
+
+      it('should not allow overflow element to distort a size-defined layout', () => {
+        element.setAttribute('layout', 'responsive');
+        element.setAttribute('width', 100);
+        element.setAttribute('height', 100);
+        expect(applyStaticLayout(element)).to.equal(Layout.RESPONSIVE);
+
+        expect(element.offsetWidth).to.equal(element.offsetHeight);
+        expect(overflow.offsetHeight).to.equal(20);
+        expect(win.getComputedStyle(overflow).position).to.equal('absolute');
+      });
+
+      it('should allow overflow element to distort container layout', () => {
+        element.setAttribute('layout', 'container');
+        overflow.text = 'test';
+        expect(applyStaticLayout(element)).to.equal(Layout.CONTAINER);
+
+        expect(element.offsetHeight).to.equal(overflow.offsetHeight);
+        expect(win.getComputedStyle(overflow).position).to.equal('relative');
+      });
+    });
+});
+
 describes.realWin('Layout: aspect-ratio CSS', {amp: true}, function (env) {
   let win, doc;
   let element;

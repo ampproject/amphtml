@@ -119,7 +119,7 @@ function SidebarWithRef(
           layout={true}
           paint={true}
           part="sidebar"
-          wrapperClassName={`${classes.sidebarClass} ${
+          wrapperClassName={`${classes.sidebar} ${
             classes.defaultSidebarStyles
           } ${side === Side.LEFT ? classes.left : classes.right}`}
           role="menu"
@@ -134,11 +134,13 @@ function SidebarWithRef(
           onClick={() => close()}
           part="backdrop"
           style={backdropStyle}
-          className={`${backdropClassName ?? ''} ${classes.backdropClass} ${
+          className={`${backdropClassName ?? ''} ${classes.backdrop} ${
             classes.defaultBackdropStyles
           }`}
           hidden={!side}
-        ></div>
+        >
+          <div className={classes.backdropOverscrollBlocker}></div>
+        </div>
       </>
     )
   );
