@@ -15,6 +15,7 @@
  */
 
 import '../amp-google-assistant-assistjs';
+import {Services} from '../../../../src/services';
 import {addAttributesToElement} from '../../../../src/dom';
 
 describes.realWin(
@@ -25,26 +26,39 @@ describes.realWin(
     },
   },
   (env) => {
-    let win;
+    let document;
     let configElement;
     let voiceButtonElement;
 
     beforeEach(() => {
-      win = env.win;
+      document = env.win.document;
 
-      configElement = win.document.createElement(
+      const configServiceMock = env.sandbox.mock(
+        Services.assistjsConfigServiceForDoc(document)
+      );
+      configServiceMock
+        .expects('getWidgetIframeUrl')
+        .withExactArgs('voicebutton')
+        .once();
+
+      configElement = document.createElement(
         'amp-google-assistant-assistjs-config'
       );
       configElement.innerHTML =
         '<script type="application/json">{"devMode": true, "projectId": "aog-assistjs-demos", "hostUrl": "https://toidemo2.web.app"}</script>';
       addAttributesToElement(configElement, {layout: 'nodisplay'});
-      win.document.body.appendChild(configElement);
+      document.body.appendChild(configElement);
 
-      voiceButtonElement = win.document.createElement(
+      voiceButtonElement = document.createElement(
         'amp-google-assistant-assistjs-voice-button'
       );
       voiceButtonElement.setAttribute('id', 'voice-button');
-      win.document.body.appendChild(voiceButtonElement);
+      document.body.appendChild(voiceButtonElement);
+    });
+
+    afterEach(() => {
+      document.body.removeChild(configElement);
+      document.body.removeChild(voiceButtonElement);
     });
 
     it('should have id "voice button" when built', () => {
