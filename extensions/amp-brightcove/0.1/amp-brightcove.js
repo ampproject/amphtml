@@ -16,7 +16,7 @@
 
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
-import {VideoEvents} from '../../../src/video-interface';
+import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
 import {addParamToUrl, addParamsToUrl} from '../../../src/url';
 import {
   createFrameFor,
@@ -43,6 +43,7 @@ import {
 import {getData, listen} from '../../../src/event-helper';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {resetStyles, setStyles} from '../../../src/style';
 
 /** @private @const {string} */
 const TAG = 'amp-brightcove';
@@ -100,6 +101,9 @@ class AmpBrightcove extends AMP.BaseElement {
 
     /**@private {?string} */
     this.consentString_ = null;
+
+    /** @private {?Promise<void>} */
+    this.initialPlayResolver_ = null;
   }
 
   /** @override */
@@ -228,17 +232,6 @@ class AmpBrightcove extends AMP.BaseElement {
       return;
     }
 
-    if (eventType === 'ready') {
-      this.onReady_(data);
-    }
-
-    if (eventType === 'playing') {
-      this.playing_ = true;
-    }
-    if (eventType === 'pause') {
-      this.playing_ = false;
-    }
-
     if (data['ct']) {
       this.currentTime_ = data['ct'];
     }
@@ -247,6 +240,27 @@ class AmpBrightcove extends AMP.BaseElement {
     }
     if (data['dur']) {
       this.duration_ = data['dur'];
+    }
+
+    if (eventType === 'ready') {
+      this.maybePauseInitially_(data).then(() => {
+        this.onReady_(data);
+      });
+      return;
+    }
+
+    if (eventType === 'playing') {
+      if (this.initialPlayResolver_) {
+        this.initialPlayResolver_();
+      }
+      this.playing_ = true;
+    }
+    if (eventType === 'pause') {
+      this.playing_ = false;
+    }
+
+    if (!this.hasAmpSupport_) {
+      return;
     }
 
     if (
@@ -272,6 +286,44 @@ class AmpBrightcove extends AMP.BaseElement {
       dispatchCustomEvent(element, mutedOrUnmutedEvent(this.muted_));
       return;
     }
+  }
+
+  /**
+   * @param {!JsonObject} readyMessageData
+   * @return {!Promise<void>}
+   * @private
+   */
+  maybePauseInitially_(readyMessageData) {
+    if (
+      // Only muted videos are autoplayed by the inner document, so any others
+      // can be displayed immediately.
+      readyMessageData.muted !== true ||
+      // Autoplay videos don't need to be paused since a host-level mask is
+      // created and we play them anyway.
+      this.element.hasAttribute(VideoAttributes.AUTOPLAY)
+    ) {
+      return Promise.resolve();
+    }
+
+    this.mutateElement(() => {
+      setStyles(this.iframe_, {'pointer-events': 'none', 'opacity': 0});
+    });
+
+    const pauseInitially = () => {
+      this.initialPlayResolver_ = null;
+      this.pause();
+      this.mutateElement(() => {
+        resetStyles(this.iframe_, ['pointer-events', 'opacity']);
+      });
+    };
+
+    const {promise, resolve} = new Deferred();
+
+    this.initialPlayResolver_ = resolve;
+
+    return Services.timerFor(this.win)
+      .timeoutPromise(2000, promise)
+      .then(pauseInitially, pauseInitially);
   }
 
   /**
