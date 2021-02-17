@@ -70,11 +70,11 @@ import {getLocalizationService} from './amp-story-localization-service';
 import {getLogEntries} from './logging';
 import {getMediaPerformanceMetricsService} from './media-performance-metrics-service';
 import {getMode} from '../../../src/mode';
+import {getStyle, px, setImportantStyles, toggle} from '../../../src/style';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {isPrerenderActivePage} from './prerender-active-page';
 import {listen} from '../../../src/event-helper';
-import {px, setImportantStyles, toggle} from '../../../src/style';
 import {renderPageDescription} from './semantic-render';
 import {setTextBackgroundColor} from './utils';
 import {toArray} from '../../../src/types';
@@ -454,7 +454,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   isPageAttachmentOutlinkV2ExperimentOn_() {
-    return isExperimentOn(this.win, 'amp-story-page-attachment-outlink-v2');
+    return true; //TODO isExperimentOn(this.win, 'amp-story-page-attachment-outlink-v2');
   }
 
   /**
@@ -1856,20 +1856,11 @@ export class AmpStoryPage extends AMP.BaseElement {
         this.openAttachment()
       );
 
-      const ctaChipEl = this.openAttachmentEl_.querySelector(
-        '.i-amphtml-story-page-attachment-outlink-chip'
-      );
       const textEl = this.openAttachmentEl_.querySelector(
         '.i-amphtml-story-page-attachment-outlink-label'
       );
       const ctaImgEl = this.openAttachmentEl_.querySelector(
         '.i-amphtml-story-page-attachment-outlink-image'
-      );
-      const barLeftEl = this.openAttachmentEl_.querySelector(
-        '.i-amphtml-story-page-open-attachment-outlink-bar-left'
-      );
-      const barRightEl = this.openAttachmentEl_.querySelector(
-        '.i-amphtml-story-page-open-attachment-outlink-bar-right'
       );
 
       const openLabelAttr = attachmentEl.getAttribute('cta-text');
@@ -1879,15 +1870,30 @@ export class AmpStoryPage extends AMP.BaseElement {
           LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
         );
 
+      const theme = attachmentEl.getAttribute('theme');
+      if (theme && AttachmentTheme.DARK === theme.toLowerCase()) {
+        this.mutateElement(() =>
+          this.openAttachmentEl_.setAttribute('theme', 'dark')
+        );
+      }
+
       this.mutateElement(() => {
-        const theme = attachmentEl.getAttribute('theme');
+        const ctaAccentColor = getStyle(attachmentEl, '--cta-accent-color');
+        if (ctaAccentColor) {
+          this.mutateElement(() =>
+            setImportantStyles(this.openAttachmentEl_, {
+              '--cta-accent-color': ctaAccentColor,
+            })
+          );
+        }
+
         const ctaImgAttr = attachmentEl.getAttribute('cta-img');
         if (ctaImgAttr !== 'none') {
           setImportantStyles(textEl, {
             'padding-left': '10px',
           });
           if (!ctaImgAttr) {
-            if (theme && AttachmentTheme.DARK === theme.toLowerCase()) {
+            if (theme && AttachmentTheme.DARK === theme) {
               ctaImgEl.classList.add(
                 'i-amphtml-story-page-attachment-outlink-dark-link-image'
               );
@@ -1903,31 +1909,6 @@ export class AmpStoryPage extends AMP.BaseElement {
               'background-image': 'url(' + ctaImgAttr + ')',
             });
           }
-        }
-
-        const ctaAccentColor = attachmentEl.getAttribute('cta-accent-color');
-        if (theme && AttachmentTheme.DARK === theme.toLowerCase()) {
-          setImportantStyles(ctaChipEl, {
-            color: 'white',
-            background: ctaAccentColor ? ctaAccentColor : 'black',
-          });
-          setImportantStyles(barRightEl, {
-            background: ctaAccentColor ? ctaAccentColor : 'black',
-          });
-          setImportantStyles(barLeftEl, {
-            background: ctaAccentColor ? ctaAccentColor : 'black',
-          });
-        } else {
-          setImportantStyles(ctaChipEl, {
-            color: ctaAccentColor ? ctaAccentColor : 'black',
-            background: 'white',
-          });
-          setImportantStyles(barRightEl, {
-            background: 'white',
-          });
-          setImportantStyles(barLeftEl, {
-            background: 'white',
-          });
         }
 
         textEl.innerHTML = openLabel;

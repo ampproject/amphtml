@@ -220,13 +220,25 @@ amp-story-page .i-amphtml-story-page-attachment-outlink-arrow {
 }
 
 amp-story-page .i-amphtml-story-page-open-attachment-outlink-bar-left {
+  background: white !important;
   left: 6px !important;
   animation: open-attachment-bar-left 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) both !important;
 }
 
 amp-story-page .i-amphtml-story-page-open-attachment-outlink-bar-right {
+  background: white !important;
   right: 6px !important;
   animation: open-attachment-bar-right 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) both !important;
+}
+
+amp-story-page .i-amphtml-story-page-open-attachment[theme="dark"] .i-amphtml-story-page-open-attachment-outlink-bar-right,
+amp-story-page .i-amphtml-story-page-open-attachment[theme="dark"] .i-amphtml-story-page-open-attachment-outlink-bar-left {
+  background: var(--cta-accent-color, black) !important;
+}
+
+amp-story-page .i-amphtml-story-page-open-attachment[theme="dark"] .i-amphtml-story-page-attachment-outlink-chip {
+  background: var(--cta-accent-color, black) !important;
+  color: white !important;
 }
 
 amp-story-page .i-amphtml-story-page-attachment-outlink-chip {
@@ -237,6 +249,13 @@ amp-story-page .i-amphtml-story-page-attachment-outlink-chip {
   height: 16px !important;
   max-width: 243px !important;
   border-radius: 30px !important;
+  background: white !important;
+  color: var(--cta-accent-color, black) !important;
+}
+
+amp-story-page .i-amphtml-story-page-open-attachment[theme="dark"] .i-amphtml-story-page-attachment-outlink-chip {
+  background: var(--cta-accent-color, black) !important;
+  color: white !important;
 }
 
 amp-story-page .i-amphtml-story-page-attachment-outlink-content {
