@@ -19,7 +19,14 @@
     "search": "${basePrefix}search=${search_keyword}&search_cat=${search_category}&search_count=${search_result_count}${baseSuffix}",
     "goal": "${basePrefix}idgoal=${goal_id}${baseSuffix}"
   },
+  "triggers": {
+    "trackPageview": {
+      "on": "visible",
+      "request": "pageview"
+    }
+  },
   "linkers": {
+    "enabled": true,
     "pk_vid": {
       "ids": {
         "vid": "${visitor_id_from_cookie}",
