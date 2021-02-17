@@ -1877,8 +1877,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         );
       }
 
-      this.mutateElement(() => {
-        const ctaAccentColor = getStyle(attachmentEl, '--cta-accent-color');
+      const ctaAccentColor = getStyle(attachmentEl, '--cta-accent-color');
         if (ctaAccentColor) {
           this.mutateElement(() =>
             setImportantStyles(this.openAttachmentEl_, {
@@ -1887,6 +1886,7 @@ export class AmpStoryPage extends AMP.BaseElement {
           );
         }
 
+      this.mutateElement(() => {
         const ctaImgAttr = attachmentEl.getAttribute('cta-img');
         if (ctaImgAttr !== 'none') {
           setImportantStyles(textEl, {
