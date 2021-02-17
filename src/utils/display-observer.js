@@ -75,12 +75,17 @@ export function measureDisplay(target) {
 }
 
 /**
- * QQQQ
+ * Registers the container to provide additional display intersection info
+ * for other targets. Mainly aimed for fixed and/or scrollable containers
+ * that can provide display information in addition to the document flow.
+ *
  * @param {!Element} container
- * @param {!Element} root
+ * @param {?Element=} opt_root The subelement inside the container to be
+ * used as an intersection root. If not specified, the container will be
+ * used as an intersection root.
  */
-export function registerContainer(container, root) {
-  getObserver(container).registerContainer(container, root);
+export function registerContainer(container, opt_root) {
+  getObserver(container).registerContainer(container, opt_root);
 }
 
 /**
@@ -160,15 +165,15 @@ export class DisplayObserver {
 
   /**
    * @param {!Element} container
-   * @param {!Element} root
+   * @param {?Element=} opt_root
    */
-  registerContainer(container, root) {
+  registerContainer(container, opt_root) {
     if (this.containers_.includes(container)) {
       return;
     }
 
     this.containers_.push(container);
-    this.containerRoots_.set(container, root);
+    this.containerRoots_.set(container, opt_root || null);
     this.observe(container, this.containerObserved_);
   }
 
@@ -226,9 +231,13 @@ export class DisplayObserver {
           (i < CONTAINER_OFFSET ||
             containsNotSelf(this.containers_[i - CONTAINER_OFFSET], target))
         ) {
+          // The `null` value will wait for the interection before deciding on
+          // the display value of `false`.
           this.setObservation_(target, i, null, /* callbacks */ null);
           this.observers_[i].observe(target);
         } else {
+          // The `false` value will essentially ignore this observe when
+          // computing the display value.
           this.setObservation_(target, i, false, /* callbacks */ null);
         }
       }
