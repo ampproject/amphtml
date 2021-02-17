@@ -39,7 +39,7 @@ function getUnminifiedConfig() {
     '@babel/preset-env',
     {
       bugfixes: true,
-      modules: 'commonjs',
+      modules: false,
       loose: true,
       targets: {'browsers': ['Last 2 versions']},
     },
