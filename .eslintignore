@@ -1,5 +1,6 @@
 # Output directories
 build/**
+extensions/**/build/**
 dist/**
 dist.3p/**
 dist.tools/**

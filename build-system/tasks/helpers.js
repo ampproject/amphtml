@@ -465,7 +465,7 @@ async function finishBundle(
  * @param {?Object} options
  * @return {!Promise}
  */
-async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
+async function esbuildJs(srcDir, srcFilename, destDir, options) {
   const startTime = Date.now();
   const entryPoint = path.join(srcDir, srcFilename);
   const destFilename = options.toName || srcFilename;
@@ -570,9 +570,11 @@ async function compileJsWithEsbuild(srcDir, srcFilename, destDir, options) {
         outfile: destFile,
         plugins: [plugin],
         minify: options.minify,
+        format: options.outputFormat || undefined,
         target: argv.esm ? 'es6' : 'es5',
         incremental: !!options.watch,
         logLevel: 'silent',
+        external: options.external,
       });
     } else {
       result = await result.rebuild();
@@ -650,10 +652,11 @@ async function minifyWithTerser(destDir, destFilename, options) {
  */
 async function compileJs(srcDir, srcFilename, destDir, options) {
   options = options || {};
+  // TODO
   if (options.minify) {
     return compileMinifiedJs(srcDir, srcFilename, destDir, options);
   } else {
-    return await compileUnminifiedJs(srcDir, srcFilename, destDir, options);
+    return esbuildJs(srcDir, srcFilename, destDir, options);
   }
 }
 
@@ -826,6 +829,7 @@ module.exports = {
   compileJsWithEsbuild,
   doBuildJs,
   endBuildStep,
+  esbuildJs,
   maybePrintCoverageMessage,
   maybeToEsmName,
   mkdirSync,

@@ -33,8 +33,11 @@ const {isCiBuild} = require('../common/ci');
 const {jsifyCssAsync} = require('./css/jsify-css');
 const {log} = require('../common/logging');
 const {maybeToEsmName, compileJs, mkdirSync} = require('./helpers');
+const {parse: pathParse} = require('path');
 const {removeFromClosureBabelCache} = require('../compile/pre-closure-babel');
 const {watch} = require('chokidar');
+const {maybeToEsmName, compileJs, esbuildJs, mkdirSync} = require('./helpers');
+const {watch} = require('gulp');
 
 /**
  * Extensions to build when `--extensions=inabox`.
@@ -80,6 +83,7 @@ const DEFAULT_EXTENSION_SET = ['amp-loader', 'amp-auto-lightbox'];
  *   loadPriority?: string,
  *   cssBinaries?: Array<string>,
  *   extraGlobs?: Array<string>,
+ *   npm?: Array<string>,
  * }}
  */
 const ExtensionOption = {}; // eslint-disable-line no-unused-vars
@@ -109,7 +113,7 @@ function declareExtension(
   extensionsObject,
   includeLatest
 ) {
-  const defaultOptions = {hasCss: false};
+  const defaultOptions = {hasCss: false, npm: undefined};
   const versions = Array.isArray(version) ? version : [version];
   versions.forEach((v) => {
     extensionsObject[`${name}-${v}`] = {
@@ -463,6 +467,10 @@ async function buildExtension(
   if (name === 'amp-bind') {
     await doBuildJs(jsBundles, 'ww.max.js', options);
   }
+  if (options.npm) {
+    mkdirSync(`${path}/build`);
+    await buildNpm(path, name, version, options);
+  }
   if (name === 'amp-analytics') {
     await analyticsVendorConfigs(options);
   }
@@ -517,6 +525,32 @@ function buildExtensionCss(extDir, name, version, options) {
     );
   }
   promises.push(mainCssBinary);
+  return Promise.all(promises);
+}
+
+async function buildNpm(path, name, version, options) {
+  const {binaries, external} = options.npm;
+  const promises = binaries.map((filename) => {
+    const {name} = pathParse(filename);
+    const esm = argv.esm || argv.sxg || false;
+    return esbuildJs(
+      path + '/',
+      filename,
+      `${path}/build`,
+      Object.assign(options, {
+        toName: `${name}${options.minify ? '' : '.max'}.${esm ? 'm' : ''}js`,
+        latestName: '',
+        outputFormat: esm ? 'esm' : 'cjs',
+        wrapper: '',
+        external,
+      })
+    );
+
+    // If an incremental watch build fails, simply return.
+    if (options.errored) {
+      return;
+    }
+  });
   return Promise.all(promises);
 }
 

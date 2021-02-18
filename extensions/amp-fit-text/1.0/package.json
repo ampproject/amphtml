@@ -1,0 +1,29 @@
+{
+  "name": "@ampproject/amp-fit-text",
+  "version": "VERSION",
+  "description": "AMP Fit Text Component",
+  "author": "The AMP HTML Authors",
+  "license": "Apache-2.0",
+  "main": "dist/component.js",
+  "module": "dist/component.mjs",
+  "exports": {
+    ".": {
+      "import": "dist/component.mjs",
+      "require": "dist/component.js"
+    },
+    "preact": {
+      "import": "dist/component.mjs",
+      "require": "dist/component.js"
+    }
+  },
+  "files": ["dist/*"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ampproject/amphtml.git",
+    "directory": "extensions/amp-fit-text/1.0"
+  },
+  "homepage": "https://github.com/ampproject/amphtml/tree/master/extensions/amp-fit-text/1.0",
+  "peerDependencies": {
+    "preact": "^10.2.1"
+  }
+}

@@ -4,6 +4,7 @@
 .babel-cache/
 build/
 .amp-dep-check
+extensions/**/build/
 c
 /dist
 dist.3p
