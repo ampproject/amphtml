@@ -767,7 +767,7 @@ export class GoogleSubscriptionsPlatform {
    * @return {!Promise}
    */
   showMeteringRegwall_() {
-    // TODO: Release/wrap gaa.js so it's compatible with AMP.
+    // eslint-disable-next-line no-undef
     const showRegwall = GaaMeteringRegwall.show;
 
     return (
