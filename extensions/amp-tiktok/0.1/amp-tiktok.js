@@ -115,7 +115,7 @@ export class AmpTiktok extends AMP.BaseElement {
 
     const {locale} = this.element.dataset;
 
-    this.iframe_.setAttribute('src', src);
+    this.iframe_.src = src;
     this.iframe_.setAttribute('name', '__tt_embed__v$');
     this.iframe_.setAttribute('aria-hidden', 'true');
     this.iframe_.setAttribute('frameborder', '0');
@@ -132,6 +132,7 @@ export class AmpTiktok extends AMP.BaseElement {
     });
 
     this.element.appendChild(iframe);
+    return this.loadPromise(iframe);
   }
 
   /**
@@ -160,7 +161,6 @@ export class AmpTiktok extends AMP.BaseElement {
   createPlaceholderCallback() {
     if (!this.oEmbedRequestUrl_) {
       return null;
-      console.log('no oembed url');
     }
 
     const placeholder = document.createElement('div');
@@ -181,10 +181,11 @@ export class AmpTiktok extends AMP.BaseElement {
               'src': thumbnailUrl,
               'placeholder': thumbnailUrl,
               'style':
-                'aspect-ratio: 0.5625;' +
-                'left: 1px;' +
-                'top: 1px;' +
-                'width: calc(100% - 2px',
+                'aspect-ratio: 0.5625; ' +
+                'left: 1px; ' +
+                'top: 1px; ' +
+                'width: calc(100% - 2px); ' +
+                'border-radius: 8px; ',
             }
           );
 
@@ -215,9 +216,6 @@ export class AmpTiktok extends AMP.BaseElement {
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
   }
-
-  /** @override */
-  firstLayoutCompleted() {}
 }
 
 AMP.extension('amp-tiktok', '0.1', (AMP) => {
