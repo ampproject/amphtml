@@ -248,7 +248,8 @@ exports.rules = [
 
       // Autolightboxing dependencies
       'extensions/amp-base-carousel/1.0/base-carousel.js->extensions/amp-lightbox-gallery/1.0/component.js',
-      'extensions/amp-lightbox-gallery/1.0/component.js->extensions/amp-lightbox/1.0/lightbox.js',
+      'extensions/amp-base-carousel/1.0/scroller.js->extensions/amp-lightbox-gallery/1.0/context.js',
+      'extensions/amp-lightbox-gallery/1.0/provider.js->extensions/amp-lightbox/1.0/lightbox.js',
 
       // Facebook components
       'extensions/amp-facebook-page/0.1/amp-facebook-page.js->extensions/amp-facebook/0.1/facebook-loader.js',
