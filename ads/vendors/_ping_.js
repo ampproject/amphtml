@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dev, devAssert, userAssert} from '../../src/log';
+import {devAssert, userAssert} from '../../src/log';
 import {validateData} from '../../3p/3p';
 
 /**
@@ -64,34 +64,9 @@ export function _ping_(global, data) {
     }
     if (data.enableIo) {
       global.context.observeIntersection(function (changes) {
-        /** @type {!Array} */ (changes).forEach(function (c) {
-          dev().info(
-            'AMP-AD',
-            'Intersection: (WxH)' +
-              `${c.intersectionRect.width}x${c.intersectionRect.height}`
-          );
-        });
         // store changes to global.lastIO for testing purpose
         global.ping.lastIO = changes[changes.length - 1];
       });
-    }
-    global.context.getHtml('a', ['href'], function (html) {
-      dev().info('GET-HTML', html);
-    });
-    global.context.getConsentState(function (consentState) {
-      dev().info('GET-CONSENT-STATE', consentState);
-    });
-    if (global.context.consentSharedData) {
-      const TAG = 'consentSharedData';
-      dev().info(TAG, global.context.consentSharedData);
-    }
-    if (global.context.initialConsentValue) {
-      const TAG = 'consentStringValue';
-      dev().info(TAG, global.context.initialConsentValue);
-    }
-    if (global.context.initialConsentMetadata) {
-      const TAG = 'consentMetadata';
-      dev().info(TAG, global.context.initialConsentMetadata);
     }
   } else {
     global.setTimeout(() => {

@@ -312,7 +312,6 @@ export class AccessService {
    */
   start_() {
     if (!this.enabled_) {
-      user().info(TAG, 'Access is disabled - no "id=amp-access" element');
       return this;
     }
     this.startInternal_();
@@ -599,7 +598,6 @@ export class AccessService {
     if (this.reportViewPromise_) {
       return this.reportViewPromise_;
     }
-    dev().fine(TAG, 'start view monitoring');
     this.reportViewPromise_ = this.whenViewed_(timeToView)
       .then(() => {
         // Wait for the most recent authorization flow to complete.
@@ -612,7 +610,6 @@ export class AccessService {
       })
       .catch((reason) => {
         // Ignore - view has been canceled.
-        dev().fine(TAG, 'view cancelled:', reason);
         this.reportViewPromise_ = null;
         throw reason;
       });

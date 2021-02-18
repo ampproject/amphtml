@@ -559,13 +559,6 @@ export class AmpStoryEmbeddedComponent {
         this.setState_(EmbeddedComponentState.HIDDEN, null /** component */);
         break;
       case EmbeddedComponentState.FOCUSED:
-        if (this.state_ !== EmbeddedComponentState.HIDDEN) {
-          dev().warn(
-            TAG,
-            `Invalid component update. Not possible to go from ${this.state_}
-              to ${component.state}`
-          );
-        }
         this.setState_(EmbeddedComponentState.FOCUSED, component);
         break;
       case EmbeddedComponentState.EXPANDED:
@@ -573,12 +566,6 @@ export class AmpStoryEmbeddedComponent {
           this.setState_(EmbeddedComponentState.EXPANDED, component);
         } else if (this.state_ === EmbeddedComponentState.EXPANDED) {
           this.maybeCloseExpandedView_(component.element);
-        } else {
-          dev().warn(
-            TAG,
-            `Invalid component update. Not possible to go from ${this.state_}
-               to ${component.state}`
-          );
         }
         break;
     }
@@ -616,7 +603,6 @@ export class AmpStoryEmbeddedComponent {
           });
         break;
       default:
-        dev().warn(TAG, `EmbeddedComponentState ${this.state_} does not exist`);
         break;
     }
   }

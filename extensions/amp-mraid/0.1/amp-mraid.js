@@ -82,7 +82,6 @@ export class MraidInitializer {
     }
 
     if (getMode().runtime !== 'inabox') {
-      dev().fine(TAG, 'Only supported with Inabox');
       this.handleMismatch_();
       return;
     }

@@ -16,10 +16,7 @@
 
 import './access-vendor';
 import {Deferred} from '../../../src/utils/promise';
-import {dev, userAssert} from '../../../src/log';
-
-/** @const {string} */
-const TAG = 'amp-access-vendor';
+import {userAssert} from '../../../src/log';
 
 /**
  * The adapter for a vendor implementation that implements `AccessVendor`
@@ -84,7 +81,6 @@ export class AccessVendorAdapter {
 
   /** @override */
   authorize() {
-    dev().fine(TAG, 'Start authorization via ', this.vendorName_);
     return this.vendorPromise_.then((vendor) => {
       return vendor.authorize();
     });
@@ -97,7 +93,6 @@ export class AccessVendorAdapter {
 
   /** @override */
   pingback() {
-    dev().fine(TAG, 'Pingback via ', this.vendorName_);
     return this.vendorPromise_.then((vendor) => {
       return vendor.pingback();
     });

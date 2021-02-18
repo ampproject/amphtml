@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import {dev} from '../src/log';
 import {dict} from '../src/utils/object.js';
-import {getMode} from '../src/mode';
 import {once} from '../src/utils/function.js';
 import {parseJson} from '../src/json';
 import {parseUrlDeprecated} from '../src/url';
@@ -64,9 +62,6 @@ const allMetadata = once(() => {
     //    to make it less terrible.
     return parseJson(iframeName);
   } catch (err) {
-    if (!getMode().test) {
-      dev().info('INTEGRATION', 'Could not parse context from:', iframeName);
-    }
     return FALLBACK;
   }
 });

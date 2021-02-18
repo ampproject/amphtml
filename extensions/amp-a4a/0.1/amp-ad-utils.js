@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 import {Services} from '../../../src/services';
-import {dev} from '../../../src/log';
 import {isArray, isObject} from '../../../src/types';
 import {isSecureUrlDeprecated} from '../../../src/url';
 import {parseJson} from '../../../src/json';
-
-const TAG = 'amp-ad-util';
 
 /**
  * Sends a CORS XHR request to the given URL.
@@ -64,20 +61,11 @@ export function getAmpAdMetadata(creative) {
   }
   if (metadataStart < 0) {
     // Couldn't find a metadata blob.
-    dev().warn(
-      TAG,
-      `Could not locate start index for amp meta data in: ${creative}`
-    );
     return null;
   }
   const metadataEnd = creative.lastIndexOf('</script>');
   if (metadataEnd < 0) {
     // Couldn't find a metadata blob.
-    dev().warn(
-      TAG,
-      'Could not locate closing script tag for amp meta data in: %s',
-      creative
-    );
     return null;
   }
   try {
@@ -152,11 +140,6 @@ export function getAmpAdMetadata(creative) {
       creative.slice(metadataEnd + '</script>'.length);
     return metaData;
   } catch (err) {
-    dev().warn(
-      TAG,
-      'Invalid amp metadata: %s',
-      creative.slice(metadataStart + metadataString.length, metadataEnd)
-    );
     return null;
   }
 }

@@ -443,7 +443,6 @@ export function runCandidates(ampdoc, candidates) {
       if (!Criteria.meetsAll(candidate)) {
         return;
       }
-      dev().info(TAG, 'apply', candidate);
       return apply(ampdoc, candidate);
     }, NOOP)
   );
@@ -457,7 +456,6 @@ export function runCandidates(ampdoc, candidates) {
  */
 export function scan(ampdoc, opt_root) {
   if (!isEnabledForDoc(ampdoc)) {
-    dev().info(TAG, 'disabled');
     return;
   }
   const root = opt_root || ampdoc.win.document;

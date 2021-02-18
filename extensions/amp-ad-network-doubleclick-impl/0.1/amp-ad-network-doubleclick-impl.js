@@ -767,12 +767,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       consentTuple.consentState == CONSENT_POLICY_STATE.UNKNOWN &&
       this.element.getAttribute('data-npa-on-unknown-consent') != 'true'
     ) {
-      user().info(TAG, 'Ad request suppressed due to unknown consent');
       this.getAdUrlDeferred.resolve('');
       return Promise.resolve('');
     }
     if (this.iframe && !this.isRefreshing) {
-      dev().warn(TAG, `Frame already exists, sra: ${this.useSra}`);
       this.getAdUrlDeferred.resolve('');
       return Promise.resolve('');
     }
@@ -802,9 +800,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     const targetingExpansionPromise = timerService
       .timeoutPromise(1000, this.expandJsonTargeting_(rtcParamsPromise))
-      .catch(() => {
-        dev().warn(TAG, 'JSON Targeting expansion failed/timed out.');
-      });
+      .catch(() => {});
 
     Promise.all([
       rtcParamsPromise,
@@ -996,7 +992,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         ),
       ATTR: (name) => {
         if (!allowlist[name.toLowerCase()]) {
-          dev().warn('TAG', `Invalid attribute ${name}`);
         } else {
           return this.element.getAttribute(name);
         }
@@ -1055,7 +1050,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   onNetworkFailure(error, adUrl) {
-    dev().info(TAG, 'network error, attempt adding of error parameter', error);
     return {adUrl: maybeAppendErrorParameter(adUrl, 'n')};
   }
 
@@ -1588,7 +1582,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.initiateSraRequests().then(() => {
       checkStillCurrent();
       if (!this.sraDeferred) {
-        dev().warn(TAG, `SRA failed to include element ${this.ifi_}`);
         if (isExperimentOn(this.win, 'doubleclickSraReportExcludedBlock')) {
           this.getAmpDoc()
             .getBody()
@@ -1628,7 +1621,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     impressions.split(',').forEach((url) => {
       try {
         if (!Services.urlForDoc(this.element).isSecure(url)) {
-          dev().warn(TAG, `insecure impression url: ${url}`);
           return;
         }
         // Create amp-pixel and append to document to send impression.
@@ -1705,14 +1697,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               const typeInstances = /** @type {!Array<!AmpAdNetworkDoubleclickImpl>}*/ (instances).filter(
                 (instance) => {
                   const isValid = instance.hasAdPromise();
-                  if (!isValid) {
-                    dev().info(
-                      TAG,
-                      'Ignoring instance without ad promise as ' +
-                        'likely invalid',
-                      instance.element
-                    );
-                  }
                   return isValid;
                 }
               );
@@ -1725,7 +1709,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               // promise which results in sending as non-SRA request (benefit
               // is it allows direct cache method).
               if (!noFallbackExp && typeInstances.length == 1) {
-                dev().info(TAG, `single block in network ${networkId}`);
                 // Ensure deferred exists, may not if getAdUrl did not yet
                 // execute.
                 typeInstances[0].sraDeferred =
@@ -1797,7 +1780,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                     // consistency), and propagate error to A4A ad promise
                     // chain.
                     assignAdUrlToError(/** @type {!Error} */ (error), sraUrl);
-                    this.warnOnError('SRA request failure', error);
                     // Publisher explicitly wants SRA so do not attempt to
                     // recover as SRA guarantees cannot be enforced.
                     typeInstances.forEach((instance) => {
@@ -1822,15 +1804,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         return Promise.all(sraRequestPromises);
       });
     return sraRequests;
-  }
-
-  /**
-   * @param {string} message
-   * @param {*} error
-   * @visibleForTesting
-   */
-  warnOnError(message, error) {
-    dev().warn(TAG, message, error);
   }
 
   /**

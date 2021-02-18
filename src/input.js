@@ -16,11 +16,8 @@
 
 import {Observable} from './observable';
 import {Services} from './services';
-import {dev} from './log';
 import {listenOnce, listenOncePromise} from './event-helper';
 import {registerServiceBuilder} from './service';
-
-const TAG_ = 'Input';
 
 const MAX_MOUSE_CONFIRM_ATTEMPS_ = 3;
 const CLICK_TIMEOUT_ = 300;
@@ -58,7 +55,6 @@ export class Input {
       (win.navigator['maxTouchPoints'] !== undefined &&
         win.navigator['maxTouchPoints'] > 0) ||
       win['DocumentTouch'] !== undefined;
-    dev().fine(TAG_, 'touch detected:', this.hasTouch_);
 
     /** @private {boolean} */
     this.keyboardActive_ = false;
@@ -213,7 +209,6 @@ export class Input {
 
     this.keyboardActive_ = true;
     this.keyboardStateObservable_.fire(true);
-    dev().fine(TAG_, 'keyboard activated');
   }
 
   /** @private */
@@ -223,7 +218,6 @@ export class Input {
     }
     this.keyboardActive_ = false;
     this.keyboardStateObservable_.fire(false);
-    dev().fine(TAG_, 'keyboard deactivated');
   }
 
   /**
@@ -267,7 +261,6 @@ export class Input {
   mouseConfirmed_() {
     this.hasMouse_ = true;
     this.mouseDetectedObservable_.fire(true);
-    dev().fine(TAG_, 'mouse detected');
   }
 
   /** @private */
@@ -280,8 +273,6 @@ export class Input {
         'mousemove',
         /** @type {function(!Event)} */ (this.boundOnMouseMove_)
       );
-    } else {
-      dev().fine(TAG_, 'mouse detection failed');
     }
   }
 }

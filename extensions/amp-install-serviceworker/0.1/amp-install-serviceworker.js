@@ -21,7 +21,6 @@ import {
 } from '../../../src/dom';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
 import {removeFragment} from '../../../src/url';
 import {toggle} from '../../../src/style';
@@ -345,13 +344,6 @@ function install(win, src, element) {
   }
   return win.navigator.serviceWorker.register(src, options).then(
     function (registration) {
-      if (getMode().development) {
-        user().info(
-          TAG,
-          'ServiceWorker registration successful with scope: ',
-          registration.scope
-        );
-      }
       // Check if there is a new service worker installing.
       const installingSw = registration.installing;
       if (installingSw) {

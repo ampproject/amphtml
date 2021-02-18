@@ -81,11 +81,9 @@ export function safeframeListener(event) {
   const sentinel = data[MESSAGE_FIELDS.SENTINEL] || payload['sentinel'];
   const safeframeHost = safeframeHosts[sentinel];
   if (!safeframeHost) {
-    dev().warn(TAG, `Safeframe Host for sentinel: ${sentinel} not found.`);
     return;
   }
   if (!safeframeHost.equalsSafeframeContentWindow(event.source)) {
-    dev().warn(TAG, `Safeframe source did not match event.source.`);
     return;
   }
   if (!safeframeHost.channel) {

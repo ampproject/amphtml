@@ -90,7 +90,6 @@ class AmpWorker {
       useLocal,
       useRtvVersion
     );
-    dev().fine(TAG, 'Fetching web worker from', url);
 
     /** @private {Worker} */
     this.worker_ = null;

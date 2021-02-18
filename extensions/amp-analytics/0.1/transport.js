@@ -85,7 +85,6 @@ export class Transport {
    */
   sendRequest(url, segments, inBatch) {
     if (!url || segments.length === 0) {
-      dev().info(TAG_, 'Empty request not sent: ', url);
       return;
     }
     const serializer = this.getSerializer_();
@@ -245,19 +244,15 @@ export class Transport {
       return;
     }
     const image = createPixel(win, request.url, referrerPolicy);
-    loadPromise(image)
-      .then(() => {
-        dev().fine(TAG_, 'Sent image request', request.url);
-      })
-      .catch(() => {
-        if (!suppressWarnings) {
-          user().warn(
-            TAG_,
-            'Response unparseable or failed to send image request',
-            request.url
-          );
-        }
-      });
+    loadPromise(image).catch(() => {
+      if (!suppressWarnings) {
+        user().warn(
+          TAG_,
+          'Response unparseable or failed to send image request',
+          request.url
+        );
+      }
+    });
   }
 
   /**
@@ -270,11 +265,7 @@ export class Transport {
     if (!sendBeacon) {
       return false;
     }
-    const result = sendBeacon(request.url, request.payload || '');
-    if (result) {
-      dev().fine(TAG_, 'Sent beacon request', request);
-    }
-    return result;
+    return sendBeacon(request.url, request.payload || '');
   }
 
   /**
@@ -296,12 +287,6 @@ export class Transport {
 
     // Prevent pre-flight HEAD request.
     xhr.setRequestHeader('Content-Type', 'text/plain');
-
-    xhr.onreadystatechange = () => {
-      if (xhr.readyState == 4) {
-        dev().fine(TAG_, 'Sent XHR request', request.url);
-      }
-    };
 
     xhr.send(request.payload || '');
     return true;

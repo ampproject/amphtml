@@ -14,8 +14,6 @@
  * the License.
  */
 
-import {TAG} from './vars';
-import {dev} from '../../../src/log';
 import {getData} from '../../../src/event-helper';
 import {parseUrlDeprecated} from '../../../src/url';
 
@@ -73,7 +71,6 @@ export class WindowMessenger {
      * @type {(Object<string,Array>|null)}
      */
     this.listeners_ = {};
-    this.debug_ = options.debug;
     this.listening_ = false;
     this.connecting_ = false;
     this.connected_ = false;
@@ -130,9 +127,6 @@ export class WindowMessenger {
         /** @type {(function (Event): (boolean|undefined)|null)} */
         (this.onListenConnectionMessageReceivedProc_)
       );
-      if (this.debug_) {
-        dev().fine(TAG, 'Listening for a connection message...');
-      }
     }).then(() => {
       this.send(WindowMessenger.Topics.CONNECT_HANDSHAKE, null);
       this.connected_ = true;
@@ -185,38 +179,16 @@ export class WindowMessenger {
   ) {
     const message = getData(messageChannelEvent);
     const {origin, ports: messagePorts} = messageChannelEvent;
-    if (this.debug_) {
-      dev().fine(
-        TAG,
-        'Window message for listen() connection received:',
-        message
-      );
-    }
     if (!this.isAllowedOrigin_(origin, allowedOrigins)) {
-      dev().fine(
-        TAG,
-        `Discarding connection message from ${origin} ` +
-          "because it isn't an allowed origin:",
-        message,
-        ' (allowed  origins are)',
-        allowedOrigins
-      );
       return;
     }
     if (
       !message ||
       message['topic'] !== WindowMessenger.Topics.CONNECT_HANDSHAKE
     ) {
-      dev().fine(
-        TAG,
-        'Discarding connection message because it did ' +
-          'not contain our expected handshake:',
-        message
-      );
       return;
     }
 
-    dev().fine(TAG, 'Received expected connection handshake message:', message);
     // This was our expected handshake message Remove our message handler so we
     // don't get spammed with cross-domain messages
     this.window_.removeEventListener(
@@ -292,7 +264,6 @@ export class WindowMessenger {
           : parseUrlDeprecated(expectedRemoteOrigin).origin,
         [this.channel_.port2]
       );
-      dev().fine(TAG, `Opening channel to ${expectedRemoteOrigin}...`);
     });
   }
 
@@ -311,12 +282,6 @@ export class WindowMessenger {
   ) {
     // This is the remote frame's reply to our initial handshake topic message
     this.connected_ = true;
-    if (this.debug_) {
-      dev().fine(
-        TAG,
-        `Messenger channel to ${expectedRemoteOrigin} established.`
-      );
-    }
     // Remove our message handler
     messagePort.removeEventListener(
       'message',
@@ -364,14 +329,6 @@ export class WindowMessenger {
       const {promiseResolver} = existingMessage;
       // Set new incoming message data on existing message
       existingMessage.message = message['data'];
-      if (this.debug_) {
-        dev().fine(
-          TAG,
-          "Received reply for topic '%s': %s",
-          message['topic'],
-          message['data']
-        );
-      }
       promiseResolver([
         message['data'],
         this.sendReply_.bind(this, message['id'], existingMessage['topic']),
@@ -380,13 +337,6 @@ export class WindowMessenger {
       const listeners = this.listeners_[message['topic']];
       if (!listeners) {
         return;
-      }
-      if (this.debug_) {
-        dev().fine(
-          TAG,
-          'Received new message for ' +
-            `topic '${message['topic']}': ${message['data']}`
-        );
       }
       for (let i = 0; i < listeners.length; i++) {
         const listener = listeners[i];
@@ -481,9 +431,6 @@ export class WindowMessenger {
       topic,
       data,
     };
-    if (this.debug_) {
-      dev().fine(TAG, 'Sending %s: %s', topic, data);
-    }
     this.messagePort_./*OK*/ postMessage(payload);
 
     return new Promise((resolve) => {

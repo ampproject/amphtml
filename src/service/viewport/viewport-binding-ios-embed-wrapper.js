@@ -27,8 +27,6 @@ import {layoutRectLtwh} from '../../layout-rect';
 import {waitForBodyOpen} from '../../dom';
 import {whenDocumentReady} from '../../document-ready';
 
-const TAG_ = 'Viewport';
-
 /**
  * Implementation of ViewportBindingDef based for iframed iOS case where iframes
  * are not scrollable. Scrolling accomplished here by inserting a scrollable
@@ -85,8 +83,6 @@ export class ViewportBindingIosEmbedWrapper_ {
     whenDocumentReady(doc).then(() => {
       documentElement.classList.add('i-amphtml-ios-overscroll');
     });
-
-    dev().fine(TAG_, 'initialized ios-embed-wrapper viewport');
   }
 
   /** @override */

@@ -16,10 +16,7 @@
 
 import {Services} from '../../../src/services';
 import {cancellation} from '../../../src/error';
-import {dev} from '../../../src/log';
 import {listenOnce} from '../../../src/event-helper';
-
-const TAG = 'local-viewer';
 
 export class ViewerTracker {
   /**
@@ -68,10 +65,8 @@ export class ViewerTracker {
     if (this.reportViewPromise_) {
       return this.reportViewPromise_;
     }
-    dev().fine(TAG, 'start view monitoring');
     this.reportViewPromise_ = this.whenViewed_(timeToView).catch((reason) => {
       // Ignore - view has been canceled.
-      dev().fine(TAG, 'view cancelled:', reason);
       this.reportViewPromise_ = null;
       throw reason;
     });

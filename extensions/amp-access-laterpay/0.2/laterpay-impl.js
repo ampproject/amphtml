@@ -281,7 +281,6 @@ export class LaterpayVendor {
         return this.accessSource_.getLoginUrl(url);
       })
       .then((url) => {
-        dev().info(TAG, 'Authorization URL: ', url);
         return this.timer_
           .timeoutPromise(
             AUTHORIZATION_TIMEOUT,
@@ -616,7 +615,6 @@ export class LaterpayVendor {
       /* useAuthData */ false
     );
     return urlPromise.then((url) => {
-      dev().fine(TAG, 'Authorization URL: ', url);
       this.accessSource_.loginWithUrl(url, purchaseType);
     });
   }

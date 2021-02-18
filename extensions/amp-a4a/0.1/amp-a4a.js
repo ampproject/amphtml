@@ -418,12 +418,6 @@ export class AmpA4A extends AMP.BaseElement {
       width: this.element.getAttribute('width'),
       height: this.element.getAttribute('height'),
     };
-    const upgradeDelayMs = Math.round(this.getResource().getUpgradeDelayMs());
-    dev().info(
-      TAG,
-      `upgradeDelay ${this.element.getAttribute('type')}: ${upgradeDelayMs}`
-    );
-
     this.uiHandler = new AMP.AmpAdUIHandler(this);
 
     const verifier = signatureVerifierFor(this.win);
@@ -615,11 +609,6 @@ export class AmpA4A extends AMP.BaseElement {
       // TODO(levitzky): May need additional checks for other display:hidden cases.
       this.element.classList.contains('i-amphtml-hidden-by-media-query')
     ) {
-      dev().fine(
-        TAG,
-        'onLayoutMeasure canceled due height/width 0',
-        this.element
-      );
       return false;
     }
     if (!isAdPositionAllowed(this.element, this.win)) {
@@ -841,7 +830,6 @@ export class AmpA4A extends AMP.BaseElement {
             this.win.location.search
           );
           if (match && match[1]) {
-            dev().info(TAG, `Using debug exp features: ${match[1]}`);
             this.populatePostAdResponseExperimentFeatures_(
               tryDecodeUriComponent(match[1])
             );
@@ -1198,7 +1186,6 @@ export class AmpA4A extends AMP.BaseElement {
       }
       const parts = line.split('=');
       if (parts.length != 2 || !parts[0]) {
-        dev().warn(TAG, `invalid experiment feature ${line}`);
         return;
       }
       this.postAdResponseExperimentFeatures[parts[0]] = parts[1];
@@ -1426,11 +1413,10 @@ export class AmpA4A extends AMP.BaseElement {
         .then(() => {
           this.originalSlotSize_ = null;
         })
-        .catch((err) => {
+        .catch(() => {
           // TODO(keithwrightbos): if we are unable to revert size, on next
           // trigger of promise chain the ad request may fail due to invalid
           // slot size.  Determine how to handle this case.
-          dev().warn(TAG, 'unable to revert to original size', err);
         });
     }
 
@@ -1629,19 +1615,6 @@ export class AmpA4A extends AMP.BaseElement {
     );
   }
 
-  /**
-   * @param {!Element} iframe that was just created.  To be overridden for
-   * testing.
-   * @visibleForTesting
-   */
-  onCrossDomainIframeCreated(iframe) {
-    dev().info(
-      TAG,
-      this.element.getAttribute('type'),
-      `onCrossDomainIframeCreated ${iframe}`
-    );
-  }
-
   /** @return {boolean} whether html creatives should be sandboxed. */
   sandboxHTMLCreativeFrame() {
     return true;
@@ -1679,10 +1652,6 @@ export class AmpA4A extends AMP.BaseElement {
         if (networkFailureHandlerResult.frameGetDisabled) {
           // Reset adUrl to null which will cause layoutCallback to not
           // fetch via frame GET.
-          dev().info(
-            TAG,
-            'frame get disabled as part of network failure handler'
-          );
           this.resetAdUrl();
         } else {
           this.adUrl_ = networkFailureHandlerResult.adUrl || this.adUrl_;
@@ -1729,8 +1698,6 @@ export class AmpA4A extends AMP.BaseElement {
       );
       return Promise.resolve(false);
     }
-    // TODO(keithwrightbos): remove when no longer needed.
-    dev().warn(TAG, 'fallback to 3p');
     // Haven't rendered yet, so try rendering via one of our
     // cross-domain iframe solutions.
     const method = this.experimentalNonAmpCreativeRenderMethod_;
@@ -2200,23 +2167,11 @@ export class AmpA4A extends AMP.BaseElement {
     }
     if (metadataStart < 0) {
       // Couldn't find a metadata blob.
-      dev().warn(
-        TAG,
-        this.element.getAttribute('type'),
-        'Could not locate start index for amp meta data in: %s',
-        creative
-      );
       return null;
     }
     const metadataEnd = creative.lastIndexOf('</script>');
     if (metadataEnd < 0) {
       // Couldn't find a metadata blob.
-      dev().warn(
-        TAG,
-        this.element.getAttribute('type'),
-        'Could not locate closing script tag for amp meta data in: %s',
-        creative
-      );
       return null;
     }
     try {
@@ -2291,12 +2246,6 @@ export class AmpA4A extends AMP.BaseElement {
         creative.slice(metadataEnd + '</script>'.length);
       return metaData;
     } catch (err) {
-      dev().warn(
-        TAG,
-        this.element.getAttribute('type'),
-        'Invalid amp metadata: %s',
-        creative.slice(metadataStart + metadataString.length, metadataEnd)
-      );
       if (this.isSinglePageStoryAd) {
         throw err;
       }

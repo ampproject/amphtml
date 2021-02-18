@@ -19,7 +19,6 @@ import {Animation} from '../../../src/animation';
 import {BaseCarousel} from './base-carousel';
 import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
-import {dev} from '../../../src/log';
 import {isLayoutSizeFixed} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
 import {numeric} from '../../../src/transition';
@@ -260,21 +259,9 @@ export class AmpScrollableCarousel extends BaseCarousel {
     ).delay(() => {
       // TODO(yuxichen): test out the threshold for identifying fast scrolling
       if (Math.abs(startingScrollLeft - this.pos_) < 30) {
-        dev().fine(
-          TAG,
-          'slow scrolling: %s - %s',
-          startingScrollLeft,
-          this.pos_
-        );
         this.scrollTimerId_ = null;
         this.commitSwitch_(this.pos_);
       } else {
-        dev().fine(
-          TAG,
-          'fast scrolling: %s - %s',
-          startingScrollLeft,
-          this.pos_
-        );
         this.waitForScroll_(this.pos_);
       }
     }, 100));

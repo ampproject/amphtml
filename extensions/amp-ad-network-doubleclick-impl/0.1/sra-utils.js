@@ -15,16 +15,13 @@
  */
 
 import {RENDERING_TYPE_HEADER, XORIGIN_MODE} from '../../amp-a4a/0.1/amp-a4a';
-import {dev, devAssert} from '../../../src/log';
+import {devAssert} from '../../../src/log';
 import {getEnclosingContainerTypes} from '../../../ads/google/a4a/utils';
 import {getPageLayoutBoxBlocking} from '../../../src/utils/page-layout-box';
 import {isInManualExperiment} from '../../../ads/google/a4a/traffic-experiments';
 import {isObject} from '../../../src/types';
 import {tryResolve} from '../../../src/utils/promise';
 import {utf8Encode} from '../../../src/utils/bytes';
-
-/** @type {string} */
-const TAG = 'amp-ad-network-doubleclick-impl';
 
 /**
  * @const {string}
@@ -457,16 +454,6 @@ export function sraBlockCallbackHandler(
   // This allows the block to start rendering while the SRA
   // response is streaming back to the client.
   devAssert(sraRequestAdUrlResolvers.shift())(fetchResponse);
-  // If done, expect array to be empty (ensures ad response
-  // included data for all slots).
-  if (done && sraRequestAdUrlResolvers.length) {
-    dev().warn(
-      TAG,
-      'Premature end of SRA response',
-      sraRequestAdUrlResolvers.length,
-      sraUrl
-    );
-  }
 }
 
 /**

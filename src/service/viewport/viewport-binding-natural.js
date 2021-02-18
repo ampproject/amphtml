@@ -21,10 +21,7 @@ import {
   marginBottomOfLastChild,
 } from './viewport-binding-def';
 import {computedStyle, px, setImportantStyles} from '../../style';
-import {dev} from '../../log';
 import {layoutRectLtwh} from '../../layout-rect';
-
-const TAG_ = 'Viewport';
 
 /**
  * Implementation of ViewportBindingDef based on the native window. It assumes
@@ -61,8 +58,6 @@ export class ViewportBindingNatural_ {
 
     /** @const {function()} */
     this.boundResizeEventListener_ = () => this.resizeObservable_.fire();
-
-    dev().fine(TAG_, 'initialized natural viewport');
   }
 
   /** @private */

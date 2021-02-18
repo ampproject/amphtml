@@ -148,12 +148,7 @@ export function installFriendlyIframeEmbed(
     iframe.readyState = 'complete';
   };
   const registerViolationListener = () => {
-    iframe.contentWindow.addEventListener(
-      'securitypolicyviolation',
-      (violationEvent) => {
-        dev().warn('FIE', 'security policy violation', violationEvent);
-      }
-    );
+    iframe.contentWindow.addEventListener('securitypolicyviolation', () => {});
   };
   let loadedPromise;
   if (isSrcdocSupported()) {

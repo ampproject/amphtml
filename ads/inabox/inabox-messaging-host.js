@@ -20,14 +20,11 @@ import {
   serializeMessage,
 } from '../../src/3p-frame-messaging';
 import {canInspectWindow} from '../../src/iframe-helper';
-import {dev, devAssert} from '../../src/log';
+import {devAssert} from '../../src/log';
 import {dict} from '../../src/utils/object';
 import {getData} from '../../src/event-helper';
 import {getFrameOverlayManager} from './frame-overlay-manager';
 import {getPositionObserver} from './position-observer';
-
-/** @const */
-const TAG = 'InaboxMessagingHost';
 
 /** @const */
 const READ_ONLY_MESSAGES = [MessageType.SEND_POSITIONS];
@@ -47,9 +44,6 @@ class NamedObservable {
    * @param {!Function} callback
    */
   listen(key, callback) {
-    if (key in this.map_) {
-      dev().fine(TAG, `Overriding message callback [${key}]`);
-    }
     this.map_[key] = callback;
   }
 
@@ -128,13 +122,11 @@ export class InaboxMessagingHost {
   processMessage(message) {
     const request = deserializeMessage(getData(message));
     if (!request || !request['sentinel']) {
-      dev().fine(TAG, 'Ignored non-AMP message:', message);
       return false;
     }
 
     const adFrame = this.getFrameElement_(message.source, request['sentinel']);
     if (!adFrame) {
-      dev().info(TAG, 'Ignored message from untrusted iframe:', message);
       return false;
     }
 
@@ -143,7 +135,6 @@ export class InaboxMessagingHost {
       ? allowedTypes.split(/\s*,\s*/)
       : READ_ONLY_MESSAGES;
     if (allowedTypesList.indexOf(request['type']) === -1) {
-      dev().info(TAG, 'Message type ignored:', message);
       return false;
     }
 
@@ -155,7 +146,6 @@ export class InaboxMessagingHost {
         message.origin,
       ])
     ) {
-      dev().warn(TAG, 'Unprocessed AMP message:', message);
       return false;
     }
 
@@ -197,7 +187,6 @@ export class InaboxMessagingHost {
    * @param {?JsonObject} data
    */
   sendPosition_(request, source, data) {
-    dev().fine(TAG, 'Sent position data to [%s] %s', request.sentinel, data);
     source./*OK*/ postMessage(
       serializeMessage(MessageType.POSITION, request.sentinel, data),
       // We don't need to restrict what origin we send the data to because (a)

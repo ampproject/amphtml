@@ -134,7 +134,6 @@ export class ResponsiveState {
         })
         // Do nothing if we fail to read localstorage.
         .catch(() => {
-          dev().warn(TAG, 'Failed to look up publisher ad size settings.');
           return null;
         })
     );
@@ -251,17 +250,11 @@ export class ResponsiveState {
               autoAdSizeStatus
             )
             .then(() => {
-              dev().info(
-                TAG,
-                `Saved publisher auto ad size setting: ${autoAdSizeStatus}`
-              );
               promiseResolver();
             })
         )
         // Do nothing if we fail to write to localstorage.
-        .catch(() => {
-          dev().warn(TAG, 'Failed to persist publisher auto ad size setting.');
-        });
+        .catch(() => {});
     };
     win.addEventListener('message', listener);
     return savePromise;
@@ -416,16 +409,16 @@ export class ResponsiveState {
     // Attempt to resize to the correct height. The width should already be
     // 100vw, but is fixed here so that future resizes of the viewport don't
     // affect it.
-    return this.element_.getImpl(/* waitForBuild= */ false).then((impl) =>
-      impl
-        .attemptChangeSize(
-          this.getResponsiveHeight_(viewportSize),
-          viewportSize.width
-        )
-        .catch(() => {
-          dev().info(TAG, `Change size attempt failed.`);
-        })
-    );
+    return this.element_
+      .getImpl(/* waitForBuild= */ false)
+      .then((impl) =>
+        impl
+          .attemptChangeSize(
+            this.getResponsiveHeight_(viewportSize),
+            viewportSize.width
+          )
+          .catch(() => {})
+      );
   }
 
   /**

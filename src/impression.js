@@ -77,9 +77,7 @@ export function maybeTrackImpression(win) {
 
   trackImpressionPromise = Services.timerFor(win)
     .timeoutPromise(TIMEOUT_VALUE, promise, 'TrackImpressionPromise timeout')
-    .catch((error) => {
-      dev().warn('IMPRESSION', error);
-    });
+    .catch(() => {});
 
   const viewer = Services.viewerForDoc(win.document.documentElement);
   const isTrustedViewerPromise = viewer.isTrustedViewer();
@@ -156,14 +154,11 @@ function handleReplaceUrl(win) {
     .then(
       (response) => {
         if (!response || typeof response != 'object') {
-          dev().warn('IMPRESSION', 'get invalid replaceUrl response');
           return;
         }
         viewer.replaceUrl(response['replaceUrl'] || null);
       },
-      (err) => {
-        dev().warn('IMPRESSION', 'Error request replaceUrl from viewer', err);
-      }
+      () => {}
     );
 }
 

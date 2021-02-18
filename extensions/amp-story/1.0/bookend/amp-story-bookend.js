@@ -46,7 +46,6 @@ import {toggle} from '../../../../src/style';
 
 // TODO(#14591): Clean when bookend API v0.1 is deprecated.
 const BOOKEND_VERSION_1 = 'v1.0';
-const BOOKEND_VERSION_0 = 'v0.1';
 
 /**
  * Key for components in bookend config.
@@ -483,12 +482,6 @@ export class AmpStoryBookend extends DraggableDrawer {
               response[SHARE_PROVIDERS_KEY] ||
               response[DEPRECATED_SHARE_PROVIDERS_KEY],
           });
-        } else {
-          dev().warn(
-            TAG,
-            `Version ${BOOKEND_VERSION_0} of the amp-story` +
-              `-bookend is deprecated. Use ${BOOKEND_VERSION_1} instead.`
-          );
         }
         return this.config_;
       })

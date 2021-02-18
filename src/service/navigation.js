@@ -572,11 +572,6 @@ export class Navigation {
    * @private
    */
   removeViewerQueryBeforeNavigation_(win, fromLocation, target) {
-    dev().info(
-      TAG,
-      'Removing iframe query string before navigation:',
-      fromLocation.search
-    );
     const original = fromLocation.href;
     const noQuery = `${fromLocation.origin}${fromLocation.pathname}${fromLocation.hash}`;
     win.history.replaceState(null, '', noQuery);
@@ -584,7 +579,6 @@ export class Navigation {
     const restoreQuery = () => {
       const currentHref = win.location.href;
       if (currentHref == noQuery) {
-        dev().info(TAG, 'Restored iframe URL with query string:', original);
         win.history.replaceState(null, '', original);
       } else {
         dev().error(TAG, 'Unexpected iframe URL change:', currentHref, noQuery);
@@ -658,11 +652,11 @@ export class Navigation {
     // we do `replace` to avoid messing with the container's history.
     if (toLocation.hash != fromLocation.hash) {
       this.history_.replaceStateForTarget(toLocation.hash).then(() => {
-        this.scrollToElement_(el, hash);
+        this.scrollToElement_(el);
       });
     } else {
       // If the hash did not update just scroll to the element.
-      this.scrollToElement_(el, hash);
+      this.scrollToElement_(el);
     }
   }
 
@@ -685,10 +679,9 @@ export class Navigation {
   /**
    * Scrolls the page to the given element.
    * @param {?Element} elem
-   * @param {string} hash
    * @private
    */
-  scrollToElement_(elem, hash) {
+  scrollToElement_(elem) {
     // Scroll to the element if found.
     if (elem) {
       // The first call to scrollIntoView overrides browsers' default scrolling
@@ -703,11 +696,6 @@ export class Navigation {
       Services.timerFor(this.ampdoc.win).delay(
         () => this.viewport_./*OK*/ scrollIntoView(dev().assertElement(elem)),
         1
-      );
-    } else {
-      dev().warn(
-        TAG,
-        `failed to find element with id=${hash} or a[name=${hash}]`
       );
     }
   }

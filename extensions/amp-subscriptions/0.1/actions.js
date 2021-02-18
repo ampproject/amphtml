@@ -16,11 +16,10 @@
 
 import {ActionStatus} from './analytics';
 import {assertHttpsUrl, parseQueryString} from '../../../src/url';
-import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {openLoginDialog} from '../../amp-access/0.1/login-dialog';
+import {userAssert} from '../../../src/log';
 
-const TAG = 'amp-subscriptions';
 const LOCAL = 'local';
 
 /**
@@ -115,13 +114,10 @@ export class Actions {
       return this.actionPromise_;
     }
 
-    dev().fine(TAG, 'Start action: ', url, action);
-
     this.analytics_.actionEvent(LOCAL, action, ActionStatus.STARTED);
     const dialogPromise = this.openPopup_(url);
     const actionPromise = dialogPromise
       .then((result) => {
-        dev().fine(TAG, 'Action completed: ', action, result);
         this.actionPromise_ = null;
         const query = parseQueryString(result);
         const s = query['success'];
@@ -134,7 +130,6 @@ export class Actions {
         return success || !s;
       })
       .catch((reason) => {
-        dev().fine(TAG, 'Action failed: ', action, reason);
         this.analytics_.actionEvent(LOCAL, action, ActionStatus.FAILED);
         if (this.actionPromise_ == actionPromise) {
           this.actionPromise_ = null;

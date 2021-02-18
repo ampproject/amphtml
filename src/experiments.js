@@ -205,9 +205,7 @@ function getExperimentToggles(win) {
     if ('localStorage' in win) {
       experimentsString = win.localStorage.getItem(LOCAL_STORAGE_KEY);
     }
-  } catch (e) {
-    dev().warn(TAG, 'Failed to retrieve experiments from localStorage.');
-  }
+  } catch (err) {}
   const tokens = experimentsString ? experimentsString.split(/\s*,\s*/g) : [];
 
   const toggles = Object.create(null);

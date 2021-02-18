@@ -74,9 +74,8 @@ export function getOrCreateAdCid(
   // 1 second, assume it will never arrive.
   return Services.timerFor(ampDoc.win)
     .timeoutPromise(timeout, cidPromise, 'cid timeout')
-    .catch((error) => {
+    .catch(() => {
       // Timeout is not fatal.
-      dev().warn('AD-CID', error);
       return undefined;
     });
 }

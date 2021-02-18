@@ -1086,7 +1086,6 @@ class TransferLayerBody {
       return;
     }
 
-    dev().fine(TAG, 'transfer to fixed:', fe.id, fe.element);
     user().warn(
       TAG,
       'In order to improve scrolling performance in Safari,' +
@@ -1142,7 +1141,6 @@ class TransferLayerBody {
       return;
     }
     const {element, placeholder} = fe;
-    dev().fine(TAG, 'return from fixed:', fe.id, element);
 
     if (fe.lightboxed) {
       element.classList.remove(LIGHTBOX_ELEMENT_CLASS);

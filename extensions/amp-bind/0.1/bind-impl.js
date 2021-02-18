@@ -239,8 +239,6 @@ export class Bind {
    * @return {!Promise}
    */
   setState(state, opts = {}) {
-    dev().info(TAG, 'setState (init=%s):', opts.skipEval, state);
-
     try {
       deepMerge(this.state_, state, MAX_MERGE_DEPTH);
     } catch (e) {
@@ -357,7 +355,6 @@ export class Bind {
    * @private
    */
   setStateAndUpdateHistory_(state) {
-    dev().info(TAG, 'setState:', state);
     this.setStatePromise_ = this.setState(state)
       .then(() => this.getDataForHistory_())
       .then((data) => {
@@ -378,7 +375,6 @@ export class Bind {
    * @return {!Promise}
    */
   pushStateWithExpression(expression, scope) {
-    dev().info(TAG, 'pushState:', expression);
     return this.evaluateExpression_(expression, scope).then((result) => {
       // Store the current values of each referenced variable in `expression`
       // so that we can restore them on history-pop.
@@ -464,8 +460,6 @@ export class Bind {
    * @private
    */
   rescan_(addedElements, removedElements, options) {
-    dev().info(TAG, 'rescan: ', addedElements, removedElements, options);
-
     const rescanPromise = options.fast
       ? this.fastScan_(addedElements, removedElements)
       : this.slowScan_(addedElements, removedElements);
@@ -491,7 +485,7 @@ export class Bind {
   fastScan_(addedElements, removedElements) {
     // Sync remove bindings from internal state first, but don't chain on
     // returned promise (worker message) as an optimization.
-    const removePromise = this.removeBindingsForNodes_(removedElements);
+    this.removeBindingsForNodes_(removedElements);
 
     // Scan `addedElements` and descendants for bindings.
     const bindings = [];
@@ -509,15 +503,6 @@ export class Bind {
         break;
       }
     }
-
-    removePromise.then((removed) => {
-      dev().info(
-        TAG,
-        'rescan.fast: delta=%s, total=%s',
-        bindings.length - removed,
-        this.numberOfBindings()
-      );
-    });
 
     if (bindings.length > 0) {
       return this.sendBindingsToWorker_(bindings);
@@ -1102,7 +1087,6 @@ export class Bind {
           this.reportError_(userError, elements[0]);
         }
       });
-      dev().info(TAG, 'evaluation:', results);
       return results;
     });
   }
@@ -1600,7 +1584,6 @@ export class Bind {
     if (parent && FAST_RESCAN_TAGS.includes(parent.nodeName)) {
       return;
     }
-    dev().info(TAG, 'dom_update:', target);
     this.slowScan_([target], [target], 'dom_update.end').then(() => {
       this.dispatchEventForTesting_(BindEvents.RESCAN_TEMPLATE);
     });
@@ -1612,26 +1595,13 @@ export class Bind {
    * of removed and added bindings.
    * @param {!Array<!Node>} addedNodes
    * @param {!Array<!Node>} removedNodes
-   * @param {string=} label
    * @return {!Promise}
    * @private
    */
-  slowScan_(addedNodes, removedNodes, label = 'rescan.slow') {
-    let removed = 0;
-    return this.removeBindingsForNodes_(removedNodes)
-      .then((r) => {
-        removed = r;
-        return this.addBindingsForNodes_(addedNodes);
-      })
-      .then((added) => {
-        dev().info(
-          TAG,
-          '%s: delta=%s, total=%s',
-          label,
-          added - removed,
-          this.numberOfBindings()
-        );
-      });
+  slowScan_(addedNodes, removedNodes) {
+    return this.removeBindingsForNodes_(removedNodes).then(() =>
+      this.addBindingsForNodes_(addedNodes)
+    );
   }
 
   /**
@@ -1717,21 +1687,10 @@ export class Bind {
   debugPrintState_(opt_elementOrExpr) {
     if (opt_elementOrExpr) {
       if (typeof opt_elementOrExpr == 'string') {
-        const value = getValueForExpr(this.state_, opt_elementOrExpr);
-        user().info(TAG, value);
       } else if (opt_elementOrExpr.nodeType == Node.ELEMENT_NODE) {
         const element = user().assertElement(opt_elementOrExpr);
         this.debugPrintElement_(element);
-      } else {
-        user().info(
-          TAG,
-          'Invalid argument. Pass a JSON expression or an ' +
-            'element instead e.g. AMP.printState("foo.bar") or ' +
-            'AMP.printState($0) after selecting an element.'
-        );
       }
-    } else {
-      user().info(TAG, this.state_);
     }
   }
 
@@ -1745,7 +1704,6 @@ export class Bind {
       return boundElement.element == element;
     });
     if (index < 0) {
-      user().info(TAG, 'Element has no bindings:', element);
       return;
     }
     // Evaluate expressions in bindings in `element`.
@@ -1755,24 +1713,13 @@ export class Bind {
       const {expressionString} = boundProperty;
       promises.push(this.evaluateExpression_(expressionString, this.state_));
     });
-    // Print the map of attribute to expression value for `element`.
-    Promise.all(promises).then((results) => {
-      const output = map();
-      boundProperties.forEach((boundProperty, i) => {
-        const {property} = boundProperty;
-        output[property] = results[i];
-      });
-      user().info(TAG, output);
-    });
   }
 
   /**
    * @param {string} expression
    */
   debugEvaluate_(expression) {
-    this.evaluateExpression_(expression, this.state_).then((result) => {
-      user().info(TAG, result);
-    });
+    this.evaluateExpression_(expression, this.state_);
   }
 
   /**

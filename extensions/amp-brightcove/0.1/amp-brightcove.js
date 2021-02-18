@@ -229,7 +229,7 @@ class AmpBrightcove extends AMP.BaseElement {
     }
 
     if (eventType === 'ready') {
-      this.onReady_(data);
+      this.onReady_();
     }
 
     if (eventType === 'playing') {
@@ -274,11 +274,8 @@ class AmpBrightcove extends AMP.BaseElement {
     }
   }
 
-  /**
-   * @param {!JsonObject} data
-   * @private
-   */
-  onReady_(data) {
+  /** @private */
+  onReady_() {
     this.hasAmpSupport_ = true;
 
     Services.timerFor(this.win).cancel(this.readyTimeout_);
@@ -289,15 +286,6 @@ class AmpBrightcove extends AMP.BaseElement {
     Services.videoManagerForDoc(element).register(this);
 
     this.playerReadyResolver_(this.iframe_);
-
-    dev().info(
-      TAG,
-      'Player %s ready. ' +
-        'Brightcove Player version: %s AMP Support version: %s',
-      this.playerId_,
-      data['bcVersion'],
-      data['ampSupportVersion']
-    );
   }
 
   /**

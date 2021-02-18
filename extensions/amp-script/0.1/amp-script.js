@@ -279,16 +279,6 @@ export class AmpScript extends AMP.BaseElement {
         // TODO(dvoytenko): consider additional "progress" UI.
       },
       sanitizer: new SanitizerImpl(this, sandboxTokens),
-      // Callbacks.
-      onCreateWorker: (data) => {
-        dev().info(TAG, 'Create worker:', data);
-      },
-      onSendMessage: (data) => {
-        dev().info(TAG, 'To worker:', data);
-      },
-      onReceiveMessage: (data) => {
-        dev().info(TAG, 'From worker:', data);
-      },
     };
 
     // Create worker and hydrate.

@@ -151,14 +151,9 @@ export class ViewerImpl {
     }
 
     this.isRuntimeOn_ = !parseInt(ampdoc.getParam('off'), 10);
-    dev().fine(TAG_, '- runtimeOn:', this.isRuntimeOn_);
-
     this.overtakeHistory_ = !!(
       parseInt(ampdoc.getParam('history'), 10) || this.overtakeHistory_
     );
-    dev().fine(TAG_, '- history:', this.overtakeHistory_);
-
-    dev().fine(TAG_, '- visibilityState:', this.ampdoc.getVisibilityState());
 
     /**
      * Whether the AMP document is embedded in a Chrome Custom Tab.
@@ -265,7 +260,6 @@ export class ViewerImpl {
         }
         this.win.history.replaceState({}, '', newUrl);
         delete this.hashParams_['click'];
-        dev().fine(TAG_, 'replace fragment:' + this.win.location.href);
       }
     }
 
@@ -429,7 +423,6 @@ export class ViewerImpl {
   /** @override */
   toggleRuntime() {
     this.isRuntimeOn_ = !this.isRuntimeOn_;
-    dev().fine(TAG_, 'Runtime state:', this.isRuntimeOn_);
     this.runtimeOnObservable_.fire(this.isRuntimeOn_);
   }
 
@@ -546,11 +539,6 @@ export class ViewerImpl {
     }
 
     this.ampdoc.overrideVisibilityState(state);
-    dev().fine(
-      TAG_,
-      'visibilitychange event:',
-      this.ampdoc.getVisibilityState()
-    );
   }
 
   /** @override */
@@ -750,7 +738,6 @@ export class ViewerImpl {
     if (origin == null) {
       throw new Error('message channel must have an origin');
     }
-    dev().fine(TAG_, 'message channel established with origin: ', origin);
     this.messageDeliverer_ = deliverer;
     this.messagingOrigin_ = origin;
     this.messagingReadyResolver_(origin);
@@ -891,7 +878,6 @@ export class ViewerImpl {
       ) {
         this.win.history.replaceState({}, '', replaceUrl.href);
         this.win.location.originalHref = url.href;
-        dev().fine(TAG_, 'replace url:' + replaceUrl.href);
       }
     } catch (e) {
       dev().error(TAG_, 'replaceUrl failed', e);

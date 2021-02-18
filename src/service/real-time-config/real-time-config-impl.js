@@ -16,11 +16,11 @@
 import {CONSENT_POLICY_STATE} from '../../consent-state';
 import {RTC_VENDORS} from './callout-vendors';
 import {Services} from '../../services';
-import {dev, user, userAssert} from '../../log';
 import {getMode} from '../../mode';
 import {isArray, isObject} from '../../types';
 import {isCancellation} from '../../error';
 import {tryParseJson} from '../../json';
+import {user, userAssert} from '../../log';
 
 /** @type {string} */
 const TAG = 'real-time-config';
@@ -116,7 +116,6 @@ export class RealTimeConfigManager {
    * @private
    */
   buildErrorResponse_(error, callout, errorReportingUrl, opt_rtcTime) {
-    dev().warn(TAG, `RTC callout to ${callout} caused ${error}`);
     if (errorReportingUrl) {
       this.sendErrorMessage(error, errorReportingUrl);
     }
@@ -222,12 +221,6 @@ export class RealTimeConfigManager {
           CONSENT_POLICY_STATE[sendRegardlessOfConsentState[i]]
         ) {
           return true;
-        } else if (!CONSENT_POLICY_STATE[sendRegardlessOfConsentState[i]]) {
-          dev().warn(
-            TAG,
-            'Invalid RTC consent state given: ' +
-              `${sendRegardlessOfConsentState[i]}`
-          );
         }
       }
       return false;
@@ -316,8 +309,6 @@ export class RealTimeConfigManager {
         errorReportingUrl = urlObj.errorReportingUrl;
       } else if (typeof urlObj == 'string') {
         url = urlObj;
-      } else {
-        dev().warn(TAG, `Invalid url: ${urlObj}`);
       }
       this.inflateAndSendRtc_(
         url,
@@ -621,7 +612,6 @@ export class RealTimeConfigManager {
       const validateErrorReportingUrl = (urlObj) => {
         const errorUrl = urlObj['errorReportingUrl'];
         if (errorUrl && !Services.urlForDoc(this.ampDoc_).isSecure(errorUrl)) {
-          dev().warn(TAG, `Insecure RTC errorReportingUrl: ${errorUrl}`);
           urlObj['errorReportingUrl'] = undefined;
         }
       };

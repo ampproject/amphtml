@@ -16,7 +16,6 @@
 
 import {Services} from '../services';
 import {TickLabel} from '../enums';
-import {dev, user} from '../log';
 import {htmlFor} from '../static-template';
 import {isExperimentOn} from '../experiments';
 
@@ -79,7 +78,6 @@ export class JankMeter {
     this.totalFrameCnt_++;
     if (paintLatency > 16) {
       this.badFrameCnt_++;
-      dev().info('JANK', 'Paint latency: ' + paintLatency + 'ms');
     }
 
     // Report metrics on Nth frame, so we have sort of normalized numbers.
@@ -167,13 +165,8 @@ export class JankMeter {
           const span = this.win_.Math.floor(entries[i].duration / 50);
           if (entries[i].name == 'cross-origin-descendant') {
             this.longTaskChild_ += span;
-            user().info(
-              'LONGTASK',
-              `from child frame ${entries[i].duration}ms`
-            );
           } else {
             this.longTaskSelf_ += span;
-            dev().info('LONGTASK', `from self frame ${entries[i].duration}ms`);
           }
         }
       }

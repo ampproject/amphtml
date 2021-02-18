@@ -16,10 +16,7 @@
 
 import {MessageType} from '../../../src/3p-frame-messaging';
 import {SubscriptionApi} from '../../../src/iframe-helper';
-import {dev, devAssert} from '../../../src/log';
-
-/** @private @const {string} */
-const TAG_ = 'amp-analytics/iframe-transport-message-queue';
+import {devAssert} from '../../../src/log';
 
 /** @private @const {number} */
 const MAX_QUEUE_SIZE_ = 100;
@@ -99,10 +96,6 @@ export class IframeTransportMessageQueue {
     );
     this.pendingEvents_.push(event);
     if (this.queueSize() >= MAX_QUEUE_SIZE_) {
-      dev().warn(
-        TAG_,
-        'Exceeded maximum size of queue for: ' + event.creativeId
-      );
       this.pendingEvents_.shift();
     }
     this.flushQueue_();
