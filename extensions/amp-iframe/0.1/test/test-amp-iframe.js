@@ -17,7 +17,6 @@
 import {ActionTrust} from '../../../../src/action-constants';
 import {AmpIframe, setTrackingIframeTimeoutForTesting} from '../amp-iframe';
 import {CommonSignals} from '../../../../src/common-signals';
-import {DisplayObserver} from '../../../../src/utils/display-observer';
 import {LayoutPriority} from '../../../../src/layout';
 import {Services} from '../../../../src/services';
 import {
@@ -52,7 +51,6 @@ describes.realWin(
     let content;
     let win;
     let doc;
-    let displayObserverTargets;
 
     beforeEach(() => {
       iframeSrc =
@@ -81,22 +79,7 @@ describes.realWin(
         }
       });
       setTrackingIframeTimeoutForTesting(20);
-
-      displayObserverTargets = [];
-      env.sandbox
-        .stub(DisplayObserver.prototype, 'observe')
-        .callsFake((target, callback) => {
-          displayObserverTargets.push({target, callback});
-        });
     });
-
-    function setDisplay(aTarget, value) {
-      displayObserverTargets.forEach(({target, callback}) => {
-        if (target === aTarget) {
-          callback(value);
-        }
-      });
-    }
 
     function stubUserAsserts() {
       const errors = [];
@@ -1086,76 +1069,10 @@ describes.realWin(
         width: 100,
         height: 100,
       });
-      const impl = await ampIframe.getImpl(false);
+      await ampIframe.getImpl(false);
       await waitForAmpIframeLayoutPromise(doc, ampIframe);
       expect(ampIframe.querySelector('iframe')).to.exist;
       expect(ampIframe.unlayoutOnPause()).to.be.true;
-
-      // The element should become visible before pause is necessary.
-      setDisplay(ampIframe, true);
-      setDisplay(ampIframe, false);
-
-      await new Promise((resolve) => {
-        env.sandbox./*OK*/ stub(impl, 'unload').callsFake(resolve);
-      });
-      expect(impl.unload).to.be.calledOnce;
-    });
-
-    it('should not unlayout on pause if has owner', async () => {
-      const ampIframe = createAmpIframe(env, {
-        src: iframeSrc,
-        width: 100,
-        height: 100,
-      });
-      const impl = await ampIframe.getImpl(false);
-      impl.element.getOwner = () => ({});
-      await waitForAmpIframeLayoutPromise(doc, ampIframe);
-      expect(ampIframe.querySelector('iframe')).to.exist;
-      expect(ampIframe.unlayoutOnPause()).to.be.true;
-
-      setDisplay(ampIframe, true);
-      setDisplay(ampIframe, false);
-      env.sandbox.stub(impl, 'unload');
-
-      await new Promise(setTimeout);
-      expect(impl.unload).not.called;
-    });
-
-    it('should now need pausing before displayed', async () => {
-      const ampIframe = createAmpIframe(env, {
-        src: iframeSrc,
-        width: 100,
-        height: 100,
-      });
-      const impl = await ampIframe.getImpl(false);
-      await waitForAmpIframeLayoutPromise(doc, ampIframe);
-      expect(ampIframe.querySelector('iframe')).to.exist;
-      expect(ampIframe.unlayoutOnPause()).to.be.true;
-
-      // The element was never visible.
-      env.sandbox./*OK*/ stub(impl, 'unload');
-      setDisplay(ampIframe, false);
-
-      await impl.getVsync().mutate(() => {});
-      expect(impl.unload).to.not.be.called;
-    });
-
-    it('should not allow pausing before loaded', async () => {
-      const ampIframe = createAmpIframe(env, {
-        src: iframeSrc,
-        width: 100,
-        height: 100,
-      });
-      const impl = await ampIframe.getImpl(false);
-      expect(ampIframe.querySelector('iframe')).to.not.exist;
-      expect(ampIframe.unlayoutOnPause()).to.be.true;
-
-      env.sandbox./*OK*/ stub(impl, 'unload');
-      setDisplay(ampIframe, true);
-      setDisplay(ampIframe, false);
-
-      await impl.getVsync().mutate(() => {});
-      expect(impl.unload).to.not.be.called;
     });
 
     describe('throwIfCannotNavigate()', () => {
