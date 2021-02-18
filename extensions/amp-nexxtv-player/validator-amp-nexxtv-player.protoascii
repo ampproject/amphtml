@@ -44,10 +44,12 @@ tags: {  # <amp-nexxtv-player>
   }
   attrs: {
     name: "data-streamtype"
+    value: "album"
     value: "audioalbum"
     value: "audio"
     value: "live"
     value: "playlist"
+    value: "playlist-marked"
     value: "video"
     value: "radio"
     value: "set"
