@@ -45,7 +45,6 @@ export function WithLightbox({
     <Comp
       {...rest}
       aria-label={ariaLabel}
-      key={genKey}
       onClick={() => open()}
       role={role}
       tabIndex={tabIndex}
