@@ -248,10 +248,7 @@ export class BitrateManager {
         return;
       }
       this.sortSources_(video);
-      // If video has metadata, load again. Avoid loading videos that are far or were unloaded.
-      if (video.readyState > 0) {
-        video.load();
-      }
+      video.load();
     }
   }
 }
@@ -309,6 +306,9 @@ function currentSource(video) {
  * @return {number}
  */
 function getBufferedPercentage(videoEl) {
+  if (!videoEl.duration) {
+    return 0;
+  }
   let bufferedSum = 0;
   for (let i = 0; i < videoEl.buffered.length; i++) {
     bufferedSum += videoEl.buffered.end(i) - videoEl.buffered.start(i);
