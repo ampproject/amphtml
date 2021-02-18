@@ -54,7 +54,7 @@ export class AmpTiktok extends AMP.BaseElement {
           'height',
           'position',
           'opacity',
-          'pointer-event',
+          'pointer-events',
         ]);
         this.iframe_.removeAttribute('aria-hidden');
         this.iframe_.setAttribute('aria-title', 'Tiktok');
@@ -102,6 +102,7 @@ export class AmpTiktok extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     const iframe = this.element.ownerDocument.createElement('iframe');
+    const {locale = 'en-US'} = this.element.dataset;
     const src = `https://www.tiktok.com/embed/v2/${encodeURIComponent(
       this.videoId_
     )}?lang=${encodeURIComponent(locale)}`;
@@ -113,9 +114,7 @@ export class AmpTiktok extends AMP.BaseElement {
       this.handleTiktokMessages_.bind(this)
     );
 
-    const {locale} = this.element.dataset;
-
-    this.iframe_.setAttribute('src', src);
+    this.iframe_.src = src;
     this.iframe_.setAttribute('name', '__tt_embed__v$');
     this.iframe_.setAttribute('aria-hidden', 'true');
     this.iframe_.setAttribute('frameborder', '0');
@@ -132,6 +131,7 @@ export class AmpTiktok extends AMP.BaseElement {
     });
 
     this.element.appendChild(iframe);
+    return this.loadPromise(iframe);
   }
 
   /**
@@ -146,7 +146,7 @@ export class AmpTiktok extends AMP.BaseElement {
       return;
     }
     const data = tryParseJson(getData(event));
-    if (data === undefined) {
+    if (!data || data === undefined) {
       return;
     }
     if (data['height']) {
