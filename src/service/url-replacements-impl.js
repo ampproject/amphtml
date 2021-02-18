@@ -35,7 +35,7 @@ import {
 } from '../url';
 import {dev, devAssert, user, userAssert} from '../log';
 import {
-  installServiceInEmbedScope,
+  installServiceInEmbedDoc,
   registerServiceBuilderForDoc,
 } from '../service';
 
@@ -639,8 +639,9 @@ export class GlobalVariableSource extends VariableSource {
       Services.accessServiceForDocOrNull(element),
       Services.subscriptionsServiceForDocOrNull(element),
     ]).then((services) => {
-      const service = /** @type {?../../extensions/amp-access/0.1/access-vars.AccessVars} */ (services[0] ||
-        services[1]);
+      const accessService = /** @type {?../../extensions/amp-access/0.1/access-vars.AccessVars} */ (services[0]);
+      const subscriptionService = /** @type {?../../extensions/amp-access/0.1/access-vars.AccessVars} */ (services[1]);
+      const service = accessService || subscriptionService;
       if (!service) {
         // Access/subscriptions service is not installed.
         user().error(
@@ -650,6 +651,13 @@ export class GlobalVariableSource extends VariableSource {
         );
         return null;
       }
+
+      // If both an access and subscription service are present, prefer
+      // subscription then fall back to access because access can be namespaced.
+      if (accessService && subscriptionService) {
+        return getter(subscriptionService) || getter(accessService);
+      }
+
       return getter(service);
     });
   }
@@ -762,7 +770,7 @@ export class UrlReplacements {
    * variables or override existing ones.  Any async bindings are ignored.
    * @param {string} source
    * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=} opt_bindings
-   * @param {!Object<string, boolean>=} opt_allowlist Optional white list of
+   * @param {!Object<string, boolean>=} opt_allowlist Optional allowlist of
    *     names that can be substituted.
    * @return {string}
    */
@@ -803,7 +811,7 @@ export class UrlReplacements {
    * variables or override existing ones.  Any async bindings are ignored.
    * @param {string} url
    * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=} opt_bindings
-   * @param {!Object<string, boolean>=} opt_allowlist Optional white list of
+   * @param {!Object<string, boolean>=} opt_allowlist Optional allowlist of
    *     names that can be substituted.
    * @return {string}
    */
@@ -826,7 +834,7 @@ export class UrlReplacements {
    * or override existing ones.
    * @param {string} url
    * @param {!Object<string, *>=} opt_bindings
-   * @param {!Object<string, boolean>=} opt_allowlist Optional white list of names
+   * @param {!Object<string, boolean>=} opt_allowlist Optional allowlist of names
    *     that can be substituted.
    * @param {boolean=} opt_noEncode should not encode URL
    * @return {!Promise<string>}
@@ -1149,12 +1157,11 @@ export function installUrlReplacementsServiceForDoc(ampdoc) {
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
- * @param {!Window} embedWin
  * @param {!VariableSource} varSource
  */
-export function installUrlReplacementsForEmbed(ampdoc, embedWin, varSource) {
-  installServiceInEmbedScope(
-    embedWin,
+export function installUrlReplacementsForEmbed(ampdoc, varSource) {
+  installServiceInEmbedDoc(
+    ampdoc,
     'url-replace',
     new UrlReplacements(ampdoc, varSource)
   );

@@ -150,6 +150,11 @@ const adConfig = jsonConfiguration({
     preconnect: ['https://inv-nets.admixer.net', 'https://cdn.admixer.net'],
   },
 
+  'adnuntius': {
+    prefetch: 'https://cdn.adnuntius.com/adn.js',
+    renderStartImplemented: true,
+  },
+
   'adocean': {
     consentHandlingOverride: true,
   },
@@ -168,6 +173,11 @@ const adConfig = jsonConfiguration({
   'adpon': {
     prefetch: 'https://ad.adpon.jp/amp.js',
     clientIdScope: 'AMP_ECID_ADPON',
+  },
+
+  'adpushup': {
+    prefetch: 'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
+    preconnect: 'https://cdn.adpushup.com',
   },
 
   'adreactor': {},
@@ -208,6 +218,11 @@ const adConfig = jsonConfiguration({
   'adtech': {
     prefetch: 'https://s.aolcdn.com/os/ads/adsWrapper3.js',
     preconnect: ['https://mads.at.atwola.com', 'https://aka-cdn.adtechus.com'],
+  },
+
+  'adtelligent': {
+    preconnect: ['https://s.adtelligent.com'],
+    renderStartImplemented: true,
   },
 
   'adthrive': {
@@ -438,11 +453,6 @@ const adConfig = jsonConfiguration({
     ],
   },
 
-  'eas': {
-    prefetch: 'https://amp.emediate.eu/amp.v0.js',
-    renderStartImplemented: true,
-  },
-
   'empower': {
     prefetch: 'https://cdn.empower.net/sdk/amp-ad.min.js',
     renderStartImplemented: true,
@@ -478,6 +488,14 @@ const adConfig = jsonConfiguration({
 
   'fake-delayed': {
     renderStartImplemented: true,
+  },
+
+  'feedad': {
+    clientIdScope: '__fa_amp',
+    prefetch: 'https://web.feedad.com/sdk/feedad-async.js',
+    renderStartImplemented: true,
+    fullWidthHeightRatio: 16 / 9,
+    consentHandlingOverride: true,
   },
 
   'felmat': {
@@ -762,6 +780,15 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'myfinance': {
+    preconnect: [
+      'https://a.myfidevs.io',
+      'https://static.myfinance.com',
+      'https://www.myfinance.com',
+    ],
+    renderStartImplemented: true,
+  },
+
   'myoffrz': {
     renderStartImplemented: true,
   },
@@ -905,6 +932,11 @@ const adConfig = jsonConfiguration({
 
   'puffnetwork': {
     prefetch: 'https://static.puffnetwork.com/amp_ad.js',
+    renderStartImplemented: true,
+  },
+
+  'pulse': {
+    prefetch: 'https://static.pulse.mail.ru/pulse-widget-amp.js',
     renderStartImplemented: true,
   },
 
@@ -1216,7 +1248,7 @@ const adConfig = jsonConfiguration({
   },
 
   'vlyby': {
-    prefetch: 'https://amp.vlyby.com/qad/qad-outer2.js',
+    prefetch: 'https://cdn.vlyby.com/amp/qad/qad-outer2.js',
   },
 
   'vmfive': {
@@ -1294,6 +1326,8 @@ const adConfig = jsonConfiguration({
       'https://rfetch.yektanet.net',
       'https://scrapper.yektanet.com',
       'https://ua.yektanet.com',
+      'https://bfetch.yektanet.com',
+      'https://mostatil.cdn.yektanet.com',
     ],
     renderStartImplemented: true,
   },

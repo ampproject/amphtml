@@ -42,6 +42,7 @@ import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {Extensions} from '../../../../src/service/extensions-impl';
 import {FetchMock, networkFailure} from './fetch-mock';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
+import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
 import {LayoutPriority} from '../../../../src/layout';
 import {MockA4AImpl, TEST_URL} from './utils';
 import {RealTimeConfigManager} from '../../../../src/service/real-time-config/real-time-config-impl';
@@ -55,7 +56,7 @@ import {
   incrementLoadingAds,
   is3pThrottled,
 } from '../../../amp-ad/0.1/concurrent-load';
-import {layoutRectLtwh} from '../../../../src/layout-rect';
+import {layoutRectLtwh, layoutSizeFromRect} from '../../../../src/layout-rect';
 import {resetScheduledElementForTesting} from '../../../../src/service/custom-element-registry';
 import {data as testFragments} from './testdata/test_fragments';
 import {data as validCSSAmp} from './testdata/valid_css_at_rules_amp.reserialized';
@@ -96,7 +97,7 @@ if (NO_SIGNING_RTV) {
       const fie = doc.body.querySelector('iframe[srcdoc]');
       expect(fie.getAttribute('sandbox')).to.equal(
         'allow-forms allow-popups allow-popups-to-escape-sandbox ' +
-          'allow-same-origin allow-top-navigation'
+          'allow-same-origin allow-scripts allow-top-navigation'
       );
       const cspMeta = fie.contentDocument.querySelector(
         'meta[http-equiv=Content-Security-Policy]'
@@ -134,18 +135,6 @@ if (NO_SIGNING_RTV) {
       expect(fie.getAttribute('sandbox')).to.equal(
         'allow-forms allow-popups allow-popups-to-escape-sandbox ' +
           'allow-same-origin allow-top-navigation'
-      );
-    });
-
-    it('should add allow-scripts to sandbox in Safari', async () => {
-      env.sandbox.stub(Services.platformFor(env.win), 'isSafari').returns(true);
-      await a4a.buildCallback();
-      a4a.onLayoutMeasure();
-      await a4a.layoutCallback();
-      const fie = doc.body.querySelector('iframe[srcdoc]');
-      expect(fie.getAttribute('sandbox')).to.equal(
-        'allow-forms allow-popups allow-popups-to-escape-sandbox ' +
-          'allow-same-origin allow-top-navigation allow-scripts'
       );
     });
 
@@ -200,6 +189,24 @@ if (NO_SIGNING_RTV) {
       a4a.onLayoutMeasure();
       await a4a.layoutCallback();
       expect(iframe3pInit).to.be.called;
+    });
+
+    it('should not try to validate if #skipClientSideValidation', async () => {
+      const fallbackSpy = env.sandbox.spy(a4a, 'handleFallback_');
+      env.sandbox.stub(a4a, 'skipClientSideValidation').returns(true);
+      await a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      await a4a.adPromise_;
+      expect(fallbackSpy).to.be.called;
+    });
+
+    it('should validate if #skipClientSideValidation == false', async () => {
+      const fallbackSpy = env.sandbox.spy(a4a, 'handleFallback_');
+      env.sandbox.stub(a4a, 'skipClientSideValidation').returns(false);
+      await a4a.buildCallback();
+      await a4a.onLayoutMeasure();
+      await a4a.adPromise_;
+      expect(fallbackSpy).not.to.be.called;
     });
   });
 }
@@ -294,6 +301,7 @@ describe('amp-a4a', () => {
       'height': opt_rect ? String(opt_rect.height) : '50',
       'type': 'adsense',
     });
+    const layoutBox = opt_rect || layoutRectLtwh(0, 0, 200, 50);
     element.getAmpDoc = () => {
       const ampdocService = Services.ampdocServiceFor(doc.defaultView);
       return ampdocService.getAmpDoc(element);
@@ -301,14 +309,16 @@ describe('amp-a4a', () => {
     element.isBuilt = () => {
       return true;
     };
-    element.getLayoutBox = () => {
-      return opt_rect || layoutRectLtwh(0, 0, 200, 50);
-    };
-    element.getPageLayoutBox = () => {
-      return element.getLayoutBox.apply(element, arguments);
-    };
+    element.getLayout = () => 'fixed';
+    element.getLayoutBox = () => layoutBox;
+    element.getLayoutSize = () => layoutSizeFromRect(layoutBox);
     element.getIntersectionChangeEntry = () => {
-      return null;
+      return {
+        time: null,
+        boundingClientRect: {},
+        rootBounds: {},
+        intersectionRect: {},
+      };
     };
     const signals = new Signals();
     element.signals = () => signals;
@@ -940,7 +950,7 @@ describe('amp-a4a', () => {
 
       ['', 'client_cache', 'safeframe', 'some_random_thing'].forEach(
         (headerVal) => {
-          // TODO(wg-monetization, #25690): Fails on Travis.
+          // TODO(wg-monetization, #25690): Fails on CI.
           it.skip(`should not attach a NameFrame when header is ${headerVal}`, async () => {
             const devStub = window.sandbox.stub(dev(), 'error');
             // Make sure there's no signature, so that we go down the 3p
@@ -1508,6 +1518,11 @@ describe('amp-a4a', () => {
         .stub(a4a, 'maybeValidateAmpCreative')
         .returns(Promise.resolve());
       a4a.onLayoutMeasure();
+      a4a.uiHandler = {
+        getScrollPromiseForStickyAd: () => Promise.resolve(null),
+        isStickyAd: () => false,
+        maybeInitStickyAd: () => {},
+      };
       await a4a.layoutCallback();
       expect(
         renderNonAmpCreativeSpy.calledOnce,
@@ -1928,9 +1943,12 @@ describe('amp-a4a', () => {
           applyUnlayoutUI: () => {
             unlayoutUISpy();
           },
+          getScrollPromiseForStickyAd: () => Promise.resolve(null),
+          maybeInitStickyAd: () => {},
+          cleanup: () => {},
         };
         window.sandbox
-          .stub(a4a, 'getLayoutBox')
+          .stub(a4a, 'getLayoutSize')
           .returns({width: 123, height: 456});
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.ok;
@@ -2785,6 +2803,94 @@ describe('amp-a4a', () => {
     });
   });
 
+  describe('block-rtc attribute', () => {
+    describes.realWin('block-rtc attribute', {}, (env) => {
+      let geoService, a4a, element, fixture;
+
+      beforeEach(async () => {
+        AMP.RealTimeConfigManager = RealTimeConfigManager;
+        fixture = await createIframePromise();
+        element = createA4aElement(fixture.doc);
+        a4a = new MockA4AImpl(element);
+        geoService = {
+          isInCountryGroup(country) {
+            switch (country) {
+              case 'usca':
+                return GEO_IN_GROUP.IN;
+              case 'gdpr':
+                return GEO_IN_GROUP.NOT_IN;
+              default:
+                return GEO_IN_GROUP.NOT_DEFINED;
+            }
+          },
+        };
+        return fixture;
+      });
+
+      it('should return false if no attribute found', async () => {
+        expect(await a4a.getBlockRtc_()).to.false;
+      });
+
+      it('should return false if empty string', async () => {
+        element.setAttribute('block-rtc', '');
+        expect(await a4a.getBlockRtc_()).to.false;
+      });
+
+      it('should return if doc is served from a defined geo group', async () => {
+        env.sandbox
+          .stub(Services, 'geoForDocOrNull')
+          .returns(Promise.resolve(geoService));
+        element.setAttribute('block-rtc', 'gdpr,usca');
+        expect(await a4a.getBlockRtc_()).to.true;
+      });
+
+      it('should return false when doc is in an undefined group or not in', async () => {
+        const warnSpy = env.sandbox.stub(user(), 'warn');
+        env.sandbox
+          .stub(Services, 'geoForDocOrNull')
+          .returns(Promise.resolve(geoService));
+
+        // Undefined group
+        element.setAttribute('block-rtc', 'tx');
+        expect(await a4a.getBlockRtc_()).to.false;
+        expect(warnSpy.args[0][0]).to.match(/AMP-AD/);
+        expect(warnSpy.args[0][1]).to.match(/Geo group "tx" was not defined./);
+        expect(warnSpy).to.have.been.calledOnce;
+        // Not in
+        element.setAttribute('block-rtc', 'gdpr');
+        expect(await a4a.getBlockRtc_()).to.false;
+      });
+
+      it('should throw an error when there is no geoService', async () => {
+        geoService = null;
+        env.sandbox
+          .stub(Services, 'geoForDocOrNull')
+          .returns(Promise.resolve(geoService));
+        element.setAttribute('block-rtc', 'usca');
+        await expect(a4a.getBlockRtc_()).to.be.rejectedWith(
+          /requires <amp-geo> to use `block-rtc`/
+        );
+      });
+
+      it('should not execute RealTimeConfig if the attribute is valid', async () => {
+        env.sandbox
+          .stub(Services, 'geoForDocOrNull')
+          .returns(Promise.resolve(geoService));
+
+        const maybeExecuteRealTimeConfigStub = window.sandbox.stub();
+        window.sandbox
+          .stub(
+            AMP.RealTimeConfigManager.prototype,
+            'maybeExecuteRealTimeConfig'
+          )
+          .callsFake(maybeExecuteRealTimeConfigStub);
+        element.setAttribute('block-rtc', 'usca');
+        await a4a.tryExecuteRealTimeConfig_();
+        expect(maybeExecuteRealTimeConfigStub).to.not.be.called;
+      });
+    });
+  });
+
   describe('#assignAdUrlToError', () => {
     it('should attach info to error correctly', () => {
       const error = new Error('foo');
@@ -2955,6 +3061,50 @@ describe('amp-a4a', () => {
       const a4a = new MockA4AImpl(element);
       a4a.buildCallback();
       expect(a4a.isSinglePageStoryAd).to.be.true;
+    });
+  });
+
+  describe('pause and resume', () => {
+    let a4a;
+    let pauseStub, resumeStub;
+
+    beforeEach(async () => {
+      const fixture = await createIframePromise();
+      const element = createA4aElement(fixture.doc);
+      a4a = new MockA4AImpl(element);
+      await a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      await a4a.layoutCallback();
+
+      // Never resolve
+      window.sandbox
+        ./*OK*/ stub(FriendlyIframeEmbed.prototype, 'whenIniLoaded')
+        .callsFake(() => {
+          return new Promise(() => {});
+        });
+      const creativeString = buildCreativeString();
+      const metaData = a4a.getAmpAdMetadata(creativeString);
+      await a4a.renderAmpCreative_(metaData);
+
+      pauseStub = window.sandbox./*OK*/ stub(
+        FriendlyIframeEmbed.prototype,
+        'pause'
+      );
+      resumeStub = window.sandbox./*OK*/ stub(
+        FriendlyIframeEmbed.prototype,
+        'resume'
+      );
+    });
+
+    it('should pause the embed', () => {
+      expect(pauseStub).to.not.be.called;
+      expect(resumeStub).to.not.be.called;
+
+      a4a.pauseCallback();
+      expect(pauseStub).to.be.calledOnce;
+
+      a4a.resumeCallback();
+      expect(resumeStub).to.be.calledOnce;
     });
   });
 

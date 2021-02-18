@@ -30,7 +30,7 @@ tags: {  # amp-anim
 tags: {  # amp-anim
   html_format: AMP4EMAIL
   tag_name: "SCRIPT"
-  spec_name: "amp-anim extension .js script (AMP4EMAIL)"
+  spec_name: "amp-anim extension script (AMP4EMAIL)"
   extension_spec: {
     name: "amp-anim"
     # AMP4EMAIL doesn't allow version: "latest".

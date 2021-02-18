@@ -15,35 +15,32 @@
  */
 
 const argv = require('minimist')(process.argv.slice(2));
-const babelify = require('babelify');
-const browserify = require('browserify');
-const buffer = require('vinyl-buffer');
+const babel = require('@babel/core');
+const crypto = require('crypto');
 const debounce = require('debounce');
 const del = require('del');
+const esbuild = require('esbuild');
+const experimentDefines = require('../global-configs/experiments-const.json');
 const file = require('gulp-file');
 const fs = require('fs-extra');
 const gulp = require('gulp');
-const log = require('fancy-log');
+const MagicString = require('magic-string');
 const open = require('open');
 const path = require('path');
-const regexpSourcemaps = require('gulp-regexp-sourcemaps');
-const rename = require('gulp-rename');
-const source = require('vinyl-source-stream');
-const sourcemaps = require('gulp-sourcemaps');
-const watchify = require('watchify');
+const remapping = require('@ampproject/remapping');
 const wrappers = require('../compile/compile-wrappers');
 const {
   VERSION: internalRuntimeVersion,
 } = require('../compile/internal-version');
 const {applyConfig, removeConfig} = require('./prepend-global/index.js');
 const {closureCompile} = require('../compile/compile');
-const {EventEmitter} = require('events');
-const {green, red, cyan} = require('ansi-colors');
-const {isTravisBuild} = require('../common/travis');
+const {green, red, cyan} = require('kleur/colors');
+const {isCiBuild} = require('../common/ci');
 const {jsBundles} = require('../compile/bundles.config');
+const {log, logLocalDev} = require('../common/logging');
 const {thirdPartyFrames} = require('../test-configs/config');
 const {transpileTs} = require('../compile/typescript');
-const {watch: gulpWatch} = require('gulp');
+const {watch: fileWatch} = require('chokidar');
 
 /**
  * Tasks that should print the `--nobuild` help text.
@@ -66,6 +63,7 @@ const EXTENSION_BUNDLE_MAP = {
     'third_party/vega/vega.js',
   ],
   'amp-inputmask.js': ['third_party/inputmask/bundle.js'],
+  'amp-date-picker.js': ['third_party/react-dates/bundle.js'],
 };
 
 /**
@@ -87,6 +85,12 @@ const hostname3p = argv.hostname3p || '3p.ampproject.net';
  * Used to debounce file edits during watch to prevent races.
  */
 const watchDebounceDelay = 1000;
+
+/**
+ * Used to cache babel transforms done by esbuild.
+ * @private @const {!Map<string, File>}
+ */
+const cache = new Map();
 
 /**
  * @param {!Object} jsBundles
@@ -116,18 +120,17 @@ function doBuildJs(jsBundles, name, extraOptions) {
 async function bootstrapThirdPartyFrames(options) {
   const startTime = Date.now();
   const promises = [];
-  const {watch, minify} = options;
   thirdPartyFrames.forEach((frameObject) => {
     promises.push(
       thirdPartyBootstrap(frameObject.max, frameObject.min, options)
     );
   });
-  if (watch) {
+  if (options.watch) {
     thirdPartyFrames.forEach((frameObject) => {
       const watchFunc = () => {
         thirdPartyBootstrap(frameObject.max, frameObject.min, options);
       };
-      gulpWatch(frameObject.max).on(
+      fileWatch(frameObject.max).on(
         'change',
         debounce(watchFunc, watchDebounceDelay)
       );
@@ -136,7 +139,7 @@ async function bootstrapThirdPartyFrames(options) {
   await Promise.all(promises);
   endBuildStep(
     'Bootstrapped 3p frames into',
-    `dist.3p/${minify ? internalRuntimeVersion : 'current'}/`,
+    `dist.3p/${options.minify ? internalRuntimeVersion : 'current'}/`,
     startTime
   );
 }
@@ -162,7 +165,7 @@ async function compileAllJs(options) {
   if (minify) {
     log('Minifying multi-pass JS with', cyan('closure-compiler') + '...');
   } else {
-    log('Compiling JS with', cyan('browserify') + '...');
+    log('Compiling JS with', cyan('esbuild'), 'and', cyan('babel') + '...');
   }
   const startTime = Date.now();
   await Promise.all([
@@ -191,34 +194,63 @@ async function compileAllJs(options) {
 }
 
 /**
- * Allows (ap|pre)pending to the already compiled, minified JS file
- *
+ * Allows pending inside the compile wrapper to the already compiled, minified JS file.
  * @param {string} srcFilename Name of the JS source file
  * @param {string} destFilePath File path to the compiled JS file
+ * @param {?Object} options
  */
-function appendToCompiledFile(srcFilename, destFilePath) {
+function combineWithCompiledFile(srcFilename, destFilePath, options) {
   const bundleFiles = EXTENSION_BUNDLE_MAP[srcFilename];
-  if (bundleFiles) {
-    const newSource = concatFilesToString(bundleFiles.concat([destFilePath]));
-    fs.writeFileSync(destFilePath, newSource, 'utf8');
-  } else if (srcFilename == 'amp-date-picker.js') {
-    // For amp-date-picker, we inject the react-dates bundle after compile
-    // to avoid CC from messing with browserify's module boilerplate.
-    const file = fs.readFileSync(destFilePath, 'utf8');
-    const firstLineBreak = file.indexOf('\n');
-    const wrapperOpen = file.substr(0, firstLineBreak + 1);
-    const reactDates = fs.readFileSync(
-      'third_party/react-dates/bundle.js',
-      'utf8'
-    );
-    // Inject the bundle inside the standard AMP wrapper (after the first line).
-    const newSource = [
-      wrapperOpen,
-      reactDates,
-      file.substr(firstLineBreak + 1),
-    ].join('\n');
-    fs.writeFileSync(destFilePath, newSource, 'utf8');
+  if (!bundleFiles) {
+    return;
   }
+  const bundle = new MagicString.Bundle({
+    separator: '\n',
+  });
+  // We need to inject the code _inside_ the extension wrapper
+  const destFileName = path.basename(destFilePath);
+  const contents = new MagicString(fs.readFileSync(destFilePath, 'utf8'), {
+    filename: destFileName,
+  });
+  const map = JSON.parse(fs.readFileSync(`${destFilePath}.map`, 'utf8'));
+  const {sourceRoot} = map;
+  map.sourceRoot = undefined;
+
+  // The wrapper may have been minified further. Search backwards from the
+  // expected <%=contents%> location to find the start of the `{` in the
+  // wrapping function.
+  const wrapperIndex = options.wrapper.indexOf('<%= contents %>');
+  const index = contents.original.lastIndexOf('{', wrapperIndex) + 1;
+
+  const wrapperOpen = contents.snip(0, index);
+  const remainingContents = contents.snip(index, contents.length());
+
+  bundle.addSource(wrapperOpen);
+  for (const bundleFile of bundleFiles) {
+    const contents = fs.readFileSync(bundleFile, 'utf8');
+    bundle.addSource(new MagicString(contents, {filename: bundleFile}));
+    bundle.append(MODULE_SEPARATOR);
+  }
+  bundle.addSource(remainingContents);
+
+  const bundledMap = bundle.generateDecodedMap({
+    file: destFileName,
+    hires: true,
+  });
+  const remapped = remapping(
+    bundledMap,
+    (file) => {
+      if (file === destFileName) {
+        return map;
+      }
+      return null;
+    },
+    !argv.full_sourcemaps
+  );
+  remapped.sourceRoot = sourceRoot;
+
+  fs.writeFileSync(destFilePath, bundle.toString(), 'utf8');
+  fs.writeFileSync(`${destFilePath}.map`, remapped.toString(), 'utf8');
 }
 
 function toEsmName(name) {
@@ -244,14 +276,12 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
 
   if (options.watch) {
     const watchFunc = async () => {
-      const compileComplete = await doCompileMinifiedJs(
-        /* continueOnError */ true
-      );
+      const compileDone = await doCompileMinifiedJs(/* continueOnError */ true);
       if (options.onWatchBuild) {
-        options.onWatchBuild(compileComplete);
+        options.onWatchBuild(compileDone);
       }
     };
-    gulpWatch(entryPoint).on('change', debounce(watchFunc, watchDebounceDelay));
+    fileWatch(entryPoint).on('change', debounce(watchFunc, watchDebounceDelay));
   }
 
   async function doCompileMinifiedJs(continueOnError) {
@@ -265,7 +295,7 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
     }
 
     const destPath = path.join(destDir, minifiedName);
-    appendToCompiledFile(srcFilename, destPath);
+    combineWithCompiledFile(srcFilename, destPath, options);
     fs.writeFileSync(path.join(destDir, 'version.txt'), internalRuntimeVersion);
     if (options.latestName) {
       fs.copySync(
@@ -294,7 +324,7 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
 }
 
 /**
- * Handles a browserify bundling error
+ * Handles a bundling error
  * @param {Error} err
  * @param {boolean} continueOnError
  * @param {string} destFilename
@@ -312,19 +342,23 @@ function handleBundleError(err, continueOnError, destFilename) {
   } else {
     const reason = new Error(reasonMessage);
     reason.showStack = false;
-    new EventEmitter().emit('error', reason);
+    throw reason;
   }
 }
 
 /**
- * Performs the final steps after Browserify bundles a JS file
+ * Performs the final steps after a JS file is bundled with esbuild and babel
  * @param {string} srcFilename
  * @param {string} destDir
  * @param {string} destFilename
  * @param {?Object} options
  */
 function finishBundle(srcFilename, destDir, destFilename, options) {
-  appendToCompiledFile(srcFilename, path.join(destDir, destFilename));
+  combineWithCompiledFile(
+    srcFilename,
+    path.join(destDir, destFilename),
+    options
+  );
 
   if (options.latestName) {
     // "amp-foo-latest.js" -> "amp-foo-latest.max.js"
@@ -338,96 +372,109 @@ function finishBundle(srcFilename, destDir, destFilename, options) {
 }
 
 /**
- * Transforms a given JavaScript file entry point with browserify, and watches
- * it for changes (if required).
+ * Transforms a given JavaScript file entry point with esbuild and babel, and
+ * watches it for changes (if required).
  * @param {string} srcDir
  * @param {string} srcFilename
  * @param {string} destDir
  * @param {?Object} options
  * @return {!Promise}
  */
-function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
+async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
+  const startTime = Date.now();
   const entryPoint = path.join(srcDir, srcFilename);
   const destFilename = options.toName || srcFilename;
-  const wrapper = options.wrapper || wrappers.none;
-  const devWrapper = wrapper.replace('<%= contents %>', '$1');
-
-  // TODO: @jonathantyng remove browserifyOptions #22757
-  const browserifyOptions = {
-    entries: entryPoint,
-    debug: true,
-    fast: true,
-    ...options.browserifyOptions,
-  };
-
-  let bundler = browserify(browserifyOptions).transform(babelify, {
-    caller: {name: 'unminified'},
-    global: true,
-  });
+  const destFile = path.join(destDir, destFilename);
 
   if (options.watch) {
-    const watchFunc = () => {
-      const bundleComplete = performBundle(/* continueOnError */ true);
+    const watchFunc = async () => {
+      const bundleDone = await performBundle(/* continueOnError */ true);
       if (options.onWatchBuild) {
-        options.onWatchBuild(bundleComplete);
+        options.onWatchBuild(bundleDone);
       }
     };
-    bundler = watchify(bundler);
-    bundler.on('update', debounce(watchFunc, watchDebounceDelay));
+    fileWatch(entryPoint).on('change', debounce(watchFunc, watchDebounceDelay));
   }
 
   /**
-   * @param {boolean} continueOnError
-   * @return {Promise}
+   * Babel plugin for esbuild
    */
-  function performBundle(continueOnError) {
-    let startTime;
-    return toPromise(
-      bundler
-        .bundle()
-        .once('readable', () => (startTime = Date.now()))
-        .on('error', (err) =>
-          handleBundleError(err, continueOnError, destFilename)
-        )
-        .pipe(source(srcFilename))
-        .pipe(buffer())
-        .pipe(sourcemaps.init({loadMaps: true}))
-        .pipe(
-          regexpSourcemaps(
-            /\$internalRuntimeVersion\$/g,
-            internalRuntimeVersion,
-            'runtime-version'
-          )
-        )
-        .pipe(regexpSourcemaps(/([^]+)/, devWrapper, 'wrapper'))
-        .pipe(rename(destFilename))
-        .pipe(sourcemaps.write('.'))
-        .pipe(gulp.dest(destDir))
-        .on('end', () =>
-          finishBundle(srcFilename, destDir, destFilename, options)
-        )
-    )
-      .then(() => {
-        let name = destFilename;
-        if (options.latestName) {
-          const latestMaxName = options.latestName.split('.js')[0] + '.max.js';
-          name = `${name} → ${latestMaxName}`;
+  const esbuildBabelPlugin = {
+    name: 'babel',
+    async setup(build) {
+      const transformContents = async ({file, contents}) => {
+        const babelOptions = babel.loadOptions({
+          caller: {name: 'unminified'},
+          filename: file.path,
+          sourceFileName: path.relative(process.cwd(), file.path),
+        });
+        const result = await babel.transformAsync(contents, babelOptions);
+        return {contents: result.code};
+      };
+
+      build.onLoad({filter: /.*/, namespace: ''}, async (file) => {
+        const contents = await fs.promises.readFile(file.path, 'utf-8');
+        const hash = crypto.createHash('sha1').update(contents).digest('hex');
+        if (cache.has(hash)) {
+          return {contents: cache.get(hash)};
         }
-        endBuildStep('Compiled', name, startTime);
-      })
-      .then(() => {
-        const target = path.basename(destFilename, path.extname(destFilename));
-        if (UNMINIFIED_TARGETS.includes(target)) {
-          return applyAmpConfig(
-            `${destDir}/${destFilename}`,
-            /* localDev */ true,
-            /* fortesting */ options.fortesting
-          );
-        }
+        const transformed = await transformContents({file, contents});
+        cache.set(hash, transformed.contents);
+        return transformed;
       });
+    },
+  };
+
+  /**
+   * Splits up the wrapper to compute the banner and footer
+   * @return {Object}
+   */
+  function splitWrapper() {
+    const wrapper = options.wrapper || wrappers.none;
+    const sentinel = '<%= contents %>';
+    const start = wrapper.indexOf(sentinel);
+    return {
+      banner: wrapper.slice(0, start),
+      footer: wrapper.slice(start + sentinel.length),
+    };
   }
 
-  return performBundle(options.continueOnError);
+  /**
+   * Bundles an entry point with all its imports and applies babel transforms.
+   * @param {boolean} continueOnError
+   */
+  async function performBundle(continueOnError) {
+    const {banner, footer} = splitWrapper();
+    await esbuild
+      .build({
+        entryPoints: [entryPoint],
+        bundle: true,
+        sourcemap: true,
+        define: experimentDefines,
+        outfile: destFile,
+        plugins: [esbuildBabelPlugin],
+        banner,
+        footer,
+      })
+      .catch((err) => handleBundleError(err, continueOnError, destFilename));
+    finishBundle(srcFilename, destDir, destFilename, options);
+    let name = destFilename;
+    if (options.latestName) {
+      const latestMaxName = options.latestName.split('.js')[0] + '.max.js';
+      name = `${name} → ${latestMaxName}`;
+    }
+    endBuildStep('Compiled', name, startTime);
+    const target = path.basename(destFilename, path.extname(destFilename));
+    if (UNMINIFIED_TARGETS.includes(target)) {
+      await applyAmpConfig(
+        destFile,
+        /* localDev */ true,
+        /* fortesting */ options.fortesting
+      );
+    }
+  }
+
+  await performBundle(options.continueOnError);
 }
 
 /**
@@ -463,13 +510,12 @@ async function compileJs(srcDir, srcFilename, destDir, options) {
   if (options.minify) {
     return compileMinifiedJs(srcDir, srcFilename, destDir, options);
   } else {
-    return compileUnminifiedJs(srcDir, srcFilename, destDir, options);
+    return await compileUnminifiedJs(srcDir, srcFilename, destDir, options);
   }
 }
 
 /**
- * Stops the timer for the given build step and prints the execution time,
- * unless we are on Travis.
+ * Stops the timer for the given build step and prints the execution time.
  * @param {string} stepName Name of the action, like 'Compiled' or 'Minified'
  * @param {string} targetName Name of the target, like a filename or path
  * @param {DOMHighResTimeStamp} startTime Start time of build step
@@ -503,15 +549,13 @@ function printConfigHelp(command) {
     cyan(argv.config === 'canary' ? 'canary' : 'prod'),
     green('AMP config.')
   );
-  if (!isTravisBuild()) {
-    log(
-      green('⤷ Use'),
-      cyan('--config={canary|prod}'),
-      green('with your'),
-      cyan(command),
-      green('command to specify which config to apply.')
-    );
-  }
+  logLocalDev(
+    green('⤷ Use'),
+    cyan('--config={canary|prod}'),
+    green('with your'),
+    cyan(command),
+    green('command to specify which config to apply.')
+  );
 }
 
 /**
@@ -539,7 +583,7 @@ function printNobuildHelp() {
  * @return {!Promise}
  */
 async function maybePrintCoverageMessage(covPath) {
-  if (!argv.coverage || isTravisBuild()) {
+  if (!argv.coverage || isCiBuild()) {
     return;
   }
 
@@ -574,20 +618,6 @@ async function applyAmpConfig(targetFile, localDev, fortesting) {
       /* opt_fortesting */ fortesting
     );
   });
-}
-
-/**
- * Synchronously concatenates the given files into a string.
- *
- * @param {Array<string>} files A list of file paths.
- * @return {string} The concatenated contents of the given files.
- */
-function concatFilesToString(files) {
-  return files
-    .map(function (filePath) {
-      return fs.readFileSync(filePath, 'utf8');
-    })
-    .join(MODULE_SEPARATOR);
 }
 
 /**

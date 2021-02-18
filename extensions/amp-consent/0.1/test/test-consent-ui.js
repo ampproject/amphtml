@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {
   CONSENT_ITEM_STATE,
   constructConsentInfo,
@@ -47,6 +47,7 @@ describes.realWin(
     let consentUI;
     let mockInstance;
     let parent;
+    let ownersStubs;
 
     beforeEach(() => {
       doc = env.win.document;
@@ -84,7 +85,12 @@ describes.realWin(
           return Promise.resolve();
         },
       };
-      Services.ownersForDoc(doc).scheduleLayout = env.sandbox.mock();
+      const owners = Services.ownersForDoc(doc);
+      ownersStubs = {
+        scheduleLayout: env.sandbox.stub(owners, 'scheduleLayout'),
+        schedulePause: env.sandbox.stub(owners, 'schedulePause'),
+        scheduleResume: env.sandbox.stub(owners, 'scheduleResume'),
+      };
       resetServiceForTesting(win, 'consentStateManager');
       registerServiceBuilder(win, 'consentStateManager', function () {
         return Promise.resolve({
@@ -158,9 +164,32 @@ describes.realWin(
         consentUI.show(false);
         expect(parent.classList.contains('amp-active')).to.be.true;
         expect(parent).to.not.have.display('none');
+        expect(ownersStubs.scheduleLayout).to.be.calledOnce;
+        expect(ownersStubs.scheduleResume).to.be.calledOnce;
         consentUI.hide();
         expect(parent.classList.contains('amp-active')).to.be.false;
         expect(parent.classList.contains('amp-hidden')).to.be.true;
+        expect(ownersStubs.schedulePause).to.be.calledOnce;
+      });
+
+      it('should support pause/resume lifecycle', () => {
+        const config = dict({
+          'promptUI': 'test1',
+        });
+        consentUI = new ConsentUI(mockInstance, config);
+        consentUI.show(false);
+        expect(ownersStubs.scheduleLayout).to.be.calledOnce;
+        expect(ownersStubs.scheduleResume).to.be.calledOnce;
+
+        consentUI.pause();
+        expect(ownersStubs.schedulePause).to.be.calledOnce;
+        expect(ownersStubs.scheduleLayout).to.be.calledOnce; // no change.
+        expect(ownersStubs.scheduleResume).to.be.calledOnce; // no change.
+
+        consentUI.resume();
+        expect(ownersStubs.scheduleLayout).to.be.calledTwice;
+        expect(ownersStubs.scheduleResume).to.be.calledTwice;
+        expect(ownersStubs.schedulePause).to.be.calledOnce; // no change.
       });
 
       it('append/remove iframe', async () => {
@@ -168,7 +197,7 @@ describes.realWin(
           'promptUISrc': 'https://promptUISrc',
         });
         consentUI = new ConsentUI(mockInstance, config);
-        const clock = lolex.install({target: win});
+        const clock = fakeTimers.withGlobal(win).install();
 
         // Append iframe, and remove iframe after 1sec timeout
         expect(elementByTag(parent, 'iframe')).to.be.null;
@@ -216,6 +245,30 @@ describes.realWin(
         consentUI.disableScroll_();
         consentUI.hide();
         expect(consentUI.scrollEnabled_).to.be.true;
+      });
+
+      it('should set the iframe transform class on parent', async () => {
+        const config = dict({
+          'promptUISrc': 'https://promptUISrc',
+        });
+        consentUI = new ConsentUI(mockInstance, config);
+
+        consentUI.show(false);
+        consentUI.handleIframeMessages_({
+          source: consentUI.ui_.contentWindow,
+          data: {
+            type: 'consent-ui',
+            action: 'ready',
+            initialHeight: '80vh',
+          },
+        });
+        await macroTask();
+        expect(
+          consentUI.parent_.style.getPropertyValue('--i-amphtml-modal-height')
+        ).to.equal('80vh');
+        expect(
+          consentUI.parent_.classList.contains(consentUiClasses.iframeTransform)
+        ).to.be.true;
       });
     });
 
@@ -370,7 +423,7 @@ describes.realWin(
           consentUI = new ConsentUI(mockInstance, {
             'promptUISrc': 'https://promptUISrc',
           });
-          const clock = lolex.install({target: win});
+          const clock = fakeTimers.withGlobal(win).install();
           consentUI.show(false);
           consentUI.iframeReady_.resolve();
           await macroTask();

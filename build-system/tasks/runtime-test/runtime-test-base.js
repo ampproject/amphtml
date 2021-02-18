@@ -16,8 +16,7 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const karmaConfig = require('../karma.conf');
-const log = require('fancy-log');
+const karmaConfig = require('../../test-configs/karma.conf');
 const testConfig = require('../../test-configs/config');
 const {
   createCtrlcHandler,
@@ -26,9 +25,10 @@ const {
 const {app} = require('../../server/test-server');
 const {createKarmaServer, getAdTypes} = require('./helpers');
 const {getFilesFromArgv} = require('../../common/utils');
-const {green, yellow, cyan, red} = require('ansi-colors');
-const {isGithubActionsBuild} = require('../../common/github-actions');
-const {isTravisBuild} = require('../../common/travis');
+const {getPersistentBrowserifyCache} = require('../../common/browserify-cache');
+const {green, yellow, cyan, red} = require('kleur/colors');
+const {isCiBuild} = require('../../common/ci');
+const {log} = require('../../common/logging');
 const {reportTestStarted} = require('.././report-test-status');
 const {startServer, stopServer} = require('../serve');
 const {unitTestsToRun} = require('./helpers-unit');
@@ -109,7 +109,7 @@ function updateBrowsers(config) {
 
   // Default to Chrome.
   Object.assign(config, {
-    browsers: [isTravisBuild() ? 'Chrome_travis_ci' : 'Chrome_no_extensions'],
+    browsers: [isCiBuild() ? 'Chrome_ci' : 'Chrome_no_extensions'],
   });
 }
 
@@ -128,7 +128,7 @@ function getFiles(testType) {
       if (argv.files) {
         return files.concat(getFilesFromArgv());
       }
-      if (isGithubActionsBuild()) {
+      if (argv.firefox || argv.safari || argv.edge) {
         return files.concat(testConfig.unitTestCrossBrowserPaths);
       }
       if (argv.local_changes) {
@@ -143,9 +143,6 @@ function getFiles(testType) {
       }
       return files.concat(testConfig.integrationTestPaths);
 
-    case 'a4a':
-      return testConfig.a4aTestPaths;
-
     default:
       throw new Error(`Test type ${testType} was not recognized`);
   }
@@ -159,7 +156,7 @@ function getFiles(testType) {
 function updateReporters(config) {
   if (
     (argv.testnames || argv.local_changes || argv.files || argv.verbose) &&
-    !isTravisBuild()
+    !isCiBuild()
   ) {
     config.reporters = ['mocha'];
   }
@@ -188,6 +185,7 @@ class RuntimeTestConfig {
     this.client.mocha.grep = !!argv.grep;
     this.client.verboseLogging = !!argv.verbose || !!argv.v;
     this.client.captureConsole = !!argv.verbose || !!argv.v || !!argv.files;
+    this.browserify.persistentCache = getPersistentBrowserifyCache();
     this.browserify.configure = function (bundle) {
       bundle.on('prebundle', function () {
         log(
@@ -203,15 +201,16 @@ class RuntimeTestConfig {
       adTypes: getAdTypes(),
       mochaTimeout: this.client.mocha.timeout,
       testServerPort: this.client.testServerPort,
+      // This is used in _init_tests for matchers such as `skipModuleBuild` and
+      // `ifModuleBuild`.
+      isModuleBuild: !!argv.esm,
     };
 
-    if (argv.coverage && this.testType != 'a4a') {
+    if (argv.coverage) {
       this.plugins.push('karma-coverage-istanbul-reporter');
       this.coverageIstanbulReporter = {
         dir: 'test/coverage',
-        reports: isTravisBuild()
-          ? ['lcovonly']
-          : ['html', 'text', 'text-summary'],
+        reports: isCiBuild() ? ['lcovonly'] : ['html', 'text', 'text-summary'],
         'report-config': {lcovonly: {file: `lcov-${testType}.info`}},
       };
     }

@@ -18,17 +18,17 @@ import {getCarousel, getScrollingElement, getSlide, getSlides} from './helpers';
 import {useStyles} from '../base-carousel.jss';
 
 const pageWidth = 800;
-const pageHeight = 600;
+const pageHeight = 800;
 
-/** Increase timeout for running on Travis macOS **/
-const testTimeout = 30000;
+/** Increase timeout for running on CircleCI **/
+const testTimeout = 40000;
 
 describes.endtoend(
-  'AMP carousel',
+  'amp-base-carousel - basic functionality',
   {
-    testUrl:
-      'http://localhost:8000/test/manual/amp-base-carousel/1.0/basic.amp.html',
-    experiments: ['amp-base-carousel-bento'],
+    version: '1.0',
+    fixture: 'amp-base-carousel/1.0/basic.amp.html',
+    experiments: ['bento-carousel'],
     initialRect: {width: pageWidth, height: pageHeight},
     environments: ['single', 'viewer-demo'],
   },
@@ -94,7 +94,8 @@ describes.endtoend(
     });
 
     describe('looping', function () {
-      it('should show the last slide when looping', async function () {
+      // TODO(wg-components, #24195): Make this less flaky during CI.
+      it.skip('should show the last slide when looping', async function () {
         this.timeout(testTimeout);
         const el = await getScrollingElement(styles, controller);
         const lastSlide = await getSlide(styles, controller, SLIDE_COUNT - 1);

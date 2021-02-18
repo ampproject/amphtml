@@ -31,7 +31,7 @@ describes.realWin(
       doc = win.document;
     });
 
-    async function getVimeo(videoId, opt_responsive) {
+    async function getVimeo(videoId, opt_responsive, opt_doNotTrack) {
       const vimeo = doc.createElement('amp-vimeo');
       vimeo.setAttribute('data-videoid', videoId);
       vimeo.setAttribute('width', '111');
@@ -39,8 +39,11 @@ describes.realWin(
       if (opt_responsive) {
         vimeo.setAttribute('layout', 'responsive');
       }
+      if (opt_doNotTrack) {
+        vimeo.setAttribute('do-not-track', '');
+      }
       doc.body.appendChild(vimeo);
-      await vimeo.build();
+      await vimeo.buildInternal();
       await vimeo.layoutCallback();
       return vimeo;
     }
@@ -64,6 +67,12 @@ describes.realWin(
       return getVimeo('').should.eventually.be.rejectedWith(
         /The data-videoid attribute is required for/
       );
+    });
+
+    it('renders do-not-track src url', async () => {
+      const vimeo = await getVimeo('2323', false, true);
+      const iframe = vimeo.querySelector('iframe');
+      expect(iframe.src).to.equal('https://player.vimeo.com/video/2323?dnt=1');
     });
   }
 );

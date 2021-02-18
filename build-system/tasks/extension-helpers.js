@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-const colors = require('ansi-colors');
+const colors = require('kleur/colors');
 const debounce = require('debounce');
 const fs = require('fs-extra');
-const log = require('fancy-log');
 const wrappers = require('../compile/compile-wrappers');
 const {
   extensionAliasBundles,
   extensionBundles,
   verifyExtensionBundles,
 } = require('../compile/bundles.config');
+const {analyticsVendorConfigs} = require('./analytics-vendor-configs');
 const {endBuildStep, watchDebounceDelay} = require('./helpers');
-const {isTravisBuild} = require('../common/travis');
-const {jsifyCssAsync} = require('./jsify-css');
+const {isCiBuild} = require('../common/ci');
+const {jsifyCssAsync} = require('./css/jsify-css');
+const {log} = require('../common/logging');
 const {maybeToEsmName, compileJs, mkdirSync} = require('./helpers');
-const {vendorConfigs} = require('./vendor-configs');
 const {watch} = require('gulp');
 
 const {green, red, cyan} = colors;
@@ -130,8 +130,8 @@ function declareExtension(
 }
 
 /**
- * Initializes all extensions from build-system/compile/bundles.config.js if not
- * already done and populates the given extensions object.
+ * Initializes all extensions from build-system/compile/bundles.config.extensions.json
+ * if not already done and populates the given extensions object.
  * @param {?Object} extensionsObject
  * @param {?boolean} includeLatest
  */
@@ -175,10 +175,7 @@ function setExtensionsToBuildFromDocuments(examples) {
  * @return {!Array<string>}
  */
 function getExtensionsToBuild(preBuild = false) {
-  if (extensionsToBuild) {
-    return extensionsToBuild;
-  }
-  extensionsToBuild = DEFAULT_EXTENSION_SET;
+  extensionsToBuild = argv.core_runtime_only ? [] : DEFAULT_EXTENSION_SET;
   if (argv.extensions) {
     if (typeof argv.extensions !== 'string') {
       log(red('ERROR:'), 'Missing list of extensions.');
@@ -217,7 +214,7 @@ function getExtensionsToBuild(preBuild = false) {
  * @param {boolean=} preBuild
  */
 function parseExtensionFlags(preBuild = false) {
-  if (isTravisBuild()) {
+  if (isCiBuild()) {
     return;
   }
 
@@ -456,7 +453,7 @@ async function buildExtension(
     }
   }
   if (name === 'amp-analytics') {
-    await vendorConfigs(options);
+    await analyticsVendorConfigs(options);
   }
   await buildExtensionJs(path, name, version, latestVersion, options);
 }
@@ -542,7 +539,7 @@ async function buildExtensionJs(path, name, version, latestVersion, options) {
       // See https://github.com/ampproject/amphtml/issues/3977
       wrapper: options.noWrapper
         ? ''
-        : wrappers.extension(name, options.loadPriority),
+        : wrappers.extension(name, argv.esm, options.loadPriority),
     })
   );
 

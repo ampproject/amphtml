@@ -64,7 +64,6 @@
 #include "validator.pb.h"
 #include "re2/re2.h"  // NOLINT(build/deprecated)
 
-
 using absl::AsciiStrToLower;
 using absl::AsciiStrToUpper;
 using absl::ByAnyChar;
@@ -84,6 +83,7 @@ using absl::StartsWith;
 using absl::Status;
 using absl::StrAppend;
 using absl::StrCat;
+using absl::StrContains;
 using absl::string_view;
 using absl::StrJoin;
 using absl::StrSplit;
@@ -108,11 +108,39 @@ ABSL_FLAG(bool, duplicate_html_body_elements_is_error, false,
           "If true, duplicate <html>,<body> elements is considered error for "
           "validation purposes. (Default is to allow, leaving it to HTML5 "
           "user-agent to treat them as per the spec).");
-
+ABSL_FLAG(bool, allow_module_nomodule, true,
+          "If true, then script versions for module and nomdule are allowed "
+          "in AMP documents. This gating should be temporary and removed "
+          "after necessary transformers are in place. See b/173803451.");
 
 namespace amp::validator {
 
 constexpr char kAmpCacheRootUrl[] = "https://cdn.ampproject.org/";
+// Examples (note these are the same as kNomoduleLtsScriptSrcRe):
+// https://cdn.ampproject.org/lts/v0.js
+// https://cdn.ampproject.org/lts/v0/amp-ad-0.1.js
+static const LazyRE2 kLtsScriptSrcRe = {
+    R"re(https://cdn\.ampproject\.org/lts/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\.js)re"};
+// Examples:
+// https://cdn.ampproject.org/v0.mjs
+// https://cdn.ampproject.org/v0/amp-ad-0.1.mjs
+static const LazyRE2 kModuleScriptSrcRe = {
+    R"re(https://cdn\.ampproject\.org/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\.mjs)re"};
+// Examples:
+// https://cdn.ampproject.org/v0.js
+// https://cdn.ampproject.org/v0/amp-ad-0.1.js
+static const LazyRE2 kNomoduleScriptSrcRe = {
+    R"re(https://cdn\.ampproject\.org/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\.js)re"};
+// Examples:
+// https://cdn.ampproject.org/lts/v0.mjs
+// https://cdn.ampproject.org/lts/v0/amp-ad-0.1.mjs
+static const LazyRE2 kModuleLtsScriptSrcRe = {
+    R"re(https://cdn\.ampproject\.org/lts/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\.mjs)re"};
+// Examples (note these are the same as kLtsScriptSrcRe):
+// https://cdn.ampproject.org/lts/v0.js
+// https://cdn.ampproject.org/lts/v0/amp-ad-0.1.js
+static const LazyRE2 kNomoduleLtsScriptSrcRe = {
+    R"re(https://cdn\.ampproject\.org/lts/(v0|v0/amp-[a-z0-9-]*-[a-z0-9.]*)\.js)re"};
 
 namespace {
 
@@ -216,6 +244,34 @@ class ParsedHtmlTagAttr {
   std::string attr_value_;  // Stored unescaped.
 };                          // class ParsedHtmlTagAttr
 
+// If any script in the page uses a specific release version, then all scripts
+// must use that specific release version. This is used to record the first seen
+// script tag and ensure all following script tags follow the convention set by
+// it.
+enum ScriptReleaseVersion {
+  UNKNOWN,
+  STANDARD,
+  LTS,
+  MODULE_NOMODULE,
+  MODULE_NOMODULE_LTS
+};
+
+std::string ScriptReleaseVersionToString(ScriptReleaseVersion version) {
+  switch (version) {
+    case ScriptReleaseVersion::UNKNOWN:
+      return "unknown";
+    case ScriptReleaseVersion::STANDARD:
+      return "standard";
+    case ScriptReleaseVersion::LTS:
+      return "LTS";
+    case ScriptReleaseVersion::MODULE_NOMODULE:
+      return "module/nomodule";
+    case ScriptReleaseVersion::MODULE_NOMODULE_LTS:
+      return "module/nomodule LTS";
+  }
+  return "";
+}
+
 class ParsedHtmlTag {
  public:
   explicit ParsedHtmlTag(htmlparser::Node* node) : node_(node) {
@@ -270,6 +326,70 @@ class ParsedHtmlTag {
   }
 
   bool IsEmpty() const { return node_->Data().empty(); }
+
+  std::string ExtensionScriptNameAttribute() const {
+    if (UpperName() == "SCRIPT") {
+      for (const std::string& attribute :
+           {"custom-element", "custom-template", "host-service"}) {
+        if (GetAttr(attribute).has_value()) {
+          return attribute;
+        }
+      }
+    }
+    return "";
+  }
+
+  bool IsExtensionScript() const {
+    return !ExtensionScriptNameAttribute().empty();
+  }
+
+  bool IsAsyncScriptTag() const {
+    return UpperName() == "SCRIPT" && GetAttr("async").has_value() &&
+           GetAttr("src").has_value();
+  }
+
+  bool IsAmpRuntimeScript() const {
+    const string_view src = GetAttr("src").value_or("");
+    return IsAsyncScriptTag() && !IsExtensionScript() &&
+           StartsWith(src, kAmpCacheRootUrl) &&
+           (EndsWith(src, "/v0.js") || EndsWith(src, "/v0.mjs") ||
+            EndsWith(src, "/v0.mjs?f=sxg"));
+  }
+
+  bool IsLtsScriptTag() const {
+    return IsAsyncScriptTag() &&
+           RE2::FullMatch(GetAttr("src").value_or(""), *kLtsScriptSrcRe);
+  }
+
+  bool IsModuleScriptTag() const {
+    return IsAsyncScriptTag() && (GetAttr("type").value_or("") == "module") &&
+           RE2::FullMatch(GetAttr("src").value_or(""), *kModuleScriptSrcRe);
+  }
+
+  bool IsNomoduleScriptTag() const {
+    return IsAsyncScriptTag() && GetAttr("nomodule").has_value() &&
+           RE2::FullMatch(GetAttr("src").value_or(""), *kNomoduleScriptSrcRe);
+  }
+
+  bool IsModuleLtsScriptTag() const {
+    return IsAsyncScriptTag() && (GetAttr("type").value_or("") == "module") &&
+           RE2::FullMatch(GetAttr("src").value_or(""), *kModuleLtsScriptSrcRe);
+  }
+
+  bool IsNomoduleLtsScriptTag() const {
+    return IsAsyncScriptTag() && GetAttr("nomodule").has_value() &&
+           RE2::FullMatch(GetAttr("src").value_or(""),
+                          *kNomoduleLtsScriptSrcRe);
+  }
+
+  ScriptReleaseVersion GetScriptReleaseVersion() const {
+    if (IsModuleLtsScriptTag() || IsNomoduleLtsScriptTag())
+      return ScriptReleaseVersion::MODULE_NOMODULE_LTS;
+    if (IsModuleScriptTag() || IsNomoduleScriptTag())
+      return ScriptReleaseVersion::MODULE_NOMODULE;
+    if (IsLtsScriptTag()) return ScriptReleaseVersion::LTS;
+    return ScriptReleaseVersion::STANDARD;
+  }
 
   const vector<ParsedHtmlTagAttr>& Attributes() const { return attributes_; }
 
@@ -710,6 +830,7 @@ CssParsingConfig GenCssParsingConfig() {
   config.at_rule_spec["media"] = BlockType::PARSE_AS_RULES;
   config.at_rule_spec["page"] = BlockType::PARSE_AS_DECLARATIONS;
   config.at_rule_spec["supports"] = BlockType::PARSE_AS_RULES;
+  config.at_rule_spec["-moz-document"] = BlockType::PARSE_AS_RULES;
   // Note that ignoring still generates an error.
   config.default_spec = BlockType::PARSE_AS_IGNORE;
   return config;
@@ -764,8 +885,15 @@ class ParsedCdataSpec {
                   << at_rule_name;
       return false;
     }
-    return allowed_at_rules_.find(
-               std::string(htmlparser::css::StripVendorPrefix(at_rule_name))) !=
+    // "-moz-document" is specified in the list of allowed rules with an
+    // explicit vendor prefix. The idea here is that only this specific vendor
+    // prefix is allowed, not "-ms-document" or even "document". We first search
+    // the allowed list for the seen `at_rule_name` with stripped vendor prefix,
+    // then if not found, we search again without sripping the vendor prefix.
+    if (allowed_at_rules_.find(std::string(htmlparser::css::StripVendorPrefix(
+            at_rule_name))) != allowed_at_rules_.end())
+      return true;
+    return allowed_at_rules_.find(std::string(at_rule_name)) !=
            allowed_at_rules_.end();
   }
 
@@ -1167,8 +1295,8 @@ class TagSpecDispatch {
   // corresponding tag_spec_ids which are ordered by their specificity of match
   // (e.g. Name/Value/Parent, then Name/Value, and then Name).
   vector<int32_t> MatchingDispatchKey(const std::string& attr_name,
-                                    const std::string& attr_value,
-                                    const std::string& parent) const {
+                                      const std::string& attr_value,
+                                      const std::string& parent) const {
     if (!HasDispatchKeys()) return {};
 
     vector<int32_t> tag_spec_ids;
@@ -1213,7 +1341,7 @@ class TagSpecDispatch {
 
  private:
   unordered_map<std::string /*dispatch key*/,
-      vector<int32_t> /* tag_spec_ids */>
+                vector<int32_t> /* tag_spec_ids */>
       tagspecs_by_dispatch_;
   vector<int32_t> all_tag_specs_;
 };
@@ -1234,6 +1362,10 @@ class ParsedValidatorRules {
   void FilterRules(const ValidatorRules& all_rules,
                    ValidatorRules* filtered_rules) const;
 
+  void ExpandModuleExtensionSpec(TagSpec* tagspec,
+                                 const string_view spec_name) const;
+  void ExpandNomoduleExtensionSpec(TagSpec* tagspec,
+                                   const string_view spec_name) const;
   void ExpandExtensionSpec(ValidatorRules* rules) const;
 
   // Returns true iff `tagspec` is usable for the HTML Format these rules are
@@ -1276,7 +1408,7 @@ class ParsedValidatorRules {
                                   const ValidationResult& resultB) const;
 
   bool HasValidatedAlternativeTagSpec(Context* context,
-                                      const string& ext_name) const;
+                                      const std::string& ext_name) const;
 
   void MaybeEmitMandatoryTagValidationErrors(Context* context,
                                              ValidationResult* result) const;
@@ -1339,8 +1471,9 @@ class ParsedValidatorRules {
   ValidatorRules rules_;
   HtmlFormat::Code html_format_;
   vector<ParsedTagSpec> tagspec_by_id_;
-  unordered_map<std::string, TagSpecDispatch> tagspecs_by_tagname_;
-  unordered_map<std::string, vector<int32_t>> ext_tag_spec_ids_by_ext_name_;
+  absl::node_hash_map<std::string, TagSpecDispatch> tagspecs_by_tagname_;
+  absl::node_hash_map<std::string, vector<int32_t>>
+      ext_tag_spec_ids_by_ext_name_;
   TagSpecDispatch empty_dispatch_;
   vector<int32_t> mandatory_tagspecs_;
   vector<ErrorCodeMetaData> error_codes_;
@@ -1937,44 +2070,6 @@ struct ValueSetProvision {
   std::string value;
 };
 
-// If any script in the page uses LTS, all scripts must use LTS. This is used to
-// record when a script is seen and validate following script tags.
-enum ScriptReleaseVersion { UNKNOWN, STANDARD, LTS };
-
-std::string ExtensionScriptNameAttribute(const ParsedHtmlTag& tag) {
-  if (tag.UpperName() == "SCRIPT") {
-    for (const std::string& attribute :
-         {"custom-element", "custom-template", "host-service"}) {
-      if (tag.GetAttr(attribute).has_value()) {
-        return attribute;
-      }
-    }
-  }
-  return "";
-}
-
-bool IsExtensionScript(const ParsedHtmlTag& tag) {
-  return !ExtensionScriptNameAttribute(tag).empty();
-}
-
-bool IsAsyncScriptTag(const ParsedHtmlTag& tag) {
-  return tag.UpperName() == "SCRIPT" && tag.GetAttr("async").has_value() &&
-         tag.GetAttr("src").has_value();
-}
-
-// This diverges from
-// google3/search/amphtml/transformers/amp_runtime_and_extensions.cc by
-// excluding amp4ads, since amp4ads does not currently support LTS
-bool IsAmpRuntimeScript(const ParsedHtmlTag& tag) {
-  const string_view src = tag.GetAttr("src").value_or("");
-  return IsAsyncScriptTag(tag) && !IsExtensionScript(tag) &&
-         StartsWith(src, kAmpCacheRootUrl) && EndsWith(src, "/v0.js");
-}
-
-bool IsLtsScriptUrl(string_view url) {
-  return StartsWith(url, StrCat(kAmpCacheRootUrl, "lts/"));
-}
-
 // The context keeps track of the line / column that the validator is
 // in, as well as the mandatory and unique tag specs that have already
 // been validated. So, this constitutes the mutable state for the
@@ -2104,7 +2199,7 @@ class Context {
     RecordAttrRequiresExtension(encountered_tag, tag_result);
     UpdateFromTagResult(reference_point_result);
     UpdateFromTagResult(tag_result);
-    RecordScriptReleaseVersionFromTagResult(encountered_tag, tag_result);
+    RecordScriptReleaseVersionFromTagResult(encountered_tag);
     AddInlineStyleByteSize(tag_result.inline_style_css_bytes);
   }
 
@@ -2322,13 +2417,10 @@ class Context {
   }
 
   void RecordScriptReleaseVersionFromTagResult(
-      const ParsedHtmlTag& parsed_tag, const ValidateTagResult& tag_result) {
+      const ParsedHtmlTag& parsed_tag) {
     if (script_release_version() == ScriptReleaseVersion::UNKNOWN &&
-        (IsExtensionScript(parsed_tag) || IsAmpRuntimeScript(parsed_tag))) {
-      const string_view script_src = parsed_tag.GetAttr("src").value_or("");
-      script_release_version_ = IsLtsScriptUrl(script_src)
-                                    ? ScriptReleaseVersion::LTS
-                                    : ScriptReleaseVersion::STANDARD;
+        (parsed_tag.IsExtensionScript() || parsed_tag.IsAmpRuntimeScript())) {
+      script_release_version_ = parsed_tag.GetScriptReleaseVersion();
     }
   }
 
@@ -3063,7 +3155,7 @@ void CdataMatcher::MatchCss(string_view cdata, const CssSpec& css_spec,
 
   // Validate the allowed CSS declarations (eg: `background-color`)
   if (maybe_doc_css_spec &&
-      !(**maybe_doc_css_spec).spec().allow_all_declaration_in_style_tag()) {
+      !(**maybe_doc_css_spec).spec().allow_all_declaration_in_style()) {
     InvalidDeclVisitor visitor(
         **maybe_doc_css_spec, context,
         TagDescriptiveName(parsed_cdata_spec_->ParentTagSpec()), result);
@@ -3812,7 +3904,7 @@ bool ValidateAttrInExtension(const TagSpec& tag_spec, const Context& context,
   CHECK(tag_spec.has_extension_spec());
 
   static LazyRE2 src_url_re = {
-      R"re(https://cdn\.ampproject\.org(?:/lts)?/v0/(amp-[a-z0-9-]*)-([a-z0-9.]*)\.js)re"};
+      R"re(https://cdn\.ampproject\.org(?:/lts)?/v0/(amp-[a-z0-9-]*)-([a-z0-9.]*)\.(?:m)?js(?:\?f=sxg)?)re"};
 
   const auto& extension_spec = tag_spec.extension_spec();
   // TagSpecs with extensions will only be evaluated if their dispatch_key
@@ -3874,31 +3966,69 @@ void ValidateClassAttr(const ParsedHtmlTagAttr& class_attr,
   }
 }
 
-// Validates that LTS is used for either all script sources or none.
-void ValidateScriptSrcAttr(const ParsedHtmlTagAttr& src_attr,
-                           const TagSpec& tag_spec, const Context& context,
-                           ValidationResult* result) {
+// Validates the same script release version is used for all script sources.
+void ValidateScriptSrcAttr(const ParsedHtmlTag& tag, const TagSpec& tag_spec,
+                           const Context& context, ValidationResult* result) {
   if (context.script_release_version() == ScriptReleaseVersion::UNKNOWN) return;
 
   const ScriptReleaseVersion script_release_version =
-      IsLtsScriptUrl(src_attr.value()) ? ScriptReleaseVersion::LTS
-                                       : ScriptReleaseVersion::STANDARD;
+      tag.GetScriptReleaseVersion();
 
   if (context.script_release_version() != script_release_version) {
     const std::string spec_name = tag_spec.has_extension_spec()
                                       ? tag_spec.extension_spec().name()
                                       : tag_spec.spec_name();
-    context.AddError(
-        script_release_version == ScriptReleaseVersion::LTS
-            ? ValidationError::LTS_SCRIPT_AFTER_NON_LTS
-            : ValidationError::NON_LTS_SCRIPT_AFTER_LTS,
-        context.line_col(),
-        /*params=*/{spec_name},
-        "https://amp.dev/documentation/guides-and-tutorials/learn/spec/"
-        "amphtml#required-markup",
-        result);
+    switch (context.script_release_version()) {
+      case ScriptReleaseVersion::LTS:
+        context.AddError(
+            ValidationError::INCORRECT_SCRIPT_RELEASE_VERSION,
+            context.line_col(),
+            /*params=*/
+            {spec_name, ScriptReleaseVersionToString(script_release_version),
+             ScriptReleaseVersionToString(context.script_release_version())},
+            "https://amp.dev/documentation/guides-and-tutorials/learn/spec/"
+            "amphtml#required-markup",
+            result);
+        break;
+      case ScriptReleaseVersion::MODULE_NOMODULE:
+        context.AddError(
+            ValidationError::INCORRECT_SCRIPT_RELEASE_VERSION,
+            context.line_col(),
+            /*params=*/
+            {spec_name, ScriptReleaseVersionToString(script_release_version),
+             ScriptReleaseVersionToString(context.script_release_version())},
+            "https://amp.dev/documentation/guides-and-tutorials/learn/spec/"
+            "amphtml#required-markup",
+            result);
+        break;
+      case ScriptReleaseVersion::MODULE_NOMODULE_LTS:
+        context.AddError(
+            ValidationError::INCORRECT_SCRIPT_RELEASE_VERSION,
+            context.line_col(),
+            /*params=*/
+            {spec_name, ScriptReleaseVersionToString(script_release_version),
+             ScriptReleaseVersionToString(context.script_release_version())},
+            "https://amp.dev/documentation/guides-and-tutorials/learn/spec/"
+            "amphtml#required-markup",
+            result);
+        break;
+      case ScriptReleaseVersion::STANDARD:
+        context.AddError(
+            ValidationError::INCORRECT_SCRIPT_RELEASE_VERSION,
+            context.line_col(),
+            /*params=*/
+            {spec_name, ScriptReleaseVersionToString(script_release_version),
+             ScriptReleaseVersionToString(context.script_release_version())},
+            "https://amp.dev/documentation/guides-and-tutorials/learn/spec/"
+            "amphtml#required-markup",
+            result);
+        break;
+      default:
+        break;
+    }
   }
 }
+
 // Helper method for ValidateAttributes.
 void ValidateAttrCss(const ParsedAttrSpec& parsed_attr_spec,
                      const Context& context, const TagSpec& tag_spec,
@@ -3974,11 +4104,55 @@ void ValidateAttrCss(const ParsedAttrSpec& parsed_attr_spec,
     // in the allowed list for this DocCssSpec, and have allowed values if
     // relevant.
     for (auto& declaration : declarations) {
-      const CssDeclaration* css_declaration =
-          CssDeclarationByName(declaration->name());
-      // If there is no matching declaration in the rules, then this
-      // declaration is not allowed.
-      if (!css_declaration) {
+      // Validate declarations only when they are not all allowed.
+      if (!spec.spec().allow_all_declaration_in_style()) {
+        const CssDeclaration* css_declaration =
+            CssDeclarationByName(declaration->name());
+        // If there is no matching declaration in the rules, then this
+        // declaration is not allowed.
+        if (!css_declaration) {
+          context.AddError(
+              ValidationError::DISALLOWED_PROPERTY_IN_ATTR_VALUE,
+              context.line_col(),
+              /*params=*/{declaration->name(), attr_name, tag_description},
+              /*spec_url=*/context.rules().styles_spec_url(),
+              &result->validation_result);
+          // Don't emit additional errors for this declaration.
+          continue;
+        } else if (css_declaration->value_casei_size() > 0) {
+          bool has_valid_value = false;
+          const std::string first_ident = declaration->FirstIdent();
+          for (auto& value : css_declaration->value_casei()) {
+            if (EqualsIgnoreCase(first_ident, value)) {
+              has_valid_value = true;
+              break;
+            }
+          }
+          if (!has_valid_value) {
+            // Declaration value not allowed.
+            context.AddError(
+                ValidationError::CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
+                context.line_col(),
+                /*params=*/{tag_description, declaration->name(), first_ident},
+                /*spec_url=*/context.rules().styles_spec_url(),
+                &result->validation_result);
+          }
+        } else if (css_declaration->has_value_regex_casei()) {
+          RE2::Options options;
+          options.set_case_sensitive(false);
+          RE2 pattern(css_declaration->value_regex_casei(), options);
+          const std::string first_ident = declaration->FirstIdent();
+          if (!RE2::FullMatch(first_ident, pattern)) {
+            context.AddError(
+                ValidationError::CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
+                context.line_col(),
+                /*params=*/{tag_description, declaration->name(), first_ident},
+                /*spec_url=*/context.rules().styles_spec_url(),
+                &result->validation_result);
+          }
+        }
+      }
+      if (StrContains(declaration->name(), "i-amphtml-")) {
         context.AddError(
             ValidationError::DISALLOWED_PROPERTY_IN_ATTR_VALUE,
             context.line_col(),
@@ -3987,37 +4161,6 @@ void ValidateAttrCss(const ParsedAttrSpec& parsed_attr_spec,
             &result->validation_result);
         // Don't emit additional errors for this declaration.
         continue;
-      } else if (css_declaration->value_casei_size() > 0) {
-        bool has_valid_value = false;
-        const std::string first_ident = declaration->FirstIdent();
-        for (auto& value : css_declaration->value_casei()) {
-          if (EqualsIgnoreCase(first_ident, value)) {
-            has_valid_value = true;
-            break;
-          }
-        }
-        if (!has_valid_value) {
-          // Declaration value not allowed.
-          context.AddError(
-              ValidationError::CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
-              context.line_col(),
-              /*params=*/{tag_description, declaration->name(), first_ident},
-              /*spec_url=*/context.rules().styles_spec_url(),
-              &result->validation_result);
-        }
-      } else if (css_declaration->has_value_regex_casei()) {
-        RE2::Options options;
-        options.set_case_sensitive(false);
-        RE2 pattern(css_declaration->value_regex_casei(), options);
-        const std::string first_ident = declaration->FirstIdent();
-        if (!RE2::FullMatch(first_ident, pattern)) {
-          context.AddError(
-              ValidationError::CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
-              context.line_col(),
-              /*params=*/{tag_description, declaration->name(), first_ident},
-              /*spec_url=*/context.rules().styles_spec_url(),
-              &result->validation_result);
-        }
       }
       if (!spec.spec().allow_important()) {
         if (declaration->important()) {
@@ -4200,9 +4343,10 @@ void ValidateAttributes(const ParsedTagSpec& parsed_tag_spec,
 
     // If |spec| is the runtime or an extension script, validate that LTS is
     // either used by all pages or no pages.
-    if (attr.name() == "src" && (IsExtensionScript(encountered_tag) ||
-                                 IsAmpRuntimeScript(encountered_tag))) {
-      ValidateScriptSrcAttr(attr, spec, context, &result->validation_result);
+    if (attr.name() == "src" && (encountered_tag.IsExtensionScript() ||
+                                 encountered_tag.IsAmpRuntimeScript())) {
+      ValidateScriptSrcAttr(encountered_tag, spec, context,
+                            &result->validation_result);
     }
 
     auto jt = attr_ids_by_name.find(attr.name());
@@ -4594,9 +4738,54 @@ void ParsedValidatorRules::FilterRules(const ValidatorRules& all_rules,
   }
 }
 
+// For every tagspec that contains an ExtensionSpec, add module specific
+// requirements for that tagspec that will be added to ValidatorRules.
+void ParsedValidatorRules::ExpandModuleExtensionSpec(
+    TagSpec* tagspec, const string_view spec_name) const {
+  tagspec->set_spec_name(StrCat(spec_name, " module extension script"));
+  tagspec->set_descriptive_name(tagspec->spec_name());
+  tagspec->add_satisfies(tagspec->spec_name());
+  tagspec->add_requires(StrCat(spec_name, " nomodule extension script"));
+  AttrSpec* attr = tagspec->add_attrs();
+  attr->set_name("crossorigin");
+  attr->add_value("anonymous");
+  attr->set_mandatory(true);
+  attr = tagspec->add_attrs();
+  attr->set_name("src");
+  attr->set_value_regex(
+      "https://cdn\\.ampproject\\.org(?:/lts)?/(v0|v0/"
+      "amp-[a-z0-9-]*-[a-z0-9.]*)\\.mjs");
+  attr->set_mandatory(true);
+  attr = tagspec->add_attrs();
+  attr->set_name("type");
+  attr->add_value("module");
+  attr->set_mandatory(true);
+}
+
+// For every tagspec that contains an ExtensionSpec, add nomodule specific
+// requirements for that tagspec that will be added to ValidatorRules.
+void ParsedValidatorRules::ExpandNomoduleExtensionSpec(
+    TagSpec* tagspec, const string_view spec_name) const {
+  tagspec->set_spec_name(StrCat(spec_name, " nomodule extension script"));
+  tagspec->set_descriptive_name(tagspec->spec_name());
+  tagspec->add_satisfies(tagspec->spec_name());
+  tagspec->add_requires(StrCat(spec_name, " module extension script"));
+  AttrSpec* attr = tagspec->add_attrs();
+  attr->set_name("nomodule");
+  attr->add_value("");
+  attr->set_mandatory(true);
+  attr = tagspec->add_attrs();
+  attr->set_name("src");
+  attr->set_value_regex(
+      "https://cdn\\.ampproject\\.org(?:/lts)?/(v0|v0/"
+      "amp-[a-z0-9-]*-[a-z0-9.]*)\\.js");
+  attr->set_mandatory(true);
+}
+
 // For every tagspec that contains an ExtensionSpec, we add several TagSpec
 // fields corresponding to the data found in the ExtensionSpec.
 void ParsedValidatorRules::ExpandExtensionSpec(ValidatorRules* rules) const {
+  vector<TagSpec> new_tagspecs;
   for (int ii = 0; ii < rules->tags_size(); ++ii) {
     TagSpec* tagspec = rules->mutable_tags(ii);
     if (!tagspec->has_extension_spec()) continue;
@@ -4615,6 +4804,35 @@ void ParsedValidatorRules::ExpandExtensionSpec(ValidatorRules* rules) const {
 
     // Disallow any contents in the script cdata.
     tagspec->mutable_cdata()->set_whitespace_only(true);
+
+    // TODO(b/173803451): allow module/nomodule tagspecs.
+    if (GetFlag(FLAGS_allow_module_nomodule)) {
+      // Add module/nomodule tagspecs for AMP ExtensionSpec tagspecs.
+      const auto& html_formats = tagspec->html_format();
+      if (std::find(html_formats.begin(), html_formats.end(),
+                    HtmlFormat::AMP) != html_formats.end()) {
+        TagSpec basic_tagspec = *tagspec;
+        basic_tagspec.clear_html_format();
+        basic_tagspec.add_html_format(HtmlFormat::AMP);
+        basic_tagspec.clear_enabled_by();
+        basic_tagspec.add_enabled_by("transformed");
+
+        // Expand module script tagspec.
+        TagSpec module_tagspec = basic_tagspec;
+        ExpandModuleExtensionSpec(&module_tagspec,
+                                  tagspec->extension_spec().name());
+        new_tagspecs.push_back(module_tagspec);
+        // Expand nomodule script tagspec.
+        TagSpec nomodule_tagspec = basic_tagspec;
+        ExpandNomoduleExtensionSpec(&nomodule_tagspec,
+                                    tagspec->extension_spec().name());
+        new_tagspecs.push_back(nomodule_tagspec);
+      }
+    }
+  }
+  // Add module and nomodule tagspecs.
+  for (TagSpec new_tagspec : new_tagspecs) {
+    rules->mutable_tags()->Add(std::move(new_tagspec));
   }
 }
 
@@ -4664,7 +4882,11 @@ void ParsedValidatorRules::ValidateTypeIdentifiers(
     ValidationResult* result) const {
   CHECK_NE(0, format_identifiers.size());
   bool has_mandatory_type_identifier = false;
-  static LazyRE2 transformed_value_regex = {"^\\w+;v=(\\d+)$"};
+  bool has_email_type_identifier = false;
+  bool has_css_strict_type_identifier = false;
+  // The named values should match up to `self` and AMP caches listed at
+  // https://cdn.ampproject.org/caches.json
+  static LazyRE2 transformed_value_regex = {"^(bing|google|self);v=(\\d+)$"};
   for (const ParsedHtmlTagAttr& attr : html_tag.Attributes()) {
     // Verify this attribute is a type identifier. Other attributes are
     // validated in ValidateAttributes.
@@ -4688,11 +4910,10 @@ void ParsedValidatorRules::ValidateTypeIdentifiers(
             type_identifier != TypeIdentifier::kCssStrict)
           has_mandatory_type_identifier = true;
         // The type identifier "transformed" has restrictions on its value.
-        // It must be \w+;v=\d+ (e.g. google;v=1).
-        if ((type_identifier == TypeIdentifier::kTransformed) &&
-            !attr.value().empty()) {
+        if (type_identifier == TypeIdentifier::kTransformed) {
+          std::string name;
           std::string version;
-          if (RE2::FullMatch(attr.value(), *transformed_value_regex,
+          if (RE2::FullMatch(attr.value(), *transformed_value_regex, &name,
                              &version)) {
             int32_t transformer_version;
             if (absl::SimpleAtoi(version, &transformer_version)) {
@@ -4715,6 +4936,10 @@ void ParsedValidatorRules::ValidateTypeIdentifiers(
           context->AddError(ValidationError::DEV_MODE_ONLY, context->line_col(),
                             /*params=*/{}, /*url*/ "", result);
         }
+        if (type_identifier == TypeIdentifier::kEmail)
+          has_email_type_identifier = true;
+        if (type_identifier == TypeIdentifier::kCssStrict)
+          has_css_strict_type_identifier = true;
       } else {
         context->AddError(
             ValidationError::DISALLOWED_ATTR, context->line_col(),
@@ -4724,6 +4949,15 @@ void ParsedValidatorRules::ValidateTypeIdentifiers(
             result);
       }
     }
+  }
+  // If AMP Email format and not set to data-css-strict, then issue a warning
+  // that not having data-css-strict is deprecated. See b/179798751.
+  if (has_email_type_identifier && !has_css_strict_type_identifier) {
+    context->AddWarning(
+        ValidationError::AMP_EMAIL_MISSING_STRICT_CSS_ATTR, context->line_col(),
+        /*params=*/{},
+        /*spec_url=*/"https://github.com/ampproject/amphtml/issues/32587",
+        result);
   }
   if (!has_mandatory_type_identifier) {
     // Missing mandatory type identifier (any AMP variant but "transformed").
@@ -4884,7 +5118,7 @@ void ParsedValidatorRules::MaybeEmitMandatoryTagValidationErrors(
 
 // Returns true if one of the alternative_tag_spec_ids has been validated.
 bool ParsedValidatorRules::HasValidatedAlternativeTagSpec(
-    Context* context, const string& ext_name) const {
+    Context* context, const std::string& ext_name) const {
   auto it = ext_tag_spec_ids_by_ext_name_.find(ext_name);
   if (it != ext_tag_spec_ids_by_ext_name_.end()) {
     for (int32_t alternative_tag_spec_id : it->second) {
@@ -5393,8 +5627,6 @@ class Validator {
         .frameset_ok = true,
         .record_node_offsets = true,
         .record_attribute_offsets = true,
-        // Validator need disallwed/deprecated elements for error reporting.
-        .allow_deprecated_tags = true,
     };
     // The validation check for document size can't be done here since
     // the Type Identifiers on the html tag have not been parsed yet and
@@ -5407,8 +5639,8 @@ class Validator {
     // NOTE: If htmlparser starts returning null document for other reasons, we
     // must add new error types here.
     if (doc == nullptr) {
-      context_.AddError(ValidationError::DOCUMENT_TOO_COMPLEX,
-                        LineCol(1, 0), {}, "", &result_);
+      context_.AddError(ValidationError::DOCUMENT_TOO_COMPLEX, LineCol(1, 0),
+                        {}, "", &result_);
       return result_;
     }
 
@@ -5712,12 +5944,12 @@ class Validator {
 
     // As some errors can be inserted out of order, sort errors at the
     // end based on their line/col numbers.
-    std::stable_sort(result_.mutable_errors()->begin(),
-              result_.mutable_errors()->end(),
-              [](const ValidationError& lhs, const ValidationError& rhs) {
-                if (lhs.line() != rhs.line()) return lhs.line() < rhs.line();
-                return lhs.col() < rhs.col();
-              });
+    std::stable_sort(
+        result_.mutable_errors()->begin(), result_.mutable_errors()->end(),
+        [](const ValidationError& lhs, const ValidationError& rhs) {
+          if (lhs.line() != rhs.line()) return lhs.line() < rhs.line();
+          return lhs.col() < rhs.col();
+        });
   }
 
  private:

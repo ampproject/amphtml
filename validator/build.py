@@ -129,12 +129,12 @@ def InstallNodeDependencies():
   logging.info('installing AMP Validator engine dependencies ...')
   subprocess.check_call(
       ['npm', 'install', '--userconfig', '../.npmrc'],
-      stdout=(open(os.devnull, 'wb') if os.environ.get('TRAVIS') else sys.stdout))
+      stdout=(open(os.devnull, 'wb') if os.environ.get('CI') else sys.stdout))
   logging.info('installing AMP Validator nodejs dependencies ...')
   subprocess.check_call(['npm', 'install', '--userconfig', '../../../.npmrc'],
                         cwd='js/nodejs',
                         stdout=(open(os.devnull, 'wb')
-                                if os.environ.get('TRAVIS') else sys.stdout))
+                                if os.environ.get('CI') else sys.stdout))
   logging.info('... done')
 
 
@@ -166,6 +166,7 @@ def GenValidatorProtoascii(out_dir):
 
   protoascii_segments = [open('validator-main.protoascii').read()]
   protoascii_segments.append(open('validator-css.protoascii').read())
+  protoascii_segments.append(open('validator-svg.protoascii').read())
   extensions = glob.glob('extensions/*/validator-*.protoascii')
   # In the Github project, the extensions are located in a sibling directory
   # to the validator rather than a child directory.
@@ -542,11 +543,13 @@ def GenerateTestRunner(out_dir):
   # to the validator rather than a child directory.
   if not os.path.isdir(extensions_dir):
     extensions_dir = '../extensions'
+  log_level = ('false' if os.environ.get('CI') else '\'dots\'')
   f.write("""#!/usr/bin/env node
              global.assert = require('assert');
              global.fs = require('fs');
              global.path = require('path');
              var JasmineRunner = require('jasmine');
+             var Reporter = require('jasmine-console-reporter');
              var jasmine = new JasmineRunner();
              process.env.TESTDATA_ROOTS = 'testdata:%s'
              require('./validator_test_minified');
@@ -556,11 +559,14 @@ def GenerateTestRunner(out_dir):
              require('./amp4ads-parse-css_test_minified');
              require('./keyframes-parse-css_test_minified');
              require('./parse-srcset_test_minified');
+             var reporter = new Reporter({verbosity: 1, activity: %s});
+             jasmine.env.clearReporters();
+             jasmine.env.addReporter(reporter);
              jasmine.onComplete(function (passed) {
                  process.exit(passed ? 0 : 1);
              });
              jasmine.execute();
-          """ % extensions_dir)
+          """ % (extensions_dir, log_level))
   os.chmod('%s/test_runner' % out_dir, 0o750)
   logging.info('... success')
 
@@ -586,7 +592,7 @@ def Main(parsed_args):
   """The main method, which executes all build steps and runs the tests."""
   logging.basicConfig(
       format='[[%(filename)s %(funcName)s]] - %(message)s',
-      level=(logging.ERROR if os.environ.get('TRAVIS') else logging.INFO))
+      level=(logging.ERROR if os.environ.get('CI') else logging.INFO))
   EnsureNodeJsIsInstalled()
   CheckPrereqs()
   InstallNodeDependencies()

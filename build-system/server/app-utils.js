@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-const log = require('fancy-log');
 const minimist = require('minimist');
-const {cyan, green} = require('ansi-colors');
+const {cyan, green} = require('kleur/colors');
+const {log} = require('../common/logging');
 
 let serveMode = 'default';
 

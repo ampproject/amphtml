@@ -34,7 +34,7 @@ function getExperimentGlobals() {
 
 module.exports = {
   'root': true,
-  'parser': 'babel-eslint',
+  'parser': '@babel/eslint-parser',
   'plugins': [
     'chai-expect',
     'google-camelcase',
@@ -98,7 +98,6 @@ module.exports = {
           'export',
           'final',
           'nocollapse',
-          'noinline',
           'package',
           'record',
           'restricted',
@@ -160,6 +159,7 @@ module.exports = {
     'local/no-style-property-setting': 2,
     'local/no-swallow-return-from-allow-console-error': 2,
     'local/no-unload-listener': 2,
+    'local/objstr-literal': 2,
     'local/preact': 2,
     'local/prefer-deferred-promise': 0,
     'local/prefer-destructuring': 2,
@@ -274,6 +274,7 @@ module.exports = {
         'local/always-call-chai-methods': 2,
         'local/no-bigint': 0,
         'local/no-dynamic-import': 0,
+        'local/no-for-of-statement': 0,
         'local/no-function-async': 0,
         'local/no-function-generator': 0,
         'local/no-import-meta': 0,
@@ -306,7 +307,7 @@ module.exports = {
       },
     },
     {
-      'files': ['babel.config.js', '**/.eslintrc.js'],
+      'files': ['babel.config.js', '**/.eslintrc.js', 'package-scripts.js'],
       'globals': {
         'module': false,
         'process': false,

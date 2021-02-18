@@ -49,12 +49,12 @@ the element scrolls faster or slower depending on the value assigned to the
 Specifies a decimal value that controls how much faster or slower the element
 scrolls relative to the scrolling speed:
 
-- A value greater than `1` scrolls the element upward (element scrolls faster)
-  when the user scrolls down the page.
-- A value less than `1` scrolls the element downward (element scrolls slower)
-  when the user scrolls downward.
-- A value of `1` behaves normally.
-- A value of `0` effectively makes the element scroll fixed with the page.
+-   A value greater than `1` scrolls the element upward (element scrolls faster)
+    when the user scrolls down the page.
+-   A value less than `1` scrolls the element downward (element scrolls slower)
+    when the user scrolls downward.
+-   A value of `1` behaves normally.
+-   A value of `0` effectively makes the element scroll fixed with the page.
 
 In this example, as the user scrolls the page, the `h1` element scrolls faster
 relative to the page's content.
@@ -93,11 +93,11 @@ In the below example, the animation lasts over `2000ms`.
 This parameter lets you vary the animation's speed over the course of its
 duration. The default is `ease-in` which is `cubic-bezier(0.40, 0.00, 0.40, 1.00)`. You can choose from one of the presets available:
 
-- `"linear"` - `cubic-bezier(0.00, 0.00, 1.00, 1.00)`
-- `"ease-in-out"` - `cubic-bezier(0.80, 0.00, 0.20, 1.00)`
-- `"ease-in"` - `cubic-bezier(0.80, 0.00, 0.60, 1.00)` (default)
-- `"ease-out"` - `cubic-bezier(0.40, 0.00, 0.40, 1.00)`
-- Specify a `custom-bezier()` input.
+-   `"linear"` - `cubic-bezier(0.00, 0.00, 1.00, 1.00)`
+-   `"ease-in-out"` - `cubic-bezier(0.80, 0.00, 0.20, 1.00)`
+-   `"ease-in"` - `cubic-bezier(0.80, 0.00, 0.60, 1.00)` (default)
+-   `"ease-out"` - `cubic-bezier(0.40, 0.00, 0.40, 1.00)`
+-   Specify a `custom-bezier()` input.
 
 In the below example, the animation acceleration curve is a custom specified
 `cubic-bezier(...)` curve.
@@ -196,10 +196,10 @@ element in-and-out of view as the document is scrolled up or down.
 An element with `amp-fx="float-in-top"` or `amp-fx="float-in-bottom"` must have
 the following CSS properties:
 
-- `position: fixed`
-- `overflow: hidden`
-- **if it's `top`**, `top: 0`
-- **if it's `bottom`**, `bottom: 0`
+-   `position: fixed`
+-   `overflow: hidden`
+-   **if it's `top`**, `top: 0`
+-   **if it's `bottom`**, `bottom: 0`
 
 If any of these is not set, the effect will not be applied and a warning will be
 thrown in [development mode](https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validate_amp#browser-developer-console).
@@ -238,11 +238,11 @@ default will apply across all devices.
 This parameter lets you vary the animation's speed over the course of its
 duration. The default is `ease-out` which is `cubic-bezier(0.40, 0.00, 0.40, 1.00)`. You can choose from one of the presets available:
 
-- `"linear"` - `cubic-bezier(0.00, 0.00, 1.00, 1.00)`
-- `"ease-in-out"` - `cubic-bezier(0.80, 0.00, 0.20, 1.00)`
-- `"ease-in"` - `cubic-bezier(0.80, 0.00, 0.60, 1.00)`
-- `"ease-out"` - `cubic-bezier(0.40, 0.00, 0.40, 1.00)` (default)
-- Specify a `custom-bezier()` input.
+-   `"linear"` - `cubic-bezier(0.00, 0.00, 1.00, 1.00)`
+-   `"ease-in-out"` - `cubic-bezier(0.80, 0.00, 0.20, 1.00)`
+-   `"ease-in"` - `cubic-bezier(0.80, 0.00, 0.60, 1.00)`
+-   `"ease-out"` - `cubic-bezier(0.40, 0.00, 0.40, 1.00)` (default)
+-   Specify a `custom-bezier()` input.
 
 #### `data-fly-in-distance` (optional)
 

@@ -16,10 +16,10 @@
 
 const app = require('express').Router();
 const fs = require('fs');
-const log = require('fancy-log');
 const request = require('request');
 const {getServeMode, replaceUrls} = require('../app-utils');
-const {red} = require('ansi-colors');
+const {log} = require('../../common/logging');
+const {red} = require('kleur/colors');
 
 // In-a-box envelope.
 // Examples:

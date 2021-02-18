@@ -37,7 +37,7 @@ module.exports = {
       if (
         computed ||
         object.type === 'Super' ||
-        property.leadingComments ||
+        context.getCommentsBefore(property).length > 0 ||
         property.type !== 'Identifier'
       ) {
         return false;
@@ -124,7 +124,7 @@ module.exports = {
         }
 
         const {init} = node;
-        if (init.leadingComments) {
+        if (context.getCommentsInside(node).length > 0) {
           return;
         }
 
@@ -161,7 +161,7 @@ module.exports = {
             const decl = declarations[j];
             const {id, init} = decl;
 
-            if (!init || init.leadingComments) {
+            if (!init || context.getCommentsInside(decl).length > 0) {
               continue;
             }
 

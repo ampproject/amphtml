@@ -17,10 +17,10 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs');
-const log = require('fancy-log');
 const path = require('path');
-const {green, yellow, cyan} = require('ansi-colors');
-const {isTravisBuild} = require('../../common/travis');
+const {green, yellow, cyan} = require('kleur/colors');
+const {isCiBuild} = require('../../common/ci');
+const {log} = require('../../common/logging');
 const {maybePrintCoverageMessage} = require('../helpers');
 const {reportTestRunComplete} = require('../report-test-status');
 const {Server} = require('karma');
@@ -72,7 +72,7 @@ function getAdTypes() {
  * Prints help messages for args if tests are being run for local development.
  */
 function maybePrintArgvMessages() {
-  if (argv.nohelp || isTravisBuild()) {
+  if (argv.nohelp || isCiBuild()) {
     return;
   }
 
@@ -113,7 +113,7 @@ function maybePrintArgvMessages() {
 
   log(
     green('Run'),
-    cyan('gulp help'),
+    cyan('gulp --tasks'),
     green('to see a list of all test flags.')
   );
   log(green('⤷ Use'), cyan('--nohelp'), green('to silence these messages.'));

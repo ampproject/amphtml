@@ -15,6 +15,7 @@
  */
 import {
   CONSENT_ITEM_STATE,
+  PURPOSE_CONSENT_STATE,
   composeStoreValue,
   constructConsentInfo,
   constructMetadata,
@@ -25,6 +26,7 @@ import {
   ConsentStateManager,
 } from '../consent-state-manager';
 import {CONSENT_STRING_TYPE} from '../../../../src/consent-state';
+import {Services} from '../../../../src/services';
 import {dev} from '../../../../src/log';
 import {macroTask} from '../../../../testing/yield';
 import {
@@ -256,6 +258,52 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
         );
       });
     });
+
+    describe('updatePurposes', () => {
+      it('updates purpose consents', () => {
+        expect(manager.purposeConsents_).to.be.null;
+        manager.updateConsentInstancePurposes({'a': true, 'b': false});
+        expect(manager.purposeConsents_).to.deep.equal({
+          'a': PURPOSE_CONSENT_STATE.ACCEPTED,
+          'b': PURPOSE_CONSENT_STATE.REJECTED,
+        });
+
+        // new values
+        manager.updateConsentInstancePurposes({'c': true});
+        expect(manager.purposeConsents_).to.deep.equal({
+          'a': PURPOSE_CONSENT_STATE.ACCEPTED,
+          'b': PURPOSE_CONSENT_STATE.REJECTED,
+          'c': PURPOSE_CONSENT_STATE.ACCEPTED,
+        });
+
+        // overrides
+        manager.updateConsentInstancePurposes({'c': false, 'd': true});
+        expect(manager.purposeConsents_).to.deep.equal({
+          'a': PURPOSE_CONSENT_STATE.ACCEPTED,
+          'b': PURPOSE_CONSENT_STATE.REJECTED,
+          'c': PURPOSE_CONSENT_STATE.REJECTED,
+          'd': PURPOSE_CONSENT_STATE.ACCEPTED,
+        });
+      });
+
+      it('opt_defaultsOnly', () => {
+        manager.updateConsentInstancePurposes({'a': true, 'b': true});
+        expect(manager.purposeConsents_).to.deep.equal({
+          'a': PURPOSE_CONSENT_STATE.ACCEPTED,
+          'b': PURPOSE_CONSENT_STATE.ACCEPTED,
+        });
+
+        manager.updateConsentInstancePurposes(
+          {'a': false, 'b': false, 'c': false},
+          true
+        );
+        expect(manager.purposeConsents_).to.deep.equal({
+          'a': PURPOSE_CONSENT_STATE.ACCEPTED,
+          'b': PURPOSE_CONSENT_STATE.ACCEPTED,
+          'c': PURPOSE_CONSENT_STATE.REJECTED,
+        });
+      });
+    });
   });
 
   describe('ConsentInstance', () => {
@@ -263,6 +311,12 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
 
     beforeEach(() => {
       instance = new ConsentInstance(ampdoc, 'test', {});
+    });
+
+    it('instantiates storage with the top level document', async () => {
+      const spy = env.sandbox.stub(Services, 'storageForTopLevelDoc');
+      new ConsentInstance(ampdoc, 'test', {});
+      expect(spy.calledOnceWith(ampdoc)).to.be.true;
     });
 
     describe('update', () => {

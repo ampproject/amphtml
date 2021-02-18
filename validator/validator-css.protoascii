@@ -29,6 +29,7 @@ declaration_list {
   declaration: { name: "animation-name" }
   declaration: { name: "animation-play-state" }
   declaration: { name: "animation-timing-function" }
+  declaration: { name: "aspect-ratio" }
   declaration: { name: "backface-visibility" }
   declaration: { name: "background" }
   declaration: { name: "background-attachment" }
@@ -300,11 +301,6 @@ declaration_list {
 }
 
 declaration_list {
-  name: "AMP_ONLY_DECLARATIONS"
-  declaration: { name: "clip-path" }
-}
-
-declaration_list {
   name: "EMAIL_SPECIFIC_DECLARATIONS"
   # AMP4EMAIL supported properties:
   # https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css/#supported-css-properties
@@ -315,6 +311,7 @@ declaration_list {
   declaration: { name: "align-items" }
   declaration: { name: "align-self" }
   declaration: { name: "appearance" }
+  declaration: { name: "aspect-ratio" }
   declaration: { name: "azimuth" }
   declaration: { name: "background" }
   declaration: { name: "background-attachment" }
@@ -574,11 +571,7 @@ css {
   "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size"
   url_bytes_included: true
 
-  # This is a legacy requirement. Style tags support all declarations while
-  # style attributes limit the allowed declarations. Support for style
-  # attributes was added at a later date than style tags, and more validation
-  # requirements were able to be enforced at that time.
-  allow_all_declaration_in_style_tag: true
+  allow_all_declaration_in_style: true
   allow_important: false
   image_url_spec: {
     protocol: "https"
@@ -593,9 +586,6 @@ css {
     allow_empty: true
   }
   expand_vendor_prefixes: true
-  declaration_list: "BASIC_DECLARATIONS"
-  declaration_list_svg: "SVG_BASIC_DECLARATIONS"
-  declaration_list: "AMP_ONLY_DECLARATIONS"
 }
 
 # DocCss Rules for AMP transformed documents.
@@ -606,13 +596,13 @@ css {
   enabled_by: "transformed"
   spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#stylesheets"
 
-  max_bytes: 75000
-  max_bytes_per_inline_style: 1000
+  max_bytes: 112500
+  max_bytes_per_inline_style: 1500
   max_bytes_spec_url:
   "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size"
   url_bytes_included: false
 
-  allow_all_declaration_in_style_tag: true
+  allow_all_declaration_in_style: true
   allow_important: false
   image_url_spec: {
     protocol: "https"
@@ -627,9 +617,6 @@ css {
     allow_empty: true
   }
   expand_vendor_prefixes: true
-  declaration_list: "BASIC_DECLARATIONS"
-  declaration_list_svg: "SVG_BASIC_DECLARATIONS"
-  declaration_list: "AMP_ONLY_DECLARATIONS"
 }
 
 # DocCss rules for AMP4ADS.
@@ -643,7 +630,7 @@ css {
   # max_bytes_per_inline_style: 1000
   max_bytes_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/a4a_spec/#css"
 
-  allow_all_declaration_in_style_tag: true
+  allow_all_declaration_in_style: true
   allow_important: false
   image_url_spec: {
     protocol: "https"
@@ -658,8 +645,6 @@ css {
     allow_empty: true
   }
   expand_vendor_prefixes: true
-  declaration_list: "BASIC_DECLARATIONS"
-  declaration_list_svg: "SVG_BASIC_DECLARATIONS"
 }
 
 # DocCss rules for AMP4EMAIL, not data-css-strict
@@ -679,11 +664,7 @@ css {
   "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size"
   url_bytes_included: true
 
-  # This is a legacy requirement. Style tags support all declarations while
-  # style attributes limit the allowed declarations. Support for style
-  # attributes was added at a later date than style tags, and more validation
-  # requirements were able to be enforced at that time.
-  allow_all_declaration_in_style_tag: true
+  allow_all_declaration_in_style: true
   allow_important: false
   image_url_spec: {
     protocol: "https"
@@ -708,7 +689,7 @@ css {
   "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size"
   url_bytes_included: true
 
-  allow_all_declaration_in_style_tag: false
+  allow_all_declaration_in_style: false
   allow_important: false
   image_url_spec: {
     protocol: "https"
@@ -782,9 +763,87 @@ tags: {  # <style amp-custom>, [AMP]
     css_spec: {
       at_rule_spec: { name: 'font-face' }
       at_rule_spec: { name: 'keyframes' }
-      at_rule_spec: { name: 'media' }
+      at_rule_spec: {
+         name: 'media'
+         media_query_spec: {
+           issues_as_error: false
+           type: 'all'
+           type: 'print'
+           type: 'screen'
+           type: 'speech'
+           type: 'tty'
+           type: 'tv'
+           type: 'projection'
+           type: 'handheld'
+           type: 'braille'
+           type: 'embossesd'
+           type: 'aural'
+           feature: 'any-hover'
+           feature: 'any-pointer'
+           feature: 'aspect-ratio'
+           feature: 'color'
+           feature: 'color-gamut'
+           feature: 'color-index'
+           feature: 'device-aspect-ratio'
+           feature: 'device-height'
+           feature: 'device-width'
+           feature: 'display-mode'
+           feature: 'forced-colors'
+           feature: 'grid'
+           feature: 'height'
+           feature: 'hover'
+           feature: 'inverted-colors'
+           feature: 'light-level'
+           feature: 'max-aspect-ratio'
+           feature: 'max-color-index'
+           feature: 'max-device-aspect-ratio'
+           feature: 'max-device-height'
+           feature: 'max-device-width'
+           feature: 'max-height'
+           feature: 'max-resolution'
+           feature: 'max-width'
+           feature: 'min-aspect-ratio'
+           feature: 'min-color-index'
+           feature: 'min-device-aspect-ratio'
+           feature: 'min-device-height'
+           feature: 'min-device-width'
+           feature: 'min-height'
+           feature: 'min-resolution'
+           feature: 'min-width'
+           feature: 'monochrome'
+           feature: 'orientation'
+           feature: 'overflow-block'
+           feature: 'overflow-inline'
+           feature: 'pointer'
+           feature: 'prefers-color-scheme'
+           feature: 'prefers-contrast'
+           feature: 'prefers-reduced-motion'
+           feature: 'prefers-reduced-transparency'
+           feature: 'resolution'
+           feature: 'scan'
+           feature: 'scripting'
+           feature: 'transform-3d'
+           feature: 'update'
+           feature: 'width'
+           # Other non-standard media types and features commonly seen:
+           type: '-sass-debug-info'
+           type: 'device-pixel-ratio'
+           type: 'device-pixel-ratio2'
+           feature: '--mod'
+           feature: '--md'
+           feature: 'device-pixel-ratio'
+           feature: 'device-pixel-ratio2'
+           feature: 'high-contrast'
+           feature: 'max-device-pixel-ratio'
+           feature: 'min-device-pixel-ratio'
+           feature: 'max-device-pixel-ratio2'
+           feature: 'min-device-pixel-ratio2'
+         }
+      }
       at_rule_spec: { name: 'page' }
       at_rule_spec: { name: 'supports' }
+      # https://github.com/ampproject/amphtml/issues/26406
+      at_rule_spec: { name: '-moz-document' }
     }
     disallowed_cdata_regex: {
       regex: "<!--"
@@ -1228,7 +1287,85 @@ tags: {  # `<style amp-keyframes>`, [AMP, AMP4ADS]
     max_bytes_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#keyframes-stylesheet"
     css_spec: {
       at_rule_spec: { name: 'keyframes' }
-      at_rule_spec: { name: 'media' }
+      at_rule_spec: {
+         name: 'media'
+         media_query_spec: {
+           issues_as_error: false
+           type: 'all'
+           type: 'print'
+           type: 'screen'
+           type: 'speech'
+           type: 'tty'
+           type: 'tv'
+           type: 'projection'
+           type: 'handheld'
+           type: 'braille'
+           type: 'embossesd'
+           type: 'aural'
+           feature: 'any-hover'
+           feature: 'any-pointer'
+           feature: 'aspect-ratio'
+           feature: 'color'
+           feature: 'color-gamut'
+           feature: 'color-index'
+           feature: 'device-aspect-ratio'
+           feature: 'device-height'
+           feature: 'device-width'
+           feature: 'display-mode'
+           feature: 'forced-colors'
+           feature: 'grid'
+           feature: 'height'
+           feature: 'hover'
+           feature: 'inverted-colors'
+           feature: 'light-level'
+           feature: 'monochrome'
+           feature: 'max-aspect-ratio'
+           feature: 'max-color-index'
+           feature: 'max-device-aspect-ratio'
+           feature: 'max-device-height'
+           feature: 'max-device-width'
+           feature: 'max-height'
+           feature: 'max-resolution'
+           feature: 'max-width'
+           feature: 'min-aspect-ratio'
+           feature: 'min-color-index'
+           feature: 'min-device-aspect-ratio'
+           feature: 'min-device-height'
+           feature: 'min-device-width'
+           feature: 'min-height'
+           feature: 'min-resolution'
+           feature: 'min-width'
+           feature: 'orientation'
+           feature: 'overflow-block'
+           feature: 'overflow-inline'
+           feature: 'pointer'
+           feature: 'prefers-color-scheme'
+           feature: 'prefers-contrast'
+           feature: 'prefers-reduced-motion'
+           feature: 'prefers-reduced-transparency'
+           feature: 'resolution'
+           feature: 'scan'
+           feature: 'scripting'
+           feature: 'transform-3d'
+           feature: 'update'
+           feature: 'width'
+           # Other non-standard media types and features commonly seen:
+           type: '-sass-debug-info'
+           type: 'device-pixel-ratio'
+           type: 'device-pixel-ratio2'
+           feature: '--mod'
+           feature: '--md'
+           feature: 'device-pixel-ratio'
+           feature: 'device-pixel-ratio2'
+           feature: 'high-contrast'
+           feature: 'aspect-ratio'
+           feature: 'max-device-pixel-ratio'
+           feature: 'min-device-pixel-ratio'
+           feature: 'max-device-pixel-ratio2'
+           feature: 'min-device-pixel-ratio2'
+         }
+      }
+
       at_rule_spec: { name: 'supports' }
       validate_keyframes: true
       declaration: "animation-timing-function"

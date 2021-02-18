@@ -36,7 +36,12 @@ import {dict, memo} from '../../../src/utils/object';
 import {forwardRef} from '../../../src/preact/compat';
 import {isExperimentOn} from '../../../src/experiments';
 import {toArray, toWin} from '../../../src/types';
-import {useImperativeHandle, useLayoutEffect} from '../../../src/preact';
+import {
+  useImperativeHandle,
+  useLayoutEffect,
+  useRef,
+} from '../../../src/preact';
+import {useSlotContext} from '../../../src/preact/slot';
 
 /** @const {string} */
 const TAG = 'amp-accordion';
@@ -46,6 +51,10 @@ const HEADER_SHIM_PROP = '__AMP_H_SHIM';
 const CONTENT_SHIM_PROP = '__AMP_C_SHIM';
 const SECTION_POST_RENDER = '__AMP_PR';
 const EXPAND_STATE_SHIM_PROP = '__AMP_EXPAND_STATE_SHIM';
+
+const isDisplayLockingEnabledForAccordion = (win) =>
+  isExperimentOn(win, 'amp-accordion-display-locking') &&
+  win.document.body.onbeforematch !== undefined;
 
 /** @extends {PreactBaseElement<AccordionDef.AccordionApi>} */
 class AmpAccordion extends PreactBaseElement {
@@ -62,6 +71,12 @@ class AmpAccordion extends PreactBaseElement {
     );
 
     const {element} = this;
+    const experimentDisplayLocking = isDisplayLockingEnabledForAccordion(
+      this.win
+    );
+    if (experimentDisplayLocking) {
+      element.classList.add('i-amphtml-display-locking');
+    }
 
     const mu = new MutationObserver(() => {
       this.mutateProps(getState(element, mu));
@@ -69,17 +84,22 @@ class AmpAccordion extends PreactBaseElement {
     mu.observe(element, {
       attributeFilter: ['expanded', 'id'],
       subtree: true,
+      childList: true,
     });
 
     const {'children': children} = getState(element, mu);
-    return dict({'children': children});
+    return dict({
+      'experimentDisplayLocking': experimentDisplayLocking,
+      'children': children,
+    });
   }
 
   /** @override */
   isLayoutSupported(unusedLayout) {
     userAssert(
-      isExperimentOn(this.win, 'amp-accordion-bento'),
-      'expected amp-accordion-bento experiment to be enabled'
+      isExperimentOn(this.win, 'bento') ||
+        isExperimentOn(this.win, 'bento-accordion'),
+      'expected global "bento" or specific "bento-accordion" experiment to be enabled'
     );
     return true;
   }
@@ -155,7 +175,7 @@ function getExpandStateTrigger(section) {
       dict()
     );
     action.trigger(section, eventName, event, ActionTrust.HIGH);
-    dispatchCustomEvent(section, name);
+    dispatchCustomEvent(section, eventName);
   };
   return triggerEvent;
 }
@@ -236,16 +256,19 @@ const bindHeaderShimToElement = (element) => HeaderShim.bind(null, element);
 
 /**
  * @param {!Element} sectionElement
- * @param {!AccordionDef.ContentProps} props
+ * @param {!AccordionDef.ContentShimProps} props
  * @param {{current: ?}} ref
  * @return {PreactDef.Renderable}
  */
 function ContentShimWithRef(
   sectionElement,
-  {hidden, id, role, 'aria-labelledby': ariaLabelledBy},
+  {id, role, 'aria-labelledby': ariaLabelledBy},
   ref
 ) {
   const contentElement = sectionElement.lastElementChild;
+  const contentRef = useRef();
+  contentRef.current = contentElement;
+  useSlotContext(contentRef);
   useImperativeHandle(ref, () => contentElement, [contentElement]);
   useLayoutEffect(() => {
     if (!contentElement) {
@@ -255,11 +278,10 @@ function ContentShimWithRef(
     contentElement.setAttribute('id', id);
     contentElement.setAttribute('role', role);
     contentElement.setAttribute('aria-labelledby', ariaLabelledBy);
-    toggleAttribute(contentElement, 'hidden', hidden);
     if (sectionElement[SECTION_POST_RENDER]) {
       sectionElement[SECTION_POST_RENDER]();
     }
-  }, [sectionElement, contentElement, hidden, id, role, ariaLabelledBy]);
+  }, [sectionElement, contentElement, id, role, ariaLabelledBy]);
   return <div />;
 }
 

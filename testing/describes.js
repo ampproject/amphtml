@@ -107,6 +107,7 @@ import {installDocService} from '../src/service/ampdoc-impl';
 import {installExtensionsService} from '../src/service/extensions-impl';
 import {installFriendlyIframeEmbed} from '../src/friendly-iframe-embed';
 import {install as installIntersectionObserver} from '../src/polyfills/intersection-observer';
+import {install as installResizeObserver} from '../src/polyfills/resize-observer';
 import {
   maybeTrackImpression,
   resetTrackImpressionPromiseForTesting,
@@ -635,7 +636,7 @@ class RealWinFixture {
         win.testLocation = new FakeLocation(window.location.href, win);
 
         if (!spec.allowExternalResources) {
-          doNotLoadExternalResourcesInTest(win);
+          doNotLoadExternalResourcesInTest(win, env.sandbox);
         }
 
         // Install AMP CSS if requested.
@@ -661,6 +662,7 @@ class RealWinFixture {
 
         // Install IntersectionObserver polyfill.
         installIntersectionObserver(win);
+        installResizeObserver(win);
 
         // Intercept event listeners
         interceptEventListeners(win);

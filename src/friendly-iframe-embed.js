@@ -15,9 +15,11 @@
  */
 
 import {CommonSignals} from './common-signals';
+import {Deferred} from './utils/promise';
 import {FIE_EMBED_PROP} from './iframe-helper';
 import {Services} from './services';
 import {Signals} from './utils/signals';
+import {VisibilityState} from './visibility-state';
 import {cssText as ampSharedCss} from '../build/ampshared.css';
 import {dev, devAssert, rethrowAsync, userAssert} from './log';
 import {
@@ -26,11 +28,13 @@ import {
   setParentWindow,
 } from './service';
 import {escapeHtml} from './dom';
+import {install as installAbortController} from './polyfills/abort-controller';
 import {installAmpdocServicesForEmbed} from './service/core-services';
 import {install as installCustomElements} from './polyfills/custom-elements';
 import {install as installDOMTokenList} from './polyfills/domtokenlist';
 import {install as installDocContains} from './polyfills/document-contains';
 import {installForChildWin as installIntersectionObserver} from './polyfills/intersection-observer';
+import {installForChildWin as installResizeObserver} from './polyfills/resize-observer';
 import {installStylesForDoc} from './style-installer';
 import {installTimerInEmbedWindow} from './service/timer-impl';
 import {isDocumentReady} from './document-ready';
@@ -365,10 +369,16 @@ export class FriendlyIframeEmbed {
       ? this.host.signals()
       : new Signals();
 
+    /** @private @const {!Deferred} */
+    this.renderComplete_ = new Deferred();
+
     /** @private @const {!Promise} */
-    this.winLoadedPromise_ = Promise.all([loadedPromise, this.whenReady()]);
+    this.winLoadedPromise_ = Promise.all([
+      loadedPromise,
+      this.whenRenderStarted(),
+    ]);
     if (this.ampdoc) {
-      this.whenReady().then(() => this.ampdoc.setReady());
+      this.whenRenderComplete().then(() => this.ampdoc.setReady());
     }
 
     this.win.addEventListener('resize', () => this.handleResize_());
@@ -378,7 +388,6 @@ export class FriendlyIframeEmbed {
    * Ensures that all resources from this iframe have been released.
    */
   destroy() {
-    this.removeResources_();
     disposeServicesForEmbed(this.win);
     if (this.ampdoc) {
       this.ampdoc.dispose();
@@ -410,7 +419,7 @@ export class FriendlyIframeEmbed {
    * Notice that this signal coincides with the embed's `render-start`.
    * @return {!Promise}
    */
-  whenReady() {
+  whenRenderStarted() {
     return this.signals_.whenSignal(CommonSignals.RENDER_START);
   }
 
@@ -434,6 +443,41 @@ export class FriendlyIframeEmbed {
   }
 
   /**
+   * Returns a promise that will resolve when all elements have been
+   * transferred into live embed DOM.
+   * @return {!Promise}
+   */
+  whenRenderComplete() {
+    return this.renderComplete_.promise;
+  }
+
+  /**
+   * Signal that indicates that all DOM elements have been tranferred to live
+   * embed DOM.
+   */
+  renderCompleted() {
+    this.renderComplete_.resolve();
+  }
+
+  /**
+   * Pause the embed.
+   */
+  pause() {
+    if (this.ampdoc) {
+      this.ampdoc.overrideVisibilityState(VisibilityState.PAUSED);
+    }
+  }
+
+  /**
+   * Resume the embed.
+   */
+  resume() {
+    if (this.ampdoc) {
+      this.ampdoc.overrideVisibilityState(VisibilityState.VISIBLE);
+    }
+  }
+
+  /**
    * @private
    * @restricted
    */
@@ -443,6 +487,13 @@ export class FriendlyIframeEmbed {
     } else {
       this.signals_.signal(CommonSignals.RENDER_START);
     }
+
+    // TODO(ccordry): remove when no-signing launched.
+    if (!this.spec.skipHtmlMerge) {
+      // When not streaming renderStart signal is good enough.
+      this.renderComplete_.resolve();
+    }
+
     // Common signal RENDER_START indicates time to toggle visibility
     setStyle(this.iframe, 'visibility', '');
     if (this.win.document && this.win.document.body) {
@@ -467,8 +518,8 @@ export class FriendlyIframeEmbed {
       );
     }
     Promise.all([
-      this.whenReady(),
-      whenContentIniLoad(this.iframe, this.win, rect),
+      this.whenRenderComplete(),
+      whenContentIniLoad(this.ampdoc, this.win, rect),
     ]).then(() => {
       this.signals_.signal(CommonSignals.INI_LOAD);
     });
@@ -496,16 +547,6 @@ export class FriendlyIframeEmbed {
   }
 
   /**
-   * @return {!./service/resources-interface.ResourcesInterface}
-   * @private
-   */
-  getResources_() {
-    const host =
-      this.host && !this.iframe.isConnected ? this.host : this.iframe;
-    return Services.resourcesForDoc(host);
-  }
-
-  /**
    * @return {!./service/mutator-interface.MutatorInterface}
    * @private
    */
@@ -526,21 +567,6 @@ export class FriendlyIframeEmbed {
       task.measure || null,
       task.mutate
     );
-  }
-
-  /**
-   * Removes all resources belonging to the FIE window.
-   * @private
-   */
-  removeResources_() {
-    const resources = this.getResources_();
-    const toRemove = resources
-      .get()
-      .filter((resource) => resource.hostWin == this.win);
-    toRemove.forEach((resource) => {
-      resources.remove(resource.element);
-      resource.disconnect();
-    });
   }
 
   /**
@@ -651,6 +677,8 @@ function installPolyfillsInChildWindow(parentWin, childWin) {
   if (!IS_SXG) {
     installCustomElements(childWin, class {});
     installIntersectionObserver(parentWin, childWin);
+    installResizeObserver(parentWin, childWin);
+    installAbortController(childWin);
   }
 }
 
@@ -692,11 +720,12 @@ export class Installers {
       .then(getDelayPromise)
       .then(() => {
         if (IS_ESM) {
-          const css = parentWin.document.querySelector('style[amp-runtime]')
-            .textContent;
+          // TODO: This is combined (ampdoc + shared), not just shared
+          // const css = parentWin.document.querySelector('style[amp-runtime]')
+          // .textContent;
           installStylesForDoc(
             ampdoc,
-            css,
+            ampSharedCss,
             /* callback */ null,
             /* opt_isRuntimeCss */ true,
             /* opt_ext */ 'amp-runtime'
@@ -764,7 +793,7 @@ export class Installers {
    * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
    */
   static installStandardServicesInEmbed(ampdoc) {
-    installAmpdocServicesForEmbed(ampdoc);
     installTimerInEmbedWindow(ampdoc.win);
+    installAmpdocServicesForEmbed(ampdoc);
   }
 }

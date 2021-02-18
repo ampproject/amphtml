@@ -52,7 +52,7 @@ describes.realWin(
       }
       doc.body.appendChild(gfycat);
       return gfycat
-        .build()
+        .buildInternal()
         .then(() => {
           return gfycat.layoutCallback();
         })
@@ -95,21 +95,22 @@ describes.realWin(
       return getGfycat('LeanMediocreBeardeddragon').then((gfycat) => {
         const iframe = gfycat.querySelector('iframe');
         return Promise.resolve()
-          .then(() => {
+          .then(async () => {
             const p = listenOncePromise(gfycat, VideoEvents.PLAYING);
-            sendFakeMessage(gfycat, iframe, 'playing');
+            await sendFakeMessage(gfycat, iframe, 'playing');
             return p;
           })
-          .then(() => {
+          .then(async () => {
             const p = listenOncePromise(gfycat, VideoEvents.PAUSE);
-            sendFakeMessage(gfycat, iframe, 'paused');
+            await sendFakeMessage(gfycat, iframe, 'paused');
             return p;
           });
       });
     });
 
-    function sendFakeMessage(gfycat, iframe, command) {
-      gfycat.implementation_.handleGfycatMessages_({
+    async function sendFakeMessage(gfycat, iframe, command) {
+      const impl = await gfycat.getImpl(false);
+      impl.handleGfycatMessages_({
         origin: 'https://gfycat.com',
         source: iframe.contentWindow,
         data: command,

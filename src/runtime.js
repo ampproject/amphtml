@@ -42,6 +42,7 @@ import {isExperimentOn, toggleExperiment} from './experiments';
 import {registerExtendedTemplate} from './service/template-impl';
 import {reportErrorForWin} from './error';
 import {scheduleUpgradeIfNeeded as scheduleInObUpgradeIfNeeded} from './polyfillstub/intersection-observer-stub';
+import {scheduleUpgradeIfNeeded as scheduleResObUpgradeIfNeeded} from './polyfillstub/resize-observer-stub';
 import {setStyle} from './style';
 import {startupChunk} from './chunk';
 import {stubElementsForDoc} from './service/custom-element-registry';
@@ -170,7 +171,6 @@ function adoptShared(global, callback) {
    * @param {function(string,?string=,number=)} unusedFn
    * @param {function()=} opt_flush
    * @deprecated
-   * @export
    */
   global.AMP.setTickFunction = (unusedFn, opt_flush) => {};
 
@@ -269,6 +269,7 @@ function adoptShared(global, callback) {
 
   // Some deferred polyfills.
   scheduleInObUpgradeIfNeeded(global);
+  scheduleResObUpgradeIfNeeded(global);
 
   return iniPromise;
 }
@@ -392,7 +393,12 @@ function adoptServicesAndResources(global) {
  */
 function adoptMultiDocDeps(global) {
   global.AMP.installAmpdocServices = installAmpdocServices.bind(null);
-  global.AMP.combinedCss = ampDocCss + ampSharedCss;
+  if (IS_ESM) {
+    const style = global.document.querySelector('style[amp-runtime]');
+    global.AMP.combinedCss = style ? style.textContent : '';
+  } else {
+    global.AMP.combinedCss = ampDocCss + ampSharedCss;
+  }
 }
 
 /**
@@ -460,6 +466,21 @@ function maybeLoadCorrectVersion(win, fnOrStruct) {
   if (typeof fnOrStruct == 'function') {
     return false;
   }
+
+  if (IS_ESM) {
+    // If we're in a module runtime, trying to execute a nomodule extension
+    // simply remove the nomodule extension so that it is not executed.
+    if (!fnOrStruct.m) {
+      return true;
+    }
+  } else {
+    // If we're in a nomodule runtime, trying to execute a module extension
+    // simply remove the module extension so that it is not executed.
+    if (fnOrStruct.m) {
+      return true;
+    }
+  }
+
   const {v} = fnOrStruct;
   // This is non-obvious, but we only care about the release version,
   // not about the full rtv version, because these only differ
@@ -479,10 +500,6 @@ function maybeLoadCorrectVersion(win, fnOrStruct) {
  *     pumped.
  */
 function maybePumpEarlyFrame(win, cb) {
-  if (!isExperimentOn(win, 'pump-early-frame')) {
-    cb();
-    return;
-  }
   // There is definitely nothing to draw yet, so we might as well
   // proceed.
   if (!win.document.body) {

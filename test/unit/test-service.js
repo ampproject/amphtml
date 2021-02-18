@@ -15,6 +15,7 @@
  */
 
 import {
+  adoptServiceForEmbedDoc,
   assertDisposable,
   disposeServicesForDoc,
   getExistingServiceOrNull,
@@ -22,6 +23,7 @@ import {
   getService,
   getServiceForDoc,
   getServiceForDocOrNull,
+  getServiceInEmbedWin,
   getServicePromise,
   getServicePromiseForDoc,
   getServicePromiseOrNull,
@@ -29,6 +31,7 @@ import {
   isDisposable,
   registerServiceBuilder,
   registerServiceBuilderForDoc,
+  registerServiceBuilderInEmbedWin,
   rejectServicePromiseForDoc,
   resetServiceForTesting,
   setParentWindow,
@@ -477,6 +480,7 @@ describe('service', () => {
       let childWin, grandchildWin;
       let childWinNode, grandChildWinNode;
       let topService;
+      let parentAmpdoc;
 
       beforeEach(() => {
         // A child.
@@ -502,6 +506,13 @@ describe('service', () => {
 
         registerServiceBuilderForDoc(ampdoc, 'c', factory);
         topService = getServiceForDoc(ampdoc, 'c');
+
+        ampdoc.win = childWin;
+        parentAmpdoc = {
+          isSingleDoc: () => false,
+          win: windowApi,
+        };
+        ampdoc.getParent = () => parentAmpdoc;
       });
 
       it('should return the service via node', () => {
@@ -567,6 +578,52 @@ describe('service', () => {
         // The service is NOT also registered on the embed window.
         expect(childWin.__AMP_SERVICES && childWin.__AMP_SERVICES['c']).to.not
           .exist;
+      });
+
+      it('should override services on embedded window', () => {
+        const topService = {};
+        const embedService = {};
+        registerServiceBuilder(windowApi, 'A', function () {
+          return topService;
+        });
+        registerServiceBuilderInEmbedWin(childWin, 'A', function () {
+          return embedService;
+        });
+
+        expect(getService(windowApi, 'A')).to.equal(topService);
+        expect(getService(childWin, 'A')).to.equal(topService);
+
+        expect(getServiceInEmbedWin(windowApi, 'A')).to.equal(topService);
+        expect(getServiceInEmbedWin(childWin, 'A')).to.equal(embedService);
+      });
+
+      it('should dispose disposable services', () => {
+        const disposableFactory = function () {
+          return {
+            dispose: window.sandbox.spy(),
+          };
+        };
+
+        // A disposable service in parent.
+        registerServiceBuilderForDoc(parentAmpdoc, 'a', disposableFactory);
+        const parentDisposable = getServiceForDoc(parentAmpdoc, 'a');
+
+        // A disposable service.
+        registerServiceBuilderForDoc(ampdoc, 'b', disposableFactory);
+        const disposable = getServiceForDoc(node, 'b');
+
+        // An adopted disposable service.
+        adoptServiceForEmbedDoc(ampdoc, 'a');
+        const adopted = getServiceForDoc(ampdoc, 'a');
+
+        disposeServicesForDoc(ampdoc);
+
+        // Parent's services are not disposed.
+        expect(parentDisposable.dispose).to.not.be.called;
+        expect(adopted).to.equal(parentDisposable);
+
+        // Disposable and initialized are disposed right away.
+        expect(disposable.dispose).to.be.calledOnce;
       });
     });
   });

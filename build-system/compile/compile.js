@@ -32,7 +32,8 @@ const {
 const {checkForUnknownDeps} = require('./check-for-unknown-deps');
 const {CLOSURE_SRC_GLOBS} = require('./sources');
 const {cpus} = require('os');
-const {isTravisBuild} = require('../common/travis');
+const {green, cyan} = require('kleur/colors');
+const {log, logLocalDev} = require('../common/logging');
 const {postClosureBabel} = require('./post-closure-babel');
 const {preClosureBabel, handlePreClosureError} = require('./pre-closure-babel');
 const {sanitize} = require('./sanitize');
@@ -42,14 +43,13 @@ const {writeSourcemaps} = require('./helpers');
 const queue = [];
 let inProgress = 0;
 
-const MAX_PARALLEL_CLOSURE_INVOCATIONS = isTravisBuild()
-  ? 10
-  : parseInt(argv.closure_concurrency, 10) || cpus().length;
+const MAX_PARALLEL_CLOSURE_INVOCATIONS =
+  parseInt(argv.closure_concurrency, 10) || cpus().length;
 
 // Compiles AMP with the closure compiler. This is intended only for
 // production use. During development we intend to continue using
 // babel, as it has much faster incremental compilation.
-exports.closureCompile = async function (
+async function closureCompile(
   entryModuleFilename,
   outputDir,
   outputFilename,
@@ -87,7 +87,7 @@ exports.closureCompile = async function (
     queue.push(start);
     next();
   });
-};
+}
 
 function cleanupBuildDir() {
   del.sync('build/fake-module');
@@ -97,7 +97,6 @@ function cleanupBuildDir() {
   fs.mkdirsSync('build/fake-module/src/polyfills/');
   fs.mkdirsSync('build/fake-polyfills/src/polyfills');
 }
-exports.cleanupBuildDir = cleanupBuildDir;
 
 function compile(
   entryModuleFilenames,
@@ -171,11 +170,6 @@ function compile(
     }
     if (options.include3pDirectories) {
       srcs.push('3p/**/*.js', 'ads/**/*.js');
-    }
-    // For ESM Builds, exclude ampdoc and ampshared css from inclusion.
-    // These styles are guaranteed to already be present on elgible documents.
-    if (options.esmPassCompilation) {
-      srcs.push('!build/ampdoc.css.js', '!build/ampshared.css.js');
     }
     // Many files include the polyfills, but we only want to deliver them
     // once. Since all files automatically wait for the main binary to load
@@ -271,27 +265,47 @@ function compile(
 
     // See https://github.com/google/closure-compiler/wiki/Warnings#warnings-categories
     // for a full list of closure's default error / warning levels.
+    // NOTE: We do not use jscomp_warning because they are silenced by closure
+    // unless there are accompanying errors. Pick a side and use either one of
+    // jscomp_error or jscomp_off.
     if (options.typeCheckOnly) {
       compilerOptions.checks_only = true;
-
-      // Don't modify compilation_level to a lower level since
-      // it won't do strict type checking if its whitespace only.
+      // WARNING: compilation_level=WHITESPACE_ONLY will disable type-checking.
       compilerOptions.define.push('TYPECHECK_ONLY=true');
+      // These aren't type-check errors by default, but should be.
       compilerOptions.jscomp_error.push(
         'accessControls',
+        'checkDebuggerStatement',
         'conformanceViolations',
         'checkTypes',
         'const',
         'constantProperty',
         'globalThis',
-        'misplacedTypeAnnotation'
+        'misplacedTypeAnnotation',
+        'missingProperties',
+        'strictMissingProperties',
+        'visibility'
       );
-      compilerOptions.jscomp_off.push('moduleLoad', 'unknownDefines');
+      // These are type-check errors / warnings by default, but cannot be.
+      compilerOptions.jscomp_off.push(
+        'moduleLoad', // Breaks type-only modules: google/closure-compiler#3041
+        'unknownDefines' // Closure complains about VERSION
+      );
       compilerOptions.conformance_configs =
         'build-system/test-configs/conformance-config.textproto';
     } else {
-      compilerOptions.jscomp_warning.push('accessControls', 'moduleLoad');
-      compilerOptions.jscomp_off.push('unknownDefines');
+      // These aren't compilation errors by default, but should be.
+      compilerOptions.jscomp_error.push(
+        'missingProperties',
+        'strictMissingProperties',
+        'visibility'
+      );
+      // Thse are compilation errors / warnings by default, but cannot be.
+      compilerOptions.jscomp_off.push(
+        'accessControls', // Silences spurious JSC_BAD_PRIVATE_GLOBAL_ACCESS
+        'moduleLoad', // Breaks type-only modules: google/closure-compiler#3041
+        'unknownDefines' // Closure complains about VERSION
+      );
     }
 
     if (compilerOptions.define.length == 0) {
@@ -359,3 +373,24 @@ function compile(
     }
   });
 }
+
+function printClosureConcurrency() {
+  log(
+    green('Using up to'),
+    cyan(MAX_PARALLEL_CLOSURE_INVOCATIONS),
+    green('concurrent invocations of closure compiler.')
+  );
+  if (!argv.closure_concurrency) {
+    logLocalDev(
+      green('⤷ Use'),
+      cyan('--closure_concurrency=N'),
+      green('to change this number.')
+    );
+  }
+}
+
+module.exports = {
+  cleanupBuildDir,
+  closureCompile,
+  printClosureConcurrency,
+};

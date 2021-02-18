@@ -19,6 +19,7 @@ import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Slot} from '../../../src/preact/slot';
 import {createElementWithAttributes} from '../../../src/dom';
 import {htmlFor} from '../../../src/static-template';
+import {omit} from '../../../src/utils/object';
 import {upgradeOrRegisterElement} from '../../../src/service/custom-element-registry';
 import {waitFor} from '../../../testing/test-helper';
 
@@ -27,15 +28,20 @@ const spec = {amp: true, frameStyle: {width: '300px'}};
 describes.realWin('PreactBaseElement', spec, (env) => {
   let win, doc, html;
   let Impl, component, lastProps;
+  let isLayoutSupportedOverride;
 
   beforeEach(() => {
     win = env.win;
     doc = win.document;
     html = htmlFor(doc);
 
+    isLayoutSupportedOverride = () => true;
     Impl = class extends PreactBaseElement {
-      isLayoutSupported() {
-        return true;
+      isLayoutSupported(layout) {
+        if (isLayoutSupportedOverride !== undefined) {
+          return isLayoutSupportedOverride(layout);
+        }
+        return super.isLayoutSupported(layout);
       }
     };
     component = env.sandbox.stub().callsFake((props) => {
@@ -67,6 +73,24 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       return new Promise((resolve) => setTimeout(resolve, 32));
     });
   }
+
+  describe('layout mapping', () => {
+    let element;
+
+    beforeEach(() => {
+      element = doc.createElement('amp-preact');
+      isLayoutSupportedOverride = undefined;
+    });
+
+    it('should allow container for layoutSizeDefined', async () => {
+      Impl['layoutSizeDefined'] = true;
+      doc.body.appendChild(element);
+      await element.buildInternal();
+      const impl = await element.getImpl();
+      expect(impl.isLayoutSupported('fixed')).to.be.true;
+      expect(impl.isLayoutSupported('container')).to.be.true;
+    });
+  });
 
   describe('attribute mapping', () => {
     const DATE_STRING = '2018-01-01T08:00:00Z';
@@ -111,7 +135,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       `;
       element.setAttribute('a-date', DATE_STRING);
       doc.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
       await waitFor(() => component.callCount > 0, 'component rendered');
     });
 
@@ -227,7 +251,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
         </amp-preact>
       `;
       doc.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
       await waitFor(() => component.callCount > 0, 'component rendered');
       expect(win.innerWidth).to.equal(300);
     });
@@ -267,7 +291,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
         <amp-preact layout="fixed" width="100" height="100"></amp-preact>
       `;
       doc.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
       await waitFor(() => component.callCount > 0, 'component rendered');
     });
 
@@ -289,7 +313,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
         <amp-preact layout="fixed" width="100" height="100"> </amp-preact>
       `;
       doc.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
       await waitFor(() => component.callCount > 0, 'component rendered');
     });
 
@@ -318,7 +342,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
 
     it('should render from scratch', async () => {
       doc.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
       await waitFor(() => component.callCount > 0, 'component rendered');
       expect(component).to.be.calledOnce;
       const container = element.shadowRoot.querySelector(':scope > c');
@@ -348,7 +372,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
         shadowRoot.appendChild(styleEl);
 
         doc.body.appendChild(element);
-        await element.build();
+        await element.buildInternal();
         await waitFor(() => component.callCount > 0, 'component hydrated');
       });
 
@@ -375,7 +399,8 @@ describes.realWin('PreactBaseElement', spec, (env) => {
 
       it('should rerender after SSR hydration', async () => {
         // Only rendering updates attributes.
-        element.implementation_.mutateProps({name: 'A'});
+        const impl = await element.getImpl();
+        impl.mutateProps({name: 'A'});
         await waitFor(() => component.callCount > 1, 'component rendered');
         expect(component).to.be.calledTwice;
         expect(componentEl.getAttribute('data-name')).to.equal('A');
@@ -427,7 +452,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
 
     it('should render from scratch', async () => {
       doc.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
       await waitFor(
         () => element.querySelector(':scope > time'),
         'lightDom element created'
@@ -447,7 +472,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
     it('should add fill class', async () => {
       Impl['layoutSizeDefined'] = true;
       doc.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
       await waitFor(
         () => element.querySelector(':scope > time'),
         'lightDom element created'
@@ -468,7 +493,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       const existing = document.createElement('time');
       element.appendChild(existing);
       doc.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
       await waitFor(() => component.callCount > 0, 'component rendered');
       expect(element.querySelector(':scope > time')).to.equal(existing);
       expect(existing.querySelector(':scope > #component')).to.be.ok;
@@ -568,7 +593,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       `;
       element.firstElementChild.setAttribute('a-date', DATE_STRING);
       doc.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
       await waitFor(() => component.callCount > 0, 'component rendered');
     });
 
@@ -605,28 +630,32 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       expect(children).to.have.lengthOf(2);
       const {0: child1, 1: child2} = children;
       expect(child1.type).to.equal(Slot);
-      expect(child1.props).to.deep.equal({
-        name: 'i-amphtml-children-0',
+      expect(omit(child1.props, 'name')).to.deep.equal({
         boolDefTrue: true,
         combined: 'A+B',
         params: {test: 'helloworld', testTwo: 'confirm'},
       });
-      expect(element.querySelector('#child1').slot).to.equal(
-        'i-amphtml-children-0'
-      );
       expect(child2.type).to.equal(Slot);
-      expect(child2.props).to.deep.equal({
-        name: 'i-amphtml-children-1',
+      expect(omit(child2.props, 'name')).to.deep.equal({
         boolDefTrue: true,
         combined: 'C+D',
         params: {test: 'helloworld2', testTwo: 'confirm2'},
       });
-      expect(element.querySelector('#child2').slot).to.equal(
-        'i-amphtml-children-1'
-      );
+
+      // Names are random and most importantly not equal to each other.
+      expect(child1.props.name).to.match(/i-amphtml-children-\d/);
+      expect(child2.props.name).to.match(/i-amphtml-children-\d/);
+      expect(child1.props.name).to.not.equal(child2.props.name);
+      expect(element.querySelector('#child1').slot).to.equal(child1.props.name);
+      expect(element.querySelector('#child2').slot).to.equal(child2.props.name);
     });
 
     it('should rerender on new children', async () => {
+      await waitFor(() => component.callCount > 0, 'component rendered');
+      const {children: prevChildren} = lastProps;
+      expect(prevChildren).to.have.lengthOf(2);
+      const {0: prevChild1, 1: prevChild2} = prevChildren;
+
       const newChild = createElementWithAttributes(doc, 'div', {
         'id': 'child3',
         'part-a': 'E',
@@ -643,37 +672,40 @@ describes.realWin('PreactBaseElement', spec, (env) => {
 
       // New child.
       expect(child3.type).to.equal(Slot);
-      expect(child3.props).to.deep.equal({
-        name: 'i-amphtml-children-2',
+      expect(omit(child3.props, 'name')).to.deep.equal({
         boolDefTrue: true,
         combined: 'E+F',
       });
-      expect(newChild.slot).to.equal('i-amphtml-children-2');
+      expect(child3.props.name).to.match(/i-amphtml-children-\d/);
+      expect(child3.props.name).to.not.equal(prevChild1.props.name);
+      expect(child3.props.name).to.not.equal(prevChild2.props.name);
+      expect(newChild.slot).to.equal(child3.props.name);
 
       // No changes.
       expect(child1.type).to.equal(Slot);
       expect(child1.props).to.deep.equal({
-        name: 'i-amphtml-children-0',
+        name: prevChild1.props.name,
         boolDefTrue: true,
         combined: 'A+B',
         params: {test: 'helloworld', testTwo: 'confirm'},
       });
-      expect(element.querySelector('#child1').slot).to.equal(
-        'i-amphtml-children-0'
-      );
+      expect(element.querySelector('#child1').slot).to.equal(child1.props.name);
       expect(child2.type).to.equal(Slot);
       expect(child2.props).to.deep.equal({
-        name: 'i-amphtml-children-1',
+        name: prevChild2.props.name,
         boolDefTrue: true,
         combined: 'C+D',
         params: {test: 'helloworld2', testTwo: 'confirm2'},
       });
-      expect(element.querySelector('#child2').slot).to.equal(
-        'i-amphtml-children-1'
-      );
+      expect(element.querySelector('#child2').slot).to.equal(child2.props.name);
     });
 
     it('should rerender when children are removed', async () => {
+      await waitFor(() => component.callCount > 0, 'component rendered');
+      const {children: prevChildren} = lastProps;
+      expect(prevChildren).to.have.lengthOf(2);
+      const {1: prevChild2} = prevChildren;
+
       const oldChild = element.querySelector('#child1');
       element.removeChild(oldChild);
 
@@ -687,17 +719,22 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       // No changes.
       expect(child2.type).to.equal(Slot);
       expect(child2.props).to.deep.equal({
-        name: 'i-amphtml-children-1',
+        name: prevChild2.props.name,
         boolDefTrue: true,
         combined: 'C+D',
         params: {test: 'helloworld2', testTwo: 'confirm2'},
       });
       expect(element.querySelector('#child2').slot).to.equal(
-        'i-amphtml-children-1'
+        prevChild2.props.name
       );
     });
 
     it('should rerender on reorder', async () => {
+      await waitFor(() => component.callCount > 0, 'component rendered');
+      const {children: prevChildren} = lastProps;
+      expect(prevChildren).to.have.lengthOf(2);
+      const {0: prevChild1, 1: prevChild2} = prevChildren;
+
       element.insertBefore(
         element.querySelector('#child2'),
         element.querySelector('#child1')
@@ -713,23 +750,23 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       // No changes, except for ordering.
       expect(child1.type).to.equal(Slot);
       expect(child1.props).to.deep.equal({
-        name: 'i-amphtml-children-0',
+        name: prevChild1.props.name,
         boolDefTrue: true,
         combined: 'A+B',
         params: {test: 'helloworld', testTwo: 'confirm'},
       });
       expect(element.querySelector('#child1').slot).to.equal(
-        'i-amphtml-children-0'
+        prevChild1.props.name
       );
       expect(child2.type).to.equal(Slot);
       expect(child2.props).to.deep.equal({
-        name: 'i-amphtml-children-1',
+        name: prevChild2.props.name,
         boolDefTrue: true,
         combined: 'C+D',
         params: {test: 'helloworld2', testTwo: 'confirm2'},
       });
       expect(element.querySelector('#child2').slot).to.equal(
-        'i-amphtml-children-1'
+        prevChild2.props.name
       );
     });
 
@@ -792,7 +829,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
         </amp-preact>
       `;
       doc.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
       await waitFor(() => component.callCount > 0, 'component rendered');
     });
 
@@ -870,7 +907,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
         <amp-preact layout="fixed" width="100" height="100"> text </amp-preact>
       `;
       doc.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
       await waitFor(() => component.callCount > 0, 'component rendered');
     });
 
@@ -926,6 +963,38 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       element.setAttribute('prop-a', 'B');
       await waitFor(() => component.callCount > 1, 'component re-rendered');
       expect(component).to.be.calledTwice;
+    });
+  });
+
+  describe('delegatesFocus mapping', () => {
+    let element;
+
+    beforeEach(async () => {
+      Impl['delegatesFocus'] = true;
+      Impl['passthroughNonEmpty'] = true;
+      element = html`
+        <amp-preact layout="fixed" width="100" height="100"></amp-preact>
+      `;
+      doc.body.appendChild(element);
+      await element.buildInternal();
+      await waitFor(() => component.callCount > 0, 'component rendered');
+    });
+
+    it('should focus on the host when an element in the shadow DOM receives focus', async () => {
+      // expect the shadowRoot to have delegatesFocus property set to true
+      expect(element.shadowRoot.delegatesFocus).to.be.true;
+
+      // initial focus is not on host
+      expect(doc.activeElement).to.not.equal(element);
+
+      // focus an element within the shadow DOM
+      const inner = element.shadowRoot.querySelector('#component');
+      // required to receive focus
+      inner.setAttribute('tabIndex', 0);
+      inner.focus();
+
+      // host receives focus and custom style for outline
+      expect(doc.activeElement).to.equal(element);
     });
   });
 });
