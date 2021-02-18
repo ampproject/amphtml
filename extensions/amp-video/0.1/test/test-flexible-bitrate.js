@@ -78,6 +78,21 @@ describes.fakeWin('amp-video flexible-bitrate', {}, (env) => {
       expect(currentBitrates(v1)[0]).to.equal(1000);
       expect(v1.currentSrc).to.equal('http://localhost:9876/1000.mp4');
     });
+
+    it('should not lower bitrate on loaded video', () => {
+      const m = getManager('4g');
+      const v0 = getVideo([4000, 1000, 3000, 2000]);
+      env.sandbox.stub(v0, 'duration').value(10);
+      env.sandbox.stub(v0, 'buffered').value({
+        start: () => 0,
+        end: () => 9,
+        length: 1,
+      });
+      m.manage(v0);
+      m.updateOtherManagedAndPausedVideos_();
+
+      expect(currentBitrates(v0)[0]).to.equal(4000);
+    });
   });
 
   describe('sorting', () => {
@@ -201,7 +216,7 @@ describes.fakeWin('amp-video flexible-bitrate', {}, (env) => {
 
   function currentBitrates(video) {
     return toArray(childElementsByTag(video, 'source')).map((source) => {
-      return source.bitrate_;
+      return source.bitrate_ || parseFloat(source.getAttribute('data-bitrate'));
     });
   }
 
