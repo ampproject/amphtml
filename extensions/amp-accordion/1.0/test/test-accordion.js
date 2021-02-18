@@ -20,7 +20,7 @@ import {
   AccordionContent,
   AccordionHeader,
   AccordionSection,
-} from '../accordion';
+} from '../component';
 import {mount} from 'enzyme';
 import {useAmpContext} from '../../../../src/preact/context';
 import {waitFor} from '../../../../testing/test-helper';

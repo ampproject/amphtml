@@ -20,7 +20,7 @@ import {
   AccordionContent,
   AccordionHeader,
   AccordionSection,
-} from '../../../amp-accordion/1.0/accordion';
+} from '../../../amp-accordion/1.0/component';
 import {Instagram} from '../component';
 import {boolean, number, text, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
