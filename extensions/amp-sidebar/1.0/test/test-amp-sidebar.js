@@ -161,6 +161,33 @@ describes.realWin(
         expect(container.children.length).to.equal(0);
       });
 
+      it('should close the sidebar when the esc key is pressed', async () => {
+        element.enqueAction(invocation('open'));
+        await waitForOpen(element, true);
+
+        // sidebar is opened, wait for eventListener to be attached
+        expect(container.children.length).to.equal(2);
+        const sidebar = container.children[0];
+        const doc = sidebar.ownerDocument;
+        const addListenerSpy = env.sandbox.spy(doc, 'addEventListener');
+
+        await waitFor(
+          () => addListenerSpy.callCount > 0,
+          'event listener attached'
+        );
+
+        // dispatch esc key event
+        const documentEl = sidebar.ownerDocument.documentElement;
+        documentEl.dispatchEvent(
+          new KeyboardEvent('keydown', {key: 'Escape', bubbles: true})
+        );
+
+        // verify sidebar is closed
+        await waitForOpen(element, false);
+        expect(element).to.not.have.attribute('open');
+        expect(container.children.length).to.equal(0);
+      });
+
       it('should render all children of the sidebar', async () => {
         // closed sidebar should not render any content
         expect(container.children.length).to.equal(0);
