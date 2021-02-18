@@ -51,18 +51,49 @@ describes.sandboxed('Sidebar preact component', {}, (env) => {
 
     afterEach(() => {
       Element.prototype.animate = animateFunction;
+      wrapper.unmount();
     });
 
     it('close the sidebar when the backdrop is clicked', () => {
       openButton.getDOMNode().click();
       wrapper.update();
 
+      // verify sidebar is opened
+      let sidebarElement = wrapper.find(Sidebar).getDOMNode();
+      expect(sidebarElement).to.not.be.null;
+
+      // click on the backdrop
       const backdropElement = wrapper.find(Sidebar).getDOMNode().nextSibling;
       backdropElement.click();
       wrapper.update();
 
+      // verify sidebar closes
+      sidebarElement = wrapper.find(Sidebar).getDOMNode();
+      expect(sidebarElement).to.be.null;
+    });
+
+    it('should close the sidebar when the esc key is pressed', () => {
+      openButton.getDOMNode().click();
+      wrapper.update();
+
+      // verify sidebar is opened
+      let sidebarElement = wrapper.find(Sidebar).getDOMNode();
+      expect(sidebarElement).to.not.be.null;
+
+      // forces flush of effect queue (attaches esc key event listener)
+      wrapper.mount();
+
+      // simulate an 'esc' key press from the documentElement
+      sidebarElement.ownerDocument.documentElement.dispatchEvent(
+        new KeyboardEvent('keydown', {key: 'Escape', bubbles: true})
+      );
+
+      // force rerender
+      wrapper.update();
+
       // Sidebar closes
-      expect(sidebar.getDOMNode()).to.be.null;
+      sidebarElement = wrapper.find(Sidebar).getDOMNode();
+      expect(sidebarElement).to.be.null;
     });
 
     it('should include the content in the sidebar', () => {
