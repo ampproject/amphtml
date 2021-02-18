@@ -16,20 +16,20 @@
 
 import * as Preact from '../../../../src/preact';
 import {BaseCarousel} from '../../../amp-base-carousel/1.0/base-carousel';
-import {LightboxGallery, WithLightbox} from '../component';
+import {LightboxGalleryProvider, WithLightbox} from '../component';
 import {withA11y} from '@storybook/addon-a11y';
 import {withKnobs} from '@storybook/addon-knobs';
 
 export default {
   title: 'LightboxGallery',
-  component: LightboxGallery,
+  component: LightboxGalleryProvider,
   decorators: [withKnobs, withA11y],
 };
 
 export const _default = () => {
   return (
     <>
-      <LightboxGallery>
+      <LightboxGalleryProvider>
         <style>{`
         img {
           width: 240px;
@@ -65,7 +65,7 @@ export const _default = () => {
             </div>
           </div>
         </div>
-      </LightboxGallery>
+      </LightboxGalleryProvider>
     </>
   );
 };
@@ -79,7 +79,7 @@ export const carousel = () => {
       height: 160px;
     }
   `}</style>
-      <LightboxGallery>
+      <LightboxGalleryProvider>
         <BaseCarousel lightbox style={{width: '240px', height: '160px'}}>
           <img
             src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1498&q=80"
@@ -106,7 +106,7 @@ export const carousel = () => {
             thumbnailSrc="https://images.unsplash.com/photo-1603123853880-a92fafb7809f?ixlib=rb-1.2.1&auto=format&fit=crop&w=120&q=80"
           />
         </BaseCarousel>
-      </LightboxGallery>
+      </LightboxGalleryProvider>
     </>
   );
 };
