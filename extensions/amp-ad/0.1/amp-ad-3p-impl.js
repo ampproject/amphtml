@@ -249,12 +249,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   preconnectCallback(opt_onLayout) {
     const preconnect = Services.preconnectFor(this.win);
     // We always need the bootstrap.
-    preloadBootstrap(
-      this.win,
-      this.getAmpDoc(),
-      preconnect,
-      this.config.remoteHTMLDisabled
-    );
+    preloadBootstrap(this.win, this.getAmpDoc(), preconnect);
     if (typeof this.config.prefetch == 'string') {
       preconnect.preload(this.getAmpDoc(), this.config.prefetch, 'script');
     } else if (this.config.prefetch) {
@@ -427,7 +422,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
             this.type_,
             opt_context,
             {
-              disallowCustom: this.config.remoteHTMLDisabled,
               initialIntersection: intersectionEntryToJson(intersection),
             }
           );
