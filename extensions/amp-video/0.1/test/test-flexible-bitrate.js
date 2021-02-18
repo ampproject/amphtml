@@ -82,7 +82,7 @@ describes.fakeWin('amp-video flexible-bitrate', {}, (env) => {
     it('should not lower bitrate on loaded video', () => {
       const m = getManager('4g');
       const v0 = getVideo([4000, 1000, 3000, 2000]);
-      env.sandbox.stub(v0, 'duration').value(0);
+      env.sandbox.stub(v0, 'duration').value(10);
       env.sandbox.stub(v0, 'buffered').value({
         start: () => 0,
         end: () => 9,

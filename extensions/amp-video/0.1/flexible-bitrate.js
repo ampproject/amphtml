@@ -35,7 +35,7 @@ const BITRATE_BY_EFFECTIVE_TYPE = {
   '5g': 5000,
 };
 
-/** @const {number} The percentage that videos need to be buffered to not downgrade them */
+/** @const {number} Do not downgrade the quality of a video that has loaded enough content */
 const BUFFERED_THRESHOLD_PERCENTAGE = 0.8;
 
 /** @type {!BitrateManager|undefined} */
@@ -303,7 +303,7 @@ function currentSource(video) {
 /**
  * @private
  * @param {!Element} videoEl
- * @return {number}
+ * @return {number} the percentage buffered [0-1]
  */
 function getBufferedPercentage(videoEl) {
   // videoEl.duration can be NaN if video is not loaded or 0.
