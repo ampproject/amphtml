@@ -13,8 +13,8 @@
     "baseSuffix": "&idsite=${website_id}&rec=1&r=${request_random}&url=${sourceUrl}&_id=${visitor_id_from_cookie}&apiv=1&urlref=${documentReferrer}&res=${screenWidth}x${screenHeight}&lang=${browserLanguage}&gt_ms=${serverResponseTime}&cs=${documentCharset}&pv_id=$SUBSTR($PAGE_VIEW_ID_64, 0, 6)",
     "performanceMetrics": "${basePrefix}ping=1${baseSuffix}&t_di=${domInteractiveTime}&t_le=${contentLoadTime}&t_dc=${pageDownloadTime}&t_ee=${pageLoadTime}",
     "pageview": "${basePrefix}action_name=${title}${baseSuffix}",
-    "customevent": "${basePrefix}e_c=${event_category}&e_a=${event_action}&e_n=${event_name}${baseSuffix}",
-    "download": "${basePrefix}download=${download_name}${baseSuffix}",
+    "customevent": "${basePrefix}e_c=${event_category}&e_a=${event_action}&e_n=${event_name}&e_v=$DEFAULT(${event_value}, 0)${baseSuffix}",
+    "download": "${basePrefix}download=${download_url}${baseSuffix}",
     "outlink": "${basePrefix}link=${outlink_url}${baseSuffix}",
     "search": "${basePrefix}search=${search_keyword}&search_cat=${search_category}&search_count=${search_result_count}${baseSuffix}",
     "goal": "${basePrefix}idgoal=${goal_id}${baseSuffix}"
