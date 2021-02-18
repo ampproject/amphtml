@@ -19,35 +19,24 @@
  * @fileoverview Script that runs the experiment A/B/C tests during CI.
  */
 
-const experimentsConfig = require('../global-configs/experiments-config.json');
+const {
+  getExperimentConfig,
+  downloadExperimentOutput,
+  printSkipMessage,
+  timedExecOrDie,
+} = require('./utils');
 const {buildTargetsInclude, Targets} = require('./build-targets');
 const {experiment} = require('minimist')(process.argv.slice(2));
-const {printSkipMessage, timedExecOrDie} = require('./utils');
 const {runCiJob} = require('./ci-job');
 
 const jobName = `${experiment}-tests.js`;
 
-/**
- * Extracts and validates the experiment config.
- * @return {Object|null}
- */
-function getConfig_() {
-  const config = experimentsConfig[experiment];
-  const valid =
-    config?.name &&
-    config?.define_experiment_constant &&
-    config?.expiration_date_utc &&
-    new Date(config.expiration_date_utc) >= Date.now();
-  return valid ? config : null;
-}
-
 function pushBuildWorkflow() {
-  const config = getConfig_();
+  const config = getExperimentConfig(experiment);
   if (config) {
     const defineFlag = `--define_experiment_constant ${config.define_experiment_constant}`;
     const experimentFlag = `--experiment ${experiment}`;
-    timedExecOrDie('gulp update-packages');
-    timedExecOrDie(`gulp dist --fortesting ${defineFlag}`);
+    downloadExperimentOutput(experiment);
     timedExecOrDie(
       `gulp integration --nobuild --compiled --headless ${experimentFlag} ${defineFlag}`
     );
