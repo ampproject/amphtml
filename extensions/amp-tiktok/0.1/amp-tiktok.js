@@ -106,7 +106,7 @@ export class AmpTiktok extends AMP.BaseElement {
       this.handleTiktokMessages_.bind(this)
     );
 
-    this.iframe_.setAttribute('src', src);
+    this.iframe_.src = src;
     this.iframe_.setAttribute('name', '__tt_embed__v$');
     this.iframe_.setAttribute('aria-hidden', 'true');
     this.iframe_.setAttribute('frameborder', '0');
@@ -117,6 +117,7 @@ export class AmpTiktok extends AMP.BaseElement {
     });
 
     this.element.appendChild(iframe);
+    return this.loadPromise(iframe);
   }
 
   /**
@@ -134,7 +135,6 @@ export class AmpTiktok extends AMP.BaseElement {
     if (!data || data === undefined) {
       return;
     }
-    console.log(data);
     if (data['height']) {
       this.resizeOuter_(data['height']);
       setStyle(this.iframe_, 'width', `${data['width']}px`);

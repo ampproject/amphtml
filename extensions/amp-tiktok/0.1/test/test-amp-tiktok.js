@@ -21,16 +21,19 @@ describes.realWin(
   'amp-tiktok',
   {
     amp: {
-      runtimeOn: true,
       extensions: ['amp-tiktok'],
     },
   },
   (env) => {
-    let win, doc;
+    let win;
+    let doc;
+    let clock;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
+      clock = env.sandbox.useFakeTimers();
+      clock.tick(0);
     });
 
     async function getTiktok() {
@@ -45,7 +48,6 @@ describes.realWin(
       return tiktok
         .buildInternal()
         .then(() => {
-          console.log('here');
           return tiktok.layoutCallback();
         })
         .then(() => tiktok);
@@ -56,7 +58,7 @@ describes.realWin(
       impl.handleTiktokMessages_({
         origin: 'https://www.tiktok.com',
         source: iframe.contentWindow,
-        data: details,
+        data: JSON.stringify(details),
       });
     }
 
@@ -76,7 +78,10 @@ describes.realWin(
       const forceChangeHeight = env.sandbox.spy(impl, 'forceChangeHeight');
       expect(iframe).to.not.be.null;
       const newHeight = 900;
-      await sendFakeMessage(tiktok, iframe, `height: ${newHeight}`);
+      await sendFakeMessage(tiktok, iframe, {height: newHeight});
+      await Promise.resolve().then(() => {
+        clock.tick(2000);
+      });
       expect(forceChangeHeight).to.be.calledOnce;
       expect(forceChangeHeight.firstCall.args[0]).to.equal(newHeight);
     });
