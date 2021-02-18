@@ -17,8 +17,7 @@
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
-import {addParamsToUrl} from '../../../src/url';
-import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
+import {addParamsToUrl, assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
 import {
   createFrameFor,
   objOrParseJson,
@@ -32,11 +31,7 @@ import {
   isFullscreenElement,
   removeElement,
 } from '../../../src/dom';
-import {
-  getConsentPolicyInfo,
-  getConsentPolicySharedData,
-  getConsentPolicyState,
-} from '../../../src/consent';
+import {getConsentPolicyInfo} from '../../../src/consent';
 import {getData, listen} from '../../../src/event-helper';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -110,10 +105,8 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
    * @private
    */
   getVideoIframeSrc_() {
-    const {
-      element: el
-    } = this;
-    
+    const {element: el} = this;
+
     const {
       client,
       domainId,
@@ -145,12 +138,12 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
       addParamsToUrl(
         url,
         dict({
-          dataMode: mode,
-          platform: 'amp',
-          disableAds: disableAds,
-          streamingFilter: streamingFilter,
-          exitMode: exitMode,
-          consentString: this.consentString_,
+          'dataMode': mode,
+          'platform': 'amp',
+          'disableAds': disableAds,
+          'streamingFilter': streamingFilter,
+          'exitMode': exitMode,
+          'consentString': this.consentString_,
         })
       )
     );
@@ -165,10 +158,8 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     const consentStringPromise = consentPolicy
       ? getConsentPolicyInfo(this.element, consentPolicy)
       : Promise.resolve(null);
-      
-    return Promise.all([
-      consentStringPromise,
-    ]).then((consentData) => {
+
+    return Promise.all([consentStringPromise]).then((consentData) => {
       this.consentString_ = consentData;
     });
   }
