@@ -22,7 +22,7 @@ import {useCallback, useRef} from '../../../src/preact';
  * @param {!LightboxGalleryDef.Props} props
  * @return {PreactDef.Renderable}
  */
-export function LightboxGalleryProvider({children}) {
+export function LightboxGalleryProvider({children, render}) {
   const lightboxRef = useRef(null);
   const renderers = useRef([]);
   const lightboxElements = useRef([]);
@@ -65,7 +65,7 @@ export function LightboxGalleryProvider({children}) {
         <div>{lightboxElements.current}</div>
       </Lightbox>
       <LightboxGalleryContext.Provider value={context}>
-        {children}
+        {render ? render() : children}
       </LightboxGalleryContext.Provider>
     </>
   );
