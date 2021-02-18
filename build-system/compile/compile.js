@@ -144,13 +144,6 @@ function compile(
   options,
   timeInfo
 ) {
-  function shouldAppendSourcemappingURLText(file) {
-    // Do not append sourceMappingURL if its a sourcemap
-    return (
-      pathModule.extname(file.path) !== '.map' && options.esmPassCompilation
-    );
-  }
-
   const hideWarningsFor = [
     'third_party/amp-toolbox-cache-url/',
     'third_party/caja/',
@@ -402,12 +395,6 @@ function compile(
           )
         )
         .on('error', reject)
-        .pipe(
-          gulpIf(
-            shouldAppendSourcemappingURLText,
-            gap.appendText(`\n//# sourceMappingURL=${outputFilename}.map`)
-          )
-        )
         .pipe(postClosureBabel())
         .pipe(sanitize())
         .pipe(writeSourcemaps(options))
