@@ -41,6 +41,7 @@ import {
   useState,
 } from '../../../src/preact';
 import {useResourcesNotify} from '../../../src/preact/utils';
+import objstr from 'obj-str';
 
 /**
  * @param {?{getMetadata: (function():?JsonObject|undefined)}} player
@@ -300,7 +301,12 @@ function Autoplay({
   return (
     <>
       {displayIcon && (
-        <div className={`${classes.eq} ${playing ? classes.eqPlaying : ''}`}>
+        <div
+          className={objstr({
+            [classes.eq]: true,
+            [classes.eqPlaying]: playing,
+          })}
+        >
           <AutoplayIconContent />
         </div>
       )}

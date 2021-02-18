@@ -392,6 +392,36 @@ describes.sandboxed('amp-img', {}, (env) => {
     expect(AmpImg.prerenderAllowed(el)).to.equal(true);
   });
 
+  it('should propogate src as the final attribute when provided a srcset', () => {
+    // Providing src before srcset will cause Safari 14.4 to request two src values for the same `img`.
+    const el = document.createElement('amp-img');
+    el.setAttribute('src', 'test.jpg');
+    el.setAttribute('srcset', SRCSET_STRING);
+    el.setAttribute('width', 300);
+    el.setAttribute('height', 200);
+    el.getResources = () => Services.resourcesForDoc(document);
+    el.getPlaceholder = () => {
+      const img = document.createElement('img');
+      img.src = 'data:image/svg+xml;charset=utf-8,%3Csvg%3E%3C/svg%3E';
+      return img;
+    };
+    el.getLayout = () => 'responsive';
+    el.getLayoutSize = () => ({width: 300, height: 200});
+
+    const impl = new AmpImg(el);
+    const propagateAttributesSpy = sandbox.spy(impl, 'propagateAttributes');
+    impl.buildCallback();
+    impl.layoutCallback();
+
+    expect(propagateAttributesSpy).to.be.calledOnce;
+    const spiedAttributesToPropagate = propagateAttributesSpy.getCall(0)
+      .args[0];
+
+    expect(
+      spiedAttributesToPropagate[spiedAttributesToPropagate.length - 1]
+    ).to.equal('src');
+  });
+
   it('should propagate ARIA attributes', () => {
     const el = document.createElement('amp-img');
     el.setAttribute('src', 'test.jpg');
@@ -610,7 +640,44 @@ describes.sandboxed('amp-img', {}, (env) => {
       return impl;
     }
 
-    it('should not generate sizes for amp-imgs that already have sizes', async () => {
+    it('should not generate sizes for amp-imgs that already have sizes on their rendered image children', async () => {
+      const serverRenderedImg = document.createElement('img');
+      serverRenderedImg.setAttribute('src', '/examples/img/sample.jpg');
+      serverRenderedImg.setAttribute('srcset', SRCSET_STRING);
+      serverRenderedImg.setAttribute('sizes', '50vw');
+      const ampImg = await getImg(
+        {
+          src: '/examples/img/sample.jpg',
+          srcset: SRCSET_STRING,
+          sizes: '50vw',
+          width: 300,
+          height: 200,
+        },
+        [serverRenderedImg]
+      );
+      const impl = await ampImg.getImpl(false);
+      impl.buildCallback();
+      await impl.layoutCallback();
+      const img = impl.img_;
+      expect(img.getAttribute('sizes')).to.equal('50vw');
+    });
+
+    it('should not generate sizes for amp-imgs when rendered from the server', async () => {
+      const ampImg = await getImg({
+        src: '/examples/img/sample.jpg',
+        srcset: SRCSET_STRING,
+        width: 300,
+        height: 200,
+        'i-amphtml-ssr': '',
+      });
+      const impl = await ampImg.getImpl(false);
+      impl.buildCallback();
+      await impl.layoutCallback();
+      const img = impl.img_;
+      expect(img.hasAttribute('sizes')).to.be.false;
+    });
+
+    it('should not generate sizes for amp-imgs, rendered with sizes from the server', async () => {
       const ampImg = await getImg({
         src: '/examples/img/sample.jpg',
         srcset: SRCSET_STRING,

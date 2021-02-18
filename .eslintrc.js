@@ -159,6 +159,7 @@ module.exports = {
     'local/no-style-property-setting': 2,
     'local/no-swallow-return-from-allow-console-error': 2,
     'local/no-unload-listener': 2,
+    'local/objstr-literal': 2,
     'local/preact': 2,
     'local/prefer-deferred-promise': 0,
     'local/prefer-destructuring': 2,
