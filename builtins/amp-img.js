@@ -47,8 +47,8 @@ const ATTRIBUTES_TO_PROPAGATE = [
 
 export class AmpImg extends BaseElement {
   /** @override @nocollapse */
-  static V2() {
-    return V2_IMG_VIDEO;
+  static V1() {
+    return V1_IMG_VIDEO;
   }
 
   /** @override @nocollapse */
@@ -136,7 +136,7 @@ export class AmpImg extends BaseElement {
         guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
       }
 
-      if (AmpImg.V2() && !this.img_.complete) {
+      if (AmpImg.V1() && !this.img_.complete) {
         this.onReadyState(ReadyState.LOADING);
       }
     }
@@ -295,11 +295,11 @@ export class AmpImg extends BaseElement {
 
   /** @override */
   buildCallback() {
-    if (!AmpImg.V2()) {
+    if (!AmpImg.V1()) {
       return;
     }
 
-    // A V2 amp-img loads and reloads automatically.
+    // A V1 amp-img loads and reloads automatically.
     this.onReadyState(ReadyState.LOADING);
     this.initialize_();
     const img = dev().assertElement(this.img_);
@@ -340,7 +340,7 @@ export class AmpImg extends BaseElement {
 
   /** @override */
   unlayoutCallback() {
-    if (!AmpImg.V2()) {
+    if (!AmpImg.V1()) {
       return;
     }
 

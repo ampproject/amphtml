@@ -18,9 +18,9 @@ import {AmpImg} from '../../builtins/amp-img';
 import {BaseElement} from '../../src/base-element';
 import {Layout, LayoutPriority} from '../../src/layout';
 import {createElementWithAttributes, dispatchCustomEvent} from '../../src/dom';
-import {testElementV2} from '../../testing/element-v2';
+import {testElementV1} from '../../testing/element-v1';
 
-describes.realWin('amp-img V2', {amp: true}, (env) => {
+describes.realWin('amp-img V1', {amp: true}, (env) => {
   let win, doc;
   let sandbox;
   let windowWidth;
@@ -33,7 +33,7 @@ describes.realWin('amp-img V2', {amp: true}, (env) => {
     doc = win.document;
     sandbox = env.sandbox;
 
-    sandbox.stub(AmpImg, 'V2').returns(true);
+    sandbox.stub(AmpImg, 'V1').returns(true);
 
     windowWidth = 320;
     sandbox.stub(BaseElement.prototype, 'getViewport').callsFake(() => {
@@ -65,8 +65,8 @@ describes.realWin('amp-img V2', {amp: true}, (env) => {
     return img;
   }
 
-  it('testElementV2', () => {
-    testElementV2(AmpImg, {
+  it('testElementV1', () => {
+    testElementV1(AmpImg, {
       exceptions: [
         'Must not have preconnectCallback',
         'Must not have layoutCallback',

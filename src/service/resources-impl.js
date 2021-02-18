@@ -1208,7 +1208,7 @@ export class ResourcesImpl {
       if (
         r.getState() == ResourceState.NOT_BUILT &&
         !r.isBuilding() &&
-        !r.element.V2()
+        !r.element.V1()
       ) {
         this.buildOrScheduleBuildForResource_(r, /* checkForDupes */ true);
       }
@@ -1275,7 +1275,7 @@ export class ResourcesImpl {
     ) {
       for (let i = 0; i < this.resources_.length; i++) {
         const r = this.resources_[i];
-        if ((r.hasOwner() && !r.isMeasureRequested()) || r.element.V2()) {
+        if ((r.hasOwner() && !r.isMeasureRequested()) || r.element.V1()) {
           // If element has owner, and measure is not requested, do nothing.
           continue;
         }
@@ -1339,7 +1339,7 @@ export class ResourcesImpl {
       if (
         r.getState() == ResourceState.NOT_BUILT ||
         r.hasOwner() ||
-        r.element.V2()
+        r.element.V1()
       ) {
         continue;
       }
@@ -1365,7 +1365,7 @@ export class ResourcesImpl {
           !r.isBuilt() &&
           !r.isBuilding() &&
           !r.hasOwner() &&
-          !r.element.V2() &&
+          !r.element.V1() &&
           r.hasBeenMeasured() &&
           r.isDisplayed() &&
           r.overlaps(loadRect)
@@ -1401,7 +1401,7 @@ export class ResourcesImpl {
         if (
           r.getState() == ResourceState.READY_FOR_LAYOUT &&
           !r.hasOwner() &&
-          !r.element.V2() &&
+          !r.element.V1() &&
           r.isDisplayed() &&
           r.idleRenderOutsideViewport()
         ) {
@@ -1421,7 +1421,7 @@ export class ResourcesImpl {
         if (
           r.getState() == ResourceState.READY_FOR_LAYOUT &&
           !r.hasOwner() &&
-          !r.element.V2() &&
+          !r.element.V1() &&
           r.isDisplayed()
         ) {
           dev().fine(TAG_, 'idle layout:', r.debugid);
@@ -1727,7 +1727,7 @@ export class ResourcesImpl {
     opt_parentPriority,
     opt_forceOutsideViewport
   ) {
-    if (resource.element.V2()) {
+    if (resource.element.V1()) {
       return;
     }
     const isBuilt = resource.getState() != ResourceState.NOT_BUILT;

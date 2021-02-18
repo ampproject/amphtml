@@ -374,7 +374,7 @@ function createBaseCustomElementClass(win) {
       this.classList.remove('i-amphtml-unresolved');
       this.assertLayout_();
       this.dispatchCustomEventForTesting(AmpEvents.ATTACHED);
-      if (!this.V2()) {
+      if (!this.V1()) {
         this.getResources().upgraded(this);
       }
       this.signals_.signal(CommonSignals.UPGRADED);
@@ -411,7 +411,7 @@ function createBaseCustomElementClass(win) {
     /**
      * Get the priority to load the element.
      * @return {number}
-     * TODO(#31915): remove once V2 migration is complete.
+     * TODO(#31915): remove once V1 migration is complete.
      */
     getLayoutPriority() {
       return this.impl_
@@ -512,7 +512,7 @@ function createBaseCustomElementClass(win) {
           this.classList.remove('amp-notbuilt');
           this.signals_.signal(CommonSignals.BUILT);
 
-          if (this.V2()) {
+          if (this.V1()) {
             if (this.readyState_ == ReadyState.BUILDING) {
               this.onReadyStateInternal(ReadyState.COMPLETE);
             }
@@ -546,7 +546,7 @@ function createBaseCustomElementClass(win) {
             /** @type {!Error} */ (reason)
           );
 
-          if (this.V2()) {
+          if (this.V1()) {
             this.onReadyStateInternal(ReadyState.ERROR, reason);
           }
 
@@ -570,7 +570,7 @@ function createBaseCustomElementClass(win) {
         CommonSignals.READY_TO_UPGRADE
       );
       return readyPromise.then(() => {
-        if (this.V2()) {
+        if (this.V1()) {
           const builder = getBuilderForDoc(this.getAmpDoc());
           builder.scheduleAsap(this);
         }
@@ -595,7 +595,7 @@ function createBaseCustomElementClass(win) {
      */
     ensureLoaded(opt_parentPriority) {
       return this.build().then(() => {
-        if (this.V2()) {
+        if (this.V1()) {
           if (this.readyState_ == ReadyState.LOADING) {
             this.impl_.ensureLoaded();
             return this.whenLoaded();
@@ -641,7 +641,7 @@ function createBaseCustomElementClass(win) {
 
       this.readyState_ = state;
 
-      if (!this.V2()) {
+      if (!this.V1()) {
         return;
       }
 
@@ -676,7 +676,7 @@ function createBaseCustomElementClass(win) {
      * Called to instruct the element to preconnect to hosts it uses during
      * layout.
      * @param {boolean} onLayout Whether this was called after a layout.
-     * TODO(#31915): remove once V2 migration is complete.
+     * TODO(#31915): remove once V1 migration is complete.
      */
     preconnect(onLayout) {
       devAssert(this.isUpgraded());
@@ -696,13 +696,13 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
-     * See `BaseElement.V2()`.
+     * See `BaseElement.V1()`.
      *
      * @return {boolean}
      * @final
      */
-    V2() {
-      return this.implClass_ ? this.implClass_.V2() : false;
+    V1() {
+      return this.implClass_ ? this.implClass_.V1() : false;
     }
 
     /**
@@ -972,7 +972,7 @@ function createBaseCustomElementClass(win) {
           }
           this.connected_();
           this.dispatchCustomEventForTesting(AmpEvents.ATTACHED);
-        } else if (this.implClass_ && this.V2()) {
+        } else if (this.implClass_ && this.V1()) {
           this.upgradeOrSchedule_();
         }
       } else {
@@ -1016,11 +1016,11 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
-     * Upgrade or schedule element based on V2.
+     * Upgrade or schedule element based on V1.
      * @private @final
      */
     upgradeOrSchedule_() {
-      if (!this.V2()) {
+      if (!this.V1()) {
         this.tryUpgrade_();
         return;
       }
@@ -1153,7 +1153,7 @@ function createBaseCustomElementClass(win) {
       if (this.impl_) {
         this.impl_.detachedCallback();
       }
-      if (!this.built_ && this.V2()) {
+      if (!this.built_ && this.V1()) {
         const builder = getBuilderForDoc(this.getAmpDoc());
         builder.unschedule(this);
       }

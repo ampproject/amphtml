@@ -28,7 +28,7 @@ import {
 } from '../../src/custom-element';
 import {getBuilderForDoc} from '../../src/service/builder';
 
-describes.realWin('CustomElement V2', {amp: true}, (env) => {
+describes.realWin('CustomElement V1', {amp: true}, (env) => {
   let win, doc, ampdoc;
   let resources, resourcesMock;
   let builder, builderMock;
@@ -69,7 +69,7 @@ describes.realWin('CustomElement V2', {amp: true}, (env) => {
   });
 
   class TestElement extends BaseElement {
-    static V2() {
+    static V1() {
       return true;
     }
 
