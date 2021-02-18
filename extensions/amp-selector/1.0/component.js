@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as CSS from './selector.css';
+import * as CSS from './component.css';
 import * as Preact from '../../../src/preact';
 import {Keys} from '../../../src/utils/key-codes';
 import {forwardRef} from '../../../src/preact/compat';
