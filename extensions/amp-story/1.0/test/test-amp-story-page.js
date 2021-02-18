@@ -630,6 +630,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     const attachmentEl = win.document.createElement(
       'amp-story-page-attachment'
     );
+    attachmentEl.setAttribute('layout', 'nodisplay');
     element.appendChild(attachmentEl);
 
     page.buildCallback();
@@ -646,6 +647,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     const attachmentEl = win.document.createElement(
       'amp-story-page-attachment'
     );
+    attachmentEl.setAttribute('layout', 'nodisplay');
     attachmentEl.setAttribute('data-cta-text', 'Custom label');
     element.appendChild(attachmentEl);
 
