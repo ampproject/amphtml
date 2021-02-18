@@ -27,7 +27,6 @@ import {Services} from '../../../../src/services';
 import {adConfig} from '../../../../ads/_config';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {macroTask} from '../../../../testing/yield';
-import {user} from '../../../../src/log';
 
 function createAmpAd(win, attachToAmpdoc = false, ampdoc) {
   const ampAdElement = createElementWithAttributes(win.document, 'amp-ad', {
@@ -260,24 +259,6 @@ describes.realWin(
           ).to.be.ok;
         });
       });
-
-      it('should use default path if custom disabled', () => {
-        const meta = win.document.createElement('meta');
-        meta.setAttribute('name', 'amp-3p-iframe-src');
-        meta.setAttribute('content', 'https://src.test/boot/remote.html');
-        win.document.head.appendChild(meta);
-        ad3p.config.remoteHTMLDisabled = true;
-        ad3p.onLayoutMeasure();
-        env.sandbox.stub(user(), 'error');
-        return ad3p.layoutCallback().then(() => {
-          expect(
-            win.document.querySelector(
-              'iframe[src="' +
-                'http://ads.localhost:9876/dist.3p/current/frame.max.html"]'
-            )
-          ).to.be.ok;
-        });
-      });
     });
 
     describe('pause/resume', () => {
@@ -363,27 +344,6 @@ describes.realWin(
           expect(
             Array.from(win.document.querySelectorAll('link[rel=preload]')).some(
               (link) => link.href == `${remoteUrl}?$internalRuntimeVersion$`
-            )
-          ).to.be.true;
-        });
-      });
-
-      it('should not use remote html path for preload if disabled', () => {
-        const meta = win.document.createElement('meta');
-        meta.setAttribute('name', 'amp-3p-iframe-src');
-        meta.setAttribute('content', 'https://src.test/boot/remote.html');
-        win.document.head.appendChild(meta);
-        ad3p.config.remoteHTMLDisabled = true;
-        ad3p.buildCallback();
-        allowConsoleError(() => {
-          ad3p.preconnectCallback();
-        });
-        return whenFirstVisible.then(() => {
-          expect(
-            Array.from(win.document.querySelectorAll('link[rel=preload]')).some(
-              (link) =>
-                link.href ==
-                'http://ads.localhost:9876/dist.3p/current/frame.max.html'
             )
           ).to.be.true;
         });
