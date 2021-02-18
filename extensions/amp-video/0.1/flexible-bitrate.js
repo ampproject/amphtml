@@ -306,6 +306,7 @@ function currentSource(video) {
  * @return {number}
  */
 function getBufferedPercentage(videoEl) {
+  // videoEl.duration can be NaN if video is not loaded or 0.
   if (!videoEl.duration) {
     return 0;
   }
