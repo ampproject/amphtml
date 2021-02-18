@@ -996,7 +996,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         ),
       ATTR: (name) => {
         if (!allowlist[name.toLowerCase()]) {
-          dev().warn('TAG', `Invalid attribute ${name}`);
+          dev().warn(TAG, `Invalid attribute ${name}`);
         } else {
           return this.element.getAttribute(name);
         }
