@@ -1629,29 +1629,29 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
       });
 
       describe('access values via amp-subscriptions', () => {
-        let subscriptionsService;
-        let subscriptionsServiceMock;
+        let accessService;
+        let accessServiceMock;
 
         beforeEach(() => {
-          subscriptionsService = {
+          accessService = {
             getAccessReaderId: () => {},
             getAuthdataField: () => {},
           };
-          subscriptionsServiceMock = env.sandbox.mock(subscriptionsService);
+          accessServiceMock = env.sandbox.mock(accessService);
           env.sandbox
             .stub(Services, 'subscriptionsServiceForDocOrNull')
             .callsFake(() => {
-              return Promise.resolve(subscriptionsService);
+              return Promise.resolve(accessService);
             });
         });
 
         afterEach(() => {
-          subscriptionsServiceMock.verify();
+          accessServiceMock.verify();
         });
 
         function expandUrlAsync(url, opt_disabled) {
           if (opt_disabled) {
-            subscriptionsService = null;
+            accessService = null;
           }
           return createIframePromise().then((iframe) => {
             iframe.doc.title = 'Pixel Test';
@@ -1668,7 +1668,7 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
         }
 
         it('should replace ACCESS_READER_ID', () => {
-          subscriptionsServiceMock
+          accessServiceMock
             .expects('getAccessReaderId')
             .returns(Promise.resolve('reader1'))
             .once();
@@ -1679,7 +1679,7 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
         });
 
         it('should replace AUTHDATA', () => {
-          subscriptionsServiceMock
+          accessServiceMock
             .expects('getAuthdataField')
             .withExactArgs('field1')
             .returns(Promise.resolve('value1'))
@@ -1691,38 +1691,13 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
         });
 
         it('should report error if not available', () => {
-          subscriptionsServiceMock.expects('getAccessReaderId').never();
+          accessServiceMock.expects('getAccessReaderId').never();
           return expandUrlAsync(
             '?a=ACCESS_READER_ID;',
             /* disabled */ true
           ).then((res) => {
             expect(res).to.match(/a=;/);
             expect(userErrorStub).to.be.calledOnce;
-          });
-        });
-
-        it('should prefer amp-subscriptions if amp-access also available', () => {
-          const accessService = {
-            getAccessReaderId: () => {},
-            getAuthdataField: () => {},
-          };
-          const accessServiceMock = env.sandbox.mock(accessService);
-          env.sandbox
-            .stub(Services, 'accessServiceForDocOrNull')
-            .callsFake(() => {
-              return Promise.resolve(accessService);
-            });
-          accessServiceMock.expects('getAuthdataField').never();
-
-          subscriptionsServiceMock
-            .expects('getAuthdataField')
-            .withExactArgs('field1')
-            .returns(Promise.resolve('value1'))
-            .once();
-          return expandUrlAsync('?a=AUTHDATA(field1)').then((res) => {
-            expect(res).to.match(/a=value1/);
-            expect(userErrorStub).to.have.not.been.called;
-            accessServiceMock.verify();
           });
         });
       });

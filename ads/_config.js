@@ -175,11 +175,6 @@ const adConfig = jsonConfiguration({
     clientIdScope: 'AMP_ECID_ADPON',
   },
 
-  'adpushup': {
-    prefetch: 'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
-    preconnect: 'https://cdn.adpushup.com',
-  },
-
   'adreactor': {},
 
   'adsensor': {

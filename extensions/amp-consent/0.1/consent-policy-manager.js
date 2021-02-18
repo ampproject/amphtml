@@ -79,9 +79,6 @@ export class ConsentPolicyManager {
 
     /** @private {?Object|undefined} */
     this.consentMetadata_ = null;
-
-    /** @private {?function()} */
-    this.tcfConsentChangeHandler_ = null;
   }
 
   /**
@@ -218,20 +215,6 @@ export class ConsentPolicyManager {
       this.consentState_ = state;
     }
     this.consentStateChangeObservables_.fire(this.consentState_);
-    if (this.tcfConsentChangeHandler_) {
-      this.tcfConsentChangeHandler_();
-    }
-  }
-
-  /**
-   * Sets the handler that will be called when a consent change
-   * has been fired.
-   * @param {function()} callback
-   */
-  setOnPolicyChange(callback) {
-    if (!this.tcfConsentChangeHandler_) {
-      this.tcfConsentChangeHandler_ = callback;
-    }
   }
 
   /**

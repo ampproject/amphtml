@@ -16,13 +16,11 @@
 
 import * as Preact from '../../../src/preact';
 import {ContainWrapper, useValueRef} from '../../../src/preact/component';
-import {Keys} from '../../../src/utils/key-codes';
 import {Side} from './sidebar-config';
 import {forwardRef} from '../../../src/preact/compat';
 import {isRTL} from '../../../src/dom';
 import {
   useCallback,
-  useEffect,
   useImperativeHandle,
   useLayoutEffect,
   useRef,
@@ -111,29 +109,6 @@ function SidebarWithRef(
     setMounted
   );
 
-  useEffect(() => {
-    const sidebarElement = sidebarRef.current;
-    const backdropElement = backdropRef.current;
-    if (!sidebarElement || !backdropElement) {
-      return;
-    }
-    const document = sidebarElement.ownerDocument;
-    if (!document) {
-      return;
-    }
-    const keydownCallback = (event) => {
-      if (event.key === Keys.ESCAPE) {
-        event.stopImmediatePropagation();
-        event.preventDefault();
-        close();
-      }
-    };
-    document.addEventListener('keydown', keydownCallback);
-    return () => {
-      document.removeEventListener('keydown', keydownCallback);
-    };
-  }, [opened, close]);
-
   return (
     mounted && (
       <>
@@ -144,7 +119,7 @@ function SidebarWithRef(
           layout={true}
           paint={true}
           part="sidebar"
-          wrapperClassName={`${classes.sidebar} ${
+          wrapperClassName={`${classes.sidebarClass} ${
             classes.defaultSidebarStyles
           } ${side === Side.LEFT ? classes.left : classes.right}`}
           role="menu"
@@ -159,13 +134,11 @@ function SidebarWithRef(
           onClick={() => close()}
           part="backdrop"
           style={backdropStyle}
-          className={`${backdropClassName ?? ''} ${classes.backdrop} ${
+          className={`${backdropClassName ?? ''} ${classes.backdropClass} ${
             classes.defaultBackdropStyles
           }`}
           hidden={!side}
-        >
-          <div className={classes.backdropOverscrollBlocker}></div>
-        </div>
+        ></div>
       </>
     )
   );
