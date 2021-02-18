@@ -19,6 +19,7 @@ import {Lightbox} from './../../amp-lightbox/1.0/lightbox';
 import {LightboxGalleryContext} from './context';
 import {sequentialIdGenerator} from '../../../src/utils/id-generator';
 import {
+  useCallback,
   useContext,
   useLayoutEffect,
   useRef,
@@ -33,21 +34,35 @@ const generateLightboxItemKey = sequentialIdGenerator();
  */
 export function LightboxGallery({children}) {
   const lightboxRef = useRef(null);
+  const renderers = useRef([]);
   const lightboxElements = useRef([]);
   const register = (key, render) => {
-    lightboxElements.current[key] = render();
+    renderers.current[key] = render;
   };
   const deregister = (key) => {
     delete lightboxElements.current[key];
+    delete renderers.current[key];
   };
   const context = {
     deregister,
     register,
     open: () => lightboxRef.current.open(),
   };
+
+  const renderElements = useCallback(() => {
+    renderers.current.forEach((render, index) => {
+      if (!lightboxElements.current[index]) {
+        lightboxElements.current[index] = render();
+      }
+    });
+  }, []);
   return (
     <>
-      <Lightbox ref={lightboxRef} scrollable>
+      <Lightbox
+        onBeforeOpen={() => renderElements()}
+        ref={lightboxRef}
+        scrollable
+      >
         {/* TODO: This needs an actual close button UI */}
         <div
           aria-label="Close the lightbox"
