@@ -15,7 +15,7 @@
  */
 
 import '../amp-tiktok';
-import {createElementWithAttributes} from '../../../../src/dom';
+import {createElementWithAttributes, isAmpElement} from '../../../../src/dom';
 
 describes.realWin(
   'amp-tiktok',
@@ -26,20 +26,59 @@ describes.realWin(
     },
   },
   (env) => {
-    let win;
-    let element;
+    let win, doc;
 
     beforeEach(() => {
       win = env.win;
-      element = createElementWithAttributes(win.document, 'amp-tiktok', {
-        layout: 'responsive',
-      });
-      win.document.body.appendChild(element);
+      doc = win.document;
     });
 
-    it('should contain "hello world" when built', async () => {
-      await element.whenBuilt();
-      expect(element.querySelector('div').textContent).to.equal('hello world');
+    async function getTiktok() {
+      const tiktok = createElementWithAttributes(win.document, 'amp-tiktok', {
+        layout: 'responsive',
+        width: '325px',
+        height: '730px',
+        'data-src':
+          'https://www.tiktok.com/@scout2015/video/6718335390845095173',
+      });
+      doc.body.appendChild(tiktok);
+      return tiktok
+        .buildInternal()
+        .then(() => {
+          console.log('here');
+          return tiktok.layoutCallback();
+        })
+        .then(() => tiktok);
+    }
+
+    async function sendFakeMessage(tiktok, iframe, details) {
+      const impl = await tiktok.getImpl(false);
+      impl.handleTiktokMessages_({
+        origin: 'https://www.tiktok.com',
+        source: iframe.contentWindow,
+        data: details,
+      });
+    }
+
+    it('renders', async () => {
+      const tiktok = await getTiktok();
+      const iframe = tiktok.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.src).to.equal(
+        'https://www.tiktok.com/embed/v2/6718335390845095173?lang=en-US'
+      );
+    });
+
+    it('resizes in response to messges from Tiktok iframe', async () => {
+      const tiktok = await getTiktok();
+      const impl = await tiktok.getImpl(false);
+      const iframe = tiktok.querySelector('iframe');
+      const forceChangeHeight = env.sandbox.spy(impl, 'forceChangeHeight');
+      expect(iframe).to.not.be.null;
+      const newHeight = 900;
+      await sendFakeMessage(tiktok, iframe, `height: ${newHeight}`);
+      expect(forceChangeHeight).to.be.calledOnce;
+      expect(forceChangeHeight.firstCall.args[0]).to.equal(newHeight);
     });
   }
 );
