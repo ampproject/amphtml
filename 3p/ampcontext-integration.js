@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 import {AbstractAmpContext} from './ampcontext';
-import {adConfig} from '../ads/_config';
 import {computeInMasterFrame} from './3p';
 import {dev, user, userAssert} from '../src/log';
 import {dict} from '../src/utils/object';
@@ -30,10 +29,8 @@ import {dict} from '../src/utils/object';
  */
 export function masterSelection(win, type) {
   type = type.toLowerCase();
-  const configType =
-    adConfig[type] && adConfig[type]['masterFrameAccessibleType'];
   // The master has a special name.
-  const masterName = 'frame_' + (configType || type) + '_master';
+  const masterName = 'frame_' + type + '_master';
   let master;
   try {
     // Try to get the master from the parent. If it does not
