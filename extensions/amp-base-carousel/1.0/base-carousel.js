@@ -324,14 +324,7 @@ function BaseCarouselWithRef(
       contentRef={contentRef}
       contentProps={{
         autoLightbox: false,
-        render: () =>
-          children.map((child) =>
-            child.props?.thumbnailSrc ? (
-              <img src={child.props?.thumbnailSrc} />
-            ) : (
-              child
-            )
-          ),
+        render: () => children,
       }}
       {...rest}
     >
