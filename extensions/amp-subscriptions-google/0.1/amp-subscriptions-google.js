@@ -767,12 +767,10 @@ export class GoogleSubscriptionsPlatform {
    * @return {!Promise}
    */
   showMeteringRegwall_() {
-    // eslint-disable-next-line no-undef
-    const showRegwall = GaaMeteringRegwall.show;
-
     return (
       Promise.all([
-        showRegwall({
+        // eslint-disable-next-line no-undef
+        GaaMeteringRegwall.show({
           // Specify a URL that renders a Google Sign-In button.
           iframeUrl: this.serviceConfig_['googleSignInHelperUrl'],
         }),
