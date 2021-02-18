@@ -50,8 +50,9 @@ export function LightboxGallery({children}) {
       <Lightbox ref={lightboxRef} scrollable>
         {/* TODO: This needs an actual close button UI */}
         <div
+          aria-label="Close the lightbox"
           role="button"
-          tabindex="0"
+          tabIndex="0"
           onClick={() => lightboxRef.current.close()}
         >
           Close lightbox
@@ -70,12 +71,13 @@ export function LightboxGallery({children}) {
  * @return {PreactDef.Renderable}
  */
 export function WithLightbox({
+  'aria-label': ariaLabel = 'Close the button',
   autoLightbox = true,
   as: Comp = 'div',
   children,
   render = () => children,
   role = 'button',
-  tabindex = '0',
+  tabIndex = '0',
   ...rest
 }) {
   const [genKey] = useState(generateLightboxItemKey);
@@ -87,10 +89,11 @@ export function WithLightbox({
   return autoLightbox ? (
     <Comp
       {...rest}
+      aria-label={ariaLabel}
       key={genKey}
       onClick={() => open()}
       role={role}
-      tabindex={tabindex}
+      tabIndex={tabIndex}
     >
       {children}
     </Comp>
