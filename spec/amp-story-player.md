@@ -82,7 +82,7 @@ The code snippet below demonstrates an embed of `<amp-story-player>` in a non-AM
     <a
       href="https://preview.amp.dev/documentation/examples/introduction/stories_in_amp/"
     >
-      Stories in AMP - Hello World
+      <img src="https://amp.dev/static/samples/img/story_dog2_portrait.jpg" width="360" height="600" loading="lazy" amp-story-player-poster-img>
     </a>
   </amp-story-player>
 </body>
@@ -112,6 +112,8 @@ If specified, the player will rewrite the URL using the AMP Cache prefix provide
 The `<amp-story-player>` component contains one or more `<a>` tags. Point the href attribute of each to the story URL.
 
 Place the story's title within the `<a>` tag. This provides a better user experience and allows search engines to crawl embedded stories.
+
+Use a poster image as a placeholder to display to users while the story loads. To do this, add an image tag as a child of the `<a>` tag with the following configuration: `<img src= "" loading="lazy" width="360" height="600" data-amp-story-player-poster-img></img>`.
 
 ### Attributes
 
