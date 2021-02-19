@@ -120,7 +120,7 @@ class Doc {
 
   /**
    * The `Document` node or analog.
-   * @return {!Document}
+   * @return {!Node}
    */
   getRootNode() {}
 
@@ -873,7 +873,7 @@ class MetaParser {
 
     // Try to find product id.
     const productId = getMetaTag(
-      this.doc_.getRootNode(),
+      this.doc_.getWin().document,
       'subscriptions-product-id'
     );
     if (!productId) {
