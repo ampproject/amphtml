@@ -41,7 +41,7 @@ const {isCiBuild} = require('../../common/ci');
 const {log} = require('../../common/logging');
 const {maybePrintCoverageMessage} = require('../helpers');
 const {reportTestStarted} = require('../report-test-status');
-const {watch} = require('gulp');
+const {watch} = require('chokidar');
 
 const SLOW_TEST_THRESHOLD_MS = 2500;
 const TEST_RETRIES = isCiBuild() ? 2 : 0;
@@ -226,6 +226,9 @@ e2e.flags = {
   'core_runtime_only': '  Builds only the core runtime.',
   'nobuild':
     '  Skips building the runtime via `gulp (build|dist) --fortesting`',
+  'define_experiment_constant':
+    '  Transforms tests with the EXPERIMENT constant set to true',
+  'experiment': '  Experiment being tested (used for status reporting)',
   'extensions': '  Builds only the listed extensions.',
   'compiled': '  Runs tests against minified JS',
   'files': '  Run tests found in a specific path (ex: **/test-e2e/*.js)',

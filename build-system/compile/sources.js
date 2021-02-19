@@ -43,6 +43,8 @@ const COMMON_GLOBS = [
   'node_modules/intersection-observer/intersection-observer.install.js',
   'node_modules/resize-observer-polyfill/package.json',
   'node_modules/resize-observer-polyfill/ResizeObserver.install.js',
+  'node_modules/obj-str/package.json',
+  'node_modules/obj-str/dist/obj-str.mjs',
   'node_modules/promise-pjs/package.json',
   'node_modules/promise-pjs/promise.mjs',
   'node_modules/rrule/dist/es5/rrule.js',
@@ -112,6 +114,9 @@ const CLOSURE_SRC_GLOBS = [
   'extensions/amp-bind/**/*.js',
   // Needed to access to Variant interface from other extensions
   'extensions/amp-experiment/**/*.js',
+  // TODO(#32523) Remove this when Bento experiment is done.
+  // Needed to access across versions
+  'extensions/amp-fit-text/1.0/*.js',
   // Needed to access form impl from other extensions
   'extensions/amp-form/**/*.js',
   // Needed by amp-facebook-* for the loader logo
