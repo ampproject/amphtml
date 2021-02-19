@@ -330,6 +330,10 @@ export class DisplayObserver {
     }
 
     const observer = this.observers_[index];
+    if (isDisplayed && observer.io) {
+      // Has already been initialized.
+      return;
+    }
 
     if (isDisplayed) {
       const {win} = this.ampdoc_;
