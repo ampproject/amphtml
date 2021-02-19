@@ -248,6 +248,9 @@ Here's the JSON configuration for opting out of autoplay:
 
 By default, the player will scroll the page it's embedded in so that users don't get stuck when scrolling through the player.
 
+-   Players embedded in a document's content need this enabled so they don't block user scrolling.
+-   Players displayed full screen on a device (eg: lightbox) need this disabled so the page does not scroll in the background.
+
 You can opt-out of the default behavior by using the configuration below. This will prevent the player from scrolling the page.
 
 ### JSON Configuration

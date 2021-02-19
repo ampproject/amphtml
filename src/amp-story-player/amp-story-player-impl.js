@@ -1463,7 +1463,7 @@ export class AmpStoryPlayer {
         this.win_,
         'amp-story-player-touchstart',
         dict({
-          'coordinates': coordinates,
+          'touches': event.touches,
         })
       )
     );
@@ -1485,7 +1485,7 @@ export class AmpStoryPlayer {
         this.win_,
         'amp-story-player-touchmove',
         dict({
-          'coordinates': coordinates,
+          'touches': event.touches,
           'isNavigationalSwipe': this.touchEventState_.isSwipeX,
         })
       )
@@ -1526,6 +1526,7 @@ export class AmpStoryPlayer {
         this.win_,
         'amp-story-player-touchend',
         dict({
+          'touches': event.touches,
           'isNavigationalSwipe': this.touchEventState_.isSwipeX,
         })
       )

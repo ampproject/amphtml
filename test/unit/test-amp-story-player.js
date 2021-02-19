@@ -545,10 +545,12 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     expect(touchSpy).to.have.been.calledWithMatch({
       type: 'amp-story-player-touchmove',
       detail: {
-        coordinates: {
-          screenX: 95,
-          screenY: 100,
-        },
+        touches: [
+          {
+            screenX: 95,
+            screenY: 100,
+          },
+        ],
         isNavigationalSwipe: true,
       },
     });
@@ -569,10 +571,12 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     expect(touchSpy).to.have.been.calledWithMatch({
       type: 'amp-story-player-touchmove',
       detail: {
-        coordinates: {
-          screenX: 200,
-          screenY: 205,
-        },
+        touches: [
+          {
+            screenX: 200,
+            screenY: 205,
+          },
+        ],
         isNavigationalSwipe: false,
       },
     });
