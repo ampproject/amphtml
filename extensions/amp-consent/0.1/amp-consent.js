@@ -241,7 +241,7 @@ export class AmpConsent extends AMP.BaseElement {
         /** @type {!Object} */ (this.policyConfig_)
       );
       for (let i = 0; i < policyKeys.length; i++) {
-        this.consentPolicyManager_.registerConsentPolicyInstance(
+        this.consentPolicyManager_.registerPolicy(
           policyKeys[i],
           this.policyConfig_[policyKeys[i]]
         );

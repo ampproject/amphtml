@@ -273,12 +273,8 @@ export class BaseElement {
    * @return {?string}
    */
   getConsentPolicy() {
-    let policyId = null;
-    if (this.element.hasAttribute('data-block-on-consent')) {
-      policyId =
-        this.element.getAttribute('data-block-on-consent') || 'default';
-    }
-    return policyId;
+    const {blockOnConsent} = this.element.dataset;
+    return blockOnConsent == null ? null : blockOnConsent || 'default';
   }
 
   /**

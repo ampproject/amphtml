@@ -24,10 +24,7 @@ import {
   CONSENT_POLICY_STATE,
   CONSENT_STRING_TYPE,
 } from '../../../../src/consent-state';
-import {
-  ConsentPolicyInstance,
-  ConsentPolicyManager,
-} from '../consent-policy-manager';
+import {ConsentPolicy, ConsentPolicyManager} from '../consent-policy-manager';
 import {dict} from '../../../../src/utils/object';
 import {expandPolicyConfig} from '../consent-config';
 import {macroTask} from '../../../../testing/yield';
@@ -104,7 +101,7 @@ describes.realWin(
 
       describe('Register policy instance', () => {
         it('Valid consent policy', function* () {
-          manager.registerConsentPolicyInstance('default', {
+          manager.registerPolicy('default', {
             'waitFor': {
               'ABC': undefined,
             },
@@ -121,7 +118,7 @@ describes.realWin(
             '[consent-policy-manager] ' +
               'invalid waitFor value, consent policy will never resolve'
           );
-          manager.registerConsentPolicyInstance('default', {
+          manager.registerPolicy('default', {
             'waitFor': {
               'ABC': undefined,
               'invalid': undefined,
@@ -132,47 +129,47 @@ describes.realWin(
 
       it('Handle consent state change', () => {
         // UNKNOWN Init value
-        manager.consentStateChangeHandler_(
+        manager.onStateChange_(
           constructConsentInfo(CONSENT_ITEM_STATE.UNKNOWN)
         );
         expect(manager.consentState_).to.be.null;
 
         // Dismiss override unknown
-        manager.consentStateChangeHandler_(
+        manager.onStateChange_(
           constructConsentInfo(CONSENT_ITEM_STATE.DISMISSED)
         );
         expect(manager.consentState_).to.equal(CONSENT_ITEM_STATE.UNKNOWN);
 
         // Not required override unknown
-        manager.consentStateChangeHandler_(
+        manager.onStateChange_(
           constructConsentInfo(CONSENT_ITEM_STATE.NOT_REQUIRED)
         );
         expect(manager.consentState_).to.equal(CONSENT_ITEM_STATE.NOT_REQUIRED);
 
         // Accept
-        manager.consentStateChangeHandler_(
+        manager.onStateChange_(
           constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED)
         );
         expect(manager.consentState_).to.equal(CONSENT_ITEM_STATE.ACCEPTED);
 
         // UNKNOWN/NOT_REQUIRED/DISMISS cannot override ACCEPTED/REJECTED
-        manager.consentStateChangeHandler_(
+        manager.onStateChange_(
           constructConsentInfo(CONSENT_ITEM_STATE.NOT_REQUIRED)
         );
         expect(manager.consentState_).to.equal(CONSENT_ITEM_STATE.ACCEPTED);
-        manager.consentStateChangeHandler_(
+        manager.onStateChange_(
           constructConsentInfo(CONSENT_ITEM_STATE.UNKNOWN)
         );
         expect(manager.consentState_).to.equal(CONSENT_ITEM_STATE.ACCEPTED);
 
         // Reject
-        manager.consentStateChangeHandler_(
+        manager.onStateChange_(
           constructConsentInfo(CONSENT_ITEM_STATE.REJECTED)
         );
         expect(manager.consentState_).to.equal(CONSENT_ITEM_STATE.REJECTED);
 
         // UNKNOWN/NOT_REQUIRED/DISMISS cannot override ACCEPTED/REJECTED
-        manager.consentStateChangeHandler_(
+        manager.onStateChange_(
           constructConsentInfo(CONSENT_ITEM_STATE.DISMISSED)
         );
         expect(manager.consentState_).to.equal(CONSENT_ITEM_STATE.REJECTED);
@@ -192,7 +189,7 @@ describes.realWin(
         });
 
         it('return promise when policy is resolved', () => {
-          manager.registerConsentPolicyInstance('default', {
+          manager.registerPolicy('default', {
             'waitFor': {
               'ABC': undefined,
             },
@@ -202,7 +199,7 @@ describes.realWin(
 
         it('handle cases when requested before policy is registered', () => {
           const promise = manager.whenPolicyResolved('default');
-          manager.registerConsentPolicyInstance('default', {
+          manager.registerPolicy('default', {
             'waitFor': {
               'ABC': undefined,
             },
@@ -220,12 +217,12 @@ describes.realWin(
           policy = expandPolicyConfig(dict({}), 'ABC');
           const keys = Object.keys(policy);
           for (let i = 0; i < keys.length; i++) {
-            manager.registerConsentPolicyInstance(keys[i], policy[keys[i]]);
+            manager.registerPolicy(keys[i], policy[keys[i]]);
           }
         });
 
         it('Not required', () => {
-          manager.consentStateChangeHandler_(
+          manager.onStateChange_(
             constructConsentInfo(CONSENT_ITEM_STATE.NOT_REQUIRED)
           );
           const promises = [];
@@ -286,7 +283,7 @@ describes.realWin(
         });
 
         it('Dismiss', () => {
-          manager.consentStateChangeHandler_(
+          manager.onStateChange_(
             constructConsentInfo(CONSENT_ITEM_STATE.DISMISSED)
           );
           const promises = [];
@@ -339,7 +336,7 @@ describes.realWin(
         });
 
         it('Accept', () => {
-          manager.consentStateChangeHandler_(
+          manager.onStateChange_(
             constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED)
           );
           const promises = [];
@@ -368,7 +365,7 @@ describes.realWin(
         });
 
         it('Reject', () => {
-          manager.consentStateChangeHandler_(
+          manager.onStateChange_(
             constructConsentInfo(CONSENT_ITEM_STATE.REJECTED)
           );
           const promises = [];
@@ -415,7 +412,7 @@ describes.realWin(
             'ABC': [],
           },
         };
-        instance = new ConsentPolicyInstance(config);
+        instance = new ConsentPolicy(config);
       });
 
       describe('timeout', () => {
@@ -448,7 +445,7 @@ describes.realWin(
         });
 
         it('consent policy should resolve after timeout', function* () {
-          instance = new ConsentPolicyInstance(config1);
+          instance = new ConsentPolicy(config1);
           let ready = false;
           instance.getReadyPromise().then(() => (ready = true));
           instance.startTimeout(ampdoc.win);
@@ -460,13 +457,13 @@ describes.realWin(
           clock.tick(1);
           yield macroTask();
           expect(ready).to.be.true;
-          expect(instance.getCurrentPolicyStatus()).to.equal(
+          expect(instance.getCurrentStatus()).to.equal(
             CONSENT_POLICY_STATE.INSUFFICIENT
           );
         });
 
         it('consent policy resolve before timeout', function* () {
-          instance = new ConsentPolicyInstance(config2);
+          instance = new ConsentPolicy(config2);
           let ready = false;
           instance.getReadyPromise().then(() => (ready = true));
           instance.startTimeout(ampdoc.win);
@@ -478,40 +475,40 @@ describes.realWin(
           expect(ready).to.be.true;
           clock.tick(1001);
           yield macroTask();
-          expect(instance.getCurrentPolicyStatus()).to.equal(
+          expect(instance.getCurrentStatus()).to.equal(
             CONSENT_POLICY_STATE.UNKNOWN
           );
         });
       });
 
-      describe('getCurrentPolicyStatus', () => {
+      describe('getCurrentStatus', () => {
         it('should return current policy state', function* () {
-          instance = new ConsentPolicyInstance({
+          instance = new ConsentPolicy({
             'waitFor': {
               'ABC': [],
             },
           });
-          expect(instance.getCurrentPolicyStatus()).to.equal(
+          expect(instance.getCurrentStatus()).to.equal(
             CONSENT_POLICY_STATE.UNKNOWN
           );
 
           instance.evaluate(CONSENT_ITEM_STATE.REJECTED);
-          expect(instance.getCurrentPolicyStatus()).to.equal(
+          expect(instance.getCurrentStatus()).to.equal(
             CONSENT_POLICY_STATE.INSUFFICIENT
           );
 
           instance.evaluate(CONSENT_ITEM_STATE.ACCEPTED);
-          expect(instance.getCurrentPolicyStatus()).to.equal(
+          expect(instance.getCurrentStatus()).to.equal(
             CONSENT_POLICY_STATE.SUFFICIENT
           );
 
           instance.evaluate(CONSENT_ITEM_STATE.DISMISSED);
-          expect(instance.getCurrentPolicyStatus()).to.equal(
+          expect(instance.getCurrentStatus()).to.equal(
             CONSENT_POLICY_STATE.UNKNOWN
           );
 
           instance.evaluate(CONSENT_ITEM_STATE.NOT_REQUIRED);
-          expect(instance.getCurrentPolicyStatus()).to.equal(
+          expect(instance.getCurrentStatus()).to.equal(
             CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED
           );
         });
@@ -519,7 +516,7 @@ describes.realWin(
 
       describe('shouldBlock', () => {
         it('default should block list', () => {
-          instance = new ConsentPolicyInstance({
+          instance = new ConsentPolicy({
             'waitFor': {
               'ABC': [],
             },
@@ -535,7 +532,7 @@ describes.realWin(
         });
 
         it('customized should block list', () => {
-          instance = new ConsentPolicyInstance({
+          instance = new ConsentPolicy({
             'waitFor': {
               'ABC': [],
             },
@@ -564,7 +561,7 @@ describes.realWin(
       beforeEach(() => {
         manager = new ConsentPolicyManager(ampdoc);
         env.sandbox
-          .stub(ConsentPolicyInstance.prototype, 'getReadyPromise')
+          .stub(ConsentPolicy.prototype, 'getReadyPromise')
           .callsFake(() => {
             return Promise.resolve();
           });
@@ -573,7 +570,7 @@ describes.realWin(
       });
 
       it('should return sharedData', function* () {
-        manager.registerConsentPolicyInstance('default', {
+        manager.registerPolicy('default', {
           'waitFor': {
             'ABC': undefined,
           },
@@ -594,7 +591,7 @@ describes.realWin(
         manager = new ConsentPolicyManager(ampdoc);
         manager.setLegacyConsentInstanceId('ABC');
         env.sandbox
-          .stub(ConsentPolicyInstance.prototype, 'getReadyPromise')
+          .stub(ConsentPolicy.prototype, 'getReadyPromise')
           .callsFake(() => {
             return Promise.resolve();
           });
@@ -606,7 +603,7 @@ describes.realWin(
       });
 
       it('should return metadata values from state manager', async () => {
-        manager.registerConsentPolicyInstance('default', {
+        manager.registerPolicy('default', {
           'waitFor': {
             'ABC': undefined,
           },

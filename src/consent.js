@@ -28,13 +28,10 @@ import {dict} from './utils/object';
  * @return {!Promise<?CONSENT_POLICY_STATE>}
  */
 export function getConsentPolicyState(element, policyId = 'default') {
-  return Services.consentPolicyServiceForDocOrNull(element).then(
-    (consentPolicy) => {
-      if (!consentPolicy) {
-        return null;
-      }
-      return consentPolicy.whenPolicyResolved(/** @type {string} */ (policyId));
-    }
+  return Services.consentPolicyServiceForDocOrNull(
+    element
+  ).then((consentPolicy) =>
+    consentPolicy?.whenPolicyResolved(/** @type {string} */ (policyId))
   );
 }
 
@@ -46,15 +43,10 @@ export function getConsentPolicyState(element, policyId = 'default') {
  * @return {!Promise<?Object>}
  */
 export function getConsentPolicySharedData(element, policyId) {
-  return Services.consentPolicyServiceForDocOrNull(element).then(
-    (consentPolicy) => {
-      if (!consentPolicy) {
-        return null;
-      }
-      return consentPolicy.getMergedSharedData(
-        /** @type {string} */ (policyId)
-      );
-    }
+  return Services.consentPolicyServiceForDocOrNull(
+    element
+  ).then((consentPolicy) =>
+    consentPolicy?.getMergedSharedData(/** @type {string} */ (policyId))
   );
 }
 
@@ -65,15 +57,10 @@ export function getConsentPolicySharedData(element, policyId) {
  */
 export function getConsentPolicyInfo(element, policyId = 'default') {
   // Return the stored consent string.
-  return Services.consentPolicyServiceForDocOrNull(element).then(
-    (consentPolicy) => {
-      if (!consentPolicy) {
-        return null;
-      }
-      return consentPolicy.getConsentStringInfo(
-        /** @type {string} */ (policyId)
-      );
-    }
+  return Services.consentPolicyServiceForDocOrNull(
+    element
+  ).then((consentPolicy) =>
+    consentPolicy?.getConsentStringInfo(/** @type {string} */ (policyId))
   );
 }
 
@@ -84,15 +71,10 @@ export function getConsentPolicyInfo(element, policyId = 'default') {
  */
 export function getConsentMetadata(element, policyId = 'default') {
   // Return the stored consent metadata.
-  return Services.consentPolicyServiceForDocOrNull(element).then(
-    (consentPolicy) => {
-      if (!consentPolicy) {
-        return null;
-      }
-      return consentPolicy.getConsentMetadataInfo(
-        /** @type {string} */ (policyId)
-      );
-    }
+  return Services.consentPolicyServiceForDocOrNull(
+    element
+  ).then((consentPolicy) =>
+    consentPolicy?.getConsentMetadataInfo(/** @type {string} */ (policyId))
   );
 }
 

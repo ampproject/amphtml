@@ -35,6 +35,8 @@ import {htmlFor} from '../../../src/static-template';
 import {setImportantStyles, setStyles, toggle} from '../../../src/style';
 
 const TAG = 'amp-consent-ui';
+
+// Share?
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const MINIMUM_INITIAL_HEIGHT = 10;
 const DEFAULT_INITIAL_HEIGHT = 30;

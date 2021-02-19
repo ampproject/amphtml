@@ -42,28 +42,24 @@ export class ConsentPolicyManager {
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
-    /** @private {!Object<string, ?Deferred>} */
-    this.policyInstancesDeferred_ = map();
+    /** @private {!Object<string, !Deferred<ConsentPolicy>>} */
+    this.policiesAwaitingRegistration_ = map();
 
-    /** @private {!Object<string, ConsentPolicyInstance>} */
-    this.instances_ = map();
+    /** @private {!Object<string, !Promise<ConsentPolicy>>} */
+    this.policiesRegistered_ = map();
 
     /** @private {!Promise} */
-    this.ConsentStateManagerPromise_ = getServicePromiseForDoc(
+    // Does this need to be a service?
+    this.consentStateManagerPromise_ = getServicePromiseForDoc(
       this.ampdoc_,
       CONSENT_STATE_MANAGER
     );
 
-    /** @private {!Deferred} */
+    /** @private @const {!Deferred<void>} */
     this.consentPromptInitiated_ = new Deferred();
 
-    const consentValueInitiated = new Deferred();
-
-    /** @private {!Promise} */
-    this.consentValueInitiatedPromise_ = consentValueInitiated.promise;
-
-    /** @private {?function()} */
-    this.consentValueInitiatedResolver_ = consentValueInitiated.resolve;
+    /** @private @const {!Deferred<void>} */
+    this.consentValueInitiated_ = new Deferred();
 
     /** @private {!Observable} */
     this.consentStateChangeObservables_ = new Observable();
@@ -107,8 +103,8 @@ export class ConsentPolicyManager {
    * @param {string} policyId
    * @param {!JsonObject} config
    */
-  registerConsentPolicyInstance(policyId, config) {
-    if (this.instances_[policyId]) {
+  registerPolicy(policyId, config) {
+    if (this.policiesRegistered_[policyId]) {
       // Note <amp-next-page> could wait for the same consent policy.
       // Return without thowing error.
       // TODO: Make sure multiple consentPolicyManager services is installed
@@ -125,25 +121,22 @@ export class ConsentPolicyManager {
       return;
     }
 
-    const instance = new ConsentPolicyInstance(config);
+    const policy = new ConsentPolicy(config);
+    const policyReady = policy.getReadyPromise();
 
-    this.instances_[policyId] = instance;
+    this.policiesRegistered_[policyId] = policyReady;
+    this.policiesAwaitingRegistration_[policyId]?.resolve(policyReady);
 
-    if (this.policyInstancesDeferred_[policyId]) {
-      this.policyInstancesDeferred_[policyId].resolve();
-      this.policyInstancesDeferred_[policyId] = null;
-    }
-
-    this.consentValueInitiatedPromise_.then(() => {
+    this.consentValueInitiated_.promise.then(() => {
       if (this.consentState_) {
         // Has initial consent state value. Evaluate immediately
-        instance.evaluate(this.consentState_);
+        policy.evaluate(this.consentState_);
       }
       this.consentStateChangeObservables_.add((state) => {
-        instance.evaluate(state);
+        policy.evaluate(state);
       });
       this.consentPromptInitiated_.promise.then(() => {
-        instance.startTimeout(this.ampdoc_.win);
+        policy.startTimeout(this.ampdoc_.win);
       });
     });
   }
@@ -154,14 +147,11 @@ export class ConsentPolicyManager {
    */
   init_() {
     // Set up handler to listen to consent instance value change.
-    this.ConsentStateManagerPromise_.then((manager) => {
+    this.consentStateManagerPromise_.then((manager) => {
       manager.whenConsentReady().then(() => {
         manager.onConsentStateChange((info) => {
-          this.consentStateChangeHandler_(info);
-          if (this.consentValueInitiatedResolver_) {
-            this.consentValueInitiatedResolver_();
-            this.consentValueInitiatedResolver_ = null;
-          }
+          this.onStateChange_(info);
+          this.consentValueInitiated_.resolve();
         });
       });
     });
@@ -179,7 +169,7 @@ export class ConsentPolicyManager {
    * Handle initial consent instance value and following consent value change
    * @param {!ConsentInfoDef} info
    */
-  consentStateChangeHandler_(info) {
+  onStateChange_(info) {
     const state = info['consentState'];
     const consentStr = info['consentString'];
     const consentMetadata = info['consentMetadata'];
@@ -219,46 +209,24 @@ export class ConsentPolicyManager {
 
   /**
    * Used to wait for policy to resolve;
-   * @param {string} policyId
+   * @param {?string=} opt_policyId
    * @return {!Promise<CONSENT_POLICY_STATE>}
    */
-  whenPolicyResolved(policyId) {
-    // If customized policy is not supported
-    if (!ALLOWLIST_POLICY[policyId]) {
-      user().error(
-        TAG,
-        'can not find policy %s, only predefined policies are supported',
-        policyId
-      );
-      return Promise.resolve(CONSENT_POLICY_STATE.UNKNOWN);
-    }
-    return this.whenPolicyInstanceRegistered_(policyId).then(() => {
-      return this.instances_[policyId].getReadyPromise().then(() => {
-        return this.instances_[policyId].getCurrentPolicyStatus();
-      });
-    });
+  whenPolicyResolved(opt_policyId) {
+    return this.whenPolicyReady_(opt_policyId).then(
+      (policy) => policy?.getCurrentStatus() ?? CONSENT_POLICY_STATE.UNKNOWN
+    );
   }
 
   /**
    * Wait for policy to resolve and check if it should be unblocked
-   * @param {string} policyId
+   * @param {?string=} opt_policyId
    * @return {!Promise<boolean>}
    */
-  whenPolicyUnblock(policyId) {
-    // If customized policy is not supported
-    if (!ALLOWLIST_POLICY[policyId]) {
-      user().error(
-        TAG,
-        'can not find policy %s, only predefined policies are supported',
-        policyId
-      );
-      return Promise.resolve(false);
-    }
-    return this.whenPolicyInstanceRegistered_(policyId).then(() => {
-      return this.instances_[policyId].getReadyPromise().then(() => {
-        return this.instances_[policyId].shouldUnblock();
-      });
-    });
+  whenPolicyUnblock(opt_policyId) {
+    return this.whenPolicyReady_(opt_policyId).then(
+      (policy) => !!policy?.shouldUnblock()
+    );
   }
 
   /**
@@ -267,12 +235,12 @@ export class ConsentPolicyManager {
    * later consent instance (as defined in the policy config) will override
    * the previous ones.
    *
-   * @param {string} policyId
+   * @param {?string=} opt_policyId
    * @return {!Promise<Object>}
    */
-  getMergedSharedData(policyId) {
-    return this.whenPolicyResolved(policyId)
-      .then(() => this.ConsentStateManagerPromise_)
+  getMergedSharedData(opt_policyId) {
+    return this.whenPolicyReady_(opt_policyId)
+      .then(() => this.consentStateManagerPromise_)
       .then((manager) => {
         return manager.getConsentInstanceSharedData();
       });
@@ -285,7 +253,7 @@ export class ConsentPolicyManager {
    * @return {!Promise<?string>}
    */
   getConsentStringInfo(policyId) {
-    return this.whenPolicyResolved(policyId).then(() => {
+    return this.whenPolicyReady_(policyId).then(() => {
       return this.consentString_;
     });
   }
@@ -293,35 +261,48 @@ export class ConsentPolicyManager {
   /**
    * Get the consent metadata value of a policy. Return a promise that resolves
    * when the policy resolves.
-   * @param {string} policyId
+   * @param {?string=} opt_policyId
    * @return {!Promise<?Object|undefined>}
    */
-  getConsentMetadataInfo(policyId) {
-    return this.whenPolicyResolved(policyId).then(() => {
+  getConsentMetadataInfo(opt_policyId) {
+    return this.whenPolicyReady_(opt_policyId).then(() => {
       return this.consentMetadata_;
     });
   }
 
   /**
-   * Wait for policy instance to be registered.
-   * @param {string} policyId
-   * @return {!Promise}
+   * Wait for policy instance to be ready.
+   * @param {?string=} opt_policyId
+   * @return {!Promise<?ConsentPolicy>}
    */
-  whenPolicyInstanceRegistered_(policyId) {
-    if (this.instances_[policyId]) {
-      return Promise.resolve();
+  whenPolicyReady_(opt_policyId) {
+    const policyId = opt_policyId || 'default';
+
+    if (!ALLOWLIST_POLICY[policyId]) {
+      user().error(
+        TAG,
+        'can not find policy %s, only predefined policies are supported',
+        policyId
+      );
+      return Promise.resolve(null);
     }
-    if (!this.policyInstancesDeferred_[policyId]) {
-      this.policyInstancesDeferred_[policyId] = new Deferred();
+
+    if (this.policiesRegistered_[policyId]) {
+      return this.policiesRegistered_[policyId];
     }
-    return /** @type {!Promise} */ (this.policyInstancesDeferred_[policyId]
-      .promise);
+
+    if (!this.policiesAwaitingRegistration_[policyId]) {
+      const deferred = /** @type {!Deferred<!ConsentPolicy>} */ (new Deferred());
+      this.policiesAwaitingRegistration_[policyId] = deferred;
+    }
+
+    return this.policiesAwaitingRegistration_[policyId].promise;
   }
 }
 
-export class ConsentPolicyInstance {
+export class ConsentPolicy {
   /**
-   * Creates an instance of ConsentPolicyInstance.
+   * Creates an instance of ConsentPolicy.
    * @param {!JsonObject} config
    */
   constructor(config) {
@@ -427,7 +408,7 @@ export class ConsentPolicyInstance {
     }
 
     if (this.readyResolver_) {
-      this.readyResolver_();
+      this.readyResolver_(this);
       this.readyResolver_ = null;
     }
   }
@@ -435,7 +416,7 @@ export class ConsentPolicyInstance {
   /**
    * Return a promise that resolved when policy ready.
    * Note: the promise can be reset if use toggle consent state
-   * @return {!Promise}
+   * @return {!Promise<!ConsentPolicy>}
    */
   getReadyPromise() {
     return this.readyPromise_;
@@ -445,7 +426,7 @@ export class ConsentPolicyInstance {
    * Returns the current consent policy state
    * @return {CONSENT_POLICY_STATE}
    */
-  getCurrentPolicyStatus() {
+  getCurrentStatus() {
     return this.status_;
   }
 
