@@ -17,22 +17,32 @@
 import * as Preact from '../../../src/preact';
 import {LightboxGalleryContext} from './context';
 import {sequentialIdGenerator} from '../../../src/utils/id-generator';
-import {useContext, useLayoutEffect, useState} from '../../../src/preact';
+import {
+  useContext,
+  useLayoutEffect,
+  useMemo,
+  useState,
+} from '../../../src/preact';
 
 const generateLightboxItemKey = sequentialIdGenerator();
+
+const DEFAULT_ARIA_LABEL = 'Open content in a lightbox view.';
+const DEFAULT_ACTIVATION_PROPS = {
+  'aria-label': DEFAULT_ARIA_LABEL,
+  role: 'button',
+  tabIndex: '0',
+};
 
 /**
  * @param {!LightboxGalleryDef.WithLightboxProps} props
  * @return {PreactDef.Renderable}
  */
 export function WithLightbox({
-  'aria-label': ariaLabel = 'Close the button',
   as: Comp = 'div',
   children,
   enableActivation = true,
+  onClick: customOnClick,
   render = () => children,
-  role = 'button',
-  tabIndex = '0',
   ...rest
 }) {
   const [genKey] = useState(generateLightboxItemKey);
@@ -41,17 +51,23 @@ export function WithLightbox({
     register(genKey, render);
     return () => deregister(genKey);
   }, [genKey, deregister, register, render]);
-  return enableActivation ? (
-    <Comp
-      {...rest}
-      aria-label={ariaLabel}
-      onClick={() => open()}
-      role={role}
-      tabIndex={tabIndex}
-    >
+
+  const activationProps = useMemo(
+    () =>
+      enableActivation && {
+        ...DEFAULT_ACTIVATION_PROPS,
+        onClick: () => {
+          if (customOnClick) {
+            customOnClick();
+          }
+          open();
+        },
+      },
+    [customOnClick, enableActivation, open]
+  );
+  return (
+    <Comp {...activationProps} {...rest}>
       {children}
     </Comp>
-  ) : (
-    children
   );
 }

@@ -29,13 +29,11 @@ LightboxGalleryDef.Props;
 
 /**
  * @typedef {{
- *   aria-label: (string|undefined),
  *   as: (string|undefined),
  *   children: (!PreactDef.Renderable),
  *   enableActivation: (boolean|undefined),
+ *   onClick: (function(Event)|undefined)
  *   render: (function():PreactDef.Renderable),
- *   role: (string|undefined),
- *   tabindex: (string|undefined),
  * }}
  */
 LightboxGalleryDef.WithLightboxProps;
