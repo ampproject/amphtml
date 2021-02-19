@@ -202,12 +202,14 @@ export class AmpList extends AMP.BaseElement {
       const hasDiffablePlaceholder =
         this.element.hasAttribute('diffable') &&
         this.queryDiffablePlaceholder_();
-      userAssert(
-        this.getPlaceholder() || hasDiffablePlaceholder,
-        'amp-list[layout=container] requires a placeholder to establish an initial size. ' +
-          'See https://go.amp.dev/c/amp-list/#placeholder-and-fallback. %s',
-        this.element
-      );
+      if (!this.getPlaceholder() && !hasDiffablePlaceholder) {
+        user().warn(
+          TAG,
+          'amp-list[layout=container] should have a placeholder to establish an initial size. ' +
+            'See https://go.amp.dev/c/amp-list/#placeholder-and-fallback. %s',
+          this.element
+        );
+      }
       return (this.enableManagedResizing_ = true);
     }
     return isLayoutSizeDefined(layout);
