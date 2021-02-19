@@ -105,6 +105,14 @@ const cache = new Map();
  */
 const watchedTargets = new Map();
 
+/*
+ * Used to remove a file from the babel cache after it is modified.
+ * @param {string} filepath relative to the project root.
+ */
+function invalidateBabelCache(filepath) {
+  cache.delete(filepath);
+}
+
 /**
  * @param {!Object} jsBundles
  * @param {string} name
@@ -792,4 +800,5 @@ module.exports = {
   printConfigHelp,
   printNobuildHelp,
   watchDebounceDelay,
+  invalidateBabelCache,
 };
