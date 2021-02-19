@@ -308,6 +308,8 @@ If the `supports-landscape` attribute is specified on the `<amp-story>` element,
 -   Allow the story to be seen when a mobile device is held in a landscape orientation.
 -   Change the desktop experience to an immersive full bleed mode, replacing the default three portrait panels experience.
 
+While this is currently opt-in and optional, we strongly recommend making sure that users on mobile devices are able to view stories in whatever orientation best suits their needs - otherwise, they will simply be presented with a "The page is best viewed in portrait mode" message.
+
 Usage: `<amp-story ... supports-landscape>...</amp-story>`
 
 <figure class="centered-fig">
