@@ -16,7 +16,7 @@
 
 import * as Preact from '../../../../src/preact';
 import {Keys} from '../../../../src/utils/key-codes';
-import {Option, Selector} from '../selector';
+import {Option, Selector} from '../component';
 import {mount} from 'enzyme';
 
 describes.sandboxed('Selector preact component', {}, () => {

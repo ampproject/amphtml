@@ -97,8 +97,11 @@ export class BitrateManager {
    * @param {!Element} video
    */
   manage(video) {
-    const downgradeVideo = () => {
-      console.log('downgrade video');
+    // Prevent duplicate listeners if already managing this video.
+    if (video.changedSources) {
+      return;
+    }
+    onNontrivialWait(video, () => {
       const current = currentSource(video);
       this.acceptableBitrate_ = current.bitrate_ - 1;
       if (this.switchToLowerBitrate_(video, current.bitrate_)) {
@@ -332,9 +335,13 @@ function currentSource(video) {
 /**
  * @private
  * @param {!Element} videoEl
- * @return {number}
+ * @return {number} the percentage buffered [0-1]
  */
 function getBufferedPercentage(videoEl) {
+  // videoEl.duration can be NaN if video is not loaded or 0.
+  if (!videoEl.duration) {
+    return 0;
+  }
   let bufferedSum = 0;
   for (let i = 0; i < videoEl.buffered.length; i++) {
     bufferedSum += videoEl.buffered.end(i) - videoEl.buffered.start(i);

@@ -530,12 +530,10 @@ export class MediaPool {
           new UpdateSourcesTask(this.win_, sources)
         )
       )
-      .then(
-        () => this.enqueueMediaElementTask_(poolMediaEl, new LoadTask()),
-        () => {
-          this.forceDeallocateMediaElement_(poolMediaEl);
-        }
-      );
+      .then(() => this.enqueueMediaElementTask_(poolMediaEl, new LoadTask()))
+      .catch(() => {
+        this.forceDeallocateMediaElement_(poolMediaEl);
+      });
   }
 
   /**
