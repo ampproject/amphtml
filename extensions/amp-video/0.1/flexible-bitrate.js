@@ -108,12 +108,11 @@ export class BitrateManager {
         this.updateOtherManagedAndPausedVideos_();
       }
     };
-    onNontrivialWait(video, downgradeVideo);
-    onSlowLoad(video, () => downgradeVideo());
     if (video.changedSources) {
       return;
     }
-    onNontrivialWait(video, () => downgradeVideo());
+    onNontrivialWait(video, downgradeVideo);
+    onSlowLoad(video, downgradeVideo);
     video.changedSources = () => {
       this.sortSources_(video);
     };
