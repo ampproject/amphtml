@@ -249,7 +249,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   preconnectCallback(opt_onLayout) {
     const preconnect = Services.preconnectFor(this.win);
     // We always need the bootstrap.
-    preloadBootstrap(this.win, this.getAmpDoc(), preconnect);
+    preloadBootstrap(this.win, this.type_, this.getAmpDoc(), preconnect);
     if (typeof this.config.prefetch == 'string') {
       preconnect.preload(this.getAmpDoc(), this.config.prefetch, 'script');
     } else if (this.config.prefetch) {
