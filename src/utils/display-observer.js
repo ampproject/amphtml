@@ -187,20 +187,29 @@ export class DisplayObserver {
    * @param {?Element=} opt_root
    */
   registerContainer(container, opt_root) {
-    const index = findObserverByContainer(this.observers_, container);
-    if (index != -1) {
+    const existing = findObserverByContainer(this.observers_, container);
+    if (existing != -1) {
       return;
     }
 
-    this.observers_.push({
+    /** @type {!ObserverDef} */
+    const observer = {
       container,
       root: opt_root || container,
       contains: (target) => containsNotSelf(container, target),
       // Start with null as IntersectionObserver. Will be initialized when
       // the container itself becomes displayed.
       io: null,
-    });
+    };
+    const index = this.observers_.length;
+    this.observers_.push(observer);
     this.observe(container, this.containerObserved_);
+
+    this.targetObserverCallbacks_.forEach((_, target) => {
+      // Reset observation to `null` and wait for the actual measurement.
+      const value = observer.contains(target) ? null : false;
+      this.setObservation_(target, index, value, /* callbacks */ null);
+    });
   }
 
   /**

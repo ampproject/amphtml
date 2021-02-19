@@ -65,6 +65,9 @@ describes.realWin('display-observer', {amp: true}, (env) => {
       }
 
       notify(entries) {
+        if (!entries.some(({target}) => this.elements.includes(target))) {
+          throw new Error('unobserved target');
+        }
         const {callback} = this;
         return Promise.resolve().then(() => {
           callback(entries, this);
@@ -447,6 +450,79 @@ describes.realWin('display-observer', {amp: true}, (env) => {
       ]);
       const display3 = await elementCallback.next();
       expect(display3).to.be.false;
+    });
+
+    it('should compute display for nested observers', async () => {
+      const childContainer = doc.createElement('div');
+      childContainer.id = 'child-container1';
+      container.appendChild(childContainer);
+      childContainer.appendChild(element);
+
+      const elementCallback = createCallbackCaller();
+      observeDisplay(element, elementCallback);
+      await viewportObserver.notify([{target: element, isIntersecting: false}]);
+      expect(elementCallback.isEmpty()).to.be.true;
+
+      await docObserver.notify([{target: element, isIntersecting: false}]);
+      expect(await elementCallback.next()).to.be.false;
+
+      // 1. Register childContainer.
+      registerContainer(childContainer);
+      expect(containerObservers.get(childContainer)).to.not.exist;
+      expect(elementCallback.isEmpty()).to.be.true;
+
+      // 2. Make child container undisplayed.
+      await viewportObserver.notify([
+        {target: childContainer, isIntersecting: false},
+      ]);
+      await docObserver.notify([
+        {target: childContainer, isIntersecting: false},
+      ]);
+      expect(containerObservers.get(childContainer)).to.not.exist;
+      expect(await elementCallback.next()).to.be.false;
+
+      // 3. Register parent container.
+      registerContainer(container);
+      expect(containerObservers.get(container)).to.not.exist;
+      expect(elementCallback.isEmpty()).to.be.true;
+
+      // 4. Make parent container displayed, but child is still undisplayed.
+      await docObserver.notify([{target: container, isIntersecting: true}]);
+      expect(containerObservers.get(container)).to.exist;
+      expect(elementCallback.isEmpty()).to.be.true;
+
+      // 5. Intersect the child container inside the parent container.
+      await containerObservers
+        .get(container)
+        .notify([{target: childContainer, isIntersecting: true}]);
+      expect(containerObservers.get(childContainer)).to.exist;
+      expect(elementCallback.isEmpty()).to.be.true;
+
+      // 6. Intesect the element inside the child container.
+      await containerObservers
+        .get(childContainer)
+        .notify([{target: element, isIntersecting: true}]);
+      expect(await elementCallback.next()).to.be.true;
+    });
+
+    it('should not interrupt observations for the unrelated targets', async () => {
+      const elementCallback = createCallbackCaller();
+      observeDisplay(topElement, elementCallback);
+
+      // 1. Register a container, but not observations on it yet.
+      registerContainer(container);
+      expect(elementCallback.isEmpty()).to.be.true;
+
+      await viewportObserver.notify([
+        {target: topElement, isIntersecting: false},
+      ]);
+      await docObserver.notify([{target: topElement, isIntersecting: false}]);
+      expect(await elementCallback.next()).to.be.false;
+
+      // 2. Provide observations for the container.
+      await docObserver.notify([{target: container, isIntersecting: true}]);
+      expect(containerObservers.get(container)).to.exist;
+      expect(elementCallback.isEmpty()).to.be.true;
     });
   });
 });
