@@ -17,10 +17,6 @@
 import {Deferred} from '../utils/promise';
 import {FiniteStateMachine} from '../finite-state-machine';
 import {FocusHistory} from '../focus-history';
-import {
-  INTERSECT_RESOURCES_EXP,
-  divertIntersectResources,
-} from '../experiments/intersect-resources-exp';
 import {Pass} from '../pass';
 import {READY_SCAN_SIGNAL, ResourcesInterface} from './resources-interface';
 
@@ -31,7 +27,7 @@ import {VisibilityState} from '../visibility-state';
 import {dev, devAssert} from '../log';
 import {dict} from '../utils/object';
 import {expandLayoutRect} from '../layout-rect';
-import {getExperimentBranch, isExperimentOn} from '../experiments';
+import {isExperimentOn} from '../experiments';
 import {getMode} from '../mode';
 import {getSourceUrl} from '../url';
 import {hasNextNodeInDocumentOrder, isIframed} from '../dom';
@@ -222,13 +218,7 @@ export class ResourcesImpl {
      */
     this.intersectionObserverCallbackFired_ = false;
 
-    divertIntersectResources(this.win);
-
-    if (
-      isExperimentOn(this.win, 'bento') ||
-      getExperimentBranch(this.win, INTERSECT_RESOURCES_EXP.id) ===
-        INTERSECT_RESOURCES_EXP.experiment
-    ) {
+    if (isExperimentOn(this.win, 'bento')) {
       const iframed = isIframed(this.win);
 
       // Classic IntersectionObserver doesn't support viewport tracking and
