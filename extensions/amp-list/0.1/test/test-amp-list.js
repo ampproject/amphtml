@@ -313,15 +313,6 @@ describes.repeated(
                   }
                 });
 
-                it('should require placeholder', () => {
-                  list.getPlaceholder = () => null;
-                  allowConsoleError(() => {
-                    expect(() => list.isLayoutSupported('container')).to.throw(
-                      /amp-list\[layout=container\] requires a placeholder/
-                    );
-                  });
-                });
-
                 it('should unlock height for layout=container with successful attemptChangeHeight', () => {
                   expect(list.isLayoutSupported('container')).to.be.true;
                   expect(list.enableManagedResizing_).to.be.true;
