@@ -289,15 +289,12 @@ function onNontrivialWait(video, callback) {
  * @param {function()} callback
  */
 function onSlowLoad(video, callback) {
-  console.log('adding onSlowLoad listener');
   listen(video, 'loadstart', () => {
     let timer = null;
     const unlisten = listenOnce(video, 'loadeddata', () => {
-      console.log('loadeddata');
       clearTimeout(timer);
     });
     timer = setTimeout(() => {
-      console.log('ran callback after', SLOW_LOADING_THRESHOLD_MS);
       unlisten();
       callback();
     }, SLOW_LOADING_THRESHOLD_MS);

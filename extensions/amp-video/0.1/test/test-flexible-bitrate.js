@@ -93,6 +93,26 @@ describes.fakeWin('amp-video flexible-bitrate', {}, (env) => {
 
       expect(currentBitrates(v0)[0]).to.equal(4000);
     });
+
+    it('should trigger the callback when video loads slowly', async () => {
+      const m = getManager('4g');
+      const v0 = getVideo([4000, 1000, 3000, 2000]);
+      v0.id = 'v0';
+      const v1 = getVideo([4000, 1000, 3000, 2000]);
+      v1.id = 'v1';
+      m.sortSources_(v0);
+      v0.load();
+      m.sortSources_(v1);
+      m.manage(v0);
+      m.manage(v1);
+      expect(currentBitrates(v0)[0]).to.equal(2000);
+      expect(currentBitrates(v1)[0]).to.equal(2000);
+      causeSlowLoad(v0);
+      expect(currentBitrates(v0)[0]).to.equal(1000);
+      expect(v0.currentSrc).to.equal('http://localhost:9876/1000.mp4');
+      expect(currentBitrates(v1)[0]).to.equal(1000);
+      expect(v1.currentSrc).to.equal('http://localhost:9876/1000.mp4');
+    });
   });
 
   describe('sorting', () => {
@@ -236,6 +256,11 @@ describes.fakeWin('amp-video flexible-bitrate', {}, (env) => {
   function causeWait(video, opt_time) {
     callEvent(video, 'waiting');
     clock.tick(opt_time || 100);
+  }
+
+  function causeSlowLoad(video, opt_time) {
+    video.dispatchEvent(new Event('loadstart'));
+    clock.tick(opt_time || 2000);
   }
 
   function getVideo(rates, opt_types) {
