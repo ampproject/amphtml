@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {Lightbox} from '../lightbox';
+import {Lightbox} from '../component';
 import {mount} from 'enzyme';
 
 describes.sandboxed('Lightbox preact component v1.0', {}, () => {
