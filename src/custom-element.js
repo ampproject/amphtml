@@ -513,6 +513,8 @@ function createBaseCustomElementClass(win) {
           this.signals_.signal(CommonSignals.BUILT);
 
           if (this.V1()) {
+            // If the implementation hasn't changed the readyState to, e.g.,
+            // "loading", then update the state to "complete".
             if (this.readyState_ == ReadyState.BUILDING) {
               this.setReadyStateInternal(ReadyState.COMPLETE);
             }
