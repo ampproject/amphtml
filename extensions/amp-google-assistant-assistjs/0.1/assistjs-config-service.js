@@ -39,17 +39,15 @@ export class AssistjsConfigService {
 
     /** @private {Deferred} */
     this.initializedDeferred_ = new Deferred();
+
+    /** @private {boolean} */
+    this.isInitialized_ = false;
   }
 
   /** @return {string} */
-  initializeConfigs() {
-    const configElements = document.getElementsByTagName(
-      'amp-google-assistant-assistjs-config'
-    );
-    if (configElements.length != 1) {
-      throw new Error('No assist.js config or more than one is provided.');
-    }
-    const config = JSON.parse(configElements[0].textContent);
+  initializeConfigs(config) {
+    // If somehow there are multiple config elements, the first config element would be used and the rest would be ignored.
+    if (this.isInitialized_) return;
 
     if (!hasOwn(config, 'projectId')) {
       throw new Error('Project id is required to embed assist.js.');
@@ -65,6 +63,7 @@ export class AssistjsConfigService {
     if (hasOwn(config, 'hostUrl')) {
       this.hostUrl_ = config.hostUrl;
     }
+    this.isInitialized_ = true;
     this.initializedDeferred_.resolve();
   }
 

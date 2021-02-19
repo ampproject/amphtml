@@ -30,7 +30,8 @@ import {Services} from '../../../src/services';
 export class AmpGoogleAssistantAssistjsConfig extends AMP.BaseElement {
   /** @override */
   buildCallback() {
-    Services.assistjsConfigServiceForDoc(this.element).initializeConfigs();
+    const config = JSON.parse(this.element.textContent);
+    Services.assistjsConfigServiceForDoc(this.element).initializeConfigs(config);
   }
 }
 
