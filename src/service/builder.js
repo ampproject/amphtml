@@ -127,7 +127,12 @@ export class Builder {
   /** @private */
   docVisibilityChanged_() {
     const vs = this.ampdoc_.getVisibilityState();
-    if (vs != VisibilityState.PAUSED && vs != VisibilityState.INACTIVE) {
+    if (
+      (vs =
+        VisibilityState.VISIBLE ||
+        vs == VisibilityState.HIDDEN ||
+        vs == VisibilityState.PRERENDER)
+    ) {
       this.targets_.forEach((_, target) => this.maybeBuild_(target));
     }
   }
@@ -138,8 +143,10 @@ export class Builder {
    */
   waitParsing_(target) {
     const parsingTargets = this.parsingTargets_;
-    if (parsingTargets && !parsingTargets.includes(target)) {
-      parsingTargets.push(target);
+    if (parsingTargets) {
+      if (!parsingTargets.includes(target)) {
+        parsingTargets.push(target);
+      }
       this.checkParsing_();
     } else {
       this.maybeBuild_(target);

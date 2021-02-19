@@ -24,6 +24,10 @@ export function installIntersectionObserverStub(sandbox, win) {
 }
 
 class IntersectionObservers {
+  /**
+   * @param {!Object} sandbox
+   * @param {!Window} win
+   */
   constructor(sandbox, win) {
     const observers = new Set();
     this.observers = observers;
@@ -37,16 +41,19 @@ class IntersectionObservers {
     });
   }
 
+  /**
+   * @param {!Element} target
+   * @return {boolean}
+   */
   isObserved(target) {
-    let found = false;
-    this.observers.forEach((observer) => {
-      if (observer.elements.has(target)) {
-        found = true;
-      }
-    });
-    return found;
+    return Array.from(this.observers).some((observer) =>
+      observer.elements.has(target)
+    );
   }
 
+  /**
+   * @param {!IntersectionObserverEntry|!Array<IntersectionObserverEntry>} entryOrEntries
+   */
   notifySync(entryOrEntries) {
     const entries = Array.isArray(entryOrEntries)
       ? entryOrEntries
@@ -74,10 +81,16 @@ class IntersectionObserverStub {
     onDisconnect();
   }
 
+  /**
+   * @param {!Element} element
+   */
   observe(element) {
     this.elements.add(element);
   }
 
+  /**
+   * @param {!Element} element
+   */
   unobserve(element) {
     this.elements.delete(element);
   }
