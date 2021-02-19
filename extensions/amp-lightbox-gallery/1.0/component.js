@@ -14,7 +14,5 @@
  * limitations under the License.
  */
 
-import {LightboxGalleryProvider} from './provider';
-import {WithLightbox} from './consumer';
-
-export {LightboxGalleryProvider, WithLightbox};
+export {LightboxGalleryProvider} from './provider';
+export {WithLightbox} from './consumer';
