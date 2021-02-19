@@ -104,9 +104,8 @@ export class BitrateManager {
     const downgradeVideo = () => {
       const current = currentSource(video);
       this.acceptableBitrate_ = current.bitrate_ - 1;
-      if (this.switchToLowerBitrate_(video, current.bitrate_)) {
-        this.updateOtherManagedAndPausedVideos_();
-      }
+      this.switchToLowerBitrate_(video, current.bitrate_);
+      this.updateOtherManagedAndPausedVideos_();
     };
     if (video.changedSources) {
       return;
@@ -217,13 +216,12 @@ export class BitrateManager {
    * This should be called if the video is currently in waiting mode.
    * @param {!Element} video
    * @param {number} currentBitrate
-   * @return {boolean} whether the source was changed.
    * @private
    */
   switchToLowerBitrate_(video, currentBitrate) {
     if (!this.hasLowerBitrate_(video, currentBitrate)) {
       dev().fine(TAG, 'No lower bitrate available');
-      return false;
+      return;
     }
     const {currentTime} = video;
     video.pause();
@@ -235,7 +233,6 @@ export class BitrateManager {
       video.play();
       dev().fine(TAG, 'Playing at lower bitrate %s', video.currentSrc);
     });
-    return true;
   }
 
   /**
