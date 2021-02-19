@@ -326,6 +326,10 @@ describes.realWin('Linker Manager', {amp: true}, (env) => {
 
       const lm = new LinkerManager(ampdoc, config, /* type */ null, element);
       return lm.init().then(() => {
+        windowInterface.getLocation.returns({
+          origin: 'https://testdomain.com',
+        });
+
         // testLinker1 should apply to both canonical and source
         // testLinker2 should not
         const canonicalDomainUrl = clickAnchor(
@@ -350,8 +354,7 @@ describes.realWin('Linker Manager', {amp: true}, (env) => {
 
         // When the window host name matches the target,
         // the linker should not be applied.
-        win.location.hostname = 'window.com';
-        const localDomainUrl = clickAnchor('https://window.com/path');
+        const localDomainUrl = clickAnchor('https://testdomain.com/path');
         expect(localDomainUrl).to.not.contain('testLinker1=');
         expect(localDomainUrl).to.not.contain('testLinker2=');
       });
@@ -634,7 +637,7 @@ describes.realWin('Linker Manager', {amp: true}, (env) => {
       });
     });
 
-    it('should add linker if same domain is in destination domains', () => {
+    it('should not add linker if same domain is in destination domains', () => {
       const config = {
         linkers: {
           testLinker: {
@@ -650,7 +653,7 @@ describes.realWin('Linker Manager', {amp: true}, (env) => {
       const lm = new LinkerManager(ampdoc, config, /* type */ null, element);
       return lm.init().then(() => {
         const url = clickAnchor('https://amp.source.test/');
-        expect(url).to.contain('testLinker');
+        expect(url).not.to.contain('testLinker');
       });
     });
 
