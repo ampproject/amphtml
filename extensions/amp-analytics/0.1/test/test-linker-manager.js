@@ -22,7 +22,6 @@ import {
 } from '../linker-manager';
 import {Priority} from '../../../../src/service/navigation';
 import {Services} from '../../../../src/services';
-import {WindowInterface} from '../../../../src/window-interface';
 import {
   installLinkerReaderService,
   linkerReaderServiceFor,
@@ -326,8 +325,8 @@ describes.realWin('Linker Manager', {amp: true}, (env) => {
 
       const lm = new LinkerManager(ampdoc, config, /* type */ null, element);
       return lm.init().then(() => {
-        windowInterface.getLocation.returns({
-          origin: 'https://testdomain.com',
+        windowInterface.getHostname.returns({
+          origin: 'testdomain.com',
         });
 
         // testLinker1 should apply to both canonical and source
