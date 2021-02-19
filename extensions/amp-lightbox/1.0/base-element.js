@@ -17,8 +17,37 @@
 import {CSS as COMPONENT_CSS} from './component.jss';
 import {Lightbox} from './component';
 import {PreactBaseElement} from '../../../src/preact/base-element';
+import {dict} from '../../../src/utils/object';
+import {toggle} from '../../../src/style';
+import {toggleAttribute} from '../../../src/dom';
 
-export class BaseElement extends PreactBaseElement {}
+export class BaseElement extends PreactBaseElement {
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {boolean} */
+    this.open_ = false;
+  }
+
+  /** @override */
+  init() {
+    return dict({
+      'onBeforeOpen': this.toggle_.bind(this, true),
+      'onAfterClose': this.toggle_.bind(this, false),
+    });
+  }
+
+  /**
+   * Toggle open/closed attributes.
+   * @param {boolean} opt_state
+   */
+  toggle_(opt_state) {
+    this.open_ = toggleAttribute(this.element, 'open', opt_state);
+    toggle(this.element, this.open_);
+    this.triggerEvent(this.element, this.open_ ? 'open' : 'close');
+  }
+}
 
 /** @override */
 BaseElement['Component'] = Lightbox;

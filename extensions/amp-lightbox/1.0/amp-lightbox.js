@@ -19,11 +19,8 @@ import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-lightbox-1.0.css';
 import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {toWin} from '../../../src/types';
-import {toggle} from '../../../src/style';
-import {toggleAttribute} from '../../../src/dom';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
@@ -31,15 +28,6 @@ const TAG = 'amp-lightbox';
 
 /** @extends {PreactBaseElement<LightboxDef.Api>} */
 class AmpLightbox extends BaseElement {
-  /** @param {!AmpElement} element */
-  constructor(element) {
-    console.error(1);
-    super(element);
-
-    /** @private {boolean} */
-    this.open_ = false;
-  }
-
   /** @override */
   init() {
     this.registerApiAction(
@@ -49,10 +37,8 @@ class AmpLightbox extends BaseElement {
     );
     this.registerApiAction('open', (api) => api.open(), ActionTrust.LOW);
     this.registerApiAction('close', (api) => api.close(), ActionTrust.LOW);
-    return dict({
-      'onBeforeOpen': this.toggle_.bind(this, true),
-      'onAfterClose': this.toggle_.bind(this, false),
-    });
+
+    return super.init();
   }
 
   /** @override */
@@ -70,16 +56,6 @@ class AmpLightbox extends BaseElement {
     );
 
     super.triggerEvent(element, eventName, detail);
-  }
-
-  /**
-   * Toggle open/closed attributes.
-   * @param {boolean} opt_state
-   */
-  toggle_(opt_state) {
-    this.open_ = toggleAttribute(this.element, 'open', opt_state);
-    toggle(this.element, this.open_);
-    this.triggerEvent(this.element, this.open_ ? 'open' : 'close');
   }
 
   /** @override */
