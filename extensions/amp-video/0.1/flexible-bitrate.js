@@ -35,10 +35,10 @@ const BITRATE_BY_EFFECTIVE_TYPE = {
   '5g': 5000,
 };
 
-/** @const {number} The percentage that videos need to be buffered to not downgrade them */
+/** @const {number} Do not downgrade the quality of a video that has loaded enough content */
 const BUFFERED_THRESHOLD_PERCENTAGE = 0.8;
 
-/** @const {number} The time it takes for a slow video to start loading to get downgraded */
+/** @const {number} Downgrade a video if it takes more than this time to load */
 const SLOW_LOADING_THRESHOLD_MS = 1000;
 
 /** @type {!BitrateManager|undefined} */
@@ -218,7 +218,7 @@ export class BitrateManager {
    * This should be called if the video is currently in waiting mode.
    * @param {!Element} video
    * @param {number} currentBitrate
-   * @return {boolean}
+   * @return {boolean} whether the source was changed.
    * @private
    */
   switchToLowerBitrate_(video, currentBitrate) {
@@ -260,10 +260,7 @@ export class BitrateManager {
         return;
       }
       this.sortSources_(video);
-      // If video has metadata, load again. Avoid loading videos that are far or were unloaded.
-      if (video.readyState > 0) {
-        video.load();
-      }
+      video.load();
     }
   }
 }

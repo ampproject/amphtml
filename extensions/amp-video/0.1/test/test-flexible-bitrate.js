@@ -74,7 +74,9 @@ describes.fakeWin('amp-video flexible-bitrate', {}, (env) => {
       expect(currentBitrates(v1)[0]).to.equal(2000);
       causeWait(v0);
       expect(currentBitrates(v0)[0]).to.equal(1000);
+      expect(v0.currentSrc).to.equal('http://localhost:9876/1000.mp4');
       expect(currentBitrates(v1)[0]).to.equal(1000);
+      expect(v1.currentSrc).to.equal('http://localhost:9876/1000.mp4');
     });
 
     it('should not lower bitrate on loaded video', () => {
@@ -256,7 +258,7 @@ describes.fakeWin('amp-video flexible-bitrate', {}, (env) => {
 
   function causeSlowLoad(video, opt_time) {
     video.dispatchEvent(new Event('loadstart'));
-    clock.tick(opt_time || 2000);
+    clock.tick(opt_time || 1000);
   }
 
   function getVideo(rates, opt_types) {
@@ -275,7 +277,6 @@ describes.fakeWin('amp-video flexible-bitrate', {}, (env) => {
 
     Object.defineProperty(video, 'currentSrc', {
       get: () => {
-        console.log('accessing currentSrc');
         return video.currentSrcOverride;
       },
     });

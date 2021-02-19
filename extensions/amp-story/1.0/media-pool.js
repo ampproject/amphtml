@@ -18,14 +18,12 @@ import {
   BlessTask,
   ELEMENT_BLESSED_PROPERTY_NAME,
   LoadTask,
-  ManageBitrateTask,
   MuteTask,
   PauseTask,
   PlayTask,
   SetCurrentTimeTask,
   SwapIntoDomTask,
   SwapOutOfDomTask,
-  UnmanageBitrateTask,
   UnmuteTask,
   UpdateSourcesTask,
 } from './media-tasks';
@@ -35,7 +33,6 @@ import {Sources} from './sources';
 import {ampMediaElementFor} from './utils';
 import {dev, devAssert} from '../../../src/log';
 import {findIndex} from '../../../src/utils/array';
-import {getBitrateManager} from '../../amp-video/0.1/flexible-bitrate';
 import {isConnectedNode, matches} from '../../../src/dom';
 import {toWin} from '../../../src/types';
 import {userInteractedWith} from '../../../src/video-interface';
@@ -595,17 +592,6 @@ export class MediaPool {
       poolMediaEl,
       new SwapOutOfDomTask(placeholderEl)
     );
-    if (poolMediaEl.isBitrateManaged) {
-      const bitrateManager = getBitrateManager(this.win_);
-      this.enqueueMediaElementTask_(
-        poolMediaEl,
-        new UnmanageBitrateTask(bitrateManager)
-      );
-      this.enqueueMediaElementTask_(
-        placeholderEl,
-        new ManageBitrateTask(bitrateManager)
-      );
-    }
 
     this.resetPoolMediaElementSource_(poolMediaEl);
     return swapOutOfDom;
