@@ -27,7 +27,7 @@ limitations under the License.
 [Web stories](https://amp.dev/documentation/guides-and-tutorials/start/create_successful_stories/?format=stories) are an immersive, tappable and easily shareable storytelling format. Web stories are built using the AMP Framework. The `amp-story` component provides the AMP story subset of AMP. It is the base technology for web stories.
 
 <figure class="centered-fig">
-  <amp-anim width="300" height="533" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story.gif">
+  <amp-anim width="300" height="533" layout="fixed" alt="AMP Story Example" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story.gif">
     <noscript>
     <img alt="AMP Story Example" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story.gif" />
   </noscript>
@@ -149,6 +149,7 @@ The following markup is a decent starting point or boilerplate. Copy this and sa
             src="https://example.ampproject.org/helloworld/bg1.jpg"
             width="900"
             height="1600"
+            alt=""
           >
           </amp-img>
         </amp-story-grid-layer>
@@ -162,6 +163,7 @@ The following markup is a decent starting point or boilerplate. Copy this and sa
             src="https://example.ampproject.org/helloworld/bg2.gif"
             width="900"
             height="1600"
+            alt=""
           >
           </amp-img>
         </amp-story-grid-layer>
@@ -311,11 +313,11 @@ Usage: `<amp-story ... supports-landscape>...</amp-story>`
 <figure class="centered-fig">
   <span class="special-char">Before:</span>
   <amp-anim alt="Desktop three panels experience" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-desktop-three-panels.gif" width="400" height="299">
-  <noscript><img width="400" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-desktop-three-panels.gif" /></noscript>
+  <noscript><img width="400" alt="Desktop three panels experience" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-desktop-three-panels.gif" /></noscript>
   </amp-anim>
   <span class="special-char">After:</span>
   <amp-anim alt="Desktop full bleed experience" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-desktop-full-bleed.gif" width="400" height="299">
-  <noscript><img width="400" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-desktop-full-bleed.gif" /></noscript>
+  <noscript><img width="400" alt="Desktop full bleed experience" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-desktop-full-bleed.gif" /></noscript>
   </amp-anim>
 </figure>
 
@@ -391,7 +393,7 @@ Example:
 This same image can be used for both mobile portrait and landscape desktop using the `object-position` this way:
 
 ```html
-<amp-img src="cat.jpg" object-position="75% 40%"></amp-img>
+<amp-img src="cat.jpg" alt="..." object-position="75% 40%"></amp-img>
 ```
 
 ##### `data-text-background-color`
@@ -443,7 +445,7 @@ Example:
 <figure class="centered-fig">
   <span class="special-char">Example:</span>
   <amp-anim alt="Embedded component example" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-tooltip.gif" width="300" height="553">
-  <noscript><img width="300" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-tooltip.gif" /></noscript>
+  <noscript><img width="300"  alt="Embedded component example" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-tooltip.gif" /></noscript>
   </amp-anim>
 </figure>
 
@@ -720,6 +722,7 @@ _Example_: An image zooming-in from 2x to 5x its size over 4 seconds.
   src="https://picsum.photos/720/320?image=1026"
   width="720"
   height="320"
+  alt="..."
 >
 </amp-img>
 ```
@@ -739,6 +742,7 @@ _Example_: An image panning 200px to the left over 10 seconds.
   src="https://picsum.photos/720/320?image=1026"
   width="720"
   height="320"
+  alt="..."
 >
 </amp-img>
 ```
@@ -758,6 +762,7 @@ _Example_: An image panning 50px down over 15 seconds.
   src="https://picsum.photos/720/320?image=1026"
   width="720"
   height="320"
+  alt="..."
 >
 </amp-img>
 ```
