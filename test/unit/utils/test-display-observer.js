@@ -307,7 +307,7 @@ describes.realWin('display-observer', {amp: true}, (env) => {
     });
   });
 
-  describe.only('registerContainer', () => {
+  describe('registerContainer', () => {
     let container;
     let topElement;
 

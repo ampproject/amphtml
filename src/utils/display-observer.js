@@ -23,12 +23,22 @@ const SERVICE_ID = 'DisplayObserver';
 
 const DISPLAY_THRESHOLD = 0.51;
 
-const CONTAINER_OFFSET = 2;
+const CUSTOM_CONTAINER_OFFSET = 2;
 
 /**
  * @typedef {function(boolean, !Element)}
  */
 let ObserverCallbackDef;
+
+/**
+ * @typedef {{
+ *   container: ?Element,
+ *   root: ?Element,
+ *   contains: function(!Element):boolean,
+ *   io: ?IntersectionObserver,
+ * }}
+ */
+let ObserverDef;
 
 /**
  * Observes whether the specified target is displayable. The initial observation
@@ -109,23 +119,35 @@ export class DisplayObserver {
     this.ampdoc_ = ampdoc;
 
     const {win} = ampdoc;
+    const body = ampdoc.getBody();
 
-    /** @private @const {!Array<!IntersectionObserver>} */
+    this.observed_ = this.observed_.bind(this);
+    this.containerObserved_ = this.containerObserved_.bind(this);
+
+    /** @private @const {!Array<!ObserverDef>} */
     this.observers_ = [];
-    const boundObserved = this.observed_.bind(this);
-    this.observers_.push(
-      new win.IntersectionObserver(boundObserved, {
-        root: ampdoc.getBody(),
-        threshold: DISPLAY_THRESHOLD,
-      })
-    );
+
     // Viewport observer is only needed because `postion:fixed` elements
     // are not observable by a documentElement or body's root.
-    this.observers_.push(
-      new win.IntersectionObserver(boundObserved, {
+    this.observers_.push({
+      container: null,
+      root: null,
+      contains: () => true,
+      io: new win.IntersectionObserver(this.observed_, {
         threshold: DISPLAY_THRESHOLD,
-      })
-    );
+      }),
+    });
+
+    // Body observer: very close to `display:none` observer.
+    this.observers_.push({
+      container: body,
+      root: body,
+      contains: () => true,
+      io: new win.IntersectionObserver(this.observed_, {
+        root: body,
+        threshold: DISPLAY_THRESHOLD,
+      }),
+    });
 
     /** @private {boolean} */
     this.isDocDisplay_ = computeDocIsDisplayed(ampdoc.getVisibilityState());
@@ -144,25 +166,20 @@ export class DisplayObserver {
 
     /** @private @const {!Map<!Element, !Array<boolean>>} */
     this.targetObservations_ = new Map();
-
-    /** @private @const {!Array<!Element>} */
-    this.containers_ = [];
-
-    /** @private @const {!Map<!Element, !Element>} */
-    this.containerRoots_ = new Map();
-
-    this.containerObserved_ = this.containerObserved_.bind(this);
   }
 
   /** @override */
   dispose() {
-    this.observers_.forEach((observer) => observer.disconnect());
+    this.observers_.forEach((observer) => {
+      if (observer.io) {
+        observer.io.disconnect();
+      }
+    });
+    this.observers_.length = 0;
     this.visibilityUnlisten_();
     this.visibilityUnlisten_ = null;
     this.targetObserverCallbacks_.clear();
     this.targetObservations_.clear();
-    this.containerRoots_.clear();
-    this.containers_.length = 0;
   }
 
   /**
@@ -170,12 +187,19 @@ export class DisplayObserver {
    * @param {?Element=} opt_root
    */
   registerContainer(container, opt_root) {
-    if (this.containers_.includes(container)) {
+    const index = findObserverByContainer(this.observers_, container);
+    if (index != -1) {
       return;
     }
 
-    this.containers_.push(container);
-    this.containerRoots_.set(container, opt_root || null);
+    this.observers_.push({
+      container,
+      root: opt_root || container,
+      contains: (target) => containsNotSelf(container, target),
+      // Start with null as IntersectionObserver. Will be initialized when
+      // the container itself becomes displayed.
+      io: null,
+    });
     this.observe(container, this.containerObserved_);
   }
 
@@ -183,21 +207,17 @@ export class DisplayObserver {
    * @param {!Element} container
    */
   unregisterContainer(container) {
-    const index = CONTAINER_OFFSET + this.containers_.indexOf(container);
-    if (index < CONTAINER_OFFSET) {
+    const index = findObserverByContainer(this.observers_, container);
+    if (index < CUSTOM_CONTAINER_OFFSET) {
       // The container has been unregistered already.
       return;
     }
 
-    // Remove container.
-    this.containers_.splice(index - CONTAINER_OFFSET, 1);
-    this.containerRoots_.delete(container);
-
     // Remove observer.
     const observer = this.observers_[index];
     this.observers_.splice(index, 1);
-    if (observer) {
-      observer.disconnect();
+    if (observer.io) {
+      observer.io.disconnect();
     }
 
     // Unobserve the container itself.
@@ -228,15 +248,11 @@ export class DisplayObserver {
 
       // Subscribe observers.
       for (let i = 0; i < this.observers_.length; i++) {
-        if (
-          this.observers_[i] &&
-          (i < CONTAINER_OFFSET ||
-            containsNotSelf(this.containers_[i - CONTAINER_OFFSET], target))
-        ) {
-          // The `null` value will wait for the interection before deciding on
-          // the display value of `false`.
+        const observer = this.observers_[i];
+        if (observer.io && observer.contains(target)) {
+          // Reset observation to `null` and wait for the actual measurement.
           this.setObservation_(target, i, null, /* callbacks */ null);
-          this.observers_[i].observe(target);
+          observer.io.observe(target);
         } else {
           // The `false` value will essentially ignore this observe when
           // computing the display value.
@@ -274,8 +290,9 @@ export class DisplayObserver {
       this.targetObserverCallbacks_.delete(target);
       this.targetObservations_.delete(target);
       for (let i = 0; i < this.observers_.length; i++) {
-        if (this.observers_[i]) {
-          this.observers_[i].unobserve(target);
+        const observer = this.observers_[i];
+        if (observer.io) {
+          observer.io.unobserve(target);
         }
       }
     }
@@ -297,33 +314,30 @@ export class DisplayObserver {
    * @private
    */
   containerObserved_(isDisplayed, container) {
-    const index = CONTAINER_OFFSET + this.containers_.indexOf(container);
-    if (index < CONTAINER_OFFSET) {
+    const index = findObserverByContainer(this.observers_, container);
+    if (index < CUSTOM_CONTAINER_OFFSET) {
       // The container has been unregistered already.
       return;
     }
 
+    const observer = this.observers_[index];
+
     if (isDisplayed) {
       const {win} = this.ampdoc_;
-      const root = this.containerRoots_.get(container) || container;
-      const observer = new win.IntersectionObserver(this.observed_.bind(this), {
-        root,
+      observer.io = new win.IntersectionObserver(this.observed_, {
+        root: observer.root,
         threshold: DISPLAY_THRESHOLD,
       });
-      this.observers_[index] = observer;
-    } else {
-      const observer = this.observers_[index];
-      this.observers_[index] = null;
-      if (observer) {
-        observer.disconnect();
-      }
+    } else if (observer.io) {
+      observer.io.disconnect();
+      observer.io = null;
     }
 
-    const observer = this.observers_[index];
     this.targetObserverCallbacks_.forEach((callbacks, target) => {
-      if (observer && containsNotSelf(container, target)) {
+      if (observer.io && observer.contains(target)) {
+        // Reset observation to `null` and wait for the actual measurement.
         this.setObservation_(target, index, null, callbacks);
-        observer.observe(target);
+        observer.io.observe(target);
       } else {
         this.setObservation_(target, index, false, callbacks);
       }
@@ -332,10 +346,10 @@ export class DisplayObserver {
 
   /**
    * @param {!Array<!IntersectionObserverEntry>} entries
-   * @param {!IntersectionObserver} observer
+   * @param {!IntersectionObserver} io
    * @private
    */
-  observed_(entries, observer) {
+  observed_(entries, io) {
     const seen = new Set();
     for (let i = entries.length - 1; i >= 0; i--) {
       const {target, isIntersecting} = entries[i];
@@ -344,7 +358,7 @@ export class DisplayObserver {
       }
       seen.add(target);
       const callbacks = this.targetObserverCallbacks_.get(target);
-      const index = this.observers_.indexOf(observer);
+      const index = findObserverByIo(this.observers_, io);
       if (!callbacks || index == -1) {
         continue;
       }
@@ -365,7 +379,7 @@ export class DisplayObserver {
       const observers = this.observers_;
       observations = new Array(observers.length);
       for (let i = 0; i < observers.length; i++) {
-        observations[i] = observers[i] ? null : false;
+        observations[i] = observers[i].io ? null : false;
       }
       this.targetObservations_.set(target, observations);
     }
@@ -439,12 +453,40 @@ function displayReducer(acc, value) {
 }
 
 /**
- * @param {?Element} container
+ * @param {!Array<!ObserverDef>} observers
+ * @param {!IntersectionObserver} io
+ * @return {number}
+ */
+function findObserverByIo(observers, io) {
+  for (let i = 0; i < observers.length; i++) {
+    if (observers[i].io === io) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+/**
+ * @param {!Array<!ObserverDef>} observers
+ * @param {!Element} container
+ * @return {number}
+ */
+function findObserverByContainer(observers, container) {
+  for (let i = 0; i < observers.length; i++) {
+    if (observers[i].container === container) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+/**
+ * @param {!Element} container
  * @param {!Element} child
  * @return {boolean}
  */
 function containsNotSelf(container, child) {
-  return container != null && child !== container && container.contains(child);
+  return child !== container && container.contains(child);
 }
 
 /**
