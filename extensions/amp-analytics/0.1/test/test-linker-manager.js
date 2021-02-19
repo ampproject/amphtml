@@ -318,16 +318,14 @@ describes.realWin('Linker Manager', {amp: true}, (env) => {
             ids: {
               id: '222',
             },
-            destinationDomains: ['foo.com', 'bar.com', 'window.com'],
+            destinationDomains: ['foo.com', 'bar.com', 'testdomain.com'],
           },
         },
       };
 
       const lm = new LinkerManager(ampdoc, config, /* type */ null, element);
       return lm.init().then(() => {
-        windowInterface.getHostname.returns({
-          origin: 'testdomain.com',
-        });
+        windowInterface.getHostname.returns('testdomain.com');
 
         // testLinker1 should apply to both canonical and source
         // testLinker2 should not
