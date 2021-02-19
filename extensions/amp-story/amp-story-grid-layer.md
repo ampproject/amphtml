@@ -367,6 +367,10 @@ Named Areas:
 </amp-story-grid-layer>
 ```
 
+{% call callout('Note', type='note') %}
+While these templates allow you to visually arrange content on the screen, the content will still be announced by screen readers / assistive technologies in the order in which it appears in the underlying markup. Make sure that the content order in your document's markup is logical, regardless of how it will be presented visually.
+{% endcall %}
+
 ### Pre templated UI
 
 #### Landscape half-half UI
