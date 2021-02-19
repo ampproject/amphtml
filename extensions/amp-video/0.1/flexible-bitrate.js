@@ -101,14 +101,14 @@ export class BitrateManager {
     if (video.changedSources) {
       return;
     }
-    onNontrivialWait(video, () => {
+    const downgradeVideo = () => {
       const current = currentSource(video);
       this.acceptableBitrate_ = current.bitrate_ - 1;
       if (this.switchToLowerBitrate_(video, current.bitrate_)) {
         this.updateOtherManagedAndPausedVideos_();
       }
     };
-    console.log(video);
+    onNontrivialWait(video, downgradeVideo);
     onSlowLoad(video, () => downgradeVideo());
     if (video.changedSources) {
       return;
