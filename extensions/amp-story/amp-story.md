@@ -24,7 +24,7 @@ limitations under the License.
 
 # amp-story
 
-[Web stories](https://amp.dev/documentation/guides-and-tutorials/start/create_successful_stories/?format=stories) are an immersive, tappable and easily shareable storytelling format. Web stories are built using the AMP Framework. The `amp-story` component provides the AMP story subsect of AMP. It is the base technology for web stories.
+[Web stories](https://amp.dev/documentation/guides-and-tutorials/start/create_successful_stories/?format=stories) are an immersive, tappable and easily shareable storytelling format. Web stories are built using the AMP Framework. The `amp-story` component provides the AMP story subset of AMP. It is the base technology for web stories.
 
 <figure class="centered-fig">
   <amp-anim width="300" height="533" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story.gif">
