@@ -369,7 +369,7 @@ function createBaseCustomElementClass(win) {
       this.impl_ = newImpl;
       this.upgradeDelayMs_ = win.Date.now() - upgradeStartTime;
       this.upgradeState_ = UpgradeState.UPGRADED;
-      this.onReadyStateInternal(ReadyState.BUILDING);
+      this.setReadyStateInternal(ReadyState.BUILDING);
       this.classList.remove('amp-unresolved');
       this.classList.remove('i-amphtml-unresolved');
       this.assertLayout_();
@@ -473,7 +473,7 @@ function createBaseCustomElementClass(win) {
         return this.buildingPromise_;
       }
 
-      this.onReadyStateInternal(ReadyState.BUILDING);
+      this.setReadyStateInternal(ReadyState.BUILDING);
 
       // Create the instance.
       const implPromise = this.createImpl_();
@@ -514,10 +514,10 @@ function createBaseCustomElementClass(win) {
 
           if (this.V1()) {
             if (this.readyState_ == ReadyState.BUILDING) {
-              this.onReadyStateInternal(ReadyState.COMPLETE);
+              this.setReadyStateInternal(ReadyState.COMPLETE);
             }
           } else {
-            this.onReadyStateInternal(ReadyState.LOADING);
+            this.setReadyStateInternal(ReadyState.LOADING);
             this.preconnect(/* onLayout */ false);
           }
 
@@ -547,7 +547,7 @@ function createBaseCustomElementClass(win) {
           );
 
           if (this.V1()) {
-            this.onReadyStateInternal(ReadyState.ERROR, reason);
+            this.setReadyStateInternal(ReadyState.ERROR, reason);
           }
 
           if (!isBlockedByConsent(reason)) {
@@ -634,7 +634,7 @@ function createBaseCustomElementClass(win) {
      * @protected
      * @final
      */
-    onReadyStateInternal(state, opt_failure) {
+    setReadyStateInternal(state, opt_failure) {
       if (state === this.readyState_) {
         return;
       }
@@ -1030,7 +1030,7 @@ function createBaseCustomElementClass(win) {
       }
 
       // Schedule build.
-      this.onReadyStateInternal(ReadyState.BUILDING);
+      this.setReadyStateInternal(ReadyState.BUILDING);
       const builder = getBuilderForDoc(this.getAmpDoc());
       builder.schedule(this);
 
@@ -1399,7 +1399,7 @@ function createBaseCustomElementClass(win) {
           if (isLoadEvent) {
             this.signals_.signal(CommonSignals.LOAD_END);
           }
-          this.onReadyStateInternal(ReadyState.COMPLETE);
+          this.setReadyStateInternal(ReadyState.COMPLETE);
           this.layoutCount_++;
           this.toggleLoading(false);
           // Check if this is the first success layout that needs
@@ -1421,7 +1421,7 @@ function createBaseCustomElementClass(win) {
               /** @type {!Error} */ (reason)
             );
           }
-          this.onReadyStateInternal(ReadyState.ERROR, reason);
+          this.setReadyStateInternal(ReadyState.ERROR, reason);
           this.layoutCount_++;
           this.toggleLoading(false);
           throw reason;

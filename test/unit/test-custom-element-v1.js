@@ -270,7 +270,7 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
 
     it('should continue in loading state if buildCallback requests it', async () => {
       buildCallbackStub.callsFake(function () {
-        this.onReadyState('loading');
+        this.setReadyState('loading');
       });
 
       const element = new ElementClass();
@@ -486,10 +486,10 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
 
     it('should force build and ensureLoaded if loading', async () => {
       buildCallbackStub.callsFake(function () {
-        this.onReadyState('loading');
+        this.setReadyState('loading');
       });
       ensureLoadedStub.callsFake(function () {
-        this.onReadyState('complete');
+        this.setReadyState('complete');
       });
 
       const promise = element.ensureLoaded();
@@ -505,7 +505,7 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
     });
   });
 
-  describe('onReadyStateInternal', () => {
+  describe('setReadyStateInternal', () => {
     let element;
 
     beforeEach(async () => {
@@ -515,7 +515,7 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
       doc.body.appendChild(element);
       await element.buildInternal();
       element.reset_();
-      element.onReadyStateInternal('other');
+      element.setReadyStateInternal('other');
 
       env.sandbox.stub(element, 'toggleLoading');
     });
@@ -527,7 +527,7 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
       element.signals().signal(CommonSignals.UNLOAD);
       element.classList.remove('i-amphtml-layout');
 
-      element.onReadyStateInternal('loading');
+      element.setReadyStateInternal('loading');
       expect(element.readyState).equal('loading');
       expect(element.toggleLoading).to.be.calledOnce.calledWith(true);
       expect(element.signals().get(CommonSignals.LOAD_START)).to.exist;
@@ -544,7 +544,7 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
       expect(element.signals().get(CommonSignals.LOAD_END)).to.be.null;
       element.classList.remove('i-amphtml-layout');
 
-      element.onReadyStateInternal('complete');
+      element.setReadyStateInternal('complete');
       expect(element.readyState).equal('complete');
       expect(element.toggleLoading).to.be.calledOnce.calledWith(false);
       expect(element.signals().get(CommonSignals.LOAD_END)).to.exist;
@@ -561,7 +561,7 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
       expect(element.signals().get(CommonSignals.LOAD_END)).to.be.null;
 
       const error = new Error();
-      element.onReadyStateInternal('error', error);
+      element.setReadyStateInternal('error', error);
       expect(element.readyState).equal('error');
       expect(element.toggleLoading).to.be.calledOnce.calledWith(false);
       expect(element.signals().get(CommonSignals.LOAD_END)).to.equal(error);
@@ -572,11 +572,11 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
       const loadEventSpy = env.sandbox.spy();
       element.addEventListener('load', loadEventSpy);
 
-      element.onReadyStateInternal('complete');
+      element.setReadyStateInternal('complete');
       expect(loadEventSpy).to.be.calledOnce;
 
       // Repeat.
-      element.onReadyStateInternal('complete');
+      element.setReadyStateInternal('complete');
       expect(loadEventSpy).to.be.calledOnce; // no change.
     });
   });

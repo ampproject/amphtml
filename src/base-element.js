@@ -497,8 +497,8 @@ export class BaseElement {
    * @param {*=} opt_failure
    * @final
    */
-  onReadyState(state, opt_failure) {
-    this.element.onReadyStateInternal(state, opt_failure);
+  setReadyState(state, opt_failure) {
+    this.element.setReadyStateInternal(state, opt_failure);
   }
 
   /**

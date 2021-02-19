@@ -137,7 +137,7 @@ export class AmpImg extends BaseElement {
       }
 
       if (AmpImg.V1() && !this.img_.complete) {
-        this.onReadyState(ReadyState.LOADING);
+        this.setReadyState(ReadyState.LOADING);
       }
     }
   }
@@ -300,21 +300,21 @@ export class AmpImg extends BaseElement {
     }
 
     // A V1 amp-img loads and reloads automatically.
-    this.onReadyState(ReadyState.LOADING);
+    this.setReadyState(ReadyState.LOADING);
     this.initialize_();
     const img = dev().assertElement(this.img_);
     if (img.complete) {
-      this.onReadyState(ReadyState.COMPLETE);
+      this.setReadyState(ReadyState.COMPLETE);
       this.firstLayoutCompleted();
       this.hideFallbackImg_();
     }
     listen(img, 'load', () => {
-      this.onReadyState(ReadyState.COMPLETE);
+      this.setReadyState(ReadyState.COMPLETE);
       this.firstLayoutCompleted();
       this.hideFallbackImg_();
     });
     listen(img, 'error', (reason) => {
-      this.onReadyState(ReadyState.ERROR, reason);
+      this.setReadyState(ReadyState.ERROR, reason);
       this.onImgLoadingError_();
     });
   }
