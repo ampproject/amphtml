@@ -471,7 +471,7 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
       builderMock.expects('scheduleAsap').atLeast(1);
     });
 
-    it('should force build and immediately resolve if not loading', async () => {
+    it('should force build and wait for whenLoaded even if not marked as loading', async () => {
       const promise = element.ensureLoaded();
 
       doc.body.appendChild(element);
@@ -479,7 +479,7 @@ describes.realWin('CustomElement V1', {amp: true}, (env) => {
 
       await element.buildInternal();
       await promise;
-      expect(ensureLoadedStub).to.not.be.called;
+      expect(ensureLoadedStub).to.be.calledOnce;
 
       await element.whenLoaded();
     });
