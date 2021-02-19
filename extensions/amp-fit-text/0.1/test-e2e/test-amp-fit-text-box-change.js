@@ -74,7 +74,7 @@ describes.endtoend(
 
     async function selectContentDiv(id) {
       return await controller.findElement(
-        `#${id} .i-amphtml-fit-text-content > div`
+        `#${id} > .i-amphtml-fit-text-content > div`
       );
     }
   }
