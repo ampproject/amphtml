@@ -49,9 +49,9 @@ As of 2018-07-16, version 0.1 is considered deprecated, and will be deleted on 2
 
 An [AMP story](#story:-amp-story) is a complete AMP HTML document that is comprised of [pages](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/amp-story-page.md), within the pages are [layers](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/amp-story-grid-layer.md), within the layers are AMP & HTML elements, like media, analytics, text, and so on.
 
-<amp-img alt="AMP story tag hierarchy" layout="responsive" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-tag-hierarchy.png" width="591" height="358">
+<amp-img alt="An illustration of the nested markup structure of an amp-story: an amp-story element, which contains two amp-story-page blocks, which in turn contain an amp-story-grid-layer, which then contains the actual content elements" layout="responsive" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-tag-hierarchy.png" width="591" height="358">
   <noscript>
-    <img alt="AMP story tag hierarchy" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-tag-hierarchy.png" />
+    <img alt="An illustration of the nested markup structure of an amp-story: an amp-story element, which contains two amp-story-page blocks, which in turn contain an amp-story-grid-layer, which then contains the actual content elements" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-tag-hierarchy.png" />
   </noscript>
 </amp-img>
 
