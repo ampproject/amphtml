@@ -27,9 +27,9 @@ const generateLightboxItemKey = sequentialIdGenerator();
  */
 export function WithLightbox({
   'aria-label': ariaLabel = 'Close the button',
-  autoLightbox = true,
   as: Comp = 'div',
   children,
+  enableActivation = true,
   render = () => children,
   role = 'button',
   tabIndex = '0',
@@ -41,7 +41,7 @@ export function WithLightbox({
     register(genKey, render);
     return () => deregister(genKey);
   }, [genKey, deregister, register, render]);
-  return autoLightbox ? (
+  return enableActivation ? (
     <Comp
       {...rest}
       aria-label={ariaLabel}

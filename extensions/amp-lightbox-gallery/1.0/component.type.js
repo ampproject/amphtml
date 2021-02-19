@@ -29,8 +29,8 @@ LightboxGalleryDef.Props;
 /**
  * @typedef {{
  *   as: (string|undefined),
- *   autoLightbox: (boolean|undefined),
  *   children: (!PreactDef.Renderable),
+ *   enableActivation: (boolean|undefined),
  *   render: (function():PreactDef.Renderable),
  *   role: (string|undefined),
  *   tabindex: (string|undefined),

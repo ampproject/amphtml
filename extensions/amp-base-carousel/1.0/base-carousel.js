@@ -323,7 +323,7 @@ function BaseCarouselWithRef(
       contentAs={lightbox ? WithLightbox : 'div'}
       contentRef={contentRef}
       contentProps={{
-        autoLightbox: false,
+        enableActivation: false,
         render: () => children,
       }}
       {...rest}
