@@ -596,11 +596,8 @@ function createBaseCustomElementClass(win) {
     ensureLoaded(opt_parentPriority) {
       return this.build().then(() => {
         if (this.V1()) {
-          if (this.readyState_ == ReadyState.LOADING) {
-            this.impl_.ensureLoaded();
-            return this.whenLoaded();
-          }
-          return;
+          this.impl_.ensureLoaded();
+          return this.whenLoaded();
         }
 
         const resource = this.getResource_();

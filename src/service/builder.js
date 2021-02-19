@@ -90,7 +90,6 @@ export class Builder {
     }
 
     this.waitParsing_(target);
-    this.signalScanReady_();
   }
 
   /**
@@ -113,7 +112,7 @@ export class Builder {
 
   /** @private*/
   signalScanReady_() {
-    if (!this.scheduledReady_) {
+    if (this.ampdoc_.isReady() && !this.scheduledReady_) {
       this.scheduledReady_ = true;
       const {win} = this.ampdoc_;
       win.setTimeout(() => {

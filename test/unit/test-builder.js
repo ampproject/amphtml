@@ -103,14 +103,14 @@ describes.realWin('Builder', {amp: true}, (env) => {
       expect(intersectionObserverStub.isObserved(element)).to.be.false;
     });
 
-    it('should signal READY_SCAN_SIGNAL after first element scheduled', async () => {
+    it('should NOT signal READY_SCAN_SIGNAL until document is ready', async () => {
       ampdoc.signals().reset(READY_SCAN_SIGNAL);
       const element = createAmpElement({deferredBuild: false});
       builder.schedule(element);
       expect(ampdoc.signals().get(READY_SCAN_SIGNAL)).to.be.null;
 
       clock.tick(50);
-      expect(ampdoc.signals().get(READY_SCAN_SIGNAL)).to.exist;
+      expect(ampdoc.signals().get(READY_SCAN_SIGNAL)).to.be.null;
     });
 
     it('should signal READY_SCAN_SIGNAL after document ready', async () => {

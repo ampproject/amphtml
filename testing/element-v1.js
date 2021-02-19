@@ -204,6 +204,13 @@ export function testElementV1(implClass, options = {}) {
   });
 }
 
+/**
+ * Returns `true` if the class's source contains the given substring.
+ *
+ * @param {typeof BaseElement} implClass
+ * @param {string} substring
+ * @return {boolean}
+ */
 function sourceIncludes(implClass, substring) {
   const code = [];
   code.push(implClass.toString());
