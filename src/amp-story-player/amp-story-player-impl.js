@@ -235,7 +235,7 @@ export class AmpStoryPlayer {
 
     this.attachCallbacksToElement_();
 
-    /** @private {!PageScroller} */
+    /** @private {?PageScroller} */
     this.pageScroller_ = new PageScroller(win);
 
     /** @private {boolean} */
@@ -362,6 +362,7 @@ export class AmpStoryPlayer {
     this.readPlayerConfig_();
     this.maybeFetchMoreStories_(this.stories_.length - this.currentIdx_ - 1);
     this.initializeAutoplay_();
+    this.initializePageScroll_();
     this.initializeCircularWrapping_();
     this.signalReady_();
     this.isBuilt_ = true;
@@ -1454,7 +1455,18 @@ export class AmpStoryPlayer {
     this.touchEventState_.startX = coordinates.screenX;
     this.touchEventState_.startY = coordinates.screenY;
 
-    this.pageScroller_.onTouchStart(event.timeStamp, coordinates.clientY);
+    this.pageScroller_ &&
+      this.pageScroller_.onTouchStart(event.timeStamp, coordinates.clientY);
+
+    this.element_.dispatchEvent(
+      createCustomEvent(
+        this.win_,
+        'amp-story-player-touchstart',
+        dict({
+          'touches': event.touches,
+        })
+      )
+    );
   }
 
   /**
@@ -1468,8 +1480,20 @@ export class AmpStoryPlayer {
       return;
     }
 
+    this.element_.dispatchEvent(
+      createCustomEvent(
+        this.win_,
+        'amp-story-player-touchmove',
+        dict({
+          'touches': event.touches,
+          'isNavigationalSwipe': this.touchEventState_.isSwipeX,
+        })
+      )
+    );
+
     if (this.touchEventState_.isSwipeX === false) {
-      this.pageScroller_.onTouchMove(event.timeStamp, coordinates.clientY);
+      this.pageScroller_ &&
+        this.pageScroller_.onTouchMove(event.timeStamp, coordinates.clientY);
       return;
     }
 
@@ -1497,13 +1521,24 @@ export class AmpStoryPlayer {
    * @private
    */
   onTouchEnd_(event) {
+    this.element_.dispatchEvent(
+      createCustomEvent(
+        this.win_,
+        'amp-story-player-touchend',
+        dict({
+          'touches': event.touches,
+          'isNavigationalSwipe': this.touchEventState_.isSwipeX,
+        })
+      )
+    );
+
     if (this.touchEventState_.isSwipeX === true) {
       this.onSwipeX_({
         deltaX: this.touchEventState_.lastX - this.touchEventState_.startX,
         last: true,
       });
     } else {
-      this.pageScroller_.onTouchEnd(event.timeStamp);
+      this.pageScroller_ && this.pageScroller_.onTouchEnd(event.timeStamp);
     }
 
     this.touchEventState_.startX = 0;
@@ -1610,6 +1645,19 @@ export class AmpStoryPlayer {
 
     if (behavior && typeof behavior.autoplay === 'boolean') {
       this.autoplay_ = behavior.autoplay;
+    }
+  }
+
+  /** @private */
+  initializePageScroll_() {
+    if (!this.playerConfig_) {
+      return;
+    }
+
+    const {behavior} = this.playerConfig_;
+
+    if (behavior && behavior.pageScroll === false) {
+      this.pageScroller_ = null;
     }
   }
 
