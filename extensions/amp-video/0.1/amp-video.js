@@ -37,7 +37,7 @@ import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {listen} from '../../../src/event-helper';
+import {listen, listenOncePromise} from '../../../src/event-helper';
 import {mutedOrUnmutedEvent} from '../../../src/iframe-video';
 import {
   observeDisplay,
@@ -168,6 +168,9 @@ export class AmpVideo extends AMP.BaseElement {
     /** @private {boolean} */
     this.isPlaying_ = false;
 
+    /** @private {?boolean} whether there are sources that will use a BitrateManager */
+    this.hasBitrateSources_ = null;
+
     this.onDisplay_ = this.onDisplay_.bind(this);
   }
 
@@ -221,12 +224,6 @@ export class AmpVideo extends AMP.BaseElement {
     this.configure_();
 
     this.video_ = element.ownerDocument.createElement('video');
-    // Manage video if the sources contain bitrate or amp-orig-src will be expanded to multiple bitrates.
-    if (
-      this.element.querySelector('source[data-bitrate], source[amp-orig-src]')
-    ) {
-      getBitrateManager(this.win).manage(this.video_);
-    }
 
     const poster = element.getAttribute('poster');
     if (!poster && getMode().development) {
@@ -261,6 +258,11 @@ export class AmpVideo extends AMP.BaseElement {
       'album': album || '',
       'artwork': [{'src': artwork || poster || ''}],
     };
+
+    // Cached so mediapool operations (eg: swapping sources) don't interfere with this bool.
+    this.hasBitrateSources_ =
+      !!this.element.querySelector('source[data-bitrate]') ||
+      this.hasAnyCachedSources_();
 
     installVideoManagerForDoc(element);
 
@@ -577,6 +579,22 @@ export class AmpVideo extends AMP.BaseElement {
 
   /**
    * @private
+   * @return {boolean}
+   */
+  hasAnyCachedSources_() {
+    const {element} = this;
+    const sources = toArray(childElementsByTag(element, 'source'));
+    sources.push(element);
+    for (let i = 0; i < sources.length; i++) {
+      if (isCachedByCdn(sources[i])) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * @private
    */
   installEventHandlers_() {
     const video = dev().assertElement(this.video_);
@@ -632,11 +650,21 @@ export class AmpVideo extends AMP.BaseElement {
       childElementByTag(this.element, 'video'),
       'Tried to reset amp-video without an underlying <video>.'
     );
-
     this.uninstallEventHandlers_();
     this.installEventHandlers_();
+    if (this.hasBitrateSources_) {
+      getBitrateManager(this.win).manage(this.video_);
+    }
     // When source changes, video needs to trigger loaded again.
-    this.loadPromise(this.video_).then(() => this.onVideoLoaded_());
+    if (this.video_.readyState >= 1) {
+      this.onVideoLoaded_();
+      return;
+    }
+    // Video might not have the sources yet, so instead of loadPromise (which would fail),
+    // we listen for loadedmetadata.
+    listenOncePromise(this.video_, 'loadedmetadata').then(() =>
+      this.onVideoLoaded_()
+    );
   }
 
   /** @private */
