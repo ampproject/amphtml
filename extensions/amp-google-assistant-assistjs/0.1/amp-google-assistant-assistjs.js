@@ -23,7 +23,6 @@ import {AmpGoogleAssistantInlineSuggestionBar} from './amp-google-assistant-inli
 import {AmpGoogleAssistantVoiceBar} from './amp-google-assistant-voice-bar';
 import {AmpGoogleAssistantVoiceButton} from './amp-google-assistant-voice-button';
 import {AssistjsConfigService} from './assistjs-config-service';
-import {AssistjsFrameService} from './assistjs-frame-service';
 import {CSS} from '../../../build/amp-google-assistant-assistjs-0.1.css';
 import {Services} from '../../../src/services';
 
@@ -31,13 +30,14 @@ export class AmpGoogleAssistantAssistjsConfig extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     const config = JSON.parse(this.element.textContent);
-    Services.assistjsConfigServiceForDoc(this.element).initializeConfigs(config);
+    Services.assistjsConfigServiceForDoc(this.element).initializeConfigs(
+      config
+    );
   }
 }
 
 AMP.extension('amp-google-assistant-assistjs', '0.1', (AMP) => {
   AMP.registerServiceForDoc('assistjs-config-service', AssistjsConfigService);
-  AMP.registerServiceForDoc('assistjs-frame-service', AssistjsFrameService);
   AMP.registerElement(
     'amp-google-assistant-assistjs-config',
     AmpGoogleAssistantAssistjsConfig,

@@ -54,9 +54,9 @@ export class AmpGoogleAssistantInlineSuggestionBar extends AMP.BaseElement {
         });
 
         // applyFillContent so that frame covers the entire component.
-    this.applyFillContent(iframe, /* replacedContent */ true);
+        this.applyFillContent(iframe, /* replacedContent */ true);
 
-    this.element.appendChild(iframe);
+        this.element.appendChild(iframe);
       });
 
     // Return a load promise for the frame so the runtime knows when the

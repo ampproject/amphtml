@@ -44,10 +44,15 @@ export class AssistjsConfigService {
     this.isInitialized_ = false;
   }
 
-  /** @return {string} */
+  /**
+   * @param {Object} config
+   * @return {string}
+   * */
   initializeConfigs(config) {
     // If somehow there are multiple config elements, the first config element would be used and the rest would be ignored.
-    if (this.isInitialized_) return;
+    if (this.isInitialized_) {
+      return;
+    }
 
     if (!hasOwn(config, 'projectId')) {
       throw new Error('Project id is required to embed assist.js.');
