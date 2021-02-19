@@ -37,7 +37,6 @@ import {getSourceUrl} from '../url';
 import {hasNextNodeInDocumentOrder, isIframed} from '../dom';
 import {ieIntrinsicCheckAndFix} from './ie-intrinsic-bug';
 import {ieMediaCheckAndFix} from './ie-media-bug';
-import {isAmp4Email} from '../format';
 import {isBlockedByConsent, reportError} from '../error';
 import {listen, loadPromise} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
@@ -228,8 +227,7 @@ export class ResourcesImpl {
     if (
       isExperimentOn(this.win, 'bento') ||
       getExperimentBranch(this.win, INTERSECT_RESOURCES_EXP.id) ===
-        INTERSECT_RESOURCES_EXP.experiment ||
-      isAmp4Email(this.win.document)
+        INTERSECT_RESOURCES_EXP.experiment
     ) {
       const iframed = isIframed(this.win);
 
