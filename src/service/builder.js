@@ -128,10 +128,9 @@ export class Builder {
   docVisibilityChanged_() {
     const vs = this.ampdoc_.getVisibilityState();
     if (
-      (vs =
-        VisibilityState.VISIBLE ||
-        vs == VisibilityState.HIDDEN ||
-        vs == VisibilityState.PRERENDER)
+      vs == VisibilityState.VISIBLE ||
+      vs == VisibilityState.HIDDEN ||
+      vs == VisibilityState.PRERENDER
     ) {
       this.targets_.forEach((_, target) => this.maybeBuild_(target));
     }
