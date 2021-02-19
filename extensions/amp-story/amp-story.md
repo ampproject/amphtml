@@ -846,7 +846,7 @@ where `page-id` refers to the unique id of an `amp-story-page`. You can also use
 
 ## Localization
 
-To localize your story, include the language code in the `lang` attribute on the `<html>` tag of your story, such as `<html ⚡ lang="en">` for English. The supported language codes are:
+You should always include the language code in the `lang` attribute on the `<html>` tag of your story, such as `<html ⚡ lang="en">` for English content. The supported language codes are:
 
 -   ar (Arabic)
 -   de (German)
