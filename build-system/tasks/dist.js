@@ -149,9 +149,9 @@ async function doDist(extraArgs = {}) {
     await compileAllJs(options);
   }
   await buildExtensions(options);
-  await buildVendorConfigs(options);
 
   if (!argv.core_runtime_only) {
+    await buildVendorConfigs(options);
     await formatExtractedMessages();
   }
   if (!argv.watch) {
