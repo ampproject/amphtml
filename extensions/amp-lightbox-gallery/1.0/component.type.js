@@ -21,13 +21,15 @@ var LightboxGalleryDef = {};
 
 /**
  * @typedef {{
- *   children: (!PreactDef.Renderable),
+ *   children: (PreactDef.Renderable),
+ *   render: (function():PreactDef.Renderable|undefined),
  * }}
  */
 LightboxGalleryDef.Props;
 
 /**
  * @typedef {{
+ *   aria-label: (string|undefined),
  *   as: (string|undefined),
  *   children: (!PreactDef.Renderable),
  *   enableActivation: (boolean|undefined),
