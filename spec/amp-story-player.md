@@ -246,6 +246,33 @@ Here's the JSON configuration for opting out of autoplay:
   ...
 ```
 
+## Page Scrolling
+
+By default, the player will scroll the page it's embedded in so that users don't get stuck when scrolling through the player.
+
+-   Players embedded in a document's content need this enabled so they don't block user scrolling.
+-   Players displayed full screen on a device (eg: lightbox) need this disabled so the page does not scroll in the background.
+
+You can opt-out of the default behavior by using the configuration below. This will prevent the player from scrolling the page.
+
+### JSON Configuration
+
+Here's the JSON configuration for opting out of page scrolling:
+
+```html
+<amp-story-player>
+  <script type="application/json">
+  {
+    "behavior": {
+      "pageScroll": false
+    }
+  }
+</script>
+ <a href="./story1.html"> ... </a>
+ <a href="./story2.html"> ... </a>
+  ...
+```
+
 ## Programmatically fetching more stories
 
 You can create an “infinite scroll” experience by fetching more stories as the user navigates through them in your player. Simply use the new JSON configuration to specify an endpoint, and the player will automatically fetch more stories as it gets closer to the last story in the player.
@@ -522,6 +549,70 @@ player.addEventListener('ready', () => {
 if (player.isReady) {
    console.log('Player is ready!');
 }
+```
+
+#### amp-story-player-touchstart
+
+Fired when the player detects a touchstart event.
+
+```javascript
+player.addEventListener('amp-story-player-touchstart', (event) => {
+  console.log('Coordinates:' event.detail.coordinates);
+})
+```
+
+#### amp-story-player-touchmove
+
+Fired when the player detects a touchmove event.
+
+```javascript
+player.addEventListener('amp-story-player-touchmove', (event) => {
+  console.log('Coordinates:' event.detail.coordinates);
+})
+```
+
+This event also provides a `isNavigationalSwipe` property, which tells if the player is using this touch event for navigation.
+
+```js
+player.addEventListener("amp-story-player-touchmove", (event) => {
+    if (
+      event.detail.isNavigationalSwipe ||
+      event.detail.isNavigationalSwipe === null
+    ) {
+      // Ignore when swiping to next story.
+      return;
+    }
+
+    // Do something else when not navigating.
+
+});
+```
+
+#### amp-story-player-touchend
+
+Fired when the player detects a touchend event.
+
+```javascript
+player.addEventListener('amp-story-player-touchend', () => {
+  console.log('touchend');
+})
+```
+
+This event also provides a `isNavigationalSwipe` property, which tells if the player is using this touch event for navigation.
+
+```js
+player.addEventListener("amp-story-player-touchend", (event) => {
+    if (
+      event.detail.isNavigationalSwipe ||
+      event.detail.isNavigationalSwipe === null
+    ) {
+      // Ignore when swiping to next story.
+      return;
+    }
+
+    // Do something else when not navigating.
+
+});
 ```
 
 #### navigation
