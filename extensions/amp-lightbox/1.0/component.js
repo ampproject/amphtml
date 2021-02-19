@@ -24,7 +24,7 @@ import {
   useRef,
   useState,
 } from '../../../src/preact';
-import {useStyles} from './lightbox.jss';
+import {useStyles} from './component.jss';
 
 const ANIMATION_DURATION = 200;
 const ANIMATION_PRESETS = {
