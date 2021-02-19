@@ -562,8 +562,8 @@ describes.realWin(
         manager = new ConsentPolicyManager(ampdoc);
         env.sandbox
           .stub(ConsentPolicy.prototype, 'getReadyPromise')
-          .callsFake(() => {
-            return Promise.resolve();
+          .callsFake(function () {
+            return Promise.resolve(this);
           });
         consentInfo = constructConsentInfo(CONSENT_ITEM_STATE.UNKNOWN);
         manager.setLegacyConsentInstanceId('ABC');
