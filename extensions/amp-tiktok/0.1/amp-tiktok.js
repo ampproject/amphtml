@@ -181,6 +181,9 @@ export class AmpTiktok extends AMP.BaseElement {
               'src': thumbnailUrl,
               'placeholder': thumbnailUrl,
               'style':
+                'display: block; ' +
+                'margin-left: auto; '+
+                'margin-right: auto; '+
                 'aspect-ratio: 0.5625; ' +
                 'left: 1px; ' +
                 'top: 1px; ' +
