@@ -15,6 +15,8 @@
  */
 'use strict';
 
+const {generateBundles} = require('../tasks/3p-vendor-helpers');
+
 const argv = require('minimist')(process.argv.slice(2));
 const {
   doBuildExtension,
@@ -128,6 +130,20 @@ async function lazyBuildJs(req, _res, next) {
 }
 
 /**
+ * Lazy builds a 3p iframe vendor file when requested.
+ *
+ * @param {!Object} req
+ * @param {!Object} res
+ * @param {function()} next
+ */
+async function lazyBuild3pVendor(req, res, next) {
+  const matcher = argv.compiled
+    ? /\/dist\.3p\/\d+\/vendor\/([^\/]*)\.js/ // '/dist.3p/current/vendor/*.js'
+    : /\/dist\.3p\/current\/vendor\/([^\/]*)\.max\.js/; // '/dist.3p/current/vendor/*.max.js'
+  await lazyBuild(req.url, matcher, generateBundles(), doBuildJs, next);
+}
+
+/**
  * Pre-builds the core runtime and the JS files that it loads.
  */
 async function preBuildRuntimeFiles() {
@@ -152,6 +168,7 @@ async function preBuildExtensions() {
 module.exports = {
   lazyBuildExtensions,
   lazyBuildJs,
+  lazyBuild3pVendor,
   preBuildExtensions,
   preBuildRuntimeFiles,
 };
