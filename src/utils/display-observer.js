@@ -161,6 +161,8 @@ export class DisplayObserver {
     this.visibilityUnlisten_ = null;
     this.targetObserverCallbacks_.clear();
     this.targetObservations_.clear();
+    this.containerRoots_.clear();
+    this.containers_.length = 0;
   }
 
   /**
@@ -437,7 +439,7 @@ function displayReducer(acc, value) {
 }
 
 /**
- * @param {!Element} container
+ * @param {?Element} container
  * @param {!Element} child
  * @return {boolean}
  */
