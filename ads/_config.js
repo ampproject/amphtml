@@ -514,9 +514,12 @@ const adConfig = jsonConfiguration({
   'flite': {},
 
   'fluct': {
+    prefetch: [
+      'https://pdn.adingo.jp/p.js',
+    ],
     preconnect: [
       'https://cdn-fluct.sh.adingo.jp',
-      'https://s.sh.adingo.jp',
+      'https://sh.adingo.jp',
       'https://i.adingo.jp',
     ],
   },

@@ -25,6 +25,7 @@ limitations under the License.
   type="fluct"
   data-g="{GROUP-ID}"
   data-u="{UNIT-ID}"
+  data-tagtype="api"
 >
 </amp-ad>
 ```
