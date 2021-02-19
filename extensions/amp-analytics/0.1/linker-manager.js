@@ -301,7 +301,7 @@ export class LinkerManager {
    * @param {Location} location
    * @param {string} name Name given in linker config.
    * @param {?Array} domains
-   * @return {*} TODO(#23582): Specify return type
+   * @return {boolean}
    */
   isDomainMatch_(location, name, domains) {
     const {hostname} = location;
