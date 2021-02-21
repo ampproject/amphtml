@@ -342,6 +342,10 @@ The `amp-story-interactive` component elements support [`amp-analytics`](https:/
 </amp-analytics>
 ```
 
+## Accessibility considerations
+
+Currently, this component lacks keyboard and screen reader accessibility.
+
 ## Validation
 
 See validation rules in [amp-story-interactive validator](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story-interactive/validator-amp-story-interactive.protoascii).
