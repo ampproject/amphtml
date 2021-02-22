@@ -60,9 +60,9 @@ export function getDate(value) {
 /** Map from attribute names to their parsers. */
 const dateAttrParsers = {
   'datetime': (datetime) =>
-    userAssert(parseDate(datetime), `Invalid date: ${datetime}`),
+    userAssert(parseDate(datetime), 'Invalid date: %s', datetime),
   'end-date': (datetime) =>
-    userAssert(parseDate(datetime), `Invalid date: ${datetime}`),
+    userAssert(parseDate(datetime), 'Invalid date: %s', datetime),
   'timeleft-ms': (timeleftMs) => Date.now() + Number(timeleftMs),
   'timestamp-ms': (ms) => Number(ms),
   'timestamp-seconds': (timestampSeconds) => 1000 * Number(timestampSeconds),
@@ -76,7 +76,8 @@ const dateAttrParsers = {
 export function parseDateAttrs(element, dateAttrs) {
   const epoch = userAssert(
     parseEpoch(element, dateAttrs),
-    `One of [${dateAttrs.join(', ')}] is required`
+    'One of attributes [%s] is required',
+    dateAttrs.join(', ')
   );
 
   const offsetSeconds =
@@ -96,7 +97,11 @@ function parseEpoch(element, dateAttrs) {
   // invalid attr is provided, even if that attribute isn't present on the
   // element.
   const parsers = dateAttrs.map((attrName) =>
-    devAssert(dateAttrParsers[attrName], `Invalid date attribute "${attrName}"`)
+    devAssert(
+      dateAttrParsers[attrName],
+      'Invalid date attribute "%s"',
+      attrName
+    )
   );
 
   for (let i = 0; i < dateAttrs.length; ++i) {
