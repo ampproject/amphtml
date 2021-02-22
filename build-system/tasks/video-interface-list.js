@@ -97,7 +97,7 @@ async function videoInterfaceList() {
 
   writeFileSync(temporary, output);
 
-  const diff = getStdout(`diff -u ${filepath} ${temporary}`)
+  const diff = getStdout(`diff --unified ${filepath} ${temporary}`)
     // we don't want to output the ugly temporary name
     .replace(temporary, filepath);
 
