@@ -58,7 +58,7 @@ const cssNanoDefaultOptions = {
  * @param {string} cssStr the css text to transform
  * @param {!Object=} opt_cssnano cssnano options
  * @param {!Object=} opt_filename the filename of the file being transformed. Used for sourcemaps generation.
- * @return {!Promise<string>} that resolves with the css content after
+ * @return {!Promise<postcss.Result>} that resolves with the css content after
  *    processing
  */
 function transformCss(cssStr, opt_cssnano, opt_filename) {
@@ -72,7 +72,12 @@ function transformCss(cssStr, opt_cssnano, opt_filename) {
   );
   const cssnanoTransformer = cssnano({preset: ['default', cssnanoOptions]});
   const transformers = [postcssImport, cssprefixer, cssnanoTransformer];
-  return postcss(transformers).process(cssStr, {
+  /**
+   * TypeScript doesn't like default exports.
+   * @type {*}
+   */
+  const postCss = postcss;
+  return postCss(transformers).process(cssStr, {
     'from': opt_filename,
   });
 }
@@ -82,7 +87,7 @@ function transformCss(cssStr, opt_cssnano, opt_filename) {
 
  * @param {string} filename css file
  * @param {!Object=} opt_cssnano cssnano options
- * @return {!Promise<string>} that resolves with the css content after
+ * @return {!Promise<postcss.Result>} that resolves with the css content after
  *    processing
  */
 function transformCssFile(filename, opt_cssnano) {

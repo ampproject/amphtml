@@ -17,6 +17,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const babel = require('@babel/core');
 const path = require('path');
+/** @type {*} */
 const remapping = require('@ampproject/remapping');
 const terser = require('terser');
 const through = require('through2');
@@ -30,7 +31,7 @@ let mainBundles;
  *
  * @param {string} code
  * @param {string} filename
- * @return {Promise<Object<string, string>>}
+ * @return {Promise<Object<string, terser.SourceMapOptions['content']>>}
  */
 async function terserMinify(code, filename) {
   const options = {

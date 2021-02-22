@@ -57,6 +57,15 @@ const containsExpr = (haystack, needle, onTrue, onFalse) =>
 
 const ampStateKey = (...keys) => keys.join('.');
 
+/**
+ *
+ * @param {{
+ *  body: string,
+ *  canonical: string,
+ *  css?: string,
+ *  head?: string,
+ * }} param0
+ */
 const AmpDoc = ({body, css, head, canonical}) => {
   assert(canonical);
   return html`
