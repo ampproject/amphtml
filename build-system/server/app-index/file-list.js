@@ -72,12 +72,10 @@ const linksToExample = (shouldContainBasepath, opt_name) =>
   examplesPathRegex.test(shouldContainBasepath) &&
   htmlDocRegex.test(opt_name || shouldContainBasepath);
 
-const ExamplesSelectModeOptional = ({basepath, selectModePrefix}) =>
+const ExamplesSelectModeOptional = ({basepath}) =>
   !examplesPathRegex.test(basepath + '/')
     ? ''
-    : ExamplesDocumentModeSelect({
-        selectModePrefix,
-      });
+    : ExamplesDocumentModeSelect();
 
 /**
  * @param {{ name: string, href: string, boundHref?: string|undefined }} config
@@ -121,7 +119,7 @@ const FileListHeading = ({basepath, selectModePrefix}) => html`
       ${AmpState(selectModeStateId, {
         [selectModeStateKey]: selectModePrefix,
       })}
-      ${ExamplesSelectModeOptional({basepath, selectModePrefix})}
+      ${ExamplesSelectModeOptional({basepath})}
       <a href="/~" class="underlined">List root directory</a>
     </div>
   </div>
