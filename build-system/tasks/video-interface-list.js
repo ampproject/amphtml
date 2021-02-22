@@ -50,7 +50,7 @@ function getSectionRange(content) {
   const entryRegExp = new RegExp(
     entry('$NAME')
       .replace(/[\[\]\(\)]/g, (c) => `\\${c}`)
-      .replace(/\$NAME/g, '([a-z0-9-]+)') + '[\ns]+',
+      .replace(/\$NAME/g, '([a-z0-9-]+)') + '[\\n\\s]+',
     'gim'
   );
 
