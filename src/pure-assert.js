@@ -60,14 +60,14 @@ export class UserError extends Error {
  * @return {T}
  * @throws {Error} when shouldBeTruthy is not truthy.
  */
-function pureAssertion(errorCls, shouldBeTruthy, opt_message, var_args) {
-  // TODO: Support format strings.
+function assertion(errorCls, shouldBeTruthy, opt_message, var_args) {
   if (shouldBeTruthy) {
     return shouldBeTruthy;
   }
 
   // Substitute provided values into format string in message
   const message = Array.prototype.slice
+    // Skip the first 3 arguments to isolate format params
     .call(arguments, 3)
     .reduce(
       (msg, subValue) => msg.replace('%s', subValue),
@@ -108,7 +108,7 @@ export function pureUserAssert(
   opt_8,
   opt_9
 ) {
-  return pureAssertion(
+  return assertion(
     UserError,
     shouldBeTruthy,
     opt_message,
@@ -155,7 +155,7 @@ export function pureDevAssert(
   opt_8,
   opt_9
 ) {
-  return pureAssertion(
+  return assertion(
     Error,
     shouldBeTruthy,
     opt_message,
