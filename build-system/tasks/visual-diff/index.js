@@ -68,7 +68,7 @@ const percyCss = [
 // 5. Go to "Tools" -> "Version information"
 // 6. Paste the full version in the "Version" field and click "Lookup"
 // 7. Copy the value next to "Branch Base Position" and update the line below
-const PUPPETEER_CHROMIUM_REVISION = '812852'; // 87.0.4280.0
+const PUPPETEER_CHROMIUM_REVISION = '827102'; // 88.0.4324.0
 
 const SNAPSHOT_SINGLE_BUILD_OPTIONS = {
   widths: [375],
