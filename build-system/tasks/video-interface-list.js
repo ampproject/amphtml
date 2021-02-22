@@ -15,11 +15,11 @@
  */
 const argv = require('minimist')(process.argv.slice(2));
 const fastGlob = require('fast-glob');
-const log = require('fancy-log');
 const tempy = require('tempy');
 const {basename} = require('path');
 const {getStdout} = require('../common/process');
 const {green, red} = require('kleur/colors');
+const {log, logWithoutTimestamp} = require('../common/logging');
 const {readFileSync, writeFileSync} = require('fs-extra');
 
 const TASK = 'video-interface-list';
@@ -102,12 +102,12 @@ async function videoInterfaceList() {
     .replace(temporary, filepath);
 
   log(
-    (argv.write
+    argv.write
       ? green(`Wrote ${filepath}:`)
-      : red(`${filepath} requires changes:`)) +
-      '\n' +
-      diff
+      : red(`${filepath} requires changes:`)
   );
+
+  logWithoutTimestamp(diff);
 
   if (!argv.write) {
     throw new Error(`You should update this file:\n\tgulp ${TASK} --write\n`);
