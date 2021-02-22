@@ -28,11 +28,11 @@ const joinFragments = (fragments, renderer = identity) =>
 
 /**
  * pass-through for syntax highlighting
- * @param {!Array<string>} strings
+ * @param {!Array<string>|TemplateStringsArray} strings
  * @param {...*} values
  * @return {string}
  */
 const html = (strings, ...values) =>
-  joinFragments(strings, (string, i) => string + (values[i] || ''));
+  joinFragments(Array.from(strings), (string, i) => string + (values[i] || ''));
 
 module.exports = {html, joinFragments};

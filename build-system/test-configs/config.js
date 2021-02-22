@@ -15,6 +15,15 @@
  */
 'use strict';
 
+/**
+ * @type
+ * Array<string | {
+ *   pattern: string,
+ *   included: boolean,
+ *   nocache: boolean,
+ *   watched: boolean
+ * }>
+ */
 const initTestsPath = ['test/_init_tests.js'];
 
 const fixturesExamplesPaths = [

@@ -252,13 +252,13 @@ app.use('/pwa', (req, res) => {
   });
 });
 
-app.use('/api/show', (req, res) => {
+app.use('/api/show', (_req, res) => {
   res.json({
     showNotification: true,
   });
 });
 
-app.use('/api/dont-show', (req, res) => {
+app.use('/api/dont-show', (_req, res) => {
   res.json({
     showNotification: false,
   });
@@ -273,7 +273,7 @@ app.use('/api/echo/post', (req, res) => {
   res.end(req.body);
 });
 
-app.use('/api/ping', (req, res) => {
+app.use('/api/ping', (_req, res) => {
   res.status(204).end();
 });
 
@@ -281,7 +281,7 @@ app.use('/form/html/post', (req, res) => {
   cors.assertCors(req, res, ['POST']);
 
   const form = new formidable.IncomingForm();
-  form.parse(req, (err, fields) => {
+  form.parse(req, (_err, fields) => {
     res.setHeader('Content-Type', 'text/html');
     if (fields['email'] == 'already@subscribed.com') {
       res.statusCode = 500;
@@ -324,7 +324,7 @@ app.use('/form/echo-json/post', (req, res) => {
     }
     fields[realName].push(value);
   });
-  form.parse(req, (unusedErr) => {
+  form.parse(req, () => {
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
     if (fields['email'] == 'already@subscribed.com') {
       res.statusCode = 500;
@@ -379,7 +379,7 @@ app.post('/form/json/upload', upload.fields([{name: 'myFile'}]), (req, res) => {
   res.json({message: contents});
 });
 
-app.use('/form/search-html/get', (req, res) => {
+app.use('/form/search-html/get', (_req, res) => {
   res.setHeader('Content-Type', 'text/html');
   res.end(`
      <h1>Here's results for your search<h1>
@@ -425,7 +425,7 @@ app.use('/form/autocomplete/query', (req, res) => {
   }
 });
 
-app.use('/form/autocomplete/error', (req, res) => {
+app.use('/form/autocomplete/error', (_req, res) => {
   res.status(500).end();
 });
 
@@ -445,7 +445,7 @@ app.use('/form/mention/query', (req, res) => {
 app.use('/form/verify-search-json/post', (req, res) => {
   cors.assertCors(req, res, ['POST']);
   const form = new formidable.IncomingForm();
-  form.parse(req, (err, fields) => {
+  form.parse(req, (_err, fields) => {
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
 
     const errors = [];
@@ -491,7 +491,7 @@ function proxyToAmpProxy(req, res, mode) {
     (req.query['amp_js_v'] ? 'v' : 'c') +
     req.url;
   logWithoutTimestamp('Fetching URL: ' + url);
-  request(url, function (error, response, body) {
+  request(url, function (_error, response, body) {
     body = body
       // Unversion URLs.
       .replace(
@@ -689,7 +689,9 @@ function getLiveBlogItem() {
             </p>
             <p class="brand">PublisherName News Reporter<p>
             <p><span itemscope itemtype="http://schema.org/Date"
-                itemprop="Date">${Date(now).replace(/ GMT.*$/, '')}<span></p>
+                itemprop="Date">
+                ${new Date(now).toString().replace(/ GMT.*$/, '')}
+                <span></p>
           </div>
         </div>
         <div class="article-body">${body}</div>
@@ -920,7 +922,7 @@ app.get('/iframe-echo-message', (req, res) => {
  * <script async custom-element="amp-form"
  *    src="https://cdn.ampproject.org/v0/amp-form-0.1.js?sleep=5"></script>
  */
-app.use(['/dist/v0/amp-*.(m?js)', '/dist/amp*.(m?js)'], (req, res, next) => {
+app.use(['/dist/v0/amp-*.(m?js)', '/dist/amp*.(m?js)'], (req, _res, next) => {
   const sleep = parseInt(req.query.sleep || 0, 10) * 1000;
   setTimeout(next, sleep);
 });
@@ -928,7 +930,7 @@ app.use(['/dist/v0/amp-*.(m?js)', '/dist/amp*.(m?js)'], (req, res, next) => {
 /**
  * Disable caching for extensions if the --no_caching_extensions flag is used.
  */
-app.get(['/dist/v0/amp-*.(m?js)'], (req, res, next) => {
+app.get(['/dist/v0/amp-*.(m?js)'], (_req, res, next) => {
   if (argv.no_caching_extensions) {
     res.header('Cache-Control', 'no-store');
   }
@@ -1303,12 +1305,12 @@ app.get(
   }
 );
 
-app.get('/dist/iframe-transport-client-lib.(m?js)', (req, res, next) => {
+app.get('/dist/iframe-transport-client-lib.(m?js)', (req, _res, next) => {
   req.url = req.url.replace(/dist/, 'dist.3p/current');
   next();
 });
 
-app.get('/dist/amp-inabox-host.(m?js)', (req, res, next) => {
+app.get('/dist/amp-inabox-host.(m?js)', (req, _res, next) => {
   const mode = SERVE_MODE;
   if (mode != 'default') {
     req.url = req.url.replace('amp-inabox-host', 'amp4ads-host-v0');
@@ -1324,12 +1326,7 @@ app.get('/dist/sw(.max)?.(m?js)', (req, res, next) => {
   fs.promises
     .readFile(pc.cwd() + filePath, 'utf8')
     .then((file) => {
-      let n = new Date();
-      // Round down to the nearest 5 minutes.
-      n -=
-        (n.getMinutes() % 5) * 1000 * 60 +
-        n.getSeconds() * 1000 +
-        n.getMilliseconds();
+      const n = nearestFiveMinutes();
       file =
         'self.AMP_CONFIG = {v: "99' +
         n +
@@ -1374,12 +1371,7 @@ app.get(['/dist/cache-sw.html'], (req, res, next) => {
   fs.promises
     .readFile(pc.cwd() + filePath, 'utf8')
     .then((file) => {
-      let n = new Date();
-      // Round down to the nearest 5 minutes.
-      n -=
-        (n.getMinutes() % 5) * 1000 * 60 +
-        n.getSeconds() * 1000 +
-        n.getMilliseconds();
+      let n = nearestFiveMinutes();
       const percent = parseFloat(req.query.canary) || 0.01;
       let env = '99';
       if (Math.random() < percent) {
@@ -1395,13 +1387,8 @@ app.get(['/dist/cache-sw.html'], (req, res, next) => {
     .catch(next);
 });
 
-app.get('/dist/diversions', (req, res) => {
-  let n = new Date();
-  // Round down to the nearest 5 minutes.
-  n -=
-    (n.getMinutes() % 5) * 1000 * 60 +
-    n.getSeconds() * 1000 +
-    n.getMilliseconds();
+app.get('/dist/diversions', (_req, res) => {
+  let n = nearestFiveMinutes();
   n += 5 * 1000 * 60;
   res.setHeader('Content-Type', 'application/json');
   res.setHeader('Date', new Date().toUTCString());
@@ -1424,7 +1411,7 @@ app.get('/dist/ww(.max)?.(m?js)', (req, res) => {
   });
 });
 
-app.get('/mraid.js', (req, res, next) => {
+app.get('/mraid.js', (req, _res, next) => {
   req.url = req.url.replace('mraid.js', 'examples/mraid/mraid.js');
   next();
 });
@@ -1458,12 +1445,27 @@ app.use('/mraid/', (req, res) => {
 });
 
 /**
- * @param {string} ampJsVersion
+ * Get the current time rounded down to the nearest 5 minutes.
+ * @return {number}
+ */
+function nearestFiveMinutes() {
+  const date = new Date();
+  // Round down to the nearest 5 minutes.
+  const time =
+    Number(date) -
+    (date.getMinutes() % 5) * 1000 * 60 +
+    date.getSeconds() * 1000 +
+    date.getMilliseconds();
+  return time;
+}
+
+/**
+ * @param {string} ampJsVersionString
  * @param {string} file
  * @return {string}
  */
-function addViewerIntegrationScript(ampJsVersion, file) {
-  ampJsVersion = parseFloat(ampJsVersion);
+function addViewerIntegrationScript(ampJsVersionString, file) {
+  const ampJsVersion = parseFloat(ampJsVersionString);
   if (!ampJsVersion) {
     return file;
   }

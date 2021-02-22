@@ -43,6 +43,7 @@ const cssEntryPoints = [
     path: 'ampdoc.css',
     outJs: 'ampdoc.css.js',
     outCss: 'v0.css',
+    append: false,
   },
   {
     path: 'ampshared.css',
@@ -59,23 +60,27 @@ const cssEntryPoints = [
     // be preferred. We should rename the out.css to have a different name
     // than the JS file to avoid loading CSS as JS
     outCss: 'video-autoplay-out.css',
+    append: false,
   },
   {
     path: 'amp-story-entry-point.css',
     outJs: 'amp-story-entry-point.css.js',
     outCss: 'amp-story-entry-point-v0.css',
+    append: false,
   },
   {
     // Publisher imported CSS for `src/amp-story-player/amp-story-player.js`.
     path: 'amp-story-player.css',
     outJs: 'amp-story-player.css.js',
     outCss: 'amp-story-player-v0.css',
+    append: false,
   },
   {
     // Internal CSS used for the iframes inside `src/amp-story-player/amp-story-player.js`.
     path: 'amp-story-player-iframe.css',
     outJs: 'amp-story-player-iframe.css.js',
     outCss: 'amp-story-player-iframe-v0.css',
+    append: false,
   },
 ];
 
@@ -137,8 +142,7 @@ function compileCss(options = {}) {
 
   let promise = Promise.resolve();
 
-  cssEntryPoints.forEach((entryPoint) => {
-    const {path, outJs, outCss, append} = entryPoint;
+  cssEntryPoints.forEach(({path, outJs, outCss, append}) => {
     promise = promise.then(() =>
       writeCssEntryPoint(path, outJs, outCss, append)
     );

@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-const app = require('express').Router();
+const express = require('express');
 const fs = require('fs');
 const request = require('request');
 const {getServeMode, replaceUrls} = require('../app-utils');
 const {log} = require('../../common/logging');
 const {red} = require('kleur/colors');
+
+const app = express.Router();
 
 // In-a-box envelope.
 // Examples:
@@ -97,8 +99,8 @@ app.use('/a4a(|-3p)/', async (req, res) => {
 });
 
 /**
- * @param {Request} req
- * @param {string|undefined} extraExperiment
+ * @param {express.Request} req
+ * @param {string=} extraExperiment
  * @return {!URL}
  */
 function getInaboxUrl(req, extraExperiment) {
@@ -163,7 +165,7 @@ function requestFromUrl(template, url, query) {
  * @param {string} template
  * @param {string} url
  * @param {Object} query
- * @param {string|undefined} body
+ * @param {string=} body
  * @return {string}
  */
 function fillTemplate(template, url, query, body) {
@@ -181,7 +183,7 @@ function fillTemplate(template, url, query, body) {
   return (
     template
       .replace(/BODY/g, newBody)
-      .replace(/LENGTH/g, length)
+      .replace(/LENGTH/g, length.toString())
       .replace(/AD_URL/g, url)
       .replace(/OFFSET/g, query.offset || '0px')
       .replace(/AD_WIDTH/g, query.width || '300')

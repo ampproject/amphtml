@@ -61,7 +61,7 @@ exports.createCtrlcHandler = function (command) {
 /**
  * Exits the Ctrl C handler process.
  *
- * @param {string} handlerProcess
+ * @param {string|number} handlerProcess
  */
 exports.exitCtrlcHandler = function (handlerProcess) {
   const exitCmd = killCmd + ' ' + handlerProcess + ' ' + killSuffix;

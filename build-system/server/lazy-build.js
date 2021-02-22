@@ -53,10 +53,10 @@ function maybeGetUnminifiedName(bundles, name) {
  * required.
  *
  * @param {string} url
- * @param {string} matcher
+ * @param {string|RegExp} matcher
  * @param {!Object} bundles
- * @param {function()} buildFunc
- * @param {function()} next
+ * @param {function(!Object, string, ?Object):Promise} buildFunc
+ * @param {function(): void} next
  */
 async function lazyBuild(url, matcher, bundles, buildFunc, next) {
   const match = url.match(matcher);
@@ -76,8 +76,8 @@ async function lazyBuild(url, matcher, bundles, buildFunc, next) {
  *
  * @param {!Object} bundles
  * @param {string} name
- * @param {function()} buildFunc
- * @return {Promise|undefined}
+ * @param {function(!Object, string, ?Object):Promise} buildFunc
+ * @return {Promise<void>}
  */
 async function build(bundles, name, buildFunc) {
   const bundle = bundles[name];
@@ -105,10 +105,10 @@ async function build(bundles, name, buildFunc) {
  * Lazy builds the correct version of an extension when requested.
  *
  * @param {!Object} req
- * @param {!Object} res
- * @param {function()} next
+ * @param {!Object} _res
+ * @param {function(): void} next
  */
-async function lazyBuildExtensions(req, res, next) {
+async function lazyBuildExtensions(req, _res, next) {
   const matcher = argv.compiled
     ? /\/dist\/v0\/([^\/]*)\.js/ // '/dist/v0/*.js'
     : /\/dist\/v0\/([^\/]*)\.max\.js/; // '/dist/v0/*.max.js'
@@ -119,10 +119,10 @@ async function lazyBuildExtensions(req, res, next) {
  * Lazy builds a non-extension JS file when requested.
  *
  * @param {!Object} req
- * @param {!Object} res
- * @param {function()} next
+ * @param {!Object} _res
+ * @param {function(): void} next
  */
-async function lazyBuildJs(req, res, next) {
+async function lazyBuildJs(req, _res, next) {
   const matcher = /\/.*\/([^\/]*\.js)/;
   await lazyBuild(req.url, matcher, jsBundles, doBuildJs, next);
 }

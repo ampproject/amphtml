@@ -75,7 +75,7 @@ async function terserMinify(code, filename) {
  * @return {!Promise}
  */
 exports.postClosureBabel = function () {
-  return through.obj(async function (file, enc, next) {
+  return through.obj(async function (file, _enc, next) {
     if ((!argv.esm && !argv.sxg) || path.extname(file.path) === '.map') {
       debug(
         CompilationLifecycles['complete'],

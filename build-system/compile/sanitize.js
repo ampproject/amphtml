@@ -20,7 +20,7 @@ const through = require('through2');
 const argv = require('minimist')(process.argv.slice(2));
 
 exports.sanitize = function () {
-  return through.obj((file, enc, next) => {
+  return through.obj((file, _enc, next) => {
     if (!argv.sanitize_vars_for_diff) {
       return next(null, file);
     }
