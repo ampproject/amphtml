@@ -936,16 +936,17 @@ export class AmpA4A extends AMP.BaseElement {
       return Promise.reject(NO_CONTENT_RESPONSE);
     }
 
+    // Extract size will also parse x-ampanalytics header for some subclasses.
+    const size = this.extractSize(httpResponse.headers);
+    this.creativeSize_ = size || this.creativeSize_;
+
     if (this.skipClientSideValidation(httpResponse.headers)) {
       return this.handleFallback_(httpResponse, checkStillCurrent);
     }
 
-    // Duplicating httpResponse stream as safeframe/nameframe rending will need the
+    // Duplicating httpResponse stream as safeframe/nameframe rendering will need the
     // unaltered httpResponse content.
     const fallbackHttpResponse = httpResponse.clone();
-
-    const size = this.extractSize(httpResponse.headers);
-    this.creativeSize_ = size || this.creativeSize_;
 
     // This transformation consumes the detached DOM chunks and
     // exposes our waitForHead and transferBody methods.
