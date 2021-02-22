@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../src/preact';
-import {ContainWrapper} from '../../../src/preact/component';
+import {ContainWrapper, useValueRef} from '../../../src/preact/component';
 import {forwardRef} from '../../../src/preact/compat';
 import {setStyle} from '../../../src/style';
 import {
@@ -24,7 +24,7 @@ import {
   useRef,
   useState,
 } from '../../../src/preact';
-import {useStyles} from './lightbox.jss';
+import {useStyles} from './component.jss';
 
 const ANIMATION_DURATION = 200;
 const ANIMATION_PRESETS = {
@@ -43,17 +43,6 @@ const ANIMATION_PRESETS = {
 };
 
 const DEFAULT_CLOSE_LABEL = 'Close the modal';
-
-/**
- * @param {T} current
- * @return {{current: T}}
- * @template T
- */
-function useValueRef(current) {
-  const valueRef = useRef(null);
-  valueRef.current = current;
-  return valueRef;
-}
 
 /**
  * @param {!LightboxDef.Props} props
