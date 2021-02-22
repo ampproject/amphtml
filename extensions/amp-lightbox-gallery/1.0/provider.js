@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import * as Preact from '../../../src/preact';
-import {Lightbox} from './../../amp-lightbox/1.0/lightbox';
+import {Lightbox} from './../../amp-lightbox/1.0/component';
 import {LightboxGalleryContext} from './context';
 import {useCallback, useRef} from '../../../src/preact';
 
