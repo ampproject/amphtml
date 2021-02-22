@@ -156,7 +156,7 @@ export function OptionShim({
       }
       shimDomElement.addEventListener(type, handler);
       return () =>
-        shimDomElement.removeEventListener(name, pureDevAssert(handler));
+        shimDomElement.removeEventListener(type, pureDevAssert(handler));
     },
     [shimDomElement]
   );
