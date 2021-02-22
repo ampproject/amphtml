@@ -16,9 +16,9 @@ limitations under the License.
 
 # AMP HTML Responsive Attributes
 
-## Overview
+You can apply or remove certain attributes based on screen size. These are responsive attributes, or media attributes. On eligible components, these attributes are applied or removed based on media queries. You can also use a value without any media queries. Media queries evaluate from from left to right, applying the first matching media query. You must include a default value with no media query.
 
-Responsive attributes, or media attributes, are the attributes for certain AMP components that can be configured to use different options based on a media query. You can also use a value without any media queries. The format looks like:
+To apply this behavior to an attribute, use the following format:
 
 ```html
 <amp-component
@@ -26,15 +26,9 @@ Responsive attributes, or media attributes, are the attributes for certain AMP c
 ></amp-component>
 ```
 
-The media queries are evaluated from left to right, with the first matching
-media query being used. A default value (without a media query) is required. In
-this case, if the page has a screen width of 1000px or more, `valueOne` is used.
-If the width is between 999px and 600px, `valueTwo` is used. When it is 599px or
-smaller, `defaultValue` is used.
+In the example above, if the page has a screen of `1000px` or more, it applies `valueOne`. If the width is between `999px` and `600px`, it applies `valueTwo`. When the screen is `599px` or smaller, it applies the `defaultValue`.
 
-## Example
-
-The following `amp-base-carousel` will show three slides at a time when width >= 800px, and 2 otherwise.
+The following `amp-base-carousel` will show `3` slides at a time when width is greater than or equal to `800px`, and `2` otherwise.
 
 [example preview="top-frame" playground="true" imports="amp-base-carousel:1.0"]
 
@@ -56,6 +50,8 @@ The following `amp-base-carousel` will show three slides at a time when width >=
 [/example]
 
 ## Eligible components
+
+You may apply responsive attribute values to the following components:
 
 -   [amp-base-carousel](./../extensions/amp-base-carousel/amp-base-carousel.md)
 -   [amp-inline-gallery-pagination](./../extensions/amp-inline-gallery/amp-inline-gallery.md#include-pagination-indicators)
