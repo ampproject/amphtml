@@ -33,7 +33,7 @@ const excludeGeneric = ['amp-video', 'amp-video-iframe'];
 const entry = (name) =>
   `-   [${name}](https://amp.dev/documentation/components/${name})`;
 
-const find = () =>
+const findVideoInterfaceExtensions = () =>
   getStdout(
     [
       'grep -lr',
@@ -79,7 +79,7 @@ function expected(content) {
   const [sectionStart, sectionEnd] = getSectionRange(content);
   return (
     content.substr(0, sectionStart) +
-    find().map(entry).join('\n') +
+    findVideoInterfaceExtensions().map(entry).join('\n') +
     '\n\n' +
     content.substr(sectionEnd)
   );
