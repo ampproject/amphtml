@@ -32,6 +32,29 @@ this case, if the page has a screen width of 1000px or more, `valueOne` is used.
 If the width is between 999px and 600px, `valueTwo` is used. When it is 599px or
 smaller, `defaultValue` is used.
 
+## Example
+
+The following `amp-base-carousel` will show three slides at a time when width >= 800px, and 2 otherwise.
+
+[example preview="top-frame" playground="true" imports="amp-base-carousel:1.0"]
+
+```html
+<amp-base-carousel
+    width="900" height="200"
+    layout="responsive"
+    visible-count="(min-width: 800px) 3, 2">
+  <amp-img src="./img/redgradient.png" layout="flex-item"></amp-img>
+  <amp-img src="./img/greengradient.png" layout="flex-item"></amp-img>
+  <amp-img src="./img/bluegradient.png" layout="flex-item"></amp-img>
+  <amp-img src="./img/orangegradient.png" layout="flex-item"></amp-img>
+  <amp-img src="./img/tealgradient.png" layout="flex-item"></amp-img>
+  <amp-img src="./img/lemonyellowgradient.png" layout="flex-item"></amp-img>
+  <amp-img src="./img/lilacgradient.png" layout="flex-item"></amp-img>
+</amp-base-carousel>
+```
+
+[/example]
+
 ## Eligible components
 
 -   [amp-base-carousel](./../extensions/amp-base-carousel/amp-base-carousel.md)
