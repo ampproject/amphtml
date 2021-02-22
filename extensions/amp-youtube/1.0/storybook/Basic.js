@@ -101,8 +101,8 @@ function WithStateTable({videoid, autoplay, loop, params, credentials, style}) {
         >
           🔄 current state
         </button>
-        {stateTable}
       </p>
+      {stateTable}
     </>
   );
 }
