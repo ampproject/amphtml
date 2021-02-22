@@ -18,6 +18,12 @@ limitations under the License.
 
 You can apply or remove certain attributes based on screen size. These are responsive attributes, or media attributes. On eligible components, these attributes are applied or removed based on media queries. You can also use a value without any media queries. Media queries evaluate from from left to right, applying the first matching media query. You must include a default value with no media query.
 
+[tip type="note"]
+
+Responsive attributes do not require media queries. You may apply media query eligible attributes the same as regular attributes: `attr-name="attr-value"`.
+
+[/tip]
+
 To apply this behavior to an attribute, use the following format:
 
 ```html
