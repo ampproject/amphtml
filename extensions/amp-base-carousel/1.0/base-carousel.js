@@ -27,6 +27,7 @@ import {CarouselContext} from './carousel-context';
 import {ContainWrapper} from '../../../src/preact/component';
 import {Scroller} from './scroller';
 import {WithAmpContext} from '../../../src/preact/context';
+import {WithLightbox} from '../../amp-lightbox-gallery/1.0/component';
 import {forwardRef} from '../../../src/preact/compat';
 import {isRTL} from '../../../src/dom';
 import {mod} from '../../../src/utils/math';
@@ -93,6 +94,7 @@ function BaseCarouselWithRef(
     controls = Controls.AUTO,
     defaultSlide = 0,
     dir = Direction.AUTO,
+    lightbox = false,
     loop,
     mixedLength = false,
     onFocus,
@@ -298,7 +300,6 @@ function BaseCarouselWithRef(
         direction: rtl ? Direction.RTL : Direction.LTR,
       }}
       ref={containRef}
-      contentRef={contentRef}
       onFocus={(e) => {
         if (onFocus) {
           onFocus(e);
@@ -319,6 +320,12 @@ function BaseCarouselWithRef(
       }}
       tabIndex="0"
       wrapperClassName={classes.carousel}
+      contentAs={lightbox ? WithLightbox : 'div'}
+      contentRef={contentRef}
+      contentProps={{
+        enableActivation: false,
+        render: () => children,
+      }}
       {...rest}
     >
       {!hideControls && (
@@ -336,6 +343,7 @@ function BaseCarouselWithRef(
         alignment={snapAlign}
         autoAdvanceCount={autoAdvanceCount}
         axis={axis}
+        lightbox={lightbox}
         loop={loop}
         mixedLength={mixedLength}
         restingIndex={currentSlide}
