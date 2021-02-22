@@ -114,7 +114,7 @@ function YoutubeWithRef(
 
   src = addParamsToUrl(src, params);
 
-  // Passed through to imperative handoe below.
+  // Passed through to imperative handle below.
   const infoRef = useRef(
     dict({
       'currentTime': 0,
