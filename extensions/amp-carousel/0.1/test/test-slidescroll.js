@@ -23,7 +23,7 @@ import {
   whenUpgradedToCustomElement,
 } from '../../../../src/dom';
 import {installResizeObserverStub} from '../../../../testing/resize-observer-stub';
-import {user} from '../../../../src/log';
+import {dev, user} from '../../../../src/log';
 
 describes.realWin(
   'SlideScroll',
@@ -1269,6 +1269,25 @@ describes.realWin(
         args = {'index': '4'};
         impl.executeAction({method: 'goToSlide', args, satisfiesTrust});
         expect(showSlideSpy).to.have.been.calledWith(4);
+      });
+
+      it('should error on a non-number goToSlide', async () => {
+        const ampSlideScroll = await getAmpSlideScroll(true);
+        const impl = await ampSlideScroll.getImpl();
+        const devErrorSpy = env.sandbox.spy(dev(), 'error');
+
+        impl.showSlideAndTriggerAction_(NaN)
+        expect(devErrorSpy).to.be.calledOnce;
+        expect(devErrorSpy.args[0][0]).to.match(/Attempted to show slide that is not a number/);
+      });
+      
+      it('should return false for invalid slide number', async () => {
+        const ampSlideScroll = await getAmpSlideScroll(true);
+        const impl = await ampSlideScroll.getImpl();
+
+        impl.noOfSlides_ = 10;
+        expect(impl.showSlide_(Infinity)).to.be.false;
+        expect(impl.showSlide_(-Infinity)).to.be.false;
       });
 
       it('should NOT call showSlide_ before layout', async () => {

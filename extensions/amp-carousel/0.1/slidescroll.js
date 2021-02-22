@@ -686,7 +686,10 @@ export class AmpSlideScroll extends BaseSlides {
    */
   showSlide_(newIndex) {
     const {noOfSlides_} = this;
-    newIndex = dev().assertNumber(newIndex);
+    if (isNaN(newIndex)) {
+      dev().error(TAG, 'Attempted to show slide that is not a number');
+      return;
+    }
     if (
       newIndex < 0 ||
       newIndex >= noOfSlides_ ||
