@@ -66,7 +66,6 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
  * @param {string=} opt_type
  * @param {Object=} opt_context
  * @param {{
- *   disallowCustom: (boolean|undefined),
  *   allowFullscreen: (boolean|undefined),
  *   initialIntersection: (IntersectionObserverEntry|undefined),
  * }=} options Options for the created iframe.
@@ -79,11 +78,7 @@ export function getIframe(
   opt_context,
   options = {}
 ) {
-  const {
-    disallowCustom = false,
-    allowFullscreen = false,
-    initialIntersection,
-  } = options;
+  const {allowFullscreen = false, initialIntersection} = options;
   // Check that the parentElement is already in DOM. This code uses a new and
   // fast `isConnected` API and thus only used when it's available.
   devAssert(
@@ -111,12 +106,7 @@ export function getIframe(
   count[attributes['type']] += 1;
 
   const ampdoc = parentElement.getAmpDoc();
-  const baseUrl = getBootstrapBaseUrl(
-    parentWindow,
-    ampdoc,
-    undefined,
-    disallowCustom
-  );
+  const baseUrl = getBootstrapBaseUrl(parentWindow, ampdoc);
   const host = parseUrlDeprecated(baseUrl).hostname;
   // This name attribute may be overwritten if this frame is chosen to
   // be the master frame. That is ok, as we will read the name off
@@ -220,10 +210,9 @@ export function getBootstrapUrl() {
  * @param {!Window} win
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!./preconnect.PreconnectService} preconnect
- * @param {boolean=} opt_disallowCustom whether 3p url should not use meta tag.
  */
-export function preloadBootstrap(win, ampdoc, preconnect, opt_disallowCustom) {
-  const url = getBootstrapBaseUrl(win, ampdoc, undefined, opt_disallowCustom);
+export function preloadBootstrap(win, ampdoc, preconnect) {
+  const url = getBootstrapBaseUrl(win, ampdoc);
   preconnect.preload(ampdoc, url, 'document');
 
   // While the URL may point to a custom domain, this URL will always be
@@ -236,20 +225,18 @@ export function preloadBootstrap(win, ampdoc, preconnect, opt_disallowCustom) {
  * @param {!Window} parentWindow
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  * @param {boolean=} opt_strictForUnitTest
- * @param {boolean=} opt_disallowCustom whether 3p url should not use meta tag.
  * @return {string}
  * @visibleForTesting
  */
 export function getBootstrapBaseUrl(
   parentWindow,
   ampdoc,
-  opt_strictForUnitTest,
-  opt_disallowCustom
+  opt_strictForUnitTest
 ) {
-  const customBootstrapBaseUrl = opt_disallowCustom
-    ? null
-    : getCustomBootstrapBaseUrl(parentWindow, ampdoc, opt_strictForUnitTest);
-  return customBootstrapBaseUrl || getDefaultBootstrapBaseUrl(parentWindow);
+  return (
+    getCustomBootstrapBaseUrl(parentWindow, ampdoc, opt_strictForUnitTest) ||
+    getDefaultBootstrapBaseUrl(parentWindow)
+  );
 }
 
 /**
