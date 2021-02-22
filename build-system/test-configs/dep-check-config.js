@@ -320,6 +320,9 @@ exports.rules = [
         'src/service/variable-source.js',
       'extensions/amp-a4a/0.1/amp-a4a.js->' +
         'src/service/url-replacements-impl.js',
+      // Real time config.
+      'extensions/amp-a4a/0.1/amp-a4a.js->' +
+        'src/service/real-time-config/real-time-config-impl.js',
       // Parsing extension urls.
       'extensions/amp-a4a/0.1/head-validation.js->' +
         'src/service/extension-location.js',
