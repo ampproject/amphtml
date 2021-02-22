@@ -24,7 +24,7 @@ import {
   createElementWithAttributes,
   removeElement,
 } from '../../../src/dom';
-import {devAssert} from '../../../src/log';
+import {pureDevAssert as devAssert} from '../../../src/pure-assert';
 import {dict} from '../../../src/utils/object';
 import {getExperimentBranch} from '../../../src/experiments';
 

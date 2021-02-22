@@ -24,7 +24,7 @@ import {
 } from '../../../src/service/position-observer/position-observer-impl';
 import {RelativePositions} from '../../../src/layout-rect';
 import {Services} from '../../../src/services';
-import {devAssert} from '../../../src/log';
+import {pureDevAssert as devAssert} from '../../../src/pure-assert';
 import {throttle} from '../../../src/utils/rate-limit';
 
 /** @enum {number} */

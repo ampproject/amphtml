@@ -16,7 +16,7 @@
 
 import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
-import {devAssert} from '../../../src/log';
+import {pureDevAssert as devAssert} from '../../../src/pure-assert';
 import {dict} from '../../../src/utils/object';
 import {htmlFor} from '../../../src/static-template';
 import {toArray} from '../../../src/types';

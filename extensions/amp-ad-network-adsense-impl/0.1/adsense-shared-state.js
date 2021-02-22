@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {devAssert} from '../../../src/log';
+import {pureDevAssert as devAssert} from '../../../src/pure-assert';
 
 /**
  * Maintains state in between different AdSense slots on the same page. This

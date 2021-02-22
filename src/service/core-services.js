@@ -15,7 +15,7 @@
  */
 
 import {adoptServiceForEmbedDoc} from '../service';
-import {devAssert} from '../log';
+import {pureDevAssert as devAssert} from '../pure-assert';
 import {installActionServiceForDoc} from './action-impl';
 import {installBatchedXhrService} from './batched-xhr-impl';
 import {installCidService} from './cid-impl';
