@@ -622,6 +622,17 @@ export class Services {
   }
 
   /**
+   * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @return {!Promise<RealTimeConfigManager>}
+   */
+  static realTimeConfigForDoc(elementOrAmpDoc) {
+    return /** @type {!Promise<RealTimeConfigManager>} */ (getServicePromiseForDoc(
+      elementOrAmpDoc,
+      'real-time-config'
+    ));
+  }
+
+  /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!Promise<!./service/storage-impl.Storage>}
    */

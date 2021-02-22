@@ -20,6 +20,7 @@ import {dev, user, userAssert} from '../../log';
 import {getMode} from '../../mode';
 import {isArray, isObject} from '../../types';
 import {isCancellation} from '../../error';
+import {registerServiceBuilderForDoc} from '../../service';
 import {tryParseJson} from '../../json';
 
 /** @type {string} */
@@ -73,6 +74,47 @@ export const RTC_ERROR_ENUM = {
 
 /** @const {!Object<string, boolean>} */
 const GLOBAL_MACRO_ALLOWLIST = {CLIENT_ID: true};
+
+export class RealTimeConfigService {
+  /**
+   * @param {!../ampdoc-impl.AmpDoc} ampDoc
+   */
+  constructor(ampDoc) {
+    /** @protected {!../ampdoc-impl.AmpDoc} */
+    this.ampDoc_ = ampDoc;
+  }
+
+  /**
+   * For a given A4A Element, sends out Real Time Config requests to
+   * any urls or vendors specified by the publisher.
+   * @param {!Element} element
+   * @param {!Object<string, !../../../src/service/variable-source.AsyncResolverDef>} customMacros The ad-network specified macro
+   *   substitutions available to use.
+   * @param {?CONSENT_POLICY_STATE} consentState
+   * @param {?string} consentString
+   * @param {?Object<string, string|number|boolean|undefined>} consentMetadata
+   * @param {!Function} checkStillCurrent
+   * @return {Promise<!Array<!rtcResponseDef>>|undefined}
+   * @visibleForTesting
+   */
+  maybeExecuteRealTimeConfig(
+    element,
+    customMacros,
+    consentState,
+    consentString,
+    consentMetadata,
+    checkStillCurrent
+  ) {
+    return new RealTimeConfigManager(this.ampDoc_).execute(
+      element,
+      customMacros,
+      consentState,
+      consentString,
+      consentMetadata,
+      checkStillCurrent
+    );
+  }
+}
 
 export class RealTimeConfigManager {
   /**
@@ -160,41 +202,6 @@ export class RealTimeConfigManager {
     const urlService = Services.urlForDoc(this.ampDoc_);
     const parsedUrl = urlService.parse(url);
     return (parsedUrl.hostname + parsedUrl.pathname).substr(0, 50);
-  }
-
-  /**
-   * For a given A4A Element, sends out Real Time Config requests to
-   * any urls or vendors specified by the publisher.
-   * @param {!Element} element
-   * @param {!Object<string, !../../../src/service/variable-source.AsyncResolverDef>} customMacros The ad-network specified macro
-   *   substitutions available to use.
-   * @param {?CONSENT_POLICY_STATE} consentState
-   * @param {?string} consentString
-   * @param {?Object<string, string|number|boolean|undefined>} consentMetadata
-   * @param {!Function} checkStillCurrent
-   * @return {Promise<!Array<!rtcResponseDef>>|undefined}
-   * @visibleForTesting
-   */
-  maybeExecuteRealTimeConfig(
-    element,
-    customMacros,
-    consentState,
-    consentString,
-    consentMetadata,
-    checkStillCurrent
-  ) {
-    if (!this.validateRtcConfig_(element)) {
-      return;
-    }
-    this.consentState_ = consentState;
-    this.consentString_ = consentString;
-    this.consentMetadata_ = consentMetadata;
-    this.modifyRtcConfigForConsentStateSettings();
-    customMacros = this.assignMacros(customMacros);
-    this.rtcStartTime_ = Date.now();
-    this.handleRtcForCustomUrls(customMacros, checkStillCurrent);
-    this.handleRtcForVendorUrls(customMacros, checkStillCurrent);
-    return Promise.all(this.promiseArray_);
   }
 
   /**
@@ -552,6 +559,41 @@ export class RealTimeConfigManager {
   }
 
   /**
+   * For a given A4A Element, sends out Real Time Config requests to
+   * any urls or vendors specified by the publisher.
+   * @param {!Element} element
+   * @param {!Object<string, !../../../src/service/variable-source.AsyncResolverDef>} customMacros The ad-network specified macro
+   *   substitutions available to use.
+   * @param {?CONSENT_POLICY_STATE} consentState
+   * @param {?string} consentString
+   * @param {?Object<string, string|number|boolean|undefined>} consentMetadata
+   * @param {!Function} checkStillCurrent
+   * @return {Promise<!Array<!rtcResponseDef>>|undefined}
+   * @visibleForTesting
+   */
+  execute(
+    element,
+    customMacros,
+    consentState,
+    consentString,
+    consentMetadata,
+    checkStillCurrent
+  ) {
+    if (!this.validateRtcConfig_(element)) {
+      return;
+    }
+    this.consentState_ = consentState;
+    this.consentString_ = consentString;
+    this.consentMetadata_ = consentMetadata;
+    this.modifyRtcConfigForConsentStateSettings();
+    customMacros = this.assignMacros(customMacros);
+    this.rtcStartTime_ = Date.now();
+    this.handleRtcForCustomUrls(customMacros, checkStillCurrent);
+    this.handleRtcForVendorUrls(customMacros, checkStillCurrent);
+    return Promise.all(this.promiseArray_);
+  }
+
+  /**
    * Attempts to parse the publisher-defined RTC config off the amp-ad
    * element, then validates that the rtcConfig exists, and contains
    * an entry for either vendor URLs, or publisher-defined URLs. If the
@@ -641,4 +683,12 @@ export class RealTimeConfigManager {
     return true;
   }
 }
-AMP.RealTimeConfigManager = RealTimeConfigManager;
+
+/**
+ * @param {!../ampdoc-impl.AmpDoc} ampdoc
+ */
+export function installRealTimeConfigServiceForDoc(ampdoc) {
+  registerServiceBuilderForDoc(ampdoc, 'real-time-config', function (doc) {
+    return new RealTimeConfigService(doc);
+  });
+}
