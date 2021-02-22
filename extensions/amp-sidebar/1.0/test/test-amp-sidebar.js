@@ -161,6 +161,33 @@ describes.realWin(
         expect(container.children.length).to.equal(0);
       });
 
+      it('should close the sidebar when the esc key is pressed', async () => {
+        element.enqueAction(invocation('open'));
+        await waitForOpen(element, true);
+
+        // sidebar is opened, wait for eventListener to be attached
+        expect(container.children.length).to.equal(2);
+        const sidebar = container.children[0];
+        const doc = sidebar.ownerDocument;
+        const addListenerSpy = env.sandbox.spy(doc, 'addEventListener');
+
+        await waitFor(
+          () => addListenerSpy.callCount > 0,
+          'event listener attached'
+        );
+
+        // dispatch esc key event
+        const documentEl = sidebar.ownerDocument.documentElement;
+        documentEl.dispatchEvent(
+          new KeyboardEvent('keydown', {key: 'Escape', bubbles: true})
+        );
+
+        // verify sidebar is closed
+        await waitForOpen(element, false);
+        expect(element).to.not.have.attribute('open');
+        expect(container.children.length).to.equal(0);
+      });
+
       it('should render all children of the sidebar', async () => {
         // closed sidebar should not render any content
         expect(container.children.length).to.equal(0);
@@ -401,6 +428,25 @@ describes.realWin(
         win.document.dir = documentDir;
       });
 
+      it('should have `overscroll-behavior: none` to prevent background scrolling', async () => {
+        // open the sidebar
+        openButton.click();
+        await waitForOpen(element, true);
+        expect(element).to.have.attribute('open');
+
+        const {
+          firstElementChild: sidebarElement,
+          lastElementChild: backdropElement,
+        } = container;
+
+        expect(
+          win.getComputedStyle(sidebarElement).overscrollBehavior
+        ).to.equal('none');
+        expect(
+          win.getComputedStyle(backdropElement).overscrollBehavior
+        ).to.equal('none');
+      });
+
       describe('programatic access to imperative API', () => {
         it('open', async () => {
           // sidebar is initially closed
@@ -615,6 +661,75 @@ describes.realWin(
         await waitForOpen(element, false);
         expect(element).to.not.have.attribute('open');
         expect(container.children.length).to.equal(0);
+      });
+
+      it('should reverse animations if closed while opening', async () => {
+        const animation = {
+          reverse: env.sandbox.spy(),
+        };
+        animateStub = env.sandbox.stub(Element.prototype, 'animate');
+        animateStub.returns(animation);
+
+        // sidebar is initially closed
+        expect(element).to.not.have.attribute('open');
+        expect(container.children.length).to.equal(0);
+
+        // begin open animation
+        openButton.click();
+        await waitForOpen(element, true);
+
+        // animate stub called once for backdrop, once for sidebar
+        expect(animateStub).to.be.calledTwice;
+
+        // close the sidebar and reverse the animation (mid animation)
+        closeButton.click();
+
+        // animation begins to reverse
+        await waitFor(
+          () => animation.reverse.callCount > 0,
+          'reverse animation has begun'
+        );
+        expect(animation.reverse).to.be.calledTwice;
+      });
+
+      it('should reverse animations if opened while closing', async () => {
+        const animateFunction = Element.prototype.animate;
+        Element.prototype.animate = null;
+
+        // sidebar is initially closed
+        expect(element).to.not.have.attribute('open');
+        expect(container.children.length).to.equal(0);
+
+        // synchronous open
+        openButton.click();
+        await waitForOpen(element, true);
+
+        // turn on animations
+        Element.prototype.animate = animateFunction;
+        const animation = {reverse: env.sandbox.spy()};
+        animateStub = env.sandbox.stub(Element.prototype, 'animate');
+        animateStub.returns(animation);
+
+        // sidebar is initially opened
+        expect(element).to.have.attribute('open');
+        expect(container.children.length).to.not.equal(0);
+
+        // begin close animation
+        closeButton.click();
+        await waitFor(() => animateStub.callCount > 0, 'animation has begun');
+
+        // animate stub called once for backdrop, once for sidebar
+        expect(animateStub).to.be.calledTwice;
+
+        // open the sidebar and reverse the animation (mid animation)
+        openButton.click();
+
+        // animation begins to reverse
+        await waitFor(
+          () => animation.reverse.callCount > 0,
+          'reverse animation has begun'
+        );
+        expect(animation.reverse).to.be.calledTwice;
       });
     });
   }

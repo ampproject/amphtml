@@ -43,6 +43,8 @@ const COMMON_GLOBS = [
   'node_modules/intersection-observer/intersection-observer.install.js',
   'node_modules/resize-observer-polyfill/package.json',
   'node_modules/resize-observer-polyfill/ResizeObserver.install.js',
+  'node_modules/obj-str/package.json',
+  'node_modules/obj-str/dist/obj-str.mjs',
   'node_modules/promise-pjs/package.json',
   'node_modules/promise-pjs/promise.mjs',
   'node_modules/rrule/dist/es5/rrule.js',
@@ -108,6 +110,10 @@ const CLOSURE_SRC_GLOBS = [
   'extensions/amp-animation/**/*.js',
   // Needed for amp-carousel 0.2, amp-inline-gallery, amp-stream-gallery
   'extensions/amp-base-carousel/**/*.js',
+  // Needed for carousel autolightbox
+  'extensions/amp-lightbox-gallery/1.0/*.js',
+  // Needed for amp-lightbox-gallery using amp-lightbox
+  'extensions/amp-lightbox/1.0/*.js',
   // For amp-bind in the web worker (ww.js).
   'extensions/amp-bind/**/*.js',
   // Needed to access to Variant interface from other extensions

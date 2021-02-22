@@ -248,6 +248,8 @@
       "enable_percy_javascript": true
     },
     {
+      // TODO(#32685, @ampproject/wg-stories): see https://percy.io/ampproject/amphtml/builds/8876280/changed/503548953
+      "flaky": true,
       "url": "examples/visual-tests/amp-story/basic.html",
       "name": "amp-story: basic",
       "viewport": {"width": 320, "height": 480},
@@ -694,6 +696,22 @@
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
       ],
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-dev-tools.html#development=1&url=https://preview.amp.dev/documentation/examples/introduction/stories_in_amp",
+      "name": "amp-story-dev-tools: preview tab loading and running",
+      "viewport": {"width": 1080, "height": 720},
+      "loading_complete_selectors": [
+        ".i-amphtml-story-dev-tools-tab.i-amphtml-layout"
+      ]
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-dev-tools.html#development=1&url=https://preview.amp.dev/documentation/examples/introduction/stories_in_amp&devices=desktop;ipad",
+      "name": "amp-story-dev-tools: preview tab loading and running with a desktop and ipad layout",
+      "viewport": {"width": 1080, "height": 720},
+      "loading_complete_selectors": [
+        ".i-amphtml-story-dev-tools-tab.i-amphtml-layout"
+      ]
     },
     {
       "flaky": true,
