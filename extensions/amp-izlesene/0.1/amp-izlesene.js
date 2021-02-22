@@ -16,7 +16,10 @@
 
 import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
-import {devAssert, userAssert} from '../../../src/log';
+import {
+  pureDevAssert as devAssert,
+  pureUserAssert as userAssert,
+} from '../../../src/pure-assert';
 import {dict} from '../../../src/utils/object';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';

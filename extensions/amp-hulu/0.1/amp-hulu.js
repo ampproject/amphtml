@@ -15,7 +15,10 @@
  */
 
 import {Services} from '../../../src/services';
-import {devAssert, userAssert} from '../../../src/log';
+import {
+  pureDevAssert as devAssert,
+  pureUserAssert as userAssert,
+} from '../../../src/pure-assert';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
 import {setIsMediaComponent} from '../../../src/video-interface';

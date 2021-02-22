@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 import {Services} from './services';
-import {devAssert, userAssert} from './log';
+import {
+  pureDevAssert as devAssert,
+  pureUserAssert as userAssert,
+} from './pure-assert';
 import {isArray, isObject} from './types';
 import {tryParseJson} from './json';
 

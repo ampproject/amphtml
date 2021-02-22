@@ -19,7 +19,10 @@ import {Entitlement} from './entitlement';
 import {LocalSubscriptionBasePlatform} from './local-subscription-platform-base';
 import {Messenger} from '../../amp-access/0.1/iframe-api/messenger';
 import {assertHttpsUrl, parseUrlDeprecated} from '../../../src/url';
-import {devAssert, userAssert} from '../../../src/log';
+import {
+  pureDevAssert as devAssert,
+  pureUserAssert as userAssert,
+} from '../../../src/pure-assert';
 import {isArray} from '../../../src/types';
 import {parseJson} from '../../../src/json';
 import {toggle} from '../../../src/style';
