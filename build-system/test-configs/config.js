@@ -47,6 +47,12 @@ const builtRuntimePaths = [
     watched: true,
   },
   {
+    pattern: 'dist/**/*.sxg.js',
+    included: false,
+    nocache: false,
+    watched: true,
+  },
+  {
     pattern: 'dist.3p/**/*',
     included: false,
     nocache: false,
@@ -60,6 +66,12 @@ const builtRuntimePaths = [
   },
   {
     pattern: 'dist.tools/**/*.mjs',
+    included: false,
+    nocache: false,
+    watched: true,
+  },
+  {
+    pattern: 'dist.tools/**/*.sxg.js',
     included: false,
     nocache: false,
     watched: true,
