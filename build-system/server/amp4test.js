@@ -233,7 +233,7 @@ app.get('/a4a/:bid', (req, res) => {
 });
 
 /**
- * @param {{body: string, css: string|undefined, extensions: Array<string>|undefined, head: string|undefined, spec: string|undefined}} config
+ * @param {{body: string, css?: string|undefined, extensions: Array<string>|undefined, head?: string|undefined, spec?: string|undefined, mode?: string|undefined}} config
  * @return {string}
  */
 function composeDocument(config) {

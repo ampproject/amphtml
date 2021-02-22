@@ -79,6 +79,10 @@ const ExamplesSelectModeOptional = ({basepath, selectModePrefix}) =>
         selectModePrefix,
       });
 
+/**
+ * @param {{ name: string, href: string, boundHref?: string|undefined }} config
+ * @return {string}
+ */
 const FileListItem = ({name, href, boundHref}) =>
   html`
     <div class="file-link-container" role="listitem">

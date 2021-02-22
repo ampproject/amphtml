@@ -76,8 +76,8 @@ function prependAmpStyles(head: posthtml.Node): posthtml.Node {
 /**
  * Replace the src for every stories script tag.
  */
-export default function(options: OptionSet = {}): (tree: posthtml.Node) => void {
-  return function(tree: posthtml.Node) {
+export default function (_options: OptionSet = {}): (tree: posthtml.Node) => void {
+  return function (tree: posthtml.Node) {
     tree.match({tag: 'head'}, prependAmpStyles);
   }
 }
