@@ -17,7 +17,7 @@
 import {
   pureDevAssert as devAssert,
   pureUserAssert as userAssert,
-} from '../pure-assert';
+} from '../assert';
 
 /**
  * Parses the date using the `Date.parse()` rules. Additionally supports the
