@@ -89,29 +89,31 @@ async function videoInterfaceList() {
   const content = readFileSync(filepath).toString();
   const output = expected(content);
 
-  if (output !== content) {
-    const temporary = tempy.file({name: basename(filepath)});
-
-    writeFileSync(temporary, output);
-
-    const diff = getStdout(`diff -u ${filepath} ${temporary}`)
-      // we don't want to output the ugly temporary name
-      .replace(temporary, filepath);
-
-    log(
-      (argv.write
-        ? green(`Wrote ${filepath}:`)
-        : red(`${filepath} requires changes:`)) +
-        '\n' +
-        diff
-    );
-
-    if (!argv.write) {
-      throw new Error(`You should update this file:\n\tgulp ${TASK} --write\n`);
-    }
-
-    writeFileSync(filepath, output);
+  if (output === content) {
+    return;
   }
+
+  const temporary = tempy.file({name: basename(filepath)});
+
+  writeFileSync(temporary, output);
+
+  const diff = getStdout(`diff -u ${filepath} ${temporary}`)
+    // we don't want to output the ugly temporary name
+    .replace(temporary, filepath);
+
+  log(
+    (argv.write
+      ? green(`Wrote ${filepath}:`)
+      : red(`${filepath} requires changes:`)) +
+      '\n' +
+      diff
+  );
+
+  if (!argv.write) {
+    throw new Error(`You should update this file:\n\tgulp ${TASK} --write\n`);
+  }
+
+  writeFileSync(filepath, output);
 }
 
 module.exports = {
