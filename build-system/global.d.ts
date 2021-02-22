@@ -1,3 +1,4 @@
+// TODO(#28387) delete this once all uses of these properties have been removed.
 declare global {
   interface Error {
     /**
