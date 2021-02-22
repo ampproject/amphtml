@@ -8,13 +8,7 @@
   "triggers": {
     "pageview": {
       "on": "visible",
-      "request": "url",
-      "iframePing": true
+      "request": "url"
     }
-  },
-  "transport": {
-    "beacon": false,
-    "xhrpost": false,
-    "image": true
   }
 }
