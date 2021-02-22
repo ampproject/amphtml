@@ -20,7 +20,7 @@ import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
 } from '../../../src/viewport-observer';
-import {userAssert} from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/pure-assert';
 
 export class AmpTimeAgo extends AMP.BaseElement {
   /** @param {!AmpElement} element */

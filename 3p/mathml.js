@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {setStyle} from '../src/style';
-import {userAssert} from '../src/log';
+import {pureUserAssert as userAssert} from '../src/pure-assert';
 import {writeScript} from './3p';
 
 /**

@@ -21,7 +21,7 @@ import {Sidebar} from './sidebar';
 import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {toggle} from '../../../src/style';
-import {userAssert} from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/pure-assert';
 
 /** @const {string} */
 const TAG = 'amp-sidebar';

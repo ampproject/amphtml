@@ -17,7 +17,7 @@
 import {Services} from '../../../src/services';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {setIsMediaComponent} from '../../../src/video-interface';
-import {userAssert} from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/pure-assert';
 
 class AmpSpringboardPlayer extends AMP.BaseElement {
   /** @param {!AmpElement} element */
