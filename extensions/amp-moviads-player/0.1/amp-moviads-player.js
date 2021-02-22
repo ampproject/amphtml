@@ -19,7 +19,6 @@ import {Deferred} from '../../../src/utils/promise';
 import {ImaPlayerData} from '../../../ads/google/ima-player-data';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
-import {addUnsafeAllowAutoplay} from '../../../src/iframe-video';
 
 import {
   childElementsByTag,
@@ -81,15 +80,6 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
     /** @private {boolean} */
     this.isAdStart_ = false;
 
-    /** @private {boolean} */
-    this.isStat25_ = false;
-
-    /** @private {boolean} */
-    this.isStat50_ = false;
-
-    /** @private {boolean} */
-    this.isStat75_ = false;
-
     /**
      * Maps events to their unlisteners.
      * @private {!Object<string, function()>}
@@ -134,7 +124,6 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
         );
         _this.viewport_ = _this.getViewport();
         _this.mapExternalConfig();
-        _this.trackByPixel('movi_stat_init');
         _this.setRandMovieSrc();
         if (_this.element.getAttribute('data-delay-ad-request') === 'true') {
           _this.unlisteners_['onFirstScroll'] = _this.viewport_.onScroll(() => {
@@ -253,10 +242,6 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
 
       this.applyFillContent(iframe);
 
-      // This is temporary until M74 launches.
-      // TODO(aghassemi, #21247)
-      addUnsafeAllowAutoplay(iframe);
-
       this.iframe_ = iframe;
 
       const deferred = new Deferred();
@@ -349,30 +334,7 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
     }
 
     const videoEvent = eventData['event'];
-    if (
-      eventData.data &&
-      this.isStat25_ === false &&
-      eventData.data.duration * 0.25 < eventData.data.currentTime
-    ) {
-      this.isStat25_ = true;
-      this.trackByPixel('movi_stat_25_proc');
-    }
-    if (
-      eventData.data &&
-      this.isStat50_ === false &&
-      eventData.data.duration * 0.5 < eventData.data.currentTime
-    ) {
-      this.isStat50_ = true;
-      this.trackByPixel('movi_stat_50_proc');
-    }
-    if (
-      eventData.data &&
-      this.isStat75_ === false &&
-      eventData.data.duration * 0.75 < eventData.data.currentTime
-    ) {
-      this.isStat75_ = true;
-      this.trackByPixel('movi_stat_75_proc');
-    }
+
     if (videoEvent === VideoEvents.AD_START) {
       this.isAdStart_ = true;
     }
@@ -394,7 +356,6 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
       this.hideWhenEnd();
       this.functionAfterEnded();
       this.config_.functionAfterEnded = null;
-      this.trackByPixel('movi_stat_100_proc');
     }
 
     if (isEnumValue(VideoEvents, videoEvent)) {
@@ -564,7 +525,6 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
       'mid': null,
       'license': null,
       'pid': null,
-      'stat': null,
     };
     Object.keys(mapConfIndex).forEach(key => {
       if (this.configLocal_[key] !== undefined) {
@@ -597,8 +557,6 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
   hideWhenNoAd() {
     if (this.config_.hideWhenNoAd === true) {
       this.element.remove();
-    } else {
-      this.trackByPixel('movi_stat_start');
     }
   }
 
@@ -617,21 +575,6 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
     this.embedWatermark();
     this.layoutLoad();
     this.preconnectAds();
-  }
-
-  /** @override */
-  trackByPixel(event) {
-    const _this = this;
-    if (this.config_.stat.length) {
-      this.config_.stat.forEach(function(item) {
-        if (item.event === event && item.track.trim() != '') {
-          const img = document.createElement('IMG');
-          img.src = _this.replaceUrl(item.track);
-          img.className = 'pixel-none';
-          _this.element.appendChild(img);
-        }
-      });
-    }
   }
 
   /** @override
