@@ -57,8 +57,36 @@ export const _default = () => {
  * @return {*}
  */
 function WithStateTable({videoid, autoplay, loop, params, credentials, style}) {
-  const [stateTable, setStateTable] = useState(null);
   const ref = useRef(null);
+
+  const [stateTable, setStateTable] = useState(null);
+  const setCurrentStateTable = () => {
+    setStateTable(
+      <table>
+        <tr>
+          <td>autoplay</td>
+          <td>{ref.current.autoplay}</td>
+        </tr>
+        <tr>
+          <td>controls</td>
+          <td>{ref.current.controls}</td>
+        </tr>
+        <tr>
+          <td>loop</td>
+          <td>{ref.current.loop}</td>
+        </tr>
+        <tr>
+          <td>currentTime</td>
+          <td>{ref.current.currentTime}</td>
+        </tr>
+        <tr>
+          <td>duration</td>
+          <td>{ref.current.duration}</td>
+        </tr>
+      </table>
+    );
+  };
+
   return (
     <>
       <Youtube
@@ -71,36 +99,7 @@ function WithStateTable({videoid, autoplay, loop, params, credentials, style}) {
         credentials={credentials}
       />
       <p>
-        <button
-          onClick={() => {
-            setStateTable(
-              <table>
-                <tr>
-                  <td>autoplay</td>
-                  <td>{ref.current.autoplay}</td>
-                </tr>
-                <tr>
-                  <td>controls</td>
-                  <td>{ref.current.controls}</td>
-                </tr>
-                <tr>
-                  <td>loop</td>
-                  <td>{ref.current.loop}</td>
-                </tr>
-                <tr>
-                  <td>currentTime</td>
-                  <td>{ref.current.currentTime}</td>
-                </tr>
-                <tr>
-                  <td>duration</td>
-                  <td>{ref.current.duration}</td>
-                </tr>
-              </table>
-            );
-          }}
-        >
-          🔄 current state
-        </button>
+        <button onClick={setCurrentStateTable}>🔄 current state</button>
       </p>
       {stateTable}
     </>
