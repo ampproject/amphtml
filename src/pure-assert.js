@@ -55,40 +55,118 @@ export class UserError extends Error {
  * Throws a provided error if the second argument isn't trueish.
  * @param {Object} errorCls
  * @param {T} shouldBeTruthy
- * @param {string} message
+ * @param {string} opt_message
+ * @param {...*} var_args Arguments substituted into %s in the message
  * @return {T}
- * @throws {Error} when attribute values are missing or invalid.
+ * @throws {Error} when shouldBeTruthy is not truthy.
  */
-function pureAssertion(errorCls, shouldBeTruthy, message) {
+function pureAssertion(errorCls, shouldBeTruthy, opt_message, var_args) {
   // TODO: Support format strings.
-  if (!shouldBeTruthy) {
-    throw new errorCls(message);
+  if (shouldBeTruthy) {
+    return shouldBeTruthy;
   }
-  return shouldBeTruthy;
+
+  // Substitute provided values into format string in message
+  const message = Array.prototype.slice
+    .call(arguments, 3)
+    .reduce(
+      (msg, subValue) => msg.replace('%s', subValue),
+      opt_message || 'Assertion failed'
+    );
+
+  throw new errorCls(message);
 }
 
 /**
  * Throws a user error if the first argument isn't trueish. Mirrors userAssert
  * in src/log.js.
  * @param {T} shouldBeTruthy
- * @param {string} message
+ * @param {string} opt_message
+ * @param {*=} opt_1 Optional argument (var arg as individual params for better
+ * @param {*=} opt_2 Optional argument inlining)
+ * @param {*=} opt_3 Optional argument
+ * @param {*=} opt_4 Optional argument
+ * @param {*=} opt_5 Optional argument
+ * @param {*=} opt_6 Optional argument
+ * @param {*=} opt_7 Optional argument
+ * @param {*=} opt_8 Optional argument
+ * @param {*=} opt_9 Optional argument
  * @return {T}
- * @throws {UserError} when attribute values are missing or invalid.
+ * @throws {UserError} when shouldBeTruthy is not truthy.
  * @closurePrimitive {asserts.truthy}
  */
-export function pureUserAssert(shouldBeTruthy, message) {
-  return pureAssertion(UserError, shouldBeTruthy, message);
+export function pureUserAssert(
+  shouldBeTruthy,
+  opt_message,
+  opt_1,
+  opt_2,
+  opt_3,
+  opt_4,
+  opt_5,
+  opt_6,
+  opt_7,
+  opt_8,
+  opt_9
+) {
+  return pureAssertion(
+    UserError,
+    shouldBeTruthy,
+    opt_message,
+    opt_1,
+    opt_2,
+    opt_3,
+    opt_4,
+    opt_5,
+    opt_6,
+    opt_7,
+    opt_8,
+    opt_9
+  );
 }
 
 /**
  * Throws an error if the first argument isn't trueish. Mirrors devAssert in
  * src/log.js.
  * @param {T} shouldBeTruthy
- * @param {string} message
+ * @param {string} opt_message
+ * @param {*=} opt_1 Optional argument (var arg as individual params for better
+ * @param {*=} opt_2 Optional argument inlining)
+ * @param {*=} opt_3 Optional argument
+ * @param {*=} opt_4 Optional argument
+ * @param {*=} opt_5 Optional argument
+ * @param {*=} opt_6 Optional argument
+ * @param {*=} opt_7 Optional argument
+ * @param {*=} opt_8 Optional argument
+ * @param {*=} opt_9 Optional argument
  * @return {T}
- * @throws {Error} when attribute values are missing or invalid.
+ * @throws {Error} when shouldBeTruthy is not truthy.
  * @closurePrimitive {asserts.truthy}
  */
-export function pureDevAssert(shouldBeTruthy, message) {
-  return pureAssertion(Error, shouldBeTruthy, message);
+export function pureDevAssert(
+  shouldBeTruthy,
+  opt_message,
+  opt_1,
+  opt_2,
+  opt_3,
+  opt_4,
+  opt_5,
+  opt_6,
+  opt_7,
+  opt_8,
+  opt_9
+) {
+  return pureAssertion(
+    Error,
+    shouldBeTruthy,
+    opt_message,
+    opt_1,
+    opt_2,
+    opt_3,
+    opt_4,
+    opt_5,
+    opt_6,
+    opt_7,
+    opt_8,
+    opt_9
+  );
 }
