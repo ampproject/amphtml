@@ -250,5 +250,5 @@ function makeMethodMessage(method) {
 }
 
 const Youtube = forwardRef(YoutubeWithRef);
-Youtube.displayName = 'YouTube'; // Make findable for tests.
+Youtube.displayName = 'Youtube'; // Make findable for tests.
 export {Youtube};
