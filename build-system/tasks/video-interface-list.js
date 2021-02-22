@@ -28,6 +28,10 @@ const filepath = 'spec/amp-video-interface.md';
 
 const excludeGeneric = ['amp-video', 'amp-video-iframe'];
 
+const grepJsContent = '"@implements {.*VideoInterface}"';
+
+const grepJsFiles = 'extensions/**/*.js';
+
 // File should have a section containing only entries.
 // - [amp-whatever](https://amp.dev/documentation/components/amp-whatever)
 const entry = (name) =>
@@ -35,11 +39,7 @@ const entry = (name) =>
 
 const findVideoInterfaceExtensions = () =>
   getStdout(
-    [
-      'grep -lr',
-      '"@implements {.*VideoInterface}"',
-      ...fastGlob.sync('extensions/**/*.js'),
-    ].join(' ')
+    ['grep -lr', grepJsContent, ...fastGlob.sync(grepJsFiles)].join(' ')
   )
     .trim()
     .split('\n')
