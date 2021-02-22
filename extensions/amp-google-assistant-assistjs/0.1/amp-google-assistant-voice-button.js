@@ -53,6 +53,7 @@ export class AmpGoogleAssistantVoiceButton extends AMP.BaseElement {
     this.configService_.getWidgetIframeUrl('voicebutton').then((iframeUrl) => {
       addAttributesToElement(iframe, {
         src: iframeUrl,
+        sandbox: 'allow-scripts',
       });
 
       // applyFillContent so that frame covers the entire component.

@@ -40,13 +40,14 @@ export class AssistjsFrameService {
 
   /** @private */
   createAssistantIframe_() {
-    document.addEventListener('DOMContentLoaded', () => {
+    this.ampDoc_.whenReady().then(() => {
       this.configService_ = Services.assistjsConfigServiceForDoc(this.ampDoc_);
-      const iframe = this.win.document.createElement('iframe');
+      const iframe = window.document.createElement('iframe');
       this.configService_.getWidgetIframeUrl('frame').then((iframeUrl) => {
         addAttributesToElement(iframe, {
           src: iframeUrl,
           allow: 'microphone',
+          sandbox: 'allow-scripts',
         });
         toggle(iframe, false);
         document.body.appendChild(iframe);
