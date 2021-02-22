@@ -140,4 +140,9 @@ createTask('unit', 'unit', 'unit');
 createTask('update-packages', 'updatePackages', 'update-packages');
 createTask('validator', 'validator', 'validator');
 createTask('validator-webui', 'validatorWebui', 'validator');
+createTask(
+  'video-interface-list',
+  'video-interface-list',
+  'video-interface-list'
+);
 createTask('visual-diff', 'visualDiff', 'visual-diff');

@@ -42,6 +42,7 @@ function pushBuildWorkflow() {
   timedExecOrDie('gulp check-types');
   timedExecOrDie('gulp check-sourcemaps');
   timedExecOrDie('gulp performance-urls');
+  timedExecOrDie('gulp video-interface-list');
 }
 
 async function prBuildWorkflow() {
@@ -50,6 +51,7 @@ async function prBuildWorkflow() {
 
   if (buildTargetsInclude(Targets.PRESUBMIT)) {
     timedExecOrDie('gulp presubmit');
+    timedExecOrDie('gulp video-interface-list');
   }
 
   if (buildTargetsInclude(Targets.LINT)) {
