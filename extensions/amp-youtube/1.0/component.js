@@ -21,7 +21,9 @@ import {VideoWrapper} from '../../amp-video/1.0/video-wrapper';
 import {addParamsToUrl} from '../../../src/url';
 import {dict} from '../../../src/utils/object';
 import {dispatchCustomEvent} from '../../../src/dom';
+import {forwardRef} from '../../../src/preact/compat';
 import {mutedOrUnmutedEvent, objOrParseJson} from '../../../src/iframe-video';
+import {useImperativeHandle, useRef} from '../../../src/preact';
 
 // Correct PlayerStates taken from
 // https://developers.google.com/youtube/iframe_api_reference#Playback_status
@@ -62,17 +64,14 @@ const VIDEO_EVENT_OPTIONS = {bubbles: false, cancelable: false};
 
 /**
  * @param {!YoutubeProps} props
+ * @param {{current: (T|null)}} ref
  * @return {PreactDef.Renderable}
+ * @template T
  */
-export function Youtube({
-  autoplay,
-  loop,
-  videoid,
-  liveChannelid,
-  params = {},
-  credentials,
-  ...rest
-}) {
+function YoutubeWithRef(
+  {autoplay, loop, videoid, liveChannelid, params = {}, credentials, ...rest},
+  ref
+) {
   const datasourceExists =
     !(videoid && liveChannelid) && (videoid || liveChannelid);
 
@@ -115,19 +114,50 @@ export function Youtube({
 
   src = addParamsToUrl(src, params);
 
+  // Passed through to imperative handoe below.
+  const infoRef = useRef(
+    dict({
+      'currentTime': 0,
+      'duration': NaN,
+    })
+  );
+
+  useImperativeHandle(
+    ref,
+    () => {
+      const handle = {};
+      for (const key in infoRef.current) {
+        const get = () => infoRef.current[key];
+        Object.defineProperty(handle, key, {get});
+      }
+      return handle;
+    },
+    [infoRef]
+  );
+
   const onMessage = ({data, currentTarget}) => {
-    data = objOrParseJson(data);
-    if (data == null) {
+    const parsedData = objOrParseJson(data);
+    if (!parsedData) {
       return;
     }
-    if (data.event == 'initialDelivery') {
+
+    const {'event': event, 'info': info} = parsedData;
+
+    if (event == 'initialDelivery') {
       dispatchVideoEvent(currentTarget, VideoEvents.LOADEDMETADATA);
       return;
     }
-    const {info} = data;
-    if (info == undefined) {
+
+    if (!info) {
       return;
     }
+
+    for (const key in infoRef.current) {
+      if (info[key] != null) {
+        infoRef.current[key] = info[key];
+      }
+    }
+
     const playerState = info['playerState'];
     if (data.event == 'infoDelivery' && playerState == 0 && loop) {
       currentTarget.contentWindow./*OK*/ postMessage(
@@ -140,10 +170,10 @@ export function Youtube({
         '*'
       );
     }
-    if (data.event == 'infoDelivery' && playerState != undefined) {
+    if (event == 'infoDelivery' && playerState != undefined) {
       dispatchVideoEvent(currentTarget, PlayerStates[playerState.toString()]);
     }
-    if (data.event == 'infoDelivery' && info['muted']) {
+    if (event == 'infoDelivery' && info['muted']) {
       dispatchVideoEvent(currentTarget, mutedOrUnmutedEvent(info['muted']));
       return;
     }
@@ -218,3 +248,7 @@ function makeMethodMessage(method) {
     })
   );
 }
+
+const Youtube = forwardRef(YoutubeWithRef);
+Youtube.displayName = 'YouTube'; // Make findable for tests.
+export {Youtube};

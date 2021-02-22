@@ -23,6 +23,7 @@ import {
 } from '../../../amp-accordion/1.0/component';
 import {Youtube} from '../component';
 import {boolean, number, object, text, withKnobs} from '@storybook/addon-knobs';
+import {useRef, useState} from '../../../../src/preact';
 import {withA11y} from '@storybook/addon-a11y';
 
 export default {
@@ -50,6 +51,84 @@ export const _default = () => {
     />
   );
 };
+
+/**
+ * @param {*} props
+ * @return {*}
+ */
+function WithStateTable({videoid, autoplay, loop, params, credentials, style}) {
+  const [stateTable, setStateTable] = useState(null);
+  const ref = useRef(null);
+  return (
+    <>
+      <Youtube
+        ref={ref}
+        autoplay={autoplay}
+        loop={loop}
+        videoid={videoid}
+        params={params}
+        style={style}
+        credentials={credentials}
+      />
+      <p>
+        <button
+          onClick={() => {
+            setStateTable(
+              <table>
+                <tr>
+                  <td>autoplay</td>
+                  <td>{ref.current.autoplay}</td>
+                </tr>
+                <tr>
+                  <td>controls</td>
+                  <td>{ref.current.controls}</td>
+                </tr>
+                <tr>
+                  <td>loop</td>
+                  <td>{ref.current.loop}</td>
+                </tr>
+                <tr>
+                  <td>currentTime</td>
+                  <td>{ref.current.currentTime}</td>
+                </tr>
+                <tr>
+                  <td>duration</td>
+                  <td>{ref.current.duration}</td>
+                </tr>
+              </table>
+            );
+          }}
+        >
+          🔄 current state
+        </button>
+        {stateTable}
+      </p>
+    </>
+  );
+}
+
+/**
+ * @return {*}
+ */
+export function State() {
+  const width = number('width', 300);
+  const height = number('height', 200);
+  const videoid = text('videoid', 'IAvf-rkzNck');
+  const autoplay = boolean('autoplay', false);
+  const loop = boolean('loop', false);
+  const params = object('params', {});
+  const credentials = text('credentials', 'include');
+  return (
+    <WithStateTable
+      autoplay={autoplay}
+      loop={loop}
+      videoid={videoid}
+      params={params}
+      style={{width, height}}
+      credentials={credentials}
+    />
+  );
+}
 
 export const liveChannelId = () => {
   const width = number('width', 300);
