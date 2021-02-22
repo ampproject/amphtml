@@ -63,7 +63,7 @@ function logOnSameLine(...messages) {
   if (!isCiBuild() && process.stdout.isTTY) {
     process.stdout.moveCursor(0, -1);
     process.stdout.cursorTo(0);
-    process.stdout.clearLine();
+    process.stdout.clearLine(0);
   }
   log(...messages);
 }
