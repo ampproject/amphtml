@@ -20,7 +20,7 @@ import {
   pureUserAssert as userAssert,
 } from '../../src/assert';
 
-describe('assertions', () => {
+describes.sandboxed('assertions', {}, () => {
   describe('devAssert', () => {
     it('should not fail for truthy values', () => {
       devAssert(true, 'True!');
