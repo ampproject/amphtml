@@ -159,7 +159,7 @@ function YoutubeWithRef(
     }
 
     const playerState = info['playerState'];
-    if (data.event == 'infoDelivery' && playerState == 0 && loop) {
+    if (event == 'infoDelivery' && playerState == 0 && loop) {
       currentTarget.contentWindow./*OK*/ postMessage(
         JSON.stringify(
           dict({
