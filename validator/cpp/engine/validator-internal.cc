@@ -5755,7 +5755,9 @@ class Validator {
         for (auto& attr : node->Attributes()) {
           if (!has_template_ancestor &&
               htmlparser::Strings::EqualFold(attr.key, "type") &&
-              htmlparser::Strings::EqualFold(attr.value, "application/json")) {
+              (htmlparser::Strings::EqualFold(attr.value, "application/json") ||
+               htmlparser::Strings::EqualFold(attr.value,
+                                              "application/ld+json"))) {
             if (auto v = htmlparser::json::JSONParser::Validate(
                     node->FirstChild()->Data());
                 !v.first) {
