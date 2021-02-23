@@ -63,26 +63,14 @@ function WithStateTable({videoid, autoplay, loop, params, credentials, style}) {
   const setCurrentStateTable = () => {
     setStateTable(
       <table>
-        <tr>
-          <td>autoplay</td>
-          <td>{ref.current.autoplay}</td>
-        </tr>
-        <tr>
-          <td>controls</td>
-          <td>{ref.current.controls}</td>
-        </tr>
-        <tr>
-          <td>loop</td>
-          <td>{ref.current.loop}</td>
-        </tr>
-        <tr>
-          <td>currentTime</td>
-          <td>{ref.current.currentTime}</td>
-        </tr>
-        <tr>
-          <td>duration</td>
-          <td>{ref.current.duration}</td>
-        </tr>
+        {['autoplay', 'controls', 'loop', 'currentTime', 'duration'].map(
+          (key) => (
+            <tr key={key}>
+              <td>{key}</td>
+              <td>{ref.current[key]}</td>
+            </tr>
+          )
+        )}
       </table>
     );
   };
