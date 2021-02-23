@@ -23,9 +23,9 @@ import {
 } from './component';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {childElementsByTag, toggleAttribute} from '../../../src/dom';
+import {pureDevAssert as devAssert} from '../../../src/assert';
 import {dict, memo} from '../../../src/utils/object';
 import {forwardRef} from '../../../src/preact/compat';
-import {pureDevAssert} from '../../../src/pure-assert';
 import {toArray} from '../../../src/types';
 import {
   useImperativeHandle,
@@ -175,7 +175,7 @@ function HeaderShim(
       sectionElement[SECTION_POST_RENDER]();
     }
     return () => {
-      headerElement.removeEventListener('click', pureDevAssert(onClick));
+      headerElement.removeEventListener('click', devAssert(onClick));
     };
   }, [
     sectionElement,
