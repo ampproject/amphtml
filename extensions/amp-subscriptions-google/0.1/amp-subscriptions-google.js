@@ -730,10 +730,11 @@ export class GoogleSubscriptionsPlatform {
   activate(entitlement, grantEntitlement, continueAuthorizationFlow) {
     const best = grantEntitlement || entitlement;
 
-    Promise.all([
-      this.getGoogleMeteringStrategy_(),
-      this.serviceAdapter_.loadMeteringState(),
-    ]).then((results) => {
+    const googleMeteringStrategyPromise = this.getGoogleMeteringStrategy_();
+    const meteringStatePromise = this.serviceAdapter_.loadMeteringState();
+    const promises = [googleMeteringStrategyPromise, meteringStatePromise];
+
+    promises.then((results) => {
       const meteringStrategy = results[0];
       const meteringState = results[1];
 
@@ -1094,7 +1095,6 @@ export class AmpFetcher {
    * @return {!Promise<!JsonObject>}
    */
   sendPostToPublisher(url, payload) {
-    console.log(payload);
     const init = {
       method: 'POST',
       headers: {
@@ -1104,9 +1104,13 @@ export class AmpFetcher {
       credentials: 'include',
       body: JSON.stringify(payload),
     };
-    return this.fetch(url, init).then(
+
+    const fetchPromise = this.fetch(url, init);
+    const responsePromise = fetchPromise.then(
       (response) => (response && response.json()) || {}
     );
+
+    return responsePromise;
   }
 }
 
