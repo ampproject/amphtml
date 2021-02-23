@@ -16,7 +16,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const globby = require('globby');
 const tempy = require('tempy');
-const {bold, blue, yellow} = require('kleur/colors');
+const {bold, blue, red} = require('kleur/colors');
 const {getStdout} = require('../common/process');
 const {log, logWithoutTimestamp} = require('../common/logging');
 const {readFile, writeFile} = require('fs-extra');
@@ -92,23 +92,17 @@ async function checkVideoInterfaceList() {
     return;
   }
 
-  log(
-    bold(
-      argv.write
-        ? blue(`Writing to ${filepath}:`)
-        : yellow(`${filepath} requires changes:`)
-    )
-  );
-
   logWithoutTimestamp(await diffTentative(filepath, output));
 
   if (!argv.write) {
     throw new Error(
-      `You should apply these changes by running:\n\tgulp check-video-interface-list --write\n`
+      bold(red(`You should apply the above changes:`)) +
+        '\n\tgulp check-video-interface-list --write\n'
     );
   }
 
   await writeFile(filepath, output);
+  log('Wrote', bold(blue(filepath)));
 }
 
 module.exports = {
