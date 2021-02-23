@@ -125,6 +125,45 @@ function patchResizeObserver() {
 }
 
 /**
+ * Patches Timeago by renaming some locales in lang/ in the format supported by
+ * amp-timeago, as well as files which import these.
+ */
+function patchTimeago() {
+  // Copies full.js into a new file that imports updated formats.
+  const patchedFullName = 'node_modules/timeago.js/lib/full.patched.js';
+  let file = fs.readFileSync('node_modules/timeago.js/lib/full.js').toString();
+
+  // Wrap the contents inside the install function.
+  file = file
+    // For some reason Closure fails on this three lines. Babel is fine.
+    .replace(
+      `Object.keys(Languages).forEach(function (locale) {
+        _1.register(locale, Languages[locale]);
+    });`,
+      `var timeagoReplacements = {
+        'en_US': 'en',
+        'en_short': 'enshort',
+        'bn_IN': 'inbg',
+        'id_ID': 'inid',
+        'hi_IN': 'inhi',
+        'nb_NO': 'nbno',
+        'nn_NO': 'nnno',
+        'pt_BR': 'ptbr',
+        'zh_CN': 'zhcn',
+        'zh_TW': 'zhtw',
+      };
+      Object.keys(Languages).forEach(function (locale) {
+        var localeStr = locale;
+        if (timeagoReplacements[locale]) {
+          localeStr = timeagoReplacements[locale]
+        }
+          _1.register(localeStr, Languages[locale]);
+    });`
+    );
+  writeIfUpdated(patchedFullName, file);
+}
+
+/**
  * Deletes the map file for rrule, which breaks closure compiler.
  * TODO(rsimha): Remove this workaround after a fix is merged for
  * https://github.com/google/closure-compiler/issues/3720.
@@ -186,6 +225,7 @@ async function updatePackages() {
   patchIntersectionObserver();
   patchResizeObserver();
   removeRruleSourcemap();
+  patchTimeago();
 }
 
 module.exports = {
