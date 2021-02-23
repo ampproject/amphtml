@@ -19,7 +19,7 @@ import {CarouselContextProp} from '../../amp-base-carousel/1.0/carousel-props';
 import {Pagination} from './pagination';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {isExperimentOn} from '../../../src/experiments';
-import {pureUserAssert as userAssert} from '../../../src/pure-assert';
+import {pureUserAssert as userAssert} from '../../../src/assert';
 
 /** @const {string} */
 export const TAG = 'amp-inline-gallery-pagination';

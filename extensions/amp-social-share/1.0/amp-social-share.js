@@ -26,7 +26,7 @@ import {getSocialConfig} from './social-share-config';
 import {isExperimentOn} from '../../../src/experiments';
 import {toWin} from '../../../src/types';
 import {toggle} from '../../../src/style';
-import {pureUserAssert as userAssert} from '../../../src/pure-assert';
+import {pureUserAssert as userAssert} from '../../../src/assert';
 
 /** @const {string} */
 const TAG = 'amp-social-share';

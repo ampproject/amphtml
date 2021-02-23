@@ -19,7 +19,7 @@ import {Services} from '../services';
 import {createCustomElementClass, stubbedElements} from '../custom-element';
 import {extensionScriptsInNode} from '../element-service';
 import {reportError} from '../error';
-import {pureUserAssert as userAssert} from '../pure-assert';
+import {pureUserAssert as userAssert} from '../assert';
 
 /**
  * @param {!Window} win

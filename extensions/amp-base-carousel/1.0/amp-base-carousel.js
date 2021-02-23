@@ -25,7 +25,7 @@ import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/utils/object';
 import {dispatchCustomEvent} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
-import {pureUserAssert as userAssert} from '../../../src/pure-assert';
+import {pureUserAssert as userAssert} from '../../../src/assert';
 
 /** @const {string} */
 const TAG = 'amp-base-carousel';

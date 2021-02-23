@@ -15,7 +15,7 @@
  */
 
 import {Observable} from '../observable';
-import {pureDevAssert as devAssert} from '../pure-assert';
+import {pureDevAssert as devAssert} from '../assert';
 import {registerServiceBuilderForDoc} from '../service';
 
 /**

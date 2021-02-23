@@ -24,7 +24,7 @@ import {CommonSignals} from '../../../src/common-signals';
 import {EventType, dispatch} from './events';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
-import {pureDevAssert as devAssert} from '../../../src/pure-assert';
+import {pureDevAssert as devAssert} from '../../../src/assert';
 import {htmlFor} from '../../../src/static-template';
 
 /** @struct @typedef {{className: string, triggers: (string|undefined)}} */

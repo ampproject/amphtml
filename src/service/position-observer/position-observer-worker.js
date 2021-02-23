@@ -15,7 +15,7 @@
  */
 
 import {Services} from '../../services';
-import {pureDevAssert as devAssert} from '../../pure-assert';
+import {pureDevAssert as devAssert} from '../../assert';
 import {
   layoutRectEquals,
   layoutRectLtwh,

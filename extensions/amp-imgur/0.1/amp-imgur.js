@@ -32,7 +32,7 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {isObject} from '../../../src/types';
 import {removeElement} from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';
-import {pureUserAssert as userAssert} from '../../../src/pure-assert';
+import {pureUserAssert as userAssert} from '../../../src/assert';
 
 export class AmpImgur extends AMP.BaseElement {
   /** @param {!AmpElement} element */

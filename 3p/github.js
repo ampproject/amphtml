@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {pureUserAssert as userAssert} from '../src/pure-assert';
+import {pureUserAssert as userAssert} from '../src/assert';
 import {writeScript} from './3p';
 
 /**

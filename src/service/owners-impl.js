@@ -17,7 +17,7 @@
 import {OwnersInterface} from './owners-interface';
 import {Resource} from './resource';
 import {Services} from '../services';
-import {pureDevAssert as devAssert} from '../pure-assert';
+import {pureDevAssert as devAssert} from '../assert';
 import {isArray} from '../types';
 import {registerServiceBuilderForDoc} from '../service';
 

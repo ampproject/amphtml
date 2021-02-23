@@ -16,7 +16,7 @@
 
 import {ownProperty} from '../../../src/utils/object';
 import {tryFocus} from '../../../src/dom';
-import {pureUserAssert as userAssert} from '../../../src/pure-assert';
+import {pureUserAssert as userAssert} from '../../../src/assert';
 
 const TAG = 'amp-autocomplete';
 

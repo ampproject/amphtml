@@ -15,7 +15,7 @@
  */
 
 import {isObject, toArray} from '../../../src/types';
-import {pureUserAssert as userAssert} from '../../../src/pure-assert';
+import {pureUserAssert as userAssert} from '../../../src/assert';
 
 /**
  * Types of possibile mutations

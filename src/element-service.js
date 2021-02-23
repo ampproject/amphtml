@@ -24,7 +24,7 @@ import {
   getServicePromiseOrNull,
   getServicePromiseOrNullForDoc,
 } from './service';
-import {pureUserAssert as userAssert} from './pure-assert';
+import {pureUserAssert as userAssert} from './assert';
 
 /**
  * Returns a promise for a service for the given id and window. Also expects an

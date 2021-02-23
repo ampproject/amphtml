@@ -17,7 +17,7 @@ import {getData, listen} from './../../../src/event-helper';
 import {isFiniteNumber, isObject} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
-import {pureUserAssert as userAssert} from '../../../src/pure-assert';
+import {pureUserAssert as userAssert} from '../../../src/assert';
 
 export class AmpRiddleQuiz extends AMP.BaseElement {
   /** @param {!AmpElement} element */

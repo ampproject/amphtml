@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {pureUserAssert as userAssert} from '../../../../src/pure-assert';
+import {pureUserAssert as userAssert} from '../../../../src/assert';
 
 /**
  * @param {!Array<!../web-animation-types.InternalWebAnimationRequestDef>} requests

@@ -15,7 +15,7 @@
  */
 
 import {Layout} from '../../../src/layout';
-import {pureUserAssert as userAssert} from '../../../src/pure-assert';
+import {pureUserAssert as userAssert} from '../../../src/assert';
 
 /** @const {string} */
 export const TAG = 'amp-embedly-key';

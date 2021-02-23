@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {pureDevAssert as devAssert} from './pure-assert';
+import {pureDevAssert as devAssert} from './assert';
 
 /**
  * @template STATE

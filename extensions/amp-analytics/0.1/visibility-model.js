@@ -16,7 +16,7 @@
 
 import {Deferred} from '../../../src/utils/promise';
 import {Observable} from '../../../src/observable';
-import {pureDevAssert as devAssert} from '../../../src/pure-assert';
+import {pureDevAssert as devAssert} from '../../../src/assert';
 import {dict} from '../../../src/utils/object';
 
 /**

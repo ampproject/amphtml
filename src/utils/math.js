@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {pureDevAssert as devAssert} from '../pure-assert';
+import {pureDevAssert as devAssert} from '../assert';
 
 /**
  * Maps a value in a first range to its equivalent in a second range
