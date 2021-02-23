@@ -732,7 +732,10 @@ export class GoogleSubscriptionsPlatform {
 
     const googleMeteringStrategyPromise = this.getGoogleMeteringStrategy_();
     const meteringStatePromise = this.serviceAdapter_.loadMeteringState();
-    const promises = [googleMeteringStrategyPromise, meteringStatePromise];
+    const promises = Promise.all([
+      googleMeteringStrategyPromise,
+      meteringStatePromise,
+    ]);
 
     promises.then((results) => {
       const meteringStrategy = results[0];
