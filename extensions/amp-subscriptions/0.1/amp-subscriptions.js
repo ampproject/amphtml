@@ -556,7 +556,7 @@ export class SubscriptionService {
         this.handleGrantState_({granted, shouldActivatePlatform});
 
       if (!this.metering_) {
-        // Move along. The additional logic for AMP subscriptions isn't needed.
+        // Move along. This article doesn't need AMP metering's special logic.
         continueAuthorizationFlow();
         return;
       }
