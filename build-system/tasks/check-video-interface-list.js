@@ -39,7 +39,7 @@ const grepJsFiles = 'extensions/**/*.js';
  * @return {name}
  */
 const entry = (name) =>
-  `-   [${name}](https://amp.dev/documentation/components/${name})`;
+  `-   [${name}](https://amp.dev/documentation/components/${name})\n`;
 
 /**
  * Generates Markdown list by finding matching extensions.
@@ -51,26 +51,22 @@ const generateList = () =>
   )
     .trim()
     .split('\n')
-    .map((path) => path.substr('extensions/'.length).split('/').shift())
-    .filter((name) => !excludeGeneric.includes(name))
-    .map(entry)
-    .join('\n');
+    .reduce((list, path) => {
+      const name = path.substr('extensions/'.length).split('/').shift();
+      return list + (excludeGeneric.includes(name) ? '' : entry(name));
+    }, '');
 
 /**
  * Returns a RegExp that matches the existing list.
- * @param {string} name
  * @return {RegExp}
  */
-function getListRegExp() {
-  const entryRegExpPart = entry('$NAME')
-    .replace(/[\[\]\(\)]/g, (c) => `\\${c}`)
-    .replace(/\$NAME/g, `((?!${excludeGeneric.join('|')})[a-z0-9-])+`);
-
-  return new RegExp(
-    `(${entryRegExpPart}[\\n\\s]+)*(${entryRegExpPart})`,
+const getListRegExp = () =>
+  new RegExp(
+    `(${entry('NAME')
+      .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      .replace(/\NAME/g, `((?!${excludeGeneric.join('|')})[a-z0-9-]+)`)})+`,
     'gim'
   );
-}
 
 /**
  * Diffs an existing file with content that might replace it.
