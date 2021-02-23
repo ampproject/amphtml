@@ -652,7 +652,7 @@ export class GoogleSubscriptionsPlatform {
 
           entitlementsParams.metering = {state: meteringState};
 
-          // Remembers we requested metering entitlements.
+          // Remember we requested metering entitlements.
           // This helps avoid redundant fetches for metering entitlements.
           this.serviceAdapter_.rememberMeteringEntitlementsWereFetched();
         }
