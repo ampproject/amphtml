@@ -254,20 +254,7 @@ wrapping element, and use that to center the content.
 ### Media Queries
 
 The attributes for `<amp-stream-gallery>` can be configured to use different
-options based on a media query. You can also use a value without any media
-queries. The format looks like:
-
-```html
-<amp-stream-gallery
-  attr-name="(min-width: 1000px) valueOne, (min-width: 600px) valueTwo, defaultValue"
-></amp-stream-gallery>
-```
-
-The media queries are evaluated from left to right, with the first matching
-media query being used. A default value (without a media query) is required. In
-this case, if the page has a screen width of 1000px or more, `valueOne` is used.
-If the width is between 999px and 600px, `valueTwo` is used. When it is 599px or
-smaller, `defaultValue` is used.
+options based on a [media query](./../../spec/amp-html-responsive-attributes.md).
 
 ### Behavior
 
