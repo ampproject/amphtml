@@ -327,7 +327,7 @@ carousel.
 ##### snap-by
 
 A number, defaults to `1`. This determines the granularity of snapping and is
-useful when using `visible-count`. This
+useful when using `visible-count`.
 
 #### Miscellaneous
 

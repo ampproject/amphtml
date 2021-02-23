@@ -110,6 +110,10 @@ const CLOSURE_SRC_GLOBS = [
   'extensions/amp-animation/**/*.js',
   // Needed for amp-carousel 0.2, amp-inline-gallery, amp-stream-gallery
   'extensions/amp-base-carousel/**/*.js',
+  // Needed for carousel autolightbox
+  'extensions/amp-lightbox-gallery/1.0/*.js',
+  // Needed for amp-lightbox-gallery using amp-lightbox
+  'extensions/amp-lightbox/1.0/*.js',
   // For amp-bind in the web worker (ww.js).
   'extensions/amp-bind/**/*.js',
   // Needed to access to Variant interface from other extensions

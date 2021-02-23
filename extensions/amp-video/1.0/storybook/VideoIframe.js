@@ -19,7 +19,7 @@ import {
   AccordionContent,
   AccordionHeader,
   AccordionSection,
-} from '../../../amp-accordion/1.0/accordion';
+} from '../../../amp-accordion/1.0/component';
 import {VideoIframe} from '../video-iframe';
 import {VideoWrapper} from '../video-wrapper';
 import {boolean, text, withKnobs} from '@storybook/addon-knobs';
