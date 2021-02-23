@@ -37,6 +37,7 @@ amp-selector [selected][disabled],
 amp-selector[disabled] [selected] {
   cursor: auto;
   outline: none;
+  opacity: 0.4;
 }
 
 amp-selector [option][selected] {
