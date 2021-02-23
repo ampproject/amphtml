@@ -69,7 +69,7 @@ const getListRegExp = () =>
   );
 
 /**
- * Diffs an existing file with content that might replace it.
+ * Diffs a file against content that might replace it.
  * @param {string} filepath
  * @param {string} content
  * @return {!Promise<string>}
