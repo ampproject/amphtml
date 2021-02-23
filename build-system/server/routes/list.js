@@ -175,7 +175,7 @@ router.get('/infinite-scroll-state', function (req, res) {
   res.json(results);
 });
 
-router.get('/ecommerce-nested-menu', function (req, res) {
+router.get('/ecommerce-nested-menu', function (_req, res) {
   res.json({
     'menu': [
       {

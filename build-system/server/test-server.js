@@ -44,11 +44,11 @@ app.use('/redirect-to', function (req, res) {
   res.redirect(302, req.query.url);
 });
 
-app.use('/status/404', function (req, res) {
+app.use('/status/404', function (_req, res) {
   res.status(404).end();
 });
 
-app.use('/status/500', function (req, res) {
+app.use('/status/500', function (_req, res) {
   res.status(500).end();
 });
 
@@ -101,7 +101,7 @@ app.use('/form/post', function (req, res) {
   });
 });
 
-app.use('/form/verify-error', function (req, res) {
+app.use('/form/verify-error', function (_req, res) {
   res.status(400).json({
     verifyErrors: [{name: 'email', message: 'That email is already taken.'}],
   });

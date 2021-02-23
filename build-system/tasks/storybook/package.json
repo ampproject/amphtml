@@ -5,15 +5,15 @@
   "main": "index.js",
   "devDependencies": {
     "@ampproject/storybook-addon": "1.1.6",
-    "@babel/core": "7.12.16",
+    "@babel/core": "7.12.17",
     "@babel/preset-react": "7.12.13",
-    "@babel/runtime-corejs3": "7.12.13",
+    "@babel/runtime-corejs3": "7.12.18",
     "@storybook/addon-a11y": "5.3.21",
     "@storybook/addon-knobs": "5.3.21",
     "@storybook/addon-viewport": "5.3.21",
     "@storybook/preact": "5.3.21",
     "babel-loader": "8.2.2",
-    "core-js": "3.8.3",
+    "core-js": "3.9.0",
     "preact": "10.5.12",
     "preact-render-to-string": "5.1.12",
     "styled-jsx": "3.4.4"

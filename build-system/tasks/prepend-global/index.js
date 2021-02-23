@@ -60,7 +60,7 @@ function sanityCheck(str) {
 
 /**
  * @param {string} filename File containing the config
- * @param {string=} opt_localBranch Whether to use the local branch version
+ * @param {boolean=} opt_localBranch Whether to use the local branch version
  * @param {string=} opt_branch If not the local branch, which branch to use
  * @return {!Promise}
  */
@@ -168,7 +168,7 @@ async function applyConfig(
     }
   }
   if (opt_localDev) {
-    configJson = enableLocalDev(config, target, configJson);
+    configJson = enableLocalDev(target, configJson);
   }
   if (opt_fortesting) {
     configJson = {test: true, ...configJson};
@@ -187,12 +187,11 @@ async function applyConfig(
 }
 
 /**
- * @param {string} config Prod or canary
  * @param {string} target File containing the AMP runtime (amp.js or v0.js)
  * @param {string} configJson The json object in which to enable local dev
  * @return {string}
  */
-function enableLocalDev(config, target, configJson) {
+function enableLocalDev(target, configJson) {
   let LOCAL_DEV_AMP_CONFIG = {localDev: true};
   const TESTING_HOST = process.env.AMP_TESTING_HOST;
   if (typeof TESTING_HOST == 'string') {
