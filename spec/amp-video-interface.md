@@ -22,7 +22,7 @@ these players implement.
     gulp check-video-interface-list --fix
 
   These link to Github instead of amp.dev since we couldn't otherwise check
-  existance of links to extensions added in a pull request.
+  existence of links to extensions added in a pull request.
 -->
 
 -   [amp-3q-player](https://github.com/ampproject/amphtml/blob/master/extensions/amp-3q-player/amp-3q-player.md)
