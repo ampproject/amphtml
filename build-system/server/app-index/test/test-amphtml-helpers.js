@@ -38,17 +38,14 @@ describe('devdash', () => {
     describe('AmpDoc', () => {
 
       it('fails without args', () => {
-        // @ts-ignore
         expect(() => AmpDoc()).to.throw;
       });
 
       it('fails without min required fields', () => {
-        // @ts-ignore
         expect(() => AmpDoc({})).to.throw;
       });
 
       it('creates valid doc with min required fields', async() => {
-        // @ts-ignore
         expectValidAmphtml(await amphtmlValidator.getInstance(), AmpDoc({
           canonical: '/',
         }));

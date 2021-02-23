@@ -65,6 +65,7 @@ const ampStateKey = (...keys) => keys.join('.');
  *  css?: string,
  *  head?: string,
  * }} param0
+ * @return {string}
  */
 const AmpDoc = ({body, css, head, canonical}) => {
   assert(canonical);

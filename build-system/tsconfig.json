@@ -1,7 +1,10 @@
 {
   "compileOnSave": true,
   "compilerOptions": {
-    "lib": ["dom", "esnext"],
+    "lib": [
+      "dom",
+      "esnext"
+    ],
     "outDir": "dist",
     "sourceMap": true,
     "moduleResolution": "node",
@@ -28,5 +31,11 @@
     "./server/**/*.js",
     "./server/**/*.ts"
   ],
-  "exclude": ["**/node_modules", "common/check-package-manager.js"]
+  "exclude": [
+    "**/node_modules",
+    "common/check-package-manager.js",
+    "server/app-index/test/test-html.js",
+    "server/typescript-compile.js",
+    "server/app-index/test/test-amphtml-helpers.js"
+  ]
 }

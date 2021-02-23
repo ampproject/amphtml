@@ -73,9 +73,7 @@ const linksToExample = (shouldContainBasepath, opt_name) =>
   htmlDocRegex.test(opt_name || shouldContainBasepath);
 
 const ExamplesSelectModeOptional = ({basepath}) =>
-  !examplesPathRegex.test(basepath + '/')
-    ? ''
-    : ExamplesDocumentModeSelect();
+  !examplesPathRegex.test(basepath + '/') ? '' : ExamplesDocumentModeSelect();
 
 /**
  * @param {{ name: string, href: string, boundHref?: string|undefined }} config
