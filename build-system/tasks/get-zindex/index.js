@@ -20,11 +20,14 @@ const globby = require('globby');
 const path = require('path');
 const postcss = require('postcss');
 const prettier = require('prettier');
+const tempy = require('tempy');
 const textTable = require('text-table');
+const {getStdout} = require('../../common/process');
+const {readJsonSync} = require('fs-extra');
 const {writeDiffOrFail} = require('../../common/diff');
 
 const tableHeaders = [
-  ['selector', 'z-index', 'file'],
+  ['context', 'z-index', 'file'],
   ['---', '---', '---'],
 ];
 
@@ -71,7 +74,11 @@ function createTable(filesData) {
         .sort()
         .forEach((selectorName) => {
           const zIndex = selectors[selectorName];
-          const row = [selectorName, zIndex, fileName];
+          const row = [
+            `\`${selectorName}\``,
+            zIndex,
+            `[${fileName}](/${fileName})`,
+          ];
           rows.push(row);
         });
     });
@@ -98,7 +105,7 @@ function createTable(filesData) {
 /**
  * Extract z-index selectors from all files matching the given glob starting at
  * the given working directory
- * @param {string} glob
+ * @param {string|Array<string>} glob
  * @param {string=} cwd
  * @return {Object}
  */
@@ -116,10 +123,51 @@ async function getZindexSelectors(glob, cwd = '.') {
 }
 
 /**
+ * @param {string|Array<string>} glob
+ * @param {string=} cwd
+ * @return {Object}
+ */
+async function getZindexChainsInJs(glob, cwd = '.') {
+  const files = globby.sync(glob, {cwd}).map((file) => path.join(cwd, file));
+  const filesIncludingString = getStdout(
+    ['grep -irl "z-*index"', ...files].join(' ')
+  )
+    .trim()
+    .split('\n');
+  return tempy.write.task('{}', (temporary) => {
+    getStdout(
+      [
+        'npx jscodeshift',
+        '--dry',
+        '--parser babylon',
+        `--parser-config ${__dirname}/jscodeshift/parser-config.json`,
+        `--transform ${__dirname}/jscodeshift/collect-zindex.js`,
+        `--collectZindexToFile=${temporary}`,
+        ...filesIncludingString,
+      ].join(' ')
+    );
+    const resultAbsolute = readJsonSync(temporary);
+    const result = {};
+    for (const key in resultAbsolute) {
+      const relative = path.relative(cwd, key);
+      result[relative] = resultAbsolute[key];
+    }
+    return result;
+  });
+}
+
+/**
  * Entry point for gulp get-zindex
  */
 async function getZindex() {
-  const filesData = await getZindexSelectors('{css,src,extensions}/**/*.css');
+  const filesData = {
+    ...(await getZindexSelectors('{css,src,extensions}/**/*.css')),
+    ...(await getZindexChainsInJs([
+      '{3p,src,extensions}/**/*.js',
+      '!extensions/**/test/**/*.js',
+      '!extensions/**/storybook/**/*.js',
+    ])),
+  };
   const filename = 'css/Z_INDEX.md';
   const rows = [...tableHeaders, ...createTable(filesData)];
   const table = textTable(rows, tableOptions);
@@ -154,6 +202,7 @@ module.exports = {
   createTable,
   getZindex,
   getZindexSelectors,
+  getZindexChainsInJs,
 };
 
 getZindex.description =
