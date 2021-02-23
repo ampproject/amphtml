@@ -118,9 +118,8 @@ function tryUpgradeElement(element, toClass) {
 function waitReadyForUpgrade(win, elementClass) {
   // Make sure the polyfill is installed for Shadow DOM if element needs it.
   if (elementClass.usesShadowDom() && !win.Element.prototype.attachShadow) {
-    const extId = 'amp-shadow-dom-polyfill';
     const extensions = Services.extensionsFor(win);
-    return extensions.importUnwrapped(win, extId);
+    return extensions.importUnwrapped(win, 'amp-shadow-dom-polyfill');
   }
 }
 
