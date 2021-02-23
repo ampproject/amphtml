@@ -13,13 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const argv = require('minimist')(process.argv.slice(2));
 const globby = require('globby');
-const tempy = require('tempy');
-const {blue, bold, cyan, red} = require('kleur/colors');
 const {getStdout} = require('../common/process');
-const {log, logWithoutTimestamp} = require('../common/logging');
-const {readFile, writeFile} = require('fs-extra');
+const {readFile} = require('fs-extra');
+const {writeDiffOrFail} = require('../common/diff');
 
 /** Checks or updates 3rd party video player list on this Markdown file. */
 const filepath = 'spec/amp-video-interface.md';
@@ -69,57 +66,14 @@ const getListRegExp = () =>
   );
 
 /**
- * Diffs a file against content that might replace it.
- * @param {string} filepath
- * @param {string} content
- * @return {!Promise<string>}
- */
-const diffTentative = (filepath, content) =>
-  tempy.write.task(content, (temporary) =>
-    getStdout(
-      `git -c color.ui=always diff -U1 ${filepath} ${temporary}`
-    ).replace(new RegExp(temporary, 'g'), `/${filepath}`)
-  );
-
-/**
- * @param {string} filepath
- * @param {string} content
- * @param {string} output
- * @param {boolean} write
- */
-async function writeOrFailWhenUnequal(
-  filepath,
-  content,
-  output,
-  write = false
-) {
-  if (output === content) {
-    return;
-  }
-
-  logWithoutTimestamp();
-  logWithoutTimestamp(await diffTentative(filepath, output));
-
-  if (!write) {
-    log(red('ERROR:'), cyan(filepath), 'is missing the changes above.');
-    log(
-      '⤷ To automatically apply them, run',
-      cyan('gulp check-video-interface-list --fix')
-    );
-    throw new Error(`${filepath} is outdated`);
-  }
-
-  await writeFile(filepath, output);
-  log('Wrote', bold(blue(filepath)));
-}
-
-/**
  * Checks or updates 3rd party video player list.
  */
 async function checkVideoInterfaceList() {
-  const content = await readFile(filepath, 'utf-8');
-  const output = content.replace(getListRegExp(), generateList());
-  await writeOrFailWhenUnequal(filepath, content, output, argv.fix);
+  const current = await readFile(filepath, 'utf-8');
+  const tentative = current.replace(getListRegExp(), generateList());
+  if (current !== tentative) {
+    await writeDiffOrFail('check-video-interface-list', filepath, tentative);
+  }
 }
 
 module.exports = {
