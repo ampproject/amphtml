@@ -89,7 +89,7 @@ async function diffTentative(filepath, content) {
  * Checks or updates 3rd party video player list.
  */
 async function checkVideoInterfaceList() {
-  const content = (await readFile(filepath)).toString('utf-8');
+  const content = await readFile(filepath, 'utf-8');
   const output = content.replace(getListRegExp(), generateList());
 
   if (output === content) {
