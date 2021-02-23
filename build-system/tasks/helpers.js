@@ -154,11 +154,14 @@ async function compileCoreRuntime(options) {
     const bundleComplete = await doBuildJs(jsBundles, 'amp.js', options);
     if (options.onWatchBuild) {
       options.onWatchBuild(bundleComplete);
-    } 
+    }
   }
 
   if (options.watch) {
-    fileWatch('src/**/*.js').on('change', debounce(watchFunc, watchDebounceDelay)); 
+    fileWatch('src/**/*.js').on(
+      'change',
+      debounce(watchFunc, watchDebounceDelay)
+    );
   }
 
   await doBuildJs(jsBundles, 'amp.js', options);
