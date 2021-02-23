@@ -135,6 +135,18 @@ export class BaseElement {
     return {};
   }
 
+  /**
+   * Subclasses can override this method to indicate that instances need to
+   * use Shadow DOM. The Runtime will ensure that the Shadow DOM polyfill is
+   * installed before uprading and building this class.
+   *
+   * @return {boolean}
+   * @nocollapse
+   */
+  static usesShadowDom() {
+    return false;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     /** @public @const {!Element} */

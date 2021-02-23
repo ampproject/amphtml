@@ -383,6 +383,12 @@
     "options": {"hasCss": true}
   },
   {
+    "name": "amp-shadow-dom-polyfill",
+    "version": "0.1",
+    "latestVersion": "0.1",
+    "options": {"noWrapper": true}
+  },
+  {
     "name": "amp-sidebar",
     "version": ["0.1", "0.2", "1.0"],
     "latestVersion": "0.1",
