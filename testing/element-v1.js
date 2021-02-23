@@ -29,15 +29,6 @@ const RULES = [
   },
 
   {
-    name: 'Must not have getLayoutPriority',
-    test: (implClass) => {
-      const hasLayoutPriority =
-        implClass.prototype.getLayoutPriority !==
-        BaseElement.prototype.getLayoutPriority;
-      return !hasLayoutPriority;
-    },
-  },
-  {
     name: 'If has getLayoutPriority, must also have getBuildPriority',
     test: (implClass) => {
       const hasLayoutPriority =
@@ -49,15 +40,6 @@ const RULES = [
     },
   },
 
-  {
-    name: 'Must not have preconnectCallback',
-    test: (implClass) => {
-      const hasPreconnectCallback =
-        implClass.prototype.preconnectCallback !==
-        BaseElement.prototype.preconnectCallback;
-      return !hasPreconnectCallback;
-    },
-  },
   {
     name: 'If has preconnectCallback, must also have getPreconnects',
     test: (implClass) => {
@@ -71,15 +53,6 @@ const RULES = [
   },
 
   {
-    name: 'Must not have layoutCallback',
-    test: (implClass) => {
-      const hasLayoutCallback =
-        implClass.prototype.layoutCallback !==
-        BaseElement.prototype.layoutCallback;
-      return !hasLayoutCallback;
-    },
-  },
-  {
     name: 'If has layoutCallback, must also have ensureLoaded',
     test: (implClass) => {
       const hasLayoutCallback =
@@ -91,15 +64,6 @@ const RULES = [
     },
   },
 
-  {
-    name: 'Must not have onLayoutMeasure',
-    test: (implClass) => {
-      const hasCallback =
-        implClass.prototype.onLayoutMeasure !==
-        BaseElement.prototype.onLayoutMeasure;
-      return !hasCallback;
-    },
-  },
   {
     name: 'Must not use getLayoutBox',
     test: (implClass) => {
@@ -113,51 +77,6 @@ const RULES = [
     },
   },
 
-  {
-    name: 'Must not have pauseCallback',
-    test: (implClass) => {
-      const hasCallback =
-        implClass.prototype.pauseCallback !==
-        BaseElement.prototype.pauseCallback;
-      return !hasCallback;
-    },
-  },
-  {
-    name: 'Must not have resumeCallback',
-    test: (implClass) => {
-      const hasCallback =
-        implClass.prototype.resumeCallback !==
-        BaseElement.prototype.resumeCallback;
-      return !hasCallback;
-    },
-  },
-  {
-    name: 'Must not have unlayoutCallback',
-    test: (implClass) => {
-      const hasCallback =
-        implClass.prototype.unlayoutCallback !==
-        BaseElement.prototype.unlayoutCallback;
-      return !hasCallback;
-    },
-  },
-  {
-    name: 'Must not have unlayoutOnPause',
-    test: (implClass) => {
-      const hasCallback =
-        implClass.prototype.unlayoutOnPause !==
-        BaseElement.prototype.unlayoutOnPause;
-      return !hasCallback;
-    },
-  },
-  {
-    name: 'Must not have firstLayoutCompleted',
-    test: (implClass) => {
-      const hasCallback =
-        implClass.prototype.firstLayoutCompleted !==
-        BaseElement.prototype.firstLayoutCompleted;
-      return !hasCallback;
-    },
-  },
   {
     name: 'Must not have renderOutsideViewport',
     test: (implClass) => {

@@ -68,11 +68,7 @@ describes.realWin('amp-img V1', {amp: true}, (env) => {
   it('testElementV1', () => {
     testElementV1(AmpImg, {
       exceptions: [
-        'Must not have preconnectCallback',
-        'Must not have layoutCallback',
-        'Must not have unlayoutCallback',
         'Must not use getLayoutSize',
-        'Must not have firstLayoutCompleted',
       ],
     });
   });
