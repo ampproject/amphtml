@@ -42,6 +42,7 @@ describe('devdash', () => {
       });
 
       it('fails without min required fields', () => {
+        // @ts-ignore
         expect(() => AmpDoc({})).to.throw;
       });
 

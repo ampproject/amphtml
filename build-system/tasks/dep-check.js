@@ -214,7 +214,7 @@ function getGraph(entryModule) {
   }).transform(babelify, {caller: {name: 'dep-check'}, global: true});
 
   bundler.pipeline.get('deps').push(
-    through.obj(function (row, enc, next) {
+    through.obj(function (row, _enc, next) {
       module.deps.push({
         name: row.file.replace(absPathRegExp, ''),
         deps: row.deps,
