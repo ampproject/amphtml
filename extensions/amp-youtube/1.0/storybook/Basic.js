@@ -32,10 +32,13 @@ export default {
   decorators: [withA11y, withKnobs],
 };
 
+const VIDEOID = 'IAvf-rkzNck';
+const LIVE_CHANNEL_ID = 'sKCkM-f2Qk4';
+
 export const _default = () => {
   const width = number('width', 300);
   const height = number('height', 200);
-  const videoid = text('videoid', 'IAvf-rkzNck');
+  const videoid = text('videoid', VIDEOID);
   const autoplay = boolean('autoplay', false);
   const loop = boolean('loop', false);
   const params = object('params', {});
@@ -100,7 +103,7 @@ function WithStateTable({videoid, autoplay, loop, params, credentials, style}) {
 export function State() {
   const width = number('width', 300);
   const height = number('height', 200);
-  const videoid = text('videoid', 'IAvf-rkzNck');
+  const videoid = text('videoid', VIDEOID);
   const autoplay = boolean('autoplay', false);
   const loop = boolean('loop', false);
   const params = object('params', {});
@@ -120,7 +123,7 @@ export function State() {
 export const liveChannelId = () => {
   const width = number('width', 300);
   const height = number('height', 200);
-  const liveChannelid = text('liveChannelid', 'sKCkM-f2Qk4');
+  const liveChannelid = text('liveChannelid', LIVE_CHANNEL_ID);
   const autoplay = boolean('autoplay', false);
   const loop = boolean('loop', false);
   const params = object('params', {});
@@ -140,7 +143,7 @@ export const liveChannelId = () => {
 export const InsideAccordion = () => {
   const width = text('width', '320px');
   const height = text('height', '180px');
-  const videoid = text('videoid', 'IAvf-rkzNck');
+  const videoid = text('videoid', VIDEOID);
   const params = object('params', {});
   return (
     <Accordion expandSingleSection>
