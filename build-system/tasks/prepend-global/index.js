@@ -194,8 +194,8 @@ async function applyConfig(
 
 /**
  * @param {string} target File containing the AMP runtime (amp.js or v0.js)
- * @param {string} configJson The json object in which to enable local dev
- * @return {string}
+ * @param {!JSON} configJson The json object in which to enable local dev
+ * @return {!JSON}
  */
 function enableLocalDev(target, configJson) {
   let LOCAL_DEV_AMP_CONFIG = {localDev: true};
