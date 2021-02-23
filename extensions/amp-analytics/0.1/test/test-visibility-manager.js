@@ -772,15 +772,9 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, (env) => {
     clock.tick(1);
     const target = win.document.createElement('div');
     target.id = 'targetElementId';
-    const resource = {
-      getLayoutBox() {
-        return {top: 10, left: 11, width: 110, height: 111};
-      },
-    };
-    const resources = win.__AMP_SERVICES.resources.obj;
     env.sandbox
-      .stub(resources, 'getResourceForElementOptional')
-      .callsFake(() => resource);
+      .stub(target, 'getBoundingClientRect')
+      .returns({top: 10, left: 11, width: 110, height: 111});
     const spec = {totalTimeMin: 10};
     root.listenElement(target, spec, null, null, eventResolver);
 
@@ -1122,10 +1116,9 @@ describes.realWin('VisibilityManager integrated', {amp: true}, (env) => {
       startTime = 10000;
       clock.tick(startTime);
 
-      const resource = resources.getResourceForElement(ampElement);
       scrollTop = 10;
       env.sandbox
-        .stub(resource, 'getLayoutBox')
+        .stub(ampElement, 'getBoundingClientRect')
         .callsFake(() => layoutRectLtwh(0, scrollTop, 100, 100));
     });
   });

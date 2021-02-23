@@ -18,15 +18,15 @@
 const fs = require('fs');
 const globby = require('globby');
 const listImportsExports = require('list-imports-exports');
-const log = require('fancy-log');
 const minimatch = require('minimatch');
 const path = require('path');
 const testConfig = require('../../test-configs/config');
 const {execOrDie} = require('../../common/exec');
 const {extensions, maybeInitializeExtensions} = require('../extension-helpers');
 const {gitDiffNameOnlyMaster} = require('../../common/git');
-const {green, cyan} = require('ansi-colors');
-const {isTravisBuild} = require('../../common/travis');
+const {green, cyan} = require('kleur/colors');
+const {isCiBuild} = require('../../common/ci');
+const {log, logLocalDev} = require('../../common/logging');
 const {reportTestSkipped} = require('../report-test-status');
 
 const LARGE_REFACTOR_THRESHOLD = 50;
@@ -87,7 +87,9 @@ function extractCssJsFileMap() {
  */
 function getImports(jsFile) {
   const jsFileContents = fs.readFileSync(jsFile, 'utf8');
-  const {imports} = listImportsExports.parse(jsFileContents);
+  const {imports} = listImportsExports.parse(jsFileContents, [
+    'importAssertions',
+  ]);
   const files = [];
   const jsFileDir = path.dirname(jsFile);
   imports.forEach(function (file) {
@@ -145,7 +147,7 @@ function getUnitTestsToRun() {
     reportTestSkipped();
     return;
   }
-  if (isTravisBuild() && tests.length > TEST_FILE_COUNT_THRESHOLD) {
+  if (isCiBuild() && tests.length > TEST_FILE_COUNT_THRESHOLD) {
     log(
       green('INFO:'),
       'Several tests were affected by local changes. Running all tests below.'
@@ -204,9 +206,12 @@ function unitTestsToRun() {
 
   filesChanged.forEach((file) => {
     if (!fs.existsSync(file)) {
-      if (!isTravisBuild()) {
-        log(green('INFO:'), 'Skipping', cyan(file), 'because it was deleted');
-      }
+      logLocalDev(
+        green('INFO:'),
+        'Skipping',
+        cyan(file),
+        'because it was deleted'
+      );
     } else if (isUnitTest(file)) {
       testsToRun.push(file);
     } else if (path.extname(file) == '.js') {

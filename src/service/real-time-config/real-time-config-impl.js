@@ -71,6 +71,9 @@ export const RTC_ERROR_ENUM = {
   MACRO_EXPAND_TIMEOUT: '11',
 };
 
+/** @const {!Object<string, boolean>} */
+const GLOBAL_MACRO_ALLOWLIST = {CLIENT_ID: true};
+
 export class RealTimeConfigManager {
   /**
    * @param {!../ampdoc-impl.AmpDoc} ampDoc
@@ -438,7 +441,7 @@ export class RealTimeConfigManager {
       );
     };
 
-    const allowlist = {};
+    const allowlist = {...GLOBAL_MACRO_ALLOWLIST};
     Object.keys(macros).forEach((key) => (allowlist[key] = true));
     const urlReplacementStartTime = Date.now();
     this.promiseArray_.push(

@@ -37,26 +37,40 @@ before allowing buttons to be activated. */
   visibility: 'visible',
 };
 
-const lightboxContainWrapper = {
-  zIndex: 1000,
+const wrapper = {
   top: 0,
   bottom: 0,
   left: 0,
   right: 0,
-  backgroundColor: 'rgba(0, 0, 0, 0.9)',
-  color: '#fff',
   width: '100%',
   height: '100%',
   position: 'fixed',
-  opacity: 0,
-  alignItems: 'center',
-  justifyContent: 'right',
-  display: 'block',
+  boxSizing: 'border-box',
+};
+
+// User overridable styles
+const defaultStyles = {
+  zIndex: 1000,
+  backgroundColor: 'rgba(0, 0, 0, 0.9)',
+  color: '#fff',
+};
+
+/* 
+  overflow: hidden does not trigger overscrollBehavior, so 
+  overflow: auto is applied even though the lightbox should not scroll.
+  We rely instead on the overflow: hidden in ContainWrapper to prevent 
+  scrolling inside the lightbox.
+*/
+const containScroll = {
+  overflow: 'auto', // Prevent scrolling inside lightbox.
+  overscrollBehavior: 'none', // Prevent scrolling outside lightbox.
 };
 
 const JSS = {
   closeButton,
-  lightboxContainWrapper,
+  wrapper,
+  defaultStyles,
+  containScroll,
 };
 
 // useStyles gets replaced for AMP builds via `babel-plugin-transform-jss`.

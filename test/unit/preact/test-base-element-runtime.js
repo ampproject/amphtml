@@ -16,8 +16,12 @@
 
 import * as Preact from '../../../src/preact/index';
 import {CanRender} from '../../../src/contextprops';
-import {PreactBaseElement} from '../../../src/preact/base-element';
+import {
+  PreactBaseElement,
+  whenUpgraded,
+} from '../../../src/preact/base-element';
 import {Slot} from '../../../src/preact/slot';
+import {forwardRef} from '../../../src/preact/compat';
 import {htmlFor} from '../../../src/static-template';
 import {removeElement} from '../../../src/dom';
 import {subscribe} from '../../../src/context';
@@ -83,7 +87,7 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
     });
 
     it('should render with default context', async () => {
-      await element.build();
+      await element.buildInternal();
       await waitFor(() => component.callCount > 0, 'component rendered');
       expect(lastContext).to.contain({
         renderable: true,
@@ -95,7 +99,7 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
     });
 
     it('should propagate context to children', async () => {
-      await element.build();
+      await element.buildInternal();
       await waitFor(() => component.callCount > 0, 'component rendered');
 
       const child1 = element.querySelector('#child1');
@@ -112,7 +116,7 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
         );
       }
 
-      await element.build();
+      await element.buildInternal();
       const child1 = element.querySelector('#child1');
 
       await waitFor(() => getSlot(), 'slot rendered');
@@ -125,29 +129,43 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
     });
 
     it('should load when requested', async () => {
+      const loadEventSpy = env.sandbox.spy();
+      const errorEventSpy = env.sandbox.spy();
+      element.addEventListener('load', loadEventSpy);
+      element.addEventListener('error', errorEventSpy);
       loader.callsFake((load, props) => {
         if (load) {
           props.onLoad();
         }
       });
 
-      await element.build();
+      await element.buildInternal();
       await element.layoutCallback();
       expect(lastLoad).to.be.true;
       expect(loader).to.be.calledWith(true);
+      expect(loadEventSpy).to.be.calledOnce;
+      expect(loadEventSpy.firstCall.firstArg).to.contain({bubbles: false});
+      expect(errorEventSpy).to.not.be.called;
     });
 
     it('should handle load failure', async () => {
+      const loadEventSpy = env.sandbox.spy();
+      const errorEventSpy = env.sandbox.spy();
+      element.addEventListener('load', loadEventSpy);
+      element.addEventListener('error', errorEventSpy);
       loader.callsFake((load, props) => {
         if (load) {
           props.onLoadError();
         }
       });
 
-      await element.build();
+      await element.buildInternal();
       await expect(element.layoutCallback()).to.be.eventually.rejected;
       expect(lastLoad).to.be.true;
       expect(loader).to.be.calledWith(true);
+      expect(errorEventSpy).to.be.calledOnce;
+      expect(errorEventSpy.firstCall.firstArg).to.contain({bubbles: false});
+      expect(loadEventSpy).to.not.be.called;
     });
   });
 
@@ -172,7 +190,7 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
     }
 
     it('should unrender component on disconnect', async () => {
-      await element.build();
+      await element.buildInternal();
       await waitFor(() => getSlot(), 'content rendered');
 
       // Disconnect.
@@ -181,7 +199,7 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
     });
 
     it('should rerender component on reconnect', async () => {
-      await element.build();
+      await element.buildInternal();
       await waitFor(() => getSlot(), 'content rendered');
       removeElement(element);
       await waitFor(() => getSlot() === null, 'content unrendered');
@@ -190,5 +208,131 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
       doc.body.appendChild(element);
       await waitFor(() => getSlot(), 'content rerendered');
     });
+  });
+});
+
+describes.realWin('whenUpgraded', {amp: true}, (env) => {
+  let win;
+  let doc;
+  let Impl;
+  let Component;
+
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+
+    Impl = class extends PreactBaseElement {
+      isLayoutSupported() {
+        return true;
+      }
+    };
+    Component = (props, ref) => {
+      Preact.useImperativeHandle(ref, () => {
+        return {key: true};
+      });
+    };
+    Impl['Component'] = forwardRef(Component);
+    Impl['children'] = {};
+    Impl['loadable'] = true;
+  });
+
+  it('waits for CE definition', async () => {
+    const el = doc.createElement('amp-preact');
+    doc.body.appendChild(el);
+    const p = whenUpgraded(el);
+    upgradeOrRegisterElement(win, 'amp-preact', Impl);
+    el.buildInternal();
+
+    const api = await p;
+    expect(api.key).to.be.true;
+  });
+
+  it('waits for build', async () => {
+    const el = doc.createElement('amp-preact');
+    doc.body.appendChild(el);
+    upgradeOrRegisterElement(win, 'amp-preact', Impl);
+    const p = whenUpgraded(el);
+    el.buildInternal();
+
+    const api = await p;
+    expect(api.key).to.be.true;
+  });
+
+  it('resolves after mount', async () => {
+    const el = doc.createElement('amp-preact');
+    doc.body.appendChild(el);
+    upgradeOrRegisterElement(win, 'amp-preact', Impl);
+    await el.buildInternal();
+    const p = whenUpgraded(el);
+
+    const api = await p;
+    expect(api.key).to.be.true;
+  });
+
+  it('wraps API to preserve object identity accross rerenders', async () => {
+    let imperativeApi;
+    let setState;
+    Component = env.sandbox.stub().callsFake((props, ref) => {
+      const [state, set] = Preact.useState(0);
+      setState = set;
+      Preact.useImperativeHandle(ref, () => {
+        return (imperativeApi = {state});
+      });
+    });
+    Impl['Component'] = forwardRef(Component);
+    const el = doc.createElement('amp-preact');
+    doc.body.appendChild(el);
+    upgradeOrRegisterElement(win, 'amp-preact', Impl);
+    const p = whenUpgraded(el);
+    el.buildInternal();
+
+    const api = await p;
+    expect(api).not.to.equal(imperativeApi);
+    expect(api.state).to.equal(0);
+
+    const current = Component.callCount;
+    setState(1);
+    await waitFor(
+      () => Component.callCount > current,
+      'rerender after setState'
+    );
+
+    const api2 = await whenUpgraded(el);
+    expect(api2).to.equal(api);
+    expect(api.state).to.equal(1);
+  });
+
+  it('throws when API surface changes after rerender', async () => {
+    let setState;
+    Component = env.sandbox.stub().callsFake((props, ref) => {
+      const [api, set] = Preact.useState({
+        first: true,
+      });
+      setState = set;
+      Preact.useImperativeHandle(ref, () => {
+        return api;
+      });
+    });
+    Impl['Component'] = forwardRef(Component);
+    const el = doc.createElement('amp-preact');
+    doc.body.appendChild(el);
+    upgradeOrRegisterElement(win, 'amp-preact', Impl);
+    const p = whenUpgraded(el);
+    el.buildInternal();
+
+    const api = await p;
+    expect(api.first).to.be.true;
+    expect(el).not.to.have.display('none');
+
+    const current = Component.callCount;
+    setState({
+      second: true,
+    });
+    await waitFor(
+      () => Component.callCount > current,
+      'rerender after setState'
+    );
+
+    expect(el).to.have.class('i-amphtml-error');
   });
 });

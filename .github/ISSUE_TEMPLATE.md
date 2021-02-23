@@ -1,7 +1,7 @@
 **Please only file bugs/feature requests for AMP here.**
 
-- If you have questions about how to use AMP or other general questions about AMP please ask them on Stack Overflow under the AMP HTML tag instead of filing an issue here: http://stackoverflow.com/questions/tagged/amp-html
-- If you have questions/issues related to Google Search please ask them in Google's AMP forum instead of filing an issue here: https://goo.gl/utQ1KZ
+-   If you have questions about how to use AMP or other general questions about AMP please ask them on Stack Overflow under the AMP HTML tag instead of filing an issue here: http://stackoverflow.com/questions/tagged/amp-html
+-   If you have questions/issues related to Google Search please ask them in Google's AMP forum instead of filing an issue here: https://goo.gl/utQ1KZ
 
 If you have a bug or feature request for AMP please fill in the following template. Delete everything except the headers (including this text).
 

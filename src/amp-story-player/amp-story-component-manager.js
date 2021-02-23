@@ -16,11 +16,8 @@
 
 import {AmpStoryEntryPoint} from './amp-story-entry-point/amp-story-entry-point-impl';
 import {AmpStoryPlayer} from './amp-story-player-impl';
+import {AmpStoryPlayerViewportObserver} from './amp-story-player-viewport-observer';
 import {initLogConstructor} from '../log';
-import {throttle} from '../utils/rate-limit';
-
-/** @const {string} */
-const SCROLL_THROTTLE_MS = 500;
 
 export class AmpStoryComponentManager {
   /**
@@ -38,58 +35,18 @@ export class AmpStoryComponentManager {
    * @private
    */
   layoutEl_(elImpl) {
-    if (!this.win_.IntersectionObserver || this.win_ !== this.win_.parent) {
-      this.layoutFallback_(elImpl);
-      return;
-    }
-
-    const intersectingCallback = (entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) {
-          return;
-        }
-        elImpl.layoutCallback();
-      });
-    };
-
-    const observer = new IntersectionObserver(intersectingCallback, {
-      rootMargin: '100%',
-    });
-    observer.observe(elImpl.getElement());
-  }
-
-  /**
-   * Fallback for when IntersectionObserver is not supported. Calls
-   * layoutCallback on the element when it is close to the viewport.
-   * @param {!AmpStoryPlayer|!AmpStoryEntryPoint} elImpl
-   * @private
-   */
-  layoutFallback_(elImpl) {
-    // TODO(Enriqe): pause elements when scrolling away from viewport.
-    this.win_.addEventListener(
-      'scroll',
-      throttle(
-        this.win_,
-        this.layoutIfVisible_.bind(this, elImpl),
-        SCROLL_THROTTLE_MS
-      )
+    new AmpStoryPlayerViewportObserver(
+      this.win_,
+      elImpl.getElement(),
+      elImpl.layoutCallback.bind(elImpl)
     );
 
-    // Calls it once it in case scroll event never fires.
-    this.layoutIfVisible_(elImpl);
-  }
-
-  /**
-   * Checks if element is close to the viewport and calls layoutCallback when it
-   * is.
-   * @param {!AmpStoryPlayer|!AmpStoryEntryPoint} elImpl
-   * @private
-   */
-  layoutIfVisible_(elImpl) {
-    const elTop = elImpl.getElement()./*OK*/ getBoundingClientRect().top;
-    if (this.win_./*OK*/ innerHeight * 2 > elTop) {
+    const scrollHandler = () => {
       elImpl.layoutCallback();
-    }
+      this.win_.removeEventListener('scroll', scrollHandler);
+    };
+
+    this.win_.addEventListener('scroll', scrollHandler);
   }
 
   /**

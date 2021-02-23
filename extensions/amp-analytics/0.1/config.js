@@ -378,7 +378,6 @@ export class AnalyticsConfig {
   /**
    * @private
    * @return {!JsonObject}
-   * @noinline
    */
   getInlineConfig_() {
     if (this.element_.CONFIG) {

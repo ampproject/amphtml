@@ -10,23 +10,23 @@
 
 ## Summary
 
-The player is fully available and the functionalities here (unless otherwise specified) are ready to use. The goal of this issue is to polish documentation, provide more examples of the player, and showcase new functionalities. To learn how to try out the new features (marked in (**Beta**)), refer to the [FAQs](<#FAQs-(please-feel-free-to-reach-out-with-other-questions-&-thoughts)>).
+The player is fully available and the functionalities here (unless otherwise specified) are ready to use. The goal of this issue is to polish documentation, provide more examples of the player, and showcase new functionalities. To learn how to try out the new features (marked in (**Beta**)), refer to the [FAQs](#faqs-please-feel-free-to-reach-out-with-other-questions--thoughts).
 
 This update contains guidance on using the Web Story Player to support:
 
-- [Navigating between stories](#Navigating-between-stories)
-- [Integrating Web Stories into your website (entrypoints)](<#Integrating-web-stories-into-your-website-(entrypoints)>)
-- [(Beta) Programmatically fetching more stories](<#(Beta)-Programmatically-fetching-more-stories>)
-- [(Beta) Circular wrapping](<#(Beta)-Circular-wrapping>)
-- [(Beta) Customizing position & visibility of story UI controls](<#(Beta)-Customizing-position-&-visibility-of-story-UI-controls>)
-- [(Beta) Custom Events](<#(Beta)-Custom-Events>)
-- [Upcoming API Change: Poster Image](#Upcoming-API-Change:-Poster-Image)
+-   [Navigating between stories](#Navigating-between-stories)
+-   [Integrating Web Stories into your website (entrypoints)](#integrating-web-stories-into-your-website-entrypoints)
+-   [Programmatically fetching more stories](#Programmatically-fetching-more-stories)
+-   [Circular wrapping](#Circular-wrapping)
+-   [Customizing position & visibility of story UI controls](#Customizing-position-&-visibility-of-story-UI-controls)
+-   [Custom Events](#Custom-Events)
+-   [Upcoming API Change: Poster Image](#Upcoming-API-Change:-Poster-Image)
 
 Beyond this, you’ll also find:
 
-- [Additional use case demos](#Additional-use-case-demos)
-- [Additional explorations and roadmap](#Additional-explorations-and-roadmap)
-- [FAQs](<#FAQs-(please-feel-free-to-reach-out-with-other-questions-&-thoughts)>)
+-   [Additional use case demos](#Additional-use-case-demos)
+-   [Additional explorations and roadmap](#Additional-explorations-and-roadmap)
+-   [FAQs](#faqs-please-feel-free-to-reach-out-with-other-questions--thoughts)
 
 ## Player setup
 
@@ -84,20 +84,20 @@ There are many ways in which you can use the player on your own surfaces. Below 
 <tbody>
   <tr>
     <td><strong>Carousel with circle avatars</strong> <br>In this codepen, we provide an example of how to create a carousel entry point and how to link it to your player. <br> <a href="https://codepen.io/maenrique/pen/wvWjNYr" target="_blank" rel="noopener noreferrer">https://codepen.io/maenrique/pen/wvWjNYr</a><br><br><strong>Demo</strong>  <br>This demo showcases a more complex implementation with a horizontally scrollable carousel and the player being opened in a lightbox. <br><a href="https://web-player-cards-carousel.web.app/examples/amp-story/player-entry-point-circular.html" target="_blank" rel="noopener noreferrer">https://web-player-cards-carousel.web.app/examples/amp-story/player-entry-point-circular.html</a><br></td>
-    <td><img width="360" height="642" src="https://github.com/ampproject/amphtml/blob/master/src/amp-story-player/img/carousel-circuclar-entry-point.png?raw=true"></td>
+    <td><img src="https://github.com/ampproject/amphtml/blob/master/src/amp-story-player/img/carousel-circuclar-entry-point.png?raw=true"></td>
   </tr>
   <tr>
     <td><strong>Carousel with cards</strong><br>In this codepen, we provide an example of how to create a simple card carousel entry point and how to link it to your player.<br><a href="https://codepen.io/maenrique/pen/MWeGxqY" target="_blank" rel="noopener noreferrer">https://codepen.io/maenrique/pen/MWeGxqY</a><br><br><strong>Demo</strong> <br>This demo showcases a more complex implementation with a horizontally scrollable carousel and the player being opened in a lightbox. <br> <a href="https://web-player-cards-carousel.web.app/examples/amp-story/player-entry-point-cards.html" target="_blank" rel="noopener noreferrer">https://web-player-cards-carousel.web.app/examples/amp-story/player-entry-point-cards.html</a><br><br></td>
-    <td><img width="360" height="642" src="https://github.com/ampproject/amphtml/blob/master/src/amp-story-player/img/carousel-cards-entry-point.png?raw=true"></td>
+    <td><img src="https://github.com/ampproject/amphtml/blob/master/src/amp-story-player/img/carousel-cards-entry-point.png?raw=true"></td>
   </tr>
   <tr>
     <td>Embedding directly into some text<br>The simplest way to use the player is to directly embed the player in your platform.<br><a href="https://web-player-cards-carousel.web.app/examples/amp-story/player-blog.html" target="_blank" rel="noopener noreferrer">Demo</a><br></td>
-    <td><img width="360" height="409" src="https://github.com/ampproject/amphtml/blob/master/src/amp-story-player/img/embed-in-blog.png?raw=true"></td>
+    <td><img src="https://github.com/ampproject/amphtml/blob/master/src/amp-story-player/img/embed-in-blog.png?raw=true"></td>
   </tr>
 </tbody>
 </table>
 
-## (Beta) Programmatically fetching more stories
+## Programmatically fetching more stories
 
 You can now create an “infinite scroll” experience by fetching more stories as the user navigates through them in your player. Simply use the new JSON configuration to specify an endpoint, and the player will automatically fetch more stories as it gets closer to the last story in the player.
 
@@ -160,7 +160,7 @@ Example:
 ]
 ```
 
-## (Beta) Circular Wrapping
+## Circular Wrapping
 
 You can now create a circular consumption of stories. This enables users to go back to the first story when they finish the last one. To do this, use the JSON configuration with the `circular-wrapping` action.
 
@@ -186,7 +186,7 @@ Here’s an example of how the configuration looks:
 
 The configuration must be a direct child of the <amp-story-player> element, with the `type=”application/json”` attribute.
 
-## (Beta) Customizing position & visibility of story UI controls
+## Customizing position & visibility of story UI controls
 
 You can now customize controls of the story UI with a variety of options. These include new buttons, changing the position (start or end), among others.
 
@@ -232,17 +232,17 @@ The configuration will end up looking like the following:
 
 Specify a control object with the “close” name to get the close icon.
 
-- `event`: The close button dispatches the `amp-story-player-close` event.
+-   `event`: The close button dispatches the `amp-story-player-close` event.
 
 The “close” control supports the following customizable properties:
 
-- `position`: “start” or “end”.
-  - Places the icon either on the left or right on LTR languages.
-- `visibility`: “hidden” or “visible” (default).
-  - Toggles the control’s visibility. If omitted, the default is visible.
-  - See [Example #2 - Showing skip-to-next story on desktop.](#Example-#2---Showing-skip-to-next-story-on-desktop)
-- `backgroundImageUrl`: string with url or data string (escaped).
-  - Changes the icon image to the provided url or data string (for inline svgs).
+-   `position`: “start” or “end”.
+    -   Places the icon either on the left or right on LTR languages.
+-   `visibility`: “hidden” or “visible” (default).
+    -   Toggles the control’s visibility. If omitted, the default is visible.
+    -   See [Example #2 - Showing skip-to-next story on desktop.](#Example-#2---Showing-skip-to-next-story-on-desktop)
+-   `backgroundImageUrl`: string with url or data string (escaped).
+    -   Changes the icon image to the provided url or data string (for inline svgs).
 
 ### Skip-next
 
@@ -250,18 +250,18 @@ Skips to the next story inside the player (only available on desktop).
 
 The “skip-next” control supports the following customizable properties:
 
-- `position`: “start” or “end”.
-  - Places the icon either on the left or right on LTR languages.
-- `visibility`: “hidden” or “visible” (default).
-  - Toggles the control’s visibility. If omitted, the default is visible.
-- `backgroundImageUrl`: string with url or data string (escaped).
-  - Changes the icon image to the provided url or data string (for inline svgs).
+-   `position`: “start” or “end”.
+    -   Places the icon either on the left or right on LTR languages.
+-   `visibility`: “hidden” or “visible” (default).
+    -   Toggles the control’s visibility. If omitted, the default is visible.
+-   `backgroundImageUrl`: string with url or data string (escaped).
+    -   Changes the icon image to the provided url or data string (for inline svgs).
 
 ### Custom control
 
 You can add a custom control to the stories inside the player with a custom control. Simply specify a “name” and an “backgroundImageUrl”, and any optional properties:
 
-- `name` (**required**): a string with the name of the control. e.g. “lightbox”. **The dispatched event will depend on this name.** The custom event will be the name of the control prefixed with `amp-story-player-*`. E.g. `amp-story-player-lightbox`:
+-   `name` (**required**): a string with the name of the control. e.g. “lightbox”. **The dispatched event will depend on this name.** The custom event will be the name of the control prefixed with `amp-story-player-*`. E.g. `amp-story-player-lightbox`:
 
 ```javascript
 const player = document.body.querySelector("amp-story-player");
@@ -273,12 +273,12 @@ player.addEventListener("amp-story-player-lightbox", () => {
 });
 ```
 
-- `backgroundImageUrl` (**required**): Accepts URLs, as well as svgs and `data` paths (note that strings must be JSON escaped). See [example 3](#Example-#3---Changing-the-icon-of-the-close-button).
-  - Changes the control icon.
-- `position`: “start” or “end”.
-  - Places the icon either on the left or right on LTR languages.
-- `visibility`: “hidden” or “visible” (default).
-  - Toggles the control’s visibility. If omitted, the default is visible.
+-   `backgroundImageUrl` (**required**): Accepts URLs, as well as svgs and `data` paths (note that strings must be JSON escaped). See [example 3](#Example-#3---Changing-the-icon-of-the-close-button).
+    -   Changes the control icon.
+-   `position`: “start” or “end”.
+    -   Places the icon either on the left or right on LTR languages.
+-   `visibility`: “hidden” or “visible” (default).
+    -   Toggles the control’s visibility. If omitted, the default is visible.
 
 ### Example #1 - Close button on the start position
 
@@ -303,7 +303,7 @@ Since by default the close button will be placed to the end, all we have to do i
 </amp-story-player>
       </pre>
     </td>
-    <td><img width="360" height="600" src="https://github.com/ampproject/amphtml/blob/master/src/amp-story-player/img/lightbox-close-button.png?raw=true"></td>
+    <td><img src="https://github.com/ampproject/amphtml/blob/master/src/amp-story-player/img/lightbox-close-button.png?raw=true"></td>
   </tr>
 </table>
 
@@ -359,13 +359,13 @@ On desktop, you can now display a button that navigates from the current story t
   </tr>
 </table>
 
-## (Beta) Custom Events
+## Custom Events
 
 We’ve recently introduced some new events that the player will dispatch and that you can listen to. To see the existing events, refer to the documentation of [Custom Events](https://github.com/ampproject/amphtml/blob/master/spec/amp-story-player.md#custom-events).
 
 ### noNextStory
 
-Dispatched when there is no next story. Note that this will not be dispatched when using [(Beta) Circular wrapping](<#(Beta)-Circular-wrapping>).
+Dispatched when there is no next story. Note that this will not be dispatched when using [Circular wrapping](#Circular-wrapping).
 
 ```javascript
 player.addEventListener('noNextStory', (event) => {
@@ -375,7 +375,7 @@ player.addEventListener('noNextStory', (event) => {
 
 ### noPreviousStory
 
-Dispatched when there is no next story. Note that this will not be dispatched when using [(Beta) Circular wrapping](<#(Beta)-Circular-wrapping>).
+Dispatched when there is no next story. Note that this will not be dispatched when using [Circular wrapping](#Circular-wrapping).
 
 ```javascript
 player.addEventListener('noPreviousStory', (event) => {
@@ -409,11 +409,9 @@ This new API is still a work in progress, and will send more information when it
 
 ## Additional use case demos
 
-Circle entry point + scrolling + lightbox:
-https://codepen.io/maenrique/pen/rNLyqXg
+<a href="https://codepen.io/maenrique/pen/rNLyqXg" target="_blank" rel="noopener noreferrer">Circle entry point + scrolling + lightbox</a>
 
-Card entry point + scrolling + lightbox
-https://codepen.io/maenrique/pen/WNxpPqJ
+<a href="https://codepen.io/maenrique/pen/WNxpPqJ" target="_blank" rel="noopener noreferrer">Card entry point + scrolling + lightbox</a>
 
 ## Additional explorations and roadmap
 
@@ -425,10 +423,10 @@ Follow feature requests & bugs in the [Github project](https://github.com/amppro
 
 Good question. While the basic functionality of the player is in the [AMP version](https://amp.dev/documentation/components/amp-story-player/), including embedding multiple stories and swiping through them, we are still working on porting over some of the features from the non-AMP version to the AMP version. These include:
 
-- Circular wrapping
-- Programmatically fetching more stories from an endpoint
-- Customizable UI controls
-- Custom events
+-   Circular wrapping
+-   Programmatically fetching more stories from an endpoint
+-   Customizable UI controls
+-   Custom events
 
 Follow our [roadmap on Github](https://github.com/ampproject/amphtml/projects/109) and the wg-stories updates for the [latest status updates](https://github.com/ampproject/wg-stories/issues).
 

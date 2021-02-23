@@ -27,7 +27,7 @@ limitations under the License.
   </script>
   <div id="opencmp-consent-prompt-ui">
     Post Prompt UI
-    <button on="tap:consent.prompt(consent=opencmp)" role="button">
+    <button on="tap:consent.prompt(consent=opencmp)">
       Privacy Settings
     </button>
   </div>

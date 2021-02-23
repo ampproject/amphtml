@@ -17,8 +17,13 @@
 import {Deferred} from '../utils/promise';
 import {FiniteStateMachine} from '../finite-state-machine';
 import {FocusHistory} from '../focus-history';
+import {
+  INTERSECT_RESOURCES_EXP,
+  divertIntersectResources,
+} from '../experiments/intersect-resources-exp';
 import {Pass} from '../pass';
 import {READY_SCAN_SIGNAL, ResourcesInterface} from './resources-interface';
+
 import {Resource, ResourceState} from './resource';
 import {Services} from '../services';
 import {TaskQueue} from './task-queue';
@@ -26,6 +31,7 @@ import {VisibilityState} from '../visibility-state';
 import {dev, devAssert} from '../log';
 import {dict} from '../utils/object';
 import {expandLayoutRect} from '../layout-rect';
+import {getExperimentBranch, isExperimentOn} from '../experiments';
 import {getMode} from '../mode';
 import {getSourceUrl} from '../url';
 import {hasNextNodeInDocumentOrder, isIframed} from '../dom';
@@ -33,7 +39,6 @@ import {ieIntrinsicCheckAndFix} from './ie-intrinsic-bug';
 import {ieMediaCheckAndFix} from './ie-media-bug';
 import {isAmp4Email} from '../format';
 import {isBlockedByConsent, reportError} from '../error';
-import {isExperimentOn} from '../experiments';
 import {listen, loadPromise} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
 import {remove} from '../utils/array';
@@ -218,9 +223,13 @@ export class ResourcesImpl {
      */
     this.intersectionObserverCallbackFired_ = false;
 
+    divertIntersectResources(this.win);
+
     if (
-      isExperimentOn(this.win, 'intersect-resources') &&
-      !isAmp4Email(this.win.document)
+      isExperimentOn(this.win, 'bento') ||
+      getExperimentBranch(this.win, INTERSECT_RESOURCES_EXP.id) ===
+        INTERSECT_RESOURCES_EXP.experiment ||
+      isAmp4Email(this.win.document)
     ) {
       const iframed = isIframed(this.win);
 
@@ -248,33 +257,31 @@ export class ResourcesImpl {
     // When user scrolling stops, run pass to check newly in-viewport elements.
     // When viewport is resized, we have to re-measure everything.
     this.viewport_.onChanged((event) => {
-      this.lastScrollTime_ = Date.now();
+      this.lastScrollTime_ = this.win.Date.now();
       this.lastVelocity_ = event.velocity;
       if (event.relayoutAll) {
         this.relayoutAll_ = true;
         this.maybeChangeHeight_ = true;
       }
 
-      // With IntersectionObserver, we only need to handle viewport resize.
-      if (this.relayoutAll_ || !this.intersectionObserver_) {
-        this.schedulePass();
-      }
       // Unfortunately, a viewport size change invalidates all premeasurements.
       if (this.relayoutAll_ && this.intersectionObserver_) {
         this.resources_.forEach((resource) =>
           resource.invalidatePremeasurementAndRequestMeasure()
         );
       }
+
+      this.schedulePass();
     });
     this.viewport_.onScroll(() => {
-      this.lastScrollTime_ = Date.now();
+      this.lastScrollTime_ = this.win.Date.now();
     });
 
     // When document becomes visible, e.g. from "prerender" mode, do a
     // simple pass.
     this.ampdoc.onVisibilityChanged(() => {
       if (this.firstVisibleTime_ == -1 && this.ampdoc.isVisible()) {
-        this.firstVisibleTime_ = Date.now();
+        this.firstVisibleTime_ = this.win.Date.now();
       }
       this.schedulePass();
     });
@@ -622,6 +629,10 @@ export class ResourcesImpl {
       // TODO(willchou): Fix observe/unobserve/remeasure churn in reparenting.
       this.intersectionObserver_.unobserve(resource.element);
     }
+
+    if (resource.getState() === ResourceState.LAYOUT_SCHEDULED) {
+      resource.layoutCanceled();
+    }
     this.cleanupTasks_(resource, /* opt_removePending */ true);
     dev().fine(TAG_, 'resource removed:', resource.debugid);
   }
@@ -851,7 +862,7 @@ export class ResourcesImpl {
     // scroll adjustment to avoid active viewport changing without user's
     // action. The elements in the active viewport are not resized and instead
     // the overflow callbacks are called.
-    const now = Date.now();
+    const now = this.win.Date.now();
     const viewportRect = this.viewport_.getRect();
     const topOffset = viewportRect.height / 10;
     const bottomOffset = viewportRect.height / 10;
@@ -1004,7 +1015,7 @@ export class ResourcesImpl {
                 // If the element has siblings, it's possible that a width-expansion will
                 // cause some of them to be pushed down.
                 const parentWidth =
-                  (parent.getLayoutWidth && parent.getLayoutWidth()) ||
+                  (parent.getLayoutSize && parent.getLayoutSize().width) ||
                   parent./*OK*/ offsetWidth;
                 let cumulativeWidth = widthDiff;
                 for (let i = 0; i < parent.childElementCount; i++) {
@@ -1179,7 +1190,7 @@ export class ResourcesImpl {
   discoverWork_() {
     // TODO(dvoytenko): vsync separation may be needed for different phases
 
-    const now = Date.now();
+    const now = this.win.Date.now();
 
     // Ensure all resources layout phase complete; when relayoutAll is requested
     // force re-layout.
@@ -1200,23 +1211,13 @@ export class ResourcesImpl {
         this.buildOrScheduleBuildForResource_(r, /* checkForDupes */ true);
       }
       if (this.intersectionObserver_) {
-        // With IntersectionObserver, we call applySizesAndMediaQuery() early
-        // in connectedCallback(), so we only need to re-apply on relayout.
-        // relayoutCount is also irrelevant and doesn't need an increment.
-        if (relayoutAll) {
-          r.applySizesAndMediaQuery();
-          dev().fine(TAG_, 'apply sizes/media query:', r.debugid);
-        }
+        // Do nothing.
       } else if (
         relayoutAll ||
         !r.hasBeenMeasured() ||
         // NOT_LAID_OUT is the state after build() but before measure().
         r.getState() == ResourceState.NOT_LAID_OUT
       ) {
-        // TODO(willchou): We sometimes call this needlessly/repeatedly.
-        // All elements outside of the loading rect are NOT_LAID_OUT!
-        r.applySizesAndMediaQuery();
-        dev().fine(TAG_, 'apply sizes/media query:', r.debugid);
         relayoutCount++;
       }
       if (r.isMeasureRequested()) {
@@ -1453,7 +1454,7 @@ export class ResourcesImpl {
    * @private
    */
   work_() {
-    const now = Date.now();
+    const now = this.win.Date.now();
 
     let timeout = -1;
     let task = this.queue_.peek(this.boundTaskScorer_);
@@ -1606,7 +1607,7 @@ export class ResourcesImpl {
    * @private
    */
   calcTaskTimeout_(task) {
-    const now = Date.now();
+    const now = this.win.Date.now();
 
     if (this.exec_.getSize() == 0) {
       // If we've never been visible, return 0. This follows the previous
@@ -1780,7 +1781,7 @@ export class ResourcesImpl {
         Math.max(resource.getLayoutPriority(), parentPriority) + priorityOffset,
       forceOutsideViewport,
       callback,
-      scheduleTime: Date.now(),
+      scheduleTime: this.win.Date.now(),
       startTime: 0,
       promise: null,
     };

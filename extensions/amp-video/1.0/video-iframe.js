@@ -60,14 +60,15 @@ function usePropRef(prop) {
  */
 function VideoIframeWithRef(
   {
-    loading = 'lazy',
+    loading,
     sandbox = DEFAULT_SANDBOX,
     muted = false,
     controls = false,
     origin,
     onCanPlay,
     onMessage,
-    makeMethodMessage,
+    makeMethodMessage: makeMethodMessageProp,
+    onIframeLoad,
     ...rest
   },
   ref
@@ -76,17 +77,21 @@ function VideoIframeWithRef(
 
   const readyDeferred = useMemo(() => new Deferred(), []);
 
+  // Only use the first instance of `makeMethodMessage` to avoid resetting this
+  // callback all the time.
+  const makeMethodMessageRef = useRef(makeMethodMessageProp);
   const postMethodMessage = useCallback(
     (method) => {
       if (!iframeRef.current || !iframeRef.current.contentWindow) {
         return;
       }
+      const makeMethodMessage = makeMethodMessageRef.current;
       readyDeferred.promise.then(() => {
         const message = makeMethodMessage(method);
         iframeRef.current.contentWindow./*OK*/ postMessage(message, '*');
       });
     },
-    [readyDeferred.promise, makeMethodMessage]
+    [readyDeferred.promise]
   );
 
   useImperativeHandle(
@@ -103,6 +108,10 @@ function VideoIframeWithRef(
   const onMessageRef = usePropRef(onMessage);
 
   useLayoutEffect(() => {
+    if (!iframeRef.current) {
+      return;
+    }
+
     /** @param {Event} event */
     function handleMessage(event) {
       if (!onMessageRef.current) {
@@ -155,6 +164,11 @@ function VideoIframeWithRef(
           readyDeferred.promise.then(onCanPlay);
         }
         readyDeferred.resolve();
+      }}
+      onLoad={(event) => {
+        if (onIframeLoad) {
+          onIframeLoad(event);
+        }
       }}
     />
   );

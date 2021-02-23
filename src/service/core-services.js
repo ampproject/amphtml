@@ -26,6 +26,7 @@ import {installGlobalSubmitListenerForDoc} from '../document-submit';
 import {installHiddenObserverForDoc} from './hidden-observer-impl';
 import {installHistoryServiceForDoc} from './history-impl';
 import {installImg} from '../../builtins/amp-img';
+import {installInaboxResourcesServiceForDoc} from '../inabox/inabox-resources';
 import {installInputService} from '../input';
 import {installLayout} from '../../builtins/amp-layout';
 import {installLoadingIndicatorForDoc} from './loading-indicator';
@@ -123,15 +124,13 @@ function installAmpdocServicesInternal(ampdoc, isEmbedded) {
   isEmbedded
     ? adoptServiceForEmbedDoc(ampdoc, 'history')
     : installHistoryServiceForDoc(ampdoc);
+
   isEmbedded
-    ? adoptServiceForEmbedDoc(ampdoc, 'resources')
+    ? installInaboxResourcesServiceForDoc(ampdoc)
     : installResourcesServiceForDoc(ampdoc);
-  isEmbedded
-    ? adoptServiceForEmbedDoc(ampdoc, 'owners')
-    : installOwnersServiceForDoc(ampdoc);
-  isEmbedded
-    ? adoptServiceForEmbedDoc(ampdoc, 'mutator')
-    : installMutatorServiceForDoc(ampdoc);
+  installOwnersServiceForDoc(ampdoc);
+  installMutatorServiceForDoc(ampdoc);
+
   isEmbedded
     ? adoptServiceForEmbedDoc(ampdoc, 'url-replace')
     : installUrlReplacementsServiceForDoc(ampdoc);

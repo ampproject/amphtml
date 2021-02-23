@@ -32,8 +32,9 @@ import {getDetail, listenOncePromise} from '../../../../src/event-helper';
  */
 async function afterIndexUpdate(el, index) {
   const event = await listenOncePromise(el, CarouselEvents.INDEX_CHANGE);
-  await el.implementation_.mutateElement(() => {});
-  await el.implementation_.mutateElement(() => {});
+  const impl = await el.getImpl(false);
+  await impl.mutateElement(() => {});
+  await impl.mutateElement(() => {});
 
   if (index != undefined && getDetail(event)['index'] != index) {
     return afterIndexUpdate(el, index);
@@ -129,7 +130,7 @@ describes.realWin(
       }
 
       container.appendChild(carousel);
-      await carousel.build();
+      await carousel.buildInternal();
       carousel.updateLayoutBox({
         top: 0,
         left: 0,
@@ -168,23 +169,30 @@ describes.realWin(
       const slideWrappers = getSlideWrappers(carousel);
       expect(slideWrappers.length).to.equal(5);
 
-      // Ensure that the content has the snap property not wrapper
-      // or else it will break scrolling animation.
-      for (let i = 0; i < slideWrappers.length; i++) {
-        expect(slideWrappers[i].style.scrollSnapAlign).to.equal('');
-        expect(slideWrappers[i].children[0].style.scrollSnapAlign).to.not.equal(
-          ''
-        );
+      const slides = carousel.querySelector('.i-amphtml-carousel-scroll')
+        .children;
+
+      // Ensure that the spacers have the snap property and not the
+      // slides.
+      for (let i = 0; i < slides.length; i++) {
+        const slide = slides[i];
+        if (slide.classList.contains('i-amphtml-carousel-spacer')) {
+          // type=slides is always center alignment.
+          expect(slide.style.scrollSnapAlign).to.equal('center');
+        } else {
+          expect(slide.style.scrollSnapAlign).to.equal('');
+          expect(slide.children[0].style.scrollSnapAlign).to.equal('');
+        }
       }
     });
 
     it('should show focus outline and border on next and prev buttons', async () => {
       const carousel = await getCarousel({loop: false});
+      const impl = await carousel.getImpl();
 
-      carousel.implementation_.interactionNext();
+      impl.interactionNext();
       await afterIndexUpdate(carousel);
 
-      const impl = carousel.implementation_;
       impl.prevButton_.focus();
       expect(doc.activeElement).to.equal(impl.prevButton_);
       expect(win.getComputedStyle(impl.prevButton_).outline).to.equal(
@@ -239,8 +247,9 @@ describes.realWin(
 
       it('should disable the next button when at the end', async () => {
         const carousel = await getCarousel({loop: false});
+        const impl = await carousel.getImpl();
 
-        carousel.implementation_.goToSlide(4);
+        impl.goToSlide(4);
         await afterIndexUpdate(carousel);
 
         expect(getNextButton(carousel).getAttribute('aria-disabled')).to.equal(
@@ -250,9 +259,10 @@ describes.realWin(
 
       it('should correctly style controls; focusable but not visible', async () => {
         const carousel = await getCarousel({loop: false});
+        const impl = await carousel.getImpl();
 
         getNextButton(carousel).focus();
-        carousel.implementation_.goToSlide(4);
+        impl.goToSlide(4);
         await afterIndexUpdate(carousel);
         expect(getNextButton(carousel).getAttribute('tabIndex')).to.equal('-1');
         expect(getPrevButton(carousel).getAttribute('tabIndex')).to.equal('0');
@@ -261,7 +271,7 @@ describes.realWin(
         expect(doc.activeElement).to.equal(getNextButton(carousel));
 
         getPrevButton(carousel).focus();
-        carousel.implementation_.goToSlide(0);
+        impl.goToSlide(0);
         await afterIndexUpdate(carousel);
         expect(getNextButton(carousel).getAttribute('tabIndex')).to.equal('0');
         expect(getPrevButton(carousel).getAttribute('tabIndex')).to.equal('-1');
@@ -280,22 +290,27 @@ describes.realWin(
         expect(eventSpy).to.have.not.been.called;
       });
 
-      it('should dispatch when changing slides', async () => {
-        const eventSpy = env.sandbox.spy();
-        container.addEventListener('slideChange', eventSpy);
+      it('should dispatch event with index and actionTrust when changing slides', async () => {
+        let event;
+        container.addEventListener('slideChange', (e) => {
+          expect(event).to.be.undefined;
+          event = e;
+        });
         const carousel = await getCarousel({loop: false});
+        const impl = await carousel.getImpl();
 
-        carousel.implementation_.interactionNext();
+        impl.interactionNext();
         await afterIndexUpdate(carousel);
 
-        expect(eventSpy).to.have.been.calledOnce;
+        expect(event.data.index).to.equal(1);
+        expect(event.data.actionTrust).to.equal(ActionTrust.HIGH);
       });
     });
 
     describe('goToSlide action', () => {
       it('should propagate high trust', async () => {
         const carousel = await getCarousel({loop: false});
-        const impl = carousel.implementation_;
+        const impl = await carousel.getImpl();
         const triggerSpy = env.sandbox.spy(impl.action_, 'trigger');
 
         impl.executeAction({
@@ -316,7 +331,7 @@ describes.realWin(
 
       it('should propagate low trust', async () => {
         const carousel = await getCarousel({loop: false});
-        const impl = carousel.implementation_;
+        const impl = await carousel.getImpl();
         const triggerSpy = env.sandbox.spy(impl.action_, 'trigger');
 
         impl.executeAction({
@@ -337,7 +352,7 @@ describes.realWin(
 
       it('should allow string-valued index', async () => {
         const carousel = await getCarousel({loop: false});
-        const impl = carousel.implementation_;
+        const impl = await carousel.getImpl();
         const triggerSpy = env.sandbox.spy(impl.action_, 'trigger');
 
         impl.executeAction({
@@ -358,7 +373,7 @@ describes.realWin(
 
       it('should cause error with invalid index', async () => {
         const carousel = await getCarousel({loop: false});
-        const impl = carousel.implementation_;
+        const impl = await carousel.getImpl();
         const triggerSpy = env.sandbox.spy(impl.action_, 'trigger');
 
         try {
@@ -472,8 +487,9 @@ describes.realWin(
 
         it('should have the correct values on the last index', async () => {
           const carousel = await getCarousel({loop: false, slideCount: 3});
+          const impl = await carousel.getImpl();
 
-          carousel.implementation_.goToSlide(2);
+          impl.goToSlide(2);
           await afterIndexUpdate(carousel);
 
           expect(getPrevTitle(carousel)).to.equal(
@@ -499,8 +515,9 @@ describes.realWin(
 
         it('should have the correct values on the last index', async () => {
           const carousel = await getCarousel({loop: true, slideCount: 3});
+          const impl = await carousel.getImpl();
 
-          carousel.implementation_.goToSlide(2);
+          impl.goToSlide(2);
           await afterIndexUpdate(carousel);
 
           expect(getPrevTitle(carousel)).to.equal(

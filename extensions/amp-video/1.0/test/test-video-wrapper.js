@@ -16,6 +16,8 @@
 
 import * as Preact from '../../../../src/preact';
 import {VideoWrapper} from '../video-wrapper';
+import {WithAmpContext} from '../../../../src/preact/context';
+import {createRef} from '../../../../src/preact';
 import {forwardRef} from '../../../../src/preact/compat';
 import {mount} from 'enzyme';
 import {omit} from '../../../../src/utils/object';
@@ -81,6 +83,39 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
     expect(player).to.have.lengthOf(1);
     expect(player.props()).to.include(expectedPassthroughProps);
     expect(player.props().children).to.equal(wrapper.props().sources);
+  });
+
+  it('should render only shell and resolve API as unloaded', () => {
+    const ref = createRef();
+    const wrapper = mount(
+      <VideoWrapper
+        ref={ref}
+        loading="unload"
+        component={TestPlayer}
+        sources={<div></div>}
+      />
+    );
+    const player = wrapper.find(TestPlayer);
+    expect(player).to.have.lengthOf(0);
+
+    // API is functional but returns 0/NaN values.
+    const api = ref.current;
+    expect(api.currentTime).to.equal(0);
+    expect(api.duration).to.be.NaN;
+  });
+
+  it('should render only shell when paused in unloadOnPause', () => {
+    const wrapper = mount(
+      <WithAmpContext playable={false}>
+        <VideoWrapper
+          unloadOnPause={true}
+          component={TestPlayer}
+          sources={<div></div>}
+        />
+      </WithAmpContext>
+    );
+    const player = wrapper.find(TestPlayer);
+    expect(player).to.have.lengthOf(0);
   });
 
   describe('MediaSession', () => {
@@ -266,6 +301,17 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
       await wrapper.find(TestPlayer).invoke('onCanPlay')();
       expect(play).to.not.have.been.called;
       expect(pause).to.have.been.calledOnce;
+    });
+
+    it('should not play when not playable', async () => {
+      const wrapper = mount(
+        <WithAmpContext playable={false}>
+          <VideoWrapper component={TestPlayer} controls autoplay />
+        </WithAmpContext>
+      );
+      intersectionObserverCallback([{isIntersecting: true}]);
+      await wrapper.find(TestPlayer).invoke('onCanPlay')();
+      expect(play).to.not.have.been.called;
     });
   });
 });

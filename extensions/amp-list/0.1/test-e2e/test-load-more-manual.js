@@ -20,9 +20,7 @@ const pageHeight = 600;
 describes.endtoend(
   'AMP list load-more=manual',
   {
-    testUrl:
-      'http://localhost:8000/test/manual/amp-list/' +
-      'load-more-manual.amp.html',
+    fixture: 'amp-list/load-more-manual.amp.html',
     initialRect: {width: pageWidth, height: pageHeight},
     // TODO(cathyxz, cvializ): figure out why 'viewer-demo' only shows 'FALLBACK'
     environments: ['single'],

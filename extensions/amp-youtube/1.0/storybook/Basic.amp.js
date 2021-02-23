@@ -20,11 +20,14 @@ import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
 export default {
-  title: 'amp-youtube',
+  title: 'amp-youtube-1_0',
   decorators: [withKnobs, withA11y, withAmp],
-
   parameters: {
-    extensions: [{name: 'amp-youtube', version: '1.0'}],
+    extensions: [
+      {name: 'amp-youtube', version: '1.0'},
+      {name: 'amp-accordion', version: '1.0'},
+    ],
+    experiments: ['bento'],
   },
 };
 
@@ -46,6 +49,29 @@ export const Default = () => {
       loop={loop}
       credentials={credentials}
     ></amp-youtube>
+  );
+};
+
+export const InsideAccordion = () => {
+  const videoid = text('videoid', 'IAvf-rkzNck');
+  const width = number('width', 300);
+  const height = number('height', 200);
+  const autoplay = boolean('autoplay', false);
+  return (
+    <amp-accordion expand-single-section>
+      <section expanded>
+        <h2>YouTube Video</h2>
+        <div>
+          <amp-youtube
+            width={width}
+            height={height}
+            data-videoid={videoid}
+            autoplay={autoplay}
+            loop
+          ></amp-youtube>
+        </div>
+      </section>
+    </amp-accordion>
   );
 };
 

@@ -16,11 +16,17 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const log = require('fancy-log');
 const requestPromise = require('request-promise');
-const {cyan, green, yellow} = require('ansi-colors');
+const {
+  isCircleciBuild,
+  isPullRequestBuild,
+  isGithubActionsBuild,
+} = require('../common/ci');
+const {ciJobUrl} = require('../common/ci');
+const {cyan, green, yellow} = require('kleur/colors');
+const {determineBuildTargets, Targets} = require('../pr-check/build-targets');
 const {gitCommitHash} = require('../common/git');
-const {travisJobUrl, isTravisPullRequestBuild} = require('../common/travis');
+const {log} = require('../common/logging');
 
 const reportBaseUrl = 'https://amp-test-status-bot.appspot.com/v0/tests';
 
@@ -28,49 +34,76 @@ const IS_GULP_INTEGRATION = argv._[0] === 'integration';
 const IS_GULP_UNIT = argv._[0] === 'unit';
 const IS_GULP_E2E = argv._[0] === 'e2e';
 
-const IS_LOCAL_CHANGES = !!argv.local_changes;
-const IS_DIST = !!argv.compiled;
-const IS_ESM = !!argv.esm;
-
-const TEST_TYPE_SUBTYPES = new Map([
-  ['integration', ['local', 'minified', 'esm']],
-  ['unit', ['local', 'local-changes']],
-  ['e2e', ['local']],
-]);
+const TEST_TYPE_SUBTYPES = isGithubActionsBuild()
+  ? new Map([
+      ['integration', ['firefox', 'safari', 'edge', 'ie']],
+      ['unit', ['firefox', 'safari', 'edge']],
+      ['e2e', ['firefox', 'safari']],
+    ])
+  : isCircleciBuild()
+  ? new Map([
+      [
+        'integration',
+        [
+          'unminified',
+          'nomodule',
+          'module',
+          'experimentA',
+          'experimentB',
+          'experimentC',
+        ],
+      ],
+      ['unit', ['unminified', 'local-changes']],
+      ['e2e', ['nomodule', 'experimentA', 'experimentB', 'experimentC']],
+    ])
+  : new Map([]);
 const TEST_TYPE_BUILD_TARGETS = new Map([
-  ['integration', ['RUNTIME', 'FLAG_CONFIG', 'INTEGRATION_TEST']],
-  ['unit', ['RUNTIME', 'UNIT_TEST']],
-  ['e2e', ['RUNTIME', 'FLAG_CONFIG', 'E2E_TEST']],
+  ['integration', [Targets.RUNTIME, Targets.INTEGRATION_TEST]],
+  ['unit', [Targets.RUNTIME, Targets.UNIT_TEST]],
+  ['e2e', [Targets.RUNTIME, Targets.E2E_TEST]],
 ]);
 
 function inferTestType() {
-  if (IS_GULP_E2E) {
-    return 'e2e/local';
-  }
-
-  let type;
-  if (IS_GULP_UNIT) {
-    type = 'unit';
-  } else if (IS_GULP_INTEGRATION) {
-    type = 'integration';
-  } else {
+  // Determine type (early exit if there's no match).
+  const type = IS_GULP_E2E
+    ? 'e2e'
+    : IS_GULP_INTEGRATION
+    ? 'integration'
+    : IS_GULP_UNIT
+    ? 'unit'
+    : null;
+  if (type == null) {
     return null;
   }
 
-  if (IS_LOCAL_CHANGES) {
-    return `${type}/local-changes`;
-  } else if (IS_DIST) {
-    if (IS_ESM) {
-      return `${type}/esm`;
-    }
-    return `${type}/minified`;
-  } else {
-    return `${type}/local`;
-  }
+  // Determine subtype (more specific cases come first).
+  const subtype = argv.local_changes
+    ? 'local-changes'
+    : argv.esm
+    ? 'module'
+    : argv.firefox
+    ? 'firefox'
+    : argv.safari
+    ? 'safari'
+    : argv.edge
+    ? 'edge'
+    : argv.ie
+    ? 'ie'
+    : argv.browsers == 'safari'
+    ? 'safari'
+    : argv.browsers == 'firefox'
+    ? 'firefox'
+    : argv.experiment
+    ? argv.experiment
+    : argv.compiled
+    ? 'nomodule'
+    : 'unminified';
+
+  return `${type}/${subtype}`;
 }
 
 async function postReport(type, action) {
-  if (type !== null && isTravisPullRequestBuild()) {
+  if (type && isPullRequestBuild()) {
     const commitHash = gitCommitHash();
 
     try {
@@ -78,7 +111,7 @@ async function postReport(type, action) {
         method: 'POST',
         uri: `${reportBaseUrl}/${commitHash}/${type}/${action}`,
         body: JSON.stringify({
-          travisJobUrl: travisJobUrl(),
+          ciJobUrl: ciJobUrl(),
         }),
         headers: {
           'Content-Type': 'application/json',
@@ -128,7 +161,8 @@ function reportTestStarted() {
   return postReport(inferTestType(), 'started');
 }
 
-async function reportAllExpectedTests(buildTargets) {
+async function reportAllExpectedTests() {
+  const buildTargets = determineBuildTargets();
   for (const [type, subTypes] of TEST_TYPE_SUBTYPES) {
     const testTypeBuildTargets = TEST_TYPE_BUILD_TARGETS.get(type);
     const action = testTypeBuildTargets.some((target) =>
