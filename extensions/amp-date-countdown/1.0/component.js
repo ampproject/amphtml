@@ -222,6 +222,7 @@ function getYDHMSFromMs(ms, biggestUnit, countUp) {
     'mm': padStart(m),
     's': s,
     'ss': padStart(s),
+    'VERSION': '1.0',
   });
 }
 

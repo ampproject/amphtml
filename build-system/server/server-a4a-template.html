@@ -13,6 +13,8 @@
       overflow: hidden;
     }
   </style>
+  <script async custom-element="amp-date-countdown" src="https://cdn.ampproject.org/v0/amp-date-countdown-1.0.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
 </head>
 <body>
   <h1 id="title">A4A Envelope</h1>
@@ -31,6 +33,14 @@
       data-experiment-id="DATAEXPERIMENTIDS"
       src="AD_URL">
   </amp-ad>
+
+  <div style="background: green">
+    <amp-date-countdown id="ampdate" end-date="2018-03-15T10:48:20+08:00" height="50" width="400" when-ended="stop" locale='en'>
+      <template type="amp-mustache">
+        <div>Version: {{VERSION}}</div>
+      </template>
+    </amp-date-countdown>
+  </div>
 
   <div style="background: #eee; overflow: hidden;; height: 100vh;"></div>
 </body>

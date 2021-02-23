@@ -325,6 +325,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
       mm: this.padStart_(m),
       s,
       ss: this.padStart_(s),
+      VERSION: '0.1',
     };
   }
 
