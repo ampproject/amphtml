@@ -83,15 +83,10 @@ function getPreClosureConfig() {
       ? './build-system/babel-plugins/babel-plugin-is_dev-constant-transformer'
       : null,
   ].filter(Boolean);
-  const presetEnv = [
-    '@babel/preset-env',
-    {
-      bugfixes: true,
-      modules: false,
-      targets: {esmodules: true},
-    },
-  ];
-  const preClosurePresets = argv.esm || argv.sxg ? [presetEnv] : [];
+
+  const preClosurePresets =
+    argv.esm || argv.sxg ? ['@babel/preset-modules'] : [];
+
   const preClosureConfig = {
     compact: false,
     plugins: preClosurePlugins,
