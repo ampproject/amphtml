@@ -619,7 +619,7 @@ export class GoogleSubscriptionsPlatform {
       }
 
       // Allow publishers to disable SwG entitlement checks.
-      // Some publishers just use LAA entitlements.
+      // Some publishers just want LAA entitlements.
       if (!this.enableEntitlements_) {
         return null;
       }
