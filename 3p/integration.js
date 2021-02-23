@@ -132,6 +132,7 @@ import {f1h} from '../ads/vendors/f1h';
 import {fakeDelayed} from '../ads/vendors/_fakedelayed_';
 import {feedad} from '../ads/vendors/feedad';
 import {felmat} from '../ads/vendors/felmat';
+import {finative} from '../ads/vendors/finative';
 import {firstimpression} from '../ads/vendors/firstimpression';
 import {flite} from '../ads/vendors/flite';
 import {fluct} from '../ads/vendors/fluct';
