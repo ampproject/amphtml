@@ -591,8 +591,7 @@ export class SubscriptionService {
           return;
         }
 
-        // Activate the metering platform.
-        // It will finish the authorization flow.
+        // Consume metering entitlements.
         const finishAuthorizationFlow = () => {
           this.handleGrantState_({
             granted: true,
@@ -609,19 +608,19 @@ export class SubscriptionService {
 
       if (this.metering_.entitlementsWereFetchedWithCurrentMeteringState) {
         // Move along.
-        // There's no use fetching metering entitlements again, until the metering state changes.
+        // There's no use fetching metering entitlements again,
+        // until the metering state changes.
         continueAuthorizationFlow();
         return;
       }
 
-      // Ask metering platform to either (1) fetch entitlements or (2) unblock authorization flow.
+      // Ask metering platform to either (1) fetch entitlements or (2) show regwall.
       this.metering_.loadMeteringState().then((meteringState) => {
         if (meteringState) {
           // Fetch metering entitlements.
           this.resetPlatform(this.metering_.platformKey);
         } else {
-          // Unblock authorization flow.
-          // Handle lack of metering state.
+          // Show regwall.
           const emptyEntitlement = Entitlement.empty('local');
           meteringPlatform.activate(emptyEntitlement, emptyEntitlement);
         }
