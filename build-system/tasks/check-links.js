@@ -26,7 +26,11 @@ const {log, logLocalDev} = require('../common/logging');
 const {maybeUpdatePackages} = require('./update-packages');
 
 const LARGE_REFACTOR_THRESHOLD = 20;
-const GITHUB_BASE_PATH = 'https://github.com/ampproject/amphtml/blob/master/';
+const GITHUB_BASE_URL = 'https://github.com/ampproject/amphtml/blob/master/';
+const EXTENSION_BASE_URLS = [
+  'https://amp.dev/documentation/components/',
+  'https://go.amp.dev/c/',
+];
 
 let filesIntroducedByPr;
 
@@ -89,6 +93,25 @@ function reportResults(results) {
 }
 
 /**
+ * @param {string} link
+ * @param {string} file
+ * @return {boolean}
+ */
+function matchesPublished(link, file) {
+  if (link === GITHUB_BASE_URL + file) {
+    return true;
+  }
+  const extensionBaseUrl = EXTENSION_BASE_URLS.find((base) =>
+    link.startsWith(base)
+  );
+  if (!extensionBaseUrl) {
+    return false;
+  }
+  const name = link.substr(extensionBaseUrl.length).split(/[\/#]/).shift();
+  return new RegExp(`^extensions/${name}/([0-9\.]/)?${name}.md$`).test(file);
+}
+
+/**
  * Determines if a link points to a file added, copied, or renamed in the PR.
  *
  * @param {string} link Link being tested.
@@ -96,7 +119,7 @@ function reportResults(results) {
  */
 function isLinkToFileIntroducedByPR(link) {
   return filesIntroducedByPr.some((file) => {
-    return file.length > 0 && link.includes(path.parse(file).base);
+    return file.length > 0 && link.includes(path.basename(file, '.md'));
   });
 }
 
@@ -140,10 +163,9 @@ function checkLinksInFile(file) {
         // Skip links to files that were introduced by the PR.
         if (isLinkToFileIntroducedByPR(link) && status == 'dead') {
           // Log links with the correct github base as alive, otherwise flag deadlinks.
-          const isValid = filesIntroducedByPr.some((file) => {
-            return link === GITHUB_BASE_PATH + file;
-          });
-          if (isValid) {
+          if (
+            filesIntroducedByPr.some((file) => matchesPublished(link, file))
+          ) {
             status = 'alive';
           }
         }
