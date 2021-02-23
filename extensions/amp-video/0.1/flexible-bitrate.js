@@ -101,21 +101,50 @@ export class BitrateManager {
     if (video.changedSources) {
       return;
     }
-    const downgradeVideo = () => {
-      const current = currentSource(video);
-      this.acceptableBitrate_ = current.bitrate_ - 1;
-      this.switchToLowerBitrate_(video, current.bitrate_);
-      this.updateOtherManagedAndPausedVideos_();
+    this.installListeners_(video);
+    // Reset slowLoad unlisten
+    this.videos_.push(DomBasedWeakRef.make(this.win, video));
+  }
+
+  /**
+   *
+   * @param {!Element} videoEl
+   */
+  installListeners_(videoEl) {
+    videoEl.bitrateUnlisteners_ = [];
+    videoEl.bitrateUnlisteners_.push(
+      onNontrivialWait(videoEl, () => this.downgradeVideo_(videoEl))
+    );
+    videoEl.bitrateUnlisteners_.push(
+      onSlowLoad(videoEl, () => this.downgradeVideo_(videoEl))
+    );
+    videoEl.changedSources = () => {
+      this.sortSources_(videoEl);
+      this.uninstallListeners_(videoEl);
+      this.installListeners_(videoEl);
     };
-    if (video.changedSources) {
+  }
+
+  /**
+   *
+   * @param {!Element} videoEl
+   */
+  uninstallListeners_(videoEl) {
+    if (!videoEl.bitrateUnlisteners_) {
       return;
     }
-    onNontrivialWait(video, downgradeVideo);
-    onSlowLoad(video, downgradeVideo);
-    video.changedSources = () => {
-      this.sortSources_(video);
-    };
-    this.videos_.push(DomBasedWeakRef.make(this.win, video));
+    videoEl.bitrateUnlisteners_.forEach((unlistener) => unlistener());
+  }
+
+  /**
+   *
+   * @param {!Element} videoEl
+   */
+  downgradeVideo_(videoEl) {
+    const current = currentSource(videoEl);
+    this.acceptableBitrate_ = current.bitrate_ - 1;
+    this.switchToLowerBitrate_(videoEl, current.bitrate_);
+    this.updateOtherManagedAndPausedVideos_();
   }
 
   /**
@@ -283,18 +312,27 @@ function onNontrivialWait(video, callback) {
 /**
  * @param {!Element} video
  * @param {function()} callback
+ * @return {function()} unlistener
+ *
  */
 function onSlowLoad(video, callback) {
-  listen(video, 'loadstart', () => {
-    let timer = null;
+  let timer = null;
+  const unlistener = listen(video, 'loadstart', () => {
+    const startTime = Date.now();
     const unlisten = listenOnce(video, 'loadeddata', () => {
       clearTimeout(timer);
+      console.log('loaded in', Date.now() - startTime);
     });
     timer = setTimeout(() => {
+      console.log('downgrading from slow load');
       unlisten();
       callback();
     }, SLOW_LOADING_THRESHOLD_MS);
   });
+  return () => {
+    unlistener();
+    clearTimeout(timer);
+  };
 }
 
 /**
