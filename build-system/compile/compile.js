@@ -46,9 +46,29 @@ let inProgress = 0;
 const MAX_PARALLEL_CLOSURE_INVOCATIONS =
   parseInt(argv.closure_concurrency, 10) || cpus().length;
 
-// Compiles AMP with the closure compiler. This is intended only for
-// production use. During development we intend to continue using
-// babel, as it has much faster incremental compilation.
+/**
+ * Compiles AMP with the closure compiler. This is intended only for
+ * production use. During development we intend to continue using
+ * babel, as it has much faster incremental compilation.
+ *
+ * @param {string} entryModuleFilename
+ * @param {string} outputDir
+ * @param {string} outputFilename
+ * @param {{
+ *  esmPassCompilation?: string,
+ *  wrapper?: string,
+ *  extraGlobs?: string,
+ *  include3pDirectories?: boolean,
+ *  includePolyfills?: boolean,
+ *  externs?: string[],
+ *  compilationLevel?: string,
+ *  verboseLogging?: boolean,
+ *  typeCheckOnly?: boolean,
+ *  skipUnknownDepsCheck?: boolean,
+ * }} options
+ * @param {{startTime?: number}} timeInfo
+ * @return {Promise<void>}
+ */
 async function closureCompile(
   entryModuleFilename,
   outputDir,
@@ -98,6 +118,25 @@ function cleanupBuildDir() {
   fs.mkdirsSync('build/fake-polyfills/src/polyfills');
 }
 
+/**
+ * @param {string[]|string} entryModuleFilenames
+ * @param {string} outputDir
+ * @param {string} outputFilename
+ * @param {{
+ *  esmPassCompilation?: string,
+ *  wrapper?: string,
+ *  extraGlobs?: string,
+ *  include3pDirectories?: boolean,
+ *  includePolyfills?: boolean,
+ *  externs?: string[],
+ *  compilationLevel?: string,
+ *  verboseLogging?: boolean,
+ *  typeCheckOnly?: boolean,
+ *  skipUnknownDepsCheck?: boolean,
+ * }} options
+ * @param {{startTime?: number}} timeInfo
+ * @return {Promise<void>}
+ */
 function compile(
   entryModuleFilenames,
   outputDir,
@@ -211,6 +250,10 @@ function compile(
     }
     externs.push('build-system/externs/amp.multipass.extern.js');
 
+    /**
+     * TODO(#28387) write a type for this.
+     * @type {Object}
+     */
     /* eslint "google-camelcase/google-camelcase": 0*/
     const compilerOptions = {
       compilation_level: options.compilationLevel || 'SIMPLE_OPTIMIZATIONS',
@@ -377,7 +420,7 @@ function compile(
 function printClosureConcurrency() {
   log(
     green('Using up to'),
-    cyan(MAX_PARALLEL_CLOSURE_INVOCATIONS),
+    cyan(MAX_PARALLEL_CLOSURE_INVOCATIONS.toString()),
     green('concurrent invocations of closure compiler.')
   );
   if (!argv.closure_concurrency) {

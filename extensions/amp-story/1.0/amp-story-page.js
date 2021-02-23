@@ -1040,9 +1040,9 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   preloadAllMedia_() {
-    return this.whenAllMediaElements_((mediaPool, mediaEl) => {
-      this.preloadMedia_(mediaPool, mediaEl);
-    });
+    return this.whenAllMediaElements_((mediaPool, mediaEl) =>
+      this.preloadMedia_(mediaPool, mediaEl)
+    );
   }
 
   /**

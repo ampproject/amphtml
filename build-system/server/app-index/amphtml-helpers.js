@@ -110,11 +110,11 @@ const addRequiredExtensionsToHead = (
     addExtension(name, {isTemplate: true, ...defaultConf});
 
   Array.from(matchIterator(componentTagNameRegex, docStr))
-    .map(([unusedFullMatch, tagName]) => componentExtensionName(tagName))
+    .map(([, tagName]) => componentExtensionName(tagName))
     .forEach(addExtension);
 
   Array.from(matchIterator(templateTagTypeRegex, docStr))
-    .map(([unusedFullMatch, type]) => type)
+    .map(([, type]) => type)
     .forEach(addTemplate);
 
   // TODO(alanorozco): Too greedy. Parse "on" attributes instead.

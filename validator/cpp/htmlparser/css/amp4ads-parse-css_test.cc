@@ -62,7 +62,7 @@ TEST(Amp4AdsParseCssTest, AmpAnimateExample_Good) {
       Tokenize(&css, /*line=*/1, /*col=*/0, &errors);
   unique_ptr<Stylesheet> stylesheet =
       ParseAStylesheet(&tokens, A4aCssParsingConfig(), &errors);
-  EXPECT_EQ(JsonFromList(errors), "[\n\n]");
+  EXPECT_EQ(JsonFromList(errors), "[]");
   EXPECT_EQ(stylesheet->ToJson().ToString(), R""({
   "tokentype": "STYLESHEET",
   "line": 1,
@@ -202,7 +202,7 @@ TEST(Amp4AdsParseCssTest, AmpAnimateExample_Good) {
   }
 })"");
   ValidateAmp4AdsCss(*stylesheet, &errors);
-  EXPECT_EQ(JsonFromList(errors), "[\n\n]");
+  EXPECT_EQ(JsonFromList(errors), "[]");
 }
 
 TEST(Amp4AdsParseCssTest, AmpAnimateExample_Good_VendorPrefixed) {
@@ -216,7 +216,7 @@ TEST(Amp4AdsParseCssTest, AmpAnimateExample_Good_VendorPrefixed) {
   unique_ptr<Stylesheet> stylesheet =
       ParseAStylesheet(&tokens, A4aCssParsingConfig(), &errors);
   ValidateAmp4AdsCss(*stylesheet, &errors);
-  EXPECT_EQ(JsonFromList(errors), "[\n\n]");
+  EXPECT_EQ(JsonFromList(errors), "[]");
 }
 
 TEST(Amp4AdsParseCssTest,
@@ -229,7 +229,7 @@ TEST(Amp4AdsParseCssTest,
       Tokenize(&css, /*line=*/1, /*col=*/0, &errors);
   unique_ptr<Stylesheet> stylesheet =
       ParseAStylesheet(&tokens, A4aCssParsingConfig(), &errors);
-  EXPECT_EQ(JsonFromList(errors), "[\n\n]");
+  EXPECT_EQ(JsonFromList(errors), "[]");
   EXPECT_EQ(stylesheet->ToJson().ToString(), R""({
   "tokentype": "STYLESHEET",
   "line": 1,
@@ -360,7 +360,7 @@ TEST(Amp4AdsParseCssTest,
       Tokenize(&css, /*line=*/1, /*col=*/0, &errors);
   unique_ptr<Stylesheet> stylesheet =
       ParseAStylesheet(&tokens, A4aCssParsingConfig(), &errors);
-  EXPECT_EQ(JsonFromList(errors), "[\n\n]");
+  EXPECT_EQ(JsonFromList(errors), "[]");
   EXPECT_EQ(stylesheet->ToJson().ToString(), R""({
   "tokentype": "STYLESHEET",
   "line": 1,
@@ -525,7 +525,7 @@ TEST(Amp4AdsParseCssTest,
   }
 })"");
   ValidateAmp4AdsCss(*stylesheet, &errors);
-  EXPECT_EQ(JsonFromList(errors), "[\n\n]");
+  EXPECT_EQ(JsonFromList(errors), "[]");
 }
 
 TEST(Amp4AdsParseCssTest,
@@ -543,9 +543,9 @@ TEST(Amp4AdsParseCssTest,
       Tokenize(&css, /*line=*/1, /*col=*/0, &errors);
   unique_ptr<Stylesheet> stylesheet =
       ParseAStylesheet(&tokens, A4aCssParsingConfig(), &errors);
-  EXPECT_EQ(JsonFromList(errors), "[\n\n]");
+  EXPECT_EQ(JsonFromList(errors), "[]");
   ValidateAmp4AdsCss(*stylesheet, &errors);
-  EXPECT_EQ(JsonFromList(errors), "[\n\n]");
+  EXPECT_EQ(JsonFromList(errors), "[]");
 }
 
 TEST(Amp4AdsParseCssTest, AmpAnimateExample_Good_MissingContextClass) {
@@ -560,7 +560,7 @@ TEST(Amp4AdsParseCssTest, AmpAnimateExample_Good_MissingContextClass) {
       Tokenize(&css, /*line=*/1, /*col=*/0, &errors);
   unique_ptr<Stylesheet> stylesheet =
       ParseAStylesheet(&tokens, A4aCssParsingConfig(), &errors);
-  EXPECT_EQ(JsonFromList(errors), "[\n\n]");
+  EXPECT_EQ(JsonFromList(errors), "[]");
   EXPECT_EQ(stylesheet->ToJson().ToString(), R""({
   "tokentype": "STYLESHEET",
   "line": 1,
@@ -683,7 +683,7 @@ TEST(Amp4AdsParseCssTest, AmpAnimateExample_Good_MissingContextClass) {
   }
 })"");
   ValidateAmp4AdsCss(*stylesheet, &errors);
-  EXPECT_EQ(JsonFromList(errors), "[\n\n]");
+  EXPECT_EQ(JsonFromList(errors), "[]");
 }
 
 TEST(Amp4AdsParseCssTest,
@@ -697,7 +697,7 @@ TEST(Amp4AdsParseCssTest,
       Tokenize(&css, /*line=*/1, /*col=*/0, &errors);
   unique_ptr<Stylesheet> stylesheet =
       ParseAStylesheet(&tokens, A4aCssParsingConfig(), &errors);
-  EXPECT_EQ(JsonFromList(errors), "[\n\n]");
+  EXPECT_EQ(JsonFromList(errors), "[]");
   ValidateAmp4AdsCss(*stylesheet, &errors);
   EXPECT_EQ(JsonFromList(errors), R""([
   {
@@ -726,7 +726,7 @@ TEST(Amp4AdsParseCssTest, KeyframesExample_Good) {
       Tokenize(&css, /*line=*/1, /*col=*/0, &errors);
   unique_ptr<Stylesheet> stylesheet =
       ParseAStylesheet(&tokens, A4aCssParsingConfig(), &errors);
-  EXPECT_EQ(JsonFromList(errors), "[\n\n]");
+  EXPECT_EQ(JsonFromList(errors), "[]");
   EXPECT_EQ(stylesheet->ToJson().ToString(), R""({
   "tokentype": "STYLESHEET",
   "line": 1,
@@ -890,9 +890,7 @@ TEST(Amp4AdsParseCssTest, KeyframesExample_Good) {
           ]
         }
       ],
-      "declarations":      [
-
-      ]
+      "declarations":      []
     }
   ],
   "eof":  {
@@ -902,7 +900,7 @@ TEST(Amp4AdsParseCssTest, KeyframesExample_Good) {
   }
 })"");
   ValidateAmp4AdsCss(*stylesheet, &errors);
-  EXPECT_EQ(JsonFromList(errors), "[\n\n]");
+  EXPECT_EQ(JsonFromList(errors), "[]");
 }
 
 TEST(Amp4AdsParseCssTest, KeyframesExample_Good_VendorPrefixed) {
@@ -917,7 +915,7 @@ TEST(Amp4AdsParseCssTest, KeyframesExample_Good_VendorPrefixed) {
   unique_ptr<Stylesheet> stylesheet =
       ParseAStylesheet(&tokens, A4aCssParsingConfig(), &errors);
   ValidateAmp4AdsCss(*stylesheet, &errors);
-  EXPECT_EQ(JsonFromList(errors), "[\n\n]");
+  EXPECT_EQ(JsonFromList(errors), "[]");
 }
 
 TEST(Amp4AdsParseCssTest, KeyframesExample_Good_AnimationTimingFunction) {
@@ -933,7 +931,7 @@ TEST(Amp4AdsParseCssTest, KeyframesExample_Good_AnimationTimingFunction) {
   unique_ptr<Stylesheet> stylesheet =
       ParseAStylesheet(&tokens, A4aCssParsingConfig(), &errors);
   ValidateAmp4AdsCss(*stylesheet, &errors);
-  EXPECT_EQ(JsonFromList(errors), "[\n\n]");
+  EXPECT_EQ(JsonFromList(errors), "[]");
 }
 
 TEST(Amp4AdsParseCssTest,
@@ -948,7 +946,7 @@ TEST(Amp4AdsParseCssTest,
       Tokenize(&css, /*line=*/1, /*col=*/0, &errors);
   unique_ptr<Stylesheet> stylesheet =
       ParseAStylesheet(&tokens, A4aCssParsingConfig(), &errors);
-  EXPECT_EQ(JsonFromList(errors), "[\n\n]");
+  EXPECT_EQ(JsonFromList(errors), "[]");
   ValidateAmp4AdsCss(*stylesheet, &errors);
   EXPECT_EQ(JsonFromList(errors), R""([
   {
@@ -1014,7 +1012,7 @@ TEST(Amp4AdsParseCssTest,
       Tokenize(&css, /*line=*/1, /*col=*/0, &errors);
   unique_ptr<Stylesheet> stylesheet =
       ParseAStylesheet(&tokens, A4aCssParsingConfig(), &errors);
-  EXPECT_EQ(JsonFromList(errors), "[\n\n]");
+  EXPECT_EQ(JsonFromList(errors), "[]");
   ValidateAmp4AdsCss(*stylesheet, &errors);
   EXPECT_EQ(JsonFromList(errors), R""([
   {

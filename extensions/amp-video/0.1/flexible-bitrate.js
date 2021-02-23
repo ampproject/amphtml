@@ -35,6 +35,9 @@ const BITRATE_BY_EFFECTIVE_TYPE = {
   '5g': 5000,
 };
 
+/** @const {number} Do not downgrade the quality of a video that has loaded enough content */
+const BUFFERED_THRESHOLD_PERCENTAGE = 0.8;
+
 /** @type {!BitrateManager|undefined} */
 let instance;
 /**
@@ -91,6 +94,10 @@ export class BitrateManager {
    * @param {!Element} video
    */
   manage(video) {
+    // Prevent duplicate listeners if already managing this video.
+    if (video.changedSources) {
+      return;
+    }
     onNontrivialWait(video, () => {
       const current = currentSource(video);
       this.acceptableBitrate_ = current.bitrate_ - 1;
@@ -234,7 +241,10 @@ export class BitrateManager {
         this.videos_.splice(i, 1);
         return;
       }
-      if (!video.paused) {
+      if (
+        !video.paused ||
+        getBufferedPercentage(video) > BUFFERED_THRESHOLD_PERCENTAGE
+      ) {
         return;
       }
       this.sortSources_(video);
@@ -288,4 +298,21 @@ function currentSource(video) {
       return source.src == video.currentSrc;
     })
   );
+}
+
+/**
+ * @private
+ * @param {!Element} videoEl
+ * @return {number} the percentage buffered [0-1]
+ */
+function getBufferedPercentage(videoEl) {
+  // videoEl.duration can be NaN if video is not loaded or 0.
+  if (!videoEl.duration) {
+    return 0;
+  }
+  let bufferedSum = 0;
+  for (let i = 0; i < videoEl.buffered.length; i++) {
+    bufferedSum += videoEl.buffered.end(i) - videoEl.buffered.start(i);
+  }
+  return bufferedSum / videoEl.duration;
 }
