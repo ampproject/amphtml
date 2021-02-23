@@ -67,9 +67,7 @@ describes.realWin('amp-img V1', {amp: true}, (env) => {
 
   it('testElementV1', () => {
     testElementV1(AmpImg, {
-      exceptions: [
-        'Must not use getLayoutSize',
-      ],
+      exceptions: ['Must not use getLayoutSize'],
     });
   });
 
