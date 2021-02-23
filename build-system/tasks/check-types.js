@@ -14,21 +14,18 @@
  * limitations under the License.
  */
 
-const log = require('fancy-log');
-const {
-  checkTypesNailgunPort,
-  startNailgunServer,
-  stopNailgunServer,
-} = require('./nailgun');
 const {
   createCtrlcHandler,
   exitCtrlcHandler,
 } = require('../common/ctrlcHandler');
+const {
+  displayLifecycleDebugging,
+} = require('../compile/debug-compilation-lifecycle');
 const {cleanupBuildDir, closureCompile} = require('../compile/compile');
 const {compileCss} = require('./css');
 const {extensions, maybeInitializeExtensions} = require('./extension-helpers');
+const {log} = require('../common/logging');
 const {maybeUpdatePackages} = require('./update-packages');
-const {transferSrcsToTempDir} = require('./helpers');
 
 /**
  * Dedicated type check path.
@@ -40,7 +37,6 @@ async function checkTypes() {
   process.env.NODE_ENV = 'production';
   cleanupBuildDir();
   maybeInitializeExtensions();
-  transferSrcsToTempDir({isChecktypes: true});
   const compileSrcs = [
     './src/amp.js',
     './src/amp-shadow.js',
@@ -49,14 +45,14 @@ async function checkTypes() {
     './ads/inabox/inabox-host.js',
     './src/web-worker/web-worker.js',
   ];
-  const extensionValues = Object.keys(extensions).map(function(key) {
+  const extensionValues = Object.keys(extensions).map(function (key) {
     return extensions[key];
   });
   const extensionSrcs = extensionValues
-    .filter(function(extension) {
+    .filter(function (extension) {
       return !extension.noTypeCheck;
     })
-    .map(function(extension) {
+    .map(function (extension) {
       return (
         './extensions/' +
         extension.name +
@@ -69,11 +65,9 @@ async function checkTypes() {
     })
     .sort();
   return compileCss()
-    .then(async () => {
-      await startNailgunServer(checkTypesNailgunPort, /* detached */ false);
-    })
     .then(() => {
       log('Checking types...');
+      displayLifecycleDebugging();
       return Promise.all([
         closureCompile(
           compileSrcs.concat(extensionSrcs),
@@ -122,9 +116,6 @@ async function checkTypes() {
         ),
       ]);
     })
-    .then(async () => {
-      await stopNailgunServer(checkTypesNailgunPort);
-    })
     .then(() => exitCtrlcHandler(handlerProcess));
 }
 
@@ -136,6 +127,6 @@ module.exports = {
 
 checkTypes.description = 'Check source code for JS type errors';
 checkTypes.flags = {
-  disable_nailgun:
-    "  Doesn't use nailgun to invoke closure compiler (much slower)",
+  closure_concurrency: '  Sets the number of concurrent invocations of closure',
+  debug: '  Outputs the file contents during compilation lifecycles',
 };

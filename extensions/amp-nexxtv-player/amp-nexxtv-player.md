@@ -24,21 +24,6 @@ limitations under the License.
 
 # amp-nexxtv-player
 
-Displays a media stream from the nexxOMNIA platform.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-nexxtv-player" src="https://cdn.ampproject.org/v0/amp-nexxtv-player-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Example
 
 With the responsive layout, the width and height from the example should yield correct layouts for 16:9 aspect ratio videos:

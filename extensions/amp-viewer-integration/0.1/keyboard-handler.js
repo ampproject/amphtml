@@ -145,7 +145,7 @@ function isHandledByEventTarget(e) {
  */
 function getKeyboardEventInit(e) {
   const copiedEvent = dict();
-  eventProperties.forEach(eventProperty => {
+  eventProperties.forEach((eventProperty) => {
     if (e[eventProperty] !== undefined) {
       copiedEvent[eventProperty] = e[eventProperty];
     }

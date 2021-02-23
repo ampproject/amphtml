@@ -18,6 +18,7 @@ import {Observable} from './observable';
 import {Pass} from './pass';
 import {devAssert} from './log';
 import {findIndex} from './utils/array';
+import {supportsPassiveEventListener} from './event-helper-listen';
 import {toWin} from './types';
 
 const PROP_ = '__AMP_Gestures';
@@ -144,9 +145,19 @@ export class Gestures {
     /** @private @const {function(!Event)} */
     this.boundOnTouchCancel_ = this.onTouchCancel_.bind(this);
 
-    this.element_.addEventListener('touchstart', this.boundOnTouchStart_);
+    const win = element.ownerDocument.defaultView;
+    const passiveSupported = supportsPassiveEventListener(toWin(win));
+    this.element_.addEventListener(
+      'touchstart',
+      this.boundOnTouchStart_,
+      passiveSupported ? {passive: true} : false
+    );
     this.element_.addEventListener('touchend', this.boundOnTouchEnd_);
-    this.element_.addEventListener('touchmove', this.boundOnTouchMove_);
+    this.element_.addEventListener(
+      'touchmove',
+      this.boundOnTouchMove_,
+      passiveSupported ? {passive: true} : false
+    );
     this.element_.addEventListener('touchcancel', this.boundOnTouchCancel_);
 
     /** @private {boolean} */
@@ -200,7 +211,7 @@ export class Gestures {
     const overserver = this.overservers_[type];
     if (overserver) {
       overserver.removeAll();
-      const index = findIndex(this.recognizers_, e => e.getType() == type);
+      const index = findIndex(this.recognizers_, (e) => e.getType() == type);
       if (index < 0) {
         return false;
       }

@@ -46,7 +46,7 @@ export class StandaloneService {
    * Add an event listener to change the link navigation behavior.
    */
   initialize() {
-    listen(this.ampdoc_.getRootNode(), 'click', event =>
+    listen(this.ampdoc_.getRootNode(), 'click', (event) =>
       this.handleClick_(event)
     );
   }
@@ -117,6 +117,6 @@ export class StandaloneService {
   }
 }
 
-AMP.extension('amp-standalone', '0.1', AMP => {
+AMP.extension('amp-standalone', '0.1', (AMP) => {
   AMP.registerServiceForDoc('standalone', StandaloneService);
 });

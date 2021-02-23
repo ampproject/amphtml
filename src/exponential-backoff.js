@@ -23,7 +23,7 @@
  */
 export function exponentialBackoff(opt_base) {
   const getTimeout = exponentialBackoffClock(opt_base);
-  return work => {
+  return (work) => {
     return setTimeout(work, getTimeout());
   };
 }

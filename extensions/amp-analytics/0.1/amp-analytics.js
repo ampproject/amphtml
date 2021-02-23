@@ -17,7 +17,9 @@
 import {Activity} from './activity-impl';
 import {AnalyticsConfig, mergeObjects} from './config';
 import {AnalyticsEventType} from './events';
+import {ChunkPriority, chunk} from '../../../src/chunk';
 import {CookieWriter} from './cookie-writer';
+import {Deferred} from '../../../src/utils/promise';
 import {
   ExpansionOptions,
   VariableService,
@@ -41,15 +43,16 @@ import {installLinkerReaderService} from './linker-reader';
 import {isArray, isEnumValue} from '../../../src/types';
 import {isIframed} from '../../../src/dom';
 import {isInFie} from '../../../src/iframe-helper';
-import {toggle} from '../../../src/style';
 
 const TAG = 'amp-analytics';
 
 const MAX_REPLACES = 16; // The maximum number of entries in a extraUrlParamsReplaceMap
 
-const WHITELIST_EVENT_IN_SANDBOX = [
+const ALLOWLIST_EVENT_IN_SANDBOX = [
   AnalyticsEventType.VISIBLE,
   AnalyticsEventType.HIDDEN,
+  AnalyticsEventType.INI_LOAD,
+  AnalyticsEventType.RENDER_START,
 ];
 
 export class AmpAnalytics extends AMP.BaseElement {
@@ -136,7 +139,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (this.consentNotificationId_ != null) {
       this.consentPromise_ = Services.userNotificationManagerForDoc(
         this.element
-      ).then(service =>
+      ).then((service) =>
         service.get(dev().assertString(this.consentNotificationId_))
       );
     }
@@ -205,7 +208,6 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (this.iniPromise_) {
       return this.iniPromise_;
     }
-    toggle(this.element, false);
 
     this.iniPromise_ = this.getAmpDoc()
       .whenFirstVisible()
@@ -213,20 +215,32 @@ export class AmpAnalytics extends AMP.BaseElement {
       .then(() => Services.timerFor(this.win).promise(1))
       .then(() => this.consentPromise_)
       .then(() => Services.ampdocServiceFor(this.win))
-      .then(ampDocService => ampDocService.getAmpDoc(this.element))
-      .then(ampdoc =>
+      .then((ampDocService) => ampDocService.getAmpDoc(this.element))
+      .then((ampdoc) =>
         Promise.all([
           instrumentationServicePromiseForDoc(ampdoc),
           variableServicePromiseForDoc(ampdoc),
         ])
       )
-      .then(services => {
+      .then((services) => {
         this.instrumentation_ = services[0];
         this.variableService_ = services[1];
-        return new AnalyticsConfig(this.element).loadConfig();
+        const loadConfigDeferred = new Deferred();
+        const loadConfigTask = () => {
+          const configPromise = new AnalyticsConfig(this.element).loadConfig();
+          loadConfigDeferred.resolve(configPromise);
+        };
+        if (this.isInabox_) {
+          // Chunk in inabox ad leads to activeview regression, handle seperately
+          loadConfigTask();
+        } else {
+          chunk(this.element, loadConfigTask, ChunkPriority.HIGH);
+        }
+        return loadConfigDeferred.promise;
       })
-      .then(config => {
+      .then((config) => {
         this.config_ = /** @type {!JsonObject} */ (config);
+        // CookieWriter not enabled on proxy origin, do not chunk
         return new CookieWriter(this.win, this.element, this.config_).write();
       })
       .then(() => {
@@ -237,6 +251,9 @@ export class AmpAnalytics extends AMP.BaseElement {
       })
       .then(this.registerTriggers_.bind(this))
       .then(this.initializeLinker_.bind(this));
+    this.iniPromise_.then(() => {
+      this./*OK*/ collapse();
+    });
     return this.iniPromise_;
   }
 
@@ -274,7 +291,7 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     if (!this.config_['triggers']) {
       const TAG = this.getName_();
-      this.user().error(
+      this.user().warn(
         TAG,
         'No triggers were found in the ' +
           'config. No analytics data will be sent.'
@@ -329,7 +346,7 @@ export class AmpAnalytics extends AMP.BaseElement {
           const eventType = trigger['on'];
           if (
             isEnumValue(AnalyticsEventType, eventType) &&
-            !WHITELIST_EVENT_IN_SANDBOX.includes(eventType)
+            !ALLOWLIST_EVENT_IN_SANDBOX.includes(eventType)
           ) {
             this.user().error(
               TAG,
@@ -344,7 +361,7 @@ export class AmpAnalytics extends AMP.BaseElement {
           this.config_['extraUrlParamsReplaceMap']
         );
         promises.push(
-          this.isSampledIn_(trigger).then(result => {
+          this.isSampledIn_(trigger).then((result) => {
             if (!result) {
               return;
             }
@@ -357,8 +374,8 @@ export class AmpAnalytics extends AMP.BaseElement {
               }
               trigger['selector'] = this.element.parentElement.tagName;
               trigger['selectionMethod'] = 'closest';
-              this.addTrigger_(trigger);
-            } else if (trigger['selector']) {
+              return this.addTrigger_(trigger);
+            } else if (trigger['selector'] && !isArray(trigger['selector'])) {
               // Expand the selector using variable expansion.
               return this.variableService_
                 .expandTemplate(
@@ -366,12 +383,12 @@ export class AmpAnalytics extends AMP.BaseElement {
                   expansionOptions,
                   this.element
                 )
-                .then(selector => {
+                .then((selector) => {
                   trigger['selector'] = selector;
-                  this.addTrigger_(trigger);
+                  return this.addTrigger_(trigger);
                 });
             } else {
-              this.addTrigger_(trigger);
+              return this.addTrigger_(trigger);
             }
           })
         );
@@ -400,16 +417,16 @@ export class AmpAnalytics extends AMP.BaseElement {
    * Calls `AnalyticsGroup.addTrigger` and reports any errors.
    * @param {!JsonObject} config
    * @private
-   * @noinline
+   * @return {!Promise}
    */
   addTrigger_(config) {
     if (!this.analyticsGroup_) {
       // No need to handle trigger for component that has already been detached
       // from DOM
-      return;
+      return Promise.resolve();
     }
     try {
-      this.analyticsGroup_.addTrigger(
+      return this.analyticsGroup_.addTrigger(
         config,
         this.handleEvent_.bind(this, config)
       );
@@ -417,6 +434,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       const TAG = this.getName_();
       const eventType = config['on'];
       rethrowAsync(TAG, 'Failed to process trigger "' + eventType + '"', e);
+      return Promise.resolve();
     }
   }
 
@@ -500,7 +518,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (!this.config_['requests']) {
       if (!this.allowParentPostMessage_()) {
         const TAG = this.getName_();
-        this.user().error(
+        this.user().warn(
           TAG,
           'No request strings defined. Analytics ' +
             'data will not be sent from this page.'
@@ -526,7 +544,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       for (const k in this.config_['requests']) {
         this.config_['requests'][k]['baseUrl'] = expandTemplate(
           this.config_['requests'][k]['baseUrl'],
-          key => {
+          (key) => {
             const request = this.config_['requests'][key];
             return (request && request['baseUrl']) || '${' + key + '}';
           },
@@ -553,6 +571,7 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /**
    * Create the linker-manager that will append linker params as necessary.
+   * The initialization is asynchronous and non blocking
    * @private
    */
   initializeLinker_() {
@@ -563,7 +582,15 @@ export class AmpAnalytics extends AMP.BaseElement {
       type,
       this.element
     );
-    this.linkerManager_.init();
+    const linkerTask = () => {
+      this.linkerManager_.init();
+    };
+    if (this.isInabox_) {
+      // Chunk in inabox ad leads to activeview regression, handle seperately
+      linkerTask();
+    } else {
+      chunk(this.element, linkerTask, ChunkPriority.LOW);
+    }
   }
 
   /**
@@ -613,8 +640,10 @@ export class AmpAnalytics extends AMP.BaseElement {
         return;
       }
     }
-    this.checkTriggerEnabled_(trigger, event).then(enabled => {
-      if (!enabled) {
+    this.checkTriggerEnabled_(trigger, event).then((enabled) => {
+      const isConnected =
+        this.element.ownerDocument && this.element.ownerDocument.defaultView;
+      if (!enabled || !isConnected) {
         return;
       }
       this.expandAndSendRequest_(request, trigger, event);
@@ -657,7 +686,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       trigger,
       expansionOptions,
       this.element
-    ).then(message => {
+    ).then((message) => {
       if (isIframed(this.win)) {
         // Only post message with explict `parentPostMessage`
         this.win.parent./*OK*/ postMessage(message, '*');
@@ -674,25 +703,38 @@ export class AmpAnalytics extends AMP.BaseElement {
   isSampledIn_(trigger) {
     /** @const {!JsonObject} */
     const spec = trigger['sampleSpec'];
-    const resolve = Promise.resolve(true);
     const TAG = this.getName_();
     if (!spec) {
-      return resolve;
+      return Promise.resolve(true);
     }
     const sampleOn = spec['sampleOn'];
     if (!sampleOn) {
       this.user().error(TAG, 'Invalid sampleOn value.');
-      return resolve;
+      return Promise.resolve(true);
     }
-    const threshold = parseFloat(spec['threshold']); // Threshold can be NaN.
+    const threshold = parseFloat(spec['threshold']);
     if (threshold >= 0 && threshold <= 100) {
-      const expansionOptions = this.expansionOptions_(dict({}), trigger);
-      return this.expandTemplateWithUrlParams_(sampleOn, expansionOptions)
-        .then(key => this.cryptoService_.uniform(key))
-        .then(digest => digest * 100 < threshold);
+      const sampleDeferred = new Deferred();
+      const sampleInTask = () => {
+        const expansionOptions = this.expansionOptions_(dict({}), trigger);
+        const samplePromise = this.expandTemplateWithUrlParams_(
+          sampleOn,
+          expansionOptions
+        )
+          .then((key) => this.cryptoService_.uniform(key))
+          .then((digest) => digest * 100 < threshold);
+        sampleDeferred.resolve(samplePromise);
+      };
+      if (this.isInabox_) {
+        // Chunk in inabox ad leads to activeview regression, handle seperately
+        sampleInTask();
+      } else {
+        chunk(this.element, sampleInTask, ChunkPriority.LOW);
+      }
+      return sampleDeferred.promise;
     }
     user()./*OK*/ error(TAG, 'Invalid threshold for sampling.');
-    return resolve;
+    return Promise.resolve(true);
   }
 
   /**
@@ -715,7 +757,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     );
 
     return Promise.all([enabledOnTagLevel, enabledOnTriggerLevel]).then(
-      enabled => {
+      (enabled) => {
         devAssert(enabled.length === 2);
         return enabled[0] && enabled[1];
       }
@@ -742,9 +784,10 @@ export class AmpAnalytics extends AMP.BaseElement {
       return Promise.resolve(spec);
     }
 
-    return this.expandTemplateWithUrlParams_(spec, expansionOptions).then(val =>
-      stringToBool(val)
-    );
+    return this.expandTemplateWithUrlParams_(
+      spec,
+      expansionOptions
+    ).then((val) => stringToBool(val));
   }
 
   /**
@@ -758,7 +801,7 @@ export class AmpAnalytics extends AMP.BaseElement {
   expandTemplateWithUrlParams_(spec, expansionOptions) {
     return this.variableService_
       .expandTemplate(spec, expansionOptions, this.element)
-      .then(key =>
+      .then((key) =>
         Services.urlReplacementsForDoc(this.element).expandUrlAsync(
           key,
           this.variableService_.getMacros(this.element)
@@ -793,7 +836,7 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   // Register doc-service factory.
   AMP.registerServiceForDoc(
     'amp-analytics-instrumentation',

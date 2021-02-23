@@ -39,7 +39,7 @@ tags: {  # <amp-ima-video>
       protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attrs: {
     name: "data-tag"
@@ -58,7 +58,7 @@ tags: {  # <amp-ima-video>
     value: ""
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://amp.dev/documentation/components/amp-ima-video"
+  spec_url: "https://amp.dev/documentation/components/amp-ima-video/"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

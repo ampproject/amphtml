@@ -17,7 +17,6 @@
 // Note: loaded by 3p system. Cannot rely on babel polyfills.
 import {dev, devAssert} from './log';
 import {map} from './utils/object.js';
-import {startsWith} from './string';
 
 /** @type {Object<string, string>} */
 let propertyNameCache;
@@ -26,7 +25,6 @@ let propertyNameCache;
 const vendorPrefixes = ['Webkit', 'webkit', 'Moz', 'moz', 'ms', 'O', 'o'];
 
 /**
- * @export
  * @param {string} camelCase camel cased string
  * @return {string} title cased string
  */
@@ -56,7 +54,6 @@ function getVendorJsPropertyName_(style, titleCase) {
  * Returns the possibly prefixed JavaScript property name of a style property
  * (ex. WebkitTransitionDuration) given a camelCase'd version of the property
  * (ex. transitionDuration).
- * @export
  * @param {!Object} style
  * @param {string} camelCase the camel cased version of a css property name
  * @param {boolean=} opt_bypassCache bypass the memoized cache of property
@@ -64,7 +61,7 @@ function getVendorJsPropertyName_(style, titleCase) {
  * @return {string}
  */
 export function getVendorJsPropertyName(style, camelCase, opt_bypassCache) {
-  if (startsWith(camelCase, '--')) {
+  if (isVar(camelCase)) {
     // CSS vars are returned as is.
     return camelCase;
   }
@@ -120,10 +117,16 @@ export function setStyle(element, property, value, opt_units, opt_bypassCache) {
     property,
     opt_bypassCache
   );
-  if (propertyName) {
-    element.style[propertyName] = /** @type {string} */ (opt_units
-      ? value + opt_units
-      : value);
+  if (!propertyName) {
+    return;
+  }
+  const styleValue = /** @type {string} */ (opt_units
+    ? value + opt_units
+    : value);
+  if (isVar(propertyName)) {
+    element.style.setProperty(propertyName, styleValue);
+  } else {
+    element.style[propertyName] = styleValue;
   }
 }
 
@@ -142,6 +145,9 @@ export function getStyle(element, property, opt_bypassCache) {
   );
   if (!propertyName) {
     return undefined;
+  }
+  if (isVar(propertyName)) {
+    return element.style.getPropertyValue(propertyName);
   }
   return element.style[propertyName];
 }
@@ -359,4 +365,12 @@ export function propagateObjectFitStyles(fromEl, toEl) {
   if (fromEl.hasAttribute('object-position')) {
     setStyle(toEl, 'object-position', fromEl.getAttribute('object-position'));
   }
+}
+
+/**
+ * @param {string} property
+ * @return {boolean}
+ */
+function isVar(property) {
+  return property.startsWith('--');
 }

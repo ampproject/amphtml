@@ -23,7 +23,7 @@ describes.realWin(
       extensions: ['amp-imgur'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
 
     beforeEach(() => {
@@ -39,7 +39,7 @@ describes.realWin(
       imgur.setAttribute('layout', 'responsive');
       doc.body.appendChild(imgur);
       return imgur
-        .build()
+        .buildInternal()
         .then(() => imgur.layoutCallback())
         .then(() => imgur);
     }
@@ -53,52 +53,50 @@ describes.realWin(
     }
 
     it('renders', () => {
-      return getImgur('2CnX7').then(imgur => {
-        testIframe(imgur.querySelector('iframe'), '2CnX7');
+      return getImgur('2CnX7').then((imgur) => {
+        testIframe(imgur.querySelector('iframe'), 'a/2CnX7');
       });
     });
 
     it('renders a/ type urls', () => {
-      return getImgur('a/ZF7NS3V').then(imgur => {
+      return getImgur('a/ZF7NS3V').then((imgur) => {
         testIframe(imgur.querySelector('iframe'), 'a/ZF7NS3V');
       });
     });
 
-    it('resizes with JSON String message', () => {
-      return getImgur('2CnX7').then(imgur => {
-        const impl = imgur.implementation_;
-        const changeHeightSpy = env.sandbox.spy(impl, 'attemptChangeHeight');
-        expect(changeHeightSpy).not.to.have.been.called;
-        const event = {
-          origin: 'https://imgur.com',
-          source: impl.iframe_.contentWindow,
-          data:
-            '{"message":"resize_imgur","href":"https://imgur.com/2CnX7/embed?pub=true","height":396,"width":1400,"context":true}',
-        };
-        impl.handleImgurMessages_(event);
-        expect(changeHeightSpy).to.have.been.calledWith(396);
-      });
+    it('resizes with JSON String message', async () => {
+      const imgur = await getImgur('2CnX7');
+      const impl = await imgur.getImpl(false);
+      const changeHeightSpy = env.sandbox.spy(impl, 'attemptChangeHeight');
+      expect(changeHeightSpy).not.to.have.been.called;
+      const event = {
+        origin: 'https://imgur.com',
+        source: impl.iframe_.contentWindow,
+        data:
+          '{"message":"resize_imgur","href":"https://imgur.com/2CnX7/embed?pub=true","height":396,"width":1400,"context":true}',
+      };
+      impl.handleImgurMessages_(event);
+      expect(changeHeightSpy).to.have.been.calledWith(396);
     });
 
-    it('resizes with JSON Object message', () => {
-      return getImgur('2CnX7').then(imgur => {
-        const impl = imgur.implementation_;
-        const changeHeightSpy = env.sandbox.spy(impl, 'attemptChangeHeight');
-        expect(changeHeightSpy).not.to.have.been.called;
-        const event = {
-          origin: 'https://imgur.com',
-          source: impl.iframe_.contentWindow,
-          data: {
-            'message': 'resize_imgur',
-            'href': 'https://imgur.com/2CnX7/embed?pub=true',
-            'height': 400,
-            'width': 1400,
-            'context': true,
-          },
-        };
-        impl.handleImgurMessages_(event);
-        expect(changeHeightSpy).to.have.been.calledWith(400);
-      });
+    it('resizes with JSON Object message', async () => {
+      const imgur = await getImgur('2CnX7');
+      const impl = await imgur.getImpl(false);
+      const changeHeightSpy = env.sandbox.spy(impl, 'attemptChangeHeight');
+      expect(changeHeightSpy).not.to.have.been.called;
+      const event = {
+        origin: 'https://imgur.com',
+        source: impl.iframe_.contentWindow,
+        data: {
+          'message': 'resize_imgur',
+          'href': 'https://imgur.com/2CnX7/embed?pub=true',
+          'height': 400,
+          'width': 1400,
+          'context': true,
+        },
+      };
+      impl.handleImgurMessages_(event);
+      expect(changeHeightSpy).to.have.been.calledWith(400);
     });
   }
 );

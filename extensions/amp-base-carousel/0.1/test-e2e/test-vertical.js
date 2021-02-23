@@ -20,15 +20,14 @@ const pageWidth = 800;
 const pageHeight = 600;
 
 describes.endtoend(
-  'Vertical AMP carousel',
+  'amp-base-carousel - vertical orientation',
   {
-    testUrl:
-      'http://localhost:8000/test/manual/amp-base-carousel/' +
-      'vertical.amp.html',
+    version: '0.1',
+    fixture: 'amp-base-carousel/vertical.amp.html',
     experiments: ['amp-base-carousel', 'layers'],
     initialRect: {width: pageWidth, height: pageHeight},
   },
-  async env => {
+  async (env) => {
     /** The total number of slides in the carousel */
     const SLIDE_COUNT = 7;
     let controller;

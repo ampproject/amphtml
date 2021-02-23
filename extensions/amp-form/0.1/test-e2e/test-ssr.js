@@ -17,10 +17,10 @@
 describes.endtoend(
   'amp-form',
   {
-    testUrl: 'http://localhost:8000/test/fixtures/e2e/amp-form/amp-form.html',
+    fixture: 'amp-form/amp-form.html',
     environments: ['single'],
   },
-  async env => {
+  async (env) => {
     let controller;
 
     beforeEach(async () => {
@@ -50,10 +50,10 @@ describes.endtoend(
 describes.endtoend(
   'amp-form SSR templates',
   {
-    testUrl: 'http://localhost:8000/test/fixtures/e2e/amp-form/amp-form.html',
+    fixture: 'amp-form/amp-form.html',
     environments: ['viewer-demo'],
   },
-  async env => {
+  async (env) => {
     let controller;
 
     beforeEach(async () => {

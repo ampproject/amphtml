@@ -23,7 +23,7 @@ describes.realWin(
       extensions: ['amp-dailymotion'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
 
     beforeEach(() => {
@@ -44,7 +44,7 @@ describes.realWin(
         dailymotion.setAttribute('data-param-origin', 'example&.org');
       }
       doc.body.appendChild(dailymotion);
-      await dailymotion.build();
+      await dailymotion.buildInternal();
       await dailymotion.layoutCallback();
       return dailymotion;
     }

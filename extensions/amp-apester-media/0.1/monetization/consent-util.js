@@ -29,7 +29,7 @@ const TAG = 'amp-apester-media';
 const AWAIT_TIME_OUT_FOR_RESPONSE = 3000;
 
 const awaitPromiseTimeout = () => {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     setTimeout(() => {
       resolve([CONSENT_POLICY_STATE.UNKNOWN, undefined]);
     }, AWAIT_TIME_OUT_FOR_RESPONSE);
@@ -41,7 +41,7 @@ const awaitPromiseTimeout = () => {
  * */
 export function getConsentData(apesterElement) {
   const consentStatePromise = getConsentPolicyState(apesterElement).catch(
-    err => {
+    (err) => {
       dev().error(TAG, 'Error determining consent state', err);
       return CONSENT_POLICY_STATE.UNKNOWN;
     }
@@ -49,7 +49,7 @@ export function getConsentData(apesterElement) {
   const consentStringPromise = getConsentPolicyInfo(
     apesterElement,
     'default'
-  ).catch(err => {
+  ).catch((err) => {
     dev().error(TAG, 'Error determining consent string', err);
     return undefined;
   });
@@ -58,7 +58,7 @@ export function getConsentData(apesterElement) {
     consentStringPromise,
   ]);
   return Promise.race([consentDataPromise, awaitPromiseTimeout()]).then(
-    consentDataResponse => {
+    (consentDataResponse) => {
       const consentStatus = consentDataResponse[0];
       const gdprString = consentDataResponse[1];
       switch (consentStatus) {

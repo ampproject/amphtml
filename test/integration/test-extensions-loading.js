@@ -35,8 +35,8 @@ function checkElementUpgrade(element) {
  */
 function testLoadOrderFixture(fixtureName, testElements) {
   let fixture;
-  return createFixtureIframe(fixtureName)
-    .then(f => {
+  return createFixtureIframe(fixtureName, 500)
+    .then((f) => {
       fixture = f;
       for (let i = 0; i < testElements.length; i++) {
         expect(fixture.doc.querySelectorAll(testElements[i])).to.have.length(1);
@@ -48,17 +48,28 @@ function testLoadOrderFixture(fixtureName, testElements) {
         const testElement = fixture.doc.querySelectorAll(testElements[i])[0];
         checkElementUpgrade(testElement);
         if (testElement.tagName == 'AMP-FIT-TEXT') {
-          expect(
-            fixture.doc.getElementsByClassName('i-amphtml-fit-text-content')
-          ).to.have.length(1);
+          // TODO(#32523) Remove this when Bento experiment is done.
+          if (BENTO_AUTO_UPGRADE) {
+            expect(testElement.shadowRoot).to.be.defined;
+          } else {
+            expect(
+              fixture.doc.getElementsByClassName('i-amphtml-fit-text-content')
+            ).to.have.length(1);
+          }
         }
       }
     });
 }
 
-const t = describe.configure().retryOnSaucelabs();
-t.run('test extensions loading in multiple orders', function() {
+describe('test extensions loading in multiple orders', function () {
   this.timeout(15000);
+
+  before(function () {
+    // TODO(#32523) Remove this when Bento experiment is done.
+    if (BENTO_AUTO_UPGRADE) {
+      this.skipTest();
+    }
+  });
 
   it('one extension, extension loads first, all scripts in header', () => {
     return testLoadOrderFixture(
@@ -74,14 +85,20 @@ t.run('test extensions loading in multiple orders', function() {
     );
   });
 
-  it('one extension, extension loads first, all scripts in footer', () => {
+  // TODO(#30528): skip this test as it doesn't make sense. The script
+  // tags are in the footer and our posthtml transforms break on the
+  // transformation of these invalid html files.
+  it.skip('one extension, extension loads first, all scripts in footer', () => {
     return testLoadOrderFixture(
       'test/fixtures/script-load-extension-footer-v0-footer.html',
       ['amp-fit-text']
     );
   });
 
-  it('one extension, v0 loads first, all scripts in footer', () => {
+  // TODO(#30528): skip this test as it doesn't make sense. The script
+  // tags are in the footer and our posthtml transforms break on the
+  // transformation of these invalid html files.
+  it.skip('one extension, v0 loads first, all scripts in footer', () => {
     return testLoadOrderFixture(
       'test/fixtures/script-load-v0-footer-extension-footer.html',
       ['amp-fit-text']

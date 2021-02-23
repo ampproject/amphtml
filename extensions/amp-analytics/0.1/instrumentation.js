@@ -24,6 +24,8 @@ import {
 import {AmpdocAnalyticsRoot, EmbedAnalyticsRoot} from './analytics-root';
 import {AnalyticsGroup} from './analytics-group';
 import {Services} from '../../../src/services';
+import {dev} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {
   getParentWindowFrameElement,
@@ -33,6 +35,7 @@ import {
 } from '../../../src/service';
 
 const PROP = '__AMP_AN_ROOT';
+const TAG = 'ANALYTICS-INSTRUMENTATION';
 
 /**
  * @implements {../../../src/service.Disposable}
@@ -91,10 +94,26 @@ export class InstrumentationService {
    *
    * @param {!Element} target
    * @param {string} eventType
-   * @param {!JsonObject=} opt_vars A map of vars and their values.
+   * @param {!JsonObject} vars A map of vars and their values.
+   * @param {boolean} enableDataVars A boolean to indicate if data-vars-*
+   * attribute value from target element should be included.
    */
-  triggerEventForTarget(target, eventType, opt_vars) {
-    const event = new AnalyticsEvent(target, eventType, opt_vars);
+  triggerEventForTarget(
+    target,
+    eventType,
+    vars = dict(),
+    enableDataVars = true
+  ) {
+    if (!target.isConnected) {
+      dev().error(
+        TAG,
+        'Attempting to trigger event for detached target: %s',
+        target
+      );
+      return;
+    }
+
+    const event = new AnalyticsEvent(target, eventType, vars, enableDataVars);
     const root = this.findRoot_(target);
     const trackerName = getTrackerKeyName(eventType);
     const tracker = /** @type {!CustomEventTracker|!AmpStoryEventTracker} */ (root.getTracker(

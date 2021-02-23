@@ -16,11 +16,11 @@
 'use strict';
 
 const fs = require('fs');
-const gulp = require('gulp');
-const PluginError = require('plugin-error');
+const globby = require('globby');
+const path = require('path');
 const postcss = require('postcss');
+const prettier = require('prettier');
 const table = require('text-table');
-const through = require('through2');
 
 const tableHeaders = [
   ['selector', 'z-index', 'file'],
@@ -32,18 +32,20 @@ const tableOptions = {
   hsep: '   |   ',
 };
 
+const preamble = 'Run `gulp get-zindex` to generate this file.';
+
 /**
  * @param {!Object<string, !Array<number>} acc accumulator object for selectors
  * @param {!Rules} css post css rules object
  */
 function zIndexCollector(acc, css) {
-  css.walkRules(rule => {
-    rule.walkDecls(decl => {
+  css.walkRules((rule) => {
+    rule.walkDecls((decl) => {
       // Split out multi selector rules
       let selectorNames = rule.selector.replace('\n', '');
       selectorNames = selectorNames.split(',');
       if (decl.prop == 'z-index') {
-        selectorNames.forEach(selector => {
+        selectorNames.forEach((selector) => {
           // If multiple redeclaration of a selector and z index
           // are done in a single file, this will get overridden.
           acc[selector] = decl.value;
@@ -51,33 +53,6 @@ function zIndexCollector(acc, css) {
       }
     });
   });
-}
-
-/**
- * @param {!Vinyl} file vinyl fs object
- * @param {string} enc encoding value
- * @param {function(err: ?Object, data: !Vinyl|string)} cb chunk data through
- */
-function onFileThrough(file, enc, cb) {
-  if (file.isNull()) {
-    cb(null, file);
-    return;
-  }
-
-  if (file.isStream()) {
-    cb(new PluginError('size', 'Stream not supported'));
-    return;
-  }
-
-  const selectors = Object.create(null);
-
-  postcss([zIndexCollector.bind(null, selectors)])
-    .process(file.contents.toString(), {
-      from: file.relative,
-    })
-    .then(() => {
-      cb(null, {name: file.relative, selectors});
-    });
 }
 
 /**
@@ -89,11 +64,11 @@ function createTable(filesData) {
   const rows = [];
   Object.keys(filesData)
     .sort()
-    .forEach(fileName => {
+    .forEach((fileName) => {
       const selectors = filesData[fileName];
       Object.keys(selectors)
         .sort()
-        .forEach(selectorName => {
+        .forEach((selectorName) => {
           const zIndex = selectors[selectorName];
           const row = [selectorName, zIndex, fileName];
           rows.push(row);
@@ -102,42 +77,66 @@ function createTable(filesData) {
   rows.sort((a, b) => {
     const aZIndex = parseInt(a[1], 10);
     const bZIndex = parseInt(b[1], 10);
-    return aZIndex - bZIndex;
+    // Word values sorted lexicographically.
+    if (isNaN(aZIndex) && isNaN(bZIndex)) {
+      return a[1].localeCompare(b[1]);
+    }
+    // Word values before length values.
+    if (isNaN(aZIndex)) {
+      return -1;
+    }
+    if (isNaN(bZIndex)) {
+      return 1;
+    }
+    // By length descending.
+    return bZIndex - aZIndex;
   });
   return rows;
 }
 
 /**
+ * Extract z-index selectors from all files matching the given glob starting at
+ * the given working directory
  * @param {string} glob
- * @return {!Stream}
+ * @param {string=} cwd
+ * @return {Object}
  */
-function getZindexStream(glob) {
-  return gulp.src(glob).pipe(through.obj(onFileThrough));
+async function getZindexSelectors(glob, cwd = '.') {
+  const filesData = Object.create(null);
+  const files = globby.sync(glob, {cwd});
+  for (const file of files) {
+    const contents = await fs.promises.readFile(path.join(cwd, file), 'utf-8');
+    const selectors = Object.create(null);
+    const plugins = [zIndexCollector.bind(null, selectors)];
+    await postcss(plugins).process(contents, {from: file});
+    filesData[file] = selectors;
+  }
+  return filesData;
 }
 
 /**
- * @param {function()} cb
+ * Entry point for gulp get-zindex
  */
-function getZindex(cb) {
-  const filesData = Object.create(null);
-  // Don't return the stream here since we do a `writeFileSync`
-  getZindexStream('{css,src,extensions}/**/*.css')
-    .on('data', chunk => {
-      filesData[chunk.name] = chunk.selectors;
-    })
-    .on('end', () => {
-      const rows = createTable(filesData);
-      rows.unshift.apply(rows, tableHeaders);
-      const tbl = table(rows, tableOptions);
-      fs.writeFileSync('css/Z_INDEX.md', tbl);
-      cb();
-    });
+async function getZindex() {
+  const filesData = await getZindexSelectors('{css,src,extensions}/**/*.css');
+  const filename = 'css/Z_INDEX.md';
+  const rows = [...tableHeaders, ...createTable(filesData)];
+  const tbl = table(rows, tableOptions);
+  const output = `${preamble}\n\n${tbl}`;
+  fs.writeFileSync(filename, await prettierFormat(filename, output));
+}
+
+async function prettierFormat(filename, output) {
+  return prettier.format(output, {
+    ...(await prettier.resolveConfig(filename)),
+    parser: 'markdown',
+  });
 }
 
 module.exports = {
   createTable,
   getZindex,
-  getZindexStream,
+  getZindexSelectors,
 };
 
 getZindex.description =

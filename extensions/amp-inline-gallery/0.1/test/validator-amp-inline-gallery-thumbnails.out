@@ -32,41 +32,41 @@ FAIL
 |    <!-- Invalid: Not in a gallery -->
 |    <amp-inline-gallery-thumbnails layout="fixed-height" height="96">
 >>   ^~~~~~~~~
-amp-inline-gallery/0.1/test/validator-amp-inline-gallery-thumbnails.html:32:2 The tag 'amp-inline-gallery-thumbnails' may only appear as a descendant of tag 'amp-inline-gallery'. (see https://amp.dev/documentation/components/amp-inline-gallery)
+amp-inline-gallery/0.1/test/validator-amp-inline-gallery-thumbnails.html:32:2 The tag 'amp-inline-gallery-thumbnails' may only appear as a descendant of tag 'amp-inline-gallery'. (see https://amp.dev/documentation/components/amp-inline-gallery/)
 |    </amp-inline-gallery-thumbnails>
 |    <!-- Invalid: Aspect ratio height widthout width -->
 |    <amp-inline-gallery layout="container">
 |      <amp-inline-gallery-thumbnails layout="fixed-height" height="96" aspect-ratio-height="2">
 >>     ^~~~~~~~~
-amp-inline-gallery/0.1/test/validator-amp-inline-gallery-thumbnails.html:36:4 The attribute 'aspect-ratio-width' in tag 'amp-inline-gallery-thumbnails' is missing or incorrect, but required by attribute 'aspect-ratio-height'. (see https://amp.dev/documentation/components/amp-inline-gallery)
+amp-inline-gallery/0.1/test/validator-amp-inline-gallery-thumbnails.html:36:4 The attribute 'aspect-ratio-width' in tag 'amp-inline-gallery-thumbnails' is missing or incorrect, but required by attribute 'aspect-ratio-height'. (see https://amp.dev/documentation/components/amp-inline-gallery/)
 |      </amp-inline-gallery-thumbnails>
 |    </amp-inline-gallery>
 |    <!-- Invalid: Non-number aspect ratio height-->
 |    <amp-inline-gallery layout="container">
 |      <amp-inline-gallery-thumbnails layout="fixed-height" height="96" aspect-ratio-height="two" aspect-ratio-width="3">
 >>     ^~~~~~~~~
-amp-inline-gallery/0.1/test/validator-amp-inline-gallery-thumbnails.html:41:4 The attribute 'aspect-ratio-height' in tag 'amp-inline-gallery-thumbnails' is set to the invalid value 'two'. (see https://amp.dev/documentation/components/amp-inline-gallery)
+amp-inline-gallery/0.1/test/validator-amp-inline-gallery-thumbnails.html:41:4 The attribute 'aspect-ratio-height' in tag 'amp-inline-gallery-thumbnails' is set to the invalid value 'two'. (see https://amp.dev/documentation/components/amp-inline-gallery/)
 |      </amp-inline-gallery-thumbnails>
 |    </amp-inline-gallery>
 |    <!-- Invalid: Aspect ratio component of zero -->
 |    <amp-inline-gallery layout="container">
 |      <amp-inline-gallery-thumbnails layout="fixed-height" height="96" aspect-ratio-height="0" aspect-ratio-width="3">
 >>     ^~~~~~~~~
-amp-inline-gallery/0.1/test/validator-amp-inline-gallery-thumbnails.html:46:4 The attribute 'aspect-ratio-height' in tag 'amp-inline-gallery-thumbnails' is set to the invalid value '0'. (see https://amp.dev/documentation/components/amp-inline-gallery)
+amp-inline-gallery/0.1/test/validator-amp-inline-gallery-thumbnails.html:46:4 The attribute 'aspect-ratio-height' in tag 'amp-inline-gallery-thumbnails' is set to the invalid value '0'. (see https://amp.dev/documentation/components/amp-inline-gallery/)
 |      </amp-inline-gallery-thumbnails>
 |    </amp-inline-gallery>
 |    <!-- Invalid: Aspect ratio component of zero (float) -->
 |    <amp-inline-gallery layout="container">
 |      <amp-inline-gallery-thumbnails layout="fixed-height" height="96" aspect-ratio-height="0.00" aspect-ratio-width="3">
 >>     ^~~~~~~~~
-amp-inline-gallery/0.1/test/validator-amp-inline-gallery-thumbnails.html:51:4 The attribute 'aspect-ratio-height' in tag 'amp-inline-gallery-thumbnails' is set to the invalid value '0.00'. (see https://amp.dev/documentation/components/amp-inline-gallery)
+amp-inline-gallery/0.1/test/validator-amp-inline-gallery-thumbnails.html:51:4 The attribute 'aspect-ratio-height' in tag 'amp-inline-gallery-thumbnails' is set to the invalid value '0.00'. (see https://amp.dev/documentation/components/amp-inline-gallery/)
 |      </amp-inline-gallery-thumbnails>
 |    </amp-inline-gallery>
 |    <!-- Invalid: Loop attribute without value -->
 |    <amp-inline-gallery layout="container">
 |      <amp-inline-gallery-thumbnails layout="fixed-height" height="96" loop>
 >>     ^~~~~~~~~
-amp-inline-gallery/0.1/test/validator-amp-inline-gallery-thumbnails.html:56:4 The attribute 'loop' in tag 'amp-inline-gallery-thumbnails' is set to the invalid value ''. (see https://amp.dev/documentation/components/amp-inline-gallery)
+amp-inline-gallery/0.1/test/validator-amp-inline-gallery-thumbnails.html:56:4 The attribute 'loop' in tag 'amp-inline-gallery-thumbnails' is set to the invalid value ''. (see https://amp.dev/documentation/components/amp-inline-gallery/)
 |      </amp-inline-gallery-thumbnails>
 |    </amp-inline-gallery>
 |    <!-- Valid: Wrapped with a parent div -->

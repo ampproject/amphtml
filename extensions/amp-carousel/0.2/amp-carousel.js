@@ -21,7 +21,10 @@ import {Carousel} from '../../amp-base-carousel/0.1/carousel.js';
 import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events';
 import {ChildLayoutManager} from '../../amp-base-carousel/0.1/child-layout-manager';
 import {Services} from '../../../src/services';
-import {closestAncestorElementBySelector} from '../../../src/dom';
+import {
+  closestAncestorElementBySelector,
+  dispatchCustomEvent,
+} from '../../../src/dom';
 import {computedStyle} from '../../../src/style';
 import {createCustomEvent, getDetail} from '../../../src/event-helper';
 import {dev, devAssert, userAssert} from '../../../src/log';
@@ -39,13 +42,18 @@ const CarouselType = {
 };
 
 class AmpCarousel extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    return true;
+  }
+
   /**
    * @private
    */
   setupActions_() {
     this.registerAction(
       'goToSlide',
-      actionInvocation => {
+      (actionInvocation) => {
         const {args, trust} = actionInvocation;
         const slide = Number(args['index'] || 0);
         userAssert(
@@ -62,7 +70,7 @@ class AmpCarousel extends AMP.BaseElement {
     );
     this.registerAction(
       'toggleAutoplay',
-      actionInvocation => {
+      (actionInvocation) => {
         const {args} = actionInvocation;
         // args will be `null` if not present, so we cannot use a default value above
         const toggle = args ? args['toggleOn'] : undefined;
@@ -115,6 +123,12 @@ class AmpCarousel extends AMP.BaseElement {
 
     /** @private {?ChildLayoutManager} */
     this.childLayoutManager_ = null;
+
+    /**
+     * Whether to show control buttons
+     * @private {boolean}
+     */
+    this.showControls_ = false;
   }
 
   /** @override */
@@ -141,13 +155,13 @@ class AmpCarousel extends AMP.BaseElement {
       element,
       scrollContainer: dev().assertElement(this.scrollContainer_),
       initialIndex: Number(this.element.getAttribute('slide')),
-      runMutate: cb => this.mutateElement(cb),
+      runMutate: (cb) => this.mutateElement(cb),
     });
     this.configureCarousel_(slides);
 
     // Setup actions and listeners
     this.setupActions_();
-    this.element.addEventListener(CarouselEvents.INDEX_CHANGE, event => {
+    this.element.addEventListener(CarouselEvents.INDEX_CHANGE, (event) => {
       this.onIndexChanged_(event);
     });
     this.element.addEventListener(CarouselEvents.SCROLL_START, () => {
@@ -165,7 +179,7 @@ class AmpCarousel extends AMP.BaseElement {
     const owners = Services.ownersForDoc(element);
     this.childLayoutManager_ = new ChildLayoutManager({
       ampElement: this,
-      intersectionElement: this.scrollContainer_,
+      intersectionElement: dev().assertElement(this.scrollContainer_),
       // For iOS, we queue changes until scrolling stops, which we detect
       // ~200ms after it actually stops. Load items earlier so they have time
       // to load.
@@ -188,6 +202,18 @@ class AmpCarousel extends AMP.BaseElement {
     // Need to wait for slides to exist first.
     this.carousel_.goToSlide(Number(this.element.getAttribute('slide') || '0'));
     // Signal for runtime to check children for layout.
+
+    if (this.element.hasAttribute('controls')) {
+      this.showControls_ = true;
+    } else {
+      Services.inputFor(this.win).onMouseDetected((mouseDetected) => {
+        if (mouseDetected) {
+          this.showControls_ = true;
+          this.updateUi_();
+        }
+      }, true);
+    }
+
     return this.mutateElement(() => {});
   }
 
@@ -428,9 +454,7 @@ class AmpCarousel extends AMP.BaseElement {
     const count = String(this.slides_.length);
     return (
       ' ' +
-      this.getButtonSuffixFormat_()
-        .replace('%s', index)
-        .replace('%s', count)
+      this.getButtonSuffixFormat_().replace('%s', index).replace('%s', count)
     );
   }
 
@@ -467,17 +491,18 @@ class AmpCarousel extends AMP.BaseElement {
    */
   updateUi_() {
     const index = this.carousel_.getCurrentIndex();
-    const bothDisabled =
-      this.hadTouch_ && !this.element.hasAttribute('controls');
+    const bothDisabled = this.hadTouch_ && !this.showControls_;
     const prevDisabled = bothDisabled || this.carousel_.isAtStart();
     const nextDisabled = bothDisabled || this.carousel_.isAtEnd();
 
     this.prevButton_.classList.toggle('amp-disabled', prevDisabled);
     this.prevButton_.setAttribute('aria-disabled', prevDisabled);
     this.prevButton_.title = this.getPrevButtonTitle_(index);
+    this.prevButton_.tabIndex = prevDisabled ? -1 : 0;
     this.nextButton_.classList.toggle('amp-disabled', nextDisabled);
     this.nextButton_.setAttribute('aria-disabled', nextDisabled);
     this.nextButton_.title = this.getNextButtonTitle_(index);
+    this.nextButton_.tabIndex = nextDisabled ? -1 : 0;
   }
 
   /**
@@ -500,19 +525,22 @@ class AmpCarousel extends AMP.BaseElement {
     this.prevButton_.setAttribute('role', buttonRole);
     this.nextButton_.setAttribute('role', buttonRole);
 
-    this.slides_ = slides.map(slide => {
+    this.slides_ = slides.map((slide) => {
       slide.classList.add('amp-carousel-slide');
 
       if (isSlides) {
         const wrapper = document.createElement('div');
-        wrapper.className = 'i-amphtml-carousel-slotted';
+        wrapper.classList.add(
+          'i-amphtml-carousel-slotted',
+          'i-amphtml-carousel-wrapper'
+        );
         wrapper.appendChild(slide);
         return wrapper;
       }
 
       return slide;
     });
-    this.slides_.forEach(slide => {
+    this.slides_.forEach((slide) => {
       this.scrollContainer_.appendChild(slide);
 
       if (isSlides) {
@@ -541,10 +569,11 @@ class AmpCarousel extends AMP.BaseElement {
     const name = 'slideChange';
     const isHighTrust = this.isHighTrustActionSource_(actionSource);
     const trust = isHighTrust ? ActionTrust.HIGH : ActionTrust.LOW;
+    const dataWithActionTrust = dict({'index': index, 'actionTrust': trust});
 
     const action = createCustomEvent(this.win, `slidescroll.${name}`, data);
     this.action_.trigger(this.element, name, action, trust);
-    this.element.dispatchCustomEvent(name, data);
+    dispatchCustomEvent(this.element, name, dataWithActionTrust);
     this.triggerAnalyticsEvent_(prevIndex, index);
   }
 
@@ -655,6 +684,6 @@ class AmpCarousel extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-carousel', '0.2', AMP => {
+AMP.extension('amp-carousel', '0.2', (AMP) => {
   AMP.registerElement('amp-carousel', AmpCarousel, CSS);
 });

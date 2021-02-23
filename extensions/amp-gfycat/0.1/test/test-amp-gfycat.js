@@ -25,7 +25,7 @@ describes.realWin(
       extensions: ['amp-gfycat'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
 
     beforeEach(() => {
@@ -52,7 +52,7 @@ describes.realWin(
       }
       doc.body.appendChild(gfycat);
       return gfycat
-        .build()
+        .buildInternal()
         .then(() => {
           return gfycat.layoutCallback();
         })
@@ -60,7 +60,7 @@ describes.realWin(
     }
 
     it('renders', () => {
-      return getGfycat('LeanMediocreBeardeddragon').then(gfycat => {
+      return getGfycat('LeanMediocreBeardeddragon').then((gfycat) => {
         const iframe = gfycat.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.tagName).to.equal('IFRAME');
@@ -73,7 +73,7 @@ describes.realWin(
     it('renders responsively', () => {
       return getGfycat('LeanMediocreBeardeddragon', {
         responsive: true,
-      }).then(gfycat => {
+      }).then((gfycat) => {
         const iframe = gfycat.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.className).to.match(/i-amphtml-fill-content/);
@@ -82,7 +82,7 @@ describes.realWin(
     it('noautoplay', () => {
       return getGfycat('LeanMediocreBeardeddragon', {
         noautoplay: true,
-      }).then(gfycat => {
+      }).then((gfycat) => {
         const iframe = gfycat.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.src).to.equal(
@@ -92,24 +92,25 @@ describes.realWin(
     });
 
     it('should forward events from gfycat player to the amp element', () => {
-      return getGfycat('LeanMediocreBeardeddragon').then(gfycat => {
+      return getGfycat('LeanMediocreBeardeddragon').then((gfycat) => {
         const iframe = gfycat.querySelector('iframe');
         return Promise.resolve()
-          .then(() => {
+          .then(async () => {
             const p = listenOncePromise(gfycat, VideoEvents.PLAYING);
-            sendFakeMessage(gfycat, iframe, 'playing');
+            await sendFakeMessage(gfycat, iframe, 'playing');
             return p;
           })
-          .then(() => {
+          .then(async () => {
             const p = listenOncePromise(gfycat, VideoEvents.PAUSE);
-            sendFakeMessage(gfycat, iframe, 'paused');
+            await sendFakeMessage(gfycat, iframe, 'paused');
             return p;
           });
       });
     });
 
-    function sendFakeMessage(gfycat, iframe, command) {
-      gfycat.implementation_.handleGfycatMessages_({
+    async function sendFakeMessage(gfycat, iframe, command) {
+      const impl = await gfycat.getImpl(false);
+      impl.handleGfycatMessages_({
         origin: 'https://gfycat.com',
         source: iframe.contentWindow,
         data: command,
@@ -127,7 +128,7 @@ describes.realWin(
     it('renders placeholder with an alt', () => {
       return getGfycat('LeanMediocreBeardeddragon', {
         withAlt: true,
-      }).then(gfycat => {
+      }).then((gfycat) => {
         const placeHolder = gfycat.querySelector('amp-img');
         expect(placeHolder).to.not.be.null;
         expect(placeHolder.getAttribute('alt')).to.equal(
@@ -138,7 +139,7 @@ describes.realWin(
     it('renders placeholder with an aria-label', () => {
       return getGfycat('LeanMediocreBeardeddragon', {
         withAria: true,
-      }).then(gfycat => {
+      }).then((gfycat) => {
         const placeHolder = gfycat.querySelector('amp-img');
         expect(placeHolder).to.not.be.null;
         expect(placeHolder.getAttribute('alt')).to.equal(

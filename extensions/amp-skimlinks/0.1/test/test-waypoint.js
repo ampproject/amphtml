@@ -27,7 +27,7 @@ describes.fakeWin(
       extensions: ['amp-skimlinks'],
     },
   },
-  env => {
+  (env) => {
     let helpers;
     let trackingService;
     let waypoint;

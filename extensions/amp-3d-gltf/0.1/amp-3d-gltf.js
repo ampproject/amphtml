@@ -22,6 +22,14 @@ import {dict} from '../../../src/utils/object';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor, postMessage} from '../../../src/iframe-helper';
+import {
+  observeContentSize,
+  unobserveContentSize,
+} from '../../../src/utils/size-observer';
+import {
+  observeWithSharedInOb,
+  unobserveWithSharedInOb,
+} from '../../../src/viewport-observer';
 import {removeElement} from '../../../src/dom';
 
 const TAG = 'amp-3d-gltf';
@@ -52,6 +60,8 @@ export class Amp3dGltf extends AMP.BaseElement {
 
     /** @private {?Function} */
     this.unlistenMessage_ = null;
+
+    this.onResized_ = this.onResized_.bind(this);
   }
 
   /**
@@ -80,6 +90,8 @@ export class Amp3dGltf extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
+    unobserveWithSharedInOb(this.element);
+    this.viewportCallback_(false);
     if (this.iframe_) {
       removeElement(this.iframe_);
       this.iframe_ = null;
@@ -91,6 +103,7 @@ export class Amp3dGltf extends AMP.BaseElement {
     this.willBeReady_ = new Deferred();
     this.willBeLoaded_ = new Deferred();
 
+    unobserveContentSize(this.element, this.onResized_);
     return true;
   }
 
@@ -101,9 +114,9 @@ export class Amp3dGltf extends AMP.BaseElement {
         ? fmt(this.element.getAttribute(name))
         : dflt;
 
-    const bool = x => x !== 'false';
-    const string = x => x;
-    const number = x => parseFloat(x);
+    const bool = (x) => x !== 'false';
+    const string = (x) => x;
+    const number = (x) => parseFloat(x);
 
     const src = assertHttpsUrl(getOption('src', string, ''), this.element);
 
@@ -131,11 +144,11 @@ export class Amp3dGltf extends AMP.BaseElement {
     });
     this.registerAction(
       'setModelRotation',
-      invocation => {
+      (invocation) => {
         this.sendCommandWhenReady_(
           'setModelRotation',
           invocation.args
-        ).catch(e =>
+        ).catch((e) =>
           dev().error('AMP-3D-GLTF', 'setModelRotation failed: %s', e)
         );
       },
@@ -145,18 +158,23 @@ export class Amp3dGltf extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    observeWithSharedInOb(this.element, (inViewport) =>
+      this.viewportCallback_(inViewport)
+    );
     if (!isWebGLSupported()) {
       this.toggleFallback(true);
       return Promise.resolve();
     }
 
     const iframe = getIframe(this.win, this.element, '3d-gltf', this.context_);
-
+    iframe.title = this.element.title || 'GLTF 3D model';
     this.applyFillContent(iframe, true);
     this.iframe_ = iframe;
     this.unlistenMessage_ = devAssert(this.listenGltfViewerMessages_());
 
     this.element.appendChild(this.iframe_);
+
+    observeContentSize(this.element, this.onResized_);
 
     return this.willBeLoaded_.promise;
   }
@@ -180,7 +198,7 @@ export class Amp3dGltf extends AMP.BaseElement {
         this.toggleFallback(true);
       }),
     ];
-    return () => disposers.forEach(d => d());
+    return () => disposers.forEach((d) => d());
   }
 
   /**
@@ -215,10 +233,10 @@ export class Amp3dGltf extends AMP.BaseElement {
 
   /**
    * @param {boolean} inViewport
-   * @override
+   * @private
    */
-  viewportCallback(inViewport) {
-    return this.sendCommandWhenReady_('toggleAmpViewport', inViewport);
+  viewportCallback_(inViewport) {
+    this.sendCommandWhenReady_('toggleAmpViewport', inViewport);
   }
 
   /** @override */
@@ -233,13 +251,13 @@ export class Amp3dGltf extends AMP.BaseElement {
 
   /**
    * Sends `setSize` command when ready
-   *
+   * @param {!../layout-rect.LayoutSizeDef} size
+   * @private
    */
-  onLayoutMeasure() {
-    const box = this.getLayoutBox();
+  onResized_({width, height}) {
     this.sendCommandWhenReady_(
       'setSize',
-      dict({'width': box.width, 'height': box.height})
+      dict({'width': width, 'height': height})
     );
   }
 
@@ -249,6 +267,6 @@ export class Amp3dGltf extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, Amp3dGltf);
 });

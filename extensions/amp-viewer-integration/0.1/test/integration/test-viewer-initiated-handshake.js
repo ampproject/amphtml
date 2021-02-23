@@ -16,10 +16,10 @@
 
 import {WebviewViewerForTesting} from '../../viewer-initiated-handshake-viewer-for-testing';
 
-describes.sandboxed('AmpWebviewViewerIntegration', {}, env => {
+describes.sandboxed('AmpWebviewViewerIntegration', {}, (env) => {
   const ampDocSrc = '/test/fixtures/served/ampdoc-with-messaging.html';
   // TODO(aghassemi): Investigate failure in beforeEach. #10974.
-  describe.skip('Handshake', function() {
+  describe.skip('Handshake', function () {
     let viewerEl;
     let viewer;
 

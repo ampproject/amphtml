@@ -8,6 +8,11 @@
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <script async custom-element="amp-accordion" src="https://cdn.ampproject.org/v0/amp-accordion-0.1.js"></script>
   <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+  <script>
+      (self.AMP = self.AMP || []).push(function(AMP) {
+        AMP.toggleExperiment('amp-accordion-display-locking', true);
+      });
+  </script>
   <style amp-custom>
     .menu {
       padding: 1em;
@@ -32,6 +37,7 @@
   </style>
 </head>
 <body>
+  <button onclick="document.querySelector('#initClosed').scrollIntoView()">Scroll</button>
   <button on="tap:AMP.setState({expandAc1: true})">Expand item 1</button>
   <button on="tap:AMP.setState({expandAc1: false})">Collapse item 1</button>
 
@@ -70,15 +76,30 @@
   <amp-accordion expand-single-section>
     <section [data-expand]="expandAc2" on="expand:AMP.setState({expandAc2: true});collapse:AMP.setState({expandAc2: false})">
       <h2>Section 1</h2>
-      <p>Bunch of awesome content</p>
+      <amp-video
+        id=myVideo
+        title="Big Buck Bunny"
+        artist="Blender Foundation"
+        poster="img/bigbuckbunny.jpg"
+        album="The Peach Open Movie Project"
+        src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+        width="720"
+        height="405"
+        layout="responsive"
+        controls>
+    </amp-video>
     </section>
-    <section expanded>
+    <section>
       <h2>Section 2</h2>
-      <div>Bunch of awesome content</div>
+      <div id="initClosed">Bunch of awesome content</div>
     </section>
-    <section expanded>
+    <section>
       <h2>Section 3</h2>
-      <amp-img src="/awesome.png" width="300" height="300"></amp-img>
+      <div>
+          <amp-img src="./img/sea@1x.jpg" width="300" height="300"></amp-img>
+          Check out the sea!
+          <input>
+      </div>
     </section>
     <section>
       <h2>Properly nested amp-accordion</h2>
@@ -91,7 +112,7 @@
     </section>
     <section>
       <header>The header tag is supported as well.</header>
-      <p>Even more awesome.</p>
+      <p>Even more awesome. <input> </p>
     </section>
   </amp-accordion>
 </body>

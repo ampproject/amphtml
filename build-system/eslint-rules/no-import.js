@@ -29,11 +29,11 @@ const imports = [
   },
 ];
 
-module.exports = function(context) {
+module.exports = function (context) {
   return {
     ImportDeclaration(node) {
       const comments = context.getCommentsBefore(node.source);
-      const ok = comments.some(comment => comment.value === 'OK');
+      const ok = comments.some((comment) => comment.value === 'OK');
       if (ok) {
         return;
       }
@@ -41,14 +41,13 @@ module.exports = function(context) {
       const name = node.source.value;
 
       for (const forbidden of imports) {
-        if (name !== forbidden.import) {
-          continue;
+        const importSource = forbidden.import;
+        if (name === importSource || name.startsWith(`${importSource}/`)) {
+          context.report({
+            node,
+            message: forbidden.message,
+          });
         }
-
-        context.report({
-          node,
-          message: forbidden.message,
-        });
       }
     },
   };

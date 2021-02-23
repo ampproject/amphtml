@@ -15,6 +15,10 @@
  */
 
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {
+  observeWithSharedInOb,
+  unobserveWithSharedInOb,
+} from '../../../src/viewport-observer';
 import {timeago} from '../../../third_party/timeagojs/timeago';
 import {userAssert} from '../../../src/log';
 
@@ -53,8 +57,10 @@ export class AmpTimeAgo extends AMP.BaseElement {
       this.win.document.documentElement.lang;
     this.title_ = this.element.textContent.trim();
 
-    this.element.title = this.title_;
     this.element.textContent = '';
+    if (!this.element.hasAttribute('role')) {
+      this.element.setAttribute('role', 'text');
+    }
 
     this.timeElement_ = document.createElement('time');
     this.timeElement_.setAttribute('datetime', this.datetime_);
@@ -63,11 +69,28 @@ export class AmpTimeAgo extends AMP.BaseElement {
     this.element.appendChild(this.timeElement_);
   }
 
-  /** @override */
-  viewportCallback(inViewport) {
+  /**
+   * @param {boolean} inViewport
+   * @private
+   */
+  viewportCallback_(inViewport) {
     if (inViewport && !this.cutOffReached_) {
       this.setFuzzyTimestampValue_();
     }
+  }
+
+  /** @override */
+  layoutCallback() {
+    observeWithSharedInOb(this.element, (inViewport) =>
+      this.viewportCallback_(inViewport)
+    );
+    return Promise.resolve();
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    unobserveWithSharedInOb(this.element);
+    return false;
   }
 
   /** @override */
@@ -103,6 +126,6 @@ export class AmpTimeAgo extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-timeago', '0.1', AMP => {
+AMP.extension('amp-timeago', '0.1', (AMP) => {
   AMP.registerElement('amp-timeago', AmpTimeAgo);
 });

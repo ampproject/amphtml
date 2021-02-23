@@ -32,8 +32,6 @@ tags: {  # amp-subscriptions (json)
   unique: true
   mandatory_parent: "HEAD"
   requires_extension: "amp-subscriptions"
-  satisfies: "amp-subscriptions extension .json script"
-  excludes: "amp-access extension .json script"
   attrs: {
     name: "id"
     mandatory: true
@@ -47,7 +45,7 @@ tags: {  # amp-subscriptions (json)
   }
   attr_lists: "nonce-attr"
   cdata: {
-    blacklisted_cdata_regex: {
+    disallowed_cdata_regex: {
       regex: "<!--"
       error_message: "html comments"
     }
@@ -126,7 +124,7 @@ tags: {  # <script type="application/octet-stream" ciphertext>
     mandatory: true
   }
   cdata: {
-    blacklisted_cdata_regex: {
+    disallowed_cdata_regex: {
       regex: "<!--"
       error_message: "html comments"
     }

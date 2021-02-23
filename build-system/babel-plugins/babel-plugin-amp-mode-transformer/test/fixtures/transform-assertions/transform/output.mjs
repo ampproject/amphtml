@@ -17,3 +17,10 @@ import { getMode } from '../../../../../../../src/mode';
 const test = false;
 const localDev = false;
 const minified = true;
+const development = false;
+
+function foo() {
+  if (false == false) {
+    return false;
+  }
+}

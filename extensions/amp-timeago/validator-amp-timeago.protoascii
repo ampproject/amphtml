@@ -16,7 +16,6 @@
 
 tags: {  # amp-timeago
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-timeago"
@@ -39,7 +38,6 @@ tags: {  # amp-timeago
 tags: {  # <amp-timeago>
   html_format: AMP
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "AMP-TIMEAGO"
   requires_extension: "amp-timeago"
   attrs: {
@@ -58,7 +56,7 @@ tags: {  # <amp-timeago>
   attrs: { name: "[datetime]" }
   attrs: { name: "[title]" }
   attr_lists: "extended-amp-global"
-  spec_url: "https://amp.dev/documentation/components/amp-timeago"
+  spec_url: "https://amp.dev/documentation/components/amp-timeago/"
   amp_layout: {
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT

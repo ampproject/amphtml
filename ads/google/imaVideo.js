@@ -37,28 +37,19 @@ const PlayerStates = {
  * Icons from Google Material Icons
  * https://material.io/tools/icons
  */
-/*eslint-disable*/
 const icons = {
-  'play':
-    `<path d="M8 5v14l11-7z"></path>
+  'play': `<path d="M8 5v14l11-7z"></path>
      <path d="M0 0h24v24H0z" fill="none"></path>`,
-  'pause':
-    `<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path>
+  'pause': `<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path>
      <path d="M0 0h24v24H0z" fill="none"></path>`,
-  'fullscreen':
-    `<path d="M0 0h24v24H0z" fill="none"/>
+  'fullscreen': `<path d="M0 0h24v24H0z" fill="none"/>
      <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>`,
-  'mute':
-    `<path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"></path>
+  'mute': `<path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"></path>
      <path d="M0 0h24v24H0z" fill="none"></path>`,
-  'volume_max':
-    `<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path>
+  'volume_max': `<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path>
      <path d="M0 0h24v24H0z" fill="none"></path>`,
-  'seek':
-  `<circle cx="12" cy="12" r="12" />`
+  'seek': `<circle cx="12" cy="12" r="12" />`,
 };
-
-/*eslint-enable */
 
 const bigPlayDivDisplayStyle = 'table-cell';
 
@@ -179,6 +170,15 @@ let adsActive;
 
 // Flag tracking if playback has started.
 let playbackStarted;
+
+// Flag for video's controls first being shown.
+let showControlsFirstCalled;
+
+// Flag to indicate that showControls() should
+// not take immediate effect: i.e. the case when
+// hideControls() is called before controls are
+// visible.
+let hideControlsQueued;
 
 // Boolean tracking if controls are hidden or shown
 let controlsVisible;
@@ -440,7 +440,7 @@ export function imaVideo(global, data) {
   }
   if (data.childElements) {
     const children = JSON.parse(data.childElements);
-    children.forEach(child => {
+    /** @type {!Array} */ (children).forEach((child) => {
       videoPlayer.appendChild(htmlToElement(child));
     });
   }
@@ -457,6 +457,8 @@ export function imaVideo(global, data) {
 
   window.addEventListener('message', onMessage.bind(null, global));
 
+  hideControlsQueued = false;
+  showControlsFirstCalled = false;
   contentComplete = false;
   adsActive = false;
   allAdsCompleted = false;
@@ -510,7 +512,7 @@ export function imaVideo(global, data) {
     'mozfullscreenchange',
     'webkitfullscreenchange',
   ];
-  fullScreenEvents.forEach(fsEvent => {
+  fullScreenEvents.forEach((fsEvent) => {
     global.document.addEventListener(
       fsEvent,
       onFullscreenChange.bind(null, global),
@@ -832,6 +834,14 @@ export function onAdsManagerLoaded(global, adsManagerLoadedEvent) {
   );
   adsManager.addEventListener(global.google.ima.AdEvent.Type.LOADED, onAdLoad);
   adsManager.addEventListener(
+    global.google.ima.AdEvent.Type.PAUSED,
+    onAdPaused
+  );
+  adsManager.addEventListener(
+    global.google.ima.AdEvent.Type.RESUMED,
+    onAdResumed
+  );
+  adsManager.addEventListener(
     global.google.ima.AdEvent.Type.AD_PROGRESS,
     onAdProgress
   );
@@ -902,11 +912,13 @@ export function onAdLoad(global) {
 
 /**
  * Called intermittently as the ad plays, allowing us to display ad counter.
- * @param {!Object} global
+ * @param {!Object} unusedEvent
  * @visibleForTesting
  */
-export function onAdProgress(global) {
-  const {adPosition, totalAds} = global.getAdData();
+export function onAdProgress(unusedEvent) {
+  const adPodInfo = currentAd.getAdPodInfo();
+  const adPosition = adPodInfo.getAdPosition();
+  const totalAds = adPodInfo.getTotalAds();
   const remainingTime = adsManager.getRemainingTime();
   const remainingMinutes = Math.floor(remainingTime / 60);
   let remainingSeconds = Math.floor(remainingTime % 60);
@@ -966,6 +978,30 @@ export function onContentResumeRequested() {
   }
 
   videoPlayer.addEventListener('ended', onContentEnded);
+}
+
+/**
+ * Called when the IMA SDK emmitts the event: AdEvent.Type.PAUSED.
+ * Sets the (ads) controls to reflect a paused state.
+ * Does not need to set the big play pause since that is handled
+ * by the SDK generally.
+ * @visibleForTesting
+ */
+export function onAdPaused() {
+  // show play button while ad is paused
+  changeIcon(playPauseDiv, 'play');
+}
+
+/**
+ * Called when the IMA SDK emmitts the event: AdEvent.Type.RESUMED.
+ * Sets the (ads) controls to reflect a paused state.
+ * Does not need to set the big play pause since that is handled
+ * by the SDK generally.
+ * @visibleForTesting
+ */
+export function onAdResumed() {
+  // show pause button when ad resumes
+  changeIcon(playPauseDiv, 'pause');
 }
 
 /**
@@ -1328,7 +1364,7 @@ export function showAdControls() {
   const isSkippable = currentAd ? currentAd.getSkipTimeOffset() !== -1 : false;
   const miniControls = hasMobileStyles && isSkippable;
   // hide non-ad controls
-  [timeDiv, progressBarWrapperDiv].forEach(button => {
+  [timeDiv, progressBarWrapperDiv].forEach((button) => {
     setStyle(button, 'display', 'none');
   });
   // set ad control styles
@@ -1337,7 +1373,7 @@ export function showAdControls() {
     'justify-content': 'flex-end',
     'padding': '10px',
   });
-  [fullscreenDiv, playPauseDiv, muteUnmuteDiv].forEach(button => {
+  [fullscreenDiv, playPauseDiv, muteUnmuteDiv].forEach((button) => {
     setStyles(button, {'height': miniControls ? '18px' : '22px'});
   });
   setStyles(muteUnmuteDiv, {'margin-right': '10px'});
@@ -1345,7 +1381,7 @@ export function showAdControls() {
   changeIcon(playPauseDiv, 'pause');
   // show ad controls
   setStyle(countdownWrapperDiv, 'display', 'flex');
-  showControls();
+  showControls(true);
 }
 
 /**
@@ -1362,23 +1398,30 @@ export function resetControlsAfterAd() {
     'height': '100px',
     'padding': '60px 10px 10px',
   });
-  [fullscreenDiv, playPauseDiv, muteUnmuteDiv].forEach(button => {
+  [fullscreenDiv, playPauseDiv, muteUnmuteDiv].forEach((button) => {
     setStyles(button, {'height': '30px'});
   });
   setStyles(muteUnmuteDiv, {'margin-right': '20px'});
   // show non-ad controls
-  [timeDiv, progressBarWrapperDiv].forEach(button => {
+  [timeDiv, progressBarWrapperDiv].forEach((button) => {
     setStyle(button, 'display', 'block');
   });
 }
 
 /**
  * Show video controls and reset hide controls timeout.
- *
+ * @param {boolean} opt_adsForce
  * @visibleForTesting
  */
-export function showControls() {
+export function showControls(opt_adsForce) {
+  showControlsFirstCalled = true;
   if (!controlsVisible) {
+    // Bail out if hideControls signal was queued before
+    // showControls (does not matter for ads case)
+    if (hideControlsQueued && !opt_adsForce) {
+      hideControlsQueued = false;
+      return;
+    }
     setStyle(controlsDiv, 'display', 'flex');
     controlsVisible = true;
   }
@@ -1401,6 +1444,11 @@ export function hideControls() {
   if (controlsVisible && !adsActive) {
     setStyle(controlsDiv, 'display', 'none');
     controlsVisible = false;
+  } else if (!showControlsFirstCalled) {
+    // showControls has not been called yet,
+    // so set flag to indicate first showControls
+    // should not take precedence.
+    hideControlsQueued = true;
   }
 }
 
@@ -1531,6 +1579,8 @@ export function getPropertiesForTesting() {
     timeNode,
     uiTicker,
     videoPlayer,
+    hideControlsQueued,
+    icons,
   };
 }
 
@@ -1760,8 +1810,7 @@ const VideoEvents = {
   /**
    * amp:video:visibility
    *
-   * Fired when the video's visibility changes. Normally fired
-   * from `viewportCallback`.
+   * Fired when the video's visibility changes.
    *
    * @event amp:video:visibility
    * @property {boolean} visible Whether the video player is visible or not.

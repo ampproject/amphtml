@@ -96,16 +96,16 @@ export class SubscriptionAnalytics {
 
   /**
    * @param {!SubscriptionAnalyticsEvents|string} eventType
-   * @param {string} serviceId
+   * @param {string} platformKey
    * @param {!JsonObject=} opt_vars
    * @param {!JsonObject=} internalVars
    */
-  serviceEvent(eventType, serviceId, opt_vars, internalVars) {
+  serviceEvent(eventType, platformKey, opt_vars, internalVars) {
     this.event(
       eventType,
       /** @type {!JsonObject} */ (Object.assign(
         dict({
-          'serviceId': serviceId,
+          'serviceId': platformKey,
         }),
         opt_vars
       )),
@@ -129,7 +129,12 @@ export class SubscriptionAnalytics {
     user().info(TAG, loggedString, opt_vars || '');
 
     opt_vars = opt_vars || dict({});
-    triggerAnalyticsEvent(this.element_, loggedString, opt_vars);
+    triggerAnalyticsEvent(
+      this.element_,
+      loggedString,
+      opt_vars,
+      /** enableDataVars */ false
+    );
 
     for (let l = 0; l < this.listeners_.length; l++) {
       this.listeners_[l](eventType, opt_vars, internalVars);
@@ -137,15 +142,15 @@ export class SubscriptionAnalytics {
   }
 
   /**
-   * @param {string} serviceId
+   * @param {string} platformKey
    * @param {!Action|string} action
    * @param {!ActionStatus|string} status
    * @param {!JsonObject=} opt_vars
    */
-  actionEvent(serviceId, action, status, opt_vars) {
+  actionEvent(platformKey, action, status, opt_vars) {
     this.serviceEvent(
       SubscriptionAnalyticsEvents.SUBSCRIPTIONS_ACTION,
-      serviceId,
+      platformKey,
       opt_vars,
       dict({
         'action': action,

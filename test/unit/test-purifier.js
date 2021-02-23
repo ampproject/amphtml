@@ -42,14 +42,15 @@ describe
        * @param {string} html
        * @return {string}
        */
-      purify = html => purifier.purifyHtml(html).innerHTML;
+      purify = (html) => purifier.purifyHtml(html).innerHTML;
 
       /**
        * Helper that calls purifyTagsForTripleMustache().
        * @param {string} html
        * @return {string}
        */
-      purifyTripleMustache = html => purifier.purifyTagsForTripleMustache(html);
+      purifyTripleMustache = (html) =>
+        purifier.purifyTagsForTripleMustache(html);
     });
 
     describe('sanitizer tests', () => {
@@ -292,7 +293,7 @@ describe
         });
       });
 
-      it('should NOT output blacklisted values for class attributes', () => {
+      it('should NOT output denylisted values for class attributes', () => {
         allowConsoleError(() => {
           expect(purify('<p class="i-amphtml-">hello</p>')).to.be.equal(
             '<p>hello</p>'
@@ -368,7 +369,7 @@ describe
       });
 
       // Need to test this since DOMPurify doesn't offer a API for tag-specific
-      // attribute whitelists. Instead, we hack around it with custom hooks.
+      // attribute allowlists. Instead, we hack around it with custom hooks.
       it('should not allow unsupported attributes after a valid one', () => {
         const html =
           '<form action-xhr="https://foo.com"></form>' +
@@ -402,8 +403,8 @@ describe
       });
 
       it('should avoid disallowing default-supported attributes', () => {
-        // We whitelist all attributes of AMP elements, but make sure we don't
-        // remove default-supported attributes from the whitelist afterwards.
+        // We allowlist all attributes of AMP elements, but make sure we don't
+        // remove default-supported attributes from the allowlist afterwards.
         expect(
           purify(
             '<amp-img style="color: red"></amp-img><p style="color: blue"></p>'
@@ -486,7 +487,7 @@ describe
         );
       });
 
-      it('should NOT output non-whitelisted markup', () => {
+      it('should NOT output non-allowlisted markup', () => {
         expect(purifyTripleMustache('a<style>b</style>c')).to.be.equal('ac');
         expect(purifyTripleMustache('a<img>c')).to.be.equal('ac');
       });
@@ -502,23 +503,32 @@ describe
         expect(purifyTripleMustache(html)).to.be.equal(html);
       });
 
-      it('should whitelist formatting related elements', () => {
-        const nonWhiteListedTag = '<img>';
-        const whiteListedFormattingTags =
+      it('should allowlist formatting related elements', () => {
+        const nonAllowlistedTag = '<img>';
+        const allowlistedFormattingTags =
           '<b>abc</b><div>def</div>' +
           '<br><code></code><del></del><em></em>' +
           '<i></i><ins></ins><mark></mark><s></s>' +
           '<small></small><strong></strong><sub></sub>' +
           '<sup></sup><time></time><u></u><hr>';
-        const html = `${whiteListedFormattingTags}${nonWhiteListedTag}`;
-        // Expect the purifier to unescape the whitelisted tags and to sanitize
+        const html = `${allowlistedFormattingTags}${nonAllowlistedTag}`;
+        // Expect the purifier to unescape the allowlisted tags and to sanitize
         // and remove the img tag.
         expect(purifyTripleMustache(html)).to.be.equal(
-          whiteListedFormattingTags
+          allowlistedFormattingTags
         );
       });
 
-      it('should whitelist table related elements and anchor tags', () => {
+      it('should allowlist h1, h2, h3 and amp-img elements', () => {
+        const html =
+          '<h1>Heading 1</h1>' +
+          '<h2>Heading 2</h2>' +
+          '<h3>Heading 3</h3>' +
+          '<amp-img></amp-img>';
+        expect(purifyTripleMustache(html)).to.be.equal(html);
+      });
+
+      it('should allowlist table related elements and anchor tags', () => {
         const html =
           '<table class="valid-class">' +
           '<colgroup><col><col></colgroup>' +
@@ -531,6 +541,24 @@ describe
           '<td colspan="2"><span>footer</span></td>' +
           '</tr></tfoot>' +
           '</table>';
+        expect(purifyTripleMustache(html)).to.be.equal(html);
+      });
+
+      it('should allowlist container elements', () => {
+        const html =
+          '<article>Article</article>' +
+          '<aside></aside>' +
+          '<blockquote>A quote</blockquote>' +
+          '<details></details>' +
+          '<figcaption></figcaption>' +
+          '<figure></figure>' +
+          '<footer>Footer</footer>' +
+          '<header></header>' +
+          '<main class="content"></main>' +
+          '<nav></nav>' +
+          '<pre></pre>' +
+          '<section id="sec"></section>' +
+          '<summary></summary>';
         expect(purifyTripleMustache(html)).to.be.equal(html);
       });
 
@@ -749,7 +777,7 @@ describe
       html = document.createElement('html');
       const doc = {
         documentElement: html,
-        createElement: tagName => document.createElement(tagName),
+        createElement: (tagName) => document.createElement(tagName),
       };
 
       const purifier = () => new Purifier(doc);
@@ -759,11 +787,11 @@ describe
        * @param {string} html
        * @return {string}
        */
-      purify = html => purifier().purifyHtml(html).innerHTML;
+      purify = (html) => purifier().purifyHtml(html).innerHTML;
     });
 
     describe('AMP formats', () => {
-      it('should blacklist input[type="image"] and input[type="button"] in AMP', () => {
+      it('should denylist input[type="image"] and input[type="button"] in AMP', () => {
         // Given the AMP format type.
         html.setAttribute('amp', '');
         allowConsoleError(() => {
@@ -773,7 +801,7 @@ describe
       });
 
       it('should allow input[type="file"] and input[type="password"]', () => {
-        // Given that the AMP format does not blacklist input types file and
+        // Given that the AMP format does not denylist input types file and
         // password.
         html.setAttribute('amp', '');
         expect(purify('<input type="file">')).to.equal('<input type="file">');
@@ -796,7 +824,7 @@ describe
         });
       });
 
-      it('should only allow whitelisted AMP elements in AMP4EMAIL', () => {
+      it('should only allow allowlisted AMP elements in AMP4EMAIL', () => {
         html.setAttribute('amp4email', '');
         expect(purify('<amp-analytics>')).to.equal('');
         expect(purify('<amp-iframe>')).to.equal('');
@@ -875,7 +903,7 @@ describe('validateAttributeChange', () => {
     expect(vac('p', 'data-amp-bind-text', 'foo')).to.be.false;
   });
 
-  it('should allow whitelisted-by-tag attributes', () => {
+  it('should allow allowlisted-by-tag attributes', () => {
     purifier.isValidAttribute = () => false;
 
     expect(vac('a', 'rel', 'amphtml')).to.be.true;
@@ -898,9 +926,9 @@ describe('validateAttributeChange', () => {
     expect(vac('p', 'class', 'i-amphtml-illegal')).to.be.false;
     // __amp_source_origin in URLs.
     expect(vac('amp-img', 'src', '?__amp_source_origin=evil')).to.be.false;
-    // BLACKLISTED_TAG_SPECIFIC_ATTRS.
+    // DENYLISTED_TAG_SPECIFIC_ATTRS.
     expect(vac('select', 'form', 'foo')).to.be.false;
-    // BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES.
+    // DENYLISTED_TAG_SPECIFIC_ATTR_VALUES.
     expect(vac('input', 'type', 'image')).to.be.false;
   });
 });
@@ -922,7 +950,7 @@ describe('getAllowedTags', () => {
     expect(allowedTags).to.have.property('feblend', true);
   });
 
-  it('should have blacklisted tags set to false', () => {
+  it('should have denylisted tags set to false', () => {
     // Tags allowed in DOMPurify but disallowed in AMP.
     expect(allowedTags).to.have.property('audio', false);
     expect(allowedTags).to.have.property('img', false);

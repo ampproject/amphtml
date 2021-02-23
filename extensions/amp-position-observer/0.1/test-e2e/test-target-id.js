@@ -17,8 +17,7 @@
 describes.endtoend(
   'amp-position-observer target in AMPHTML ad',
   {
-    testUrl:
-      'http://localhost:8000/test/fixtures/e2e/amp-position-observer/target-id.html',
+    fixture: 'amp-position-observer/target-id.html',
     environments: 'amp4ads-preset',
     initialRect: {width: 800, height: 600},
   },
@@ -70,14 +69,14 @@ async function scrollParentWindowYBy(controller, px) {
   await controller.scrollBy(article, {top: px});
   await controller
     .findElement('iframe')
-    .then(frame => controller.switchToFrame(frame));
+    .then((frame) => controller.switchToFrame(frame));
 }
 
 async function verifyClockHandRect(controller, rect) {
   const clockHand = await controller.findElement('.clock-hand');
   const delta = controller
     .getElementRect(clockHand)
-    .then(clockRect =>
+    .then((clockRect) =>
       Math.max(
         Math.abs(clockRect.x - rect.x),
         Math.abs(clockRect.y - rect.y),

@@ -16,7 +16,7 @@
 
 const {VERSION} = require('../../compile/internal-version');
 
-module.exports = function(babel) {
+module.exports = function (babel) {
   const {types: t} = babel;
   return {
     name: 'transform-version-call',

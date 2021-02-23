@@ -15,13 +15,12 @@
  */
 'use strict';
 
-const colors = require('ansi-colors');
 const fs = require('fs-extra');
-const log = require('fancy-log');
 const path = require('path');
 const ts = require('typescript');
 const tsickle = require('tsickle');
-const {endBuildStep} = require('../tasks/helpers');
+const {log} = require('../common/logging');
+const {red} = require('kleur/colors');
 
 /**
  * Given a file path `foo/bar.js`, transpiles the TypeScript entry point of
@@ -31,8 +30,7 @@ const {endBuildStep} = require('../tasks/helpers');
  * @param {string} srcFilename
  * @return {!Promise}
  */
-exports.transpileTs = function(srcDir, srcFilename) {
-  const startTime = Date.now();
+exports.transpileTs = async function (srcDir, srcFilename) {
   const tsEntry = path.join(srcDir, srcFilename).replace(/\.js$/, '.ts');
   const tsConfig = ts.convertCompilerOptionsFromJson(
     {
@@ -43,7 +41,7 @@ exports.transpileTs = function(srcDir, srcFilename) {
   );
   const tsOptions = tsConfig.options;
   if (tsConfig.errors.length) {
-    log(colors.red('TSickle:'), tsickle.formatDiagnostics(tsConfig.errors));
+    log(red('TSickle:'), tsickle.formatDiagnostics(tsConfig.errors));
   }
 
   const compilerHost = ts.createCompilerHost(tsOptions);
@@ -60,6 +58,8 @@ exports.transpileTs = function(srcDir, srcFilename) {
     }
     return fileName;
   };
+  // TODO(#28387) fix this typing.
+  /** @type {Object} */
   const transformerHost = {
     host: compilerHost,
     options: tsOptions,
@@ -67,24 +67,22 @@ exports.transpileTs = function(srcDir, srcFilename) {
     shouldSkipTsickleProcessing: () => false,
     transformTypesToClosure: true,
   };
-  return tsickle
-    .emitWithTsickle(
-      program,
-      transformerHost,
-      compilerHost,
-      tsOptions,
-      undefined,
-      (filePath, contents) => {
-        fs.writeFileSync(filePath, contents, {encoding: 'utf-8'});
-      }
-    )
-    .then(emitResult => {
-      const diagnostics = ts
-        .getPreEmitDiagnostics(program)
-        .concat(emitResult.diagnostics);
-      if (diagnostics.length) {
-        log(colors.red('TSickle:'), tsickle.formatDiagnostics(diagnostics));
-      }
-      endBuildStep('Transpiled', srcFilename, startTime);
-    });
+
+  const emitResult = await tsickle.emitWithTsickle(
+    program,
+    transformerHost,
+    compilerHost,
+    tsOptions,
+    undefined,
+    (filePath, contents) => {
+      fs.writeFileSync(filePath, contents, {encoding: 'utf-8'});
+    }
+  );
+
+  const diagnostics = ts
+    .getPreEmitDiagnostics(program)
+    .concat(emitResult.diagnostics);
+  if (diagnostics.length) {
+    log(red('TSickle:'), tsickle.formatDiagnostics(diagnostics));
+  }
 };

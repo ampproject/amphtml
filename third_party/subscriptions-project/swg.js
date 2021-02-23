@@ -1,6 +1,6 @@
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
+/*
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.93 */
+/** Version: 0.1.22.145 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -29,7 +29,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /** @enum {number} */
 const AnalyticsEvent = {
   UNKNOWN: 0,
@@ -53,6 +52,9 @@ const AnalyticsEvent = {
   IMPRESSION_SELECT_OFFER_SWG_BUTTON: 18,
   IMPRESSION_SHOW_CONTRIBUTIONS_SWG_BUTTON: 19,
   IMPRESSION_SELECT_CONTRIBUTION_SWG_BUTTON: 20,
+  IMPRESSION_METER_TOAST: 21,
+  IMPRESSION_REGWALL: 22,
+  IMPRESSION_SHOWCASE_REGWALL: 23,
   ACTION_SUBSCRIBE: 1000,
   ACTION_PAYMENT_COMPLETE: 1001,
   ACTION_ACCOUNT_CREATED: 1002,
@@ -74,6 +76,15 @@ const AnalyticsEvent = {
   ACTION_SWG_BUTTON_SELECT_OFFER_CLICK: 1018,
   ACTION_SWG_BUTTON_SHOW_CONTRIBUTIONS_CLICK: 1019,
   ACTION_SWG_BUTTON_SELECT_CONTRIBUTION_CLICK: 1020,
+  ACTION_USER_CONSENT_DEFERRED_ACCOUNT: 1021,
+  ACTION_USER_DENY_DEFERRED_ACCOUNT: 1022,
+  ACTION_DEFERRED_ACCOUNT_REDIRECT: 1023,
+  ACTION_GET_ENTITLEMENTS: 1024,
+  ACTION_METER_TOAST_SUBSCRIBE_CLICK: 1025,
+  ACTION_METER_TOAST_EXPANDED: 1026,
+  ACTION_METER_TOAST_CLOSED_BY_ARTICLE_INTERACTION: 1027,
+  ACTION_METER_TOAST_CLOSED_BY_SWIPE_DOWN: 1028,
+  ACTION_METER_TOAST_CLOSED_BY_X_CLICKED: 1029,
   EVENT_PAYMENT_FAILED: 2000,
   EVENT_CUSTOM: 3000,
   EVENT_CONFIRM_TX_ID: 3001,
@@ -81,7 +92,30 @@ const AnalyticsEvent = {
   EVENT_GPAY_NO_TX_ID: 3003,
   EVENT_GPAY_CANNOT_CONFIRM_TX_ID: 3004,
   EVENT_GOOGLE_UPDATED: 3005,
+  EVENT_NEW_TX_ID: 3006,
+  EVENT_UNLOCKED_BY_SUBSCRIPTION: 3007,
+  EVENT_UNLOCKED_BY_METER: 3008,
+  EVENT_NO_ENTITLEMENTS: 3009,
+  EVENT_HAS_METERING_ENTITLEMENTS: 3010,
+  EVENT_OFFERED_METER: 3011,
+  EVENT_UNLOCKED_FREE_PAGE: 3012,
   EVENT_SUBSCRIPTION_STATE: 4000,
+};
+/** @enum {number} */
+const EntitlementResult = {
+  UNKNOWN_ENTITLEMENT_RESULT: 0,
+  UNLOCKED_SUBSCRIBER: 1001,
+  UNLOCKED_FREE: 1002,
+  UNLOCKED_METER: 1003,
+  LOCKED_REGWALL: 2001,
+  LOCKED_PAYWALL: 2002,
+};
+/** @enum {number} */
+const EntitlementSource = {
+  UNKNOWN_ENTITLEMENT_SOURCE: 0,
+  GOOGLE_SUBSCRIBER_ENTITLEMENT: 1001,
+  GOOGLE_SHOWCASE_METERING_SERVICE: 2001,
+  PUBLISHER_ENTITLEMENT: 3001,
 };
 /** @enum {number} */
 const EventOriginator = {
@@ -91,19 +125,22 @@ const EventOriginator = {
   PROPENSITY_CLIENT: 3,
   SWG_SERVER: 4,
   PUBLISHER_CLIENT: 5,
+  SHOWCASE_CLIENT: 6,
 };
 
 /**
  * @implements {Message}
  */
 class AccountCreationRequest {
- /**
-  * @param {!Array=} data
-  */
-  constructor(data = []) {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
 
     /** @private {?boolean} */
-    this.complete_ = (data[1] == null) ? null : data[1];
+    this.complete_ = data[base] == null ? null : data[base];
   }
 
   /**
@@ -121,14 +158,18 @@ class AccountCreationRequest {
   }
 
   /**
-   * @return {!Array}
+   * @param {boolean} includeLabel
+   * @return {!Array<?>}
    * @override
    */
-  toArray() {
-    return [
-      this.label(),  // message label
-      this.complete_,  // field 1 - complete
+  toArray(includeLabel = true) {
+    const arr = [
+        this.complete_, // field 1 - complete
     ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
   }
 
   /**
@@ -144,16 +185,18 @@ class AccountCreationRequest {
  * @implements {Message}
  */
 class AlreadySubscribedResponse {
- /**
-  * @param {!Array=} data
-  */
-  constructor(data = []) {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
 
     /** @private {?boolean} */
-    this.subscriberOrMember_ = (data[1] == null) ? null : data[1];
+    this.subscriberOrMember_ = data[base] == null ? null : data[base];
 
     /** @private {?boolean} */
-    this.linkRequested_ = (data[2] == null) ? null : data[2];
+    this.linkRequested_ = data[1 + base] == null ? null : data[1 + base];
   }
 
   /**
@@ -185,15 +228,19 @@ class AlreadySubscribedResponse {
   }
 
   /**
-   * @return {!Array}
+   * @param {boolean} includeLabel
+   * @return {!Array<?>}
    * @override
    */
-  toArray() {
-    return [
-      this.label(),  // message label
-      this.subscriberOrMember_,  // field 1 - subscriber_or_member
-      this.linkRequested_,  // field 2 - link_requested
+  toArray(includeLabel = true) {
+    const arr = [
+        this.subscriberOrMember_, // field 1 - subscriber_or_member
+        this.linkRequested_, // field 2 - link_requested
     ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
   }
 
   /**
@@ -209,43 +256,45 @@ class AlreadySubscribedResponse {
  * @implements {Message}
  */
 class AnalyticsContext {
- /**
-  * @param {!Array=} data
-  */
-  constructor(data = []) {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
 
     /** @private {?string} */
-    this.embedderOrigin_ = (data[1] == null) ? null : data[1];
+    this.embedderOrigin_ = data[base] == null ? null : data[base];
 
     /** @private {?string} */
-    this.transactionId_ = (data[2] == null) ? null : data[2];
+    this.transactionId_ = data[1 + base] == null ? null : data[1 + base];
 
     /** @private {?string} */
-    this.referringOrigin_ = (data[3] == null) ? null : data[3];
+    this.referringOrigin_ = data[2 + base] == null ? null : data[2 + base];
 
     /** @private {?string} */
-    this.utmSource_ = (data[4] == null) ? null : data[4];
+    this.utmSource_ = data[3 + base] == null ? null : data[3 + base];
 
     /** @private {?string} */
-    this.utmCampaign_ = (data[5] == null) ? null : data[5];
+    this.utmCampaign_ = data[4 + base] == null ? null : data[4 + base];
 
     /** @private {?string} */
-    this.utmMedium_ = (data[6] == null) ? null : data[6];
+    this.utmMedium_ = data[5 + base] == null ? null : data[5 + base];
 
     /** @private {?string} */
-    this.sku_ = (data[7] == null) ? null : data[7];
+    this.sku_ = data[6 + base] == null ? null : data[6 + base];
 
     /** @private {?boolean} */
-    this.readyToPay_ = (data[8] == null) ? null : data[8];
+    this.readyToPay_ = data[7 + base] == null ? null : data[7 + base];
 
     /** @private {!Array<string>} */
-    this.label_ = data[9] || [];
+    this.label_ = data[8 + base] || [];
 
     /** @private {?string} */
-    this.clientVersion_ = (data[10] == null) ? null : data[10];
+    this.clientVersion_ = data[9 + base] == null ? null : data[9 + base];
 
     /** @private {?string} */
-    this.url_ = (data[11] == null) ? null : data[11];
+    this.url_ = data[10 + base] == null ? null : data[10 + base];
   }
 
   /**
@@ -403,24 +452,28 @@ class AnalyticsContext {
   }
 
   /**
-   * @return {!Array}
+   * @param {boolean} includeLabel
+   * @return {!Array<?>}
    * @override
    */
-  toArray() {
-    return [
-      this.label(),  // message label
-      this.embedderOrigin_,  // field 1 - embedder_origin
-      this.transactionId_,  // field 2 - transaction_id
-      this.referringOrigin_,  // field 3 - referring_origin
-      this.utmSource_,  // field 4 - utm_source
-      this.utmCampaign_,  // field 5 - utm_campaign
-      this.utmMedium_,  // field 6 - utm_medium
-      this.sku_,  // field 7 - sku
-      this.readyToPay_,  // field 8 - ready_to_pay
-      this.label_,  // field 9 - label
-      this.clientVersion_,  // field 10 - client_version
-      this.url_,  // field 11 - url
+  toArray(includeLabel = true) {
+    const arr = [
+        this.embedderOrigin_, // field 1 - embedder_origin
+        this.transactionId_, // field 2 - transaction_id
+        this.referringOrigin_, // field 3 - referring_origin
+        this.utmSource_, // field 4 - utm_source
+        this.utmCampaign_, // field 5 - utm_campaign
+        this.utmMedium_, // field 6 - utm_medium
+        this.sku_, // field 7 - sku
+        this.readyToPay_, // field 8 - ready_to_pay
+        this.label_, // field 9 - label
+        this.clientVersion_, // field 10 - client_version
+        this.url_, // field 11 - url
     ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
   }
 
   /**
@@ -436,16 +489,18 @@ class AnalyticsContext {
  * @implements {Message}
  */
 class AnalyticsEventMeta {
- /**
-  * @param {!Array=} data
-  */
-  constructor(data = []) {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
 
     /** @private {?EventOriginator} */
-    this.eventOriginator_ = (data[1] == null) ? null : data[1];
+    this.eventOriginator_ = data[base] == null ? null : data[base];
 
     /** @private {?boolean} */
-    this.isFromUserAction_ = (data[2] == null) ? null : data[2];
+    this.isFromUserAction_ = data[1 + base] == null ? null : data[1 + base];
   }
 
   /**
@@ -477,15 +532,19 @@ class AnalyticsEventMeta {
   }
 
   /**
-   * @return {!Array}
+   * @param {boolean} includeLabel
+   * @return {!Array<?>}
    * @override
    */
-  toArray() {
-    return [
-      this.label(),  // message label
-      this.eventOriginator_,  // field 1 - event_originator
-      this.isFromUserAction_,  // field 2 - is_from_user_action
+  toArray(includeLabel = true) {
+    const arr = [
+        this.eventOriginator_, // field 1 - event_originator
+        this.isFromUserAction_, // field 2 - is_from_user_action
     ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
   }
 
   /**
@@ -501,25 +560,33 @@ class AnalyticsEventMeta {
  * @implements {Message}
  */
 class AnalyticsRequest {
- /**
-  * @param {!Array=} data
-  */
-  constructor(data = []) {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
 
     /** @private {?AnalyticsContext} */
-    this.context_ = (data[1] == null || data[1] == undefined) ? null : new
-        AnalyticsContext(data[1]);
+    this.context_ =
+      data[base] == null || data[base] == undefined
+        ? null
+        : new AnalyticsContext(data[base], includesLabel);
 
     /** @private {?AnalyticsEvent} */
-    this.event_ = (data[2] == null) ? null : data[2];
+    this.event_ = data[1 + base] == null ? null : data[1 + base];
 
     /** @private {?AnalyticsEventMeta} */
-    this.meta_ = (data[3] == null || data[3] == undefined) ? null : new
-        AnalyticsEventMeta(data[3]);
+    this.meta_ =
+      data[2 + base] == null || data[2 + base] == undefined
+        ? null
+        : new AnalyticsEventMeta(data[2 + base], includesLabel);
 
     /** @private {?EventParams} */
-    this.params_ = (data[4] == null || data[4] == undefined) ? null : new
-        EventParams(data[4]);
+    this.params_ =
+      data[3 + base] == null || data[3 + base] == undefined
+        ? null
+        : new EventParams(data[3 + base], includesLabel);
   }
 
   /**
@@ -579,17 +646,21 @@ class AnalyticsRequest {
   }
 
   /**
-   * @return {!Array}
+   * @param {boolean} includeLabel
+   * @return {!Array<?>}
    * @override
    */
-  toArray() {
-    return [
-      this.label(),  // message label
-      this.context_ ? this.context_.toArray() : [], // field 1 - context
-      this.event_,  // field 2 - event
-      this.meta_ ? this.meta_.toArray() : [], // field 3 - meta
-      this.params_ ? this.params_.toArray() : [], // field 4 - params
+  toArray(includeLabel = true) {
+    const arr = [
+        this.context_ ? this.context_.toArray(includeLabel) : [], // field 1 - context
+        this.event_, // field 2 - event
+        this.meta_ ? this.meta_.toArray(includeLabel) : [], // field 3 - meta
+        this.params_ ? this.params_.toArray(includeLabel) : [], // field 4 - params
     ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
   }
 
   /**
@@ -604,14 +675,19 @@ class AnalyticsRequest {
 /**
  * @implements {Message}
  */
-class EntitlementsResponse {
- /**
-  * @param {!Array=} data
-  */
-  constructor(data = []) {
+class EntitlementJwt {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
 
     /** @private {?string} */
-    this.jwt_ = (data[1] == null) ? null : data[1];
+    this.jwt_ = data[base] == null ? null : data[base];
+
+    /** @private {?string} */
+    this.source_ = data[1 + base] == null ? null : data[1 + base];
   }
 
   /**
@@ -629,14 +705,219 @@ class EntitlementsResponse {
   }
 
   /**
-   * @return {!Array}
+   * @return {?string}
+   */
+  getSource() {
+    return this.source_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setSource(value) {
+    this.source_ = value;
+  }
+
+  /**
+   * @param {boolean} includeLabel
+   * @return {!Array<?>}
    * @override
    */
-  toArray() {
-    return [
-      this.label(),  // message label
-      this.jwt_,  // field 1 - jwt
+  toArray(includeLabel = true) {
+    const arr = [
+        this.jwt_, // field 1 - jwt
+        this.source_, // field 2 - source
     ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'EntitlementJwt';
+  }
+}
+
+/**
+ * @implements {Message}
+ */
+class EntitlementsRequest {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
+
+    /** @private {?EntitlementJwt} */
+    this.usedEntitlement_ =
+      data[base] == null || data[base] == undefined
+        ? null
+        : new EntitlementJwt(data[base], includesLabel);
+
+    /** @private {?Timestamp} */
+    this.clientEventTime_ =
+      data[1 + base] == null || data[1 + base] == undefined
+        ? null
+        : new Timestamp(data[1 + base], includesLabel);
+
+    /** @private {?EntitlementSource} */
+    this.entitlementSource_ = data[2 + base] == null ? null : data[2 + base];
+
+    /** @private {?EntitlementResult} */
+    this.entitlementResult_ = data[3 + base] == null ? null : data[3 + base];
+
+    /** @private {?string} */
+    this.nonce_ = data[4 + base] == null ? null : data[4 + base];
+  }
+
+  /**
+   * @return {?EntitlementJwt}
+   */
+  getUsedEntitlement() {
+    return this.usedEntitlement_;
+  }
+
+  /**
+   * @param {!EntitlementJwt} value
+   */
+  setUsedEntitlement(value) {
+    this.usedEntitlement_ = value;
+  }
+
+  /**
+   * @return {?Timestamp}
+   */
+  getClientEventTime() {
+    return this.clientEventTime_;
+  }
+
+  /**
+   * @param {!Timestamp} value
+   */
+  setClientEventTime(value) {
+    this.clientEventTime_ = value;
+  }
+
+  /**
+   * @return {?EntitlementSource}
+   */
+  getEntitlementSource() {
+    return this.entitlementSource_;
+  }
+
+  /**
+   * @param {!EntitlementSource} value
+   */
+  setEntitlementSource(value) {
+    this.entitlementSource_ = value;
+  }
+
+  /**
+   * @return {?EntitlementResult}
+   */
+  getEntitlementResult() {
+    return this.entitlementResult_;
+  }
+
+  /**
+   * @param {!EntitlementResult} value
+   */
+  setEntitlementResult(value) {
+    this.entitlementResult_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getNonce() {
+    return this.nonce_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setNonce(value) {
+    this.nonce_ = value;
+  }
+
+  /**
+   * @param {boolean} includeLabel
+   * @return {!Array<?>}
+   * @override
+   */
+  toArray(includeLabel = true) {
+    const arr = [
+      this.usedEntitlement_ ? this.usedEntitlement_.toArray(includeLabel) :
+                              [],  // field 1 - used_entitlement
+      this.clientEventTime_ ? this.clientEventTime_.toArray(includeLabel) :
+                              [],  // field 2 - client_event_time
+      this.entitlementSource_,     // field 3 - entitlement_source
+      this.entitlementResult_,     // field 4 - entitlement_result
+      this.nonce_,                 // field 5 - nonce
+    ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'EntitlementsRequest';
+  }
+}
+
+/**
+ * @implements {Message}
+ */
+class EntitlementsResponse {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
+
+    /** @private {?string} */
+    this.jwt_ = data[base] == null ? null : data[base];
+  }
+
+  /**
+   * @return {?string}
+   */
+  getJwt() {
+    return this.jwt_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setJwt(value) {
+    this.jwt_ = value;
+  }
+
+  /**
+   * @param {boolean} includeLabel
+   * @return {!Array<?>}
+   * @override
+   */
+  toArray(includeLabel = true) {
+    const arr = [
+        this.jwt_, // field 1 - jwt
+    ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
   }
 
   /**
@@ -652,22 +933,30 @@ class EntitlementsResponse {
  * @implements {Message}
  */
 class EventParams {
- /**
-  * @param {!Array=} data
-  */
-  constructor(data = []) {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
 
     /** @private {?string} */
-    this.smartboxMessage_ = (data[1] == null) ? null : data[1];
+    this.smartboxMessage_ = data[base] == null ? null : data[base];
 
     /** @private {?string} */
-    this.gpayTransactionId_ = (data[2] == null) ? null : data[2];
+    this.gpayTransactionId_ = data[1 + base] == null ? null : data[1 + base];
 
     /** @private {?boolean} */
-    this.hadLogged_ = (data[3] == null) ? null : data[3];
+    this.hadLogged_ = data[2 + base] == null ? null : data[2 + base];
 
     /** @private {?string} */
-    this.sku_ = (data[4] == null) ? null : data[4];
+    this.sku_ = data[3 + base] == null ? null : data[3 + base];
+
+    /** @private {?string} */
+    this.oldTransactionId_ = data[4 + base] == null ? null : data[4 + base];
+
+    /** @private {?boolean} */
+    this.isUserRegistered_ = data[5 + base] == null ? null : data[5 + base];
   }
 
   /**
@@ -727,17 +1016,51 @@ class EventParams {
   }
 
   /**
-   * @return {!Array}
+   * @return {?string}
+   */
+  getOldTransactionId() {
+    return this.oldTransactionId_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setOldTransactionId(value) {
+    this.oldTransactionId_ = value;
+  }
+
+  /**
+   * @return {?boolean}
+   */
+  getIsUserRegistered() {
+    return this.isUserRegistered_;
+  }
+
+  /**
+   * @param {boolean} value
+   */
+  setIsUserRegistered(value) {
+    this.isUserRegistered_ = value;
+  }
+
+  /**
+   * @param {boolean} includeLabel
+   * @return {!Array<?>}
    * @override
    */
-  toArray() {
-    return [
-      this.label(),  // message label
-      this.smartboxMessage_,  // field 1 - smartbox_message
-      this.gpayTransactionId_,  // field 2 - gpay_transaction_id
-      this.hadLogged_,  // field 3 - had_logged
-      this.sku_,  // field 4 - sku
+  toArray(includeLabel = true) {
+    const arr = [
+        this.smartboxMessage_, // field 1 - smartbox_message
+        this.gpayTransactionId_, // field 2 - gpay_transaction_id
+        this.hadLogged_, // field 3 - had_logged
+        this.sku_, // field 4 - sku
+        this.oldTransactionId_, // field 5 - old_transaction_id
+        this.isUserRegistered_, // field 6 - is_user_registered
     ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
   }
 
   /**
@@ -753,16 +1076,18 @@ class EventParams {
  * @implements {Message}
  */
 class FinishedLoggingResponse {
- /**
-  * @param {!Array=} data
-  */
-  constructor(data = []) {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
 
     /** @private {?boolean} */
-    this.complete_ = (data[1] == null) ? null : data[1];
+    this.complete_ = data[base] == null ? null : data[base];
 
     /** @private {?string} */
-    this.error_ = (data[2] == null) ? null : data[2];
+    this.error_ = data[1 + base] == null ? null : data[1 + base];
   }
 
   /**
@@ -794,15 +1119,19 @@ class FinishedLoggingResponse {
   }
 
   /**
-   * @return {!Array}
+   * @param {boolean} includeLabel
+   * @return {!Array<?>}
    * @override
    */
-  toArray() {
-    return [
-      this.label(),  // message label
-      this.complete_,  // field 1 - complete
-      this.error_,  // field 2 - error
+  toArray(includeLabel = true) {
+    const arr = [
+        this.complete_, // field 1 - complete
+        this.error_, // field 2 - error
     ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
   }
 
   /**
@@ -818,16 +1147,18 @@ class FinishedLoggingResponse {
  * @implements {Message}
  */
 class LinkSaveTokenRequest {
- /**
-  * @param {!Array=} data
-  */
-  constructor(data = []) {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
 
     /** @private {?string} */
-    this.authCode_ = (data[1] == null) ? null : data[1];
+    this.authCode_ = data[base] == null ? null : data[base];
 
     /** @private {?string} */
-    this.token_ = (data[2] == null) ? null : data[2];
+    this.token_ = data[1 + base] == null ? null : data[1 + base];
   }
 
   /**
@@ -859,15 +1190,19 @@ class LinkSaveTokenRequest {
   }
 
   /**
-   * @return {!Array}
+   * @param {boolean} includeLabel
+   * @return {!Array<?>}
    * @override
    */
-  toArray() {
-    return [
-      this.label(),  // message label
-      this.authCode_,  // field 1 - auth_code
-      this.token_,  // field 2 - token
+  toArray(includeLabel = true) {
+    const arr = [
+        this.authCode_, // field 1 - auth_code
+        this.token_, // field 2 - token
     ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
   }
 
   /**
@@ -883,13 +1218,15 @@ class LinkSaveTokenRequest {
  * @implements {Message}
  */
 class LinkingInfoResponse {
- /**
-  * @param {!Array=} data
-  */
-  constructor(data = []) {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
 
     /** @private {?boolean} */
-    this.requested_ = (data[1] == null) ? null : data[1];
+    this.requested_ = data[base] == null ? null : data[base];
   }
 
   /**
@@ -907,14 +1244,18 @@ class LinkingInfoResponse {
   }
 
   /**
-   * @return {!Array}
+   * @param {boolean} includeLabel
+   * @return {!Array<?>}
    * @override
    */
-  toArray() {
-    return [
-      this.label(),  // message label
-      this.requested_,  // field 1 - requested
+  toArray(includeLabel = true) {
+    const arr = [
+        this.requested_, // field 1 - requested
     ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
   }
 
   /**
@@ -930,25 +1271,27 @@ class LinkingInfoResponse {
  * @implements {Message}
  */
 class SkuSelectedResponse {
- /**
-  * @param {!Array=} data
-  */
-  constructor(data = []) {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
 
     /** @private {?string} */
-    this.sku_ = (data[1] == null) ? null : data[1];
+    this.sku_ = data[base] == null ? null : data[base];
 
     /** @private {?string} */
-    this.oldSku_ = (data[2] == null) ? null : data[2];
+    this.oldSku_ = data[1 + base] == null ? null : data[1 + base];
 
     /** @private {?boolean} */
-    this.oneTime_ = (data[3] == null) ? null : data[3];
+    this.oneTime_ = data[2 + base] == null ? null : data[2 + base];
 
     /** @private {?string} */
-    this.playOffer_ = (data[4] == null) ? null : data[4];
+    this.playOffer_ = data[3 + base] == null ? null : data[3 + base];
 
     /** @private {?string} */
-    this.oldPlayOffer_ = (data[5] == null) ? null : data[5];
+    this.oldPlayOffer_ = data[4 + base] == null ? null : data[4 + base];
   }
 
   /**
@@ -1022,18 +1365,22 @@ class SkuSelectedResponse {
   }
 
   /**
-   * @return {!Array}
+   * @param {boolean} includeLabel
+   * @return {!Array<?>}
    * @override
    */
-  toArray() {
-    return [
-      this.label(),  // message label
-      this.sku_,  // field 1 - sku
-      this.oldSku_,  // field 2 - old_sku
-      this.oneTime_,  // field 3 - one_time
-      this.playOffer_,  // field 4 - play_offer
-      this.oldPlayOffer_,  // field 5 - old_play_offer
+  toArray(includeLabel = true) {
+    const arr = [
+        this.sku_, // field 1 - sku
+        this.oldSku_, // field 2 - old_sku
+        this.oneTime_, // field 3 - one_time
+        this.playOffer_, // field 4 - play_offer
+        this.oldPlayOffer_, // field 5 - old_play_offer
     ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
   }
 
   /**
@@ -1049,13 +1396,15 @@ class SkuSelectedResponse {
  * @implements {Message}
  */
 class SmartBoxMessage {
- /**
-  * @param {!Array=} data
-  */
-  constructor(data = []) {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
 
     /** @private {?boolean} */
-    this.isClicked_ = (data[1] == null) ? null : data[1];
+    this.isClicked_ = data[base] == null ? null : data[base];
   }
 
   /**
@@ -1073,14 +1422,18 @@ class SmartBoxMessage {
   }
 
   /**
-   * @return {!Array}
+   * @param {boolean} includeLabel
+   * @return {!Array<?>}
    * @override
    */
-  toArray() {
-    return [
-      this.label(),  // message label
-      this.isClicked_,  // field 1 - is_clicked
+  toArray(includeLabel = true) {
+    const arr = [
+        this.isClicked_, // field 1 - is_clicked
     ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
   }
 
   /**
@@ -1096,13 +1449,15 @@ class SmartBoxMessage {
  * @implements {Message}
  */
 class SubscribeResponse {
- /**
-  * @param {!Array=} data
-  */
-  constructor(data = []) {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
 
     /** @private {?boolean} */
-    this.subscribe_ = (data[1] == null) ? null : data[1];
+    this.subscribe_ = data[base] == null ? null : data[base];
   }
 
   /**
@@ -1120,14 +1475,18 @@ class SubscribeResponse {
   }
 
   /**
-   * @return {!Array}
+   * @param {boolean} includeLabel
+   * @return {!Array<?>}
    * @override
    */
-  toArray() {
-    return [
-      this.label(),  // message label
-      this.subscribe_,  // field 1 - subscribe
+  toArray(includeLabel = true) {
+    const arr = [
+        this.subscribe_, // field 1 - subscribe
     ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
   }
 
   /**
@@ -1142,14 +1501,140 @@ class SubscribeResponse {
 /**
  * @implements {Message}
  */
-class ViewSubscriptionsResponse {
- /**
-  * @param {!Array=} data
-  */
-  constructor(data = []) {
+class Timestamp {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
+
+    /** @private {?number} */
+    this.seconds_ = data[base] == null ? null : data[base];
+
+    /** @private {?number} */
+    this.nanos_ = data[1 + base] == null ? null : data[1 + base];
+  }
+
+  /**
+   * @return {?number}
+   */
+  getSeconds() {
+    return this.seconds_;
+  }
+
+  /**
+   * @param {number} value
+   */
+  setSeconds(value) {
+    this.seconds_ = value;
+  }
+
+  /**
+   * @return {?number}
+   */
+  getNanos() {
+    return this.nanos_;
+  }
+
+  /**
+   * @param {number} value
+   */
+  setNanos(value) {
+    this.nanos_ = value;
+  }
+
+  /**
+   * @param {boolean} includeLabel
+   * @return {!Array<?>}
+   * @override
+   */
+  toArray(includeLabel = true) {
+    const arr = [
+        this.seconds_, // field 1 - seconds
+        this.nanos_, // field 2 - nanos
+    ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'Timestamp';
+  }
+}
+
+/**
+ * @implements {Message}
+ */
+class ToastCloseRequest {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
 
     /** @private {?boolean} */
-    this.native_ = (data[1] == null) ? null : data[1];
+    this.close_ = data[base] == null ? null : data[base];
+  }
+
+  /**
+   * @return {?boolean}
+   */
+  getClose() {
+    return this.close_;
+  }
+
+  /**
+   * @param {boolean} value
+   */
+  setClose(value) {
+    this.close_ = value;
+  }
+
+  /**
+   * @param {boolean} includeLabel
+   * @return {!Array<?>}
+   * @override
+   */
+  toArray(includeLabel = true) {
+    const arr = [
+        this.close_, // field 1 - close
+    ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'ToastCloseRequest';
+  }
+}
+
+/**
+ * @implements {Message}
+ */
+class ViewSubscriptionsResponse {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
+
+    /** @private {?boolean} */
+    this.native_ = data[base] == null ? null : data[base];
   }
 
   /**
@@ -1167,14 +1652,18 @@ class ViewSubscriptionsResponse {
   }
 
   /**
-   * @return {!Array}
+   * @param {boolean} includeLabel
+   * @return {!Array<?>}
    * @override
    */
-  toArray() {
-    return [
-      this.label(),  // message label
-      this.native_,  // field 1 - native
+  toArray(includeLabel = true) {
+    const arr = [
+        this.native_, // field 1 - native
     ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
   }
 
   /**
@@ -1192,6 +1681,8 @@ const PROTO_MAP = {
   'AnalyticsContext': AnalyticsContext,
   'AnalyticsEventMeta': AnalyticsEventMeta,
   'AnalyticsRequest': AnalyticsRequest,
+  'EntitlementJwt': EntitlementJwt,
+  'EntitlementsRequest': EntitlementsRequest,
   'EntitlementsResponse': EntitlementsResponse,
   'EventParams': EventParams,
   'FinishedLoggingResponse': FinishedLoggingResponse,
@@ -1200,12 +1691,14 @@ const PROTO_MAP = {
   'SkuSelectedResponse': SkuSelectedResponse,
   'SmartBoxMessage': SmartBoxMessage,
   'SubscribeResponse': SubscribeResponse,
+  'Timestamp': Timestamp,
+  'ToastCloseRequest': ToastCloseRequest,
   'ViewSubscriptionsResponse': ViewSubscriptionsResponse,
 };
 
 /**
  * Utility to deserialize a buffer
- * @param {!Array} data
+ * @param {!Array<*>} data
  * @return {!Message}
  */
 function deserialize(data) {
@@ -1228,6 +1721,78 @@ function deserialize(data) {
 function getLabel(messageType) {
   const message = /** @type {!Message} */ (new messageType());
   return message.label();
+}
+
+/**
+ * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/** @enum {number}  */
+const FilterResult = {
+  /** The event is allowed to proceed to the listeners. */
+  PROCESS_EVENT: 0,
+  /** The event is canceled and the listeners are not informed about it. */
+  CANCEL_EVENT: 1,
+};
+
+/**
+ * Defines a client event in SwG
+ * Properties:
+ * - eventType: Required. The AnalyticsEvent type that occurred.
+ * - eventOriginator: Required.  The codebase that initiated the event.
+ * - isFromUserAction: Optional.  True if the user took an action to generate
+ *   the event.
+ * - additionalParameters: Optional.  A JSON object to store generic data.
+ *
+ *  @typedef {{
+ *    eventType: !AnalyticsEvent,
+ *    eventOriginator: !EventOriginator,
+ *    isFromUserAction: ?boolean,
+ *    additionalParameters: ?Object,
+ * }}
+ */
+let ClientEvent;
+
+/**
+ * @interface
+ */
+class ClientEventManagerApi {
+  /**
+   * Call this function to log an event. The registered listeners will be
+   * invoked unless the event is filtered.
+   * @param {!function(!ClientEvent)} listener
+   */
+  registerEventListener(listener) {}
+
+  /**
+   * Register a filterer for events if you need to potentially prevent the
+   * listeners from hearing about it.  A filterer should return
+   * FilterResult.CANCEL_EVENT to prevent listeners from hearing about the
+   * event.
+   * @param {!function(!ClientEvent):FilterResult} filterer
+   */
+  registerEventFilterer(filterer) {}
+
+  /**
+   * Call this function to log an event.  It will immediately throw an error if
+   * the event is invalid.  It will then asynchronously call the filterers and
+   * stop the event if a filterer cancels it.  After that, it will call each
+   * listener asynchronously.
+   * @param {!ClientEvent} event
+   */
+  logEvent(event) {}
 }
 
 /**
@@ -1327,7 +1892,7 @@ function acceptPortResultData(
   requireOriginVerified,
   requireSecureChannel
 ) {
-  return port.acceptResult().then(result => {
+  return port.acceptResult().then((result) => {
     if (
       result.origin != requireOrigin ||
       (requireOriginVerified && !result.originVerified) ||
@@ -1492,6 +2057,30 @@ function map(initial) {
 }
 
 /**
+ * Implements `Array.find()` method that's not yet available in all browsers.
+ *
+ * @param {?Array<T>} array
+ * @param {function(T, number, !Array<T>):boolean} predicate
+ * @return {?T}
+ * @template T
+ */
+function findInArray(array, predicate) {
+  if (!array) {
+    return null;
+  }
+  const len = array.length || 0;
+  if (len > 0) {
+    for (let i = 0; i < len; i++) {
+      const other = array[i];
+      if (predicate(other, i, array)) {
+        return other;
+      }
+    }
+  }
+  return null;
+}
+
+/**
  * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -1522,8 +2111,10 @@ function getRandomInts(numInts, maxVal) {
       ? new Uint16Array(numInts)
       : new Uint32Array(numInts);
 
-  if (crypto && crypto.getRandomValues) {
-    crypto.getRandomValues(arr);
+  const isIE = !!self['msCrypto'];
+  const localCrypto = isIE ? self['msCrypto'] : self.crypto;
+  if (localCrypto && localCrypto.getRandomValues) {
+    localCrypto.getRandomValues(arr);
     for (let i = arr.length - 1; i > -1; i--) {
       arr[i] = arr[i] % maxVal;
     }
@@ -1535,6 +2126,96 @@ function getRandomInts(numInts, maxVal) {
   }
 
   return arr;
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Character mapping from base64url to base64.
+ * @const {!Object<string, string>}
+ */
+const base64UrlDecodeSubs = {'-': '+', '_': '/', '.': '='};
+
+/**
+ * Converts a string which holds 8-bit code points, such as the result of atob,
+ * into a Uint8Array with the corresponding bytes.
+ * If you have a string of characters, you probably want to be using utf8Encode.
+ * @param {string} str
+ * @return {!Uint8Array}
+ */
+function stringToBytes(str) {
+  const bytes = new Uint8Array(str.length);
+  for (let i = 0; i < str.length; i++) {
+    const charCode = str.charCodeAt(i);
+    log_2(charCode <= 255, 'Characters must be in range [0,255]');
+    bytes[i] = charCode;
+  }
+  return bytes;
+}
+
+/**
+ * Converts a 8-bit bytes array into a string
+ * @param {!Uint8Array} bytes
+ * @return {string}
+ */
+function bytesToString(bytes) {
+  // Intentionally avoids String.fromCharCode.apply so we don't suffer a
+  // stack overflow. #10495, https://jsperf.com/bytesToString-2
+  const array = new Array(bytes.length);
+  for (let i = 0; i < bytes.length; i++) {
+    array[i] = String.fromCharCode(bytes[i]);
+  }
+  return array.join('');
+}
+
+/**
+ * Interpret a byte array as a UTF-8 string.
+ * @param {!Uint8Array} bytes
+ * @return {string}
+ */
+function utf8DecodeSync(bytes) {
+  if (typeof TextDecoder !== 'undefined') {
+    return new TextDecoder('utf-8').decode(bytes);
+  }
+  const asciiString = bytesToString(new Uint8Array(bytes));
+  return decodeURIComponent(escape(asciiString));
+}
+
+/**
+ * Turn a string into UTF-8 bytes.
+ * @param {string} string
+ * @return {!Uint8Array}
+ */
+function utf8EncodeSync(string) {
+  if (typeof TextEncoder !== 'undefined') {
+    return new TextEncoder('utf-8').encode(string);
+  }
+  return stringToBytes(unescape(encodeURIComponent(string)));
+}
+
+/**
+ * Converts a string which is in base64url encoding into a Uint8Array
+ * containing the decoded value.
+ * @param {string} str
+ * @return {!Uint8Array}
+ */
+function base64UrlDecodeToBytes(str) {
+  const encoded = atob(str.replace(/[-_.]/g, (ch) => base64UrlDecodeSubs[ch]));
+  return stringToBytes(encoded);
 }
 
 /**
@@ -1615,6 +2296,46 @@ function getUuid() {
     }
   }
   return uuid;
+}
+
+function getSwgTransactionId() {
+  return getUuid() + '.swg';
+}
+
+/**
+ * Returns a string whose length matches the length of format.
+ * @param {string} str
+ * @param {string} format
+ * @return {string}
+ */
+function padString(str, format) {
+  return (format + str).slice(-format.length);
+}
+
+const PADDING = '00000000';
+function toHex(buffer) {
+  const hexCodes = [];
+  const view = new DataView(buffer);
+  for (let i = 0; i < view.byteLength; i += 4) {
+    // toString(16) will give the hex representation of the number without padding
+    const stringValue = view.getUint32(i).toString(16);
+    hexCodes.push(padString(stringValue, PADDING));
+  }
+  return hexCodes.join('');
+}
+
+/**
+ * Returns a hexadecimal 128 character string that is the
+ * SHA-512 hash of the passed string.
+ * @param {string} stringToHash
+ * @return {!Promise<string>}
+ */
+function hash(stringToHash) {
+  const crypto = self.crypto || self.msCrypto;
+  const subtle = crypto.subtle;
+  return subtle
+    .digest('SHA-512', utf8EncodeSync(stringToHash))
+    .then((digest) => toHex(digest));
 }
 
 /**
@@ -1771,7 +2492,6 @@ const defaultStyles = {
 };
 
 /**
- * @export
  * @param {string} camelCase camel cased string
  * @return {string} title cased string
  */
@@ -1801,7 +2521,6 @@ function getVendorJsPropertyName_(style, titleCase) {
  * Returns the possibly prefixed JavaScript property name of a style property
  * (ex. WebkitTransitionDuration) given a camelCase'd version of the property
  * (ex. transitionDuration).
- * @export
  * @param {!Object} style
  * @param {string} camelCase the camel cased version of a css property name
  * @param {boolean=} bypassCache bypass the memoized cache of property
@@ -1890,7 +2609,7 @@ function setStyles(element, styles) {
  */
 function resetStyles(element, properties) {
   const styleObj = {};
-  properties.forEach(prop => {
+  properties.forEach((prop) => {
     styleObj[prop] = null;
   });
   setStyles(element, styleObj);
@@ -4002,7 +4721,7 @@ class ActivityIframeView extends View {
      * @private @const
      * {!Promise<!web-activities/activity-ports.ActivityIframePort>}
      */
-    this.portPromise_ = new Promise(resolve => {
+    this.portPromise_ = new Promise((resolve) => {
       this.portResolver_ = resolve;
     });
   }
@@ -4016,7 +4735,7 @@ class ActivityIframeView extends View {
   init(dialog) {
     return this.activityPorts_
       .openIframe(this.iframe_, this.src_, this.args_)
-      .then(port => this.onOpenIframeResponse_(port, dialog));
+      .then((port) => this.onOpenIframeResponse_(port, dialog));
   }
 
   /**
@@ -4044,7 +4763,7 @@ class ActivityIframeView extends View {
     this.port_ = port;
     this.portResolver_(port);
 
-    this.port_.onResizeRequest(height => {
+    this.port_.onResizeRequest((height) => {
       dialog.resizeView(this, height);
     });
 
@@ -4065,7 +4784,7 @@ class ActivityIframeView extends View {
    * @template T
    */
   on(message, callback) {
-    this.getPortPromise_().then(port => {
+    this.getPortPromise_().then((port) => {
       port.on(message, callback);
     });
   }
@@ -4074,7 +4793,7 @@ class ActivityIframeView extends View {
    * @param {!../proto/api_messages.Message} request
    */
   execute(request) {
-    this.getPortPromise_().then(port => {
+    this.getPortPromise_().then((port) => {
       port.execute(request);
     });
   }
@@ -4084,7 +4803,7 @@ class ActivityIframeView extends View {
    * @return {!Promise<!web-activities/activity-ports.ActivityResult>}
    */
   acceptResult() {
-    return this.getPortPromise_().then(port => port.acceptResult());
+    return this.getPortPromise_().then((port) => port.acceptResult());
   }
 
   /**
@@ -4099,7 +4818,7 @@ class ActivityIframeView extends View {
     requireOriginVerified,
     requireSecureChannel
   ) {
-    return this.getPortPromise_().then(port => {
+    return this.getPortPromise_().then((port) => {
       return acceptPortResultData(
         port,
         requireOrigin,
@@ -4121,7 +4840,7 @@ class ActivityIframeView extends View {
    * @param {function()} callback
    */
   onCancel(callback) {
-    this.acceptResult().catch(reason => {
+    this.acceptResult().catch((reason) => {
       if (isCancelError(reason)) {
         callback();
       }
@@ -4135,96 +4854,6 @@ class ActivityIframeView extends View {
       this.port_.resized();
     }
   }
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * Character mapping from base64url to base64.
- * @const {!Object<string, string>}
- */
-const base64UrlDecodeSubs = {'-': '+', '_': '/', '.': '='};
-
-/**
- * Converts a string which holds 8-bit code points, such as the result of atob,
- * into a Uint8Array with the corresponding bytes.
- * If you have a string of characters, you probably want to be using utf8Encode.
- * @param {string} str
- * @return {!Uint8Array}
- */
-function stringToBytes(str) {
-  const bytes = new Uint8Array(str.length);
-  for (let i = 0; i < str.length; i++) {
-    const charCode = str.charCodeAt(i);
-    log_2(charCode <= 255, 'Characters must be in range [0,255]');
-    bytes[i] = charCode;
-  }
-  return bytes;
-}
-
-/**
- * Converts a 8-bit bytes array into a string
- * @param {!Uint8Array} bytes
- * @return {string}
- */
-function bytesToString(bytes) {
-  // Intentionally avoids String.fromCharCode.apply so we don't suffer a
-  // stack overflow. #10495, https://jsperf.com/bytesToString-2
-  const array = new Array(bytes.length);
-  for (let i = 0; i < bytes.length; i++) {
-    array[i] = String.fromCharCode(bytes[i]);
-  }
-  return array.join('');
-}
-
-/**
- * Interpret a byte array as a UTF-8 string.
- * @param {!Uint8Array} bytes
- * @return {string}
- */
-function utf8DecodeSync(bytes) {
-  if (typeof TextDecoder !== 'undefined') {
-    return new TextDecoder('utf-8').decode(bytes);
-  }
-  const asciiString = bytesToString(new Uint8Array(bytes));
-  return decodeURIComponent(escape(asciiString));
-}
-
-/**
- * Turn a string into UTF-8 bytes.
- * @param {string} string
- * @return {!Uint8Array}
- */
-function utf8EncodeSync(string) {
-  if (typeof TextEncoder !== 'undefined') {
-    return new TextEncoder('utf-8').encode(string);
-  }
-  return stringToBytes(unescape(encodeURIComponent(string)));
-}
-
-/**
- * Converts a string which is in base64url encoding into a Uint8Array
- * containing the decoded value.
- * @param {string} str
- * @return {!Uint8Array}
- */
-function base64UrlDecodeToBytes(str) {
-  const encoded = atob(str.replace(/[-_.]/g, ch => base64UrlDecodeSubs[ch]));
-  return stringToBytes(encoded);
 }
 
 /**
@@ -4370,6 +4999,9 @@ class JwtHelper {
  * limitations under the License.
  */
 
+/** Source for Google-provided metering entitlements. */
+const GOOGLE_METERING_SOURCE = 'google:metering';
+
 /**
  * The holder of the entitlements for a service.
  */
@@ -4380,6 +5012,7 @@ class Entitlements {
    * @param {!Array<!Entitlement>} entitlements
    * @param {?string} currentProduct
    * @param {function(!Entitlements)} ackHandler
+   * @param {function(!Entitlements, ?Function=)} consumeHandler
    * @param {?boolean|undefined} isReadyToPay
    * @param {?string|undefined} decryptedDocumentKey
    */
@@ -4389,6 +5022,7 @@ class Entitlements {
     entitlements,
     currentProduct,
     ackHandler,
+    consumeHandler,
     isReadyToPay,
     decryptedDocumentKey
   ) {
@@ -4407,6 +5041,8 @@ class Entitlements {
     this.product_ = currentProduct;
     /** @private @const {function(!Entitlements)} */
     this.ackHandler_ = ackHandler;
+    /** @private @const {function(!Entitlements, ?Function=)} */
+    this.consumeHandler_ = consumeHandler;
   }
 
   /**
@@ -4416,9 +5052,10 @@ class Entitlements {
     return new Entitlements(
       this.service,
       this.raw,
-      this.entitlements.map(ent => ent.clone()),
+      this.entitlements.map((ent) => ent.clone()),
       this.product_,
       this.ackHandler_,
+      this.consumeHandler_,
       this.isReadyToPay,
       this.decryptedDocumentKey
     );
@@ -4430,9 +5067,34 @@ class Entitlements {
   json() {
     return {
       'service': this.service,
-      'entitlements': this.entitlements.map(item => item.json()),
+      'entitlements': this.entitlements.map((item) => item.json()),
       'isReadyToPay': this.isReadyToPay,
     };
+  }
+
+  /**
+   * Returns true if the current article is unlocked by a
+   * cacheable entitlement. Metering entitlements aren't cacheable,
+   * because each metering entitlement is meant to be used for one article.
+   * Subscription entitlements are cacheable, because subscription entitlements
+   * are meant to be used across multiple articles on a publication.
+   * @return {boolean}
+   */
+  enablesThisWithCacheableEntitlements() {
+    const entitlement = this.getEntitlementForThis();
+    return !!entitlement && entitlement.source !== GOOGLE_METERING_SOURCE;
+  }
+
+  /**
+   * Returns true if the current article is unlocked by a
+   * Google metering entitlement. These entitlements come
+   * from Google News Intiative's licensing program to support news.
+   * https://www.blog.google/outreach-initiatives/google-news-initiative/licensing-program-support-news-industry-/
+   * @return {boolean}
+   */
+  enablesThisWithGoogleMetering() {
+    const entitlement = this.getEntitlementForThis();
+    return !!entitlement && entitlement.source === GOOGLE_METERING_SOURCE;
   }
 
   /**
@@ -4486,22 +5148,46 @@ class Entitlements {
   /**
    * Returns the first matching entitlement for the specified product,
    * optionally also matching the specified source.
+   *
+   * Returns non-metering entitlements if possible, to avoid consuming
+   * metered reads unnecessarily.
+   *
    * @param {?string} product
    * @param {string=} source
    * @return {?Entitlement}
    */
   getEntitlementFor(product, source) {
-    if (product && this.entitlements.length > 0) {
-      for (let i = 0; i < this.entitlements.length; i++) {
-        if (
-          this.entitlements[i].enables(product) &&
-          (!source || source == this.entitlements[i].source)
-        ) {
-          return this.entitlements[i];
-        }
-      }
+    if (!product) {
+      // Require a product ID.
+      log_4(
+        'SwG needs this article to define a product ID (e.g. example.com:premium). Articles can define a product ID using JSON+LD. SwG can check entitlements after this article defines a product ID.'
+      );
+      return null;
     }
-    return null;
+
+    // Prefer subscription entitlements over metering entitlements.
+    // Metering entitlements are a limited resource. When a metering entitlement
+    // unlocks an article, that depletes the user's remaining "free reads".
+    // Subscription entitlements are *not* depleted when they unlock articles.
+    // They are essentially unlimited if the subscription remains valid.
+    // For this reason, subscription entitlements are preferred.
+    const entitlementsThatUnlockArticle = this.entitlements.filter(
+      (entitlement) =>
+        entitlement.enables(product) &&
+        (!source || source === entitlement.source)
+    );
+
+    const subscriptionEntitlement = findInArray(
+      entitlementsThatUnlockArticle,
+      (entitlement) => entitlement.source !== GOOGLE_METERING_SOURCE
+    );
+
+    const meteringEntitlement = findInArray(
+      entitlementsThatUnlockArticle,
+      (entitlement) => entitlement.source === GOOGLE_METERING_SOURCE
+    );
+
+    return subscriptionEntitlement || meteringEntitlement || null;
   }
 
   /**
@@ -4530,6 +5216,17 @@ class Entitlements {
    */
   ack() {
     this.ackHandler_(this);
+  }
+
+  /**
+   * A 3p site should call this method to consume a Google metering entitlement.
+   * When a metering entitlement is consumed, SwG shows the user a metering dialog.
+   * When the user closes the dialog, SwG depletes one of the user's remaining
+   * "free reads".
+   * @param {?Function=} onCloseDialog Called after the user closes the dialog.
+   */
+  consume(onCloseDialog) {
+    this.consumeHandler_(this, onCloseDialog);
   }
 }
 
@@ -4617,7 +5314,7 @@ class Entitlement {
     const jsonList = Array.isArray(json)
       ? /** @type {!Array<Object>} */ (json)
       : [json];
-    return jsonList.map(json => Entitlement.parseFromJson(json));
+    return jsonList.map((json) => Entitlement.parseFromJson(json));
   }
 
   /**
@@ -4628,12 +5325,10 @@ class Entitlement {
     if (this.source !== 'google') {
       return null;
     }
-    const sku = (
-        /** @type {?string} */ (getPropertyFromJsonString(
-            this.subscriptionToken,
-            'productId'
-        ) || null)
-    );
+    const sku = /** @type {?string} */ (getPropertyFromJsonString(
+      this.subscriptionToken,
+      'productId'
+    ) || null);
     if (!sku) {
       log_4('Unable to retrieve SKU from SwG subscription token');
     }
@@ -4657,11 +5352,9 @@ class Entitlement {
  * limitations under the License.
  */
 
-
 /**
  */
 class UserData {
-
   /**
    * @param {string} idToken
    * @param {!Object} data
@@ -4727,11 +5420,9 @@ class UserData {
  * limitations under the License.
  */
 
-
 /**
  */
 class SubscribeResponse$1 {
-
   /**
    * @param {string} raw
    * @param {!PurchaseData} purchaseData
@@ -4740,9 +5431,18 @@ class SubscribeResponse$1 {
    * @param {!string} productType
    * @param {function():!Promise} completeHandler
    * @param {?string=} oldSku
+   * @param {?number=} paymentRecurrence
    */
-  constructor(raw, purchaseData, userData, entitlements, productType,
-      completeHandler, oldSku = null) {
+  constructor(
+    raw,
+    purchaseData,
+    userData,
+    entitlements,
+    productType,
+    completeHandler,
+    oldSku = null,
+    paymentRecurrence = null
+  ) {
     /** @const {string} */
     this.raw = raw;
     /** @const {!PurchaseData} */
@@ -4757,6 +5457,8 @@ class SubscribeResponse$1 {
     this.completeHandler_ = completeHandler;
     /** @const {?string} */
     this.oldSku = oldSku;
+    /** @const {?number} */
+    this.paymentRecurrence = paymentRecurrence;
   }
 
   /**
@@ -4764,13 +5466,13 @@ class SubscribeResponse$1 {
    */
   clone() {
     return new SubscribeResponse$1(
-        this.raw,
-        this.purchaseData,
-        this.userData,
-        this.entitlements,
-        this.productType,
-        this.completeHandler_,
-        this.oldSku
+      this.raw,
+      this.purchaseData,
+      this.userData,
+      this.entitlements,
+      this.productType,
+      this.completeHandler_,
+      this.oldSku
     );
   }
 
@@ -4782,7 +5484,7 @@ class SubscribeResponse$1 {
       'purchaseData': this.purchaseData.json(),
       'userData': this.userData ? this.userData.json() : null,
       'entitlements': this.entitlements ? this.entitlements.json() : null,
-      'oldSku' : this.oldSku,
+      'oldSku': this.oldSku,
       'productType': this.productType,
     };
   }
@@ -4805,11 +5507,9 @@ class SubscribeResponse$1 {
   }
 }
 
-
 /**
  */
 class PurchaseData {
-
   /**
    * @param {string} raw
    * @param {string} signature
@@ -4857,11 +5557,9 @@ class PurchaseData {
  * limitations under the License.
  */
 
-
 /**
  */
 class DeferredAccountCreationResponse {
-
   /**
    * @param {!Entitlements} entitlements
    * @param {!UserData} userData
@@ -4887,10 +5585,11 @@ class DeferredAccountCreationResponse {
    */
   clone() {
     return new DeferredAccountCreationResponse(
-        this.entitlements,
-        this.userData,
-        this.purchaseDataList,
-        this.completeHandler_);
+      this.entitlements,
+      this.userData,
+      this.purchaseDataList,
+      this.completeHandler_
+    );
   }
 
   /**
@@ -4900,7 +5599,7 @@ class DeferredAccountCreationResponse {
     return {
       'entitlements': this.entitlements.json(),
       'userData': this.userData.json(),
-      'purchaseDataList': this.purchaseDataList.map(pd => pd.json()),
+      'purchaseDataList': this.purchaseDataList.map((pd) => pd.json()),
       // TODO(dvoytenko): deprecate.
       'purchaseData': this.purchaseData.json(),
     };
@@ -5164,6 +5863,20 @@ const PropensityType = {
  */
 
 /** @enum {string} */
+const PublisherEntitlementEvent = {
+  EVENT_SHOWCASE_UNLOCKED_BY_SUBSCRIPTION:
+    'EVENT_SHOWCASE_UNLOCKED_BY_SUBSCRIPTION', // Publisher managed subscriptions only
+  EVENT_SHOWCASE_METER_OFFERED: 'EVENT_SHOWCASE_METER_OFFERED', // This event is only required if the user can choose not to use a publisher meter
+  EVENT_SHOWCASE_UNLOCKED_BY_METER: 'EVENT_SHOWCASE_UNLOCKED_BY_METER', // Publisher managed meters only
+  EVENT_SHOWCASE_UNLOCKED_FREE_PAGE: 'EVENT_SHOWCASE_UNLOCKED_FREE_PAGE', // When the article is free for any reason (lead article, etc)
+
+  EVENT_SHOWCASE_NO_ENTITLEMENTS_REGWALL:
+    'EVENT_SHOWCASE_NO_ENTITLEMENTS_REGWALL', // When the user must register to view the article
+  EVENT_SHOWCASE_NO_ENTITLEMENTS_PAYWALL:
+    'EVENT_SHOWCASE_NO_ENTITLEMENTS_PAYWALL', // When the user must subscribe to view the article
+};
+
+/** @enum {string} */
 const SubscriptionFlows = {
   SHOW_OFFERS: 'showOffers',
   SHOW_SUBSCRIBE_OPTION: 'showSubscribeOption',
@@ -5175,6 +5888,7 @@ const SubscriptionFlows = {
   LINK_ACCOUNT: 'linkAccount',
   SHOW_LOGIN_PROMPT: 'showLoginPrompt',
   SHOW_LOGIN_NOTIFICATION: 'showLoginNotification',
+  SHOW_METER_TOAST: 'showMeterToast',
 };
 
 /**
@@ -5232,6 +5946,9 @@ function defaultConfig() {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+// NOTE: This regex was copied from SwG's AMP extension. https://github.com/ampproject/amphtml/blob/c23bf281f817a2ee5df73f6fd45e9f4b71bb68b6/extensions/amp-subscriptions-google/0.1/amp-subscriptions-google.js#L56
+const GOOGLE_DOMAIN_RE = /(^|\.)google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)$/;
 
 /**
  * Cached a-tag to avoid memory allocation during URL parsing.
@@ -5341,10 +6058,15 @@ function parseQueryString$1(query) {
     .split('&')
     .reduce((params, param) => {
       const item = param.split('=');
-      const key = decodeURIComponent(item[0] || '');
-      const value = decodeURIComponent(item[1] || '');
-      if (key) {
-        params[key] = value;
+      try {
+        const key = decodeURIComponent(item[0] || '');
+        const value = decodeURIComponent(item[1] || '');
+        if (key) {
+          params[key] = value;
+        }
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        log_4(`SwG could not parse a URL query param: ${item[0]}`);
       }
       return params;
     }, {});
@@ -5372,6 +6094,57 @@ function addQueryParam(url, param, value) {
   }
   url += encodeURIComponent(param) + '=' + encodeURIComponent(value);
   return url + fragment;
+}
+
+/**
+ * @param {!../proto/api_messages.Message} message
+ * @return {string}
+ */
+function serializeProtoMessageForUrl(message) {
+  return JSON.stringify(/** @type {JsonObject} */ (message.toArray(false)));
+}
+
+/**
+ * @param {!../model/doc.Doc} doc
+ * @return {string}
+ */
+function getCanonicalUrl(doc) {
+  const node = doc.getRootNode().querySelector("link[rel='canonical']");
+  return (node && node.href) || '';
+}
+
+const PARSED_URL = parseUrl$1(self.window.location.href);
+const PARSED_REFERRER = parseUrl$1(self.document.referrer);
+
+/**
+ * True for Google domains
+ * @param {LocationDef=} parsedUrl Defaults to the current page's URL
+ * @return {boolean}
+ */
+function isGoogleDomain(parsedUrl) {
+  parsedUrl = parsedUrl || PARSED_URL;
+  return GOOGLE_DOMAIN_RE.test(parsedUrl.hostname);
+}
+
+/**
+ * True for HTTPS URLs
+ * @param {LocationDef=} parsedUrl Defaults to the current page's URL
+ * @return {boolean}
+ */
+function isSecure(parsedUrl) {
+  parsedUrl = parsedUrl || PARSED_URL;
+  return parsedUrl.protocol === 'https' || parsedUrl.protocol === 'https:';
+}
+
+/**
+ * True when the page is rendered within a secure Google application or
+ * was linked to from a secure Google domain.
+ * @param {LocationDef=} parsedReferrer Defaults to the current page's referrer
+ * @return {boolean}
+ */
+function wasReferredByGoogle(parsedReferrer) {
+  parsedReferrer = parsedReferrer || PARSED_REFERRER;
+  return isSecure(parsedReferrer) && isGoogleDomain(parsedReferrer);
 }
 
 /**
@@ -5459,7 +6232,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.93',
+    '_client': 'SwG 0.1.22.145',
   });
 }
 
@@ -5641,7 +6414,7 @@ class PayCompleteFlow {
     /** @const @type {./client-event-manager.ClientEventManager} */
     const eventManager = deps.eventManager();
 
-    deps.payClient().onResponse(payPromise => {
+    deps.payClient().onResponse((payPromise) => {
       deps.entitlementsManager().blockNextNotification();
       const flow = new PayCompleteFlow(deps);
       const promise = validatePayResponse(
@@ -5651,7 +6424,7 @@ class PayCompleteFlow {
       );
       deps.callbacks().triggerPaymentResponse(promise);
       return promise.then(
-        response => {
+        (response) => {
           const sku = parseSkuFromPurchaseDataSafe(response.purchaseData);
           deps.analytics().setSku(sku || '');
           eventManager.logSwgEvent(
@@ -5661,7 +6434,7 @@ class PayCompleteFlow {
           );
           flow.start(response);
         },
-        reason => {
+        (reason) => {
           if (isCancelError(reason)) {
             const productType = /** @type {!Object} */ (reason)['productType'];
             const flow =
@@ -5733,10 +6506,12 @@ class PayCompleteFlow {
     );
     this.deps_.entitlementsManager().reset(true);
     this.response_ = response;
+    // TODO(dianajing): future-proof isOneTime flag
     const args = {
       'publicationId': this.deps_.pageConfig().getPublicationId(),
       'productType': this.response_['productType'],
       'isSubscriptionUpdate': !!this.response_['oldSku'],
+      'isOneTime': !!this.response_['paymentRecurrence'],
     };
     // TODO(dvoytenko, #400): cleanup once entitlements is launched everywhere.
     if (response.userData && response.entitlements) {
@@ -5822,7 +6597,7 @@ PayCompleteFlow.waitingForPayClient_ = false;
 function validatePayResponse(deps, payPromise, completeHandler) {
   const wasRedirect = !PayCompleteFlow.waitingForPayClient_;
   PayCompleteFlow.waitingForPayClient_ = false;
-  return payPromise.then(data => {
+  return payPromise.then((data) => {
     // 1) We log against a random TX ID which is how we track a specific user
     //    anonymously.
     // 2) If there was a redirect to gPay, we may have lost our stored TX ID.
@@ -5877,6 +6652,7 @@ function parseSubscriptionResponse(deps, data, completeHandler) {
   let raw = null;
   let productType = ProductType.SUBSCRIPTION;
   let oldSku = null;
+  let paymentRecurrence = null;
 
   if (data) {
     if (typeof data == 'string') {
@@ -5892,6 +6668,9 @@ function parseSubscriptionResponse(deps, data, completeHandler) {
       }
       if ('paymentRequest' in data) {
         oldSku = (data['paymentRequest']['swg'] || {})['oldSku'];
+        paymentRecurrence = (data['paymentRequest']['swg'] || {})[
+          'paymentRecurrence'
+        ];
         productType =
           (data['paymentRequest']['i'] || {})['productType'] ||
           ProductType.SUBSCRIPTION;
@@ -5916,7 +6695,8 @@ function parseSubscriptionResponse(deps, data, completeHandler) {
     parseEntitlements(deps, swgData),
     productType,
     completeHandler,
-    oldSku
+    oldSku,
+    paymentRecurrence
   );
 }
 
@@ -5962,12 +6742,10 @@ function parseEntitlements(deps, swgData) {
  * @return {?string}
  */
 function parseSkuFromPurchaseDataSafe(purchaseData) {
-  return (
-    /** @type {?string} */ (getPropertyFromJsonString(
-      purchaseData.raw,
-      'productId'
-    ) || null)
-  );
+  return /** @type {?string} */ (getPropertyFromJsonString(
+    purchaseData.raw,
+    'productId'
+  ) || null);
 }
 
 /**
@@ -6047,7 +6825,7 @@ class OffersFlow {
       // Remove old sku from offers if in list.
       let skuList = feArgsObj['skus'];
       const /** @type {string} */ oldSku = feArgsObj['oldSku'];
-      skuList = skuList.filter(sku => sku !== oldSku);
+      skuList = skuList.filter((sku) => sku !== oldSku);
 
       log_2(
         skuList.length > 0,
@@ -6232,7 +7010,7 @@ class SubscribeOptionFlow {
     );
 
     this.activityIframeView_.acceptResult().then(
-      result => {
+      (result) => {
         const data = result.data;
         const response = new SubscribeResponse();
         if (data['subscribe']) {
@@ -6240,7 +7018,7 @@ class SubscribeOptionFlow {
         }
         this.maybeOpenOffersFlow_(response);
       },
-      reason => {
+      (reason) => {
         this.dialogManager_.completeView(this.activityIframeView_);
         throw reason;
       }
@@ -6350,7 +7128,7 @@ class AbbrvOfferFlow {
     );
 
     // If result is due to requesting offers, redirect to offers flow
-    this.activityIframeView_.acceptResult().then(result => {
+    this.activityIframeView_.acceptResult().then((result) => {
       if (result.data['viewOffers']) {
         const options = this.options_ || {};
         if (options.isClosable == undefined) {
@@ -6447,7 +7225,7 @@ class ActivityIframePort$1 {
   connect() {
     return this.iframePort_.connect().then(() => {
       // Attach a callback to receive messages after connection complete
-      this.iframePort_.onMessage(data => {
+      this.iframePort_.onMessage((data) => {
         const response = data && data['RESPONSE'];
         if (!response) {
           return;
@@ -6459,7 +7237,7 @@ class ActivityIframePort$1 {
       });
 
       if (this.deps_ && this.deps_.eventManager()) {
-        this.on(AnalyticsRequest, request => {
+        this.on(AnalyticsRequest, (request) => {
           this.deps_.eventManager().logEvent({
             eventType: request.getEvent(),
             eventOriginator: EventOriginator.SWG_SERVER,
@@ -6573,7 +7351,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.93',
+        '_client': 'SwG 0.1.22.145',
         'supportsEventManager': true,
       },
       args || {}
@@ -6672,7 +7450,7 @@ class ActivityPorts$1 {
    * @param {function(!ActivityPortDef)} callback
    */
   onResult(requestId, callback) {
-    this.activityPorts_.onResult(requestId, port => {
+    this.activityPorts_.onResult(requestId, (port) => {
       callback(new ActivityPortDeprecated(port));
     });
   }
@@ -6690,78 +7468,6 @@ class ActivityPorts$1 {
   getOriginalWebActivityPorts() {
     return this.activityPorts_;
   }
-}
-
-/**
- * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/** @enum {number}  */
-const FilterResult = {
-  /** The event is allowed to proceed to the listeners. */
-  PROCESS_EVENT: 0,
-  /** The event is canceled and the listeners are not informed about it. */
-  CANCEL_EVENT: 1,
-};
-
-/**
- * Defines a client event in SwG
- * Properties:
- * - eventType: Required. The AnalyticsEvent type that occurred.
- * - eventOriginator: Required.  The codebase that initiated the event.
- * - isFromUserAction: Optional.  True if the user took an action to generate
- *   the event.
- * - additionalParameters: Optional.  A JSON object to store generic data.
- *
- *  @typedef {{
- *    eventType: !AnalyticsEvent,
- *    eventOriginator: !EventOriginator,
- *    isFromUserAction: ?boolean,
- *    additionalParameters: ?Object,
- * }}
- */
-let ClientEvent;
-
-/**
- * @interface
- */
-class ClientEventManagerApi {
-  /**
-   * Call this function to log an event. The registered listeners will be
-   * invoked unless the event is filtered.
-   * @param {!function(!ClientEvent)} listener
-   */
-  registerEventListener(listener) { }
-
-  /**
-   * Register a filterer for events if you need to potentially prevent the
-   * listeners from hearing about it.  A filterer should return
-   * FilterResult.CANCEL_EVENT to prevent listeners from hearing about the
-   * event.
-   * @param {!function(!ClientEvent):FilterResult} filterer
-   */
-  registerEventFilterer(filterer) { }
-
-  /**
-   * Call this function to log an event.  It will immediately throw an error if
-   * the event is invalid.  It will then asynchronously call the filterers and
-   * stop the event if a filterer cancels it.  After that, it will call each
-   * listener asynchronously.
-   * @param {!ClientEvent} event
-   */
-  logEvent(event) { }
 }
 
 /**
@@ -7005,6 +7711,65 @@ class ClientEventManager {
  */
 
 /**
+ * @enum {string}
+ */
+const ExperimentFlags = {
+  /**
+   * Enables the feature that allows you to replace one subscription
+   * for another in the subscribe() API.
+   */
+  REPLACE_SUBSCRIPTION: 'replace-subscription',
+
+  /**
+   * Enables the contributions feature.
+   * DEPRECATED. This flag can be removed once not used by anyone.
+   */
+  CONTRIBUTIONS: 'contributions',
+
+  /**
+   * Enables the Propensity feature
+   */
+  PROPENSITY: 'propensity',
+
+  /**
+   * Enables the Smartbox feature.
+   */
+  SMARTBOX: 'smartbox',
+
+  /**
+   * Enables using new Activities APIs
+   */
+  HEJIRA: 'hejira',
+
+  /** Enables logging to both the new SwG Clearcut service and the pre-existing
+   *  Clearcut iframe while we verify the new logging system works.
+   *  Publishers should not activate this experiment.
+   */
+  LOGGING_BEACON: 'logging-beacon',
+
+  /** Enables googleTransactionID change. With the experiment on the ID is
+   *  changed from '<uuid>' to '<uuid>.swg'.
+   */
+  UPDATE_GOOGLE_TRANSACTION_ID: 'update-google-transaction-id',
+};
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
  * @fileoverview
  *
  * Client-side experiments in SwG.
@@ -7072,7 +7837,7 @@ function getExperiments(win) {
 
     // Format:
     // - experimentString = (experimentSpec,)*
-    combinedExperimentString.split(',').forEach(s => {
+    combinedExperimentString.split(',').forEach((s) => {
       s = s.trim();
       if (!s) {
         return;
@@ -7261,8 +8026,12 @@ function createErrorResponse(error) {
 class AnalyticsService {
   /**
    * @param {!./deps.DepsDef} deps
+   * @param {!./fetcher.Fetcher} fetcher
    */
-  constructor(deps) {
+  constructor(deps, fetcher) {
+    /** @private @const {!./fetcher.Fetcher} */
+    this.fetcher_ = fetcher;
+
     /** @private @const {!../model/doc.Doc} */
     this.doc_ = deps.doc();
 
@@ -7327,7 +8096,18 @@ class AnalyticsService {
    * @param {string} transactionId
    */
   setTransactionId(transactionId) {
+    const oldTransactionId = this.context_.getTransactionId();
     this.context_.setTransactionId(transactionId);
+    if (oldTransactionId != null && oldTransactionId != transactionId) {
+      const eventType = AnalyticsEvent.EVENT_NEW_TX_ID;
+      const eventParams = new EventParams();
+      eventParams.setOldTransactionId(oldTransactionId);
+      this.eventManager_.logSwgEvent(
+        eventType,
+        /* isFromUserAction= */ true,
+        eventParams
+      );
+    }
   }
 
   /**
@@ -7364,7 +8144,7 @@ class AnalyticsService {
   addLabels(labels) {
     if (labels && labels.length > 0) {
       const newLabels = [].concat(this.context_.getLabelList());
-      labels.forEach(label => {
+      labels.forEach((label) => {
         if (newLabels.indexOf(label) == -1) {
           newLabels.push(label);
         }
@@ -7402,9 +8182,19 @@ class AnalyticsService {
   setStaticContext_() {
     const context = this.context_;
     // These values should all be available during page load.
-    context.setTransactionId(getUuid());
+    if (
+      isExperimentOn(
+        this.doc_.getWin(),
+        ExperimentFlags.UPDATE_GOOGLE_TRANSACTION_ID
+      )
+    ) {
+      context.setTransactionId(getSwgTransactionId());
+    } else {
+      context.setTransactionId(getUuid());
+    }
     context.setReferringOrigin(parseUrl$1(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.93');
+    context.setClientVersion('SwG 0.1.22.145');
+    context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString$1(this.getQueryString_());
     const campaign = utmParams['utm_campaign'];
@@ -7418,13 +8208,6 @@ class AnalyticsService {
     }
     if (source) {
       context.setUtmSource(source);
-    }
-
-    const urlNode = this.doc_
-      .getRootNode()
-      .querySelector("link[rel='canonical']");
-    if (urlNode && urlNode.href) {
-      context.setUrl(urlNode.href);
     }
   }
 
@@ -7440,7 +8223,7 @@ class AnalyticsService {
       this.serviceReady_ = this.activityPorts_
         .openIframe(this.iframe_, feUrl('/serviceiframe'), null, true)
         .then(
-          port => {
+          (port) => {
             // Register a listener for the logging to code indicate it is
             // finished logging.
             port.on(FinishedLoggingResponse, this.afterLogging_.bind(this));
@@ -7451,7 +8234,7 @@ class AnalyticsService {
               return port;
             });
           },
-          message => {
+          (message) => {
             // If the port doesn't open register that logging is broken so
             // nothing is just waiting.
             this.loggingBroken_ = true;
@@ -7538,6 +8321,13 @@ class AnalyticsService {
       return;
     }
 
+    // Permission should be asked from a privacy workgroup before this originator
+    // can be submitted to the analytics service.  It should most likely be treated
+    // as another kind of publisher event here though.
+    if (event.eventOriginator === EventOriginator.SHOWCASE_CLIENT) {
+      return;
+    }
+
     if (
       ClientEventManager.isPublisherEvent(event) &&
       !this.shouldLogPublisherEvents_() &&
@@ -7547,9 +8337,13 @@ class AnalyticsService {
     }
     // Register we sent a log, the port will call this.afterLogging_ when done.
     this.unfinishedLogs_++;
-    this.lastAction_ = this.start().then(port =>
-      port.execute(this.createLogRequest_(event))
-    );
+    this.lastAction_ = this.start().then((port) => {
+      const analyticsRequest = this.createLogRequest_(event);
+      port.execute(analyticsRequest);
+      if (isExperimentOn(this.doc_.getWin(), ExperimentFlags.LOGGING_BEACON)) {
+        this.sendBeacon_(analyticsRequest);
+      }
+    });
   }
 
   /**
@@ -7598,7 +8392,7 @@ class AnalyticsService {
       return Promise.resolve(true);
     }
     if (this.promiseToLog_ === null) {
-      this.promiseToLog_ = new Promise(resolve => {
+      this.promiseToLog_ = new Promise((resolve) => {
         this.loggingResolver_ = resolve;
       });
 
@@ -7615,6 +8409,19 @@ class AnalyticsService {
     }
 
     return this.promiseToLog_;
+  }
+
+  /**
+   * A beacon is a rapid fire browser request that does not wait for a response
+   * from the server.  It is guaranteed to go out before the page redirects.
+   * @param {!AnalyticsRequest} analyticsRequest
+   */
+  sendBeacon_(analyticsRequest) {
+    const pubId = encodeURIComponent(
+      this.deps_.pageConfig().getPublicationId()
+    );
+    const url = serviceUrl('/publication/' + pubId + '/clientlogs');
+    this.fetcher_.sendBeacon(url, analyticsRequest);
   }
 }
 
@@ -7735,9 +8542,11 @@ class SmartSubscriptionButtonApi {
     });
     this.button_.appendChild(this.iframe_);
     const args = this.activityPorts_.addDefaultArguments(this.args_);
-    this.activityPorts_.openIframe(this.iframe_, this.src_, args).then(port => {
-      port.on(SmartBoxMessage, this.handleSmartBoxClick_.bind(this));
-    });
+    this.activityPorts_
+      .openIframe(this.iframe_, this.src_, args)
+      .then((port) => {
+        port.on(SmartBoxMessage, this.handleSmartBoxClick_.bind(this));
+      });
     return this.iframe_;
   }
 }
@@ -7948,11 +8757,39 @@ class ButtonApi {
   }
 
   /**
+   * Attaches all buttons with the specified attribute set to any of the
+   * attribute values.
+   * @param {string} attribute
+   * @param {!Array<string>} attributeValues
+   * @param {../api/subscriptions.ButtonOptions} options
+   * @param {!Object<string, function()>} attributeValueToCallback
+   */
+  attachButtonsWithAttribute(
+    attribute,
+    attributeValues,
+    options,
+    attributeValueToCallback
+  ) {
+    attributeValues.forEach((attributeValue) => {
+      const elements = this.doc_
+        .getRootNode()
+        .querySelectorAll(`button[${attribute}="${attributeValue}"]`);
+      for (let i = 0; i < elements.length; i++) {
+        this.attach(
+          elements[i],
+          options,
+          attributeValueToCallback[attributeValue]
+        );
+      }
+    });
+  }
+
+  /**
    * @param {!AnalyticsEvent} eventType
    * @param {boolean=} isFromUserAction
    */
   logSwgEvent_(eventType, isFromUserAction) {
-    this.configuredRuntimePromise_.then(configuredRuntime => {
+    this.configuredRuntimePromise_.then((configuredRuntime) => {
       configuredRuntime.eventManager().logSwgEvent(eventType, isFromUserAction);
     });
   }
@@ -7964,11 +8801,10 @@ class ButtonApi {
    * @private
    */
   getOptions_(optionsOrCallback) {
-    const options =
-      /** @type {!../api/subscriptions.ButtonOptions|!../api/subscriptions.SmartButtonOptions} */ (optionsOrCallback &&
-      typeof optionsOrCallback != 'function'
-        ? optionsOrCallback
-        : {'theme': Theme.LIGHT});
+    const options = /** @type {!../api/subscriptions.ButtonOptions|!../api/subscriptions.SmartButtonOptions} */ (optionsOrCallback &&
+    typeof optionsOrCallback != 'function'
+      ? optionsOrCallback
+      : {'theme': Theme.LIGHT});
 
     const theme = options['theme'];
     if (theme !== Theme.LIGHT && theme !== Theme.DARK) {
@@ -7985,12 +8821,10 @@ class ButtonApi {
    * @private
    */
   getCallback_(optionsOrCallback, callback) {
-    return (
-      /** @type {function()|function(Event):boolean} */ ((typeof optionsOrCallback ==
-      'function'
-        ? optionsOrCallback
-        : null) || callback)
-    );
+    return /** @type {function()|function(Event):boolean} */ ((typeof optionsOrCallback ==
+    'function'
+      ? optionsOrCallback
+      : null) || callback);
   }
 
   /**
@@ -8002,7 +8836,7 @@ class ButtonApi {
   setupButtonAndGetParams_(button, optionsOrCallback, callbackFun) {
     const options = this.getOptions_(optionsOrCallback);
     const callback = this.getCallback_(optionsOrCallback, callbackFun);
-    const clickFun = event => {
+    const clickFun = (event) => {
       this.logSwgEvent_(AnalyticsEvent.ACTION_SWG_BUTTON_CLICK, true);
       if (typeof callback === 'function') {
         callback(event);
@@ -8091,7 +8925,7 @@ class Callbacks {
   triggerEntitlementsResponse(promise) {
     return this.trigger_(
       CallbackId.ENTITLEMENTS,
-      promise.then(res => res.clone())
+      promise.then((res) => res.clone())
     );
   }
 
@@ -8212,13 +9046,13 @@ class Callbacks {
    */
   triggerPaymentResponse(responsePromise) {
     this.paymentResponsePromise_ = responsePromise.then(
-      res => {
+      (res) => {
         this.trigger_(
           CallbackId.PAYMENT_RESPONSE,
           Promise.resolve(res.clone())
         );
       },
-      reason => {
+      (reason) => {
         if (isCancelError(reason)) {
           return;
         }
@@ -8536,13 +9370,13 @@ class DeferredAccountFlow {
 
     this.openPromise_ = this.dialogManager_.openView(this.activityIframeView_);
     return this.activityIframeView_.acceptResult().then(
-      result => {
+      (result) => {
         // The consent part is complete.
         return this.handleConsentResponse_(
           /** @type {!Object} */ (result.data)
         );
       },
-      reason => {
+      (reason) => {
         if (isCancelError(reason)) {
           this.deps_
             .callbacks()
@@ -8578,7 +9412,7 @@ class DeferredAccountFlow {
     );
     const purchaseDataList = data['purchaseDataList']
       ? data['purchaseDataList'].map(
-          pd => new PurchaseData(pd['data'], pd['signature'])
+          (pd) => new PurchaseData(pd['data'], pd['signature'])
         )
       : [
           // TODO(dvoytenko): cleanup/deprecate.
@@ -8666,7 +9500,7 @@ class FriendlyIframe {
     resetAllStyles(this.iframe_);
 
     /** @private @const {!Promise} */
-    this.ready_ = new Promise(resolve => {
+    this.ready_ = new Promise((resolve) => {
       this.iframe_.onload = resolve;
     });
   }
@@ -8747,7 +9581,7 @@ class FriendlyIframe {
 function transition(el, props, durationMillis, curve) {
   const win = el.ownerDocument.defaultView;
   const previousTransitionValue = el.style.transition || '';
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     win.setTimeout(() => {
       win.setTimeout(resolve, durationMillis);
       const tr = `${durationMillis}ms ${curve}`;
@@ -9047,7 +9881,7 @@ function onDocumentState(doc, condition, callback) {
  * @return {!Promise<!Document>}
  */
 function whenDocumentReady(doc) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     onDocumentReady(doc, resolve);
   });
 }
@@ -9382,6 +10216,14 @@ class Dialog {
    */
   getElement() {
     return this.iframe_.getElement();
+  }
+
+  /**
+   * Gets the LoadingView for this dialog.
+   * @return {LoadingView}
+   */
+  getLoadingView() {
+    return this.loadingView_;
   }
 
   /**
@@ -9723,14 +10565,21 @@ class DialogManager {
    * @return {!Promise}
    */
   openView(view, hidden = false) {
-    view.whenComplete().catch(reason => {
+    this.handleCancellations(view);
+    return this.openDialog(hidden).then((dialog) => dialog.openView(view));
+  }
+
+  /**
+   * Handles cancellations (ex: user clicks close button on dialog).
+   * @param {!./view.View} view
+   * @return {!Promise}
+   */
+  handleCancellations(view) {
+    return view.whenComplete().catch((reason) => {
       if (isCancelError(reason)) {
         this.completeView(view);
       }
       throw reason;
-    });
-    return this.openDialog(hidden).then(dialog => {
-      return dialog.openView(view);
     });
   }
 
@@ -9755,6 +10604,13 @@ class DialogManager {
     if (this.popupGraypane_.isAttached()) {
       this.popupGraypane_.destroy();
     }
+  }
+
+  /**
+   * @returns {?Dialog}
+   */
+  getDialog() {
+    return this.dialog_;
   }
 
   /** @private */
@@ -9784,6 +10640,276 @@ class DialogManager {
     } catch (e) {
       // Ignore.
     }
+  }
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/** @enum {number}  */
+const MeterClientTypes = {
+  /** Meter client type for content licensed by Google. */
+  LICENSED_BY_GOOGLE: 1,
+};
+
+/**
+ * Copyright 2020 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+const IFRAME_BOX_SHADOW =
+  'rgba(60, 64, 67, 0.3) 0px -2px 5px, rgba(60, 64, 67, 0.15) 0px -5px 5px';
+const MINIMIZED_IFRAME_SIZE = '420px';
+
+class MeterToastApi {
+  /**
+   * @param {!./deps.DepsDef} deps
+   */
+  constructor(deps) {
+    /** @private @const {!./deps.DepsDef} */
+    this.deps_ = deps;
+
+    /** @private @const {!Window} */
+    this.win_ = deps.win();
+
+    /** @private @const {!../components/activities.ActivityPorts} */
+    this.activityPorts_ = deps.activities();
+
+    /** @private @const {!../components/dialog-manager.DialogManager} */
+    this.dialogManager_ = deps.dialogManager();
+
+    const iframeArgs = this.activityPorts_.addDefaultArguments({
+      isClosable: true,
+      hasSubscriptionCallback: deps.callbacks().hasSubscribeRequestCallback(),
+    });
+    /** @private @const {!ActivityIframeView} */
+    this.activityIframeView_ = new ActivityIframeView(
+      this.win_,
+      this.activityPorts_,
+      feUrl('/metertoastiframe'),
+      iframeArgs,
+      /* shouldFadeBody */ false
+    );
+
+    /**
+     * Function this class calls when a user dismisses the toast to consume a free read.
+     * @private {?function()}
+     */
+    this.onConsumeCallback_ = null;
+
+    /**
+     * Boolean indicating whether or not the onConsumeCallback_ has been handled
+     * (either called or ignored). This is used to protect against unexpected
+     * cancellations not consuming a meter.
+     * @private {!boolean}
+     */
+    this.onConsumeCallbackHandled_ = false;
+
+    /** @private @const {!function()} */
+    this.sendCloseRequestFunction_ = () => {
+      const closeRequest = new ToastCloseRequest();
+      closeRequest.setClose(true);
+      this.activityIframeView_.execute(closeRequest);
+      this.removeCloseEventListener();
+
+      this.deps_
+        .eventManager()
+        .logSwgEvent(
+          AnalyticsEvent.ACTION_METER_TOAST_CLOSED_BY_ARTICLE_INTERACTION,
+          true
+        );
+
+      if (this.onConsumeCallback_ && !this.onConsumeCallbackHandled_) {
+        this.onConsumeCallbackHandled_ = true;
+        this.onConsumeCallback_();
+      }
+    };
+
+    /** @private {?function()} */
+    this.scrollEventListener_ = null;
+  }
+
+  /**
+   * Shows the user the metering toast.
+   * @return {!Promise}
+   */
+  start() {
+    this.deps_
+      .callbacks()
+      .triggerFlowStarted(SubscriptionFlows.SHOW_METER_TOAST);
+    this.activityIframeView_.on(
+      ViewSubscriptionsResponse,
+      this.startNativeFlow_.bind(this)
+    );
+    if (!this.deps_.callbacks().hasSubscribeRequestCallback()) {
+      const errorMessage =
+        '[swg.js]: `setOnNativeSubscribeRequest` has not been ' +
+        'set before starting the metering flow, so users will not be able to ' +
+        'subscribe from the metering dialog directly. Please call ' +
+        '`setOnNativeSubscribeRequest` with a subscription flow callback before ' +
+        'starting metering.';
+      log_4(errorMessage);
+    }
+
+    this.dialogManager_
+      .handleCancellations(this.activityIframeView_)
+      .catch((reason) => {
+        // Possibly call onConsumeCallback on all dialog cancellations to ensure unexpected
+        // dialog closes don't give access without a meter consumed.
+        if (this.onConsumeCallback_ && !this.onConsumeCallbackHandled_) {
+          this.onConsumeCallbackHandled_ = true;
+          this.onConsumeCallback_();
+        }
+        throw reason;
+      });
+    return this.dialogManager_.openDialog().then((dialog) => {
+      this.setDialogBoxShadow_();
+      this.setLoadingViewWidth_();
+      return dialog.openView(this.activityIframeView_).then(() => {
+        // Allow closing of the iframe with any scroll or click event.
+        this.win_.addEventListener('click', this.sendCloseRequestFunction_);
+        this.win_.addEventListener(
+          'touchstart',
+          this.sendCloseRequestFunction_
+        );
+        this.win_.addEventListener('mousedown', this.sendCloseRequestFunction_);
+        // Making body's overflow property 'hidden' to prevent scrolling
+        // while swiping on the iframe only on mobile.
+        if (this.isMobile_()) {
+          const $body = this.win_.document.body;
+          setStyle($body, 'overflow', 'hidden');
+        } else {
+          let start, scrollTimeout;
+          this.scrollEventListener_ = () => {
+            start = start || this.win_./*REVIEW*/ pageYOffset;
+            this.win_.clearTimeout(scrollTimeout);
+            scrollTimeout = this.win_.setTimeout(() => {
+              // If the scroll is longer than 100, close the toast.
+              if (Math.abs(this.win_./*REVIEW*/ pageYOffset - start) > 100) {
+                this.sendCloseRequestFunction_();
+              }
+            }, 100);
+          };
+          this.win_.addEventListener('scroll', this.scrollEventListener_);
+        }
+        this.deps_
+          .eventManager()
+          .logSwgEvent(AnalyticsEvent.IMPRESSION_METER_TOAST);
+        this.deps_
+          .eventManager()
+          .logSwgEvent(AnalyticsEvent.EVENT_OFFERED_METER);
+      });
+    });
+  }
+
+  /**
+   * Sets a callback function this class calls when a user dismisses the toast to consume a free read.
+   * @param {function()} onConsumeCallback
+   */
+  setOnConsumeCallback(onConsumeCallback) {
+    this.onConsumeCallback_ = onConsumeCallback;
+  }
+
+  /**
+   * Removes the event listeners that close the iframe and make the body visible.
+   */
+  removeCloseEventListener() {
+    this.win_.removeEventListener('click', this.sendCloseRequestFunction_);
+    this.win_.removeEventListener('touchstart', this.sendCloseRequestFunction_);
+    this.win_.removeEventListener('mousedown', this.sendCloseRequestFunction_);
+    if (this.isMobile_()) {
+      const $body = this.win_.document.body;
+      setStyle($body, 'overflow', 'visible');
+    } else {
+      this.win_.removeEventListener('scroll', this.scrollEventListener_);
+    }
+  }
+
+  /**
+   * Changes the iframe box shadow to match desired specifications on mobile.
+   */
+  setDialogBoxShadow_() {
+    const mobileMediaQuery = this.win_.matchMedia(
+      '(max-width: 640px), (max-height: 640px)'
+    );
+    const element = this.dialogManager_.getDialog().getElement();
+    if (mobileMediaQuery.matches) {
+      setImportantStyles(element, {'box-shadow': IFRAME_BOX_SHADOW});
+    }
+    mobileMediaQuery.addListener((changed) => {
+      if (changed.matches) {
+        setImportantStyles(element, {'box-shadow': IFRAME_BOX_SHADOW});
+      } else {
+        setImportantStyles(element, {'box-shadow': ''});
+      }
+    });
+  }
+
+  /**
+   * Changes the size of the loading iframe on desktop to match the size of
+   * the meter toast iframe.
+   */
+  setLoadingViewWidth_() {
+    const desktopMediaQuery = this.win_.matchMedia(
+      '(min-width: 640px) and (min-height: 640px)'
+    );
+    if (desktopMediaQuery.matches) {
+      const element = this.dialogManager_
+        .getDialog()
+        .getLoadingView()
+        .getElement();
+      setImportantStyles(element, {
+        'width': MINIMIZED_IFRAME_SIZE,
+        'margin': 'auto',
+      });
+    }
+  }
+
+  /**
+   * @param {ViewSubscriptionsResponse} response
+   * @private
+   */
+  startNativeFlow_(response) {
+    if (response.getNative()) {
+      this.removeCloseEventListener();
+      // We shouldn't decrement the meter on redirects, so don't call onConsumeCallback.
+      this.onConsumeCallbackHandled_ = true;
+      this.deps_.callbacks().triggerSubscribeRequest();
+    }
+  }
+
+  /**
+   * Returns true if the window userAgent is a mobile platform.
+   * @private
+   */
+  isMobile_() {
+    return !!this.win_.navigator.userAgent.match(
+      /Android|iPhone|iPad|iPod|BlackBerry|IEMobile/i
+    );
   }
 }
 
@@ -9850,7 +10976,7 @@ class Toast {
     setImportantStyles(this.iframe_, toastImportantStyles);
 
     /** @private @const {!Promise} */
-    this.ready_ = new Promise(resolve => {
+    this.ready_ = new Promise((resolve) => {
       this.iframe_.onload = resolve;
     });
   }
@@ -9879,7 +11005,7 @@ class Toast {
     const toastDurationSeconds = 7;
     return this.activityPorts_
       .openIframe(this.iframe_, this.src_, this.args_)
-      .then(port => {
+      .then((port) => {
         return port.whenReady();
       })
       .then(() => {
@@ -9958,6 +11084,152 @@ class Toast {
 }
 
 /**
+ * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/** @const {!Object<string,AnalyticsEvent>} */
+const PublisherEventToAnalyticsEvent = {
+  [Event.IMPRESSION_PAYWALL]: AnalyticsEvent.IMPRESSION_PAYWALL,
+  [Event.IMPRESSION_AD]: AnalyticsEvent.IMPRESSION_AD,
+  [Event.IMPRESSION_OFFERS]: AnalyticsEvent.IMPRESSION_OFFERS,
+  [Event.ACTION_SUBSCRIPTIONS_LANDING_PAGE]:
+    AnalyticsEvent.ACTION_SUBSCRIPTIONS_LANDING_PAGE,
+  [Event.ACTION_OFFER_SELECTED]: AnalyticsEvent.ACTION_OFFER_SELECTED,
+  [Event.ACTION_PAYMENT_FLOW_STARTED]:
+    AnalyticsEvent.ACTION_PAYMENT_FLOW_STARTED,
+  [Event.ACTION_PAYMENT_COMPLETED]: AnalyticsEvent.ACTION_PAYMENT_COMPLETE,
+  [Event.EVENT_CUSTOM]: AnalyticsEvent.EVENT_CUSTOM,
+};
+
+/** @const {!Object<number,?Event>} */
+const AnalyticsEventToPublisherEvent = {
+  [AnalyticsEvent.UNKNOWN]: null,
+  [AnalyticsEvent.IMPRESSION_PAYWALL]: Event.IMPRESSION_PAYWALL,
+  [AnalyticsEvent.IMPRESSION_AD]: Event.IMPRESSION_AD,
+  [AnalyticsEvent.IMPRESSION_OFFERS]: Event.IMPRESSION_OFFERS,
+  [AnalyticsEvent.IMPRESSION_SUBSCRIBE_BUTTON]: null,
+  [AnalyticsEvent.IMPRESSION_SMARTBOX]: null,
+  [AnalyticsEvent.ACTION_SUBSCRIBE]: null,
+  [AnalyticsEvent.ACTION_PAYMENT_COMPLETE]: Event.ACTION_PAYMENT_COMPLETED,
+  [AnalyticsEvent.ACTION_ACCOUNT_CREATED]: null,
+  [AnalyticsEvent.ACTION_ACCOUNT_ACKNOWLEDGED]: null,
+  [AnalyticsEvent.ACTION_SUBSCRIPTIONS_LANDING_PAGE]:
+    Event.ACTION_SUBSCRIPTIONS_LANDING_PAGE,
+  [AnalyticsEvent.ACTION_PAYMENT_FLOW_STARTED]:
+    Event.ACTION_PAYMENT_FLOW_STARTED,
+  [AnalyticsEvent.ACTION_OFFER_SELECTED]: Event.ACTION_OFFER_SELECTED,
+  [AnalyticsEvent.EVENT_PAYMENT_FAILED]: null,
+  [AnalyticsEvent.EVENT_CUSTOM]: Event.EVENT_CUSTOM,
+};
+
+/** @const {!Object<string,?Array<AnalyticsEvent>>} */
+const ShowcaseEntitlemenntToAnalyticsEvents = {
+  [PublisherEntitlementEvent.EVENT_SHOWCASE_UNLOCKED_BY_SUBSCRIPTION]: [
+    AnalyticsEvent.EVENT_UNLOCKED_BY_SUBSCRIPTION,
+  ],
+  [PublisherEntitlementEvent.EVENT_SHOWCASE_UNLOCKED_BY_METER]: [
+    AnalyticsEvent.EVENT_HAS_METERING_ENTITLEMENTS,
+    AnalyticsEvent.EVENT_UNLOCKED_BY_METER,
+  ],
+  [PublisherEntitlementEvent.EVENT_SHOWCASE_UNLOCKED_FREE_PAGE]: [
+    AnalyticsEvent.EVENT_UNLOCKED_FREE_PAGE,
+  ],
+  [PublisherEntitlementEvent.EVENT_SHOWCASE_NO_ENTITLEMENTS_REGWALL]: [
+    AnalyticsEvent.EVENT_NO_ENTITLEMENTS,
+    AnalyticsEvent.IMPRESSION_REGWALL,
+    AnalyticsEvent.IMPRESSION_SHOWCASE_REGWALL,
+  ],
+  [PublisherEntitlementEvent.EVENT_SHOWCASE_NO_ENTITLEMENTS_PAYWALL]: [
+    AnalyticsEvent.EVENT_NO_ENTITLEMENTS,
+    AnalyticsEvent.IMPRESSION_PAYWALL,
+  ],
+  [PublisherEntitlementEvent.EVENT_SHOWCASE_METER_OFFERED]: [
+    AnalyticsEvent.EVENT_HAS_METERING_ENTITLEMENTS,
+    AnalyticsEvent.EVENT_OFFERED_METER,
+  ],
+};
+
+/** @const {!Object<number,?Event>} */
+const AnalyticsEventToEntitlementResult = {
+  [AnalyticsEvent.IMPRESSION_REGWALL]: EntitlementResult.LOCKED_REGWALL,
+  [AnalyticsEvent.EVENT_UNLOCKED_BY_METER]: EntitlementResult.UNLOCKED_METER,
+  [AnalyticsEvent.EVENT_UNLOCKED_BY_SUBSCRIPTION]:
+    EntitlementResult.UNLOCKED_SUBSCRIBER,
+  [AnalyticsEvent.EVENT_UNLOCKED_FREE_PAGE]: EntitlementResult.UNLOCKED_FREE,
+  [AnalyticsEvent.IMPRESSION_PAYWALL]: EntitlementResult.LOCKED_PAYWALL,
+};
+
+/**
+ * Converts a propensity event enum into an analytics event enum.
+ * @param {!Event|string} propensityEvent
+ * @returns {!AnalyticsEvent}
+ */
+function publisherEventToAnalyticsEvent(propensityEvent) {
+  return PublisherEventToAnalyticsEvent[propensityEvent];
+}
+
+/**
+ * Converts an analytics event enum into a propensity event enum.
+ * @param {!AnalyticsEvent} analyticsEvent
+ * @returns {?Event}
+ */
+function analyticsEventToPublisherEvent(analyticsEvent) {
+  return AnalyticsEventToPublisherEvent[analyticsEvent];
+}
+
+/**
+ * Converts a publisher entitlement event enum into an array analytics events.
+ * @param {!PublisherEntitlementEvent|string} event
+ * @returns {!Array<AnalyticsEvent>}
+ */
+function publisherEntitlementEventToAnalyticsEvents(event) {
+  return ShowcaseEntitlemenntToAnalyticsEvents[event] || [];
+}
+
+function analyticsEventToEntitlementResult(event) {
+  return AnalyticsEventToEntitlementResult[event];
+}
+
+/**
+ * Copyright 2020 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @param {!number} millis
+ * @return {!Timestamp}
+ */
+function toTimestamp(millis) {
+  return new Timestamp(
+    [Math.floor(millis / 1000), (millis % 1000) * 1000000],
+    false
+  );
+}
+
+/**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -10023,6 +11295,10 @@ class EntitlementsManager {
 
     /** @private @const {!../api/subscriptions.Config} */
     this.config_ = deps.config();
+
+    this.deps_
+      .eventManager()
+      .registerEventListener(this.handleClientEvent_.bind(this));
   }
 
   /**
@@ -10053,22 +11329,31 @@ class EntitlementsManager {
   }
 
   /**
-   * @return {string}
-   * @private
-   */
-  getQueryString_() {
-    return this.win_.location.search;
-  }
-
-  /**
-   * @param {?string=} encryptedDocumentKey
+   * @param {!GetEntitlementsParamsExternalDef=} params
    * @return {!Promise<!Entitlements>}
    */
-  getEntitlements(encryptedDocumentKey) {
-    if (!this.responsePromise_) {
-      this.responsePromise_ = this.getEntitlementsFlow_(encryptedDocumentKey);
+  getEntitlements(params) {
+    // Remain backwards compatible by accepting
+    // `encryptedDocumentKey` string as a first param.
+    if (typeof params === 'string') {
+      // TODO: Delete the fallback if nobody needs it. Use a log to verify.
+      if (Date.now() > 1600289016959) {
+        // TODO: Remove the conditional check for this warning
+        // after the AMP extension is updated to pass an object.
+        log_4(
+          `[swg.js:getEntitlements]: If present, the first param of getEntitlements() should be an object of type GetEntitlementsParamsExternalDef.`
+        );
+      }
+
+      params = {
+        encryption: {encryptedDocumentKey: /**@type {string} */ (params)},
+      };
     }
-    return this.responsePromise_.then(response => {
+
+    if (!this.responsePromise_) {
+      this.responsePromise_ = this.getEntitlementsFlow_(params);
+    }
+    return this.responsePromise_.then((response) => {
       if (response.isReadyToPay != null) {
         this.analyticsService_.setReadyToPay(response.isReadyToPay);
       }
@@ -10095,33 +11380,110 @@ class EntitlementsManager {
   }
 
   /**
-   * @param {?string=} encryptedDocumentKey
-   * @return {!Promise<!Entitlements>}
-   * @private
+   * Sends a pingback that marks a metering entitlement as used.
+   * @param {!Entitlements} entitlements
    */
-  getEntitlementsFlow_(encryptedDocumentKey) {
-    return this.fetchEntitlementsWithCaching_(encryptedDocumentKey).then(
-      entitlements => {
-        this.onEntitlementsFetched_(entitlements);
-        return entitlements;
-      }
+  consumeMeter_(entitlements) {
+    const entitlement = entitlements.getEntitlementForThis();
+    if (!entitlement || entitlement.source !== GOOGLE_METERING_SOURCE) {
+      return;
+    }
+
+    this.deps_
+      .eventManager()
+      .logSwgEvent(AnalyticsEvent.EVENT_UNLOCKED_BY_METER, false);
+
+    const jwt = new EntitlementJwt();
+    jwt.setSource(entitlement.source);
+    jwt.setJwt(entitlement.subscriptionToken);
+    return this.postEntitlementsRequest_(
+      jwt,
+      EntitlementResult.UNLOCKED_METER,
+      EntitlementSource.GOOGLE_SHOWCASE_METERING_SERVICE
     );
   }
 
+  // Listens for events from the event manager and informs
+  // the server about publisher entitlements and non-
+  // consumable Google entitlements.
+  handleClientEvent_(event) {
+    // A subset of analytics events are also an entitlement result
+    const result = analyticsEventToEntitlementResult(event.eventType);
+    if (!result) {
+      return;
+    }
+    let source = null;
+
+    switch (event.eventOriginator) {
+      // The indicates the publisher reported it via subscriptions.setShowcaseEntitlement
+      case EventOriginator.SHOWCASE_CLIENT:
+        source = EntitlementSource.PUBLISHER_ENTITLEMENT;
+        break;
+      case EventOriginator.SWG_CLIENT: // Fallthrough, these are the same
+      case EventOriginator.SWG_SERVER:
+        if (result == EntitlementResult.UNLOCKED_METER) {
+          // Meters from Google require a valid jwt, which is sent by
+          // an entitlement.
+          return;
+        }
+        source = EntitlementSource.GOOGLE_SUBSCRIBER_ENTITLEMENT;
+        break;
+      // Permission to pingback other sources was not requested
+      default:
+        return;
+    }
+
+    this.postEntitlementsRequest_(new EntitlementJwt(), result, source);
+  }
+
+  // Informs the Entitlements server about the entitlement used
+  // to unlock the page.
+  postEntitlementsRequest_(
+    usedEntitlement,
+    entitlementResult,
+    entitlementSource
+  ) {
+    const message = new EntitlementsRequest();
+    message.setUsedEntitlement(usedEntitlement);
+    message.setClientEventTime(toTimestamp(Date.now()));
+    message.setEntitlementResult(entitlementResult);
+    message.setEntitlementSource(entitlementSource);
+
+    const url =
+      '/publication/' +
+      encodeURIComponent(this.publicationId_) +
+      '/entitlements';
+
+    this.fetcher_.sendPost(serviceUrl(url), message);
+  }
+
   /**
-   * @param {?string=} encryptedDocumentKey
+   * @param {!GetEntitlementsParamsExternalDef=} params
    * @return {!Promise<!Entitlements>}
    * @private
    */
-  fetchEntitlementsWithCaching_(encryptedDocumentKey) {
+  getEntitlementsFlow_(params) {
+    return this.fetchEntitlementsWithCaching_(params).then((entitlements) => {
+      this.onEntitlementsFetched_(entitlements);
+      return entitlements;
+    });
+  }
+
+  /**
+   * @param {!GetEntitlementsParamsExternalDef=} params
+   * @return {!Promise<!Entitlements>}
+   * @private
+   */
+  fetchEntitlementsWithCaching_(params) {
     return Promise.all([
       this.storage_.get(ENTS_STORAGE_KEY),
       this.storage_.get(IS_READY_TO_PAY_STORAGE_KEY),
-    ]).then(cachedValues => {
+    ]).then((cachedValues) => {
       const raw = cachedValues[0];
       const irtp = cachedValues[1];
       // Try cache first.
-      if (raw && !encryptedDocumentKey) {
+      const needsDecryption = !!(params && params.encryption);
+      if (raw && !needsDecryption) {
         const cached = this.getValidJwtEntitlements_(
           raw,
           /* requireNonExpired */ true,
@@ -10134,9 +11496,9 @@ class EntitlementsManager {
         }
       }
       // If cache didn't match, perform fetch.
-      return this.fetchEntitlements_(encryptedDocumentKey).then(ents => {
-        // If entitlements match the product, store them in cache.
-        if (ents && ents.enablesThis() && ents.raw) {
+      return this.fetchEntitlements_(params).then((ents) => {
+        // If the product is enabled by cacheable entitlements, store them in cache.
+        if (ents && ents.enablesThisWithCacheableEntitlements() && ents.raw) {
           this.storage_.set(ENTS_STORAGE_KEY, ents.raw);
         }
         return ents;
@@ -10145,21 +11507,21 @@ class EntitlementsManager {
   }
 
   /**
-   * @param {?string=} encryptedDocumentKey
+   * @param {!GetEntitlementsParamsExternalDef=} params
    * @return {!Promise<!Entitlements>}
    * @private
    */
-  fetchEntitlements_(encryptedDocumentKey) {
+  fetchEntitlements_(params) {
     // TODO(dvoytenko): Replace retries with consistent fetch.
     let positiveRetries = this.positiveRetries_;
     this.positiveRetries_ = 0;
     const attempt = () => {
       positiveRetries--;
-      return this.fetch_(encryptedDocumentKey).then(entitlements => {
+      return this.fetch_(params).then((entitlements) => {
         if (entitlements.enablesThis() || positiveRetries <= 0) {
           return entitlements;
         }
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
           this.win_.setTimeout(() => {
             resolve(attempt());
           }, 550);
@@ -10286,6 +11648,7 @@ class EntitlementsManager {
       Entitlement.parseListFromJson(json),
       this.pageConfig_.getProductId(),
       this.ack_.bind(this),
+      this.consume_.bind(this),
       isReadyToPay,
       decryptedDocumentKey
     );
@@ -10309,47 +11672,51 @@ class EntitlementsManager {
       .callbacks()
       .triggerEntitlementsResponse(Promise.resolve(entitlements));
 
-    // Show a toast if needed.
-    this.maybeShowToast_(entitlements);
-  }
-
-  /**
-   * @param {!Entitlements} entitlements
-   * @return {!Promise}
-   * @private
-   */
-  maybeShowToast_(entitlements) {
     const entitlement = entitlements.getEntitlementForThis();
     if (!entitlement) {
-      return Promise.resolve();
+      this.deps_
+        .eventManager()
+        .logSwgEvent(AnalyticsEvent.EVENT_NO_ENTITLEMENTS, false);
+      return;
     }
-    // Check if storage bit is set. It's only set by the `Entitlements.ack`
-    // method.
-    return this.storage_.get(TOAST_STORAGE_KEY).then(value => {
-      if (value == '1') {
-        // Already shown;
-        return;
-      }
-      if (entitlement) {
-        this.showToast_(entitlement);
-      }
-    });
+    this.maybeShowToast_(entitlement);
   }
 
   /**
    * @param {!Entitlement} entitlement
+   * @return {!Promise}
    * @private
    */
-  showToast_(entitlement) {
-    const source = entitlement.source || 'google';
-    return new Toast(
-      this.deps_,
-      feUrl('/toastiframe'),
-      feArgs({
-        'publicationId': this.publicationId_,
-        'source': source,
-      })
-    ).open();
+  maybeShowToast_(entitlement) {
+    // Don't show toast for metering entitlements.
+    if (entitlement.source === GOOGLE_METERING_SOURCE) {
+      this.deps_
+        .eventManager()
+        .logSwgEvent(AnalyticsEvent.EVENT_HAS_METERING_ENTITLEMENTS, false);
+      return Promise.resolve();
+    }
+
+    this.deps_
+      .eventManager()
+      .logSwgEvent(AnalyticsEvent.EVENT_UNLOCKED_BY_SUBSCRIPTION, false);
+    // Check if storage bit is set. It's only set by the `Entitlements.ack` method.
+    return this.storage_.get(TOAST_STORAGE_KEY).then((value) => {
+      const toastWasShown = value === '1';
+      if (toastWasShown) {
+        return;
+      }
+
+      // Show toast.
+      const source = entitlement.source || GOOGLE_METERING_SOURCE;
+      return new Toast(
+        this.deps_,
+        feUrl('/toastiframe'),
+        feArgs({
+          'publicationId': this.publicationId_,
+          'source': source,
+        })
+      ).open();
+    });
   }
 
   /**
@@ -10363,22 +11730,139 @@ class EntitlementsManager {
   }
 
   /**
-   * @param {?string=} encryptedDocumentKey
+   * @param {!Entitlements} entitlements
+   * @param {?Function=} onCloseDialog Called after the user closes the dialog.
+   * @private
+   */
+  consume_(entitlements, onCloseDialog) {
+    if (entitlements.enablesThisWithGoogleMetering()) {
+      const onConsumeCallback = () => {
+        if (onCloseDialog) {
+          onCloseDialog();
+        }
+        this.consumeMeter_(entitlements);
+      };
+      const showToast = this.getShowToastFromEntitlements_(entitlements);
+      if (showToast === false) {
+        // If showToast is explicitly false, call onConsumeCallback directly.
+        return onConsumeCallback();
+      }
+      const meterToastApi = new MeterToastApi(this.deps_);
+      meterToastApi.setOnConsumeCallback(onConsumeCallback);
+      return meterToastApi.start();
+    }
+  }
+
+  /**
+   * Gets the `showToast` value (or null/undefined if unavailable) from
+   * the Google metering entitlement details in the input entitlements.
+   * @param {!Entitlements} entitlements
+   * @return {boolean|undefined}
+   * @private
+   */
+  getShowToastFromEntitlements_(entitlements) {
+    const entitlement = entitlements.getEntitlementForThis();
+    if (!entitlement || entitlement.source !== GOOGLE_METERING_SOURCE) {
+      return;
+    }
+    try {
+      const meteringJwt = this.jwtHelper_.decode(entitlement.subscriptionToken);
+      return meteringJwt['metering'] && meteringJwt['metering']['showToast'];
+    } catch (e) {
+      // Ignore decoding errors.
+      return;
+    }
+  }
+
+  /**
+   * @param {!GetEntitlementsParamsExternalDef=} params
    * @return {!Promise<!Entitlements>}
    * @private
    */
-  fetch_(encryptedDocumentKey) {
-    let url =
-      '/publication/' +
-      encodeURIComponent(this.publicationId_) +
-      '/entitlements';
-    if (encryptedDocumentKey) {
-      //TODO(chenshay): Make this a 'Post'.
-      url += '?crypt=' + encodeURIComponent(encryptedDocumentKey);
-    }
-    return this.fetcher_
-      .fetchCredentialedJson(serviceUrl(url))
-      .then(json => this.parseEntitlements(json));
+  fetch_(params) {
+    return hash(getCanonicalUrl(this.deps_.doc()))
+      .then((hashedCanonicalUrl) => {
+        const urlParams = [];
+
+        // Add encryption param.
+        if (params && params.encryption) {
+          urlParams.push(
+            'crypt=' +
+              encodeURIComponent(params.encryption.encryptedDocumentKey)
+          );
+        }
+
+        // Add metering params.
+        if (
+          this.publicationId_ &&
+          params &&
+          params.metering &&
+          params.metering.state
+        ) {
+          /** @type {!GetEntitlementsParamsInternalDef} */
+          const encodableParams = {
+            metering: {
+              clientTypes: [MeterClientTypes.LICENSED_BY_GOOGLE],
+              owner: this.publicationId_,
+              resource: {
+                hashedCanonicalUrl,
+              },
+              state: {
+                id: params.metering.state.id,
+                attributes: [],
+              },
+            },
+          };
+
+          // Add attributes.
+          const standardAttributes = params.metering.state.standardAttributes;
+          if (standardAttributes) {
+            Object.keys(standardAttributes).forEach((key) => {
+              encodableParams.metering.state.attributes.push({
+                name: 'standard_' + key,
+                timestamp: standardAttributes[key].timestamp,
+              });
+            });
+          }
+          const customAttributes = params.metering.state.customAttributes;
+          if (customAttributes) {
+            Object.keys(customAttributes).forEach((key) => {
+              encodableParams.metering.state.attributes.push({
+                name: 'custom_' + key,
+                timestamp: customAttributes[key].timestamp,
+              });
+            });
+          }
+
+          // Encode params.
+          const encodedParams = btoa(JSON.stringify(encodableParams));
+          urlParams.push('encodedParams=' + encodedParams);
+        }
+
+        // Build URL.
+        let url =
+          '/publication/' +
+          encodeURIComponent(this.publicationId_) +
+          '/entitlements';
+        if (urlParams.length > 0) {
+          url += '?' + urlParams.join('&');
+        }
+        return serviceUrl(url);
+      })
+      .then((url) => {
+        this.deps_
+          .eventManager()
+          .logSwgEvent(AnalyticsEvent.ACTION_GET_ENTITLEMENTS, false);
+        return this.fetcher_.fetchCredentialedJson(url);
+      })
+      .then((json) => {
+        if (json.errorMessages && json.errorMessages.length > 0) {
+          json.errorMessages.forEach((errorMessage) => {
+            log_4('SwG Entitlements: ' + errorMessage);
+          });
+        }
+        return this.parseEntitlements(json);
+      });
   }
 }
 
@@ -10399,54 +11883,6 @@ function irtpStringToBoolean(value) {
       return undefined;
   }
 }
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * @enum {string}
- */
-const ExperimentFlags = {
-  /**
-   * Enables the feature that allows you to replace one subscription
-   * for another in the subscribe() API.
-   */
-  REPLACE_SUBSCRIPTION: 'replace-subscription',
-
-  /**
-   * Enables the contributions feature.
-   * DEPRECATED. This flag can be removed once not used by anyone.
-   */
-  CONTRIBUTIONS: 'contributions',
-
-  /**
-   * Enables the Propensity feature
-   */
-  PROPENSITY: 'propensity',
-
-  /**
-   * Enables the Smartbox feature.
-   */
-  SMARTBOX: 'smartbox',
-
-  /**
-   * Enables using new Activities APIs
-   */
-  HEJIRA: 'hejira',
-};
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -10524,8 +11960,8 @@ class Xhr {
     init = setupInit(init);
     return this.fetch_(input, init)
       .then(
-        response => response,
-        reason => {
+        (response) => response,
+        (reason) => {
           const targetOrigin = parseUrl$1(input).origin;
           throw new Error(
             `XHR Failed fetching (${targetOrigin}/...):`,
@@ -10533,7 +11969,7 @@ class Xhr {
           );
         }
       )
-      .then(response => assertSuccess(response));
+      .then((response) => assertSuccess(response));
   }
 }
 
@@ -10590,7 +12026,7 @@ function setupInit(init, accept) {
  * @private Visible for testing
  */
 function fetchPolyfill(input, init) {
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     const xhr = createXhrRequest(init.method || 'GET', input);
 
     if (init.credentials == 'include') {
@@ -10602,7 +12038,7 @@ function fetchPolyfill(input, init) {
     }
 
     if (init.headers) {
-      Object.keys(init.headers).forEach(function(header) {
+      Object.keys(init.headers).forEach(function (header) {
         xhr.setRequestHeader(header, init.headers[header]);
       });
     }
@@ -10670,7 +12106,7 @@ function isRetriable(status) {
  * @private Visible for testing
  */
 function assertSuccess(response) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     if (response.ok) {
       return resolve(response);
     }
@@ -10845,6 +12281,21 @@ class Fetcher {
    * @return {!Promise<!../utils/xhr.FetchResponse>}
    */
   fetch(unusedUrl, unusedInit) {}
+
+  /**
+   * POST data to a URL endpoint, do not wait for a response.
+   * @param {!string} unusedUrl
+   * @param {!string|!Object} unusedData
+   */
+  sendBeacon(unusedUrl, unusedData) {}
+
+  /**
+   * POST data to a URL endpoint, get a Promise for a response
+   * @param {!string} unusedUrl
+   * @param {!string|!Object} unusedMessage
+   * @return {!Promise<!../utils/xhr.FetchResponse>}
+   */
+  sendPost(unusedUrl, unusedMessage) {}
 }
 
 /**
@@ -10866,12 +12317,41 @@ class XhrFetcher {
       headers: {'Accept': 'text/plain, application/json'},
       credentials: 'include',
     });
-    return this.xhr_.fetch(url, init).then(response => response.json());
+    return this.fetch(url, init).then((response) => response.json());
+  }
+
+  sendPost(url, message) {
+    const init = /** @type {!../utils/xhr.FetchInitDef} */ ({
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+      },
+      credentials: 'include',
+      body: 'f.req=' + serializeProtoMessageForUrl(message),
+    });
+    return this.fetch(url, init).then(
+      (response) => (response && response.json()) || {}
+    );
   }
 
   /** @override */
   fetch(url, init) {
     return this.xhr_.fetch(url, init);
+  }
+
+  /** @override */
+  sendBeacon(url, data) {
+    if (navigator.sendBeacon) {
+      const headers = {type: 'application/x-www-form-urlencoded;charset=UTF-8'};
+      const blob = new Blob(
+        ['f.req=' + serializeProtoMessageForUrl(data)],
+        headers
+      );
+      navigator.sendBeacon(url, blob);
+      return;
+    }
+    // Only newer browsers support beacon.  Fallback to standard XHR POST.
+    this.sendPost(url, data);
   }
 }
 
@@ -11074,14 +12554,14 @@ class LinkCompleteFlow {
         /* requireSecureChannel */ false
       );
       return promise.then(
-        response => {
+        (response) => {
           deps
             .eventManager()
             .logSwgEvent(AnalyticsEvent.ACTION_LINK_CONTINUE, true);
           const flow = new LinkCompleteFlow(deps, response);
           flow.start();
         },
-        reason => {
+        (reason) => {
           if (isCancelError(reason)) {
             deps
               .eventManager()
@@ -11141,7 +12621,7 @@ class LinkCompleteFlow {
     this.completeResolver_ = null;
 
     /** @private @const {!Promise} */
-    this.completePromise_ = new Promise(resolve => {
+    this.completePromise_ = new Promise((resolve) => {
       this.completeResolver_ = resolve;
     });
   }
@@ -11157,10 +12637,10 @@ class LinkCompleteFlow {
       /* requireSecureChannel */ true
     );
     promise
-      .then(response => {
+      .then((response) => {
         this.complete_(response);
       })
-      .catch(reason => {
+      .catch((reason) => {
         // Rethrow async.
         setTimeout(() => {
           throw reason;
@@ -11292,10 +12772,10 @@ class LinkSaveFlow {
     if (!response || !response.getRequested()) {
       return;
     }
-    this.requestPromise_ = new Promise(resolve => {
+    this.requestPromise_ = new Promise((resolve) => {
       resolve(this.callback_());
     })
-      .then(request => {
+      .then((request) => {
         const saveRequest = new LinkSaveTokenRequest();
         if (request && request.token) {
           if (request.authCode) {
@@ -11310,7 +12790,7 @@ class LinkSaveFlow {
         }
         this.activityIframeView_.execute(saveRequest);
       })
-      .catch(reason => {
+      .catch((reason) => {
         // The flow is complete.
         this.complete_();
         throw reason;
@@ -11355,10 +12835,10 @@ class LinkSaveFlow {
         /* requireOriginVerified */ true,
         /* requireSecureChannel */ true
       )
-      .then(result => {
+      .then((result) => {
         return this.handleLinkSaveResponse_(result);
       })
-      .catch(reason => {
+      .catch((reason) => {
         // In case this flow wasn't complete, complete it here
         this.complete_();
         // Handle cancellation from user, link confirm start or completion here
@@ -11377,75 +12857,6 @@ class LinkSaveFlow {
         throw reason;
       });
   }
-}
-
-/**
- * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/** @const {!Object<string,AnalyticsEvent>} */
-const PublisherEventToAnalyticsEvent = {
-  [Event.IMPRESSION_PAYWALL]: AnalyticsEvent.IMPRESSION_PAYWALL,
-  [Event.IMPRESSION_AD]: AnalyticsEvent.IMPRESSION_AD,
-  [Event.IMPRESSION_OFFERS]: AnalyticsEvent.IMPRESSION_OFFERS,
-  [Event.ACTION_SUBSCRIPTIONS_LANDING_PAGE]:
-    AnalyticsEvent.ACTION_SUBSCRIPTIONS_LANDING_PAGE,
-  [Event.ACTION_OFFER_SELECTED]: AnalyticsEvent.ACTION_OFFER_SELECTED,
-  [Event.ACTION_PAYMENT_FLOW_STARTED]:
-    AnalyticsEvent.ACTION_PAYMENT_FLOW_STARTED,
-  [Event.ACTION_PAYMENT_COMPLETED]: AnalyticsEvent.ACTION_PAYMENT_COMPLETE,
-  [Event.EVENT_CUSTOM]: AnalyticsEvent.EVENT_CUSTOM,
-};
-
-/** @const {!Object<number,?Event>} */
-const AnalyticsEventToPublisherEvent = {
-  [AnalyticsEvent.UNKNOWN]: null,
-  [AnalyticsEvent.IMPRESSION_PAYWALL]: Event.IMPRESSION_PAYWALL,
-  [AnalyticsEvent.IMPRESSION_AD]: Event.IMPRESSION_AD,
-  [AnalyticsEvent.IMPRESSION_OFFERS]: Event.IMPRESSION_OFFERS,
-  [AnalyticsEvent.IMPRESSION_SUBSCRIBE_BUTTON]: null,
-  [AnalyticsEvent.IMPRESSION_SMARTBOX]: null,
-  [AnalyticsEvent.ACTION_SUBSCRIBE]: null,
-  [AnalyticsEvent.ACTION_PAYMENT_COMPLETE]: Event.ACTION_PAYMENT_COMPLETED,
-  [AnalyticsEvent.ACTION_ACCOUNT_CREATED]: null,
-  [AnalyticsEvent.ACTION_ACCOUNT_ACKNOWLEDGED]: null,
-  [AnalyticsEvent.ACTION_SUBSCRIPTIONS_LANDING_PAGE]:
-    Event.ACTION_SUBSCRIPTIONS_LANDING_PAGE,
-  [AnalyticsEvent.ACTION_PAYMENT_FLOW_STARTED]:
-    Event.ACTION_PAYMENT_FLOW_STARTED,
-  [AnalyticsEvent.ACTION_OFFER_SELECTED]: Event.ACTION_OFFER_SELECTED,
-  [AnalyticsEvent.EVENT_PAYMENT_FAILED]: null,
-  [AnalyticsEvent.EVENT_CUSTOM]: Event.EVENT_CUSTOM,
-};
-
-/**
- * Converts a propensity event enum into an analytics event enum.
- * @param {!Event|string} propensityEvent
- * @returns {!AnalyticsEvent}
- */
-function publisherEventToAnalyticsEvent(propensityEvent) {
-  return PublisherEventToAnalyticsEvent[propensityEvent];
-}
-
-/**
- * Converts an analytics event enum into a propensity event enum.
- * @param {!AnalyticsEvent} analyticsEvent
- * @returns {?Event}
- */
-function analyticsEventToPublisherEvent(analyticsEvent) {
-  return AnalyticsEventToPublisherEvent[analyticsEvent];
 }
 
 /**
@@ -11590,7 +13001,6 @@ class LoginNotificationApi {
         productId: deps.pageConfig().getProductId(),
         // No need to ask the user. Just tell them you're logging them in.
         userConsent: false,
-        // TODO(chenshay): Pass entitlements value here.
       }),
       /* shouldFadeBody */ true
     );
@@ -11614,7 +13024,7 @@ class LoginNotificationApi {
         // The consent part is complete.
         this.dialogManager_.completeView(this.activityIframeView_);
       },
-      reason => {
+      (reason) => {
         this.dialogManager_.completeView(this.activityIframeView_);
         throw reason;
       }
@@ -11668,7 +13078,6 @@ class LoginPromptApi {
         productId: deps.pageConfig().getProductId(),
         // First ask the user if they want us to log them in.
         userConsent: true,
-        // TODO(chenshay): Pass entitlements value here.
       }),
       /* shouldFadeBody */ true
     );
@@ -11692,7 +13101,7 @@ class LoginPromptApi {
         // The consent part is complete.
         this.dialogManager_.completeView(this.activityIframeView_);
       },
-      reason => {
+      (reason) => {
         if (isCancelError(reason)) {
           this.deps_
             .callbacks()
@@ -11760,7 +13169,7 @@ class OffersApi {
         encodeURIComponent(productId)
     );
     // TODO(dvoytenko): switch to a non-credentialed request after launch.
-    return this.fetcher_.fetchCredentialedJson(url).then(json => {
+    return this.fetcher_.fetchCredentialedJson(url).then((json) => {
       return json['offers'] || [];
     });
   }
@@ -12893,9 +14302,6 @@ class PayFrameHelper {
   }
 }
 
-// Start loading pay frame early
-PayFrameHelper.load();
-
 /**
  * @license
  * Copyright 2018 Google Inc. All Rights Reserved.
@@ -13951,8 +15357,7 @@ class UpiHandler {
   loadPaymentData(paymentDataRequest, upiPaymentMethod, onResultCallback) {
     const parameters = upiPaymentMethod['parameters'];
     const transactionInfo = paymentDataRequest['transactionInfo'];
-    const supportedInstruments = 
-        [{
+    const supportedInstruments = [{
           'supportedMethods': ['https://tez.google.com/pay'],
           'data': {
             'pa': parameters['payeeVpa'],
@@ -14064,7 +15469,7 @@ class UpiHandler {
    */
   redirectToGooglePlay_() {
     window.location.replace(
-          // NOLINT
+        // NOLINT
             'https://play.google.com/store/apps/details?id=com.google.android.apps.nbu.paisa.user');  // NOLINT
     return Promise.reject(
         {'errorMessage': 'Cannot redirect to Tez page in Google Play.'});
@@ -14363,6 +15768,9 @@ class PaymentsAsyncClient {
     this.webActivityDelegate_.onResult(this.onResult_.bind(this));
     this.delegate_.onResult(this.onResult_.bind(this));
 
+    // Load PayFrameHelper upon client construction.
+    PayFrameHelper.load();
+
     // If web delegate is used anyway then this is overridden in the web
     // activity delegate when load payment data is called.
     if (chromeSupportsPaymentHandler()) {
@@ -14392,7 +15800,6 @@ class PaymentsAsyncClient {
    * @param {!IsReadyToPayRequest} isReadyToPayRequest
    * @return {!Promise} The promise will contain the boolean result and error
    *     message when possible.
-   * @export
    */
   isReadyToPay(isReadyToPayRequest) {
     // Merge with paymentOptions, preferring values from isReadyToPayRequest
@@ -14560,7 +15967,6 @@ class PaymentsAsyncClient {
    *
    * @param {!PaymentDataRequest} paymentDataRequest Provides necessary
    *     information to support a payment.
-   * @export
    */
   prefetchPaymentData(paymentDataRequest) {
     /** @type {?string} */
@@ -14591,7 +15997,6 @@ class PaymentsAsyncClient {
    *
    * @param {!PaymentDataRequest} paymentDataRequest Provides necessary
    *     information to support a payment.
-   * @export
    */
   loadPaymentData(paymentDataRequest) {
     PayFrameHelper.postMessage({
@@ -14637,16 +16042,13 @@ class PaymentsAsyncClient {
       return;
     }
 
-    const isReadyToPayResult = window.sessionStorage.getItem(
-      Constants.IS_READY_TO_PAY_RESULT_KEY
-    );
     this.loadPaymentDataApiStartTimeMs_ = Date.now();
     this.assignInternalParams_(paymentDataRequest);
     // We want to fall back to the web delegate if payment handler is supported
     // and isReadyToPay bit is not explicitly set to true (fallback to web if
     // isReadyToPay wasn't called for PH)
     if (
-      (chromeSupportsPaymentHandler() && isReadyToPayResult !== 'true') ||
+      chromeSupportsPaymentHandler() ||
       isNativeDisabledInRequest(paymentDataRequest)
     ) {
       this.webActivityDelegate_.loadPaymentData(paymentDataRequest);
@@ -14671,7 +16073,6 @@ class PaymentsAsyncClient {
    *
    * @param {!ButtonOptions=} options
    * @return {!Element}
-   * @export
    */
   createButton(options = {}) {
     const button = null;
@@ -14782,6 +16183,79 @@ function isNativeDisabledInRequest(request) {
  * limitations under the License.
  */
 
+class Preconnect {
+  /**
+   * @param {!Document} doc
+   */
+  constructor(doc) {
+    /** @private @const {!Document} */
+    this.doc_ = doc;
+  }
+
+  /**
+   * @param {string} url
+   */
+  preconnect(url) {
+    this.pre_(url, 'preconnect');
+  }
+
+  /**
+   * @param {string} url
+   */
+  dnsPrefetch(url) {
+    this.pre_(url, 'dns-prefetch');
+  }
+
+  /**
+   * @param {string} url
+   */
+  prefetch(url) {
+    this.pre_(url, 'preconnect prefetch');
+  }
+
+  /**
+   * @param {string} url
+   * @param {string} as
+   */
+  preload(url, as) {
+    this.pre_(url, 'preconnect preload', as);
+  }
+
+  /**
+   * @param {string} url
+   * @param {string} rel
+   * @param {?string=} as
+   * @private
+   */
+  pre_(url, rel, as) {
+    // <link rel="prefetch" href="..." as="">
+    const linkEl = createElement(this.doc_, 'link', {
+      'rel': rel,
+      'href': url,
+    });
+    if (as) {
+      linkEl.setAttribute('as', as);
+    }
+    this.doc_.head.appendChild(linkEl);
+  }
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 const REDIRECT_STORAGE_KEY = 'subscribe.google.com:rk';
 
 /**
@@ -14826,18 +16300,11 @@ class PayClient {
     /** @private @const {!RedirectVerifierHelper} */
     this.redirectVerifierHelper_ = new RedirectVerifierHelper(this.win_);
 
-    /** @private @const {!PaymentsAsyncClient} */
-    this.client_ = this.createClient_(
-      /** @type {!PaymentOptions} */
-      ({
-        environment: 'PRODUCTION',
-        'i': {
-          'redirectKey': this.redirectVerifierHelper_.restoreKey(),
-        },
-      }),
-      this.analytics_.getTransactionId(),
-      this.handleResponse_.bind(this)
-    );
+    /** @private {?PaymentsAsyncClient} */
+    this.client_ = null;
+
+    /** @private @const {!Preconnect} */
+    this.preconnect_ = new Preconnect(this.win_.document);
 
     // Prepare new verifier pair.
     this.redirectVerifierHelper_.prepare();
@@ -14874,9 +16341,6 @@ class PayClient {
       'https://payments.google.com/payments/v4/js/integrator.js?ss=md'
     );
     pre.prefetch('https://clients2.google.com/gr/gr_full_2.0.6.js');
-    pre.preconnect('https://www.gstatic.com/');
-    pre.preconnect('https://fonts.googleapis.com/');
-    pre.preconnect('https://www.google.com/');
   }
 
   /**
@@ -14894,6 +16358,20 @@ class PayClient {
   start(paymentRequest, options = {}) {
     this.request_ = paymentRequest;
 
+    if (!this.client_) {
+      this.preconnect(this.preconnect_);
+      this.client_ = this.createClient_(
+        /** @type {!PaymentOptions} */
+        ({
+          environment: 'PRODUCTION',
+          'i': {
+            'redirectKey': this.redirectVerifierHelper_.restoreKey(),
+          },
+        }),
+        this.analytics_.getTransactionId(),
+        this.handleResponse_.bind(this)
+      );
+    }
     if (options.forceRedirect) {
       paymentRequest = Object.assign(paymentRequest, {
         'forceRedirect': options.forceRedirect || false,
@@ -14907,9 +16385,9 @@ class PayClient {
       this.win_ != this.top_()
     );
     let resolver = null;
-    const promise = new Promise(resolve => (resolver = resolve));
+    const promise = new Promise((resolve) => (resolver = resolve));
     // Notice that the callback for verifier may execute asynchronously.
-    this.redirectVerifierHelper_.useVerifier(verifier => {
+    this.redirectVerifierHelper_.useVerifier((verifier) => {
       if (verifier) {
         setInternalParam(paymentRequest, 'redirectVerifier', verifier);
       }
@@ -14969,19 +16447,20 @@ class PayClient {
         // Temporary client side solution to remember the
         // input params. TODO: Remove this once server-side
         // input preservation is done and is part of the response.
-        res => {
+        (res) => {
           if (request) {
             res['paymentRequest'] = request;
           }
           return res;
         }
       )
-      .catch(reason => {
+      .catch((reason) => {
         if (typeof reason == 'object' && reason['statusCode'] == 'CANCELED') {
           const error = createCancelError(this.win_);
           if (request) {
-            error['productType'] =
-              /** @type {!PaymentDataRequest} */ (request)['i']['productType'];
+            error['productType'] = /** @type {!PaymentDataRequest} */ (request)[
+              'i'
+            ]['productType'];
           } else {
             error['productType'] = null;
           }
@@ -15057,7 +16536,7 @@ class RedirectVerifierHelper {
    * @param {function(?string)} callback
    */
   useVerifier(callback) {
-    this.getOrCreatePair_(pair => {
+    this.getOrCreatePair_((pair) => {
       if (pair) {
         try {
           this.win_.localStorage.setItem(REDIRECT_STORAGE_KEY, pair.key);
@@ -15100,7 +16579,7 @@ class RedirectVerifierHelper {
       callback(this.pair_);
     } else if (this.pairPromise_) {
       // Otherwise wait for it to be created.
-      this.pairPromise_.then(pair => callback(pair));
+      this.pairPromise_.then((pair) => callback(pair));
     }
     return this.pairPromise_;
   }
@@ -15120,9 +16599,16 @@ class RedirectVerifierHelper {
     // b. WebCrypto (crypto.subtle);
     // c. Crypto random (crypto.getRandomValues);
     // d. SHA284 (crypto.subtle.digest).
+    let supportsLocalStorage;
+    try {
+      supportsLocalStorage = !!this.win_.localStorage;
+    } catch (e) {
+      // Note: This can happen when cookies are disabled.
+      supportsLocalStorage = false;
+    }
     const crypto = this.win_.crypto;
     if (
-      this.win_.localStorage &&
+      supportsLocalStorage &&
       crypto &&
       crypto.getRandomValues &&
       crypto.subtle &&
@@ -15138,7 +16624,7 @@ class RedirectVerifierHelper {
 
         // 3. Create a hash.
         crypto.subtle.digest({name: 'SHA-384'}, stringToBytes(key)).then(
-          buffer => {
+          (buffer) => {
             const verifier = btoa(
               bytesToString(
                 new Uint8Array(/** @type {!ArrayBuffer} */ (buffer))
@@ -15146,7 +16632,7 @@ class RedirectVerifierHelper {
             );
             resolve({key, verifier});
           },
-          reason => {
+          (reason) => {
             reject(reason);
           }
         );
@@ -15156,7 +16642,7 @@ class RedirectVerifierHelper {
           // recoverable.
           return null;
         })
-        .then(pair => {
+        .then((pair) => {
           this.pairCreated_ = true;
           this.pair_ = pair;
           return pair;
@@ -15178,79 +16664,6 @@ function setInternalParam(paymentRequest, param, value) {
   paymentRequest['i'] = Object.assign(paymentRequest['i'] || {}, {
     [param]: value,
   });
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-class Preconnect {
-  /**
-   * @param {!Document} doc
-   */
-  constructor(doc) {
-    /** @private @const {!Document} */
-    this.doc_ = doc;
-  }
-
-  /**
-   * @param {string} url
-   */
-  preconnect(url) {
-    this.pre_(url, 'preconnect');
-  }
-
-  /**
-   * @param {string} url
-   */
-  dnsPrefetch(url) {
-    this.pre_(url, 'dns-prefetch');
-  }
-
-  /**
-   * @param {string} url
-   */
-  prefetch(url) {
-    this.pre_(url, 'preconnect prefetch');
-  }
-
-  /**
-   * @param {string} url
-   * @param {string} as
-   */
-  preload(url, as) {
-    this.pre_(url, 'preconnect preload', as);
-  }
-
-  /**
-   * @param {string} url
-   * @param {string} rel
-   * @param {?string=} as
-   * @private
-   */
-  pre_(url, rel, as) {
-    // <link rel="prefetch" href="..." as="">
-    const linkEl = createElement(this.doc_, 'link', {
-      'rel': rel,
-      'href': url,
-    });
-    if (as) {
-      linkEl.setAttribute('as', as);
-    }
-    this.doc_.head.appendChild(linkEl);
-  }
 }
 
 /**
@@ -15382,6 +16795,12 @@ class PropensityServer {
    * @param {!../api/client-event-manager-api.ClientEvent} event
    */
   handleClientEvent_(event) {
+    // Propensity does not need this data and does not have the right to
+    // it at this time.  We can consider this if necessary in the future.
+    if (event.eventOriginator === EventOriginator.SHOWCASE_CLIENT) {
+      return;
+    }
+
     /**
      * Does a live check of the config because we don't know when publisher
      * called to enable (it may be after a consent dialog).
@@ -15493,8 +16912,8 @@ class PropensityServer {
       referrer;
     return this.fetcher_
       .fetch(this.propensityUrl_(url), init)
-      .then(result => result.json())
-      .then(response => {
+      .then((result) => result.json())
+      .then((response) => {
         return this.parsePropensityResponse_(response);
       });
   }
@@ -15651,7 +17070,7 @@ class Storage {
    */
   get(key) {
     if (!this.values_[key]) {
-      this.values_[key] = new Promise(resolve => {
+      this.values_[key] = new Promise((resolve) => {
         if (this.win_.sessionStorage) {
           try {
             resolve(this.win_.sessionStorage.getItem(storageKey(key)));
@@ -15674,7 +17093,7 @@ class Storage {
    */
   set(key, value) {
     this.values_[key] = Promise.resolve(value);
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       if (this.win_.sessionStorage) {
         try {
           this.win_.sessionStorage.setItem(storageKey(key), value);
@@ -15692,7 +17111,7 @@ class Storage {
    */
   remove(key) {
     delete this.values_[key];
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       if (this.win_.sessionStorage) {
         try {
           this.win_.sessionStorage.removeItem(storageKey(key));
@@ -15779,17 +17198,672 @@ class WaitForSubscriptionLookupApi {
     );
 
     return this.accountPromise_.then(
-      account => {
+      (account) => {
         // Account was found.
         this.dialogManager_.completeView(this.activityIframeView_);
         return account;
       },
-      reason => {
+      (reason) => {
         this.dialogManager_.completeView(this.activityIframeView_);
         throw reason;
       }
     );
   }
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// NOTE: Please don't edit this file directly!
+//   You can (re)compile this file by running the "yarn build-i18n" shell command.
+
+const I18N_STRINGS = {
+  'GAA_REGWALL_TITLE': {
+    'de': 'Immer gut informiert mit Google',
+    'en': 'Get more with Google',
+    'fr': 'Plus de possibilit&#xE9;s avec Google',
+    'pt-br': 'Veja mais com o Google',
+  },
+  'GAA_REGWALL_DESCRIPTION': {
+    'de':
+      '<strong></strong>Dieser Inhalt ist normalerweise kostenpflichtig. Google gew&#xE4;hrt dir jedoch kostenlos Zugriff auf diesen Artikel und andere Inhalte, wenn du dich mit deinem Google-Konto bei <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> registrierst.',
+    'en':
+      '<strong></strong>This content usually requires payment, but Google is giving you free access to this article and more when you register with <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> using your Google Account.',
+    'fr':
+      '<strong></strong>Ce contenu est g&#xE9;n&#xE9;ralement payant, mais vous pouvez lire cet article et d&apos;autres contenus gratuitement gr&#xE2;ce &#xE0; Google en vous inscrivant sur <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> avec votre compte Google.',
+    'pt-br':
+      '<strong></strong>Normalmente, &#xE9; preciso pagar por este conte&#xFA;do. Por&#xE9;m, basta voc&#xEA; se registrar na publica&#xE7;&#xE3;o <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> usando sua Conta do Google para ter acesso gratuito a esta mat&#xE9;ria e muito mais.',
+  },
+  'GAA_REGWALL_PUBLISHER_SIGN_IN_BUTTON': {
+    'de': 'Du hast bereits ein Konto?',
+    'en': 'Already have an account?',
+    'fr': 'Vous avez d&#xE9;j&#xE0; un compte&#xA0;?',
+    'pt-br': 'J&#xE1; tem uma conta?',
+  },
+};
+
+/**
+ * Copyright 2020 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/** Stamp for post messages. */
+const POST_MESSAGE_STAMP = 'swg-gaa-post-message-stamp';
+
+/** Introduction command for post messages. */
+const POST_MESSAGE_COMMAND_INTRODUCTION = 'introduction';
+
+/** User command for post messages. */
+const POST_MESSAGE_COMMAND_USER = 'user';
+
+/** ID for the Google Sign-In iframe element. */
+const GOOGLE_SIGN_IN_IFRAME_ID = 'swg-google-sign-in-iframe';
+
+/** ID for the Google Sign-In button element. */
+const GOOGLE_SIGN_IN_BUTTON_ID = 'swg-google-sign-in-button';
+
+/** ID for the Publisher sign-in button element. */
+const PUBLISHER_SIGN_IN_BUTTON_ID = 'swg-publisher-sign-in-button';
+
+/** ID for the Regwall container element. */
+const REGWALL_CONTAINER_ID = 'swg-regwall-container';
+
+/** ID for the Regwall dialog element. */
+const REGWALL_DIALOG_ID = 'swg-regwall-dialog';
+
+/** ID for the Regwall title element. */
+const REGWALL_TITLE_ID = 'swg-regwall-title';
+
+/** Class the Regwall uses to disable scrolling. */
+const REGWALL_DISABLE_SCROLLING_CLASS =
+  'gaa-metering-regwall--disable-scrolling';
+
+/**
+ * HTML for the metering regwall dialog, where users can sign in with Google.
+ * The script creates a dialog based on this HTML.
+ *
+ * The HTML includes an iframe that loads the Google Sign-In button.
+ * This iframe can live on a different origin.
+ */
+const REGWALL_HTML = `
+<style>
+  .${REGWALL_DISABLE_SCROLLING_CLASS} {
+    overflow: hidden;
+  }
+
+  .gaa-metering-regwall--dialog-spacer,
+  .gaa-metering-regwall--dialog,
+  .gaa-metering-regwall--logo,
+  .gaa-metering-regwall--title,
+  .gaa-metering-regwall--description,
+  .gaa-metering-regwall--description strong,
+  .gaa-metering-regwall--iframe,
+  .gaa-metering-regwall--publisher-no-thanks-button {
+    all: initial;
+    box-sizing: border-box;
+    font-family: Roboto, arial, sans-serif;
+  }
+
+  .gaa-metering-regwall--dialog-spacer {
+    bottom: 0;
+    display: block;
+    position: fixed;
+    width: 100%;
+  }
+
+  @keyframes slideUp {
+    from {transform: translate(0, 200px);}
+    to {transform: translate(0, 0);}
+  }
+
+  .gaa-metering-regwall--dialog {
+    animation: slideUp 0.5s;
+    background: white;
+    border-radius: 12px 12px 0 0;
+    box-shadow: 0px -2px 6px rgba(0, 0, 0, 0.3);
+    display: block;
+    margin: 0 auto;
+    max-width: 100%;
+    padding: 24px 20px;
+    width: 410px;
+  }
+
+  .gaa-metering-regwall--logo {
+    display: block;
+    margin: 0 auto 24px;
+  }
+
+  .gaa-metering-regwall--title {
+    color: #000;
+    display: block;
+    font-size: 16px;
+    margin: 0 0 8px;
+  }
+  
+  .gaa-metering-regwall--description {
+    color: #646464;
+    display: block;
+    font-size: 14px;
+    line-height: 19px;
+    margin: 0 0 30px;
+  }
+
+  .gaa-metering-regwall--description strong {
+    color: #646464;
+    font-size: 14px;
+    line-height: 19px;
+    font-weight: bold;
+  }
+
+  .gaa-metering-regwall--iframe {
+    border: none;
+    display: block;
+    height: 36px;
+    margin: 0 0 30px;
+    width: 100%;
+  }
+
+  .gaa-metering-regwall--line {
+    background-color: #ddd;
+    display: block;
+    height: 1px;
+    margin: 0 0 24px;
+  }
+
+  .gaa-metering-regwall--publisher-sign-in-button,
+  .gaa-metering-regwall--publisher-no-thanks-button {
+    color: #1967d2;
+    display: block;
+    cursor: pointer;
+    font-size: 12px;
+  }
+
+  .gaa-metering-regwall--publisher-sign-in-button {
+  }
+
+  .gaa-metering-regwall--publisher-no-thanks-button {
+    display: none;
+    float: right;
+  }
+
+  .gaa-metering-regwall--google-sign-in-button {
+    height: 36px;
+    margin: 0 auto 30px;
+  }
+
+  .gaa-metering-regwall--google-sign-in-button > div {
+    animation: swgGoogleSignInButtonfadeIn 0.32s;
+  }
+
+  @keyframes swgGoogleSignInButtonfadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .gaa-metering-regwall--google-sign-in-button .abcRioButton.abcRioButtonBlue {
+    background-color: #1A73E8;
+    box-shadow: none;
+    -webkit-box-shadow: none;
+    border-radius: 4px;
+    width: 100% !important;
+  }
+
+  .gaa-metering-regwall--google-sign-in-button .abcRioButton.abcRioButtonBlue .abcRioButtonIcon {
+    display: none;
+  }
+
+  .gaa-metering-regwall--google-sign-in-button .abcRioButton.abcRioButtonBlue .abcRioButtonContents {
+    font-size: 15px !important;
+  }
+</style>
+
+<div class="gaa-metering-regwall--dialog-spacer">
+  <div role="dialog" aria-modal="true" class="gaa-metering-regwall--dialog" id="${REGWALL_DIALOG_ID}" aria-labelledby="${REGWALL_TITLE_ID}">
+    <img alt="Google" class="gaa-metering-regwall--logo" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI3NCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDc0IDI0Ij48cGF0aCBmaWxsPSIjNDI4NUY0IiBkPSJNOS4yNCA4LjE5djIuNDZoNS44OGMtLjE4IDEuMzgtLjY0IDIuMzktMS4zNCAzLjEtLjg2Ljg2LTIuMiAxLjgtNC41NCAxLjgtMy42MiAwLTYuNDUtMi45Mi02LjQ1LTYuNTRzMi44My02LjU0IDYuNDUtNi41NGMxLjk1IDAgMy4zOC43NyA0LjQzIDEuNzZMMTUuNCAyLjVDMTMuOTQgMS4wOCAxMS45OCAwIDkuMjQgMCA0LjI4IDAgLjExIDQuMDQuMTEgOXM0LjE3IDkgOS4xMyA5YzIuNjggMCA0LjctLjg4IDYuMjgtMi41MiAxLjYyLTEuNjIgMi4xMy0zLjkxIDIuMTMtNS43NSAwLS41Ny0uMDQtMS4xLS4xMy0xLjU0SDkuMjR6Ii8+PHBhdGggZmlsbD0iI0VBNDMzNSIgZD0iTTI1IDYuMTljLTMuMjEgMC01LjgzIDIuNDQtNS44MyA1LjgxIDAgMy4zNCAyLjYyIDUuODEgNS44MyA1LjgxczUuODMtMi40NiA1LjgzLTUuODFjMC0zLjM3LTIuNjItNS44MS01LjgzLTUuODF6bTAgOS4zM2MtMS43NiAwLTMuMjgtMS40NS0zLjI4LTMuNTIgMC0yLjA5IDEuNTItMy41MiAzLjI4LTMuNTJzMy4yOCAxLjQzIDMuMjggMy41MmMwIDIuMDctMS41MiAzLjUyLTMuMjggMy41MnoiLz48cGF0aCBmaWxsPSIjNDI4NUY0IiBkPSJNNTMuNTggNy40OWgtLjA5Yy0uNTctLjY4LTEuNjctMS4zLTMuMDYtMS4zQzQ3LjUzIDYuMTkgNDUgOC43MiA0NSAxMmMwIDMuMjYgMi41MyA1LjgxIDUuNDMgNS44MSAxLjM5IDAgMi40OS0uNjIgMy4wNi0xLjMyaC4wOXYuODFjMCAyLjIyLTEuMTkgMy40MS0zLjEgMy40MS0xLjU2IDAtMi41My0xLjEyLTIuOTMtMi4wN2wtMi4yMi45MmMuNjQgMS41NCAyLjMzIDMuNDMgNS4xNSAzLjQzIDIuOTkgMCA1LjUyLTEuNzYgNS41Mi02LjA1VjYuNDloLTIuNDJ2MXptLTIuOTMgOC4wM2MtMS43NiAwLTMuMS0xLjUtMy4xLTMuNTIgMC0yLjA1IDEuMzQtMy41MiAzLjEtMy41MiAxLjc0IDAgMy4xIDEuNSAzLjEgMy41NC4wMSAyLjAzLTEuMzYgMy41LTMuMSAzLjV6Ii8+PHBhdGggZmlsbD0iI0ZCQkMwNSIgZD0iTTM4IDYuMTljLTMuMjEgMC01LjgzIDIuNDQtNS44MyA1LjgxIDAgMy4zNCAyLjYyIDUuODEgNS44MyA1LjgxczUuODMtMi40NiA1LjgzLTUuODFjMC0zLjM3LTIuNjItNS44MS01LjgzLTUuODF6bTAgOS4zM2MtMS43NiAwLTMuMjgtMS40NS0zLjI4LTMuNTIgMC0yLjA5IDEuNTItMy41MiAzLjI4LTMuNTJzMy4yOCAxLjQzIDMuMjggMy41MmMwIDIuMDctMS41MiAzLjUyLTMuMjggMy41MnoiLz48cGF0aCBmaWxsPSIjMzRBODUzIiBkPSJNNTggLjI0aDIuNTF2MTcuNTdINTh6Ii8+PHBhdGggZmlsbD0iI0VBNDMzNSIgZD0iTTY4LjI2IDE1LjUyYy0xLjMgMC0yLjIyLS41OS0yLjgyLTEuNzZsNy43Ny0zLjIxLS4yNi0uNjZjLS40OC0xLjMtMS45Ni0zLjctNC45Ny0zLjctMi45OSAwLTUuNDggMi4zNS01LjQ4IDUuODEgMCAzLjI2IDIuNDYgNS44MSA1Ljc2IDUuODEgMi42NiAwIDQuMi0xLjYzIDQuODQtMi41N2wtMS45OC0xLjMyYy0uNjYuOTYtMS41NiAxLjYtMi44NiAxLjZ6bS0uMTgtNy4xNWMxLjAzIDAgMS45MS41MyAyLjIgMS4yOGwtNS4yNSAyLjE3YzAtMi40NCAxLjczLTMuNDUgMy4wNS0zLjQ1eiIvPjwvc3ZnPg==" />
+
+    <div class="gaa-metering-regwall--title" id="${REGWALL_TITLE_ID}" tabindex="0">$GAA_REGWALL_TITLE$</div>
+
+    <div class="gaa-metering-regwall--description">
+      $GAA_REGWALL_DESCRIPTION$
+    </div>
+
+    <iframe
+        id="${GOOGLE_SIGN_IN_IFRAME_ID}"
+        class="gaa-metering-regwall--iframe"
+        src="$iframeUrl$">
+    </iframe>
+
+    <div class="gaa-metering-regwall--line"></div>
+
+    <a
+        id="${PUBLISHER_SIGN_IN_BUTTON_ID}"
+        class="gaa-metering-regwall--publisher-sign-in-button"
+        tabindex="0"
+        href="#">
+      $GAA_REGWALL_PUBLISHER_SIGN_IN_BUTTON$
+    </a>
+  </div>
+</div>
+`;
+
+/** Styles for the Google Sign-In button iframe. */
+const GOOGLE_SIGN_IN_IFRAME_STYLES = `
+body {
+  margin: 0;
+  overflow: hidden;
+}
+#${GOOGLE_SIGN_IN_BUTTON_ID} {
+  margin: 0 auto;
+}
+#${GOOGLE_SIGN_IN_BUTTON_ID} > div {
+  animation: fadeIn 0.32s;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+#${GOOGLE_SIGN_IN_BUTTON_ID} .abcRioButton.abcRioButtonBlue {
+  background-color: #1A73E8;
+  box-shadow: none;
+  -webkit-box-shadow: none;
+  border-radius: 4px;
+  width: 100% !important;
+}
+#${GOOGLE_SIGN_IN_BUTTON_ID} .abcRioButton.abcRioButtonBlue .abcRioButtonIcon {
+  display: none;
+}
+#${GOOGLE_SIGN_IN_BUTTON_ID} .abcRioButton.abcRioButtonBlue .abcRioButtonContents {
+  font-size: 15px !important;
+}
+`;
+
+/**
+ * Returns true if the query string contains fresh Google Article Access (GAA) params.
+ * @param {string} queryString
+ * @return {boolean}
+ */
+function queryStringHasFreshGaaParams(queryString) {
+  const params = parseQueryString$1(queryString);
+
+  // Verify GAA params exist.
+  if (
+    !params['gaa_at'] ||
+    !params['gaa_n'] ||
+    !params['gaa_sig'] ||
+    !params['gaa_ts']
+  ) {
+    return false;
+  }
+
+  // Verify timestamp isn't stale.
+  const expirationTimestamp = parseInt(params['gaa_ts'], 16);
+  const currentTimestamp = Date.now() / 1000;
+  if (expirationTimestamp < currentTimestamp) {
+    return false;
+  }
+
+  return true;
+}
+
+/** Renders Google Article Access (GAA) Metering Regwall. */
+class GaaMeteringRegwall {
+  /**
+   * Returns a promise for a Google Sign-In user object.
+   * https://developers.google.com/identity/sign-in/web/reference#googleusergetbasicprofile
+   *
+   * This method opens a metering regwall dialog,
+   * where users can sign in with Google.
+   * @nocollapse
+   * @param {{ iframeUrl: string }} params
+   * @return {!Promise<!GaaUserDef>}
+   */
+  static show({iframeUrl}) {
+    const queryString = GaaMeteringRegwall.getQueryString_();
+    if (!queryStringHasFreshGaaParams(queryString)) {
+      const errorMessage =
+        '[swg-gaa.js:GaaMeteringRegwall.show]: URL needs fresh GAA params.';
+      log_4(errorMessage);
+      return Promise.reject(errorMessage);
+    }
+
+    GaaMeteringRegwall.render_({iframeUrl});
+    GaaMeteringRegwall.sendIntroMessageToGsiIframe_({iframeUrl});
+    return GaaMeteringRegwall.getGaaUser_().then((gaaUser) => {
+      GaaMeteringRegwall.remove_();
+      return gaaUser;
+    });
+  }
+
+  /**
+   * Signs out of Google Sign-In.
+   * This is useful for developers who are testing their
+   * SwG integrations.
+   * @nocollapse
+   * @return {!Promise}
+   */
+  static signOut() {
+    return configureGoogleSignIn().then(() =>
+      self.gapi.auth2.getAuthInstance().signOut()
+    );
+  }
+
+  /**
+   * Renders the Regwall.
+   * @private
+   * @nocollapse
+   * @param {{ iframeUrl: string }} params
+   */
+  static render_({iframeUrl}) {
+    const containerEl = /** @type {!HTMLDivElement} */ (self.document.createElement(
+      'div'
+    ));
+    containerEl.id = REGWALL_CONTAINER_ID;
+    setImportantStyles(containerEl, {
+      'all': 'unset',
+      'background-color': 'rgba(32, 33, 36, 0.6)',
+      'border': 'none',
+      'bottom': '0',
+      'height': '100%',
+      'left': '0',
+      'opacity': '0',
+      'position': 'fixed',
+      'right': '0',
+      'transition': 'opacity 0.5s',
+      'top': '0',
+      'width': '100%',
+      'z-index': 2147483646,
+    });
+    containerEl./*OK*/ innerHTML = REGWALL_HTML.replace(
+      '$iframeUrl$',
+      iframeUrl
+    )
+      .replace(
+        '$GAA_REGWALL_TITLE$',
+        msg(I18N_STRINGS['GAA_REGWALL_TITLE'], containerEl)
+      )
+      .replace(
+        '$GAA_REGWALL_DESCRIPTION$',
+        msg(I18N_STRINGS['GAA_REGWALL_DESCRIPTION'], containerEl)
+      )
+      .replace(
+        '$GAA_REGWALL_PUBLISHER_SIGN_IN_BUTTON$',
+        msg(I18N_STRINGS['GAA_REGWALL_PUBLISHER_SIGN_IN_BUTTON'], containerEl)
+      );
+    containerEl.querySelector('ph')./*OK*/ innerHTML =
+      '<strong>' +
+      GaaMeteringRegwall.getPublisherNameFromPageConfig_() +
+      '</strong>';
+    self.document.body.appendChild(containerEl);
+    /** @suppress {suspiciousCode} */
+    containerEl.offsetHeight; // Trigger a repaint (to prepare the CSS transition).
+    setImportantStyles(containerEl, {'opacity': 1});
+    GaaMeteringRegwall.addClickListenerOnPublisherSignInButton_();
+
+    // Disable scrolling on the body element.
+    self.document.body.classList.add(REGWALL_DISABLE_SCROLLING_CLASS);
+
+    // Focus on the title after the dialog animates in.
+    // This helps people using screenreaders.
+    const dialogEl = self.document.getElementById(REGWALL_DIALOG_ID);
+    dialogEl.addEventListener('animationend', () => {
+      const titleEl = self.document.getElementById(REGWALL_TITLE_ID);
+      titleEl.focus();
+    });
+  }
+
+  /**
+   * Gets publisher name from page config.
+   * @private
+   * @nocollapse
+   * @return {string}
+   */
+  static getPublisherNameFromPageConfig_() {
+    const ldJsonElements = self.document.querySelectorAll(
+      'script[type="application/ld+json"]'
+    );
+
+    for (let i = 0; i < ldJsonElements.length; i++) {
+      const ldJsonElement = ldJsonElements[i];
+      const ldJson = /** @type {{ publisher: { name: string } }} */ (parseJson(
+        ldJsonElement.textContent
+      ));
+      if (ldJson.publisher && ldJson.publisher.name) {
+        return ldJson.publisher.name;
+      }
+    }
+
+    throw new Error('Article needs JSON-LD with a publisher name.');
+  }
+
+  /**
+   * Adds a click listener on the publisher sign-in button.
+   * @private
+   * @nocollapse
+   */
+  static addClickListenerOnPublisherSignInButton_() {
+    self.document
+      .getElementById(PUBLISHER_SIGN_IN_BUTTON_ID)
+      .addEventListener('click', (e) => {
+        e.preventDefault();
+        (self.SWG = self.SWG || []).push((subscriptions) => {
+          /** @type {!Subscriptions} */ (subscriptions).triggerLoginRequest({
+            linkRequested: false,
+          });
+        });
+      });
+  }
+
+  /**
+   * Returns the GAA user, after the user signs in.
+   * @private
+   * @nocollapse
+   * @return {!Promise<!GoogleUserDef>}
+   */
+  static getGaaUser_() {
+    // Listen for GAA user.
+    return new Promise((resolve) => {
+      self.addEventListener('message', (e) => {
+        if (
+          e.data.stamp === POST_MESSAGE_STAMP &&
+          e.data.command === POST_MESSAGE_COMMAND_USER
+        ) {
+          resolve(e.data.gaaUser);
+        }
+      });
+    });
+  }
+
+  /**
+   * Sends intro post message to Google Sign-In iframe.
+   * @private
+   * @nocollapse
+   * @param {{ iframeUrl: string }} params
+   */
+  static sendIntroMessageToGsiIframe_({iframeUrl}) {
+    // Introduce this window to the publisher's Google Sign-In iframe.
+    // This lets the iframe send post messages back to this window.
+    // Without the introduction, the iframe wouldn't have a reference to this window.
+    const googleSignInIframe = /** @type {!HTMLIFrameElement} */ (self.document.getElementById(
+      GOOGLE_SIGN_IN_IFRAME_ID
+    ));
+    googleSignInIframe.onload = () => {
+      googleSignInIframe.contentWindow.postMessage(
+        {
+          stamp: POST_MESSAGE_STAMP,
+          command: POST_MESSAGE_COMMAND_INTRODUCTION,
+        },
+        new URL(iframeUrl).origin
+      );
+    };
+  }
+
+  /**
+   * Removes the Regwall.
+   * @private
+   * @nocollapse
+   */
+  static remove_() {
+    const regwallContainer = self.document.getElementById(REGWALL_CONTAINER_ID);
+    if (regwallContainer) {
+      regwallContainer.remove();
+    }
+
+    // Re-enable scrolling on the body element.
+    self.document.body.classList.remove(REGWALL_DISABLE_SCROLLING_CLASS);
+  }
+
+  /**
+   * Returns query string from current URL.
+   * @private
+   * @return {string}
+   */
+  static getQueryString_() {
+    return self.location.search;
+  }
+}
+
+self.GaaMeteringRegwall = GaaMeteringRegwall;
+
+class GaaGoogleSignInButton {
+  /**
+   * Renders the Google Sign-In button.
+   * @nocollapse
+   * @param {{ allowedOrigins: !Array<string> }} params
+   */
+  static show({allowedOrigins}) {
+    // Apply iframe styles.
+    const styleEl = self.document.createElement('style');
+    styleEl./*OK*/ innerText = GOOGLE_SIGN_IN_IFRAME_STYLES;
+    self.document.head.appendChild(styleEl);
+
+    // Promise a function that sends messages to the parent frame.
+    // Note: A function is preferable to a reference to the parent frame
+    // because referencing the parent frame outside of the 'message' event
+    // handler throws an Error. A function defined within the handler can
+    // effectively save a reference to the parent frame though.
+    const sendMessageToParentFnPromise = new Promise((resolve) => {
+      self.addEventListener('message', (e) => {
+        if (
+          allowedOrigins.indexOf(e.origin) !== -1 &&
+          e.data.stamp === POST_MESSAGE_STAMP &&
+          e.data.command === POST_MESSAGE_COMMAND_INTRODUCTION
+        ) {
+          resolve((message) => {
+            e.source.postMessage(message, e.origin);
+          });
+        }
+      });
+    });
+
+    // Render the Google Sign-In button.
+    configureGoogleSignIn()
+      .then(
+        // Promise credentials.
+        () =>
+          new Promise((resolve) => {
+            // Render the Google Sign-In button.
+            const buttonEl = self.document.createElement('div');
+            buttonEl.id = GOOGLE_SIGN_IN_BUTTON_ID;
+            buttonEl.tabIndex = 0;
+            self.document.body.appendChild(buttonEl);
+            self.gapi.signin2.render(GOOGLE_SIGN_IN_BUTTON_ID, {
+              'longtitle': true,
+              'onsuccess': resolve,
+              'prompt': 'select_account',
+              'scope': 'profile email',
+              'theme': 'dark',
+            });
+          })
+      )
+      .then((googleUser) => {
+        // Gather GAA user details.
+        const basicProfile = /** @type {!GoogleUserDef} */ (googleUser).getBasicProfile();
+        /** @type {!GaaUserDef} */
+        const gaaUser = {
+          idToken: /** @type {!GoogleUserDef} */ (googleUser).getAuthResponse()
+            .id_token,
+          name: basicProfile.getName(),
+          givenName: basicProfile.getGivenName(),
+          familyName: basicProfile.getFamilyName(),
+          imageUrl: basicProfile.getImageUrl(),
+          email: basicProfile.getEmail(),
+        };
+
+        // Send GAA user to parent frame.
+        sendMessageToParentFnPromise.then((sendMessageToParent) => {
+          sendMessageToParent({
+            stamp: POST_MESSAGE_STAMP,
+            command: POST_MESSAGE_COMMAND_USER,
+            gaaUser,
+          });
+        });
+      });
+  }
+}
+
+self.GaaGoogleSignInButton = GaaGoogleSignInButton;
+
+/**
+ * Loads the Google Sign-In API.
+ *
+ * This function is used in two places.
+ * 1. The publisher's Google Sign-In iframe.
+ * 2. (Optional) Demos that allow users to sign out.
+ *
+ * @return {!Promise}
+ */
+function configureGoogleSignIn() {
+  // Wait for Google Sign-In API.
+  return (
+    new Promise((resolve) => {
+      const apiCheckInterval = setInterval(() => {
+        if (!!self.gapi) {
+          clearInterval(apiCheckInterval);
+          resolve();
+        }
+      }, 50);
+    })
+      // Load Auth2 module.
+      .then(() => new Promise((resolve) => self.gapi.load('auth2', resolve)))
+      // Specify "redirect" mode. It plays nicer with webviews.
+      .then(
+        () =>
+          // Only initialize Google Sign-In once.
+          self.gapi.auth2.getAuthInstance() || self.gapi.auth2.init()
+      )
+  );
 }
 
 /**
@@ -15874,7 +17948,7 @@ class ConfiguredRuntime {
     this.activityPorts_ = new ActivityPorts$1(this);
 
     /** @private @const {!AnalyticsService} */
-    this.analyticsService_ = new AnalyticsService(this);
+    this.analyticsService_ = new AnalyticsService(this, this.fetcher_);
     this.analyticsService_.start();
 
     /** @private @const {!PayClient} */
@@ -15910,14 +17984,16 @@ class ConfiguredRuntime {
     const preconnect = new Preconnect(this.win_.document);
 
     preconnect.prefetch('https://news.google.com/swg/js/v1/loader.svg');
+    preconnect.preconnect('https://www.gstatic.com/');
+    preconnect.preconnect('https://fonts.googleapis.com/');
+    preconnect.preconnect('https://www.google.com/');
     LinkCompleteFlow.configurePending(this);
     PayCompleteFlow.configurePending(this);
-    this.payClient_.preconnect(preconnect);
 
     injectStyleSheet(this.doc_, CSS$1);
 
     // Report redirect errors if any.
-    this.activityPorts_.onRedirectError(error => {
+    this.activityPorts_.onRedirectError((error) => {
       this.analyticsService_.addLabels(['redirect']);
       this.eventManager_.logSwgEvent(
         AnalyticsEvent.EVENT_PAYMENT_FAILED,
@@ -16009,7 +18085,7 @@ class ConfiguredRuntime {
           }
           break;
         case 'experiments':
-          v.forEach(experiment => setExperiment(this.win_, experiment, true));
+          v.forEach((experiment) => setExperiment(this.win_, experiment, true));
           if (this.analytics()) {
             // If analytics service isn't set up yet, then it will get the
             // experiments later.
@@ -16068,15 +18144,16 @@ class ConfiguredRuntime {
   }
 
   /** @override */
-  getEntitlements(encryptedDocumentKey) {
+  getEntitlements(params) {
     return this.entitlementsManager_
-      .getEntitlements(encryptedDocumentKey)
-      .then(entitlements => {
+      .getEntitlements(params)
+      .then((entitlements) => {
         // Auto update internal things tracking the user's current SKU.
         if (entitlements) {
           try {
             const skus = entitlements.entitlements.map(
-              entitlement => entitlement.getSku() || 'unknown subscriptionToken'
+              (entitlement) =>
+                entitlement.getSku() || 'unknown subscriptionToken'
             );
             if (skus.length > 0) {
               this.analyticsService_.setSku(skus.join(','));
@@ -16160,6 +18237,11 @@ class ConfiguredRuntime {
   /** @override */
   setOnLoginRequest(callback) {
     this.callbacks_.setOnLoginRequest(callback);
+  }
+
+  /** @override */
+  triggerLoginRequest(request) {
+    this.callbacks_.triggerLoginRequest(request);
   }
 
   /** @override */
@@ -16308,17 +18390,59 @@ class ConfiguredRuntime {
     return Promise.resolve(this.propensityModule_);
   }
 
-  /** @override
+  /**
+   * This one exists as an internal helper so SwG logging doesn't require a promise.
    * @return {!ClientEventManager}
    */
   eventManager() {
     return this.eventManager_;
   }
 
+  /**
+   * This one exists as a public API so publishers can subscribe to SwG events.
+   * @override */
+  getEventManager() {
+    return Promise.resolve(this.eventManager_);
+  }
+
   /** @override */
   getLogger() {
     return Promise.resolve(this.logger_);
   }
+
+  /** @override */
+  setShowcaseEntitlement(entitlement) {
+    if (
+      !entitlement ||
+      !isSecure(this.win().location) ||
+      !wasReferredByGoogle(parseUrl$1(this.win().document.referrer)) ||
+      !queryStringHasFreshGaaParams(this.win().location.search)
+    ) {
+      return;
+    }
+
+    const eventsToLog =
+      publisherEntitlementEventToAnalyticsEvents(entitlement.entitlement) || [];
+    const params = new EventParams();
+    params.setIsUserRegistered(entitlement.isUserRegistered);
+
+    for (let k = 0; k < eventsToLog.length; k++) {
+      this.eventManager().logEvent({
+        eventType: eventsToLog[k],
+        eventOriginator: EventOriginator.SHOWCASE_CLIENT,
+        isFromUserAction: false,
+        additionalParameters: params,
+      });
+    }
+  }
+
+  /** @override */
+  consumeShowcaseEntitlementJwt(showcaseEntitlementJwt) {
+    const entitlements = this.entitlementsManager().parseEntitlements({
+      signedEntitlements: showcaseEntitlementJwt,
+    });
+    entitlements.consume();
+  }
 }
 
-export { AnalyticsEvent, ClientEvent, ClientEventManagerApi, ConfiguredRuntime, Entitlement, Entitlements, EventOriginator, Fetcher, FilterResult, SubscribeResponse$1 as SubscribeResponse };
+export { AnalyticsEvent, ClientEvent, ClientEventManagerApi, ConfiguredRuntime, DeferredAccountCreationResponse, Entitlement, Entitlements, EventOriginator, Fetcher, FilterResult, PurchaseData, SubscribeResponse$1 as SubscribeResponse, UserData };

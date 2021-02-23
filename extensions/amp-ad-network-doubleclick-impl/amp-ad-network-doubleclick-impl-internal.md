@@ -71,6 +71,11 @@ limitations under the License.
     <td>Launched</td>
   </tr>
   <tr>
+    <td><a href="lazy-fetch.md">Lazy Fetch</a></td>
+    <td>Allows for delaying ad request until slot is within a configurable distance from the viewport.</td>
+    <td>Launched</td>
+  </tr>
+  <tr>
     <td><a href="refresh.md">Refresh</a></td>
     <td>Enabled slots will periodically refetch new creatives.</td>
     <td>Launched</td>
@@ -93,6 +98,11 @@ limitations under the License.
     <td><a href="amp-consent.md">AMP Consent Integration</a></td>
     <td>Integration with AMP Consent extension.</td>
     <td>Launched</td>
+  </tr>
+  <tr>
+    <td><a href="always-serve-npa.md">Always Serve NPA</a></td>
+    <td>Utilizes <code>&lt;amp-geo></code> to detect user's geo location to decide if a non-personalized ad should be requested regardless of user consent.</td>
+    <td>Beta</td>
   </tr>
 </table>
 
@@ -131,21 +141,21 @@ For multi-size attributes, see the <a href="multi-size.md">multi-size documentat
 
 ### Supported parameters
 
-- `data-slot`: Full path of the ad unit with the network code and unit code.
-- `data-multi-size`: See the <a href="multi-size.md">multi-size documentation page</a> for details.
-- `data-multi-size-validation`
+-   `data-slot`: Full path of the ad unit with the network code and unit code.
+-   `data-multi-size`: See the <a href="multi-size.md">multi-size documentation page</a> for details.
+-   `data-multi-size-validation`
 
 Supported via `json` attribute:
 
-- `categoryExclusions`: Sets a slot-level category exclusion for the given label name.
-- `cookieOptions`: Sets options for ignoring DFP cookies on the current page.
-  - 0: Enables DFP cookies on ad requests on the page. This option is set by default.
-  - 1: Ignores DFP cookies on subsequent ad requests and prevents cookies from being created on the page.
-- `tagForChildDirectedTreatment`: Configures whether the slot should be treated as child-directed.
-  See the TFCD article for <a href="https://support.google.com/dfp_sb/answer/3721907">Small Business</a> or <a href="https://support.google.com/dfp_premium/answer/3671211">Premium</a> for more details and allowed values.
-- `targeting`: Sets a custom targeting parameter for this slot. Values must of the form:
-  - `"<key_string>":"<value_string>"` or
-  - `"<key_string>":["<value1>", "<value2>", ...]`. See below for example.
+-   `categoryExclusions`: Sets a slot-level category exclusion for the given label name.
+-   `cookieOptions`: Sets options for ignoring DFP cookies on the current page.
+    -   0: Enables DFP cookies on ad requests on the page. This option is set by default.
+    -   1: Ignores DFP cookies on subsequent ad requests and prevents cookies from being created on the page.
+-   `tagForChildDirectedTreatment`: Configures whether the slot should be treated as child-directed.
+    See the TFCD article for <a href="https://support.google.com/dfp_sb/answer/3721907">Small Business</a> or <a href="https://support.google.com/dfp_premium/answer/3671211">Premium</a> for more details and allowed values.
+-   `targeting`: Sets a custom targeting parameter for this slot. Values must of the form:
+    -   `"<key_string>":"<value_string>"` or
+    -   `"<key_string>":["<value1>", "<value2>", ...]`. See below for example.
 
 Example with json attribute:
 
@@ -162,11 +172,11 @@ Example with json attribute:
 
 ### Supported DFP Formats
 
-- Anchor Ads / Adhesion Units may be implemented using <a href="../../extensions/amp-sticky-ad/amp-sticky-ad.md">amp-sticky-ads</a>.
-- Expandable formats can now leverage the <a href="safeframe.md">Safeframe API</a>.
+-   Anchor Ads / Adhesion Units may be implemented using <a href="../../extensions/amp-sticky-ad/amp-sticky-ad.md">amp-sticky-ads</a>.
+-   Expandable formats can now leverage the <a href="safeframe.md">Safeframe API</a>.
 
 ### Unsupported DFP Formats
 
-- Interstitials
-- Flash
-- Creatives served over HTTP.
+-   Interstitials
+-   Flash
+-   Creatives served over HTTP.

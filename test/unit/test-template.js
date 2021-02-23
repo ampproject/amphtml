@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
+import {BaseTemplate} from '../../src/base-template';
+import {Services} from '../../src/services';
+import {getServiceForDoc, resetServiceForTesting} from '../../src/service';
 import {
-  BaseTemplate,
   installTemplatesService,
   registerExtendedTemplate,
 } from '../../src/service/template-impl';
-import {Services} from '../../src/services';
-import {getServiceForDoc, resetServiceForTesting} from '../../src/service';
 
-describes.realWin('Template', {amp: true}, env => {
+describes.realWin('Template', {amp: true}, (env) => {
   let templates;
   let doc;
   let win;
@@ -44,8 +44,11 @@ describes.realWin('Template', {amp: true}, env => {
   class TemplateImpl extends BaseTemplate {
     render(data) {
       const elem = doc.createElement('div');
-      elem.textContent = 'abc' + data.value;
+      elem.textContent = `abc${data.value}`;
       return elem;
+    }
+    renderAsString(data) {
+      return `str(abc${data.value})`;
     }
   }
 
@@ -77,9 +80,23 @@ describes.realWin('Template', {amp: true}, env => {
       templateElement.getAttribute('type'),
       TemplateImpl
     );
-    return templates.renderTemplate(templateElement, {value: 1}).then(res => {
+    return templates.renderTemplate(templateElement, {value: 1}).then((res) => {
       expect(res.textContent).to.equal('abc1');
     });
+  });
+
+  it('should render as string', () => {
+    const templateElement = createTemplateElement();
+    registerExtendedTemplate(
+      win,
+      templateElement.getAttribute('type'),
+      TemplateImpl
+    );
+    return templates
+      .renderTemplateAsString(templateElement, {value: 1})
+      .then((res) => {
+        expect(res).to.equal('str(abc1)');
+      });
   });
 
   it('should render when detached', () => {
@@ -99,7 +116,7 @@ describes.realWin('Template', {amp: true}, env => {
         templateElement.parentElement.removeChild(templateElement);
         return templates.renderTemplate(templateElement, {value: 2});
       })
-      .then(res => {
+      .then((res) => {
         expect(res.textContent).to.equal('abc2');
       });
   });
@@ -113,7 +130,7 @@ describes.realWin('Template', {amp: true}, env => {
     );
     return templates
       .renderTemplateArray(templateElement, [{value: 1}, {value: 2}])
-      .then(res => {
+      .then((res) => {
         expect(res).to.have.length.of(2);
         expect(res[0].textContent).to.equal('abc1');
         expect(res[1].textContent).to.equal('abc2');
@@ -147,7 +164,7 @@ describes.realWin('Template', {amp: true}, env => {
     );
     doc.body.appendChild(scriptElement);
     let result = undefined;
-    templates.renderTemplate(templateElement, {value: 0}).then(res => {
+    templates.renderTemplate(templateElement, {value: 0}).then((res) => {
       result = res;
     });
     return Promise.resolve().then(() => {
@@ -171,7 +188,7 @@ describes.realWin('Template', {amp: true}, env => {
       templateElement.getAttribute('type'),
       TemplateImpl
     );
-    return p.then(res => {
+    return p.then((res) => {
       expect(res.textContent).to.equal('abc1');
     });
   });
@@ -193,12 +210,12 @@ describes.realWin('Template', {amp: true}, env => {
     );
     // This is just a complicated way to say Promise -> all.
     return p1
-      .then(res1 => {
-        return p2.then(res2 => {
+      .then((res1) => {
+        return p2.then((res2) => {
           return [res1, res2];
         });
       })
-      .then(res => {
+      .then((res) => {
         expect(res[0].textContent).to.equal('abc1');
         expect(res[1].textContent).to.equal('abc2');
       });
@@ -217,7 +234,7 @@ describes.realWin('Template', {amp: true}, env => {
     doc.body.appendChild(parentElement);
     return templates
       .findAndRenderTemplate(parentElement, {value: 1})
-      .then(res => {
+      .then((res) => {
         expect(res.textContent).to.equal('abc1');
       });
   });
@@ -273,7 +290,7 @@ describes.realWin('Template', {amp: true}, env => {
     container.appendChild(parentElement);
     return templates
       .findAndRenderTemplate(parentElement, {value: 1})
-      .then(res => {
+      .then((res) => {
         expect(res.textContent).to.equal('abc1');
       });
   });
@@ -329,7 +346,7 @@ describes.realWin('Template', {amp: true}, env => {
     doc.body.appendChild(parentElement);
     return templates
       .findAndRenderTemplateArray(parentElement, [{value: 1}, {value: 2}])
-      .then(res => {
+      .then((res) => {
         expect(res).to.have.length.of(2);
         expect(res[0].textContent).to.equal('abc1');
         expect(res[1].textContent).to.equal('abc2');
@@ -337,7 +354,7 @@ describes.realWin('Template', {amp: true}, env => {
   });
 });
 
-describes.realWin('BaseTemplate', {amp: true}, env => {
+describes.realWin('BaseTemplate', {amp: true}, (env) => {
   let win;
   let doc;
   let templateElement;
@@ -349,39 +366,96 @@ describes.realWin('BaseTemplate', {amp: true}, env => {
     doc.body.appendChild(templateElement);
   });
 
-  it('should require render override', () => {
-    expect(() => {
-      new BaseTemplate(templateElement).render();
-    }).to.throw(/Not implemented/);
+  describe('tryUnwrap()', () => {
+    it('should unwrap single element', () => {
+      const root = doc.createElement('div');
+      const element1 = doc.createElement('div');
+      root.appendChild(element1);
+      expect(new BaseTemplate(templateElement).tryUnwrap(root)).to.equal(
+        element1
+      );
+    });
+
+    it('should unwrap with empty/whitespace text', () => {
+      const root = doc.createElement('div');
+      const element1 = doc.createElement('div');
+      root.appendChild(doc.createTextNode('   '));
+      root.appendChild(element1);
+      root.appendChild(doc.createTextNode(' \n\t  '));
+      expect(new BaseTemplate(templateElement).tryUnwrap(root)).to.equal(
+        element1
+      );
+    });
+
+    it('should NOT unwrap single non-div element', () => {
+      const root = doc.createElement('a');
+      root.textContent = 'abc';
+      expect(new BaseTemplate(templateElement).tryUnwrap(root)).to.equal(root);
+    });
+
+    it('should NOT unwrap multiple elements', () => {
+      const root = doc.createElement('div');
+      root.appendChild(doc.createElement('div'));
+      root.appendChild(doc.createElement('div'));
+      expect(new BaseTemplate(templateElement).tryUnwrap(root)).to.equal(root);
+    });
+
+    it('should NOT unwrap with non-empty/whitespace text', () => {
+      const root = doc.createElement('div');
+      root.appendChild(doc.createTextNode('a'));
+      root.appendChild(doc.createElement('div'));
+      expect(new BaseTemplate(templateElement).tryUnwrap(root)).to.equal(root);
+    });
   });
 
-  it('should unwrap single element', () => {
-    const root = doc.createElement('div');
-    const element1 = doc.createElement('div');
-    root.appendChild(element1);
-    expect(new BaseTemplate(templateElement).unwrap(root)).to.equal(element1);
-  });
+  describe('unwrapChildren()', () => {
+    it('should unwrap single element', () => {
+      const root = doc.createElement('div');
+      const element1 = doc.createElement('div');
+      root.appendChild(element1);
+      expect(
+        new BaseTemplate(templateElement).unwrapChildren(root)
+      ).to.have.ordered.members([element1]);
+    });
 
-  it('should unwrap with empty/whitespace text', () => {
-    const root = doc.createElement('div');
-    const element1 = doc.createElement('div');
-    root.appendChild(doc.createTextNode('   '));
-    root.appendChild(element1);
-    root.appendChild(doc.createTextNode(' \n\t  '));
-    expect(new BaseTemplate(templateElement).unwrap(root)).to.equal(element1);
-  });
+    it('should unwrap single non-div element', () => {
+      const root = doc.createElement('a');
+      root.textContent = 'abc';
+      const result = new BaseTemplate(templateElement).unwrapChildren(root);
+      expect(result).to.have.length(1);
+      expect(result[0].tagName).to.equal('DIV');
+      expect(result[0].textContent).to.equal('abc');
+    });
 
-  it('should NOT unwrap multiple elements', () => {
-    const root = doc.createElement('div');
-    root.appendChild(doc.createElement('div'));
-    root.appendChild(doc.createElement('div'));
-    expect(new BaseTemplate(templateElement).unwrap(root)).to.equal(root);
-  });
+    it('should unwrap with empty/whitespace text', () => {
+      const root = doc.createElement('div');
+      const element1 = doc.createElement('div');
+      root.appendChild(doc.createTextNode('   '));
+      root.appendChild(element1);
+      root.appendChild(doc.createTextNode(' \n\t  '));
+      expect(
+        new BaseTemplate(templateElement).unwrapChildren(root)
+      ).to.have.ordered.members([element1]);
+    });
 
-  it('should NOT unwrap with non-empty/whitespace text', () => {
-    const root = doc.createElement('div');
-    root.appendChild(doc.createTextNode('a'));
-    root.appendChild(doc.createElement('div'));
-    expect(new BaseTemplate(templateElement).unwrap(root)).to.equal(root);
+    it('should unwrap multiple elements', () => {
+      const root = doc.createElement('div');
+      const children = [doc.createElement('div'), doc.createElement('div')];
+      children.forEach((child) => root.appendChild(child));
+      expect(
+        new BaseTemplate(templateElement).unwrapChildren(root)
+      ).to.have.ordered.members(children);
+    });
+
+    it('should unwrap multiple elements and wrap any non-empty/whitespace text', () => {
+      const root = doc.createElement('div');
+      const children = [doc.createTextNode('a'), doc.createElement('div')];
+      children.forEach((child) => root.appendChild(child));
+      const result = new BaseTemplate(templateElement).unwrapChildren(root);
+      expect(result).to.have.length(2);
+      expect(result[0].tagName).to.equal('DIV');
+      expect(result[0].textContent).to.equal('a');
+      expect(result[1]).to.equal(children[1]);
+    });
   });
 });

@@ -21,7 +21,7 @@ import {ServiceAdapter} from '../service-adapter';
 import {Services} from '../../../../src/services';
 import {createElementWithAttributes} from '../../../../src/dom';
 
-describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
+describes.realWin('local-subscriptions-rendering', {amp: true}, (env) => {
   let win, doc, ampdoc;
   let renderer;
   let dialog, serviceAdapter;
@@ -38,9 +38,9 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
       dialog,
       serviceAdapter
     );
-    const serviceIds = ['service1', 'service2'];
+    const platformKeys = ['platformKey1', 'platformKey2'];
     entitlementsForService1 = new Entitlement({
-      service: serviceIds[0],
+      service: platformKeys[0],
       granted: false,
       grantReason: null,
     });
@@ -79,7 +79,7 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
         'subscriptions-decorate': '',
       });
       elements = [actions1, actions2];
-      elements.forEach(element => {
+      elements.forEach((element) => {
         doc.body.appendChild(element);
       });
     });
@@ -96,7 +96,7 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
     }
 
     function displayed(array) {
-      elements.forEach(element => {
+      elements.forEach((element) => {
         const shouldBeDisplayed = array.includes(element);
         expect(isDisplayed(element)).to.equal(
           shouldBeDisplayed,
@@ -174,7 +174,7 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
       dialogMock
         .expects('open')
         .withExactArgs(
-          env.sandbox.match(arg => {
+          env.sandbox.match((arg) => {
             content = arg;
             return true;
           }),
@@ -202,7 +202,7 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
       dialogMock
         .expects('open')
         .withExactArgs(
-          env.sandbox.match(arg => {
+          env.sandbox.match((arg) => {
             content = arg;
             return true;
           }),

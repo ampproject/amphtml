@@ -15,7 +15,7 @@
  */
 import {DomAncestorVisitor} from '../../../src/utils/dom-ancestor-visitor';
 
-describes.realWin('#DomAncestorVisitor', {amp: true}, env => {
+describes.realWin('#DomAncestorVisitor', {amp: true}, (env) => {
   let doc, win;
   let domAncestorVisitor;
   beforeEach(() => {
@@ -31,7 +31,7 @@ describes.realWin('#DomAncestorVisitor', {amp: true}, env => {
     parent.id = 'parent';
 
     let result = false;
-    const callback = el => {
+    const callback = (el) => {
       if (el.id == 'parent') {
         result = true;
         return true;
@@ -54,14 +54,14 @@ describes.realWin('#DomAncestorVisitor', {amp: true}, env => {
     parent.appendChild(child);
 
     let result1 = false;
-    const callback1 = el => {
+    const callback1 = (el) => {
       if (el.id == 'parent') {
         result1 = true;
         return true;
       }
     };
     let result2 = false;
-    const callback2 = el => {
+    const callback2 = (el) => {
       if (el.id == 'parent') {
         result2 = true;
         return true;
@@ -88,7 +88,7 @@ describes.realWin('#DomAncestorVisitor', {amp: true}, env => {
       elements.push(el);
     }
     domAncestorVisitor
-      .addVisitor(el => {
+      .addVisitor((el) => {
         el.classList.add('visited');
         if (el.id == '50') {
           return true;

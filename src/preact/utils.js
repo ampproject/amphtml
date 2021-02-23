@@ -14,33 +14,15 @@
  * limitations under the License.
  */
 
-import {getAmpContext} from './context';
-import {useContext, useEffect, useLayoutEffect} from './index';
-
-/**
- * @param {function()} callback
- */
-export function useMountEffect(callback) {
-  useEffect(callback, [
-    /* mount-only effect*/
-  ]);
-}
-
-/**
- * @param {function()} callback
- */
-export function useMountLayoutEffect(callback) {
-  useLayoutEffect(callback, [
-    /* mount-only effect*/
-  ]);
-}
+import {useAmpContext} from './context';
+import {useLayoutEffect} from './index';
 
 /**
  * Notifies Resources (if present) of a rerender in the component.
  * Every functional component **must** use this helper.
  */
 export function useResourcesNotify() {
-  const {'notify': notify} = useContext(getAmpContext());
+  const {notify} = useAmpContext();
   useLayoutEffect(() => {
     if (notify) {
       notify();

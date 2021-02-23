@@ -39,7 +39,7 @@ FAIL
 |         AMP documents. This should produce an error. -->
 |    <meta name=amp-tag-does-not-exist content="...">
 >>   ^~~~~~~~~
-feature_tests/amp_meta_tags.html:39:2 The attribute 'name' in tag 'meta name= and content=' is set to the invalid value 'amp-tag-does-not-exist'.
+feature_tests/amp_meta_tags.html:39:2 The attribute 'name' in tag 'meta' is set to the invalid value 'amp-tag-does-not-exist'.
 |
 |  </head>
 |  <body>

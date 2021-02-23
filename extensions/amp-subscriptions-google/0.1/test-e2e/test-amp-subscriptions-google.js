@@ -17,11 +17,10 @@
 describes.endtoend(
   'amp-subscriptions-google',
   {
-    testUrl:
-      'http://localhost:8000/test/fixtures/e2e/amp-subscriptions-google/swg.amp.html',
+    fixture: 'amp-subscriptions-google/swg.amp.html',
     environments: ['single'],
   },
-  env => {
+  (env) => {
     let controller;
 
     beforeEach(() => {
@@ -53,12 +52,12 @@ describes.endtoend(
 
       const basicAccessText = await controller.findElement('.amekj');
       await expect(controller.getElementText(basicAccessText)).to.equal(
-        'Basic Access'
+        'Basic Access!'
       );
 
       const basicAccessDesc = await controller.findElement('.a02uaf');
       await expect(controller.getElementText(basicAccessDesc)).to.equal(
-        'Basic access charged weekly'
+        'Basic access charged weekly..'
       );
 
       const basicAccessPrice = await controller.findElement('.mojnzf');

@@ -24,6 +24,7 @@ import {
 } from '../../../src/iframe-video';
 import {dev, userAssert} from '../../../src/log';
 import {
+  dispatchCustomEvent,
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
@@ -132,12 +133,12 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
 
     this.iframe_ = iframe;
 
-    this.unlistenMessage_ = listen(this.win, 'message', event => {
+    this.unlistenMessage_ = listen(this.win, 'message', (event) => {
       this.handleOoyalaMessage_(event);
     });
 
     const loaded = this.loadPromise(this.iframe_).then(() => {
-      el.dispatchCustomEvent(VideoEvents.LOAD);
+      dispatchCustomEvent(el, VideoEvents.LOAD);
     });
     this.playerReadyResolver_(loaded);
     return loaded;
@@ -163,11 +164,6 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
-  }
-
-  /** @override */
-  viewportCallback(visible) {
-    this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
   }
 
   /** @override */
@@ -318,6 +314,6 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpOoyalaPlayer);
 });

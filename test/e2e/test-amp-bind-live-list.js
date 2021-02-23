@@ -17,11 +17,9 @@
 describes.endtoend(
   'amp-bind',
   {
-    testUrl:
-      'http://localhost:8000/test/fixtures/e2e/amp-bind/' +
-      'bind-live-list.html',
+    fixture: 'amp-bind/bind-live-list.html',
   },
-  async env => {
+  async (env) => {
     let controller;
 
     beforeEach(async () => {
@@ -67,7 +65,7 @@ describes.endtoend(
         );
 
         // The test server should handle this
-        // const impl = liveList.implementation_;
+        // const impl = await liveList.getImpl(false);
         // const update = document.createElement('div');
         // update.innerHTML =
         //     '<div items>' +

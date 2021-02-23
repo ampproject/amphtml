@@ -18,7 +18,7 @@
 const config = require('../test-configs/config');
 const globby = require('globby');
 const Mocha = require('mocha');
-const {isTravisBuild} = require('../common/travis');
+const {isCiBuild} = require('../common/ci');
 
 /**
  * Run all the dev dashboard tests
@@ -26,23 +26,23 @@ const {isTravisBuild} = require('../common/travis');
  */
 async function devDashboardTests() {
   const mocha = new Mocha({
-    reporter: isTravisBuild() ? 'mocha-silent-reporter' : 'spec',
+    reporter: isCiBuild() ? 'mocha-silent-reporter' : 'spec',
   });
 
   // Add our files
   const allDevDashboardTests = globby.sync(config.devDashboardTestPaths);
-  allDevDashboardTests.forEach(file => {
+  allDevDashboardTests.forEach((file) => {
     mocha.addFile(file);
   });
 
   // Create our deffered
   let resolver;
-  const deferred = new Promise(resolverIn => {
+  const deferred = new Promise((resolverIn) => {
     resolver = resolverIn;
   });
 
   // Run the tests.
-  mocha.run(function(failures) {
+  mocha.run(function (failures) {
     if (failures) {
       process.exitCode = 1;
     }

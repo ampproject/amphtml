@@ -11,5 +11,14 @@
         },
       ],
     },
+    {
+      pattern: 'experiments-config.json',
+      owners: [
+        {
+          name: 'danielrozenberg',
+          notify: true,
+        },
+      ],
+    },
   ],
 }

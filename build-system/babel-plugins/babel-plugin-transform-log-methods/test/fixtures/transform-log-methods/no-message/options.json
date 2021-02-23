@@ -1,7 +1,7 @@
 {
   "plugins": [
     [
-      "../../../../../babel-plugin-transform-log-methods",
+      "../../../..",
       {
         "messagesPath": "dist/.log-messages.test.no-message.temp"
       }

@@ -28,6 +28,7 @@ import {
 import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
+  dispatchCustomEvent,
   fullscreenEnter,
   fullscreenExit,
   getDataParamsFromAttributes,
@@ -99,13 +100,6 @@ class AmpPowrPlayer extends AMP.BaseElement {
   }
 
   /** @override */
-  viewportCallback(visible) {
-    this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {
-      visible,
-    });
-  }
-
-  /** @override */
   buildCallback() {
     this.urlReplacements_ = Services.urlReplacementsForDoc(this.element);
 
@@ -120,7 +114,7 @@ class AmpPowrPlayer extends AMP.BaseElement {
 
     this.iframe_ = iframe;
 
-    this.unlistenMessage_ = listen(this.win, 'message', e =>
+    this.unlistenMessage_ = listen(this.win, 'message', (e) =>
       this.handlePlayerMessage_(e)
     );
 
@@ -168,7 +162,7 @@ class AmpPowrPlayer extends AMP.BaseElement {
     }
 
     const data = objOrParseJson(eventData);
-    if (data === undefined) {
+    if (data == null) {
       return; // We only process valid JSON.
     }
 
@@ -198,7 +192,7 @@ class AmpPowrPlayer extends AMP.BaseElement {
         return;
       }
       this.muted_ = muted;
-      element.dispatchCustomEvent(mutedOrUnmutedEvent(this.muted_));
+      dispatchCustomEvent(element, mutedOrUnmutedEvent(this.muted_));
       return;
     }
   }
@@ -443,6 +437,6 @@ class AmpPowrPlayer extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpPowrPlayer);
 });

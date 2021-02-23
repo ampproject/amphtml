@@ -27,7 +27,7 @@ import {WebLoginDialog} from '../../../amp-access/0.1/login-dialog';
 const LOCAL = 'local';
 const LOCAL_OPTS = {serviceId: LOCAL};
 
-describes.realWin('Actions', {amp: true}, env => {
+describes.realWin('Actions', {amp: true}, (env) => {
   let ampdoc;
   let clock;
   let actions;
@@ -58,7 +58,7 @@ describes.realWin('Actions', {amp: true}, env => {
     openStub = env.sandbox
       .stub(WebLoginDialog.prototype, 'open')
       .callsFake(() => {
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
           openResolver = resolve;
         });
       });

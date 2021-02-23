@@ -90,7 +90,7 @@ export class AmpVk extends AMP.BaseElement {
       iframeSrcPromise = this.getVkPollIFrameSrc_();
     }
 
-    return iframeSrcPromise.then(iframeSrc => {
+    return iframeSrcPromise.then((iframeSrc) => {
       return appendEncodedParamStringToUrl(iframeSrc, createdTime);
     });
   }
@@ -102,7 +102,7 @@ export class AmpVk extends AMP.BaseElement {
   getVkPostIFrameSrc_() {
     return Services.viewerForDoc(this.element)
       .getReferrerUrl()
-      .then(ref => {
+      .then((ref) => {
         const startWidth = this.element./*OK*/ offsetWidth;
         const pageUrl = this.getAmpDoc().getUrl();
         const iframeUrl = 'https://vk.com/widget_post.php';
@@ -131,7 +131,7 @@ export class AmpVk extends AMP.BaseElement {
   getVkPollIFrameSrc_() {
     return Services.viewerForDoc(this.element)
       .getReferrerUrl()
-      .then(ref => {
+      .then((ref) => {
         const pageUrl = this.getAmpDoc().getUrl();
         const iframeUrl = 'https://vk.com/al_widget_poll.php';
         const queryParams = dict({
@@ -214,7 +214,7 @@ export class AmpVk extends AMP.BaseElement {
       this.handleVkIframeMessage_.bind(this)
     );
 
-    return this.getIFrameSrc_().then(src => {
+    return this.getIFrameSrc_().then((src) => {
       iframe.src = src;
       iframe.setAttribute('name', 'fXD');
       iframe.setAttribute('scrolling', 'no');
@@ -247,7 +247,7 @@ export class AmpVk extends AMP.BaseElement {
         const newHeight = parseInt(matches[1], 10);
         if (this.widgetHeight_ !== newHeight) {
           this.widgetHeight_ = newHeight;
-          this./*OK*/ changeHeight(newHeight);
+          this.forceChangeHeight(newHeight);
         }
       }
     }
@@ -280,6 +280,6 @@ export class AmpVk extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-vk', '0.1', AMP => {
+AMP.extension('amp-vk', '0.1', (AMP) => {
   AMP.registerElement('amp-vk', AmpVk);
 });

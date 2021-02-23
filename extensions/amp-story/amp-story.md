@@ -1,7 +1,6 @@
 ---
 $category@: presentation
 formats:
-  - websites
   - stories
 teaser:
   text: A rich, visual storytelling format.
@@ -23,33 +22,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="`amp-story`"></a> `amp-story`
+# amp-story
 
-The `amp-story` extension provides a format for displaying visual content that you can assemble into a story-telling experience. With an AMP story, you can provide users with bite-sized, visually rich information and content.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>A rich, visual storytelling format.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>none</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><ul>
-      <li>See AMP By Example's <a href="https://amp.dev/documentation/examples/introduction/stories_in_amp/">Hello World</a> sample.</li>
-      <li>Learn from the <a href="https://amp.dev/documentation/guides-and-tutorials/start/visual_story/">Create a visual AMP story</a> tutorial.</li>
-    </ul></td>
-  </tr>
-</table>
-
-[TOC]
+[Web stories](https://amp.dev/documentation/guides-and-tutorials/start/create_successful_stories/?format=stories) are an immersive, tappable and easily shareable storytelling format. Web stories are built using the AMP Framework. The `amp-story` component provides the AMP story subsect of AMP. It is the base technology for web stories.
 
 <figure class="centered-fig">
   <amp-anim width="300" height="533" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story.gif">
@@ -72,7 +47,7 @@ As of 2018-07-16, version 0.1 is considered deprecated, and will be deleted on 2
 
 ## AMP story format
 
-An [AMP story](#story:-amp-story) is a complete AMP HTML document that is comprised of [pages](#pages:-amp-story-page), within the pages are [layers](#layers:-amp-story-grid-layer), within the layers are AMP & HTML elements, like media, analytics, text, and so on.
+An [AMP story](#story:-amp-story) is a complete AMP HTML document that is comprised of [pages](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/amp-story-page.md), within the pages are [layers](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/amp-story-grid-layer.md), within the layers are AMP & HTML elements, like media, analytics, text, and so on.
 
 <amp-img alt="AMP story tag hierarchy" layout="responsive" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-tag-hierarchy.png" width="591" height="358">
   <noscript>
@@ -245,72 +220,19 @@ The `amp-story` component represents an entire story. The component itself imple
 </amp-story>
 ```
 
-### Attributes
-
-<table>
-  <tr id="standalone">
-    <td width="40%"><strong>standalone [required]</strong></td>
-    <td>Identifies that the AMP document is a story.</td>
-  </tr>
-  <tr id="title">
-    <td width="40%"><strong>title [required]</strong></td>
-    <td>The title of the story.</td>
-  </tr>
-  <tr id="publisher">
-    <td width="40%"><strong>publisher [required]</strong></td>
-    <td>The name of the story's publisher.</td>
-  </tr>
-  <tr id="publisher-logo-src">
-    <td width="40%"><strong>publisher-logo-src [required]</strong></td>
-    <td>A URL to the story publisher's logo in square format (1x1 aspect ratio). For example <code>publisher-logo-src="https://example.com/logo/1x1.png"</code>, where 1x1.png is a 96x96 px logo.</td>
-  </tr>
-  <tr id="poster-portrait-src">
-    <td width="40%"><strong>poster-portrait-src [required]</strong></td>
-    <td>A URL to the <a href="#poster-guidelines-(for-poster-portrait-src,-poster-landscape-src,-and-poster-square-src)">story poster</a> in portrait format (3x4 aspect ratio).</td>
-  </tr>
-  <tr id="poster-square-src">
-    <td width="40%"><strong>poster-square-src [optional]</strong></td>
-    <td>A URL to the <a href="#poster-guidelines-(for-poster-portrait-src,-poster-landscape-src,-and-poster-square-src)">story poster</a> in square format (1x1 aspect ratio).</td>
-  </tr>
-  <tr id="poster-landscape-src">
-    <td width="40%"><strong>poster-landscape-src [optional]</strong></td>
-    <td>A URL to the <a href="#poster-guidelines-(for-poster-portrait-src,-poster-landscape-src,-and-poster-square-src)">story poster</a> in landscape format (4x3 aspect ratio).</td>
-  </tr>
-  <tr id="supports-landscape">
-    <td width="40%"><strong>supports-landscape [optional]</strong></td>
-    <td>Enables landscape orientation support on mobile devices and a full bleed landscape experience on desktop devices.</td>
-  </tr>
-  <tr id="background-audio">
-    <td width="40%"><strong>background-audio [optional]</strong></td>
-    <td>A URL to an audio file that plays throughout the story.</td>
-  </tr>
-  <tr id="live-story">
-    <td width="40%"><strong>live-story [optional]</strong></td>
-    <td>Enables the <a href="#Live-story">Live story</a> functionality.</td>
-  </tr>
-  <tr id="live-story-disabled">
-    <td width="40%"><strong>live-story-disabled [optional]</strong></td>
-    <td>Disables the <a href="#Live-story">Live story</a> functionality.</td>
-  </tr>
-  <tr id="data-poll-interval">
-    <td width="40%"><strong>data-poll-interval [optional]</strong></td>
-    <td>Used with the <code>live-story</code> attribute. Time interval (in milliseconds) between checks for new content. If no <code>data-poll-interval</code> is provided it with default to the 15000 millisecond minimum. A value under 15000 milliseconds is invalid.</td>
-  </tr>
-</table>
-
 ### Metadata guidelines
 
-Metadata attributes display a preview of the story across the AMP stories ecosystem, such as rendering an engaging preview link in the bookend of a related stories. These attributes future-proof your story for rich, embedded experience AMP stories surfaces to come.
+Metadata attributes display a preview of the story across the Web Stories ecosystem, such as rendering an engaging preview link in the bookend of a related stories. These attributes future-proof your story for rich, embedded experience Web Stories surfaces to come.
 
-These metadata attributes supplement and do not replace any Structured Data (e.g. JSON-LD) on the page. We still recommend adding [Structured Data](https://developers.google.com/search/docs/data-types/article#amp-sd) to all your AMP pages, including AMP stories.
+These metadata attributes supplement and do not replace any Structured Data (e.g. JSON-LD) on the page. We still recommend adding [Structured Data to your Web Stories](https://developers.google.com/search/docs/guides/enable-web-stories#implement).
 
 #### `publisher-logo-src` guidelines
 
 These guidelines apply to the publisher logo image:
 
-- Provide a raster file, such as `.jpg`, `.png`, or `.gif`. Avoid vector files, such as `.svg` or `.eps`.
-- Avoid animated images, such as animated gifs.
-- Image logo should be legible on the background color.
+-   Provide a raster file, such as `.jpg`, `.png`, or `.gif`. Avoid vector files, such as `.svg` or `.eps`.
+-   Avoid animated images, such as animated gifs.
+-   Image logo should be legible on the background color.
 
 <table>
   <tr>
@@ -350,30 +272,39 @@ These guidelines apply to the publisher logo image:
   </tr>
 </table>
 
-- Logos should be at least 96x96 pixels and a perfect square.
-- The background should not be transparent.
-- Use one logo per brand that is consistent across AMP stories.
+-   Logos should be at least 96x96 pixels and a perfect square.
+-   The background should not be transparent.
+-   Use one logo per brand that is consistent across AMP stories.
 
 #### Poster guidelines (for `poster-portrait-src`, `poster-landscape-src`, and `poster-square-src`)
 
 These guidelines apply to the story poster image(s):
 
-- The poster image should be representative of the entire AMP story.
-- The poster image should be visible to the user when the AMP story begins. To accommodate sizing, cropping or minor styling changes or preview purposes, the image file URL used in the metadata does not need to be an exact match to the URL on the first page of the story.
-- Provide a raster file, such as `.jpg`, `.png`, or `.gif`. Avoid vector files, such as `.svg` or `.eps`.
-- The poster image should be in 3x4 aspect ratio for portrait, 4x3 for landscape, and 1x1 for square.
-- If the poster image is derived from a frame in a video, the thumbnail should be representative of the video. For example, the first frame in a video is often not representative.
-- Each poster image should meet the recommended minimium size:
-  - Portrait: 696px x 928px
-  - Landscape: 928px x 696px
-  - Square: 928px x 928px
+-   The poster image should be representative of the entire AMP story.
+-   The poster image should be visible to the user when the AMP story begins. To accommodate sizing, cropping or minor styling changes or preview purposes, the image file URL used in the metadata does not need to be an exact match to the URL on the first page of the story.
+-   Provide a raster file, such as `.jpg`, `.png`, or `.gif`. Avoid vector files, such as `.svg` or `.eps`.
+-   The poster image should be in 3x4 aspect ratio for portrait, 4x3 for landscape, and 1x1 for square.
+-   If the poster image is derived from a frame in a video, the thumbnail should be representative of the video. For example, the first frame in a video is often not representative.
+-   Each poster image should meet the recommended minimum size:
+    -   Portrait: 640px x 853px
+    -   Landscape: 853px x 640px
+    -   Square: 640px x 640px
+
+### Story generator meta tags
+
+Optional HTML meta tags can be used to indicate which Story generator the document was created with. There are two meta tags, respectively indicating the generator name and its version.
+
+```html
+<meta name="amp-story-generator-name" content="Story generator name" />
+<meta name="amp-story-generator-version" content="0.1" />
+```
 
 ### Landscape orientation and full bleed desktop experience opt in
 
 If the `supports-landscape` attribute is specified on the `<amp-story>` element, it will:
 
-- Allow the story to be seen when a mobile device is held in a landscape orientation.
-- Change the desktop experience to an immersive full bleed mode, replacing the default three portrait panels experience.
+-   Allow the story to be seen when a mobile device is held in a landscape orientation.
+-   Change the desktop experience to an immersive full bleed mode, replacing the default three portrait panels experience.
 
 Usage: `<amp-story ... supports-landscape>...</amp-story>`
 
@@ -414,7 +345,7 @@ In most implementations for live blogs, content is either pushed by the server t
 
 This means that publishers of stories do not need to set up a JSON endpoint or push mechanism for this functionality to work.
 
-Content is updated by publishing to the same URL with valid `<amp-story>` markup. The content is pulled into the user's client instance during the next poll. Poll intervals are configurable using the [`data-poll-interval`](#data-poll-interval) attribute.
+Content is updated by publishing to the same URL with valid `<amp-story>` markup. The content is pulled into the user's client instance during the next poll. Poll intervals are configurable using the [`data-poll-interval`](<#data-poll-interval-(optional)>) attribute.
 
 #### Stop polling
 
@@ -422,12 +353,12 @@ As long as the `live-story` attribute is present on the `<amp-story>` element, t
 
 #### Usage
 
-- Specify an `id` on the `<amp-story>` element.
-- Add the `live-story` attribute to the `<amp-story>` element.
-- [Optional] Add the [`data-poll-interval`](#data-poll-interval) attribute to the `<amp-story>` element to specify a time interval for checking for new updates.
-- [Optional] When finishing the live broadcast, add the [`live-story-disabled`](#live-story-disabled) attribute to the `<amp-story>` element to disable the polling.
-- On each `<amp-story-page>`:
-  - Specify a `data-sort-time` attribute with a valid value. This is a timestamp used for sorting the pages. Higher timestamps will be inserted after older page entries. We recommend using [Unix time](https://www.unixtimestamp.com/).
+-   Specify an `id` on the `<amp-story>` element.
+-   Add the `live-story` attribute to the `<amp-story>` element.
+-   [Optional] Add the [`data-poll-interval`](<#data-poll-interval-(optional)>) attribute to the `<amp-story>` element to specify a time interval for checking for new updates.
+-   [Optional] When finishing the live broadcast, add the [`live-story-disabled`](<#live-story-disabled-(optional)>) attribute to the `<amp-story>` element to disable the polling.
+-   On each `<amp-story-page>`:
+    -   Specify a `data-sort-time` attribute with a valid value. This is a timestamp used for sorting the pages. Higher timestamps will be inserted after older page entries. We recommend using [Unix time](https://www.unixtimestamp.com/).
 
 ```html
 <amp-story id="story1" live-story ...>
@@ -439,7 +370,7 @@ As long as the `live-story` attribute is present on the `<amp-story>` element, t
 
 ### Children (of amp-story)
 
-The `<amp-story>` component contains one or more [`<amp-story-page>`](#pages:-amp-story-page) components, containing each of the individual screens of the story. The first page specified in the document order is the first page shown in the story.
+The `<amp-story>` component contains one or more [`<amp-story-page>`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/amp-story-page.md) components, containing each of the individual screens of the story. The first page specified in the document order is the first page shown in the story.
 
 #### Optional customization
 
@@ -501,10 +432,6 @@ Example:
 </amp-story-grid-layer>
 ```
 
-#### Links in amp-story-grid-layer
-
-We support inline links `<a>` as a descendant of `amp-story-grid-layer`. Whenever a link is tapped a tooltip will be shown - deferring the corresponding action until the user taps again in the tooltip.
-
 #### Interactive components
 
 We support embedding components such as `<amp-twitter>` inside `amp-story-grid-layer`. By default they are not interactive in the story (i.e. tapping on them will not have any effect), but by using the `interactive` attribute, you can make them be fully interactive.
@@ -531,6 +458,15 @@ Example:
 </amp-twitter>
 ```
 
+#### Links in amp-story-grid-layer
+
+We support inline links `<a>` as a descendant of `amp-story-grid-layer`. Whenever a link is tapped a tooltip will be shown - deferring the corresponding action until the user taps again in the tooltip.
+
+Please note the following guidelines for including links in your amp-story:
+
+-   Parts of links that are too far to the left or right edge of a story page will yield to navigation.
+-   Links that occupy too much of the page area will be ignored for navigation.
+
 #### Customizing tooltip for links or interactive components
 
 You can customize the contents of the tooltip displayed on top of a user interactive element by specifying the following attributes. If they are not specified, a fallback value will be provided automatically.
@@ -556,6 +492,104 @@ Example:
 </a>
 ```
 
+#### Integration with sidebar for stories
+
+`amp-story` supports the use of `amp-sidebar` with a few limitations and caveats. See the [Sidebar for Stories documentation](https://amp.dev/documentation/components/amp-sidebar?format=websites#sidebar-for-stories) for more details.
+
+By using branching and `amp-sidebar`, you can create stories that have a table of contents. To do this, make use of URL fragment parameter.
+
+The following example demonstrates a table of contents inside of an `amp-sidebar`. The table of contents has a link to a specific story page, and and out-link to a different website.
+
+```html
+<amp-story id="story" standalone>
+  <amp-sidebar id="sidebar1" layout="nodisplay">
+    <ul>
+      <li><a href="#page=bacon-page"> Bacon page </a></li>
+      <li><a href="https://www.amp.dev"> External Link </a></li>
+    </ul>
+  </amp-sidebar>
+
+  <amp-story-page id="bacon-page">
+    <amp-story-grid-layer>
+      <p>Bacon, of course!</p>
+    </amp-story-grid-layer>
+  </amp-story-page>
+  ...
+</amp-story>
+```
+
+#### Other components usable in AMP stories
+
+The following are other components usable in AMP stories that require some story-specific caveats.
+
+-   [amp-consent](https://amp.dev/documentation/components/amp-consent#prompt-ui-for-stories)
+-   [amp-sidebar](https://amp.dev/documentation/components/amp-sidebar#sidebar-for-stories)
+-   [amp-twitter](https://amp.dev/documentation/components/amp-twitter)
+
+For more generally usable components see the [list of allowed children](https://amp.dev/documentation/components/amp-story#children).
+
+## Attributes
+
+### standalone (required)
+
+Identifies that the AMP document is a story.
+
+### title (required)
+
+The title of the story.
+
+### publisher (required)
+
+The name of the story's publisher.
+
+### publisher-logo-src (required)
+
+A URL to the story publisher's logo in square format (1x1 aspect ratio). For example `publisher-logo-src="https://example.com/logo/1x1.png"`, where 1x1.png is a 96x96 px logo.
+
+### poster-portrait-src (required)
+
+A URL to the [story poster](<#poster-guidelines-(for-poster-portrait-src,-poster-landscape-src,-and-poster-square-src)>) in portrait format (3x4 aspect ratio).
+
+### poster-square-src (optional)
+
+A URL to the [story poster](<#poster-guidelines-(for-poster-portrait-src,-poster-landscape-src,-and-poster-square-src)>) in square format (1x1 aspect ratio).
+
+### poster-landscape-src (optional)
+
+A URL to the [story poster](<#poster-guidelines-(for-poster-portrait-src,-poster-landscape-src,-and-poster-square-src)>) in landscape format (4x3 aspect ratio).
+
+### entity (optional)
+
+The name of the story's creating entity. For example: `entity="User"`, where User created the story on the publisher's platform.
+
+### entity-logo-src (optional)
+
+A URL to the story creating entity's logo in square format (1x1 aspect ratio). For example `entity-logo-src="https://example.com/logo/1x1.png"`, where 1x1.png is a 96x96 px logo.
+
+### entity-url (optional)
+
+A URL to the story creating entity's platform. For example `entity-url="https://example.com/profile/user"`, which links to User's profile on the publisher's platform.
+
+### supports-landscape (optional)
+
+Enables landscape orientation support on mobile devices and a full bleed landscape experience on desktop devices.
+
+### background-audio (optional)
+
+A URL to an audio file that plays throughout the story.
+
+### live-story (optional)
+
+Enables the [Live story](#Live-story) functionality.
+
+### live-story-disabled (optional)
+
+Disables the [Live story](#Live-story) functionality.
+
+### data-poll-interval (optional)
+
+Used with the `live-story` attribute. Time interval (in milliseconds) between checks for new content. If no `data-poll-interval` is provided it with default to the 15000 millisecond minimum. A value under 15000 milliseconds is invalid.
+
 ## Animations
 
 Every element inside an `<amp-story-page>` can have an entrance animation.
@@ -569,17 +603,19 @@ The following animation effects are available as presets for AMP stories:
 | Preset name       | Default duration (ms) | Default delay (ms) |
 | ----------------- | --------------------- | ------------------ |
 | `drop`            | 1600                  | 0                  |
-| `fade-in`         | 500                   | 0                  |
-| `fly-in-bottom`   | 500                   | 0                  |
-| `fly-in-left`     | 500                   | 0                  |
-| `fly-in-right`    | 500                   | 0                  |
-| `fly-in-top`      | 500                   | 0                  |
-| `pulse`           | 500                   | 0                  |
-| `rotate-in-left`  | 700                   | 0                  |
-| `rotate-in-right` | 700                   | 0                  |
+| `fade-in`         | 600                   | 0                  |
+| `fly-in-bottom`   | 600                   | 0                  |
+| `fly-in-left`     | 600                   | 0                  |
+| `fly-in-right`    | 600                   | 0                  |
+| `fly-in-top`      | 600                   | 0                  |
+| `pulse`           | 600                   | 0                  |
+| `rotate-in-left`  | 1000                  | 0                  |
+| `rotate-in-right` | 1000                  | 0                  |
+| `scale-fade-down` | 600                   | 0                  |
+| `scale-fade-up`   | 600                   | 0                  |
 | `twirl-in`        | 1000                  | 0                  |
-| `whoosh-in-left`  | 500                   | 0                  |
-| `whoosh-in-right` | 500                   | 0                  |
+| `whoosh-in-left`  | 600                   | 0                  |
+| `whoosh-in-right` | 600                   | 0                  |
 | `pan-left`        | 1000                  | 0                  |
 | `pan-right`       | 1000                  | 0                  |
 | `pan-down`        | 1000                  | 0                  |
@@ -593,7 +629,7 @@ See a [live demo of all the AMP story animations](https://amp.dev/documentation/
 
 ### Animation attributes
 
-##### animate-in [required]
+#### animate-in [required]
 
 Use this attribute to specify the name of the entrance [animation preset](#animation-effects).
 
@@ -605,7 +641,7 @@ _Example_: A heading flies in from left of the page.
 </h2>
 ```
 
-##### animate-in-duration [optional]
+#### animate-in-duration [optional]
 
 Use this attribute to specify the duration of the entrance animation, in seconds or milliseconds (e.g., 0.2s or 200ms). The default duration depends on the animation preset you specified.
 
@@ -617,7 +653,7 @@ _Example_: A heading flies in from left of the page and the animation finishes w
 </h2>
 ```
 
-##### animate-in-timing-function [optional]
+#### animate-in-timing-function [optional]
 
 Use this attribute to specify the timing function (animation curve) of the entrance animation. The default timing function depends on the animation preset you specified.
 
@@ -632,7 +668,7 @@ _Example_: A heading flies in from left of the page and the animation decelerate
 </h2>
 ```
 
-##### animate-in-delay [optional]
+#### animate-in-delay [optional]
 
 Use this attribute to specify the delay before starting the animation. The value must be greater than or equal to 0, in seconds or milliseconds (for example, 0.2s or 200ms). The default delay depends on the animation preset you specified.
 
@@ -648,7 +684,7 @@ _Example_: After 0.4 seconds, a heading flies in from the left of the page and c
 The animation delay is not guaranteed to be exact. Additional delays can be caused by loading the `amp-animation` extension in the background when the first animated element has been scanned. The attribute contract is defined as _delay this animation for at least N milliseconds_. This applies to all elements including those with a delay of 0 seconds.
 {% endcall %}
 
-##### animate-in-after [optional]
+#### animate-in-after [optional]
 
 Use this attribute to chain or sequence animations (for example, animation2 starts after animation1 is complete). Specify the ID of the animated element that this element's animation will follow. The element must be present on the same `<amp-story-page>`. The delay is applied after the previous element's animation has finished. For further details, see the [Sequencing animations](#sequencing-animations) section below.
 
@@ -668,7 +704,7 @@ For example, in the following code, `object2` animates in after `object1` comple
 </amp-story-page>
 ```
 
-##### scale-start, scale-end [optional, only works with `zoom-in` & `zoom-out` animations]
+#### scale-start, scale-end [optional, only works with `zoom-in` & `zoom-out` animations]
 
 Use these two attributes to further specify the parameters of your zoom-in and zoom-out animations. The value must be greater than or equal to 0, and decimals are allowed. The default will be scale-start: 1 and scale-start: 3 for zoom-in, and the inverse for zoom-out.
 
@@ -688,7 +724,7 @@ _Example_: An image zooming-in from 2x to 5x its size over 4 seconds.
 </amp-img>
 ```
 
-##### translate-x [optional, only works with `pan-left` & `pan-right` animations]
+#### translate-x [optional, only works with `pan-left` & `pan-right` animations]
 
 Use this attribute to specify the horizontal panning of your image in a pan-left/pan-right animation. The value must be greater than or equal to 0 in pixels. The default value will pan the whole width of the specified image.
 
@@ -707,7 +743,7 @@ _Example_: An image panning 200px to the left over 10 seconds.
 </amp-img>
 ```
 
-##### translate-y [optional, only works with `pan-up` & `pan-down` animations]
+#### translate-y [optional, only works with `pan-up` & `pan-down` animations]
 
 Use this attribute to specify the vertical panning of your image in a pan-up/pan-down animation. The value must be greater than or equal to 0 in pixels. The default value will pan the whole height of the specified image.
 
@@ -791,6 +827,8 @@ Branching enables the identification of individual story pages. Users can jump a
 
 Fragment parameters in the URL supports this feature.
 
+Branching allows navigation manipulation within a story. The story tracks navigation. If a user navigates from `page-1` to `page-5` and then `page-6`, navigating backwards will follow the exact path. The skipped pages are not exposed to the user when navigating backwards, it will follow `page-6`, to `page-5`, and ends back at `page-1`.
+
 ### URL Fragment Parameter
 
 With branching, AMP Stories now supports URLs in the form of:
@@ -801,81 +839,41 @@ https://www.mydomain.com/good-story/#page=<page-id>
 
 where `page-id` refers to the unique id of an `amp-story-page`. You can also use the fragment parameter and the `page-id` value like an anchor link in some use cases. See [Integration with Sidebar for Stories](#integration-with-sidebar-for-stories) for an example.
 
-## Integration with Sidebar for Stories
-
-`amp-story` supports the use of `amp-sidebar` with a few limitations and caveats. See the [Sidebar for Stories documentation](https://amp.dev/documentation/components/amp-sidebar?format=websites#sidebar-for-stories) for more details.
-
-By using branching and `amp-sidebar`, you can create stories that have a table of contents. To do this, make use of URL fragment parameter.
-
-The following example demonstrates a table of contents inside of an `amp-sidebar`. The table of contents has a link to a specific story page, and and out-link to a different website.
-
-```html
-<amp-story id="story" standalone>
-  <amp-sidebar id="sidebar1" layout="nodisplay">
-    <ul>
-      <li><a href="#page=bacon-page"> Bacon page </a></li>
-      <li><a href="https://www.amp.dev"> External Link </a></li>
-    </ul>
-  </amp-sidebar>
-
-  <amp-story-page id="bacon-page">
-    <amp-story-grid-layer>
-      <p>Bacon, of course!</p>
-    </amp-story-grid-layer>
-  </amp-story-page>
-  ...
-</amp-story>
-```
-
-### Manipulating Navigation
-
-Branching allows navigation manipulation within a story. The story tracks navigation. If a user navigates from `page-1` to `page-5` and then `page-6`, navigating backwards will follow the exact path. The skipped pages are not exposed to the user when navigating backwards, it will follow `page-6`, to `page-5`, and ends back at `page-1`.
-
-## Other components usable in AMP stories
-
-The following are other components usable in AMP stories that require some story-specific caveats.
-
-- [amp-consent](https://amp.dev/documentation/components/amp-consent#prompt-ui-for-stories)
-- [amp-sidebar](https://amp.dev/documentation/components/amp-sidebar#sidebar-for-stories)
-- [amp-twitter](https://amp.dev/documentation/components/amp-twitter)
-
-For more generally usable components see the [list of allowed children](https://amp.dev/documentation/components/amp-story#children).
-
-## Validation
-
-See [amp-story rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/validator-amp-story.protoascii) in the AMP validator specification.
-
 ## Localization
 
 To localize your story, include the language code in the `lang` attribute on the `<html>` tag of your story, such as `<html ⚡ lang="en">` for English. The supported language codes are:
 
-- ar (Arabic)
-- de (German)
-- en-GB (English, UK)
-- en (English, US)
-- es-419 (Spanish, Central/Latin America)
-- es (Spanish, Spain)
-- fr-CA (French, Canada)
-- fr (French, France)
-- hi (Hindi)
-- id (Indonesian)
-- it (Italian)
-- ja (Japanese)
-- ko (Korean)
-- nl (Dutch)
-- no (Norwegian)
-- pt-BR (Portuguese, Brazil)
-- pt (Portuguese, Portugal)
-- ru (Russian)
-- tr (Turkish)
-- vi (Vietnamese)
-- zh-TW (Traditional Chinese)
-- zh (Simplified Chinese)
+-   ar (Arabic)
+-   de (German)
+-   en-GB (English, UK)
+-   en (English, US)
+-   es-419 (Spanish, Central/Latin America)
+-   es (Spanish, Spain)
+-   fr-CA (French, Canada)
+-   fr (French, France)
+-   hi (Hindi)
+-   id (Indonesian)
+-   it (Italian)
+-   ja (Japanese)
+-   ko (Korean)
+-   nl (Dutch)
+-   no (Norwegian)
+-   pt-BR (Portuguese, Brazil)
+-   pt (Portuguese, Portugal)
+-   ru (Russian)
+-   tr (Turkish)
+-   vi (Vietnamese)
+-   zh-TW (Traditional Chinese)
+-   zh (Simplified Chinese)
 
 Additionally, for right-to-left languages, you may include the `dir="rtl"` attribute on the `<html>` tag of your story. This may be used in conjunction with the language code as well, e.g. `<html ⚡ lang="ar" dir="rtl">`.
 
 ## Related resources
 
-- [Tutorial: Create a visual AMP story](https://www.ampproject.org/docs/tutorials/visual_story)
-- [Samples on AMP By Example](https://amp.dev/documentation/examples/?format=stories)
-- [Best practices for creating an AMP story](https://amp.dev/documentation/guides-and-tutorials/develop/amp_story_best_practices)
+-   [Tutorial: Create a visual AMP story](https://www.ampproject.org/docs/tutorials/visual_story)
+-   [Samples on AMP By Example](https://amp.dev/documentation/examples/?format=stories)
+-   [Best practices for creating an AMP story](https://amp.dev/documentation/guides-and-tutorials/develop/amp_story_best_practices)
+
+## Validation
+
+See [amp-story rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/validator-amp-story.protoascii) in the AMP validator specification.

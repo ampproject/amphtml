@@ -27,7 +27,6 @@ import {isFiniteNumber, isObject} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {parseJson} from '../../../src/json';
 import {removeElement} from '../../../src/dom';
-import {startsWith} from '../../../src/string';
 import {userAssert} from '../../../src/log';
 
 const TAG = 'amp-bodymovin-animation';
@@ -73,12 +72,14 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
    */
   preconnectCallback(opt_onLayout) {
     const preconnect = Services.preconnectFor(this.win);
-    const scriptToLoad =
-      this.renderer_ === 'svg'
-        ? 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin_light.min.js'
-        : 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin.min.js';
     preloadBootstrap(this.win, this.getAmpDoc(), preconnect);
-    preconnect.url(this.getAmpDoc(), scriptToLoad, opt_onLayout);
+    // Different scripts are loaded based on `renderer` but their origin is the
+    // same. See 3p/bodymovinanimation.js#libSourceUrl.
+    preconnect.url(
+      this.getAmpDoc(),
+      'https://cdnjs.cloudflare.com',
+      opt_onLayout
+    );
   }
 
   /** @override */
@@ -119,7 +120,7 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
     );
     this.registerAction(
       'seekTo',
-      invocation => {
+      (invocation) => {
         const {args} = invocation;
         if (args) {
           this.seekTo_(args);
@@ -132,7 +133,7 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     const animData = batchFetchJsonFor(this.ampdoc_, this.element);
-    return animData.then(data => {
+    return animData.then((data) => {
       const opt_context = {
         loop: this.loop_,
         autoplay: this.autoplay_,
@@ -145,6 +146,7 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
         'bodymovinanimation',
         opt_context
       );
+      iframe.title = this.element.title || 'Airbnb BodyMovin animation';
       return Services.vsyncFor(this.win)
         .mutatePromise(() => {
           this.applyFillContent(iframe);
@@ -189,7 +191,7 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
       !getData(event) ||
       !(
         isObject(getData(event)) ||
-        startsWith(/** @type {string} */ (getData(event)), '{')
+        /** @type {string} */ (getData(event)).startsWith('{')
       )
     ) {
       return; // Doesn't look like JSON.
@@ -262,6 +264,6 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpBodymovinAnimation);
 });

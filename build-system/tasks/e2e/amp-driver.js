@@ -18,6 +18,7 @@
 const AmpdocEnvironment = {
   SINGLE: 'single',
   VIEWER_DEMO: 'viewer-demo',
+  EMAIL_DEMO: 'email-demo',
   SHADOW_DEMO: 'shadow-demo',
 
   // AMPHTML ads environments
@@ -44,26 +45,23 @@ const EnvironmentBehaviorMap = {
   [AmpdocEnvironment.VIEWER_DEMO]: {
     ready(controller) {
       return controller
-        .findElement('#AMP_DOC_dynamic[data-loaded]')
-        .then(frame => controller.switchToFrame(frame));
+        .findElement('#viewer[data-loaded]')
+        .then((frame) => controller.switchToFrame(frame));
     },
 
     url(url) {
-      const defaultCaps = [
-        'a2a',
-        'focus-rect',
-        'foo',
-        'keyboard',
-        'swipe',
-        'iframeScroll',
-      ];
-      // Correctly append extra params in original url
-      url = url.replace('#', '&');
-      // TODO(estherkim): somehow allow non-8000 port and domain
-      return (
-        `http://localhost:8000/examples/viewer.html#href=${url}` +
-        `&caps=${defaultCaps.join(',')}`
-      );
+      return getViewerUrl(url);
+    },
+  },
+
+  [AmpdocEnvironment.EMAIL_DEMO]: {
+    ready(controller) {
+      return controller
+        .findElement('#viewer[data-loaded]')
+        .then((frame) => controller.switchToFrame(frame));
+    },
+    url(url) {
+      return getViewerUrl(url, {isEmail: true});
     },
   },
 
@@ -90,7 +88,7 @@ const EnvironmentBehaviorMap = {
     async ready(controller) {
       return controller
         .findElement('amp-ad > iframe')
-        .then(frame => controller.switchToFrame(frame));
+        .then((frame) => controller.switchToFrame(frame));
     },
 
     url(url) {
@@ -102,7 +100,7 @@ const EnvironmentBehaviorMap = {
     async ready(controller) {
       return controller
         .findElement('#inabox-frame')
-        .then(frame => controller.switchToFrame(frame));
+        .then((frame) => controller.switchToFrame(frame));
     },
 
     url(url) {
@@ -114,7 +112,7 @@ const EnvironmentBehaviorMap = {
     async ready(controller) {
       return controller
         .findElement('#inabox-frame')
-        .then(frame => controller.switchToFrame(frame));
+        .then((frame) => controller.switchToFrame(frame));
     },
 
     url(url) {
@@ -126,7 +124,7 @@ const EnvironmentBehaviorMap = {
     async ready(controller) {
       return controller
         .findElement('#inabox-frame')
-        .then(frame => controller.switchToFrame(frame));
+        .then((frame) => controller.switchToFrame(frame));
     },
 
     url(url) {
@@ -134,6 +132,31 @@ const EnvironmentBehaviorMap = {
     },
   },
 };
+
+/**
+ * @param {string} url
+ * @param {Object=} opts
+ * @param {boolean} opts.isEmail
+ * @return {string}
+ */
+function getViewerUrl(url, {isEmail} = {isEmail: false}) {
+  const defaultCaps = [
+    'a2a',
+    'focus-rect',
+    'foo',
+    'keyboard',
+    'swipe',
+    'iframeScroll',
+  ];
+  // Correctly append extra params in original url
+  url = url.replace('#', '&');
+  // TODO(estherkim): somehow allow non-8000 port and domain
+  return (
+    `http://localhost:8000/test/fixtures/e2e/amp-viewer-integration/viewer.html#href=${url}` +
+    `&caps=${defaultCaps.join(',')}` +
+    `&isEmail=${isEmail}`
+  );
+}
 
 /**
  * Provides AMP-related utilities for E2E Functional Tests.
@@ -156,7 +179,7 @@ class AmpDriver {
   async toggleExperiment(name, toggle) {
     await this.controller_.evaluate(
       (name, toggle) => {
-        (window.AMP = window.AMP || []).push(AMP => {
+        (window.AMP = window.AMP || []).push((AMP) => {
           AMP.toggleExperiment(name, toggle);
         });
       },

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {AccessIframeAdapter} from '../amp-access-iframe';
 import {Messenger} from '../iframe-api/messenger';
 import {dev} from '../../../../src/log';
@@ -24,7 +24,7 @@ describes.fakeWin(
   {
     amp: true,
   },
-  env => {
+  (env) => {
     let ampdoc;
     let clock;
     let validConfig;
@@ -33,8 +33,7 @@ describes.fakeWin(
 
     beforeEach(() => {
       ampdoc = env.ampdoc;
-      clock = lolex.install({
-        target: ampdoc.win,
+      clock = fakeTimers.withGlobal(ampdoc.win).install({
         toFake: ['Date', 'setTimeout', 'clearTimeout'],
       });
 
@@ -216,7 +215,7 @@ describes.fakeWin(
             .withExactArgs('authorize', {})
             .returns(Promise.resolve({a: 1}))
             .once();
-          return adapter.authorize().then(result => {
+          return adapter.authorize().then((result) => {
             expect(result).to.deep.equal({a: 1});
           });
         });
@@ -229,7 +228,7 @@ describes.fakeWin(
             .once();
           const p = adapter.authorize();
           clock.tick(3001);
-          return p.then(result => {
+          return p.then((result) => {
             expect(result).to.deep.equal({response: 'default'});
           });
         });
@@ -280,7 +279,7 @@ describes.fakeWin(
             .once();
           const p = adapter.authorize();
           clock.tick(3001);
-          return p.then(result => {
+          return p.then((result) => {
             expect(result).to.deep.equal(data);
           });
         });
@@ -304,7 +303,7 @@ describes.fakeWin(
             .once();
           const p = adapter.authorize();
           clock.tick(3001);
-          return p.then(result => {
+          return p.then((result) => {
             expect(result).to.deep.equal({response: 'default'});
           });
         });
@@ -329,7 +328,7 @@ describes.fakeWin(
             .once();
           const p = adapter.authorize();
           clock.tick(3001);
-          return p.then(result => {
+          return p.then((result) => {
             expect(result).to.deep.equal({response: 'default'});
             expect(devErrorStub).to.be.calledOnce;
             expect(devErrorStub.args[0][1]).to.match(/failed to restore/);
@@ -350,7 +349,7 @@ describes.fakeWin(
             .once();
           const p = adapter.authorize();
           clock.tick(3001);
-          return p.then(result => {
+          return p.then((result) => {
             expect(result).to.deep.equal({response: 'default'});
           });
         });

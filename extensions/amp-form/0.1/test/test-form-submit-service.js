@@ -24,7 +24,7 @@ describe('form-submit-service', () => {
   });
 
   it('firing without callbacks should not break', () => {
-    expect(submitService.fire()).not.to.throw;
+    expect(() => submitService.fire()).not.to.throw();
   });
 
   it('should register & fire one callback', () => {

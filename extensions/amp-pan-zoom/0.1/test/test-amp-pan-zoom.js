@@ -28,7 +28,7 @@ describes.realWin(
       extensions: ['amp-pan-zoom'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let doc;
     let el;
@@ -36,9 +36,7 @@ describes.realWin(
     let svg;
 
     const measureMutateElementStub = (measure, mutate) => {
-      return Promise.resolve()
-        .then(measure)
-        .then(mutate);
+      return Promise.resolve().then(measure).then(mutate);
     };
 
     /**
@@ -65,15 +63,18 @@ describes.realWin(
 
       el.appendChild(svg);
       doc.body.appendChild(el);
-      return el.build().then(() => {
-        impl = el.implementation_;
-        env.sandbox
-          .stub(impl, 'measureMutateElement')
-          .callsFake(measureMutateElementStub);
-        env.sandbox
-          .stub(impl, 'mutateElement')
-          .callsFake(mutate => measureMutateElementStub(undefined, mutate));
-      });
+      return el
+        .buildInternal()
+        .then(() => el.getImpl(false))
+        .then((aImpl) => {
+          impl = aImpl;
+          env.sandbox
+            .stub(impl, 'measureMutateElement')
+            .callsFake(measureMutateElementStub);
+          env.sandbox
+            .stub(impl, 'mutateElement')
+            .callsFake((mutate) => measureMutateElementStub(undefined, mutate));
+        });
     }
 
     beforeEach(() => {
@@ -288,7 +289,7 @@ describes.realWin(
     });
 
     describe('reset-on-resize', () => {
-      it('should clear inline width/height before measuring', async function() {
+      it('should clear inline width/height before measuring', async function () {
         await getPanZoom();
         await el.layoutCallback();
         expect(svg.style.width).to.equal('300px');
@@ -306,7 +307,7 @@ describes.realWin(
     });
 
     describe('gestures', () => {
-      it('should pan correctly via mouse when zoomed', async function() {
+      it('should pan correctly via mouse when zoomed', async function () {
         await getPanZoom();
         await el.layoutCallback();
         await impl.transform(0, 0, 2);
@@ -324,7 +325,7 @@ describes.realWin(
     });
 
     describe('transformEnd', () => {
-      it('should trigger only once after double tap zoom', async function() {
+      it('should trigger only once after double tap zoom', async function () {
         await getPanZoom();
         await el.layoutCallback();
         const transformEndPromise = listenOncePromise(el, 'transformEnd');
@@ -334,7 +335,7 @@ describes.realWin(
         expect(actionTriggerSpy).to.be.calledOnce;
       });
 
-      it('should not trigger while pinch zooming', async function() {
+      it('should not trigger while pinch zooming', async function () {
         await getPanZoom();
         await el.layoutCallback();
         const actionTriggerSpy = env.sandbox.spy(impl.action_, 'trigger');
@@ -349,7 +350,7 @@ describes.realWin(
         expect(actionTriggerSpy).not.to.be.called;
       });
 
-      it('should trigger exactly once after pinch zoom ends', async function() {
+      it('should trigger exactly once after pinch zoom ends', async function () {
         await getPanZoom();
         await el.layoutCallback();
         const transformEndPromise = listenOncePromise(el, 'transformEnd');
@@ -366,7 +367,7 @@ describes.realWin(
         expect(actionTriggerSpy).to.be.calledOnce;
       });
 
-      it('should not trigger while panning', async function() {
+      it('should not trigger while panning', async function () {
         await getPanZoom();
         await el.layoutCallback();
         const actionTriggerSpy = env.sandbox.spy(impl.action_, 'trigger');
@@ -380,7 +381,7 @@ describes.realWin(
         expect(actionTriggerSpy).not.to.be.called;
       });
 
-      it('should trigger exactly once after panning ends', async function() {
+      it('should trigger exactly once after panning ends', async function () {
         await getPanZoom();
         await el.layoutCallback();
         const transformEndPromise = listenOncePromise(el, 'transformEnd');

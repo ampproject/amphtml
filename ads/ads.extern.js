@@ -221,6 +221,10 @@ var google;
 google.ima;
 google.ima.Ad;
 google.ima.Ad.getSkipTimeOffset;
+google.ima.Ad.getAdPodInfo;
+google.ima.AdPodInfo;
+google.ima.AdPodInfo.getAdPosition;
+google.ima.AdPodInfo.getTotalAds;
 google.ima.AdDisplayContainer;
 google.ima.AdDisplayContainer.initialize;
 google.ima.ImaSdkSettings;
@@ -252,6 +256,8 @@ google.ima.AdEvent.Type.AD_PROGRESS;
 google.ima.AdEvent.Type.CONTENT_PAUSE_REQUESTED;
 google.ima.AdEvent.Type.CONTENT_RESUME_REQUESTED;
 google.ima.AdEvent.Type.LOADED;
+google.ima.AdEvent.Type.PAUSED;
+google.ima.AdEvent.Type.RESUMED;
 google.ima.AdEvent.Type.ALL_ADS_COMPLETED;
 google.ima.AdsManager;
 google.ima.AdsManager.getRemainingTime;
@@ -303,6 +309,17 @@ data.s;
 // adpicker.js
 data.ph;
 
+// adpushup.js
+window.adpushup = {};
+window.adpushup.initAmp = function (
+  global,
+  width,
+  height,
+  siteid,
+  slotpath,
+  totalampslots
+) {};
+
 // adreactor.js
 data.zid;
 data.pid;
@@ -338,7 +355,15 @@ data.siteId;
 // aduptech.js
 window.uAd = {};
 window.uAd.embed;
+data.amp;
 data.responsive;
+data.placementkey;
+data.mincpc;
+data.query;
+data.pageurl;
+data.gdpr;
+data.gdpr_consent;
+data.adtest;
 data.onAds;
 data.onNoAds;
 
@@ -408,7 +433,7 @@ data.epl_e;
  * @param {!Window} global
  * @param {!Object} data
  */
-window.EzoicAmpAd = function(global, data) {};
+window.EzoicAmpAd = function (global, data) {};
 window.EzoicAmpAd.prototype.createAd;
 
 // flite.js
@@ -474,6 +499,10 @@ data.adslot;
 window.MADSAdrequest = {};
 window.MADSAdrequest.adrequest;
 data.adrequest;
+
+// marfeel.js
+data.tenant;
+data.version;
 
 // medianet.js
 data.crid;

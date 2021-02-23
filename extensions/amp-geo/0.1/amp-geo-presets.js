@@ -29,6 +29,8 @@
  * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+export const US_CA_CODE = 'us-ca';
+
 export const ampGeoPresets = {
   /* Expanded EEA countries */
   'preset-eea': [
@@ -88,4 +90,5 @@ export const ampGeoPresets = {
     'CH', // Switzerland
     /** END Machine Generated */
   ],
+  'preset-us-ca': [US_CA_CODE],
 };

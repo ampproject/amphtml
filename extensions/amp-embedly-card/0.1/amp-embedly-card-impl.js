@@ -75,13 +75,14 @@ export class AmpEmbedlyCard extends AMP.BaseElement {
     }
 
     const iframe = getIframe(this.win, this.element, 'embedly');
+    iframe.title = this.element.title || 'Embedly card';
 
     const opt_is3P = true;
     listenFor(
       iframe,
       'embed-size',
-      data => {
-        this./*OK*/ changeHeight(data['height']);
+      (data) => {
+        this.forceChangeHeight(data['height']);
       },
       opt_is3P
     );

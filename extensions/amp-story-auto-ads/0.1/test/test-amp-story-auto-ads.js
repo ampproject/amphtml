@@ -24,6 +24,7 @@ import {
 import {AmpStory} from '../../../amp-story/1.0/amp-story';
 import {AmpStoryAutoAds, Attributes} from '../amp-story-auto-ads';
 import {CommonSignals} from '../../../../src/common-signals';
+import {LocalizationService} from '../../../../src/service/localization';
 import {
   MockStoryImpl,
   addStoryAutoAdsConfig,
@@ -45,7 +46,7 @@ describes.realWin(
       extensions: ['amp-story:1.0', 'amp-story-auto-ads'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let doc;
     let adElement;
@@ -58,9 +59,13 @@ describes.realWin(
     beforeEach(() => {
       win = env.win;
       doc = win.document;
+      const localizationService = new LocalizationService(win.document.body);
+      env.sandbox
+        .stub(Services, 'localizationForDoc')
+        .returns(localizationService);
       const viewer = Services.viewerForDoc(env.ampdoc);
       env.sandbox.stub(Services, 'viewerForDoc').returns(viewer);
-      registerServiceBuilder(win, 'performance', function() {
+      registerServiceBuilder(win, 'performance', function () {
         return {
           isPerformanceTrackingOn: () => false,
         };

@@ -17,7 +17,7 @@
 describe
   .configure()
   .skipEdge()
-  .run('amp-accordion', function() {
+  .run('amp-accordion', function () {
     this.timeout(10000);
     const extensions = ['amp-accordion'];
     const body = `
@@ -36,7 +36,7 @@ describe
         body,
         extensions,
       },
-      env => {
+      (env) => {
         let win, iframe, doc;
         beforeEach(() => {
           win = env.win;
@@ -68,5 +68,5 @@ describe
  * @return {!Promise}
  */
 function timeout(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }

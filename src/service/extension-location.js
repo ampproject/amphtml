@@ -37,7 +37,11 @@ let ExtensionInfoDef;
 export function calculateScriptBaseUrl(location, opt_isLocalDev) {
   if (opt_isLocalDev) {
     let prefix = `${location.protocol}//${location.host}`;
-    if (location.protocol == 'about:') {
+    if (
+      location.protocol == 'about:' ||
+      location.protocol == 'blob:' ||
+      location.protocol == 'data:'
+    ) {
       prefix = '';
     }
     return `${prefix}/dist`;

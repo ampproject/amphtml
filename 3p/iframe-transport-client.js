@@ -62,7 +62,7 @@ export class IframeTransportClient {
     this.iframeMessagingClient_.makeRequest(
       MessageType.SEND_IFRAME_TRANSPORT_EVENTS,
       MessageType.IFRAME_TRANSPORT_EVENTS,
-      eventData => {
+      (eventData) => {
         const events =
           /**
            * @type
@@ -77,7 +77,7 @@ export class IframeTransportClient {
           events.length,
           'Received empty events list in ' + this.win_.location.href
         );
-        events.forEach(event => {
+        events.forEach((event) => {
           try {
             devAssert(
               event.creativeId,

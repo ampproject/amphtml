@@ -5,10 +5,10 @@
   rules: [
     {
       owners: [
-        {name: 'philwinchester'},
-        {name: 'pbecotte'},
-        {name: 'c-nichols'},
-        {name: 'zhouyx'},
+        {name: 'philwinchester', requestReviews: false},
+        {name: 'pbecotte', requestReviews: false},
+        {name: 'c-nichols', requestReviews: false},
+        {name: 'ampproject/wg-ads-reviewers'},
       ],
     },
   ],

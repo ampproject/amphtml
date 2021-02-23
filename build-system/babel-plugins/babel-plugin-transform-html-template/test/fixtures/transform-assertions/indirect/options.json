@@ -1,3 +1,3 @@
 {
-  "plugins": ["../../../../../babel-plugin-transform-html-template"]
+  "plugins": ["../../../.."]
 }

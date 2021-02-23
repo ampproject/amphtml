@@ -236,7 +236,7 @@ export class AmpWebPushHelperFrame {
       .then(() => {
         this.replyToFrameWithPayload_(replyToFrame, true, null, null);
       })
-      .catch(error => {
+      .catch((error) => {
         this.replyToFrameWithPayload_(
           replyToFrame,
           true,
@@ -265,7 +265,7 @@ export class AmpWebPushHelperFrame {
     if (!message || !message.topic) {
       throw new Error('Expected argument topic in message, got:', message);
     }
-    new Promise(resolve => {
+    new Promise((resolve) => {
       // Allow this message through, just for the next time it's received
       this.allowedWorkerMessageTopics_[message.topic] = resolve;
 
@@ -273,7 +273,7 @@ export class AmpWebPushHelperFrame {
       this.waitUntilWorkerControlsPage().then(() => {
         this.messageServiceWorker(message);
       });
-    }).then(workerReplyPayload => {
+    }).then((workerReplyPayload) => {
       delete this.allowedWorkerMessageTopics_[message.topic];
 
       // The service worker's reply is forwarded back to the AMP page
@@ -344,7 +344,7 @@ export class AmpWebPushHelperFrame {
    * @return {Promise}
    */
   waitUntilWorkerControlsPage() {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       if (this.isWorkerControllingPage_()) {
         resolve();
       } else {

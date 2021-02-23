@@ -24,7 +24,7 @@ describes.realWin(
       extensions: ['amp-orientation-observer'],
     },
   },
-  env => {
+  (env) => {
     let impl;
     let triggerEventSpy;
 

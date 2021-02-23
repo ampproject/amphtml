@@ -24,7 +24,7 @@ const definitionFile = 'src/log.js';
 /** Functions exposed as singleton getters for `Log`. */
 const singletonFunctions = ['dev', 'user'];
 
-const assertAliases = singletonFunctions.map(prefix => `${prefix}Assert`);
+const assertAliases = singletonFunctions.map((prefix) => `${prefix}Assert`);
 
 /**
  * Known transformable logging methods.

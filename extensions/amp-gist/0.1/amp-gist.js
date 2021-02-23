@@ -63,13 +63,14 @@ export class AmpGist extends AMP.BaseElement {
   layoutCallback() {
     /* the third parameter 'github' ties it to the 3p/github.js */
     const iframe = getIframe(this.win, this.element, 'github');
+    iframe.title = this.element.title || 'Github gist';
     this.applyFillContent(iframe);
     // Triggered by window.context.requestResize() inside the iframe.
     listenFor(
       iframe,
       'embed-size',
-      data => {
-        this./*OK*/ changeHeight(data['height']);
+      (data) => {
+        this.forceChangeHeight(data['height']);
       },
       /* opt_is3P */ true
     );
@@ -91,6 +92,6 @@ export class AmpGist extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-gist', '0.1', AMP => {
+AMP.extension('amp-gist', '0.1', (AMP) => {
   AMP.registerElement('amp-gist', AmpGist);
 });

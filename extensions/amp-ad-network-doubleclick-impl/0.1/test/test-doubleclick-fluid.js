@@ -54,7 +54,7 @@ const rawCreative = `
   </script>`;
 
 const mockPromise = {
-  then: callback => {
+  then: (callback) => {
     callback();
     return {
       catch: () => {},
@@ -72,7 +72,7 @@ const mockPromise = {
 function createScaffoldingForFluidRendering(impl, sandbox, resize = true) {
   impl.getVsync = () => {
     return {
-      run: runArgs => {
+      run: (runArgs) => {
         runArgs.mutate();
       },
     };
@@ -93,7 +93,7 @@ function createScaffoldingForFluidRendering(impl, sandbox, resize = true) {
   sandbox./*OK*/ stub(impl.safeframeApi_, 'setupGeom_');
 }
 
-describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
+describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, (env) => {
   let impl;
   let multiSizeImpl;
   let element;
@@ -374,9 +374,9 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     impl.isVerifiedAmpCreative_ = true;
     impl.reattemptToExpandFluidCreative_ = true;
     // Should do nothing
-    impl.viewportCallback(true);
+    impl.viewportCallbackTemp(true);
     expect(attemptChangeHeightStub).to.not.be.called;
-    impl.viewportCallback(false);
+    impl.viewportCallbackTemp(false);
     expect(attemptChangeHeightStub).to.be.calledOnce;
   });
 

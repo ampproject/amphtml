@@ -66,7 +66,7 @@ export function insertAnalyticsElement(
     const ampdoc = Services.ampdoc(parentElement);
     extensions./*OK*/ installExtensionForDoc(ampdoc, 'amp-analytics');
   } else {
-    Services.analyticsForDocOrNull(parentElement).then(analytics => {
+    Services.analyticsForDocOrNull(parentElement).then((analytics) => {
       devAssert(analytics);
     });
   }
@@ -126,7 +126,8 @@ class CustomEventReporter {
     triggerAnalyticsEvent(
       this.parent_,
       this.getEventTypeInSandbox_(eventType),
-      opt_vars
+      opt_vars,
+      /** enableDataVars */ false
     );
   }
   /**
@@ -234,7 +235,7 @@ export function useAnalyticsInSandbox(element, promise) {
       if (analyticsElement || !configPromise) {
         return;
       }
-      configPromise.then(config => {
+      configPromise.then((config) => {
         if (!configPromise) {
           // If config promise resolve after unload, do nothing.
           return;

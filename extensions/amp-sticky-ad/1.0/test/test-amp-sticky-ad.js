@@ -35,7 +35,7 @@ describes.realWin(
       extensions: ['amp-sticky-ad:1.0', 'amp-ad'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let ampStickyAd;
     let ampAd;
@@ -43,7 +43,7 @@ describes.realWin(
     let addToFixedLayerStub, addToFixedLayerPromise;
     const adUpgradedToCustomElementPromise = Promise.resolve();
     describe('with valid child 1.0', () => {
-      beforeEach(() => {
+      beforeEach(async () => {
         win = env.win;
         ampStickyAd = win.document.createElement('amp-sticky-ad');
         ampStickyAd.setAttribute('layout', 'nodisplay');
@@ -54,8 +54,8 @@ describes.realWin(
         });
         ampStickyAd.appendChild(ampAd);
         win.document.body.appendChild(ampStickyAd);
-        ampStickyAd.build();
-        impl = ampStickyAd.implementation_;
+        ampStickyAd.buildInternal();
+        impl = await ampStickyAd.getImpl(false);
         addToFixedLayerPromise = Promise.resolve();
         addToFixedLayerStub = env.sandbox
           .stub(impl.viewport_, 'addToFixedLayer')
@@ -63,7 +63,7 @@ describes.realWin(
       });
 
       // TODO(#16916): Make this test work with synchronous throws.
-      it.skip('should listen to scroll event', function*() {
+      it.skip('should listen to scroll event', function* () {
         const spy = env.sandbox.spy(impl, 'removeOnScrollListener_');
         expect(impl.scrollUnlisten_).to.be.null;
         yield macroTask();
@@ -87,16 +87,16 @@ describes.realWin(
         const getScrollTopSpy = env.sandbox.spy();
         const getScrollHeightSpy = env.sandbox.spy();
 
-        impl.viewport_.getScrollTop = function() {
+        impl.viewport_.getScrollTop = function () {
           getScrollTopSpy();
           return 1;
         };
-        impl.viewport_.getScrollHeight = function() {
+        impl.viewport_.getScrollHeight = function () {
           getScrollHeightSpy();
           return 300;
         };
         impl.onScroll_();
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
           setTimeout(resolve, 0);
         }).then(() => {
           expect(getScrollTopSpy).to.have.been.called;
@@ -129,10 +129,10 @@ describes.realWin(
         );
         getScrollHeightStub.returns(300);
 
-        impl.mutateElement = function(callback) {
+        impl.mutateElement = function (callback) {
           callback();
         };
-        impl.vsync_.mutate = function(callback) {
+        impl.vsync_.mutate = function (callback) {
           callback();
         };
         impl.adReadyPromise_ = Promise.resolve();
@@ -176,19 +176,19 @@ describes.realWin(
         const addCloseButtonSpy = env.sandbox.spy(impl, 'addCloseButton_');
         env.sandbox.stub(impl, 'scheduleLayoutForAd_').callsFake(() => {});
 
-        impl.viewport_.getScrollTop = function() {
+        impl.viewport_.getScrollTop = function () {
           return 100;
         };
-        impl.viewport_.getSize = function() {
+        impl.viewport_.getSize = function () {
           return {height: 50};
         };
-        impl.viewport_.getScrollHeight = function() {
+        impl.viewport_.getScrollHeight = function () {
           return 300;
         };
-        impl.mutateElement = function(callback) {
+        impl.mutateElement = function (callback) {
           callback();
         };
-        impl.vsync_.mutate = function(callback) {
+        impl.vsync_.mutate = function (callback) {
           callback();
         };
 
@@ -211,7 +211,7 @@ describes.realWin(
       });
 
       it('should wait for built and render-start signals', () => {
-        impl.vsync_.mutate = function(callback) {
+        impl.vsync_.mutate = function (callback) {
           callback();
         };
         const layoutAdSpy = env.sandbox.spy(impl, 'layoutAd_');
@@ -238,7 +238,7 @@ describes.realWin(
           'style',
           'background-color: rgba(55, 55, 55, 0.55) !important'
         );
-        impl.vsync_.mutate = function(callback) {
+        impl.vsync_.mutate = function (callback) {
           callback();
         };
         const layoutPromise = impl.layoutAd_();
@@ -256,7 +256,7 @@ describes.realWin(
           'style',
           'background-color: transparent !important'
         );
-        impl.vsync_.mutate = function(callback) {
+        impl.vsync_.mutate = function (callback) {
           callback();
         };
         const layoutPromise = impl.layoutAd_();
@@ -279,6 +279,7 @@ describes.realWin(
         ampStickyAd = win.document.createElement('amp-sticky-ad');
         ampStickyAd.setAttribute('layout', 'nodisplay');
         ampImg = win.document.createElement('amp-img');
+        ampImg.setAttribute('layout', 'nodisplay');
         ampAd1 = createElementWithAttributes(win.document, 'amp-ad', {
           'type': '_ping_',
           'height': 50,
@@ -292,9 +293,9 @@ describes.realWin(
         win.document.body.appendChild(ampStickyAd);
       });
 
-      it('should not build when child is not ad', () => {
+      it('should not build when child is not ad', async () => {
         ampStickyAd.appendChild(ampImg);
-        const impl = ampStickyAd.implementation_;
+        const impl = await ampStickyAd.getImpl(false);
         allowConsoleError(() => {
           expect(() => impl.buildCallback()).to.throw(
             /amp-sticky-ad must have a single amp-ad child/
@@ -302,10 +303,10 @@ describes.realWin(
         });
       });
 
-      it('should not build when has more than 1 children', () => {
+      it('should not build when has more than 1 children', async () => {
         ampStickyAd.appendChild(ampAd1);
         ampStickyAd.appendChild(ampAd2);
-        const impl = ampStickyAd.implementation_;
+        const impl = await ampStickyAd.getImpl(false);
 
         allowConsoleError(() => {
           expect(() => impl.buildCallback()).to.throw(
@@ -331,12 +332,12 @@ describes.realWin(
       extensions: ['amp-sticky-ad:1.0', 'amp-ad'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let ampStickyAd;
     let impl;
     let addToFixedLayerPromise;
-    beforeEach(() => {
+    beforeEach(async () => {
       win = env.win;
       ampStickyAd = win.document.createElement('amp-sticky-ad');
       ampStickyAd.setAttribute('layout', 'nodisplay');
@@ -347,30 +348,30 @@ describes.realWin(
       });
       ampStickyAd.appendChild(ampAd);
       win.document.body.appendChild(ampStickyAd);
-      ampStickyAd.build();
-      impl = ampStickyAd.implementation_;
+      ampStickyAd.buildInternal();
+      impl = await ampStickyAd.getImpl(false);
       addToFixedLayerPromise = Promise.resolve();
       env.sandbox
         .stub(impl.viewport_, 'addToFixedLayer')
         .callsFake(() => addToFixedLayerPromise);
-      return ampAd.implementation_.upgradeCallback();
+      return impl.upgradeCallback();
     });
 
     // TODO(zhouyx, #18574): Fix failing borderWidth check and re-enable.
     it.skip('close button should close ad and reset body borderBottom', () => {
-      impl.viewport_.getScrollTop = function() {
+      impl.viewport_.getScrollTop = function () {
         return 100;
       };
-      impl.viewport_.getSize = function() {
+      impl.viewport_.getSize = function () {
         return {height: 50};
       };
-      impl.viewport_.getScrollHeight = function() {
+      impl.viewport_.getScrollHeight = function () {
         return 300;
       };
-      impl.mutateElement = function(callback) {
+      impl.mutateElement = function (callback) {
         callback();
       };
-      impl.vsync_.mutate = function(callback) {
+      impl.vsync_.mutate = function (callback) {
         callback();
       };
       env.sandbox.defineProperty(impl.element, 'offsetHeight', {value: 20});
@@ -403,19 +404,19 @@ describes.realWin(
 
     // TODO(zhouyx, #18574): Fix failing borderWidth check and re-enable.
     it.skip('should collapse and reset borderBottom when its child do', () => {
-      impl.viewport_.getScrollTop = function() {
+      impl.viewport_.getScrollTop = function () {
         return 100;
       };
-      impl.viewport_.getSize = function() {
+      impl.viewport_.getSize = function () {
         return {height: 50};
       };
-      impl.viewport_.getScrollHeight = function() {
+      impl.viewport_.getScrollHeight = function () {
         return 300;
       };
-      impl.mutateElement = function(callback) {
+      impl.mutateElement = function (callback) {
         callback();
       };
-      impl.vsync_.mutate = function(callback) {
+      impl.vsync_.mutate = function (callback) {
         callback();
       };
       env.sandbox.defineProperty(impl.element, 'offsetHeight', {value: 20});

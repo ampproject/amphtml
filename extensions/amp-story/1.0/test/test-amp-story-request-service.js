@@ -20,7 +20,7 @@ import {
   BOOKEND_CREDENTIALS_ATTRIBUTE_NAME,
 } from '../amp-story-request-service';
 
-describes.fakeWin('amp-story-store-service', {amp: true}, env => {
+describes.fakeWin('amp-story-store-service', {amp: true}, (env) => {
   let requestService;
   let storyElement;
   let bookendElement;

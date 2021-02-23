@@ -16,12 +16,12 @@
 'use strict';
 
 module.exports = {
-  'open attachment UI element': async (page, name) => {
-    await page.waitFor(1600);
+  'open attachment UI element': async (page, unusedName) => {
+    await page.waitForTimeout(1600);
   },
 
-  'open attachment': async (page, name) => {
+  'open attachment': async (page, unusedName) => {
     await page.tap('.i-amphtml-story-page-open-attachment-label');
-    await page.waitFor(410);
+    await page.waitForTimeout(410);
   },
- };
+};

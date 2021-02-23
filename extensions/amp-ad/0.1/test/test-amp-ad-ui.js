@@ -29,7 +29,7 @@ describes.realWin(
       ampdoc: 'single',
     },
   },
-  env => {
+  (env) => {
     let adImpl;
     let uiHandler;
     let adContainer;
@@ -60,7 +60,7 @@ describes.realWin(
       it(
         'should force collapse ad inside flying carpet, ' +
           'if it is the only and direct child of flying carpet',
-        function*() {
+        function* () {
           adContainer = 'AMP-FX-FLYING-CARPET';
           const attemptCollapseSpy = env.sandbox.spy(adImpl, 'attemptCollapse');
           const collapseSpy = env.sandbox
@@ -89,7 +89,7 @@ describes.realWin(
       it(
         'should NOT force collapse ad inside flying carpet, ' +
           'if there is another element',
-        function*() {
+        function* () {
           adContainer = 'AMP-FX-FLYING-CARPET';
           const attemptCollapseSpy = env.sandbox.spy(adImpl, 'attemptCollapse');
           const collapseSpy = env.sandbox
@@ -120,7 +120,7 @@ describes.realWin(
       it(
         'should NOT force collapse ad inside flying carpet, ' +
           'if it is not a direct child of flying carpet.',
-        function*() {
+        function* () {
           adContainer = 'AMP-FX-FLYING-CARPET';
           const attemptCollapseSpy = env.sandbox.spy(adImpl, 'attemptCollapse');
           const collapseSpy = env.sandbox
@@ -187,7 +187,7 @@ describes.realWin(
 
       it('should toggle fallback when collapse fail', () => {
         let resolve = null;
-        const promise = new Promise(resolve_ => {
+        const promise = new Promise((resolve_) => {
           resolve = resolve_;
         });
         const placeholderSpy = env.sandbox.spy(adImpl, 'togglePlaceholder');
@@ -201,7 +201,7 @@ describes.realWin(
           });
         env.sandbox
           .stub(uiHandler.baseInstance_, 'mutateElement')
-          .callsFake(callback => {
+          .callsFake((callback) => {
             callback();
             resolve();
           });
@@ -217,13 +217,13 @@ describes.realWin(
           return false;
         });
         let resolve = null;
-        const promise = new Promise(resolve_ => {
+        const promise = new Promise((resolve_) => {
           resolve = resolve_;
         });
         env.sandbox.stub(adImpl, 'attemptCollapse').callsFake(() => {
           return Promise.reject();
         });
-        env.sandbox.stub(adImpl, 'mutateElement').callsFake(callback => {
+        env.sandbox.stub(adImpl, 'mutateElement').callsFake((callback) => {
           callback();
           resolve();
         });
@@ -245,6 +245,7 @@ describes.realWin(
             height: '50px',
           });
           env.win.document.body.appendChild(adElement);
+          env.sandbox.stub(uiHandler, 'setSize_');
           env.sandbox
             .stub(adImpl, 'attemptChangeSize')
             .callsFake((height, width) => {
@@ -252,7 +253,7 @@ describes.realWin(
               expect(width).to.equal(450);
               return Promise.resolve();
             });
-          return uiHandler.updateSize(100, 400, 50, 300, {}).then(sizes => {
+          return uiHandler.updateSize(100, 400, 50, 300, {}).then((sizes) => {
             expect(sizes).to.deep.equal({
               success: true,
               newWidth: 450,
@@ -262,6 +263,7 @@ describes.realWin(
         });
 
         it('should tolerate string input', () => {
+          env.sandbox.stub(uiHandler, 'setSize_');
           env.sandbox
             .stub(adImpl, 'attemptChangeSize')
             .callsFake((height, width) => {
@@ -269,7 +271,7 @@ describes.realWin(
               expect(width).to.equal(400);
               return Promise.resolve();
             });
-          return uiHandler.updateSize('100', 400, 0, 0, {}).then(sizes => {
+          return uiHandler.updateSize('100', 400, 0, 0, {}).then((sizes) => {
             expect(sizes).to.deep.equal({
               success: true,
               newWidth: 400,
@@ -285,7 +287,7 @@ describes.realWin(
           );
           return uiHandler
             .updateSize(undefined, undefined, 0, 0, {})
-            .catch(e => {
+            .catch((e) => {
               expect(e.message).to.equal('undefined width and height');
               expect(attemptChangeSizeSpy).to.not.be.called;
             });
@@ -297,7 +299,7 @@ describes.realWin(
             adImpl,
             'attemptChangeSize'
           );
-          return uiHandler.updateSize(100, 400, 0, 0, {}).then(sizes => {
+          return uiHandler.updateSize(100, 400, 0, 0, {}).then((sizes) => {
             expect(sizes).to.deep.equal({
               success: false,
               newWidth: 400,
@@ -311,7 +313,7 @@ describes.realWin(
           env.sandbox.stub(adImpl, 'attemptChangeSize').callsFake(() => {
             return Promise.reject();
           });
-          return uiHandler.updateSize(100, 400, 0, 0, {}).then(sizes => {
+          return uiHandler.updateSize(100, 400, 0, 0, {}).then((sizes) => {
             expect(sizes).to.deep.equal({
               success: false,
               newWidth: 400,
@@ -319,6 +321,21 @@ describes.realWin(
             });
           });
         });
+      });
+    });
+
+    describe('sticky ads', () => {
+      it('should render close buttons on render once', () => {
+        expect(uiHandler.unlisteners_).to.be.empty;
+        uiHandler.stickyAdPosition_ = 'bottom';
+        uiHandler.onResizeSuccess();
+        expect(uiHandler.closeButtonRendered_).to.be.true;
+        expect(uiHandler.unlisteners_.length).to.equal(1);
+        expect(uiHandler.element_.querySelector('.amp-ad-close-button')).to.be
+          .not.null;
+
+        uiHandler.onResizeSuccess();
+        expect(uiHandler.unlisteners_.length).to.equal(1);
       });
     });
   }

@@ -21,16 +21,16 @@ const pageHeight = 600;
 const arrowMargin = 12;
 
 describes.endtoend(
-  'AMP carousel rtl',
+  'amp-base-carousel - rtl',
   {
-    testUrl:
-      'http://localhost:8000/test/manual/amp-base-carousel/basic-rtl.amp.html',
+    version: '0.1',
+    fixture: 'amp-base-carousel/basic-rtl.amp.html',
     experiments: ['amp-base-carousel', 'layers'],
     initialRect: {width: pageWidth, height: pageHeight},
     // TODO(sparhami) Make other environments work too
     environments: ['single'],
   },
-  async env => {
+  async (env) => {
     /** The total number of slides in the carousel */
     const SLIDE_COUNT = 7;
     let controller;

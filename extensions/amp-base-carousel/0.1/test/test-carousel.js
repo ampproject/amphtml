@@ -18,10 +18,11 @@
  */
 
 import {Carousel} from '../carousel';
+import {dev} from '../../../../src/log';
 import {setInitialDisplay, setStyle, setStyles} from '../../../../src/style';
 import {toArray} from '../../../../src/types';
 
-describes.realWin('carousel implementation', {}, env => {
+describes.realWin('carousel implementation', {}, (env) => {
   let win;
   let doc;
   let element;
@@ -40,7 +41,7 @@ describes.realWin('carousel implementation', {}, env => {
    * @return {!Array<!Element>}
    */
   function setSlides(count) {
-    toArray(scrollContainer.querySelectorAll('test-slide')).forEach(slide => {
+    toArray(scrollContainer.querySelectorAll('test-slide')).forEach((slide) => {
       scrollContainer.removeChild(slide);
     });
 
@@ -55,7 +56,7 @@ describes.realWin('carousel implementation', {}, env => {
       return slide;
     });
 
-    slides.forEach(slide => scrollContainer.appendChild(slide));
+    slides.forEach((slide) => scrollContainer.appendChild(slide));
 
     return slides;
   }
@@ -98,6 +99,7 @@ describes.realWin('carousel implementation', {}, env => {
 
     element.appendChild(scrollContainer);
     doc.body.appendChild(element);
+    element.getAmpDoc = () => env.ampdoc;
   });
 
   afterEach(() => {
@@ -232,5 +234,47 @@ describes.realWin('carousel implementation', {}, env => {
 
       expect(carousel.isAtStart()).to.be.false;
     });
+  });
+
+  describe('resetScrollReferencePoint_', () => {
+    it(
+      'currentElementOffset_ & currentIndex_ should be set when it is a' +
+        ' programmatic scroll',
+      async () => {
+        const carousel = await createCarousel({
+          slideCount: 12,
+          loop: false,
+        });
+
+        // Fake the scroll that ends short of the correct index.
+        // This is handled by scroll event listener.
+        carousel.touching_ = false;
+        carousel.requestedIndex_ = 1;
+        carousel.currentIndex_ = 0;
+        carousel.restingIndex_ = 0;
+        carousel.currentElementOffset_ = -0.99382;
+
+        carousel.resetScrollReferencePoint_();
+
+        expect(carousel.currentElementOffset_).to.equal(0);
+        expect(carousel.currentIndex_).to.equal(1);
+        expect(carousel.requestedIndex_).to.be.null;
+      }
+    );
+  });
+
+  it('should warn if no slides', async () => {
+    const warnSpy = env.sandbox.spy(dev(), 'warn');
+    await createCarousel({slideCount: 0, loop: false});
+
+    expect(warnSpy).to.be.calledOnce;
+    expect(warnSpy.args[0][1]).to.match(/No slides were found./);
+
+    warnSpy.resetHistory();
+    await createCarousel({
+      slideCount: 12,
+      loop: false,
+    });
+    expect(warnSpy).to.not.be.called;
   });
 });

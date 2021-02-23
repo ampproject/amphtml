@@ -24,19 +24,6 @@ limitations under the License.
 
 # amp-skimlinks
 
-Run skimlinks inside your AMP page
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-skimlinks" src="https://cdn.ampproject.org/v0/amp-skimlinks-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>nodisplay</td>
-  </tr>
-</table>
-
 ## Overview
 
 Skimlinks allows you to monetise your content through affiliate marketing. It gives you instant access to over 24,000 merchant affiliate programs without the hassle of network sign ups, approvals or creating affiliate links.

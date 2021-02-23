@@ -31,7 +31,7 @@ describes.realWin(
       extensions: ['amp-recaptcha-input'],
     },
   },
-  env => {
+  (env) => {
     let recaptchaService;
     const fakeSitekey = 'fake-sitekey-fortesting';
     const anotherFakeSitekey = 'another-fake-sitekey-fortesting';
@@ -109,16 +109,40 @@ describes.realWin(
         ' if they pass a different sitekey',
       () => {
         expect(recaptchaService.registeredElementCount_).to.be.equal(0);
-        return recaptchaService.register(fakeSitekey).then(() => {
-          expect(recaptchaService.registeredElementCount_).to.be.equal(1);
-          expect(recaptchaService.iframe_).to.be.ok;
-
-          return recaptchaService.register(anotherFakeSitekey).catch(err => {
+        return recaptchaService
+          .register(fakeSitekey)
+          .then(() => {
+            expect(recaptchaService.registeredElementCount_).to.be.equal(1);
+            expect(recaptchaService.iframe_).to.be.ok;
+            return recaptchaService.register(anotherFakeSitekey);
+          })
+          .catch((err) => {
             expect(err).to.be.ok;
+            expect(err.message).to.have.string('sitekey');
             expect(recaptchaService.registeredElementCount_).to.be.equal(1);
             expect(recaptchaService.iframe_).to.be.ok;
           });
-        });
+      }
+    );
+
+    it(
+      'should not allow elements to register,' +
+        ' if they do not all or none pass in the global attribute',
+      () => {
+        expect(recaptchaService.registeredElementCount_).to.be.equal(0);
+        return recaptchaService
+          .register(fakeSitekey, true)
+          .then(() => {
+            expect(recaptchaService.registeredElementCount_).to.be.equal(1);
+            expect(recaptchaService.iframe_).to.be.ok;
+            return recaptchaService.register(fakeSitekey, false);
+          })
+          .catch((err) => {
+            expect(err).to.be.ok;
+            expect(err.message).to.have.string('data-global');
+            expect(recaptchaService.registeredElementCount_).to.be.equal(1);
+            expect(recaptchaService.iframe_).to.be.ok;
+          });
       }
     );
 
@@ -178,7 +202,7 @@ describes.realWin(
     it('should reject if there is no iframe on execute', () => {
       expect(recaptchaService.registeredElementCount_).to.be.equal(0);
       expect(recaptchaService.iframe_).to.not.be.ok;
-      return recaptchaService.execute(0, '').catch(err => {
+      return recaptchaService.execute(0, '').catch((err) => {
         expect(err).to.be.ok;
       });
     });

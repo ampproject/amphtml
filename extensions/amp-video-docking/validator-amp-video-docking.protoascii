@@ -17,7 +17,6 @@
 tags: {  # amp-video-docking
   html_format: AMP
   tag_name: "SCRIPT"
-  spec_name: "amp-video-docking"
   extension_spec: {
     name: "amp-video-docking"
     version: "0.1"

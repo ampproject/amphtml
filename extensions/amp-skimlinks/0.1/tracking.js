@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {CustomEventReporterBuilder} from '../../../src/extension-analytics.js';
+import {CustomEventReporterBuilder} from '../../../src/extension-analytics';
 import {dict} from '../../../src/utils/object';
 import {generatePageImpressionId, isExcludedAnchorUrl} from './utils';
 
@@ -284,7 +284,7 @@ export class Tracking {
     let numberAffiliateLinks = 0;
     const urls = dict({});
 
-    anchorReplacementList.forEach(anchorReplacement => {
+    anchorReplacementList.forEach((anchorReplacement) => {
       const {replacementUrl, anchor} = anchorReplacement;
       const isExcluded = isExcludedAnchorUrl(anchor, this.skimOptions_);
       const isAffiliate = Boolean(replacementUrl);

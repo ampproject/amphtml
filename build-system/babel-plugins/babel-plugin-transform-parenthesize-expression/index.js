@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-module.exports = function(babel) {
+module.exports = function (babel) {
   const {types: t} = babel;
   return {
     visitor: {

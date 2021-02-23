@@ -19,7 +19,7 @@
   allowed, like input[type=password].
 -->
 <!doctype html>
-<html ⚡4email>
+<html ⚡4email data-css-strict>
 <head>
   <meta charset="utf-8">
   <style amp4email-boilerplate>body{visibility:hidden}</style>
@@ -43,6 +43,7 @@
         <span>Your email</span>
         <input type="email" name="email" required>
       </label>
+      <input type="button" name="button">
       <input type="submit" value="Subscribe">
     </fieldset>
     <div submit-success>
@@ -99,9 +100,8 @@
     </div>
     <input type="submit" value="OK">
   </form>
-  <!-- Invalid: input can not be type="button|file|image". -->
+  <!-- Invalid: input can not be type="file|image". -->
   <form method="post" action-xhr="https://example.com/subscribe">
-    <input type="button" name="button">
     <input type="image" name="image">
   </form>
   <!-- Invalid: input can not be type="password" -->

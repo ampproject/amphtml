@@ -16,14 +16,8 @@
 
 import '../../../amp-ad/0.1/amp-ad';
 import {AdTracker} from '../ad-tracker';
-import {
-  NO_OP_EXP,
-  PlacementState,
-  getPlacementsFromConfigObj,
-} from '../placement';
+import {PlacementState, getPlacementsFromConfigObj} from '../placement';
 import {Services} from '../../../../src/services';
-import {forceExperimentBranch} from '../../../../src/experiments';
-import {isInExperiment} from '../../../../ads/google/a4a/traffic-experiments';
 
 describes.realWin(
   'placement',
@@ -34,7 +28,7 @@ describes.realWin(
       extensions: ['amp-ad'],
     },
   },
-  env => {
+  (env) => {
     let win, doc, ampdoc;
     let container;
 
@@ -55,52 +49,6 @@ describes.realWin(
       env.sandbox
         .stub(win.__AMP_BASE_CE_CLASS.prototype, 'whenBuilt')
         .callsFake(() => Promise.resolve());
-    });
-
-    describe('noOpExperiment', () => {
-      it('should set the correct ID on the ad element', () => {
-        forceExperimentBranch(
-          ampdoc.win,
-          NO_OP_EXP.branch,
-          NO_OP_EXP.experiment
-        );
-
-        const anchor = doc.createElement('div');
-        anchor.id = 'anId';
-        container.appendChild(anchor);
-
-        const placements = getPlacementsFromConfigObj(ampdoc, {
-          placements: [
-            {
-              anchor: {
-                selector: 'DIV#anId',
-              },
-              pos: 2,
-              type: 1,
-            },
-          ],
-        });
-        expect(placements).to.have.lengthOf(1);
-
-        const attributes = {
-          'type': '_ping_',
-        };
-
-        const sizing = {};
-
-        const adTracker = new AdTracker([], {
-          initialMinSpacing: 0,
-          subsequentMinSpacing: [],
-          maxAdCount: 10,
-        });
-
-        const result = placements[0].placeAd(attributes, sizing, adTracker);
-        env.flushVsync();
-        return result.then(() => {
-          const adElement = anchor.firstChild;
-          expect(isInExperiment(adElement, NO_OP_EXP.experiment)).to.be.true;
-        });
-      });
     });
 
     describe('getAdElement', () => {
@@ -187,7 +135,7 @@ describes.realWin(
         });
         expect(placements).to.have.lengthOf(1);
 
-        return placements[0].getEstimatedPosition(yPosition => {
+        return placements[0].getEstimatedPosition((yPosition) => {
           expect(yPosition).to.equal(15);
         });
       });
@@ -213,7 +161,7 @@ describes.realWin(
         });
         expect(placements).to.have.lengthOf(1);
 
-        return placements[0].getEstimatedPosition(yPosition => {
+        return placements[0].getEstimatedPosition((yPosition) => {
           expect(yPosition).to.equal(15);
         });
       });
@@ -239,7 +187,7 @@ describes.realWin(
         });
         expect(placements).to.have.lengthOf(1);
 
-        return placements[0].getEstimatedPosition(yPosition => {
+        return placements[0].getEstimatedPosition((yPosition) => {
           expect(yPosition).to.equal(115);
         });
       });
@@ -266,7 +214,7 @@ describes.realWin(
         });
         expect(placements).to.have.lengthOf(1);
 
-        return placements[0].getEstimatedPosition(yPosition => {
+        return placements[0].getEstimatedPosition((yPosition) => {
           expect(yPosition).to.equal(115);
         });
       });
@@ -463,7 +411,7 @@ describes.realWin(
         });
 
         const mutator = Services.mutatorForDoc(anchor);
-        env.sandbox.stub(mutator, 'attemptChangeSize').callsFake(() => {
+        env.sandbox.stub(mutator, 'requestChangeSize').callsFake(() => {
           return Promise.reject();
         });
 
@@ -660,16 +608,18 @@ describes.realWin(
         });
       });
 
-      it('should set the correct attributes for responsive enabled ads using amp-ad responsive', () => {
+      it('should set the full-with responsive attributes for responsive enabled users on narrow viewport.', () => {
         const anchor = doc.createElement('div');
         anchor.id = 'anId';
         container.appendChild(anchor);
 
-        const mutator = Services.mutatorForDoc(anchor);
-        env.sandbox.stub(mutator, 'attemptChangeSize').callsFake(() => {
-          return Promise.resolve();
-        });
-        env.sandbox.stub(mutator.viewport_, 'getWidth').callsFake(() => 2000);
+        const viewportMock = env.sandbox.mock(
+          Services.viewportForDoc(env.win.document)
+        );
+        viewportMock
+          .expects('getSize')
+          .returns({width: 487, height: 823})
+          .atLeast(1);
 
         const placements = getPlacementsFromConfigObj(ampdoc, {
           placements: [
@@ -697,7 +647,7 @@ describes.realWin(
         });
         return placements[0]
           .placeAd(attributes, sizing, adTracker, true)
-          .then(placementState => {
+          .then((placementState) => {
             const adElement = anchor.firstChild;
             expect(adElement.tagName).to.equal('AMP-AD');
             expect(adElement.getAttribute('type')).to.equal('_ping_');
@@ -713,13 +663,68 @@ describes.realWin(
           });
       });
 
+      it('should not set the full-with responsive attributes for responsive enabled users on wide viewport.', () => {
+        const anchor = doc.createElement('div');
+        anchor.id = 'anId';
+        container.appendChild(anchor);
+
+        const viewportMock = env.sandbox.mock(
+          Services.viewportForDoc(env.win.document)
+        );
+        viewportMock
+          .expects('getSize')
+          .returns({width: 488, height: 1000})
+          .atLeast(1);
+
+        const placements = getPlacementsFromConfigObj(ampdoc, {
+          placements: [
+            {
+              anchor: {
+                selector: 'DIV#anId',
+              },
+              pos: 2,
+              type: 1,
+            },
+          ],
+        });
+        expect(placements).to.have.lengthOf(1);
+
+        const attributes = {
+          'type': '_ping_',
+        };
+
+        const sizing = {};
+        const adTracker = new AdTracker([], {
+          initialMinSpacing: 0,
+          subsequentMinSpacing: [],
+          maxAdCount: 10,
+        });
+
+        return placements[0]
+          .placeAd(attributes, sizing, adTracker, true)
+          .then((placementState) => {
+            const adElement = anchor.firstChild;
+            expect(adElement.tagName).to.equal('AMP-AD');
+            expect(adElement.getAttribute('type')).to.equal('_ping_');
+            expect(adElement.getAttribute('layout')).to.equal('fixed-height');
+            expect(adElement.getAttribute('height')).to.equal('0');
+            expect(adElement.hasAttribute('data-auto-format')).to.be.false;
+            expect(adElement.hasAttribute('data-full-width')).to.be.false;
+            expect(adElement.style.marginTop).to.equal('');
+            expect(adElement.style.marginBottom).to.equal('');
+            expect(adElement.style.marginLeft).to.equal('');
+            expect(adElement.style.marginRight).to.equal('');
+            expect(placementState).to.equal(PlacementState.PLACED);
+          });
+      });
+
       it('should report placement placed when resize allowed', () => {
         const anchor = doc.createElement('div');
         anchor.id = 'anId';
         container.appendChild(anchor);
 
         const mutator = Services.mutatorForDoc(anchor);
-        env.sandbox.stub(mutator, 'attemptChangeSize').callsFake(() => {
+        env.sandbox.stub(mutator, 'requestChangeSize').callsFake(() => {
           return Promise.resolve();
         });
 
@@ -749,8 +754,8 @@ describes.realWin(
         });
         return placements[0]
           .placeAd(attributes, sizing, adTracker)
-          .then(placementState => {
-            expect(mutator.attemptChangeSize).to.have.been.calledWith(
+          .then((placementState) => {
+            expect(mutator.requestChangeSize).to.have.been.calledWith(
               anchor.firstChild,
               250,
               undefined
@@ -765,7 +770,7 @@ describes.realWin(
         container.appendChild(anchor);
 
         const mutator = Services.mutatorForDoc(anchor);
-        env.sandbox.stub(mutator, 'attemptChangeSize').callsFake(() => {
+        env.sandbox.stub(mutator, 'requestChangeSize').callsFake(() => {
           return Promise.reject(new Error('Resize failed'));
         });
 
@@ -795,8 +800,8 @@ describes.realWin(
         });
         return placements[0]
           .placeAd(attributes, sizing, adTracker)
-          .then(placementState => {
-            expect(mutator.attemptChangeSize).to.have.been.calledWith(
+          .then((placementState) => {
+            expect(mutator.requestChangeSize).to.have.been.calledWith(
               anchor.firstChild,
               250,
               undefined
@@ -840,7 +845,7 @@ describes.realWin(
 
         return placements[0]
           .placeAd(attributes, sizing, adTracker)
-          .then(placementState => {
+          .then((placementState) => {
             expect(placementState).to.equal(
               PlacementState.TOO_NEAR_EXISTING_AD
             );
@@ -880,7 +885,7 @@ describes.realWin(
         });
         return placements[0]
           .placeAd(attributes, sizing, adTracker)
-          .then(placementState => {
+          .then((placementState) => {
             expect(placementState).to.equal(PlacementState.PLACED);
             expect(container.childNodes).to.have.lengthOf(2);
             expect(container.childNodes[0].tagName).to.equal('AMP-AD');
@@ -918,7 +923,7 @@ describes.realWin(
         });
         return placements[0]
           .placeAd(attributes, sizing, adTracker)
-          .then(placementState => {
+          .then((placementState) => {
             expect(placementState).to.equal(PlacementState.PLACED);
             expect(container.childNodes).to.have.lengthOf(2);
             expect(container.childNodes[1].tagName).to.equal('AMP-AD');
@@ -957,7 +962,7 @@ describes.realWin(
         });
         return placements[0]
           .placeAd(attributes, sizing, adTracker)
-          .then(placementState => {
+          .then((placementState) => {
             expect(placementState).to.equal(PlacementState.PLACED);
             expect(container.childNodes).to.have.lengthOf(1);
             expect(anchor.childNodes[0].tagName).to.equal('AMP-AD');
@@ -996,7 +1001,7 @@ describes.realWin(
         });
         return placements[0]
           .placeAd(attributes, sizing, adTracker)
-          .then(placementState => {
+          .then((placementState) => {
             expect(placementState).to.equal(PlacementState.PLACED);
             expect(container.childNodes).to.have.lengthOf(1);
             expect(anchor.childNodes[1].tagName).to.equal('AMP-AD');
@@ -1039,7 +1044,7 @@ describes.realWin(
         });
         return placements[0]
           .placeAd(attributes, sizing, adTracker)
-          .then(placementState => {
+          .then((placementState) => {
             expect(placementState).to.equal(PlacementState.PLACED);
             expect(anchor1.childNodes).to.have.lengthOf(0);
             expect(anchor2.childNodes).to.have.lengthOf(1);
@@ -1310,7 +1315,7 @@ describes.realWin(
       });
 
       it(
-        'should not return a placement that is a child of a blacklisted ' +
+        'should not return a placement that is a child of a denylisted ' +
           'ancestor.',
         () => {
           const parent = doc.createElement('amp-sidebar');
@@ -1335,7 +1340,7 @@ describes.realWin(
         }
       );
 
-      it('should get a placement when anchor parent of blacklisted ancestor.', () => {
+      it('should get a placement when anchor parent of denylisted ancestor.', () => {
         const anchor = doc.createElement('div');
         anchor.id = 'anId';
         container.appendChild(anchor);

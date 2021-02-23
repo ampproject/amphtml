@@ -45,6 +45,7 @@ const {
   recaptchaRouter,
 } = require('./recaptcha-router');
 const {getServeMode} = require('./app-utils');
+const {logWithoutTimestamp} = require('../common/logging');
 const {renderShadowViewer} = require('./shadow-viewer');
 const {replaceUrls, isRtvMode} = require('./app-utils');
 
@@ -52,11 +53,22 @@ const TEST_SERVER_PORT = argv.port || 8000;
 let SERVE_MODE = getServeMode();
 
 app.use(bodyParser.text());
+
+// Middleware is executed in order, so this must be at the top.
+// TODO(#24333): Migrate all server URL handlers to new-server/router and
+// deprecate this file.
+if (argv.new_server) {
+  app.use(require('./new-server/router'));
+}
+
 app.use(require('./routes/a4a-envelopes'));
 app.use('/amp4test', require('./amp4test').app);
 app.use('/analytics', require('./routes/analytics'));
 app.use('/list/', require('./routes/list'));
 app.use('/test', require('./routes/test'));
+if (argv.coverage) {
+  app.use('/coverage', require('istanbul-middleware').createHandler());
+}
 
 // Append ?csp=1 to the URL to turn on the CSP header.
 // TODO: shall we turn on CSP all the time?
@@ -72,7 +84,8 @@ app.use((req, res, next) => {
 
 function isValidServeMode(serveMode) {
   return (
-    ['default', 'compiled', 'cdn'].includes(serveMode) || isRtvMode(serveMode)
+    ['default', 'compiled', 'cdn', 'esm'].includes(serveMode) ||
+    isRtvMode(serveMode)
   );
 }
 
@@ -144,7 +157,7 @@ app.get('/proxy', async (req, res, next) => {
     const proxyUrl = `${modePrefix}/proxy/s/${ampdocUrlSuffix}`;
     res.redirect(proxyUrl);
   } catch ({message}) {
-    console.log(`ERROR: ${message}`);
+    logWithoutTimestamp(`ERROR: ${message}`);
     next();
   }
 });
@@ -158,7 +171,7 @@ app.get('/proxy', async (req, res, next) => {
  */
 function requestAmphtmlDocUrl(urlSuffix, protocol = 'https') {
   const defaultUrl = `${protocol}://${urlSuffix}`;
-  console.log(`Fetching URL: ${defaultUrl}`);
+  logWithoutTimestamp(`Fetching URL: ${defaultUrl}`);
   return new Promise((resolve, reject) => {
     request(defaultUrl, (error, response, body) => {
       if (
@@ -234,18 +247,18 @@ app.use('/pwa', (req, res) => {
   }
   res.statusCode = 200;
   res.setHeader('Content-Type', contentType);
-  fs.promises.readFile(pc.cwd() + file).then(file => {
+  fs.promises.readFile(pc.cwd() + file).then((file) => {
     res.end(file);
   });
 });
 
-app.use('/api/show', (req, res) => {
+app.use('/api/show', (_req, res) => {
   res.json({
     showNotification: true,
   });
 });
 
-app.use('/api/dont-show', (req, res) => {
+app.use('/api/dont-show', (_req, res) => {
   res.json({
     showNotification: false,
   });
@@ -260,7 +273,7 @@ app.use('/api/echo/post', (req, res) => {
   res.end(req.body);
 });
 
-app.use('/api/ping', (req, res) => {
+app.use('/api/ping', (_req, res) => {
   res.status(204).end();
 });
 
@@ -268,7 +281,7 @@ app.use('/form/html/post', (req, res) => {
   cors.assertCors(req, res, ['POST']);
 
   const form = new formidable.IncomingForm();
-  form.parse(req, (err, fields) => {
+  form.parse(req, (_err, fields) => {
     res.setHeader('Content-Type', 'text/html');
     if (fields['email'] == 'already@subscribed.com') {
       res.statusCode = 500;
@@ -295,7 +308,7 @@ app.use('/form/echo-json/post', (req, res) => {
   cors.assertCors(req, res, ['POST']);
   const form = new formidable.IncomingForm();
   const fields = Object.create(null);
-  form.on('field', function(name, value) {
+  form.on('field', function (name, value) {
     if (!(name in fields)) {
       fields[name] = value;
       return;
@@ -311,7 +324,7 @@ app.use('/form/echo-json/post', (req, res) => {
     }
     fields[realName].push(value);
   });
-  form.parse(req, unusedErr => {
+  form.parse(req, () => {
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
     if (fields['email'] == 'already@subscribed.com') {
       res.statusCode = 500;
@@ -366,7 +379,7 @@ app.post('/form/json/upload', upload.fields([{name: 'myFile'}]), (req, res) => {
   res.json({message: contents});
 });
 
-app.use('/form/search-html/get', (req, res) => {
+app.use('/form/search-html/get', (_req, res) => {
   res.setHeader('Content-Type', 'text/html');
   res.end(`
      <h1>Here's results for your search<h1>
@@ -405,14 +418,14 @@ app.use('/form/autocomplete/query', (req, res) => {
     res.json({items: autocompleteColors});
   } else {
     const lowerCaseQuery = query.toLowerCase();
-    const filtered = autocompleteColors.filter(l =>
+    const filtered = autocompleteColors.filter((l) =>
       l.toLowerCase().includes(lowerCaseQuery)
     );
     res.json({items: filtered});
   }
 });
 
-app.use('/form/autocomplete/error', (req, res) => {
+app.use('/form/autocomplete/error', (_req, res) => {
   res.status(500).end();
 });
 
@@ -423,7 +436,7 @@ app.use('/form/mention/query', (req, res) => {
     return;
   }
   const lowerCaseQuery = query.toLowerCase().trim();
-  const filtered = autocompleteEmailData.filter(l =>
+  const filtered = autocompleteEmailData.filter((l) =>
     l.toLowerCase().startsWith(lowerCaseQuery)
   );
   res.json({items: filtered});
@@ -432,7 +445,7 @@ app.use('/form/mention/query', (req, res) => {
 app.use('/form/verify-search-json/post', (req, res) => {
   cors.assertCors(req, res, ['POST']);
   const form = new formidable.IncomingForm();
-  form.parse(req, (err, fields) => {
+  form.parse(req, (_err, fields) => {
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
 
     const errors = [];
@@ -470,12 +483,6 @@ app.use('/form/verify-search-json/post', (req, res) => {
   });
 });
 
-app.use('/share-tracking/get-outgoing-fragment', (req, res) => {
-  res.json({
-    fragment: '54321',
-  });
-});
-
 // Fetches an AMP document from the AMP proxy and replaces JS
 // URLs, so that they point to localhost.
 function proxyToAmpProxy(req, res, mode) {
@@ -483,8 +490,8 @@ function proxyToAmpProxy(req, res, mode) {
     'https://cdn.ampproject.org/' +
     (req.query['amp_js_v'] ? 'v' : 'c') +
     req.url;
-  console.log('Fetching URL: ' + url);
-  request(url, function(error, response, body) {
+  logWithoutTimestamp('Fetching URL: ' + url);
+  request(url, function (_error, response, body) {
     body = body
       // Unversion URLs.
       .replace(
@@ -549,7 +556,7 @@ app.use('/examples/live-list-update(-reverse)?.amp.html', (req, res, next) => {
   }
   if (!liveListDoc) {
     const liveListUpdateFullPath = `${pc.cwd()}${req.baseUrl}`;
-    console.log('liveListUpdateFullPath', liveListUpdateFullPath);
+    logWithoutTimestamp('liveListUpdateFullPath', liveListUpdateFullPath);
     const liveListFile = fs.readFileSync(liveListUpdateFullPath);
     liveListDoc = liveListDocs[req.baseUrl] = new jsdom.JSDOM(
       liveListFile
@@ -576,7 +583,7 @@ app.use('/examples/live-list-update(-reverse)?.amp.html', (req, res, next) => {
       pagination.textContent = '';
       const liveChildren = [].slice
         .call(items.children)
-        .filter(x => !x.hasAttribute('data-tombstone'));
+        .filter((x) => !x.hasAttribute('data-tombstone'));
 
       const pageCount = Math.ceil(liveChildren.length / perPage);
       const pageListItems = Array.apply(null, Array(pageCount))
@@ -608,7 +615,7 @@ function liveListReplace(item) {
 
 function liveListInsert(liveList, node) {
   const iterCount = Math.floor(Math.random() * 2) + 1;
-  console.log(`inserting ${iterCount} item(s)`);
+  logWithoutTimestamp(`inserting ${iterCount} item(s)`);
   for (let i = 0; i < iterCount; i++) {
     const child = node.cloneNode(true);
     child.setAttribute('id', `list-item-${itemCtr++}`);
@@ -619,7 +626,7 @@ function liveListInsert(liveList, node) {
 
 function liveListTombstone(liveList) {
   const tombstoneId = Math.floor(Math.random() * itemCtr);
-  console.log(`trying to tombstone #list-item-${tombstoneId}`);
+  logWithoutTimestamp(`trying to tombstone #list-item-${tombstoneId}`);
   // We can tombstone any list item except item-1 since we always do a
   // replace example on item-1.
   if (tombstoneId != 1) {
@@ -682,7 +689,9 @@ function getLiveBlogItem() {
             </p>
             <p class="brand">PublisherName News Reporter<p>
             <p><span itemscope itemtype="http://schema.org/Date"
-                itemprop="Date">${Date(now).replace(/ GMT.*$/, '')}<span></p>
+                itemprop="Date">
+                ${new Date(now).toString().replace(/ GMT.*$/, '')}
+                <span></p>
           </div>
         </div>
         <div class="article-body">${body}</div>
@@ -786,6 +795,7 @@ app.post('/get-consent-v1/', (req, res) => {
   cors.assertCors(req, res, ['POST']);
   const body = {
     'promptIfUnknown': true,
+    'purposeConsentRequired': ['purpose-foo', 'purpose-bar'],
     'forcePromptOnNext': forcePromptOnNext,
     'sharedData': {
       'tfua': true,
@@ -815,11 +825,18 @@ app.post('/get-consent-no-prompt/', (req, res) => {
 
 app.post('/check-consent', (req, res) => {
   cors.assertCors(req, res, ['POST']);
-  res.json({
+  const response = {
     'consentRequired': req.query.consentRequired === 'true',
     'consentStateValue': req.query.consentStateValue,
+    'consentString': req.query.consentString,
     'expireCache': req.query.expireCache === 'true',
-  });
+  };
+  if (req.query.consentMetadata) {
+    response['consentMetadata'] = JSON.parse(
+      req.query.consentMetadata.replace(/'/g, '"')
+    );
+  }
+  res.json(response);
 });
 
 // Proxy with local JS.
@@ -858,7 +875,7 @@ app.get('/a4a_template/*', (req, res) => {
     `0.1/data/${match[2]}.template`;
   fs.promises
     .readFile(filePath)
-    .then(file => {
+    .then((file) => {
       res.setHeader('Content-Type', 'application/json');
       res.setHeader('AMP-template-amp-creative', 'amp-mustache');
       res.end(file);
@@ -905,7 +922,7 @@ app.get('/iframe-echo-message', (req, res) => {
  * <script async custom-element="amp-form"
  *    src="https://cdn.ampproject.org/v0/amp-form-0.1.js?sleep=5"></script>
  */
-app.use(['/dist/v0/amp-*.js', '/dist/amp*.js'], (req, res, next) => {
+app.use(['/dist/v0/amp-*.(m?js)', '/dist/amp*.(m?js)'], (req, _res, next) => {
   const sleep = parseInt(req.query.sleep || 0, 10) * 1000;
   setTimeout(next, sleep);
 });
@@ -913,7 +930,7 @@ app.use(['/dist/v0/amp-*.js', '/dist/amp*.js'], (req, res, next) => {
 /**
  * Disable caching for extensions if the --no_caching_extensions flag is used.
  */
-app.get(['/dist/v0/amp-*.js'], (req, res, next) => {
+app.get(['/dist/v0/amp-*.(m?js)'], (_req, res, next) => {
   if (argv.no_caching_extensions) {
     res.header('Cache-Control', 'no-store');
   }
@@ -930,16 +947,18 @@ app.get(
     '/examples/(**/)?*.html',
     '/test/manual/(**/)?*.html',
     '/test/fixtures/e2e/(**/)?*.html',
+    '/test/fixtures/performance/(**/)?*.html',
   ],
   (req, res, next) => {
     const filePath = req.path;
     const mode = SERVE_MODE;
     const inabox = req.query['inabox'];
     const stream = Number(req.query['stream']);
+    const componentVersion = req.query['componentVersion'];
     const urlPrefix = getUrlPrefix(req);
     fs.promises
       .readFile(pc.cwd() + filePath, 'utf8')
-      .then(file => {
+      .then((file) => {
         if (req.query['amp_js_v']) {
           file = addViewerIntegrationScript(req.query['amp_js_v'], file);
         }
@@ -962,6 +981,9 @@ app.get(
             );
         }
         file = file.replace(/__TEST_SERVER_PORT__/g, TEST_SERVER_PORT);
+        if (componentVersion) {
+          file = file.replace(/-latest.js/g, `-${componentVersion}.js`);
+        }
 
         if (inabox && req.headers.origin) {
           // Allow CORS requests for A4A.
@@ -1020,7 +1042,7 @@ app.get(
         if (stream > 0) {
           res.writeHead(200, {'Content-Type': 'text/html'});
           let pos = 0;
-          const writeChunk = function() {
+          const writeChunk = function () {
             const chunk = file.substring(
               pos,
               Math.min(pos + stream, file.length)
@@ -1134,12 +1156,28 @@ app.use('/subscription/:id/entitlements', (req, res) => {
   cors.assertCors(req, res, ['GET']);
   res.json({
     source: 'local' + req.params.id,
-    granted: true,
+    granted: req.params.id > 0 ? true : false,
     grantedReason: 'NOT_SUBSCRIBED',
     data: {
       login: true,
     },
     decryptedDocumentKey: decryptDocumentKey(req.query.crypt),
+  });
+});
+
+app.use('/subscriptions/skumap', (req, res) => {
+  cors.assertCors(req, res, ['GET']);
+  res.json({
+    'subscribe.google.com': {
+      'subscribeButtonSimple': {
+        'sku': 'basic',
+      },
+      'subscribeButtonCarousel': {
+        'carouselOptions': {
+          'skus': ['basic', 'premium_monthly'],
+        },
+      },
+    },
   });
 });
 
@@ -1163,7 +1201,7 @@ app.get('/adzerk/*', (req, res) => {
     pc.cwd() + '/extensions/amp-ad-network-adzerk-impl/0.1/data/' + match[1];
   fs.promises
     .readFile(filePath)
-    .then(file => {
+    .then((file) => {
       res.setHeader('Content-Type', 'application/json');
       res.setHeader('AMP-Ad-Template-Extension', 'amp-mustache');
       res.setHeader('AMP-Ad-Response-Type', 'template');
@@ -1175,11 +1213,17 @@ app.get('/adzerk/*', (req, res) => {
     });
 });
 
+app.get('/dist/*.mjs', (req, res, next) => {
+  // Allow CORS access control explicitly for mjs files
+  cors.enableCors(req, res);
+  next();
+});
+
 /*
  * Serve extension scripts and their source maps.
  */
 app.get(
-  ['/dist/rtv/*/v0/*.js', '/dist/rtv/*/v0/*.js.map'],
+  ['/dist/rtv/*/v0/*.(m?js)', '/dist/rtv/*/v0/*.(m?js).map'],
   (req, res, next) => {
     const mode = SERVE_MODE;
     const fileName = path.basename(req.path).replace('.max.', '.');
@@ -1199,7 +1243,7 @@ app.get(
     }
     const isJsMap = filePath.endsWith('.map');
     if (isJsMap) {
-      filePath = filePath.replace(/\.js\.map$/, '.js');
+      filePath = filePath.replace(/\.(m?js)\.map$/, '.$1');
     }
     filePath = replaceUrls(mode, filePath);
     req.url = filePath + (isJsMap ? '.map' : '');
@@ -1207,11 +1251,35 @@ app.get(
   }
 );
 
+if (argv.coverage === 'live') {
+  app.get('/dist/amp.js', async (req, res) => {
+    const ampJs = await fs.promises.readFile(`${pc.cwd()}${req.path}`);
+    res.setHeader('Content-Type', 'text/javascript');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    // Append an unload handler that reports coverage information each time you
+    // leave a page.
+    res.end(`${ampJs};
+window.addEventListener('beforeunload', (evt) => {
+  const COV_REPORT_URL = 'http://localhost:${TEST_SERVER_PORT}/coverage/client';
+  console.info('POSTing code coverage to', COV_REPORT_URL);
+
+  const xhr = new XMLHttpRequest();
+  xhr.open('POST', COV_REPORT_URL, true);
+  xhr.setRequestHeader('Content-type', 'application/json');
+  xhr.send(JSON.stringify(window.__coverage__));
+
+  // Required by Chrome
+  evt.returnValue = '';
+  return null;
+});`);
+  });
+}
+
 /**
  * Serve entry point script url
  */
 app.get(
-  ['/dist/sw.js', '/dist/sw-kill.js', '/dist/ww.js'],
+  ['/dist/sw.(m?js)', '/dist/sw-kill.(m?js)', '/dist/ww.(m?js)'],
   (req, res, next) => {
     // Special case for entry point script url. Use compiled for testing
     const mode = SERVE_MODE;
@@ -1220,7 +1288,7 @@ app.get(
       // This will not be useful until extension-location.js change in prod
       // Require url from cdn
       const filePath = 'https://cdn.ampproject.org/' + fileName;
-      request(filePath, function(error, response) {
+      request(filePath, function (error, response) {
         if (error) {
           res.status(404);
           res.end();
@@ -1231,18 +1299,18 @@ app.get(
       return;
     }
     if (mode == 'default') {
-      req.url = req.url.replace(/\.js$/, '.max.js');
+      req.url = req.url.replace(/\.(m?js)$/, '.max.$1');
     }
     next();
   }
 );
 
-app.get('/dist/iframe-transport-client-lib.js', (req, res, next) => {
+app.get('/dist/iframe-transport-client-lib.(m?js)', (req, _res, next) => {
   req.url = req.url.replace(/dist/, 'dist.3p/current');
   next();
 });
 
-app.get('/dist/amp-inabox-host.js', (req, res, next) => {
+app.get('/dist/amp-inabox-host.(m?js)', (req, _res, next) => {
   const mode = SERVE_MODE;
   if (mode != 'default') {
     req.url = req.url.replace('amp-inabox-host', 'amp4ads-host-v0');
@@ -1253,17 +1321,12 @@ app.get('/dist/amp-inabox-host.js', (req, res, next) => {
 /*
  * Start Cache SW LOCALDEV section
  */
-app.get('/dist/sw(.max)?.js', (req, res, next) => {
+app.get('/dist/sw(.max)?.(m?js)', (req, res, next) => {
   const filePath = req.path;
   fs.promises
     .readFile(pc.cwd() + filePath, 'utf8')
-    .then(file => {
-      let n = new Date();
-      // Round down to the nearest 5 minutes.
-      n -=
-        (n.getMinutes() % 5) * 1000 * 60 +
-        n.getSeconds() * 1000 +
-        n.getMilliseconds();
+    .then((file) => {
+      const n = nearestFiveMinutes();
       file =
         'self.AMP_CONFIG = {v: "99' +
         n +
@@ -1278,18 +1341,18 @@ app.get('/dist/sw(.max)?.js', (req, res, next) => {
     .catch(next);
 });
 
-app.get('/dist/rtv/9[89]*/*.js', (req, res, next) => {
+app.get('/dist/rtv/9[89]*/*.(m?js)', (req, res, next) => {
   res.setHeader('Content-Type', 'application/javascript');
   res.setHeader('Date', new Date().toUTCString());
   res.setHeader('Cache-Control', 'no-cache;max-age=31536000');
 
   setTimeout(() => {
     // Cause a delay, to show the "stale-while-revalidate"
-    if (req.path.includes('v0.js')) {
+    if (req.path.includes('v0.js') || req.path.includes('v0.mjs')) {
       const path = req.path.replace(/rtv\/\d+/, '');
       return fs.promises
         .readFile(pc.cwd() + path, 'utf8')
-        .then(file => {
+        .then((file) => {
           res.end(file);
         })
         .catch(next);
@@ -1307,13 +1370,8 @@ app.get(['/dist/cache-sw.html'], (req, res, next) => {
   const filePath = '/test/manual/cache-sw.html';
   fs.promises
     .readFile(pc.cwd() + filePath, 'utf8')
-    .then(file => {
-      let n = new Date();
-      // Round down to the nearest 5 minutes.
-      n -=
-        (n.getMinutes() % 5) * 1000 * 60 +
-        n.getSeconds() * 1000 +
-        n.getMilliseconds();
+    .then((file) => {
+      let n = nearestFiveMinutes();
       const percent = parseFloat(req.query.canary) || 0.01;
       let env = '99';
       if (Math.random() < percent) {
@@ -1329,13 +1387,8 @@ app.get(['/dist/cache-sw.html'], (req, res, next) => {
     .catch(next);
 });
 
-app.get('/dist/diversions', (req, res) => {
-  let n = new Date();
-  // Round down to the nearest 5 minutes.
-  n -=
-    (n.getMinutes() % 5) * 1000 * 60 +
-    n.getSeconds() * 1000 +
-    n.getMilliseconds();
+app.get('/dist/diversions', (_req, res) => {
+  let n = nearestFiveMinutes();
   n += 5 * 1000 * 60;
   res.setHeader('Content-Type', 'application/json');
   res.setHeader('Date', new Date().toUTCString());
@@ -1350,15 +1403,15 @@ app.get('/dist/diversions', (req, res) => {
 /**
  * Web worker binary.
  */
-app.get('/dist/ww(.max)?.js', (req, res) => {
-  fs.promises.readFile(pc.cwd() + req.path).then(file => {
+app.get('/dist/ww(.max)?.(m?js)', (req, res) => {
+  fs.promises.readFile(pc.cwd() + req.path).then((file) => {
     res.setHeader('Content-Type', 'text/javascript');
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.end(file);
   });
 });
 
-app.get('/mraid.js', (req, res, next) => {
+app.get('/mraid.js', (req, _res, next) => {
   req.url = req.url.replace('mraid.js', 'examples/mraid/mraid.js');
   next();
 });
@@ -1392,12 +1445,27 @@ app.use('/mraid/', (req, res) => {
 });
 
 /**
- * @param {string} ampJsVersion
+ * Get the current time rounded down to the nearest 5 minutes.
+ * @return {number}
+ */
+function nearestFiveMinutes() {
+  const date = new Date();
+  // Round down to the nearest 5 minutes.
+  const time =
+    Number(date) -
+    (date.getMinutes() % 5) * 1000 * 60 +
+    date.getSeconds() * 1000 +
+    date.getMilliseconds();
+  return time;
+}
+
+/**
+ * @param {string} ampJsVersionString
  * @param {string} file
  * @return {string}
  */
-function addViewerIntegrationScript(ampJsVersion, file) {
-  ampJsVersion = parseFloat(ampJsVersion);
+function addViewerIntegrationScript(ampJsVersionString, file) {
+  const ampJsVersion = parseFloat(ampJsVersionString);
   if (!ampJsVersion) {
     return file;
   }
@@ -1489,7 +1557,7 @@ app.use('(/dist)?/rtv/*/v0/analytics-vendors/:vendor.json', (req, res) => {
 
   fs.promises
     .readFile(localVendorConfigPath)
-    .then(file => {
+    .then((file) => {
       res.setHeader('Content-Type', 'application/json');
       res.end(file);
     })

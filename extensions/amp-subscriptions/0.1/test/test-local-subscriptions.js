@@ -21,7 +21,7 @@ import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../service-adapter';
 import {localSubscriptionPlatformFactory} from '../local-subscription-platform';
 
-describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
+describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, (env) => {
   let ampdoc;
   let localSubscriptionPlatform;
   let serviceAdapter;
@@ -223,12 +223,16 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
 
     it('should check that login action is present', () => {
       delete actionMap[Action.LOGIN];
-      expect(localSubscriptionPlatform.validateActionMap, actionMap).to.throw;
+      expect(() =>
+        localSubscriptionPlatform.validateActionMap(actionMap)
+      ).to.throw();
     });
 
     it('should check that subscribe action is present', () => {
       delete actionMap[Action.SUBSCRIBE];
-      expect(localSubscriptionPlatform.validateActionMap, actionMap).to.throw;
+      expect(() =>
+        localSubscriptionPlatform.validateActionMap(actionMap)
+      ).to.throw();
     });
 
     it(
@@ -303,8 +307,10 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
         element.setAttribute('subscriptions-action', Action.LOGIN);
         element.removeAttribute('subscriptions-service');
         const platform = {};
-        const serviceId = 'serviceId';
-        platform.getServiceId = env.sandbox.stub().callsFake(() => serviceId);
+        const platformKey = 'platformKey';
+        platform.getPlatformKey = env.sandbox
+          .stub()
+          .callsFake(() => platformKey);
         const loginStub = env.sandbox
           .stub(
             localSubscriptionPlatform.serviceAdapter_,
@@ -317,7 +323,7 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
         );
         localSubscriptionPlatform.handleClick_(element);
         expect(loginStub).to.be.called;
-        expect(delegateStub).to.be.calledWith(Action.LOGIN, serviceId);
+        expect(delegateStub).to.be.calledWith(Action.LOGIN, platformKey);
       }
     );
 
@@ -338,11 +344,13 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
           'delegateActionToService'
         );
         const platform = {};
-        const serviceId = 'serviceId';
-        platform.getServiceId = env.sandbox.stub().callsFake(() => serviceId);
+        const platformKey = 'platformKey';
+        platform.getPlatformKey = env.sandbox
+          .stub()
+          .callsFake(() => platformKey);
         localSubscriptionPlatform.handleClick_(element);
         expect(loginStub).to.be.called;
-        expect(delegateStub).to.be.calledWith(Action.LOGIN, serviceId);
+        expect(delegateStub).to.be.calledWith(Action.LOGIN, platformKey);
       }
     );
 
@@ -362,8 +370,8 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
         'delegateActionToService'
       );
       const platform = {};
-      const serviceId = 'serviceId';
-      platform.getServiceId = env.sandbox.stub().callsFake(() => serviceId);
+      const platformKey = 'platformKey';
+      platform.getPlatformKey = env.sandbox.stub().callsFake(() => platformKey);
       localSubscriptionPlatform.handleClick_(element);
       expect(loginStub).to.not.be.called;
       expect(delegateStub).to.not.be.called;

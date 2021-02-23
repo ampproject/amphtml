@@ -58,7 +58,7 @@ const overrideKeys = [
  */
 export function getWidgetOverload(self) {
   const override = dict({});
-  overrideKeys.forEach(item => {
+  overrideKeys.forEach((item) => {
     const data = self.element.getAttribute(`data-attr-${item}`);
     if (
       typeof data === 'string' ||

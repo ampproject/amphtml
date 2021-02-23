@@ -102,7 +102,7 @@ export class AmpDriveViewer extends AMP.BaseElement {
   /** @override */
   mutatedAttributesCallback(mutations) {
     const attrs = ATTRIBUTES_TO_PROPAGATE.filter(
-      value => mutations[value] !== undefined
+      (value) => mutations[value] !== undefined
     );
     const iframe = dev().assertElement(this.iframe_);
     this.propagateAttributes(attrs, iframe, /* opt_removeMissingAttrs */ true);
@@ -144,6 +144,6 @@ export class AmpDriveViewer extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-google-document-embed', '0.1', AMP => {
+AMP.extension('amp-google-document-embed', '0.1', (AMP) => {
   AMP.registerElement('amp-google-document-embed', AmpDriveViewer);
 });

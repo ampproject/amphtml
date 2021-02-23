@@ -101,8 +101,15 @@ class AmpWorker {
         ampCors: false,
         bypassInterceptorForDev: getMode().localDev,
       })
-      .then(res => res.text())
-      .then(text => {
+      .then((res) => res.text())
+      .then((text) => {
+        // Replace sourceMappingUrl with the absolute URL
+        const sourceMappingUrl = `${url}.map`;
+        text = text.replace(
+          /^\/\/# sourceMappingURL=.*/,
+          `//# sourceMappingURL=${sourceMappingUrl}`
+        );
+
         // Workaround since Worker constructor only accepts same origin URLs.
         const blob = new win.Blob([text + '\n//# sourceurl=' + url], {
           type: 'text/javascript',

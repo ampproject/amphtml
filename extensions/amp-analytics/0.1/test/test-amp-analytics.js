@@ -34,6 +34,7 @@ import {
 import {installCryptoService} from '../../../../src/service/crypto-impl';
 import {installUserNotificationManagerForTesting} from '../../../amp-user-notification/0.1/amp-user-notification';
 import {instrumentationServiceForDocForTesting} from '../instrumentation';
+import {macroTask} from '../../../../testing/yield';
 
 describes.realWin(
   'amp-analytics',
@@ -42,7 +43,7 @@ describes.realWin(
       extensions: ['amp-analytics'],
     },
   },
-  function(env) {
+  function (env) {
     let win, doc;
     let configWithCredentials;
     let uidService;
@@ -65,12 +66,6 @@ describes.realWin(
       'triggers': {'pageview': {'on': 'visible', 'request': 'foo'}},
     };
 
-    const noTriggersError =
-      '[AmpAnalytics <unknown id>] No triggers were ' +
-      'found in the config. No analytics data will be sent.';
-    const noRequestStringsError =
-      '[AmpAnalytics <unknown id>] No request ' +
-      'strings defined. Analytics data will not be sent from this page.';
     const oneScriptChildError =
       '[AmpAnalytics <unknown id>] The tag should ' +
       'contain only one <script> child.';
@@ -101,7 +96,7 @@ describes.realWin(
       doc.title = 'My Test Title';
       resetServiceForTesting(win, 'xhr');
       jsonRequestConfigs = {};
-      registerServiceBuilder(win, 'xhr', function() {
+      registerServiceBuilder(win, 'xhr', function () {
         return {
           fetchJson: (url, init) => {
             jsonRequestConfigs[url] = init;
@@ -132,9 +127,11 @@ describes.realWin(
 
       const wi = mockWindowInterface(env.sandbox);
       requestVerifier = new ImagePixelVerifier(wi);
-      return Services.userNotificationManagerForDoc(doc.head).then(manager => {
-        uidService = manager;
-      });
+      return Services.userNotificationManagerForDoc(doc.head).then(
+        (manager) => {
+          uidService = manager;
+        }
+      );
     });
 
     function getAnalyticsTag(config = {}, attrs) {
@@ -156,7 +153,6 @@ describes.realWin(
 
       el.connectedCallback();
       const analytics = new AmpAnalytics(el);
-      analytics.createdCallback();
       analytics.buildCallback();
       return analytics;
     }
@@ -168,7 +164,7 @@ describes.realWin(
         if (requestVerifier.hasRequestSent()) {
           return;
         }
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
           const start = Date.now();
           const interval = setInterval(() => {
             const time = Date.now();
@@ -191,23 +187,20 @@ describes.realWin(
     }
 
     describe('send hit', () => {
-      it('sends a basic hit', function() {
+      it('sends a basic hit', function () {
         const analytics = getAnalyticsTag(trivialConfig);
         return waitForSendRequest(analytics).then(() => {
           requestVerifier.verifyRequest('https://example.test/bar');
         });
       });
 
-      it('does not send a hit when config is not in a script tag', function() {
-        expectAsyncConsoleError(noTriggersError);
-        expectAsyncConsoleError(noRequestStringsError);
+      it('does not send a hit when config is not in a script tag', function () {
         const config = JSON.stringify(trivialConfig);
         const el = doc.createElement('amp-analytics');
         el.textContent = config;
         const analytics = new AmpAnalytics(el);
         doc.body.appendChild(el);
         el.connectedCallback();
-        analytics.createdCallback();
         analytics.buildCallback();
         // Initialization has not started.
         expect(analytics.iniPromise_).to.be.null;
@@ -222,26 +215,26 @@ describes.realWin(
         el.textContent = config;
         const whenFirstVisibleStub = env.sandbox
           .stub(ampdoc, 'whenFirstVisible')
-          .callsFake(() => new Promise(function() {}));
+          .callsFake(() => Promise.resolve());
         doc.body.appendChild(el);
         const analytics = new AmpAnalytics(el);
         el.getAmpDoc = () => ampdoc;
         analytics.buildCallback();
         const iniPromise = analytics.iniPromise_;
         expect(iniPromise).to.be.ok;
-        expect(el).to.have.attribute('hidden');
         // Viewer.whenFirstVisible is the first blocking call to initialize.
         expect(whenFirstVisibleStub).to.be.calledOnce;
 
         // Repeated call, returns pre-created promise.
         expect(analytics.ensureInitialized_()).to.equal(iniPromise);
         expect(whenFirstVisibleStub).to.be.calledOnce;
+        return iniPromise.then(() => {
+          expect(el).to.have.attribute('hidden');
+        });
       });
 
-      it('does not send a hit when multiple child tags exist', function() {
+      it('does not send a hit when multiple child tags exist', function () {
         expectAsyncConsoleError(oneScriptChildError);
-        expectAsyncConsoleError(noRequestStringsError);
-        expectAsyncConsoleError(noTriggersError);
         const analytics = getAnalyticsTag(trivialConfig);
         const script2 = document.createElement('script');
         script2.setAttribute('type', 'application/json');
@@ -249,10 +242,8 @@ describes.realWin(
         return waitForNoSendRequest(analytics);
       });
 
-      it('does not send a hit when script tag does not have a type attribute', function() {
+      it('does not send a hit when script tag does not have a type attribute', function () {
         expectAsyncConsoleError(scriptTypeError);
-        expectAsyncConsoleError(noRequestStringsError);
-        expectAsyncConsoleError(noTriggersError);
         const el = doc.createElement('amp-analytics');
         const script = doc.createElement('script');
         script.textContent = JSON.stringify(trivialConfig);
@@ -260,16 +251,13 @@ describes.realWin(
         doc.body.appendChild(el);
         const analytics = new AmpAnalytics(el);
         el.connectedCallback();
-        analytics.createdCallback();
         analytics.buildCallback();
 
         return waitForNoSendRequest(analytics);
       });
 
-      it('does not send a hit when json config is not valid', function() {
+      it('does not send a hit when json config is not valid', function () {
         expectAsyncConsoleError(configParseError);
-        expectAsyncConsoleError(noRequestStringsError);
-        expectAsyncConsoleError(noTriggersError);
         const el = doc.createElement('amp-analytics');
         const script = doc.createElement('script');
         script.setAttribute('type', 'application/json');
@@ -278,13 +266,12 @@ describes.realWin(
         doc.body.appendChild(el);
         const analytics = new AmpAnalytics(el);
         el.connectedCallback();
-        analytics.createdCallback();
         analytics.buildCallback();
 
         return waitForNoSendRequest(analytics);
       });
 
-      it('does not send a hit when request is not provided', function() {
+      it('does not send a hit when request is not provided', function () {
         expectAsyncConsoleError(onAndRequestAttributesError);
         const analytics = getAnalyticsTag({
           'requests': {'foo': 'https://example.test/bar'},
@@ -294,9 +281,7 @@ describes.realWin(
         return waitForNoSendRequest(analytics);
       });
 
-      it('does not send a hit when request type is not defined', function() {
-        expectAsyncConsoleError(noRequestStringsError);
-        expectAsyncConsoleError(/Request string not found/);
+      it('does not send a hit when request type is not defined', function () {
         const analytics = getAnalyticsTag({
           'triggers': [{'on': 'visible', 'request': 'foo'}],
         });
@@ -304,7 +289,7 @@ describes.realWin(
         return waitForNoSendRequest(analytics);
       });
 
-      it('expands nested requests', function() {
+      it('expands nested requests', function () {
         const analytics = getAnalyticsTag({
           'requests': {
             'foo': 'https://example.test/bar&${foobar}&baz',
@@ -330,7 +315,7 @@ describes.realWin(
         });
       });
 
-      it('expands nested requests (3 levels)', function() {
+      it('expands nested requests (3 levels)', function () {
         const analytics = getAnalyticsTag({
           'requests': {
             'foo': 'https://example.test/bar&${foobar}',
@@ -345,7 +330,7 @@ describes.realWin(
         });
       });
 
-      it('should tolerate invalid triggers', function() {
+      it('should tolerate invalid triggers', function () {
         expectAsyncConsoleError(/No request strings defined/);
         const analytics = getAnalyticsTag({
           'request': {'foo': 'https://example.test'},
@@ -354,7 +339,7 @@ describes.realWin(
         return waitForNoSendRequest(analytics);
       });
 
-      it('expands recursive requests', function() {
+      it('expands recursive requests', function () {
         const analytics = getAnalyticsTag({
           'requests': {'foo': '/bar&${foobar}&baz', 'foobar': '${foo}'},
           'triggers': [{'on': 'visible', 'request': 'foo'}],
@@ -365,7 +350,7 @@ describes.realWin(
         });
       });
 
-      it('sends multiple requests per trigger', function() {
+      it('sends multiple requests per trigger', function () {
         expectAsyncConsoleError(/Request string not found/);
         const analytics = getAnalyticsTag({
           'requests': {
@@ -398,7 +383,7 @@ describes.realWin(
         });
       });
 
-      it('fills cid', function() {
+      it('fills cid', function () {
         const analytics = getAnalyticsTag({
           'requests': {
             'foo': 'https://example.test/cid=${clientId(analytics-abc)}',
@@ -413,7 +398,7 @@ describes.realWin(
         });
       });
 
-      it('fills internally provided trigger vars', function() {
+      it('fills internally provided trigger vars', async function* () {
         const analytics = getAnalyticsTag({
           'requests': {
             'timer':
@@ -429,7 +414,7 @@ describes.realWin(
             'visibility': {'on': 'visible', 'request': 'visible'},
           },
         });
-
+        await macroTask();
         return waitForSendRequest(analytics).then(() => {
           requestVerifier.verifyRequestMatch(
             /https:\/\/e.com\/start=[0-9]+&duration=[0-9]/
@@ -471,7 +456,7 @@ describes.realWin(
         });
       });
 
-      it('updates requestCount on each request', () => {
+      it('updates requestCount on each request', async function* () {
         const analytics = getAnalyticsTag({
           'host': 'example.test',
           'requests': {
@@ -483,6 +468,7 @@ describes.realWin(
             {'on': 'visible', 'request': 'pageview2'},
           ],
         });
+        await macroTask();
         return waitForSendRequest(analytics).then(() => {
           requestVerifier.verifyRequest('/test1=1');
           requestVerifier.verifyRequest('/test2=2');
@@ -550,7 +536,7 @@ describes.realWin(
         });
       });
 
-      it('expands url-replacements vars', function() {
+      it('expands url-replacements vars', function () {
         const analytics = getAnalyticsTag({
           'requests': {'foo': 'https://example.test/TITLE'},
           'triggers': [{'on': 'visible', 'request': 'foo'}],
@@ -729,9 +715,9 @@ describes.realWin(
         );
         env.sandbox
           .stub(urlReplacements.getVariableSource(), 'get')
-          .callsFake(function(name) {
+          .callsFake(function (name) {
             return {
-              sync: param => {
+              sync: (param) => {
                 return '_' + name.toLowerCase() + '_' + param + '_';
               },
             };
@@ -840,7 +826,7 @@ describes.realWin(
         );
       });
 
-      it('works for vendor config when optout returns false', function() {
+      it('works for vendor config when optout returns false', function () {
         win['foo'] = {'bar': () => false};
         const analytics = getAnalyticsTag(trivialConfig);
         return waitForSendRequest(analytics).then(() => {
@@ -848,9 +834,9 @@ describes.realWin(
         });
       });
 
-      it('works for vendor config when optout returns true', function() {
+      it('works for vendor config when optout returns true', function () {
         win['foo'] = {
-          'bar': function() {
+          'bar': function () {
             return true;
           },
         };
@@ -860,7 +846,7 @@ describes.realWin(
         return waitForNoSendRequest(analytics);
       });
 
-      it('works for vendor config when optout is not defined', function() {
+      it('works for vendor config when optout is not defined', function () {
         const analytics = getAnalyticsTag(trivialConfig, {
           'type': 'testVendor',
         });
@@ -893,7 +879,7 @@ describes.realWin(
         );
       });
 
-      it('doesnt send hit when config optout id is found', function() {
+      it('doesnt send hit when config optout id is found', function () {
         const element = doc.createElement('script');
         element.type = 'text/javascript';
         element.id = 'elementId';
@@ -908,7 +894,7 @@ describes.realWin(
         return waitForNoSendRequest(analytics);
       });
 
-      it('sends hit when config optout id is not found', function() {
+      it('sends hit when config optout id is not found', function () {
         const analytics = getAnalyticsTag(trivialConfig, {
           'type': 'testVendor',
         });
@@ -1417,7 +1403,7 @@ describes.realWin(
           }
         );
 
-        env.sandbox.stub(uidService, 'get').callsFake(id => {
+        env.sandbox.stub(uidService, 'get').callsFake((id) => {
           expect(id).to.equal('amp-user-notification1');
           return Promise.resolve();
         });
@@ -1438,7 +1424,7 @@ describes.realWin(
           }
         );
 
-        env.sandbox.stub(uidService, 'get').callsFake(id => {
+        env.sandbox.stub(uidService, 'get').callsFake((id) => {
           expect(id).to.equal('amp-user-notification1');
           return Promise.reject();
         });
@@ -1466,7 +1452,7 @@ describes.realWin(
             }
           );
 
-          env.sandbox.stub(uidService, 'get').callsFake(id => {
+          env.sandbox.stub(uidService, 'get').callsFake((id) => {
             expect(id).to.equal('amp-user-notification1');
             return Promise.reject();
           });
@@ -1483,16 +1469,19 @@ describes.realWin(
       beforeEach(() => {
         // Unfortunately need to fake sandbox analytics element's parent
         // to an AMP element
+        // Set the doc width/height to 1 to trigger visible event.
         doc.body.classList.add('i-amphtml-element');
+        doc.body.style.minWidth = '1px';
+        doc.body.style.minHeight = '1px';
       });
 
       afterEach(() => {
         doc.body.classList.remove('i-amphtml-element');
       });
 
-      it('should not add listener when eventType is not whitelist', function() {
+      it('should not add listener when eventType is not allowlist', function () {
         expectAsyncConsoleError(clickTrackerNotSupportedError);
-        // Right now we only whitelist VISIBLE & HIDDEN
+        // Right now we only allowlist VISIBLE & HIDDEN
         const tracker = ins.root_.getTracker('click', ClickEventTracker);
         const addStub = env.sandbox.stub(tracker, 'add');
         const analytics = getAnalyticsTag(
@@ -1533,7 +1522,7 @@ describes.realWin(
         });
       });
 
-      it('expand vendor vars but not replace non whitelist variables', () => {
+      it('expand vendor vars but not replace non allowlist variables', () => {
         const analytics = getAnalyticsTag(
           {
             'requests': {
@@ -1563,7 +1552,7 @@ describes.realWin(
         });
       });
 
-      it('should not replace non whitelist variable', () => {
+      it('should not replace non allowlist variable', () => {
         const analytics = getAnalyticsTag(
           {
             'requests': {
@@ -1583,7 +1572,7 @@ describes.realWin(
         });
       });
 
-      it('should replace whitelist variable', () => {
+      it('should replace allowlist variable', () => {
         const analytics = getAnalyticsTag(
           {
             'requests': {'foo': 'https://example.test/random=${random}'},
@@ -1602,7 +1591,7 @@ describes.realWin(
         });
       });
 
-      it('should replace for multi whitelisted(or not) variables', () => {
+      it('should replace for multi allowlisted(or not) variables', () => {
         const analytics = getAnalyticsTag(
           {
             'requests': {
@@ -1658,7 +1647,7 @@ describes.realWin(
         });
       });
 
-      it('allow a request sample through on non whitelist url variables', () => {
+      it('allow a request sample through on non allowlist url variables', () => {
         const config = {
           'requests': {
             'pageview1': '/test1=${requestCount}',
@@ -1713,15 +1702,13 @@ describes.realWin(
         analytics.getAmpDoc = () => ampdoc;
       });
 
-      it('Initializes a new Linker.', () => {
-        expectAsyncConsoleError(noTriggersError);
-        expectAsyncConsoleError(noRequestStringsError);
-
+      it('Initializes a new Linker.', async function* () {
         env.sandbox.stub(AnalyticsConfig.prototype, 'loadConfig').resolves({});
 
         const linkerStub = env.sandbox.stub(LinkerManager.prototype, 'init');
 
         analytics.buildCallback();
+        await macroTask();
         return analytics.layoutCallback().then(() => {
           expect(linkerStub.calledOnce).to.be.true;
         });
@@ -1768,11 +1755,16 @@ describes.realWin(
     describe('parentPostMessage', () => {
       let postMessageSpy;
 
+      beforeEach(() => {
+        doc.body.style.minWidth = '1px';
+        doc.body.style.minHeight = '1px';
+      });
+
       function waitForParentPostMessage(opt_max) {
         if (postMessageSpy.callCount) {
           return Promise.resolve();
         }
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
           const start = Date.now();
           const interval = setInterval(() => {
             const time = Date.now();
@@ -1793,7 +1785,7 @@ describes.realWin(
         });
       }
 
-      it('does send a hit when parentPostMessage is provided inabox', function() {
+      it('does send a hit when parentPostMessage is provided inabox', function () {
         env.win.__AMP_MODE.runtime = 'inabox';
         const analytics = getAnalyticsTag({
           'requests': {'foo': 'https://example.test/bar'},
@@ -1805,7 +1797,7 @@ describes.realWin(
         });
       });
 
-      it('does send a hit when parentPostMessage is provided for FIE', function() {
+      it('does send a hit when parentPostMessage is provided for FIE', function () {
         const analytics = getAnalyticsTag({
           'triggers': [{'on': 'visible', 'parentPostMessage': 'foo'}],
         });
@@ -1816,7 +1808,7 @@ describes.realWin(
         });
       });
 
-      it('does not send with parentPostMessage not inabox', function() {
+      it('does not send with parentPostMessage not inabox', function () {
         const analytics = getAnalyticsTag({
           'requests': {'foo': 'https://example.test/bar'},
           'triggers': [
@@ -1832,7 +1824,7 @@ describes.realWin(
         });
       });
 
-      it('not send when request and parentPostMessage are not provided', function() {
+      it('not send when request and parentPostMessage are not provided', function () {
         env.win.__AMP_MODE.runtime = 'inabox';
         expectAsyncConsoleError(onAndRequestAttributesInaboxError);
         const analytics = getAnalyticsTag({
@@ -1845,7 +1837,7 @@ describes.realWin(
         });
       });
 
-      it('send when request and parentPostMessage are provided', function() {
+      it('send when request and parentPostMessage are provided', function () {
         env.win.__AMP_MODE.runtime = 'inabox';
         const analytics = getAnalyticsTag({
           'requests': {'foo': 'https://example.test/bar'},

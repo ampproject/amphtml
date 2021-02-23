@@ -25,7 +25,7 @@ describes.fakeWin(
       extensions: ['amp-fx-collection'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let ampdoc;
 

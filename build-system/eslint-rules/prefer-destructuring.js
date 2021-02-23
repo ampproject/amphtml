@@ -37,7 +37,7 @@ module.exports = {
       if (
         computed ||
         object.type === 'Super' ||
-        property.leadingComments ||
+        context.getCommentsBefore(property).length > 0 ||
         property.type !== 'Identifier'
       ) {
         return false;
@@ -94,22 +94,22 @@ module.exports = {
           const fixes = [];
           const ids = [];
 
-          names.forEach(name => ids.push(name));
+          names.forEach((name) => ids.push(name));
           const replacement = `{${ids.join(', ')}} = ${base}`;
           fixes.push(fixer.replaceText(node, replacement));
 
-          declarations.forEach(declaration => {
+          declarations.forEach((declaration) => {
             const {declarations} = declaration;
-            const all = declarations.every(decl => nodes.has(decl));
+            const all = declarations.every((decl) => nodes.has(decl));
             if (!all) {
               return;
             }
 
             fixes.push(fixer.remove(declaration));
-            declarations.forEach(decl => nodes.delete(decl));
+            declarations.forEach((decl) => nodes.delete(decl));
           });
 
-          nodes.forEach(node => {
+          nodes.forEach((node) => {
             fixes.push(fixer.remove(node));
           });
           return fixes;
@@ -124,7 +124,7 @@ module.exports = {
         }
 
         const {init} = node;
-        if (init.leadingComments) {
+        if (context.getCommentsInside(node).length > 0) {
           return;
         }
 
@@ -141,7 +141,7 @@ module.exports = {
         });
       },
 
-      'BlockStatement, Program': function(node) {
+      'BlockStatement, Program': function (node) {
         const {body} = node;
         const sourceCode = context.getSourceCode();
         const letMap = new Map();
@@ -161,7 +161,7 @@ module.exports = {
             const decl = declarations[j];
             const {id, init} = decl;
 
-            if (!init || init.leadingComments) {
+            if (!init || context.getCommentsInside(decl).length > 0) {
               continue;
             }
 
@@ -193,12 +193,13 @@ module.exports = {
               const names = setStruct(variables, base, decl, node);
               const {properties} = id;
               for (let k = 0; k < properties.length; k++) {
-                const {key} = properties[k];
-                if (key.type !== 'Identifier') {
-                  // Deep destructuring, too complicated.
-                  return;
+                const prop = properties[k];
+                names.add(sourceCode.getText(prop));
+                if (!prop.key) {
+                  // rest element
+                  processMaps([letMap, constMap]);
+                  break;
                 }
-                names.add(key.name);
               }
             }
           }

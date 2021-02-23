@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {
   ImagePixelVerifier,
   mockWindowInterface,
@@ -31,7 +31,7 @@ describes.realWin(
     amp: false,
     allowExternalResources: true,
   },
-  env => {
+  (env) => {
     let win;
     let doc;
     let openXhrStub;
@@ -342,7 +342,7 @@ describes.realWin(
       }
 
       it('should create and delete an iframe', () => {
-        const clock = lolex.install({target: win});
+        const clock = fakeTimers.withGlobal(win).install();
         installTimerService(win);
         sendRequestUsingIframe(win, url);
         const iframe = doc.querySelector('iframe[src="' + url + '"]');

@@ -29,3 +29,16 @@ export const CONSENT_POLICY_STATE = {
   UNKNOWN_NOT_REQUIRED: 3,
   UNKNOWN: 4,
 };
+
+/**
+ * Defines valid consent string types passed
+ * in by consent iframe metadata.
+ * @enum {number}
+ */
+export const CONSENT_STRING_TYPE = {
+  // Enum value has external dependency for metadata collection.
+  // It is up to the vendor to interpret an undefined CONSENT_STRING_TYPE.
+  TCF_V1: 1,
+  TCF_V2: 2,
+  US_PRIVACY_STRING: 3,
+};

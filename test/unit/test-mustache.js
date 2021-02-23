@@ -21,7 +21,7 @@ describe('Mustache', () => {
 
   beforeEach(() => {
     savedSanitizer = mustache.sanitizeUnescaped;
-    mustache.setUnescapedSanitizer(function(value) {
+    mustache.setUnescapedSanitizer(function (value) {
       return value.toUpperCase();
     });
   });

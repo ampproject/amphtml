@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+import {USER_ERROR_SENTINEL} from './pure-assert';
 import {getMode} from './mode';
-import {getModeObject} from './mode-object';
 import {internalRuntimeVersion} from './internal-version';
 import {isArray, isEnumValue} from './types';
 import {once} from './utils/function';
@@ -23,16 +23,7 @@ import {urls} from './config';
 
 const noop = () => {};
 
-/**
- * Triple zero width space.
- *
- * This is added to user error messages, so that we can later identify
- * them, when the only thing that we have is the message. This is the
- * case in many browsers when the global exception handler is invoked.
- *
- * @const {string}
- */
-export const USER_ERROR_SENTINEL = '\u200B\u200B\u200B';
+export {USER_ERROR_SENTINEL};
 
 /**
  * Four zero width space.
@@ -130,7 +121,7 @@ const externalMessagesSimpleTableUrl = () =>
  * @param {*} arg
  * @return {string}
  */
-const messageArgToEncodedComponent = arg =>
+const messageArgToEncodedComponent = (arg) =>
   encodeURIComponent(String(elementStringOrPassthru(arg)));
 
 /**
@@ -152,7 +143,7 @@ export class Log {
    * https://blog.sentry.io/2016/01/04/client-javascript-reporting-window-onerror.html
    *
    * @param {!Window} win
-   * @param {function(!./mode.ModeDef):!LogLevel} levelFunc
+   * @param {function(number, boolean):!LogLevel} levelFunc
    * @param {string=} opt_suffix
    */
   constructor(win, levelFunc, opt_suffix = '') {
@@ -163,7 +154,7 @@ export class Log {
      */
     this.win = getMode().test && win.__AMP_TEST_IFRAME ? win.parent : win;
 
-    /** @private @const {function(!./mode.ModeDef):!LogLevel} */
+    /** @private @const {function(number, boolean):!LogLevel} */
     this.levelFunc_ = levelFunc;
 
     /** @private @const {!LogLevel} */
@@ -178,8 +169,8 @@ export class Log {
     this.fetchExternalMessagesOnce_ = once(() => {
       win
         .fetch(externalMessagesSimpleTableUrl())
-        .then(response => response.json(), noop)
-        .then(opt_messages => {
+        .then((response) => response.json(), noop)
+        .then((opt_messages) => {
           if (opt_messages) {
             this.messages_ = /** @type {!JsonObject} */ (opt_messages);
           }
@@ -220,8 +211,16 @@ export class Log {
       return LogLevel.INFO;
     }
 
+    return this.defaultLevelWithFunc_();
+  }
+
+  /**
+   * @return {!LogLevel}
+   * @private
+   */
+  defaultLevelWithFunc_() {
     // Delegate to the specific resolver.
-    return this.levelFunc_(getModeObject());
+    return this.levelFunc_(parseInt(getMode().log, 10), getMode().development);
   }
 
   /**
@@ -378,25 +377,14 @@ export class Log {
    *   elements in an array. When e.g. passed to console.error this yields
    *   native displays of things like HTML elements.
    *
-   * NOTE: for an explanation of the tempate R implementation see
-   * https://github.com/google/closure-library/blob/08858804/closure/goog/asserts/asserts.js#L192-L213
-   *
    * @param {T} shouldBeTrueish The value to assert. The assert fails if it does
    *     not evaluate to true.
    * @param {!Array|string=} opt_message The assertion message
    * @param {...*} var_args Arguments substituted into %s in the message.
-   * @return {R} The value of shouldBeTrueish.
-   * @throws {!Error} When `value` is `null` or `undefined`.
+   * @return {T} The value of shouldBeTrueish.
+   * @throws {!Error} When `value` is falsey.
    * @template T
-   * @template R :=
-   *     mapunion(T, (V) =>
-   *         cond(eq(V, 'null'),
-   *             none(),
-   *             cond(eq(V, 'undefined'),
-   *                 none(),
-   *                 V)))
-   *  =:
-   * @closurePrimitive {asserts.matchesReturn}
+   * @closurePrimitive {asserts.truthy}
    */
   assert(shouldBeTrueish, opt_message, var_args) {
     let firstElement;
@@ -643,7 +631,7 @@ export class Log {
  * @param {string|!Element} val
  * @return {string}
  */
-const stringOrElementString = val =>
+const stringOrElementString = (val) =>
   /** @type {string} */ (elementStringOrPassthru(val));
 
 /**
@@ -814,9 +802,8 @@ function getUserLogger(suffix) {
   }
   return new logConstructor(
     self,
-    mode => {
-      const logNum = parseInt(mode.log, 10);
-      if (mode.development || logNum >= 1) {
+    (logNum, development) => {
+      if (development || logNum >= 1) {
         return LogLevel.FINE;
       }
       return LogLevel.WARN;
@@ -844,8 +831,7 @@ export function dev() {
   if (!logConstructor) {
     throw new Error('failed to call initLogConstructor');
   }
-  return (logs.dev = new logConstructor(self, mode => {
-    const logNum = parseInt(mode.log, 10);
+  return (logs.dev = new logConstructor(self, (logNum) => {
     if (logNum >= 3) {
       return LogLevel.FINE;
     }
@@ -880,9 +866,6 @@ export function isFromEmbed(win, opt_element) {
  *   elements in an array. When e.g. passed to console.error this yields
  *   native displays of things like HTML elements.
  *
- * NOTE: for an explanation of the tempate R implementation see
- * https://github.com/google/closure-library/blob/08858804/closure/goog/asserts/asserts.js#L192-L213
- *
  * @param {T} shouldBeTrueish The value to assert. The assert fails if it does
  *     not evaluate to true.
  * @param {!Array|string=} opt_message The assertion message
@@ -895,18 +878,10 @@ export function isFromEmbed(win, opt_element) {
  * @param {*=} opt_7 Optional argument
  * @param {*=} opt_8 Optional argument
  * @param {*=} opt_9 Optional argument
- * @return {R} The value of shouldBeTrueish.
+ * @return {T} The value of shouldBeTrueish.
+ * @throws {!Error} When `shouldBeTrueish` is falsey.
  * @template T
- * @template R :=
- *     mapunion(T, (V) =>
- *         cond(eq(V, 'null'),
- *             none(),
- *             cond(eq(V, 'undefined'),
- *                 none(),
- *                 V)))
- *  =:
- * @throws {!Error} When `value` is `null` or `undefined`.
- * @closurePrimitive {asserts.matchesReturn}
+ * @closurePrimitive {asserts.truthy}
  */
 export function devAssert(
   shouldBeTrueish,
@@ -951,9 +926,6 @@ export function devAssert(
  *   elements in an array. When e.g. passed to console.error this yields
  *   native displays of things like HTML elements.
  *
- * NOTE: for an explanation of the tempate R implementation see
- * https://github.com/google/closure-library/blob/08858804/closure/goog/asserts/asserts.js#L192-L213
- *
  * @param {T} shouldBeTrueish The value to assert. The assert fails if it does
  *     not evaluate to true.
  * @param {!Array|string=} opt_message The assertion message
@@ -966,18 +938,10 @@ export function devAssert(
  * @param {*=} opt_7 Optional argument
  * @param {*=} opt_8 Optional argument
  * @param {*=} opt_9 Optional argument
- * @return {R} The value of shouldBeTrueish.
+ * @return {T} The value of shouldBeTrueish.
+ * @throws {!Error} When `shouldBeTrueish` is falsey.
  * @template T
- * @template R :=
- *     mapunion(T, (V) =>
- *         cond(eq(V, 'null'),
- *             none(),
- *             cond(eq(V, 'undefined'),
- *                 none(),
- *                 V)))
- *  =:
- * @throws {!Error} When `value` is `null` or `undefined`.
- * @closurePrimitive {asserts.matchesReturn}
+ * @closurePrimitive {asserts.truthy}
  */
 export function userAssert(
   shouldBeTrueish,

@@ -15,6 +15,7 @@
  */
 
 import {Services} from '../services';
+import {TickLabel} from '../enums';
 import {dev, user} from '../log';
 import {htmlFor} from '../static-template';
 import {isExperimentOn} from '../experiments';
@@ -83,16 +84,14 @@ export class JankMeter {
 
     // Report metrics on Nth frame, so we have sort of normalized numbers.
     if (this.perf_ && this.totalFrameCnt_ == NTH_FRAME) {
-      // gfp: Good Frame Probability
       const gfp = this.calculateGfp_();
-      this.perf_.tickDelta('gfp', gfp);
-      // bf: Bad Frames
-      this.perf_.tickDelta('bf', this.badFrameCnt_);
+      this.perf_.tickDelta(TickLabel.GOOD_FRAME_PROBABILITY, gfp);
+      this.perf_.tickDelta(TickLabel.BAD_FRAMES, this.badFrameCnt_);
       if (this.longTaskObserver_) {
         // lts: Long Tasks of Self frame
-        this.perf_.tickDelta('lts', this.longTaskSelf_);
+        this.perf_.tickDelta(TickLabel.LONG_TASKS_SELF, this.longTaskSelf_);
         // ltc: Long Tasks of Child frames
-        this.perf_.tickDelta('ltc', this.longTaskChild_);
+        this.perf_.tickDelta(TickLabel.LONG_TASKS_CHILD, this.longTaskChild_);
         this.longTaskObserver_.disconnect();
         this.longTaskObserver_ = null;
       }
@@ -104,8 +103,7 @@ export class JankMeter {
             this.batteryManager_.level * 100 - this.batteryLevelStart_
           )
         );
-        // bd: Battery Drop
-        this.perf_.tickDelta('bd', batteryDrop);
+        this.perf_.tickDelta(TickLabel.BATTERY_DROP, batteryDrop);
       }
       this.perf_.flush();
       if (isJankMeterEnabled(this.win_)) {
@@ -160,7 +158,7 @@ export class JankMeter {
     if (!this.isEnabled_() || !isLongTaskApiSupported(this.win_)) {
       return;
     }
-    this.longTaskObserver_ = new this.win_.PerformanceObserver(entryList => {
+    this.longTaskObserver_ = new this.win_.PerformanceObserver((entryList) => {
       const entries = entryList.getEntries();
       for (let i = 0; i < entries.length; i++) {
         if (entries[i].entryType == 'longtask') {
@@ -188,7 +186,7 @@ export class JankMeter {
    */
   initializeBatteryManager_() {
     if (isBatteryApiSupported(this.win_)) {
-      this.win_.navigator.getBattery().then(battery => {
+      this.win_.navigator.getBattery().then((battery) => {
         this.batteryManager_ = battery;
         this.batteryLevelStart_ = battery.level * 100;
       });

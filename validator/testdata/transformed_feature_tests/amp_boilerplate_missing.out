@@ -20,7 +20,7 @@ PASS
 |     - boilerplate is not required.
 |  -->
 |  <!doctype html>
-|  <html ⚡ transformed>
+|  <html ⚡ transformed="self;v=1">
 |  <head>
 |    <meta charset="utf-8">
 |    <style amp-runtime i-amphtml-version=123456789012345>.omitted-for-brevity{}</style>

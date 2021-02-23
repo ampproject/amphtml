@@ -48,7 +48,7 @@ export const DrawerState = {
  * @param {!Element} element
  * @return {!Element}
  */
-const getTemplateEl = element => {
+const getTemplateEl = (element) => {
   return htmlFor(element)`
     <div class="i-amphtml-story-draggable-drawer">
       <div class="i-amphtml-story-draggable-drawer-container">
@@ -62,7 +62,7 @@ const getTemplateEl = element => {
  * @param {!Element} element
  * @return {!Element}
  */
-const getHeaderEl = element => {
+const getHeaderEl = (element) => {
   return htmlFor(element)`
     <div class="i-amphtml-story-draggable-drawer-header"></div>`;
 };
@@ -72,6 +72,11 @@ const getHeaderEl = element => {
  * @abstract
  */
 export class DraggableDrawer extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    return false;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -85,17 +90,20 @@ export class DraggableDrawer extends AMP.BaseElement {
     /** @protected {?Element} */
     this.contentEl_ = null;
 
+    /** @private {number} Max value in pixels that can be dragged when opening the drawer. */
+    this.dragCap_ = Infinity;
+
     /** @protected {?Element} */
     this.headerEl_ = null;
+
+    /** @private {boolean} */
+    this.ignoreCurrentSwipeYGesture_ = false;
 
     /** @protected {!DrawerState} */
     this.state_ = DrawerState.CLOSED;
 
     /** @protected @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win);
-
-    /** @private {boolean} */
-    this.ignoreCurrentSwipeYGesture_ = false;
 
     /** @private {!Object} */
     this.touchEventState_ = {
@@ -108,16 +116,14 @@ export class DraggableDrawer extends AMP.BaseElement {
 
     /** @private {!Array<function()>} */
     this.touchEventUnlisteners_ = [];
+
+    /** @private {number} Threshold in pixels above which the drawer opens itself. */
+    this.openThreshold_ = Infinity;
   }
 
   /** @override */
   isLayoutSupported(layout) {
     return layout === Layout.NODISPLAY;
-  }
-
-  /** @override */
-  prerenderAllowed() {
-    return false;
   }
 
   /** @override */
@@ -141,6 +147,7 @@ export class DraggableDrawer extends AMP.BaseElement {
     );
 
     this.element.appendChild(templateEl);
+    this.element.setAttribute('aria-hidden', true);
   }
 
   /** @override */
@@ -169,7 +176,7 @@ export class DraggableDrawer extends AMP.BaseElement {
   initializeListeners_() {
     this.storeService_.subscribe(
       StateProperty.UI_STATE,
-      uiState => {
+      (uiState) => {
         this.onUIStateUpdate_(uiState);
       },
       true /** callToInitialize */
@@ -221,7 +228,7 @@ export class DraggableDrawer extends AMP.BaseElement {
    * @private
    */
   stopListeningForTouchEvents_() {
-    this.touchEventUnlisteners_.forEach(fn => fn());
+    this.touchEventUnlisteners_.forEach((fn) => fn());
     this.touchEventUnlisteners_ = [];
   }
 
@@ -283,7 +290,9 @@ export class DraggableDrawer extends AMP.BaseElement {
       return;
     }
 
-    event.stopPropagation();
+    if (this.shouldStopPropagation_()) {
+      event.stopPropagation();
+    }
 
     if (this.touchEventState_.isSwipeY === null) {
       this.touchEventState_.isSwipeY =
@@ -302,6 +311,18 @@ export class DraggableDrawer extends AMP.BaseElement {
         last: false,
       },
     });
+  }
+
+  /**
+   * Checks for when scroll event should be stopped from propagating.
+   * @return {boolean}
+   * @private
+   */
+  shouldStopPropagation_() {
+    return (
+      this.state_ !== DrawerState.CLOSED ||
+      (this.state_ === DrawerState.CLOSED && this.touchEventState_.swipingUp)
+    );
   }
 
   /**
@@ -336,7 +357,7 @@ export class DraggableDrawer extends AMP.BaseElement {
   onSwipeY_(gesture) {
     const {data} = gesture;
 
-    if (this.ignoreCurrentSwipeYGesture_ === true) {
+    if (this.ignoreCurrentSwipeYGesture_) {
       this.ignoreCurrentSwipeYGesture_ = !data.last;
       return;
     }
@@ -379,6 +400,16 @@ export class DraggableDrawer extends AMP.BaseElement {
           ? this.open()
           : this.close_();
       }
+
+      return;
+    }
+
+    if (
+      this.state_ === DrawerState.DRAGGING_TO_OPEN &&
+      swipingUp &&
+      -deltaY > this.openThreshold_
+    ) {
+      this.open();
       return;
     }
 
@@ -394,13 +425,31 @@ export class DraggableDrawer extends AMP.BaseElement {
   isDrawerContentDescendant_(element) {
     return !!closest(
       element,
-      el => {
+      (el) => {
         return el.classList.contains(
           'i-amphtml-story-draggable-drawer-content'
         );
       },
       /* opt_stopAt */ this.element
     );
+  }
+
+  /**
+   * Sets a swipe threshold in pixels above which the drawer opens itself.
+   * @param {number} openThreshold
+   * @protected
+   */
+  setOpenThreshold_(openThreshold) {
+    this.openThreshold_ = openThreshold;
+  }
+
+  /**
+   * Sets the max value in pixels that can be dragged when opening the drawer.
+   * @param {number} dragCap
+   * @protected
+   */
+  setDragCap_(dragCap) {
+    this.dragCap_ = dragCap;
   }
 
   /**
@@ -418,7 +467,8 @@ export class DraggableDrawer extends AMP.BaseElement {
           return;
         }
         this.state_ = DrawerState.DRAGGING_TO_OPEN;
-        translate = `translate3d(0, calc(100% + ${deltaY}px), 0)`;
+        const drag = Math.max(deltaY, -this.dragCap_);
+        translate = `translate3d(0, calc(100% + ${drag}px), 0)`;
         break;
       case DrawerState.OPEN:
       case DrawerState.DRAGGING_TO_CLOSE:
@@ -452,6 +502,7 @@ export class DraggableDrawer extends AMP.BaseElement {
     this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
 
     this.mutateElement(() => {
+      this.element.setAttribute('aria-hidden', false);
       resetStyles(this.element, ['transform', 'transition']);
 
       if (!shouldAnimate) {
@@ -467,7 +518,6 @@ export class DraggableDrawer extends AMP.BaseElement {
       const owners = Services.ownersForDoc(this.element);
       owners.scheduleLayout(this.element, this.ampComponents_);
       owners.scheduleResume(this.element, this.ampComponents_);
-      owners.updateInViewport(this.element, this.ampComponents_, true);
     });
   }
 
@@ -482,9 +532,10 @@ export class DraggableDrawer extends AMP.BaseElement {
 
   /**
    * Fully closes the drawer from its current position.
+   * @param {boolean=} shouldAnimate
    * @protected
    */
-  closeInternal_() {
+  closeInternal_(shouldAnimate = true) {
     if (this.state_ === DrawerState.CLOSED) {
       return;
     }
@@ -494,18 +545,20 @@ export class DraggableDrawer extends AMP.BaseElement {
     this.storeService_.dispatch(Action.TOGGLE_PAUSED, false);
 
     this.mutateElement(() => {
+      this.element.setAttribute('aria-hidden', true);
       resetStyles(this.element, ['transform', 'transition']);
+
+      if (!shouldAnimate) {
+        // Resets the 'transition' property, and removes this override in the
+        // next frame, after the element is positioned.
+        setImportantStyles(this.element, {transition: 'initial'});
+        this.mutateElement(() => resetStyles(this.element, ['transition']));
+      }
+
       this.element.classList.remove('i-amphtml-story-draggable-drawer-open');
-      // Note: if you change the duration here, you'll also have to change the
-      // animation duration in the CSS.
-      setTimeout(
-        () => toggle(dev().assertElement(this.containerEl_), false),
-        250
-      );
     }).then(() => {
       const owners = Services.ownersForDoc(this.element);
       owners.schedulePause(this.element, this.ampComponents_);
-      owners.updateInViewport(this.element, this.ampComponents_, false);
     });
   }
 }

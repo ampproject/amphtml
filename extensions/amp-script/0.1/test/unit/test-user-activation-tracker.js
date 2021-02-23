@@ -20,7 +20,7 @@ import {
 } from '../../user-activation-tracker';
 import {htmlFor} from '../../../../../src/static-template';
 
-describes.realWin('UserActivationTracker', {}, env => {
+describes.realWin('UserActivationTracker', {}, (env) => {
   let win;
   let root;
   let tracker;
@@ -31,9 +31,7 @@ describes.realWin('UserActivationTracker', {}, env => {
     const doc = win.document;
     const html = htmlFor(doc);
 
-    root = html`
-      <root></root>
-    `;
+    root = html` <root></root> `;
     doc.body.appendChild(root);
 
     tracker = new UserActivationTracker(root);
@@ -42,7 +40,7 @@ describes.realWin('UserActivationTracker', {}, env => {
   });
 
   function microTask() {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       win.setTimeout(resolve, 0);
     });
   }

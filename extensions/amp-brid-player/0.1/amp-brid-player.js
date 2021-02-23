@@ -26,6 +26,7 @@ import {
 } from '../../../src/iframe-video';
 import {dev, userAssert} from '../../../src/log';
 import {
+  dispatchCustomEvent,
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
@@ -292,12 +293,16 @@ class AmpBridPlayer extends AMP.BaseElement {
         'ready': VideoEvents.LOAD,
         'play': VideoEvents.PLAYING,
         'pause': VideoEvents.PAUSE,
+        'ended': VideoEvents.ENDED,
+        'adStart': VideoEvents.AD_START,
+        'adEnd': VideoEvents.AD_END,
+        'loadedmetadata': VideoEvents.LOADEDMETADATA,
       });
     }
 
     if (params[2] == 'volume') {
       this.volume_ = parseFloat(params[3]);
-      element.dispatchCustomEvent(mutedOrUnmutedEvent(this.volume_ <= 0));
+      dispatchCustomEvent(element, mutedOrUnmutedEvent(this.volume_ <= 0));
     }
 
     if (params[2] == 'currentTime') {
@@ -320,8 +325,8 @@ class AmpBridPlayer extends AMP.BaseElement {
   }
 
   /** @override */
-  play(unusedIsAutoplay) {
-    this.sendCommand_('play');
+  play(isAutoplay) {
+    this.sendCommand_('play', isAutoplay ? 'auto' : '');
   }
 
   /** @override */
@@ -416,6 +421,6 @@ class AmpBridPlayer extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpBridPlayer);
 });

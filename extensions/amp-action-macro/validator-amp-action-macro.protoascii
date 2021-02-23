@@ -15,7 +15,6 @@
 #
 tags: {  # amp-action-macro
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-action-macro"
@@ -26,7 +25,6 @@ tags: {  # amp-action-macro
 }
 tags: {  # <amp-action-macro>
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "AMP-ACTION-MACRO"
   requires_extension: "amp-action-macro"
   attrs: {
@@ -37,5 +35,5 @@ tags: {  # <amp-action-macro>
     mandatory: true
   }
   attr_lists: "mandatory-id-attr"
-  spec_url: "https://amp.dev/documentation/components/amp-action-macro"
+  spec_url: "https://amp.dev/documentation/components/amp-action-macro/"
 }

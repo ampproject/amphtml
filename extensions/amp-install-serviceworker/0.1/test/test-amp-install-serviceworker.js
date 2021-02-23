@@ -48,7 +48,7 @@ describes.realWin(
       extensions: ['amp-install-serviceworker'],
     },
   },
-  env => {
+  (env) => {
     let doc;
     let container;
     let ampdoc;
@@ -186,7 +186,7 @@ describes.realWin(
           getEntriesByType: () => {
             return AMP_SCRIPTS.concat(
               'https://code.jquery.com/jquery-3.3.1.min.js'
-            ).map(script => {
+            ).map((script) => {
               return {
                 initiatorType: 'script',
                 name: script,
@@ -201,7 +201,7 @@ describes.realWin(
       implementation.buildCallback();
       return Promise.all([whenVisible, loadPromise(implementation.win)]).then(
         () => {
-          return p.then(fakeRegistration => {
+          return p.then((fakeRegistration) => {
             expect(
               fakeRegistration.installing.addEventListener
             ).to.be.calledWith('statechange', env.sandbox.match.func);
@@ -285,10 +285,11 @@ describes.realWin(
       }
     );
 
-    it('should be ok without service worker.', () => {
+    it('should be ok without service worker.', async () => {
       const install = doc.createElement('amp-install-serviceworker');
-      const implementation = install.implementation_;
-      expect(implementation).to.exist;
+      install.setAttribute('layout', 'nodisplay');
+      doc.body.appendChild(install);
+      const implementation = await install.getImpl(false);
       install.setAttribute('src', 'https://example.com/sw.js');
       implementation.win = {
         location: {
@@ -300,10 +301,11 @@ describes.realWin(
       expect(maybeInstallUrlRewriteStub).to.be.calledOnce;
     });
 
-    it('should do nothing with non-matching origins', () => {
+    it('should do nothing with non-matching origins', async () => {
       const install = doc.createElement('amp-install-serviceworker');
-      const implementation = install.implementation_;
-      expect(implementation).to.exist;
+      install.setAttribute('layout', 'nodisplay');
+      doc.body.appendChild(install);
+      const implementation = await install.getImpl(false);
       install.setAttribute('src', 'https://other-origin.com/sw.js');
       const p = new Promise(() => {});
       implementation.win = {
@@ -324,10 +326,11 @@ describes.realWin(
       expect(install.children).to.have.length(0);
     });
 
-    it('should do nothing on proxy without iframe URL', () => {
+    it('should do nothing on proxy without iframe URL', async () => {
       const install = doc.createElement('amp-install-serviceworker');
-      const implementation = install.implementation_;
-      expect(implementation).to.exist;
+      install.setAttribute('layout', 'nodisplay');
+      doc.body.appendChild(install);
+      const implementation = await install.getImpl(false);
       install.setAttribute('src', 'https://cdn.ampproject.org/sw.js');
       let calledSrc;
       const p = new Promise(() => {});
@@ -337,7 +340,7 @@ describes.realWin(
         },
         navigator: {
           serviceWorker: {
-            register: src => {
+            register: (src) => {
               calledSrc = src;
               return p;
             },
@@ -372,7 +375,7 @@ describes.realWin(
           },
           navigator: {
             serviceWorker: {
-              register: src => {
+              register: (src) => {
                 calledSrc = src;
                 return p;
               },
@@ -392,7 +395,7 @@ describes.realWin(
           sourceUrl: 'https://source.example.com/path',
         };
         resetServiceForTesting(env.win, 'documentInfo');
-        registerServiceBuilderForDoc(doc, 'documentInfo', function() {
+        registerServiceBuilderForDoc(doc, 'documentInfo', function () {
           return {
             get: () => docInfo,
           };
@@ -407,7 +410,7 @@ describes.realWin(
         install.setAttribute('data-iframe-src', iframeSrc);
         let iframe;
         const {appendChild} = install;
-        install.appendChild = child => {
+        install.appendChild = (child) => {
           iframe = child;
           iframe.complete = true; // Mark as loaded.
           expect(iframe.src).to.equal(iframeSrc);
@@ -415,7 +418,7 @@ describes.realWin(
           appendChild.call(install, iframe);
         };
         const mutateElement = env.sandbox.stub(implementation, 'mutateElement');
-        mutateElement.callsFake(fn => {
+        mutateElement.callsFake((fn) => {
           expect(iframe).to.be.undefined;
           const returnedValue = fn();
           expect(iframe).to.exist;
@@ -487,7 +490,7 @@ describes.fakeWin(
     },
     amp: 1,
   },
-  env => {
+  (env) => {
     let win;
     let ampdoc;
     let viewer;
@@ -609,7 +612,7 @@ describes.fakeWin(
       beforeEach(() => {
         mutateElementStub = window.sandbox
           .stub(implementation, 'mutateElement')
-          .callsFake(callback => callback());
+          .callsFake((callback) => callback());
         preloadStub = env.sandbox.stub(implementation, 'preloadShell_');
         viewer.setVisibilityState_('visible');
       });

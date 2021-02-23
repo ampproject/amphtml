@@ -23,32 +23,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# `amp-truncate-text`
+# amp-truncate-text
 
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Truncates text within a container with an ellipsis.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td><div><a href="https://amp.dev/documentation/guides-and-tutorials/learn/experimental">Experimental</a>; You must turn on the <code>amp-truncate-text</code> experiment to use this component.</div></td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-truncate-text" src="https://cdn.ampproject.org/v0/amp-truncate-text-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>container, fill, fixed, fixed-height, flex-item, intrinsic, nodisplay, responsive</td>
-  </tr>
-</table>
-
-## Behavior
+## Usage
 
 Truncates text with an ellipsis, optionally showing an overflow element when there is overflow. The overflow element is always placed at the end of the content and must be a direct child of `<amp-truncate-text>`.
 
-## Children
+```html
+<amp-truncate-text layout="fixed" height="3em" width="20em">
+  Some text that may get truncated.
+  <button slot="collapsed">See more</button>
+  <button slot="expanded">See less</button>
+</amp-truncate-text>
+```
+
+### Valid children
 
 <table>
   <tr>
@@ -67,17 +56,7 @@ Truncates text with an ellipsis, optionally showing an overflow element when the
   </tr>
 </table>
 
-## Usage
-
-```html
-<amp-truncate-text layout="fixed" height="3em" width="20em">
-  Some text that may get truncated.
-  <button slot="collapsed">See more</button>
-  <button slot="expanded">See less</button>
-</amp-truncate-text>
-```
-
-## Using a Custom Action
+### Custom actions
 
 If you do not want to expand in place, you can use `slot="persistent"` to perform a custom acton, such as navigating to another page with additional information. This can be useful when there is more content than would make sense to expand inline.
 

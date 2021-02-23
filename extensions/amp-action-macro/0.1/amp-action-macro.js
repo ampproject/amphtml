@@ -15,7 +15,6 @@
  */
 import {LayoutPriority} from '../../../src/layout';
 import {Services} from '../../../src/services';
-import {isExperimentOn} from '../../../src/experiments';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
@@ -38,17 +37,13 @@ export class AmpActionMacro extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    userAssert(
-      isExperimentOn(this.win, 'amp-action-macro'),
-      'Experiment is off'
-    );
     const {element} = this;
 
     this.actions_ = Services.actionServiceForDoc(element);
 
     const argVarNames = element.getAttribute('arguments');
     if (argVarNames) {
-      this.arguments_ = argVarNames.split(',').map(s => s.trim());
+      this.arguments_ = argVarNames.split(',').map((s) => s.trim());
     }
 
     this.registerAction('execute', this.execute_.bind(this));
@@ -123,6 +118,6 @@ export class AmpActionMacro extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpActionMacro);
 });

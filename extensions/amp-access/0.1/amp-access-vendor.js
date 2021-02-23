@@ -85,7 +85,7 @@ export class AccessVendorAdapter {
   /** @override */
   authorize() {
     dev().fine(TAG, 'Start authorization via ', this.vendorName_);
-    return this.vendorPromise_.then(vendor => {
+    return this.vendorPromise_.then((vendor) => {
       return vendor.authorize();
     });
   }
@@ -98,7 +98,7 @@ export class AccessVendorAdapter {
   /** @override */
   pingback() {
     dev().fine(TAG, 'Pingback via ', this.vendorName_);
-    return this.vendorPromise_.then(vendor => {
+    return this.vendorPromise_.then((vendor) => {
       return vendor.pingback();
     });
   }

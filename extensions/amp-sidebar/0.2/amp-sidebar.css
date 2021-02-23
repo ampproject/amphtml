@@ -80,6 +80,10 @@ amp-sidebar[side], .i-amphtml-sidebar-mask {
   margin: 0;
 }
 
+.amp-sidebar-mask {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
 .i-amphtml-sidebar-mask {
   position: fixed !important;
   top: 0 !important;

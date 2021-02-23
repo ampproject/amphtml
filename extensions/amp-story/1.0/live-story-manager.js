@@ -85,12 +85,12 @@ export class LiveStoryManager {
    * Updates the client amp-story with the changes from the server document.
    */
   update() {
-    const lastNewPageEl = lastChildElement(this.storyEl_, page =>
+    const lastNewPageEl = lastChildElement(this.storyEl_, (page) =>
       page.classList.contains('amp-live-list-item-new')
     );
 
     const storyPages = this.storyEl_.querySelectorAll('amp-story-page');
-    const pageIds = Array.prototype.map.call(storyPages, el => el.id);
+    const pageIds = Array.prototype.map.call(storyPages, (el) => el.id);
 
     this.storeService_.dispatch(Action.SET_PAGE_IDS, pageIds);
     this.storeService_.dispatch(Action.ADD_NEW_PAGE_ID, lastNewPageEl.id);

@@ -5,7 +5,7 @@ The generic [`amp-video`](https://go.amp.dev/c/amp-video) component plays videos
 Unfortunately, not all videos can be embedded this way. For these specialized cases, AMP provides vendor-optimized components like [`amp-youtube`](https://go.amp.dev/c/amp-youtube), [`amp-ima-video`](https://go.amp.dev/c/amp-ima-video), and [others](./amp-video-interface.md).
 Internally these players load an iframe whose page communicates with the outer document to coordinate playback.
 
-We would prefer to not have additional custom video implementations. Instead we believe, [`amp-video-iframe`](https://go.amp.dev/c/amp-video-iframe) should be used instead, since it is a generic component that can load any video document to coordinate playback.
+**We would prefer to not have additional custom video implementations.** Instead we believe, [`amp-video-iframe`](https://go.amp.dev/c/amp-video-iframe) should be used instead, since it is a generic component that can load any video document to coordinate playback. Instead, new integrations should come in the form of [`amp-video-iframe` configurations](https://go.amp.dev/c/amp-video-iframe#vendors). _If you believe you're unable to integrate with `amp-video-iframe`, please [file an issue](https://github.com/ampproject/amphtml/issues/new/choose) mentioning `@alanorozco` and `@wassgha`._
 
 ## I want to contribute my vendor-specific player
 
@@ -13,24 +13,26 @@ You probaby do **_not_** need to build your own player.
 
 The `amp-video-iframe` playback interface supports the following methods, which we believe cover the vast majority of cases AMP documents necessitate:
 
-- `play`
-- `pause`
-- `mute`
-- `unmute`
-- `showcontrols`
-- `hidecontrols`
-- `fullscreenenter`
-- `fullscreenexit`
+-   `play`
+-   `pause`
+-   `mute`
+-   `unmute`
+-   `showcontrols`
+-   `hidecontrols`
+-   `fullscreenenter`
+-   `fullscreenexit`
 
 `amp-video-iframe` can also [send custom namespaced analytics signals](<https://amp.dev/documentation/components/amp-video-iframe/#postanalyticsevent(eventtype[,-vars])>).
 
 (If there is a feature missing from this list that a custom player requires, we are happy to work on extending it as necessary.)
 
 If this is enough for your use case, you'd only need to build a playback document hosted on your server that's able to communicate with `amp-video-iframe`.
-For guidance on accomplishing this, [refer to the component documentation.](https://go.amp.dev/c/amp-video-iframe)
+For guidance on accomplishing this, [refer to the component documentation.](https://go.amp.dev/c/amp-video-iframe#vendors)
 
-If you _cannot_ support these playback methods, it's likely that a simple [`amp-iframe`](https://go.amp.dev/c/amp-iframe)
-can embed a separate video document just fine.
+(If you _cannot_ support these playback methods, it's likely that a simple [`amp-iframe`](https://go.amp.dev/c/amp-iframe)
+can embed a separate video document just fine.)
+
+Once you host your integration document, you may provide a code sample for document authors to find your service [in the AMP documentation.](https://github.com/ampproject/amphtml/blob/master/extensions/amp-video-iframe/amp-video-iframe.md)
 
 ### When _should_ I build a vendor-specific player?
 
@@ -39,10 +41,10 @@ since `amp-video-iframe` [also has plumbing for that.](<https://amp.dev/document
 
 For example, these are some of the features that justify specific players:
 
-- **`amp-youtube`** loads initial-frame placeholder images based on a URL scheme for perceived performance.
-  Its underlying implementation also loads with lower-than-default priority, since it's rather large in binary size.
+-   **`amp-youtube`** loads initial-frame placeholder images based on a URL scheme for perceived performance.
+    Its underlying implementation also loads with lower-than-default priority, since it's rather large in binary size.
 
-- **`amp-ima-video`** embeds a generic host-less page that ships with the IMA SDK in order to transparently include standard IMA interface videos.
+-   **`amp-ima-video`** embeds a generic host-less page that ships with the IMA SDK in order to transparently include standard IMA interface videos.
 
 (Please note that most other 3p players historically exist before `amp-video-iframe` could fulfill their use case.)
 
@@ -62,11 +64,11 @@ Every player component talks to a single [`VideoManager`](../src/service/video-m
 
 This manager performs standard responsibilities for all videos, regardless of type:
 
-- accessible, managed autoplay
-- analytics tracking for playback
-- coordination with [`amp-story`](https://go.amp.dev/c/amp-story)
-- [docked video](https://amp.dev/documentation/components/amp-video-docking/)
-- rotate-to-fullscreen
+-   accessible, managed autoplay
+-   analytics tracking for playback
+-   coordination with [`amp-story`](https://go.amp.dev/c/amp-story)
+-   [docked video](https://amp.dev/documentation/components/amp-video-docking/)
+-   rotate-to-fullscreen
 
 #### Interface support
 

@@ -1,0 +1,13 @@
+{
+  "filesize": {
+    "track": [
+      "dist/*.js",
+      "dist/v0/*-?.?.js",
+      "dist/*.mjs",
+      "dist/v0/*-?.?.mjs",
+      "dist.3p/current-min/vendor/*.js",
+      "dist.3p/current-min/vendor/*.mjs"
+    ],
+    "trackFormat": ["brotli"]
+  }
+}

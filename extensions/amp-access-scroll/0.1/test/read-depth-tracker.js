@@ -23,7 +23,7 @@ describes.realWin(
       extensions: ['amp-access-scroll'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let doc;
     let ampdoc;

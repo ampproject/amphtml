@@ -71,7 +71,7 @@ export class CarouselAccessibility {
       },
       true
     );
-    element.addEventListener(CarouselEvents.INDEX_CHANGE, event => {
+    element.addEventListener(CarouselEvents.INDEX_CHANGE, (event) => {
       this.onIndexChanged_(event);
     });
   }
@@ -138,13 +138,13 @@ export class CarouselAccessibility {
     if (this.treatAsList_()) {
       this.scrollContainer_.removeAttribute('aria-live');
       this.scrollContainer_.setAttribute('role', 'list');
-      this.slides_.forEach(slide => {
+      this.slides_.forEach((slide) => {
         slide.setAttribute('role', 'listitem');
       });
     } else {
       this.scrollContainer_.setAttribute('aria-live', 'polite');
       this.scrollContainer_.removeAttribute('role');
-      this.slides_.forEach(slide => {
+      this.slides_.forEach((slide) => {
         slide.removeAttribute('role');
       });
     }

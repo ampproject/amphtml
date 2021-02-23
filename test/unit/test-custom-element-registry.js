@@ -27,8 +27,9 @@ import {
   upgradeOrRegisterElement,
 } from '../../src/service/custom-element-registry';
 import {createElementWithAttributes} from '../../src/dom';
+import {getImplSyncForTesting} from '../../src/custom-element';
 
-describes.realWin('CustomElement register', {amp: true}, env => {
+describes.realWin('CustomElement register', {amp: true}, (env) => {
   class ConcreteElement extends BaseElement {}
 
   let win, doc, ampdoc, extensions;
@@ -63,19 +64,20 @@ describes.realWin('CustomElement register', {amp: true}, env => {
     const element1 = doc.createElement('amp-element1');
     element1.setAttribute('layout', 'nodisplay');
     doc.body.appendChild(element1);
-    expect(element1.implementation_).to.be.instanceOf(ElementStub);
+    expect(getImplSyncForTesting(element1)).to.be.null;
 
     // Post-download, elements are upgraded.
     upgradeOrRegisterElement(win, 'amp-element1', ConcreteElement);
     expect(getElementClassForTesting(win, 'amp-element1')).to.equal(
       ConcreteElement
     );
-    expect(element1.implementation_).to.be.instanceOf(ConcreteElement);
+    expect(getImplSyncForTesting(element1)).to.be.instanceOf(ConcreteElement);
 
     // Elements created post-download and immediately upgraded.
     const element2 = doc.createElement('amp-element1');
-    doc.body.appendChild(element1);
-    expect(element2.implementation_).to.be.instanceOf(ConcreteElement);
+    element2.setAttribute('layout', 'nodisplay');
+    doc.body.appendChild(element2);
+    expect(getImplSyncForTesting(element2)).to.be.instanceOf(ConcreteElement);
   });
 
   it('should mark stubbed element as declared', () => {
@@ -177,7 +179,7 @@ describes.realWin('CustomElement register', {amp: true}, env => {
         },
         head: {
           nodeType: /* ELEMENT */ 1,
-          querySelectorAll: selector => {
+          querySelectorAll: (selector) => {
             if (selector == 'script[custom-element],script[custom-template]') {
               return elements;
             }
@@ -188,7 +190,7 @@ describes.realWin('CustomElement register', {amp: true}, env => {
       };
 
       elem1 = {
-        getAttribute: name => {
+        getAttribute: (name) => {
           if (name == 'custom-element') {
             return 'amp-test1';
           }
@@ -203,7 +205,7 @@ describes.realWin('CustomElement register', {amp: true}, env => {
           define: env.sandbox.spy(),
         },
         Object: {
-          create: proto => Object.create(proto),
+          create: (proto) => Object.create(proto),
         },
         HTMLElement,
         __AMP_EXTENDED_ELEMENTS: {},
@@ -241,7 +243,7 @@ describes.realWin('CustomElement register', {amp: true}, env => {
 
       // Add more elements
       const elem2 = {
-        getAttribute: name => {
+        getAttribute: (name) => {
           if (name == 'custom-element') {
             return 'amp-test2';
           }

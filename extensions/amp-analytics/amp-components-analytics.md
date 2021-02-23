@@ -20,9 +20,9 @@ limitations under the License.
 
 Third-party content providers are encouraged to create their own AMP components. To collect analytics for those components, use the AMP analytics APIs described in this document.
 
-- To collect custom events that the AMP component triggers programmatically in its own code, use the [CustomEventReporter API](#CustomEventReporter-API).
+-   To collect custom events that the AMP component triggers programmatically in its own code, use the [CustomEventReporter API](#CustomEventReporter-API).
 
-- To collect the `visible` or `hidden` analytics events defined by the [amp-analytics spec](amp-analytics.md#Triggers) that are triggered through user interaction, use the [useAnalyticsInSandbox API](#useAnalyticsInSandbox-API).
+-   To collect the `visible` or `hidden` analytics events defined by the [amp-analytics spec](amp-analytics.md#Triggers) that are triggered through user interaction, use the [useAnalyticsInSandbox API](#useAnalyticsInSandbox-API).
 
 The two APIs can be used individually or together.
 
@@ -80,7 +80,7 @@ Both APIs will insert an `<amp-analytics>` element into the DOM when the third-p
 
 ## Restrictions
 
-An inserted amp-analytics element is sandboxed within its parent third-party AMP component. This means its selector cannot access elements outside of its parent scope, and the [URL variable substitution](../../spec/amp-var-substitutions.md) only works if variable is included in the [whitelist](./0.1/sandbox-vars-whitelist.js).
+An inserted amp-analytics element is sandboxed within its parent third-party AMP component. This means its selector cannot access elements outside of its parent scope, and the [URL variable substitution](../../spec/amp-var-substitutions.md) only works if variable is included in the [allowlist](./0.1/sandbox-vars-allowlist.js).
 
 ## Documentation requirements
 

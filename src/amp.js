@@ -19,9 +19,10 @@
  */
 
 // src/polyfills.js must be the first import.
-import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
+import './polyfills';
 
 import {Services} from './services';
+import {TickLabel} from './enums';
 import {adoptWithMultidocDeps} from './runtime';
 import {cssText as ampDocCss} from '../build/ampdoc.css';
 import {cssText as ampSharedCss} from '../build/ampshared.css';
@@ -56,13 +57,57 @@ import {stubElementsForDoc} from './service/custom-element-registry';
  * main v0.js since it is the "main" js.
  * This global boolean is set by alternative binaries like amp-inabox and
  * amp-shadow which has their own bootstrapping sequence.
- * With how single pass works these alternative binaries cannot be generated
- * easily because we can only do a "single pass" so we treat these alternative
- * main binaries as "extensions" and we concatenate their code with the main
- * v0.js code.
  * @type {boolean|undefined}
  */
 const shouldMainBootstrapRun = !self.IS_AMP_ALT;
+
+/**
+ * Execute the bootstrap
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./service/performance-impl.Performance} perf
+ */
+function bootstrap(ampdoc, perf) {
+  startupChunk(self.document, function services() {
+    // Core services.
+    installRuntimeServices(self);
+    installAmpdocServices(ampdoc);
+    // We need the core services (viewer/resources) to start instrumenting
+    perf.coreServicesAvailable();
+    maybeTrackImpression(self);
+  });
+  startupChunk(self.document, function adoptWindow() {
+    adoptWithMultidocDeps(self);
+  });
+  startupChunk(self.document, function builtins() {
+    // Builtins.
+    installBuiltinElements(self);
+  });
+  startupChunk(self.document, function stub() {
+    // Pre-stub already known elements.
+    stubElementsForDoc(ampdoc);
+  });
+  startupChunk(
+    self.document,
+    function final() {
+      if (!IS_SXG) {
+        installPullToRefreshBlocker(self);
+      }
+      installAutoLightboxExtension(ampdoc);
+      installStandaloneExtension(ampdoc);
+      maybeValidate(self);
+      makeBodyVisible(self.document);
+      preconnectToOrigin(self.document);
+    },
+    /* makes the body visible */ true
+  );
+  startupChunk(self.document, function finalTick() {
+    perf.tick(TickLabel.END_INSTALL_STYLES);
+    Services.resourcesForDoc(ampdoc).ampInitComplete();
+    // TODO(erwinm): move invocation of the `flush` method when we have the
+    // new ticks in place to batch the ticks properly.
+    perf.flush();
+  });
+}
 
 if (shouldMainBootstrapRun) {
   // Store the originalHash as early as possible. Trying to debug:
@@ -101,57 +146,22 @@ if (shouldMainBootstrapRun) {
     ) {
       perf.addEnabledExperiment('no-boilerplate');
     }
-    if (getMode().esm) {
+    if (IS_ESM) {
       perf.addEnabledExperiment('esm');
     }
     fontStylesheetTimeout(self);
-    perf.tick('is');
-    installStylesForDoc(
-      ampdoc,
-      ampDocCss + ampSharedCss,
-      () => {
-        startupChunk(self.document, function services() {
-          // Core services.
-          installRuntimeServices(self);
-          installAmpdocServices(ampdoc);
-          // We need the core services (viewer/resources) to start instrumenting
-          perf.coreServicesAvailable();
-          maybeTrackImpression(self);
-        });
-        startupChunk(self.document, function adoptWindow() {
-          adoptWithMultidocDeps(self);
-        });
-        startupChunk(self.document, function builtins() {
-          // Builtins.
-          installBuiltinElements(self);
-        });
-        startupChunk(self.document, function stub() {
-          // Pre-stub already known elements.
-          stubElementsForDoc(ampdoc);
-        });
-        startupChunk(
-          self.document,
-          function final() {
-            installPullToRefreshBlocker(self);
-            installAutoLightboxExtension(ampdoc);
-            installStandaloneExtension(ampdoc);
-            maybeValidate(self);
-            makeBodyVisible(self.document);
-            preconnectToOrigin(self.document);
-          },
-          /* makes the body visible */ true
-        );
-        startupChunk(self.document, function finalTick() {
-          perf.tick('e_is');
-          Services.resourcesForDoc(ampdoc).ampInitComplete();
-          // TODO(erwinm): move invocation of the `flush` method when we have the
-          // new ticks in place to batch the ticks properly.
-          perf.flush();
-        });
-      },
-      /* opt_isRuntimeCss */ true,
-      /* opt_ext */ 'amp-runtime'
-    );
+    perf.tick(TickLabel.INSTALL_STYLES);
+    if (IS_ESM) {
+      bootstrap(ampdoc, perf);
+    } else {
+      installStylesForDoc(
+        ampdoc,
+        ampDocCss + ampSharedCss,
+        () => bootstrap(ampdoc, perf),
+        /* opt_isRuntimeCss */ true,
+        /* opt_ext */ 'amp-runtime'
+      );
+    }
   });
 
   // Output a message to the console and add an attribute to the <html>
@@ -163,6 +173,10 @@ if (shouldMainBootstrapRun) {
       `Powered by AMP ⚡ HTML – Version ${internalRuntimeVersion()}`,
       self.location.href
     );
+  }
+  // This code is eleminated in prod build through a babel transformer.
+  if (getMode().localDev) {
+    self.document.documentElement.setAttribute('esm', IS_ESM ? 1 : 0);
   }
   self.document.documentElement.setAttribute(
     'amp-version',

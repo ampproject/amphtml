@@ -24,6 +24,7 @@
 🐛 Bug fix
 🔥 P0 fix
 ✅ Tests
+❄️ Flaky tests
 🚀 Performance improvements
 🖍 CSS / Styling
 ♿ Accessibility
@@ -33,4 +34,5 @@
 ⏪ Reverting a previous change
 ♻️ Refactoring
 🚮 Deleting code
+🧪 Experimental code
 -->

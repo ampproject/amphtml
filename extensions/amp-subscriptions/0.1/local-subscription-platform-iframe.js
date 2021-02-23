@@ -89,11 +89,11 @@ export class LocalSubscriptionIframePlatform extends LocalSubscriptionBasePlatfo
     return this.connect().then(() => {
       return this.messenger_
         .sendCommandRsvp('authorize', {})
-        .then(res => {
+        .then((res) => {
           res.source = 'local-iframe';
           return res;
         })
-        .then(resJson => Entitlement.parseFromJson(resJson));
+        .then((resJson) => Entitlement.parseFromJson(resJson));
     });
   }
 
@@ -135,7 +135,7 @@ export class LocalSubscriptionIframePlatform extends LocalSubscriptionBasePlatfo
    * @private
    */
   resolveConfig_() {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       const configJson = parseJson(JSON.stringify(this.serviceConfig_));
       const pageConfig = this.serviceAdapter_.getPageConfig();
       // Pass id's to the iframe for context.
@@ -149,7 +149,7 @@ export class LocalSubscriptionIframePlatform extends LocalSubscriptionBasePlatfo
         const varsString = this.iframeVars_.join('&');
         this.urlBuilder_
           .collectUrlVars(varsString, /* useAuthData */ false)
-          .then(vars => {
+          .then((vars) => {
             configJson['iframeVars'] = vars;
             resolve(configJson);
           });
@@ -162,13 +162,12 @@ export class LocalSubscriptionIframePlatform extends LocalSubscriptionBasePlatfo
   /**
    * @param {string} cmd
    * @param {?Object} unusedPayload
-   * @return {*}
    * @private
    */
   handleCommand_(cmd, unusedPayload) {
-    if (cmd == 'connect') {
+    if (cmd === 'connect') {
       // First ever message. Indicates that the receiver is listening.
-      this.configPromise_.then(configJson => {
+      this.configPromise_.then((configJson) => {
         this.messenger_
           .sendCommandRsvp('start', {
             'protocol': 'amp-subscriptions',
@@ -182,7 +181,6 @@ export class LocalSubscriptionIframePlatform extends LocalSubscriptionBasePlatfo
             }
           });
       });
-      return;
     }
   }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import * as service from '../../src/service';
 import {createIframePromise} from '../../testing/iframe';
 import {
@@ -47,9 +47,9 @@ describe('waitForServices', () => {
       .stub(variantService, 'whenReady')
       .returns(Promise.resolve());
 
-    return createIframePromise().then(iframe => {
+    return createIframePromise().then((iframe) => {
       win = iframe.win;
-      clock = lolex.install({target: win});
+      clock = fakeTimers.withGlobal(win).install();
     });
   });
 
@@ -64,7 +64,7 @@ describe('waitForServices', () => {
     return expect(waitForServices(win)).to.eventually.have.lengthOf(0);
   });
 
-  it('should timeout if some blocking services are missing', function*() {
+  it('should timeout if some blocking services are missing', function* () {
     addExtensionScript(win, 'amp-dynamic-css-classes');
     win.document.body.appendChild(win.document.createElement('amp-experiment'));
     expect(hasRenderDelayingServices(win)).to.be.true;
@@ -116,7 +116,7 @@ describe('waitForServices', () => {
     dynamicCssResolve();
     variantResolve(); // this unblocks 'amp-experiment'
 
-    return promise.then(services => {
+    return promise.then((services) => {
       expect(services.length).to.be.equal(2);
       expect(variantStub).to.be.calledOnce;
     });
@@ -126,7 +126,7 @@ describe('waitForServices', () => {
 function waitForService(getService, serviceId, service) {
   let resolve = null;
   getService.withArgs(window.sandbox.match.any, serviceId).returns(
-    new Promise(r => {
+    new Promise((r) => {
       resolve = r.bind(this, service);
     })
   );

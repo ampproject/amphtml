@@ -26,7 +26,7 @@ describes.realWin(
       extensions: ['amp-experiment'],
     },
   },
-  env => {
+  (env) => {
     const config = {
       'experiment-1': {
         variants: {
@@ -125,8 +125,8 @@ describes.realWin(
         },
         () => {
           return Services.variantsForDocOrNull(ampdoc.getHeadNode())
-            .then(service => service.getVariants())
-            .then(variants => {
+            .then((service) => service.getVariants())
+            .then((variants) => {
               expect(variants).to.deep.equal({});
             });
         }
@@ -148,8 +148,8 @@ describes.realWin(
 
       experiment.buildCallback();
       return Services.variantsForDocOrNull(ampdoc.getHeadNode())
-        .then(variantsService => variantsService.getVariants())
-        .then(variants => {
+        .then((variantsService) => variantsService.getVariants())
+        .then((variants) => {
           expect(variants).to.jsonEqual({
             'experiment-1': 'variant-a',
             'experiment-2': 'variant-d',

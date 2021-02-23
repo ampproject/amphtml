@@ -49,7 +49,7 @@ export const Type = {
  * @param {!Element} element
  * @return {!Element}
  */
-const getBlockingTemplate = element => {
+const getBlockingTemplate = (element) => {
   return htmlFor(element)`
       <div class="i-amphtml-story-access-overflow">
         <div class="i-amphtml-story-access-container">
@@ -66,7 +66,7 @@ const getBlockingTemplate = element => {
  * @param {!Element} element
  * @return {!Element}
  */
-const getNotificationTemplate = element => {
+const getNotificationTemplate = (element) => {
   return htmlFor(element)`
       <div class="i-amphtml-story-access-overflow">
         <div class="i-amphtml-story-access-container">
@@ -115,7 +115,7 @@ export class AmpStoryAccess extends AMP.BaseElement {
 
     this.element.appendChild(drawerEl);
 
-    this.whitelistActions_();
+    this.allowlistActions_();
 
     this.initializeListeners_();
   }
@@ -129,19 +129,19 @@ export class AmpStoryAccess extends AMP.BaseElement {
    * @private
    */
   initializeListeners_() {
-    this.storeService_.subscribe(StateProperty.ACCESS_STATE, isAccess => {
+    this.storeService_.subscribe(StateProperty.ACCESS_STATE, (isAccess) => {
       this.onAccessStateChange_(isAccess);
     });
 
     this.storeService_.subscribe(
       StateProperty.CURRENT_PAGE_INDEX,
-      currentPageIndex => {
+      (currentPageIndex) => {
         this.onCurrentPageIndexChange_(currentPageIndex);
       },
       true /** callToInitialize */
     );
 
-    this.element.addEventListener('click', event => this.onClick_(event));
+    this.element.addEventListener('click', (event) => this.onClick_(event));
   }
 
   /**
@@ -183,7 +183,7 @@ export class AmpStoryAccess extends AMP.BaseElement {
     }
 
     // Closes the menu if click happened outside of the main container.
-    if (!closest(el, el => el === this.containerEl_, this.element)) {
+    if (!closest(el, (el) => el === this.containerEl_, this.element)) {
       this.storeService_.dispatch(Action.TOGGLE_ACCESS, false);
     }
   }
@@ -255,18 +255,20 @@ export class AmpStoryAccess extends AMP.BaseElement {
     );
     const logoSrc = storyEl && storyEl.getAttribute('publisher-logo-src');
 
-    logoSrc
-      ? assertHttpsUrl(logoSrc, storyEl, 'publisher-logo-src')
-      : user().warn(
-          TAG,
-          'Expected "publisher-logo-src" attribute on <amp-story>'
-        );
+    if (logoSrc) {
+      assertHttpsUrl(logoSrc, storyEl, 'publisher-logo-src');
+    } else {
+      user().warn(
+        TAG,
+        'Expected "publisher-logo-src" attribute on <amp-story>'
+      );
+    }
 
     return logoSrc;
   }
 
   /**
-   * Whitelists the <amp-access> actions.
+   * Allowlists the <amp-access> actions.
    * Depending on the publisher configuration, actions can be:
    *   - login
    *   - login-<namespace>
@@ -275,10 +277,10 @@ export class AmpStoryAccess extends AMP.BaseElement {
    * Publishers can provide one (object) or multiple (array) configurations,
    * identified by their "namespace" property.
    * Each configuration can have one or multiple login URLs, called "type".
-   * All the namespace/type pairs have to be whitelisted.
+   * All the namespace/type pairs have to be allowlisted.
    * @private
    */
-  whitelistActions_() {
+  allowlistActions_() {
     const accessEl = dev().assertElement(
       this.win.document.getElementById('amp-access'),
       'Cannot find the amp-access configuration'
@@ -301,12 +303,12 @@ export class AmpStoryAccess extends AMP.BaseElement {
 
     const actions = [];
 
-    accessConfig.forEach(config => {
+    /** @type {!Array} */ (accessConfig).forEach((config) => {
       const {login, namespace} = /** @type {{login, namespace}} */ (config);
 
       if (isObject(login)) {
         const types = Object.keys(login);
-        types.forEach(type =>
+        types.forEach((type) =>
           actions.push(this.getActionObject_(namespace, type))
         );
       } else {
@@ -314,18 +316,18 @@ export class AmpStoryAccess extends AMP.BaseElement {
       }
     });
 
-    this.storeService_.dispatch(Action.ADD_TO_ACTIONS_WHITELIST, actions);
+    this.storeService_.dispatch(Action.ADD_TO_ACTIONS_ALLOWLIST, actions);
   }
 
   /**
-   * Whitelists an action for the given namespace / type pair.
+   * Allowlists an action for the given namespace / type pair.
    * @param {string=} namespace
    * @param {string=} type
    * @return {*} TODO(#23582): Specify return type
    * @private
    */
   getActionObject_(namespace = undefined, type = undefined) {
-    const method = ['login', namespace, type].filter(s => !!s).join('-');
+    const method = ['login', namespace, type].filter((s) => !!s).join('-');
     return {tagOrTarget: 'SCRIPT', method};
   }
 }

@@ -207,7 +207,7 @@ export class VisibilityModel {
       clearTimeout(this.scheduleRepeatId_);
       this.scheduleRepeatId_ = null;
     }
-    this.unsubscribe_.forEach(unsubscribe => {
+    this.unsubscribe_.forEach((unsubscribe) => {
       unsubscribe();
     });
     this.unsubscribe_.length = 0;
@@ -437,6 +437,7 @@ export class VisibilityModel {
         this.minVisiblePercentage_ > 0
           ? Math.min(this.minVisiblePercentage_, visibility)
           : visibility;
+
       this.maxVisiblePercentage_ = Math.max(
         this.maxVisiblePercentage_,
         visibility

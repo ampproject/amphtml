@@ -27,6 +27,7 @@ import {
 } from '../../../src/iframe-video';
 import {dev, userAssert} from '../../../src/log';
 import {
+  dispatchCustomEvent,
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
@@ -119,7 +120,7 @@ class AmpWistiaPlayer extends AMP.BaseElement {
     const loaded = this.loadPromise(this.iframe_).then(() => {
       // Tell Wistia Player we want to receive messages
       this.listenToFrame_();
-      element.dispatchCustomEvent(VideoEvents.LOAD);
+      dispatchCustomEvent(element, VideoEvents.LOAD);
     });
 
     this.playerReadyResolver_(loaded);
@@ -144,11 +145,6 @@ class AmpWistiaPlayer extends AMP.BaseElement {
   }
 
   /** @override */
-  viewportCallback(visible) {
-    this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
-  }
-
-  /** @override */
   pauseCallback() {
     if (this.iframe_) {
       this.pause();
@@ -170,7 +166,7 @@ class AmpWistiaPlayer extends AMP.BaseElement {
     }
 
     const data = objOrParseJson(eventData);
-    if (data === undefined) {
+    if (data == null) {
       return; // We only process valid JSON.
     }
 
@@ -194,7 +190,7 @@ class AmpWistiaPlayer extends AMP.BaseElement {
 
     if (playerEvent == 'mutechange') {
       const isMuted = data['args'] ? data['args'][1] : undefined;
-      element.dispatchCustomEvent(mutedOrUnmutedEvent(isMuted));
+      dispatchCustomEvent(element, mutedOrUnmutedEvent(isMuted));
       return;
     }
   }
@@ -331,6 +327,6 @@ class AmpWistiaPlayer extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpWistiaPlayer);
 });

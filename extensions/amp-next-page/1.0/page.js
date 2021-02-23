@@ -20,12 +20,12 @@ import {devAssert} from '../../../src/log';
 
 /** @enum {number} */
 export const PageState = {
-  QUEUED: 0,
-  FETCHING: 1,
-  LOADED: 2,
-  FAILED: 3,
-  INSERTED: 4,
-  PAUSED: 5,
+  QUEUED: 1,
+  FETCHING: 2,
+  LOADED: 3,
+  FAILED: 4,
+  INSERTED: 5,
+  PAUSED: 6,
 };
 
 export const VISIBLE_DOC_CLASS = 'amp-next-page-visible';
@@ -179,11 +179,6 @@ export class Page {
         .getBody()
         .classList.toggle(HIDDEN_DOC_CLASS, !this.isVisible());
     }
-
-    if (this.isVisible()) {
-      // Switch the title and url of the page to reflect this page
-      this.manager_.setTitlePage(this);
-    }
   }
 
   /**
@@ -224,6 +219,7 @@ export class Page {
     if (
       this.state_ === PageState.INSERTED ||
       this.state_ === PageState.FETCHING ||
+      this.state_ === PageState.LOADED ||
       this.state_ === PageState.FAILED
     ) {
       return Promise.resolve();
@@ -233,7 +229,7 @@ export class Page {
 
     return this.manager_
       .fetchPageDocument(this)
-      .then(content => {
+      .then((content) => {
         this.state_ = PageState.LOADED;
         this.content_ = content;
         this.container_ = this.manager_.createDocumentContainerForPage(
@@ -259,7 +255,7 @@ export class Page {
         /** @type {!Document} */ (devAssert(this.content_)),
         this.is(PageState.PAUSED) /** force */
       )
-      .then(shadowDoc => {
+      .then((shadowDoc) => {
         if (!shadowDoc) {
           this.state_ = PageState.FAILED;
           return;
@@ -279,16 +275,16 @@ export class HostPage extends Page {
    * @param {{ url: string, title: string, image: string }} meta
    * @param {!PageState} initState
    * @param {!VisibilityState} initVisibility
-   * @param {!Document} initDoc
+   * @param {!Document} doc
    */
-  constructor(manager, meta, initState, initVisibility, initDoc) {
+  constructor(manager, meta, initState, initVisibility, doc) {
     super(manager, meta);
     /** @override */
     this.state_ = initState;
     /** @override */
     this.visibilityState_ = initVisibility;
     /** @private {!Document} */
-    this.document_ = initDoc;
+    this.document_ = doc;
   }
 
   /** @override */

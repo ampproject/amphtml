@@ -58,8 +58,7 @@ export default class GltfViewer {
     this.ampPlay_ = true;
 
     /** @private */
-    this.ampInViewport_ =
-      options['initialIntersection']['intersectionRatio'] > 0;
+    this.ampInViewport_ = false;
 
     /** @private */
     this.setSize_ = this.setupSize_();
@@ -128,7 +127,7 @@ export default class GltfViewer {
     let oldW = null;
     let oldH = null;
     /** @param {JsonObject} box */
-    const setSize = box => {
+    const setSize = (box) => {
       const w = box['width'];
       const h = box['height'];
       if (oldW === w && oldH === h) {
@@ -250,9 +249,9 @@ export default class GltfViewer {
     loader.load(
       this.options_['src'],
       /** @param {{scene: !THREE.Scene}} gltfData */
-      gltfData => {
+      (gltfData) => {
         this.setupCameraForObject_(gltfData.scene);
-        gltfData.scene.children.slice().forEach(child => {
+        gltfData.scene.children.slice().forEach((child) => {
           this.model_.add(child);
         });
 

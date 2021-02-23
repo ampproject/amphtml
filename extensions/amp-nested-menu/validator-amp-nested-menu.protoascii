@@ -39,7 +39,7 @@ tags: {  # amp-nested-menu
     supported_layouts: FILL
   }
   descendant_tag_list: "amp-nested-menu-allowed-descendants"
-  spec_url: "https://amp.dev/documentation/components/amp-nested-menu"
+  spec_url: "https://amp.dev/documentation/components/amp-nested-menu/"
 }
 tags: {  # <amp-nested-menu> <div amp-nested-submenu(-open/-close)>
   html_format: AMP
@@ -123,7 +123,7 @@ tags: {  # <amp-nested-menu> <span amp-nested-submenu-open/close>
   attr_lists: "amp-nested-menu-actions"
 }
 descendant_tag_list {
-  # Purposefully being restrictive when whitelisting child components;
+  # Purposefully being restrictive when allowlisting child components;
   # On demand, add more components to this list after manual testing.
   name: "amp-nested-menu-allowed-descendants"
   tag: "A"
@@ -156,6 +156,7 @@ descendant_tag_list {
   tag: "P"
   tag: "PATH"
   tag: "SECTION"
+  tag: "SELECT"
   tag: "SPAN"
   tag: "STRIKE"
   tag: "STRONG"
@@ -172,4 +173,5 @@ descendant_tag_list {
   tag: "TR"
   tag: "U"
   tag: "UL"
+  tag: "USE"
 }

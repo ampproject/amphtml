@@ -26,6 +26,11 @@ import {removeElement} from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';
 
 class AmpFacebookComments extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static createLoaderLogoCallback(element) {
+    return createLoaderLogo(element);
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -74,13 +79,14 @@ class AmpFacebookComments extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     const iframe = getIframe(this.win, this.element, 'facebook');
+    iframe.title = this.element.title || 'Facebook comments';
     this.applyFillContent(iframe);
     // Triggered by context.updateDimensions() inside the iframe.
     listenFor(
       iframe,
       'embed-size',
-      data => {
-        this./*OK*/ changeHeight(data['height']);
+      (data) => {
+        this.forceChangeHeight(data['height']);
       },
       /* opt_is3P */ true
     );
@@ -120,11 +126,6 @@ class AmpFacebookComments extends AMP.BaseElement {
   }
 
   /** @override */
-  createLoaderLogoCallback() {
-    return createLoaderLogo(this.element);
-  }
-
-  /** @override */
   unlayoutCallback() {
     if (this.iframe_) {
       removeElement(this.iframe_);
@@ -137,6 +138,6 @@ class AmpFacebookComments extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-facebook-comments', '0.1', AMP => {
+AMP.extension('amp-facebook-comments', '0.1', (AMP) => {
   AMP.registerElement('amp-facebook-comments', AmpFacebookComments);
 });

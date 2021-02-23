@@ -70,13 +70,25 @@ export class AmpNextPage extends AMP.BaseElement {
       removeElement(separator);
     }
 
-    return nextPageServiceForDoc(this.getAmpDoc()).then(service => {
+    return nextPageServiceForDoc(this.getAmpDoc()).then((service) => {
       if (service.isActive()) {
         return;
       }
 
       const {element} = this;
       element.classList.add('i-amphtml-next-page');
+
+      // Warning for validation conflicts between 1.0 and 0.1
+      const prohibitedAttribute = element.hasAttribute('deep-parsing')
+        ? 'deep-parsing'
+        : element.hasAttribute('xssi-prefix')
+        ? 'xssi-prefix'
+        : element.hasAttribute('max-pages')
+        ? 'max-pages'
+        : null;
+      if (prohibitedAttribute) {
+        this.unsupportedFeatureWarn_(prohibitedAttribute);
+      }
 
       const src = element.getAttribute('src');
       let configPromise;
@@ -99,14 +111,14 @@ export class AmpNextPage extends AMP.BaseElement {
 
         const consentPolicyId = this.getConsentPolicy();
         const consent = consentPolicyId
-          ? getConsentPolicyState(element, consentPolicyId).catch(err => {
+          ? getConsentPolicyState(element, consentPolicyId).catch((err) => {
               user().error(TAG, 'Error determining consent state', err);
               return CONSENT_POLICY_STATE.UNKNOWN;
             })
           : Promise.resolve(CONSENT_POLICY_STATE.SUFFICIENT);
 
         pagesPromise = consent
-          .then(state =>
+          .then((state) =>
             this.fetchAdSensePages_(
               client,
               slot,
@@ -114,7 +126,7 @@ export class AmpNextPage extends AMP.BaseElement {
                 state === CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED
             )
           )
-          .catch(error => {
+          .catch((error) => {
             user().warn(
               TAG,
               'error fetching recommendations from AdSense',
@@ -129,11 +141,15 @@ export class AmpNextPage extends AMP.BaseElement {
       const inlineConfig = this.getInlineConfig_();
 
       if (src) {
-        configPromise = this.fetchConfig_().catch(error =>
+        configPromise = this.fetchConfig_().catch((error) =>
           user().error(TAG, 'error fetching config', error)
         );
       } else {
         configPromise = Promise.resolve(inlineConfig);
+      }
+
+      if (inlineConfig && (src || type)) {
+        this.unsupportedFeatureWarn_('mixing configuration types');
       }
 
       userAssert(
@@ -143,7 +159,7 @@ export class AmpNextPage extends AMP.BaseElement {
         TAG
       );
 
-      return Promise.all([configPromise, pagesPromise]).then(values => {
+      return Promise.all([configPromise, pagesPromise]).then((values) => {
         const config = values[0] || {};
         const pages = values[1] || [];
         config.pages = pages.concat(config.pages || []);
@@ -172,7 +188,7 @@ export class AmpNextPage extends AMP.BaseElement {
       `${TAG} config should ` +
         'be inside a <script> tag with type="application/json"'
     );
-    return tryParseJson(scriptElement.textContent, error => {
+    return tryParseJson(scriptElement.textContent, (error) => {
       user().error(TAG, 'failed to parse config', error);
     });
   }
@@ -195,7 +211,7 @@ export class AmpNextPage extends AMP.BaseElement {
       '&ecr=1&crui=title&is_amp=3&output=xml';
     return fetchDocument(this.win, adUrl, {
       credentials: personalized ? 'include' : 'omit',
-    }).then(doc => {
+    }).then((doc) => {
       const urlService = Services.urlForDoc(dev().assertElement(this.element));
       const {origin} = urlService.parse(this.getAmpDoc().getUrl());
 
@@ -236,7 +252,7 @@ export class AmpNextPage extends AMP.BaseElement {
     const {element} = this;
     const config = assertConfig(element, configJson, this.getAmpDoc().getUrl());
     service.register(element, config, separator);
-    service.setAppendPageHandler(element => this.appendPage_(element));
+    service.setAppendPageHandler((element) => this.appendPage_(element));
   }
 
   /**
@@ -257,6 +273,17 @@ export class AmpNextPage extends AMP.BaseElement {
     const ampdoc = this.getAmpDoc();
     const policy = UrlReplacementPolicy.ALL;
     return batchFetchJsonFor(ampdoc, this.element, {urlReplacement: policy});
+  }
+
+  /**
+   * @param {string} feature unsupported feature
+   * @private
+   */
+  unsupportedFeatureWarn_(feature) {
+    user().warn(
+      TAG,
+      `${feature} is a feature of ${TAG} 1.0, please update your version to use it`
+    );
   }
 }
 
@@ -300,9 +327,9 @@ function extractAdSenseTextContent(el) {
   return content.trim();
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   const service = new NextPageService();
-  AMP.registerServiceForDoc(SERVICE_ID, function() {
+  AMP.registerServiceForDoc(SERVICE_ID, function () {
     return service;
   });
   AMP.registerElement(TAG, AmpNextPage, CSS);

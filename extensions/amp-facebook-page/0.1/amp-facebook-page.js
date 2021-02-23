@@ -26,6 +26,11 @@ import {removeElement} from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';
 
 class AmpFacebookPage extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static createLoaderLogoCallback(element) {
+    return createLoaderLogo(element);
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -74,12 +79,13 @@ class AmpFacebookPage extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     const iframe = getIframe(this.win, this.element, 'facebook');
+    iframe.title = this.element.title || 'Facebook page';
     this.applyFillContent(iframe);
     // Triggered by context.updateDimensions() inside the iframe.
     listenFor(
       iframe,
       'embed-size',
-      data => {
+      (data) => {
         this.attemptChangeHeight(data['height']).catch(() => {
           /* ignore failures */
         });
@@ -122,11 +128,6 @@ class AmpFacebookPage extends AMP.BaseElement {
   }
 
   /** @override */
-  createLoaderLogoCallback() {
-    return createLoaderLogo(this.element);
-  }
-
-  /** @override */
   unlayoutCallback() {
     if (this.iframe_) {
       removeElement(this.iframe_);
@@ -139,6 +140,6 @@ class AmpFacebookPage extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-facebook-page', '0.1', AMP => {
+AMP.extension('amp-facebook-page', '0.1', (AMP) => {
   AMP.registerElement('amp-facebook-page', AmpFacebookPage);
 });

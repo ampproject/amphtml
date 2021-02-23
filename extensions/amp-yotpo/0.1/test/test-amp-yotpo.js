@@ -24,7 +24,7 @@ describes.realWin(
       extensions: ['amp-yotpo'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
 
     const widgets = [
@@ -53,7 +53,7 @@ describes.realWin(
       ampYotpo.setAttribute('data-widget-type', opts.widgetType);
       doc.body.appendChild(ampYotpo);
       return ampYotpo
-        .build()
+        .buildInternal()
         .then(() => ampYotpo.layoutCallback())
         .then(() => ampYotpo);
     }
@@ -65,7 +65,7 @@ describes.realWin(
         height: 200,
         widgetType: 'BottomLine',
       };
-      return getYotpo(opts).then(ampYotpo => {
+      return getYotpo(opts).then((ampYotpo) => {
         const iframe = ampYotpo.firstChild;
         expect(iframe).to.not.be.null;
         expect(iframe.tagName).to.equal('IFRAME');

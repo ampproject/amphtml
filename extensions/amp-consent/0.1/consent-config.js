@@ -18,18 +18,31 @@ import {CMP_CONFIG} from './cmps';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
 import {Services} from '../../../src/services';
+import {childElementByTag} from '../../../src/dom';
 import {deepMerge, hasOwn, map} from '../../../src/utils/object';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {getChildJsonConfig} from '../../../src/json';
 
 const TAG = 'amp-consent/consent-config';
+const AMP_STORY_CONSENT_TAG = 'amp-story-consent';
 
 const ALLOWED_DEPR_CONSENTINSTANCE_ATTRS = {
   'promptUI': true,
   'checkConsentHref': true,
+  // `promptIfUnknownForGeoGroup` is legacy field
   'promptIfUnknownForGeoGroup': true,
   'onUpdateHref': true,
 };
+
+/** @const @type {!Object<string, boolean>} */
+const CONSENT_VARS_ALLOWED_LIST = {
+  'CLIENT_ID': true,
+  'PAGE_VIEW_ID': true,
+  'PAGE_VIEW_ID_64': true,
+};
+
+/** @const @type {string} */
+export const CID_SCOPE = 'AMP-CONSENT';
 
 export class ConsentConfig {
   /** @param {!Element} element */
@@ -151,8 +164,7 @@ export class ConsentConfig {
       }
     }
 
-    // TODO(micajuineho): delete promptIfUnknownForGeoGroup, once we migrate fully
-    // Migrate to geoOverride
+    // `promptIfUnknownForGeoGroup` is legacy field
     const group = config['promptIfUnknownForGeoGroup'];
     if (typeof group === 'string') {
       config['consentRequired'] = false;
@@ -168,9 +180,9 @@ export class ConsentConfig {
       config['consentRequired'] = 'remote';
     }
 
-    return this.mergeGeoOverride_(config).then(mergedConfig =>
-      this.validateMergedGeoOverride_(mergedConfig)
-    );
+    return this.mergeGeoOverride_(config)
+      .then((mergedConfig) => this.validateMergedGeoOverride_(mergedConfig))
+      .then((validatedConfig) => this.checkStoryConsent_(validatedConfig));
   }
 
   /**
@@ -182,7 +194,7 @@ export class ConsentConfig {
     if (!config['geoOverride']) {
       return Promise.resolve(config);
     }
-    return Services.geoForDocOrNull(this.element_).then(geoService => {
+    return Services.geoForDocOrNull(this.element_).then((geoService) => {
       userAssert(
         geoService,
         '%s: requires <amp-geo> to use `geoOverride`',
@@ -232,6 +244,23 @@ export class ConsentConfig {
       );
     }
     return mergedConfig;
+  }
+
+  /**
+   * Validate if story consent then no promptUiSrc
+   * @param {!JsonObject} config
+   * @return {!JsonObject}
+   */
+  checkStoryConsent_(config) {
+    if (childElementByTag(this.element_, AMP_STORY_CONSENT_TAG)) {
+      userAssert(
+        !config['promptUISrc'],
+        '%s: `promptUiSrc` cannot be specified while using %s.',
+        TAG,
+        AMP_STORY_CONSENT_TAG
+      );
+    }
+    return config;
   }
 
   /**
@@ -287,6 +316,36 @@ export class ConsentConfig {
       devAssert(config[attribute], 'CMP config must specify %s', attribute);
     }
   }
+}
+
+/**
+ * Expand consent endpoint url
+ * @param {!Element|!ShadowRoot} element
+ * @param {string} url
+ * @return {!Promise<string>}
+ */
+export function expandConsentEndpointUrl(element, url) {
+  return Services.urlReplacementsForDoc(element).expandUrlAsync(
+    url,
+    {
+      'CLIENT_ID': getConsentCID(element),
+    },
+    CONSENT_VARS_ALLOWED_LIST
+  );
+}
+
+/**
+ * Return AMP CONSENT scoped CID
+ * @param {!Element|!ShadowRoot|!../../../src/service/ampdoc-impl.AmpDoc} node
+ * @return {!Promise<string>}
+ */
+export function getConsentCID(node) {
+  return Services.cidForDoc(node).then((cid) => {
+    return cid.get(
+      {scope: CID_SCOPE, createCookieIfNotPresent: true},
+      /** consent */ Promise.resolve()
+    );
+  });
 }
 
 /**

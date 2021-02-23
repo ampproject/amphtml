@@ -83,7 +83,7 @@ export function reddit(global, data) {
 
   getContainerScript(global, scriptSource);
 
-  global.addEventListener('resize', event => {
+  global.addEventListener('resize', (event) => {
     global.context.updateDimensions(
       event.target.outerWidth,
       event.target.outerHeight

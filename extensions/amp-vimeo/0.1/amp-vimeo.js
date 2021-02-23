@@ -26,12 +26,12 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {dict} from '../../../src/utils/object';
+import {dispatchCustomEvent, removeElement} from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {once} from '../../../src/utils/function';
-import {removeElement} from '../../../src/dom';
 import {userAssert} from '../../../src/log';
 
 const TAG = 'amp-vimeo';
@@ -68,6 +68,8 @@ const VIMEO_EVENTS = {
   'volumechange': null,
 };
 
+const DO_NOT_TRACK_ATTRIBUTE = 'do-not-track';
+
 /** @implements {../../../src/video-interface.VideoInterface} */
 class AmpVimeo extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -91,7 +93,7 @@ class AmpVimeo extends AMP.BaseElement {
      * @return {*} TODO(#23582): Specify return type
      * @private
      */
-    this.boundOnMessage_ = e => this.onMessage_(e);
+    this.boundOnMessage_ = (e) => this.onMessage_(e);
 
     /** @private {!UnlistenDef|null} */
     this.unlistenFrame_ = null;
@@ -120,15 +122,18 @@ class AmpVimeo extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    return this.isAutoplay_().then(isAutoplay => this.buildIframe_(isAutoplay));
+    return this.isAutoplay_().then((isAutoplay) =>
+      this.buildIframe_(isAutoplay, this.isDoNotTrack_())
+    );
   }
 
   /**
    * @param {boolean} isAutoplay
+   * @param {boolean} isDoNotTrack
    * @return {!Promise}
    * @private
    */
-  buildIframe_(isAutoplay) {
+  buildIframe_(isAutoplay, isDoNotTrack) {
     const {element} = this;
     const vidId = userAssert(
       element.getAttribute('data-videoid'),
@@ -145,6 +150,10 @@ class AmpVimeo extends AMP.BaseElement {
       // Only muted videos are allowed to autoplay
       this.muted_ = true;
       src = addParamToUrl(src, 'muted', '1');
+    }
+
+    if (isDoNotTrack) {
+      src = addParamToUrl(src, 'dnt', '1');
     }
 
     const iframe = createFrameFor(this, src);
@@ -187,17 +196,25 @@ class AmpVimeo extends AMP.BaseElement {
     return VideoUtils.isAutoplaySupported(win, getMode(win).lite);
   }
 
+  /**
+   * @return {boolean}
+   * @private
+   */
+  isDoNotTrack_() {
+    return this.element.hasAttribute(DO_NOT_TRACK_ATTRIBUTE);
+  }
+
   /** @private */
   onReady_() {
     const {element} = this;
 
-    Object.keys(VIMEO_EVENTS).forEach(event => {
+    Object.keys(VIMEO_EVENTS).forEach((event) => {
       this.sendCommand_('addEventListener', event);
     });
 
     Services.videoManagerForDoc(element).register(this);
 
-    element.dispatchCustomEvent(VideoEvents.LOAD);
+    dispatchCustomEvent(element, VideoEvents.LOAD);
   }
 
   /**
@@ -222,6 +239,10 @@ class AmpVimeo extends AMP.BaseElement {
 
     const data = objOrParseJson(eventData);
 
+    if (data == null) {
+      return; // we only process valid json
+    }
+
     if (data['event'] == 'ready' || data['method'] == 'ping') {
       this.onReadyOnce_();
       return;
@@ -243,7 +264,7 @@ class AmpVimeo extends AMP.BaseElement {
         return;
       }
       this.muted_ = muted;
-      element.dispatchCustomEvent(mutedOrUnmutedEvent(muted));
+      dispatchCustomEvent(element, mutedOrUnmutedEvent(muted));
       return;
     }
   }
@@ -380,6 +401,6 @@ class AmpVimeo extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpVimeo);
 });

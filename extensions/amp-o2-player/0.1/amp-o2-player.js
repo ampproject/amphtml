@@ -14,9 +14,17 @@
  * limitations under the License.
  */
 
+import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
+import {MessageType} from '../../../src/3p-frame-messaging';
 import {Services} from '../../../src/services';
 import {dict} from '../../../src/utils/object';
+import {
+  getConsentPolicyInfo,
+  getConsentPolicyState,
+} from '../../../src/consent';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {listenFor} from '../../../src/iframe-helper';
+import {setIsMediaComponent} from '../../../src/video-interface';
 import {userAssert} from '../../../src/log';
 
 class AmpO2Player extends AMP.BaseElement {
@@ -59,6 +67,8 @@ class AmpO2Player extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    setIsMediaComponent(this.element);
+
     this.pid_ = userAssert(
       this.element.getAttribute('data-pid'),
       'data-pid attribute is required for <amp-o2-player> %s',
@@ -120,8 +130,97 @@ class AmpO2Player extends AMP.BaseElement {
     iframe.src = this.src_;
     this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
     this.applyFillContent(iframe);
+
+    listenFor(iframe, MessageType.SEND_CONSENT_DATA, (data, source, origin) => {
+      this.sendConsentData_(source, origin);
+    });
+
     this.element.appendChild(iframe);
     return this.loadPromise(iframe);
+  }
+
+  /**
+   * Requests consent data from consent module
+   * and forwards information to iframe
+   * @param {Window} source
+   * @param {string} origin
+   * @private
+   */
+  sendConsentData_(source, origin) {
+    const consentPolicyId = super.getConsentPolicy() || 'default';
+    const consentStringPromise = this.getConsentString_(consentPolicyId);
+    const consentPolicyStatePromise = this.getConsentPolicyState_(
+      consentPolicyId
+    );
+
+    Promise.all([consentPolicyStatePromise, consentStringPromise]).then(
+      (consents) => {
+        let consentData;
+        switch (consents[0]) {
+          case CONSENT_POLICY_STATE.SUFFICIENT:
+            consentData = {
+              'gdprApplies': true,
+              'user_consent': 1,
+              'gdprString': consents[1],
+            };
+            break;
+          case CONSENT_POLICY_STATE.INSUFFICIENT:
+          case CONSENT_POLICY_STATE.UNKNOWN:
+            consentData = {
+              'gdprApplies': true,
+              'user_consent': 0,
+              'gdprString': consents[1],
+            };
+            break;
+          case CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED:
+          default:
+            consentData = {
+              'gdprApplies': false,
+            };
+        }
+
+        this.sendConsentDataToIframe_(
+          source,
+          origin,
+          dict({
+            'sentinel': 'amp',
+            'type': MessageType.CONSENT_DATA,
+            'consentData': consentData,
+          })
+        );
+      }
+    );
+  }
+
+  /**
+   * Send consent data to iframe
+   * @param {Window} source
+   * @param {string} origin
+   * @param {JsonObject} data
+   * @private
+   */
+  sendConsentDataToIframe_(source, origin, data) {
+    source./*OK*/ postMessage(data, origin);
+  }
+
+  /**
+   * Get the consent string
+   * @param {string} consentPolicyId
+   * @private
+   * @return {Promise}
+   */
+  getConsentString_(consentPolicyId = 'default') {
+    return getConsentPolicyInfo(this.element, consentPolicyId);
+  }
+
+  /**
+   * Get the consent policy state
+   * @param {string} consentPolicyId
+   * @private
+   * @return {Promise}
+   */
+  getConsentPolicyState_(consentPolicyId = 'default') {
+    return getConsentPolicyState(this.element, consentPolicyId);
   }
 
   /** @override */
@@ -140,6 +239,6 @@ class AmpO2Player extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-o2-player', '0.1', AMP => {
+AMP.extension('amp-o2-player', '0.1', (AMP) => {
   AMP.registerElement('amp-o2-player', AmpO2Player);
 });

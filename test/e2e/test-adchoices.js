@@ -17,10 +17,10 @@
 describes.endtoend(
   'ad choices',
   {
-    testUrl: 'http://localhost:8000/test/fixtures/e2e/amphtml-ads/text.html',
+    fixture: 'amphtml-ads/text.html',
     environments: 'amp4ads-preset',
   },
-  env => {
+  (env) => {
     let controller;
 
     beforeEach(async () => {

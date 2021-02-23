@@ -143,7 +143,7 @@ export class InaboxMessagingHost {
       ? allowedTypes.split(/\s*,\s*/)
       : READ_ONLY_MESSAGES;
     if (allowedTypesList.indexOf(request['type']) === -1) {
-      dev().info(TAG, 'Ignored non-whitelisted message type:', message);
+      dev().info(TAG, 'Message type ignored:', message);
       return false;
     }
 
@@ -184,7 +184,7 @@ export class InaboxMessagingHost {
     devAssert(this.iframeMap_[request.sentinel]);
     this.iframeMap_[request.sentinel].observeUnregisterFn =
       this.iframeMap_[request.sentinel].observeUnregisterFn ||
-      this.positionObserver_.observe(iframe, data =>
+      this.positionObserver_.observe(iframe, (data) =>
         this.sendPosition_(request, source, /** @type {?JsonObject} */ (data))
       );
     return true;
@@ -201,10 +201,10 @@ export class InaboxMessagingHost {
     source./*OK*/ postMessage(
       serializeMessage(MessageType.POSITION, request.sentinel, data),
       // We don't need to restrict what origin we send the data to because (a)
-      // we've already verified that this iframe is whitelisted and allowed to
-      // learn its position, and (b) we're post messaging back directly to the
-      // requesting frame.  If we did restrict the origin this would not work
-      // with implementations that use a null origin to render ads.
+      // we've already verified that this iframe is allowed to learn its position,
+      // and (b) we're post messaging back directly to the requesting frame.
+      // If we did restrict the origin this would not work with implementations
+      // that use a null origin to render ads.
       '*'
     );
   }
@@ -220,7 +220,7 @@ export class InaboxMessagingHost {
    * 2. Disable zoom and scroll on parent doc
    */
   handleEnterFullOverlay_(iframe, request, source, origin) {
-    this.frameOverlayManager_.expandFrame(iframe, boxRect => {
+    this.frameOverlayManager_.expandFrame(iframe, (boxRect) => {
       source./*OK*/ postMessage(
         serializeMessage(
           MessageType.FULL_OVERLAY_FRAME_RESPONSE,
@@ -245,7 +245,7 @@ export class InaboxMessagingHost {
    * @return {boolean}
    */
   handleCancelFullOverlay_(iframe, request, source, origin) {
-    this.frameOverlayManager_.collapseFrame(iframe, boxRect => {
+    this.frameOverlayManager_.collapseFrame(iframe, (boxRect) => {
       source./*OK*/ postMessage(
         serializeMessage(
           MessageType.CANCEL_FULL_OVERLAY_FRAME_RESPONSE,

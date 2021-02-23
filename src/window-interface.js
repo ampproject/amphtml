@@ -23,6 +23,15 @@ export class WindowInterface {
   /**
    * @static
    * @param {!Window} win
+   * @return {!Window}
+   */
+  static getTop(win) {
+    return win.top;
+  }
+
+  /**
+   * @static
+   * @param {!Window} win
    * @return {!Location}
    */
   static getLocation(win) {

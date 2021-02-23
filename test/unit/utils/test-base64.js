@@ -24,7 +24,7 @@ import {
 } from '../../../src/utils/base64';
 import {stringToBytes, utf8Decode, utf8Encode} from '../../../src/utils/bytes';
 
-// TODO(amphtml, #25621): Cannot find atob / btoa on Safari on Sauce Labs.
+// TODO(amphtml, #25621): Cannot find atob / btoa on Safari.
 describe
   .configure()
   .skipSafari()
@@ -37,7 +37,7 @@ describe
       ];
       const scenarios = ['NativeTextEncoding', 'PolyfillTextEncoding', 'Mixed'];
 
-      scenarios.forEach(scenario => {
+      scenarios.forEach((scenario) => {
         describe(scenario, () => {
           const {
             TextEncoder: oldTextEncoder,
@@ -62,7 +62,7 @@ describe
           });
 
           describe('base64Encode/base64Decode', () => {
-            testCases.forEach(testCase => {
+            testCases.forEach((testCase) => {
               it(testCase, () => {
                 const utf8Bytes = utf8Encode(testCase);
                 const encoded = base64EncodeFromBytes(utf8Bytes);
@@ -75,7 +75,7 @@ describe
           });
 
           describe('base64UrlEncode/base64UrlDecode', () => {
-            testCases.forEach(testCase => {
+            testCases.forEach((testCase) => {
               it(testCase, () => {
                 const utf8Bytes = utf8Encode(testCase);
                 const encoded = base64UrlEncodeFromBytes(utf8Bytes);

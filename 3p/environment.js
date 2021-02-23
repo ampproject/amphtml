@@ -32,7 +32,7 @@ export function setInViewportForTesting(inV) {
 // Active intervals. Must be global, because people clear intervals
 // with clearInterval from a different window.
 const intervals = {};
-let intervalId = 0;
+let intervalId = 1;
 
 /**
  * Add instrumentation to a window and all child iframes.
@@ -73,8 +73,8 @@ function manageWin_(win) {
 function instrumentDocWrite(parent, win) {
   const doc = win.document;
   const {close} = doc;
-  doc.close = function() {
-    parent.ampManageWin = function(win) {
+  doc.close = function () {
+    parent.ampManageWin = function (win) {
       manageWin(win);
     };
     if (!parent.ampSeen) {
@@ -93,7 +93,7 @@ function instrumentDocWrite(parent, win) {
  */
 function instrumentSrcdoc(parent, iframe) {
   let srcdoc = iframe.getAttribute('srcdoc');
-  parent.ampManageWin = function(win) {
+  parent.ampManageWin = function (win) {
     manageWin(win);
   };
   srcdoc += '<script>window.parent.ampManageWin(window)</script>';
@@ -159,7 +159,7 @@ function installObserver(win) {
   if (!window.MutationObserver) {
     return;
   }
-  const observer = new MutationObserver(function(mutations) {
+  const observer = new MutationObserver(function (mutations) {
     for (let i = 0; i < mutations.length; i++) {
       maybeInstrumentsNodes(win, mutations[i].addedNodes);
     }
@@ -177,14 +177,14 @@ function installObserver(win) {
 function instrumentEntryPoints(win) {
   // Change setTimeout to respect a minimum timeout.
   const {setTimeout} = win;
-  win.setTimeout = function(fn, time) {
+  win.setTimeout = function (fn, time) {
     time = minTime(time);
     arguments[1] = time;
     return setTimeout.apply(this, arguments);
   };
   // Implement setInterval in terms of setTimeout to make
   // it respect the same rules
-  win.setInterval = function(fn) {
+  win.setInterval = function (fn) {
     const id = intervalId++;
     const args = Array.prototype.slice.call(arguments);
     /**
@@ -195,7 +195,8 @@ function instrumentEntryPoints(win) {
       next();
       if (typeof fn == 'string') {
         // Handle rare and dangerous string arg case.
-        return (0, win.eval /*NOT OK but whatcha gonna do.*/).call(win, fn); // lgtm [js/useless-expression]
+        return (0, win.eval) /*NOT OK but whatcha gonna do.*/
+          .call(win, fn); // lgtm [js/useless-expression]
       } else {
         return fn.apply(this, arguments);
       }
@@ -211,7 +212,7 @@ function instrumentEntryPoints(win) {
     return id;
   };
   const {clearInterval} = win;
-  win.clearInterval = function(id) {
+  win.clearInterval = function (id) {
     clearInterval(id);
     win.clearTimeout(intervals[id]);
     delete intervals[id];
@@ -235,11 +236,11 @@ function blockSyncPopups(win) {
   }
   try {
     win.alert = maybeThrow;
-    win.prompt = function() {
+    win.prompt = function () {
       maybeThrow();
       return '';
     };
-    win.confirm = function() {
+    win.confirm = function () {
       maybeThrow();
       return false;
     };
@@ -269,7 +270,7 @@ function minTime(time) {
  * Installs embed state listener.
  */
 export function installEmbedStateListener() {
-  listenParent(window, 'embed-state', function(data) {
+  listenParent(window, 'embed-state', function (data) {
     inViewport = data['inViewport'];
   });
 }

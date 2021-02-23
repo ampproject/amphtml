@@ -1,0 +1,12 @@
+# Percy Agent config.
+# https://docs.percy.io/docs/sdk-configuration
+
+version: 1
+snapshot:
+  widths:
+    - 375 # e.g., iPhone
+    - 411 # e.g., iPhone X, Pixel
+    - 1400 # e.g., common desktop width
+agent:
+  asset-discovery:
+    network-idle-timeout: 150 # ms

@@ -24,28 +24,9 @@ limitations under the License.
 
 # amp-web-push
 
-Allows users to subscribe to <a href="https://developers.google.com/web/fundamentals/engage-and-retain/push-notifications/">web push notifications</a>.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-web-push" src="https://cdn.ampproject.org/v0/amp-web-push-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fixed</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/amp-web-push.amp.html">amp-web-push.amp.html</a></td>
-  </tr>
-</table>
-
-## Behavior
+## Usage
 
 Developers compose widgets that appear based on a user's subscription state. Widgets are composed of AMP elements and can be as simple as a button or a text link.
-
-_Example_
 
 Clicking the subscription widget pops up a page prompting the user for notification permissions and signals the service worker (configured below) to subscribe the user to push in the background. Clicking the unsubscription widget signals the worker to unsubscribe the user from push in the background.
 
@@ -73,23 +54,13 @@ Clicking the subscription widget pops up a page prompting the user for notificat
 </amp-web-push-widget>
 ```
 
-## Attributes
-
-<table>
-  <tr>
-    <td width="40%"><strong>visibility (required)</strong></td>
-    <td>Describes when the widget is shown. The value can be one of <code>unsubscribed</code>, <code>subscribed</code>, or <code>blocked</code>.<br>
-Widgets are initially hidden while the user's subscription state is computed.</td>
-  </tr>
-
-</table>
-
-## Configuration
+### Configuration
 
 The `amp-web-push` component requires extra integration on your site. You will need to upload two HTML files (provided) on your site as well as an amp-web-push compatible service worker JavaScript file. These three files form the configuration described below.
 
 ```html
 <amp-web-push
+  layout="nodisplay"
   helper-iframe-url="https://example.com/helper-iframe.html"
   permission-dialog-url="https://example.com/permission-dialog.html"
   service-worker-url="https://example.com/service-worker.js"
@@ -157,6 +128,14 @@ All properties are <strong>required</strong>, and all URLs must begin with the s
     </td>
   </tr>
 </table>
+
+## Attributes
+
+### visibility (required)
+
+Describes when the widget is shown. The value can be one of `unsubscribed`, `subscribed`, or `blocked`.
+
+Widgets are initially hidden while the user's subscription state is computed.
 
 ## Validation
 

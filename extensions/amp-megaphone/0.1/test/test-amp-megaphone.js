@@ -23,7 +23,7 @@ describes.realWin(
       extensions: ['amp-megaphone'],
     },
   },
-  env => {
+  (env) => {
     const episodeEmbedUrl = 'https://player.megaphone.fm/OSC7749686951/';
     const playlistEmbedUrl = 'https://playlist.megaphone.fm/?p=DEM6640968282';
 
@@ -56,7 +56,7 @@ describes.realWin(
       }
 
       container.appendChild(mpplayer);
-      await mpplayer.build();
+      await mpplayer.buildInternal();
       await mpplayer.layoutCallback();
       return mpplayer;
     }

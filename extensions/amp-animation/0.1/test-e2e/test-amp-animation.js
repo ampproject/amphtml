@@ -17,12 +17,11 @@
 describes.endtoend(
   'amp-animation',
   {
-    testUrl:
-      'http://localhost:8000/test/fixtures/e2e/amp-animation/simple.html',
+    fixture: 'amp-animation/simple.html',
     // TODO(powerivq): Reenable for all environments
     environments: 'amp4ads-preset',
   },
-  env => {
+  (env) => {
     let controller;
 
     beforeEach(async () => {

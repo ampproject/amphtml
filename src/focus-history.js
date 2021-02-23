@@ -44,7 +44,7 @@ export class FocusHistory {
      * @private
      * @param {!Event} e
      */
-    this.captureFocus_ = e => {
+    this.captureFocus_ = (e) => {
       // Hack (#15079) due to Firefox firing focus events on the entire page
       if (e.target && e.target.nodeType == 1) {
         this.pushFocus_(dev().assertElement(e.target));
@@ -55,12 +55,14 @@ export class FocusHistory {
      * @private
      * @param {*} unusedE
      */
-    this.captureBlur_ = unusedE => {
+    this.captureBlur_ = (unusedE) => {
       // IFrame elements do not receive `focus` event. An alternative way is
       // implemented here. We wait for a blur to arrive on the main window
       // and after a short time check which element is active.
       Services.timerFor(win).delay(() => {
-        this.pushFocus_(dev().assertElement(this.win.document.activeElement));
+        if (this.win.document.activeElement) {
+          this.pushFocus_(this.win.document.activeElement);
+        }
       }, 500);
     };
     this.win.document.addEventListener('focus', this.captureFocus_, true);

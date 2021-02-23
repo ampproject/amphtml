@@ -105,9 +105,7 @@ describe('documentReady', () => {
       const spy2 = window.sandbox.spy();
       const spy3 = window.sandbox.spy();
 
-      whenDocumentReady(testDoc)
-        .then(spy)
-        .then(spy2);
+      whenDocumentReady(testDoc).then(spy).then(spy2);
 
       whenDocumentReady(testDoc).then(spy3);
 
@@ -161,9 +159,7 @@ describe('documentReady', () => {
       const spy2 = window.sandbox.spy();
       const spy3 = window.sandbox.spy();
 
-      whenDocumentComplete(testDoc)
-        .then(spy)
-        .then(spy2);
+      whenDocumentComplete(testDoc).then(spy).then(spy2);
 
       whenDocumentComplete(testDoc).then(spy3);
 

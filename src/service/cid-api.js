@@ -105,7 +105,7 @@ export class GoogleCidApi {
 
         const url = GOOGLE_API_URL + apiKey;
         return this.fetchCid_(dev().assertString(url), scope, token)
-          .then(response => {
+          .then((response) => {
             const cid = this.handleResponse_(response);
             if (!cid && response['alternateUrl']) {
               // If an alternate url is provided, try again with the alternate
@@ -120,10 +120,10 @@ export class GoogleCidApi {
             }
             return cid;
           })
-          .catch(e => {
+          .catch((e) => {
             this.persistToken_(TokenStatus.ERROR, TIMEOUT);
             if (e && e.response) {
-              e.response.json().then(res => {
+              e.response.json().then((res) => {
                 dev().error(TAG, JSON.stringify(res));
               });
             } else {
@@ -158,7 +158,7 @@ export class GoogleCidApi {
           mode: 'cors',
           body: payload,
         })
-        .then(res => res.json())
+        .then((res) => res.json())
     );
   }
 

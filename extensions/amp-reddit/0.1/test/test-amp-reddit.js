@@ -25,7 +25,7 @@ describes.realWin(
       canonicalUrl: 'https://foo.bar/baz',
     },
   },
-  env => {
+  (env) => {
     let win, doc;
 
     beforeEach(() => {
@@ -42,7 +42,7 @@ describes.realWin(
       ampReddit.setAttribute('layout', 'responsive');
 
       doc.body.appendChild(ampReddit);
-      await ampReddit.build();
+      await ampReddit.buildInternal();
       await ampReddit.layoutCallback();
       return ampReddit;
     }

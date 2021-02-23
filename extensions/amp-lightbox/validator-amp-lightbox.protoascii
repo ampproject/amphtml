@@ -16,7 +16,6 @@
 
 tags: {  # amp-lightbox
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-lightbox"
@@ -54,7 +53,6 @@ tags: {  # amp-lightbox
 tags: {  # <amp-lightbox>
   html_format: AMP
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "AMP-LIGHTBOX"
   requires_extension: "amp-lightbox"
   attrs: {

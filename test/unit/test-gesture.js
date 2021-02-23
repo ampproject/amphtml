@@ -45,7 +45,7 @@ describe('Gestures', () => {
       addEventListener: (eventType, handler) => {
         eventListeners[eventType] = handler;
       },
-      removeEventListener: eventType => {
+      removeEventListener: (eventType) => {
         delete eventListeners[eventType];
       },
       ownerDocument: {
@@ -80,14 +80,8 @@ describe('Gestures', () => {
   });
 
   it('should proceed with series if touchstart returns true', () => {
-    recognizerMock
-      .expects('onTouchStart')
-      .returns(true)
-      .once();
-    recognizerMock
-      .expects('onTouchMove')
-      .returns(true)
-      .once();
+    recognizerMock.expects('onTouchStart').returns(true).once();
+    recognizerMock.expects('onTouchMove').returns(true).once();
     recognizerMock.expects('onTouchEnd').once();
     sendEvent({type: 'touchstart'});
     sendEvent({type: 'touchmove'});
@@ -95,10 +89,7 @@ describe('Gestures', () => {
   });
 
   it('should cancel series if touchstart returns false', () => {
-    recognizerMock
-      .expects('onTouchStart')
-      .returns(false)
-      .once();
+    recognizerMock.expects('onTouchStart').returns(false).once();
     recognizerMock.expects('onTouchMove').never();
     recognizerMock.expects('onTouchEnd').never();
     sendEvent({type: 'touchstart'});
@@ -107,14 +98,8 @@ describe('Gestures', () => {
   });
 
   it('should cancel series if touchmove returns false', () => {
-    recognizerMock
-      .expects('onTouchStart')
-      .returns(true)
-      .once();
-    recognizerMock
-      .expects('onTouchMove')
-      .returns(false)
-      .once();
+    recognizerMock.expects('onTouchStart').returns(true).once();
+    recognizerMock.expects('onTouchMove').returns(false).once();
     recognizerMock.expects('onTouchEnd').never();
     sendEvent({type: 'touchstart'});
     sendEvent({type: 'touchmove'});
@@ -122,30 +107,21 @@ describe('Gestures', () => {
   });
 
   it('should enter tracking mode on touchstart true', () => {
-    recognizerMock
-      .expects('onTouchStart')
-      .returns(true)
-      .once();
+    recognizerMock.expects('onTouchStart').returns(true).once();
     sendEvent({type: 'touchstart'});
     expect(gestures.tracking_[0]).to.equal(true);
   });
 
   it('should stay in tracking mode on touchmove true', () => {
     gestures.tracking_[0] = true;
-    recognizerMock
-      .expects('onTouchMove')
-      .returns(true)
-      .once();
+    recognizerMock.expects('onTouchMove').returns(true).once();
     sendEvent({type: 'touchmove'});
     expect(gestures.tracking_[0]).to.equal(true);
   });
 
   it('should exit tracking mode on touchmove false', () => {
     gestures.tracking_[0] = true;
-    recognizerMock
-      .expects('onTouchMove')
-      .returns(false)
-      .once();
+    recognizerMock.expects('onTouchMove').returns(false).once();
     sendEvent({type: 'touchmove'});
     expect(gestures.tracking_[0]).to.equal(false);
   });
@@ -386,7 +362,7 @@ describe('Gestures', () => {
 
     gestures.cleanup();
 
-    eventNames.forEach(eventName => {
+    eventNames.forEach((eventName) => {
       expect(removeSpy.withArgs(eventName)).to.be.calledOnce;
     });
     expect(element[prop]).to.not.exist;

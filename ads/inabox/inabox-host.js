@@ -69,7 +69,7 @@ export class InaboxHost {
       win.AMP[INABOX_UNREGISTER_IFRAME] = host.unregisterIframe.bind(host);
     }
     const queuedMsgs = win[PENDING_MESSAGES];
-    const processMessageFn = /** @type {function(Event)} */ (evt => {
+    const processMessageFn = /** @type {function(Event)} */ ((evt) => {
       try {
         host.processMessage(evt);
       } catch (err) {
@@ -78,7 +78,7 @@ export class InaboxHost {
     });
     if (queuedMsgs) {
       if (Array.isArray(queuedMsgs)) {
-        queuedMsgs.forEach(message => {
+        /** @type {!Array} */ (queuedMsgs).forEach((message) => {
           // Pending messages are added by external scripts.
           // Validate their data types to avoid client errors.
           if (!validateMessage(message)) {

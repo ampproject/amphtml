@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,48 +15,44 @@
  */
 
 import {ScrollComponent} from './scroll-component';
+import {buildUrl, connectHostname} from './scroll-url';
 import {dict} from '../../../src/utils/object';
 
 /**
  * UI for Scroll users.
  *
  * Presents a fixed bar at the bottom of the screen with Scroll content.
- * @abstract
  */
-class Bar extends ScrollComponent {
+export class ScrollBar extends ScrollComponent {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} doc
    * @param {!../../amp-access/0.1/amp-access-source.AccessSource} accessSource
-   * @param {string} baseUrl
    */
-  constructor(doc, accessSource, baseUrl) {
+  constructor(doc, accessSource) {
     super(doc);
 
     /** @protected */
     this.accessSource_ = accessSource;
-
-    /** @protected */
-    this.baseUrl_ = baseUrl;
 
     this.render_();
   }
 
   /** @private */
   render_() {
-    this.mutate_(() => {
+    this.mutate(() => {
       if (!this.frame_) {
-        this.frame_ = this.makeIframe_();
+        this.makeIframe_();
         this.setWindow_(this.frame_.contentWindow);
       }
+      this.renderHorizontalLayout();
     });
   }
 
   /**
-   * @return {!HTMLIFrameElement}
    * @protected
    * */
   makeIframe_() {
-    const frame = this.el(
+    this.frame_ = /** @type {!HTMLIFrameElement} */ (this.el(
       'iframe',
       dict({
         'scrolling': 'no',
@@ -70,67 +66,36 @@ class Bar extends ScrollComponent {
           'allow-top-navigation allow-popups ' +
           'allow-popups-to-escape-sandbox',
       })
-    );
+    ));
 
-    const root = this.el(
+    this.root_ = this.el(
       'div',
       dict({
         'class': 'amp-access-scroll-bar',
       }),
-      [frame]
+      [this.frame_]
     );
 
-    this.mount_(root);
+    this.mount();
 
-    return /** @type {!HTMLIFrameElement} */ (frame);
-  }
-}
-
-export class ScrollUserBar extends Bar {
-  /**
-   * Load the scrollbar URL in the iframe.
-   *
-   * @override
-   * */
-  makeIframe_() {
-    const frame = Bar.prototype.makeIframe_.call(this);
     // Set iframe to scrollbar URL.
-    this.accessSource_
-      .buildUrl(
-        `${this.baseUrl_}/html/amp/scrollbar` +
-          '?rid=READER_ID' +
-          '&cid=CLIENT_ID(scroll1)' +
-          '&c=CANONICAL_URL' +
-          '&o=AMPDOC_URL',
-        false
-      )
-      .then(scrollbarUrl => {
-        frame.setAttribute('src', scrollbarUrl);
-      });
-    return frame;
+    buildUrl(
+      this.accessSource_,
+      connectHostname(this.accessSource_.getAdapterConfig()) +
+        '/html/amp/scrolltab'
+    ).then((scrollbarUrl) => {
+      this.frame_.setAttribute('src', scrollbarUrl);
+    });
   }
-}
-/**
- * Add link to the Scroll App connect page.
- */
-export class ActivateBar extends Bar {
-  /** @override */
-  makeIframe_() {
-    const frame = Bar.prototype.makeIframe_.call(this);
 
-    this.accessSource_
-      .buildUrl(
-        `${this.baseUrl_}/html/amp/activate` +
-          '?rid=READER_ID' +
-          '&cid=CLIENT_ID(scroll1)' +
-          '&c=CANONICAL_URL' +
-          '&o=AMPDOC_URL' +
-          '&x=QUERY_PARAM(scrollx)',
-        false
-      )
-      .then(url => {
-        frame.setAttribute('src', url);
-      });
-    return frame;
+  /**
+   * @param {!JsonObject} action
+   */
+  update(action) {
+    const changed = this.updateHorizontalLayout(action);
+
+    if (changed) {
+      this.render_();
+    }
   }
 }

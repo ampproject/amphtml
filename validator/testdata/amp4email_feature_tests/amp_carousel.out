@@ -19,7 +19,7 @@ FAIL
 |    Tests the additional restrictions AMP4EMAIL sets on AMP-CAROUSEL.
 |  -->
 |  <!doctype html>
-|  <html ⚡4email>
+|  <html ⚡4email data-css-strict>
 |  <head>
 |    <meta charset="utf-8">
 |    <style amp4email-boilerplate>body{visibility:hidden}</style>
@@ -44,7 +44,7 @@ FAIL
 |  -->
 |  <amp-carousel
 >> ^~~~~~~~~
-amp4email_feature_tests/amp_carousel.html:44:0 The attribute 'arrows' may not appear in tag 'AMP-CAROUSEL'. (see https://amp.dev/documentation/components/amp-carousel)
+amp4email_feature_tests/amp_carousel.html:44:0 The attribute 'arrows' may not appear in tag 'amp-carousel'. (see https://amp.dev/documentation/components/amp-carousel/)
 |    arrows
 |    width="800" height="600"
 |    layout="responsive"

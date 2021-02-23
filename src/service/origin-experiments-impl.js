@@ -32,7 +32,7 @@ const PUBLIC_JWK = /** @type {!webCrypto.JsonWebKey} */ ({
   'key_ops': ['verify'],
   'kty': 'RSA',
   'n':
-    'uAGSMYKze8Fit508UaGHz1eZowfX4YsA0lmyi-65xQfjF7nMo61c4Iz4erdqgRp-ov662yVPquhPmTxgB-nzNcTPrj15Jo05Js78Q9hS2hrPIjKMlzcKSYQN_08QieWKOSmVbLSv_-4n9Ms5ta8nRs4pwc_2nX5n7m5B5GH4VerGbqIWIn9FRNYMShBRQ9TCHpb6BIUTwUn6iwmJLenq0A1xhGrQ9rswGC1QJhjotkeReKXZDLLWaFr0uRw-IyvRa5RiiEGntgOvcbvamM5TnbKavc2rxvg2TWTCNQnb7lWSAzldJA_yAOYet_MjnHMyj2srUdbQSDCk8kPWWuafiQ', // eslint-disable-line max-len
+    'uAGSMYKze8Fit508UaGHz1eZowfX4YsA0lmyi-65xQfjF7nMo61c4Iz4erdqgRp-ov662yVPquhPmTxgB-nzNcTPrj15Jo05Js78Q9hS2hrPIjKMlzcKSYQN_08QieWKOSmVbLSv_-4n9Ms5ta8nRs4pwc_2nX5n7m5B5GH4VerGbqIWIn9FRNYMShBRQ9TCHpb6BIUTwUn6iwmJLenq0A1xhGrQ9rswGC1QJhjotkeReKXZDLLWaFr0uRw-IyvRa5RiiEGntgOvcbvamM5TnbKavc2rxvg2TWTCNQnb7lWSAzldJA_yAOYet_MjnHMyj2srUdbQSDCk8kPWWuafiQ',
 });
 
 /**
@@ -91,7 +91,7 @@ export class OriginExperiments {
     }
     const {win} = this.ampdoc_;
     const crypto = Services.cryptoFor(win);
-    return crypto.importPkcsKey(publicJwk).then(publicKey => {
+    return crypto.importPkcsKey(publicJwk).then((publicKey) => {
       const promises = [];
       for (let i = 0; i < metas.length; i++) {
         const meta = metas[i];
@@ -99,7 +99,7 @@ export class OriginExperiments {
         if (token) {
           const p = this.tokenMaster_
             .verifyToken(token, win.location, publicKey)
-            .catch(error => {
+            .catch((error) => {
               user().error(TAG, 'Failed to verify experiment token:', error);
             });
           promises.push(p);
@@ -158,7 +158,7 @@ export class TokenMaster {
   generateToken(version, json, privateKey) {
     const config = stringToBytes(JSON.stringify(json));
     const data = this.prepend_(version, config);
-    return this.sign_(data, privateKey).then(signature => {
+    return this.sign_(data, privateKey).then((signature) => {
       return this.append_(data, new Uint8Array(signature));
     });
   }
@@ -173,7 +173,7 @@ export class TokenMaster {
    * @protected
    */
   verifyToken(token, location, publicKey) {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       let i = 0;
       const bytes = stringToBytes(atob(token));
 
@@ -200,7 +200,7 @@ export class TokenMaster {
       const signature = bytes.subarray(i);
 
       resolve(
-        this.verify_(signature, data, publicKey).then(verified => {
+        this.verify_(signature, data, publicKey).then((verified) => {
           if (!verified) {
             throw new Error('Failed to verify token signature.');
           }

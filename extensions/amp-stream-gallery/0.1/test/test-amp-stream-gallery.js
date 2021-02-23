@@ -34,8 +34,9 @@ import {toggleExperiment} from '../../../../src/experiments';
  */
 async function afterIndexUpdate(el, index) {
   const event = await listenOncePromise(el, CarouselEvents.INDEX_CHANGE);
-  await el.implementation_.mutateElement(() => {});
-  await el.implementation_.mutateElement(() => {});
+  const impl = await el.getImpl(false);
+  await impl.mutateElement(() => {});
+  await impl.mutateElement(() => {});
 
   if (index != undefined && getDetail(event)['index'] != index) {
     return afterIndexUpdate(el, index);
@@ -48,7 +49,7 @@ async function afterIndexUpdate(el, index) {
  * @return {!Promise<undefined>}
  */
 async function afterAttributeMutation(el, attributeName) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     const mo = new el.ownerDocument.defaultView.MutationObserver(() => {
       resolve();
     });
@@ -87,7 +88,7 @@ describes.realWin(
       extensions: ['amp-stream-gallery'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let doc;
     let container;
@@ -168,7 +169,7 @@ describes.realWin(
 
       container.appendChild(el);
 
-      await el.build();
+      await el.buildInternal();
       await el.layoutCallback();
       await afterIndexUpdate(el);
 
@@ -288,7 +289,7 @@ describes.realWin(
           },
         });
 
-        getItems(el).forEach(item => {
+        getItems(el).forEach((item) => {
           expect(item.getBoundingClientRect().width).to.be.closeTo(
             800 / 4,
             0.1
@@ -309,7 +310,7 @@ describes.realWin(
           },
         });
 
-        getItems(el).forEach(item => {
+        getItems(el).forEach((item) => {
           expect(item.getBoundingClientRect().width).to.be.closeTo(
             799 / 3,
             0.1
@@ -330,7 +331,7 @@ describes.realWin(
           },
         });
 
-        getItems(el).forEach(item => {
+        getItems(el).forEach((item) => {
           expect(item.getBoundingClientRect().width).to.be.closeTo(
             801 / 4,
             0.1
@@ -352,7 +353,7 @@ describes.realWin(
           },
         });
 
-        getItems(el).forEach(item => {
+        getItems(el).forEach((item) => {
           expect(item.getBoundingClientRect().width).to.be.closeTo(
             600 / 3.5,
             0.1
@@ -376,7 +377,7 @@ describes.realWin(
           },
         });
 
-        getItems(el).forEach(item => {
+        getItems(el).forEach((item) => {
           expect(item.getBoundingClientRect().width).to.be.closeTo(
             750 / 3,
             0.1
@@ -398,7 +399,7 @@ describes.realWin(
           },
         });
 
-        getItems(el).forEach(item => {
+        getItems(el).forEach((item) => {
           expect(item.getBoundingClientRect().width).to.be.closeTo(225, 0.1);
         });
         expect(getScrollContainer(el).getBoundingClientRect().width).to.equal(
@@ -418,7 +419,7 @@ describes.realWin(
           },
         });
 
-        getItems(el).forEach(item => {
+        getItems(el).forEach((item) => {
           expect(item.getBoundingClientRect().width).to.be.closeTo(160, 0.1);
         });
         expect(getScrollContainer(el).getBoundingClientRect().width).to.equal(
@@ -439,7 +440,7 @@ describes.realWin(
           },
         });
 
-        getItems(el).forEach(item => {
+        getItems(el).forEach((item) => {
           expect(item.getBoundingClientRect().width).to.be.closeTo(
             300 / 2,
             0.1
@@ -463,7 +464,7 @@ describes.realWin(
           },
         });
 
-        getItems(el).forEach(item => {
+        getItems(el).forEach((item) => {
           expect(item.getBoundingClientRect().width).to.be.closeTo(
             800 / 3,
             0.1
@@ -486,7 +487,7 @@ describes.realWin(
           },
         });
 
-        getItems(el).forEach(item => {
+        getItems(el).forEach((item) => {
           expect(item.getBoundingClientRect().width).to.be.closeTo(100, 0.1);
         });
         expect(getScrollContainer(el).getBoundingClientRect().width).to.equal(
@@ -506,7 +507,7 @@ describes.realWin(
           },
         });
 
-        getItems(el).forEach(item => {
+        getItems(el).forEach((item) => {
           expect(item.getBoundingClientRect().width).to.be.closeTo(100, 0.1);
         });
         expect(getScrollContainer(el).getBoundingClientRect().width).to.equal(
@@ -530,7 +531,7 @@ describes.realWin(
         expect(getNextArrowSlot(el).getBoundingClientRect().width).to.equal(50);
         expect(getPrevArrowSlot(el).getBoundingClientRect().width).to.equal(50);
 
-        getItems(el).forEach(item => {
+        getItems(el).forEach((item) => {
           expect(item.getBoundingClientRect().width).to.be.closeTo(
             700 / 3,
             0.1
@@ -636,7 +637,7 @@ describes.realWin(
         expect(items[2].getBoundingClientRect().left).to.equal(0);
       });
 
-      it('should be disabled at the end when not looping', async function() {
+      it('should be disabled at the end when not looping', async function () {
         const slideCount = 10;
         const el = await getGallery({
           slideCount,

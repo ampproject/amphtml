@@ -175,7 +175,7 @@ module.exports = {
         stack.push({used: new Set(), declared: new Map()});
       },
 
-      'ClassBody:exit': function() {
+      'ClassBody:exit': function () {
         if (shouldIgnoreFile()) {
           return;
         }
@@ -188,7 +188,7 @@ module.exports = {
         });
       },
 
-      'ClassBody > MethodDefinition': function(node) {
+      'ClassBody > MethodDefinition': function (node) {
         if (shouldIgnoreFile()) {
           return;
         }
@@ -203,7 +203,7 @@ module.exports = {
         declared.set(name, node);
       },
 
-      'MethodDefinition[kind="constructor"] MemberExpression': function(node) {
+      'MethodDefinition[kind="constructor"] MemberExpression': function (node) {
         if (
           shouldIgnoreFile() ||
           !shouldCheckMember(node) ||
@@ -219,7 +219,7 @@ module.exports = {
         }
       },
 
-      'ClassBody MemberExpression': function(node) {
+      'ClassBody MemberExpression': function (node) {
         if (
           shouldIgnoreFile() ||
           !shouldCheckMember(node, false) ||
@@ -233,7 +233,7 @@ module.exports = {
         used.add(name);
       },
 
-      'ClassBody VariableDeclarator > ObjectPattern': function(node) {
+      'ClassBody VariableDeclarator > ObjectPattern': function (node) {
         if (shouldIgnoreFile()) {
           return;
         }

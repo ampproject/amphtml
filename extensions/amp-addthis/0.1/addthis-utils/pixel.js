@@ -36,9 +36,9 @@ const pixelatorFrameTitle = 'Pxltr Frame';
  * }>} pixelList
  * @return {Array}
  */
-const groupPixelsByTime = pixelList => {
+const groupPixelsByTime = (pixelList) => {
   // Clean delay value; if it's empty/doesn't exist, default to [0]
-  const cleanedPixels = pixelList.map(pixel => {
+  const cleanedPixels = pixelList.map((pixel) => {
     const {delay} = pixel;
     return {
       ...pixel,
@@ -47,9 +47,9 @@ const groupPixelsByTime = pixelList => {
   });
 
   const delayMap = cleanedPixels
-    .map(pixel => {
+    .map((pixel) => {
       const delays = pixel.delay;
-      return delays.map(delay => ({
+      return delays.map((delay) => ({
         delay,
         pixels: [pixel],
       }));
@@ -64,7 +64,7 @@ const groupPixelsByTime = pixelList => {
       return currentDelayMap;
     }, {});
 
-  return Object.keys(delayMap).map(delay => ({
+  return Object.keys(delayMap).map((delay) => ({
     delay: Number(delay),
     pixels: delayMap[delay],
   }));
@@ -84,7 +84,7 @@ export const pixelDrop = (url, ampDoc) => {
   doc.body.appendChild(ampPixel);
 };
 
-const getIframeName = url =>
+const getIframeName = (url) =>
   parseUrlDeprecated(url)
     .host.split('.')
     .concat(pixelatorFrameTitle.toLowerCase().replace(/\s/, '_'));
@@ -136,10 +136,10 @@ const dropPixelatorPixel = (url, ampDoc) => {
 const dropPixelGroups = (pixels, options) => {
   const {sid, ampDoc} = options;
   const pixelGroups = groupPixelsByTime(pixels);
-  pixelGroups.forEach(pixelGroup => {
+  pixelGroups.forEach((pixelGroup) => {
     const {delay, pixels} = pixelGroup;
     setTimeout(() => {
-      const pids = pixels.map(pixel => {
+      const pids = pixels.map((pixel) => {
         dropPixelatorPixel(pixel.url, ampDoc);
         return pixel.id;
       });
@@ -184,7 +184,7 @@ function getJsonObject_(object) {
   return params;
 }
 
-export const callPixelEndpoint = event => {
+export const callPixelEndpoint = (event) => {
   const {ampDoc, endpoint} = event;
   const eventData = getJsonObject_(getData(event));
   const url = addParamsToUrl(endpoint, eventData);
@@ -198,9 +198,9 @@ export const callPixelEndpoint = event => {
       ampCors: false,
       credentials: 'include',
     })
-    .then(res => res.json())
+    .then((res) => res.json())
     .then(
-      json => {
+      (json) => {
         const {pixels = []} = json;
         if (pixels.length > 0) {
           dropPixelGroups(pixels, {

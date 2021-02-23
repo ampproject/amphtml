@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import '../../../../third_party/react-dates/bundle';
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {AmpDatePicker} from '../amp-date-picker';
 import {createElementWithAttributes} from '../../../../src/dom.js';
 import {requireExternal} from '../../../../src/module';
@@ -27,7 +27,7 @@ describes.realWin(
       extensions: ['amp-date-picker'],
     },
   },
-  env => {
+  (env) => {
     const moment = requireExternal('moment');
     let clock;
     let win;
@@ -37,7 +37,8 @@ describes.realWin(
     "templates": [{
       "id": "srcTemplate",
       "dates": [
-        "2018-01-01"
+        "2018-01-01",
+        "FREQ=WEEKLY;DTSTART=20180101T080000Z;WKST=SU;BYDAY=WE"
       ]
     }, {
       "id": "defaultTemplate"
@@ -106,10 +107,9 @@ describes.realWin(
     beforeEach(() => {
       win = env.win;
       document = env.win.document;
-      clock = lolex.install({
-        // Use the global window and not env.win. There is no way to inject the
-        // env.win into moment right now.
-        target: window,
+      // Use the global window and not env.win. There is no way to inject the
+      // env.win into moment right now.
+      clock = fakeTimers.withGlobal(window).install({
         now: new Date('2018-01-01T08:00:00Z'),
       });
     });
@@ -232,7 +232,7 @@ describes.realWin(
 
     describe('templates', () => {
       describe('element templates', () => {
-        it('should parse date templates', () => {
+        it('should parse RRule and date templates', () => {
           const template = createDateTemplate('{{template}}', {
             dates: '2018-01-01',
           });
@@ -245,7 +245,7 @@ describes.realWin(
       });
 
       describe('src templates', () => {
-        it('should parse date templates', function() {
+        it('should parse RRULE and date templates', function () {
           this.timeout(4000);
           const template = createDateTemplate('{{val}}', {
             dates: '2018-01-01',
@@ -263,6 +263,7 @@ describes.realWin(
           );
           expect(srcTemplates[0].dates.contains('2018-01-01')).to.be.true;
           expect(srcTemplates[0].dates.contains('2018-01-02')).to.be.false;
+          expect(srcTemplates[0].dates.contains('2018-01-03')).to.be.true;
           expect(srcTemplates[0].template).to.equal(template);
           expect(srcDefaultTemplate).to.equal(defaultTemplate);
         });

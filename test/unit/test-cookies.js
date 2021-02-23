@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {BASE_CID_MAX_AGE_MILLIS} from '../../src/service/cid-impl';
 import {
   getCookie,
@@ -22,7 +22,7 @@ import {
   setCookie,
 } from '../../src/cookies';
 
-describes.fakeWin('test-cookies', {amp: true}, env => {
+describes.fakeWin('test-cookies', {amp: true}, (env) => {
   let win;
   let clock;
   let doc;
@@ -30,8 +30,7 @@ describes.fakeWin('test-cookies', {amp: true}, env => {
   beforeEach(() => {
     win = env.win;
     doc = win.document;
-    clock = lolex.install({
-      target: window,
+    clock = fakeTimers.withGlobal(window).install({
       now: new Date('2018-01-01T08:00:00Z'),
     });
   });
@@ -199,29 +198,39 @@ describes.fakeWin('test-cookies', {amp: true}, env => {
 
     // Fail if allowOnProxyOrigin is false
     expect(() => {
-      setCookie(win, 'c&1', 'v&1', Date.now() + BASE_CID_MAX_AGE_MILLIS, {});
+      allowConsoleError(() => {
+        setCookie(win, 'c&1', 'v&1', Date.now() + BASE_CID_MAX_AGE_MILLIS, {});
+      });
     }).to.throw(/Should never attempt to set cookie on proxy origin\: c\&1/);
 
     win.location = 'https://CDN.ampproject.org/test.html';
     expect(() => {
-      setCookie(win, 'c&1', 'v&1', Date.now() + BASE_CID_MAX_AGE_MILLIS, {});
+      allowConsoleError(() => {
+        setCookie(win, 'c&1', 'v&1', Date.now() + BASE_CID_MAX_AGE_MILLIS, {});
+      });
     }).to.throw(/Should never attempt to set cookie on proxy origin\: c\&1/);
 
     win.location = 'https://foo.bar.cdn.ampproject.org/test.html';
     expect(() => {
-      setCookie(win, 'c&1', 'v&1', Date.now() + BASE_CID_MAX_AGE_MILLIS, {});
+      allowConsoleError(() => {
+        setCookie(win, 'c&1', 'v&1', Date.now() + BASE_CID_MAX_AGE_MILLIS, {});
+      });
     }).to.throw(/in depth check/);
 
     win.location = 'http://&&&.CDN.ampproject.org/test.html';
     expect(() => {
-      setCookie(win, 'c&1', 'v&1', Date.now() + BASE_CID_MAX_AGE_MILLIS, {});
+      allowConsoleError(() => {
+        setCookie(win, 'c&1', 'v&1', Date.now() + BASE_CID_MAX_AGE_MILLIS, {});
+      });
     }).to.throw(/in depth check/);
 
     // Can't use higestAvailableDomain when allowOnProxyOrigin
     expect(() => {
-      setCookie(win, 'c&1', 'v&1', Date.now() + BASE_CID_MAX_AGE_MILLIS, {
-        allowOnProxyOrigin: true,
-        highestAvailableDomain: true,
+      allowConsoleError(() => {
+        setCookie(win, 'c&1', 'v&1', Date.now() + BASE_CID_MAX_AGE_MILLIS, {
+          allowOnProxyOrigin: true,
+          highestAvailableDomain: true,
+        });
       });
     }).to.throw(/specify domain explicitly/);
 

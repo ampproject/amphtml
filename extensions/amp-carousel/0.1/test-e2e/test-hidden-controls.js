@@ -17,12 +17,11 @@
 describes.endtoend(
   'AMP carousel 0.1 buttons with hidden controls',
   {
-    testUrl:
-      'http://localhost:8000/test/manual/amp-carousel/0.1/hidden-controls.amp.html',
+    fixture: 'amp-carousel/0.1/hidden-controls.amp.html',
     experiments: ['amp-carousel'],
     environments: ['single'],
   },
-  async function(env) {
+  async function (env) {
     /**
      * A helper function for expecting an error from an async function since we
      * don't have ChaiAsExpected and we cannot wait for errors from

@@ -16,38 +16,49 @@
 
 const cacheDocuments = require('./cache-documents');
 const compileScripts = require('./compile-scripts');
+const copyLocalImages = require('./copy-images');
 const getMetrics = require('./measure-documents');
 const loadConfig = require('./load-config');
-const log = require('fancy-log');
-const printReport = require('./print-report');
+const rewriteAnalyticsTags = require('./rewrite-analytics-tags');
 const rewriteScriptTags = require('./rewrite-script-tags');
-const {cyan} = require('ansi-colors');
-const {execOrDie} = require('../../common/exec');
-
-function installPackages_() {
-  log('Running', cyan('yarn'), 'to install packages...');
-  execOrDie('npx yarn --cwd build-system/tasks/performance', {
-    'stdio': 'ignore',
-  });
-}
+const runTests = require('./run-tests');
+const {installPackages} = require('../../common/utils');
+const {printReport} = require('./print-report');
 
 /**
  * @return {!Promise}
  */
 async function performance() {
-  installPackages_();
-  const {headless, runs, urls} = new loadConfig();
-  await cacheDocuments(urls);
-  await compileScripts(urls);
-  await rewriteScriptTags(urls);
-  await getMetrics(urls, {headless, runs});
+  let resolver;
+  const deferred = new Promise((resolverIn) => {
+    resolver = resolverIn;
+  });
+
+  installPackages(__dirname);
+  const config = new loadConfig();
+  const urls = Object.keys(config.urlToHandlers);
+  const urlsAndAdsUrls = urls.concat(config.adsUrls || []);
+  await cacheDocuments(urlsAndAdsUrls);
+  await compileScripts(urlsAndAdsUrls);
+  copyLocalImages(urlsAndAdsUrls);
+  await rewriteScriptTags(urlsAndAdsUrls);
+  await rewriteAnalyticsTags(config.handlers);
+  await getMetrics(urls, config);
   printReport(urls);
+  await runTests(resolver);
+  return deferred;
 }
 
-performance.description = '  Runs web performance test on current branch';
+performance.description = 'Runs web performance test on current branch';
 
 performance.flags = {
-  'nobuild': 'Does not compile javascripts before running tests',
+  'devtools': '  Run with devtools open',
+  'headless': '  Run chromium headless',
+  'nobuild': '  Does not compile minified runtime before running tests',
+  'threshold':
+    '  Fraction by which metrics are allowed to increase. Number between 0.0 and 1.0',
+  'quiet': '  Does not log progress per page',
+  'url': '  Page to test. Overrides urls set in config.json',
 };
 
 module.exports = {

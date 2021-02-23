@@ -17,8 +17,7 @@
 describes.endtoend(
   'amp-position-observer in AMPHTML ad',
   {
-    testUrl:
-      'http://localhost:8000/test/fixtures/e2e/amp-position-observer/scrollbound-animation.html',
+    fixture: 'amp-position-observer/scrollbound-animation.html',
     environments: 'amp4ads-preset',
     initialRect: {width: 800, height: 600},
   },
@@ -70,7 +69,7 @@ async function scrollParentWindowYBy(controller, px) {
   await controller.scrollBy(article, {top: px});
   await controller
     .findElement('iframe')
-    .then(frame => controller.switchToFrame(frame));
+    .then((frame) => controller.switchToFrame(frame));
 }
 
 async function verifyClockHandRect(controller, rect) {

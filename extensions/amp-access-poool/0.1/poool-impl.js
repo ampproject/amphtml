@@ -15,7 +15,7 @@
  */
 import {Services} from '../../../src/services';
 import {addParamToUrl, addParamsToUrl} from '../../../src/url';
-import {dev, userAssert} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {listenFor} from '../../../src/iframe-helper';
@@ -24,7 +24,7 @@ import {resetStyles, setStyle, setStyles} from '../../../src/style';
 const TAG = 'amp-access-poool';
 
 const ACCESS_CONFIG = {
-  'authorization': 'https://api.poool.fr/api/v2/amp/access?rid=READER_ID',
+  'authorization': 'https://api.poool.fr/api/v3/amp/access?rid=READER_ID',
   'iframe':
     'https://assets.poool.fr/amp.html' +
     '?rid=READER_ID' +
@@ -45,6 +45,8 @@ const AUTHORIZATION_TIMEOUT = 3000;
  *   videoClient: (string|null),
  *   customSegment: (string|null),
  *   cookiesEnabled: (boolean),
+ *   locale: (string|null),
+ *   context: (string|null),
  * }}
  */
 let PooolConfigDef;
@@ -107,10 +109,10 @@ export class PooolVendor {
    */
   authorize() {
     return this.getPooolAccess_().then(
-      response => {
+      (response) => {
         return {access: response.access};
       },
-      err => {
+      (err) => {
         if (!err || !err.response) {
           throw err;
         }
@@ -163,22 +165,34 @@ export class PooolVendor {
     const url = addParamToUrl(this.accessUrl_, 'iid', this.itemID_);
     const urlPromise = this.accessSource_.buildUrl(url, false);
     return urlPromise
-      .then(url => {
+      .then((url) => {
         return this.accessSource_.getLoginUrl(url);
       })
-      .then(url => {
+      .then((url) => {
         dev().info(TAG, 'Authorization URL: ', url);
         return this.timer_
           .timeoutPromise(AUTHORIZATION_TIMEOUT, this.xhr_.fetchJson(url))
-          .then(res => res.json());
+          .then((res) => res.json());
       });
+  }
+
+  /**
+   * @return {!Element}
+   * @private
+   */
+  getContainer_() {
+    const paywallContainer = this.ampdoc.getElementById('poool');
+    return user().assertElement(
+      paywallContainer,
+      'No element with id #poool found to render paywall into, got'
+    );
   }
 
   /**
    * @private
    */
   renderPoool_() {
-    const pooolContainer = this.ampdoc.getElementById('poool');
+    const pooolContainer = this.getContainer_();
     const urlPromise = this.accessSource_.buildUrl(
       addParamsToUrl(
         this.iframeUrl_,
@@ -193,12 +207,14 @@ export class PooolVendor {
               : getMode().development || getMode().localDev,
           'fw': this.pooolConfig_['forceWidget'],
           'cs': this.pooolConfig_['customSegment'],
+          'lo': this.pooolConfig_['locale'],
+          'co': this.pooolConfig_['context'],
         })
       ),
       false
     );
 
-    return urlPromise.then(url => {
+    return urlPromise.then((url) => {
       this.iframe_.src = url;
       listenFor(this.iframe_, 'release', this.onRelease_.bind(this));
       listenFor(this.iframe_, 'resize', this.onResize_.bind(this));

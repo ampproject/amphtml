@@ -33,7 +33,7 @@ describes.realWin(
       extensions: ['amp-minute-media-player'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
 
     beforeEach(() => {
@@ -55,7 +55,7 @@ describes.realWin(
 
       doc.body.appendChild(minuteMediaPlayerElement);
       return minuteMediaPlayerElement
-        .build()
+        .buildInternal()
         .then(() => {
           minuteMediaPlayerElement.layoutCallback();
         })

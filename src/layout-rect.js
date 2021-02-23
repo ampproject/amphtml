@@ -32,6 +32,17 @@
 export let LayoutRectDef;
 
 /**
+ * The structure that contains the size for an element. The exact
+ * interpretation of the size depends on the use case.
+ *
+ * @typedef {{
+ *   width: number,
+ *   height: number,
+ * }}
+ */
+export let LayoutSizeDef;
+
+/**
  * The structure that represents the margins of an Element.
  *
  * @typedef {{
@@ -109,11 +120,11 @@ export function layoutRectFromDomRect(rect) {
 
 /**
  * Returns true if the specified two rects overlap by a single pixel.
- * @param {!LayoutRectDef} r1
- * @param {!LayoutRectDef} r2
+ * @param {!LayoutRectDef|!ClientRect} r1
+ * @param {!LayoutRectDef|!ClientRect} r2
  * @return {boolean}
  */
-export function layoutRectsOverlap(r1, r2) {
+export function rectsOverlap(r1, r2) {
   return (
     r1.top <= r2.bottom &&
     r2.top <= r1.bottom &&
@@ -188,7 +199,7 @@ export function layoutPositionRelativeToScrolledViewport(
       right: viewport.getWidth(),
     })
   );
-  if (layoutRectsOverlap(layoutBox, scrollLayoutBox)) {
+  if (rectsOverlap(layoutBox, scrollLayoutBox)) {
     return RelativePositions.INSIDE;
   } else {
     return layoutRectsRelativePos(layoutBox, scrollLayoutBox);
@@ -279,4 +290,13 @@ export function cloneLayoutMarginsChangeDef(marginsChange) {
     left: marginsChange.left,
     right: marginsChange.right,
   };
+}
+
+/**
+ * @param {!LayoutRectDef|!ClientRect|!DOMRect} rect
+ * @return {!LayoutSizeDef}
+ */
+export function layoutSizeFromRect(rect) {
+  const {width, height} = rect;
+  return {width, height};
 }

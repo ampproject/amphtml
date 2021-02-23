@@ -28,14 +28,14 @@ const TAG = 'ie-media-bug';
  * @return {?Promise}
  * @package
  */
-export function checkAndFix(win, opt_platform) {
+export function ieMediaCheckAndFix(win, opt_platform) {
   const platform = opt_platform || Services.platformFor(win);
   if (!platform.isIe() || matchMediaIeQuite(win)) {
     return null;
   }
 
   // Poll until the expression resolves correctly, but only up to a point.
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     /** @const {number} */
     const endTime = Date.now() + 2000;
     /** @const {number} */

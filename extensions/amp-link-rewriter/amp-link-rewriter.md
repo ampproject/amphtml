@@ -22,33 +22,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# `amp-link-rewriter`
+# amp-link-rewriter
 
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Run link-rewriter inside your AMP page</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-link-rewriter" src="https://cdn.ampproject.org/v0/amp-link-rewriter-0.1.js`>&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>nodisplay</td>
-  </tr>
-</table>
+## Usage
 
-## Overview
+`amp-link-rewriter` allows publishers to rewrite URLs based on configurable
+patterns.
 
-`amp-link-rewriter` allows publishers to rewrite URL based on configurable pattern.
+### Required element structure
 
-## Getting started
+#### Add the required `script`
 
-**Add the required script**
-Inside the `<head>...</head>` section of your AMP page, insert this code before the line `<script async src="https://cdn.ampproject.org/v0.js"></script>`
-
-Code:
+Inside the `<head>...</head>` section of your AMP page, insert the following
+code before the line
+`<script async src="https://cdn.ampproject.org/v0.js"></script>`.
 
 ```html
 <script
@@ -58,33 +45,32 @@ Code:
 ></script>
 ```
 
-**Add the amp-link-rewriter extension**
-Inside the `<body>...</body>` section of your AMP page, insert code as shown below the example (it has to be customized for every vendor use case):
+#### Add the `amp-link-rewriter` component
 
-Code:
+Inside the `<body>...</body>` section of your AMP page, insert code as shown
+below the example (it has to be customized for every vendor use case):
 
 ```html
 <amp-link-rewriter layout="nodisplay">
   <script type="application/json">
     {
-        "output": "https://visit.foo.net?pid=110&url=${href}&cid=${customerId}",
-        "section": [
-            "#product-listing-1",
-            "#product-listing-2",
-        ],
-        "attribute": {
-            "href": "((?!(https:\/\/skip\.com)).)*",
-            "id": "comments",
-            "class": "sidebar",
-            "rel": "(?!(skip))*",
-        },
-        "vars": {
-            "customerId": "12345"
-        }
+      "output": "https://visit.foo.net?pid=110&url=${href}&cid=${customerId}",
+      "section": ["#product-listing-1", "#product-listing-2"],
+      "attribute": {
+        "href": "((?!(https:\/\/skip\.com)).)*",
+        "id": "comments",
+        "class": "sidebar",
+        "rel": "(?!(skip))*"
+      },
+      "vars": {
+        "customerId": "12345"
+      }
     }
   </script>
 </amp-link-rewriter>
 ```
+
+#### Full example
 
 The final code should look like:
 
@@ -106,20 +92,17 @@ The final code should look like:
     <amp-link-rewriter layout="nodisplay">
       <script type="application/json">
         {
-            "output": "https://visit.foo.net?pid=110&url=${href}&cid=${customerId}",
-            "section": [
-                "#product-listing-1",
-                "#product-listing-2",
-            ],
-            "attribute": {
-                "href": "`((?!(https:\/\/skip\.com)).)*`",
-                "id": "comments",
-                "class": "sidebar",
-                "rel": "(?!(skip))*",
-            },
-            "vars": {
-                "customerId": "12345"
-            }
+          "output": "https://visit.foo.net?pid=110&url=${href}&cid=${customerId}",
+          "section": ["#product-listing-1", "#product-listing-2"],
+          "attribute": {
+            "href": "`((?!(https:\/\/skip\.com)).)*`",
+            "id": "comments",
+            "class": "sidebar",
+            "rel": "(?!(skip))*"
+          },
+          "vars": {
+            "customerId": "12345"
+          }
         }
       </script>
     </amp-link-rewriter>
@@ -128,28 +111,29 @@ The final code should look like:
 </html>
 ```
 
-## JSON configuration
+### JSON configuration
 
-##### output (required)
+#### `output` (required)
 
-The "output" property has to be a string value with the redirection url plus a query string of placeholders that will be shifted with values defined in the config JSON 'vars' property, or in the anchor itself as a data attribute.
-
-Example:
+The `output` property has to be a string value with the redirection url plus a
+query string of placeholders that will be shifted with values defined in the
+config JSON `vars` property, or in the anchor itself as a data attribute.
 
 ```html
 <amp-link-rewriter layout="nodisplay">
   <script type="application/json">
     {
-        "output": "https://visit.foo.net?pid=110&cid=${customerId}`",
-        "vars": {
-            "customerId": "12345"
-        }
+      "output": "https://visit.foo.net?pid=110&cid=${customerId}`",
+      "vars": {
+        "customerId": "12345"
+      }
     }
   </script>
 </amp-link-rewriter>
 ```
 
-We can also define data values in the anchor data attribute as the following example:
+We can also define data values in the anchor data attribute as the following
+example:
 
 ```html
 <a
@@ -172,7 +156,12 @@ The resulting, rewritten URL would be:
 `https://visit.foo.net?eid=231&cid=12345`
 ```
 
-Apart from vars defined in the _vars_ property of the JSON configuration, or as a data attribute, there are other pre-defined _vars_ which are AMP URL MACROs plus anchor attributes id and href that could be used for replacing values in the output pattern. The AMP URL MACROs available are DOCUMENT_REFERRER and SOURCE_URL. The following table shows the relationship between defined data and placeholders.
+Apart from vars defined in the `vars` property of the JSON configuration, or as
+a data attribute, there are other predefined `vars` which are AMP URL MACROs
+plus anchor attributes `id` and `href` that could be used for replacing values
+in the output pattern. The AMP URL MACROs available are `DOCUMENT_REFERRER` and
+`SOURCE_URL`. The following table shows the relationship between defined data
+and placeholders.
 
 | value        | source | example                                        | placeholder         |
 | ------------ | ------ | ---------------------------------------------- | ------------------- |
@@ -186,11 +175,10 @@ Apart from vars defined in the _vars_ property of the JSON configuration, or as 
 | rev          | anchor | `<a href="..." rev="author" />`                | `${rev}`            |
 | vars.\*      | config | `{ "vars": { "publisherId": "123" } }`         | `${publisherId}`    |
 
-##### section (optional)
+#### section (optional)
 
-The "section" property defines an array of css selector expressions that filter areas where the url rewriting should operate.
-
-Example:
+The `section` property defines an array of css selector expressions that filter
+areas where the url rewriting should operate.
 
 ```json
 {
@@ -199,13 +187,16 @@ Example:
 }
 ```
 
-In the previous example, the html sections defined with attribute ID equal to "product-listing-1" and "product-listing-2" will be considered for url rewriting.
+In the previous example, the html sections defined with attribute ID equal to
+`product-listing-1` and `product-listing-2` will be considered for url
+rewriting.
 
-##### attribute (optional)
+#### attribute (optional)
 
-The "attribute" property defines a list of rules to match the anchor elements retrieved from the filtered sections. These rules are built from regular expressions associated with html element attributes as "id", "href", "class" or "rel".
-
-Example:
+The `attribute` property defines a list of rules to match the anchor elements
+retrieved from the filtered sections. These rules are built from regular
+expressions associated with html element attributes as `id`, `href`, `class` or
+`rel`.
 
 ```json
 {
@@ -217,9 +208,15 @@ Example:
 }
 ```
 
-The anchors within the html area with id 'product-listing-1' will have to match the regex expression defined for the attribute href and class. The regex expression will be wrapped with ^ and \$ for a full match.
-In this example, it means that all the anchors with `youtube.com` and 'mobile.vodafone.de' will be excluded. Also, the included anchors need to have a class attribute with the value 'comments'
+The anchors within the html area with id `product-listing-1` will have to match
+the regex expression defined for the attribute href and class. The regex
+expression will be wrapped with `^` and `\$` for a full match.
+
+In this example, it means that all the anchors with `youtube.com` and
+`mobile.vodafone.de` will be excluded. Also, the included anchors need to have a
+class attribute with the value `comments`.
 
 ## Validation
 
-See [amp-link-rewriter rules](validator-amp-link-rewriter.protoascii) in the AMP validator specification.
+See [`amp-link-rewriter` rules](validator-amp-link-rewriter.protoascii)
+in the AMP validator specification.

@@ -43,18 +43,15 @@
   border-bottom: 1px solid rgba(0, 0, 0, 0.12);
 }
 
-/** Default footer styles */
-.amp-next-page-footer {
+/** Default recommendation-box styles */
+.amp-next-page-links {
   border-top: 1px solid rgba(0, 0, 0, 0.1);
   margin-top: 16px;
-}
-
-.amp-next-page-footer-content {
   display: flex;
   flex-direction: column;
 }
 
-.amp-next-page-footer-article {
+.amp-next-page-link {
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   display: block;
   overflow: auto;
@@ -62,7 +59,7 @@
   text-decoration: none;
 }
 
-.amp-next-page-footer-image {
+.amp-next-page-image {
   width: 72px;
   height: 72px;
   float: left;
@@ -71,7 +68,7 @@
   background-position: center;
 }
 
-.amp-next-page-footer-title {
+.amp-next-page-text {
   position: relative;
   margin: 5px 30px 5px 0;
   color: #3c4043;
