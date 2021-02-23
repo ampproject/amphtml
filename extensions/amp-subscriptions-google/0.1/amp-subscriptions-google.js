@@ -652,9 +652,9 @@ export class GoogleSubscriptionsPlatform {
 
           entitlementsParams.metering = {state: meteringState};
 
-          // Note that we're requesting metering entitlements.
-          // This helps the `amp-subscriptions` extension plan.
-          this.serviceAdapter_.noteMeteringEntitlementsWereFetched();
+          // Remembers we requested metering entitlements.
+          // This helps avoid redundant fetches for metering entitlements.
+          this.serviceAdapter_.rememberMeteringEntitlementsWereFetched();
         }
 
         return this.runtime_
