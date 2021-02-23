@@ -275,20 +275,16 @@ export class Extensions {
   /**
    * @param {!Window} win
    * @param {string} extensionId
-   * @param {string=} opt_extensionVersion
    * @return {!Promise}
    */
-  importUnwrapped(win, extensionId, opt_extensionVersion) {
+  importUnwrapped(win, extensionId) {
     const scriptsInHead = getExtensionScripts(win, extensionId);
     let scriptElement = scriptsInHead[0];
     let promise;
     if (scriptElement) {
       promise = Promise.resolve(scriptElement[SCRIPT_LOADED_PROP]);
     } else {
-      scriptElement = this.createExtensionScript_(
-        extensionId,
-        opt_extensionVersion
-      );
+      scriptElement = this.createExtensionScript_(extensionId);
       promise = scriptElement[SCRIPT_LOADED_PROP] = new Promise(
         (resolve, reject) => {
           scriptElement.onload = resolve;
