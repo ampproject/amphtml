@@ -264,10 +264,6 @@ async function prependGlobal() {
     return;
   }
 
-  if (argv.remove) {
-    return removeConfig(target);
-  }
-
   if (!(argv.prod || argv.canary)) {
     log(red('One of --prod or --canary should be provided.'));
     return;
@@ -329,9 +325,6 @@ prependGlobal.flags = {
   'local_branch':
     "  Don't switch branches and use the config from the local branch.",
   'fortesting': '  Force the config to return true for getMode().test',
-  'remove':
-    '  Removes previously prepended json config from the target ' +
-    'file (if present).',
   'derandomize':
     '  Rounds all experiment percentages to 0 or 1, whichever is closest.',
 };
