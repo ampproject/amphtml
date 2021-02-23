@@ -27,7 +27,6 @@ these players implement.
 -   [amp-minute-media-player](https://amp.dev/documentation/components/amp-minute-media-player)
 -   [amp-mowplayer](https://amp.dev/documentation/components/amp-mowplayer)
 -   [amp-nexxtv-player](https://amp.dev/documentation/components/amp-nexxtv-player)
--   [amp-ooyala-player](https://amp.dev/documentation/components/amp-ooyala-player)
 -   [amp-powr-player](https://amp.dev/documentation/components/amp-powr-player)
 -   [amp-redbull-player](https://amp.dev/documentation/components/amp-redbull-player)
 -   [amp-vimeo](https://amp.dev/documentation/components/amp-vimeo)
