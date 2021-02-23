@@ -38,8 +38,7 @@ single iframe:
 -   By default, an `amp-iframe` is sandboxed (see [details](#sandbox)).
 -   An `amp-iframe` must only request resources via HTTPS, from a data-URI, or
     via the `srcdoc` attribute.
--   An `amp-iframe` must not be in the same origin as the container unless they
-    do not allow `allow-same-origin` in the `sandbox` attribute. See the
+-  To allow an `amp-iframe` from the same origin as the container, you must include `allow-same-origin` in the `sandbox` attribute. See the
     ["Iframe origin policy"](../../spec/amp-iframe-origin-policy.md)
     doc for further details on allowed origins for iframes.
 
