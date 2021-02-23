@@ -1,0 +1,32 @@
+{
+  "compileOnSave": true,
+  "compilerOptions": {
+    "lib": ["dom", "esnext"],
+    "outDir": "dist",
+    "sourceMap": true,
+    "moduleResolution": "node",
+    "target": "ES2020",
+    "module": "CommonJS",
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "strictNullChecks": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "incremental": true,
+    "esModuleInterop": true,
+    "declaration": true
+  },
+  "include": [
+    "./*.js",
+    "./*.ts",
+    "./common/**/*.js",
+    "./common/**/*.ts",
+    "./server/**/*.js",
+    "./server/**/*.ts"
+  ],
+  "exclude": ["**/node_modules", "common/check-package-manager.js"]
+}
