@@ -18,7 +18,7 @@ these players implement.
 
 <!--
   The following list is generated automatically:
-    gulp check-video-interface-list --write
+    gulp check-video-interface-list --fix
 -->
 
 -   [amp-3q-player](https://amp.dev/documentation/components/amp-3q-player)

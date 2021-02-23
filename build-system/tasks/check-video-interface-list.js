@@ -16,7 +16,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const globby = require('globby');
 const tempy = require('tempy');
-const {bold, blue, red} = require('kleur/colors');
+const {blue, bold, cyan, red} = require('kleur/colors');
 const {getStdout} = require('../common/process');
 const {log, logWithoutTimestamp} = require('../common/logging');
 const {readFile, writeFile} = require('fs-extra');
@@ -82,27 +82,43 @@ const diffTentative = (filepath, content) =>
   );
 
 /**
- * Checks or updates 3rd party video player list.
+ * @param {string} filepath
+ * @param {string} content
+ * @param {string} output
+ * @param {boolean} write
  */
-async function checkVideoInterfaceList() {
-  const content = await readFile(filepath, 'utf-8');
-  const output = content.replace(getListRegExp(), generateList());
-
+async function writeOrFailWhenUnequal(
+  filepath,
+  content,
+  output,
+  write = false
+) {
   if (output === content) {
     return;
   }
 
   logWithoutTimestamp(await diffTentative(filepath, output));
 
-  if (!argv.write) {
-    throw new Error(
-      bold(red(`You should apply the above changes:`)) +
-        '\n\tgulp check-video-interface-list --write\n'
+  if (!write) {
+    log(red('ERROR:'), cyan(filepath), 'is missing the changes above.');
+    log(
+      '⤷ To automatically apply them, run',
+      cyan('gulp check-video-interface-list --fix')
     );
+    throw new Error(`${filepath} is outdated`);
   }
 
   await writeFile(filepath, output);
   log('Wrote', bold(blue(filepath)));
+}
+
+/**
+ * Checks or updates 3rd party video player list.
+ */
+async function checkVideoInterfaceList() {
+  const content = await readFile(filepath, 'utf-8');
+  const output = content.replace(getListRegExp(), generateList());
+  await writeOrFailWhenUnequal(filepath, content, output, argv.fix);
 }
 
 module.exports = {
@@ -112,5 +128,5 @@ module.exports = {
 checkVideoInterfaceList.description = `Checks or updates 3rd party video player list on ${filepath}`;
 
 checkVideoInterfaceList.flags = {
-  'write': '  Write to file',
+  'fix': '  Write to file',
 };
