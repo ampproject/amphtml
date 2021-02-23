@@ -50,8 +50,10 @@ export class Metering {
     this.storagePromise_ = Services.storageForDoc(ampdoc);
 
     /**
-     * Answers question:
-     *   Have we fetched metering entitlements with the current metering state?
+     * Remembers if metering entitlements were fetched
+     * with the current metering state.
+     *
+     * This helps avoid redundant fetches.
      * @type {boolean}
      */
     this.entitlementsWereFetchedWithCurrentMeteringState = false;
