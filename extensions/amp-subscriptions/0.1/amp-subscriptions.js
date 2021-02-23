@@ -556,24 +556,24 @@ export class SubscriptionService {
         this.handleGrantState_({granted, shouldActivatePlatform});
 
       if (!this.metering_) {
-        // Move along. This article doesn't need AMP metering's special logic.
+        // Move along. This article doesn't need AMP metering's logic.
         continueAuthorizationFlow();
         return;
       }
 
-      // Metering.
+      // AMP metering's logic:
       // - Granted?
       //   - Yes.
-      //     - From metering?
-      //       - Yes. Consume entitlement.
+      //     - From AMP metering?
+      //       - Yes. Activate the AMP metering platform. It can consume entitlements.
       //       - No. Handle grant state normally.
       //   - No.
-      //     - Have we fetched metering entitlements before? (`entitlementsRequested`)
+      //     - Have we fetched AMP metering entitlements before?
       //       - Yes. Handle grant state normally.
       //       - No.
-      //         - Do we have metering state?
-      //           - Yes. Fetch entitlements.
-      //           - No. Show regwall.
+      //         - Do we have AMP metering state?
+      //           - Yes. Fetch metering entitlements.
+      //           - No. Activate the AMP metering platform. It can show a regwall.
 
       const meteringPlatform = this.platformStore_.getPlatform(
         this.metering_.platformKey
