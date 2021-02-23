@@ -341,6 +341,8 @@ export class AmpImg extends BaseElement {
   /** @override */
   unlayoutCallback() {
     if (AmpImg.V1()) {
+      // TODO(#31915): Reconsider if this is still desired for V1. This helps
+      // with network interruption when a document is inactivated.
       return;
     }
 
