@@ -97,6 +97,7 @@ async function writeOrFailWhenUnequal(
     return;
   }
 
+  logWithoutTimestamp();
   logWithoutTimestamp(await diffTentative(filepath, output));
 
   if (!write) {
