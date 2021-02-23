@@ -565,7 +565,7 @@ export class SubscriptionService {
       // - Granted?
       //   - Yes.
       //     - From AMP metering?
-      //       - Yes. AMP metering platform consumes entitlements.
+      //       - Yes. Consume entitlements.
       //       - No. Handle grant state normally.
       //   - No.
       //     - Have we fetched AMP metering entitlements before?
@@ -573,7 +573,7 @@ export class SubscriptionService {
       //       - No.
       //         - Do we have AMP metering state?
       //           - Yes. Fetch metering entitlements.
-      //           - No. AMP metering platform shows a regwall.
+      //           - No. Show regwall.
 
       const meteringPlatform = this.platformStore_.getPlatform(
         this.metering_.platformKey
