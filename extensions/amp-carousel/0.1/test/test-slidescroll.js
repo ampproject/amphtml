@@ -22,8 +22,8 @@ import {
   createElementWithAttributes,
   whenUpgradedToCustomElement,
 } from '../../../../src/dom';
-import {dev, user} from '../../../../src/log';
 import {installResizeObserverStub} from '../../../../testing/resize-observer-stub';
+import {user} from '../../../../src/log';
 
 describes.realWin(
   'SlideScroll',
@@ -1271,25 +1271,15 @@ describes.realWin(
         expect(showSlideSpy).to.have.been.calledWith(4);
       });
 
-      it('should error on a non-number goToSlide', async () => {
-        const ampSlideScroll = await getAmpSlideScroll(true);
-        const impl = await ampSlideScroll.getImpl();
-        const devErrorSpy = env.sandbox.spy(dev(), 'error');
-
-        impl.showSlideAndTriggerAction_(NaN);
-        expect(devErrorSpy).to.be.calledOnce;
-        expect(devErrorSpy.args[0][1]).to.match(
-          /Attempted to show slide that is not a number/
-        );
-      });
-
-      it('should return false for invalid slide number', async () => {
+      it('should handle carousel snapping & hiding race', async () => {
         const ampSlideScroll = await getAmpSlideScroll(true);
         const impl = await ampSlideScroll.getImpl();
 
-        impl.noOfSlides_ = 10;
-        expect(impl.showSlide_(Infinity)).to.be.false;
-        expect(impl.showSlide_(-Infinity)).to.be.false;
+        // simluate carousel hidding
+        impl.slideWidth_ = 0;
+
+        // simulate snapping
+        expect(impl.getNextSlideIndex_(0)).to.equal(0);
       });
 
       it('should NOT call showSlide_ before layout', async () => {
