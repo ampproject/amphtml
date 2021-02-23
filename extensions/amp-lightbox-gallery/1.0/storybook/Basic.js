@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {BaseCarousel} from '../../../amp-base-carousel/1.0/base-carousel';
+import {BaseCarousel} from '../../../amp-base-carousel/1.0/component';
 import {LightboxGalleryProvider, WithLightbox} from '../component';
 import {withA11y} from '@storybook/addon-a11y';
 import {withKnobs} from '@storybook/addon-knobs';
