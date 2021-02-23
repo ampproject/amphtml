@@ -15,13 +15,21 @@
 //
 
 // To regenerate states.h file, run:
-// blaze clean (necessary to take into account txt file changes)
-// bazel build htmlparser/bin:jsongrammargen
-// bazel-bin/htmlparser/bin/jsongrammargen
+//
+// blaze clean
+// bazel build htmlparser/bin:statetablegen
+// bazel-bin/htmlparser/bin/statetablegen --input_grammar=url
+//                            or
+// bazel-bin/htmlparser/bin/statetablegen --input_grammar=json
 
 #include <iostream>
 
+#include "glog/logging.h"
+#include "absl/flags/flag.h"
+#include "absl/flags/parse.h"
 #include "grammar/tablebuilder.h"
+
+ABSL_FLAG(std::string, input_grammar, "", "Options: url, json");
 
 constexpr std::string_view kLicenseHeader = R"LICENSETXT(//
 // Copyright 2020 The AMP HTML Authors. All Rights Reserved.
@@ -41,12 +49,29 @@ constexpr std::string_view kLicenseHeader = R"LICENSETXT(//
 
 
 int main(int argc, char** argv) {
+  absl::ParseCommandLine(argc, argv);
+  std::string grammar = absl::GetFlag(FLAGS_input_grammar);
+
+  std::string input_grammar;
+  std::string cpp_namespace;
+  std::string ifdef_guard;
+  std::string output_file;
+  if (grammar == "json") {
+    input_grammar = "data/jsongrammar.txt";
+    cpp_namespace = "htmlparser::json";
+    ifdef_guard = "HTMLPARSER__JSON_STATES_H_";
+    output_file = "json/states.h";
+  } else {
+    std::cerr << "Invalid -input_grammar value: " << grammar;
+    return -1;
+  }
+
   htmlparser::grammar::TableBuilder builder(
-      "data/jsongrammar.txt",
-      {.output_file_path = "json/states.h",
+      input_grammar,
+      {.output_file_path = output_file,
        .license_header = kLicenseHeader.data(),
-       .ifdef_guard = "HTMLPARSER__JSON_STATES_H_",
-       .cpp_namespace = "htmlparser::json"});
+       .ifdef_guard = ifdef_guard,
+       .cpp_namespace = cpp_namespace});
 
   if (!builder.ParseRulesAndGenerateTable()) {
     std::cerr << "Table generation failed.\n";
