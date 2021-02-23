@@ -118,13 +118,7 @@ export let ConsentMetadataDef;
  */
 export function getStoredConsentInfo(value) {
   if (value === undefined) {
-    return constructConsentInfo(
-      CONSENT_ITEM_STATE.UNKNOWN,
-      undefined,
-      undefined,
-      undefined,
-      undefined
-    );
+    return constructConsentInfo(CONSENT_ITEM_STATE.UNKNOWN);
   }
   if (typeof value === 'boolean') {
     // legacy format

@@ -675,8 +675,8 @@ export class AmpConsent extends AMP.BaseElement {
         this.updateCacheIfNotNull_(
           response['consentStateValue'],
           response['consentString'] || undefined,
-          response['consentMetadata'] || undefined,
-          response['purposeConsents'] || undefined
+          response['consentMetadata'],
+          response['purposeConsents']
         );
       }
     });
@@ -685,10 +685,10 @@ export class AmpConsent extends AMP.BaseElement {
   /**
    * Sync with local storage if consentRequired is true.
    *
-   * @param {string=} responseStateValue
-   * @param {string=} responseConsentString
-   * @param {JsonObject=} responseMetadata
-   * @param {JsonObject=} responsePurposeConsents
+   * @param {?string=} responseStateValue
+   * @param {?string=} responseConsentString
+   * @param {?JsonObject=} responseMetadata
+   * @param {?JsonObject=} responsePurposeConsents
    */
   updateCacheIfNotNull_(
     responseStateValue,
@@ -798,7 +798,8 @@ export class AmpConsent extends AMP.BaseElement {
       // False if there are no stored purposes
       if (
         !storedPurposeConsents ||
-        !Object.keys(storedPurposeConsents).length
+        Object.keys(storedPurposeConsents).length <
+          purposeConsentRequired.length
       ) {
         return false;
       }
