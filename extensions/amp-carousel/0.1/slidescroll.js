@@ -521,6 +521,11 @@ export class AmpSlideScroll extends BaseSlides {
    * @return {number} a number representing the next slide index.
    */
   getNextSlideIndex_(currentScrollLeft) {
+    // Addresses race where slideWidth is 0, due to being hidden
+    // while snapping is occuring.
+    if (!currentScrollLeft && !this.slideWidth_) {
+      return 0;
+    }
     // This can be only 0, 1 or 2, since only a max of 3 slides are shown at
     // a time.
     const scrolledSlideIndex = Math.round(currentScrollLeft / this.slideWidth_);
