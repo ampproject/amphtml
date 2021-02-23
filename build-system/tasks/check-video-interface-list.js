@@ -72,14 +72,14 @@ const getListRegExp = () =>
  * Diffs an existing file with content that might replace it.
  * @param {string} filepath
  * @param {string} content
- * @return {string}
+ * @return {!Promise<string>}
  */
-async function diffTentative(filepath, content) {
-  const temporary = await tempy.write(content);
-  return getStdout(
-    `git -c color.ui=always diff -U1 ${filepath} ${temporary}`
-  ).replace(new RegExp(temporary, 'g'), `/${filepath}`);
-}
+const diffTentative = (filepath, content) =>
+  tempy.write.task(content, (temporary) =>
+    getStdout(
+      `git -c color.ui=always diff -U1 ${filepath} ${temporary}`
+    ).replace(new RegExp(temporary, 'g'), `/${filepath}`)
+  );
 
 /**
  * Checks or updates 3rd party video player list.
