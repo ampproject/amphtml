@@ -180,6 +180,13 @@ jobs:
   'Nomodule Tests':
     executor:
       name: amphtml-large-executor
+    parameters:
+      config:
+        description: 'Which config file to use'
+        type: enum
+        enum: ['prod', 'canary']
+    environment:
+      config: << parameters.config >>
     steps:
       - setup_vm
       - install_chrome
@@ -194,6 +201,13 @@ jobs:
   'Module Tests':
     executor:
       name: amphtml-large-executor
+    parameters:
+      config:
+        description: 'Which config file to use'
+        type: enum
+        enum: ['prod', 'canary']
+    environment:
+      config: << parameters.config >>
     steps:
       - setup_vm
       - install_chrome
@@ -324,10 +338,18 @@ workflows:
           requires:
             - 'Unminified Build'
       - 'Nomodule Tests':
+          name: 'Nomodule Tests (using << matrix.config >>-config.json)'
+          matrix:
+            parameters:
+              config: ['prod', 'canary']
           <<: *push_and_pr_builds
           requires:
             - 'Nomodule Build'
       - 'Module Tests':
+          name: 'Module Tests (using << matrix.config >>-config.json)'
+          matrix:
+            parameters:
+              config: ['prod', 'canary']
           <<: *push_and_pr_builds
           requires:
             - 'Nomodule Build'
