@@ -129,6 +129,7 @@ function valueOrDefault(value, defaultValue) {
  * @param {boolean=} opt_localBranch Whether to use the local branch version
  * @param {string=} opt_branch If not the local branch, which branch to use
  * @param {boolean=} opt_fortesting Whether to force getMode().test to be true
+ * @param {boolean=} opt_derandomize Whether to remove experiment randomization
  * @return {!Promise}
  */
 async function applyConfig(
@@ -138,7 +139,8 @@ async function applyConfig(
   opt_localDev,
   opt_localBranch,
   opt_branch,
-  opt_fortesting
+  opt_fortesting,
+  opt_derandomize
 ) {
   await checkoutBranchConfigs(filename, opt_localBranch, opt_branch);
 
@@ -173,6 +175,9 @@ async function applyConfig(
   if (opt_fortesting) {
     configJson = {test: true, ...configJson};
   }
+  if (opt_derandomize) {
+    configJson = derandomize(target, configJson);
+  }
   configString = JSON.stringify(configJson);
   const fileString = await prependConfig(configString, targetString);
   sanityCheck(fileString);
@@ -182,6 +187,7 @@ async function applyConfig(
     cyan(config) +
     (opt_localDev ? ', ' + cyan('localDev') : '') +
     (opt_fortesting ? ', ' + cyan('test') : '') +
+    (opt_derandomize ? ', ' + cyan('derandomized') : '') +
     ')';
   log('Applied AMP config', details, 'to', cyan(path.basename(target)));
 }
@@ -215,6 +221,21 @@ function enableLocalDev(target, configJson) {
     );
   }
   return Object.assign(LOCAL_DEV_AMP_CONFIG, configJson);
+}
+
+/**
+ * @param {string} target File containing the AMP runtime (amp.js or v0.js)
+ * @param {!JSON} configJson The json object in which to enable local dev
+ * @return {!JSON}
+ */
+function derandomize(target, configJson) {
+  for (const [key, value] of Object.entries(configJson)) {
+    if (typeof value == 'number') {
+      configJson[key] = Math.round(value);
+    }
+  }
+  log('Derandomized experiements in', cyan(target));
+  return configJson;
 }
 
 /**
@@ -275,7 +296,8 @@ async function prependGlobal() {
     argv.local_dev,
     argv.local_branch,
     argv.branch,
-    argv.fortesting
+    argv.fortesting,
+    argv.derandomize
   );
 }
 
@@ -310,4 +332,6 @@ prependGlobal.flags = {
   'remove':
     '  Removes previously prepended json config from the target ' +
     'file (if present).',
+  'derandomize':
+    '  Rounds all experiment percentages to 0 or 1, whichever is closest.',
 };
