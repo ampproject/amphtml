@@ -16,7 +16,7 @@
 
 import {ActionTrust} from '../../../src/action-constants';
 import {Animation} from '../../../src/animation';
-import {BaseCarousel} from './component';
+import {BaseCarousel} from './base-carousel';
 import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
