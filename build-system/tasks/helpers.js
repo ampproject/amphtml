@@ -26,13 +26,13 @@ const MagicString = require('magic-string');
 const open = require('open');
 const path = require('path');
 const remapping = require('@ampproject/remapping');
+const terser = require('terser');
 const wrappers = require('../compile/compile-wrappers');
 const {
   VERSION: internalRuntimeVersion,
 } = require('../compile/internal-version');
 const {applyConfig, removeConfig} = require('./prepend-global/index.js');
-const {closureCompile} = require('../compile/compile');
-const {green, red, cyan} = require('kleur/colors');
+const {green, red, cyan, yellow} = require('kleur/colors');
 const {isCiBuild} = require('../common/ci');
 const {jsBundles} = require('../compile/bundles.config');
 const {log, logLocalDev} = require('../common/logging');
@@ -76,6 +76,11 @@ const UNMINIFIED_TARGETS = ['alp.max', 'amp-inabox', 'amp-shadow', 'amp'];
  * List of minified targets to which AMP_CONFIG should be written
  */
 const MINIFIED_TARGETS = ['alp', 'amp4ads-v0', 'shadow-v0', 'v0'];
+
+/**
+ * List of all targets to which AMP_CONFIG should be written
+ */
+const CONFIG_TARGETS = new Set(UNMINIFIED_TARGETS.concat(MINIFIED_TARGETS));
 
 /**
  * Used while building the 3p frame
@@ -176,11 +181,7 @@ async function compileCoreRuntime(options) {
  */
 async function compileAllJs(options) {
   const {minify} = options;
-  if (minify) {
-    log('Minifying multi-pass JS with', cyan('closure-compiler') + '...');
-  } else {
-    log('Compiling JS with', cyan('esbuild'), 'and', cyan('babel') + '...');
-  }
+  log('Compiling JS with', cyan('esbuild'), 'and', cyan('babel') + '...');
   const startTime = Date.now();
   await Promise.all([
     minify ? Promise.resolve() : doBuildJs(jsBundles, 'polyfills.js', options),
@@ -284,57 +285,30 @@ function maybeToEsmName(name) {
  * @return {!Promise}
  */
 async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
-  const timeInfo = {};
-  const entryPoint = path.join(srcDir, srcFilename);
-  const minifiedName = maybeToEsmName(options.minifiedName);
+  await compileUnminifiedJs(srcDir, srcFilename, destDir, options);
+  await fs.writeFile(path.join(destDir, 'version.txt'), internalRuntimeVersion);
+}
 
-  if (options.watch) {
-    const watchFunc = async () => {
-      const compileDone = await doCompileMinifiedJs(/* continueOnError */ true);
-      if (options.onWatchBuild) {
-        options.onWatchBuild(compileDone);
-      }
-    };
-    fileWatch(entryPoint).on('change', debounce(watchFunc, watchDebounceDelay));
-  }
-
-  async function doCompileMinifiedJs(continueOnError) {
-    options.continueOnError = continueOnError;
-    options.errored = false;
-    await closureCompile(entryPoint, destDir, minifiedName, options, timeInfo);
-
-    // If an incremental watch build fails, simply return.
-    if (options.errored) {
-      return;
-    }
-
-    const destPath = path.join(destDir, minifiedName);
-    combineWithCompiledFile(srcFilename, destPath, options);
-    fs.writeFileSync(path.join(destDir, 'version.txt'), internalRuntimeVersion);
-    if (options.latestName) {
-      fs.copySync(
-        destPath,
-        path.join(destDir, maybeToEsmName(options.latestName))
-      );
-    }
-
-    let name = minifiedName;
-    if (options.latestName) {
-      name += ` → ${maybeToEsmName(options.latestName)}`;
-    }
-    endBuildStep('Minified', name, timeInfo.startTime);
-
-    const target = path.basename(minifiedName, path.extname(minifiedName));
-    if (!argv.noconfig && MINIFIED_TARGETS.includes(target)) {
-      await applyAmpConfig(
-        maybeToEsmName(`${destDir}/${minifiedName}`),
-        /* localDev */ options.fortesting,
-        /* fortesting */ options.fortesting
-      );
-    }
-  }
-
-  return doCompileMinifiedJs(options.continueOnError);
+async function terserMinify(code, sourcemap) {
+  return await terser.minify(code, {
+    mangle: {
+      // properties: {
+      //   regex: '_$',
+      // },
+    },
+    compress: {
+      passes: 9,
+    },
+    output: {
+      'keep_quoted_props': true,
+    },
+    ecma: 2017, // we don't want terser doing any transpiling.
+    sourceMap: {
+      content: sourcemap,
+      filename: `${file}.map`,
+      // TODO: what goes in root? root: `${file}.map`,
+    },
+  });
 }
 
 /**
@@ -379,7 +353,7 @@ function finishBundle(srcFilename, destDir, destFilename, options) {
     const latestMaxName = options.latestName.split('.js')[0] + '.max.js';
     // Copy amp-foo-0.1.js to amp-foo-latest.max.js.
     fs.copySync(
-      path.join(destDir, options.toName),
+      path.join(destDir, destFilename),
       path.join(destDir, latestMaxName)
     );
   }
@@ -397,7 +371,9 @@ function finishBundle(srcFilename, destDir, destFilename, options) {
 async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
   const startTime = Date.now();
   const entryPoint = path.join(srcDir, srcFilename);
-  const destFilename = options.toName || srcFilename;
+  const destFilename = options.minify
+    ? maybeToEsmName(options.minifiedName)
+    : options.toName ?? srcFilename;
   const destFile = path.join(destDir, destFilename);
 
   if (options.watch) {
@@ -418,7 +394,7 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
     async setup(build) {
       const transformContents = async ({file, contents}) => {
         const babelOptions = babel.loadOptions({
-          caller: {name: 'unminified'},
+          caller: {name: options.minify ? 'minified' : 'unminified'},
           filename: file.path,
           sourceFileName: path.relative(process.cwd(), file.path),
         });
@@ -459,7 +435,7 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
    */
   async function performBundle(continueOnError) {
     const {banner, footer} = splitWrapper();
-    await esbuild
+    const {warnings, outputFiles} = await esbuild
       .build({
         entryPoints: [entryPoint],
         bundle: true,
@@ -469,20 +445,41 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
         plugins: [esbuildBabelPlugin],
         banner,
         footer,
+        minify: false,
+        write: false,
       })
       .catch((err) => handleBundleError(err, continueOnError, destFilename));
+    for (const warning of warnings) {
+      log.warn(yellow('Warning during compilation:'), warning);
+    }
+
+    let outfile = outputFiles.find((f) => !f.path.endsWith('.map')).text;
+    let sourcemap = outputFiles.find((f) => f.path.endsWith('.map')).text;
+    if (options.minify) {
+      // console.error(JSON.stringify(outputFiles[0].path))
+      const {code, map} = await terserMinify(outfile, sourcemap);
+      outfile = code;
+      sourcemap = map;
+    }
+    await Promise.all([
+      fs.outputFile(destFile, outfile),
+      fs.outputFile(`${destFile}.map`, sourcemap),
+    ]);
+
     finishBundle(srcFilename, destDir, destFilename, options);
     let name = destFilename;
     if (options.latestName) {
-      const latestMaxName = options.latestName.split('.js')[0] + '.max.js';
+      const latestMaxName = options.minify
+        ? maybeToEsmName(options.latestName).split('.js')[0] + '.max.js'
+        : options.latestName.split('.js')[0] + '.max.js';
       name = `${name} → ${latestMaxName}`;
     }
     endBuildStep('Compiled', name, startTime);
     const target = path.basename(destFilename, path.extname(destFilename));
-    if (UNMINIFIED_TARGETS.includes(target)) {
+    if (CONFIG_TARGETS.has(target) && !argv.noconfig) {
       await applyAmpConfig(
         destFile,
-        /* localDev */ true,
+        /* localDev */ !options.minify || options.fortesting,
         /* fortesting */ options.fortesting
       );
     }

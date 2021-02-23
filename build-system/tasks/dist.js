@@ -29,10 +29,6 @@ const {
   printNobuildHelp,
 } = require('./helpers');
 const {
-  cleanupBuildDir,
-  printClosureConcurrency,
-} = require('../compile/compile');
-const {
   createCtrlcHandler,
   exitCtrlcHandler,
 } = require('../common/ctrlcHandler');
@@ -40,9 +36,10 @@ const {
   displayLifecycleDebugging,
 } = require('../compile/debug-compilation-lifecycle');
 const {buildExtensions, parseExtensionFlags} = require('./extension-helpers');
-const {compileCss, copyCss} = require('./css');
+const {compileCss} = require('./css');
+const {cleanupBuildDir} = require('../compile/compile');
 const {compileJison} = require('./compile-jison');
-const {formatExtractedMessages} = require('../compile/log-messages');
+// const {formatExtractedMessages} = require('../compile/log-messages');
 const {log} = require('../common/logging');
 const {maybeUpdatePackages} = require('./update-packages');
 const {VERSION} = require('../compile/internal-version');
@@ -131,7 +128,6 @@ async function doDist(extraArgs = {}) {
     minify: true,
     watch: argv.watch,
   };
-  printClosureConcurrency();
   printNobuildHelp();
   printDistHelp(options);
   await runPreDistSteps(options);
@@ -147,9 +143,9 @@ async function doDist(extraArgs = {}) {
   }
   await buildExtensions(options);
 
-  if (!argv.core_runtime_only) {
-    await formatExtractedMessages();
-  }
+  // if (!argv.core_runtime_only) {
+  //   await formatExtractedMessages();
+  // }
   if (!argv.watch) {
     exitCtrlcHandler(handlerProcess);
   }

@@ -42,7 +42,11 @@
 module.exports = function ({types: t}) {
   return {
     visitor: {
-      AssignmentPattern(path) {
+      AssignmentPattern(path, state) {
+        if (state.file.opts.filename.includes('node_modules')) {
+          return;
+        }
+
         const left = path.get('left');
         if (!left.isIdentifier()) {
           throw left.buildCodeFrameError(

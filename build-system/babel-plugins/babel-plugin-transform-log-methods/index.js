@@ -53,6 +53,7 @@ const {
   transformableMethods,
 } = require('../log-module-metadata.js');
 
+//TODO: what the heck is this
 // Considered default for this transform, configurable only for tests.
 // For other files output from this transform see linked module.
 const {extractedPath} = require('../../compile/log-messages');

@@ -31,8 +31,6 @@ const {
 const {checkForUnknownDeps} = require('./check-for-unknown-deps');
 const {CLOSURE_SRC_GLOBS} = require('./sources');
 const {cpus} = require('os');
-const {green, cyan} = require('kleur/colors');
-const {log, logLocalDev} = require('../common/logging');
 const {postClosureBabel} = require('./post-closure-babel');
 const {preClosureBabel, handlePreClosureError} = require('./pre-closure-babel');
 const {sanitize} = require('./sanitize');
@@ -403,23 +401,7 @@ function compile(
   });
 }
 
-function printClosureConcurrency() {
-  log(
-    green('Using up to'),
-    cyan(MAX_PARALLEL_CLOSURE_INVOCATIONS.toString()),
-    green('concurrent invocations of closure compiler.')
-  );
-  if (!argv.closure_concurrency) {
-    logLocalDev(
-      green('⤷ Use'),
-      cyan('--closure_concurrency=N'),
-      green('to change this number.')
-    );
-  }
-}
-
 module.exports = {
   cleanupBuildDir,
   closureCompile,
-  printClosureConcurrency,
 };

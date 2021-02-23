@@ -31,6 +31,7 @@ const {
   getPreClosureConfig,
   getTestConfig,
   getUnminifiedConfig,
+  getMinifiedConfig,
   getEslintConfig,
 } = require('./build-system/babel-config');
 const {cyan, yellow} = require('kleur/colors');
@@ -46,6 +47,7 @@ const babelTransforms = new Map([
   ['pre-closure', getPreClosureConfig()],
   ['test', getTestConfig()],
   ['unminified', getUnminifiedConfig()],
+  ['minified', getMinifiedConfig()],
   ['@babel/eslint-parser', getEslintConfig()],
 ]);
 
