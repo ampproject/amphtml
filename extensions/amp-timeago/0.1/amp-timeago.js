@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {format} from './locales';
+import {format, getLocale} from './locales';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {
   observeWithSharedInOb,
@@ -52,10 +52,10 @@ export class AmpTimeAgo extends AMP.BaseElement {
     );
 
     this.datetime_ = this.element.getAttribute('datetime');
-    this.locale_ =
-      this.element.getAttribute('locale')?.toLocaleLowerCase() ||
-      this.win.document.documentElement.lang;
-    console.log(this.locale_);
+    this.locale_ = getLocale(
+      this.element.getAttribute('locale') ||
+        this.win.document.documentElement.lang
+    );
     this.title_ = this.element.textContent.trim();
 
     this.element.textContent = '';
