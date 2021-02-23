@@ -608,8 +608,7 @@ export class SubscriptionService {
 
       if (this.metering_.entitlementsWereFetchedWithCurrentMeteringState) {
         // Move along.
-        // There's no use fetching metering entitlements again,
-        // until the metering state changes.
+        // The current metering state isn't granting.
         continueAuthorizationFlow();
         return;
       }
