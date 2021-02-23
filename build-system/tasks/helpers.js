@@ -150,6 +150,17 @@ async function bootstrapThirdPartyFrames(options) {
  * @param {!Object} options
  */
 async function compileCoreRuntime(options) {
+  async function watchFunc() {
+    const bundleComplete = await doBuildJs(jsBundles, 'amp.js', options);
+    if (options.onWatchBuild) {
+      options.onWatchBuild(bundleComplete);
+    } 
+  }
+
+  if (options.watch) {
+    fileWatch('src/**/*.js').on('change', debounce(watchFunc, watchDebounceDelay)); 
+  }
+
   await doBuildJs(jsBundles, 'amp.js', options);
 }
 
