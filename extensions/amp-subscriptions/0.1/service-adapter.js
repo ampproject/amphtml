@@ -147,4 +147,14 @@ export class ServiceAdapter {
   saveMeteringState(meteringState) {
     return this.subscriptionService_.metering_.saveMeteringState(meteringState);
   }
+
+  /**
+   * Remembers metering entitlements were fetched
+   * with the current metering state.
+   *
+   * This helps avoid redundant fetches.
+   */
+  noteMeteringEntitlementsWereFetched() {
+    this.subscriptionService_.metering_.entitlementsWereFetchedWithCurrentMeteringState = true;
+  }
 }

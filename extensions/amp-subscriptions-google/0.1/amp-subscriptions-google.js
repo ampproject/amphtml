@@ -33,6 +33,7 @@ import {
   Entitlement,
   GrantReason,
 } from '../../amp-subscriptions/0.1/entitlement';
+import {GaaMeteringRegwall} from '../../../third_party/subscriptions-project/swg-gaa';
 import {Services} from '../../../src/services';
 import {SubscriptionsScoreFactor} from '../../amp-subscriptions/0.1/constants.js';
 import {UrlBuilder} from '../../amp-subscriptions/0.1/url-builder';
@@ -51,7 +52,7 @@ import {installStylesForDoc} from '../../../src/style-installer';
 import {devAssert, user, userAssert} from '../../../src/log';
 
 const TAG = 'amp-subscriptions-google';
-const PLATFORM_ID = 'subscribe.google.com';
+const PLATFORM_KEY = 'subscribe.google.com';
 const GOOGLE_DOMAIN_RE = /(^|\.)google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)$/;
 
 /** @enum {number} */
@@ -468,7 +469,7 @@ export class GoogleSubscriptionsPlatform {
       })
       .catch((reason) => {
         throw user().createError(
-          `fetch skuMap failed for ${PLATFORM_ID}`,
+          `fetch skuMap failed for ${PLATFORM_KEY}`,
           reason
         );
       });
@@ -529,7 +530,7 @@ export class GoogleSubscriptionsPlatform {
       return new Entitlement({
         source: 'google:laa',
         raw: '',
-        service: PLATFORM_ID,
+        service: PLATFORM_KEY,
         granted: true,
         grantReason: GrantReason.LAA,
         dataObject: {},
@@ -626,37 +627,43 @@ export class GoogleSubscriptionsPlatform {
 
       const meteringStrategyPromise = this.getGoogleMeteringStrategy_();
       const meteringStatePromise = this.serviceAdapter_.loadMeteringState();
+      const promises = Promise.all([
+        meteringStrategyPromise,
+        meteringStatePromise,
+      ]);
 
-      return Promise.all([meteringStrategyPromise, meteringStatePromise]).then(
-        (results) => {
-          const googleMeteringStrategy = results[0];
-          const meteringState = results[1];
+      return promises.then((results) => {
+        const googleMeteringStrategy = results[0];
+        const meteringState = results[1];
 
-          const entitlementsParams = {};
+        const entitlementsParams = {};
 
-          // Add encryption param.
-          if (encryptedDocumentKey) {
-            entitlementsParams.encryption = {encryptedDocumentKey};
-          }
-
-          // Add metering param.
-          if (
-            googleMeteringStrategy === GoogleMeteringStrategy.EXTENDED_ACCESS &&
-            meteringState
-          ) {
-            // Tell SwG to send a new entitlements request.
-            this.runtime_.clear();
-
-            entitlementsParams.metering = {state: meteringState};
-          }
-
-          return this.runtime_
-            .getEntitlements(entitlementsParams)
-            .then((swgEntitlements) =>
-              this.createAmpEntitlement(swgEntitlements)
-            );
+        // Add encryption param.
+        if (encryptedDocumentKey) {
+          entitlementsParams.encryption = {encryptedDocumentKey};
         }
-      );
+
+        // Add metering param.
+        if (
+          googleMeteringStrategy === GoogleMeteringStrategy.EXTENDED_ACCESS &&
+          meteringState
+        ) {
+          // Tell SwG to send a new entitlements request.
+          this.runtime_.clear();
+
+          entitlementsParams.metering = {state: meteringState};
+
+          // Note that we're requesting metering entitlements.
+          // This helps the `amp-subscriptions` extension plan.
+          this.serviceAdapter_.noteMeteringEntitlementsWereFetched();
+        }
+
+        return this.runtime_
+          .getEntitlements(entitlementsParams)
+          .then((swgEntitlements) =>
+            this.createAmpEntitlement(swgEntitlements)
+          );
+      });
     });
   }
 
@@ -706,7 +713,7 @@ export class GoogleSubscriptionsPlatform {
     return new Entitlement({
       source: swgEntitlement.source,
       raw: swgEntitlements.raw,
-      service: PLATFORM_ID,
+      service: PLATFORM_KEY,
       granted,
       // if it's granted it must be a subscriber
       grantReason,
@@ -717,11 +724,11 @@ export class GoogleSubscriptionsPlatform {
 
   /** @override */
   getPlatformKey() {
-    return PLATFORM_ID;
+    return PLATFORM_KEY;
   }
 
   /** @override */
-  activate(entitlement, grantEntitlement) {
+  activate(entitlement, grantEntitlement, continueAuthorizationFlow) {
     const best = grantEntitlement || entitlement;
 
     Promise.all([
@@ -731,11 +738,6 @@ export class GoogleSubscriptionsPlatform {
       const meteringStrategy = results[0];
       const meteringState = results[1];
 
-      console.log('SWG ACTIVATE', {
-        best,
-        meteringState,
-        meteringStrategy,
-      });
       if (meteringStrategy === GoogleMeteringStrategy.EXTENDED_ACCESS) {
         // Show the Regwall, so the user can get
         // a metering state that leads to a
@@ -747,7 +749,10 @@ export class GoogleSubscriptionsPlatform {
 
         // Consume the metering entitlement.
         if (best.granted && !best.isSubscriber()) {
-          this.runtime_.consumeShowcaseEntitlementJwt(best.raw);
+          this.runtime_.consumeShowcaseEntitlementJwt(
+            best.raw,
+            continueAuthorizationFlow
+          );
           return;
         }
       }
@@ -763,34 +768,47 @@ export class GoogleSubscriptionsPlatform {
   }
 
   /**
-   * Shows the metering regwall.
+   * Asks user to register an account with the publisher.
+   * Returns a promise that resolves when the process completes.
    * @return {!Promise}
    */
   showMeteringRegwall_() {
-    return (
-      Promise.all([
-        // eslint-disable-next-line no-undef
-        GaaMeteringRegwall.show({
-          // Specify a URL that renders a Google Sign-In button.
-          iframeUrl: this.serviceConfig_['googleSignInHelperUrl'],
-        }),
-        this.serviceAdapter_.getReaderId('local'),
-      ])
-        // Send GSI response to publisher.
-        .then((results) =>
-          this.fetcher_.sendPostToPublisher(
-            this.serviceConfig_['meteringRegistrationUrl'],
-            {
-              googleSignInDetails: results[0],
-              ampReaderId: results[1],
-            }
-          )
-        )
-        // Save metering state from publisher.
-        .then((response) =>
-          this.serviceAdapter_.saveMeteringState(response['metering']['state'])
-        )
+    // Show the Showcase Regwall.
+    const googleSignInDetailsPromise = GaaMeteringRegwall.show({
+      // Specify a URL that renders a Google Sign-In button.
+      iframeUrl: this.serviceConfig_['googleSignInHelperUrl'],
+    });
+    const ampReaderIdPromise = this.serviceAdapter_.getReaderId('local');
+
+    // Register the user with the publisher.
+    const registerUserPromise = Promise.all([
+      googleSignInDetailsPromise,
+      ampReaderIdPromise,
+    ]).then((results) => {
+      const googleSignInDetails = results[0];
+      const ampReaderId = results[1];
+
+      const url = this.serviceConfig_['meteringRegistrationUrl'];
+      const postBody = {
+        googleSignInDetails,
+        ampReaderId,
+      };
+
+      return this.fetcher_.sendPostToPublisher(url, postBody);
+    });
+
+    // The publisher responds with a metering state.
+    // Let's save it.
+    const saveMeteringStatePromise = registerUserPromise.then(
+      (publisherResponse) => {
+        const meteringState = publisherResponse['metering']['state'];
+
+        return this.serviceAdapter_.saveMeteringState(meteringState);
+      }
     );
+
+    // That's all.
+    return saveMeteringStatePromise;
   }
 
   /** @override */
@@ -1106,7 +1124,7 @@ AMP.extension(TAG, '0.1', function (AMP) {
       const element = ampdoc.getHeadNode();
       Services.subscriptionsServiceForDoc(element).then((service) => {
         service.registerPlatform(
-          PLATFORM_ID,
+          PLATFORM_KEY,
           (platformConfig, serviceAdapter) => {
             return platformService.createPlatform(
               platformConfig,

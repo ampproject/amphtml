@@ -59,9 +59,6 @@ export class SubscriptionService {
   constructor(ampdoc) {
     const configElement = ampdoc.getElementById(TAG);
 
-    /** @type {!Metering} */
-    this.metering_ = new Metering(ampdoc);
-
     /** @const @private */
     this.ampdoc_ = ampdoc;
 
@@ -134,6 +131,9 @@ export class SubscriptionService {
 
     /** @private {!CryptoHandler} */
     this.cryptoHandler_ = new CryptoHandler(ampdoc);
+
+    /** @private {?Metering} */
+    this.metering_ = null;
   }
 
   /**
@@ -149,7 +149,7 @@ export class SubscriptionService {
 
       if (this.doesViewerProvideAuth_) {
         this.delegateAuthToViewer_();
-        this.startAuthorizationFlow_(false /** doPlatformSelection */);
+        this.startAuthorizationFlow_(false /** shouldActivatePlatform */);
         return;
       }
 
@@ -178,7 +178,7 @@ export class SubscriptionService {
 
       isStoryDocument(this.ampdoc_).then((isStory) => {
         // Delegates the platform selection and activation call if is story.
-        this.startAuthorizationFlow_(!isStory /** doPlatformSelection */);
+        this.startAuthorizationFlow_(!isStory /** shouldActivatePlatform */);
       });
     });
     return this;
@@ -305,24 +305,6 @@ export class SubscriptionService {
         subscriptionPlatform.getPlatformKey()
       );
       this.fetchEntitlements_(subscriptionPlatform);
-
-      if (matchedServiceConfig.enableMetering) {
-        // Re-fetch entitlements when metering state changes,
-        // but only if a grant is still needed.
-        this.metering_.setOnSaveMeteringState(() => {
-          this.platformStore_
-            // We must wait until all platforms return entitlements.
-            .getAllPlatformsEntitlements()
-            .then(() => this.platformStore_.getGrantStatus())
-            .then((grant) => {
-              if (grant) {
-                return;
-              }
-
-              this.resetPlatform(platformKey);
-            });
-        });
-      }
     });
   }
 
@@ -557,16 +539,109 @@ export class SubscriptionService {
 
   /**
    * Unblock document based on grant state and selected platform
-   * @param {boolean=} doPlatformSelection
+   * @param {boolean=} shouldActivatePlatform
    * @private
    */
-  startAuthorizationFlow_(doPlatformSelection = true) {
-    this.platformStore_.getGrantStatus().then((grantState) => {
-      this.processGrantState_(grantState);
-      this.performPingback_();
-    });
+  startAuthorizationFlow_(shouldActivatePlatform = true) {
+    const grantStatusPromise = this.platformStore_.getGrantStatus();
+    const grantEntitlementPromise = this.platformStore_.getGrantEntitlement();
+    const promises = Promise.all([grantStatusPromise, grantEntitlementPromise]);
 
-    if (doPlatformSelection) {
+    promises.then((results) => {
+      const granted = results[0];
+      const entitlement = results[1];
+
+      // Create shortcut to continue authorization flow.
+      const continueAuthorizationFlow = () =>
+        this.handleGrantState_({granted, shouldActivatePlatform});
+
+      if (!this.metering_) {
+        // Move along. The additional logic for AMP subscriptions isn't needed.
+        continueAuthorizationFlow();
+        return;
+      }
+
+      // Metering.
+      // - Granted?
+      //   - Yes.
+      //     - From metering?
+      //       - Yes. Consume entitlement.
+      //       - No. Handle grant state normally.
+      //   - No.
+      //     - Have we fetched metering entitlements before? (`entitlementsRequested`)
+      //       - Yes. Handle grant state normally.
+      //       - No.
+      //         - Do we have metering state?
+      //           - Yes. Fetch entitlements.
+      //           - No. Show regwall.
+
+      const meteringPlatform = this.platformStore_.getPlatform(
+        this.metering_.platformKey
+      );
+
+      if (granted) {
+        const grantCameFromAmpMetering =
+          entitlement &&
+          entitlement.grantReason === GrantReason.METERING &&
+          entitlement.service === this.metering_.platformKey;
+
+        if (!grantCameFromAmpMetering) {
+          // Move along. AMP metering isn't responsible for this grant.
+          continueAuthorizationFlow();
+          return;
+        }
+
+        // Activate the metering platform.
+        // It will finish the authorization flow.
+        const finishAuthorizationFlow = () => {
+          this.handleGrantState_({
+            granted: true,
+            shouldActivatePlatform: false,
+          });
+        };
+        meteringPlatform.activate(
+          entitlement,
+          entitlement,
+          finishAuthorizationFlow
+        );
+        return;
+      }
+
+      if (this.metering_.entitlementsWereFetchedWithCurrentMeteringState) {
+        // Move along.
+        // There's no use fetching metering entitlements again, until the metering state changes.
+        continueAuthorizationFlow();
+        return;
+      }
+
+      // Ask metering platform to either (1) fetch entitlements or (2) unblock authorization flow.
+      this.metering_.loadMeteringState().then((meteringState) => {
+        if (meteringState) {
+          // Fetch metering entitlements.
+          this.resetPlatform(this.metering_.platformKey);
+        } else {
+          // Unblock authorization flow.
+          // Handle lack of metering state.
+          const emptyEntitlement = Entitlement.empty('local');
+          meteringPlatform.activate(emptyEntitlement, emptyEntitlement);
+        }
+      });
+    });
+  }
+
+  /**
+   * Handles grant status updates.
+   * @param {{
+   *   granted: boolean,
+   *   shouldActivatePlatform: boolean,
+   * }} params
+   * @private
+   */
+  handleGrantState_({granted, shouldActivatePlatform}) {
+    this.processGrantState_(granted);
+    this.performPingback_();
+
+    if (shouldActivatePlatform) {
       this.selectAndActivatePlatform_();
     }
   }
@@ -663,6 +738,7 @@ export class SubscriptionService {
   resetPlatforms() {
     this.platformStore_ = this.platformStore_.resetPlatformStore();
     this.renderer_.toggleLoading(true);
+    this.metering_.entitlementsWereFetchedWithCurrentMeteringState = false;
 
     this.platformStore_
       .getAvailablePlatforms()
@@ -785,11 +861,16 @@ export class SubscriptionService {
    * @private
    */
   maybeEnableMetering_() {
-    const isEnabled = !!this.platformConfig_.services.find(
+    const {services} = this.platformConfig_;
+    const meteringPlatform = services.find(
       (service) => service['enableMetering']
     );
-    if (isEnabled) {
-      this.metering_.enabled = true;
+
+    if (meteringPlatform) {
+      this.metering_ = new Metering({
+        ampdoc: this.ampdoc_,
+        platformKey: meteringPlatform.serviceId,
+      });
     }
   }
 }

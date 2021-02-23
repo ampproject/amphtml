@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AmpDoc as AmpDocDef} from '../../../src/service/ampdoc-impl';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 
@@ -35,33 +36,31 @@ const STORAGE_KEY = 'amp-subscriptions:metering-store';
  */
 let MeteringStateDef;
 
-/**
- * Callback that handles metering state saves.
- * @typedef {function(!MeteringStateDef)}
- */
-let OnSaveMeteringStateCallbackDef;
-
 /** Handles metering functionality. */
 export class Metering {
   /**
    *
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {{
+   *   ampdoc: !AmpDocDef,
+   *   platformKey: string,
+   * }} params
    */
-  constructor(ampdoc) {
+  constructor({ampdoc, platformKey}) {
     /** @private {Promise<!../../../src/service/storage-impl.Storage>} */
     this.storagePromise_ = Services.storageForDoc(ampdoc);
 
     /**
-     * Whether metering is enabled for this article.
-     * @const
+     * Answers question:
+     *   Have we fetched metering entitlements with the current metering state?
+     * @type {boolean}
      */
-    this.enabled = false;
+    this.entitlementsWereFetchedWithCurrentMeteringState = false;
 
     /**
-     * Callbacks for metering state saves.
-     * @type {!Array<!OnSaveMeteringStateCallbackDef>}
+     * Key for the subscription platform with metering enabled.
+     * @const
      */
-    this.onSaveMeteringStateCallbacks_ = [];
+    this.platformKey = platformKey;
   }
 
   /**
@@ -71,27 +70,37 @@ export class Metering {
    * @return {!Promise}
    */
   saveMeteringState(meteringState) {
-    if (!this.enabled) {
-      return Promise.resolve(null);
-    }
+    const meteringStateString = JSON.stringify(meteringState);
 
-    return (
-      this.storagePromise_
-        .then((storage) =>
-          storage.setNonBoolean(STORAGE_KEY, JSON.stringify(meteringState))
-        )
-        .then(() => {
-          // Execute callbacks
-          this.onSaveMeteringStateCallbacks_.forEach((callback) =>
-            callback(meteringState)
-          );
-        })
-        // Do nothing if we fail to write to localstorage.
-        .catch((err) => {
-          console.log(err);
-          dev().warn(TAG, 'Failed to save metering state.');
-        })
+    const meteringStateChangedPromise = this.loadMeteringStateString_().then(
+      (existingMeteringStateString) =>
+        meteringStateString !== existingMeteringStateString
     );
+
+    return meteringStateChangedPromise.then((meteringStateChanged) => {
+      if (!meteringStateChanged) {
+        // Bail. Fetching metering entitlements again is redundant,
+        // until the metering state changes.
+        return Promise.resolve();
+      }
+
+      return (
+        this.storagePromise_
+          // Save state.
+          .then((storage) =>
+            storage.setNonBoolean(STORAGE_KEY, JSON.stringify(meteringState))
+          )
+          // Reset flag.
+          .then(() => {
+            this.entitlementsWereFetchedWithCurrentMeteringState = false;
+          })
+          // Handle failure.
+          .catch((err) => {
+            console.log(err);
+            dev().warn(TAG, 'Failed to save metering state.');
+          })
+      );
+    });
   }
 
   /**
@@ -100,17 +109,11 @@ export class Metering {
    * @return {!Promise<?MeteringStateDef>}
    */
   loadMeteringState() {
-    if (!this.enabled) {
-      return Promise.resolve(null);
-    }
-
     return (
-      this.storagePromise_
-        .then((storage) => storage.get(STORAGE_KEY))
-        // Default to null.
-        .then((value) => value || null)
-        .then(JSON.parse)
-        // Return an empty object if we fail to load from localstorage.
+      this.loadMeteringStateString_()
+        // Parse state.
+        .then((value) => (value && JSON.parse(value)) || null)
+        // Handle failure.
         .catch((err) => {
           console.error(err);
           dev().warn(TAG, 'Failed to load metering state.');
@@ -120,10 +123,12 @@ export class Metering {
   }
 
   /**
-   * Registers a callback for handling metering state saves.
-   * @param {!OnSaveMeteringStateCallbackDef} callback
+   * Loads metering state string (unparsed) for a given publication ID.
+   *
+   * @private
+   * @return {!Promise<string|undefined>}
    */
-  setOnSaveMeteringState(callback) {
-    this.onSaveMeteringStateCallbacks_.push(callback);
+  loadMeteringStateString_() {
+    return this.storagePromise_.then((storage) => storage.get(STORAGE_KEY));
   }
 }
