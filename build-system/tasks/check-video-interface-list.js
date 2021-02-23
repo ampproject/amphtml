@@ -21,21 +21,34 @@ const {getStdout} = require('../common/process');
 const {log, logWithoutTimestamp} = require('../common/logging');
 const {readFile, writeFile} = require('fs-extra');
 
+/** Checks or updates 3rd party video player list on this Markdown file. */
 const filepath = 'spec/amp-video-interface.md';
 
+/** Excludes these extensions since they're on a separate list. */
 const excludeGeneric = ['amp-video', 'amp-video-iframe'];
 
-const grepJsContent = '"@implements {.*VideoInterface}"';
+/** Determines whether a file belongs to an extension that should be listed. */
+const grepJsContent = '@implements {.*VideoInterface}';
 
+/** Finds extension files here. */
 const grepJsFiles = 'extensions/**/*.js';
 
-// File should have a section containing only entries.
-// - [amp-whatever](https://amp.dev/documentation/components/amp-whatever)
+/**
+ * Returns a formatted list entry.
+ * @param {string} name
+ * @return {name}
+ */
 const entry = (name) =>
   `-   [${name}](https://amp.dev/documentation/components/${name})`;
 
+/**
+ * Generates Markdown list by finding matching extensions.
+ * @return {string}
+ */
 const generateList = () =>
-  getStdout(['grep -lr', grepJsContent, ...globby.sync(grepJsFiles)].join(' '))
+  getStdout(
+    ['grep -lr', `"${grepJsContent}"`, ...globby.sync(grepJsFiles)].join(' ')
+  )
     .trim()
     .split('\n')
     .map((path) => path.substr('extensions/'.length).split('/').shift())
@@ -43,6 +56,11 @@ const generateList = () =>
     .map(entry)
     .join('\n');
 
+/**
+ * Returns a RegExp that matches the existing list.
+ * @param {string} name
+ * @return {RegExp}
+ */
 function getListRegExp() {
   const entryRegExpPart = entry('$NAME')
     .replace(/[\[\]\(\)]/g, (c) => `\\${c}`)
@@ -54,6 +72,12 @@ function getListRegExp() {
   );
 }
 
+/**
+ * Diffs an existing file with content that might replace it.
+ * @param {string} filepath
+ * @param {string} content
+ * @return {string}
+ */
 async function diffTentative(filepath, content) {
   const temporary = await tempy.write(content);
   return getStdout(
@@ -61,6 +85,9 @@ async function diffTentative(filepath, content) {
   ).replace(new RegExp(temporary, 'g'), `/${filepath}`);
 }
 
+/**
+ * Checks or updates 3rd party video player list.
+ */
 async function checkVideoInterfaceList() {
   const content = (await readFile(filepath)).toString('utf-8');
   const output = content.replace(getListRegExp(), generateList());
@@ -92,7 +119,7 @@ module.exports = {
   checkVideoInterfaceList,
 };
 
-checkVideoInterfaceList.description = `Check or update 3rd party video player list on ${filepath}`;
+checkVideoInterfaceList.description = `Checks or updates 3rd party video player list on ${filepath}`;
 
 checkVideoInterfaceList.flags = {
   'write': '  Write to file',
