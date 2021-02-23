@@ -114,7 +114,10 @@ function YoutubeWithRef(
 
   src = addParamsToUrl(src, params);
 
-  // Passed through to imperative handle below.
+  /**
+   * These fields can be overridden by `infoDelivery` messages below.
+   * @const {{current: !JsonObject}}
+   */
   const infoRef = useRef(
     dict({
       'currentTime': 0,
@@ -124,14 +127,14 @@ function YoutubeWithRef(
 
   useImperativeHandle(
     ref,
-    () => {
-      const handle = {};
-      for (const key in infoRef.current) {
-        const get = () => infoRef.current[key];
-        Object.defineProperty(handle, key, {get});
-      }
-      return handle;
-    },
+    () => ({
+      get currentTime() {
+        return infoRef.current['currentTime'];
+      },
+      get duration() {
+        return infoRef.current['duration'];
+      },
+    }),
     [infoRef]
   );
 
