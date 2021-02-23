@@ -19,10 +19,8 @@ const babelify = require('babelify');
 const browserify = require('browserify');
 const depCheckConfig = require('../test-configs/dep-check-config');
 const fs = require('fs-extra');
-const gulp = require('gulp');
 const minimatch = require('minimatch');
 const path = require('path');
-const source = require('vinyl-source-stream');
 const through = require('through2');
 const {
   createCtrlcHandler,
@@ -33,8 +31,7 @@ const {css} = require('./css');
 const {cyan, red, yellow} = require('kleur/colors');
 const {log, logLocalDev} = require('../common/logging');
 
-const root = process.cwd();
-const absPathRegExp = new RegExp(`^${root}/`);
+const depCheckDir = '.amp-dep-check';
 
 /**
  * @typedef {{
@@ -155,68 +152,50 @@ Rule.prototype.matchBadDeps = function (moduleName, deps) {
 const rules = depCheckConfig.rules.map((config) => new Rule(config));
 
 /**
- * Returns a list of entryPoint modules.
- * extensions/{$extension}/{$version}/{$extension}.js
- * src/amp.js
- * 3p/integration.js
- *
- * @return {!Promise<!Array<string>>}
+ * Returns a single module that contains a list of entry points to these files:
+ * - extensions/{$extension}/{$version}/{$extension}.js
+ * - src/amp.js
+ * - 3p/integration.js
+ * @return {string}
  */
-function getSrcs() {
-  return fs
-    .readdir('extensions')
-    .then((dirItems) => {
-      // Look for extension entry points
-      return flatten(
-        dirItems
-          .map((x) => `extensions/${x}`)
-          .filter((x) => fs.statSync(x).isDirectory())
-          .map(getEntryModule)
-          // Concat the core binary and integration binary as entry points.
-          .concat('src/amp.js', '3p/integration.js')
-      );
-    })
-    .then((files) => {
-      // Write all the entry modules into a single file so they can be processed
-      // together.
-      fs.mkdirpSync('./.amp-build');
-      const filename = './.amp-build/gulp-dep-check-collection.js';
-      fs.writeFileSync(
-        filename,
-        files
-          .map((file) => {
-            return `import '../${file}';`;
-          })
-          .join('\n')
-      );
-      return [filename];
-    });
+async function getEntryPointModule() {
+  const coreBinaries = ['src/amp.js', '3p/integration.js'];
+  const extensions = await fs.promises.readdir('extensions');
+  const extensionEntryPoints = extensions
+    .map((x) => `extensions/${x}`)
+    .filter((x) => fs.statSync(x).isDirectory())
+    .map(getEntryPoint);
+  const allEntryPoints = flatten(extensionEntryPoints).concat(coreBinaries);
+  await fs.ensureDir(depCheckDir);
+  const entryPointModule = path.join(depCheckDir, 'entry-point-module.js');
+  const entryPointData = allEntryPoints
+    .map((file) => `import '../${file}';`)
+    .join('\n');
+  await fs.promises.writeFile(entryPointModule, entryPointData);
+  log('Added all entry points to', cyan(entryPointModule));
+  return entryPointModule;
 }
 
 /**
- * @param {string} entryModule
+ * @param {string} entryPointModule
  * @return {!Promise<!ModuleDef>}
  */
-function getGraph(entryModule) {
+function getModuleGraph(entryPointModule) {
   let resolve;
   const promise = new Promise((r) => {
     resolve = r;
   });
-  const module = Object.create(null);
-  module.name = entryModule;
-  module.deps = [];
 
-  // TODO(erwinm): Try and work this in with `gulp build` so that
-  // we're not running browserify twice during CI.
-  const bundler = browserify(entryModule, {
-    debug: true,
-    fast: true,
-  }).transform(babelify, {caller: {name: 'dep-check'}, global: true});
+  const moduleGraph = Object.create(null);
+  moduleGraph.name = entryPointModule;
+  moduleGraph.deps = [];
 
+  const bundleFile = path.join(depCheckDir, 'entry-point-bundle.js');
+  const bundler = browserify();
   bundler.pipeline.get('deps').push(
     through.obj(function (row, _enc, next) {
-      module.deps.push({
-        name: row.file.replace(absPathRegExp, ''),
+      moduleGraph.deps.push({
+        name: relative(row.file),
         deps: row.deps,
       });
       this.push(row);
@@ -224,12 +203,13 @@ function getGraph(entryModule) {
     })
   );
   bundler
+    .add(entryPointModule)
+    .transform(babelify, {caller: {name: 'dep-check'}, global: true})
     .bundle()
-    .pipe(source(entryModule))
-    // Unfortunately we need to write the files out.
-    .pipe(gulp.dest('./.amp-build'))
-    .on('end', () => {
-      resolve(module);
+    .pipe(fs.createWriteStream(bundleFile))
+    .on('close', () => {
+      log('Extracted module graph from', cyan(bundleFile));
+      resolve(moduleGraph);
     });
   return promise;
 }
@@ -238,7 +218,7 @@ function getGraph(entryModule) {
  * @param {string} extensionFolder
  * @return {!Array<!ModuleDef>}
  */
-function getEntryModule(extensionFolder) {
+function getEntryPoint(extensionFolder) {
   const extension = path.basename(extensionFolder);
   return fs
     .readdirSync(extensionFolder)
@@ -250,25 +230,19 @@ function getEntryModule(extensionFolder) {
 }
 
 /**
- * Flattens the graph to easily run through the Rules. Original graph
- * would be nested ModuleDef's wherein the top level are entry points
- * with nested dependencies. We flatten it so all we have are individual
- * modules and their imports as well as making the entries unique.
+ * Flattens the module dependency graph and makes its entries unique. This
+ * serves as the input on which all rules are tested.
  *
  * @param {!Array<!ModuleDef>} entryPoints
  * @return {!ModuleDef}
  */
 function flattenGraph(entryPoints) {
-  // Flatten the graph by just getting all the deps from all
-  // the entry points.
-  entryPoints = entryPoints.map((entryPoint) => entryPoint.deps);
-  // Now make the graph have unique entries
-  return flatten(entryPoints).reduce((acc, cur) => {
+  return flatten(entryPoints.deps).reduce((acc, cur) => {
     const {name} = cur;
     if (!acc[name]) {
       acc[name] = Object.keys(cur.deps)
         // Get rid of the absolute path for minimatch'ing
-        .map((x) => cur.deps[x].replace(absPathRegExp, ''));
+        .map((x) => relative(cur.deps[x]));
     }
     return acc;
   }, Object.create(null));
@@ -277,12 +251,12 @@ function flattenGraph(entryPoints) {
 /**
  * Run Module dependency graph against the rules.
  *
- * @param {!ModuleDef} modules
+ * @param {!ModuleDef} moduleGraph
  * @return {boolean} true if violations were discovered.
  */
-function runRules(modules) {
+function runRules(moduleGraph) {
   const errors = [];
-  Object.entries(modules).forEach(([moduleName, deps]) => {
+  Object.entries(moduleGraph).forEach(([moduleName, deps]) => {
     // Run Rules against the modules and flatten for reporting.
     const results = rules.flatMap((rule) => rule.run(moduleName, deps));
     errors.push(...results);
@@ -306,28 +280,18 @@ async function depCheck() {
   await css();
   await compileJison();
   logLocalDev('Checking dependencies...');
-  return getSrcs()
-    .then((entryPoints) => {
-      // This check is for extension folders that actually dont have
-      // an extension entry point module yet.
-      entryPoints = entryPoints.filter((x) => fs.existsSync(x));
-      return Promise.all(entryPoints.map(getGraph));
-    })
-    .then(flattenGraph)
-    .then(runRules)
-    .then((errorsFound) => {
-      if (errorsFound) {
-        log(
-          yellow('NOTE:'),
-          'Valid dependencies should be added whereas unused ones should be deleted. Please fix',
-          cyan('build-system/test-configs/dep-check-config.js')
-        );
-        const reason = new Error('Dependency checks failed');
-        reason.showStack = false;
-        return Promise.reject(reason);
-      }
-    })
-    .then(() => exitCtrlcHandler(handlerProcess));
+  const entryPointModule = await getEntryPointModule();
+  const moduleGraph = await getModuleGraph(entryPointModule);
+  const errorsFound = runRules(flattenGraph(moduleGraph));
+  if (errorsFound) {
+    log(
+      yellow('NOTE:'),
+      'Invalid dependencies must be removed, while valid ones must be added to',
+      cyan('build-system/test-configs/dep-check-config.js')
+    );
+    throw new Error('Dependency checks failed');
+  }
+  exitCtrlcHandler(handlerProcess);
 }
 
 /**
@@ -355,6 +319,16 @@ function toArrayOrDefault(value, defaultValue) {
  */
 function flatten(arr) {
   return [].concat.apply([], arr);
+}
+
+/**
+ * Make an absolute path relative to the repo root.
+ *
+ * @param {string} filepath
+ * @return {string}
+ */
+function relative(filepath) {
+  return path.relative(path.resolve(__dirname, '../../'), filepath);
 }
 
 module.exports = {
