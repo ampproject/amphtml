@@ -597,9 +597,9 @@ export class GoogleSubscriptionsPlatform {
      * for the page to be visible to avoid leaking that the
      * page was prerendered.
      *
-     * If the article enables metering, then it's not prerender safe.
-     * This extension can send publishers a registration request which
-     * would reveal to the publisher that the page was prerendered.
+     * If this article enables Showcase metering, then it's not prerender safe.
+     * This extension loads a publisher URL for rendering a Google Sign-In button,
+     * and this would let the publisher know the page prerendered.
      */
     return this.isGoogleViewer_ && !this.enableMetering_;
   }
