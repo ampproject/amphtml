@@ -852,7 +852,7 @@ export class AmpList extends AMP.BaseElement {
           userAssert(
             response,
             'Failed fetching JSON data: XHR Failed fetching ' +
-              `(${request.xhrUrl}): received no response.`
+              `(${this.buildElidedUrl_(request)}): received no response.`
           );
           const init = response['init'];
           if (init) {
@@ -860,7 +860,8 @@ export class AmpList extends AMP.BaseElement {
             if (status >= 300) {
               /** HTTP status codes of 300+ mean redirects and errors. */
               throw user().createError(
-                `Failed fetching JSON data (${request.xhrUrl}): HTTP error`,
+                `Failed fetching JSON data (${this.buildElidedUrl_(request)})` +
+                  ': HTTP error',
                 status
               );
             }
@@ -868,8 +869,8 @@ export class AmpList extends AMP.BaseElement {
           userAssert(
             typeof response['html'] === 'string',
             'Failed fetching JSON data: XHR Failed fetching ' +
-              `(${request.xhrUrl}): Expected response with format ` +
-              'html: <string>}. Received: ',
+              `(${this.buildElidedUrl_(request)}): Expected response with ` +
+              'format {html: <string>}. Received: ',
             response
           );
           request.fetchOpt.responseType = 'application/json';
@@ -878,7 +879,7 @@ export class AmpList extends AMP.BaseElement {
         (error) => {
           throw user().createError(
             'Failed fetching JSON data: XHR Failed fetching ' +
-              `(${request.xhrUrl})`,
+              `(${this.buildElidedUrl_(request)})`,
             error
           );
         }
@@ -890,6 +891,17 @@ export class AmpList extends AMP.BaseElement {
         }
         return this.scheduleRender_(data, /* append */ false);
       });
+  }
+
+  /**
+   * Builds an elided, shortened URL suitable for display in error messages from
+   * the given request.
+   * @param {!FetchRequestDef} request
+   * @return {string}
+   */
+  buildElidedUrl_(request) {
+    const url = Services.urlForDoc(this.element).parse(request.xhrUrl);
+    return `${url.origin}/...`;
   }
 
   /**
