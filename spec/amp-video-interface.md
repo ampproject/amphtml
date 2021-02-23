@@ -16,22 +16,33 @@ these players implement.
 
 ### For 3rd party services
 
--   [amp-3q-player](https://amp.dev/documentation/components/amp-3q-player)
--   [amp-brid-player](https://amp.dev/documentation/components/amp-brid-player)
--   [amp-brightcove](https://amp.dev/documentation/components/amp-brightcove)
--   [amp-dailymotion](https://amp.dev/documentation/components/amp-dailymotion)
--   [amp-delight-player](https://amp.dev/documentation/components/amp-delight-player)
--   [amp-gfycat](https://amp.dev/documentation/components/amp-gfycat)
--   [amp-ima-video](https://amp.dev/documentation/components/amp-ima-video)
--   [amp-minute-media-player](https://amp.dev/documentation/components/amp-minute-media-player)
--   [amp-mowplayer](https://amp.dev/documentation/components/amp-mowplayer)
--   [amp-nexxtv-player](https://amp.dev/documentation/components/amp-nexxtv-player)
--   [amp-ooyala-player](https://amp.dev/documentation/components/amp-ooyala-player)
--   [amp-powr-player](https://amp.dev/documentation/components/amp-powr-player)
--   [amp-vimeo](https://amp.dev/documentation/components/amp-vimeo)
--   [amp-viqeo-player](https://amp.dev/documentation/components/amp-viqeo-player)
--   [amp-wistia-player](https://amp.dev/documentation/components/amp-wistia-player)
--   [amp-youtube](https://amp.dev/documentation/components/amp-youtube)
+<!--
+  The following list is generated automatically:
+
+    gulp check-video-interface-list --fix
+
+  These link to Github instead of amp.dev since we couldn't otherwise check
+  existence of links to extensions added in a pull request.
+-->
+
+-   [amp-3q-player](https://github.com/ampproject/amphtml/blob/master/extensions/amp-3q-player/amp-3q-player.md)
+-   [amp-brid-player](https://github.com/ampproject/amphtml/blob/master/extensions/amp-brid-player/amp-brid-player.md)
+-   [amp-brightcove](https://github.com/ampproject/amphtml/blob/master/extensions/amp-brightcove/amp-brightcove.md)
+-   [amp-dailymotion](https://github.com/ampproject/amphtml/blob/master/extensions/amp-dailymotion/amp-dailymotion.md)
+-   [amp-delight-player](https://github.com/ampproject/amphtml/blob/master/extensions/amp-delight-player/amp-delight-player.md)
+-   [amp-gfycat](https://github.com/ampproject/amphtml/blob/master/extensions/amp-gfycat/amp-gfycat.md)
+-   [amp-ima-video](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ima-video/amp-ima-video.md)
+-   [amp-jwplayer](https://github.com/ampproject/amphtml/blob/master/extensions/amp-jwplayer/amp-jwplayer.md)
+-   [amp-minute-media-player](https://github.com/ampproject/amphtml/blob/master/extensions/amp-minute-media-player/amp-minute-media-player.md)
+-   [amp-mowplayer](https://github.com/ampproject/amphtml/blob/master/extensions/amp-mowplayer/amp-mowplayer.md)
+-   [amp-nexxtv-player](https://github.com/ampproject/amphtml/blob/master/extensions/amp-nexxtv-player/amp-nexxtv-player.md)
+-   [amp-ooyala-player](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ooyala-player/amp-ooyala-player.md)
+-   [amp-powr-player](https://github.com/ampproject/amphtml/blob/master/extensions/amp-powr-player/amp-powr-player.md)
+-   [amp-redbull-player](https://github.com/ampproject/amphtml/blob/master/extensions/amp-redbull-player/amp-redbull-player.md)
+-   [amp-vimeo](https://github.com/ampproject/amphtml/blob/master/extensions/amp-vimeo/amp-vimeo.md)
+-   [amp-viqeo-player](https://github.com/ampproject/amphtml/blob/master/extensions/amp-viqeo-player/amp-viqeo-player.md)
+-   [amp-wistia-player](https://github.com/ampproject/amphtml/blob/master/extensions/amp-wistia-player/amp-wistia-player.md)
+-   [amp-youtube](https://github.com/ampproject/amphtml/blob/master/extensions/amp-youtube/amp-youtube.md)
 
 <a id="analytics"></a>
 
