@@ -23,7 +23,7 @@ import {dict} from '../../../src/utils/object';
 import {dispatchCustomEvent} from '../../../src/dom';
 import {forwardRef} from '../../../src/preact/compat';
 import {mutedOrUnmutedEvent, objOrParseJson} from '../../../src/iframe-video';
-import {useImperativeHandle, useRef} from '../../../src/preact';
+import {useImperativeHandle, useState} from '../../../src/preact';
 
 // Correct PlayerStates taken from
 // https://developers.google.com/youtube/iframe_api_reference#Playback_status
@@ -61,6 +61,18 @@ const PlayerFlags = {
 
 /** @const {!../../../src/dom.CustomEventOptionsDef} */
 const VIDEO_EVENT_OPTIONS = {bubbles: false, cancelable: false};
+
+/**
+ * Created once per component mount.
+ * The fields returned can be overridden by `infoDelivery` messages.
+ * @return {!JsonObject}
+ */
+function createDefaultInfo() {
+  return dict({
+    'currentTime': 0,
+    'duration': NaN,
+  });
+}
 
 /**
  * @param {!YoutubeProps} props
@@ -114,28 +126,19 @@ function YoutubeWithRef(
 
   src = addParamsToUrl(src, params);
 
-  /**
-   * These fields can be overridden by `infoDelivery` messages below.
-   * @const {{current: !JsonObject}}
-   */
-  const infoRef = useRef(
-    dict({
-      'currentTime': 0,
-      'duration': NaN,
-    })
-  );
+  const [info] = useState(createDefaultInfo);
 
   useImperativeHandle(
     ref,
     () => ({
       get currentTime() {
-        return infoRef.current['currentTime'];
+        return info['currentTime'];
       },
       get duration() {
-        return infoRef.current['duration'];
+        return info['duration'];
       },
     }),
-    [infoRef]
+    [info]
   );
 
   const onMessage = ({data, currentTarget}) => {
@@ -144,24 +147,24 @@ function YoutubeWithRef(
       return;
     }
 
-    const {'event': event, 'info': info} = parsedData;
+    const {'event': event, 'info': parsedInfo} = parsedData;
 
     if (event == 'initialDelivery') {
       dispatchVideoEvent(currentTarget, VideoEvents.LOADEDMETADATA);
       return;
     }
 
-    if (!info) {
+    if (!parsedInfo) {
       return;
     }
 
-    for (const key in infoRef.current) {
-      if (info[key] != null) {
-        infoRef.current[key] = info[key];
+    for (const key in info) {
+      if (parsedInfo[key] != null) {
+        info[key] = parsedInfo[key];
       }
     }
 
-    const playerState = info['playerState'];
+    const playerState = parsedInfo['playerState'];
     if (event == 'infoDelivery' && playerState == 0 && loop) {
       currentTarget.contentWindow./*OK*/ postMessage(
         JSON.stringify(
@@ -176,8 +179,11 @@ function YoutubeWithRef(
     if (event == 'infoDelivery' && playerState != undefined) {
       dispatchVideoEvent(currentTarget, PlayerStates[playerState.toString()]);
     }
-    if (event == 'infoDelivery' && info['muted']) {
-      dispatchVideoEvent(currentTarget, mutedOrUnmutedEvent(info['muted']));
+    if (event == 'infoDelivery' && parsedInfo['muted']) {
+      dispatchVideoEvent(
+        currentTarget,
+        mutedOrUnmutedEvent(parsedInfo['muted'])
+      );
       return;
     }
   };
