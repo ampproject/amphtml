@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 const argv = require('minimist')(process.argv.slice(2));
-const fastGlob = require('fast-glob');
+const globby = require('globby');
 const tempy = require('tempy');
-const {basename} = require('path');
+const {bold, blue, yellow} = require('kleur/colors');
 const {getStdout} = require('../common/process');
-const {green, red} = require('kleur/colors');
 const {log, logWithoutTimestamp} = require('../common/logging');
-const {readFileSync, writeFileSync} = require('fs-extra');
-
-const TASK = 'video-interface-list';
+const {readFile, writeFile} = require('fs-extra');
 
 const filepath = 'spec/amp-video-interface.md';
 
@@ -38,9 +35,7 @@ const entry = (name) =>
   `-   [${name}](https://amp.dev/documentation/components/${name})`;
 
 const findVideoInterfaceExtensions = () =>
-  getStdout(
-    ['grep -lr', grepJsContent, ...fastGlob.sync(grepJsFiles)].join(' ')
-  )
+  getStdout(['grep -lr', grepJsContent, ...globby.sync(grepJsFiles)].join(' '))
     .trim()
     .split('\n')
     .map((path) => path.substr('extensions/'.length).split('/').shift())
@@ -85,43 +80,46 @@ function expected(content) {
   );
 }
 
-async function videoInterfaceList() {
-  const content = readFileSync(filepath).toString();
+async function diffTentative(filepath, content) {
+  const temporary = await tempy.write(content);
+  return getStdout(
+    `git -c color.ui=always diff -U1 ${filepath} ${temporary}`
+  ).replace(new RegExp(temporary, 'g'), `/${filepath}`);
+}
+
+async function checkVideoInterfaceList() {
+  const content = (await readFile(filepath)).toString('utf-8');
   const output = expected(content);
 
   if (output === content) {
     return;
   }
 
-  const temporary = tempy.file({name: basename(filepath)});
-
-  writeFileSync(temporary, output);
-
-  const diff = getStdout(`diff --unified ${filepath} ${temporary}`)
-    // we don't want to output the ugly temporary name
-    .replace(temporary, filepath);
-
   log(
-    argv.write
-      ? green(`Wrote ${filepath}:`)
-      : red(`${filepath} requires changes:`)
+    bold(
+      argv.write
+        ? blue(`Writing to ${filepath}:`)
+        : yellow(`${filepath} requires changes:`)
+    )
   );
 
-  logWithoutTimestamp(diff);
+  logWithoutTimestamp(await diffTentative(filepath, output));
 
   if (!argv.write) {
-    throw new Error(`You should update this file:\n\tgulp ${TASK} --write\n`);
+    throw new Error(
+      `You should apply these changes by running:\n\tgulp check-video-interface-list --write\n`
+    );
   }
 
-  writeFileSync(filepath, output);
+  await writeFile(filepath, output);
 }
 
 module.exports = {
-  [TASK]: videoInterfaceList,
+  checkVideoInterfaceList,
 };
 
-videoInterfaceList.description = `Check or update list on ${filepath}`;
+checkVideoInterfaceList.description = `Check or update 3rd party video player list on ${filepath}`;
 
-videoInterfaceList.flags = {
-  'write': 'Write to file',
+checkVideoInterfaceList.flags = {
+  'write': '  Write to file',
 };
