@@ -53,22 +53,23 @@ register('oc', oc);
  */
 export function getLocale(locale) {
   locale = locale.toLowerCase();
-  if (locale === 'en') {
-    return 'en_US';
+  if (nonStandardReplacements[locale]) {
+    return nonStandardReplacements[locale];
   }
-  if (locale === 'enshort' || locale === 'en-short') {
-    return 'en_short';
-  }
-  if (locale === 'inID') {
-    return 'id_ID';
-  }
-  if (locale.length === 4) {
-    return `${locale.slice(0, 2).toLowerCase()}_${locale.slice(2).toUpperCase()}`
-  }
-  if (locale.length === 5) {
-    const localeParts = locale.split('-');
-    localeParts[1] = localeParts[1].toUpperCase();
-    return localeParts.join('_');
+  if (
+    locale.length === 4 /* without '-|_' */ ||
+    locale.length === 5 /* with '-|_' */
+  ) {
+    return `${locale.slice(0, 2)}_${locale.slice(-2).toUpperCase()}`;
   }
   return locale;
 }
+
+const nonStandardReplacements = {
+  'en': 'en_US',
+  'enshort': 'en_short',
+  'en-short': 'en_short',
+  'inbg': 'bn_IN',
+  'inid': 'id_ID',
+  'inhi': 'hi_IN',
+};

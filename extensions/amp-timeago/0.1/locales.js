@@ -52,34 +52,24 @@ register('oc', oc);
  * @return {string}
  */
 export function getLocale(locale) {
-  switch (locale) {
-    case 'en':
-      return 'en_US';
-    case 'enShort':
-      return 'en_short';
-    case 'inBG':
-      return 'bn_IN';
-    case 'inID':
-      return 'id_ID';
-    case 'inHI':
-      return 'hi_IN';
-    case 'nbNO':
-      return 'nb_NO';
-    case 'nnNO':
-      return 'nn_NO';
-    case 'ptBR':
-      return 'pt_BR';
-    case 'zhCN':
-      return 'zh_CN';
-    case 'zhTW':
-      return 'zh_TW';
-    default:
-      // Note: This line both supports en_Short -> en_short, and consequently
-      // invalidates default formatting provided by timeago.js. i.e. "zh_CN"
-      // locale value will not work as it becomes "zh_cn", and the
-      // registration is case sensitive. If we want to expand the set of
-      // supported formats to those that are already supported by the
-      // timeago.js library, we should remove `toLocaleLowerCase`.
-      return locale.toLocaleLowerCase();
+  locale = locale.toLowerCase();
+  if (nonStandardReplacements[locale]) {
+    return nonStandardReplacements[locale];
   }
+  if (
+    locale.length === 4 /* without '-|_' */ ||
+    locale.length === 5 /* with '-|_' */
+  ) {
+    return `${locale.slice(0, 2)}_${locale.slice(-2).toUpperCase()}`;
+  }
+  return locale;
 }
+
+const nonStandardReplacements = {
+  'en': 'en_US',
+  'enshort': 'en_short',
+  'en-short': 'en_short',
+  'inbg': 'bn_IN',
+  'inid': 'id_ID',
+  'inhi': 'hi_IN',
+};
