@@ -97,7 +97,7 @@ function getOptions(element, mu) {
       (el) =>
         !closestAncestorElementBySelector(
           devAssert(
-            el.parentElement?.nodeType == 1 && el.parentElement,
+            el.parentElement?.nodeType == 1,
             'Expected an element'
           ),
           '[option]'
