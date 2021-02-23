@@ -34,49 +34,23 @@ const grepJsFiles = 'extensions/**/*.js';
 const entry = (name) =>
   `-   [${name}](https://amp.dev/documentation/components/${name})`;
 
-const findVideoInterfaceExtensions = () =>
+const generateList = () =>
   getStdout(['grep -lr', grepJsContent, ...globby.sync(grepJsFiles)].join(' '))
     .trim()
     .split('\n')
     .map((path) => path.substr('extensions/'.length).split('/').shift())
-    .filter((name) => !excludeGeneric.includes(name));
+    .filter((name) => !excludeGeneric.includes(name))
+    .map(entry)
+    .join('\n');
 
-function getSectionRange(content) {
-  const entryRegExp = new RegExp(
-    entry('$NAME')
-      .replace(/[\[\]\(\)]/g, (c) => `\\${c}`)
-      .replace(/\$NAME/g, '([a-z0-9-]+)') + '[\\n\\s]+',
+function getListRegExp() {
+  const entryRegExpPart = entry('$NAME')
+    .replace(/[\[\]\(\)]/g, (c) => `\\${c}`)
+    .replace(/\$NAME/g, `((?!${excludeGeneric.join('|')})[a-z0-9-])+`);
+
+  return new RegExp(
+    `(${entryRegExpPart}[\\n\\s]+)*(${entryRegExpPart})`,
     'gim'
-  );
-
-  let match;
-  let sectionStart = -1;
-  let sectionEnd = 0;
-  while ((match = entryRegExp.exec(content)) !== null) {
-    const [line, name] = match;
-    const {index} = match;
-    if (excludeGeneric.includes(name)) {
-      continue;
-    }
-    if (sectionStart < 0) {
-      sectionStart = index;
-      sectionEnd = index;
-    }
-    if (sectionEnd < index) {
-      break;
-    }
-    sectionEnd += line.length;
-  }
-  return [sectionStart, sectionEnd];
-}
-
-function expected(content) {
-  const [sectionStart, sectionEnd] = getSectionRange(content);
-  return (
-    content.substr(0, sectionStart) +
-    findVideoInterfaceExtensions().map(entry).join('\n') +
-    '\n\n' +
-    content.substr(sectionEnd)
   );
 }
 
@@ -89,7 +63,7 @@ async function diffTentative(filepath, content) {
 
 async function checkVideoInterfaceList() {
   const content = (await readFile(filepath)).toString('utf-8');
-  const output = expected(content);
+  const output = content.replace(getListRegExp(), generateList());
 
   if (output === content) {
     return;
