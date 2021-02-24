@@ -28,8 +28,13 @@ import {CommonSignals} from '../../../src/common-signals';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {Matrix, Renderer} from '../../../third_party/zuho/zuho';
 import {Services} from '../../../src/services';
-import {closest, whenUpgradedToCustomElement} from '../../../src/dom';
+import {
+  closest,
+  createElementWithAttributes,
+  whenUpgradedToCustomElement,
+} from '../../../src/dom';
 import {dev, user, userAssert} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenOncePromise} from '../../../src/event-helper';
@@ -352,7 +357,16 @@ export class AmpStory360 extends AMP.BaseElement {
     }
 
     const container = this.element.ownerDocument.createElement('div');
-    this.canvas_ = this.element.ownerDocument.createElement('canvas');
+    const altText = (
+      this.element.querySelector('amp-img') ||
+      this.element.querySelector('amp-video')
+    ).getAttribute('alt-text');
+    this.canvas_ = createElementWithAttributes(
+      this.element.ownerDocument,
+      'canvas',
+      dict({'role': 'img', 'aria-label': altText})
+    );
+
     this.element.appendChild(container);
     container.appendChild(this.canvas_);
     this.applyFillContent(container, /* replacedContent */ true);
