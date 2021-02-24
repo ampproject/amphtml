@@ -24,11 +24,19 @@ const {writeFile} = require('fs-extra');
  * Diffs a file against content that might replace it.
  * @param {string} filepath
  * @param {string} content
+ * @param {Array<string>=} gitDiffFlags
  * @return {!Promise<string>}
  */
-const diffTentative = (filepath, content) =>
+const diffTentative = (filepath, content, gitDiffFlags = ['-U1']) =>
   tempy.write.task(content, (temporary) =>
-    getStdout(`git -c color.ui=always diff -U1 ${filepath} ${temporary}`)
+    getStdout(
+      [
+        'git -c color.ui=always diff',
+        ...gitDiffFlags,
+        filepath,
+        temporary,
+      ].join(' ')
+    )
       .trim()
       .replace(new RegExp(temporary, 'g'), `/${filepath}`)
   );
@@ -40,9 +48,15 @@ const diffTentative = (filepath, content) =>
  * @param {string} callerTask
  * @param {string} filepath
  * @param {string} tentative
+ * @param {Array<string>=} opt_gitDiffFlags
  */
-async function writeDiffOrFail(callerTask, filepath, tentative) {
-  const diff = await diffTentative(filepath, tentative);
+async function writeDiffOrFail(
+  callerTask,
+  filepath,
+  tentative,
+  opt_gitDiffFlags
+) {
+  const diff = await diffTentative(filepath, tentative, opt_gitDiffFlags);
 
   if (!diff.length) {
     return;
