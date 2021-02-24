@@ -186,7 +186,7 @@ describes.sandboxed('Extensions', {}, () => {
 
     it('should add element in registration', () => {
       const ctor = function () {};
-      ctor.usesShadowDom = () => false;
+      ctor.reqiuresShadowDom = () => false;
       extensions.registerExtension(
         'amp-ext',
         () => {
@@ -593,7 +593,7 @@ describes.sandboxed('Extensions', {}, () => {
 
     it('should load extension class via load extension', () => {
       const ctor = function () {};
-      ctor.usesShadowDom = () => false;
+      ctor.reqiuresShadowDom = () => false;
       extensions.registerExtension(
         'amp-ext',
         () => {

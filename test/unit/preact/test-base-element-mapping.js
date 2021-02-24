@@ -340,8 +340,8 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       `;
     });
 
-    it('should return usesShadowDom', () => {
-      expect(Impl.usesShadowDom()).to.be.true;
+    it('should return reqiuresShadowDom', () => {
+      expect(Impl.reqiuresShadowDom()).to.be.true;
     });
 
     it('should render from scratch', async () => {
@@ -454,8 +454,8 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       element.addEventListener('amp:dom-update', updateEventSpy);
     });
 
-    it('should return usesShadowDom', () => {
-      expect(Impl.usesShadowDom()).to.be.false;
+    it('should return reqiuresShadowDom', () => {
+      expect(Impl.reqiuresShadowDom()).to.be.false;
     });
 
     it('should render from scratch', async () => {
@@ -605,8 +605,8 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       await waitFor(() => component.callCount > 0, 'component rendered');
     });
 
-    it('should return usesShadowDom', () => {
-      expect(Impl.usesShadowDom()).to.be.true;
+    it('should return reqiuresShadowDom', () => {
+      expect(Impl.reqiuresShadowDom()).to.be.true;
     });
 
     it('should render into shadow DOM', () => {
@@ -845,8 +845,8 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       await waitFor(() => component.callCount > 0, 'component rendered');
     });
 
-    it('should return usesShadowDom', () => {
-      expect(Impl.usesShadowDom()).to.be.true;
+    it('should return reqiuresShadowDom', () => {
+      expect(Impl.reqiuresShadowDom()).to.be.true;
     });
 
     it('should render into shadow DOM', () => {
@@ -927,8 +927,8 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       await waitFor(() => component.callCount > 0, 'component rendered');
     });
 
-    it('should return usesShadowDom', () => {
-      expect(Impl.usesShadowDom()).to.be.true;
+    it('should return reqiuresShadowDom', () => {
+      expect(Impl.reqiuresShadowDom()).to.be.true;
     });
 
     it('should render into shadow DOM', () => {

@@ -143,7 +143,7 @@ export class BaseElement {
    * @return {boolean}
    * @nocollapse
    */
-  static usesShadowDom() {
+  static reqiuresShadowDom() {
     return false;
   }
 
