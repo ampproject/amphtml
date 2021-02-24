@@ -188,7 +188,7 @@ class AmpStickyAd extends AMP.BaseElement {
    */
   scheduleLayoutForAd_() {
     whenUpgradedToCustomElement(dev().assertElement(this.ad_)).then((ad) => {
-      ad.build().then(this.layoutAd_.bind(this));
+      ad.build().then(() => this.layoutAd_());
     });
   }
 
