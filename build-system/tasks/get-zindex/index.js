@@ -20,7 +20,8 @@ const globby = require('globby');
 const path = require('path');
 const postcss = require('postcss');
 const prettier = require('prettier');
-const table = require('text-table');
+const textTable = require('text-table');
+const {writeDiffOrFail} = require('../../common/diff');
 
 const tableHeaders = [
   ['selector', 'z-index', 'file'],
@@ -32,7 +33,7 @@ const tableOptions = {
   hsep: '   |   ',
 };
 
-const preamble = 'Run `gulp get-zindex` to generate this file.';
+const preamble = '**Run `gulp get-zindex --fix` to generate this file.**';
 
 /**
  * @param {!Object<string, !Array<number>} acc accumulator object for selectors
@@ -121,9 +122,20 @@ async function getZindex() {
   const filesData = await getZindexSelectors('{css,src,extensions}/**/*.css');
   const filename = 'css/Z_INDEX.md';
   const rows = [...tableHeaders, ...createTable(filesData)];
-  const tbl = table(rows, tableOptions);
-  const output = `${preamble}\n\n${tbl}`;
-  fs.writeFileSync(filename, await prettierFormat(filename, output));
+  const table = textTable(rows, tableOptions);
+  const output = await prettierFormat(filename, `${preamble}\n\n${table}`);
+
+  await writeDiffOrFail(
+    'get-zindex',
+    filename,
+    output,
+    /* gitDiffFlags */ [
+      '-U1',
+      // Rows are formatted to align, so rows with unchanged content may change
+      // in whitespace, forcing the diff to contain the entire table.
+      '--ignore-space-change',
+    ]
+  );
 }
 
 async function prettierFormat(filename, output) {
@@ -141,3 +153,7 @@ module.exports = {
 
 getZindex.description =
   'Runs through all css files of project to gather z-index values';
+
+getZindex.flags = {
+  'fix': '  Write to file',
+};
