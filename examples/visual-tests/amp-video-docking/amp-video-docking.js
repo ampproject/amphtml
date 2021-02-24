@@ -15,23 +15,10 @@
  */
 'use strict';
 
+const {dock, scroll} = require('./_helpers');
 const {
   verifySelectorsVisible,
 } = require('../../../build-system/tasks/visual-diff/helpers');
-
-async function scroll(page, _, target = 'bottom') {
-  await page.tap(`#scroll-${target}-button`);
-
-  // Scrolling takes 500ms as defined by the runtime, and leeway.
-  await page.waitForTimeout(700);
-}
-
-async function dock(page, name) {
-  await page.tap('#play-button');
-  await page.waitForTimeout(200); // active playback
-  await scroll(page);
-  await verifySelectorsVisible(page, name, ['.amp-video-docked-shadow']);
-}
 
 async function activateControlsBy(page, name, tapOrHover) {
   if (tapOrHover == 'hover') {

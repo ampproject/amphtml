@@ -815,6 +815,27 @@
       "loading_complete_selectors": [".i-amphtml-video-interface"]
     },
     {
+      "url": "examples/visual-tests/amp-video-docking/respect-small-player-controls.html",
+      "name": "amp-video-docking (respects small player's controls)",
+      "viewport": {"width": 800, "height": 600},
+      "interactive_tests": "examples/visual-tests/amp-video-docking/respect-small-player-controls.js",
+      "loading_complete_selectors": [".i-amphtml-video-interface"]
+    },
+    {
+      "url": "examples/visual-tests/amp-video-docking/respect-small-player-controls-slot.html",
+      "name": "amp-video-docking (respects small player's controls: slot)",
+      "viewport": {"width": 800, "height": 600},
+      "interactive_tests": "examples/visual-tests/amp-video-docking/respect-small-player-controls.js",
+      "loading_complete_selectors": [".i-amphtml-video-interface"]
+    },
+    {
+      "url": "examples/visual-tests/amp-video-docking/respect-small-player-controls.html",
+      "name": "amp-video-docking (respects small player's controls: small viewport)",
+      "viewport": {"width": 375, "height": 600},
+      "interactive_tests": "examples/visual-tests/amp-video-docking/respect-small-player-controls.js",
+      "loading_complete_selectors": [".i-amphtml-video-interface"]
+    },
+    {
       "url": "examples/visual-tests/amp-story-player/back-button.html",
       "name": "amp-story-player exit control back button",
       "interactive_tests": "examples/visual-tests/amp-story-player/placeholder.js",

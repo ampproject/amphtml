@@ -59,8 +59,8 @@ import {
 
 const TAG = 'amp-video-docking';
 
-/** Ratio to viewport width to use when docked to corner. */
-export const CORNER_WIDTH_RATIO = 0.3;
+/** Target % of viewport area to cover when docked to corner. */
+export const CORNER_AREA_RATIO = 0.15;
 
 /** Min width in pixels for corner area. */
 export const CORNER_WIDTH_MIN = 180;
@@ -129,6 +129,7 @@ let DockedDef;
 
 /**
  * @struct @typedef {{
+ *   respectControls: (boolean|undefined),
  *   type: DockTargetType,
  *   rect: !RectDef,
  *   slot: (!Element|undefined),
@@ -783,7 +784,9 @@ export class VideoDocking {
       opt_inlineRect
     );
 
-    video.hideControls();
+    if (!target.respectControls) {
+      video.hideControls();
+    }
 
     const transitionDurationMs = this.calculateTransitionDuration_(step);
 
@@ -923,7 +926,7 @@ export class VideoDocking {
 
     const internalElement = getInternalVideoElementFor(element);
     const shadowLayer = this.getShadowLayer_();
-    const {overlay} = this.getControls_();
+    const controls = this.getControls_();
     const placeholderBackground = this.getPlaceholderBackground_();
     const placeholderIcon = this.getPlaceholderRefs_()['icon'];
     const hasRelativePlacement = opt_relativeX !== undefined;
@@ -1006,7 +1009,13 @@ export class VideoDocking {
       setImportantStyles(element, {'overflow': 'visible'});
 
       toggle(shadowLayer, true);
-      toggle(overlay, true);
+
+      // TODO(alanorozco): It would be nicer if these didn't get created until
+      // necessary (i.e. not at all if all players on page have their controls
+      // respected).
+      const {respectControls} = devAssert(this.currentlyDocked_).target;
+      toggle(controls.container, !respectControls);
+      toggle(controls.overlay, !respectControls);
 
       video.applyFillContent(this.getPlaceholderRefs_()['poster']);
       video.applyFillContent(placeholderBackground);
@@ -1157,7 +1166,7 @@ export class VideoDocking {
     ) {
       return;
     }
-    this.getControls_().setVideo(video, target.rect);
+    this.getControls_().setVideo(video, target.rect, target.respectControls);
     this.trigger_(Actions.DOCK, target);
   }
 
@@ -1403,7 +1412,9 @@ export class VideoDocking {
     this.reconcileUndocked_();
 
     // Show immediately due to Chrome freeze bug when out-of-view.
-    video.showControls();
+    if (!target.respectControls) {
+      video.showControls();
+    }
 
     this.placeAt_(
       video,
@@ -1456,7 +1467,9 @@ export class VideoDocking {
     ).then(() => {
       // TODO: Reuse a inlineRect
       this.undock_(video, /* reconciled */ true);
-      video.showControls();
+      if (!target.respectControls) {
+        video.showControls();
+      }
     });
   }
 
@@ -1552,22 +1565,24 @@ export class VideoDocking {
       opt_inlineRect
     );
 
+    const step = 0;
+
+    const {target} = devAssert(this.currentlyDocked_);
+
     if (!isMostlyInView) {
       video.pause();
 
       // Show controls immediately rather than after transition to work around a
       // weird Chrome bug where controls never reappear if enabled on a paused,
       // out-of-view video.
-      video.showControls();
+      if (!target.respectControls) {
+        video.showControls();
+      }
     }
 
     if (!opt_reconciled) {
       this.reconcileUndocked_();
     }
-
-    const step = 0;
-
-    const {target} = devAssert(this.currentlyDocked_);
 
     const {x, y, scale, relativeX} = this.getDims_(video, target, step);
 
@@ -1590,7 +1605,9 @@ export class VideoDocking {
       opt_inlineRect,
       /* position */ 'absolute'
     ).then(() => {
-      video.showControls();
+      if (!target.respectControls) {
+        video.showControls();
+      }
       this.resetOnUndock_(video);
     });
   }
@@ -1688,37 +1705,45 @@ export class VideoDocking {
    * @private
    */
   getUsableTarget_(video, opt_inlineRect) {
-    const slot = this.getSlot_();
     const inlineRect =
       opt_inlineRect || video.element./*OK*/ getBoundingClientRect();
 
+    let type;
+    let rect;
+    let directionX;
+
+    const slot = this.getSlot_();
+
     if (slot) {
-      return {
-        type: DockTargetType.SLOT,
-        rect: letterboxRect(inlineRect, slot./*OK*/ getBoundingClientRect()),
-        slot,
-      };
-    }
-
-    if (this.cornerDirectionX_ === null) {
-      this.cornerDirectionX_ = isRTL(this.getDoc_())
-        ? DirectionX.LEFT
-        : DirectionX.RIGHT;
-    }
-
-    return {
-      type: DockTargetType.CORNER,
-      rect: topCornerRect(
+      type = DockTargetType.SLOT;
+      rect = letterboxRect(inlineRect, slot./*OK*/ getBoundingClientRect());
+    } else {
+      if (this.cornerDirectionX_ === null) {
+        this.cornerDirectionX_ = isRTL(this.getDoc_())
+          ? DirectionX.LEFT
+          : DirectionX.RIGHT;
+      }
+      type = DockTargetType.CORNER;
+      rect = topCornerRect(
         inlineRect,
         this.viewportRect_,
         this.cornerDirectionX_,
-        CORNER_WIDTH_RATIO,
+        CORNER_AREA_RATIO,
         CORNER_WIDTH_MIN,
         CORNER_MARGIN_RATIO,
         CORNER_MARGIN_MAX
-      ),
+      );
+      directionX = this.cornerDirectionX_;
+    }
+
+    return {
+      type,
+      rect,
       // Bookkeep horizontal edge for drag-and-snap.
-      directionX: this.cornerDirectionX_,
+      directionX,
+      slot,
+      // Respect controls of players that don't shrink.
+      respectControls: rect.width === inlineRect.width,
     };
   }
 

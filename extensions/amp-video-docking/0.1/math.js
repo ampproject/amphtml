@@ -125,7 +125,7 @@ export function letterboxRect(original, container) {
  * @param {!RectDef} original
  * @param {!RectDef} container
  * @param {DirectionX} horizontalEdge
- * @param {number} widthRatio
+ * @param {number} areaRatio
  * @param {number} widthMin
  * @param {number} marginRatio
  * @param {number} marginMax
@@ -135,18 +135,30 @@ export function topCornerRect(
   original,
   container,
   horizontalEdge,
-  widthRatio,
+  areaRatio,
   widthMin,
   marginRatio,
   marginMax
 ) {
-  const widthUnit = container.width;
+  const originalArea = original.width * original.height;
+  const containerArea = container.width * container.height;
 
-  const margin = Math.min(marginMax, marginRatio * widthUnit);
+  // Try to scale original so that it covers areaRatio% of container.
+  const scale = Math.max(
+    widthMin / original.width,
+    Math.min(1, (areaRatio * containerArea) / originalArea)
+  );
+
   const aspect = original.width / original.height;
 
-  const width = Math.max(widthMin, widthUnit * widthRatio);
+  const width = Math.max(widthMin, original.width * scale);
   const height = width / aspect;
+
+  // As scaled width nears the container's width, the margin has to shrink.
+  // e.g. if the scaled original fills the container's width exactly, there's no
+  // margin.
+  const marginMin = (container.width - width) / 2;
+  const margin = Math.min(marginMin, marginMax, marginRatio * container.width);
 
   const x =
     horizontalEdge == DirectionX.RIGHT

@@ -227,7 +227,7 @@ export class Controls {
     this.area_ = null;
 
     /** @private {?../../../src/video-interface.VideoOrBaseElementDef} */
-    this.video_ = null;
+    this.media_ = null;
 
     this.hideOnTapOutside_();
     this.showOnTapOrHover_();
@@ -244,15 +244,22 @@ export class Controls {
   }
 
   /**
-   * @param {!../../../src/video-interface.VideoOrBaseElementDef} video
+   * @param {!../../../src/video-interface.VideoOrBaseElementDef} media
    * @param {!../../../src/layout-rect.LayoutRectDef} area
+   * @param {boolean} usesOwnControls
    */
-  setVideo(video, area) {
+  setVideo(media, area, usesOwnControls) {
     this.area_ = area;
 
-    if (this.video_ !== video) {
-      this.video_ = video;
-      this.listen_(video);
+    if (this.media_ === media) {
+      return;
+    }
+
+    this.media_ = media;
+    this.mediaUsesOwnControls_ = usesOwnControls;
+
+    if (!usesOwnControls) {
+      this.listen_(media);
     }
   }
 
@@ -373,7 +380,7 @@ export class Controls {
    */
   listenWhenEnabled_(element, eventType, callback) {
     return listen(element, eventType, () => {
-      if (this.isDisabled_) {
+      if (this.isDisabled_ || this.mediaUsesOwnControls_) {
         return;
       }
       callback();
@@ -414,7 +421,7 @@ export class Controls {
   /** @private */
   showOnNextAnimationFrame_() {
     const manager = Services.videoManagerForDoc(this.ampdoc_);
-    const video = devAssert(this.video_);
+    const video = devAssert(this.media_);
 
     const isRollingAd = manager.isRollingAd(video);
     const isMuted = manager.isMuted(video);
