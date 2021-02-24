@@ -302,11 +302,8 @@ function mergeHtml(spec) {
 
   const cdnBase = getMode().localDev ? 'http://localhost:8000/dist' : urls.cdn;
   const cspScriptSrc = [
-    `${cdnBase}/esm/`,
     `${cdnBase}/lts/`,
-    `${cdnBase}/mp/`,
     `${cdnBase}/rtv/`,
-    `${cdnBase}/sp/`,
     `${cdnBase}/sw/`,
   ].join(' ');
 

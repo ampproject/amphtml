@@ -279,10 +279,10 @@ export class Extensions {
    */
   importUnwrapped(win, extensionId) {
     const scriptsInHead = getExtensionScripts(win, extensionId);
-    let scriptElement = scriptsInHead[0];
+    let scriptElement = scriptsInHead.length > 0 ? scriptsInHead[0] : null;
     let promise;
     if (scriptElement) {
-      promise = Promise.resolve(scriptElement[SCRIPT_LOADED_PROP]);
+      promise = scriptElement[SCRIPT_LOADED_PROP];
     } else {
       scriptElement = this.createExtensionScript_(extensionId);
       promise = scriptElement[SCRIPT_LOADED_PROP] = new Promise(
