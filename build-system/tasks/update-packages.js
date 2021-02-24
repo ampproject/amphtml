@@ -143,7 +143,12 @@ function patchShadowDom() {
   // Wrap the contents inside the install function.
   // Also need to remove `nocompile` directive, otherwise Closure skips
   // the entire import.
-  file = `export function install() {${file.replace('@nocompile', '')}}`;
+  file = file.replace('@nocompile', '');
+  file = file.replace(
+    '"undefined"!=typeof window&&window===this?this:"undefined"!=typeof global&&null!=global?global:this',
+    'window'
+  );
+  file = `export function install() {${file}}`;
   writeIfUpdated(patchedName, file);
 }
 

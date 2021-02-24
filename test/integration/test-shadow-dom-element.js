@@ -15,6 +15,7 @@
  */
 
 import {createFixtureIframe} from '../../testing/iframe';
+import {toggleExperiment} from '../../src/experiments';
 import {whenUpgradedToCustomElement} from '../../src/dom';
 
 describe
@@ -28,6 +29,7 @@ describe
         'test/fixtures/shadow-dom-element.html',
         3000
       );
+      toggleExperiment(fixture.win, 'bento', true, true);
     });
 
     it('should create shadow root', async () => {
@@ -64,6 +66,7 @@ describe
         'test/fixtures/shadow-dom-element-polyfill.html',
         3000
       );
+      toggleExperiment(fixture.win, 'bento', true, true);
     });
 
     it('should create shadow root', async () => {
