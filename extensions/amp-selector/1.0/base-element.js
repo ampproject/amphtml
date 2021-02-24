@@ -23,8 +23,8 @@ import {
   toggleAttribute,
   tryFocus,
 } from '../../../src/dom';
+import {pureDevAssert as devAssert} from '../../../src/assert';
 import {dict} from '../../../src/utils/object';
-import {pureDevAssert} from '../../../src/pure-assert';
 import {toArray} from '../../../src/types';
 import {useCallback, useLayoutEffect, useRef} from '../../../src/preact';
 
@@ -96,10 +96,7 @@ function getOptions(element, mu) {
     .filter(
       (el) =>
         !closestAncestorElementBySelector(
-          pureDevAssert(
-            el.parentElement?.nodeType == 1 && el.parentElement,
-            'Expected an element'
-          ),
+          devAssert(el.parentElement?.nodeType == 1, 'Expected an element'),
           '[option]'
         )
     )
@@ -155,8 +152,7 @@ export function OptionShim({
         return;
       }
       shimDomElement.addEventListener(type, handler);
-      return () =>
-        shimDomElement.removeEventListener(type, pureDevAssert(handler));
+      return () => shimDomElement.removeEventListener(type, devAssert(handler));
     },
     [shimDomElement]
   );
@@ -241,7 +237,7 @@ function SelectorShim({
     }
     shimDomElement.addEventListener('keydown', onKeyDown);
     return () =>
-      shimDomElement.removeEventListener('keydown', pureDevAssert(onKeyDown));
+      shimDomElement.removeEventListener('keydown', devAssert(onKeyDown));
   }, [shimDomElement, onKeyDown]);
 
   useLayoutEffect(() => {
