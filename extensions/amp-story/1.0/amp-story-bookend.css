@@ -26,6 +26,11 @@
   color: #fff !important;
   text-align: start !important;
   z-index: 100001 !important;
+  visibility: hidden !important;
+}
+
+.i-amphtml-story-bookend[active] {
+  visibility: visible !important;
 }
 
 .i-amphtml-story-bookend-handle {
