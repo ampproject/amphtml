@@ -28,13 +28,8 @@ import {CommonSignals} from '../../../src/common-signals';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {Matrix, Renderer} from '../../../third_party/zuho/zuho';
 import {Services} from '../../../src/services';
-import {
-  closest,
-  createElementWithAttributes,
-  whenUpgradedToCustomElement,
-} from '../../../src/dom';
+import {closest, whenUpgradedToCustomElement} from '../../../src/dom';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
 import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenOncePromise} from '../../../src/event-helper';
@@ -357,20 +352,7 @@ export class AmpStory360 extends AMP.BaseElement {
     }
 
     const container = this.element.ownerDocument.createElement('div');
-    // Puts alt-text on canvas element so it can be read by screen readers.
-    // The media element is hidden with CSS it no longer can read it.
-    const altText = dev()
-      .assertElement(
-        this.element.querySelector('amp-img') ||
-          this.element.querySelector('amp-video')
-      )
-      .getAttribute('alt-text');
-    this.canvas_ = createElementWithAttributes(
-      this.element.ownerDocument,
-      'canvas',
-      dict({'role': 'img', 'aria-label': altText})
-    );
-
+    this.canvas_ = this.element.ownerDocument.createElement('canvas');
     this.element.appendChild(container);
     container.appendChild(this.canvas_);
     this.applyFillContent(container, /* replacedContent */ true);
@@ -696,6 +678,14 @@ export class AmpStory360 extends AMP.BaseElement {
       ampImgEl || this.ampVideoEl_,
       'amp-story-360 must contain an amp-img or amp-video element.'
     );
+
+    // Puts alt-text on canvas element so it can be read by screen readers.
+    // The media element is hidden with CSS it no longer can read it.
+    const altText = (ampImgEl || this.ampVideoEl_).getAttribute('alt-text');
+    if (altText) {
+      this.canvas_.setAttribute('role', 'img');
+      this.canvas_.setAttribute('aria-label', altText);
+    }
 
     if (ampImgEl) {
       return this.setupAmpImgRenderer_(ampImgEl);
