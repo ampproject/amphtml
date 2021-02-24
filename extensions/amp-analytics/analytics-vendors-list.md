@@ -335,6 +335,12 @@ Adds support for mParticle. More details for adding mParticle support can be fou
 
 Type attribute value: `mpulse`
 
+<!-- markdown-link-check-disable -->
+
+Adds support for [SOASTA mPulse](https://www.soasta.com/mPulse). Configuration details can be found at [docs.soasta.com](http://docs.soasta.com/).
+
+<!-- markdown-link-check-enable -->
+
 ### Navegg
 
 Type attribute value: `navegg`
@@ -470,12 +476,6 @@ Adds support for Sensors Data. More details for adding Sensors Data support can 
 ### ShinyStat
 
 Type attribute value: `shinystat`
-
-<!-- markdown-link-check-disable -->
-
-Adds support for [SOASTA mPulse](https://www.soasta.com/mPulse). Configuration details can be found at [docs.soasta.com](http://docs.soasta.com/).
-
-<!-- markdown-link-check-enable -->
 
 ### SimpleReach
 
