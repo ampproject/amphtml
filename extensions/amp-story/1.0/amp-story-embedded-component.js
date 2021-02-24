@@ -218,7 +218,7 @@ export const EMBED_ID_ATTRIBUTE_NAME = 'i-amphtml-embed-id';
  */
 const buildExpandedViewOverlay = (element) => htmlFor(element)`
     <div class="i-amphtml-story-expanded-view-overflow i-amphtml-story-system-reset">
-      <button class="i-amphtml-expanded-view-close-button" aria-label=""></button>
+      <button class="i-amphtml-expanded-view-close-button" aria-label="close"></button>
     </div>`;
 
 /**
@@ -681,11 +681,15 @@ export class AmpStoryEmbeddedComponent {
         '.i-amphtml-expanded-view-close-button'
       )
     );
-    const localizedCloseString =
-      getLocalizationService(devAssert(this.storyEl_)).getLocalizedString(
+    const localizationService = getLocalizationService(
+      devAssert(this.storyEl_)
+    );
+    if (localizationService) {
+      const localizedCloseString = localizationService.getLocalizedString(
         LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL
-      ) || 'Close';
-    closeButton.setAttribute('aria-label', localizedCloseString);
+      );
+      closeButton.setAttribute('aria-label', localizedCloseString);
+    }
     this.mutator_.mutateElement(dev().assertElement(this.componentPage_), () =>
       this.componentPage_.appendChild(this.expandedViewOverlay_)
     );

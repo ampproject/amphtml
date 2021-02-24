@@ -50,7 +50,7 @@ const getTemplate = (element) => {
   return htmlFor(element)`
     <div class="i-amphtml-story-share-menu i-amphtml-story-system-reset" aria-hidden="true" role="alert">
       <div class="i-amphtml-story-share-menu-container">
-        <button class="i-amphtml-story-share-menu-close-button" aria-label="">
+        <button class="i-amphtml-story-share-menu-close-button" aria-label="close">
           &times;
         </button>
       </div>
@@ -173,11 +173,15 @@ export class ShareMenu {
     this.closeButton_ = dev().assertElement(
       this.element_.querySelector('.i-amphtml-story-share-menu-close-button')
     );
-    const localizedCloseString =
-      getLocalizationService(devAssert(this.parentEl_)).getLocalizedString(
+    const localizationService = getLocalizationService(
+      devAssert(this.parentEl_)
+    );
+    if (localizationService) {
+      const localizedCloseString = localizationService.getLocalizedString(
         LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL
-      ) || 'Close';
-    this.closeButton_.setAttribute('aria-label', localizedCloseString);
+      );
+      this.closeButton_.setAttribute('aria-label', localizedCloseString);
+    }
 
     this.initializeListeners_();
 
