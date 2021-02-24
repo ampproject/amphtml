@@ -14,6 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
+<!--
+  Run to insert missing sections:
+    gulp check-analytics-vendors-list --fix
+-->
+
 # Analytics Vendors <a name="vendors"></a>
 
 This document lists analytics vendors that have built-in configurations for use with the [`amp-analytics`](https://amp.dev/documentation/components/amp-analytics/) component.
@@ -108,6 +113,10 @@ Type attribute value: `clicky`
 
 Adds support for Clicky Web Analytics. More details for adding Clicky support can be found at [clicky.com](https://clicky.com/help/apps-plugins).
 
+### colanalytics
+
+Type attribute value: `colanalytics`
+
 ### comScore
 
 Type attribute value: `comscore`
@@ -174,6 +183,10 @@ Type attribute value: `googleanalytics`
 
 Adds support for Google Analytics. More details for adding Google Analytics support can be found at [developers.google.com](https://developers.google.com/analytics/devguides/collection/amp-analytics/).
 
+### gtag
+
+Type attribute value: `gtag`
+
 ### Google Tag Manager
 
 Type attribute value: N/A
@@ -203,7 +216,7 @@ More details for adding INFOnline / IVW support can be found at [www.infonline.d
 
 ### INFOnline anonymous
 
-Type attribute value: `infonline-anonymous`
+Type attribute value: `infonline_anonymous`
 
 Adds support for the [anonymous INFOnline](https://www.infonline.de). Requires a copy of [infonline-anonymous.html](https://www.infonline.de/amp/infonline-anonymous.html) on a different subdomain than the including AMP file ([why?](https://github.com/ampproject/amphtml/blob/master/spec/amp-iframe-origin-policy.md)). The file must be served via HTTPS. For example, if your AMP files are hosted on `www.example.com`, then `infonline-anonymous.html` needs to be on another subdomain such as `iframe.example.com` or `assets.example.com`.
 
@@ -282,13 +295,19 @@ Type attribute value: `mediarithmics`
 
 Adds support for mediarithmics. More information and configuration details can be found at `https://developer.mediarithmics.com`.
 
+### mediator
+
+Type attribute value: `mediator`
+
 ### Memo
 
 Type attribute value: `memo`
 
-### Metrika
+### Yandex Metrica
 
 Type attribute value: `metrika`
+
+Adds support for Yandex Metrica. Configuration details can be found at [Yandex Support](https://yandex.com/support/metrica/code/install-counter-amp.xml).
 
 ### Moat Analytics
 
@@ -351,8 +370,12 @@ In the `requests` section:
 
 -   `url`: HTTPS location of `amp-analytics-oewa.html`
 
+### oewadirect
+
+Type attribute value: `oewadirect`
+
 [tip type="note"]
-**NOTE –** There is a variation named `oewadirect` that does not use the iframe-ping solution and has a better client detection by using `AMP CLIENT_ID`. This is currently EXPERIMENTAL, and prohibited by the OEWA because it does not use `oewa2.js`.
+**NOTE –** This is a variation of `oewa` that does not use the iframe-ping solution and has a better client detection by using `AMP CLIENT_ID`. This is currently EXPERIMENTAL, and prohibited by the OEWA because it does not use `oewa2.js`.
 [/tip]
 
 ### Oracle Infinity Analytics
@@ -460,11 +483,21 @@ Type attribute value: `simplereach`
 
 Adds support for SimpleReach. Configuration details can be found at `http://docs.simplereach.com/dev-guide/implementation/google-amp-implementation`.
 
-### Snowplow Analytics
+### snowplow
 
-Type attribute value: `snowplow`, `snowplow_v2`
+Type attribute value: `snowplow`
 
 Adds support for Snowplow Analytics. More details for adding Snowplow Analytics support can be found at [docs.snowplowanalytics.com](https://docs.snowplowanalytics.com/docs/collecting-data/collecting-from-own-applications/google-amp-tracker/).
+
+### snowplow_v2
+
+Type attribute value: `snowplow_v2`
+
+Adds support for Snowplow Analytics. More details for adding Snowplow Analytics support can be found at [docs.snowplowanalytics.com](https://docs.snowplowanalytics.com/docs/collecting-data/collecting-from-own-applications/google-amp-tracker/).
+
+### subscriptions-propensity
+
+Type attribute value: `subscriptions-propensity`
 
 ### Tail
 
@@ -516,20 +549,20 @@ Type attribute value: `upscore`
 
 Type attribute value: `vponanalytics`
 
-Adds support for Vpon Vpon Analytics. Configuration details can be found at [Vpon Analytics](https://cmp.vpadn.com/dmp/doc/amp_analytics.html).
+Adds support for Vpon Vpon Analytics. Configuration details can be found at [Vpon Analytics](https://cmp.vpadn.com/dmp/do c/amp_analytics.html).
 
 ### Webengage
 
-Type attribute `webengage`
+Type attribute value: `webengage`
+
+### Webtrekk (deprecated)
+
+Type attribute value: `webtrekk`
+
+> ⚠️ The attribute value ~~`webtrekk`~~ is deprecated. **Use `webtrekk_v2` instead.**
 
 ### Webtrekk
 
-The attribute value ~~`webtrekk`~~ is deprecated (will remove on 31/12/2018) - use `webtrekk_v2` instead
+Type attribute value: `webtrekk_v2`
 
 Adds support for Webtrekk. Configuration details can be found at [supportcenter.webtrekk.com](https://supportcenter.webtrekk.com/en/public/amp-analytics.html).
-
-### Yandex Metrica
-
-Type attribute value: `metrika`
-
-Adds support for Yandex Metrica. Configuration details can be found at [Yandex Support](https://yandex.com/support/metrica/code/install-counter-amp.xml).
