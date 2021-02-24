@@ -315,11 +315,21 @@ describes.repeated(
 
                 it('should require placeholder', () => {
                   list.getPlaceholder = () => null;
-                  allowConsoleError(() => {
-                    expect(() => list.isLayoutSupported('container')).to.throw(
-                      /amp-list\[layout=container\] requires a placeholder/
+                  if (variant.type === 'experiment') {
+                    allowConsoleError(() => {
+                      expect(() =>
+                        list.isLayoutSupported('container')
+                      ).to.throw(
+                        /amp-list\[layout=container\] should have a placeholder/
+                      );
+                    });
+                  } else {
+                    expect(() =>
+                      list.isLayoutSupported('container')
+                    ).to.not.throw(
+                      /amp-list\[layout=container\] should have a placeholder/
                     );
-                  });
+                  }
                 });
 
                 it('should unlock height for layout=container with successful attemptChangeHeight', () => {
