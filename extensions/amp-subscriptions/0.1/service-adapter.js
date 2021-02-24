@@ -163,6 +163,10 @@ export class ServiceAdapter {
    * This helps avoid redundant fetches.
    */
   rememberMeteringEntitlementsWereFetched() {
+    if (!this.subscriptionService_.metering_) {
+      return;
+    }
+
     this.subscriptionService_.metering_.entitlementsWereFetchedWithCurrentMeteringState = true;
   }
 }
