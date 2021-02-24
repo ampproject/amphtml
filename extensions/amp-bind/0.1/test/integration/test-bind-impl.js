@@ -709,10 +709,7 @@ chromed.run('Bind', function () {
           });
           expect(element.textContent).to.equal('');
           return onBindReady(env, bind).then(() => {
-            bind.setState(
-              {},
-              /* opt_skipDigest */ true
-            );
+            bind.setState({}, /* opt_skipDigest */ true);
             env.flushVsync();
             expect(element.textContent).to.equal('');
           });
@@ -1434,12 +1431,9 @@ chromed.run('Bind', function () {
               insertQuerySelectorAttr: useQuerySelector,
             });
             // New elements to rescan() don't need to be attached to DOM.
-            toAdd = createElement(
-              env,
-              /* container */ null,
-              '[text]="1+1"',
-              {insertQuerySelectorAttr: useQuerySelector}
-            );
+            toAdd = createElement(env, /* container */ null, '[text]="1+1"', {
+              insertQuerySelectorAttr: useQuerySelector,
+            });
           });
 
           it('{update: true, fast: true}', async () => {
@@ -1515,12 +1509,9 @@ chromed.run('Bind', function () {
           it('{update: "evaluate"}', async () => {
             const options = {update: 'evaluate', fast: false};
 
-            toAdd = createElement(
-              env,
-              /* container */ null,
-              '[text]="x"',
-              {insertQuerySelectorAttr: useQuerySelector}
-            );
+            toAdd = createElement(env, /* container */ null, '[text]="x"', {
+              insertQuerySelectorAttr: useQuerySelector,
+            });
             // `toRemove` is updated normally before removal.
             await onBindReadyAndSetState(env, bind, {foo: 'foo', x: '1'});
             expect(toRemove.textContent).to.equal('foo');
