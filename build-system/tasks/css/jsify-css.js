@@ -72,12 +72,7 @@ function transformCss(cssStr, opt_cssnano, opt_filename) {
   );
   const cssnanoTransformer = cssnano({preset: ['default', cssnanoOptions]});
   const transformers = [postcssImport, cssprefixer, cssnanoTransformer];
-  /**
-   * TypeScript doesn't like default exports.
-   * @type {*}
-   */
-  const postCss = postcss;
-  return postCss(transformers).process(cssStr, {
+  return postcss.default(transformers).process(cssStr, {
     'from': opt_filename,
   });
 }

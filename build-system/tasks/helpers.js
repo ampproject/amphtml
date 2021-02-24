@@ -23,14 +23,10 @@ const esbuild = require('esbuild');
 /** @type {Object} */
 const experimentDefines = require('../global-configs/experiments-const.json');
 const fs = require('fs-extra');
-const MagicString = require('magic-string');
+const magicstring = require('magic-string');
 const open = require('open');
 const path = require('path');
-/**
- * TypeScript doesn't like default exports.
- * @type {*}
- */
-const remapping = require('@ampproject/remapping');
+const Remapping = require('@ampproject/remapping');
 const wrappers = require('../compile/compile-wrappers');
 const {
   VERSION: internalRuntimeVersion,
@@ -44,6 +40,12 @@ const {log, logLocalDev} = require('../common/logging');
 const {thirdPartyFrames} = require('../test-configs/config');
 const {transpileTs} = require('../compile/typescript');
 const {watch: fileWatch} = require('chokidar');
+
+/** @type {Remapping.default} */
+const remapping = /** @type {*} */ (Remapping);
+
+/** @type {magicstring.default} */
+const MagicString = /** @type {*} */ (magicstring);
 
 /**
  * Tasks that should print the `--nobuild` help text.
@@ -237,7 +239,7 @@ function combineWithCompiledFile(srcFilename, destFilePath, options) {
    * @type {Object}
    */
   const mapMagicStringOptions = {filename: destFileName};
-  const contents = new MagicString.default(
+  const contents = new MagicString(
     fs.readFileSync(destFilePath, 'utf8'),
     mapMagicStringOptions
   );
@@ -264,9 +266,7 @@ function combineWithCompiledFile(srcFilename, destFilePath, options) {
      * @type {Object}
      */
     const bundleMagicStringOptions = {filename: bundleFile};
-    bundle.addSource(
-      new MagicString.default(contents, bundleMagicStringOptions)
-    );
+    bundle.addSource(new MagicString(contents, bundleMagicStringOptions));
     bundle.append(MODULE_SEPARATOR);
   }
   bundle.addSource(remainingContents);
@@ -275,8 +275,9 @@ function combineWithCompiledFile(srcFilename, destFilePath, options) {
     file: destFileName,
     hires: true,
   });
+
   const remapped = remapping(
-    bundledMap,
+    {...bundledMap, version: 3},
     (file) => {
       if (file === destFileName) {
         return map;
