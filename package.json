@@ -112,7 +112,6 @@
     "fuse.js": "6.4.6",
     "globby": "11.0.2",
     "gulp": "4.0.2",
-    "gulp-append-prepend": "1.0.8",
     "gulp-babel": "8.0.0",
     "gulp-connect": "5.7.0",
     "gulp-file": "0.4.0",
