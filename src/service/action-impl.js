@@ -31,7 +31,6 @@ import {getMode} from '../mode';
 import {getValueForExpr} from '../json';
 import {isAmp4Email} from '../format';
 import {isArray, isFiniteNumber, toArray, toWin} from '../types';
-
 import {registerServiceBuilderForDoc} from '../service';
 import {reportError} from '../error';
 
