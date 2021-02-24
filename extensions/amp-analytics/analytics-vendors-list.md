@@ -35,13 +35,17 @@ Adds support for Acquia Lift. The `decisionApiUrl`, `accountId` and `siteId` mus
 
 Type attribute value: `adobeanalytics`
 
-Adds support for Adobe Analytics. More details for adding Adobe Analytics support can be found at [marketing.adobe.com](https://marketing.adobe.com/resources/help/en_US/sc/implement/accelerated-mobile-pages.html).
+Adds support for Adobe Analytics. More details for adding Adobe Analytics support can be found at [experienceleague.adobe.com](https://experienceleague.adobe.com/docs/analytics/implementation/other/amp.html).
 
-### adobeanalytics_nativeConfig
+> ⚠️ Do not use both the `adobeanalytics` and `adobeanalytics_nativeConfig` types on the same page. If you attempt to do so, you can generate errors in the browser console and double-count visitors.
+
+### Adobe Analytics (`nativeConfig`)
 
 Type attribute value: `adobeanalytics_nativeConfig`
 
-DO NOT SUBMIT: Add a paragraph to describe adobeanalytics_nativeConfig.
+Adds support for Adobe Analytics. More details for adding Adobe Analytics support can be found at [experienceleague.adobe.com](https://experienceleague.adobe.com/docs/analytics/implementation/other/amp.html).
+
+> ⚠️ Do not use both the `adobeanalytics` and `adobeanalytics_nativeConfig` types on the same page. If you attempt to do so, you can generate errors in the browser console and double-count visitors.
 
 ### AFS Analytics
 
@@ -83,13 +87,9 @@ Adds support for Baidu Analytics. More details for adding Baidu Analytics suppor
 
 Type attribute value: `bg.canary`
 
-DO NOT SUBMIT: Add a paragraph to describe bg.canary.
-
 ### bg
 
 Type attribute value: `bg`
-
-DO NOT SUBMIT: Add a paragraph to describe bg.
 
 ### Black Crow AI
 
@@ -402,9 +402,7 @@ In the `requests` section:
 
 Type attribute value: `oewadirect`
 
-[tip type="note"]
-**NOTE –** This is a variation of `oewa` that does not use the iframe-ping solution and has a better client detection by using `AMP CLIENT_ID`. This is currently EXPERIMENTAL, and prohibited by the OEWA because it does not use `oewa2.js`.
-[/tip]
+> ⚠️ This is a variation of `oewa` that does not use the iframe-ping solution and has a better client detection by using `AMP CLIENT_ID`. This is currently EXPERIMENTAL, and prohibited by the OEWA because it does not use `oewa2.js`.
 
 ### Oracle Infinity Analytics
 
