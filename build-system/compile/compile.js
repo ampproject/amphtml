@@ -284,6 +284,7 @@ function compile(
       jscomp_off: [],
       define,
       hide_warnings_for: hideWarningsFor,
+      extra_annotation_name: ['visibleForTesting', 'restricted'],
     };
     if (argv.pseudo_names) {
       // Some optimizations get turned off when pseudo_names is on.
