@@ -839,7 +839,7 @@ export class SubscriptionService {
         source: '',
         raw: '',
         granted: true,
-        grantReason: GrantReason.UNLOCKED,
+        grantReason: GrantReason.FREE,
         dataObject: {},
       })
     );
