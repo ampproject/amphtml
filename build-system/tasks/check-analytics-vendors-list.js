@@ -81,7 +81,7 @@ module.exports = {
   checkAnalyticsVendorsList,
 };
 
-checkAnalyticsVendorsList.description = `Checks or updates 3rd party video player list on ${filepath}`;
+checkAnalyticsVendorsList.description = `Checks or updates list on ${filepath}`;
 
 checkAnalyticsVendorsList.flags = {
   'fix': '  Write to file',
