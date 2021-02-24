@@ -194,17 +194,29 @@ export class AmpList extends AMP.BaseElement {
   isLayoutSupported(layout) {
     if (layout === Layout.CONTAINER) {
       const doc = this.element.ownerDocument;
+      const isEmail = doc && isAmp4Email(doc);
+      const hasPlaceholder =
+        this.getPlaceholder() ||
+        (this.element.hasAttribute('diffable') &&
+          this.queryDiffablePlaceholder_());
+      if (isEmail) {
+        if (!hasPlaceholder) {
+          user().warn(
+            TAG,
+            'amp-list[layout=container] should have a placeholder to establish an initial size. ' +
+              'See https://go.amp.dev/c/amp-list/#placeholder-and-fallback. %s',
+            this.element
+          );
+        }
+        return (this.enableManagedResizing_ = true);
+      }
       userAssert(
-        (doc && isAmp4Email(doc)) ||
-          isExperimentOn(this.win, 'amp-list-layout-container'),
+        isExperimentOn(this.win, 'amp-list-layout-container'),
         'Experiment "amp-list-layout-container" is not turned on.'
       );
-      const hasDiffablePlaceholder =
-        this.element.hasAttribute('diffable') &&
-        this.queryDiffablePlaceholder_();
       userAssert(
-        this.getPlaceholder() || hasDiffablePlaceholder,
-        'amp-list[layout=container] requires a placeholder to establish an initial size. ' +
+        hasPlaceholder,
+        'amp-list[layout=container] should have a placeholder to establish an initial size. ' +
           'See https://go.amp.dev/c/amp-list/#placeholder-and-fallback. %s',
         this.element
       );
