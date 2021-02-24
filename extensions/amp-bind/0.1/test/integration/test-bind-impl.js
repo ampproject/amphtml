@@ -712,8 +712,7 @@ chromed.run('Bind', function () {
           return onBindReady(env, bind).then(() => {
             bind.setState(
               {},
-              /* opt_skipDigest */
-              true
+              /* opt_skipDigest */ true
             );
             env.flushVsync();
             expect(element.textContent).to.equal('');
@@ -1438,8 +1437,7 @@ chromed.run('Bind', function () {
             // New elements to rescan() don't need to be attached to DOM.
             toAdd = createElement(
               env,
-              /* container */
-              null,
+              /* container */ null,
               '[text]="1+1"',
               {insertQuerySelectorAttr: useQuerySelector}
             );
@@ -1520,8 +1518,7 @@ chromed.run('Bind', function () {
 
             toAdd = createElement(
               env,
-              /* container */
-              null,
+              /* container */ null,
               '[text]="x"',
               {insertQuerySelectorAttr: useQuerySelector}
             );
