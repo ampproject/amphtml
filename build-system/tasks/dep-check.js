@@ -15,20 +15,19 @@
  */
 'use strict';
 
-const babelify = require('babelify');
-const browserify = require('browserify');
+const babel = require('@babel/core');
 const depCheckConfig = require('../test-configs/dep-check-config');
+const esbuild = require('esbuild');
 const fs = require('fs-extra');
 const minimatch = require('minimatch');
 const path = require('path');
-const through = require('through2');
 const {
   createCtrlcHandler,
   exitCtrlcHandler,
 } = require('../common/ctrlcHandler');
 const {compileJison} = require('./compile-jison');
 const {css} = require('./css');
-const {cyan, red, yellow} = require('kleur/colors');
+const {cyan, green, red, yellow} = require('kleur/colors');
 const {log, logLocalDev} = require('../common/logging');
 
 const depCheckDir = '.amp-dep-check';
@@ -172,46 +171,61 @@ async function getEntryPointModule() {
     .map((file) => `import '../${file}';`)
     .join('\n');
   await fs.promises.writeFile(entryPointModule, entryPointData);
-  log('Added all entry points to', cyan(entryPointModule));
+  logLocalDev('Added all entry points to', cyan(entryPointModule));
   return entryPointModule;
 }
 
 /**
  * @param {string} entryPointModule
- * @return {!Promise<!ModuleDef>}
+ * @return {!ModuleDef}
  */
-function getModuleGraph(entryPointModule) {
-  let resolve;
-  const promise = new Promise((r) => {
-    resolve = r;
-  });
+async function getModuleGraph(entryPointModule) {
+  const esbuildBabelPlugin = {
+    name: 'babel',
+    async setup(build) {
+      const transformContents = async ({file, contents}) => {
+        const babelOptions = babel.loadOptions({
+          caller: {name: 'dep-check'},
+          filename: file.path,
+          sourceFileName: path.relative(process.cwd(), file.path),
+        });
+        const result = await babel.transformAsync(contents, babelOptions);
+        return {contents: result.code};
+      };
 
+      build.onLoad({filter: /.*/, namespace: ''}, async (file) => {
+        const contents = await fs.promises.readFile(file.path, 'utf-8');
+        const transformed = await transformContents({file, contents});
+        return transformed;
+      });
+    },
+  };
+
+  const bundleFile = path.join(depCheckDir, 'entry-point-bundle.js');
+  const moduleGraphFile = path.join(depCheckDir, 'module-graph.json');
+  await esbuild.build({
+    entryPoints: [entryPointModule],
+    bundle: true,
+    outfile: bundleFile,
+    metafile: moduleGraphFile,
+    plugins: [esbuildBabelPlugin],
+  });
+  logLocalDev('Bundled all entry points into', cyan(bundleFile));
+
+  const moduleGraphJson = await fs.readJson(moduleGraphFile);
+  const entryPoints = moduleGraphJson.inputs;
   const moduleGraph = Object.create(null);
   moduleGraph.name = entryPointModule;
   moduleGraph.deps = [];
 
-  const bundleFile = path.join(depCheckDir, 'entry-point-bundle.js');
-  const bundler = browserify();
-  bundler.pipeline.get('deps').push(
-    through.obj(function (row, _enc, next) {
-      moduleGraph.deps.push({
-        name: relative(row.file),
-        deps: row.deps,
-      });
-      this.push(row);
-      next();
-    })
-  );
-  bundler
-    .add(entryPointModule)
-    .transform(babelify, {caller: {name: 'dep-check'}, global: true})
-    .bundle()
-    .pipe(fs.createWriteStream(bundleFile))
-    .on('close', () => {
-      log('Extracted module graph from', cyan(bundleFile));
-      resolve(moduleGraph);
+  for (const entryPoint in entryPoints) {
+    moduleGraph.deps.push({
+      name: entryPoint,
+      deps: entryPoints[entryPoint].imports.map((dep) => dep.path),
     });
-  return promise;
+  }
+  logLocalDev('Extracted module graph from', cyan(moduleGraphFile));
+  return moduleGraph;
 }
 
 /**
@@ -240,9 +254,7 @@ function flattenGraph(entryPoints) {
   return flatten(entryPoints.deps).reduce((acc, cur) => {
     const {name} = cur;
     if (!acc[name]) {
-      acc[name] = Object.keys(cur.deps)
-        // Get rid of the absolute path for minimatch'ing
-        .map((x) => relative(cur.deps[x]));
+      acc[name] = Object.keys(cur.deps).map((x) => cur.deps[x]);
     }
     return acc;
   }, Object.create(null));
@@ -290,6 +302,8 @@ async function depCheck() {
       cyan('build-system/test-configs/dep-check-config.js')
     );
     throw new Error('Dependency checks failed');
+  } else {
+    logLocalDev(green('SUCCESS:'), 'Checked all dependencies.');
   }
   exitCtrlcHandler(handlerProcess);
 }
@@ -319,16 +333,6 @@ function toArrayOrDefault(value, defaultValue) {
  */
 function flatten(arr) {
   return [].concat.apply([], arr);
-}
-
-/**
- * Make an absolute path relative to the repo root.
- *
- * @param {string} filepath
- * @return {string}
- */
-function relative(filepath) {
-  return path.relative(path.resolve(__dirname, '../../'), filepath);
 }
 
 module.exports = {
