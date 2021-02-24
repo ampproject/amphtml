@@ -254,7 +254,7 @@ function flattenGraph(entryPoints) {
   return flatten(entryPoints.deps).reduce((acc, cur) => {
     const {name} = cur;
     if (!acc[name]) {
-      acc[name] = Object.keys(cur.deps).map((x) => cur.deps[x]);
+      acc[name] = Object.values(cur.deps);
     }
     return acc;
   }, Object.create(null));
