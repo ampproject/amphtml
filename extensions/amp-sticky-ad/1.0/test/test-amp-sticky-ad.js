@@ -222,6 +222,7 @@ describes.realWin(
         const ad = impl.ad_;
         await ad.buildInternal();
 
+        expect(true).to.be.false; // REMOVE
         await ad.signals().whenSignal('built');
         await new Promise(setTimeout);
         expect(layoutAdSpy).to.be.called;
