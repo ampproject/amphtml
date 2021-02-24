@@ -450,7 +450,11 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
       })
       .catch((err) => handleBundleError(err, continueOnError, destFilename));
     for (const warning of warnings) {
-      log.warn(yellow('Warning during compilation:'), warning);
+      log.warn(
+        yellow('Warning during compilation:'),
+        `  file: ${warning.file}\n`,
+        `  msg: ${warning.text}\n`
+      );
     }
 
     let outfile = outputFiles.find((f) => !f.path.endsWith('.map')).text;
