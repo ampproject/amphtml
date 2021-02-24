@@ -273,30 +273,6 @@ export class Extensions {
   }
 
   /**
-   * @param {!Window} win
-   * @param {string} extensionId
-   * @return {!Promise}
-   */
-  importUnwrapped(win, extensionId) {
-    const scriptsInHead = getExtensionScripts(win, extensionId);
-    let scriptElement = scriptsInHead.length > 0 ? scriptsInHead[0] : null;
-    let promise;
-    if (scriptElement) {
-      promise = scriptElement[SCRIPT_LOADED_PROP];
-    } else {
-      scriptElement = this.createExtensionScript_(extensionId);
-      promise = scriptElement[SCRIPT_LOADED_PROP] = new Promise(
-        (resolve, reject) => {
-          scriptElement.onload = resolve;
-          scriptElement.onerror = reject;
-        }
-      );
-      win.document.head.appendChild(scriptElement);
-    }
-    return promise;
-  }
-
-  /**
    * Returns the promise that will be resolved with the extension element's
    * class when the extension has been loaded. If necessary, adds the extension
    * script to the page.

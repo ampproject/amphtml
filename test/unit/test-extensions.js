@@ -1105,69 +1105,6 @@ describes.sandboxed('Extensions', {}, () => {
     }
   );
 
-  describes.fakeWin(
-    'importUnwrapped',
-    {
-      amp: true,
-      fakeRegisterElement: true,
-    },
-    (env) => {
-      let win, doc, extensions;
-
-      beforeEach(() => {
-        win = env.win;
-        doc = win.document;
-        extensions = env.extensions;
-      });
-
-      it('should insert extension script correctly', () => {
-        expect(
-          doc.head.querySelectorAll('[custom-element="amp-test"]')
-        ).to.have.length(0);
-        const promise = extensions.importUnwrapped(win, 'amp-test');
-        expect(
-          doc.head.querySelectorAll('[custom-element="amp-test"]')
-        ).to.have.length(1);
-
-        const script = doc.head.querySelector('[custom-element="amp-test"]');
-        dispatchCustomEvent(script, 'load', null, {bubbles: false});
-        return promise;
-      });
-
-      it('should only insert script once', () => {
-        expect(
-          doc.head.querySelectorAll('[custom-element="amp-test"]')
-        ).to.have.length(0);
-
-        const promise1 = extensions.importUnwrapped(win, 'amp-test');
-        expect(
-          doc.head.querySelectorAll('[custom-element="amp-test"]')
-        ).to.have.length(1);
-
-        const promise2 = extensions.importUnwrapped(win, 'amp-test');
-        expect(
-          doc.head.querySelectorAll('[custom-element="amp-test"]')
-        ).to.have.length(1);
-        expect(promise2).to.equal(promise1);
-      });
-
-      it('should give script correct attributes', () => {
-        expect(
-          doc.head.querySelectorAll('[custom-element="amp-test"]')
-        ).to.have.length(0);
-        extensions.importUnwrapped(win, 'amp-test');
-        expect(
-          doc.head.querySelectorAll('[custom-element="amp-test"]')
-        ).to.have.length(1);
-
-        const script = doc.head.querySelector('[custom-element="amp-test"]');
-        expect(script.getAttribute('data-script')).to.equal('amp-test');
-        expect(script.getAttribute('async')).to.equal('');
-        expect(script.getAttribute('crossorigin')).to.equal('anonymous');
-      });
-    }
-  );
-
   describes.realWin(
     'installExtensionForDoc',
     {

@@ -86,8 +86,8 @@ describes.realWin('CustomElement register', {amp: true}, (env) => {
     const extensionsMock = env.sandbox.mock(extensions);
     const polyfillPromise = Promise.resolve();
     extensionsMock
-      .expects('importUnwrapped')
-      .withExactArgs(win, 'amp-shadow-dom-polyfill')
+      .expects('preloadExtension')
+      .withExactArgs('amp-shadow-dom-polyfill')
       .returns(polyfillPromise)
       .once();
 
