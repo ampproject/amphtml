@@ -87,11 +87,9 @@ exports.rules = [
       'extensions/amp-subscriptions-google/**/*.js->third_party/subscriptions-project/swg.js',
       'extensions/amp-subscriptions/**/*.js->third_party/subscriptions-project/aes_gcm.js',
       'extensions/amp-subscriptions/**/*.js->third_party/subscriptions-project/config.js',
-      'extensions/amp-timeago/1.0/component.js->third_party/timeagojs/timeago.js',
       'src/css.js->third_party/css-escape/css-escape.js',
       'src/sanitizer.js->third_party/caja/html-sanitizer.js',
       'src/shadow-embed.js->third_party/webcomponentsjs/ShadowCSS.js',
-      'third_party/timeagojs/timeago.js->third_party/timeagojs/timeago-locales.js',
     ],
   },
   // Rules for 3p
