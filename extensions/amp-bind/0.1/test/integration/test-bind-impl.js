@@ -273,7 +273,6 @@ chromed.run('Bind', function () {
         });
 
         it('should not update host document title for <title> elements', () => {
-          );
           createElement(env, fieBody, '[text]="\'bar\'"', {
             tag: 'title',
             amp: false,
