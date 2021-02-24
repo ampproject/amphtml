@@ -305,8 +305,10 @@ function compile(
     // jscomp_error or jscomp_off.
     if (options.typeCheckOnly) {
       compilerOptions.checks_only = true;
-      // Do not swallow type check warnings.
-      compilerOptions.warning_level = 'verbose';
+      // Optionally set closure's warning_level.
+      if (argv.warning_level) {
+        compilerOptions.warning_level = argv.warning_level;
+      }
       // Note: compilation_level is SIMPLE_OPTIMIZATIONS during type checking.
       // Making it WHITESPACE_ONLY will disable type-checking, so don't do that.
       compilerOptions.define.push('TYPECHECK_ONLY=true');
