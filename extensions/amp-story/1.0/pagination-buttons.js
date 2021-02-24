@@ -23,9 +23,9 @@ import {AdvancementMode} from './story-analytics';
 import {CommonSignals} from '../../../src/common-signals';
 import {EventType, dispatch} from './events';
 import {Services} from '../../../src/services';
-import {devAssert} from '../../../src/log';
-import {dict} from './../../../src/utils/object';
-import {renderAsElement} from './simple-template';
+import {dev, devAssert} from '../../../src/log';
+
+import {htmlFor} from '../../../src/static-template';
 
 /** @struct @typedef {{className: string, triggers: (string|undefined)}} */
 let ButtonState_1_0_Def; // eslint-disable-line google-camelcase/google-camelcase
@@ -68,17 +68,15 @@ const ForwardButtonStates = {
   },
 };
 
-/** @private @const {!./simple-template.ElementDef} */
-const BUTTON = {
-  tag: 'div',
-  attrs: dict({'class': 'i-amphtml-story-button-container', 'role': 'button'}),
-  children: [
-    {
-      tag: 'button',
-      attrs: dict({'class': 'i-amphtml-story-button-move'}),
-    },
-  ],
-};
+/**
+ * @param {!Element} element
+ * @return {!Element}
+ */
+const buildPaginationButton = (element) =>
+  htmlFor(element)`
+      <div class="i-amphtml-story-button-container">
+        <button class="i-amphtml-story-button-move"></button>
+      </div>`;
 
 /**
  * @param {!Element} hoverEl
@@ -109,12 +107,16 @@ class PaginationButton {
     this.state_ = initialState;
 
     /** @public @const {!Element} */
-    this.element = renderAsElement(doc, BUTTON);
+    this.element = buildPaginationButton(doc);
+
+    /** @private @const {!Element} */
+    this.buttonElement_ = dev().assertElement(
+      this.element.querySelector('button')
+    );
 
     this.element.classList.add(initialState.className);
     initialState.label &&
-      this.element.setAttribute('aria-label', initialState.label);
-
+      this.buttonElement_.setAttribute('aria-label', initialState.label);
     this.element.addEventListener('click', (e) => this.onClick_(e));
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
@@ -132,8 +134,8 @@ class PaginationButton {
     this.element.classList.remove(this.state_.className);
     this.element.classList.add(state.className);
     state.label
-      ? this.element.setAttribute('aria-label', state.label)
-      : this.element.removeAttribute('aria-label');
+      ? this.buttonElement_.setAttribute('aria-label', state.label)
+      : this.buttonElement_.removeAttribute('aria-label');
 
     this.state_ = state;
   }
