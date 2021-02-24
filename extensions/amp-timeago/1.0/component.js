@@ -62,7 +62,7 @@ export function Timeago({
     const observer = new win.IntersectionObserver((entries) => {
       let {lang} = node.ownerDocument.documentElement;
       if (lang === 'unknown') {
-        lang = DEFAULT_LOCALE;
+        lang = win.navigator?.language || DEFAULT_LOCALE;
       }
       const locale = getLocale(localeProp || lang);
       const last = entries[entries.length - 1];
