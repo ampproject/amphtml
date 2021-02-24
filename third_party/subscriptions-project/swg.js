@@ -1,6 +1,6 @@
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
-/*
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.145 */
+/** Version: 0.1.22.149 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -6232,7 +6232,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.145',
+    '_client': 'SwG 0.1.22.149',
   });
 }
 
@@ -7351,7 +7351,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.145',
+        '_client': 'SwG 0.1.22.149',
         'supportsEventManager': true,
       },
       args || {}
@@ -8193,7 +8193,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl$1(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.145');
+    context.setClientVersion('SwG 0.1.22.149');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString$1(this.getQueryString_());
@@ -10779,12 +10779,21 @@ class MeterToastApi {
       .handleCancellations(this.activityIframeView_)
       .catch((reason) => {
         // Possibly call onConsumeCallback on all dialog cancellations to ensure unexpected
-        // dialog closes don't give access without a meter consumed.
+        // dialog closures don't give access without a meter consumed.
         if (this.onConsumeCallback_ && !this.onConsumeCallbackHandled_) {
           this.onConsumeCallbackHandled_ = true;
           this.onConsumeCallback_();
         }
-        throw reason;
+        // Don't throw on cancel errors since they happen when a user closes the toast,
+        // which is expected.
+        if (!isCancelError(reason)) {
+          // eslint-disable-next-line no-console
+          console /*OK*/
+            .error(
+              '[swg.js]: Error occurred during meter toast handling: ' + reason
+            );
+          throw reason;
+        }
       });
     return this.dialogManager_.openDialog().then((dialog) => {
       this.setDialogBoxShadow_();
@@ -17228,30 +17237,41 @@ class WaitForSubscriptionLookupApi {
  */
 
 // NOTE: Please don't edit this file directly!
-//   You can (re)compile this file by running the "yarn build-i18n" shell command.
+//   This document describes how to change i18n strings in swg-js: https://docs.google.com/document/d/1FMEKJ_TmjHhqON0krE4xhDbTEj0I0DnvzxMzB2cWUWA/edit?resourcekey=0-TQ7hPOzAD4hX8x9PfweGSg#heading=h.q9gi7t4h1tyj
 
 const I18N_STRINGS = {
-  'GAA_REGWALL_TITLE': {
+  'SHOWCASE_REGWALL_TITLE': {
     'de': 'Immer gut informiert mit Google',
     'en': 'Get more with Google',
-    'fr': 'Plus de possibilit&#xE9;s avec Google',
+    'es-ar': 'Disfruta más artículos con Google',
+    'fr': 'Plus de contenus avec Google',
     'pt-br': 'Veja mais com o Google',
   },
-  'GAA_REGWALL_DESCRIPTION': {
+  'SHOWCASE_REGWALL_DESCRIPTION': {
     'de':
-      '<strong></strong>Dieser Inhalt ist normalerweise kostenpflichtig. Google gew&#xE4;hrt dir jedoch kostenlos Zugriff auf diesen Artikel und andere Inhalte, wenn du dich mit deinem Google-Konto bei <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> registrierst.',
+      '<strong></strong>Dieser Inhalt ist normalerweise kostenpflichtig. Google gewährt dir jedoch kostenlos Zugriff auf diesen Artikel und andere Inhalte, wenn du dich mit deinem Google-Konto bei <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> registrierst.',
     'en':
       '<strong></strong>This content usually requires payment, but Google is giving you free access to this article and more when you register with <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> using your Google Account.',
+    'es-ar':
+      '<strong></strong>Normalmente, es necesario pagar para ver este contenido, pero Google te ofrece acceso gratuito a este y otros artículos si te registras en <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> con tu Cuenta&nbsp;de&nbsp;Google.',
     'fr':
-      '<strong></strong>Ce contenu est g&#xE9;n&#xE9;ralement payant, mais vous pouvez lire cet article et d&apos;autres contenus gratuitement gr&#xE2;ce &#xE0; Google en vous inscrivant sur <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> avec votre compte Google.',
+      '<strong></strong>Ce contenu est généralement payant, mais vous pouvez lire cet article et d\'autres contenus gratuitement grâce à Google en vous inscrivant sur <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> avec votre compte Google.',
     'pt-br':
-      '<strong></strong>Normalmente, &#xE9; preciso pagar por este conte&#xFA;do. Por&#xE9;m, basta voc&#xEA; se registrar na publica&#xE7;&#xE3;o <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> usando sua Conta do Google para ter acesso gratuito a esta mat&#xE9;ria e muito mais.',
+      '<strong></strong>Normalmente, é preciso pagar por este conteúdo. Porém, basta você se registrar na publicação <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> usando sua Conta do Google para ter acesso gratuito a esta matéria e muito mais.',
   },
-  'GAA_REGWALL_PUBLISHER_SIGN_IN_BUTTON': {
+  'SHOWCASE_REGWALL_PUBLISHER_SIGN_IN_BUTTON': {
     'de': 'Du hast bereits ein Konto?',
     'en': 'Already have an account?',
-    'fr': 'Vous avez d&#xE9;j&#xE0; un compte&#xA0;?',
-    'pt-br': 'J&#xE1; tem uma conta?',
+    'es-ar': '¿Ya tienes una cuenta?',
+    'fr': 'Vous avez déjà un compte&nbsp;?',
+    'pt-br': 'Já tem uma conta?',
+  },
+  'SHOWCASE_REGWALL_GOOGLE_SIGN_IN_BUTTON': {
+    'de': 'Über Google anmelden',
+    'en': 'Sign in with Google',
+    'es-ar': 'Acceder con Google',
+    'fr': 'Se connecter avec Google',
+    'pt-br': 'Fazer login com o Google',
   },
 };
 
@@ -17298,10 +17318,6 @@ const REGWALL_DIALOG_ID = 'swg-regwall-dialog';
 /** ID for the Regwall title element. */
 const REGWALL_TITLE_ID = 'swg-regwall-title';
 
-/** Class the Regwall uses to disable scrolling. */
-const REGWALL_DISABLE_SCROLLING_CLASS =
-  'gaa-metering-regwall--disable-scrolling';
-
 /**
  * HTML for the metering regwall dialog, where users can sign in with Google.
  * The script creates a dialog based on this HTML.
@@ -17311,10 +17327,6 @@ const REGWALL_DISABLE_SCROLLING_CLASS =
  */
 const REGWALL_HTML = `
 <style>
-  .${REGWALL_DISABLE_SCROLLING_CLASS} {
-    overflow: hidden;
-  }
-
   .gaa-metering-regwall--dialog-spacer,
   .gaa-metering-regwall--dialog,
   .gaa-metering-regwall--logo,
@@ -17427,32 +17439,16 @@ const REGWALL_HTML = `
       opacity: 1;
     }
   }
-
-  .gaa-metering-regwall--google-sign-in-button .abcRioButton.abcRioButtonBlue {
-    background-color: #1A73E8;
-    box-shadow: none;
-    -webkit-box-shadow: none;
-    border-radius: 4px;
-    width: 100% !important;
-  }
-
-  .gaa-metering-regwall--google-sign-in-button .abcRioButton.abcRioButtonBlue .abcRioButtonIcon {
-    display: none;
-  }
-
-  .gaa-metering-regwall--google-sign-in-button .abcRioButton.abcRioButtonBlue .abcRioButtonContents {
-    font-size: 15px !important;
-  }
 </style>
 
 <div class="gaa-metering-regwall--dialog-spacer">
   <div role="dialog" aria-modal="true" class="gaa-metering-regwall--dialog" id="${REGWALL_DIALOG_ID}" aria-labelledby="${REGWALL_TITLE_ID}">
     <img alt="Google" class="gaa-metering-regwall--logo" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI3NCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDc0IDI0Ij48cGF0aCBmaWxsPSIjNDI4NUY0IiBkPSJNOS4yNCA4LjE5djIuNDZoNS44OGMtLjE4IDEuMzgtLjY0IDIuMzktMS4zNCAzLjEtLjg2Ljg2LTIuMiAxLjgtNC41NCAxLjgtMy42MiAwLTYuNDUtMi45Mi02LjQ1LTYuNTRzMi44My02LjU0IDYuNDUtNi41NGMxLjk1IDAgMy4zOC43NyA0LjQzIDEuNzZMMTUuNCAyLjVDMTMuOTQgMS4wOCAxMS45OCAwIDkuMjQgMCA0LjI4IDAgLjExIDQuMDQuMTEgOXM0LjE3IDkgOS4xMyA5YzIuNjggMCA0LjctLjg4IDYuMjgtMi41MiAxLjYyLTEuNjIgMi4xMy0zLjkxIDIuMTMtNS43NSAwLS41Ny0uMDQtMS4xLS4xMy0xLjU0SDkuMjR6Ii8+PHBhdGggZmlsbD0iI0VBNDMzNSIgZD0iTTI1IDYuMTljLTMuMjEgMC01LjgzIDIuNDQtNS44MyA1LjgxIDAgMy4zNCAyLjYyIDUuODEgNS44MyA1LjgxczUuODMtMi40NiA1LjgzLTUuODFjMC0zLjM3LTIuNjItNS44MS01LjgzLTUuODF6bTAgOS4zM2MtMS43NiAwLTMuMjgtMS40NS0zLjI4LTMuNTIgMC0yLjA5IDEuNTItMy41MiAzLjI4LTMuNTJzMy4yOCAxLjQzIDMuMjggMy41MmMwIDIuMDctMS41MiAzLjUyLTMuMjggMy41MnoiLz48cGF0aCBmaWxsPSIjNDI4NUY0IiBkPSJNNTMuNTggNy40OWgtLjA5Yy0uNTctLjY4LTEuNjctMS4zLTMuMDYtMS4zQzQ3LjUzIDYuMTkgNDUgOC43MiA0NSAxMmMwIDMuMjYgMi41MyA1LjgxIDUuNDMgNS44MSAxLjM5IDAgMi40OS0uNjIgMy4wNi0xLjMyaC4wOXYuODFjMCAyLjIyLTEuMTkgMy40MS0zLjEgMy40MS0xLjU2IDAtMi41My0xLjEyLTIuOTMtMi4wN2wtMi4yMi45MmMuNjQgMS41NCAyLjMzIDMuNDMgNS4xNSAzLjQzIDIuOTkgMCA1LjUyLTEuNzYgNS41Mi02LjA1VjYuNDloLTIuNDJ2MXptLTIuOTMgOC4wM2MtMS43NiAwLTMuMS0xLjUtMy4xLTMuNTIgMC0yLjA1IDEuMzQtMy41MiAzLjEtMy41MiAxLjc0IDAgMy4xIDEuNSAzLjEgMy41NC4wMSAyLjAzLTEuMzYgMy41LTMuMSAzLjV6Ii8+PHBhdGggZmlsbD0iI0ZCQkMwNSIgZD0iTTM4IDYuMTljLTMuMjEgMC01LjgzIDIuNDQtNS44MyA1LjgxIDAgMy4zNCAyLjYyIDUuODEgNS44MyA1LjgxczUuODMtMi40NiA1LjgzLTUuODFjMC0zLjM3LTIuNjItNS44MS01LjgzLTUuODF6bTAgOS4zM2MtMS43NiAwLTMuMjgtMS40NS0zLjI4LTMuNTIgMC0yLjA5IDEuNTItMy41MiAzLjI4LTMuNTJzMy4yOCAxLjQzIDMuMjggMy41MmMwIDIuMDctMS41MiAzLjUyLTMuMjggMy41MnoiLz48cGF0aCBmaWxsPSIjMzRBODUzIiBkPSJNNTggLjI0aDIuNTF2MTcuNTdINTh6Ii8+PHBhdGggZmlsbD0iI0VBNDMzNSIgZD0iTTY4LjI2IDE1LjUyYy0xLjMgMC0yLjIyLS41OS0yLjgyLTEuNzZsNy43Ny0zLjIxLS4yNi0uNjZjLS40OC0xLjMtMS45Ni0zLjctNC45Ny0zLjctMi45OSAwLTUuNDggMi4zNS01LjQ4IDUuODEgMCAzLjI2IDIuNDYgNS44MSA1Ljc2IDUuODEgMi42NiAwIDQuMi0xLjYzIDQuODQtMi41N2wtMS45OC0xLjMyYy0uNjYuOTYtMS41NiAxLjYtMi44NiAxLjZ6bS0uMTgtNy4xNWMxLjAzIDAgMS45MS41MyAyLjIgMS4yOGwtNS4yNSAyLjE3YzAtMi40NCAxLjczLTMuNDUgMy4wNS0zLjQ1eiIvPjwvc3ZnPg==" />
 
-    <div class="gaa-metering-regwall--title" id="${REGWALL_TITLE_ID}" tabindex="0">$GAA_REGWALL_TITLE$</div>
+    <div class="gaa-metering-regwall--title" id="${REGWALL_TITLE_ID}" tabindex="0">$SHOWCASE_REGWALL_TITLE$</div>
 
     <div class="gaa-metering-regwall--description">
-      $GAA_REGWALL_DESCRIPTION$
+      $SHOWCASE_REGWALL_DESCRIPTION$
     </div>
 
     <iframe
@@ -17468,7 +17464,7 @@ const REGWALL_HTML = `
         class="gaa-metering-regwall--publisher-sign-in-button"
         tabindex="0"
         href="#">
-      $GAA_REGWALL_PUBLISHER_SIGN_IN_BUTTON$
+      $SHOWCASE_REGWALL_PUBLISHER_SIGN_IN_BUTTON$
     </a>
   </div>
 </div>
@@ -17504,8 +17500,14 @@ body {
 #${GOOGLE_SIGN_IN_BUTTON_ID} .abcRioButton.abcRioButtonBlue .abcRioButtonIcon {
   display: none;
 }
-#${GOOGLE_SIGN_IN_BUTTON_ID} .abcRioButton.abcRioButtonBlue .abcRioButtonContents {
-  font-size: 15px !important;
+/** Hides default "Sign in with Google" text. */
+#${GOOGLE_SIGN_IN_BUTTON_ID} .abcRioButton.abcRioButtonBlue .abcRioButtonContents span[id^=not_signed_] {
+  font-size: 0 !important;
+}
+/** Renders localized "Sign in with Google" text instead. */
+#${GOOGLE_SIGN_IN_BUTTON_ID} .abcRioButton.abcRioButtonBlue .abcRioButtonContents span[id^=not_signed_]::before {
+  content: '$SHOWCASE_REGWALL_GOOGLE_SIGN_IN_BUTTON$';
+  font-size: 15px;
 }
 `;
 
@@ -17550,7 +17552,7 @@ class GaaMeteringRegwall {
    * @return {!Promise<!GaaUserDef>}
    */
   static show({iframeUrl}) {
-    const queryString = GaaMeteringRegwall.getQueryString_();
+    const queryString = GaaUtils.getQueryString();
     if (!queryStringHasFreshGaaParams(queryString)) {
       const errorMessage =
         '[swg-gaa.js:GaaMeteringRegwall.show]: URL needs fresh GAA params.';
@@ -17586,6 +17588,11 @@ class GaaMeteringRegwall {
    * @param {{ iframeUrl: string }} params
    */
   static render_({iframeUrl}) {
+    const languageCode = getLanguageCodeFromElement(self.document.body);
+
+    // Tell the iframe which language to render.
+    iframeUrl = addQueryParam(iframeUrl, 'lang', languageCode);
+
     const containerEl = /** @type {!HTMLDivElement} */ (self.document.createElement(
       'div'
     ));
@@ -17610,16 +17617,16 @@ class GaaMeteringRegwall {
       iframeUrl
     )
       .replace(
-        '$GAA_REGWALL_TITLE$',
-        msg(I18N_STRINGS['GAA_REGWALL_TITLE'], containerEl)
+        '$SHOWCASE_REGWALL_TITLE$',
+        I18N_STRINGS['SHOWCASE_REGWALL_TITLE'][languageCode]
       )
       .replace(
-        '$GAA_REGWALL_DESCRIPTION$',
-        msg(I18N_STRINGS['GAA_REGWALL_DESCRIPTION'], containerEl)
+        '$SHOWCASE_REGWALL_DESCRIPTION$',
+        I18N_STRINGS['SHOWCASE_REGWALL_DESCRIPTION'][languageCode]
       )
       .replace(
-        '$GAA_REGWALL_PUBLISHER_SIGN_IN_BUTTON$',
-        msg(I18N_STRINGS['GAA_REGWALL_PUBLISHER_SIGN_IN_BUTTON'], containerEl)
+        '$SHOWCASE_REGWALL_PUBLISHER_SIGN_IN_BUTTON$',
+        I18N_STRINGS['SHOWCASE_REGWALL_PUBLISHER_SIGN_IN_BUTTON'][languageCode]
       );
     containerEl.querySelector('ph')./*OK*/ innerHTML =
       '<strong>' +
@@ -17630,9 +17637,6 @@ class GaaMeteringRegwall {
     containerEl.offsetHeight; // Trigger a repaint (to prepare the CSS transition).
     setImportantStyles(containerEl, {'opacity': 1});
     GaaMeteringRegwall.addClickListenerOnPublisherSignInButton_();
-
-    // Disable scrolling on the body element.
-    self.document.body.classList.add(REGWALL_DISABLE_SCROLLING_CLASS);
 
     // Focus on the title after the dialog animates in.
     // This helps people using screenreaders.
@@ -17739,18 +17743,6 @@ class GaaMeteringRegwall {
     if (regwallContainer) {
       regwallContainer.remove();
     }
-
-    // Re-enable scrolling on the body element.
-    self.document.body.classList.remove(REGWALL_DISABLE_SCROLLING_CLASS);
-  }
-
-  /**
-   * Returns query string from current URL.
-   * @private
-   * @return {string}
-   */
-  static getQueryString_() {
-    return self.location.search;
   }
 }
 
@@ -17763,9 +17755,17 @@ class GaaGoogleSignInButton {
    * @param {{ allowedOrigins: !Array<string> }} params
    */
   static show({allowedOrigins}) {
+    // Optionally grab language code from URL.
+    const queryString = GaaUtils.getQueryString();
+    const queryParams = parseQueryString$1(queryString);
+    const languageCode = queryParams['lang'] || 'en';
+
     // Apply iframe styles.
     const styleEl = self.document.createElement('style');
-    styleEl./*OK*/ innerText = GOOGLE_SIGN_IN_IFRAME_STYLES;
+    styleEl./*OK*/ innerText = GOOGLE_SIGN_IN_IFRAME_STYLES.replace(
+      '$SHOWCASE_REGWALL_GOOGLE_SIGN_IN_BUTTON$',
+      I18N_STRINGS['SHOWCASE_REGWALL_GOOGLE_SIGN_IN_BUTTON'][languageCode]
+    );
     self.document.head.appendChild(styleEl);
 
     // Promise a function that sends messages to the parent frame.
@@ -17864,6 +17864,17 @@ function configureGoogleSignIn() {
           self.gapi.auth2.getAuthInstance() || self.gapi.auth2.init()
       )
   );
+}
+
+class GaaUtils {
+  /**
+   * Returns query string from current URL.
+   * Tests can override this method to return different URLs.
+   * @return {string}
+   */
+  static getQueryString() {
+    return self.location.search;
+  }
 }
 
 /**

@@ -1271,6 +1271,17 @@ describes.realWin(
         expect(showSlideSpy).to.have.been.calledWith(4);
       });
 
+      it('should handle carousel snapping & hiding race', async () => {
+        const ampSlideScroll = await getAmpSlideScroll(true);
+        const impl = await ampSlideScroll.getImpl();
+
+        // simluate carousel hidding
+        impl.slideWidth_ = 0;
+
+        // simulate snapping
+        expect(impl.getNextSlideIndex_(0)).to.equal(0);
+      });
+
       it('should NOT call showSlide_ before layout', async () => {
         const ampSlideScroll = await getAmpSlideScroll(
           true,
