@@ -60,6 +60,7 @@ The following `amp-base-carousel` will show `3` slides at a time when width is g
 You may apply responsive attribute values to the following components:
 
 -   [amp-base-carousel](./../extensions/amp-base-carousel/amp-base-carousel.md)
+-   [amp-fit-text](./../extensions/amp-fit-text/amp-fit-text.md)
 -   [amp-inline-gallery-pagination](./../extensions/amp-inline-gallery/amp-inline-gallery.md#include-pagination-indicators)
 -   [amp-inline-gallery-thumbnails](./../extensions/amp-inline-gallery/amp-inline-gallery.md#include-pagination-thumbnails)
 -   [amp-stream-gallery](./../extensions/amp-stream-gallery/amp-stream-gallery.md)
