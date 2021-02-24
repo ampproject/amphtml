@@ -186,8 +186,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
      */
     this.initialAutocompleteAttr_ = null;
 
-    /** @const @private {!../../../src/service/template-impl.Templates} */
-    this.templates_ = Services.templatesFor(this.win);
+    /** @private {?../../../src/service/template-impl.Templates} */
+    this.templates_ = null;
 
     /**
      * Whether a <template> or <script type="text/plain"> tag is present.
@@ -236,6 +236,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.templates_ = Services.templatesForDoc(this.element);
+
     const doc = this.element.ownerDocument;
     const isEmail = doc && isAmp4Email(doc);
     userAssert(
