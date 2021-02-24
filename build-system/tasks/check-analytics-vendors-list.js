@@ -43,7 +43,8 @@ const vendorBlockRegExp = (name) =>
 async function checkAnalyticsVendorsList() {
   const vendors = globby
     .sync(vendorsGlob)
-    .map((path) => basename(path, '.json'));
+    .map((path) => basename(path, '.json'))
+    .sort();
 
   // Keeps list sorted but allows arbitrary sections in-between.
   let tentative = await readFile(filepath, 'utf-8');
@@ -62,14 +63,9 @@ async function checkAnalyticsVendorsList() {
     const block =
       `${vendorBlock(vendor, vendor)}\n\nDO NOT` +
       ` SUBMIT: Add a paragraph to describe ${vendor}.`;
-    if (!previousBlock) {
-      tentative = tentative.replace(vendorBlockRegExp('.+'), `${block}\n\n\$&`);
-    } else {
-      tentative = tentative.replace(
-        previousBlock,
-        `${previousBlock}\n\n${block}`
-      );
-    }
+    tentative = previousBlock
+      ? tentative.replace(previousBlock, `${previousBlock}\n\n${block}`)
+      : tentative.replace(vendorBlockRegExp('.+'), `${block}\n\n\$&`);
     previousBlock = block;
   }
 
