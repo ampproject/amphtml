@@ -34,7 +34,7 @@ describes.realWin('CustomElement register', {amp: true}, (env) => {
   class ConcreteElement extends BaseElement {}
 
   class ConcreteElementWithShadow extends BaseElement {
-    static usesShadowDom() {
+    static reqiuresShadowDom() {
       return true;
     }
   }
@@ -68,7 +68,7 @@ describes.realWin('CustomElement register', {amp: true}, (env) => {
     );
   });
 
-  it('should register a new class immediately for usesShadowDom if no polyfilling needed', () => {
+  it('should register a new class immediately for reqiuresShadowDom if no polyfilling needed', () => {
     if (!win.Element.prototype.attachShadow) {
       win.Element.prototype.attachShadow = () => {};
     }

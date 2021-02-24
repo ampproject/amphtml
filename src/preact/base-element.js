@@ -146,7 +146,7 @@ export class PreactBaseElement extends AMP.BaseElement {
    * @return {boolean}
    * @nocollapse
    */
-  static usesShadowDom() {
+  static reqiuresShadowDom() {
     // eslint-disable-next-line local/no-static-this
     return usesShadowDom(this);
   }
