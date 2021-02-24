@@ -577,7 +577,7 @@ Type attribute value: `webengage`
 
 Type attribute value: `webtrekk`
 
-> ⚠️ The attribute value ~~`webtrekk`~~ is deprecated. **Use `webtrekk_v2` instead.**
+> ⚠️ ~~`webtrekk`~~ is deprecated. **Use `webtrekk_v2` instead.**
 
 ### Webtrekk
 
