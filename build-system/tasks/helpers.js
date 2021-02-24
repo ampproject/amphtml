@@ -32,7 +32,7 @@ const {
 } = require('../compile/internal-version');
 const {applyConfig, removeConfig} = require('./prepend-global/index.js');
 const {closureCompile} = require('../compile/compile');
-const {green, red, cyan} = require('kleur/colors');
+const {green, red, cyan, yellow} = require('kleur/colors');
 const {isCiBuild} = require('../common/ci');
 const {jsBundles} = require('../compile/bundles.config');
 const {log, logLocalDev} = require('../common/logging');
@@ -94,6 +94,13 @@ const watchDebounceDelay = 1000;
 const cache = new Map();
 
 /**
+ * The set of extensions already built and watched by esbuild.
+ *
+ * @type {Map<string, function():void>}
+ */
+const extensionRebuilders = new Map();
+
+/**
  * @param {!Object} jsBundles
  * @param {string} name
  * @param {?Object} extraOptions
@@ -149,6 +156,11 @@ async function bootstrapThirdPartyFrames(options) {
  * @param {!Object} options
  */
 async function compileCoreRuntime(options) {
+  if (!options.compiled) {
+    await doBuildJs(jsBundles, 'amp.js', options);
+    return;
+  }
+
   async function watchFunc() {
     const bundleComplete = await doBuildJs(jsBundles, 'amp.js', {
       ...options,
@@ -367,16 +379,25 @@ function handleBundleError(err, continueOnError, destFilename) {
  * @param {string} destFilename
  * @param {?Object} options
  */
-function finishBundle(srcFilename, destDir, destFilename, options) {
+async function postBundle(srcFilename, destDir, destFilename, options) {
   combineWithCompiledFile(
     srcFilename,
     path.join(destDir, destFilename),
     options
   );
 
+  const target = path.basename(destFilename, path.extname(destFilename));
+  if (UNMINIFIED_TARGETS.includes(target)) {
+    await applyAmpConfig(
+      path.resolve(destDir, destFilename),
+      /* localDev */ true,
+      /* fortesting */ options.fortesting
+    );
+  }
+
   if (options.latestName) {
     // "amp-foo-latest.js" -> "amp-foo-latest.max.js"
-    const latestMaxName = options.latestName.split('.js')[0] + '.max.js';
+    const latestMaxName = options.latestName.replace('/.js$/', '.max.js');
     // Copy amp-foo-0.1.js to amp-foo-latest.max.js.
     fs.copySync(
       path.join(destDir, options.toName),
@@ -400,14 +421,9 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
   const destFilename = options.toName || srcFilename;
   const destFile = path.join(destDir, destFilename);
 
-  if (options.watch) {
-    const watchFunc = async () => {
-      const bundleDone = await performBundle(/* continueOnError */ true);
-      if (options.onWatchBuild) {
-        options.onWatchBuild(bundleDone);
-      }
-    };
-    fileWatch(entryPoint).on('change', debounce(watchFunc, watchDebounceDelay));
+  if (extensionRebuilders.has(entryPoint)) {
+    await extensionRebuilders.get(entryPoint)();
+    return;
   }
 
   /**
@@ -453,42 +469,46 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
     };
   }
 
-  /**
-   * Bundles an entry point with all its imports and applies babel transforms.
-   * @param {boolean} continueOnError
-   */
-  async function performBundle(continueOnError) {
-    const {banner, footer} = splitWrapper();
-    await esbuild
-      .build({
-        entryPoints: [entryPoint],
-        bundle: true,
-        sourcemap: true,
-        define: experimentDefines,
-        outfile: destFile,
-        plugins: [esbuildBabelPlugin],
-        banner,
-        footer,
-      })
-      .catch((err) => handleBundleError(err, continueOnError, destFilename));
-    finishBundle(srcFilename, destDir, destFilename, options);
-    let name = destFilename;
-    if (options.latestName) {
-      const latestMaxName = options.latestName.split('.js')[0] + '.max.js';
-      name = `${name} → ${latestMaxName}`;
-    }
-    endBuildStep('Compiled', name, startTime);
-    const target = path.basename(destFilename, path.extname(destFilename));
-    if (UNMINIFIED_TARGETS.includes(target)) {
-      await applyAmpConfig(
-        destFile,
-        /* localDev */ true,
-        /* fortesting */ options.fortesting
+  const {banner, footer} = splitWrapper();
+  async function onRebuild(error, result) {
+    if (error) {
+      log.error(
+        red(`Error while recompiling ${destFilename}`),
+        `: ${error.message}`
       );
+      return;
     }
+
+    log(green(`Recompiled ${destFilename}.`));
+    if (result.warnings.length > 0) {
+      for (const warning of result.warnings) {
+        log.warn(`${yellow('Warning')} in ${warning.file}: ${warning.text}`);
+      }
+    }
+    await postBundle(srcFilename, destDir, destFilename, options);
   }
 
-  await performBundle(options.continueOnError);
+  const buildResult = await esbuild
+    .build({
+      entryPoints: [entryPoint],
+      bundle: true,
+      sourcemap: true,
+      define: experimentDefines,
+      outfile: destFile,
+      plugins: [esbuildBabelPlugin],
+      banner,
+      footer,
+      incremental: options.watch,
+      watch: options.watch ? {onRebuild} : false,
+      logLevel: 'silent',
+    })
+    .catch((err) =>
+      handleBundleError(err, options.continueOnError, destFilename)
+    );
+  const name = options?.latestName?.replace(/\.js$/, '.max.js') ?? destFilename;
+  endBuildStep('Compiled', `${srcFilename} → ${name}`, startTime);
+
+  await postBundle(srcFilename, destDir, destFilename, options);
 }
 
 /**
