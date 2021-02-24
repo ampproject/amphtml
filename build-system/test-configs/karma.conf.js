@@ -33,22 +33,15 @@ const COMMON_CHROME_FLAGS = [
  * @param {!Object} config
  */
 module.exports = {
-  frameworks: [
-    'fixture',
-    'browserify',
-    'mocha',
-    'sinon-chai',
-    'chai',
-    'source-map-support',
-  ],
+  frameworks: ['fixture', 'mocha', 'sinon-chai', 'chai', 'source-map-support'],
 
   preprocessors: {
     // `test-bin` is the output directory of the postHTML transformation.
     './test-bin/test/fixtures/*.html': ['html2js'],
-    './test/**/*.js': ['browserify'],
-    './ads/**/test/test-*.js': ['browserify'],
-    './extensions/**/test/**/*.js': ['browserify'],
-    './testing/**/*.js': ['browserify'],
+    './test/**/*.js': ['esbuild'],
+    './ads/**/test/test-*.js': ['esbuild'],
+    './extensions/**/test/**/*.js': ['esbuild'],
+    './testing/**/*.js': ['esbuild'],
   },
 
   html2JsPreprocessor: {
@@ -58,16 +51,6 @@ module.exports = {
   },
 
   hostname: 'localhost',
-
-  browserify: {
-    watch: true,
-    debug: true,
-    fast: true,
-    basedir: __dirname + '/../../',
-    transform: [['babelify', {caller: {name: 'test'}, global: true}]],
-    // Prevent "cannot find module" errors during CI. See #14166.
-    bundleDelay: isCiBuild() ? 5000 : 1200,
-  },
 
   reporters: ['super-dots', 'spec'],
 
@@ -184,9 +167,9 @@ module.exports = {
   beforeMiddleware: ['custom'],
   plugins: [
     '@chiragrupani/karma-chromium-edge-launcher',
-    'karma-browserify',
     'karma-chai',
     'karma-chrome-launcher',
+    'karma-esbuild',
     'karma-firefox-launcher',
     'karma-fixture',
     'karma-html2js-preprocessor',

@@ -441,6 +441,48 @@ async function finishBundle(
 }
 
 /**
+ * Creates a babel plugin for esbuild for the given caller. Optionally enables
+ * caching to speed up transforms.
+ * @param {string} callerName
+ * @param {boolean} enableCache
+ * @param {function()} postStep
+ * @return {!Object}
+ */
+function getEsbuildBabelPlugin(callerName, enableCache, postStep = () => {}) {
+  return {
+    name: 'babel',
+    async setup(build) {
+      const transformContents = async ({file, contents}) => {
+        const babelOptions = babel.loadOptions({
+          caller: {name: callerName},
+          filename: file.path,
+          sourceFileName: path.relative(process.cwd(), file.path),
+        });
+        const result = await babel.transformAsync(contents, babelOptions);
+        return {contents: result.code};
+      };
+
+      build.onLoad({filter: /.*/, namespace: ''}, async (file) => {
+        const contents = await fs.promises.readFile(file.path, 'utf-8');
+        let hash;
+        if (enableCache) {
+          hash = crypto.createHash('sha1').update(contents).digest('hex');
+          if (cache.has(hash)) {
+            return {contents: cache.get(hash)};
+          }
+        }
+        const transformed = await transformContents({file, contents});
+        if (enableCache) {
+          cache.set(hash, transformed.contents);
+        }
+        postStep();
+        return transformed;
+      });
+    },
+  };
+}
+
+/**
  * Transforms a given JavaScript file entry point with esbuild and babel, and
  * watches it for changes (if required).
  * @param {string} srcDir
@@ -460,38 +502,6 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
   }
 
   /**
-   * Babel plugin for esbuild
-   */
-  const esbuildBabelPlugin = {
-    name: 'babel',
-    async setup(build) {
-      const transformContents = async ({file, contents}) => {
-        const babelOptions = babel.loadOptions({
-          caller: {name: 'unminified'},
-          filename: file.path,
-          sourceFileName: path.relative(process.cwd(), file.path),
-        });
-        const result = await babel.transformAsync(
-          contents,
-          babelOptions || undefined
-        );
-        return {contents: result.code};
-      };
-
-      build.onLoad({filter: /.*/, namespace: ''}, async (file) => {
-        const contents = await fs.promises.readFile(file.path, 'utf-8');
-        const hash = crypto.createHash('sha1').update(contents).digest('hex');
-        if (cache.has(hash)) {
-          return {contents: cache.get(hash)};
-        }
-        const transformed = await transformContents({file, contents});
-        cache.set(hash, transformed.contents);
-        return transformed;
-      });
-    },
-  };
-
-  /**
    * Splits up the wrapper to compute the banner and footer
    * @return {Object}
    */
@@ -506,6 +516,7 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
   }
 
   const {banner, footer} = splitWrapper();
+  const plugin = getEsbuildBabelPlugin('unminified', /* enableCache */ true);
   const buildResult = await esbuild
     .build({
       entryPoints: [entryPoint],
@@ -513,7 +524,7 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
       sourcemap: true,
       define: experimentDefines,
       outfile: destFile,
-      plugins: [esbuildBabelPlugin],
+      plugins: [plugin],
       banner,
       footer,
       incremental: !!options.watch,
@@ -750,6 +761,7 @@ module.exports = {
   compileTs,
   doBuildJs,
   endBuildStep,
+  getEsbuildBabelPlugin,
   maybePrintCoverageMessage,
   maybeToEsmName,
   mkdirSync,

@@ -24,14 +24,20 @@ const {
 } = require('../../common/ctrlcHandler');
 const {app} = require('../../server/test-server');
 const {createKarmaServer, getAdTypes} = require('./helpers');
+const {dotWrappingWidth} = require('../../common/logging');
+const {getEsbuildBabelPlugin} = require('../helpers');
 const {getFilesFromArgv} = require('../../common/utils');
-const {getPersistentBrowserifyCache} = require('../../common/browserify-cache');
-const {green, yellow, cyan, red} = require('kleur/colors');
 const {isCiBuild} = require('../../common/ci');
 const {log} = require('../../common/logging');
 const {reportTestStarted} = require('.././report-test-status');
 const {startServer, stopServer} = require('../serve');
 const {unitTestsToRun} = require('./helpers-unit');
+const {yellow, red} = require('kleur/colors');
+
+/**
+ * Used to print dots during esbuild + babel transforms
+ */
+let wrapCounter = 0;
 
 /**
  * Updates the browsers based off of the test type
@@ -173,10 +179,20 @@ function updateReporters(config) {
   }
 }
 
+/**
+ * Prints a dot for every babel transform, with wrapping if needed.
+ */
+function printBabelDot() {
+  process.stdout.write('.');
+  if (++wrapCounter >= dotWrappingWidth) {
+    wrapCounter = 0;
+    process.stdout.write('\n');
+  }
+}
+
 class RuntimeTestConfig {
   constructor(testType) {
     this.testType = testType;
-
     Object.assign(this, karmaConfig);
     updateBrowsers(this);
     updateReporters(this);
@@ -185,15 +201,12 @@ class RuntimeTestConfig {
     this.client.mocha.grep = !!argv.grep;
     this.client.verboseLogging = !!argv.verbose || !!argv.v;
     this.client.captureConsole = !!argv.verbose || !!argv.v || !!argv.files;
-    this.browserify.persistentCache = getPersistentBrowserifyCache();
-    this.browserify.configure = function (bundle) {
-      bundle.on('prebundle', function () {
-        log(
-          green('Transforming tests with'),
-          cyan('browserify') + green('...')
-        );
-      });
-    };
+    const plugin = getEsbuildBabelPlugin(
+      'test',
+      /* enableCache */ true,
+      printBabelDot
+    );
+    this.esbuild = {plugins: [plugin]};
 
     // c.client is available in test browser via window.parent.karma.config
     this.client.amp = {

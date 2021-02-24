@@ -31,27 +31,6 @@ executors:
     resource_class: xlarge
 
 commands:
-  save_karma_cache:
-    parameters:
-      cache_name:
-        type: string
-    steps:
-      - save_cache:
-          name: 'Save Karma Cache'
-          key: karma-cache-<<parameters.cache_name>>-{{ checksum ".karma-cache-hash" }}
-          paths:
-            - .karma-cache
-  restore_karma_cache:
-    parameters:
-      cache_name:
-        type: string
-    steps:
-      - run:
-          name: 'Compute Karma Cache Hash'
-          command: node ./build-system/common/compute-karma-cache-hash.js
-      - restore_cache:
-          name: 'Restore Karma Cache'
-          key: karma-cache-<<parameters.cache_name>>-{{ checksum ".karma-cache-hash" }}
   setup_vm:
     steps:
       - checkout
@@ -155,13 +134,9 @@ jobs:
     steps:
       - setup_vm
       - install_chrome
-      - restore_karma_cache:
-          cache_name: unit
       - run:
           name: 'Unit Tests'
           command: node build-system/pr-check/unit-tests.js
-      - save_karma_cache:
-          cache_name: unit
       - fail_fast
   'Unminified Tests':
     executor:
@@ -169,13 +144,9 @@ jobs:
     steps:
       - setup_vm
       - install_chrome
-      - restore_karma_cache:
-          cache_name: unminified
       - run:
           name: 'Unminified Tests'
           command: node build-system/pr-check/unminified-tests.js
-      - save_karma_cache:
-          cache_name: unminified
       - fail_fast
   'Nomodule Tests':
     executor:
@@ -188,13 +159,9 @@ jobs:
     steps:
       - setup_vm
       - install_chrome
-      - restore_karma_cache:
-          cache_name: nomodule
       - run:
           name: 'Nomodule Tests (<< parameters.config >>)'
           command: node build-system/pr-check/nomodule-tests.js --config=<< parameters.config >>
-      - save_karma_cache:
-          cache_name: nomodule
       - fail_fast
   'Module Tests':
     executor:
@@ -207,13 +174,9 @@ jobs:
     steps:
       - setup_vm
       - install_chrome
-      - restore_karma_cache:
-          cache_name: module
       - run:
           name: 'Module Tests (<< parameters.config >>)'
           command: node build-system/pr-check/module-tests.js --config=<< parameters.config >>
-      - save_karma_cache:
-          cache_name: module
       - fail_fast
   'End-to-End Tests':
     executor:
@@ -260,13 +223,9 @@ jobs:
     steps:
       - setup_vm
       - install_chrome
-      - restore_karma_cache:
-          cache_name: experiment<< parameters.exp >>
       - run:
           name: 'Experiment << parameters.exp >> Tests'
           command: node build-system/pr-check/experiment-tests.js --experiment=experiment<< parameters.exp >>
-      - save_karma_cache:
-          cache_name: experiment<< parameters.exp >>
       - fail_fast
 
 workflows:

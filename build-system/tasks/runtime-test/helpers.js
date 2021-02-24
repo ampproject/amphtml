@@ -180,7 +180,12 @@ function karmaBrowsersReady_() {
  * @private
  */
 function karmaRunStart_() {
-  log(green('Running tests locally...'));
+  log(
+    green('Transforming tests with'),
+    cyan('esbuild'),
+    green('and'),
+    cyan('babel') + green('...')
+  );
 }
 
 /**
