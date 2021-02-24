@@ -1865,11 +1865,11 @@ class BindWalker {
    */
   skipSubtree() {
     if (this.useQuerySelector_) {
-      const {parentNode} = this.currentNode;
+      const {currentNode} = this;
       let next = null;
       do {
         next = this.nextNode();
-      } while (next !== null && parentNode.contains(next));
+      } while (next !== null && currentNode.contains(next));
       return next;
     }
 
