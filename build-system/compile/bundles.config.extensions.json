@@ -454,6 +454,7 @@
       "cssBinaries": [
         "amp-story-auto-ads-ad-badge",
         "amp-story-auto-ads-attribution",
+        "amp-story-auto-ads-cta-button",
         "amp-story-auto-ads-inabox",
         "amp-story-auto-ads-shared"
       ]

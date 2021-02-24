@@ -16,6 +16,7 @@
 
 import {
   A4AVarNames,
+  START_CTA_ANIMATION_ATTR,
   createCta,
   getStoryAdMetadataFromDoc,
   getStoryAdMetadataFromElement,
@@ -111,6 +112,9 @@ export class StoryAdPage {
     /** @private {?Element} */
     this.adChoicesIcon_ = null;
 
+    /** @private {?Element} */
+    this.ctaAnchor_ = null;
+
     /** @private {?Document} */
     this.adDoc_ = null;
 
@@ -179,6 +183,9 @@ export class StoryAdPage {
    */
   toggleVisibility() {
     this.viewed_ = true;
+    this.ctaAnchor_ &&
+      toggleAttribute(this.ctaAnchor_, START_CTA_ANIMATION_ATTR);
+
     // TODO(calebcordry): Properly handle visible attribute for custom ads.
     if (this.adDoc_) {
       toggleAttribute(
@@ -407,6 +414,7 @@ export class StoryAdPage {
       uiMetadata
     ).then((anchor) => {
       if (anchor) {
+        this.ctaAnchor_ = anchor;
         // Click listener so that we can fire `story-ad-click` analytics trigger at
         // the appropriate time.
         anchor.addEventListener('click', () => {
