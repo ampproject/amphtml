@@ -290,7 +290,6 @@ export class ShareMenu {
    * @param {bolean} isOpen
    */
   toggleTabbableElements_(isOpen) {
-    console.log(this.element_.outerHTML);
     this.element_.querySelectorAll('amp-social-share').forEach((el) => {
       console.log(el);
       el.setAttribute('tabindex', isOpen ? 0 : -1);

@@ -158,6 +158,7 @@ function buildProvider(doc, shareType, opt_params) {
             'height': 48,
             'class': 'i-amphtml-story-share-icon',
             'type': shareType,
+            'tabindex': -1 /* Start share icons as non tabbable */,
           }),
           buildProviderParams(opt_params)
         )),
