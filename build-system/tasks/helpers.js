@@ -151,7 +151,10 @@ async function bootstrapThirdPartyFrames(options) {
  */
 async function compileCoreRuntime(options) {
   async function watchFunc() {
-    const bundleComplete = await doBuildJs(jsBundles, 'amp.js', options);
+    const bundleComplete = await doBuildJs(jsBundles, 'amp.js', {
+      ...options,
+      watch: false,
+    });
     if (options.onWatchBuild) {
       options.onWatchBuild(bundleComplete);
     }
