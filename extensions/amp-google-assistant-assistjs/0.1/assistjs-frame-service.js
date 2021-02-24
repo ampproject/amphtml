@@ -40,7 +40,7 @@ export class AssistjsFrameService {
 
   /** @private */
   createAssistantIframe_() {
-    this.ampDoc_.whenReady().then(() => {
+    this.ampDoc_.whenFirstVisible().then(() => {
       this.configService_ = Services.assistjsConfigServiceForDoc(this.ampDoc_);
       const iframe = this.ampDoc_.win.document.createElement('iframe');
       this.configService_.getWidgetIframeUrl('frame').then((iframeUrl) => {
