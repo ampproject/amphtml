@@ -149,7 +149,7 @@ export class AmpForm {
     this.ampdoc_ = Services.ampdoc(this.form_);
 
     /** @const @private {!../../../src/service/template-impl.Templates} */
-    this.templates_ = Services.templatesFor(this.win_);
+    this.templates_ = Services.templatesForDoc(this.form_);
 
     /** @const @private {!../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = Services.xhrFor(this.win_);

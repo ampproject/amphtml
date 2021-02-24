@@ -228,7 +228,7 @@ const forbiddenTerms = {
       'src/service/storage-impl.js',
     ],
   },
-  'installTemplatesService': {
+  'installTemplatesServiceForDoc': {
     message: privateServiceFactory,
     allowlist: [
       'src/runtime.js',
