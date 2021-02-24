@@ -25,6 +25,12 @@ This document lists analytics vendors that have built-in configurations for use 
 
 Vendors that wish to integrate their service with [`<amp-analytics>`](https://amp.dev/documentation/components/amp-analytics/) should refer to the details in [Integrate your analytics tools with AMP](https://amp.dev/documentation/guides-and-tutorials/contribute/integrate-your-analytics-tools).
 
+<!--
+### _fake_
+
+Type attribute value: `_fake_`
+-->
+
 ### Acquia Lift
 
 Type attribute value: `acquialift`
@@ -83,13 +89,17 @@ Adds support for Baidu Analytics. More details for adding Baidu Analytics suppor
 
 <!-- markdown-link-check-enable -->
 
+<!--
 ### bg.canary
 
 Type attribute value: `bg.canary`
+-->
 
+<!--
 ### bg
 
 Type attribute value: `bg`
+-->
 
 ### Black Crow AI
 

@@ -29,18 +29,16 @@ const filepath = 'extensions/amp-analytics/analytics-vendors-list.md';
  */
 const vendorsGlob = 'extensions/amp-analytics/0.1/vendors/*.json';
 
-const exclude = ['_fake_'];
-
 const blockHeading = (heading, name) =>
   `### ${heading}\n\nType attribute value: \`${name}\``;
 
 const blockRegExp = (name) =>
   new RegExp(
-    blockHeading(
+    `(<!--[\n]+)?${blockHeading(
       // ### any heading since vendor brands are arbitrarily named
       '.+',
       /* Type attribute value: */ name
-    ) + '((?!###)[\\S\\s\\n])*',
+    )}((?!###)[\\S\\s\\n])*(-->)?`,
     'm'
   );
 
@@ -53,13 +51,12 @@ async function checkAnalyticsVendorsList() {
     .map((path) => basename(path, '.json'))
     .sort();
 
-  // Keeps list sorted if so, allows arbitrary sections in-between.
+  // Keeps list sorted if so, allows:
+  // - arbitrary sections in-between.
+  // - intentionally commented out blocks
   let tentative = await readFile(filepath, 'utf-8');
   let previousBlock;
   for (const vendor of vendors) {
-    if (exclude.includes(vendor)) {
-      continue;
-    }
     const match = tentative.match(blockRegExp(vendor));
     if (match) {
       previousBlock = match[0].trim();
@@ -82,7 +79,8 @@ async function checkAnalyticsVendorsList() {
   let match;
   const anyVendorRegExp = new RegExp(blockRegExp('(.+)').source, 'gm');
   while ((match = anyVendorRegExp.exec(tentative)) !== null) {
-    const [fullMatch, name] = match;
+    const fullMatch = match[0];
+    const name = match[2];
     if (!vendors.includes(name)) {
       tentative = tentative.replace(fullMatch, '');
     }
