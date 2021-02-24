@@ -173,13 +173,10 @@ export class ShareMenu {
     this.closeButton_ = dev().assertElement(
       this.element_.querySelector('.i-amphtml-story-share-menu-close-button')
     );
-    const localizationService = getLocalizationService(
-      devAssert(this.parentEl_)
-    );
-    devAssert(localizationService, 'Could not retrieve LocalizationService.');
-    const localizedCloseString = localizationService.getLocalizedString(
-      LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL
-    );
+    const localizedCloseString =
+      getLocalizationService(devAssert(this.parentEl_)).getLocalizedString(
+        LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL
+      ) || 'Close';
     this.closeButton_.setAttribute('aria-label', localizedCloseString);
 
     this.initializeListeners_();
