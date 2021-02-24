@@ -19,11 +19,26 @@ const {
   verifySelectorsVisible,
 } = require('../../../build-system/tasks/visual-diff/helpers');
 
+function toggleScrollable(page, toggle) {
+  return page.evaluate((toggle) => {
+    if (toggle) {
+      document.querySelector('html').style.removeProperty('overflow');
+    } else {
+      document.querySelector('html').style.overflow = 'hidden';
+    }
+  }, toggle);
+}
+
 async function scroll(page, _, target = 'bottom') {
+  await toggleScrollable(page, true);
+
   await page.tap(`#scroll-${target}-button`);
 
   // Scrolling takes 500ms as defined by the runtime, and leeway.
   await page.waitForTimeout(700);
+
+  // Ensures that scrollbar is hidden before capture.
+  await toggleScrollable(page, false);
 }
 
 async function dock(page, name) {
