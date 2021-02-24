@@ -46,7 +46,7 @@ async function checkAnalyticsVendorsList() {
     .map((path) => basename(path, '.json'))
     .sort();
 
-  // Keeps list sorted but allows arbitrary sections in-between.
+  // Keeps list sorted if so, allows arbitrary sections in-between.
   let tentative = await readFile(filepath, 'utf-8');
   let previousBlock;
   for (const vendor of vendors) {
