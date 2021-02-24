@@ -53,9 +53,9 @@
     "@chiragrupani/karma-chromium-edge-launcher": "2.1.0",
     "@jest/core": "26.6.3",
     "@sinonjs/fake-timers": "7.0.2",
-    "@types/node": "14.14.28",
     "@types/fancy-log": "1.3.1",
     "@types/minimist": "1.2.1",
+    "@types/node": "14.14.28",
     "acorn-globals": "6.0.0",
     "amphtml-validator": "1.0.34",
     "ast-replace": "1.1.3",
@@ -190,7 +190,6 @@
     "tsickle": "0.39.1",
     "typescript": "4.1.3",
     "uglifyify": "5.0.2",
-    "vinyl-source-stream": "2.0.0",
     "vinyl-sourcemaps-apply": "0.2.1",
     "watchify": "4.0.0"
   }
