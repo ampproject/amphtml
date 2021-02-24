@@ -1,7 +1,5 @@
 # Validator Release Schedule
 
--   [Release Freezes](#release-freezes)
-
 A new release of the [AMPHTML Validator](https://github.com/ampproject/amphtml/tree/master/validator#amp-html--validator) is pushed to [cdn.ampproject.org/v0/validator.js](https://cdn.ampproject.org/v0/validator.js) roughly every week and typically on Tuesdays.
 
 The release of [AMP](https://github.com/ampproject/amphtml#amp-) has it's own [Release Schedule](https://github.com/ampproject/amphtml/blob/master/contributing/release-schedule.md).
