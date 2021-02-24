@@ -1859,9 +1859,9 @@ export class AmpStoryPage extends AMP.BaseElement {
         // If the child img element is in the dom, propogate the attribute to it.
         const childImgNode = ampImgNode.querySelector('img');
         childImgNode &&
-          ampImgNode.then((ampImg) =>
-            ampImg.propagateAttributes('alt', childImgNode)
-          );
+          ampImgNode
+            .getImpl()
+            .then((ampImg) => ampImg.propagateAttributes('alt', childImgNode));
       }
     });
   }
