@@ -38,7 +38,7 @@ import {installPreconnectService} from '../preconnect';
 import {installResourcesServiceForDoc} from './resources-impl';
 import {installStandardActionsForDoc} from './standard-actions-impl';
 import {installStorageServiceForDoc} from './storage-impl';
-import {installTemplatesService} from './template-impl';
+import {installTemplatesServiceForDoc} from './template-impl';
 import {installTimerService} from './timer-impl';
 import {installUrlForDoc} from './url-impl';
 import {installUrlReplacementsServiceForDoc} from './url-replacements-impl';
@@ -67,7 +67,6 @@ export function installRuntimeServices(global) {
   installCryptoService(global);
   installBatchedXhrService(global);
   installPlatformService(global);
-  installTemplatesService(global);
   installTimerService(global);
   installVsyncService(global);
   installXhrService(global);
@@ -106,6 +105,7 @@ function installAmpdocServicesInternal(ampdoc, isEmbedded) {
   // When making changes to this method:
   // 1. Order is important!
   // 2. Consider to install same services to amp-inabox.js
+  installTemplatesServiceForDoc(ampdoc);
   installUrlForDoc(ampdoc);
   isEmbedded
     ? adoptServiceForEmbedDoc(ampdoc, 'documentInfo')
