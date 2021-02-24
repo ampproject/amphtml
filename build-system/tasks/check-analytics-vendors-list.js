@@ -46,10 +46,7 @@ async function checkAnalyticsVendorsList() {
       `${vendorBlock(vendor, vendor)}\n\nDO NOT` +
       ` SUBMIT: Add a paragraph to describe ${vendor}.`;
     if (!previousBlock) {
-      tentative = tentative.replace(
-        vendorBlockRegExp('.+'),
-        `${block}\n\n\\$&`
-      );
+      tentative = tentative.replace(vendorBlockRegExp('.+'), `${block}\n\n\$&`);
     } else {
       tentative = tentative.replace(
         previousBlock,
