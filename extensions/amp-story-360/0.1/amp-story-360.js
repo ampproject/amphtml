@@ -357,10 +357,12 @@ export class AmpStory360 extends AMP.BaseElement {
     }
 
     const container = this.element.ownerDocument.createElement('div');
-    const altText = (
-      this.element.querySelector('amp-img') ||
-      this.element.querySelector('amp-video')
-    ).getAttribute('alt-text');
+    const altText = dev()
+      .assertElement(
+        this.element.querySelector('amp-img') ||
+          this.element.querySelector('amp-video')
+      )
+      .getAttribute('alt-text');
     this.canvas_ = createElementWithAttributes(
       this.element.ownerDocument,
       'canvas',
