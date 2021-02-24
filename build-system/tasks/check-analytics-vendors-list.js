@@ -48,7 +48,8 @@ async function checkAnalyticsVendorsList() {
       previousBlock = match[0].trim();
       continue;
     }
-    // "d* n*t s*bmit" has to be split to prevent this file from blocking CI.
+    // "d* n*t s*bmit" has to be split to prevent this file from blocking CI
+    // (unlike the resulting change, which should block it if unaddressed).
     const block =
       `${vendorBlock(vendor, vendor)}\n\nDO NOT` +
       ` SUBMIT: Add a paragraph to describe ${vendor}.`;
