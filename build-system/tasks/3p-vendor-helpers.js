@@ -94,7 +94,6 @@ async function buildVendor(name, options) {
       externs: ['./ads/ads.extern.js'],
       toName: `current/vendor/${name}.max.js`,
       minifiedName: `${VERSION}/vendor/${name}.js`,
-      esmPassCompilation: false,
     })
   );
 
