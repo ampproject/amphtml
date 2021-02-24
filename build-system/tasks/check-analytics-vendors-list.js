@@ -63,6 +63,8 @@ async function checkAnalyticsVendorsList() {
     const block =
       `${vendorBlock(vendor, vendor)}\n\nDO NOT` +
       ` SUBMIT: Add a paragraph to describe ${vendor}.`;
+    // If there's no previously found block, the name is lexicographically lower,
+    // so inserting the new block at the beginning keeps the list sorted.
     tentative = previousBlock
       ? tentative.replace(previousBlock, `${previousBlock}\n\n${block}`)
       : tentative.replace(vendorBlockRegExp('.+'), `${block}\n\n\$&`);
