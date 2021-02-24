@@ -25,12 +25,13 @@ import {Services} from '../services';
 import {debounce, throttle} from '../utils/rate-limit';
 import {dev, devAssert, user, userAssert} from '../log';
 import {dict, hasOwn, map} from '../utils/object';
+import {dispatchCustomEvent, isEnabled} from '../dom';
 import {getDetail} from '../event-helper';
 import {getMode} from '../mode';
 import {getValueForExpr} from '../json';
 import {isAmp4Email} from '../format';
 import {isArray, isFiniteNumber, toArray, toWin} from '../types';
-import {isEnabled} from '../dom';
+
 import {registerServiceBuilderForDoc} from '../service';
 import {reportError} from '../error';
 
@@ -423,7 +424,9 @@ export class ActionService {
    * @return {boolean} true if the target has an action.
    */
   trigger(target, eventType, event, trust, opt_args) {
-    return this.action_(target, eventType, event, trust, opt_args);
+    const action = this.action_(target, eventType, event, trust, opt_args);
+    dispatchCustomEvent(target, eventType, event.detail);
+    return action;
   }
 
   /**
