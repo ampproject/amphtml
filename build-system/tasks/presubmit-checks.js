@@ -1001,6 +1001,7 @@ const forbiddenTermsSrcInclusive = {
       'src/polyfillstub/intersection-observer-stub.js',
       'src/polyfillstub/resize-observer-stub.js',
       'src/runtime.js',
+      'src/service/custom-element-registry.js',
       'src/service/extensions-impl.js',
       'src/service/lightbox-manager-discovery.js',
       'src/service/crypto-impl.js',
