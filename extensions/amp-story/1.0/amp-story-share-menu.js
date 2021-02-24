@@ -178,6 +178,7 @@ export class ShareMenu {
         // Preloads and renders the share widget content.
         const shareWidget = this.shareWidget_.build(getAmpdoc(this.parentEl_));
         this.innerContainerEl_.appendChild(shareWidget);
+        this.toggleTabbableElements_(false);
       },
     });
   }
@@ -237,6 +238,7 @@ export class ShareMenu {
         this.element_.classList.toggle(VISIBLE_CLASS, isOpen);
         this.element_.setAttribute('aria-hidden', !isOpen);
       });
+      this.toggleTabbableElements_(isOpen);
     }
     this.element_[ANALYTICS_TAG_NAME] = 'amp-story-share-menu';
     this.analyticsService_.triggerEvent(
@@ -281,5 +283,16 @@ export class ShareMenu {
    */
   close_() {
     this.storeService_.dispatch(Action.TOGGLE_SHARE_MENU, false);
+  }
+
+  /**
+   * Sets the tabindex to 0 or -1 to allow tabbing through links in the bookend.
+   * @param {bolean} isOpen
+   */
+  toggleTabbableElements_(isOpen) {
+    this.element_.querySelectorAll('amp-social-share').forEach((el) => {
+      console.log(el);
+      el.setAttribute('tabindex', isOpen ? 0 : -1);
+    });
   }
 }

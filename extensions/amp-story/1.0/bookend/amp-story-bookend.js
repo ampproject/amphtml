@@ -383,6 +383,7 @@ export class AmpStoryBookend extends DraggableDrawer {
       isActive ? StoryAnalyticsEvent.OPEN : StoryAnalyticsEvent.CLOSE,
       this.element
     );
+    this.toggleTabbableElements_(isActive);
     setHistoryState(this.win, HistoryState.BOOKEND_ACTIVE, isActive);
   }
 
@@ -610,6 +611,7 @@ export class AmpStoryBookend extends DraggableDrawer {
     this.isBookendRendered_ = true;
 
     this.renderComponents_(bookendConfig.components);
+    this.toggleTabbableElements_(false);
   }
 
   /**
@@ -700,5 +702,17 @@ export class AmpStoryBookend extends DraggableDrawer {
         metadata.imageUrl
       )
     );
+  }
+
+  /**
+   * Sets the tabindex to 0 or -1 to allow tabbing through links in the bookend.
+   * @param {bolean} isActive
+   */
+  toggleTabbableElements_(isActive) {
+    console.log('toggle tabbable', isActive, this.bookendEl_);
+    this.bookendEl_.querySelectorAll('a').forEach((el) => {
+      console.log(el);
+      el.setAttribute('tabindex', isActive ? 0 : -1);
+    });
   }
 }
