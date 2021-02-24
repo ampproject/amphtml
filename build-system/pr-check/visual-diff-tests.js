@@ -8,7 +8,7 @@ const {runCiJob} = require('./ci-job');
 const {skipDependentJobs, timedExecOrDie} = require('./utils');
 const {Targets, buildTargetsInclude} = require('./build-targets');
 
-const jobName = 'visual-diff-tests.js';
+const jobName = 'nomodule-visual-diff-tests.js';
 
 /**
  * Steps to run during push builds.
