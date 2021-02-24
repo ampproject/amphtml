@@ -18,18 +18,25 @@ const {basename} = require('path');
 const {readFile} = require('fs-extra');
 const {writeDiffOrFail} = require('../common/diff');
 
+/**
+ * Ensures that this Markdown file contains a section for every matching vendor.
+ */
 const filepath = 'extensions/amp-analytics/analytics-vendors-list.md';
 
+/**
+ * Vendor JSON files are found here.
+ * Their basename without extension is their type listed in their block.
+ */
 const vendorsGlob = 'extensions/amp-analytics/0.1/vendors/*.json';
 
-const excludeVendors = ['_fake_'];
+const exclude = ['_fake_'];
 
-const vendorBlock = (heading, name) =>
+const blockHeading = (heading, name) =>
   `### ${heading}\n\nType attribute value: \`${name}\``;
 
-const vendorBlockRegExp = (name) =>
+const blockRegExp = (name) =>
   new RegExp(
-    vendorBlock(
+    blockHeading(
       // ### any heading since vendor brands are arbitrarily named
       '.+',
       /* Type attribute value: */ name
@@ -50,10 +57,10 @@ async function checkAnalyticsVendorsList() {
   let tentative = await readFile(filepath, 'utf-8');
   let previousBlock;
   for (const vendor of vendors) {
-    if (excludeVendors.includes(vendor)) {
+    if (exclude.includes(vendor)) {
       continue;
     }
-    const match = tentative.match(vendorBlockRegExp(vendor));
+    const match = tentative.match(blockRegExp(vendor));
     if (match) {
       previousBlock = match[0].trim();
       continue;
@@ -61,19 +68,19 @@ async function checkAnalyticsVendorsList() {
     // "d* n*t s*bmit" has to be split to prevent this file from blocking CI
     // (unlike the resulting change, which should block it if unaddressed).
     const block =
-      `${vendorBlock(vendor, vendor)}\n\nDO NOT` +
+      `${blockHeading(vendor, vendor)}\n\nDO NOT` +
       ` SUBMIT: Add a paragraph to describe ${vendor}.`;
     // If there's no previously found block, the name is lexicographically lower,
     // so inserting the new block at the beginning keeps the list sorted.
     tentative = previousBlock
       ? tentative.replace(previousBlock, `${previousBlock}\n\n${block}`)
-      : tentative.replace(vendorBlockRegExp('.+'), `${block}\n\n\$&`);
+      : tentative.replace(blockRegExp('.+'), `${block}\n\n\$&`);
     previousBlock = block;
   }
 
   // Remove those no longer on vendor-requests.json
   let match;
-  const anyVendorRegExp = new RegExp(vendorBlockRegExp('(.+)').source, 'gm');
+  const anyVendorRegExp = new RegExp(blockRegExp('(.+)').source, 'gm');
   while ((match = anyVendorRegExp.exec(tentative)) !== null) {
     const [fullMatch, name] = match;
     if (!vendors.includes(name)) {
