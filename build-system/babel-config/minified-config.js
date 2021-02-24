@@ -78,9 +78,8 @@ function getMinifiedConfig() {
       './build-system/babel-plugins/babel-plugin-is_dev-constant-transformer',
   ].filter(Boolean);
 
-  // TODO: What to put here for non-esm builds?
-  // What is our browserlist support?
-  const targets = argv.sxg || argv.esm ? {esmodules: true} : {ie: '11'};
+  // Default ECMASCRIPT_5 support --> IE9.
+  const targets = argv.sxg || argv.esm ? {esmodules: true} : {ie: '9'};
   const presetEnv = [
     '@babel/preset-env',
     {bugfixes: true, modules: false, targets},

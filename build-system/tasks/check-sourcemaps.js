@@ -134,7 +134,7 @@ function checkSourcemapSources(sourcemapJson, map) {
  * @param {!Object} sourcemapJson
  * @param {string} map The map filepath to check
  */
-function checkSourcemapMappings(sourcemapJson, map) {
+function checkSourcemapMappingsInterface(sourcemapJson, map) {
   log('Inspecting', cyan('mappings'), 'in', cyan(map) + '...');
   if (!sourcemapJson.mappings) {
     log(red('ERROR:'), 'Could not find', cyan('mappings'));

@@ -462,12 +462,13 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
 
     // fix sourcemap paths. remove the prepending ../src
     const sourcemapJson = JSON.parse(sourcemap);
-    sourcemapJson.sources = sourcemapJson.sources.map(s => s.replace(/^\.\.\//, ''));
-    sourcemap = JSON.stringify(sourcemapJson)
+    sourcemapJson.sources = sourcemapJson.sources.map((s) =>
+      s.replace(/^\.\.\//, '')
+    );
+    sourcemap = JSON.stringify(sourcemapJson);
     // end sourcemap fix
 
     if (options.minify) {
-      // console.error(JSON.stringify(outputFiles[0].path))
       const {code, map} = await terserMinify(outfile, sourcemap);
       outfile = code;
       sourcemap = map;
