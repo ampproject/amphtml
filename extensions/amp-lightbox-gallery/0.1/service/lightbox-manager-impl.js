@@ -244,10 +244,19 @@ export class LightboxManager {
       figure,
       (child) => child.tagName !== 'FIGCAPTION'
     );
-    if (element) {
-      element.setAttribute('lightbox', lightboxGroupId);
+    const isGallerySlide = element.classList.contains(
+      'i-amphtml-inline-gallery-slide-content-slot'
+    );
+    // Special handling for gallery slides, needed since they require a
+    // wrapping div inside of the figure for the content.
+    const unwrappedElement = isGallerySlide
+      ? isGallerySlide.firstChild
+      : element;
+
+    if (unwrappedElement) {
+      unwrappedElement.setAttribute('lightbox', lightboxGroupId);
     }
-    return element;
+    return unwrappedElement;
   }
 
   /**
