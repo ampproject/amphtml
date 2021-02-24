@@ -8,7 +8,9 @@ const {runCiJob} = require('./ci-job');
 const {skipDependentJobs, timedExecOrDie} = require('./utils');
 const {Targets, buildTargetsInclude} = require('./build-targets');
 
-const jobName = 'nomodule-visual-diff-tests.js';
+const jobName = 'visual-diff-tests.js';
+
+const esmFlag = argv.esm ? ' --esm' : '';
 
 /**
  * Steps to run during push builds.
