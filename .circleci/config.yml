@@ -193,7 +193,7 @@ jobs:
       - restore_karma_cache:
           cache_name: nomodule
       - run:
-          name: 'Nomodule Tests'
+          name: 'Nomodule Tests (using << parameters.config >>-config.json)'
           command: node build-system/pr-check/nomodule-tests.js
       - save_karma_cache:
           cache_name: nomodule
@@ -214,7 +214,7 @@ jobs:
       - restore_karma_cache:
           cache_name: module
       - run:
-          name: 'Module Tests'
+          name: 'Module Tests (using << parameters.config >>-config.json)'
           command: node build-system/pr-check/module-tests.js
       - save_karma_cache:
           cache_name: module
@@ -338,7 +338,7 @@ workflows:
           requires:
             - 'Unminified Build'
       - 'Nomodule Tests':
-          name: 'Nomodule Tests (using << matrix.config >>-config.json)'
+          name: 'Nomodule Tests (<< matrix.config >>)'
           matrix:
             parameters:
               config: ['prod', 'canary']
@@ -346,7 +346,7 @@ workflows:
           requires:
             - 'Nomodule Build'
       - 'Module Tests':
-          name: 'Module Tests (using << matrix.config >>-config.json)'
+          name: 'Module Tests (<< matrix.config >>)'
           matrix:
             parameters:
               config: ['prod', 'canary']
