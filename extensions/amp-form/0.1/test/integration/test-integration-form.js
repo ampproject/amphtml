@@ -21,7 +21,7 @@ import {Services} from '../../../../../src/services';
 import {installGlobalSubmitListenerForDoc} from '../../../../../src/document-submit';
 import {listenOncePromise} from '../../../../../src/event-helper';
 import {poll} from '../../../../../testing/iframe';
-import {registerExtendedTemplate} from '../../../../../src/service/template-impl';
+import {registerExtendedTemplateForDoc} from '../../../../../src/service/template-impl';
 
 /** @const {number} */
 const RENDER_TIMEOUT = 15000;
@@ -61,7 +61,7 @@ describes.realWin(
       const mustache = document.createElement('script');
       mustache.setAttribute('custom-template', 'amp-mustache');
       doc.body.appendChild(mustache);
-      registerExtendedTemplate(env.win, 'amp-mustache', AmpMustache);
+      registerExtendedTemplateForDoc(env.ampdoc, 'amp-mustache', AmpMustache);
 
       const form = document.createElement('script');
       form.setAttribute('custom-element', 'amp-form');

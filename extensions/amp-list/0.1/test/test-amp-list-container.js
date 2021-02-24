@@ -49,7 +49,7 @@ describes.realWin(
         findAndRenderTemplate: env.sandbox.stub(),
         findAndRenderTemplateArray: env.sandbox.stub(),
       };
-      env.sandbox.stub(Services, 'templatesFor').returns(templates);
+      env.sandbox.stub(Services, 'templatesForDoc').returns(templates);
       env.sandbox.stub(AmpDocService.prototype, 'getAmpDoc').returns(ampdoc);
 
       element = doc.createElement('amp-list');

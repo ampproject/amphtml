@@ -134,7 +134,7 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, (env) => {
     let dialog0, dialog1, dialog2, dialog3;
 
     beforeEach(() => {
-      templatesMock = env.sandbox.mock(Services.templatesFor(win));
+      templatesMock = env.sandbox.mock(Services.templatesForDoc(ampdoc));
       dialogMock = env.sandbox.mock(renderer.dialog_);
       dialog0 = createElementWithAttributes(doc, 'div', {
         'id': 'dialog0',
