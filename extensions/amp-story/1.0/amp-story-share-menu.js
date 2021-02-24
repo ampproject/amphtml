@@ -50,7 +50,7 @@ const getTemplate = (element) => {
   return htmlFor(element)`
     <div class="i-amphtml-story-share-menu i-amphtml-story-system-reset" aria-hidden="true" role="alert">
       <div class="i-amphtml-story-share-menu-container">
-        <button class="i-amphtml-story-share-menu-close-button" role="button" aria-label="">
+        <button class="i-amphtml-story-share-menu-close-button" aria-label="">
           &times;
         </button>
       </div>
