@@ -810,11 +810,8 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       spec.html = '<html><head></head><body></body></html>';
       const src = extractScriptSrc(mergeHtmlForTesting(spec));
       expect(src).to.equal(
-        'http://localhost:8000/dist/esm/' +
-          ' http://localhost:8000/dist/lts/' +
-          ' http://localhost:8000/dist/mp/' +
+        'http://localhost:8000/dist/lts/' +
           ' http://localhost:8000/dist/rtv/' +
-          ' http://localhost:8000/dist/sp/' +
           ' http://localhost:8000/dist/sw/'
       );
     });
@@ -824,11 +821,8 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       spec.html = '<html><head></head><body></body></html>';
       const src = extractScriptSrc(mergeHtmlForTesting(spec));
       expect(src).to.equal(
-        'https://cdn.ampproject.org/esm/' +
-          ' https://cdn.ampproject.org/lts/' +
-          ' https://cdn.ampproject.org/mp/' +
+        'https://cdn.ampproject.org/lts/' +
           ' https://cdn.ampproject.org/rtv/' +
-          ' https://cdn.ampproject.org/sp/' +
           ' https://cdn.ampproject.org/sw/'
       );
     });
