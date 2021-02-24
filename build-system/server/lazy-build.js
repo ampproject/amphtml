@@ -131,8 +131,8 @@ async function lazyBuildJs(req, _res, next) {
  * Pre-builds the core runtime and the JS files that it loads.
  */
 async function preBuildRuntimeFiles() {
-  await build(jsBundles, 'amp.js', () =>
-    compileCoreRuntime({watch: true, minify: argv.compiled})
+  await build(jsBundles, 'amp.js', (bundles, name, options) =>
+    compileCoreRuntime(options)
   );
   await build(jsBundles, 'ww.max.js', doBuildJs);
 }
