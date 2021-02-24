@@ -1794,7 +1794,7 @@ class BindWalker {
       'ownerDocument is null.'
     );
 
-    const useQuerySelector = document.documentElement.hasAttribute(
+    const useQuerySelector = doc.documentElement.hasAttribute(
       'i-amphtml-binding'
     );
     /** @private @const {boolean} */
@@ -1876,7 +1876,8 @@ class BindWalker {
     const walker = this.treeWalker_;
     for (let n = walker.currentNode; n; n = walker.parentNode()) {
       const sibling = walker.nextSibling();
-      if (sibling) {
+      if (sibling !== null) {
+        this.currentNode = sibling;
         return sibling;
       }
     }
