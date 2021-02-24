@@ -16,14 +16,14 @@
 
 import * as Preact from '../../../src/preact';
 import {Wrapper} from '../../../src/preact/component';
+import {format, getLocale} from './locales';
 import {getDate} from '../../../src/utils/date';
-import {timeago} from '../../../third_party/timeagojs/timeago';
 import {toWin} from '../../../src/types';
 import {useEffect, useRef, useState} from '../../../src/preact';
 import {useResourcesNotify} from '../../../src/preact/utils';
 
 /** @const {string} */
-const DEFAULT_LOCALE = 'en';
+const DEFAULT_LOCALE = 'en_US';
 
 /** @const {!Object<string, *>} */
 const DEFAULT_DATETIME_OPTIONS = {
@@ -43,7 +43,7 @@ const DEFAULT_TIME_OPTIONS = {'hour': 'numeric', 'minute': 'numeric'};
  */
 export function Timeago({
   datetime,
-  locale = DEFAULT_LOCALE,
+  locale: localeProp,
   cutoff,
   placeholder,
   ...rest
@@ -60,6 +60,11 @@ export function Timeago({
       return undefined;
     }
     const observer = new win.IntersectionObserver((entries) => {
+      let {lang} = node.ownerDocument.documentElement;
+      if (lang === 'unknown') {
+        lang = win.navigator?.language || DEFAULT_LOCALE;
+      }
+      const locale = getLocale(localeProp || lang);
       const last = entries[entries.length - 1];
       if (last.isIntersecting) {
         setTimestamp(
@@ -69,7 +74,7 @@ export function Timeago({
     });
     observer.observe(node);
     return () => observer.disconnect();
-  }, [date, locale, cutoff, placeholder]);
+  }, [date, localeProp, cutoff, placeholder]);
 
   useResourcesNotify();
 
@@ -94,14 +99,14 @@ export function Timeago({
  */
 function getFuzzyTimestampValue(date, locale, cutoff, placeholder) {
   if (!cutoff) {
-    return timeago(date, locale);
+    return format(date, locale);
   }
   const secondsAgo = Math.floor((Date.now() - date.getTime()) / 1000);
 
   if (secondsAgo > cutoff) {
     return placeholder ? placeholder : getDefaultPlaceholder(date, locale);
   }
-  return timeago(date, locale);
+  return format(date, locale);
 }
 
 /**
