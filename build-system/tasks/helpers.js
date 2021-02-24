@@ -158,13 +158,11 @@ async function compileCoreRuntime(options) {
   }
 
   if (options.watch) {
-    fileWatch('src/**/*.js').on(
-      'change',
-      debounce(watchFunc, watchDebounceDelay)
-    );
+    const debouncedRebuild = debounce(watchFunc, watchDebounceDelay);
+    fileWatch('src/**/*.js').on('change', debouncedRebuild);
   }
 
-  await doBuildJs(jsBundles, 'amp.js', options);
+  await doBuildJs(jsBundles, 'amp.js', {...options, watch: false});
 }
 
 /**
