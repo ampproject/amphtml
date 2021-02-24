@@ -36,7 +36,6 @@ const TAG = 'extensions';
 const UNKNOWN_EXTENSION = '_UNKNOWN_';
 const CUSTOM_TEMPLATES = ['amp-mustache'];
 const LOADER_PROP = '__AMP_EXT_LDR';
-const SCRIPT_LOADED_PROP = '__AMP_SCR_LOADED';
 
 /**
  * Default milliseconds to wait for all extensions to load before erroring.

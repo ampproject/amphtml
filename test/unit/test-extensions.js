@@ -19,7 +19,6 @@ import {BaseElement} from '../../src/base-element';
 import {ElementStub} from '../../src/element-stub';
 import {Extensions} from '../../src/service/extensions-impl';
 import {Services} from '../../src/services';
-import {dispatchCustomEvent} from '../../src/dom';
 import {getServiceForDoc} from '../../src/service';
 import {installTimerService} from '../../src/service/timer-impl';
 import {user} from '../../src/log';
