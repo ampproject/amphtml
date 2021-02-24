@@ -20,7 +20,7 @@ const {writeDiffOrFail} = require('../common/diff');
 
 const filepath = 'extensions/amp-analytics/analytics-vendors-list.md';
 
-const vendorsGlob = `extensions/amp-analytics/0.1/vendors/*.json`;
+const vendorsGlob = 'extensions/amp-analytics/0.1/vendors/*.json';
 
 const excludeVendors = ['_fake_'];
 
