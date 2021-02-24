@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {install} from '@webcomponents/webcomponentsjs/bundles/webcomponents-sd.install';
-
-// This is a self-installing polyfill.
-install();
+/**
+ * @fileoverview This is just a placeholder for the polyfill that will be
+ * injected here from the `node_modules/@webcomponents/webcomponentsjs/bundles/webcomponents-sd.js`
+ * script.
+ */
