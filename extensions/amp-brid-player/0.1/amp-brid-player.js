@@ -280,12 +280,14 @@ class AmpBridPlayer extends AMP.BaseElement {
    */
   getConsentData_() {
     const consentPolicy = super.getConsentPolicy() || 'default';
-    const consentStatePromise = consentPolicy
-      ? getConsentPolicyState(this.element, consentPolicy)
-      : Promise.resolve(null);
-    const consentStringPromise = consentPolicy
-      ? getConsentPolicyInfo(this.element, consentPolicy)
-      : Promise.resolve(null);
+    const consentStatePromise = getConsentPolicyState(
+      this.element,
+      consentPolicy
+    );
+    const consentStringPromise = getConsentPolicyInfo(
+      this.element,
+      consentPolicy
+    );
 
     return Promise.all([consentStatePromise, consentStringPromise]).then(
       (consents) => {
