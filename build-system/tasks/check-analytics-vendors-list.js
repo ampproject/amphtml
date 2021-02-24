@@ -24,7 +24,14 @@ const vendorBlock = (heading, name) =>
   `### ${heading}\n\nType attribute value: \`${name}\``;
 
 const vendorBlockRegExp = (name) =>
-  new RegExp(vendorBlock('.+', name) + '((?!###)[\\S\\s\\n])*', 'm');
+  new RegExp(
+    vendorBlock(
+      // ### any heading since vendor brands are arbitrarily named
+      '.+',
+      /* Type attribute value: */ name
+    ) + '((?!###)[\\S\\s\\n])*',
+    'm'
+  );
 
 /**
  * Checks or updates analytics vendors list.
