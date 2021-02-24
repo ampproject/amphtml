@@ -16,6 +16,8 @@
 
 import * as Preact from '../../../../src/preact';
 import {Youtube} from '../component';
+import {createRef} from '../../../../src/preact';
+
 import {dispatchCustomEvent} from '../../../../src/dom';
 import {mount} from 'enzyme';
 
@@ -155,4 +157,41 @@ describes.realWin('YouTube preact component v1.0', {}, (env) => {
       event: 'listening',
     });
   });
+
+  it('exposes properties from info messages', () => {
+    const ref = createRef();
+
+    const wrapper = mount(
+      <Youtube
+        ref={ref}
+        videoid="IAvf-rkzNck"
+        shortcode="B8QaZW4AQY_"
+        style={{width: 500, height: 600}}
+      />,
+      {attachTo: document.body}
+    );
+
+    const {contentWindow} = wrapper.getDOMNode().querySelector('iframe');
+
+    expect(ref.current.currentTime).to.equal(0);
+    expect(ref.current.duration).to.be.NaN;
+
+    mockMessage(window, contentWindow, {info: {duration: 420}});
+
+    expect(ref.current.currentTime).to.equal(0);
+    expect(ref.current.duration).to.equal(420);
+
+    mockMessage(window, contentWindow, {info: {currentTime: 12.3}});
+
+    expect(ref.current.currentTime).to.equal(12.3);
+    expect(ref.current.duration).to.equal(420);
+  });
 });
+
+function mockMessage(win, source, data) {
+  const mockEvent = new CustomEvent('message');
+  mockEvent.data = JSON.stringify(data);
+  mockEvent.source = source;
+  win.dispatchEvent(mockEvent);
+  return mockEvent;
+}

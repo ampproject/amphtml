@@ -164,7 +164,7 @@ class AccountCreationRequest {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.complete_, // field 1 - complete
+      this.complete_, // field 1 - complete
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -234,8 +234,8 @@ class AlreadySubscribedResponse {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.subscriberOrMember_, // field 1 - subscriber_or_member
-        this.linkRequested_, // field 2 - link_requested
+      this.subscriberOrMember_, // field 1 - subscriber_or_member
+      this.linkRequested_, // field 2 - link_requested
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -458,17 +458,17 @@ class AnalyticsContext {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.embedderOrigin_, // field 1 - embedder_origin
-        this.transactionId_, // field 2 - transaction_id
-        this.referringOrigin_, // field 3 - referring_origin
-        this.utmSource_, // field 4 - utm_source
-        this.utmCampaign_, // field 5 - utm_campaign
-        this.utmMedium_, // field 6 - utm_medium
-        this.sku_, // field 7 - sku
-        this.readyToPay_, // field 8 - ready_to_pay
-        this.label_, // field 9 - label
-        this.clientVersion_, // field 10 - client_version
-        this.url_, // field 11 - url
+      this.embedderOrigin_, // field 1 - embedder_origin
+      this.transactionId_, // field 2 - transaction_id
+      this.referringOrigin_, // field 3 - referring_origin
+      this.utmSource_, // field 4 - utm_source
+      this.utmCampaign_, // field 5 - utm_campaign
+      this.utmMedium_, // field 6 - utm_medium
+      this.sku_, // field 7 - sku
+      this.readyToPay_, // field 8 - ready_to_pay
+      this.label_, // field 9 - label
+      this.clientVersion_, // field 10 - client_version
+      this.url_, // field 11 - url
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -538,8 +538,8 @@ class AnalyticsEventMeta {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.eventOriginator_, // field 1 - event_originator
-        this.isFromUserAction_, // field 2 - is_from_user_action
+      this.eventOriginator_, // field 1 - event_originator
+      this.isFromUserAction_, // field 2 - is_from_user_action
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -652,10 +652,10 @@ class AnalyticsRequest {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.context_ ? this.context_.toArray(includeLabel) : [], // field 1 - context
-        this.event_, // field 2 - event
-        this.meta_ ? this.meta_.toArray(includeLabel) : [], // field 3 - meta
-        this.params_ ? this.params_.toArray(includeLabel) : [], // field 4 - params
+      this.context_ ? this.context_.toArray(includeLabel) : [], // field 1 - context
+      this.event_, // field 2 - event
+      this.meta_ ? this.meta_.toArray(includeLabel) : [], // field 3 - meta
+      this.params_ ? this.params_.toArray(includeLabel) : [], // field 4 - params
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -725,8 +725,8 @@ class EntitlementJwt {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.jwt_, // field 1 - jwt
-        this.source_, // field 2 - source
+      this.jwt_, // field 1 - jwt
+      this.source_, // field 2 - source
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -853,13 +853,11 @@ class EntitlementsRequest {
    */
   toArray(includeLabel = true) {
     const arr = [
-      this.usedEntitlement_ ? this.usedEntitlement_.toArray(includeLabel) :
-                              [],  // field 1 - used_entitlement
-      this.clientEventTime_ ? this.clientEventTime_.toArray(includeLabel) :
-                              [],  // field 2 - client_event_time
-      this.entitlementSource_,     // field 3 - entitlement_source
-      this.entitlementResult_,     // field 4 - entitlement_result
-      this.nonce_,                 // field 5 - nonce
+      this.usedEntitlement_ ? this.usedEntitlement_.toArray(includeLabel) : [], // field 1 - used_entitlement
+      this.clientEventTime_ ? this.clientEventTime_.toArray(includeLabel) : [], // field 2 - client_event_time
+      this.entitlementSource_, // field 3 - entitlement_source
+      this.entitlementResult_, // field 4 - entitlement_result
+      this.nonce_, // field 5 - nonce
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -912,7 +910,7 @@ class EntitlementsResponse {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.jwt_, // field 1 - jwt
+      this.jwt_, // field 1 - jwt
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -1050,12 +1048,12 @@ class EventParams {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.smartboxMessage_, // field 1 - smartbox_message
-        this.gpayTransactionId_, // field 2 - gpay_transaction_id
-        this.hadLogged_, // field 3 - had_logged
-        this.sku_, // field 4 - sku
-        this.oldTransactionId_, // field 5 - old_transaction_id
-        this.isUserRegistered_, // field 6 - is_user_registered
+      this.smartboxMessage_, // field 1 - smartbox_message
+      this.gpayTransactionId_, // field 2 - gpay_transaction_id
+      this.hadLogged_, // field 3 - had_logged
+      this.sku_, // field 4 - sku
+      this.oldTransactionId_, // field 5 - old_transaction_id
+      this.isUserRegistered_, // field 6 - is_user_registered
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -1125,8 +1123,8 @@ class FinishedLoggingResponse {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.complete_, // field 1 - complete
-        this.error_, // field 2 - error
+      this.complete_, // field 1 - complete
+      this.error_, // field 2 - error
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -1196,8 +1194,8 @@ class LinkSaveTokenRequest {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.authCode_, // field 1 - auth_code
-        this.token_, // field 2 - token
+      this.authCode_, // field 1 - auth_code
+      this.token_, // field 2 - token
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -1250,7 +1248,7 @@ class LinkingInfoResponse {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.requested_, // field 1 - requested
+      this.requested_, // field 1 - requested
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -1371,11 +1369,11 @@ class SkuSelectedResponse {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.sku_, // field 1 - sku
-        this.oldSku_, // field 2 - old_sku
-        this.oneTime_, // field 3 - one_time
-        this.playOffer_, // field 4 - play_offer
-        this.oldPlayOffer_, // field 5 - old_play_offer
+      this.sku_, // field 1 - sku
+      this.oldSku_, // field 2 - old_sku
+      this.oneTime_, // field 3 - one_time
+      this.playOffer_, // field 4 - play_offer
+      this.oldPlayOffer_, // field 5 - old_play_offer
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -1428,7 +1426,7 @@ class SmartBoxMessage {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.isClicked_, // field 1 - is_clicked
+      this.isClicked_, // field 1 - is_clicked
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -1481,7 +1479,7 @@ class SubscribeResponse {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.subscribe_, // field 1 - subscribe
+      this.subscribe_, // field 1 - subscribe
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -1551,8 +1549,8 @@ class Timestamp {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.seconds_, // field 1 - seconds
-        this.nanos_, // field 2 - nanos
+      this.seconds_, // field 1 - seconds
+      this.nanos_, // field 2 - nanos
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -1605,7 +1603,7 @@ class ToastCloseRequest {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.close_, // field 1 - close
+      this.close_, // field 1 - close
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -1658,7 +1656,7 @@ class ViewSubscriptionsResponse {
    */
   toArray(includeLabel = true) {
     const arr = [
-        this.native_, // field 1 - native
+      this.native_, // field 1 - native
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -2018,7 +2016,7 @@ var log_1 = {
   assert,
   debugLog,
   warn,
-  log
+  log,
 };
 var log_2 = log_1.assert;
 var log_4 = log_1.warn;
@@ -2779,7 +2777,6 @@ function isLegacyEdgeBrowser(win) {
 
 /*eslint no-unused-vars: 0*/
 
-
 /**
  * @enum {string}
  */
@@ -2788,7 +2785,6 @@ const ActivityMode = {
   POPUP: 'popup',
   REDIRECT: 'redirect',
 };
-
 
 /**
  * The result code used for `ActivityResult`.
@@ -2799,7 +2795,6 @@ const ActivityResultCode = {
   CANCELED: 'canceled',
   FAILED: 'failed',
 };
-
 
 /**
  * The result of an activity. The activity implementation returns this object
@@ -2831,12 +2826,10 @@ class ActivityResult {
     /** @const {boolean} */
     this.ok = code == ActivityResultCode.OK;
     /** @const {?Error} */
-    this.error = code == ActivityResultCode.FAILED ?
-        new Error(String(data) || '') :
-        null;
+    this.error =
+      code == ActivityResultCode.FAILED ? new Error(String(data) || '') : null;
   }
 }
-
 
 /**
  * The activity request that different types of hosts can be started with.
@@ -2849,7 +2842,6 @@ class ActivityResult {
  * }}
  */
 let ActivityRequest;
-
 
 /**
  * The activity "open" options used for popups and redirects.
@@ -2876,7 +2868,6 @@ let ActivityRequest;
  */
 let ActivityOpenOptions;
 
-
 /**
  * Activity client-side binding. The port provides limited ways to communicate
  * with the activity and receive signals and results from it. Not every type
@@ -2885,7 +2876,6 @@ let ActivityOpenOptions;
  * @interface
  */
 class ActivityPort {
-
   /**
    * Returns the mode of the activity: iframe, popup or redirect.
    * @return {!ActivityMode}
@@ -2905,7 +2895,6 @@ class ActivityPort {
   acceptResult() {}
 }
 
-
 /**
  * Activity client-side binding for messaging.
  *
@@ -2916,7 +2905,6 @@ class ActivityPort {
  * @interface
  */
 class ActivityMessagingPort {
-
   /**
    * Returns the target window where host is loaded. May be unavailable.
    * @return {?Window}
@@ -2943,8 +2931,6 @@ class ActivityMessagingPort {
   messageChannel(opt_name) {}
 }
 
-
-
 /** DOMException.ABORT_ERR name */
 const ABORT_ERR_NAME = 'AbortError';
 
@@ -2953,7 +2939,6 @@ const ABORT_ERR_CODE = 20;
 
 /** @type {?HTMLAnchorElement} */
 let aResolver;
-
 
 /**
  * @param {string} urlString
@@ -2966,7 +2951,6 @@ function parseUrl(urlString) {
   aResolver.href = urlString;
   return /** @type {!HTMLAnchorElement} */ (aResolver);
 }
-
 
 /**
  * @param {!Location|!URL|!HTMLAnchorElement} loc
@@ -2988,7 +2972,6 @@ function getOrigin(loc) {
   return protocol + '//' + host;
 }
 
-
 /**
  * @param {string} urlString
  * @return {string}
@@ -2996,7 +2979,6 @@ function getOrigin(loc) {
 function getOriginFromUrl(urlString) {
   return getOrigin(parseUrl(urlString));
 }
-
 
 /**
  * @param {string} urlString
@@ -3010,7 +2992,6 @@ function removeFragment(urlString) {
   return urlString.substring(0, index);
 }
 
-
 /**
  * Parses and builds Object of URL query string.
  * @param {string} query The URL query string.
@@ -3021,18 +3002,17 @@ function parseQueryString(query) {
     return {};
   }
   return (/^[?#]/.test(query) ? query.slice(1) : query)
-      .split('&')
-      .reduce((params, param) => {
-        const item = param.split('=');
-        const key = decodeURIComponent(item[0] || '');
-        const value = decodeURIComponent(item[1] || '');
-        if (key) {
-          params[key] = value;
-        }
-        return params;
-      }, {});
+    .split('&')
+    .reduce((params, param) => {
+      const item = param.split('=');
+      const key = decodeURIComponent(item[0] || '');
+      const value = decodeURIComponent(item[1] || '');
+      if (key) {
+        params[key] = value;
+      }
+      return params;
+    }, {});
 }
-
 
 /**
  * @param {string} queryString  A query string in the form of "a=b&c=d". Could
@@ -3044,7 +3024,6 @@ function getQueryParam(queryString, param) {
   return parseQueryString(queryString)[param];
 }
 
-
 /**
  * Add a query-like parameter to the fragment string.
  * @param {string} url
@@ -3053,11 +3032,14 @@ function getQueryParam(queryString, param) {
  * @return {string}
  */
 function addFragmentParam(url, param, value) {
-  return url +
-      (url.indexOf('#') == -1 ? '#' : '&') +
-      encodeURIComponent(param) + '=' + encodeURIComponent(value);
+  return (
+    url +
+    (url.indexOf('#') == -1 ? '#' : '&') +
+    encodeURIComponent(param) +
+    '=' +
+    encodeURIComponent(value)
+  );
 }
-
 
 /**
  * @param {string} queryString  A query string in the form of "a=b&c=d". Could
@@ -3081,8 +3063,7 @@ function removeQueryParam(queryString, param) {
           end = queryString.length;
         }
         queryString =
-            queryString.substring(0, index) +
-            queryString.substring(end + 1);
+          queryString.substring(0, index) + queryString.substring(end + 1);
       } else {
         index++;
       }
@@ -3090,7 +3071,6 @@ function removeQueryParam(queryString, param) {
   } while (index != -1 && index < queryString.length);
   return queryString;
 }
-
 
 /**
  * @param {!ActivityRequest} request
@@ -3111,7 +3091,6 @@ function serializeRequest(request) {
   return JSON.stringify(map);
 }
 
-
 /**
  * @param {*} error
  * @return {boolean}
@@ -3120,9 +3099,8 @@ function isAbortError(error) {
   if (!error || typeof error != 'object') {
     return false;
   }
-  return (error['name'] === ABORT_ERR_NAME);
+  return error['name'] === ABORT_ERR_NAME;
 }
-
 
 /**
  * Creates or emulates a DOMException of AbortError type.
@@ -3136,8 +3114,9 @@ function createAbortError(win, opt_message) {
   let error = null;
   if (typeof win['DOMException'] == 'function') {
     // TODO(dvoytenko): remove typecast once externs are fixed.
-    const constr = /** @type {function(new:DOMException, string, string)} */ (
-        win['DOMException']);
+    const constr = /** @type {function(new:DOMException, string, string)} */ (win[
+      'DOMException'
+    ]);
     try {
       error = new constr(message, ABORT_ERR_NAME);
     } catch (e) {
@@ -3146,15 +3125,13 @@ function createAbortError(win, opt_message) {
   }
   if (!error) {
     // TODO(dvoytenko): remove typecast once externs are fixed.
-    const constr = /** @type {function(new:DOMException, string)} */ (
-        Error);
+    const constr = /** @type {function(new:DOMException, string)} */ (Error);
     error = new constr(message);
     error.name = ABORT_ERR_NAME;
     error.code = ABORT_ERR_CODE;
   }
   return error;
 }
-
 
 /**
  * Resolves the activity result as a promise:
@@ -3176,7 +3153,6 @@ function resolveResult(win, result, resolver) {
   }
 }
 
-
 /**
  * @param {!Window} win
  * @return {boolean}
@@ -3187,7 +3163,6 @@ function isIeBrowser(win) {
   return /Trident|MSIE|IEMobile/i.test(nav && nav.userAgent);
 }
 
-
 /**
  * @param {!Window} win
  * @return {boolean}
@@ -3197,14 +3172,14 @@ function isEdgeBrowser(win) {
   return /Edge/i.test(nav && nav.userAgent);
 }
 
-
 /**
  * @param {!Error} e
  */
 function throwAsync(e) {
-  setTimeout(() => {throw e;});
+  setTimeout(() => {
+    throw e;
+  });
 }
-
 
 /**
  * Polyfill of the `Node.isConnected` API. See
@@ -3224,16 +3199,12 @@ function isNodeConnected(node) {
   return (root && root.contains(node)) || false;
 }
 
-
-
 const SENTINEL = '__ACTIVITIES__';
-
 
 /**
  * The messenger helper for activity's port and host.
  */
 class Messenger {
-
   /**
    * @param {!Window} win
    * @param {!Window|function():?Window} targetOrCallback
@@ -3425,9 +3396,11 @@ class Messenger {
       const target = this.getTarget();
       // Only "connect" command is allowed to use `targetOrigin == '*'`
       const targetOrigin =
-          cmd == 'connect' ?
-          (this.targetOrigin_ != null ? this.targetOrigin_ : '*') :
-          this.getTargetOrigin();
+        cmd == 'connect'
+          ? this.targetOrigin_ != null
+            ? this.targetOrigin_
+            : '*'
+          : this.getTargetOrigin();
       target.postMessage(data, targetOrigin, opt_transfer || undefined);
     }
   }
@@ -3504,7 +3477,7 @@ class Messenger {
     let channelObj = this.channels_[name];
     if (!channelObj) {
       let resolver;
-      const promise = new Promise(resolve => {
+      const promise = new Promise((resolve) => {
         resolver = resolve;
       });
       channelObj = {
@@ -3527,10 +3500,10 @@ class Messenger {
       closePort(this.port_);
     }
     this.port_ = port;
-    this.port_.onmessage = event => {
+    this.port_.onmessage = (event) => {
       const data = event.data;
       const cmd = data && data['cmd'];
-      const payload = data && data['payload'] || null;
+      const payload = (data && data['payload']) || null;
       if (cmd) {
         this.handleCommand_(cmd, payload, event);
       }
@@ -3595,7 +3568,7 @@ class Messenger {
         closePort(this.port_);
         this.port_ = null;
       }
-      this.acceptsChannel_ = payload && payload['acceptsChannel'] || false;
+      this.acceptsChannel_ = (payload && payload['acceptsChannel']) || false;
       this.onCommand_(cmd, payload);
     } else if (cmd == 'start') {
       const port = event.ports && event.ports[0];
@@ -3620,7 +3593,6 @@ class Messenger {
   }
 }
 
-
 /**
  * @param {!MessagePort} port
  */
@@ -3632,9 +3604,6 @@ function closePort(port) {
   }
 }
 
-
-
-
 /**
  * The `ActivityPort` implementation for the iframe case. Unlike other types
  * of activities, iframe-based activities are always connected and can react
@@ -3644,7 +3613,6 @@ function closePort(port) {
  * @implements {ActivityMessagingPort}
  */
 class ActivityIframePort {
-
   /**
    * @param {!HTMLIFrameElement} iframe
    * @param {string} url
@@ -3671,7 +3639,7 @@ class ActivityIframePort {
     this.connectedResolver_ = null;
 
     /** @private @const {!Promise} */
-    this.connectedPromise_ = new Promise(resolve => {
+    this.connectedPromise_ = new Promise((resolve) => {
       this.connectedResolver_ = resolve;
     });
 
@@ -3679,7 +3647,7 @@ class ActivityIframePort {
     this.readyResolver_ = null;
 
     /** @private @const {!Promise} */
-    this.readyPromise_ = new Promise(resolve => {
+    this.readyPromise_ = new Promise((resolve) => {
       this.readyResolver_ = resolve;
     });
 
@@ -3687,7 +3655,7 @@ class ActivityIframePort {
     this.resultResolver_ = null;
 
     /** @private @const {!Promise<!ActivityResult>} */
-    this.resultPromise_ = new Promise(resolve => {
+    this.resultPromise_ = new Promise((resolve) => {
       this.resultResolver_ = resolve;
     });
 
@@ -3699,10 +3667,11 @@ class ActivityIframePort {
 
     /** @private @const {!Messenger} */
     this.messenger_ = new Messenger(
-        this.win_,
-        () => this.iframe_.contentWindow,
-        this.targetOrigin_,
-        /* requireTarget */ true);
+      this.win_,
+      () => this.iframe_.contentWindow,
+      this.targetOrigin_,
+      /* requireTarget */ true
+    );
   }
 
   /** @override */
@@ -3807,16 +3776,17 @@ class ActivityIframePort {
       if (this.resultResolver_) {
         const code = /** @type {!ActivityResultCode} */ (payload['code']);
         const data =
-            code == ActivityResultCode.FAILED ?
-            new Error(payload['data'] || '') :
-            payload['data'];
+          code == ActivityResultCode.FAILED
+            ? new Error(payload['data'] || '')
+            : payload['data'];
         const result = new ActivityResult(
-            code,
-            data,
-            ActivityMode.IFRAME,
-            this.messenger_.getTargetOrigin(),
-            /* originVerified */ true,
-            /* secureChannel */ true);
+          code,
+          data,
+          ActivityMode.IFRAME,
+          this.messenger_.getTargetOrigin(),
+          /* originVerified */ true,
+          /* secureChannel */ true
+        );
         resolveResult(this.win_, result, this.resultResolver_);
         this.resultResolver_ = null;
         this.messenger_.sendCommand('close');
@@ -3836,9 +3806,6 @@ class ActivityIframePort {
   }
 }
 
-
-
-
 /**
  * The `ActivityPort` implementation for the standalone window activity
  * client executed as a popup.
@@ -3847,7 +3814,6 @@ class ActivityIframePort {
  * @implements {ActivityMessagingPort}
  */
 class ActivityWindowPort {
-
   /**
    * @param {!Window} win
    * @param {string} requestId
@@ -3858,11 +3824,11 @@ class ActivityWindowPort {
    */
   constructor(win, requestId, url, target, opt_args, opt_options) {
     const isValidTarget =
-        target &&
-        (target == '_blank' || target == '_top' || target[0] != '_');
+      target && (target == '_blank' || target == '_top' || target[0] != '_');
     if (!isValidTarget) {
-      throw new Error('The only allowed targets are "_blank", "_top"' +
-          ' and name targets');
+      throw new Error(
+        'The only allowed targets are "_blank", "_top"' + ' and name targets'
+      );
     }
 
     /** @private @const {!Window} */
@@ -3882,7 +3848,7 @@ class ActivityWindowPort {
     this.connectedResolver_ = null;
 
     /** @private @const {!Promise} */
-    this.connectedPromise_ = new Promise(resolve => {
+    this.connectedPromise_ = new Promise((resolve) => {
       this.connectedResolver_ = resolve;
     });
 
@@ -3890,7 +3856,7 @@ class ActivityWindowPort {
     this.resultResolver_ = null;
 
     /** @private @const {!Promise<!ActivityResult>} */
-    this.resultPromise_ = new Promise(resolve => {
+    this.resultPromise_ = new Promise((resolve) => {
       this.resultResolver_ = resolve;
     });
 
@@ -3906,9 +3872,9 @@ class ActivityWindowPort {
 
   /** @override */
   getMode() {
-    return this.openTarget_ == '_top' ?
-        ActivityMode.REDIRECT :
-        ActivityMode.POPUP;
+    return this.openTarget_ == '_top'
+      ? ActivityMode.REDIRECT
+      : ActivityMode.POPUP;
   }
 
   /**
@@ -4015,8 +3981,7 @@ class ActivityWindowPort {
     let url = this.url_;
     if (!this.options_.skipRequestInUrl) {
       const returnUrl =
-          this.options_.returnUrl ||
-          removeFragment(this.win_.location.href);
+        this.options_.returnUrl || removeFragment(this.win_.location.href);
       const requestString = serializeRequest({
         requestId: this.requestId_,
         returnUrl,
@@ -4044,9 +4009,11 @@ class ActivityWindowPort {
       // Ignore.
     }
     // Then try with `_top` target.
-    if (!targetWin &&
-        openTarget != '_top' &&
-        !this.options_.disableRedirectFallback) {
+    if (
+      !targetWin &&
+      openTarget != '_top' &&
+      !this.options_.disableRedirectFallback
+    ) {
       openTarget = '_top';
       try {
         targetWin = this.win_.open(url, openTarget);
@@ -4090,13 +4057,17 @@ class ActivityWindowPort {
     // right width/height, it will launch in the full-screen. Other browsers
     // deal with such cases more gracefully.
     const controlsWidth =
-        isTop && this.win_.outerWidth > this.win_.innerWidth ?
-        Math.min(100, this.win_.outerWidth - this.win_.innerWidth) :
-        (isEdge ? 100 : 0);
+      isTop && this.win_.outerWidth > this.win_.innerWidth
+        ? Math.min(100, this.win_.outerWidth - this.win_.innerWidth)
+        : isEdge
+        ? 100
+        : 0;
     const controlsHeight =
-        isTop && this.win_.outerHeight > this.win_.innerHeight ?
-        Math.min(100, this.win_.outerHeight - this.win_.innerHeight) :
-        (isEdge ? 100 : 0);
+      isTop && this.win_.outerHeight > this.win_.innerHeight
+        ? Math.min(100, this.win_.outerHeight - this.win_.innerHeight)
+        : isEdge
+        ? 100
+        : 0;
     // With all the adjustments, at least 50% of the available width/height
     // should be made available to a popup.
     const maxWidth = Math.max(availWidth - controlsWidth, availWidth * 0.5);
@@ -4154,10 +4125,11 @@ class ActivityWindowPort {
     // without origin check b/c all arguments have already been passed in
     // the URL and special handling is enforced when result is delivered.
     this.messenger_ = new Messenger(
-        this.win_,
-        /** @type {!Window} */ (this.targetWin_),
-        /* targetOrigin */ null,
-        /* requireTarget */ true);
+      this.win_,
+      /** @type {!Window} */ (this.targetWin_),
+      /* targetOrigin */ null,
+      /* requireTarget */ true
+    );
     this.messenger_.connect(this.handleCommand_.bind(this));
   }
 
@@ -4173,13 +4145,16 @@ class ActivityWindowPort {
       }
       // Give a chance for the result to arrive, but otherwise consider the
       // responce to be empty.
-      this.win_.setTimeout(() => {
-        try {
-          this.result_(ActivityResultCode.CANCELED, /* data */ null);
-        } catch (e) {
-          this.disconnectWithError_(e);
-        }
-      }, opt_delayCancel ? 3000 : 0);
+      this.win_.setTimeout(
+        () => {
+          try {
+            this.result_(ActivityResultCode.CANCELED, /* data */ null);
+          } catch (e) {
+            this.disconnectWithError_(e);
+          }
+        },
+        opt_delayCancel ? 3000 : 0
+      );
     }
   }
 
@@ -4203,14 +4178,15 @@ class ActivityWindowPort {
     if (this.resultResolver_) {
       const isConnected = this.messenger_.isConnected();
       const result = new ActivityResult(
-          code,
-          data,
-          ActivityMode.POPUP,
-          isConnected ?
-              this.messenger_.getTargetOrigin() :
-              getOriginFromUrl(this.url_),
-          /* originVerified */ isConnected,
-          /* secureChannel */ isConnected);
+        code,
+        data,
+        ActivityMode.POPUP,
+        isConnected
+          ? this.messenger_.getTargetOrigin()
+          : getOriginFromUrl(this.url_),
+        /* originVerified */ isConnected,
+        /* secureChannel */ isConnected
+      );
       resolveResult(this.win_, result, this.resultResolver_);
       this.resultResolver_ = null;
     }
@@ -4234,16 +4210,15 @@ class ActivityWindowPort {
       // The last message. Indicates that the result has been received.
       const code = /** @type {!ActivityResultCode} */ (payload['code']);
       const data =
-          code == ActivityResultCode.FAILED ?
-          new Error(payload['data'] || '') :
-          payload['data'];
+        code == ActivityResultCode.FAILED
+          ? new Error(payload['data'] || '')
+          : payload['data'];
       this.result_(code, data);
     } else if (cmd == 'check') {
       this.win_.setTimeout(() => this.check_(), 200);
     }
   }
 }
-
 
 /**
  * @param {!Window} win
@@ -4278,17 +4253,17 @@ function discoverRedirectPort(win, fragment, requestId) {
   const code = response['code'];
   const data = response['data'];
   const origin = response['origin'];
-  const referrerOrigin = win.document.referrer &&
-      getOriginFromUrl(win.document.referrer);
+  const referrerOrigin =
+    win.document.referrer && getOriginFromUrl(win.document.referrer);
   const originVerified = origin == referrerOrigin;
   return new ActivityWindowRedirectPort(
-      win,
-      code,
-      data,
-      origin,
-      originVerified);
+    win,
+    code,
+    data,
+    origin,
+    originVerified
+  );
 }
-
 
 /**
  * The `ActivityPort` implementation for the standalone window activity
@@ -4297,7 +4272,6 @@ function discoverRedirectPort(win, fragment, requestId) {
  * @implements {ActivityPort}
  */
 class ActivityWindowRedirectPort {
-
   /**
    * @param {!Window} win
    * @param {!ActivityResultCode} code
@@ -4326,20 +4300,18 @@ class ActivityWindowRedirectPort {
   /** @override */
   acceptResult() {
     const result = new ActivityResult(
-        this.code_,
-        this.data_,
-        ActivityMode.REDIRECT,
-        this.targetOrigin_,
-        this.targetOriginVerified_,
-        /* secureChannel */ false);
-    return new Promise(resolve => {
+      this.code_,
+      this.data_,
+      ActivityMode.REDIRECT,
+      this.targetOrigin_,
+      this.targetOriginVerified_,
+      /* secureChannel */ false
+    );
+    return new Promise((resolve) => {
       resolveResult(this.win_, result, resolve);
     });
   }
 }
-
-
-
 
 /**
  * The page-level activities manager ports. This class is intended to be used
@@ -4347,7 +4319,6 @@ class ActivityWindowRedirectPort {
  * redirect.
  */
 class ActivityPorts {
-
   /**
    * @param {!Window} win
    */
@@ -4376,7 +4347,7 @@ class ActivityPorts {
     this.redirectErrorResolver_ = null;
 
     /** @private {!Promise<!Error>} */
-    this.redirectErrorPromise_ = new Promise(resolve => {
+    this.redirectErrorPromise_ = new Promise((resolve) => {
       this.redirectErrorResolver_ = resolve;
     });
   }
@@ -4504,7 +4475,13 @@ class ActivityPorts {
    */
   openWin_(requestId, url, target, opt_args, opt_options) {
     const port = new ActivityWindowPort(
-        this.win_, requestId, url, target, opt_args, opt_options);
+      this.win_,
+      requestId,
+      url,
+      target,
+      opt_args,
+      opt_options
+    );
     port.open().then(() => {
       // Await result if possible. Notice that when falling back to "redirect",
       // the result will never arrive through this port.
@@ -4522,8 +4499,7 @@ class ActivityPorts {
     let port = this.resultBuffer_[requestId];
     if (!port && this.fragment_) {
       try {
-        port = discoverRedirectPort(
-            this.win_, this.fragment_, requestId);
+        port = discoverRedirectPort(this.win_, this.fragment_, requestId);
       } catch (e) {
         throwAsync(e);
         this.redirectErrorResolver_(e);
@@ -4555,7 +4531,7 @@ class ActivityPorts {
     // Find and execute handlers.
     const handlers = this.requestHandlers_[requestId];
     if (handlers) {
-      handlers.forEach(handler => {
+      handlers.forEach((handler) => {
         this.consumeResult_(port, handler);
       });
     }
@@ -4563,8 +4539,6 @@ class ActivityPorts {
     this.resultBuffer_[requestId] = port;
   }
 }
-
-
 
 var activityPorts = {
   ActivityPorts,
@@ -7366,7 +7340,12 @@ class ActivityPorts$1 {
    * @return {!Promise<!ActivityIframePort>}
    */
   openActivityIframePort_(iframe, url, args) {
-    const activityPort = new ActivityIframePort$1(iframe, url, this.deps_, args);
+    const activityPort = new ActivityIframePort$1(
+      iframe,
+      url,
+      this.deps_,
+      args
+    );
     return activityPort.connect().then(() => activityPort);
   }
 
@@ -9453,7 +9432,8 @@ class DeferredAccountFlow {
   }
 }
 
-const CSS = "body{padding:0;margin:0}swg-container,swg-loading,swg-loading-animate,swg-loading-image{display:block}swg-loading-container{width:100%!important;display:-ms-flexbox!important;display:flex!important;-ms-flex-align:center!important;align-items:center!important;-ms-flex-pack:center!important;justify-content:center!important;min-height:148px!important;height:100%!important;bottom:0!important;margin-top:5px!important;z-index:2147483647!important}@media (min-height:630px), (min-width:630px){swg-loading-container{width:560px!important;margin-left:35px!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;background-color:#fff!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}swg-loading{z-index:2147483647!important;width:36px;height:36px;overflow:hidden;animation:mspin-rotate 1568.63ms linear infinite}swg-loading-animate{animation:mspin-revrot 5332ms steps(4) infinite}swg-loading-image{background-image:url(https://news.google.com/swg/js/v1/loader.svg);background-size:100%;width:11664px;height:36px;animation:swg-loading-film 5332ms steps(324) infinite}@keyframes swg-loading-film{0%{transform:translateX(0)}to{transform:translateX(-11664px)}}@keyframes mspin-rotate{0%{transform:rotate(0deg)}to{transform:rotate(1turn)}}@keyframes mspin-revrot{0%{transform:rotate(0deg)}to{transform:rotate(-1turn)}}\n/*# sourceURL=/./src/ui/ui.css*/";
+const CSS =
+  'body{padding:0;margin:0}swg-container,swg-loading,swg-loading-animate,swg-loading-image{display:block}swg-loading-container{width:100%!important;display:-ms-flexbox!important;display:flex!important;-ms-flex-align:center!important;align-items:center!important;-ms-flex-pack:center!important;justify-content:center!important;min-height:148px!important;height:100%!important;bottom:0!important;margin-top:5px!important;z-index:2147483647!important}@media (min-height:630px), (min-width:630px){swg-loading-container{width:560px!important;margin-left:35px!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;background-color:#fff!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}swg-loading{z-index:2147483647!important;width:36px;height:36px;overflow:hidden;animation:mspin-rotate 1568.63ms linear infinite}swg-loading-animate{animation:mspin-revrot 5332ms steps(4) infinite}swg-loading-image{background-image:url(https://news.google.com/swg/js/v1/loader.svg);background-size:100%;width:11664px;height:36px;animation:swg-loading-film 5332ms steps(324) infinite}@keyframes swg-loading-film{0%{transform:translateX(0)}to{transform:translateX(-11664px)}}@keyframes mspin-rotate{0%{transform:rotate(0deg)}to{transform:rotate(1turn)}}@keyframes mspin-revrot{0%{transform:rotate(0deg)}to{transform:rotate(-1turn)}}\n/*# sourceURL=/./src/ui/ui.css*/';
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -13277,7 +13257,7 @@ Constants.ButtonType = {
  * @enum {string}
  */
 Constants.ButtonColor = {
-  DEFAULT: 'default',  // Currently defaults to black.
+  DEFAULT: 'default', // Currently defaults to black.
   BLACK: 'black',
   WHITE: 'white',
 };
@@ -13296,16 +13276,14 @@ Constants.STORAGE_KEY_PREFIX = 'google.payments.api.storage';
 
 /** @const {string} */
 Constants.IS_READY_TO_PAY_RESULT_KEY =
-    Constants.STORAGE_KEY_PREFIX + '.isreadytopay.result';
+  Constants.STORAGE_KEY_PREFIX + '.isreadytopay.result';
 
 /** @const {string} */
 Constants.UPI_CAN_MAKE_PAYMENT_CACHE_KEY =
-    Constants.STORAGE_KEY_PREFIX + '.upi.canMakePaymentCache';
-
+  Constants.STORAGE_KEY_PREFIX + '.upi.canMakePaymentCache';
 
 Constants.CLASS_PREFIX = 'google-payments-';
-Constants.IFRAME_ACTIVE_CONTAINER_CLASS =
-    `${Constants.CLASS_PREFIX}activeContainer`;
+Constants.IFRAME_ACTIVE_CONTAINER_CLASS = `${Constants.CLASS_PREFIX}activeContainer`;
 Constants.IFRAME_CONTAINER_CLASS = `${Constants.CLASS_PREFIX}dialogContainer`;
 Constants.IFRAME_STYLE_CENTER_CLASS = `${Constants.CLASS_PREFIX}dialogCenter`;
 Constants.IFRAME_STYLE_CLASS = `${Constants.CLASS_PREFIX}dialog`;
@@ -13385,7 +13363,7 @@ Constants.IFRAME_STYLE_CENTER = `
 `;
 
 Constants.GPAY_BUTTON_WITH_CARD_INFO_IMAGE =
-    'background-image: url(https://pay.google.com/gp/p/generate_gpay_btn_img);';
+  'background-image: url(https://pay.google.com/gp/p/generate_gpay_btn_img);';
 
 Constants.BUTTON_LOCALE_TO_MIN_WIDTH = {
   'en': 152,
@@ -13489,47 +13467,47 @@ Constants.GPAY_BUTTON_WITH_OFFER_ICON_ADDITIONAL_STYLE = 'position: relative;';
 Constants.GPAY_OFFER_ICON_CLASS = 'gpay-offer-icon';
 
 Constants.GPAY_OFFER_ICON_SVG =
-    "<svg width=\"20px\" height=\"20px\" viewBox=\"0 0 20 20\" " +
-    "version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=" +
-    "\"http://www.w3.org/1999/xlink\" class=\"gpay-offer-icon\"><defs><path d=\"M19.41,9.58 L10.41,0.58 " +
-    "C10.05,0.22 9.55,0 9,0 L2,0 C0.9,0 0,0.9 0,2 L0,9 C0,9.55 0.22,10.05 " +
-    "0.59,10.42 L9.59,19.42 C9.95,19.78 10.45,20 11,20 C11.55,20 12.05,19.78 " +
-    "12.41,19.41 L19.41,12.41 C19.78,12.05 20,11.55 20,11 C20,10.45 19.77," +
-    "9.94 19.41,9.58 Z\" id=\"path-1\"></path></defs><g id=\"buttons_10.05\"" +
-    " stroke=\"none\" stroke-width=\"1\" fill=\"none\" fill-rule=\"evenodd\">" +
-    "<g id=\"Artboard\" transform=\"translate(-40.000000, -43.000000)\">" +
-    "<g id=\"Group-3\" transform=\"translate(40.000000, 43.000000)\">" +
-    "<g id=\"Group-2-Copy-2\"><g id=\"Group-Copy\"><g id=\"ic_loyalty_24px\">" +
-    "<mask id=\"mask-2\" fill=\"white\"><use xlink:href=\"#path-1\"></use>" +
-    "</mask><use id=\"gpay-Shape\" fill=\"#FF6100\" fill-rule=\"nonzero\" " +
-    "xlink:href=\"#path-1\"></use><path d=\"M3.5,5 C2.67,5 2,4.33 2,3.5 C2," +
-    "2.67 2.67,2 3.5,2 C4.33,2 5,2.67 5,3.5 C5,4.33 4.33,5 3.5,5 Z\" " +
-    "id=\"Path\" fill=\"#FFFFFF\" fill-rule=\"nonzero\" mask=\"url(#mask-2)\">" +
-    "</path></g></g></g><g id=\"Group-13-Copy-7\" transform=\"translate" +
-    "(6.000000, 6.000000)\" fill=\"#FFFFFF\" fill-rule=\"nonzero\">" +
-    "<g id=\"Group-13-Copy-2\"><path d=\"M2.15217391,4.55172414 C0.963561082," +
-    "4.55172414 1.99840144e-14,3.53278598 1.99840144e-14,2.27586207 " +
-    "C1.99840144e-14,1.01893816 0.963561082,6.30606678e-14 2.15217391,6." +
-    "30606678e-14 C3.34078674,6.30606678e-14 4.30434783,1.01893816 4.30434783," +
-    "2.27586207 C4.30434783,3.53278598 3.34078674,4.55172414 2.15217391," +
-    "4.55172414 Z M2.15217391,3.31034483 C2.69245247,3.31034483 3.13043478,2." +
-    "84719112 3.13043478,2.27586207 C3.13043478,1.70453302 2.69245247," +
-    "1.24137931 2.15217391,1.24137931 C1.61189535,1.24137931 1.17391304,1" +
-    ".70453302 1.17391304,2.27586207 C1.17391304,2.84719112 1.61189535,3." +
-    "31034483 2.15217391,3.31034483 Z\" id=\"Combined-Shape\"></path>" +
-    "<path d=\"M6.84782609,9 C5.65921326,9 4.69565217,7.98106184 4.69565217," +
-    "6.72413793 C4.69565217,5.46721402 5.65921326,4.44827586 6.84782609," +
-    "4.44827586 C8.03643892,4.44827586 9,5.46721402 9,6.72413793 C9,7.98106184" +
-    " 8.03643892,9 6.84782609,9 Z M6.84782609,7.75862069 C7.38810465," +
-    "7.75862069 7.82608696,7.29546698 7.82608696,6.72413793 C7.82608696" +
-    ",6.15280888 7.38810465,5.68965517 6.84782609,5.68965517 C6.30754753," +
-    "5.68965517 5.86956522,6.15280888 5.86956522,6.72413793 C5.86956522," +
-    "7.29546698 6.30754753,7.75862069 6.84782609,7.75862069 Z\" " +
-    "id=\"Combined-Shape\"></path><polygon id=\"Rectangle\" " +
-    "transform=\"translate(4.497720, 4.541938) rotate(34.000000) " +
-    "translate(-4.497720, -4.541938) \" points=\"3.77901778 -0.202295978 " +
-    "4.9740273 -0.171019161 5.21642263 9.28617278 4.02141311 9.25489596\">" +
-    "</polygon></g></g></g></g></g></svg>";
+  '<svg width="20px" height="20px" viewBox="0 0 20 20" ' +
+  'version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink=' +
+  '"http://www.w3.org/1999/xlink" class="gpay-offer-icon"><defs><path d="M19.41,9.58 L10.41,0.58 ' +
+  'C10.05,0.22 9.55,0 9,0 L2,0 C0.9,0 0,0.9 0,2 L0,9 C0,9.55 0.22,10.05 ' +
+  '0.59,10.42 L9.59,19.42 C9.95,19.78 10.45,20 11,20 C11.55,20 12.05,19.78 ' +
+  '12.41,19.41 L19.41,12.41 C19.78,12.05 20,11.55 20,11 C20,10.45 19.77,' +
+  '9.94 19.41,9.58 Z" id="path-1"></path></defs><g id="buttons_10.05"' +
+  ' stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">' +
+  '<g id="Artboard" transform="translate(-40.000000, -43.000000)">' +
+  '<g id="Group-3" transform="translate(40.000000, 43.000000)">' +
+  '<g id="Group-2-Copy-2"><g id="Group-Copy"><g id="ic_loyalty_24px">' +
+  '<mask id="mask-2" fill="white"><use xlink:href="#path-1"></use>' +
+  '</mask><use id="gpay-Shape" fill="#FF6100" fill-rule="nonzero" ' +
+  'xlink:href="#path-1"></use><path d="M3.5,5 C2.67,5 2,4.33 2,3.5 C2,' +
+  '2.67 2.67,2 3.5,2 C4.33,2 5,2.67 5,3.5 C5,4.33 4.33,5 3.5,5 Z" ' +
+  'id="Path" fill="#FFFFFF" fill-rule="nonzero" mask="url(#mask-2)">' +
+  '</path></g></g></g><g id="Group-13-Copy-7" transform="translate' +
+  '(6.000000, 6.000000)" fill="#FFFFFF" fill-rule="nonzero">' +
+  '<g id="Group-13-Copy-2"><path d="M2.15217391,4.55172414 C0.963561082,' +
+  '4.55172414 1.99840144e-14,3.53278598 1.99840144e-14,2.27586207 ' +
+  'C1.99840144e-14,1.01893816 0.963561082,6.30606678e-14 2.15217391,6.' +
+  '30606678e-14 C3.34078674,6.30606678e-14 4.30434783,1.01893816 4.30434783,' +
+  '2.27586207 C4.30434783,3.53278598 3.34078674,4.55172414 2.15217391,' +
+  '4.55172414 Z M2.15217391,3.31034483 C2.69245247,3.31034483 3.13043478,2.' +
+  '84719112 3.13043478,2.27586207 C3.13043478,1.70453302 2.69245247,' +
+  '1.24137931 2.15217391,1.24137931 C1.61189535,1.24137931 1.17391304,1' +
+  '.70453302 1.17391304,2.27586207 C1.17391304,2.84719112 1.61189535,3.' +
+  '31034483 2.15217391,3.31034483 Z" id="Combined-Shape"></path>' +
+  '<path d="M6.84782609,9 C5.65921326,9 4.69565217,7.98106184 4.69565217,' +
+  '6.72413793 C4.69565217,5.46721402 5.65921326,4.44827586 6.84782609,' +
+  '4.44827586 C8.03643892,4.44827586 9,5.46721402 9,6.72413793 C9,7.98106184' +
+  ' 8.03643892,9 6.84782609,9 Z M6.84782609,7.75862069 C7.38810465,' +
+  '7.75862069 7.82608696,7.29546698 7.82608696,6.72413793 C7.82608696' +
+  ',6.15280888 7.38810465,5.68965517 6.84782609,5.68965517 C6.30754753,' +
+  '5.68965517 5.86956522,6.15280888 5.86956522,6.72413793 C5.86956522,' +
+  '7.29546698 6.30754753,7.75862069 6.84782609,7.75862069 Z" ' +
+  'id="Combined-Shape"></path><polygon id="Rectangle" ' +
+  'transform="translate(4.497720, 4.541938) rotate(34.000000) ' +
+  'translate(-4.497720, -4.541938) " points="3.77901778 -0.202295978 ' +
+  '4.9740273 -0.171019161 5.21642263 9.28617278 4.02141311 9.25489596">' +
+  '</polygon></g></g></g></g></g></svg>';
 
 Constants.GPAY_OFFER_ICON_STYLE = `
 .${Constants.GPAY_OFFER_ICON_CLASS} {
@@ -13605,7 +13583,6 @@ Constants.GPAY_BUTTON_CARD_INFO_BUTTON_STYLE = `
   }
   `;
 
-
 /**
  * Trusted domain for secure context validation
  *
@@ -13656,34 +13633,42 @@ class PaymentsRequestDelegate {
     /** @type{!PaymentRequest} */
     const paymentRequest = this.createPaymentRequest_(isReadyToPayRequest);
     return new Promise((resolve, reject) => {
-      paymentRequest.canMakePayment()
-          .then(result => {
-            window.sessionStorage.setItem(
-                Constants.IS_READY_TO_PAY_RESULT_KEY, result.toString());
-            const response = {'result': result};
-            if (isReadyToPayRequest.apiVersion >= 2 &&
-                isReadyToPayRequest.existingPaymentMethodRequired) {
-              // For apiVersion 2, we always use native to only check for
-              // tokenized cards.
-              // For tokenized cards native always does a presence check so
-              // we can say that if canMakePayment is true for native for
-              // tokenizedCards then the user has a payment method which is
-              // present.
-              response['paymentMethodPresent'] = result;
-            }
-            resolve(response);
-          })
-          .catch(function(err) {
-            if (window.sessionStorage.getItem(
-                    Constants.IS_READY_TO_PAY_RESULT_KEY)) {
-              resolve({
-                'result': window.sessionStorage.getItem(
-                              Constants.IS_READY_TO_PAY_RESULT_KEY) == 'true'
-              });
-            } else {
-              resolve({'result': false});
-            }
-          });
+      paymentRequest
+        .canMakePayment()
+        .then((result) => {
+          window.sessionStorage.setItem(
+            Constants.IS_READY_TO_PAY_RESULT_KEY,
+            result.toString()
+          );
+          const response = {'result': result};
+          if (
+            isReadyToPayRequest.apiVersion >= 2 &&
+            isReadyToPayRequest.existingPaymentMethodRequired
+          ) {
+            // For apiVersion 2, we always use native to only check for
+            // tokenized cards.
+            // For tokenized cards native always does a presence check so
+            // we can say that if canMakePayment is true for native for
+            // tokenizedCards then the user has a payment method which is
+            // present.
+            response['paymentMethodPresent'] = result;
+          }
+          resolve(response);
+        })
+        .catch(function (err) {
+          if (
+            window.sessionStorage.getItem(Constants.IS_READY_TO_PAY_RESULT_KEY)
+          ) {
+            resolve({
+              'result':
+                window.sessionStorage.getItem(
+                  Constants.IS_READY_TO_PAY_RESULT_KEY
+                ) == 'true',
+            });
+          } else {
+            resolve({'result': false});
+          }
+        });
     });
   }
 
@@ -13692,9 +13677,11 @@ class PaymentsRequestDelegate {
     // Creating PaymentRequest instance will call
     // Gcore isReadyToPay internally which will prefetch tempaltes.
     this.createPaymentRequest_(
-        paymentDataRequest, this.environment_,
-        paymentDataRequest.transactionInfo.currencyCode,
-        paymentDataRequest.transactionInfo.totalPrice);
+      paymentDataRequest,
+      this.environment_,
+      paymentDataRequest.transactionInfo.currencyCode,
+      paymentDataRequest.transactionInfo.totalPrice
+    );
   }
 
   /** @override */
@@ -13733,10 +13720,12 @@ class PaymentsRequestDelegate {
       data['environment'] = environment;
     }
 
-    const supportedInstruments = [{
-      'supportedMethods': ['https://google.com/pay'],
-      'data': data,
-    }];
+    const supportedInstruments = [
+      {
+        'supportedMethods': ['https://google.com/pay'],
+        'data': data,
+      },
+    ];
 
     const details = {
       'total': {
@@ -13748,8 +13737,8 @@ class PaymentsRequestDelegate {
           // this requirement.
           'currency': currencyCode || 'USD',
           'value': totalPrice || '0',
-        }
-      }
+        },
+      },
     };
 
     return new PaymentRequest(supportedInstruments, details);
@@ -13761,31 +13750,40 @@ class PaymentsRequestDelegate {
    * @private
    */
   loadPaymentDataThroughPaymentRequest_(paymentDataRequest) {
-    const currencyCode = (paymentDataRequest.transactionInfo &&
-                          paymentDataRequest.transactionInfo.currencyCode) ||
-        undefined;
-    const totalPrice = (paymentDataRequest.transactionInfo &&
-                        paymentDataRequest.transactionInfo.totalPrice) ||
-        undefined;
+    const currencyCode =
+      (paymentDataRequest.transactionInfo &&
+        paymentDataRequest.transactionInfo.currencyCode) ||
+      undefined;
+    const totalPrice =
+      (paymentDataRequest.transactionInfo &&
+        paymentDataRequest.transactionInfo.totalPrice) ||
+      undefined;
     const paymentRequest = this.createPaymentRequest_(
-        paymentDataRequest, this.environment_, currencyCode, totalPrice);
+      paymentDataRequest,
+      this.environment_,
+      currencyCode,
+      totalPrice
+    );
     this.callback_(
-        /** @type{!Promise<!PaymentData>} */
-        (paymentRequest.show()
-             .then(
-                 /**
-                  * @param {!PaymentResponse} paymentResponse
-                  * @return {!PaymentData}
-                  */
-                 (paymentResponse) => {
-                   // Should be called to dismiss any remaining UI
-                   paymentResponse.complete('success');
-                   return paymentResponse.details;
-                 })
-             .catch(function(err) {
-               err['statusCode'] = Constants.ResponseStatus.CANCELED;
-               throw err;
-             })));
+      /** @type{!Promise<!PaymentData>} */
+      (paymentRequest
+        .show()
+        .then(
+          /**
+           * @param {!PaymentResponse} paymentResponse
+           * @return {!PaymentData}
+           */
+          (paymentResponse) => {
+            // Should be called to dismiss any remaining UI
+            paymentResponse.complete('success');
+            return paymentResponse.details;
+          }
+        )
+        .catch(function (err) {
+          err['statusCode'] = Constants.ResponseStatus.CANCELED;
+          throw err;
+        }))
+    );
   }
 }
 
@@ -13808,9 +13806,7 @@ class PaymentsRequestDelegate {
 
 const MAX_Z_INDEX$1 = 2147483647;
 
-
 class Graypane$1 {
-
   /**
    * @param {!Document} doc
    */
@@ -13857,9 +13853,14 @@ class Graypane$1 {
       'display': 'block',
       'opacity': 0,
     });
-    return transition$1(this.element_, {
-      'opacity': 1,
-    }, 300, 'ease-out');
+    return transition$1(
+      this.element_,
+      {
+        'opacity': 1,
+      },
+      300,
+      'ease-out'
+    );
   }
 
   /**
@@ -13873,15 +13874,19 @@ class Graypane$1 {
       // This could be possible after redirect.
       return;
     }
-    return transition$1(this.element_, {
-      'opacity': 0,
-    }, 300, 'ease-out').then(() => {
+    return transition$1(
+      this.element_,
+      {
+        'opacity': 0,
+      },
+      300,
+      'ease-out'
+    ).then(() => {
       setImportantStyles$1(this.element_, {'display': 'none'});
       this.doc_.body.removeChild(this.element_);
     });
   }
 }
-
 
 /**
  * Sets the CSS styles of the specified element with !important. The styles
@@ -13899,7 +13904,6 @@ function setImportantStyles$1(element, styles) {
   }
 }
 
-
 /**
  * Returns a promise which is resolved after the given duration of animation
  * @param {!Element} el - Element to be observed.
@@ -13911,19 +13915,31 @@ function setImportantStyles$1(element, styles) {
 function transition$1(el, props, durationMillis, curve) {
   const win = el.ownerDocument.defaultView;
   const previousTransitionValue = el.style.transition || '';
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     win.setTimeout(() => {
       win.setTimeout(resolve, durationMillis);
       const tr = `${durationMillis}ms ${curve}`;
-      setImportantStyles$1(el, Object.assign({
-        'transition': `transform ${tr}, opacity ${tr}`,
-      }, props));
+      setImportantStyles$1(
+        el,
+        Object.assign(
+          {
+            'transition': `transform ${tr}, opacity ${tr}`,
+          },
+          props
+        )
+      );
     });
   }).then(() => {
     // Stop transition and make sure that the final properties get set.
-    setImportantStyles$1(el, Object.assign({
-      'transition': previousTransitionValue,
-    }, props));
+    setImportantStyles$1(
+      el,
+      Object.assign(
+        {
+          'transition': previousTransitionValue,
+        },
+        props
+      )
+    );
   });
 }
 
@@ -14082,15 +14098,16 @@ class PayFrameHelper {
       return;
     }
     const initOptions =
-        /** @type {!PaymentOptions} */ (window['gpayInitParams']) || {};
+      /** @type {!PaymentOptions} */ (window['gpayInitParams']) || {};
     environment = initOptions.environment || Constants.Environment.PRODUCTION;
     iframe = document.createElement('iframe');
     // Pass in origin because document.referrer inside iframe is empty in
     // certain cases
     // Can be replaced by iframe.src=... in non Google context.
     iframe.src = PayFrameHelper.getIframeUrl_(
-            window.location.origin,
-            initOptions.merchantInfo && initOptions.merchantInfo.merchantId);
+      window.location.origin,
+      initOptions.merchantInfo && initOptions.merchantInfo.merchantId
+    );
     PayFrameHelper.postMessage({
       'eventType': PostMessageEventType.LOG_PAY_FRAME_REQUESTED,
       'clientLatencyStartMs': Date.now(),
@@ -14099,7 +14116,7 @@ class PayFrameHelper {
     iframe.width = '0';
     iframe.style.display = 'none';
     iframe.style.visibility = 'hidden';
-    iframe.onload = function() {
+    iframe.onload = function () {
       PayFrameHelper.postMessage({
         'eventType': PostMessageEventType.LOG_PAY_FRAME_LOADED_WITH_ALL_JS,
         'clientLatencyStartMs': Date.now(),
@@ -14112,8 +14129,9 @@ class PayFrameHelper {
     if (document.body) {
       PayFrameHelper.initialize_();
     } else {
-      document.addEventListener(
-          'DOMContentLoaded', () => PayFrameHelper.initialize_());
+      document.addEventListener('DOMContentLoaded', () =>
+        PayFrameHelper.initialize_()
+      );
     }
   }
 
@@ -14136,7 +14154,11 @@ class PayFrameHelper {
    * @param {function(!Event)} responseHandler
    */
   static sendAndWaitForResponse(
-      data, eventType, responseType, responseHandler) {
+    data,
+    eventType,
+    responseType,
+    responseHandler
+  ) {
     function callback(event) {
       if (event.data[responseType]) {
         responseHandler(event);
@@ -14183,14 +14205,17 @@ class PayFrameHelper {
       return;
     }
     const postMessageData = Object.assign(
-        {
-          'buyFlowActivityMode': buyFlowActivityMode,
-          'googleTransactionId': googleTransactionId,
-          'originTimeMs': originTimeMs,
-        },
-        data);
+      {
+        'buyFlowActivityMode': buyFlowActivityMode,
+        'googleTransactionId': googleTransactionId,
+        'originTimeMs': originTimeMs,
+      },
+      data
+    );
     postMessageService.postMessage(
-        postMessageData, PayFrameHelper.getIframeOrigin_());
+      postMessageData,
+      PayFrameHelper.getIframeOrigin_()
+    );
   }
 
   /**
@@ -14253,7 +14278,7 @@ class PayFrameHelper {
    */
   static iframeLoaded() {
     iframeLoaded = true;
-    buffer.forEach(function(data) {
+    buffer.forEach(function (data) {
       PayFrameHelper.postMessage(data);
     });
     buffer.length = 0;
@@ -14304,9 +14329,13 @@ class PayFrameHelper {
    */
   static getIframeUrl_(origin, merchantId) {
     // TrustedResourceUrl header needs to start with https or '//'.
-    const iframeUrl = `https://pay${environment == Constants.Environment.PREPROD ?
-             '-preprod.sandbox' :
-             environment == Constants.Environment.SANDBOX ? '.sandbox' : ''}.google.com/gp/p/ui/payframe?origin=${origin}&mid=%{merchantId}`;
+    const iframeUrl = `https://pay${
+      environment == Constants.Environment.PREPROD
+        ? '-preprod.sandbox'
+        : environment == Constants.Environment.SANDBOX
+        ? '.sandbox'
+        : ''
+    }.google.com/gp/p/ui/payframe?origin=${origin}&mid=%{merchantId}`;
     return iframeUrl;
   }
 }
@@ -14333,22 +14362,25 @@ class PayFrameHelper {
  */
 function chromeSupportsPaymentHandler() {
   // Check if feature is enabled for user
-  if (typeof google == 'undefined' ||
-      !null) {
+  if (typeof google == 'undefined' || !null) {
     return false;
   }
 
   // Payment handler isn't supported on mobile
   const mobilePlatform = window.navigator.userAgent.match(
-      /Android|iPhone|iPad|iPod|BlackBerry|IEMobile/i);
+    /Android|iPhone|iPad|iPod|BlackBerry|IEMobile/i
+  );
   if (mobilePlatform != null) {
     return false;
   }
 
   const chromeVersion = window.navigator.userAgent.match(/Chrome\/([0-9]+)\./i);
-  return 'PaymentRequest' in window && chromeVersion != null &&
-      Number(chromeVersion[1]) >= 68 &&
-      window.navigator.vendor == 'Google Inc.';
+  return (
+    'PaymentRequest' in window &&
+    chromeVersion != null &&
+    Number(chromeVersion[1]) >= 68 &&
+    window.navigator.vendor == 'Google Inc.'
+  );
 }
 
 /**
@@ -14367,11 +14399,15 @@ function chromeSupportsPaymentRequest() {
 
   const androidPlatform = window.navigator.userAgent.match(/Android/i);
   const chromeVersion = window.navigator.userAgent.match(/Chrome\/([0-9]+)\./i);
-  return androidPlatform != null && 'PaymentRequest' in window &&
-      // Make sure skipping PaymentRequest UI when only one PaymentMethod is
-      // supported (starts on Google Chrome 59).
-      window.navigator.vendor == 'Google Inc.' && chromeVersion != null &&
-      Number(chromeVersion[1]) >= 59;
+  return (
+    androidPlatform != null &&
+    'PaymentRequest' in window &&
+    // Make sure skipping PaymentRequest UI when only one PaymentMethod is
+    // supported (starts on Google Chrome 59).
+    window.navigator.vendor == 'Google Inc.' &&
+    chromeVersion != null &&
+    Number(chromeVersion[1]) >= 59
+  );
 }
 
 /**
@@ -14381,16 +14417,22 @@ function chromeSupportsPaymentRequest() {
  */
 function doesMerchantSupportOnlyTokenizedCards(isReadyToPayRequest) {
   if (isReadyToPayRequest.apiVersion >= 2) {
-    const allowedAuthMethods =
-        extractAllowedAuthMethodsForCards_(isReadyToPayRequest);
-    if (allowedAuthMethods && allowedAuthMethods.length == 1 &&
-        allowedAuthMethods[0] == Constants.AuthMethod.CRYPTOGRAM_3DS) {
+    const allowedAuthMethods = extractAllowedAuthMethodsForCards_(
+      isReadyToPayRequest
+    );
+    if (
+      allowedAuthMethods &&
+      allowedAuthMethods.length == 1 &&
+      allowedAuthMethods[0] == Constants.AuthMethod.CRYPTOGRAM_3DS
+    ) {
       return true;
     }
   }
-  return isReadyToPayRequest.allowedPaymentMethods.length == 1 &&
-      isReadyToPayRequest.allowedPaymentMethods[0] ==
-      Constants.PaymentMethod.TOKENIZED_CARD;
+  return (
+    isReadyToPayRequest.allowedPaymentMethods.length == 1 &&
+    isReadyToPayRequest.allowedPaymentMethods[0] ==
+      Constants.PaymentMethod.TOKENIZED_CARD
+  );
 }
 
 /**
@@ -14400,10 +14442,13 @@ function doesMerchantSupportOnlyTokenizedCards(isReadyToPayRequest) {
  * @return {boolean} true if the merchant supports pan cards.
  */
 function apiV2DoesMerchantSupportSpecifiedCardType(
-    isReadyToPayRequest, apiV2AuthMethod) {
+  isReadyToPayRequest,
+  apiV2AuthMethod
+) {
   if (isReadyToPayRequest.apiVersion >= 2) {
-    const allowedAuthMethods =
-        extractAllowedAuthMethodsForCards_(isReadyToPayRequest);
+    const allowedAuthMethods = extractAllowedAuthMethodsForCards_(
+      isReadyToPayRequest
+    );
     if (allowedAuthMethods && allowedAuthMethods.includes(apiV2AuthMethod)) {
       return true;
     }
@@ -14431,9 +14476,9 @@ function validateSecureContext() {
     // for the unsupported browser.
     return null;
   }
-  return window.isSecureContext ?
-      null :
-      'Google Pay APIs should be called in secure context!';
+  return window.isSecureContext
+    ? null
+    : 'Google Pay APIs should be called in secure context!';
 }
 
 /**
@@ -14442,12 +14487,15 @@ function validateSecureContext() {
  * @param {!PaymentOptions} paymentOptions
  */
 function validatePaymentOptions(paymentOptions) {
-  if (paymentOptions.environment &&
-      !Object.values(Constants.Environment)
-           .includes(paymentOptions.environment)) {
+  if (
+    paymentOptions.environment &&
+    !Object.values(Constants.Environment).includes(paymentOptions.environment)
+  ) {
     throw new Error(
-        'Parameter environment in PaymentOptions can optionally be set to ' +
-        'PRODUCTION, otherwise it defaults to TEST. ' + paymentOptions.environment);
+      'Parameter environment in PaymentOptions can optionally be set to ' +
+        'PRODUCTION, otherwise it defaults to TEST. ' +
+        paymentOptions.environment
+    );
   }
 }
 
@@ -14464,9 +14512,11 @@ function validateIsReadyToPayRequest(isReadyToPayRequest) {
     if (!('apiVersionMinor' in isReadyToPayRequest)) {
       return 'apiVersionMinor must be set!';
     }
-    if (!isReadyToPayRequest.allowedPaymentMethods ||
-        !Array.isArray(isReadyToPayRequest.allowedPaymentMethods) ||
-        isReadyToPayRequest.allowedPaymentMethods.length == 0) {
+    if (
+      !isReadyToPayRequest.allowedPaymentMethods ||
+      !Array.isArray(isReadyToPayRequest.allowedPaymentMethods) ||
+      isReadyToPayRequest.allowedPaymentMethods.length == 0
+    ) {
       return 'for v2 allowedPaymentMethods must be set to an array containing a list of accepted payment methods';
     }
     for (var i = 0; i < isReadyToPayRequest.allowedPaymentMethods.length; i++) {
@@ -14476,29 +14526,40 @@ function validateIsReadyToPayRequest(isReadyToPayRequest) {
           return 'Field parameters must be setup in each allowedPaymentMethod';
         }
         var allowedCardNetworks =
-            allowedPaymentMethod['parameters']['allowedCardNetworks'];
-        if (!allowedCardNetworks || !Array.isArray(allowedCardNetworks) ||
-            allowedCardNetworks.length == 0) {
+          allowedPaymentMethod['parameters']['allowedCardNetworks'];
+        if (
+          !allowedCardNetworks ||
+          !Array.isArray(allowedCardNetworks) ||
+          allowedCardNetworks.length == 0
+        ) {
           return 'allowedCardNetworks must be setup in parameters for type CARD';
         }
         var allowedAuthMethods =
-            allowedPaymentMethod['parameters']['allowedAuthMethods'];
-        if (!allowedAuthMethods || !Array.isArray(allowedAuthMethods) ||
-            allowedAuthMethods.length == 0 ||
-            !allowedAuthMethods.every(isAuthMethodValid)) {
-          return 'allowedAuthMethods must be setup in parameters for type \'CARD\' ' +
-              ' and must contain \'CRYPTOGRAM_3DS\' and/or \'PAN_ONLY\'';
+          allowedPaymentMethod['parameters']['allowedAuthMethods'];
+        if (
+          !allowedAuthMethods ||
+          !Array.isArray(allowedAuthMethods) ||
+          allowedAuthMethods.length == 0 ||
+          !allowedAuthMethods.every(isAuthMethodValid)
+        ) {
+          return (
+            "allowedAuthMethods must be setup in parameters for type 'CARD' " +
+            " and must contain 'CRYPTOGRAM_3DS' and/or 'PAN_ONLY'"
+          );
         }
       }
     }
     return null;
   } else if (
-      !isReadyToPayRequest.allowedPaymentMethods ||
-      !Array.isArray(isReadyToPayRequest.allowedPaymentMethods) ||
-      isReadyToPayRequest.allowedPaymentMethods.length == 0 ||
-      !isReadyToPayRequest.allowedPaymentMethods.every(isPaymentMethodValid)) {
-    return 'allowedPaymentMethods must be set to an array containing \'CARD\' ' +
-        'and/or \'TOKENIZED_CARD\'!';
+    !isReadyToPayRequest.allowedPaymentMethods ||
+    !Array.isArray(isReadyToPayRequest.allowedPaymentMethods) ||
+    isReadyToPayRequest.allowedPaymentMethods.length == 0 ||
+    !isReadyToPayRequest.allowedPaymentMethods.every(isPaymentMethodValid)
+  ) {
+    return (
+      "allowedPaymentMethods must be set to an array containing 'CARD' " +
+      "and/or 'TOKENIZED_CARD'!"
+    );
   }
   return null;
 }
@@ -14540,17 +14601,24 @@ function validatePaymentDataRequest(paymentDataRequest) {
   } else if (!paymentDataRequest.transactionInfo.currencyCode) {
     return 'currencyCode in transactionInfo must be set!';
   } else if (
-      !paymentDataRequest.transactionInfo.totalPriceStatus ||
-      !Object.values(Constants.TotalPriceStatus)
-           .includes(paymentDataRequest.transactionInfo.totalPriceStatus)) {
-    return 'totalPriceStatus in transactionInfo must be set to one of' +
-        ' NOT_CURRENTLY_KNOWN, ESTIMATED or FINAL!';
+    !paymentDataRequest.transactionInfo.totalPriceStatus ||
+    !Object.values(Constants.TotalPriceStatus).includes(
+      paymentDataRequest.transactionInfo.totalPriceStatus
+    )
+  ) {
+    return (
+      'totalPriceStatus in transactionInfo must be set to one of' +
+      ' NOT_CURRENTLY_KNOWN, ESTIMATED or FINAL!'
+    );
   } else if (
-      paymentDataRequest.transactionInfo.totalPriceStatus !==
-          'NOT_CURRENTLY_KNOWN' &&
-      !paymentDataRequest.transactionInfo.totalPrice) {
-    return 'totalPrice in transactionInfo must be set when' +
-        ' totalPriceStatus is ESTIMATED or FINAL!';
+    paymentDataRequest.transactionInfo.totalPriceStatus !==
+      'NOT_CURRENTLY_KNOWN' &&
+    !paymentDataRequest.transactionInfo.totalPrice
+  ) {
+    return (
+      'totalPrice in transactionInfo must be set when' +
+      ' totalPriceStatus is ESTIMATED or FINAL!'
+    );
   }
 
   // Validate payment data request for UPI payment method
@@ -14570,14 +14638,17 @@ function validatePaymentDataRequest(paymentDataRequest) {
     } else if (!parameters['mcc']) {
       return 'mcc in allowedPaymentMethod parameters must be set!';
     } else if (!parameters['transactionReferenceId']) {
-      return 'transactionReferenceId in allowedPaymentMethod parameters' +
-          ' must be set!';
+      return (
+        'transactionReferenceId in allowedPaymentMethod parameters' +
+        ' must be set!'
+      );
     }
 
     if (paymentDataRequest['transactionInfo']['currencyCode'] !== 'INR') {
       return 'currencyCode in transactionInfo must be set to INR!';
     } else if (
-        paymentDataRequest['transactionInfo']['totalPriceStatus'] !== 'FINAL') {
+      paymentDataRequest['transactionInfo']['totalPriceStatus'] !== 'FINAL'
+    ) {
       return 'totalPriceStatus in transactionInfo must be set to FINAL!';
     } else if (!paymentDataRequest['transactionInfo']['transactionNote']) {
       return 'transactionNote in transactionInfo must be set!';
@@ -14594,8 +14665,11 @@ function validatePaymentDataRequest(paymentDataRequest) {
  * @return {?Object}
  */
 function getUpiPaymentMethod(request) {
-  if (!chromeSupportsPaymentRequest() || request.apiVersion < 2 ||
-      !request.allowedPaymentMethods) {
+  if (
+    !chromeSupportsPaymentRequest() ||
+    request.apiVersion < 2 ||
+    !request.allowedPaymentMethods
+  ) {
     return null;
   }
   return getAllowedPaymentMethodForType_(request, Constants.PaymentMethod.UPI);
@@ -14627,7 +14701,9 @@ function validatePaymentDataRequestForSwg(swgParameters) {
 function extractAllowedAuthMethodsForCards_(isReadyToPayRequest) {
   if (isReadyToPayRequest.allowedPaymentMethods) {
     const allowedPaymentMethod = getAllowedPaymentMethodForType_(
-        isReadyToPayRequest, Constants.PaymentMethod.CARD);
+      isReadyToPayRequest,
+      Constants.PaymentMethod.CARD
+    );
     if (allowedPaymentMethod && allowedPaymentMethod.parameters) {
       return allowedPaymentMethod.parameters['allowedAuthMethods'];
     }
@@ -14643,7 +14719,9 @@ function extractAllowedAuthMethodsForCards_(isReadyToPayRequest) {
  * @private
  */
 function getAllowedPaymentMethodForType_(
-    isReadyToPayRequest, paymentMethodType) {
+  isReadyToPayRequest,
+  paymentMethodType
+) {
   for (var i = 0; i < isReadyToPayRequest.allowedPaymentMethods.length; i++) {
     const allowedPaymentMethod = isReadyToPayRequest.allowedPaymentMethods[i];
     if (allowedPaymentMethod.type == paymentMethodType) {
@@ -14681,8 +14759,9 @@ function injectIframe(iframeClassName) {
   const iframeContainer = document.createElement('div');
   iframeContainer.classList.add('iframeContainer');
   /** @private @const {!HTMLIFrameElement} */
-  const iframe =
-      /** @type {!HTMLIFrameElement} */ (document.createElement('iframe'));
+  const iframe = /** @type {!HTMLIFrameElement} */ (document.createElement(
+    'iframe'
+  ));
   iframe.classList.add(iframeClassName);
   iframe.setAttribute('frameborder', '0');
   iframe.setAttribute('scrolling', 'no');
@@ -14803,7 +14882,7 @@ class PaymentsWebActivityDelegate {
     // Only verified origins are allowed.
     this.callback_(
       port.acceptResult().then(
-        result => {
+        (result) => {
           // Origin must always match: popup, iframe or redirect.
           if (result.origin != this.getOrigin_()) {
             throw new Error('channel mismatch');
@@ -14813,7 +14892,7 @@ class PaymentsWebActivityDelegate {
             PayFrameHelper.setBuyFlowActivityMode(BuyFlowActivityMode.REDIRECT);
             return this.fetchRedirectResponse_(
               data['redirectEncryptedCallbackData']
-            ).then(decrypedJson => {
+            ).then((decrypedJson) => {
               // Merge other non-encrypted fields into the final response.
               const clone = Object.assign({}, data);
               delete clone['redirectEncryptedCallbackData'];
@@ -14826,7 +14905,7 @@ class PaymentsWebActivityDelegate {
           }
           return data;
         },
-        error => {
+        (error) => {
           // TODO: Log the original and the inferred error to eye3.
           const originalError = error['message'];
           let inferredError = error['message'];
@@ -14941,7 +15020,7 @@ class PaymentsWebActivityDelegate {
           isReadyToPayRequest,
           PostMessageEventType.IS_READY_TO_PAY,
           'isReadyToPayResponse',
-          function(event) {
+          function (event) {
             const response = {
               'result': isSupported,
             };
@@ -15179,9 +15258,7 @@ class PaymentsWebActivityDelegate {
    * @private
    */
   isVerticalCenterExperimentEnabled_(paymentDataRequest) {
-    return (
-      null  
-    );
+    return null;
   }
 
   /**
@@ -15248,10 +15325,10 @@ class PaymentsWebActivityDelegate {
     );
     return this.activities
       .openIframe(iframe, trustedUrl, paymentDataRequest)
-      .then(port => {
+      .then((port) => {
         // Handle custom resize message.
         this.port_ = port;
-        port.onMessage(payload => {
+        port.onMessage((payload) => {
           if (payload['type'] !== 'resize' || !this.shouldHandleResizing_) {
             // Save the resize event later after initial animation is finished
             this.savedResizePayload_ = {
@@ -15284,14 +15361,14 @@ class PaymentsWebActivityDelegate {
          * @param {!Object} result
          * @return {!PaymentData}
          */
-        result => {
+        (result) => {
           this.removeIframeAndContainer_(container, iframe);
           // This is only for popping the state we pushed earlier.
           history.back();
           const data = /** @type {!PaymentData} */ (result['data']);
           return data;
         },
-        error => {
+        (error) => {
           this.removeIframeAndContainer_(container, iframe);
           // This is only for popping the state we pushed earlier.
           history.back();
@@ -15366,17 +15443,19 @@ class UpiHandler {
   loadPaymentData(paymentDataRequest, upiPaymentMethod, onResultCallback) {
     const parameters = upiPaymentMethod['parameters'];
     const transactionInfo = paymentDataRequest['transactionInfo'];
-    const supportedInstruments = [{
-          'supportedMethods': ['https://tez.google.com/pay'],
-          'data': {
-            'pa': parameters['payeeVpa'],
-            'pn': parameters['payeeName'],
-            'tr': parameters['transactionReferenceId'],
-            'url': parameters['referenceUrl'],
-            'mc': parameters['mcc'],
-            'tn': transactionInfo['transactionNote'],
-          },
-        }];
+    const supportedInstruments = [
+      {
+        'supportedMethods': ['https://tez.google.com/pay'],
+        'data': {
+          'pa': parameters['payeeVpa'],
+          'pn': parameters['payeeName'],
+          'tr': parameters['transactionReferenceId'],
+          'url': parameters['referenceUrl'],
+          'mc': parameters['mcc'],
+          'tn': transactionInfo['transactionNote'],
+        },
+      },
+    ];
 
     if (parameters['transactionId']) {
       supportedInstruments[0]['data']['tid'] = parameters['transactionId'];
@@ -15390,34 +15469,40 @@ class UpiHandler {
           'value': transactionInfo['totalPrice'],
         },
       },
-      'displayItems': [{
-        'label': 'Original Amount',
-        'amount': {
-          'currency': transactionInfo['currencyCode'],
-          'value': transactionInfo['totalPrice'],
+      'displayItems': [
+        {
+          'label': 'Original Amount',
+          'amount': {
+            'currency': transactionInfo['currencyCode'],
+            'value': transactionInfo['totalPrice'],
+          },
         },
-      }],
+      ],
     };
 
     let request = new PaymentRequest(supportedInstruments, details);
 
     onResultCallback(
-        this.checkCanMakePayment_(request)
-            .then(result => {
-              if (result) {
-                return this.showUi_(request);
-              } else {
-                return this.redirectToGooglePlay_();
-              }
-            })
-            .then(paymentData => {
-              return this.processData_(
-                  paymentData, paymentDataRequest, upiPaymentMethod);
-            })
-            .catch(error => {
-              error['statusCode'] = Constants.ResponseStatus.CANCELED;
-              return Promise.reject(error);
-            }));
+      this.checkCanMakePayment_(request)
+        .then((result) => {
+          if (result) {
+            return this.showUi_(request);
+          } else {
+            return this.redirectToGooglePlay_();
+          }
+        })
+        .then((paymentData) => {
+          return this.processData_(
+            paymentData,
+            paymentDataRequest,
+            upiPaymentMethod
+          );
+        })
+        .catch((error) => {
+          error['statusCode'] = Constants.ResponseStatus.CANCELED;
+          return Promise.reject(error);
+        })
+    );
   }
 
   /**
@@ -15428,7 +15513,7 @@ class UpiHandler {
    * @return {!Promise<!PaymentData>} A promise containing payment response.
    */
   showUi_(request) {
-    return request.show().then(paymentResponse => {
+    return request.show().then((paymentResponse) => {
       paymentResponse.complete('success');
       return paymentResponse.details;
     });
@@ -15444,8 +15529,9 @@ class UpiHandler {
    */
   checkCanMakePayment_(request) {
     // Checks canMakePayment cache, and use the cache result if it exists.
-    const cacheResult =
-        window.sessionStorage.getItem(Constants.UPI_CAN_MAKE_PAYMENT_CACHE_KEY);
+    const cacheResult = window.sessionStorage.getItem(
+      Constants.UPI_CAN_MAKE_PAYMENT_CACHE_KEY
+    );
     if (cacheResult) {
       return Promise.resolve(cacheResult === 'true');
     }
@@ -15457,14 +15543,16 @@ class UpiHandler {
 
     let canMakePaymentPromise = request.canMakePayment();
 
-    return canMakePaymentPromise.then(result => {
+    return canMakePaymentPromise.then((result) => {
       // Store the result in cache if the result is true to avoid quota error
       // caused by querying multiple times with different data.
       // Doesn't store false because if we do so, user will be redirected to
       // Google Play again after installing Google Pay if Chrome is not closed.
       if (result) {
         window.sessionStorage.setItem(
-            Constants.UPI_CAN_MAKE_PAYMENT_CACHE_KEY, result.toString());
+          Constants.UPI_CAN_MAKE_PAYMENT_CACHE_KEY,
+          result.toString()
+        );
       }
       return result;
     });
@@ -15478,10 +15566,12 @@ class UpiHandler {
    */
   redirectToGooglePlay_() {
     window.location.replace(
-        // NOLINT
-            'https://play.google.com/store/apps/details?id=com.google.android.apps.nbu.paisa.user');  // NOLINT
-    return Promise.reject(
-        {'errorMessage': 'Cannot redirect to Tez page in Google Play.'});
+      // NOLINT
+      'https://play.google.com/store/apps/details?id=com.google.android.apps.nbu.paisa.user'
+    ); // NOLINT
+    return Promise.reject({
+      'errorMessage': 'Cannot redirect to Tez page in Google Play.',
+    });
   }
 
   /**
@@ -15505,14 +15595,14 @@ class UpiHandler {
           // payment failure due to invalid MPIN
           error = {
             'errorCode': PublicErrorCode.BUYER_ACCOUNT_ERROR,
-            'errorMessage': 'Payment failure due to invalid MPIN.'
+            'errorMessage': 'Payment failure due to invalid MPIN.',
           };
           break;
         case 'Z9':
           // payment failure due to insufficient funds
           error = {
             'errorCode': PublicErrorCode.BUYER_ACCOUNT_ERROR,
-            'errorMessage': 'Payment failure due to insufficient funds.'
+            'errorMessage': 'Payment failure due to insufficient funds.',
           };
           break;
         case '91':
@@ -15520,8 +15610,8 @@ class UpiHandler {
           error = {
             'errorCode': PublicErrorCode.INTERNAL_ERROR,
             'errorMessage':
-                'Payment failure due to transaction timeout or connection' +
-                ' issue.'
+              'Payment failure due to transaction timeout or connection' +
+              ' issue.',
           };
           break;
         default:
@@ -15536,10 +15626,10 @@ class UpiHandler {
       'payeeVpa': upiPaymentMethod['parameters']['payeeVpa'],
       'status': tezResponse['Status'],
       'transactionReferenceId':
-          upiPaymentMethod['parameters']['transactionReferenceId'],
-      'transactionId': upiPaymentMethod['parameters']['transactionId'] ?
-          upiPaymentMethod['parameters']['transactionId'] :
-          tezResponse['txnId'],
+        upiPaymentMethod['parameters']['transactionReferenceId'],
+      'transactionId': upiPaymentMethod['parameters']['transactionId']
+        ? upiPaymentMethod['parameters']['transactionId']
+        : tezResponse['txnId'],
       'transactionInfo': paymentDataRequest['transactionInfo'],
     };
 
@@ -15555,10 +15645,10 @@ class UpiHandler {
             // TODO: Verify that response comes from tez and
             // add signature and encrypt signed message here
             'signature': '',
-            'signedMessage': signedMessage
-          }
-        }
-      }
+            'signedMessage': signedMessage,
+          },
+        },
+      },
     };
     return Promise.resolve(paymentData);
   }
@@ -15597,63 +15687,71 @@ Dual licensed under the MIT and GPL licenses.
  *   "098F4D35"
  */
 
-class Random_uuid {}  // Private array of chars to use
-  var CHARS$1 = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split('');
+class Random_uuid {} // Private array of chars to use
+var CHARS$1 = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split(
+  ''
+);
 
-  Random_uuid.uuid = function (len, radix) {
-    var chars = CHARS$1, uuid = [], i;
-    radix = radix || chars.length;
+Random_uuid.uuid = function (len, radix) {
+  var chars = CHARS$1,
+    uuid = [],
+    i;
+  radix = radix || chars.length;
 
-    if (len) {
-      // Compact form
-      for (i = 0; i < len; i++) uuid[i] = chars[0 | Math.random()*radix];
+  if (len) {
+    // Compact form
+    for (i = 0; i < len; i++) uuid[i] = chars[0 | (Math.random() * radix)];
+  } else {
+    // rfc4122, version 4 form
+    var r;
+
+    // rfc4122 requires these characters
+    uuid[8] = uuid[13] = uuid[18] = uuid[23] = '-';
+    uuid[14] = '4';
+
+    // Fill in random data.  At i==19 set the high bits of clock sequence as
+    // per rfc4122, sec. 4.1.5
+    for (i = 0; i < 36; i++) {
+      if (!uuid[i]) {
+        r = 0 | (Math.random() * 16);
+        uuid[i] = chars[i == 19 ? (r & 0x3) | 0x8 : r];
+      }
+    }
+  }
+
+  return uuid.join('');
+};
+
+// A more performant, but slightly bulkier, RFC4122v4 solution.  We boost performance
+// by minimizing calls to random()
+Random_uuid.uuidFast = function () {
+  var chars = CHARS$1,
+    uuid = new Array(36),
+    rnd = 0,
+    r;
+  for (var i = 0; i < 36; i++) {
+    if (i == 8 || i == 13 || i == 18 || i == 23) {
+      uuid[i] = '-';
+    } else if (i == 14) {
+      uuid[i] = '4';
     } else {
-      // rfc4122, version 4 form
-      var r;
-
-      // rfc4122 requires these characters
-      uuid[8] = uuid[13] = uuid[18] = uuid[23] = '-';
-      uuid[14] = '4';
-
-      // Fill in random data.  At i==19 set the high bits of clock sequence as
-      // per rfc4122, sec. 4.1.5
-      for (i = 0; i < 36; i++) {
-        if (!uuid[i]) {
-          r = 0 | Math.random()*16;
-          uuid[i] = chars[(i == 19) ? (r & 0x3) | 0x8 : r];
-        }
-      }
+      if (rnd <= 0x02) rnd = (0x2000000 + Math.random() * 0x1000000) | 0;
+      r = rnd & 0xf;
+      rnd = rnd >> 4;
+      uuid[i] = chars[i == 19 ? (r & 0x3) | 0x8 : r];
     }
+  }
+  return uuid.join('');
+};
 
-    return uuid.join('');
-  };
-
-  // A more performant, but slightly bulkier, RFC4122v4 solution.  We boost performance
-  // by minimizing calls to random()
-  Random_uuid.uuidFast = function() {
-    var chars = CHARS$1, uuid = new Array(36), rnd=0, r;
-    for (var i = 0; i < 36; i++) {
-      if (i==8 || i==13 ||  i==18 || i==23) {
-        uuid[i] = '-';
-      } else if (i==14) {
-        uuid[i] = '4';
-      } else {
-        if (rnd <= 0x02) rnd = 0x2000000 + (Math.random()*0x1000000)|0;
-        r = rnd & 0xf;
-        rnd = rnd >> 4;
-        uuid[i] = chars[(i == 19) ? (r & 0x3) | 0x8 : r];
-      }
-    }
-    return uuid.join('');
-  };
-
-  // A more compact, but less performant, RFC4122v4 solution:
-  Random_uuid.uuidCompact = function() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-      var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
-      return v.toString(16);
-    });
-  };
+// A more compact, but less performant, RFC4122v4 solution:
+Random_uuid.uuidCompact = function () {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    var r = (Math.random() * 16) | 0,
+      v = c == 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+};
 
 /**
  * @license
@@ -15740,12 +15838,11 @@ class PaymentsAsyncClient {
     this.environment_ =
       paymentOptions.environment || Constants.Environment.TEST;
     if (!PaymentsAsyncClient.googleTransactionId_) {
-      PaymentsAsyncClient.googleTransactionId_ =
-        /** @type {string} */ (this.isInTrustedDomain_() &&
-        paymentOptions['i'] &&
-        paymentOptions['i']['googleTransactionId']
-          ? paymentOptions['i']['googleTransactionId']
-          : createGoogleTransactionId(this.environment_));
+      PaymentsAsyncClient.googleTransactionId_ = /** @type {string} */ (this.isInTrustedDomain_() &&
+      paymentOptions['i'] &&
+      paymentOptions['i']['googleTransactionId']
+        ? paymentOptions['i']['googleTransactionId']
+        : createGoogleTransactionId(this.environment_));
     }
 
     /** @private @const {!PaymentOptions} */
@@ -15798,7 +15895,7 @@ class PaymentsAsyncClient {
       'clientLatencyStartMs': Date.now(),
     });
 
-    window.addEventListener('message', event =>
+    window.addEventListener('message', (event) =>
       this.handleMessageEvent_(event)
     );
   }
@@ -15840,7 +15937,7 @@ class PaymentsAsyncClient {
 
     const isReadyToPayPromise = this.isReadyToPay_(isReadyToPayRequest);
 
-    isReadyToPayPromise.then(response => {
+    isReadyToPayPromise.then((response) => {
       PayFrameHelper.postMessage({
         'eventType': PostMessageEventType.LOG_IS_READY_TO_PAY_API,
         'clientLatencyStartMs': startTimeMs,
@@ -15960,7 +16057,7 @@ class PaymentsAsyncClient {
       return nativePromise.then(() => webPromise);
     }
 
-    return nativePromise.then(nativeResult => {
+    return nativePromise.then((nativeResult) => {
       if ((nativeResult && nativeResult['result']) == true) {
         return nativeResult;
       }
@@ -16123,14 +16220,14 @@ class PaymentsAsyncClient {
    */
   onResult_(response) {
     response
-      .then(result => {
+      .then((result) => {
         PayFrameHelper.postMessage({
           'eventType': PostMessageEventType.LOG_LOAD_PAYMENT_DATA_API,
           'clientLatencyStartMs': this.loadPaymentDataApiStartTimeMs_,
           'buyFlowMode': this.buyFlowMode_,
         });
       })
-      .catch(result => {
+      .catch((result) => {
         if (result['errorCode']) {
           PayFrameHelper.postMessage({
             'eventType': PostMessageEventType.LOG_LOAD_PAYMENT_DATA_API,
@@ -17041,7 +17138,8 @@ class Propensity {
   }
 }
 
-const CSS$1 = ".swg-dialog,.swg-toast{box-sizing:border-box;background-color:#fff!important}.swg-toast{position:fixed!important;bottom:0!important;max-height:46px!important;z-index:2147483647!important;border:none!important}@media (max-height:640px), (max-width:640px){.swg-dialog,.swg-toast{width:480px!important;left:-240px!important;margin-left:50vw!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}@media (min-width:640px) and (min-height:640px){.swg-dialog{width:630px!important;left:-315px!important;margin-left:50vw!important;background-color:transparent!important;border:none!important}.swg-toast{left:0!important}}@media (max-width:480px){.swg-dialog,.swg-toast{width:100%!important;left:0!important;right:0!important;margin-left:0!important}}\n/*# sourceURL=/./src/components/dialog.css*/";
+const CSS$1 =
+  '.swg-dialog,.swg-toast{box-sizing:border-box;background-color:#fff!important}.swg-toast{position:fixed!important;bottom:0!important;max-height:46px!important;z-index:2147483647!important;border:none!important}@media (max-height:640px), (max-width:640px){.swg-dialog,.swg-toast{width:480px!important;left:-240px!important;margin-left:50vw!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}@media (min-width:640px) and (min-height:640px){.swg-dialog{width:630px!important;left:-315px!important;margin-left:50vw!important;background-color:transparent!important;border:none!important}.swg-toast{left:0!important}}@media (max-width:480px){.swg-dialog,.swg-toast{width:100%!important;left:0!important;right:0!important;margin-left:0!important}}\n/*# sourceURL=/./src/components/dialog.css*/';
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -17843,4 +17941,18 @@ class ConfiguredRuntime {
   }
 }
 
-export { AnalyticsEvent, ClientEvent, ClientEventManagerApi, ConfiguredRuntime, DeferredAccountCreationResponse, Entitlement, Entitlements, EventOriginator, Fetcher, FilterResult, PurchaseData, SubscribeResponse$1 as SubscribeResponse, UserData };
+export {
+  AnalyticsEvent,
+  ClientEvent,
+  ClientEventManagerApi,
+  ConfiguredRuntime,
+  DeferredAccountCreationResponse,
+  Entitlement,
+  Entitlements,
+  EventOriginator,
+  Fetcher,
+  FilterResult,
+  PurchaseData,
+  SubscribeResponse$1 as SubscribeResponse,
+  UserData,
+};
