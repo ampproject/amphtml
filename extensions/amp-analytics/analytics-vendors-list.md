@@ -331,6 +331,10 @@ Type attribute value: `mparticle`
 
 Adds support for mParticle. More details for adding mParticle support can be found at [docs.mparticle.com](http://docs.mparticle.com/?javascript#amp).
 
+### SOASTA mPulse
+
+Type attribute value: `mpulse`
+
 ### Navegg
 
 Type attribute value: `navegg`
@@ -399,10 +403,6 @@ Adds support for Permutive event collection. Additionally, the following `vars` 
 
 Use `extraUrlParams` to add additional event properties. Full configuration details can be found at [support.permutive.com](http://support.permutive.com).
 
-### Pistats
-
-Type attribute value: `piStats`
-
 ### Piano
 
 Type attribute value: `piano`
@@ -414,6 +414,10 @@ Adds support for Piano. Configuration details can be found at `http://vx.piano.i
 Type attribute value: `pinpoll`
 
 Adds support for Pinpoll. Configuration details can be found at [pinpoll.com](https://pinpoll.com/).
+
+### Pistats
+
+Type attribute value: `piStats`
 
 ### Pressboard
 
@@ -467,10 +471,6 @@ Adds support for Sensors Data. More details for adding Sensors Data support can 
 
 Type attribute value: `shinystat`
 
-### SOASTA mPulse
-
-Type attribute value: `mpulse`
-
 <!-- markdown-link-check-disable -->
 
 Adds support for [SOASTA mPulse](https://www.soasta.com/mPulse). Configuration details can be found at [docs.soasta.com](http://docs.soasta.com/).
@@ -505,12 +505,6 @@ Type attribute value: `tail`
 
 Adds support for Tail. More details for adding Tail support can be found at [tail.digital](https://tail.digital).
 
-### Rambler/TOP-100
-
-Type attribute value: `top100`
-
-Adds support for Rambler/TOP-100. Configuration details can be found at [top100.rambler.ru](https://top100.rambler.ru).
-
 ### TEA Analytics
 
 Type attribute value: `teaanalytics`
@@ -522,6 +516,12 @@ Adds support for TEA Analytics. More details for adding TEA Analytics support ca
 Type attribute value: `tealiumcollect`
 
 Adds support for Tealium Collect. More details for adding Tealium Collect support can be found at [docs.tealium.com](https://docs.tealium.com/platforms/amp/install/).
+
+### Rambler/TOP-100
+
+Type attribute value: `top100`
+
+Adds support for Rambler/TOP-100. Configuration details can be found at [top100.rambler.ru](https://top100.rambler.ru).
 
 ### Top.Mail.Ru
 
