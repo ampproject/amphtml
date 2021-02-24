@@ -37,6 +37,12 @@ Type attribute value: `adobeanalytics`
 
 Adds support for Adobe Analytics. More details for adding Adobe Analytics support can be found at [marketing.adobe.com](https://marketing.adobe.com/resources/help/en_US/sc/implement/accelerated-mobile-pages.html).
 
+### adobeanalytics_nativeConfig
+
+Type attribute value: `adobeanalytics_nativeConfig`
+
+DO NOT SUBMIT: Add a paragraph to describe adobeanalytics_nativeConfig.
+
 ### AFS Analytics
 
 Type attribute value: `afsanalytics`
@@ -72,6 +78,18 @@ Type attribute value: `baiduanalytics`
 Adds support for Baidu Analytics. More details for adding Baidu Analytics support can be found at [tongji.baidu.com/](http://tongji.baidu.com/web/help/article?id=268&type=0).
 
 <!-- markdown-link-check-enable -->
+
+### bg.canary
+
+Type attribute value: `bg.canary`
+
+DO NOT SUBMIT: Add a paragraph to describe bg.canary.
+
+### bg
+
+Type attribute value: `bg`
+
+DO NOT SUBMIT: Add a paragraph to describe bg.
 
 ### Black Crow AI
 

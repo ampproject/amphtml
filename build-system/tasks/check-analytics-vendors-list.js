@@ -13,12 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const {readFile, readJson} = require('fs-extra');
+const globby = require('globby');
+const {basename} = require('path');
+const {readFile} = require('fs-extra');
 const {writeDiffOrFail} = require('../common/diff');
 
 const filepath = 'extensions/amp-analytics/analytics-vendors-list.md';
-const vendorsFilepath =
-  'extensions/amp-analytics/0.1/test/vendor-requests.json';
+
+const vendorsGlob = `extensions/amp-analytics/0.1/vendors/*.json`;
+
+const excludeVendors = ['_fake_'];
 
 const vendorBlock = (heading, name) =>
   `### ${heading}\n\nType attribute value: \`${name}\``;
@@ -37,12 +41,17 @@ const vendorBlockRegExp = (name) =>
  * Checks or updates analytics vendors list.
  */
 async function checkAnalyticsVendorsList() {
-  const vendorsConfig = await readJson(vendorsFilepath);
+  const vendors = globby
+    .sync(vendorsGlob)
+    .map((path) => basename(path, '.json'));
 
   // Keeps list sorted but allows arbitrary sections in-between.
   let tentative = await readFile(filepath, 'utf-8');
   let previousBlock;
-  for (const vendor of Object.keys(vendorsConfig).sort()) {
+  for (const vendor of vendors) {
+    if (excludeVendors.includes(vendor)) {
+      continue;
+    }
     const match = tentative.match(vendorBlockRegExp(vendor));
     if (match) {
       previousBlock = match[0].trim();
@@ -69,7 +78,7 @@ async function checkAnalyticsVendorsList() {
   const anyVendorRegExp = new RegExp(vendorBlockRegExp('(.+)').source, 'gm');
   while ((match = anyVendorRegExp.exec(tentative)) !== null) {
     const [fullMatch, name] = match;
-    if (!(name in vendorsConfig)) {
+    if (!vendors.includes(name)) {
       tentative = tentative.replace(fullMatch, '');
     }
   }
