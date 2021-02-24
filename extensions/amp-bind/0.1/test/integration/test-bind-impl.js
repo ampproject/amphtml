@@ -212,7 +212,6 @@ const FORM_VALUE_CHANGE_EVENT_ARGUMENTS = {
   type: AmpEvents.FORM_VALUE_CHANGE,
   bubbles: true,
 };
-  .ifChrome()
 const chromed = describe.configure().ifChrome();
 chromed.run('Bind', function () {
   describes.repeated(
@@ -298,8 +297,12 @@ chromed.run('Bind', function () {
           });
 
           it('should only scan elements in provided window', () => {
-            createElement(env, fieBody, '[text]="1+1"');
-            createElement(env, hostBody, '[text]="2+2"');
+            createElement(env, fieBody, '[text]="1+1"', {
+              insertQuerySelectorAttr: useQuerySelector,
+            });
+            createElement(env, hostBody, '[text]="2+2"', {
+              insertQuerySelectorAttr: useQuerySelector,
+            });
             return Promise.all([
               onBindReady(env, fieBind),
               onBindReady(env, hostBind),
