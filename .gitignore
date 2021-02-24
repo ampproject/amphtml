@@ -2,7 +2,7 @@
 .g4ignore
 build/
 .karma-cache*
-.amp-build
+.amp-dep-check
 c
 /dist
 dist.3p
