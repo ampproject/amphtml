@@ -25,8 +25,8 @@ BaseElement['Component'] = FitText;
 
 /** @override */
 BaseElement['props'] = {
-  'minFontSize': {attr: 'min-font-size', type: 'number'},
-  'maxFontSize': {attr: 'max-font-size', type: 'number'},
+  'minFontSize': {attr: 'min-font-size', type: 'number', media: true},
+  'maxFontSize': {attr: 'max-font-size', type: 'number', media: true},
 };
 
 /** @override */
