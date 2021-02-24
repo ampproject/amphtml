@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {CSS} from '../../../build/amp-tiktok-0.1.css';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {
@@ -119,10 +120,12 @@ export class AmpTiktok extends AMP.BaseElement {
     this.iframe_.setAttribute('name', '__tt_embed__v$');
     this.iframe_.setAttribute('aria-hidden', 'true');
     this.iframe_.setAttribute('frameborder', '0');
+    this.iframe_.setAttribute('class', 'i-amphtml-tiktok-centered');
     setStyles(this.iframe_, {
       'position': 'fixed',
       'opacity': '0',
       'pointer-events': 'none',
+      'width': '325px',
     });
 
     Promise.resolve(this.oEmbedResponsePromise_).then((data) => {
@@ -165,7 +168,11 @@ export class AmpTiktok extends AMP.BaseElement {
 
     const placeholder = document.createElement('div');
     placeholder.setAttribute('placeholder', '');
-    placeholder.setAttribute('style', 'background: rgba(220, 220, 220, 0.6');
+    const imageContainer = document.createElement('div');
+    imageContainer.setAttribute(
+      'class',
+      'i-amphtml-tiktok-placeholder-image-container'
+    );
 
     const oEmbedRequestUrl = encodeURIComponent(this.oEmbedRequestUrl_);
     this.oEmbedResponsePromise_ = Services.xhrFor(this.win)
@@ -180,20 +187,13 @@ export class AmpTiktok extends AMP.BaseElement {
             {
               'src': thumbnailUrl,
               'placeholder': thumbnailUrl,
-              'style':
-                'display: block; ' +
-                'margin-left: auto; '+
-                'margin-right: auto; '+
-                'aspect-ratio: 0.5625; ' +
-                'left: 1px; ' +
-                'top: 1px; ' +
-                'width: calc(100% - 2px); ' +
-                'border-radius: 8px; ',
+              'class': 'i-amphtml-tiktok-placeholder-image',
             }
           );
 
           if (placeholder.parentElement) {
-            placeholder.appendChild(img);
+            imageContainer.appendChild(img);
+            placeholder.appendChild(imageContainer);
           }
         }
         console.log('thumbnail: ' + thumbnailUrl);
