@@ -64,7 +64,6 @@ amp-story:not([desktop]) .i-amphtml-story-button-move {
   width: 100% !important;
   height: 100% !important;
   border: none !important;
-  background-image: none !important;
   background: none !important;
   padding: 0 !important;
 }
