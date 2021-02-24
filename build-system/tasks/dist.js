@@ -172,7 +172,6 @@ function buildExperiments() {
       minify: true,
       includePolyfills: true,
       minifiedName: maybeToEsmName('experiments.js'),
-      esmPassCompilation: argv.esm || argv.sxg || false,
     }
   );
 }
@@ -194,7 +193,6 @@ function buildLoginDone(version) {
     minify: true,
     minifiedName,
     latestName,
-    esmPassCompilation: argv.esm || argv.sxg || false,
     extraGlobs: [
       buildDir + 'amp-login-done-0.1.max.js',
       buildDir + 'amp-login-done-dialog.js',
@@ -217,7 +215,6 @@ async function buildWebPushPublisherFiles() {
         watch: argv.watch,
         includePolyfills: true,
         minify: true,
-        esmPassCompilation: argv.esm || argv.sxg || false,
         minifiedName,
         extraGlobs: [tempBuildDir + '*.js'],
       });
