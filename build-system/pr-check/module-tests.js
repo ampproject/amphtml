@@ -32,6 +32,7 @@ const {runCiJob} = require('./ci-job');
 const jobName = 'module-tests.js';
 
 function prependConfig() {
+  // TODO(@ampproject/wg-infra): change prepend-global to take multiple target files instead of looping here.
   for (const target of MINIFIED_TARGETS) {
     for (const ext of ['js', 'mjs']) {
       timedExecOrDie(

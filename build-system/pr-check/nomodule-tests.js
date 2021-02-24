@@ -32,6 +32,7 @@ const {runCiJob} = require('./ci-job');
 const jobName = 'nomodule-tests.js';
 
 function prependConfig() {
+  // TODO(@ampproject/wg-infra): change prepend-global to take multiple target files instead of looping here.
   for (const target of MINIFIED_TARGETS) {
     timedExecOrDie(
       `gulp prepend-global --${process.env.config} --local_dev --fortesting --derandomize --target=dist/${target}.js`
