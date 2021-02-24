@@ -611,7 +611,6 @@ export class AmpStoryBookend extends DraggableDrawer {
     this.isBookendRendered_ = true;
 
     this.renderComponents_(bookendConfig.components);
-    this.toggleTabbableElements_(false);
   }
 
   /**
@@ -642,7 +641,10 @@ export class AmpStoryBookend extends DraggableDrawer {
     const container = dev().assertElement(
       BookendComponent.buildContainer(this.getShadowRoot(), this.win.document)
     );
-    this.mutateElement(() => container.appendChild(bookendEls));
+    this.mutateElement(() => {
+      container.appendChild(bookendEls);
+      this.toggleTabbableElements_(false);
+    });
   }
 
   /** @return {!Element} */
@@ -709,9 +711,7 @@ export class AmpStoryBookend extends DraggableDrawer {
    * @param {bolean} isActive
    */
   toggleTabbableElements_(isActive) {
-    console.log('toggle tabbable', isActive, this.bookendEl_);
     this.bookendEl_.querySelectorAll('a').forEach((el) => {
-      console.log(el);
       el.setAttribute('tabindex', isActive ? 0 : -1);
     });
   }
