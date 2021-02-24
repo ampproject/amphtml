@@ -721,7 +721,8 @@ export class AmpSlideScroll extends BaseSlides {
       );
       return false;
     }
-    showIndexArr.forEach((showIndex, loopIndex) => {
+
+    showIndexArr.sort().forEach((showIndex, loopIndex) => {
       if (this.shouldLoop) {
         setStyle(this.slideWrappers_[showIndex], 'order', loopIndex + 1);
       }

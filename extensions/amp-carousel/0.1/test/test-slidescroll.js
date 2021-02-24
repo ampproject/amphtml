@@ -907,6 +907,22 @@ describes.realWin(
         expect(ampSlideScroll.hasAttribute('loop')).to.be.false;
       });
 
+      it('sets the right order for loop', async () => {
+        const ampSlideScroll = await getAmpSlideScroll(true, 5, true, true, 2);
+        const impl = await ampSlideScroll.getImpl();
+
+        // Simulate layout callback
+        impl.showSlide_(0);
+
+        expect(impl.slideWrappers_[0].style.order).to.equal('1');
+        expect(impl.slideWrappers_[1].style.order).to.equal('2');
+        expect(impl.slideWrappers_[2].style.order).to.equal('');
+        expect(impl.slideWrappers_[3].style.order).to.equal('');
+        // Even though we're on index 0, we should have the last slide
+        // loaded, but style.order needs to be correct here.
+        expect(impl.slideWrappers_[4].style.order).to.equal('3');
+      });
+
       // TODO(#17197): This test triggers sinonjs/sinon issues 1709 and 1321.
       it.skip('should hide unwanted slides when looping', async () => {
         const ampSlideScroll = await getAmpSlideScroll(true);
