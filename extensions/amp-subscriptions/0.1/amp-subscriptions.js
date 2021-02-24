@@ -540,6 +540,7 @@ export class SubscriptionService {
   /**
    * Unblock document based on grant state and selected platform
    * @param {boolean=} shouldActivatePlatform
+   * @return {!Promise}
    * @private
    */
   startAuthorizationFlow_(shouldActivatePlatform = true) {
@@ -547,7 +548,7 @@ export class SubscriptionService {
     const grantEntitlementPromise = this.platformStore_.getGrantEntitlement();
     const promises = Promise.all([grantStatusPromise, grantEntitlementPromise]);
 
-    promises.then((results) => {
+    return promises.then((results) => {
       const granted = results[0];
       const entitlement = results[1];
 
@@ -736,7 +737,10 @@ export class SubscriptionService {
   resetPlatforms() {
     this.platformStore_ = this.platformStore_.resetPlatformStore();
     this.renderer_.toggleLoading(true);
-    this.metering_.entitlementsWereFetchedWithCurrentMeteringState = false;
+
+    if (this.metering_) {
+      this.metering_.entitlementsWereFetchedWithCurrentMeteringState = false;
+    }
 
     this.platformStore_
       .getAvailablePlatforms()

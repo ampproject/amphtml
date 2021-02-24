@@ -562,6 +562,9 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
       const getGrantStatusStub = env.sandbox
         .stub(subscriptionService.platformStore_, 'getGrantStatus')
         .callsFake(() => Promise.resolve());
+      const getGrantEntitlementStub = env.sandbox
+        .stub(subscriptionService.platformStore_, 'getGrantEntitlement')
+        .callsFake(() => Promise.resolve());
       const selectAndActivateStub = env.sandbox.stub(
         subscriptionService,
         'selectAndActivatePlatform_'
@@ -571,11 +574,10 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
         'performPingback_'
       );
       await subscriptionService.initialize_();
-      subscriptionService.startAuthorizationFlow_();
+      await subscriptionService.startAuthorizationFlow_();
+      expect(getGrantEntitlementStub).to.be.calledOnce;
       expect(getGrantStatusStub).to.be.calledOnce;
       expect(selectAndActivateStub).to.be.calledOnce;
-
-      await subscriptionService.platformStore_.getGrantStatus();
       expect(performPingbackStub).to.be.calledOnce;
     });
 
@@ -906,13 +908,16 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
       }
     );
 
-    it('not unlock page if no entitlments and viewer provides paywall', async () => {
+    it('not unlock page if no entitlements and viewer provides paywall', async () => {
       subscriptionService.doesViewerProvidePaywall_ = true;
       subscriptionService.doesViewerProvideAuth_ = true;
       subscriptionService.platformStore_ = new PlatformStore(products);
       const getGrantStatusStub = env.sandbox
         .stub(subscriptionService.platformStore_, 'getGrantStatus')
-        .callsFake(() => Promise.resolve());
+        .returns(Promise.resolve());
+      const getGrantEntitlementStub = env.sandbox
+        .stub(subscriptionService.platformStore_, 'getGrantEntitlement')
+        .returns(Promise.resolve());
       const selectAndActivateStub = env.sandbox.stub(
         subscriptionService,
         'selectAndActivatePlatform_'
@@ -925,11 +930,10 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
         subscriptionService.renderer_,
         'setGrantState'
       );
-      subscriptionService.startAuthorizationFlow_();
+      await subscriptionService.startAuthorizationFlow_();
       expect(getGrantStatusStub).to.be.calledOnce;
+      expect(getGrantEntitlementStub).to.be.calledOnce;
       expect(selectAndActivateStub).to.be.calledOnce;
-
-      await subscriptionService.platformStore_.getGrantStatus();
       expect(performPingbackStub).to.be.called;
       expect(setGrantStateStub).to.not.be.called;
     });
@@ -1275,7 +1279,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
 
       await expect(
         subscriptionService.getAuthdataField('grantReason')
-      ).to.eventually.equal(GrantReason.UNLOCKED);
+      ).to.eventually.equal(GrantReason.FREE);
       await expect(
         subscriptionService.getAuthdataField('data.userAccount')
       ).to.eventually.equal(undefined);

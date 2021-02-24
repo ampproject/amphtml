@@ -136,6 +136,10 @@ export class ServiceAdapter {
    * @return {!Promise<?./metering-store.MeteringStateDef>}
    */
   loadMeteringState() {
+    if (!this.subscriptionService_.metering_) {
+      return Promise.resolve(null);
+    }
+
     return this.subscriptionService_.metering_.loadMeteringState();
   }
 
@@ -145,6 +149,10 @@ export class ServiceAdapter {
    * @return {!Promise}
    */
   saveMeteringState(meteringState) {
+    if (!this.subscriptionService_.metering_) {
+      return Promise.resolve();
+    }
+
     return this.subscriptionService_.metering_.saveMeteringState(meteringState);
   }
 

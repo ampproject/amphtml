@@ -69,7 +69,7 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, (env) => {
 
   beforeEach(() => {
     ampdoc = env.ampdoc;
-    serviceAdapter = new ServiceAdapter(null);
+    serviceAdapter = new ServiceAdapter({});
     const analytics = new SubscriptionAnalytics(ampdoc.getRootNode());
     env.sandbox.stub(serviceAdapter, 'getAnalytics').callsFake(() => analytics);
     env.sandbox
