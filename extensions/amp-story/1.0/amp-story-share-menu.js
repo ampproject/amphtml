@@ -178,7 +178,6 @@ export class ShareMenu {
         // Preloads and renders the share widget content.
         const shareWidget = this.shareWidget_.build(getAmpdoc(this.parentEl_));
         this.innerContainerEl_.appendChild(shareWidget);
-        console.log(this.innerContainerEl_.outerHTML);
       },
     });
   }
@@ -291,7 +290,6 @@ export class ShareMenu {
    */
   toggleTabbableElements_(isOpen) {
     this.element_.querySelectorAll('amp-social-share').forEach((el) => {
-      console.log(el);
       el.setAttribute('tabindex', isOpen ? 0 : -1);
     });
   }
