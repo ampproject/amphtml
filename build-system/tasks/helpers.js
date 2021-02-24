@@ -306,7 +306,7 @@ async function terserMinify(code, sourcemap) {
     sourceMap: {
       content: sourcemap,
       filename: `${file}.map`,
-      // TODO: what goes in root? root: `${file}.map`,
+      root: `https://raw.githubusercontent.com/ampproject/amphtml/${internalRuntimeVersion}/`,
     },
   });
 }
@@ -459,6 +459,13 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
 
     let outfile = outputFiles.find((f) => !f.path.endsWith('.map')).text;
     let sourcemap = outputFiles.find((f) => f.path.endsWith('.map')).text;
+
+    // fix sourcemap paths. remove the prepending ../src
+    const sourcemapJson = JSON.parse(sourcemap);
+    sourcemapJson.sources = sourcemapJson.sources.map(s => s.replace(/^\.\.\//, ''));
+    sourcemap = JSON.stringify(sourcemapJson)
+    // end sourcemap fix
+
     if (options.minify) {
       // console.error(JSON.stringify(outputFiles[0].path))
       const {code, map} = await terserMinify(outfile, sourcemap);
