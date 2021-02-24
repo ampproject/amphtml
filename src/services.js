@@ -669,7 +669,6 @@ export class Services {
    * @return {!./service/template-impl.Templates}
    */
   static templatesForDoc(elementOrAmpDoc) {
-    //QQQQ: calls
     return /** @type {!./service/template-impl.Templates} */ (getServiceForDoc(
       elementOrAmpDoc,
       'templates'

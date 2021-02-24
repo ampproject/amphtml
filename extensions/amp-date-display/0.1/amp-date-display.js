@@ -104,7 +104,7 @@ export class AmpDateDisplay extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.templates_ = Services.templatesForDoc(this.getAmpDoc());
+    this.templates_ = Services.templatesForDoc(this.element);
 
     this.container_ = this.element.ownerDocument.createElement('div');
     this.element.appendChild(devAssert(this.container_));
