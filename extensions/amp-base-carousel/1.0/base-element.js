@@ -110,7 +110,7 @@ BaseElement['props'] = {
 
 /** @override */
 BaseElement['staticProps'] = {
-  'slide': {attr: 'slide', type: 'number', default: '0'},
+  'defaultSlide': {attr: 'slide', type: 'number', default: '0'},
 };
 
 /** @override */
