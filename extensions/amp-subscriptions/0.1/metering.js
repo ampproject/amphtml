@@ -90,7 +90,7 @@ export class Metering {
         this.storagePromise_
           // Save state.
           .then((storage) =>
-            storage.setNonBoolean(STORAGE_KEY, JSON.stringify(meteringState))
+            storage.setNonBoolean(STORAGE_KEY, meteringStateString)
           )
           // Reset flag.
           .then(() => {
