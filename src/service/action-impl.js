@@ -416,6 +416,24 @@ export class ActionService {
 
   /**
    * Triggers the specified event on the target element.
+   * TODO(#32756): Rename this to `trigger` once all invocations have been
+   * updated to use the combined method.
+   * @param {!Element} target
+   * @param {string} eventType
+   * @param {?ActionEventDef} event
+   * @param {!ActionTrust} trust
+   * @param {?JsonObject=} opt_args
+   * @return {boolean} true if the target has an action.
+   */
+  triggerWithDispatch(target, eventType, event, trust, opt_args) {
+    const action = this.trigger(target, eventType, event, trust, opt_args);
+    dispatchCustomEvent(target, eventType, event.detail);
+    return action;
+  }
+
+  /**
+   * Triggers the specified event and dispatches a custom event on the target
+   * element.
    * @param {!Element} target
    * @param {string} eventType
    * @param {?ActionEventDef} event
@@ -424,9 +442,7 @@ export class ActionService {
    * @return {boolean} true if the target has an action.
    */
   trigger(target, eventType, event, trust, opt_args) {
-    const action = this.action_(target, eventType, event, trust, opt_args);
-    dispatchCustomEvent(target, eventType, event.detail);
-    return action;
+    return this.action_(target, eventType, event, trust, opt_args);
   }
 
   /**
