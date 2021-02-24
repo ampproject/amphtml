@@ -62,6 +62,9 @@ export class CryptographicValidator extends Validator {
   }
 
   /** @override */
+  completelyUnknownMethodShouldFail(context, unvalidatedBytes, headers) {}
+
+  /** @override */
   validate(context, unvalidatedBytes, headers) {
     return this.getSignatureVerifier_(context.win)
       .verify(
