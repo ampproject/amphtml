@@ -188,7 +188,7 @@ async function restartServer(serverOptions = {}) {
     return;
   }
   resetServerFiles();
-  startServer({}, connectOptions);
+  startServer({}, serverOptions);
 }
 
 /**

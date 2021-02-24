@@ -271,15 +271,21 @@ jobs:
       - run:
           name: '⭐ Validator Tests ⭐'
           command: node build-system/pr-check/validator-tests.js
+<<<<<<< HEAD
       - store_test_output
       - teardown_vm
   visual_diff_tests:
+=======
+      - fail_fast
+  'Visual Diff Tests':
+>>>>>>> 7abc93e073 (apply recommendations to use parameters in config)
     executor:
       name: node-docker-large
     steps:
       - setup_vm
       - install_chrome
       - run:
+<<<<<<< HEAD
           name: '⭐ Visual Diff Tests ⭐'
           command: node build-system/pr-check/visual-diff-tests.js
       - store_test_output
@@ -297,6 +303,17 @@ jobs:
       - store_test_output
       - teardown_vm
   all_unit_tests:
+=======
+          name: 'Visual Diff Tests (using << parameters.build_type >> build)'
+          command: node build-system/pr-check/visual-diff-tests.js --type << parameters.build_type >>
+      - fail_fast
+    parameters:
+      build_type:
+        description: 'Which build type to use'
+        type: string
+        enum: ['module', 'nomodule']
+  'Unit Tests':
+>>>>>>> 7abc93e073 (apply recommendations to use parameters in config)
     executor:
       name: node-docker-medium
     parallelism: 6
@@ -510,6 +527,7 @@ workflows:
       - nomodule_build_prod:
           name: 'Nomodule Build (Prod)'
           <<: *push_and_pr_builds
+<<<<<<< HEAD
           requires:
             - 'Initialize Repository'
       - module_build_prod:
@@ -540,6 +558,17 @@ workflows:
             - 'Nomodule Build (Test)'
       - local_unit_tests:
           name: 'Local Unit Tests'
+=======
+      - 'Visual Diff Tests':
+          name: 'Visual Diff Tests (<< matrix.build_type >>)'
+          matrix:
+            parameters:
+              build_type: ['module', 'nomodule']
+          <<: *push_and_pr_builds
+          requires:
+            - 'Nomodule Build'
+      - 'Unit Tests':
+>>>>>>> 7abc93e073 (apply recommendations to use parameters in config)
           <<: *push_and_pr_builds
           requires:
             - 'Initialize Repository'

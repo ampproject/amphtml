@@ -10,7 +10,7 @@ const {Targets, buildTargetsInclude} = require('./build-targets');
 
 const jobName = 'visual-diff-tests.js';
 
-const esmFlag = argv.esm ? ' --esm' : '';
+const esmFlag = argv.type === 'module' ? ' --esm' : '';
 
 /**
  * Steps to run during push builds.
