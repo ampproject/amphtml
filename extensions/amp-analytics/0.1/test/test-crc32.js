@@ -59,7 +59,7 @@ const testVectors = [
   },
 ];
 
-describe('CRC32 Implementation', () => {
+describes.sandboxed('CRC32 Implementation', {}, () => {
   testVectors.forEach((test, i) => {
     it(`test #${i}: "${test.input}"`, () => {
       expect(crc32(test.input)).to.equal(test.output);
