@@ -357,6 +357,8 @@ export class AmpStory360 extends AMP.BaseElement {
     }
 
     const container = this.element.ownerDocument.createElement('div');
+    // Puts alt-text on canvas element so it can be read by screen readers.
+    // The media element is hidden with CSS it no longer can read it.
     const altText = dev()
       .assertElement(
         this.element.querySelector('amp-img') ||
