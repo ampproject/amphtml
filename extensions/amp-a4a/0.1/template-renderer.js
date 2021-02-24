@@ -16,7 +16,7 @@
 
 import {Renderer} from './amp-ad-type-defs';
 import {devAssert} from '../../../src/log';
-import {getAmpAdTemplateHelper} from './template-validator';
+import {getAmpAdTemplateHelper} from './amp-ad-template-helper';
 import {renderCreativeIntoFriendlyFrame} from './friendly-frame-util';
 
 /**
@@ -72,7 +72,7 @@ export class TemplateRenderer extends Renderer {
       if (!data) {
         return Promise.resolve();
       }
-      const templateHelper = getAmpAdTemplateHelper(context.win);
+      const templateHelper = getAmpAdTemplateHelper(element);
       return templateHelper
         .render(data, this.getDocument(iframe).body)
         .then((renderedElement) => {

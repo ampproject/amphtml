@@ -20,6 +20,10 @@ import {ElementStub} from '../../src/element-stub';
 import {Extensions} from '../../src/service/extensions-impl';
 import {Services} from '../../src/services';
 import {getServiceForDoc} from '../../src/service';
+import {
+  getTemplateClassForTesting,
+  installTemplatesServiceForDoc,
+} from '../../src/service/template-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {user} from '../../src/log';
 
@@ -207,6 +211,66 @@ describes.sandboxed('Extensions', {}, () => {
       expect(unknown.extension.elements['e1'].implementationClass).to.equal(
         ctor
       );
+    });
+
+    it('should add template in registration', async () => {
+      const ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
+      installTemplatesServiceForDoc(ampdoc);
+      const templates = Services.templatesForDoc(ampdoc);
+
+      const ctor = function () {};
+      extensions.registerExtension(
+        'amp-ext',
+        () => {
+          extensions.addTemplate('e1', ctor);
+        },
+        {}
+      );
+      await extensions.waitForExtension(win, 'amp-ext');
+
+      const holder = extensions.getExtensionHolder_('amp-ext');
+      expect(holder.docFactories).to.have.length(1);
+
+      const implClass = await getTemplateClassForTesting(templates, 'e1');
+      expect(implClass).to.equal(ctor);
+    });
+
+    it('should add element out of registration', () => {
+      const ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
+      installTemplatesServiceForDoc(ampdoc);
+
+      const ctor = function () {};
+      allowConsoleError(() => extensions.addTemplate('e1', ctor));
+      expect(Object.keys(extensions.extensions_)).to.deep.equal(['_UNKNOWN_']);
+    });
+
+    it('should install template in shadow doc', async () => {
+      env.sandbox
+        .stub(Services.ampdocServiceFor(win), 'isSingleDoc')
+        .callsFake(() => false);
+
+      // Resolve the promise.
+      const ctor = function () {};
+      extensions.registerExtension(
+        'amp-test',
+        () => {
+          extensions.addTemplate('amp-test', ctor);
+        },
+        {}
+      );
+
+      // Install into shadow doc.
+      const shadowRoot = document.createDocumentFragment();
+      const ampdoc = new AmpDocShadow(win, 'https://a.org/', shadowRoot);
+      installTemplatesServiceForDoc(ampdoc);
+      await extensions.installExtensionsInDoc(ampdoc, ['amp-test']);
+
+      // Extension is now declared.
+      expect(ampdoc.declaresExtension('amp-test')).to.be.true;
+
+      const templates = Services.templatesForDoc(ampdoc);
+      const implClass = await getTemplateClassForTesting(templates, 'amp-test');
+      expect(implClass).to.equal(ctor);
     });
 
     it('should install auto undeclared elements for single-doc', () => {
