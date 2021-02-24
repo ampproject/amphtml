@@ -110,6 +110,7 @@ export const Selectors = {
   ALL_PLAYBACK_MEDIA:
     '> audio, amp-story-grid-layer audio, amp-story-grid-layer video',
   ALL_VIDEO: 'amp-story-grid-layer video',
+  ALL_TABBABLE: 'a',
 };
 
 /** @private @const {string} */
@@ -363,6 +364,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.setPageDescription_();
     this.element.setAttribute('role', 'region');
     this.initializeImgAltTags_();
+    this.initializeTabbableElements_();
   }
 
   /** @private */
@@ -1270,6 +1272,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.findAndPrepareEmbeddedComponents_();
       registerAllPromise.then(() => this.preloadAllMedia_());
     }
+    this.toggleTabbableElements_(distance == 0);
   }
 
   /**
@@ -1869,5 +1872,31 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   isAutoAdvance() {
     return this.advancement_.isAutoAdvance();
+  }
+
+  /**
+   * Set the data-orig-tabindex to the default tabindex of tabbable elements
+   */
+  initializeTabbableElements_() {
+    scopedQuerySelectorAll(this.element, Selectors.ALL_TABBABLE).forEach(
+      (el) => {
+        el.setAttribute('data-orig-tabindex', el.getAttribute('tabindex') || 0);
+      }
+    );
+  }
+
+  /**
+   * Toggles the tabbable elements (buttons, links, etc) to only reach them when page is active.
+   * @param {boolean} toggle
+   */
+  toggleTabbableElements_(toggle) {
+    scopedQuerySelectorAll(this.element, Selectors.ALL_TABBABLE).forEach(
+      (el) => {
+        el.setAttribute(
+          'tabindex',
+          toggle ? el.getAttribute('data-orig-tabindex') : -1
+        );
+      }
+    );
   }
 }
