@@ -1875,12 +1875,15 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
-   * Set the data-orig-tabindex to the default tabindex of tabbable elements
+   * Set the i-amphtml-orig-tabindex to the default tabindex of tabbable elements
    */
   initializeTabbableElements_() {
     scopedQuerySelectorAll(this.element, Selectors.ALL_TABBABLE).forEach(
       (el) => {
-        el.setAttribute('data-orig-tabindex', el.getAttribute('tabindex') || 0);
+        el.setAttribute(
+          'i-amphtml-orig-tabindex',
+          el.getAttribute('tabindex') || 0
+        );
       }
     );
   }
@@ -1894,7 +1897,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       (el) => {
         el.setAttribute(
           'tabindex',
-          toggle ? el.getAttribute('data-orig-tabindex') : -1
+          toggle ? el.getAttribute('i-amphtml-orig-tabindex') : -1
         );
       }
     );
