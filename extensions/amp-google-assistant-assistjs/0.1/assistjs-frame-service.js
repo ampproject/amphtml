@@ -42,7 +42,7 @@ export class AssistjsFrameService {
   createAssistantIframe_() {
     this.ampDoc_.whenReady().then(() => {
       this.configService_ = Services.assistjsConfigServiceForDoc(this.ampDoc_);
-      const iframe = window.document.createElement('iframe');
+      const iframe = this.ampDoc_.win.document.createElement('iframe');
       this.configService_.getWidgetIframeUrl('frame').then((iframeUrl) => {
         addAttributesToElement(iframe, {
           src: iframeUrl,
