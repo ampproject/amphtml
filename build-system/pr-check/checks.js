@@ -43,6 +43,7 @@ function pushBuildWorkflow() {
   timedExecOrDie('gulp check-sourcemaps');
   timedExecOrDie('gulp performance-urls');
   timedExecOrDie('gulp check-video-interface-list');
+  timedExecOrDie('gulp get-zindex');
 }
 
 async function prBuildWorkflow() {
@@ -105,6 +106,7 @@ async function prBuildWorkflow() {
     timedExecOrDie('gulp check-sourcemaps');
     timedExecOrDie('gulp performance-urls');
     timedExecOrDie('gulp check-video-interface-list');
+    timedExecOrDie('gulp get-zindex');
   }
 }
 
