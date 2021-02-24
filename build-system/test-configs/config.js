@@ -15,6 +15,15 @@
  */
 'use strict';
 
+/**
+ * @type
+ * Array<string | {
+ *   pattern: string,
+ *   included: boolean,
+ *   nocache: boolean,
+ *   watched: boolean
+ * }>
+ */
 const initTestsPath = ['test/_init_tests.js'];
 
 const fixturesExamplesPaths = [
@@ -150,7 +159,6 @@ const prettifyGlobs = [
   '.codecov.yml',
   '.lando.yml',
   '.lgtm.yml',
-  '.travis.yml',
   '.prettierrc',
   '.renovaterc.json',
   '.circleci/config.yml',

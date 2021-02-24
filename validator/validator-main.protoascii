@@ -26,7 +26,7 @@ min_validator_revision_required: 475
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 1151
+spec_file_revision: 1155
 
 styles_spec_url: "https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/"
 script_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed"
@@ -1706,7 +1706,8 @@ tags: {
 
 # 4.7 Embedded Content
 # AMP HTML allows embedded content only via its own tags (e.g. amp-img), with
-# the exception of tags inside of a <noscript> ancestor and transformed amp-img.
+# the exception of tags inside of a <noscript> or <amp-story-player> ancestor
+# and transformed amp-img.
 # 4.7.1 The img element
 tags: {
   html_format: AMP  # Disallowed in AMP4ADS because <noscript> is disallowed.
@@ -3626,6 +3627,7 @@ tags: {  # <amp-img>
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
     supported_layouts: FLEX_ITEM
+    supported_layouts: INTRINSIC
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
   }
@@ -5728,4 +5730,10 @@ error_formats {
   code: DEV_MODE_ONLY
   format: "Tag 'html' marked with attribute 'data-ampdevmode'. Validator "
           "will suppress errors regarding any other tag with this attribute."
+}
+error_formats {
+  code: AMP_EMAIL_MISSING_STRICT_CSS_ATTR
+  format: "Tag 'html' marked with attribute 'amp4email' is missing the "
+          "corresponding attribute 'data-css-strict' for enabling strict "
+          "CSS validation. This may become an error in the future."
 }

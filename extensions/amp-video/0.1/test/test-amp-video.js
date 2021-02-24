@@ -1216,5 +1216,24 @@ describes.realWin(
           );
         }));
     });
+
+    describe('bitrate manager', () => {
+      it('should manage bitrate of replaced video from mediapool', async () => {
+        const v = await getVideo(
+          {
+            src: 'video.mp4',
+            width: 160,
+            height: 90,
+          },
+          null,
+          null
+        );
+        const impl = await v.getImpl(false);
+        impl.hasBitrateSources_ = true;
+        impl.resetOnDomChange();
+
+        expect(impl.video_.changedSources).to.not.be.undefined;
+      });
+    });
   }
 );

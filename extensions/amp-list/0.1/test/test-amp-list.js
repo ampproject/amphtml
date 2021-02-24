@@ -315,11 +315,21 @@ describes.repeated(
 
                 it('should require placeholder', () => {
                   list.getPlaceholder = () => null;
-                  allowConsoleError(() => {
-                    expect(() => list.isLayoutSupported('container')).to.throw(
-                      /amp-list\[layout=container\] requires a placeholder/
+                  if (variant.type === 'experiment') {
+                    allowConsoleError(() => {
+                      expect(() =>
+                        list.isLayoutSupported('container')
+                      ).to.throw(
+                        /amp-list\[layout=container\] should have a placeholder/
+                      );
+                    });
+                  } else {
+                    expect(() =>
+                      list.isLayoutSupported('container')
+                    ).to.not.throw(
+                      /amp-list\[layout=container\] should have a placeholder/
                     );
-                  });
+                  }
                 });
 
                 it('should unlock height for layout=container with successful attemptChangeHeight', () => {
@@ -829,7 +839,7 @@ describes.repeated(
               return expect(
                 list.layoutCallback()
               ).to.eventually.be.rejectedWith(
-                /XHR Failed fetching \(https:\/\/data.com.+?\): error/
+                /XHR Failed fetching \(https:\/\/data.com\/\.\.\.\): error/
               );
             });
 
@@ -853,7 +863,7 @@ describes.repeated(
               return expect(
                 list.layoutCallback()
               ).to.eventually.be.rejectedWith(
-                /fetching JSON data \(https:\/\/data.com.+?\): HTTP error 400/
+                /fetching JSON data \(https:\/\/data.com\/\.\.\.\): HTTP error 400/
               );
             });
 
@@ -1402,6 +1412,50 @@ describes.repeated(
                   fast: true,
                 }
               );
+            });
+
+            describe('rescan vs. diff race', () => {
+              async function rescanVsDiffTest() {
+                env.sandbox.spy(list, 'diff_');
+                env.sandbox.spy(list, 'render_');
+
+                // Diffing is skipped if there's no existing children to diff against.
+                const oldChild = doc.createElement('p');
+                oldChild.textContent = 'foo';
+                list.container_.appendChild(oldChild);
+
+                const newChild = doc.createElement('p');
+                newChild.textContent = 'bar';
+                // New children must have at least one binding to trigger rescan.
+                newChild.setAttribute('i-amphtml-binding', '');
+                const rendered = expectFetchAndRender(DEFAULT_FETCHED_DATA, [
+                  newChild,
+                ]);
+                await list.layoutCallback().then(() => rendered);
+              }
+
+              it('without diffing, should rescan _before_ render', async () => {
+                await rescanVsDiffTest();
+
+                expect(list.diff_).to.not.have.been.called;
+                expect(bind.rescan).to.have.been.calledOnce;
+
+                // Without diffable, rescan should happen before rendering the new children.
+                expect(bind.rescan).calledBefore(list.render_);
+              });
+
+              it('with diffing, should rescan _after_ render/diff', async () => {
+                element.setAttribute('diffable', '');
+
+                await rescanVsDiffTest();
+
+                expect(list.diff_).to.have.been.calledOnce;
+                expect(bind.rescan).to.have.been.calledOnce;
+
+                // With diffable, rescanning must happen after rendering (diffing) the new children.
+                expect(bind.rescan).calledAfter(list.render_);
+                expect(bind.rescan).calledAfter(list.diff_);
+              });
             });
           });
 

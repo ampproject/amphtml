@@ -701,7 +701,8 @@ class ParsedDocCssSpec {
   const CssDeclaration* CssDeclarationByName(string_view candidate) const {
     std::string decl_key = AsciiStrToLower(candidate);
     if (spec_.expand_vendor_prefixes())
-      decl_key = htmlparser::css::StripVendorPrefix(decl_key);
+      decl_key = std::string(
+          htmlparser::css::StripVendorPrefix(decl_key).data());
     auto iter = css_declaration_by_name_.find(decl_key);
     if (iter != css_declaration_by_name_.end()) return iter->second;
     return nullptr;
@@ -712,7 +713,8 @@ class ParsedDocCssSpec {
   const CssDeclaration* CssDeclarationSvgByName(string_view candidate) const {
     std::string decl_key = AsciiStrToLower(candidate);
     if (spec_.expand_vendor_prefixes())
-      decl_key = htmlparser::css::StripVendorPrefix(decl_key);
+      decl_key = std::string(
+          htmlparser::css::StripVendorPrefix(decl_key).data());
     auto iter = css_declaration_svg_by_name_.find(decl_key);
     if (iter != css_declaration_svg_by_name_.end()) return iter->second;
     return nullptr;
@@ -2975,7 +2977,7 @@ void CdataMatcher::MatchMediaQuery(
   for (const auto& token : seen_media_types) {
     // Make a copy first otherwise the later string_view gets clobbered.
     std::string seen_media_type = AsciiStrToLower(token->StringValue());
-    string_view stripped_media_type =
+    auto stripped_media_type =
         htmlparser::css::StripVendorPrefix(seen_media_type);
     if (!c_linear_search(spec.type(), stripped_media_type)) {
       error_buffer->emplace_back(CreateParseErrorTokenAt(
@@ -2986,8 +2988,8 @@ void CdataMatcher::MatchMediaQuery(
   for (const auto& token : seen_media_features) {
     // Make a copy first otherwise the later string_view gets clobbered.
     std::string seen_media_feature = AsciiStrToLower(token->StringValue());
-    string_view stripped_media_feature = htmlparser::css::StripMinMaxPrefix(
-        htmlparser::css::StripVendorPrefix(seen_media_feature));
+    auto stripped_media_feature = htmlparser::css::StripMinMaxPrefix(
+        htmlparser::css::StripVendorPrefix(seen_media_feature).data());
     if (!c_linear_search(spec.feature(), stripped_media_feature)) {
       error_buffer->emplace_back(CreateParseErrorTokenAt(
           *token, ValidationError::CSS_SYNTAX_DISALLOWED_MEDIA_FEATURE,
@@ -3058,7 +3060,8 @@ void CdataMatcher::MatchCss(string_view cdata, const CssSpec& css_spec,
                             ValidationResult* result) const {
   vector<unique_ptr<htmlparser::css::ErrorToken>> css_errors;
   vector<unique_ptr<htmlparser::css::ErrorToken>> css_warnings;
-  vector<char32_t> codepoints = htmlparser::Strings::Utf8ToCodepoints(cdata);
+  vector<char32_t> codepoints = htmlparser::Strings::Utf8ToCodepoints(
+      cdata.data());
   vector<unique_ptr<htmlparser::css::Token>> tokens = htmlparser::css::Tokenize(
       &codepoints, line_col_.line(), line_col_.col(), &css_errors);
   unique_ptr<htmlparser::css::Stylesheet> stylesheet =
@@ -4882,6 +4885,8 @@ void ParsedValidatorRules::ValidateTypeIdentifiers(
     ValidationResult* result) const {
   CHECK_NE(0, format_identifiers.size());
   bool has_mandatory_type_identifier = false;
+  bool has_email_type_identifier = false;
+  bool has_css_strict_type_identifier = false;
   // The named values should match up to `self` and AMP caches listed at
   // https://cdn.ampproject.org/caches.json
   static LazyRE2 transformed_value_regex = {"^(bing|google|self);v=(\\d+)$"};
@@ -4934,6 +4939,10 @@ void ParsedValidatorRules::ValidateTypeIdentifiers(
           context->AddError(ValidationError::DEV_MODE_ONLY, context->line_col(),
                             /*params=*/{}, /*url*/ "", result);
         }
+        if (type_identifier == TypeIdentifier::kEmail)
+          has_email_type_identifier = true;
+        if (type_identifier == TypeIdentifier::kCssStrict)
+          has_css_strict_type_identifier = true;
       } else {
         context->AddError(
             ValidationError::DISALLOWED_ATTR, context->line_col(),
@@ -4943,6 +4952,15 @@ void ParsedValidatorRules::ValidateTypeIdentifiers(
             result);
       }
     }
+  }
+  // If AMP Email format and not set to data-css-strict, then issue a warning
+  // that not having data-css-strict is deprecated. See b/179798751.
+  if (has_email_type_identifier && !has_css_strict_type_identifier) {
+    context->AddWarning(
+        ValidationError::AMP_EMAIL_MISSING_STRICT_CSS_ATTR, context->line_col(),
+        /*params=*/{},
+        /*spec_url=*/"https://github.com/ampproject/amphtml/issues/32587",
+        result);
   }
   if (!has_mandatory_type_identifier) {
     // Missing mandatory type identifier (any AMP variant but "transformed").
@@ -5737,7 +5755,9 @@ class Validator {
         for (auto& attr : node->Attributes()) {
           if (!has_template_ancestor &&
               htmlparser::Strings::EqualFold(attr.key, "type") &&
-              htmlparser::Strings::EqualFold(attr.value, "application/json")) {
+              (htmlparser::Strings::EqualFold(attr.value, "application/json") ||
+               htmlparser::Strings::EqualFold(attr.value,
+                                              "application/ld+json"))) {
             if (auto v = htmlparser::json::JSONParser::Validate(
                     node->FirstChild()->Data());
                 !v.first) {

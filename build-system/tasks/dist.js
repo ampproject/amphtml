@@ -42,7 +42,6 @@ const {
   displayLifecycleDebugging,
 } = require('../compile/debug-compilation-lifecycle');
 const {buildExtensions, parseExtensionFlags} = require('./extension-helpers');
-const {buildVendorConfigs} = require('./3p-vendor-helpers');
 const {compileCss, cssEntryPoints} = require('./css');
 const {compileJison} = require('./compile-jison');
 const {formatExtractedMessages} = require('../compile/log-messages');
@@ -149,7 +148,6 @@ async function doDist(extraArgs = {}) {
     await compileAllJs(options);
   }
   await buildExtensions(options);
-  await buildVendorConfigs(options);
 
   if (!argv.core_runtime_only) {
     await formatExtractedMessages();
@@ -174,7 +172,6 @@ function buildExperiments() {
       minify: true,
       includePolyfills: true,
       minifiedName: maybeToEsmName('experiments.js'),
-      esmPassCompilation: argv.esm || argv.sxg || false,
     }
   );
 }
@@ -196,7 +193,6 @@ function buildLoginDone(version) {
     minify: true,
     minifiedName,
     latestName,
-    esmPassCompilation: argv.esm || argv.sxg || false,
     extraGlobs: [
       buildDir + 'amp-login-done-0.1.max.js',
       buildDir + 'amp-login-done-dialog.js',
@@ -219,7 +215,6 @@ async function buildWebPushPublisherFiles() {
         watch: argv.watch,
         includePolyfills: true,
         minify: true,
-        esmPassCompilation: argv.esm || argv.sxg || false,
         minifiedName,
         extraGlobs: [tempBuildDir + '*.js'],
       });

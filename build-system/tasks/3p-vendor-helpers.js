@@ -20,7 +20,7 @@ const {compileJs} = require('./helpers');
 const {endBuildStep} = require('./helpers');
 const {VERSION} = require('../compile/internal-version');
 const {watchDebounceDelay} = require('./helpers');
-const {watch} = require('gulp');
+const {watch} = require('chokidar');
 
 /**
  * Entry point for 'gulp ad-vendor-configs'
@@ -94,7 +94,6 @@ async function buildVendor(name, options) {
       externs: ['./ads/ads.extern.js'],
       toName: `current/vendor/${name}.max.js`,
       minifiedName: `${VERSION}/vendor/${name}.js`,
-      esmPassCompilation: false,
     })
   );
 

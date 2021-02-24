@@ -27,7 +27,6 @@ import {Services} from '../../../../src/services';
 import {adConfig} from '../../../../ads/_config';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {macroTask} from '../../../../testing/yield';
-import {user} from '../../../../src/log';
 
 function createAmpAd(win, attachToAmpdoc = false, ampdoc) {
   const ampAdElement = createElementWithAttributes(win.document, 'amp-ad', {
@@ -68,6 +67,10 @@ describes.realWin(
     let win;
     let registryBackup;
     const whenFirstVisible = Promise.resolve();
+
+    function mockMode(mode) {
+      env.sandbox.stub(win.parent, '__AMP_MODE').value(mode);
+    }
 
     beforeEach(() => {
       registryBackup = Object.create(null);
@@ -256,24 +259,6 @@ describes.realWin(
           ).to.be.ok;
         });
       });
-
-      it('should use default path if custom disabled', () => {
-        const meta = win.document.createElement('meta');
-        meta.setAttribute('name', 'amp-3p-iframe-src');
-        meta.setAttribute('content', 'https://src.test/boot/remote.html');
-        win.document.head.appendChild(meta);
-        ad3p.config.remoteHTMLDisabled = true;
-        ad3p.onLayoutMeasure();
-        env.sandbox.stub(user(), 'error');
-        return ad3p.layoutCallback().then(() => {
-          expect(
-            win.document.querySelector(
-              'iframe[src="' +
-                'http://ads.localhost:9876/dist.3p/current/frame.max.html"]'
-            )
-          ).to.be.ok;
-        });
-      });
     });
 
     describe('pause/resume', () => {
@@ -323,19 +308,19 @@ describes.realWin(
 
     describe('preconnectCallback', () => {
       it('should add preconnect and prefetch to DOM header', () => {
+        mockMode({});
         ad3p.buildCallback();
         ad3p.preconnectCallback();
         return whenFirstVisible.then(() => {
           const fetches = win.document.querySelectorAll('link[rel=preload]');
           expect(fetches).to.have.length(2);
-          expect(
-            Array.from(fetches)
-              .map((link) => link.href)
-              .sort()
-          ).to.jsonEqual([
-            'http://ads.localhost:9876/dist.3p/current/frame.max.html',
-            'http://ads.localhost:9876/dist.3p/current/integration.js',
-          ]);
+          expect(fetches[0].href).to.match(
+            /^https:\/\/d-\d+\.ampproject\.net\/\$internalRuntimeVersion\$\/frame\.html$/
+          );
+          expect(fetches[1]).to.have.property(
+            'href',
+            'https://3p.ampproject.net/$internalRuntimeVersion$/f.js'
+          );
 
           const preconnects = win.document.querySelectorAll(
             'link[rel=preconnect]'
@@ -359,27 +344,6 @@ describes.realWin(
           expect(
             Array.from(win.document.querySelectorAll('link[rel=preload]')).some(
               (link) => link.href == `${remoteUrl}?$internalRuntimeVersion$`
-            )
-          ).to.be.true;
-        });
-      });
-
-      it('should not use remote html path for preload if disabled', () => {
-        const meta = win.document.createElement('meta');
-        meta.setAttribute('name', 'amp-3p-iframe-src');
-        meta.setAttribute('content', 'https://src.test/boot/remote.html');
-        win.document.head.appendChild(meta);
-        ad3p.config.remoteHTMLDisabled = true;
-        ad3p.buildCallback();
-        allowConsoleError(() => {
-          ad3p.preconnectCallback();
-        });
-        return whenFirstVisible.then(() => {
-          expect(
-            Array.from(win.document.querySelectorAll('link[rel=preload]')).some(
-              (link) =>
-                link.href ==
-                'http://ads.localhost:9876/dist.3p/current/frame.max.html'
             )
           ).to.be.true;
         });
