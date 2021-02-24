@@ -221,8 +221,8 @@ chromed.run('Bind', function () {
       'using querySelectorAll': {useQuerySelector: true},
     },
     (name, variant) => {
-      describe(name, () => {
-        testSuite(variant.useQuerySelector);
+      describe(name, function () {
+        testSuite.call(this, variant.useQuerySelector);
       });
     }
   );
