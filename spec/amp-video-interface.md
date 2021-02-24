@@ -21,7 +21,7 @@ these players implement.
 
     gulp check-video-interface-list --fix
 
-  Link check disables to allow new extensions added in a pull request.
+  Link check disabled to allow new extensions added in a pull request.
 -->
 
 <!-- markdown-link-check-disable -->
