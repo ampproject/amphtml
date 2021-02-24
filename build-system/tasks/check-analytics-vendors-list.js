@@ -80,7 +80,10 @@ async function checkAnalyticsVendorsList() {
   const anyVendorRegExp = new RegExp(blockRegExp('(.+)').source, 'gm');
   while ((match = anyVendorRegExp.exec(tentative)) !== null) {
     const fullMatch = match[0];
-    const name = match[2];
+    const name = match[2]
+      .split(/[,\s]+/)
+      .shift()
+      .replace(/[`"']/g, '');
     if (!vendors.includes(name)) {
       tentative = tentative.replace(fullMatch, '');
     }

@@ -17,6 +17,8 @@ limitations under the License.
 <!--
   Run to insert missing sections:
     gulp check-analytics-vendors-list --fix
+
+  (Some are intentionally commented-out and should be kept for the CI check.)
 -->
 
 # Analytics Vendors <a name="vendors"></a>
@@ -39,19 +41,17 @@ Adds support for Acquia Lift. The `decisionApiUrl`, `accountId` and `siteId` mus
 
 ### Adobe Analytics
 
-Type attribute value: `adobeanalytics`
+Type attribute value: `adobeanalytics`, `adobeanalytics_nativeConfig`
 
 Adds support for Adobe Analytics. More details for adding Adobe Analytics support can be found at [experienceleague.adobe.com](https://experienceleague.adobe.com/docs/analytics/implementation/other/amp.html).
 
 > ⚠️ Do not use both the `adobeanalytics` and `adobeanalytics_nativeConfig` types on the same page. If you attempt to do so, you can generate errors in the browser console and double-count visitors.
 
-### Adobe Analytics (`nativeConfig`)
+<!--
+### adobeanalytics_nativeConfig (included above)
 
 Type attribute value: `adobeanalytics_nativeConfig`
-
-Adds support for Adobe Analytics. More details for adding Adobe Analytics support can be found at [experienceleague.adobe.com](https://experienceleague.adobe.com/docs/analytics/implementation/other/amp.html).
-
-> ⚠️ Do not use both the `adobeanalytics` and `adobeanalytics_nativeConfig` types on the same page. If you attempt to do so, you can generate errors in the browser console and double-count visitors.
+-->
 
 ### AFS Analytics
 
@@ -511,15 +511,15 @@ Adds support for SimpleReach. Configuration details can be found at `http://docs
 
 ### snowplow
 
-Type attribute value: `snowplow`
+Type attribute value: `snowplow`, `snowplow_v2`
 
 Adds support for Snowplow Analytics. More details for adding Snowplow Analytics support can be found at [docs.snowplowanalytics.com](https://docs.snowplowanalytics.com/docs/collecting-data/collecting-from-own-applications/google-amp-tracker/).
 
-### snowplow_v2
+<!--
+### snowplow_v2 (included above)
 
 Type attribute value: `snowplow_v2`
-
-Adds support for Snowplow Analytics. More details for adding Snowplow Analytics support can be found at [docs.snowplowanalytics.com](https://docs.snowplowanalytics.com/docs/collecting-data/collecting-from-own-applications/google-amp-tracker/).
+-->
 
 ### subscriptions-propensity
 
@@ -581,14 +581,16 @@ Adds support for Vpon Analytics. Configuration details can be found at [Vpon Ana
 
 Type attribute value: `webengage`
 
-### Webtrekk (deprecated)
+<!--
+### webtrekk (deprecated, see below)
 
 Type attribute value: `webtrekk`
-
-> ⚠️ ~~`webtrekk`~~ is deprecated. **Use `webtrekk_v2` instead.**
+-->
 
 ### Webtrekk
 
 Type attribute value: `webtrekk_v2`
+
+> ⚠️ ~~`webtrekk`~~ is deprecated. **Use `webtrekk_v2` instead.**
 
 Adds support for Webtrekk. Configuration details can be found at [supportcenter.webtrekk.com](https://supportcenter.webtrekk.com/en/public/amp-analytics.html).
