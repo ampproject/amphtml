@@ -22,12 +22,34 @@ import {dict} from '../../../src/utils/object';
 
 /** @extends {PreactBaseElement<BaseCarouselDef.CarouselApi>} */
 export class BaseElement extends PreactBaseElement {
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {?number} */
+    this.slide_ = null;
+  }
+
   /** @override */
   init() {
+    this.slide_ = parseInt(this.element.getAttribute('slide'), 10);
+
     return dict({
       'onSlideChange': (index) =>
         this.triggerEvent(this.element, 'slideChange', dict({'index': index})),
     });
+  }
+
+  /** @override */
+  mutationObserverCallback() {
+    const slide = parseInt(this.element.getAttribute('slide'), 10);
+    if (slide === this.slide_) {
+      return;
+    }
+    this.slide_ = slide;
+    if (!isNaN(slide)) {
+      this.api().goToSlide(slide);
+    }
   }
 }
 
@@ -84,6 +106,11 @@ BaseElement['props'] = {
   'snapBy': {attr: 'snap-by', type: 'number', media: true},
   'snapAlign': {attr: 'snap-align', type: 'string', media: true},
   'visibleCount': {attr: 'visible-count', type: 'number', media: true},
+};
+
+/** @override */
+BaseElement['staticProps'] = {
+  'slide': {attr: 'slide', type: 'number', default: '0'},
 };
 
 /** @override */

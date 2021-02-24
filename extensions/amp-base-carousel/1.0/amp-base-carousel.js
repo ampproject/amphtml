@@ -28,19 +28,8 @@ const TAG = 'amp-base-carousel';
 
 /** @extends {PreactBaseElement<BaseCarouselDef.CarouselApi>} */
 class AmpBaseCarousel extends BaseElement {
-  /** @param {!AmpElement} element */
-  constructor(element) {
-    super(element);
-
-    /** @private {?number} */
-    this.slide_ = null;
-  }
-
   /** @override */
   init() {
-    const props = super.init();
-
-    const {element} = this;
     this.registerApiAction('prev', (api) => api.prev(), ActionTrust.LOW);
     this.registerApiAction('next', (api) => api.next(), ActionTrust.LOW);
     this.registerApiAction(
@@ -52,9 +41,7 @@ class AmpBaseCarousel extends BaseElement {
       ActionTrust.LOW
     );
 
-    this.slide_ = parseInt(element.getAttribute('slide'), 10);
-    props['defaultSlide'] = this.slide_ || 0;
-    return props;
+    return super.init();
   }
 
   /** @override */
@@ -82,18 +69,6 @@ class AmpBaseCarousel extends BaseElement {
       'expected global "bento" or specific "bento-carousel" experiment to be enabled'
     );
     return super.isLayoutSupported(layout);
-  }
-
-  /** @override */
-  mutationObserverCallback() {
-    const slide = parseInt(this.element.getAttribute('slide'), 10);
-    if (slide === this.slide_) {
-      return;
-    }
-    this.slide_ = slide;
-    if (!isNaN(slide)) {
-      this.api().goToSlide(slide);
-    }
   }
 }
 
