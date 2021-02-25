@@ -19,12 +19,6 @@
   transform: scale(1) translateX(-100%) translateY(200%) !important;
 }
 
-.i-amphtml-cta-container {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-}
-
 .i-amphtml-story-desktop-fullbleed .i-amphtml-cta-container {
   /* Ad will be 75vh, align bottom of container to bottom of ad. */
   bottom: 12.5vh !important;

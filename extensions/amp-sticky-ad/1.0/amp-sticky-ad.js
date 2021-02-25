@@ -71,7 +71,7 @@ class AmpStickyAd extends AMP.BaseElement {
       dev().assertElement(this.ad_)
     )
       .then((ad) => {
-        return ad.whenBuilt();
+        return ad.build();
       })
       .then(() => {
         return this.mutateElement(() => {
@@ -188,7 +188,7 @@ class AmpStickyAd extends AMP.BaseElement {
    */
   scheduleLayoutForAd_() {
     whenUpgradedToCustomElement(dev().assertElement(this.ad_)).then((ad) => {
-      ad.whenBuilt().then(this.layoutAd_.bind(this));
+      ad.build().then(() => this.layoutAd_());
     });
   }
 

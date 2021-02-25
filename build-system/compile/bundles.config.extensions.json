@@ -220,7 +220,9 @@
       "hasCss": true,
       "cssBinaries": [
         "amp-inline-gallery",
+        "amp-inline-gallery-captions",
         "amp-inline-gallery-pagination",
+        "amp-inline-gallery-slide",
         "amp-inline-gallery-thumbnails"
       ]
     }
@@ -452,6 +454,7 @@
       "cssBinaries": [
         "amp-story-auto-ads-ad-badge",
         "amp-story-auto-ads-attribution",
+        "amp-story-auto-ads-cta-button",
         "amp-story-auto-ads-inabox",
         "amp-story-auto-ads-shared"
       ]
