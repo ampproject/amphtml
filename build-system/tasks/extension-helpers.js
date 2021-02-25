@@ -29,7 +29,7 @@ const {isCiBuild} = require('../common/ci');
 const {jsifyCssAsync} = require('./css/jsify-css');
 const {log} = require('../common/logging');
 const {maybeToEsmName, compileJs, mkdirSync} = require('./helpers');
-const {watch} = require('gulp');
+const {watch} = require('chokidar');
 
 const {green, red, cyan} = colors;
 const argv = require('minimist')(process.argv.slice(2));
