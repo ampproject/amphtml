@@ -107,8 +107,7 @@ export class Metering {
             this.entitlementsWereFetchedWithCurrentMeteringState = false;
           })
           // Handle failure.
-          .catch((err) => {
-            console.log(err);
+          .catch(() => {
             dev().warn(TAG, 'Failed to save metering state.');
           })
       );
