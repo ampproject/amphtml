@@ -42,7 +42,7 @@ const {
   displayLifecycleDebugging,
 } = require('../compile/debug-compilation-lifecycle');
 const {buildExtensions, parseExtensionFlags} = require('./extension-helpers');
-const {compileCss, cssEntryPoints} = require('./css');
+const {compileCss, copyCss} = require('./css');
 const {compileJison} = require('./compile-jison');
 const {formatExtractedMessages} = require('../compile/log-messages');
 const {log} = require('../common/logging');
@@ -105,8 +105,8 @@ async function runPreDistSteps(options) {
   cleanupBuildDir();
   await prebuild();
   await compileCss(options);
-  await compileJison();
   await copyCss();
+  await compileJison();
   await copyParsers();
   await bootstrapThirdPartyFrames(options);
   displayLifecycleDebugging();
@@ -229,26 +229,6 @@ async function prebuild() {
   await preBuildExperiments();
   await preBuildLoginDone();
   await preBuildWebPushPublisherFiles();
-}
-
-/**
- * Copies the css from the build folder to the dist folder
- * @return {!Promise}
- */
-function copyCss() {
-  const startTime = Date.now();
-
-  cssEntryPoints.forEach(({outCss}) => {
-    fs.copySync(`build/css/${outCss}`, `dist/${outCss}`);
-  });
-
-  return toPromise(
-    gulp
-      .src('build/css/amp-*.css', {base: 'build/css/'})
-      .pipe(gulp.dest('dist/v0'))
-  ).then(() => {
-    endBuildStep('Copied', 'build/css/*.css to dist/v0/*.css', startTime);
-  });
 }
 
 /**
