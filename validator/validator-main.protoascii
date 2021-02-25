@@ -5009,6 +5009,7 @@ attr_lists: {
   attrs: {
     enabled_by: "transformed"
     name: "i-amphtml-binding"
+    value: ""
   }
   # <amp-sidebar>
   attrs: {
