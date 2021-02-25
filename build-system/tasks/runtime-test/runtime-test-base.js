@@ -99,7 +99,7 @@ function updateBrowsers(config) {
       browsers: ['Chrome_flags'],
       customLaunchers: {
         // eslint-disable-next-line
-          Chrome_flags: {
+        Chrome_flags: {
           base: 'Chrome',
           flags: chromeFlags,
         },
@@ -201,12 +201,30 @@ class RuntimeTestConfig {
     this.client.mocha.grep = !!argv.grep;
     this.client.verboseLogging = !!argv.verbose || !!argv.v;
     this.client.captureConsole = !!argv.verbose || !!argv.v || !!argv.files;
-    const plugin = getEsbuildBabelPlugin(
+
+    const importPathPlugin = {
+      name: 'import-path',
+      setup(build) {
+        build.onResolve({filter: /^[\w-]+$/}, (file) => {
+          if (file.path === 'stream') {
+            return {path: require.resolve('stream-browserify')};
+          }
+        });
+      },
+    };
+    const babelPlugin = getEsbuildBabelPlugin(
       'test',
       /* enableCache */ true,
       printBabelDot
     );
-    this.esbuild = {plugins: [plugin]};
+    this.esbuild = {
+      inject: ['./test/_init_tests.js'],
+      define: {
+        'process.env.NODE_DEBUG': 'false',
+        'process.env.NODE_ENV': '"test"',
+      },
+      plugins: [importPathPlugin, babelPlugin],
+    };
 
     // c.client is available in test browser via window.parent.karma.config
     this.client.amp = {

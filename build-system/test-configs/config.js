@@ -75,7 +75,7 @@ const builtRuntimePaths = [
   },
 ];
 
-const commonUnitTestPaths = initTestsPath.concat(fixturesExamplesPaths);
+const commonUnitTestPaths = [].concat(fixturesExamplesPaths);
 
 const commonIntegrationTestPaths = initTestsPath.concat(
   fixturesExamplesPaths,

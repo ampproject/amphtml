@@ -18,6 +18,30 @@
 const argv = require('minimist')(process.argv.slice(2));
 const {getReplacePlugin} = require('./helpers');
 
+function replaceGlobals(babel) {
+  const {types: t} = babel;
+
+  return {
+    visitor: {
+      ReferencedIdentifier(path) {
+        const {node, scope} = path;
+        if (node.name !== 'global') {
+          return;
+        }
+        if (scope.getBinding('global')) {
+          return;
+        }
+        if (scope.getBinding('globalThis')) {
+          throw path.buildCodeFrameError(
+            'cannot replace global identifier, globalThis already in scope'
+          );
+        }
+        path.replaceWith(t.identifier('globalThis'));
+      },
+    },
+  };
+}
+
 /**
  * Gets the config for babel transforms run during `gulp [unit|integration]`.
  *
@@ -58,6 +82,7 @@ function getTestConfig() {
   const testPlugins = [
     argv.coverage ? instanbulPlugin : null,
     replacePlugin,
+    [replaceGlobals],
     './build-system/babel-plugins/babel-plugin-transform-json-import',
     './build-system/babel-plugins/babel-plugin-transform-json-configuration',
     './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments',

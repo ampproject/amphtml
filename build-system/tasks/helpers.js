@@ -462,7 +462,7 @@ function getEsbuildBabelPlugin(callerName, enableCache, postStep = () => {}) {
         return {contents: result.code};
       };
 
-      build.onLoad({filter: /.*/, namespace: ''}, async (file) => {
+      build.onLoad({filter: /.*\.m?js$/, namespace: ''}, async (file) => {
         const contents = await fs.promises.readFile(file.path, 'utf-8');
         let hash;
         if (enableCache) {
