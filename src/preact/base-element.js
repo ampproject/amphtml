@@ -1101,7 +1101,7 @@ function matchChild(element, defs) {
     const def = defs[match];
     const selector = typeof def == 'string' ? def : def.selector;
     if (matches(element, selector)) {
-      return {name: match, ...def};
+      return typeof def == 'string' ? def : {name: match, ...def};
     }
   }
   return null;
