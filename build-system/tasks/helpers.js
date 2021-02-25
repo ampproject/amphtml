@@ -350,11 +350,13 @@ function finishBundle(srcFilename, destDir, destFilename, options) {
 
   if (options.latestName) {
     // "amp-foo-latest.js" -> "amp-foo-latest.max.js"
-    const latestMaxName = options.latestName.split('.js')[0] + '.max.js';
+    const latestName = options.minify
+      ? maybeToEsmName(options.latestName)
+      : options.latestName.split('.js')[0] + '.max.js';
     // Copy amp-foo-0.1.js to amp-foo-latest.max.js.
     fs.copySync(
       path.join(destDir, destFilename),
-      path.join(destDir, latestMaxName)
+      path.join(destDir, latestName)
     );
   }
 }
@@ -481,10 +483,10 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
     finishBundle(srcFilename, destDir, destFilename, options);
     let name = destFilename;
     if (options.latestName) {
-      const latestMaxName = options.minify
-        ? maybeToEsmName(options.latestName).split('.js')[0] + '.max.js'
+      const latestName = options.minify
+        ? maybeToEsmName(options.latestName)
         : options.latestName.split('.js')[0] + '.max.js';
-      name = `${name} → ${latestMaxName}`;
+      name = `${name} → ${latestName}`;
     }
     endBuildStep('Compiled', name, startTime);
     const target = path.basename(destFilename, path.extname(destFilename));
