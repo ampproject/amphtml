@@ -72,7 +72,7 @@ export const MessageType = {
  * Listens for the specified event on the element.
  * @param {!EventTarget} element
  * @param {string} eventType
- * @param {function(!Event|!MessageEvent)} listener
+ * @param {function((Event|MessageEvent)):undefined} listener
  * @param {Object=} opt_evtListenerOpts
  * @return {!UnlistenDef}
  */
@@ -118,10 +118,10 @@ export function deserializeMessage(message) {
   if (!isAmpMessage(message)) {
     return null;
   }
-  const startPos = message.indexOf('{');
+  const startPos = /** @type {string} */ (message).indexOf('{');
   devAssert(startPos != -1, 'JSON missing in %s', message);
   try {
-    return parseJson(message.substr(startPos));
+    return parseJson(/** @type {string} */ (message).substr(startPos));
   } catch (e) {
     dev().error('MESSAGING', 'Failed to parse message: ' + message, e);
     return null;

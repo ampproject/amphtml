@@ -875,9 +875,10 @@ export function isFullscreenElement(element) {
  * Returns true if node is not disabled.
  *
  * IE8 can return false positives, see {@link matches}.
- * @param {!Element} element
+ * @param {!HTMLButtonElement|HTMLFieldSetElement|HTMLInputElement|HTMLObjectElement|HTMLOutputElement|HTMLTextAreaElement} element
  * @return {boolean}
  * @see https://www.w3.org/TR/html5/forms.html#concept-fe-disabled
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement/elements
  */
 export function isEnabled(element) {
   return !(element.disabled || matches(element, ':disabled'));

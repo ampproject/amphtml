@@ -183,6 +183,12 @@ process.env.NODE_ENV;
 /** @type {boolean|undefined} */
 window.IS_AMP_ALT;
 
+/** @type {string|undefined} */
+window.origin;
+
+/** @type {function(*, !Element=)|undefined} */
+window.__AMP_REPORT_ERROR;
+
 // Exposed to ads.
 // Preserve these filedNames so they can be accessed by 3p code.
 /** @type {?Object} */
