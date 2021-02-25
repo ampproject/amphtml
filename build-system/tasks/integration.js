@@ -45,10 +45,11 @@ class Runner extends RuntimeTestRunner {
 
   /** @override */
   async maybeBuild() {
-    if (argv.nobuild) {
-      return;
+    if (!argv.nobuild) {
+      await buildRuntime();
     }
-    await buildRuntime();
+    // buildRuntime will clean the directory! We have to do this afterwards.
+    await buildTransformedHtml();
   }
 }
 
@@ -85,7 +86,6 @@ async function integration() {
   buildNewServer();
   htmlTransform = require('../server/new-server/transforms/dist/transform')
     .transform;
-  await buildTransformedHtml();
 
   maybePrintArgvMessages();
 
