@@ -33,6 +33,7 @@ import {
   Entitlement,
   GrantReason,
 } from '../../../amp-subscriptions/0.1/entitlement';
+import {GaaMeteringRegwall} from '../../../../third_party/subscriptions-project/swg-gaa';
 import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../../../amp-subscriptions/0.1/service-adapter';
 import {Services} from '../../../../src/services';
@@ -193,6 +194,10 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
         'showAbbrvOffer'
       ),
       linkAccount: env.sandbox.stub(ConfiguredRuntime.prototype, 'linkAccount'),
+      consumeShowcaseEntitlementJwt: env.sandbox.stub(
+        ConfiguredRuntime.prototype,
+        'consumeShowcaseEntitlementJwt'
+      ),
     };
     ackStub = env.sandbox.stub(Entitlements.prototype, 'ack');
     toggleExperiment(win, 'swg-gpay-api', true);
@@ -416,6 +421,48 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     expect(fetchStub).to.not.be.called;
   });
 
+  it('should request metering entitlements if URL params are present and timestamp is valid', async () => {
+    env.sandbox
+      .stub(viewer, 'getReferrerUrl')
+      .callsFake(() => Promise.resolve('http://localhost'));
+    platform = new GoogleSubscriptionsPlatform(
+      ampdoc,
+      {enableMetering: true},
+      serviceAdapter
+    );
+    env.sandbox.stub(platform, 'getUrlParams_').returns({
+      'gaa_ts': (Date.now() / 1000 + 10).toString(16),
+      'gaa_at': 'g',
+      'gaa_sig': 'signature',
+      'gaa_n': 123456,
+    });
+    env.sandbox
+      .stub(serviceAdapter, 'loadMeteringState')
+      .resolves({key: 'value'});
+    const fetchStub = env.sandbox.stub(xhr, 'fetchJson').callsFake(() =>
+      Promise.resolve({
+        json: () =>
+          Promise.resolve({
+            entitlements: [
+              {
+                source: 'google:metering',
+                products: ['example.org:basic'],
+                subscriptionToken: 'tok1',
+              },
+            ],
+          }),
+      })
+    );
+    const ents = await platform.getEntitlements();
+    expect(ents.service).to.not.be.null;
+    expect(ents.source).to.equal('google:metering');
+
+    const fetchUrl = fetchStub.getCall(0).args[0];
+    expect(fetchUrl).to.equal(
+      'https://news.google.com/swg/_/api/v1/publication/example.org/entitlements?encodedParams=eyJtZXRlcmluZyI6eyJjbGllbnRUeXBlcyI6WzFdLCJvd25lciI6ImV4YW1wbGUub3JnIiwicmVzb3VyY2UiOnsiaGFzaGVkQ2Fub25pY2FsVXJsIjoiMjcwM2YyYjZlZjBlYWFhODEzNzZhMThmYWE3N2E1OTAwOTc1Zjc3MDVkNWQ4YjZlMWEzNzJkNWY2YzJiOTdiYjU5ZjI4M2Q3MzdiNmQ5YWI3N2M1YTNkODQ4YzZlY2UyMDdjZDYwMzU4M2NjMzIyZGQ4MGFiMGI5MzA5MmM2NTAifSwic3RhdGUiOnsiYXR0cmlidXRlcyI6W119fX0='
+    );
+  });
+
   it('should proxy fetch via AMP fetcher', async () => {
     const fetchStub = env.sandbox
       .stub(xhr, 'fetchJson')
@@ -563,6 +610,57 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
 
     expect(methods.showOffers).to.not.be.called;
     expect(methods.showAbbrvOffer).to.be.calledOnce;
+  });
+
+  it('should consume showcase entitlement, if appropriate', async () => {
+    platform = new GoogleSubscriptionsPlatform(
+      ampdoc,
+      {enableMetering: true},
+      serviceAdapter
+    );
+    env.sandbox.stub(platform, 'getUrlParams_').returns({
+      'gaa_ts': (Date.now() / 1000 + 10).toString(16),
+      'gaa_at': 'g',
+      'gaa_sig': 'signature',
+      'gaa_n': 123456,
+    });
+    const entitlement = new Entitlement({service: PLATFORM_ID, granted: true});
+    const grantEntitlement = new Entitlement({
+      service: 'local',
+      granted: true,
+      grantReason: GrantReason.METERING,
+    });
+    platform.activate(entitlement, grantEntitlement);
+    await flush();
+
+    expect(methods.consumeShowcaseEntitlementJwt).to.be.called;
+  });
+
+  it('should show showcase regwall, if appropriate', async () => {
+    platform = new GoogleSubscriptionsPlatform(
+      ampdoc,
+      {enableMetering: true},
+      serviceAdapter
+    );
+    env.sandbox.stub(platform, 'getUrlParams_').returns({
+      'gaa_ts': (Date.now() / 1000 + 10).toString(16),
+      'gaa_at': 'g',
+      'gaa_sig': 'signature',
+      'gaa_n': 123456,
+    });
+    env.sandbox.stub(serviceAdapter, 'loadMeteringState').resolves(null);
+    env.sandbox.stub(platform.fetcher_, 'sendPostToPublisher').resolves();
+    env.sandbox.stub(GaaMeteringRegwall, 'show').resolves();
+    env.sandbox.stub(serviceAdapter, 'saveMeteringState').resolves();
+    const entitlement = new Entitlement({service: PLATFORM_ID, granted: false});
+    const continueSpy = env.sandbox.spy();
+    platform.activate(entitlement, entitlement, continueSpy);
+    await flush();
+
+    expect(platform.fetcher_.sendPostToPublisher).to.be.calledOnce;
+    expect(GaaMeteringRegwall.show).to.be.calledOnce;
+    expect(serviceAdapter.saveMeteringState).to.be.calledOnce;
+    expect(continueSpy).to.be.calledOnce;
   });
 
   it('should start linking flow when requested', async () => {

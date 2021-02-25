@@ -805,7 +805,10 @@ export class GoogleSubscriptionsPlatform {
     // Let's save it.
     const saveMeteringStatePromise = registerUserPromise.then(
       (publisherResponse) => {
-        const meteringState = publisherResponse['metering']['state'];
+        const meteringState =
+          publisherResponse &&
+          publisherResponse['metering'] &&
+          publisherResponse['metering']['state'];
 
         return this.serviceAdapter_.saveMeteringState(meteringState);
       }
