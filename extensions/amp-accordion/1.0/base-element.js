@@ -170,7 +170,9 @@ function HeaderShim(
     }
     headerElement.setAttribute('aria-expanded', ariaExpanded);
     headerElement.setAttribute('aria-controls', ariaControls);
-    headerElement.setAttribute('role', role);
+    if (!headerElement.hasAttribute('role')) {
+      headerElement.setAttribute('role', role);
+    }
     if (sectionElement[SECTION_POST_RENDER]) {
       sectionElement[SECTION_POST_RENDER]();
     }
@@ -217,7 +219,9 @@ function ContentShimWithRef(
     }
     contentElement.classList.add('i-amphtml-accordion-content');
     contentElement.setAttribute('id', id);
-    contentElement.setAttribute('role', role);
+    if (!contentElement.hasAttribute('role')) {
+      contentElement.setAttribute('role', role);
+    }
     contentElement.setAttribute('aria-labelledby', ariaLabelledBy);
     if (sectionElement[SECTION_POST_RENDER]) {
       sectionElement[SECTION_POST_RENDER]();
