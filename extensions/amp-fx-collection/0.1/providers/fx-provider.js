@@ -41,7 +41,7 @@ import {
   installStyles,
   resolvePercentageToNumber,
 } from './amp-fx-presets-utils';
-import {pureDevAssert as devAssert} from '../../../../src/assert';
+import {pureDevAssert as devAssert} from '../../../../src/core/assert';
 import {
   getServiceForDoc,
   registerServiceBuilderForDoc,

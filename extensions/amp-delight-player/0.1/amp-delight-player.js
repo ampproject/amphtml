@@ -40,7 +40,7 @@ import {
   unobserveWithSharedInOb,
 } from '../../../src/viewport-observer';
 import {setStyle} from '../../../src/style';
-import {pureUserAssert as userAssert} from '../../../src/assert';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 /** @const */
 const TAG = 'amp-delight-player';

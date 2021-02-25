@@ -28,7 +28,7 @@ import {
 } from '../../utils';
 import {getSourceUrl, resolveRelativeUrl} from '../../../../../src/url';
 import {htmlFor, htmlRefs} from '../../../../../src/static-template';
-import {pureUserAssert as userAssert} from '../../../../../src/assert';
+import {pureUserAssert as userAssert} from '../../../../../src/core/assert';
 
 /**
  * @typedef {{

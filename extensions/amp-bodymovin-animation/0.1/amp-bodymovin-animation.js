@@ -27,7 +27,7 @@ import {isFiniteNumber, isObject} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {parseJson} from '../../../src/json';
 import {removeElement} from '../../../src/dom';
-import {pureUserAssert as userAssert} from '../../../src/assert';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 const TAG = 'amp-bodymovin-animation';
 

@@ -16,7 +16,7 @@
 
 import {Services} from '../../../src/services';
 import {buildGtagConfig} from './auto-analytics-configs.js';
-import {pureDevAssert as devAssert} from '../../../src/assert';
+import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {htmlFor} from '../../../src/static-template';
 
 const buildAutoAnalyticsTemplate = (element) => {

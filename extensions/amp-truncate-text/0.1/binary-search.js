@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {pureDevAssert as devAssert} from '../../../src/assert';
+import {pureDevAssert as devAssert} from '../../../src/core/assert';
 
 /**
  * When no matching index is found, whether to stop on the next or previous

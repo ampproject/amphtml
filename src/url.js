@@ -22,7 +22,7 @@ import {isArray} from './types';
 import {parseQueryString_} from './url-parse-query-string';
 import {tryDecodeUriComponent_} from './url-try-decode-uri-component';
 import {urls} from './config';
-import {pureUserAssert as userAssert} from './assert';
+import {pureUserAssert as userAssert} from './core/assert';
 
 /**
  * @type {!JsonObject}

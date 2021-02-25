@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {pureDevAssert as devAssert} from './assert';
+import {pureDevAssert as devAssert} from './core/assert';
 import {map} from './utils/object.js';
 
 let htmlContainer;
