@@ -41,6 +41,11 @@ describes.realWin(
         .withExactArgs('voicebutton')
         .once();
 
+      const frameServiceMock = env.sandbox.mock(
+        Services.assistjsFrameServiceForDoc(document)
+      );
+      frameServiceMock.expects('openMic').once();
+
       configElement = document.createElement(
         'amp-google-assistant-assistjs-config'
       );
