@@ -147,6 +147,18 @@ const forbiddenTerms = {
       'extensions/amp-analytics/0.1/requests.js',
     ],
   },
+  '\\.buildInternal': {
+    message: 'can only be called by the framework',
+    allowlist: [
+      'src/service/builder.js',
+      'src/service/resource.js',
+      'testing/iframe.js',
+    ],
+  },
+  'getBuilderForDoc': {
+    message: 'can only be used by the runtime',
+    allowlist: ['src/custom-element.js', 'src/service/builder.js'],
+  },
   // Service factories that should only be installed once.
   'installActionServiceForDoc': {
     message: privateServiceFactory,
@@ -310,6 +322,7 @@ const forbiddenTerms = {
       'src/chunk.js',
       'src/element-service.js',
       'src/service.js',
+      'src/service/builder.js',
       'src/service/cid-impl.js',
       'src/service/origin-experiments-impl.js',
       'src/service/template-impl.js',
@@ -1387,6 +1400,7 @@ function hasAnyTerms(srcFile) {
     /^test-/.test(basename) ||
     /^_init_tests/.test(basename) ||
     /_test\.js$/.test(basename) ||
+    /testing\//.test(srcFile) ||
     /storybook\/[^/]+\.js$/.test(srcFile);
   if (!isTestFile) {
     hasSrcInclusiveTerms = matchTerms(srcFile, forbiddenTermsSrcInclusive);

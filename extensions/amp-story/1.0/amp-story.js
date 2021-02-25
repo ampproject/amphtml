@@ -1047,7 +1047,7 @@ export class AmpStory extends AMP.BaseElement {
     );
     if (!this.getAmpDoc().hasBeenVisible()) {
       return whenUpgradedToCustomElement(initialPageEl).then(() => {
-        return initialPageEl.whenBuilt();
+        return initialPageEl.build();
       });
     }
 
