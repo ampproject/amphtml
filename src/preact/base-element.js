@@ -129,11 +129,8 @@ const MATCH_ANY = () => true;
 const childIdGenerator = sequentialIdGenerator();
 
 const ONE_OF_ERROR_MESSAGE =
-  'only one of "attr", "attrs", "passthrough", "passthroughNonEmpty"' +
-  ' or "selector" may be given';
-
-const MEDIA_ERROR_MESSAGE =
-  '"passthrough" and "passthroughNonEmpty" may not also be "media"';
+  'only one of "attr", "attrs", "attrPrefix", "passthrough", ' +
+  '"passthroughNonEmpty", or "selector" may be given';
 
 /**
  * Wraps a Preact Component in a BaseElement class.
@@ -505,7 +502,7 @@ export class PreactBaseElement extends AMP.BaseElement {
         devAssert(
           !isDetached,
           'The AMP element cannot be rendered in detached mode ' +
-            'when configured with "children" property.'
+            'when "props" are configured with "children" property.'
         );
         // Check if there's a pre-constructed shadow DOM.
         let {shadowRoot} = this.element;
@@ -966,7 +963,6 @@ function parsePropDefs(props, propDefs, element, mediaQueryProps) {
     if (!def) {
       continue;
     }
-
     const {single, name, clone, props: slotProps = {}} = def;
     const parsedSlotProps = {};
     parsePropDefs(parsedSlotProps, slotProps, childElement, mediaQueryProps);
@@ -998,15 +994,20 @@ function parsePropDefs(props, propDefs, element, mediaQueryProps) {
     let value;
     if (def.passthrough) {
       devAssert(
-        !def.attr && !def.attrs && !def.selector && !def.passthroughNonEmpty,
+        !def.attr &&
+          !def.attrs &&
+          !def.attrPrefix &&
+          !def.selector &&
+          !def.passthroughNonEmpty,
         ONE_OF_ERROR_MESSAGE
       );
-      devAssert(!def.media, MEDIA_ERROR_MESSAGE);
       props[def.name ?? name] = [<Slot />];
       continue;
     } else if (def.passthroughNonEmpty) {
-      devAssert(!def.attr && !def.attrs && !def.selector, ONE_OF_ERROR_MESSAGE);
-      devAssert(!def.media, MEDIA_ERROR_MESSAGE);
+      devAssert(
+        !def.attr && !def.attrs && !def.attrPrefix && !def.selector,
+        ONE_OF_ERROR_MESSAGE
+      );
       // If all children are whitespace text nodes, consider the element as
       // having no children
       props[def.name ?? name] = element
@@ -1020,14 +1021,20 @@ function parsePropDefs(props, propDefs, element, mediaQueryProps) {
         : [<Slot />];
       continue;
     } else if (def.attr) {
+      devAssert(
+        !def.attrs && !def.attrPrefix && !def.selector,
+        ONE_OF_ERROR_MESSAGE
+      );
       value = element.getAttribute(def.attr);
       if (def.media && value != null) {
         value = mediaQueryProps.resolveListQuery(String(value));
       }
     } else if (def.parseAttrs) {
       devAssert(def.attrs);
+      devAssert(!def.attrPrefix && !def.selector, ONE_OF_ERROR_MESSAGE);
       value = def.parseAttrs(element);
     } else if (def.attrPrefix) {
+      devAssert(!def.selector, ONE_OF_ERROR_MESSAGE);
       const currObj = {};
       let objContains = false;
       const attrs = element.attributes;

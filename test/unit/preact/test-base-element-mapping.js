@@ -515,14 +515,12 @@ describes.realWin('PreactBaseElement', spec, (env) => {
     beforeEach(async () => {
       Impl['props'] = {
         'cloned': {
-          name: 'cloned',
           selector: '[cloned]',
           single: false,
           clone: true,
         },
         'propA': {attr: 'prop-a'},
         'special1': {
-          name: 'special1',
           props: {
             'noValue': {attr: 'no-value'},
             'valueWithDef': {attr: 'value-with-def', default: 'DEFAULT'},
@@ -536,7 +534,6 @@ describes.realWin('PreactBaseElement', spec, (env) => {
           single: true,
         },
         'special2': {
-          name: 'special2',
           selector: '[special2]',
           single: true,
         },

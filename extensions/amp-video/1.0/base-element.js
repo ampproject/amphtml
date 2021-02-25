@@ -88,6 +88,13 @@ VideoBaseElement['props'] = {
   'artwork': {attr: 'artwork'},
   'attribution': {attr: 'attribution'},
   'autoplay': {attr: 'autoplay', type: 'boolean'},
+  'children': {
+    'sources': {
+      selector: 'source',
+      single: false,
+      clone: true,
+    },
+  },
   'controls': {attr: 'controls', type: 'boolean'},
   'controlslist': {attr: 'controlslist'},
   'crossorigin': {attr: 'crossorigin'},
@@ -101,16 +108,6 @@ VideoBaseElement['props'] = {
   // TODO(alanorozco): These props have no internal implementation yet.
   'dock': {attr: 'dock'},
   'rotate-to-fullscreen': {attr: 'rotate-to-fullscreen', type: 'boolean'},
-};
-
-/** @override */
-VideoBaseElement['children'] = {
-  'sources': {
-    name: 'sources',
-    selector: 'source',
-    single: false,
-    clone: true,
-  },
 };
 
 /** @override */

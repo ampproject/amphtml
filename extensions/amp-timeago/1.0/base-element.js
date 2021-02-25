@@ -29,20 +29,16 @@ export class BaseElement extends PreactBaseElement {
 BaseElement['Component'] = Timeago;
 
 /** @override */
-BaseElement['children'] = {
-  'children': {name: 'children', passthroughNonEmpty: true},
-};
-
-/** @override */
 BaseElement['layoutSizeDefined'] = true;
 
 /** @override */
 BaseElement['props'] = {
+  'children': {passthroughNonEmpty: true},
+  'cutoff': {attr: 'cutoff', type: 'number'},
   'datetime': {
     attrs: ['datetime', 'timestamp-ms', 'timestamp-seconds', 'offset-seconds'],
     parseAttrs: parseDateAttrs,
   },
-  'cutoff': {attr: 'cutoff', type: 'number'},
   'locale': {attr: 'locale'},
 };
 

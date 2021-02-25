@@ -25,12 +25,10 @@ BaseElement['Component'] = FitText;
 
 /** @override */
 BaseElement['props'] = {
+  'children': {passthrough: true},
   'minFontSize': {attr: 'min-font-size', type: 'number', media: true},
   'maxFontSize': {attr: 'max-font-size', type: 'number', media: true},
 };
-
-/** @override */
-BaseElement['children'] = {'children': {name: 'children', passthrough: true}};
 
 /** @override */
 BaseElement['layoutSizeDefined'] = true;

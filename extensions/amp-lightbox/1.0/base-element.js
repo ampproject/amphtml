@@ -55,12 +55,10 @@ BaseElement['Component'] = Lightbox;
 /** @override */
 BaseElement['props'] = {
   'animation': {attr: 'animation'},
-  'scrollable': {attr: 'scrollable', type: 'boolean'},
+  'children': {passthrough: true},
   'id': {attr: 'id'},
+  'scrollable': {attr: 'scrollable', type: 'boolean'},
 };
-
-/** @override */
-BaseElement['children'] = {'children': {name: 'children', passthrough: true}};
 
 /** @override */
 BaseElement['shadowCss'] = COMPONENT_CSS;

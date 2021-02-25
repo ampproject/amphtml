@@ -231,15 +231,11 @@ AmpSocialShare['Component'] = SocialShare;
 AmpSocialShare['layoutSizeDefined'] = true;
 
 /** @override */
-AmpSocialShare['children'] = {
-  'children': {name: 'children', passthroughNonEmpty: true},
-};
-
-/** @override */
 AmpSocialShare['delegatesFocus'] = true;
 
 /** @override */
 AmpSocialShare['props'] = {
+  'children': {passthroughNonEmpty: true},
   'tabIndex': {attr: 'tabindex'},
   'type': {attr: 'type'},
 };

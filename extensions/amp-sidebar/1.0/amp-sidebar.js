@@ -107,13 +107,11 @@ class AmpSidebar extends PreactBaseElement {
 AmpSidebar['Component'] = Sidebar;
 
 /** @override */
-AmpSidebar['children'] = {'children': {name: 'children', passthrough: true}};
-
-/** @override */
 AmpSidebar['shadowCss'] = COMPONENT_CSS;
 
 /** @override */
 AmpSidebar['props'] = {
+  'children': {passthrough: true},
   'side': {attr: 'side', type: 'string'},
 };
 

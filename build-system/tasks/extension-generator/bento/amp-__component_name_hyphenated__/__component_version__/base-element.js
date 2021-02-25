@@ -24,12 +24,11 @@ export class BaseElement extends PreactBaseElement {}
 BaseElement['Component'] = __component_name_pascalcase__;
 
 /** @override */
-BaseElement['props'] = {};
-
-/** @override */
-BaseElement['children'] = {'children': {name: 'children', passthrough: true}};
-// BaseElement['children'] = {'children': {name: 'children', passthroughNonEmpty: true}};
-// BaseElement['children'] = {};
+BaseElement['props'] = {
+  'children': {passthrough: true},
+  // 'children': {passthroughNonEmpty: true},
+  // 'children': {},
+};
 
 /** @override */
 BaseElement['layoutSizeDefined'] = true;

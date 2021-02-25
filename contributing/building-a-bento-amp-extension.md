@@ -275,13 +275,6 @@ export function MyElement({propName1, propName2, ...rest}) {
 -   **Usage**: The tag name used when rendering into the light DOM. Used when children contents are overwritten.
 -   **Example Usage**: `amp-date-countdown`, `amp-date-display`
 
-##### PreactBaseElement['children']
-
--   **Default**: Optional.
--   **Override**: Sometimes.
--   **Usage**: Define if user-supplied children of a certain shape and structure do matter, and targeted for more specified props than `children` alone.
--   **Example Usage**: `amp-base-carousel`
-
 ##### PreactBaseElement['detached']
 
 -   **Default**: Optional.
