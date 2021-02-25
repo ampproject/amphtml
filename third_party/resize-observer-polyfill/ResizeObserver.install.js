@@ -483,8 +483,8 @@ export function installResizeObserver(global) {
      * @returns {Node}
      */
     function getDocumentOrShadowRoot(node) {
-      if (typeof node.getDocumentOrShadowRoot === 'function') {
-        return node.getDocumentOrShadowRoot();
+      if (typeof node.getRootNode === 'function') {
+        return node.getRootNode();
       }
       var n;
       // eslint-disable-next-line no-empty

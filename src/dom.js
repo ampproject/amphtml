@@ -234,9 +234,9 @@ export function isConnectedNode(node) {
  * @return {!Node}
  */
 export function rootNodeFor(node) {
-  if (Node.prototype.getDocumentOrShadowRoot) {
+  if (Node.prototype.getRootNode) {
     // Type checker says `getDocumentOrShadowRoot` may return null.
-    return node.getDocumentOrShadowRoot() || node;
+    return node.getRootNode() || node;
   }
   let n;
   // Check isShadowRoot() is only needed for the polyfill case.
