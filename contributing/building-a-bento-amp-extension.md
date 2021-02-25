@@ -146,7 +146,9 @@ export class BaseElement extends PreactBaseElement;
 
 BaseElement['Component'] = MyElement;            // Component definition.
 
-BaseElement['props'] = {  // Map DOM attributes to Preact Component props.
+BaseElement['props'] = {  // Map DOM attributes and children to Preact Component props.
+  'button': {selector: 'button', clone: true} // All <button> children.
+  'children': {passthrough: true} // All remaining children excluding <button>s, which have already been distributed.
   'propName1': {attr: 'attr-name-1'},
   'propName2': {attr: 'attr-name-2', type: 'number'},
 };
@@ -221,7 +223,7 @@ export function MyElement({propName1, propName2, ...rest}) {
 
 -   **Default**: Optional.
 -   **Override**: Almost always.
--   **Usage**: Define the mapping of Preact prop to AmpElement DOM attributes. These will update and re-render the component on DOM mutation.
+-   **Usage**: Define the mapping of Preact prop to AmpElement DOM attributes and children. These will update and re-render the component on DOM mutation.
 -   **Example Usage**: `amp-base-carousel`, `amp-lightbox`
 
 #### PreactBaseElement['staticProps']
