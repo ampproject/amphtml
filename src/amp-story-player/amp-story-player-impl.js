@@ -384,10 +384,11 @@ export class AmpStoryPlayer {
    * Initializes story with properties used in this class and adds it to the
    * stories array.
    * @param {!StoryDef} story
+   * @private
    */
   initializeAndAddStory_(story) {
     story.connectedDeferred = new Deferred();
-    story.idx = this.stories_.length - 1;
+    story.idx = this.stories_.length;
     story.distance = story.idx - this.currentIdx_;
     this.stories_.push(story);
   }
