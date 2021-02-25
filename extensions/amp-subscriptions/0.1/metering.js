@@ -16,7 +16,7 @@
 
 import {AmpDoc as AmpDocDef} from '../../../src/service/ampdoc-impl';
 import {Services} from '../../../src/services';
-import {dev} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 
 /** @const */
 const TAG = 'amp-subscriptions';
@@ -75,8 +75,18 @@ export class Metering {
     const meteringStateString = JSON.stringify(meteringState);
 
     const meteringStateChangedPromise = this.loadMeteringStateString_().then(
-      (existingMeteringStateString) =>
-        meteringStateString !== existingMeteringStateString
+      (existingMeteringStateString) => {
+        const changed = meteringStateString !== existingMeteringStateString;
+
+        // Log when an existing metering state is updated.
+        if (existingMeteringStateString && changed) {
+          user().info(
+            `Meter state changed from ${existingMeteringStateString} to ${meteringStateString}`
+          );
+        }
+
+        return changed;
+      }
     );
 
     return meteringStateChangedPromise.then((meteringStateChanged) => {
