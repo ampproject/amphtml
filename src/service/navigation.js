@@ -122,7 +122,8 @@ export class Navigation {
 
     /** @private @const {boolean} */
     this.isEmbed_ =
-      this.rootNode_ != this.ampdoc.getDocumentOrShadowRoot() || !!this.ampdoc.getParent();
+      this.rootNode_ != this.ampdoc.getDocumentOrShadowRoot() ||
+      !!this.ampdoc.getParent();
 
     /** @private @const {boolean} */
     this.isInABox_ = getMode(this.ampdoc.win).runtime == 'inabox';

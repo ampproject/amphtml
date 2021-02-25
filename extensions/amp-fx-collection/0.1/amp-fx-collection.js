@@ -61,7 +61,9 @@ export class AmpFxCollection {
    * fx provider.
    */
   scan_() {
-    const elements = this.ampdoc_.getDocumentOrShadowRoot().querySelectorAll('[amp-fx]');
+    const elements = this.ampdoc_
+      .getDocumentOrShadowRoot()
+      .querySelectorAll('[amp-fx]');
     iterateCursor(elements, (element) => {
       if (this.seen_.includes(element)) {
         return;

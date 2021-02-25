@@ -70,7 +70,9 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, (env) => {
     win = env.win;
     clock = window.sandbox.useFakeTimers();
     serviceAdapter = new ServiceAdapter(null);
-    const analytics = new SubscriptionAnalytics(ampdoc.getDocumentOrShadowRoot());
+    const analytics = new SubscriptionAnalytics(
+      ampdoc.getDocumentOrShadowRoot()
+    );
     env.sandbox.stub(serviceAdapter, 'getAnalytics').callsFake(() => analytics);
     env.sandbox
       .stub(serviceAdapter, 'getPageConfig')

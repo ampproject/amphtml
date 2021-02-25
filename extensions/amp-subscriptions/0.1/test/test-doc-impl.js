@@ -27,7 +27,9 @@ describes.realWin('DocImpl', {amp: true}, (env) => {
 
   it('should proxy inteface to ampdoc', () => {
     expect(configDoc.getWin()).to.equal(ampdoc.win);
-    expect(configDoc.getDocumentOrShadowRoot()).to.equal(ampdoc.getDocumentOrShadowRoot());
+    expect(configDoc.getDocumentOrShadowRoot()).to.equal(
+      ampdoc.getDocumentOrShadowRoot()
+    );
     expect(configDoc.getRootElement()).to.equal(
       ampdoc.getDocumentOrShadowRoot().documentElement
     );

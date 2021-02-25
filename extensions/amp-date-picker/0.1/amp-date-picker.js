@@ -958,7 +958,8 @@ export class AmpDatePicker extends AMP.BaseElement {
    */
   setupListeners_() {
     const ampdoc = this.getAmpDoc();
-    const root = ampdoc.getDocumentOrShadowRoot().documentElement || ampdoc.getBody();
+    const root =
+      ampdoc.getDocumentOrShadowRoot().documentElement || ampdoc.getBody();
     // Only add for overlay since click events just handle opening and closing
     if (this.mode_ == DatePickerMode.OVERLAY) {
       this.listen_(root, 'click', this.handleClick_.bind(this));

@@ -336,7 +336,9 @@ export class DocMetaAnnotations {
    * @return {!Array<string>}
    */
   static getAllLdJsonTypes(ampdoc) {
-    return toArray(getDocumentOrShadowRoot(ampdoc).querySelectorAll(SCRIPT_LD_JSON))
+    return toArray(
+      getDocumentOrShadowRoot(ampdoc).querySelectorAll(SCRIPT_LD_JSON)
+    )
       .map((el) => {
         const {textContent} = el;
         return (tryParseJson(textContent) || {})['@type'];
@@ -369,7 +371,8 @@ function usesLightboxExplicitly(ampdoc) {
 
   const lightboxedElementsSelector = `[${LIGHTBOXABLE_ATTR}]:not([${VISITED_ATTR}])`;
 
-  const exists = (selector) => !!getDocumentOrShadowRoot(ampdoc).querySelector(selector);
+  const exists = (selector) =>
+    !!getDocumentOrShadowRoot(ampdoc).querySelector(selector);
 
   return (
     exists(requiredExtensionSelector) && exists(lightboxedElementsSelector)
@@ -467,10 +470,13 @@ export function scan(ampdoc, opt_root) {
 AMP.extension(TAG, '0.1', (AMP) => {
   const {ampdoc} = AMP;
   ampdoc.whenReady().then(() => {
-    getDocumentOrShadowRoot(ampdoc).addEventListener(AmpEvents.DOM_UPDATE, (e) => {
-      const {target} = e;
-      scan(ampdoc, dev().assertElement(target));
-    });
+    getDocumentOrShadowRoot(ampdoc).addEventListener(
+      AmpEvents.DOM_UPDATE,
+      (e) => {
+        const {target} = e;
+        scan(ampdoc, dev().assertElement(target));
+      }
+    );
     scan(ampdoc);
   });
 });

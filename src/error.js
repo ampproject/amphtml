@@ -755,6 +755,8 @@ export function reportErrorToAnalytics(error, win) {
  * @private
  */
 function getRootElement_(win) {
-  const root = Services.ampdocServiceFor(win).getSingleDoc().getDocumentOrShadowRoot();
+  const root = Services.ampdocServiceFor(win)
+    .getSingleDoc()
+    .getDocumentOrShadowRoot();
   return dev().assertElement(root.documentElement || root.body || root);
 }

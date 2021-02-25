@@ -659,7 +659,9 @@ export class AccessService {
       unlistenSet.push(this.viewport_.onScroll(resolve));
 
       // 4. Tap: register a view.
-      unlistenSet.push(listenOnce(this.ampdoc.getDocumentOrShadowRoot(), 'click', resolve));
+      unlistenSet.push(
+        listenOnce(this.ampdoc.getDocumentOrShadowRoot(), 'click', resolve)
+      );
     }).then(
       () => {
         unlistenSet.forEach((unlisten) => unlisten());

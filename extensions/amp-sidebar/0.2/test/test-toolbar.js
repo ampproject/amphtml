@@ -121,7 +121,9 @@ describes.realWin('amp-sidebar - toolbar', {}, (env) => {
           toolbar.onLayoutChange();
         });
         const toolbarElements = toArray(
-          obj.ampdoc.getDocumentOrShadowRoot().getElementsByClassName('i-amphtml-toolbar')
+          obj.ampdoc
+            .getDocumentOrShadowRoot()
+            .getElementsByClassName('i-amphtml-toolbar')
         );
         resizeIframeToWidth(obj.iframe, '1px', () => {
           toolbars.forEach((toolbar) => {
@@ -143,7 +145,9 @@ describes.realWin('amp-sidebar - toolbar', {}, (env) => {
           toolbar.onLayoutChange();
         });
         const toolbarElements = toArray(
-          obj.ampdoc.getDocumentOrShadowRoot().getElementsByClassName('i-amphtml-toolbar')
+          obj.ampdoc
+            .getDocumentOrShadowRoot()
+            .getElementsByClassName('i-amphtml-toolbar')
         );
         expect(toolbarElements.length).to.be.above(0);
         expect(toolbarElements[0].parentElement).to.not.have.display('none');

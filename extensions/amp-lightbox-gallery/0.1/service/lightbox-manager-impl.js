@@ -166,7 +166,9 @@ export class LightboxManager {
    */
   scanLightboxables_() {
     return this.ampdoc_.whenReady().then(() => {
-      const matches = this.ampdoc_.getDocumentOrShadowRoot().querySelectorAll('[lightbox]');
+      const matches = this.ampdoc_
+        .getDocumentOrShadowRoot()
+        .querySelectorAll('[lightbox]');
       const processLightboxElement = this.processLightboxElement_.bind(this);
       iterateCursor(matches, processLightboxElement);
     });
@@ -291,7 +293,10 @@ export class LightboxManager {
     if (isActionableByTap(element)) {
       return;
     }
-    const gallery = elementByTag(this.ampdoc_.getDocumentOrShadowRoot(), GALLERY_TAG);
+    const gallery = elementByTag(
+      this.ampdoc_.getDocumentOrShadowRoot(),
+      GALLERY_TAG
+    );
     const actions = Services.actionServiceForDoc(element);
     actions.setActions(element, `tap:${gallery.id}.activate`);
   }

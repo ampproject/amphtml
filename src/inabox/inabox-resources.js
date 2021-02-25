@@ -245,7 +245,10 @@ export class InaboxResources {
       const resource = this.pendingBuildResources_[i];
       if (
         this.documentReady_ ||
-        hasNextNodeInDocumentOrder(resource.element, this.ampdoc_.getDocumentOrShadowRoot())
+        hasNextNodeInDocumentOrder(
+          resource.element,
+          this.ampdoc_.getDocumentOrShadowRoot()
+        )
       ) {
         this.pendingBuildResources_.splice(i, 1);
         resource.build().then(() => this./*OK*/ schedulePass());

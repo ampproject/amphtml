@@ -601,7 +601,7 @@ var log_1 = {
   assert,
   debugLog,
   warn,
-  log
+  log,
 };
 var log_3 = log_1.debugLog;
 
@@ -1179,7 +1179,11 @@ class MicrodataParser {
 
     // Grab all the nodes with an itemtype and filter for our allowed types
     const nodeList = Array.prototype.slice
-      .call(this.doc_.getDocumentOrShadowRoot().querySelectorAll('[itemscope][itemtype]'))
+      .call(
+        this.doc_
+          .getDocumentOrShadowRoot()
+          .querySelectorAll('[itemscope][itemtype]')
+      )
       .filter((node) =>
         this.checkType_.checkString(
           node.getAttribute('itemtype'),
@@ -1230,4 +1234,4 @@ function getMetaTag(rootNode, name) {
   return null;
 }
 
-export { Doc, PageConfig, PageConfigResolver };
+export {Doc, PageConfig, PageConfigResolver};

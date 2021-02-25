@@ -168,7 +168,10 @@ describes.realWin('video docking', {amp: true}, (env) => {
   beforeEach(() => {
     ampdoc = env.ampdoc;
     any = env.sandbox.match.any;
-    querySelectorStub = env.sandbox.stub(ampdoc.getDocumentOrShadowRoot(), 'querySelector');
+    querySelectorStub = env.sandbox.stub(
+      ampdoc.getDocumentOrShadowRoot(),
+      'querySelector'
+    );
 
     manager = {
       getPlayingState() {

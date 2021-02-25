@@ -70,7 +70,9 @@ export class AnchorAdStrategy {
    * @private
    */
   hasExistingStickyAd_() {
-    return !!this.ampdoc.getDocumentOrShadowRoot().querySelector('AMP-STICKY-AD');
+    return !!this.ampdoc
+      .getDocumentOrShadowRoot()
+      .querySelector('AMP-STICKY-AD');
   }
 
   /**
