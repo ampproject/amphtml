@@ -83,13 +83,18 @@ const cssEntryPoints = [
  */
 async function copyCss() {
   const startTime = Date.now();
-  for (const {outCss} of cssEntryPoints) {
-    await fs.copy(`build/css/${outCss}`, `dist/${outCss}`);
-  }
+  await fs.ensureDir('dist/v0');
+  await Promise.all(
+    cssEntryPoints.map(({outCss}) => {
+      return fs.copy(`build/css/${outCss}`, `dist/${outCss}`);
+    })
+  );
   const cssFiles = globby.sync('build/css/amp-*.css');
-  for (const cssFile of cssFiles) {
-    await fs.copy(cssFile, `dist/v0/${path.basename(cssFile)}`);
-  }
+  await Promise.all(
+    cssFiles.map((cssFile) => {
+      return fs.copy(cssFile, `dist/v0/${path.basename(cssFile)}`);
+    })
+  );
   endBuildStep('Copied', 'build/css/*.css to dist/v0/*.css', startTime);
 }
 
@@ -138,6 +143,7 @@ async function compileCss(options = {}) {
   }
 
   const startTime = Date.now();
+  // Must be in order because some iterations write while others append.
   for (const {path, outJs, outCss, append} of cssEntryPoints) {
     await writeCssEntryPoint(path, outJs, outCss, append);
   }

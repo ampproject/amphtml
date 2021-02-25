@@ -241,16 +241,17 @@ async function preBuildWebPushPublisherFiles() {
     for (const fileName of WEB_PUSH_PUBLISHER_FILES) {
       const srcPath = `extensions/amp-web-push/${version}`;
       const destPath = `build/all/amp-web-push-${version}`;
-      await fs.ensureDir(destPath);
 
       // Build Helper Frame JS
       const js = await fs.readFile(`${srcPath}/${fileName}.js`, 'utf8');
       const builtName = `${fileName}.js`;
-      await fs.writeFile(`${destPath}/${builtName}`, js);
+      await fs.outputFile(`${destPath}/${builtName}`, js);
       const jsFiles = globby.sync(`${srcPath}/*.js`);
-      for (const jsFile of jsFiles) {
-        await fs.copy(jsFile, `${destPath}/${path.basename(jsFile)}`);
-      }
+      await Promise.all(
+        jsFiles.map((jsFile) => {
+          return fs.copy(jsFile, `${destPath}/${path.basename(jsFile)}`);
+        })
+      );
     }
   }
 }
@@ -298,21 +299,20 @@ async function preBuildExperiments() {
       `https://${hostname}/v0/experiments.js`
     )
     .replace(/\$internalRuntimeVersion\$/g, VERSION);
-  await fs.ensureDir(htmlDestDir);
-  await fs.writeFile(`${htmlDestDir}/experiments.cdn.html`, minHtml);
-  await fs.ensureDir(expDir);
+  await fs.outputFile(`${htmlDestDir}/experiments.cdn.html`, minHtml);
   await fs.copy(htmlSrcPath, `${htmlDestDir}/${path.basename(htmlSrcPath)}`);
 
   // Build JS.
   const jsDir = 'build/experiments/';
-  await fs.ensureDir(jsDir);
   const js = await fs.readFile(jsSrcPath, 'utf8');
   const builtName = 'experiments.max.js';
-  await fs.writeFile(`${jsDir}/${builtName}`, js);
+  await fs.outputFile(`${jsDir}/${builtName}`, js);
   const jsFiles = globby.sync(`${expDir}/*.js`);
-  for (const jsFile of jsFiles) {
-    await fs.copy(jsFile, `${jsDir}/${path.basename(jsFile)}`);
-  }
+  await Promise.all(
+    jsFiles.map((jsFile) => {
+      return fs.copy(jsFile, `${jsDir}/${path.basename(jsFile)}`);
+    })
+  );
 }
 
 /**
@@ -341,18 +341,18 @@ async function preBuildLoginDoneVersion(version) {
   if (minHtml.indexOf(minJs) == -1) {
     throw new Error('Failed to correctly set JS in login-done.html');
   }
-  await fs.ensureDir('dist/v0');
-  await fs.writeFile(`dist/v0/amp-login-done-${version}.html`, minHtml);
+  await fs.outputFile(`dist/v0/amp-login-done-${version}.html`, minHtml);
 
   // Build JS.
   const js = await fs.readFile(jsPath, 'utf8');
   const builtName = `amp-login-done-${version}.max.js`;
-  await fs.ensureDir(buildDir);
-  await fs.writeFile(`${buildDir}/${builtName}`, js);
+  await fs.outputFile(`${buildDir}/${builtName}`, js);
   const jsFiles = globby.sync(`${srcDir}/*.js`);
-  for (const jsFile of jsFiles) {
-    await fs.copy(jsFile, `${buildDir}/${path.basename(jsFile)}`);
-  }
+  await Promise.all(
+    jsFiles.map((jsFile) => {
+      return fs.copy(jsFile, `${buildDir}/${path.basename(jsFile)}`);
+    })
+  );
 }
 
 module.exports = {
