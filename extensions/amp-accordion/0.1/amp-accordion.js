@@ -162,7 +162,9 @@ class AmpAccordion extends AMP.BaseElement {
 
       const isExpanded = section.hasAttribute('expanded');
       header.classList.add('i-amphtml-accordion-header');
-      header.setAttribute('role', 'button');
+      if (!header.hasAttribute('role')) {
+        header.setAttribute('role', 'button');
+      }
       header.setAttribute('aria-controls', contentId);
       header.setAttribute('aria-expanded', String(isExpanded));
       if (!header.hasAttribute('tabindex')) {
@@ -170,7 +172,9 @@ class AmpAccordion extends AMP.BaseElement {
       }
       this.headers_.push(header);
       content.setAttribute('aria-labelledby', headerId);
-      content.setAttribute('role', 'region');
+      if (!content.hasAttribute('role')) {
+        content.setAttribute('role', 'region');
+      }
 
       userAssert(
         this.action_.hasAction(header, 'tap', section) == false,
