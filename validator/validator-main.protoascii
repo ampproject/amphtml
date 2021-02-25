@@ -5006,6 +5006,10 @@ attr_lists: {
   attrs: { name: "[class]" }
   attrs: { name: "[hidden]" }
   attrs: { name: "[text]" }
+  attrs: {
+    enabled_by: "transformed"
+    name: "i-amphtml-binding"
+  }
   # <amp-sidebar>
   attrs: {
     name: "autoscroll"
