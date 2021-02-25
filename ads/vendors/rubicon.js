@@ -53,7 +53,7 @@ function smartTag(global, data) {
   global.rp_site = data.site;
   global.rp_zonesize = data.zone + '-' + data.size;
   global.rp_adtype = 'js';
-  global.rp_page = context.sourceUrl;
+  global.rp_page = global.context.sourceUrl;
   global.rp_kw = data.kw;
   global.rp_visitor = data.visitor;
   global.rp_inventory = data.inventory;

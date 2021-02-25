@@ -41,14 +41,7 @@ export class Entitlement {
   }
 
   /**
-   * @param {Object} input
-   * @param {string} [input.source]
-   * @param {string} [input.raw]
-   * @param {string} [input.service]
-   * @param {boolean} [input.granted]
-   * @param {?GrantReason} [input.grantReason]
-   * @param {?JsonObject} [input.dataObject]
-   * @param {?string} [input.decryptedDocumentKey]
+   * @param {{source: string, raw: string, service: string, granted: boolean, grantReason: ?GrantReason, dataObject: ?JsonObject, decryptedDocumentKey: ?string}} input
    */
   constructor(input) {
     const {

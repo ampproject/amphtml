@@ -23,7 +23,7 @@ import {computeInMasterFrame, loadScript, validateData} from '../../3p/3p';
 export function imedia(global, data) {
   validateData(data, ['id', 'positions']);
   const positions = JSON.parse(data.positions);
-  const mW = context.isMaster ? global : context.master;
+  const mW = global.context.isMaster ? global : global.context.master;
 
   // create parent element
   const parentElement = document.createElement('div');
@@ -43,7 +43,7 @@ export function imedia(global, data) {
       loadScript(global, 'https://i.imedia.cz/js/im3.js', () => {
         if (global.im != null) {
           mW.im = global.im;
-          mW.im.conf.referer = context.canonicalUrl;
+          mW.im.conf.referer = global.context.canonicalUrl;
 
           // send request to get all ads
           mW.im.getAds(positions, {

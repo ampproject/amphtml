@@ -28,6 +28,13 @@ export const UrlReplacementPolicy = {
   ALL: 2,
 };
 
+/*
+ options.expr – Dot-syntax reference to subdata of JSON result to return. If not specified, entire JSON result is returned.
+ options.urlReplacement – If ALL, replaces all URL vars. If OPT_IN, replaces allowlisted URL vars. Otherwise, don't expand.
+ options.refresh – Forces refresh of browser cache.
+ options.xssiPrefix – Prefix to optionally strip from the response before calling parseJson.
+ **/
+
 /**
  * Batch fetches the JSON endpoint at the given element's `src` attribute.
  * Sets the fetch credentials option from the element's `credentials` attribute,
@@ -35,14 +42,7 @@ export const UrlReplacementPolicy = {
  *
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!Element} element
- * @param {!Object} options options bag for modifying the request.
- * @param {string|undefined} options.expr Dot-syntax reference to subdata of JSON result.
- *     to return. If not specified, entire JSON result is returned.
- * @param {UrlReplacementPolicy|undefined} options.urlReplacement If ALL, replaces all URL
- *     vars. If OPT_IN, replaces allowlisted URL vars. Otherwise, don't expand.
- * @param {boolean|undefined} options.refresh Forces refresh of browser cache.
- * @param {string|undefined} options.xssiPrefix Prefix to optionally
- *     strip from the response before calling parseJson.
+ * @param {!{expr: ?string, urlReplacement: ?UrlReplacementPolicy, refresh: ?boolean, xssiPrefix: ?string }} options options bag for modifying the request.
  * @return {!Promise<!JsonObject|!Array<JsonObject>>} Resolved with JSON
  *     result or rejected if response is invalid.
  */

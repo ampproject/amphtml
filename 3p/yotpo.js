@@ -312,7 +312,7 @@ export function yotpo(global, data) {
     if (batchLoaded && cssLoaded) {
       setTimeout(() => {
         if (yotpoWidget.widgets[0]) {
-          context.updateDimensions(
+          global.context.updateDimensions(
             yotpoWidget.widgets[0].element./*OK*/ offsetWidth,
             yotpoWidget.widgets[0].element./*OK*/ offsetHeight
           );

@@ -16,7 +16,12 @@
 
 import {validateData, writeScript} from '../../3p/3p';
 
-/* global adingoFluct: false */
+/**
+ * @typedef {Object} AdingoFluct
+ * @private
+ *
+ * @property {Function} showAd
+ */
 
 /**
  * @param {!Window} global
@@ -28,7 +33,7 @@ export function fluct(global, data) {
     global,
     `https://cdn-fluct.sh.adingo.jp/f.js?G=${encodeURIComponent(data['g'])}`,
     function () {
-      adingoFluct.showAd(data['u']);
+      global./** AdingoFluct **/ adingoFluct.showAd(data['u']);
     }
   );
 }

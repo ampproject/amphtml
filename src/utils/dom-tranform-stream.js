@@ -21,7 +21,7 @@ import {removeNoScriptElements} from './dom-writer';
 export class DomTransformStream {
   /**
    * @param {!Window} win
-   * @param {function=} opt_transferThrottleFunc
+   * @param {Function=} opt_transferThrottleFunc
    */
   constructor(win, opt_transferThrottleFunc) {
     const headDefer = new Deferred();
@@ -64,11 +64,6 @@ export class DomTransformStream {
     /** @private {boolean} */
     this.shouldTransfer_ = false;
 
-    /**
-     * @param {!function} cb
-     * @const @private {!function}
-     * @return {!Promise}
-     */
     this.transferThrottle_ =
       opt_transferThrottleFunc || ((cb) => Promise.resolve(cb()));
   }

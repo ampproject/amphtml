@@ -33,7 +33,7 @@ LightboxGalleryDef.Props;
  *   children: (!PreactDef.Renderable),
  *   enableActivation: (boolean|undefined),
  *   onClick: (function(Event)|undefined)
- *   render: (function():PreactDef.Renderable),
+ *   render: (function:PreactDef.Renderable),
  * }}
  */
 LightboxGalleryDef.WithLightboxProps;

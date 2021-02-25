@@ -17,12 +17,12 @@
 import {loadScript, validateData} from '../../3p/3p';
 import {parseUrlDeprecated} from '../../src/url';
 
-/* global
-__kxamp: false,
-__kx_ad_slots: false,
-__kx_ad_start: false,
-__kx_viewability: false,
-*/
+/**
+ * @typedef {Object} KixerViewability
+ * @private
+ *
+ * @property {?Function} process_locked
+ */
 
 /**
  * @param {!Window} global
@@ -70,9 +70,14 @@ export function kixer(global, data) {
   const kxviewFire = function () {
     if (inView) {
       // if the ad is still in the viewport
-      if (typeof __kx_viewability.process_locked === 'function') {
+      if (
+        typeof global./** KixerViewability **/ __kx_viewability
+          .process_locked === 'function'
+      ) {
         viewed = true;
-        __kx_viewability.process_locked(data.adslot); // Fire kixer view
+        global./** KixerViewability **/ __kx_viewability.process_locked(
+          data.adslot
+        ); // Fire kixer view
       }
     }
   };
@@ -85,8 +90,8 @@ export function kixer(global, data) {
 
   loadScript(global, 'https://cdn.kixer.com/ad/load.js', () => {
     global.__kx_domain = parseUrlDeprecated(global.context.sourceUrl).hostname; // Get domain
-    __kxamp[data.adslot] = 1;
-    __kx_ad_slots.push(data.adslot);
-    __kx_ad_start();
+    global./** Array<number> **/ __kxamp[data.adslot] = 1;
+    global./** Array<number> **/ __kx_ad_slots.push(data.adslot);
+    global./** Function **/ __kx_ad_start();
   });
 }

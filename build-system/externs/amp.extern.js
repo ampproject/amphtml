@@ -350,7 +350,7 @@ RRule.prototype.after = function (unusedDt, unusedInc) {};
 let PropTypes = {};
 
 /**
- * @@dict
+ * @dict
  */
 let ReactDates = {};
 

@@ -167,7 +167,7 @@ function compile(
     'third_party/moment/moment.extern.js',
     'third_party/react-externs/externs.js',
     'build-system/externs/preact.extern.js',
-    'build-system/externs/weakref.extern.js',
+    'build-system/externs/device-pixel-ratio.extern.js',
   ];
   const define = [`VERSION=${internalRuntimeVersion}`];
   if (argv.pseudo_names) {

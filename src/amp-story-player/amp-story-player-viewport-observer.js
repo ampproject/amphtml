@@ -27,7 +27,7 @@ export class AmpStoryPlayerViewportObserver {
   /**
    * @param {!Window} win
    * @param {!Element} element
-   * @param {function} viewportCb
+   * @param {Function} viewportCb
    */
   constructor(win, element, viewportCb) {
     /** @private {!Window} */
@@ -36,10 +36,10 @@ export class AmpStoryPlayerViewportObserver {
     /** @private {!Element} */
     this.element_ = element;
 
-    /** @private {function} */
+    /** @private {Function} */
     this.cb_ = viewportCb;
 
-    /** @private {?function} */
+    /** @private {?Function} */
     this.scrollHandler_ = null;
 
     this.initializeInObOrFallback_();

@@ -65,7 +65,7 @@ export function github(global, data) {
       gistLinks[i].target = '_BLANK';
     }
 
-    context.updateDimensions(
+    global.context.updateDimensions(
       gistContainer./*OK*/ offsetWidth,
       gistContainer./*OK*/ offsetHeight
     );

@@ -1207,16 +1207,17 @@ export class Bind {
     return updates;
   }
 
+  /*
+  opts.skipAmpState – If true, skips <amp-state> elements.
+  opts.constrain – If provided, restricts application to children of the provided elements.
+  opts.evaluateOnly – If provided, caches the evaluated result on each bound element and skips the actual DOM updates.
+  */
+
   /**
    * Applies expression results to elements in the document.
    *
    * @param {Object<string, BindExpressionResultDef>} results
-   * @param {!Object} opts
-   * @param {boolean=} opts.skipAmpState If true, skips <amp-state> elements.
-   * @param {Array<!Element>=} opts.constrain If provided, restricts application
-   *   to children of the provided elements.
-   * @param {boolean=} opts.evaluateOnly If provided, caches the evaluated
-   *   result on each bound element and skips the actual DOM updates.
+   * @param {!{ skipAmpState: ?boolean, constrain: ?Array<!Element>, evaulateOnly: ?boolean}} opts
    * @return {!Promise}
    * @private
    */

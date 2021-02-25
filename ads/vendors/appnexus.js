@@ -64,6 +64,7 @@ export function appnexus(global, data) {
  */
 function appnexusAst(global, data) {
   validateData(data, ['adUnits']);
+  const {context} = global;
   let apntag;
   if (context.isMaster) {
     // in case we are in the master iframe, we load AST

@@ -78,7 +78,7 @@ export function mathml(global, data) {
           display = document.getElementsByClassName('MJXc-display');
         }
         display[0].setAttribute('style', 'margin-top:0;margin-bottom:0');
-        context.requestResize(
+        global.context.requestResize(
           rendered./*OK*/ offsetWidth,
           rendered./*OK*/ offsetHeight
         );

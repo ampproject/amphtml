@@ -32,7 +32,7 @@ var LightboxDef = {};
 LightboxDef.Props;
 
 /** @interface */
-Lightbox.LightboxApi = class {
+LightboxDef.LightboxApi = class {
   /** Open the lightbox */
   open() {}
 

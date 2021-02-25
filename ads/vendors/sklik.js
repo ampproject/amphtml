@@ -16,8 +16,6 @@
 
 import {loadScript} from '../../3p/3p';
 
-/* global sklikProvider: false */
-
 /**
  * @param {!Window} global
  * @param {!Object} data
@@ -33,6 +31,6 @@ export function sklik(global, data) {
     data.elm = parentId;
     data.url = global.context.canonicalUrl;
 
-    sklikProvider.show(data);
+    global.sklikProvider.show(data);
   });
 }

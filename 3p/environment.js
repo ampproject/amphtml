@@ -125,7 +125,7 @@ function maybeInstrumentsNodes(win, addedNodes) {
             }
           });
         } else if (srcdoc) {
-          instrumentSrcdoc(parent, node);
+          instrumentSrcdoc(win, node);
         }
       }
     } catch (e) {

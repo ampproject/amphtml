@@ -18,19 +18,23 @@ import {computeInMasterFrame, loadScript} from '../../3p/3p';
 import {parseJson} from '../../src/json';
 
 /**
- * @param context
+ * @param {!Object} context
  */
-
-const initSlotList = (context) => {
+function initSlotList(context) {
   context.master.availableSlots = context.master.availableSlots || {};
-};
+}
 
-const registerSlot = (slot) => {
+/**
+ * @param {!Object} context
+ * @param {!Object} slot
+ */
+function registerSlot(context, slot) {
   context.master.availableSlots[slot.slotName] = slot;
-};
+}
 
 // eslint-disable-next-line require-jsdoc
 export function springAds(global, data) {
+  const {context} = global;
   computeInMasterFrame(
     global,
     'springAds',
@@ -50,7 +54,7 @@ export function springAds(global, data) {
       'https://www.asadcdn.com/adlib/pages/' + sitename + '_amp.js'
     );
   } else {
-    registerSlot({
+    registerSlot(context, {
       global,
       document,
       context,

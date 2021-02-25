@@ -57,7 +57,7 @@ import {setStyle} from '../../src/style';
  */
 
 /**
- * @param {!FeedAdGlobal & Window} global
+ * @param {!Window} global
  * @param {!FeedAdData} data
  */
 export function feedad(global, data) {

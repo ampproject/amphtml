@@ -53,5 +53,5 @@ function initPlayer(global, data) {
     },
   };
   // eslint-disable-next-line no-undef
-  SeedrPlayer(config);
+  global.SeedrPlayer(config);
 }

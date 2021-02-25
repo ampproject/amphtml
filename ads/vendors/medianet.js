@@ -62,9 +62,10 @@ export function medianet(global, data) {
 }
 
 /**
+ * @param {!Window} global
  * @return {{renderStartCb: (function(*=)), reportRenderedEntityIdentifierCb: (function(*=)), noContentAvailableCb: (function())}}
  */
-function getCallbacksObject() {
+function getCallbacksObject(global) {
   return {
     renderStartCb: (opt_data) => {
       global.context.renderStart(opt_data);
@@ -120,7 +121,7 @@ function loadCMTag(global, data, publisherUrl, referrerUrl) {
    * Sets callback.
    */
   function setCallbacks() {
-    global._mNAmp = getCallbacksObject();
+    global._mNAmp = getCallbacksObject(global);
   }
 
   /**
@@ -213,7 +214,7 @@ function loadHBTag(global, data, publisherUrl, referrerUrl) {
           global.context.noContentAvailable();
         },
       };
-      global.advBidxc.amp = getCallbacksObject();
+      global.advBidxc.amp = getCallbacksObject(global);
       const publisherDomain = parseUrlDeprecated(publisherUrl).hostname;
       writeScript(
         global,

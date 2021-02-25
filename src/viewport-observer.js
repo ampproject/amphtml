@@ -23,7 +23,7 @@ import {toWin} from './types';
  *
  * @param {function(!Array<!IntersectionObserverEntry>)} ioCallback
  * @param {!Window} win
- * @param {{threshold: (number|!Array<number>)=, needsRootBounds: boolean=}=} opts
+ * @param {{threshold: (number|!Array<number>), needsRootBounds: boolean}} opts
  *
  * @return {!IntersectionObserver}
  */

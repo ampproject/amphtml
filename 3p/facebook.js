@@ -234,7 +234,7 @@ export function facebook(global, data) {
       delete data.height;
 
       FB.Event.subscribe('xfbml.resize', (event) => {
-        context.updateDimensions(
+        global.context.updateDimensions(
           parseInt(event.width, 10),
           parseInt(event.height, 10) + /* margins */ 20
         );

@@ -51,8 +51,8 @@ export function gumgum(global, data) {
   // Ads logic starts
   global.ggv2id = data.zone;
   global.ggevents = ggevents;
-  global.sourceUrl = context.sourceUrl;
-  global.sourceReferrer = context.referrer;
+  global.sourceUrl = global.context.sourceUrl;
+  global.sourceReferrer = global.context.referrer;
 
   if (slotId) {
     // Slot Ad

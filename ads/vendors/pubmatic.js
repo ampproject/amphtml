@@ -16,8 +16,6 @@
 
 import {loadScript} from '../../3p/3p';
 
-/* global PubMatic: false */
-
 /**
  * @param {!Window} global
  * @param {!Object} data
@@ -25,6 +23,6 @@ import {loadScript} from '../../3p/3p';
 export function pubmatic(global, data) {
   loadScript(global, 'https://ads.pubmatic.com/AdServer/js/amp.js', () => {
     data.kadpageurl = global.context.sourceUrl || global.context.location.href;
-    PubMatic.showAd(data);
+    global.PubMatic.showAd(data);
   });
 }
