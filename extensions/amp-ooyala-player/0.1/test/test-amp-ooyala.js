@@ -196,7 +196,6 @@ describes.realWin(
         const spy = env.sandbox.spy(utils, 'fullscreenEnter');
         impl.fullscreenEnter();
         expect(spy).calledWith(impl.iframe_);
-        expect(impl.isFullscreen()).to.be.true;
       });
 
       it('can exit fullscreen', () => {
