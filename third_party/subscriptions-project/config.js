@@ -601,7 +601,7 @@ var log_1 = {
   assert,
   debugLog,
   warn,
-  log,
+  log
 };
 var log_3 = log_1.debugLog;
 
@@ -1230,4 +1230,4 @@ function getMetaTag(rootNode, name) {
   return null;
 }
 
-export {Doc, PageConfig, PageConfigResolver};
+export { Doc, PageConfig, PageConfigResolver };

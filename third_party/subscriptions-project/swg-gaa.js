@@ -328,7 +328,7 @@ var log_1 = {
   assert,
   debugLog,
   warn,
-  log,
+  log
 };
 var log_4 = log_1.warn;
 
@@ -1256,4 +1256,4 @@ class GaaUtils {
   }
 }
 
-export {GaaGoogleSignInButton, GaaMeteringRegwall, GaaUserDef, GoogleUserDef};
+export { GaaGoogleSignInButton, GaaMeteringRegwall, GaaUserDef, GoogleUserDef };
