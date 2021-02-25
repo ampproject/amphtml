@@ -911,7 +911,10 @@ export class AmpA4A extends AMP.BaseElement {
    */
   isInNoSigningExp() {
     // eslint-disable-next-line no-undef
-    return !!NO_SIGNING_RTV;
+    // Turn on and of no-signing.
+    const on = false;
+    console.log(on);
+    return !!on;
   }
 
   /**
@@ -941,7 +944,12 @@ export class AmpA4A extends AMP.BaseElement {
     const size = this.extractSize(httpResponse.headers);
     this.creativeSize_ = size || this.creativeSize_;
 
-    if (this.skipClientSideValidation(httpResponse.headers)) {
+    // No signing path.
+    const isShadowDomSupported = false;
+    if (
+      this.skipClientSideValidation(httpResponse.headers) ||
+      !isShadowDomSupported
+    ) {
       return this.handleFallback_(httpResponse, checkStillCurrent);
     }
 
@@ -1096,10 +1104,15 @@ export class AmpA4A extends AMP.BaseElement {
           // via #validateAdResponse_.  See GitHub issue
           // https://github.com/ampproject/amphtml/issues/4187
           let creativeMetaDataDef;
+
+          // Existing validation path.
+          const hasShadowSupport = false;
           if (
+            !hasShadowSupport ||
             !creativeDecoded ||
             !(creativeMetaDataDef = this.getAmpAdMetadata(creativeDecoded))
           ) {
+            // Existing
             if (this.inNonAmpPreferenceExp()) {
               // Experiment to give non-AMP creatives same benefits as AMP so
               // update priority.
