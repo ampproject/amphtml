@@ -56,7 +56,9 @@ function prBuildWorkflow() {
     downloadModuleOutput();
     timedExecOrDie('gulp update-packages');
     prependConfig();
-    timedExecOrDie('gulp integration --nobuild --compiled --headless --esm');
+    timedExecOrDie(
+      `gulp integration --nobuild --compiled --headless --esm --config=${argv.config}`
+    );
   } else {
     printSkipMessage(
       jobName,

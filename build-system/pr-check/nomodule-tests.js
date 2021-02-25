@@ -47,7 +47,7 @@ function pushBuildWorkflow() {
   prependConfig();
   try {
     timedExecOrThrow(
-      'gulp integration --nobuild --headless --compiled --report',
+      `gulp integration --nobuild --headless --compiled --report --config=${argv.config}`,
       'Integration tests failed!'
     );
   } catch (e) {
@@ -64,7 +64,9 @@ function prBuildWorkflow() {
     downloadNomoduleOutput();
     timedExecOrDie('gulp update-packages');
     prependConfig();
-    timedExecOrDie('gulp integration --nobuild --compiled --headless');
+    timedExecOrDie(
+      `gulp integration --nobuild --compiled --headless --config=${argv.config}`
+    );
   } else {
     printSkipMessage(
       jobName,
