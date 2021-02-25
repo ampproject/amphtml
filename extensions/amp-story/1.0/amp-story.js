@@ -361,9 +361,6 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private {?LiveStoryManager} */
     this.liveStoryManager_ = null;
-
-    /** @private {!Deferred} */
-    this.initialStoryLayoutDeferred_ = new Deferred();
   }
 
   /** @override */
@@ -1009,7 +1006,11 @@ export class AmpStory extends AMP.BaseElement {
           });
         }
       })
-      .then(() => this.switchTo_(initialPageId, NavigationDirection.NEXT))
+      .then(() =>
+        // We need to call this.getInitialPageId_() again because the initial
+        // page could've changed between the start of layoutStory_ and here.
+        this.switchTo_(this.getInitialPageId_(), NavigationDirection.NEXT)
+      )
       .then(() => {
         const shouldReOpenAttachmentForPageId = getHistoryState(
           this.win,
@@ -1029,8 +1030,7 @@ export class AmpStory extends AMP.BaseElement {
         if (infoDialog) {
           infoDialog.build();
         }
-      })
-      .then(() => this.initialStoryLayoutDeferred_.resolve());
+      });
 
     // Do not block the layout callback on the completion of these promises, as
     // that prevents descendents from being laid out (and therefore loaded).
@@ -2666,7 +2666,15 @@ export class AmpStory extends AMP.BaseElement {
           : NavigationDirection.PREVIOUS
       );
     } else if (data['rewind']) {
-      this.initialStoryLayoutDeferred_.promise.then(() => this.replay_());
+      this.signals()
+        .whenSignal(CommonSignals.LOAD_END)
+        .then(() => {
+          if (this.pages_.length > 0) {
+            return;
+          }
+          return this.initializePages_();
+        })
+        .then(() => this.replay_());
     }
   }
 
