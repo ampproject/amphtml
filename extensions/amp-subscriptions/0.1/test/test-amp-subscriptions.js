@@ -560,7 +560,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
     });
   });
 
-  describe.only('startAuthorizationFlow_', () => {
+  describe('startAuthorizationFlow_', () => {
     let entitlement;
     let platform;
     let platformStore;
