@@ -76,22 +76,28 @@ function assertion(errorCls, shouldBeTruthy, opt_message, var_args) {
 
   // Skip the first 3 arguments to isolate format params
   const messageArgs = Array.prototype.slice.call(arguments, 3);
+  const messageArray = [];
+  let firstElement;
+
   // Substitute provided values into format string in message
-  const message = messageArgs.reduce(
-    (msg, subValue) => msg.replace('%s', subValue),
-    opt_message || 'Assertion failed'
-  );
-  const error = new errorCls(message);
-  error.messageArray = messageArgs;
+  const message = (opt_message || 'Assertion failed').replace(/%s/g, () => {
+    const subValue = messageArgs.shift();
 
-  // If an element is provided, add it to the error object
-  for (let i = 0; i < messageArgs.length; ++i) {
-    if (messageArgs[i]?.tagName) {
-      error.associatedElement = messageArgs[i];
-      break;
+    if (subValue != '') {
+      messageArray.push(subValue);
     }
-  }
 
+    // If an element is provided, add it to the error object
+    if (!firstElement && subValue?.nodeType == 1) {
+      firstElement = subValue;
+    }
+
+    return subValue;
+  });
+
+  const error = new errorCls(message);
+  error.messageArray = messageArray;
+  error.associatedElement = firstElement;
   throw error;
 }
 
