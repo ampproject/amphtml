@@ -35,7 +35,7 @@ const {
   VERSION: internalRuntimeVersion,
 } = require('../../compile/internal-version');
 const {cyan, red, yellow} = require('kleur/colors');
-const {log} = require('../../common/logging');
+const {log, logWithoutTimestamp} = require('../../common/logging');
 const {report, NoTTYReport} = require('@ampproject/filesize');
 
 const requestPost = util.promisify(require('request').post);
@@ -113,6 +113,7 @@ async function storeBundleSize() {
   }
 
   const commitHash = gitCommitHash();
+  log('Storing bundle sizes for commit', cyan(shortSha(commitHash)) + '...');
   try {
     const response = await requestPost({
       uri: url.resolve(
@@ -125,15 +126,10 @@ async function storeBundleSize() {
         bundleSizes: await getBrotliBundleSizes(),
       },
     });
-    checkResponse(
-      response,
-      'Successfully stored bundle sizes for commit',
-      cyan(shortSha(commitHash)) + '.'
-    );
+    checkResponse(response, 'Successfully stored bundle sizes.');
   } catch (error) {
-    log(red('Could not store bundle sizes'));
-    log(red(error));
-    process.exitCode = 1;
+    log(yellow('WARNING:'), 'Could not store bundle sizes');
+    logWithoutTimestamp(error);
     return;
   }
 }
@@ -144,6 +140,10 @@ async function storeBundleSize() {
 async function skipBundleSize() {
   if (isPullRequestBuild()) {
     const commitHash = gitCommitHash();
+    log(
+      'Skipping bundle size reporting for commit',
+      cyan(shortSha(commitHash)) + '...'
+    );
     try {
       const response = await requestPost(
         url.resolve(
@@ -151,19 +151,17 @@ async function skipBundleSize() {
           path.join('commit', commitHash, 'skip')
         )
       );
-      checkResponse(
-        response,
-        'Skipped bundle size reporting for commit',
-        cyan(shortSha(commitHash)) + '.'
-      );
+      checkResponse(response, 'Successfully skipped bundle size reporting.');
     } catch (error) {
-      log(red('Could not report a skipped pull request'));
-      log(red(error));
-      process.exitCode = 1;
+      log(yellow('WARNING:'), 'Could not skip bundle size reporting');
+      logWithoutTimestamp(error);
       return;
     }
   } else {
-    log(yellow('Pull requests can be marked as skipped only during CI builds'));
+    log(
+      yellow('WARNING'),
+      'Pull requests can be marked as skipped only during CI builds'
+    );
   }
 }
 
@@ -174,6 +172,12 @@ async function reportBundleSize() {
   if (isPullRequestBuild()) {
     const baseSha = gitCiMasterBaseline();
     const commitHash = gitCommitHash();
+    log(
+      'Reporting bundle sizes for commit',
+      cyan(shortSha(commitHash)),
+      'using baseline commit',
+      cyan(shortSha(baseSha)) + '...'
+    );
     try {
       const response = await requestPost({
         uri: url.resolve(
@@ -186,24 +190,19 @@ async function reportBundleSize() {
           bundleSizes: await getBrotliBundleSizes(),
         },
       });
-      checkResponse(
-        response,
-        'Successfully reported bundle sizes for commit',
-        cyan(shortSha(commitHash)),
-        'using baseline commit',
-        cyan(shortSha(baseSha)) + '.'
-      );
+      checkResponse(response, 'Successfully reported bundle sizes.');
     } catch (error) {
-      log(red('Could not report the bundle sizes for this pull request'));
-      log(red(error));
-      process.exitCode = 1;
+      log(
+        yellow('WARNING:'),
+        'Could not report the bundle sizes for this pull request'
+      );
+      logWithoutTimestamp(error);
       return;
     }
   } else {
     log(
-      yellow(
-        'Bundle sizes from pull requests can be reported only during CI builds'
-      )
+      yellow('WARNING:'),
+      'Bundle sizes from pull requests can be reported only during CI builds'
     );
   }
 }

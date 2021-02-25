@@ -26,7 +26,7 @@ min_validator_revision_required: 475
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 1153
+spec_file_revision: 1155
 
 styles_spec_url: "https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/"
 script_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed"
@@ -1706,7 +1706,8 @@ tags: {
 
 # 4.7 Embedded Content
 # AMP HTML allows embedded content only via its own tags (e.g. amp-img), with
-# the exception of tags inside of a <noscript> ancestor and transformed amp-img.
+# the exception of tags inside of a <noscript> or <amp-story-player> ancestor
+# and transformed amp-img.
 # 4.7.1 The img element
 tags: {
   html_format: AMP  # Disallowed in AMP4ADS because <noscript> is disallowed.
@@ -5005,6 +5006,11 @@ attr_lists: {
   attrs: { name: "[class]" }
   attrs: { name: "[hidden]" }
   attrs: { name: "[text]" }
+  attrs: {
+    enabled_by: "transformed"
+    name: "i-amphtml-binding"
+    value: ""
+  }
   # <amp-sidebar>
   attrs: {
     name: "autoscroll"
