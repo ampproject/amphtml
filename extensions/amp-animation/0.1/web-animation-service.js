@@ -42,7 +42,7 @@ export class WebAnimationService {
       () =>
         new Builder(
           this.ampdoc_.win,
-          this.ampdoc_.getRootNode(),
+          this.ampdoc_.getDocumentOrShadowRoot(),
           this.ampdoc_.getUrl(),
           this.vsync_,
           this.owners_,

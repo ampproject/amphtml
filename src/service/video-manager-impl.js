@@ -331,7 +331,7 @@ export class VideoManager {
    * @return {!Promise<string>}
    */
   getVideoStateProperty(id, property) {
-    const root = this.ampdoc.getRootNode();
+    const root = this.ampdoc.getDocumentOrShadowRoot();
     const videoElement = user().assertElement(
       root.getElementById(/** @type {string} */ (id)),
       `Could not find an element with id="${id}" for VIDEO_STATE`
@@ -1117,7 +1117,7 @@ export class AutoFullscreenManager {
 
   /** @private */
   installFullscreenListener_() {
-    const root = this.ampdoc_.getRootNode();
+    const root = this.ampdoc_.getDocumentOrShadowRoot();
     const exitHandler = () => this.onFullscreenExit_();
     this.unlisteners_.push(
       listen(root, 'webkitfullscreenchange', exitHandler),

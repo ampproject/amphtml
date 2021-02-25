@@ -43,7 +43,7 @@ export class LocalSubscriptionBasePlatform {
     this.ampdoc_ = ampdoc;
 
     /** @private @const */
-    this.rootNode_ = ampdoc.getRootNode();
+    this.rootNode_ = ampdoc.getDocumentOrShadowRoot();
 
     /** @protected {!JsonObject} */
     this.serviceConfig_ = platformConfig;

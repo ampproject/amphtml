@@ -99,7 +99,7 @@ export class Navigation {
     this.ampdoc = ampdoc;
 
     /** @private @const {!Document|!ShadowRoot} */
-    this.rootNode_ = ampdoc.getRootNode();
+    this.rootNode_ = ampdoc.getDocumentOrShadowRoot();
 
     /** @private @const {!./viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc);
@@ -122,7 +122,7 @@ export class Navigation {
 
     /** @private @const {boolean} */
     this.isEmbed_ =
-      this.rootNode_ != this.ampdoc.getRootNode() || !!this.ampdoc.getParent();
+      this.rootNode_ != this.ampdoc.getDocumentOrShadowRoot() || !!this.ampdoc.getParent();
 
     /** @private @const {boolean} */
     this.isInABox_ = getMode(this.ampdoc.win).runtime == 'inabox';
@@ -755,7 +755,7 @@ export class Navigation {
     const docOptedIn =
       this.ampdoc.isSingleDoc() &&
       this.ampdoc
-        .getRootNode()
+        .getDocumentOrShadowRoot()
         .documentElement.hasAttribute('allow-navigation-interception');
 
     if (

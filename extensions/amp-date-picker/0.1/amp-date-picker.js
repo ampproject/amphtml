@@ -894,7 +894,7 @@ export class AmpDatePicker extends AMP.BaseElement {
   setupDateField_(type) {
     const fieldSelector = this.element.getAttribute(`${type}-selector`);
     const existingField = this.getAmpDoc()
-      .getRootNode()
+      .getDocumentOrShadowRoot()
       .querySelector(fieldSelector);
     if (existingField) {
       if (
@@ -958,7 +958,7 @@ export class AmpDatePicker extends AMP.BaseElement {
    */
   setupListeners_() {
     const ampdoc = this.getAmpDoc();
-    const root = ampdoc.getRootNode().documentElement || ampdoc.getBody();
+    const root = ampdoc.getDocumentOrShadowRoot().documentElement || ampdoc.getBody();
     // Only add for overlay since click events just handle opening and closing
     if (this.mode_ == DatePickerMode.OVERLAY) {
       this.listen_(root, 'click', this.handleClick_.bind(this));
@@ -1306,7 +1306,7 @@ export class AmpDatePicker extends AMP.BaseElement {
       .map((t) => ({
         dates: new DatesList(t.dates),
         template: ampdoc
-          .getRootNode()
+          .getDocumentOrShadowRoot()
           .querySelector(`#${escapeCssSelectorIdent(t.id)}[date-template]`),
       }));
 

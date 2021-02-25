@@ -51,7 +51,7 @@ export class InstrumentationService {
     this.ampdoc = ampdoc;
 
     /** @const */
-    this.root_ = this.findRoot_(ampdoc.getRootNode());
+    this.root_ = this.findRoot_(ampdoc.getDocumentOrShadowRoot());
   }
 
   /** @override */

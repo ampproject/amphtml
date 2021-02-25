@@ -144,7 +144,7 @@ export class AccessService {
 
     // Re-authorize newly added sections.
     ampdoc
-      .getRootNode()
+      .getDocumentOrShadowRoot()
       .addEventListener(AmpEvents.DOM_UPDATE, this.onDomUpdate_.bind(this));
   }
 
@@ -288,7 +288,7 @@ export class AccessService {
    * @private
    */
   getRootElement_() {
-    const root = this.ampdoc.getRootNode();
+    const root = this.ampdoc.getDocumentOrShadowRoot();
     return dev().assertElement(root.documentElement || root.body || root);
   }
 
@@ -365,7 +365,7 @@ export class AccessService {
         // Guard against anything else in flight.
         this.lastAuthorizationPromises_.then(() => {
           this.ampdoc.whenReady().then(() => {
-            const root = this.ampdoc.getRootNode();
+            const root = this.ampdoc.getDocumentOrShadowRoot();
             const responses = this.combinedResponses();
             return this.applyAuthorizationToRoot_(root, responses);
           });
@@ -404,7 +404,7 @@ export class AccessService {
     const rendered = authorizations.then(() => {
       this.toggleTopClass_('amp-access-loading', false);
       return this.ampdoc.whenReady().then(() => {
-        const root = this.ampdoc.getRootNode();
+        const root = this.ampdoc.getDocumentOrShadowRoot();
         const responses = this.combinedResponses();
         return this.applyAuthorizationToRoot_(root, responses);
       });
@@ -659,7 +659,7 @@ export class AccessService {
       unlistenSet.push(this.viewport_.onScroll(resolve));
 
       // 4. Tap: register a view.
-      unlistenSet.push(listenOnce(this.ampdoc.getRootNode(), 'click', resolve));
+      unlistenSet.push(listenOnce(this.ampdoc.getDocumentOrShadowRoot(), 'click', resolve));
     }).then(
       () => {
         unlistenSet.forEach((unlisten) => unlisten());

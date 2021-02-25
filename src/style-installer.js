@@ -61,7 +61,7 @@ export function installStylesForDoc(
   );
 
   if (cb) {
-    const rootNode = ampdoc.getRootNode();
+    const rootNode = ampdoc.getDocumentOrShadowRoot();
     // Styles aren't always available synchronously. E.g. if there is a
     // pending style download, it will have to finish before the new
     // style is visible.

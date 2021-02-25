@@ -74,7 +74,7 @@ export class LiveListManager {
     this.work_ = this.fetchDocument_.bind(this);
 
     /** @private @const {boolean} */
-    this.isTransformed_ = isDocTransformed(ampdoc.getRootNode());
+    this.isTransformed_ = isDocTransformed(ampdoc.getDocumentOrShadowRoot());
 
     // Only start polling when doc is ready and when the doc is visible.
     this.whenDocReady_().then(() => {

@@ -837,7 +837,7 @@ export class AmpIframe extends AMP.BaseElement {
   isUserGesture_() {
     // Best effort polyfill until native support is available: check that
     // iframe has focus and audio playback isn't immediately paused.
-    if (this.getAmpDoc().getRootNode().activeElement !== this.iframe_) {
+    if (this.getAmpDoc().getDocumentOrShadowRoot().activeElement !== this.iframe_) {
       return false;
     }
     const audio = this.win.document.createElement('audio');

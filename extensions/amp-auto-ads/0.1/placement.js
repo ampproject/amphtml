@@ -371,7 +371,7 @@ function getPlacementsFromObject(ampdoc, placementObj, placements) {
     user().warn(TAG, 'No anchor in placement');
     return;
   }
-  const anchorElements = getAnchorElements(ampdoc.getRootNode(), anchor);
+  const anchorElements = getAnchorElements(ampdoc.getDocumentOrShadowRoot(), anchor);
   if (!anchorElements.length) {
     user().warn(TAG, 'No anchor element found');
     return;

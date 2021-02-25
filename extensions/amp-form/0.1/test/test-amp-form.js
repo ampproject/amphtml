@@ -71,7 +71,7 @@ describes.repeated(
         let mutateElementStub;
 
         beforeEach(() => {
-          document = env.ampdoc.getRootNode();
+          document = env.ampdoc.getDocumentOrShadowRoot();
           timer = Services.timerFor(env.win);
           const ownerDoc = document.ownerDocument || document;
           createElement = (tagName, attrs) =>
@@ -780,7 +780,7 @@ describes.repeated(
             };
 
             const bubbleEl = env.ampdoc
-              .getRootNode()
+              .getDocumentOrShadowRoot()
               .querySelector('.i-amphtml-validation-bubble');
             const validationBubble = bubbleEl['__BUBBLE_OBJ'];
             env.sandbox.spy(validationBubble, 'show');
@@ -3373,7 +3373,7 @@ describes.repeated(
         let createElement;
 
         beforeEach(() => {
-          doc = env.ampdoc.getRootNode();
+          doc = env.ampdoc.getDocumentOrShadowRoot();
           const ownerDoc = doc.ownerDocument || doc;
           createElement = ownerDoc.createElement.bind(ownerDoc);
         });

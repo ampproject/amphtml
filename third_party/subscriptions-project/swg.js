@@ -6109,7 +6109,7 @@ function serializeProtoMessageForUrl(message) {
  * @return {string}
  */
 function getCanonicalUrl(doc) {
-  const node = doc.getRootNode().querySelector("link[rel='canonical']");
+  const node = doc.getDocumentOrShadowRoot().querySelector("link[rel='canonical']");
   return (node && node.href) || '';
 }
 
@@ -8772,7 +8772,7 @@ class ButtonApi {
   ) {
     attributeValues.forEach((attributeValue) => {
       const elements = this.doc_
-        .getRootNode()
+        .getDocumentOrShadowRoot()
         .querySelectorAll(`button[${attribute}="${attributeValue}"]`);
       for (let i = 0; i < elements.length; i++) {
         this.attach(
@@ -9925,7 +9925,7 @@ class GlobalDoc {
   }
 
   /** @override */
-  getRootNode() {
+  getDocumentOrShadowRoot() {
     return this.doc_;
   }
 

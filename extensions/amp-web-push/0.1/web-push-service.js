@@ -456,7 +456,7 @@ export class WebPushService {
    */
   setWidgetVisibilities(widgetCategoryName, isVisible) {
     const widgetDomElements = this.ampdoc
-      .getRootNode()
+      .getDocumentOrShadowRoot()
       .querySelectorAll(
         `${escapeCssSelectorIdent(
           WIDGET_TAG
@@ -484,7 +484,7 @@ export class WebPushService {
    */
   doesWidgetCategoryMarkupExist_(widgetCategoryName) {
     const widgetDomElements = this.ampdoc
-      .getRootNode()
+      .getDocumentOrShadowRoot()
       .querySelectorAll(
         `${escapeCssSelectorIdent(
           WIDGET_TAG

@@ -656,7 +656,7 @@ describes.sandboxed('Navigation', {}, () => {
           const meta = doc.createElement('meta');
           meta.setAttribute('name', 'amp-to-amp-navigation');
           meta.setAttribute('content', 'feature-foo, action-bar');
-          ampdoc.getRootNode().head.appendChild(meta);
+          ampdoc.getDocumentOrShadowRoot().head.appendChild(meta);
 
           const send = env.sandbox.stub(handler.viewer_, 'sendMessage');
           const hasCapability = env.sandbox.stub(
@@ -723,7 +723,7 @@ describes.sandboxed('Navigation', {}, () => {
           hasCapabilityStub.returns(true);
 
           ampdoc
-            .getRootNode()
+            .getDocumentOrShadowRoot()
             .documentElement.setAttribute('allow-navigation-interception', '');
         });
 
@@ -755,7 +755,7 @@ describes.sandboxed('Navigation', {}, () => {
 
           expect(
             ampdoc
-              .getRootNode()
+              .getDocumentOrShadowRoot()
               .documentElement.hasAttribute('allow-navigation-interception')
           ).to.be.true;
 
@@ -827,7 +827,7 @@ describes.sandboxed('Navigation', {}, () => {
 
         it('should require opted in ampdoc', () => {
           ampdoc
-            .getRootNode()
+            .getDocumentOrShadowRoot()
             .documentElement.removeAttribute('allow-navigation-interception');
           handler.handle_(event);
 

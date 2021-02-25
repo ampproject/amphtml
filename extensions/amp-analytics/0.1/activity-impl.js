@@ -238,13 +238,13 @@ export class Activity {
   /** @private */
   setUpActivityListeners_() {
     this.setUpListenersFromArray_(
-      this.ampdoc.getRootNode(),
+      this.ampdoc.getDocumentOrShadowRoot(),
       ACTIVE_EVENT_TYPES,
       this.boundHandleActivity_
     );
 
     this.setUpListenersFromArray_(
-      this.ampdoc.getRootNode(),
+      this.ampdoc.getDocumentOrShadowRoot(),
       INACTIVE_EVENT_TYPES,
       this.boundHandleInactive_
     );

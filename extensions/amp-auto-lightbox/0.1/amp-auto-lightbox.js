@@ -118,7 +118,7 @@ const NOOP = () => {};
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @return {!Document|!ShadowRoot}
  */
-const getRootNode = (ampdoc) => ampdoc.getRootNode();
+const getDocumentOrShadowRoot = (ampdoc) => ampdoc.getDocumentOrShadowRoot();
 
 /** @visibleForTesting */
 export class Criteria {
@@ -315,7 +315,7 @@ export class DocMetaAnnotations {
    * @return {string|undefined}
    */
   static getOgType(ampdoc) {
-    const tag = getRootNode(ampdoc).querySelector(META_OG_TYPE);
+    const tag = getDocumentOrShadowRoot(ampdoc).querySelector(META_OG_TYPE);
     if (tag) {
       return tag.getAttribute('content');
     }
@@ -336,7 +336,7 @@ export class DocMetaAnnotations {
    * @return {!Array<string>}
    */
   static getAllLdJsonTypes(ampdoc) {
-    return toArray(getRootNode(ampdoc).querySelectorAll(SCRIPT_LD_JSON))
+    return toArray(getDocumentOrShadowRoot(ampdoc).querySelectorAll(SCRIPT_LD_JSON))
       .map((el) => {
         const {textContent} = el;
         return (tryParseJson(textContent) || {})['@type'];
@@ -369,7 +369,7 @@ function usesLightboxExplicitly(ampdoc) {
 
   const lightboxedElementsSelector = `[${LIGHTBOXABLE_ATTR}]:not([${VISITED_ATTR}])`;
 
-  const exists = (selector) => !!getRootNode(ampdoc).querySelector(selector);
+  const exists = (selector) => !!getDocumentOrShadowRoot(ampdoc).querySelector(selector);
 
   return (
     exists(requiredExtensionSelector) && exists(lightboxedElementsSelector)
@@ -467,7 +467,7 @@ export function scan(ampdoc, opt_root) {
 AMP.extension(TAG, '0.1', (AMP) => {
   const {ampdoc} = AMP;
   ampdoc.whenReady().then(() => {
-    getRootNode(ampdoc).addEventListener(AmpEvents.DOM_UPDATE, (e) => {
+    getDocumentOrShadowRoot(ampdoc).addEventListener(AmpEvents.DOM_UPDATE, (e) => {
       const {target} = e;
       scan(ampdoc, dev().assertElement(target));
     });

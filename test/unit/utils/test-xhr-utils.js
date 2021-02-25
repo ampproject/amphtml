@@ -93,7 +93,7 @@ describes.sandboxed('utils/xhr-utils', {}, (env) => {
 
     beforeEach(() => {
       ampDocSingle = {
-        getRootNode() {
+        getDocumentOrShadowRoot() {
           return {documentElement: doc};
         },
         whenFirstVisible: env.sandbox.stub().returns(Promise.resolve()),

@@ -216,7 +216,7 @@ export class AmpOnetapGoogle extends AMP.BaseElement {
       listen(this.win, 'message', (event) => {
         this.handleIntermediateIframeMessage_(origin, event);
       }),
-      listen(this.getAmpDoc().getRootNode(), 'click', () => {
+      listen(this.getAmpDoc().getDocumentOrShadowRoot(), 'click', () => {
         if (
           this.shouldCancelOnTapOutside_ &&
           !this.element.hasAttribute('hidden')

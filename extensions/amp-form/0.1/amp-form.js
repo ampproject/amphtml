@@ -1624,7 +1624,7 @@ export class AmpFormService {
    */
   installHandlers_(ampdoc) {
     return ampdoc.whenReady().then(() => {
-      const root = ampdoc.getRootNode();
+      const root = ampdoc.getDocumentOrShadowRoot();
 
       this.installSubmissionHandlers_(root.querySelectorAll('form'));
       AmpFormTextarea.install(ampdoc);

@@ -34,7 +34,7 @@ export class AmpInputmaskService {
 
     /** @const */
     this.domUpdateUnlistener_ = listen(
-      this.ampdoc.getRootNode(),
+      this.ampdoc.getDocumentOrShadowRoot(),
       AmpEvents.DOM_UPDATE,
       () => this.install()
     );
@@ -45,7 +45,7 @@ export class AmpInputmaskService {
    */
   install() {
     const maskElements = this.ampdoc
-      .getRootNode()
+      .getDocumentOrShadowRoot()
       .querySelectorAll('input[mask]');
     iterateCursor(maskElements, (element) => {
       if (TextMask.isMasked(element)) {

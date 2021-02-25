@@ -272,7 +272,7 @@ export class LaterpayVendor {
    */
   getArticleTitle_() {
     const title = this.ampdoc
-      .getRootNode()
+      .getDocumentOrShadowRoot()
       .querySelector(this.laterpayConfig_['articleTitleSelector']);
     userAssert(
       title,

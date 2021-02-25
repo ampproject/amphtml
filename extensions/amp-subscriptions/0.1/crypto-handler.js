@@ -38,7 +38,7 @@ export class CryptoHandler {
     this.decryptionPromise_ = null;
 
     const parsedEncryptedKeys = this.ampdoc_
-      .getRootNode()
+      .getDocumentOrShadowRoot()
       .querySelector('script[cryptokeys]');
 
     /** @private {?string} */
@@ -123,7 +123,7 @@ export class CryptoHandler {
       const keybytes = base64Decode(decryptedDocumentKey);
       return safeAesGcmImportKey(keybytes.buffer).then((formattedkey) => {
         const encryptedSections = this.ampdoc_
-          .getRootNode()
+          .getDocumentOrShadowRoot()
           .querySelectorAll('script[ciphertext]');
         const promises = [];
         iterateCursor(encryptedSections, (encryptedSection) => {

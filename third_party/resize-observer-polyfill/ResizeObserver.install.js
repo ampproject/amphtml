@@ -451,17 +451,17 @@ export function installResizeObserver(global) {
     }());
 
     /**
-     * A shim for the `Node.getRootNode()` API.
+     * A shim for the `Node.getDocumentOrShadowRoot()` API.
      *
-     * See https://developer.mozilla.org/en-US/docs/Web/API/Node/getRootNode for
+     * See https://developer.mozilla.org/en-US/docs/Web/API/Node/getDocumentOrShadowRoot for
      * more info.
      *
      * @param {Node} node
      * @returns {Node}
      */
-    function getRootNode(node) {
-        if (typeof node.getRootNode === 'function') {
-            return node.getRootNode();
+    function getDocumentOrShadowRoot(node) {
+        if (typeof node.getDocumentOrShadowRoot === 'function') {
+            return node.getDocumentOrShadowRoot();
         }
         var n;
         // eslint-disable-next-line no-empty
@@ -709,7 +709,7 @@ export function installResizeObserver(global) {
      * @returns {Node}
      */
     function getControlledRootNode(target, def) {
-        var rootNode = getRootNode(target);
+        var rootNode = getDocumentOrShadowRoot(target);
         // DOCUMENT_NODE = 9
         // DOCUMENT_FRAGMENT_NODE = 11 (shadow root)
         if (rootNode.nodeType === 9 ||
@@ -1041,7 +1041,7 @@ export function installResizeObserver(global) {
             /**
              * A mapping from a DOM root node and a respective controller. A root node
              * could be the main document, a same-origin iframe, or a shadow root.
-             * See https://developer.mozilla.org/en-US/docs/Web/API/Node/getRootNode
+             * See https://developer.mozilla.org/en-US/docs/Web/API/Node/getDocumentOrShadowRoot
              * for more info.
              *
              * @private {Map<Node, ResizeObserverController>}

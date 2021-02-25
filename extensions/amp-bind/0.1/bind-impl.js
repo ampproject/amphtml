@@ -197,7 +197,7 @@ export class Bind {
     /** @const @private {!Promise<!Document>} */
     this.rootNodePromise_ = ampdoc.whenFirstVisible().then(() => {
       // Otherwise, scan the root node of the ampdoc.
-      return ampdoc.whenReady().then(() => ampdoc.getRootNode());
+      return ampdoc.whenReady().then(() => ampdoc.getDocumentOrShadowRoot());
     });
 
     /**

@@ -121,7 +121,7 @@ describes.realWin('amp-sidebar - toolbar', {}, (env) => {
           toolbar.onLayoutChange();
         });
         const toolbarElements = toArray(
-          obj.ampdoc.getRootNode().getElementsByClassName('i-amphtml-toolbar')
+          obj.ampdoc.getDocumentOrShadowRoot().getElementsByClassName('i-amphtml-toolbar')
         );
         resizeIframeToWidth(obj.iframe, '1px', () => {
           toolbars.forEach((toolbar) => {
@@ -143,7 +143,7 @@ describes.realWin('amp-sidebar - toolbar', {}, (env) => {
           toolbar.onLayoutChange();
         });
         const toolbarElements = toArray(
-          obj.ampdoc.getRootNode().getElementsByClassName('i-amphtml-toolbar')
+          obj.ampdoc.getDocumentOrShadowRoot().getElementsByClassName('i-amphtml-toolbar')
         );
         expect(toolbarElements.length).to.be.above(0);
         expect(toolbarElements[0].parentElement).to.not.have.display('none');
@@ -166,7 +166,7 @@ describes.realWin('amp-sidebar - toolbar', {}, (env) => {
         });
         const toolbarQuery = `#${targetId} > nav[toolbar]`;
         const toolbarTargetElements = toArray(
-          obj.ampdoc.getRootNode().querySelectorAll(toolbarQuery)
+          obj.ampdoc.getDocumentOrShadowRoot().querySelectorAll(toolbarQuery)
         );
         expect(toolbars.length).to.be.equal(1);
         expect(toolbarTargetElements.length).to.be.equal(1);
@@ -184,7 +184,7 @@ describes.realWin('amp-sidebar - toolbar', {}, (env) => {
     ]).then((obj) => {
       const {toolbars} = obj;
       const toolbarTargets = toArray(
-        obj.ampdoc.getRootNode().querySelectorAll(`#${targetId}`)
+        obj.ampdoc.getDocumentOrShadowRoot().querySelectorAll(`#${targetId}`)
       );
       resizeIframeToWidth(obj.iframe, '4000px', () => {
         toolbars.forEach((toolbar) => {
@@ -207,7 +207,7 @@ describes.realWin('amp-sidebar - toolbar', {}, (env) => {
     ]).then((obj) => {
       const {toolbars} = obj;
       const toolbarTargets = toArray(
-        obj.ampdoc.getRootNode().querySelectorAll(`#${targetId}`)
+        obj.ampdoc.getDocumentOrShadowRoot().querySelectorAll(`#${targetId}`)
       );
       resizeIframeToWidth(obj.iframe, '200px', () => {
         toolbars.forEach((toolbar) => {
@@ -234,7 +234,7 @@ describes.realWin('amp-sidebar - toolbar', {}, (env) => {
         });
         const toolbarNavElementsWithState = toArray(
           obj.ampdoc
-            .getRootNode()
+            .getDocumentOrShadowRoot()
             .querySelectorAll('nav[toolbar].amp-sidebar-toolbar-target-shown')
         );
         expect(toolbarNavElementsWithState.length).to.be.equal(1);
@@ -257,7 +257,7 @@ describes.realWin('amp-sidebar - toolbar', {}, (env) => {
         });
         const toolbarNavElementsWithState = toArray(
           obj.ampdoc
-            .getRootNode()
+            .getDocumentOrShadowRoot()
             .querySelectorAll('nav[toolbar].amp-sidebar-toolbar-target-hidden')
         );
         expect(toolbarNavElementsWithState.length).to.be.equal(1);

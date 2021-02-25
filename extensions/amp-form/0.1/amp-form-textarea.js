@@ -47,7 +47,7 @@ export class AmpFormTextarea {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   static install(ampdoc) {
-    const root = ampdoc.getRootNode();
+    const root = ampdoc.getDocumentOrShadowRoot();
 
     let ampFormTextarea = null;
     const maybeInstall = () => {
@@ -72,7 +72,7 @@ export class AmpFormTextarea {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
-    const root = ampdoc.getRootNode();
+    const root = ampdoc.getDocumentOrShadowRoot();
 
     /** @private @const */
     this.doc_ = root.ownerDocument || root;

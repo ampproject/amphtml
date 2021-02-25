@@ -623,7 +623,7 @@ export class VisibilityManagerForDoc extends VisibilityManager {
 
     if (getMode(this.ampdoc.win).runtime == 'inabox') {
       // In-a-box: visibility depends on the InOb.
-      const root = this.ampdoc.getRootNode();
+      const root = this.ampdoc.getDocumentOrShadowRoot();
       const rootElement = dev().assertElement(
         root.documentElement || root.body || root
       );
@@ -695,7 +695,7 @@ export class VisibilityManagerForDoc extends VisibilityManager {
 
   /** @override */
   getRootMinOpacity() {
-    const root = this.ampdoc.getRootNode();
+    const root = this.ampdoc.getDocumentOrShadowRoot();
     const rootElement = dev().assertElement(
       root.documentElement || root.body || root
     );
@@ -705,7 +705,7 @@ export class VisibilityManagerForDoc extends VisibilityManager {
   /** @override */
   getRootLayoutBox() {
     // This code is the same for "in-a-box" and standalone doc.
-    const root = this.ampdoc.getRootNode();
+    const root = this.ampdoc.getDocumentOrShadowRoot();
     const rootElement = dev().assertElement(
       root.documentElement || root.body || root
     );

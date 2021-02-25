@@ -26,7 +26,7 @@ import {whenContentIniLoad} from '../ini-load';
  */
 export function registerIniLoadListener(ampdoc) {
   const {win} = ampdoc;
-  const root = ampdoc.getRootNode();
+  const root = ampdoc.getDocumentOrShadowRoot();
   whenContentIniLoad(
     ampdoc,
     win,

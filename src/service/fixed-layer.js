@@ -166,7 +166,7 @@ export class FixedLayer {
       return false;
     }
 
-    const root = this.ampdoc.getRootNode();
+    const root = this.ampdoc.getDocumentOrShadowRoot();
     const stylesheets = root.styleSheets;
     if (!stylesheets) {
       return true;
@@ -260,7 +260,7 @@ export class FixedLayer {
       return;
     }
 
-    const root = this.ampdoc.getRootNode();
+    const root = this.ampdoc.getDocumentOrShadowRoot();
     const element = root.documentElement || root;
     const hiddenObserver = Services.hiddenObserverForDoc(element);
     this.hiddenObserverUnlistener_ = hiddenObserver.add(() => {
@@ -903,7 +903,7 @@ export class FixedLayer {
       return lastPaddingTop - paddingTop + (paddingTop - lastPaddingTop) * time;
     };
     return Animation.animate(
-      this.ampdoc.getRootNode(),
+      this.ampdoc.getDocumentOrShadowRoot(),
       (time) => {
         const p = tr(time);
         this.transformMutate(`translateY(${p}px)`);
