@@ -36,7 +36,7 @@ const grepJsFiles = 'extensions/**/*.js';
  * @return {name}
  */
 const entry = (name) =>
-  `-   [${name}](https://github.com/ampproject/amphtml/blob/master/extensions/${name}/${name}.md)\n`;
+  `-   [${name}](https://amp.dev/documentation/components/${name}.md)\n`;
 
 /**
  * Generates Markdown list by finding matching extensions.

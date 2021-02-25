@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1337 */
+/** Version: 0.1.22.150 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -6206,7 +6206,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1337',
+    '_client': 'SwG 0.1.22.150',
   });
 }
 
@@ -7325,7 +7325,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1337',
+        '_client': 'SwG 0.1.22.150',
         'supportsEventManager': true,
       },
       args || {}
@@ -8172,7 +8172,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl$1(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1337');
+    context.setClientVersion('SwG 0.1.22.150');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString$1(this.getQueryString_());
@@ -17941,18 +17941,4 @@ class ConfiguredRuntime {
   }
 }
 
-export {
-  AnalyticsEvent,
-  ClientEvent,
-  ClientEventManagerApi,
-  ConfiguredRuntime,
-  DeferredAccountCreationResponse,
-  Entitlement,
-  Entitlements,
-  EventOriginator,
-  Fetcher,
-  FilterResult,
-  PurchaseData,
-  SubscribeResponse$1 as SubscribeResponse,
-  UserData,
-};
+export { AnalyticsEvent, ClientEvent, ClientEventManagerApi, ConfiguredRuntime, DeferredAccountCreationResponse, Entitlement, Entitlements, EventOriginator, Fetcher, FilterResult, PurchaseData, SubscribeResponse$1 as SubscribeResponse, UserData };

@@ -12,6 +12,8 @@
 
 A new release of AMP is pushed to all AMP pages every week on Tuesday. **Once a change in AMP is merged into the master branch of the amphtml repository, it will typically take 1-2 weeks for the change to be live for all users.**
 
+The [AMPHTML Validator](https://github.com/ampproject/amphtml/tree/master/validator#amp-html--validator) has it's own [Release Schedule](validator-release-schedule.md)
+
 ## Release Channels
 
 The AMP runtime and extensions are provided through a variety of different _release channels_. Each channel serves a purpose for developers and for the AMP HTML Project itself. See the [release cadence section](#release-cadence) for a more detailed breakdown of how and when code from the [`ampproject/amphtml`](https://github.com/ampproject/amphtml) repository makes it into release builds.

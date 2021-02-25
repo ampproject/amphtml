@@ -103,7 +103,7 @@ module.exports = {
     await page.tap('a.i-amphtml-story-tooltip');
     await page.waitForSelector('amp-story-page.i-amphtml-expanded-mode');
     await page.waitForTimeout(1000); // For animations to finish.
-    await page.tap('span.i-amphtml-expanded-view-close-button');
+    await page.tap('button.i-amphtml-expanded-view-close-button');
     await page.waitForTimeout(300); // For animations to finish.
     await verifySelectorsInvisible(page, name, [
       'amp-story-page.i-amphtml-expanded-mode',

@@ -134,6 +134,11 @@ export class AmpStoryDevTools extends AMP.BaseElement {
   }
 
   /** @override */
+  isLayoutSupported() {
+    return true;
+  }
+
+  /** @override */
   buildCallback() {
     this.loadFonts_();
     this.removeCustomCSS_();

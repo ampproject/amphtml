@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1337 */
+/** Version: 0.1.22.150 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -87,6 +87,48 @@ const I18N_STRINGS = {
 
 /** English is the default language. */
 const DEFAULT_LANGUAGE_CODE = 'en';
+
+/**
+ * Gets a message for a given language code, from a map of messages.
+ * @param {!Object<string, string>} map
+ * @param {?string|?Element} languageCodeOrElement
+ * @return {?string}
+ */
+function msg(map, languageCodeOrElement) {
+  const defaultMsg = map[DEFAULT_LANGUAGE_CODE];
+
+  // Verify params.
+  if (typeof map !== 'object' || !languageCodeOrElement) {
+    return defaultMsg;
+  }
+
+  // Get language code.
+  let languageCode =
+    typeof languageCodeOrElement === 'string'
+      ? languageCodeOrElement
+      : getLanguageCodeFromElement(languageCodeOrElement);
+
+  // Normalize language code.
+  languageCode = languageCode.toLowerCase();
+  languageCode = languageCode.replace(/_/g, '-');
+
+  // Search for a message matching the language code.
+  // If a message can't be found, try again with a less specific language code.
+  const languageCodeSegments = languageCode.split('-');
+  while (languageCodeSegments.length) {
+    const key = languageCodeSegments.join('-');
+    if (key in map) {
+      return map[key];
+    }
+
+    // Simplify language code.
+    // Ex: "en-US-SF" => "en-US"
+    languageCodeSegments.pop();
+  }
+
+  // There was an attempt.
+  return defaultMsg;
+}
 
 /**
  * Gets a language code (ex: "en-US") from a given Element.
@@ -286,7 +328,7 @@ var log_1 = {
   assert,
   debugLog,
   warn,
-  log
+  log,
 };
 var log_4 = log_1.warn;
 
@@ -956,15 +998,18 @@ class GaaMeteringRegwall {
     )
       .replace(
         '$SHOWCASE_REGWALL_TITLE$',
-        I18N_STRINGS['SHOWCASE_REGWALL_TITLE'][languageCode]
+        msg(I18N_STRINGS['SHOWCASE_REGWALL_TITLE'], languageCode)
       )
       .replace(
         '$SHOWCASE_REGWALL_DESCRIPTION$',
-        I18N_STRINGS['SHOWCASE_REGWALL_DESCRIPTION'][languageCode]
+        msg(I18N_STRINGS['SHOWCASE_REGWALL_DESCRIPTION'], languageCode)
       )
       .replace(
         '$SHOWCASE_REGWALL_PUBLISHER_SIGN_IN_BUTTON$',
-        I18N_STRINGS['SHOWCASE_REGWALL_PUBLISHER_SIGN_IN_BUTTON'][languageCode]
+        msg(
+          I18N_STRINGS['SHOWCASE_REGWALL_PUBLISHER_SIGN_IN_BUTTON'],
+          languageCode
+        )
       );
     containerEl.querySelector('ph')./*OK*/ innerHTML =
       '<strong>' +
@@ -1211,4 +1256,4 @@ class GaaUtils {
   }
 }
 
-export { GaaGoogleSignInButton, GaaMeteringRegwall, GaaUserDef, GoogleUserDef };
+export {GaaGoogleSignInButton, GaaMeteringRegwall, GaaUserDef, GoogleUserDef};
