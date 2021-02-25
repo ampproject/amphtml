@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import '../amp-riddle-quiz';
+import {element} from 'prop-types';
 
 describes.realWin(
   'amp-riddle-quiz',
@@ -23,20 +24,41 @@ describes.realWin(
     },
   },
   (env) => {
-    let win;
-    let element;
+    let win, doc;
 
     beforeEach(() => {
       win = env.win;
-      element = win.document.createElement('amp-riddle-quiz');
-      win.document.body.appendChild(element);
+      doc = win.document;
     });
 
-    it('should have iframe when built', () => {
-      element.buildInternal().then(() => {
-        const iframe = element.querySelector('iframe');
-        expect(iframe).to.not.be.null;
-      });
+    async function getRiddleQuiz() {
+      const element = doc.createElement('amp-riddle-quiz');
+      element.setAttribute('data-riddle-id', '25799');
+      element.setAttribute('width', '100');
+      element.setAttribute('height', '200');
+
+      doc.body.appendChild(element);
+      return element
+        .buildInternal()
+        .then(() => element.layoutCallback())
+        .then(() => element);
+    }
+
+    it('renders', async () => {
+      const element = await getRiddleQuiz();
+      const iframe = element.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.src).to.equal('https://www.riddle.com/a/iframe/25799');
+    });
+
+    it('removes iframe after unlayoutCallback', async () => {
+      const element = await getRiddleQuiz();
+      const iframe = element.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+
+      const impl = await element.getImpl(false);
+      impl.unlayoutCallback();
+      expect(element.querySelector('iframe')).to.be.null;
     });
   }
 );
