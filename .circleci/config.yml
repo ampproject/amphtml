@@ -191,7 +191,7 @@ jobs:
       - restore_karma_cache:
           cache_name: nomodule
       - run:
-          name: 'Nomodule Tests (using << parameters.config >>-config.json)'
+          name: 'Nomodule Tests (<< parameters.config >>)'
           command: node build-system/pr-check/nomodule-tests.js --config=<< parameters.config >>
       - save_karma_cache:
           cache_name: nomodule
@@ -210,7 +210,7 @@ jobs:
       - restore_karma_cache:
           cache_name: module
       - run:
-          name: 'Module Tests (using << parameters.config >>-config.json)'
+          name: 'Module Tests (<< parameters.config >>)'
           command: node build-system/pr-check/module-tests.js --config=<< parameters.config >>
       - save_karma_cache:
           cache_name: module
