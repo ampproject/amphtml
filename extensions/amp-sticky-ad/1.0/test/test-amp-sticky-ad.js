@@ -220,9 +220,9 @@ describes.realWin(
 
         await adUpgradedToCustomElementPromise;
         const ad = impl.ad_;
+        expect(1).to.equal(2); // REMOVE
         await ad.buildInternal();
 
-        expect(true).to.be.false; // REMOVE
         await ad.signals().whenSignal('built');
         await new Promise(setTimeout);
         expect(layoutAdSpy).to.be.called;
