@@ -307,8 +307,10 @@ export class AmpStoryPlayer {
 
     for (let i = 0; i < newStories.length; i++) {
       const story = newStories[i];
-      this.initializeAndAddStory_(story);
-      this.buildIframeFor_(story);
+      story.idx = this.stories_.push(story) - 1;
+      story.distance = story.idx - this.currentIdx_;
+
+      this.build_(story);
     }
 
     this.render_(renderStartingIdx);
@@ -367,7 +369,7 @@ export class AmpStoryPlayer {
       return;
     }
 
-    this.initializeAnchorElStories_();
+    this.initializeStories_();
     this.initializeShadowRoot_();
     this.buildStories_();
     this.initializeButton_();
@@ -381,23 +383,10 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * Initializes story with properties used in this class and adds it to the
-   * stories array.
-   * @param {!StoryDef} story
-   * @private
-   */
-  initializeAndAddStory_(story) {
-    story.connectedDeferred = new Deferred();
-    story.idx = this.stories_.length;
-    story.distance = story.idx - this.currentIdx_;
-    this.stories_.push(story);
-  }
-
-  /**
    * Initializes stories declared inline as <a> elements.
    * @private
    */
-  initializeAnchorElStories_() {
+  initializeStories_() {
     const anchorEls = toArray(this.element_.querySelectorAll('a'));
     anchorEls.forEach((element) => {
       const posterImgEl = element.querySelector(
@@ -427,7 +416,7 @@ export class AmpStoryPlayer {
   /** @private */
   buildStories_() {
     this.stories_.forEach((story) => {
-      this.buildIframeFor_(story);
+      this.build_(story);
     });
   }
 
@@ -526,7 +515,7 @@ export class AmpStoryPlayer {
    * @param {!StoryDef} story
    * @private
    */
-  buildIframeFor_(story) {
+  build_(story) {
     const iframeEl = this.doc_.createElement('iframe');
     if (story.posterImage) {
       setStyle(iframeEl, 'backgroundImage', story.posterImage);
