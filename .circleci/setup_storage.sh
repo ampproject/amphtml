@@ -22,9 +22,9 @@ set -e
 GREEN() { echo -e "\033[0;32m$1\033[0m"; }
 RED() { echo -e "\033[0;31m$1\033[0m"; }
 
-if [[ -z "${GCP_TOKEN}" ]] ;
+if [[ -z "${STORAGE_TOKEN}" ]] ;
 then
-  echo $(RED "Could not find the GCP_TOKEN environment variable. Exiting.")
+  echo $(RED "Could not find the STORAGE_TOKEN environment variable. Exiting.")
   exit 1
 fi
 
@@ -35,11 +35,11 @@ echo $(GREEN "Setting up Cloud SDK environment...")
 (set -x && echo "source ~/google-cloud-sdk/path.bash.inc" >> $BASH_ENV)
 source $BASH_ENV
 
-echo $(GREEN "Extracting credentials...")
-openssl aes-256-cbc -k $GCP_TOKEN -in ./build-system/common/sa-travis-key.json.enc -out sa-travis-key.json -d
+echo $(GREEN "Writing key to json file...")
+echo $STORAGE_TOKEN > storage-key.json
 
 echo $(GREEN "Authenticating with GCP storage...")
-gcloud auth activate-service-account --key-file=sa-travis-key.json
+gcloud auth activate-service-account --key-file=storage-key.json
 
 echo $(GREEN "Applying settings...")
 gcloud config set account sa-travis@amp-travis-build-storage.iam.gserviceaccount.com
