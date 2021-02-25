@@ -84,11 +84,9 @@ const cssEntryPoints = [
 async function copyCss() {
   const startTime = Date.now();
   await fs.ensureDir('dist/v0');
-  await Promise.all(
-    cssEntryPoints.map(({outCss}) => {
-      return fs.copy(`build/css/${outCss}`, `dist/${outCss}`);
-    })
-  );
+  for (const {outCss} of cssEntryPoints) {
+    await fs.copy(`build/css/${outCss}`, `dist/${outCss}`);
+  }
   const cssFiles = globby.sync('build/css/amp-*.css');
   await Promise.all(
     cssFiles.map((cssFile) => {

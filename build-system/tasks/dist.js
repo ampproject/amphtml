@@ -277,7 +277,7 @@ async function postBuildWebPushPublisherFilesVersion() {
         `<!-- [REPLACE-SENTINEL ${fileName}.js] -->`,
         `<script>${js}</script>`
       );
-      await fs.writeFile(`dist/v0/${fileName}.html`, minifiedHtml);
+      await fs.outputFile(`dist/v0/${fileName}.html`, minifiedHtml);
     }
   }
 }
