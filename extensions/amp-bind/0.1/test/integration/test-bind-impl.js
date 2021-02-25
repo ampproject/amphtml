@@ -251,7 +251,10 @@ chromed.run('Bind', function () {
           chunkInstanceForTesting(env.ampdoc);
 
           if (useQuerySelector) {
-            env.doc.documentElement.setAttribute('i-amphtml-binding', '');
+            env.win.document.documentElement.setAttribute(
+              'i-amphtml-binding',
+              ''
+            );
           }
 
           fieBind = new Bind(env.ampdoc);
@@ -353,7 +356,10 @@ chromed.run('Bind', function () {
           chunkInstanceForTesting(env.ampdoc);
 
           if (useQuerySelector) {
-            env.doc.documentElement.setAttribute('i-amphtml-binding', '');
+            env.win.document.documentElement.setAttribute(
+              'i-amphtml-binding',
+              ''
+            );
           }
 
           bind = new Bind(env.ampdoc);
@@ -411,7 +417,10 @@ chromed.run('Bind', function () {
           env.sandbox.stub(viewer, 'sendMessage');
 
           if (useQuerySelector) {
-            env.doc.documentElement.setAttribute('i-amphtml-binding', '');
+            env.win.document.documentElement.setAttribute(
+              'i-amphtml-binding',
+              ''
+            );
           }
 
           bind = new Bind(ampdoc);
@@ -569,17 +578,19 @@ chromed.run('Bind', function () {
           });
         });
 
-        it('should call createTreeWalker() with all params', () => {
-          const spy = env.sandbox.spy(env.win.document, 'createTreeWalker');
-          createElement(env, container, '[text]="1+1"', {
-            insertQuerySelectorAttr: useQuerySelector,
+        if (!useQuerySelector) {
+          it('should call createTreeWalker() with all params', () => {
+            const spy = env.sandbox.spy(env.win.document, 'createTreeWalker');
+            createElement(env, container, '[text]="1+1"', {
+              insertQuerySelectorAttr: useQuerySelector,
+            });
+            return onBindReady(env, bind).then(() => {
+              // createTreeWalker() on IE does not support optional arguments.
+              expect(spy.callCount).to.equal(1);
+              expect(spy.firstCall.args.length).to.equal(4);
+            });
           });
-          return onBindReady(env, bind).then(() => {
-            // createTreeWalker() on IE does not support optional arguments.
-            expect(spy.callCount).to.equal(1);
-            expect(spy.firstCall.args.length).to.equal(4);
-          });
-        });
+        }
 
         it('should have same state after removing + re-adding a subtree', () => {
           for (let i = 0; i < 5; i++) {
@@ -1565,11 +1576,13 @@ chromed.run('Bind', function () {
 
           it('should dispatch FORM_VALUE_CHANGE at parent <select> on <option [selected]> changes', () => {
             const select = env.win.document.createElement('select');
-            select.innerHTML = `
-              <optgroup>
-                <option [selected]="foo"></option>
-              </optgroup>
-            `;
+            const optgroup = createElement(env, select, '', {
+              tag: 'optgroup',
+            });
+            createElement(env, optgroup, '[selected]="foo"', {
+              tag: 'option',
+              insertQuerySelectorAttr: useQuerySelector,
+            });
             container.appendChild(select);
 
             const spy = env.sandbox.spy(select, 'dispatchEvent');

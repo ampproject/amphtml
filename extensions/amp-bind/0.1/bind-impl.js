@@ -1808,7 +1808,7 @@ class BindWalker {
 
     /** @private @const {!Array<!Element>} */
     this.nodeList_ = useQuerySelector
-      ? toArray(root.querySelectorAll('i-amphtml-binding'))
+      ? toArray(root.querySelectorAll('[i-amphtml-binding]'))
       : [];
 
     // Confusingly, the old TreeWalker hit the root node. We need to match that behavior.
