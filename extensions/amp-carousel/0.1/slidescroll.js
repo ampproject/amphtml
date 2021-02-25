@@ -355,7 +355,7 @@ export class AmpSlideScroll extends BaseSlides {
 
     // Account for race when onResized_ has not fired before layoutCallback,
     // since we need slideWidth_ to proceed.
-    if (!this.hasFirstResizedOccured_ && this.slidesContainer_) {
+    if (!this.hasFirstResizedOccured_) {
       this.slideWidth_ = this.slidesContainer_./*OK*/ clientWidth;
     }
 
