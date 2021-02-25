@@ -106,10 +106,12 @@ function getState(element, mu, getExpandStateTrigger) {
     const headerProps = dict({
       'as': headerShim,
       'id': section.firstElementChild.getAttribute('id'),
+      'role': section.firstElementChild.getAttribute('role') || undefined,
     });
     const contentProps = dict({
       'as': contentShim,
       'id': section.lastElementChild.getAttribute('id'),
+      'role': section.lastElementChild.getAttribute('role') || undefined,
     });
     return (
       <AccordionSection {...sectionProps}>
@@ -170,9 +172,7 @@ function HeaderShim(
     }
     headerElement.setAttribute('aria-expanded', ariaExpanded);
     headerElement.setAttribute('aria-controls', ariaControls);
-    if (!headerElement.hasAttribute('role')) {
-      headerElement.setAttribute('role', role);
-    }
+    headerElement.setAttribute('role', role);
     if (sectionElement[SECTION_POST_RENDER]) {
       sectionElement[SECTION_POST_RENDER]();
     }
@@ -219,9 +219,7 @@ function ContentShimWithRef(
     }
     contentElement.classList.add('i-amphtml-accordion-content');
     contentElement.setAttribute('id', id);
-    if (!contentElement.hasAttribute('role')) {
-      contentElement.setAttribute('role', role);
-    }
+    contentElement.setAttribute('role', role);
     contentElement.setAttribute('aria-labelledby', ariaLabelledBy);
     if (sectionElement[SECTION_POST_RENDER]) {
       sectionElement[SECTION_POST_RENDER]();
