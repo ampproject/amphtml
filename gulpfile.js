@@ -145,4 +145,9 @@ createTask(
   'checkVideoInterfaceList',
   'check-video-interface-list'
 );
+createTask(
+  'check-analytics-vendors-list',
+  'checkAnalyticsVendorsList',
+  'check-analytics-vendors-list'
+);
 createTask('visual-diff', 'visualDiff', 'visual-diff');
