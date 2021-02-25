@@ -30,7 +30,7 @@
 }
 
 .i-amphtml-story-bookend[active] {
-  visibility: initial !important;
+  visibility: initial !important; /* Enables tabbing on links only when active (for a11y) */
 }
 
 .i-amphtml-story-bookend-handle {

@@ -103,6 +103,9 @@ const LINK_SHARE_ITEM_TEMPLATE = {
   tag: 'div',
   attrs: dict({
     'class': 'i-amphtml-story-share-icon i-amphtml-story-share-icon-link',
+    'tabindex': 0,
+    'role': 'button',
+    'aria-label': 'Get Link',
   }),
   children: [
     {
@@ -276,6 +279,13 @@ export class ShareWidget {
     listen(linkShareButton, 'click', (e) => {
       e.preventDefault();
       this.copyUrlToClipboard_();
+    });
+    listen(linkShareButton, 'keyup', (e) => {
+      const code = e.charCode || e.keyCode;
+      if (code === 32 || code === 13) {
+        e.preventDefault();
+        this.copyUrlToClipboard_();
+      }
     });
   }
 
