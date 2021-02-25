@@ -146,6 +146,9 @@ export class AmpSlideScroll extends BaseSlides {
       ? false
       : !isExperimentOn(this.win, 'amp-carousel-chrome-scroll-snap');
 
+    /** @private {boolean} */
+    this.hasFirstResizedOccured_ = false;
+
     this.onResized_ = this.onResized_.bind(this);
   }
 
@@ -331,6 +334,7 @@ export class AmpSlideScroll extends BaseSlides {
    */
   onResized_(size) {
     this.slideWidth_ = size.width;
+    this.hasFirstResizedOccured_ = true;
   }
 
   /** @override */
@@ -347,6 +351,12 @@ export class AmpSlideScroll extends BaseSlides {
     );
     if (isScaled) {
       return Promise.resolve();
+    }
+
+    // Account for race when onResized_ has not fired before layoutCallback,
+    // since we need slideWidth_ to proceed.
+    if (!this.hasFirstResizedOccured_) {
+      this.slideWidth_ = this.slidesContainer_./*OK*/ clientWidth;
     }
 
     if (this.slideIndex_ === null) {
