@@ -600,7 +600,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
     });
   });
 
-  describe.only('resetPlatform', () => {
+  describe('resetPlatform', () => {
     const platformKey = 'local';
     let platform;
 
