@@ -622,7 +622,12 @@ export class SubscriptionService {
         } else {
           // Show regwall.
           const emptyEntitlement = Entitlement.empty('local');
-          meteringPlatform.activate(emptyEntitlement, emptyEntitlement);
+          const restartAuthorizationFlow = () => this.startAuthorizationFlow_();
+          meteringPlatform.activate(
+            emptyEntitlement,
+            emptyEntitlement,
+            restartAuthorizationFlow
+          );
         }
       });
     });

@@ -745,8 +745,9 @@ export class GoogleSubscriptionsPlatform {
         // Show the Regwall, so the user can get
         // a metering state that leads to a
         // granting entitlement.
+        // After the Regwall flow completes, then continue authorization flow.
         if (!best.granted && !meteringState) {
-          this.showMeteringRegwall_();
+          this.showMeteringRegwall_().then(continueAuthorizationFlow);
           return;
         }
 
