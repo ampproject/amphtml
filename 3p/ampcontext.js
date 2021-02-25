@@ -341,9 +341,9 @@ export class AbstractAmpContext {
     );
 
     /** @type {AmpContext} */
-    const context = dataObject._context || dataObject.attributes._context;
+    const context = dataObject['_context'] || dataObject['attributes']['_context'];
 
-    this.data = dataObject.attributes || dataObject;
+    this.data = dataObject['attributes'] || dataObject;
 
     // TODO(alanorozco, #10576): This is really ugly. Find a better structure
     // than passing context values via data.
@@ -372,7 +372,7 @@ export class AbstractAmpContext {
     this.startTime = context.startTime;
     this.tagName = context.tagName;
 
-    this.embedType_ = dataObject.type || null;
+    this.embedType_ = dataObject['type'] || null;
   }
 
   /**
