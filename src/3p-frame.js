@@ -31,7 +31,7 @@ let count = {};
 let overrideBootstrapBaseUrl;
 
 /** @const {string} */
-const TAG = '3p-framesdfasdfasd';
+const TAG = '3p-frame';
 
 /**
  * Produces the attributes for the ad template.
