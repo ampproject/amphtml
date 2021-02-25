@@ -1307,9 +1307,24 @@ export class AmpStoryPlayer {
   rewind(storyUrl) {
     const story = this.getStoryFromUrl_(storyUrl);
 
-    story.messagingPromise.then((messaging) =>
-      messaging.sendRequest('rewind', {})
-    );
+    this.connectedPromise_(story).then(() => {
+      story.messagingPromise.then((messaging) =>
+        messaging.sendRequest('rewind', {})
+      );
+    });
+  }
+
+  /**
+   * Returns a promise when the story is connected to the DOM.
+   * @param {!StoryDef} story
+   * @return {!Promise}
+   * @private
+   */
+  connectedPromise_(story) {
+    if (story.iframe.isConnected) {
+      return Promise.resolve();
+    }
+    return story.connectedDeferred.promise;
   }
 
   /**
