@@ -17,7 +17,7 @@
 /** Remote attachment styles. */
 
 :host {
-  visibility: inherit !important;
+  visibility: inherit !important; /* Will propagate visibility of drawer to shadow dom for a11y */
 }
 
 .i-amphtml-story-page-attachment-remote {
