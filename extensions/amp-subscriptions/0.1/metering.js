@@ -81,6 +81,7 @@ export class Metering {
         // Log when an existing metering state is updated.
         if (existingMeteringStateString && changed) {
           user().info(
+            TAG,
             `Meter state changed from ${existingMeteringStateString} to ${meteringStateString}`
           );
         }
