@@ -113,8 +113,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
               role="button">
           </button>`
     );
-    const storyEl = closest(this.element, (el) => el.tagName === 'AMP-STORY');
-    const localizationService = getLocalizationService(devAssert(storyEl));
+    const localizationService = getLocalizationService(devAssert(this.element));
     if (localizationService) {
       const localizedCloseString = localizationService.getLocalizedString(
         LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL
