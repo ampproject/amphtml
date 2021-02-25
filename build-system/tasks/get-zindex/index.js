@@ -125,9 +125,9 @@ async function getZindexSelectors(glob, cwd = '.') {
 /**
  * @param {string|Array<string>} glob
  * @param {string=} cwd
- * @return {Object}
+ * @return {!Promise<Object>}
  */
-async function getZindexChainsInJs(glob, cwd = '.') {
+function getZindexChainsInJs(glob, cwd = '.') {
   const files = globby.sync(glob, {cwd}).map((file) => path.join(cwd, file));
   const filesIncludingString = getStdout(
     ['grep -irl "z-*index"', ...files].join(' ')
