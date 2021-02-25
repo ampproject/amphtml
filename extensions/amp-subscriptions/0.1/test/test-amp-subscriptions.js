@@ -560,43 +560,95 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
     });
   });
 
-  describe('startAuthorizationFlow_', () => {
-    it('should start grantStatus and platform selection', async () => {
-      subscriptionService.platformStore_ = new PlatformStore(products);
-      const getGrantStatusStub = env.sandbox
-        .stub(subscriptionService.platformStore_, 'getGrantStatus')
-        .callsFake(() => Promise.resolve());
-      const getGrantEntitlementStub = env.sandbox
-        .stub(subscriptionService.platformStore_, 'getGrantEntitlement')
-        .callsFake(() => Promise.resolve());
-      const selectAndActivateStub = env.sandbox.stub(
-        subscriptionService,
-        'selectAndActivatePlatform_'
+  describe.only('startAuthorizationFlow_', () => {
+    let entitlement;
+    let platform;
+    let platformStore;
+    let renderer;
+
+    beforeEach(() => {
+      renderer = subscriptionService.renderer_;
+
+      // Setup platform store.
+      const serviceAdapter = new ServiceAdapter(subscriptionService);
+      platformStore = new PlatformStore(products);
+      platform = localSubscriptionPlatformFactory(
+        ampdoc,
+        platformConfig.services[0],
+        serviceAdapter
       );
-      const performPingbackStub = env.sandbox.stub(
-        subscriptionService,
-        'performPingback_'
-      );
-      await subscriptionService.initialize_();
-      await subscriptionService.startAuthorizationFlow_();
-      expect(getGrantEntitlementStub).to.be.calledOnce;
-      expect(getGrantStatusStub).to.be.calledOnce;
-      expect(selectAndActivateStub).to.be.calledOnce;
-      expect(performPingbackStub).to.be.calledOnce;
+      subscriptionService.platformStore_ = platformStore;
+
+      entitlement = new Entitlement({
+        source: 'local',
+        raw: 'raw',
+        granted: true,
+        grantReason: GrantReason.SUBSCRIBER,
+      });
+
+      env.sandbox.stub(platform, 'activate');
+      env.sandbox.stub(renderer, 'setGrantState');
+      env.sandbox.stub(platformStore, 'getPlatform').returns(platform);
+      env.sandbox.stub(platformStore, 'getGrantStatus').resolves(true);
+      env.sandbox
+        .stub(platformStore, 'getGrantEntitlement')
+        .resolves(entitlement);
+      env.sandbox.stub(platformStore, 'selectPlatform').resolves(platform);
+      env.sandbox.stub(platformStore, 'getResolvedEntitlementFor');
     });
 
-    it('should not call selectAndActivatePlatform based on param', () => {
-      subscriptionService.platformStore_ = new PlatformStore(products);
-      const getGrantStatusStub = env.sandbox
-        .stub(subscriptionService.platformStore_, 'getGrantStatus')
-        .callsFake(() => Promise.resolve());
-      const selectAndActivateStub = env.sandbox.stub(
-        subscriptionService,
-        'selectAndActivatePlatform_'
-      );
+    it('should set grant state', async () => {
+      subscriptionService.startAuthorizationFlow_();
+      await flush();
+
+      expect(renderer.setGrantState).to.be.called;
+    });
+
+    it('should activate platform, when its requested', async () => {
+      subscriptionService.startAuthorizationFlow_(true);
+      await flush();
+
+      expect(platform.activate).to.be.called;
+    });
+
+    it('should not activate platform, when its not requested', async () => {
       subscriptionService.startAuthorizationFlow_(false);
-      expect(getGrantStatusStub).to.be.calledOnce;
-      expect(selectAndActivateStub).to.not.be.called;
+      await flush();
+
+      expect(platform.activate).to.not.be.called;
+    });
+
+    describe('with metering', () => {
+      beforeEach(async () => {
+        subscriptionService.getPlatformConfig_.resolves(meteringPlatformConfig);
+        await subscriptionService.initialize_();
+      });
+
+      it('handle grant state normally, when granted by a non-metering platform', async () => {
+        subscriptionService.startAuthorizationFlow_();
+        await flush();
+
+        expect(renderer.setGrantState).to.be.called;
+        expect(platform.activate).to.be.called;
+      });
+
+      it('wait to set grant state, when granted by a metering platform', async () => {
+        // Metering platform granted this entitlement.
+        entitlement.grantReason = GrantReason.METERING;
+        entitlement.service = meteringPlatformConfig.services[0].serviceId;
+
+        subscriptionService.startAuthorizationFlow_();
+        await flush();
+
+        // Wait to set grant state.
+        expect(renderer.setGrantState).to.not.be.called;
+        expect(platform.activate).be.called;
+
+        // Set grant state after platform continues flow.
+        const continueCallback = platform.activate.getCall(0).args[2];
+        continueCallback();
+        expect(renderer.setGrantState).to.be.called;
+      });
     });
   });
 
