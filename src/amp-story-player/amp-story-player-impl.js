@@ -128,7 +128,8 @@ let DocumentStateTypeDef;
  *   messagingPromise: ?Promise,
  *   title: (?string),
  *   posterImage: (?string),
- *   storyContentLoaded: ?boolean
+ *   storyContentLoaded: ?boolean,
+ *   connectedDeferred: !Deferred
  * }}
  */
 let StoryDef;
@@ -377,6 +378,18 @@ export class AmpStoryPlayer {
     this.initializeCircularWrapping_();
     this.signalReady_();
     this.isBuilt_ = true;
+  }
+
+  /**
+   * Initializes story with properties used in this class and adds it to the
+   * stories array.
+   * @param {!StoryDef} story
+   */
+  initializeAndAddStory_(story) {
+    story.connectedDeferred = new Deferred();
+    story.idx = this.stories_.length - 1;
+    story.distance = story.idx - this.currentIdx_;
+    this.stories_.push(story);
   }
 
   /**
@@ -1095,6 +1108,7 @@ export class AmpStoryPlayer {
   appendToDom_(story) {
     this.rootEl_.appendChild(story.iframe);
     this.setUpMessagingForStory_(story);
+    story.connectedDeferred.resolve();
   }
 
   /**
@@ -1103,6 +1117,7 @@ export class AmpStoryPlayer {
    */
   removeFromDom_(story) {
     story.storyContentLoaded = false;
+    story.connectedDeferred = new Deferred();
     story.iframe.setAttribute('src', '');
     story.iframe.remove();
   }
