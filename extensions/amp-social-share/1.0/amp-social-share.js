@@ -231,7 +231,9 @@ AmpSocialShare['Component'] = SocialShare;
 AmpSocialShare['layoutSizeDefined'] = true;
 
 /** @override */
-AmpSocialShare['passthroughNonEmpty'] = true;
+AmpSocialShare['children'] = {
+  'children': {name: 'children', passthroughNonEmpty: true},
+};
 
 /** @override */
 AmpSocialShare['delegatesFocus'] = true;

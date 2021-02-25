@@ -275,20 +275,6 @@ export function MyElement({propName1, propName2, ...rest}) {
 -   **Usage**: The tag name used when rendering into the light DOM. Used when children contents are overwritten.
 -   **Example Usage**: `amp-date-countdown`, `amp-date-display`
 
-##### PreactBaseElement['passthrough']
-
--   **Default**: Optional.
--   **Override**: Sometimes.
--   **Usage**: Define if requiring user-supplied children to the Preact component, but shape and structure does not matter.
--   **Example Usage**: `amp-fit-text`, `amp-sidebar`
-
-##### PreactBaseElement['passthroughNonEmpty']
-
--   **Default**: Optional.
--   **Override**: Sometimes.
--   **Usage**: Define if user-supplied children are needed **only when present** by the Preact component but their shape and structure does not matter. If no children are given to the component, the component may render something entirely different.
--   **Example Usage**: `amp-social-share`, `amp-timeago`
-
 ##### PreactBaseElement['children']
 
 -   **Default**: Optional.

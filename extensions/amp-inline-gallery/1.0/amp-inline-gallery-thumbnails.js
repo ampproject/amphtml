@@ -44,7 +44,9 @@ export class AmpInlineGalleryThumbnails extends PreactBaseElement {
 AmpInlineGalleryThumbnails['Component'] = Thumbnails;
 
 /** @override */
-AmpInlineGalleryThumbnails['passthroughNonEmpty'] = true;
+AmpInlineGalleryThumbnails['children'] = {
+  'children': {name: 'children', passthroughNonEmpty: true},
+};
 
 /** @override */
 AmpInlineGalleryThumbnails['props'] = {

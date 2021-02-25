@@ -29,7 +29,9 @@ export class BaseElement extends PreactBaseElement {
 BaseElement['Component'] = Timeago;
 
 /** @override */
-BaseElement['passthroughNonEmpty'] = true;
+BaseElement['children'] = {
+  'children': {name: 'children', passthroughNonEmpty: true},
+};
 
 /** @override */
 BaseElement['layoutSizeDefined'] = true;

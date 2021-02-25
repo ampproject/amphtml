@@ -30,7 +30,7 @@ BaseElement['props'] = {
 };
 
 /** @override */
-BaseElement['passthrough'] = true;
+BaseElement['children'] = {'children': {name: 'children', passthrough: true}};
 
 /** @override */
 BaseElement['layoutSizeDefined'] = true;
