@@ -128,6 +128,13 @@ const MATCH_ANY = () => true;
 
 const childIdGenerator = sequentialIdGenerator();
 
+const ONE_OF_ERROR_MESSAGE =
+  'only one of "attr", "attrs", "passthrough", "passthroughNonEmpty"' +
+  ' or "selector" may be given';
+
+const MEDIA_ERROR_MESSAGE =
+  '"passthrough" and "passthroughNonEmpty" may not also be "media"';
+
 /**
  * Wraps a Preact Component in a BaseElement class.
  *
@@ -248,7 +255,10 @@ export class PreactBaseElement extends AMP.BaseElement {
     const Ctor = this.constructor;
 
     this.observer = new MutationObserver(this.checkMutations_.bind(this));
-    const childrenInit = Ctor['children'] ? CHILDREN_MUTATION_INIT : null;
+    const childrenInit =
+      Ctor['props'] && Ctor['props']['children']
+        ? CHILDREN_MUTATION_INIT
+        : null;
     const templatesInit = Ctor['usesTemplate'] ? TEMPLATES_MUTATION_INIT : null;
     this.observer.observe(this.element, {
       attributes: true,
@@ -864,16 +874,11 @@ PreactBaseElement['delegatesFocus'] = false;
 PreactBaseElement['props'] = {};
 
 /**
- * @protected {!Object<string, !ChildDef>|null}
- */
-PreactBaseElement['children'] = null;
-
-/**
  * @param {typeof PreactBaseElement} Ctor
  * @return {boolean}
  */
 function usesShadowDom(Ctor) {
-  return !!Ctor['children'];
+  return !!Ctor['props'] && !!Ctor['props']['children'];
 }
 
 /**
@@ -900,7 +905,6 @@ function matchesAttrPrefix(attributeName, attributePrefix) {
  */
 function collectProps(Ctor, element, ref, defaultProps, mediaQueryProps) {
   const {
-    'children': childrenDefs,
     'className': className,
     'layoutSizeDefined': layoutSizeDefined,
     'lightDomTag': lightDomTag,
@@ -936,86 +940,6 @@ function collectProps(Ctor, element, ref, defaultProps, mediaQueryProps) {
 
   // Props.
   parsePropDefs(props, propDefs, element, mediaQueryProps);
-
-  // Children.
-  // There are plain "children" and there're slotted children assigned
-  // as separate properties. Thus in a carousel the plain "children" are
-  // slides, and the "arrowNext" children are passed via a "arrowNext"
-  // property.
-  if (childrenDefs) {
-    const children = [];
-    props['children'] = children;
-
-    // Match all children defined with "selector"
-    const nodes = element.getRealChildNodes();
-    for (let i = 0; i < nodes.length; i++) {
-      const childElement = nodes[i];
-      const def = matchChild(childElement, childrenDefs);
-      if (!def) {
-        continue;
-      }
-
-      const {single, name, clone, props: slotProps = {}} = def;
-      const parsedSlotProps = {};
-      parsePropDefs(parsedSlotProps, slotProps, childElement, mediaQueryProps);
-
-      // TBD: assign keys, reuse slots, etc.
-      if (single) {
-        props[name] = createSlot(
-          childElement,
-          childElement.getAttribute('slot') || `i-amphtml-${name}`,
-          parsedSlotProps
-        );
-      } else {
-        const list =
-          name == 'children' ? children : props[name] || (props[name] = []);
-        list.push(
-          clone
-            ? createShallowVNodeCopy(childElement)
-            : createSlot(
-                childElement,
-                childElement.getAttribute('slot') ||
-                  `i-amphtml-${name}-${childIdGenerator()}`,
-                parsedSlotProps
-              )
-        );
-      }
-    }
-
-    // Match all children defined with "passthrough" or "passthroughNonEmpty"
-    const errorMessage =
-      'only one of "passthrough", "passthroughNonEmpty"' +
-      ' or "selector" may be given';
-    for (const key in childrenDefs) {
-      const {
-        name,
-        passthrough,
-        passthroughNonEmpty,
-        selector,
-        single = true,
-      } = childrenDefs[key];
-      if (passthrough) {
-        devAssert(!selector && !passthroughNonEmpty && single, errorMessage);
-        props[name] = [<Slot />];
-        continue;
-      } else if (passthroughNonEmpty) {
-        devAssert(!selector && single, errorMessage);
-        // If all children are whitespace text nodes, consider the element as
-        // having no children
-        props[name] = element
-          .getRealChildNodes()
-          .every(
-            (node) =>
-              node.nodeType === /* TEXT_NODE */ 3 &&
-              node.nodeValue.trim().length === 0
-          )
-          ? null
-          : [<Slot />];
-        continue;
-      }
-    }
-  }
-
   if (mediaQueryProps) {
     mediaQueryProps.complete();
   }
@@ -1030,10 +954,72 @@ function collectProps(Ctor, element, ref, defaultProps, mediaQueryProps) {
  * @param {?MediaQueryProps} mediaQueryProps
  */
 function parsePropDefs(props, propDefs, element, mediaQueryProps) {
+  // Match all children defined with "selector".
+  // There are plain "children" and there're slotted children assigned
+  // as separate properties. Thus in a carousel the plain "children" are
+  // slides, and the "arrowNext" children are passed via a "arrowNext"
+  // property.
+  const nodes = element.getRealChildNodes ? element.getRealChildNodes() : [];
+  for (let i = 0; i < nodes.length; i++) {
+    const childElement = nodes[i];
+    const def = matchChild(childElement, propDefs);
+    if (!def) {
+      continue;
+    }
+
+    const {single, name, clone, props: slotProps = {}} = def;
+    const parsedSlotProps = {};
+    parsePropDefs(parsedSlotProps, slotProps, childElement, mediaQueryProps);
+
+    // TBD: assign keys, reuse slots, etc.
+    if (single) {
+      props[name] = createSlot(
+        childElement,
+        childElement.getAttribute('slot') || `i-amphtml-${name}`,
+        parsedSlotProps
+      );
+    } else {
+      const list = props[name] || (props[name] = []);
+      list.push(
+        clone
+          ? createShallowVNodeCopy(childElement)
+          : createSlot(
+              childElement,
+              childElement.getAttribute('slot') ||
+                `i-amphtml-${name}-${childIdGenerator()}`,
+              parsedSlotProps
+            )
+      );
+    }
+  }
+
   for (const name in propDefs) {
     const def = /** @type {!AmpElementPropDef} */ (propDefs[name]);
     let value;
-    if (def.attr) {
+    if (def.passthrough) {
+      devAssert(
+        !def.attr && !def.attrs && !def.selector && !def.passthroughNonEmpty,
+        ONE_OF_ERROR_MESSAGE
+      );
+      devAssert(!def.media, MEDIA_ERROR_MESSAGE);
+      props[def.name ?? name] = [<Slot />];
+      continue;
+    } else if (def.passthroughNonEmpty) {
+      devAssert(!def.attr && !def.attrs && !def.selector, ONE_OF_ERROR_MESSAGE);
+      devAssert(!def.media, MEDIA_ERROR_MESSAGE);
+      // If all children are whitespace text nodes, consider the element as
+      // having no children
+      props[def.name ?? name] = element
+        .getRealChildNodes()
+        .every(
+          (node) =>
+            node.nodeType === /* TEXT_NODE */ 3 &&
+            node.nodeValue.trim().length === 0
+        )
+        ? null
+        : [<Slot />];
+      continue;
+    } else if (def.attr) {
       value = element.getAttribute(def.attr);
       if (def.media && value != null) {
         value = mediaQueryProps.resolveListQuery(String(value));
@@ -1108,7 +1094,7 @@ function matchChild(element, defs) {
     const def = defs[match];
     const selector = typeof def == 'string' ? def : def.selector;
     if (matches(element, selector)) {
-      return def;
+      return {name: match, ...def};
     }
   }
   return null;

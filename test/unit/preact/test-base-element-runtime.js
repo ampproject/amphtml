@@ -56,8 +56,8 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
     });
     Impl['Component'] = component;
     Impl['loadable'] = true;
-    Impl['children'] = {};
     Impl['props'] = {
+      'children': {},
       'empty': {attr: 'empty', type: 'boolean'},
     };
     upgradeOrRegisterElement(win, 'amp-preact', Impl);
@@ -232,7 +232,7 @@ describes.realWin('whenUpgraded', {amp: true}, (env) => {
       });
     };
     Impl['Component'] = forwardRef(Component);
-    Impl['children'] = {};
+    Impl['props'] = {'children': {}};
     Impl['loadable'] = true;
   });
 

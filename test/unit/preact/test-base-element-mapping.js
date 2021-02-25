@@ -332,7 +332,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
     let element;
 
     beforeEach(() => {
-      Impl['children'] = {};
+      Impl['props'] = {'children': {}};
       element = html`
         <amp-preact layout="fixed" width="100" height="100">
           <div id="child1"></div>
@@ -514,9 +514,13 @@ describes.realWin('PreactBaseElement', spec, (env) => {
 
     beforeEach(async () => {
       Impl['props'] = {
+        'cloned': {
+          name: 'cloned',
+          selector: '[cloned]',
+          single: false,
+          clone: true,
+        },
         'propA': {attr: 'prop-a'},
-      };
-      Impl['children'] = {
         'special1': {
           name: 'special1',
           props: {
@@ -536,14 +540,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
           selector: '[special2]',
           single: true,
         },
-        'cloned': {
-          name: 'cloned',
-          selector: '[cloned]',
-          single: false,
-          clone: true,
-        },
         'children': {
-          name: 'children',
           props: {
             'boolDefTrue': {
               attr: 'bool-def-true',
@@ -558,7 +555,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
             'params': {attrPrefix: 'data-param-'},
             'prefix': {attrPrefix: 'prefix'},
           },
-          selector: '*',
+          selector: '*', // This should be last as catch-all.
           single: false,
         },
       };
@@ -820,9 +817,9 @@ describes.realWin('PreactBaseElement', spec, (env) => {
 
     beforeEach(async () => {
       Impl['props'] = {
+        'children': {passthrough: true},
         'propA': {attr: 'prop-a'},
       };
-      Impl['children'] = {'children': {name: 'children', passthrough: true}};
       element = html`
         <amp-preact layout="fixed" width="100" height="100">
           Some <b>text</b>
@@ -900,10 +897,8 @@ describes.realWin('PreactBaseElement', spec, (env) => {
 
     beforeEach(async () => {
       Impl['props'] = {
+        'children': {passthroughNonEmpty: true},
         'propA': {attr: 'prop-a'},
-      };
-      Impl['children'] = {
-        'children': {name: 'children', passthroughNonEmpty: true},
       };
       element = html`
         <amp-preact layout="fixed" width="100" height="100"> text </amp-preact>
@@ -973,7 +968,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
 
     beforeEach(async () => {
       Impl['delegatesFocus'] = true;
-      Impl['children'] = {'children': {passThroughNonEmpty: true}};
+      Impl['props'] = {'children': {passThroughNonEmpty: true}};
       element = html`
         <amp-preact layout="fixed" width="100" height="100"></amp-preact>
       `;
