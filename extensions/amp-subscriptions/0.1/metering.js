@@ -125,8 +125,7 @@ export class Metering {
         // Parse state.
         .then((value) => (value && JSON.parse(value)) || null)
         // Handle failure.
-        .catch((err) => {
-          console.error(err);
+        .catch(() => {
           dev().warn(TAG, 'Failed to load metering state.');
           return null;
         })
