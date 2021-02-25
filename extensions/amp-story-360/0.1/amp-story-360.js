@@ -680,7 +680,7 @@ export class AmpStory360 extends AMP.BaseElement {
       'amp-story-360 must contain an amp-img or amp-video element.'
     );
     if (mediaEl) {
-      this.setAccessableText_(mediaEl);
+      this.setAccessibleText_(mediaEl);
     }
 
     if (ampImgEl) {
@@ -694,7 +694,7 @@ export class AmpStory360 extends AMP.BaseElement {
   /**
    * Puts a11y text on canvas element so it can be read by screen readers.
    * The media element is hidden by CSS it no longer can read it.
-   * @param {!Array<!Element>} mediaEl Either an amp-img or amp-video
+   * @param {!Element} mediaEl Either an amp-img or amp-video
    * @private
    */
   setAccessibleText_(mediaEl) {
