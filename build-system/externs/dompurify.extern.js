@@ -25,14 +25,14 @@ DomPurifyConfig.prototype.FORBID_TAGS;
 DomPurifyConfig.prototype.FORBID_ATTR;
 /** @type {?Object} */
 DomPurifyConfig.prototype.USE_PROFILES = {};
-/** @type {boolean} */
-DomPurifyConfig.prototype.USE_PROFILES.html;
-/** @type {boolean} */
-DomPurifyConfig.prototype.USE_PROFILES.svg;
-/** @type {boolean} */
-DomPurifyConfig.prototype.USE_PROFILES.svgFilters;
-/** @type {boolean} */
-DomPurifyConfig.prototype.USE_PROFILES.mathMl;
+// /** @type {boolean} */
+// DomPurifyConfig.prototype.USE_PROFILES.html;
+// /** @type {boolean} */
+// DomPurifyConfig.prototype.USE_PROFILES.svg;
+// /** @type {boolean} */
+// DomPurifyConfig.prototype.USE_PROFILES.svgFilters;
+// /** @type {boolean} */
+// DomPurifyConfig.prototype.USE_PROFILES.mathMl;
 DomPurifyConfig.prototype.ALLOW_ARIA_ATTR;
 DomPurifyConfig.prototype.ALLOW_DATA_ATTR;
 DomPurifyConfig.prototype.ALLOW_UNKNOWN_PROTOCOLS;

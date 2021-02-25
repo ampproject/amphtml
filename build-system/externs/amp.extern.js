@@ -83,6 +83,13 @@ var InternalJsonLiteralTypeDef;
  */
 Element.prototype.dataset;
 
+// Events frequently contain data objects from AMP published Events.
+/** @type {!Object} */
+Event.prototype.data = {};
+
+// Events can contain origins when distributed between frames.
+Event.prototype.origin;
+
 /**
  * - n is the name.
  * - f is the function body of the extension.
@@ -150,6 +157,7 @@ VideoAnalyticsDetailsDef.prototype.state;
 VideoAnalyticsDetailsDef.prototype.width;
 
 // Node.js global
+/** @type {?Object} */
 var process = {};
 process.env;
 process.env.NODE_ENV;
@@ -159,6 +167,7 @@ window.IS_AMP_ALT;
 
 // Exposed to ads.
 // Preserve these filedNames so they can be accessed by 3p code.
+/** @type {?Object} */
 window.context = {};
 window.context.sentinel;
 window.context.clientId;
@@ -190,8 +199,8 @@ window.context.tagName;
 // TODO(bradfrizzell) Move to its own extern. Not relevant to all AMP.
 /** @type {?Object} */
 window.sf_ = {};
-/** @type {?Object} */
-window.sf_.cfg;
+// /** @type {?Object} */
+// window.sf_.cfg = {};
 
 // Exposed to custom ad iframes.
 /** @type {function(function(!Object, function(!Object)), !Array<string>=, !Array<string>=)} */
@@ -903,10 +912,10 @@ class FeaturePolicy {
   getAllowlistForFeature(feature) {}
 }
 
-/**
- * @type {?FeaturePolicy}
- */
-HTMLIFrameElement.prototype.featurePolicy;
+// /**
+//  * @type {?FeaturePolicy}
+//  */
+// HTMLIFrameElement.prototype.featurePolicy;
 
 /**
  * Going through the standardization process now.

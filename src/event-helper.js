@@ -71,7 +71,7 @@ export function listen(element, eventType, listener, opt_evtListenerOpts) {
 
 /**
  * Returns the data property of an event with the correct type.
- * @param {!Event|{data: !JsonObject}} event
+ * @param {!MessageEvent|!Event|{data: !JsonObject}} event
  * @return {?JsonObject|string|undefined}
  */
 export function getData(event) {
@@ -80,7 +80,7 @@ export function getData(event) {
 
 /**
  * Returns the detail property of an event with the correct type.
- * @param {!Event|{detail: !JsonObject}} event
+ * @param {!MessageEvent|!Event|{detail: !JsonObject}} event
  * @return {?JsonObject|string|undefined}
  */
 export function getDetail(event) {

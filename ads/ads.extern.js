@@ -310,15 +310,9 @@ data.s;
 data.ph;
 
 // adpushup.js
-window.adpushup = {};
-window.adpushup.initAmp = function (
-  global,
-  width,
-  height,
-  siteid,
-  slotpath,
-  totalampslots
-) {};
+var adpushup = {
+  initAmp: function (global, width, height, siteid, slotpath, totalampslots) {},
+};
 
 // adreactor.js
 data.zid;
@@ -353,8 +347,9 @@ data.atwwidth;
 data.siteId;
 
 // aduptech.js
-window.uAd = {};
-window.uAd.embed;
+var uAd = {
+  embed: function (elementId, options) {},
+};
 data.amp;
 data.responsive;
 data.placementkey;
@@ -380,7 +375,7 @@ data.adUnits;
 data.target;
 
 // adventive.js
-const adventive = {};
+var adventive = {};
 adventive.Ad;
 adventive.addArgs = () => {};
 adventive.addInstance = () => {};
@@ -392,7 +387,6 @@ adventive.modes;
 adventive.Plugin;
 adventive.plugins;
 adventive.utility;
-window.adventive = adventive;
 
 // colombia.js
 data.clmb_slot;
@@ -496,8 +490,8 @@ data.slot;
 data.adslot;
 
 // mads.js
-window.MADSAdrequest = {};
-window.MADSAdrequest.adrequest;
+var MADSAdrequest = {};
+MADSAdrequest.adrequest;
 data.adrequest;
 
 // marfeel.js
@@ -513,7 +507,7 @@ data.versionId;
 data.timeout;
 
 // microad.js
-var MicroAd;
+var MicroAd = {};
 MicroAd.Compass;
 MicroAd.Compass.showAd;
 data.spot;

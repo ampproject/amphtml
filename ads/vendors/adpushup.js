@@ -34,7 +34,7 @@ export function adpushup(global, data) {
         global,
         'https://cdn.adpushup.com/' + data.siteid + '/amp.js',
         () => {
-          window.adpushup.initAmp(
+          adpushup.initAmp(
             global,
             data.width,
             data.height,

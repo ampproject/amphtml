@@ -182,6 +182,34 @@ export class IframeMessagingClient {
   }
 
   /**
+   * @param {!MessageEvent} event
+   * @private
+   */
+  handleMessage_(event) {
+    // If we have set a host window, strictly check that it's from it.
+    if (this.hostWindow_ && event.source != this.hostWindow_) {
+      return;
+    }
+
+    // Does it look like a message from AMP?
+    const message = deserializeMessage(getData(event));
+    if (!message || message['sentinel'] != this.sentinel_) {
+      return;
+    }
+
+    // At this point the message is valid; serialize necessary information and
+    // set its source as the host window if we don't have it set (aka in
+    // broadcast mode).
+    message['origin'] = event.origin;
+
+    if (!this.hostWindow_) {
+      this.hostWindow_ = event.source;
+    }
+
+    this.fireObservable_(message['type'], message);
+  }
+
+  /**
    * Sets up event listener for post messages of the desired type.
    *   The actual implementation only uses a single event listener for all of
    *   the different messages, and simply diverts the message to be handled
@@ -191,29 +219,7 @@ export class IframeMessagingClient {
    * @private
    */
   setupEventListener_() {
-    listen(this.win_, 'message', (event) => {
-      // If we have set a host window, strictly check that it's from it.
-      if (this.hostWindow_ && event.source != this.hostWindow_) {
-        return;
-      }
-
-      // Does it look like a message from AMP?
-      const message = deserializeMessage(getData(event));
-      if (!message || message['sentinel'] != this.sentinel_) {
-        return;
-      }
-
-      // At this point the message is valid; serialize necessary information and
-      // set its source as the host window if we don't have it set (aka in
-      // broadcast mode).
-      message['origin'] = event.origin;
-
-      if (!this.hostWindow_) {
-        this.hostWindow_ = event.source;
-      }
-
-      this.fireObservable_(message['type'], message);
-    });
+    listen(this.win_, 'message', this.handleMessage_);
   }
 
   /**
