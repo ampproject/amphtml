@@ -445,7 +445,7 @@ export class AmpDoc {
    * @return {!Document|!ShadowRoot}
    * @abstract
    */
-  getRootNode() {}
+  getDocumentOrShadowRoot() {}
 
   /**
    * Returns the head node. It's either an element or a shadow root.
@@ -514,7 +514,7 @@ export class AmpDoc {
    * @return {?Element}
    */
   getElementById(id) {
-    return this.getRootNode().getElementById(id);
+    return this.getDocumentOrShadowRoot().getElementById(id);
   }
 
   /**
@@ -523,7 +523,7 @@ export class AmpDoc {
    * @return {boolean}
    */
   contains(node) {
-    return this.getRootNode().contains(node);
+    return this.getDocumentOrShadowRoot().contains(node);
   }
 
   /**
@@ -728,7 +728,7 @@ export class AmpDocSingle extends AmpDoc {
   }
 
   /** @override */
-  getRootNode() {
+  getDocumentOrShadowRoot() {
     return this.win.document;
   }
 
@@ -816,7 +816,7 @@ export class AmpDocShadow extends AmpDoc {
   }
 
   /** @override */
-  getRootNode() {
+  getDocumentOrShadowRoot() {
     return this.shadowRoot_;
   }
 
@@ -931,7 +931,7 @@ export class AmpDocFie extends AmpDoc {
   }
 
   /** @override */
-  getRootNode() {
+  getDocumentOrShadowRoot() {
     return this.win.document;
   }
 

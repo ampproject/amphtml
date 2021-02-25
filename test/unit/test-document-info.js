@@ -86,7 +86,7 @@ describe
           querySelector() {
             return 'http://www.origin.com/foo/?f=0';
           },
-          getRootNode() {
+          getDocumentOrShadowRoot() {
             return win.document;
           },
         },
@@ -123,7 +123,7 @@ describe
           querySelector() {
             return 'http://www.origin.com/foo/?f=0';
           },
-          getRootNode() {
+          getDocumentOrShadowRoot() {
             return win.document;
           },
         },
@@ -322,7 +322,7 @@ describe
           querySelector() {
             return 'http://www.origin.com/foo/?f=0';
           },
-          getRootNode() {
+          getDocumentOrShadowRoot() {
             return win.document;
           },
         },
@@ -360,7 +360,7 @@ describe
           querySelector() {
             return 'http://www.origin.com/foo/?f=0';
           },
-          getRootNode() {
+          getDocumentOrShadowRoot() {
             return win.document;
           },
         },
@@ -397,7 +397,7 @@ describe
           querySelector() {
             return 'http://www.origin.com/foo/?f=0';
           },
-          getRootNode() {
+          getDocumentOrShadowRoot() {
             return win.document;
           },
         },

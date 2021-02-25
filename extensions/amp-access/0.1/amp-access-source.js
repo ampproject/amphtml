@@ -262,7 +262,7 @@ export class AccessSource {
    * @private
    */
   getRootElement_() {
-    const root = this.ampdoc.getRootNode();
+    const root = this.ampdoc.getDocumentOrShadowRoot();
     return dev().assertElement(root.documentElement || root.body || root);
   }
 

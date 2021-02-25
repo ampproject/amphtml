@@ -479,7 +479,7 @@ export class AmpAnimation extends AMP.BaseElement {
     return Promise.all([polyfillPromise, readyPromise]).then(() => {
       const builder = new Builder(
         hostWin,
-        this.getRootNode_(),
+        this.getDocumentOrShadowRoot_(),
         baseUrl,
         this.getVsync(),
         Services.ownersForDoc(this.element.getAmpDoc())
@@ -492,8 +492,8 @@ export class AmpAnimation extends AMP.BaseElement {
    * @return {!Document|!ShadowRoot}
    * @private
    */
-  getRootNode_() {
-    return this.getAmpDoc().getRootNode();
+  getDocumentOrShadowRoot_() {
+    return this.getAmpDoc().getDocumentOrShadowRoot();
   }
 
   /** @private */

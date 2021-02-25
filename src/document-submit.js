@@ -36,7 +36,7 @@ export function installGlobalSubmitListenerForDoc(ampdoc) {
     (ampFormInstalled) => {
       if (ampFormInstalled) {
         ampdoc
-          .getRootNode()
+          .getDocumentOrShadowRoot()
           .addEventListener('submit', onDocumentFormSubmit_, true);
       }
     }

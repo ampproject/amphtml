@@ -210,7 +210,7 @@ export function getViewerInterceptResponse(win, ampdocSingle, input, init) {
     return whenUnblocked;
   }
 
-  const htmlElement = ampdocSingle.getRootNode().documentElement;
+  const htmlElement = ampdocSingle.getDocumentOrShadowRoot().documentElement;
   const docOptedIn = htmlElement.hasAttribute('allow-xhr-interception');
   if (!docOptedIn) {
     return whenUnblocked;

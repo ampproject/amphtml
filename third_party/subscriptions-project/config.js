@@ -122,7 +122,7 @@ class Doc {
    * The `Document` node or analog.
    * @return {!Node}
    */
-  getRootNode() {}
+  getDocumentOrShadowRoot() {}
 
   /**
    * The `Document.documentElement` element or analog.
@@ -189,7 +189,7 @@ class GlobalDoc {
   }
 
   /** @override */
-  getRootNode() {
+  getDocumentOrShadowRoot() {
     return this.doc_;
   }
 
@@ -873,7 +873,7 @@ class MetaParser {
 
     // Try to find product id.
     const productId = getMetaTag(
-      this.doc_.getRootNode(),
+      this.doc_.getDocumentOrShadowRoot(),
       'subscriptions-product-id'
     );
     if (!productId) {
@@ -882,7 +882,7 @@ class MetaParser {
 
     // Is locked?
     const accessibleForFree = getMetaTag(
-      this.doc_.getRootNode(),
+      this.doc_.getDocumentOrShadowRoot(),
       'subscriptions-accessible-for-free'
     );
     const locked =
@@ -917,7 +917,7 @@ class JsonLdParser {
 
     // type: 'application/ld+json'
     const elements = this.doc_
-      .getRootNode()
+      .getDocumentOrShadowRoot()
       .querySelectorAll('script[type="application/ld+json"]');
     for (let i = 0; i < elements.length; i++) {
       const element = elements[i];
@@ -1179,7 +1179,7 @@ class MicrodataParser {
 
     // Grab all the nodes with an itemtype and filter for our allowed types
     const nodeList = Array.prototype.slice
-      .call(this.doc_.getRootNode().querySelectorAll('[itemscope][itemtype]'))
+      .call(this.doc_.getDocumentOrShadowRoot().querySelectorAll('[itemscope][itemtype]'))
       .filter((node) =>
         this.checkType_.checkString(
           node.getAttribute('itemtype'),

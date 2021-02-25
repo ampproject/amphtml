@@ -1413,7 +1413,7 @@ export function installLightboxGallery(ampdoc) {
     .whenReady()
     .then(() => ampdoc.getBody())
     .then((body) => {
-      const existingGallery = elementByTag(ampdoc.getRootNode(), TAG);
+      const existingGallery = elementByTag(ampdoc.getDocumentOrShadowRoot(), TAG);
       if (!existingGallery) {
         const gallery = ampdoc.win.document.createElement(TAG);
         gallery.setAttribute('layout', 'nodisplay');

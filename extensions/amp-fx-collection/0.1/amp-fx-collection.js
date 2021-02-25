@@ -48,7 +48,7 @@ export class AmpFxCollection {
     this.seen_ = [];
 
     Promise.all([ampdoc.whenReady(), ampdoc.whenFirstVisible()]).then(() => {
-      const root = this.ampdoc_.getRootNode();
+      const root = this.ampdoc_.getDocumentOrShadowRoot();
       // Scan when page becomes visible.
       this.scan_();
       // Rescan as DOM changes happen.
@@ -61,7 +61,7 @@ export class AmpFxCollection {
    * fx provider.
    */
   scan_() {
-    const elements = this.ampdoc_.getRootNode().querySelectorAll('[amp-fx]');
+    const elements = this.ampdoc_.getDocumentOrShadowRoot().querySelectorAll('[amp-fx]');
     iterateCursor(elements, (element) => {
       if (this.seen_.includes(element)) {
         return;

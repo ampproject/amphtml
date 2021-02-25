@@ -19,7 +19,7 @@ import {ValidationBubble} from '../validation-bubble';
 describes.realWin('validation-bubble', {amp: true}, (env) => {
   it('should append a dom element to the document', () => {
     const {ampdoc} = env;
-    const document = ampdoc.getRootNode();
+    const document = ampdoc.getDocumentOrShadowRoot();
 
     new ValidationBubble(ampdoc);
     expect(document.querySelector('.i-amphtml-validation-bubble')).to.not.be
@@ -28,7 +28,7 @@ describes.realWin('validation-bubble', {amp: true}, (env) => {
 
   it('should show and hide bubble', () => {
     const {ampdoc} = env;
-    const document = ampdoc.getRootNode();
+    const document = ampdoc.getDocumentOrShadowRoot();
 
     const targetEl = document.createElement('div');
     targetEl.textContent = 'I am the target!';

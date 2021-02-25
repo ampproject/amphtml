@@ -115,7 +115,7 @@ export class ViewerTracker {
 
       // 4. Tap: register a view.
       unlistenSet.push(
-        listenOnce(this.ampdoc_.getRootNode(), 'click', resolve)
+        listenOnce(this.ampdoc_.getDocumentOrShadowRoot(), 'click', resolve)
       );
     }).then(
       () => {

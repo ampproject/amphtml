@@ -161,7 +161,7 @@ export class AmpFont extends AMP.BaseElement {
   onFontLoadFinish_(addClassName, removeClassName) {
     const ampdoc = this.getAmpDoc();
     // Add the class to <html> unless in ShadowRoot, where we append to <body>
-    const root = ampdoc.getRootNode().documentElement || ampdoc.getBody();
+    const root = ampdoc.getDocumentOrShadowRoot().documentElement || ampdoc.getBody();
     if (addClassName) {
       root.classList.add(addClassName);
     }

@@ -101,7 +101,7 @@ describes.sandboxed('Viewer', {}, (env) => {
       body: {style: {}},
       documentElement: {style: {}},
       title: 'Awesome doc',
-      getRootNode() {
+      getDocumentOrShadowRoot() {
         return windowApi.document;
       },
       querySelector() {

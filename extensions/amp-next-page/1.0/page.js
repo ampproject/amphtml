@@ -108,7 +108,7 @@ export class Page {
     if (!this.shadowDoc_) {
       return;
     }
-    return this.shadowDoc_.ampdoc.getRootNode();
+    return this.shadowDoc_.ampdoc.getDocumentOrShadowRoot();
   }
 
   /** @return {?Element} */

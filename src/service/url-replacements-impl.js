@@ -589,7 +589,7 @@ export class GlobalVariableSource extends VariableSource {
 
     this.setAsync('AMP_STATE', (key) => {
       // This is safe since AMP_STATE is not an A4A allowlisted variable.
-      const root = this.ampdoc.getRootNode();
+      const root = this.ampdoc.getDocumentOrShadowRoot();
       const element = /** @type {!Element|!ShadowRoot} */ (root.documentElement ||
         root);
       return Services.bindForDocOrNull(element).then((bind) => {

@@ -179,7 +179,7 @@ describes.realWin(
         const shadowDoc = attachShadowDocSpy.firstCall.returnValue.ampdoc;
         yield shadowDoc.whenReady();
 
-        const shadowRoot = shadowDoc.getRootNode();
+        const shadowRoot = shadowDoc.getDocumentOrShadowRoot();
 
         expect(shadowRoot.querySelector('header')).to.have.class(
           'i-amphtml-next-page-hidden'
@@ -213,7 +213,7 @@ describes.realWin(
         yield macroTask();
         const shadowDoc = attachShadowDocSpy.firstCall.returnValue.ampdoc;
         yield shadowDoc.whenReady();
-        const shadowRoot = shadowDoc.getRootNode();
+        const shadowRoot = shadowDoc.getDocumentOrShadowRoot();
         expect(shadowRoot.getElementById('analytics1')).to.be.null;
         expect(shadowRoot.getElementById('analytics2')).to.be.null;
       });

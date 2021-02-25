@@ -35,7 +35,7 @@ describes.realWin(
   (env) => {
     let doc;
     beforeEach(() => {
-      doc = env.ampdoc.getRootNode();
+      doc = env.ampdoc.getDocumentOrShadowRoot();
       installStylesForDoc(env.ampdoc, CSS, () => {}, false, 'amp-form');
     });
 

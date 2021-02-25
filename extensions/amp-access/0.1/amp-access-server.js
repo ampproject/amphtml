@@ -201,7 +201,7 @@ export class AccessServerAdapter {
         const section = sections[i];
         const sectionId = section.getAttribute('i-amphtml-access-id');
         const target = this.ampdoc
-          .getRootNode()
+          .getDocumentOrShadowRoot()
           .querySelector(
             `[i-amphtml-access-id="${escapeCssSelectorIdent(sectionId)}"]`
           );

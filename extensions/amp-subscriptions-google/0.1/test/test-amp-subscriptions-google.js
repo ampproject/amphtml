@@ -139,7 +139,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     env.sandbox
       .stub(serviceAdapter, 'getReaderId')
       .callsFake(() => Promise.resolve('ari1'));
-    const analytics = new SubscriptionAnalytics(ampdoc.getRootNode());
+    const analytics = new SubscriptionAnalytics(ampdoc.getDocumentOrShadowRoot());
     env.sandbox.stub(serviceAdapter, 'getAnalytics').callsFake(() => analytics);
     analyticsMock = env.sandbox.mock(analytics);
     getEncryptedDocumentKeyStub = env.sandbox

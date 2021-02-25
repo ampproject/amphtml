@@ -167,7 +167,7 @@ export class GwdAnimation extends AMP.BaseElement {
    * @private
    */
   getRoot_() {
-    return this.fie_ ? this.fie_.win.document : this.getAmpDoc().getRootNode();
+    return this.fie_ ? this.fie_.win.document : this.getAmpDoc().getDocumentOrShadowRoot();
   }
 
   /**

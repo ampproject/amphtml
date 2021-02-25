@@ -66,7 +66,7 @@ describes.fakeWin(
 
     it('Should match the built url', () => {
       const linkRewriterElement = helpers.createLinkRewriterElement(config);
-      env.ampdoc.getRootNode().body.appendChild(linkRewriterElement);
+      env.ampdoc.getDocumentOrShadowRoot().body.appendChild(linkRewriterElement);
 
       const rewriter = new LinkRewriter('', linkRewriterElement, env.ampdoc);
 

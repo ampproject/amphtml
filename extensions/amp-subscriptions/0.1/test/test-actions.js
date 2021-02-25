@@ -46,7 +46,7 @@ describes.realWin('Actions', {amp: true}, (env) => {
     urlBuilder.setAuthResponse({
       'a': 'A',
     });
-    analytics = new SubscriptionAnalytics(ampdoc.getRootNode());
+    analytics = new SubscriptionAnalytics(ampdoc.getDocumentOrShadowRoot());
     analyticsMock = env.sandbox.mock(analytics);
     buildSpy = env.sandbox.spy(Actions.prototype, 'build');
     actions = new Actions(ampdoc, urlBuilder, analytics, {

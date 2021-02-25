@@ -556,7 +556,7 @@ export class ResourcesImpl {
       const resource = this.pendingBuildResources_[i];
       if (
         this.documentReady_ ||
-        hasNextNodeInDocumentOrder(resource.element, this.ampdoc.getRootNode())
+        hasNextNodeInDocumentOrder(resource.element, this.ampdoc.getDocumentOrShadowRoot())
       ) {
         // Remove resource before build to remove it from the pending list
         // in either case the build succeed or throws an error.
