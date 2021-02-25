@@ -341,9 +341,10 @@ export class AbstractAmpContext {
     );
 
     /** @type {AmpContext} */
-    const context = dataObject._context || dataObject.attributes._context;
+    const context =
+      dataObject['_context'] || dataObject['attributes']['_context'];
 
-    this.data = dataObject.attributes || dataObject;
+    this.data = dataObject['attributes'] || dataObject;
 
     // TODO(alanorozco, #10576): This is really ugly. Find a better structure
     // than passing context values via data.
@@ -372,7 +373,7 @@ export class AbstractAmpContext {
     this.startTime = context.startTime;
     this.tagName = context.tagName;
 
-    this.embedType_ = dataObject.type || null;
+    this.embedType_ = dataObject['type'] || null;
   }
 
   /**
@@ -402,11 +403,9 @@ export class AbstractAmpContext {
     // to check the name attribute as it has been bypassed.
     // TODO(alanorozco): why the heck could AMP_CONTEXT_DATA be two different
     // types? FIX THIS.
-    if (
-      isObject(this.win_.sf_) &&
-      /** @type {{cfg: string}} */ (this.win_.sf_).cfg
-    ) {
-      this.setupMetadata_(/** @type {{cfg: string}} */ (this.win_.sf_).cfg);
+    const sf = this.win_['sf_'];
+    if (isObject(sf) && sf['cfg']) {
+      this.setupMetadata_(/** @type {string}*/ (sf['cfg']));
     } else if (this.win_.AMP_CONTEXT_DATA) {
       if (typeof this.win_.AMP_CONTEXT_DATA == 'string') {
         this.sentinel = this.win_.AMP_CONTEXT_DATA;
