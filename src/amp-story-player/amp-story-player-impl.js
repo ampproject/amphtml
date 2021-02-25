@@ -1302,8 +1302,9 @@ export class AmpStoryPlayer {
       ? findIndex(this.stories_, ({href}) => href === storyUrl)
       : this.currentIdx_;
 
-    const story = this.stories_[storyIdx];
-    if (!story) {
+    // TODO(#28987): add() stories when show() calls this and story isn't added
+    // yet.
+    if (!this.stories_[storyIdx]) {
       throw new Error(`Story URL not found in the player: ${storyUrl}`);
     }
 
