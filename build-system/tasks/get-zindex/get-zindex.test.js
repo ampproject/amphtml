@@ -36,6 +36,7 @@ const jsResult = {
     '<div />': 'initial',
     'assignment': 'auto',
     'declarator': 0,
+    'setStyle': 15,
     'setStyles': 9999,
   },
   'test-1.js': {
@@ -65,6 +66,7 @@ test('sync - create array of arrays with z index order', (t) => {
     ['`setStyles`', 9999, '[test-0.js](/test-0.js)'],
     ['`.selector-3`', '99', '[test.css](/test.css)'],
     ['`.selector-4`', '80', '[test-2.css](/test-2.css)'],
+    ['`setStyle`', 15, '[test-0.js](/test-0.js)'],
     ['`.selector-1`', '1', '[test.css](/test.css)'],
     ['`declarator`', 0, '[test-0.js](/test-0.js)'],
     ['`.selector-2`', '0', '[test.css](/test.css)'],

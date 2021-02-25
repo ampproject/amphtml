@@ -21,7 +21,11 @@ function getCallExpressionZIndexValue(node) {
   for (let i = 0; i < node.arguments.length; i++) {
     const argument = node.arguments[i];
     const next = node.arguments[i + 1];
-    if (next && next.type === 'Literal' && zIndexRegExp.test(argument.value)) {
+    if (
+      next &&
+      next.type.endsWith('Literal') &&
+      zIndexRegExp.test(argument.value)
+    ) {
       return next.value;
     }
   }
