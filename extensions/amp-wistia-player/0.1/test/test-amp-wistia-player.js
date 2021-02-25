@@ -93,7 +93,7 @@ describes.realWin(
 
       it('can pause', () => {
         const spy = env.sandbox.spy(impl, 'sendCommand_');
-        impl.play(true);
+        impl.pause();
         expect(spy).to.be.calledWith('amp-pause');
       });
 
