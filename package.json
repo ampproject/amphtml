@@ -119,7 +119,6 @@
     "gulp-nop": "0.0.3",
     "gulp-rename": "2.0.0",
     "gulp-sourcemaps": "3.0.0",
-    "gulp-watch": "5.0.1",
     "html-minifier": "4.0.0",
     "istanbul-middleware": "0.2.2",
     "jest-dot-reporter": "1.0.12",
