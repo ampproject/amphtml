@@ -15,6 +15,7 @@
  */
 
 import '../amp-wistia-player';
+import * as utils from '../../../../src/dom';
 
 describes.realWin(
   'amp-wistia-player',
@@ -43,21 +44,84 @@ describes.realWin(
         .then(() => wistiaEmbed);
     }
 
-    it('renders', () => {
-      return getWistiaEmbed('u8p9wq6mq8').then((wistiaEmbed) => {
-        const iframe = wistiaEmbed.querySelector('iframe');
-        expect(iframe).to.not.be.null;
-        expect(iframe.tagName).to.equal('IFRAME');
-        expect(iframe.src).to.equal(
-          'https://fast.wistia.net/embed/iframe/u8p9wq6mq8'
+    describe('rendering', async () => {
+      it('renders', () => {
+        return getWistiaEmbed('u8p9wq6mq8').then((wistiaEmbed) => {
+          const iframe = wistiaEmbed.querySelector('iframe');
+          expect(iframe).to.not.be.null;
+          expect(iframe.tagName).to.equal('IFRAME');
+          expect(iframe.src).to.equal(
+            'https://fast.wistia.net/embed/iframe/u8p9wq6mq8'
+          );
+        });
+      });
+
+      it('requires data-media-hashed-id', () => {
+        return getWistiaEmbed('').should.eventually.be.rejectedWith(
+          /The data-media-hashed-id attribute is required for/
         );
+      });
+
+      it('removes iframe after unlayoutCallback', async () => {
+        const player = await getWistiaEmbed('u8p9wq6mq8');
+        const playerIframe = player.querySelector('iframe');
+        expect(playerIframe).to.not.be.null;
+
+        const impl = await player.getImpl(false);
+        impl.unlayoutCallback();
+        expect(player.querySelector('iframe')).to.be.null;
+        expect(impl.iframe_).to.be.null;
       });
     });
 
-    it('requires data-media-hashed-id', () => {
-      return getWistiaEmbed('').should.eventually.be.rejectedWith(
-        /The data-media-hashed-id attribute is required for/
-      );
+    describe('methods', async () => {
+      let impl;
+      beforeEach(async () => {
+        const player = await getWistiaEmbed('u8p9wq6mq8');
+        impl = await player.getImpl(false);
+      });
+
+      it('is interactive', () => {
+        expect(impl.isInteractive()).to.be.true;
+      });
+
+      it('plays', () => {
+        const spy = env.sandbox.spy(impl, 'sendCommand_');
+        impl.play();
+        expect(spy).to.be.calledWith('amp-play');
+      });
+
+      it('can pause', () => {
+        const spy = env.sandbox.spy(impl, 'sendCommand_');
+        impl.play(true);
+        expect(spy).to.be.calledWith('amp-pause');
+      });
+
+      it('can mute', () => {
+        env.sandbox.spy(impl, 'sendCommand_');
+        impl.mute();
+        expect(impl.sendCommand_).calledWith('amp-mute');
+      });
+
+      it('can unmute', () => {
+        env.sandbox.spy(impl, 'sendCommand_');
+        impl.unmute();
+        expect(impl.sendCommand_).calledWith('amp-unmute');
+      });
+
+      it('can enter fullscreen', () => {
+        const spy = env.sandbox.spy(utils, 'fullscreenEnter');
+        impl.fullscreenEnter();
+        expect(spy).calledWith(impl.iframe_);
+        expect(impl.isFullscreen()).to.be.true;
+      });
+
+      it('can exit fullscreen', () => {
+        const spy = env.sandbox.spy(utils, 'fullscreenExit');
+        impl.fullscreenExit();
+        expect(spy).calledWith(impl.iframe_);
+        expect(impl.isFullscreen()).to.be.false;
+      });
     });
   }
 );
