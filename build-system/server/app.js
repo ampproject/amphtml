@@ -1236,10 +1236,6 @@ app.use('/subscription/pingback', (req, res) => {
 app.use('/subscription/register', (req, res) => {
   cors.assertCors(req, res, ['POST']);
 
-  // For demo purposes, log the AMP reader ID and Google Sign-In user info.
-  // Production systems should register an account with this data.
-  console.log(req.body);
-
   // Generate a new ID for this metering state.
   const meteringStateId = 'ppid' + Math.round(Math.random() * 99999999);
 
