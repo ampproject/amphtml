@@ -19,6 +19,7 @@ module.exports = {
     'no-restricted-imports': [
       'error',
       {
+        // Disallow importing dependencies from outside this directory
         'patterns': ['..'],
       },
     ],
