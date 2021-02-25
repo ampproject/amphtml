@@ -50,12 +50,21 @@ import {sequentialIdGenerator} from '../utils/id-generator';
 
 /**
  * The following combinations are allowed.
- * - `attr` and (optionally) `type` can be specified when an attribute maps to
- *   a component prop 1:1.
+ * - `attr`, (optionally) `type`, and (optionally) `media` can be specified when
+ *   an attribute maps to a component prop 1:1.
  * - `attrs` and `parseAttrs` can be specified when multiple attributes map
  *   to a single prop.
  * - `attrPrefix` can be specified when multiple attributes with the same prefix
  *   map to a single prop object. The prefix cannot equal the attribute name.
+ * - `selector` can be specified for children of a certain shape and structure
+ *   according to ChildDef.
+ * - `passthrough` can be specified to slot children using a single
+ *   `<slot>` element for all children. This is in contrast to selector mode,
+ *   which creates a new named `<slot>` for every selector.
+ * - `passthroughNonEmpty` is similar to passthrough mode except that when there
+ *   are no children elements, the returned value will be null instead of the
+ *   unnamed `<slot>`. This allows the Preact environment to have conditional
+ *   behavior depending on whether or not there are children.
  *
  * @typedef {{
  *   attr: (string|undefined),
