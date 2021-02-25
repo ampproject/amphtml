@@ -73,6 +73,10 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
     services: [{'serviceId': 'platform1'}],
   };
 
+  const meteringPlatformConfig = {
+    services: [{'serviceId': 'platform1', 'enableMetering': true}],
+  };
+
   const serviceConfigIframe = {
     services: [
       {
@@ -593,6 +597,58 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
       subscriptionService.startAuthorizationFlow_(false);
       expect(getGrantStatusStub).to.be.calledOnce;
       expect(selectAndActivateStub).to.not.be.called;
+    });
+  });
+
+  describe.only('resetPlatform', () => {
+    const platformKey = 'local';
+    let platform;
+
+    beforeEach(async () => {
+      const serviceAdapter = new ServiceAdapter(subscriptionService);
+      platform = localSubscriptionPlatformFactory(
+        ampdoc,
+        platformConfig.services[0],
+        serviceAdapter
+      );
+      env.sandbox.stub(platform, 'reset');
+
+      subscriptionService.getPlatformConfig_.resolves(meteringPlatformConfig);
+      subscriptionService.pageConfig_ = pageConfig;
+      subscriptionService.platformStore_ = new PlatformStore([platformKey]);
+      subscriptionService.platformStore_.resolvePlatform(platformKey, platform);
+
+      await subscriptionService.initialize_();
+    });
+
+    it('resets a specific platform', async () => {
+      expectAsyncConsoleError(/Platform for id platform1 is not resolved/);
+
+      subscriptionService.resetPlatform(platformKey);
+
+      await flush();
+
+      expect(platform.reset).to.be.called;
+    });
+  });
+
+  describe('resetPlatforms', () => {
+    beforeEach(async () => {
+      subscriptionService.getPlatformConfig_.resolves(meteringPlatformConfig);
+      subscriptionService.pageConfig_ = pageConfig;
+      subscriptionService.platformStore_ = new PlatformStore(['local']);
+      await subscriptionService.initialize_();
+    });
+
+    it('should clear metering flag(s), if metering is enabled', async () => {
+      subscriptionService.metering_.entitlementsWereFetchedWithCurrentMeteringState = true;
+
+      await subscriptionService.resetPlatforms();
+
+      expect(
+        subscriptionService.metering_
+          .entitlementsWereFetchedWithCurrentMeteringState
+      ).to.be.false;
     });
   });
 
