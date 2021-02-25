@@ -63,19 +63,6 @@ describes.realWin('InstrumentationService', {amp: 1}, (env) => {
     expect(event.type).to.equal('test-event');
     expect(event.vars).to.deep.equal({foo: 'bar'});
   });
-
-  it('should bail and emit error if element is detached', () => {
-    expectAsyncConsoleError(/detached/);
-    const detached = ampdoc.win.document.createElement('div');
-    const tracker = root.getTracker(
-      AnalyticsEventType.CUSTOM,
-      CustomEventTracker
-    );
-    const triggerStub = env.sandbox.stub(tracker, 'trigger');
-    service.triggerEventForTarget(detached, 'test-event');
-
-    expect(triggerStub).not.called;
-  });
 });
 
 describes.realWin(
