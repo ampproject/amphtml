@@ -180,13 +180,20 @@ jobs:
   'Nomodule Tests':
     executor:
       name: amphtml-large-executor
+    parameters:
+      config:
+        description: 'Which config file to use'
+        type: enum
+        enum: ['prod', 'canary']
+    environment:
+      config: << parameters.config >>
     steps:
       - setup_vm
       - install_chrome
       - restore_karma_cache:
           cache_name: nomodule
       - run:
-          name: 'Nomodule Tests'
+          name: 'Nomodule Tests (using << parameters.config >>-config.json)'
           command: node build-system/pr-check/nomodule-tests.js
       - save_karma_cache:
           cache_name: nomodule
@@ -194,13 +201,20 @@ jobs:
   'Module Tests':
     executor:
       name: amphtml-large-executor
+    parameters:
+      config:
+        description: 'Which config file to use'
+        type: enum
+        enum: ['prod', 'canary']
+    environment:
+      config: << parameters.config >>
     steps:
       - setup_vm
       - install_chrome
       - restore_karma_cache:
           cache_name: module
       - run:
-          name: 'Module Tests'
+          name: 'Module Tests (using << parameters.config >>-config.json)'
           command: node build-system/pr-check/module-tests.js
       - save_karma_cache:
           cache_name: module
@@ -324,10 +338,18 @@ workflows:
           requires:
             - 'Unminified Build'
       - 'Nomodule Tests':
+          name: 'Nomodule Tests (<< matrix.config >>)'
+          matrix:
+            parameters:
+              config: ['prod', 'canary']
           <<: *push_and_pr_builds
           requires:
             - 'Nomodule Build'
       - 'Module Tests':
+          name: 'Module Tests (<< matrix.config >>)'
+          matrix:
+            parameters:
+              config: ['prod', 'canary']
           <<: *push_and_pr_builds
           requires:
             - 'Nomodule Build'

@@ -26,13 +26,24 @@ const {
   timedExecOrThrow,
 } = require('./utils');
 const {buildTargetsInclude, Targets} = require('./build-targets');
+const {MINIFIED_TARGETS} = require('../tasks/helpers');
 const {runCiJob} = require('./ci-job');
 
 const jobName = 'nomodule-tests.js';
 
+function prependConfig() {
+  // TODO(@ampproject/wg-infra): change prepend-global to take multiple target files instead of looping here.
+  for (const target of MINIFIED_TARGETS) {
+    timedExecOrDie(
+      `gulp prepend-global --${process.env.config} --local_dev --fortesting --derandomize --target=dist/${target}.js`
+    );
+  }
+}
+
 function pushBuildWorkflow() {
   downloadNomoduleOutput();
   timedExecOrDie('gulp update-packages');
+  prependConfig();
   try {
     timedExecOrThrow(
       'gulp integration --nobuild --headless --compiled --report',
@@ -51,6 +62,7 @@ function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
     downloadNomoduleOutput();
     timedExecOrDie('gulp update-packages');
+    prependConfig();
     timedExecOrDie('gulp integration --nobuild --compiled --headless');
   } else {
     printSkipMessage(

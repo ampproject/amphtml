@@ -46,8 +46,10 @@ const TEST_TYPE_SUBTYPES = isGithubActionsBuild()
         'integration',
         [
           'unminified',
-          'nomodule',
-          'module',
+          'nomodule-prod',
+          'nomodule-canary',
+          'module-prod',
+          'module-canary',
           'experimentA',
           'experimentB',
           'experimentC',
@@ -99,7 +101,14 @@ function inferTestType() {
     ? 'nomodule'
     : 'unminified';
 
-  return `${type}/${subtype}`;
+  return `${type}/${subtype}${maybeAddConfigSubtype()}`;
+}
+
+function maybeAddConfigSubtype() {
+  if (isCircleciBuild() && process.env.config) {
+    return `-${process.env.config}`;
+  }
+  return '';
 }
 
 async function postReport(type, action) {
