@@ -53,7 +53,7 @@ export class UserError extends Error {
 
 /**
  * Throws a provided error if the second argument isn't trueish.
- * @param {Object} errorCls
+ * @param {typeof UserError|typeof Error} errorCls
  * @param {T} shouldBeTruthy
  * @param {string} opt_message
  * @param {...*} var_args Arguments substituted into %s in the message
@@ -66,16 +66,18 @@ function assertion(errorCls, shouldBeTruthy, opt_message, var_args) {
     return shouldBeTruthy;
   }
 
-  // Substitute provided values into format string in message
-  const message = Array.prototype.slice
-    // Skip the first 3 arguments to isolate format params
-    .call(arguments, 3)
-    .reduce(
-      (msg, subValue) => msg.replace('%s', subValue),
-      opt_message || 'Assertion failed'
-    );
+  if (errorCls) {
+    // Substitute provided values into format string in message
+    const message = Array.prototype.slice
+      // Skip the first 3 arguments to isolate format params
+      .call(arguments, 3)
+      .reduce(
+        (msg, subValue) => msg.replace('%s', subValue),
+        opt_message || 'Assertion failed'
+      );
 
-  throw new errorCls(message);
+    throw new errorCls(message);
+  }
 }
 
 /**

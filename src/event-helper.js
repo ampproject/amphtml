@@ -150,14 +150,16 @@ export function listenOncePromise(
  */
 export function isLoaded(eleOrWindow) {
   const asImage = /** @type {HTMLImageElement} */ (eleOrWindow);
+  const asDocument = /** @type {Document} */ (eleOrWindow);
   const asWindow = /** @type {Window} */ (eleOrWindow);
+  const asMediaElement = /** @type {HTMLMediaElement} */ (eleOrWindow);
   return !!(
     asImage.complete ||
-    /** @type {Document} */ (eleOrWindow).readyState == 'complete' ||
+    asDocument.readyState == 'complete' ||
     (isHTMLMediaElement(
       /** @type {Element|HTMLMediaElement} */ (eleOrWindow)
     ) &&
-      /** @type {HTMLMediaElement} */ (eleOrWindow).readyState > 0) ||
+      asMediaElement.readyState > 0) ||
     // If the passed in thing is a Window, infer loaded state from
     (asWindow.document && asWindow.document.readyState == 'complete')
   );
@@ -243,14 +245,14 @@ function failedToLoad(eleOrWindow) {
   // they already errored, even though the error event was already dispatched.
   if (isHTMLMediaElement(eleOrWindow)) {
     eleOrWindow[MEDIA_LOAD_FAILURE_SRC_PROPERTY] =
-      eleOrWindow.currentSrc || true;
+      /** @type {HTMLMediaElement} */ (eleOrWindow).currentSrc || true;
   }
 
   // Report failed loads as user errors so that they automatically go
   // into the "document error" bucket.
   let target = eleOrWindow;
-  if (target && target.src) {
-    target = target.src;
+  if (target && /** @type {HTMLMediaElement} */ (target).src) {
+    target = /** @type {HTMLMediaElement} */ (target).src;
   }
   throw user().createError(LOAD_FAILURE_PREFIX, target);
 }

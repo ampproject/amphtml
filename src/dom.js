@@ -782,9 +782,10 @@ export function isAmpElement(element) {
  */
 export function whenUpgradedToCustomElement(element) {
   devAssert(isAmpElement(element), 'element is not AmpElement');
-  /** @type {AmpElement} */
-  const ampElement = element;
-  if (ampElement.createdCallback) {
+  if (
+    /** @type {{createdCallback: (Function|undefined)}}*/ (element)
+      .createdCallback
+  ) {
     // Element already is CustomElement;
     return Promise.resolve(element);
   }

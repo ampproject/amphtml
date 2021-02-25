@@ -36,8 +36,8 @@ let passiveSupported;
  *
  * @param {!EventTarget} element
  * @param {string} eventType
- * @param {function(!Event)} listener
- * @param {Object=} opt_evtListenerOpts
+ * @param {function((!Event|!MessageEvent)):undefined} listener
+ * @param {EventListenerOptions=} opt_evtListenerOpts
  * @return {!UnlistenDef}
  */
 export function internalListenImplementation(

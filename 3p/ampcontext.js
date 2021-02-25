@@ -334,7 +334,7 @@ export class AbstractAmpContext {
    */
   setupMetadata_(data) {
     // TODO(alanorozco): Use metadata utils in 3p/frame-metadata
-    /** @type {{_context:AmpContext|undefined,attributes:{_context:AmpContext}}} */
+    /** @type {{_context:(AmpContext|undefined),attributes:({_context:AmpContext}|undefined)}} */
     const dataObject = devAssert(
       typeof data === 'string' ? tryParseJson(data) : data,
       'Could not setup metadata.'

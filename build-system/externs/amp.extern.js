@@ -90,6 +90,14 @@ Event.prototype.data = {};
 // Events can contain origins when distributed between frames.
 Event.prototype.origin;
 
+// Synthetic Events can be triggered from the Event Interface.
+Event.prototype.initCustomEvent = function (
+  type,
+  canBubble,
+  cancelable,
+  detail
+) {};
+
 // HTMLAnchorElements contian origins.
 HTMLAnchorElement.prototype.origin;
 
