@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {AmpDoc as AmpDocDef} from '../../../src/service/ampdoc-impl';
 import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
 
@@ -41,7 +40,7 @@ export class Metering {
   /**
    *
    * @param {{
-   *   ampdoc: !AmpDocDef,
+   *   ampdoc: !../../../src/service/ampdoc-impl.AmpDoc,
    *   platformKey: string,
    * }} params
    */
