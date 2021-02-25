@@ -210,6 +210,9 @@ window.__AMP_LOG.dev;
 window.__AMP_LOG.userForEmbed;
 
 /** @type {boolean} */
+window.ENABLE_LOG;
+
+/** @type {boolean} */
 var IS_ESM;
 
 /** @type {string|undefined} */
