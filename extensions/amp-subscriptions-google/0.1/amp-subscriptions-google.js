@@ -647,7 +647,7 @@ export class GoogleSubscriptionsPlatform {
           googleMeteringStrategy === GoogleMeteringStrategy.EXTENDED_ACCESS &&
           meteringState
         ) {
-          // Tell SwG to send a new entitlements request.
+          // Make sure SwG sends a fresh request, instead of using cache.
           this.runtime_.clear();
 
           entitlementsParams.metering = {state: meteringState};
