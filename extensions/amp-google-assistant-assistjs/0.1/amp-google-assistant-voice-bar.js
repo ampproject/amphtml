@@ -22,6 +22,7 @@
 import {Services} from '../../../src/services';
 import {addAttributesToElement} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import * as closure from './libs/closure-bundle'
 
 export class AmpGoogleAssistantVoiceBar extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -33,6 +34,9 @@ export class AmpGoogleAssistantVoiceBar extends AMP.BaseElement {
 
     /** @private {?AssistjsFrameService} */
     this.frameService_ = null;
+
+    /** @private */
+    this.channel_ = null;
   }
 
   /** @override */
@@ -62,10 +66,22 @@ export class AmpGoogleAssistantVoiceBar extends AMP.BaseElement {
       this.element.appendChild(iframe);
     });
 
+    let serviceHandlersMap = new Map();
+    serviceHandlersMap.set('RuntimeService.TriggerSendTextQuery',
+      () => {
+        this.frameService_.sendTextQuery();
+      });
+    serviceHandlersMap.set('RuntimeService.TriggerOpenMic',
+      () => {
+        this.frameService_.openMic();
+      });
+
     iframe.addEventListener('load', () => {
-      // TODO: create a channel to receive requests from underlying assist.js iframe.
-      this.frameService_.openMic();
-      this.frameService_.sendTextQuery();
+      this.channel_ = closure.createRespondingChannel(
+        iframe.contentWindow,
+        origin,
+        serviceHandlersMap
+      );
     });
 
     // Return a load promise for the frame so the runtime knows when the
