@@ -1,5 +1,6 @@
-<!doctype html>
+<!DOCTYPE html>
 <html amp lang="en">
+  <!-- prettier-ignore -->
   <head>
     <meta charset="utf-8">
     <script async src="https://cdn.ampproject.org/v0.js"></script>
@@ -33,8 +34,8 @@
       poster-portrait-src="https://example.com/my-story/poster/3x4.jpg"
       poster-square-src="https://example.com/my-story/poster/1x1.jpg"
       poster-landscape-src="https://example.com/my-story/poster/4x3.jpg"
-      standalone>
-
+      standalone
+    >
       <amp-story-auto-ads id="i-amphtml-demo-1" development>
         <script type="application/json">
           {
@@ -59,19 +60,19 @@
           <h1>two Page</h1>
         </amp-story-grid-layer>
       </amp-story-page>
-      
+
       <amp-story-page id="three">
         <amp-story-grid-layer template="vertical">
           <h1>three Page</h1>
         </amp-story-grid-layer>
       </amp-story-page>
-      
+
       <amp-story-page id="four">
         <amp-story-grid-layer template="vertical">
           <h1>four Page</h1>
         </amp-story-grid-layer>
       </amp-story-page>
-      
+
       <amp-story-page id="five">
         <amp-story-grid-layer template="vertical">
           <h1>five Page</h1>
@@ -144,7 +145,10 @@
         </amp-story-grid-layer>
       </amp-story-page>
 
-      <amp-story-bookend src="../../examples/amp-story/bookendv1.json" layout="nodisplay">
+      <amp-story-bookend
+        src="../../examples/amp-story/bookendv1.json"
+        layout="nodisplay"
+      >
       </amp-story-bookend>
     </amp-story>
   </body>

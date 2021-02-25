@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html ⚡ lang="en">
+  <!-- prettier-ignore -->
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,minimum-scale=1">
@@ -30,7 +31,7 @@
         -moz-osx-font-smoothing: grayscale;
       }
       body {
-        font: 14px "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font: 14px 'Helvetica Neue', Helvetica, Arial, sans-serif;
         line-height: 1.4em;
         background: #f5f5f5;
         color: #4d4d4d;
@@ -130,7 +131,7 @@
         transform: rotate(90deg);
       }
       .toggle-all + label:before {
-        content: "❯";
+        content: '❯';
         font-size: 22px;
         color: #e6e6e6;
         padding: 10px 27px 10px 27px;
@@ -216,7 +217,7 @@
         color: #af5b5e;
       }
       .todo-list li .destroy:after {
-        content: "×";
+        content: '×';
       }
       .todo-list li:hover .destroy {
         display: block;
@@ -235,7 +236,7 @@
         border-top: 1px solid #e6e6e6;
       }
       .footer:before {
-        content: "";
+        content: '';
         position: absolute;
         right: 0;
         bottom: 0;
@@ -333,7 +334,11 @@
     <title>Vue.js TodoMVC in AMP Script</title>
   </head>
   <body>
-    <amp-script layout="container" src="/examples/amp-script/vue-todomvc.js" sandbox="allow-forms">
+    <amp-script
+      layout="container"
+      src="/examples/amp-script/vue-todomvc.js"
+      sandbox="allow-forms"
+    >
       <div class="todoapp">
         <header class="header">
           <h1>todos</h1>
@@ -344,7 +349,7 @@
             placeholder="What needs to be done?"
             v-model="newTodo"
             @keyup.enter="addTodo"
-          >
+          />
         </header>
         <section class="main" v-show="todos.length" v-cloak>
           <input
@@ -352,7 +357,7 @@
             class="toggle-all"
             type="checkbox"
             v-model="allDone"
-          >
+          />
           <label for="toggle-all"></label>
           <ul class="todo-list">
             <li
@@ -367,7 +372,7 @@
                   type="checkbox"
                   :checked="todo.completed"
                   @change="todo.completed = !todo.completed"
-                >
+                />
                 <label @dblclick="editTodo(todo)">{{ todo.title }}</label>
                 <button class="destroy" @click="removeTodo(todo)"></button>
               </div>
@@ -378,7 +383,7 @@
                 @blur="doneEdit(todo)"
                 @keyup.enter="doneEdit(todo)"
                 @keyup.esc="cancelEdit(todo)"
-              >
+              />
             </li>
           </ul>
         </section>
@@ -388,16 +393,35 @@
           </span>
           <ul class="filters">
             <li>
-              <a href="#" @click="visibility = 'all'" :class="{ selected: visibility == 'all' }">All</a>
+              <a
+                href="#"
+                @click="visibility = 'all'"
+                :class="{ selected: visibility == 'all' }"
+                >All</a
+              >
             </li>
             <li>
-              <a href="#" @click="visibility = 'active'" :class="{ selected: visibility == 'active' }">Active</a>
+              <a
+                href="#"
+                @click="visibility = 'active'"
+                :class="{ selected: visibility == 'active' }"
+                >Active</a
+              >
             </li>
             <li>
-              <a href="#" @click="visibility = 'completed'" :class="{ selected: visibility == 'completed' }">Completed</a>
+              <a
+                href="#"
+                @click="visibility = 'completed'"
+                :class="{ selected: visibility == 'completed' }"
+                >Completed</a
+              >
             </li>
           </ul>
-          <button class="clear-completed" @click="removeCompleted" v-show="todos.length > remaining">
+          <button
+            class="clear-completed"
+            @click="removeCompleted"
+            v-show="todos.length > remaining"
+          >
             Clear completed
           </button>
         </footer>

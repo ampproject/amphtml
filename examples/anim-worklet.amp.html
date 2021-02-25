@@ -11,8 +11,9 @@
  * limitations under the License.
 -->
 
-<!doctype html>
+<!DOCTYPE html>
 <html amp>
+  <!-- prettier-ignore -->
   <head>
     <meta charset="utf-8">
     <link rel="canonical" href="anim-worklet.amp.html">
@@ -23,7 +24,8 @@
     <script async src="https://cdn.ampproject.org/v0.js"></script>
 
     <style amp-custom>
-      html, body {
+      html,
+      body {
         margin: 0;
         padding: 0;
         position: relative;
@@ -45,8 +47,8 @@
   </head>
   <body>
     <amp-animation id="anim1" layout="nodisplay">
-        <script type="application/json">
-          {
+      <script type="application/json">
+        {
           "duration": "2s",
           "fill": "both",
           "direction": "alternate",
@@ -54,23 +56,29 @@
             {
               "selector": "#target",
               "keyframes": [
-                { "transform": "translateY(0)" },
-                { "transform": "translateY(30vh)" }
+                {"transform": "translateY(0)"},
+                {"transform": "translateY(30vh)"}
               ]
             }
           ]
         }
-        </script>
-      </amp-animation>
-      <div></div>
-      <div id="target">
-        <amp-position-observer
-          intersection-ratios="1"
-          on="scroll:anim1.seekTo(percent=event.percent)"
-          layout="nodisplay">
-        </amp-position-observer>        
-        <amp-img layout=responsive width=411 height=411 src="https://placekitten.com/g/4000/4000"></amp-img>
-      </div>
-      <div></div>
+      </script>
+    </amp-animation>
+    <div></div>
+    <div id="target">
+      <amp-position-observer
+        intersection-ratios="1"
+        on="scroll:anim1.seekTo(percent=event.percent)"
+        layout="nodisplay"
+      >
+      </amp-position-observer>
+      <amp-img
+        layout="responsive"
+        width="411"
+        height="411"
+        src="https://placekitten.com/g/4000/4000"
+      ></amp-img>
+    </div>
+    <div></div>
   </body>
 </html>

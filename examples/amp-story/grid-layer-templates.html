@@ -1,15 +1,14 @@
-<!doctype html>
+<!DOCTYPE html>
 <html amp lang="en">
+  <!-- prettier-ignore -->
   <head>
     <meta charset="utf-8">
     <script async src="https://cdn.ampproject.org/v0.js"></script>
-    <script async custom-element="amp-story"
-        src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+    <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
     <title>My Story</title>
     <meta name="description" content="Get started with amp-story">
 
-    <meta name="viewport"
-          content="width=device-width,minimum-scale=1,initial-scale=1">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
     <link rel="canonical" href="grid-layer-templates.html">
     <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
     <style amp-custom>
@@ -26,12 +25,11 @@
         height: 100%;
         padding: 8px;
       }
-      </style>
+    </style>
   </head>
 
   <body>
     <amp-story standalone>
-
       <amp-story-page id="cover">
         <amp-story-grid-layer template="vertical">
           <h1>Templates</h1>
@@ -52,7 +50,11 @@
 
       <amp-story-page id="fill-template-example">
         <amp-story-grid-layer template="fill">
-          <amp-img src="https://unsplash.it/800/400/" width="800" height="400"></amp-img>
+          <amp-img
+            src="https://unsplash.it/800/400/"
+            width="800"
+            height="400"
+          ></amp-img>
         </amp-story-grid-layer>
       </amp-story-page>
 
@@ -67,7 +69,9 @@
           <div class="content">A paragraph</div>
           <div class="content">A longer paragraph</div>
           <div class="content">A much longer paragraph</div>
-          <div class="content">The looooongest Paragraph. By far. So very very much longer.</div>
+          <div class="content">
+            The looooongest Paragraph. By far. So very very much longer.
+          </div>
         </amp-story-grid-layer>
       </amp-story-page>
 
@@ -120,7 +124,6 @@
           <div class="content">Paragraph 6</div>
         </amp-story-grid-layer>
       </amp-story-page>
-
     </amp-story>
   </body>
 </html>

@@ -1,5 +1,6 @@
-<!doctype html>
+<!DOCTYPE html>
 <html amp lang="en">
+  <!-- prettier-ignore -->
   <head>
     <meta charset="utf-8">
     <script async src="https://cdn.ampproject.org/v0.js"></script>
@@ -15,7 +16,9 @@
       amp-story-page {
         background: white;
       }
-      #link1, #link2, #link3 {
+      #link1,
+      #link2,
+      #link3 {
         position: relative;
         width: 30px;
       }
@@ -51,19 +54,29 @@
       publisher="The AMP Team"
       publisher-logo-src="https://example.com/logo/1x1.png"
       poster-portrait-src="https://example.com/my-story/poster/3x4.jpg"
-      standalone>
-
+      standalone
+    >
       <amp-story-page id="1">
         <amp-story-grid-layer template="vertical">
           <h2>Test Story for Invalid Links</h2>
-          <p>This story is best tested when story pages are smaller than 345px x 575px.</p>
+          <p>
+            This story is best tested when story pages are smaller than 345px x
+            575px.
+          </p>
         </amp-story-grid-layer>
       </amp-story-page>
 
       <amp-story-page id="2">
         <amp-story-grid-layer template="vertical">
-          <p>Clicking link(s) within 48px of the left or right edge of this page should result in navigating to the next or previous page, and not actually open the link.</p>
-          <p>Clicking the link(s) centered on this page should allow opening the link.</p>
+          <p>
+            Clicking link(s) within 48px of the left or right edge of this page
+            should result in navigating to the next or previous page, and not
+            actually open the link.
+          </p>
+          <p>
+            Clicking the link(s) centered on this page should allow opening the
+            link.
+          </p>
           <a href="http://www.google.com" id="link1">link1</a>
           <a href="http://www.google.com" id="link2">link2</a>
           <a href="http://www.google.com" id="link3">link3</a>
@@ -72,17 +85,25 @@
 
       <amp-story-page id="3">
         <amp-story-grid-layer template="vertical">
-            <a href="http://www.google.com" id="link4">Links that occupy too much area on the page should be ignored.</a>
+          <a href="http://www.google.com" id="link4"
+            >Links that occupy too much area on the page should be ignored.</a
+          >
         </amp-story-grid-layer>
       </amp-story-page>
 
       <amp-story-page id="4">
         <amp-story-grid-layer template="vertical">
-            <a href="http://www.google.com" id="link5">Links that do not occupy too much area on the page should be treated as normal.</a>
+          <a href="http://www.google.com" id="link5"
+            >Links that do not occupy too much area on the page should be
+            treated as normal.</a
+          >
         </amp-story-grid-layer>
       </amp-story-page>
 
-      <amp-story-bookend src="../../examples/amp-story/bookendv1.json" layout="nodisplay">
+      <amp-story-bookend
+        src="../../examples/amp-story/bookendv1.json"
+        layout="nodisplay"
+      >
       </amp-story-bookend>
     </amp-story>
   </body>

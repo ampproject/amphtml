@@ -1,5 +1,6 @@
-<!doctype html>
+<!DOCTYPE html>
 <html amp lang="en">
+  <!-- prettier-ignore -->
   <head>
     <meta charset="utf-8">
     <script async src="https://cdn.ampproject.org/v0.js"></script>
@@ -35,18 +36,18 @@
       poster-portrait-src="https://example.com/my-story/poster/3x4.jpg"
       poster-square-src="https://example.com/my-story/poster/1x1.jpg"
       poster-landscape-src="https://example.com/my-story/poster/4x3.jpg"
-      standalone>
-
-        <amp-story-auto-ads>
-            <script type="application/json">
-              {
-                "ad-attributes": {
-                  "type": "doubleclick",
-                  "data-slot": "/30497360/a4a/amp_story_dfp_example"
-                }
-              }
-            </script>
-          </amp-story-auto-ads>
+      standalone
+    >
+      <amp-story-auto-ads>
+        <script type="application/json">
+          {
+            "ad-attributes": {
+              "type": "doubleclick",
+              "data-slot": "/30497360/a4a/amp_story_dfp_example"
+            }
+          }
+        </script>
+      </amp-story-auto-ads>
 
       <amp-story-page id="cover">
         <amp-story-grid-layer template="vertical">
@@ -71,7 +72,8 @@
             width="720"
             height="405"
             layout="responsive"
-            controls>
+            controls
+          >
           </amp-video>
         </amp-story-grid-layer>
       </amp-story-page>
@@ -85,7 +87,8 @@
             width="720"
             height="405"
             layout="responsive"
-            controls>
+            controls
+          >
           </amp-video>
         </amp-story-grid-layer>
       </amp-story-page>
@@ -102,7 +105,8 @@
             artist="Sintel"
             height="50"
             width="auto"
-            controls>
+            controls
+          >
           </amp-audio>
         </amp-story-grid-layer>
       </amp-story-page>
@@ -197,7 +201,10 @@
         </amp-story-grid-layer>
       </amp-story-page>
 
-      <amp-story-bookend src="../../examples/amp-story/bookendv1.json" layout="nodisplay">
+      <amp-story-bookend
+        src="../../examples/amp-story/bookendv1.json"
+        layout="nodisplay"
+      >
       </amp-story-bookend>
     </amp-story>
   </body>

@@ -13,12 +13,13 @@
   See the License for the specific language governing permissions and
   limitations under the license.
 -->
-<!doctype html>
+<!DOCTYPE html>
 <html ⚡>
-<head>
+  <!-- prettier-ignore -->
+  <head>
     <meta charset="utf-8">
     <title>AMP Ad Lightbox Prototype Example</title>
-    <link rel="canonical" href="amps.html" >
+    <link rel="canonical" href="amps.html">
     <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
     <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
     <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
@@ -36,45 +37,53 @@
         color: #ccc;
       }
     </style>
-</head>
-<body>
-  <!--
+  </head>
+  <body>
+    <!--
     THIS EXAMPLE IS INVALID AMP.
 
     It corresponds to an in-progress prototype. It will not validate or function
     properly under normal circumstances.
   -->
 
-  <div on="tap:main-lightbox"
-     role="button"
-     class="button button-secondary play"
-     tabindex="0">
-    <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w400-h300-no-n"
-             width="400"
-             height="300"
-             layout="responsive">
-    </amp-img>
-  </div>
+    <div
+      on="tap:main-lightbox"
+      role="button"
+      class="button button-secondary play"
+      tabindex="0"
+    >
+      <amp-img
+        src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w400-h300-no-n"
+        width="400"
+        height="300"
+        layout="responsive"
+      >
+      </amp-img>
+    </div>
 
-  <amp-lightbox id="main-lightbox"
-                class="main-lightbox"
-                layout="nodisplay"
-                animate-in="fly-in-bottom"
-                close-button>
-    <amp-carousel type="slides"
-                  height="300"
-                  layout="fixed-height">
-      <amp-img src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w400-h300-no-n"
-               width="400"
-               height="300"
-               layout="responsive">
-      </amp-img>
-      <amp-img src="https://amp.dev/static/samples/img/amp.jpg"
-               layout="responsive"
-               width="1080"
-               height="610">
-      </amp-img>
-    </amp-carousel>
-  </amp-lightbox>
-</body>
+    <amp-lightbox
+      id="main-lightbox"
+      class="main-lightbox"
+      layout="nodisplay"
+      animate-in="fly-in-bottom"
+      close-button
+    >
+      <amp-carousel type="slides" height="300" layout="fixed-height">
+        <amp-img
+          src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w400-h300-no-n"
+          width="400"
+          height="300"
+          layout="responsive"
+        >
+        </amp-img>
+        <amp-img
+          src="https://amp.dev/static/samples/img/amp.jpg"
+          layout="responsive"
+          width="1080"
+          height="610"
+        >
+        </amp-img>
+      </amp-carousel>
+    </amp-lightbox>
+  </body>
 </html>
