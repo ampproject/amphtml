@@ -697,7 +697,7 @@ export class AmpStory360 extends AMP.BaseElement {
    * @param {!Array<!Element>} mediaEl Either an amp-img or amp-video
    * @private
    */
-  setAccessableText_(mediaEl) {
+  setAccessibleText_(mediaEl) {
     const altTags = ['alt', 'title', 'aria-label']; /** In order of priority. */
     const altTag = altTags.find((attr) => mediaEl.getAttribute(attr));
     if (altTag) {
