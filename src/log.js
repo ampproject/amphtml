@@ -155,7 +155,7 @@ export class Log {
      */
     this.win = getMode().test && win.__AMP_TEST_IFRAME ? win.parent : win;
 
-    /** @private @const {function(number, boolean|undefined):!LogLevel} */
+    /** @private @const {function(number, boolean):!LogLevel} */
     this.levelFunc_ = levelFunc;
 
     /** @private @const {!LogLevel} */
@@ -647,7 +647,7 @@ function elementStringOrPassthru(val) {
   if (val && /** @type {Element} **/ (val).nodeType == 1) {
     const asElement /** @type {Element} */ = /** @type {Element} **/ (val);
     return (
-      asElement.tagName.toLowerCase() + (asElement.id ? '#' + asElement.id : '')
+      asElement.localName + (asElement.id ? '#' + asElement.id : '')
     );
   }
   return val;
