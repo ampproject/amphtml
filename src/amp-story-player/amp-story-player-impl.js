@@ -128,7 +128,8 @@ let DocumentStateTypeDef;
  *   messagingPromise: ?Promise,
  *   title: (?string),
  *   posterImage: (?string),
- *   storyContentLoaded: ?boolean
+ *   storyContentLoaded: ?boolean,
+ *   connectedDeferred: !Deferred
  * }}
  */
 let StoryDef;
@@ -257,6 +258,7 @@ export class AmpStoryPlayer {
     this.element_.mute = this.mute.bind(this);
     this.element_.unmute = this.unmute.bind(this);
     this.element_.getStoryState = this.getStoryState.bind(this);
+    this.element_.rewind = this.rewind.bind(this);
   }
 
   /**
@@ -379,6 +381,21 @@ export class AmpStoryPlayer {
   }
 
   /**
+<<<<<<< HEAD
+=======
+   * Initializes story with properties used in this class and adds it to the
+   * stories array.
+   * @param {!StoryDef} story
+   */
+  initializeAndAddStory_(story) {
+    story.connectedDeferred = new Deferred();
+    story.idx = this.stories_.length - 1;
+    story.distance = story.idx - this.currentIdx_;
+    this.stories_.push(story);
+  }
+
+  /**
+>>>>>>> 623f57252 (rewind API and small refactor)
    * Initializes stories declared inline as <a> elements.
    * @private
    */
@@ -391,6 +408,16 @@ export class AmpStoryPlayer {
         posterImage: element.getAttribute('data-poster-portrait-src'),
       });
 
+<<<<<<< HEAD
+=======
+    anchorEls.forEach((anchorEl) => {
+      const story = /** @type {!StoryDef} */ ({
+        href: anchorEl.href,
+        title: (anchorEl.textContent && anchorEl.textContent.trim()) || null,
+        posterImage: anchorEl.getAttribute('data-poster-portrait-src'),
+      });
+
+>>>>>>> 623f57252 (rewind API and small refactor)
       this.initializeAndAddStory_(story);
     });
   }
@@ -1096,6 +1123,7 @@ export class AmpStoryPlayer {
   appendToDom_(story) {
     this.rootEl_.appendChild(story.iframe);
     this.setUpMessagingForStory_(story);
+    story.connectedDeferred.resolve();
   }
 
   /**
@@ -1104,6 +1132,7 @@ export class AmpStoryPlayer {
    */
   removeFromDom_(story) {
     story.storyContentLoaded = false;
+    story.connectedDeferred = new Deferred();
     story.iframe.setAttribute('src', '');
     story.iframe.remove();
   }
@@ -1273,6 +1302,32 @@ export class AmpStoryPlayer {
     story.messagingPromise.then((messaging) =>
       messaging.sendRequest('selectPage', {'id': pageId})
     );
+  }
+
+  /**
+   * Rewinds the given story.
+   * @param {string} storyUrl
+   */
+  rewind(storyUrl) {
+    const storyIdx = storyUrl
+      ? findIndex(this.stories_, ({href}) => href === storyUrl)
+      : this.currentIdx_;
+
+    const story = this.stories_[storyIdx];
+    if (!story) {
+      throw new Error(`Story URL not found in the player: ${storyUrl}`);
+    }
+
+    let connectedPromise = Promise.resolve();
+    if (!story.iframe.isConnected) {
+      connectedPromise = story.connectedDeferred.promise;
+    }
+
+    connectedPromise.then(() => {
+      story.messagingPromise.then((messaging) =>
+        messaging.sendRequest('selectPage', {'rewind': true})
+      );
+    });
   }
 
   /**

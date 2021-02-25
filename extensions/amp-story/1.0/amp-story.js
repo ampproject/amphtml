@@ -57,6 +57,7 @@ import {AmpStoryViewerMessagingHandler} from './amp-story-viewer-messaging-handl
 import {AnalyticsVariable, getVariableService} from './variable-service';
 import {CSS} from '../../../build/amp-story-1.0.css';
 import {CommonSignals} from '../../../src/common-signals';
+import {Deferred} from '../../../src/utils/promise';
 import {EventType, dispatch} from './events';
 import {Gestures} from '../../../src/gesture';
 import {HistoryState, getHistoryState, setHistoryState} from './history';
@@ -360,6 +361,9 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private {?LiveStoryManager} */
     this.liveStoryManager_ = null;
+
+    /** @private {!Deferred} */
+    this.initialStoryLayoutDeferred_ = new Deferred();
   }
 
   /** @override */
@@ -1024,7 +1028,8 @@ export class AmpStory extends AMP.BaseElement {
         if (infoDialog) {
           infoDialog.build();
         }
-      });
+      })
+      .then(() => this.initialStoryLayoutDeferred_.resolve());
 
     // Do not block the layout callback on the completion of these promises, as
     // that prevents descendents from being laid out (and therefore loaded).
@@ -2652,6 +2657,8 @@ export class AmpStory extends AMP.BaseElement {
           ? NavigationDirection.NEXT
           : NavigationDirection.PREVIOUS
       );
+    } else if (data['rewind']) {
+      this.initialStoryLayoutDeferred_.promise.then(() => this.replay_());
     }
   }
 

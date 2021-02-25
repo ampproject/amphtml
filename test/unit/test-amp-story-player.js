@@ -799,6 +799,44 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       );
     });
 
+    it('rewind() callback should rewind current story', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      attachPlayerWithStories(playerEl, 1);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+      await nextTick();
+
+      const sendRequestSpy = env.sandbox.spy(fakeMessaging, 'sendRequest');
+      player.rewind('https://example.com/story0.html');
+      await nextTick();
+
+      expect(sendRequestSpy).to.have.been.calledWith('selectPage', {
+        'rewind': true,
+      });
+    });
+
+    it('rewind() callback should eventually rewind story without iframe', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      attachPlayerWithStories(playerEl, 3);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+      await nextTick();
+
+      const sendRequestSpy = env.sandbox.spy(fakeMessaging, 'sendRequest');
+      player.rewind('https://example.com/story0.html');
+
+      await player.go(2);
+      await nextTick();
+
+      expect(sendRequestSpy).to.have.been.calledWith('selectPage', {
+        'rewind': true,
+      });
+    });
+
     // TODO(proyectoramirez): delete once add() is implemented.
     it('show callback should throw when story is not found', async () => {
       const playerEl = win.document.createElement('amp-story-player');
