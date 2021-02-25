@@ -295,7 +295,7 @@ export class ConsentUI {
       // at build time. (see #18841).
       if (isAmpElement(this.ui_)) {
         whenUpgradedToCustomElement(this.ui_)
-          .then(() => this.ui_.whenBuilt())
+          .then(() => this.ui_.build())
           .then(() => show());
       } else {
         show();
