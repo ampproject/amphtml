@@ -381,22 +381,6 @@ export class AmpStoryPlayer {
   }
 
   /**
-<<<<<<< HEAD
-=======
-   * Initializes story with properties used in this class and adds it to the
-   * stories array.
-   * @param {!StoryDef} story
-   * @private
-   */
-  initializeAndAddStory_(story) {
-    story.connectedDeferred = new Deferred();
-    story.idx = this.stories_.length;
-    story.distance = story.idx - this.currentIdx_;
-    this.stories_.push(story);
-  }
-
-  /**
->>>>>>> 623f57252 (rewind API and small refactor)
    * Initializes stories declared inline as <a> elements.
    * @private
    */
@@ -409,16 +393,6 @@ export class AmpStoryPlayer {
         posterImage: element.getAttribute('data-poster-portrait-src'),
       });
 
-<<<<<<< HEAD
-=======
-    anchorEls.forEach((anchorEl) => {
-      const story = /** @type {!StoryDef} */ ({
-        href: anchorEl.href,
-        title: (anchorEl.textContent && anchorEl.textContent.trim()) || null,
-        posterImage: anchorEl.getAttribute('data-poster-portrait-src'),
-      });
-
->>>>>>> 623f57252 (rewind API and small refactor)
       this.initializeAndAddStory_(story);
     });
   }
@@ -767,7 +741,15 @@ export class AmpStoryPlayer {
    * @return {!Promise}
    */
   show(storyUrl, pageId = null) {
-    const storyIdx = this.getStoryIdxFromUrl_(storyUrl);
+    // TODO(enriqe): sanitize URLs for matching.
+    const storyIdx = storyUrl
+      ? findIndex(this.stories_, ({href}) => href === storyUrl)
+      : this.currentIdx_;
+
+    // TODO(#28987): replace for add() once implemented.
+    if (!this.stories_[storyIdx]) {
+      throw new Error(`Story URL not found in the player: ${storyUrl}`);
+    }
 
     let renderPromise = Promise.resolve();
     if (storyIdx !== this.currentIdx_) {
@@ -1298,36 +1280,29 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * Returns the storyIdx of a story given a URL.
-   * @param {string} storyUrl
-   * @return {number}
-   * @private
-   */
-  getStoryIdxFromUrl_(storyUrl) {
-    // TODO(enriqe): sanitize URLs for matching.
-    const storyIdx = storyUrl
-      ? findIndex(this.stories_, ({href}) => href === storyUrl)
-      : this.currentIdx_;
-
-    // TODO(#28987): add() stories when show() calls this and story isn't added
-    // yet.
-    if (!this.stories_[storyIdx]) {
-      throw new Error(`Story URL not found in the player: ${storyUrl}`);
-    }
-
-    return storyIdx;
-  }
-
-  /**
    * Rewinds the given story.
    * @param {string} storyUrl
    */
   rewind(storyUrl) {
-    const story = this.stories_[this.getStoryIdxFromUrl_(storyUrl)];
+    const storyIdx = storyUrl
+      ? findIndex(this.stories_, ({href}) => href === storyUrl)
+      : this.currentIdx_;
 
-    story.messagingPromise.then((messaging) =>
-      messaging.sendRequest('selectPage', {'rewind': true})
-    );
+    const story = this.stories_[storyIdx];
+    if (!story) {
+      throw new Error(`Story URL not found in the player: ${storyUrl}`);
+    }
+
+    let connectedPromise = Promise.resolve();
+    if (!story.iframe.isConnected) {
+      connectedPromise = story.connectedDeferred.promise;
+    }
+
+    connectedPromise.then(() => {
+      story.messagingPromise.then((messaging) =>
+        messaging.sendRequest('selectPage', {'rewind': true})
+      );
+    });
   }
 
   /**
