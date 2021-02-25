@@ -10,7 +10,10 @@ const {Targets, buildTargetsInclude} = require('./build-targets');
 
 const jobName = 'visual-diff-tests.js';
 
-const esmFlag = argv.type === 'module' ? ' --esm' : '';
+let baseCommand = 'gulp visual-diff';
+if (argv.type === 'module') {
+  baseCommand += ' --esm';
+}
 
 /**
  * Steps to run during push builds.
