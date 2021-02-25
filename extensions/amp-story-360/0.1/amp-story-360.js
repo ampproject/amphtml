@@ -679,6 +679,14 @@ export class AmpStory360 extends AMP.BaseElement {
       'amp-story-360 must contain an amp-img or amp-video element.'
     );
 
+    // Puts alt-text on canvas element so it can be read by screen readers.
+    // The media element is hidden with CSS it no longer can read it.
+    const altText = (ampImgEl || this.ampVideoEl_).getAttribute('alt-text');
+    if (altText) {
+      this.canvas_.setAttribute('role', 'img');
+      this.canvas_.setAttribute('aria-label', altText);
+    }
+
     if (ampImgEl) {
       return this.setupAmpImgRenderer_(ampImgEl);
     }
