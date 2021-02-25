@@ -767,15 +767,7 @@ export class AmpStoryPlayer {
    * @return {!Promise}
    */
   show(storyUrl, pageId = null) {
-    // TODO(enriqe): sanitize URLs for matching.
-    const storyIdx = storyUrl
-      ? findIndex(this.stories_, ({href}) => href === storyUrl)
-      : this.currentIdx_;
-
-    // TODO(#28987): replace for add() once implemented.
-    if (!this.stories_[storyIdx]) {
-      throw new Error(`Story URL not found in the player: ${storyUrl}`);
-    }
+    const storyIdx = this.getStoryIdxFromUrl_(storyUrl);
 
     let renderPromise = Promise.resolve();
     if (storyIdx !== this.currentIdx_) {
@@ -1306,29 +1298,36 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * Rewinds the given story.
+   * Returns the storyIdx of a story given a URL.
    * @param {string} storyUrl
+   * @return {number}
+   * @private
    */
-  rewind(storyUrl) {
+  getStoryIdxFromUrl_(storyUrl) {
+    // TODO(enriqe): sanitize URLs for matching.
     const storyIdx = storyUrl
       ? findIndex(this.stories_, ({href}) => href === storyUrl)
       : this.currentIdx_;
 
-    const story = this.stories_[storyIdx];
-    if (!story) {
+    // TODO(#28987): add() stories when show() calls this and story isn't added
+    // yet.
+    if (!this.stories_[storyIdx]) {
       throw new Error(`Story URL not found in the player: ${storyUrl}`);
     }
 
-    let connectedPromise = Promise.resolve();
-    if (!story.iframe.isConnected) {
-      connectedPromise = story.connectedDeferred.promise;
-    }
+    return storyIdx;
+  }
 
-    connectedPromise.then(() => {
-      story.messagingPromise.then((messaging) =>
-        messaging.sendRequest('selectPage', {'rewind': true})
-      );
-    });
+  /**
+   * Rewinds the given story.
+   * @param {string} storyUrl
+   */
+  rewind(storyUrl) {
+    const story = this.stories_[this.getStoryIdxFromUrl_(storyUrl)];
+
+    story.messagingPromise.then((messaging) =>
+      messaging.sendRequest('selectPage', {'rewind': true})
+    );
   }
 
   /**
