@@ -100,10 +100,6 @@ describes.realWin(
         expect(impl.supportsPlatform()).to.be.true;
       });
 
-      it('supports platform', () => {
-        expect(impl.supportsPlatform()).to.be.true;
-      });
-
       it('does not pre-implement MediaSession API', () => {
         expect(impl.preimplementsMediaSessionAPI()).to.be.false;
       });
