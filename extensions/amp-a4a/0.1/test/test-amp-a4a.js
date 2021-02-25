@@ -1443,7 +1443,12 @@ describe('amp-a4a', () => {
       expect(getAdUrlSpy.calledOnce, 'getAdUrl called exactly once').to.be.true;
       expect(
         getAdUrlSpy.calledWith(
-          {consentState: null, consentString: null, gdprApplies: null},
+          {
+            consentState: null,
+            consentString: null,
+            gdprApplies: null,
+            additionalConsent: null,
+          },
           rtcResponse
         )
       ).to.be.true;
@@ -2583,6 +2588,7 @@ describe('amp-a4a', () => {
             consentState: CONSENT_POLICY_STATE.SUFFICIENT,
             consentString,
             gdprApplies,
+            additionalConsent: consentMetadata['additionalConsent'],
           })
         ).calledOnce;
         expect(
@@ -2608,7 +2614,7 @@ describe('amp-a4a', () => {
         expect(consentServiceSpy).to.not.be.called;
       });
 
-      it('should pass consent state to getAdUrl', async () => {
+      it('should pass consent tuple to getAdUrl', async () => {
         window.sandbox
           .stub(AMP.BaseElement.prototype, 'getConsentPolicy')
           .returns('default');
@@ -2637,6 +2643,7 @@ describe('amp-a4a', () => {
             consentState: CONSENT_POLICY_STATE.SUFFICIENT,
             consentString,
             gdprApplies,
+            additionalConsent: consentMetadata['additionalConsent'],
           })
         ).calledOnce;
         expect(
@@ -2683,6 +2690,7 @@ describe('amp-a4a', () => {
             consentState: CONSENT_POLICY_STATE.UNKNOWN,
             consentString: null,
             gdprApplies: null,
+            additionalConsent: null,
           })
         ).calledOnce;
         expect(
