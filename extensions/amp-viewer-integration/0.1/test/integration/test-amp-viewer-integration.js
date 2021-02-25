@@ -21,13 +21,10 @@ import {
   parseMessage,
 } from '../../messaging/messaging';
 import {ViewerForTesting} from '../../viewer-for-testing';
-// import {dereferenceArgsVariables} from '../../../../../src/service/action-impl';
 import {getSourceUrl} from '../../../../../src/url';
 
-describes.sandboxed('AmpViewerIntegration', {}, (env) => {
+describes.sandboxed('amp-viewer-integration', {}, (env) => {
   const ampDocSrc = '/test/fixtures/served/ampdoc-with-messaging.html';
-  // TODO(aghassemi): Investigate failure in beforeEach. #10974.
-  // describe('Handshake', function () {
   let viewerEl;
   let viewer;
   let ampDocUrl;
@@ -64,7 +61,7 @@ describes.sandboxed('AmpViewerIntegration', {}, (env) => {
 });
 
 describes.realWin(
-  'amp-viewer-integration',
+  'amp-viewer-integration with messaging',
   {
     amp: {
       location: 'https://cdn.ampproject.org/c/s/www.example.com/path',
@@ -225,12 +222,11 @@ describes.realWin(
   }
 );
 
-describes.sandboxed('AmpViewerIntegration', {}, (env) => {
-  describe
-    .configure()
-    .ifChrome()
-    .run('Unit Tests for messaging.js', () => {
-      // describes.sandboxed('AmpViewerIntegration', {}, (env) => {
+describe
+  .configure()
+  .ifChrome()
+  .run('Unit Tests for messaging.js', () => {
+    describes.sandboxed('amp-viewer-integration', {}, (env) => {
       const viewerOrigin = 'http://localhost:9876';
       const messagingToken = '32q4pAwei09W845V3j24o8OJIO3fE9l3q49p';
       const requestProcessor = function () {
@@ -470,4 +466,4 @@ describes.sandboxed('AmpViewerIntegration', {}, (env) => {
         expect(parseMessage(badJson)).to.be.null;
       });
     });
-});
+  });
