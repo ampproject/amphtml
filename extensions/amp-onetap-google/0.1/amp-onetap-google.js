@@ -189,7 +189,7 @@ export class AmpOnetapGoogle extends AMP.BaseElement {
     if (this.iframe_) {
       return;
     }
-    this.iframe_ = this.getAmpDoc().getRootNode().createElement('iframe');
+    this.iframe_ = this.getAmpDoc().win.document.createElement('iframe');
 
     // Don't insert <iframe> until URL has been expanded.
     // Likewise, don't display the UI until then.
