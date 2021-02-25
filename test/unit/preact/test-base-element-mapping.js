@@ -822,7 +822,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       Impl['props'] = {
         'propA': {attr: 'prop-a'},
       };
-      Impl['passthrough'] = true;
+      Impl['children'] = {'children': {name: 'children', passthrough: true}};
       element = html`
         <amp-preact layout="fixed" width="100" height="100">
           Some <b>text</b>
@@ -902,7 +902,9 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       Impl['props'] = {
         'propA': {attr: 'prop-a'},
       };
-      Impl['passthroughNonEmpty'] = true;
+      Impl['children'] = {
+        'children': {name: 'children', passthroughNonEmpty: true},
+      };
       element = html`
         <amp-preact layout="fixed" width="100" height="100"> text </amp-preact>
       `;
@@ -971,7 +973,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
 
     beforeEach(async () => {
       Impl['delegatesFocus'] = true;
-      Impl['passthroughNonEmpty'] = true;
+      Impl['children'] = {'children': {passThroughNonEmpty: true}};
       element = html`
         <amp-preact layout="fixed" width="100" height="100"></amp-preact>
       `;

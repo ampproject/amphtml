@@ -75,6 +75,8 @@ let AmpElementPropDef;
  *   selector: string,
  *   single: (boolean|undefined),
  *   clone: (boolean|undefined),
+ *   passthrough: (boolean|undefined)
+ *   passthroughNonEmpty: (boolean|undefined)
  *   props: (!JsonObject|undefined),
  * }}
  */
@@ -82,11 +84,6 @@ let ChildDef;
 
 /** @const {!MutationObserverInit} */
 const CHILDREN_MUTATION_INIT = {
-  childList: true,
-};
-
-/** @const {!MutationObserverInit} */
-const PASSTHROUGH_MUTATION_INIT = {
   childList: true,
   characterData: true,
 };
@@ -252,15 +249,10 @@ export class PreactBaseElement extends AMP.BaseElement {
 
     this.observer = new MutationObserver(this.checkMutations_.bind(this));
     const childrenInit = Ctor['children'] ? CHILDREN_MUTATION_INIT : null;
-    const passthroughInit =
-      Ctor['passthrough'] || Ctor['passthroughNonEmpty']
-        ? PASSTHROUGH_MUTATION_INIT
-        : null;
     const templatesInit = Ctor['usesTemplate'] ? TEMPLATES_MUTATION_INIT : null;
     this.observer.observe(this.element, {
       attributes: true,
       ...childrenInit,
-      ...passthroughInit,
       ...templatesInit,
     });
 
@@ -503,8 +495,7 @@ export class PreactBaseElement extends AMP.BaseElement {
         devAssert(
           !isDetached,
           'The AMP element cannot be rendered in detached mode ' +
-            'when configured with "children", "passthrough", or ' +
-            '"passthroughNonEmpty" properties.'
+            'when configured with "children" property.'
         );
         // Check if there's a pre-constructed shadow DOM.
         let {shadowRoot} = this.element;
@@ -836,26 +827,6 @@ PreactBaseElement['lightDomTag'] = '';
 PreactBaseElement['className'] = '';
 
 /**
- * Enabling passthrough mode alters the children slotting to use a single
- * `<slot>` element for all children. This is in contrast to children mode,
- * which creates a new named `<slot>` for every child.
- *
- * @protected {boolean}
- */
-PreactBaseElement['passthrough'] = false;
-
-/**
- * Handling children with passthroughNonEmpty mode is similar to passthrough
- * mode except that when there are no children elements, the returned
- * prop['children'] will be null instead of the unnamed <slot>.  This allows
- * the Preact environment to have conditional behavior depending on whether
- * or not there are children.
- *
- * @protected {boolean}
- */
-PreactBaseElement['passthroughNonEmpty'] = false;
-
-/**
  * Whether this element uses "templates" system.
  *
  * @protected {boolean}
@@ -902,11 +873,7 @@ PreactBaseElement['children'] = null;
  * @return {boolean}
  */
 function usesShadowDom(Ctor) {
-  return !!(
-    Ctor['children'] ||
-    Ctor['passthrough'] ||
-    Ctor['passthroughNonEmpty']
-  );
+  return !!Ctor['children'];
 }
 
 /**
@@ -937,8 +904,6 @@ function collectProps(Ctor, element, ref, defaultProps, mediaQueryProps) {
     'className': className,
     'layoutSizeDefined': layoutSizeDefined,
     'lightDomTag': lightDomTag,
-    'passthrough': passthrough,
-    'passthroughNonEmpty': passthroughNonEmpty,
     'props': propDefs,
   } = Ctor;
 
@@ -977,29 +942,11 @@ function collectProps(Ctor, element, ref, defaultProps, mediaQueryProps) {
   // as separate properties. Thus in a carousel the plain "children" are
   // slides, and the "arrowNext" children are passed via a "arrowNext"
   // property.
-  const errorMessage =
-    'only one of "passthrough", "passthroughNonEmpty"' +
-    ' or "children" may be given';
-  if (passthrough) {
-    devAssert(!childrenDefs && !passthroughNonEmpty, errorMessage);
-    props['children'] = [<Slot />];
-  } else if (passthroughNonEmpty) {
-    devAssert(!childrenDefs, errorMessage);
-    // If all children are whitespace text nodes, consider the element as
-    // having no children
-    props['children'] = element
-      .getRealChildNodes()
-      .every(
-        (node) =>
-          node.nodeType === /* TEXT_NODE */ 3 &&
-          node.nodeValue.trim().length === 0
-      )
-      ? null
-      : [<Slot />];
-  } else if (childrenDefs) {
+  if (childrenDefs) {
     const children = [];
     props['children'] = children;
 
+    // Match all children defined with "selector"
     const nodes = element.getRealChildNodes();
     for (let i = 0; i < nodes.length; i++) {
       const childElement = nodes[i];
@@ -1032,6 +979,39 @@ function collectProps(Ctor, element, ref, defaultProps, mediaQueryProps) {
                 parsedSlotProps
               )
         );
+      }
+    }
+
+    // Match all children defined with "passthrough" or "passthroughNonEmpty"
+    const errorMessage =
+      'only one of "passthrough", "passthroughNonEmpty"' +
+      ' or "selector" may be given';
+    for (const key in childrenDefs) {
+      const {
+        name,
+        passthrough,
+        passthroughNonEmpty,
+        selector,
+        single = true,
+      } = childrenDefs[key];
+      if (passthrough) {
+        devAssert(!selector && !passthroughNonEmpty && single, errorMessage);
+        props[name] = [<Slot />];
+        continue;
+      } else if (passthroughNonEmpty) {
+        devAssert(!selector && single, errorMessage);
+        // If all children are whitespace text nodes, consider the element as
+        // having no children
+        props[name] = element
+          .getRealChildNodes()
+          .every(
+            (node) =>
+              node.nodeType === /* TEXT_NODE */ 3 &&
+              node.nodeValue.trim().length === 0
+          )
+          ? null
+          : [<Slot />];
+        continue;
       }
     }
   }
