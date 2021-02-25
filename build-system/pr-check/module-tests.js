@@ -32,14 +32,13 @@ const {runCiJob} = require('./ci-job');
 const jobName = 'module-tests.js';
 
 function prependConfig() {
-  // TODO(@ampproject/wg-infra): change prepend-global to take multiple target files instead of looping here.
-  for (const target of MINIFIED_TARGETS) {
-    for (const ext of ['js', 'mjs']) {
-      timedExecOrDie(
-        `gulp prepend-global --${process.env.config} --local_dev --fortesting --derandomize --target=dist/${target}.${ext}`
-      );
-    }
-  }
+  const targets = MINIFIED_TARGETS.flatMap((target) => [
+    `dist/${target}.js`,
+    `dist/${target}.mjs`,
+  ]).join(',');
+  timedExecOrDie(
+    `gulp prepend-global --${process.env.config} --local_dev --fortesting --derandomize --target=${targets}`
+  );
 }
 
 function pushBuildWorkflow() {
