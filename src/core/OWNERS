@@ -6,7 +6,7 @@
     {
       owners: [
         {name: 'dvoytenko'},
-        {name: 'jridgewell'},
+        {name: 'jridgewell', required: true},
         {name: 'ampproject/wg-performance'},
       ],
     },
