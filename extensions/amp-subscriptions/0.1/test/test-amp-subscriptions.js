@@ -587,14 +587,19 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
       });
 
       env.sandbox.stub(platform, 'activate');
+      env.sandbox.stub(platform, 'getEntitlements').callsFake(() => {
+        subscriptionService.metering_.entitlementsWereFetchedWithCurrentMeteringState = true;
+        return Promise.resolve();
+      });
       env.sandbox.stub(renderer, 'setGrantState');
-      env.sandbox.stub(platformStore, 'getPlatform').returns(platform);
-      env.sandbox.stub(platformStore, 'getGrantStatus').resolves(true);
       env.sandbox
         .stub(platformStore, 'getGrantEntitlement')
         .resolves(entitlement);
-      env.sandbox.stub(platformStore, 'selectPlatform').resolves(platform);
+      env.sandbox.stub(platformStore, 'getGrantStatus').resolves(true);
+      env.sandbox.stub(platformStore, 'getPlatform').returns(platform);
       env.sandbox.stub(platformStore, 'getResolvedEntitlementFor');
+      env.sandbox.stub(platformStore, 'resetPlatform');
+      env.sandbox.stub(platformStore, 'selectPlatform').resolves(platform);
     });
 
     it('should set grant state', async () => {
@@ -624,7 +629,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
         await subscriptionService.initialize_();
       });
 
-      it('handle grant state normally, when granted by a non-metering platform', async () => {
+      it('handle grant state normally, when a non-metering platform granted', async () => {
         subscriptionService.startAuthorizationFlow_();
         await flush();
 
@@ -632,7 +637,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
         expect(platform.activate).to.be.called;
       });
 
-      it('wait to set grant state, when granted by a metering platform', async () => {
+      it('allow metering platform to consume entitlement before setting grant state, when the metering platform granted', async () => {
         // Metering platform granted this entitlement.
         entitlement.grantReason = GrantReason.METERING;
         entitlement.service = meteringPlatformConfig.services[0].serviceId;
@@ -648,6 +653,59 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
         const continueCallback = platform.activate.getCall(0).args[2];
         continueCallback();
         expect(renderer.setGrantState).to.be.called;
+      });
+
+      it('handle grant state normally, when there is no grant and we already fetched entitlements with the current metering state', async () => {
+        // Nothing granted.
+        platformStore.getGrantStatus.resolves(false);
+
+        // We already fetched entitlements with the current metering state.
+        subscriptionService.metering_.entitlementsWereFetchedWithCurrentMeteringState = true;
+
+        subscriptionService.startAuthorizationFlow_();
+        await flush();
+
+        expect(renderer.setGrantState).to.be.called;
+        expect(platform.activate).to.be.called;
+      });
+
+      it('fetch entitlements, when there is no grant and we have not fetched entitlements with the current metering state yet', async () => {
+        // Nothing granted.
+        platformStore.getGrantStatus.resolves(false);
+
+        // Add metering state.
+        env.sandbox
+          .stub(subscriptionService.metering_, 'loadMeteringState')
+          .resolves({key: 'value'});
+
+        subscriptionService.startAuthorizationFlow_();
+        await flush();
+
+        expect(platformStore.resetPlatform).to.be.called;
+        expect(platform.getEntitlements).to.be.called;
+      });
+
+      it('allow metering platform to generate metering state, before restarting authorization flow, when there is no grant and no metering state', async () => {
+        // Nothing granted.
+        platformStore.getGrantStatus.resolves(false);
+
+        // No metering state...
+        env.sandbox
+          .stub(subscriptionService.metering_, 'loadMeteringState')
+          .resolves(null);
+
+        subscriptionService.startAuthorizationFlow_();
+        await flush();
+
+        // Wait to set grant state.
+        expect(renderer.setGrantState).to.not.be.called;
+        expect(platform.activate).to.be.called;
+
+        // Let platform restart flow.
+        env.sandbox.stub(subscriptionService, 'startAuthorizationFlow_');
+        const restartCallback = platform.activate.getCall(0).args[2];
+        restartCallback();
+        expect(subscriptionService.startAuthorizationFlow_).to.be.called;
       });
     });
   });
