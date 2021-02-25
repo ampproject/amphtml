@@ -91,19 +91,14 @@ export function getWinOrigin(win) {
  * Consider the returned object immutable. This is enforced during
  * testing by freezing the object.
  * @param {string} url
- * @param {boolean=} opt_nocache
- *   Cache is always ignored on ESM builds, see https://go.amp.dev/pr/31594
  * @return {!Location}
  */
-export function parseUrlDeprecated(url, opt_nocache) {
+export function parseUrlDeprecated(url) {
   if (!a) {
     a = /** @type {!HTMLAnchorElement} */ (self.document.createElement('a'));
-    cache = IS_ESM
-      ? null
-      : self.__AMP_URL_CACHE || (self.__AMP_URL_CACHE = new LruCache(100));
   }
 
-  return parseUrlWithA(a, url, IS_ESM || opt_nocache ? null : cache);
+  return parseUrlWithA(a, url);
 }
 
 /**
@@ -113,19 +108,14 @@ export function parseUrlDeprecated(url, opt_nocache) {
  * testing by freezing the object.
  * @param {!HTMLAnchorElement} a
  * @param {string} url
- * @param {LruCache=} opt_cache
  *   Cache is always ignored on ESM builds, see https://go.amp.dev/pr/31594
  * @return {!Location}
  * @restricted
  */
-export function parseUrlWithA(a, url, opt_cache) {
+export function parseUrlWithA(a, url) {
   if (IS_ESM) {
     a.href = '';
-    return /** @type {!Location} */ (new URL(url, a.href));
-  }
-
-  if (opt_cache && opt_cache.has(url)) {
-    return opt_cache.get(url);
+    return /** @type {!Location} */ (new URL(url, a.href).location);
   }
 
   a.href = url;
@@ -178,10 +168,6 @@ export function parseUrlWithA(a, url, opt_cache) {
 
   // Freeze during testing to avoid accidental mutation.
   const frozen = getMode().test && Object.freeze ? Object.freeze(info) : info;
-
-  if (opt_cache) {
-    opt_cache.put(url, frozen);
-  }
 
   return frozen;
 }

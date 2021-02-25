@@ -236,9 +236,6 @@ Error.prototype.fromAssert;
 Error.prototype.associatedElement;
 Error.prototype.messageArray;
 
-/** @type {Object|undefined} */
-window.__AMP_URL_CACHE;
-
 // Exposed to ads.
 // Preserve these filedNames so they can be accessed by 3p code.
 /** @type {?Object} */
