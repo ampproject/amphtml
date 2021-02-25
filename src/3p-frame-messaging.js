@@ -72,7 +72,7 @@ export const MessageType = {
  * Listens for the specified event on the element.
  * @param {!EventTarget} element
  * @param {string} eventType
- * @param {function((Event|MessageEvent)):undefined} listener
+ * @param {function((!Event|!MessageEvent))} listener
  * @param {EventListenerOptions=} opt_evtListenerOpts
  * @return {!UnlistenDef}
  */

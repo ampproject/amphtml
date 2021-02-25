@@ -156,9 +156,7 @@ export function isLoaded(eleOrWindow) {
   return !!(
     asImage.complete ||
     asDocument.readyState == 'complete' ||
-    (isHTMLMediaElement(
-      /** @type {Element|HTMLMediaElement} */ (eleOrWindow)
-    ) &&
+    (isHTMLMediaElement(eleOrWindow) &&
       asMediaElement.readyState > 0) ||
     // If the passed in thing is a Window, infer loaded state from
     (asWindow.document && asWindow.document.readyState == 'complete')
@@ -259,7 +257,7 @@ function failedToLoad(eleOrWindow) {
 
 /**
  * Returns true if the parameter is a HTMLMediaElement.
- * @param {!Element|!Window} eleOrWindow
+ * @param {!Element|!Window|!Document} eleOrWindow
  * @return {boolean}
  */
 function isHTMLMediaElement(eleOrWindow) {

@@ -182,10 +182,12 @@ export class IframeMessagingClient {
   }
 
   /**
-   * @param {!MessageEvent} event
+   * @param {!Event|!MessageEvent} aEvent
    * @private
    */
-  handleMessage_(event) {
+  handleMessage_(aEvent) {
+    const event = /** @type {!MessageEvent} */ (aEvent);
+
     // If we have set a host window, strictly check that it's from it.
     if (this.hostWindow_ && event.source != this.hostWindow_) {
       return;
