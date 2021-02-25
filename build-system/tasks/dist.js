@@ -15,9 +15,9 @@
  */
 
 const colors = require('kleur/colors');
-const file = require('gulp-file');
 const fs = require('fs-extra');
-const gulp = require('gulp');
+const globby = require('globby');
+const path = require('path');
 const {
   bootstrapThirdPartyFrames,
   compileAllJs,
@@ -25,10 +25,8 @@ const {
   compileJs,
   endBuildStep,
   maybeToEsmName,
-  mkdirSync,
   printConfigHelp,
   printNobuildHelp,
-  toPromise,
 } = require('./helpers');
 const {
   cleanupBuildDir,
@@ -42,7 +40,7 @@ const {
   displayLifecycleDebugging,
 } = require('../compile/debug-compilation-lifecycle');
 const {buildExtensions, parseExtensionFlags} = require('./extension-helpers');
-const {compileCss, cssEntryPoints} = require('./css');
+const {compileCss, copyCss} = require('./css');
 const {compileJison} = require('./compile-jison');
 const {formatExtractedMessages} = require('../compile/log-messages');
 const {log} = require('../common/logging');
@@ -105,8 +103,8 @@ async function runPreDistSteps(options) {
   cleanupBuildDir();
   await prebuild();
   await compileCss(options);
-  await compileJison();
   await copyCss();
+  await compileJison();
   await copyParsers();
   await bootstrapThirdPartyFrames(options);
   displayLifecycleDebugging();
@@ -159,11 +157,9 @@ async function doDist(extraArgs = {}) {
 
 /**
  * Build AMP experiments.js.
- *
- * @return {!Promise}
  */
-function buildExperiments() {
-  return compileJs(
+async function buildExperiments() {
+  await compileJs(
     './build/experiments/',
     'experiments.max.js',
     './dist.tools/experiments/',
@@ -183,19 +179,19 @@ function buildExperiments() {
  * @return {!Promise}
  */
 function buildLoginDone(version) {
-  const buildDir = `build/all/amp-access-${version}/`;
+  const buildDir = `build/all/amp-access-${version}`;
   const builtName = `amp-login-done-${version}.max.js`;
   const minifiedName = `amp-login-done-${version}.js`;
   const latestName = 'amp-login-done-latest.js';
-  return compileJs('./' + buildDir, builtName, './dist/v0/', {
+  return compileJs(`./${buildDir}`, builtName, './dist/v0/', {
     watch: argv.watch,
     includePolyfills: true,
     minify: true,
     minifiedName,
     latestName,
     extraGlobs: [
-      buildDir + 'amp-login-done-0.1.max.js',
-      buildDir + 'amp-login-done-dialog.js',
+      `${buildDir}/amp-login-done-0.1.max.js`,
+      `${buildDir}/amp-login-done-dialog.js`,
     ],
   });
 }
@@ -205,23 +201,20 @@ function buildLoginDone(version) {
  */
 async function buildWebPushPublisherFiles() {
   const distDir = 'dist/v0';
-  const promises = [];
-  WEB_PUSH_PUBLISHER_VERSIONS.forEach((version) => {
-    WEB_PUSH_PUBLISHER_FILES.forEach((fileName) => {
-      const tempBuildDir = `build/all/amp-web-push-${version}/`;
-      const builtName = fileName + '.js';
-      const minifiedName = maybeToEsmName(fileName + '.js');
-      const p = compileJs('./' + tempBuildDir, builtName, './' + distDir, {
+  for (const version of WEB_PUSH_PUBLISHER_VERSIONS) {
+    for (const fileName of WEB_PUSH_PUBLISHER_FILES) {
+      const tempBuildDir = `build/all/amp-web-push-${version}`;
+      const builtName = `${fileName}.js`;
+      const minifiedName = maybeToEsmName(builtName);
+      await compileJs(`./${tempBuildDir}`, builtName, `./${distDir}`, {
         watch: argv.watch,
         includePolyfills: true,
         minify: true,
         minifiedName,
-        extraGlobs: [tempBuildDir + '*.js'],
+        extraGlobs: [`${tempBuildDir}/*.js`],
       });
-      promises.push(p);
-    });
-  });
-  await Promise.all(promises);
+    }
+  }
   await postBuildWebPushPublisherFilesVersion();
 }
 
@@ -232,151 +225,115 @@ async function prebuild() {
 }
 
 /**
- * Copies the css from the build folder to the dist folder
- * @return {!Promise}
- */
-function copyCss() {
-  const startTime = Date.now();
-
-  cssEntryPoints.forEach(({outCss}) => {
-    fs.copySync(`build/css/${outCss}`, `dist/${outCss}`);
-  });
-
-  return toPromise(
-    gulp
-      .src('build/css/amp-*.css', {base: 'build/css/'})
-      .pipe(gulp.dest('dist/v0'))
-  ).then(() => {
-    endBuildStep('Copied', 'build/css/*.css to dist/v0/*.css', startTime);
-  });
-}
-
-/**
  * Copies parsers from the build folder to the dist folder
- * @return {!Promise}
  */
-function copyParsers() {
+async function copyParsers() {
   const startTime = Date.now();
-  return fs.copy('build/parsers', 'dist/v0').then(() => {
-    endBuildStep('Copied', 'build/parsers/ to dist/v0', startTime);
-  });
+  await fs.copy('build/parsers', 'dist/v0');
+  endBuildStep('Copied', 'build/parsers/ to dist/v0', startTime);
 }
 
 /**
  * Build amp-web-push publisher files HTML page.
- *
- * @return {!Promise<!Array>}
  */
 async function preBuildWebPushPublisherFiles() {
-  mkdirSync('dist');
-  mkdirSync('dist/v0');
-  const promises = [];
-
-  WEB_PUSH_PUBLISHER_VERSIONS.forEach((version) => {
-    WEB_PUSH_PUBLISHER_FILES.forEach((fileName) => {
-      const basePath = `extensions/amp-web-push/${version}/`;
-      const tempBuildDir = `build/all/amp-web-push-${version}/`;
+  for (const version of WEB_PUSH_PUBLISHER_VERSIONS) {
+    for (const fileName of WEB_PUSH_PUBLISHER_FILES) {
+      const srcPath = `extensions/amp-web-push/${version}`;
+      const destPath = `build/all/amp-web-push-${version}`;
 
       // Build Helper Frame JS
-      const js = fs.readFileSync(basePath + fileName + '.js', 'utf8');
-      const builtName = fileName + '.js';
-      const promise = toPromise(
-        gulp
-          .src(basePath + '/*.js', {base: basePath})
-          .pipe(file(builtName, js))
-          .pipe(gulp.dest(tempBuildDir))
+      const js = await fs.readFile(`${srcPath}/${fileName}.js`, 'utf8');
+      const builtName = `${fileName}.js`;
+      await fs.outputFile(`${destPath}/${builtName}`, js);
+      const jsFiles = globby.sync(`${srcPath}/*.js`);
+      await Promise.all(
+        jsFiles.map((jsFile) => {
+          return fs.copy(jsFile, `${destPath}/${path.basename(jsFile)}`);
+        })
       );
-      promises.push(promise);
-    });
-  });
-  return Promise.all(promises);
+    }
+  }
 }
 
 /**
  * post Build amp-web-push publisher files HTML page.
  */
-function postBuildWebPushPublisherFilesVersion() {
+async function postBuildWebPushPublisherFilesVersion() {
   const distDir = 'dist/v0';
-  WEB_PUSH_PUBLISHER_VERSIONS.forEach((version) => {
-    const basePath = `extensions/amp-web-push/${version}/`;
-    WEB_PUSH_PUBLISHER_FILES.forEach((fileName) => {
-      const minifiedName = maybeToEsmName(fileName + '.js');
-      if (!fs.existsSync(distDir + '/' + minifiedName)) {
-        throw new Error(`Cannot find ${distDir}/${minifiedName}`);
+  for (const version of WEB_PUSH_PUBLISHER_VERSIONS) {
+    const basePath = `extensions/amp-web-push/${version}`;
+    for (const fileName of WEB_PUSH_PUBLISHER_FILES) {
+      const minifiedName = maybeToEsmName(`${fileName}.js`);
+      const minifiedFile = `${distDir}/${minifiedName}`;
+      if (!fs.existsSync(minifiedFile)) {
+        throw new Error(`Cannot find ${minifiedFile}`);
       }
 
       // Build Helper Frame HTML
-      let fileContents = fs.readFileSync(basePath + fileName + '.html', 'utf8');
-      fileContents = fileContents.replace(
-        '<!-- [GULP-MAGIC-REPLACE ' + fileName + '.js] -->',
-        '<script>' +
-          fs.readFileSync(distDir + '/' + minifiedName, 'utf8') +
-          '</script>'
+      const html = await fs.readFile(`${basePath}/${fileName}.html`, 'utf8');
+      const js = await fs.readFile(minifiedFile, 'utf8');
+      const minifiedHtml = html.replace(
+        `<!-- [REPLACE-SENTINEL ${fileName}.js] -->`,
+        `<script>${js}</script>`
       );
-
-      fs.writeFileSync('dist/v0/' + fileName + '.html', fileContents);
-    });
-  });
+      await fs.outputFile(`dist/v0/${fileName}.html`, minifiedHtml);
+    }
+  }
 }
 
 /**
  * Precompilation steps required to build experiment js binaries.
- * @return {!Promise}
  */
 async function preBuildExperiments() {
-  const path = 'tools/experiments';
-  const htmlPath = path + '/experiments.html';
-  const jsPath = path + '/experiments.js';
+  const expDir = 'tools/experiments';
+  const htmlDestDir = 'dist.tools/experiments';
+  const htmlSrcPath = `${expDir}/experiments.html`;
+  const jsSrcPath = `${expDir}/experiments.js`;
 
   // Build HTML.
-  const html = fs.readFileSync(htmlPath, 'utf8');
+  const html = await fs.readFile(htmlSrcPath, 'utf8');
   const minHtml = html
     .replace(
       '/dist.tools/experiments/experiments.js',
       `https://${hostname}/v0/experiments.js`
     )
     .replace(/\$internalRuntimeVersion\$/g, VERSION);
-
-  await toPromise(
-    gulp
-      .src(htmlPath)
-      .pipe(file('experiments.cdn.html', minHtml))
-      .pipe(gulp.dest('dist.tools/experiments/'))
-  );
+  await fs.outputFile(`${htmlDestDir}/experiments.cdn.html`, minHtml);
+  await fs.copy(htmlSrcPath, `${htmlDestDir}/${path.basename(htmlSrcPath)}`);
 
   // Build JS.
-  const js = fs.readFileSync(jsPath, 'utf8');
+  const jsDir = 'build/experiments/';
+  const js = await fs.readFile(jsSrcPath, 'utf8');
   const builtName = 'experiments.max.js';
-  return toPromise(
-    gulp
-      .src(path + '/*.js')
-      .pipe(file(builtName, js))
-      .pipe(gulp.dest('build/experiments/'))
+  await fs.outputFile(`${jsDir}/${builtName}`, js);
+  const jsFiles = globby.sync(`${expDir}/*.js`);
+  await Promise.all(
+    jsFiles.map((jsFile) => {
+      return fs.copy(jsFile, `${jsDir}/${path.basename(jsFile)}`);
+    })
   );
 }
 
 /**
  * Build "Login Done" page.
- * @return {!Promise}
  */
-function preBuildLoginDone() {
-  return preBuildLoginDoneVersion('0.1');
+async function preBuildLoginDone() {
+  await preBuildLoginDoneVersion('0.1');
 }
 
 /**
  * Build "Login Done" page for the specified version.
- *
  * @param {string} version
- * @return {!Promise}
  */
-function preBuildLoginDoneVersion(version) {
-  const path = `extensions/amp-access/${version}/`;
-  const buildDir = `build/all/amp-access-${version}/`;
-  const htmlPath = path + 'amp-login-done.html';
-  const jsPath = path + 'amp-login-done.js';
+async function preBuildLoginDoneVersion(version) {
+  const srcDir = `extensions/amp-access/${version}`;
+  const buildDir = `build/all/amp-access-${version}`;
+  const htmlPath = `${srcDir}/amp-login-done.html`;
+  const jsPath = `${srcDir}/amp-login-done.js`;
 
   // Build HTML.
-  const html = fs.readFileSync(htmlPath, 'utf8');
+  const html = await fs.readFile(htmlPath, 'utf8');
   const minJs = `https://${hostname}/v0/amp-login-done-${version}.js`;
   const minHtml = html
     .replace(`../../../dist/v0/amp-login-done-${version}.max.js`, minJs)
@@ -384,20 +341,17 @@ function preBuildLoginDoneVersion(version) {
   if (minHtml.indexOf(minJs) == -1) {
     throw new Error('Failed to correctly set JS in login-done.html');
   }
-
-  mkdirSync('dist');
-  mkdirSync('dist/v0');
-
-  fs.writeFileSync('dist/v0/amp-login-done-' + version + '.html', minHtml);
+  await fs.outputFile(`dist/v0/amp-login-done-${version}.html`, minHtml);
 
   // Build JS.
-  const js = fs.readFileSync(jsPath, 'utf8');
-  const builtName = 'amp-login-done-' + version + '.max.js';
-  return toPromise(
-    gulp
-      .src(path + '/*.js', {base: path})
-      .pipe(file(builtName, js))
-      .pipe(gulp.dest(buildDir))
+  const js = await fs.readFile(jsPath, 'utf8');
+  const builtName = `amp-login-done-${version}.max.js`;
+  await fs.outputFile(`${buildDir}/${builtName}`, js);
+  const jsFiles = globby.sync(`${srcDir}/*.js`);
+  await Promise.all(
+    jsFiles.map((jsFile) => {
+      return fs.copy(jsFile, `${buildDir}/${path.basename(jsFile)}`);
+    })
   );
 }
 
