@@ -48,10 +48,10 @@ let rtvVersion = '';
  */
 export function getMode(opt_win) {
   const win = opt_win || self;
-  if (win.__AMP_MODE) {
-    return win.__AMP_MODE;
+  if (win['__AMP_MODE']) {
+    return win['__AMP_MODE'];
   }
-  return (win.__AMP_MODE = getMode_(win));
+  return (win['__AMP_MODE'] = getMode_(win));
 }
 
 /**
@@ -71,12 +71,12 @@ function getMode_(win) {
   const IS_MINIFIED = false;
 
   const runningTests =
-    IS_DEV && !!(AMP_CONFIG.test || win.__AMP_TEST || win.__karma__);
+    IS_DEV && !!(AMP_CONFIG.test || win.__AMP_TEST || win['__karma__']);
   const isLocalDev = IS_DEV && (!!AMP_CONFIG.localDev || runningTests);
   const hashQuery = parseQueryString_(
     // location.originalHash is set by the viewer when it removes the fragment
     // from the URL.
-    win.location.originalHash || win.location.hash
+    win.location['originalHash'] || win.location.hash
   );
 
   const searchQuery = parseQueryString_(win.location.search);
@@ -98,7 +98,7 @@ function getMode_(win) {
     development: !!(
       ['1', 'actions', 'amp', 'amp4ads', 'amp4email'].indexOf(
         hashQuery['development']
-      ) >= 0 || win.AMP_DEV_MODE
+      ) >= 0 || win['AMP_DEV_MODE']
     ),
     examiner: hashQuery['development'] == '2',
     esm: IS_ESM,
