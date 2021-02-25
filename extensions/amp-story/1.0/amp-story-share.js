@@ -98,23 +98,32 @@ const SHARE_ITEM_TEMPLATE = {
   attrs: dict({'class': 'i-amphtml-story-share-item'}),
 };
 
-/** @private @const {!./simple-template.ElementDef} */
-const LINK_SHARE_ITEM_TEMPLATE = {
-  tag: 'div',
-  attrs: dict({
-    'class': 'i-amphtml-story-share-icon i-amphtml-story-share-icon-link',
-    'tabindex': 0,
-    'role': 'button',
-    'aria-label': 'Get Link',
-  }),
-  children: [
-    {
-      tag: 'span',
-      attrs: dict({'class': 'i-amphtml-story-share-label'}),
-      localizedStringId: LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK,
-    },
-  ],
-};
+/**
+ * @private
+ * @param {!Element} el
+ * @return {./simple-template-ElementDef}
+ */
+function buildLinkShareItemTemplate(el) {
+  return {
+    tag: 'div',
+    attrs: dict({
+      'class': 'i-amphtml-story-share-icon i-amphtml-story-share-icon-link',
+      'tabindex': 0,
+      'role': 'button',
+      'aria-label': getLocalizationService(el).getLocalizedString(
+        LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK
+      ),
+    }),
+    children: [
+      {
+        tag: 'span',
+        attrs: dict({'class': 'i-amphtml-story-share-label'}),
+        localizedStringId:
+          LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK,
+      },
+    ],
+  };
+}
 
 /** @private @const {string} */
 const SCROLLABLE_CLASSNAME = 'i-amphtml-story-share-widget-scrollable';
@@ -271,7 +280,7 @@ export class ShareWidget {
 
     const linkShareButton = renderAsElement(
       this.win.document,
-      LINK_SHARE_ITEM_TEMPLATE
+      buildLinkShareItemTemplate(this.storyEl)
     );
 
     this.add_(linkShareButton);
