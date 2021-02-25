@@ -90,6 +90,9 @@ Event.prototype.data = {};
 // Events can contain origins when distributed between frames.
 Event.prototype.origin;
 
+// HTMLAnchorElements contian origins.
+HTMLAnchorElement.prototype.origin;
+
 // Fullscreen methods
 Document.prototype.cancelFullScreen = function () {};
 Document.prototype.webkitExitFullscreen = function () {};
@@ -183,11 +186,47 @@ process.env.NODE_ENV;
 /** @type {boolean|undefined} */
 window.IS_AMP_ALT;
 
+/** @type {boolean|undefined} */
+window.AMP_DEV_MODE;
+
+/** @type {Object} */
+window.__AMP_MODE = {};
+window.__AMP_MODE.localDev;
+window.__AMP_MODE.development;
+window.__AMP_MODE.minified;
+window.__AMP_MODE.lite;
+window.__AMP_MODE.test;
+window.__AMP_MODE.log;
+window.__AMP_MODE.version;
+window.__AMP_MODE.rtvVersion;
+window.__AMP_MODE.runtime;
+window.__AMP_MODE.a4aId;
+window.__AMP_MODE.esm;
+
+/** @type {Object} */
+window.__AMP_LOG = {};
+window.__AMP_LOG.user;
+window.__AMP_LOG.dev;
+window.__AMP_LOG.userForEmbed;
+
+/** @type {boolean} */
+var IS_ESM;
+
 /** @type {string|undefined} */
 window.origin;
 
 /** @type {function(*, !Element=)|undefined} */
 window.__AMP_REPORT_ERROR;
+
+// Error prototypes are extended by AMP.
+Error.prototype.expected;
+Error.prototype.never;
+Error.prototype.fromAssert;
+Error.prototype.associatedElement;
+Error.prototype.messageArray;
+
+/** @type {Object|undefined} */
+window.__AMP_URL_CACHE;
 
 // Exposed to ads.
 // Preserve these filedNames so they can be accessed by 3p code.

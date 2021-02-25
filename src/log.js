@@ -19,6 +19,7 @@ import {getMode} from './mode';
 import {internalRuntimeVersion} from './internal-version';
 import {isArray, isEnumValue} from './types';
 import {once} from './utils/function';
+import {type} from 'os';
 import {urls} from './config';
 
 const noop = () => {};
@@ -154,7 +155,7 @@ export class Log {
      */
     this.win = getMode().test && win.__AMP_TEST_IFRAME ? win.parent : win;
 
-    /** @private @const {function(number, boolean):!LogLevel} */
+    /** @private @const {function(number, boolean|undefined):!LogLevel} */
     this.levelFunc_ = levelFunc;
 
     /** @private @const {!LogLevel} */
@@ -220,7 +221,9 @@ export class Log {
    */
   defaultLevelWithFunc_() {
     // Delegate to the specific resolver.
-    return this.levelFunc_(parseInt(getMode().log, 10), getMode().development);
+    /** @type {boolean} */
+    const isDevelopment = getMode().development;
+    return this.levelFunc_(parseInt(getMode().log, 10), isDevelopment);
   }
 
   /**
@@ -438,7 +441,8 @@ export class Log {
    * @closurePrimitive {asserts.matchesReturn}
    */
   assertElement(shouldBeElement, opt_message) {
-    const shouldBeTrueish = shouldBeElement && shouldBeElement.nodeType == 1;
+    const shouldBeTrueish =
+      shouldBeElement && /** @type {Element} */ (shouldBeElement).nodeType == 1;
     this.assertType_(
       shouldBeElement,
       shouldBeTrueish,
@@ -640,8 +644,11 @@ const stringOrElementString = (val) =>
  */
 function elementStringOrPassthru(val) {
   // Do check equivalent to `val instanceof Element` without cross-window bug
-  if (val && val.nodeType == 1) {
-    return val.tagName.toLowerCase() + (val.id ? '#' + val.id : '');
+  if (val && /** @type {Element} **/ (val).nodeType == 1) {
+    const asElement /** @type {Element} */ = /** @type {Element} **/ (val);
+    return (
+      asElement.tagName.toLowerCase() + (asElement.id ? '#' + asElement.id : '')
+    );
   }
   return val;
 }

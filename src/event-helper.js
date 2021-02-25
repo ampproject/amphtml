@@ -145,17 +145,21 @@ export function listenOncePromise(
 
 /**
  * Whether the specified element/window has been loaded already.
- * @param {!Element|!Window} eleOrWindow
+ * @param {!Element|!Window|!Document} eleOrWindow
  * @return {boolean}
  */
 export function isLoaded(eleOrWindow) {
+  const asImage = /** @type {HTMLImageElement} */ (eleOrWindow);
+  const asWindow = /** @type {Window} */ (eleOrWindow);
   return !!(
-    eleOrWindow.complete ||
-    eleOrWindow.readyState == 'complete' ||
-    (isHTMLMediaElement(eleOrWindow) && eleOrWindow.readyState > 0) ||
+    asImage.complete ||
+    /** @type {Document} */ (eleOrWindow).readyState == 'complete' ||
+    (isHTMLMediaElement(
+      /** @type {Element|HTMLMediaElement} */ (eleOrWindow)
+    ) &&
+      /** @type {HTMLMediaElement} */ (eleOrWindow).readyState > 0) ||
     // If the passed in thing is a Window, infer loaded state from
-    //
-    (eleOrWindow.document && eleOrWindow.document.readyState == 'complete')
+    (asWindow.document && asWindow.document.readyState == 'complete')
   );
 }
 
