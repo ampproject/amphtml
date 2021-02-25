@@ -509,7 +509,7 @@ Type attribute value: `simplereach`
 
 Adds support for SimpleReach. Configuration details can be found at `http://docs.simplereach.com/dev-guide/implementation/google-amp-implementation`.
 
-### snowplow
+### Snowplow Analytics
 
 Type attribute value: `snowplow`, `snowplow_v2`
 
