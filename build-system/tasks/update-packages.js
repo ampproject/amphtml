@@ -125,6 +125,30 @@ function patchResizeObserver() {
 }
 
 /**
+ * Patches Shadow DOM polyfill by wrapping its body into `install`
+ * function.
+ * This gives us an option to control when and how the polyfill is installed.
+ * The polyfill can only be installed on the root context.
+ */
+function patchShadowDom() {
+  // Copies webcomponents-sd into a new file that has an export.
+  const patchedName =
+    'node_modules/@webcomponents/webcomponentsjs/bundles/webcomponents-sd.install.js';
+  let file = fs
+    .readFileSync(
+      'node_modules/@webcomponents/webcomponentsjs/bundles/webcomponents-sd.js'
+    )
+    .toString();
+
+  // ESM binaries fail on this expression.
+  file = file.replace(
+    '"undefined"!=typeof window&&window===this?this:"undefined"!=typeof global&&null!=global?global:this',
+    'window'
+  );
+  writeIfUpdated(patchedName, file);
+}
+
+/**
  * Deletes the map file for rrule, which breaks closure compiler.
  * TODO(rsimha): Remove this workaround after a fix is merged for
  * https://github.com/google/closure-compiler/issues/3720.
@@ -185,6 +209,7 @@ async function updatePackages() {
   patchWebAnimations();
   patchIntersectionObserver();
   patchResizeObserver();
+  patchShadowDom();
   removeRruleSourcemap();
 }
 
