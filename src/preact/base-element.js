@@ -75,8 +75,6 @@ let AmpElementPropDef;
  *   selector: string,
  *   single: (boolean|undefined),
  *   clone: (boolean|undefined),
- *   passthrough: (boolean|undefined)
- *   passthroughNonEmpty: (boolean|undefined)
  *   props: (!JsonObject|undefined),
  * }}
  */
