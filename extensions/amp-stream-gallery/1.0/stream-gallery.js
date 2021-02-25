@@ -28,6 +28,7 @@ import {
   useState,
 } from '../../../src/preact';
 import {useStyles} from './stream-gallery.jss';
+import objstr from 'obj-str';
 
 const DEFAULT_VISIBLE_COUNT = 1;
 const OUTSET_ARROWS_WIDTH = 100;
@@ -129,9 +130,11 @@ function StreamGalleryWithRef(props, ref) {
       advanceCount={Math.floor(visibleCount)}
       arrowPrev={arrowPrev}
       arrowNext={arrowNext}
-      className={`${className ?? ''} ${classes.gallery} ${
-        extraSpace === 'around' ? classes.extraSpace : ''
-      }`}
+      className={objstr({
+        [classes.gallery]: true,
+        [classes.extraSpace]: extraSpace === 'around',
+        [className]: !!className,
+      })}
       outsetArrows={outsetArrows}
       snapAlign={slideAlign}
       ref={carouselRef}
@@ -156,9 +159,13 @@ function DefaultArrow({advance, by, outsetArrows, ...rest}) {
   return (
     <button
       onClick={() => advance(by)}
-      className={`${classes.arrow} ${
-        by < 0 ? classes.arrowPrev : classes.arrowNext
-      } ${outsetArrows ? classes.outsetArrow : classes.insetArrow}`}
+      className={objstr({
+        [classes.arrow]: true,
+        [classes.arrowPrev]: by < 0,
+        [classes.arrowNext]: by >= 0,
+        [classes.outsetArrow]: outsetArrows,
+        [classes.insetArrow]: !outsetArrows,
+      })}
       aria-hidden="true"
       {...rest}
     >

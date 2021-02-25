@@ -26,6 +26,7 @@ import {
   useState,
 } from '../../../src/preact';
 import {useStyles} from './thumbnails.jss';
+import objstr from 'obj-str';
 
 /**
  * @param {!InlineGalleryDef.ThumbnailProps} props
@@ -69,7 +70,10 @@ export function Thumbnails({
 
   return (
     <BaseCarousel
-      className={`${className} ${classes.thumbnails}`}
+      className={objstr({
+        [classes.thumbnails]: true,
+        [className]: true,
+      })}
       mixedLength={true}
       snap={false}
       snapAlign={loop ? 'center' : 'start'}

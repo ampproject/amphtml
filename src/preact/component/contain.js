@@ -16,6 +16,7 @@
 
 import * as Preact from '../';
 import {forwardRef} from '../compat';
+import objstr from 'obj-str';
 
 const CONTAIN = [
   null, // 0: none
@@ -76,7 +77,10 @@ function ContainWrapperWithRef(
     <Comp
       {...rest}
       ref={ref}
-      className={`${className || ''} ${wrapperClassName || ''}`.trim() || null}
+      className={objstr({
+        [wrapperClassName]: wrapperClassName,
+        [className]: className,
+      })}
       style={{
         ...style,
         ...wrapperStyle,

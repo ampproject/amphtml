@@ -33,7 +33,8 @@ import {
   useRef,
   useState,
 } from '../../../src/preact';
-import {useStyles} from './component.jss';
+import {useStyles} from './accordion.jss';
+import objstr from 'obj-str';
 
 const AccordionContext = Preact.createContext(
   /** @type {AccordionDef.AccordionContext} */ ({})
@@ -369,7 +370,7 @@ export function AccordionSection({
 export function AccordionHeader({
   as: Comp = 'div',
   role = 'button',
-  className = '',
+  className,
   tabIndex = 0,
   id,
   children,
@@ -395,7 +396,11 @@ export function AccordionHeader({
       {...rest}
       id={headerId}
       role={role}
-      className={`${className} ${classes.sectionChild} ${classes.header}`}
+      className={objstr({
+        [classes.sectionChild]: true,
+        [classes.header]: true,
+        [className]: !!className,
+      })}
       tabIndex={tabIndex}
       aria-controls={contentId}
       onClick={() => toggleHandler()}
@@ -413,7 +418,7 @@ export function AccordionHeader({
 export function AccordionContent({
   as: Comp = 'div',
   role = 'region',
-  className = '',
+  className,
   id,
   children,
   ...rest
@@ -495,9 +500,11 @@ export function AccordionContent({
       <Comp
         {...rest}
         ref={ref}
-        className={`${className} ${classes.sectionChild} ${
-          expanded ? '' : hiddenClass
-        }`}
+        className={objstr({
+          [classes.sectionChild]: true,
+          [hiddenClass]: !expanded,
+          [className]: !!className,
+        })}
         id={contentId}
         aria-labelledby={headerId}
         role={role}
