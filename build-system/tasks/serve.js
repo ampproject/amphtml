@@ -88,9 +88,9 @@ function getMiddleware() {
 /**
  * Launches a server and waits for it to fully start up
  *
- * @param {?ConnectOptionsDef} connectOptions
- * @param {?ServerOptionsDef} serverOptions
- * @param {?ModeOptionsDef} modeOptions
+ * @param {?Object} connectOptions
+ * @param {?Object} serverOptions
+ * @param {?Object} modeOptions
  * @return {Promise<void>}
  */
 async function startServer(
@@ -177,9 +177,9 @@ async function stopServer() {
 
 /**
  * Closes the existing server and restarts it
- * @param {ServerOptionsDef=} serverOptions
+ * @return {Promise<void>}
  */
-async function restartServer(serverOptions = {}) {
+async function restartServer() {
   stopServer();
   try {
     await buildNewServer();
@@ -188,7 +188,7 @@ async function restartServer(serverOptions = {}) {
     return;
   }
   resetServerFiles();
-  startServer({}, serverOptions);
+  startServer();
 }
 
 /**
@@ -210,14 +210,10 @@ async function serve() {
 
 /**
  * Starts a webserver at the repository root to serve built files.
-<<<<<<< HEAD
- * @param {?ServerOptionsDef} serverOptions
+ * @param {boolean=} lazyBuild
  * @return {Promise<void>}
-=======
- * @param {ServerOptionsDef=} serverOptions
->>>>>>> 24885f3d02 (apply recommendations)
  */
-async function doServe(serverOptions = {}) {
+async function doServe(lazyBuild = false) {
   createCtrlcHandler('serve');
   const watchFunc = async () => {
     await restartServer();
