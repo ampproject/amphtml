@@ -1855,7 +1855,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   initializeImgAltTags_() {
     toArray(this.element.querySelectorAll('amp-img')).forEach((ampImgNode) => {
       if (!ampImgNode.getAttribute('alt')) {
-        ampImgNode.setAttribute('alt', ' ');
+        ampImgNode.setAttribute('alt', '');
         // If the child img element is in the dom, propogate the attribute to it.
         const childImgNode = ampImgNode.querySelector('img');
         childImgNode &&
