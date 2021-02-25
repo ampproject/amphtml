@@ -684,18 +684,6 @@ function mkdirSync(path) {
   }
 }
 
-/**
- * Returns a promise for readable
- *
- * @param {*} readable
- * @return {Promise}
- */
-function toPromise(readable) {
-  return new Promise(function (resolve, reject) {
-    readable.on('error', reject).on('end', resolve);
-  });
-}
-
 module.exports = {
   MINIFIED_TARGETS,
   applyAmpConfig,
@@ -711,6 +699,5 @@ module.exports = {
   mkdirSync,
   printConfigHelp,
   printNobuildHelp,
-  toPromise,
   watchDebounceDelay,
 };
