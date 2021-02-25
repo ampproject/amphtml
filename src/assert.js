@@ -53,6 +53,15 @@ export class UserError extends Error {
 
 /**
  * Throws a provided error if the second argument isn't trueish.
+ *
+ * Supports argument substitution into the message via %s placeholders.
+ *
+ * Throws an error object that has two extra properties:
+ * - associatedElement: This is the first element provided in the var args.
+ *   It can be used for improved display of error messages.
+ * - messageArray: The elements of the substituted message as non-stringified
+ *   elements in an array. When e.g. passed to console.error this yields
+ *   native displays of things like HTML elements.
  * @param {Object} errorCls
  * @param {T} shouldBeTruthy
  * @param {string} opt_message
@@ -65,16 +74,31 @@ function assertion(errorCls, shouldBeTruthy, opt_message, var_args) {
     return shouldBeTruthy;
   }
 
-  // Substitute provided values into format string in message
-  const message = Array.prototype.slice
-    // Skip the first 3 arguments to isolate format params
-    .call(arguments, 3)
-    .reduce(
-      (msg, subValue) => msg.replace('%s', subValue),
-      opt_message || 'Assertion failed'
-    );
+  // Skip the first 3 arguments to isolate format params
+  const messageArgs = Array.prototype.slice.call(arguments, 3);
+  const messageArray = [];
+  let firstElement;
 
-  throw new errorCls(message);
+  // Substitute provided values into format string in message
+  const message = (opt_message || 'Assertion failed').replace(/%s/g, () => {
+    const subValue = messageArgs.shift();
+
+    if (subValue != '') {
+      messageArray.push(subValue);
+    }
+
+    // If an element is provided, add it to the error object
+    if (!firstElement && subValue?.nodeType == 1) {
+      firstElement = subValue;
+    }
+
+    return subValue;
+  });
+
+  const error = new errorCls(message);
+  error.messageArray = messageArray;
+  error.associatedElement = firstElement;
+  throw error;
 }
 
 /**
