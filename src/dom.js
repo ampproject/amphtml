@@ -246,7 +246,7 @@ export function rootNodeFor(node) {
 
 /**
  * Determines if value is actually a `ShadowRoot` node.
- * @param {*} value
+ * @param {!Node} value
  * @return {boolean}
  */
 export function isShadowRoot(value) {
@@ -760,7 +760,7 @@ export function isIframed(win) {
 
 /**
  * Determines if this element is an AMP element
- * @param {!Element} element
+ * @param {!Element|AmpElement} element
  * @return {boolean}
  */
 export function isAmpElement(element) {
@@ -777,12 +777,12 @@ export function isAmpElement(element) {
 /**
  * Return a promise that resolve when an AMP element upgrade from HTMLElement
  * to CustomElement
- * @param {!Element} element
+ * @param {!Element|AmpElement} element
  * @return {!Promise<!Element>}
  */
 export function whenUpgradedToCustomElement(element) {
   devAssert(isAmpElement(element), 'element is not AmpElement');
-  if (element.createdCallback) {
+  if (/** @type {AmpElement} */ (element).createdCallback) {
     // Element already is CustomElement;
     return Promise.resolve(element);
   }

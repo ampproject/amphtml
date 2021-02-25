@@ -219,7 +219,7 @@ export class IframeMessagingClient {
    * @private
    */
   setupEventListener_() {
-    listen(this.win_, 'message', this.handleMessage_);
+    listen(this.win_, 'message', this.handleMessage_.bind(this));
   }
 
   /**

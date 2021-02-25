@@ -59,6 +59,7 @@ export class UserError extends Error {
  * @param {...*} var_args Arguments substituted into %s in the message
  * @return {T}
  * @throws {Error} when shouldBeTruthy is not truthy.
+ * @template T
  */
 function assertion(errorCls, shouldBeTruthy, opt_message, var_args) {
   if (shouldBeTruthy) {
@@ -94,6 +95,7 @@ function assertion(errorCls, shouldBeTruthy, opt_message, var_args) {
  * @return {T}
  * @throws {UserError} when shouldBeTruthy is not truthy.
  * @closurePrimitive {asserts.truthy}
+ * @template T
  */
 export function pureUserAssert(
   shouldBeTruthy,
@@ -141,6 +143,7 @@ export function pureUserAssert(
  * @return {T}
  * @throws {Error} when shouldBeTruthy is not truthy.
  * @closurePrimitive {asserts.truthy}
+ * @template T
  */
 export function pureDevAssert(
   shouldBeTruthy,

@@ -79,9 +79,9 @@ class CSSSupportsRule {
   }
 }
 
-/**
- */
-CSS.animationWorklet = {
-  /** @param {string} module */
-  addModule: function(module) {}
-};
+// /**
+//  */
+// CSS.animationWorklet = {
+//   /** @param {string} module */
+//   addModule: function(module) {}
+// };
