@@ -69,12 +69,18 @@ describes.realWin('carousel implementation', {}, (env) => {
    *  forwards: boolean,
    * }} options
    */
-  async function createCarousel({slideCount, loop, forwards = true}) {
+  async function createCarousel({
+    slideCount,
+    loop,
+    forwards = true,
+    initialIndex,
+  }) {
     const carousel = new Carousel({
       win,
       element,
       scrollContainer,
       runMutate,
+      initialIndex,
     });
     carousel.updateSlides(setSlides(slideCount));
     carousel.updateLoop(loop);
@@ -276,5 +282,13 @@ describes.realWin('carousel implementation', {}, (env) => {
       loop: false,
     });
     expect(warnSpy).to.not.be.called;
+  });
+
+  it('should start at slide 1 with initialIndex set to 1', async () => {
+    const carousel = await createCarousel({
+      slideCount: 3,
+      initialIndex: 1,
+    });
+    expect(carousel.isAtStart()).to.be.false;
   });
 });
