@@ -111,7 +111,7 @@ const buildActivateButtonTemplate = (element) => htmlFor(element)`
 const buildDiscoveryTemplate = (element) => htmlFor(element)`
     <div class="i-amphtml-story-360-discovery" aria-live="polite">
       <div class="i-amphtml-story-360-discovery-animation"></div>
-      <span class="i-amphtml-story-360-discovery-text" aria-hidden="true">
+      <span class="i-amphtml-story-360-discovery-text">
         Move device to explore
       </span>
     </div>
