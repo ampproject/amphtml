@@ -907,20 +907,17 @@ describes.realWin(
         expect(ampSlideScroll.hasAttribute('loop')).to.be.false;
       });
 
-      it('sets the right order for loop', async () => {
-        const ampSlideScroll = await getAmpSlideScroll(true, 5, true, true, 2);
+      it('sets the correct scrollLeft for looping carousel', async () => {
+        const ampSlideScroll = await getAmpSlideScroll(true, 7, false, true);
+        doc.body.appendChild(ampSlideScroll);
+        await ampSlideScroll.buildInternal();
         const impl = await ampSlideScroll.getImpl();
+        ampSlideScroll.layoutCallback();
+        expect(impl.slideWidth_).to.not.be.null;
+        expect(impl.slideWidth_).to.be.greaterThan(0);
 
-        // Simulate layout callback
-        impl.showSlide_(0);
-
-        expect(impl.slideWrappers_[0].style.order).to.equal('1');
-        expect(impl.slideWrappers_[1].style.order).to.equal('2');
-        expect(impl.slideWrappers_[2].style.order).to.equal('');
-        expect(impl.slideWrappers_[3].style.order).to.equal('');
-        // Even though we're on index 0, we should have the last slide
-        // loaded, but style.order needs to be correct here.
-        expect(impl.slideWrappers_[4].style.order).to.equal('3');
+        // I.e. the scrollContainer is centered (not at 0)
+        expect(impl.slidesContainer_.scrollLeft).to.equal(impl.slideWidth_);
       });
 
       // TODO(#17197): This test triggers sinonjs/sinon issues 1709 and 1321.
