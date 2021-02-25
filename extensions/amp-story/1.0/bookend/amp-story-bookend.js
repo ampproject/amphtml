@@ -379,7 +379,6 @@ export class AmpStoryBookend extends DraggableDrawer {
       HistoryState.BOOKEND_ACTIVE
     );
     isActive ? this.open(shouldAnimate) : this.closeInternal_();
-    this.bookendEl_.toggleAttribute('active', isActive);
     this.analyticsService_.triggerEvent(
       isActive ? StoryAnalyticsEvent.OPEN : StoryAnalyticsEvent.CLOSE,
       this.element

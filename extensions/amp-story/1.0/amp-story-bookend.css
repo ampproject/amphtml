@@ -17,6 +17,10 @@
 @import './amp-story-shadow-reset.css';
 @import './amp-story-share.css';
 
+:host {
+  visibility: inherit !important;
+}
+
 .i-amphtml-story-bookend {
   display: flex !important;
   font-family: 'Roboto', sans-serif !important;
@@ -26,11 +30,6 @@
   color: #fff !important;
   text-align: start !important;
   z-index: 100001 !important;
-  visibility: hidden !important;
-}
-
-.i-amphtml-story-bookend[active] {
-  visibility: initial !important; /* Enables tabbing on links only when active (for a11y) */
 }
 
 .i-amphtml-story-bookend-handle {

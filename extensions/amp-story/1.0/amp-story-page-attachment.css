@@ -16,6 +16,10 @@
 
 /** Remote attachment styles. */
 
+:host {
+  visibility: inherit !important;
+}
+
 .i-amphtml-story-page-attachment-remote {
   height: 48px !important;
   bottom: 0 !important;
