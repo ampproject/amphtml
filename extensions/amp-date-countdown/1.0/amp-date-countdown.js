@@ -49,7 +49,8 @@ class AmpDateCountdown extends BaseElement {
   /** @override */
   checkPropsPostMutations() {
     const templates =
-      this.templates_ || (this.templates_ = Services.templatesFor(this.win));
+      this.templates_ ||
+      (this.templates_ = Services.templatesForDoc(this.element));
     const template = templates.maybeFindTemplate(this.element);
     if (template === this.template_) {
       return;

@@ -66,7 +66,7 @@ describes.repeated(
             findAndRenderTemplate: env.sandbox.stub(),
             findAndRenderTemplateArray: env.sandbox.stub(),
           };
-          env.sandbox.stub(Services, 'templatesFor').returns(templates);
+          env.sandbox.stub(Services, 'templatesForDoc').returns(templates);
           env.sandbox
             .stub(AmpDocService.prototype, 'getAmpDoc')
             .returns(ampdoc);
@@ -315,11 +315,21 @@ describes.repeated(
 
                 it('should require placeholder', () => {
                   list.getPlaceholder = () => null;
-                  allowConsoleError(() => {
-                    expect(() => list.isLayoutSupported('container')).to.throw(
-                      /amp-list\[layout=container\] requires a placeholder/
+                  if (variant.type === 'experiment') {
+                    allowConsoleError(() => {
+                      expect(() =>
+                        list.isLayoutSupported('container')
+                      ).to.throw(
+                        /amp-list\[layout=container\] should have a placeholder/
+                      );
+                    });
+                  } else {
+                    expect(() =>
+                      list.isLayoutSupported('container')
+                    ).to.not.throw(
+                      /amp-list\[layout=container\] should have a placeholder/
                     );
-                  });
+                  }
                 });
 
                 it('should unlock height for layout=container with successful attemptChangeHeight', () => {
@@ -829,7 +839,7 @@ describes.repeated(
               return expect(
                 list.layoutCallback()
               ).to.eventually.be.rejectedWith(
-                /XHR Failed fetching \(https:\/\/data.com.+?\): error/
+                /XHR Failed fetching \(https:\/\/data.com\/\.\.\.\): error/
               );
             });
 
@@ -853,7 +863,7 @@ describes.repeated(
               return expect(
                 list.layoutCallback()
               ).to.eventually.be.rejectedWith(
-                /fetching JSON data \(https:\/\/data.com.+?\): HTTP error 400/
+                /fetching JSON data \(https:\/\/data.com\/\.\.\.\): HTTP error 400/
               );
             });
 
