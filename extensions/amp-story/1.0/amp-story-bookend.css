@@ -18,7 +18,7 @@
 @import './amp-story-share.css';
 
 :host {
-  visibility: inherit !important;
+  visibility: inherit !important; /* Will propagate visibility of drawer to shadow dom for a11y */
 }
 
 .i-amphtml-story-bookend {
