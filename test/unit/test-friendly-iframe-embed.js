@@ -673,6 +673,15 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       };
     });
 
+    function extractScriptSrc(html) {
+      const beg = html.indexOf('script-src');
+      const end = html.indexOf(';', beg + 1);
+      if (beg == -1 || end == -1) {
+        throw new Error('script-src not found');
+      }
+      return html.substring(beg + 'script-src'.length, end).trim();
+    }
+
     it('should install base', () => {
       const html = mergeHtmlForTesting(spec);
       expect(html.indexOf('<base href="https://acme.org/embed1">')).to.equal(0);
@@ -702,88 +711,119 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
 
     it('should pre-pend to html', () => {
       const html = mergeHtmlForTesting(spec);
-      expect(html).to.equal(
-        '<base href="https://acme.org/embed1">' +
-          '<meta http-equiv=Content-Security-Policy content=' +
-          "\"script-src 'none';object-src 'none';child-src 'none'\">" +
-          '<a></a>'
+      expect(html).to.contain('<base href="https://acme.org/embed1">');
+      expect(html).to.contain(
+        '<meta http-equiv=Content-Security-Policy content='
       );
+      expect(html).to.contain("object-src 'none';child-src 'none'");
+      expect(html).to.contain("child-src 'none'\"><a></a>");
     });
 
     it('should insert into head', () => {
       spec.html = '<html><head>head</head><body>body';
       const html = mergeHtmlForTesting(spec);
-      expect(html).to.equal(
+      expect(html).to.contain(
         '<html><head><base href="https://acme.org/embed1">' +
-          '<meta http-equiv=Content-Security-Policy content=' +
-          "\"script-src 'none';object-src 'none';" +
-          "child-src 'none'\">head</head><body>body"
+          '<meta http-equiv=Content-Security-Policy content='
       );
+      expect(html).to.contain("child-src 'none'\">head</head><body>body");
     });
 
     it('should insert into head w/o html', () => {
       spec.html = '<head>head</head><body>body';
       const html = mergeHtmlForTesting(spec);
-      expect(html).to.equal(
+      expect(html).to.contain(
         '<head><base href="https://acme.org/embed1">' +
-          '<meta http-equiv=Content-Security-Policy content="' +
-          "script-src 'none';object-src 'none';child-src 'none'\">head" +
-          '</head><body>body'
+          '<meta http-equiv=Content-Security-Policy content="script-src'
+      );
+      expect(html).to.contain(
+        ";object-src 'none';child-src 'none'\">head</head><body>body"
       );
     });
 
     it('should insert before body', () => {
       spec.html = '<html><body>body';
       const html = mergeHtmlForTesting(spec);
-      expect(html).to.equal(
+      expect(html).to.contain(
         '<html><base href="https://acme.org/embed1">' +
-          '<meta http-equiv=Content-Security-Policy content="script-src ' +
-          "'none';object-src 'none';child-src 'none'\"><body>body"
+          '<meta http-equiv=Content-Security-Policy content="script-src '
+      );
+      expect(html).to.contain(
+        ";object-src 'none';child-src 'none'\"><body>body"
       );
     });
 
     it('should insert before body w/o html', () => {
       spec.html = '<body>body';
       const html = mergeHtmlForTesting(spec);
-      expect(html).to.equal(
+      expect(html).to.contain(
         '<base href="https://acme.org/embed1">' +
-          '<meta http-equiv=Content-Security-Policy content="script-src ' +
-          "'none';object-src 'none';child-src 'none'\"><body>body"
+          '<meta http-equiv=Content-Security-Policy content="script-src '
+      );
+      expect(html).to.contain(
+        ";object-src 'none';child-src 'none'\"><body>body"
       );
     });
 
     it('should insert after html', () => {
       spec.html = '<html>content';
       const html = mergeHtmlForTesting(spec);
-      expect(html).to.equal(
+      expect(html).to.contain(
         '<html><base href="https://acme.org/embed1">' +
-          '<meta http-equiv=Content-Security-Policy content="script-src ' +
-          "'none';object-src 'none';child-src 'none'\">content"
+          '<meta http-equiv=Content-Security-Policy content="script-src '
       );
+      expect(html).to.contain(";object-src 'none';child-src 'none'\">content");
     });
 
     it('should insert CSP', () => {
       spec.html = '<html><head></head><body></body></html>';
-      expect(mergeHtmlForTesting(spec)).to.equal(
-        '<html><head><base href="https://acme.org/embed1">' +
-          '<meta http-equiv=Content-Security-Policy ' +
-          "content=\"script-src 'none';object-src 'none';" +
+      expect(mergeHtmlForTesting(spec)).to.contain(
+        '<meta http-equiv=Content-Security-Policy content="script-src '
+      );
+      expect(mergeHtmlForTesting(spec)).to.contain(
+        ";object-src 'none';" +
           "child-src 'none'\">" +
           '</head><body></body></html>'
       );
       spec.html = '<html>foo';
-      expect(mergeHtmlForTesting(spec)).to.equal(
+      expect(mergeHtmlForTesting(spec)).to.contain(
         '<html><base href="https://acme.org/embed1">' +
           '<meta http-equiv=Content-Security-Policy ' +
-          "content=\"script-src 'none';object-src 'none';" +
-          "child-src 'none'\">foo"
+          'content="script-src '
+      );
+      expect(mergeHtmlForTesting(spec)).to.contain(
+        ";object-src 'none';child-src 'none'\">foo"
       );
       spec.html = '<body>foo';
-      expect(mergeHtmlForTesting(spec)).to.equal(
+      expect(mergeHtmlForTesting(spec)).to.contain(
         '<base href="https://acme.org/embed1">' +
           '<meta http-equiv=Content-Security-Policy ' +
-          "content=\"script-src 'none';object-src 'none';" +
-          "child-src 'none'\"><body>foo"
+          'content="script-src '
+      );
+      expect(mergeHtmlForTesting(spec)).to.contain(
+        ";object-src 'none';child-src 'none'\"><body>foo"
+      );
+    });
+
+    it('should create the correct script-src CSP in dev mode', () => {
+      env.sandbox.stub(self, '__AMP_MODE').value({localDev: true});
+      spec.html = '<html><head></head><body></body></html>';
+      const src = extractScriptSrc(mergeHtmlForTesting(spec));
+      expect(src).to.equal(
+        'http://localhost:8000/dist/lts/' +
+          ' http://localhost:8000/dist/rtv/' +
+          ' http://localhost:8000/dist/sw/'
+      );
+    });
+
+    it('should create the correct script-src CSP in non-dev mode', () => {
+      env.sandbox.stub(self, '__AMP_MODE').value({localDev: false});
+      spec.html = '<html><head></head><body></body></html>';
+      const src = extractScriptSrc(mergeHtmlForTesting(spec));
+      expect(src).to.equal(
+        'https://cdn.ampproject.org/lts/' +
+          ' https://cdn.ampproject.org/rtv/' +
+          ' https://cdn.ampproject.org/sw/'
       );
     });
   });

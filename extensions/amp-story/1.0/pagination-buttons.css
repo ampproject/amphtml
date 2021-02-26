@@ -59,9 +59,15 @@ amp-story:not([desktop]) .i-amphtml-story-button-container {
   pointer-events: none !important;
 }
 
-/* Navigation buttons. These are only displayed on desktop. */
-.i-amphtml-story-button-move {
-  display: none !important;
+/* Navigation button element. Visibly hidden on mobile but focusable by screen readers. */
+amp-story:not([desktop]) .i-amphtml-story-button-move,
+[dir=rtl] amp-story:not([desktop]) .i-amphtml-story-button-move {
+  width: 100% !important;
+  height: 100% !important;
+  border: none !important;
+  background: none !important;
+  padding: 0 !important;
+  pointer-events: none !important;
 }
 
 [desktop] .i-amphtml-story-button-move {
