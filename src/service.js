@@ -382,7 +382,7 @@ function getServiceInternal(holder, id) {
  * @param {string} id of the service.
  * @param {?function(new:Object, !Window)|?function(new:Object, !./service/ampdoc-impl.AmpDoc)} ctor Constructor function to new the service. Called with context.
  * @param {boolean=} opt_override
- * @param {boolean=} opt_adopted
+ * @param {boolean=} opt_sharedInstance
  */
 function registerServiceInternal(
   holder,
@@ -390,7 +390,7 @@ function registerServiceInternal(
   id,
   ctor,
   opt_override,
-  opt_adopted
+  opt_sharedInstance
 ) {
   const services = getServices(holder);
   let s = services[id];
@@ -403,7 +403,7 @@ function registerServiceInternal(
       reject: null,
       context: null,
       ctor: null,
-      adopted: opt_adopted || false,
+      sharedInstance: opt_sharedInstance || false,
     };
   }
 
@@ -414,7 +414,7 @@ function registerServiceInternal(
 
   s.ctor = ctor;
   s.context = context;
-  s.adopted = opt_adopted || false;
+  s.sharedInstance = opt_sharedInstance || false;
 
   // The service may have been requested already, in which case there is a
   // pending promise that needs to fulfilled.
@@ -545,7 +545,7 @@ function disposeServicesInternal(holder) {
       continue;
     }
     const serviceHolder = services[id];
-    if (serviceHolder.adopted) {
+    if (serviceHolder.sharedInstance) {
       continue;
     }
     if (serviceHolder.obj) {
@@ -597,7 +597,7 @@ export function adoptServiceForEmbedDoc(ampdoc, id) {
       return service;
     },
     /* override */ false,
-    /* adopted */ true
+    /* sharedInstance */ true
   );
 }
 
@@ -623,9 +623,7 @@ export function adoptServiceFactoryForEmbedDoc(ampdoc, id) {
     getAmpdocServiceHolder(ampdoc),
     ampdoc,
     id,
-    devAssert(service.ctor),
-    /* override */ false,
-    /* adopted */ true
+    devAssert(service.ctor)
   );
 }
 
@@ -647,7 +645,7 @@ export function resetServiceForTesting(holder, id) {
  */
 function isServiceRegistered(holder, id) {
   const service = holder.__AMP_SERVICES && holder.__AMP_SERVICES[id];
-  // All registered services must have an implementation or a constructor.
+  // All registered services must have a constructor.
   return !!(service && service.ctor);
 }
 
