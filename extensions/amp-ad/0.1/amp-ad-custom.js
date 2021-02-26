@@ -123,7 +123,7 @@ export class AmpAdCustom extends AMP.BaseElement {
       this.renderStarted();
 
       try {
-        Services.templatesForDoc(this.element)
+        Services.templatesFor(this.win)
           .findAndRenderTemplate(this.element, templateData)
           .then((renderedElement) => {
             // Get here when the template has been rendered Clear out the

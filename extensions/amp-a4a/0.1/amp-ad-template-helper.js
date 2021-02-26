@@ -20,10 +20,6 @@ import {createElementWithAttributes} from '../../../src/dom';
 import {devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
-import {
-  getServiceForDoc,
-  registerServiceBuilderForDoc,
-} from '../../../src/service';
 import {isArray} from '../../../src/types';
 import {parseUrlDeprecated} from '../../../src/url';
 import {urls} from '../../../src/config';
@@ -38,15 +34,13 @@ const TEMPLATE_CORS_CONFIG = {
   credentials: 'omit',
 };
 
-const SERVICE_ID = 'AmpAdTemplateHelper';
-
 export class AmpAdTemplateHelper {
   /**
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!Window} win
    */
-  constructor(ampdoc) {
-    /** @private @const */
-    this.ampdoc_ = ampdoc;
+  constructor(win) {
+    /** @private {!Window} */
+    this.win_ = win;
 
     /** @private {LruCache} */
     this.cache_ = new LruCache(5);
@@ -59,15 +53,14 @@ export class AmpAdTemplateHelper {
    * @return {!Promise<string>}
    */
   fetch(templateUrl) {
-    const {win} = this.ampdoc_;
     const proxyUrl =
-      getMode(win).localDev && !isNaN(templateUrl)
-        ? `http://ads.localhost:${win.location.port}` +
+      getMode(this.win_).localDev && !isNaN(templateUrl)
+        ? `http://ads.localhost:${this.win_.location.port}` +
           `/a4a_template/adzerk/${templateUrl}`
         : this.getTemplateProxyUrl_(templateUrl);
     let templatePromise = this.cache_.get(proxyUrl);
     if (!templatePromise) {
-      templatePromise = Services.xhrFor(win)
+      templatePromise = Services.xhrFor(this.win_)
         .fetchText(proxyUrl, TEMPLATE_CORS_CONFIG)
         .then((response) => response.text());
       this.cache_.put(proxyUrl, templatePromise);
@@ -82,7 +75,7 @@ export class AmpAdTemplateHelper {
    * @return {!Promise<!Element>} Promise which resolves after rendering completes.
    */
   render(templateValues, element) {
-    return Services.templatesForDoc(this.ampdoc_).findAndRenderTemplate(
+    return Services.templatesFor(this.win_).findAndRenderTemplate(
       element,
       templateValues
     );
@@ -138,16 +131,4 @@ export class AmpAdTemplateHelper {
           loc.hostname +
           loc.pathname;
   }
-}
-
-/**
- * @param {!Element|!../../../src/service/ampdoc-impl.AmpDoc} target
- * @return {!AmpAdTemplateHelper}
- */
-export function getAmpAdTemplateHelper(target) {
-  registerServiceBuilderForDoc(target, SERVICE_ID, AmpAdTemplateHelper);
-  return /** @type {!AmpAdTemplateHelper} */ (getServiceForDoc(
-    target,
-    SERVICE_ID
-  ));
 }

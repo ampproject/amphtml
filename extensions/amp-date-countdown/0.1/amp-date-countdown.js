@@ -73,8 +73,8 @@ export class AmpDateCountdown extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {?../../../src/service/template-impl.Templates} */
-    this.templates_ = null;
+    /** @const {!../../../src/service/template-impl.Templates} */
+    this.templates_ = Services.templatesFor(this.win);
 
     /** @const {function(!Element)} */
     this.boundRendered_ = this.rendered_.bind(this);
@@ -115,8 +115,6 @@ export class AmpDateCountdown extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.templates_ = Services.templatesForDoc(this.element);
-
     // Store this in buildCallback() because `this.element` sometimes
     // is missing attributes in the constructor.
 
