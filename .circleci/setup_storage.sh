@@ -29,7 +29,7 @@ then
 fi
 
 echo $(GREEN "Installing Google Cloud SDK...")
-(set -x && cd ~/ && curl -Ss --retry 5 https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-323.0.0-linux-x86_64.tar.gz | tar xz)
+(set -x && cd ~/ && curl -Ss --retry 5 https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-329.0.0-linux-x86_64.tar.gz | tar xz)
 
 echo $(GREEN "Setting up Cloud SDK environment...")
 (set -x && echo "source ~/google-cloud-sdk/path.bash.inc" >> $BASH_ENV)
