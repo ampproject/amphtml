@@ -136,8 +136,8 @@ const MATCH_ANY = () => true;
 const childIdGenerator = sequentialIdGenerator();
 
 const ONE_OF_ERROR_MESSAGE =
-  'only one of "attr", "attrs", "attrPrefix", "passthrough", ' +
-  '"passthroughNonEmpty", or "selector" may be given';
+  'Only one of "attr", "attrs", "attrPrefix", "passthrough", ' +
+  '"passthroughNonEmpty", or "selector" must be given';
 
 /**
  * Wraps a Preact Component in a BaseElement class.
@@ -1010,23 +1010,21 @@ function parsePropDefs(props, propDefs, element, mediaQueryProps) {
 
   for (const name in propDefs) {
     const def = /** @type {!AmpElementPropDef} */ (propDefs[name]);
+    devAssert(
+      !!def.attr +
+        !!def.attrs +
+        !!def.attrPrefix +
+        !!def.selector +
+        !!def.passthrough +
+        !!def.passthroughNonEmpty <=
+        1,
+      ONE_OF_ERROR_MESSAGE
+    );
     let value;
     if (def.passthrough) {
-      devAssert(
-        !def.attr &&
-          !def.attrs &&
-          !def.attrPrefix &&
-          !def.selector &&
-          !def.passthroughNonEmpty,
-        ONE_OF_ERROR_MESSAGE
-      );
       props[def.name || name] = [<Slot />];
       continue;
     } else if (def.passthroughNonEmpty) {
-      devAssert(
-        !def.attr && !def.attrs && !def.attrPrefix && !def.selector,
-        ONE_OF_ERROR_MESSAGE
-      );
       // If all children are whitespace text nodes, consider the element as
       // having no children
       props[def.name || name] = element
@@ -1040,20 +1038,14 @@ function parsePropDefs(props, propDefs, element, mediaQueryProps) {
         : [<Slot />];
       continue;
     } else if (def.attr) {
-      devAssert(
-        !def.attrs && !def.attrPrefix && !def.selector,
-        ONE_OF_ERROR_MESSAGE
-      );
       value = element.getAttribute(def.attr);
       if (def.media && value != null) {
         value = mediaQueryProps.resolveListQuery(String(value));
       }
     } else if (def.parseAttrs) {
       devAssert(def.attrs);
-      devAssert(!def.attrPrefix && !def.selector, ONE_OF_ERROR_MESSAGE);
       value = def.parseAttrs(element);
     } else if (def.attrPrefix) {
-      devAssert(!def.selector, ONE_OF_ERROR_MESSAGE);
       const currObj = {};
       let objContains = false;
       const attrs = element.attributes;
