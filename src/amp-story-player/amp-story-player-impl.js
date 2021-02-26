@@ -257,6 +257,7 @@ export class AmpStoryPlayer {
     this.element_.mute = this.mute.bind(this);
     this.element_.unmute = this.unmute.bind(this);
     this.element_.getStoryState = this.getStoryState.bind(this);
+    this.element_.prerender = this.prerender.bind(this);
   }
 
   /**
@@ -277,6 +278,7 @@ export class AmpStoryPlayer {
    * Adds stories to the player. Additionally, creates or assigns
    * iframes to those that are close to the current playing story.
    * @param {!Array<!{href: string, title: ?string, posterImage: ?string}>} newStories
+   * @return {!Promise}
    * @public
    */
   add(newStories) {
@@ -299,7 +301,40 @@ export class AmpStoryPlayer {
       this.build_(story);
     }
 
-    this.render_(renderStartingIdx);
+    return this.render_(renderStartingIdx);
+  }
+
+  /**
+   * Prerenders the provided story in the player.
+   * @param {string} storyUrl
+   * @public
+   */
+  prerender(storyUrl) {
+    let storyIdx = storyUrl
+      ? findIndex(this.stories_, ({href}) => href === storyUrl)
+      : this.currentIdx_;
+
+    // Add story to the player if it isn't there yet.
+    let renderPromise = Promise.resolve();
+    if (!this.stories_[storyIdx]) {
+      renderPromise = this.add([{href: storyUrl}]);
+      storyIdx = this.stories_.length - 1;
+    }
+
+    renderPromise.then(() => {
+      const story = this.stories_[storyIdx];
+
+      if (story.iframe.isConnected) {
+        // If iframe is already in the DOM then there's no need to prerender.
+        return;
+      }
+
+      this.appendToDom_(story);
+      this.maybeGetCacheUrl_(story.href).then((storyUrl) => {
+        this.setSrc_(story, storyUrl);
+        this.updatePosition_(story);
+      });
+    });
   }
 
   /**
@@ -733,7 +768,6 @@ export class AmpStoryPlayer {
       ? findIndex(this.stories_, ({href}) => href === storyUrl)
       : this.currentIdx_;
 
-    // TODO(#28987): replace for add() once implemented.
     if (!this.stories_[storyIdx]) {
       throw new Error(`Story URL not found in the player: ${storyUrl}`);
     }

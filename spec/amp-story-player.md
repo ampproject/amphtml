@@ -210,6 +210,18 @@ player.play();
 player.pause();
 ```
 
+#### prerender
+
+**Parameters**
+
+-   string: the URL of the story to prerender.
+
+Will start loading and prerendering the story on the player.
+
+```javascript
+player.prerender('cool-story.html'); // Will load and prerender cool-story.html
+```
+
 #### getStoryState
 
 **Parameters**
