@@ -18,7 +18,17 @@ import {validateData, writeScript} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   method: string,
+ *   account: string,
+ *   site: string,
+ *   zone: string,
+ *   size: string,
+ *   kw: string,
+ *   visitor: string,
+ *   inventory: string,
+ *   callback: Function
+ * }} data
  */
 export function rubicon(global, data) {
   // TODO: check mandatory fields
@@ -45,7 +55,16 @@ export function rubicon(global, data) {
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   account: string,
+ *   site: string,
+ *   zone: string,
+ *   size: string,
+ *   kw: string,
+ *   visitor: string,
+ *   inventory: string,
+ *   callback: Function
+ * }} data
  */
 function smartTag(global, data) {
   /* eslint-disable */

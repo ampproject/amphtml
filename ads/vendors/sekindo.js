@@ -19,19 +19,19 @@ import {loadScript, validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   spaceid: string
+ * }} data
  */
 export function sekindo(global, data) {
   validateData(data, ['spaceid']);
-  const pubUrl = encodeURIComponent(global.context.sourceUrl);
+  /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */
+  const context = /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context);
+  const pubUrl = encodeURIComponent(context.sourceUrl || '');
   const excludesSet = {ampSlotIndex: 1, type: 1};
   const customParamMap = {spaceid: 's', width: 'x', height: 'y'};
   let query =
-    'isAmpProject=1&pubUrl=' +
-    pubUrl +
-    '&cbuster=' +
-    global.context.startTime +
-    '&';
+    'isAmpProject=1&pubUrl=' + pubUrl + '&cbuster=' + context.startTime + '&';
   let getParam = '';
   for (const key in data) {
     if (hasOwn(data, key)) {
@@ -46,10 +46,10 @@ export function sekindo(global, data) {
     global,
     'https://live.sekindo.com/live/liveView.php?' + query,
     () => {
-      global.context.renderStart();
+      context.renderStart();
     },
     () => {
-      global.context.noContentAvailable();
+      context.noContentAvailable();
     }
   );
 }

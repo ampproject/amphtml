@@ -20,7 +20,9 @@ const jsnPrefix = 'https://api.rnet.plus/';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   src: string
+ * }} data
  */
 export function rnetplus(global, data) {
   validateData(data, ['src']);

@@ -18,7 +18,10 @@ import {loadScript} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   elm: (string|undefined),
+ *   url: (string|undefined)
+ * }} data
  */
 export function sklik(global, data) {
   loadScript(global, 'https://c.imedia.cz/js/amp.js', () => {

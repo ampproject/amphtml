@@ -18,7 +18,13 @@ import {loadScript, validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   tag: string,
+ *   key: string,
+ *   plc: (string|undefined),
+ *   opts: (string|undefined),
+ *   params: (Object|undefined)
+ * }} data
  */
 export function revjet(global, data) {
   validateData(data, ['tag', 'key'], ['plc', 'opts', 'params']);
@@ -30,7 +36,7 @@ export function revjet(global, data) {
     'https://cdn.revjet.com/~cdn/JS/03/amp.js',
     /* opt_cb */ undefined,
     () => {
-      global.context.noContentAvailable();
+      /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context).noContentAvailable();
     }
   );
 }

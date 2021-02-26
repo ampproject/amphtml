@@ -20,7 +20,18 @@ import {validateData, writeScript} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   customerName: string,
+ *   adHost: (string|undefined),
+ *   site: (string|undefined),
+ *   size: (string|undefined),
+ *   area: (string|undefined),
+ *   mid: (string|undefined),
+ *   tags: (string|undefined),
+ *   multiSize: (string|undefined),
+ *   width: string,
+ *   height: string,
+ * }} data
  */
 export function sas(global, data) {
   let url, adHost, whSize;
@@ -95,6 +106,6 @@ export function sas(global, data) {
     }
   }
   writeScript(global, url, () => {
-    global.context.renderStart();
+    /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context).renderStart();
   });
 }

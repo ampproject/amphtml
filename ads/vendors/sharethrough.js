@@ -18,7 +18,9 @@ import {validateData, writeScript} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   pkey: string,
+ * }} data
  */
 export function sharethrough(global, data) {
   validateData(data, ['pkey'], []);

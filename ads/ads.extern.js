@@ -607,6 +607,15 @@ data.section;
 // pulsepoint.js
 window.PulsePointHeaderTag;
 
+// revcontent.js
+window.data;
+
+// revjet.js
+window._revjetData;
+
+// rfp.js
+window.rfpData;
+
 // rubicon.js
 data.method;
 data.width;
@@ -620,10 +629,24 @@ data.site;
 data.zone;
 data.callback;
 
+// sekindo.js
+window.rp_account;
+window.rp_site;
+window.rp_zonesize;
+window.rp_adtype;
+window.rp_page;
+window.rp_kw;
+window.rp_visitor;
+window.rp_inventory;
+window.rp_amp;
+window.rp_callback;
+
 // sharethrough.js
+window.pkey;
 data.pkey;
 
 // sklik.js
+window.sklikProvider;
 data.elm;
 
 // slimcutmedia.js

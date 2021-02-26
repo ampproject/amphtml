@@ -18,7 +18,36 @@ import {loadScript, validateData, writeScript} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   id: string,
+ *   height: string,
+ *   wrapper: (string|undefined),
+ *   subIds: (string|undefined),
+ *   revcontent: (string|undefined),
+ *   env: (string|undefined),
+ *   loadscript: (string|undefined),
+ *   api: (string|undefined),
+ *   key: (string|undefined),
+ *   ssl: (string|undefined),
+ *   adxw: (string|undefined),
+ *   adxh: (string|undefined),
+ *   rows: (string|undefined),
+ *   cols: (string|undefined),
+ *   domain: (string|undefined),
+ *   source: (string|undefined),
+ *   testing: (string|undefined),
+ *   endpoint: (string|undefined),
+ *   publisher: (string|undefined),
+ *   branding: (string|undefined),
+ *   font: (string|undefined),
+ *   css: (string|undefined),
+ *   sizer: (string|undefined),
+ *   debug: (string|undefined),
+ *   ampcreative: (string|undefined),
+ *   gdpr: (string|undefined),
+ *   gdprConsent: (string|undefined),
+ *   usPrivacy: (string|undefined),
+ * }} data
  */
 export function revcontent(global, data) {
   let endpoint =
