@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {USER_ERROR_SENTINEL} from './assert';
+import {USER_ERROR_SENTINEL} from './core/assert';
 import {getMode} from './mode';
 import {internalRuntimeVersion} from './internal-version';
 import {isArray, isEnumValue} from './types';
