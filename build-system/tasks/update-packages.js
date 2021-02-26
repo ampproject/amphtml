@@ -134,17 +134,64 @@ function patchShadowDom() {
   // Copies webcomponents-sd into a new file that has an export.
   const patchedName =
     'node_modules/@webcomponents/webcomponentsjs/bundles/webcomponents-sd.install.js';
-  let file = fs
-    .readFileSync(
-      'node_modules/@webcomponents/webcomponentsjs/bundles/webcomponents-sd.js'
-    )
-    .toString();
+
+  let file = '(function() {';
+  // HTMLElement is replaced, but the original needs to be used for the polyfill
+  // since it manipulates "own" properties. See `src/polyfills/custom-element.js`.
+  file += 'var HTMLElementOrig = window.HTMLElementOrig || window.HTMLElement;';
+  file += 'window.HTMLElementOrig = HTMLElementOrig;';
+  file += `
+    (function() {
+      var origContains = document.contains;
+      if (origContains) {
+        Object.defineProperty(document, '__shady_native_contains', {value: origContains});
+      }
+      Object.defineProperty(document, 'contains', {
+        configurable: true,
+        value: function(node) {
+          if (node === this) {
+            return true;
+          }
+          if (this.documentElement) {
+            return this.documentElement.contains(node);
+          }
+          return false;
+        }
+      });
+    })();
+  `;
+
+  function transformScript(file) {
+    // Use the HTMLElement from above.
+    file = file.replace(/\bHTMLElement\b/g, 'HTMLElementOrig');
+    return file;
+  }
+
+  // Relevant DOM polyfills
+  file += transformScript(
+    fs
+      .readFileSync(
+        'node_modules/@webcomponents/webcomponentsjs/bundles/webcomponents-pf_dom.js'
+      )
+      .toString()
+  );
+  file += transformScript(
+    fs
+      .readFileSync(
+        'node_modules/@webcomponents/webcomponentsjs/bundles/webcomponents-sd.js'
+      )
+      .toString()
+  );
+  file += '})();';
 
   // ESM binaries fail on this expression.
   file = file.replace(
     '"undefined"!=typeof window&&window===this?this:"undefined"!=typeof global&&null!=global?global:this',
     'window'
   );
+  // Disable any integration with CE.
+  file = file.replace(/window\.customElements/g, 'window.__customElements');
+
   writeIfUpdated(patchedName, file);
 }
 
