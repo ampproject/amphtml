@@ -819,7 +819,10 @@ export class AmpStoryInteractive extends AMP.BaseElement {
   toggleTabbableElements_(toggle) {
     this.rootEl_.querySelectorAll('button, a').forEach((el) => {
       // Disable tabbing through options if already selected.
-      if (this.getOptionElements().includes(el) && this.hasUserSelection_) {
+      if (
+        el.classList.contains('i-amphtml-story-interactive-option') &&
+        this.hasUserSelection_
+      ) {
         el.setAttribute('tabindex', -1);
       } else {
         el.setAttribute('tabindex', toggle ? 0 : -1);

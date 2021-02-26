@@ -184,6 +184,7 @@
 .i-amphtml-story-interactive-quiz-option::before {
   content: '' !important;
   position: absolute !important;
+  left: 0px !important;
   width: 100% !important;
   height: 100% !important;
   border-radius: var(--i-amphtml-interactive-chip-radius) !important;
@@ -192,7 +193,6 @@
 
 .i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
   .i-amphtml-story-interactive-quiz-option:focus::before {
-    left: 0px !important;
     background: var(--i-amphtml-interactive-theme-shading) !important;
 }
 
