@@ -53,15 +53,6 @@ import {startupChunk} from './chunk';
 import {stubElementsForDoc} from './service/custom-element-registry';
 
 /**
- * self.IS_AMP_ALT (is AMP alternative binary) is undefined by default in the
- * main v0.js since it is the "main" js.
- * This global boolean is set by alternative binaries like amp-inabox and
- * amp-shadow which has their own bootstrapping sequence.
- * @type {boolean|undefined}
- */
-const shouldMainBootstrapRun = !self.IS_AMP_ALT;
-
-/**
  * Execute the bootstrap
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!./service/performance-impl.Performance} perf
@@ -109,77 +100,73 @@ function bootstrap(ampdoc, perf) {
   });
 }
 
-if (shouldMainBootstrapRun) {
-  // Store the originalHash as early as possible. Trying to debug:
-  // https://github.com/ampproject/amphtml/issues/6070
-  if (self.location) {
-    self.location.originalHash = self.location.hash;
+// Store the originalHash as early as possible. Trying to debug:
+// https://github.com/ampproject/amphtml/issues/6070
+if (self.location) {
+  self.location.originalHash = self.location.hash;
+}
+
+/** @type {!./service/ampdoc-impl.AmpDocService} */
+let ampdocService;
+// We must under all circumstances call makeBodyVisible.
+// It is much better to have AMP tags not rendered than having
+// a completely blank page.
+try {
+  // Should happen first.
+  installErrorReporting(self); // Also calls makeBodyVisibleRecovery on errors.
+
+  // Declare that this runtime will support a single root doc. Should happen
+  // as early as possible.
+  installDocService(self, /* isSingleDoc */ true);
+  ampdocService = Services.ampdocServiceFor(self);
+} catch (e) {
+  // In case of an error call this.
+  makeBodyVisibleRecovery(self.document);
+  throw e;
+}
+startupChunk(self.document, function initial() {
+  /** @const {!./service/ampdoc-impl.AmpDoc} */
+  const ampdoc = ampdocService.getAmpDoc(self.document);
+  installPlatformService(self);
+  installPerformanceService(self);
+  /** @const {!./service/performance-impl.Performance} */
+  const perf = Services.performanceFor(self);
+  if (self.document.documentElement.hasAttribute('i-amphtml-no-boilerplate')) {
+    perf.addEnabledExperiment('no-boilerplate');
   }
-
-  /** @type {!./service/ampdoc-impl.AmpDocService} */
-  let ampdocService;
-  // We must under all circumstances call makeBodyVisible.
-  // It is much better to have AMP tags not rendered than having
-  // a completely blank page.
-  try {
-    // Should happen first.
-    installErrorReporting(self); // Also calls makeBodyVisibleRecovery on errors.
-
-    // Declare that this runtime will support a single root doc. Should happen
-    // as early as possible.
-    installDocService(self, /* isSingleDoc */ true);
-    ampdocService = Services.ampdocServiceFor(self);
-  } catch (e) {
-    // In case of an error call this.
-    makeBodyVisibleRecovery(self.document);
-    throw e;
+  if (IS_ESM) {
+    perf.addEnabledExperiment('esm');
   }
-  startupChunk(self.document, function initial() {
-    /** @const {!./service/ampdoc-impl.AmpDoc} */
-    const ampdoc = ampdocService.getAmpDoc(self.document);
-    installPlatformService(self);
-    installPerformanceService(self);
-    /** @const {!./service/performance-impl.Performance} */
-    const perf = Services.performanceFor(self);
-    if (
-      self.document.documentElement.hasAttribute('i-amphtml-no-boilerplate')
-    ) {
-      perf.addEnabledExperiment('no-boilerplate');
-    }
-    if (IS_ESM) {
-      perf.addEnabledExperiment('esm');
-    }
-    fontStylesheetTimeout(self);
-    perf.tick(TickLabel.INSTALL_STYLES);
-    if (IS_ESM) {
-      bootstrap(ampdoc, perf);
-    } else {
-      installStylesForDoc(
-        ampdoc,
-        ampDocCss + ampSharedCss,
-        () => bootstrap(ampdoc, perf),
-        /* opt_isRuntimeCss */ true,
-        /* opt_ext */ 'amp-runtime'
-      );
-    }
-  });
-
-  // Output a message to the console and add an attribute to the <html>
-  // tag to give some information that can be used in error reports.
-  // (At least by sophisticated users).
-  if (self.console) {
-    (console.info || console.log).call(
-      console,
-      `Powered by AMP ⚡ HTML – Version ${internalRuntimeVersion()}`,
-      self.location.href
+  fontStylesheetTimeout(self);
+  perf.tick(TickLabel.INSTALL_STYLES);
+  if (IS_ESM) {
+    bootstrap(ampdoc, perf);
+  } else {
+    installStylesForDoc(
+      ampdoc,
+      ampDocCss + ampSharedCss,
+      () => bootstrap(ampdoc, perf),
+      /* opt_isRuntimeCss */ true,
+      /* opt_ext */ 'amp-runtime'
     );
   }
-  // This code is eleminated in prod build through a babel transformer.
-  if (getMode().localDev) {
-    self.document.documentElement.setAttribute('esm', IS_ESM ? 1 : 0);
-  }
-  self.document.documentElement.setAttribute(
-    'amp-version',
-    internalRuntimeVersion()
+});
+
+// Output a message to the console and add an attribute to the <html>
+// tag to give some information that can be used in error reports.
+// (At least by sophisticated users).
+if (self.console) {
+  (console.info || console.log).call(
+    console,
+    `Powered by AMP ⚡ HTML – Version ${internalRuntimeVersion()}`,
+    self.location.href
   );
 }
+// This code is eleminated in prod build through a babel transformer.
+if (getMode().localDev) {
+  self.document.documentElement.setAttribute('esm', IS_ESM ? 1 : 0);
+}
+self.document.documentElement.setAttribute(
+  'amp-version',
+  internalRuntimeVersion()
+);

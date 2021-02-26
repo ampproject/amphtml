@@ -147,7 +147,6 @@ module.exports = {
     'local/no-import-meta': 2,
     'local/no-import-rename': 2,
     'local/no-invalid-this': 2,
-    'local/no-is-amp-alt': 2,
     'local/no-log-array': 2,
     'local/no-mixed-interpolation': 2,
     'local/no-mixed-operators': 2,
