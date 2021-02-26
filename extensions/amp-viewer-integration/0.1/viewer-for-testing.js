@@ -35,7 +35,7 @@ export class ViewerForTesting {
     this.ampdocUrl = ampdocUrl;
 
     /** @visibleForTesting @private {boolean} */
-    this.alreadyLoaded_ = false;
+    this.hasDocumentLoaded_ = false;
 
     /** @private {string} */
     this.visibilityState_ = visible ? 'visible' : 'hidden';
@@ -58,6 +58,7 @@ export class ViewerForTesting {
     this.documentLoadedPromise_ = new Promise((resolve) => {
       /** @private {?function()} */
       this.documentLoadedResolve_ = resolve;
+      this.hasDocumentLoaded_ = true;
     });
   }
 
