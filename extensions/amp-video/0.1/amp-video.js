@@ -236,6 +236,7 @@ export class AmpVideo extends AMP.BaseElement {
     this.video_.setAttribute('webkit-playsinline', '');
     // Disable video preload in prerender mode.
     this.video_.setAttribute('preload', 'none');
+    this.checkA11yAttributeText_();
     this.propagateAttributes(
       ATTRS_TO_PROPAGATE_ON_BUILD,
       this.video_,
@@ -267,6 +268,17 @@ export class AmpVideo extends AMP.BaseElement {
     installVideoManagerForDoc(element);
 
     Services.videoManagerForDoc(element).register(this);
+  }
+
+  /**
+   * @private
+   * Overrides aria-label with alt since alt is not read by screen readers on video elements.
+   */
+  checkA11yAttributeText_() {
+    const altText = this.element.getAttribute('alt');
+    if (altText) {
+      this.element.setAttribute('aria-label', altText);
+    }
   }
 
   /** @override */
