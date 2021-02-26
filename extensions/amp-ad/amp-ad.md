@@ -336,6 +336,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [Ezoic](../../ads/vendors/ezoic.md)
 -   [FeedAd](../../ads/vendors/feedad.md)
 -   [Felmat](../../ads/vendors/felmat.md)
+-   [finative](../../ads/vendors/finative.md)
 -   [FlexOneELEPHANT](../../ads/vendors/f1e.md)
 -   [FlexOneHARRIER](../../ads/vendors/f1h.md)
 -   [Flite](../../ads/vendors/flite.md)

@@ -150,6 +150,15 @@ const ONE_OF_ERROR_MESSAGE =
  * @template API_TYPE
  */
 export class PreactBaseElement extends AMP.BaseElement {
+  /**
+   * @return {boolean}
+   * @nocollapse
+   */
+  static requiresShadowDom() {
+    // eslint-disable-next-line local/no-static-this
+    return usesShadowDom(this);
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
