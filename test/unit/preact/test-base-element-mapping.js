@@ -340,6 +340,10 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       `;
     });
 
+    it('should return requiresShadowDom', () => {
+      expect(Impl.requiresShadowDom()).to.be.true;
+    });
+
     it('should render from scratch', async () => {
       doc.body.appendChild(element);
       await element.buildInternal();
@@ -448,6 +452,10 @@ describes.realWin('PreactBaseElement', spec, (env) => {
 
       updateEventSpy = env.sandbox.stub();
       element.addEventListener('amp:dom-update', updateEventSpy);
+    });
+
+    it('should return requiresShadowDom', () => {
+      expect(Impl.requiresShadowDom()).to.be.false;
     });
 
     it('should render from scratch', async () => {
@@ -595,6 +603,10 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       doc.body.appendChild(element);
       await element.buildInternal();
       await waitFor(() => component.callCount > 0, 'component rendered');
+    });
+
+    it('should return requiresShadowDom', () => {
+      expect(Impl.requiresShadowDom()).to.be.true;
     });
 
     it('should render into shadow DOM', () => {
@@ -833,6 +845,10 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       await waitFor(() => component.callCount > 0, 'component rendered');
     });
 
+    it('should return requiresShadowDom', () => {
+      expect(Impl.requiresShadowDom()).to.be.true;
+    });
+
     it('should render into shadow DOM', () => {
       expect(component).to.be.calledOnce;
       expect(element.shadowRoot).to.be.ok;
@@ -909,6 +925,10 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       doc.body.appendChild(element);
       await element.buildInternal();
       await waitFor(() => component.callCount > 0, 'component rendered');
+    });
+
+    it('should return requiresShadowDom', () => {
+      expect(Impl.requiresShadowDom()).to.be.true;
     });
 
     it('should render into shadow DOM', () => {

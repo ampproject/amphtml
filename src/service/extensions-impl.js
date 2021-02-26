@@ -37,6 +37,7 @@ const TAG = 'extensions';
 const UNKNOWN_EXTENSION = '_UNKNOWN_';
 const CUSTOM_TEMPLATES = ['amp-mustache'];
 const LOADER_PROP = '__AMP_EXT_LDR';
+const SCRIPT_LOADED_PROP = '__AMP_SCR_LOADED';
 
 /**
  * Default milliseconds to wait for all extensions to load before erroring.
@@ -244,7 +245,8 @@ export class Extensions {
    */
   reloadExtension(extensionId) {
     // Ignore inserted script elements to prevent recursion.
-    const els = this.getExtensionScripts_(
+    const els = getExtensionScripts(
+      this.win,
       extensionId,
       /* includeInserted */ false
     );
@@ -272,33 +274,27 @@ export class Extensions {
   }
 
   /**
-   * Returns the extension <script> element and attribute for the given
-   * extension ID, if it exists. Otherwise, returns null.
+   * @param {!Window} win
    * @param {string} extensionId
-   * @param {boolean=} includeInserted If true, includes script elements that
-   *   are inserted by the runtime dynamically. Default is true.
-   * @return {!Array<!Element>}
-   * @private
+   * @return {!Promise}
    */
-  getExtensionScripts_(extensionId, includeInserted = true) {
-    // Always ignore <script> elements that have a mismatched RTV.
-    const modifier =
-      ':not([i-amphtml-loaded-new-version])' +
-      (includeInserted ? '' : ':not([i-amphtml-inserted])');
-    // We have to match against "src" because a few extensions, such as
-    // "amp-viewer-integration", do not have "custom-element" attribute.
-    const matches = this.win.document.head./*OK*/ querySelectorAll(
-      `script[src*="/${extensionId}-"]` + modifier
-    );
-    const filtered = [];
-    for (let i = 0; i < matches.length; i++) {
-      const match = matches[i];
-      const urlParts = parseExtensionUrl(match.src);
-      if (urlParts.extensionId === extensionId) {
-        filtered.push(match);
-      }
+  importUnwrapped(win, extensionId) {
+    const scriptsInHead = getExtensionScripts(win, extensionId);
+    let scriptElement = scriptsInHead.length > 0 ? scriptsInHead[0] : null;
+    let promise;
+    if (scriptElement) {
+      promise = scriptElement[SCRIPT_LOADED_PROP];
+    } else {
+      scriptElement = this.createExtensionScript_(extensionId);
+      promise = scriptElement[SCRIPT_LOADED_PROP] = new Promise(
+        (resolve, reject) => {
+          scriptElement.onload = resolve;
+          scriptElement.onerror = reject;
+        }
+      );
+      win.document.head.appendChild(scriptElement);
     }
-    return filtered;
+    return promise;
   }
 
   /**
@@ -595,7 +591,7 @@ export class Extensions {
       return false;
     }
     if (holder.scriptPresent === undefined) {
-      const scriptsInHead = this.getExtensionScripts_(extensionId);
+      const scriptsInHead = getExtensionScripts(this.win, extensionId);
       holder.scriptPresent = scriptsInHead.length > 0;
     }
     return !holder.scriptPresent;
@@ -685,4 +681,34 @@ function copyBuiltinElementsToChildWindow(parentWin, childWin) {
 function emptyService() {
   // All services need to resolve to an object.
   return {};
+}
+
+/**
+ * Returns the extension <script> element and attribute for the given
+ * extension ID, if it exists. Otherwise, returns null.
+ * @param {!Window} win
+ * @param {string} extensionId
+ * @param {boolean=} includeInserted If true, includes script elements that
+ *   are inserted by the runtime dynamically. Default is true.
+ * @return {!Array<!Element>}
+ */
+function getExtensionScripts(win, extensionId, includeInserted = true) {
+  // Always ignore <script> elements that have a mismatched RTV.
+  const modifier =
+    ':not([i-amphtml-loaded-new-version])' +
+    (includeInserted ? '' : ':not([i-amphtml-inserted])');
+  // We have to match against "src" because a few extensions, such as
+  // "amp-viewer-integration", do not have "custom-element" attribute.
+  const matches = win.document.head./*OK*/ querySelectorAll(
+    `script[src*="/${extensionId}-"]` + modifier
+  );
+  const filtered = [];
+  for (let i = 0; i < matches.length; i++) {
+    const match = matches[i];
+    const urlParts = parseExtensionUrl(match.src);
+    if (urlParts.extensionId === extensionId) {
+      filtered.push(match);
+    }
+  }
+  return filtered;
 }
