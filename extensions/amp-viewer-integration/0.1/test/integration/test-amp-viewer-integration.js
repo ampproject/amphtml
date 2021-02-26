@@ -46,8 +46,10 @@ describes.sandboxed('amp-viewer-integration', {}, () => {
   it('should confirm the handshake', async () => {
     await viewer.waitForHandshakeRequest();
     viewer.confirmHandshake();
-    await viewer.waitForDocumentLoaded();
-    expect(viewer.hasDocumentLoaded_).to.be.true;
+    viewer.waitForDocumentLoaded().then(() => {
+      expect(viewer.hasDocumentLoaded_).to.be.true;
+      done();
+    });
   });
 });
 
