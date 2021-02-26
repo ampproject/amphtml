@@ -32,10 +32,10 @@ export function yengo(global, data) {
     global,
     url,
     () => {
-      global.context.renderStart();
+      /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context).renderStart();
     },
     () => {
-      global.context.noContentAvailable();
+      /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context).noContentAvailable();
     }
   );
 }

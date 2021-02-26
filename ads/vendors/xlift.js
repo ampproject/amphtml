@@ -29,11 +29,13 @@ export function xlift(global, data) {
   global.document.getElementById('c').appendChild(d);
 
   d.addEventListener('SuccessLoadedXliftAd', function (e) {
-    e.detail = e.detail || {adSizeInfo: {}};
-    global.context.renderStart(e.detail.adSizeInfo);
+    e.detail = e.detail || {adSizeInfo: undefined};
+    /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context).renderStart(
+      e.detail.adSizeInfo
+    );
   });
   d.addEventListener('FailureLoadedXliftAd', function () {
-    global.context.noContentAvailable();
+    /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context).noContentAvailable();
   });
 
   //assign XliftAmpHelper property to global(window)
@@ -44,13 +46,13 @@ export function xlift(global, data) {
     'https://cdn.x-lift.jp/resources/common/xlift_amp.js',
     () => {
       if (!global.XliftAmpHelper) {
-        global.context.noContentAvailable();
+        /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context).noContentAvailable();
       } else {
         global.XliftAmpHelper.show();
       }
     },
     () => {
-      global.context.noContentAvailable();
+      /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context).noContentAvailable();
     }
   );
 }

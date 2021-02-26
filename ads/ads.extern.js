@@ -701,6 +701,25 @@ data.wbo_is_mobile;
 data.wbo_vars;
 data.wbo_weak_encoding;
 
+// xlift.js
+window.xliftParams;
+window.XliftAmpHelper;
+/** @type {Object} */
+Event.prototype.detail = {};
+
+// yahoo.js
+window.yadData;
+
+// yahoofedads.js
+window.adConfig;
+
+// yahoonativeads.js
+window.native;
+window.publisherUrl;
+
+// yahoojp.js
+window.yahoojpParam;
+
 // yandex.js
 var Ya;
 Ya.Context;

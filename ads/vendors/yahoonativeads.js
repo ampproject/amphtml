@@ -18,7 +18,11 @@ import {loadScript, validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   code: *,
+ *   url: string,
+ *   key: (string|undefined)
+ * }} data
  */
 export function yahoonativeads(global, data) {
   validateData(data, ['code', 'url']);
@@ -39,6 +43,6 @@ export function yahoonativeads(global, data) {
   (global.native = global.native || []).push(config);
 
   loadScript(global, 'https://s.yimg.com/dy/ads/native.js', () =>
-    global.context.renderStart()
+    /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context).renderStart()
   );
 }

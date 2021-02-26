@@ -20,7 +20,13 @@ const renderTo = 'yandex_rtb';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *  blockId: *,
+ *  statId: *,
+ *  data: *,
+ *  onRender: Function,
+ *  onError: Function
+ * }} data
  */
 export function yandex(global, data) {
   validateData(data, ['blockId'], ['data', 'onRender', 'onError']);
@@ -31,7 +37,13 @@ export function yandex(global, data) {
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *  blockId: *,
+ *  statId: *,
+ *  data: *,
+ *  onRender: Function,
+ *  onError: Function
+ * }} data
  */
 function addToQueue(global, data) {
   global[n] = global[n] || [];
@@ -51,14 +63,14 @@ function addToQueue(global, data) {
           if (typeof data.onRender === 'function') {
             data.onRender();
           }
-          global.context.renderStart();
+          /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context).renderStart();
         },
       },
       () => {
         if (typeof data.onError === 'function') {
           data.onError();
         } else {
-          global.context.noContentAvailable();
+          /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context).noContentAvailable();
         }
       }
     );
