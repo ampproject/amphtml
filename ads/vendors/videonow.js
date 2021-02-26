@@ -20,7 +20,13 @@ import {tryDecodeUriComponent} from '../../src/url';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   pid: string,
+ *   width: string,
+ *   height: string,
+ *   kind: (string|undefined),
+ *   src: (string|undefined)
+ * }} data
  */
 export function videonow(global, data) {
   const mandatoryAttributes = ['pid', 'width', 'height'];

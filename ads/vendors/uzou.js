@@ -59,7 +59,7 @@ export function uzou(global, data) {
   global.UzouInjector = uzouInjector;
 
   loadScript(global, entryPoint, () => {
-    global.context.renderStart();
+    /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context).renderStart();
   });
 }
 

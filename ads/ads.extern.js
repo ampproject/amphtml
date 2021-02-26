@@ -678,6 +678,18 @@ data.slot.setVisibility;
 data.slot.setTargeting;
 data.slot.setExtraParameters;
 
+// unruly.js
+window.unruly;
+
+// ozou.js
+window.UzouInjector;
+
+// valuecommerce.js
+window.vcParam;
+
+// vdoai.js
+window.vdo_ai_;
+
 // vlyby.js
 window._vlyby_amp;
 

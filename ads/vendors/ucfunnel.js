@@ -18,10 +18,12 @@ import {loadScript, validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   siteId: string
+ * }} data
  */
 export function ucfunnel(global, data) {
   validateData(data, ['siteId']);
   loadScript(window, 'https://ads.aralego.com/ampsdk');
-  window.context.renderStart();
+  /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context).renderStart();
 }

@@ -19,7 +19,7 @@ import {loadScript, validateData} from '../../3p/3p';
 import {setStyles} from '../../src/style';
 
 /**
- * @param {!Object} theObject
+ * @param {Object|null|undefined} theObject
  * @param {!Function} callback
  */
 function forEachOnObject(theObject, callback) {
@@ -52,7 +52,18 @@ function centerAd(global) {
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *  accId: string,
+ *  adUnit: string,
+ *  sizes: string,
+ *  locLat: (string|undefined),
+ *  locLon: (string|undefined),
+ *  locSrc: (string|undefined),
+ *  pageURL: (string|undefined),
+ *  targetings: (Object|undefined),
+ *  extraParams: (Object|undefined),
+ *  visibility: (string|undefined),
+ * }} data
  */
 export function uas(global, data) {
   validateData(
