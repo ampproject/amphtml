@@ -1271,6 +1271,8 @@ export class AmpStoryPlayer {
   /**
    * Returns the story given a URL.
    * @param {string} storyUrl
+   * @return {!StoryDef}
+   * @private
    */
   getStoryFromUrl_(storyUrl) {
     // TODO(enriqe): sanitize URLs for matching.
