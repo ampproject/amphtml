@@ -799,6 +799,38 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       );
     });
 
+    it('rewind() callback should rewind current story', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      attachPlayerWithStories(playerEl, 1);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+      await nextTick();
+
+      const sendRequestSpy = env.sandbox.spy(fakeMessaging, 'sendRequest');
+      player.rewind('https://example.com/story0.html');
+      await nextTick();
+
+      expect(sendRequestSpy).to.have.been.calledWith('rewind', {});
+    });
+
+    it('rewind() throws when invalid url is provided', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      attachPlayerWithStories(playerEl, 1);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+      await nextTick();
+
+      return expect(() =>
+        player.rewind('https://example.com/story6.html')
+      ).to.throw(
+        'Story URL not found in the player: https://example.com/story6.html'
+      );
+    });
+
     // TODO(proyectoramirez): delete once add() is implemented.
     it('show callback should throw when story is not found', async () => {
       const playerEl = win.document.createElement('amp-story-player');
