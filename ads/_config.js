@@ -502,6 +502,8 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'finative': {},
+
   'firstimpression': {
     prefetch: 'https://ecdn.firstimpression.io/static/js/fiamp.js',
     preconnect: 'https://cdn.firstimpression.io',

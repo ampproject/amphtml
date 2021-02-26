@@ -21,9 +21,7 @@ const debounce = require('debounce');
 const del = require('del');
 const esbuild = require('esbuild');
 const experimentDefines = require('../global-configs/experiments-const.json');
-const file = require('gulp-file');
 const fs = require('fs-extra');
-const gulp = require('gulp');
 const MagicString = require('magic-string');
 const open = require('open');
 const path = require('path');
@@ -64,6 +62,9 @@ const EXTENSION_BUNDLE_MAP = {
   ],
   'amp-inputmask.js': ['third_party/inputmask/bundle.js'],
   'amp-date-picker.js': ['third_party/react-dates/bundle.js'],
+  'amp-shadow-dom-polyfill.js': [
+    'node_modules/@webcomponents/webcomponentsjs/bundles/webcomponents-sd.install.js',
+  ],
 };
 
 /**
@@ -119,16 +120,10 @@ function doBuildJs(jsBundles, name, extraOptions) {
  */
 async function bootstrapThirdPartyFrames(options) {
   const startTime = Date.now();
-  const promises = [];
-  thirdPartyFrames.forEach((frameObject) => {
-    promises.push(
-      thirdPartyBootstrap(frameObject.max, frameObject.min, options)
-    );
-  });
   if (options.watch) {
     thirdPartyFrames.forEach((frameObject) => {
-      const watchFunc = () => {
-        thirdPartyBootstrap(frameObject.max, frameObject.min, options);
+      const watchFunc = async () => {
+        await thirdPartyBootstrap(frameObject.max, frameObject.min, options);
       };
       fileWatch(frameObject.max).on(
         'change',
@@ -136,7 +131,11 @@ async function bootstrapThirdPartyFrames(options) {
       );
     });
   }
-  await Promise.all(promises);
+  await Promise.all(
+    thirdPartyFrames.map(async (frameObject) => {
+      await thirdPartyBootstrap(frameObject.max, frameObject.min, options);
+    })
+  );
   endBuildStep(
     'Bootstrapped 3p frames into',
     `dist.3p/${options.minify ? internalRuntimeVersion : 'current'}/`,
@@ -644,10 +643,14 @@ async function applyAmpConfig(targetFile, localDev, fortesting) {
  * @param {!Object} options
  * @return {!Promise}
  */
-function thirdPartyBootstrap(input, outputName, options) {
+async function thirdPartyBootstrap(input, outputName, options) {
   const {minify, fortesting} = options;
+  const destDir = `dist.3p/${minify ? internalRuntimeVersion : 'current'}`;
+  await fs.ensureDir(destDir);
+
   if (!minify) {
-    return toPromise(gulp.src(input).pipe(gulp.dest('dist.3p/current')));
+    await fs.copy(input, `${destDir}/${path.basename(input)}`);
+    return;
   }
 
   // By default we use an absolute URL, that is independent of the
@@ -661,21 +664,12 @@ function thirdPartyBootstrap(input, outputName, options) {
   const html = fs
     .readFileSync(input, 'utf8')
     .replace(/\.\/integration\.js/g, integrationJs);
-  return toPromise(
-    file(outputName, html, {src: true})
-      .pipe(gulp.dest('dist.3p/' + internalRuntimeVersion))
-      .on('end', function () {
-        const aliasToLatestBuild = 'dist.3p/current-min';
-        if (fs.existsSync(aliasToLatestBuild)) {
-          fs.unlinkSync(aliasToLatestBuild);
-        }
-        fs.symlinkSync(
-          './' + internalRuntimeVersion,
-          aliasToLatestBuild,
-          'dir'
-        );
-      })
-  );
+  await fs.writeFile(`${destDir}/${outputName}`, html);
+  const aliasToLatestBuild = 'dist.3p/current-min';
+  if (fs.existsSync(aliasToLatestBuild)) {
+    fs.unlinkSync(aliasToLatestBuild);
+  }
+  fs.symlinkSync('./' + internalRuntimeVersion, aliasToLatestBuild, 'dir');
 }
 
 /**
@@ -693,18 +687,6 @@ function mkdirSync(path) {
   }
 }
 
-/**
- * Returns a promise for readable
- *
- * @param {*} readable
- * @return {Promise}
- */
-function toPromise(readable) {
-  return new Promise(function (resolve, reject) {
-    readable.on('error', reject).on('end', resolve);
-  });
-}
-
 module.exports = {
   MINIFIED_TARGETS,
   applyAmpConfig,
@@ -720,6 +702,5 @@ module.exports = {
   mkdirSync,
   printConfigHelp,
   printNobuildHelp,
-  toPromise,
   watchDebounceDelay,
 };
