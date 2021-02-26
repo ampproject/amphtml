@@ -49,7 +49,7 @@ const buildPollTemplate = (element) => {
 const buildOptionTemplate = (option) => {
   const html = htmlFor(option);
   return html`
-    <button class="i-amphtml-story-interactive-option">
+    <button class="i-amphtml-story-interactive-option" aria-live="polite">
       <span class="i-amphtml-story-interactive-option-text"></span>
       <span class="i-amphtml-story-interactive-option-percentage">
         <span class="i-amphtml-story-interactive-option-percentage-text"></span>
