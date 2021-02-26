@@ -329,7 +329,7 @@ workflows:
               exp: ['A', 'B', 'C']
           <<: *push_and_pr_builds
       - 'Experiment Tests':
-          name: 'Experiment << matrix.exp >> Tests (<< matrix.test_type >>)'
+          name: 'Experiment << matrix.exp >> Tests'
           matrix:
             parameters:
               exp: ['A', 'B', 'C']
