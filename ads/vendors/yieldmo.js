@@ -22,7 +22,7 @@ import {loadScript} from '../../3p/3p';
  */
 export function yieldmo(global, data) {
   const ymElem = global.document.createElement('div');
-  ymElem.id = 'ym_' + data.ymid;
+  ymElem.id = 'ym_' + /** @type {{ymid: string}} */ (data).ymid;
   ymElem.className = 'ym';
   ymElem.dataset['ampEnabled'] = true;
   global.document.getElementById('c').appendChild(ymElem);

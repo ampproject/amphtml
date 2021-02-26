@@ -20,7 +20,16 @@ import {rethrowAsync, user} from '../../src/log';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *  multiSize: string,
+ *  overrideWidth: string,
+ *  width: string,
+ *  overrideHeight: string,
+ *  height: string,
+ *  psn: string,
+ *  ybSlot: *,
+ *  targeting: *
+ * }} data
  */
 export function yieldbot(global, data) {
   validateData(data, ['psn', 'ybSlot', 'slot']);

@@ -44,8 +44,9 @@ function addToQueue(global, data) {
     createContainer(global, renderTo);
 
     const {YandexZen} = global;
+    const clid = /** @type {{clid: string}} */ (data).clid;
     const config = Object.assign(data, {
-      clid: JSON.parse(data.clid),
+      clid: JSON.parse(clid),
       container: `#${renderTo}`,
       isAMP: true,
       successCallback: () => {

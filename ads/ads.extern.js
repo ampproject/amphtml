@@ -711,18 +711,26 @@ Ya.adfoxCode.onRender;
 data.isAdfox;
 
 // yieldbot.js
-var yieldbot;
-yieldbot.psn;
-yieldbot.enableAsync;
-yieldbot.defineSlot;
-yieldbot.go;
-yieldbot.nextPageview;
-yieldbot.getSlotCriteria;
+window.ybotq;
+window.yieldbot;
+window.yieldbot.psn;
+window.yieldbot.enableAsync;
+window.yieldbot.defineSlot;
+window.yieldbot.go;
+window.yieldbot.nextPageview;
+window.yieldbot.getSlotCriteria;
 data.psn;
 data.ybSlot;
 
 // yieldmo.js
 data.ymid;
+
+// yieldone.js
+window.yieldoneParam;
+
+// yieldpro.js
+window.showadAMPAdapter;
+window.showadAMPAdapter.inited;
 
 // zedo.js
 var ZGTag;
@@ -752,6 +760,10 @@ data.failCallback;
 // zergnet.js
 window.zergnetWidgetId;
 data.zergid;
+
+// zucks.js
+window.gZgokZoeWidgetQueue;
+window.gZgokZoeQueue;
 
 // _ping_.js
 window.networkIntegrationDataParamForTesting;

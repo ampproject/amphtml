@@ -42,7 +42,7 @@ export function zucks(global, data) {
     });
   } else if (data['adtype'] === 'native') {
     const s = global.document.createElement('script');
-    s.src = `https://j.zucks.net.zimg.jp/n?f=${data['frameId']}`;
+    s.setAttribute('src', `https://j.zucks.net.zimg.jp/n?f=${data['frameId']}`);
     global.document.getElementById('c').appendChild(s);
   } else {
     writeScript(global, `https://j.zucks.net.zimg.jp/j?f=${data['frameId']}`);
