@@ -18,7 +18,9 @@ import {validateData, writeScript} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *  sid: string,
+ * }} data
  */
 export function widespace(global, data) {
   const WS_AMP_CODE_VER = '1.0.1';

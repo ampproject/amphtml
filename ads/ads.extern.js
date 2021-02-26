@@ -701,6 +701,12 @@ data.wbo_is_mobile;
 data.wbo_vars;
 data.wbo_weak_encoding;
 
+// whopainfeed.js
+window._whopainfeed;
+
+// wpmedia.js
+window.run;
+
 // xlift.js
 window.xliftParams;
 window.XliftAmpHelper;
