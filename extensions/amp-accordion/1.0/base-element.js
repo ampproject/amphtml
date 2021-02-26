@@ -23,9 +23,9 @@ import {
 } from './component';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {childElementsByTag, toggleAttribute} from '../../../src/dom';
+import {pureDevAssert as devAssert} from '../../../src/assert';
 import {dict, memo} from '../../../src/utils/object';
 import {forwardRef} from '../../../src/preact/compat';
-import {pureDevAssert} from '../../../src/pure-assert';
 import {toArray} from '../../../src/types';
 import {
   useImperativeHandle,
@@ -103,13 +103,22 @@ function getState(element, mu, getExpandStateTrigger) {
       'id': section.getAttribute('id'),
       'onExpandStateChange': expandStateShim,
     });
+    // For headerProps and contentProps:
+    // || undefined needed for the `role` attribute since an element w/o
+    // role results in `null`.  When `null` is passed into Preact, the
+    // default prop value is not used.  `undefined` triggers default prop
+    // value.  This is not needed for `id` since this is handled with
+    // explicit logic (not default prop value) and all falsy values are
+    // handled the same.
     const headerProps = dict({
       'as': headerShim,
       'id': section.firstElementChild.getAttribute('id'),
+      'role': section.firstElementChild.getAttribute('role') || undefined,
     });
     const contentProps = dict({
       'as': contentShim,
       'id': section.lastElementChild.getAttribute('id'),
+      'role': section.lastElementChild.getAttribute('role') || undefined,
     });
     return (
       <AccordionSection {...sectionProps}>
@@ -175,7 +184,7 @@ function HeaderShim(
       sectionElement[SECTION_POST_RENDER]();
     }
     return () => {
-      headerElement.removeEventListener('click', pureDevAssert(onClick));
+      headerElement.removeEventListener('click', devAssert(onClick));
     };
   }, [
     sectionElement,

@@ -357,6 +357,14 @@ amp-img:not(.i-amphtml-element)[i-amphtml-ssr] > img.i-amphtml-fill-content
   z-index: 1;
 }
 
+/* We reset the z-index of blurry image placeholders for images that are
+   rendered by the server and are not (yet) controlled by JS to speed up
+   display of the real image. This conveniently also fixes the display of
+   the image when JS fails to load. */
+amp-img.i-amphtml-ssr:not(.i-amphtml-element) > [placeholder] {
+  z-index: auto;
+}
+
 .i-amphtml-notbuilt > [placeholder] {
   display: block !important;
 }
