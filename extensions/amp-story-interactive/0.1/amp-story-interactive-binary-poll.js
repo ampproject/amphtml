@@ -65,7 +65,7 @@ const buildBinaryPollTemplate = (element) => {
 const buildOptionTemplate = (element) => {
   const html = htmlFor(element);
   return html`
-    <div class="i-amphtml-story-interactive-option">
+    <button class="i-amphtml-story-interactive-option" aria-live="polite">
       <span class="i-amphtml-story-interactive-option-percent-bar"></span>
       <span class="i-amphtml-story-interactive-option-text-container">
         <span class="i-amphtml-story-interactive-option-title"
@@ -75,7 +75,7 @@ const buildOptionTemplate = (element) => {
           >0%</span
         >
       </span>
-    </div>
+    </button>
   `;
 };
 
