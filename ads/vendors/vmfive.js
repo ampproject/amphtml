@@ -18,7 +18,11 @@ import {validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   appKey: string,
+ *   placementId: string,
+ *   adType: string
+ * }} data
  */
 export function vmfive(global, data) {
   /*eslint "google-camelcase/google-camelcase": 0*/
@@ -45,8 +49,8 @@ function parallelDownloadScriptsAndExecuteInOrder(win) {
     'https://man.vm5apis.com/dist/adn-web-sdk.js',
   ].forEach(function (src) {
     const script = document.createElement('script');
-    script.src = src;
-    script.async = false;
+    /** @type {HTMLScriptElement} */ (script).src = src;
+    /** @type {HTMLScriptElement} */ (script).async = false;
     win.document.head.appendChild(script);
   });
 }

@@ -20,7 +20,10 @@ import {parseJson} from '../../src/json';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *  zid: string,
+ *  extra: (Object|undefined)
+ * }} data
  */
 export function viralize(global, data) {
   const endpoint = 'https://ads.viralize.tv/display/';
@@ -39,7 +42,9 @@ export function viralize(global, data) {
     queryParams['location'] = defaultLocation;
   }
   if (!queryParams['u']) {
-    queryParams['u'] = global.context.sourceUrl;
+    queryParams[
+      'u'
+    ] = /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context).sourceUrl;
   }
 
   const scriptUrl = addParamsToUrl(endpoint, queryParams);
@@ -47,7 +52,9 @@ export function viralize(global, data) {
   loadScript(
     global,
     scriptUrl,
-    () => global.context.renderStart(),
-    () => global.context.noContentAvailable()
+    () =>
+      /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context).renderStart(),
+    () =>
+      /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context).noContentAvailable()
   );
 }

@@ -38,13 +38,15 @@ export function vlyby(global, data) {
   const rand = Math.round(Math.random() * 100000000);
 
   // install observation on entering/leaving the view
-  global.context.observeIntersection(function (changes) {
-    /** @type {!Array} */ (changes).forEach(function (c) {
-      if (global._vlyby_amp) {
-        global._vlyby_amp.rects = c;
-      }
-    });
-  });
+  /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context).observeIntersection(
+    function (changes) {
+      /** @type {!Array} */ (changes).forEach(function (c) {
+        if (global._vlyby_amp) {
+          global._vlyby_amp.rects = c;
+        }
+      });
+    }
+  );
 
   //create Container
   const containerId = 'qad' + rand;

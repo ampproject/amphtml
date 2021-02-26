@@ -678,28 +678,20 @@ data.slot.setVisibility;
 data.slot.setTargeting;
 data.slot.setExtraParameters;
 
+// vlyby.js
+window._vlyby_amp;
+
+// vmfive.js
+window._vmfive_amp;
+window.onVM5AdSDKReady;
+HTMLScriptElement.prototype.async;
+
 // webediads.js
 var wads;
 wads.init;
-data.position;
 
 // weborama.js
-data.wbo_account_id;
-data.wbo_customparameter;
-data.wbo_tracking_element_id;
-data.wbo_host;
-data.wbo_fullhost;
-data.wbo_bid_price;
-data.wbo_price_paid;
-data.wbo_random;
-data.wbo_debug;
-data.wbo_publisherclick;
-data.wbo_disable_unload_event;
-data.wbo_donottrack;
-data.wbo_script_variant;
-data.wbo_is_mobile;
-data.wbo_vars;
-data.wbo_weak_encoding;
+window.weborama_display_tag;
 
 // whopainfeed.js
 window._whopainfeed;

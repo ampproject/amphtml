@@ -18,7 +18,26 @@ import {validateData, writeScript} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   width: string,
+ *   height: string,
+ *   wbo_account_id: string,
+ *   wbo_tracking_element_id: string,
+ *   wbo_fullhost: string,
+ *   wbo_bid_price: (string|undefined),
+ *   wbo_price_paid: (string|undefined),
+ *   wbo_random: (number|undefined),
+ *   wbo_debug: (boolean|undefined),
+ *   wbo_host: (string|undefined),
+ *   wbo_publisherclick: (string|undefined),
+ *   wbo_customparameter: (string|undefined),
+ *   wbo_disable_unload_event: (Function|undefined),
+ *   wbo_donottrack: (boolean|undefined),
+ *   wbo_script_variant: (boolean|undefined),
+ *   wbo_is_mobile: (boolean|undefined),
+ *   wbo_vars: (boolean|undefined),
+ *   wbo_weak_encoding: (boolean|undefined)
+ * }} data
  */
 export function weboramaDisplay(global, data) {
   const mandatoryFields = [

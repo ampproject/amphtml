@@ -19,7 +19,12 @@ import {loadScript, validateData} from '../../3p/3p';
 /**
  * Created by Webedia on 07/03/16 - last updated on 11/10/16
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *  site: string,
+ *  page: string,
+ *  position: string,
+ *  query: (string|undefined)
+ * }} data
  */
 export function webediads(global, data) {
   validateData(data, ['site', 'page', 'position'], ['query']);
