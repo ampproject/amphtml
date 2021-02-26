@@ -16,7 +16,6 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const babel = require('@babel/core');
-const crypto = require('crypto');
 const debounce = require('debounce');
 const del = require('del');
 const esbuild = require('esbuild');
@@ -457,7 +456,7 @@ function getEsbuildBabelPlugin(callerName, enableCache, postStep = () => {}) {
         const babelOptions = babel.loadOptions({
           caller: {name: callerName},
           filename: file.path,
-          sourceFileName: path.relative(process.cwd(), file.path),
+          sourceFileName: path.basename(file.path),
         });
         const result = await babel.transformAsync(contents, babelOptions);
         return {contents: result.code};
