@@ -291,6 +291,7 @@ export class ShareWidget {
     });
     listen(linkShareButton, 'keyup', (e) => {
       const code = e.charCode || e.keyCode;
+      // Check if pressed Space or Enter to trigger button.
       if (code === 32 || code === 13) {
         e.preventDefault();
         this.copyUrlToClipboard_();
