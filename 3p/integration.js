@@ -402,6 +402,7 @@ register('f1h', f1h);
 register('facebook', facebook);
 register('feedad', feedad);
 register('felmat', felmat);
+register('finative', finative);
 register('firstimpression', firstimpression);
 register('flite', flite);
 register('fluct', fluct);
