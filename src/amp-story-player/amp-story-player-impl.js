@@ -274,6 +274,18 @@ export class AmpStoryPlayer {
   }
 
   /**
+   * Initializes story with properties used in this class and adds it to the
+   * stories array.
+   * @param {!StoryDef} story
+   * @private
+   */
+  initializeAndAddStory_(story) {
+    story.idx = this.stories_.length;
+    story.distance = story.idx - this.currentIdx_;
+    this.stories_.push(story);
+  }
+
+  /**
    * Adds stories to the player. Additionally, creates or assigns
    * iframes to those that are close to the current playing story.
    * @param {!Array<!{href: string, title: ?string, posterImage: ?string}>} newStories
@@ -293,10 +305,8 @@ export class AmpStoryPlayer {
 
     for (let i = 0; i < newStories.length; i++) {
       const story = newStories[i];
-      story.idx = this.stories_.push(story) - 1;
-      story.distance = story.idx - this.currentIdx_;
-
-      this.build_(story);
+      this.initializeAndAddStory_(story);
+      this.buildIframeFor_(story);
     }
 
     this.render_(renderStartingIdx);
@@ -355,7 +365,7 @@ export class AmpStoryPlayer {
       return;
     }
 
-    this.initializeStories_();
+    this.initializeAnchorElStories_();
     this.initializeShadowRoot_();
     this.buildStories_();
     this.initializeButton_();
@@ -368,20 +378,21 @@ export class AmpStoryPlayer {
     this.isBuilt_ = true;
   }
 
-  /** @private */
-  initializeStories_() {
+  /**
+   * Initializes stories declared inline as <a> elements.
+   * @private
+   */
+  initializeAnchorElStories_() {
     const anchorEls = toArray(this.element_.querySelectorAll('a'));
+    anchorEls.forEach((element) => {
+      const story = /** @type {!StoryDef} */ ({
+        href: element.href,
+        title: (element.textContent && element.textContent.trim()) || null,
+        posterImage: element.getAttribute('data-poster-portrait-src'),
+      });
 
-    this.stories_ = anchorEls.map(
-      (anchorEl, idx) =>
-        /** @type {!StoryDef} */ ({
-          href: anchorEl.href,
-          distance: idx,
-          title: (anchorEl.textContent && anchorEl.textContent.trim()) || null,
-          posterImage: anchorEl.getAttribute('data-poster-portrait-src'),
-          idx,
-        })
-    );
+      this.initializeAndAddStory_(story);
+    });
   }
 
   /** @private */
@@ -395,7 +406,7 @@ export class AmpStoryPlayer {
   /** @private */
   buildStories_() {
     this.stories_.forEach((story) => {
-      this.build_(story);
+      this.buildIframeFor_(story);
     });
   }
 
@@ -494,7 +505,7 @@ export class AmpStoryPlayer {
    * @param {!StoryDef} story
    * @private
    */
-  build_(story) {
+  buildIframeFor_(story) {
     const iframeEl = this.doc_.createElement('iframe');
     if (story.posterImage) {
       setStyle(iframeEl, 'backgroundImage', story.posterImage);

@@ -42,6 +42,11 @@
   flex-direction: column !important;
   width: 50%;
   position: relative !important;
+  background-color: transparent !important;
+  font: inherit !important;
+  border: none !important;
+  outline: none !important;
+  color: inherit !important;
 }
 
 .i-amphtml-story-interactive-prompt {
@@ -161,7 +166,7 @@
 }
 
 .i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection) 
-  .i-amphtml-story-interactive-option:before {
+  .i-amphtml-story-interactive-option::before {
   background-color: var(--i-amphtml-interactive-theme-shading-flash) !important;
   content: '' !important;
   position: absolute !important;
@@ -174,9 +179,15 @@
 }
 
 .i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection) 
-  .i-amphtml-story-interactive-option:nth-of-type(2):before {
+  .i-amphtml-story-interactive-option:nth-of-type(2)::before {
   animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el2) !important;
 } 
+
+.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection) 
+  .i-amphtml-story-interactive-option:focus::before {
+    opacity: 1 !important;
+    background-color: var(--i-amphtml-interactive-theme-shading) !important;
+}
 
 .i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
   .i-amphtml-story-interactive-option

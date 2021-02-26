@@ -26,14 +26,26 @@ const {
   timedExecOrDie,
 } = require('./utils');
 const {buildTargetsInclude, Targets} = require('./build-targets');
+const {MINIFIED_TARGETS} = require('../tasks/helpers');
 const {runCiJob} = require('./ci-job');
 
 const jobName = 'module-tests.js';
+
+function prependConfig() {
+  const targets = MINIFIED_TARGETS.flatMap((target) => [
+    `dist/${target}.js`,
+    `dist/${target}.mjs`,
+  ]).join(',');
+  timedExecOrDie(
+    `gulp prepend-global --${process.env.config} --local_dev --fortesting --derandomize --target=${targets}`
+  );
+}
 
 function pushBuildWorkflow() {
   downloadNomoduleOutput();
   downloadModuleOutput();
   timedExecOrDie('gulp update-packages');
+  prependConfig();
   timedExecOrDie('gulp integration --nobuild --compiled --headless --esm');
 }
 
@@ -42,6 +54,7 @@ function prBuildWorkflow() {
     downloadNomoduleOutput();
     downloadModuleOutput();
     timedExecOrDie('gulp update-packages');
+    prependConfig();
     timedExecOrDie('gulp integration --nobuild --compiled --headless --esm');
   } else {
     printSkipMessage(
