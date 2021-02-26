@@ -484,6 +484,7 @@ export class DraggableDrawer extends AMP.BaseElement {
       setImportantStyles(this.element, {
         transform: translate,
         transition: 'none',
+        visibility: 'visible',
       });
     });
   }
@@ -503,7 +504,7 @@ export class DraggableDrawer extends AMP.BaseElement {
 
     this.mutateElement(() => {
       this.element.setAttribute('aria-hidden', false);
-      resetStyles(this.element, ['transform', 'transition']);
+      resetStyles(this.element, ['transform', 'transition', 'visibility']);
 
       if (!shouldAnimate) {
         // Resets the 'transition' property, and removes this override in the

@@ -17,6 +17,10 @@
 @import './amp-story-shadow-reset.css';
 @import './amp-story-share.css';
 
+:host {
+  visibility: inherit !important; /* Will propagate visibility of drawer to shadow dom for a11y */
+}
+
 .i-amphtml-story-bookend {
   display: flex !important;
   font-family: 'Roboto', sans-serif !important;
