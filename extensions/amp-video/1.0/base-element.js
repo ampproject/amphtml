@@ -88,13 +88,7 @@ VideoBaseElement['props'] = {
   'artwork': {attr: 'artwork'},
   'attribution': {attr: 'attribution'},
   'autoplay': {attr: 'autoplay', type: 'boolean'},
-  'children': {
-    'sources': {
-      selector: 'source',
-      single: false,
-      clone: true,
-    },
-  },
+  'children': {},
   'controls': {attr: 'controls', type: 'boolean'},
   'controlslist': {attr: 'controlslist'},
   'crossorigin': {attr: 'crossorigin'},
@@ -102,6 +96,11 @@ VideoBaseElement['props'] = {
   'loop': {attr: 'loop', type: 'boolean'},
   'noaudio': {attr: 'noaudio', type: 'boolean'},
   'poster': {attr: 'poster'},
+  'sources': {
+    selector: 'source',
+    single: false,
+    clone: true,
+  },
   'src': {attr: 'src'},
   'title': {attr: 'title'},
 

@@ -25,6 +25,7 @@ BaseElement['Component'] = Youtube;
 BaseElement['props'] = {
   'autoplay': {attr: 'autoplay', type: 'boolean'},
   'loop': {attr: 'loop', type: 'boolean'},
+  'children': {},
   'controls': {attr: 'controls', type: 'boolean'},
   'videoid': {attr: 'data-videoid'},
   'liveChannelid': {attr: 'data-live-channelid'},
