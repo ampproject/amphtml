@@ -1005,7 +1005,12 @@ export class AmpStory extends AMP.BaseElement {
           });
         }
       })
-      .then(() => this.switchTo_(initialPageId, NavigationDirection.NEXT))
+      .then(() =>
+        // We need to call this.getInitialPageId_() again because the initial
+        // page could've changed between the start of layoutStory_ and here.
+
+        this.switchTo_(this.getInitialPageId_(), NavigationDirection.NEXT)
+      )
       .then(() => {
         const shouldReOpenAttachmentForPageId = getHistoryState(
           this.win,
@@ -2661,7 +2666,15 @@ export class AmpStory extends AMP.BaseElement {
           : NavigationDirection.PREVIOUS
       );
     } else if (data['rewind']) {
-      this.replay_();
+      this.signals()
+        .whenSignal(CommonSignals.LOAD_END)
+        .then(() => {
+          if (this.pages_.length > 0) {
+            return;
+          }
+          return this.initializePages_();
+        })
+        .then(() => this.replay_());
     }
   }
 
