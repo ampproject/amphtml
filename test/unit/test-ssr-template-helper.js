@@ -35,7 +35,7 @@ describes.fakeWin(
     beforeEach(() => {
       ampdoc = env.ampdoc;
       win = env.win;
-      templates = Services.templatesForDoc(ampdoc);
+      templates = Services.templatesFor(win);
       viewer = Services.viewerForDoc(ampdoc);
       viewer.isTrustedViewer = () => Promise.resolve(true);
       hasCapabilityStub = env.sandbox.stub(viewer, 'hasCapability');

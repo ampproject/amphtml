@@ -120,8 +120,8 @@ export class AmpList extends AMP.BaseElement {
     /** @private {?Array} */
     this.renderedItems_ = null;
 
-    /** @private {?../../../src/service/template-impl.Templates} */
-    this.templates_ = null;
+    /** @const {!../../../src/service/template-impl.Templates} */
+    this.templates_ = Services.templatesFor(this.win);
 
     /**
      * Has layoutCallback() been called yet?
@@ -227,7 +227,6 @@ export class AmpList extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.templates_ = Services.templatesForDoc(this.element);
     this.action_ = Services.actionServiceForDoc(this.element);
     this.owners_ = Services.ownersForDoc(this.element);
     /** If the element is in an email document,

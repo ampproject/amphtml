@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import {AMP_TEMPLATED_CREATIVE_HEADER_NAME} from '../../../amp-a4a/0.1/template-validator';
+import {
+  AMP_TEMPLATED_CREATIVE_HEADER_NAME,
+  getAmpAdTemplateHelper,
+} from '../../../amp-a4a/0.1/template-validator';
 import {AmpAdTemplate} from '../amp-ad-custom';
 import {AmpMustache} from '../../../amp-mustache/0.1/amp-mustache';
 import {data} from '../../../amp-a4a/0.1/test/testdata/valid_css_at_rules_amp.reserialized';
-import {getAmpAdTemplateHelper} from '../../../amp-a4a/0.1/amp-ad-template-helper';
-import {registerExtendedTemplateForDoc} from '../../../../src/service/template-impl';
 import {tryParseJson} from '../../../../src/json';
 import {utf8Encode} from '../../../../src/utils/bytes';
 
@@ -32,13 +33,12 @@ const realWinConfig = {
 describes.realWin('TemplateRenderer', realWinConfig, (env) => {
   const templateUrl = '/adzerk/1';
 
-  let doc, ampdoc;
+  let doc;
   let containerElement;
   let impl;
 
   beforeEach(() => {
     doc = env.win.document;
-    ampdoc = env.ampdoc;
     containerElement = doc.createElement('div');
     containerElement.setAttribute('height', 50);
     containerElement.setAttribute('width', 320);
@@ -69,7 +69,7 @@ describes.realWin('TemplateRenderer', realWinConfig, (env) => {
       impl.element.style.width = width;
       impl.element.style.height = height;
     };
-    registerExtendedTemplateForDoc(ampdoc, 'amp-mustache', AmpMustache);
+    env.win.AMP.registerTemplate('amp-mustache', AmpMustache);
   });
 
   afterEach(() => {
@@ -105,7 +105,7 @@ describes.realWin('TemplateRenderer', realWinConfig, (env) => {
       });
 
       env.sandbox
-        .stub(getAmpAdTemplateHelper(ampdoc), 'fetch')
+        .stub(getAmpAdTemplateHelper(env.win), 'fetch')
         .callsFake((url) => {
           expect(url).to.equal(templateUrl);
           return Promise.resolve(data.adTemplate);

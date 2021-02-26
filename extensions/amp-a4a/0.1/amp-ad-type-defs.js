@@ -84,18 +84,12 @@ export let CrossDomainDataDef;
 export class Validator {
   /**
    * @param {!Object} unusedContext
-   * @param {!Element} unusedContainerElement
    * @param {!ArrayBuffer} unusedUnvalidatedBytes
    * @param {!Headers} unusedHeaders
    * @return {!Promise<!ValidatorOutput>}
    * @abstract
    */
-  validate(
-    unusedContext,
-    unusedContainerElement,
-    unusedUnvalidatedBytes,
-    unusedHeaders
-  ) {}
+  validate(unusedContext, unusedUnvalidatedBytes, unusedHeaders) {}
 }
 
 /**
