@@ -752,7 +752,6 @@ const forbiddenTerms = {
       'ads/google/test/test-utils.js',
       'extensions/amp-a4a/0.1/test/test-a4a-integration.js',
       'extensions/amp-a4a/0.1/test/test-a4a-var-source.js',
-      'extensions/amp-a4a/0.1/test/test-amp-a4a.js',
       'extensions/amp-a4a/0.1/test/test-amp-ad-utils.js',
       'extensions/amp-a4a/0.1/test/test-refresh.js',
       'extensions/amp-access/0.1/test/test-access-expr.js',
