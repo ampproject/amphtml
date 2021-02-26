@@ -36,21 +36,21 @@ describes.sandboxed('amp-viewer-integration', {}, (env) => {
     viewerEl = document.createElement('div');
     document.body.appendChild(viewerEl);
     viewer = new ViewerForTesting(viewerEl, '1', ampDocUrl, true);
-    return viewer.waitForHandshakeRequest();
   });
 
   afterEach(() => {
     document.body.removeChild(viewerEl);
   });
 
-  it('should confirm the handshake', () => {
-    console /*OK*/
-      .log('sending handshake response');
+  it('should confirm the handshake', async () => {
+    await viewer.waitForHandshakeRequest();
     viewer.confirmHandshake();
-    return viewer.waitForDocumentLoaded();
+    await viewer.waitForDocumentLoaded();
+    expect(viewer.hasDocumentLoaded_).to.be.true;
   });
 
-  it('should handle unload correctly', () => {
+  it('should handle unload correctly', async () => {
+    await viewer.waitForHandshakeRequest();
     viewer.confirmHandshake();
     viewer.waitForDocumentLoaded().then(() => {
       const stub = env.sandbox.stub(viewer, 'handleUnload_');
