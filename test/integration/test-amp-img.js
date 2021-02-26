@@ -64,7 +64,7 @@ describe
       );
     });
 
-    it.skip('should respect media queries', async () => {
+    it('should respect media queries', async () => {
       await fixture.awaitEvent(AmpEvents.LOAD_START, 3);
       await new Promise((res) => setTimeout(res, 1));
 
@@ -83,7 +83,7 @@ describe
       fixture.iframe.width = 600;
       fixture.win.dispatchEvent(createCustomEvent(fixture.win, 'resize', null));
 
-      await fixture.awaitEvent(AmpEvents.LOAD_START, 4);
+      await largeScreen.whenLoaded();
 
       expect(smallScreen.className).to.match(/i-amphtml-hidden-by-media-query/);
       expect(largeScreen.className).to.not.match(
