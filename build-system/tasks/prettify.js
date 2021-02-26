@@ -34,7 +34,7 @@ const {
   logOnSameLineLocalDev,
   logWithoutTimestamp,
 } = require('../common/logging');
-const {exec} = require('../common/exec');
+const {exec, getStdout} = require('../common/exec');
 const {getFilesToCheck} = require('../common/utils');
 const {green, cyan, red, yellow} = require('kleur/colors');
 const {maybeUpdatePackages} = require('./update-packages');
@@ -119,8 +119,13 @@ function printFixMessages() {
  */
 async function runPrettify(filesToCheck) {
   logLocalDev(green('Starting checks...'));
+  const trackedFilesToCheck = getStdout(
+    ['git ls-files', ...filesToCheck].join(' ')
+  )
+    .trim()
+    .split('\n');
   const filesWithErrors = [];
-  for (const file of filesToCheck) {
+  for (const file of trackedFilesToCheck) {
     const options = await getOptions(file);
     const original = fs.readFileSync(file).toString();
     if (argv.fix) {
