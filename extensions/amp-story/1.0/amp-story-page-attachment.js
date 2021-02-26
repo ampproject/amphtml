@@ -17,10 +17,12 @@
 import {Action, StateProperty} from './amp-story-store-service';
 import {DraggableDrawer, DrawerState} from './amp-story-draggable-drawer';
 import {HistoryState, setHistoryState} from './history';
+import {LocalizedStringId} from '../../../src/localized-strings';
 import {Services} from '../../../src/services';
 import {StoryAnalyticsEvent, getAnalyticsService} from './story-analytics';
 import {closest, removeElement} from '../../../src/dom';
-import {dev} from '../../../src/log';
+import {dev, devAssert} from '../../../src/log';
+import {getLocalizationService} from './amp-story-localization-service';
 import {getState} from '../../../src/history';
 import {htmlFor} from '../../../src/static-template';
 import {toggle} from '../../../src/style';
@@ -105,12 +107,20 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @private
    */
   buildInline_() {
-    this.headerEl_.appendChild(
+    const closeButtonEl = this.headerEl_.appendChild(
       htmlFor(this.element)`
-          <span class="i-amphtml-story-page-attachment-close-button" aria-label="X"
+          <button class="i-amphtml-story-page-attachment-close-button" aria-label="close"
               role="button">
-          </span>`
+          </button>`
     );
+    const localizationService = getLocalizationService(devAssert(this.element));
+    if (localizationService) {
+      const localizedCloseString = localizationService.getLocalizedString(
+        LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL
+      );
+      closeButtonEl.setAttribute('aria-label', localizedCloseString);
+    }
+
     this.headerEl_.appendChild(
       htmlFor(this.element)`
           <span class="i-amphtml-story-page-attachment-title"></span>`

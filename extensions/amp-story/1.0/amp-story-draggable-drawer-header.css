@@ -40,6 +40,10 @@
   background-repeat: no-repeat !important;
   color: rgba(0, 0, 0, 0.87) !important;
   cursor: pointer !important;
+  /* default button style overrides */
+  box-sizing: content-box !important;
+  border: none !important;
+  background-color: transparent !important;
 }
 
 .i-amphtml-story-draggable-drawer-theme-dark .i-amphtml-story-page-attachment-close-button {

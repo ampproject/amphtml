@@ -218,7 +218,7 @@ export const EMBED_ID_ATTRIBUTE_NAME = 'i-amphtml-embed-id';
  */
 const buildExpandedViewOverlay = (element) => htmlFor(element)`
     <div class="i-amphtml-story-expanded-view-overflow i-amphtml-story-system-reset">
-      <button class="i-amphtml-expanded-view-close-button" aria-label="close"></button>
+      <button class="i-amphtml-expanded-view-close-button" aria-label="close" role="button"></button>
     </div>`;
 
 /**
@@ -282,7 +282,7 @@ function buildDefaultStringStyle(embedData) {
 }
 
 /**
- * Measures syles for a given element in preparation for its expanded animation.
+ * Measures styles for a given element in preparation for its expanded animation.
  * @param {!Element} element
  * @param {!Object} state
  * @param {!DOMRect} pageRect
