@@ -105,8 +105,8 @@ function inferTestType() {
 }
 
 function maybeAddConfigSubtype() {
-  if (isCircleciBuild() && process.env.config) {
-    return `-${process.env.config}`;
+  if (isCircleciBuild() && argv.config) {
+    return `-${argv.config}`;
   }
   return '';
 }
