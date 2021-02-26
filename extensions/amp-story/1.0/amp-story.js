@@ -1008,7 +1008,6 @@ export class AmpStory extends AMP.BaseElement {
       .then(() =>
         // We need to call this.getInitialPageId_() again because the initial
         // page could've changed between the start of layoutStory_ and here.
-
         this.switchTo_(this.getInitialPageId_(), NavigationDirection.NEXT)
       )
       .then(() => {
