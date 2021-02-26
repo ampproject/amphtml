@@ -1019,7 +1019,7 @@ function parsePropDefs(props, propDefs, element, mediaQueryProps) {
           !def.passthroughNonEmpty,
         ONE_OF_ERROR_MESSAGE
       );
-      props[def.name ?? name] = [<Slot />];
+      props[def.name || name] = [<Slot />];
       continue;
     } else if (def.passthroughNonEmpty) {
       devAssert(
@@ -1028,7 +1028,7 @@ function parsePropDefs(props, propDefs, element, mediaQueryProps) {
       );
       // If all children are whitespace text nodes, consider the element as
       // having no children
-      props[def.name ?? name] = element
+      props[def.name || name] = element
         .getRealChildNodes()
         .every(
           (node) =>
