@@ -963,7 +963,9 @@ function parsePropDefs(props, propDefs, element, mediaQueryProps) {
   // as separate properties. Thus in a carousel the plain "children" are
   // slides, and the "arrowNext" children are passed via a "arrowNext"
   // property.
-  const nodes = element.getRealChildNodes ? element.getRealChildNodes() : [];
+  const nodes = element.getRealChildNodes
+    ? element.getRealChildNodes()
+    : element.childNodes;
   for (let i = 0; i < nodes.length; i++) {
     const childElement = nodes[i];
     const def = matchChild(childElement, propDefs);
