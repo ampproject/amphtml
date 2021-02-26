@@ -220,7 +220,7 @@ export class AmpStoryInteractiveBinaryPoll extends AmpStoryInteractive {
   /**
    * @override
    */
-  updateOptionPercentages_(responseData) {
+  displayOptionsData(responseData) {
     if (!responseData) {
       return;
     }

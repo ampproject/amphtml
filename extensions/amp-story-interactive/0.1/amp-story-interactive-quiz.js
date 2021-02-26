@@ -34,7 +34,10 @@ const buildQuizTemplate = (element) => {
   return html`
     <div class="i-amphtml-story-interactive-quiz-container">
       <div class="i-amphtml-story-interactive-prompt-container"></div>
-      <div class="i-amphtml-story-interactive-quiz-option-container"></div>
+      <div
+        class="i-amphtml-story-interactive-quiz-option-container"
+        aria-live="polite"
+      ></div>
     </div>
   `;
 };
@@ -50,7 +53,7 @@ const buildOptionTemplate = (option) => {
   return html`
     <button
       class="i-amphtml-story-interactive-quiz-option i-amphtml-story-interactive-option"
-      aria-live="polite"
+      aria-atomic="true"
     >
       <span
         class="i-amphtml-story-interactive-quiz-answer-choice notranslate"
@@ -121,9 +124,10 @@ export class AmpStoryInteractiveQuiz extends AmpStoryInteractive {
     const convertedOption = buildOptionTemplate(this.element);
 
     // Fill in the answer choice and set the option ID
-    convertedOption.querySelector(
+    const answerChoiceEl = convertedOption.querySelector(
       '.i-amphtml-story-interactive-quiz-answer-choice'
-    ).textContent = this.localizedAnswerChoices_[index];
+    );
+    answerChoiceEl.textContent = this.localizedAnswerChoices_[index];
     convertedOption.optionIndex_ = option['optionIndex'];
 
     // Extract and structure the option information
@@ -148,18 +152,27 @@ export class AmpStoryInteractiveQuiz extends AmpStoryInteractive {
   /**
    * @override
    */
-  updateOptionPercentages_(optionsData) {
+  displayOptionsData(optionsData) {
     if (!optionsData) {
       return;
     }
 
     const percentages = this.preprocessPercentages_(optionsData);
-    percentages.forEach((percentage, index) => {
-      const option = this.getOptionElements()[index];
-      option.querySelector(
+
+    // Update the answer choices aria-label so they read "selected" and "correct" or "incorrect"
+    this.getOptionElements().forEach((el, index) => {
+      const answerChoiceEl = el.querySelector(
+        '.i-amphtml-story-interactive-quiz-answer-choice'
+      );
+      let ariaLabel = el.hasAttribute('correct') ? 'correct' : 'incorrect';
+      if (optionsData[index].selected) {
+        ariaLabel += ' selected';
+      }
+      answerChoiceEl.setAttribute('aria-label', ariaLabel);
+      el.querySelector(
         '.i-amphtml-story-interactive-quiz-percentage-text'
-      ).textContent = `${percentage}%`;
-      setStyle(option, '--option-percentage', percentage + '%');
+      ).textContent = `${percentages[index]}%`;
+      setStyle(el, '--option-percentage', percentages[index] + '%');
     });
   }
 }

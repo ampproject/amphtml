@@ -128,7 +128,7 @@ export class AmpStoryInteractivePoll extends AmpStoryInteractive {
   /**
    * @override
    */
-  updateOptionPercentages_(optionsData) {
+  displayOptionsData(optionsData) {
     if (!optionsData) {
       return;
     }
