@@ -62,6 +62,11 @@ describes.realWin(
       expect(() => {
         win.customElements.define('x-test', Test);
       }).not.to.throw();
+
+      expect(win.HTMLElementOrig).to.exist;
+      expect(Object.getPrototypeOf(win.HTMLElement)).to.equal(
+        win.HTMLElementOrig
+      );
     });
 
     it('handles missing innerHTML descriptor (Yandex)', () => {
@@ -77,6 +82,11 @@ describes.realWin(
       expect(() => {
         win.customElements.define('x-test', Test);
       }).not.to.throw();
+
+      expect(win.HTMLElementOrig).to.exist;
+      expect(Object.getPrototypeOf(win.HTMLElement)).to.equal(
+        win.HTMLElementOrig
+      );
     });
 
     it('handles innerHTML descriptor on HTMLElement (IE11)', () => {
@@ -94,6 +104,11 @@ describes.realWin(
       expect(() => {
         win.customElements.define('x-test', Test);
       }).not.to.throw();
+
+      expect(win.HTMLElementOrig).to.exist;
+      expect(Object.getPrototypeOf(win.HTMLElement)).to.equal(
+        win.HTMLElementOrig
+      );
     });
   }
 );

@@ -17,6 +17,7 @@
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {BaseElement} from '../../src/base-element';
 import {ElementStub} from '../../src/element-stub';
+import {Services} from '../../src/services';
 import {
   copyElementToChildWindow,
   getElementClassForTesting,
@@ -31,6 +32,12 @@ import {getImplSyncForTesting} from '../../src/custom-element';
 
 describes.realWin('CustomElement register', {amp: true}, (env) => {
   class ConcreteElement extends BaseElement {}
+
+  class ConcreteElementWithShadow extends BaseElement {
+    static requiresShadowDom() {
+      return true;
+    }
+  }
 
   let win, doc, ampdoc, extensions;
 
@@ -53,6 +60,47 @@ describes.realWin('CustomElement register', {amp: true}, (env) => {
     });
     doc.body.appendChild(testElement);
   }
+
+  it('should register a new class immediately if no need to wait', () => {
+    upgradeOrRegisterElement(win, 'amp-element1', ConcreteElement);
+    expect(getElementClassForTesting(win, 'amp-element1')).to.equal(
+      ConcreteElement
+    );
+  });
+
+  it('should register a new class immediately for requiresShadowDom if no polyfilling needed', () => {
+    if (!win.Element.prototype.attachShadow) {
+      win.Element.prototype.attachShadow = () => {};
+    }
+    upgradeOrRegisterElement(win, 'amp-element1', ConcreteElementWithShadow);
+    expect(getElementClassForTesting(win, 'amp-element1')).to.equal(
+      ConcreteElementWithShadow
+    );
+  });
+
+  it('should wait for the shadow DOM polyfill before registering a class', async () => {
+    if (win.Element.prototype.attachShadow) {
+      delete win.Element.prototype.attachShadow;
+    }
+    const extensions = Services.extensionsFor(win);
+    const extensionsMock = env.sandbox.mock(extensions);
+    const polyfillPromise = Promise.resolve();
+    extensionsMock
+      .expects('importUnwrapped')
+      .withExactArgs(win, 'amp-shadow-dom-polyfill')
+      .returns(polyfillPromise)
+      .once();
+
+    upgradeOrRegisterElement(win, 'amp-element1', ConcreteElementWithShadow);
+    expect(getElementClassForTesting(win, 'amp-element1')).to.not.exist;
+
+    // Resolve polyfill.
+    await polyfillPromise;
+    expect(getElementClassForTesting(win, 'amp-element1')).to.equal(
+      ConcreteElementWithShadow
+    );
+    extensionsMock.verify();
+  });
 
   it('should go through stub/upgrade cycle', () => {
     registerElement(win, 'amp-element1', ElementStub);

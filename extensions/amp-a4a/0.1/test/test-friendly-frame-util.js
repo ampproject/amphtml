@@ -80,14 +80,16 @@ describes.realWin('FriendlyFrameUtil', realWinConfig, (env) => {
   });
 
   it('should set the correct srcdoc on the iframe', () => {
-    const srcdoc =
-      '<base href="http://www.google.com">' +
-      '<meta http-equiv=Content-Security-Policy content="script-src ' +
-      "'none';object-src 'none';child-src 'none'\">" +
-      '<p>Hello, World!</p>';
     return renderPromise.then((iframe) => {
       expect(iframe).to.be.ok;
-      expect(iframe.getAttribute('srcdoc')).to.equal(srcdoc);
+      const srcdoc = iframe.getAttribute('srcdoc');
+      expect(srcdoc).to.contain('<base href="http://www.google.com">');
+      expect(srcdoc).to.contain(
+        '<meta http-equiv=Content-Security-Policy content="script-src '
+      );
+      expect(srcdoc).to.contain(
+        ";object-src 'none';child-src 'none'\"><p>Hello, World!</p>"
+      );
     });
   });
 

@@ -62,6 +62,9 @@ const EXTENSION_BUNDLE_MAP = {
   ],
   'amp-inputmask.js': ['third_party/inputmask/bundle.js'],
   'amp-date-picker.js': ['third_party/react-dates/bundle.js'],
+  'amp-shadow-dom-polyfill.js': [
+    'node_modules/@webcomponents/webcomponentsjs/bundles/webcomponents-sd.install.js',
+  ],
 };
 
 /**
