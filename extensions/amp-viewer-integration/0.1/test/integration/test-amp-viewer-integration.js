@@ -21,6 +21,7 @@ import {
   parseMessage,
 } from '../../messaging/messaging';
 import {ViewerForTesting} from '../../viewer-for-testing';
+import {done} from 'fetch-mock';
 import {getSourceUrl} from '../../../../../src/url';
 
 describes.sandboxed('amp-viewer-integration', {}, (env) => {
@@ -47,16 +48,6 @@ describes.sandboxed('amp-viewer-integration', {}, (env) => {
     viewer.confirmHandshake();
     await viewer.waitForDocumentLoaded();
     expect(viewer.hasDocumentLoaded_).to.be.true;
-  });
-
-  it('should handle unload correctly', async () => {
-    await viewer.waitForHandshakeRequest();
-    viewer.confirmHandshake();
-    viewer.waitForDocumentLoaded().then(() => {
-      const stub = env.sandbox.stub(viewer, 'handleUnload_');
-      window.eventListeners.fire({type: 'unload'});
-      expect(stub).to.be.calledOnce;
-    });
   });
 });
 
@@ -89,14 +80,32 @@ describes.realWin(
       const ampDocSrc = '/test/fixtures/served/ampdoc-with-messaging.html';
 
       beforeEach(() => {
-        win = document.createElement('div');
-        win.document = document.createElement('div');
+        win = env.win;
         ampDocUrl = `${loc.protocol}//iframe.${loc.hostname}:${loc.port}${ampDocSrc}`;
         viewerEl = document.createElement('div');
         viewer = new ViewerForTesting(viewerEl, '1', ampDocUrl, true);
         ampViewerIntegration = new AmpViewerIntegration(win);
         messaging = new Messaging();
         origin = 'http://localhost:9876';
+      });
+
+      it('should handle unload correctly', async () => {
+        env.sandbox.stub(messaging, 'sendRequest').callsFake(() => {
+          return Promise.resolve();
+        });
+
+        ampViewerIntegration.openChannelAndStart_(
+          viewer,
+          env.ampdoc,
+          origin,
+          messaging
+        );
+
+        win.eventListeners.fire({type: 'unload'});
+
+        ampViewerIntegration.handleUnload_(messaging).then(() => {
+          done();
+        });
       });
 
       it('should start with the correct message', () => {
