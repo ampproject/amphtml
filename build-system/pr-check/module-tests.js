@@ -19,6 +19,7 @@
  * @fileoverview Script that tests the module AMP runtime during CI.
  */
 
+const argv = require('minimist')(process.argv.slice(2));
 const {
   downloadModuleOutput,
   downloadNomoduleOutput,
@@ -37,7 +38,7 @@ function prependConfig() {
     `dist/${target}.mjs`,
   ]).join(',');
   timedExecOrDie(
-    `gulp prepend-global --${process.env.config} --local_dev --fortesting --derandomize --target=${targets}`
+    `gulp prepend-global --${argv.config} --local_dev --fortesting --derandomize --target=${targets}`
   );
 }
 
@@ -55,7 +56,9 @@ function prBuildWorkflow() {
     downloadModuleOutput();
     timedExecOrDie('gulp update-packages');
     prependConfig();
-    timedExecOrDie('gulp integration --nobuild --compiled --headless --esm');
+    timedExecOrDie(
+      `gulp integration --nobuild --compiled --headless --esm --config=${argv.config}`
+    );
   } else {
     printSkipMessage(
       jobName,

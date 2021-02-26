@@ -19,6 +19,7 @@
  * @fileoverview Script that tests the nomodule AMP runtime during CI.
  */
 
+const argv = require('minimist')(process.argv.slice(2));
 const {
   downloadNomoduleOutput,
   printSkipMessage,
@@ -36,7 +37,7 @@ function prependConfig() {
     `dist/${target}.js`,
   ]).join(',');
   timedExecOrDie(
-    `gulp prepend-global --${process.env.config} --local_dev --fortesting --derandomize --target=${targets}`
+    `gulp prepend-global --${argv.config} --local_dev --fortesting --derandomize --target=${targets}`
   );
 }
 
@@ -46,7 +47,7 @@ function pushBuildWorkflow() {
   prependConfig();
   try {
     timedExecOrThrow(
-      'gulp integration --nobuild --headless --compiled --report',
+      `gulp integration --nobuild --headless --compiled --report --config=${argv.config}`,
       'Integration tests failed!'
     );
   } catch (e) {
@@ -63,7 +64,9 @@ function prBuildWorkflow() {
     downloadNomoduleOutput();
     timedExecOrDie('gulp update-packages');
     prependConfig();
-    timedExecOrDie('gulp integration --nobuild --compiled --headless');
+    timedExecOrDie(
+      `gulp integration --nobuild --compiled --headless --config=${argv.config}`
+    );
   } else {
     printSkipMessage(
       jobName,
