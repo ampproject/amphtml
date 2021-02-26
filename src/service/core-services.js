@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {adoptServiceForEmbedDoc} from '../service';
+import {
+  adoptServiceFactoryForEmbedDoc,
+  adoptServiceForEmbedDoc,
+} from '../service';
 import {devAssert} from '../log';
 import {installActionServiceForDoc} from './action-impl';
 import {installBatchedXhrService} from './batched-xhr-impl';
@@ -107,6 +110,9 @@ function installAmpdocServicesInternal(ampdoc, isEmbedded) {
   // 1. Order is important!
   // 2. Consider to install same services to amp-inabox.js
   installUrlForDoc(ampdoc);
+  isEmbedded
+    ? adoptServiceFactoryForEmbedDoc(ampdoc, 'templates')
+    : installTemplatesServiceForDoc(ampdoc);
   isEmbedded
     ? adoptServiceForEmbedDoc(ampdoc, 'documentInfo')
     : installDocumentInfoServiceForDoc(ampdoc);

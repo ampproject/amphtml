@@ -37,8 +37,8 @@ import {toWin} from './types';
  *   resolve: (?function(!Object)),
  *   reject: (?function((*))),
  *   context: (?Window|?./service/ampdoc-impl.AmpDoc),
- *   ctor: (?function(new:Object, !Window)|
- *          ?function(new:Object, !./service/ampdoc-impl.AmpDoc)),
+ *   ctor: (function(new:Object, !Window)|
+ *          function(new:Object, !./service/ampdoc-impl.AmpDoc)),
  * }}
  */
 let ServiceHolderDef;
@@ -366,7 +366,6 @@ function getServiceInternal(holder, id) {
     devAssert(s.context, `Service ${id} registered without context.`);
     s.obj = new s.ctor(s.context);
     devAssert(s.obj, `Service ${id} constructed to null.`);
-    s.ctor = null;
     s.context = null;
     // The service may have been requested already, in which case we have a
     // pending promise we need to fulfill.
@@ -408,7 +407,7 @@ function registerServiceInternal(
     };
   }
 
-  if (!opt_override && (s.ctor || s.obj)) {
+  if (!opt_override && s.ctor) {
     // Service already registered.
     return;
   }
@@ -577,6 +576,11 @@ function disposeServiceInternal(id, service) {
 }
 
 /**
+ * This adopts the service **instance** from the parent.
+ *
+ * This function is dangerous! Sharing an instance means data can leak to and
+ * from a child ampdoc.
+ *
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  * @param {string} id
  */
@@ -592,6 +596,34 @@ export function adoptServiceForEmbedDoc(ampdoc, id) {
     function () {
       return service;
     },
+    /* override */ false,
+    /* adopted */ true
+  );
+}
+
+/**
+ * This adopts the service **factory** from the parent.
+ *
+ * This function is safer than sharing the service instance, since each ampdoc
+ * will create its own instance of the factory (and each instance will have its
+ * own instance data). Note that static data is still shared, so it's not 100%
+ * foolproof.
+ *
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {string} id
+ */
+export function adoptServiceFactoryForEmbedDoc(ampdoc, id) {
+  const parentHolder = getAmpdocServiceHolder(devAssert(ampdoc.getParent()));
+  devAssert(
+    isServiceRegistered(parentHolder, id),
+    `Expected service ${id} to be registered`
+  );
+  const service = getServices(parentHolder)[id];
+  registerServiceInternal(
+    getAmpdocServiceHolder(ampdoc),
+    ampdoc,
+    id,
+    devAssert(service.ctor),
     /* override */ false,
     /* adopted */ true
   );
@@ -616,7 +648,7 @@ export function resetServiceForTesting(holder, id) {
 function isServiceRegistered(holder, id) {
   const service = holder.__AMP_SERVICES && holder.__AMP_SERVICES[id];
   // All registered services must have an implementation or a constructor.
-  return !!(service && (service.ctor || service.obj));
+  return !!(service && service.ctor);
 }
 
 /** @return {!ServiceHolderDef} */
