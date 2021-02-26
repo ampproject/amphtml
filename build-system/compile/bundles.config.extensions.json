@@ -134,8 +134,7 @@
     "name": "amp-date-picker",
     "version": "0.1",
     "latestVersion": "0.1",
-    "options": {"hasCss": true},
-    "postPrepend": ["third_party/react-dates/bundle.js"]
+    "options": {"hasCss": true}
   },
   {
     "name": "amp-delight-player",
@@ -239,8 +238,7 @@
   {
     "name": "amp-inputmask",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "postPrepend": ["third_party/inputmask/bundle.js"]
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-instagram",
@@ -381,6 +379,12 @@
     "version": ["0.1", "1.0"],
     "latestVersion": "0.1",
     "options": {"hasCss": true}
+  },
+  {
+    "name": "amp-shadow-dom-polyfill",
+    "version": "0.1",
+    "latestVersion": "0.1",
+    "options": {"noWrapper": true}
   },
   {
     "name": "amp-sidebar",
@@ -571,12 +575,7 @@
     "name": "amp-viz-vega",
     "version": "0.1",
     "latestVersion": "0.1",
-    "options": {"hasCss": true},
-    "postPrepend": [
-      "third_party/d3/d3.js",
-      "third_party/d3-geo-projection/d3-geo-projection.js",
-      "third_party/vega/vega.js"
-    ]
+    "options": {"hasCss": true}
   },
   {"name": "amp-vk", "version": "0.1", "latestVersion": "0.1"},
   {
