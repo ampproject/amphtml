@@ -24,7 +24,7 @@ import {ViewerForTesting} from '../../viewer-for-testing';
 import {done} from 'fetch-mock';
 import {getSourceUrl} from '../../../../../src/url';
 
-describes.sandboxed('amp-viewer-integration', {}, (env) => {
+describes.sandboxed('amp-viewer-integration', {}, () => {
   const ampDocSrc = '/test/fixtures/served/ampdoc-with-messaging.html';
   let viewerEl;
   let viewer;
