@@ -38,6 +38,7 @@ source $BASH_ENV
 echo $(GREEN "Authenticating with GCP storage...")
 echo $STORAGE_TOKEN > storage-key.json
 gcloud auth activate-service-account --key-file=storage-key.json
+rm -f storage-key.json
 
 echo $(GREEN "Applying settings...")
 gcloud config set pass_credentials_to_gsutil true
