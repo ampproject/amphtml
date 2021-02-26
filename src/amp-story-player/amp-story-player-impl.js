@@ -1312,7 +1312,7 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * Returns a promise when the story is connected to the DOM.
+   * Returns a promise that resolves when the story is connected to the DOM.
    * @param {!StoryDef} story
    * @return {!Promise}
    * @private
