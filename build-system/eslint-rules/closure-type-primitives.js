@@ -15,7 +15,7 @@
  */
 'use strict';
 
-const doctrine = require('doctrine');
+const doctrine = require('@jridgewell/doctrine');
 const traverse = require('traverse');
 
 /** @typedef {!Object} */

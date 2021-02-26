@@ -918,7 +918,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   /**
    * Applies the specified callback to each media element on the page, after the
    * media element is loaded.
-   * @param {!function(!./media-pool.MediaPool, !Element)} callbackFn The
+   * @param {function(!./media-pool.MediaPool, !Element)} callbackFn The
    *     callback to be applied to each media element.
    * @return {!Promise} Promise that resolves after the callbacks are called.
    * @private
