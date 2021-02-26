@@ -128,8 +128,7 @@ let DocumentStateTypeDef;
  *   messagingPromise: ?Promise,
  *   title: (?string),
  *   posterImage: (?string),
- *   storyContentLoaded: ?boolean,
- *   connectedDeferred: !Deferred
+ *   storyContentLoaded: ?boolean
  * }}
  */
 let StoryDef;
@@ -741,19 +740,11 @@ export class AmpStoryPlayer {
    * @return {!Promise}
    */
   show(storyUrl, pageId = null) {
-    // TODO(enriqe): sanitize URLs for matching.
-    const storyIdx = storyUrl
-      ? findIndex(this.stories_, ({href}) => href === storyUrl)
-      : this.currentIdx_;
-
-    // TODO(#28987): replace for add() once implemented.
-    if (!this.stories_[storyIdx]) {
-      throw new Error(`Story URL not found in the player: ${storyUrl}`);
-    }
+    const story = this.getStoryFromUrl_(storyUrl);
 
     let renderPromise = Promise.resolve();
-    if (storyIdx !== this.currentIdx_) {
-      this.currentIdx_ = storyIdx;
+    if (story.idx !== this.currentIdx_) {
+      this.currentIdx_ = story.idx;
 
       renderPromise = this.render_();
       this.onNavigation_();
@@ -1098,7 +1089,6 @@ export class AmpStoryPlayer {
   appendToDom_(story) {
     this.rootEl_.appendChild(story.iframe);
     this.setUpMessagingForStory_(story);
-    story.connectedDeferred.resolve();
   }
 
   /**
@@ -1107,7 +1097,6 @@ export class AmpStoryPlayer {
    */
   removeFromDom_(story) {
     story.storyContentLoaded = false;
-    story.connectedDeferred = new Deferred();
     story.iframe.setAttribute('src', '');
     story.iframe.remove();
   }
@@ -1280,10 +1269,11 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * Rewinds the given story.
+   * Returns the story given a URL.
    * @param {string} storyUrl
    */
-  rewind(storyUrl) {
+  getStoryFromUrl_(storyUrl) {
+    // TODO(enriqe): sanitize URLs for matching.
     const storyIdx = storyUrl
       ? findIndex(this.stories_, ({href}) => href === storyUrl)
       : this.currentIdx_;
@@ -1293,16 +1283,19 @@ export class AmpStoryPlayer {
       throw new Error(`Story URL not found in the player: ${storyUrl}`);
     }
 
-    let connectedPromise = Promise.resolve();
-    if (!story.iframe.isConnected) {
-      connectedPromise = story.connectedDeferred.promise;
-    }
+    return this.stories_[storyIdx];
+  }
 
-    connectedPromise.then(() => {
-      story.messagingPromise.then((messaging) =>
-        messaging.sendRequest('selectPage', {'rewind': true})
-      );
-    });
+  /**
+   * Rewinds the given story.
+   * @param {string} storyUrl
+   */
+  rewind(storyUrl) {
+    const story = this.getStoryFromUrl_(storyUrl);
+
+    story.messagingPromise.then((messaging) =>
+      messaging.sendRequest('rewind', {})
+    );
   }
 
   /**
