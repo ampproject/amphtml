@@ -24,7 +24,8 @@
   overflow: hidden !important;
   z-index: 4 !important; /** Over amp-story-cta-layer. */
   transform: translate3d(0, 100%, 0) !important;
-  transition: transform 0.25s cubic-bezier(0.4, 0.0, 1, 1) !important;
+  transition: transform 0.25s cubic-bezier(0.4, 0.0, 1, 1), visibility 0s linear 0.4s !important;
+  visibility: hidden !important;
 }
 
 .amp-story-draggable-drawer-root[hidden] {
@@ -33,7 +34,8 @@
 
 .amp-story-draggable-drawer-root.i-amphtml-story-draggable-drawer-open {
   transform: translate3d(0, 0, 0) !important;
-  transition: transform 0.4s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+  transition: transform 0.4s cubic-bezier(0.0, 0.0, 0.2, 1), visibility 0s linear 0s !important;
+  visibility: visible !important;
 }
 
 .i-amphtml-story-draggable-drawer {
@@ -81,12 +83,12 @@
   justify-content: center !important;
   background: rgba(0, 0, 0, 0.55) !important;
   opacity: 0 !important;
-  transition: opacity 0.15s cubic-bezier(0.4, 0.0, 1, 1), transform 0s linear 0.15s !important;
+  transition: opacity 0.15s cubic-bezier(0.4, 0.0, 1, 1), transform 0s linear 0.15s, visibility 0s linear 0.4s !important;
 }
 
 [desktop] .amp-story-draggable-drawer-root.i-amphtml-story-draggable-drawer-open {
   opacity: 1 !important;
-  transition: opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+  transition: opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1), visibility 0s linear 0s !important;
   transform: translate3d(0, 0, 0) !important;
 }
 
