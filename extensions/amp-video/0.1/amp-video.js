@@ -273,7 +273,7 @@ export class AmpVideo extends AMP.BaseElement {
 
   /**
    * @private
-   * Overrides aria-label with alt if aria-label or alt-text is not specified.
+   * Overrides aria-label with alt if aria-label or title is not specified.
    */
   checkA11yAttributeText_() {
     const altText = this.element.getAttribute('alt');
