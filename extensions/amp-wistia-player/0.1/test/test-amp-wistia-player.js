@@ -44,7 +44,7 @@ describes.realWin(
         .then(() => wistiaEmbed);
     }
 
-    describe('rendering', async () => {
+    describe('rendering', () => {
       it('renders', () => {
         return getWistiaEmbed('u8p9wq6mq8').then((wistiaEmbed) => {
           const iframe = wistiaEmbed.querySelector('iframe');
@@ -74,7 +74,7 @@ describes.realWin(
       });
     });
 
-    describe('methods', async () => {
+    describe('methods', () => {
       let impl;
       beforeEach(async () => {
         const player = await getWistiaEmbed('u8p9wq6mq8');
@@ -98,15 +98,15 @@ describes.realWin(
       });
 
       it('can mute', () => {
-        env.sandbox.spy(impl, 'sendCommand_');
+        const spy = env.sandbox.spy(impl, 'sendCommand_');
         impl.mute();
-        expect(impl.sendCommand_).calledWith('amp-mute');
+        expect(spy).calledWith('amp-mute');
       });
 
       it('can unmute', () => {
-        env.sandbox.spy(impl, 'sendCommand_');
+        const spy = env.sandbox.spy(impl, 'sendCommand_');
         impl.unmute();
-        expect(impl.sendCommand_).calledWith('amp-unmute');
+        expect(spy).calledWith('amp-unmute');
       });
 
       it('can enter fullscreen', () => {
