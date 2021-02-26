@@ -15,6 +15,7 @@
  */
 
 import '../amp-dailymotion';
+import * as utils from '../../../../src/dom';
 
 describes.realWin(
   'amp-dailymotion',
@@ -32,55 +33,122 @@ describes.realWin(
     });
 
     async function getDailymotion(videoId, optResponsive, optCustomSettings) {
-      const dailymotion = doc.createElement('amp-dailymotion');
-      dailymotion.setAttribute('data-videoid', videoId);
-      dailymotion.setAttribute('width', '111');
-      dailymotion.setAttribute('height', '222');
+      const player = doc.createElement('amp-dailymotion');
+      player.setAttribute('data-videoid', videoId);
+      player.setAttribute('width', '111');
+      player.setAttribute('height', '222');
       if (optResponsive) {
-        dailymotion.setAttribute('layout', 'responsive');
+        player.setAttribute('layout', 'responsive');
       }
       if (optCustomSettings) {
-        dailymotion.setAttribute('data-start', 123);
-        dailymotion.setAttribute('data-param-origin', 'example&.org');
+        player.setAttribute('data-start', 123);
+        player.setAttribute('data-param-origin', 'example&.org');
       }
-      doc.body.appendChild(dailymotion);
-      await dailymotion.buildInternal();
-      await dailymotion.layoutCallback();
-      return dailymotion;
+      doc.body.appendChild(player);
+      await player.buildInternal();
+      await player.layoutCallback();
+      return player;
     }
 
-    it('renders', async () => {
-      const dailymotion = await getDailymotion('x2m8jpp');
+    describe('rendering', async () => {
+      it('renders', async () => {
+        const player = await getDailymotion('x2m8jpp');
 
-      const iframe = dailymotion.querySelector('iframe');
-      expect(iframe).to.not.be.null;
-      expect(iframe.tagName).to.equal('IFRAME');
-      expect(iframe.src).to.equal(
-        'https://www.dailymotion.com/embed/video/x2m8jpp?api=1&html=1&app=amp'
-      );
-    });
-
-    it('renders responsively', async () => {
-      const dailymotion = await getDailymotion('x2m8jpp', true);
-      const iframe = dailymotion.querySelector('iframe');
-      expect(iframe).to.not.be.null;
-      expect(iframe.className).to.match(/i-amphtml-fill-content/);
-    });
-
-    it('renders with custom settings', async () => {
-      const dailymotion = await getDailymotion('x2m8jpp', false, true);
-      const iframe = dailymotion.querySelector('iframe');
-      expect(iframe).to.not.be.null;
-      expect(iframe.src).to.equal(
-        'https://www.dailymotion.com/embed/video/x2m8jpp?api=1&html=1&app=amp&start=123&origin=example%26.org'
-      );
-    });
-
-    it('requires data-videoid', () => {
-      return allowConsoleError(() => {
-        return getDailymotion('').should.eventually.be.rejectedWith(
-          /The data-videoid attribute is required for/
+        const iframe = player.querySelector('iframe');
+        expect(iframe).to.not.be.null;
+        expect(iframe.tagName).to.equal('IFRAME');
+        expect(iframe.src).to.equal(
+          'https://www.dailymotion.com/embed/video/x2m8jpp?api=1&html=1&app=amp'
         );
+      });
+
+      it('renders responsively', async () => {
+        const player = await getDailymotion('x2m8jpp', true);
+        const iframe = player.querySelector('iframe');
+        expect(iframe).to.not.be.null;
+        expect(iframe.className).to.match(/i-amphtml-fill-content/);
+      });
+
+      it('renders with custom settings', async () => {
+        const player = await getDailymotion('x2m8jpp', false, true);
+        const iframe = player.querySelector('iframe');
+        expect(iframe).to.not.be.null;
+        expect(iframe.src).to.equal(
+          'https://www.dailymotion.com/embed/video/x2m8jpp?api=1&html=1&app=amp&start=123&origin=example%26.org'
+        );
+      });
+
+      it('requires data-videoid', () => {
+        return allowConsoleError(() => {
+          return getDailymotion('').should.eventually.be.rejectedWith(
+            /The data-videoid attribute is required for/
+          );
+        });
+      });
+    });
+
+    describe('methods', async () => {
+      let impl;
+      beforeEach(async () => {
+        const player = await getDailymotion('x2m8jpp', true);
+        impl = await player.getImpl(false);
+      });
+
+      it('is interactive', () => {
+        expect(impl.isInteractive()).to.be.true;
+      });
+
+      it('can play', () => {
+        const spy = env.sandbox.spy(impl, 'sendCommand_');
+        impl.play();
+        expect(spy).to.be.calledWith('play');
+      });
+
+      it('can autoplay', () => {
+        const spy = env.sandbox.spy(impl, 'sendCommand_');
+        impl.play(true);
+        expect(spy).to.be.calledWith('play');
+      });
+
+      it('can pause', () => {
+        const spy = env.sandbox.spy(impl, 'sendCommand_');
+        impl.pause();
+        expect(spy).to.be.calledWith('pause');
+      });
+
+      it('can mute', () => {
+        env.sandbox.spy(impl, 'sendCommand_');
+        impl.mute();
+        expect(impl.sendCommand_).calledWith('muted', [true]);
+      });
+
+      it('can unmute', () => {
+        env.sandbox.spy(impl, 'sendCommand_');
+        impl.unmute();
+        expect(impl.sendCommand_).calledWith('muted', [false]);
+      });
+
+      it('can enter fullscreen', () => {
+        const spy = env.sandbox.spy(utils, 'fullscreenEnter');
+        impl.fullscreenEnter();
+        expect(spy).calledWith(impl.iframe_);
+      });
+
+      it('can exit fullscreen', () => {
+        const spy = env.sandbox.spy(utils, 'fullscreenExit');
+        impl.fullscreenExit();
+        expect(spy).calledWith(impl.iframe_);
+        expect(impl.isFullscreen()).to.be.false;
+      });
+
+      it('toggles controls', () => {
+        const spy = env.sandbox.stub(impl, 'sendCommand_');
+        impl.showControls();
+        expect(spy).calledWith('controls', [true]);
+        impl.hideControls();
+        expect(spy).calledWith('controls', [false]);
+        impl.showControls();
+        expect(spy).calledWith('controls', [true]);
       });
     });
   }
