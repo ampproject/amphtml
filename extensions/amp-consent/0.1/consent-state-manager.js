@@ -64,8 +64,8 @@ export class ConsentStateManager {
     /** @private {?function()} */
     this.consentReadyResolver_ = null;
 
-    /** @private {?Object<string, PURPOSE_CONSENT_STATE>} */
-    this.purposeConsents_ = null;
+    /** @private {Object<string, PURPOSE_CONSENT_STATE>|undefined} */
+    this.purposeConsents_ = undefined;
   }
 
   /**
@@ -106,11 +106,22 @@ export class ConsentStateManager {
       dev().error(TAG, 'instance not registered');
       return;
     }
-    this.instance_.update(state, consentStr, opt_consentMetadata, false);
+    this.instance_.update(
+      state,
+      consentStr,
+      this.purposeConsents_,
+      opt_consentMetadata,
+      false
+    );
 
     if (this.consentChangeHandler_) {
       this.consentChangeHandler_(
-        constructConsentInfo(state, consentStr, opt_consentMetadata)
+        constructConsentInfo(
+          state,
+          consentStr,
+          opt_consentMetadata,
+          this.purposeConsents_
+        )
       );
     }
   }
@@ -298,6 +309,7 @@ export class ConsentInstance {
       this.update(
         info['consentState'],
         info['consentString'],
+        info['purposeConsents'],
         info['consentMetadata'],
         true
       );
@@ -308,24 +320,29 @@ export class ConsentInstance {
    * Update the local consent state list
    * @param {!CONSENT_ITEM_STATE} state
    * @param {string=} consentString
+   * @param {Object<string, PURPOSE_CONSENT_STATE>=} purposeConsents
    * @param {ConsentMetadataDef=} opt_consentMetadata
    * @param {boolean=} opt_systemUpdate
    */
-  update(state, consentString, opt_consentMetadata, opt_systemUpdate) {
+  update(
+    state,
+    consentString,
+    purposeConsents,
+    opt_consentMetadata,
+    opt_systemUpdate
+  ) {
     const localState =
       this.localConsentInfo_ && this.localConsentInfo_['consentState'];
     const calculatedState = recalculateConsentStateValue(state, localState);
 
     if (state === CONSENT_ITEM_STATE.DISMISSED) {
-      const localConsentStr =
-        this.localConsentInfo_ && this.localConsentInfo_['consentString'];
-      const localConsentMetadata =
-        this.localConsentInfo_ && this.localConsentInfo_['consentMetadata'];
-      // If state is dismissed, use the old consent string and metadata.
+      // If state is dismissed, use the old consent string, metadata,
+      // and puporse consents.
       this.localConsentInfo_ = constructConsentInfo(
         calculatedState,
-        localConsentStr,
-        localConsentMetadata
+        this.localConsentInfo_?.consentString,
+        this.localConsentInfo_?.consentMetadata,
+        this.localConsentInfo_?.purposeConsents
       );
       return;
     }
@@ -338,6 +355,7 @@ export class ConsentInstance {
         calculatedState,
         consentString,
         opt_consentMetadata,
+        purposeConsents,
         true
       );
     } else {
@@ -346,7 +364,8 @@ export class ConsentInstance {
       this.localConsentInfo_ = constructConsentInfo(
         calculatedState,
         consentString,
-        opt_consentMetadata
+        opt_consentMetadata,
+        purposeConsents
       );
     }
 
@@ -354,6 +373,7 @@ export class ConsentInstance {
       calculatedState,
       consentString,
       opt_consentMetadata,
+      purposeConsents,
       this.hasDirtyBitNext_
     );
 
@@ -516,6 +536,9 @@ export class ConsentInstance {
       }
       if (consentInfo['consentMetadata']) {
         request['consentMetadata'] = consentInfo['consentMetadata'];
+      }
+      if (consentInfo['purposeConsents']) {
+        request['purposeConsents'] = consentInfo['purposeConsents'];
       }
       const init = {
         credentials: 'include',

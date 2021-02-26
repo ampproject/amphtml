@@ -17,6 +17,7 @@
 import * as fakeTimers from '@sinonjs/fake-timers';
 import {
   CONSENT_ITEM_STATE,
+  PURPOSE_CONSENT_STATE,
   constructConsentInfo,
   constructMetadata,
 } from '../consent-info';
@@ -30,6 +31,7 @@ import {
   registerServiceBuilder,
   resetServiceForTesting,
 } from '../../../../src/service';
+import {toggleExperiment} from '../../../../src/experiments';
 import {user} from '../../../../src/log';
 import {whenCalled} from '../../../../testing/test-helper.js';
 
@@ -99,7 +101,8 @@ describes.realWin(
               constructConsentInfo(
                 CONSENT_ITEM_STATE.ACCEPTED,
                 'test',
-                constructMetadata(CONSENT_STRING_TYPE.TCF_V2, '1~1.10.12.103')
+                constructMetadata(CONSENT_STRING_TYPE.TCF_V2, '1~1.10.12.103'),
+                {'abc': PURPOSE_CONSENT_STATE.ACCEPTED}
               )
             );
           },
@@ -370,6 +373,39 @@ describes.realWin(
             'isDirty': false,
           })
         );
+      });
+
+      // TODO(micajuineho): consolidate w/ test above after exp done
+      it('should pass purpose consents to the iframe', async () => {
+        toggleExperiment(win, 'amp-consent-granular-consent', true);
+        const config = dict({
+          'promptUISrc': 'https://promptUISrc',
+          'clientConfig': {
+            'test': 'ABC',
+          },
+        });
+        consentUI = new ConsentUI(mockInstance, config);
+        consentUI.show(false);
+        await macroTask();
+
+        expect(consentUI.ui_.getAttribute('name')).to.deep.equal(
+          JSON.stringify({
+            'clientConfig': {
+              'test': 'ABC',
+            },
+            'consentState': 'accepted',
+            'consentStateValue': 'accepted',
+            'consentMetadata': constructMetadata(
+              CONSENT_STRING_TYPE.TCF_V2,
+              '1~1.10.12.103'
+            ),
+            'consentString': 'test',
+            'promptTrigger': 'load',
+            'isDirty': false,
+            'purposeConsents': {'abc': 1},
+          })
+        );
+        toggleExperiment(win, 'amp-consent-granular-consent', false);
       });
 
       it('should pass the promptTrigger reason to the iframe', function* () {
