@@ -16,11 +16,17 @@
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   url: string,
+ *   version: string,
+ * }} data
  */
 export function remixd(global, data) {
   global._rmxd = {};
-  global._rmxd.url = data.url || global.context.sourceUrl;
+  global._rmxd.url =
+    data.url ||
+    /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context)
+      .sourceUrl;
   global._rmxd.amp = true;
   const sriptVersion = data.version || '5';
   const tagUrl =
@@ -36,5 +42,5 @@ export function remixd(global, data) {
       '" id="remixd-audio-player-script"><' +
       '/script>'
   );
-  global.context.renderStart();
+  /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context).renderStart();
 }

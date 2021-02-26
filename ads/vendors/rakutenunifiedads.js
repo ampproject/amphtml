@@ -19,7 +19,10 @@ import {validateData, writeScript} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   id: string,
+ *   env: (string|undefined)
+ * }} data
  */
 export function rakutenunifiedads(global, data) {
   validateData(data, ['id']);

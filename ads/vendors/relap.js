@@ -18,11 +18,17 @@ import {loadScript, validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   version: string,
+ *   token: (string|undefined),
+ *   url: (string|undefined),
+ *   anchorid: (string|undefined),
+ * }} data
  */
 export function relap(global, data) {
   validateData(data, [], ['token', 'url', 'anchorid', 'version']);
 
+  const context = /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context);
   const urlParam = data['url'] || window.context.canonicalUrl;
 
   if (data['version'] === 'v7') {
@@ -40,10 +46,10 @@ export function relap(global, data) {
         position: 'append',
         events: {
           onReady: function () {
-            window.context.renderStart();
+            context.renderStart();
           },
           onNoContent: function () {
-            window.context.noContentAvailable();
+            context.noContentAvailable();
           },
         },
       });
@@ -52,11 +58,11 @@ export function relap(global, data) {
     loadScript(global, 'https://relap.io/v7/relap.js');
   } else {
     window.relapV6WidgetReady = function () {
-      window.context.renderStart();
+      context.renderStart();
     };
 
     window.relapV6WidgetNoSimilarPages = function () {
-      window.context.noContentAvailable();
+      context.noContentAvailable();
     };
 
     const anchorEl = global.document.createElement('div');

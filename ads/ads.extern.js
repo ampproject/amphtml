@@ -607,6 +607,28 @@ data.section;
 // pulsepoint.js
 window.PulsePointHeaderTag;
 
+// rakutenunifiedads.js
+window.runa;
+
+// readmo.js
+window.publisherUrl;
+window.readmo;
+
+// realclick.js
+window.rcParams;
+
+// relap.js
+window.relapV6WidgetNoSimilarPages;
+window.relapV6WidgetReady;
+window.onRelapAPIInit;
+window.onRelapAPIReady;
+
+// relappro.js
+window.params;
+
+// remixd.js
+window._rmxd;
+
 // revcontent.js
 window.data;
 

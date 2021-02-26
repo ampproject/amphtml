@@ -18,7 +18,9 @@ import {loadScript, validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   url: string
+ * }} data
  */
 export function readmo(global, data) {
   validateData(data, ['section']);
@@ -39,6 +41,6 @@ export function readmo(global, data) {
   (global.readmo = global.readmo || []).push(config);
 
   loadScript(global, 'https://s.yimg.com/dy/ads/readmo.js', () =>
-    global.context.renderStart()
+    /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context).renderStart()
   );
 }

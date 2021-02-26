@@ -20,7 +20,9 @@ const n = 'infoxContextAsyncCallbacks';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   src: string
+ * }} data
  */
 export function rbinfox(global, data) {
   validateData(data, ['src']);

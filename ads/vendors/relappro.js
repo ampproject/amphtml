@@ -18,7 +18,11 @@ import {loadScript, validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   slotId: (string|undefined),
+ *   nameAdUnit: (string|undefined),
+ *   requirements: (string|undefined)
+ * }} data
  */
 export function relappro(global, data) {
   validateData(data, [], ['slotId', 'nameAdUnit', 'requirements']);

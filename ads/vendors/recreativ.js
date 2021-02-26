@@ -18,7 +18,9 @@ import {loadScript, validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   bn: string
+ * }} data
  */
 export function recreativ(global, data) {
   validateData(data, ['bn']);
@@ -30,10 +32,10 @@ export function recreativ(global, data) {
     global,
     'https://go.rcvlink.com/static/amp.js',
     () => {
-      global.context.renderStart();
+      /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context).renderStart();
     },
     () => {
-      global.context.noContentAvailable();
+      /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context).noContentAvailable();
     }
   );
 }
