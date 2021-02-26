@@ -11,7 +11,7 @@ function createRC(frameWindow, origin, serviceHandlersMap) {
       goog.messaging.PortChannel.forEmbeddedWindow(frameWindow, origin);
   const respondingChannel = new goog.messaging.RespondingChannel(portChannel);
 
-  serviceHandlersMap.keys().forEach(serviceName => {
+  serviceHandlersMap.forEach((_, serviceName, serviceHandlersMap) => {
     if (serviceName != null && serviceHandlersMap.get(serviceName) != null) {
       respondingChannel.registerService(serviceName, serviceHandlersMap.get(serviceName));
     }
