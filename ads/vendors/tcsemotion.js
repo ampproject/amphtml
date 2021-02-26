@@ -16,7 +16,11 @@
 import {validateData, writeScript} from '../../3p/3p';
 /**
  * @param {!Window} global
- * @param {!Object} d
+ * @param {{
+ *   zone: string,
+ *   delhost: string,
+ *   hb: (boolean|undefined),
+ * }} d
  */
 export function tcsemotion(global, d) {
   validateData(d, ['zone', 'delhost']);

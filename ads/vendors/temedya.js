@@ -18,7 +18,9 @@ import {loadScript, validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   widgetid: string,
+ * }} data
  */
 export function temedya(global, data) {
   validateData(data, ['widgetid']);
@@ -26,14 +28,17 @@ export function temedya(global, data) {
     widgetId: data['widgetid'],
   };
   global._temedya.AMPCallbacks = {
-    renderStart: global.context.renderStart,
-    noContentAvailable: global.context.noContentAvailable,
+    renderStart: /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context)
+      .renderStart,
+    noContentAvailable: /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context)
+      .noContentAvailable,
   };
   // load the temedya  AMP JS file script asynchronously
   loadScript(
     global,
     'https://widget.cdn.vidyome.com/builds/loader-amp.js',
     () => {},
-    global.context.noContentAvailable
+    /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context)
+      .noContentAvailable
   );
 }

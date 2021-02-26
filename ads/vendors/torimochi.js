@@ -14,12 +14,21 @@
  * limitations under the License.
  */
 
+import {dict} from '../../src/utils/object';
 import {parseJson} from '../../src/json';
 import {validateData, writeScript} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   area: string,
+ *   adtype: string,
+ *   tcid: string,
+ *   wid: string,
+ *   extra: (Object|undefined),
+ *   height: string,
+ *   width: string
+ * }} data
  */
 export function torimochi(global, data) {
   validateData(data, ['area', 'adtype']);
@@ -33,7 +42,9 @@ export function torimochi(global, data) {
   global.tcid = data['tcid'];
   global.wid = data['wid'];
   global.extra = parseJson(data['extra'] || '{}');
-  global.context.renderStart({width: global.width, height: global.height});
+  /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context).renderStart(
+    dict({'width': data.width, 'height': data.height})
+  );
 
   const url =
     'https://asset.torimochi-ad.net/js/torimochi_ad_amp.min.js?v=' + Date.now();

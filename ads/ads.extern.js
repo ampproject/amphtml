@@ -655,11 +655,28 @@ data.referrer;
 data.publisher;
 data.mode;
 
+// tcsemotion.js
+window.djaxData;
+
 // teads.js
-data.tag;
-data.tag;
-data.tag.tta;
-data.tag.ttp;
+window._teads_amp;
+window._tta;
+window._ttp;
+
+// temedya.js
+window._temedya;
+
+// torimochi.js
+window.width;
+window.height;
+window.area;
+window.adtype;
+window.tcid;
+window.wid;
+window.extra;
+
+// tracdelight.js
+window.tdData;
 
 // uas.js
 var Phoenix;
