@@ -41,8 +41,8 @@ class Runner extends RuntimeTestRunner {
 
 async function unit() {
   maybePrintArgvMessages();
-
-  if (argv.local_changes && !getUnitTestsToRun()) {
+  const unitTestsToRun = await getUnitTestsToRun();
+  if (argv.local_changes && !unitTestsToRun) {
     return;
   }
 

@@ -337,7 +337,7 @@ class RuntimeTestRunner {
   }
 
   async run() {
-    reportTestStarted();
+    await reportTestStarted();
     this.exitCode = await createKarmaServer(this.config);
   }
 
