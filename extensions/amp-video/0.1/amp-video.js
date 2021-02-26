@@ -62,6 +62,7 @@ const ATTRS_TO_PROPAGATE_ON_BUILD = [
   'crossorigin',
   'disableremoteplayback',
   'controlsList',
+  'title',
 ];
 
 /** @private {!Map<string, number>} the bitrate in Kb/s of amp_quality for videos in the ampproject cdn */
@@ -276,7 +277,9 @@ export class AmpVideo extends AMP.BaseElement {
    */
   checkA11yAttributeText_() {
     const altText = this.element.getAttribute('alt');
-    if (altText) {
+    const hasTitle = this.element.hasAttribute('title');
+    const hasAriaLabel = this.element.hasAttribute('aria-label');
+    if (altText && !hasTitle && !hasAriaLabel) {
       this.element.setAttribute('aria-label', altText);
     }
   }
