@@ -977,11 +977,12 @@ function parsePropDefs(props, propDefs, element, mediaQueryProps) {
     : element.childNodes;
   for (let i = 0; i < nodes.length; i++) {
     const childElement = nodes[i];
-    const def = matchChild(childElement, propDefs);
-    if (!def) {
+    const match = matchChild(childElement, propDefs);
+    if (!match) {
       continue;
     }
-    const {single, name, clone, props: slotProps = {}} = def;
+    const def = propDefs[match];
+    const {single, name = match, clone, props: slotProps = {}} = def;
     const parsedSlotProps = {};
     parsePropDefs(parsedSlotProps, slotProps, childElement, mediaQueryProps);
 
@@ -1119,7 +1120,7 @@ function matchChild(element, defs) {
     const def = defs[match];
     const selector = typeof def == 'string' ? def : def.selector;
     if (matches(element, selector)) {
-      return typeof def == 'string' ? def : {name: match, ...def};
+      return match;
     }
   }
   return null;
