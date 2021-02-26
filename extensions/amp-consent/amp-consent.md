@@ -366,12 +366,8 @@ When defined, the post-prompt UI is shown when all prompt UIs have been hidden, 
 <amp-consent layout="nodisplay" id="consent-element">
   <script type="application/json">
     {
-      "consents": {
-        "consent-foo": {
-          ...
-          "promptUI": "consent-ui"
-        }
-      },
+      "consentInstanceId": "consent-foo",
+      "promptUI": "consent-ui",
       "postPromptUI": "post-consent-ui"
     }
   </script>
