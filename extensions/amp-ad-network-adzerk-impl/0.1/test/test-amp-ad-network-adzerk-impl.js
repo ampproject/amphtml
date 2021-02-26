@@ -26,20 +26,18 @@ import {
 import {AmpMustache} from '../../../amp-mustache/0.1/amp-mustache';
 import {Xhr} from '../../../../src/service/xhr-impl';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {registerExtendedTemplateForDoc} from '../../../../src/service/template-impl';
 import {utf8Decode, utf8Encode} from '../../../../src/utils/bytes';
 
 describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, (env) => {
-  let win, doc, ampdoc;
+  let win, doc;
   let element, impl;
   let fetchTextMock;
 
   beforeEach(() => {
     win = env.win;
     win.__AMP_MODE = {localDev: false};
+    win.AMP.registerTemplate('amp-mustache', AmpMustache);
     doc = win.document;
-    ampdoc = env.ampdoc;
-    registerExtendedTemplateForDoc(ampdoc, 'amp-mustache', AmpMustache);
     fetchTextMock = env.sandbox.stub(Xhr.prototype, 'fetchText');
     element = createElementWithAttributes(doc, 'amp-ad', {
       'type': 'adzerk',
