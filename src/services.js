@@ -665,12 +665,12 @@ export class Services {
   }
 
   /**
-   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @param {!Window} window
    * @return {!./service/template-impl.Templates}
    */
-  static templatesForDoc(elementOrAmpDoc) {
-    return /** @type {!./service/template-impl.Templates} */ (getServiceForDoc(
-      elementOrAmpDoc,
+  static templatesFor(window) {
+    return /** @type {!./service/template-impl.Templates} */ (getService(
+      window,
       'templates'
     ));
   }
