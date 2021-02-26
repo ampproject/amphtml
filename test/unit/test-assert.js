@@ -18,7 +18,7 @@ import {
   USER_ERROR_SENTINEL,
   pureDevAssert as devAssert,
   pureUserAssert as userAssert,
-} from '../../src/assert';
+} from '../../src/core/assert';
 
 describes.sandboxed('assertions', {}, () => {
   describe('devAssert', () => {
@@ -60,5 +60,18 @@ describes.sandboxed('assertions', {}, () => {
     expect(() => userAssert(false, '%s a %s b %s', 1, 2, 3)).to.throw(
       `1 a 2 b 3${USER_ERROR_SENTINEL}`
     );
+  });
+
+  it('should add element and message info', () => {
+    const div = document.createElement('div');
+    let error;
+    try {
+      devAssert(false, '%s a %s b %s', div, 2, 3);
+    } catch (e) {
+      error = e;
+    }
+
+    expect(error.associatedElement).to.equal(div);
+    expect(error.messageArray).to.deep.equal([div, 2, 3]);
   });
 });
