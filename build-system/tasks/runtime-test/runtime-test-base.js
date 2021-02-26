@@ -188,6 +188,41 @@ function updateReporters(config) {
 }
 
 /**
+ * Processes and adds test files to the karma spec so esbuild can consume them.
+ * @param {!RuntimeTestConfig} config
+ */
+function updateFiles(config) {
+  const patterns = Object.keys(config.preprocessors).filter((pattern) => {
+    return config.preprocessors[pattern].includes('esbuild');
+  });
+  config.preprocessors[runFile] = ['esbuild'];
+  const leftovers = [];
+  const files = getFiles(config.testType).flatMap((files) => {
+    if (typeof files === 'object') {
+      leftovers.push(files);
+      return [];
+    }
+
+    const globed = globby.sync(files).map((f) => `./${f}`);
+    return globed.filter((file) => {
+      const matched = patterns.some((p) => minimatch(file, p));
+      if (matched) {
+        return true;
+      }
+      leftovers.push(file);
+      return false;
+    });
+  });
+
+  const imports = files
+    .map((f) => `import '${path.relative(runDir, f)}';`)
+    .join('\n');
+  fs.writeFileSync(runFile, imports);
+  leftovers.push(runFile);
+  config.files = leftovers;
+}
+
+/**
  * Prints a dot for every babel transform, with wrapping if needed.
  */
 function printBabelDot() {
@@ -199,10 +234,10 @@ function printBabelDot() {
 }
 
 /**
- * Constructs the configuration object used by esbuild for test transforms.
- * @return {!Object}
+ * Updates the esbuild config in the karma spec so esbuild can run with it.
+ * @param {!RuntimeTestConfig} config
  */
-function getEsbuildConfig() {
+function updateEsbuildConfig(config) {
   const importPathPlugin = {
     name: 'import-path',
     setup(build) {
@@ -218,7 +253,7 @@ function getEsbuildConfig() {
     /* enableCache */ true,
     printBabelDot
   );
-  return {
+  config.esbuild = {
     define: {
       'process.env.NODE_DEBUG': 'false',
       'process.env.NODE_ENV': '"test"',
@@ -228,67 +263,51 @@ function getEsbuildConfig() {
   };
 }
 
+/**
+ * Updates the client so that tests can access karma state. This is available in
+ * the browser via window.parent.karma.config.
+ * @param {!RuntimeTestConfig} config
+ */
+function updateClient(config) {
+  config.singleRun = !argv.watch && !argv.w;
+  config.client.mocha.grep = !!argv.grep;
+  config.client.verboseLogging = !!argv.verbose || !!argv.v;
+  config.client.captureConsole = !!argv.verbose || !!argv.v || !!argv.files;
+  config.client.amp = {
+    useCompiledJs: !!argv.compiled,
+    adTypes: getAdTypes(),
+    mochaTimeout: config.client.mocha.timeout,
+    testServerPort: config.client.testServerPort,
+    // This is used in _init_tests for matchers such as `skipModuleBuild` and
+    // `ifModuleBuild`.
+    isModuleBuild: !!argv.esm,
+  };
+}
+
+/**
+ * Updates the Karma config to gather coverage info.
+ * @param {!RuntimeTestConfig} config
+ */
+function updateCoverageSettings(config) {
+  config.plugins.push('karma-coverage-istanbul-reporter');
+  config.coverageIstanbulReporter = {
+    dir: 'test/coverage',
+    reports: isCiBuild() ? ['lcovonly'] : ['html', 'text', 'text-summary'],
+    'report-config': {lcovonly: {file: `lcov-${config.testType}.info`}},
+  };
+}
+
 class RuntimeTestConfig {
   constructor(testType) {
     this.testType = testType;
     Object.assign(this, karmaConfig);
     updateBrowsers(this);
     updateReporters(this);
-    this.singleRun = !argv.watch && !argv.w;
-    this.client.mocha.grep = !!argv.grep;
-    this.client.verboseLogging = !!argv.verbose || !!argv.v;
-    this.client.captureConsole = !!argv.verbose || !!argv.v || !!argv.files;
-    this.esbuild = getEsbuildConfig();
-
-    const patterns = Object.keys(this.preprocessors).filter((pattern) => {
-      return this.preprocessors[pattern].includes('esbuild');
-    });
-    this.preprocessors[runFile] = ['esbuild'];
-
-    const leftovers = [];
-    const files = getFiles(this.testType).flatMap((files) => {
-      if (typeof files === 'object') {
-        leftovers.push(files);
-        return [];
-      }
-
-      const globed = globby.sync(files).map((f) => `./${f}`);
-      return globed.filter((file) => {
-        const matched = patterns.some((p) => minimatch(file, p));
-        if (matched) {
-          return true;
-        }
-        leftovers.push(file);
-        return false;
-      });
-    });
-
-    const imports = files
-      .map((f) => `import '${path.relative(runDir, f)}';`)
-      .join('\n');
-    fs.writeFileSync(runFile, imports);
-    leftovers.push(runFile);
-
-    this.files = leftovers;
-
-    // c.client is available in test browser via window.parent.karma.config
-    this.client.amp = {
-      useCompiledJs: !!argv.compiled,
-      adTypes: getAdTypes(),
-      mochaTimeout: this.client.mocha.timeout,
-      testServerPort: this.client.testServerPort,
-      // This is used in _init_tests for matchers such as `skipModuleBuild` and
-      // `ifModuleBuild`.
-      isModuleBuild: !!argv.esm,
-    };
-
+    updateEsbuildConfig(this);
+    updateFiles(this);
+    updateClient(this);
     if (argv.coverage) {
-      this.plugins.push('karma-coverage-istanbul-reporter');
-      this.coverageIstanbulReporter = {
-        dir: 'test/coverage',
-        reports: isCiBuild() ? ['lcovonly'] : ['html', 'text', 'text-summary'],
-        'report-config': {lcovonly: {file: `lcov-${testType}.info`}},
-      };
+      updateCoverageSettings(this);
     }
   }
 }
