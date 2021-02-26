@@ -239,74 +239,38 @@ jobs:
           name: 'Performance Tests'
           command: node build-system/pr-check/performance-tests.js
       - fail_fast
-  'Experiment A Build':
+  'Experiment Build':
     executor:
       name: amphtml-xlarge-executor
+    parameters:
+      exp:
+        description: 'Which of the three (A/B/C) experiments to use'
+        type: enum
+        enum: ['A', 'B', 'C']
     steps:
       - setup_vm
       - run:
-          name: 'Experiment A Build'
-          command: node build-system/pr-check/experiment-build.js --experiment=experimentA
+          name: 'Experiment << parameters.exp >> Build'
+          command: node build-system/pr-check/experiment-build.js --experiment=experiment<< parameters.exp >>
       - fail_fast
-  'Experiment B Build':
-    executor:
-      name: amphtml-xlarge-executor
-    steps:
-      - setup_vm
-      - run:
-          name: 'Experiment B Build'
-          command: node build-system/pr-check/experiment-build.js --experiment=experimentB
-      - fail_fast
-  'Experiment C Build':
-    executor:
-      name: amphtml-xlarge-executor
-    steps:
-      - setup_vm
-      - run:
-          name: 'Experiment C Build'
-          command: node build-system/pr-check/experiment-build.js --experiment=experimentC
-      - fail_fast
-  'Experiment A Tests':
+  'Experiment Tests':
     executor:
       name: amphtml-large-executor
+    parameters:
+      exp:
+        description: 'Which of the three (A/B/C) experiments to use'
+        type: enum
+        enum: ['A', 'B', 'C']
     steps:
       - setup_vm
       - install_chrome
       - restore_karma_cache:
-          cache_name: experimentA
+          cache_name: experiment<< parameters.exp >>
       - run:
-          name: 'Experiment A Tests'
-          command: node build-system/pr-check/experiment-tests.js --experiment=experimentA
+          name: 'Experiment << parameters.exp >> Tests'
+          command: node build-system/pr-check/experiment-tests.js --experiment=experiment<< parameters.exp >>
       - save_karma_cache:
-          cache_name: experimentA
-      - fail_fast
-  'Experiment B Tests':
-    executor:
-      name: amphtml-large-executor
-    steps:
-      - setup_vm
-      - install_chrome
-      - restore_karma_cache:
-          cache_name: experimentB
-      - run:
-          name: 'Experiment B Tests'
-          command: node build-system/pr-check/experiment-tests.js --experiment=experimentB
-      - save_karma_cache:
-          cache_name: experimentB
-      - fail_fast
-  'Experiment C Tests':
-    executor:
-      name: amphtml-large-executor
-    steps:
-      - setup_vm
-      - install_chrome
-      - restore_karma_cache:
-          cache_name: experimentC
-      - run:
-          name: 'Experiment C Tests'
-          command: node build-system/pr-check/experiment-tests.js --experiment=experimentC
-      - save_karma_cache:
-          cache_name: experimentC
+          cache_name: experiment<< parameters.exp >>
       - fail_fast
 
 workflows:
@@ -358,24 +322,20 @@ workflows:
           <<: *push_and_pr_builds
           requires:
             - 'Nomodule Build'
-      - 'Experiment A Build':
+      - 'Experiment Build':
+          name: 'Experiment << matrix.exp >> Build'
+          matrix:
+            parameters:
+              exp: ['A', 'B', 'C']
           <<: *push_and_pr_builds
-      - 'Experiment B Build':
-          <<: *push_and_pr_builds
-      - 'Experiment C Build':
-          <<: *push_and_pr_builds
-      - 'Experiment A Tests':
-          <<: *push_and_pr_builds
-          requires:
-            - 'Experiment A Build'
-      - 'Experiment B Tests':
-          <<: *push_and_pr_builds
-          requires:
-            - 'Experiment B Build'
-      - 'Experiment C Tests':
+      - 'Experiment Tests':
+          name: 'Experiment << matrix.exp >> Tests'
+          matrix:
+            parameters:
+              exp: ['A', 'B', 'C']
           <<: *push_and_pr_builds
           requires:
-            - 'Experiment C Build'
+            - 'Experiment << matrix.exp >> Build'
       # TODO(wg-performance, #12128): This takes 30 mins and fails regularly.
       # - 'Performance Tests':
       #     <<: *push_builds_only
