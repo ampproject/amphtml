@@ -206,7 +206,7 @@ export class BaseElement {
    * @return {boolean}
    * @nocollapse
    */
-  static reqiuresShadowDom() {
+  static requiresShadowDom() {
     return false;
   }
 
