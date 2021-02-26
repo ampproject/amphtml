@@ -257,6 +257,7 @@ export class AmpStoryPlayer {
     this.element_.mute = this.mute.bind(this);
     this.element_.unmute = this.unmute.bind(this);
     this.element_.getStoryState = this.getStoryState.bind(this);
+    this.element_.rewind = this.rewind.bind(this);
   }
 
   /**
@@ -739,19 +740,11 @@ export class AmpStoryPlayer {
    * @return {!Promise}
    */
   show(storyUrl, pageId = null) {
-    // TODO(enriqe): sanitize URLs for matching.
-    const storyIdx = storyUrl
-      ? findIndex(this.stories_, ({href}) => href === storyUrl)
-      : this.currentIdx_;
-
-    // TODO(#28987): replace for add() once implemented.
-    if (!this.stories_[storyIdx]) {
-      throw new Error(`Story URL not found in the player: ${storyUrl}`);
-    }
+    const story = this.getStoryFromUrl_(storyUrl);
 
     let renderPromise = Promise.resolve();
-    if (storyIdx !== this.currentIdx_) {
-      this.currentIdx_ = storyIdx;
+    if (story.idx !== this.currentIdx_) {
+      this.currentIdx_ = story.idx;
 
       renderPromise = this.render_();
       this.onNavigation_();
@@ -1272,6 +1265,38 @@ export class AmpStoryPlayer {
 
     story.messagingPromise.then((messaging) =>
       messaging.sendRequest('selectPage', {'id': pageId})
+    );
+  }
+
+  /**
+   * Returns the story given a URL.
+   * @param {string} storyUrl
+   * @return {!StoryDef}
+   * @private
+   */
+  getStoryFromUrl_(storyUrl) {
+    // TODO(enriqe): sanitize URLs for matching.
+    const storyIdx = storyUrl
+      ? findIndex(this.stories_, ({href}) => href === storyUrl)
+      : this.currentIdx_;
+
+    const story = this.stories_[storyIdx];
+    if (!story) {
+      throw new Error(`Story URL not found in the player: ${storyUrl}`);
+    }
+
+    return this.stories_[storyIdx];
+  }
+
+  /**
+   * Rewinds the given story.
+   * @param {string} storyUrl
+   */
+  rewind(storyUrl) {
+    const story = this.getStoryFromUrl_(storyUrl);
+
+    story.messagingPromise.then((messaging) =>
+      messaging.sendRequest('rewind', {})
     );
   }
 
