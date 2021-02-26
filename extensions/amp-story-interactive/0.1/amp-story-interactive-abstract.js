@@ -817,9 +817,8 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    * @param {boolean} toggle
    */
   toggleTabbableElements_(toggle) {
-    // TODO: Revise tabbable elements on components when considering #31747.
     this.rootEl_.querySelectorAll('button, a').forEach((el) => {
-      if (this.getOptionElements().indexOf(el) > -1 && this.hasUserSelection_) {
+      if (this.getOptionElements().includes(el) && this.hasUserSelection_) {
         el.setAttribute('tabindex', -1);
       } else {
         el.setAttribute('tabindex', toggle ? 0 : -1);
