@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-import * as rrule from '../../../node_modules/rrule/dist/es5/rrule.js';
 import {requireExternal} from '../../../src/module';
-
-const {rrulestr} = rrule.default;
+import rrulestr from '../../../node_modules/rrule/dist/es5/rrule.js';
 
 /** @enum {string} */
 const DateType = {

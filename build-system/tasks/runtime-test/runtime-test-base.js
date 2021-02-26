@@ -190,6 +190,37 @@ function printBabelDot() {
   }
 }
 
+/**
+ * Constructs the configuration object used by esbuild for test transforms.
+ * @return {!Object}
+ */
+function getEsbuildConfig() {
+  const importPathPlugin = {
+    name: 'import-path',
+    setup(build) {
+      build.onResolve({filter: /^[\w-]+$/}, (file) => {
+        if (file.path === 'stream') {
+          return {path: require.resolve('stream-browserify')};
+        }
+      });
+    },
+  };
+  const babelPlugin = getEsbuildBabelPlugin(
+    'test',
+    /* enableCache */ true,
+    printBabelDot
+  );
+  return {
+    inject: ['./test/_init_tests.js'],
+    define: {
+      'process.env.NODE_DEBUG': 'false',
+      'process.env.NODE_ENV': '"test"',
+    },
+    plugins: [importPathPlugin, babelPlugin],
+    sourcemap: 'inline',
+  };
+}
+
 class RuntimeTestConfig {
   constructor(testType) {
     this.testType = testType;
@@ -201,30 +232,7 @@ class RuntimeTestConfig {
     this.client.mocha.grep = !!argv.grep;
     this.client.verboseLogging = !!argv.verbose || !!argv.v;
     this.client.captureConsole = !!argv.verbose || !!argv.v || !!argv.files;
-
-    const importPathPlugin = {
-      name: 'import-path',
-      setup(build) {
-        build.onResolve({filter: /^[\w-]+$/}, (file) => {
-          if (file.path === 'stream') {
-            return {path: require.resolve('stream-browserify')};
-          }
-        });
-      },
-    };
-    const babelPlugin = getEsbuildBabelPlugin(
-      'test',
-      /* enableCache */ true,
-      printBabelDot
-    );
-    this.esbuild = {
-      inject: ['./test/_init_tests.js'],
-      define: {
-        'process.env.NODE_DEBUG': 'false',
-        'process.env.NODE_ENV': '"test"',
-      },
-      plugins: [importPathPlugin, babelPlugin],
-    };
+    this.esbuild = getEsbuildConfig();
 
     // c.client is available in test browser via window.parent.karma.config
     this.client.amp = {
