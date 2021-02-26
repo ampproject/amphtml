@@ -35,15 +35,11 @@ echo $(GREEN "Setting up Cloud SDK environment...")
 (set -x && echo "source ~/google-cloud-sdk/path.bash.inc" >> $BASH_ENV)
 source $BASH_ENV
 
-echo $(GREEN "Writing key to json file...")
-echo $STORAGE_TOKEN > storage-key.json
-
 echo $(GREEN "Authenticating with GCP storage...")
+echo $STORAGE_TOKEN > storage-key.json
 gcloud auth activate-service-account --key-file=storage-key.json
 
 echo $(GREEN "Applying settings...")
-gcloud config set account sa-travis@amp-travis-build-storage.iam.gserviceaccount.com
 gcloud config set pass_credentials_to_gsutil true
-gcloud config set project amp-travis-build-storage
 
 echo $(GREEN "Successfully set up GCP storage.")
