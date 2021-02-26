@@ -334,6 +334,42 @@ describes.sandboxed('Accordion preact component', {}, (env) => {
       );
     });
 
+    it('should default role attribute unless role prop provided', () => {
+      wrapper = mount(
+        <Accordion>
+          <AccordionSection key={1} expanded>
+            <AccordionHeader role="cat">header1</AccordionHeader>
+            <AccordionContent role="dog">content1</AccordionContent>
+          </AccordionSection>
+          <AccordionSection key={2}>
+            <AccordionHeader>header2</AccordionHeader>
+            <AccordionContent>content2</AccordionContent>
+          </AccordionSection>
+        </Accordion>
+      );
+
+      const dom = wrapper.getDOMNode();
+      expect(dom.localName).to.equal('section');
+
+      const sections = wrapper.find(AccordionSection);
+      expect(sections).to.have.lengthOf(2);
+
+      const header0 = sections.at(0).find('div').at(0).getDOMNode();
+      const header1 = sections.at(1).find('div').at(0).getDOMNode();
+      const content0 = sections.at(0).find('div').at(1).getDOMNode();
+      const content1 = sections.at(1).find('div').at(1).getDOMNode();
+
+      expect(header0).to.have.attribute('role');
+      expect(header0.getAttribute('role')).to.equal('cat');
+      expect(content0).to.have.attribute('role');
+      expect(content0.getAttribute('role')).to.equal('dog');
+
+      expect(header1).to.have.attribute('role');
+      expect(header1.getAttribute('role')).to.equal('button');
+      expect(content1).to.have.attribute('role');
+      expect(content1.getAttribute('role')).to.equal('region');
+    });
+
     it('should expand a section on click', () => {
       const dom = wrapper.getDOMNode();
       expect(dom.localName).to.equal('section');
