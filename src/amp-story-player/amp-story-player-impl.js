@@ -284,6 +284,7 @@ export class AmpStoryPlayer {
   initializeAndAddStory_(story) {
     story.idx = this.stories_.length;
     story.distance = story.idx - this.currentIdx_;
+    story.connectedDeferred = new Deferred();
     this.stories_.push(story);
   }
 

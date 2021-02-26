@@ -839,7 +839,7 @@ export class AmpStory extends AMP.BaseElement {
     // there is a way to navigate to pages that does not involve using private
     // amp-story methods.
     this.viewer_.onMessage('selectPage', (data) => this.onSelectPage_(data));
-    this.viewer_.onMessage('rewind', () => this.replay_());
+    this.viewer_.onMessage('rewind', () => this.onRewind_());
 
     if (this.viewerMessagingHandler_) {
       this.viewerMessagingHandler_.startListening();
@@ -2638,6 +2638,22 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
+   * Handles the rewind viewer event.
+   * @private
+   */
+  onRewind_() {
+    this.signals()
+      .whenSignal(CommonSignals.LOAD_END)
+      .then(() => {
+        if (this.pages_.length > 0) {
+          return;
+        }
+        return this.initializePages_();
+      })
+      .then(() => this.replay_());
+  }
+
+  /**
    * Handles the selectPage viewer event.
    * @param {!JsonObject} data
    * @private
@@ -2665,16 +2681,6 @@ export class AmpStory extends AMP.BaseElement {
           ? NavigationDirection.NEXT
           : NavigationDirection.PREVIOUS
       );
-    } else if (data['rewind']) {
-      this.signals()
-        .whenSignal(CommonSignals.LOAD_END)
-        .then(() => {
-          if (this.pages_.length > 0) {
-            return;
-          }
-          return this.initializePages_();
-        })
-        .then(() => this.replay_());
     }
   }
 
