@@ -32,16 +32,14 @@ const cssResult = {
 };
 
 const jsResult = {
-  'test-0.js': {
-    '<div />': 'initial',
-    'assignment': 'auto',
-    'declarator': 0,
-    'setStyle': 15,
-    'setStyles': 9999,
-  },
-  'test-1.js': {
-    '<Component />': 12345,
-  },
+  'test-0.js': [
+    ['<div />', 'initial'],
+    ['assignment', 'auto'],
+    ['declarator', 0],
+    ['setStyle', 15],
+    ['setStyles', 9999],
+  ],
+  'test-1.js': [['<Component />', 12345]],
 };
 
 test('collects selectors', async (t) => {

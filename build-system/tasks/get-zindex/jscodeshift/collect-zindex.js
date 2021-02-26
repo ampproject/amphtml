@@ -24,6 +24,7 @@ function getCallExpressionZIndexValue(node) {
     if (
       next &&
       next.type.endsWith('Literal') &&
+      next.value !== '' &&
       zIndexRegExp.test(argument.value)
     ) {
       return next.value;
@@ -85,7 +86,7 @@ function chainId(file, path) {
 export default function transformer(file, api, options) {
   const j = api.jscodeshift;
 
-  const reports = {};
+  const reports = [];
 
   const {collectZindexToFile} = options;
 
@@ -99,7 +100,7 @@ export default function transformer(file, api, options) {
         zIndexRegExp.test(node.key.value || node.key.name)
     )
     .forEach((path) => {
-      reports[chainId(file, path.parent.parent)] = path.value.value.value;
+      reports.push([chainId(file, path.parent.parent), path.value.value.value]);
     });
 
   j(file.source)
@@ -108,7 +109,10 @@ export default function transformer(file, api, options) {
       (node) => getCallExpressionZIndexValue(node) != null
     )
     .forEach((path) => {
-      reports[chainId(file, path)] = getCallExpressionZIndexValue(path.value);
+      reports.push([
+        chainId(file, path),
+        getCallExpressionZIndexValue(path.value),
+      ]);
     });
 
   if (collectZindexToFile && Object.keys(reports).length > 0) {

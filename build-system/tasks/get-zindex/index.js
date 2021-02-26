@@ -38,6 +38,8 @@ const tableOptions = {
 
 const preamble = '**Run `gulp get-zindex --fix` to generate this file.**';
 
+const sortedByEntryKey = (a, b) => a[0].localeCompare(b[0]);
+
 /**
  * @param {!Object<string, !Array<number>} acc accumulator object for selectors
  * @param {!Rules} css post css rules object
@@ -66,22 +68,18 @@ function zIndexCollector(acc, css) {
  */
 function createTable(filesData) {
   const rows = [];
-  Object.keys(filesData)
-    .sort()
-    .forEach((fileName) => {
-      const selectors = filesData[fileName];
-      Object.keys(selectors)
-        .sort()
-        .forEach((selectorName) => {
-          const zIndex = selectors[selectorName];
-          const row = [
-            `\`${selectorName}\``,
-            zIndex,
-            `[${fileName}](/${fileName})`,
-          ];
-          rows.push(row);
-        });
-    });
+  for (const filename of Object.keys(filesData).sort()) {
+    // JS entries are Arrays of Arrays since they can have duplicate contexts
+    // like [['context', 9999]]
+    // CSS entries are Obejcts since they should not have duplicate selectors
+    // like {'.selector': 9999}
+    const entry = Array.isArray(filesData[filename])
+      ? filesData[filename]
+      : Object.entries(filesData[filename]).sort(sortedByEntryKey);
+    for (const [context, zIndex] of entry) {
+      rows.push([`\`${context}\``, zIndex, `[${filename}](/${filename})`]);
+    }
+  }
   rows.sort((a, b) => {
     const aZIndex = parseInt(a[1], 10);
     const bZIndex = parseInt(b[1], 10);
@@ -150,7 +148,7 @@ function getZindexChainsInJs(glob, cwd = '.') {
     const result = {};
     for (const key in resultAbsolute) {
       const relative = path.relative(cwd, key);
-      result[relative] = resultAbsolute[key];
+      result[relative] = resultAbsolute[key].sort(sortedByEntryKey);
     }
     return result;
   });
