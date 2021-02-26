@@ -92,6 +92,11 @@ let ChildDef;
 /** @const {!MutationObserverInit} */
 const CHILDREN_MUTATION_INIT = {
   childList: true,
+};
+
+/** @const {!MutationObserverInit} */
+const PASSTHROUGH_MUTATION_INIT = {
+  childList: true,
   characterData: true,
 };
 
@@ -268,14 +273,20 @@ export class PreactBaseElement extends AMP.BaseElement {
     const Ctor = this.constructor;
 
     this.observer = new MutationObserver(this.checkMutations_.bind(this));
-    const childrenInit =
-      Ctor['props'] && Ctor['props']['children']
-        ? CHILDREN_MUTATION_INIT
-        : null;
+    const props = Object.values(Ctor['props']);
+    const childrenInit = props.some((p) => p.selector)
+      ? CHILDREN_MUTATION_INIT
+      : null;
+    const passthroughInit = props.some(
+      (p) => p.passthrough || p.passthroughNonEmpty
+    )
+      ? PASSTHROUGH_MUTATION_INIT
+      : null;
     const templatesInit = Ctor['usesTemplate'] ? TEMPLATES_MUTATION_INIT : null;
     this.observer.observe(this.element, {
       attributes: true,
       ...childrenInit,
+      ...passthroughInit,
       ...templatesInit,
     });
 
