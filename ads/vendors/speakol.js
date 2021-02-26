@@ -19,7 +19,9 @@ import {loadScript, validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   widgetid: string
+ * }} data
  */
 
 export function speakol(global, data) {

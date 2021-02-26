@@ -19,20 +19,29 @@ import {validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *  spotx_channel_id: string,
+ *  width: number,
+ *  height: number,
+ *  spotx_content_width: (number|undefined),
+ *  spotx_content_height: (number|undefined),
+ *  spotx_content_page_url: (string|undefined),
+ *  spotx_ad_done_function: (Function|undefined)
+ * }} data
  */
 export function spotx(global, data) {
   // ensure we have valid channel id
   validateData(data, ['spotx_channel_id', 'width', 'height']);
 
+  /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */
+  const context = /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context);
   // Because 3p's loadScript does not allow for data attributes,
   // we will write the JS tag ourselves.
   const script = global.document.createElement('script');
 
   data['spotx_content_width'] = data.spotx_content_width || data.width;
   data['spotx_content_height'] = data.spotx_content_height || data.height;
-  data['spotx_content_page_url'] =
-    global.context.location.href || global.context.sourceUrl;
+  data['spotx_content_page_url'] = context.location.href || context.sourceUrl;
 
   // Add data-* attribute for each data value passed in.
   for (const key in data) {
@@ -43,14 +52,13 @@ export function spotx(global, data) {
 
   global['spotx_ad_done_function'] = function (spotxAdFound) {
     if (!spotxAdFound) {
-      global.context.noContentAvailable();
+      context.noContentAvailable();
     }
   };
 
   // TODO(KenneyE): Implement AdLoaded callback in script to accurately trigger
   // renderStart()
-  script.onload = global.context.renderStart;
-
-  script.src = `//js.spotx.tv/easi/v1/${data['spotx_channel_id']}.js`;
+  script.onload = () => context.renderStart();
+  /** @type {HTMLScriptElement} */ (script).src = `//js.spotx.tv/easi/v1/${data['spotx_channel_id']}.js`;
   global.document.body.appendChild(script);
 }

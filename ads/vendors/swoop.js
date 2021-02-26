@@ -18,7 +18,12 @@ import {computeInMasterFrame, loadScript, validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   layout: string,
+ *   placement: string,
+ *   publisher: string,
+ *   slot: string,
+ * }} data
  */
 export function swoop(global, data) {
   // Required properties
@@ -36,11 +41,19 @@ export function swoop(global, data) {
     },
     (success) => {
       if (success) {
-        if (!global.context.isMaster) {
-          global.context.master.Swoop.announcePlace(global, data);
+        if (
+          !(
+            /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context)
+              .isMaster
+          )
+        ) {
+          /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context).master.Swoop.announcePlace(
+            global,
+            data
+          );
         }
       } else {
-        global.context.noContentAvailable();
+        /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context).noContentAvailable();
         throw new Error('Swoop failed to load');
       }
     }

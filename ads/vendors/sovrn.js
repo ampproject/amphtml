@@ -23,7 +23,16 @@
 import {writeScript} from '../../3p/3p';
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   width: string,
+ *   height: string,
+ *   domain: string,
+ *   u: string,
+ *   iid: string,
+ *   aid: string,
+ *   z: string,
+ *   tf: string
+ * }} data
  */
 export function sovrn(global, data) {
   /*eslint "google-camelcase/google-camelcase": 0*/

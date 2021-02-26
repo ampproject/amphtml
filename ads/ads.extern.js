@@ -626,34 +626,69 @@ data.pkey;
 // sklik.js
 data.elm;
 
+// slimcutmedia.js
+window._scm_amp;
+
 // smartadserver.js
 var sas;
 sas.callAmpAd;
 
 // smartclip.js
+window._smartclip_amp;
 data.plc;
 data.sz;
 data.extra;
 
+// smi2.js
+window._smi2;
+
+// smilewanted.js
+window.smilewantedConfig;
+
 // sortable.js
 data.name;
 
+// sogouad.js
+window.sogouUn;
+
 // sovrn.js
-data.domain;
-data.u;
-data.iid;
-data.aid;
-data.z;
-data.tf;
+window.width;
+window.height;
+window.domain;
+window.u;
+window.iid;
+window.aid;
+window.z;
+window.tf;
+
+// speakol.js
+window.spksdk;
+
+// springAds.js
+window.ASCDP;
+window.adSSetup;
+window.availableSlots;
+
+// ssp.js
+window.sssp;
+window.fetchingSSPs;
+
+// strossle.js
+window._strossle;
+
+// sulvo.js
+window.sulvoAmpAdData;
+
+// sunmedia.js
+window._sunmedia_amp;
 
 // swoop.js
 var Swoop;
 Swoop.announcePlace;
+window.swoopIabConfig;
 
 // taboola.js
-data.referrer;
-data.publisher;
-data.mode;
+window._taboola;
 
 // tcsemotion.js
 window.djaxData;

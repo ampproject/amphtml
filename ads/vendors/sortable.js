@@ -18,7 +18,13 @@ import {loadScript, validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   site: string,
+ *   name: string,
+ *   responsive: (string|undefined),
+ *   width: number,
+ *   height: number,
+ * }} data
  */
 export function sortable(global, data) {
   validateData(data, ['site', 'name'], ['responsive']);

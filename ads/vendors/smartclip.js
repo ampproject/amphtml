@@ -18,7 +18,11 @@ import {loadScript, validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   plc: string,
+ *   sz: string,
+ *   extra: (string|undefined)
+ * }} data
  */
 export function smartclip(global, data) {
   /*eslint "google-camelcase/google-camelcase": 0*/

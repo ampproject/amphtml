@@ -15,6 +15,7 @@
  */
 
 import {computeInMasterFrame, loadScript, validateData} from '../../3p/3p';
+import {dict} from '../../src/utils/object';
 import {parseJson} from '../../src/json';
 import {setStyles} from '../../src/style';
 
@@ -73,20 +74,31 @@ export function handlePosition(element, center, dimensions) {
 
 /**
  * @param {number} availableWidth
- * @param {!Object} data
- * @return {?Object}
+ * @param {{
+ *   position: string,
+ *   width: number,
+ *   height: number,
+ *   site: (string|undefined)
+ * }} data
+ * @return {!JsonObject}
  */
 export function sizeAgainstWindow(availableWidth, data) {
   if (data.width > availableWidth) {
     const newWidth = availableWidth;
     const newHeight = data.height / (data.width / availableWidth);
-    return {width: newWidth, height: newHeight};
+    return dict({'width': newWidth, 'height': newHeight});
   }
+  return dict({'width': data.width, 'height': data.height});
 }
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   position: string,
+ *   width: number,
+ *   height: number,
+ *   site: (string|undefined)
+ * }} data
  */
 export function ssp(global, data) {
   // validate AMP input data- attributes
@@ -102,23 +114,20 @@ export function ssp(global, data) {
     }
   } catch (error) {}
 
+  const context = /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context);
   if (position['id'] === -1) {
-    global.context.noContentAvailable();
+    context.noContentAvailable();
 
     return;
   }
 
   // This is super important. Without this any variables on context are not shared
-  const mW = global.context.isMaster ? global : global.context.master;
-
+  const mW = context.isMaster ? global : context.master;
   // create parent element
   const parentElement = document.createElement('div');
-
   parentElement.id = position['id'];
-
   // https://github.com/ampproject/amphtml/tree/master/ads#the-iframe-sandbox
   global.document.getElementById('c').appendChild(parentElement);
-
   // validate dimensions against available space (window)
   const sizing = sizeAgainstWindow(parentElement./*OK*/ clientWidth, data);
 
@@ -140,7 +149,7 @@ export function ssp(global, data) {
         const sssp = global['sssp'];
 
         sssp.config({
-          site: data.site || global.context.canonicalUrl,
+          site: data.site || context.canonicalUrl,
         });
 
         // propagate SSP and running XHR across all ad units
@@ -152,7 +161,7 @@ export function ssp(global, data) {
     },
     (loaded) => {
       if (!loaded) {
-        global.context.noContentAvailable();
+        context.noContentAvailable();
 
         return;
       }
@@ -160,12 +169,12 @@ export function ssp(global, data) {
       // perform cleanup only after all SSP XHRs are settled
       const noContent = () => {
         runWhenFetchingSettled(mW.fetchingSSPs, () =>
-          global.context.noContentAvailable()
+          context.noContentAvailable()
         );
       };
 
       // register XHR and start fetching
-      mW.fetchingSSPs[position.zoneId] = true;
+      mW.fetchingSSPs[position['zoneId']] = true;
 
       mW.sssp.getAds([position], {
         // todo on SSP side (option to register error callback)
@@ -184,11 +193,11 @@ export function ssp(global, data) {
             // init dimensions / centering
             const d = ad.responsive ? {width: '100%', height: 'auto'} : null;
             handlePosition(parentElement, true, d);
-            global.context.renderStart(sizing);
+            context.renderStart(sizing);
           }
 
           // unregister XHR
-          delete mW.fetchingSSPs[position.zoneId];
+          delete mW.fetchingSSPs[position['zoneId']];
         },
       });
     }

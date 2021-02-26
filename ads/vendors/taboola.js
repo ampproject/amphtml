@@ -18,7 +18,22 @@ import {loadScript, validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *  height: string,
+ *  type: string,
+ *  width: string,
+ *  publisher: string,
+ *  placement: string,
+ *  mode: string,
+ *  article: (boolean|undefined),
+ *  video: (boolean|undefined),
+ *  search: (boolean|undefined),
+ *  category: (boolean|undefined),
+ *  homepage: (boolean|undefined),
+ *  other: (boolean|undefined),
+ *  referrer: (string|undefined),
+ *  url: (string|undefined)
+ * }} data
  */
 export function taboola(global, data) {
   // do not copy the following attributes from the 'data' object
@@ -36,8 +51,14 @@ export function taboola(global, data) {
 
   // setup default values for referrer and url
   const params = {
-    referrer: data.referrer || global.context.referrer,
-    url: data.url || global.context.canonicalUrl,
+    referrer:
+      data.referrer ||
+      /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context)
+        .referrer,
+    url:
+      data.url ||
+      /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context)
+        .canonicalUrl,
   };
 
   // copy none denylisted attribute to the 'params' map
@@ -50,7 +71,8 @@ export function taboola(global, data) {
   // push the two object into the '_taboola' global
   (global._taboola = global._taboola || []).push([
     {
-      viewId: global.context.pageViewId,
+      viewId: /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context)
+        .pageViewId,
       publisher: data.publisher,
       placement: data.placement,
       mode: data.mode,
@@ -62,17 +84,19 @@ export function taboola(global, data) {
   ]);
 
   // install observation on entering/leaving the view
-  global.context.observeIntersection(function (changes) {
-    /** @type {!Array} */ (changes).forEach(function (c) {
-      if (c.intersectionRect.height) {
-        global._taboola.push({
-          visible: true,
-          rects: c,
-          placement: data.placement,
-        });
-      }
-    });
-  });
+  /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context).observeIntersection(
+    function (changes) {
+      /** @type {!Array} */ (changes).forEach(function (c) {
+        if (c.intersectionRect.height) {
+          global._taboola.push({
+            visible: true,
+            rects: c,
+            placement: data.placement,
+          });
+        }
+      });
+    }
+  );
 
   // load the taboola loader asynchronously
   loadScript(

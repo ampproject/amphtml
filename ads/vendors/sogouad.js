@@ -18,7 +18,12 @@ import {loadScript, validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   slot: string,
+ *   w: string,
+ *   h: string,
+ *   responsive: (string|undefined),
+ * }} data
  */
 export function sogouad(global, data) {
   validateData(data, ['slot', 'w', 'h'], ['responsive']);

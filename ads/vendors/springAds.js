@@ -18,23 +18,32 @@ import {computeInMasterFrame, loadScript} from '../../3p/3p';
 import {parseJson} from '../../src/json';
 
 /**
- * @param {!Object} context
+ * @param {./3p/ampcontext-integration.IntegrationAmpContext} context
  */
 function initSlotList(context) {
   context.master.availableSlots = context.master.availableSlots || {};
 }
 
 /**
- * @param {!Object} context
- * @param {!Object} slot
+ * @param {./3p/ampcontext-integration.IntegrationAmpContext} context
+ * @param {{
+ *   slotName: string
+ * }} slot
  */
 function registerSlot(context, slot) {
   context.master.availableSlots[slot.slotName] = slot;
 }
 
-// eslint-disable-next-line require-jsdoc
+/**
+ * @param {!Window} global
+ * @param {{
+ *   adssetup: (JsonObject|undefined),
+ *   adslot: string,
+ * }} data
+ */
 export function springAds(global, data) {
-  const {context} = global;
+  /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */
+  const context = /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context);
   computeInMasterFrame(
     global,
     'springAds',
