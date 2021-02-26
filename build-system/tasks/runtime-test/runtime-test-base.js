@@ -16,7 +16,12 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const fs = require('fs');
+const globby = require('globby');
 const karmaConfig = require('../../test-configs/karma.conf');
+const minimatch = require('minimatch');
+const path = require('path');
+const tempy = require('tempy');
 const testConfig = require('../../test-configs/config');
 const {
   createCtrlcHandler,
@@ -38,6 +43,9 @@ const {yellow, red} = require('kleur/colors');
  * Used to print dots during esbuild + babel transforms
  */
 let wrapCounter = 0;
+
+const runFile = tempy.file({extension: 'js'});
+const runDir = path.dirname(runFile);
 
 /**
  * Updates the browsers based off of the test type
@@ -200,7 +208,7 @@ function getEsbuildConfig() {
     setup(build) {
       build.onResolve({filter: /^[\w-]+$/}, (file) => {
         if (file.path === 'stream') {
-          return {path: require.resolve('stream-browserify')};
+          return {path: require.resolve('stream-browserify'), namespace: ''};
         }
       });
     },
@@ -211,7 +219,6 @@ function getEsbuildConfig() {
     printBabelDot
   );
   return {
-    inject: ['./test/_init_tests.js'],
     define: {
       'process.env.NODE_DEBUG': 'false',
       'process.env.NODE_ENV': '"test"',
@@ -227,12 +234,42 @@ class RuntimeTestConfig {
     Object.assign(this, karmaConfig);
     updateBrowsers(this);
     updateReporters(this);
-    this.files = getFiles(this.testType);
     this.singleRun = !argv.watch && !argv.w;
     this.client.mocha.grep = !!argv.grep;
     this.client.verboseLogging = !!argv.verbose || !!argv.v;
     this.client.captureConsole = !!argv.verbose || !!argv.v || !!argv.files;
     this.esbuild = getEsbuildConfig();
+
+    const patterns = Object.keys(this.preprocessors).filter((pattern) => {
+      return this.preprocessors[pattern].includes('esbuild');
+    });
+    this.preprocessors[runFile] = ['esbuild'];
+
+    const leftovers = [];
+    const files = getFiles(this.testType).flatMap((files) => {
+      if (typeof files === 'object') {
+        leftovers.push(files);
+        return [];
+      }
+
+      const globed = globby.sync(files).map((f) => `./${f}`);
+      return globed.filter((file) => {
+        const matched = patterns.some((p) => minimatch(file, p));
+        if (matched) {
+          return true;
+        }
+        leftovers.push(file);
+        return false;
+      });
+    });
+
+    const imports = files
+      .map((f) => `import '${path.relative(runDir, f)}';`)
+      .join('\n');
+    fs.writeFileSync(runFile, imports);
+    leftovers.push(runFile);
+
+    this.files = leftovers;
 
     // c.client is available in test browser via window.parent.karma.config
     this.client.amp = {
