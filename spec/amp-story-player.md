@@ -123,7 +123,7 @@ URL pointing to the story.
 
 ## Programmatic Control
 
-Call the player's various methods to programmatically control the player. These methods are exposed on the HTML element, `const playerEl = document.querySelector('amp-story-player')` and on instances of the global class variable, `const player = new AmpStoryPlayer(window, playerEl)`.
+Call the player's various methods to programmatically control the player. These methods are exposed on the HTML element, `const playerEl = document.querySelector('amp-story-player')`.
 
 ### Methods
 
