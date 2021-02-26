@@ -11,11 +11,11 @@ function createRC(frameWindow, origin, serviceHandlersMap) {
       goog.messaging.PortChannel.forEmbeddedWindow(frameWindow, origin);
   const respondingChannel = new goog.messaging.RespondingChannel(portChannel);
 
-  for (let serviceName of serviceHandlersMap.keys()) {
+  serviceHandlersMap.keys().forEach(serviceName => {
     if (serviceName != null && serviceHandlersMap.get(serviceName) != null) {
       respondingChannel.registerService(serviceName, serviceHandlersMap.get(serviceName));
     }
-  }
+  });
 
   return respondingChannel;
 }

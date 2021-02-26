@@ -3,17 +3,16 @@
 # install google closure library:  `npm install google-closure-library` at amphtml
 # folder
 
-COMPILER=../../../../node_modules/@ampproject/google-closure-compiler-linux/compiler
-CLOSURE_LIB=../../../../node_modules/google-closure-library
-BUILDER=../../../../node_modules/google-closure-library/closure/bin/build/closurebuilder.py
-
 # use closure builder to generate dependencies
-#$BUILDER \
-#  --root=closure-library/ \
-#  --root=wrapper/ \
-#  --namespace="assistjs"
+# BUILDER=../../../../node_modules/google-closure-library/closure/bin/build/closurebuilder.py
+# $BUILDER \
+#   --root=closure-library/ \
+#   --root=wrapper/ \
+#   --namespace="assistjs"
 
-$COMPILER \
+CLOSURE_LIB=../../../../node_modules/google-closure-library
+
+npx google-closure-compiler \
   --compilation_level ADVANCED_OPTIMIZATIONS \
   --manage_closure_dependencies \
   --define "goog.DEBUG=true" \
