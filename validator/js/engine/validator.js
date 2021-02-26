@@ -3826,8 +3826,9 @@ function parseLayout(layout) {
   if (layout === undefined) {
     return generated.AmpLayout.Layout.UNKNOWN;
   }
-  const normLayout = layout.toUpperCase().replace('-', '_');
-  const idx = generated.AmpLayout.Layout_NamesByIndex.indexOf(normLayout);
+  const idx = generated.AmpLayout.Layout_NamesByIndex.findIndex((name) => {
+    return name.toLowerCase().replace('_', '-') === layout;
+  });
   if (idx === -1) {
     return generated.AmpLayout.Layout.UNKNOWN;
   }
