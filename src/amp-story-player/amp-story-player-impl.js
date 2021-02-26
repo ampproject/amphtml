@@ -308,10 +308,8 @@ export class AmpStoryPlayer {
 
     for (let i = 0; i < newStories.length; i++) {
       const story = newStories[i];
-      story.idx = this.stories_.push(story) - 1;
-      story.distance = story.idx - this.currentIdx_;
-
-      this.build_(story);
+      this.initializeAndAddStory_(story);
+      this.buildIframeFor_(story);
     }
 
     this.render_(renderStartingIdx);
@@ -370,7 +368,7 @@ export class AmpStoryPlayer {
       return;
     }
 
-    this.initializeStories_();
+    this.initializeAnchorElStories_();
     this.initializeShadowRoot_();
     this.buildStories_();
     this.initializeButton_();
@@ -387,7 +385,7 @@ export class AmpStoryPlayer {
    * Initializes stories declared inline as <a> elements.
    * @private
    */
-  initializeStories_() {
+  initializeAnchorElStories_() {
     const anchorEls = toArray(this.element_.querySelectorAll('a'));
     anchorEls.forEach((element) => {
       const posterImgEl = element.querySelector(
@@ -417,7 +415,7 @@ export class AmpStoryPlayer {
   /** @private */
   buildStories_() {
     this.stories_.forEach((story) => {
-      this.build_(story);
+      this.buildIframeFor_(story);
     });
   }
 
@@ -516,7 +514,7 @@ export class AmpStoryPlayer {
    * @param {!StoryDef} story
    * @private
    */
-  build_(story) {
+  buildIframeFor_(story) {
     const iframeEl = this.doc_.createElement('iframe');
     if (story.posterImage) {
       setStyle(iframeEl, 'backgroundImage', story.posterImage);
@@ -1292,8 +1290,6 @@ export class AmpStoryPlayer {
       ? findIndex(this.stories_, ({href}) => href === storyUrl)
       : this.currentIdx_;
 
-    // TODO(#28987): add() stories when show() calls this and story isn't added
-    // yet.
     if (!this.stories_[storyIdx]) {
       throw new Error(`Story URL not found in the player: ${storyUrl}`);
     }
