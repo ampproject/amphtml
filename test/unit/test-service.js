@@ -634,22 +634,19 @@ describe('service', () => {
       });
 
       it('should share adoptable instances', () => {
-        const topService = {};
-        registerServiceBuilderForDoc(parentAmpdoc, 'A', function () {
-          return topService;
-        });
+        class Factory {}
+        registerServiceBuilderForDoc(parentAmpdoc, 'A', Factory);
         adoptServiceForEmbedDoc(ampdoc, 'A');
 
-        expect(getServiceForDoc(ampdoc, 'A')).to.equal(topService);
+        const parent = getServiceForDoc(parentAmpdoc, 'A');
+        const child = getServiceForDoc(ampdoc, 'A');
+        expect(parent).to.be.instanceof(Factory);
+        expect(child).to.be.instanceof(Factory);
+        expect(child).to.equal(parent);
       });
 
       it('should share adoptable factories but not instances', () => {
-        const instances = [];
-        class Factory {
-          constructor() {
-            instances.push(this);
-          }
-        }
+        class Factory {}
         registerServiceBuilderForDoc(parentAmpdoc, 'A', Factory);
         adoptServiceFactoryForEmbedDoc(ampdoc, 'A');
 
