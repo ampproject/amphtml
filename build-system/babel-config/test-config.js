@@ -78,6 +78,19 @@ function getTestConfig() {
   };
 }
 
+/**
+ * Gets the config for babel transforms run by Karma tests.
+ *
+ * @return {!Object}
+ */
+function getKarmaTestConfig() {
+  return {
+    compact: false,
+    presets: ['@babel/preset-env'],
+  };
+}
+
 module.exports = {
+  getKarmaTestConfig,
   getTestConfig,
 };

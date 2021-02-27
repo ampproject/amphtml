@@ -128,6 +128,7 @@
     "json5": "2.2.0",
     "jsonminify": "0.4.1",
     "karma": "6.1.1",
+    "karma-babel-preprocessor": "8.0.1",
     "karma-chai": "0.1.0",
     "karma-chrome-launcher": "3.1.0",
     "karma-coverage-istanbul-reporter": "3.0.3",

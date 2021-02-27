@@ -50,7 +50,9 @@ let transform;
 
 /**
  * Updates the set of preprocessors to run on HTML and JS files before testing.
- * The transformer is lazy-required because the server is built at startup.
+ * Notes:
+ * - The HTML transform is lazy-required because the server is built at startup.
+ * - We must use babel on windows until esbuild can natively downconvert to ES5.
  * @param {!RuntimeTestConfig} config
  */
 function updatePreprocessors(config) {
@@ -67,8 +69,18 @@ function updatePreprocessors(config) {
   config.plugins.push({
     'preprocessor:htmlTransformer': ['factory', createhtmlTransformer],
   });
+  const htmlPreprocessors = ['htmlTransformer', 'html2js'];
   const {fixturesPath} = testConfig;
-  config.preprocessors[fixturesPath] = ['htmlTransformer', 'html2js'];
+  config.preprocessors[fixturesPath] = htmlPreprocessors;
+
+  const jsPreprocessors = ['esbuild'];
+  // TODO(rsimha): Remove this block after evanw/esbuild#297 is fixed.
+  if (process.platform == 'win32') {
+    jsPreprocessors.push('babel');
+    config.babelPreprocessor = {options: {caller: {name: 'karma'}}};
+  }
+  const unifiedJsFile = [...config.files].pop(); // Inserted by updateFiles()
+  config.preprocessors[unifiedJsFile] = jsPreprocessors;
 }
 
 /**
@@ -236,10 +248,9 @@ function updateFiles(config) {
     return `import '${posixPath}';`;
   };
   const jsImports = jsFiles.map(getPosixImport);
-  fs.writeFileSync(unifiedFile, jsImports.join('\n'));
 
+  fs.writeFileSync(unifiedFile, jsImports.join('\n'));
   config.files = nonJsGlobs.concat([unifiedFile]);
-  config.preprocessors[unifiedFile] = ['esbuild'];
 }
 
 /**
@@ -337,10 +348,10 @@ class RuntimeTestConfig {
   constructor(testType) {
     this.testType = testType;
     Object.assign(this, karmaConfig);
-    updatePreprocessors(this);
     updateBrowsers(this);
     updateReporters(this);
     updateFiles(this);
+    updatePreprocessors(this);
     updateEsbuildConfig(this);
     updateClient(this);
     updateMiddleware(this);
