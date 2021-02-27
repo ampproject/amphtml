@@ -250,5 +250,9 @@
   "89": {
     "string": "Your response will be sent to",
     "description": "Text displayed to users after clicking a button that reveals a disclaimer, telling them more about where their user data will be stored, after they interact with a poll or quiz."
+  },
+  "90": {
+    "string": "Move device to explore",
+    "description": "Text displayed to users on first instance of an AMP 360 Story, telling them to move their device to experience the gyroscope effect."
   }
 }
