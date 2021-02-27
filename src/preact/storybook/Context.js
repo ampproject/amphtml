@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../';
-import {WithAmpContext, useAmpContext, useLoad} from '../context';
+import {WithAmpContext, useAmpContext, useLoading} from '../context';
 import {boolean, select, withKnobs} from '@storybook/addon-knobs';
 
 import {withA11y} from '@storybook/addon-a11y';
@@ -34,31 +34,37 @@ export const _default = () => {
   const renderable = boolean('top renderable', true);
   const playable = boolean('top playable', true);
   const loading = select('top loading', LOADING_OPTIONS, LOADING_OPTIONS[0]);
+  const unloadOnPause = boolean('unload on pause', false);
   return (
     <WithAmpContext
       renderable={renderable}
       playable={playable}
       loading={loading}
     >
-      <Composite />
+      <Composite unloadOnPause={unloadOnPause} />
     </WithAmpContext>
   );
 };
 
 /**
+ * @param {{unloadOnPause: boolean}} props
  * @return {PreactDef.Renderable}
  */
-function Composite() {
+function Composite({unloadOnPause}) {
   return (
     <div class="composite">
-      <Info title="Default" />
+      <Info title="Default" unloadOnPause={unloadOnPause} />
       <WithAmpContext renderable={false}>
-        <Info title="Context: non-renderable" />
+        <Info title="Context: non-renderable" unloadOnPause={unloadOnPause} />
       </WithAmpContext>
       <WithAmpContext playable={false}>
-        <Info title="Context: non-playable" />
+        <Info title="Context: non-playable" unloadOnPause={unloadOnPause} />
       </WithAmpContext>
-      <Info title="Prop: loading = lazy" loading="lazy" />
+      <Info
+        title="Prop: loading = lazy"
+        loading="lazy"
+        unloadOnPause={unloadOnPause}
+      />
     </div>
   );
 }
@@ -67,9 +73,10 @@ function Composite() {
  * @param {{title: string, loading: string}} props
  * @return {PreactDef.Renderable}
  */
-function Info({title, loading: loadingProp, ...rest}) {
-  const {renderable, playable, loading} = useAmpContext();
-  const load = useLoad(loadingProp);
+function Info({title, loading: loadingProp, unloadOnPause, ...rest}) {
+  const {renderable, playable, loading: loadingContext} = useAmpContext();
+  const loading = useLoading(loadingProp, unloadOnPause);
+  const load = loading != 'unload';
   const infoStyle = {border: '1px dotted gray', margin: 8};
   const imgStyle = {
     marginLeft: 8,
@@ -83,8 +90,10 @@ function Info({title, loading: loadingProp, ...rest}) {
       <div>
         <div>context.renderable: {String(renderable)}</div>
         <div>context.playable: {String(playable)}</div>
-        <div>context.loading: {String(loading)}</div>
-        <div>useLoad.load: {String(load)}</div>
+        <div>context.loading: {String(loadingContext)}</div>
+        <div>unloadOnPause: {String(unloadOnPause)}</div>
+        <div>useLoading.loading: {String(loading)}</div>
+        <div>load: {String(load)}</div>
         <div>
           img: {String(load)}
           <img src={load ? IMG_SRC : undefined} style={imgStyle} />

@@ -58,7 +58,7 @@ VideoWrapperDef.PlayerComponent;
  *   artist: (string|undefined),
  *   album: (string|undefined),
  *   artwork: (string|undefined),
- *   onLoad: (function()|undefined),
+ *   onReadyState: (function(string, *=)|undefined),
  * }}
  */
 VideoWrapperDef.Props;

@@ -15,33 +15,72 @@
  */
 
 import * as Preact from '../../../src/preact';
-import {ContainWrapper} from '../../../src/preact/component';
+import {ContainWrapper, useValueRef} from '../../../src/preact/component';
+import {Loading} from '../../../src/loading';
+import {ReadyState} from '../../../src/ready-state';
 import {dict} from '../../../src/utils/object';
+import {forwardRef} from '../../../src/preact/compat';
 import {getData} from '../../../src/event-helper';
 import {parseJson} from '../../../src/json';
-import {useLayoutEffect, useRef, useState} from '../../../src/preact';
-import {useLoad} from '../../../src/preact/context';
+import {
+  useImperativeHandle,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from '../../../src/preact';
+import {useLoading} from '../../../src/preact/context';
 
 const NO_HEIGHT_STYLE = dict();
 
 /**
- * @param {!InstagramPropsDef} props
+ * @param {!InstagramDef.Props} props
+ * @param {{current: (!InstagramDef.Api|null)}} ref
  * @return {PreactDef.Renderable}
+ * @template T
  */
-export function Instagram({
-  shortcode,
-  captioned,
-  title,
-  requestResize,
-  loading,
-  onLoad,
-  ...rest
-}) {
-  const load = useLoad(loading, /* unlayoutOnPause */ true);
+export function InstagramWithRef(
+  {
+    shortcode,
+    captioned,
+    title,
+    requestResize,
+    loading: loadingProp,
+    onReadyState,
+    ...rest
+  },
+  ref
+) {
+  const loading = useLoading(loadingProp, /* unlayoutOnPause */ true);
+  const load = loading !== Loading.UNLOAD;
+  const [loaded, setLoaded] = useState(false);
 
   const iframeRef = useRef(null);
   const [heightStyle, setHeightStyle] = useState(NO_HEIGHT_STYLE);
   const [opacity, setOpacity] = useState(0);
+
+  // Component API: InstagramDef.Api.
+  useImperativeHandle(
+    ref,
+    () => ({
+      // Standard Bento
+      get readyState() {
+        return loaded ? ReadyState.COMPLETE : ReadyState.LOADING;
+      },
+    }),
+    [loaded]
+  );
+
+  // Reset readyState to "laoding" when an iframe is unloaded.
+  const onReadyStateRef = useValueRef(onReadyState);
+  useLayoutEffect(() => {
+    if (!load) {
+      setLoaded(false);
+      const onReadyState = onReadyStateRef.current;
+      if (onReadyState) {
+        onReadyState(ReadyState.LOADING);
+      }
+    }
+  }, [load, onReadyStateRef]);
 
   useLayoutEffect(() => {
     if (!iframeRef.current || !load) {
@@ -89,7 +128,12 @@ export function Instagram({
             '?cr=1&v=12'
           }
           loading={loading}
-          onLoad={onLoad}
+          onLoad={() => {
+            setLoaded(true);
+            if (onReadyState) {
+              onReadyState(ReadyState.COMPLETE);
+            }
+          }}
           scrolling="no"
           frameborder="0"
           allowtransparency
@@ -105,3 +149,7 @@ export function Instagram({
     </ContainWrapper>
   );
 }
+
+const Instagram = forwardRef(InstagramWithRef);
+Instagram.displayName = 'Instagram'; // Make findable for tests.
+export {Instagram};

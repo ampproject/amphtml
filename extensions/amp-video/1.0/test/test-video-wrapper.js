@@ -28,6 +28,7 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
   let intersectionObserverObserved;
   let intersectionObserverCallback;
 
+  let playerReadyState;
   let play;
   let pause;
 
@@ -35,6 +36,9 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
 
   const TestPlayer = forwardRef(({}, ref) => {
     Preact.useImperativeHandle(ref, () => ({
+      get readyState() {
+        return playerReadyState;
+      },
       play,
       pause,
       getMetadata: () => metadata,
@@ -43,6 +47,7 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
   });
 
   beforeEach(() => {
+    playerReadyState = undefined;
     pause = env.sandbox.spy();
     play = env.sandbox.spy();
 
@@ -100,6 +105,7 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
 
     // API is functional but returns 0/NaN values.
     const api = ref.current;
+    expect(api.readyState).to.equal('loading');
     expect(api.currentTime).to.equal(0);
     expect(api.duration).to.be.NaN;
   });
@@ -116,6 +122,79 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
     );
     const player = wrapper.find(TestPlayer);
     expect(player).to.have.lengthOf(0);
+  });
+
+  it('should initialize in a readyState=complete', () => {
+    playerReadyState = 1;
+    const ref = createRef();
+    mount(
+      <VideoWrapper ref={ref} component={TestPlayer} sources={<div></div>} />
+    );
+    const api = ref.current;
+    expect(api.readyState).to.equal('complete');
+  });
+
+  it('should set readyState=complete on canplay', async () => {
+    const ref = createRef();
+    const onReadyState = env.sandbox.spy();
+    const wrapper = mount(
+      <VideoWrapper
+        ref={ref}
+        component={TestPlayer}
+        sources={<div></div>}
+        onReadyState={onReadyState}
+      />
+    );
+    let api = ref.current;
+    expect(api.readyState).to.equal('loading');
+    expect(onReadyState).to.not.be.called;
+
+    await wrapper.find(TestPlayer).invoke('onCanPlay')();
+    api = ref.current;
+    expect(api.readyState).to.equal('complete');
+    expect(onReadyState).to.be.calledOnce.calledWith('complete');
+  });
+
+  it('should set readyState=complete on metadata', async () => {
+    const ref = createRef();
+    const onReadyState = env.sandbox.spy();
+    const wrapper = mount(
+      <VideoWrapper
+        ref={ref}
+        component={TestPlayer}
+        sources={<div></div>}
+        onReadyState={onReadyState}
+      />
+    );
+    let api = ref.current;
+    expect(api.readyState).to.equal('loading');
+    expect(onReadyState).to.not.be.called;
+
+    await wrapper.find(TestPlayer).invoke('onLoadedMetadata')();
+    api = ref.current;
+    expect(api.readyState).to.equal('complete');
+    expect(onReadyState).to.be.calledOnce.calledWith('complete');
+  });
+
+  it('should set readyState=error on error event', async () => {
+    const ref = createRef();
+    const onReadyState = env.sandbox.spy();
+    const wrapper = mount(
+      <VideoWrapper
+        ref={ref}
+        component={TestPlayer}
+        sources={<div></div>}
+        onReadyState={onReadyState}
+      />
+    );
+    let api = ref.current;
+    expect(api.readyState).to.equal('loading');
+    expect(onReadyState).to.not.be.called;
+
+    await wrapper.find(TestPlayer).invoke('onError')();
+    api = ref.current;
+    expect(api.readyState).to.equal('error');
+    expect(onReadyState).to.be.calledOnce.calledWith('error');
   });
 
   describe('MediaSession', () => {

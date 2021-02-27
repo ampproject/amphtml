@@ -16,6 +16,8 @@
 
 import * as Preact from '../../../../src/preact';
 import {Instagram} from '../component';
+import {WithAmpContext} from '../../../../src/preact/context';
+import {createRef} from '../../../../src/preact';
 import {mount} from 'enzyme';
 import {waitFor} from '../../../../testing/test-helper';
 
@@ -99,6 +101,69 @@ describes.sandboxed('Instagram preact component v1.0', {}, (env) => {
     );
 
     expect(wrapper.find('div').at(0).prop('style').height).to.equal(1000);
+  });
+
+  it('load event is dispatched', async () => {
+    const ref = createRef();
+    const onReadyState = env.sandbox.spy();
+    const wrapper = mount(
+      <Instagram
+        ref={ref}
+        shortcode="B8QaZW4AQY_"
+        style={{'width': 500, 'height': 600}}
+        onReadyState={onReadyState}
+      />
+    );
+
+    let api = ref.current;
+    expect(api.readyState).to.equal('loading');
+    expect(onReadyState).to.not.be.called;
+
+    await wrapper.find('iframe').invoke('onLoad')();
+    api = ref.current;
+    expect(api.readyState).to.equal('complete');
+    expect(onReadyState).to.be.calledOnce.calledWith('complete');
+  });
+
+  it('should render only shell when paused in unloadOnPause', () => {
+    const ref = createRef();
+    const wrapper = mount(
+      <WithAmpContext playable={false}>
+        <Instagram
+          ref={ref}
+          shortcode="B8QaZW4AQY_"
+          style={{'width': 500, 'height': 600}}
+        />
+      </WithAmpContext>
+    );
+    expect(wrapper.find('iframe')).to.have.lengthOf(0);
+  });
+
+  it('should reload after pause', async () => {
+    const ref = createRef();
+    const onReadyState = env.sandbox.spy();
+    const wrapper = mount(
+      <WithAmpContext playable={true}>
+        <Instagram
+          ref={ref}
+          shortcode="B8QaZW4AQY_"
+          style={{'width': 500, 'height': 600}}
+          onReadyState={onReadyState}
+        />
+      </WithAmpContext>
+    );
+
+    await wrapper.find('iframe').invoke('onLoad')();
+    let api = ref.current;
+    expect(api.readyState).to.equal('complete');
+    expect(onReadyState).to.be.calledOnce.calledWith('complete');
+    expect(wrapper.find('iframe')).to.have.lengthOf(1);
+
+    wrapper.setProps({playable: false});
+    api = ref.current;
+    expect(api.readyState).to.equal('loading');
+    expect(onReadyState).to.be.calledTwice.calledWith('loading');
+    expect(wrapper.find('iframe')).to.have.lengthOf(0);
   });
 });
 

@@ -93,29 +93,24 @@ export function useAmpContext() {
  * @param {boolean} unloadOnPause
  * @return {boolean}
  */
-export function useLoad(loadingProp, unloadOnPause = false) {
-  const loadingRef = useRef(false);
-
-  const {loading: loadingContext, renderable, playable} = useAmpContext();
-
+export function useLoading(loadingProp, unloadOnPause = false) {
+  const {loading: loadingContext, playable} = useAmpContext();
   const loading = loadingReducer(loadingProp, loadingContext);
 
-  // Compute whether the element should be loading at this time.
-  const load =
-    // Explicit instruction to unload.
-    loading == Loading.UNLOAD
-      ? false
-      : // Must be unloaded to pause.
-      unloadOnPause && !playable
-      ? false
-      : // Explicit instruction to load.
-      loading == Loading.EAGER
-      ? true
-      : // Auto: allowed to load.
-      loading == Loading.AUTO && renderable
-      ? true
-      : // Lazy: can continue loading if already started, but do not start it.
-        loadingRef.current || false;
-  loadingRef.current = load;
-  return load;
+  const shouldUnloadOnPauseRef = useRef(false);
+  const triggerUnloadOnPauseRef = useRef(false);
+
+  // Force unload only when the playable goes from true -> false.
+  const shouldUnloadOnPause = !playable && unloadOnPause;
+  if (shouldUnloadOnPause != shouldUnloadOnPauseRef.current) {
+    shouldUnloadOnPauseRef.current = shouldUnloadOnPause;
+    triggerUnloadOnPauseRef.current = shouldUnloadOnPause;
+  }
+
+  // Reset triggerUnloadOnPause when loading becomes eager.
+  if (loading == Loading.EAGER) {
+    triggerUnloadOnPauseRef.current = false;
+  }
+
+  return triggerUnloadOnPauseRef.current ? Loading.UNLOAD : loading;
 }

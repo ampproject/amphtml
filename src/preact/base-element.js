@@ -22,6 +22,7 @@ import {Deferred} from '../utils/promise';
 import {Layout, isLayoutSizeDefined} from '../layout';
 import {Loading} from '../core/loading-instructions';
 import {MediaQueryProps} from '../utils/media-query-props';
+import {ReadyState} from '../ready-state';
 import {Slot, createSlot} from './slot';
 import {WithAmpContext} from './context';
 import {
@@ -29,9 +30,9 @@ import {
   discover,
   setGroupProp,
   setParent,
+  setProp,
   subscribe,
 } from '../context';
-import {cancellation} from '../error';
 import {
   childElementByTag,
   createElementWithAttributes,
@@ -190,10 +191,12 @@ const IS_EMPTY_TEXT_NODE = (node) =>
  * @template API_TYPE
  */
 export class PreactBaseElement extends AMP.BaseElement {
-  /**
-   * @return {boolean}
-   * @nocollapse
-   */
+  /** @override @nocollapse */
+  static V1() {
+    return true;
+  }
+
+  /** @override @nocollapse */
   static requiresShadowDom() {
     // eslint-disable-next-line local/no-static-this
     return this['usesShadowDom'];
@@ -206,17 +209,19 @@ export class PreactBaseElement extends AMP.BaseElement {
     /** @private {!JsonObject} */
     this.defaultProps_ = dict({
       'loading': Loading.AUTO,
-      'onLoad': this.onLoad_.bind(this),
-      'onLoadError': this.onLoadError_.bind(this),
+      'onReadyState': this.onReadyState_.bind(this),
     });
 
     /** @private {!AmpContextDef.ContextType} */
     this.context_ = {
       renderable: false,
-      playable: false,
-      loading: Loading.LAZY,
+      playable: true,
+      loading: Loading.AUTO,
       notify: () => this.mutateElement(() => {}),
     };
+
+    /** @private {boolean} */
+    this.resetLoading_ = false;
 
     /** @private {?API_TYPE} */
     this.apiWrapper_ = null;
@@ -235,6 +240,7 @@ export class PreactBaseElement extends AMP.BaseElement {
         }
       }
       this.currentRef_ = current;
+      this.maybeUpdateReadyState_();
     };
 
     /** @type {?Deferred<!API_TYPE>} */
@@ -263,9 +269,6 @@ export class PreactBaseElement extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.mounted_ = false;
-
-    /** @private {?Deferred} */
-    this.loadDeferred_ = null;
 
     /** @protected {?MutationObserver} */
     this.observer = null;
@@ -360,10 +363,7 @@ export class PreactBaseElement extends AMP.BaseElement {
       (canRender, canPlay, loading) => {
         this.context_.renderable = canRender;
         this.context_.playable = canPlay;
-        // TODO(#30283): trust "loading" completely from the context once it's
-        // fully supported.
-        this.context_.loading =
-          loading == Loading.AUTO ? Loading.LAZY : loading;
+        this.context_.loading = loading;
         this.mounted_ = true;
         this.scheduleRender_();
       }
@@ -379,41 +379,23 @@ export class PreactBaseElement extends AMP.BaseElement {
 
     this.renderDeferred_ = new Deferred();
     this.scheduleRender_();
+
+    if (Ctor['loadable']) {
+      this.setReadyState(ReadyState.LOADING);
+    }
+    this.maybeUpdateReadyState_();
+
     return this.renderDeferred_.promise;
   }
 
   /** @override */
-  layoutCallback() {
+  ensureLoaded() {
     const Ctor = this.constructor;
     if (!Ctor['loadable']) {
-      return super.layoutCallback();
+      return;
     }
-
     this.mutateProps(dict({'loading': Loading.EAGER}));
-
-    // Check if the element has already been loaded.
-    const api = this.currentRef_;
-    if (api && api['complete']) {
-      return Promise.resolve();
-    }
-
-    // If not, wait for `onLoad` callback.
-    this.loadDeferred_ = new Deferred();
-    return this.loadDeferred_.promise;
-  }
-
-  /** @override */
-  unlayoutCallback() {
-    if (this.mediaQueryProps_) {
-      this.mediaQueryProps_.dispose();
-    }
-    const Ctor = this.constructor;
-    if (!Ctor['loadable']) {
-      return super.unlayoutCallback();
-    }
-    this.mutateProps(dict({'loading': Loading.UNLOAD}));
-    this.onLoadError_(cancellation());
-    return true;
+    this.resetLoading_ = true;
   }
 
   /** @override */
@@ -424,6 +406,19 @@ export class PreactBaseElement extends AMP.BaseElement {
   /** @override */
   detachedCallback() {
     discover(this.element);
+    if (this.mediaQueryProps_) {
+      this.mediaQueryProps_.dispose();
+    }
+  }
+
+  /** @override */
+  pauseCallback() {
+    setProp(this.element, CanPlay, this.element, false);
+  }
+
+  /** @override */
+  resumeCallback() {
+    setProp(this.element, CanPlay, this.element, true);
   }
 
   /** @override */
@@ -523,23 +518,27 @@ export class PreactBaseElement extends AMP.BaseElement {
   }
 
   /** @private */
-  onLoad_() {
-    if (this.loadDeferred_) {
-      this.loadDeferred_.resolve();
-      this.loadDeferred_ = null;
-      dispatchCustomEvent(this.element, 'load', null, {bubbles: false});
+  maybeUpdateReadyState_() {
+    const {currentRef_: api} = this;
+
+    const apiReadyState = api && api['readyState'];
+    if (apiReadyState && apiReadyState !== this.element.readyState) {
+      this.onReadyState_(apiReadyState);
     }
   }
 
   /**
-   * @param {*} opt_reason
+   * @param {!ReadyState} state
+   * @param {*=} opt_failure
    * @private
    */
-  onLoadError_(opt_reason) {
-    if (this.loadDeferred_) {
-      this.loadDeferred_.reject(opt_reason || new Error('load error'));
-      this.loadDeferred_ = null;
-      dispatchCustomEvent(this.element, 'error', null, {bubbles: false});
+  onReadyState_(state, opt_failure) {
+    this.setReadyState(state, opt_failure);
+
+    // Reset "loading" property back to "auto".
+    if (state != ReadyState.LOADING && this.resetLoading_) {
+      this.resetLoading_ = false;
+      this.mutateProps({'loading': Loading.AUTO});
     }
   }
 
