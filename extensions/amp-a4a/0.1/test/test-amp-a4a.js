@@ -58,6 +58,7 @@ import {
 } from '../../../amp-ad/0.1/concurrent-load';
 import {installRealTimeConfigServiceForDoc} from '../../../../src/service/real-time-config/real-time-config-impl';
 import {layoutRectLtwh, layoutSizeFromRect} from '../../../../src/layout-rect';
+import {macroTask} from '../../../../testing/yield';
 import {resetScheduledElementForTesting} from '../../../../src/service/custom-element-registry';
 import {data as testFragments} from './testdata/test_fragments';
 import {data as validCSSAmp} from './testdata/valid_css_at_rules_amp.reserialized';
@@ -108,7 +109,11 @@ if (NO_SIGNING_RTV) {
       expect(cspMeta.content).to.include('media-src *;');
       expect(cspMeta.content).to.include('font-src *;');
       expect(cspMeta.content).to.include('connect-src *;');
-      expect(cspMeta.content).to.include("script-src 'none';");
+      expect(cspMeta.content).to.include(
+        'script-src http://localhost:8000/dist/lts/ ' +
+          'http://localhost:8000/dist/rtv/ ' +
+          'http://localhost:8000/dist/sw/;'
+      );
       expect(cspMeta.content).to.include("object-src 'none';");
       expect(cspMeta.content).to.include("child-src 'none';");
       expect(cspMeta.content).to.include("default-src 'none';");
@@ -135,7 +140,7 @@ if (NO_SIGNING_RTV) {
       const fie = doc.body.querySelector('iframe[srcdoc]');
       expect(fie.getAttribute('sandbox')).to.equal(
         'allow-forms allow-popups allow-popups-to-escape-sandbox ' +
-          'allow-same-origin allow-top-navigation'
+          'allow-same-origin allow-scripts allow-top-navigation'
       );
     });
 
@@ -160,6 +165,42 @@ if (NO_SIGNING_RTV) {
         'Hello, world.'
       );
       expect(prioritySpy).to.be.calledWith(LayoutPriority.CONTENT);
+    });
+
+    it('should not throw on polyfill scripts', async () => {
+      env.sandbox.stub(mode, 'getMode').returns({localDev: false});
+      await a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      await a4a.layoutCallback();
+      const fie = doc.body.querySelector('iframe[srcdoc]');
+      const violationSpy = env.sandbox.spy();
+      fie.contentWindow.addEventListener(
+        'securitypolicyviolation',
+        violationSpy
+      );
+      const fakePolyfill = doc.createElement('script');
+      fakePolyfill.src = 'https://cdn.ampproject.org/rtv/some-polyfill.js';
+      fie.contentDocument.head.appendChild(fakePolyfill);
+      await macroTask();
+      expect(violationSpy).not.to.be.called;
+    });
+
+    it('should throw on non-approved injected scripts', async () => {
+      env.sandbox.stub(mode, 'getMode').returns({localDev: false});
+      await a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      await a4a.layoutCallback();
+      const fie = doc.body.querySelector('iframe[srcdoc]');
+      const violationSpy = env.sandbox.spy();
+      fie.contentWindow.addEventListener(
+        'securitypolicyviolation',
+        violationSpy
+      );
+      const fakePolyfill = doc.createElement('script');
+      fakePolyfill.src = 'https://www.cats.example';
+      fie.contentDocument.head.appendChild(fakePolyfill);
+      await macroTask();
+      expect(violationSpy).to.be.called;
     });
 
     it('should collapse on no content', async () => {

@@ -16,8 +16,11 @@
 
 import {createElementWithAttributes, escapeHtml} from '../../../src/dom';
 import {dict} from '../../../src/utils/object';
+import {getMode} from '../../../src/mode';
+import {urls} from '../../../src/config';
 
 // If making changes also change ALLOWED_FONT_REGEX in head-validation.js
+/** @const {string} */
 const fontProviderAllowList = [
   'https://cdn.materialdesignicons.com',
   'https://cloud.typography.com',
@@ -30,6 +33,7 @@ const fontProviderAllowList = [
   'https://use.typekit.net',
 ].join(' ');
 
+/** @const {string} */
 const sandboxVals =
   'allow-forms ' +
   'allow-popups ' +
@@ -38,6 +42,23 @@ const sandboxVals =
   'allow-scripts ' +
   'allow-top-navigation';
 
+/**
+ * Get trusted urls enabled for polyfills.
+ * @return {string}
+ */
+export const getFieSafeScriptSrcs = () => {
+  const cdnBase = getMode().localDev ? 'http://localhost:8000/dist' : urls.cdn;
+  return `${cdnBase}/lts/ ${cdnBase}/rtv/ ${cdnBase}/sw/`;
+};
+
+/**
+ * Create the starting html for all FIE ads. If streaming is supported body will be
+ * piped in later.
+ * @param {string} url
+ * @param {string} sanitizedHeadElements
+ * @param {string} body
+ * @return {string}
+ */
 export const createSecureDocSkeleton = (url, sanitizedHeadElements, body) =>
   `<!DOCTYPE html>
   <html ⚡4ads lang="en">
@@ -49,7 +70,7 @@ export const createSecureDocSkeleton = (url, sanitizedHeadElements, body) =>
       media-src *;
       font-src *;
       connect-src *;
-      script-src 'none';
+      script-src ${getFieSafeScriptSrcs()};
       object-src 'none';
       child-src 'none';
       default-src 'none';
