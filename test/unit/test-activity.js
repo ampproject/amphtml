@@ -101,6 +101,7 @@ describe('Activity getTotalEngagedTime', () => {
         isSingleDoc: () => true,
         getSingleDoc: () => ampdoc,
       },
+      ctor: Object,
     };
 
     installTimerService(fakeWin);
@@ -330,6 +331,7 @@ describe('Activity getIncrementalEngagedTime', () => {
         isSingleDoc: () => true,
         getSingleDoc: () => ampdoc,
       },
+      ctor: Object,
     };
 
     installTimerService(fakeWin);

@@ -36,7 +36,7 @@ describes.sandboxed('ViewerLoginDialog', {}, (env) => {
 
     windowApi = {
       __AMP_SERVICES: {
-        'viewer': {obj: viewer},
+        'viewer': {obj: viewer, ctor: Object},
       },
       screen: {width: 1000, height: 1000},
       document: {
@@ -168,7 +168,7 @@ describes.sandboxed('WebLoginDialog', {}, (env) => {
     };
     const windowObj = {
       __AMP_SERVICES: {
-        'viewer': {obj: viewer},
+        'viewer': {obj: viewer, ctor: Object},
       },
       open: () => {},
       document: {

@@ -15,6 +15,7 @@
  */
 
 import {
+  adoptServiceFactoryForEmbedDoc,
   adoptServiceForEmbedDoc,
   assertDisposable,
   disposeServicesForDoc,
@@ -190,13 +191,13 @@ describe('service', () => {
       expect(p).to.not.be.null;
     });
 
-    it('should set service builders to null after instantiation', () => {
+    it('should not set service builders to null after instantiation', () => {
       registerServiceBuilder(window, 'a', Class);
       expect(window.__AMP_SERVICES['a'].obj).to.be.null;
       expect(window.__AMP_SERVICES['a'].ctor).to.not.be.null;
       getService(window, 'a');
       expect(window.__AMP_SERVICES['a'].obj).to.not.be.null;
-      expect(window.__AMP_SERVICES['a'].ctor).to.be.null;
+      expect(window.__AMP_SERVICES['a'].ctor).to.not.be.null;
     });
 
     it('should resolve service for a child window', () => {
@@ -610,20 +611,50 @@ describe('service', () => {
 
         // A disposable service.
         registerServiceBuilderForDoc(ampdoc, 'b', disposableFactory);
-        const disposable = getServiceForDoc(node, 'b');
+        const b = getServiceForDoc(node, 'b');
 
-        // An adopted disposable service.
+        // A shared disposable service instance.
         adoptServiceForEmbedDoc(ampdoc, 'a');
-        const adopted = getServiceForDoc(ampdoc, 'a');
+        const shared = getServiceForDoc(ampdoc, 'a');
+
+        // A shared disposable service factory.
+        registerServiceBuilderForDoc(parentAmpdoc, 'f', disposableFactory);
+        adoptServiceFactoryForEmbedDoc(ampdoc, 'f');
+        const f = getServiceForDoc(ampdoc, 'f');
 
         disposeServicesForDoc(ampdoc);
 
         // Parent's services are not disposed.
         expect(parentDisposable.dispose).to.not.be.called;
-        expect(adopted).to.equal(parentDisposable);
+        expect(shared).to.equal(parentDisposable);
 
         // Disposable and initialized are disposed right away.
-        expect(disposable.dispose).to.be.calledOnce;
+        expect(b.dispose).to.be.calledOnce;
+        expect(f.dispose).to.be.calledOnce;
+      });
+
+      it('should share adoptable instances', () => {
+        class Factory {}
+        registerServiceBuilderForDoc(parentAmpdoc, 'A', Factory);
+        adoptServiceForEmbedDoc(ampdoc, 'A');
+
+        const parent = getServiceForDoc(parentAmpdoc, 'A');
+        const child = getServiceForDoc(ampdoc, 'A');
+        expect(parent).to.be.instanceof(Factory);
+        expect(child).to.be.instanceof(Factory);
+        expect(child).to.equal(parent);
+      });
+
+      it('should share adoptable factories but not instances', () => {
+        class Factory {}
+        registerServiceBuilderForDoc(parentAmpdoc, 'A', Factory);
+        adoptServiceFactoryForEmbedDoc(ampdoc, 'A');
+
+        const parent = getServiceForDoc(parentAmpdoc, 'A');
+        const child = getServiceForDoc(ampdoc, 'A');
+        expect(parent).to.be.instanceof(Factory);
+        expect(child).to.be.instanceof(Factory);
+        expect(child).not.to.equal(parent);
       });
     });
   });

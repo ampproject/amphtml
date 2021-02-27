@@ -917,6 +917,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
             obj: {
               preloadExtension: () => {},
             },
+            ctor: Object,
           },
         },
         setInterval() {

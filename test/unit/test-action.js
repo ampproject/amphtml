@@ -46,7 +46,7 @@ function actionService() {
       },
     },
     __AMP_SERVICES: {
-      vsync: {obj: {}},
+      vsync: {obj: {}, ctor: Object},
     },
   };
   return new ActionService(new AmpDocSingle(win), document);
