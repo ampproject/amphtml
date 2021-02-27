@@ -1667,4 +1667,10 @@ app.use('(/dist)?/rtv/*/v0/analytics-vendors/:vendor.json', (req, res) => {
     });
 });
 
+// Used by test/unit/test-3p.js to test script loading.
+app.use('/test/script', function (req, res) {
+  res.send("typeof require === 'function' && require('foo.js');");
+  res.status(200).send();
+});
+
 module.exports = app;
