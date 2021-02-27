@@ -119,11 +119,14 @@ function getreplaceGlobalsPlugin() {
               return;
             }
             if (scope.getBinding('globalThis')) {
-              throw path.buildCodeFrameError(
-                'cannot replace global identifier, globalThis already in scope'
-              );
+              return;
             }
-            path.replaceWith(t.identifier('globalThis'));
+            if (process.platform == 'win32') {
+              // IE 11: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/globalThis#browser_compatibility
+              path.replaceWith(t.identifier('window'));
+            } else {
+              path.replaceWith(t.identifier('globalThis'));
+            }
           },
         },
       };
