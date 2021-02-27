@@ -26,6 +26,9 @@ describes.realWin(
   },
   function (env) {
     let win, doc;
+    const embedCode = 'Vxc2k0MDE6Y_C7J5podo3UDxlFxGaZrQ';
+    const playerId = '6440813504804d76ba35c8c787a4b33c';
+    const pCode = '5zb2wxOlZcNCe_HVT3a6cawW298X';
 
     beforeEach(() => {
       win = env.win;
@@ -73,13 +76,11 @@ describes.realWin(
 
     describe('rendering', async () => {
       it('renders a V3 player', () => {
-        return getOoyalaElement(
-          'Vxc2k0MDE6Y_C7J5podo3UDxlFxGaZrQ',
-          '6440813504804d76ba35c8c787a4b33c',
-          '5zb2wxOlZcNCe_HVT3a6cawW298X'
-        ).then((player) => {
+        return getOoyalaElement(embedCode, playerId, pCode).then((player) => {
           const playerIframe = player.querySelector('iframe');
           expect(playerIframe).to.not.be.null;
+          expect(playerIframe.src).to.contain(embedCode);
+          expect(playerIframe.src).to.contain(playerId);
           expect(playerIframe.src).to.equal(
             'https://player.ooyala.com/iframe.html' +
               '?platform=html5-priority&ec=Vxc2k0MDE6Y_C7J5podo3UDxlFxGaZrQ' +
@@ -89,29 +90,29 @@ describes.realWin(
       });
 
       it('renders a V4 player', () => {
-        return getOoyalaElement(
-          'Vxc2k0MDE6Y_C7J5podo3UDxlFxGaZrQ',
-          '6440813504804d76ba35c8c787a4b33c',
-          '5zb2wxOlZcNCe_HVT3a6cawW298X',
-          'V4'
-        ).then((player) => {
-          const playerIframe = player.querySelector('iframe');
-          expect(playerIframe).to.not.be.null;
-          expect(playerIframe.src).to.equal(
-            'https://player.ooyala.com/static/v4/production/latest/' +
-              'skin-plugin/amp_iframe.html' +
-              '?pcode=5zb2wxOlZcNCe_HVT3a6cawW298X' +
-              '&ec=Vxc2k0MDE6Y_C7J5podo3UDxlFxGaZrQ' +
-              '&pbid=6440813504804d76ba35c8c787a4b33c'
-          );
-        });
+        return getOoyalaElement(embedCode, playerId, pCode, 'V4').then(
+          (player) => {
+            const playerIframe = player.querySelector('iframe');
+            expect(playerIframe).to.not.be.null;
+            expect(playerIframe.src).to.contain(embedCode);
+            expect(playerIframe.src).to.contain(playerId);
+            expect(playerIframe.src).to.contain(pCode);
+            expect(playerIframe.src).to.equal(
+              'https://player.ooyala.com/static/v4/production/latest/' +
+                'skin-plugin/amp_iframe.html' +
+                '?pcode=5zb2wxOlZcNCe_HVT3a6cawW298X' +
+                '&ec=Vxc2k0MDE6Y_C7J5podo3UDxlFxGaZrQ' +
+                '&pbid=6440813504804d76ba35c8c787a4b33c'
+            );
+          }
+        );
       });
 
       it('fails without an embed code', () => {
         return getOoyalaElement(
           null,
-          '6440813504804d76ba35c8c787a4b33c',
-          '5zb2wxOlZcNCe_HVT3a6cawW298X'
+          playerId,
+          pCode
         ).should.eventually.be.rejectedWith(
           /The data-embedcode attribute is required/
         );
@@ -119,9 +120,9 @@ describes.realWin(
 
       it('fails without a player ID', () => {
         return getOoyalaElement(
-          'Vxc2k0MDE6Y_C7J5podo3UDxlFxGaZrQ',
+          embedCode,
           null,
-          '5zb2wxOlZcNCe_HVT3a6cawW298X'
+          pCode
         ).should.eventually.be.rejectedWith(
           /The data-playerid attribute is required/
         );
@@ -129,8 +130,8 @@ describes.realWin(
 
       it('fails without a p-code', () => {
         return getOoyalaElement(
-          'Vxc2k0MDE6Y_C7J5podo3UDxlFxGaZrQ',
-          '6440813504804d76ba35c8c787a4b33c',
+          embedCode,
+          playerId,
           null
         ).should.eventually.be.rejectedWith(
           /The data-pcode attribute is required/
@@ -138,11 +139,7 @@ describes.realWin(
       });
 
       it('removes iframe after unlayoutCallback', async () => {
-        const player = await getOoyalaElement(
-          'Vxc2k0MDE6Y_C7J5podo3UDxlFxGaZrQ',
-          '6440813504804d76ba35c8c787a4b33c',
-          '5zb2wxOlZcNCe_HVT3a6cawW298X'
-        );
+        const player = await getOoyalaElement(embedCode, playerId, pCode);
         const playerIframe = player.querySelector('iframe');
         expect(playerIframe).to.not.be.null;
 
@@ -156,11 +153,7 @@ describes.realWin(
     describe('methods', async () => {
       let impl;
       beforeEach(async () => {
-        const player = await getOoyalaElement(
-          'Vxc2k0MDE6Y_C7J5podo3UDxlFxGaZrQ',
-          '6440813504804d76ba35c8c787a4b33c',
-          '5zb2wxOlZcNCe_HVT3a6cawW298X'
-        );
+        const player = await getOoyalaElement(embedCode, playerId, pCode);
         impl = await player.getImpl(false);
       });
 
