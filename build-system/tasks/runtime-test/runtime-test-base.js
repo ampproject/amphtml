@@ -229,9 +229,13 @@ function updateFiles(config) {
 
   const unifiedFile = tempy.file({extension: 'js'});
   const jsFiles = globby.sync(jsGlobs);
-  const jsImports = jsFiles.map(
-    (jsFile) => `import '${path.relative(path.dirname(unifiedFile), jsFile)}';`
-  );
+
+  const getPosixImport = (jsFile) => {
+    const relativePath = path.relative(path.dirname(unifiedFile), jsFile);
+    const posixPath = relativePath.split(path.sep).join(path.posix.sep);
+    return `import '${posixPath}';`;
+  };
+  const jsImports = jsFiles.map(getPosixImport);
   fs.writeFileSync(unifiedFile, jsImports.join('\n'));
 
   config.files = nonJsGlobs.concat([unifiedFile]);
