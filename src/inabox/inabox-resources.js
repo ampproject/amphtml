@@ -214,7 +214,7 @@ export class InaboxResources {
     dev().fine(TAG, 'doPass');
     // measure in a batch
     this.resources_.forEach((resource) => {
-      if (!resource.isLayoutPending()) {
+      if (!resource.isLayoutPending() || resource.element.V1()) {
         return;
       }
       resource.measure();
@@ -222,6 +222,7 @@ export class InaboxResources {
     // mutation in a batch
     this.resources_.forEach((resource) => {
       if (
+        !resource.element.V1() &&
         resource.getState() === ResourceState.READY_FOR_LAYOUT &&
         resource.isDisplayed()
       ) {
