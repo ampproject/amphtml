@@ -44,8 +44,44 @@ const {yellow, red} = require('kleur/colors');
  */
 let wrapCounter = 0;
 
+/**
+ * Used to consolidate test code for esbuild transforms before Karma runs tests.
+ */
 const runFile = tempy.file({extension: 'js'});
 const runDir = path.dirname(runFile);
+
+/**
+ * Used to lazy-require the HTML transformer function after the server is built.
+ */
+let transform;
+
+/**
+ * Updates the set of preprocessors to run on HTML and JS files before testing.
+ * The transformer is lazy-required because the server is built at startup.
+ * @param {!RuntimeTestConfig} config
+ */
+function updatePreprocessors(config) {
+  const createhtmlTransformer = function () {
+    return function (content, file, done) {
+      if (!transform) {
+        const outputDir = '../../server/new-server/transforms/dist/transform';
+        transform = require(outputDir).transformSync;
+      }
+      done(transform(content));
+    };
+  };
+  createhtmlTransformer.$inject = [];
+  config.plugins.push({
+    'preprocessor:htmlTransformer': ['factory', createhtmlTransformer],
+  });
+  config.preprocessors = {
+    './test/fixtures/*.html': ['htmlTransformer', 'html2js'],
+    './test/**/*.js': ['esbuild'],
+    './ads/**/test/test-*.js': ['esbuild'],
+    './extensions/**/test/**/*.js': ['esbuild'],
+    './testing/**/*.js': ['esbuild'],
+  };
+}
 
 /**
  * Updates the browsers based off of the test type
@@ -128,6 +164,31 @@ function updateBrowsers(config) {
 }
 
 /**
+ * Adds reporters to the default karma spec per test settings.
+ * Overrides default reporters for verbose settings.
+ * @param {!RuntimeTestConfig} config
+ */
+function updateReporters(config) {
+  if (
+    (argv.testnames || argv.local_changes || argv.files || argv.verbose) &&
+    !isCiBuild()
+  ) {
+    config.reporters = ['mocha'];
+  }
+
+  if (argv.coverage) {
+    config.reporters.push('coverage-istanbul');
+  }
+
+  if (argv.report) {
+    config.reporters.push('json-result');
+    config.jsonResultReporter = {
+      outputFile: `result-reports/${config.testType}.json`,
+    };
+  }
+}
+
+/**
  * Get the appropriate files based off of the test type
  * being run (unit, integration, a4a) and test settings.
  * @param {string} testType
@@ -163,32 +224,8 @@ function getFiles(testType) {
 }
 
 /**
- * Adds reporters to the default karma spec per test settings.
- * Overrides default reporters for verbose settings.
- * @param {!RuntimeTestConfig} config
- */
-function updateReporters(config) {
-  if (
-    (argv.testnames || argv.local_changes || argv.files || argv.verbose) &&
-    !isCiBuild()
-  ) {
-    config.reporters = ['mocha'];
-  }
-
-  if (argv.coverage) {
-    config.reporters.push('coverage-istanbul');
-  }
-
-  if (argv.report) {
-    config.reporters.push('json-result');
-    config.jsonResultReporter = {
-      outputFile: `result-reports/${config.testType}.json`,
-    };
-  }
-}
-
-/**
  * Processes and adds test files to the karma spec so esbuild can consume them.
+ * TODO(rsimha, jridewell): Simplify this once everything works.
  * @param {!RuntimeTestConfig} config
  */
 function updateFiles(config) {
@@ -202,18 +239,18 @@ function updateFiles(config) {
       leftovers.push(files);
       return [];
     }
-
-    const globed = globby.sync(files).map((f) => `./${f}`);
-    return globed.filter((file) => {
-      const matched = patterns.some((p) => minimatch(file, p));
-      if (matched) {
-        return true;
-      }
-      leftovers.push(file);
-      return false;
-    });
+    return globby
+      .sync(files)
+      .map((f) => `./${f}`)
+      .filter((file) => {
+        const matched = patterns.some((p) => minimatch(file, p));
+        if (matched) {
+          return true;
+        }
+        leftovers.push(file);
+        return false;
+      });
   });
-
   const imports = files
     .map((f) => `import '${path.relative(runDir, f)}';`)
     .join('\n');
@@ -285,30 +322,46 @@ function updateClient(config) {
 }
 
 /**
- * Updates the Karma config to gather coverage info.
+ * Inserts the AMP dev server into the middleware used by the Karma server.
+ * @param {!RuntimeTestConfig} config
+ */
+function updateMiddleware(config) {
+  const createDevServerMiddleware = function () {
+    return require(require.resolve('../../server/app.js'));
+  };
+  config.plugins.push({
+    'middleware:devServer': ['factory', createDevServerMiddleware],
+  });
+  config.beforeMiddleware = ['devServer'];
+}
+
+/**
+ * Updates the Karma config to gather coverage info if coverage is enabled.
  * @param {!RuntimeTestConfig} config
  */
 function updateCoverageSettings(config) {
-  config.plugins.push('karma-coverage-istanbul-reporter');
-  config.coverageIstanbulReporter = {
-    dir: 'test/coverage',
-    reports: isCiBuild() ? ['lcovonly'] : ['html', 'text', 'text-summary'],
-    'report-config': {lcovonly: {file: `lcov-${config.testType}.info`}},
-  };
+  if (argv.coverage) {
+    config.plugins.push('karma-coverage-istanbul-reporter');
+    config.coverageIstanbulReporter = {
+      dir: 'test/coverage',
+      reports: isCiBuild() ? ['lcovonly'] : ['html', 'text', 'text-summary'],
+      'report-config': {lcovonly: {file: `lcov-${config.testType}.info`}},
+    };
+  }
 }
 
 class RuntimeTestConfig {
   constructor(testType) {
     this.testType = testType;
     Object.assign(this, karmaConfig);
+    updatePreprocessors(this);
     updateBrowsers(this);
     updateReporters(this);
-    updateEsbuildConfig(this);
     updateFiles(this);
+    updateEsbuildConfig(this);
     updateClient(this);
-    if (argv.coverage) {
-      updateCoverageSettings(this);
-    }
+    updateMiddleware(this);
+    updateCoverageSettings(this);
   }
 }
 
@@ -332,7 +385,6 @@ class RuntimeTestRunner {
       middleware: () => [app],
     });
     const handlerProcess = createCtrlcHandler(`gulp ${this.config.testType}`);
-
     this.env = new Map().set('handlerProcess', handlerProcess);
   }
 
@@ -344,7 +396,6 @@ class RuntimeTestRunner {
   async teardown() {
     await stopServer();
     exitCtrlcHandler(this.env.get('handlerProcess'));
-
     if (this.exitCode != 0) {
       log(
         red('ERROR:'),

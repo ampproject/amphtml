@@ -27,7 +27,7 @@
 const initTestsPath = ['test/_init_tests.js'];
 
 const fixturesExamplesPaths = [
-  'test-bin/test/fixtures/*.html',
+  'test/fixtures/*.html',
   {
     pattern: 'test/fixtures/served/*.html',
     included: false,

@@ -35,21 +35,6 @@ const COMMON_CHROME_FLAGS = [
 module.exports = {
   frameworks: ['fixture', 'mocha', 'sinon-chai', 'chai', 'source-map-support'],
 
-  preprocessors: {
-    // `test-bin` is the output directory of the postHTML transformation.
-    './test-bin/test/fixtures/*.html': ['html2js'],
-    './test/**/*.js': ['esbuild'],
-    './ads/**/test/test-*.js': ['esbuild'],
-    './extensions/**/test/**/*.js': ['esbuild'],
-    './testing/**/*.js': ['esbuild'],
-  },
-
-  html2JsPreprocessor: {
-    // Strip the test-bin/ prefix for the transformer destination so that the
-    // change is transparent for users of the path.
-    stripPrefix: 'test-bin/',
-  },
-
   hostname: 'localhost',
 
   reporters: ['super-dots', 'spec'],
@@ -162,9 +147,6 @@ module.exports = {
   // IF YOU CHANGE THIS, DEBUGGING WILL RANDOMLY KILL THE BROWSER
   browserDisconnectTolerance: isCiBuild() ? 2 : 0,
 
-  // Import our gulp webserver as a Karma server middleware
-  // So we instantly have all the custom server endpoints available
-  beforeMiddleware: ['custom'],
   plugins: [
     '@chiragrupani/karma-chromium-edge-launcher',
     'karma-chai',
@@ -182,13 +164,5 @@ module.exports = {
     'karma-source-map-support',
     'karma-spec-reporter',
     'karma-super-dots-reporter',
-    {
-      'middleware:custom': [
-        'factory',
-        function () {
-          return require(require.resolve('../server/app.js'));
-        },
-      ],
-    },
   ],
 };
