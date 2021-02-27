@@ -28,7 +28,7 @@ import {
   setParentWindow,
 } from './service';
 import {escapeHtml} from './dom';
-import {getFieSafeScriptSrcs} from '../extensions/amp-a4a/0.1/secure-frame';
+import {getMode} from './mode';
 import {install as installAbortController} from './polyfills/abort-controller';
 import {installAmpdocServicesForEmbed} from './service/core-services';
 import {install as installCustomElements} from './polyfills/custom-elements';
@@ -49,6 +49,7 @@ import {
   setStyles,
 } from './style';
 import {toWin} from './types';
+import {urls} from './config';
 import {whenContentIniLoad} from './ini-load';
 
 /**
@@ -104,6 +105,15 @@ export function isSrcdocSupported() {
     srcdocSupported = 'srcdoc' in HTMLIFrameElement.prototype;
   }
   return srcdocSupported;
+}
+
+/**
+ * Get trusted urls enabled for polyfills.
+ * @return {string}
+ */
+export function getFieSafeScriptSrcs() {
+  const cdnBase = getMode().localDev ? 'http://localhost:8000/dist' : urls.cdn;
+  return `${cdnBase}/lts/ ${cdnBase}/rtv/ ${cdnBase}/sw/`;
 }
 
 /**

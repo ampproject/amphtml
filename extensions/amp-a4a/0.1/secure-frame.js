@@ -16,8 +16,7 @@
 
 import {createElementWithAttributes, escapeHtml} from '../../../src/dom';
 import {dict} from '../../../src/utils/object';
-import {getMode} from '../../../src/mode';
-import {urls} from '../../../src/config';
+import {getFieSafeScriptSrcs} from '../../../src/friendly-iframe-embed';
 
 // If making changes also change ALLOWED_FONT_REGEX in head-validation.js
 /** @const {string} */
@@ -41,15 +40,6 @@ const sandboxVals =
   'allow-same-origin ' +
   'allow-scripts ' +
   'allow-top-navigation';
-
-/**
- * Get trusted urls enabled for polyfills.
- * @return {string}
- */
-export const getFieSafeScriptSrcs = () => {
-  const cdnBase = getMode().localDev ? 'http://localhost:8000/dist' : urls.cdn;
-  return `${cdnBase}/lts/ ${cdnBase}/rtv/ ${cdnBase}/sw/`;
-};
 
 /**
  * Create the starting html for all FIE ads. If streaming is supported body will be
