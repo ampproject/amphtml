@@ -26,8 +26,9 @@
  */
 const initTestsPath = ['test/_init_tests.js'];
 
-const fixturesExamplesPaths = [
-  'test/fixtures/*.html',
+const fixturesPath = 'test/fixtures/*.html';
+
+const fixturesExamplesPaths = [fixturesPath].concat([
   {
     pattern: 'test/fixtures/served/*.html',
     included: false,
@@ -40,7 +41,7 @@ const fixturesExamplesPaths = [
     nocache: false,
     watched: true,
   },
-];
+]);
 
 const builtRuntimePaths = [
   {
@@ -220,6 +221,7 @@ module.exports = {
   e2eTestPaths,
   integrationTestPaths,
   jisonPaths,
+  fixturesPath,
   linkCheckGlobs,
   lintGlobs,
   presubmitGlobs,

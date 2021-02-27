@@ -35,6 +35,8 @@ const COMMON_CHROME_FLAGS = [
 module.exports = {
   frameworks: ['fixture', 'mocha', 'sinon-chai', 'chai', 'source-map-support'],
 
+  preprocessors: {}, // Dynamically populated based on tests being run.
+
   hostname: 'localhost',
 
   reporters: ['super-dots', 'spec'],

@@ -19,7 +19,6 @@ const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs');
 const globby = require('globby');
 const karmaConfig = require('../../test-configs/karma.conf');
-const minimatch = require('minimatch');
 const path = require('path');
 const tempy = require('tempy');
 const testConfig = require('../../test-configs/config');
@@ -45,12 +44,6 @@ const {yellow, red} = require('kleur/colors');
 let wrapCounter = 0;
 
 /**
- * Used to consolidate test code for esbuild transforms before Karma runs tests.
- */
-const runFile = tempy.file({extension: 'js'});
-const runDir = path.dirname(runFile);
-
-/**
  * Used to lazy-require the HTML transformer function after the server is built.
  */
 let transform;
@@ -74,13 +67,8 @@ function updatePreprocessors(config) {
   config.plugins.push({
     'preprocessor:htmlTransformer': ['factory', createhtmlTransformer],
   });
-  config.preprocessors = {
-    './test/fixtures/*.html': ['htmlTransformer', 'html2js'],
-    './test/**/*.js': ['esbuild'],
-    './ads/**/test/test-*.js': ['esbuild'],
-    './extensions/**/test/**/*.js': ['esbuild'],
-    './testing/**/*.js': ['esbuild'],
-  };
+  const {fixturesPath} = testConfig;
+  config.preprocessors[fixturesPath] = ['htmlTransformer', 'html2js'];
 }
 
 /**
@@ -224,39 +212,30 @@ function getFiles(testType) {
 }
 
 /**
- * Processes and adds test files to the karma spec so esbuild can consume them.
- * TODO(rsimha, jridewell): Simplify this once everything works.
+ * Recomputes the set of files for Karma to load.
+ * - Non-JS files are included as they are.
+ * - JS files are imported into a unified file for esbuild to transform at once.
+ * - The list of all non-JS files plus the unified JS file is returned.
  * @param {!RuntimeTestConfig} config
  */
 function updateFiles(config) {
-  const patterns = Object.keys(config.preprocessors).filter((pattern) => {
-    return config.preprocessors[pattern].includes('esbuild');
-  });
-  config.preprocessors[runFile] = ['esbuild'];
-  const leftovers = [];
-  const files = getFiles(config.testType).flatMap((files) => {
-    if (typeof files === 'object') {
-      leftovers.push(files);
-      return [];
-    }
-    return globby
-      .sync(files)
-      .map((f) => `./${f}`)
-      .filter((file) => {
-        const matched = patterns.some((p) => minimatch(file, p));
-        if (matched) {
-          return true;
-        }
-        leftovers.push(file);
-        return false;
-      });
-  });
-  const imports = files
-    .map((f) => `import '${path.relative(runDir, f)}';`)
-    .join('\n');
-  fs.writeFileSync(runFile, imports);
-  leftovers.push(runFile);
-  config.files = leftovers;
+  const fileGlobs = getFiles(config.testType);
+
+  const isJsGlob = (glob) => typeof glob === 'string' && glob.endsWith('.js');
+  const jsGlobs = fileGlobs.filter(isJsGlob);
+
+  const isNonJsGlob = (glob) => !isJsGlob(glob);
+  const nonJsGlobs = fileGlobs.filter(isNonJsGlob);
+
+  const unifiedFile = tempy.file({extension: 'js'});
+  const jsFiles = globby.sync(jsGlobs);
+  const jsImports = jsFiles.map(
+    (jsFile) => `import '${path.relative(path.dirname(unifiedFile), jsFile)}';`
+  );
+  fs.writeFileSync(unifiedFile, jsImports.join('\n'));
+
+  config.files = nonJsGlobs.concat([unifiedFile]);
+  config.preprocessors[unifiedFile] = ['esbuild'];
 }
 
 /**
