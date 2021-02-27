@@ -170,7 +170,7 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
             },
           },
           __AMP_SERVICES: {
-            'viewport': {obj: {}},
+            'viewport': {obj: {}, ctor: Object},
             'cid': {
               promise: Promise.resolve({
                 get: (config) =>
