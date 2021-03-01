@@ -46,10 +46,10 @@ amp-nested-menu/0.1/test/validator-amp-nested-menu-error.html:36:4 The attribute
 amp-nested-menu/0.1/test/validator-amp-nested-menu-error.html:39:8 Mutually exclusive attributes encountered in tag 'h4' - pick one of ['amp-nested-submenu-close', 'amp-nested-submenu-open'].
 |          <div amp-nested-submenu amp-nested-submenu-close></div>
 >>         ^~~~~~~~~
-amp-nested-menu/0.1/test/validator-amp-nested-menu-error.html:40:8 Mutually exclusive attributes encountered in tag 'div' - pick one of ['amp-nested-submenu', 'amp-nested-submenu-close', 'amp-nested-submenu-open'].
+amp-nested-menu/0.1/test/validator-amp-nested-menu-error.html:40:8 Mutually exclusive attributes encountered in tag 'div amp-nested-menu' - pick one of ['amp-nested-submenu', 'amp-nested-submenu-close', 'amp-nested-submenu-open'].
 |          <div amp-nested-submenu amp-nested-submenu-open></div>
 >>         ^~~~~~~~~
-amp-nested-menu/0.1/test/validator-amp-nested-menu-error.html:41:8 Mutually exclusive attributes encountered in tag 'div' - pick one of ['amp-nested-submenu', 'amp-nested-submenu-close', 'amp-nested-submenu-open'].
+amp-nested-menu/0.1/test/validator-amp-nested-menu-error.html:41:8 Mutually exclusive attributes encountered in tag 'div amp-nested-menu' - pick one of ['amp-nested-submenu', 'amp-nested-submenu-close', 'amp-nested-submenu-open'].
 |        </div>
 |        <!-- Invalid: only divs may include the amp-nested-submenu attribute -->
 |        <div>
@@ -77,7 +77,7 @@ amp-nested-menu/0.1/test/validator-amp-nested-menu-error.html:51:8 The attribute
 |              <h4 amp-nested-submenu-open></h4>
 |              <div amp-nested-submenu></div>
 >>             ^~~~~~~~~
-amp-nested-menu/0.1/test/validator-amp-nested-menu-error.html:59:12 The attribute 'amp-nested-submenu' may not appear in tag 'div'.
+amp-nested-menu/0.1/test/validator-amp-nested-menu-error.html:59:12 The tag 'div amp-nested-menu' may not appear as a descendant of tag 'amp-accordion'.
 |            </div>
 |          </section>
 |        </amp-accordion>
