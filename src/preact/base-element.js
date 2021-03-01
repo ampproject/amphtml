@@ -202,6 +202,13 @@ export class PreactBaseElement extends AMP.BaseElement {
     return this['usesShadowDom'];
   }
 
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    // eslint-disable-next-line local/no-static-this
+    const Ctor = this;
+    return !Ctor['loadable'];
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);

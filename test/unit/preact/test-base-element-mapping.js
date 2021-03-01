@@ -22,6 +22,7 @@ import {htmlFor} from '../../../src/static-template';
 import {omit} from '../../../src/utils/object';
 import {upgradeOrRegisterElement} from '../../../src/service/custom-element-registry';
 import {waitFor} from '../../../testing/test-helper';
+import {testElementV1} from '../../../testing/element-v1';
 
 const spec = {amp: true, frameStyle: {width: '300px'}};
 
@@ -73,6 +74,20 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       return new Promise((resolve) => setTimeout(resolve, 32));
     });
   }
+
+  describe('V1', () => {
+    it('testElementV1', () => {
+      testElementV1(PreactBaseElement);
+    });
+
+    it('by default prerenderAllowed is tied to the "loadable" flag', () => {
+      Impl['loadable'] = false;
+      expect(Impl.prerenderAllowed()).to.be.true;
+
+      Impl['loadable'] = true;
+      expect(Impl.prerenderAllowed()).to.be.false;
+    });
+  });
 
   describe('layout mapping', () => {
     let element;
