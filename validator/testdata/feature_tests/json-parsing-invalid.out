@@ -93,6 +93,9 @@ feature_tests/json-parsing-invalid.html:71:2 The script tag contains invalid JSO
 |      // This is comment
 |   "foo": "bar"}</script>
 |  </amp-state>
-|  </body>
+|    <!-- Invalid: JSON-LD can not be parsed. -->
+|    <script type="application/ld+json">lemur</script>
+>>   ^~~~~~~~~
+feature_tests/json-parsing-invalid.html:82:2 The script tag contains invalid JSON that cannot be parsed.
 |  </body>
 |  </html>
