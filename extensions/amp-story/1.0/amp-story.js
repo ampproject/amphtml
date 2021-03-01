@@ -1139,7 +1139,7 @@ export class AmpStory extends AMP.BaseElement {
 
     const storyLoadPromise = Promise.all(
       pagesToWaitFor
-        .filter((page) => !!page)
+        .filter(Boolean)
         .map((page) =>
           page.element.signals().whenSignal(CommonSignals.LOAD_END)
         )
