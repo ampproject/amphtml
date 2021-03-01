@@ -96,7 +96,7 @@ function getFilesFromArgv() {
  * file matching globs. Used by tasks like prettify, check-links, etc.
  *
  * @param {!Array<string>} globs
- * @param {!Object} options
+ * @param {Object=} options
  * @return {!Array<string>}
  */
 function getFilesToCheck(globs, options = {}) {
