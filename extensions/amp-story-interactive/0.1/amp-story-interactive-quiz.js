@@ -159,16 +159,16 @@ export class AmpStoryInteractiveQuiz extends AmpStoryInteractive {
 
     const percentages = this.preprocessPercentages_(optionsData);
 
-    // Update the answer choices aria-label so they read "selected" and "correct" or "incorrect"
     this.getOptionElements().forEach((el, index) => {
-      const answerChoiceEl = el.querySelector(
+      // Update the aria-label so they read "selected" and "correct" or "incorrect"
+      el.querySelector(
         '.i-amphtml-story-interactive-quiz-answer-choice'
-      );
-      let ariaLabel = el.hasAttribute('correct') ? 'correct' : 'incorrect';
+      ).setAttribute('aria-label', el.hasAttribute('correct') ? 'correct' : 'incorrect');
       if (optionsData[index].selected) {
-        ariaLabel += ' selected';
+        const textEl = el.querySelector('.i-amphtml-story-interactive-option-text');
+        textEl.setAttribute('aria-label', 'selected ' + textEl.textContent);
       }
-      answerChoiceEl.setAttribute('aria-label', ariaLabel);
+      // Update percentage text
       el.querySelector(
         '.i-amphtml-story-interactive-quiz-percentage-text'
       ).textContent = `${percentages[index]}%`;
