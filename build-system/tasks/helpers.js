@@ -305,7 +305,7 @@ async function terserMinify(code, sourcemap) {
     ecma: 2017, // we don't want terser doing any transpiling.
     sourceMap: {
       content: sourcemap,
-      filename: `${file}.map`,
+      // filename: `${file}.map`,
       root: `https://raw.githubusercontent.com/ampproject/amphtml/${internalRuntimeVersion}/`,
     },
   });

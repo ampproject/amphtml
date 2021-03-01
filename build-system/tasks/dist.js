@@ -36,8 +36,8 @@ const {
   displayLifecycleDebugging,
 } = require('../compile/debug-compilation-lifecycle');
 const {buildExtensions, parseExtensionFlags} = require('./extension-helpers');
-const {compileCss} = require('./css');
 const {cleanupBuildDir} = require('../compile/compile');
+const {compileCss, copyCss} = require('./css');
 const {compileJison} = require('./compile-jison');
 // const {formatExtractedMessages} = require('../compile/log-messages');
 const {log} = require('../common/logging');
