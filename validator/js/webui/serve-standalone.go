@@ -84,6 +84,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			}
 			w.Header().Set("Content-type", "text/javascript")
 			w.Write(bytes)
+			return
 		}
 		// Look up any other resources relative to node_modules or webui.
 		relative_path := r.RequestURI[1:] // Strip leading "/".
