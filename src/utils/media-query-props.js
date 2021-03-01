@@ -224,7 +224,7 @@ function parseMediaQueryListExpr(win, exprString) {
       })
       // Remove any items that did not match the regex above and are
       // undefined as a result.
-      .filter((item) => item)
+      .filter(Boolean)
   );
 }
 

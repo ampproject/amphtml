@@ -658,7 +658,7 @@ export class AnimationManager {
               })
           )
         )
-        .filter((presetOrNull) => !!presetOrNull);
+        .filter(Boolean);
     }
     return devAssert(this.runners_);
   }

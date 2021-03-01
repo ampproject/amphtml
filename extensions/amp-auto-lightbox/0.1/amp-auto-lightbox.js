@@ -341,7 +341,7 @@ export class DocMetaAnnotations {
         const {textContent} = el;
         return (tryParseJson(textContent) || {})['@type'];
       })
-      .filter((typeOrUndefined) => typeOrUndefined);
+      .filter(Boolean);
   }
 
   /**
