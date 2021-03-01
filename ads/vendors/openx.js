@@ -17,33 +17,26 @@
 import {doubleclick} from '../../ads/google/doubleclick';
 import {loadScript, validateData, writeScript} from '../../3p/3p';
 
-const {hasOwnProperty} = Object.prototype;
-
-/**
- * Sort of like Object.assign.
- * @param {!Object} target
- * @param {!Object} source
- * @return {!Object}
- */
-function assign(target, source) {
-  for (const prop in source) {
-    if (hasOwnProperty.call(source, prop)) {
-      target[prop] = source[prop];
-    }
-  }
-
-  return target;
-}
-
-/* global OX: false */
+/** @typedef {{
+ *   width: string,
+ *   height: string,
+ *   targeting: (Object|undefined),
+ *   host: (string|undefined),
+ *   nc: (string|undefined),
+ *   auid: (string|undefined),
+ *   dfpSlot: (string|undefined),
+ *   dfp: (Object|undefined),
+ *   openx: ({customVars:(Object|undefined)}|undefined)
+ * }} */
+let DataTypeDef;
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {DataTypeDef} data
  */
 export function openx(global, data) {
   const openxData = ['host', 'nc', 'auid', 'dfpSlot', 'dfp', 'openx'];
-  const dfpData = assign({}, data); // Make a copy for dfp.
+  const dfpData = {...data}; // Make a copy for dfp.
 
   // TODO: check mandatory fields
   validateData(data, [], openxData);
@@ -65,7 +58,9 @@ export function openx(global, data) {
 
     // Promote the whole 'dfp' object.
     if ('dfp' in data) {
-      assign(dfpData, dfpData.dfp);
+      /** @type {!Object} */
+      const dfp = /** @type {!Object} */ (data.dfp);
+      Object.assign(dfpData, dfp);
       delete dfpData['dfp'];
     }
   }
@@ -77,9 +72,18 @@ export function openx(global, data) {
     if (data.nc && data.dfpSlot) {
       jssdk += '?nc=' + encodeURIComponent(data.nc);
       if (data.auid) {
-        advanceImplementation(global, jssdk, dfpData, data);
+        advanceImplementation(
+          global,
+          jssdk,
+          /** @type {DataTypeDef} */ (dfpData),
+          data
+        );
       } else {
-        standardImplementation(global, jssdk, dfpData);
+        standardImplementation(
+          global,
+          jssdk,
+          /** @type {DataTypeDef} */ (dfpData)
+        );
       }
     } else if (data.auid) {
       // Just show an ad.
@@ -96,7 +100,7 @@ export function openx(global, data) {
             setCustomVars(oxRequest, filterCustomVar(data.openx.customVars));
           }
           oxRequest.getOrCreateAdUnit(data.auid).set('anchor', oxAnchor);
-          global.context.renderStart();
+          /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context).renderStart();
           oxRequest.load();
         },
       ];
@@ -111,7 +115,7 @@ export function openx(global, data) {
 /**
  * @param {!Window} global
  * @param {string} jssdk
- * @param {!Object} dfpData
+ * @param {DataTypeDef} dfpData
  */
 function standardImplementation(global, jssdk, dfpData) {
   writeScript(global, jssdk, () => {
@@ -123,8 +127,8 @@ function standardImplementation(global, jssdk, dfpData) {
 /**
  * @param {!Window} global
  * @param {string} jssdk
- * @param {!Object} dfpData
- * @param {*} data
+ * @param {DataTypeDef} dfpData
+ * @param {DataTypeDef} data
  */
 function advanceImplementation(global, jssdk, dfpData, data) {
   const size = [data.width + 'x' + data.height];
@@ -141,7 +145,7 @@ function advanceImplementation(global, jssdk, dfpData, data) {
         ? `${slot.size}_${slot.price},hb-bid-${slot.bid_id}`
         : 'none_t';
       dfpData.targeting = dfpData.targeting || {};
-      assign(dfpData.targeting, {oxb: targeting});
+      Object.assign(dfpData.targeting, {oxb: targeting});
       doubleclick(global, dfpData);
     },
   };
@@ -150,7 +154,9 @@ function advanceImplementation(global, jssdk, dfpData, data) {
 }
 
 /**
- * @param {*} oxRequest
+ * @param {{
+ *   addVariable: Function
+ * }} oxRequest
  * @param {!Object} customVars
  */
 function setCustomVars(oxRequest, customVars) {

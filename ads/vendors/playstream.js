@@ -21,7 +21,10 @@ const optionalParams = ['fluid'];
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   id: string,
+ *   fluid: (string|undefined),
+ * }} data
  */
 export function playstream(global, data) {
   /*eslint "google-camelcase/google-camelcase": 0*/

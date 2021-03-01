@@ -22,7 +22,15 @@ const pubmineOptional = ['section', 'pt', 'ht', 'npaOnUnknownConsent'],
   pubmineURL = 'https://s.pubmine.com/head.js';
 
 /**
- * @param {!Object} data
+ * @param {{
+ *   siteid: string,
+ *   section: (string|undefined),
+ *   pt: (string|undefined),
+ *   ht: (string|undefined),
+ *   npaOnUnknownConsent: (string|undefined),
+ *   height: number,
+ *   width: number
+ * }} data
  * @param {!Window} global
  */
 function initMasterFrame(data, global) {
@@ -33,7 +41,7 @@ function initMasterFrame(data, global) {
   const paUnknown =
     data['npaOnUnknownConsent'] !== undefined &&
     'false' == data['npaOnUnknownConsent'];
-  const ctxt = global.context;
+  const ctxt = /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context);
   const consent =
     ctxt.initialConsentState === null ||
     ctxt.initialConsentState === CONSENT_POLICY_STATE.SUFFICIENT ||
@@ -66,7 +74,15 @@ function createSlot(slotId, global) {
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {!{
+ *   siteid: string,
+ *   section: (string|undefined),
+ *   pt: (string|undefined),
+ *   ht: (string|undefined),
+ *   npaOnUnknownConsent: (string|undefined),
+ *   height: number,
+ *   width: number
+ * }} data
  */
 export function pubmine(global, data) {
   validateData(data, pubmineRequired, pubmineOptional);

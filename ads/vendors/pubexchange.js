@@ -18,7 +18,12 @@ import {loadScript, validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   publication: string,
+ *   moduleId: string,
+ *   moduleNum: number,
+ *   test: (string|undefined)
+ * }} data
  */
 export function pubexchange(global, data) {
   // ensure we have valid widgetIds value
@@ -31,6 +36,5 @@ export function pubexchange(global, data) {
     test: data['test'],
   };
 
-  // load the Outbrain AMP JS file
   loadScript(global, 'https://main.pubexchange.com/loader-amp.min.js');
 }

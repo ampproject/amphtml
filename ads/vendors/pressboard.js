@@ -18,7 +18,10 @@ import {loadScript, validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   media: string,
+ *   baseUrl: string
+ * }} data
  */
 export function pressboard(global, data) {
   validateData(data, ['media']);
@@ -28,10 +31,10 @@ export function pressboard(global, data) {
     global,
     data.baseUrl + '/js/amp-ad.js',
     () => {
-      global.context.renderStart();
+      /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context).renderStart();
     },
     () => {
-      global.context.noContentAvailable();
+      /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context).noContentAvailable();
     }
   );
 }

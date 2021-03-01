@@ -549,6 +549,8 @@ data.pos;
 data.query;
 
 // openx.js
+window.oxhbjs;
+window.OX_cmds;
 var OX;
 OX._requestArgs;
 var OX_bidder_options;
@@ -567,7 +569,11 @@ data.dfpSlot;
 data.nc;
 data.auid;
 
+// outbrain.js
+window._outbrain;
+
 // pixels.js
+window._pixelsParam;
 var pixelsAd;
 var pixelsAMPAd;
 var pixelsAMPTag;
@@ -578,34 +584,49 @@ data.tag;
 data.clickTracker;
 data.viewability;
 
+// playstream.js
+window.playstream;
+
 // plista.js
-data.widgetname;
-data.publickey;
-data.urlprefix;
-data.item;
-data.geo;
-data.categories;
+window.PLISTA;
+
+// polymophicads.js
+window.polyParam;
+
+// postquare.js
+window._postquare;
+
+// ppstudio.js
+window._ppstudio;
 
 // pressboard.js
-data.media;
-data.baseUrl;
+window.pbParams;
+
+// pubexchange.js
+window.PUBX;
 
 // pubguru.js
-data.height;
-data.publisher;
-data.slot;
-data.width;
+window.$pubguru;
 
 // pubmatic.js
+window.PubMatic;
 data.kadpageurl;
 
 // pubmine.js
-data.adsafe;
-data.wordads;
-data.section;
+window.__ATA_PP;
+window.__ATA;
+
+// puffnetwork.js
+window.pn;
+
+// pulse.js
+window.pulseInit;
 
 // pulsepoint.js
 window.PulsePointHeaderTag;
+
+// quoraad.js
+window.ampAdParam;
 
 // rakutenunifiedads.js
 window.runa;

@@ -18,7 +18,12 @@ import {loadScript, validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   crid: string,
+ *   width: number,
+ *   height: number,
+ *   holderScript: string
+ * }} data
  */
 export function ppstudio(global, data) {
   validateData(data, ['crid', 'width', 'height', 'holderScript'], []);
@@ -35,7 +40,7 @@ export function ppstudio(global, data) {
   e.setAttribute('data-width', data.width);
   e.setAttribute('data-height', data.height);
   e.setAttribute('data-click-url', '');
-  e.src = data.holderScript;
+  /** @type {HTMLScriptElement} */ (global.context).src = data.holderScript;
   global.document.getElementById('c').appendChild(e);
 
   const i = global.document.createElement('ins');
@@ -44,6 +49,6 @@ export function ppstudio(global, data) {
   global.document.getElementById('c').appendChild(i);
 
   loadScript(global, 'https://ads-cdn.tenmax.io/code/ppstudio.js', () => {
-    global.context.renderStart();
+    /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context).renderStart();
   });
 }

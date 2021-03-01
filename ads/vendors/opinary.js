@@ -18,7 +18,9 @@ import {loadScript, validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   client: string
+ * }} data
  */
 export function opinary(global, data) {
   validateData(data, ['client']);
@@ -35,7 +37,9 @@ export function opinary(global, data) {
   global.document.getElementById('c').appendChild(div).appendChild(div2);
 
   if (!document.querySelector("link[rel='canonical']")) {
-    const link = document.createElement('link');
+    const link = /** @type {HTMLLinkElement} */ (document.createElement(
+      'link'
+    ));
     link.rel = 'canonical';
     link.href = global.context.canonicalUrl;
     global.document.head.appendChild(link);

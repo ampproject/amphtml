@@ -18,11 +18,17 @@ import {loadScript} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   kadpageurl: (string|undefined)
+ * }} data
  */
 export function pubmatic(global, data) {
   loadScript(global, 'https://ads.pubmatic.com/AdServer/js/amp.js', () => {
-    data.kadpageurl = global.context.sourceUrl || global.context.location.href;
+    data.kadpageurl =
+      /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context)
+        .sourceUrl ||
+      /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context)
+        .location.href;
     global.PubMatic.showAd(data);
   });
 }

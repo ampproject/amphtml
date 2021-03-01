@@ -18,7 +18,15 @@ import {loadScript, validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   publickey: string,
+ *   widgetname: string,
+ *   urlprefix: string,
+ *   item: string,
+ *   geo: string,
+ *   categories: string,
+ *   countrycode: string
+ * }} data
  */
 export function plista(global, data) {
   // TODO: check mandatory fields

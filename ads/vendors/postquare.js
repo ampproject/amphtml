@@ -18,7 +18,12 @@ import {loadScript, validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   widgitids: string,
+ *   websiteid: string,
+ *   publisherid: string,
+ *   url: (string|undefined),
+ * }} data
  */
 export function postquare(global, data) {
   validateData(data, ['widgetids']);

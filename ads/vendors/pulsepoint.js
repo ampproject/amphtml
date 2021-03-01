@@ -19,7 +19,15 @@ import {loadScript, validateData, writeScript} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   tagtype: (string|undefined),
+ *   timeout: (number|undefined),
+ *   pid: string,
+ *   tagid: string,
+ *   width: string,
+ *   height: string,
+ *   slot: string
+ * }} data
  */
 export function pulsepoint(global, data) {
   // TODO: check mandatory fields
@@ -33,7 +41,14 @@ export function pulsepoint(global, data) {
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   timeout: (number|undefined),
+ *   pid: string,
+ *   tagid: string,
+ *   width: string,
+ *   height: string,
+ *   slot: string
+ * }} data
  */
 function tag(global, data) {
   writeScript(
@@ -50,7 +65,14 @@ function tag(global, data) {
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   timeout: (number|undefined),
+ *   pid: string,
+ *   tagid: string,
+ *   width: string,
+ *   height: string,
+ *   slot: string
+ * }} data
  */
 function headerBidding(global, data) {
   loadScript(global, 'https://ads.contextweb.com/ht.js', () => {

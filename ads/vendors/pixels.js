@@ -18,9 +18,16 @@ import {validateData, writeScript} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   origin: string,
+ *   sid: string,
+ *   tag: string,
+ *   clickTracker: (Function|undefined),
+ *   viewability: (boolean|undefined)
+ * }} data
  */
 export function pixels(global, data) {
+  const context = /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context);
   validateData(data, ['origin', 'sid', 'tag'], ['clickTracker', 'viewability']);
   data.tag = data.tag.toString().toLowerCase();
   global._pixelsParam = data;
@@ -31,11 +38,11 @@ export function pixels(global, data) {
       () => {
         const pixelsAMPAd = global.pixelsAd;
         const pixelsAMPTag = new pixelsAMPAd(data);
-        pixelsAMPTag.renderAmp(global.context);
-        global.context.renderStart();
+        pixelsAMPTag.renderAmp(context);
+        context.renderStart();
       }
     );
   } else {
-    global.context.noContentAvailable();
+    context.noContentAvailable();
   }
 }
