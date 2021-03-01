@@ -56,6 +56,16 @@ feature_tests/amp_layouts.html:47:2 The attribute 'layout' in tag 'amp-img' is s
 >>   ^~~~~~~~~
 feature_tests/amp_layouts.html:50:2 The attribute 'layout' in tag 'amp-img' is set to the invalid value 'fixed_height'. (see https://amp.dev/documentation/components/amp-img/)
 |
+|    <!-- invalid: layout value must be lower case -->
+|    <amp-img layout="FIXED-HEIGHT" height="200"  src="itshappening.gif"></amp-img>
+>>   ^~~~~~~~~
+feature_tests/amp_layouts.html:47:2 The attribute 'layout' in tag 'amp-img' is set to the invalid value 'FIXED-HEIGHT'. (see https://amp.dev/documentation/components/amp-img/)
+|
+|    <!-- invalid: layout value must use hyphen rather than underscore -->
+|    <amp-img layout="fixed_height" height="200"  src="itshappening.gif"></amp-img>
+>>   ^~~~~~~~~
+feature_tests/amp_layouts.html:50:2 The attribute 'layout' in tag 'amp-img' is set to the invalid value 'fixed_height'. (see https://amp.dev/documentation/components/amp-img/)
+|
 |    <!-- valid: layout=fixed-height, with width=auto -->
 |    <amp-img layout="fixed-height" height="200" width="auto"
 |             src="itshappening.gif"></amp-img>
