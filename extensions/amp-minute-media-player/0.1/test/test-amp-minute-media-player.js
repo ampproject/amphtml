@@ -71,9 +71,6 @@ describes.realWin(
         expect(iframe).to.not.be.null;
         expect(iframe.src).to.contain(CURATED);
         expect(iframe.src).to.contain(DATA_CONTENT_ID);
-        expect(iframe.src).to.equal(
-          `https://www.oo-syringe.com/prod/AMP/minute-media-player.html?content_type=${CURATED}&content_id=${DATA_CONTENT_ID}`
-        );
         expect(iframe.className).to.match(/i-amphtml-fill-content/);
       });
 
@@ -85,9 +82,6 @@ describes.realWin(
         const iframe = player.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.src).to.contain(SEMANTIC);
-        expect(iframe.src).to.equal(
-          `https://www.oo-syringe.com/prod/AMP/minute-media-player.html?content_type=${SEMANTIC}`
-        );
         expect(iframe.className).to.match(/i-amphtml-fill-content/);
       });
 
@@ -104,9 +98,6 @@ describes.realWin(
         expect(iframe.src).to.contain(DATA_MINIMUM_DATE_FACTOR);
         expect(iframe.src).to.contain(DATA_SCANNED_ELEMENT_TYPE);
         expect(iframe.src).to.contain(DATA_SCOPED_KEYWORDS);
-        expect(iframe.src).to.equal(
-          `https://www.oo-syringe.com/prod/AMP/minute-media-player.html?content_type=${SEMANTIC}&scanned_element_type=${DATA_SCANNED_ELEMENT_TYPE}&minimum_date_factor=${DATA_MINIMUM_DATE_FACTOR}&scoped_keywords=${DATA_SCOPED_KEYWORDS}`
-        );
         expect(iframe.className).to.match(/i-amphtml-fill-content/);
       });
 
