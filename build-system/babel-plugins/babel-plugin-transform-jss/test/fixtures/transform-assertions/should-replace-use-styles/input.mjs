@@ -1,11 +1,5 @@
-/** @enum {string}*/
-var _classes = {
-  floatLeft: "float-left-07984bd"
-};
-export const $floatLeft = "float-left-07984bd";
-
 /**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +13,25 @@ export const $floatLeft = "float-left-07984bd";
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export const useStyles = () => _classes; // These next lines should be unaffected by jss transform.
 
-export const CSS = ".float-left-07984bd{float:left}";
-export const unrelated = 5;
-unrelated + unrelated == unrelated * 2;
+import {useStyles} from '../foo.jss';
+import {useStyles as useSomeOtherNameWithStyles} from './something.jss';
+
+const a = useStyles();
+console.log(a.b);
+console.log(a.x);
+
+function x() {
+  const x = useSomeOtherNameWithStyles();
+  return x.foo;
+}
+
+useStyles().x;
+
+const {
+  one,
+  two: twoRenamed,
+  ...rest
+} = useStyles();
+
+let {single} = useStyles();
