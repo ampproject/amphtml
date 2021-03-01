@@ -6033,6 +6033,11 @@ class ParsedValidatorRules {
       for (const otherTag of tag.alsoRequiresTagWarning) {
         this.tagSpecIdsToTrack_[otherTag] = true;
       }
+      const parsed = new ParsedTagSpec(
+          this.parsedAttrSpecs_,
+          shouldRecordTagspecValidated(tag, tagSpecId, this.tagSpecIdsToTrack_),
+          tag, tagSpecId);
+      this.parsedTagSpecById_[tagSpecId] = parsed;
       if (tag.tagName !== '$REFERENCE_POINT') {
         if (!(tag.tagName in this.tagSpecByTagName_)) {
           this.tagSpecByTagName_[tag.tagName] = new TagSpecDispatch();
@@ -6674,18 +6679,7 @@ class ParsedValidatorRules {
    * @return {!ParsedTagSpec}
    */
   getByTagSpecId(id) {
-    let parsed = this.parsedTagSpecById_[id];
-    if (parsed !== undefined) {
-      return parsed;
-    }
-    const tag = this.rules_.tags[id];
-    asserts.assert(tag !== undefined);
-    parsed = new ParsedTagSpec(
-        this.parsedAttrSpecs_,
-        shouldRecordTagspecValidated(tag, id, this.tagSpecIdsToTrack_), tag,
-        id);
-    this.parsedTagSpecById_[id] = parsed;
-    return parsed;
+    return this.parsedTagSpecById_[id];
   }
 
   /**
