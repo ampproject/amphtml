@@ -20,10 +20,10 @@ import {
 } from './amp-story-interactive-abstract';
 import {CSS} from '../../../build/amp-story-interactive-poll-0.1.css';
 import {computedStyle, setStyle} from '../../../src/style';
+import {createElementWithAttributes} from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
 import {toArray} from '../../../src/types';
-import { createElementWithAttributes } from '../../../src/dom';
 
 /**
  * Generates the template for the poll.
@@ -138,12 +138,16 @@ export class AmpStoryInteractivePoll extends AmpStoryInteractive {
 
     this.getOptionElements().forEach((el, index) => {
       if (optionsData[index].selected) {
-        const textEl = el.querySelector('.i-amphtml-story-interactive-option-text');
+        const textEl = el.querySelector(
+          '.i-amphtml-story-interactive-option-text'
+        );
         textEl.setAttribute('aria-label', 'selected ' + textEl.textContent);
       }
-      el.querySelector('.i-amphtml-story-interactive-option-percentage-text').textContent = percentages[index];
+      el.querySelector(
+        '.i-amphtml-story-interactive-option-percentage-text'
+      ).textContent = percentages[index];
       setStyle(el, '--option-percentage', percentages[index] + '%');
-    })
+    });
   }
 
   /**

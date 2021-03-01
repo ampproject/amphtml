@@ -163,9 +163,14 @@ export class AmpStoryInteractiveQuiz extends AmpStoryInteractive {
       // Update the aria-label so they read "selected" and "correct" or "incorrect"
       el.querySelector(
         '.i-amphtml-story-interactive-quiz-answer-choice'
-      ).setAttribute('aria-label', el.hasAttribute('correct') ? 'correct' : 'incorrect');
+      ).setAttribute(
+        'aria-label',
+        el.hasAttribute('correct') ? 'correct' : 'incorrect'
+      );
       if (optionsData[index].selected) {
-        const textEl = el.querySelector('.i-amphtml-story-interactive-option-text');
+        const textEl = el.querySelector(
+          '.i-amphtml-story-interactive-quiz-option-text'
+        );
         textEl.setAttribute('aria-label', 'selected ' + textEl.textContent);
       }
       // Update percentage text

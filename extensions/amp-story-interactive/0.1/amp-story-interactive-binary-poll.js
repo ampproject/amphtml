@@ -71,8 +71,10 @@ const buildOptionTemplate = (element) => {
         <span class="i-amphtml-story-interactive-option-title"
           ><span class="i-amphtml-story-interactive-option-title-text"></span
         ></span>
-        <span class="i-amphtml-story-interactive-option-percentage-text"
-          ></span
+        <span
+          class="i-amphtml-story-interactive-option-percentage-text"
+          aria-hidden="true"
+          >0%</span
         >
       </span>
     </button>
@@ -227,17 +229,17 @@ export class AmpStoryInteractiveBinaryPoll extends AmpStoryInteractive {
 
     const percentages = this.preprocessPercentages_(responseData);
 
-    this.getOptionElements.forEach((el, index) => {
+    this.getOptionElements().forEach((el, index) => {
       // TODO(jackbsteinberg): Add i18n support for various ways of displaying percentages.
       const percentage = percentages[index];
-      el.querySelector(
+      const percentageEl = el.querySelector(
         '.i-amphtml-story-interactive-option-percentage-text'
-      ).textContent = `${percentage}%`;
+      );
+      percentageEl.textContent = `${percentage}%`;
+      percentageEl.removeAttribute('aria-hidden');
 
       setStyle(
-        el.querySelector(
-          '.i-amphtml-story-interactive-option-percent-bar'
-        ),
+        el.querySelector('.i-amphtml-story-interactive-option-percent-bar'),
         'transform',
         `scaleX(${percentage * 0.01 * 2})`
       );
@@ -252,6 +254,12 @@ export class AmpStoryInteractiveBinaryPoll extends AmpStoryInteractive {
           this.getTransformVal_(percentage) * (index === 0 ? 1 : -1)
         }%) !important`
       );
+      if (responseData[index].selected) {
+        textContainer.setAttribute(
+          'aria-label',
+          'selected ' + textContainer.textContent
+        );
+      }
 
       if (percentage === 0) {
         setStyle(textContainer, 'opacity', '0');
