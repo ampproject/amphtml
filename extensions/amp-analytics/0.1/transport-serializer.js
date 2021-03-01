@@ -115,7 +115,7 @@ export const TransportSerializers = {
 export function defaultSerializer(baseUrl, batchSegments) {
   const extraUrlParamsStr = batchSegments
     .map((item) => serializeQueryString(item['extraUrlParams']))
-    .filter((queryString) => !!queryString)
+    .filter(Boolean)
     .join('&');
   let requestUrl;
   if (baseUrl.indexOf(EXTRA_URL_PARAM_VAR) >= 0) {
