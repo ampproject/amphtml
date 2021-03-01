@@ -185,16 +185,14 @@ jobs:
         description: 'Which config file to use'
         type: enum
         enum: ['prod', 'canary']
-    environment:
-      config: << parameters.config >>
     steps:
       - setup_vm
       - install_chrome
       - restore_karma_cache:
           cache_name: nomodule
       - run:
-          name: 'Nomodule Tests (using << parameters.config >>-config.json)'
-          command: node build-system/pr-check/nomodule-tests.js
+          name: 'Nomodule Tests (<< parameters.config >>)'
+          command: node build-system/pr-check/nomodule-tests.js --config=<< parameters.config >>
       - save_karma_cache:
           cache_name: nomodule
       - fail_fast
@@ -206,16 +204,14 @@ jobs:
         description: 'Which config file to use'
         type: enum
         enum: ['prod', 'canary']
-    environment:
-      config: << parameters.config >>
     steps:
       - setup_vm
       - install_chrome
       - restore_karma_cache:
           cache_name: module
       - run:
-          name: 'Module Tests (using << parameters.config >>-config.json)'
-          command: node build-system/pr-check/module-tests.js
+          name: 'Module Tests (<< parameters.config >>)'
+          command: node build-system/pr-check/module-tests.js --config=<< parameters.config >>
       - save_karma_cache:
           cache_name: module
       - fail_fast
