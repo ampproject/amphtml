@@ -1852,6 +1852,7 @@ describe('ValidatorRulesMakeSense', () => {
         let hasTextPlain = false;
         let hasOctetStream = false;
         let hasCiphertext = false;
+        let hasAmpOnerror = false;
         for (const attrSpecId of tagSpec.attrs) {
           if (attrSpecId < 0) {
             continue;
@@ -1877,14 +1878,17 @@ describe('ValidatorRulesMakeSense', () => {
               }
             }
           }
+          if (attrSpec.name === 'amp-onerror') {
+            hasAmpOnerror = true;
+          }
         }
         it('script tags must have either a src attribute or type json, ' +
                'octet-stream (during SwG encryption), or text/plain',
            () => {
              expect(
                  hasSrc || hasJson || hasTextPlain ||
-                 (hasOctetStream && hasCiphertext))
-                 .toBe(true);
+                 (hasOctetStream && hasCiphertext) ||
+                 hasAmpOnerror).toBe(true);
            });
       }
       // cdata_regex and mandatory_cdata
