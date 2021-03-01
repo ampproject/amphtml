@@ -20,9 +20,9 @@ import {Slot} from '../../../src/preact/slot';
 import {createElementWithAttributes} from '../../../src/dom';
 import {htmlFor} from '../../../src/static-template';
 import {omit} from '../../../src/utils/object';
+import {testElementV1} from '../../../testing/element-v1';
 import {upgradeOrRegisterElement} from '../../../src/service/custom-element-registry';
 import {waitFor} from '../../../testing/test-helper';
-import {testElementV1} from '../../../testing/element-v1';
 
 const spec = {amp: true, frameStyle: {width: '300px'}};
 
