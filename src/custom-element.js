@@ -526,7 +526,11 @@ function createBaseCustomElementClass(win) {
      * @final
      */
     ensureLoaded(opt_parentPriority) {
-      return this.whenBuilt().then(() => {
+      // Very ugly! The "built" signal must be resolved from the Resource
+      // and not the element itself because the Resource has not correctly
+      // set its state for the downstream to process it correctly.
+      const resource = this.getResource_();
+      return resource.whenBuilt().then(() => {
         const resource = this.getResource_();
         if (resource.getState() == ResourceState.LAYOUT_COMPLETE) {
           return;
