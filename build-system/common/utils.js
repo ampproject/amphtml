@@ -21,7 +21,7 @@ const path = require('path');
 const {clean} = require('../tasks/clean');
 const {doBuild} = require('../tasks/build');
 const {doDist} = require('../tasks/dist');
-const {execOrDie} = require('./exec');
+const {execOrDie, getStdout} = require('./exec');
 const {gitDiffNameOnlyMaster} = require('./git');
 const {green, cyan, yellow} = require('kleur/colors');
 const {log, logLocalDev} = require('./logging');
@@ -111,7 +111,14 @@ function getFilesToCheck(globs, options = {}) {
     }
     return logFiles(filesChanged);
   }
-  return globby.sync(globs, options);
+  const untrackedFiles = getStdout('git ls-files --others --exclude-standard')
+    .trim()
+    .split('\n');
+  return globby.sync(globs, {
+    ignore: untrackedFiles,
+    gitignore: true,
+    ...options,
+  });
 }
 
 /**
