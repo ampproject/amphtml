@@ -16,6 +16,9 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const {
+  VERSION: internalRuntimeVersion,
+} = require('../compile/internal-version');
 const {getReplacePlugin} = require('./helpers');
 
 /**
@@ -55,6 +58,10 @@ function getMinifiedConfig() {
     [
       './build-system/babel-plugins/babel-plugin-transform-json-import',
       {freeze: false},
+    ],
+    [
+      './build-system/babel-plugins/babel-plugin-transform-internal-version',
+      {version: internalRuntimeVersion},
     ],
     './build-system/babel-plugins/babel-plugin-is_minified-constant-transformer',
     './build-system/babel-plugins/babel-plugin-transform-amp-extension-call',
