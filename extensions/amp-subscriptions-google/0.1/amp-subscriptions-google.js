@@ -792,7 +792,7 @@ export class GoogleSubscriptionsPlatform {
       const googleSignInDetails = results[0];
       const ampReaderId = results[1];
 
-      const url = this.serviceConfig_['meteringRegistrationUrl'];
+      const url = this.serviceConfig_['extendedAccessRegistrationUrl'];
       const postBody = {
         googleSignInDetails,
         ampReaderId,
