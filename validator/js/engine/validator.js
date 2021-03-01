@@ -892,7 +892,7 @@ class ParsedTagSpec {
       }
       if (spec.name === 'type' && spec.valueCasei.length > 0) {
         for (const v of spec.valueCasei) {
-          if ('application/json' === v) {
+          if (('application/json' === v) || ('application/ld+json' === v)) {
             this.isTypeJson_ = true;
             break;
           }
