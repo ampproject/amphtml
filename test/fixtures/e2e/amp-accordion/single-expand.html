@@ -17,30 +17,22 @@
 
 <body>
     <amp-accordion
-        id="accordion"
+        id="accordion2"
         animate="true"
+        expand-single-section="true"
       >
-        <section id="section1">
-            <h2 id="header1">Section 1</h2>
-            <div id="content1">Puppies are cute.</div>
+        <section id="section2-1">
+            <h2 id="header2-1">Section 1</h2>
+            <div id="content2-1">Puppies are cute.</div>
         </section>
-        <section id="section2">
-            <h2 id="header2">Section 2</h2>
-            <div id="content2">Kittens are furry.</div>
+        <section id="section2-2">
+            <h2 id="header2-2">Section 2</h2>
+            <div id="content2-2">Kittens are furry.</div>
         </section>
-        <section id="section3" expanded>
-            <h2 id="header3">Section 3</h2>
-            <div id="content3">Elephants have great memory.</div>
+        <section id="section2-3" expanded>
+            <h2 id="header2-3">Section 3</h2>
+            <div id="content2-3">Elephants have great memory.</div>
         </section>
     </amp-accordion>
-
-    <div class="buttons">
-        <button id="button1" on="tap:accordion.toggle(section='section1')">
-            toggle(section1)
-        </button>
-        <button id="button2" on="tap:accordion.collapse()">
-            collapse all
-        </button>
-    </div>
 </body>
 </html>
