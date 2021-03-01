@@ -37,7 +37,6 @@ const {
 const {exec} = require('../common/exec');
 const {getFilesToCheck} = require('../common/utils');
 const {green, cyan, red, yellow} = require('kleur/colors');
-const {isCiBuild} = require('../common/ci');
 const {maybeUpdatePackages} = require('./update-packages');
 const {prettifyGlobs} = require('../test-configs/config');
 
@@ -49,10 +48,7 @@ const tempDir = tempy.directory();
  */
 async function prettify() {
   maybeUpdatePackages();
-  const filesToCheck = getFilesToCheck(prettifyGlobs, {
-    dot: true,
-    trackedOnly: isCiBuild(),
-  });
+  const filesToCheck = getFilesToCheck(prettifyGlobs, {dot: true});
   if (filesToCheck.length == 0) {
     return;
   }

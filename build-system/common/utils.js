@@ -92,23 +92,11 @@ function getFilesFromArgv() {
 }
 
 /**
- * @typedef {{
- *   trackedOnly: (boolean|undefined),
- * }}
- * In addition to globby's options:
- * https://github.com/sindresorhus/globby#options
- *
- * - trackedOnly
- *   include only files tracked by Git, exclude those in .gitignore
- */
-let FilesToCheckOptsDef;
-
-/**
  * Gets a list of files to be checked based on command line args and the given
  * file matching globs. Used by tasks like prettify, check-links, etc.
  *
  * @param {!Array<string>} globs
- * @param {FilesToCheckOptsDef=} options
+ * @param {!Object} options
  * @return {!Array<string>}
  */
 function getFilesToCheck(globs, options = {}) {
@@ -123,17 +111,14 @@ function getFilesToCheck(globs, options = {}) {
     }
     return logFiles(filesChanged);
   }
-  const {trackedOnly = false, ...globbyOptions} = options;
-  const files = globby.sync(globs, {
-    gitignore: trackedOnly,
-    ...globbyOptions,
+  const untrackedFiles = getStdout('git ls-files --others --exclude-standard')
+    .trim()
+    .split('\n');
+  return globby.sync(globs, {
+    ignore: untrackedFiles,
+    gitignore: true,
+    ...options,
   });
-  if (trackedOnly) {
-    return getStdout(`git ls-files ${files.join(' ')}`)
-      .trim()
-      .split('\n');
-  }
-  return files;
 }
 
 /**
