@@ -602,26 +602,31 @@ function createBaseCustomElementClass(win) {
           return this.whenLoaded();
         }
 
+        // Very ugly! The "built" signal must be resolved from the Resource
+        // and not the element itself because the Resource has not correctly
+        // set its state for the downstream to process it correctly.
         const resource = this.getResource_();
-        if (resource.getState() == ResourceState.LAYOUT_COMPLETE) {
-          return;
-        }
-        if (
-          resource.getState() != ResourceState.LAYOUT_SCHEDULED ||
-          resource.isMeasureRequested()
-        ) {
-          resource.measure();
-        }
-        if (!resource.isDisplayed()) {
-          return;
-        }
-        this.getResources().scheduleLayoutOrPreload(
-          resource,
-          /* layout */ true,
-          opt_parentPriority,
-          /* forceOutsideViewport */ true
-        );
-        return this.whenLoaded();
+        return resource.whenBuilt().then(() => {
+          if (resource.getState() == ResourceState.LAYOUT_COMPLETE) {
+            return;
+          }
+          if (
+            resource.getState() != ResourceState.LAYOUT_SCHEDULED ||
+            resource.isMeasureRequested()
+          ) {
+            resource.measure();
+          }
+          if (!resource.isDisplayed()) {
+            return;
+          }
+          this.getResources().scheduleLayoutOrPreload(
+            resource,
+            /* layout */ true,
+            opt_parentPriority,
+            /* forceOutsideViewport */ true
+          );
+          return this.whenLoaded();
+        });
       });
     }
 
