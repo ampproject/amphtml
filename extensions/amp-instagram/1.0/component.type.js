@@ -16,9 +16,11 @@
 
 /** @externs */
 
+/** @const */
 var InstagramDef = {};
 
-/** @typedef {{
+/**
+ * @typedef {{
  *   shortcode: string,
  *   captioned: (boolean|undefined),
  *   title: (string|undefined),
@@ -29,8 +31,8 @@ var InstagramDef = {};
  */
 InstagramDef.Props;
 
-/** @interface */
-InstagramDef.Api = class {
-  /** @return {string} */
-  get readyState() {}
-};
+/** @constructor */
+InstagramDef.Api = function() {};
+
+/** @type {string} */
+InstagramDef.Api.prototype.readyState;
