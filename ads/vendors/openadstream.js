@@ -18,7 +18,12 @@ import {validateData, writeScript} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   adhost: string,
+ *   sitepage: string,
+ *   pos: string,
+ *   query: (string|undefined)
+ * }} data
  */
 export function openadstream(global, data) {
   validateData(data, ['adhost', 'sitepage', 'pos'], ['query']);

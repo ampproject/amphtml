@@ -18,7 +18,10 @@ import {validateData, writeScript} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   config: Object,
+ *   script: (string|undefined)
+ * }} data
  */
 export function myoffrz(global, data) {
   validateData(data, ['config'], ['script']);

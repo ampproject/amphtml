@@ -24,6 +24,8 @@ import {setStyles} from '../../src/style';
 export function mytarget(global, data) {
   validateData(data, ['adSlot'], ['adQuery']);
 
+  /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */
+  const context = /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context);
   // Create ad tag placeholder
   const container = global.document.createElement('ins');
 
@@ -41,8 +43,8 @@ export function mytarget(global, data) {
 
   // Add tag and callbacks to queue
   (global.MRGtag = global.MRGtag || []).push({
-    onNoAds: () => global.context.noContentAvailable(),
-    onAdsSuccess: () => global.context.renderStart(),
+    onNoAds: () => context.noContentAvailable(),
+    onAdsSuccess: () => context.renderStart(),
   });
 
   // Load main js asynchronously

@@ -26,29 +26,41 @@ const hosts = {
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   src: (string|undefined),
+ *   sid: (string|undefined),
+ *   mid: (string|undefined)
+ * }} data
  */
 export function onnetwork(global, data) {
   validateData(data, [['src', 'sid', 'mid']]);
   global.onnetwork = {ampData: data};
   const {src, sid, mid} = data;
-  let url;
 
-  // Custom movie url using "data-src" attribute
   if (src) {
+    // Custom movie url using "data-src" attribute
     validateSrcPrefix(
       Object.keys(hosts).map((type) => hosts[type]),
       src
     );
-    url = src;
-  }
-  // Movie tag using "data-sid" attribute
-  else if (sid) {
-    url = hosts.video + '/embed.php?ampsrc=1&sid=' + encodeURIComponent(sid);
-    // Movie placement using "data-mid" attribute
-  } else if (mid) {
-    url = hosts.video + '/embed.php?ampsrc=1&mid=' + encodeURIComponent(mid);
+    writeScript(global, src);
+    return;
   }
 
-  writeScript(global, url);
+  if (sid) {
+    // Movie tag using "data-sid" attribute
+    writeScript(
+      global,
+      hosts.video + '/embed.php?ampsrc=1&sid=' + encodeURIComponent(sid)
+    );
+    return;
+  }
+
+  if (mid) {
+    // Movie placement using "data-mid" attribute
+    writeScript(
+      global,
+      hosts.video + '/embed.php?ampsrc=1&mid=' + encodeURIComponent(mid)
+    );
+  }
 }

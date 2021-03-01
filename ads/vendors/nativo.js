@@ -17,7 +17,12 @@ import {loadScript} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   delayByTime: number,
+ *   requestUrl: string,
+ *   delay: (boolean|undefined),
+ *   delayByView: (boolean|undefined)
+ * }} data
  */
 export function nativo(global, data) {
   let ntvAd;
@@ -41,7 +46,11 @@ export function nativo(global, data) {
       );
     }
     /**
-     * @param {!Object} data
+     * @param {{
+     *   delayByTime: number,
+     *   delay: (boolean|undefined),
+     *   delayByView: (boolean|undefined)
+     * }} data
      * @return {boolean}
      */
     function isDelayedTimeStart(data) {
@@ -52,7 +61,11 @@ export function nativo(global, data) {
       );
     }
     /**
-     * @param {!Object} data
+     * @param {{
+     *   delayByTime: number,
+     *   delay: (boolean|undefined),
+     *   delayByView: (boolean|undefined)
+     * }} data
      * @return {boolean}
      */
     function isDelayedViewStart(data) {
@@ -63,19 +76,29 @@ export function nativo(global, data) {
      */
     function loadAdWhenViewed() {
       const g = global;
-      global.context.observeIntersection(function (positions) {
+
+      /**
+       * Handles Intersection Changes
+       * @param {Array<IntersectionObserverEntry>} positions
+       */
+      function intersectionHandler(positions) {
         const coordinates = getLastPositionCoordinates(positions);
         if (
           typeof coordinates.rootBounds != 'undefined' &&
           coordinates.intersectionRect.top ==
-            coordinates.rootBounds.top + coordinates.boundingClientRect.y
+            coordinates.rootBounds.top +
+              /** @type {{y:number}} */ (coordinates.boundingClientRect).y
         ) {
           if (isDelayedViewStart(data) && !delayedAdLoad) {
             g.PostRelease.Start();
             delayedAdLoad = true;
           }
         }
-      });
+      }
+
+      /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context).observeIntersection(
+        intersectionHandler
+      );
     }
     /**
      * Loads ad when timeouts.
@@ -87,9 +110,10 @@ export function nativo(global, data) {
         delayedAdLoad = true;
       }, parseInt(data.delayByTime, 10));
     }
+
     /**
-     * @param {*} positions
-     * @return {*} TODO(#23582): Specify return type
+     * @param {Array<IntersectionObserverEntry>} positions
+     * @return {IntersectionObserverEntry}
      */
     function getLastPositionCoordinates(positions) {
       return positions[positions.length - 1];
@@ -103,7 +127,7 @@ export function nativo(global, data) {
     /**
      * Used to track ad during scrolling event and trigger checkIsAdVisible
      * method on PostRelease instance
-     * @param {*} positions
+     * @param {Array<IntersectionObserverEntry>} positions
      */
     function viewabilityConfiguration(positions) {
       const coordinates = getLastPositionCoordinates(positions);
@@ -154,7 +178,9 @@ export function nativo(global, data) {
         return ntvAd.getPercentageOfadViewed();
       };
       // ADD TRACKING HANDLER TO OBSERVER
-      global.context.observeIntersection(viewabilityConfiguration);
+      /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context).observeIntersection(
+        viewabilityConfiguration
+      );
     };
   })(ntvAd || (ntvAd = {}), global, data);
   // Setup Configurations

@@ -525,6 +525,22 @@ data.local;
 data.enablemraid;
 data.jsplayer;
 
+// myoffrz.js
+window.config;
+window.sourceUrl;
+
+// mytarget.js
+window.MRGtag;
+
+// mywidget.js
+window.myWidgetInit;
+
+// nativeroll.js
+window.SeedrPlayer;
+
+// nativery.js
+window._nativery;
+
 // nativo.js
 var PostRelease;
 PostRelease.Start;
@@ -533,14 +549,34 @@ var _prx;
 data.delayByTime;
 data.delayByTime;
 
+// nend.js
+window.nendParam;
+
+// netletix.js
+window._netletix_amp;
+
+// noddus.js
+window.noddus;
+
 // nokta.js
-data.category;
+window.category;
+window.site;
+window.zone;
+window.iwidth;
+window.iheight;
+
+// oblivki.js
+window.oblivkiParam;
 
 // onead.js
 var Guoshi;
 Guoshi.queryAd;
 Guoshi.queryAd.amp;
 Guoshi.queryAd.amp.setup;
+window.ONEAD_AMP;
+
+// onnetwork.js
+window.onnetwork;
 
 // openadstream.js
 data.adhost;

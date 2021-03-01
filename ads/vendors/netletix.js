@@ -31,7 +31,19 @@ const DEFAULT_NX_SITE = 'none';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   nxkey: string,
+ *   nxunit: string,
+ *   nxwidth: string,
+ *   nxheight: string,
+ *   ampSlotIndex: string,
+ *   async: (string|undefined),
+ *   nxasync: (string|undefined),
+ *   nxv: (string|undefined),
+ *   nxsite: (string|undefined),
+ *   nxid: (string|undefined),
+ *   nxscript: (string|undefined),
+ * }} data
  */
 export function netletix(global, data) {
   /*eslint "google-camelcase/google-camelcase": 0*/
@@ -63,32 +75,33 @@ export function netletix(global, data) {
     ),
     data.ampSlotIndex
   );
+  /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */
+  const context = /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context);
 
   window.addEventListener('message', (event) => {
-    if (
-      event.data.type &&
-      dev().assertString(event.data.type).startsWith('nx-')
-    ) {
-      switch (event.data.type) {
+    /** @type {{type:(string|undefined),width:number,height:number,identifier:string}} */
+    const data = /** @type {{type:(string|undefined),width:number,height:number,identifier:string}} */ (event.data);
+    if (data.type && dev().assertString(data.type).startsWith('nx-')) {
+      switch (data.type) {
         case 'nx-resize':
-          const renderconfig = {
-            'width': event.data.width,
-            'height': event.data.height,
-          };
-          global.context.renderStart(renderconfig);
+          const renderconfig = dict({
+            'width': data.width,
+            'height': data.height,
+          });
+          context.renderStart(renderconfig);
           if (
-            event.data.width &&
-            event.data.height &&
-            (event.data.width != nxw || event.data.height != nxh)
+            data.width &&
+            data.height &&
+            (data.width != nxw || data.height != nxh)
           ) {
-            global.context.requestResize(event.data.width, event.data.height);
+            context.requestResize(data.width, data.height);
           }
           break;
         case 'nx-empty':
-          global.context.noContentAvailable();
+          context.noContentAvailable();
           break;
         case 'nx-identifier':
-          global.context.reportRenderedEntityIdentifier(event.data.identifier);
+          context.reportRenderedEntityIdentifier(data.identifier);
           break;
         default:
           break;

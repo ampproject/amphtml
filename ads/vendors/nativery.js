@@ -19,18 +19,23 @@ import {validateData, writeScript} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   wid: string,
+ *   referrer: (string|undefined),
+ *   url: (string|undefined),
+ * }} data
  */
 export function nativery(global, data) {
   validateData(data, ['wid']);
   const params = {...data};
+  const context = /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context);
 
   // push the two object into the '_nativery' global
   global._nativery = global._nativery || {
     wid: data.wid,
-    referrer: data.referrer || global.context.referrer,
-    url: data.url || global.context.canonicalUrl,
-    viewId: global.context.pageViewId,
+    referrer: data.referrer || context.referrer,
+    url: data.url || context.canonicalUrl,
+    viewId: context.pageViewId,
     visible: 0,
     params,
   };
@@ -38,21 +43,27 @@ export function nativery(global, data) {
   // must add listener for resize
   global.addEventListener('amp-widgetCreated', function (e) {
     if (e && e.detail) {
-      global.context.requestResize(undefined, e.detail.height);
+      const height = /** @type {{height:number}} */ (e.detail).height;
+      context.requestResize(undefined, height);
     }
   });
 
   // install observation to check if is in viewport
-  const unlisten = global.context.observeIntersection(function (changes) {
-    toArray(changes).forEach(function (c) {
-      global._nativery.visible = Math.floor(
-        (c.intersectionRect.height / c.boundingClientRect.height) * 100
-      );
-      if (global._nativery.visible) {
-        unlisten();
-      }
-    });
-  });
+  const unlisten = context.observeIntersection(
+    /**
+     * @param {Array<IntersectionObserverEntry>} changes
+     */
+    function (changes) {
+      toArray(changes).forEach(function (c) {
+        global._nativery.visible = Math.floor(
+          (c.intersectionRect.height / c.boundingClientRect.height) * 100
+        );
+        if (global._nativery.visible) {
+          unlisten();
+        }
+      });
+    }
+  );
 
   // load the nativery loader asynchronously
   writeScript(global, `https://cdn.nativery.com/widget/js/natamp.js`);

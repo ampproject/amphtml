@@ -18,7 +18,12 @@ import {loadScript, validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   playmode: (string|undefined),
+ *   uid: (string|undefined),
+ *   pid: (string|undefined),
+ *   host: (string|undefined)
+ * }} data
  */
 export function onead(global, data) {
   validateData(data, [], ['playmode', 'uid', 'pid', 'host']);

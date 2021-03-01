@@ -20,7 +20,9 @@ const oblivkiFields = ['id'];
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   id: string,
+ * }} data
  */
 export function oblivki(global, data) {
   validateData(data, oblivkiFields, []);

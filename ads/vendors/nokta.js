@@ -18,7 +18,13 @@ import {validateData, writeScript} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   category: string,
+ *   site: string,
+ *   zone: string,
+ *   width: number,
+ *   height: number,
+ * }} data
  */
 export function nokta(global, data) {
   validateData(data, ['category', 'site', 'zone']);

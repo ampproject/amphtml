@@ -20,7 +20,9 @@ const nendFields = ['nend_params'];
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   nend_params: Object
+ * }} data
  */
 export function nend(global, data) {
   validateData(data, nendFields, []);

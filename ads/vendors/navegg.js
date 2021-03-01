@@ -19,13 +19,15 @@ import {loadScript, validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   acc: string,
+ *   targeting: (Object|undefined)
+ * }} data
  */
 export function navegg(global, data) {
   validateData(data, ['acc']);
   const {acc} = data;
-  let seg,
-    nvg = function () {};
+  let nvg = function () {};
   delete data.acc;
   nvg.prototype.getProfile = function () {};
   data.targeting = data.targeting || {};
@@ -34,6 +36,7 @@ export function navegg(global, data) {
       acc,
     });
     nvg.getProfile((nvgTargeting) => {
+      let seg;
       for (seg in nvgTargeting) {
         data.targeting[seg] = nvgTargeting[seg];
       }
