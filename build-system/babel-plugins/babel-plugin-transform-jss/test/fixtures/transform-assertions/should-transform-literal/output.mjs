@@ -3,6 +3,8 @@ var _classes = {
   floatLeft: "float-left-a6c6677",
   fill: "fill-a6c6677"
 };
+export const $floatLeft = "float-left-a6c6677";
+export const $fill = "fill-a6c6677";
 
 /**
  * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
