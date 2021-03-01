@@ -1231,8 +1231,31 @@ app.use('/subscription/pingback', (req, res) => {
   });
 });
 
-// Simulate a publisher's account registration API.
-// (amp-subscriptions-google)
+/*
+  Simulate a publisher's account registration API.
+
+  The `amp-subscriptions-google` extension sends this API a POST request.
+  The request body looks like:
+
+  {
+    "googleSignInDetails": {
+      // This signed JWT contains information from Google Sign-In
+      "idToken": "...JWT from Google Sign-In...",
+      // Some useful fields from the `idToken`, pre-parsed for convenience
+      "name": "Jane Smith",
+      "givenName": "Jane",
+      "familyName": "Smith",
+      "imageUrl": "https://imageurl",
+      "email": "janesmith@example.com"
+    },
+    // Associate this ID with the registration. Use it to look up metering state
+    // for future entitlements requests
+    // https://amp.dev/documentation/components/amp-access/#amp-reader-id
+    "ampReaderId": "amp-s0m31d3nt1f13r"
+  }
+
+  (amp-subscriptions-google)
+*/
 app.use('/subscription/register', (req, res) => {
   cors.assertCors(req, res, ['POST']);
 
