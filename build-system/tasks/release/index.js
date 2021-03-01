@@ -22,8 +22,9 @@ const fs = require('fs-extra');
 const klaw = require('klaw');
 const path = require('path');
 const tar = require('tar');
-const {cyan, green} = require('kleur/colors');
+const {cyan, green, red, yellow} = require('kleur/colors');
 const {execOrDie} = require('../../common/exec');
+const {gitCherryMaster} = require('../../common/git');
 const {log} = require('../../common/logging');
 const {MINIFIED_TARGETS} = require('../helpers');
 const {VERSION} = require('../../compile/internal-version');
@@ -412,7 +413,27 @@ async function release() {
   const outputDir = path.resolve(argv.output_dir || './release');
   const tempDir = path.join(outputDir, 'tmp');
 
-  log('Preparing environment for release build in', `${cyan(outputDir)}...`);
+  if (!argv.skip_commits_verification) {
+    log(
+      'Checking if branch contains commits not on master (exluding cherry-picks)'
+    );
+    const unknownCommits = gitCherryMaster().filter(
+      ({isCherryPick}) => !isCherryPick
+    );
+    if (unknownCommits.length > 0) {
+      log(red('Unknown commits found!'));
+      for (const {sha} of unknownCommits) {
+        log(`- ${yellow(sha)}`);
+      }
+      log(red('Aborting...'));
+      throw new Error('Found unknown commit during release');
+    }
+  } else if (!argv.version_override) {
+    throw new Error(
+      'Skipping commit verification requires an explicit version_override'
+    );
+  }
+
   await prepareEnvironment_(outputDir, tempDir);
 
   log('Discovering release', `${green('flavors')}...`);
@@ -463,4 +484,7 @@ release.flags = {
     '  Directory path to emplace release files (defaults to "./release")',
   'flavor':
     '  Limit this release build to a single flavor. Can be used to split the release work between multiple build machines.',
+  'skip_commits_verification':
+    '  Skip verifying that every commit exists on master (or is a cherry-pick of a commit on master). If this is set, then you must provide version_override.',
+  'version_override': '  Overrides the version written to AMP_CONFIG',
 };
