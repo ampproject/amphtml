@@ -485,35 +485,33 @@ describe('Validator.ScriptLength', () => {
   const inlineScriptBlob = 'alert(\'\');';
   assertStrictEqual(10, inlineScriptBlob.length);
 
-  it('accepts 10000 bytes of inline style',
-     () => {
-       const inlineScript = Array(1001).join(inlineScriptBlob);
-       assertStrictEqual(10000, inlineScript.length);
-       const test = new ValidatorTestCase('feature_tests/inline_script_length.html');
-       test.inlineOutput = false;
-       test.ampHtmlFileContents =
-           test.ampHtmlFileContents
-               .replace('replace_inline_script', inlineScript);
-       test.expectedOutput = 'PASS';
-       test.run();
-     });
+  it('accepts 10000 bytes of inline style', () => {
+    const inlineScript = Array(1001).join(inlineScriptBlob);
+    assertStrictEqual(10000, inlineScript.length);
+    const test =
+        new ValidatorTestCase('feature_tests/inline_script_length.html');
+    test.inlineOutput = false;
+    test.ampHtmlFileContents =
+        test.ampHtmlFileContents.replace('replace_inline_script', inlineScript);
+    test.expectedOutput = 'PASS';
+    test.run();
+  });
 
-  it('will not accept 10010 bytes in inline script',
-     () => {
-       const inlineScript = Array(1001).join(inlineScriptBlob) + ' ';
-       assertStrictEqual(10001, inlineScript.length);
-       const test = new ValidatorTestCase('feature_tests/inline_script_length.html');
-       test.inlineOutput = false;
-       test.ampHtmlFileContents =
-           test.ampHtmlFileContents
-               .replace('replace_inline_script', inlineScript);
-       test.expectedOutputFile = null;
-       test.expectedOutput = 'FAIL\n' +
-           'feature_tests/inline_script_length.html:35:2 The inline script ' +
-           'is 10001 bytes, which exceeds the limit of 10000 bytes. ' +
-           '(see https://amp.dev/documentation/components/amp-script/#faq)';
-       test.run();
-     });
+  it('will not accept 10010 bytes in inline script', () => {
+    const inlineScript = Array(1001).join(inlineScriptBlob) + ' ';
+    assertStrictEqual(10001, inlineScript.length);
+    const test =
+        new ValidatorTestCase('feature_tests/inline_script_length.html');
+    test.inlineOutput = false;
+    test.ampHtmlFileContents =
+        test.ampHtmlFileContents.replace('replace_inline_script', inlineScript);
+    test.expectedOutputFile = null;
+    test.expectedOutput = 'FAIL\n' +
+        'feature_tests/inline_script_length.html:35:2 The inline script ' +
+        'is 10001 bytes, which exceeds the limit of 10000 bytes. ' +
+        '(see https://amp.dev/documentation/components/amp-script/#faq)';
+    test.run();
+  });
 });
 
 describe('Validator.CssLength', () => {
@@ -1340,8 +1338,8 @@ function attrRuleShouldMakeSense(attrSpec, tagSpec, rules) {
   // dispatch_key
   if (attrSpec.dispatchKey !== null && attrSpec.dispatchKey) {
     it('mandatory must be true when dispatch_key is true', () => {
-      expect(attrSpec.mandatory).toBeDefined();
-      expect(attrSpec.mandatory).toBe(true);
+      expect(attrSpec.mandatory === true || attrSpec.mandatoryOneof !== null)
+          .toBe(true);
     });
   }
   // Value property names must be unique.
@@ -1683,7 +1681,6 @@ describe('ValidatorRulesMakeSense', () => {
     }
 
     // attr_specs within tag.
-    let seenDispatchKey = false;
     const attrNameIsUnique = {};
     for (const attrSpecId of tagSpec.attrs) {
       if (attrSpecId < 0) {
@@ -1722,14 +1719,6 @@ describe('ValidatorRulesMakeSense', () => {
            () => {
              expect(attrSpec.value.length > 0 || attrSpec.valueRegex !== null)
                  .toBe(true);
-           });
-      }
-      if (attrSpec.dispatchKey) {
-        it('tag_spec ' + tagSpecName +
-               ' can not have more than one dispatch_key',
-           () => {
-             expect(seenDispatchKey).toBe(false);
-             seenDispatchKey = true;
            });
       }
     }
