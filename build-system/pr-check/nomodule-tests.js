@@ -19,6 +19,7 @@
  * @fileoverview Script that tests the nomodule AMP runtime during CI.
  */
 
+const argv = require('minimist')(process.argv.slice(2));
 const {
   downloadNomoduleOutput,
   printSkipMessage,
@@ -26,16 +27,27 @@ const {
   timedExecOrThrow,
 } = require('./utils');
 const {buildTargetsInclude, Targets} = require('./build-targets');
+const {MINIFIED_TARGETS} = require('../tasks/helpers');
 const {runCiJob} = require('./ci-job');
 
 const jobName = 'nomodule-tests.js';
 
+function prependConfig() {
+  const targets = MINIFIED_TARGETS.flatMap((target) => [
+    `dist/${target}.js`,
+  ]).join(',');
+  timedExecOrDie(
+    `gulp prepend-global --${argv.config} --local_dev --fortesting --derandomize --target=${targets}`
+  );
+}
+
 function pushBuildWorkflow() {
   downloadNomoduleOutput();
   timedExecOrDie('gulp update-packages');
+  prependConfig();
   try {
     timedExecOrThrow(
-      'gulp integration --nobuild --headless --compiled --report',
+      `gulp integration --nobuild --headless --compiled --report --config=${argv.config}`,
       'Integration tests failed!'
     );
   } catch (e) {
@@ -51,7 +63,10 @@ function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
     downloadNomoduleOutput();
     timedExecOrDie('gulp update-packages');
-    timedExecOrDie('gulp integration --nobuild --compiled --headless');
+    prependConfig();
+    timedExecOrDie(
+      `gulp integration --nobuild --compiled --headless --config=${argv.config}`
+    );
   } else {
     printSkipMessage(
       jobName,

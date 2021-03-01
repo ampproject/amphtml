@@ -110,6 +110,7 @@ export const Selectors = {
   ALL_PLAYBACK_MEDIA:
     '> audio, amp-story-grid-layer audio, amp-story-grid-layer video',
   ALL_VIDEO: 'amp-story-grid-layer video',
+  ALL_TABBABLE: 'a',
 };
 
 /** @private @const {string} */
@@ -363,6 +364,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.setPageDescription_();
     this.element.setAttribute('role', 'region');
     this.initializeImgAltTags_();
+    this.initializeTabbableElements_();
   }
 
   /** @private */
@@ -916,7 +918,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   /**
    * Applies the specified callback to each media element on the page, after the
    * media element is loaded.
-   * @param {!function(!./media-pool.MediaPool, !Element)} callbackFn The
+   * @param {function(!./media-pool.MediaPool, !Element)} callbackFn The
    *     callback to be applied to each media element.
    * @return {!Promise} Promise that resolves after the callbacks are called.
    * @private
@@ -1040,9 +1042,9 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   preloadAllMedia_() {
-    return this.whenAllMediaElements_((mediaPool, mediaEl) => {
-      this.preloadMedia_(mediaPool, mediaEl);
-    });
+    return this.whenAllMediaElements_((mediaPool, mediaEl) =>
+      this.preloadMedia_(mediaPool, mediaEl)
+    );
   }
 
   /**
@@ -1270,6 +1272,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.findAndPrepareEmbeddedComponents_();
       registerAllPromise.then(() => this.preloadAllMedia_());
     }
+    this.toggleTabbableElements_(distance == 0);
   }
 
   /**
@@ -1852,7 +1855,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   initializeImgAltTags_() {
     toArray(this.element.querySelectorAll('amp-img')).forEach((ampImgNode) => {
       if (!ampImgNode.getAttribute('alt')) {
-        ampImgNode.setAttribute('alt', ' ');
+        ampImgNode.setAttribute('alt', '');
         // If the child img element is in the dom, propogate the attribute to it.
         const childImgNode = ampImgNode.querySelector('img');
         childImgNode &&
@@ -1869,5 +1872,34 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   isAutoAdvance() {
     return this.advancement_.isAutoAdvance();
+  }
+
+  /**
+   * Set the i-amphtml-orig-tabindex to the default tabindex of tabbable elements
+   */
+  initializeTabbableElements_() {
+    scopedQuerySelectorAll(this.element, Selectors.ALL_TABBABLE).forEach(
+      (el) => {
+        el.setAttribute(
+          'i-amphtml-orig-tabindex',
+          el.getAttribute('tabindex') || 0
+        );
+      }
+    );
+  }
+
+  /**
+   * Toggles the tabbable elements (buttons, links, etc) to only reach them when page is active.
+   * @param {boolean} toggle
+   */
+  toggleTabbableElements_(toggle) {
+    scopedQuerySelectorAll(this.element, Selectors.ALL_TABBABLE).forEach(
+      (el) => {
+        el.setAttribute(
+          'tabindex',
+          toggle ? el.getAttribute('i-amphtml-orig-tabindex') : -1
+        );
+      }
+    );
   }
 }

@@ -261,30 +261,34 @@
 
         // Interprets the parameters after the '#' in the URL.
         var params = getLocationHashParams();
-        // Extracts the code to be validated if sent as a query param.
-        const incomingDocStr = getIncomingDoc(params);
-        if (incomingDocStr) {
-          editor.setEditorValue(incomingDocStr);
-          const format = params['htmlFormat'] || 'AMP';
-          urlForm.setHtmlFormat(format)
-        }
+        const incomingHtmlFormat = params.hasOwnProperty('htmlFormat') && params['htmlFormat'];
 
-        // If #url=<url> was provided, load it, otherwise, start with the
-        // minimum valid AMP document.
-        else if (params.hasOwnProperty('url') && params['url']) {
-          this.$.urlForm.setURLAndValidate(params['url']);
-        } else if (params.hasOwnProperty('htmlFormat') &&
-                   params['htmlFormat'] === 'AMP4ADS' ) {
+        if (incomingHtmlFormat === 'AMP4ADS') {
           urlForm.setHtmlFormat('AMP4ADS');
-          editor.setEditorValue(minimumValidAmp4Ads);
-        } else if (params.hasOwnProperty('htmlFormat') &&
-                   params['htmlFormat'] === 'AMP4EMAIL' ) {
+        } else if (incomingHtmlFormat === 'AMP4EMAIL') {
           urlForm.setHtmlFormat('AMP4EMAIL');
-          editor.setEditorValue(minimumValidAmp4Email);
         } else {
           urlForm.setHtmlFormat('AMP');
-          editor.setEditorValue(minimumValidAmp);
         }
+
+        const incomingDocStr = getIncomingDoc(params);
+        if (incomingDocStr) {
+          // Extract doc from query param
+          editor.setEditorValue(incomingDocStr);
+        } else if (params.hasOwnProperty('url') && params['url']) {
+          // Load doc fromm url
+          this.$.urlForm.setURLAndValidate(params['url']);
+        } else {
+          // Use minimal valid AMP doc
+          if (incomingHtmlFormat === 'AMP4ADS') {
+            editor.setEditorValue(minimumValidAmp4Ads);
+          } else if (incomingHtmlFormat === 'AMP4EMAIL') {
+            editor.setEditorValue(minimumValidAmp4Email);
+          } else {
+            editor.setEditorValue(minimumValidAmp);
+          }
+        }
+
       }
     });
   </script>

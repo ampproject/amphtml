@@ -142,6 +142,15 @@ const childIdGenerator = sequentialIdGenerator();
  * @template API_TYPE
  */
 export class PreactBaseElement extends AMP.BaseElement {
+  /**
+   * @return {boolean}
+   * @nocollapse
+   */
+  static requiresShadowDom() {
+    // eslint-disable-next-line local/no-static-this
+    return usesShadowDom(this);
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -729,6 +738,18 @@ export class PreactBaseElement extends AMP.BaseElement {
         this.element
       );
     }
+  }
+
+  /**
+   * Dispatches an error event. Provided as a method so Preact components can
+   * call into it, while AMP components can override to trigger action services.
+   * @param {!Element} element
+   * @param {string} eventName
+   * @param {!JSONObject|string|undefined|null} detail
+   * @return {!Object}
+   */
+  triggerEvent(element, eventName, detail) {
+    dispatchCustomEvent(element, eventName, detail);
   }
 }
 

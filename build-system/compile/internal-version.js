@@ -96,10 +96,8 @@ function getVersion() {
     `HEAD~${numberOfCherryPicks}`
   ).slice(0, -2);
 
-  return `${lastCommitFormattedTime}${String(numberOfCherryPicks).padStart(
-    3,
-    '0'
-  )}`;
+  const numberOfCherryPicksStr = String(numberOfCherryPicks).padStart(3, '0');
+  return `${lastCommitFormattedTime}${numberOfCherryPicksStr}`;
 }
 
 // Used to e.g. references the ads binary from the runtime to get version lock.

@@ -15,37 +15,30 @@
  */
 
 const argv = require('minimist')(process.argv.slice(2));
-const babelify = require('babelify');
-const browserify = require('browserify');
-const buffer = require('vinyl-buffer');
+const babel = require('@babel/core');
+const crypto = require('crypto');
 const debounce = require('debounce');
 const del = require('del');
-const file = require('gulp-file');
+const esbuild = require('esbuild');
+const experimentDefines = require('../global-configs/experiments-const.json');
 const fs = require('fs-extra');
-const gulp = require('gulp');
 const MagicString = require('magic-string');
 const open = require('open');
 const path = require('path');
-const regexpSourcemaps = require('gulp-regexp-sourcemaps');
 const remapping = require('@ampproject/remapping');
-const rename = require('gulp-rename');
-const source = require('vinyl-source-stream');
-const sourcemaps = require('gulp-sourcemaps');
-const watchify = require('watchify');
 const wrappers = require('../compile/compile-wrappers');
 const {
   VERSION: internalRuntimeVersion,
 } = require('../compile/internal-version');
 const {applyConfig, removeConfig} = require('./prepend-global/index.js');
 const {closureCompile} = require('../compile/compile');
-const {EventEmitter} = require('events');
 const {green, red, cyan} = require('kleur/colors');
 const {isCiBuild} = require('../common/ci');
 const {jsBundles} = require('../compile/bundles.config');
 const {log, logLocalDev} = require('../common/logging');
 const {thirdPartyFrames} = require('../test-configs/config');
 const {transpileTs} = require('../compile/typescript');
-const {watch: gulpWatch} = require('gulp');
+const {watch: fileWatch} = require('chokidar');
 
 /**
  * Tasks that should print the `--nobuild` help text.
@@ -69,6 +62,9 @@ const EXTENSION_BUNDLE_MAP = {
   ],
   'amp-inputmask.js': ['third_party/inputmask/bundle.js'],
   'amp-date-picker.js': ['third_party/react-dates/bundle.js'],
+  'amp-shadow-dom-polyfill.js': [
+    'node_modules/@webcomponents/webcomponentsjs/bundles/webcomponents-sd.install.js',
+  ],
 };
 
 /**
@@ -90,6 +86,12 @@ const hostname3p = argv.hostname3p || '3p.ampproject.net';
  * Used to debounce file edits during watch to prevent races.
  */
 const watchDebounceDelay = 1000;
+
+/**
+ * Used to cache babel transforms done by esbuild.
+ * @private @const {!Map<string, File>}
+ */
+const cache = new Map();
 
 /**
  * @param {!Object} jsBundles
@@ -118,28 +120,25 @@ function doBuildJs(jsBundles, name, extraOptions) {
  */
 async function bootstrapThirdPartyFrames(options) {
   const startTime = Date.now();
-  const promises = [];
-  const {watch, minify} = options;
-  thirdPartyFrames.forEach((frameObject) => {
-    promises.push(
-      thirdPartyBootstrap(frameObject.max, frameObject.min, options)
-    );
-  });
-  if (watch) {
+  if (options.watch) {
     thirdPartyFrames.forEach((frameObject) => {
-      const watchFunc = () => {
-        thirdPartyBootstrap(frameObject.max, frameObject.min, options);
+      const watchFunc = async () => {
+        await thirdPartyBootstrap(frameObject.max, frameObject.min, options);
       };
-      gulpWatch(frameObject.max).on(
+      fileWatch(frameObject.max).on(
         'change',
         debounce(watchFunc, watchDebounceDelay)
       );
     });
   }
-  await Promise.all(promises);
+  await Promise.all(
+    thirdPartyFrames.map(async (frameObject) => {
+      await thirdPartyBootstrap(frameObject.max, frameObject.min, options);
+    })
+  );
   endBuildStep(
     'Bootstrapped 3p frames into',
-    `dist.3p/${minify ? internalRuntimeVersion : 'current'}/`,
+    `dist.3p/${options.minify ? internalRuntimeVersion : 'current'}/`,
     startTime
   );
 }
@@ -150,7 +149,22 @@ async function bootstrapThirdPartyFrames(options) {
  * @param {!Object} options
  */
 async function compileCoreRuntime(options) {
-  await doBuildJs(jsBundles, 'amp.js', options);
+  async function watchFunc() {
+    const bundleComplete = await doBuildJs(jsBundles, 'amp.js', {
+      ...options,
+      watch: false,
+    });
+    if (options.onWatchBuild) {
+      options.onWatchBuild(bundleComplete);
+    }
+  }
+
+  if (options.watch) {
+    const debouncedRebuild = debounce(watchFunc, watchDebounceDelay);
+    fileWatch('src/**/*.js').on('change', debouncedRebuild);
+  }
+
+  await doBuildJs(jsBundles, 'amp.js', {...options, watch: false});
 }
 
 /**
@@ -165,7 +179,7 @@ async function compileAllJs(options) {
   if (minify) {
     log('Minifying multi-pass JS with', cyan('closure-compiler') + '...');
   } else {
-    log('Compiling JS with', cyan('browserify') + '...');
+    log('Compiling JS with', cyan('esbuild'), 'and', cyan('babel') + '...');
   }
   const startTime = Date.now();
   await Promise.all([
@@ -276,14 +290,12 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
 
   if (options.watch) {
     const watchFunc = async () => {
-      const compileComplete = await doCompileMinifiedJs(
-        /* continueOnError */ true
-      );
+      const compileDone = await doCompileMinifiedJs(/* continueOnError */ true);
       if (options.onWatchBuild) {
-        options.onWatchBuild(compileComplete);
+        options.onWatchBuild(compileDone);
       }
     };
-    gulpWatch(entryPoint).on('change', debounce(watchFunc, watchDebounceDelay));
+    fileWatch(entryPoint).on('change', debounce(watchFunc, watchDebounceDelay));
   }
 
   async function doCompileMinifiedJs(continueOnError) {
@@ -326,7 +338,7 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
 }
 
 /**
- * Handles a browserify bundling error
+ * Handles a bundling error
  * @param {Error} err
  * @param {boolean} continueOnError
  * @param {string} destFilename
@@ -344,12 +356,12 @@ function handleBundleError(err, continueOnError, destFilename) {
   } else {
     const reason = new Error(reasonMessage);
     reason.showStack = false;
-    new EventEmitter().emit('error', reason);
+    throw reason;
   }
 }
 
 /**
- * Performs the final steps after Browserify bundles a JS file
+ * Performs the final steps after a JS file is bundled with esbuild and babel
  * @param {string} srcFilename
  * @param {string} destDir
  * @param {string} destFilename
@@ -374,96 +386,109 @@ function finishBundle(srcFilename, destDir, destFilename, options) {
 }
 
 /**
- * Transforms a given JavaScript file entry point with browserify, and watches
- * it for changes (if required).
+ * Transforms a given JavaScript file entry point with esbuild and babel, and
+ * watches it for changes (if required).
  * @param {string} srcDir
  * @param {string} srcFilename
  * @param {string} destDir
  * @param {?Object} options
  * @return {!Promise}
  */
-function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
+async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
+  const startTime = Date.now();
   const entryPoint = path.join(srcDir, srcFilename);
   const destFilename = options.toName || srcFilename;
-  const wrapper = options.wrapper || wrappers.none;
-  const devWrapper = wrapper.replace('<%= contents %>', '$1');
-
-  // TODO: @jonathantyng remove browserifyOptions #22757
-  const browserifyOptions = {
-    entries: entryPoint,
-    debug: true,
-    fast: true,
-    ...options.browserifyOptions,
-  };
-
-  let bundler = browserify(browserifyOptions).transform(babelify, {
-    caller: {name: 'unminified'},
-    global: true,
-  });
+  const destFile = path.join(destDir, destFilename);
 
   if (options.watch) {
-    const watchFunc = () => {
-      const bundleComplete = performBundle(/* continueOnError */ true);
+    const watchFunc = async () => {
+      const bundleDone = await performBundle(/* continueOnError */ true);
       if (options.onWatchBuild) {
-        options.onWatchBuild(bundleComplete);
+        options.onWatchBuild(bundleDone);
       }
     };
-    bundler = watchify(bundler);
-    bundler.on('update', debounce(watchFunc, watchDebounceDelay));
+    fileWatch(entryPoint).on('change', debounce(watchFunc, watchDebounceDelay));
   }
 
   /**
-   * @param {boolean} continueOnError
-   * @return {Promise}
+   * Babel plugin for esbuild
    */
-  function performBundle(continueOnError) {
-    let startTime;
-    return toPromise(
-      bundler
-        .bundle()
-        .once('readable', () => (startTime = Date.now()))
-        .on('error', (err) =>
-          handleBundleError(err, continueOnError, destFilename)
-        )
-        .pipe(source(srcFilename))
-        .pipe(buffer())
-        .pipe(sourcemaps.init({loadMaps: true}))
-        .pipe(
-          regexpSourcemaps(
-            /\$internalRuntimeVersion\$/g,
-            internalRuntimeVersion,
-            'runtime-version'
-          )
-        )
-        .pipe(regexpSourcemaps(/([^]+)/, devWrapper, 'wrapper'))
-        .pipe(rename(destFilename))
-        .pipe(sourcemaps.write('.'))
-        .pipe(gulp.dest(destDir))
-        .on('end', () =>
-          finishBundle(srcFilename, destDir, destFilename, options)
-        )
-    )
-      .then(() => {
-        let name = destFilename;
-        if (options.latestName) {
-          const latestMaxName = options.latestName.split('.js')[0] + '.max.js';
-          name = `${name} → ${latestMaxName}`;
+  const esbuildBabelPlugin = {
+    name: 'babel',
+    async setup(build) {
+      const transformContents = async ({file, contents}) => {
+        const babelOptions = babel.loadOptions({
+          caller: {name: 'unminified'},
+          filename: file.path,
+          sourceFileName: path.relative(process.cwd(), file.path),
+        });
+        const result = await babel.transformAsync(contents, babelOptions);
+        return {contents: result.code};
+      };
+
+      build.onLoad({filter: /.*/, namespace: ''}, async (file) => {
+        const contents = await fs.promises.readFile(file.path, 'utf-8');
+        const hash = crypto.createHash('sha1').update(contents).digest('hex');
+        if (cache.has(hash)) {
+          return {contents: cache.get(hash)};
         }
-        endBuildStep('Compiled', name, startTime);
-      })
-      .then(() => {
-        const target = path.basename(destFilename, path.extname(destFilename));
-        if (UNMINIFIED_TARGETS.includes(target)) {
-          return applyAmpConfig(
-            `${destDir}/${destFilename}`,
-            /* localDev */ true,
-            /* fortesting */ options.fortesting
-          );
-        }
+        const transformed = await transformContents({file, contents});
+        cache.set(hash, transformed.contents);
+        return transformed;
       });
+    },
+  };
+
+  /**
+   * Splits up the wrapper to compute the banner and footer
+   * @return {Object}
+   */
+  function splitWrapper() {
+    const wrapper = options.wrapper || wrappers.none;
+    const sentinel = '<%= contents %>';
+    const start = wrapper.indexOf(sentinel);
+    return {
+      banner: wrapper.slice(0, start),
+      footer: wrapper.slice(start + sentinel.length),
+    };
   }
 
-  return performBundle(options.continueOnError);
+  /**
+   * Bundles an entry point with all its imports and applies babel transforms.
+   * @param {boolean} continueOnError
+   */
+  async function performBundle(continueOnError) {
+    const {banner, footer} = splitWrapper();
+    await esbuild
+      .build({
+        entryPoints: [entryPoint],
+        bundle: true,
+        sourcemap: true,
+        define: experimentDefines,
+        outfile: destFile,
+        plugins: [esbuildBabelPlugin],
+        banner,
+        footer,
+      })
+      .catch((err) => handleBundleError(err, continueOnError, destFilename));
+    finishBundle(srcFilename, destDir, destFilename, options);
+    let name = destFilename;
+    if (options.latestName) {
+      const latestMaxName = options.latestName.split('.js')[0] + '.max.js';
+      name = `${name} → ${latestMaxName}`;
+    }
+    endBuildStep('Compiled', name, startTime);
+    const target = path.basename(destFilename, path.extname(destFilename));
+    if (UNMINIFIED_TARGETS.includes(target)) {
+      await applyAmpConfig(
+        destFile,
+        /* localDev */ true,
+        /* fortesting */ options.fortesting
+      );
+    }
+  }
+
+  await performBundle(options.continueOnError);
 }
 
 /**
@@ -499,7 +524,7 @@ async function compileJs(srcDir, srcFilename, destDir, options) {
   if (options.minify) {
     return compileMinifiedJs(srcDir, srcFilename, destDir, options);
   } else {
-    return compileUnminifiedJs(srcDir, srcFilename, destDir, options);
+    return await compileUnminifiedJs(srcDir, srcFilename, destDir, options);
   }
 }
 
@@ -618,10 +643,14 @@ async function applyAmpConfig(targetFile, localDev, fortesting) {
  * @param {!Object} options
  * @return {!Promise}
  */
-function thirdPartyBootstrap(input, outputName, options) {
+async function thirdPartyBootstrap(input, outputName, options) {
   const {minify, fortesting} = options;
+  const destDir = `dist.3p/${minify ? internalRuntimeVersion : 'current'}`;
+  await fs.ensureDir(destDir);
+
   if (!minify) {
-    return toPromise(gulp.src(input).pipe(gulp.dest('dist.3p/current')));
+    await fs.copy(input, `${destDir}/${path.basename(input)}`);
+    return;
   }
 
   // By default we use an absolute URL, that is independent of the
@@ -635,21 +664,12 @@ function thirdPartyBootstrap(input, outputName, options) {
   const html = fs
     .readFileSync(input, 'utf8')
     .replace(/\.\/integration\.js/g, integrationJs);
-  return toPromise(
-    file(outputName, html, {src: true})
-      .pipe(gulp.dest('dist.3p/' + internalRuntimeVersion))
-      .on('end', function () {
-        const aliasToLatestBuild = 'dist.3p/current-min';
-        if (fs.existsSync(aliasToLatestBuild)) {
-          fs.unlinkSync(aliasToLatestBuild);
-        }
-        fs.symlinkSync(
-          './' + internalRuntimeVersion,
-          aliasToLatestBuild,
-          'dir'
-        );
-      })
-  );
+  await fs.writeFile(`${destDir}/${outputName}`, html);
+  const aliasToLatestBuild = 'dist.3p/current-min';
+  if (fs.existsSync(aliasToLatestBuild)) {
+    fs.unlinkSync(aliasToLatestBuild);
+  }
+  fs.symlinkSync('./' + internalRuntimeVersion, aliasToLatestBuild, 'dir');
 }
 
 /**
@@ -667,18 +687,6 @@ function mkdirSync(path) {
   }
 }
 
-/**
- * Returns a promise for readable
- *
- * @param {*} readable
- * @return {Promise}
- */
-function toPromise(readable) {
-  return new Promise(function (resolve, reject) {
-    readable.on('error', reject).on('end', resolve);
-  });
-}
-
 module.exports = {
   MINIFIED_TARGETS,
   applyAmpConfig,
@@ -694,6 +702,5 @@ module.exports = {
   mkdirSync,
   printConfigHelp,
   printNobuildHelp,
-  toPromise,
   watchDebounceDelay,
 };
