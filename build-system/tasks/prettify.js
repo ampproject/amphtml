@@ -34,9 +34,10 @@ const {
   logOnSameLineLocalDev,
   logWithoutTimestamp,
 } = require('../common/logging');
-const {exec, getStdout} = require('../common/exec');
+const {exec} = require('../common/exec');
 const {getFilesToCheck} = require('../common/utils');
 const {green, cyan, red, yellow} = require('kleur/colors');
+const {isCiBuild} = require('../common/ci');
 const {maybeUpdatePackages} = require('./update-packages');
 const {prettifyGlobs} = require('../test-configs/config');
 
@@ -48,7 +49,10 @@ const tempDir = tempy.directory();
  */
 async function prettify() {
   maybeUpdatePackages();
-  const filesToCheck = getFilesToCheck(prettifyGlobs, {dot: true});
+  const filesToCheck = getFilesToCheck(prettifyGlobs, {
+    dot: true,
+    trackedOnly: isCiBuild(),
+  });
   if (filesToCheck.length == 0) {
     return;
   }
@@ -119,13 +123,8 @@ function printFixMessages() {
  */
 async function runPrettify(filesToCheck) {
   logLocalDev(green('Starting checks...'));
-  const trackedFilesToCheck = getStdout(
-    ['git ls-files', ...filesToCheck].join(' ')
-  )
-    .trim()
-    .split('\n');
   const filesWithErrors = [];
-  for (const file of trackedFilesToCheck) {
+  for (const file of filesToCheck) {
     const options = await getOptions(file);
     const original = fs.readFileSync(file).toString();
     if (argv.fix) {

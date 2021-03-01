@@ -21,7 +21,7 @@ const path = require('path');
 const {clean} = require('../tasks/clean');
 const {doBuild} = require('../tasks/build');
 const {doDist} = require('../tasks/dist');
-const {execOrDie} = require('./exec');
+const {execOrDie, getStdout} = require('./exec');
 const {gitDiffNameOnlyMaster} = require('./git');
 const {green, cyan, yellow} = require('kleur/colors');
 const {log, logLocalDev} = require('./logging');
@@ -92,11 +92,23 @@ function getFilesFromArgv() {
 }
 
 /**
+ * @typedef {{
+ *   trackedOnly: (boolean|undefined),
+ * }}
+ * In addition to globby's options:
+ * https://github.com/sindresorhus/globby#options
+ *
+ * - trackedOnly
+ *   include only files tracked by Git, exclude those in .gitignore
+ */
+let FilesToCheckOptsDef;
+
+/**
  * Gets a list of files to be checked based on command line args and the given
  * file matching globs. Used by tasks like prettify, check-links, etc.
  *
  * @param {!Array<string>} globs
- * @param {Object=} options
+ * @param {FilesToCheckOptsDef=} options
  * @return {!Array<string>}
  */
 function getFilesToCheck(globs, options = {}) {
@@ -111,7 +123,17 @@ function getFilesToCheck(globs, options = {}) {
     }
     return logFiles(filesChanged);
   }
-  return globby.sync(globs, options);
+  const {trackedOnly = false, ...globbyOptions} = options;
+  const files = globby.sync(globs, {
+    gitignore: trackedOnly,
+    ...globbyOptions,
+  });
+  if (trackedOnly) {
+    return getStdout(`git ls-files ${files.join(' ')}`)
+      .trim()
+      .split('\n');
+  }
+  return files;
 }
 
 /**
