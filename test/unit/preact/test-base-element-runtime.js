@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../src/preact/index';
-import {CanRender} from '../../../src/contextprops';
+import {CanRender} from '../../../src/preact/contextprops';
 import {
   PreactBaseElement,
   whenUpgraded,

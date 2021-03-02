@@ -15,7 +15,11 @@
  */
 
 import * as Preact from '../../../src/preact/index';
-import {CanPlay, CanRender, LoadingProp} from '../../../src/contextprops';
+import {
+  CanPlay,
+  CanRender,
+  LoadingProp,
+} from '../../../src/preact/contextprops';
 import {Slot} from '../../../src/preact/slot';
 import {WithAmpContext} from '../../../src/preact/context';
 import {mount} from 'enzyme';
