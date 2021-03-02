@@ -38,9 +38,11 @@ Running the mentioned command inserts the TOC after the comment if necessary:
   Content.
 ```
 
+These files are checked during Continuous Integration so they will stay up-to-date.
+
 ## Options
 
-Files may configure how they'd like to create and format their TOCs. They can include a comment after a TOC header including JSON for [`markdown-toc` options](https://github.com/jonschlinkert/markdown-toc#options).
+You may configure how you'd like to create and format a TOC. They can include a second comment after the header including a JSON object. This object contains [`markdown-toc` options](https://github.com/jonschlinkert/markdown-toc#options).
 
 For example, the following options:
 
