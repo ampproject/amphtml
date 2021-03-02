@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as CSS from './component.css';
 import * as Preact from '../../../src/preact';
 import {Keys} from '../../../src/utils/key-codes';
 import {forwardRef} from '../../../src/preact/compat';
@@ -30,6 +29,8 @@ import {
   useRef,
   useState,
 } from '../../../src/preact';
+import {useStyles} from './component.jss';
+import objstr from 'obj-str';
 
 const SelectorContext = Preact.createContext(
   /** @type {SelectorDef.ContextProps} */ ({selected: []})
@@ -291,10 +292,10 @@ export function Option({
   onKeyDown: customOnKeyDown,
   option,
   role = 'option',
-  style,
   tabIndex,
   ...rest
 }) {
+  const classes = useStyles();
   const ref = useRef(null);
   const {
     disabled: selectorDisabled,
@@ -384,6 +385,12 @@ export function Option({
       : CSS.OPTION;
   const optionProps = {
     ...rest,
+    className: objstr({
+      [classes.option]: true,
+      [classes.selected]: isSelected && !selectorMultiple,
+      [classes.multiselected]: isSelected && selectorMultiple,
+      [classes.disabled]: disabled || selectorDisabled,
+    }),
     disabled,
     'aria-disabled': String(disabled),
     onClick,
@@ -394,7 +401,6 @@ export function Option({
     role,
     selected: isSelected,
     'aria-selected': String(isSelected),
-    style: {...statusStyle, ...style},
     tabIndex:
       tabIndex ?? keyboardSelectMode === KEYBOARD_SELECT_MODE.SELECT ? -1 : 0,
   };
