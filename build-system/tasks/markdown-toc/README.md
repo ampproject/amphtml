@@ -11,18 +11,12 @@ gulp markdown-toc [--fix]
 Markdown files must contain the following comment where they'd like to include the TOC.
 
 ```markdown
-# Hello
-
 <!--
   (Do not remove or edit this comment.)
 
   This table-of-contents is automatically generated. To generate it, run:
     gulp markdown-toc --fix
 -->
-
-## Section
-
-Content.
 ```
 
 ```diff
