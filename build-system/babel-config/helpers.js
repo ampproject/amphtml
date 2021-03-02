@@ -118,15 +118,16 @@ function getReplaceGlobalsPlugin() {
             if (scope.getBinding('global')) {
               return;
             }
-            if (scope.getBinding('globalThis')) {
-              return;
-            }
+            const possibleNames = ['globalThis', 'self'];
+            // See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/globalThis#browser_compatibility
             if (argv.ie) {
-              // See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/globalThis#browser_compatibility
-              path.replaceWith(t.identifier('window'));
-            } else {
-              path.replaceWith(t.identifier('globalThis'));
+              possibleNames.shift();
             }
+            const name = possibleNames.find(name => !scope.getBinding(name));
+            if (!name) {
+              throw path.buildCodeFrameError('Could not replace `global` with globalThis identifier');
+            }
+            path.replaceWith(t.identifier(name));
           },
         },
       };
