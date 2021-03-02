@@ -139,7 +139,7 @@ export function extractTags(ampdoc, element) {
   const concatedTags = extractedTags.concat(
     articleMetaTags.length
       ? articleMetaTags
-      : extractTitle(ampdoc.getRootNode()) || []
+      : extractTitle(ampdoc.getDocumentOrShadowRoot()) || []
   );
   const loweredCase = concatedTags.map((tag) => tag.toLowerCase().trim());
   const noDuplication = loweredCase.filter(

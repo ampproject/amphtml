@@ -832,7 +832,7 @@ describes.realWin('AmpDocSingle', {}, (env) => {
   });
 
   it('should return document as root', () => {
-    expect(ampdoc.getRootNode()).to.equal(win.document);
+    expect(ampdoc.getDocumentOrShadowRoot()).to.equal(win.document);
     expect(ampdoc.getHeadNode()).to.equal(win.document.head);
     expect(ampdoc.isSingleDoc()).to.be.true;
   });
@@ -963,7 +963,7 @@ describes.realWin('AmpDocShadow', {}, (env) => {
     if (!ampdoc) {
       return;
     }
-    expect(ampdoc.getRootNode()).to.equal(shadowRoot);
+    expect(ampdoc.getDocumentOrShadowRoot()).to.equal(shadowRoot);
     expect(ampdoc.getHeadNode()).to.equal(shadowRoot);
   });
 
@@ -1086,7 +1086,7 @@ describes.realWin('AmpDocFie', {}, (env) => {
   });
 
   it('should return document as root', () => {
-    expect(ampdoc.getRootNode()).to.equal(childWin.document);
+    expect(ampdoc.getDocumentOrShadowRoot()).to.equal(childWin.document);
     expect(ampdoc.getHeadNode()).to.equal(childWin.document.head);
   });
 

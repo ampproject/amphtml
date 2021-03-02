@@ -90,7 +90,7 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
           beforeEach(() => {
             ampdoc = env.ampdoc;
             win = ampdoc.win;
-            doc = ampdoc.getRootNode();
+            doc = ampdoc.getDocumentOrShadowRoot();
 
             // Create a test amp-carousel GWD page deck.
             doc.body.innerHTML = `<amp-carousel id="pagedeck"

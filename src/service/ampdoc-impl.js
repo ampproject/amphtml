@@ -323,11 +323,9 @@ export class AmpDoc {
    * Whether the runtime in the single-doc mode. Alternative is the shadow-doc
    * mode that supports multiple documents per a single window.
    * @return {boolean}
+   * @abstract
    */
-  isSingleDoc() {
-    // TODO(#22733): remove when ampdoc-fie is launched.
-    return /** @type {?} */ (devAssert(null, 'not implemented'));
-  }
+  isSingleDoc() {}
 
   /**
    * @return {?AmpDoc}
@@ -408,16 +406,16 @@ export class AmpDoc {
   /**
    * Stores the value of an ampdoc's meta tag content for a given name. To be
    * implemented by subclasses.
-   * @param {string} unusedName
-   * @param {string} unusedContent
    *
    * Avoid using this method in components. It is only meant to be used by the
    * runtime for AmpDoc subclasses where <meta> elements do not exist and name/
    * content pairs must be stored in this.meta_.
+   *
+   * @param {string} unusedName
+   * @param {string} unusedContent
+   * @abstract
    */
-  setMetaByName(unusedName, unusedContent) {
-    devAssert(null, 'not implemented');
-  }
+  setMetaByName(unusedName, unusedContent) {}
 
   /**
    * Returns whether the specified extension has been declared on this ampdoc.
@@ -445,10 +443,9 @@ export class AmpDoc {
    * node can be used, among other things, to add ampdoc-wide event listeners.
    *
    * @return {!Document|!ShadowRoot}
+   * @abstract
    */
-  getRootNode() {
-    return /** @type {?} */ (devAssert(null, 'not implemented'));
-  }
+  getDocumentOrShadowRoot() {}
 
   /**
    * Returns the head node. It's either an element or a shadow root.
@@ -461,10 +458,9 @@ export class AmpDoc {
    * Returns `true` if the ampdoc's body is available.
    *
    * @return {boolean}
+   * @abstract
    */
-  isBodyAvailable() {
-    return /** @type {?} */ (devAssert(false, 'not implemented'));
-  }
+  isBodyAvailable() {}
 
   /**
    * Returns the ampdoc's body. Requires the body to already be available.
@@ -472,19 +468,17 @@ export class AmpDoc {
    * See `isBodyAvailable` and `waitForBodyOpen`.
    *
    * @return {!Element}
+   * @abstract
    */
-  getBody() {
-    return /** @type {?} */ (devAssert(null, 'not implemented'));
-  }
+  getBody() {}
 
   /**
    * Returns a promise that will be resolved when the ampdoc's body is
    * available.
    * @return {!Promise<!Element>}
+   * @abstract
    */
-  waitForBodyOpen() {
-    return /** @type {?} */ (devAssert(null, 'not implemented'));
-  }
+  waitForBodyOpen() {}
 
   /**
    * Returns `true` if document is ready.
@@ -492,27 +486,24 @@ export class AmpDoc {
    * See `whenReady`.
    *
    * @return {boolean}
+   * @abstract
    */
-  isReady() {
-    return /** @type {?} */ (devAssert(null, 'not implemented'));
-  }
+  isReady() {}
 
   /**
    * Returns a promise that will be resolved when the ampdoc's DOM is fully
    * ready.
    * @return {!Promise}
+   * @abstract
    */
-  whenReady() {
-    return /** @type {?} */ (devAssert(null, 'not implemented'));
-  }
+  whenReady() {}
 
   /**
    * Returns the URL from which the document was loaded.
    * @return {string}
+   * @abstract
    */
-  getUrl() {
-    return /** @type {?} */ (devAssert(null, 'not implemented'));
-  }
+  getUrl() {}
 
   /**
    * Locates an element with the specified ID within the ampdoc. In the
@@ -523,7 +514,7 @@ export class AmpDoc {
    * @return {?Element}
    */
   getElementById(id) {
-    return this.getRootNode().getElementById(id);
+    return this.getDocumentOrShadowRoot().getElementById(id);
   }
 
   /**
@@ -532,7 +523,7 @@ export class AmpDoc {
    * @return {boolean}
    */
   contains(node) {
-    return this.getRootNode().contains(node);
+    return this.getDocumentOrShadowRoot().contains(node);
   }
 
   /**
@@ -737,7 +728,7 @@ export class AmpDocSingle extends AmpDoc {
   }
 
   /** @override */
-  getRootNode() {
+  getDocumentOrShadowRoot() {
     return this.win.document;
   }
 
@@ -825,7 +816,7 @@ export class AmpDocShadow extends AmpDoc {
   }
 
   /** @override */
-  getRootNode() {
+  getDocumentOrShadowRoot() {
     return this.shadowRoot_;
   }
 
@@ -940,7 +931,7 @@ export class AmpDocFie extends AmpDoc {
   }
 
   /** @override */
-  getRootNode() {
+  getDocumentOrShadowRoot() {
     return this.win.document;
   }
 

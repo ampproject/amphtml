@@ -89,7 +89,7 @@ export class FormValidator {
     this.mutator = Services.mutatorForDoc(form);
 
     /** @protected @const {!Document|!ShadowRoot} */
-    this.root = this.ampdoc.getRootNode();
+    this.root = this.ampdoc.getDocumentOrShadowRoot();
 
     /**
      * Tribool indicating last known validity of form.

@@ -222,7 +222,7 @@ export class Extensions {
    * @return {!Promise<!ExtensionDef>}
    */
   installExtensionForDoc(ampdoc, extensionId, opt_extensionVersion) {
-    const rootNode = ampdoc.getRootNode();
+    const rootNode = ampdoc.getDocumentOrShadowRoot();
     let extLoaders = rootNode[LOADER_PROP];
     if (!extLoaders) {
       extLoaders = rootNode[LOADER_PROP] = map();

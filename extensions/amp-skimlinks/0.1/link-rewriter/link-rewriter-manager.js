@@ -54,12 +54,12 @@ export class LinkRewriterManager {
    */
   constructor(ampdoc) {
     /**
-     * Use getRootNode() to support "shadow AMP" mode where the rootNode is not
+     * Use getDocumentOrShadowRoot() to support "shadow AMP" mode where the rootNode is not
      * necessarily the page document.
      * See https://www.ampproject.org/docs/integration/pwa-amp/amp-in-pwa
      * @private {!Document|!ShadowRoot}
      */
-    this.rootNode_ = ampdoc.getRootNode();
+    this.rootNode_ = ampdoc.getDocumentOrShadowRoot();
 
     /**
      * List of link rewriter Id in priority order as defined

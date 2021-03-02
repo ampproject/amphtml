@@ -33,7 +33,7 @@ export class LocalSubscriptionPlatformRenderer {
     this.ampdoc_ = ampdoc;
 
     /** @private @const */
-    this.rootNode_ = ampdoc.getRootNode();
+    this.rootNode_ = ampdoc.getDocumentOrShadowRoot();
 
     /** @private @const {!./dialog.Dialog} */
     this.dialog_ = dialog;
@@ -86,7 +86,7 @@ export class LocalSubscriptionPlatformRenderer {
       .then(() => {
         // Find the first matching dialog.
         const candidates = this.ampdoc_
-          .getRootNode()
+          .getDocumentOrShadowRoot()
           .querySelectorAll('[subscriptions-dialog][subscriptions-display]');
         for (let i = 0; i < candidates.length; i++) {
           const candidate = candidates[i];

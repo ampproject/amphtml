@@ -37,7 +37,7 @@ describes.fakeWin('LinkRewriterManager', {amp: true}, (env) => {
 
   beforeEach(() => {
     win = env.win;
-    rootDocument = env.ampdoc.getRootNode();
+    rootDocument = env.ampdoc.getDocumentOrShadowRoot();
     env.sandbox.spy(rootDocument, 'addEventListener');
     env.sandbox.spy(rootDocument, 'querySelector');
 
@@ -443,7 +443,7 @@ describes.fakeWin('Link Rewriter', {amp: true}, (env) => {
     env.sandbox.stub(chunkModule, 'chunk').callsFake((node, task) => {
       task();
     });
-    rootDocument = env.ampdoc.getRootNode();
+    rootDocument = env.ampdoc.getDocumentOrShadowRoot();
 
     createResolveResponseHelper = (syncData, asyncData) => {
       const twoStepsResponse = new TwoStepsResponse(syncData, asyncData);
@@ -778,7 +778,7 @@ describes.fakeWin('LinkReplacementCache', {amp: true}, (env) => {
   let rootDocument, cache, anchor1, anchor2, anchor3;
 
   beforeEach(() => {
-    rootDocument = env.ampdoc.getRootNode();
+    rootDocument = env.ampdoc.getDocumentOrShadowRoot();
     anchor1 = rootDocument.createElement('a');
     anchor2 = rootDocument.createElement('a');
     anchor3 = rootDocument.createElement('a');

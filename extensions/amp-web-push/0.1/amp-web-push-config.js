@@ -186,7 +186,7 @@ export class WebPushConfig extends AMP.BaseElement {
    */
   ensureUniqueElement_() {
     const webPushConfigElements = this.getAmpDoc()
-      .getRootNode()
+      .getDocumentOrShadowRoot()
       .querySelectorAll(`#${escapeCssSelectorIdent(CONFIG_TAG)}`);
     if (webPushConfigElements.length > 1) {
       throw user().createError(

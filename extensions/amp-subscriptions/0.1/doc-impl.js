@@ -40,13 +40,13 @@ export class DocImpl {
   }
 
   /** @override */
-  getRootNode() {
-    return this.ampdoc_.getRootNode();
+  getDocumentOrShadowRoot() {
+    return this.ampdoc_.getDocumentOrShadowRoot();
   }
 
   /** @override */
   getRootElement() {
-    const root = this.ampdoc_.getRootNode();
+    const root = this.ampdoc_.getDocumentOrShadowRoot();
     return dev().assertElement(root.documentElement || root.body || root);
   }
 

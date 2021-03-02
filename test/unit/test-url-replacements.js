@@ -152,7 +152,7 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
             cookie: '',
             documentElement: {
               nodeType: /* element */ 1,
-              getRootNode() {
+              getDocumentOrShadowRoot() {
                 return win.document;
               },
               hasAttribute: () => {},
@@ -186,7 +186,7 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
           // Fake query selectors needed to bypass <meta> tag checks.
           querySelector: () => null,
           querySelectorAll: () => [],
-          getRootNode() {
+          getDocumentOrShadowRoot() {
             return win.document;
           },
         };

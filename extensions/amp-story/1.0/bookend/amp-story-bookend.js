@@ -658,7 +658,7 @@ export class AmpStoryBookend extends DraggableDrawer {
    * @private
    */
   getStoryMetadata_() {
-    const jsonLd = getJsonLd(this.getAmpDoc().getRootNode());
+    const jsonLd = getJsonLd(this.getAmpDoc().getDocumentOrShadowRoot());
 
     const urlService = Services.urlForDoc(this.element);
     const {canonicalUrl} = Services.documentInfoForDoc(this.getAmpDoc());

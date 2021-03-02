@@ -38,7 +38,7 @@ export class Url {
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
-    const root = ampdoc.getRootNode();
+    const root = ampdoc.getDocumentOrShadowRoot();
     const doc = root.ownerDocument || root;
 
     /** @private @const {!HTMLAnchorElement} */

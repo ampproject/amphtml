@@ -182,7 +182,7 @@ class AmpVideoIframe extends AMP.BaseElement {
    */
   getMetadata_() {
     const {sourceUrl, canonicalUrl} = Services.documentInfoForDoc(this.element);
-    const {title, documentElement} = this.getAmpDoc().getRootNode();
+    const {title, documentElement} = this.getAmpDoc().getDocumentOrShadowRoot();
 
     return dict({
       'sourceUrl': sourceUrl,

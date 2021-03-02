@@ -228,7 +228,7 @@ export class PooolVendor {
    */
   onRelease_() {
     const articlePreview = this.ampdoc
-      .getRootNode()
+      .getDocumentOrShadowRoot()
       .querySelector('[poool-access-preview]');
 
     if (articlePreview) {
@@ -238,7 +238,7 @@ export class PooolVendor {
     }
 
     const articleContent = this.ampdoc
-      .getRootNode()
+      .getDocumentOrShadowRoot()
       .querySelector('[poool-access-content]');
 
     if (articleContent) {

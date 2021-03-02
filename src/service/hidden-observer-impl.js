@@ -40,7 +40,7 @@ export class HiddenObserver {
    */
   constructor(ampdoc) {
     /** @const {!Document|!ShadowRoot} */
-    this.root_ = ampdoc.getRootNode();
+    this.root_ = ampdoc.getDocumentOrShadowRoot();
     const doc = this.root_.ownerDocument || this.root_;
 
     /** @const {!Window} */

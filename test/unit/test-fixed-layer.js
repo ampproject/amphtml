@@ -417,7 +417,7 @@ describes.sandboxed('FixedLayer', {}, () => {
         this.firstElementChild = createElement('i-amphtml-fpa');
         toggle(this.firstElementChild, false);
       },
-      getRootNode() {
+      getDocumentOrShadowRoot() {
         return documentApi;
       },
       dispatchEvent() {},

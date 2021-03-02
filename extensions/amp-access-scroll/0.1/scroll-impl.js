@@ -131,7 +131,7 @@ export class ScrollAccessVendor extends AccessClientAdapter {
     // TODO(dbow): Handle timeout?
     return super.authorize().then((response) => {
       const isStory = this.ampdoc
-        .getRootNode()
+        .getDocumentOrShadowRoot()
         .querySelector('amp-story[standalone]');
 
       if (response && response['scroll']) {

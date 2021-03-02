@@ -23,7 +23,7 @@ import {iterateCursor} from '../../../src/dom';
  * @return {!Array<!Element>}
  */
 export function getScopeElements(ampDoc, configOpts) {
-  const doc = ampDoc.getRootNode();
+  const doc = ampDoc.getDocumentOrShadowRoot();
   let cssSelector = configOpts.section.join(' a, ');
   let selection = doc.querySelectorAll('a');
   const filteredSelection = [];

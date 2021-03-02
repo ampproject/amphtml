@@ -360,7 +360,7 @@ export class VideoDocking {
     )}]`;
 
     const dockableElements = ampdoc
-      .getRootNode()
+      .getDocumentOrShadowRoot()
       .querySelectorAll(dockableSelector);
 
     for (let i = 0; i < dockableElements.length; i++) {
@@ -398,7 +398,7 @@ export class VideoDocking {
    * @private
    */
   findSlot_() {
-    const root = this.ampdoc_.getRootNode();
+    const root = this.ampdoc_.getDocumentOrShadowRoot();
 
     // For consistency always honor the dock attribute on the first el in page.
     const video = root.querySelector('[dock]');
@@ -504,7 +504,7 @@ export class VideoDocking {
    * @private
    */
   getDoc_() {
-    const root = this.ampdoc_.getRootNode();
+    const root = this.ampdoc_.getDocumentOrShadowRoot();
     return /** @type {!Document} */ (root.ownerDocument || root);
   }
 
@@ -1252,7 +1252,7 @@ export class VideoDocking {
 
     const onDragEnd = () => this.onDragEnd_(unlisteners);
 
-    const root = this.ampdoc_.getRootNode();
+    const root = this.ampdoc_.getDocumentOrShadowRoot();
     const unlisteners = [
       this.disableScroll_(),
       this.disableUserSelect_(),

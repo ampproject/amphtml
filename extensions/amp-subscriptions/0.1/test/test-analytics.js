@@ -37,7 +37,7 @@ describes.realWin('SubscriptionAnalytics', {amp: true}, (env) => {
 
   beforeEach(() => {
     ampdoc = env.ampdoc;
-    analytics = new SubscriptionAnalytics(ampdoc.getRootNode());
+    analytics = new SubscriptionAnalytics(ampdoc.getDocumentOrShadowRoot());
   });
 
   it('should not fail', () => {

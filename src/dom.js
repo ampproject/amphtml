@@ -235,7 +235,7 @@ export function isConnectedNode(node) {
  */
 export function rootNodeFor(node) {
   if (Node.prototype.getRootNode) {
-    // Type checker says `getRootNode` may return null.
+    // Type checker says `getDocumentOrShadowRoot` may return null.
     return node.getRootNode() || node;
   }
   let n;

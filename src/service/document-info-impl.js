@@ -84,7 +84,7 @@ export class DocInfo {
     const ampdoc = this.ampdoc_;
     const url = ampdoc.getUrl();
     const sourceUrl = getSourceUrl(url);
-    const rootNode = ampdoc.getRootNode();
+    const rootNode = ampdoc.getDocumentOrShadowRoot();
     let canonicalUrl = rootNode && rootNode.AMP && rootNode.AMP.canonicalUrl;
     if (!canonicalUrl) {
       const canonicalTag = rootNode.querySelector('link[rel=canonical]');

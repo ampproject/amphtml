@@ -493,7 +493,7 @@ export class AmpdocAnalyticsRoot extends AnalyticsRoot {
 
   /** @override */
   getRoot() {
-    return this.ampdoc.getRootNode();
+    return this.ampdoc.getDocumentOrShadowRoot();
   }
 
   /** @override */

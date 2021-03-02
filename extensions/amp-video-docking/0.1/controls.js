@@ -473,7 +473,7 @@ export class Controls {
 
   /** @private */
   hideOnTapOutside_() {
-    listen(this.ampdoc_.getRootNode(), 'mousedown', (e) => {
+    listen(this.ampdoc_.getDocumentOrShadowRoot(), 'mousedown', (e) => {
       if (this.isControlsTarget_(dev().assertElement(e.target))) {
         return;
       }

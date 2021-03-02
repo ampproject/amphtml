@@ -250,7 +250,7 @@ export class ActionService {
     this.ampdoc = ampdoc;
 
     /** @const {!Document|!ShadowRoot} */
-    this.root_ = opt_root || ampdoc.getRootNode();
+    this.root_ = opt_root || ampdoc.getDocumentOrShadowRoot();
 
     /** @const {boolean} */
     this.isEmail_ =

@@ -280,7 +280,7 @@ class UrlRewriter_ {
     /** @const @private {!Location} */
     this.shellLoc_ = this.urlService_.parse(shellUrl);
 
-    listen(ampdoc.getRootNode(), 'click', this.handle_.bind(this));
+    listen(ampdoc.getDocumentOrShadowRoot(), 'click', this.handle_.bind(this));
   }
 
   /**
