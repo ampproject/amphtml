@@ -27,7 +27,6 @@
 
 const {
   getDepCheckConfig,
-  getIETestConfig,
   getPostClosureConfig,
   getPreClosureConfig,
   getTestConfig,
@@ -43,7 +42,6 @@ const {log} = require('./build-system/common/logging');
 const babelTransforms = new Map([
   ['babel-jest', {}],
   ['dep-check', getDepCheckConfig()],
-  ['ie-test', getIETestConfig()],
   ['post-closure', getPostClosureConfig()],
   ['pre-closure', getPreClosureConfig()],
   ['test', getTestConfig()],

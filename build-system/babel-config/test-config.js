@@ -78,19 +78,6 @@ function getTestConfig() {
   };
 }
 
-/**
- * Gets the config for babel transforms when tests are run on IE.
- *
- * @return {!Object}
- */
-function getIETestConfig() {
-  return {
-    compact: false,
-    presets: ['@babel/preset-env'],
-  };
-}
-
 module.exports = {
-  getIETestConfig,
   getTestConfig,
 };

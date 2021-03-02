@@ -79,14 +79,7 @@ function updatePreprocessors(config) {
   const htmlPreprocessors = ['htmlTransformer', 'html2js'];
   const {fixturesPath} = testConfig;
   config.preprocessors[fixturesPath] = htmlPreprocessors;
-
-  const jsPreprocessors = ['esbuild'];
-  // TODO(rsimha): Remove this block after evanw/esbuild#297 is fixed.
-  if (argv.ie) {
-    jsPreprocessors.push('babel');
-    config.babelPreprocessor = {options: {caller: {name: 'ie-test'}}};
-  }
-  config.preprocessors[unifiedJsFile] = jsPreprocessors;
+  config.preprocessors[unifiedJsFile] = ['esbuild'];
 }
 
 /**
@@ -290,6 +283,7 @@ function updateEsbuildConfig(config) {
     printBabelDot
   );
   config.esbuild = {
+    target: 'es5',
     define: {
       'process.env.NODE_DEBUG': 'false',
       'process.env.NODE_ENV': '"test"',
