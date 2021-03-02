@@ -123,9 +123,11 @@ function getReplaceGlobalsPlugin() {
             if (argv.ie) {
               possibleNames.shift();
             }
-            const name = possibleNames.find(name => !scope.getBinding(name));
+            const name = possibleNames.find((name) => !scope.getBinding(name));
             if (!name) {
-              throw path.buildCodeFrameError('Could not replace `global` with globalThis identifier');
+              throw path.buildCodeFrameError(
+                'Could not replace `global` with globalThis identifier'
+              );
             }
             path.replaceWith(t.identifier(name));
           },
