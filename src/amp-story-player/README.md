@@ -14,13 +14,27 @@ The player is fully available and the functionalities here (unless otherwise spe
 
 This update contains guidance on using the Web Story Player to support:
 
--   [Navigating between stories](#Navigating-between-stories)
--   [Integrating Web Stories into your website (entrypoints)](#integrating-web-stories-into-your-website-entrypoints)
--   [Programmatically fetching more stories](#Programmatically-fetching-more-stories)
--   [Circular wrapping](#Circular-wrapping)
--   [Customizing position & visibility of story UI controls](#Customizing-position-&-visibility-of-story-UI-controls)
--   [Custom Events](#Custom-Events)
--   [Upcoming API Change: Poster Image](#Upcoming-API-Change:-Poster-Image)
+<!--
+  (Do not remove or edit this comment.)
+
+  This table-of-contents is automatically generated. To generate it, run:
+    gulp markdown-toc --fix
+-->
+
+<!-- {"maxdepth": 1} -->
+
+-   [Summary](#summary)
+-   [Player setup](#player-setup)
+-   [Navigating between stories](#navigating-between-stories)
+-   [Integrating web stories into your website (entrypoints)](#integrating-web-stories-into-your-website-entrypoints)
+-   [Programmatically fetching more stories](#programmatically-fetching-more-stories)
+-   [Circular Wrapping](#circular-wrapping)
+-   [Customizing position & visibility of story UI controls](#customizing-position--visibility-of-story-ui-controls)
+-   [Custom Events](#custom-events)
+-   [Upcoming API Change: Poster Image](#upcoming-api-change-poster-image)
+-   [Additional use case demos](#additional-use-case-demos)
+-   [Additional explorations and roadmap](#additional-explorations-and-roadmap)
+-   [FAQs (please feel free to reach out with other questions & thoughts)](#faqs-please-feel-free-to-reach-out-with-other-questions--thoughts)
 
 Beyond this, you’ll also find:
 

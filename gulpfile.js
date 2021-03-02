@@ -124,6 +124,7 @@ createTask('get-zindex', 'getZindex', 'get-zindex');
 createTask('integration', 'integration', 'integration');
 createTask('lint', 'lint', 'lint');
 createTask('make-extension', 'makeExtension', 'extension-generator');
+createTask('markdown-toc', 'markdownToc', 'markdown-toc');
 createTask('performance', 'performance', 'performance');
 createTask('performance-urls', 'performanceUrls', 'performance-urls');
 createTask('pr-check', 'prCheck', 'pr-check');

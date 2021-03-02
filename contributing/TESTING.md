@@ -20,6 +20,13 @@ This document provides details for testing and building your AMP code.
 
 **Contents**
 
+<!--
+  (Do not remove or edit this comment.)
+
+  This table-of-contents is automatically generated. To generate it, run:
+    gulp markdown-toc --fix
+-->
+
 -   [Testing commands](#testing-commands)
 -   [Manual testing](#manual-testing)
     -   [Serve Mode](#serve-mode)

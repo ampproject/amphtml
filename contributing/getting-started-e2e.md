@@ -24,28 +24,40 @@ If you're already familiar with Git/GitHub/etc. or you just want to know what co
 
 If you do not yet have a specific code contribution project in mind as you go through this guide, consider grabbing one of the [Good First Issues](https://github.com/ampproject/amphtml/labels/good%20first%20issue) we have created for new contributors.
 
+<!--
+  (Do not remove or edit this comment.)
+
+  This table-of-contents is automatically generated. To generate it, run:
+    gulp markdown-toc --fix
+-->
+
 -   [How to get help](#how-to-get-help)
 -   [Intro to Git and GitHub](#intro-to-git-and-github)
 -   [Set up your GitHub account and Git](#set-up-your-github-account-and-git)
 -   [Get a copy of the amphtml code](#get-a-copy-of-the-amphtml-code)
-    -   [Understanding repositories](#understanding-repositories)
-    -   [Creating your GitHub fork and your local repository](#creating-your-github-fork-and-your-local-repository)
+-   [Understanding repositories](#understanding-repositories)
+-   [Creating your GitHub fork and your local repository](#creating-your-github-fork-and-your-local-repository)
 -   [Set up aliases for the remote Git repositories](#set-up-aliases-for-the-remote-git-repositories)
 -   [Building AMP and starting a local server](#building-amp-and-starting-a-local-server)
 -   [Create a Git branch](#create-a-git-branch)
 -   [Pull the latest changes from the amphtml repository](#pull-the-latest-changes-from-the-amphtml-repository)
 -   [Edit files and commit them](#edit-files-and-commit-them)
-    -   [Code quality and style](#code-quality-and-style)
+-   [Code quality and style](#code-quality-and-style)
+    -   [Workflow for Visual Studio Code](#workflow-for-visual-studio-code)
+        -   [To automatically fix JS files on save](#to-automatically-fix-js-files-on-save)
+        -   [To automatically fix non-JS files on save](#to-automatically-fix-non-js-files-on-save)
+    -   [Manually fixing code](#manually-fixing-code)
 -   [Testing your changes](#testing-your-changes)
-    -   [Running tests locally](#running-tests-locally)
-    -   [Running all the CircleCI checks locally](#running-all-the-circleci-checks-locally)
-    -   [Adding tests for your change](#adding-tests-for-your-change)
+-   [Running tests locally](#running-tests-locally)
+-   [Running all the CircleCI checks locally](#running-all-the-circleci-checks-locally)
+-   [Adding tests](#adding-tests)
+-   [Perform manual tests](#perform-manual-tests)
 -   [Push your changes to your GitHub fork](#push-your-changes-to-your-github-fork)
 -   [Send a Pull Request (i.e. request a code review)](#send-a-pull-request-ie-request-a-code-review)
 -   [Respond to Pull Request comments](#respond-to-pull-request-comments)
 -   [Delete your branch](#delete-your-branch)
 -   [See your changes in production](#see-your-changes-in-production)
--   [⚡⚡⚡... (Next steps)](#-next-steps)
+-   [⚡⚡⚡... (Next steps)](#%E2%9A%A1%E2%9A%A1%E2%9A%A1-next-steps)
 -   [Other resources](#other-resources)
 
 # How to get help
