@@ -32,7 +32,14 @@ module.exports = {
             // Disallow importing AMP dependencies into preact/Bento
             'target': 'src/preact',
             'from': 'src',
-            'except': ['./core', './preact'],
+            'except': ['./core', './context', './preact'],
+          },
+          {
+            // Disallow importing AMP dependencies into context module
+            // TODO(rcebulko): Try to migrate src/context into src/preact
+            'target': 'src/context',
+            'from': 'src',
+            'except': ['./core', './context'],
           },
         ],
       },
@@ -42,7 +49,17 @@ module.exports = {
   // Do not add to this list
   'overrides': [
     {
-      'files': ['./preact/base-element.js', './preact/slot.js'],
+      'files': [
+        './preact/base-element.js',
+        './preact/slot.js',
+        './context/component-hooks.js',
+        './context/component-install.js',
+        './context/component.js',
+        './context/node.js',
+        './context/prop.js',
+        './context/scheduler.js',
+        './context/values.js',
+      ],
       'rules': {'import/no-restricted-paths': 1},
     },
   ],
