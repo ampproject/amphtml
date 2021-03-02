@@ -56,7 +56,7 @@ const PLATFORM_KEY = 'subscribe.google.com';
 const GOOGLE_DOMAIN_RE = /(^|\.)google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)$/;
 
 /** @enum {number} */
-const GoogleMeteringStrategy = {
+const ShowcaseStrategy = {
   NONE: 1,
   LEAD_ARTICLE: 2,
   EXTENDED_ACCESS: 3,
@@ -520,9 +520,9 @@ export class GoogleSubscriptionsPlatform {
    * @private
    */
   maybeGetLAAEntitlement_() {
-    return this.getGoogleMeteringStrategy_().then((strategy) => {
+    return this.getShowcaseStrategy_().then((strategy) => {
       // Verify Google's metering strategy for this article.
-      if (strategy !== GoogleMeteringStrategy.LEAD_ARTICLE) {
+      if (strategy !== ShowcaseStrategy.LEAD_ARTICLE) {
         return null;
       }
 
@@ -540,14 +540,14 @@ export class GoogleSubscriptionsPlatform {
   }
 
   /**
-   * Returns Google's metering strategy for this article.
+   * Returns Google's Showcase strategy for this article.
    * @private
-   * @return {!Promise<!GoogleMeteringStrategy>}
+   * @return {!Promise<!ShowcaseStrategy>}
    */
-  getGoogleMeteringStrategy_() {
+  getShowcaseStrategy_() {
     // Verify the service config enables a Google metering strategy.
     if (!this.enableLAA_ && !this.enableMetering_) {
-      return Promise.resolve(GoogleMeteringStrategy.NONE);
+      return Promise.resolve(ShowcaseStrategy.NONE);
     }
 
     return this.viewerPromise_.getReferrerUrl().then((referrer) => {
@@ -561,7 +561,7 @@ export class GoogleSubscriptionsPlatform {
         // construct LAA urls.
         !getMode(this.ampdoc_.win).localDev
       ) {
-        return GoogleMeteringStrategy.NONE;
+        return ShowcaseStrategy.NONE;
       }
 
       // Parse URL params.
@@ -569,21 +569,21 @@ export class GoogleSubscriptionsPlatform {
 
       // Verify timestamp.
       if (parseInt(urlParams[`gaa_ts`], 16) < Date.now() / 1000) {
-        return GoogleMeteringStrategy.NONE;
+        return ShowcaseStrategy.NONE;
       }
 
       // Verify a few params exist.
       if (!urlParams[`gaa_n`] || !urlParams[`gaa_sig`]) {
-        return GoogleMeteringStrategy.NONE;
+        return ShowcaseStrategy.NONE;
       }
 
       // Determine Google metering strategy.
       if (urlParams[`gaa_at`] === 'la') {
-        return GoogleMeteringStrategy.LEAD_ARTICLE;
+        return ShowcaseStrategy.LEAD_ARTICLE;
       } else if (urlParams[`gaa_at`] === 'g') {
-        return GoogleMeteringStrategy.EXTENDED_ACCESS;
+        return ShowcaseStrategy.EXTENDED_ACCESS;
       } else {
-        return GoogleMeteringStrategy.NONE;
+        return ShowcaseStrategy.NONE;
       }
     });
   }
@@ -624,7 +624,7 @@ export class GoogleSubscriptionsPlatform {
         return null;
       }
 
-      const meteringStrategyPromise = this.getGoogleMeteringStrategy_();
+      const meteringStrategyPromise = this.getShowcaseStrategy_();
       const meteringStatePromise = this.serviceAdapter_.loadMeteringState();
       const promises = Promise.all([
         meteringStrategyPromise,
@@ -644,7 +644,7 @@ export class GoogleSubscriptionsPlatform {
 
         // Add metering param.
         if (
-          googleMeteringStrategy === GoogleMeteringStrategy.EXTENDED_ACCESS &&
+          googleMeteringStrategy === ShowcaseStrategy.EXTENDED_ACCESS &&
           meteringState
         ) {
           // Make sure SwG sends a fresh request, instead of using cache.
@@ -730,7 +730,7 @@ export class GoogleSubscriptionsPlatform {
   activate(entitlement, grantEntitlement, continueAuthorizationFlow) {
     const best = grantEntitlement || entitlement;
 
-    const googleMeteringStrategyPromise = this.getGoogleMeteringStrategy_();
+    const googleMeteringStrategyPromise = this.getShowcaseStrategy_();
     const meteringStatePromise = this.serviceAdapter_.loadMeteringState();
     const promises = Promise.all([
       googleMeteringStrategyPromise,
@@ -741,7 +741,7 @@ export class GoogleSubscriptionsPlatform {
       const meteringStrategy = results[0];
       const meteringState = results[1];
 
-      if (meteringStrategy === GoogleMeteringStrategy.EXTENDED_ACCESS) {
+      if (meteringStrategy === ShowcaseStrategy.EXTENDED_ACCESS) {
         // Show the Regwall, so the user can get
         // a metering state that leads to a
         // granting entitlement.
