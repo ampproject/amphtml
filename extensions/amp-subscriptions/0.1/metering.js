@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dev, user} from '../../../src/log';
+import {user} from '../../../src/log';
 
 /** @const */
 const TAG = 'amp-subscriptions';
