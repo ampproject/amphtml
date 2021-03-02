@@ -15,7 +15,6 @@
  */
 'use strict';
 
-const argv = require('minimist')(process.argv.slice(2));
 const {execOrDie} = require('../common/exec');
 
 /**
@@ -27,14 +26,7 @@ async function ava() {
     'build-system/tasks/markdown-toc/test/test.js',
     'build-system/tasks/prepend-global/prepend-global.test.js',
   ];
-  execOrDie(
-    [
-      'npx ava',
-      ...testFiles,
-      '--color --fail-fast',
-      argv.watch ? '--watch' : '',
-    ].join(' ')
-  );
+  execOrDie(['npx ava', ...testFiles, '--color --fail-fast'].join(' '));
 }
 
 module.exports = {
