@@ -246,10 +246,8 @@ function updateFiles(config) {
   const jsFiles = globby.sync(jsGlobs);
 
   const getPosixImport = (jsFile) => {
-    const posixPath = path.posix.relative(
-      path.posix.dirname(unifiedJsFile),
-      jsFile
-    );
+    const relativePath = path.relative(path.dirname(unifiedJsFile), jsFile);
+    const posixPath = relativePath.split(path.sep).join(path.posix.sep);
     return `import '${posixPath}';`;
   };
   const jsImports = jsFiles.map(getPosixImport);
