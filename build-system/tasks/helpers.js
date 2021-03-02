@@ -488,9 +488,13 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
       banner,
       footer,
       incremental: !!options.watch,
+      logLevel: 'silent',
+    })
+    .then((result) => {
+      finishBundle(srcFilename, destDir, destFilename, options, startTime);
+      return result;
     })
     .catch((err) => handleBundleError(err, !!options.watch, destFilename));
-  finishBundle(srcFilename, destDir, destFilename, options, startTime);
 
   if (options.watch) {
     watchedTargets.set(entryPoint, {
@@ -498,11 +502,11 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
         const time = Date.now();
         const buildPromise = buildResult
           .rebuild()
-          .catch((err) =>
-            handleBundleError(err, /* continueOnError */ true, destFilename)
-          )
           .then(() =>
             finishBundle(srcFilename, destDir, destFilename, options, time)
+          )
+          .catch((err) =>
+            handleBundleError(err, /* continueOnError */ true, destFilename)
           );
         options?.onWatchBuild(buildPromise);
         await buildPromise;
