@@ -100,7 +100,7 @@ describes.realWin(
         manager.setLegacyConsentInstanceId('ABC');
       });
 
-      it('Initiate consent value', async () => {
+      it('should initiate consent value', async () => {
         await macroTask();
         expect(consentManagerOnChangeSpy).to.be.called;
         expect(manager.consentState_).to.equal(CONSENT_ITEM_STATE.ACCEPTED);
@@ -114,7 +114,7 @@ describes.realWin(
       });
 
       describe('Register policy instance', () => {
-        it('Valid consent policy', async () => {
+        it('should register valid consent policy', async () => {
           manager.registerConsentPolicyInstance('default', {
             'waitFor': {
               'ABC': undefined,

@@ -597,6 +597,20 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         return element.whenBuilt();
       });
 
+      it('should build on no consent policy', () => {
+        const element = new ElementClass();
+        env.sandbox
+          .stub(Services, 'consentPolicyServiceForDocOrNull')
+          .resolves(null);
+        env.sandbox.stub(element, 'getConsentPolicy_').callsFake(() => {
+          return 'default';
+        });
+
+        clock.tick(1);
+        container.appendChild(element);
+        return element.whenBuilt();
+      });
+
       it('should not build on consent insufficient', () => {
         const element = new ElementClass();
         env.sandbox
@@ -671,20 +685,17 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
           const purposesSpy = env.sandbox.spy();
           env.sandbox
             .stub(Services, 'consentPolicyServiceForDocOrNull')
-            .callsFake(() => {
-              return Promise.resolve({
-                whenPolicyUnblock: () => {
-                  return Promise.resolve(true);
-                },
-                whenPurposesUnblock: () => purposesSpy,
-              });
+            .resolves({
+              whenPolicyUnblock: () => {
+                return Promise.resolve(true);
+              },
+              whenPurposesUnblock: () => purposesSpy,
             });
-          env.sandbox.stub(element, 'getConsentPolicy_').callsFake(() => {
-            return 'default';
-          });
-          env.sandbox.stub(element, 'getPurposesConsent_').callsFake(() => {
-            return ['purpose-foo', 'purpose-bar'];
-          });
+          element.setAttribute('data-block-on-consent', '');
+          element.setAttribute(
+            'data-block-on-consent-purposes',
+            'purpose-foo,purpose-bar'
+          );
 
           clock.tick(1);
           container.appendChild(element);
@@ -698,19 +709,18 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
           const defaultPolicySpy = env.sandbox.spy();
           env.sandbox
             .stub(Services, 'consentPolicyServiceForDocOrNull')
-            .callsFake(() => {
-              return Promise.resolve({
-                whenPolicyUnblock: () => {
-                  return defaultPolicySpy;
-                },
-                whenPurposesUnblock: () => {
-                  return Promise.resolve(true);
-                },
-              });
+            .resolves({
+              whenPolicyUnblock: () => {
+                return defaultPolicySpy;
+              },
+              whenPurposesUnblock: () => {
+                return Promise.resolve(true);
+              },
             });
-          env.sandbox.stub(element, 'getPurposesConsent_').callsFake(() => {
-            return ['purpose-foo', 'purpose-bar'];
-          });
+          element.setAttribute(
+            'data-block-on-consent-purposes',
+            'purpose-foo,purpose-bar'
+          );
 
           clock.tick(1);
           container.appendChild(element);
@@ -723,16 +733,15 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
           const element = new ElementClass();
           env.sandbox
             .stub(Services, 'consentPolicyServiceForDocOrNull')
-            .callsFake(() => {
-              return Promise.resolve({
-                whenPolicyUnblock: () => {
-                  return Promise.resolve(false);
-                },
-              });
+            .resolves({
+              whenPurposesUnblock: () => {
+                return Promise.resolve(false);
+              },
             });
-          env.sandbox.stub(element, 'getConsentPolicy_').callsFake(() => {
-            return 'default';
-          });
+          element.setAttribute(
+            'data-block-on-consent-purposes',
+            'purpose-foo,purpose-bar'
+          );
 
           clock.tick(1);
           container.appendChild(element);

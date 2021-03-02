@@ -1683,12 +1683,7 @@ function createBaseCustomElementClass(win) {
      */
     getPurposesConsent_() {
       const purposes = this.getAttribute('data-block-on-consent-purposes');
-      // null or empty string
-      if (!purposes) {
-        return null;
-      }
-      const purposesArray = purposes.split(',');
-      return purposesArray.length ? purposesArray : null;
+      return purposes ? purposes.split(',') : null;
     }
 
     /**

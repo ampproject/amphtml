@@ -789,36 +789,31 @@ export class AmpConsent extends AMP.BaseElement {
     if (!this.isGranularConsentExperimentOn_) {
       return Promise.resolve(true);
     }
-    return this.getPurposeConsentRequired_()
-      .then((purposeConsentRequired) => {
-        // True if there are no required purposes
-        if (!purposeConsentRequired || !purposeConsentRequired.length) {
-          return true;
-        }
-        const storedPurposeConsents = consentInfo['purposeConsents'];
-        // False if there are no stored purposes
-        if (
-          !storedPurposeConsents ||
-          Object.keys(storedPurposeConsents).length <
-            purposeConsentRequired.length
-        ) {
+    return this.getPurposeConsentRequired_().then((purposeConsentRequired) => {
+      // True if there are no required purposes
+      if (!purposeConsentRequired?.length) {
+        this.consentStateManager_.hasAllPurposeConsents();
+        return true;
+      }
+      const storedPurposeConsents = consentInfo['purposeConsents'];
+      // False if there are no stored purposes
+      if (
+        !storedPurposeConsents ||
+        Object.keys(storedPurposeConsents).length <
+          purposeConsentRequired.length
+      ) {
+        return false;
+      }
+      // Check if we have a stored consent for each purpose required
+      for (let i = 0; i < purposeConsentRequired.length; i++) {
+        const purpose = purposeConsentRequired[i];
+        if (!hasOwn(storedPurposeConsents, purpose)) {
           return false;
         }
-        // Check if we have a stored consent for each purpose required
-        for (let i = 0; i < purposeConsentRequired.length; i++) {
-          const purpose = purposeConsentRequired[i];
-          if (!hasOwn(storedPurposeConsents, purpose)) {
-            return false;
-          }
-        }
-        return true;
-      })
-      .then((hasPurposeConsents) => {
-        if (hasPurposeConsents) {
-          this.consentStateManager_.hasAllPurposeConsents();
-        }
-        return hasPurposeConsents;
-      });
+      }
+      this.consentStateManager_.hasAllPurposeConsents();
+      return true;
+    });
   }
 
   /**

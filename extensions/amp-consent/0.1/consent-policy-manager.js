@@ -347,16 +347,10 @@ export class ConsentPolicyManager {
       if (!this.purposeConsents_) {
         return false;
       }
-      let shouldUnblock = true;
-      purposes.forEach((purpose) => {
-        if (
-          !hasOwn(this.purposeConsents_, purpose) ||
-          this.purposeConsents_[purpose] === PURPOSE_CONSENT_STATE.REJECTED
-        ) {
-          shouldUnblock = false;
-        }
-      });
-      return shouldUnblock;
+      const shouldUnblock = (purpose) =>
+        hasOwn(this.purposeConsents_, purpose) &&
+        this.purposeConsents_[purpose] === PURPOSE_CONSENT_STATE.ACCEPTED;
+      return purposes.every(shouldUnblock);
     });
   }
 
