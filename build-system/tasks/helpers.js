@@ -20,12 +20,13 @@ const crypto = require('crypto');
 const debounce = require('debounce');
 const del = require('del');
 const esbuild = require('esbuild');
+/** @type {Object} */
 const experimentDefines = require('../global-configs/experiments-const.json');
 const fs = require('fs-extra');
-const MagicString = require('magic-string');
+const magicstring = require('magic-string');
 const open = require('open');
 const path = require('path');
-const remapping = require('@ampproject/remapping');
+const Remapping = require('@ampproject/remapping');
 const wrappers = require('../compile/compile-wrappers');
 const {
   VERSION: internalRuntimeVersion,
@@ -39,6 +40,12 @@ const {log, logLocalDev} = require('../common/logging');
 const {thirdPartyFrames} = require('../test-configs/config');
 const {transpileTs} = require('../compile/typescript');
 const {watch: fileWatch} = require('chokidar');
+
+/** @type {Remapping.default} */
+const remapping = /** @type {*} */ (Remapping);
+
+/** @type {magicstring.default} */
+const MagicString = /** @type {*} */ (magicstring);
 
 /**
  * Tasks that should print the `--nobuild` help text.
@@ -109,7 +116,9 @@ function doBuildJs(jsBundles, name, extraOptions) {
       {...target.options, ...extraOptions}
     );
   } else {
-    return Promise.reject(red('Error:'), 'Could not find', cyan(name));
+    return Promise.reject(
+      [red('Error:'), 'Could not find', cyan(name)].join(' ')
+    );
   }
 }
 
@@ -223,9 +232,17 @@ function combineWithCompiledFile(srcFilename, destFilePath, options) {
   });
   // We need to inject the code _inside_ the extension wrapper
   const destFileName = path.basename(destFilePath);
-  const contents = new MagicString(fs.readFileSync(destFilePath, 'utf8'), {
-    filename: destFileName,
-  });
+  /**
+   * TODO (rileyajones) This should be import('magic-string').MagicStringOptions but
+   * is invalid until https://github.com/Rich-Harris/magic-string/pull/183
+   * is merged.
+   * @type {Object}
+   */
+  const mapMagicStringOptions = {filename: destFileName};
+  const contents = new MagicString(
+    fs.readFileSync(destFilePath, 'utf8'),
+    mapMagicStringOptions
+  );
   const map = JSON.parse(fs.readFileSync(`${destFilePath}.map`, 'utf8'));
   const {sourceRoot} = map;
   map.sourceRoot = undefined;
@@ -242,7 +259,14 @@ function combineWithCompiledFile(srcFilename, destFilePath, options) {
   bundle.addSource(wrapperOpen);
   for (const bundleFile of bundleFiles) {
     const contents = fs.readFileSync(bundleFile, 'utf8');
-    bundle.addSource(new MagicString(contents, {filename: bundleFile}));
+    /**
+     * TODO (rileyajones) This should be import('magic-string').MagicStringOptions but
+     * is invalid until https://github.com/Rich-Harris/magic-string/pull/183
+     * is merged.
+     * @type {Object}
+     */
+    const bundleMagicStringOptions = {filename: bundleFile};
+    bundle.addSource(new MagicString(contents, bundleMagicStringOptions));
     bundle.append(MODULE_SEPARATOR);
   }
   bundle.addSource(remainingContents);
@@ -251,8 +275,9 @@ function combineWithCompiledFile(srcFilename, destFilePath, options) {
     file: destFileName,
     hires: true,
   });
+
   const remapped = remapping(
-    bundledMap,
+    {...bundledMap, version: 3},
     (file) => {
       if (file === destFileName) {
         return map;
@@ -344,6 +369,7 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
  * @param {string} destFilename
  */
 function handleBundleError(err, continueOnError, destFilename) {
+  /** @type {Error|string} */
   let message = err;
   if (err.stack) {
     // Drop the node_modules call stack, which begins with '    at'.
@@ -422,7 +448,10 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
           filename: file.path,
           sourceFileName: path.relative(process.cwd(), file.path),
         });
-        const result = await babel.transformAsync(contents, babelOptions);
+        const result = await babel.transformAsync(
+          contents,
+          babelOptions || undefined
+        );
         return {contents: result.code};
       };
 
@@ -596,7 +625,7 @@ function printNobuildHelp() {
  * @param {string=} covPath
  * @return {!Promise}
  */
-async function maybePrintCoverageMessage(covPath) {
+async function maybePrintCoverageMessage(covPath = '') {
   if (!argv.coverage || isCiBuild()) {
     return;
   }
@@ -628,7 +657,7 @@ async function applyAmpConfig(targetFile, localDev, fortesting) {
       baseConfigFile,
       /* opt_localDev */ localDev,
       /* opt_localBranch */ true,
-      /* opt_branch */ false,
+      /* opt_branch */ undefined,
       /* opt_fortesting */ fortesting
     );
   });
