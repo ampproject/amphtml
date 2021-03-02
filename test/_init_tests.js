@@ -339,6 +339,7 @@ function warnForConsoleError() {
 function restoreConsoleError() {
   consoleErrorSandbox.restore();
   if (expectedAsyncErrors.length > 0) {
+    console.log('throw error');
     const helpMessage =
       'The test "' +
       testName +
