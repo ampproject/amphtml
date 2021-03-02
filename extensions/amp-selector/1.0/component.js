@@ -373,16 +373,7 @@ export function Option({
     [customOnKeyDown, trySelect]
   );
 
-  const isSelected =
-    /** @type {!Array} */ (selected).includes(option) && !disabled;
-  const statusStyle =
-    disabled || selectorDisabled
-      ? CSS.DISABLED
-      : isSelected
-      ? selectorMultiple
-        ? CSS.MULTI_SELECTED
-        : CSS.SELECTED
-      : CSS.OPTION;
+  const isSelected = /** @type {!Array} */ (selected).includes(option);
   const optionProps = {
     ...rest,
     className: objstr({
