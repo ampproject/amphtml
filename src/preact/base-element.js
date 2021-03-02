@@ -971,7 +971,7 @@ function collectProps(Ctor, element, ref, defaultProps, mediaQueryProps) {
 }
 
 /**
- * @param Ctor
+ * @param {typeof PreactBaseElement} Ctor
  * @param {!Object} props
  * @param {!Object} propDefs
  * @param {!Element} element
