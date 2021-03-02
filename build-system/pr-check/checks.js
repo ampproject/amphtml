@@ -45,6 +45,7 @@ function pushBuildWorkflow() {
   timedExecOrDie('gulp check-analytics-vendors-list');
   timedExecOrDie('gulp check-video-interface-list');
   timedExecOrDie('gulp get-zindex');
+  timedExecOrDie('gulp markdown-toc');
 }
 
 async function prBuildWorkflow() {
@@ -78,6 +79,7 @@ async function prBuildWorkflow() {
   // Check document links only for PR builds.
   if (buildTargetsInclude(Targets.DOCS)) {
     timedExecOrDie('gulp check-links --local_changes');
+    timedExecOrDie('gulp markdown-toc');
   }
 
   if (buildTargetsInclude(Targets.DEV_DASHBOARD)) {

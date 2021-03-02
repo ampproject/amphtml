@@ -24,6 +24,7 @@ const {execOrDie} = require('../common/exec');
 async function ava() {
   const testFiles = [
     'build-system/tasks/get-zindex/get-zindex.test.js',
+    'build-system/tasks/markdown-toc/test/test.js',
     'build-system/tasks/prepend-global/prepend-global.test.js',
   ];
   execOrDie(

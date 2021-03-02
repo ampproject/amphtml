@@ -152,6 +152,7 @@
     "list-imports-exports": "0.1.2",
     "magic-string": "0.25.7",
     "markdown-link-check": "3.8.6",
+    "markdown-toc": "1.2.0",
     "minimatch": "3.0.4",
     "minimist": "1.2.5",
     "mocha": "8.3.0",

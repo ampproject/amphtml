@@ -11,6 +11,14 @@ be given preferential rendering.
 
 ## Contents
 
+<!--
+  (Do not remove or edit this comment.)
+
+  This table-of-contents is automatically generated. To generate it, run:
+    gulp markdown-toc --fix
+-->
+
+-   [Contents](#contents)
 -   [Background](#background)
 -   [Overview](#overview)
 -   [Detailed design](#detailed-design)
