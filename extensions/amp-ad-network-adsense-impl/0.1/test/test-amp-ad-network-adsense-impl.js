@@ -911,6 +911,16 @@ describes.realWin(
           expect(url).to.not.match(/(\?|&)gdpr=(&|$)/);
         }));
 
+      it('should include addtl_consent', () =>
+        impl.getAdUrl({additionalConsent: 'abc123'}).then((url) => {
+          expect(url).to.match(/(\?|&)addtl_consent=abc123(&|$)/);
+        }));
+
+      it('should not include addtl_consent, if additionalConsent is missing', () =>
+        impl.getAdUrl({}).then((url) => {
+          expect(url).to.not.match(/(\?|&)addtl_consent=(&|$)/);
+        }));
+
       it('should have spsa and size 1x1 when single page story ad', () => {
         impl.isSinglePageStoryAd = true;
         return impl.getAdUrl().then((url) => {

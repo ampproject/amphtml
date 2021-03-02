@@ -637,7 +637,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   getPageParameters(consentTuple, instances) {
     instances = instances || [this];
     const tokens = getPageviewStateTokensForAdRequest(instances);
-    const {consentString, gdprApplies} = consentTuple;
+    const {consentString, gdprApplies, additionalConsent} = consentTuple;
 
     return {
       'ptt': 13,
@@ -654,6 +654,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'psts': tokens.length ? tokens : null,
       'gdpr': gdprApplies === true ? '1' : gdprApplies === false ? '0' : null,
       'gdpr_consent': consentString,
+      'addtl_consent': additionalConsent,
     };
   }
 

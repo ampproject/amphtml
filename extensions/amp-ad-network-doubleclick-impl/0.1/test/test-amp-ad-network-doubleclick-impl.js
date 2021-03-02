@@ -1076,6 +1076,16 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
         expect(url).to.not.match(/(\?|&)gdpr=(&|$)/);
       }));
 
+    it('should include addtl_consent', () =>
+      impl.getAdUrl({additionalConsent: 'abc123'}).then((url) => {
+        expect(url).to.match(/(\?|&)addtl_consent=abc123(&|$)/);
+      }));
+
+    it('should not include addtl_consent, if additionalConsent is missing', () =>
+      impl.getAdUrl({}).then((url) => {
+        expect(url).to.not.match(/(\?|&)addtl_consent=(&|$)/);
+      }));
+
     it('should include msz/psz/fws if in holdback control', () => {
       env.sandbox
         .stub(impl, 'randomlySelectUnsetExperiments_')

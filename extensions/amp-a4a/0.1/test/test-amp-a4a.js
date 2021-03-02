@@ -1479,7 +1479,12 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
       expect(getAdUrlSpy.calledOnce, 'getAdUrl called exactly once').to.be.true;
       expect(
         getAdUrlSpy.calledWith(
-          {consentState: null, consentString: null, gdprApplies: null},
+          {
+            consentState: null,
+            consentString: null,
+            gdprApplies: null,
+            additionalConsent: null,
+          },
           rtcResponse
         )
       ).to.be.true;
@@ -2617,6 +2622,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
             consentState: CONSENT_POLICY_STATE.SUFFICIENT,
             consentString,
             gdprApplies,
+            additionalConsent: consentMetadata['additionalConsent'],
           })
         ).calledOnce;
         expect(
@@ -2669,6 +2675,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
             consentState: CONSENT_POLICY_STATE.SUFFICIENT,
             consentString,
             gdprApplies,
+            additionalConsent: consentMetadata['additionalConsent'],
           })
         ).calledOnce;
         expect(
@@ -2713,6 +2720,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
             consentState: CONSENT_POLICY_STATE.UNKNOWN,
             consentString: null,
             gdprApplies: null,
+            additionalConsent: null,
           })
         ).calledOnce;
         expect(
