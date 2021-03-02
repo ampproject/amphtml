@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+const globby = require('globby');
 const path = require('path');
 const test = require('ava');
 const {headerForTesting, overrideToc, overrideTocGlob} = require('../');
@@ -47,121 +48,20 @@ test('README.md includes correct header', async (t) => {
   isIncludedExactlyTimes(t, content, headerIndented, 1);
 });
 
-const contentWithHeadings = `## Foo
-
-foo
-
-## Foo bar baz
-
-Foo? Bar baz!
-
-### Third-level
-
-abc
-
-### Third-level two
-
-abc
-`;
-
-test('inserts new toc', async (t) => {
-  const header = `# inserts new toc
-
-  ${headerForTesting}`;
-  t.is(
-    await overrideToc(`${header}
-
-${contentWithHeadings}`),
-    `${header}
-
--   [Foo](#foo)
--   [Foo bar baz](#foo-bar-baz)
-    -   [Third-level](#third-level)
-    -   [Third-level two](#third-level-two)
-
-${contentWithHeadings}`
-  );
-});
-
-test('allows paragraph before header after toc', async (t) => {
-  const content = `# allows paragraph before header after toc
-
-${headerForTesting}
-
--   [section](#section)
-
-allows paragraph before header after toc
-
-# section
-`;
-
-  t.is(await overrideToc(content), content);
-});
-
-test('uses options', async (t) => {
-  const header = `# uses options
-
-${headerForTesting}
-
-<!-- {"maxdepth": 1} -->`;
-
-  t.is(
-    await overrideToc(`${header}
-
-${contentWithHeadings}`),
-    `${header}
-
--   [Foo](#foo)
--   [Foo bar baz](#foo-bar-baz)
-
-${contentWithHeadings}`
-  );
-});
-
-test('ignores unparsable options', async (t) => {
-  const content = `# ignores unparsable options
-
-${headerForTesting}
-
-<!-- unparsable -->
-
--   [foo](#foo)
-
-# foo
-
-foo
-`;
-  t.is(await overrideToc(content), content);
-});
-
-test('maintains correct list', async (t) => {
-  const content = `# This list is already correct
-
-${headerForTesting}
-
--   [Foo](#foo)
--   [Foo bar baz](#foo-bar-baz)
-    -   [Third-level](#third-level)
-    -   [Third-level two](#third-level-two)
-
-${contentWithHeadings}`;
-
-  t.is(await overrideToc(content), content);
-});
-
-test('overrideTocGlob ./all-are-complete', async (t) => {
-  t.deepEqual(await overrideTocGlob(`${dirname}/all-are-complete`), {
-    // Returns null when no changes need to be made.
-    [`${dirname}/all-are-complete/one.md`]: null,
-    [`${dirname}/all-are-complete/two.md`]: null,
-  });
+test('overrideToc ./all-are-complete', async (t) => {
+  for (const filename of globby.sync(`${dirname}/all-are-complete/**/*.md`)) {
+    const content = await readFile(filename, 'utf-8');
+    t.deepEqual(await overrideToc(content), content);
+  }
 });
 
 test('overrideTocGlob ./some-are-incomplete', async (t) => {
-  t.deepEqual(await overrideTocGlob(`${dirname}/some-are-incomplete`), {
-    [`${dirname}/some-are-incomplete/one.md`]: null,
-    [`${dirname}/some-are-incomplete/two.md`]:
-      // Has same content but with TOC
-      await readFile(`${dirname}/all-are-complete/two.md`, 'utf-8'),
-  });
+  const dir = `${dirname}/some-are-incomplete`;
+  const expected = {
+    [`${dir}/complete.md`]: null,
+    [`${dir}/incomplete.md`]:
+      // Has exact same content but with TOC
+      await readFile(`${dir}/complete.md`, 'utf-8'),
+  };
+  t.deepEqual(await overrideTocGlob(dir), expected);
 });

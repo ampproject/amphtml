@@ -1,4 +1,4 @@
-# two.md
+# complete.md
 
 <!--
   (Do not remove or edit this comment.)
@@ -13,8 +13,6 @@
     -   [veggie](#veggie)
 
 ## tacos
-
-tacos
 
 ### asada
 

@@ -1,4 +1,4 @@
-# two.md
+# allows-paragraph-after-list.md
 
 <!--
   (Do not remove or edit this comment.)
@@ -7,18 +7,10 @@
     gulp markdown-toc --fix
 -->
 
-## tacos
+-   [section](#section)
 
-tacos
+This paragraph should be preserved.
 
-### asada
+## section
 
-asada
-
-### al pastor
-
-al pastor
-
-### veggie
-
-veggie
+content
