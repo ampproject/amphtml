@@ -76,13 +76,6 @@ const builtRuntimePaths = [
   },
 ];
 
-const karmaEsbuildTransformPaths = [
-  'test/**/*.js',
-  'ads/**/test/test-*.js',
-  'extensions/**/test/**/*.js',
-  'testing/**/*.js',
-];
-
 const commonUnitTestPaths = initTestsPath.concat(fixturesExamplesPaths);
 
 const commonIntegrationTestPaths = initTestsPath.concat(
@@ -226,10 +219,9 @@ module.exports = {
   commonUnitTestPaths,
   devDashboardTestPaths,
   e2eTestPaths,
-  fixturesPath,
   integrationTestPaths,
   jisonPaths,
-  karmaEsbuildTransformPaths,
+  fixturesPath,
   linkCheckGlobs,
   lintGlobs,
   presubmitGlobs,
