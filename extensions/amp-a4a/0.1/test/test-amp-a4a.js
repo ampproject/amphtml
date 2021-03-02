@@ -64,231 +64,233 @@ import {data as testFragments} from './testdata/test_fragments';
 import {toggleExperiment} from '../../../../src/experiments';
 import {data as validCSSAmp} from './testdata/valid_css_at_rules_amp.reserialized';
 
-describes.realWin('amp-a4a: no signing', {amp: true}, (env) => {
-  let doc;
-  let element;
-  let a4a;
-  let attachShadowStub;
+if (NO_SIGNING_RTV) {
+  describes.realWin('amp-a4a: no signing', {amp: true}, (env) => {
+    let doc;
+    let element;
+    let a4a;
+    let attachShadowStub;
 
-  beforeEach(() => {
-    doc = env.win.document;
-    env.sandbox.stub(AmpA4A.prototype, 'isInNoSigningExp').returns(true);
-    element = createElementWithAttributes(env.win.document, 'amp-ad', {
-      'width': '300',
-      'height': '250',
-      'type': 'doubleclick',
-      'layout': 'fixed',
+    beforeEach(() => {
+      doc = env.win.document;
+      env.sandbox.stub(AmpA4A.prototype, 'isInNoSigningExp').returns(true);
+      element = createElementWithAttributes(env.win.document, 'amp-ad', {
+        'width': '300',
+        'height': '250',
+        'type': 'doubleclick',
+        'layout': 'fixed',
+      });
+      doc.body.appendChild(element);
+      a4a = new AmpA4A(element);
+      // Make the ad think it has size.
+      env.sandbox.stub(a4a, 'getIntersectionElementLayoutBox').returns({
+        height: 250,
+        width: 300,
+      });
+      env.sandbox.stub(a4a, 'getAdUrl').returns('https://adnetwork.com');
+      env.fetchMock.mock(
+        'begin:https://adnetwork.com',
+        validCSSAmp.minifiedCreative
+      );
+
+      attachShadowStub = env.sandbox.stub(
+        env.win.Element.prototype,
+        'attachShadow'
+      );
+      // Emulate native function.
+      attachShadowStub.value(function () {
+        return '[native code]';
+      });
     });
-    doc.body.appendChild(element);
-    a4a = new AmpA4A(element);
-    // Make the ad think it has size.
-    env.sandbox.stub(a4a, 'getIntersectionElementLayoutBox').returns({
-      height: 250,
-      width: 300,
+
+    it('should contain the correct csp meta content', async () => {
+      await a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      await a4a.layoutCallback();
+      const fie = doc.body.querySelector('iframe[srcdoc]');
+      expect(fie.getAttribute('sandbox')).to.equal(
+        'allow-forms allow-popups allow-popups-to-escape-sandbox ' +
+          'allow-same-origin allow-scripts allow-top-navigation'
+      );
+      const cspMeta = fie.contentDocument.querySelector(
+        'meta[http-equiv=Content-Security-Policy]'
+      );
+      expect(cspMeta).to.be.ok;
+      expect(cspMeta.content).to.include('img-src * data:;');
+      expect(cspMeta.content).to.include('media-src *;');
+      expect(cspMeta.content).to.include('font-src *;');
+      expect(cspMeta.content).to.include('connect-src *;');
+      expect(cspMeta.content).to.include(
+        'script-src http://localhost:8000/dist/lts/ ' +
+          'http://localhost:8000/dist/rtv/ ' +
+          'http://localhost:8000/dist/sw/;'
+      );
+      expect(cspMeta.content).to.include("object-src 'none';");
+      expect(cspMeta.content).to.include("child-src 'none';");
+      expect(cspMeta.content).to.include("default-src 'none';");
+      expect(cspMeta.content).to.include(
+        'style-src ' +
+          'https://cdn.materialdesignicons.com ' +
+          'https://cloud.typography.com ' +
+          'https://fast.fonts.net ' +
+          'https://fonts.googleapis.com ' +
+          'https://maxcdn.bootstrapcdn.com https://p.typekit.net https://pro.fontawesome.com ' +
+          'https://use.fontawesome.com ' +
+          'https://use.typekit.net ' +
+          "'unsafe-inline';"
+      );
     });
-    env.sandbox.stub(a4a, 'getAdUrl').returns('https://adnetwork.com');
-    env.fetchMock.mock(
-      'begin:https://adnetwork.com',
-      validCSSAmp.minifiedCreative
-    );
 
-    attachShadowStub = env.sandbox.stub(
-      env.win.Element.prototype,
-      'attachShadow'
-    );
-    // Emulate native function.
-    attachShadowStub.value(function () {
-      return '[native code]';
+    it('should set the correct sandbox features', async () => {
+      env.sandbox.stub(Services.platformFor(env.win), 'isSafari').returns(false);
+      await a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      await a4a.layoutCallback();
+      const fie = doc.body.querySelector('iframe[srcdoc]');
+      expect(fie.getAttribute('sandbox')).to.equal(
+        'allow-forms allow-popups allow-popups-to-escape-sandbox ' +
+          'allow-same-origin allow-scripts allow-top-navigation'
+      );
+    });
+
+    it('FIE should contain <base> with adurl', async () => {
+      await a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      await a4a.layoutCallback();
+      const fie = doc.body.querySelector('iframe[srcdoc]');
+      const base = fie.contentDocument.querySelector('base');
+      expect(base).to.be.ok;
+      expect(base.href).to.equal('https://adnetwork.com/');
+    });
+
+    it('should complete the rendering FIE', async () => {
+      const prioritySpy = env.sandbox.spy(a4a, 'updateLayoutPriority');
+      await a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      await a4a.layoutCallback();
+      const fie = doc.body.querySelector('iframe[srcdoc]');
+      expect(fie).to.be.ok;
+      expect(fie.contentDocument.body.textContent).to.contain.string(
+        'Hello, world.'
+      );
+      expect(prioritySpy).to.be.calledWith(LayoutPriority.CONTENT);
+    });
+
+    it('should not throw on polyfill scripts', async () => {
+      env.sandbox.stub(mode, 'getMode').returns({localDev: false});
+      await a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      await a4a.layoutCallback();
+      const fie = doc.body.querySelector('iframe[srcdoc]');
+      const violationSpy = env.sandbox.spy();
+      fie.contentWindow.addEventListener('securitypolicyviolation', violationSpy);
+      const fakePolyfill = doc.createElement('script');
+      fakePolyfill.src = 'https://cdn.ampproject.org/rtv/some-polyfill.js';
+      fie.contentDocument.head.appendChild(fakePolyfill);
+      await macroTask();
+      expect(violationSpy).not.to.be.called;
+    });
+
+    it('should throw on non-approved injected scripts', async () => {
+      env.sandbox.stub(mode, 'getMode').returns({localDev: false});
+      await a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      await a4a.layoutCallback();
+      const fie = doc.body.querySelector('iframe[srcdoc]');
+      const violationSpy = env.sandbox.spy();
+      fie.contentWindow.addEventListener('securitypolicyviolation', violationSpy);
+      const fakePolyfill = doc.createElement('script');
+      fakePolyfill.src = 'https://www.cats.example';
+      fie.contentDocument.head.appendChild(fakePolyfill);
+      await macroTask();
+      expect(violationSpy).to.be.called;
+    });
+
+    it('should collapse on no content', async () => {
+      env.fetchMock.config.overwriteRoutes = true;
+      env.fetchMock.mock('begin:https://adnetwork.com', ''); // no content.
+      const iframe3pInit = env.sandbox
+        .stub(AmpAdXOriginIframeHandler.prototype, 'init')
+        .resolves();
+      const collapseSpy = env.sandbox.spy(a4a, 'forceCollapse');
+
+      await a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      await a4a.layoutCallback();
+      expect(collapseSpy).to.be.called;
+      expect(iframe3pInit).not.to.be.called;
+    });
+
+    it('should fallback to x-domain without ⚡️4ads', async () => {
+      env.fetchMock.config.overwriteRoutes = true;
+      env.fetchMock.mock(
+        'begin:https://adnetwork.com',
+        testFragments.minimalDocOneStyle
+      );
+      const iframe3pInit = env.sandbox
+        .stub(AmpAdXOriginIframeHandler.prototype, 'init')
+        .resolves();
+      await a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      await a4a.layoutCallback();
+      expect(iframe3pInit).to.be.called;
+    });
+
+    it('should not try to validate if #skipClientSideValidation', async () => {
+      const fallbackSpy = env.sandbox.spy(a4a, 'handleFallback_');
+      env.sandbox.stub(a4a, 'skipClientSideValidation').returns(true);
+      await a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      await a4a.adPromise_;
+      expect(fallbackSpy).to.be.called;
+    });
+
+    it('should validate if #skipClientSideValidation == false', async () => {
+      const fallbackSpy = env.sandbox.spy(a4a, 'handleFallback_');
+      env.sandbox.stub(a4a, 'skipClientSideValidation').returns(false);
+      await a4a.buildCallback();
+      await a4a.onLayoutMeasure();
+      await a4a.adPromise_;
+      expect(fallbackSpy).not.to.be.called;
+    });
+
+    it('should fallback when shadow DOM is not supported', async () => {
+      toggleExperiment(env.win, 'disable-a4a-non-sd', true, true);
+      attachShadowStub.value(undefined);
+      const fallbackSpy = env.sandbox.spy(a4a, 'handleFallback_');
+      env.sandbox.stub(a4a, 'skipClientSideValidation').returns(false);
+      await a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      await a4a.adPromise_;
+      expect(fallbackSpy).to.be.called;
+    });
+
+    it('should fallback when shadow DOM is polyfilled', async () => {
+      toggleExperiment(env.win, 'disable-a4a-non-sd', true, true);
+      attachShadowStub.value(function () {
+        // A non-native function.
+        return null;
+      });
+      const fallbackSpy = env.sandbox.spy(a4a, 'handleFallback_');
+      env.sandbox.stub(a4a, 'skipClientSideValidation').returns(false);
+      await a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      await a4a.adPromise_;
+      expect(fallbackSpy).to.be.called;
+    });
+
+    it('should ignore shadow DOM requirement without an experiment', async () => {
+      toggleExperiment(env.win, 'disable-a4a-non-sd', false, true);
+      attachShadowStub.value(undefined);
+      const fallbackSpy = env.sandbox.spy(a4a, 'handleFallback_');
+      env.sandbox.stub(a4a, 'skipClientSideValidation').returns(false);
+      await a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      await a4a.adPromise_;
+      expect(fallbackSpy).to.not.be.called;
     });
   });
-
-  it('should contain the correct csp meta content', async () => {
-    await a4a.buildCallback();
-    a4a.onLayoutMeasure();
-    await a4a.layoutCallback();
-    const fie = doc.body.querySelector('iframe[srcdoc]');
-    expect(fie.getAttribute('sandbox')).to.equal(
-      'allow-forms allow-popups allow-popups-to-escape-sandbox ' +
-        'allow-same-origin allow-scripts allow-top-navigation'
-    );
-    const cspMeta = fie.contentDocument.querySelector(
-      'meta[http-equiv=Content-Security-Policy]'
-    );
-    expect(cspMeta).to.be.ok;
-    expect(cspMeta.content).to.include('img-src * data:;');
-    expect(cspMeta.content).to.include('media-src *;');
-    expect(cspMeta.content).to.include('font-src *;');
-    expect(cspMeta.content).to.include('connect-src *;');
-    expect(cspMeta.content).to.include(
-      'script-src http://localhost:8000/dist/lts/ ' +
-        'http://localhost:8000/dist/rtv/ ' +
-        'http://localhost:8000/dist/sw/;'
-    );
-    expect(cspMeta.content).to.include("object-src 'none';");
-    expect(cspMeta.content).to.include("child-src 'none';");
-    expect(cspMeta.content).to.include("default-src 'none';");
-    expect(cspMeta.content).to.include(
-      'style-src ' +
-        'https://cdn.materialdesignicons.com ' +
-        'https://cloud.typography.com ' +
-        'https://fast.fonts.net ' +
-        'https://fonts.googleapis.com ' +
-        'https://maxcdn.bootstrapcdn.com https://p.typekit.net https://pro.fontawesome.com ' +
-        'https://use.fontawesome.com ' +
-        'https://use.typekit.net ' +
-        "'unsafe-inline';"
-    );
-  });
-
-  it('should set the correct sandbox features', async () => {
-    env.sandbox.stub(Services.platformFor(env.win), 'isSafari').returns(false);
-    await a4a.buildCallback();
-    a4a.onLayoutMeasure();
-    await a4a.layoutCallback();
-    const fie = doc.body.querySelector('iframe[srcdoc]');
-    expect(fie.getAttribute('sandbox')).to.equal(
-      'allow-forms allow-popups allow-popups-to-escape-sandbox ' +
-        'allow-same-origin allow-scripts allow-top-navigation'
-    );
-  });
-
-  it('FIE should contain <base> with adurl', async () => {
-    await a4a.buildCallback();
-    a4a.onLayoutMeasure();
-    await a4a.layoutCallback();
-    const fie = doc.body.querySelector('iframe[srcdoc]');
-    const base = fie.contentDocument.querySelector('base');
-    expect(base).to.be.ok;
-    expect(base.href).to.equal('https://adnetwork.com/');
-  });
-
-  it('should complete the rendering FIE', async () => {
-    const prioritySpy = env.sandbox.spy(a4a, 'updateLayoutPriority');
-    await a4a.buildCallback();
-    a4a.onLayoutMeasure();
-    await a4a.layoutCallback();
-    const fie = doc.body.querySelector('iframe[srcdoc]');
-    expect(fie).to.be.ok;
-    expect(fie.contentDocument.body.textContent).to.contain.string(
-      'Hello, world.'
-    );
-    expect(prioritySpy).to.be.calledWith(LayoutPriority.CONTENT);
-  });
-
-  it('should not throw on polyfill scripts', async () => {
-    env.sandbox.stub(mode, 'getMode').returns({localDev: false});
-    await a4a.buildCallback();
-    a4a.onLayoutMeasure();
-    await a4a.layoutCallback();
-    const fie = doc.body.querySelector('iframe[srcdoc]');
-    const violationSpy = env.sandbox.spy();
-    fie.contentWindow.addEventListener('securitypolicyviolation', violationSpy);
-    const fakePolyfill = doc.createElement('script');
-    fakePolyfill.src = 'https://cdn.ampproject.org/rtv/some-polyfill.js';
-    fie.contentDocument.head.appendChild(fakePolyfill);
-    await macroTask();
-    expect(violationSpy).not.to.be.called;
-  });
-
-  it('should throw on non-approved injected scripts', async () => {
-    env.sandbox.stub(mode, 'getMode').returns({localDev: false});
-    await a4a.buildCallback();
-    a4a.onLayoutMeasure();
-    await a4a.layoutCallback();
-    const fie = doc.body.querySelector('iframe[srcdoc]');
-    const violationSpy = env.sandbox.spy();
-    fie.contentWindow.addEventListener('securitypolicyviolation', violationSpy);
-    const fakePolyfill = doc.createElement('script');
-    fakePolyfill.src = 'https://www.cats.example';
-    fie.contentDocument.head.appendChild(fakePolyfill);
-    await macroTask();
-    expect(violationSpy).to.be.called;
-  });
-
-  it('should collapse on no content', async () => {
-    env.fetchMock.config.overwriteRoutes = true;
-    env.fetchMock.mock('begin:https://adnetwork.com', ''); // no content.
-    const iframe3pInit = env.sandbox
-      .stub(AmpAdXOriginIframeHandler.prototype, 'init')
-      .resolves();
-    const collapseSpy = env.sandbox.spy(a4a, 'forceCollapse');
-
-    await a4a.buildCallback();
-    a4a.onLayoutMeasure();
-    await a4a.layoutCallback();
-    expect(collapseSpy).to.be.called;
-    expect(iframe3pInit).not.to.be.called;
-  });
-
-  it('should fallback to x-domain without ⚡️4ads', async () => {
-    env.fetchMock.config.overwriteRoutes = true;
-    env.fetchMock.mock(
-      'begin:https://adnetwork.com',
-      testFragments.minimalDocOneStyle
-    );
-    const iframe3pInit = env.sandbox
-      .stub(AmpAdXOriginIframeHandler.prototype, 'init')
-      .resolves();
-    await a4a.buildCallback();
-    a4a.onLayoutMeasure();
-    await a4a.layoutCallback();
-    expect(iframe3pInit).to.be.called;
-  });
-
-  it('should not try to validate if #skipClientSideValidation', async () => {
-    const fallbackSpy = env.sandbox.spy(a4a, 'handleFallback_');
-    env.sandbox.stub(a4a, 'skipClientSideValidation').returns(true);
-    await a4a.buildCallback();
-    a4a.onLayoutMeasure();
-    await a4a.adPromise_;
-    expect(fallbackSpy).to.be.called;
-  });
-
-  it('should validate if #skipClientSideValidation == false', async () => {
-    const fallbackSpy = env.sandbox.spy(a4a, 'handleFallback_');
-    env.sandbox.stub(a4a, 'skipClientSideValidation').returns(false);
-    await a4a.buildCallback();
-    await a4a.onLayoutMeasure();
-    await a4a.adPromise_;
-    expect(fallbackSpy).not.to.be.called;
-  });
-
-  it('should fallback when shadow DOM is not supported', async () => {
-    toggleExperiment(env.win, 'disable-a4a-non-sd', true, true);
-    attachShadowStub.value(undefined);
-    const fallbackSpy = env.sandbox.spy(a4a, 'handleFallback_');
-    env.sandbox.stub(a4a, 'skipClientSideValidation').returns(false);
-    await a4a.buildCallback();
-    a4a.onLayoutMeasure();
-    await a4a.adPromise_;
-    expect(fallbackSpy).to.be.called;
-  });
-
-  it('should fallback when shadow DOM is polyfilled', async () => {
-    toggleExperiment(env.win, 'disable-a4a-non-sd', true, true);
-    attachShadowStub.value(function () {
-      // A non-native function.
-      return null;
-    });
-    const fallbackSpy = env.sandbox.spy(a4a, 'handleFallback_');
-    env.sandbox.stub(a4a, 'skipClientSideValidation').returns(false);
-    await a4a.buildCallback();
-    a4a.onLayoutMeasure();
-    await a4a.adPromise_;
-    expect(fallbackSpy).to.be.called;
-  });
-
-  it('should ignore shadow DOM requirement without an experiment', async () => {
-    toggleExperiment(env.win, 'disable-a4a-non-sd', false, true);
-    attachShadowStub.value(undefined);
-    const fallbackSpy = env.sandbox.spy(a4a, 'handleFallback_');
-    env.sandbox.stub(a4a, 'skipClientSideValidation').returns(false);
-    await a4a.buildCallback();
-    a4a.onLayoutMeasure();
-    await a4a.adPromise_;
-    expect(fallbackSpy).to.not.be.called;
-  });
-});
+}
 
 describes.realWin('amp-a4a', {amp: true}, (env) => {
   const IFRAME_SANDBOXING_FLAGS = [
