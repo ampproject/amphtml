@@ -32,6 +32,19 @@ const header = `<!--
     gulp markdown-toc --fix
 -->`;
 
+// Case-insensitive, allows multiple newlines and arbitrary indentation.
+const headerRegexp = new RegExp(
+  header
+    .split(/\n+/g)
+    .map((line) =>
+      line.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/^\s+/, '\\s*')
+    )
+    .join('\n+'),
+  'im'
+);
+
+// throw new Error(headerRegexp.source);
+
 /**
  * @param {string} content
  * @return {?string}
@@ -75,13 +88,13 @@ function isolateCommentJson(maybeComment) {
  * @return {string}
  */
 async function overrideToc(content) {
-  const indexOfHeader = content.indexOf(header);
+  const headerMatch = content.match(headerRegexp);
 
-  if (indexOfHeader < 0) {
+  if (!headerMatch) {
     return null;
   }
 
-  const headerEnd = indexOfHeader + header.length;
+  const headerEnd = headerMatch.index + headerMatch[0].length;
 
   const afterHeader = content.substr(headerEnd);
 
