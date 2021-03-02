@@ -21,7 +21,7 @@ const wrappers = require('../compile/compile-wrappers');
 const {
   endBuildStep,
   watchDebounceDelay,
-  invalidateBabelCache,
+  invalidateUnminifiedBabelCache,
 } = require('./helpers');
 const {
   extensionAliasBundles,
@@ -387,7 +387,7 @@ async function doBuildExtension(extensions, extension, options) {
  */
 function watchExtension(path, name, version, latestVersion, hasCss, options) {
   const watchFunc = function (modifiedFile) {
-    invalidateBabelCache(modifiedFile);
+    invalidateUnminifiedBabelCache(modifiedFile);
     const bundleComplete = buildExtension(
       name,
       version,

@@ -109,7 +109,7 @@ const watchedTargets = new Map();
  * Used to remove a file from the babel cache after it is modified.
  * @param {string} filepath relative to the project root.
  */
-function invalidateBabelCache(filepath) {
+function invalidateUnminifiedBabelCache(filepath) {
   cache.delete(filepath);
 }
 
@@ -800,5 +800,5 @@ module.exports = {
   printConfigHelp,
   printNobuildHelp,
   watchDebounceDelay,
-  invalidateBabelCache,
+  invalidateUnminifiedBabelCache,
 };
