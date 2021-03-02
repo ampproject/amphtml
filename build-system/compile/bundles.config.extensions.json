@@ -89,11 +89,10 @@
   },
   {
     "name": "amp-base-carousel",
-    "version": "0.1",
+    "version": ["0.1", "1.0"],
     "latestVersion": "0.1",
     "options": {"hasCss": true}
   },
-  {"name": "amp-base-carousel", "version": "1.0", "latestVersion": "0.1"},
   {"name": "amp-beopinion", "version": "0.1", "latestVersion": "0.1"},
   {"name": "amp-bind", "version": "0.1", "latestVersion": "0.1"},
   {"name": "amp-bodymovin-animation", "version": "0.1", "latestVersion": "0.1"},
@@ -135,8 +134,7 @@
     "name": "amp-date-picker",
     "version": "0.1",
     "latestVersion": "0.1",
-    "options": {"hasCss": true},
-    "postPrepend": ["third_party/react-dates/bundle.js"]
+    "options": {"hasCss": true}
   },
   {
     "name": "amp-delight-player",
@@ -153,11 +151,10 @@
   {"name": "amp-facebook-page", "version": "0.1", "latestVersion": "0.1"},
   {
     "name": "amp-fit-text",
-    "version": "0.1",
+    "version": ["0.1", "1.0"],
     "latestVersion": "0.1",
     "options": {"hasCss": true}
   },
-  {"name": "amp-fit-text", "version": "1.0", "latestVersion": "0.1"},
   {"name": "amp-font", "version": "0.1", "latestVersion": "0.1"},
   {
     "name": "amp-form",
@@ -175,6 +172,12 @@
   {"name": "amp-geo", "version": "0.1", "latestVersion": "0.1"},
   {"name": "amp-gfycat", "version": "0.1", "latestVersion": "0.1"},
   {"name": "amp-gist", "version": "0.1", "latestVersion": "0.1"},
+  {
+    "name": "amp-google-assistant-assistjs",
+    "version": "0.1",
+    "latestVersion": "0.1",
+    "options": {"hasCss": true}
+  },
   {
     "name": "amp-google-document-embed",
     "version": "0.1",
@@ -216,7 +219,9 @@
       "hasCss": true,
       "cssBinaries": [
         "amp-inline-gallery",
+        "amp-inline-gallery-captions",
         "amp-inline-gallery-pagination",
+        "amp-inline-gallery-slide",
         "amp-inline-gallery-thumbnails"
       ]
     }
@@ -233,16 +238,14 @@
   {
     "name": "amp-inputmask",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "postPrepend": ["third_party/inputmask/bundle.js"]
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-instagram",
-    "version": "0.1",
+    "version": ["0.1", "1.0"],
     "latestVersion": "0.1",
     "options": {"hasCss": true}
   },
-  {"name": "amp-instagram", "version": "1.0", "latestVersion": "0.1"},
   {
     "name": "amp-install-serviceworker",
     "version": "0.1",
@@ -258,13 +261,7 @@
   {"name": "amp-kaltura-player", "version": "0.1", "latestVersion": "0.1"},
   {
     "name": "amp-lightbox",
-    "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {"hasCss": true}
-  },
-  {
-    "name": "amp-lightbox",
-    "version": "1.0",
+    "version": ["0.1", "1.0"],
     "latestVersion": "0.1",
     "options": {"hasCss": true}
   },
@@ -384,6 +381,12 @@
     "options": {"hasCss": true}
   },
   {
+    "name": "amp-shadow-dom-polyfill",
+    "version": "0.1",
+    "latestVersion": "0.1",
+    "options": {"noWrapper": true}
+  },
+  {
     "name": "amp-sidebar",
     "version": ["0.1", "0.2", "1.0"],
     "latestVersion": "0.1",
@@ -455,10 +458,16 @@
       "cssBinaries": [
         "amp-story-auto-ads-ad-badge",
         "amp-story-auto-ads-attribution",
+        "amp-story-auto-ads-cta-button",
         "amp-story-auto-ads-inabox",
         "amp-story-auto-ads-shared"
       ]
     }
+  },
+  {
+    "name": "amp-story-auto-analytics",
+    "version": "0.1",
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-story-dev-tools",
@@ -500,11 +509,10 @@
   },
   {
     "name": "amp-stream-gallery",
-    "version": "0.1",
+    "version": ["0.1", "1.0"],
     "latestVersion": "0.1",
     "options": {"hasCss": true}
   },
-  {"name": "amp-stream-gallery", "version": "1.0", "latestVersion": "0.1"},
   {
     "name": "amp-subscriptions",
     "version": "0.1",
@@ -535,7 +543,12 @@
     "options": {"hasCss": true}
   },
   {"name": "amp-video", "version": "0.1", "latestVersion": "0.1"},
-  {"name": "amp-video", "version": "1.0", "latestVersion": "0.1"},
+  {
+    "name": "amp-video",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {"hasCss": true}
+  },
   {
     "name": "amp-video-docking",
     "version": "0.1",
@@ -562,12 +575,7 @@
     "name": "amp-viz-vega",
     "version": "0.1",
     "latestVersion": "0.1",
-    "options": {"hasCss": true},
-    "postPrepend": [
-      "third_party/d3/d3.js",
-      "third_party/d3-geo-projection/d3-geo-projection.js",
-      "third_party/vega/vega.js"
-    ]
+    "options": {"hasCss": true}
   },
   {"name": "amp-vk", "version": "0.1", "latestVersion": "0.1"},
   {
@@ -578,6 +586,11 @@
   },
   {"name": "amp-wistia-player", "version": "0.1", "latestVersion": "0.1"},
   {"name": "amp-yotpo", "version": "0.1", "latestVersion": "0.1"},
-  {"name": "amp-youtube", "version": "1.0", "latestVersion": "0.1"},
-  {"name": "amp-youtube", "version": "0.1", "latestVersion": "0.1"}
+  {"name": "amp-youtube", "version": "0.1", "latestVersion": "0.1"},
+  {
+    "name": "amp-youtube",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {"hasCss": true}
+  }
 ]

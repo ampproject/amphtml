@@ -15,7 +15,7 @@
  */
 
 import '../amp-sidebar';
-import * as lolex from 'lolex';
+import * as fakeTimers from '@sinonjs/fake-timers';
 import {ActionService} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/action-constants';
 import {Keys} from '../../../../src/utils/key-codes';
@@ -95,12 +95,12 @@ describes.realWin(
       ampSidebar.setAttribute('layout', 'nodisplay');
       doc.body.appendChild(ampSidebar);
       return ampSidebar
-        .build()
+        .buildInternal()
         .then(() => {
           return ampSidebar.layoutCallback();
         })
-        .then(() => {
-          const impl = ampSidebar.implementation_;
+        .then(() => ampSidebar.getImpl(false))
+        .then((impl) => {
           if (options.toolbars) {
             env.sandbox.stub(timer, 'delay').callsFake(function (callback) {
               callback();
@@ -195,7 +195,7 @@ describes.realWin(
 
       it('should create mask element in DOM', async () => {
         const sidebarElement = await getAmpSidebar({'stubHistory': true});
-        const impl = sidebarElement.implementation_;
+        const impl = await sidebarElement.getImpl(false);
         execute(impl, 'open');
         expect(doc.querySelectorAll('.i-amphtml-sidebar-mask').length).to.equal(
           1
@@ -204,14 +204,14 @@ describes.realWin(
 
       it('should create styleable mask element in DOM', async () => {
         const sidebarElement = await getAmpSidebar({'stubHistory': true});
-        const impl = sidebarElement.implementation_;
+        const impl = await sidebarElement.getImpl(false);
         execute(impl, 'open');
         expect(doc.querySelectorAll('.amp-sidebar-mask').length).to.equal(1);
       });
 
       it('should create an invisible close button for screen readers only', async () => {
         const sidebarElement = await getAmpSidebar();
-        const impl = sidebarElement.implementation_;
+        const impl = await sidebarElement.getImpl(false);
         impl.close_ = env.sandbox.spy();
         const closeButton = sidebarElement.lastElementChild;
         expect(closeButton).to.exist;
@@ -225,12 +225,11 @@ describes.realWin(
 
       it('should open sidebar on button click', async () => {
         const sidebarElement = await getAmpSidebar();
-        const impl = sidebarElement.implementation_;
+        const impl = await sidebarElement.getImpl(false);
         const screenReaderCloseButton = sidebarElement.querySelector(
           'button.i-amphtml-screen-reader'
         );
-        clock = lolex.install({
-          target: impl.win,
+        clock = fakeTimers.withGlobal(impl.win).install({
           toFake: ['Date', 'setTimeout'],
         });
         const historyPushSpy = env.sandbox.spy();
@@ -278,7 +277,7 @@ describes.realWin(
 
       it('ignore repeated calls to open', async () => {
         const sidebarElement = await getAmpSidebar({'stubHistory': true});
-        const impl = sidebarElement.implementation_;
+        const impl = await sidebarElement.getImpl(false);
 
         execute(impl, 'open');
         expect(getModalStackLength()).to.equal(1);
@@ -288,7 +287,7 @@ describes.realWin(
 
       it('ignore repeated calls to close', async () => {
         const sidebarElement = await getAmpSidebar({'stubHistory': true});
-        const impl = sidebarElement.implementation_;
+        const impl = await sidebarElement.getImpl(false);
 
         execute(impl, 'open');
         execute(impl, 'close');
@@ -298,7 +297,7 @@ describes.realWin(
 
       it('close on history back', async () => {
         const sidebarElement = await getAmpSidebar({'stubHistory': true});
-        const impl = sidebarElement.implementation_;
+        const impl = await sidebarElement.getImpl(false);
 
         execute(impl, 'open');
 
@@ -323,7 +322,7 @@ describes.realWin(
         env.sandbox.stub(platform, 'isSafari').returns(true);
 
         const sidebarElement = await getAmpSidebar({'stubHistory': true});
-        const impl = sidebarElement.implementation_;
+        const impl = await sidebarElement.getImpl(false);
 
         execute(impl, 'open');
         // history "back"
@@ -335,9 +334,8 @@ describes.realWin(
 
       it('should close sidebar on button click', async () => {
         const sidebarElement = await getAmpSidebar({'stubHistory': true});
-        const impl = sidebarElement.implementation_;
-        clock = lolex.install({
-          target: impl.win,
+        const impl = await sidebarElement.getImpl(false);
+        clock = fakeTimers.withGlobal(impl.win).install({
           toFake: ['Date', 'setTimeout'],
         });
         owners.schedulePause = env.sandbox.spy();
@@ -383,9 +381,8 @@ describes.realWin(
         const screenReaderCloseButton = sidebarElement.querySelector(
           'button.i-amphtml-screen-reader'
         );
-        const impl = sidebarElement.implementation_;
-        clock = lolex.install({
-          target: impl.win,
+        const impl = await sidebarElement.getImpl(false);
+        clock = fakeTimers.withGlobal(impl.win).install({
           toFake: ['Date', 'setTimeout'],
         });
         owners.scheduleLayout = env.sandbox.spy();
@@ -418,9 +415,8 @@ describes.realWin(
 
       it('should close sidebar on escape', async () => {
         const sidebarElement = await getAmpSidebar({stubHistory: true});
-        const impl = sidebarElement.implementation_;
-        clock = lolex.install({
-          target: impl.win,
+        const impl = await sidebarElement.getImpl(false);
+        clock = fakeTimers.withGlobal(impl.win).install({
           toFake: ['Date', 'setTimeout'],
         });
         owners.schedulePause = env.sandbox.spy();
@@ -450,9 +446,8 @@ describes.realWin(
 
       it('should reflect state of the sidebar', async () => {
         const sidebarElement = await getAmpSidebar({stubHistory: true});
-        const impl = sidebarElement.implementation_;
-        clock = lolex.install({
-          target: impl.win,
+        const impl = await sidebarElement.getImpl(false);
+        clock = fakeTimers.withGlobal(impl.win).install({
           toFake: ['Date', 'setTimeout'],
         });
         owners.schedulePause = env.sandbox.spy();
@@ -496,7 +491,7 @@ describes.realWin(
         env.sandbox.stub(platform, 'isIos').returns(true);
         env.sandbox.stub(platform, 'isSafari').returns(true);
         const sidebarElement = await getAmpSidebar();
-        const impl = sidebarElement.implementation_;
+        const impl = await sidebarElement.getImpl(false);
         env.sandbox.stub(timer, 'delay').callsFake(function (callback) {
           callback();
         });
@@ -509,7 +504,7 @@ describes.realWin(
         env.sandbox.stub(platform, 'isIos').returns(true);
         env.sandbox.stub(platform, 'isSafari').returns(true);
         const sidebarElement = await getAmpSidebar();
-        const impl = sidebarElement.implementation_;
+        const impl = await sidebarElement.getImpl(false);
         env.sandbox.stub(timer, 'delay').callsFake(function (callback) {
           callback();
         });
@@ -530,9 +525,8 @@ describes.realWin(
         const sidebarElement = await getAmpSidebar({stubHistory: true});
         const anchor = sidebarElement.getElementsByTagName('a')[0];
         anchor.href = '#newloc';
-        const impl = sidebarElement.implementation_;
-        clock = lolex.install({
-          target: impl.win,
+        const impl = await sidebarElement.getImpl(false);
+        clock = fakeTimers.withGlobal(impl.win).install({
           toFake: ['Date', 'setTimeout'],
         });
         owners.schedulePause = env.sandbox.spy();
@@ -562,7 +556,7 @@ describes.realWin(
         const sidebarElement = await getAmpSidebar({stubHistory: true});
         const anchor = sidebarElement.getElementsByTagName('a')[0];
         anchor.href = '#newloc';
-        const impl = sidebarElement.implementation_;
+        const impl = await sidebarElement.getImpl(false);
         owners.schedulePause = env.sandbox.spy();
         env.sandbox.stub(timer, 'delay').callsFake(function (callback) {
           callback();
@@ -592,7 +586,7 @@ describes.realWin(
         const sidebarElement = await getAmpSidebar({stubHistory: true});
         const anchor = sidebarElement.getElementsByTagName('a')[0];
         anchor.href = '#newloc';
-        const impl = sidebarElement.implementation_;
+        const impl = await sidebarElement.getImpl(false);
         owners.schedulePause = env.sandbox.spy();
 
         env.sandbox.stub(timer, 'delay').callsFake(function (callback) {
@@ -624,7 +618,7 @@ describes.realWin(
       it('should not close sidebar if clicked on non-anchor', async () => {
         const sidebarElement = await getAmpSidebar({stubHistory: true});
         const li = sidebarElement.getElementsByTagName('li')[0];
-        const impl = sidebarElement.implementation_;
+        const impl = await sidebarElement.getImpl(false);
         owners.schedulePause = env.sandbox.spy();
 
         env.sandbox.stub(timer, 'delay').callsFake(function (callback) {
@@ -651,7 +645,7 @@ describes.realWin(
 
       it('should trigger actions on open and close', async () => {
         const sidebarElement = await getAmpSidebar({stubHistory: true});
-        const impl = sidebarElement.implementation_;
+        const impl = await sidebarElement.getImpl(false);
         const triggerSpy = env.sandbox.spy(impl.action_, 'trigger');
         env.sandbox.stub(timer, 'delay').callsFake(function (callback) {
           callback();
@@ -679,13 +673,13 @@ describes.realWin(
 
       it('should disable swipe to close when attribute specified', async () => {
         const sidebarElement = await getAmpSidebar({disableSwipe: true});
-        const impl = sidebarElement.implementation_;
+        const impl = await sidebarElement.getImpl(false);
         expect(impl.disableSwipeClose_).to.be.true;
       });
 
       it('should not allow swipe on input range (slider) element', async () => {
         const sidebarElement = await getAmpSidebar();
-        const impl = sidebarElement.implementation_;
+        const impl = await sidebarElement.getImpl(false);
 
         const swipeMoveStub = env.sandbox.stub(
           impl.swipeToDismiss_,
@@ -711,18 +705,20 @@ describes.realWin(
       // Tests for amp-sidebar 1.0
       it('should not create toolbars without <nav toolbar />', async () => {
         const sidebarElement = await getAmpSidebar();
+        const impl = await sidebarElement.getImpl(false);
         const headerElements = doc.getElementsByTagName('header');
         const toolbarElements = doc.querySelectorAll('[toolbar]');
         expect(headerElements.length).to.be.equal(0);
         expect(toolbarElements.length).to.be.equal(0);
-        expect(sidebarElement.implementation_.toolbars_.length).to.be.equal(0);
+        expect(impl.toolbars_.length).to.be.equal(0);
       });
 
       it('should create a toolbar element within the toolbar-target', async () => {
         const sidebarElement = await getAmpSidebar({
           toolbars: [{}],
         });
-        expect(sidebarElement.implementation_.toolbars_.length).to.be.equal(1);
+        const impl = await sidebarElement.getImpl(false);
+        expect(impl.toolbars_.length).to.be.equal(1);
       });
 
       it(
@@ -737,9 +733,8 @@ describes.realWin(
               },
             ],
           });
-          expect(sidebarElement.implementation_.toolbars_.length).to.be.equal(
-            2
-          );
+          const impl = await sidebarElement.getImpl(false);
+          expect(impl.toolbars_.length).to.be.equal(2);
         }
       );
     });

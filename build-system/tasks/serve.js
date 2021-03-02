@@ -35,11 +35,11 @@ const {
   preBuildExtensions,
 } = require('../server/lazy-build');
 const {createCtrlcHandler} = require('../common/ctrlcHandler');
-const {cyan, green, red} = require('ansi-colors');
+const {cyan, green, red} = require('kleur/colors');
 const {logServeMode, setServeMode} = require('../server/app-utils');
 const {log} = require('../common/logging');
 const {watchDebounceDelay} = require('./helpers');
-const {watch} = require('gulp');
+const {watch} = require('chokidar');
 
 const argv = minimist(process.argv.slice(2), {string: ['rtv']});
 
@@ -163,6 +163,7 @@ async function stopServer() {
  * Closes the existing server and restarts it
  */
 async function restartServer() {
+  stopServer();
   if (argv.new_server) {
     try {
       buildNewServer();

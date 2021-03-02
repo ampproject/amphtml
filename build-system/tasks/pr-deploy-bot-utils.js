@@ -18,10 +18,9 @@
 const fs = require('fs-extra');
 const path = require('path');
 const request = require('request-promise');
-const {ciBuildId} = require('../common/ci');
-const {cyan} = require('ansi-colors');
+const {ciBuildSha} = require('../common/ci');
+const {cyan} = require('kleur/colors');
 const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
-const {gitCommitHash} = require('../common/git');
 const {replaceUrls: replaceUrlsAppUtil} = require('../server/app-utils');
 
 const hostNamePrefix = 'https://storage.googleapis.com/amp-test-website-1';
@@ -42,7 +41,7 @@ async function walk(dest) {
 }
 
 function getBaseUrl() {
-  return `${hostNamePrefix}/amp_nomodule_${ciBuildId()}`;
+  return `${hostNamePrefix}/amp_nomodule_${ciBuildSha()}`;
 }
 
 async function replace(filePath) {
@@ -76,10 +75,9 @@ async function signalPrDeployUpload(result) {
     cyan(result),
     'to the pr-deploy GitHub App...'
   );
-  const sha = gitCommitHash();
-  const ciBuild = ciBuildId();
+  const sha = ciBuildSha();
   const baseUrl = 'https://amp-pr-deploy-bot.appspot.com/v0/pr-deploy/';
-  const url = `${baseUrl}cibuilds/${ciBuild}/headshas/${sha}/${result}`;
+  const url = `${baseUrl}headshas/${sha}/${result}`;
   await request.post(url);
 }
 

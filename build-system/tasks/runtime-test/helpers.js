@@ -18,7 +18,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs');
 const path = require('path');
-const {green, yellow, cyan} = require('ansi-colors');
+const {green, yellow, cyan} = require('kleur/colors');
 const {isCiBuild} = require('../../common/ci');
 const {log} = require('../../common/logging');
 const {maybePrintCoverageMessage} = require('../helpers');
@@ -113,7 +113,7 @@ function maybePrintArgvMessages() {
 
   log(
     green('Run'),
-    cyan('gulp help'),
+    cyan('gulp --tasks'),
     green('to see a list of all test flags.')
   );
   log(green('⤷ Use'), cyan('--nohelp'), green('to silence these messages.'));

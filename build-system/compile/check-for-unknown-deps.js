@@ -17,7 +17,7 @@
 
 const through = require('through2');
 const {log} = require('../common/logging');
-const {red, cyan, yellow} = require('ansi-colors');
+const {red, cyan, yellow} = require('kleur/colors');
 
 /**
  * Searches for the identifier "module$", which Closure uses to uniquely
@@ -29,7 +29,7 @@ const {red, cyan, yellow} = require('ansi-colors');
 exports.checkForUnknownDeps = function () {
   const regex = /[\w$]*module\$[\w$]+/;
 
-  return through.obj(function (file, encoding, cb) {
+  return through.obj(function (file, _encoding, cb) {
     const contents = file.contents.toString();
     if (!contents.includes('module$')) {
       // Fast check, since regexes can backtrack like crazy.

@@ -154,9 +154,6 @@ var process = {};
 process.env;
 process.env.NODE_ENV;
 
-/** @type {boolean|undefined} */
-window.IS_AMP_ALT;
-
 // Exposed to ads.
 // Preserve these filedNames so they can be accessed by 3p code.
 window.context = {};
@@ -649,8 +646,6 @@ AMP.AmpAdUIHandler = class {
    */
   constructor(baseInstance) {}
 };
-
-AMP.RealTimeConfigManager;
 
 /**
  * Actual filled values for this exists in

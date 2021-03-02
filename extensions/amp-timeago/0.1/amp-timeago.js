@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import {format, getLocale} from './locales';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {
   observeWithSharedInOb,
   unobserveWithSharedInOb,
 } from '../../../src/viewport-observer';
-import {timeago} from '../../../third_party/timeagojs/timeago';
 import {userAssert} from '../../../src/log';
 
 export class AmpTimeAgo extends AMP.BaseElement {
@@ -52,13 +52,16 @@ export class AmpTimeAgo extends AMP.BaseElement {
     );
 
     this.datetime_ = this.element.getAttribute('datetime');
-    this.locale_ =
+    this.locale_ = getLocale(
       this.element.getAttribute('locale') ||
-      this.win.document.documentElement.lang;
+        this.win.document.documentElement.lang
+    );
     this.title_ = this.element.textContent.trim();
 
-    this.element.title = this.title_;
     this.element.textContent = '';
+    if (!this.element.hasAttribute('role')) {
+      this.element.setAttribute('role', 'text');
+    }
 
     this.timeElement_ = document.createElement('time');
     this.timeElement_.setAttribute('datetime', this.datetime_);
@@ -116,10 +119,10 @@ export class AmpTimeAgo extends AMP.BaseElement {
         this.timeElement_.textContent = this.title_;
         this.cutOffReached_ = true;
       } else {
-        this.timeElement_.textContent = timeago(this.datetime_, this.locale_);
+        this.timeElement_.textContent = format(this.datetime_, this.locale_);
       }
     } else {
-      this.timeElement_.textContent = timeago(this.datetime_, this.locale_);
+      this.timeElement_.textContent = format(this.datetime_, this.locale_);
     }
   }
 }

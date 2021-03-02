@@ -40,7 +40,7 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
       element.setAttribute(attr, attrs[attr]);
     }
     root.body.appendChild(element);
-    return element.build().then(() => element);
+    return element.buildInternal().then(() => element);
   }
 
   /**
@@ -112,12 +112,16 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
               'timeline-event-prefix': 'tl_',
               'layout': 'nodisplay',
             };
-            return createGwdAnimationElement(doc, config).then((el) => {
-              element = el;
-              impl = element.implementation_;
-              runtime = getServiceForDocOrNull(element, GWD_SERVICE_NAME);
-              page1Elem = doc.getElementById('page1');
-            });
+            return createGwdAnimationElement(doc, config)
+              .then((el) => {
+                element = el;
+                runtime = getServiceForDocOrNull(element, GWD_SERVICE_NAME);
+                page1Elem = doc.getElementById('page1');
+                return element.getImpl(false);
+              })
+              .then((aImpl) => {
+                impl = aImpl;
+              });
           });
 
           afterEach(() => {

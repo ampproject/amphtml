@@ -23,6 +23,7 @@ import {LocalizationService} from '../../../../src/service/localization';
 import {MediaType} from '../media-pool';
 import {Services} from '../../../../src/services';
 import {Signals} from '../../../../src/utils/signals';
+import {VideoUtils} from '../../../../src/utils/video';
 import {
   addAttributesToElement,
   createElementWithAttributes,
@@ -324,7 +325,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     page.element.querySelector('amp-story-grid-layer').appendChild(ampAudioEl);
 
     new AmpAudio(ampAudioEl);
-    ampAudioEl.build();
+    ampAudioEl.buildInternal();
     page.buildCallback();
 
     const mediaPool = await page.mediaPoolPromise_;
@@ -588,6 +589,32 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     expect(actions[0]).to.be.equal('pageId');
   });
 
+  it('play message should have role="button" to prevent story page navigation', async () => {
+    env.sandbox.stub(page, 'loadPromise').returns(Promise.resolve());
+    env.sandbox
+      .stub(VideoUtils, 'isAutoplaySupported')
+      .returns(Promise.resolve(false));
+    const videoEl = win.document.createElement('video');
+    videoEl.setAttribute('src', 'https://example.com/video.mp4');
+    gridLayerEl.appendChild(videoEl);
+
+    page.buildCallback();
+    const mediaPool = await page.mediaPoolPromise_;
+    const mediaPoolPlay = env.sandbox.stub(mediaPool, 'play');
+    mediaPoolPlay.returns(Promise.reject());
+
+    page.layoutCallback();
+
+    page.setState(PageState.PLAYING);
+    await nextTick();
+
+    const playButtonEl = element.querySelector(
+      '.i-amphtml-story-page-play-button'
+    );
+
+    expect(playButtonEl.getAttribute('role')).to.eql('button');
+  });
+
   it('should not build the open attachment UI if no attachment', async () => {
     page.buildCallback();
     await page.layoutCallback();
@@ -603,6 +630,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     const attachmentEl = win.document.createElement(
       'amp-story-page-attachment'
     );
+    attachmentEl.setAttribute('layout', 'nodisplay');
     element.appendChild(attachmentEl);
 
     page.buildCallback();
@@ -619,6 +647,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     const attachmentEl = win.document.createElement(
       'amp-story-page-attachment'
     );
+    attachmentEl.setAttribute('layout', 'nodisplay');
     attachmentEl.setAttribute('data-cta-text', 'Custom label');
     element.appendChild(attachmentEl);
 

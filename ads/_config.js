@@ -24,7 +24,6 @@ import {jsonConfiguration} from '../src/json';
  *   clientIdScope: (string|undefined),
  *   clientIdCookieName: (string|undefined),
  *   consentHandlingOverride: (boolean|undefined),
- *   remoteHTMLDisabled: (boolean|undefined),
  *   fullWidthHeightRatio: (number|undefined),
  * }}
  */
@@ -173,6 +172,11 @@ const adConfig = jsonConfiguration({
   'adpon': {
     prefetch: 'https://ad.adpon.jp/amp.js',
     clientIdScope: 'AMP_ECID_ADPON',
+  },
+
+  'adpushup': {
+    prefetch: 'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
+    preconnect: 'https://cdn.adpushup.com',
   },
 
   'adreactor': {},
@@ -497,6 +501,8 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://t.felmat.net/js/fmamp.js',
     renderStartImplemented: true,
   },
+
+  'finative': {},
 
   'firstimpression': {
     prefetch: 'https://ecdn.firstimpression.io/static/js/fiamp.js',

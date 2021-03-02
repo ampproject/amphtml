@@ -366,6 +366,23 @@ amp-story-grid-layer {
   pointer-events: none !important;
 }
 
+amp-story-grid-layer[anchor*="left"] {
+  margin-left: 0 !important;
+}
+
+amp-story-grid-layer[anchor*="top"] {
+  margin-top: 0 !important;
+}
+
+amp-story-grid-layer[anchor*="bottom"] {
+  margin-bottom: 0 !important;
+}
+
+amp-story-grid-layer[anchor*="right"] {
+  margin-right: 0 !important;
+  margin-left: auto !important;
+}
+
 /**
  * Click shield to make sure click events are never swallowed by videos on
  * Safari iOS 11.2, which would prevent the user from navigating through the
@@ -830,6 +847,7 @@ amp-story .amp-video-eq,
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 36 36" fill="rgba(255, 255, 255, 0.8)"><path d="M28.5 9.62L26.38 7.5 18 15.88 9.62 7.5 7.5 9.62 15.88 18 7.5 26.38l2.12 2.12L18 20.12l8.38 8.38 2.12-2.12L20.12 18z"/><path d="M0 0h36v36H0z" fill="none"/></svg>') !important;
   cursor: pointer !important;
   text-align: center !important;
+  background-color: transparent !important; /* Resets default button background-color. */
 }
 
 @keyframes play-button-fly-in {

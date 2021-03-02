@@ -22,7 +22,7 @@ const fs = require('fs-extra');
 const klaw = require('klaw');
 const path = require('path');
 const tar = require('tar');
-const {cyan, green} = require('ansi-colors');
+const {cyan, green} = require('kleur/colors');
 const {execOrDie} = require('../../common/exec');
 const {log} = require('../../common/logging');
 const {MINIFIED_TARGETS} = require('../helpers');
@@ -406,9 +406,6 @@ async function cleanup_(tempDir) {
 }
 
 async function release() {
-  // TODO(#27771, danielrozenberg): fail this release quickly if there are
-  // commits in the tree that are not from the `master` branch.
-
   const outputDir = path.resolve(argv.output_dir || './release');
   const tempDir = path.join(outputDir, 'tmp');
 

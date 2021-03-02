@@ -12,7 +12,7 @@ Read this document to learn how to create a new Bento AMP component.
 -   [Extend AMP.PreactBaseElement](#extend-amppreactbaseelement)
     -   [Element and Component classes](#element-and-component-classes)
     -   [PreactBaseElement callbacks](#preactbaseelement-callbacks)
-    -   [AMP/Preact Bridge](#amp-preact-bridge)
+    -   [AMP/Preact Bridge](#amppreact-bridge)
 -   [Element styling](#element-styling)
 -   [Register element with AMP](#register-element-with-amp)
 -   [Actions and events](#actions-and-events)
@@ -64,11 +64,12 @@ The directory structure is below:
 |   ├── test/                            # Element's unit test suite (req'd)
 |   |   ├── test-amp-my-element.js
 |   |   └── More test JS files (optional)
-|   ├── my-element.js                    # Preact implementation (req'd)
-|   ├── my-element.type.js               # Preact type definitions (req'd)
+|   ├── base-element.js                  # Preact base element (req'd)
+|   ├── component.js                     # Preact implementation (req'd)
+|   ├── component.type.js                # Preact type definitions (req'd)
 |   ├── amp-my-element.js                # Element's implementation (req'd)
 |   ├── amp-my-element.css               # Custom CSS (optional)
-|   ├── my-element.jss.js                # Preact JSS (optional)
+|   ├── component.jss.js                 # Preact JSS (optional)
 |   └── More JS files (optional)
 ├── validator-amp-my-element.protoascii  # Validator rules (req'd)
 ├── amp-my-element.md                    # Element's main documentation (req'd)
@@ -90,7 +91,7 @@ All Preact-based Bento AMP extensions extend `AMP.PreactBaseElement`, which buil
 callbacks. Bento AMP extensions differ from AMP extensions because they are self-managing and independent, and therefore usable in a wider range of contexts beyond AMP pages, while still being fully integrated with the AMP environment
 in a fully AMP document.
 
-The configurations which bridge the Preact implementation of the component and its custom element counterpart in an HTML or AMP document are explained in the [AMP/Preact Bridge](#amp/preact-bridge) section, and the callbacks which handle AMP- and DOM- specific mutability traits are explained in the [PreactBaseElement Callbacks](#preactbaseelement-callbacks) section. All of these are also explained inline in the [PreactBaseElement](https://github.com/ampproject/amphtml/blob/master/src/preact/base-element.js) class.
+The configurations which bridge the Preact implementation of the component and its custom element counterpart in an HTML or AMP document are explained in the [AMP/Preact Bridge](#amppreact-bridge) section, and the callbacks which handle AMP- and DOM- specific mutability traits are explained in the [PreactBaseElement Callbacks](#preactbaseelement-callbacks) section. All of these are also explained inline in the [PreactBaseElement](https://github.com/ampproject/amphtml/blob/master/src/preact/base-element.js) class.
 
 ### Element and Component classes
 
@@ -99,7 +100,7 @@ file (`extensions/amp-my-element/0.1/amp-my-element.js`). See [Experiments](#exp
 
 ```js
 import {func1, func2} from '../../../src/module';
-import {MyElement} from './my-element'; // Preact component.
+import {BaseElement} from './my-element'; // Preact base element.
 import {CSS} from '../../../build/amp-my-element-0.1.css';
 // more ES2015-style import statements.
 
@@ -109,7 +110,7 @@ const EXPERIMENT = 'amp-my-element';
 /** @const */
 const TAG = 'amp-my-element';
 
-class AmpMyElement extends AMP.PreactBaseElement {
+class AmpMyElement extends BaseElement {
   /** @override */
   init() {
     // Perform any additional processing of prop values that are not
@@ -130,19 +131,28 @@ class AmpMyElement extends AMP.PreactBaseElement {
   }
 }
 
-AmpMyElement['Component'] = MyElement;            // Component definition.
-
-AmpMyElement['props'] = {  // Map DOM attributes to Preact Component props.
-  'propName1': {attr: 'attr-name-1'},
-  'propName2': {attr: 'attr-name-2', type: 'number'},
-};
-
 AMP.extension('amp-my-element', '0.1', (AMP) => {
   AMP.registerElement('amp-my-element', AmpMyElement, CSS);
 });
 ```
 
-The following shows the corresponding overall structure of your Preact functional component implementation file (extensions/amp-my-element/0.1/my-element.js).
+The following shows the corresponding overall structure of your Preact base element implementation file (extensions/amp-my-element/0.1/base-element.js).
+
+```js
+import {MyElement} from './component'; // Preact component.
+import {PreactBaseElement} from '../../../src/preact/base-element'; // Preact component.
+
+export class BaseElement extends PreactBaseElement;
+
+BaseElement['Component'] = MyElement;            // Component definition.
+
+BaseElement['props'] = {  // Map DOM attributes to Preact Component props.
+  'propName1': {attr: 'attr-name-1'},
+  'propName2': {attr: 'attr-name-2', type: 'number'},
+};
+```
+
+The following shows the corresponding overall structure of your Preact functional component implementation file (extensions/amp-my-element/0.1/component.js).
 
 ```js
 import * as Preact from '../../../src/preact';

@@ -23,10 +23,7 @@ import {
 import {closest} from '../../../src/dom';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {htmlFor} from '../../../src/static-template';
-import {
-  observeContentSize,
-  unobserveContentSize,
-} from '../../../src/utils/size-observer';
+import {observeContentSize} from '../../../src/utils/size-observer';
 import {setStyles} from '../../../src/style';
 
 /**
@@ -53,9 +50,27 @@ const buildDeviceTemplate = (element) => {
   return html`
     <div class="i-amphtml-story-dev-tools-device">
       <div class="i-amphtml-story-dev-tools-device-screen">
+        <div class="i-amphtml-story-dev-tools-device-statusbar">
+          <div class="i-amphtml-story-dev-tools-device-statusbar-clock"></div>
+          <div class="i-amphtml-story-dev-tools-device-statusbar-icons"></div>
+        </div>
+        <div class="i-amphtml-story-dev-tools-device-appbar">
+          <div class="i-amphtml-story-dev-tools-device-appbar-icon"></div>
+          <div class="i-amphtml-story-dev-tools-device-appbar-urlbar"></div>
+          <div class="i-amphtml-story-dev-tools-device-appbar-icon"></div>
+          <div class="i-amphtml-story-dev-tools-device-appbar-icon"></div>
+        </div>
         <amp-story-player width="1" height="1" layout="container">
           <a></a>
         </amp-story-player>
+        <div class="i-amphtml-story-dev-tools-device-bottombar">
+          <div class="i-amphtml-story-dev-tools-device-appbar-icon"></div>
+          <div class="i-amphtml-story-dev-tools-device-appbar-icon"></div>
+          <div class="i-amphtml-story-dev-tools-device-appbar-icon"></div>
+          <div class="i-amphtml-story-dev-tools-device-appbar-icon"></div>
+          <div class="i-amphtml-story-dev-tools-device-appbar-icon"></div>
+        </div>
+        <div class="i-amphtml-story-dev-tools-device-navigation"></div>
       </div>
     </div>
   `;
@@ -141,6 +156,13 @@ const buildHelpDialogTemplate = (element) => {
           >
         </div>
         <h1>Helpful links</h1>
+        <a
+          class="i-amphtml-story-dev-tools-device-dialog-link i-amphtml-story-dev-tools-help-page-experience-link"
+          target="_blank"
+          href="https://amp.dev/page-experience/"
+          ><span>Analyze the Page Experience</span>
+          <div class="i-amphtml-story-dev-tools-device-dialog-arrow"></div
+        ></a>
         <a
           class="i-amphtml-story-dev-tools-device-dialog-link"
           target="_blank"
@@ -229,6 +251,7 @@ const ALL_DEVICES = [
     'height': 605,
     'deviceHeight': 731,
     'deviceSpaces': 1,
+    'details': ['pixel2', 'browser', 'android'],
   },
   {
     'name': 'Pixel 3',
@@ -236,6 +259,7 @@ const ALL_DEVICES = [
     'height': 686,
     'deviceHeight': 823,
     'deviceSpaces': 1,
+    'details': ['pixel3', 'browser', 'android'],
   },
   {
     'name': 'iPhone 8 (Browser)',
@@ -243,13 +267,15 @@ const ALL_DEVICES = [
     'height': 554,
     'deviceHeight': 667,
     'deviceSpaces': 1,
+    'details': ['iphone8', 'browser', 'ios'],
   },
   {
     'name': 'iPhone 8 (Native)',
     'width': 375,
-    'height': 632,
+    'height': 596,
     'deviceHeight': 667,
     'deviceSpaces': 1,
+    'details': ['iphone8', 'native', 'ios'],
   },
   {
     'name': 'iPhone 11 (Browser)',
@@ -257,6 +283,7 @@ const ALL_DEVICES = [
     'height': 724,
     'deviceHeight': 896,
     'deviceSpaces': 1,
+    'details': ['iphone11', 'browser', 'ios'],
   },
   {
     'name': 'iPhone 11 (Native)',
@@ -264,6 +291,7 @@ const ALL_DEVICES = [
     'height': 795,
     'deviceHeight': 896,
     'deviceSpaces': 1,
+    'details': ['iphone11', 'native', 'ios'],
   },
   {
     'name': 'iPhone 11 Pro (Browser)',
@@ -271,6 +299,7 @@ const ALL_DEVICES = [
     'height': 635,
     'deviceHeight': 812,
     'deviceSpaces': 1,
+    'details': ['iphone11pro', 'browser', 'ios'],
   },
   {
     'name': 'iPhone 11 Pro (Native)',
@@ -278,6 +307,7 @@ const ALL_DEVICES = [
     'height': 713,
     'deviceHeight': 812,
     'deviceSpaces': 1,
+    'details': ['iphone11pro', 'native', 'ios'],
   },
   {
     'name': 'iPad (Browser)',
@@ -285,6 +315,7 @@ const ALL_DEVICES = [
     'height': 1010,
     'deviceHeight': 1080,
     'deviceSpaces': 2,
+    'details': ['ipad', 'browser', 'ios'],
   },
   {
     'name': 'OnePlus 5T',
@@ -292,20 +323,23 @@ const ALL_DEVICES = [
     'height': 820,
     'deviceHeight': 910,
     'deviceSpaces': 1,
+    'details': ['oneplus5t', 'browser', 'android'],
   },
   {
     'name': 'OnePlus 7 Pro',
     'width': 412,
-    'height': 743,
+    'height': 782,
     'deviceHeight': 892,
     'deviceSpaces': 1,
+    'details': ['oneplus7pro', 'browser', 'android'],
   },
   {
     'name': 'Desktop 1080p',
     'width': 1920,
-    'height': 1080,
+    'height': 1000,
     'deviceHeight': 1080,
     'deviceSpaces': 2,
+    'details': ['desktop1080', 'browser', 'desktop'],
   },
 ];
 
@@ -378,6 +412,14 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
     this.devicesContainer_ = null;
 
     this.onResize_ = this.onResize_.bind(this);
+
+    /** @private {Map<!Element, !Array<string>>} navigation events expected to be received on each player */
+    this.expectedNavigationEvents_ = {};
+  }
+
+  /** @override */
+  isLayoutSupported() {
+    return true;
   }
 
   /** @override */
@@ -400,24 +442,18 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
     chipListContainer.appendChild(chipList);
     chipListContainer.appendChild(this.buildAddDeviceButton_());
     chipListContainer.appendChild(this.buildHelpButton_());
+  }
 
+  /** @override */
+  layoutCallback() {
     parseDevices(
       this.element.getAttribute('data-devices') || DEFAULT_DEVICES
     ).forEach((device) => {
       this.addDevice_(device.name);
     });
     this.repositionDevices_();
-  }
-
-  /** @override */
-  layoutCallback() {
     this.element.addEventListener('click', (e) => this.handleTap_(e.target));
     observeContentSize(this.element, this.onResize_);
-  }
-
-  /** @override */
-  unlayoutCallback() {
-    unobserveContentSize(this.element, this.onResize_);
   }
 
   /**
@@ -458,6 +494,7 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
    */
   buildDeviceLayout_(device) {
     const deviceLayout = buildDeviceTemplate(this.element);
+    device.details.forEach((detail) => deviceLayout.setAttribute(detail, ''));
     const devicePlayer = deviceLayout.querySelector('amp-story-player');
     devicePlayer.setAttribute('width', device.width);
     devicePlayer.setAttribute('height', device.height);
@@ -490,25 +527,23 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
       (el) => el.hasAttribute('data-action'),
       this.element
     );
-    if (actionElement.hasAttribute('disabled')) {
+    if (!actionElement || actionElement.hasAttribute('disabled')) {
       return;
     }
-    if (actionElement) {
-      switch (actionElement.getAttribute('data-action')) {
-        case PREVIEW_ACTIONS.SHOW_HELP_DIALOG:
-          this.showHelpDialog_();
-          break;
-        case PREVIEW_ACTIONS.SHOW_ADD_DEVICE_DIALIG:
-          this.showAddDeviceDialog_();
-          break;
-        case PREVIEW_ACTIONS.CLOSE_DIALOG:
-          this.hideCurrentDialog_();
-          break;
-        case PREVIEW_ACTIONS.REMOVE_DEVICE:
-        case PREVIEW_ACTIONS.TOGGLE_DEVICE_CHIP:
-          this.onDeviceChipToggled_(actionElement);
-          break;
-      }
+    switch (actionElement.getAttribute('data-action')) {
+      case PREVIEW_ACTIONS.SHOW_HELP_DIALOG:
+        this.showHelpDialog_();
+        break;
+      case PREVIEW_ACTIONS.SHOW_ADD_DEVICE_DIALIG:
+        this.showAddDeviceDialog_();
+        break;
+      case PREVIEW_ACTIONS.CLOSE_DIALOG:
+        this.hideCurrentDialog_();
+        break;
+      case PREVIEW_ACTIONS.REMOVE_DEVICE:
+      case PREVIEW_ACTIONS.TOGGLE_DEVICE_CHIP:
+        this.onDeviceChipToggled_(actionElement);
+        break;
     }
   }
 
@@ -532,17 +567,52 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
     }).then(() => {
       deviceSpecs.player
         .getElement()
-        .addEventListener('storyNavigation', (event) => {
-          this.devices_.forEach((d) => {
-            if (d != deviceSpecs) {
-              d.player.show(null, event.detail.pageId);
-            }
-          });
-        });
+        .addEventListener('storyNavigation', (event) =>
+          this.onPlayerNavigation_(event, deviceSpecs)
+        );
       deviceSpecs.player.load();
     });
+    this.expectedNavigationEvents_[deviceSpecs.name] = [];
     this.devices_.push(deviceSpecs);
     this.updateDevicesInHash_();
+  }
+
+  /**
+   * Triggered when a player emits a storyNavigationEvent.
+   *
+   * A navigation event from a player can come from a user interaction or a previous programmatic call.
+   * Expected navigation events from programmatic calls are stored in `this.expectedNavigationEvents_`,
+   * so they should not be propagated (but deleted from the list of expected events).
+   *
+   * Behavior of expectedNavigationEvents:
+   * - If an event was not expected, it means it was user navigation and should be propagated to other players.
+   * - If an event was expected, sync the expected list up to that page by removing all the pages expected
+   * up to the one received in the navigation event. This clears any events that could be dispatched when the story
+   * was loading and never were executed.
+   *
+   * @param {!Event} event
+   * @param {!DeviceInfo} deviceSpecs
+   * @private
+   */
+  onPlayerNavigation_(event, deviceSpecs) {
+    const {pageId} = event.detail;
+    const pageIndexInExpectedList = this.expectedNavigationEvents_[
+      deviceSpecs.name
+    ].lastIndexOf(pageId);
+    if (pageIndexInExpectedList > -1) {
+      // Remove the expected events up to the most recently received event if it was in the list.
+      this.expectedNavigationEvents_[deviceSpecs.name].splice(
+        0,
+        pageIndexInExpectedList + 1
+      );
+      return;
+    }
+    this.devices_.forEach((d) => {
+      if (d != deviceSpecs) {
+        d.player.show(/* storyUrl */ null, event.detail.pageId);
+        this.expectedNavigationEvents_[d.name].push(pageId);
+      }
+    });
   }
 
   /**
@@ -559,6 +629,7 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
         device.element.remove();
       });
       this.devices_ = this.devices_.filter((d) => d != device);
+      delete this.expectedNavigationEvents_[device.name];
       this.updateDevicesInHash_();
       return true;
     }
@@ -625,8 +696,12 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
    * @private
    * */
   repositionDevices_() {
-    const {width: layoutWidth, height} = this.getLayoutSize();
-    const width = layoutWidth * 0.8; // To account for 10% horizontal padding.
+    const {
+      offsetWidth: width,
+      offsetHeight: height,
+    } = this.element.querySelector(
+      '.i-amphtml-story-dev-tools-devices-container'
+    );
     let sumDeviceWidths = 0;
     let maxDeviceHeights = 0;
     // Find the sum of the device widths and max of heights since they are horizontally laid out.
@@ -719,6 +794,11 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
     dialog.querySelector(
       '.i-amphtml-story-dev-tools-help-search-preview-link'
     ).href += this.storyUrl_;
+    dialog.querySelector(
+      '.i-amphtml-story-dev-tools-help-page-experience-link'
+    ).href =
+      'https://amp.dev/page-experience/?url=' +
+      encodeURIComponent(this.storyUrl_);
 
     this.mutateElement(() => this.element.appendChild(dialog));
     addAttributeAfterTimeout(this, dialog, 1, 'active');

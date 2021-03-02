@@ -73,7 +73,7 @@ describes.realWin(
         </amp-accordion>
       `;
       win.document.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
     });
 
     it('should render expanded and collapsed sections', () => {
@@ -323,7 +323,7 @@ describes.realWin(
         </amp-accordion>
       `;
       win.document.body.appendChild(element);
-      await element.build();
+      await element.buildInternal();
 
       const sections = element.children;
       const {
@@ -363,6 +363,43 @@ describes.realWin(
       expect(header2.getAttribute('id')).to.equal(
         content2.getAttribute('aria-labelledby')
       );
+    });
+
+    it('should not overwrite existing role attributes', async () => {
+      element = html`
+        <amp-accordion layout="fixed" width="300" height="200">
+          <section expanded id="section1">
+            <h1 role="cat">header1</h1>
+            <div role="dog">content1</div>
+          </section>
+          <section>
+            <h1 id="h2">header2</h1>
+            <div>content2</div>
+          </section>
+        </amp-accordion>
+      `;
+      win.document.body.appendChild(element);
+      await element.buildInternal();
+
+      const sections = element.children;
+      const {
+        firstElementChild: header0,
+        lastElementChild: content0,
+      } = sections[0];
+      const {
+        firstElementChild: header1,
+        lastElementChild: content1,
+      } = sections[1];
+
+      expect(header0).to.have.attribute('role');
+      expect(header0.getAttribute('role')).to.equal('cat');
+      expect(content0).to.have.attribute('role');
+      expect(content0.getAttribute('role')).to.equal('dog');
+
+      expect(header1).to.have.attribute('role');
+      expect(header1.getAttribute('role')).to.equal('button');
+      expect(content1).to.have.attribute('role');
+      expect(content1.getAttribute('role')).to.equal('region');
     });
 
     it('should pick up new children', async () => {
@@ -407,7 +444,7 @@ describes.realWin(
           </amp-accordion>
         `;
         win.document.body.appendChild(element);
-        await element.build();
+        await element.buildInternal();
       });
 
       function invocation(method, args = {}) {
@@ -495,6 +532,64 @@ describes.realWin(
         expect(section2).to.not.have.attribute('expanded');
         expect(section3).to.have.attribute('expanded');
       });
+
+      it('should capture events in bento mode (w/o "on" attribute)', async () => {
+        const section1 = element.children[0];
+        const section3 = element.children[2];
+
+        // Set up section 1 to trigger expand of section 3 on expand
+        // and collapse of section 3 on collapse
+        const api = await element.getApi();
+        section1.addEventListener('expand', () => api.expand('section3'));
+        section1.addEventListener('collapse', () => api.collapse('section3'));
+
+        // initally both section 1 and 3 are collapsed
+        expect(section1).to.not.have.attribute('expanded');
+        expect(section3).to.not.have.attribute('expanded');
+
+        // expand section 1
+        section1.firstElementChild.click();
+        await waitForExpanded(section1, true);
+
+        // both section 1 and 3 are expanded
+        expect(section1).to.have.attribute('expanded');
+        expect(section3).to.have.attribute('expanded');
+
+        // collapse section 1
+        section1.firstElementChild.click();
+        await waitForExpanded(section1, false);
+
+        // both section 1 and 3 are collapsed
+        expect(section1).to.not.have.attribute('expanded');
+        expect(section3).to.not.have.attribute('expanded');
+      });
+
+      it('should fire and listen for "expand" and "collapse" events', async () => {
+        const section1 = element.children[0];
+
+        // Add spy functions for expand and collapse
+        const spyE = env.sandbox.spy();
+        const spyC = env.sandbox.spy();
+        section1.addEventListener('expand', spyE);
+        section1.addEventListener('collapse', spyC);
+
+        expect(spyE).to.not.be.called;
+        expect(spyC).to.not.be.called;
+
+        // expand section 1
+        section1.firstElementChild.click();
+        await waitForExpanded(section1, true);
+
+        expect(spyE).to.be.calledOnce;
+        expect(spyC).to.not.be.called;
+
+        // collapse section 1
+        section1.firstElementChild.click();
+        await waitForExpanded(section1, false);
+
+        expect(spyE).to.be.calledOnce;
+        expect(spyC).to.be.calledOnce;
+      });
     });
 
     describe('animate', () => {
@@ -515,7 +610,7 @@ describes.realWin(
           </amp-accordion>
         `;
         win.document.body.appendChild(element);
-        await element.build();
+        await element.buildInternal();
       });
 
       it('should not animate on build', () => {
@@ -594,7 +689,7 @@ describes.realWin(
         win.document.body.appendChild(element);
         win.CSS.supports = () => true;
         win.document.body.onbeforematch = null;
-        await element.build();
+        await element.buildInternal();
 
         const section1 = element.children[0];
         const content1 = section1.lastElementChild;
@@ -609,7 +704,7 @@ describes.realWin(
         win.document.body.appendChild(element);
         win.CSS.supports = () => true;
         win.document.body.onbeforematch = null;
-        await element.build();
+        await element.buildInternal();
 
         const section2 = element.children[1];
         const content2 = section2.lastElementChild;
@@ -626,7 +721,7 @@ describes.realWin(
         win.document.body.appendChild(element);
         win.CSS.supports = () => true;
         win.document.body.onbeforematch = null;
-        await element.build();
+        await element.buildInternal();
 
         const section1 = element.children[0];
         const content1 = section1.lastElementChild;
@@ -759,7 +854,7 @@ describes.realWin(
             </amp-accordion>
           `;
           win.document.body.appendChild(element);
-          await element.build();
+          await element.buildInternal();
 
           section1 = element.children[0];
           section2 = element.children[1];

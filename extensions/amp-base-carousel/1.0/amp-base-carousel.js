@@ -16,12 +16,14 @@
 
 import {ActionTrust} from '../../../src/action-constants';
 import {BaseCarousel} from './base-carousel';
-import {CSS} from './base-carousel.jss';
+import {CSS as COMPONENT_CSS} from './base-carousel.jss';
+import {CSS} from '../../../build/amp-base-carousel-1.0.css';
 import {CarouselContextProp} from './carousel-props';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/utils/object';
+import {dispatchCustomEvent} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
 import {userAssert} from '../../../src/log';
 
@@ -140,7 +142,7 @@ AmpBaseCarousel['props'] = {
 };
 
 /** @override */
-AmpBaseCarousel['shadowCss'] = CSS;
+AmpBaseCarousel['shadowCss'] = COMPONENT_CSS;
 
 /** @override */
 AmpBaseCarousel['useContexts'] = [CarouselContextProp];
@@ -155,15 +157,22 @@ AmpBaseCarousel['useContexts'] = [CarouselContextProp];
  * @private
  */
 function fireSlideChangeEvent(win, el, index, trust) {
-  const name = 'slideChange';
+  const eventName = 'slideChange';
+  const data = dict({'index': index});
   const slideChangeEvent = createCustomEvent(
     win,
-    `amp-base-carousel.${name}`,
-    dict({'index': index})
+    `amp-base-carousel.${eventName}`,
+    data
   );
-  Services.actionServiceForDoc(el).trigger(el, name, slideChangeEvent, trust);
+  Services.actionServiceForDoc(el).trigger(
+    el,
+    eventName,
+    slideChangeEvent,
+    trust
+  );
+  dispatchCustomEvent(el, eventName, data);
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpBaseCarousel);
+  AMP.registerElement(TAG, AmpBaseCarousel, CSS);
 });

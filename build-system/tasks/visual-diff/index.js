@@ -38,7 +38,7 @@ const {
   shortSha,
 } = require('../../common/git');
 const {buildRuntime, installPackages} = require('../../common/utils');
-const {cyan, yellow} = require('ansi-colors');
+const {cyan, yellow} = require('kleur/colors');
 const {execScriptAsync} = require('../../common/exec');
 const {isCiBuild} = require('../../common/ci');
 const {startServer, stopServer} = require('../serve');
@@ -56,6 +56,19 @@ const percyCss = [
   // causing the test to flake.
   '.i-amphtml-new-loader * { animation: none !important; }',
 ].join('\n');
+
+// REPEATING TODO(@ampproject/wg-infra): Update this whenever the Percy backend
+// starts using a new version of Chrome to render DOM snapshots.
+//
+// Steps:
+// 1. Open a recent Percy build, and click the “ⓘ” icon
+// 2. Note the Chrome major version at the bottom
+// 3. Look up the full version at https://en.wikipedia.org/wiki/Google_Chrome_version_history
+// 4. Open https://omahaproxy.appspot.com in a browser
+// 5. Go to "Tools" -> "Version information"
+// 6. Paste the full version in the "Version" field and click "Lookup"
+// 7. Copy the value next to "Branch Base Position" and update the line below
+const PUPPETEER_CHROMIUM_REVISION = '827102'; // 88.0.4324.0
 
 const SNAPSHOT_SINGLE_BUILD_OPTIONS = {
   widths: [375],
@@ -788,6 +801,7 @@ async function ensureOrBuildAmpRuntimeInTestMode_() {
 }
 
 function installPercy_() {
+  process.env['PUPPETEER_CHROMIUM_REVISION'] = PUPPETEER_CHROMIUM_REVISION;
   if (!argv.noinstall) {
     installPackages(__dirname);
   }

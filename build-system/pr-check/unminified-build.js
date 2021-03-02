@@ -16,58 +16,36 @@
 'use strict';
 
 /**
- * @fileoverview
- * This script builds the AMP runtime.
- * This is run during the CI stage = build; job = unminified build.
+ * @fileoverview Script that builds the unminified AMP runtime during CI.
  */
 
 const {
-  abortTimedJob,
-  printChangeSummary,
   printSkipMessage,
-  startTimer,
-  stopTimer,
   timedExecOrDie,
   uploadUnminifiedOutput,
 } = require('./utils');
-const {determineBuildTargets} = require('./build-targets');
-const {isPullRequestBuild} = require('../common/ci');
-const {runNpmChecks} = require('./npm-checks');
-const {setLoggingPrefix} = require('../common/logging');
+const {buildTargetsInclude, Targets} = require('./build-targets');
+const {runCiJob} = require('./ci-job');
 
 const jobName = 'unminified-build.js';
 
-function main() {
-  setLoggingPrefix(jobName);
-  const startTime = startTimer(jobName);
-  if (!runNpmChecks()) {
-    return abortTimedJob(jobName, startTime);
-  }
+function pushBuildWorkflow() {
+  timedExecOrDie('gulp update-packages');
+  timedExecOrDie('gulp build --fortesting');
+  uploadUnminifiedOutput();
+}
 
-  if (!isPullRequestBuild()) {
+function prBuildWorkflow() {
+  if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
     timedExecOrDie('gulp update-packages');
     timedExecOrDie('gulp build --fortesting');
     uploadUnminifiedOutput();
   } else {
-    printChangeSummary();
-    const buildTargets = determineBuildTargets();
-    if (
-      buildTargets.has('RUNTIME') ||
-      buildTargets.has('FLAG_CONFIG') ||
-      buildTargets.has('INTEGRATION_TEST')
-    ) {
-      timedExecOrDie('gulp update-packages');
-      timedExecOrDie('gulp build --fortesting');
-      uploadUnminifiedOutput();
-    } else {
-      printSkipMessage(
-        jobName,
-        'this PR does not affect the runtime, flag configs, or integration tests'
-      );
-    }
+    printSkipMessage(
+      jobName,
+      'this PR does not affect the runtime or integration tests'
+    );
   }
-
-  stopTimer(jobName, startTime);
 }
 
-main();
+runCiJob(jobName, pushBuildWorkflow, prBuildWorkflow);

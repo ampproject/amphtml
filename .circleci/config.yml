@@ -1,106 +1,135 @@
 version: 2.1
 
 orbs:
-  browser-tools: circleci/browser-tools@1.1.1
+  browser-tools: circleci/browser-tools@1.1.3
 
-skip_pr_branches: &skip_pr_branches
+push_and_pr_builds: &push_and_pr_builds
   filters:
     branches:
-      ignore: /^pull\/.*$/
+      ignore:
+        - nightly
+
+push_builds_only: &push_builds_only
+  filters:
+    branches:
+      only:
+        - master
+        - /^amp-release-.*$/
 
 executors:
-  amphtml-executor:
+  amphtml-medium-executor:
+    machine:
+      image: ubuntu-2004:202010-01
+    resource_class: medium
+  amphtml-large-executor:
+    machine:
+      image: ubuntu-2004:202010-01
+    resource_class: large
+  amphtml-xlarge-executor:
     machine:
       image: ubuntu-2004:202010-01
     resource_class: xlarge
 
 commands:
+  save_karma_cache:
+    parameters:
+      cache_name:
+        type: string
+    steps:
+      - save_cache:
+          name: 'Save Karma Cache'
+          key: karma-cache-<<parameters.cache_name>>-{{ checksum ".karma-cache-hash" }}
+          paths:
+            - .karma-cache
+  restore_karma_cache:
+    parameters:
+      cache_name:
+        type: string
+    steps:
+      - run:
+          name: 'Compute Karma Cache Hash'
+          command: node ./build-system/common/compute-karma-cache-hash.js
+      - restore_cache:
+          name: 'Restore Karma Cache'
+          key: karma-cache-<<parameters.cache_name>>-{{ checksum ".karma-cache-hash" }}
   setup_vm:
     steps:
       - checkout
-      - browser-tools/install-chrome:
-          replace-existing: true
       - run:
-          name: 'Install Google Cloud SDK'
-          command: |
-            cd ~/
-            curl -Ss --retry 5 https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-323.0.0-linux-x86_64.tar.gz | tar xz
-            echo 'source ~/google-cloud-sdk/path.bash.inc' >> $BASH_ENV
+          name: 'Fetch Merge Commit'
+          command: ./.circleci/fetch_merge_commit.sh
       - run:
-          # TODO(rsimha, ampproject/amp-github-apps#1110): Update storage details.
-          name: 'Setup Storage'
-          command: |
-            openssl aes-256-cbc -k $GCP_TOKEN -in build-system/common/sa-travis-key.json.enc -out sa-travis-key.json -d
-            gcloud auth activate-service-account --key-file=sa-travis-key.json
-            gcloud config set account sa-travis@amp-travis-build-storage.iam.gserviceaccount.com
-            gcloud config set pass_credentials_to_gsutil true
-            gcloud config set project amp-travis-build-storage
+          name: 'Check Config'
+          command: ./.circleci/check_config.sh
+      - run:
+          name: 'Setup Google Cloud Storage'
+          command: ./.circleci/setup_storage.sh
       - run:
           name: 'Configure Hosts'
-          command: |
-            echo "127.0.0.1 ads.localhost" | sudo tee -a /etc/hosts
-            echo "127.0.0.1 iframe.localhost" | sudo tee -a /etc/hosts
-            echo "127.0.0.1 jgla3zmib2ggq5buc4hwi5taloh6jlvzukddfr4zltz3vay5s5rq.recaptcha.localhost" | sudo tee -a /etc/hosts
-            echo "127.0.0.1 fonts.googleapis.com" | sudo tee -a /etc/hosts
-      - run:
-          name: 'Install NVM'
-          command: |
-            curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
-      - run:
-          name: 'Install Node LTS'
-          command: |
-            nvm install 'lts/*'
-            echo "export PATH=`which node`:$PATH" >> $BASH_ENV
+          command: cat ./build-system/test-configs/hosts | sudo tee -a /etc/hosts
       - run:
           name: 'Install Dependencies'
-          command: |
-            npm install --global gulp-cli
-            npm ci
+          command: ./.circleci/install_dependencies.sh
+  install_chrome:
+    steps:
+      - browser-tools/install-chrome:
+          replace-existing: true
+  fail_fast:
+    steps:
+      - run:
+          name: 'Fail Fast'
+          when: on_fail
+          command: ./.circleci/fail_fast.sh
 
 jobs:
   'Checks':
     executor:
-      name: amphtml-executor
+      name: amphtml-medium-executor
     steps:
       - setup_vm
       - run:
           name: 'Checks'
           command: node build-system/pr-check/checks.js
+      - fail_fast
   'Unminified Build':
     executor:
-      name: amphtml-executor
+      name: amphtml-xlarge-executor
     steps:
       - setup_vm
       - run:
           name: 'Unminified Build'
           command: node build-system/pr-check/unminified-build.js
+      - fail_fast
   'Nomodule Build':
     executor:
-      name: amphtml-executor
+      name: amphtml-xlarge-executor
     steps:
       - setup_vm
       - run:
           name: 'Nomodule Build'
           command: node build-system/pr-check/nomodule-build.js
+      - fail_fast
   'Module Build':
     executor:
-      name: amphtml-executor
+      name: amphtml-xlarge-executor
     steps:
       - setup_vm
       - run:
           name: 'Module Build'
           command: node build-system/pr-check/module-build.js
+      - fail_fast
   'Bundle Size':
     executor:
-      name: amphtml-executor
+      name: amphtml-medium-executor
     steps:
       - setup_vm
       - run:
           name: 'Bundle Size'
           command: node build-system/pr-check/bundle-size.js
+      - fail_fast
   'Validator Tests':
     executor:
-      name: amphtml-executor
+      name: amphtml-medium-executor
     steps:
       - setup_vm
       - run:
@@ -109,129 +138,202 @@ jobs:
       - run:
           name: 'Validator Tests'
           command: node build-system/pr-check/validator-tests.js
+      - fail_fast
   'Visual Diff Tests':
     executor:
-      name: amphtml-executor
+      name: amphtml-large-executor
     steps:
       - setup_vm
+      - install_chrome
       - run:
           name: 'Visual Diff Tests'
           command: node build-system/pr-check/visual-diff-tests.js
-  'Unminified Tests':
+      - fail_fast
+  'Unit Tests':
     executor:
-      name: amphtml-executor
+      name: amphtml-large-executor
     steps:
       - setup_vm
+      - install_chrome
+      - restore_karma_cache:
+          cache_name: unit
+      - run:
+          name: 'Unit Tests'
+          command: node build-system/pr-check/unit-tests.js
+      - save_karma_cache:
+          cache_name: unit
+      - fail_fast
+  'Unminified Tests':
+    executor:
+      name: amphtml-large-executor
+    steps:
+      - setup_vm
+      - install_chrome
+      - restore_karma_cache:
+          cache_name: unminified
       - run:
           name: 'Unminified Tests'
           command: node build-system/pr-check/unminified-tests.js
+      - save_karma_cache:
+          cache_name: unminified
+      - fail_fast
   'Nomodule Tests':
     executor:
-      name: amphtml-executor
+      name: amphtml-large-executor
+    parameters:
+      config:
+        description: 'Which config file to use'
+        type: enum
+        enum: ['prod', 'canary']
     steps:
       - setup_vm
+      - install_chrome
+      - restore_karma_cache:
+          cache_name: nomodule
       - run:
-          name: 'Nomodule Tests'
-          command: node build-system/pr-check/nomodule-tests.js
+          name: 'Nomodule Tests (<< parameters.config >>)'
+          command: node build-system/pr-check/nomodule-tests.js --config=<< parameters.config >>
+      - save_karma_cache:
+          cache_name: nomodule
+      - fail_fast
   'Module Tests':
     executor:
-      name: amphtml-executor
+      name: amphtml-large-executor
+    parameters:
+      config:
+        description: 'Which config file to use'
+        type: enum
+        enum: ['prod', 'canary']
     steps:
       - setup_vm
+      - install_chrome
+      - restore_karma_cache:
+          cache_name: module
       - run:
-          name: 'Module Tests'
-          command: node build-system/pr-check/module-tests.js
+          name: 'Module Tests (<< parameters.config >>)'
+          command: node build-system/pr-check/module-tests.js --config=<< parameters.config >>
+      - save_karma_cache:
+          cache_name: module
+      - fail_fast
   'End-to-End Tests':
     executor:
-      name: amphtml-executor
+      name: amphtml-large-executor
     steps:
       - setup_vm
+      - install_chrome
       - run:
           name: 'End-to-End Tests'
           command: node build-system/pr-check/e2e-tests.js
+      - fail_fast
   'Performance Tests':
     executor:
-      name: amphtml-executor
+      name: amphtml-xlarge-executor
     steps:
       - setup_vm
+      - install_chrome
       - run:
           name: 'Performance Tests'
           command: node build-system/pr-check/performance-tests.js
-  'Experiment A Tests':
+      - fail_fast
+  'Experiment Build':
     executor:
-      name: amphtml-executor
+      name: amphtml-xlarge-executor
+    parameters:
+      exp:
+        description: 'Which of the three (A/B/C) experiments to use'
+        type: enum
+        enum: ['A', 'B', 'C']
     steps:
       - setup_vm
       - run:
-          name: 'Experiment A Tests'
-          command: node build-system/pr-check/experiment-tests.js --experiment=experimentA
-  'Experiment B Tests':
+          name: 'Experiment << parameters.exp >> Build'
+          command: node build-system/pr-check/experiment-build.js --experiment=experiment<< parameters.exp >>
+      - fail_fast
+  'Experiment Tests':
     executor:
-      name: amphtml-executor
+      name: amphtml-large-executor
+    parameters:
+      exp:
+        description: 'Which of the three (A/B/C) experiments to use'
+        type: enum
+        enum: ['A', 'B', 'C']
     steps:
       - setup_vm
+      - install_chrome
+      - restore_karma_cache:
+          cache_name: experiment<< parameters.exp >>
       - run:
-          name: 'Experiment B Tests'
-          command: node build-system/pr-check/experiment-tests.js --experiment=experimentB
-  'Experiment C Tests':
-    executor:
-      name: amphtml-executor
-    steps:
-      - setup_vm
-      - run:
-          name: 'Experiment C Tests'
-          command: node build-system/pr-check/experiment-tests.js --experiment=experimentC
+          name: 'Experiment << parameters.exp >> Tests'
+          command: node build-system/pr-check/experiment-tests.js --experiment=experiment<< parameters.exp >>
+      - save_karma_cache:
+          cache_name: experiment<< parameters.exp >>
+      - fail_fast
 
 workflows:
-  'CircleCI PR Check':
+  'CircleCI':
     jobs:
       - 'Checks':
-          context: amphtml-context
+          <<: *push_and_pr_builds
       - 'Unminified Build':
-          context: amphtml-context
+          <<: *push_and_pr_builds
       - 'Nomodule Build':
-          context: amphtml-context
+          <<: *push_and_pr_builds
       - 'Module Build':
-          context: amphtml-context
+          <<: *push_and_pr_builds
       - 'Bundle Size':
-          context: amphtml-context
+          <<: *push_and_pr_builds
           requires:
             - 'Nomodule Build'
             - 'Module Build'
       - 'Validator Tests':
-          context: amphtml-context
+          <<: *push_and_pr_builds
       - 'Visual Diff Tests':
-          context: amphtml-context
+          <<: *push_and_pr_builds
           requires:
             - 'Nomodule Build'
+      - 'Unit Tests':
+          <<: *push_and_pr_builds
       - 'Unminified Tests':
-          context: amphtml-context
+          <<: *push_and_pr_builds
           requires:
             - 'Unminified Build'
       - 'Nomodule Tests':
-          context: amphtml-context
+          name: 'Nomodule Tests (<< matrix.config >>)'
+          matrix:
+            parameters:
+              config: ['prod', 'canary']
+          <<: *push_and_pr_builds
           requires:
             - 'Nomodule Build'
       - 'Module Tests':
-          context: amphtml-context
+          name: 'Module Tests (<< matrix.config >>)'
+          matrix:
+            parameters:
+              config: ['prod', 'canary']
+          <<: *push_and_pr_builds
           requires:
             - 'Nomodule Build'
             - 'Module Build'
       - 'End-to-End Tests':
-          context: amphtml-context
+          <<: *push_and_pr_builds
           requires:
             - 'Nomodule Build'
-      - 'Performance Tests':
-          <<: *skip_pr_branches
-          context: amphtml-context
+      - 'Experiment Build':
+          name: 'Experiment << matrix.exp >> Build'
+          matrix:
+            parameters:
+              exp: ['A', 'B', 'C']
+          <<: *push_and_pr_builds
+      - 'Experiment Tests':
+          name: 'Experiment << matrix.exp >> Tests'
+          matrix:
+            parameters:
+              exp: ['A', 'B', 'C']
+          <<: *push_and_pr_builds
           requires:
-            - 'Nomodule Build'
-      - 'Experiment A Tests':
-          <<: *skip_pr_branches
-          context: amphtml-context
-      - 'Experiment B Tests':
-          <<: *skip_pr_branches
-          context: amphtml-context
-      - 'Experiment C Tests':
-          <<: *skip_pr_branches
-          context: amphtml-context
+            - 'Experiment << matrix.exp >> Build'
+      # TODO(wg-performance, #12128): This takes 30 mins and fails regularly.
+      # - 'Performance Tests':
+      #     <<: *push_builds_only
+      #     requires:
+      #       - 'Nomodule Build'

@@ -142,6 +142,15 @@ const childIdGenerator = sequentialIdGenerator();
  * @template API_TYPE
  */
 export class PreactBaseElement extends AMP.BaseElement {
+  /**
+   * @return {boolean}
+   * @nocollapse
+   */
+  static requiresShadowDom() {
+    // eslint-disable-next-line local/no-static-this
+    return usesShadowDom(this);
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -513,7 +522,10 @@ export class PreactBaseElement extends AMP.BaseElement {
           this.hydrationPending_ = true;
         } else {
           // Create new shadow root.
-          shadowRoot = this.element.attachShadow({mode: 'open'});
+          shadowRoot = this.element.attachShadow({
+            mode: 'open',
+            delegatesFocus: Ctor['delegatesFocus'],
+          });
 
           // The pre-constructed shadow root is required to have the stylesheet
           // inline. Thus, only the new shadow roots share the stylesheets.
@@ -727,6 +739,18 @@ export class PreactBaseElement extends AMP.BaseElement {
       );
     }
   }
+
+  /**
+   * Dispatches an error event. Provided as a method so Preact components can
+   * call into it, while AMP components can override to trigger action services.
+   * @param {!Element} element
+   * @param {string} eventName
+   * @param {!JSONObject|string|undefined|null} detail
+   * @return {!Object}
+   */
+  triggerEvent(element, eventName, detail) {
+    dispatchCustomEvent(element, eventName, detail);
+  }
 }
 
 /**
@@ -861,6 +885,14 @@ PreactBaseElement['shadowCss'] = null;
  * @protected {boolean}
  */
 PreactBaseElement['detached'] = false;
+
+/**
+ * This enables the 'delegatesFocus' option when creating the shadow DOM for
+ * this component.  A key feature of 'delegatesFocus' set to true is that
+ * when elements within the shadow DOM gain focus, the focus is also applied
+ * to the host element.
+ */
+PreactBaseElement['delegatesFocus'] = false;
 
 /**
  * Provides a mapping of Preact prop to AmpElement DOM attributes.

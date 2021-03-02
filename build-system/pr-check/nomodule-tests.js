@@ -16,66 +16,63 @@
 'use strict';
 
 /**
- * @fileoverview
- * This script runs the unit and integration tests against minified code
- * on a local CI service VM.
- * This is run during the CI stage = test; job = nomodule tests.
+ * @fileoverview Script that tests the nomodule AMP runtime during CI.
  */
 
+const argv = require('minimist')(process.argv.slice(2));
 const {
   downloadNomoduleOutput,
-  printChangeSummary,
   printSkipMessage,
-  startTimer,
-  stopTimer,
   timedExecOrDie,
   timedExecOrThrow,
 } = require('./utils');
-const {determineBuildTargets} = require('./build-targets');
-const {isPullRequestBuild} = require('../common/ci');
-const {setLoggingPrefix} = require('../common/logging');
+const {buildTargetsInclude, Targets} = require('./build-targets');
+const {MINIFIED_TARGETS} = require('../tasks/helpers');
+const {runCiJob} = require('./ci-job');
 
 const jobName = 'nomodule-tests.js';
 
-function main() {
-  setLoggingPrefix(jobName);
-  const startTime = startTimer(jobName);
-
-  if (!isPullRequestBuild()) {
-    downloadNomoduleOutput();
-    timedExecOrDie('gulp update-packages');
-    try {
-      timedExecOrThrow(
-        'gulp integration --nobuild --headless --compiled --report',
-        'Integration tests failed!'
-      );
-    } catch (e) {
-      if (e.status) {
-        process.exitCode = e.status;
-      }
-    } finally {
-      timedExecOrDie('gulp test-report-upload');
-    }
-  } else {
-    printChangeSummary();
-    const buildTargets = determineBuildTargets();
-    if (
-      buildTargets.has('RUNTIME') ||
-      buildTargets.has('FLAG_CONFIG') ||
-      buildTargets.has('INTEGRATION_TEST')
-    ) {
-      downloadNomoduleOutput();
-      timedExecOrDie('gulp update-packages');
-      timedExecOrDie('gulp integration --nobuild --compiled --headless');
-    } else {
-      printSkipMessage(
-        jobName,
-        'this PR does not affect the runtime, flag configs, or integration tests'
-      );
-    }
-  }
-
-  stopTimer(jobName, startTime);
+function prependConfig() {
+  const targets = MINIFIED_TARGETS.flatMap((target) => [
+    `dist/${target}.js`,
+  ]).join(',');
+  timedExecOrDie(
+    `gulp prepend-global --${argv.config} --local_dev --fortesting --derandomize --target=${targets}`
+  );
 }
 
-main();
+function pushBuildWorkflow() {
+  downloadNomoduleOutput();
+  timedExecOrDie('gulp update-packages');
+  prependConfig();
+  try {
+    timedExecOrThrow(
+      `gulp integration --nobuild --headless --compiled --report --config=${argv.config}`,
+      'Integration tests failed!'
+    );
+  } catch (e) {
+    if (e.status) {
+      process.exitCode = e.status;
+    }
+  } finally {
+    timedExecOrDie('gulp test-report-upload');
+  }
+}
+
+function prBuildWorkflow() {
+  if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
+    downloadNomoduleOutput();
+    timedExecOrDie('gulp update-packages');
+    prependConfig();
+    timedExecOrDie(
+      `gulp integration --nobuild --compiled --headless --config=${argv.config}`
+    );
+  } else {
+    printSkipMessage(
+      jobName,
+      'this PR does not affect the runtime or integration tests'
+    );
+  }
+}
+
+runCiJob(jobName, pushBuildWorkflow, prBuildWorkflow);

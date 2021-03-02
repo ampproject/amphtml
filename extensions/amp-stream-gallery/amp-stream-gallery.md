@@ -59,7 +59,179 @@ navigational arrows to go forward or backwards by a given number of items.
 The gallery advances between items if the user swipes or uses the customizable
 arrow buttons.
 
-### Slide layout
+### Standalone use outside valid AMP documents
+
+Bento AMP allows you to use AMP components in non-AMP pages without needing to commit to fully valid AMP. You can take these components and place them in implementations with frameworks and CMSs that don't support AMP. Read more in our guide [Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/).
+
+#### Example
+
+The example below demonstrates `amp-stream-gallery` component in standalone use.
+
+[example preview="top-frame" playground="false"]
+
+```html
+<head>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-stream-gallery-1.0.css">
+  <script async custom-element="amp-stream-gallery" src="https://cdn.ampproject.org/v0/amp-stream-gallery-1.0.js"></script>
+  <style>
+    amp-stream-gallery {
+      aspect-ratio: 3/1;
+    }
+    amp-stream-gallery > div {
+      aspect-ratio: 1/1;
+    }
+    .red-gradient {
+      background: brown;
+      background: linear-gradient(90deg, brown 50%, lightsalmon 90%, wheat 100%);
+    }
+    .blue-gradient {
+      background: steelblue;
+      background: linear-gradient(90deg, steelblue 50%, plum 90%, lavender 100%);
+    }
+    .green-gradient {
+      background: seagreen;
+      background: linear-gradient(90deg, seagreen 50%, mediumturquoise 90%, turquoise 100%);
+    }
+    .pink-gradient {
+      background: pink;
+      background: linear-gradient(90deg, pink 50%, lightsalmon 90%, wheat 100%);
+    }
+    .yellow-gradient {
+      background: gold;
+      background: linear-gradient(90deg, gold 50%, goldenrod 90%, darkgoldenrod 100%);
+    }
+    .orange-gradient {
+      background: peru;
+      background: linear-gradient(90deg, peru 50%, chocolate 90%, saddlebrown 100%);
+    }
+    .seafoam-gradient {
+      background: darkseagreen;
+      background: linear-gradient(90deg, darkseagreen 50%, lightseagreen 90%, MediumAquaMarine 100%);
+    }
+    .purple-gradient {
+      background: rebeccapurple;
+      background: linear-gradient(90deg, rebeccapurple 50%, mediumpurple 90%, mediumslateblue 100%);
+    }
+    .cyan-gradient {
+      background: darkcyan;
+      background: linear-gradient(90deg, darkcyan 50%, lightcyan 90%, white 100%);
+    }
+  </style>
+</head>
+<amp-stream-gallery id="my-carousel" max-visible-count="3">
+  <div class="red-gradient"></div>
+  <div class="blue-gradient"></div>
+  <div class="green-gradient"></div>
+
+  <div class="pink-gradient"></div>
+  <div class="yellow-gradient"></div>
+  <div class="orange-gradient"></div>
+
+  <div class="seafoam-gradient"></div>
+  <div class="purple-gradient"></div>
+  <div class="cyan-gradient"></div>
+</amp-stream-gallery>
+<div class="buttons" style="margin-top: 8px;">
+  <button id='prev-button'>Go to previous page of slides</button>
+  <button id='next-button'>Go to next page of slides</button>
+  <button id='go-to-button'>Go to slide with green gradient</button>
+</div>
+<script>
+  (async () => {
+    const carousel = document.querySelector('#my-carousel');
+    await customElements.whenDefined('amp-stream-gallery');
+    const api = await carousel.getApi();
+    // programatically advance to next slide
+    api.next();
+    // set up button actions
+    document.querySelector('#prev-button').onclick = () => api.prev();
+    document.querySelector('#next-button').onclick = () => api.next();
+    document.querySelector('#go-to-button').onclick = () => api.goToSlide(2);
+  })();
+</script>
+```
+
+[/example]
+
+#### Interactivity and API usage
+
+Bento enabled components in standalone use are highly interactive through their API. In Bento standalone use, the element's API replaces AMP Actions and events and [`amp-bind`](https://amp.dev/documentation/components/amp-bind/?format=websites).
+
+The `amp-stream-gallery` component API is accessible by including the following script tag in your document:
+
+```js
+await customElements.whenDefined('amp-stream-gallery');
+const api = await carousel.getApi();
+```
+
+##### Actions
+
+The `amp-stream-gallery` API allows you to perform the following actions:
+
+**next()**
+Moves the carousel forwards by `advance-count` slides.
+
+```js
+api.next();
+```
+
+**prev()**
+Moves the carousel backwards by `advance-count` slides.
+
+```js
+api.prev();
+```
+
+**goToSlide(index: number)**
+Moves the carousel to the slide specified by the `index` argument.
+Note: `index` will be normalized to a number greater than or equal to `0` and less than the number of slides given.
+
+```js
+api.goToSlide(0); // Advance to first slide.
+api.goToSlide(length - 1); // Advance to last slide.
+```
+
+##### Events
+
+The `amp-stream-gallery` API allows you to register and respond to the following events:
+
+**slideChange**
+
+This event is triggered when the index displayed by the carousel has changed.
+The new index is available via `event.data.index`.
+
+```js
+carousel.addEventListener('slideChange', (e) => console.log(e.data.index))
+```
+
+#### Layout and style
+
+Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
+
+```html
+<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-stream-gallery-1.0.css">
+```
+
+Fully valid AMP pages use the AMP layout system to infer sizing of elements to create a page structure before downloading any remote resources. However, Bento use imports components into less controlled environments and AMP's layout system is inaccessible.
+
+**Container type**
+
+The `amp-stream-gallery` component has a defined layout size type. To ensure the component renders correctly, be sure to apply a size to the component and its immediate children (slides) via a desired CSS layout (such as one defined with `height`, `width`, `aspect-ratio`, or other such properties):
+
+```css
+amp-stream-gallery {
+  height: 100px;
+  width: 100%;
+}
+amp-stream-gallery > * {
+  aspect-ratio: 4/1
+}
+```
+
+### Behavior users should be aware of
+
+#### Slide layout
 
 Slides are automatically sized by the carousel. You should give the slides `layout="flex-item"`:
 
@@ -82,20 +254,7 @@ wrapping element, and use that to center the content.
 ### Media Queries
 
 The attributes for `<amp-stream-gallery>` can be configured to use different
-options based on a media query. You can also use a value without any media
-queries. The format looks like:
-
-```html
-<amp-stream-gallery
-  attr-name="(min-width: 1000px) valueOne, (min-width: 600px) valueTwo, defaultValue"
-></amp-stream-gallery>
-```
-
-The media queries are evaluated from left to right, with the first matching
-media query being used. A default value (without a media query) is required. In
-this case, if the page has a screen width of 1000px or more, `valueOne` is used.
-If the width is between 999px and 600px, `valueTwo` is used. When it is 599px or
-smaller, `defaultValue` is used.
+options based on a [media query](./../../spec/amp-html-responsive-attributes.md).
 
 ### Behavior
 

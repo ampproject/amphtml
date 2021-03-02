@@ -20,11 +20,10 @@ const pageWidth = 800;
 const pageHeight = 600;
 
 describes.endtoend(
-  'AMP carousel mixed length slides',
+  'amp-base-carousel - mixed length slides without snapping',
   {
-    testUrl:
-      'http://localhost:8000/test/manual/amp-base-carousel/' +
-      'mixed-lengths-no-snap.amp.html',
+    version: '0.1',
+    fixture: 'amp-base-carousel/mixed-lengths-no-snap.amp.html',
     experiments: ['amp-base-carousel', 'layers'],
     initialRect: {width: pageWidth, height: pageHeight},
     //TODO(spaharmi): fails on viewer and shadow demo

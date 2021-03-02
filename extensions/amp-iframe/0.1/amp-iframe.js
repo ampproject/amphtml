@@ -561,11 +561,6 @@ export class AmpIframe extends AMP.BaseElement {
     source./*OK*/ postMessage(data, origin);
   }
 
-  /** @override */
-  unlayoutOnPause() {
-    return true;
-  }
-
   /**
    * Removes this iframe from the page, freeing its resources. This is needed
    * to stop the bad eggs who continue to play videos even after the user has
@@ -619,9 +614,13 @@ export class AmpIframe extends AMP.BaseElement {
     }
     if (this.iframe_ && mutations['title']) {
       // only propagating title because propagating all causes e2e error:
-      // See <https://travis-ci.com/ampproject/amphtml/jobs/657440421>
       this.propagateAttributes(['title'], this.iframe_);
     }
+  }
+
+  /** @override */
+  unlayoutOnPause() {
+    return true;
   }
 
   /**

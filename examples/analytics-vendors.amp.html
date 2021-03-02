@@ -110,6 +110,7 @@
       <option>retargetly</option>
       <option>rudderstack</option>
       <option>segment</option>
+      <option>sensorsanalytics</option>
       <option>shinystat</option>
       <option>simplereach</option>
       <option>snowplow</option>
@@ -135,7 +136,7 @@
 
 <div id="container">
 Container for analytics tags. Positioned far away from top to make sure that doesn't matter.
-
+  
 <!-- Acquia Lift example -->
 <amp-analytics type="acquialift" id="acquialift">
 <script type="application/json">
@@ -1470,6 +1471,45 @@ For complete documentation and additional examples please see: https://marketing
       }
     }
   }
+}
+</script>
+</amp-analytics>
+
+<!-- Sensorsanalytics stats tracking -->
+<amp-analytics type="sensorsanalytics" id="sensoranalytis">
+<script type="application/json">
+{
+   "requests": {
+      "event": "https://jssdkdata.debugbox.sensorsdata.cn/sa?project=liangshuang"
+   },
+   "triggers": {
+      "trackPageview": {
+         "on": "visible",
+         "request": "event",
+         "vars": {
+            "event": "$pageview",
+            "amp_properties": "%7B%22a%22%3A%22www%22%7D"
+          }
+       },
+      "id_test1": {
+          "on": "click",
+          "selector": "#test1",
+          "request": "event",
+          "vars": {
+             "event": "click_test1",
+             "amp_properties": "#test1"
+          }
+       },
+       "class_test2": {
+           "on": "click",
+           "selector": ".test2",
+           "request": "event",
+           "vars": {
+              "event": "click_test2",
+              "amp_properties": ".test2"
+           }
+        }
+    }
 }
 </script>
 </amp-analytics>

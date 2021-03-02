@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const colors = require('ansi-colors');
+const colors = require('kleur/colors');
 const {execScriptAsync, exec} = require('./exec');
 const {logLocalDev} = require('./logging');
 
@@ -61,7 +61,7 @@ exports.createCtrlcHandler = function (command) {
 /**
  * Exits the Ctrl C handler process.
  *
- * @param {string} handlerProcess
+ * @param {string|number} handlerProcess
  */
 exports.exitCtrlcHandler = function (handlerProcess) {
   const exitCmd = killCmd + ' ' + handlerProcess + ' ' + killSuffix;

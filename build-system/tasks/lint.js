@@ -17,129 +17,121 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const config = require('../test-configs/config');
-const debounce = require('gulp-debounce');
-const eslint = require('gulp-eslint');
-const eslintIfFixed = require('gulp-eslint-if-fixed');
+const fs = require('fs');
 const globby = require('globby');
-const gulp = require('gulp');
-const lazypipe = require('lazypipe');
 const path = require('path');
-const watch = require('gulp-watch');
 const {
   log,
   logLocalDev,
   logOnSameLine,
   logOnSameLineLocalDev,
 } = require('../common/logging');
-const {cyan, green, red, yellow} = require('ansi-colors');
+const {cyan, green, red, yellow} = require('kleur/colors');
+const {ESLint} = require('eslint');
 const {getFilesChanged, getFilesFromArgv} = require('../common/utils');
 const {gitDiffNameOnlyMaster} = require('../common/git');
 const {maybeUpdatePackages} = require('./update-packages');
-const {watchDebounceDelay} = require('./helpers');
 
 const rootDir = path.dirname(path.dirname(__dirname));
 
+const options = {
+  fix: argv.fix,
+  reportUnusedDisableDirectives: 'error',
+};
+
 /**
- * Initializes the linter stream based on globs
- *
- * @param {!Object} globs
- * @param {!Object} streamOptions
- * @return {!ReadableStream}
+ * Runs the linter on the given set of files.
+ * @param {Array<string>} filesToLint
  */
-function initializeStream(globs, streamOptions) {
-  let stream = gulp.src(globs, streamOptions);
-  if (argv.watch) {
-    const watcher = lazypipe().pipe(watch, globs);
-    stream = stream.pipe(watcher()).pipe(debounce({wait: watchDebounceDelay}));
+async function runLinter(filesToLint) {
+  logLocalDev(green('Starting linter...'));
+  const eslint = new ESLint(options);
+  const results = {
+    errorCount: 0,
+    warningCount: 0,
+  };
+  const fixedFiles = {};
+  for (const file of filesToLint) {
+    const text = fs.readFileSync(file, 'utf-8');
+    const lintResult = await eslint.lintText(text, {filePath: file});
+    if (lintResult.length == 0) {
+      continue; // File was ignored via .eslintignore.
+    }
+    const result = lintResult[0];
+    results.errorCount += result.errorCount;
+    results.warningCount += result.warningCount;
+    const formatter = await eslint.loadFormatter('stylish');
+    const resultText = formatter
+      .format(lintResult)
+      .replace(`${rootDir}/`, '')
+      .trim();
+    if (resultText.length) {
+      logOnSameLine(resultText);
+    }
+    if (argv.fix) {
+      await ESLint.outputFixes(lintResult);
+    }
+    logOnSameLineLocalDev(green('Linted: ') + file);
+    if (options.fix && result.output) {
+      const status =
+        result.errorCount == 0 ? green('Fixed: ') : yellow('Partially fixed: ');
+      logOnSameLine(status + cyan(file));
+      fixedFiles[file] = status;
+    }
   }
-  return stream;
+  summarizeResults(results, fixedFiles);
 }
 
 /**
- * Runs the linter on the given stream using the given options.
- *
- * @param {!ReadableStream} stream
- * @return {boolean}
+ * Summarize the results of linting all files.
+ * @param {Object} results
+ * @param {Object} fixedFiles
  */
-function runLinter(stream) {
-  logLocalDev(green('Starting linter...'));
-  const options = {
-    fix: argv.fix,
-    quiet: argv.quiet,
-  };
-  const fixedFiles = {};
-  return stream
-    .pipe(eslint(options))
-    .pipe(
-      eslint.formatEach('stylish', function (msg) {
-        logOnSameLine(msg.replace(`${rootDir}/`, '').trim() + '\n');
-      })
-    )
-    .pipe(eslintIfFixed(rootDir))
-    .pipe(
-      eslint.result(function (result) {
-        const relativePath = path.relative(rootDir, result.filePath);
-        logOnSameLineLocalDev(green('Linted: ') + relativePath);
-        if (options.fix && result.fixed) {
-          const status =
-            result.errorCount == 0
-              ? green('Fixed: ')
-              : yellow('Partially fixed: ');
-          logOnSameLine(status + cyan(relativePath));
-          fixedFiles[relativePath] = status;
-        }
-      })
-    )
-    .pipe(
-      eslint.results(function (results) {
-        if (results.errorCount == 0 && results.warningCount == 0) {
-          logOnSameLineLocalDev(
-            green('SUCCESS: ') + 'No linter warnings or errors.'
-          );
-        } else {
-          const prefix =
-            results.errorCount == 0 ? yellow('WARNING: ') : red('ERROR: ');
-          logOnSameLine(
-            prefix +
-              'Found ' +
-              results.errorCount +
-              ' error(s) and ' +
-              results.warningCount +
-              ' warning(s).'
-          );
-          if (!options.fix) {
-            log(
-              yellow('NOTE 1:'),
-              'You may be able to automatically fix some of these warnings ' +
-                '/ errors by running',
-              cyan('gulp lint --local_changes --fix'),
-              'from your local branch.'
-            );
-            log(
-              yellow('NOTE 2:'),
-              'Since this is a destructive operation (that edits your files',
-              'in-place), make sure you commit before running the command.'
-            );
-            log(
-              yellow('NOTE 3:'),
-              'If you see any',
-              cyan('prettier/prettier'),
-              'errors, read',
-              cyan(
-                'https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md#code-quality-and-style'
-              )
-            );
-          }
-        }
-        if (options.fix && Object.keys(fixedFiles).length > 0) {
-          log(green('INFO: ') + 'Summary of fixes:');
-          Object.keys(fixedFiles).forEach((file) => {
-            log(fixedFiles[file] + cyan(file));
-          });
-        }
-      })
-    )
-    .pipe(eslint.failAfterError());
+function summarizeResults(results, fixedFiles) {
+  const {errorCount, warningCount} = results;
+  if (errorCount == 0 && warningCount == 0) {
+    logOnSameLineLocalDev(green('SUCCESS: ') + 'No linter warnings or errors.');
+  } else {
+    const prefix = errorCount == 0 ? yellow('WARNING: ') : red('ERROR: ');
+    logOnSameLine(
+      prefix +
+        'Found ' +
+        errorCount +
+        ' error(s) and ' +
+        warningCount +
+        ' warning(s).'
+    );
+    if (!options.fix) {
+      log(
+        yellow('NOTE 1:'),
+        'You may be able to automatically fix some of these warnings ' +
+          '/ errors by running',
+        cyan('gulp lint --local_changes --fix'),
+        'from your local branch.'
+      );
+      log(
+        yellow('NOTE 2:'),
+        'Since this is a destructive operation (that edits your files',
+        'in-place), make sure you commit before running the command.'
+      );
+      log(
+        yellow('NOTE 3:'),
+        'If you see any',
+        cyan('prettier/prettier'),
+        'errors, read',
+        cyan(
+          'https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md#code-quality-and-style'
+        )
+      );
+    }
+    process.exitCode = 1;
+  }
+  if (options.fix && Object.keys(fixedFiles).length > 0) {
+    log(green('INFO: ') + 'Summary of fixes:');
+    Object.keys(fixedFiles).forEach((file) => {
+      log(fixedFiles[file] + cyan(file));
+    });
+  }
 }
 
 /**
@@ -175,11 +167,9 @@ function getFilesToLint(files) {
 }
 
 /**
- * Run the eslinter on the src javascript and log the output
- *
- * @return {!ReadableStream}
+ * Run eslint on JS files and log the output
  */
-function lint() {
+async function lint() {
   maybeUpdatePackages();
   let filesToLint = globby.sync(config.lintGlobs, {gitignore: true});
   if (argv.files) {
@@ -188,22 +178,20 @@ function lint() {
     const lintableFiles = getFilesChanged(config.lintGlobs);
     if (lintableFiles.length == 0) {
       log(green('INFO: ') + 'No JS files in this PR');
-      return Promise.resolve();
+      return;
     }
     filesToLint = getFilesToLint(lintableFiles);
   }
-  return runLinter(initializeStream(filesToLint, {base: rootDir}));
+  await runLinter(filesToLint);
 }
 
 module.exports = {
   lint,
 };
 
-lint.description = 'Validates against Google Closure Linter';
+lint.description = 'Runs eslint checks against JS files';
 lint.flags = {
-  'watch': '  Watches for changes in files, validates against the linter',
   'fix': '  Fixes simple lint errors (spacing etc)',
   'files': '  Lints just the specified files',
   'local_changes': '  Lints just the files changed in the local branch',
-  'quiet': '  Suppress warnings from outputting',
 };

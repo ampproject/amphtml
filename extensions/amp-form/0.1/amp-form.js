@@ -399,7 +399,7 @@ export class AmpForm {
       EXTERNAL_DEPS.join(',')
     );
     // Wait for an element to be built to make sure it is ready.
-    const promises = toArray(depElements).map((el) => el.whenBuilt());
+    const promises = toArray(depElements).map((el) => el.build());
     return (this.dependenciesPromise_ = this.waitOnPromisesOrTimeout_(
       promises,
       2000
@@ -504,7 +504,11 @@ export class AmpForm {
     }
     formDataForAnalytics['formId'] = this.form_.id;
 
-    this.analyticsEvent_(eventType, formDataForAnalytics);
+    try {
+      this.analyticsEvent_(eventType, formDataForAnalytics);
+    } catch (err) {
+      dev().error(TAG, 'Sending analytics failed:', err);
+    }
   }
 
   /**
@@ -1042,8 +1046,8 @@ export class AmpForm {
       promise = Promise.resolve(null);
     }
     return promise.then((responseJson) => {
-      this.triggerFormSubmitInAnalytics_('amp-form-submit-error');
       this.handleSubmitFailure_(e, responseJson, incomingTrust);
+      this.triggerFormSubmitInAnalytics_('amp-form-submit-error');
       this.maybeHandleRedirect_(e.response);
     });
   }

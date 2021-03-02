@@ -17,7 +17,6 @@
 import {CommonSignals} from './common-signals';
 import {Deferred} from './utils/promise';
 import {FIE_EMBED_PROP} from './iframe-helper';
-import {FIE_RESOURCES_EXP} from './experiments/fie-resources-exp';
 import {Services} from './services';
 import {Signals} from './utils/signals';
 import {VisibilityState} from './visibility-state';
@@ -29,7 +28,8 @@ import {
   setParentWindow,
 } from './service';
 import {escapeHtml} from './dom';
-import {getExperimentBranch} from './experiments';
+import {getMode} from './mode';
+import {install as installAbortController} from './polyfills/abort-controller';
 import {installAmpdocServicesForEmbed} from './service/core-services';
 import {install as installCustomElements} from './polyfills/custom-elements';
 import {install as installDOMTokenList} from './polyfills/domtokenlist';
@@ -49,6 +49,7 @@ import {
   setStyles,
 } from './style';
 import {toWin} from './types';
+import {urls} from './config';
 import {whenContentIniLoad} from './ini-load';
 
 /**
@@ -104,6 +105,15 @@ export function isSrcdocSupported() {
     srcdocSupported = 'srcdoc' in HTMLIFrameElement.prototype;
   }
   return srcdocSupported;
+}
+
+/**
+ * Get trusted urls enabled for polyfills.
+ * @return {string}
+ */
+export function getFieSafeScriptSrcs() {
+  const cdnBase = getMode().localDev ? 'http://localhost:8000/dist' : urls.cdn;
+  return `${cdnBase}/lts/ ${cdnBase}/rtv/ ${cdnBase}/sw/`;
 }
 
 /**
@@ -299,10 +309,12 @@ function mergeHtml(spec) {
     });
   }
 
+  const cspScriptSrc = getFieSafeScriptSrcs();
+
   // Load CSP
   result.push(
     '<meta http-equiv=Content-Security-Policy ' +
-      "content=\"script-src 'none';object-src 'none';child-src 'none'\">"
+      `content="script-src ${cspScriptSrc};object-src 'none';child-src 'none'">`
   );
 
   // Postambule.
@@ -389,8 +401,6 @@ export class FriendlyIframeEmbed {
    * Ensures that all resources from this iframe have been released.
    */
   destroy() {
-    // TODO(#31246): remove when the fie-resources experiment is cleaned up.
-    this.removeResources_();
     disposeServicesForEmbed(this.win);
     if (this.ampdoc) {
       this.ampdoc.dispose();
@@ -520,18 +530,9 @@ export class FriendlyIframeEmbed {
         this.win./*OK*/ innerHeight
       );
     }
-    const fieResourcesOn =
-      this.ampdoc &&
-      this.ampdoc.getParent() &&
-      getExperimentBranch(this.ampdoc.getParent().win, FIE_RESOURCES_EXP.id) ===
-        FIE_RESOURCES_EXP.experiment;
     Promise.all([
       this.whenRenderComplete(),
-      whenContentIniLoad(
-        fieResourcesOn ? this.ampdoc : this.iframe,
-        this.win,
-        rect
-      ),
+      whenContentIniLoad(this.ampdoc, this.win, rect),
     ]).then(() => {
       this.signals_.signal(CommonSignals.INI_LOAD);
     });
@@ -559,16 +560,6 @@ export class FriendlyIframeEmbed {
   }
 
   /**
-   * @return {!./service/resources-interface.ResourcesInterface}
-   * @private
-   */
-  getResources_() {
-    const host =
-      this.host && !this.iframe.isConnected ? this.host : this.iframe;
-    return Services.resourcesForDoc(host);
-  }
-
-  /**
    * @return {!./service/mutator-interface.MutatorInterface}
    * @private
    */
@@ -589,21 +580,6 @@ export class FriendlyIframeEmbed {
       task.measure || null,
       task.mutate
     );
-  }
-
-  /**
-   * Removes all resources belonging to the FIE window.
-   * @private
-   */
-  removeResources_() {
-    const resources = this.getResources_();
-    const toRemove = resources
-      .get()
-      .filter((resource) => resource.hostWin == this.win);
-    toRemove.forEach((resource) => {
-      resources.remove(resource.element);
-      resource.disconnect();
-    });
   }
 
   /**
@@ -715,6 +691,7 @@ function installPolyfillsInChildWindow(parentWin, childWin) {
     installCustomElements(childWin, class {});
     installIntersectionObserver(parentWin, childWin);
     installResizeObserver(parentWin, childWin);
+    installAbortController(childWin);
   }
 }
 

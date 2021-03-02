@@ -37,7 +37,6 @@ import {getSourceUrl} from '../url';
 import {hasNextNodeInDocumentOrder, isIframed} from '../dom';
 import {ieIntrinsicCheckAndFix} from './ie-intrinsic-bug';
 import {ieMediaCheckAndFix} from './ie-media-bug';
-import {isAmp4Email} from '../format';
 import {isBlockedByConsent, reportError} from '../error';
 import {listen, loadPromise} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
@@ -156,7 +155,7 @@ export class ResourcesImpl {
     /** @const {!TaskQueue} */
     this.queue_ = new TaskQueue();
 
-    /** @const {!function(./task-queue.TaskDef):number} */
+    /** @const {function(./task-queue.TaskDef):number} */
     this.boundTaskScorer_ = this.calcTaskScore_.bind(this);
 
     /**
@@ -228,8 +227,7 @@ export class ResourcesImpl {
     if (
       isExperimentOn(this.win, 'bento') ||
       getExperimentBranch(this.win, INTERSECT_RESOURCES_EXP.id) ===
-        INTERSECT_RESOURCES_EXP.experiment ||
-      isAmp4Email(this.win.document)
+        INTERSECT_RESOURCES_EXP.experiment
     ) {
       const iframed = isIframed(this.win);
 
@@ -628,6 +626,10 @@ export class ResourcesImpl {
     if (this.intersectionObserver_) {
       // TODO(willchou): Fix observe/unobserve/remeasure churn in reparenting.
       this.intersectionObserver_.unobserve(resource.element);
+    }
+
+    if (resource.getState() === ResourceState.LAYOUT_SCHEDULED) {
+      resource.layoutCanceled();
     }
     this.cleanupTasks_(resource, /* opt_removePending */ true);
     dev().fine(TAG_, 'resource removed:', resource.debugid);
@@ -1203,7 +1205,11 @@ export class ResourcesImpl {
     let remeasureCount = 0;
     for (let i = 0; i < this.resources_.length; i++) {
       const r = this.resources_[i];
-      if (r.getState() == ResourceState.NOT_BUILT && !r.isBuilding()) {
+      if (
+        r.getState() == ResourceState.NOT_BUILT &&
+        !r.isBuilding() &&
+        !r.element.V1()
+      ) {
         this.buildOrScheduleBuildForResource_(r, /* checkForDupes */ true);
       }
       if (this.intersectionObserver_) {
@@ -1269,7 +1275,7 @@ export class ResourcesImpl {
     ) {
       for (let i = 0; i < this.resources_.length; i++) {
         const r = this.resources_[i];
-        if (r.hasOwner() && !r.isMeasureRequested()) {
+        if ((r.hasOwner() && !r.isMeasureRequested()) || r.element.V1()) {
           // If element has owner, and measure is not requested, do nothing.
           continue;
         }
@@ -1330,7 +1336,11 @@ export class ResourcesImpl {
     // Phase 3: Set inViewport status for resources.
     for (let i = 0; i < this.resources_.length; i++) {
       const r = this.resources_[i];
-      if (r.getState() == ResourceState.NOT_BUILT || r.hasOwner()) {
+      if (
+        r.getState() == ResourceState.NOT_BUILT ||
+        r.hasOwner() ||
+        r.element.V1()
+      ) {
         continue;
       }
       // Note that when the document is not visible, neither are any of its
@@ -1355,6 +1365,7 @@ export class ResourcesImpl {
           !r.isBuilt() &&
           !r.isBuilding() &&
           !r.hasOwner() &&
+          !r.element.V1() &&
           r.hasBeenMeasured() &&
           r.isDisplayed() &&
           r.overlaps(loadRect)
@@ -1390,6 +1401,7 @@ export class ResourcesImpl {
         if (
           r.getState() == ResourceState.READY_FOR_LAYOUT &&
           !r.hasOwner() &&
+          !r.element.V1() &&
           r.isDisplayed() &&
           r.idleRenderOutsideViewport()
         ) {
@@ -1409,6 +1421,7 @@ export class ResourcesImpl {
         if (
           r.getState() == ResourceState.READY_FOR_LAYOUT &&
           !r.hasOwner() &&
+          !r.element.V1() &&
           r.isDisplayed()
         ) {
           dev().fine(TAG_, 'idle layout:', r.debugid);
@@ -1714,6 +1727,9 @@ export class ResourcesImpl {
     opt_parentPriority,
     opt_forceOutsideViewport
   ) {
+    if (resource.element.V1()) {
+      return;
+    }
     const isBuilt = resource.getState() != ResourceState.NOT_BUILT;
     const isDisplayed = resource.isDisplayed();
     if (!isBuilt || !isDisplayed) {

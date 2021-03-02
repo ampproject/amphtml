@@ -18,7 +18,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const del = require('del');
 const path = require('path');
-const {cyan} = require('ansi-colors');
+const {cyan} = require('kleur/colors');
 const {log} = require('../common/logging');
 
 const ROOT_DIR = path.resolve(__dirname, '../../');
@@ -28,8 +28,8 @@ const ROOT_DIR = path.resolve(__dirname, '../../');
  */
 async function clean() {
   const pathsToDelete = [
-    '.amp-build',
-    '.karma-cache',
+    '.amp-dep-check',
+    '.karma-cache*',
     'build',
     'build-system/server/new-server/transforms/dist',
     'deps.txt',

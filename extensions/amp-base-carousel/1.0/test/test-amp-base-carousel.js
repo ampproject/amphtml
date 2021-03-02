@@ -28,7 +28,7 @@ import {useStyles} from '../base-carousel.jss';
 import {waitFor, whenCalled} from '../../../../testing/test-helper';
 
 describes.realWin(
-  'amp-base-carousel',
+  'amp-base-carousel:1.0',
   {
     amp: {
       runtimeOn: true,
@@ -62,7 +62,7 @@ describes.realWin(
       const wrappers = await getSlideWrappersFromShadow();
       const slots = Array.from(wrappers)
         .map((wrapper) => wrapper.querySelector('slot'))
-        .filter((slot) => !!slot);
+        .filter(Boolean);
       return toArray(slots).reduce(
         (acc, slot) => acc.concat(slot.assignedElements()),
         []
@@ -241,6 +241,25 @@ describes.realWin(
             expect(slide.classList.contains(styles.disableSnap)).to.be.true;
           }
         });
+      });
+    });
+
+    it('should fire DOM event', async () => {
+      const userSuppliedChildren = setSlides(3);
+      userSuppliedChildren.forEach((child) => element.appendChild(child));
+      win.document.body.appendChild(element);
+      await getSlidesFromShadow();
+
+      const eventSpy = env.sandbox.spy();
+      element.addEventListener('slideChange', eventSpy);
+      element.setAttribute('slide', '1');
+
+      await waitFor(() => eventSpy.callCount > 0, 'event fired');
+      expect(eventSpy).to.be.calledOnce;
+      expect(eventSpy.firstCall).calledWithMatch({
+        'data': {
+          'index': 1,
+        },
       });
     });
 

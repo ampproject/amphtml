@@ -111,6 +111,7 @@ export let InteractiveReactData;
  *    mutedState: boolean,
  *    pageAudioState: boolean,
  *    pageHasElementsWithPlaybackState: boolean,
+ *    panningMediaState: !Map<string, ../../amp-story-panning-media/0.1/amp-story-panning-media.panningMediaPositionDef> ,
  *    pausedState: boolean,
  *    previewState: boolean,
  *    rtlState: boolean,
@@ -164,6 +165,7 @@ export const StateProperty = {
   MUTED_STATE: 'mutedState',
   PAGE_HAS_AUDIO_STATE: 'pageAudioState',
   PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE: 'pageHasElementsWithPlaybackState',
+  PANNING_MEDIA_STATE: 'panningMediaState',
   PAUSED_STATE: 'pausedState',
   // Story preview state.
   PREVIEW_STATE: 'previewState',
@@ -229,6 +231,7 @@ export const Action = {
   TOGGLE_VIEWPORT_WARNING: 'toggleViewportWarning',
   ADD_NEW_PAGE_ID: 'addNewPageId',
   SET_PAGE_SIZE: 'updatePageSize',
+  ADD_PANNING_MEDIA_STATE: 'addPanningMediaState',
   SET_VIEWER_CUSTOM_CONTROLS: 'setCustomControls',
 };
 
@@ -252,6 +255,8 @@ const stateComparisonFunctions = {
     curr === null ||
     old.width !== curr.width ||
     old.height !== curr.height,
+  [StateProperty.PANNING_MEDIA_STATE]: (old, curr) =>
+    old === null || curr === null || !deepEquals(old, curr, 2),
   [StateProperty.INTERACTIVE_REACT_STATE]: (old, curr) =>
     !deepEquals(old, curr, 3),
 };
@@ -277,6 +282,15 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ ({
         ...state,
         [StateProperty.NEW_PAGE_AVAILABLE_ID]: data,
+      });
+    case Action.ADD_PANNING_MEDIA_STATE:
+      const updatedState = {
+        ...state[StateProperty.PANNING_MEDIA_STATE],
+        ...data,
+      };
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.PANNING_MEDIA_STATE]: updatedState,
       });
     case Action.ADD_TO_ACTIONS_ALLOWLIST:
       const newActionsAllowlist = [].concat(
@@ -608,6 +622,7 @@ export class AmpStoryStoreService {
       [StateProperty.PAGE_ATTACHMENT_STATE]: false,
       [StateProperty.PAGE_HAS_AUDIO_STATE]: false,
       [StateProperty.PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE]: false,
+      [StateProperty.PANNING_MEDIA_STATE]: {},
       [StateProperty.PAUSED_STATE]: false,
       [StateProperty.RTL_STATE]: false,
       [StateProperty.SHARE_MENU_STATE]: false,
