@@ -231,24 +231,32 @@ function getFiles(testType) {
  */
 function updateFiles(config) {
   const fileGlobs = getFiles(config.testType);
+  const filesToTransform = globby.sync(testConfig.karmaEsbuildTransformPaths);
 
-  const isJsGlob = (glob) => typeof glob === 'string' && glob.endsWith('.js');
-  const jsGlobs = fileGlobs.filter(isJsGlob);
+  const transformedKarmaFiles = [];
+  const nonTransformedKarmaFiles = [];
 
-  const isNonJsGlob = (glob) => !isJsGlob(glob);
-  const nonJsGlobs = fileGlobs.filter(isNonJsGlob);
-
-  const jsFiles = globby.sync(jsGlobs);
+  for (const fileGlob of fileGlobs) {
+    const glob = typeof fileGlob === 'string' ? fileGlob : fileGlob.pattern;
+    const files = globby.sync(glob);
+    transformedKarmaFiles.push(
+      ...files.filter((file) => filesToTransform.includes(file))
+    );
+    nonTransformedKarmaFiles.push(
+      ...files.filter((file) => path.extname(file) == '.html')
+    );
+  }
 
   const getPosixImport = (jsFile) => {
     const relativePath = path.relative(path.dirname(unifiedJsFile), jsFile);
     const posixPath = relativePath.split(path.sep).join(path.posix.sep);
     return `import '${posixPath}';`;
   };
-  const jsImports = jsFiles.map(getPosixImport);
+  const imports = transformedKarmaFiles.map(getPosixImport);
 
-  fs.writeFileSync(unifiedJsFile, jsImports.join('\n'));
-  config.files = nonJsGlobs.concat([unifiedJsFile]);
+  console.log(unifiedJsFile);
+  fs.writeFileSync(unifiedJsFile, imports.join('\n'));
+  config.files = nonTransformedKarmaFiles.concat([unifiedJsFile]);
 }
 
 /**
