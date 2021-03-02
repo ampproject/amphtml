@@ -43,8 +43,6 @@ const headerRegexp = new RegExp(
   'im'
 );
 
-// throw new Error(headerRegexp.source);
-
 /**
  * @param {string} content
  * @return {?string}
