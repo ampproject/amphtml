@@ -6,9 +6,9 @@ Ensures that Markdown files in this repository have updated Tables-Of-Content.
 gulp markdown-toc [--fix]
 ```
 
-## Header
+## Usage
 
-Markdown files must contain the following comment where they'd like to include the TOC.
+Files must contain the following header comment:
 
 ```markdown
 <!--
@@ -18,6 +18,8 @@ Markdown files must contain the following comment where they'd like to include t
     gulp markdown-toc --fix
 -->
 ```
+
+Running the mentioned command inserts the TOC after the comment if necessary:
 
 ```diff
   # Hello
