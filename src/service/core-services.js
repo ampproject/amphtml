@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {adoptServiceForEmbedDoc} from '../service';
+import {
+  adoptServiceFactoryForEmbedDoc,
+  adoptServiceForEmbedDoc,
+} from '../service';
 import {devAssert} from '../log';
 import {installActionServiceForDoc} from './action-impl';
 import {installBatchedXhrService} from './batched-xhr-impl';
@@ -38,7 +41,7 @@ import {installPreconnectService} from '../preconnect';
 import {installResourcesServiceForDoc} from './resources-impl';
 import {installStandardActionsForDoc} from './standard-actions-impl';
 import {installStorageServiceForDoc} from './storage-impl';
-import {installTemplatesService} from './template-impl';
+import {installTemplatesServiceForDoc} from './template-impl';
 import {installTimerService} from './timer-impl';
 import {installUrlForDoc} from './url-impl';
 import {installUrlReplacementsServiceForDoc} from './url-replacements-impl';
@@ -67,7 +70,6 @@ export function installRuntimeServices(global) {
   installCryptoService(global);
   installBatchedXhrService(global);
   installPlatformService(global);
-  installTemplatesService(global);
   installTimerService(global);
   installVsyncService(global);
   installXhrService(global);
@@ -107,6 +109,9 @@ function installAmpdocServicesInternal(ampdoc, isEmbedded) {
   // 1. Order is important!
   // 2. Consider to install same services to amp-inabox.js
   installUrlForDoc(ampdoc);
+  isEmbedded
+    ? adoptServiceFactoryForEmbedDoc(ampdoc, 'templates')
+    : installTemplatesServiceForDoc(ampdoc);
   isEmbedded
     ? adoptServiceForEmbedDoc(ampdoc, 'documentInfo')
     : installDocumentInfoServiceForDoc(ampdoc);

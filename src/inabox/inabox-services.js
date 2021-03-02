@@ -28,6 +28,7 @@ import {installInaboxViewerServiceForDoc} from './inabox-viewer';
 import {installInaboxViewportService} from './inabox-viewport';
 import {installOwnersServiceForDoc} from '../service/owners-impl';
 import {installStandardActionsForDoc} from '../service/standard-actions-impl';
+import {installTemplatesServiceForDoc} from '../service/template-impl';
 import {installUrlForDoc} from '../service/url-impl';
 import {installUrlReplacementsServiceForDoc} from '../service/url-replacements-impl';
 import {rejectServicePromiseForDoc} from '../service';
@@ -40,6 +41,7 @@ export function installAmpdocServicesForInabox(ampdoc) {
   // Order is important!
   installIframeMessagingClient(ampdoc.win); // this is an inabox-only service
   installUrlForDoc(ampdoc);
+  installTemplatesServiceForDoc(ampdoc);
   installDocumentInfoServiceForDoc(ampdoc);
   installInaboxCidService(ampdoc);
   installInaboxViewerServiceForDoc(ampdoc);

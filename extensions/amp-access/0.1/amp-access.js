@@ -90,7 +90,7 @@ export class AccessService {
     this.viewport_ = Services.viewportForDoc(ampdoc);
 
     /** @private @const {!../../../src/service/template-impl.Templates} */
-    this.templates_ = Services.templatesFor(ampdoc.win);
+    this.templates_ = Services.templatesForDoc(ampdoc);
 
     /** @private @const {!../../../src/service/mutator-interface.MutatorInterface} */
     this.mutator_ = Services.mutatorForDoc(ampdoc);
