@@ -17,5 +17,37 @@
 module.exports = {
   'rules': {
     'local/no-global': 2,
+
+    'import/no-restricted-paths': [
+      'error',
+      {
+        'zones': [
+          {
+            // Disallow importing AMP dependencies into core
+            'target': 'src/core',
+            'from': 'src',
+            'except': ['./core'],
+          },
+          {
+            // Disallow importing AMP dependencies into preact/Bento
+            'target': 'src/preact',
+            'from': 'src',
+            'except': ['./core', './preact'],
+          },
+        ],
+      },
+    ],
   },
+  // Exclusions where imports are necessary or have not yet been migrated;
+  // Do not add to this list
+  'overrides': [
+    {
+      'files': [
+        './preact/base-element.js',
+        './preact/slot.js',
+        './preact/context.js',
+      ],
+      'rules': {'import/no-restricted-paths': 1},
+    },
+  ],
 };
