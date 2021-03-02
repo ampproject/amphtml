@@ -50,6 +50,12 @@ let wrapCounter = 0;
 let transform;
 
 /**
+ * Used to consolidate all JS test files into one file that's transformed by
+ * karma-esbuild.
+ */
+const unifiedJsFile = tempy.file({extension: 'js'});
+
+/**
  * Updates the set of preprocessors to run on HTML and JS files before testing.
  * Notes:
  * - The HTML transform is lazy-required because the server is built at startup.
@@ -80,7 +86,6 @@ function updatePreprocessors(config) {
     jsPreprocessors.push('babel');
     config.babelPreprocessor = {options: {caller: {name: 'ie-test'}}};
   }
-  const unifiedJsFile = [...config.files].pop(); // Inserted by updateFiles()
   config.preprocessors[unifiedJsFile] = jsPreprocessors;
 }
 
@@ -240,18 +245,17 @@ function updateFiles(config) {
   const isNonJsGlob = (glob) => !isJsGlob(glob);
   const nonJsGlobs = fileGlobs.filter(isNonJsGlob);
 
-  const unifiedFile = tempy.file({extension: 'js'});
   const jsFiles = globby.sync(jsGlobs);
 
   const getPosixImport = (jsFile) => {
-    const relativePath = path.relative(path.dirname(unifiedFile), jsFile);
+    const relativePath = path.relative(path.dirname(unifiedJsFile), jsFile);
     const posixPath = relativePath.split(path.sep).join(path.posix.sep);
     return `import '${posixPath}';`;
   };
   const jsImports = jsFiles.map(getPosixImport);
 
-  fs.writeFileSync(unifiedFile, jsImports.join('\n'));
-  config.files = nonJsGlobs.concat([unifiedFile]);
+  fs.writeFileSync(unifiedJsFile, jsImports.join('\n'));
+  config.files = nonJsGlobs.concat([unifiedJsFile]);
 }
 
 /**
