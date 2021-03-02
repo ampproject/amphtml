@@ -62,12 +62,14 @@ class AmpAccordion extends BaseElement {
       `accordionSection.${eventName}`,
       detail
     );
-    Services.actionServiceForDoc(section).triggerWithDispatch(
+    Services.actionServiceForDoc(section).trigger(
       section,
       eventName,
       event,
       ActionTrust.HIGH
     );
+
+    super.triggerEvent(section, eventName, detail);
   }
 
   /** @override */
