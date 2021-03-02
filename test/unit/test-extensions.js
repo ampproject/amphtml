@@ -19,11 +19,8 @@ import {BaseElement} from '../../src/base-element';
 import {ElementStub} from '../../src/element-stub';
 import {Extensions} from '../../src/service/extensions-impl';
 import {Services} from '../../src/services';
+import {dispatchCustomEvent} from '../../src/dom';
 import {getServiceForDoc} from '../../src/service';
-import {
-  getTemplateClassForTesting,
-  installTemplatesServiceForDoc,
-} from '../../src/service/template-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {user} from '../../src/log';
 
@@ -189,6 +186,7 @@ describes.sandboxed('Extensions', {}, () => {
 
     it('should add element in registration', () => {
       const ctor = function () {};
+      ctor.requiresShadowDom = () => false;
       extensions.registerExtension(
         'amp-ext',
         () => {
@@ -211,66 +209,6 @@ describes.sandboxed('Extensions', {}, () => {
       expect(unknown.extension.elements['e1'].implementationClass).to.equal(
         ctor
       );
-    });
-
-    it('should add template in registration', async () => {
-      const ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
-      installTemplatesServiceForDoc(ampdoc);
-      const templates = Services.templatesForDoc(ampdoc);
-
-      const ctor = function () {};
-      extensions.registerExtension(
-        'amp-ext',
-        () => {
-          extensions.addTemplate('e1', ctor);
-        },
-        {}
-      );
-      await extensions.waitForExtension(win, 'amp-ext');
-
-      const holder = extensions.getExtensionHolder_('amp-ext');
-      expect(holder.docFactories).to.have.length(1);
-
-      const implClass = await getTemplateClassForTesting(templates, 'e1');
-      expect(implClass).to.equal(ctor);
-    });
-
-    it('should add element out of registration', () => {
-      const ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
-      installTemplatesServiceForDoc(ampdoc);
-
-      const ctor = function () {};
-      allowConsoleError(() => extensions.addTemplate('e1', ctor));
-      expect(Object.keys(extensions.extensions_)).to.deep.equal(['_UNKNOWN_']);
-    });
-
-    it('should install template in shadow doc', async () => {
-      env.sandbox
-        .stub(Services.ampdocServiceFor(win), 'isSingleDoc')
-        .callsFake(() => false);
-
-      // Resolve the promise.
-      const ctor = function () {};
-      extensions.registerExtension(
-        'amp-test',
-        () => {
-          extensions.addTemplate('amp-test', ctor);
-        },
-        {}
-      );
-
-      // Install into shadow doc.
-      const shadowRoot = document.createDocumentFragment();
-      const ampdoc = new AmpDocShadow(win, 'https://a.org/', shadowRoot);
-      installTemplatesServiceForDoc(ampdoc);
-      await extensions.installExtensionsInDoc(ampdoc, ['amp-test']);
-
-      // Extension is now declared.
-      expect(ampdoc.declaresExtension('amp-test')).to.be.true;
-
-      const templates = Services.templatesForDoc(ampdoc);
-      const implClass = await getTemplateClassForTesting(templates, 'amp-test');
-      expect(implClass).to.equal(ctor);
     });
 
     it('should install auto undeclared elements for single-doc', () => {
@@ -655,6 +593,7 @@ describes.sandboxed('Extensions', {}, () => {
 
     it('should load extension class via load extension', () => {
       const ctor = function () {};
+      ctor.requiresShadowDom = () => false;
       extensions.registerExtension(
         'amp-ext',
         () => {
@@ -1162,6 +1101,69 @@ describes.sandboxed('Extensions', {}, () => {
           doc.head.querySelectorAll('[custom-element="amp-embed"]')
         ).to.have.length(0);
         expect(extensions.extensions_['amp-embed']).to.be.undefined;
+      });
+    }
+  );
+
+  describes.fakeWin(
+    'importUnwrapped',
+    {
+      amp: true,
+      fakeRegisterElement: true,
+    },
+    (env) => {
+      let win, doc, extensions;
+
+      beforeEach(() => {
+        win = env.win;
+        doc = win.document;
+        extensions = env.extensions;
+      });
+
+      it('should insert extension script correctly', () => {
+        expect(
+          doc.head.querySelectorAll('[custom-element="amp-test"]')
+        ).to.have.length(0);
+        const promise = extensions.importUnwrapped(win, 'amp-test');
+        expect(
+          doc.head.querySelectorAll('[custom-element="amp-test"]')
+        ).to.have.length(1);
+
+        const script = doc.head.querySelector('[custom-element="amp-test"]');
+        dispatchCustomEvent(script, 'load', null, {bubbles: false});
+        return promise;
+      });
+
+      it('should only insert script once', () => {
+        expect(
+          doc.head.querySelectorAll('[custom-element="amp-test"]')
+        ).to.have.length(0);
+
+        const promise1 = extensions.importUnwrapped(win, 'amp-test');
+        expect(
+          doc.head.querySelectorAll('[custom-element="amp-test"]')
+        ).to.have.length(1);
+
+        const promise2 = extensions.importUnwrapped(win, 'amp-test');
+        expect(
+          doc.head.querySelectorAll('[custom-element="amp-test"]')
+        ).to.have.length(1);
+        expect(promise2).to.equal(promise1);
+      });
+
+      it('should give script correct attributes', () => {
+        expect(
+          doc.head.querySelectorAll('[custom-element="amp-test"]')
+        ).to.have.length(0);
+        extensions.importUnwrapped(win, 'amp-test');
+        expect(
+          doc.head.querySelectorAll('[custom-element="amp-test"]')
+        ).to.have.length(1);
+
+        const script = doc.head.querySelector('[custom-element="amp-test"]');
+        expect(script.getAttribute('data-script')).to.equal('amp-test');
+        expect(script.getAttribute('async')).to.equal('');
+        expect(script.getAttribute('crossorigin')).to.equal('anonymous');
       });
     }
   );

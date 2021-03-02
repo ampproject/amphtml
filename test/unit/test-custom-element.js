@@ -1584,7 +1584,8 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
             .once();
 
           const promise = element.ensureLoaded(parentPriority);
-          await element.buildInternal();
+          await resource.build();
+          await resource.whenBuilt();
           await element.layoutCallback();
 
           await promise;
@@ -1599,7 +1600,8 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
           container.appendChild(element);
           const resource = element.getResource_();
 
-          await element.buildInternal();
+          await resource.build();
+          await resource.whenBuilt();
           expect(element.isBuilt()).to.be.true;
 
           const parentPriority = 1;
@@ -1626,7 +1628,8 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
           container.appendChild(element);
           const resource = element.getResource_();
 
-          await element.buildInternal();
+          await resource.build();
+          await resource.whenBuilt();
           resource.measure();
           resource.layoutScheduled(Date.now());
           await resource.startLayout();
@@ -1644,7 +1647,8 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
           container.appendChild(element);
           const resource = element.getResource_();
 
-          await element.buildInternal();
+          await resource.build();
+          await resource.whenBuilt();
           resource.measure();
           resource.layoutScheduled(Date.now());
           const layoutCallbackStub = env.sandbox.stub(
@@ -1678,7 +1682,10 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
           const element = new ElementClass();
           element.setAttribute('layout', 'nodisplay');
           container.appendChild(element);
-          await element.buildInternal();
+          const resource = element.getResource_();
+
+          await resource.build();
+          await resource.whenBuilt();
 
           resourcesMock.expects('scheduleLayoutOrPreload').never();
 
@@ -1690,7 +1697,9 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
           element.setAttribute('layout', 'nodisplay');
           container.appendChild(element);
           const resource = element.getResource_();
-          await element.buildInternal();
+
+          await resource.build();
+          await resource.whenBuilt();
 
           const measureSpy = env.sandbox.spy(resource, 'measure');
           resourcesMock.expects('scheduleLayoutOrPreload').never();
