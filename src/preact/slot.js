@@ -66,7 +66,7 @@ export function useSlotContext(ref) {
       slot,
       LoadingProp,
       Slot,
-      /** @type {!../core/loading-instructions.Loading} */ (context.loading)
+      /** @type {!./loading-instructions.Loading} */ (context.loading)
     );
     return () => {
       removeProp(slot, CanRender, Slot);
