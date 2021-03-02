@@ -261,6 +261,13 @@ export function MyElement({propName1, propName2, ...rest}) {
 -   **Usage**: Define the CSS for shadow stylesheets.
 -   **Example Usage**: `amp-lightbox`, `amp-sidebar`
 
+#### PreactBaseElement['usesShadowDom']
+
+-   **Default**: Optional.
+-   **Override**: Rarely.
+-   **Usage**: Notify when the element uses the Shadow DOM.
+-   **Example Usage**: `amp-social-share`, `amp-youtube`
+
 #### PreactBaseElement['usesTemplate']
 
 -   **Default**: Optional.

@@ -332,7 +332,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
     let element;
 
     beforeEach(() => {
-      Impl['props'] = {'children': {}};
+      Impl['usesShadowDom'] = true;
       element = html`
         <amp-preact layout="fixed" width="100" height="100">
           <div id="child1"></div>
@@ -521,6 +521,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
     const DATE = Date.parse(DATE_STRING);
 
     beforeEach(async () => {
+      Impl['usesShadowDom'] = true;
       Impl['props'] = {
         'cloned': {
           selector: '[cloned]',
@@ -826,6 +827,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
     let element;
 
     beforeEach(async () => {
+      Impl['usesShadowDom'] = true;
       Impl['props'] = {
         'children': {passthrough: true},
         'propA': {attr: 'prop-a'},
@@ -910,6 +912,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
     let element;
 
     beforeEach(async () => {
+      Impl['usesShadowDom'] = true;
       Impl['props'] = {
         'children': {passthroughNonEmpty: true},
         'propA': {attr: 'prop-a'},
@@ -987,6 +990,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
     beforeEach(async () => {
       Impl['delegatesFocus'] = true;
       Impl['props'] = {'children': {passThroughNonEmpty: true}};
+      Impl['usesShadowDom'] = true;
       element = html`
         <amp-preact layout="fixed" width="100" height="100"></amp-preact>
       `;
@@ -1019,6 +1023,7 @@ describes.realWin('PreactBaseElement', spec, (env) => {
     const DATE = Date.parse(DATE_STRING);
 
     beforeEach(async () => {
+      Impl['usesShadowDom'] = true;
       Impl['props'] = {
         'cloned': {
           selector: '[cloned]',

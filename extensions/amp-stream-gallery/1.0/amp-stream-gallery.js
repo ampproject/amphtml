@@ -123,6 +123,9 @@ AmpStreamGallery['props'] = {
 };
 
 /** @override */
+AmpStreamGallery['usesShadowDom'] = true;
+
+/** @override */
 AmpStreamGallery['shadowCss'] = GALLERY_CSS + CAROUSEL_CSS;
 
 AMP.extension(TAG, '1.0', (AMP) => {

@@ -34,4 +34,7 @@ BaseElement['props'] = {
 BaseElement['layoutSizeDefined'] = true;
 
 /** @override */
+BaseElement['usesShadowDom'] = true;
+
+/** @override */
 BaseElement['shadowCss'] = CSS;

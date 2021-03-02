@@ -54,6 +54,9 @@ AmpInlineGalleryThumbnails['props'] = {
 AmpInlineGalleryThumbnails['layoutSizeDefined'] = true;
 
 /** @override */
+AmpInlineGalleryThumbnails['usesShadowDom'] = true;
+
+/** @override */
 AmpInlineGalleryThumbnails['shadowCss'] = CAROUSEL_CSS + THUMBNAIL_CSS;
 
 /** @override */

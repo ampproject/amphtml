@@ -161,7 +161,7 @@ export class PreactBaseElement extends AMP.BaseElement {
    */
   static requiresShadowDom() {
     // eslint-disable-next-line local/no-static-this
-    return usesShadowDom(this);
+    return this['usesShadowDom'];
   }
 
   /** @param {!AmpElement} element */
@@ -519,7 +519,7 @@ export class PreactBaseElement extends AMP.BaseElement {
     }
 
     const Ctor = this.constructor;
-    const isShadow = usesShadowDom(Ctor);
+    const isShadow = Ctor['usesShadowDom'];
     const lightDomTag = isShadow ? null : Ctor['lightDomTag'];
     const isDetached = Ctor['detached'];
 
@@ -875,6 +875,13 @@ PreactBaseElement['usesTemplate'] = false;
 PreactBaseElement['shadowCss'] = null;
 
 /**
+ * Whether this element uses Shadow DOM.
+ *
+ * @protected {boolean}
+ */
+PreactBaseElement['usesShadowDom'] = !!PreactBaseElement['shadowCss'];
+
+/**
  * Enabling detached mode alters the children to be rendered in an
  * unappended container. By default the children will be attached to the DOM.
  *
@@ -896,14 +903,6 @@ PreactBaseElement['delegatesFocus'] = false;
  * @protected {!Object<string, !AmpElementPropDef>}
  */
 PreactBaseElement['props'] = {};
-
-/**
- * @param {typeof PreactBaseElement} Ctor
- * @return {boolean}
- */
-function usesShadowDom(Ctor) {
-  return !!Ctor['props'] && !!Ctor['props']['children'];
-}
 
 /**
  * @param {null|string} attributeName
@@ -954,7 +953,7 @@ function collectProps(Ctor, element, ref, defaultProps, mediaQueryProps) {
 
   // Common styles.
   if (layoutSizeDefined) {
-    if (usesShadowDom(Ctor)) {
+    if (Ctor['usesShadowDom']) {
       props['style'] = SIZE_DEFINED_STYLE;
     } else {
       props['className'] =
@@ -963,7 +962,7 @@ function collectProps(Ctor, element, ref, defaultProps, mediaQueryProps) {
   }
 
   // Props.
-  parsePropDefs(props, propDefs, element, mediaQueryProps);
+  parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps);
   if (mediaQueryProps) {
     mediaQueryProps.complete();
   }
@@ -972,12 +971,13 @@ function collectProps(Ctor, element, ref, defaultProps, mediaQueryProps) {
 }
 
 /**
+ * @param Ctor
  * @param {!Object} props
  * @param {!Object} propDefs
  * @param {!Element} element
  * @param {?MediaQueryProps} mediaQueryProps
  */
-function parsePropDefs(props, propDefs, element, mediaQueryProps) {
+function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
   // Match all children defined with "selector".
   // There are plain "children" and there're slotted children assigned
   // as separate properties. Thus in a carousel the plain "children" are
@@ -994,8 +994,15 @@ function parsePropDefs(props, propDefs, element, mediaQueryProps) {
     }
     const def = propDefs[match];
     const {single, name = match, clone, props: slotProps = {}} = def;
+    devAssert(clone || Ctor['usesShadowDom']);
     const parsedSlotProps = {};
-    parsePropDefs(parsedSlotProps, slotProps, childElement, mediaQueryProps);
+    parsePropDefs(
+      Ctor,
+      parsedSlotProps,
+      slotProps,
+      childElement,
+      mediaQueryProps
+    );
 
     // TBD: assign keys, reuse slots, etc.
     if (single) {
@@ -1033,9 +1040,11 @@ function parsePropDefs(props, propDefs, element, mediaQueryProps) {
     );
     let value;
     if (def.passthrough) {
+      devAssert(Ctor['usesShadowDom']);
       props[def.name || name] = [<Slot />];
       continue;
     } else if (def.passthroughNonEmpty) {
+      devAssert(Ctor['usesShadowDom']);
       // If all children are whitespace text nodes, consider the element as
       // having no children
       props[def.name || name] = element

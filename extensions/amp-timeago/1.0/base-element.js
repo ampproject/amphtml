@@ -42,6 +42,9 @@ BaseElement['props'] = {
   'locale': {attr: 'locale'},
 };
 
+/** @override */
+BaseElement['usesShadowDom'] = true;
+
 /**
  * @param {!Element} element
  * @return {?number}

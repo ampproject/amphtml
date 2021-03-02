@@ -61,4 +61,7 @@ BaseElement['props'] = {
 };
 
 /** @override */
+BaseElement['usesShadowDom'] = true;
+
+/** @override */
 BaseElement['shadowCss'] = COMPONENT_CSS;

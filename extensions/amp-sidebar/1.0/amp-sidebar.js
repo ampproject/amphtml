@@ -107,6 +107,9 @@ class AmpSidebar extends PreactBaseElement {
 AmpSidebar['Component'] = Sidebar;
 
 /** @override */
+AmpSidebar['usesShadowDom'] = true;
+
+/** @override */
 AmpSidebar['shadowCss'] = COMPONENT_CSS;
 
 /** @override */

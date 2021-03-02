@@ -34,4 +34,7 @@ BaseElement['props'] = {
 };
 
 /** @override */
+BaseElement['usesShadowDom'] = true;
+
+/** @override */
 BaseElement['layoutSizeDefined'] = true;

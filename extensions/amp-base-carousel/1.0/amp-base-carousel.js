@@ -135,6 +135,9 @@ AmpBaseCarousel['props'] = {
 };
 
 /** @override */
+AmpBaseCarousel['usesShadowDom'] = true;
+
+/** @override */
 AmpBaseCarousel['shadowCss'] = COMPONENT_CSS;
 
 /** @override */

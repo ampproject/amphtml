@@ -88,7 +88,6 @@ VideoBaseElement['props'] = {
   'artwork': {attr: 'artwork'},
   'attribution': {attr: 'attribution'},
   'autoplay': {attr: 'autoplay', type: 'boolean'},
-  'children': {},
   'controls': {attr: 'controls', type: 'boolean'},
   'controlslist': {attr: 'controlslist'},
   'crossorigin': {attr: 'crossorigin'},
@@ -111,3 +110,6 @@ VideoBaseElement['props'] = {
 
 /** @override */
 VideoBaseElement['shadowCss'] = CSS;
+
+/** @override */
+VideoBaseElement['usesShadowDom'] = true;
