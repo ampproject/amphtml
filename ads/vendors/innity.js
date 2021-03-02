@@ -18,7 +18,13 @@ import {validateData, writeScript} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   pub: string,
+ *   zone: string,
+ *   width: string,
+ *   height: string,
+ *   channel: (string|undefined)
+ * }} data
  */
 export function innity(global, data) {
   validateData(data, ['pub', 'zone'], ['channel']);
@@ -36,6 +42,6 @@ export function innity(global, data) {
     // AMP handling or noContentAvailable
     innityAMPTag.amp(global.context);
     // else renderStart (with at least house ad)
-    global.context.renderStart();
+    /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context).renderStart();
   });
 }

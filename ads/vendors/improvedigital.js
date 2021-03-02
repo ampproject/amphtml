@@ -18,7 +18,13 @@ import {validateData, writeScript} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   placement: string,
+ *   width: string,
+ *   height: string,
+ *   optin: string,
+ *   keyvalue: (string|undefined)
+ * }} data
  */
 export function improvedigital(global, data) {
   validateData(data, ['placement'], ['width', 'height', 'optin', 'keyvalue']);

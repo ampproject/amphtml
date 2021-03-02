@@ -18,7 +18,10 @@ import {computeInMasterFrame, loadScript, validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   id: string,
+ *   positions: string
+ * }} data
  */
 export function imedia(global, data) {
   validateData(data, ['id', 'positions']);
@@ -58,16 +61,20 @@ export function imedia(global, data) {
     () => {
       mW.inPagePositions = mW.inPagePositions.filter((inPagePostion) => {
         let used = true;
-        positions.filter((position, index) => {
+        /** @type {Array<Object>} */ (positions).filter((position, index) => {
           // match right element and zone to write advert from adserver
-          if (inPagePostion.parentElement.id == position.id) {
+          if (
+            /** @type {HTMLElement} */ (inPagePostion.parentElement).id ==
+            /** @type {{id: string}} */ (position).id
+          ) {
             used = false;
-            position.id = inPagePostion.parentElement; // right element "c" to position obj.
+            /** @type {{id: HTMLElement}} */ (position).id =
+              inPagePostion.parentElement; // right element "c" to position obj.
             if (mW.im.writeAd) {
               mW.im.writeAd(mW.ads[index], position);
 
               // inform AMP runtime when the ad starts rendering
-              if (mW.ads[index].impress) {
+              if (/** @type {{impress: boolean}} */ (mW.ads[index]).impress) {
                 inPagePostion.context.renderStart();
               } else {
                 inPagePostion.context.noContentAvailable();

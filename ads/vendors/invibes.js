@@ -18,7 +18,11 @@ import {loadScript, validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   adCateg: (string|undefined),
+ *   pid: (string|undefined),
+ *   customEndpoint: (string|undefined)
+ * }} data
  */
 export function invibes(global, data) {
   global.invibesAmp = {

@@ -450,31 +450,31 @@ data.parameters;
 data.queue;
 
 // imedia.js
-data.positions;
+window.im;
+
+// imobile.js
+window.imobileParam;
 
 // imonomy.js
+window.CasaleArgs;
 data.pid;
 data.subId;
-
-// improvedigital.js
-data.placement;
-data.optin;
-data.keyvalue;
 
 // inmobi.js
 var _inmobi;
 window._inmobi;
 _inmobi.getNewAd;
-data.siteid;
-data.slotid;
 
 // innity.js
 var innity_adZone;
 var innityAMPZone;
 var innityAMPTag;
-data.pub;
-data.zone;
-data.channel;
+
+// insticator.js
+window.Insticator;
+
+// invibes.js
+window.invibesAmp;
 
 // iprom.js
 window.ipromNS;

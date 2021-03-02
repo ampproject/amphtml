@@ -27,7 +27,15 @@ const imonomyData = ['pid', 'subId', 'timeout'];
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   timeout: number,
+ *   width: string,
+ *   height: string,
+ *   subId: string,
+ *   targeting: (Object|undefined),
+ *   pid: (string|undefined),
+ *   slot: (string|undefined)
+ * }} data
  */
 export function imonomy(global, data) {
   if (!('slot' in data)) {
@@ -66,17 +74,25 @@ export function imonomy(global, data) {
       global,
       `//tag.imonomy.com/amp/${data.pid}/amp.js`,
       () => {
-        global.context.renderStart();
+        /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context).renderStart();
       },
       () => {
-        global.context.noContentAvailable();
+        /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context).noContentAvailable();
       }
     );
   }
 }
 
 /**
- * @param {*} data
+ * @param {{
+ *   timeout: number,
+ *   width: string,
+ *   height: string,
+ *   subId: string,
+ *   targeting: (Object|undefined),
+ *   pid: (string|undefined),
+ *   slot: (string|undefined)
+ * }} data
  */
 function prepareData(data) {
   for (const attr in data) {
@@ -89,7 +105,15 @@ function prepareData(data) {
 }
 
 /**
- * @param {*} data
+ * @param {{
+ *   timeout: number,
+ *   width: string,
+ *   height: string,
+ *   subId: string,
+ *   targeting: (Object|undefined),
+ *   pid: (string|undefined),
+ *   slot: (string|undefined)
+ * }} data
  * @param {number} code
  */
 function reportStats(data, code) {

@@ -18,7 +18,10 @@ import {validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   siteId: string,
+ *   embedId: string
+ * }} data
  */
 export function insticator(global, data) {
   // validate passed data attributes
@@ -36,10 +39,13 @@ export function insticator(global, data) {
 /**
  * Create HTML template to be populated later
  * @param {string} embedId The Unique Identifier of this particular Embed
- * @return {Element} HTML template
+ * @return {DocumentFragment} HTML template
  */
 function createTemplate(embedId) {
-  const template = document.createElement('template');
+  /** @type {HTMLTemplateElement} */
+  const template = /** @type {HTMLTemplateElement} */ (document.createElement(
+    'template'
+  ));
   template./*OK*/ innerHTML = `
     <div id="insticator-container">
       <div id="div-insticator-ad-1"></div>
@@ -83,7 +89,8 @@ function createAdsAndEmbed(siteId, embedId) {
     });
 
   // load ads code
-  const b = c.createElement(s);
+  /** @type {HTMLScriptElement} */
+  const b = /** @type {HTMLScriptElement} */ (c.createElement(s));
   b.src = u;
   b.async = !0;
   const d = c.getElementsByTagName(s)[0];
@@ -95,5 +102,5 @@ function createAdsAndEmbed(siteId, embedId) {
   a.Insticator.load('em', {id: embedId});
 
   // now tell AMP runtime to start rendering ads
-  window.context.renderStart();
+  /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (window.context).renderStart();
 }

@@ -19,7 +19,10 @@ import {validateData, writeScript} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   siteid: string,
+ *   slotid: string,
+ * }} data
  */
 export function inmobi(global, data) {
   validateData(data, ['siteid', 'slotid'], []);
@@ -30,12 +33,12 @@ export function inmobi(global, data) {
     manual: true,
     onError: (code) => {
       if (code == 'nfr') {
-        global.context.noContentAvailable();
+        /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context).noContentAvailable();
         setStyle(document.getElementById('my-ad-slot'), 'display', 'none');
       }
     },
     onSuccess: () => {
-      global.context.renderStart();
+      /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context).renderStart();
     },
   };
 
