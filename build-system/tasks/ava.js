@@ -32,9 +32,7 @@ async function ava() {
       ...testFiles,
       '--color --fail-fast',
       argv.watch ? '--watch' : '',
-    ]
-      .join(' ')
-      .trim()
+    ].join(' ')
   );
 }
 
