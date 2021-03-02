@@ -453,11 +453,12 @@ function getEsbuildBabelPlugin(callerName, enableCache, postStep = () => {}) {
     async setup(build) {
       const transformContents = async (file) => {
         const contents = await fs.promises.readFile(file.path, 'utf-8');
-        const babelOptions = babel.loadOptions({
-          caller: {name: callerName},
-          filename: file.path,
-          sourceFileName: path.basename(file.path),
-        });
+        const babelOptions =
+          babel.loadOptions({
+            caller: {name: callerName},
+            filename: file.path,
+            sourceFileName: path.basename(file.path),
+          }) || undefined;
         const result = await babel.transformAsync(contents, babelOptions);
         return {contents: result.code};
       };
