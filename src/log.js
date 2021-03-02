@@ -635,7 +635,7 @@ export class Log {
  * @return {string}
  */
 const stringOrElementString = (val) =>
-  /** @type {string} */ (elementStringOrPassthru(val));
+  /** @type {string} */ (elementStringOrPassThru(val));
 
 /**
  * @param {!Array} array
