@@ -279,7 +279,7 @@ function parseExtensionFlags(preBuild = false) {
  */
 function getExtensionsFromArg(examples) {
   if (!examples) {
-    return;
+    return [];
   }
 
   const extensions = [];
