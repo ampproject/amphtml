@@ -42,7 +42,7 @@ These files are checked during Continuous Integration so they will stay up-to-da
 
 ## Options
 
-You may configure how you'd like to create and format a TOC. They can include a second comment after the header including a JSON object. This object contains [`markdown-toc` options](https://github.com/jonschlinkert/markdown-toc#options).
+You may configure how you'd like to create and format a TOC by including a second comment including a JSON object. This object contains [`markdown-toc` options](https://github.com/jonschlinkert/markdown-toc#options).
 
 For example, the following options:
 
