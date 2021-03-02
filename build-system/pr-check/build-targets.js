@@ -127,6 +127,7 @@ const targetMatchers = {
     return (
       file == 'build-system/tasks/ava.js' ||
       file.startsWith('build-system/tasks/get-zindex/') ||
+      file.startsWith('build-system/tasks/markdown-toc/') ||
       file.startsWith('build-system/tasks/prepend-global/')
     );
   },
