@@ -19,7 +19,7 @@ const argv = require('minimist')(process.argv.slice(2));
 const {getReplacePlugin, getreplaceGlobalsPlugin} = require('./helpers');
 
 /**
- * Gets the config for babel transforms run during `gulp [unit|integration]`.
+ * Gets the config for babel transforms run during `gulp [unit|integration|e2e]`.
  *
  * @return {!Object}
  */
@@ -79,11 +79,11 @@ function getTestConfig() {
 }
 
 /**
- * Gets the config for babel transforms run by Karma tests.
+ * Gets the config for babel transforms when tests are run on IE.
  *
  * @return {!Object}
  */
-function getKarmaTestConfig() {
+function getIETestConfig() {
   return {
     compact: false,
     presets: ['@babel/preset-env'],
@@ -91,6 +91,6 @@ function getKarmaTestConfig() {
 }
 
 module.exports = {
-  getKarmaTestConfig,
+  getIETestConfig,
   getTestConfig,
 };

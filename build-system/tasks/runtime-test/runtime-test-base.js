@@ -75,9 +75,9 @@ function updatePreprocessors(config) {
 
   const jsPreprocessors = ['esbuild'];
   // TODO(rsimha): Remove this block after evanw/esbuild#297 is fixed.
-  if (process.platform == 'win32') {
+  if (argv.ie) {
     jsPreprocessors.push('babel');
-    config.babelPreprocessor = {options: {caller: {name: 'karma'}}};
+    config.babelPreprocessor = {options: {caller: {name: 'ie-test'}}};
   }
   const unifiedJsFile = [...config.files].pop(); // Inserted by updateFiles()
   config.preprocessors[unifiedJsFile] = jsPreprocessors;
