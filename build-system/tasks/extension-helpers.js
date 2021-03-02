@@ -394,11 +394,7 @@ function watchExtension(path, name, version, latestVersion, hasCss, options) {
       options.onWatchBuild(bundleComplete);
     }
   };
-  const fileExtensionToWatch = options.compileOnlyCss ? '.css' : '';
-  watch(`${path}/**/*${fileExtensionToWatch}`).on(
-    'change',
-    debounce(watchFunc, watchDebounceDelay)
-  );
+  watch(`${path}/**/*`).on('change', debounce(watchFunc, watchDebounceDelay));
 }
 
 /**
@@ -440,28 +436,14 @@ async function buildExtension(
   // instead of relying on the watchers used by compileUnminifiedJs and
   // compileMinifiedJs, which only recompile JS.
   if (options.watch) {
-    // we want to pass through watch:true to unminified mode.
-    if (argv.compiled) {
-      options.watch = false;
-    }
-    const watcherOptions = {...options, watch: false, compileOnlyCss: true};
-
-    watchExtension(path, name, version, latestVersion, hasCss, watcherOptions);
+    options.watch = false;
+    watchExtension(path, name, version, latestVersion, hasCss, options);
     // When an ad network extension is being watched, also watch amp-a4a.
-    // Not necessary for esbuild (unminified) watch mode.
-    if (argv.compiled && name.match(/amp-ad-network-.*-impl/)) {
+    if (name.match(/amp-ad-network-.*-impl/)) {
       const a4aPath = `extensions/amp-a4a/${version}`;
-      watchExtension(
-        a4aPath,
-        name,
-        version,
-        latestVersion,
-        hasCss,
-        watcherOptions
-      );
+      watchExtension(a4aPath, name, version, latestVersion, hasCss, options);
     }
   }
-
   if (hasCss) {
     mkdirSync('build');
     mkdirSync('build/css');

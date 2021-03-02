@@ -63,7 +63,6 @@ async function lazyBuild(url, matcher, bundles, buildFunc, next) {
   if (match && match.length == 2) {
     const name = maybeGetUnminifiedName(bundles, match[1]);
     const bundle = bundles[name];
-
     if (bundle) {
       await build(bundles, name, buildFunc);
     }
