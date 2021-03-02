@@ -875,7 +875,6 @@ export class SubscriptionService {
 
     if (meteringPlatform) {
       this.metering_ = new Metering({
-        ampdoc: this.ampdoc_,
         platformKey: meteringPlatform.serviceId,
       });
     }

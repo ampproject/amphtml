@@ -16,31 +16,16 @@
 
 import {Metering} from '../metering';
 
-describes.fakeWin('Metering', {amp: true}, (env) => {
+describes.fakeWin('Metering', {amp: true}, () => {
   /** @type {!Metering} */
   let metering;
-  let savedMeteringState;
-  let mockStorageService;
 
   beforeEach(() => {
-    const {ampdoc} = env;
     const platformKey = 'subscribe.google.com';
 
     metering = new Metering({
-      ampdoc,
       platformKey,
     });
-
-    savedMeteringState = {key: 'value'};
-
-    mockStorageService = {
-      get: env.sandbox.fake(() => JSON.stringify(savedMeteringState)),
-      setNonBoolean: env.sandbox.fake((storageKeyUnused, meteringState) => {
-        savedMeteringState = JSON.parse(meteringState);
-      }),
-    };
-
-    metering.storagePromise_ = Promise.resolve(mockStorageService);
   });
 
   describe('saveMeteringState', () => {
@@ -48,6 +33,7 @@ describes.fakeWin('Metering', {amp: true}, (env) => {
       const newMeteringState = {new: true};
 
       await metering.saveMeteringState(newMeteringState);
+      const savedMeteringState = await metering.loadMeteringState();
 
       expect(savedMeteringState).to.deep.equal(newMeteringState);
     });
@@ -60,39 +46,22 @@ describes.fakeWin('Metering', {amp: true}, (env) => {
       expect(metering.entitlementsWereFetchedWithCurrentMeteringState).to.be
         .false;
     });
-
-    it('avoids redundant saves', async () => {
-      await metering.saveMeteringState(savedMeteringState);
-
-      expect(mockStorageService.setNonBoolean).to.not.be.called;
-    });
-
-    it('handles failure', async () => {
-      mockStorageService.setNonBoolean = env.sandbox.fake.throws('Fail whale');
-
-      await metering.saveMeteringState({});
-
-      expect(mockStorageService.setNonBoolean).to.be.calledOnce;
-    });
   });
 
   describe('loadMeteringState', () => {
     it('loads state', async () => {
-      const meteringState = await metering.loadMeteringState();
+      const newMeteringState = {new: true};
 
-      expect(meteringState).to.deep.equal(savedMeteringState);
-      expect(mockStorageService.get).to.be.calledOnce;
+      await metering.saveMeteringState(newMeteringState);
+      const savedMeteringState = await metering.loadMeteringState();
+
+      expect(savedMeteringState).to.deep.equal(newMeteringState);
     });
 
-    it('handles failure', async () => {
-      expectAsyncConsoleError(/Fail whale/);
-
-      mockStorageService.get = env.sandbox.fake.throws('Fail whale');
-
+    it('returns null if state is not defined', async () => {
       const meteringState = await metering.loadMeteringState();
 
       expect(meteringState).to.equal(null);
-      expect(mockStorageService.get).to.be.calledOnce;
     });
   });
 });
