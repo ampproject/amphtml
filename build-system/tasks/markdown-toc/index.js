@@ -36,8 +36,9 @@ const header = `<!--
 const headerRegexp = new RegExp(
   header
     .split(/\n+/g)
-    .map((line) =>
-      line.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/^\s+/, '\\s*')
+    .map(
+      (line) =>
+        `\\s*${line.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/^\s+/, '')}`
     )
     .join('\n+'),
   'im'
@@ -186,7 +187,7 @@ async function markdownToc() {
 }
 
 module.exports = {
-  headerForTesting: header,
+  headerRegExpForTesting: headerRegexp,
   markdownToc,
   overrideTocGlob,
   overrideToc,

@@ -16,36 +16,25 @@
 const globby = require('globby');
 const path = require('path');
 const test = require('ava');
-const {headerForTesting, overrideToc, overrideTocGlob} = require('../');
+const {headerRegExpForTesting, overrideToc, overrideTocGlob} = require('../');
 const {readFile} = require('fs-extra');
 
 const dirname = path.relative(process.cwd(), __dirname);
 
-function isIncludedExactlyTimes(t, string, substring, times) {
-  let foundIndex = -substring.length;
-
-  for (let i = 0; i <= times; i++) {
-    foundIndex = string.indexOf(substring, foundIndex + substring.length);
-    if (i < times) {
-      t.true(foundIndex > 0, `Found substring ${i} times, expected ${times}`);
-    } else {
-      t.is(foundIndex, -1, `Found substring over ${times} times`);
-    }
-  }
-}
-
 test('README.md includes correct header', async (t) => {
-  const content = await readFile(path.join(dirname, '../README.md'), 'utf-8');
+  const expectedFoundTimes = 3;
 
-  // Included normally twice
-  isIncludedExactlyTimes(t, content, headerForTesting, 2);
+  const filename = path.join(dirname, '../README.md');
+  const content = await readFile(filename, 'utf-8');
 
-  // Included once in a diff code block, in which all lines are once indented.
-  const headerIndented = headerForTesting
-    .split('\n')
-    .map((line) => (line.length > 0 ? `  ${line}` : ''))
-    .join('\n');
-  isIncludedExactlyTimes(t, content, headerIndented, 1);
+  const {length} = content.match(
+    new RegExp(headerRegExpForTesting.source, 'gim')
+  );
+  t.is(
+    length,
+    expectedFoundTimes,
+    `${filename} should include TOC header comment ${expectedFoundTimes} times`
+  );
 });
 
 test('overrideToc ./all-are-complete', async (t) => {
