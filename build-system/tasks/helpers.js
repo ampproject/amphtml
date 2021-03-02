@@ -485,9 +485,7 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
       footer,
       incremental: !!options.watch,
     })
-    .catch((err) =>
-      handleBundleError(err, options.continueOnError, destFilename)
-    );
+    .catch((err) => handleBundleError(err, !!options.watch, destFilename));
   finishBundle(srcFilename, destDir, destFilename, options, startTime);
 
   if (options.watch) {
@@ -496,6 +494,9 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
         const time = Date.now();
         const buildPromise = buildResult
           .rebuild()
+          .catch((err) =>
+            handleBundleError(err, /* continueOnError */ true, destFilename)
+          )
           .then(() =>
             finishBundle(srcFilename, destDir, destFilename, options, time)
           );
