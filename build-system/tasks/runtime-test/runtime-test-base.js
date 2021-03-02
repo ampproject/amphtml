@@ -56,7 +56,7 @@ let transform;
  * @param {!RuntimeTestConfig} config
  */
 function updatePreprocessors(config) {
-  const createhtmlTransformer = function () {
+  const createHtmlTransformer = function () {
     return function (content, file, done) {
       if (!transform) {
         const outputDir = '../../server/new-server/transforms/dist/transform';
@@ -65,9 +65,9 @@ function updatePreprocessors(config) {
       done(transform(content));
     };
   };
-  createhtmlTransformer.$inject = [];
+  createHtmlTransformer.$inject = [];
   config.plugins.push({
-    'preprocessor:htmlTransformer': ['factory', createhtmlTransformer],
+    'preprocessor:htmlTransformer': ['factory', createHtmlTransformer],
   });
   const htmlPreprocessors = ['htmlTransformer', 'html2js'];
   const {fixturesPath} = testConfig;

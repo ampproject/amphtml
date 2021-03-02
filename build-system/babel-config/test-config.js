@@ -16,7 +16,7 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const {getReplacePlugin, getreplaceGlobalsPlugin} = require('./helpers');
+const {getReplacePlugin, getReplaceGlobalsPlugin} = require('./helpers');
 
 /**
  * Gets the config for babel transforms run during `gulp [unit|integration|e2e]`.
@@ -55,7 +55,7 @@ function getTestConfig() {
     },
   ];
   const replacePlugin = getReplacePlugin();
-  const replaceGlobalsPlugin = getreplaceGlobalsPlugin();
+  const replaceGlobalsPlugin = getReplaceGlobalsPlugin();
   const testPlugins = [
     argv.coverage ? instanbulPlugin : null,
     replacePlugin,

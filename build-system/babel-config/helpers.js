@@ -99,12 +99,12 @@ function getReplacePlugin() {
 }
 
 /**
- * Returns a plugin that replaces the global identifier with the correct
+ * Returns a Babel plugin that replaces the global identifier with the correct
  * alternative. Used before transforming test code with esbuild.
  *
  * @return {Array<string|Object>}
  */
-function getreplaceGlobalsPlugin() {
+function getReplaceGlobalsPlugin() {
   return [
     (babel) => {
       const {types: t} = babel;
@@ -137,5 +137,5 @@ function getreplaceGlobalsPlugin() {
 module.exports = {
   getExperimentConstant,
   getReplacePlugin,
-  getreplaceGlobalsPlugin,
+  getReplaceGlobalsPlugin,
 };
