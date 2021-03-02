@@ -13,15 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 // Guarantee this directory is free of AMP dependencies
 module.exports = {
   'rules': {
     'no-restricted-imports': [
       'error',
       {
-        // Disallow importing dependencies from outside this directory
-        'patterns': ['..'],
+        // Disallow importing dependencies from outside the `preact` directory
+        'patterns': ['../..'],
       },
     ],
   },
