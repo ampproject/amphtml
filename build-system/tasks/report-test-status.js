@@ -23,7 +23,7 @@ const {
   isGithubActionsBuild,
 } = require('../common/ci');
 const {ciJobUrl} = require('../common/ci');
-const {cyan, green, yellow} = require('kleur/colors');
+const {cyan, yellow} = require('kleur/colors');
 const {determineBuildTargets, Targets} = require('../pr-check/build-targets');
 const {gitCommitHash} = require('../common/git');
 const {log} = require('../common/logging');
@@ -128,46 +128,36 @@ async function postReport(type, action) {
         // Do not use `json: true` because the response is a string, not JSON.
       });
 
-      log(
-        green('INFO:'),
-        'reported',
-        cyan(`${type}/${action}`),
-        'to the test-status GitHub App'
-      );
-
+      log('Reported', cyan(`${type}/${action}`, 'to GitHub'));
       if (body.length > 0) {
-        log(
-          green('INFO:'),
-          'response from test-status was',
-          cyan(body.substr(0, 100))
-        );
+        log('Response was', cyan(body.substr(0, 100)));
       }
     } catch (error) {
       log(
         yellow('WARNING:'),
         'failed to report',
         cyan(`${type}/${action}`),
-        'to the test-status GitHub App:\n',
+        'to GitHub:\n',
         error.message.substr(0, 100)
       );
     }
   }
 }
 
-function reportTestErrored() {
-  return postReport(inferTestType(), 'report/errored');
+async function reportTestErrored() {
+  await postReport(inferTestType(), 'report/errored');
 }
 
-function reportTestFinished(success, failed) {
-  return postReport(inferTestType(), `report/${success}/${failed}`);
+async function reportTestFinished(success, failed) {
+  await postReport(inferTestType(), `report/${success}/${failed}`);
 }
 
-function reportTestSkipped() {
-  return postReport(inferTestType(), 'skipped');
+async function reportTestSkipped() {
+  await postReport(inferTestType(), 'skipped');
 }
 
-function reportTestStarted() {
-  return postReport(inferTestType(), 'started');
+async function reportTestStarted() {
+  await postReport(inferTestType(), 'started');
 }
 
 async function reportAllExpectedTests() {
@@ -191,11 +181,11 @@ async function reportAllExpectedTests() {
  * @param {!any} browsers
  * @param {!Karma.TestResults} results
  */
-function reportTestRunComplete(browsers, results) {
+async function reportTestRunComplete(browsers, results) {
   if (results.error) {
-    reportTestErrored();
+    await reportTestErrored();
   } else {
-    reportTestFinished(results.success, results.failed);
+    await reportTestFinished(results.success, results.failed);
   }
 }
 
