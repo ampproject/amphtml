@@ -521,7 +521,7 @@ export class GoogleSubscriptionsPlatform {
    */
   maybeGetLAAEntitlement_() {
     return this.getShowcaseStrategy_().then((strategy) => {
-      // Verify Google's metering strategy for this article.
+      // Verify Google's Showcase strategy for this article.
       if (strategy !== ShowcaseStrategy.LEAD_ARTICLE) {
         return null;
       }
@@ -545,7 +545,7 @@ export class GoogleSubscriptionsPlatform {
    * @return {!Promise<!ShowcaseStrategy>}
    */
   getShowcaseStrategy_() {
-    // Verify the service config enables a Google metering strategy.
+    // Verify the service config enables a Google Showcase strategy.
     if (!this.enableLAA_ && !this.enableMetering_) {
       return Promise.resolve(ShowcaseStrategy.NONE);
     }
@@ -577,10 +577,13 @@ export class GoogleSubscriptionsPlatform {
         return ShowcaseStrategy.NONE;
       }
 
-      // Determine Google metering strategy.
-      if (urlParams[`gaa_at`] === 'la') {
+      // Determine Google's Showcase strategy.
+      if (urlParams[`gaa_at`] === 'la' && this.enableLAA_) {
         return ShowcaseStrategy.LEAD_ARTICLE;
-      } else if (urlParams[`gaa_at`] === 'g') {
+      } else if (
+        (urlParams[`gaa_at`] === 'la' || urlParams[`gaa_at`] === 'g') &&
+        this.enableMetering_
+      ) {
         return ShowcaseStrategy.EXTENDED_ACCESS;
       } else {
         return ShowcaseStrategy.NONE;
@@ -624,15 +627,15 @@ export class GoogleSubscriptionsPlatform {
         return null;
       }
 
-      const meteringStrategyPromise = this.getShowcaseStrategy_();
+      const showcaseStrategyPromise = this.getShowcaseStrategy_();
       const meteringStatePromise = this.serviceAdapter_.loadMeteringState();
       const promises = Promise.all([
-        meteringStrategyPromise,
+        showcaseStrategyPromise,
         meteringStatePromise,
       ]);
 
       return promises.then((results) => {
-        const googleMeteringStrategy = results[0];
+        const showcaseStrategy = results[0];
         const meteringState = results[1];
 
         const entitlementsParams = {};
@@ -644,7 +647,7 @@ export class GoogleSubscriptionsPlatform {
 
         // Add metering param.
         if (
-          googleMeteringStrategy === ShowcaseStrategy.EXTENDED_ACCESS &&
+          showcaseStrategy === ShowcaseStrategy.EXTENDED_ACCESS &&
           meteringState
         ) {
           // Make sure SwG sends a fresh request, instead of using cache.
@@ -730,18 +733,18 @@ export class GoogleSubscriptionsPlatform {
   activate(entitlement, grantEntitlement, continueAuthorizationFlow) {
     const best = grantEntitlement || entitlement;
 
-    const googleMeteringStrategyPromise = this.getShowcaseStrategy_();
+    const showcaseStrategyPromise = this.getShowcaseStrategy_();
     const meteringStatePromise = this.serviceAdapter_.loadMeteringState();
     const promises = Promise.all([
-      googleMeteringStrategyPromise,
+      showcaseStrategyPromise,
       meteringStatePromise,
     ]);
 
     promises.then((results) => {
-      const meteringStrategy = results[0];
+      const showcaseStrategy = results[0];
       const meteringState = results[1];
 
-      if (meteringStrategy === ShowcaseStrategy.EXTENDED_ACCESS) {
+      if (showcaseStrategy === ShowcaseStrategy.EXTENDED_ACCESS) {
         // Show the Regwall, so the user can get
         // a metering state that leads to a
         // granting entitlement.
