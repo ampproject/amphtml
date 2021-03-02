@@ -1,0 +1,25 @@
+<body>
+  <!--
+    NOTE: Replace `content` with your own Google Sign-In OAuth Client ID.
+    https://developers.google.com/identity/sign-in/web/sign-in
+  -->
+  <meta
+    content="520465458218-e9vp957krfk2r0i4ejeh6aklqm7c25p4.apps.googleusercontent.com"
+    name="google-signin-client_id"
+  />
+  <script src="https://apis.google.com/js/platform.js" async defer></script>
+  <script src="https://news.google.com/swg/js/v1/swg-gaa.js"></script>
+
+  <script>
+    GaaGoogleSignInButton.show({
+      // List the origins you trust to host your Google Sign-In button's iframe.
+      // This should include the origin(s) you serve articles from.
+      // This should also include your AMP cache origin(s), if you're using AMP.
+      allowedOrigins: [
+        "http://localhost:8000", // Local server, for development
+        "http://localhost:8080", // Local server, for development
+        "https://scenic-2017.appspot.com", // Production server, for demos
+      ],
+    });
+  </script>
+</body>

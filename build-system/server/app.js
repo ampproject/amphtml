@@ -52,6 +52,7 @@ const {replaceUrls, isRtvMode} = require('./app-utils');
 const TEST_SERVER_PORT = argv.port || 8000;
 let SERVE_MODE = getServeMode();
 
+app.use(bodyParser.json());
 app.use(bodyParser.text());
 
 // Middleware is executed in order, so this must be at the top.
@@ -1151,20 +1152,60 @@ app.use('/bind/ecommerce/sizes', (req, res) => {
   }, 1000); // Simulate network delay.
 });
 
-// Simulated subscription entitlement
+/**
+ * Simulates a publisher's metering state store.
+ * (amp-subscriptions)
+ * @type {{[ampReaderId: string]: {}}}
+ */
+const meteringStateStore = {};
+
+// Simulate a publisher's entitlements API.
+// (amp-subscriptions)
 app.use('/subscription/:id/entitlements', (req, res) => {
   cors.assertCors(req, res, ['GET']);
-  res.json({
-    source: 'local' + req.params.id,
-    granted: req.params.id > 0 ? true : false,
-    grantedReason: 'NOT_SUBSCRIBED',
+
+  // Create entitlements response.
+  const source = 'local' + req.params.id;
+  const granted = req.params.id > 0;
+  const grantReason = granted ? 'SUBSCRIBER' : 'NOT_SUBSCRIBER';
+  const decryptedDocumentKey = decryptDocumentKey(req.query.crypt);
+  const response = {
+    source,
+    granted,
+    grantReason,
     data: {
       login: true,
     },
-    decryptedDocumentKey: decryptDocumentKey(req.query.crypt),
-  });
+    decryptedDocumentKey,
+  };
+
+  // Store metering state, if possible.
+  const ampReaderId = req.query.rid;
+  if (ampReaderId && req.query.meteringState) {
+    // Parse metering state from encoded Base64 string.
+    const encodedMeteringState = req.query.meteringState;
+    const decodedMeteringState = Buffer.from(
+      encodedMeteringState,
+      'base64'
+    ).toString();
+    const meteringState = JSON.parse(decodedMeteringState);
+
+    // Store metering state.
+    meteringStateStore[ampReaderId] = meteringState;
+  }
+
+  // Add metering state to response, if possible.
+  if (meteringStateStore[ampReaderId]) {
+    response.metering = {
+      state: meteringStateStore[ampReaderId],
+    };
+  }
+
+  res.json(response);
 });
 
+// Simulate a publisher's SKU map API.
+// (amp-subscriptions)
 app.use('/subscriptions/skumap', (req, res) => {
   cors.assertCors(req, res, ['GET']);
   res.json({
@@ -1181,10 +1222,71 @@ app.use('/subscriptions/skumap', (req, res) => {
   });
 });
 
+// Simulate a publisher's pingback API.
+// (amp-subscriptions)
 app.use('/subscription/pingback', (req, res) => {
   cors.assertCors(req, res, ['POST']);
   res.json({
     done: true,
+  });
+});
+
+/*
+  Simulate a publisher's account registration API.
+
+  The `amp-subscriptions-google` extension sends this API a POST request.
+  The request body looks like:
+
+  {
+    "googleSignInDetails": {
+      // This signed JWT contains information from Google Sign-In
+      "idToken": "...JWT from Google Sign-In...",
+      // Some useful fields from the `idToken`, pre-parsed for convenience
+      "name": "Jane Smith",
+      "givenName": "Jane",
+      "familyName": "Smith",
+      "imageUrl": "https://imageurl",
+      "email": "janesmith@example.com"
+    },
+    // Associate this ID with the registration. Use it to look up metering state
+    // for future entitlements requests
+    // https://amp.dev/documentation/components/amp-access/#amp-reader-id
+    "ampReaderId": "amp-s0m31d3nt1f13r"
+  }
+
+  (amp-subscriptions-google)
+*/
+app.use('/subscription/register', (req, res) => {
+  cors.assertCors(req, res, ['POST']);
+
+  // Generate a new ID for this metering state.
+  const meteringStateId = 'ppid' + Math.round(Math.random() * 99999999);
+
+  // Define registration timestamp.
+  //
+  // For demo purposes, set timestamp to 30 seconds ago.
+  // This causes Metering Toast to show immediately,
+  // which helps engineers test metering.
+  const registrationTimestamp = Math.round(Date.now() / 1000) - 30000;
+
+  // Store metering state.
+  //
+  // For demo purposes, just save this in memory.
+  // Production systems should persist this.
+  meteringStateStore[req.body.ampReaderId] = {
+    id: meteringStateId,
+    standardAttributes: {
+      // eslint-disable-next-line google-camelcase/google-camelcase
+      registered_user: {
+        timestamp: registrationTimestamp, // In seconds.
+      },
+    },
+  };
+
+  res.json({
+    metering: {
+      state: meteringStateStore[req.body.ampReaderId],
+    },
   });
 });
 

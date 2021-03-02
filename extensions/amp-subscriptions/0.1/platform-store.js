@@ -77,10 +77,10 @@ export class PlatformStore {
     this.grantStatusEntitlement_ = null;
 
     /** @private {?Deferred<?Entitlement>} */
-    this.grantStatusEntitlementPromise_ = null;
+    this.grantStatusEntitlementDeferred_ = null;
 
     /** @private {?Deferred<!Array<!./entitlement.Entitlement>>} */
-    this.allResolvedPromise_ = null;
+    this.allResolvedDeferred_ = null;
 
     /** @private {!Array<string>} */
     this.failedPlatforms_ = [];
@@ -114,13 +114,35 @@ export class PlatformStore {
     for (const platformKey in this.subscriptionPlatforms_) {
       this.subscriptionPlatforms_[platformKey].reset();
     }
-    // Then create new platform store withe the newply reset platforms in it.
+
+    // Then create new platform store with the newly reset platforms in it.
     return new PlatformStore(
       this.platformKeys_,
       this.scoreConfig_,
       this.fallbackEntitlement_,
       this.subscriptionPlatforms_
     );
+  }
+
+  /**
+   * Resets a given platform.
+   * @param {string} platformKey
+   */
+  resetPlatform(platformKey) {
+    // Remove platform's entitlement.
+    delete this.entitlements_[platformKey];
+
+    // Reset platform's deferred entitlement map entry.
+    this.entitlementDeferredMap_[platformKey] = new Deferred();
+
+    // Reset platform's UX.
+    this.subscriptionPlatforms_[platformKey].reset();
+
+    // Reset summary promises.
+    this.grantStatusPromise_ = null;
+    this.grantStatusEntitlement_ = null;
+    this.grantStatusEntitlementDeferred_ = null;
+    this.allResolvedDeferred_ = null;
   }
 
   /**
@@ -354,31 +376,37 @@ export class PlatformStore {
    * @return {!Promise<?Entitlement>}
    */
   getGrantEntitlement() {
-    if (this.grantStatusEntitlementPromise_) {
-      return this.grantStatusEntitlementPromise_.promise;
+    // Define when grant entitlement promise can resolve.
+    const canResolveImmediately = () =>
+      this.grantStatusEntitlement_ &&
+      (this.grantStatusEntitlement_.isSubscriber() ||
+        this.grantStatusEntitlement_.isFree());
+    const canResolve = () =>
+      canResolveImmediately() || this.areAllPlatformsResolved_();
+
+    // Cache deferred.
+    if (this.grantStatusEntitlementDeferred_) {
+      return this.grantStatusEntitlementDeferred_.promise;
     }
-    this.grantStatusEntitlementPromise_ = new Deferred();
-    if (
-      (this.grantStatusEntitlement_ &&
-        this.grantStatusEntitlement_.isSubscriber()) ||
-      this.areAllPlatformsResolved_()
-    ) {
-      this.grantStatusEntitlementPromise_.resolve(this.grantStatusEntitlement_);
+    this.grantStatusEntitlementDeferred_ = new Deferred();
+
+    // Resolve when possible.
+    if (canResolve()) {
+      this.grantStatusEntitlementDeferred_.resolve(
+        this.grantStatusEntitlement_
+      );
     } else {
       this.onEntitlementResolvedCallbacks_.add(() => {
         // Grant entitlement only if subscriber
-        if (
-          (this.grantStatusEntitlement_ &&
-            this.grantStatusEntitlement_.isSubscriber()) ||
-          this.areAllPlatformsResolved_()
-        ) {
-          this.grantStatusEntitlementPromise_.resolve(
+        if (canResolve()) {
+          this.grantStatusEntitlementDeferred_.resolve(
             this.grantStatusEntitlement_
           );
         }
       });
     }
-    return this.grantStatusEntitlementPromise_.promise;
+
+    return this.grantStatusEntitlementDeferred_.promise;
   }
 
   /**
@@ -393,26 +421,30 @@ export class PlatformStore {
    * @return {!Promise<!Array<!./entitlement.Entitlement>>}
    */
   getAllPlatformsEntitlements() {
-    if (this.allResolvedPromise_) {
-      return this.allResolvedPromise_.promise;
+    // Cache deferred.
+    if (this.allResolvedDeferred_) {
+      return this.allResolvedDeferred_.promise;
     }
-    this.allResolvedPromise_ = new Deferred();
+    this.allResolvedDeferred_ = new Deferred();
+
+    // Resolve when possible.
     if (this.areAllPlatformsResolved_()) {
       // Resolve with null if none of the entitlements unblock the reader
-      this.allResolvedPromise_.resolve(
+      this.allResolvedDeferred_.resolve(
         this.getAvailablePlatformsEntitlements_()
       );
     } else {
       // Listen if any upcoming entitlements unblock the reader
       this.onChange(() => {
         if (this.areAllPlatformsResolved_()) {
-          this.allResolvedPromise_.resolve(
+          this.allResolvedDeferred_.resolve(
             this.getAvailablePlatformsEntitlements_()
           );
         }
       });
     }
-    return this.allResolvedPromise_.promise;
+
+    return this.allResolvedDeferred_.promise;
   }
 
   /**
@@ -487,14 +519,14 @@ export class PlatformStore {
       'All platforms are not resolved yet'
     );
 
-    // Subscriber wins immediately.
+    // Prefer platforms that granted with subscriptions or free articles.
     const availablePlatforms = this.getAvailablePlatforms();
     while (availablePlatforms.length) {
       const platform = availablePlatforms.pop();
       const entitlement = this.getResolvedEntitlementFor(
         platform.getPlatformKey()
       );
-      if (entitlement.isSubscriber()) {
+      if (entitlement.isSubscriber() || entitlement.isFree()) {
         return platform;
       }
     }
