@@ -21,37 +21,20 @@ This update contains guidance on using the Web Story Player to support:
     gulp markdown-toc --fix
 -->
 
+<!-- {"maxdepth": 1} -->
+
 -   [Summary](#summary)
 -   [Player setup](#player-setup)
 -   [Navigating between stories](#navigating-between-stories)
 -   [Integrating web stories into your website (entrypoints)](#integrating-web-stories-into-your-website-entrypoints)
 -   [Programmatically fetching more stories](#programmatically-fetching-more-stories)
-    -   [JSON Configuration](#json-configuration)
-    -   [Response](#response)
-        -   [href](#href)
-        -   [title (optional)](#title-optional)
-        -   [posterImage (optional)](#posterimage-optional)
 -   [Circular Wrapping](#circular-wrapping)
-    -   [JSON Configuration](#json-configuration-1)
 -   [Customizing position & visibility of story UI controls](#customizing-position--visibility-of-story-ui-controls)
-    -   [Close](#close)
-    -   [Skip-next](#skip-next)
-    -   [Custom control](#custom-control)
-    -   [Example #1 - Close button on the start position](#example-%231---close-button-on-the-start-position)
-    -   [Example #2 - Showing skip-to-next story on desktop](#example-%232---showing-skip-to-next-story-on-desktop)
-    -   [Example #3 - Changing the icon of the close button](#example-%233---changing-the-icon-of-the-close-button)
 -   [Custom Events](#custom-events)
-    -   [noNextStory](#nonextstory)
-    -   [noPreviousStory](#nopreviousstory)
-    -   [amp-story-close](#amp-story-close)
 -   [Upcoming API Change: Poster Image](#upcoming-api-change-poster-image)
 -   [Additional use case demos](#additional-use-case-demos)
 -   [Additional explorations and roadmap](#additional-explorations-and-roadmap)
 -   [FAQs (please feel free to reach out with other questions & thoughts)](#faqs-please-feel-free-to-reach-out-with-other-questions--thoughts)
-    -   [The Web Player supports more features on non-AMP pages than on AMP pages currently. What features are missing for AMP-pages?](#the-web-player-supports-more-features-on-non-amp-pages-than-on-amp-pages-currently-what-features-are-missing-for-amp-pages)
-    -   [Is the player ready to use? When will these features be ready?](#is-the-player-ready-to-use-when-will-these-features-be-ready)
-    -   [I want the bleeding-edge and latest features, how can I get them?](#i-want-the-bleeding-edge-and-latest-features-how-can-i-get-them)
-    -   [I have found a bug or have questions / comments / issues, how do I contact you?](#i-have-found-a-bug-or-have-questions--comments--issues-how-do-i-contact-you)
 
 Beyond this, you’ll also find:
 
