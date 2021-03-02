@@ -21,7 +21,7 @@ import {validateData, writeScript} from '../../3p/3p';
  * @param {!Object} data
  */
 export function ketshwa(global, data) {
-  validateData(data, ['widgetid'], []);
+  validateData(data, ['widgetid', 'externalid'], []);
 
   const d = global.document.createElement('div');
   d.id = `widget_${data.widgetid}`;
@@ -30,7 +30,11 @@ export function ketshwa(global, data) {
   const t = data.widgetid;
   const e = `widget_${data.widgetid}`;
 
-  writeScript(global, 'https://widget.ketshwa.com/sdk.min.js', () => {
-    global.KetshwaSDK.showWidget(t, e);
-  });
+  writeScript(
+    global,
+    `https://widget-cdn.ketshwa.com/m/p/${data.widgetid}/${data.externalid}.js`,
+    () => {
+      global.KetshwaSDK.showWidget(t, e);
+    }
+  );
 }
