@@ -626,13 +626,16 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     expect(openAttachmentEl).to.not.exist;
   });
 
-  it('should build the open attachment UI if attachment', async () => {
+  it.only('should build the open attachment UI if attachment', async () => {
     const attachmentEl = win.document.createElement(
       'amp-story-page-attachment'
     );
     attachmentEl.setAttribute('layout', 'nodisplay');
     element.appendChild(attachmentEl);
-
+    await attachmentEl
+      .getImpl()
+      .then((attachment) => attachment.buildCallback());
+    debugger;
     page.buildCallback();
     await page.layoutCallback();
     page.setState(PageState.PLAYING);
