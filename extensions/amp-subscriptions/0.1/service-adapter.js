@@ -130,4 +130,43 @@ export class ServiceAdapter {
   selectPlatformForLogin() {
     return this.subscriptionService_.selectPlatformForLogin();
   }
+
+  /**
+   * Loads metering state.
+   * @return {!Promise<?./metering-store.MeteringStateDef>}
+   */
+  loadMeteringState() {
+    if (!this.subscriptionService_.metering_) {
+      return Promise.resolve(null);
+    }
+
+    return this.subscriptionService_.metering_.loadMeteringState();
+  }
+
+  /**
+   * Saves metering state.
+   * @param {!./metering-store.MeteringStateDef} meteringState
+   * @return {!Promise}
+   */
+  saveMeteringState(meteringState) {
+    if (!this.subscriptionService_.metering_) {
+      return Promise.resolve();
+    }
+
+    return this.subscriptionService_.metering_.saveMeteringState(meteringState);
+  }
+
+  /**
+   * Remembers metering entitlements were fetched
+   * with the current metering state.
+   *
+   * This helps avoid redundant fetches.
+   */
+  rememberMeteringEntitlementsWereFetched() {
+    if (!this.subscriptionService_.metering_) {
+      return;
+    }
+
+    this.subscriptionService_.metering_.entitlementsWereFetchedWithCurrentMeteringState = true;
+  }
 }
