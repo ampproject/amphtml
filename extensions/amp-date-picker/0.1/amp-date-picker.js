@@ -232,8 +232,8 @@ export class AmpDatePicker extends AMP.BaseElement {
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
 
-    /** @private @const */
-    this.templates_ = Services.templatesFor(this.win);
+    /** @private {?../../../src/service/template-impl.Templates} */
+    this.templates_ = null;
 
     /** @private @const */
     this.input_ = Services.inputFor(this.win);
@@ -373,6 +373,8 @@ export class AmpDatePicker extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.templates_ = Services.templatesForDoc(this.element);
+
     const format = this.element.getAttribute('format');
     if (format) {
       this.format_ = format;

@@ -29,6 +29,7 @@ import {dev, devAssert, rethrowAsync, user} from '../log';
 import {getMode} from '../mode';
 import {installStylesForDoc} from '../style-installer';
 import {map} from '../utils/object';
+import {registerExtendedTemplateForDoc} from './template-impl';
 import {registerServiceBuilder, registerServiceBuilderForDoc} from '../service';
 
 export const LEGACY_ELEMENTS = ['amp-ad', 'amp-embed', 'amp-video'];
@@ -328,6 +329,20 @@ export class Extensions {
     holder.extension.elements[name] = {implementationClass, css};
     this.addDocFactory((ampdoc) => {
       this.installElement_(ampdoc, name, implementationClass, css);
+    });
+  }
+
+  /**
+   * Add a template type to the extension currently being registered. This is a
+   * restricted method and it's allowed to be called only during the overall
+   * extension registration.
+   * @param {string} name
+   * @param {typeof ../base-template.BaseTemplate} implementationClass
+   * @restricted
+   */
+  addTemplate(name, implementationClass) {
+    this.addDocFactory((ampdoc) => {
+      registerExtendedTemplateForDoc(ampdoc, name, implementationClass);
     });
   }
 

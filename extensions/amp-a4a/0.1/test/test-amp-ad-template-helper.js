@@ -17,6 +17,7 @@
 import {AmpAdTemplateHelper} from '../amp-ad-template-helper';
 import {AmpMustache} from '../../../amp-mustache/0.1/amp-mustache';
 import {Xhr} from '../../../../src/service/xhr-impl';
+import {registerExtendedTemplateForDoc} from '../../../../src/service/template-impl';
 
 describes.fakeWin('AmpAdTemplateHelper', {amp: true}, (env) => {
   const cdnUrl =
@@ -24,7 +25,7 @@ describes.fakeWin('AmpAdTemplateHelper', {amp: true}, (env) => {
     'adserver.com/amp_template_1';
   const canonicalUrl = 'https://adserver.com/amp_template_1';
 
-  let win, doc;
+  let win, doc, ampdoc;
   let fetchTextMock;
   let ampAdTemplateHelper;
 
@@ -32,8 +33,9 @@ describes.fakeWin('AmpAdTemplateHelper', {amp: true}, (env) => {
     win = env.win;
     win.__AMP_MODE = {localDev: false};
     doc = win.document;
+    ampdoc = env.ampdoc;
     fetchTextMock = env.sandbox.stub(Xhr.prototype, 'fetchText');
-    ampAdTemplateHelper = new AmpAdTemplateHelper(win);
+    ampAdTemplateHelper = new AmpAdTemplateHelper(ampdoc);
   });
 
   it('should return a promise resolving to a string template', () => {
@@ -67,11 +69,7 @@ describes.fakeWin('AmpAdTemplateHelper', {amp: true}, (env) => {
   });
 
   it('should render a template with correct values', () => {
-    win.AMP.registerTemplate('amp-mustache', AmpMustache);
-  });
-
-  it('should render a template with correct values', () => {
-    win.AMP.registerTemplate('amp-mustache', AmpMustache);
+    registerExtendedTemplateForDoc(ampdoc, 'amp-mustache', AmpMustache);
     const parentDiv = doc.createElement('div');
     parentDiv./*OK*/ innerHTML =
       '<template type="amp-mustache"><p>{{foo}}</p></template>';
