@@ -22,19 +22,6 @@ import {
 /** @fileoverview Dependency-free assertion helpers for use in Preact. */
 
 /**
- * Converts an element to a readable string; all other types are unchanged.
- * @param {*} val
- * @return {*}
- */
-function elementStringOrPassThru(val) {
-  // Do check equivalent to `val instanceof Element` without cross-window bug
-  if (val?.nodeType == 1) {
-    return val.tagName.toLowerCase() + (val.id ? `#${val.id}` : '');
-  }
-  return val;
-}
-
-/**
  * User error class for use in Preact. Use of sentinel string instead of a
  * boolean to check user errors because errors could be rethrown by some native
  * code as a new error, and only a message would survive. Mirrors errors
