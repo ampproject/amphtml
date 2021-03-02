@@ -16,7 +16,7 @@
 
 import {
   USER_ERROR_SENTINEL,
-  elementStringOrPassthru,
+  elementStringOrPassThru,
 } from './core/error-message-helpers';
 import {getMode} from './mode';
 import {internalRuntimeVersion} from './internal-version';
