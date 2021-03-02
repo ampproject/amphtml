@@ -15,18 +15,25 @@
  */
 'use strict';
 
+const argv = require('minimist')(process.argv.slice(2));
 const {execOrDie} = require('../common/exec');
 
 /**
  * Runs ava tests.
  */
 async function ava() {
-  const avaCli = 'node_modules/ava/cli.js';
   const testFiles = [
     'build-system/tasks/get-zindex/get-zindex.test.js',
     'build-system/tasks/prepend-global/prepend-global.test.js',
-  ].join(' ');
-  execOrDie(`${avaCli} ${testFiles} --color --fail-fast`);
+  ];
+  execOrDie(
+    [
+      'npx ava',
+      ...testFiles,
+      '--color --fail-fast',
+      argv.watch ? '--watch' : '',
+    ].join(' ')
+  );
 }
 
 module.exports = {
@@ -34,3 +41,7 @@ module.exports = {
 };
 
 ava.description = "Runs ava tests for AMP's tasks";
+
+ava.flags = {
+  'watch': '  Watches for changes',
+};
