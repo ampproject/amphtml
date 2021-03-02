@@ -190,22 +190,17 @@ function karmaRunStart_() {
 
 /**
  * Creates and starts karma server
- * @param {!Object} configBatch
- * @param {function()} runCompleteFn a function to execute on the
- *     `run_complete` event. It should take two arguments, (browser, results),
- *     and return nothing.
+ * @param {!Object} config
  * @return {!Promise<number>}
  */
-async function createKarmaServer(
-  configBatch,
-  runCompleteFn = reportTestRunComplete
-) {
-  let resolver;
+async function createKarmaServer(config) {
+  let resolver, browsers_, results_;
   const deferred = new Promise((resolverIn) => {
     resolver = resolverIn;
   });
 
-  const karmaServer = new Server(configBatch, (exitCode) => {
+  const karmaServer = new Server(config, async (exitCode) => {
+    await reportTestRunComplete(browsers_, results_);
     maybePrintCoverageMessage('test/coverage/index.html');
     resolver(exitCode);
   });
@@ -214,7 +209,10 @@ async function createKarmaServer(
     .on('run_start', karmaRunStart_)
     .on('browsers_ready', karmaBrowsersReady_)
     .on('browser_complete', karmaBrowserComplete_)
-    .on('run_complete', runCompleteFn);
+    .on('run_complete', (browsers, results) => {
+      browsers_ = browsers;
+      results_ = results;
+    });
 
   karmaServer.start();
 
