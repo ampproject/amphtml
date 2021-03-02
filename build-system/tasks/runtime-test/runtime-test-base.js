@@ -33,7 +33,8 @@ const {getEsbuildBabelPlugin} = require('../helpers');
 const {getFilesFromArgv} = require('../../common/utils');
 const {isCiBuild} = require('../../common/ci');
 const {log} = require('../../common/logging');
-const {reportTestStarted} = require('.././report-test-status');
+const {reportTestStarted} = require('../report-test-status');
+const {SERVER_TRANSFORM_PATH} = require('../../server/typescript-compile');
 const {startServer, stopServer} = require('../serve');
 const {unitTestsToRun} = require('./helpers-unit');
 const {yellow, red} = require('kleur/colors');
@@ -59,7 +60,7 @@ function updatePreprocessors(config) {
   const createHtmlTransformer = function () {
     return function (content, file, done) {
       if (!transform) {
-        const outputDir = '../../server/new-server/transforms/dist/transform';
+        const outputDir = `../../../${SERVER_TRANSFORM_PATH}/dist/transform`;
         transform = require(outputDir).transformSync;
       }
       done(transform(content));
