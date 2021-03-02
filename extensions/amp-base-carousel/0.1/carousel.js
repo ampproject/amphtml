@@ -613,11 +613,16 @@ export class Carousel {
    * @param {!Array<!Element>} slides
    */
   updateSlides(slides) {
-    if (!slides.length) {
+    const {length} = slides;
+    if (!length) {
       const TAG = this.element_.tagName.toUpperCase();
       dev().warn(TAG, 'No slides were found.');
     }
     this.slides_ = slides;
+    // Normalize current index to updated slide length.
+    this.currentIndex_ = this.isLooping()
+      ? mod(this.currentIndex_, length)
+      : clamp(this.currentIndex_, 0, length) || 0;
     this.carouselAccessibility_.updateSlides(slides);
     // TODO(sparhami) Should need to call `this.updateUi()` here.
   }

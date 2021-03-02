@@ -82,8 +82,8 @@ describes.realWin('carousel implementation', {}, (env) => {
       runMutate,
       initialIndex,
     });
-    carousel.updateSlides(setSlides(slideCount));
     carousel.updateLoop(loop);
+    carousel.updateSlides(setSlides(slideCount));
     carousel.updateForwards(forwards);
     await runMutate(() => {});
 
@@ -284,35 +284,73 @@ describes.realWin('carousel implementation', {}, (env) => {
     expect(warnSpy).to.not.be.called;
   });
 
-  it('should start at slide 1 with initialIndex set to 1', async () => {
-    const carousel = await createCarousel({
-      slideCount: 3,
-      initialIndex: 1,
+  describe('initialIndex', () => {
+    it('should start at slide 1 with initialIndex set to 1', async () => {
+      const carousel = await createCarousel({
+        slideCount: 3,
+        initialIndex: 1,
+      });
+      expect(carousel.isAtStart()).to.be.false;
     });
-    expect(carousel.isAtStart()).to.be.false;
-  });
 
-  it('should start at slide 0 with negative initialIndex', async () => {
-    const carousel = await createCarousel({
-      slideCount: 3,
-      initialIndex: -1,
+    it('should start at slide 0 with negative initialIndex', async () => {
+      const carousel = await createCarousel({
+        slideCount: 3,
+        initialIndex: -1,
+      });
+      expect(carousel.isAtStart()).to.be.true;
     });
-    expect(carousel.isAtStart()).to.be.true;
-  });
 
-  it('should start at slide 0 with initialIndex that is greater than number of slides', async () => {
-    const carousel = await createCarousel({
-      slideCount: 3,
-      initialIndex: 4,
+    it('should start at slide 0 with initialIndex that is greater than number of slides', async () => {
+      const carousel = await createCarousel({
+        slideCount: 3,
+        initialIndex: 4,
+      });
+      expect(carousel.isAtStart()).to.be.true;
     });
-    expect(carousel.isAtStart()).to.be.true;
-  });
 
-  it('should start at slide 0 with invalid initialIndex', async () => {
-    const carousel = await createCarousel({
-      slideCount: 3,
-      initialIndex: NaN,
+    it('should start at slide 0 with invalid initialIndex', async () => {
+      const carousel = await createCarousel({
+        slideCount: 3,
+        initialIndex: NaN,
+      });
+      expect(carousel.isAtStart()).to.be.true;
     });
-    expect(carousel.isAtStart()).to.be.true;
+
+    it('should start at slide 1 with initialIndex set to 1', async () => {
+      const carousel = await createCarousel({
+        slideCount: 3,
+        initialIndex: 1,
+        loop: true,
+      });
+      expect(carousel.getCurrentIndex()).to.equal(1);
+    });
+
+    it('should normalize slide with negative initialIndex when looping', async () => {
+      const carousel = await createCarousel({
+        slideCount: 3,
+        initialIndex: -1,
+        loop: true,
+      });
+      expect(carousel.getCurrentIndex()).to.equal(2);
+    });
+
+    it('should normalize slide with initialIndex that is greater than number of slides when looping', async () => {
+      const carousel = await createCarousel({
+        slideCount: 3,
+        initialIndex: 4,
+        loop: true,
+      });
+      expect(carousel.getCurrentIndex()).to.equal(1);
+    });
+
+    it('should start at slide 0 with invalid initialIndex when looping', async () => {
+      const carousel = await createCarousel({
+        slideCount: 3,
+        initialIndex: NaN,
+        loop: true,
+      });
+      expect(carousel.getCurrentIndex()).to.equal(0);
+    });
   });
 });
