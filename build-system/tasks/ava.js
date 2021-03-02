@@ -43,6 +43,5 @@ module.exports = {
 ava.description = "Runs ava tests for AMP's tasks";
 
 ava.flags = {
-  'watch':
-    '  https://github.com/avajs/ava/blob/main/docs/recipes/watch-mode.md',
+  'watch': '  Watches for changes',
 };
