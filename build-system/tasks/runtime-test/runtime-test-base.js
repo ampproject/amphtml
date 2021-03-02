@@ -21,7 +21,14 @@ const globby = require('globby');
 const karmaConfig = require('../../test-configs/karma.conf');
 const path = require('path');
 const tempy = require('tempy');
-const testConfig = require('../../test-configs/config');
+const {
+  commonIntegrationTestPaths,
+  commonUnitTestPaths,
+  fixturesPath,
+  integrationTestPaths,
+  unitTestCrossBrowserPaths,
+  unitTestPaths,
+} = require('../../test-configs/config');
 const {
   createCtrlcHandler,
   exitCtrlcHandler,
@@ -76,9 +83,7 @@ function updatePreprocessors(config) {
   config.plugins.push({
     'preprocessor:htmlTransformer': ['factory', createHtmlTransformer],
   });
-  const htmlPreprocessors = ['htmlTransformer', 'html2js'];
-  const {fixturesPath} = testConfig;
-  config.preprocessors[fixturesPath] = htmlPreprocessors;
+  config.preprocessors[fixturesPath] = ['htmlTransformer', 'html2js'];
   config.preprocessors[unifiedJsFile] = ['esbuild'];
 }
 
@@ -198,24 +203,24 @@ function getFiles(testType) {
 
   switch (testType) {
     case 'unit':
-      files = testConfig.commonUnitTestPaths;
+      files = commonUnitTestPaths;
       if (argv.files) {
         return files.concat(getFilesFromArgv());
       }
       if (argv.firefox || argv.safari || argv.edge) {
-        return files.concat(testConfig.unitTestCrossBrowserPaths);
+        return files.concat(unitTestCrossBrowserPaths);
       }
       if (argv.local_changes) {
         return files.concat(unitTestsToRun());
       }
-      return files.concat(testConfig.unitTestPaths);
+      return files.concat(unitTestPaths);
 
     case 'integration':
-      files = testConfig.commonIntegrationTestPaths;
+      files = commonIntegrationTestPaths;
       if (argv.files) {
         return files.concat(getFilesFromArgv());
       }
-      return files.concat(testConfig.integrationTestPaths);
+      return files.concat(integrationTestPaths);
 
     default:
       throw new Error(`Test type ${testType} was not recognized`);
