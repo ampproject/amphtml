@@ -18,7 +18,10 @@ import {validateData, writeScript} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   x: string,
+ *   u: string
+ * }} data
  */
 export function eadv(global, data) {
   validateData(data, ['x', 'u'], []);

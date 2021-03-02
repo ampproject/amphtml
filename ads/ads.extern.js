@@ -405,7 +405,12 @@ Criteo.DisplayAd;
 data.tagtype;
 data.zone;
 
+// dable.js
+window.dable;
+window.dable.q;
+
 // distroscale.js
+window.dsAMPCallbacks;
 data.tid;
 
 // engageya.js

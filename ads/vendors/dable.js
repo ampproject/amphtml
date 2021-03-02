@@ -18,7 +18,9 @@ import {loadScript, validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   widgetId: string
+ * }} data
  */
 export function dable(global, data) {
   // check required props
@@ -29,12 +31,12 @@ export function dable(global, data) {
     function () {
       (global.dable.q = global.dable.q || []).push(arguments);
     };
-  global.dable(
-    'setService',
-    data['serviceName'] || global.window.context.location.hostname
-  );
-  global.dable('setURL', global.window.context.sourceUrl);
-  global.dable('setRef', global.window.context.referrer);
+
+  /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */
+  const context = /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context);
+  global.dable('setService', data['serviceName'] || context.location.hostname);
+  global.dable('setURL', context.sourceUrl);
+  global.dable('setRef', context.referrer);
 
   const slot = global.document.createElement('div');
   slot.id = '_dbl_' + Math.floor(Math.random() * 100000);
@@ -57,9 +59,9 @@ export function dable(global, data) {
   // call render widget
   global.dable('renderWidget', slot.id, itemId, opts, function (hasAd) {
     if (hasAd) {
-      global.context.renderStart();
+      context.renderStart();
     } else {
-      global.context.noContentAvailable();
+      context.noContentAvailable();
     }
   });
 

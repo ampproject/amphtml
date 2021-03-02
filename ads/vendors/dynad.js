@@ -23,7 +23,9 @@ import {
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   src: string
+ * }} data
  */
 export function dynad(global, data) {
   validateData(data, ['src'], []);

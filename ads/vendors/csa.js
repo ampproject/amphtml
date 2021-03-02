@@ -67,7 +67,11 @@ export function csa(global, data) {
   containerDiv.id = containerId;
   global.document.getElementById('c').appendChild(containerDiv);
 
-  const pageOptions = {source: 'amp', referer: global.context.referrer};
+  const pageOptions = {
+    source: 'amp',
+    referer: /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context)
+      .referrer,
+  };
   const adblockOptions = {container: containerId};
 
   // Parse all the options
@@ -246,7 +250,7 @@ export function callbackWithNoBackfill(global, containerName, hasAd) {
   if (hasAd) {
     resizeIframe(global, containerName);
   } else {
-    global.context.noContentAvailable();
+    /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context).noContentAvailable();
   }
 }
 
@@ -277,11 +281,13 @@ export function callbackWithBackfill(global, page, ad, containerName, hasAd) {
  */
 export function resizeIframe(global, containerName) {
   // Get actual height of container
-  const container = global.document.getElementById(containerName);
+  const container = /** @type {HTMLElement} */ (global.document.getElementById(
+    containerName
+  ));
   const height = container./*OK*/ offsetHeight;
   // Set initial AMP height
-  currentAmpHeight =
-    global.context.initialIntersection.boundingClientRect.height;
+  currentAmpHeight = /** @type {{height: number}} */ (global.context
+    .initialIntersection.boundingClientRect).height;
 
   // If the height of the container is larger than the height of the
   // initially requested AMP tag, add the overflow element
@@ -299,7 +305,7 @@ export function resizeIframe(global, containerName) {
  * @param {number} height
  */
 function requestResizeInternal(global, container, height) {
-  global.context
+  /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context)
     .requestResize(undefined, height)
     .then(() => {
       resizeSuccessHandler(global, container, height);

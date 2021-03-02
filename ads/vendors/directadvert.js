@@ -24,17 +24,19 @@ import {serializeQueryString} from '../../src/url';
 export function directadvert(global, data) {
   validateData(data, ['blockId']);
 
+  /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */
+  const context = /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context);
   const params = /** @type {!JsonObject} */ ({
     'async': 1,
     'div': 'c',
   });
 
-  if (global.context.referrer) {
-    params['amp_rref'] = encodeURIComponent(global.context.referrer);
+  if (context.referrer) {
+    params['amp_rref'] = encodeURIComponent(context.referrer);
   }
 
-  if (global.context.canonicalUrl) {
-    params['amp_rurl'] = encodeURIComponent(global.context.canonicalUrl);
+  if (context.canonicalUrl) {
+    params['amp_rurl'] = encodeURIComponent(context.canonicalUrl);
   }
 
   const serverName = data['serverName'] || 'code.directadvert.ru';
@@ -51,10 +53,10 @@ export function directadvert(global, data) {
     global,
     url,
     () => {
-      global.context.renderStart();
+      context.renderStart();
     },
     () => {
-      global.context.noContentAvailable();
+      context.noContentAvailable();
     }
   );
 }
