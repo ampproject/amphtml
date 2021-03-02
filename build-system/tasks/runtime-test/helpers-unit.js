@@ -126,7 +126,11 @@ function getJsFilesFor(cssFile, cssJsFileMap) {
   return jsFiles;
 }
 
-function getUnitTestsToRun() {
+/**
+ * Computes the list of unit tests to run under difference scenarios
+ * @return {Array<string>|undefined}
+ */
+async function getUnitTestsToRun() {
   log(green('INFO:'), 'Determining which unit tests to run...');
 
   if (isLargeRefactor()) {
@@ -134,7 +138,7 @@ function getUnitTestsToRun() {
       green('INFO:'),
       'Skipping tests on local changes because this is a large refactor.'
     );
-    reportTestSkipped();
+    await reportTestSkipped();
     return;
   }
 
@@ -144,7 +148,7 @@ function getUnitTestsToRun() {
       green('INFO:'),
       'No unit tests were directly affected by local changes.'
     );
-    reportTestSkipped();
+    await reportTestSkipped();
     return;
   }
   if (isCiBuild() && tests.length > TEST_FILE_COUNT_THRESHOLD) {
@@ -152,7 +156,7 @@ function getUnitTestsToRun() {
       green('INFO:'),
       'Several tests were affected by local changes. Running all tests below.'
     );
-    reportTestSkipped();
+    await reportTestSkipped();
     return;
   }
 

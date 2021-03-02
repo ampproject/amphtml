@@ -26,8 +26,9 @@
  */
 const initTestsPath = ['test/_init_tests.js'];
 
-const fixturesExamplesPaths = [
-  'test-bin/test/fixtures/*.html',
+const fixturesPath = 'test/fixtures/*.html';
+
+const fixturesExamplesPaths = [fixturesPath].concat([
   {
     pattern: 'test/fixtures/served/*.html',
     included: false,
@@ -40,7 +41,7 @@ const fixturesExamplesPaths = [
     nocache: false,
     watched: true,
   },
-];
+]);
 
 const builtRuntimePaths = [
   {
@@ -169,7 +170,7 @@ const prettifyGlobs = [
   '**/*.md',
   '!**/package*.json',
   '!.github/ISSUE_TEMPLATE/**',
-  '!**/{node_modules,build,dist,dist.3p,dist.tools,.karma-cache}/**',
+  '!**/{node_modules,build,dist,dist.3p,dist.tools}/**',
 ];
 
 /**
@@ -178,7 +179,7 @@ const prettifyGlobs = [
  */
 const linkCheckGlobs = [
   '**/*.md',
-  '!**/{examples,node_modules,build,dist,dist.3p,dist.tools,.karma-cache}/**',
+  '!**/{examples,node_modules,build,dist,dist.3p,dist.tools}/**',
 ];
 
 /**
@@ -220,6 +221,7 @@ module.exports = {
   e2eTestPaths,
   integrationTestPaths,
   jisonPaths,
+  fixturesPath,
   linkCheckGlobs,
   lintGlobs,
   presubmitGlobs,

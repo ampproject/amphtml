@@ -16,27 +16,12 @@
 'using strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const fs = require('fs-extra');
-const globby = require('globby');
-const pathModule = require('path');
 const {
   RuntimeTestRunner,
   RuntimeTestConfig,
 } = require('./runtime-test/runtime-test-base');
-const {buildNewServer} = require('../server/typescript-compile');
 const {buildRuntime} = require('../common/utils');
-const {cyan, yellow} = require('kleur/colors');
-const {log} = require('../common/logging');
 const {maybePrintArgvMessages} = require('./runtime-test/helpers');
-
-const INTEGRATION_FIXTURES = [
-  './test/fixtures/**/*.html',
-  '!./test/fixtures/e2e',
-  '!./test/fixtures/served',
-  '!./test/fixtures/performance',
-];
-
-let htmlTransform;
 
 class Runner extends RuntimeTestRunner {
   constructor(config) {
@@ -48,45 +33,10 @@ class Runner extends RuntimeTestRunner {
     if (!argv.nobuild) {
       await buildRuntime();
     }
-    // buildRuntime will clean the directory! We have to do this afterwards.
-    await buildTransformedHtml();
-  }
-}
-
-async function buildTransformedHtml() {
-  const filePaths = await globby(INTEGRATION_FIXTURES);
-  fs.ensureDirSync('./test-bin/');
-  for (const filePath of filePaths) {
-    const normalizedFilePath = pathModule.normalize(filePath);
-    await transformAndWriteToTestFolder(normalizedFilePath);
-  }
-}
-
-async function transformAndWriteToTestFolder(filePath) {
-  try {
-    const html = await htmlTransform(filePath);
-    const fullFilePath = `./test-bin/${filePath}`;
-    const targetDir = pathModule.dirname(fullFilePath);
-    fs.ensureDirSync(targetDir);
-    fs.writeFileSync(fullFilePath, html);
-  } catch (e) {
-    log(
-      yellow('WARNING:'),
-      cyan(
-        `${filePath} could not be transformed by the postHTML ` +
-          'pipeline. Falling back to copying.'
-      ),
-      yellow(`Reason: ${e.message}`)
-    );
-    fs.copySync(filePath, `./test-bin/${filePath}`);
   }
 }
 
 async function integration() {
-  buildNewServer();
-  htmlTransform = require('../server/new-server/transforms/dist/transform')
-    .transform;
-
   maybePrintArgvMessages();
 
   const config = new RuntimeTestConfig('integration');

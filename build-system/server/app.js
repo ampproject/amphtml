@@ -57,8 +57,9 @@ app.use(bodyParser.text());
 
 // Middleware is executed in order, so this must be at the top.
 // TODO(#24333): Migrate all server URL handlers to new-server/router and
-// deprecate this file.
-if (argv.new_server) {
+// deprecate app.js.
+// TODO(erwinmombay, #32865): Make visual diff tests use the new server
+if (!argv._.includes('visual-diff')) {
   app.use(require('./new-server/router'));
 }
 
@@ -1667,6 +1668,12 @@ app.use('(/dist)?/rtv/*/v0/analytics-vendors/:vendor.json', (req, res) => {
       res.status(404);
       res.end('Not found: ' + localVendorConfigPath);
     });
+});
+
+// Used by test/unit/test-3p.js to test script loading.
+app.use('/test/script', function (req, res) {
+  res.send("typeof require === 'function' && require('foo.js');");
+  res.status(200).send();
 });
 
 module.exports = app;

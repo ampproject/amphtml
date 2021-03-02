@@ -38,7 +38,9 @@ import {resetEvtListenerOptsSupportForTesting} from '../src/event-helper-listen'
 import {resetExperimentTogglesForTesting} from '../src/experiments';
 import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
 import {setReportError} from '../src/log';
+import AMP_CONFIG from '../build-system/global-configs/prod-config.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import PreactEnzyme from 'enzyme-adapter-preact-pure';
+import chaiAsPromised from 'chai-as-promised';
 import sinon from /*OK*/ 'sinon';
 import stringify from 'json-stable-stringify';
 
@@ -412,8 +414,7 @@ function beforeTest() {
   activateChunkingForTesting();
   window.__AMP_MODE = undefined;
   window.context = undefined;
-  // eslint-disable-next-line no-undef
-  window.AMP_CONFIG = require('../build-system/global-configs/prod-config.json');
+  window.AMP_CONFIG = AMP_CONFIG;
   window.__AMP_TEST = true;
   installDocService(window, /* isSingleDoc */ true);
   const ampdoc = Services.ampdocServiceFor(window).getSingleDoc();
@@ -482,7 +483,7 @@ afterEach(function () {
   cancelTimersForTesting();
 });
 
-chai.use(require('chai-as-promised')); // eslint-disable-line
+chai.use(chaiAsPromised);
 
 chai.Assertion.addMethod('attribute', function (attr) {
   const obj = this._obj;

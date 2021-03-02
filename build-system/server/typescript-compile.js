@@ -38,13 +38,14 @@ function getBuildCmd() {
 function buildNewServer() {
   log(
     green('Building'),
-    cyan('AMP Dev Server'),
+    cyan('AMP Server'),
     green('at'),
     cyan(`${SERVER_TRANSFORM_PATH}/dist`) + green('...')
   );
   const result = exec(getBuildCmd(), {'stdio': ['inherit', 'inherit', 'pipe']});
   if (result.status != 0) {
-    const err = new Error('Could not build AMP Dev Server');
+    const err = new Error('Could not build AMP Server');
+    // @ts-ignore
     err.showStack = false;
     throw err;
   }

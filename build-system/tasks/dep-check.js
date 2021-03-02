@@ -15,7 +15,6 @@
  */
 'use strict';
 
-const babel = require('@babel/core');
 const depCheckConfig = require('../test-configs/dep-check-config');
 const esbuild = require('esbuild');
 const fs = require('fs-extra');
@@ -28,6 +27,7 @@ const {
 const {compileJison} = require('./compile-jison');
 const {css} = require('./css');
 const {cyan, green, red, yellow} = require('kleur/colors');
+const {getEsbuildBabelPlugin} = require('./helpers');
 const {log, logLocalDev} = require('../common/logging');
 
 const depCheckDir = '.amp-dep-check';
@@ -180,35 +180,15 @@ async function getEntryPointModule() {
  * @return {!ModuleDef}
  */
 async function getModuleGraph(entryPointModule) {
-  const esbuildBabelPlugin = {
-    name: 'babel',
-    async setup(build) {
-      const transformContents = async ({file, contents}) => {
-        const babelOptions = babel.loadOptions({
-          caller: {name: 'dep-check'},
-          filename: file.path,
-          sourceFileName: path.relative(process.cwd(), file.path),
-        });
-        const result = await babel.transformAsync(contents, babelOptions);
-        return {contents: result.code};
-      };
-
-      build.onLoad({filter: /.*/, namespace: ''}, async (file) => {
-        const contents = await fs.promises.readFile(file.path, 'utf-8');
-        const transformed = await transformContents({file, contents});
-        return transformed;
-      });
-    },
-  };
-
   const bundleFile = path.join(depCheckDir, 'entry-point-bundle.js');
   const moduleGraphFile = path.join(depCheckDir, 'module-graph.json');
+  const plugin = getEsbuildBabelPlugin('dep-check', /* enableCache */ false);
   await esbuild.build({
     entryPoints: [entryPointModule],
     bundle: true,
     outfile: bundleFile,
     metafile: moduleGraphFile,
-    plugins: [esbuildBabelPlugin],
+    plugins: [plugin],
   });
   logLocalDev('Bundled all entry points into', cyan(bundleFile));
 
