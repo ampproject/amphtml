@@ -97,7 +97,7 @@ const cache = new Map();
  * Stores esbuild's watch mode rebuilders.
  * @private @const {!Map<string, {rebuild: function():!Promise<void>}>}
  */
-const watchedExtensions = new Map();
+const watchedTargets = new Map();
 
 /**
  * @param {!Object} jsBundles
@@ -425,8 +425,8 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
   const destFilename = options.toName || srcFilename;
   const destFile = path.join(destDir, destFilename);
 
-  if (options.watch && watchedExtensions.has(entryPoint)) {
-    return watchedExtensions.get(entryPoint).rebuild();
+  if (options.watch && watchedTargets.has(entryPoint)) {
+    return watchedTargets.get(entryPoint).rebuild();
   }
 
   /**
@@ -491,12 +491,16 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
   finishBundle(srcFilename, destDir, destFilename, options, startTime);
 
   if (options.watch) {
-    watchedExtensions.set(entryPoint, {
+    watchedTargets.set(entryPoint, {
       rebuild: async () => {
         const time = Date.now();
-        await buildResult.rebuild();
-        await finishBundle(srcFilename, destDir, destFilename, options, time);
-        options?.onWatchBuild();
+        const buildPromise = buildResult
+          .rebuild()
+          .then(() =>
+            finishBundle(srcFilename, destDir, destFilename, options, time)
+          );
+        options?.onWatchBuild(buildPromise);
+        await buildPromise;
       },
     });
   }
