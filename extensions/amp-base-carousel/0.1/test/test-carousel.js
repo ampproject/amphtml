@@ -291,4 +291,20 @@ describes.realWin('carousel implementation', {}, (env) => {
     });
     expect(carousel.isAtStart()).to.be.false;
   });
+
+  it('should start at slide 0 with negative initialIndex', async () => {
+    const carousel = await createCarousel({
+      slideCount: 3,
+      initialIndex: -1,
+    });
+    expect(carousel.isAtStart()).to.be.true;
+  });
+
+  it('should start at slide 0 with initialIndex that is greater than number of slides', async () => {
+    const carousel = await createCarousel({
+      slideCount: 3,
+      initialIndex: 4,
+    });
+    expect(carousel.isAtStart()).to.be.true;
+  });
 });
