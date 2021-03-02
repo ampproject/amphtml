@@ -48,8 +48,7 @@ class AmpDateDisplay extends BaseElement {
   /** @override */
   checkPropsPostMutations() {
     const templates =
-      this.templates_ ||
-      (this.templates_ = Services.templatesForDoc(this.element));
+      this.templates_ || (this.templates_ = Services.templatesFor(this.win));
     const template = templates.maybeFindTemplate(this.element);
     if (template != this.template_) {
       this.template_ = template;
