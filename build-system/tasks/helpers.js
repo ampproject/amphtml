@@ -170,7 +170,11 @@ async function compileCoreRuntime(options) {
     fileWatch('src/**/*.js').on('change', debouncedRebuild);
   }
 
-  await doBuildJs(jsBundles, 'amp.js', {...options, watch: false});
+  await doBuildJs(jsBundles, 'amp.js', {
+    ...options,
+    // Pass {watch:true} for the initial esbuild call, but not for Closure.
+    watch: options.watch && !argv.compiled,
+  });
 }
 
 /**
@@ -425,7 +429,7 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
   const destFilename = options.toName || srcFilename;
   const destFile = path.join(destDir, destFilename);
 
-  if (options.watch && watchedTargets.has(entryPoint)) {
+  if (watchedTargets.has(entryPoint)) {
     return watchedTargets.get(entryPoint).rebuild();
   }
 
