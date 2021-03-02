@@ -76,9 +76,8 @@ async function prBuildWorkflow() {
     timedExecOrDie('gulp caches-json');
   }
 
-  // Check document links only for PR builds.
   if (buildTargetsInclude(Targets.DOCS)) {
-    timedExecOrDie('gulp check-links --local_changes');
+    timedExecOrDie('gulp check-links --local_changes'); // only for PR builds
     timedExecOrDie('gulp markdown-toc');
   }
 

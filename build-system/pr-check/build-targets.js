@@ -170,6 +170,7 @@ const targetMatchers = {
     }
     return (
       file == 'build-system/tasks/check-links.js' ||
+      file.startsWith('build-system/tasks/markdown-toc/') ||
       (path.extname(file) == '.md' && !file.startsWith('examples/'))
     );
   },

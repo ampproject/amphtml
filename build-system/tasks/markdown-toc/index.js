@@ -18,8 +18,8 @@ const path = require('path');
 const prettier = require('prettier');
 const toc = require('markdown-toc');
 const {getStdout} = require('../../common/exec');
-const {gray} = require('kleur/colors');
-const {log} = require('../../common/logging');
+const {green} = require('kleur/colors');
+const {logOnSameLineLocalDev} = require('../../common/logging');
 const {readFile} = require('fs-extra');
 const {writeDiffOrFail} = require('../../common/diff');
 
@@ -173,7 +173,7 @@ async function markdownToc() {
     }
     const tentative = result[filename];
     if (!tentative) {
-      log(gray(filename));
+      logOnSameLineLocalDev(green('Checked: ') + filename);
     } else {
       try {
         writeDiffOrFail('markdown-toc', filename, tentative);
