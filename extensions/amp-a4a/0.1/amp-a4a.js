@@ -71,7 +71,6 @@ import {
 } from '../../../src/utils/intersection';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isArray, isEnumValue, isObject} from '../../../src/types';
-
 import {listenOnce} from '../../../src/event-helper';
 import {
   observeWithSharedInOb,

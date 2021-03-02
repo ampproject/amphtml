@@ -142,7 +142,9 @@ if (NO_SIGNING_RTV) {
     });
 
     it('should set the correct sandbox features', async () => {
-      env.sandbox.stub(Services.platformFor(env.win), 'isSafari').returns(false);
+      env.sandbox
+        .stub(Services.platformFor(env.win), 'isSafari')
+        .returns(false);
       await a4a.buildCallback();
       a4a.onLayoutMeasure();
       await a4a.layoutCallback();
@@ -183,7 +185,10 @@ if (NO_SIGNING_RTV) {
       await a4a.layoutCallback();
       const fie = doc.body.querySelector('iframe[srcdoc]');
       const violationSpy = env.sandbox.spy();
-      fie.contentWindow.addEventListener('securitypolicyviolation', violationSpy);
+      fie.contentWindow.addEventListener(
+        'securitypolicyviolation',
+        violationSpy
+      );
       const fakePolyfill = doc.createElement('script');
       fakePolyfill.src = 'https://cdn.ampproject.org/rtv/some-polyfill.js';
       fie.contentDocument.head.appendChild(fakePolyfill);
@@ -198,7 +203,10 @@ if (NO_SIGNING_RTV) {
       await a4a.layoutCallback();
       const fie = doc.body.querySelector('iframe[srcdoc]');
       const violationSpy = env.sandbox.spy();
-      fie.contentWindow.addEventListener('securitypolicyviolation', violationSpy);
+      fie.contentWindow.addEventListener(
+        'securitypolicyviolation',
+        violationSpy
+      );
       const fakePolyfill = doc.createElement('script');
       fakePolyfill.src = 'https://www.cats.example';
       fie.contentDocument.head.appendChild(fakePolyfill);
@@ -312,6 +320,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
   let getResourceStub;
 
   beforeEach(() => {
+    // TODO(ccordry): remove with no-signing launch or similar.
     env.sandbox.stub(AmpA4A.prototype, 'isInNoSigningExp').returns(false);
 
     fetchMock = null;
