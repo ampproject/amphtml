@@ -42,11 +42,7 @@ module.exports = {
   // Do not add to this list
   'overrides': [
     {
-      'files': [
-        './preact/base-element.js',
-        './preact/slot.js',
-        './preact/context.js',
-      ],
+      'files': ['./preact/base-element.js', './preact/slot.js'],
       'rules': {'import/no-restricted-paths': 1},
     },
   ],
