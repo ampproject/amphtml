@@ -468,7 +468,6 @@ const forbiddenTerms = {
       'extensions/amp-ad-network-adsense-impl/0.1/responsive-state.js',
       'extensions/amp-app-banner/0.1/amp-app-banner.js',
       'extensions/amp-consent/0.1/consent-state-manager.js',
-      'extensions/amp-subscriptions/0.1/metering.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
     ],
   },
@@ -1113,7 +1112,6 @@ const forbiddenTermsSrcInclusive = {
       'src/service/cid-impl.js',
       'src/service/storage-impl.js',
       'extensions/amp-consent/0.1/consent-state-manager.js',
-      'extensions/amp-subscriptions/0.1/metering.js',
     ],
   },
   '(cdn|3p)\\.ampproject\\.': {
