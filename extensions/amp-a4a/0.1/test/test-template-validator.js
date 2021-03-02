@@ -18,10 +18,10 @@ import {
   AMP_TEMPLATED_CREATIVE_HEADER_NAME,
   DEPRECATED_AMP_TEMPLATED_CREATIVE_HEADER_NAME,
   TemplateValidator,
+  getAmpAdTemplateHelper,
 } from '../template-validator';
 import {AdResponseType, ValidatorResult} from '../amp-ad-type-defs';
 import {data} from './testdata/valid_css_at_rules_amp.reserialized';
-import {getAmpAdTemplateHelper} from '../amp-ad-template-helper';
 import {utf8Encode} from '../../../../src/utils/bytes';
 
 const realWinConfig = {
@@ -39,15 +39,10 @@ describes.realWin('TemplateValidator', realWinConfig, (env) => {
       }
     },
   };
-
   let validator;
-  let containerElement;
 
   beforeEach(() => {
     validator = new TemplateValidator();
-
-    containerElement = env.win.document.createElement('div');
-    env.win.document.body.appendChild(containerElement);
   });
 
   describe('AMP Result', () => {
@@ -55,7 +50,7 @@ describes.realWin('TemplateValidator', realWinConfig, (env) => {
 
     beforeEach(() => {
       env.sandbox
-        .stub(getAmpAdTemplateHelper(env.ampdoc), 'fetch')
+        .stub(getAmpAdTemplateHelper(env.win), 'fetch')
         .callsFake((url) => {
           expect(url).to.equal(templateUrl);
           return Promise.resolve(data.adTemplate);
@@ -63,7 +58,6 @@ describes.realWin('TemplateValidator', realWinConfig, (env) => {
 
       validatorPromise = validator.validate(
         {win: env.win},
-        containerElement,
         utf8Encode(
           JSON.stringify({
             templateUrl,
@@ -88,7 +82,6 @@ describes.realWin('TemplateValidator', realWinConfig, (env) => {
       validator
         .validate(
           {win: env.win},
-          containerElement,
           utf8Encode(
             JSON.stringify({
               templateUrl,
@@ -148,7 +141,6 @@ describes.realWin('TemplateValidator', realWinConfig, (env) => {
       return validator
         .validate(
           {win: env.win},
-          containerElement,
           utf8Encode(
             JSON.stringify({
               templateUrl,
@@ -167,7 +159,6 @@ describes.realWin('TemplateValidator', realWinConfig, (env) => {
       return validator
         .validate(
           {win: env.win},
-          containerElement,
           utf8Encode(
             JSON.stringify({
               templateUrl,
@@ -189,7 +180,6 @@ describes.realWin('TemplateValidator', realWinConfig, (env) => {
       return validator
         .validate(
           {win: env.win},
-          containerElement,
           utf8Encode(
             JSON.stringify({
               templateUrl,
@@ -208,14 +198,9 @@ describes.realWin('TemplateValidator', realWinConfig, (env) => {
 
     it('should have the response body as the creative in creativeData', () => {
       return validator
-        .validate(
-          {win: env.win},
-          containerElement,
-          utf8Encode(JSON.stringify({templateUrl})),
-          {
-            get: () => null,
-          }
-        )
+        .validate({win: env.win}, utf8Encode(JSON.stringify({templateUrl})), {
+          get: () => null,
+        })
         .then((validatorOutput) => {
           expect(validatorOutput).to.be.ok;
           expect(validatorOutput.creativeData).to.be.ok;

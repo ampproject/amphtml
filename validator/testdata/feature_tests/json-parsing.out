@@ -30,10 +30,41 @@ PASS
 |  </head>
 |  <body>
 |
-|  <!-- The JSON string contains a carriage return `\r` between `:` and `false` -->
+|  <!-- Valid: The JSON string contains a carriage return `\r` between `:` and `false` -->
 |  <amp-state id="td_amp_menu_state"><script type="application/json">
 |  {"visible":
 |  false}</script></amp-state>
 |
+|  <!-- Valid: The JSON-LD can be parsed -->
+|  <script type="application/ld+json">
+|  {
+|     "@context":"http://schema.org",
+|     "@type":"Webpage",
+|     "url":"https://amp.dev/ ",
+|     "name":"amp.dev",
+|     "headline":"AMP - a web component framework to easily create user-first web experiences",
+|     "description":"Whether you are a publisher, e-commerce company, storyteller, advertiser or email sender, AMP makes it easy to create great experiences on the web. Use AMP to build websites, stories, ads and emails.",
+|     "mainEntityOfPage":{
+|        "@type":"WebPage",
+|        "@id":"https://amp.dev"
+|     },
+|     "publisher":{
+|        "@type":"Organization",
+|        "name":"AMP Project",
+|        "logo":{
+|           "url":"https://amp.dev/static/img/icons/icon-512x512.png",
+|           "width":512,
+|           "height":512,
+|           "@type":"ImageObject"
+|        }
+|     },
+|     "image":{
+|        "@type":"ImageObject",
+|        "url":"https://amp.dev/static/img/sharing/default-600x314.png",
+|        "width":600,
+|        "height":314
+|     }
+|  }
+|  </script>
 |  </body>
 |  </html>

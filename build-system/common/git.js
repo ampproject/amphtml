@@ -179,13 +179,7 @@ function gitCommitterEmail() {
  * @return {!Array<{sha: string, isCherryPick: boolean}>}
  */
 function gitCherryMaster() {
-  return getStdout('git cherry master')
-    .trim()
-    .split('\n')
-    .map((line) => ({
-      isCherryPick: line.substring(0, 2) == '- ',
-      sha: line.substring(2),
-    }));
+  return getStdout('git cherry master').trim().split('\n');
 }
 
 /**
@@ -200,27 +194,6 @@ function gitCommitFormattedTime(ref = 'HEAD') {
   return getStdout(
     `${envPrefix} git log ${ref} -1 --pretty="%cd" --date=format-local:%y%m%d%H%M%S`
   ).trim();
-}
-
-/**
- * Returns the commit message of a given ref.
- * @param {string} ref a Git reference (commit SHA, branch name, etc.) for the
- *   commit to get the time of.
- * @return {string}
- */
-function gitCommitMessage(ref = 'HEAD') {
-  return getStdout(`git log ${ref} -n 1 --pretty="%B"`);
-}
-
-/**
- * Checks if a branch contains a specific ref.
- * @param {string} ref a Git reference (commit SHA, branch name, etc.) for the
- *   commit to get the time of.
- * @param {string} branch the branch to check.
- * @return {boolean}
- */
-function gitBranchContains(ref, branch = 'master') {
-  return Boolean(getStdout(`git branch ${branch} --contains ${ref}`).trim());
 }
 
 /**
@@ -254,13 +227,11 @@ function gitDiffPath(path, commit) {
 }
 
 module.exports = {
-  gitBranchContains,
   gitBranchCreationPoint,
   gitBranchName,
   gitCherryMaster,
   gitCommitFormattedTime,
   gitCommitHash,
-  gitCommitMessage,
   gitCommitterEmail,
   gitDiffAddedNameOnlyMaster,
   gitDiffColor,

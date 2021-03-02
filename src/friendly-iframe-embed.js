@@ -28,6 +28,7 @@ import {
   setParentWindow,
 } from './service';
 import {escapeHtml} from './dom';
+import {getMode} from './mode';
 import {install as installAbortController} from './polyfills/abort-controller';
 import {installAmpdocServicesForEmbed} from './service/core-services';
 import {install as installCustomElements} from './polyfills/custom-elements';
@@ -48,6 +49,7 @@ import {
   setStyles,
 } from './style';
 import {toWin} from './types';
+import {urls} from './config';
 import {whenContentIniLoad} from './ini-load';
 
 /**
@@ -103,6 +105,15 @@ export function isSrcdocSupported() {
     srcdocSupported = 'srcdoc' in HTMLIFrameElement.prototype;
   }
   return srcdocSupported;
+}
+
+/**
+ * Get trusted urls enabled for polyfills.
+ * @return {string}
+ */
+export function getFieSafeScriptSrcs() {
+  const cdnBase = getMode().localDev ? 'http://localhost:8000/dist' : urls.cdn;
+  return `${cdnBase}/lts/ ${cdnBase}/rtv/ ${cdnBase}/sw/`;
 }
 
 /**
@@ -298,10 +309,12 @@ function mergeHtml(spec) {
     });
   }
 
+  const cspScriptSrc = getFieSafeScriptSrcs();
+
   // Load CSP
   result.push(
     '<meta http-equiv=Content-Security-Policy ' +
-      "content=\"script-src 'none';object-src 'none';child-src 'none'\">"
+      `content="script-src ${cspScriptSrc};object-src 'none';child-src 'none'">`
   );
 
   // Postambule.
