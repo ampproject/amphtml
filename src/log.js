@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {USER_ERROR_SENTINEL} from './core/assert';
+import {
+  USER_ERROR_SENTINEL,
+  elementStringOrPassthru,
+} from './core/error-message-helpers';
 import {getMode} from './mode';
 import {internalRuntimeVersion} from './internal-version';
 import {isArray, isEnumValue} from './types';
@@ -633,18 +636,6 @@ export class Log {
  */
 const stringOrElementString = (val) =>
   /** @type {string} */ (elementStringOrPassthru(val));
-
-/**
- * @param {*} val
- * @return {*}
- */
-function elementStringOrPassthru(val) {
-  // Do check equivalent to `val instanceof Element` without cross-window bug
-  if (val && val.nodeType == 1) {
-    return val.tagName.toLowerCase() + (val.id ? '#' + val.id : '');
-  }
-  return val;
-}
 
 /**
  * @param {!Array} array
