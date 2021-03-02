@@ -16,7 +16,7 @@
 const path = require('path');
 const test = require('ava');
 const {headerForTesting, overrideToc, overrideTocGlob} = require('../');
-const {readFileSync, readFile} = require('fs-extra');
+const {readFile} = require('fs-extra');
 
 const dirname = path.relative(process.cwd(), __dirname);
 
@@ -162,6 +162,6 @@ test('overrideTocGlob ./some-are-incomplete', async (t) => {
     [`${dirname}/some-are-incomplete/one.md`]: null,
     [`${dirname}/some-are-incomplete/two.md`]:
       // Has same content but with TOC
-      readFileSync(`${dirname}/all-are-complete/two.md`, 'utf-8'),
+      await readFile(`${dirname}/all-are-complete/two.md`, 'utf-8'),
   });
 });

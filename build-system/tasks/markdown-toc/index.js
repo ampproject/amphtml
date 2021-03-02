@@ -20,7 +20,7 @@ const toc = require('markdown-toc');
 const {getStdout} = require('../../common/exec');
 const {gray} = require('kleur/colors');
 const {log} = require('../../common/logging');
-const {readFileSync} = require('fs-extra');
+const {readFile} = require('fs-extra');
 const {writeDiffOrFail} = require('../../common/diff');
 
 const task = 'markdown-toc';
@@ -138,7 +138,7 @@ async function overrideTocGlob(cwd) {
   const result = {};
 
   for (const filename of filesIncludingString) {
-    const content = readFileSync(filename, 'utf-8');
+    const content = await readFile(filename, 'utf-8');
     const tentative = await overrideToc(content);
 
     if (!tentative) {
