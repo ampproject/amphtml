@@ -255,6 +255,10 @@ BaseElement['detached'] = true;
 
 /** @override */
 BaseElement['props'] = {
-  'animate': {attr: 'animate', type: 'boolean'},
-  'expandSingleSection': {attr: 'expand-single-section', type: 'boolean'},
+  'animate': {attr: 'animate', type: 'boolean', media: true},
+  'expandSingleSection': {
+    attr: 'expand-single-section',
+    type: 'boolean',
+    media: true,
+  },
 };

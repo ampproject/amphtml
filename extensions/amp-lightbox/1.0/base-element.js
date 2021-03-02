@@ -54,8 +54,8 @@ BaseElement['Component'] = Lightbox;
 
 /** @override */
 BaseElement['props'] = {
-  'animation': {attr: 'animation'},
-  'scrollable': {attr: 'scrollable', type: 'boolean'},
+  'animation': {attr: 'animation', media: true},
+  'scrollable': {attr: 'scrollable', type: 'boolean', media: true},
   'id': {attr: 'id'},
 };
 

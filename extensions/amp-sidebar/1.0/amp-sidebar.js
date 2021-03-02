@@ -114,7 +114,7 @@ AmpSidebar['shadowCss'] = COMPONENT_CSS;
 
 /** @override */
 AmpSidebar['props'] = {
-  'side': {attr: 'side', type: 'string'},
+  'side': {attr: 'side', type: 'string', media: true},
 };
 
 AMP.extension(TAG, '1.0', (AMP) => {

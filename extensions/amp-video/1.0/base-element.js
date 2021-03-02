@@ -87,20 +87,24 @@ VideoBaseElement['props'] = {
   'artist': {attr: 'artist'},
   'artwork': {attr: 'artwork'},
   'attribution': {attr: 'attribution'},
-  'autoplay': {attr: 'autoplay', type: 'boolean'},
-  'controls': {attr: 'controls', type: 'boolean'},
+  'autoplay': {attr: 'autoplay', type: 'boolean', media: true},
+  'controls': {attr: 'controls', type: 'boolean', media: true},
   'controlslist': {attr: 'controlslist'},
   'crossorigin': {attr: 'crossorigin'},
-  'disableremoteplayback': {attr: 'disableremoteplayback'},
-  'loop': {attr: 'loop', type: 'boolean'},
-  'noaudio': {attr: 'noaudio', type: 'boolean'},
+  'disableremoteplayback': {attr: 'disableremoteplayback', media: true},
+  'loop': {attr: 'loop', type: 'boolean', media: true},
+  'noaudio': {attr: 'noaudio', type: 'boolean', media: true},
   'poster': {attr: 'poster'},
-  'src': {attr: 'src'},
+  'src': {attr: 'src', media: true},
   'title': {attr: 'title'},
 
   // TODO(alanorozco): These props have no internal implementation yet.
-  'dock': {attr: 'dock'},
-  'rotate-to-fullscreen': {attr: 'rotate-to-fullscreen', type: 'boolean'},
+  'dock': {attr: 'dock', media: true},
+  'rotate-to-fullscreen': {
+    attr: 'rotate-to-fullscreen',
+    type: 'boolean',
+    media: true,
+  },
 };
 
 /** @override */

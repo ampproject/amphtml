@@ -238,8 +238,8 @@ AmpSocialShare['delegatesFocus'] = true;
 
 /** @override */
 AmpSocialShare['props'] = {
-  'tabIndex': {attr: 'tabindex'},
-  'type': {attr: 'type'},
+  'tabIndex': {attr: 'tabindex', media: true},
+  'type': {attr: 'type', media: true},
 };
 
 AMP.extension(TAG, '1.0', (AMP) => {
