@@ -25,12 +25,12 @@ import {Services} from '../services';
 import {debounce, throttle} from '../utils/rate-limit';
 import {dev, devAssert, user, userAssert} from '../log';
 import {dict, hasOwn, map} from '../utils/object';
-import {dispatchCustomEvent, isEnabled} from '../dom';
 import {getDetail} from '../event-helper';
 import {getMode} from '../mode';
 import {getValueForExpr} from '../json';
 import {isAmp4Email} from '../format';
 import {isArray, isFiniteNumber, toArray, toWin} from '../types';
+import {isEnabled} from '../dom';
 import {registerServiceBuilderForDoc} from '../service';
 import {reportError} from '../error';
 
@@ -415,24 +415,6 @@ export class ActionService {
 
   /**
    * Triggers the specified event on the target element.
-   * TODO(#32756): Rename this to `trigger` once all invocations have been
-   * updated to use the combined method.
-   * @param {!Element} target
-   * @param {string} eventType
-   * @param {?ActionEventDef} event
-   * @param {!ActionTrust} trust
-   * @param {?JsonObject=} opt_args
-   * @return {boolean} true if the target has an action.
-   */
-  triggerWithDispatch(target, eventType, event, trust, opt_args) {
-    const action = this.trigger(target, eventType, event, trust, opt_args);
-    dispatchCustomEvent(target, eventType, event.detail);
-    return action;
-  }
-
-  /**
-   * Triggers the specified event and dispatches a custom event on the target
-   * element.
    * @param {!Element} target
    * @param {string} eventType
    * @param {?ActionEventDef} event
