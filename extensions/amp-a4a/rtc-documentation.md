@@ -138,6 +138,7 @@ The `errorReportingUrl` property is optional. The only available macros are ERRO
 -   Galaxie Media
 -   IndexExchange
 -   Kargo
+-   Local Media Consortium
 -   Lotame
 -   Media.net
 -   Nexx360.io
