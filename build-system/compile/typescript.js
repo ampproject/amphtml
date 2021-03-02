@@ -18,6 +18,7 @@
 const fs = require('fs-extra');
 const path = require('path');
 const ts = require('typescript');
+/** @type {*} */
 const tsickle = require('tsickle');
 const {log} = require('../common/logging');
 const {red} = require('kleur/colors');
