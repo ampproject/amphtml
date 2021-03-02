@@ -18,7 +18,10 @@ import {loadScript, validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   guid: string,
+ *   mixins: (string|undefined)
+ * }} data
  */
 export function flite(global, data) {
   // TODO: check mandatory fields

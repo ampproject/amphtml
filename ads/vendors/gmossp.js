@@ -20,7 +20,9 @@ const gmosspFields = ['id'];
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   id: string
+ * }} data
  */
 export function gmossp(global, data) {
   validateData(data, gmosspFields, []);

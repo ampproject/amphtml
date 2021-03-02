@@ -14,22 +14,29 @@
  * limitations under the License.
  */
 
+import {dict} from '../../src/utils/object';
 import {loadScript, validateData} from '../../3p/3p';
 import {setStyles} from '../../src/style';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   zone: string,
+ *   slot: string,
+ *   width: string,
+ *   height: string
+ * }} data
  */
 export function gumgum(global, data) {
   validateData(data, ['zone', 'slot']);
 
-  const win = window,
-    ctx = win.context,
-    dom = global.document.getElementById('c'),
-    ampWidth = parseInt(data.width || '0', 10),
-    ampHeight = parseInt(data.height || '0', 10),
-    ggevents = global.ggevents || [];
+  const win = window;
+  /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */
+  const ctx = /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (win.context);
+  const dom = global.document.getElementById('c');
+  const ampWidth = parseInt(data.width || '0', 10);
+  const ampHeight = parseInt(data.height || '0', 10);
+  const ggevents = global.ggevents || [];
 
   const {max} = Math,
     slotId = parseInt(data.slot, 10),
@@ -38,10 +45,12 @@ export function gumgum(global, data) {
         const ad = {width: 0, height: 0, ...(evt.ad || {})},
           identifier = ['GUMGUM', type, evt.id].join('_');
         ctx.reportRenderedEntityIdentifier(identifier);
-        ctx.renderStart({
-          width: max(ampWidth, ad.width),
-          height: max(ampHeight, ad.height),
-        });
+        ctx.renderStart(
+          dict({
+            'width': max(ampWidth, ad.width),
+            'height': max(ampHeight, ad.height),
+          })
+        );
       };
     },
     noFill = function () {

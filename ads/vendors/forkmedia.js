@@ -18,7 +18,10 @@ import {loadScript} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   product: string,
+ *   format: (string|undefined)
+ * }} data
  */
 export function forkmedia(global, data) {
   let src = null;
@@ -53,10 +56,10 @@ export function forkmedia(global, data) {
     global,
     src,
     () => {
-      global.context.renderStart();
+      /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context).renderStart();
     },
     () => {
-      global.context.noContentAvailable();
+      /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context).noContentAvailable();
     }
   );
 }

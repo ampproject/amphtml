@@ -408,12 +408,21 @@ data.zone;
 // distroscale.js
 data.tid;
 
+// engageya.js
+window._engageya;
+
 // empower.js
-data.category;
-data.site;
-data.zone;
+window.category;
+window.site;
+window.zone;
+window.iwidth;
+window.iheight;
+
+// epeex.js
+window._epeex;
 
 // eplanning.js
+window._eplanning;
 data.epl_si;
 data.epl_isv;
 data.epl_sv;
@@ -430,9 +439,28 @@ data.epl_e;
 window.EzoicAmpAd = function (global, data) {};
 window.EzoicAmpAd.prototype.createAd;
 
+// f1e.js
+window.f1eData;
+
+// f1h.js
+window.f1hData;
+
+// feedad.js
+window.feedad;
+window.feedad.sdk;
+window.feedad.sdk.requestAd;
+
+// felmat.js
+window.fmParam;
+
 // flite.js
-data.guid;
-data.mixins;
+window.FLITE;
+
+// fluct.js
+window.adingoFluct;
+
+// freewheel.js
+window._freewheel_amp;
 
 // fusion.js
 var ev;
@@ -445,6 +473,14 @@ data.mediaZone;
 data.layout;
 data.space;
 data.parameters;
+
+// gmossp.js
+window.gmosspParam;
+
+// gumgum.js
+window.ggevents;
+window.ggv2id;
+window.sourceReferrer;
 
 // holder.js
 data.queue;

@@ -18,7 +18,12 @@ import {validateData, writeScript} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   host: string,
+ *   fmt: string,
+ *   fmk: string,
+ *   fmp: string
+ * }} data
  */
 export function felmat(global, data) {
   validateData(data, ['host', 'fmt', 'fmk', 'fmp']);

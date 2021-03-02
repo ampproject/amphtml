@@ -18,7 +18,10 @@ import {validateData, writeScript} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   url: string,
+ *   target: string
+ * }} data
  */
 export function f1e(global, data) {
   validateData(data, ['url', 'target'], []);

@@ -26,7 +26,9 @@ const validHosts = [
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   src: string
+ * }} data
  */
 export function ibillboard(global, data) {
   validateData(data, ['src']);

@@ -18,11 +18,15 @@ import {validateData, writeScript} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   block: string,
+ *   queue: (string|undefined)
+ * }} data
  */
 export function holder(global, data) {
   validateData(data, ['block'], []);
-  const wcl = global.context.location;
+  const wcl = /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context)
+    .location;
   const n = navigator.userAgent;
   let l = '&r' + Math.round(Math.random() * 10000000) + '&h' + wcl.href;
   if (!(n.indexOf('Safari') != -1 && n.indexOf('Chrome') == -1)) {

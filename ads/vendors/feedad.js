@@ -44,41 +44,47 @@ import {setStyle} from '../../src/style';
  * @typedef {Object} FeedAdResponse
  * @private
  *
- * @property {function():HTMLElement} createAdContainer()
- */
-
-/**
- * @typedef {Object} FeedAdData
- * @private
- *
- * @property {string} clientToken
- * @property {string} placementId
- * @property {string} [background]
+ * @property {function():HTMLElement} createAdContainer
  */
 
 /**
  * @param {!Window} global
- * @param {!FeedAdData} data
+ * @param {{
+ *   clientToken: string,
+ *   placementId: string,
+ *   background: (string|undefined)
+ * }} data
  */
 export function feedad(global, data) {
   validateData(data, ['clientToken', 'placementId'], ['background']);
 
+  /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */
+  const context = /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context);
   global.feedad = global.feedad || {cmd: []};
   global.feedad.cmd.push(() => {
     global.feedad.sdk
       .init(data.clientToken)
       .then(() => global.feedad.sdk.requestAd(data.placementId))
-      .then((response) => {
-        const ad = response.createAdContainer();
-        const container = global.document.getElementById('c');
-        applyContainerStyle(container, data);
-        container.appendChild(ad);
-        global.context.renderStart();
-        global.context.reportRenderedEntityIdentifier('FeedAd');
-        return response.promise;
-      })
+      .then(
+        /**
+         * @param {{createAdContainer: function():HTMLElement,promise:Promise}} response
+         * @return {Promise}
+         */
+        (response) => {
+          const ad = response.createAdContainer();
+          /** @type {HTMLElement} */
+          const container = /** @type {HTMLElement} */ (global.document.getElementById(
+            'c'
+          ));
+          applyContainerStyle(container, data);
+          container.appendChild(ad);
+          context.renderStart();
+          context.reportRenderedEntityIdentifier('FeedAd');
+          return response.promise;
+        }
+      )
       .catch(() => {
-        global.context.noContentAvailable();
+        context.noContentAvailable();
       });
   });
   loadScript(global, 'https://web.feedad.com/sdk/feedad-async.js');
@@ -89,7 +95,11 @@ export function feedad(global, data) {
  * Applies the optional background color for the unfilled space.
  *
  * @param {HTMLElement} container
- * @param {!FeedAdData} data
+ * @param {{
+ *   clientToken: string,
+ *   placementId: string,
+ *   background: (string|undefined)
+ * }} data
  */
 function applyContainerStyle(container, data) {
   setStyle(container, 'display', 'flex');

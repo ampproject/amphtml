@@ -35,7 +35,13 @@ function queryParametersToObject(input) {
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   space: string,
+ *   mediaZone: (string|undefined),
+ *   layout: (string|undefined),
+ *   adServer: (string|undefined),
+ *   parameters: (string|undefined)
+ * }} data
  */
 export function fusion(global, data) {
   validateData(
@@ -58,7 +64,7 @@ export function fusion(global, data) {
 
       global.Fusion.on.warning.run((ev) => {
         if (ev.msg === 'Space not present in response.') {
-          global.context.noContentAvailable();
+          /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context).noContentAvailable();
         }
       });
     }

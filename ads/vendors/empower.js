@@ -18,7 +18,13 @@ import {validateData, writeScript} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   site: string,
+ *   zone: string,
+ *   width: string,
+ *   height: string,
+ *   category: (string|undefined)
+ * }} data
  */
 export function empower(global, data) {
   validateData(data, ['site', 'zone'], ['category']);

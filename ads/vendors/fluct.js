@@ -25,7 +25,10 @@ import {validateData, writeScript} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   g: string,
+ *   u: string
+ * }} data
  */
 export function fluct(global, data) {
   validateData(data, ['g', 'u']);
