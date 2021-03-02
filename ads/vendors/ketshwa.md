@@ -31,3 +31,4 @@ Serves ads from [Ketshwa](https://www.ketshwa.com/).
 #### Required parameters
 
 -   `widgetid`
+-   `externalid`
