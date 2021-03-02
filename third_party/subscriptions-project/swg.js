@@ -8654,7 +8654,7 @@ function getLanguageCodeFromElement(element) {
 /** @type {!Object<string, string>} */
 const TITLE_LANG_MAP = {
   'en': 'Subscribe with Google',
-  'ar': 'Google اشترك مع',
+  'ar': 'Google اشترك مع',
   'de': 'Abonnieren mit Google',
   'es': 'Suscríbete con Google',
   'es-latam': 'Suscríbete con Google',
