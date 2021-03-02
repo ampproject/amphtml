@@ -47,12 +47,31 @@ const AttachmentType = {
 };
 
 /**
+ * @param {!Element} element
+ * @return {!Element}
+ */
+const buildOpenAttachmentElement = (element) =>
+  htmlFor(element)`
+      <a class="
+          i-amphtml-story-page-open-attachment i-amphtml-story-system-reset"
+          role="button">
+        <span class="i-amphtml-story-page-open-attachment-icon">
+          <span class="i-amphtml-story-page-open-attachment-bar-left"></span>
+          <span class="i-amphtml-story-page-open-attachment-bar-right"></span>
+        </span>
+        <span class="i-amphtml-story-page-open-attachment-label"></span>
+      </a>`;
+
+/**
  * AMP Story page attachment.
  */
 export class AmpStoryPageAttachment extends DraggableDrawer {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
+
+    /** @private {?Element} */
+    this.openAttachmentEl_ = null;
 
     /** @private @const {!./story-analytics.StoryAnalyticsService} */
     this.analyticsService_ = getAnalyticsService(this.win, this.element);
@@ -69,6 +88,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    */
   buildCallback() {
     super.buildCallback();
+    this.renderOpenAttachmentUI_();
 
     const theme = this.element.getAttribute('theme');
     if (theme && AttachmentTheme.DARK === theme.toLowerCase()) {
@@ -100,6 +120,38 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
     toggle(this.element, true);
     this.element.setAttribute('aria-live', 'assertive');
+  }
+
+  /**
+   * Renders the open attachment UI on the parent page.
+   * @private
+   */
+  renderOpenAttachmentUI_() {
+    const parentPageEl = this.getPage_();
+
+    this.openAttachmentEl_ = buildOpenAttachmentElement(parentPageEl);
+    // If the attachment is a link, copy href to the element so it can be previewed on hover and long press.
+    const attachmentHref = this.element.getAttribute('href');
+    if (attachmentHref) {
+      this.openAttachmentEl_.setAttribute('href', attachmentHref);
+    }
+    this.openAttachmentEl_.addEventListener('click', () => this.open());
+
+    const textEl = this.openAttachmentEl_.querySelector(
+      '.i-amphtml-story-page-open-attachment-label'
+    );
+
+    const openLabelAttr = this.element.getAttribute('data-cta-text');
+    const openLabel =
+      (openLabelAttr && openLabelAttr.trim()) ||
+      getLocalizationService(parentPageEl).getLocalizedString(
+        LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
+      );
+
+    this.mutateElement(() => {
+      textEl.textContent = openLabel;
+      parentPageEl.appendChild(this.openAttachmentEl_);
+    });
   }
 
   /**
@@ -344,6 +396,17 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     );
     this.analyticsService_.triggerEvent(
       StoryAnalyticsEvent.PAGE_ATTACHMENT_EXIT
+    );
+  }
+
+  /**
+   * @private
+   * @return {?Element} the parent amp-story-page
+   */
+  getPage_() {
+    return closest(
+      dev().assertElement(this.element),
+      (el) => el.tagName.toLowerCase() === 'amp-story-page'
     );
   }
 }
