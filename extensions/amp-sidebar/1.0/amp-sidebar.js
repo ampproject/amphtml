@@ -16,34 +16,20 @@
 
 import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-sidebar-1.0.css';
-import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
-import {toggle} from '../../../src/style';
-import {toggleAttribute} from '../../../src/dom';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-sidebar';
 
 class AmpSidebar extends BaseElement {
-  /** @param {!AmpElement} element */
-  constructor(element) {
-    super(element);
-
-    /** @private {boolean} */
-    this.open_ = false;
-  }
-
   /** @override */
   init() {
     this.registerApiAction('toggle', (api) => api./*OK*/ toggle());
     this.registerApiAction('open', (api) => api./*OK*/ open());
     this.registerApiAction('close', (api) => api./*OK*/ close());
 
-    return dict({
-      'onBeforeOpen': this.toggle_.bind(this, true),
-      'onAfterClose': this.toggle_.bind(this, false),
-    });
+    return super.init();
   }
 
   /** @override */
@@ -59,25 +45,6 @@ class AmpSidebar extends BaseElement {
           ` element to preserve a logical DOM order.`
       );
     }
-  }
-
-  /**
-   * Toggle open/closed attributes.
-   * @param {boolean} opt_state
-   */
-  toggle_(opt_state) {
-    this.open_ = toggleAttribute(this.element, 'open', opt_state);
-    toggle(this.element, this.open_);
-  }
-
-  /** @override */
-  mutationObserverCallback() {
-    const open = this.element.hasAttribute('open');
-    if (open === this.open_) {
-      return;
-    }
-    this.open_ = open;
-    open ? this.api().open() : this.api().close();
   }
 
   /** @override */
