@@ -47,6 +47,7 @@ import {getMode} from '../mode';
 import {hydrate, render} from './index';
 import {installShadowStyle} from '../shadow-embed';
 import {sequentialIdGenerator} from '../utils/id-generator';
+import {toArray} from '../types';
 
 /**
  * The following combinations are allowed.
@@ -979,50 +980,54 @@ function collectProps(Ctor, element, ref, defaultProps, mediaQueryProps) {
  */
 function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
   // Match all children defined with "selector".
-  // There are plain "children" and there're slotted children assigned
-  // as separate properties. Thus in a carousel the plain "children" are
-  // slides, and the "arrowNext" children are passed via a "arrowNext"
-  // property.
-  const nodes = element.getRealChildNodes
-    ? element.getRealChildNodes()
-    : element.childNodes;
-  for (let i = 0; i < nodes.length; i++) {
-    const childElement = nodes[i];
-    const match = matchChild(childElement, propDefs);
-    if (!match) {
-      continue;
-    }
-    const def = propDefs[match];
-    const {single, name = match, clone, props: slotProps = {}} = def;
-    devAssert(clone || Ctor['usesShadowDom']);
-    const parsedSlotProps = {};
-    parsePropDefs(
-      Ctor,
-      parsedSlotProps,
-      slotProps,
-      childElement,
-      mediaQueryProps
-    );
-
-    // TBD: assign keys, reuse slots, etc.
-    if (single) {
-      props[name] = createSlot(
+  if (
+    Object.values(propDefs).some((p) => typeof p === 'string' || p.selector)
+  ) {
+    // There are plain "children" and there're slotted children assigned
+    // as separate properties. Thus in a carousel the plain "children" are
+    // slides, and the "arrowNext" children are passed via a "arrowNext"
+    // property.
+    const nodes = element.getRealChildNodes
+      ? element.getRealChildNodes()
+      : toArray(element.childNodes);
+    for (let i = 0; i < nodes.length; i++) {
+      const childElement = nodes[i];
+      const match = matchChild(childElement, propDefs);
+      if (!match) {
+        continue;
+      }
+      const def = propDefs[match];
+      const {single, name = match, clone, props: slotProps = {}} = def;
+      devAssert(clone || Ctor['usesShadowDom']);
+      const parsedSlotProps = {};
+      parsePropDefs(
+        Ctor,
+        parsedSlotProps,
+        slotProps,
         childElement,
-        childElement.getAttribute('slot') || `i-amphtml-${name}`,
-        parsedSlotProps
+        mediaQueryProps
       );
-    } else {
-      const list = props[name] || (props[name] = []);
-      list.push(
-        clone
-          ? createShallowVNodeCopy(childElement)
-          : createSlot(
-              childElement,
-              childElement.getAttribute('slot') ||
-                `i-amphtml-${name}-${childIdGenerator()}`,
-              parsedSlotProps
-            )
-      );
+
+      // TBD: assign keys, reuse slots, etc.
+      if (single) {
+        props[name] = createSlot(
+          childElement,
+          childElement.getAttribute('slot') || `i-amphtml-${name}`,
+          parsedSlotProps
+        );
+      } else {
+        const list = props[name] || (props[name] = []);
+        list.push(
+          clone
+            ? createShallowVNodeCopy(childElement)
+            : createSlot(
+                childElement,
+                childElement.getAttribute('slot') ||
+                  `i-amphtml-${name}-${childIdGenerator()}`,
+                parsedSlotProps
+              )
+        );
+      }
     }
   }
 
