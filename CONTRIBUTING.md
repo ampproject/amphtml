@@ -21,6 +21,8 @@ How would you like to help?
 -   [Get started with open source](#get-started-with-open-source)
 -   [Ongoing participation](#ongoing-participation)
 
+If you have questions about _using_ AMP or are _encountering problems using AMP_ on your site please visit our [support page](SUPPORT.md) for help.
+
 ## Report a bug
 
 [File an issue](https://github.com/ampproject/amphtml/issues/new?assignees=&labels=Type%3A+Bug&template=bug-report.md&title=) if you find a bug in AMP. Provide a detailed description and steps for reproducing the bug; screenshots and working examples that demonstrate the problem are appreciated!
