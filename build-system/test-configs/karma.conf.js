@@ -151,7 +151,6 @@ module.exports = {
 
   plugins: [
     '@chiragrupani/karma-chromium-edge-launcher',
-    'karma-babel-preprocessor',
     'karma-chai',
     'karma-chrome-launcher',
     'karma-esbuild',
