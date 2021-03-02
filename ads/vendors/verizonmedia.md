@@ -35,19 +35,19 @@ limitations under the License.
 For semantics of configuration, please see ad network documentation.
 
 ### Required Parameters:
-  `data-config` - Config for ad call
+`data-config` - Config for ad call
 
 ### Optional parameters:
-  `data-stylesheet` - stylesheet to use inside iframe
+`data-stylesheet` - stylesheet to use inside iframe
 
 ### Configuration Details
 Required
-  "adServer":{"1AS":{region":"US"}},
-  "positions":{"FB":{alias:"1111111"},"sizes":["300x250"]}},
-  "site":{name:{"autoblogAMP"}},"spaceId":"111111"}
+"adServer":{"1AS":{region":"US"}},
+"positions":{"FB":{alias:"1111111"},"sizes":["300x250"]}},
+"site":{name:{"autoblogAMP"}},"spaceId":"111111"}
 
 Alias, Sizes, SiteName and spaceId should be replaced by correct values.
 NOTE: SiteName should be site name + "AMP"
 
 Optional
-  "params":{"name":"value"}
+"params":{"name":"value"}
