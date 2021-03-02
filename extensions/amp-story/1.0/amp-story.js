@@ -1013,7 +1013,12 @@ export class AmpStory extends AMP.BaseElement {
         );
 
         if (shouldReOpenAttachmentForPageId === this.activePage_.element.id) {
-          this.activePage_.openAttachment(false /** shouldAnimate */);
+          const attachmentEl = this.activePage_.element.querySelector(
+            'amp-story-page-attachment'
+          );
+          if(attachmentEl) {
+            attachmentEl.getImpl().then((attachment) => attachment.open(false /** shouldAnimate */));
+          }
         }
 
         // Preloads and prerenders the share menu.
