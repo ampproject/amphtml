@@ -248,8 +248,10 @@ function updateFiles(config) {
   }
 
   const getPosixImport = (jsFile) => {
-    const relativePath = path.relative(path.dirname(unifiedJsFile), jsFile);
-    const posixPath = relativePath.split(path.sep).join(path.posix.sep);
+    const posixPath = path.posix.relative(
+      path.posix.dirname(unifiedJsFile),
+      jsFile
+    );
     return `import '${posixPath}';`;
   };
   const imports = transformedKarmaFiles.map(getPosixImport);
