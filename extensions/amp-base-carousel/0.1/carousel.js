@@ -313,7 +313,7 @@ export class Carousel {
      * restingIndex to currentIndex.
      * @private {number}
      */
-    this.currentIndex_ = initialIndex ?? 0;
+    this.currentIndex_ = initialIndex || 0;
 
     /**
      * Whether or not looping is requested. Do not use directly, but rather use
