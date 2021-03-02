@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {promises as fsPromises} from 'fs';
+import fs from 'fs';
 import minimist from 'minimist';
 import posthtml from 'posthtml';
 import transformModules from './modules/modules-transform';
@@ -38,15 +38,21 @@ const transforms = [
   transformScriptPaths(defaultTransformConfig),
 ];
 
-export async function transform(fileLocation: string): Promise<string> {
-  if (ESM) {
-    transforms.unshift(
-      transformCss(),
-      transformModules(defaultTransformConfig),
-    );
-  }
+if (ESM) {
+  transforms.unshift(
+    transformCss(),
+    transformModules(defaultTransformConfig),
+  );
+}
 
-  const source = await fsPromises.readFile(fileLocation, 'utf8');
+export async function transform(fileLocation: string): Promise<string> {
+  const source = await fs.promises.readFile(fileLocation, 'utf8');
   const result = await posthtml(transforms).process(source);
   return result.html;
+}
+
+export function transformSync(content: string): string {
+  // @ts-ignore We can only use posthtml's sync API in our Karma preprocessor.
+  // See https://github.com/posthtml/posthtml#api
+  return posthtml(transforms).process(content, {sync: true}).html;
 }

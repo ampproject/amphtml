@@ -30,7 +30,6 @@ import {SubscriptionPlatform} from '../subscription-platform';
 import {SubscriptionService} from '../amp-subscriptions';
 import {ViewerSubscriptionPlatform} from '../viewer-subscription-platform';
 import {localSubscriptionPlatformFactory} from '../local-subscription-platform';
-import {setTimeout} from 'timers';
 
 describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
   let win;

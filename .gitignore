@@ -1,13 +1,11 @@
 .DS_Store
 .g4ignore
 build/
-.karma-cache*
 .amp-dep-check
 c
 /dist
 dist.3p
 dist.tools
-test-bin
 /release
 examples.min
 node_modules

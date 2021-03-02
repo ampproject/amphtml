@@ -25,9 +25,7 @@ import {
 import {Services} from '../../../../src/services';
 import {hasOwn} from '../../../../src/utils/object';
 import {macroTask} from '../../../../testing/yield';
-
-/* global require: false */
-const VENDOR_REQUESTS = require('./vendor-requests.json');
+import VENDOR_REQUESTS from './vendor-requests.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 
 describes.realWin(
   'amp-analytics',
