@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const {getOutput} = require('../common/exec');
+const {getOutput} = require('../../common/exec');
 
 /**
  * @param {Array<string>} args

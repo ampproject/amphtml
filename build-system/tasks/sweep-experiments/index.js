@@ -19,7 +19,7 @@ const path = require('path');
 const tempy = require('tempy');
 const {cyan, magenta, yellow} = require('kleur/colors');
 const {getOutput} = require('../../common/process');
-const {jscodeshift} = require('../../jscodeshift');
+const {jscodeshift} = require('../../test-configs/jscodeshift');
 const {log} = require('../../common/logging');
 const {readJsonSync, writeFileSync} = require('fs-extra');
 
