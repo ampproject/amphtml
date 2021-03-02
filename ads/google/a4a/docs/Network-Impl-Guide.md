@@ -9,8 +9,6 @@ be given preferential rendering.
     [bradfrizzell@google.com](mailto:bradfrizzell@google.com)_
 -   _Last Updated: 1-27-2016_
 
-## Contents
-
 <!--
   (Do not remove or edit this comment.)
 
@@ -18,7 +16,6 @@ be given preferential rendering.
     gulp markdown-toc --fix
 -->
 
--   [Contents](#contents)
 -   [Background](#background)
 -   [Overview](#overview)
 -   [Detailed design](#detailed-design)
