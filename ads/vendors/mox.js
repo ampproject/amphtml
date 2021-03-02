@@ -18,7 +18,12 @@ import {loadScript, validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} config
+ * @param {{
+ *   z: string,
+ *   w: string,
+ *   h: string,
+ *   u: (string|undefined)
+ * }} config
  */
 export function mox(global, config) {
   validateData(config, ['z', 'w', 'h'], ['u']);

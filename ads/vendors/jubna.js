@@ -18,7 +18,10 @@ import {loadScript, validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   wid: string,
+ *   pid: string
+ * }} data
  */
 export function jubna(global, data) {
   validateData(data, ['wid', 'pid']);

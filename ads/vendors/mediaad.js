@@ -18,7 +18,10 @@ import {loadScript, validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   medtag: string,
+ *   publisher: string,
+ * }} data
  */
 export function mediaad(global, data) {
   // ensure we have vlid publisher, placement and mode
@@ -33,16 +36,18 @@ export function mediaad(global, data) {
   global._mediaad = global._mediaad || [];
 
   // install observation on entering/leaving the view
-  global.context.observeIntersection(function (changes) {
-    /** @type {!Array} */ (changes).forEach(function (c) {
-      if (c.intersectionRect.height) {
-        global._mediaad.push({
-          medtag: data['medtag'],
-          publisher: data.publisher,
-        });
-      }
-    });
-  });
+  /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context).observeIntersection(
+    function (changes) {
+      /** @type {!Array} */ (changes).forEach(function (c) {
+        if (c.intersectionRect.height) {
+          global._mediaad.push({
+            medtag: data['medtag'],
+            publisher: data.publisher,
+          });
+        }
+      });
+    }
+  );
 
   loadScript(
     global,

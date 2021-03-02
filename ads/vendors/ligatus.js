@@ -18,7 +18,9 @@ import {validateSrcPrefix, writeScript} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   src: string
+ * }} data
  */
 export function ligatus(global, data) {
   const {src} = data;

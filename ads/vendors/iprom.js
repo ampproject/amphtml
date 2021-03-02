@@ -19,7 +19,12 @@ import {validateData, writeScript} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   sitepath: string,
+ *   zone: Array<string>,
+ *   keywords: (string|undefined),
+ *   channels: (string|undefined)
+ * }} data
  */
 export function iprom(global, data) {
   validateData(data, ['zone', 'sitepath'], ['keywords', 'channels']);
@@ -41,13 +46,21 @@ export function iprom(global, data) {
     ipromNS.AdTag = ipromNS.AdTag || {};
 
     const config = {
-      sitePath: parseJson(ampdata.sitepath),
+      sitePath: parseJson(/** @type {{sitepath: string}} */ (ampdata).sitepath),
       containerId: 'c',
-      zoneId: ampdata.zone,
+      zoneId: /** @type {{zone: Array<string>}} */ (ampdata).zone,
       prebid: true,
       amp: true,
-      keywords: ampdata.keywords ? ampdata.keywords.split(',') : [],
-      channels: ampdata.channels ? ampdata.channels.split(',') : [],
+      keywords: /** @type {{keywords: (string|undefined)}} */ (ampdata).keywords
+        ? /** @type {{keywords: (string|undefined)}} */ (ampdata).keywords.split(
+            ','
+          )
+        : [],
+      channels: /** @type {{channels: (string|undefined)}} */ (ampdata).channels
+        ? /** @type {{channels: (string|undefined)}} */ (ampdata).channels.split(
+            ','
+          )
+        : [],
     };
 
     const tag = new ipromNS.AdTag(config);

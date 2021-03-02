@@ -18,12 +18,20 @@ import {validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   widgetKey: string,
+ *   url: (string|undefined),
+ *   organicClicks: (string|undefined),
+ *   paidClicks: (string|undefined)
+ * }} data
  */
 export function my6sense(global, data) {
   validateData(data, ['widgetKey']);
 
-  const widgetTag = global.document.createElement('script');
+  /** @type {HTMLScriptElement} */
+  const widgetTag = /** @type {HTMLScriptElement} */ (global.document.createElement(
+    'script'
+  ));
   widgetTag.src = `//web-clients.mynativeplatform.com/web-clients/bootloaders/${data['widgetKey']}/bootloader.js`;
   const url =
     data['url'] && data['url'] !== '[PAGE_URL]'

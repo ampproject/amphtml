@@ -18,7 +18,9 @@ import {loadScript, validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   slot: string,
+ * }} data
  */
 export function lockerdome(global, data) {
   validateData(data, ['slot']);

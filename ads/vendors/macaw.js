@@ -18,11 +18,15 @@ import {loadScript, validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   blockId: string
+ * }} data
  */
 export function macaw(global, data) {
   validateData(data, ['blockId']);
 
+  /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */
+  const context = /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context);
   const url =
     'https://code.macaw.is/data/' +
     encodeURIComponent(data['blockId']) +
@@ -32,10 +36,10 @@ export function macaw(global, data) {
     global,
     url,
     () => {
-      global.context.renderStart();
+      context.renderStart();
     },
     () => {
-      global.context.noContentAvailable();
+      context.noContentAvailable();
     }
   );
 }

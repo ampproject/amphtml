@@ -18,7 +18,10 @@ import {loadScript, validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   property: string,
+ *   zone: string,
+ * }} data
  */
 export function mantisDisplay(global, data) {
   validateData(data, ['property', 'zone'], []);
@@ -41,7 +44,10 @@ export function mantisDisplay(global, data) {
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   property: string,
+ *   css: (string|undefined)
+ * }} data
  */
 export function mantisRecommend(global, data) {
   validateData(data, ['property'], ['css']);

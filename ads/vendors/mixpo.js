@@ -18,16 +18,31 @@ import {validateData, writeScript} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   guid: string,
+ *   subdomain: string,
+ *   width: string,
+ *   height: string,
+ *   loader: (string|undefined),
+ *   embedv: (string|undefined),
+ *   clicktag: (string|undefined),
+ *   customtarget: (string|undefined),
+ *   dynclickthrough: (string|undefined),
+ *   viewtracking: (string|undefined),
+ *   customcss: (string|undefined),
+ *   local: (string|undefined),
+ *   enablemraid: (string|undefined),
+ *   jsplayer: (string|undefined),
+ * }} data
  */
 export function mixpo(global, data) {
   validateData(data, ['guid', 'subdomain']);
 
-  const g = global,
-    cdnSubdomain = data.subdomain == 'www' ? 'cdn' : data.subdomain + '-cdn',
-    url = data.loader || `https://${cdnSubdomain}.mixpo.com/js/loader.js`;
+  const cdnSubdomain =
+    data.subdomain == 'www' ? 'cdn' : data.subdomain + '-cdn';
+  const url = data.loader || `https://${cdnSubdomain}.mixpo.com/js/loader.js`;
 
-  g.mixpoAd = {
+  global.mixpoAd = {
     amp: true,
     noflash: true,
     width: data.width,
@@ -45,5 +60,5 @@ export function mixpo(global, data) {
     jsPlayer: data.jsplayer,
   };
 
-  writeScript(g, url);
+  writeScript(global, url);
 }

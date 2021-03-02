@@ -26,7 +26,9 @@ import {parseUrlDeprecated} from '../../src/url';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   adslot: string
+ * }} data
  */
 export function kixer(global, data) {
   /*eslint "google-camelcase/google-camelcase": 0*/
@@ -37,6 +39,8 @@ export function kixer(global, data) {
   let viewed = false;
   let viewTimer = null;
 
+  /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */
+  const context = /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context);
   const d = global.document.createElement('div');
   d.id = '__kx_ad_' + data.adslot;
   global.document.getElementById('c').appendChild(d);
@@ -44,9 +48,9 @@ export function kixer(global, data) {
   const kxload = function () {
     d.removeEventListener('load', kxload, false);
     if (d.childNodes.length > 0) {
-      global.context.renderStart();
+      context.renderStart();
     } else {
-      global.context.noContentAvailable();
+      context.noContentAvailable();
     }
   };
   d.addEventListener('load', kxload, false); // Listen for the kixer load event
@@ -82,7 +86,7 @@ export function kixer(global, data) {
     }
   };
 
-  global.context.observeIntersection(function (changes) {
+  context.observeIntersection(function (changes) {
     /** @type {!Array} */ (changes).forEach(function (c) {
       kxviewCheck(c);
     });

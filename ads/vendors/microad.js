@@ -20,7 +20,14 @@ import {loadScript, validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   spot: string,
+ *   url: (string|undefined),
+ *   referrer: (string|undefined),
+ *   ifa: (string|undefined),
+ *   appid: (string|undefined),
+ *   geo: (string|undefined)
+ * }} data
  */
 export function microad(global, data) {
   // TODO: check mandatory fields

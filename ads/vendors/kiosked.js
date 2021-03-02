@@ -27,10 +27,13 @@ export function kiosked(global, data) {
   if (hasOwn(data, 'scriptid')) {
     scriptId = data['scriptid'];
   }
+
+  /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */
+  const context = /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context);
   window.addEventListener(
     'kioskedAdRender',
     function () {
-      global.context.renderStart();
+      context.renderStart();
     },
     false
   );
@@ -38,7 +41,7 @@ export function kiosked(global, data) {
   window.addEventListener(
     'kioskedAdNoFill',
     function () {
-      global.context.noContentAvailable();
+      context.noContentAvailable();
     },
     false
   );

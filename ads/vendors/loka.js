@@ -18,19 +18,23 @@ import {loadScript, validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   unitParams: string
+ * }} data
  */
 export function loka(global, data) {
   validateData(data, ['unitParams'], []);
 
   global.lokaParams = data;
 
+  /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */
+  const context = /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context);
   const container = global.document.querySelector('#c');
   container.addEventListener('lokaUnitLoaded', (e) => {
-    if (e.detail.isReady) {
-      global.context.renderStart();
+    if (/** @type {{isReady: boolean}} */ (e.detail).isReady) {
+      context.renderStart();
     } else {
-      global.context.noContentAvailable();
+      context.noContentAvailable();
     }
   });
 

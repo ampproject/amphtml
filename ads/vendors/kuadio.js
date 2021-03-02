@@ -18,7 +18,15 @@ import {loadScript, validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   widgetId: string,
+ *   region: (string|undefined),
+ *   baseUrl: (string|undefined),
+ *   betaMode: (string|undefined),
+ *   debugMode: (string|undefined),
+ *   fastParse: (string|undefined),
+ *   ref: (string|undefined)
+ * }} data
  */
 export function kuadio(global, data) {
   validateData(
@@ -38,7 +46,13 @@ export function kuadio(global, data) {
   const e = global.document.createElement('div');
   e.className = '_pvmax_recommend';
   e.setAttribute('data-widget-id', data.widgetId);
-  e.setAttribute('data-ref', data.ref || global.context.canonicalUrl);
+  e.setAttribute(
+    'data-ref',
+    data.ref ||
+      /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context)
+        .canonicalUrl ||
+      ''
+  );
   global.document.getElementById('c').appendChild(e);
 
   loadScript(global, 'https://api.pvmax.net/v1.0/pvmax.js');

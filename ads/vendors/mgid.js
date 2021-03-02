@@ -18,7 +18,13 @@ import {loadScript, validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   publisher: string,
+ *   widget: string,
+ *   container: string,
+ *   url: (string|undefined),
+ *   options: (Object|undefined)
+ * }} data
  */
 export function mgid(global, data) {
   validateData(data, ['publisher', 'widget', 'container'], ['url', 'options']);
@@ -49,14 +55,24 @@ export function mgid(global, data) {
   ).slice(-5);
   window['ampOptions' + data.widget + '_' + global.uniqId] = data.options;
 
-  global.context.observeIntersection(function (changes) {
-    /** @type {!Array} */ (changes).forEach(function (c) {
-      window['intersectionRect' + data.widget + '_' + global.uniqId] =
-        c.intersectionRect;
-      window['boundingClientRect' + data.widget + '_' + global.uniqId] =
-        c.boundingClientRect;
-    });
-  });
+  /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context).observeIntersection(
+    /**
+     * @param {Array<IntersectionObserverEntry>} changes
+     */
+    function (changes) {
+      changes.forEach(
+        /**
+         * @param {IntersectionObserverEntry} c
+         */
+        function (c) {
+          window['intersectionRect' + data.widget + '_' + global.uniqId] =
+            c.intersectionRect;
+          window['boundingClientRect' + data.widget + '_' + global.uniqId] =
+            c.boundingClientRect;
+        }
+      );
+    }
+  );
 
   loadScript(global, data.url || url);
 }

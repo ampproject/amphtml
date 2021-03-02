@@ -18,7 +18,11 @@ import {computeInMasterFrame, loadScript, validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   site: string,
+ *   slot: string,
+ *   options: (string|undefined)
+ * }} data
  */
 export function kargo(global, data) {
   /*eslint "google-camelcase/google-camelcase": 0*/
@@ -38,7 +42,7 @@ export function kargo(global, data) {
   }
 
   // Add window source reference to ad options
-  options.source_window = global;
+  /** @type {{source_window: Window}} */ (options).source_window = global;
 
   computeInMasterFrame(
     global,
@@ -56,7 +60,8 @@ export function kargo(global, data) {
     },
     (success) => {
       if (success) {
-        const w = options.source_window;
+        const w = /** @type {{source_window: Window}} */ (options)
+          .source_window;
 
         // Add reference to Kargo api to this window if it's not the Master window
         if (!w.context.isMaster) {

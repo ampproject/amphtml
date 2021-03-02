@@ -18,26 +18,34 @@ import {loadScript, validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   blockid: string,
+ *   canonical: (string|undefined),
+ *   ampurl: (string|undefined),
+ *   testmode: (string|undefined),
+ *   referrer: (string|undefined),
+ * }} data
  */
 export function miximedia(global, data) {
   validateData(data, ['blockid']);
+  /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */
+  const context = /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context);
   global._miximedia = global._miximedia || {
-    viewId: global.context.pageViewId,
+    viewId: context.pageViewId,
     blockId: data['blockid'],
-    htmlURL: data['canonical'] || global.context.canonicalUrl,
-    ampURL: data['ampurl'] || global.context.sourceUrl,
+    htmlURL: data['canonical'] || context.canonicalUrl,
+    ampURL: data['ampurl'] || context.sourceUrl,
     testMode: data['testmode'] || 'false',
-    referrer: data['referrer'] || global.context.referrer,
-    hostname: global.window.context.location.hostname,
-    clientId: window.context.clientId,
-    domFingerprint: window.context.domFingerprint,
-    location: window.context.location,
-    startTime: window.context.startTime,
+    referrer: data['referrer'] || context.referrer,
+    hostname: context.location.hostname,
+    clientId: context.clientId,
+    domFingerprint: context.domFingerprint,
+    location: context.location,
+    startTime: context.startTime,
   };
   global._miximedia.AMPCallbacks = {
-    renderStart: global.context.renderStart,
-    noContentAvailable: global.context.noContentAvailable,
+    renderStart: context.renderStart,
+    noContentAvailable: context.noContentAvailable,
   };
   // load the miximedia  AMP JS file script asynchronously
   const rand = Math.round(Math.random() * 100000000);
@@ -45,6 +53,6 @@ export function miximedia(global, data) {
     global,
     'https://amp.mixi.media/ampclient/mixi.js?rand=' + rand,
     () => {},
-    global.context.noContentAvailable
+    context.noContentAvailable
   );
 }

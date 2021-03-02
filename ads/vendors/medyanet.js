@@ -19,7 +19,12 @@ import {validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   slot: string,
+ *   domain: string,
+ *   width: string,
+ *   height: string
+ * }} data
  */
 export function medyanet(global, data) {
   validateData(data, ['slot', 'domain']);
@@ -33,10 +38,18 @@ export function medyanet(global, data) {
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   slot: string,
+ *   domain: string,
+ *   width: string,
+ *   height: string
+ * }} data
  */
 function medyanetAds(global, data) {
-  const f = global.document.createElement('iframe');
+  /** @type {HTMLIFrameElement} */
+  const f = /** @type {HTMLIFrameElement} */ (global.document.createElement(
+    'iframe'
+  ));
   f.setAttribute('id', 'adframe');
   f.setAttribute('width', data.width);
   f.setAttribute('height', data.height);
@@ -50,7 +63,7 @@ function medyanetAds(global, data) {
     position: 'relative',
   });
   f.onload = function () {
-    window.context.renderStart();
+    /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context).renderStart();
   };
   f.src = `https://app.medyanetads.com/amp/medyanetads.html?bidderData=${global.domain}&adunit=${global.adunit}&size=${global.size}`;
   const url = window.top.location.search.substring(1);

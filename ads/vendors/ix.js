@@ -26,7 +26,13 @@ const EVENT_BADTAG = 3;
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   ixId: (string|undefined),
+ *   ixSlot: (string|undefined),
+ *   ixTimeout: (number|undefined),
+ *   slot: (string|undefined),
+ *   targeting: (Object|undefined)
+ * }} data
  */
 export function ix(global, data) {
   if (!('slot' in data)) {
@@ -40,7 +46,7 @@ export function ix(global, data) {
     data.ixTimeout = isNaN(data.ixTimeout) ? DEFAULT_TIMEOUT : data.ixTimeout;
     const timer = setTimeout(() => {
       callDoubleclick(EVENT_TIMEOUT);
-    }, data.ixTimeout);
+    }, /** @type {{ixTimeout: number}} */ (data).ixTimeout);
 
     const callDoubleclick = function (code) {
       if (calledDoubleclick) {
@@ -48,7 +54,13 @@ export function ix(global, data) {
       }
       calledDoubleclick = true;
       clearTimeout(timer);
-      reportStats(data.ixId, data.ixSlot, data.slot, start, code);
+      reportStats(
+        /** @type {{ixId: string}} */ (data).ixId,
+        /** @type {{ixSlot: string}} */ (data).ixSlot,
+        /** @type {{slot: string}} */ (data).slot,
+        start,
+        code
+      );
       prepareData(data);
       doubleclick(global, data);
     };
@@ -76,7 +88,13 @@ export function ix(global, data) {
 }
 
 /**
- * @param {!Object} data
+ * @param {{
+ *   ixId: (string|undefined),
+ *   ixSlot: (string|undefined),
+ *   ixTimeout: (number|undefined),
+ *   slot: (string|undefined),
+ *   targeting: (Object|undefined)
+ * }} data
  */
 function prepareData(data) {
   for (const attr in data) {

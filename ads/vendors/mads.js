@@ -18,7 +18,9 @@ import {validateData, writeScript} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   adrequest: string
+ * }} data
  */
 export function mads(global, data) {
   validateData(data, ['adrequest'], []);

@@ -18,7 +18,9 @@ import {loadScript, validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   site: string
+ * }} data
  */
 export function mediavine(global, data) {
   validateData(data, ['site']);

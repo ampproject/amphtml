@@ -22,13 +22,17 @@ const adUrl = 'https://www.myfinance.com/amp/ad';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   adType: string,
+ *   mf_referrer: (string|undefined)
+ * }} data
  */
 export function myfinance(global, data) {
   validateData(data, mandatoryFields);
+  /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */
+  const context = /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context);
   if (!data['mf_referrer']) {
-    data['mf_referrer'] =
-      global.context.canonicalUrl || global.context.sourceUrl;
+    data['mf_referrer'] = context.canonicalUrl || context.sourceUrl;
   }
   const url = buildUrl(data);
   global.MF_AMP_DATA = data;

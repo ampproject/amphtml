@@ -17,21 +17,25 @@ import {loadScript, validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   code: string,
+ * }} data
  */
 export function meg(global, data) {
   validateData(data, ['code']);
   const {code} = data;
+  /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */
+  const context = /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context);
   const lang = global.encodeURIComponent(global.navigator.language);
-  const ref = global.encodeURIComponent(global.context.referrer);
+  const ref = global.encodeURIComponent(context.referrer || '');
   const params = ['lang=' + lang, 'ref=' + ref].join('&');
   const url = 'https://apps.meg.com/embedjs/' + code + '?' + params;
   global._megAdsLoaderCallbacks = {
     onSuccess: () => {
-      global.context.renderStart();
+      context.renderStart();
     },
     onError: () => {
-      global.context.noContentAvailable();
+      context.noContentAvailable();
     },
   };
   loadScript(
@@ -42,7 +46,7 @@ export function meg(global, data) {
     },
     () => {
       // Cannot load meg embed.js
-      global.context.noContentAvailable();
+      context.noContentAvailable();
     }
   );
 }

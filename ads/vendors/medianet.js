@@ -42,14 +42,22 @@ const mandatoryParams = ['tagtype', 'cid'],
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   tagtype: string,
+ *   cid: string,
+ *   crid: (string|undefined),
+ *   misc: (string|undefined),
+ *   targeting: (Object|undefined),
+ * }} data
  */
 export function medianet(global, data) {
   validateData(data, mandatoryParams, optionalParams);
 
+  /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */
+  const context = /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context);
   const publisherUrl =
-      global.context.canonicalUrl || getSourceUrl(global.context.location.href),
-    referrerUrl = global.context.referrer;
+      context.canonicalUrl || getSourceUrl(context.location.href),
+    referrerUrl = context.referrer;
 
   if (data.tagtype === 'headerbidder') {
     //parameter tagtype is used to identify the product the publisher is using. Going ahead we plan to support more product types.
@@ -57,7 +65,7 @@ export function medianet(global, data) {
   } else if (data.tagtype === 'cm' && data.crid) {
     loadCMTag(global, data, publisherUrl, referrerUrl);
   } else {
-    global.context.noContentAvailable();
+    context.noContentAvailable();
   }
 }
 
@@ -66,22 +74,33 @@ export function medianet(global, data) {
  * @return {{renderStartCb: (function(*=)), reportRenderedEntityIdentifierCb: (function(*=)), noContentAvailableCb: (function())}}
  */
 function getCallbacksObject(global) {
+  /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */
+  const context = /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context);
   return {
     renderStartCb: (opt_data) => {
-      global.context.renderStart(opt_data);
+      context.renderStart(opt_data);
     },
     reportRenderedEntityIdentifierCb: (ampId) => {
-      global.context.reportRenderedEntityIdentifier(ampId);
+      context.reportRenderedEntityIdentifier(ampId);
     },
     noContentAvailableCb: () => {
-      global.context.noContentAvailable();
+      context.noContentAvailable();
     },
   };
 }
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   tagtype: string,
+ *   cid: string,
+ *   crid: (string|undefined),
+ *   misc: (string|undefined),
+ *   targeting: (Object|undefined),
+ *   requrl: (string|undefined),
+ *   refurl: (string|undefined),
+ *   versionId: (string|undefined),
+ * }} data
  * @param {string} publisherUrl
  * @param {?string} referrerUrl
  */
@@ -131,8 +150,8 @@ function loadCMTag(global, data, publisherUrl, referrerUrl) {
     let url = 'https://contextual.media.net/ampnmedianet.js?';
     url += 'cid=' + encodeURIComponent(data.cid);
     url += '&https=1';
-    url += '&requrl=' + encodeURIComponent(data.requrl);
-    url += '&refurl=' + encodeURIComponent(data.refurl);
+    url += '&requrl=' + encodeURIComponent(data.requrl || '');
+    url += '&refurl=' + encodeURIComponent(data.refurl || '');
     writeScript(global, url);
   }
 
@@ -150,11 +169,23 @@ function loadCMTag(global, data, publisherUrl, referrerUrl) {
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   tagtype: string,
+ *   cid: string,
+ *   crid: (string|undefined),
+ *   misc: (string|undefined),
+ *   targeting: (Object|undefined),
+ *   requrl: (string|undefined),
+ *   refurl: (string|undefined),
+ *   versionId: (string|undefined),
+ * }} data
  * @param {string} publisherUrl
  * @param {?string} referrerUrl
  */
 function loadHBTag(global, data, publisherUrl, referrerUrl) {
+  /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */
+  const context = /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context);
+
   /**
    * Loads MNETAd.
    */
@@ -164,7 +195,7 @@ function loadHBTag(global, data, publisherUrl, referrerUrl) {
     }
     loadMNETAd.alreadyCalled = true;
 
-    global.advBidxc = global.context.master.advBidxc;
+    global.advBidxc = context.master.advBidxc;
     if (global.advBidxc && typeof global.advBidxc.renderAmpAd === 'function') {
       global.addEventListener('message', (event) => {
         global.advBidxc.renderAmpAd(event, global);
@@ -186,7 +217,7 @@ function loadHBTag(global, data, publisherUrl, referrerUrl) {
    * Handler for mnet.
    */
   function mnetHBHandle() {
-    global.advBidxc = global.context.master.advBidxc;
+    global.advBidxc = context.master.advBidxc;
     if (
       global.advBidxc &&
       typeof global.advBidxc.registerAmpSlot === 'function'
@@ -211,7 +242,7 @@ function loadHBTag(global, data, publisherUrl, referrerUrl) {
         setAmpTargeting: () => {},
         renderAmpAd: () => {},
         loadAmpAd: () => {
-          global.context.noContentAvailable();
+          context.noContentAvailable();
         },
       };
       global.advBidxc.amp = getCallbacksObject(global);

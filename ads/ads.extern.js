@@ -476,35 +476,72 @@ data.pub;
 data.zone;
 data.channel;
 
+// iprom.js
+window.ipromNS;
+
 // ix.js
-data.ixId;
-data.ixId;
-data.ixSlot;
-data.ixSlot;
+window.IndexArgs;
+window.CasaleArgs;
+
+// jubna.js
+window._jubna;
 
 // kargo.js
+window.Kargo;
 data.options;
 data.slot;
 
 // kixer.js
+window.__kx_domain;
+window.__kxamp;
+window.__kx_ad_slots;
+window.__kx_ad_start;
+window.__kx_viewability;
 data.adslot;
+
+// kuaudio.js
+window._pvmax;
+
+// lockerdome.js
+window.SLOT;
+
+// loka.js
+window.lokaParams;
 
 // mads.js
 var MADSAdrequest = {};
 MADSAdrequest.adrequest;
 data.adrequest;
 
+// mantis.js
+window.mantis;
+
 // marfeel.js
 data.tenant;
 data.version;
 
+// mediaad.js
+window._mediaad;
+
 // medianet.js
-data.crid;
-data.hasOwnProperty;
-data.requrl;
-data.refurl;
-data.versionId;
-data.timeout;
+window.advBidxc_requrl;
+window.advBidxc_refurl;
+window.advBidxc;
+window._mNAmp;
+
+// mediavine.js
+window.$mediavine;
+
+// medyanet.js
+window.domain;
+window.adunit;
+window.size;
+
+// meg.js
+window._megAdsLoaderCallbacks;
+
+// mgid.js
+window.uniqId;
 
 // microad.js
 var MicroAd = {};
@@ -512,18 +549,18 @@ MicroAd.Compass;
 MicroAd.Compass.showAd;
 data.spot;
 
+// miximedia.js
+window._miximedia;
+
 // mixpo.js
-data.subdomain;
-data.guid;
-data.embedv;
-data.clicktag;
-data.customtarget;
-data.dynclickthrough;
-data.viewtracking;
-data.customcss;
-data.local;
-data.enablemraid;
-data.jsplayer;
+window.mixpoAd;
+
+// monetizer101.js
+window.widget;
+window.config;
+
+// myfinance.js
+window.MF_AMP_DATA;
 
 // myoffrz.js
 window.config;
