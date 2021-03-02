@@ -94,6 +94,12 @@ const watchDebounceDelay = 1000;
 const cache = new Map();
 
 /**
+ * Stores esbuild's watch mode rebuilders.
+ * @private @const {!Map<string, {rebuild: function():!Promise<void>}>}
+ */
+const watchedExtensions = new Map();
+
+/**
  * @param {!Object} jsBundles
  * @param {string} name
  * @param {?Object} extraOptions
@@ -366,8 +372,15 @@ function handleBundleError(err, continueOnError, destFilename) {
  * @param {string} destDir
  * @param {string} destFilename
  * @param {?Object} options
+ * @param {number} startTime
  */
-function finishBundle(srcFilename, destDir, destFilename, options) {
+async function finishBundle(
+  srcFilename,
+  destDir,
+  destFilename,
+  options,
+  startTime
+) {
   combineWithCompiledFile(
     srcFilename,
     path.join(destDir, destFilename),
@@ -376,11 +389,23 @@ function finishBundle(srcFilename, destDir, destFilename, options) {
 
   if (options.latestName) {
     // "amp-foo-latest.js" -> "amp-foo-latest.max.js"
-    const latestMaxName = options.latestName.split('.js')[0] + '.max.js';
+    const latestMaxName = options.latestName.replace(/\.js$/, '.max.js');
     // Copy amp-foo-0.1.js to amp-foo-latest.max.js.
     fs.copySync(
       path.join(destDir, options.toName),
       path.join(destDir, latestMaxName)
+    );
+    endBuildStep('Compiled', `${destFilename} → ${latestMaxName}`, startTime);
+  } else {
+    endBuildStep('Compiled', destFilename, startTime);
+  }
+
+  const target = path.basename(destFilename, path.extname(destFilename));
+  if (UNMINIFIED_TARGETS.includes(target)) {
+    await applyAmpConfig(
+      path.join(destDir, destFilename),
+      /* localDev */ true,
+      /* fortesting */ options.fortesting
     );
   }
 }
@@ -400,14 +425,8 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
   const destFilename = options.toName || srcFilename;
   const destFile = path.join(destDir, destFilename);
 
-  if (options.watch) {
-    const watchFunc = async () => {
-      const bundleDone = await performBundle(/* continueOnError */ true);
-      if (options.onWatchBuild) {
-        options.onWatchBuild(bundleDone);
-      }
-    };
-    fileWatch(entryPoint).on('change', debounce(watchFunc, watchDebounceDelay));
+  if (options.watch && watchedExtensions.has(entryPoint)) {
+    return watchedExtensions.get(entryPoint).rebuild();
   }
 
   /**
@@ -453,42 +472,35 @@ async function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
     };
   }
 
-  /**
-   * Bundles an entry point with all its imports and applies babel transforms.
-   * @param {boolean} continueOnError
-   */
-  async function performBundle(continueOnError) {
-    const {banner, footer} = splitWrapper();
-    await esbuild
-      .build({
-        entryPoints: [entryPoint],
-        bundle: true,
-        sourcemap: true,
-        define: experimentDefines,
-        outfile: destFile,
-        plugins: [esbuildBabelPlugin],
-        banner,
-        footer,
-      })
-      .catch((err) => handleBundleError(err, continueOnError, destFilename));
-    finishBundle(srcFilename, destDir, destFilename, options);
-    let name = destFilename;
-    if (options.latestName) {
-      const latestMaxName = options.latestName.split('.js')[0] + '.max.js';
-      name = `${name} → ${latestMaxName}`;
-    }
-    endBuildStep('Compiled', name, startTime);
-    const target = path.basename(destFilename, path.extname(destFilename));
-    if (UNMINIFIED_TARGETS.includes(target)) {
-      await applyAmpConfig(
-        destFile,
-        /* localDev */ true,
-        /* fortesting */ options.fortesting
-      );
-    }
-  }
+  const {banner, footer} = splitWrapper();
+  const buildResult = await esbuild
+    .build({
+      entryPoints: [entryPoint],
+      bundle: true,
+      sourcemap: true,
+      define: experimentDefines,
+      outfile: destFile,
+      plugins: [esbuildBabelPlugin],
+      banner,
+      footer,
+      incremental: !!options.watch,
+    })
+    .catch((err) =>
+      handleBundleError(err, options.continueOnError, destFilename)
+    );
+  finishBundle(srcFilename, destDir, destFilename, options, startTime);
 
-  await performBundle(options.continueOnError);
+  if (options.watch) {
+    watchedExtensions.set(entryPoint, {
+      rebuild: async () => {
+        const time = Date.now();
+        await buildResult.rebuild();
+        await finishBundle(srcFilename, destDir, destFilename, options, time);
+        options?.onWatchBuild();
+      },
+      latestPromise: Promise.resolve(),
+    });
+  }
 }
 
 /**
