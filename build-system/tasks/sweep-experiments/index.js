@@ -19,6 +19,7 @@ const path = require('path');
 const tempy = require('tempy');
 const {cyan, magenta, yellow} = require('kleur/colors');
 const {getOutput} = require('../../common/process');
+const {jscodeshift} = require('../../test-configs/jscodeshift');
 const {log} = require('../../common/logging');
 const {readJsonSync, writeFileSync} = require('fs-extra');
 
@@ -93,29 +94,13 @@ const getModifiedSourceFiles = (fromHash) =>
   );
 
 /**
- * Runs a jscodeshift transform under this directory.
- * @param {string} transform
- * @param {Array<string>=} args
- * @return {string}
- */
-const jscodeshift = (transform, args = []) =>
-  getStdoutThrowOnError(
-    [
-      'npx jscodeshift',
-      '--parser babylon',
-      `--parser-config ${__dirname}/jscodeshift/parser-config.json`,
-      `--transform ${__dirname}/jscodeshift/${transform}`,
-      ...args,
-    ].join(' ')
-  );
-
-/**
  * @param {string} id
  * @param {string} experimentsRemovedJson
  * @return {Array<string>} modified files
  */
 function removeFromExperimentsConfig(id, experimentsRemovedJson) {
-  jscodeshift('remove-experiment-config.js', [
+  jscodeshift([
+    `--transform ${__dirname}/jscodeshift/remove-experiment-config.js`,
     `--experimentId=${id}`,
     `--experimentsRemovedJson=${experimentsRemovedJson}`,
     experimentsConfigPath,
@@ -154,7 +139,8 @@ function removeFromRuntimeSource(id, percentage) {
     id
   );
   if (possiblyModifiedSourceFiles.length > 0) {
-    jscodeshift('remove-experiment-runtime.js', [
+    jscodeshift([
+      `--transform ${__dirname}/jscodeshift/remove-experiment-runtime.js`,
       `--isExperimentOnLaunched=${percentage}`,
       `--isExperimentOnExperiment=${id}`,
       ...possiblyModifiedSourceFiles,
