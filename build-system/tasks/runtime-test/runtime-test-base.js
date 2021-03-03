@@ -35,6 +35,7 @@ const {
 } = require('../../common/ctrlcHandler');
 const {app} = require('../../server/test-server');
 const {createKarmaServer, getAdTypes} = require('./helpers');
+const {cyan, green, red, yellow} = require('kleur/colors');
 const {dotWrappingWidth} = require('../../common/logging');
 const {getEsbuildBabelPlugin} = require('../helpers');
 const {getFilesFromArgv} = require('../../common/utils');
@@ -44,7 +45,6 @@ const {reportTestStarted} = require('../report-test-status');
 const {SERVER_TRANSFORM_PATH} = require('../../server/typescript-compile');
 const {startServer, stopServer} = require('../serve');
 const {unitTestsToRun} = require('./helpers-unit');
-const {yellow, red} = require('kleur/colors');
 
 /**
  * Used to print dots during esbuild + babel transforms
@@ -257,6 +257,19 @@ function updateFiles(config) {
 }
 
 /**
+ * Logs a message indicating the start of babel transforms.
+ */
+function logBabelStart() {
+  wrapCounter = 0;
+  log(
+    green('Transforming tests with'),
+    cyan('esbuild'),
+    green('and'),
+    cyan('babel') + green('...')
+  );
+}
+
+/**
  * Prints a dot for every babel transform, with wrapping if needed.
  */
 function printBabelDot() {
@@ -283,9 +296,10 @@ function updateEsbuildConfig(config) {
     },
   };
   const babelPlugin = getEsbuildBabelPlugin(
-    'test',
-    /* enableCache */ true,
-    printBabelDot
+    /* callerName */ 'test',
+    /* enableCache */ !argv.watch, // TODO(jridgewell): Make this true when unifiedJsFile goes away.
+    /* preSetup */ logBabelStart,
+    /* postLoad */ printBabelDot
   );
   config.esbuild = {
     target: 'es5',
@@ -304,18 +318,16 @@ function updateEsbuildConfig(config) {
  * @param {!RuntimeTestConfig} config
  */
 function updateClient(config) {
-  config.singleRun = !argv.watch && !argv.w;
+  config.singleRun = !argv.watch;
   config.client.mocha.grep = !!argv.grep;
-  config.client.verboseLogging = !!argv.verbose || !!argv.v;
-  config.client.captureConsole = !!argv.verbose || !!argv.v || !!argv.files;
+  config.client.verboseLogging = !!argv.verbose;
+  config.client.captureConsole = !!argv.verbose || !!argv.files;
   config.client.amp = {
     useCompiledJs: !!argv.compiled,
     adTypes: getAdTypes(),
     mochaTimeout: config.client.mocha.timeout,
     testServerPort: config.client.testServerPort,
-    // This is used in _init_tests for matchers such as `skipModuleBuild` and
-    // `ifModuleBuild`.
-    isModuleBuild: !!argv.esm,
+    isModuleBuild: !!argv.esm, // Used by skip matchers in _init_tests.js
   };
 }
 
