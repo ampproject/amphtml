@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {} from '../src/log';
 import {dashToUnderline} from '../src/string';
 import {dict} from '../src/utils/object';
 import {loadScript} from './3p';

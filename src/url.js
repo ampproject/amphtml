@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {} from './log';
 import {LruCache} from './utils/lru-cache';
 import {dict, hasOwn} from './utils/object';
 import {endsWith} from './string';

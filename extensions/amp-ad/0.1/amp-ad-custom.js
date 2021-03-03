@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {} from '../../../src/log';
 import {AmpAdUIHandler} from './amp-ad-ui';
 import {CommonSignals} from '../../../src/common-signals';
 import {LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';

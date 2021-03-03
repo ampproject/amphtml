@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {} from '../../../src/log';
 import {Services} from '../../../src/services';
 import {getIframe} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';

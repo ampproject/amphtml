@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {} from '../../../src/log';
 import {
   PositionInViewportEntryDef,
   PositionObserverFidelity,

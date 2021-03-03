@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {} from './log';
 import * as dom from './dom';
 import {extensionScriptsInNode} from './service/extension-script';
 import {

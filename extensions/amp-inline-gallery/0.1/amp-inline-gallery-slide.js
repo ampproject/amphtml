@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {} from '../../../src/log';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {htmlFor} from '../../../src/static-template';

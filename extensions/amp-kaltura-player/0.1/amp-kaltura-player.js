@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {} from '../../../src/log';
 import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
 import {dict} from '../../../src/utils/object';

@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-import {} from '../../../src/log';
 import {AmpAd3PImpl} from './amp-ad-3p-impl';
 import {AmpAdCustom} from './amp-ad-custom';
 import {CSS} from '../../../build/amp-ad-0.1.css';

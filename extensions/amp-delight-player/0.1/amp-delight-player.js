@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {} from '../../../src/log';
 import {CSS} from '../../../build/amp-delight-player-0.1.css';
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';

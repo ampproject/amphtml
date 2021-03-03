@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {} from '../../../src/log';
 import {AdStrategy} from './ad-strategy';
 import {
   AdTracker,

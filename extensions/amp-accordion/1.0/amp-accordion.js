@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {} from '../../../src/log';
 import {ActionTrust} from '../../../src/action-constants';
 import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-accordion-1.0.css';

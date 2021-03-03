@@ -27,7 +27,6 @@
  * </amp-soundcloud>
  */
 
-import {} from '../../../src/log';
 import {Services} from '../../../src/services';
 import {dict} from '../../../src/utils/object';
 import {isLayoutSizeDefined} from '../../../src/layout';

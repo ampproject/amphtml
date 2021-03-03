@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {} from './log';
 import {dict} from './utils/object';
 import {isArray} from './types';
 import {toStructuredCloneable} from './utils/xhr-utils';

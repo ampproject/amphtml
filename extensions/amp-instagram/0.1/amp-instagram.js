@@ -35,7 +35,6 @@
  * style without changing the layout/size.
  */
 
-import {} from '../../../src/log';
 import {CSS} from '../../../build/amp-instagram-0.1.css';
 import {Services} from '../../../src/services';
 import {getData, listen} from '../../../src/event-helper';

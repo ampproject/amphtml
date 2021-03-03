@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {} from '../../../src/log';
 import {closestAncestorElementBySelector} from '../../../src/dom';
 import {exponentialFalloff} from './amp-inline-gallery-pagination';
 import {isExperimentOn} from '../../../src/experiments';

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {} from '../log';
 import {ElementStub} from '../element-stub';
 import {Services} from '../services';
 import {createCustomElementClass, stubbedElements} from '../custom-element';

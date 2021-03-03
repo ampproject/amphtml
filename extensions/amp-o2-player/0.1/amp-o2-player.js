@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {} from '../../../src/log';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {MessageType} from '../../../src/3p-frame-messaging';
 import {Services} from '../../../src/services';

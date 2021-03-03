@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {} from '../../../src/log';
 import {TAG as KEY_TAG} from './amp-embedly-key';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';

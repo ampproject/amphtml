@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {} from './log';
 import {Observable} from './observable';
 import {Pass} from './pass';
 import {pureDevAssert as devAssert} from './core/assert';

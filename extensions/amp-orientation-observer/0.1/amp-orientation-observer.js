@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {} from '../../../src/log';
 import {ActionTrust} from '../../../src/action-constants';
 import {Services} from '../../../src/services';
 import {clamp, sum} from '../../../src/utils/math';

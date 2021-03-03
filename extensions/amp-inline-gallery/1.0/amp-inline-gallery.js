@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {} from '../../../src/log';
 import * as Preact from '../../../src/preact';
 import {
   AmpInlineGalleryPagination,

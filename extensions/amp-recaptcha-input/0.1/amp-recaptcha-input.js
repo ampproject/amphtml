@@ -20,7 +20,6 @@
  * recaptcha tokens
  */
 
-import {} from '../../../src/log';
 import {
   AmpRecaptchaService,
   recaptchaServiceForDoc,

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {} from '../../../src/log';
 import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-youtube-1.0.css';
 import {isExperimentOn} from '../../../src/experiments';

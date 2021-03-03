@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {} from '../../../src/log';
 import {format, getLocale} from './locales';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {

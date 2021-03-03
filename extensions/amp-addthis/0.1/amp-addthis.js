@@ -32,7 +32,6 @@
  * </code>
  */
 
-import {} from '../../../src/log';
 import {
   ALT_TEXT,
   API_SERVER,

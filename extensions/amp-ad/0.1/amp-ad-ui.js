@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {} from '../../../src/log';
 import {
   STICKY_AD_TRANSITION_EXP,
   divertStickyAdTransition,

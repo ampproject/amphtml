@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {} from '../log';
 import * as Preact from './index';
 import {ActionTrust} from '../action-constants';
 import {AmpEvents} from '../amp-events';

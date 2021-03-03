@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {} from './log';
 import {endsWith} from './string';
 import {
   getSourceOrigin,

@@ -27,7 +27,6 @@
  * </code>
  */
 
-import {} from '../../../src/log';
 import {getData, listen} from '../../../src/event-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {isObject} from '../../../src/types';
