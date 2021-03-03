@@ -59,7 +59,9 @@ export function Slot(props) {
 export function useSlotContext(ref) {
   const context = useAmpContext();
   useLayoutEffect(() => {
-    const slot = devAssert(ref.current?.nodeType == 1, 'Element expected');
+    const slot = ref.current;
+    devAssert(slot?.nodeType == 1, 'Element expected');
+
     setProp(slot, CanRender, Slot, context.renderable);
     setProp(slot, CanPlay, Slot, context.playable);
     setProp(
