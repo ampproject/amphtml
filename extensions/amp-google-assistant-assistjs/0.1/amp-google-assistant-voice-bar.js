@@ -57,7 +57,7 @@ export class AmpGoogleAssistantVoiceBar extends AMP.BaseElement {
     this.configService_.getWidgetIframeUrl('voicebar').then((iframeUrl) => {
       addAttributesToElement(iframe, {
         src: iframeUrl,
-        sandbox: 'allow-scripts'
+        sandbox: 'allow-scripts',
       });
 
       // applyFillContent so that frame covers the entire component.
