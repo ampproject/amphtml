@@ -21,9 +21,12 @@ const path = require('path');
 const postcss = require('postcss');
 const prettier = require('prettier');
 const textTable = require('text-table');
+const {
+  jscodeshiftAsync,
+  getJscodeshiftReport,
+} = require('../../test-configs/jscodeshift');
 const {getStdout} = require('../../common/process');
-const {gray, cyan} = require('kleur/colors');
-const {jscodeshiftAsync} = require('../../test-configs/jscodeshift');
+const {gray} = require('kleur/colors');
 const {logOnSameLineLocalDev} = require('../../common/logging');
 const {writeDiffOrFail} = require('../../common/diff');
 
@@ -42,8 +45,6 @@ const preamble = `
 
 <!-- markdown-link-check-disable -->
 `.trim();
-
-const stripColors = (str) => str.replace(/\x1B[[(?);]{0,2}(;?\d)*./g, '');
 
 const logChecking = (filename) =>
   logOnSameLineLocalDev(gray(path.basename(filename)));
@@ -164,24 +165,21 @@ function getZindexChainsInJs(glob, cwd = '.') {
     });
 
     stdout.on('data', (data) => {
-      const stripped = stripColors(data.toString());
+      const reportLine = getJscodeshiftReport(data.toString());
 
-      // Lines starting with " REP " are reports from transform, which we
-      // own and format.
-      if (!stripped.startsWith(' REP ')) {
+      if (!reportLine) {
         return;
       }
 
-      const noPrefix = stripped.substr(' REP '.length);
-      const [filename] = noPrefix.split(' ', 1);
+      const [filename, report] = reportLine;
       const relative = path.relative(cwd, filename);
 
       logChecking(filename);
 
-      const report = JSON.parse(noPrefix.substr(filename.length + 1));
+      const reportParsed = JSON.parse(report);
 
-      if (report.length) {
-        result[relative] = report.sort(sortedByEntryKey);
+      if (reportParsed.length) {
+        result[relative] = reportParsed.sort(sortedByEntryKey);
       }
     });
 
