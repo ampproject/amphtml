@@ -238,7 +238,7 @@ AmpSocialShare['delegatesFocus'] = true;
 
 /** @override */
 AmpSocialShare['props'] = {
-  'tabIndex': {attr: 'tabindex', media: true},
+  'tabIndex': {attr: 'tabindex'},
   'type': {attr: 'type'},
 };
 
