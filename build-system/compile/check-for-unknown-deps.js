@@ -15,7 +15,7 @@
  */
 'use strict';
 
-const through = require('through2');
+const fs = require('fs-extra');
 const {log} = require('../common/logging');
 const {red, cyan, yellow} = require('kleur/colors');
 
@@ -23,30 +23,27 @@ const {red, cyan, yellow} = require('kleur/colors');
  * Searches for the identifier "module$", which Closure uses to uniquely
  * reference module imports. If any are found, that means Closure couldn't
  * import the module correctly.
- *
- * @return {!NodeJS.ReadStream}
+ * @param {string} file
+ * @return {Promise<void>}
  */
-exports.checkForUnknownDeps = function () {
+async function checkForUnknownDeps(file) {
   const regex = /[\w$]*module\$[\w$]+/;
+  const contents = await fs.readFile(file, 'utf-8');
+  if (!contents.includes('module$')) {
+    // Fast check, since regexes can backtrack like crazy.
+    return;
+  }
+  const match = regex.exec(contents) || [
+    `couldn't parse the dep. Look for "module$" in the file`,
+  ];
+  log(
+    red('Error:'),
+    `Unknown dependency ${cyan(match[0])} found in ${cyan(file)}`
+  );
+  log(yellow(contents));
+  throw new Error('Compilation failed due to unknown dependency');
+}
 
-  return through.obj(function (file, _encoding, cb) {
-    const contents = file.contents.toString();
-    if (!contents.includes('module$')) {
-      // Fast check, since regexes can backtrack like crazy.
-      return cb(null, file);
-    }
-
-    const match = regex.exec(contents) || [
-      `couldn't parse the dep. Look for "module$" in the file`,
-    ];
-
-    log(
-      red('Error:'),
-      `Unknown dependency ${cyan(match[0])} found in ${cyan(file.relative)}`
-    );
-    log(yellow(contents));
-    const err = new Error('Compilation failed due to unknown dependency');
-    err.showStack = false;
-    cb(err, file);
-  });
+module.exports = {
+  checkForUnknownDeps,
 };

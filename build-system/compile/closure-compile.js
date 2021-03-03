@@ -15,31 +15,29 @@
  */
 'use strict';
 
-const closureCompiler = require('@ampproject/google-closure-compiler');
-const path = require('path');
-const pumpify = require('pumpify');
-const sourcemaps = require('gulp-sourcemaps');
+const {
+  getNativeImagePath,
+} = require('@ampproject/google-closure-compiler/lib/utils');
+const {compiler} = require('@ampproject/google-closure-compiler');
 const {cyan, red, yellow} = require('kleur/colors');
-const {EventEmitter} = require('events');
+const {getBabelCacheDir} = require('./pre-closure-babel');
 const {highlight} = require('cli-highlight');
 const {log} = require('../common/logging');
 
-let compilerErrors = '';
-
 /**
  * Formats a closure compiler error message into a more readable form by
- * dropping the closure compiler plugin's logging prefix and then syntax
- * highlighting the error text.
+ * normalizing paths and syntax highlighting the error text.
  * @param {string} message
  * @return {string}
  */
 function formatClosureCompilerError(message) {
-  const closurePluginLoggingPrefix = /^.*?gulp-google-closure-compiler.*?: /;
-  message = highlight(message, {ignoreIllegals: true})
-    .replace(closurePluginLoggingPrefix, '')
-    .replace(/ WARNING /g, yellow(' WARNING '))
-    .replace(/ ERROR /g, red(' ERROR '));
-  return message;
+  if (message) {
+    const babelCacheDir = `${getBabelCacheDir()}/`;
+    const normalized = message.replace(new RegExp(babelCacheDir, 'g'), '');
+    return highlight(normalized, {ignoreIllegals: true})
+      .replace(/ WARNING /g, yellow(' WARNING '))
+      .replace(/ ERROR /g, red(' ERROR '));
+  }
 }
 
 /**
@@ -47,87 +45,89 @@ function formatClosureCompilerError(message) {
  * emit a fatal error when compilation fails and signals the error so subsequent
  * operations can be skipped (used in watch mode).
  *
- * @param {Error} err
+ * @param {string} err
  * @param {string} outputFilename
  * @param {?Object} options
- * @param {?Function} resolve
  */
-function handleCompilerError(err, outputFilename, options, resolve) {
-  logError(`${red('ERROR:')} Could not minify ${cyan(outputFilename)}`);
+function handleCompilerError(err, outputFilename, options) {
+  const message = `${red('ERROR:')} Could not minify ${cyan(outputFilename)}`;
+  logError(message, err);
   if (options && options.continueOnError) {
     options.errored = true;
-    if (resolve) {
-      resolve();
-    }
   } else {
-    emitError(err);
+    throw new Error(message);
   }
 }
 
 /**
  * Handles a closure error during type checking
  *
- * @param {Error} err
+ * @param {string} err
  */
 function handleTypeCheckError(err) {
-  logError(red('Type checking failed:'));
-  emitError(err);
-}
-
-/**
- * Emits an error to the caller
- *
- * @param {Error} err
- */
-function emitError(err) {
-  err.showStack = false;
-  new EventEmitter().emit('error', err);
+  const message = `${red('ERROR:')} Type checking failed`;
+  logError(message, err);
+  throw new Error(message);
 }
 
 /**
  * Prints an error message when compilation fails
  * @param {string} message
+ * @param {string} err
  */
-function logError(message) {
-  log(`${message}\n` + formatClosureCompilerError(compilerErrors));
+function logError(message, err) {
+  log(`${message}\n` + formatClosureCompilerError(err));
 }
 
 /**
- * Normalize the sourcemap file paths before pushing into Closure.
- * Closure don't follow Gulp's normal sourcemap "root" pattern. Gulp considers
- * all files to be relative to the CWD by default, meaning a file `src/foo.js`
- * with a sourcemap alongside points to `src/foo.js`. Closure considers each
- * file relative to the sourcemap. Since the sourcemap for `src/foo.js` "lives"
- * in `src/`, it ends up resolving to `src/src/foo.js`.
- *
- * @param {!NodeJS.WritableStream} closureStream
- * @return {!NodeJS.WritableStream}
+ * Extracts the actual error message from closure compiler's stdErr by removing
+ * the long preamble that ends with the full command line.
+ * @param {Array<string>} flags
+ * @param {string} stdErr
+ * @return {string}
  */
-function makeSourcemapsRelative(closureStream) {
-  const relativeSourceMap = sourcemaps.mapSources((source, file) => {
-    const dir = path.dirname(file.sourceMap.file);
-    return path.relative(dir, source);
+function getErrorText(flags, stdErr) {
+  const lastFlag = flags.slice(-1).pop();
+  return stdErr.split(lastFlag).pop();
+}
+
+/**
+ * Initializes closure compiler with the given set of flags and ensures that the
+ * native compiler is used during compilation.
+ * @param {Array<string>} flags
+ * @return {!Object}
+ */
+function initializeClosure(flags) {
+  const closure = new compiler(flags);
+  closure.JAR_PATH = null;
+  closure.javaPath = getNativeImagePath();
+  return closure;
+}
+
+/**
+ * Runs closure compiler with the given set of flags.
+ * @param {string} outputFilename
+ * @param {!Object} options
+ * @param {Array<string>} flags
+ * @return {Promise<void>}
+ */
+function runClosure(outputFilename, options, flags) {
+  return new Promise((resolve) => {
+    initializeClosure(flags).run((exitCode, _code, stdErr) => {
+      if (exitCode !== 0) {
+        const err = getErrorText(flags, stdErr);
+        options.typeCheckOnly
+          ? handleTypeCheckError(err)
+          : handleCompilerError(err, outputFilename, options);
+      } else {
+        resolve();
+      }
+    });
   });
-
-  return pumpify.obj(relativeSourceMap, closureStream);
-}
-
-/**
- * @param {Array<string>} compilerOptions
- * @return {NodeJS.WritableStream}
- */
-function gulpClosureCompile(compilerOptions) {
-  const pluginOptions = {
-    logger: (errors) => (compilerErrors = errors), // Capture compiler errors
-  };
-
-  return makeSourcemapsRelative(
-    closureCompiler.gulp()(compilerOptions, pluginOptions)
-  );
 }
 
 module.exports = {
-  gulpClosureCompile,
+  runClosure,
   handleCompilerError,
   handleTypeCheckError,
 };
