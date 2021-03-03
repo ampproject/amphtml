@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from '../../../src/action-constants';
+import {BridActions, BridEvents} from './brid-events';
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
@@ -65,6 +67,9 @@ class AmpBridPlayer extends AMP.BaseElement {
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
 
+    /** @const @private {!BridPlayer} */
+    this.player_ = element;
+
     /** @private {?Promise} */
     this.playerReadyPromise_ = null;
 
@@ -79,6 +84,9 @@ class AmpBridPlayer extends AMP.BaseElement {
 
     /** @private {?Function} */
     this.unlistenMessage_ = null;
+
+    /** @const @private {!../../../src/service/action-impl.ActionService} */
+    this.actions_ = Services.actionServiceForDoc(this.player_);
   }
 
   /**
@@ -176,6 +184,9 @@ class AmpBridPlayer extends AMP.BaseElement {
 
     installVideoManagerForDoc(element);
     Services.videoManagerForDoc(element).register(this);
+
+    /** Register Brid actions */
+    this.registerDefaultAction(() => this.destroy(), BridActions.DESTROY);
   }
 
   /** @override */
@@ -312,6 +323,10 @@ class AmpBridPlayer extends AMP.BaseElement {
     if (params[2] == 'duration') {
       this.duration_ = parseFloat(params[3]);
     }
+
+    if (Object.values(BridEvents).includes(params[3])) {
+      this.actions_.trigger(this.player_, params[3], null, ActionTrust.LOW);
+    }
   }
 
   /** @override */
@@ -418,6 +433,11 @@ class AmpBridPlayer extends AMP.BaseElement {
   /** @override */
   seekTo(unusedTimeSeconds) {
     this.user().error(TAG, '`seekTo` not supported.');
+  }
+
+  /** Destroy player element */
+  destroy() {
+    this.sendCommand_('destroy');
   }
 }
 
