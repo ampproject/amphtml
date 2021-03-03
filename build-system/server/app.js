@@ -1390,7 +1390,7 @@ app.get(
     const fileName = path.basename(req.path).replace('.max.', '.');
     let filePath = 'https://cdn.ampproject.org/v0/' + fileName;
     if (mode == 'cdn') {
-      // This will not be useful until extension-location.js change in prod
+      // This will not be useful until extension-script.js change in prod
       // Require url from cdn
       request(filePath, (error, response) => {
         if (error) {
@@ -1446,7 +1446,7 @@ app.get(
     const mode = SERVE_MODE;
     const fileName = path.basename(req.path);
     if (mode == 'cdn') {
-      // This will not be useful until extension-location.js change in prod
+      // This will not be useful until extension-script.js change in prod
       // Require url from cdn
       const filePath = 'https://cdn.ampproject.org/' + fileName;
       request(filePath, function (error, response) {

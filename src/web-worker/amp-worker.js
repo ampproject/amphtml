@@ -16,7 +16,7 @@
 
 import {ModeDef, getMode} from '../mode';
 import {Services} from '../services';
-import {calculateEntryPointScriptUrl} from '../service/extension-location';
+import {calculateEntryPointScriptUrl} from '../service/extension-script';
 import {dev, devAssert} from '../log';
 import {getService, registerServiceBuilder} from '../service';
 

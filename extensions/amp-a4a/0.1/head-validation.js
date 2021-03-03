@@ -18,7 +18,7 @@ import {Services} from '../../../src/services';
 import {getMode} from '../../../src/mode';
 import {includes} from '../../../src/string';
 import {map} from '../../../src/utils/object';
-import {parseExtensionUrl} from '../../../src/service/extension-location';
+import {parseExtensionUrl} from '../../../src/service/extension-script';
 import {removeElement, rootNodeFor} from '../../../src/dom';
 import {urls} from '../../../src/config';
 
@@ -174,7 +174,7 @@ function handleScript(extensions, script) {
     (isTesting && includes(src, '/dist/'))
   ) {
     const extensionInfo = parseExtensionUrl(src);
-    if (EXTENSION_ALLOWLIST[extensionInfo.extensionId]) {
+    if (extensionInfo && EXTENSION_ALLOWLIST[extensionInfo.extensionId]) {
       extensions.push(extensionInfo);
     }
   }
