@@ -19,11 +19,18 @@
  * @fileoverview Creates an http server to handle responses for different test
  * cases.
  */
-const app = require('express')();
 const bodyParser = require('body-parser');
+const express = require('express');
+const app = express();
 
 app.use(bodyParser.json());
 
+/**
+ *
+ * @param {express.Request} req
+ * @param {express.Response} res
+ * @param {express.NextFunction} next
+ */
 function setCorsHeaders(req, res, next) {
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');

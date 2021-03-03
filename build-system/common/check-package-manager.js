@@ -71,15 +71,39 @@ ${cyan('$')} npm uninstall [package_name]
 ${yellow('For detailed instructions, see')} ${cyan(setupInstructionsUrl)}`;
 
 // Color formatting libraries may not be available when this script is run.
+/**
+ * Formats the text to appear red
+ *
+ * @param {string} text
+ * @return {string}
+ */
 function red(text) {
   return '\x1b[31m' + text + '\x1b[0m';
 }
+/**
+ * Formats the text to appear cyan
+ *
+ * @param {string} text
+ * @return {string}
+ */
 function cyan(text) {
   return '\x1b[36m' + text + '\x1b[0m';
 }
+/**
+ * Formats the text to appear green
+ *
+ * @param {string} text
+ * @return {string}
+ */
 function green(text) {
   return '\x1b[32m' + text + '\x1b[0m';
 }
+/**
+ * Formats the text to appear yellow
+ *
+ * @param {string} text
+ * @return {string}
+ */
 function yellow(text) {
   return '\x1b[33m' + text + '\x1b[0m';
 }

@@ -32,7 +32,7 @@ module.exports = function ({types: t, template}, options) {
   const {freeze = true} = options;
 
   return {
-    manipulateOptions(opts, parserOpts) {
+    manipulateOptions(_opts, parserOpts) {
       parserOpts.plugins.push('importAssertions');
     },
 

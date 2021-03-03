@@ -46,6 +46,11 @@ exports.extension = function (
   let deps = '';
   if (intermediateDeps && intermediateDeps.length) {
     deps = 'i:';
+    /**
+     * Wraps the provided string in quotes.
+     * @param {string} s
+     * @return {string}
+     */
     function quote(s) {
       return `"${s}"`;
     }

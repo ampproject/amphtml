@@ -27,6 +27,10 @@ const {getUnitTestsToRun} = require('./runtime-test/helpers-unit');
 const {maybePrintArgvMessages} = require('./runtime-test/helpers');
 
 class Runner extends RuntimeTestRunner {
+  /**
+   *
+   * @param {RuntimeTestConfig} config
+   */
   constructor(config) {
     super(config);
   }
@@ -39,6 +43,9 @@ class Runner extends RuntimeTestRunner {
   }
 }
 
+/**
+ * @return {Promise<void>}
+ */
 async function unit() {
   maybePrintArgvMessages();
   if (argv.local_changes && !(await getUnitTestsToRun())) {

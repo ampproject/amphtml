@@ -65,6 +65,9 @@ const TEST_TYPE_BUILD_TARGETS = new Map([
   ['e2e', [Targets.RUNTIME, Targets.E2E_TEST]],
 ]);
 
+/**
+ * @return {string|null}
+ */
 function inferTestType() {
   // Determine type (early exit if there's no match).
   const type = IS_GULP_E2E
@@ -104,6 +107,9 @@ function inferTestType() {
   return `${type}/${subtype}${maybeAddConfigSubtype()}`;
 }
 
+/**
+ * @return {string}
+ */
 function maybeAddConfigSubtype() {
   if (isCircleciBuild() && argv.config) {
     return `-${argv.config}`;
@@ -111,6 +117,11 @@ function maybeAddConfigSubtype() {
   return '';
 }
 
+/**
+ * @param {string} type
+ * @param {string} action
+ * @return {Promise<void>}
+ */
 async function postReport(type, action) {
   if (type && isPullRequestBuild()) {
     const commitHash = gitCommitHash();
@@ -144,22 +155,39 @@ async function postReport(type, action) {
   }
 }
 
+/**
+ * @return {Promise<void>}
+ */
 async function reportTestErrored() {
   await postReport(inferTestType(), 'report/errored');
 }
 
+/**
+ * @param {number|string} success
+ * @param {number|string} failed
+ * @return {Promise<void>}
+ */
 async function reportTestFinished(success, failed) {
   await postReport(inferTestType(), `report/${success}/${failed}`);
 }
 
+/**
+ * @return {Promise<void>}
+ */
 async function reportTestSkipped() {
   await postReport(inferTestType(), 'skipped');
 }
 
+/**
+ * @return {Promise<void>}
+ */
 async function reportTestStarted() {
   await postReport(inferTestType(), 'started');
 }
 
+/**
+ * @return {Promise<void>}
+ */
 async function reportAllExpectedTests() {
   const buildTargets = determineBuildTargets();
   for (const [type, subTypes] of TEST_TYPE_SUBTYPES) {

@@ -18,6 +18,10 @@ const Mocha = require('mocha');
 const path = require('path');
 const TEST_SUITE_PATH = 'build-system/tasks/performance/test-suite.js';
 
+/**
+ * @param {function} resolver
+ * @return {void}
+ */
 function runTests(resolver) {
   const mocha = new Mocha();
   mocha.addFile(path.join('./', TEST_SUITE_PATH));

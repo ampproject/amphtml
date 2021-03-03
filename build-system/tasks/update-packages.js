@@ -161,6 +161,10 @@ function patchShadowDom() {
     })();
   `;
 
+  /**
+   * @param {string} file
+   * @return {string}
+   */
   function transformScript(file) {
     // Use the HTMLElement from above.
     file = file.replace(/\bHTMLElement\b/g, 'HTMLElementOrig');
