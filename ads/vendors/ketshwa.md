@@ -28,6 +28,10 @@ Serves ads from [Ketshwa](https://www.ketshwa.com/).
 </amp-ad>
 ```
 
+## Configuration
+
+For details on the configuration semantics, please contact the ad network or refer to their documentation.
+
 #### Required parameters
 
 -   `widgetid`
