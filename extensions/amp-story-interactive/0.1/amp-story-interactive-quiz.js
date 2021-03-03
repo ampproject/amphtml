@@ -22,6 +22,7 @@ import {CSS} from '../../../build/amp-story-interactive-quiz-0.1.css';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {htmlFor} from '../../../src/static-template';
 import {setStyle} from '../../../src/style';
+import objstr from 'obj-str';
 
 /**
  * Generates the template for the quiz.
@@ -34,10 +35,7 @@ const buildQuizTemplate = (element) => {
   return html`
     <div class="i-amphtml-story-interactive-quiz-container">
       <div class="i-amphtml-story-interactive-prompt-container"></div>
-      <div
-        class="i-amphtml-story-interactive-quiz-option-container"
-        aria-live="polite"
-      ></div>
+      <div class="i-amphtml-story-interactive-quiz-option-container"></div>
     </div>
   `;
 };
@@ -53,7 +51,7 @@ const buildOptionTemplate = (option) => {
   return html`
     <button
       class="i-amphtml-story-interactive-quiz-option i-amphtml-story-interactive-option"
-      aria-atomic="true"
+      aria-live="polite"
     >
       <span
         class="i-amphtml-story-interactive-quiz-answer-choice notranslate"
@@ -161,18 +159,21 @@ export class AmpStoryInteractiveQuiz extends AmpStoryInteractive {
 
     this.getOptionElements().forEach((el, index) => {
       // Update the aria-label so they read "selected" and "correct" or "incorrect"
+      const ariaDescription = objstr({
+        selected: optionsData[index].selected,
+        correct: el.hasAttribute('correct'),
+        incorrect: !el.hasAttribute('correct'),
+      });
       el.querySelector(
         '.i-amphtml-story-interactive-quiz-answer-choice'
-      ).setAttribute(
-        'aria-label',
-        el.hasAttribute('correct') ? 'correct' : 'incorrect'
+      ).setAttribute('aria-hidden', true);
+      const optionText = el.querySelector(
+        '.i-amphtml-story-interactive-quiz-option-text'
       );
-      if (optionsData[index].selected) {
-        const textEl = el.querySelector(
-          '.i-amphtml-story-interactive-quiz-option-text'
-        );
-        textEl.setAttribute('aria-label', 'selected ' + textEl.textContent);
-      }
+      optionText.setAttribute(
+        'aria-label',
+        ariaDescription + ' ' + optionText.textContent
+      );
       // Update percentage text
       el.querySelector(
         '.i-amphtml-story-interactive-quiz-percentage-text'
