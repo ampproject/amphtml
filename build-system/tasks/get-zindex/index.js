@@ -37,7 +37,11 @@ const tableOptions = {
   hsep: '   |   ',
 };
 
-const preamble = '**Run `gulp get-zindex --fix` to generate this file.**';
+const preamble = `
+**Run \`gulp get-zindex --fix\` to generate this file.**
+
+<!-- markdown-link-check-disable -->
+`.trim();
 
 const sortedByEntryKey = (a, b) => a[0].localeCompare(b[0]);
 

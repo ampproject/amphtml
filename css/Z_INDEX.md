@@ -1,5 +1,7 @@
 **Run `gulp get-zindex --fix` to generate this file.**
 
+<!-- markdown-link-check-disable -->
+
 | context                                                                                                   | z-index    | file                                                                                                                                                                    |
 | --------------------------------------------------------------------------------------------------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `amp-img.i-amphtml-ssr:not(.i-amphtml-element) > [placeholder]`                                           | auto       | [css/ampshared.css](/css/ampshared.css)                                                                                                                                 |
