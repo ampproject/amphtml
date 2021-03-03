@@ -15,7 +15,7 @@
  */
 
 import {Renderer} from './amp-ad-type-defs';
-import {devAssert} from '../../../src/log';
+import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {getAmpAdTemplateHelper} from './amp-ad-template-helper';
 import {renderCreativeIntoFriendlyFrame} from './friendly-frame-util';
 

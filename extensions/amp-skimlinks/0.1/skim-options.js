@@ -16,7 +16,7 @@
 
 import {getChildJsonConfig} from '../../../src/json';
 import {getNormalizedHostnameFromUrl} from './utils';
-import {userAssert} from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 import {
   DEFAULT_CONFIG,

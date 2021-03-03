@@ -32,7 +32,7 @@ import {getMode} from '../../../src/mode';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {once} from '../../../src/utils/function';
-import {userAssert} from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 const TAG = 'amp-vimeo';
 

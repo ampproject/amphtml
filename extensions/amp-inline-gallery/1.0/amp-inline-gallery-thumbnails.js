@@ -20,7 +20,7 @@ import {PreactBaseElement} from '../../../src/preact/base-element';
 import {CSS as THUMBNAIL_CSS} from './thumbnails.jss';
 import {Thumbnails} from './thumbnails';
 import {isExperimentOn} from '../../../src/experiments';
-import {userAssert} from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 /** @const {string} */
 export const TAG = 'amp-inline-gallery-thumbnails';

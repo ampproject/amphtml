@@ -19,7 +19,7 @@ import {Services} from '../../../src/services';
 import {clamp, sum} from '../../../src/utils/math';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/utils/object';
-import {userAssert} from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 const TAG = 'amp-orientation-observer';
 /**

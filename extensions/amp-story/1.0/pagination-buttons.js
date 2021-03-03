@@ -23,8 +23,8 @@ import {AdvancementMode} from './story-analytics';
 import {CommonSignals} from '../../../src/common-signals';
 import {EventType, dispatch} from './events';
 import {Services} from '../../../src/services';
-import {dev, devAssert} from '../../../src/log';
-
+import {dev} from '../../../src/log';
+import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {htmlFor} from '../../../src/static-template';
 
 /** @struct @typedef {{className: string, triggers: (string|undefined)}} */

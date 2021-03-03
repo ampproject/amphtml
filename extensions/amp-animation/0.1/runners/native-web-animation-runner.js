@@ -29,7 +29,7 @@ import {
   WebSwitchAnimationDef,
 } from '../web-animation-types';
 import {assertDoesNotContainDisplay, setStyles} from '../../../../src/style';
-import {devAssert} from '../../../../src/log';
+import {pureDevAssert as devAssert} from '../../../../src/core/assert';
 import {getTotalDuration} from './utils';
 
 /**

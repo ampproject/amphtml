@@ -36,7 +36,7 @@ import {isObject} from '../../../src/types';
 import {removeElement} from '../../../src/dom';
 import {setIsMediaComponent} from '../../../src/video-interface';
 import {tryParseJson} from '../../../src/json';
-import {userAssert} from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 class AmpMegaphone extends AMP.BaseElement {
   /** @param {!AmpElement} element */
