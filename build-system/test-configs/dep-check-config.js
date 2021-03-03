@@ -325,7 +325,7 @@ exports.rules = [
         'src/service/real-time-config/real-time-config-impl.js',
       // Parsing extension urls.
       'extensions/amp-a4a/0.1/head-validation.js->' +
-        'src/service/extension-location.js',
+        'src/service/extension-script.js',
       'extensions/amp-video/0.1/amp-video.js->' +
         'src/service/video-manager-impl.js',
       'extensions/amp-video-iframe/0.1/amp-video-iframe.js->' +
@@ -405,9 +405,9 @@ exports.rules = [
         'src/service/navigation.js',
       'extensions/amp-skimlinks/0.1/link-rewriter/link-rewriter-manager.js->' +
         'src/service/navigation.js',
-      // Accessing extension-location.calculateExtensionScriptUrl().
+      // Accessing extension-script.calculateExtensionScriptUrl().
       'extensions/amp-script/0.1/amp-script.js->' +
-        'src/service/extension-location.js',
+        'src/service/extension-script.js',
       // Origin experiments.
       'extensions/amp-experiment/1.0/amp-experiment.js->' +
         'src/service/origin-experiments-impl.js',
@@ -419,7 +419,7 @@ exports.rules = [
       'extensions/amp-story-auto-ads/0.1/story-ad-localization.js->src/service/localization.js',
       // Accessing calculateScriptBaseUrl() for vendor config URLs
       'extensions/amp-analytics/0.1/config.js->' +
-        'src/service/extension-location.js',
+        'src/service/extension-script.js',
       // Experiment moving Fixed Layer to extension
       'extensions/amp-viewer-integration/0.1/amp-viewer-integration.js->' +
         'src/service/fixed-layer.js',
