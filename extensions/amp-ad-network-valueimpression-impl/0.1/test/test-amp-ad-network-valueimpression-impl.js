@@ -87,7 +87,7 @@ describes.realWin(
         };
         const rtcConfig = {
           'urls': [
-            'https://useast.quantumdex.io/amp?client=23&metadata=autoCollect&tagid=1234',
+            'https://useast.quantumdex.io/ampv2?client=23&metadata=autoCollect&tagid=1234',
           ],
         };
         element = createElementWithAttributes(env.win.document, 'amp-ad', {
@@ -115,7 +115,7 @@ describes.realWin(
       beforeEach(() => {
         const rtcConfig = {
           'urls': [
-            'https://useast.quantumdex.io/amp?client=23&metadata=autoCollect&tagid=1234',
+            'https://useast.quantumdex.io/ampv2?client=23&metadata=autoCollect&tagid=1234',
           ],
         };
 
@@ -163,7 +163,7 @@ describes.realWin(
                 'vli_adtype': 'display',
               },
             },
-            callout: 'useast.quantumdex.io/amp',
+            callout: 'useast.quantumdex.io/ampv2',
             rtcTime: 250,
           },
         ];
