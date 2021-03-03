@@ -172,9 +172,7 @@ describes.sandboxed('Extension Location', {}, () => {
     });
 
     it('returns null for non-extensions', () => {
-      const urlParts = parseExtensionUrl(
-        'https://cdn.ampproject.org/v0.js'
-      );
+      const urlParts = parseExtensionUrl('https://cdn.ampproject.org/v0.js');
       expect(urlParts).to.be.null;
     });
   });
