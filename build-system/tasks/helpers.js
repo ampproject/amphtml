@@ -110,7 +110,7 @@ const watchedTargets = new Map();
  * @param {string} filepath relative to the project root.
  */
 function invalidateUnminifiedBabelCache(filepath) {
-  cache.delete(filepath);
+  cache.delete(path.resolve(filepath)); // Must be absolute path.
 }
 
 /**
@@ -173,9 +173,11 @@ async function bootstrapThirdPartyFrames(options) {
  */
 async function compileCoreRuntime(options) {
   /**
+   * @param {string} modifiedFile
    * @return {Promise<void>}
    */
-  async function watchFunc() {
+  async function watchFunc(modifiedFile) {
+    invalidateUnminifiedBabelCache(modifiedFile);
     const bundleComplete = await doBuildJs(jsBundles, 'amp.js', {
       ...options,
       watch: false,
