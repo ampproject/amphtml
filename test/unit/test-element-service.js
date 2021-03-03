@@ -16,7 +16,6 @@
 
 import {FakeWindow} from '../../testing/fake-dom';
 import {
-  getElementService,
   getElementServiceForDoc,
   getElementServiceIfAvailable,
   getElementServiceIfAvailableForDoc,
