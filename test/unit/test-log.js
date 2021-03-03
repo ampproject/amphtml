@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {USER_ERROR_SENTINEL} from '../src/core/error-message-helpers';
+import {USER_ERROR_SENTINEL} from '../../src/core/error-message-helpers';
 import {
   Log,
   LogLevel,
