@@ -133,13 +133,19 @@ function getZindexChainsInJs(glob, cwd = '.') {
   )
     .trim()
     .split('\n');
+
   return tempy.write.task('{}', (temporary) => {
+    // This seems to be slower if we parallelize a small number of files.
+    // (The divisor is arbitrary and not necessarily ideal.)
+    const cpus = Math.ceil(filesIncludingString.length / 20);
     jscodeshift([
       '--dry',
+      `--cpus ${cpus}`,
       `--transform ${__dirname}/jscodeshift/collect-zindex.js`,
       `--collectZindexToFile=${temporary}`,
       ...filesIncludingString,
     ]);
+
     const resultAbsolute = readJsonSync(temporary);
     const result = {};
     for (const key in resultAbsolute) {
@@ -154,14 +160,18 @@ function getZindexChainsInJs(glob, cwd = '.') {
  * Entry point for gulp get-zindex
  */
 async function getZindex() {
-  const filesData = {
-    ...(await getZindexSelectors('{css,src,extensions}/**/*.css')),
-    ...(await getZindexChainsInJs([
-      '{3p,src,extensions}/**/*.js',
-      '!extensions/**/test/**/*.js',
-      '!extensions/**/storybook/**/*.js',
-    ])),
-  };
+  const filesData = Object.assign(
+    {},
+    ...(await Promise.all([
+      getZindexSelectors('{css,src,extensions}/**/*.css'),
+      getZindexChainsInJs([
+        '{3p,src,extensions}/**/*.js',
+        '!extensions/**/test/**/*.js',
+        '!extensions/**/storybook/**/*.js',
+      ]),
+    ]))
+  );
+
   const filename = 'css/Z_INDEX.md';
   const rows = [...tableHeaders, ...createTable(filesData)];
   const table = textTable(rows, tableOptions);
