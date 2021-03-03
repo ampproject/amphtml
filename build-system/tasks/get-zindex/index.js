@@ -149,13 +149,9 @@ function getZindexChainsInJs(glob, cwd = '.') {
 
     const result = {};
 
-    // This seems to be slower if we parallelize a small number of files.
-    // (The divisor is arbitrary and not necessarily ideal.)
-    const cpus = Math.ceil(filesIncludingString.length / 20);
     const {stdout, stderr} = jscodeshiftAsync([
       '--dry',
       '--no-babel',
-      `--cpus=${cpus}`,
       `--transform=${__dirname}/jscodeshift/collect-zindex.js`,
       ...filesIncludingString,
     ]);
@@ -176,11 +172,13 @@ function getZindexChainsInJs(glob, cwd = '.') {
 
       logChecking(filename);
 
-      const reportParsed = JSON.parse(report);
+      try {
+        const reportParsed = JSON.parse(report);
 
-      if (reportParsed.length) {
-        result[relative] = reportParsed.sort(sortedByEntryKey);
-      }
+        if (reportParsed.length) {
+          result[relative] = reportParsed.sort(sortedByEntryKey);
+        }
+      } catch (_) {}
     });
 
     stdout.on('close', () => {
