@@ -146,6 +146,41 @@ const ONE_OF_ERROR_MESSAGE =
   '"passthroughNonEmpty", or "selector" must be given';
 
 /**
+ * @param {!Object<string, !AmpElementPropDef>} propDefs
+ * @param {function(!AmpElementPropDef):boolean} cb
+ * @return {boolean}
+ */
+function checkPropsFor(propDefs, cb) {
+  return Object.values(propDefs).some(cb);
+}
+
+/**
+ * @param {!AmpElementPropDef} def
+ * @return {boolean}
+ */
+const HAS_MEDIA = (def) => def.media;
+
+/**
+ * @param {!AmpElementPropDef} def
+ * @return {boolean}
+ */
+const HAS_SELECTOR = (def) => typeof def === 'string' || def.selector;
+
+/**
+ * @param {!AmpElementPropDef} def
+ * @return {boolean}
+ */
+const HAS_PASSTHROUGH = (def) => def.passthrough || def.passthroughNonEmpty;
+
+/**
+ * Ignore whitespace text nodes.
+ * @param {Node} node
+ * @return {boolean}
+ */
+const IS_REAL_CHILD = (node) =>
+  node.nodeType === /* TEXT_NODE */ 3 && node.nodeValue.trim().length === 0;
+
+/**
  * Wraps a Preact Component in a BaseElement class.
  *
  * Most functionality should be done in Preact. We don't expose the BaseElement
@@ -275,10 +310,10 @@ export class PreactBaseElement extends AMP.BaseElement {
 
     this.observer = new MutationObserver(this.checkMutations_.bind(this));
     const props = Ctor['props'];
-    const childrenInit = hasSelectorProps(props)
+    const childrenInit = checkPropsFor(props, HAS_SELECTOR)
       ? CHILDREN_MUTATION_INIT
       : null;
-    const passthroughInit = hasPassthroughProps(props)
+    const passthroughInit = checkPropsFor(props, HAS_PASSTHROUGH)
       ? PASSTHROUGH_MUTATION_INIT
       : null;
     const templatesInit = Ctor['usesTemplate'] ? TEMPLATES_MUTATION_INIT : null;
@@ -289,7 +324,7 @@ export class PreactBaseElement extends AMP.BaseElement {
       ...templatesInit,
     });
 
-    this.mediaQueryProps_ = hasMediaQueryProps(props)
+    this.mediaQueryProps_ = checkPropsFor(props, HAS_MEDIA)
       ? new MediaQueryProps(this.win, () => this.scheduleRender_())
       : null;
 
@@ -978,7 +1013,7 @@ function collectProps(Ctor, element, ref, defaultProps, mediaQueryProps) {
  */
 function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
   // Match all children defined with "selector".
-  if (hasSelectorProps(propDefs)) {
+  if (checkPropsFor(propDefs, HAS_SELECTOR)) {
     // There are plain "children" and there're slotted children assigned
     // as separate properties. Thus in a carousel the plain "children" are
     // slides, and the "arrowNext" children are passed via a "arrowNext"
@@ -1046,7 +1081,9 @@ function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
       continue;
     } else if (def.passthroughNonEmpty) {
       devAssert(Ctor['usesShadowDom']);
-      props[def.name || name] = hasRealChildren(element) ? null : [<Slot />];
+      props[def.name || name] = element.getRealChildNodes().every(IS_REAL_CHILD)
+        ? null
+        : [<Slot />];
       continue;
     } else if (def.attr) {
       value = element.getAttribute(def.attr);
@@ -1188,47 +1225,4 @@ function shouldMutationBeRerendered(Ctor, m) {
     );
   }
   return false;
-}
-
-/**
- * @param {!AmpElementPropDef} propDefs
- * @return {boolean}
- */
-function hasMediaQueryProps(propDefs) {
-  return Object.values(propDefs).some((p) => p.media);
-}
-
-/**
- * @param {!AmpElementPropDef} propDefs
- * @return {boolean}
- */
-function hasSelectorProps(propDefs) {
-  return Object.values(propDefs).some(
-    (p) => typeof p === 'string' || p.selector
-  );
-}
-
-/**
- * @param {!AmpElementPropDef} propDefs
- * @return {boolean}
- */
-function hasPassthroughProps(propDefs) {
-  return Object.values(propDefs).some(
-    (p) => p.passthrough || p.passthroughNonEmpty
-  );
-}
-
-/**
- * If all children are whitespace text nodes, consider the element as having no children.
- * @param {Element} element
- * @return {boolean}
- */
-function hasRealChildren(element) {
-  return element
-    .getRealChildNodes()
-    .every(
-      (node) =>
-        node.nodeType === /* TEXT_NODE */ 3 &&
-        node.nodeValue.trim().length === 0
-    );
 }
