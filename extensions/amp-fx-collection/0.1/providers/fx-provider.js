@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {FxType} from '../fx-type';
 import {PositionObserverFidelity} from '../../../../src/service/position-observer/position-observer-worker';
 import {Presets} from './amp-fx-presets';
 import {
@@ -51,7 +50,7 @@ import {installPositionObserverServiceForDoc} from '../../../../src/service/posi
 /**
  * @param {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!Element} element The element to give a preset effect.
- * @param {!FxType} type
+ * @param {!../fx-type.FxType} type
  */
 export function installScrollToggledFx(ampdoc, element, type) {
   // TODO(alanorozco): Surface FixedLayer APIs to make this work.
@@ -123,7 +122,7 @@ function scrollToggle(element, isShown, position) {
 /**
  * @param {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!Element} element The element to give a preset effect.
- * @param {!FxType} type
+ * @param {!../fx-type.FxType} type
  */
 export function installPositionBoundFx(ampdoc, element, type) {
   installPositionObserverServiceForDoc(ampdoc);
@@ -138,7 +137,7 @@ export class FxElement {
   /**
    * @param {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!Element} element The element to give a preset effect.
-   * @param {!FxType} fxType
+   * @param {!../fx-type.FxType} fxType
    */
   constructor(ampdoc, element, fxType) {
     /** @public @const  {!Window} */
@@ -165,7 +164,7 @@ export class FxElement {
     /** @public {number} */
     this.offset = 0;
 
-    /** @private @const {!FxType} */
+    /** @private @const {!../fx-type.FxType} */
     this.fxType_ = fxType;
 
     Presets[fxType].userAsserts(element);

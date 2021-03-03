@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {LocalizedStringId} from '../../../src/localized-strings';
 import {createElementWithAttributes} from '../../../src/dom';
 import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {getLocalizationService} from './amp-story-localization-service';
@@ -24,9 +23,9 @@ import {isArray} from '../../../src/types';
  * @typedef {{
  *   tag: string,
  *   attrs: (!JsonObject|undefined),
- *   localizedStringId: (!LocalizedStringId|undefined),
+ *   localizedStringId: (!../../../src/localized-strings.LocalizedStringId|undefined),
  *   unlocalizedString: (string|undefined),
- *   localizedLabelId: (!LocalizedStringId|undefined),
+ *   localizedLabelId: (!../../../src/localized-strings.LocalizedStringId|undefined),
  *   children: (!Array<!ElementDef>|undefined),
  * }}
  */
@@ -88,13 +87,13 @@ function renderSingle(doc, elementDef) {
 
     if (hasLocalizedTextContent) {
       el.textContent = localizationService.getLocalizedString(
-        /** @type {!LocalizedStringId} */ (elementDef.localizedStringId)
+        /** @type {!../../../src/localized-strings.LocalizedStringId} */ (elementDef.localizedStringId)
       );
     }
 
     if (hasLocalizedLabel) {
       const labelString = localizationService.getLocalizedString(
-        /** @type {!LocalizedStringId} */ (elementDef.localizedLabelId)
+        /** @type {!../../../src/localized-strings.LocalizedStringId} */ (elementDef.localizedLabelId)
       );
       if (labelString) {
         el.setAttribute('aria-label', labelString);
