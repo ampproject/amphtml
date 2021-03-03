@@ -19,7 +19,7 @@ import {addParamsToUrl} from '../../../src/url';
 import {
   pureDevAssert as devAssert,
   pureUserAssert as userAssert,
-} from '../../../src/pure-assert';
+} from '../../../src/core/assert';
 import {dict} from '../../../src/utils/object';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';

@@ -17,7 +17,7 @@ import {Services} from './services';
 import {
   pureDevAssert as devAssert,
   pureUserAssert as userAssert,
-} from './pure-assert';
+} from './core/assert';
 import {isArray, isObject} from './types';
 import {tryParseJson} from './json';
 

@@ -17,7 +17,7 @@
 import {
   pureDevAssert as devAssert,
   pureUserAssert as userAssert,
-} from './pure-assert';
+} from './core/assert';
 
 /**
  * A single source within a srcset. Only one: width or DPR can be specified at

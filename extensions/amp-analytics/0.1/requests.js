@@ -22,7 +22,7 @@ import {Services} from '../../../src/services';
 import {
   pureDevAssert as devAssert,
   pureUserAssert as userAssert,
-} from '../../../src/pure-assert';
+} from '../../../src/core/assert';
 import {dict} from '../../../src/utils/object';
 import {getResourceTiming} from './resource-timing';
 import {isArray, isFiniteNumber, isObject} from '../../../src/types';

@@ -22,7 +22,7 @@ import {assertHttpsUrl, parseUrlDeprecated} from '../../../src/url';
 import {
   pureDevAssert as devAssert,
   pureUserAssert as userAssert,
-} from '../../../src/pure-assert';
+} from '../../../src/core/assert';
 import {isArray} from '../../../src/types';
 import {parseJson} from '../../../src/json';
 import {toggle} from '../../../src/style';
