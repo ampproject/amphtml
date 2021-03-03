@@ -26,9 +26,9 @@ export function ketshwa(global, data) {
   const {widgetid, externalid} = data;
   const skey = `widget_${widgetid}`;
 
-  const d = global.document.createElement('div');
-  d.id = skey;
-  global.document.getElementById('c').appendChild(d);
+  const dv = global.document.createElement('div');
+  dv.id = skey;
+  global.document.getElementById('c').appendChild(dv);
 
   writeScript(
     global,
