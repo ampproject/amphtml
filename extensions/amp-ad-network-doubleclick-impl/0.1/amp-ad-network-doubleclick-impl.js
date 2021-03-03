@@ -971,6 +971,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const allowlist = {
       'height': true,
       'width': true,
+      'json': true,
       'data-slot': true,
       'data-multi-size': true,
       'data-multi-size-validation': true,
