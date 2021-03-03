@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.150 */
+/** Version: 0.1.22.151 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -651,6 +651,9 @@ const POST_MESSAGE_COMMAND_INTRODUCTION = 'introduction';
 /** User command for post messages. */
 const POST_MESSAGE_COMMAND_USER = 'user';
 
+/** Error command for post messages. */
+const POST_MESSAGE_COMMAND_ERROR = 'error';
+
 /** ID for the Google Sign-In iframe element. */
 const GOOGLE_SIGN_IN_IFRAME_ID = 'swg-google-sign-in-iframe';
 
@@ -942,10 +945,18 @@ class GaaMeteringRegwall {
 
     GaaMeteringRegwall.render_({iframeUrl});
     GaaMeteringRegwall.sendIntroMessageToGsiIframe_({iframeUrl});
-    return GaaMeteringRegwall.getGaaUser_().then((gaaUser) => {
-      GaaMeteringRegwall.remove_();
-      return gaaUser;
-    });
+    return GaaMeteringRegwall.getGaaUser_()
+      .then((gaaUser) => {
+        GaaMeteringRegwall.remove_();
+        return gaaUser;
+      })
+      .catch((err) => {
+        // Close the Regwall, since the flow failed.
+        GaaMeteringRegwall.remove_();
+
+        // Rethrow error.
+        throw err;
+      });
   }
 
   /**
@@ -1080,13 +1091,18 @@ class GaaMeteringRegwall {
    */
   static getGaaUser_() {
     // Listen for GAA user.
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       self.addEventListener('message', (e) => {
-        if (
-          e.data.stamp === POST_MESSAGE_STAMP &&
-          e.data.command === POST_MESSAGE_COMMAND_USER
-        ) {
-          resolve(e.data.gaaUser);
+        if (e.data.stamp === POST_MESSAGE_STAMP) {
+          if (e.data.command === POST_MESSAGE_COMMAND_USER) {
+            // Pass along GAA user.
+            resolve(e.data.gaaUser);
+          }
+
+          if (e.data.command === POST_MESSAGE_COMMAND_ERROR) {
+            // Reject promise due to Google Sign-In error.
+            reject('Google Sign-In failed to initialize');
+          }
         }
       });
     });
@@ -1145,7 +1161,7 @@ class GaaGoogleSignInButton {
     const styleEl = self.document.createElement('style');
     styleEl./*OK*/ innerText = GOOGLE_SIGN_IN_IFRAME_STYLES.replace(
       '$SHOWCASE_REGWALL_GOOGLE_SIGN_IN_BUTTON$',
-      I18N_STRINGS['SHOWCASE_REGWALL_GOOGLE_SIGN_IN_BUTTON'][languageCode]
+      msg(I18N_STRINGS['SHOWCASE_REGWALL_GOOGLE_SIGN_IN_BUTTON'], languageCode)
     );
     self.document.head.appendChild(styleEl);
 
@@ -1208,6 +1224,15 @@ class GaaGoogleSignInButton {
             stamp: POST_MESSAGE_STAMP,
             command: POST_MESSAGE_COMMAND_USER,
             gaaUser,
+          });
+        });
+      })
+      .catch(() => {
+        // Report error to parent frame.
+        sendMessageToParentFnPromise.then((sendMessageToParent) => {
+          sendMessageToParent({
+            stamp: POST_MESSAGE_STAMP,
+            command: POST_MESSAGE_COMMAND_ERROR,
           });
         });
       });
