@@ -56,7 +56,7 @@ import {
   getConsentPolicyState,
 } from '../../../src/consent';
 import {getContextMetadata} from '../../../src/iframe-attributes';
-import {getExperimentBranch} from '../../../src/experiments';
+import {getExperimentBranch, isExperimentOn} from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {
@@ -914,8 +914,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {boolean}
    */
   isInNoSigningExp() {
-    // eslint-disable-next-line no-undef
-    return !!NO_SIGNING_RTV;
+    return NO_SIGNING_RTV;
   }
 
   /**
@@ -945,7 +944,10 @@ export class AmpA4A extends AMP.BaseElement {
     const size = this.extractSize(httpResponse.headers);
     this.creativeSize_ = size || this.creativeSize_;
 
-    if (this.skipClientSideValidation(httpResponse.headers)) {
+    if (
+      !isPlatformSupported(this.win) ||
+      this.skipClientSideValidation(httpResponse.headers)
+    ) {
       return this.handleFallback_(httpResponse, checkStillCurrent);
     }
 
@@ -1100,7 +1102,9 @@ export class AmpA4A extends AMP.BaseElement {
           // via #validateAdResponse_.  See GitHub issue
           // https://github.com/ampproject/amphtml/issues/4187
           let creativeMetaDataDef;
+
           if (
+            !isPlatformSupported(this.win) ||
             !creativeDecoded ||
             !(creativeMetaDataDef = this.getAmpAdMetadata(creativeDecoded))
           ) {
@@ -2560,4 +2564,29 @@ export function signatureVerifierFor(win) {
     win[propertyName] ||
     (win[propertyName] = new SignatureVerifier(win, signingServerURLs))
   );
+}
+
+/**
+ * @param {!Window} win
+ * @return {boolean}
+ * @visibleForTesting
+ */
+export function isPlatformSupported(win) {
+  // Require Shadow DOM support for a4a.
+  if (
+    !isNative(win.Element.prototype.attachShadow) &&
+    isExperimentOn(win, 'disable-a4a-non-sd')
+  ) {
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Returns `true` if the passed function exists and is native to the browser.
+ * @param {Function|undefined} func
+ * @return {boolean}
+ */
+function isNative(func) {
+  return !!func && func.toString().indexOf('[native code]') != -1;
 }
