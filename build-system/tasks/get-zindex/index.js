@@ -208,7 +208,7 @@ async function getZindex() {
   );
 
   logOnSameLineLocalDev(
-    'Tracking z-index in',
+    'Generating z-index table from',
     magenta(`${Object.keys(filesData).length} files`)
   );
 
