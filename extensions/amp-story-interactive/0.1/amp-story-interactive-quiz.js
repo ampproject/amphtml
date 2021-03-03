@@ -22,6 +22,7 @@ import {CSS} from '../../../build/amp-story-interactive-quiz-0.1.css';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {htmlFor} from '../../../src/static-template';
 import {setStyle} from '../../../src/style';
+import objstr from 'obj-str';
 
 /**
  * Generates the template for the quiz.
@@ -121,9 +122,10 @@ export class AmpStoryInteractiveQuiz extends AmpStoryInteractive {
     const convertedOption = buildOptionTemplate(this.element);
 
     // Fill in the answer choice and set the option ID
-    convertedOption.querySelector(
+    const answerChoiceEl = convertedOption.querySelector(
       '.i-amphtml-story-interactive-quiz-answer-choice'
-    ).textContent = this.localizedAnswerChoices_[index];
+    );
+    answerChoiceEl.textContent = this.localizedAnswerChoices_[index];
     convertedOption.optionIndex_ = option['optionIndex'];
 
     // Extract and structure the option information
@@ -148,18 +150,35 @@ export class AmpStoryInteractiveQuiz extends AmpStoryInteractive {
   /**
    * @override
    */
-  updateOptionPercentages_(optionsData) {
+  displayOptionsData(optionsData) {
     if (!optionsData) {
       return;
     }
 
     const percentages = this.preprocessPercentages_(optionsData);
-    percentages.forEach((percentage, index) => {
-      const option = this.getOptionElements()[index];
-      option.querySelector(
+
+    this.getOptionElements().forEach((el, index) => {
+      // Update the aria-label so they read "selected" and "correct" or "incorrect"
+      const ariaDescription = objstr({
+        selected: optionsData[index].selected,
+        correct: el.hasAttribute('correct'),
+        incorrect: !el.hasAttribute('correct'),
+      });
+      el.querySelector(
+        '.i-amphtml-story-interactive-quiz-answer-choice'
+      ).setAttribute('aria-hidden', true);
+      const optionText = el.querySelector(
+        '.i-amphtml-story-interactive-quiz-option-text'
+      );
+      optionText.setAttribute(
+        'aria-label',
+        ariaDescription + ' ' + optionText.textContent
+      );
+      // Update percentage text
+      el.querySelector(
         '.i-amphtml-story-interactive-quiz-percentage-text'
-      ).textContent = `${percentage}%`;
-      setStyle(option, '--option-percentage', percentage + '%');
+      ).textContent = `${percentages[index]}%`;
+      setStyle(el, '--option-percentage', `${percentages[index]}%`);
     });
   }
 }
