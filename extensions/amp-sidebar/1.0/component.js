@@ -29,7 +29,7 @@ import {
   useState,
 } from '../../../src/preact';
 import {useSidebarAnimation} from './sidebar-animations-hook';
-import {useStyles} from './sidebar.jss';
+import {useStyles} from './component.jss';
 
 /**
  * @param {!SidebarDef.Props} props
