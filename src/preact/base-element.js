@@ -75,7 +75,7 @@ import {toArray} from '../types';
  *   parseAttrs: ((function(!Element):*)|undefined),
  *   media: (boolean|undefined),
  *   default: *,
- * }}
+ * }|string}
  */
 let AmpElementPropDef;
 
@@ -274,13 +274,11 @@ export class PreactBaseElement extends AMP.BaseElement {
     const Ctor = this.constructor;
 
     this.observer = new MutationObserver(this.checkMutations_.bind(this));
-    const props = Object.values(Ctor['props']);
-    const childrenInit = props.some((p) => p.selector)
+    const props = Ctor['props'];
+    const childrenInit = hasSelectorProps(props)
       ? CHILDREN_MUTATION_INIT
       : null;
-    const passthroughInit = props.some(
-      (p) => p.passthrough || p.passthroughNonEmpty
-    )
+    const passthroughInit = hasPassthroughProps(props)
       ? PASSTHROUGH_MUTATION_INIT
       : null;
     const templatesInit = Ctor['usesTemplate'] ? TEMPLATES_MUTATION_INIT : null;
@@ -291,7 +289,7 @@ export class PreactBaseElement extends AMP.BaseElement {
       ...templatesInit,
     });
 
-    this.mediaQueryProps_ = hasMediaQueryProps(Ctor)
+    this.mediaQueryProps_ = hasMediaQueryProps(props)
       ? new MediaQueryProps(this.win, () => this.scheduleRender_())
       : null;
 
@@ -980,9 +978,7 @@ function collectProps(Ctor, element, ref, defaultProps, mediaQueryProps) {
  */
 function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
   // Match all children defined with "selector".
-  if (
-    Object.values(propDefs).some((p) => typeof p === 'string' || p.selector)
-  ) {
+  if (hasSelectorProps(propDefs)) {
     // There are plain "children" and there're slotted children assigned
     // as separate properties. Thus in a carousel the plain "children" are
     // slides, and the "arrowNext" children are passed via a "arrowNext"
@@ -1050,17 +1046,7 @@ function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
       continue;
     } else if (def.passthroughNonEmpty) {
       devAssert(Ctor['usesShadowDom']);
-      // If all children are whitespace text nodes, consider the element as
-      // having no children
-      props[def.name || name] = element
-        .getRealChildNodes()
-        .every(
-          (node) =>
-            node.nodeType === /* TEXT_NODE */ 3 &&
-            node.nodeValue.trim().length === 0
-        )
-        ? null
-        : [<Slot />];
+      props[def.name || name] = hasRealChildren(element) ? null : [<Slot />];
       continue;
     } else if (def.attr) {
       value = element.getAttribute(def.attr);
@@ -1205,18 +1191,44 @@ function shouldMutationBeRerendered(Ctor, m) {
 }
 
 /**
- * @param {typeof PreactBaseElement} Ctor
+ * @param {!AmpElementPropDef} propDefs
  * @return {boolean}
  */
-function hasMediaQueryProps(Ctor) {
-  const props = Ctor['props'];
-  if (props) {
-    for (const name in props) {
-      const def = /** @type {!AmpElementPropDef} */ (props[name]);
-      if (def.media) {
-        return true;
-      }
-    }
-  }
-  return false;
+function hasMediaQueryProps(propDefs) {
+  return Object.values(propDefs).some((p) => p.media);
+}
+
+/**
+ * @param {!AmpElementPropDef} propDefs
+ * @return {boolean}
+ */
+function hasSelectorProps(propDefs) {
+  return Object.values(propDefs).some(
+    (p) => typeof p === 'string' || p.selector
+  );
+}
+
+/**
+ * @param {!AmpElementPropDef} propDefs
+ * @return {boolean}
+ */
+function hasPassthroughProps(propDefs) {
+  return Object.values(propDefs).some(
+    (p) => p.passthrough || p.passthroughNonEmpty
+  );
+}
+
+/**
+ * If all children are whitespace text nodes, consider the element as having no children.
+ * @param {Element} element
+ * @return {boolean}
+ */
+function hasRealChildren(element) {
+  return element
+    .getRealChildNodes()
+    .every(
+      (node) =>
+        node.nodeType === /* TEXT_NODE */ 3 &&
+        node.nodeValue.trim().length === 0
+    );
 }
