@@ -178,7 +178,7 @@ export class AmpStoryInteractiveQuiz extends AmpStoryInteractive {
       el.querySelector(
         '.i-amphtml-story-interactive-quiz-percentage-text'
       ).textContent = `${percentages[index]}%`;
-      setStyle(el, '--option-percentage', percentages[index] + '%');
+      setStyle(el, '--option-percentage', `${percentages[index]}%`);
     });
   }
 }
