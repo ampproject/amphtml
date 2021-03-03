@@ -27,7 +27,7 @@ BaseElement['Component'] = __component_name_pascalcase__;
 BaseElement['props'] = {
   'children': {passthrough: true},
   // 'children': {passthroughNonEmpty: true},
-  // 'children': {},
+  // 'children': {selector: '...'},
 };
 
 /** @override */
