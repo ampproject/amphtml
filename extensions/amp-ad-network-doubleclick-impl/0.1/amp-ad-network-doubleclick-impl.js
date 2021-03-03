@@ -56,7 +56,6 @@ import {
   FlexibleAdSlotDataTypeDef,
   getFlexibleAdSlotData,
 } from './flexible-ad-slot-utils';
-import {INTERSECT_RESOURCES_EXP} from '../../../src/experiments/intersect-resources-exp';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Navigation} from '../../../src/service/navigation';
 import {RTC_VENDORS} from '../../../src/service/real-time-config/callout-vendors';
@@ -510,14 +509,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const moduleNomoduleExpId = this.getModuleNomoduleExpIds_();
     if (moduleNomoduleExpId) {
       this.experimentIds.push(moduleNomoduleExpId);
-    }
-
-    const intersectResourcesExpId = getExperimentBranch(
-      this.win,
-      INTERSECT_RESOURCES_EXP.id
-    );
-    if (intersectResourcesExpId) {
-      this.experimentIds.push(intersectResourcesExpId);
     }
 
     const ssrExpIds = this.getSsrExpIds_();
