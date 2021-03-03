@@ -4,15 +4,25 @@ This guide provides details for ad networks to create an `amp-ad` integration fo
 
 **Table of contents**
 
+<!--
+  (Do not remove or edit this comment.)
+
+  This table-of-contents is automatically generated. To generate it, run:
+    gulp markdown-toc --fix
+-->
+
+<!-- {"maxdepth": 2} -->
+
 -   [Overview](#overview)
 -   [Constraints](#constraints)
 -   [The iframe sandbox](#the-iframe-sandbox)
-    -   [Available information](#available-information)
+    -   [Available information to the ad](#available-information-to-the-ad)
     -   [Available APIs](#available-apis)
     -   [Exceptions to available APIs and information](#exceptions-to-available-apis-and-information)
     -   [Ad viewability](#ad-viewability)
     -   [Ad resizing](#ad-resizing)
     -   [Support for multi-size ad requests](#support-for-multi-size-ad-requests)
+    -   [amp-consent integration](#amp-consent-integration)
     -   [Optimizing ad performance](#optimizing-ad-performance)
     -   [Ad markup](#ad-markup)
     -   [1st party cookies](#1st-party-cookies)
@@ -20,8 +30,9 @@ This guide provides details for ad networks to create an `amp-ad` integration fo
     -   [Files to change](#files-to-change)
     -   [Verify your examples](#verify-your-examples)
     -   [Tests](#tests)
+    -   [Lint and type-check](#lint-and-type-check)
     -   [Other tips](#other-tips)
--   [Developer announcements for ads related API changes ](#developer-announcements-for-ads-related-API-changes)
+-   [Developer announcements for ads related API changes](#developer-announcements-for-ads-related-api-changes)
 
 ## Overview
 

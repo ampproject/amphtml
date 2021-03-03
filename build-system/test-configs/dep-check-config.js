@@ -85,6 +85,7 @@ exports.rules = [
       'extensions/amp-resize-observer-polyfill/**/*.js->third_party/resize-observer-polyfill/ResizeObserver.install.js',
       'extensions/amp-story-360/0.1/amp-story-360.js->third_party/zuho/zuho.js',
       'extensions/amp-subscriptions-google/**/*.js->third_party/subscriptions-project/swg.js',
+      'extensions/amp-subscriptions-google/**/*.js->third_party/subscriptions-project/swg-gaa.js',
       'extensions/amp-subscriptions/**/*.js->third_party/subscriptions-project/aes_gcm.js',
       'extensions/amp-subscriptions/**/*.js->third_party/subscriptions-project/config.js',
       'src/css.js->third_party/css-escape/css-escape.js',

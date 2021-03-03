@@ -29,13 +29,13 @@ Google Ad Manager's RTC implementation has made many macros available for RTC ur
 -   **ATTR(data-multi-size-validation)** - data-multi-size-validation attribute of the amp-ad element
 -   **ATTR(data-override-width)** - data-override-width attribute of the amp-ad element
 -   **ATTR(data-override-height)** - data-override-height attribute of the amp-ad element
--   **ATTR(data-json)** - data-json attribute of the amp-ad element
+-   **ATTR(json)** - json attribute of the amp-ad element
 -   **ELEMENT_POS** - Offset of the element from document's top
 -   **SCROLL_TOP** - Number of pixels that the user scrolled from the document's top
 -   **PAGE_HEIGHT** - Height of the amp-doc
 -   **BKG_STATE** - Current visibility state of the amp-doc
 -   **ADCID** - adClientId
--   **TGT** - Just the targeting piece of data-json
+-   **TGT** - Just the targeting piece of json
 -   **CANONICAL_URL** - The canonical URL of the page
 
 -   **TIMEOUT** - The publisher-specified timeout for the RTC callout.

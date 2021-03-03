@@ -1,9 +1,16 @@
 # Release Schedule
 
+<!--
+  (Do not remove or edit this comment.)
+
+  This table-of-contents is automatically generated. To generate it, run:
+    gulp markdown-toc --fix
+-->
+
 -   [Release Channels](#release-channels)
     -   [Nightly](#nightly)
     -   [Weekly](#weekly)
-        -   [Experimental and Beta channels](#experimental-and-beta-channels)
+        -   [Beta and Experimental channels](#beta-and-experimental-channels)
     -   [Long-Term Stable (lts)](#long-term-stable-lts)
 -   [Determining if your change is in a release](#determining-if-your-change-is-in-a-release)
 -   [Release Cadence](#release-cadence)
