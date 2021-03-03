@@ -105,6 +105,14 @@ const componentExtensionNameMapping = {
 const componentExtensionName = (tagName) =>
   componentExtensionNameMapping[tagName] || tagName;
 
+/**
+ *
+ * @param {string} docStr
+ * @param {{
+ *  'amp-mustache': {version: string}
+ * }=} extensionConf
+ * @return {string}
+ */
 const addRequiredExtensionsToHead = (
   docStr,
   extensionConf = {

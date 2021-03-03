@@ -161,8 +161,12 @@ async function bootstrapThirdPartyFrames(options) {
  * Compile and optionally minify the core runtime.
  *
  * @param {!Object} options
+ * @return {Promise<void>}
  */
 async function compileCoreRuntime(options) {
+  /**
+   * @return {Promise<void>}
+   */
   async function watchFunc() {
     const bundleComplete = await doBuildJs(jsBundles, 'amp.js', {
       ...options,
@@ -286,7 +290,7 @@ function combineWithCompiledFile(srcFilename, destFilePath, options) {
   });
 
   const remapped = remapping(
-    {...bundledMap, version: 3},
+    bundledMap,
     (file) => {
       if (file === destFileName) {
         return map;
@@ -301,10 +305,18 @@ function combineWithCompiledFile(srcFilename, destFilePath, options) {
   fs.writeFileSync(`${destFilePath}.map`, remapped.toString(), 'utf8');
 }
 
+/**
+ * @param {string} name
+ * @return {string}
+ */
 function toEsmName(name) {
   return name.replace(/\.js$/, '.mjs');
 }
 
+/**
+ * @param {string} name
+ * @return {string}
+ */
 function maybeToEsmName(name) {
   return argv.esm ? toEsmName(name) : name;
 }
@@ -332,6 +344,10 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
     fileWatch(entryPoint).on('change', debounce(watchFunc, watchDebounceDelay));
   }
 
+  /**
+   * @param {boolean} continueOnError
+   * @return {Promise<void>}
+   */
   async function doCompileMinifiedJs(continueOnError) {
     options.continueOnError = continueOnError;
     options.errored = false;

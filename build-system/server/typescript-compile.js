@@ -20,6 +20,9 @@ const {log} = require('../common/logging');
 
 const SERVER_TRANSFORM_PATH = 'build-system/server/new-server/transforms';
 
+/**
+ * @return {string}
+ */
 function getBuildCmd() {
   switch (process.platform) {
     case 'win32':
@@ -34,6 +37,7 @@ function getBuildCmd() {
 
 /**
  * Builds the new server by converting typescript transforms to JS
+ * @return {void}
  */
 function buildNewServer() {
   log(

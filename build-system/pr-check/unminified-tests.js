@@ -30,6 +30,9 @@ const {runCiJob} = require('./ci-job');
 
 const jobName = 'unminified-tests.js';
 
+/**
+ * @return {void}
+ */
 function pushBuildWorkflow() {
   downloadUnminifiedOutput();
   timedExecOrDie('gulp update-packages');
@@ -52,6 +55,9 @@ function pushBuildWorkflow() {
   }
 }
 
+/**
+ * @return {void}
+ */
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
     downloadUnminifiedOutput();
