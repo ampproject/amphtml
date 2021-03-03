@@ -24,19 +24,17 @@ export function ketshwa(global, data) {
   validateData(data, ['widgetid', 'externalid'], []);
 
   const {widgetid, externalid} = data;
+  const skey = `widget_${widgetid}`;
 
   const d = global.document.createElement('div');
-  d.id = `widget_${widgetid}`;
+  d.id = skey;
   global.document.getElementById('c').appendChild(d);
-
-  const t = widgetid;
-  const e = `widget_${widgetid}`;
 
   writeScript(
     global,
     `https://widget-cdn.ketshwa.com/m/p/${widgetid}/${externalid}.js`,
     () => {
-      global.KetshwaSDK.showWidget(t, e);
+      global.KetshwaSDK.showWidget(widgetid, skey);
     }
   );
 }
