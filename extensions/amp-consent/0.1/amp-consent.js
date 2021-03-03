@@ -791,7 +791,8 @@ export class AmpConsent extends AMP.BaseElement {
     }
     return this.getPurposeConsentRequired_().then((purposeConsentRequired) => {
       // True if there are no required purposes
-      if (!purposeConsentRequired || !purposeConsentRequired.length) {
+      if (!purposeConsentRequired?.length) {
+        this.consentStateManager_.hasAllPurposeConsents();
         return true;
       }
       const storedPurposeConsents = consentInfo['purposeConsents'];
@@ -810,6 +811,7 @@ export class AmpConsent extends AMP.BaseElement {
           return false;
         }
       }
+      this.consentStateManager_.hasAllPurposeConsents();
       return true;
     });
   }

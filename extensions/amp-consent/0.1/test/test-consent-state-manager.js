@@ -102,36 +102,30 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
     });
 
     describe('update/get consentInfo', () => {
-      it('get initial default consentInfo value', function* () {
+      it('get initial default consentInfo value', async () => {
         manager.registerConsentInstance('test', {});
-        let value;
-        const p = manager.getConsentInstanceInfo().then((v) => (value = v));
-        yield p;
+        const value = await manager.getConsentInstanceInfo();
         expect(value).to.deep.equal(
           constructConsentInfo(CONSENT_ITEM_STATE.UNKNOWN)
         );
       });
 
-      it('update/get consent state', function* () {
+      it('update/get consent state', async () => {
         manager.registerConsentInstance('test', {});
         manager.updateConsentInstanceState(CONSENT_ITEM_STATE.ACCEPTED);
-        let value;
-        const p = manager.getConsentInstanceInfo().then((v) => (value = v));
-        yield p;
+        const value = await manager.getConsentInstanceInfo();
         expect(value).to.deep.equal(
           constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED)
         );
       });
 
-      it('update/get consent string', function* () {
+      it('update/get consent string', async () => {
         manager.registerConsentInstance('test', {});
         manager.updateConsentInstanceState(
           CONSENT_ITEM_STATE.ACCEPTED,
           'test-string'
         );
-        let value;
-        const p = manager.getConsentInstanceInfo().then((v) => (value = v));
-        yield p;
+        const value = await manager.getConsentInstanceInfo();
         expect(value).to.deep.equal(
           constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED, 'test-string')
         );
@@ -262,6 +256,19 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
         expect(spy).to.be.calledWith(
           constructConsentInfo(CONSENT_ITEM_STATE.UNKNOWN)
         );
+      });
+
+      it('should call purpose consent resolver on update', () => {
+        const resolverSpy = env.sandbox.spy(manager, 'hasAllPurposeConsents');
+        manager.onConsentStateChange(spy);
+        manager.updateConsentInstanceState(CONSENT_ITEM_STATE.REJECTED);
+        expect(resolverSpy).to.be.calledAfter(spy);
+        expect(resolverSpy).to.be.calledOnce;
+        resolverSpy.resetHistory();
+
+        manager.updateConsentInstanceState(CONSENT_ITEM_STATE.NOT_REQUIRED);
+        expect(resolverSpy).to.be.calledAfter(spy);
+        expect(resolverSpy).to.be.calledOnce;
       });
 
       it('handles race condition', function* () {
