@@ -18,16 +18,15 @@ import {readJsonSync, writeJsonSync} from 'fs-extra';
 const zIndexRegExp = /^z-?index$/i;
 
 function getCallExpressionZIndexValue(node) {
-  for (let i = 0; i < node.arguments.length; i++) {
+  for (let i = 1; i < node.arguments.length; i++) {
     const argument = node.arguments[i];
-    const next = node.arguments[i + 1];
+    const previous = node.arguments[i - 1];
     if (
-      next &&
-      next.type.endsWith('Literal') &&
-      next.value !== '' &&
-      zIndexRegExp.test(argument.value)
+      argument.type.endsWith('Literal') &&
+      argument.value !== '' &&
+      zIndexRegExp.test(previous.value)
     ) {
-      return next.value;
+      return argument.value;
     }
   }
 }
