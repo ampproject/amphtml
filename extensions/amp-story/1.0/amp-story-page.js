@@ -43,6 +43,7 @@ import {
   expandableElementsSelectors,
 } from './amp-story-embedded-component';
 import {AnimationManager, hasAnimations} from './animation';
+import {CSS} from '../../../build/amp-story-page-attachment-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {Deferred} from '../../../src/utils/promise';
 import {EventType, dispatch} from './events';
@@ -60,6 +61,7 @@ import {
   scopedQuerySelectorAll,
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
+import {createShadowRootWithStyle, setTextBackgroundColor} from './utils';
 import {debounce} from '../../../src/utils/rate-limit';
 import {delegateAutoplay} from '../../../src/video-interface';
 import {dev} from '../../../src/log';
@@ -76,7 +78,6 @@ import {isPrerenderActivePage} from './prerender-active-page';
 import {listen} from '../../../src/event-helper';
 import {px, toggle} from '../../../src/style';
 import {renderPageDescription} from './semantic-render';
-import {setTextBackgroundColor} from './utils';
 import {toArray} from '../../../src/types';
 import {upgradeBackgroundAudio} from './audio';
 
@@ -171,7 +172,8 @@ const buildOpenAttachmentElement = (element) =>
   htmlFor(element)`
       <a class="
           i-amphtml-story-page-open-attachment i-amphtml-story-system-reset"
-          role="button">
+          role="button"
+          active>
         <span class="i-amphtml-story-page-open-attachment-icon">
           <span class="i-amphtml-story-page-open-attachment-bar-left"></span>
           <span class="i-amphtml-story-page-open-attachment-bar-right"></span>
@@ -477,6 +479,9 @@ export class AmpStoryPage extends AMP.BaseElement {
       case PageState.PLAYING:
         if (this.state_ === PageState.NOT_ACTIVE) {
           this.element.setAttribute('active', '');
+          if (this.openAttachmentEl_) {
+            this.openAttachmentEl_.setAttribute('active', '');
+          }
           this.resume_();
         }
 
@@ -1783,7 +1788,11 @@ export class AmpStoryPage extends AMP.BaseElement {
 
       this.mutateElement(() => {
         textEl.textContent = openLabel;
-        this.element.appendChild(this.openAttachmentEl_);
+        const container = this.element.ownerDocument
+          .createElement('div')
+          .classList.add('shadow-root-container-element');
+        this.element.appendChild(container);
+        createShadowRootWithStyle(container, this.openAttachmentEl_, CSS);
       });
     }
   }

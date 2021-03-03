@@ -126,11 +126,11 @@
  * Hiding the element and only showing it on the active page so the animation
  * triggers every time the page becomes active.
  */
-amp-story-page .i-amphtml-story-page-open-attachment {
+.i-amphtml-story-page-open-attachment {
   display: none !important;
 }
 
-amp-story-page[active] .i-amphtml-story-page-open-attachment {
+.i-amphtml-story-page-open-attachment[active] {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -147,12 +147,12 @@ amp-story-page[active] .i-amphtml-story-page-open-attachment {
   text-decoration: none !important;
 }
 
-amp-story-page .i-amphtml-story-page-open-attachment > * {
+.i-amphtml-story-page-open-attachment > * {
   cursor: pointer !important;
   pointer-events: auto !important;
 }
 
-amp-story-page .i-amphtml-story-page-open-attachment-icon {
+.i-amphtml-story-page-open-attachment-icon {
   display: block !important;
   height: 32px !important;
   width: 32px !important;
@@ -160,7 +160,7 @@ amp-story-page .i-amphtml-story-page-open-attachment-icon {
   animation: open-attachment-icon 0.2s cubic-bezier(0.4, 0.0, 0.2, 1) 2s both !important;
 }
 
-amp-story-page .i-amphtml-story-page-open-attachment-icon::after {
+.i-amphtml-story-page-open-attachment-icon::after {
   content: "" !important;
   position: absolute !important;
   top: 0 !important;
@@ -173,8 +173,8 @@ amp-story-page .i-amphtml-story-page-open-attachment-icon::after {
   animation: open-attachment-icon-explode 0.25s cubic-bezier(0.4, 0.0, 0.2, 1) 2s both !important;
 }
 
-amp-story-page .i-amphtml-story-page-open-attachment-bar-left,
-amp-story-page .i-amphtml-story-page-open-attachment-bar-right {
+.i-amphtml-story-page-open-attachment-bar-left,
+.i-amphtml-story-page-open-attachment-bar-right {
   position: absolute !important;
   display: block !important;
   height: 3px !important;
@@ -183,19 +183,19 @@ amp-story-page .i-amphtml-story-page-open-attachment-bar-right {
   top: 14px !important;
 }
 
-amp-story-page .i-amphtml-story-page-open-attachment-bar-left {
+.i-amphtml-story-page-open-attachment-bar-left {
   left: 6px !important;
   animation: open-attachment-icon-color 0.25s cubic-bezier(0.4, 0.0, 0.2, 1) 2s both,
              open-attachment-bar-left 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) both !important;
 }
 
-amp-story-page .i-amphtml-story-page-open-attachment-bar-right {
+.i-amphtml-story-page-open-attachment-bar-right {
   right: 6px !important;
   animation: open-attachment-icon-color 0.25s cubic-bezier(0.4, 0.0, 0.2, 1) 2s both,
              open-attachment-bar-right 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) both !important;
 }
 
-amp-story-page .i-amphtml-story-page-open-attachment-label {
+.i-amphtml-story-page-open-attachment-label {
   position: relative !important;
   padding: 12px 32px 20px 32px !important;
   height: 16px !important;
