@@ -68,35 +68,36 @@ class AmpBeOpinion extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const iframe = getIframe(this.win, this.element, 'beopinion');
-    iframe.title = this.element.title || 'BeOpinion content';
-    this.applyFillContent(iframe);
-    listenFor(
-      iframe,
-      'embed-size',
-      (data) => {
-        // We only get the message if and when there is a tweet to display,
-        // so hide the placeholder
-        this.togglePlaceholder(false);
-        this.forceChangeHeight(data['height']);
-      },
-      /* opt_is3P */ true
-    );
-    listenFor(
-      iframe,
-      'no-content',
-      () => {
-        if (this.getFallback()) {
+    return getIframe(this.win, this.element, 'beopinion').then((iframe) => {
+      iframe.title = this.element.title || 'BeOpinion content';
+      this.applyFillContent(iframe);
+      listenFor(
+        iframe,
+        'embed-size',
+        (data) => {
+          // We only get the message if and when there is a tweet to display,
+          // so hide the placeholder
           this.togglePlaceholder(false);
-          this.toggleFallback(true);
-        }
-        // else keep placeholder displayed since there's no fallback
-      },
-      /* opt_is3P */ true
-    );
-    this.element.appendChild(iframe);
-    this.iframe_ = iframe;
-    return this.loadPromise(iframe);
+          this.forceChangeHeight(data['height']);
+        },
+        /* opt_is3P */ true
+      );
+      listenFor(
+        iframe,
+        'no-content',
+        () => {
+          if (this.getFallback()) {
+            this.togglePlaceholder(false);
+            this.toggleFallback(true);
+          }
+          // else keep placeholder displayed since there's no fallback
+        },
+        /* opt_is3P */ true
+      );
+      this.element.appendChild(iframe);
+      this.iframe_ = iframe;
+      return this.loadPromise(iframe);
+    });
   }
 
   /** @override */

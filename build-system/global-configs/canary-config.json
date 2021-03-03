@@ -16,5 +16,6 @@
   "ads-initialIntersection": 1,
   "amp-cid-backup": 1,
   "sticky-ad-transition": 0.1,
-  "layout-aspect-ratio-css": 1
+  "layout-aspect-ratio-css": 1,
+  "3p-deterministic-subdomain": 0.1
 }

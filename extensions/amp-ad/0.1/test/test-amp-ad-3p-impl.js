@@ -27,6 +27,7 @@ import {Services} from '../../../../src/services';
 import {adConfig} from '../../../../ads/_config';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {macroTask} from '../../../../testing/yield';
+import {poll} from '../../../../testing/iframe';
 
 function createAmpAd(win, attachToAmpdoc = false, ampdoc) {
   const ampAdElement = createElementWithAttributes(win.document, 'amp-ad', {
@@ -307,29 +308,31 @@ describes.realWin(
     });
 
     describe('preconnectCallback', () => {
-      it('should add preconnect and prefetch to DOM header', () => {
+      it('should add preconnect and prefetch to DOM header', async () => {
         mockMode({});
         ad3p.buildCallback();
         ad3p.preconnectCallback();
-        return whenFirstVisible.then(() => {
-          const fetches = win.document.querySelectorAll('link[rel=preload]');
-          expect(fetches).to.have.length(2);
-          expect(fetches[0].href).to.match(
-            /^https:\/\/d-\d+\.ampproject\.net\/\$internalRuntimeVersion\$\/frame\.html$/
-          );
-          expect(fetches[1]).to.have.property(
-            'href',
-            'https://3p.ampproject.net/$internalRuntimeVersion$/f.js'
-          );
+        await whenFirstVisible;
+        await poll(
+          'wait for preload to appear',
+          () => win.document.querySelectorAll('link[rel=preload]').length == 2
+        );
 
-          const preconnects = win.document.querySelectorAll(
-            'link[rel=preconnect]'
-          );
-          expect(preconnects[preconnects.length - 1]).to.have.property(
-            'href',
-            'https://src.test/'
-          );
-        });
+        const fetches = win.document.querySelectorAll('link[rel=preload]');
+        expect(fetches).to.have.length(2);
+        expect(fetches[0]).to.have.property(
+          'href',
+          'https://3p.ampproject.net/$internalRuntimeVersion$/f.js'
+        );
+        expect(fetches[1].href).to.match(
+          /^https:\/\/d-\d+\.ampproject\.net\/\$internalRuntimeVersion\$\/frame\.html$/
+        );
+
+        expect(
+          Array.from(
+            win.document.querySelectorAll('link[rel=preconnect]')
+          ).some((preconnect) => preconnect.href == 'https://src.test/')
+        ).to.be.true;
       });
 
       it('should use remote html path for preload', () => {
@@ -340,13 +343,11 @@ describes.realWin(
         win.document.head.appendChild(meta);
         ad3p.buildCallback();
         ad3p.preconnectCallback();
-        return whenFirstVisible.then(() => {
-          expect(
-            Array.from(win.document.querySelectorAll('link[rel=preload]')).some(
-              (link) => link.href == `${remoteUrl}?$internalRuntimeVersion$`
-            )
-          ).to.be.true;
-        });
+        return poll('wait for preload', () =>
+          Array.from(win.document.querySelectorAll('link[rel=preload]')).some(
+            (link) => link.href == `${remoteUrl}?$internalRuntimeVersion$`
+          )
+        );
       });
     });
 

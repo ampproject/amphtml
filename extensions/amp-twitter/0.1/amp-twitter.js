@@ -95,31 +95,32 @@ class AmpTwitter extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const iframe = getIframe(this.win, this.element, 'twitter', null, {
+    return getIframe(this.win, this.element, 'twitter', null, {
       allowFullscreen: true,
+    }).then((iframe) => {
+      iframe.title = this.element.title || 'Twitter';
+      this.applyFillContent(iframe);
+      this.updateForLoadingState_();
+      listenFor(
+        iframe,
+        MessageType.EMBED_SIZE,
+        (data) => {
+          this.updateForSuccessState_(data['height']);
+        },
+        /* opt_is3P */ true
+      );
+      listenFor(
+        iframe,
+        MessageType.NO_CONTENT,
+        () => {
+          this.updateForFailureState_();
+        },
+        /* opt_is3P */ true
+      );
+      this.element.appendChild(iframe);
+      this.iframe_ = iframe;
+      return this.loadPromise(iframe);
     });
-    iframe.title = this.element.title || 'Twitter';
-    this.applyFillContent(iframe);
-    this.updateForLoadingState_();
-    listenFor(
-      iframe,
-      MessageType.EMBED_SIZE,
-      (data) => {
-        this.updateForSuccessState_(data['height']);
-      },
-      /* opt_is3P */ true
-    );
-    listenFor(
-      iframe,
-      MessageType.NO_CONTENT,
-      () => {
-        this.updateForFailureState_();
-      },
-      /* opt_is3P */ true
-    );
-    this.element.appendChild(iframe);
-    this.iframe_ = iframe;
-    return this.loadPromise(iframe);
   }
 
   /**

@@ -415,20 +415,23 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         const intersectionPromise = asyncIntersection
           ? measureIntersection(this.element)
           : Promise.resolve(this.element.getIntersectionChangeEntry());
-        return intersectionPromise.then((intersection) => {
-          const iframe = getIframe(
-            toWin(this.element.ownerDocument.defaultView),
-            this.element,
-            this.type_,
-            opt_context,
-            {
-              initialIntersection: intersectionEntryToJson(intersection),
-            }
-          );
-          iframe.title = this.element.title || 'Advertisement';
-          this.xOriginIframeHandler_ = new AmpAdXOriginIframeHandler(this);
-          return this.xOriginIframeHandler_.init(iframe);
-        });
+        return intersectionPromise
+          .then((intersection) =>
+            getIframe(
+              toWin(this.element.ownerDocument.defaultView),
+              this.element,
+              this.type_,
+              opt_context,
+              {
+                initialIntersection: intersectionEntryToJson(intersection),
+              }
+            )
+          )
+          .then((iframe) => {
+            iframe.title = this.element.title || 'Advertisement';
+            this.xOriginIframeHandler_ = new AmpAdXOriginIframeHandler(this);
+            return this.xOriginIframeHandler_.init(iframe);
+          });
       })
       .then(() => {
         observeWithSharedInOb(this.element, (inViewport) =>

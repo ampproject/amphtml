@@ -82,33 +82,34 @@ class AmpFacebook extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const iframe = getIframe(this.win, this.element, 'facebook');
-    iframe.title = this.element.title || 'Facebook';
-    this.applyFillContent(iframe);
-    if (this.element.hasAttribute('data-allowfullscreen')) {
-      iframe.setAttribute('allowfullscreen', 'true');
-    }
-    // Triggered by context.updateDimensions() inside the iframe.
-    listenFor(
-      iframe,
-      'embed-size',
-      (data) => {
-        this.forceChangeHeight(data['height']);
-      },
-      /* opt_is3P */ true
-    );
-    this.unlistenMessage_ = listen(
-      this.win,
-      'message',
-      this.handleFacebookMessages_.bind(this)
-    );
-    this.toggleLoading(true);
-    if (getMode().test) {
-      this.toggleLoadingCounter_++;
-    }
-    this.element.appendChild(iframe);
-    this.iframe_ = iframe;
-    return this.loadPromise(iframe);
+    return getIframe(this.win, this.element, 'facebook').then((iframe) => {
+      iframe.title = this.element.title || 'Facebook';
+      this.applyFillContent(iframe);
+      if (this.element.hasAttribute('data-allowfullscreen')) {
+        iframe.setAttribute('allowfullscreen', 'true');
+      }
+      // Triggered by context.updateDimensions() inside the iframe.
+      listenFor(
+        iframe,
+        'embed-size',
+        (data) => {
+          this.forceChangeHeight(data['height']);
+        },
+        /* opt_is3P */ true
+      );
+      this.unlistenMessage_ = listen(
+        this.win,
+        'message',
+        this.handleFacebookMessages_.bind(this)
+      );
+      this.toggleLoading(true);
+      if (getMode().test) {
+        this.toggleLoadingCounter_++;
+      }
+      this.element.appendChild(iframe);
+      this.iframe_ = iframe;
+      return this.loadPromise(iframe);
+    });
   }
 
   /**

@@ -72,29 +72,30 @@ class AmpFacebookLike extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const iframe = getIframe(this.win, this.element, 'facebook');
-    iframe.title = this.element.title || 'Facebook like button';
-    this.applyFillContent(iframe);
-    // Triggered by context.updateDimensions() inside the iframe.
-    listenFor(
-      iframe,
-      'embed-size',
-      (data) => {
-        this.attemptChangeHeight(data['height']).catch(() => {
-          /* ignore failures */
-        });
-      },
-      /* opt_is3P */ true
-    );
-    this.unlistenMessage_ = listen(
-      this.win,
-      'message',
-      this.handleFacebookMessages_.bind(this)
-    );
-    this.toggleLoading(true);
-    this.element.appendChild(iframe);
-    this.iframe_ = iframe;
-    return this.loadPromise(iframe);
+    return getIframe(this.win, this.element, 'facebook').then((iframe) => {
+      iframe.title = this.element.title || 'Facebook like button';
+      this.applyFillContent(iframe);
+      // Triggered by context.updateDimensions() inside the iframe.
+      listenFor(
+        iframe,
+        'embed-size',
+        (data) => {
+          this.attemptChangeHeight(data['height']).catch(() => {
+            /* ignore failures */
+          });
+        },
+        /* opt_is3P */ true
+      );
+      this.unlistenMessage_ = listen(
+        this.win,
+        'message',
+        this.handleFacebookMessages_.bind(this)
+      );
+      this.toggleLoading(true);
+      this.element.appendChild(iframe);
+      this.iframe_ = iframe;
+      return this.loadPromise(iframe);
+    });
   }
 
   /**

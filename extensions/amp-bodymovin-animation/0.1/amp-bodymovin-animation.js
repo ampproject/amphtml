@@ -133,35 +133,38 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     const animData = batchFetchJsonFor(this.ampdoc_, this.element);
-    return animData.then((data) => {
-      const opt_context = {
-        loop: this.loop_,
-        autoplay: this.autoplay_,
-        renderer: this.renderer_,
-        animationData: data,
-      };
-      const iframe = getIframe(
-        this.win,
-        this.element,
-        'bodymovinanimation',
-        opt_context
-      );
-      iframe.title = this.element.title || 'Airbnb BodyMovin animation';
-      return Services.vsyncFor(this.win)
-        .mutatePromise(() => {
-          this.applyFillContent(iframe);
-          this.unlistenMessage_ = listen(
-            this.win,
-            'message',
-            this.handleBodymovinMessages_.bind(this)
-          );
-          this.element.appendChild(iframe);
-          this.iframe_ = iframe;
-        })
-        .then(() => {
-          return this.playerReadyPromise_;
-        });
-    });
+    return animData
+      .then((data) => {
+        const opt_context = {
+          loop: this.loop_,
+          autoplay: this.autoplay_,
+          renderer: this.renderer_,
+          animationData: data,
+        };
+        return getIframe(
+          this.win,
+          this.element,
+          'bodymovinanimation',
+          opt_context
+        );
+      })
+      .then((iframe) => {
+        iframe.title = this.element.title || 'Airbnb BodyMovin animation';
+        return Services.vsyncFor(this.win)
+          .mutatePromise(() => {
+            this.applyFillContent(iframe);
+            this.unlistenMessage_ = listen(
+              this.win,
+              'message',
+              this.handleBodymovinMessages_.bind(this)
+            );
+            this.element.appendChild(iframe);
+            this.iframe_ = iframe;
+          })
+          .then(() => {
+            return this.playerReadyPromise_;
+          });
+      });
   }
 
   /** @override */
