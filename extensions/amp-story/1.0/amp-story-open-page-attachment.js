@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Helper for amp-story rendering of page-attachment UI.
+ */
 import {htmlFor} from '../../../src/static-template';
+import {getLocalizationService} from './amp-story-localization-service';
+import {LocalizedStringId} from '../../../src/localized-strings';
 
 /**
  * @param {!Element} element
@@ -35,9 +40,7 @@ htmlFor(element)`
 /**
  * Renders the open attachment UI affordance.
  */
-class AmpStoryOpenPageAttachment {
-
-  export renderPageAttachmentUI(el, attachmentEl, openAttachmentEl) {
+export function renderPageAttachmentUI(el, attachmentEl, openAttachmentEl) {
     // If the attachment is a link, copy href to the element so it can be previewed on hover and long press.
     const attachmentHref = attachmentEl.getAttribute('href');
     if (attachmentHref) {
@@ -56,5 +59,4 @@ class AmpStoryOpenPageAttachment {
     );
 
     textEl.textContent = openLabel;
-  }
-}
+    }
