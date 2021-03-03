@@ -1235,6 +1235,12 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'verizonmedia': {
+    prefetch: 'https://jac.yahoosandbox.com/amp/jac.js',
+    preconnect: ['https://jill.fc.yahoo.com'],
+    renderStartImplemented: true,
+  },
+
   'videointelligence': {
     preconnect: 'https://s.vi-serve.com',
     renderStartImplemented: true,
