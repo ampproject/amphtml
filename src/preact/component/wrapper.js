@@ -16,6 +16,7 @@
 
 import * as Preact from '../';
 import {forwardRef} from '../compat';
+import objstr from 'obj-str';
 
 /**
  * The wrapper component provides the canonical wrapper for components whose
@@ -41,7 +42,10 @@ function WrapperWithRef(
     <Comp
       {...rest}
       ref={ref}
-      className={`${className || ''} ${wrapperClassName || ''}`.trim() || null}
+      className={objstr({
+        [wrapperClassName]: wrapperClassName,
+        [className]: className,
+      })}
       style={{...style, ...wrapperStyle}}
     >
       {children}

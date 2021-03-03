@@ -24,7 +24,8 @@ import {
   useRef,
   useState,
 } from '../../../src/preact';
-import {useStyles} from './component.jss';
+import {useStyles} from './lightbox.jss';
+import objstr from 'obj-str';
 
 const ANIMATION_DURATION = 200;
 const ANIMATION_PRESETS = {
@@ -166,9 +167,11 @@ function LightboxWithRef(
             overscrollBehavior: 'none',
           }
         }
-        wrapperClassName={`${classes.defaultStyles} ${classes.wrapper} ${
-          scrollable ? '' : classes.containScroll
-        }`}
+        wrapperClassName={objstr({
+          [classes.defaultStyles]: true,
+          [classes.wrapper]: true,
+          [classes.containScroll]: scrollable,
+        })}
         role="dialog"
         tabindex="0"
         onKeyDown={(event) => {

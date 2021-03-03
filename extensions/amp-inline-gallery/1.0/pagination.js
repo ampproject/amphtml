@@ -19,6 +19,7 @@ import {CarouselContext} from '../../amp-base-carousel/1.0/carousel-context';
 import {Wrapper} from '../../../src/preact/component';
 import {useContext} from '../../../src/preact';
 import {useStyles} from './pagination.jss';
+import objstr from 'obj-str';
 
 /**
  * @param {!InlineGalleryDef.PaginationProps} props
@@ -32,7 +33,10 @@ export function Pagination({inset, ...rest}) {
   return (
     <Wrapper
       aria-hidden="true"
-      wrapperClassName={`${classes.container} ${inset ? classes.inset : ''}`}
+      wrapperClassName={objstr({
+        [classes.container]: true,
+        [classes.inset]: inset,
+      })}
       {...rest}
     >
       <div
