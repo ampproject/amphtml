@@ -114,12 +114,13 @@ function VideoWrapperWithRef(
   // <source>s change.
   const readyDeferred = useMemo(() => new Deferred(), []);
 
-  const [readyState, setReadyState_] = useState(ReadyState.LOADING);
-
+  const readyStateRef = useRef(ReadyState.LOADING);
+  // The `onReadyStateRef` is passed via a ref to avoid the changed values
+  // of `onReadyState` re-triggering the side effects.
   const onReadyStateRef = useValueRef(onReadyState);
   const setReadyState = useCallback(
     (state, opt_failure) => {
-      setReadyState_(state);
+      readyStateRef.current = state;
       const onReadyState = onReadyStateRef.current;
       if (onReadyState) {
         onReadyState(state, opt_failure);
@@ -147,7 +148,8 @@ function VideoWrapperWithRef(
     setHasUserInteracted(true);
   }, []);
 
-  // Update the initial readyState.
+  // Update the initial readyState. Using `useLayoutEffect` here to avoid
+  // race conditions with possible future events.
   useLayoutEffect(() => {
     const player = playerRef.current;
     const readyState = player && player.readyState;
@@ -180,7 +182,7 @@ function VideoWrapperWithRef(
     () => ({
       // Standard Bento
       get readyState() {
-        return readyState;
+        return readyStateRef.current;
       },
 
       // Standard HTMLMediaElement/Element
@@ -219,7 +221,6 @@ function VideoWrapperWithRef(
       },
     }),
     [
-      readyState,
       play,
       pause,
       requestFullscreen,

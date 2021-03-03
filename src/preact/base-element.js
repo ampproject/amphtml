@@ -413,9 +413,7 @@ export class PreactBaseElement extends AMP.BaseElement {
   /** @override */
   detachedCallback() {
     discover(this.element);
-    if (this.mediaQueryProps_) {
-      this.mediaQueryProps_.dispose();
-    }
+    this.mediaQueryProps_?.dispose();
   }
 
   /** @override */

@@ -23,6 +23,7 @@ import {forwardRef} from '../../../src/preact/compat';
 import {getData} from '../../../src/event-helper';
 import {parseJson} from '../../../src/json';
 import {
+  useCallback,
   useImperativeHandle,
   useLayoutEffect,
   useRef,
@@ -52,7 +53,21 @@ export function InstagramWithRef(
 ) {
   const loading = useLoading(loadingProp, /* unlayoutOnPause */ true);
   const load = loading !== Loading.UNLOAD;
-  const [loaded, setLoaded] = useState(false);
+
+  const loadedRef = useRef(false);
+  // The `onReadyStateRef` is passed via a ref to avoid the changed values
+  // of `onReadyState` re-triggering the side effects.
+  const onReadyStateRef = useValueRef(onReadyState);
+  const setLoaded = useCallback(
+    (value) => {
+      loadedRef.current = value;
+      const onReadyState = onReadyStateRef.current;
+      if (onReadyState) {
+        onReadyState(value ? ReadyState.COMPLETE : ReadyState.LOADING);
+      }
+    },
+    [onReadyStateRef]
+  );
 
   const iframeRef = useRef(null);
   const [heightStyle, setHeightStyle] = useState(NO_HEIGHT_STYLE);
@@ -64,23 +79,19 @@ export function InstagramWithRef(
     () => ({
       // Standard Bento
       get readyState() {
-        return loaded ? ReadyState.COMPLETE : ReadyState.LOADING;
+        return loadedRef.current ? ReadyState.COMPLETE : ReadyState.LOADING;
       },
     }),
-    [loaded]
+    []
   );
 
-  // Reset readyState to "laoding" when an iframe is unloaded.
-  const onReadyStateRef = useValueRef(onReadyState);
+  // Reset readyState to "loading" when an iframe is unloaded. Has to be
+  // a `useLayoutEffect` to avoid race condition with a future "load" event.
   useLayoutEffect(() => {
     if (!load) {
       setLoaded(false);
-      const onReadyState = onReadyStateRef.current;
-      if (onReadyState) {
-        onReadyState(ReadyState.LOADING);
-      }
     }
-  }, [load, onReadyStateRef]);
+  }, [load, setLoaded]);
 
   useLayoutEffect(() => {
     if (!iframeRef.current || !load) {
@@ -128,12 +139,7 @@ export function InstagramWithRef(
             '?cr=1&v=12'
           }
           loading={loading}
-          onLoad={() => {
-            setLoaded(true);
-            if (onReadyState) {
-              onReadyState(ReadyState.COMPLETE);
-            }
-          }}
+          onLoad={() => setLoaded(true)}
           scrolling="no"
           frameborder="0"
           allowtransparency
