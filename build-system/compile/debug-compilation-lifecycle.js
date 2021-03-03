@@ -63,6 +63,10 @@ function debug(lifecycle, fullpath, content, sourcemap) {
   }
 }
 
+/**
+ * Logs debug information.
+ * @return {void}
+ */
 function displayLifecycleDebugging() {
   if (argv.debug) {
     log(cyan('Debug Lifecycles: ') + red(logFile));

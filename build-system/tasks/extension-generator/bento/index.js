@@ -69,6 +69,13 @@ async function* walkDir(dir) {
   }
 }
 
+/**
+ * @return {!{
+ *   name: string,
+ *   version,
+ *   options: {hasCss: true},
+ * }}
+ */
 async function makeBentoExtension() {
   const componentName = (argv.name || '').replace(/^amp-/, '');
   const version = argv.version || '1.0';
