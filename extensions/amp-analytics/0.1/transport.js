@@ -30,7 +30,8 @@ import {
   parseUrlDeprecated,
 } from '../../../src/url';
 import {createPixel} from '../../../src/pixel';
-import {dev, user, userAssert} from '../../../src/log';
+import {dev, user, } from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 import {getAmpAdResourceId} from '../../../src/ad-helper';
 import {getMode} from '../../../src/mode';
 import {getTopWindow} from '../../../src/service';

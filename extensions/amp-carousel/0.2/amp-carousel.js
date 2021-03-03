@@ -27,7 +27,8 @@ import {
 } from '../../../src/dom';
 import {computedStyle} from '../../../src/style';
 import {createCustomEvent, getDetail} from '../../../src/event-helper';
-import {dev, userAssert} from '../../../src/log';
+import {dev, } from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {dict} from '../../../src/utils/object';
 import {htmlFor} from '../../../src/static-template';

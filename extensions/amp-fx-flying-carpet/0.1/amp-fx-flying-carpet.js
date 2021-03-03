@@ -18,7 +18,8 @@ import {CSS} from '../../../build/amp-fx-flying-carpet-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
-import {dev, userAssert} from '../../../src/log';
+import {dev, } from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 import {setStyle} from '../../../src/style';
 
 const TAG = 'amp-fx-flying-carpet';

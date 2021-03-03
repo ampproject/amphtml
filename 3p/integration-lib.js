@@ -23,8 +23,9 @@ import {
   initLogConstructor,
   isUserErrorMessage,
   setReportError,
-  userAssert,
+  ,
 } from '../src/log';
+import {pureUserAssert as userAssert} from '../src/core/assert';
 import {installEmbedStateListener, manageWin} from './environment';
 import {internalRuntimeVersion} from '../src/internal-version';
 import {parseJson} from '../src/json';

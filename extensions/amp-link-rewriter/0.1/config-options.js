@@ -15,7 +15,8 @@
  */
 import {getChildJsonConfig} from '../../../src/json';
 import {hasOwn} from '../../../src/utils/object';
-import {user, userAssert} from '../../../src/log';
+import {user, } from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 /**
  * @typedef {{output: string, section:Array, attribute:Object, vars:Object}}

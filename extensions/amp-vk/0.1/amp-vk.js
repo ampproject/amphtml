@@ -28,7 +28,8 @@ import {addParamsToUrl, appendEncodedParamStringToUrl} from '../../../src/url';
 import {dict} from '../../../src/utils/object';
 import {getData, listen} from '../../../src/event-helper';
 import {removeElement} from '../../../src/dom';
-import {user, userAssert} from '../../../src/log';
+import {user, } from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 export class AmpVk extends AMP.BaseElement {
   /** @param {!AmpElement} element */

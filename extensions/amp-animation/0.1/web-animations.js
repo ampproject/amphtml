@@ -41,7 +41,8 @@ import {
 } from '../../../src/dom';
 import {computedStyle, getVendorJsPropertyName} from '../../../src/style';
 import {dashToCamelCase} from '../../../src/string';
-import {dev, user, userAssert} from '../../../src/log';
+import {dev, user, } from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {extractKeyframes} from './parsers/keyframes-extractor';

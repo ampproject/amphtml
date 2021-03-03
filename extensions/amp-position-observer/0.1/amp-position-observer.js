@@ -29,7 +29,8 @@ import {
   parseLength,
 } from '../../../src/layout';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dev, user, userAssert} from '../../../src/log';
+import {dev, user, } from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {dict} from '../../../src/utils/object';
 import {installPositionObserverServiceForDoc} from '../../../src/service/position-observer/position-observer-impl';

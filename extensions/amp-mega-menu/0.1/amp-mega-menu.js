@@ -28,7 +28,8 @@ import {
   scopedQuerySelectorAll,
   tryFocus,
 } from '../../../src/dom';
-import {dev, userAssert} from '../../../src/log';
+import {dev, } from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 import {mod} from '../../../src/utils/math';
 import {setModalAsClosed, setModalAsOpen} from '../../../src/modal';
 import {toArray} from '../../../src/types';

@@ -21,7 +21,8 @@ import {Gestures} from '../../../src/gesture';
 import {Services} from '../../../src/services';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {clamp} from '../../../src/utils/math';
-import {dev, user, userAssert} from '../../../src/log';
+import {dev, user, } from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
 import {

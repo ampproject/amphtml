@@ -25,7 +25,8 @@ import {
   originMatches,
   redispatch,
 } from '../../../src/iframe-video';
-import {dev, userAssert} from '../../../src/log';
+import {dev, } from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 import {
   dispatchCustomEvent,
   fullscreenEnter,

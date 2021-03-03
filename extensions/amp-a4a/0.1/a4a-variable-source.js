@@ -21,7 +21,8 @@ import {
   getTimingDataAsync,
   getTimingDataSync,
 } from '../../../src/service/variable-source';
-import {user, userAssert} from '../../../src/log';
+import {user, } from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 const ALLOWLISTED_VARIABLES = [
   'AMPDOC_HOST',

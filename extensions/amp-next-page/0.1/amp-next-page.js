@@ -31,7 +31,8 @@ import {
   isJsonScriptTag,
   removeElement,
 } from '../../../src/dom';
-import {dev, user, userAssert} from '../../../src/log';
+import {dev, user, } from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 import {fetchDocument} from '../../../src/document-fetcher';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getServicePromiseForDoc} from '../../../src/service';

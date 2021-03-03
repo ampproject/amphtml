@@ -19,7 +19,8 @@ import {
   closestAncestorElementBySelector,
   removeElement,
 } from '../../../src/dom';
-import {dev, user, userAssert} from '../../../src/log';
+import {dev, user, } from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';

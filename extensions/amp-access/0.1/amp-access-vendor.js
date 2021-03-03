@@ -16,7 +16,8 @@
 
 import './access-vendor';
 import {Deferred} from '../../../src/utils/promise';
-import {dev, userAssert} from '../../../src/log';
+import {dev, } from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 /** @const {string} */
 const TAG = 'amp-access-vendor';

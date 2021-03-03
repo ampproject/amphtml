@@ -15,7 +15,8 @@
  */
 import {Services} from '../../../src/services';
 import {addParamToUrl, addParamsToUrl} from '../../../src/url';
-import {dev, user, userAssert} from '../../../src/log';
+import {dev, user, } from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {listenFor} from '../../../src/iframe-helper';

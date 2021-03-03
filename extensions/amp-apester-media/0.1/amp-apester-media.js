@@ -17,7 +17,8 @@ import {CSS} from '../../../build/amp-apester-media-0.1.css';
 import {IntersectionObserver3pHost} from '../../../src/utils/intersection-observer-3p-host';
 import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
-import {dev, userAssert} from '../../../src/log';
+import {dev, } from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 import {dict} from '../../../src/utils/object';
 import {
   extractTags,

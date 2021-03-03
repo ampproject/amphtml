@@ -15,7 +15,8 @@
  */
 import {AbstractAmpContext} from './ampcontext';
 import {computeInMasterFrame} from './3p';
-import {dev, user, userAssert} from '../src/log';
+import {dev, user, } from '../src/log';
+import {pureUserAssert as userAssert} from '../src/core/assert';
 import {dict} from '../src/utils/object';
 
 /**

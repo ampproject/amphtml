@@ -22,7 +22,8 @@ import {
   isProxyOrigin,
 } from './url';
 import {Services} from './services';
-import {dev, user, userAssert} from './log';
+import {dev, user, } from './log';
+import {pureUserAssert as userAssert} from './core/assert';
 import {isExtensionScriptInNode} from './element-service';
 
 /**

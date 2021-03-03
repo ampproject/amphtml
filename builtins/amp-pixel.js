@@ -17,7 +17,8 @@
 import {BaseElement} from '../src/base-element';
 import {Services} from '../src/services';
 import {createPixel} from '../src/pixel';
-import {dev, userAssert} from '../src/log';
+import {dev, } from '../src/log';
+import {pureUserAssert as userAssert} from '../src/core/assert';
 import {registerElement} from '../src/service/custom-element-registry';
 
 const TAG = 'amp-pixel';

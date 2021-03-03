@@ -25,8 +25,9 @@ import {
   rethrowAsync,
   setReportError,
   user,
-  userAssert,
+  ,
 } from '../../src/log';
+import {pureUserAssert as userAssert} from '../../src/core/assert';
 import {pureDevAssert as devAssert} from '../../src/core/assert';
 
 describe('Logging', () => {

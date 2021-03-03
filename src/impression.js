@@ -23,7 +23,8 @@ import {
   parseQueryString,
   parseUrlDeprecated,
 } from './url';
-import {dev, user, userAssert} from './log';
+import {dev, user, } from './log';
+import {pureUserAssert as userAssert} from './core/assert';
 import {getMode} from './mode';
 import {isExperimentOn} from './experiments';
 

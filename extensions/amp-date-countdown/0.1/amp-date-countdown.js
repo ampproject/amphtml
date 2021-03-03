@@ -18,7 +18,8 @@ import {ActionTrust} from '../../../src/action-constants';
 import {Services} from '../../../src/services';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeChildren} from '../../../src/dom';
-import {user, userAssert} from '../../../src/log';
+import {user, } from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 /** @const {string} */
 const TAG = 'amp-date-countdown';

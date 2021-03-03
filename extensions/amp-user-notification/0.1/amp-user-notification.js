@@ -23,7 +23,8 @@ import {
 } from '../../../src/service/notification-ui-manager';
 import {Services} from '../../../src/services';
 import {addParamsToUrl, assertHttpsUrl} from '../../../src/url';
-import {dev, rethrowAsync, user, userAssert} from '../../../src/log';
+import {dev, rethrowAsync, user, } from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 import {dict} from '../../../src/utils/object';
 import {
   getServicePromiseForDoc,

@@ -22,7 +22,8 @@ import {
   matches,
   scopedQuerySelector,
 } from '../../../src/dom';
-import {dev, user, userAssert} from '../../../src/log';
+import {dev, user, } from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 import {getMode} from '../../../src/mode';
 import {isArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';

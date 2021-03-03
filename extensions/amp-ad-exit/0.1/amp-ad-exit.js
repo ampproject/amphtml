@@ -25,7 +25,8 @@ import {
 import {Services} from '../../../src/services';
 import {TransportMode, assertConfig, assertVendor} from './config';
 import {createFilter} from './filters/factory';
-import {dev, user, userAssert} from '../../../src/log';
+import {dev, user, } from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {getAmpAdResourceId} from '../../../src/ad-helper';
 import {getData} from '../../../src/event-helper';

@@ -19,7 +19,8 @@ import {Actions} from './actions';
 import {LocalSubscriptionPlatformRenderer} from './local-subscription-platform-renderer';
 import {UrlBuilder} from './url-builder';
 import {closestAncestorElementBySelector} from '../../../src/dom';
-import {dev, userAssert} from '../../../src/log';
+import {dev, } from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 /**
  * Surrogate property added to click events marking them as handled by the

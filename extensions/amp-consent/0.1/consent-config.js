@@ -20,7 +20,8 @@ import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
 import {Services} from '../../../src/services';
 import {childElementByTag} from '../../../src/dom';
 import {deepMerge, hasOwn, map} from '../../../src/utils/object';
-import {user, userAssert} from '../../../src/log';
+import {user, } from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {getChildJsonConfig} from '../../../src/json';
 

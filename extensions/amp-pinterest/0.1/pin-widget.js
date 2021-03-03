@@ -21,7 +21,8 @@ import {assertAbsoluteHttpOrHttpsUrl, assertHttpsUrl} from '../../../src/url';
 import {measureIntersection} from '../../../src/utils/intersection';
 import {openWindowDialog} from '../../../src/dom';
 import {toWin} from '../../../src/types';
-import {user, userAssert} from '../../../src/log';
+import {user, } from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 // Popup options
 const POP =

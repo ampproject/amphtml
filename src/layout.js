@@ -19,7 +19,8 @@
  * details.
  */
 
-import {dev, userAssert} from './log';
+import {dev, } from './log';
+import {pureUserAssert as userAssert} from './core/assert';
 import {pureDevAssert as devAssert} from './core/assert';
 import {htmlFor} from './static-template';
 import {isExperimentOn} from './experiments';

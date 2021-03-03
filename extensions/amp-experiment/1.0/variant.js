@@ -16,7 +16,8 @@
 
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
-import {dev, userAssert} from '../../../src/log';
+import {dev, } from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 import {hasOwn} from '../../../src/utils/object';
 import {isArray, isObject} from '../../../src/types';
 

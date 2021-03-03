@@ -35,7 +35,8 @@ import {boundValue, distance, magnitude} from '../../../src/utils/math';
 import {closestAncestorElementBySelector, elementByTag} from '../../../src/dom';
 import {continueMotion} from '../../../src/motion';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dev, userAssert} from '../../../src/log';
+import {dev, } from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 import {
   expandLayoutRect,
   layoutRectFromDomRect,

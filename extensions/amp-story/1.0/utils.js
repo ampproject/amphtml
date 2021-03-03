@@ -27,7 +27,8 @@ import {
   resolveRelativeUrl,
 } from '../../../src/url';
 import {setStyle, toggle} from '../../../src/style';
-import {user, userAssert} from '../../../src/log';
+import {user, } from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 /**
  * Returns millis as number if given a string(e.g. 1s, 200ms etc)

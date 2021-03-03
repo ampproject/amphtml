@@ -16,7 +16,8 @@
 
 import {ActionStatus} from './analytics';
 import {assertHttpsUrl, parseQueryString} from '../../../src/url';
-import {dev, userAssert} from '../../../src/log';
+import {dev, } from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 import {dict} from '../../../src/utils/object';
 import {openLoginDialog} from '../../amp-access/0.1/login-dialog';
 

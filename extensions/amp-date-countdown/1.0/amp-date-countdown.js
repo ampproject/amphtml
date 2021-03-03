@@ -16,7 +16,8 @@
 
 import {BaseElement} from './base-element';
 import {Services} from '../../../src/services';
-import {dev, userAssert} from '../../../src/log';
+import {dev, } from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';

@@ -48,7 +48,8 @@ import {Services} from '../../../src/services';
 import {US_CA_CODE, ampGeoPresets} from './amp-geo-presets';
 
 import {GEO_IN_GROUP} from './amp-geo-in-group';
-import {dev, user, userAssert} from '../../../src/log';
+import {dev, user, } from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
 import {isCanary} from '../../../src/experiments';

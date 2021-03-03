@@ -30,7 +30,8 @@ import {
 } from '../../../src/batched-json';
 import {addParamToUrl} from '../../../src/url';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dev, user, userAssert} from '../../../src/log';
+import {dev, user, } from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 import {dict, hasOwn, map, ownProperty} from '../../../src/utils/object';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
 import {includes} from '../../../src/string';

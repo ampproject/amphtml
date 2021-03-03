@@ -45,7 +45,8 @@ import {
   getSourceUrl,
   resolveRelativeUrl,
 } from '../../../src/url';
-import {dev, user, userAssert} from '../../../src/log';
+import {dev, user, } from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {dict, hasOwn} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';

@@ -21,7 +21,8 @@ import {
   computedStyle,
   setStyles,
 } from '../../../../src/style';
-import {dev, userAssert} from '../../../../src/log';
+import {dev, } from '../../../../src/log';
+import {pureUserAssert as userAssert} from '../../../../src/core/assert';
 import {pureDevAssert as devAssert} from '../../../../src/core/assert';
 
 /**

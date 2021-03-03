@@ -16,7 +16,8 @@
 
 import {CSS} from '../../../build/amp-access-laterpay-0.2.css';
 import {Services} from '../../../src/services';
-import {dev, user, userAssert} from '../../../src/log';
+import {dev, user, } from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {installStylesForDoc} from '../../../src/style-installer';

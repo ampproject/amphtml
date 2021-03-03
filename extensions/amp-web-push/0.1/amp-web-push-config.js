@@ -15,7 +15,8 @@
  */
 
 import {CONFIG_TAG, TAG} from './vars';
-import {dev, user, userAssert} from '../../../src/log';
+import {dev, user, } from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {parseUrlDeprecated} from '../../../src/url';
 import {webPushServiceForDoc} from './web-push-service';

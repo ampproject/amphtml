@@ -16,7 +16,8 @@
 
 import {CSS} from '../../../build/amp-app-banner-0.1.css';
 import {Services} from '../../../src/services';
-import {dev, rethrowAsync, user, userAssert} from '../../../src/log';
+import {dev, rethrowAsync, user, } from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 import {dict} from '../../../src/utils/object';
 import {openWindowDialog, removeElement} from '../../../src/dom';
 

@@ -21,7 +21,8 @@ import {
   resolveRelativeUrl,
 } from '../../../src/url';
 import {isArray} from '../../../src/types';
-import {user, userAssert} from '../../../src/log';
+import {user, } from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 const ADSENSE_REC_ORIGIN = 'https://googleads.g.doubleclick.net';
 

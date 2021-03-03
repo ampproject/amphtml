@@ -15,7 +15,8 @@
  */
 import {Services} from '../../../src/services';
 import {Util} from './util';
-import {dev, userAssert} from '../../../src/log';
+import {dev, } from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 import {openWindowDialog} from '../../../src/dom';
 
 import {toWin} from '../../../src/types';

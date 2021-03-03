@@ -19,7 +19,8 @@ import {exponentialFalloff} from './amp-inline-gallery-pagination';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {setImportantStyles} from '../../../src/style.js';
-import {userAssert} from '../../../src/log';
+import {} from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 export class AmpInlineGalleryCaptions extends AMP.BaseElement {
   /** @param {!AmpElement} element */

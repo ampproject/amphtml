@@ -21,7 +21,8 @@ import {Services} from './services';
 import {Signals} from './utils/signals';
 import {VisibilityState} from './visibility-state';
 import {cssText as ampSharedCss} from '../build/ampshared.css';
-import {dev, rethrowAsync, userAssert} from './log';
+import {dev, rethrowAsync, } from './log';
+import {pureUserAssert as userAssert} from './core/assert';
 import {pureDevAssert as devAssert} from './core/assert';
 import {
   disposeServicesForEmbed,

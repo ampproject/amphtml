@@ -49,7 +49,8 @@ import {getMode} from '../../../src/mode';
 import {getValueForExpr} from '../../../src/json';
 import {installStylesForDoc} from '../../../src/style-installer';
 
-import {user, userAssert} from '../../../src/log';
+import {user, } from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 import {pureDevAssert as devAssert} from '../../../src/core/assert';
 
 const TAG = 'amp-subscriptions-google';

@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {dev, userAssert} from '../../src/log';
+import {dev, } from '../../src/log';
+import {pureUserAssert as userAssert} from '../../src/core/assert';
 import {pureDevAssert as devAssert} from '../../src/core/assert';
 import {validateData} from '../../3p/3p';
 

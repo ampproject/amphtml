@@ -41,7 +41,8 @@ import {SaveButton} from './save-button';
 import {Services} from '../../../src/services';
 import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {user, userAssert} from '../../../src/log';
+import {user, } from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 /**
  * AMP Pinterest

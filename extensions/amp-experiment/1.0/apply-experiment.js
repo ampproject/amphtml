@@ -22,7 +22,8 @@ import {
   assertMutationRecordFormat,
   getElementsFromMutationRecordSelector,
 } from './mutation-record';
-import {user, userAssert} from '../../../src/log';
+import {user, } from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 const TAG = 'amp-experiment apply-experiment';
 

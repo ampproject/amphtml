@@ -41,7 +41,8 @@ import {dict} from '../../../src/utils/object';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor} from '../../../src/iframe-helper';
 import {setStyles} from '../../../src/style';
-import {user, userAssert} from '../../../src/log';
+import {user, } from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 /** @const {string} */
 const TAG_ = 'amp-byside-content';

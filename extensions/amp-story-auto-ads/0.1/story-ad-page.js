@@ -40,7 +40,8 @@ import {
   isJsonScriptTag,
   toggleAttribute,
 } from '../../../src/dom';
-import {dev, userAssert} from '../../../src/log';
+import {dev, } from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {dict, map} from '../../../src/utils/object';
 import {getData, listen} from '../../../src/event-helper';

@@ -17,7 +17,8 @@
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {addParamsToUrl} from '../../../src/url';
-import {dev, userAssert} from '../../../src/log';
+import {dev, } from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 import {
   dispatchCustomEvent,
   getDataParamsFromAttributes,

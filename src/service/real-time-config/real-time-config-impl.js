@@ -16,7 +16,8 @@
 import {CONSENT_POLICY_STATE} from '../../consent-state';
 import {RTC_VENDORS} from './callout-vendors';
 import {Services} from '../../services';
-import {dev, user, userAssert} from '../../log';
+import {dev, user, } from '../../log';
+import {pureUserAssert as userAssert} from '../../core/assert';
 import {getMode} from '../../mode';
 import {isArray, isObject} from '../../types';
 import {isCancellation} from '../../error';

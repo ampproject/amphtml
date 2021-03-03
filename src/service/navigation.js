@@ -21,7 +21,8 @@ import {
   openWindowDialog,
   tryFocus,
 } from '../dom';
-import {dev, user, userAssert} from '../log';
+import {dev, user, } from '../log';
+import {pureUserAssert as userAssert} from '../core/assert';
 import {dict} from '../utils/object';
 import {escapeCssSelectorIdent} from '../css';
 import {getExtraParamsUrl, shouldAppendExtraParams} from '../impression';

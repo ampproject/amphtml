@@ -23,7 +23,8 @@ import {
   batchFetchJsonFor,
 } from '../../../src/batched-json';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dev, userAssert} from '../../../src/log';
+import {dev, } from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {dict, map} from '../../../src/utils/object';
 import {getSourceOrigin} from '../../../src/url';

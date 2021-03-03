@@ -36,7 +36,8 @@
 import {FontLoader} from './fontloader';
 import {Services} from '../../../src/services';
 import {isFiniteNumber} from '../../../src/types';
-import {user, userAssert} from '../../../src/log';
+import {user, } from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 const TAG = 'amp-font';
 
