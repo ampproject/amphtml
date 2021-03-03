@@ -171,21 +171,9 @@ async function karmaBrowserComplete_(browser) {
 /**
  * @private
  */
-function karmaBrowsersReady_() {
+function karmaBrowserStart_() {
   console./*OK*/ log('\n');
   log(green('Done. Running tests...'));
-}
-
-/**
- * @private
- */
-function karmaRunStart_() {
-  log(
-    green('Transforming tests with'),
-    cyan('esbuild'),
-    green('and'),
-    cyan('babel') + green('...')
-  );
 }
 
 /**
@@ -206,8 +194,7 @@ async function createKarmaServer(config) {
   });
 
   karmaServer
-    .on('run_start', karmaRunStart_)
-    .on('browsers_ready', karmaBrowsersReady_)
+    .on('browser_start', karmaBrowserStart_)
     .on('browser_complete', karmaBrowserComplete_)
     .on('run_complete', (browsers, results) => {
       browsers_ = browsers;
