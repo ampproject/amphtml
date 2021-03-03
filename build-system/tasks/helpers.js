@@ -460,13 +460,20 @@ async function finishBundle(
  * caching to speed up transforms.
  * @param {string} callerName
  * @param {boolean} enableCache
- * @param {function()} postStep
+ * @param {function()} preSetup
+ * @param {function()} postLoad
  * @return {!Object}
  */
-function getEsbuildBabelPlugin(callerName, enableCache, postStep = () => {}) {
+function getEsbuildBabelPlugin(
+  callerName,
+  enableCache,
+  preSetup = () => {},
+  postLoad = () => {}
+) {
   return {
     name: 'babel',
     async setup(build) {
+      preSetup();
       const transformContents = async (file) => {
         const contents = await fs.promises.readFile(file.path, 'utf-8');
         const babelOptions =
@@ -492,7 +499,7 @@ function getEsbuildBabelPlugin(callerName, enableCache, postStep = () => {}) {
           cache.set(path, promise);
         }
         const transformed = await promise;
-        postStep();
+        postLoad();
         return transformed;
       });
     },

@@ -65,6 +65,7 @@ module.exports = {
 
   mochaReporter: {
     output: 'full',
+    divider: false,
     colors: {
       success: 'green',
       error: 'red',
