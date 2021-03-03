@@ -24,7 +24,11 @@ router.use('/form/post/success', function (req, res) {
   });
 });
 
-router.use('/date-picker/config.json', (req, res) => {
+router.use('/date-picker/config.json', (_req, res) => {
+  /**
+   * @param {Date} date
+   * @return {string}
+   */
   function getISO8601Date(date) {
     const year = date.toLocaleString('en-US', {year: 'numeric'});
     const month = date.toLocaleString('en-US', {month: '2-digit'});

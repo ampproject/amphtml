@@ -57,11 +57,18 @@ const percyCss = [
   '.i-amphtml-new-loader * { animation: none !important; }',
 ].join('\n');
 
-// Pin the version of Chromium to 78.0.3904.0, same as the one running on Percy.
-// Use https://omahaproxy.appspot.com/ to convert version<->revision numbers.
-// REPEATING TODO(@ampproject/wg-infra): keep this pinned with Percy whenever we
-// update the version of Chrome in the project settings.
-const PUPPETEER_CHROMIUM_REVISION = '693954';
+// REPEATING TODO(@ampproject/wg-infra): Update this whenever the Percy backend
+// starts using a new version of Chrome to render DOM snapshots.
+//
+// Steps:
+// 1. Open a recent Percy build, and click the “ⓘ” icon
+// 2. Note the Chrome major version at the bottom
+// 3. Look up the full version at https://en.wikipedia.org/wiki/Google_Chrome_version_history
+// 4. Open https://omahaproxy.appspot.com in a browser
+// 5. Go to "Tools" -> "Version information"
+// 6. Paste the full version in the "Version" field and click "Lookup"
+// 7. Copy the value next to "Branch Base Position" and update the line below
+const PUPPETEER_CHROMIUM_REVISION = '827102'; // 88.0.4324.0
 
 const SNAPSHOT_SINGLE_BUILD_OPTIONS = {
   widths: [375],
@@ -769,6 +776,9 @@ async function performVisualTests() {
   }
 }
 
+/**
+ * @return {Promise<void>}
+ */
 async function ensureOrBuildAmpRuntimeInTestMode_() {
   if (argv.empty) {
     return;
@@ -793,6 +803,9 @@ async function ensureOrBuildAmpRuntimeInTestMode_() {
   }
 }
 
+/**
+ * @return {void}
+ */
 function installPercy_() {
   process.env['PUPPETEER_CHROMIUM_REVISION'] = PUPPETEER_CHROMIUM_REVISION;
   if (!argv.noinstall) {
@@ -803,6 +816,9 @@ function installPercy_() {
   percySnapshot = require('@percy/puppeteer').percySnapshot;
 }
 
+/**
+ * @return {void}
+ */
 function setupCleanup_() {
   process.on('exit', cleanup_);
   process.on('SIGINT', cleanup_);
@@ -810,6 +826,9 @@ function setupCleanup_() {
   process.on('unhandledRejection', cleanup_);
 }
 
+/**
+ * @return {Promise<void>}
+ */
 async function exitPercyAgent_() {
   if (percyAgentProcess_ && !percyAgentProcess_.killed) {
     let resolver;
@@ -825,6 +844,9 @@ async function exitPercyAgent_() {
   }
 }
 
+/**
+ * @return {Promise<void>}
+ */
 async function cleanup_() {
   if (browser_) {
     await browser_.close();

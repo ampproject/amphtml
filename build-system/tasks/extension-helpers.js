@@ -29,7 +29,7 @@ const {isCiBuild} = require('../common/ci');
 const {jsifyCssAsync} = require('./css/jsify-css');
 const {log} = require('../common/logging');
 const {maybeToEsmName, compileJs, mkdirSync} = require('./helpers');
-const {watch} = require('gulp');
+const {watch} = require('chokidar');
 
 const {green, red, cyan} = colors;
 const argv = require('minimist')(process.argv.slice(2));
@@ -72,12 +72,12 @@ const DEFAULT_EXTENSION_SET = ['amp-loader', 'amp-auto-lightbox'];
 
 /**
  * @typedef {{
- *   name: ?string,
- *   version: ?string,
- *   hasCss: ?boolean,
- *   loadPriority: ?string,
- *   cssBinaries: ?Array<string>,
- *   extraGlobs: ?Array<string>,
+ *   name?: string,
+ *   version?: string,
+ *   hasCss?: boolean,
+ *   loadPriority?: string,
+ *   cssBinaries?: Array<string>,
+ *   extraGlobs?: Array<string>,
  * }}
  */
 const ExtensionOption = {}; // eslint-disable-line no-unused-vars
@@ -95,7 +95,7 @@ const adVendors = [];
  * @param {string} name
  * @param {string|!Array<string>} version E.g. 0.1 or [0.1, 0.2]
  * @param {string} latestVersion E.g. 0.1
- * @param {!ExtensionOption} options extension options object.
+ * @param {!ExtensionOption|undefined} options extension options object.
  * @param {!Object} extensionsObject
  * @param {boolean} includeLatest
  */
@@ -133,7 +133,7 @@ function declareExtension(
  * Initializes all extensions from build-system/compile/bundles.config.extensions.json
  * if not already done and populates the given extensions object.
  * @param {?Object} extensionsObject
- * @param {?boolean} includeLatest
+ * @param {boolean=} includeLatest
  */
 function maybeInitializeExtensions(
   extensionsObject = extensions,
@@ -279,7 +279,7 @@ function parseExtensionFlags(preBuild = false) {
  */
 function getExtensionsFromArg(examples) {
   if (!examples) {
-    return;
+    return [];
   }
 
   const extensions = [];
@@ -531,7 +531,6 @@ async function buildExtensionJs(path, name, version, latestVersion, options) {
       toName: `${name}-${version}.max.js`,
       minifiedName: `${name}-${version}.js`,
       latestName: version === latestVersion ? `${name}-latest.js` : '',
-      esmPassCompilation: argv.esm || argv.sxg || false,
       // Wrapper that either registers the extension or schedules it for
       // execution after the main binary comes back.
       // The `function` is wrapped in `()` to avoid lazy parsing it,

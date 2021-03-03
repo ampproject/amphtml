@@ -48,13 +48,14 @@ const buildQuizTemplate = (element) => {
 const buildOptionTemplate = (option) => {
   const html = htmlFor(option);
   return html`
-    <span
+    <button
       class="i-amphtml-story-interactive-quiz-option i-amphtml-story-interactive-option"
+      aria-live="polite"
     >
       <span
         class="i-amphtml-story-interactive-quiz-answer-choice notranslate"
       ></span>
-    </span>
+    </button>
   `;
 };
 

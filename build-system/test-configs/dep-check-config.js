@@ -85,14 +85,12 @@ exports.rules = [
       'extensions/amp-resize-observer-polyfill/**/*.js->third_party/resize-observer-polyfill/ResizeObserver.install.js',
       'extensions/amp-story-360/0.1/amp-story-360.js->third_party/zuho/zuho.js',
       'extensions/amp-subscriptions-google/**/*.js->third_party/subscriptions-project/swg.js',
+      'extensions/amp-subscriptions-google/**/*.js->third_party/subscriptions-project/swg-gaa.js',
       'extensions/amp-subscriptions/**/*.js->third_party/subscriptions-project/aes_gcm.js',
       'extensions/amp-subscriptions/**/*.js->third_party/subscriptions-project/config.js',
-      'extensions/amp-timeago/0.1/amp-timeago.js->third_party/timeagojs/timeago.js',
-      'extensions/amp-timeago/1.0/component.js->third_party/timeagojs/timeago.js',
       'src/css.js->third_party/css-escape/css-escape.js',
       'src/sanitizer.js->third_party/caja/html-sanitizer.js',
       'src/shadow-embed.js->third_party/webcomponentsjs/ShadowCSS.js',
-      'third_party/timeagojs/timeago.js->third_party/timeagojs/timeago-locales.js',
     ],
   },
   // Rules for 3p
@@ -246,6 +244,11 @@ exports.rules = [
       'extensions/amp-stream-gallery/1.0/amp-stream-gallery.js->extensions/amp-base-carousel/1.0/base-carousel.jss.js',
       'extensions/amp-stream-gallery/1.0/stream-gallery.js->extensions/amp-base-carousel/1.0/base-carousel.js',
 
+      // Autolightboxing dependencies
+      'extensions/amp-base-carousel/1.0/base-carousel.js->extensions/amp-lightbox-gallery/1.0/component.js',
+      'extensions/amp-base-carousel/1.0/scroller.js->extensions/amp-lightbox-gallery/1.0/context.js',
+      'extensions/amp-lightbox-gallery/1.0/provider.js->extensions/amp-lightbox/1.0/component.js',
+
       // Facebook components
       'extensions/amp-facebook-page/0.1/amp-facebook-page.js->extensions/amp-facebook/0.1/facebook-loader.js',
       'extensions/amp-facebook-comments/0.1/amp-facebook-comments.js->extensions/amp-facebook/0.1/facebook-loader.js',
@@ -315,6 +318,9 @@ exports.rules = [
         'src/service/variable-source.js',
       'extensions/amp-a4a/0.1/amp-a4a.js->' +
         'src/service/url-replacements-impl.js',
+      // Real time config.
+      'extensions/amp-a4a/0.1/amp-a4a.js->' +
+        'src/service/real-time-config/real-time-config-impl.js',
       // Parsing extension urls.
       'extensions/amp-a4a/0.1/head-validation.js->' +
         'src/service/extension-location.js',

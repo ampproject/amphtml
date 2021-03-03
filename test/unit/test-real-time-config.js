@@ -33,7 +33,7 @@ import {isFiniteNumber} from '../../src/types';
 describes.realWin('real-time-config service', {amp: true}, (env) => {
   let element;
   let fetchJsonStub;
-  let getCalloutParam_, maybeExecuteRealTimeConfig_, validateRtcConfig_;
+  let getCalloutParam_, execute_, validateRtcConfig_;
   let truncUrl_, inflateAndSendRtc_, sendErrorMessage;
   let rtc;
 
@@ -61,7 +61,7 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
       .returns(urlReplacements);
 
     rtc = new RealTimeConfigManager(doc);
-    maybeExecuteRealTimeConfig_ = rtc.maybeExecuteRealTimeConfig.bind(rtc);
+    execute_ = rtc.execute.bind(rtc);
     getCalloutParam_ = rtc.getCalloutParam_.bind(rtc);
     validateRtcConfig_ = rtc.validateRtcConfig_.bind(rtc);
     truncUrl_ = rtc.truncUrl_.bind(rtc);
@@ -122,7 +122,7 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
     });
   });
 
-  describe('#maybeExecuteRealTimeConfig_', () => {
+  describe('#execute_', () => {
     function executeTest(args) {
       const {
         urls,
@@ -145,7 +145,7 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
         );
       });
       const customMacros = args['customMacros'] || {};
-      const rtcResponsePromiseArray = maybeExecuteRealTimeConfig_(
+      const rtcResponsePromiseArray = execute_(
         element,
         customMacros,
         /* consentState */ undefined,
@@ -608,7 +608,7 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
     for (const consentState in CONSENT_POLICY_STATE) {
       it(`should handle consentState ${consentState}`, () => {
         setRtcConfig({urls: ['https://foo.com']});
-        const rtcResult = maybeExecuteRealTimeConfig_(
+        const rtcResult = execute_(
           element,
           {},
           CONSENT_POLICY_STATE[consentState],
