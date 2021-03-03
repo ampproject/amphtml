@@ -71,7 +71,7 @@
     "baconipsum": "0.1.2",
     "base62": "2.0.1",
     "body-parser": "1.19.0",
-    "chai": "4.3.0",
+    "chai": "4.3.3",
     "chai-as-promised": "7.1.1",
     "check-dependencies": "1.1.0",
     "chokidar": "3.5.1",
