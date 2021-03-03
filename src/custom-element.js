@@ -964,11 +964,13 @@ function createBaseCustomElementClass(win) {
         const ampdoc = ampdocService.getAmpDoc(this);
         this.ampdoc_ = ampdoc;
         // Load the pre-stubbed extension if needed.
-        const extensionId = this.tagName.toLowerCase();
+        const extensionId = this.localName;
         if (!this.implClass_ && !ampdoc.declaresExtension(extensionId)) {
           Services.extensionsFor(win).installExtensionForDoc(
             ampdoc,
-            extensionId
+            extensionId,
+            // The legacy auto-extensions are always 0.1.
+            '0.1'
           );
         }
       }
