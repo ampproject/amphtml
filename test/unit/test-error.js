@@ -35,7 +35,6 @@ import {
   toggleExperiment,
 } from '../../src/experiments';
 import {user} from '../../src/log';
-import {pureUserAssert as userAssert} from '../../src/core/assert';
 
 describes.fakeWin('installErrorReporting', {}, (env) => {
   let win;
@@ -328,7 +327,7 @@ describe('getErrorReportData', () => {
     let e = '';
     allowConsoleError(() => {
       try {
-        userAssert(false, 'XYZ');
+        user().assert(false, 'XYZ');
       } catch (error) {
         e = error;
       }
@@ -349,7 +348,7 @@ describe('getErrorReportData', () => {
     let e = '';
     allowConsoleError(() => {
       try {
-        userAssert(false, 'XYZ');
+        user().assert(false, 'XYZ');
       } catch (error) {
         e = error;
       }
@@ -525,7 +524,7 @@ describe('getErrorReportData', () => {
     let e = '';
     allowConsoleError(() => {
       try {
-        userAssert(false, 'XYZ');
+        user().assert(false, 'XYZ');
       } catch (error) {
         e = error;
       }
