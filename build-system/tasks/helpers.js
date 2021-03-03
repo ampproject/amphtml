@@ -105,6 +105,14 @@ const cache = new Map();
  */
 const watchedTargets = new Map();
 
+/*
+ * Used to remove a file from the babel cache after it is modified.
+ * @param {string} filepath relative to the project root.
+ */
+function invalidateUnminifiedBabelCache(filepath) {
+  cache.delete(path.resolve(filepath)); // Must be absolute path.
+}
+
 /**
  * @param {!Object} jsBundles
  * @param {string} name
@@ -165,9 +173,11 @@ async function bootstrapThirdPartyFrames(options) {
  */
 async function compileCoreRuntime(options) {
   /**
+   * @param {string} modifiedFile
    * @return {Promise<void>}
    */
-  async function watchFunc() {
+  async function watchFunc(modifiedFile) {
+    invalidateUnminifiedBabelCache(modifiedFile);
     const bundleComplete = await doBuildJs(jsBundles, 'amp.js', {
       ...options,
       watch: false,
@@ -792,4 +802,5 @@ module.exports = {
   printConfigHelp,
   printNobuildHelp,
   watchDebounceDelay,
+  invalidateUnminifiedBabelCache,
 };
