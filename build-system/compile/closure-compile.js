@@ -100,8 +100,8 @@ function logError(message) {
  * file relative to the sourcemap. Since the sourcemap for `src/foo.js` "lives"
  * in `src/`, it ends up resolving to `src/src/foo.js`.
  *
- * @param {!Stream} closureStream
- * @return {!Stream}
+ * @param {!NodeJS.WritableStream} closureStream
+ * @return {!NodeJS.WritableStream}
  */
 function makeSourcemapsRelative(closureStream) {
   const relativeSourceMap = sourcemaps.mapSources((source, file) => {
@@ -114,7 +114,7 @@ function makeSourcemapsRelative(closureStream) {
 
 /**
  * @param {Array<string>} compilerOptions
- * @return {stream.Writable}
+ * @return {NodeJS.WritableStream}
  */
 function gulpClosureCompile(compilerOptions) {
   const pluginOptions = {

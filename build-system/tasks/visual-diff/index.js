@@ -776,6 +776,9 @@ async function performVisualTests() {
   }
 }
 
+/**
+ * @return {Promise<void>}
+ */
 async function ensureOrBuildAmpRuntimeInTestMode_() {
   if (argv.empty) {
     return;
@@ -800,6 +803,9 @@ async function ensureOrBuildAmpRuntimeInTestMode_() {
   }
 }
 
+/**
+ * @return {void}
+ */
 function installPercy_() {
   process.env['PUPPETEER_CHROMIUM_REVISION'] = PUPPETEER_CHROMIUM_REVISION;
   if (!argv.noinstall) {
@@ -810,6 +816,9 @@ function installPercy_() {
   percySnapshot = require('@percy/puppeteer').percySnapshot;
 }
 
+/**
+ * @return {void}
+ */
 function setupCleanup_() {
   process.on('exit', cleanup_);
   process.on('SIGINT', cleanup_);
@@ -817,6 +826,9 @@ function setupCleanup_() {
   process.on('unhandledRejection', cleanup_);
 }
 
+/**
+ * @return {Promise<void>}
+ */
 async function exitPercyAgent_() {
   if (percyAgentProcess_ && !percyAgentProcess_.killed) {
     let resolver;
@@ -832,6 +844,9 @@ async function exitPercyAgent_() {
   }
 }
 
+/**
+ * @return {Promise<void>}
+ */
 async function cleanup_() {
   if (browser_) {
     await browser_.close();

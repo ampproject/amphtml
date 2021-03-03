@@ -25,6 +25,9 @@ const {runCiJob} = require('./ci-job');
 
 const jobName = 'unit-tests.js';
 
+/**
+ * @return {void}
+ */
 function pushBuildWorkflow() {
   timedExecOrDie('gulp update-packages');
   try {
@@ -45,6 +48,9 @@ function pushBuildWorkflow() {
   }
 }
 
+/**
+ * @return {void}
+ */
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.UNIT_TEST)) {
     timedExecOrDie('gulp update-packages');

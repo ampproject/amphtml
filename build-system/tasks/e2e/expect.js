@@ -22,6 +22,9 @@ let installed;
 let lastExpectError;
 let networkLogger;
 
+/**
+ * @return {void}
+ */
 function clearLastExpectError() {
   lastExpectError = null;
 }
@@ -135,6 +138,11 @@ const chaiMethodsAndProperties = [
   {name: 'within', type: ChaiType.METHOD},
 ];
 
+/**
+ * @param {Chai.ChaiStatic} chai
+ * @param {Chai.ChaiUtils} utils
+ * @return {void}
+ */
 function installWrappers(chai, utils) {
   const {METHOD, PROPERTY, CHAINABLE_METHOD} = ChaiType;
   const {Assertion} = chai;
@@ -164,6 +172,10 @@ function installWrappers(chai, utils) {
   }
 }
 
+/**
+ * @param {Chai.ChaiUtils} utils
+ * @return {Function(_super: Chai.AssertionStatic): Function(): any}
+ */
 function overwriteAlwaysUseSuper(utils) {
   const {flag} = utils;
 
@@ -219,12 +231,20 @@ function overwriteAlwaysUseSuper(utils) {
   };
 }
 
+/**
+ * @param {Chai.AssertionStatic} _super
+ * @return {Function(): *}
+ */
 function inheritChainingBehavior(_super) {
   return function () {
     _super.apply(this, arguments);
   };
 }
 
+/**
+ * @param {Chai.AssertionStatic} _super
+ * @return {Function(): *}
+ */
 function overwriteUnsupported(_super) {
   return function () {
     const obj = this._obj;
@@ -238,11 +258,21 @@ function overwriteUnsupported(_super) {
   };
 }
 
+/**
+ * @param {*} _networkLogger
+ * @return {void}
+ */
 function installBrowserAssertions(_networkLogger) {
   networkLogger = _networkLogger;
   chai.use(installBrowserWrappers);
 }
 
+/**
+ *
+ * @param {Chai.ChaiStatic} chai
+ * @param {Chai.ChaiUtils} utils
+ * @return {void}
+ */
 function installBrowserWrappers(chai, utils) {
   const {Assertion} = chai;
 

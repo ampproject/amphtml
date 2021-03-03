@@ -271,6 +271,10 @@ const issueUrlToNumberRe = new RegExp(
   ].join('|')
 );
 
+/**
+ * @param {string} url
+ * @return {string}
+ */
 function issueUrlToNumberOrUrl(url) {
   const match = url.match(issueUrlToNumberRe);
   const number = match && match.find((group) => /^\d+$/.test(group));

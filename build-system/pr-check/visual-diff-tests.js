@@ -30,6 +30,9 @@ const {runCiJob} = require('./ci-job');
 
 const jobName = 'visual-diff-tests.js';
 
+/**
+ * @return {void}
+ */
 function pushBuildWorkflow() {
   downloadNomoduleOutput();
   timedExecOrDie('gulp update-packages');
@@ -37,6 +40,9 @@ function pushBuildWorkflow() {
   timedExecOrDie('gulp visual-diff --nobuild --master');
 }
 
+/**
+ * @return {void}
+ */
 function prBuildWorkflow() {
   process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
   if (buildTargetsInclude(Targets.RUNTIME, Targets.VISUAL_DIFF)) {

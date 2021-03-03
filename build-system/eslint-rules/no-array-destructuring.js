@@ -27,6 +27,10 @@
 // const [b] = value;
 // function bad([b]) {}
 module.exports = function (context) {
+  /**
+   * @param {*} node
+   * @return {boolean}
+   */
   function isAllowed(node) {
     const {parent} = node;
     if (parent.type !== 'VariableDeclarator') {

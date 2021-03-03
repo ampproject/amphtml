@@ -207,6 +207,9 @@ async function reportBundleSize() {
   }
 }
 
+/**
+ * @return {Promise<void>}
+ */
 async function getLocalBundleSize() {
   if (globby.sync(fileGlobs).length === 0) {
     log('Could not find runtime files.');
@@ -224,6 +227,9 @@ async function getLocalBundleSize() {
   await getBrotliBundleSizes();
 }
 
+/**
+ * @return {Promise<void>}
+ */
 async function bundleSize() {
   if (argv.on_skipped_build) {
     return skipBundleSize();

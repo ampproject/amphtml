@@ -349,6 +349,9 @@ function updateCoverageSettings(config) {
 }
 
 class RuntimeTestConfig {
+  /**
+   * @param {string} testType
+   */
   constructor(testType) {
     this.testType = testType;
     Object.assign(this, karmaConfig);
@@ -364,16 +367,26 @@ class RuntimeTestConfig {
 }
 
 class RuntimeTestRunner {
+  /**
+   *
+   * @param {RuntimeTestConfig} config
+   */
   constructor(config) {
     this.config = config;
     this.env = null;
     this.exitCode = 0;
   }
 
+  /**
+   * @return {Promise<void>}
+   */
   async maybeBuild() {
     throw new Error('maybeBuild method must be overridden');
   }
 
+  /**
+   * @return {Promise<void>}
+   */
   async setup() {
     await this.maybeBuild();
     await startServer({
@@ -386,11 +399,17 @@ class RuntimeTestRunner {
     this.env = new Map().set('handlerProcess', handlerProcess);
   }
 
+  /**
+   * @return {Promise<void>}
+   */
   async run() {
     await reportTestStarted();
     this.exitCode = await createKarmaServer(this.config);
   }
 
+  /**
+   * @return {Promise<void>}
+   */
   async teardown() {
     await stopServer();
     exitCtrlcHandler(this.env.get('handlerProcess'));

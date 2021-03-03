@@ -249,6 +249,9 @@ async function removeConfig(target) {
   log('Removed existing config from', cyan(target));
 }
 
+/**
+ * @return {Promise<void>}
+ */
 async function prependGlobal() {
   if (!argv.target) {
     log(red('Missing --target.'));
@@ -277,7 +280,7 @@ async function prependGlobal() {
     );
   }
   await Promise.all([...targets.map(removeConfig)]);
-  return Promise.all([
+  await Promise.all([
     ...targets.map((target) =>
       applyConfig(
         config,

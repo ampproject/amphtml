@@ -26,6 +26,9 @@ const {timedExecOrDie} = require('./utils');
 
 const jobName = 'checks.js';
 
+/**
+ * @return {void}
+ */
 function pushBuildWorkflow() {
   timedExecOrDie('gulp update-packages');
   timedExecOrDie('gulp presubmit');
@@ -48,6 +51,9 @@ function pushBuildWorkflow() {
   timedExecOrDie('gulp markdown-toc');
 }
 
+/**
+ * @return {Promise<void>}
+ */
 async function prBuildWorkflow() {
   await reportAllExpectedTests();
   timedExecOrDie('gulp update-packages');

@@ -50,6 +50,11 @@ module.exports = {
     const spreadElement =
       ':matches(ObjectExpression > ExperimentalSpreadProperty, ObjectExpression > SpreadElement)';
 
+    /**
+     * @param {Array<T>} array
+     * @param {T} item
+     * @return {T|null}
+     */
     function findAfter(array, item) {
       const index = array.indexOf(item);
       return index < array.length - 1 ? array[index + 1] : null;

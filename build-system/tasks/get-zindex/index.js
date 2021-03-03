@@ -138,6 +138,11 @@ async function getZindex() {
   );
 }
 
+/**
+ * @param {string} filename
+ * @param {string} output
+ * @return {string}
+ */
 async function prettierFormat(filename, output) {
   return prettier.format(output, {
     ...(await prettier.resolveConfig(filename)),

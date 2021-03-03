@@ -29,7 +29,10 @@ const {makeBentoExtension} = require('./bento');
 const year = new Date().getFullYear();
 
 /*eslint "max-len": 0*/
-
+/**
+ * @param {string} str
+ * @return {string}
+ */
 function pascalCase(str) {
   return (
     str[0].toUpperCase() +
@@ -39,6 +42,10 @@ function pascalCase(str) {
   );
 }
 
+/**
+ * @param {string} name
+ * @return {string}
+ */
 function getValidatorFile(name) {
   return `#
 # Copyright ${year} The AMP HTML Authors. All Rights Reserved.
@@ -107,6 +114,10 @@ const getAmpCssFile = async (name) => {
     .replace(/__do_not_submit__/g, dns);
 };
 
+/**
+ * @param {string} name
+ * @return {string}
+ */
 function getJsTestExtensionFile(name) {
   return `/**
  * Copyright ${year} The AMP HTML Authors. All Rights Reserved.
@@ -156,6 +167,10 @@ describes.realWin(
 `;
 }
 
+/**
+ * @param {string} name
+ * @return {string}
+ */
 function getJsExtensionFile(name) {
   const className = pascalCase(name);
   return `/**
@@ -209,6 +224,10 @@ AMP.extension('${name}', '0.1', AMP => {
 `;
 }
 
+/**
+ * @param {string} name
+ * @return {string}
+ */
 function getExamplesFile(name) {
   return `<!--
   Copyright ${year} The AMP HTML Authors. All Rights Reserved.
@@ -248,6 +267,15 @@ function getExamplesFile(name) {
 `;
 }
 
+/**
+ * @return {Promise<{
+ *   name: *,
+ *   version: *,
+ *   options: {
+ *        hasCss: boolean,
+ *   },
+ * }>}
+ */
 async function makeAmpExtension() {
   if (!argv.name) {
     log(red('Error! Please pass in the "--name" flag with a value'));
@@ -295,6 +323,9 @@ async function makeAmpExtension() {
   };
 }
 
+/**
+ * @return {Promise<void>}
+ */
 async function makeExtension() {
   const bundleConfig = await (argv.bento
     ? makeBentoExtension()

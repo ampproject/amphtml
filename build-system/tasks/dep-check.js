@@ -267,6 +267,9 @@ function runRules(moduleGraph) {
   return errors.length > 0;
 }
 
+/**
+ * @return {Promise<void>}
+ */
 async function depCheck() {
   const handlerProcess = createCtrlcHandler('dep-check');
   await css();

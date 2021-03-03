@@ -19,12 +19,12 @@
  * @fileoverview Creates an http server to handle static
  * files and list directories for use with the gulp live server
  */
-const app = require('express')();
 const argv = require('minimist')(process.argv.slice(2));
 const bacon = require('baconipsum');
 const bodyParser = require('body-parser');
 const cors = require('./amp-cors');
 const devDashboard = require('./app-index/index');
+const express = require('express');
 const formidable = require('formidable');
 const fs = require('fs');
 const jsdom = require('jsdom');
@@ -49,6 +49,7 @@ const {logWithoutTimestamp} = require('../common/logging');
 const {renderShadowViewer} = require('./shadow-viewer');
 const {replaceUrls, isRtvMode} = require('./app-utils');
 
+const app = express();
 const TEST_SERVER_PORT = argv.port || 8000;
 let SERVE_MODE = getServeMode();
 
@@ -84,6 +85,11 @@ app.use((req, res, next) => {
   next();
 });
 
+/**
+ *
+ * @param {string} serveMode
+ * @return {boolean}
+ */
 function isValidServeMode(serveMode) {
   return (
     ['default', 'compiled', 'cdn', 'esm'].includes(serveMode) ||
@@ -91,6 +97,11 @@ function isValidServeMode(serveMode) {
   );
 }
 
+/**
+ *
+ * @param {string} serveMode
+ * @return {void}
+ */
 function setServeMode(serveMode) {
   SERVE_MODE = serveMode;
 }
@@ -368,7 +379,6 @@ app.use('/form/json/poll1', (req, res) => {
 app.post('/form/json/upload', upload.fields([{name: 'myFile'}]), (req, res) => {
   cors.assertCors(req, res, ['POST']);
 
-  /** @type {!Array<!File>|undefined} */
   const myFile = req.files['myFile'];
 
   if (!myFile) {
@@ -485,8 +495,15 @@ app.use('/form/verify-search-json/post', (req, res) => {
   });
 });
 
-// Fetches an AMP document from the AMP proxy and replaces JS
-// URLs, so that they point to localhost.
+/**
+ * Fetches an AMP document from the AMP proxy and replaces JS
+ * URLs, so that they point to localhost.
+ *
+ * @param {express.Request} req
+ * @param {express.Response} res
+ * @param {string} mode
+ * @return {void}
+ */
 function proxyToAmpProxy(req, res, mode) {
   const url =
     'https://cdn.ampproject.org/' +
@@ -608,24 +625,41 @@ app.use('/examples/live-list-update(-reverse)?.amp.html', (req, res, next) => {
   res.send(`${doctype}${outerHTML}`);
 });
 
+/**
+ * @param {Element} item
+ * @return {void}
+ */
 function liveListReplace(item) {
-  item.setAttribute('data-update-time', Date.now());
+  item.setAttribute('data-update-time', Date.now().toString());
   const itemContents = item.querySelectorAll('.content');
-  itemContents[0].textContent = Math.floor(Math.random() * 10);
-  itemContents[1].textContent = Math.floor(Math.random() * 10);
+  itemContents[0].textContent = Math.floor(Math.random() * 10).toString();
+  itemContents[1].textContent = Math.floor(Math.random() * 10).toString();
 }
 
+/**
+ * @param {Element} liveList
+ * @param {Element} node
+ * @return {void}
+ */
 function liveListInsert(liveList, node) {
   const iterCount = Math.floor(Math.random() * 2) + 1;
   logWithoutTimestamp(`inserting ${iterCount} item(s)`);
   for (let i = 0; i < iterCount; i++) {
-    const child = node.cloneNode(true);
+    /**
+     * TODO(#28387) this type cast may be hiding a bug.
+     * @type {Element}
+     */
+    const child = /** @type {*} */ (node.cloneNode(true));
     child.setAttribute('id', `list-item-${itemCtr++}`);
     child.setAttribute('data-sort-time', Date.now());
-    liveList.querySelector('[items]').appendChild(child);
+    liveList.querySelector('[items]')?.appendChild(child);
   }
 }
 
+/**
+ * @param {Element} liveList
+ * @return {void}
+ */
 function liveListTombstone(liveList) {
   const tombstoneId = Math.floor(Math.random() * itemCtr);
   logWithoutTimestamp(`trying to tombstone #list-item-${tombstoneId}`);
@@ -639,8 +673,14 @@ function liveListTombstone(liveList) {
   }
 }
 
-// Generate a random number between min and max
-// Value is inclusive of both min and max values.
+/**
+ * Generate a random number between min and max
+ * Value is inclusive of both min and max values.
+ *
+ * @param {number} min
+ * @param {number} max
+ * @return {number}
+ */
 function range(min, max) {
   const values = Array.apply(null, new Array(max - min + 1)).map(
     (_, i) => min + i
@@ -648,11 +688,18 @@ function range(min, max) {
   return values[Math.round(Math.random() * (max - min))];
 }
 
-// Returns the result of a coin flip, true or false
+/**
+ * Returns the result of a coin flip, true or false
+ *
+ * @return {boolean}
+ */
 function flip() {
   return !!Math.floor(Math.random() * 2);
 }
 
+/**
+ * @return {string}
+ */
 function getLiveBlogItem() {
   const now = Date.now();
   // Generate a 3 to 7 worded headline
@@ -710,6 +757,9 @@ function getLiveBlogItem() {
     </amp-live-list></body></html>`;
 }
 
+/**
+ * @return {string}
+ */
 function getLiveBlogItemWithBindAttributes() {
   const now = Date.now();
   // Generate a 3 to 7 worded headline
@@ -1004,9 +1054,10 @@ app.get(
 
         // Extract amp-ad for the given 'type' specified in URL query.
         if (req.path.indexOf('/examples/ads.amp.html') == 0 && req.query.type) {
-          const ads = file.match(
-            elementExtractor('(amp-ad|amp-embed)', req.query.type)
-          );
+          const ads =
+            file.match(
+              elementExtractor('(amp-ad|amp-embed)', req.query.type)
+            ) ?? [];
           file = file.replace(
             /<body>[\s\S]+<\/body>/m,
             '<body>' + ads.join('') + '</body>'
@@ -1018,9 +1069,8 @@ app.get(
           req.path.indexOf('/examples/analytics-vendors.amp.html') == 0 &&
           req.query.type
         ) {
-          const analytics = file.match(
-            elementExtractor('amp-analytics', req.query.type)
-          );
+          const analytics =
+            file.match(elementExtractor('amp-analytics', req.query.type)) ?? [];
           file = file.replace(
             /<div id="container">[\s\S]+<\/div>/m,
             '<div id="container">' + analytics.join('') + '</div>'
@@ -1032,9 +1082,8 @@ app.get(
           req.path.indexOf('/examples/amp-consent/cmp-vendors.amp.html') == 0 &&
           req.query.type
         ) {
-          const consent = file.match(
-            elementExtractor('amp-consent', req.query.type)
-          );
+          const consent =
+            file.match(elementExtractor('amp-consent', req.query.type)) ?? [];
           file = file.replace(
             /<div id="container">[\s\S]+<\/div>/m,
             '<div id="container">' + consent.join('') + '</div>'
@@ -1068,10 +1117,19 @@ app.get(
   }
 );
 
+/**
+ * @param {string} string
+ * @return {string}
+ */
 function escapeRegExp(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+/**
+ * @param {string} tagName
+ * @param {string} type
+ * @return {RegExp}
+ */
 function elementExtractor(tagName, type) {
   type = escapeRegExp(type);
   return new RegExp(
@@ -1594,10 +1652,18 @@ function addViewerIntegrationScript(ampJsVersionString, file) {
   return file;
 }
 
+/**
+ * @param {express.Request} req
+ * @return {string}
+ */
 function getUrlPrefix(req) {
   return req.protocol + '://' + req.headers.host;
 }
 
+/**
+ * @param {string} filePath
+ * @return {string}
+ */
 function generateInfo(filePath) {
   const mode = SERVE_MODE;
   filePath = filePath.substr(0, filePath.length - 9) + '.html';
@@ -1620,6 +1686,10 @@ function generateInfo(filePath) {
   );
 }
 
+/**
+ * @param {string} encryptedDocumentKey
+ * @return {string|null}
+ */
 function decryptDocumentKey(encryptedDocumentKey) {
   if (!encryptedDocumentKey) {
     return null;

@@ -27,6 +27,10 @@ const INVALID_PROPS = [
   'parseInt',
 ];
 
+/**
+ * @param {string} property
+ * @return {boolean}
+ */
 function isInvalidProperty(property) {
   return INVALID_PROPS.indexOf(property) != -1;
 }

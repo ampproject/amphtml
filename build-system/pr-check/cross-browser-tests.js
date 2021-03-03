@@ -99,6 +99,9 @@ function runUnitTestsForPlatform() {
   }
 }
 
+/**
+ * @return {void}
+ */
 function pushBuildWorkflow() {
   timedExecOrDie('gulp update-packages');
   runUnitTestsForPlatform();
@@ -106,6 +109,9 @@ function pushBuildWorkflow() {
   runIntegrationTestsForPlatform();
 }
 
+/**
+ * @return {Promise<void>}
+ */
 async function prBuildWorkflow() {
   if (process.platform == 'linux') {
     await reportAllExpectedTests(); // Only once is sufficient.
