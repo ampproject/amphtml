@@ -1790,7 +1790,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         textEl.textContent = openLabel;
         const container = this.element.ownerDocument
           .createElement('div')
-          .classList.add('shadow-root-container-element');
+          .classList.add('i-amphtml-page-attachment-host');
         this.element.appendChild(container);
         createShadowRootWithStyle(container, this.openAttachmentEl_, CSS);
       });
