@@ -12,7 +12,7 @@
   "intersect-resources": 0,
   "ios-fixed-no-transfer": 0,
   "visibility-trigger-improvements": 1,
-  "layout-aspect-ratio-css": 1,
+  "layout-aspect-ratio-css": 0,
   "sticky-ad-transition": 0.02,
   "disable-a4a-non-sd": 1
 }
