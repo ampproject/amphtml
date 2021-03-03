@@ -19,7 +19,7 @@ import {CommonSignals} from '../../../src/common-signals';
 import {Services} from '../../../src/services';
 import {createElementWithAttributes, lastChildElement} from '../../../src/dom';
 import {dict} from '../../../src/utils/object';
-import {userAssert} from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 /**
  * Property used for storing id of custom slot. This custom slot can be used to

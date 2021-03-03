@@ -18,7 +18,7 @@ import {BaseElement} from './base-element';
 import {CSS} from '../../../build/amp-__component_name_hyphenated__-__component_version__.css';
 import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
-import {userAssert} from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 /** @const {string} */
 const TAG = 'amp-__component_name_hyphenated__';

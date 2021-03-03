@@ -15,7 +15,7 @@
  */
 
 import {areEqualOrdered} from '../utils/array';
-import {devAssert} from '../log';
+import {pureDevAssert as devAssert} from '../core/assert';
 import {tryCallback} from './scheduler';
 
 const EMPTY_DEPS = [];

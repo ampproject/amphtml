@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {devAssert} from '../log';
+import {pureDevAssert as devAssert} from '../core/assert';
 
 /**
  * The internal structure for the task.

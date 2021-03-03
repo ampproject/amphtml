@@ -17,7 +17,7 @@
 import {dict} from './utils/object';
 import {isArray} from './types';
 import {toStructuredCloneable} from './utils/xhr-utils';
-import {userAssert} from './log';
+import {pureUserAssert as userAssert} from './core/assert';
 
 /**
  * @typedef {{

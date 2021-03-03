@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {Services} from '../services';
-import {devAssert} from '../log';
+import {pureDevAssert as devAssert} from '../core/assert';
 import {isAmp4Email} from '../format';
 import {isFiniteNumber} from '../types';
 import {loadPromise} from '../event-helper';

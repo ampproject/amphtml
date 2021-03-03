@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {devAssert} from '../src/log';
+import {pureDevAssert as devAssert} from '../src/core/assert';
 import {getMode} from './mode';
 import {isIframed} from './dom';
 import {toWin} from './types';

@@ -22,7 +22,7 @@
 import {FxType} from '../fx-type';
 import {Services} from '../../../../src/services';
 import {mapRange} from '../../../../src/utils/math';
-import {userAssert} from '../../../../src/log';
+import {pureUserAssert as userAssert} from '../../../../src/core/assert';
 
 const MAX_MOBILE_WIDTH = 480;
 const MAX_TABLET_WIDTH = 1000;

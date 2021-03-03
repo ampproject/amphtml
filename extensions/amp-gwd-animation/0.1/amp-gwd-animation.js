@@ -27,7 +27,7 @@ import {
   getParentWindowFrameElement,
   getServiceForDocOrNull,
 } from '../../../src/service';
-import {userAssert} from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 /**
  * Returns a value at any level in an object structure addressed by dot-notation
