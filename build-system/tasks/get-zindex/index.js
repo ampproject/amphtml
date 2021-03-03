@@ -26,8 +26,8 @@ const {
   getJscodeshiftReport,
 } = require('../../test-configs/jscodeshift');
 const {getStdout} = require('../../common/process');
-const {gray} = require('kleur/colors');
-const {logOnSameLineLocalDev} = require('../../common/logging');
+const {gray, magenta} = require('kleur/colors');
+const {logOnSameLineLocalDev, logLocalDev} = require('../../common/logging');
 const {writeDiffOrFail} = require('../../common/diff');
 
 const tableHeaders = [
@@ -127,7 +127,9 @@ async function getZindexSelectors(glob, cwd = '.') {
     const plugins = [zIndexCollector.bind(null, selectors)];
     logChecking(file);
     await postcss(plugins).process(contents, {from: file});
-    filesData[file] = selectors;
+    if (Object.keys(selectors).length) {
+      filesData[file] = selectors;
+    }
   }
   return filesData;
 }
@@ -191,6 +193,8 @@ function getZindexChainsInJs(glob, cwd = '.') {
  * Entry point for gulp get-zindex
  */
 async function getZindex() {
+  logLocalDev('...');
+
   const filesData = Object.assign(
     {},
     ...(await Promise.all([
@@ -203,7 +207,10 @@ async function getZindex() {
     ]))
   );
 
-  logOnSameLineLocalDev();
+  logOnSameLineLocalDev(
+    'Tracking z-index in',
+    magenta(`${Object.keys(filesData).length} files`)
+  );
 
   const filename = 'css/Z_INDEX.md';
   const rows = [...tableHeaders, ...createTable(filesData)];
