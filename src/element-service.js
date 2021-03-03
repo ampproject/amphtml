@@ -15,6 +15,7 @@
  */
 
 import * as dom from './dom';
+import {extensionScriptsInNode} from './service/extension-script';
 import {
   getAmpdoc,
   getService,
@@ -186,32 +187,6 @@ function assertService(service, id, extension) {
     extension,
     extension
   ));
-}
-
-/**
- * Get list of all the extension JS files.
- * @param {HTMLHeadElement|Element|ShadowRoot} head
- * @return {!Array<string>}
- */
-export function extensionScriptsInNode(head) {
-  // ampdoc.getHeadNode() can return null.
-  if (!head) {
-    return [];
-  }
-  const scripts = {};
-  // Note: Some extensions don't have [custom-element] or [custom-template]
-  // e.g. amp-viewer-integration.
-  const list = head.querySelectorAll(
-    'script[custom-element],script[custom-template]'
-  );
-  for (let i = 0; i < list.length; i++) {
-    const script = list[i];
-    const name =
-      script.getAttribute('custom-element') ||
-      script.getAttribute('custom-template');
-    scripts[name] = true;
-  }
-  return Object.keys(scripts);
 }
 
 /**

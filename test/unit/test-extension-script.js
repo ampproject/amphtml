@@ -18,7 +18,7 @@ import {
   calculateEntryPointScriptUrl,
   calculateExtensionScriptUrl,
   parseExtensionUrl,
-} from '../../src/service/extension-location';
+} from '../../src/service/extension-script';
 import {initLogConstructor, resetLogConstructorForTesting} from '../../src/log';
 
 describes.sandboxed('Extension Location', {}, () => {
