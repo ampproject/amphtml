@@ -253,6 +253,6 @@
   },
   "90": {
     "string": "Move device to explore",
-    "description": "Text displayed to users on first instance of an AMP 360 Story, telling them to move their device to experience the gyroscope effect."
+    "description": "Text displayed to users on gyroscope activation of an amp-story-360 component, telling them to move their device to experience the gyroscope effect."
   }
 }
