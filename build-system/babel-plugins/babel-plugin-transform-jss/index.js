@@ -53,6 +53,10 @@ const {relative, join} = require('path');
 const {transformCssSync} = require('../../tasks/css/jsify-css-sync');
 
 module.exports = function ({template, types: t}) {
+  /**
+   * @param {string} filename
+   * @return {boolean}
+   */
   function isJssFile(filename) {
     return filename.endsWith('.jss.js');
   }
@@ -244,6 +248,17 @@ module.exports = function ({template, types: t}) {
   }
 
   const seen = new Map();
+  /**
+   * @param {string} JSS
+   * @param {string} filename
+   * @return {{
+   *   visitor: {
+   *     Program: {Function(path: string, state: *): void},
+   *     CallExpression: {Function(path: string, state: *): void},
+   *     ImportDeclaration: {Function(path: string, state: *): void},
+   *   }
+   * }}
+   */
   function compileJss(JSS, filename) {
     const relativeFilepath = relative(join(__dirname, '../../..'), filename);
     const filehash = hash.createHash(relativeFilepath);
@@ -271,7 +286,7 @@ module.exports = function ({template, types: t}) {
 
   return {
     visitor: {
-      Program(path, state) {
+      Program(_path, state) {
         const {filename} = state.file.opts;
         seen.forEach((file, key) => {
           if (file === filename) {

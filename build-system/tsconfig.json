@@ -26,7 +26,9 @@
     "./common/**/*.js",
     "./common/**/*.ts",
     "./server/**/*.js",
-    "./server/**/*.ts"
+    "./server/**/*.ts",
+    "./tasks/**/*.ts",
+    "./tasks/**/*.ts"
   ],
   "exclude": [
     "**/node_modules",
