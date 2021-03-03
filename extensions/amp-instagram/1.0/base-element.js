@@ -28,7 +28,6 @@ BaseElement['loadable'] = true;
 /** @override */
 BaseElement['props'] = {
   'captioned': {attr: 'data-captioned'},
-  'children': {},
   'shortcode': {attr: 'data-shortcode'},
   'title': {attr: 'title'},
 };
