@@ -42,7 +42,7 @@ describes.sandboxed('Extension Location', {}, () => {
           protocol: 'http:',
         },
         'amp-ad',
-        /*opt_extensionVersion*/ undefined,
+        '0.1',
         true
       );
       expect(script).to.equal(
@@ -59,11 +59,11 @@ describes.sandboxed('Extension Location', {}, () => {
           protocol: 'http:',
         },
         'amp-ad',
-        /*opt_extensionVersion*/ undefined,
+        '1.0',
         false
       );
       expect(script).to.equal(
-        'https://cdn.ampproject.org/rtv/123/v0/amp-ad-0.1.js'
+        'https://cdn.ampproject.org/rtv/123/v0/amp-ad-1.0.js'
       );
     });
 
@@ -194,11 +194,11 @@ describes.sandboxed('Module Extension Location', {}, () => {
           protocol: 'http:',
         },
         'amp-ad',
-        /*opt_extensionVersion*/ undefined,
+        '1.0',
         true
       );
       expect(script).to.equal(
-        'http://localhost:8000/dist/rtv/123/v0/amp-ad-0.1.mjs'
+        'http://localhost:8000/dist/rtv/123/v0/amp-ad-1.0.mjs'
       );
     });
 
@@ -211,7 +211,7 @@ describes.sandboxed('Module Extension Location', {}, () => {
           protocol: 'http:',
         },
         'amp-ad',
-        /*opt_extensionVersion*/ undefined,
+        '0.1',
         false
       );
       expect(script).to.equal(
