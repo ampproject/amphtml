@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+import {USER_ERROR_SENTINEL} from '../../src/core/error-message-helpers';
 import {
-  USER_ERROR_SENTINEL,
   pureDevAssert as devAssert,
   pureUserAssert as userAssert,
 } from '../../src/core/assert';
@@ -64,6 +64,7 @@ describes.sandboxed('assertions', {}, () => {
 
   it('should add element and message info', () => {
     const div = document.createElement('div');
+    div.id = 'testId';
     let error;
     try {
       devAssert(false, '%s a %s b %s', div, 2, 3);
@@ -71,6 +72,7 @@ describes.sandboxed('assertions', {}, () => {
       error = e;
     }
 
+    expect(error.toString()).to.match(/div#testId a 2 b 3/);
     expect(error.associatedElement).to.equal(div);
     expect(error.messageArray).to.deep.equal([div, 2, 3]);
   });

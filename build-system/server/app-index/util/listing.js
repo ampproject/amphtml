@@ -18,10 +18,20 @@
 const fs = require('fs');
 const {join, normalize, sep} = require('path');
 
+/**
+ * @param {string} path
+ * @param {string} rootPath
+ * @return {boolean}
+ */
 function isMaliciousPath(path, rootPath) {
   return (path + sep).substr(0, rootPath.length) !== rootPath;
 }
 
+/**
+ * @param {string} rootPath
+ * @param {string} basepath
+ * @return {Promise<null|undefined|string[]>}
+ */
 async function getListing(rootPath, basepath) {
   const path = normalize(join(rootPath, basepath));
 
@@ -43,6 +53,10 @@ async function getListing(rootPath, basepath) {
   }
 }
 
+/**
+ * @param {string} url
+ * @return {boolean}
+ */
 function isMainPageFromUrl(url) {
   return url == '/';
 }

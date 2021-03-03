@@ -39,7 +39,6 @@ import {
 } from './service/extensions-impl';
 import {internalRuntimeVersion} from './internal-version';
 import {isExperimentOn, toggleExperiment} from './experiments';
-import {registerExtendedTemplate} from './service/template-impl';
 import {reportErrorForWin} from './error';
 import {scheduleUpgradeIfNeeded as scheduleInObUpgradeIfNeeded} from './polyfillstub/intersection-observer-stub';
 import {scheduleUpgradeIfNeeded as scheduleResObUpgradeIfNeeded} from './polyfillstub/resize-observer-stub';
@@ -136,9 +135,7 @@ function adoptShared(global, callback) {
    * @param {string} name
    * @param {typeof ./base-template.BaseTemplate} implementationClass
    */
-  global.AMP.registerTemplate = function (name, implementationClass) {
-    registerExtendedTemplate(global, name, implementationClass);
-  };
+  global.AMP.registerTemplate = extensions.addTemplate.bind(extensions);
 
   /**
    * Registers an ampdoc service.

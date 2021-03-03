@@ -75,6 +75,9 @@ function performCherryPick(sha) {
   }
 }
 
+/**
+ * @return {Promise<void>}
+ */
 async function cherryPick() {
   const {push, remote = 'origin'} = argv;
   const commits = (argv.commits || '').split(',').filter(Boolean);

@@ -21,6 +21,12 @@ const {VERSION: internalRuntimeVersion} = require('./internal-version');
 
 const argv = minimist(process.argv.slice(2));
 
+/**
+ * @param {{
+ *  fortesting: boolean,
+ * }} options
+ * @return {string}
+ */
 function getSourceMapBase(options) {
   if (argv.sourcemap_url) {
     // Custom sourcemap URLs have placeholder {version} that should be
@@ -35,6 +41,10 @@ function getSourceMapBase(options) {
   return `https://raw.githubusercontent.com/ampproject/amphtml/${internalRuntimeVersion}/`;
 }
 
+/**
+ * @param {*} options
+ * @return {NodeJS.ReadStream}
+ */
 function writeSourcemaps(options) {
   return sourcemaps.write('.', {
     sourceRoot: getSourceMapBase(options),

@@ -66,6 +66,14 @@ export class ConsentStateManager {
 
     /** @private {Object<string, PURPOSE_CONSENT_STATE>|undefined} */
     this.purposeConsents_ = undefined;
+
+    const allPurposeConsentsDeferred = new Deferred();
+
+    /** @private {?function()} */
+    this.hasAllPurposeConsentsResolver_ = allPurposeConsentsDeferred.resolve;
+
+    /** @private {!Promise} */
+    this.hasAllPurposeConsentsPromise_ = allPurposeConsentsDeferred.promise;
   }
 
   /**
@@ -123,6 +131,8 @@ export class ConsentStateManager {
           this.purposeConsents_
         )
       );
+      // Need to be called after handler.
+      this.hasAllPurposeConsents();
     }
   }
 
@@ -202,6 +212,24 @@ export class ConsentStateManager {
   setConsentInstanceSharedData(sharedDataPromise) {
     devAssert(this.instance_, '%s: cannot find the instance', TAG);
     this.instance_.sharedDataPromise = sharedDataPromise;
+  }
+
+  /**
+   * Signifies that we collected all the purpose consents
+   * from our source of truth (i.e locally stored or updated)
+   */
+  hasAllPurposeConsents() {
+    this.hasAllPurposeConsentsResolver_();
+  }
+
+  /**
+   * Wait for our purpose consents to be collected,
+   * either locally or from update. Let amp-consent handle
+   * when to resolve the promis (via update() or directly).
+   * @return {!Promise}
+   */
+  whenHasAllPurposeConsents() {
+    return this.hasAllPurposeConsentsPromise_;
   }
 
   /**
