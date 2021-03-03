@@ -53,8 +53,10 @@ import {createCustomEvent} from '../../../src/event-helper';
 import {createFormDataWrapper} from '../../../src/form-data-wrapper';
 import {deepMerge, dict} from '../../../src/utils/object';
 import {dev, user, } from '../../../src/log';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
-import {pureDevAssert as devAssert} from '../../../src/core/assert';
+import {
+  pureDevAssert as devAssert,
+  pureUserAssert as userAssert,
+} from '../../../src/core/assert';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {
   formOrNullForElement,

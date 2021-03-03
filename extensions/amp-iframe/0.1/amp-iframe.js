@@ -23,8 +23,10 @@ import {Services} from '../../../src/services';
 import {base64EncodeFromBytes} from '../../../src/utils/base64.js';
 import {createCustomEvent, getData, listen} from '../../../src/event-helper';
 import {user, } from '../../../src/log';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
-import {pureDevAssert as devAssert} from '../../../src/core/assert';
+import {
+  pureDevAssert as devAssert,
+  pureUserAssert as userAssert,
+} from '../../../src/core/assert';
 import {dict} from '../../../src/utils/object';
 import {endsWith} from '../../../src/string';
 import {getConsentDataToForward} from '../../../src/consent';

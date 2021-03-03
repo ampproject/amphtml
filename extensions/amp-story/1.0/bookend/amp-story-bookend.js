@@ -35,8 +35,10 @@ import {StoryAnalyticsEvent, getAnalyticsService} from '../story-analytics';
 import {closest, closestAncestorElementBySelector} from '../../../../src/dom';
 import {createShadowRootWithStyle} from '../utils';
 import {dev, user, } from '../../../../src/log';
-import {pureUserAssert as userAssert} from '../../../../src/core/assert';
-import {pureDevAssert as devAssert} from '../../../../src/core/assert';
+import {
+  pureDevAssert as devAssert,
+  pureUserAssert as userAssert,
+} from '../../../../src/core/assert';
 import {dict} from '../../../../src/utils/object';
 import {getAmpdoc} from '../../../../src/service';
 import {getJsonLd} from '../jsonld';

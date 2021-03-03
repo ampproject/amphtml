@@ -22,8 +22,10 @@
 // Note: loaded by 3p system. Cannot rely on babel polyfills.
 
 import {rethrowAsync, } from '../src/log';
-import {pureUserAssert as userAssert} from '../src/core/assert';
-import {pureDevAssert as devAssert} from '../src/core/assert';
+import {
+  pureDevAssert as devAssert,
+  pureUserAssert as userAssert,
+} from '../src/core/assert';
 import {hasOwn, map} from '../src/utils/object';
 import {isArray} from '../src/types';
 

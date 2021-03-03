@@ -24,8 +24,10 @@ import {Keys} from '../utils/key-codes';
 import {Services} from '../services';
 import {debounce, throttle} from '../utils/rate-limit';
 import {dev, user, } from '../log';
-import {pureUserAssert as userAssert} from '../core/assert';
-import {pureDevAssert as devAssert} from '../core/assert';
+import {
+  pureDevAssert as devAssert,
+  pureUserAssert as userAssert,
+} from '../core/assert';
 import {dict, hasOwn, map} from '../utils/object';
 import {getDetail} from '../event-helper';
 import {getMode} from '../mode';

@@ -16,8 +16,10 @@
 
 import {assertHttpsUrl, parseUrlDeprecated} from './url';
 import {dev, user, } from './log';
-import {pureUserAssert as userAssert} from './core/assert';
-import {pureDevAssert as devAssert} from './core/assert';
+import {
+  pureDevAssert as devAssert,
+  pureUserAssert as userAssert,
+} from './core/assert';
 import {dict} from './utils/object';
 import {getContextMetadata} from '../src/iframe-attributes';
 import {getMode} from './mode';

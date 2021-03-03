@@ -22,8 +22,10 @@ import {
   setStyles,
 } from '../../../../src/style';
 import {dev, } from '../../../../src/log';
-import {pureUserAssert as userAssert} from '../../../../src/core/assert';
-import {pureDevAssert as devAssert} from '../../../../src/core/assert';
+import {
+  pureDevAssert as devAssert,
+  pureUserAssert as userAssert,
+} from '../../../../src/core/assert';
 
 /**
  * These fully qualified names, my goodness.

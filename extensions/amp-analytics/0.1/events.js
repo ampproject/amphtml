@@ -24,8 +24,10 @@ import {
 } from '../../../src/video-interface';
 import {deepMerge, dict, hasOwn} from '../../../src/utils/object';
 import {dev, user, } from '../../../src/log';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
-import {pureDevAssert as devAssert} from '../../../src/core/assert';
+import {
+  pureDevAssert as devAssert,
+  pureUserAssert as userAssert,
+} from '../../../src/core/assert';
 import {getData} from '../../../src/event-helper';
 import {getDataParamsFromAttributes, isAmpElement} from '../../../src/dom';
 import {isArray, isEnumValue, isFiniteNumber} from '../../../src/types';

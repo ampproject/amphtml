@@ -18,8 +18,10 @@ import {AmpEvents} from '../../../src/amp-events';
 import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, } from '../../../src/log';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
-import {pureDevAssert as devAssert} from '../../../src/core/assert';
+import {
+  pureDevAssert as devAssert,
+  pureUserAssert as userAssert,
+} from '../../../src/core/assert';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeChildren} from '../../../src/dom';
 

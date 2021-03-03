@@ -32,8 +32,10 @@ import {createCustomEvent} from '../../../src/event-helper';
 import {debounce} from '../../../src/utils/rate-limit';
 import {descendsFromStory} from '../../../src/utils/story';
 import {dev, } from '../../../src/log';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
-import {pureDevAssert as devAssert} from '../../../src/core/assert';
+import {
+  pureDevAssert as devAssert,
+  pureUserAssert as userAssert,
+} from '../../../src/core/assert';
 import {dict} from '../../../src/utils/object';
 import {handleAutoscroll} from './autoscroll';
 import {isExperimentOn} from '../../../src/experiments';

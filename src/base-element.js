@@ -18,8 +18,10 @@ import {ActionTrust, DEFAULT_ACTION} from './action-constants';
 import {Layout, LayoutPriority} from './layout';
 import {Services} from './services';
 import {user, } from './log';
-import {pureUserAssert as userAssert} from './core/assert';
-import {pureDevAssert as devAssert} from './core/assert';
+import {
+  pureDevAssert as devAssert,
+  pureUserAssert as userAssert,
+} from './core/assert';
 import {dispatchCustomEvent} from './dom';
 import {getData, listen, loadPromise} from './event-helper';
 import {getMode} from './mode';

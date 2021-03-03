@@ -35,8 +35,10 @@ import {StoryAdPage} from './story-ad-page';
 import {CSS as adBadgeCSS} from '../../../build/amp-story-auto-ads-ad-badge-0.1.css';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {dev, } from '../../../src/log';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
-import {pureDevAssert as devAssert} from '../../../src/core/assert';
+import {
+  pureDevAssert as devAssert,
+  pureUserAssert as userAssert,
+} from '../../../src/core/assert';
 import {dict, hasOwn} from '../../../src/utils/object';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {lastItem} from '../../../src/utils/array';

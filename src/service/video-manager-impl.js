@@ -41,8 +41,10 @@ import {clamp} from '../utils/math';
 import {createCustomEvent, getData, listen, listenOnce} from '../event-helper';
 import {createViewportObserver} from '../viewport-observer';
 import {dev, user, } from '../log';
-import {pureUserAssert as userAssert} from '../core/assert';
-import {pureDevAssert as devAssert} from '../core/assert';
+import {
+  pureDevAssert as devAssert,
+  pureUserAssert as userAssert,
+} from '../core/assert';
 import {dict, map} from '../utils/object';
 import {dispatchCustomEvent, removeElement} from '../dom';
 import {getMode} from '../mode';

@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 import {user, } from '../../../src/log';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
-import {pureDevAssert as devAssert} from '../../../src/core/assert';
+import {
+  pureDevAssert as devAssert,
+  pureUserAssert as userAssert,
+} from '../../../src/core/assert';
 
 const TAG = 'amp-fx-collection';
 

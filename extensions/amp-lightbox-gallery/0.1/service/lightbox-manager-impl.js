@@ -34,8 +34,10 @@ import {
   iterateCursor,
 } from '../../../../src/dom';
 import {dev, } from '../../../../src/log';
-import {pureUserAssert as userAssert} from '../../../../src/core/assert';
-import {pureDevAssert as devAssert} from '../../../../src/core/assert';
+import {
+  pureDevAssert as devAssert,
+  pureUserAssert as userAssert,
+} from '../../../../src/core/assert';
 import {map} from '../../../../src/utils/object';
 import {srcsetFromElement, srcsetFromSrc} from '../../../../src/srcset';
 import {toArray} from '../../../../src/types';

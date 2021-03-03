@@ -25,8 +25,10 @@ import {clamp} from '../../../src/utils/math';
 import {closest, dispatchCustomEvent, tryFocus} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user, } from '../../../src/log';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
-import {pureDevAssert as devAssert} from '../../../src/core/assert';
+import {
+  pureDevAssert as devAssert,
+  pureUserAssert as userAssert,
+} from '../../../src/core/assert';
 import {dict} from '../../../src/utils/object';
 import {getStyle, setImportantStyles, setStyles} from '../../../src/style';
 import {isExperimentOn} from '../../../src/experiments';

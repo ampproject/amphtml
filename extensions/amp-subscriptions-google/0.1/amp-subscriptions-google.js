@@ -50,8 +50,10 @@ import {getValueForExpr} from '../../../src/json';
 import {installStylesForDoc} from '../../../src/style-installer';
 
 import {user, } from '../../../src/log';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
-import {pureDevAssert as devAssert} from '../../../src/core/assert';
+import {
+  pureDevAssert as devAssert,
+  pureUserAssert as userAssert,
+} from '../../../src/core/assert';
 
 const TAG = 'amp-subscriptions-google';
 const PLATFORM_KEY = 'subscribe.google.com';
