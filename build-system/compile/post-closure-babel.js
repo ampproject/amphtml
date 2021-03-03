@@ -17,11 +17,14 @@
 const argv = require('minimist')(process.argv.slice(2));
 const babel = require('@babel/core');
 const path = require('path');
-const remapping = require('@ampproject/remapping');
+const Remapping = require('@ampproject/remapping');
 const terser = require('terser');
 const through = require('through2');
 const {debug, CompilationLifecycles} = require('./debug-compilation-lifecycle');
 const {jsBundles} = require('./bundles.config.js');
+
+/** @type {Remapping.default} */
+const remapping = /** @type {*} */ (Remapping);
 
 let mainBundles;
 
@@ -30,7 +33,7 @@ let mainBundles;
  *
  * @param {string} code
  * @param {string} filename
- * @return {Promise<Object<string, string>>}
+ * @return {Promise<Object<string, terser.SourceMapOptions['content']>>}
  */
 async function terserMinify(code, filename) {
   const options = {
@@ -95,9 +98,13 @@ exports.postClosureBabel = function () {
         file.contents,
         file.sourceMap
       );
-      const {code, map: babelMap} = babel.transformSync(file.contents, {
-        caller: {name: 'post-closure'},
-      });
+      const {code, map: babelMap} =
+        babel.transformSync(file.contents, {
+          caller: {name: 'post-closure'},
+        }) || {};
+      if (!code || !babelMap) {
+        throw new Error(`Error transforming contents of ${file.path}`);
+      }
 
       debug(
         CompilationLifecycles['closured-pre-terser'],
@@ -110,7 +117,10 @@ exports.postClosureBabel = function () {
         code,
         path.basename(file.path)
       );
-      file.contents = Buffer.from(compressed, 'utf-8');
+      if (!compressed) {
+        throw new Error(`Error minifying contents of ${file.path}`);
+      }
+      file.contents = Buffer.from(compressed.toString(), 'utf-8');
       file.sourceMap = remapping(
         [terserMap, babelMap, map],
         () => null,

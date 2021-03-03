@@ -19,12 +19,16 @@ const debounce = require('debounce');
 const fs = require('fs-extra');
 const wrappers = require('../compile/compile-wrappers');
 const {
+  endBuildStep,
+  watchDebounceDelay,
+  invalidateUnminifiedBabelCache,
+} = require('./helpers');
+const {
   extensionAliasBundles,
   extensionBundles,
   verifyExtensionBundles,
 } = require('../compile/bundles.config');
 const {analyticsVendorConfigs} = require('./analytics-vendor-configs');
-const {endBuildStep, watchDebounceDelay} = require('./helpers');
 const {isCiBuild} = require('../common/ci');
 const {jsifyCssAsync} = require('./css/jsify-css');
 const {log} = require('../common/logging');
@@ -72,12 +76,12 @@ const DEFAULT_EXTENSION_SET = ['amp-loader', 'amp-auto-lightbox'];
 
 /**
  * @typedef {{
- *   name: ?string,
- *   version: ?string,
- *   hasCss: ?boolean,
- *   loadPriority: ?string,
- *   cssBinaries: ?Array<string>,
- *   extraGlobs: ?Array<string>,
+ *   name?: string,
+ *   version?: string,
+ *   hasCss?: boolean,
+ *   loadPriority?: string,
+ *   cssBinaries?: Array<string>,
+ *   extraGlobs?: Array<string>,
  * }}
  */
 const ExtensionOption = {}; // eslint-disable-line no-unused-vars
@@ -95,7 +99,7 @@ const adVendors = [];
  * @param {string} name
  * @param {string|!Array<string>} version E.g. 0.1 or [0.1, 0.2]
  * @param {string} latestVersion E.g. 0.1
- * @param {!ExtensionOption} options extension options object.
+ * @param {!ExtensionOption|undefined} options extension options object.
  * @param {!Object} extensionsObject
  * @param {boolean} includeLatest
  */
@@ -279,7 +283,7 @@ function parseExtensionFlags(preBuild = false) {
  */
 function getExtensionsFromArg(examples) {
   if (!examples) {
-    return;
+    return [];
   }
 
   const extensions = [];
@@ -382,7 +386,8 @@ async function doBuildExtension(extensions, extension, options) {
  * @param {?Object} options
  */
 function watchExtension(path, name, version, latestVersion, hasCss, options) {
-  const watchFunc = function () {
+  const watchFunc = function (modifiedFile) {
+    invalidateUnminifiedBabelCache(modifiedFile);
     const bundleComplete = buildExtension(
       name,
       version,

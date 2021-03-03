@@ -26,7 +26,16 @@
     "./common/**/*.js",
     "./common/**/*.ts",
     "./server/**/*.js",
-    "./server/**/*.ts"
+    "./server/**/*.ts",
+    "./tasks/**/*.ts",
+    "./tasks/**/*.ts"
   ],
-  "exclude": ["**/node_modules", "common/check-package-manager.js"]
+  "exclude": [
+    "**/node_modules",
+    "common/check-package-manager.js",
+    "server/app-index/test/test-html.js",
+    "server/app-index/test/test-amphtml-helpers.js",
+    "server/new-server/transforms/dist",
+    "server/typescript-compile.js"
+  ]
 }

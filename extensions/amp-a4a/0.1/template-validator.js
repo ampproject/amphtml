@@ -15,9 +15,9 @@
  */
 
 import {AdResponseType, Validator, ValidatorResult} from './amp-ad-type-defs';
-import {AmpAdTemplateHelper} from '../../amp-a4a/0.1/amp-ad-template-helper';
 import {Services} from '../../../src/services';
 import {getAmpAdMetadata} from './amp-ad-utils';
+import {getAmpAdTemplateHelper} from './amp-ad-template-helper';
 import {pushIfNotExist} from '../../../src/utils/array';
 import {tryParseJson} from '../../../src/json';
 import {utf8Decode} from '../../../src/utils/bytes';
@@ -27,26 +27,12 @@ export const AMP_TEMPLATED_CREATIVE_HEADER_NAME = 'AMP-Ad-Template-Extension';
 export const DEPRECATED_AMP_TEMPLATED_CREATIVE_HEADER_NAME =
   'AMP-template-amp-creative';
 
-/** @type {?AmpAdTemplateHelper} */
-let ampAdTemplateHelper;
-
-/**
- * Returns the global template helper.
- * @param {!Window} win
- * @return {!AmpAdTemplateHelper}
- */
-export function getAmpAdTemplateHelper(win) {
-  return (
-    ampAdTemplateHelper || (ampAdTemplateHelper = new AmpAdTemplateHelper(win))
-  );
-}
-
 /**
  * Validator for Template ads.
  */
 export class TemplateValidator extends Validator {
   /** @override */
-  validate(context, unvalidatedBytes, headers) {
+  validate(context, containerElement, unvalidatedBytes, headers) {
     const body = utf8Decode(/** @type {!ArrayBuffer} */ (unvalidatedBytes));
     const parsedResponseBody = /** @type {./amp-ad-type-defs.AmpTemplateCreativeDef} */ (tryParseJson(
       body
@@ -75,7 +61,7 @@ export class TemplateValidator extends Validator {
       );
     }
 
-    return getAmpAdTemplateHelper(context.win)
+    return getAmpAdTemplateHelper(containerElement)
       .fetch(parsedResponseBody.templateUrl)
       .then((template) => {
         const creativeMetadata = getAmpAdMetadata(template);

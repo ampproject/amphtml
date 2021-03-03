@@ -27,6 +27,12 @@ const {
 const {Base} = require('mocha').reporters;
 const {inherits} = require('mocha').utils;
 
+/**
+ *
+ * @param {string} output
+ * @param {string} filename
+ * @return {Promise<void>}
+ */
 async function writeOutput(output, filename) {
   try {
     await fs.mkdir('result-reports');
