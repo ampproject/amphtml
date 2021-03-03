@@ -176,10 +176,11 @@ function gitCommitterEmail() {
  * from <branch> are prefixed with '- ', and those that were not are prefixed
  * with '+ '.
  *
- * @return {!Array<{sha: string, isCherryPick: boolean}>}
+ * @return {!Array<string>}
  */
 function gitCherryMaster() {
-  return getStdout('git cherry master').trim().split('\n');
+  const stdout = getStdout('git cherry master').trim();
+  return stdout ? stdout.split('\n') : [];
 }
 
 /**
