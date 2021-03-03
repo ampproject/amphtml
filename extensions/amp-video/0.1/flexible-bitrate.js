@@ -101,6 +101,9 @@ export class BitrateManager {
     if (video.changedSources) {
       return;
     }
+    video.addEventListener('play', () => {
+      console.log('playing');
+    });
     this.installListeners_(video);
     // Reset slowLoad unlisten
     this.videos_.push(DomBasedWeakRef.make(this.win, video));
