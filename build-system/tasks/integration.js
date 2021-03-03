@@ -24,6 +24,9 @@ const {buildRuntime} = require('../common/utils');
 const {maybePrintArgvMessages} = require('./runtime-test/helpers');
 
 class Runner extends RuntimeTestRunner {
+  /**
+   * @param {RuntimeTestConfig} config
+   */
   constructor(config) {
     super(config);
   }

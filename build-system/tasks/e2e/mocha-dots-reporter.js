@@ -38,6 +38,9 @@ const {reportTestFinished} = require('../report-test-status');
  * @param {*} runner
  */
 class MochaDotsReporter extends Base {
+  /**
+   * @param {*} runner
+   */
   constructor(runner) {
     super(runner);
 

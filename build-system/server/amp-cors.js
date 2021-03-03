@@ -24,6 +24,12 @@ const ORIGIN_REGEX = new RegExp(
   '^https?://localhost:8000|^https?://.+\\.localhost:8000'
 );
 
+/**
+ * @param {*} req require('express').Request
+ * @param {*} res require('express').Response
+ * @param {['POST'|'GET']} opt_validMethods
+ * @param {string[]=} opt_exposeHeaders
+ */
 function assertCors(req, res, opt_validMethods, opt_exposeHeaders) {
   // Allow disable CORS check (iframe fixtures have origin 'about:srcdoc').
   if (req.query.cors == '0') {
@@ -60,6 +66,12 @@ function assertCors(req, res, opt_validMethods, opt_exposeHeaders) {
   enableCors(req, res, origin, opt_exposeHeaders);
 }
 
+/**
+ * @param {*} req require('express').Request
+ * @param {*} res require('express').Response
+ * @param {string=} origin
+ * @param {string[]=} opt_exposeHeaders
+ */
 function enableCors(req, res, origin, opt_exposeHeaders) {
   res.setHeader('Access-Control-Allow-Credentials', 'true');
 
@@ -76,6 +88,10 @@ function enableCors(req, res, origin, opt_exposeHeaders) {
   );
 }
 
+/**
+ * @param {*} req require('express').Request
+ * @return {string}
+ */
 function getUrlPrefix(req) {
   return req.protocol + '://' + req.headers.host;
 }

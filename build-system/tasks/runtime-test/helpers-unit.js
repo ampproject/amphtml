@@ -55,7 +55,14 @@ function extractCssJsFileMap() {
   maybeInitializeExtensions(extensions);
   const cssJsFileMap = {};
 
-  // Adds an entry that maps a CSS file to a JS file
+  /**
+   * Adds an entry that maps a CSS file to a JS file
+   *
+   * @param {Object} cssData
+   * @param {string} cssBinaryName
+   * @param {Object} cssJsFileMap
+   * @return {void}
+   */
   function addCssJsEntry(cssData, cssBinaryName, cssJsFileMap) {
     const cssFilePath =
       `extensions/${cssData['name']}/${cssData['version']}/` +
@@ -184,12 +191,21 @@ function unitTestsToRun() {
   testsToRun = [];
   let srcFiles = [];
 
+  /**
+   * @param {string} file
+   * @return {boolean}
+   */
   function isUnitTest(file) {
     return unitTestPaths.some((pattern) => {
       return minimatch(file, pattern);
     });
   }
 
+  /**
+   * @param {string} testFile
+   * @param {string[]} srcFiles
+   * @return {boolean}
+   */
   function shouldRunTest(testFile, srcFiles) {
     const filesImported = getImports(testFile);
     return (
@@ -199,8 +215,13 @@ function unitTestsToRun() {
     );
   }
 
-  // Retrieves the set of unit tests that should be run
-  // for a set of source files.
+  /**
+   * Retrieves the set of unit tests that should be run
+   * for a set of source files.
+   *
+   * @param {string[]} srcFiles
+   * @return {string[]}
+   */
   function getTestsFor(srcFiles) {
     const allUnitTests = globby.sync(unitTestPaths);
     return allUnitTests.filter((testFile) => {
