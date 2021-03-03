@@ -6,6 +6,15 @@ Bento AMP is a project that allows you to take AMP components and use them in ot
 
 Read this document to learn how to create a new Bento AMP component.
 
+<!--
+  (Do not remove or edit this comment.)
+
+  This table-of-contents is automatically generated. To generate it, run:
+    gulp markdown-toc --fix
+-->
+
+<!-- {"maxdepth": 2} -->
+
 -   [Getting started](#getting-started)
 -   [Naming](#naming)
 -   [Directory structure](#directory-structure)
@@ -20,7 +29,7 @@ Read this document to learn how to create a new Bento AMP component.
 -   [Performance considerations](#performance-considerations)
     -   [Loading external resources](#loading-external-resources)
 -   [Layouts supported in your element](#layouts-supported-in-your-element)
-    -   [What layout should your element support?](#what-layout-should-your-element-support-)
+    -   [What layout should your element support?](#what-layout-should-your-element-support)
 -   [Experiments](#experiments)
     -   [Enabling and removing your experiment](#enabling-and-removing-your-experiment)
 -   [Documenting your extended Bento component](#documenting-your-extended-bento-component)

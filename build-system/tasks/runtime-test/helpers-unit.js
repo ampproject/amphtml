@@ -55,7 +55,14 @@ function extractCssJsFileMap() {
   maybeInitializeExtensions(extensions);
   const cssJsFileMap = {};
 
-  // Adds an entry that maps a CSS file to a JS file
+  /**
+   * Adds an entry that maps a CSS file to a JS file
+   *
+   * @param {Object} cssData
+   * @param {string} cssBinaryName
+   * @param {Object} cssJsFileMap
+   * @return {void}
+   */
   function addCssJsEntry(cssData, cssBinaryName, cssJsFileMap) {
     const cssFilePath =
       `extensions/${cssData['name']}/${cssData['version']}/` +
@@ -126,7 +133,11 @@ function getJsFilesFor(cssFile, cssJsFileMap) {
   return jsFiles;
 }
 
-function getUnitTestsToRun() {
+/**
+ * Computes the list of unit tests to run under difference scenarios
+ * @return {Array<string>|undefined}
+ */
+async function getUnitTestsToRun() {
   log(green('INFO:'), 'Determining which unit tests to run...');
 
   if (isLargeRefactor()) {
@@ -134,7 +145,7 @@ function getUnitTestsToRun() {
       green('INFO:'),
       'Skipping tests on local changes because this is a large refactor.'
     );
-    reportTestSkipped();
+    await reportTestSkipped();
     return;
   }
 
@@ -144,7 +155,7 @@ function getUnitTestsToRun() {
       green('INFO:'),
       'No unit tests were directly affected by local changes.'
     );
-    reportTestSkipped();
+    await reportTestSkipped();
     return;
   }
   if (isCiBuild() && tests.length > TEST_FILE_COUNT_THRESHOLD) {
@@ -152,7 +163,7 @@ function getUnitTestsToRun() {
       green('INFO:'),
       'Several tests were affected by local changes. Running all tests below.'
     );
-    reportTestSkipped();
+    await reportTestSkipped();
     return;
   }
 
@@ -180,12 +191,21 @@ function unitTestsToRun() {
   testsToRun = [];
   let srcFiles = [];
 
+  /**
+   * @param {string} file
+   * @return {boolean}
+   */
   function isUnitTest(file) {
     return unitTestPaths.some((pattern) => {
       return minimatch(file, pattern);
     });
   }
 
+  /**
+   * @param {string} testFile
+   * @param {string[]} srcFiles
+   * @return {boolean}
+   */
   function shouldRunTest(testFile, srcFiles) {
     const filesImported = getImports(testFile);
     return (
@@ -195,8 +215,13 @@ function unitTestsToRun() {
     );
   }
 
-  // Retrieves the set of unit tests that should be run
-  // for a set of source files.
+  /**
+   * Retrieves the set of unit tests that should be run
+   * for a set of source files.
+   *
+   * @param {string[]} srcFiles
+   * @return {string[]}
+   */
   function getTestsFor(srcFiles) {
     const allUnitTests = globby.sync(unitTestPaths);
     return allUnitTests.filter((testFile) => {

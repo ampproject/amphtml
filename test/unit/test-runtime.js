@@ -30,6 +30,7 @@ import {
 } from '../../src/service';
 import {installAmpdocServices} from '../../src/service/core-services';
 import {installPlatformService} from '../../src/service/platform-impl';
+import {installTemplatesServiceForDoc} from '../../src/service/template-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {setShadowDomSupportedVersionForTesting} from '../../src/web-components';
 import {toArray} from '../../src/types';
@@ -704,6 +705,45 @@ describes.fakeWin(
         // Single-doc mode does not create `attachShadowDoc`.
         expect(win.AMP.attachShadowDoc).to.not.exist;
         expect(win.AMP.attachShadowDocAsStream).to.not.exist;
+      });
+
+      it('should register template', async () => {
+        const ampdoc = ampdocService.getSingleDoc();
+        installTemplatesServiceForDoc(ampdoc);
+        const templates = Services.templatesForDoc(ampdoc);
+
+        class TemplateType {}
+
+        ampdoc.declareExtension('amp-ext');
+        win.AMP.push({
+          n: 'amp-ext',
+          f: (amp) => {
+            amp.registerTemplate('amp-ext', TemplateType);
+          },
+          v: '$internalRuntimeVersion$',
+        });
+        runChunks(win.document);
+
+        await extensions.waitForExtension(win, 'amp-ext');
+
+        // Extension is added immediately. Can't find for micro-tasks here.
+        const extHolder = extensions.extensions_['amp-ext'];
+        const ext = extHolder.extension;
+        expect(ext.elements['amp-ext']).not.exist;
+
+        const templateElement = win.document.createElement('template');
+        templateElement.setAttribute('type', 'amp-ext');
+        await templates.whenReady(templateElement);
+
+        const shadowRoot = document.createDocumentFragment();
+        const ampdoc2 = new AmpDocShadow(win, 'https://acme.org/', shadowRoot);
+        installTemplatesServiceForDoc(ampdoc2);
+        const templates2 = Services.templatesForDoc(ampdoc2);
+        expect(extHolder.docFactories).to.have.length(1);
+        extHolder.docFactories[0](ampdoc2);
+        const templateElement2 = win.document.createElement('template');
+        templateElement2.setAttribute('type', 'amp-ext');
+        await templates2.whenReady(templateElement2);
       });
 
       it('should register element without CSS', function* () {
