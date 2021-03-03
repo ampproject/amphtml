@@ -473,6 +473,9 @@ export class AmpStoryPage extends AMP.BaseElement {
     switch (state) {
       case PageState.NOT_ACTIVE:
         this.element.removeAttribute('active');
+        if (this.openAttachmentEl_) {
+          this.openAttachmentEl_.removeAttribute('active');
+        }
         this.pause_();
         this.state_ = state;
         break;
