@@ -179,7 +179,7 @@ function gitCommitterEmail() {
  * @return {!Array<{sha: string, isCherryPick: boolean}>}
  */
 function gitCherryMaster() {
-  return getStdout('git cherry master').trim().split('\n');
+  return getStdout('git cherry upstream/master').trim().split('\n');
 }
 
 /**
