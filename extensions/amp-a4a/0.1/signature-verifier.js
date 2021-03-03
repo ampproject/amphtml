@@ -16,7 +16,8 @@
 
 import {Services} from '../../../src/services';
 import {base64DecodeToBytes} from '../../../src/utils/base64';
-import {dev, devAssert, user} from '../../../src/log';
+import {dev, user} from '../../../src/log';
+import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {isArray} from '../../../src/types';
 
 /** @visibleForTesting */

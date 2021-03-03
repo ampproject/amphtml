@@ -89,7 +89,8 @@ import {
   removeElement,
 } from '../../../src/dom';
 import {deepMerge, dict} from '../../../src/utils/object';
-import {dev, devAssert, user} from '../../../src/log';
+import {dev, user} from '../../../src/log';
+import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {

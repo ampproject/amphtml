@@ -17,7 +17,8 @@
 import {ActionTrust, DEFAULT_ACTION} from './action-constants';
 import {Layout, LayoutPriority} from './layout';
 import {Services} from './services';
-import {devAssert, user, userAssert} from './log';
+import {user, userAssert} from './log';
+import {pureDevAssert as devAssert} from './core/assert';
 import {dispatchCustomEvent} from './dom';
 import {getData, listen, loadPromise} from './event-helper';
 import {getMode} from './mode';

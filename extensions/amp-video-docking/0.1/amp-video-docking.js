@@ -40,7 +40,8 @@ import {
 } from './math';
 import {createCustomEvent, listen, listenOnce} from '../../../src/event-helper';
 import {createViewportRect} from './viewport-rect';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
+import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {dict} from '../../../src/utils/object';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {getInternalVideoElementFor} from '../../../src/utils/video';

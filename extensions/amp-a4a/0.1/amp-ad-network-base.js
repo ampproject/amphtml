@@ -15,7 +15,8 @@
  */
 
 import {FailureType, RecoveryModeType} from './amp-ad-type-defs';
-import {dev, devAssert} from '../../../src/log';
+import {dev, } from '../../../src/log';
+import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {map} from '../../../src/utils/object';
 import {sendXhrRequest} from './amp-ad-utils';

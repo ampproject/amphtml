@@ -24,7 +24,8 @@ import {
   removeDocumentVisibilityChangeListener,
 } from '../utils/document-visibility';
 import {cancellation} from '../error';
-import {dev, devAssert, rethrowAsync} from '../log';
+import {dev, rethrowAsync} from '../log';
+import {pureDevAssert as devAssert} from '../core/assert';
 import {getService, registerServiceBuilder} from '../service';
 import {installTimerService} from './timer-impl';
 

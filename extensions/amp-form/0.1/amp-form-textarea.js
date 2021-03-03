@@ -17,7 +17,8 @@
 import {AmpEvents} from '../../../src/amp-events';
 import {Services} from '../../../src/services';
 import {computedStyle, px, setStyle} from '../../../src/style';
-import {dev, devAssert, user} from '../../../src/log';
+import {dev, user} from '../../../src/log';
+import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {iterateCursor, removeElement} from '../../../src/dom';
 import {listen, listenOncePromise} from '../../../src/event-helper';
 import {throttle} from '../../../src/utils/rate-limit';

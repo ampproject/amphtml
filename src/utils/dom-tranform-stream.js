@@ -15,7 +15,8 @@
  */
 
 import {Deferred} from './promise';
-import {dev, devAssert} from '../log';
+import {dev, } from '../log';
+import {pureDevAssert as devAssert} from '../core/assert';
 import {removeNoScriptElements} from './dom-writer';
 
 export class DomTransformStream {

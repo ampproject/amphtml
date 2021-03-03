@@ -43,7 +43,8 @@ import {
   delayAfterDeferringToEventLoop,
   secondsToTimestampString,
 } from './utils';
-import {dev, devAssert, userAssert} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
+import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {dict} from '../../../src/utils/object';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {getData, getDetail, isLoaded, listen} from '../../../src/event-helper';

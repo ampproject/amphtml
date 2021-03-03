@@ -15,7 +15,8 @@
  */
 
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
-import {dev, devAssert} from '../../../src/log';
+import {dev, } from '../../../src/log';
+import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {parseJson} from '../../../src/json';
 import {removeElement} from '../../../src/dom';

@@ -22,7 +22,8 @@ import {
   getShadowDomSupportedVersion,
   isShadowCssSupported,
 } from './web-components';
-import {dev, devAssert} from './log';
+import {dev, } from './log';
+import {pureDevAssert as devAssert} from './core/assert';
 import {escapeCssSelectorIdent} from './css';
 import {installCssTransformer} from './style-installer';
 import {iterateCursor} from './dom';

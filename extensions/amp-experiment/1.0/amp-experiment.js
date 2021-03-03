@@ -18,7 +18,8 @@ import {ATTR_PREFIX, Variants, allocateVariant} from './variant';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {applyExperimentToVariant} from './apply-experiment';
-import {devAssert, user, userAssert} from '../../../src/log';
+import {user, userAssert} from '../../../src/log';
+import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {dict} from '../../../src/utils/object';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {

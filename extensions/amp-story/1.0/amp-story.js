@@ -94,7 +94,8 @@ import {
 } from '../../../src/style';
 import {createPseudoLocale} from '../../../src/localized-strings';
 import {debounce} from '../../../src/utils/rate-limit';
-import {dev, devAssert, user} from '../../../src/log';
+import {dev, user} from '../../../src/log';
+import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {dict, map} from '../../../src/utils/object';
 import {endsWith} from '../../../src/string';
 import {escapeCssSelectorIdent} from '../../../src/css';

@@ -23,7 +23,8 @@ import {
   videoAnalyticsCustomEventTypeKey,
 } from '../../../src/video-interface';
 import {deepMerge, dict, hasOwn} from '../../../src/utils/object';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
+import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {getData} from '../../../src/event-helper';
 import {getDataParamsFromAttributes, isAmpElement} from '../../../src/dom';
 import {isArray, isEnumValue, isFiniteNumber} from '../../../src/types';

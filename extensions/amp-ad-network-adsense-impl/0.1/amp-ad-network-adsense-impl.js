@@ -52,7 +52,8 @@ import {
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
 import {computedStyle, setStyles} from '../../../src/style';
-import {dev, devAssert, user} from '../../../src/log';
+import {dev, user} from '../../../src/log';
+import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {getAmpAdRenderOutsideViewport} from '../../amp-ad/0.1/concurrent-load';
 import {getData} from '../../../src/event-helper';

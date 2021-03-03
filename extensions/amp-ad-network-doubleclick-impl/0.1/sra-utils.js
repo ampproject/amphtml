@@ -15,7 +15,8 @@
  */
 
 import {RENDERING_TYPE_HEADER, XORIGIN_MODE} from '../../amp-a4a/0.1/amp-a4a';
-import {dev, devAssert} from '../../../src/log';
+import {dev, } from '../../../src/log';
+import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {getEnclosingContainerTypes} from '../../../ads/google/a4a/utils';
 import {getPageLayoutBoxBlocking} from '../../../src/utils/page-layout-box';
 import {isInManualExperiment} from '../../../ads/google/a4a/traffic-experiments';

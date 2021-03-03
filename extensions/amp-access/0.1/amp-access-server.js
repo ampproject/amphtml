@@ -16,7 +16,8 @@
 
 import {AccessClientAdapter} from './amp-access-client';
 import {Services} from '../../../src/services';
-import {dev, devAssert} from '../../../src/log';
+import {dev, } from '../../../src/log';
+import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {dict} from '../../../src/utils/object';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {fetchDocument} from '../../../src/document-fetcher';

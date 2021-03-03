@@ -31,7 +31,8 @@ import {
   removeElement,
 } from '../../../src/dom';
 import {descendsFromStory} from '../../../src/utils/story';
-import {dev, devAssert, user} from '../../../src/log';
+import {dev, user} from '../../../src/log';
+import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {getBitrateManager} from './flexible-bitrate';
 import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';

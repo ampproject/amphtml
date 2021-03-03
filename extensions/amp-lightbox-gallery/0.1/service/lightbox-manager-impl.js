@@ -33,7 +33,8 @@ import {
   elementByTag,
   iterateCursor,
 } from '../../../../src/dom';
-import {dev, devAssert, userAssert} from '../../../../src/log';
+import {dev, userAssert} from '../../../../src/log';
+import {pureDevAssert as devAssert} from '../../../../src/core/assert';
 import {map} from '../../../../src/utils/object';
 import {srcsetFromElement, srcsetFromSrc} from '../../../../src/srcset';
 import {toArray} from '../../../../src/types';

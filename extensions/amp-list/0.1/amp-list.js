@@ -47,7 +47,8 @@ import {
   tryFocus,
 } from '../../../src/dom';
 import {createCustomEvent, listen} from '../../../src/event-helper';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
+import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {getSourceOrigin} from '../../../src/url';

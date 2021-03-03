@@ -15,7 +15,8 @@
  */
 
 import {Services} from '../../../src/services';
-import {dev, devAssert, user} from '../../../src/log';
+import {dev, user} from '../../../src/log';
+import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {dict, hasOwn} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getPageLayoutBoxBlocking} from '../../../src/utils/page-layout-box';

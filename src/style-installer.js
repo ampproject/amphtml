@@ -17,7 +17,8 @@
 import {CommonSignals} from './common-signals';
 import {Services} from './services';
 import {TickLabel} from './enums';
-import {dev, devAssert, rethrowAsync} from './log';
+import {dev, rethrowAsync} from './log';
+import {pureDevAssert as devAssert} from './core/assert';
 import {getAmpdoc} from './service';
 import {insertAfterOrAtStart, waitForBodyOpenPromise} from './dom';
 import {map} from './utils/object';

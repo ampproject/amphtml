@@ -39,11 +39,11 @@ import {createElementWithAttributes} from '../../../src/dom';
 import {createSecureDocSkeleton, createSecureFrame} from './secure-frame';
 import {
   dev,
-  devAssert,
   duplicateErrorIfNecessary,
   user,
   userAssert,
 } from '../../../src/log';
+import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {dict} from '../../../src/utils/object';
 import {
   getAmpAdRenderOutsideViewport,

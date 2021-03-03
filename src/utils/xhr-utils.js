@@ -15,7 +15,8 @@
  */
 
 import {Services} from '../services';
-import {devAssert, user, userAssert} from '../log';
+import {user, userAssert} from '../log';
+import {pureDevAssert as devAssert} from '../core/assert';
 import {dict, map} from './object';
 import {fromIterator} from './array';
 import {

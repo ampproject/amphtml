@@ -20,7 +20,8 @@ import {
   NO_CONTENT_RESPONSE,
 } from '../../amp-a4a/0.1/amp-a4a';
 import {AmpTemplateCreativeDef} from '../../amp-a4a/0.1/amp-ad-type-defs';
-import {dev, devAssert} from '../../../src/log';
+import {dev, } from '../../../src/log';
+import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {getAmpAdTemplateHelper} from '../../amp-a4a/0.1/amp-ad-template-helper';
 import {getMode} from '../../../src/mode';
 import {tryParseJson} from '../../../src/json';

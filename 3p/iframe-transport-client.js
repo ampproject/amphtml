@@ -16,7 +16,8 @@
 
 import {IframeMessagingClient} from './iframe-messaging-client';
 import {MessageType} from '../src/3p-frame-messaging';
-import {dev, devAssert, user, userAssert} from '../src/log';
+import {dev, user, userAssert} from '../src/log';
+import {pureDevAssert as devAssert} from '../src/core/assert';
 import {tryParseJson} from '../src/json';
 
 /** @private @const {string} */

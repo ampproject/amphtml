@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {dev, devAssert} from '../../../src/log';
+import {dev, } from '../../../src/log';
+import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {isProxyOrigin} from '../../../src/url';
 
 /** @const {string} */

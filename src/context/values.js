@@ -15,7 +15,8 @@
  */
 
 import {deepScan, findParent} from './scan';
-import {devAssert, rethrowAsync} from '../log';
+import {rethrowAsync} from '../log';
+import {pureDevAssert as devAssert} from '../core/assert';
 import {pushIfNotExist, removeItem} from '../utils/array';
 import {throttleTail} from './scheduler';
 

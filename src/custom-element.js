@@ -36,7 +36,8 @@ import {
   isBlockedByConsent,
   reportError,
 } from './error';
-import {dev, devAssert, rethrowAsync, user, userAssert} from './log';
+import {dev, rethrowAsync, user, userAssert} from './log';
+import {pureDevAssert as devAssert} from './core/assert';
 import {getBuilderForDoc} from './service/builder';
 import {getIntersectionChangeEntry} from './utils/intersection-observer-3p-host';
 import {getMode} from './mode';

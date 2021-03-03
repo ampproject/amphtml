@@ -20,7 +20,8 @@ import {
   copyTextToClipboard,
   isCopyingToClipboardSupported,
 } from '../../../src/clipboard';
-import {dev, devAssert, user} from '../../../src/log';
+import {dev, user} from '../../../src/log';
+import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {dict, map} from './../../../src/utils/object';
 import {getLocalizationService} from './amp-story-localization-service';
 import {getRequestService} from './amp-story-request-service';

@@ -28,7 +28,8 @@ import {
   originMatches,
   redispatch,
 } from '../../../src/iframe-video';
-import {dev, devAssert, userAssert} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
+import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {dict} from '../../../src/utils/object';
 import {
   dispatchCustomEvent,

@@ -16,7 +16,8 @@
 
 import {IframeTransportMessageQueue} from './iframe-transport-message-queue';
 import {createElementWithAttributes} from '../../../src/dom';
-import {devAssert, user} from '../../../src/log';
+import {user} from '../../../src/log';
+import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {getMode} from '../../../src/mode';
 import {hasOwn} from '../../../src/utils/object';
 import {internalRuntimeVersion} from '../../../src/internal-version';

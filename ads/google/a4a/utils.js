@@ -19,7 +19,8 @@ import {DomFingerprint} from '../../../src/utils/dom-fingerprint';
 import {GEO_IN_GROUP} from '../../../extensions/amp-geo/0.1/amp-geo-in-group';
 import {Services} from '../../../src/services';
 import {buildUrl} from './shared/url-builder';
-import {dev, devAssert, user} from '../../../src/log';
+import {dev, user} from '../../../src/log';
+import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {dict} from '../../../src/utils/object';
 import {
   getBinaryType,

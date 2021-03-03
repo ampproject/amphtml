@@ -15,7 +15,8 @@
  */
 
 import {AstNodeType} from './bind-expr-defines';
-import {devAssert, user} from '../../../src/log';
+import {user} from '../../../src/log';
+import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';

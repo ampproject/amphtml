@@ -15,7 +15,8 @@
  */
 
 import {Services} from '../../../src/services';
-import {devAssert, user, userAssert} from '../../../src/log';
+import {user, userAssert} from '../../../src/log';
+import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {dict} from '../../../src/utils/object';
 
 /**

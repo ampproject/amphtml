@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {dev, devAssert, user} from '../log';
+import {dev, user} from '../log';
+import {pureDevAssert as devAssert} from '../core/assert';
 import {hasOwn, map} from '../utils/object';
 import {isArray, isObject} from '../types';
 import {parseJson} from '../json';

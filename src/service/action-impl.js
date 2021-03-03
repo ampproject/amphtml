@@ -23,7 +23,8 @@ import {
 import {Keys} from '../utils/key-codes';
 import {Services} from '../services';
 import {debounce, throttle} from '../utils/rate-limit';
-import {dev, devAssert, user, userAssert} from '../log';
+import {dev, user, userAssert} from '../log';
+import {pureDevAssert as devAssert} from '../core/assert';
 import {dict, hasOwn, map} from '../utils/object';
 import {getDetail} from '../event-helper';
 import {getMode} from '../mode';

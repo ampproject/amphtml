@@ -16,7 +16,8 @@
 
 import {Layout} from '../../../src/layout';
 import {Variants, allocateVariant} from './variant';
-import {dev, devAssert, userAssert} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
+import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {parseJson} from '../../../src/json';
 

@@ -19,7 +19,8 @@
  * details.
  */
 
-import {dev, devAssert, userAssert} from './log';
+import {dev, userAssert} from './log';
+import {pureDevAssert as devAssert} from './core/assert';
 import {htmlFor} from './static-template';
 import {isExperimentOn} from './experiments';
 import {isFiniteNumber, toWin} from './types';

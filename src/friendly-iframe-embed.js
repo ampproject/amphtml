@@ -21,7 +21,8 @@ import {Services} from './services';
 import {Signals} from './utils/signals';
 import {VisibilityState} from './visibility-state';
 import {cssText as ampSharedCss} from '../build/ampshared.css';
-import {dev, devAssert, rethrowAsync, userAssert} from './log';
+import {dev, rethrowAsync, userAssert} from './log';
+import {pureDevAssert as devAssert} from './core/assert';
 import {
   disposeServicesForEmbed,
   getTopWindow,

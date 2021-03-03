@@ -24,7 +24,8 @@ import {
   getDocumentVisibilityState,
   removeDocumentVisibilityChangeListener,
 } from '../utils/document-visibility';
-import {dev, devAssert} from '../log';
+import {dev, } from '../log';
+import {pureDevAssert as devAssert} from '../core/assert';
 import {
   disposeServicesForDoc,
   getParentWindowFrameElement,

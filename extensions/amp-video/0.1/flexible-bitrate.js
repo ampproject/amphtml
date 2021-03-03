@@ -16,7 +16,8 @@
 
 import {DomBasedWeakRef} from '../../../src/utils/dom-based-weakref';
 import {childElement, childElementsByTag} from '../../../src/dom';
-import {dev, devAssert} from '../../../src/log';
+import {dev, } from '../../../src/log';
+import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {listen, listenOnce} from '../../../src/event-helper';
 import {toArray} from '../../../src/types';
 

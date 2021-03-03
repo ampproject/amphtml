@@ -26,7 +26,8 @@ import {
   getExtensionScripts,
   parseExtensionUrl,
 } from './extension-script';
-import {dev, devAssert, rethrowAsync, user} from '../log';
+import {dev, rethrowAsync, user} from '../log';
+import {pureDevAssert as devAssert} from '../core/assert';
 import {getMode} from '../mode';
 import {installStylesForDoc} from '../style-installer';
 import {map} from '../utils/object';

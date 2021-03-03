@@ -21,7 +21,8 @@ import {
   FxType, // eslint-disable-line no-unused-vars
   getFxTypes,
 } from './fx-type';
-import {devAssert, rethrowAsync} from '../../../src/log';
+import {rethrowAsync} from '../../../src/log';
+import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {
   installPositionBoundFx,
   installScrollToggledFx,

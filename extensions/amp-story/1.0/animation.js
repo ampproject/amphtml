@@ -33,7 +33,8 @@ import {
   WebKeyframesDef,
 } from './animation-types';
 import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
+import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {getChildJsonConfig} from '../../../src/json';
 import {map, omit} from '../../../src/utils/object';

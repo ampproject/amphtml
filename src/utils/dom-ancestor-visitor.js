@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 import {computedStyle} from '../style';
-import {dev, devAssert} from '../log';
+import {dev, } from '../log';
+import {pureDevAssert as devAssert} from '../core/assert';
 
 /** @typedef {
  *    function(!Element, !Object<string, string>): *

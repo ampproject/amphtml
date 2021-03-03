@@ -21,7 +21,8 @@ import {
   computedStyle,
   setStyles,
 } from '../../../../src/style';
-import {dev, devAssert, userAssert} from '../../../../src/log';
+import {dev, userAssert} from '../../../../src/log';
+import {pureDevAssert as devAssert} from '../../../../src/core/assert';
 
 /**
  * These fully qualified names, my goodness.

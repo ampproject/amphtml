@@ -15,7 +15,8 @@
  */
 
 import {Services} from '../../../src/services';
-import {dev, devAssert} from '../../../src/log';
+import {dev, } from '../../../src/log';
+import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {toWin} from '../../../src/types';
 
 /**

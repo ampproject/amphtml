@@ -33,7 +33,8 @@ import {
   removeAmpJsParamsFromUrl,
   removeFragment,
 } from '../url';
-import {dev, devAssert, user, userAssert} from '../log';
+import {dev, user, userAssert} from '../log';
+import {pureDevAssert as devAssert} from '../core/assert';
 import {
   installServiceInEmbedDoc,
   registerServiceBuilderForDoc,

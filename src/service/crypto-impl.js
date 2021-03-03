@@ -16,7 +16,8 @@
 
 import {Services} from '../services';
 import {base64UrlEncodeFromBytes} from '../utils/base64';
-import {dev, devAssert, user} from '../log';
+import {dev, user} from '../log';
+import {pureDevAssert as devAssert} from '../core/assert';
 import {getService, registerServiceBuilder} from '../service';
 import {stringToBytes, utf8Encode} from '../utils/bytes';
 

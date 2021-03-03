@@ -20,7 +20,8 @@ import {
   isScopeSelectorSupported,
   prependSelectorsWith,
 } from './css';
-import {dev, devAssert} from './log';
+import {dev, } from './log';
+import {pureDevAssert as devAssert} from './core/assert';
 import {dict} from './utils/object';
 import {includes} from './string';
 import {toWin} from './types';

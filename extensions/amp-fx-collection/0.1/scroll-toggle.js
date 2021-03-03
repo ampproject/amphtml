@@ -15,7 +15,8 @@
  */
 import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
-import {devAssert, user} from '../../../src/log';
+import {user} from '../../../src/log';
+import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {once} from '../../../src/utils/function';
 import {px, setImportantStyles} from '../../../src/style';
 

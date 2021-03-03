@@ -19,7 +19,8 @@ import {TickLabel} from '../../../src/enums';
 import {asyncStringReplace} from '../../../src/string';
 import {base64UrlEncodeFromString} from '../../../src/utils/base64';
 import {cookieReader} from './cookie-reader';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
+import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {dict} from '../../../src/utils/object';
 import {
   getActiveExperimentBranches,

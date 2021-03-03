@@ -15,7 +15,8 @@
  */
 
 // Note: loaded by 3p system. Cannot rely on babel polyfills.
-import {dev, devAssert} from './log';
+import {dev, } from './log';
+import {pureDevAssert as devAssert} from './core/assert';
 import {map} from './utils/object.js';
 
 /** @type {Object<string, string>} */
