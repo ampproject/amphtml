@@ -90,7 +90,7 @@ export function calculateEntryPointScriptUrl(
 /**
  * Parse the extension version from a given script URL.
  * @param {string} scriptUrl
- * @return {?{extensionId: string, version: string}}
+ * @return {?{extensionId: string, extensionVersion: string}}
  */
 export function parseExtensionUrl(scriptUrl) {
   //QQQ:calls
