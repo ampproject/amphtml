@@ -93,7 +93,6 @@ export function calculateEntryPointScriptUrl(
  * @return {?{extensionId: string, extensionVersion: string}}
  */
 export function parseExtensionUrl(scriptUrl) {
-  //QQQ:calls
   // Note that the "(\.max)?" group only applies to local dev.
   const matches = scriptUrl.match(
     /^(.*)\/(.*)-([0-9.]+|latest)(\.max)?\.(?:js|mjs)$/i
