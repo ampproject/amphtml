@@ -32,8 +32,7 @@ import {WindowInterface} from '../../../src/window-interface';
 import {bezierCurve} from '../../../src/curve';
 import {boundValue, clamp, distance, magnitude} from '../../../src/utils/math';
 import {continueMotion} from '../../../src/motion';
-import {dev, } from '../../../src/log';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {dev} from '../../../src/log';
 import {isLoaded} from '../../../src/event-helper';
 import {
   layoutRectFromDomRect,
@@ -42,6 +41,7 @@ import {
 } from '../../../src/layout-rect';
 import {setStyles, toggle} from '../../../src/style';
 import {srcsetFromElement} from '../../../src/srcset';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 const TAG = 'amp-image-lightbox';
 

@@ -22,9 +22,9 @@ import {
   isProxyOrigin,
 } from './url';
 import {Services} from './services';
-import {dev, user, } from './log';
-import {pureUserAssert as userAssert} from './core/assert';
+import {dev, user} from './log';
 import {isExtensionScriptInNode} from './element-service';
+import {pureUserAssert as userAssert} from './core/assert';
 
 /**
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc

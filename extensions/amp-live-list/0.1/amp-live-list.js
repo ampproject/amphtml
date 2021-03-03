@@ -23,7 +23,7 @@ import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-live-list-0.1.css';
 import {Layout} from '../../../src/layout';
 import {childElementByAttr} from '../../../src/dom';
-import {user, } from '../../../src/log';
+import {user} from '../../../src/log';
 import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 /**

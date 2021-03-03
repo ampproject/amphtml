@@ -40,7 +40,7 @@ import {VideoUtils, getInternalVideoElementFor} from '../utils/video';
 import {clamp} from '../utils/math';
 import {createCustomEvent, getData, listen, listenOnce} from '../event-helper';
 import {createViewportObserver} from '../viewport-observer';
-import {dev, user, } from '../log';
+import {dev, user} from '../log';
 import {
   pureDevAssert as devAssert,
   pureUserAssert as userAssert,

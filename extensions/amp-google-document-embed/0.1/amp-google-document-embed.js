@@ -29,10 +29,10 @@
 
 import {Services} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
-import {dev, } from '../../../src/log';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {dev} from '../../../src/log';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 export const TAG = 'amp-google-document-embed';
 

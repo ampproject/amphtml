@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import {} from '../../../src/log';
 import {closestAncestorElementBySelector} from '../../../src/dom';
 import {exponentialFalloff} from './amp-inline-gallery-pagination';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {setImportantStyles} from '../../../src/style.js';
-import {} from '../../../src/log';
 import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 export class AmpInlineGalleryCaptions extends AMP.BaseElement {

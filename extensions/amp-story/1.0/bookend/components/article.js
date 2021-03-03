@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {} from '../../../../../src/log';
 import {
   AMP_STORY_BOOKEND_COMPONENT_DATA,
   BOOKEND_COMPONENT_TYPES,

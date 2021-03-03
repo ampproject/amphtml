@@ -21,8 +21,7 @@ import {
   openWindowDialog,
   tryFocus,
 } from '../dom';
-import {dev, user, } from '../log';
-import {pureUserAssert as userAssert} from '../core/assert';
+import {dev, user} from '../log';
 import {dict} from '../utils/object';
 import {escapeCssSelectorIdent} from '../css';
 import {getExtraParamsUrl, shouldAppendExtraParams} from '../impression';
@@ -30,6 +29,7 @@ import {getMode} from '../mode';
 import {isLocalhostOrigin} from '../url';
 import {registerServiceBuilderForDoc} from '../service';
 import {toWin} from '../types';
+import {pureUserAssert as userAssert} from '../core/assert';
 import PriorityQueue from '../utils/priority-queue';
 
 const TAG = 'navigation';

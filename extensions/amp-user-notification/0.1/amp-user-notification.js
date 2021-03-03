@@ -23,14 +23,14 @@ import {
 } from '../../../src/service/notification-ui-manager';
 import {Services} from '../../../src/services';
 import {addParamsToUrl, assertHttpsUrl} from '../../../src/url';
-import {dev, rethrowAsync, user, } from '../../../src/log';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {dev, rethrowAsync, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
 } from '../../../src/service';
 import {toggle} from '../../../src/style';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 const TAG = 'amp-user-notification';
 const SERVICE_ID = 'userNotificationManager';

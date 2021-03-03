@@ -21,13 +21,13 @@ import {Services} from '../../../src/services';
 import {WebAnimationPlayState} from './web-animation-types';
 import {WebAnimationService} from './web-animation-service';
 import {clamp} from '../../../src/utils/math';
-import {dev, } from '../../../src/log';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {dev} from '../../../src/log';
 import {getChildJsonConfig} from '../../../src/json';
 import {getDetail, listen} from '../../../src/event-helper';
 import {installWebAnimationsIfNecessary} from './install-polyfill';
 import {isFiniteNumber} from '../../../src/types';
 import {setInitialDisplay, setStyles, toggle} from '../../../src/style';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 const TAG = 'amp-animation';
 

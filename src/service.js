@@ -21,7 +21,7 @@
  */
 
 import {Deferred} from './utils/promise';
-import {dev, } from './log';
+import {dev} from './log';
 import {pureDevAssert as devAssert} from './core/assert';
 import {toWin} from './types';
 

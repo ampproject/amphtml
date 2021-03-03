@@ -15,10 +15,10 @@
  */
 
 import {CONFIG_TAG, TAG} from './vars';
-import {dev, user, } from '../../../src/log';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {dev, user} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {parseUrlDeprecated} from '../../../src/url';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 import {webPushServiceForDoc} from './web-push-service';
 
 /** @enum {string} */

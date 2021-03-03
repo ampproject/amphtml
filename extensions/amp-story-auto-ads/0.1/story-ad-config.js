@@ -17,7 +17,7 @@
 import {isJsonScriptTag} from '../../../src/dom';
 import {isObject} from '../../../src/types';
 import {parseJson} from '../../../src/json';
-import {user, } from '../../../src/log';
+import {user} from '../../../src/log';
 import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 /** @const {string} */

@@ -20,7 +20,7 @@ import {getChildJsonConfig} from '../../../src/json';
 import {isProtocolValid} from '../../../src/url';
 import {once} from '../../../src/utils/function';
 import {registerServiceBuilder} from '../../../src/service';
-import {user, } from '../../../src/log';
+import {user} from '../../../src/log';
 import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 /** @private @const {string} */

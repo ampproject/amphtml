@@ -38,7 +38,7 @@ import {createDateRangePicker} from './date-range-picker';
 import {createDeferred} from './react-utils';
 import {createSingleDatePicker} from './single-date-picker';
 import {dashToCamelCase} from '../../../src/string';
-import {dev, user, } from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {
   pureDevAssert as devAssert,
   pureUserAssert as userAssert,

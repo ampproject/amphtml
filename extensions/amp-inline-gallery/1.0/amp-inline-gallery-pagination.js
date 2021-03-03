@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {} from '../../../src/log';
 import {CSS} from './pagination.jss';
 import {CarouselContextProp} from '../../amp-base-carousel/1.0/carousel-props';
 import {Pagination} from './pagination';

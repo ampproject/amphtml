@@ -34,7 +34,7 @@ import {
   resetExperimentTogglesForTesting,
   toggleExperiment,
 } from '../../src/experiments';
-import {user, } from '../../src/log';
+import {user} from '../../src/log';
 import {pureUserAssert as userAssert} from '../../src/core/assert';
 
 describes.fakeWin('installErrorReporting', {}, (env) => {

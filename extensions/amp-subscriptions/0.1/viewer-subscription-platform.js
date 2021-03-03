@@ -19,7 +19,6 @@ import {Entitlement, GrantReason} from './entitlement';
 import {JwtHelper} from '../../amp-access/0.1/jwt';
 import {PageConfig as PageConfigInterface} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
-import {user, } from '../../../src/log';
 import {
   pureDevAssert as devAssert,
   pureUserAssert as userAssert,
@@ -27,6 +26,7 @@ import {
 import {dict} from '../../../src/utils/object';
 import {getSourceOrigin, getWinOrigin} from '../../../src/url';
 import {localSubscriptionPlatformFactory} from './local-subscription-platform';
+import {user} from '../../../src/log';
 
 /**
  * This implements the methods to interact with viewer subscription platform.

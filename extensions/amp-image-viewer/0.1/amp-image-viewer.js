@@ -35,8 +35,7 @@ import {boundValue, distance, magnitude} from '../../../src/utils/math';
 import {closestAncestorElementBySelector, elementByTag} from '../../../src/dom';
 import {continueMotion} from '../../../src/motion';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dev, } from '../../../src/log';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {dev} from '../../../src/log';
 import {
   expandLayoutRect,
   layoutRectFromDomRect,
@@ -49,6 +48,7 @@ import {
 } from '../../../src/utils/size-observer';
 import {setStyles} from '../../../src/style';
 import {srcsetFromElement} from '../../../src/srcset';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
 const TAG = 'amp-image-viewer';

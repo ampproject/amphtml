@@ -24,7 +24,7 @@ import {bezierCurve} from '../../../src/curve';
 import {clamp} from '../../../src/utils/math';
 import {closest, dispatchCustomEvent, tryFocus} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dev, user, } from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {
   pureDevAssert as devAssert,
   pureUserAssert as userAssert,

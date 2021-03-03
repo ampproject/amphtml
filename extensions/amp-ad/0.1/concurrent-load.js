@@ -15,7 +15,7 @@
 
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
-import {user, } from '../../../src/log';
+import {user} from '../../../src/log';
 import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 /**

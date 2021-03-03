@@ -25,8 +25,7 @@ import {
   objOrParseJson,
   redispatch,
 } from '../../../src/iframe-video';
-import {dev, } from '../../../src/log';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
   dispatchCustomEvent,
@@ -39,6 +38,7 @@ import {
 import {getData, listen} from '../../../src/event-helper';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 /** @private @const {string} */
 const TAG = 'amp-powr-player';

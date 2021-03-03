@@ -21,7 +21,6 @@ import {
   FxType, // eslint-disable-line no-unused-vars
   getFxTypes,
 } from './fx-type';
-import {rethrowAsync} from '../../../src/log';
 import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {
   installPositionBoundFx,
@@ -29,6 +28,7 @@ import {
 } from './providers/fx-provider';
 import {iterateCursor} from '../../../src/dom';
 import {listen} from '../../../src/event-helper';
+import {rethrowAsync} from '../../../src/log';
 
 const TAG = 'amp-fx-collection';
 

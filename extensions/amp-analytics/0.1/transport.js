@@ -30,8 +30,7 @@ import {
   parseUrlDeprecated,
 } from '../../../src/url';
 import {createPixel} from '../../../src/pixel';
-import {dev, user, } from '../../../src/log';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {dev, user} from '../../../src/log';
 import {getAmpAdResourceId} from '../../../src/ad-helper';
 import {getMode} from '../../../src/mode';
 import {getTopWindow} from '../../../src/service';
@@ -39,6 +38,7 @@ import {loadPromise} from '../../../src/event-helper';
 import {removeElement} from '../../../src/dom';
 import {toWin} from '../../../src/types';
 import {toggle} from '../../../src/style';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 /** @const {string} */
 const TAG_ = 'amp-analytics/transport';

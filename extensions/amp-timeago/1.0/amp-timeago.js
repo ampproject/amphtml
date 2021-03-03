@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {} from '../../../src/log';
 import {BaseElement} from './base-element';
 import {isExperimentOn} from '../../../src/experiments';
 import {pureUserAssert as userAssert} from '../../../src/core/assert';

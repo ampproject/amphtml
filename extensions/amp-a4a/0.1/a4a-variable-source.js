@@ -21,7 +21,7 @@ import {
   getTimingDataAsync,
   getTimingDataSync,
 } from '../../../src/service/variable-source';
-import {user, } from '../../../src/log';
+import {user} from '../../../src/log';
 import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 const ALLOWLISTED_VARIABLES = [

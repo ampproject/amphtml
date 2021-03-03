@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {} from '../../../src/log';
 import {ActionTrust} from '../../../src/action-constants';
 import {BaseCarousel} from './base-carousel';
 import {Services} from '../../../src/services';

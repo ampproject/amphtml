@@ -31,13 +31,13 @@ import {
   isJsonScriptTag,
   removeElement,
 } from '../../../src/dom';
-import {dev, user, } from '../../../src/log';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {dev, user} from '../../../src/log';
 import {fetchDocument} from '../../../src/document-fetcher';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {isExperimentOn} from '../../../src/experiments';
 import {parseJson, tryParseJson} from '../../../src/json';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 const TAG = 'amp-next-page';
 

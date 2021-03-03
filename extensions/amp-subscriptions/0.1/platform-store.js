@@ -18,9 +18,9 @@ import {DEFAULT_SCORE_CONFIG, SubscriptionsScoreFactor} from './constants.js';
 import {Deferred} from '../../../src/utils/promise';
 import {Entitlement} from './entitlement';
 import {Observable} from '../../../src/observable';
-import {user} from '../../../src/log';
 import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {dict, hasOwn} from '../../../src/utils/object';
+import {user} from '../../../src/log';
 
 /** @typedef {{platformKey: string, entitlement: (!./entitlement.Entitlement|undefined)}} */
 export let EntitlementChangeEventDef;

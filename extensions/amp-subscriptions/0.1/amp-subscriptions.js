@@ -37,7 +37,7 @@ import {Services} from '../../../src/services';
 import {SubscriptionPlatform as SubscriptionPlatformInterface} from './subscription-platform';
 import {ViewerSubscriptionPlatform} from './viewer-subscription-platform';
 import {ViewerTracker} from './viewer-tracker';
-import {dev, user, } from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {
   pureDevAssert as devAssert,
   pureUserAssert as userAssert,

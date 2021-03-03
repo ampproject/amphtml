@@ -25,7 +25,7 @@ import {Observable} from '../../../src/observable';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {hasOwn, map} from '../../../src/utils/object';
 import {isFiniteNumber, isObject} from '../../../src/types';
-import {user, } from '../../../src/log';
+import {user} from '../../../src/log';
 import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';

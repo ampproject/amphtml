@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {} from '../../../src/log';
 import {Services} from '../../../src/services';
 import {assertDoesNotContainDisplay, px, setStyles} from '../../../src/style';
 import {createElementWithAttributes} from '../../../src/dom';

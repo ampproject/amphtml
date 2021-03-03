@@ -24,8 +24,7 @@ import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
 import {TickLabel} from '../../../src/enums';
 import {cancellation} from '../../../src/error';
-import {dev, user, } from '../../../src/log';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getSourceOrigin} from '../../../src/url';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
@@ -34,6 +33,7 @@ import {isArray} from '../../../src/types';
 import {isJsonScriptTag} from '../../../src/dom';
 import {listenOnce} from '../../../src/event-helper';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 /** @const */
 const TAG = 'amp-access';

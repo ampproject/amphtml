@@ -48,14 +48,14 @@ import {Services} from '../../../src/services';
 import {US_CA_CODE, ampGeoPresets} from './amp-geo-presets';
 
 import {GEO_IN_GROUP} from './amp-geo-in-group';
-import {dev, user, } from '../../../src/log';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
 import {isCanary} from '../../../src/experiments';
 import {isJsonScriptTag} from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';
 import {urls} from '../../../src/config';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 /** @const */
 const TAG = 'amp-geo';

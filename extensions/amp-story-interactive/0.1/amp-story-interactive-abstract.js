@@ -38,7 +38,7 @@ import {
 import {closest} from '../../../src/dom';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {deduplicateInteractiveIds} from './utils';
-import {dev, } from '../../../src/log';
+import {dev} from '../../../src/log';
 import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {dict} from '../../../src/utils/object';
 import {emojiConfetti} from './interactive-confetti';

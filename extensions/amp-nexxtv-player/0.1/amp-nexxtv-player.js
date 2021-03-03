@@ -23,8 +23,7 @@ import {
   objOrParseJson,
   redispatch,
 } from '../../../src/iframe-video';
-import {dev, } from '../../../src/log';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
   dispatchCustomEvent,
@@ -37,6 +36,7 @@ import {getData, listen} from '../../../src/event-helper';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {once} from '../../../src/utils/function';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 const TAG = 'amp-nexxtv-player';
 

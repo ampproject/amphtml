@@ -18,11 +18,7 @@ import {Deferred, tryResolve} from '../utils/promise';
 import {Observable} from '../observable';
 import {Services} from '../services';
 import {VisibilityState} from '../visibility-state';
-import {
-  dev,
-  duplicateErrorIfNecessary,
-  stripUserError,
-} from '../log';
+import {dev, duplicateErrorIfNecessary, stripUserError} from '../log';
 import {pureDevAssert as devAssert} from '../core/assert';
 import {endsWith} from '../string';
 import {findIndex} from '../utils/array';

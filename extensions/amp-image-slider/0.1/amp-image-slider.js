@@ -21,8 +21,7 @@ import {Gestures} from '../../../src/gesture';
 import {Services} from '../../../src/services';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {clamp} from '../../../src/utils/math';
-import {dev, user, } from '../../../src/log';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {dev, user} from '../../../src/log';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
 import {
@@ -30,6 +29,7 @@ import {
   unobserveWithSharedInOb,
 } from '../../../src/viewport-observer';
 import {setStyles} from '../../../src/style';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 export class AmpImageSlider extends AMP.BaseElement {
   /** @param {!AmpElement} element */

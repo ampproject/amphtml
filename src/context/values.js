@@ -15,9 +15,9 @@
  */
 
 import {deepScan, findParent} from './scan';
-import {rethrowAsync} from '../log';
 import {pureDevAssert as devAssert} from '../core/assert';
 import {pushIfNotExist, removeItem} from '../utils/array';
+import {rethrowAsync} from '../log';
 import {throttleTail} from './scheduler';
 
 const EMPTY_ARRAY = [];

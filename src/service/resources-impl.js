@@ -24,7 +24,7 @@ import {Resource, ResourceState} from './resource';
 import {Services} from '../services';
 import {TaskQueue} from './task-queue';
 import {VisibilityState} from '../visibility-state';
-import {dev, } from '../log';
+import {dev} from '../log';
 import {pureDevAssert as devAssert} from '../core/assert';
 import {dict} from '../utils/object';
 import {expandLayoutRect} from '../layout-rect';

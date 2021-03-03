@@ -15,7 +15,7 @@
  */
 
 import {assertHttpsUrl, parseUrlDeprecated} from './url';
-import {dev, user, } from './log';
+import {dev, user} from './log';
 import {
   pureDevAssert as devAssert,
   pureUserAssert as userAssert,

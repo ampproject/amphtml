@@ -23,9 +23,9 @@ import {
   setStyle,
   toggle,
 } from '../../../src/style';
-import {dev, user, } from '../../../src/log';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {dev, user} from '../../../src/log';
 import {removeElement, whenUpgradedToCustomElement} from '../../../src/dom';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 class AmpStickyAd extends AMP.BaseElement {
   /** @param {!AmpElement} element */

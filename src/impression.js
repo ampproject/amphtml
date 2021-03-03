@@ -23,10 +23,10 @@ import {
   parseQueryString,
   parseUrlDeprecated,
 } from './url';
-import {dev, user, } from './log';
-import {pureUserAssert as userAssert} from './core/assert';
+import {dev, user} from './log';
 import {getMode} from './mode';
 import {isExperimentOn} from './experiments';
+import {pureUserAssert as userAssert} from './core/assert';
 
 const TIMEOUT_VALUE = 8000;
 

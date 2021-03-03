@@ -21,7 +21,7 @@ import {LocalizedStringId} from '../../../src/localized-strings';
 import {Services} from '../../../src/services';
 import {StoryAnalyticsEvent, getAnalyticsService} from './story-analytics';
 import {closest, removeElement} from '../../../src/dom';
-import {dev, } from '../../../src/log';
+import {dev} from '../../../src/log';
 import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {getLocalizationService} from './amp-story-localization-service';
 import {getState} from '../../../src/history';

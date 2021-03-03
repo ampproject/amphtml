@@ -19,7 +19,7 @@ import {Signals} from '../utils/signals';
 import {TickLabel} from '../enums';
 import {VisibilityState} from '../visibility-state';
 import {createCustomEvent} from '../event-helper';
-import {dev, } from '../log';
+import {dev} from '../log';
 import {pureDevAssert as devAssert} from '../core/assert';
 import {dict, map} from '../utils/object';
 import {getMode} from '../mode';

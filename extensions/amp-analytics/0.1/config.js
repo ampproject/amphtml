@@ -19,12 +19,12 @@ import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {calculateScriptBaseUrl} from '../../../src/service/extension-script';
 import {deepMerge, dict, hasOwn} from '../../../src/utils/object';
-import {dev, user, } from '../../../src/log';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {dev, user} from '../../../src/log';
 import {getChildJsonConfig} from '../../../src/json';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject, toWin} from '../../../src/types';
 import {isCanary} from '../../../src/experiments';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 import {variableServiceForDoc} from './variables';
 
 const TAG = 'amp-analytics/config';

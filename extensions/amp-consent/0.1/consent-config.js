@@ -20,12 +20,12 @@ import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
 import {Services} from '../../../src/services';
 import {childElementByTag} from '../../../src/dom';
 import {deepMerge, hasOwn, map} from '../../../src/utils/object';
-import {user, } from '../../../src/log';
 import {
   pureDevAssert as devAssert,
   pureUserAssert as userAssert,
 } from '../../../src/core/assert';
 import {getChildJsonConfig} from '../../../src/json';
+import {user} from '../../../src/log';
 
 const TAG = 'amp-consent/consent-config';
 const AMP_STORY_CONSENT_TAG = 'amp-story-consent';

@@ -33,7 +33,7 @@ import {Services} from '../../../src/services';
 import {adConfig} from '../../../ads/_config';
 import {clamp} from '../../../src/utils/math';
 import {computedStyle, setStyle} from '../../../src/style';
-import {dev, } from '../../../src/log';
+import {dev} from '../../../src/log';
 import {
   pureDevAssert as devAssert,
   pureUserAssert as userAssert,

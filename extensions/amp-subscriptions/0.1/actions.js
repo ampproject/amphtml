@@ -16,10 +16,10 @@
 
 import {ActionStatus} from './analytics';
 import {assertHttpsUrl, parseQueryString} from '../../../src/url';
-import {dev, } from '../../../src/log';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {openLoginDialog} from '../../amp-access/0.1/login-dialog';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 const TAG = 'amp-subscriptions';
 const LOCAL = 'local';

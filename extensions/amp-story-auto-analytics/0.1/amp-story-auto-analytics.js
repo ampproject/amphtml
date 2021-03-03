@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {} from '../../../src/log';
 import {Services} from '../../../src/services';
 import {buildGtagConfig} from './auto-analytics-configs.js';
 import {pureDevAssert as devAssert} from '../../../src/core/assert';

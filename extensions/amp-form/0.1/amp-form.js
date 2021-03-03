@@ -52,7 +52,7 @@ import {
 import {createCustomEvent} from '../../../src/event-helper';
 import {createFormDataWrapper} from '../../../src/form-data-wrapper';
 import {deepMerge, dict} from '../../../src/utils/object';
-import {dev, user, } from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {
   pureDevAssert as devAssert,
   pureUserAssert as userAssert,

@@ -25,7 +25,6 @@ import {
   rethrowAsync,
   setReportError,
   user,
-  ,
 } from '../../src/log';
 import {
   pureDevAssert as devAssert,

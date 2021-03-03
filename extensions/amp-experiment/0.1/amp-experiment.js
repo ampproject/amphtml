@@ -16,7 +16,7 @@
 
 import {Layout} from '../../../src/layout';
 import {Variants, allocateVariant} from './variant';
-import {dev, } from '../../../src/log';
+import {dev} from '../../../src/log';
 import {
   pureDevAssert as devAssert,
   pureUserAssert as userAssert,

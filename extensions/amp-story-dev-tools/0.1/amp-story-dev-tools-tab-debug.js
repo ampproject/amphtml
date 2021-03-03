@@ -19,7 +19,7 @@ import {createElementWithAttributes} from '../../../src/dom';
 import {htmlFor} from '../../../src/static-template';
 import {loadScript} from '../../../src/validator-integration';
 import {urls} from '../../../src/config';
-import {user, } from '../../../src/log';
+import {user} from '../../../src/log';
 import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 /**

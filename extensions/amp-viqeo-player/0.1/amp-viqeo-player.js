@@ -21,8 +21,7 @@ import {Services} from '../../../src/services';
 import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
 import {redispatch} from '../../../src/iframe-video';
 
-import {dev, } from '../../../src/log';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {dev} from '../../../src/log';
 import {
   fullscreenEnter,
   fullscreenExit,
@@ -32,6 +31,7 @@ import {
 import {getData, listen} from '../../../src/event-helper';
 import {getIframe} from '../../../src/3p-frame';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 const TAG = 'amp-viqeo-player';
 

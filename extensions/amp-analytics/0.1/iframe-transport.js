@@ -16,7 +16,6 @@
 
 import {IframeTransportMessageQueue} from './iframe-transport-message-queue';
 import {createElementWithAttributes} from '../../../src/dom';
-import {user} from '../../../src/log';
 import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {getMode} from '../../../src/mode';
 import {hasOwn} from '../../../src/utils/object';
@@ -24,6 +23,7 @@ import {internalRuntimeVersion} from '../../../src/internal-version';
 import {isLongTaskApiSupported} from '../../../src/service/jank-meter';
 import {toggle} from '../../../src/style';
 import {urls} from '../../../src/config';
+import {user} from '../../../src/log';
 
 /** @private @const {string} */
 const TAG_ = 'amp-analytics/iframe-transport';

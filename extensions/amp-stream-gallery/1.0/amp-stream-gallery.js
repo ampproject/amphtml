@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {} from '../../../src/log';
 import {ActionTrust} from '../../../src/action-constants';
 import {CSS as CAROUSEL_CSS} from '../../amp-base-carousel/1.0/base-carousel.jss';
 import {CSS} from '../../../build/amp-stream-gallery-1.0.css';

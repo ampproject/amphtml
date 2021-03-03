@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {} from '../log';
 import {Deferred} from '../utils/promise';
 import {getServiceForDoc, registerServiceBuilderForDoc} from '../service';
 import {rootNodeFor, scopedQuerySelector} from '../dom';

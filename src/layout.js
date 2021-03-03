@@ -19,7 +19,7 @@
  * details.
  */
 
-import {dev, } from './log';
+import {dev} from './log';
 import {
   pureDevAssert as devAssert,
   pureUserAssert as userAssert,

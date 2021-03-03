@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {} from '../log';
 import {OwnersInterface} from './owners-interface';
 import {Resource} from './resource';
 import {Services} from '../services';

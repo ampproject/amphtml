@@ -15,7 +15,6 @@
  */
 
 import {Services} from '../services';
-import {user, } from '../log';
 import {
   pureDevAssert as devAssert,
   pureUserAssert as userAssert,
@@ -33,6 +32,7 @@ import {getMode} from '../mode';
 import {isArray, isObject} from '../types';
 import {isExperimentOn} from '../experiments';
 import {isFormDataWrapper} from '../form-data-wrapper';
+import {user} from '../log';
 
 /** @private @const {!Array<string>} */
 const allowedMethods_ = ['GET', 'POST'];

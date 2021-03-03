@@ -25,8 +25,7 @@ import {
   originMatches,
   redispatch,
 } from '../../../src/iframe-video';
-import {dev, } from '../../../src/log';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {dev} from '../../../src/log';
 import {
   dispatchCustomEvent,
   fullscreenEnter,
@@ -42,6 +41,7 @@ import {getData, listen} from '../../../src/event-helper';
 import {htmlFor} from '../../../src/static-template';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 const TAG = 'amp-brid-player';
 

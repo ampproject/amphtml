@@ -16,10 +16,10 @@
 
 import {CSS} from '../../../build/amp-app-banner-0.1.css';
 import {Services} from '../../../src/services';
-import {dev, rethrowAsync, user, } from '../../../src/log';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {dev, rethrowAsync, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {openWindowDialog, removeElement} from '../../../src/dom';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 const TAG = 'amp-app-banner';
 const OPEN_LINK_TIMEOUT = 1500;

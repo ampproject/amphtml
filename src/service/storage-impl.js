@@ -15,7 +15,7 @@
  */
 
 import {Services} from '../services';
-import {dev, } from '../log';
+import {dev} from '../log';
 import {pureDevAssert as devAssert} from '../core/assert';
 import {dict} from '../utils/object';
 import {getSourceOrigin} from '../url';

@@ -17,7 +17,6 @@
 import {ActionTrust, DEFAULT_ACTION} from './action-constants';
 import {Layout, LayoutPriority} from './layout';
 import {Services} from './services';
-import {user, } from './log';
 import {
   pureDevAssert as devAssert,
   pureUserAssert as userAssert,
@@ -26,6 +25,7 @@ import {dispatchCustomEvent} from './dom';
 import {getData, listen, loadPromise} from './event-helper';
 import {getMode} from './mode';
 import {isArray, toWin} from './types';
+import {user} from './log';
 
 /**
  * Base class for all custom element implementations. Instead of inheriting

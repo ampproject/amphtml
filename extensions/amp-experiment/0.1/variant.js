@@ -16,10 +16,10 @@
 
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
-import {dev, } from '../../../src/log';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {dev} from '../../../src/log';
 import {hasOwn} from '../../../src/utils/object';
 import {isObject} from '../../../src/types';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 const ATTR_PREFIX = 'amp-x-';
 const nameValidator = /^[\w-]+$/;

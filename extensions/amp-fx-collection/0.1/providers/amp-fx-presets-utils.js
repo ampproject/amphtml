@@ -19,6 +19,7 @@
  * presets.
  */
 
+import {} from '../../../../src/log';
 import {FxType} from '../fx-type';
 import {Services} from '../../../../src/services';
 import {mapRange} from '../../../../src/utils/math';

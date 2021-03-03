@@ -20,7 +20,7 @@ import {Services} from '../services';
 import {ViewportBindingDef} from '../service/viewport/viewport-binding-def';
 import {ViewportInterface} from '../service/viewport/viewport-interface';
 import {canInspectWindow} from '../iframe-helper';
-import {dev, } from '../log';
+import {dev} from '../log';
 import {pureDevAssert as devAssert} from '../core/assert';
 import {getFrameOverlayManager} from '../../ads/inabox/frame-overlay-manager.js';
 import {getPositionObserver} from '../../ads/inabox/position-observer';

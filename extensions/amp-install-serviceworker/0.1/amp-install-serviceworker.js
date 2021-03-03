@@ -19,14 +19,14 @@ import {
   closestAncestorElementBySelector,
   removeElement,
 } from '../../../src/dom';
-import {dev, user, } from '../../../src/log';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
 import {removeFragment} from '../../../src/url';
 import {toggle} from '../../../src/style';
 import {urls} from '../../../src/config';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 /** @private @const {string} */
 const TAG = 'amp-install-serviceworker';

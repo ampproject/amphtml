@@ -15,7 +15,7 @@
  */
 
 import {Filter, FilterType} from './filter';
-import {dev, } from '../../../../src/log';
+import {dev} from '../../../../src/log';
 import {pureUserAssert as userAssert} from '../../../../src/core/assert';
 
 /** @type {string} */

@@ -25,7 +25,7 @@ import {
   iterateCursor,
 } from '../../../src/dom';
 import {createCustomEvent, listen} from '../../../src/event-helper';
-import {dev, } from '../../../src/log';
+import {dev} from '../../../src/log';
 import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {layoutRectLtwh} from '../../../src/layout-rect';

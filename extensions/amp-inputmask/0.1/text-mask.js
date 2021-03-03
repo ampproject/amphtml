@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {} from '../../../src/log';
 import {Mask} from './mask-impl';
 import {OutputMode} from './constants';
 import {Services} from '../../../src/services';

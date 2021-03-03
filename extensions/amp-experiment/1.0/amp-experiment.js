@@ -18,7 +18,6 @@ import {ATTR_PREFIX, Variants, allocateVariant} from './variant';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {applyExperimentToVariant} from './apply-experiment';
-import {user, } from '../../../src/log';
 import {
   pureDevAssert as devAssert,
   pureUserAssert as userAssert,
@@ -31,6 +30,7 @@ import {
 } from '../../../src/service/origin-experiments-impl';
 import {isExperimentOn} from '../../../src/experiments';
 import {parseJson} from '../../../src/json';
+import {user} from '../../../src/log';
 
 const TAG = 'amp-experiment';
 

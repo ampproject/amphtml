@@ -16,11 +16,11 @@
 
 import {ChunkPriority, chunk} from '../../../src/chunk';
 import {Deferred} from '../../../src/utils/promise';
-import {dev, } from '../../../src/log';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {getTrackerKeyName, getTrackerTypesForParentType} from './events';
 import {toWin} from '../../../src/types';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 /**
  * @const {number}

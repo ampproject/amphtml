@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {user, } from '../../../src/log';
 import {
   pureDevAssert as devAssert,
   pureUserAssert as userAssert,
 } from '../../../src/core/assert';
+import {user} from '../../../src/log';
 
 const TAG = 'amp-fx-collection';
 

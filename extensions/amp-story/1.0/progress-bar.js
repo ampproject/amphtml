@@ -22,7 +22,7 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {debounce} from '../../../src/utils/rate-limit';
-import {dev, } from '../../../src/log';
+import {dev} from '../../../src/log';
 import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {escapeCssSelectorNth} from '../../../src/css';
 import {hasOwn, map} from '../../../src/utils/object';

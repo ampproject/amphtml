@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {} from './log';
 import {CommonSignals} from './common-signals';
 import {Services} from './services';
 import {createElementWithAttributes, removeElement} from './dom';

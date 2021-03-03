@@ -20,7 +20,7 @@ import {
   parseUrlDeprecated,
   resolveRelativeUrl,
 } from '../../../src/url';
-import {user, } from '../../../src/log';
+import {user} from '../../../src/log';
 import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 /**

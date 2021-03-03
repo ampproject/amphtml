@@ -23,7 +23,7 @@ import {
   videoAnalyticsCustomEventTypeKey,
 } from '../../../src/video-interface';
 import {deepMerge, dict, hasOwn} from '../../../src/utils/object';
-import {dev, user, } from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {
   pureDevAssert as devAssert,
   pureUserAssert as userAssert,

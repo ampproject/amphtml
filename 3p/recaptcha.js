@@ -20,12 +20,7 @@ import './polyfills';
 import ampToolboxCacheUrl from '../third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm';
 
 import {IframeMessagingClient} from './iframe-messaging-client';
-import {
-  dev,
-  initLogConstructor,
-  setReportError,
-  user,
-} from '../src/log';
+import {dev, initLogConstructor, setReportError, user} from '../src/log';
 import {pureDevAssert as devAssert} from '../src/core/assert';
 import {dict, hasOwn} from '../src/utils/object';
 import {isProxyOrigin, parseUrlDeprecated} from '../src/url';

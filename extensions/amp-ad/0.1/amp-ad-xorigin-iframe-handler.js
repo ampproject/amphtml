@@ -25,7 +25,7 @@ import {
   listenForOncePromise,
   postMessageToWindows,
 } from '../../../src/iframe-helper';
-import {dev, } from '../../../src/log';
+import {dev} from '../../../src/log';
 import {pureDevAssert as devAssert} from '../../../src/core/assert';
 import {dict} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';

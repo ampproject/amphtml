@@ -15,12 +15,12 @@
  */
 
 import {Services} from '../../../src/services';
-import {user, } from '../../../src/log';
 import {
   pureDevAssert as devAssert,
   pureUserAssert as userAssert,
 } from '../../../src/core/assert';
 import {dict} from '../../../src/utils/object';
+import {user} from '../../../src/log';
 
 /**
  * - visibilePercentageMin: The percentage of pixels that need to be on screen

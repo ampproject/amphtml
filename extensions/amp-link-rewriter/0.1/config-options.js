@@ -15,7 +15,7 @@
  */
 import {getChildJsonConfig} from '../../../src/json';
 import {hasOwn} from '../../../src/utils/object';
-import {user, } from '../../../src/log';
+import {user} from '../../../src/log';
 import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 /**

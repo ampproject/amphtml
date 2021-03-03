@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {dev, user, } from '../../../src/log';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {dev, user} from '../../../src/log';
 import {handleAutoscroll} from './autoscroll';
 import {toggle} from '../../../src/style';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 /**
  * Class representing toolbar behavior in sidebar

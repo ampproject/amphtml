@@ -34,7 +34,7 @@ import {Services} from '../../../../src/services';
 import {StoryAnalyticsEvent, getAnalyticsService} from '../story-analytics';
 import {closest, closestAncestorElementBySelector} from '../../../../src/dom';
 import {createShadowRootWithStyle} from '../utils';
-import {dev, user, } from '../../../../src/log';
+import {dev, user} from '../../../../src/log';
 import {
   pureDevAssert as devAssert,
   pureUserAssert as userAssert,

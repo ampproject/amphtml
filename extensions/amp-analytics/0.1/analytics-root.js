@@ -22,8 +22,7 @@ import {
   matches,
   scopedQuerySelector,
 } from '../../../src/dom';
-import {dev, user, } from '../../../src/log';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
@@ -31,6 +30,7 @@ import {layoutRectLtwh} from '../../../src/layout-rect';
 import {map} from '../../../src/utils/object';
 import {provideVisibilityManager} from './visibility-manager';
 import {tryResolve} from '../../../src/utils/promise';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 import {whenContentIniLoad} from '../../../src/ini-load';
 
 const TAG = 'amp-analytics/analytics-root';

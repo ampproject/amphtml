@@ -30,8 +30,7 @@ import {bezierCurve} from '../../../src/curve';
 import {boundValue, distance, magnitude} from '../../../src/utils/math';
 import {continueMotion} from '../../../src/motion';
 import {createCustomEvent, listen} from '../../../src/event-helper';
-import {dev, } from '../../../src/log';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {dispatchCustomEvent} from '../../../src/dom';
 import {layoutRectFromDomRect, layoutRectLtwh} from '../../../src/layout-rect';
@@ -41,6 +40,7 @@ import {
   unobserveContentSize,
 } from '../../../src/utils/size-observer';
 import {px, scale, setStyles, translate} from '../../../src/style';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
 const TAG = 'amp-pan-zoom';

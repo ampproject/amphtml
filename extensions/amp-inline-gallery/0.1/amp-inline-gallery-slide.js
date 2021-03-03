@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import {} from '../../../src/log';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {toArray} from '../../../src/types';
-import {} from '../../../src/log';
 import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 export class AmpInlineGallerySlide extends AMP.BaseElement {

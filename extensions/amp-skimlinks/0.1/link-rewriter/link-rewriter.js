@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {} from '../../../../src/log';
 import {ChunkPriority, chunk} from '../../../../src/chunk';
 import {EVENTS, ORIGINAL_URL_ATTRIBUTE} from './constants';
 import {LinkReplacementCache} from './link-replacement-cache';

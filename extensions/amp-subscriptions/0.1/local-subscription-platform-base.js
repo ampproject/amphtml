@@ -19,7 +19,7 @@ import {Actions} from './actions';
 import {LocalSubscriptionPlatformRenderer} from './local-subscription-platform-renderer';
 import {UrlBuilder} from './url-builder';
 import {closestAncestorElementBySelector} from '../../../src/dom';
-import {dev, } from '../../../src/log';
+import {dev} from '../../../src/log';
 import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 /**

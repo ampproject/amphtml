@@ -15,9 +15,9 @@
  */
 import {AbstractAmpContext} from './ampcontext';
 import {computeInMasterFrame} from './3p';
-import {dev, user, } from '../src/log';
-import {pureUserAssert as userAssert} from '../src/core/assert';
+import {dev, user} from '../src/log';
 import {dict} from '../src/utils/object';
+import {pureUserAssert as userAssert} from '../src/core/assert';
 
 /**
  * Returns the "master frame" for all widgets of a given type.

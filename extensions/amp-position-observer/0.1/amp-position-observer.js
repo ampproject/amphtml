@@ -29,7 +29,7 @@ import {
   parseLength,
 } from '../../../src/layout';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dev, user, } from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {
   pureDevAssert as devAssert,
   pureUserAssert as userAssert,

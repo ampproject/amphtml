@@ -22,7 +22,6 @@ import {MessageType} from '../../../src/3p-frame-messaging';
 import {Services} from '../../../src/services';
 import {base64EncodeFromBytes} from '../../../src/utils/base64.js';
 import {createCustomEvent, getData, listen} from '../../../src/event-helper';
-import {user, } from '../../../src/log';
 import {
   pureDevAssert as devAssert,
   pureUserAssert as userAssert,
@@ -43,6 +42,7 @@ import {removeElement} from '../../../src/dom';
 import {removeFragment} from '../../../src/url';
 import {setStyle} from '../../../src/style';
 import {urls} from '../../../src/config';
+import {user} from '../../../src/log';
 import {utf8Encode} from '../../../src/utils/bytes.js';
 
 /** @const {string} */

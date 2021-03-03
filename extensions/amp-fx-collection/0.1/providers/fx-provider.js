@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {FxType} from '../fx-type'; // eslint-disable-line no-unused-vars
+import {} from '../../../../src/log'; // eslint-disable-line no-unused-vars
+import {FxType} from '../fx-type';
 import {PositionObserverFidelity} from '../../../../src/service/position-observer/position-observer-worker';
 import {Presets} from './amp-fx-presets';
 import {

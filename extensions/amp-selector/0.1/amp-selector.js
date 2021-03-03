@@ -26,11 +26,11 @@ import {
   tryFocus,
 } from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dev, user, } from '../../../src/log';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {mod} from '../../../src/utils/math';
 import {toArray} from '../../../src/types';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 const TAG = 'amp-selector';
 

@@ -47,7 +47,7 @@ import {
   tryFocus,
 } from '../../../src/dom';
 import {createCustomEvent, listen} from '../../../src/event-helper';
-import {dev, user, } from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {
   pureDevAssert as devAssert,
   pureUserAssert as userAssert,

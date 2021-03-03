@@ -17,8 +17,7 @@
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {addParamsToUrl} from '../../../src/url';
-import {dev, } from '../../../src/log';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {dev} from '../../../src/log';
 import {
   dispatchCustomEvent,
   getDataParamsFromAttributes,
@@ -27,6 +26,7 @@ import {
 import {getData, listen} from '../../../src/event-helper';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 const TAG = 'amp-gfycat';
 

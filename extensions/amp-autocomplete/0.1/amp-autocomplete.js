@@ -30,8 +30,7 @@ import {
 } from '../../../src/batched-json';
 import {addParamToUrl} from '../../../src/url';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dev, user, } from '../../../src/log';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {dev, user} from '../../../src/log';
 import {dict, hasOwn, map, ownProperty} from '../../../src/utils/object';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
 import {includes} from '../../../src/string';
@@ -46,6 +45,7 @@ import {
   setupJsonFetchInit,
 } from '../../../src/utils/xhr-utils';
 import {toggle} from '../../../src/style';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 import fuzzysearch from '../../../third_party/fuzzysearch/index';
 
 /**

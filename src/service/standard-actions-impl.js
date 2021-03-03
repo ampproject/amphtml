@@ -18,11 +18,11 @@ import {ActionTrust} from '../action-constants';
 import {Layout, getLayoutClass} from '../layout';
 import {Services} from '../services';
 import {computedStyle, toggle} from '../style';
-import {dev, user, } from '../log';
-import {pureUserAssert as userAssert} from '../core/assert';
+import {dev, user} from '../log';
 import {getAmpdoc, registerServiceBuilderForDoc} from '../service';
 import {isFiniteNumber, toWin} from '../types';
 import {tryFocus} from '../dom';
+import {pureUserAssert as userAssert} from '../core/assert';
 
 /**
  * @param {!Element} element

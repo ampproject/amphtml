@@ -19,7 +19,7 @@ import {Layout} from '../layout';
 import {Services} from '../services';
 import {cancellation, isBlockedByConsent, reportError} from '../error';
 import {computedStyle, toggle} from '../style';
-import {dev, } from '../log';
+import {dev} from '../log';
 import {pureDevAssert as devAssert} from '../core/assert';
 import {
   layoutRectLtwh,

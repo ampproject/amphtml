@@ -36,7 +36,7 @@ import {
   isBlockedByConsent,
   reportError,
 } from './error';
-import {dev, rethrowAsync, user, } from './log';
+import {dev, rethrowAsync, user} from './log';
 import {
   pureDevAssert as devAssert,
   pureUserAssert as userAssert,

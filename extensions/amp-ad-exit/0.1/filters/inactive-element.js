@@ -15,9 +15,9 @@
  */
 
 import {Filter, FilterType} from './filter';
-import {dev, } from '../../../../src/log';
-import {pureUserAssert as userAssert} from '../../../../src/core/assert';
+import {dev} from '../../../../src/log';
 import {matches} from '../../../../src/dom';
+import {pureUserAssert as userAssert} from '../../../../src/core/assert';
 
 /**
  * A Filter that ignores events originating from elements that match a specified

@@ -29,7 +29,7 @@ import {
   isIframed,
 } from '../../dom';
 import {computedStyle, setStyle} from '../../style';
-import {dev, } from '../../log';
+import {dev} from '../../log';
 import {pureDevAssert as devAssert} from '../../core/assert';
 import {dict} from '../../utils/object';
 import {getFriendlyIframeEmbedOptional} from '../../iframe-helper';

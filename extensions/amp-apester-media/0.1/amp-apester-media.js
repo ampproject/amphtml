@@ -17,8 +17,7 @@ import {CSS} from '../../../build/amp-apester-media-0.1.css';
 import {IntersectionObserver3pHost} from '../../../src/utils/intersection-observer-3p-host';
 import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
-import {dev, } from '../../../src/log';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
   extractTags,
@@ -35,6 +34,7 @@ import {
 } from '../../../src/viewport-observer';
 import {removeElement} from '../../../src/dom';
 import {setStyles} from '../../../src/style';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 /** @const */
 const TAG = 'amp-apester-media';

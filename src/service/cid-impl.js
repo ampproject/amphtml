@@ -27,8 +27,7 @@ import {GoogleCidApi, TokenStatus} from './cid-api';
 import {Services} from '../services';
 import {ViewerCidApi} from './viewer-cid-api';
 import {base64UrlEncodeFromBytes} from '../utils/base64';
-import {dev, rethrowAsync, user, } from '../log';
-import {pureUserAssert as userAssert} from '../core/assert';
+import {dev, rethrowAsync, user} from '../log';
 import {dict} from '../utils/object';
 import {getCookie, setCookie} from '../cookies';
 import {getCryptoRandomBytesArray} from '../utils/bytes';
@@ -38,6 +37,7 @@ import {isExperimentOn} from '../../src/experiments';
 import {isIframed} from '../dom';
 import {parseJson, tryParseJson} from '../json';
 import {tryResolve} from '../utils/promise';
+import {pureUserAssert as userAssert} from '../core/assert';
 
 const ONE_DAY_MILLIS = 24 * 3600 * 1000;
 

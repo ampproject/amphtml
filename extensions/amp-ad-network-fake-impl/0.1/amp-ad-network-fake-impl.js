@@ -19,7 +19,7 @@ import {AmpAdMetadataTransformer} from './amp-ad-metadata-transformer';
 import {ExternalReorderHeadTransformer} from './external-reorder-head-transformer';
 import {forceExperimentBranch} from '../../../src/experiments';
 import {includes} from '../../../src/string';
-import {user, } from '../../../src/log';
+import {user} from '../../../src/log';
 import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 const TAG = 'AMP-AD-NETWORK-FAKE-IMPL';

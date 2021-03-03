@@ -47,8 +47,7 @@ import {
   parseUrlDeprecated,
   removeFragment,
 } from '../../../src/url';
-import {dev, } from '../../../src/log';
-import {pureUserAssert as userAssert} from '../../../src/core/assert';
+import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {logo, showMoreArrow} from './images';
 import {
@@ -56,6 +55,7 @@ import {
   unobserveWithSharedInOb,
 } from '../../../src/viewport-observer';
 import {removeElement} from '../../../src/dom';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 class AmpPlaybuzz extends AMP.BaseElement {
   /** @param {!AmpElement} element */

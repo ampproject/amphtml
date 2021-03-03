@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {} from '../../../../src/log';
 import {AnimationRunner} from './animation-runner';
 import {Observable} from '../../../../src/observable';
 import {
