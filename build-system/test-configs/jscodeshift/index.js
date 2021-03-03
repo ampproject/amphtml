@@ -14,20 +14,29 @@
  * limitations under the License.
  */
 
-const {getOutput} = require('../../common/exec');
+const {getOutput, execScriptAsync} = require('../../common/exec');
+
+const command = (args = []) =>
+  [
+    'npx jscodeshift',
+    '--parser=babylon',
+    `--parser-config=${__dirname}/parser-config.json`,
+    ...args,
+  ].join(' ');
 
 /**
  * @param {Array<string>} args
+ * @param {Object} opts
  * @return {string}
  */
-const jscodeshift = (args = []) =>
-  getOutput(
-    [
-      'npx jscodeshift',
-      '--parser babylon',
-      `--parser-config ${__dirname}/parser-config.json`,
-      ...args,
-    ].join(' ')
-  );
+const jscodeshift = (args = [], opts) => getOutput(command(args), opts);
 
-module.exports = {jscodeshift};
+/**
+ * @param {Array<string>} args
+ * @param {Object} opts
+ * @return {ChildProcess}
+ */
+const jscodeshiftAsync = (args = [], opts) =>
+  execScriptAsync(command(args), opts);
+
+module.exports = {jscodeshift, jscodeshiftAsync};

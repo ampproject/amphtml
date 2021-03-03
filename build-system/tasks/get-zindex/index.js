@@ -20,11 +20,11 @@ const globby = require('globby');
 const path = require('path');
 const postcss = require('postcss');
 const prettier = require('prettier');
-const tempy = require('tempy');
 const textTable = require('text-table');
 const {getStdout} = require('../../common/process');
-const {jscodeshift} = require('../../test-configs/jscodeshift');
-const {readJsonSync} = require('fs-extra');
+const {gray, cyan} = require('kleur/colors');
+const {jscodeshiftAsync} = require('../../test-configs/jscodeshift');
+const {logOnSameLineLocalDev} = require('../../common/logging');
 const {writeDiffOrFail} = require('../../common/diff');
 
 const tableHeaders = [
@@ -42,6 +42,11 @@ const preamble = `
 
 <!-- markdown-link-check-disable -->
 `.trim();
+
+const stripColors = (str) => str.replace(/\x1B[[(?);]{0,2}(;?\d)*./g, '');
+
+const logChecking = (filename) =>
+  logOnSameLineLocalDev(gray(path.basename(filename)));
 
 const sortedByEntryKey = (a, b) => a[0].localeCompare(b[0]);
 
@@ -119,6 +124,7 @@ async function getZindexSelectors(glob, cwd = '.') {
     const contents = await fs.promises.readFile(path.join(cwd, file), 'utf-8');
     const selectors = Object.create(null);
     const plugins = [zIndexCollector.bind(null, selectors)];
+    logChecking(file);
     await postcss(plugins).process(contents, {from: file});
     filesData[file] = selectors;
   }
@@ -131,33 +137,57 @@ async function getZindexSelectors(glob, cwd = '.') {
  * @return {!Promise<Object>}
  */
 function getZindexChainsInJs(glob, cwd = '.') {
-  return tempy.write.task('{}', (temporary) => {
+  return new Promise((resolve) => {
     const files = globby.sync(glob, {cwd}).map((file) => path.join(cwd, file));
+
     const filesIncludingString = getStdout(
       ['grep -irl "z-*index"', ...files].join(' ')
     )
       .trim()
       .split('\n');
 
+    const result = {};
+
     // This seems to be slower if we parallelize a small number of files.
     // (The divisor is arbitrary and not necessarily ideal.)
     const cpus = Math.ceil(filesIncludingString.length / 20);
-    jscodeshift([
+    const {stdout, stderr} = jscodeshiftAsync([
       '--dry',
       '--no-babel',
-      `--cpus ${cpus}`,
-      `--transform ${__dirname}/jscodeshift/collect-zindex.js`,
-      `--collectZindexToFile=${temporary}`,
+      `--cpus=${cpus}`,
+      `--transform=${__dirname}/jscodeshift/collect-zindex.js`,
       ...filesIncludingString,
     ]);
 
-    const resultAbsolute = readJsonSync(temporary);
-    const result = {};
-    for (const key in resultAbsolute) {
-      const relative = path.relative(cwd, key);
-      result[relative] = resultAbsolute[key].sort(sortedByEntryKey);
-    }
-    return result;
+    stderr.on('data', (data) => {
+      throw new Error(data.toString());
+    });
+
+    stdout.on('data', (data) => {
+      const stripped = stripColors(data.toString());
+
+      // Lines starting with " REP " are reports from transform, which we
+      // own and format.
+      if (!stripped.startsWith(' REP ')) {
+        return;
+      }
+
+      const noPrefix = stripped.substr(' REP '.length);
+      const [filename] = noPrefix.split(' ', 1);
+      const relative = path.relative(cwd, filename);
+
+      logChecking(filename);
+
+      const report = JSON.parse(noPrefix.substr(filename.length + 1));
+
+      if (report.length) {
+        result[relative] = report.sort(sortedByEntryKey);
+      }
+    });
+
+    stdout.on('close', () => {
+      resolve(result);
+    });
   });
 }
 
@@ -176,6 +206,8 @@ async function getZindex() {
       ]),
     ]))
   );
+
+  logOnSameLineLocalDev();
 
   const filename = 'css/Z_INDEX.md';
   const rows = [...tableHeaders, ...createTable(filesData)];

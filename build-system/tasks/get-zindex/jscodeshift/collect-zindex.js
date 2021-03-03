@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const {readJsonSync, writeJsonSync} = require('fs-extra');
 
 const zIndexRegExp = /^z-?index$/i;
 
@@ -82,12 +81,10 @@ function chainId(file, path) {
   return '(unknown)';
 }
 
-module.exports = function (file, api, options) {
+module.exports = function (file, api) {
   const j = api.jscodeshift;
 
-  const reports = [];
-
-  const {collectZindexToFile} = options;
+  const report = [];
 
   j(file.source)
     .find(
@@ -99,7 +96,7 @@ module.exports = function (file, api, options) {
         zIndexRegExp.test(node.key.value || node.key.name)
     )
     .forEach((path) => {
-      reports.push([chainId(file, path.parent.parent), path.value.value.value]);
+      report.push([chainId(file, path.parent.parent), path.value.value.value]);
     });
 
   j(file.source)
@@ -108,18 +105,13 @@ module.exports = function (file, api, options) {
       (node) => getCallExpressionZIndexValue(node) != null
     )
     .forEach((path) => {
-      reports.push([
+      report.push([
         chainId(file, path),
         getCallExpressionZIndexValue(path.value),
       ]);
     });
 
-  if (collectZindexToFile && Object.keys(reports).length > 0) {
-    writeJsonSync(collectZindexToFile, {
-      ...readJsonSync(collectZindexToFile, {throws: false}),
-      [file.path]: reports,
-    });
-  }
+  api.report(JSON.stringify(report));
 
   return file.source;
 };
