@@ -20,7 +20,7 @@ import {AmpEvents} from '../amp-events';
 import {CanPlay, CanRender, LoadingProp} from './contextprops';
 import {Deferred} from '../utils/promise';
 import {Layout, isLayoutSizeDefined} from '../layout';
-import {Loading} from './loading-instructions';
+import {Loading} from '../core/loading-instructions';
 import {MediaQueryProps} from '../utils/media-query-props';
 import {Slot, createSlot} from './slot';
 import {WithAmpContext} from './context';
