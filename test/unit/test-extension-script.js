@@ -170,6 +170,13 @@ describes.sandboxed('Extension Location', {}, () => {
       expect(urlParts.extensionId).to.equal('amp-ad');
       expect(urlParts.extensionVersion).to.equal('latest');
     });
+
+    it('returns null for non-extensions', () => {
+      const urlParts = parseExtensionUrl(
+        'https://cdn.ampproject.org/v0.js'
+      );
+      expect(urlParts).to.be.null;
+    });
   });
 });
 
