@@ -60,10 +60,12 @@ export function InstagramWithRef(
   const onReadyStateRef = useValueRef(onReadyState);
   const setLoaded = useCallback(
     (value) => {
-      loadedRef.current = value;
-      const onReadyState = onReadyStateRef.current;
-      if (onReadyState) {
-        onReadyState(value ? ReadyState.COMPLETE : ReadyState.LOADING);
+      if (value !== loadedRef.current) {
+        loadedRef.current = value;
+        const onReadyState = onReadyStateRef.current;
+        if (onReadyState) {
+          onReadyState(value ? ReadyState.COMPLETE : ReadyState.LOADING);
+        }
       }
     },
     [onReadyStateRef]

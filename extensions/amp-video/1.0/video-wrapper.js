@@ -120,10 +120,12 @@ function VideoWrapperWithRef(
   const onReadyStateRef = useValueRef(onReadyState);
   const setReadyState = useCallback(
     (state, opt_failure) => {
-      readyStateRef.current = state;
-      const onReadyState = onReadyStateRef.current;
-      if (onReadyState) {
-        onReadyState(state, opt_failure);
+      if (state !== readyStateRef.current) {
+        readyStateRef.current = state;
+        const onReadyState = onReadyStateRef.current;
+        if (onReadyState) {
+          onReadyState(state, opt_failure);
+        }
       }
     },
     [onReadyStateRef]
