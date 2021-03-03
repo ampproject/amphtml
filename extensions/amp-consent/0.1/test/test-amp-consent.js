@@ -25,6 +25,7 @@ import {
   getConsentStateValue,
 } from '../consent-info';
 import {CONSENT_STRING_TYPE} from '../../../../src/consent-state';
+import {ConsentStateManager} from '../consent-state-manager';
 import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
 import {dev, user} from '../../../../src/log';
 import {dict} from '../../../../src/utils/object';
@@ -1837,6 +1838,57 @@ describes.realWin(
           await macroTask();
           expect(await hasRequiredConsentsSpy.returnValues[0]).to.equal(false);
         });
+
+        it('informs consent state manager if all purpose consents are collected', async () => {
+          storageValue = {
+            'amp-consent:abc': {
+              [STORAGE_KEY.STATE]: 1,
+              [STORAGE_KEY.PURPOSE_CONSENTS]: {
+                'abc': 1,
+                'hij': 1,
+                'xyz': 0,
+              },
+            },
+          };
+          consentElement = createConsentElement(doc, defaultConfig);
+          doc.body.appendChild(consentElement);
+          ampConsent = new AmpConsent(consentElement);
+          const consentStateManagerSpy = env.sandbox.spy(
+            ConsentStateManager.prototype,
+            'hasAllPurposeConsents'
+          );
+          await ampConsent.buildCallback();
+          await macroTask();
+          // Once for remote sync, once for showing UI flow
+          expect(consentStateManagerSpy).to.be.calledTwice;
+        });
+
+        it(
+          'does not inform consent state manager if not all' +
+            'purpose consents are collected',
+          async () => {
+            storageValue = {
+              'amp-consent:abc': {
+                [STORAGE_KEY.STATE]: 1,
+                [STORAGE_KEY.PURPOSE_CONSENTS]: {
+                  'abc': 1,
+                  'hij': 1,
+                },
+              },
+            };
+            consentElement = createConsentElement(doc, defaultConfig);
+            doc.body.appendChild(consentElement);
+            ampConsent = new AmpConsent(consentElement);
+            const consentStateManagerSpy = env.sandbox.spy(
+              ConsentStateManager.prototype,
+              'hasAllPurposeConsents'
+            );
+            await ampConsent.buildCallback();
+            await macroTask();
+            // Only once b/c of sync flow
+            expect(consentStateManagerSpy).to.be.calledOnce;
+          }
+        );
       });
     });
   }
