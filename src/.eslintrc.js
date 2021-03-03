@@ -51,6 +51,7 @@ module.exports = {
     {
       'files': [
         './preact/base-element.js',
+        './core/contextprops.js',
         './context/component-hooks.js',
         './context/component-install.js',
         './context/component.js',
