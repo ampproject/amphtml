@@ -40,7 +40,7 @@ BaseElement['props'] = {
     attrs: ['datetime', 'timestamp-ms', 'timestamp-seconds', 'offset-seconds'],
     parseAttrs: parseDateAttrs,
   },
-  'cutoff': {attr: 'cutoff', type: 'number', media: true},
+  'cutoff': {attr: 'cutoff', type: 'number'},
   'locale': {attr: 'locale'},
 };
 

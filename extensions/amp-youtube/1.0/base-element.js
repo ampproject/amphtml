@@ -23,12 +23,12 @@ BaseElement['Component'] = Youtube;
 
 /** @override */
 BaseElement['props'] = {
-  'autoplay': {attr: 'autoplay', type: 'boolean', media: true},
-  'loop': {attr: 'loop', type: 'boolean', media: true},
+  'autoplay': {attr: 'autoplay', type: 'boolean'},
+  'loop': {attr: 'loop', type: 'boolean'},
   'controls': {attr: 'controls', type: 'boolean', media: true},
-  'videoid': {attr: 'data-videoid', media: true},
-  'liveChannelid': {attr: 'data-live-channelid', media: true},
+  'videoid': {attr: 'data-videoid'},
+  'liveChannelid': {attr: 'data-live-channelid'},
   'dock': {attr: 'dock', media: true},
-  'credentials': {attr: 'credentials', media: true},
+  'credentials': {attr: 'credentials'},
   'params': {attrPrefix: 'data-param-'},
 };

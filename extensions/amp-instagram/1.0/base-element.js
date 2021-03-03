@@ -30,7 +30,7 @@ BaseElement['loadable'] = true;
 
 /** @override */
 BaseElement['props'] = {
-  'shortcode': {attr: 'data-shortcode', media: true},
+  'shortcode': {attr: 'data-shortcode'},
   'captioned': {attr: 'data-captioned', media: true},
   'title': {attr: 'title'},
 };

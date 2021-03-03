@@ -259,6 +259,5 @@ BaseElement['props'] = {
   'expandSingleSection': {
     attr: 'expand-single-section',
     type: 'boolean',
-    media: true,
   },
 };
