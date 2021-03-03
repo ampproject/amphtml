@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {USER_ERROR_SENTINEL} from '../../src/core/error-message-helpers';
 import {
   Log,
   LogLevel,
@@ -26,6 +25,7 @@ import {
   setReportError,
   user,
 } from '../../src/log';
+import {USER_ERROR_SENTINEL} from '../../src/core/error-message-helpers';
 import {
   pureDevAssert as devAssert,
   pureUserAssert as userAssert,

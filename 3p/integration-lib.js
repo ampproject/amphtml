@@ -24,12 +24,12 @@ import {
   isUserErrorMessage,
   setReportError,
 } from '../src/log';
-import {pureUserAssert as userAssert} from '../src/core/assert';
 import {installEmbedStateListener, manageWin} from './environment';
 import {internalRuntimeVersion} from '../src/internal-version';
 import {parseJson} from '../src/json';
 import {run, setExperimentToggles} from './3p';
 import {urls} from '../src/config';
+import {pureUserAssert as userAssert} from '../src/core/assert';
 
 /**
  * Whether the embed type may be used with amp-embed tag.

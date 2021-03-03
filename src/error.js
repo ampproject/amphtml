@@ -16,13 +16,13 @@
 
 import {AmpEvents} from './amp-events';
 import {Services} from './services';
+import {USER_ERROR_SENTINEL} from './core/error-message-helpers';
 import {
   dev,
   duplicateErrorIfNecessary,
   isUserErrorEmbed,
   isUserErrorMessage,
 } from './log';
-import {USER_ERROR_SENTINEL} from './core/error-message-helpers';
 import {dict} from './utils/object';
 import {experimentTogglesOrNull, getBinaryType, isCanary} from './experiments';
 import {exponentialBackoff} from './exponential-backoff';

@@ -37,11 +37,7 @@ import {assertHttpsUrl, tryDecodeUriComponent} from '../../../src/url';
 import {cancellation, isCancellation} from '../../../src/error';
 import {createElementWithAttributes} from '../../../src/dom';
 import {createSecureDocSkeleton, createSecureFrame} from './secure-frame';
-import {
-  dev,
-  duplicateErrorIfNecessary,
-  user,
-} from '../../../src/log';
+import {dev, duplicateErrorIfNecessary, user} from '../../../src/log';
 import {
   pureDevAssert as devAssert,
   pureUserAssert as userAssert,
