@@ -17,14 +17,15 @@
 import {Deferred} from '../utils/promise';
 import {Services} from '../services';
 import {
-  calculateExtensionScriptUrl,
-  parseExtensionUrl,
-} from './extension-location';
-import {
   copyElementToChildWindow,
   stubElementIfNotKnown,
   upgradeOrRegisterElement,
 } from './custom-element-registry';
+import {
+  createExtensionScript,
+  getExtensionScripts,
+  parseExtensionUrl,
+} from './extension-script';
 import {dev, devAssert, rethrowAsync, user} from '../log';
 import {getMode} from '../mode';
 import {installStylesForDoc} from '../style-installer';
@@ -34,6 +35,7 @@ import {registerServiceBuilder, registerServiceBuilderForDoc} from '../service';
 
 export const LEGACY_ELEMENTS = ['amp-ad', 'amp-embed', 'amp-video'];
 const TAG = 'extensions';
+const DEFAULT_VERSION = '0.1';
 const UNKNOWN_EXTENSION = '_UNKNOWN_';
 const CUSTOM_TEMPLATES = ['amp-mustache'];
 const LOADER_PROP = '__AMP_EXT_LDR';
@@ -98,14 +100,6 @@ let ExtensionHolderDef;
  */
 export function isTemplateExtension(extensionId) {
   return CUSTOM_TEMPLATES.indexOf(extensionId) >= 0;
-}
-
-/**
- * @param {string} extensionId
- * @return {boolean}
- */
-function isIntermediateExtension(extensionId) {
-  return extensionId.startsWith('_');
 }
 
 /**
@@ -270,22 +264,23 @@ export class Extensions {
       el.setAttribute('i-amphtml-loaded-new-version', extensionId)
     );
     const urlParts = parseExtensionUrl(els[0].src);
-    return this.preloadExtension(extensionId, urlParts.extensionVersion);
+    return this.preloadExtension(extensionId, urlParts?.extensionVersion);
   }
 
   /**
    * @param {!Window} win
    * @param {string} extensionId
+   * @param {string=} version
    * @return {!Promise}
    */
-  importUnwrapped(win, extensionId) {
+  importUnwrapped(win, extensionId, version = DEFAULT_VERSION) {
     const scriptsInHead = getExtensionScripts(win, extensionId);
     let scriptElement = scriptsInHead.length > 0 ? scriptsInHead[0] : null;
     let promise;
     if (scriptElement) {
       promise = scriptElement[SCRIPT_LOADED_PROP];
     } else {
-      scriptElement = this.createExtensionScript_(extensionId);
+      scriptElement = createExtensionScript(this.win, extensionId, version);
       promise = scriptElement[SCRIPT_LOADED_PROP] = new Promise(
         (resolve, reject) => {
           scriptElement.onload = resolve;
@@ -570,9 +565,10 @@ export class Extensions {
    */
   insertExtensionScriptIfNeeded_(extensionId, holder, opt_extensionVersion) {
     if (this.isExtensionScriptRequired_(extensionId, holder)) {
-      const scriptElement = this.createExtensionScript_(
+      const scriptElement = createExtensionScript(
+        this.win,
         extensionId,
-        opt_extensionVersion
+        opt_extensionVersion || DEFAULT_VERSION
       );
       this.win.document.head.appendChild(scriptElement);
       holder.scriptPresent = true;
@@ -595,64 +591,6 @@ export class Extensions {
       holder.scriptPresent = scriptsInHead.length > 0;
     }
     return !holder.scriptPresent;
-  }
-
-  /**
-   * Create the missing amp extension HTML script element.
-   * @param {string} extensionId
-   * @param {string=} opt_extensionVersion
-   * @return {!Element} Script object
-   * @private
-   */
-  createExtensionScript_(extensionId, opt_extensionVersion) {
-    const scriptElement = this.win.document.createElement('script');
-    scriptElement.async = true;
-    if (isIntermediateExtension(extensionId)) {
-      opt_extensionVersion = '';
-    } else {
-      scriptElement.setAttribute(
-        this.attributeForExtension_(extensionId),
-        extensionId
-      );
-    }
-    scriptElement.setAttribute('data-script', extensionId);
-    scriptElement.setAttribute('i-amphtml-inserted', '');
-    if (getMode().esm) {
-      scriptElement.setAttribute('type', 'module');
-    }
-
-    // Propagate nonce to all generated script tags.
-    const currentScript = this.win.document.head.querySelector('script[nonce]');
-    if (currentScript) {
-      scriptElement.setAttribute('nonce', currentScript.getAttribute('nonce'));
-    }
-
-    // Allow error information to be collected
-    // https://github.com/ampproject/amphtml/issues/7353
-    scriptElement.setAttribute('crossorigin', 'anonymous');
-    let loc = this.win.location;
-    if (getMode(this.win).test && this.win.testLocation) {
-      loc = this.win.testLocation;
-    }
-    const scriptSrc = calculateExtensionScriptUrl(
-      loc,
-      extensionId,
-      opt_extensionVersion,
-      getMode(this.win).localDev
-    );
-    scriptElement.src = scriptSrc;
-    return scriptElement;
-  }
-
-  /**
-   * @param {string} extensionId
-   * @return {string}
-   * @private
-   */
-  attributeForExtension_(extensionId) {
-    return isTemplateExtension(extensionId)
-      ? 'custom-template'
-      : 'custom-element';
   }
 }
 
@@ -681,34 +619,4 @@ function copyBuiltinElementsToChildWindow(parentWin, childWin) {
 function emptyService() {
   // All services need to resolve to an object.
   return {};
-}
-
-/**
- * Returns the extension <script> element and attribute for the given
- * extension ID, if it exists. Otherwise, returns null.
- * @param {!Window} win
- * @param {string} extensionId
- * @param {boolean=} includeInserted If true, includes script elements that
- *   are inserted by the runtime dynamically. Default is true.
- * @return {!Array<!Element>}
- */
-function getExtensionScripts(win, extensionId, includeInserted = true) {
-  // Always ignore <script> elements that have a mismatched RTV.
-  const modifier =
-    ':not([i-amphtml-loaded-new-version])' +
-    (includeInserted ? '' : ':not([i-amphtml-inserted])');
-  // We have to match against "src" because a few extensions, such as
-  // "amp-viewer-integration", do not have "custom-element" attribute.
-  const matches = win.document.head./*OK*/ querySelectorAll(
-    `script[src*="/${extensionId}-"]` + modifier
-  );
-  const filtered = [];
-  for (let i = 0; i < matches.length; i++) {
-    const match = matches[i];
-    const urlParts = parseExtensionUrl(match.src);
-    if (urlParts.extensionId === extensionId) {
-      filtered.push(match);
-    }
-  }
-  return filtered;
 }

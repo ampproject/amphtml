@@ -16,7 +16,6 @@
 
 import {FakeWindow} from '../../testing/fake-dom';
 import {
-  getElementService,
   getElementServiceForDoc,
   getElementServiceIfAvailable,
   getElementServiceIfAvailableForDoc,
@@ -167,47 +166,6 @@ describes.realWin(
       resetServiceForTesting(env.win, 'e1');
       resetScheduledElementForTesting(env.win, 'element-1');
       resetScheduledElementForTesting(env.win, 'element-foo');
-    });
-
-    describe('getElementService()', () => {
-      it('should be provided by element', () => {
-        markElementScheduledForTesting(env.win, 'element-1');
-        const p1 = getElementService(env.win, 'e1', 'element-1');
-        const p2 = getElementService(env.win, 'e1', 'element-1');
-
-        registerServiceBuilder(env.win, 'e1', function () {
-          return {str: 'from e1'};
-        });
-
-        return p1.then((s1) => {
-          expect(s1).to.deep.equal({str: 'from e1'});
-          return p2.then((s2) => {
-            expect(s1).to.equal(s2);
-          });
-        });
-      });
-
-      it('should fail if element is not in page.', () => {
-        expectAsyncConsoleError(
-          /e1 was requested to be provided through element-bar/
-        );
-        markElementScheduledForTesting(env.win, 'element-foo');
-
-        return getElementService(env.win, 'e1', 'element-bar')
-          .then(
-            () => {
-              return 'SUCCESS';
-            },
-            (error) => {
-              return 'ERROR ' + error;
-            }
-          )
-          .then((result) => {
-            expect(result).to.match(
-              /Service e1 was requested to be provided through element-bar/
-            );
-          });
-      });
     });
 
     describe('getElementServiceIfAvailable()', () => {

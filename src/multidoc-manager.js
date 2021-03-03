@@ -28,7 +28,7 @@ import {disposeServicesForDoc, getServicePromiseOrNullForDoc} from './service';
 import {getMode} from './mode';
 import {installStylesForDoc} from './style-installer';
 import {isArray, isObject} from './types';
-import {parseExtensionUrl} from './service/extension-location';
+import {parseExtensionUrl} from './service/extension-script';
 import {parseUrlDeprecated} from './url';
 import {setStyle} from './style';
 
@@ -430,25 +430,18 @@ export class MultidocManager {
               dev().fine(TAG, '- src script: ', n);
               const src = n.getAttribute('src');
               const urlParts = parseExtensionUrl(src);
-              const isRuntime = !urlParts.extensionId;
               // Note: Some extensions don't have [custom-element] or
               // [custom-template] e.g. amp-viewer-integration.
               const customElement = n.getAttribute('custom-element');
               const customTemplate = n.getAttribute('custom-template');
-              if (isRuntime) {
+              const extensionId = customElement || customTemplate;
+              if (!urlParts) {
                 dev().fine(TAG, '- ignore runtime script: ', src);
-              } else if (customElement || customTemplate) {
+              } else if (extensionId) {
                 // This is an extension.
                 this.extensions_.installExtensionForDoc(
                   ampdoc,
-                  customElement || customTemplate,
-                  urlParts.extensionVersion
-                );
-                dev().fine(
-                  TAG,
-                  '- load extension: ',
-                  customElement || customTemplate,
-                  ' ',
+                  extensionId,
                   urlParts.extensionVersion
                 );
                 if (customElement) {

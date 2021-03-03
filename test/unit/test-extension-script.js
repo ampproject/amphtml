@@ -18,7 +18,7 @@ import {
   calculateEntryPointScriptUrl,
   calculateExtensionScriptUrl,
   parseExtensionUrl,
-} from '../../src/service/extension-location';
+} from '../../src/service/extension-script';
 import {initLogConstructor, resetLogConstructorForTesting} from '../../src/log';
 
 describes.sandboxed('Extension Location', {}, () => {
@@ -42,7 +42,7 @@ describes.sandboxed('Extension Location', {}, () => {
           protocol: 'http:',
         },
         'amp-ad',
-        /*opt_extensionVersion*/ undefined,
+        '0.1',
         true
       );
       expect(script).to.equal(
@@ -59,11 +59,11 @@ describes.sandboxed('Extension Location', {}, () => {
           protocol: 'http:',
         },
         'amp-ad',
-        /*opt_extensionVersion*/ undefined,
+        '1.0',
         false
       );
       expect(script).to.equal(
-        'https://cdn.ampproject.org/rtv/123/v0/amp-ad-0.1.js'
+        'https://cdn.ampproject.org/rtv/123/v0/amp-ad-1.0.js'
       );
     });
 
@@ -170,6 +170,11 @@ describes.sandboxed('Extension Location', {}, () => {
       expect(urlParts.extensionId).to.equal('amp-ad');
       expect(urlParts.extensionVersion).to.equal('latest');
     });
+
+    it('returns null for non-extensions', () => {
+      const urlParts = parseExtensionUrl('https://cdn.ampproject.org/v0.js');
+      expect(urlParts).to.be.null;
+    });
   });
 });
 
@@ -194,11 +199,11 @@ describes.sandboxed('Module Extension Location', {}, () => {
           protocol: 'http:',
         },
         'amp-ad',
-        /*opt_extensionVersion*/ undefined,
+        '1.0',
         true
       );
       expect(script).to.equal(
-        'http://localhost:8000/dist/rtv/123/v0/amp-ad-0.1.mjs'
+        'http://localhost:8000/dist/rtv/123/v0/amp-ad-1.0.mjs'
       );
     });
 
@@ -211,7 +216,7 @@ describes.sandboxed('Module Extension Location', {}, () => {
           protocol: 'http:',
         },
         'amp-ad',
-        /*opt_extensionVersion*/ undefined,
+        '0.1',
         false
       );
       expect(script).to.equal(
