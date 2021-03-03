@@ -26,8 +26,6 @@ import {urls} from './config';
 
 const noop = () => {};
 
-export {USER_ERROR_SENTINEL};
-
 /**
  * Four zero width space.
  *
