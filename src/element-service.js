@@ -28,29 +28,6 @@ import {
 import {pureUserAssert as userAssert} from './core/assert';
 
 /**
- * Returns a promise for a service for the given id and window. Also expects an
- * element that has the actual implementation. The promise resolves when the
- * implementation loaded. Users should typically wrap this as a special purpose
- * function (e.g. Services.viewportForDoc(...)) for type safety and because the
- * factory should not be passed around.
- * @param {!Window} win
- * @param {string} id of the service.
- * @param {string} extension Name of the custom extension that provides the
- *     implementation of this service.
- * @param {boolean=} opt_element Whether this service is provided by an element,
- *     not the extension.
- * @return {!Promise<*>}
- */
-export function getElementService(win, id, extension, opt_element) {
-  return getElementServiceIfAvailable(
-    win,
-    id,
-    extension,
-    opt_element
-  ).then((service) => assertService(service, id, extension));
-}
-
-/**
  * Same as getElementService but produces null if the given element is not
  * actually available on the current page.
  * @param {!Window} win
