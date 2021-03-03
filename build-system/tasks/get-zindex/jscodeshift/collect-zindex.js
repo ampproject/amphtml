@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {readJsonSync, writeJsonSync} from 'fs-extra';
+const {readJsonSync, writeJsonSync} = require('fs-extra');
 
 const zIndexRegExp = /^z-?index$/i;
 
@@ -82,7 +82,7 @@ function chainId(file, path) {
   return '(unknown)';
 }
 
-export default function transformer(file, api, options) {
+module.exports = function (file, api, options) {
   const j = api.jscodeshift;
 
   const reports = [];
@@ -122,4 +122,4 @@ export default function transformer(file, api, options) {
   }
 
   return file.source;
-}
+};

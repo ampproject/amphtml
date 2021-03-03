@@ -140,6 +140,7 @@ function getZindexChainsInJs(glob, cwd = '.') {
     const cpus = Math.ceil(filesIncludingString.length / 20);
     jscodeshift([
       '--dry',
+      '--no-babel',
       `--cpus ${cpus}`,
       `--transform ${__dirname}/jscodeshift/collect-zindex.js`,
       `--collectZindexToFile=${temporary}`,
