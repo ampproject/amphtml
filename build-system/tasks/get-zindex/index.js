@@ -23,6 +23,7 @@ const prettier = require('prettier');
 const tempy = require('tempy');
 const textTable = require('text-table');
 const {getStdout} = require('../../common/process');
+const {jscodeshift} = require('../../test-configs/jscodeshift');
 const {readJsonSync} = require('fs-extra');
 const {writeDiffOrFail} = require('../../common/diff');
 
@@ -133,17 +134,12 @@ function getZindexChainsInJs(glob, cwd = '.') {
     .trim()
     .split('\n');
   return tempy.write.task('{}', (temporary) => {
-    getStdout(
-      [
-        'npx jscodeshift',
-        '--dry',
-        '--parser babylon',
-        `--parser-config ${__dirname}/jscodeshift/parser-config.json`,
-        `--transform ${__dirname}/jscodeshift/collect-zindex.js`,
-        `--collectZindexToFile=${temporary}`,
-        ...filesIncludingString,
-      ].join(' ')
-    );
+    jscodeshift([
+      '--dry',
+      `--transform ${__dirname}/jscodeshift/collect-zindex.js`,
+      `--collectZindexToFile=${temporary}`,
+      ...filesIncludingString,
+    ]);
     const resultAbsolute = readJsonSync(temporary);
     const result = {};
     for (const key in resultAbsolute) {
