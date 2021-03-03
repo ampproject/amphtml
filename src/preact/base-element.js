@@ -880,7 +880,7 @@ PreactBaseElement['shadowCss'] = null;
  *
  * @protected {boolean}
  */
-PreactBaseElement['usesShadowDom'] = !!PreactBaseElement['shadowCss'];
+PreactBaseElement['usesShadowDom'] = false;
 
 /**
  * Enabling detached mode alters the children to be rendered in an
