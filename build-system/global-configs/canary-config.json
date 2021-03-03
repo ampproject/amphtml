@@ -12,8 +12,6 @@
   "flexAdSlots": 0.05,
   "intersect-resources": 0,
   "ios-fixed-no-transfer": 1,
-  "remove-task-timeout": 0,
-  "build-in-chunks": 1,
   "visibility-trigger-improvements": 1,
   "ads-initialIntersection": 1,
   "amp-cid-backup": 1,
