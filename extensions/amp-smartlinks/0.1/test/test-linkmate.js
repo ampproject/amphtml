@@ -55,7 +55,9 @@ describes.fakeWin(
     });
 
     beforeEach(() => {
-      env.sandbox.stub(DocumentReady, 'whenDocumentReady').rejects();
+      env.sandbox
+        .stub(DocumentReady, 'whenDocumentReady')
+        .returns(Promise.reject());
     });
 
     afterEach(() => {

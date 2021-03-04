@@ -175,20 +175,22 @@ describes.fakeWin(
           .withExactArgs('https://builturl', {
             credentials: 'include',
           })
-          .rejects({
-            response: {
-              status: 402,
-              json() {
-                return Promise.resolve({
-                  'purchase_options': [
-                    {'sales_model': 'single_purchase'},
-                    {'sales_model': 'timepass'},
-                    {'sales_model': 'subscription'},
-                  ],
-                });
+          .returns(
+            Promise.reject({
+              response: {
+                status: 402,
+                json() {
+                  return Promise.resolve({
+                    'purchase_options': [
+                      {'sales_model': 'single_purchase'},
+                      {'sales_model': 'timepass'},
+                      {'sales_model': 'subscription'},
+                    ],
+                  });
+                },
               },
-            },
-          })
+            })
+          )
           .once();
         emptyContainerStub.resolves();
         return vendor.authorize().then((err) => {

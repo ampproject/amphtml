@@ -65,7 +65,9 @@ describes.fakeWin(
         ampSkimlinks = helpers.createAmpSkimlinks({
           'publisher-code': 'pubIdXdomainId',
         });
-        env.sandbox.stub(DocumentReady, 'whenDocumentReady').rejects();
+        env.sandbox
+          .stub(DocumentReady, 'whenDocumentReady')
+          .returns(Promise.reject());
         expect(() => {
           ampSkimlinks.buildCallback();
         }).to.not.throw();

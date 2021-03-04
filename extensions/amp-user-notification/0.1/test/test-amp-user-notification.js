@@ -204,7 +204,7 @@ describes.realWin(
       storageMock
         .expects('get')
         .withExactArgs('amp-user-notification:n1')
-        .rejects('intentional')
+        .returns(Promise.reject('intentional'))
         .once();
       impl.isDismissed().then((dismissed) => {
         expect(dismissed).to.be.false;
@@ -352,7 +352,7 @@ describes.realWin(
       storageMock
         .expects('get')
         .withExactArgs('amp-user-notification:n1')
-        .rejects('intentional')
+        .returns(Promise.reject('intentional'))
         .once();
 
       const cidStub = env.sandbox.stub(impl, 'getAsyncCid_').resolves('12345');
@@ -380,7 +380,7 @@ describes.realWin(
       storageMock
         .expects('get')
         .withExactArgs('amp-user-notification:n1')
-        .rejects('intentional')
+        .returns(Promise.reject('intentional'))
         .once();
       return impl.shouldShow().then((shouldShow) => {
         expect(shouldShow).to.equal(true);

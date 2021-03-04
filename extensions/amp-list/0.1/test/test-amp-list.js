@@ -354,7 +354,7 @@ describes.repeated(
                   listMock
                     .expects('attemptChangeHeight')
                     .withExactArgs(1337)
-                    .rejects(false);
+                    .returns(Promise.reject(false));
                   listMock
                     .expects('maybeResizeListToFitItems_')
                     .resolves(false);
@@ -650,7 +650,7 @@ describes.repeated(
 
           it('should not show placeholder on fetch failure', function* () {
             // Stub fetch_() to fail.
-            listMock.expects('fetch_').rejects().once();
+            listMock.expects('fetch_').returns(Promise.reject()).once();
             listMock.expects('toggleLoading').withExactArgs(false).once();
             listMock.expects('togglePlaceholder').never();
 
@@ -662,7 +662,7 @@ describes.repeated(
             env.sandbox.stub(Services, 'actionServiceForDoc').returns(actions);
 
             // Stub fetch_() to fail.
-            listMock.expects('fetch_').rejects().once();
+            listMock.expects('fetch_').returns(Promise.reject()).once();
             listMock.expects('toggleLoading').withExactArgs(false).once();
 
             yield list.layoutCallback();
@@ -828,7 +828,7 @@ describes.repeated(
             it('should error if proxied fetch fails', () => {
               env.sandbox
                 .stub(ssrTemplateHelper, 'ssr')
-                .rejects(new Error('error'));
+                .returns(Promise.reject(new Error('error')));
 
               listMock.expects('toggleLoading').withExactArgs(false).once();
 
@@ -990,7 +990,7 @@ describes.repeated(
 
             it('should hide placeholder and show fallback on fetch failure', () => {
               // Stub fetch_() to fail.
-              listMock.expects('fetch_').rejects().once();
+              listMock.expects('fetch_').returns(Promise.reject()).once();
 
               listMock.expects('togglePlaceholder').withExactArgs(false).once();
               listMock.expects('toggleFallback').withExactArgs(true).once();

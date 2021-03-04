@@ -1763,7 +1763,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
             element,
             'layoutCallback'
           );
-          layoutCallbackStub.rejects(new Error('intentional'));
+          layoutCallbackStub.returns(Promise.reject(new Error('intentional')));
           try {
             await resource.startLayout();
           } catch (e) {
@@ -2125,7 +2125,9 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         });
 
         it('should toggle loading off after layout failed', () => {
-          env.sandbox.stub(TestElement.prototype, 'layoutCallback').rejects();
+          env.sandbox
+            .stub(TestElement.prototype, 'layoutCallback')
+            .returns(Promise.reject());
           element.setAttribute('height', '10');
           element.setAttribute('width', '10');
           container.appendChild(element);
@@ -2147,7 +2149,9 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         });
 
         it('should disable toggle loading on after layout failed', () => {
-          env.sandbox.stub(TestElement.prototype, 'layoutCallback').rejects();
+          env.sandbox
+            .stub(TestElement.prototype, 'layoutCallback')
+            .returns(Promise.reject());
           element.setAttribute('height', '10');
           element.setAttribute('width', '10');
           container.appendChild(element);

@@ -105,7 +105,7 @@ describes.realWin(
     });
 
     it('should trigger "fetch-error" if fetch fails', async () => {
-      ampState.fetch_.rejects();
+      ampState.fetch_.returns(Promise.reject());
 
       const actions = {trigger: env.sandbox.spy()};
       env.sandbox.stub(Services, 'actionServiceForDoc').returns(actions);

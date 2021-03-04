@@ -196,7 +196,7 @@ describes.realWin(
             .withExactArgs('https://acme.com/a?rid=reader1', {
               credentials: 'include',
             })
-            .rejects('intentional')
+            .returns(Promise.reject('intentional'))
             .once();
           return adapter.authorize().then(
             () => {
@@ -293,7 +293,7 @@ describes.realWin(
                 );
               })
             )
-            .rejects('intentional')
+            .returns(Promise.reject('intentional'))
             .once();
           return adapter.pingback().then(
             () => {

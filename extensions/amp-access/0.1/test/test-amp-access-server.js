@@ -229,7 +229,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, (env) => {
               'Content-Type': 'application/x-www-form-urlencoded',
             },
           })
-          .rejects('intentional')
+          .returns(Promise.reject('intentional'))
           .once();
         return adapter.authorize().then(
           () => {

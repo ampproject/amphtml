@@ -184,7 +184,7 @@ describes.sandboxed('Storage', {}, (env) => {
         bindingMock
           .expects('loadBlob')
           .withExactArgs('https://acme.com')
-          .rejects('intentional')
+          .returns(Promise.reject('intentional'))
           .once();
         expect(storage.storePromise_).to.not.exist;
         const promise = storage.get('key1');
@@ -741,7 +741,7 @@ describes.sandboxed('ViewerStorageBinding', {}, (env) => {
           return arg['origin'] == 'https://acme.com';
         })
       )
-      .rejects('unknown')
+      .returns(Promise.reject('unknown'))
       .once();
     return binding
       .loadBlob('https://acme.com')
@@ -775,7 +775,7 @@ describes.sandboxed('ViewerStorageBinding', {}, (env) => {
         'saveStore',
         env.sandbox.match(() => true)
       )
-      .rejects('unknown')
+      .returns(Promise.reject('unknown'))
       .once();
     return binding
       .saveBlob('https://acme.com', 'BLOB1')
