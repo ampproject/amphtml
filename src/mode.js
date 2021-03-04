@@ -15,6 +15,7 @@
  */
 
 import {internalRuntimeVersion} from './internal-version';
+import {isDevMode, isLocalDevMode} from './core/dev-mode';
 import {parseQueryString_} from './url-parse-query-string';
 
 /**

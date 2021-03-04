@@ -21,7 +21,7 @@ import {parseQueryString} from './url';
 const IS_DEV = true;
 
 /**
- * Returns true if the `development` query param is present with any value.
+ * Returns true if the `#development` has param has any value set.
  * @private
  * @visibleForTesting
  * @param location {!Location}
@@ -29,14 +29,11 @@ const IS_DEV = true;
  * @return {boolean}
  */
 export function isDevQueryParamPresent_(location) {
-  return (
-    'development' in
-    parseQueryString(
-      // location.originalHash is set by the viewer when it removes the fragment
-      // from the URL.
-      location.originalHash || location.hash
-    )
-  );
+  return !!parseQueryString(
+    // location.originalHash is set by the viewer when it removes the fragment
+    // from the URL.
+    location.originalHash || location.hash
+  )['development'];
 }
 
 /**
