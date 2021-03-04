@@ -16,10 +16,12 @@
 const argv = require('minimist')(process.argv.slice(2));
 const fastGlob = require('fast-glob');
 const path = require('path');
-const tempy = require('tempy');
+const {
+  jscodeshift,
+  getJscodeshiftReport,
+} = require('../../test-configs/jscodeshift');
 const {cyan, magenta, yellow} = require('kleur/colors');
 const {getOutput} = require('../../common/process');
-const {jscodeshift} = require('../../test-configs/jscodeshift');
 const {log} = require('../../common/logging');
 const {readJsonSync, writeFileSync} = require('fs-extra');
 
@@ -95,16 +97,31 @@ const getModifiedSourceFiles = (fromHash) =>
 
 /**
  * @param {string} id
- * @param {string} experimentsRemovedJson
+ * @param {Array} removedFromConfig
  * @return {Array<string>} modified files
  */
-function removeFromExperimentsConfig(id, experimentsRemovedJson) {
-  jscodeshift([
+function removeFromExperimentsConfig(id, removedFromConfig) {
+  const {stdout} = jscodeshift([
+    `--no-babel`,
     `--transform ${__dirname}/jscodeshift/remove-experiment-config.js`,
     `--experimentId=${id}`,
-    `--experimentsRemovedJson=${experimentsRemovedJson}`,
     experimentsConfigPath,
   ]);
+
+  for (const line of stdout.split('\n')) {
+    const reportLine = getJscodeshiftReport(line);
+    if (reportLine) {
+      const [
+        // eslint-disable-next-line no-unused-vars
+        _,
+        report,
+      ] = reportLine;
+      try {
+        const removed = JSON.parse(report);
+        removedFromConfig.push(removed);
+      } catch (_) {}
+    }
+  }
   return [experimentsConfigPath];
 }
 
@@ -140,6 +157,7 @@ function removeFromRuntimeSource(id, percentage) {
   );
   if (possiblyModifiedSourceFiles.length > 0) {
     jscodeshift([
+      `--no-babel`,
       `--transform ${__dirname}/jscodeshift/remove-experiment-runtime.js`,
       `--isExperimentOnLaunched=${percentage}`,
       `--isExperimentOnExperiment=${id}`,
@@ -449,13 +467,13 @@ async function sweepExperiments() {
 
   const removed = [];
 
-  const removedFromExperimentsConfigJson = tempy.file();
+  const removedFromConfig = [];
 
   Object.entries(include).forEach(([id, workItem], i) => {
     log(`🚮 ${i + 1}/${total}`, magenta(`${id}...`));
 
     const modified = [
-      ...removeFromExperimentsConfig(id, removedFromExperimentsConfigJson),
+      ...removeFromExperimentsConfig(id, removedFromConfig),
       ...removeFromJsonConfig(prodConfig, prodConfigPath, id),
       ...removeFromJsonConfig(canaryConfig, canaryConfigPath, id),
       ...removeFromRuntimeSource(id, workItem.percentage),
@@ -475,10 +493,7 @@ async function sweepExperiments() {
   });
 
   if (removed.length > 0) {
-    const removedFromExperimentsConfig =
-      readJsonSync(removedFromExperimentsConfigJson, {throws: false}) || [];
-
-    const cleanupIssues = removedFromExperimentsConfig.filter(
+    const cleanupIssues = removedFromConfig.filter(
       ({cleanupIssue}) => !!cleanupIssue
     );
 
