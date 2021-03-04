@@ -48,3 +48,12 @@ export function isDevQueryParamPresent_(location) {
 export function isDevMode(win = window) {
   return IS_DEV || isDevQueryParamPresent_(win.location);
 }
+
+/**
+ * Returns true for local development and testing.
+ * @param win
+ * @return {boolean}
+ */
+export function isLocalDevMode() {
+  return IS_DEV;
+}

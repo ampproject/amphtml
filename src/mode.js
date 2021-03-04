@@ -89,16 +89,12 @@ function getMode_(win) {
   // flags. This improved DCE on the production file we deploy as the code
   // paths for localhost/testing/development are eliminated.
   return {
-    localDev: isLocalDev,
+    localDev: isLocalDevMode(),
     // Triggers validation or enable pub level logging. Validation can be
     // bypassed via #validate=0.
     // Note that AMP_DEV_MODE flag is used for testing purposes.
     // Use Array.indexOf instead of Array.includes because of #24219
-    development: !!(
-      ['1', 'actions', 'amp', 'amp4ads', 'amp4email'].indexOf(
-        hashQuery['development']
-      ) >= 0 || win.AMP_DEV_MODE
-    ),
+    development: isDevMode(),
     examiner: hashQuery['development'] == '2',
     esm: IS_ESM,
     // amp-geo override
