@@ -158,19 +158,19 @@ function checkPropsFor(propDefs, cb) {
  * @param {!AmpElementPropDef} def
  * @return {boolean}
  */
-const HAS_MEDIA = (def) => def.media;
+const HAS_MEDIA = (def) => !!def.media;
 
 /**
  * @param {!AmpElementPropDef} def
  * @return {boolean}
  */
-const HAS_SELECTOR = (def) => typeof def === 'string' || def.selector;
+const HAS_SELECTOR = (def) => typeof def === 'string' || !!def.selector;
 
 /**
  * @param {!AmpElementPropDef} def
  * @return {boolean}
  */
-const HAS_PASSTHROUGH = (def) => def.passthrough || def.passthroughNonEmpty;
+const HAS_PASSTHROUGH = (def) => !!(def.passthrough || def.passthroughNonEmpty);
 
 /**
  * Ignore whitespace text nodes.
