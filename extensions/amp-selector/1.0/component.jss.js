@@ -14,24 +14,34 @@
  * limitations under the License.
  */
 
-// TODO(wg-bento): These are non-overridable non-essential styles.
-// See https://github.com/ampproject/wg-bento/issues/12.
+import {createUseStyles} from 'react-jss';
 
-export const OPTION = {
+const option = {
   'cursor': 'pointer',
 };
 
-export const SELECTED = {
+const selected = {
   'cursor': 'auto',
   'outline': 'solid 1px rgba(0, 0, 0, 0.7)',
 };
 
-export const DISABLED = {
+const disabled = {
   'cursor': 'auto',
-  'outline': 'none',
+  'opacity': '0.4',
 };
 
-export const MULTI_SELECTED = {
+const multiselected = {
   'cursor': 'pointer',
   'outline': 'solid 1px rgba(0, 0, 0, 0.7)',
 };
+
+const JSS = {
+  option,
+  selected,
+  disabled,
+  multiselected,
+};
+
+// useStyles gets replaced for AMP builds via `babel-plugin-transform-jss`.
+// eslint-disable-next-line local/no-export-side-effect
+export const useStyles = createUseStyles(JSS);
