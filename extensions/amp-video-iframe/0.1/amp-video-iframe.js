@@ -202,19 +202,14 @@ class AmpVideoIframe extends AMP.BaseElement {
   /** @override */
   createPlaceholderCallback() {
     const {element} = this;
-    const src = addDataParamsToUrl(
-      user().assertString(element.getAttribute('poster')),
-      element
-    );
-    return createElementWithAttributes(
-      devAssert(element.ownerDocument),
-      'amp-img',
-      dict({
-        'src': src,
-        'layout': 'fill',
-        'placeholder': '',
-      })
-    );
+    const poster = element.getAttribute('poster');
+    if (!poster) {
+      return null;
+    }
+    const img = new Image();
+    img.src = addDataParamsToUrl(poster, element);
+    this.applyFillContent(img);
+    return img;
   }
 
   /** @override */

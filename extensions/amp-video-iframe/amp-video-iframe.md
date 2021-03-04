@@ -75,9 +75,8 @@ source documents to know that they are embedded in the AMP context. This fragmen
 not already have a fragment.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>poster (required)</strong></td>
-    <td>Points to an image URL that will be displayed while the video loads.
-</td>
+    <td width="40%"><strong>poster</strong></td>
+    <td>URL to an image displayed while the video loads. <strong>It's recommended to set this attribute</strong> for perceived performance.</td>
   </tr>
   <tr>
     <td width="40%"><strong>autoplay</strong></td>
