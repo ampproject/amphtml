@@ -944,12 +944,12 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       expect(child.props).to.deep.equal({});
     });
 
-    it('should pass children as null when empty', async () => {
+    it('should pass children as undefined when empty', async () => {
       element.textContent = '   ';
 
       await waitFor(() => component.callCount > 1, 'component re-rendered');
       expect(component).to.be.calledTwice;
-      expect(lastProps.children).to.be.null;
+      expect(lastProps.children).to.be.undefined;
     });
 
     it('should re-render on content changes', async () => {

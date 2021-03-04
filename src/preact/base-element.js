@@ -1077,14 +1077,12 @@ function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
     let value;
     if (def.passthrough) {
       devAssert(Ctor['usesShadowDom']);
-      props[def.name || name] = [<Slot />];
-      continue;
+      value = [<Slot />];
     } else if (def.passthroughNonEmpty) {
       devAssert(Ctor['usesShadowDom']);
-      props[def.name || name] = element.getRealChildNodes().every(IS_REAL_CHILD)
+      value = element.getRealChildNodes().every(IS_REAL_CHILD)
         ? null
         : [<Slot />];
-      continue;
     } else if (def.attr) {
       value = element.getAttribute(def.attr);
       if (def.media && value != null) {
