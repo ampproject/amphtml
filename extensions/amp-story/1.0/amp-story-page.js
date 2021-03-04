@@ -172,7 +172,8 @@ const buildOpenAttachmentElement = (element) =>
   htmlFor(element)`
       <a class="
           i-amphtml-story-page-open-attachment i-amphtml-story-system-reset"
-          role="button">
+          role="button"
+          >
         <span class="i-amphtml-story-page-open-attachment-icon">
           <span class="i-amphtml-story-page-open-attachment-bar-left"></span>
           <span class="i-amphtml-story-page-open-attachment-bar-right"></span>
@@ -481,10 +482,10 @@ export class AmpStoryPage extends AMP.BaseElement {
       case PageState.PLAYING:
         if (this.state_ === PageState.NOT_ACTIVE) {
           this.element.setAttribute('active', '');
+          this.resume_();
           if (this.openAttachmentEl_) {
             this.openAttachmentEl_.setAttribute('active', '');
           }
-          this.resume_();
         }
 
         if (this.state_ === PageState.PAUSED) {
