@@ -1774,9 +1774,6 @@ export class AmpStoryPage extends AMP.BaseElement {
       if (attachmentHref) {
         this.openAttachmentEl_.setAttribute('href', attachmentHref);
       }
-      this.openAttachmentEl_.addEventListener('click', () =>
-        this.openAttachment()
-      );
 
       const textEl = this.openAttachmentEl_.querySelector(
         '.i-amphtml-story-page-open-attachment-label'
@@ -1795,6 +1792,15 @@ export class AmpStoryPage extends AMP.BaseElement {
         container.classList.add('i-amphtml-page-attachment-host');
         this.element.appendChild(container);
         createShadowRootWithStyle(container, this.openAttachmentEl_, CSS);
+
+        const root = container.shadowRoot;
+        console.log(root);
+        const clickTarget = root.querySelector('.i-amphtml-story-page-open-attachment');
+        console.log(clickTarget);
+
+        clickTarget.addEventListener('click', () =>
+          console.log("clicked")
+        );
       });
     }
   }
