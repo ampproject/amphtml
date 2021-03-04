@@ -222,6 +222,38 @@ describes.fakeWin('Viewport', {}, (env) => {
       expect(root).to.have.class('i-amphtml-iframed');
     });
 
+    describe('scroll to in ios-webview', () => {
+      beforeEach(() => {
+        ampdoc.win.scrollTo = env.sandbox.spy();
+        env.sandbox.stub(Services, 'platformFor').returns({
+          isIos: () => {
+            return true;
+          },
+        });
+        // To ensure isIframed() returns true
+        ampdoc.win.parent = {};
+      });
+
+      it('should scroll when *not* in a shadow doc', async () => {
+        env.sandbox.stub(ampdoc, 'getRootNode').returns({
+          nodeType: 9, // DOCUMENT_NODE
+        });
+
+        new ViewportImpl(ampdoc, binding, viewer);
+        await ampdoc.whenReady();
+        expect(ampdoc.win.scrollTo).to.have.been.called;
+      });
+
+      it('should *not* scroll when in a shadow doc', async () => {
+        env.sandbox.stub(ampdoc, 'getRootNode').returns({
+          nodeType: 1, // ELEMENT_NODE
+        });
+        new ViewportImpl(ampdoc, binding, viewer);
+        await ampdoc.whenReady();
+        expect(ampdoc.win.scrollTo).not.to.have.been.called;
+      });
+    });
+
     describe('ios-webview', () => {
       let webviewParam;
       let isIos;
