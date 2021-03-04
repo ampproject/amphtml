@@ -16,8 +16,9 @@
 
 const debounce = require('debounce');
 const globby = require('globby');
-const {doBuildJs} = require('./helpers');
+const {compileJsWithEsbuild} = require('./helpers');
 const {endBuildStep} = require('./helpers');
+const {red, cyan} = require('kleur/colors');
 const {VERSION} = require('../compile/internal-version');
 const {watchDebounceDelay} = require('./helpers');
 const {watch} = require('chokidar');
@@ -48,7 +49,14 @@ async function buildVendorConfigs(options) {
   const bundles = generateBundles();
 
   await Promise.all(
-    Object.keys(bundles).map((name) => doBuildJs(bundles, name, options))
+    Object.values(bundles).map((bundle) =>
+      compileJsWithEsbuild(
+        bundle.srcDir,
+        bundle.srcFilename,
+        options.minify ? bundle.minifiedDestDir : bundle.destDir,
+        {...bundle.options, ...options}
+      )
+    )
   );
 
   endBuildStep(
@@ -57,6 +65,30 @@ async function buildVendorConfigs(options) {
     destPath,
     startTime
   );
+}
+
+/**
+ * Build the JavaScript for the vendor specified for lazy building.
+ *
+ * @param {!Object} jsBundles
+ * @param {string} name
+ * @param {?Object} options
+ * @return {!Promise}
+ */
+async function buildVendorLazily(jsBundles, name, options) {
+  const target = jsBundles[name];
+  if (target) {
+    return compileJsWithEsbuild(
+      target.srcDir,
+      target.srcFilename,
+      options.minify ? target.minifiedDestDir : target.destDir,
+      {...target.options, ...options}
+    );
+  } else {
+    return Promise.reject(
+      [red('Error:'), 'Could not find', cyan(name)].join(' ')
+    );
+  }
 }
 
 /**
@@ -77,7 +109,6 @@ function generateBundles() {
         externs: ['./ads/ads.extern.js'],
         toName: `${vendor}.max.js`,
         minifiedName: `${vendor}.js`,
-        esmPassCompilation: false,
       },
     };
   });
@@ -109,5 +140,6 @@ function listVendors() {
 
 module.exports = {
   buildVendorConfigs,
+  buildVendorLazily,
   generateBundles,
 };
