@@ -148,7 +148,12 @@ export const optionItems = () => {
 
 export const multiselect = () => {
   return (
-    <Selector as="ul" multiple aria-label="Multiselect menu">
+    <Selector
+      as="ul"
+      multiple
+      aria-label="Multiselect menu"
+      defaultValue={['2']}
+    >
       <Option as="li" option="1">
         Option 1
       </Option>
