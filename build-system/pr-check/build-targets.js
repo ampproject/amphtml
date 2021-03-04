@@ -24,7 +24,7 @@ const config = require('../test-configs/config');
 const globby = require('globby');
 const minimatch = require('minimatch');
 const path = require('path');
-const {cyan} = require('ansi-colors');
+const {cyan} = require('kleur/colors');
 const {getLoggingPrefix, logWithoutTimestamp} = require('../common/logging');
 const {gitDiffNameOnlyMaster} = require('../common/git');
 const {isCiBuild} = require('../common/ci');
@@ -126,8 +126,8 @@ const targetMatchers = {
     }
     return (
       file == 'build-system/tasks/ava.js' ||
-      file.startsWith('build-system/tasks/csvify-size/') ||
       file.startsWith('build-system/tasks/get-zindex/') ||
+      file.startsWith('build-system/tasks/markdown-toc/') ||
       file.startsWith('build-system/tasks/prepend-global/')
     );
   },
@@ -171,6 +171,7 @@ const targetMatchers = {
     }
     return (
       file == 'build-system/tasks/check-links.js' ||
+      file.startsWith('build-system/tasks/markdown-toc/') ||
       (path.extname(file) == '.md' && !file.startsWith('examples/'))
     );
   },
@@ -218,7 +219,12 @@ const targetMatchers = {
   },
   [Targets.PRETTIFY]: (file) => {
     // OWNERS files can be prettified.
-    return prettifyFiles.includes(file);
+    return (
+      prettifyFiles.includes(file) ||
+      file == '.prettierrc' ||
+      file == '.prettierignore' ||
+      file == 'build-system/tasks/prettify.js'
+    );
   },
   [Targets.RENOVATE_CONFIG]: (file) => {
     return (

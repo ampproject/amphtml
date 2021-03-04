@@ -76,7 +76,7 @@ The example below demonstrates `amp-fit-text` component in standalone use.
 
 [example preview="top-frame" playground="false"]
 
-```
+```html
 <head>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-fit-text-1.0.css">
@@ -114,7 +114,7 @@ The example below demonstrates `amp-fit-text` component in standalone use.
 
 Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
 
-```
+```html
 <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-fit-text-1.0.css">
 ```
 
@@ -156,6 +156,11 @@ In the following example, we specified a `min-font-size` of `40`, and added more
 While overflowing content is _visually_ truncated to fit the container, note that it's still present in the document. Do not rely on the overflow behaviour to simply "stuff" large amounts of content in your pages - while visually it may look appropriate, it may lead to the page becoming overly verbose to users of assistive technologies (such as screen readers), as for these users all the truncated content will still be read/announced in full.
 
 ## Attributes
+
+### Media Queries
+
+The attributes for `<amp-fit-text>` can be configured to use different
+options based on a [media query](./../../spec/amp-html-responsive-attributes.md).
 
 ### `min-font-size`
 

@@ -15,13 +15,11 @@
  */
 
 import * as Preact from '../../../src/preact';
-import * as styles from './component.css';
 import {ContainWrapper} from '../../../src/preact/component';
+import {LINE_HEIGHT_EM_, useStyles} from './component.jss';
 import {px, resetStyles, setStyle, setStyles} from '../../../src/style';
 import {toWin} from '../../../src/types';
 import {useCallback, useLayoutEffect, useRef} from '../../../src/preact';
-
-const {LINE_HEIGHT_EM_} = styles;
 
 /**
  * @param {!FitTextProps} props
@@ -33,6 +31,7 @@ export function FitText({
   maxFontSize = 72,
   ...rest
 }) {
+  const classes = useStyles();
   const containerRef = useRef(null);
   const measurerRef = useRef(null);
   const heightRef = useRef(null);
@@ -75,14 +74,14 @@ export function FitText({
       size={true}
       layout={true}
       paint={true}
-      ref={containerRef}
-      wrapperStyle={styles.fitTextContentWrapper}
-      contentRef={measurerRef}
-      contentStyle={styles.fitTextContent}
+      contentRef={containerRef}
+      contentClassName={classes.fitTextContentWrapper}
       {...rest}
     >
-      <div ref={heightRef} style={styles.minContentHeight}>
-        {children}
+      <div ref={measurerRef} className={classes.fitTextContent}>
+        <div ref={heightRef} className={classes.minContentHeight}>
+          {children}
+        </div>
       </div>
     </ContainWrapper>
   );
@@ -135,7 +134,12 @@ function setOverflowStyle(measurer, maxHeight, fontSize) {
       '-webkit-line-clamp': numberOfLines,
       'maxHeight': px(lineHeight * numberOfLines),
     });
+    // Cannot use setInitialDisplay which calls devAssert.
+    // eslint-disable-next-line local/no-style-display
+    resetStyles(measurer, ['display']);
   } else {
+    // eslint-disable-next-line local/no-style-display
+    setStyle(measurer, 'display', 'flex');
     resetStyles(measurer, ['lineClamp', '-webkit-line-clamp', 'maxHeight']);
   }
 }

@@ -29,7 +29,7 @@ const {
   icon,
   nbDotsPerLine,
 } = require('../../test-configs/karma.conf').superDotsReporter;
-const {green, red, yellow} = require('ansi-colors');
+const {green, red, yellow} = require('kleur/colors');
 const {reportTestFinished} = require('../report-test-status');
 
 /**
@@ -38,6 +38,9 @@ const {reportTestFinished} = require('../report-test-status');
  * @param {*} runner
  */
 class MochaDotsReporter extends Base {
+  /**
+   * @param {*} runner
+   */
   constructor(runner) {
     super(runner);
 

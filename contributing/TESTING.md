@@ -20,6 +20,13 @@ This document provides details for testing and building your AMP code.
 
 **Contents**
 
+<!--
+  (Do not remove or edit this comment.)
+
+  This table-of-contents is automatically generated. To generate it, run:
+    gulp markdown-toc --fix
+-->
+
 -   [Testing commands](#testing-commands)
 -   [Manual testing](#manual-testing)
     -   [Serve Mode](#serve-mode)
@@ -47,7 +54,7 @@ This document provides details for testing and building your AMP code.
 
 Before running these commands, make sure you have Node.js and Gulp installed. For installation instructions, see the [One-time setup](getting-started-quick.md#one-time-setup) section in the Quick Start guide.
 
-**Pro tip:** To see a full listing of `gulp` commands and their flags, run `gulp help`.
+**Pro tip:** To see a full listing of `gulp` commands and their flags, run `gulp --tasks`.
 
 | Command                                                   | Description                                                                                                                                                                                                                                            |
 | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -111,8 +118,7 @@ Before running these commands, make sure you have Node.js and Gulp installed. Fo
 | `gulp serve --compiled`                                   | Same as `serve`, but serves minified binaries.                                                                                                                                                                                                         |
 | `gulp serve --cdn`                                        | Same as `serve`, but serves CDN binaries.                                                                                                                                                                                                              |
 | `gulp serve --rtv <rtv_number>`                           | Same as `serve`, but serves binaries with the given 15 digit RTV.                                                                                                                                                                                      |
-| `gulp serve --new_server`                                 | Same as `serve`, but uses new Typescript based transforms. _Still under active development._                                                                                                                                                           |
-| `gulp serve --new_server --esm`                           | Same as `serve`, but serves esm (module) binaries. Requires the new Typescript based transforms. _Still under active development._                                                                                                                     |
+| `gulp serve --esm`                                        | Same as `serve`, but serves esm (module) binaries. Uses the new Typescript based transforms. _Still under active development._                                                                                                                         |
 | `gulp serve --quiet`                                      | Same as `serve`, with logging silenced.                                                                                                                                                                                                                |
 | `gulp serve --port <port>`                                | Same as `serve`, but uses a port number other than the default of 8000.                                                                                                                                                                                |
 | `gulp check-types`                                        | Verifies that there are no errors associated with Closure typing. Run automatically upon push.                                                                                                                                                         |
@@ -161,7 +167,7 @@ There are 5 serving modes:
 -   COMPILED mode serves minified AMP. This is closer to what is served in production on the stable channel. Serve this mode by running `gulp --compiled`.
 -   CDN mode serves stable channel binaries. Local changes are not served in this mode. Serve CDN mode by running `gulp serve --cdn`.
 -   RTV mode serves the bundle from the given RTV number (a 15 digit number). E.g. `001907161745080`. Serve RTV mode by running `gulp serve --rtv <rtv_number>`
--   ESM mode serves the esm (module) binaries. First run `gulp dist --fortesting --esm` and then serve esm mode by running `gulp serve --new_server --esm`. _This mode is new, and under active development._
+-   ESM mode serves the esm (module) binaries. First run `gulp dist --fortesting --esm` and then serve esm mode by running `gulp serve --esm`. _This mode is new, and under active development._
 
 To switch serving mode during runtime, go to http://localhost:8000/serve_mode=MODE and set `MODE` to one of the following values: `default`, `compiled`, `cdn` or `<RTV_NUMBER>`.
 

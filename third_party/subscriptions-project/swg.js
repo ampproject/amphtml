@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.143 */
+/** Version: 0.1.22.151 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -100,6 +100,22 @@ const AnalyticsEvent = {
   EVENT_OFFERED_METER: 3011,
   EVENT_UNLOCKED_FREE_PAGE: 3012,
   EVENT_SUBSCRIPTION_STATE: 4000,
+};
+/** @enum {number} */
+const EntitlementResult = {
+  UNKNOWN_ENTITLEMENT_RESULT: 0,
+  UNLOCKED_SUBSCRIBER: 1001,
+  UNLOCKED_FREE: 1002,
+  UNLOCKED_METER: 1003,
+  LOCKED_REGWALL: 2001,
+  LOCKED_PAYWALL: 2002,
+};
+/** @enum {number} */
+const EntitlementSource = {
+  UNKNOWN_ENTITLEMENT_SOURCE: 0,
+  GOOGLE_SUBSCRIBER_ENTITLEMENT: 1001,
+  GOOGLE_SHOWCASE_METERING_SERVICE: 2001,
+  PUBLISHER_ENTITLEMENT: 3001,
 };
 /** @enum {number} */
 const EventOriginator = {
@@ -755,6 +771,9 @@ class EntitlementsRequest {
 
     /** @private {?EntitlementResult} */
     this.entitlementResult_ = data[3 + base] == null ? null : data[3 + base];
+
+    /** @private {?string} */
+    this.nonce_ = data[4 + base] == null ? null : data[4 + base];
   }
 
   /**
@@ -814,6 +833,20 @@ class EntitlementsRequest {
   }
 
   /**
+   * @return {?string}
+   */
+  getNonce() {
+    return this.nonce_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setNonce(value) {
+    this.nonce_ = value;
+  }
+
+  /**
    * @param {boolean} includeLabel
    * @return {!Array<?>}
    * @override
@@ -826,6 +859,7 @@ class EntitlementsRequest {
                               [],  // field 2 - client_event_time
       this.entitlementSource_,     // field 3 - entitlement_source
       this.entitlementResult_,     // field 4 - entitlement_result
+      this.nonce_,                 // field 5 - nonce
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -1414,7 +1448,7 @@ class SmartBoxMessage {
 /**
  * @implements {Message}
  */
-class SubscribeResponse {
+class SubscribeResponse$1 {
   /**
    * @param {!Array<*>=} data
    * @param {boolean=} includesLabel
@@ -1656,7 +1690,7 @@ const PROTO_MAP = {
   'LinkingInfoResponse': LinkingInfoResponse,
   'SkuSelectedResponse': SkuSelectedResponse,
   'SmartBoxMessage': SmartBoxMessage,
-  'SubscribeResponse': SubscribeResponse,
+  'SubscribeResponse': SubscribeResponse$1,
   'Timestamp': Timestamp,
   'ToastCloseRequest': ToastCloseRequest,
   'ViewSubscriptionsResponse': ViewSubscriptionsResponse,
@@ -2200,7 +2234,7 @@ function base64UrlDecodeToBytes(str) {
  * limitations under the License.
  */
 
-const CHARS = '0123456789ABCDEF';
+const CHARS$1 = '0123456789ABCDEF';
 
 /**
  * Polyfill for String.prototype.startsWith.
@@ -2221,7 +2255,7 @@ function startsWith(string, prefix) {
  * @param {!number} v
  */
 function getChar19(v) {
-  return CHARS[(v & 0x3) | 0x8];
+  return CHARS$1[(v & 0x3) | 0x8];
 }
 
 /**
@@ -2257,7 +2291,7 @@ function getUuid() {
         uuid += getChar19(rands[rIndex++]);
         break;
       default:
-        uuid += CHARS[rands[rIndex++]];
+        uuid += CHARS$1[rands[rIndex++]];
         break;
     }
   }
@@ -2458,7 +2492,6 @@ const defaultStyles = {
 };
 
 /**
- * @export
  * @param {string} camelCase camel cased string
  * @return {string} title cased string
  */
@@ -2488,7 +2521,6 @@ function getVendorJsPropertyName_(style, titleCase) {
  * Returns the possibly prefixed JavaScript property name of a style property
  * (ex. WebkitTransitionDuration) given a camelCase'd version of the property
  * (ex. transitionDuration).
- * @export
  * @param {!Object} style
  * @param {string} camelCase the camel cased version of a css property name
  * @param {boolean=} bypassCache bypass the memoized cache of property
@@ -2527,7 +2559,7 @@ function getVendorJsPropertyName(style, camelCase, bypassCache) {
  * @param {!Element} element
  * @param {!Object<string, string|number>} styles
  */
-function setImportantStyles(element, styles) {
+function setImportantStyles$1(element, styles) {
   for (const k in styles) {
     element.style.setProperty(
       getVendorJsPropertyName(styles, k),
@@ -2589,7 +2621,7 @@ function resetStyles(element, properties) {
  * @param {!Element} element
  */
 function resetAllStyles(element) {
-  setImportantStyles(element, defaultStyles);
+  setImportantStyles$1(element, defaultStyles);
 }
 
 /**
@@ -2927,7 +2959,7 @@ let aResolver;
  * @param {string} urlString
  * @return {!HTMLAnchorElement}
  */
-function parseUrl(urlString) {
+function parseUrl$1(urlString) {
   if (!aResolver) {
     aResolver = /** @type {!HTMLAnchorElement} */ (document.createElement('a'));
   }
@@ -2962,7 +2994,7 @@ function getOrigin(loc) {
  * @return {string}
  */
 function getOriginFromUrl(urlString) {
-  return getOrigin(parseUrl(urlString));
+  return getOrigin(parseUrl$1(urlString));
 }
 
 
@@ -2984,7 +3016,7 @@ function removeFragment(urlString) {
  * @param {string} query The URL query string.
  * @return {!Object<string, string>}
  */
-function parseQueryString(query) {
+function parseQueryString$1(query) {
   if (!query) {
     return {};
   }
@@ -3009,7 +3041,7 @@ function parseQueryString(query) {
  * @return {?string}
  */
 function getQueryParam(queryString, param) {
-  return parseQueryString(queryString)[param];
+  return parseQueryString$1(queryString)[param];
 }
 
 
@@ -3611,7 +3643,7 @@ function closePort(port) {
  * @implements {ActivityPort}
  * @implements {ActivityMessagingPort}
  */
-class ActivityIframePort {
+class ActivityIframePort$1 {
 
   /**
    * @param {!HTMLIFrameElement} iframe
@@ -4314,7 +4346,7 @@ class ActivityWindowRedirectPort {
  * as a singleton. It can start activities of all modes: iframe, popup, and
  * redirect.
  */
-class ActivityPorts {
+class ActivityPorts$1 {
 
   /**
    * @param {!Window} win
@@ -4357,7 +4389,7 @@ class ActivityPorts {
    * @return {!Promise<!ActivityIframePort>}
    */
   openIframe(iframe, url, opt_args) {
-    const port = new ActivityIframePort(iframe, url, opt_args);
+    const port = new ActivityIframePort$1(iframe, url, opt_args);
     return port.connect().then(() => port);
   }
 
@@ -4535,8 +4567,8 @@ class ActivityPorts {
 
 
 var activityPorts = {
-  ActivityPorts,
-  ActivityIframePort,
+  ActivityPorts: ActivityPorts$1,
+  ActivityIframePort: ActivityIframePort$1,
   ActivityMessagingPort,
   ActivityMode,
   ActivityOpenOptions,
@@ -4621,7 +4653,7 @@ class ErrorUtils {
  */
 
 /** @const {!Object<string, string>} */
-const iframeAttributes = {
+const iframeAttributes$2 = {
   'frameborder': '0',
   'scrolling': 'no',
 };
@@ -4658,7 +4690,7 @@ class ActivityIframeView extends View {
     this.iframe_ = /** @type {!HTMLIFrameElement} */ (createElement(
       this.doc_,
       'iframe',
-      iframeAttributes
+      iframeAttributes$2
     ));
 
     /** @private @const {!../components/activities.ActivityPorts} */
@@ -5390,7 +5422,7 @@ class UserData {
 
 /**
  */
-class SubscribeResponse$1 {
+class SubscribeResponse {
   /**
    * @param {string} raw
    * @param {!PurchaseData} purchaseData
@@ -5433,7 +5465,7 @@ class SubscribeResponse$1 {
    * @return {!SubscribeResponse}
    */
   clone() {
-    return new SubscribeResponse$1(
+    return new SubscribeResponse(
       this.raw,
       this.purchaseData,
       this.userData,
@@ -5940,7 +5972,7 @@ let cache;
  * @param {string} url
  * @return {!LocationDef}
  */
-function parseUrl$1(url) {
+function parseUrl(url) {
   if (!a) {
     a = /** @type {!HTMLAnchorElement} */ (self.document.createElement('a'));
     cache = self.UrlCache || (self.UrlCache = Object.create(null));
@@ -6018,7 +6050,7 @@ function parseUrlWithA(a, url) {
  * @param {string} query The URL query string.
  * @return {!Object<string, string>}
  */
-function parseQueryString$1(query) {
+function parseQueryString(query) {
   if (!query) {
     return {};
   }
@@ -6081,8 +6113,8 @@ function getCanonicalUrl(doc) {
   return (node && node.href) || '';
 }
 
-const PARSED_URL = parseUrl$1(self.window.location.href);
-const PARSED_REFERRER = parseUrl$1(self.document.referrer);
+const PARSED_URL = parseUrl(self.window.location.href);
+const PARSED_REFERRER = parseUrl(self.document.referrer);
 
 /**
  * True for Google domains
@@ -6148,7 +6180,7 @@ const CACHE_KEYS = {
  * @return {string}
  */
 function feOrigin() {
-  return parseUrl$1('https://news.google.com').origin;
+  return parseUrl('https://news.google.com').origin;
 }
 
 /**
@@ -6177,7 +6209,7 @@ function feUrl(url, prefix = '') {
   url = feCached('https://news.google.com' + prefix + '/swg/_/ui/v1' + url);
 
   // Optionally add jsmode param. This allows us to test against "aggressively" compiled Boq JS.
-  const query = parseQueryString$1(self.location.hash);
+  const query = parseQueryString(self.location.hash);
   const boqJsMode = query['swg.boqjsmode'];
   if (boqJsMode !== undefined) {
     url = addQueryParam(url, 'jsmode', boqJsMode);
@@ -6200,7 +6232,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.143',
+    '_client': 'SwG 0.1.22.151',
   });
 }
 
@@ -6265,7 +6297,7 @@ const RecurrenceMapping = {
  * @param {string} sku
  * @return {!EventParams}
  */
-function getEventParams(sku) {
+function getEventParams$1(sku) {
   return new EventParams([, , , , sku]);
 }
 
@@ -6346,7 +6378,7 @@ class PayStartFlow {
     this.eventManager_.logSwgEvent(
       AnalyticsEvent.ACTION_PAYMENT_FLOW_STARTED,
       true,
-      getEventParams(swgPaymentRequest['skuId'])
+      getEventParams$1(swgPaymentRequest['skuId'])
     );
     PayCompleteFlow.waitingForPayClient_ = true;
     this.payClient_.start(
@@ -6398,7 +6430,7 @@ class PayCompleteFlow {
           eventManager.logSwgEvent(
             AnalyticsEvent.ACTION_PAYMENT_COMPLETE,
             true,
-            getEventParams(sku || '')
+            getEventParams$1(sku || '')
           );
           flow.start(response);
         },
@@ -6470,7 +6502,7 @@ class PayCompleteFlow {
     this.eventManager_.logSwgEvent(
       AnalyticsEvent.IMPRESSION_ACCOUNT_CHANGED,
       true,
-      getEventParams(this.sku_ || '')
+      getEventParams$1(this.sku_ || '')
     );
     this.deps_.entitlementsManager().reset(true);
     this.response_ = response;
@@ -6529,7 +6561,7 @@ class PayCompleteFlow {
     this.eventManager_.logSwgEvent(
       AnalyticsEvent.ACTION_ACCOUNT_CREATED,
       true,
-      getEventParams(this.sku_ || '')
+      getEventParams$1(this.sku_ || '')
     );
     this.deps_.entitlementsManager().unblockNextNotification();
     this.readyPromise_.then(() => {
@@ -6546,7 +6578,7 @@ class PayCompleteFlow {
         this.eventManager_.logSwgEvent(
           AnalyticsEvent.ACTION_ACCOUNT_ACKNOWLEDGED,
           true,
-          getEventParams(this.sku_ || '')
+          getEventParams$1(this.sku_ || '')
         );
         this.deps_.entitlementsManager().setToastShown(true);
       });
@@ -6656,7 +6688,7 @@ function parseSubscriptionResponse(deps, data, completeHandler) {
     throw new Error('unexpected payment response');
   }
   raw = JSON.stringify(/** @type {!JsonObject} */ (swgData));
-  return new SubscribeResponse$1(
+  return new SubscribeResponse(
     raw,
     parsePurchaseData(swgData),
     parseUserData(swgData),
@@ -6736,7 +6768,7 @@ function parseSkuFromPurchaseDataSafe(purchaseData) {
  * @param {string} sku
  * @return {!EventParams}
  */
-function getEventParams$1(sku) {
+function getEventParams(sku) {
   return new EventParams([, , , , sku]);
 }
 
@@ -6849,7 +6881,7 @@ class OffersFlow {
       this.eventManager_.logSwgEvent(
         AnalyticsEvent.ACTION_OFFER_SELECTED,
         true,
-        getEventParams$1(sku)
+        getEventParams(sku)
       );
       new PayStartFlow(this.deps_, subscriptionRequest).start();
     }
@@ -6973,14 +7005,14 @@ class SubscribeOptionFlow {
         .triggerFlowCanceled(SubscriptionFlows.SHOW_SUBSCRIBE_OPTION);
     });
     this.activityIframeView_.on(
-      SubscribeResponse,
+      SubscribeResponse$1,
       this.maybeOpenOffersFlow_.bind(this)
     );
 
     this.activityIframeView_.acceptResult().then(
       (result) => {
         const data = result.data;
-        const response = new SubscribeResponse();
+        const response = new SubscribeResponse$1();
         if (data['subscribe']) {
           response.setSubscribe(true);
         }
@@ -7160,7 +7192,7 @@ class ActivityPortDeprecated {
 /**
  * @implements {ActivityPortDef}
  */
-class ActivityIframePort$1 {
+class ActivityIframePort {
   /**
    * @param {!HTMLIFrameElement} iframe
    * @param {string} url
@@ -7293,7 +7325,7 @@ class ActivityIframePort$1 {
   }
 }
 
-class ActivityPorts$1 {
+class ActivityPorts {
   /**
    * @param {!../runtime/deps.DepsDef} deps
    */
@@ -7319,7 +7351,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.143',
+        '_client': 'SwG 0.1.22.151',
         'supportsEventManager': true,
       },
       args || {}
@@ -7334,7 +7366,7 @@ class ActivityPorts$1 {
    * @return {!Promise<!ActivityIframePort>}
    */
   openActivityIframePort_(iframe, url, args) {
-    const activityPort = new ActivityIframePort$1(iframe, url, this.deps_, args);
+    const activityPort = new ActivityIframePort(iframe, url, this.deps_, args);
     return activityPort.connect().then(() => activityPort);
   }
 
@@ -7793,7 +7825,7 @@ function getExperiments(win) {
     experimentMap = {};
     let combinedExperimentString = experimentsString;
     try {
-      const query = parseQueryString$1(win.location.hash);
+      const query = parseQueryString(win.location.hash);
       const experimentStringFromHash = query['swg.experiments'];
       if (experimentStringFromHash) {
         combinedExperimentString += ',' + experimentStringFromHash;
@@ -8015,7 +8047,7 @@ class AnalyticsService {
       'iframe',
       {}
     ));
-    setImportantStyles(this.iframe_, iframeStyles);
+    setImportantStyles$1(this.iframe_, iframeStyles);
     this.doc_.getBody().appendChild(this.getElement());
 
     /** @private @type {!boolean} */
@@ -8160,11 +8192,11 @@ class AnalyticsService {
     } else {
       context.setTransactionId(getUuid());
     }
-    context.setReferringOrigin(parseUrl$1(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.143');
+    context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
+    context.setClientVersion('SwG 0.1.22.151');
     context.setUrl(getCanonicalUrl(this.doc_));
 
-    const utmParams = parseQueryString$1(this.getQueryString_());
+    const utmParams = parseQueryString(this.getQueryString_());
     const campaign = utmParams['utm_campaign'];
     const medium = utmParams['utm_medium'];
     const source = utmParams['utm_source'];
@@ -8498,7 +8530,7 @@ class SmartSubscriptionButtonApi {
    * @return {!Element}
    */
   start() {
-    setImportantStyles(this.iframe_, {
+    setImportantStyles$1(this.iframe_, {
       'opacity': 1,
       'position': 'absolute',
       'top': 0,
@@ -9408,7 +9440,7 @@ class DeferredAccountFlow {
 
     // Start the "sync" flow.
     creatingFlow.start(
-      new SubscribeResponse$1(
+      new SubscribeResponse(
         '', // raw field doesn't matter in this case
         purchaseDataList[0],
         userData,
@@ -9421,7 +9453,7 @@ class DeferredAccountFlow {
   }
 }
 
-const CSS = "body{padding:0;margin:0}swg-container,swg-loading,swg-loading-animate,swg-loading-image{display:block}swg-loading-container{width:100%!important;display:-ms-flexbox!important;display:flex!important;-ms-flex-align:center!important;align-items:center!important;-ms-flex-pack:center!important;justify-content:center!important;min-height:148px!important;height:100%!important;bottom:0!important;margin-top:5px!important;z-index:2147483647!important}@media (min-height:630px), (min-width:630px){swg-loading-container{width:560px!important;margin-left:35px!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;background-color:#fff!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}swg-loading{z-index:2147483647!important;width:36px;height:36px;overflow:hidden;animation:mspin-rotate 1568.63ms linear infinite}swg-loading-animate{animation:mspin-revrot 5332ms steps(4) infinite}swg-loading-image{background-image:url(https://news.google.com/swg/js/v1/loader.svg);background-size:100%;width:11664px;height:36px;animation:swg-loading-film 5332ms steps(324) infinite}@keyframes swg-loading-film{0%{transform:translateX(0)}to{transform:translateX(-11664px)}}@keyframes mspin-rotate{0%{transform:rotate(0deg)}to{transform:rotate(1turn)}}@keyframes mspin-revrot{0%{transform:rotate(0deg)}to{transform:rotate(-1turn)}}\n/*# sourceURL=/./src/ui/ui.css*/";
+const CSS$1 = "body{padding:0;margin:0}swg-container,swg-loading,swg-loading-animate,swg-loading-image{display:block}swg-loading-container{width:100%!important;display:-ms-flexbox!important;display:flex!important;-ms-flex-align:center!important;align-items:center!important;-ms-flex-pack:center!important;justify-content:center!important;min-height:148px!important;height:100%!important;bottom:0!important;margin-top:5px!important;z-index:2147483647!important}@media (min-height:630px), (min-width:630px){swg-loading-container{width:560px!important;margin-left:35px!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;background-color:#fff!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}swg-loading{z-index:2147483647!important;width:36px;height:36px;overflow:hidden;animation:mspin-rotate 1568.63ms linear infinite}swg-loading-animate{animation:mspin-revrot 5332ms steps(4) infinite}swg-loading-image{background-image:url(https://news.google.com/swg/js/v1/loader.svg);background-size:100%;width:11664px;height:36px;animation:swg-loading-film 5332ms steps(324) infinite}@keyframes swg-loading-film{0%{transform:translateX(0)}to{transform:translateX(-11664px)}}@keyframes mspin-rotate{0%{transform:rotate(0deg)}to{transform:rotate(1turn)}}@keyframes mspin-revrot{0%{transform:rotate(0deg)}to{transform:rotate(-1turn)}}\n/*# sourceURL=/./src/ui/ui.css*/";
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -9546,14 +9578,14 @@ class FriendlyIframe {
  * @param {string} curve - transition function for the animation.
  * @return {!Promise} Promise which resolves once the animation is done playing.
  */
-function transition(el, props, durationMillis, curve) {
+function transition$1(el, props, durationMillis, curve) {
   const win = el.ownerDocument.defaultView;
   const previousTransitionValue = el.style.transition || '';
   return new Promise((resolve) => {
     win.setTimeout(() => {
       win.setTimeout(resolve, durationMillis);
       const tr = `${durationMillis}ms ${curve}`;
-      setImportantStyles(
+      setImportantStyles$1(
         el,
         Object.assign(
           {
@@ -9564,7 +9596,7 @@ function transition(el, props, durationMillis, curve) {
       );
     });
   }).then(() => {
-    setImportantStyles(el, {
+    setImportantStyles$1(el, {
       'transition': previousTransitionValue,
     });
   });
@@ -9586,7 +9618,7 @@ function transition(el, props, durationMillis, curve) {
  * limitations under the License.
  */
 
-class Graypane {
+class Graypane$1 {
   /**
    * @param {!../model/doc.Doc} doc
    * @param {number} zIndex
@@ -9599,7 +9631,7 @@ class Graypane {
     this.fadeBackground_ = this.doc_
       .getWin()
       .document.createElement('swg-popup-background');
-    setImportantStyles(this.fadeBackground_, {
+    setImportantStyles$1(this.fadeBackground_, {
       'z-index': zIndex,
       'display': 'none',
       'position': 'fixed',
@@ -9645,12 +9677,12 @@ class Graypane {
    * @return {!Promise|undefined}
    */
   show(animated = true) {
-    setImportantStyles(this.fadeBackground_, {
+    setImportantStyles$1(this.fadeBackground_, {
       'display': 'block',
       'opacity': animated ? 0 : 1,
     });
     if (animated) {
-      return transition(
+      return transition$1(
         this.fadeBackground_,
         {
           'opacity': 1,
@@ -9668,7 +9700,7 @@ class Graypane {
    */
   hide(animated = true) {
     if (animated) {
-      return transition(
+      return transition$1(
         this.fadeBackground_,
         {
           'opacity': 0,
@@ -9676,10 +9708,10 @@ class Graypane {
         300,
         'ease-out'
       ).then(() => {
-        setImportantStyles(this.fadeBackground_, {'display': 'none'});
+        setImportantStyles$1(this.fadeBackground_, {'display': 'none'});
       });
     }
-    setImportantStyles(this.fadeBackground_, {'display': 'none'});
+    setImportantStyles$1(this.fadeBackground_, {'display': 'none'});
   }
 }
 
@@ -10031,14 +10063,14 @@ class Dialog {
     });
 
     /** @private @const {!Graypane} */
-    this.graypane_ = new Graypane(doc, Z_INDEX - 1);
+    this.graypane_ = new Graypane$1(doc, Z_INDEX - 1);
 
     const modifiedImportantStyles = Object.assign(
       {},
       rootElementImportantStyles,
       importantStyles
     );
-    setImportantStyles(this.iframe_.getElement(), modifiedImportantStyles);
+    setImportantStyles$1(this.iframe_.getElement(), modifiedImportantStyles);
 
     setStyles(this.iframe_.getElement(), styles);
 
@@ -10081,7 +10113,7 @@ class Dialog {
     this.graypane_.attach();
 
     if (hidden) {
-      setImportantStyles(iframe.getElement(), {
+      setImportantStyles$1(iframe.getElement(), {
         'visibility': 'hidden',
         'opacity': 0,
       });
@@ -10116,7 +10148,7 @@ class Dialog {
     const iframeDoc = /** @type {!HTMLDocument} */ (this.iframe_.getDocument());
 
     // Inject Google fonts in <HEAD> section of the iframe.
-    injectStyleSheet(resolveDoc(iframeDoc), CSS);
+    injectStyleSheet(resolveDoc(iframeDoc), CSS$1);
 
     // Add Loading indicator.
     this.loadingView_ = new LoadingView(iframeDoc);
@@ -10138,7 +10170,7 @@ class Dialog {
     if (animated) {
       animating = this.animate_(() => {
         this.graypane_.hide(/* animate */ true);
-        return transition(
+        return transition$1(
           this.getElement(),
           {
             'transform': 'translateY(100%)',
@@ -10236,7 +10268,7 @@ class Dialog {
    * @return {!Promise}
    */
   openView(view) {
-    setImportantStyles(view.getElement(), resetViewStyles);
+    setImportantStyles$1(view.getElement(), resetViewStyles);
     this.entryTransitionToNextView_();
 
     this.view_ = view;
@@ -10248,7 +10280,7 @@ class Dialog {
     }
 
     return view.init(this).then(() => {
-      setImportantStyles(view.getElement(), {
+      setImportantStyles$1(view.getElement(), {
         'opacity': 1,
       });
       if (this.hidden_) {
@@ -10267,12 +10299,12 @@ class Dialog {
    */
   show_() {
     this.animate_(() => {
-      setImportantStyles(this.getElement(), {
+      setImportantStyles$1(this.getElement(), {
         'transform': 'translateY(100%)',
         'opactiy': 1,
         'visibility': 'visible',
       });
-      return transition(
+      return transition$1(
         this.getElement(),
         {
           'transform': 'translateY(0)',
@@ -10305,11 +10337,11 @@ class Dialog {
       if (newHeight >= oldHeight) {
         // Expand.
         animating = this.animate_(() => {
-          setImportantStyles(this.getElement(), {
+          setImportantStyles$1(this.getElement(), {
             'height': `${newHeight}px`,
             'transform': `translateY(${newHeight - oldHeight}px)`,
           });
-          return transition(
+          return transition$1(
             this.getElement(),
             {
               'transform': 'translateY(0)',
@@ -10321,7 +10353,7 @@ class Dialog {
       } else {
         // Collapse.
         animating = this.animate_(() => {
-          return transition(
+          return transition$1(
             this.getElement(),
             {
               'transform': `translateY(${oldHeight - newHeight}px)`,
@@ -10329,7 +10361,7 @@ class Dialog {
             300,
             'ease-out'
           ).then(() => {
-            setImportantStyles(this.getElement(), {
+            setImportantStyles$1(this.getElement(), {
               'height': `${newHeight}px`,
               'transform': 'translateY(0)',
             });
@@ -10337,7 +10369,7 @@ class Dialog {
         });
       }
     } else {
-      setImportantStyles(this.getElement(), {
+      setImportantStyles$1(this.getElement(), {
         'height': `${newHeight}px`,
       });
       animating = Promise.resolve();
@@ -10392,7 +10424,7 @@ class Dialog {
    * Sets the position of the dialog. Currently 'BOTTOM' is set by default.
    */
   setPosition_() {
-    setImportantStyles(this.getElement(), this.getPositionStyle_());
+    setImportantStyles$1(this.getElement(), this.getPositionStyle_());
   }
 
   /**
@@ -10405,7 +10437,7 @@ class Dialog {
     if (this.inferPosition_() == PositionAt.BOTTOM) {
       const bottomPadding = newHeight + 20; // Add some extra padding.
       const htmlElement = this.doc_.getRootElement();
-      setImportantStyles(htmlElement, {
+      setImportantStyles$1(htmlElement, {
         'padding-bottom': `${bottomPadding}px`,
       });
     }
@@ -10499,7 +10531,7 @@ class DialogManager {
     this.openPromise_ = null;
 
     /** @private @const {!Graypane} */
-    this.popupGraypane_ = new Graypane(doc, POPUP_Z_INDEX);
+    this.popupGraypane_ = new Graypane$1(doc, POPUP_Z_INDEX);
 
     /** @private {?Window} */
     this.popupWin_ = null;
@@ -10689,20 +10721,30 @@ class MeterToastApi {
      */
     this.onConsumeCallback_ = null;
 
+    /**
+     * Boolean indicating whether or not the onConsumeCallback_ has been handled
+     * (either called or ignored). This is used to protect against unexpected
+     * cancellations not consuming a meter.
+     * @private {!boolean}
+     */
+    this.onConsumeCallbackHandled_ = false;
+
     /** @private @const {!function()} */
     this.sendCloseRequestFunction_ = () => {
+      const closeRequest = new ToastCloseRequest();
+      closeRequest.setClose(true);
+      this.activityIframeView_.execute(closeRequest);
+      this.removeCloseEventListener();
+
       this.deps_
         .eventManager()
         .logSwgEvent(
           AnalyticsEvent.ACTION_METER_TOAST_CLOSED_BY_ARTICLE_INTERACTION,
           true
         );
-      const closeRequest = new ToastCloseRequest();
-      closeRequest.setClose(true);
-      this.activityIframeView_.execute(closeRequest);
-      this.removeCloseEventListener();
 
-      if (this.onConsumeCallback_) {
+      if (this.onConsumeCallback_ && !this.onConsumeCallbackHandled_) {
+        this.onConsumeCallbackHandled_ = true;
         this.onConsumeCallback_();
       }
     };
@@ -10732,7 +10774,27 @@ class MeterToastApi {
         'starting metering.';
       log_4(errorMessage);
     }
-    this.dialogManager_.handleCancellations(this.activityIframeView_);
+
+    this.dialogManager_
+      .handleCancellations(this.activityIframeView_)
+      .catch((reason) => {
+        // Possibly call onConsumeCallback on all dialog cancellations to ensure unexpected
+        // dialog closures don't give access without a meter consumed.
+        if (this.onConsumeCallback_ && !this.onConsumeCallbackHandled_) {
+          this.onConsumeCallbackHandled_ = true;
+          this.onConsumeCallback_();
+        }
+        // Don't throw on cancel errors since they happen when a user closes the toast,
+        // which is expected.
+        if (!isCancelError(reason)) {
+          // eslint-disable-next-line no-console
+          console /*OK*/
+            .error(
+              '[swg.js]: Error occurred during meter toast handling: ' + reason
+            );
+          throw reason;
+        }
+      });
     return this.dialogManager_.openDialog().then((dialog) => {
       this.setDialogBoxShadow_();
       this.setLoadingViewWidth_();
@@ -10805,13 +10867,13 @@ class MeterToastApi {
     );
     const element = this.dialogManager_.getDialog().getElement();
     if (mobileMediaQuery.matches) {
-      setImportantStyles(element, {'box-shadow': IFRAME_BOX_SHADOW});
+      setImportantStyles$1(element, {'box-shadow': IFRAME_BOX_SHADOW});
     }
     mobileMediaQuery.addListener((changed) => {
       if (changed.matches) {
-        setImportantStyles(element, {'box-shadow': IFRAME_BOX_SHADOW});
+        setImportantStyles$1(element, {'box-shadow': IFRAME_BOX_SHADOW});
       } else {
-        setImportantStyles(element, {'box-shadow': ''});
+        setImportantStyles$1(element, {'box-shadow': ''});
       }
     });
   }
@@ -10829,7 +10891,7 @@ class MeterToastApi {
         .getDialog()
         .getLoadingView()
         .getElement();
-      setImportantStyles(element, {
+      setImportantStyles$1(element, {
         'width': MINIMIZED_IFRAME_SIZE,
         'margin': 'auto',
       });
@@ -10843,6 +10905,8 @@ class MeterToastApi {
   startNativeFlow_(response) {
     if (response.getNative()) {
       this.removeCloseEventListener();
+      // We shouldn't decrement the meter on redirects, so don't call onConsumeCallback.
+      this.onConsumeCallbackHandled_ = true;
       this.deps_.callbacks().triggerSubscribeRequest();
     }
   }
@@ -10880,7 +10944,7 @@ const toastImportantStyles = {
 };
 
 /** @const {!Object<string, string>} */
-const iframeAttributes$2 = {
+const iframeAttributes = {
   'frameborder': '0',
   'scrolling': 'no',
   'class': 'swg-toast',
@@ -10915,10 +10979,10 @@ class Toast {
     this.iframe_ = /** @type {!HTMLIFrameElement} */ (createElement(
       this.doc_.getWin().document,
       'iframe',
-      iframeAttributes$2
+      iframeAttributes
     ));
 
-    setImportantStyles(this.iframe_, toastImportantStyles);
+    setImportantStyles$1(this.iframe_, toastImportantStyles);
 
     /** @private @const {!Promise} */
     this.ready_ = new Promise((resolve) => {
@@ -10957,12 +11021,12 @@ class Toast {
         resetStyles(this.iframe_, ['height']);
 
         this.animate_(() => {
-          setImportantStyles(this.iframe_, {
+          setImportantStyles$1(this.iframe_, {
             'transform': 'translateY(100%)',
             'opactiy': 1,
             'visibility': 'visible',
           });
-          return transition(
+          return transition$1(
             this.iframe_,
             {
               'transform': 'translateY(0)',
@@ -11014,7 +11078,7 @@ class Toast {
         return Promise.resolve();
       }, 500);
 
-      return transition(
+      return transition$1(
         this.iframe_,
         {
           'transform': 'translateY(100%)',
@@ -11026,6 +11090,169 @@ class Toast {
       );
     });
   }
+}
+
+/**
+ * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/** @const {!Object<string,AnalyticsEvent>} */
+const PublisherEventToAnalyticsEvent = {
+  [Event.IMPRESSION_PAYWALL]: AnalyticsEvent.IMPRESSION_PAYWALL,
+  [Event.IMPRESSION_AD]: AnalyticsEvent.IMPRESSION_AD,
+  [Event.IMPRESSION_OFFERS]: AnalyticsEvent.IMPRESSION_OFFERS,
+  [Event.ACTION_SUBSCRIPTIONS_LANDING_PAGE]:
+    AnalyticsEvent.ACTION_SUBSCRIPTIONS_LANDING_PAGE,
+  [Event.ACTION_OFFER_SELECTED]: AnalyticsEvent.ACTION_OFFER_SELECTED,
+  [Event.ACTION_PAYMENT_FLOW_STARTED]:
+    AnalyticsEvent.ACTION_PAYMENT_FLOW_STARTED,
+  [Event.ACTION_PAYMENT_COMPLETED]: AnalyticsEvent.ACTION_PAYMENT_COMPLETE,
+  [Event.EVENT_CUSTOM]: AnalyticsEvent.EVENT_CUSTOM,
+};
+
+/** @const {!Object<number,?Event>} */
+const AnalyticsEventToPublisherEvent = {
+  [AnalyticsEvent.UNKNOWN]: null,
+  [AnalyticsEvent.IMPRESSION_PAYWALL]: Event.IMPRESSION_PAYWALL,
+  [AnalyticsEvent.IMPRESSION_AD]: Event.IMPRESSION_AD,
+  [AnalyticsEvent.IMPRESSION_OFFERS]: Event.IMPRESSION_OFFERS,
+  [AnalyticsEvent.IMPRESSION_SUBSCRIBE_BUTTON]: null,
+  [AnalyticsEvent.IMPRESSION_SMARTBOX]: null,
+  [AnalyticsEvent.ACTION_SUBSCRIBE]: null,
+  [AnalyticsEvent.ACTION_PAYMENT_COMPLETE]: Event.ACTION_PAYMENT_COMPLETED,
+  [AnalyticsEvent.ACTION_ACCOUNT_CREATED]: null,
+  [AnalyticsEvent.ACTION_ACCOUNT_ACKNOWLEDGED]: null,
+  [AnalyticsEvent.ACTION_SUBSCRIPTIONS_LANDING_PAGE]:
+    Event.ACTION_SUBSCRIPTIONS_LANDING_PAGE,
+  [AnalyticsEvent.ACTION_PAYMENT_FLOW_STARTED]:
+    Event.ACTION_PAYMENT_FLOW_STARTED,
+  [AnalyticsEvent.ACTION_OFFER_SELECTED]: Event.ACTION_OFFER_SELECTED,
+  [AnalyticsEvent.EVENT_PAYMENT_FAILED]: null,
+  [AnalyticsEvent.EVENT_CUSTOM]: Event.EVENT_CUSTOM,
+};
+
+/** @const {!Object<string,?Array<AnalyticsEvent>>} */
+const ShowcaseEntitlemenntToAnalyticsEvents = {
+  [PublisherEntitlementEvent.EVENT_SHOWCASE_UNLOCKED_BY_SUBSCRIPTION]: [
+    AnalyticsEvent.EVENT_UNLOCKED_BY_SUBSCRIPTION,
+  ],
+  [PublisherEntitlementEvent.EVENT_SHOWCASE_UNLOCKED_BY_METER]: [
+    AnalyticsEvent.EVENT_HAS_METERING_ENTITLEMENTS,
+    AnalyticsEvent.EVENT_UNLOCKED_BY_METER,
+  ],
+  [PublisherEntitlementEvent.EVENT_SHOWCASE_UNLOCKED_FREE_PAGE]: [
+    AnalyticsEvent.EVENT_UNLOCKED_FREE_PAGE,
+  ],
+  [PublisherEntitlementEvent.EVENT_SHOWCASE_NO_ENTITLEMENTS_REGWALL]: [
+    AnalyticsEvent.EVENT_NO_ENTITLEMENTS,
+    AnalyticsEvent.IMPRESSION_REGWALL,
+    AnalyticsEvent.IMPRESSION_SHOWCASE_REGWALL,
+  ],
+  [PublisherEntitlementEvent.EVENT_SHOWCASE_NO_ENTITLEMENTS_PAYWALL]: [
+    AnalyticsEvent.EVENT_NO_ENTITLEMENTS,
+    AnalyticsEvent.IMPRESSION_PAYWALL,
+  ],
+  [PublisherEntitlementEvent.EVENT_SHOWCASE_METER_OFFERED]: [
+    AnalyticsEvent.EVENT_HAS_METERING_ENTITLEMENTS,
+    AnalyticsEvent.EVENT_OFFERED_METER,
+  ],
+};
+
+/** @const {!Object<number,?Event>} */
+const AnalyticsEventToEntitlementResult = {
+  [AnalyticsEvent.IMPRESSION_REGWALL]: EntitlementResult.LOCKED_REGWALL,
+  [AnalyticsEvent.EVENT_UNLOCKED_BY_METER]: EntitlementResult.UNLOCKED_METER,
+  [AnalyticsEvent.EVENT_UNLOCKED_BY_SUBSCRIPTION]:
+    EntitlementResult.UNLOCKED_SUBSCRIBER,
+  [AnalyticsEvent.EVENT_UNLOCKED_FREE_PAGE]: EntitlementResult.UNLOCKED_FREE,
+  [AnalyticsEvent.IMPRESSION_PAYWALL]: EntitlementResult.LOCKED_PAYWALL,
+};
+
+/**
+ * Converts a propensity event enum into an analytics event enum.
+ * @param {!Event|string} propensityEvent
+ * @returns {!AnalyticsEvent}
+ */
+function publisherEventToAnalyticsEvent(propensityEvent) {
+  return PublisherEventToAnalyticsEvent[propensityEvent];
+}
+
+/**
+ * Converts an analytics event enum into a propensity event enum.
+ * @param {!AnalyticsEvent} analyticsEvent
+ * @returns {?Event}
+ */
+function analyticsEventToPublisherEvent(analyticsEvent) {
+  return AnalyticsEventToPublisherEvent[analyticsEvent];
+}
+
+/**
+ * Converts a publisher entitlement event enum into an array analytics events.
+ * @param {!PublisherEntitlementEvent|string} event
+ * @returns {!Array<AnalyticsEvent>}
+ */
+function publisherEntitlementEventToAnalyticsEvents(event) {
+  return ShowcaseEntitlemenntToAnalyticsEvents[event] || [];
+}
+
+function analyticsEventToEntitlementResult(event) {
+  return AnalyticsEventToEntitlementResult[event];
+}
+
+/**
+ * Copyright 2020 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Returns true if the query string contains fresh Google Article Access (GAA) params.
+ * @param {string} queryString
+ * @return {boolean}
+ */
+function queryStringHasFreshGaaParams(queryString) {
+  const params = parseQueryString(queryString);
+
+  // Verify GAA params exist.
+  if (
+    !params['gaa_at'] ||
+    !params['gaa_n'] ||
+    !params['gaa_sig'] ||
+    !params['gaa_ts']
+  ) {
+    return false;
+  }
+
+  // Verify timestamp isn't stale.
+  const expirationTimestamp = parseInt(params['gaa_ts'], 16);
+  const currentTimestamp = Date.now() / 1000;
+  if (expirationTimestamp < currentTimestamp) {
+    return false;
+  }
+
+  return true;
 }
 
 /**
@@ -11121,6 +11348,10 @@ class EntitlementsManager {
 
     /** @private @const {!../api/subscriptions.Config} */
     this.config_ = deps.config();
+
+    this.deps_
+      .eventManager()
+      .registerEventListener(this.possiblyPingbackOnClientEvent_.bind(this));
   }
 
   /**
@@ -11205,9 +11436,14 @@ class EntitlementsManager {
    * Sends a pingback that marks a metering entitlement as used.
    * @param {!Entitlements} entitlements
    */
-  sendPingback_(entitlements) {
+  consumeMeter_(entitlements) {
     const entitlement = entitlements.getEntitlementForThis();
     if (!entitlement || entitlement.source !== GOOGLE_METERING_SOURCE) {
+      return;
+    }
+    // Verify GAA params are present, otherwise bail since the pingback
+    // shouldn't happen on non-metering requests.
+    if (!queryStringHasFreshGaaParams(this.win_.location.search)) {
       return;
     }
 
@@ -11218,10 +11454,63 @@ class EntitlementsManager {
     const jwt = new EntitlementJwt();
     jwt.setSource(entitlement.source);
     jwt.setJwt(entitlement.subscriptionToken);
+    return this.postEntitlementsRequest_(
+      jwt,
+      EntitlementResult.UNLOCKED_METER,
+      EntitlementSource.GOOGLE_SHOWCASE_METERING_SERVICE
+    );
+  }
 
+  // Listens for events from the event manager and informs
+  // the server about publisher entitlements and non-
+  // consumable Google entitlements.
+  possiblyPingbackOnClientEvent_(event) {
+    // Verify GAA params are present, otherwise bail since the pingback
+    // shouldn't happen on non-metering requests.
+    if (!queryStringHasFreshGaaParams(this.win_.location.search)) {
+      return;
+    }
+
+    // A subset of analytics events are also an entitlement result
+    const result = analyticsEventToEntitlementResult(event.eventType);
+    if (!result) {
+      return;
+    }
+    let source = null;
+
+    switch (event.eventOriginator) {
+      // The indicates the publisher reported it via subscriptions.setShowcaseEntitlement
+      case EventOriginator.SHOWCASE_CLIENT:
+        source = EntitlementSource.PUBLISHER_ENTITLEMENT;
+        break;
+      case EventOriginator.SWG_CLIENT: // Fallthrough, these are the same
+      case EventOriginator.SWG_SERVER:
+        if (result == EntitlementResult.UNLOCKED_METER) {
+          // Meters from Google require a valid jwt, which is sent by
+          // an entitlement.
+          return;
+        }
+        source = EntitlementSource.GOOGLE_SUBSCRIBER_ENTITLEMENT;
+        break;
+      // Permission to pingback other sources was not requested
+      default:
+        return;
+    }
+    this.postEntitlementsRequest_(new EntitlementJwt(), result, source);
+  }
+
+  // Informs the Entitlements server about the entitlement used
+  // to unlock the page.
+  postEntitlementsRequest_(
+    usedEntitlement,
+    entitlementResult,
+    entitlementSource
+  ) {
     const message = new EntitlementsRequest();
-    message.setUsedEntitlement(jwt);
+    message.setUsedEntitlement(usedEntitlement);
     message.setClientEventTime(toTimestamp(Date.now()));
+    message.setEntitlementResult(entitlementResult);
+    message.setEntitlementSource(entitlementSource);
 
     const url =
       '/publication/' +
@@ -11453,7 +11742,6 @@ class EntitlementsManager {
         .logSwgEvent(AnalyticsEvent.EVENT_NO_ENTITLEMENTS, false);
       return;
     }
-
     this.maybeShowToast_(entitlement);
   }
 
@@ -11482,7 +11770,7 @@ class EntitlementsManager {
       }
 
       // Show toast.
-      const source = entitlement.source || 'google';
+      const source = entitlement.source || GOOGLE_METERING_SOURCE;
       return new Toast(
         this.deps_,
         feUrl('/toastiframe'),
@@ -11515,7 +11803,7 @@ class EntitlementsManager {
         if (onCloseDialog) {
           onCloseDialog();
         }
-        this.sendPingback_(entitlements);
+        this.consumeMeter_(entitlements);
       };
       const showToast = this.getShowToastFromEntitlements_(entitlements);
       if (showToast === false) {
@@ -11731,19 +12019,21 @@ class Xhr {
    * @return {!Promise<!FetchResponse>}
    */
   fetch(input, init) {
-    // TODO (avimehta): Figure out if CORS needs be handled the way AMP does it.
     init = setupInit(init);
     return this.fetch_(input, init)
-      .then(
-        (response) => response,
-        (reason) => {
-          const targetOrigin = parseUrl$1(input).origin;
-          throw new Error(
-            `XHR Failed fetching (${targetOrigin}/...):`,
-            reason && reason.message
-          );
-        }
-      )
+      .catch((reason) => {
+        /*
+         * If the domain is not valid for SwG we return 404 without
+         * CORS headers and the browser throws a CORS error.
+         * We include some helpful text in the message to point the
+         * publisher towards the real problem.
+         */
+        const targetOrigin = parseUrl(input).origin;
+        throw new Error(
+          `XHR Failed fetching (${targetOrigin}/...): (Note: a CORS error above may indicate that this domain is not configured for Subscribe with Google)`,
+          reason && reason.message
+        );
+      })
       .then((response) => assertSuccess(response));
   }
 }
@@ -12092,7 +12382,13 @@ class XhrFetcher {
       headers: {'Accept': 'text/plain, application/json'},
       credentials: 'include',
     });
-    return this.fetch(url, init).then((response) => response.json());
+    return this.fetch(url, init).then((response) => {
+      return response.text().then((text) => {
+        // Remove "")]}'\n" XSSI prevention prefix in safe responses.
+        const cleanedText = text.replace(/^(\)\]\}'\n)/, '');
+        return parseJson(cleanedText);
+      });
+    });
   }
 
   sendPost(url, message) {
@@ -12650,111 +12946,6 @@ class LinkSaveFlow {
  * limitations under the License.
  */
 
-/** @const {!Object<string,AnalyticsEvent>} */
-const PublisherEventToAnalyticsEvent = {
-  [Event.IMPRESSION_PAYWALL]: AnalyticsEvent.IMPRESSION_PAYWALL,
-  [Event.IMPRESSION_AD]: AnalyticsEvent.IMPRESSION_AD,
-  [Event.IMPRESSION_OFFERS]: AnalyticsEvent.IMPRESSION_OFFERS,
-  [Event.ACTION_SUBSCRIPTIONS_LANDING_PAGE]:
-    AnalyticsEvent.ACTION_SUBSCRIPTIONS_LANDING_PAGE,
-  [Event.ACTION_OFFER_SELECTED]: AnalyticsEvent.ACTION_OFFER_SELECTED,
-  [Event.ACTION_PAYMENT_FLOW_STARTED]:
-    AnalyticsEvent.ACTION_PAYMENT_FLOW_STARTED,
-  [Event.ACTION_PAYMENT_COMPLETED]: AnalyticsEvent.ACTION_PAYMENT_COMPLETE,
-  [Event.EVENT_CUSTOM]: AnalyticsEvent.EVENT_CUSTOM,
-};
-
-/** @const {!Object<number,?Event>} */
-const AnalyticsEventToPublisherEvent = {
-  [AnalyticsEvent.UNKNOWN]: null,
-  [AnalyticsEvent.IMPRESSION_PAYWALL]: Event.IMPRESSION_PAYWALL,
-  [AnalyticsEvent.IMPRESSION_AD]: Event.IMPRESSION_AD,
-  [AnalyticsEvent.IMPRESSION_OFFERS]: Event.IMPRESSION_OFFERS,
-  [AnalyticsEvent.IMPRESSION_SUBSCRIBE_BUTTON]: null,
-  [AnalyticsEvent.IMPRESSION_SMARTBOX]: null,
-  [AnalyticsEvent.ACTION_SUBSCRIBE]: null,
-  [AnalyticsEvent.ACTION_PAYMENT_COMPLETE]: Event.ACTION_PAYMENT_COMPLETED,
-  [AnalyticsEvent.ACTION_ACCOUNT_CREATED]: null,
-  [AnalyticsEvent.ACTION_ACCOUNT_ACKNOWLEDGED]: null,
-  [AnalyticsEvent.ACTION_SUBSCRIPTIONS_LANDING_PAGE]:
-    Event.ACTION_SUBSCRIPTIONS_LANDING_PAGE,
-  [AnalyticsEvent.ACTION_PAYMENT_FLOW_STARTED]:
-    Event.ACTION_PAYMENT_FLOW_STARTED,
-  [AnalyticsEvent.ACTION_OFFER_SELECTED]: Event.ACTION_OFFER_SELECTED,
-  [AnalyticsEvent.EVENT_PAYMENT_FAILED]: null,
-  [AnalyticsEvent.EVENT_CUSTOM]: Event.EVENT_CUSTOM,
-};
-
-/** @const {!Object<string,?Array<AnalyticsEvent>>} */
-const ShowcaseEntitlemenntToAnalyticsEvents = {
-  [PublisherEntitlementEvent.EVENT_SHOWCASE_UNLOCKED_BY_SUBSCRIPTION]: [
-    AnalyticsEvent.EVENT_UNLOCKED_BY_SUBSCRIPTION,
-  ],
-  [PublisherEntitlementEvent.EVENT_SHOWCASE_UNLOCKED_BY_METER]: [
-    AnalyticsEvent.EVENT_HAS_METERING_ENTITLEMENTS,
-    AnalyticsEvent.EVENT_UNLOCKED_BY_METER,
-  ],
-  [PublisherEntitlementEvent.EVENT_SHOWCASE_UNLOCKED_FREE_PAGE]: [
-    AnalyticsEvent.EVENT_UNLOCKED_FREE_PAGE,
-  ],
-  [PublisherEntitlementEvent.EVENT_SHOWCASE_NO_ENTITLEMENTS_REGWALL]: [
-    AnalyticsEvent.EVENT_NO_ENTITLEMENTS,
-    AnalyticsEvent.IMPRESSION_REGWALL,
-    AnalyticsEvent.IMPRESSION_SHOWCASE_REGWALL,
-  ],
-  [PublisherEntitlementEvent.EVENT_SHOWCASE_NO_ENTITLEMENTS_PAYWALL]: [
-    AnalyticsEvent.EVENT_NO_ENTITLEMENTS,
-    AnalyticsEvent.IMPRESSION_PAYWALL,
-  ],
-  [PublisherEntitlementEvent.EVENT_SHOWCASE_METER_OFFERED]: [
-    AnalyticsEvent.EVENT_HAS_METERING_ENTITLEMENTS,
-    AnalyticsEvent.EVENT_OFFERED_METER,
-  ],
-};
-
-/**
- * Converts a propensity event enum into an analytics event enum.
- * @param {!Event|string} propensityEvent
- * @returns {!AnalyticsEvent}
- */
-function publisherEventToAnalyticsEvent(propensityEvent) {
-  return PublisherEventToAnalyticsEvent[propensityEvent];
-}
-
-/**
- * Converts an analytics event enum into a propensity event enum.
- * @param {!AnalyticsEvent} analyticsEvent
- * @returns {?Event}
- */
-function analyticsEventToPublisherEvent(analyticsEvent) {
-  return AnalyticsEventToPublisherEvent[analyticsEvent];
-}
-
-/**
- * Converts a publisher entitlement event enum into an array analytics events.
- * @param {!PublisherEntitlementEvent|string} event
- * @returns {!Array<AnalyticsEvent>}
- */
-function publisherEntitlementEventToAnalyticsEvents(event) {
-  return ShowcaseEntitlemenntToAnalyticsEvents[event] || [];
-}
-
-/**
- * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 /**
  * @implements {../api/logger-api.LoggerApi}
  */
@@ -13072,7 +13263,7 @@ class OffersApi {
  * limitations under the License.
  */
 
-const MAX_Z_INDEX = 2147483647;
+const MAX_Z_INDEX$1 = 2147483647;
 
 const Constants = {};
 
@@ -13197,7 +13388,7 @@ Constants.IFRAME_STYLE = `
     overflow: visible;
     position: fixed;
     width: 100%;
-    z-index: ${MAX_Z_INDEX};
+    z-index: ${MAX_Z_INDEX$1};
     -webkit-appearance: none;
     left: 0;
 }
@@ -13241,7 +13432,7 @@ Constants.IFRAME_STYLE_CENTER = `
   top: 100%;
   transform: scale(0.8);
   width: 480px;
-  z-index: ${MAX_Z_INDEX};
+  z-index: ${MAX_Z_INDEX$1};
   -webkit-appearance: none;
 }
 @media (min-height: 667px) {
@@ -13677,10 +13868,10 @@ class PaymentsRequestDelegate {
  * limitations under the License.
  */
 
-const MAX_Z_INDEX$1 = 2147483647;
+const MAX_Z_INDEX = 2147483647;
 
 
-class Graypane$1 {
+class Graypane {
 
   /**
    * @param {!Document} doc
@@ -13691,8 +13882,8 @@ class Graypane$1 {
 
     /** @private @const {!Element} */
     this.element_ = doc.createElement(Constants.GPAY_GRAYPANE);
-    setImportantStyles$1(this.element_, {
-      'z-index': MAX_Z_INDEX$1,
+    setImportantStyles(this.element_, {
+      'z-index': MAX_Z_INDEX,
       'display': 'none',
       'position': 'fixed',
       'top': 0,
@@ -13724,11 +13915,11 @@ class Graypane$1 {
   show(popupWindow) {
     this.popupWindow_ = popupWindow || null;
     this.doc_.body.appendChild(this.element_);
-    setImportantStyles$1(this.element_, {
+    setImportantStyles(this.element_, {
       'display': 'block',
       'opacity': 0,
     });
-    return transition$1(this.element_, {
+    return transition(this.element_, {
       'opacity': 1,
     }, 300, 'ease-out');
   }
@@ -13744,10 +13935,10 @@ class Graypane$1 {
       // This could be possible after redirect.
       return;
     }
-    return transition$1(this.element_, {
+    return transition(this.element_, {
       'opacity': 0,
     }, 300, 'ease-out').then(() => {
-      setImportantStyles$1(this.element_, {'display': 'none'});
+      setImportantStyles(this.element_, {'display': 'none'});
       this.doc_.body.removeChild(this.element_);
     });
   }
@@ -13764,7 +13955,7 @@ class Graypane$1 {
  * @param {!Element} element
  * @param {!Object<string, string|number>} styles
  */
-function setImportantStyles$1(element, styles) {
+function setImportantStyles(element, styles) {
   for (const k in styles) {
     element.style.setProperty(k, styles[k].toString(), 'important');
   }
@@ -13779,20 +13970,20 @@ function setImportantStyles$1(element, styles) {
  * @param {string} curve - transition function for the animation.
  * @return {!Promise} Promise which resolves once the animation is done playing.
  */
-function transition$1(el, props, durationMillis, curve) {
+function transition(el, props, durationMillis, curve) {
   const win = el.ownerDocument.defaultView;
   const previousTransitionValue = el.style.transition || '';
   return new Promise(resolve => {
     win.setTimeout(() => {
       win.setTimeout(resolve, durationMillis);
       const tr = `${durationMillis}ms ${curve}`;
-      setImportantStyles$1(el, Object.assign({
+      setImportantStyles(el, Object.assign({
         'transition': `transform ${tr}, opacity ${tr}`,
       }, props));
     });
   }).then(() => {
     // Stop transition and make sure that the final properties get set.
-    setImportantStyles$1(el, Object.assign({
+    setImportantStyles(el, Object.assign({
       'transition': previousTransitionValue,
     }, props));
   });
@@ -14624,7 +14815,7 @@ class PaymentsWebActivityDelegate {
     /** @const {!ActivityPorts} */
     this.activities = activities || new activityPorts_1(window);
     /** @const @private {!Graypane} */
-    this.graypane_ = new Graypane$1(window.document);
+    this.graypane_ = new Graypane(window.document);
     /** @private {?function(!Promise<!PaymentData>)} */
     this.callback_ = null;
     /**
@@ -15237,8 +15428,7 @@ class UpiHandler {
   loadPaymentData(paymentDataRequest, upiPaymentMethod, onResultCallback) {
     const parameters = upiPaymentMethod['parameters'];
     const transactionInfo = paymentDataRequest['transactionInfo'];
-    const supportedInstruments = 
-        [{
+    const supportedInstruments = [{
           'supportedMethods': ['https://tez.google.com/pay'],
           'data': {
             'pa': parameters['payeeVpa'],
@@ -15350,7 +15540,7 @@ class UpiHandler {
    */
   redirectToGooglePlay_() {
     window.location.replace(
-          // NOLINT
+        // NOLINT
             'https://play.google.com/store/apps/details?id=com.google.android.apps.nbu.paisa.user');  // NOLINT
     return Promise.reject(
         {'errorMessage': 'Cannot redirect to Tez page in Google Play.'});
@@ -15470,10 +15660,10 @@ Dual licensed under the MIT and GPL licenses.
  */
 
 class Random_uuid {}  // Private array of chars to use
-  var CHARS$1 = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split('');
+  var CHARS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split('');
 
   Random_uuid.uuid = function (len, radix) {
-    var chars = CHARS$1, uuid = [], i;
+    var chars = CHARS, uuid = [], i;
     radix = radix || chars.length;
 
     if (len) {
@@ -15503,7 +15693,7 @@ class Random_uuid {}  // Private array of chars to use
   // A more performant, but slightly bulkier, RFC4122v4 solution.  We boost performance
   // by minimizing calls to random()
   Random_uuid.uuidFast = function() {
-    var chars = CHARS$1, uuid = new Array(36), rnd=0, r;
+    var chars = CHARS, uuid = new Array(36), rnd=0, r;
     for (var i = 0; i < 36; i++) {
       if (i==8 || i==13 ||  i==18 || i==23) {
         uuid[i] = '-';
@@ -15681,7 +15871,6 @@ class PaymentsAsyncClient {
    * @param {!IsReadyToPayRequest} isReadyToPayRequest
    * @return {!Promise} The promise will contain the boolean result and error
    *     message when possible.
-   * @export
    */
   isReadyToPay(isReadyToPayRequest) {
     // Merge with paymentOptions, preferring values from isReadyToPayRequest
@@ -15849,7 +16038,6 @@ class PaymentsAsyncClient {
    *
    * @param {!PaymentDataRequest} paymentDataRequest Provides necessary
    *     information to support a payment.
-   * @export
    */
   prefetchPaymentData(paymentDataRequest) {
     /** @type {?string} */
@@ -15880,7 +16068,6 @@ class PaymentsAsyncClient {
    *
    * @param {!PaymentDataRequest} paymentDataRequest Provides necessary
    *     information to support a payment.
-   * @export
    */
   loadPaymentData(paymentDataRequest) {
     PayFrameHelper.postMessage({
@@ -15957,7 +16144,6 @@ class PaymentsAsyncClient {
    *
    * @param {!ButtonOptions=} options
    * @return {!Element}
-   * @export
    */
   createButton(options = {}) {
     const button = null;
@@ -16917,7 +17103,7 @@ class Propensity {
   }
 }
 
-const CSS$1 = ".swg-dialog,.swg-toast{box-sizing:border-box;background-color:#fff!important}.swg-toast{position:fixed!important;bottom:0!important;max-height:46px!important;z-index:2147483647!important;border:none!important}@media (max-height:640px), (max-width:640px){.swg-dialog,.swg-toast{width:480px!important;left:-240px!important;margin-left:50vw!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}@media (min-width:640px) and (min-height:640px){.swg-dialog{width:630px!important;left:-315px!important;margin-left:50vw!important;background-color:transparent!important;border:none!important}.swg-toast{left:0!important}}@media (max-width:480px){.swg-dialog,.swg-toast{width:100%!important;left:0!important;right:0!important;margin-left:0!important}}\n/*# sourceURL=/./src/components/dialog.css*/";
+const CSS = ".swg-dialog,.swg-toast{box-sizing:border-box;background-color:#fff!important}.swg-toast{position:fixed!important;bottom:0!important;max-height:46px!important;z-index:2147483647!important;border:none!important}@media (max-height:640px), (max-width:640px){.swg-dialog,.swg-toast{width:480px!important;left:-240px!important;margin-left:50vw!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}@media (min-width:640px) and (min-height:640px){.swg-dialog{width:630px!important;left:-315px!important;margin-left:50vw!important;background-color:transparent!important;border:none!important}.swg-toast{left:0!important}}@media (max-width:480px){.swg-dialog,.swg-toast{width:100%!important;left:0!important;right:0!important;margin-left:0!important}}\n/*# sourceURL=/./src/components/dialog.css*/";
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -17112,657 +17298,6 @@ class WaitForSubscriptionLookupApi {
  * limitations under the License.
  */
 
-// NOTE: Please don't edit this file directly!
-//   You can (re)compile this file by running the "yarn build-i18n" shell command.
-
-const I18N_STRINGS = {
-  'GAA_REGWALL_TITLE': {
-    'de': 'Immer gut informiert mit Google',
-    'en': 'Get more with Google',
-    'fr': 'Plus de possibilit&#xE9;s avec Google',
-    'pt-br': 'Veja mais com o Google',
-  },
-  'GAA_REGWALL_DESCRIPTION': {
-    'de':
-      '<strong></strong>Dieser Inhalt ist normalerweise kostenpflichtig. Google gew&#xE4;hrt dir jedoch kostenlos Zugriff auf diesen Artikel und andere Inhalte, wenn du dich mit deinem Google-Konto bei <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> registrierst.',
-    'en':
-      '<strong></strong>This content usually requires payment, but Google is giving you free access to this article and more when you register with <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> using your Google Account.',
-    'fr':
-      '<strong></strong>Ce contenu est g&#xE9;n&#xE9;ralement payant, mais vous pouvez lire cet article et d&apos;autres contenus gratuitement gr&#xE2;ce &#xE0; Google en vous inscrivant sur <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> avec votre compte Google.',
-    'pt-br':
-      '<strong></strong>Normalmente, &#xE9; preciso pagar por este conte&#xFA;do. Por&#xE9;m, basta voc&#xEA; se registrar na publica&#xE7;&#xE3;o <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> usando sua Conta do Google para ter acesso gratuito a esta mat&#xE9;ria e muito mais.',
-  },
-  'GAA_REGWALL_PUBLISHER_SIGN_IN_BUTTON': {
-    'de': 'Du hast bereits ein Konto?',
-    'en': 'Already have an account?',
-    'fr': 'Vous avez d&#xE9;j&#xE0; un compte&#xA0;?',
-    'pt-br': 'J&#xE1; tem uma conta?',
-  },
-};
-
-/**
- * Copyright 2020 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/** Stamp for post messages. */
-const POST_MESSAGE_STAMP = 'swg-gaa-post-message-stamp';
-
-/** Introduction command for post messages. */
-const POST_MESSAGE_COMMAND_INTRODUCTION = 'introduction';
-
-/** User command for post messages. */
-const POST_MESSAGE_COMMAND_USER = 'user';
-
-/** ID for the Google Sign-In iframe element. */
-const GOOGLE_SIGN_IN_IFRAME_ID = 'swg-google-sign-in-iframe';
-
-/** ID for the Google Sign-In button element. */
-const GOOGLE_SIGN_IN_BUTTON_ID = 'swg-google-sign-in-button';
-
-/** ID for the Publisher sign-in button element. */
-const PUBLISHER_SIGN_IN_BUTTON_ID = 'swg-publisher-sign-in-button';
-
-/** ID for the Regwall container element. */
-const REGWALL_CONTAINER_ID = 'swg-regwall-container';
-
-/** ID for the Regwall dialog element. */
-const REGWALL_DIALOG_ID = 'swg-regwall-dialog';
-
-/** ID for the Regwall title element. */
-const REGWALL_TITLE_ID = 'swg-regwall-title';
-
-/** Class the Regwall uses to disable scrolling. */
-const REGWALL_DISABLE_SCROLLING_CLASS =
-  'gaa-metering-regwall--disable-scrolling';
-
-/**
- * HTML for the metering regwall dialog, where users can sign in with Google.
- * The script creates a dialog based on this HTML.
- *
- * The HTML includes an iframe that loads the Google Sign-In button.
- * This iframe can live on a different origin.
- */
-const REGWALL_HTML = `
-<style>
-  .${REGWALL_DISABLE_SCROLLING_CLASS} {
-    overflow: hidden;
-  }
-
-  .gaa-metering-regwall--dialog-spacer,
-  .gaa-metering-regwall--dialog,
-  .gaa-metering-regwall--logo,
-  .gaa-metering-regwall--title,
-  .gaa-metering-regwall--description,
-  .gaa-metering-regwall--description strong,
-  .gaa-metering-regwall--iframe,
-  .gaa-metering-regwall--publisher-no-thanks-button {
-    all: initial;
-    box-sizing: border-box;
-    font-family: Roboto, arial, sans-serif;
-  }
-
-  .gaa-metering-regwall--dialog-spacer {
-    bottom: 0;
-    display: block;
-    position: fixed;
-    width: 100%;
-  }
-
-  @keyframes slideUp {
-    from {transform: translate(0, 200px);}
-    to {transform: translate(0, 0);}
-  }
-
-  .gaa-metering-regwall--dialog {
-    animation: slideUp 0.5s;
-    background: white;
-    border-radius: 12px 12px 0 0;
-    box-shadow: 0px -2px 6px rgba(0, 0, 0, 0.3);
-    display: block;
-    margin: 0 auto;
-    max-width: 100%;
-    padding: 24px 20px;
-    width: 410px;
-  }
-
-  .gaa-metering-regwall--logo {
-    display: block;
-    margin: 0 auto 24px;
-  }
-
-  .gaa-metering-regwall--title {
-    color: #000;
-    display: block;
-    font-size: 16px;
-    margin: 0 0 8px;
-  }
-  
-  .gaa-metering-regwall--description {
-    color: #646464;
-    display: block;
-    font-size: 14px;
-    line-height: 19px;
-    margin: 0 0 30px;
-  }
-
-  .gaa-metering-regwall--description strong {
-    color: #646464;
-    font-size: 14px;
-    line-height: 19px;
-    font-weight: bold;
-  }
-
-  .gaa-metering-regwall--iframe {
-    border: none;
-    display: block;
-    height: 36px;
-    margin: 0 0 30px;
-    width: 100%;
-  }
-
-  .gaa-metering-regwall--line {
-    background-color: #ddd;
-    display: block;
-    height: 1px;
-    margin: 0 0 24px;
-  }
-
-  .gaa-metering-regwall--publisher-sign-in-button,
-  .gaa-metering-regwall--publisher-no-thanks-button {
-    color: #1967d2;
-    display: block;
-    cursor: pointer;
-    font-size: 12px;
-  }
-
-  .gaa-metering-regwall--publisher-sign-in-button {
-  }
-
-  .gaa-metering-regwall--publisher-no-thanks-button {
-    display: none;
-    float: right;
-  }
-
-  .gaa-metering-regwall--google-sign-in-button {
-    height: 36px;
-    margin: 0 auto 30px;
-  }
-
-  .gaa-metering-regwall--google-sign-in-button > div {
-    animation: swgGoogleSignInButtonfadeIn 0.32s;
-  }
-
-  @keyframes swgGoogleSignInButtonfadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-
-  .gaa-metering-regwall--google-sign-in-button .abcRioButton.abcRioButtonBlue {
-    background-color: #1A73E8;
-    box-shadow: none;
-    -webkit-box-shadow: none;
-    border-radius: 4px;
-    width: 100% !important;
-  }
-
-  .gaa-metering-regwall--google-sign-in-button .abcRioButton.abcRioButtonBlue .abcRioButtonIcon {
-    display: none;
-  }
-
-  .gaa-metering-regwall--google-sign-in-button .abcRioButton.abcRioButtonBlue .abcRioButtonContents {
-    font-size: 15px !important;
-  }
-</style>
-
-<div class="gaa-metering-regwall--dialog-spacer">
-  <div role="dialog" aria-modal="true" class="gaa-metering-regwall--dialog" id="${REGWALL_DIALOG_ID}" aria-labelledby="${REGWALL_TITLE_ID}">
-    <img alt="Google" class="gaa-metering-regwall--logo" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI3NCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDc0IDI0Ij48cGF0aCBmaWxsPSIjNDI4NUY0IiBkPSJNOS4yNCA4LjE5djIuNDZoNS44OGMtLjE4IDEuMzgtLjY0IDIuMzktMS4zNCAzLjEtLjg2Ljg2LTIuMiAxLjgtNC41NCAxLjgtMy42MiAwLTYuNDUtMi45Mi02LjQ1LTYuNTRzMi44My02LjU0IDYuNDUtNi41NGMxLjk1IDAgMy4zOC43NyA0LjQzIDEuNzZMMTUuNCAyLjVDMTMuOTQgMS4wOCAxMS45OCAwIDkuMjQgMCA0LjI4IDAgLjExIDQuMDQuMTEgOXM0LjE3IDkgOS4xMyA5YzIuNjggMCA0LjctLjg4IDYuMjgtMi41MiAxLjYyLTEuNjIgMi4xMy0zLjkxIDIuMTMtNS43NSAwLS41Ny0uMDQtMS4xLS4xMy0xLjU0SDkuMjR6Ii8+PHBhdGggZmlsbD0iI0VBNDMzNSIgZD0iTTI1IDYuMTljLTMuMjEgMC01LjgzIDIuNDQtNS44MyA1LjgxIDAgMy4zNCAyLjYyIDUuODEgNS44MyA1LjgxczUuODMtMi40NiA1LjgzLTUuODFjMC0zLjM3LTIuNjItNS44MS01LjgzLTUuODF6bTAgOS4zM2MtMS43NiAwLTMuMjgtMS40NS0zLjI4LTMuNTIgMC0yLjA5IDEuNTItMy41MiAzLjI4LTMuNTJzMy4yOCAxLjQzIDMuMjggMy41MmMwIDIuMDctMS41MiAzLjUyLTMuMjggMy41MnoiLz48cGF0aCBmaWxsPSIjNDI4NUY0IiBkPSJNNTMuNTggNy40OWgtLjA5Yy0uNTctLjY4LTEuNjctMS4zLTMuMDYtMS4zQzQ3LjUzIDYuMTkgNDUgOC43MiA0NSAxMmMwIDMuMjYgMi41MyA1LjgxIDUuNDMgNS44MSAxLjM5IDAgMi40OS0uNjIgMy4wNi0xLjMyaC4wOXYuODFjMCAyLjIyLTEuMTkgMy40MS0zLjEgMy40MS0xLjU2IDAtMi41My0xLjEyLTIuOTMtMi4wN2wtMi4yMi45MmMuNjQgMS41NCAyLjMzIDMuNDMgNS4xNSAzLjQzIDIuOTkgMCA1LjUyLTEuNzYgNS41Mi02LjA1VjYuNDloLTIuNDJ2MXptLTIuOTMgOC4wM2MtMS43NiAwLTMuMS0xLjUtMy4xLTMuNTIgMC0yLjA1IDEuMzQtMy41MiAzLjEtMy41MiAxLjc0IDAgMy4xIDEuNSAzLjEgMy41NC4wMSAyLjAzLTEuMzYgMy41LTMuMSAzLjV6Ii8+PHBhdGggZmlsbD0iI0ZCQkMwNSIgZD0iTTM4IDYuMTljLTMuMjEgMC01LjgzIDIuNDQtNS44MyA1LjgxIDAgMy4zNCAyLjYyIDUuODEgNS44MyA1LjgxczUuODMtMi40NiA1LjgzLTUuODFjMC0zLjM3LTIuNjItNS44MS01LjgzLTUuODF6bTAgOS4zM2MtMS43NiAwLTMuMjgtMS40NS0zLjI4LTMuNTIgMC0yLjA5IDEuNTItMy41MiAzLjI4LTMuNTJzMy4yOCAxLjQzIDMuMjggMy41MmMwIDIuMDctMS41MiAzLjUyLTMuMjggMy41MnoiLz48cGF0aCBmaWxsPSIjMzRBODUzIiBkPSJNNTggLjI0aDIuNTF2MTcuNTdINTh6Ii8+PHBhdGggZmlsbD0iI0VBNDMzNSIgZD0iTTY4LjI2IDE1LjUyYy0xLjMgMC0yLjIyLS41OS0yLjgyLTEuNzZsNy43Ny0zLjIxLS4yNi0uNjZjLS40OC0xLjMtMS45Ni0zLjctNC45Ny0zLjctMi45OSAwLTUuNDggMi4zNS01LjQ4IDUuODEgMCAzLjI2IDIuNDYgNS44MSA1Ljc2IDUuODEgMi42NiAwIDQuMi0xLjYzIDQuODQtMi41N2wtMS45OC0xLjMyYy0uNjYuOTYtMS41NiAxLjYtMi44NiAxLjZ6bS0uMTgtNy4xNWMxLjAzIDAgMS45MS41MyAyLjIgMS4yOGwtNS4yNSAyLjE3YzAtMi40NCAxLjczLTMuNDUgMy4wNS0zLjQ1eiIvPjwvc3ZnPg==" />
-
-    <div class="gaa-metering-regwall--title" id="${REGWALL_TITLE_ID}" tabindex="0">$GAA_REGWALL_TITLE$</div>
-
-    <div class="gaa-metering-regwall--description">
-      $GAA_REGWALL_DESCRIPTION$
-    </div>
-
-    <iframe
-        id="${GOOGLE_SIGN_IN_IFRAME_ID}"
-        class="gaa-metering-regwall--iframe"
-        src="$iframeUrl$">
-    </iframe>
-
-    <div class="gaa-metering-regwall--line"></div>
-
-    <a
-        id="${PUBLISHER_SIGN_IN_BUTTON_ID}"
-        class="gaa-metering-regwall--publisher-sign-in-button"
-        tabindex="0"
-        href="#">
-      $GAA_REGWALL_PUBLISHER_SIGN_IN_BUTTON$
-    </a>
-  </div>
-</div>
-`;
-
-/** Styles for the Google Sign-In button iframe. */
-const GOOGLE_SIGN_IN_IFRAME_STYLES = `
-body {
-  margin: 0;
-  overflow: hidden;
-}
-#${GOOGLE_SIGN_IN_BUTTON_ID} {
-  margin: 0 auto;
-}
-#${GOOGLE_SIGN_IN_BUTTON_ID} > div {
-  animation: fadeIn 0.32s;
-}
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-#${GOOGLE_SIGN_IN_BUTTON_ID} .abcRioButton.abcRioButtonBlue {
-  background-color: #1A73E8;
-  box-shadow: none;
-  -webkit-box-shadow: none;
-  border-radius: 4px;
-  width: 100% !important;
-}
-#${GOOGLE_SIGN_IN_BUTTON_ID} .abcRioButton.abcRioButtonBlue .abcRioButtonIcon {
-  display: none;
-}
-#${GOOGLE_SIGN_IN_BUTTON_ID} .abcRioButton.abcRioButtonBlue .abcRioButtonContents {
-  font-size: 15px !important;
-}
-`;
-
-/**
- * Returns true if the URL contains fresh Google Article Access (GAA) params.
- * @return {boolean}
- */
-function urlContainsFreshGaaParams() {
-  const params = parseQueryString$1(GaaMeteringRegwall.location_.search);
-
-  // Verify GAA params exist.
-  if (
-    !params['gaa_at'] ||
-    !params['gaa_n'] ||
-    !params['gaa_sig'] ||
-    !params['gaa_ts']
-  ) {
-    return false;
-  }
-
-  // Verify timestamp isn't stale.
-  const expirationTimestamp = parseInt(params['gaa_ts'], 16);
-  const currentTimestamp = Date.now() / 1000;
-  if (expirationTimestamp < currentTimestamp) {
-    return false;
-  }
-
-  return true;
-}
-
-/** Renders Google Article Access (GAA) Metering Regwall. */
-class GaaMeteringRegwall {
-  /**
-   * Returns a promise for a Google Sign-In user object.
-   * https://developers.google.com/identity/sign-in/web/reference#googleusergetbasicprofile
-   *
-   * This method opens a metering regwall dialog,
-   * where users can sign in with Google.
-   * @nocollapse
-   * @param {{ iframeUrl: string }} params
-   * @return {!Promise<!GaaUserDef>}
-   */
-  static show({iframeUrl}) {
-    if (!urlContainsFreshGaaParams()) {
-      const errorMessage =
-        '[swg-gaa.js:GaaMeteringRegwall.show]: URL needs fresh GAA params.';
-      log_4(errorMessage);
-      return Promise.reject(errorMessage);
-    }
-
-    GaaMeteringRegwall.render_({iframeUrl});
-    GaaMeteringRegwall.sendIntroMessageToGsiIframe_({iframeUrl});
-    return GaaMeteringRegwall.getGaaUser_().then((gaaUser) => {
-      GaaMeteringRegwall.remove_();
-      return gaaUser;
-    });
-  }
-
-  /**
-   * Signs out of Google Sign-In.
-   * This is useful for developers who are testing their
-   * SwG integrations.
-   * @nocollapse
-   * @return {!Promise}
-   */
-  static signOut() {
-    return configureGoogleSignIn().then(() =>
-      self.gapi.auth2.getAuthInstance().signOut()
-    );
-  }
-
-  /**
-   * Renders the Regwall.
-   * @private
-   * @nocollapse
-   * @param {{ iframeUrl: string }} params
-   */
-  static render_({iframeUrl}) {
-    const containerEl = /** @type {!HTMLDivElement} */ (self.document.createElement(
-      'div'
-    ));
-    containerEl.id = REGWALL_CONTAINER_ID;
-    setImportantStyles(containerEl, {
-      'all': 'unset',
-      'background-color': 'rgba(32, 33, 36, 0.6)',
-      'border': 'none',
-      'bottom': '0',
-      'height': '100%',
-      'left': '0',
-      'opacity': '0',
-      'position': 'fixed',
-      'right': '0',
-      'transition': 'opacity 0.5s',
-      'top': '0',
-      'width': '100%',
-      'z-index': 2147483646,
-    });
-    containerEl./*OK*/ innerHTML = REGWALL_HTML.replace(
-      '$iframeUrl$',
-      iframeUrl
-    )
-      .replace(
-        '$GAA_REGWALL_TITLE$',
-        msg(I18N_STRINGS['GAA_REGWALL_TITLE'], containerEl)
-      )
-      .replace(
-        '$GAA_REGWALL_DESCRIPTION$',
-        msg(I18N_STRINGS['GAA_REGWALL_DESCRIPTION'], containerEl)
-      )
-      .replace(
-        '$GAA_REGWALL_PUBLISHER_SIGN_IN_BUTTON$',
-        msg(I18N_STRINGS['GAA_REGWALL_PUBLISHER_SIGN_IN_BUTTON'], containerEl)
-      );
-    containerEl.querySelector('ph')./*OK*/ innerHTML =
-      '<strong>' +
-      GaaMeteringRegwall.getPublisherNameFromPageConfig_() +
-      '</strong>';
-    self.document.body.appendChild(containerEl);
-    /** @suppress {suspiciousCode} */
-    containerEl.offsetHeight; // Trigger a repaint (to prepare the CSS transition).
-    setImportantStyles(containerEl, {'opacity': 1});
-    GaaMeteringRegwall.addClickListenerOnPublisherSignInButton_();
-
-    // Disable scrolling on the body element.
-    self.document.body.classList.add(REGWALL_DISABLE_SCROLLING_CLASS);
-
-    // Focus on the title after the dialog animates in.
-    // This helps people using screenreaders.
-    const dialogEl = self.document.getElementById(REGWALL_DIALOG_ID);
-    dialogEl.addEventListener('animationend', () => {
-      const titleEl = self.document.getElementById(REGWALL_TITLE_ID);
-      titleEl.focus();
-    });
-  }
-
-  /**
-   * Gets publisher name from page config.
-   * @private
-   * @nocollapse
-   * @return {string}
-   */
-  static getPublisherNameFromPageConfig_() {
-    const ldJsonElements = self.document.querySelectorAll(
-      'script[type="application/ld+json"]'
-    );
-
-    for (let i = 0; i < ldJsonElements.length; i++) {
-      const ldJsonElement = ldJsonElements[i];
-      const ldJson = /** @type {{ publisher: { name: string } }} */ (parseJson(
-        ldJsonElement.textContent
-      ));
-      if (ldJson.publisher && ldJson.publisher.name) {
-        return ldJson.publisher.name;
-      }
-    }
-
-    throw new Error('Article needs JSON-LD with a publisher name.');
-  }
-
-  /**
-   * Adds a click listener on the publisher sign-in button.
-   * @private
-   * @nocollapse
-   */
-  static addClickListenerOnPublisherSignInButton_() {
-    self.document
-      .getElementById(PUBLISHER_SIGN_IN_BUTTON_ID)
-      .addEventListener('click', (e) => {
-        e.preventDefault();
-        (self.SWG = self.SWG || []).push((subscriptions) => {
-          /** @type {!Subscriptions} */ (subscriptions).triggerLoginRequest({
-            linkRequested: false,
-          });
-        });
-      });
-  }
-
-  /**
-   * Returns the GAA user, after the user signs in.
-   * @private
-   * @nocollapse
-   * @return {!Promise<!GoogleUserDef>}
-   */
-  static getGaaUser_() {
-    // Listen for GAA user.
-    return new Promise((resolve) => {
-      self.addEventListener('message', (e) => {
-        if (
-          e.data.stamp === POST_MESSAGE_STAMP &&
-          e.data.command === POST_MESSAGE_COMMAND_USER
-        ) {
-          resolve(e.data.gaaUser);
-        }
-      });
-    });
-  }
-
-  /**
-   * Sends intro post message to Google Sign-In iframe.
-   * @private
-   * @nocollapse
-   * @param {{ iframeUrl: string }} params
-   */
-  static sendIntroMessageToGsiIframe_({iframeUrl}) {
-    // Introduce this window to the publisher's Google Sign-In iframe.
-    // This lets the iframe send post messages back to this window.
-    // Without the introduction, the iframe wouldn't have a reference to this window.
-    const googleSignInIframe = /** @type {!HTMLIFrameElement} */ (self.document.getElementById(
-      GOOGLE_SIGN_IN_IFRAME_ID
-    ));
-    googleSignInIframe.onload = () => {
-      googleSignInIframe.contentWindow.postMessage(
-        {
-          stamp: POST_MESSAGE_STAMP,
-          command: POST_MESSAGE_COMMAND_INTRODUCTION,
-        },
-        new URL(iframeUrl).origin
-      );
-    };
-  }
-
-  /**
-   * Removes the Regwall.
-   * @private
-   * @nocollapse
-   */
-  static remove_() {
-    const regwallContainer = self.document.getElementById(REGWALL_CONTAINER_ID);
-    if (regwallContainer) {
-      regwallContainer.remove();
-    }
-
-    // Re-enable scrolling on the body element.
-    self.document.body.classList.remove(REGWALL_DISABLE_SCROLLING_CLASS);
-  }
-}
-
-/**
- * References window's location object. Tests can override this.
- * @private
- * @type {!Location}
- */
-GaaMeteringRegwall.location_ = self.location;
-
-self.GaaMeteringRegwall = GaaMeteringRegwall;
-
-class GaaGoogleSignInButton {
-  /**
-   * Renders the Google Sign-In button.
-   * @nocollapse
-   * @param {{ allowedOrigins: !Array<string> }} params
-   */
-  static show({allowedOrigins}) {
-    // Apply iframe styles.
-    const styleEl = self.document.createElement('style');
-    styleEl./*OK*/ innerText = GOOGLE_SIGN_IN_IFRAME_STYLES;
-    self.document.head.appendChild(styleEl);
-
-    // Promise a function that sends messages to the parent frame.
-    // Note: A function is preferable to a reference to the parent frame
-    // because referencing the parent frame outside of the 'message' event
-    // handler throws an Error. A function defined within the handler can
-    // effectively save a reference to the parent frame though.
-    const sendMessageToParentFnPromise = new Promise((resolve) => {
-      self.addEventListener('message', (e) => {
-        if (
-          allowedOrigins.indexOf(e.origin) !== -1 &&
-          e.data.stamp === POST_MESSAGE_STAMP &&
-          e.data.command === POST_MESSAGE_COMMAND_INTRODUCTION
-        ) {
-          resolve((message) => {
-            e.source.postMessage(message, e.origin);
-          });
-        }
-      });
-    });
-
-    // Render the Google Sign-In button.
-    configureGoogleSignIn()
-      .then(
-        // Promise credentials.
-        () =>
-          new Promise((resolve) => {
-            // Render the Google Sign-In button.
-            const buttonEl = self.document.createElement('div');
-            buttonEl.id = GOOGLE_SIGN_IN_BUTTON_ID;
-            buttonEl.tabIndex = 0;
-            self.document.body.appendChild(buttonEl);
-            self.gapi.signin2.render(GOOGLE_SIGN_IN_BUTTON_ID, {
-              'longtitle': true,
-              'onsuccess': resolve,
-              'prompt': 'select_account',
-              'scope': 'profile email',
-              'theme': 'dark',
-            });
-          })
-      )
-      .then((googleUser) => {
-        // Gather GAA user details.
-        const basicProfile = /** @type {!GoogleUserDef} */ (googleUser).getBasicProfile();
-        /** @type {!GaaUserDef} */
-        const gaaUser = {
-          idToken: /** @type {!GoogleUserDef} */ (googleUser).getAuthResponse()
-            .id_token,
-          name: basicProfile.getName(),
-          givenName: basicProfile.getGivenName(),
-          familyName: basicProfile.getFamilyName(),
-          imageUrl: basicProfile.getImageUrl(),
-          email: basicProfile.getEmail(),
-        };
-
-        // Send GAA user to parent frame.
-        sendMessageToParentFnPromise.then((sendMessageToParent) => {
-          sendMessageToParent({
-            stamp: POST_MESSAGE_STAMP,
-            command: POST_MESSAGE_COMMAND_USER,
-            gaaUser,
-          });
-        });
-      });
-  }
-}
-
-self.GaaGoogleSignInButton = GaaGoogleSignInButton;
-
-/**
- * Loads the Google Sign-In API.
- *
- * This function is used in two places.
- * 1. The publisher's Google Sign-In iframe.
- * 2. (Optional) Demos that allow users to sign out.
- *
- * @return {!Promise}
- */
-function configureGoogleSignIn() {
-  // Wait for Google Sign-In API.
-  return (
-    new Promise((resolve) => {
-      const apiCheckInterval = setInterval(() => {
-        if (!!self.gapi) {
-          clearInterval(apiCheckInterval);
-          resolve();
-        }
-      }, 50);
-    })
-      // Load Auth2 module.
-      .then(() => new Promise((resolve) => self.gapi.load('auth2', resolve)))
-      // Specify "redirect" mode. It plays nicer with webviews.
-      .then(
-        () =>
-          // Only initialize Google Sign-In once.
-          self.gapi.auth2.getAuthInstance() || self.gapi.auth2.init()
-      )
-  );
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 /**
  * @implements {DepsDef}
  * @implements {Subscriptions}
@@ -17826,7 +17361,7 @@ class ConfiguredRuntime {
     // WARNING: DepsDef ('this') is being progressively defined below.
     // Constructors will crash if they rely on something that doesn't exist yet.
     /** @private @const {!../components/activities.ActivityPorts} */
-    this.activityPorts_ = new ActivityPorts$1(this);
+    this.activityPorts_ = new ActivityPorts(this);
 
     /** @private @const {!AnalyticsService} */
     this.analyticsService_ = new AnalyticsService(this, this.fetcher_);
@@ -17871,7 +17406,7 @@ class ConfiguredRuntime {
     LinkCompleteFlow.configurePending(this);
     PayCompleteFlow.configurePending(this);
 
-    injectStyleSheet(this.doc_, CSS$1);
+    injectStyleSheet(this.doc_, CSS);
 
     // Report redirect errors if any.
     this.activityPorts_.onRedirectError((error) => {
@@ -17932,6 +17467,11 @@ class ConfiguredRuntime {
   /** @override */
   storage() {
     return this.storage_;
+  }
+
+  /** @override */
+  clientConfigManager() {
+    return null;
   }
 
   /** @override */
@@ -18296,8 +17836,8 @@ class ConfiguredRuntime {
     if (
       !entitlement ||
       !isSecure(this.win().location) ||
-      !wasReferredByGoogle(parseUrl$1(this.win().document.referrer)) ||
-      !urlContainsFreshGaaParams()
+      !wasReferredByGoogle(parseUrl(this.win().document.referrer)) ||
+      !queryStringHasFreshGaaParams(this.win().location.search)
     ) {
       return;
     }
@@ -18318,12 +17858,12 @@ class ConfiguredRuntime {
   }
 
   /** @override */
-  consumeShowcaseEntitlementJwt(showcaseEntitlementJwt) {
+  consumeShowcaseEntitlementJwt(showcaseEntitlementJwt, onCloseDialog) {
     const entitlements = this.entitlementsManager().parseEntitlements({
       signedEntitlements: showcaseEntitlementJwt,
     });
-    entitlements.consume();
+    entitlements.consume(onCloseDialog);
   }
 }
 
-export { AnalyticsEvent, ClientEvent, ClientEventManagerApi, ConfiguredRuntime, DeferredAccountCreationResponse, Entitlement, Entitlements, EventOriginator, Fetcher, FilterResult, PurchaseData, SubscribeResponse$1 as SubscribeResponse, UserData };
+export { AnalyticsEvent, ClientEvent, ClientEventManagerApi, ConfiguredRuntime, DeferredAccountCreationResponse, Entitlement, Entitlements, EventOriginator, Fetcher, FilterResult, PurchaseData, SubscribeResponse, UserData };

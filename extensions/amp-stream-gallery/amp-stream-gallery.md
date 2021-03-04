@@ -69,7 +69,7 @@ The example below demonstrates `amp-stream-gallery` component in standalone use.
 
 [example preview="top-frame" playground="false"]
 
-```
+```html
 <head>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-stream-gallery-1.0.css">
@@ -160,7 +160,7 @@ Bento enabled components in standalone use are highly interactive through their 
 
 The `amp-stream-gallery` component API is accessible by including the following script tag in your document:
 
-```
+```js
 await customElements.whenDefined('amp-stream-gallery');
 const api = await carousel.getApi();
 ```
@@ -172,14 +172,14 @@ The `amp-stream-gallery` API allows you to perform the following actions:
 **next()**
 Moves the carousel forwards by `advance-count` slides.
 
-```
+```js
 api.next();
 ```
 
 **prev()**
 Moves the carousel backwards by `advance-count` slides.
 
-```
+```js
 api.prev();
 ```
 
@@ -187,7 +187,7 @@ api.prev();
 Moves the carousel to the slide specified by the `index` argument.
 Note: `index` will be normalized to a number greater than or equal to `0` and less than the number of slides given.
 
-```
+```js
 api.goToSlide(0); // Advance to first slide.
 api.goToSlide(length - 1); // Advance to last slide.
 ```
@@ -201,7 +201,7 @@ The `amp-stream-gallery` API allows you to register and respond to the following
 This event is triggered when the index displayed by the carousel has changed.
 The new index is available via `event.data.index`.
 
-```
+```js
 carousel.addEventListener('slideChange', (e) => console.log(e.data.index))
 ```
 
@@ -209,7 +209,7 @@ carousel.addEventListener('slideChange', (e) => console.log(e.data.index))
 
 Each Bento component has a small CSS library you must include to guarantee proper loading without [content shifts](https://web.dev/cls/). Because of order-based specificity, you must manually ensure that stylesheets are included before any custom styles.
 
-```
+```html
 <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/amp-stream-gallery-1.0.css">
 ```
 
@@ -254,20 +254,7 @@ wrapping element, and use that to center the content.
 ### Media Queries
 
 The attributes for `<amp-stream-gallery>` can be configured to use different
-options based on a media query. You can also use a value without any media
-queries. The format looks like:
-
-```html
-<amp-stream-gallery
-  attr-name="(min-width: 1000px) valueOne, (min-width: 600px) valueTwo, defaultValue"
-></amp-stream-gallery>
-```
-
-The media queries are evaluated from left to right, with the first matching
-media query being used. A default value (without a media query) is required. In
-this case, if the page has a screen width of 1000px or more, `valueOne` is used.
-If the width is between 999px and 600px, `valueTwo` is used. When it is 599px or
-smaller, `defaultValue` is used.
+options based on a [media query](./../../spec/amp-html-responsive-attributes.md).
 
 ### Behavior
 

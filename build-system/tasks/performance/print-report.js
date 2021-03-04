@@ -16,7 +16,7 @@
 
 const fs = require('fs');
 const {CONTROL, EXPERIMENT, RESULTS_PATH} = require('./helpers');
-const {cyan} = require('ansi-colors');
+const {cyan} = require('kleur/colors');
 const {percent, trimmedMean} = require('./stats');
 
 const HEADER_COLUMN = 26;
@@ -64,6 +64,11 @@ function linesForMetric(metric, results) {
   ];
 }
 
+/**
+ *
+ * @param {string[]} urls
+ * @return {void}
+ */
 function printReport(urls) {
   const results = JSON.parse(fs.readFileSync(RESULTS_PATH));
 
@@ -84,11 +89,21 @@ class PageMetrics {
   url;
   metrics;
 
+  /**
+   * @param {string} url
+   */
   constructor(url) {
     this.url = url;
     this.metrics = new Map();
   }
 
+  /**
+   *
+   * @param {string*} metric
+   * @param {number} experiment
+   * @param {number} control
+   * @return {void}
+   */
   set(metric, experiment, control) {
     this.metrics.set(metric, {experiment, control});
   }

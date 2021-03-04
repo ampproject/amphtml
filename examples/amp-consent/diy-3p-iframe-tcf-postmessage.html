@@ -151,6 +151,7 @@
             const msg = {
               __tcfapiCall: {
                 command: cmd,
+                parameter: arg,
                 version: version,
                 callId: callId,
               },
@@ -203,7 +204,32 @@
 
       __tcfapi("ping", 2, (pingReturn, success) => {
         // should get response from window.top's CMP
+        console.log('Ping return:', pingReturn);
       });
+      
+      __tcfapi("getTCData", 2, (tcData, success) => {
+        // should get response from window.top's CMP
+        console.log('Minimal TCData return:', tcData);
+      });
+      
+      const callback = (tcData, success) => {
+        console.log('addEventListenerCallback:', tcData)
+        if(success && tcData.eventStatus === 'tcloaded') {
+          // do something with tcData.tcString
+
+          // remove the ourself to not get called more than once
+          __tcfapi('removeEventListener', 2, (returnValue, success) => {
+            console.log('removeEventListener success:', success);
+            if(success) {
+              // oh good...
+            }
+          }, tcData.listenerId);
+        } else {
+          // do something else
+        }
+      }
+
+      __tcfapi('addEventListener', 2, callback);
     </script>
   </body>
 </html>

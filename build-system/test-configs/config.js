@@ -15,10 +15,20 @@
  */
 'use strict';
 
+/**
+ * @type
+ * Array<string | {
+ *   pattern: string,
+ *   included: boolean,
+ *   nocache: boolean,
+ *   watched: boolean
+ * }>
+ */
 const initTestsPath = ['test/_init_tests.js'];
 
-const fixturesExamplesPaths = [
-  'test-bin/test/fixtures/*.html',
+const fixturesPath = 'test/fixtures/*.html';
+
+const fixturesExamplesPaths = [fixturesPath].concat([
   {
     pattern: 'test/fixtures/served/*.html',
     included: false,
@@ -31,7 +41,7 @@ const fixturesExamplesPaths = [
     nocache: false,
     watched: true,
   },
-];
+]);
 
 const builtRuntimePaths = [
   {
@@ -77,12 +87,6 @@ const testPaths = commonIntegrationTestPaths.concat([
   'test/*/!(e2e)/**/*.js',
   'ads/**/test/test-*.js',
   'extensions/**/test/**/*.js',
-]);
-
-const a4aTestPaths = initTestsPath.concat([
-  'extensions/amp-a4a/**/test/**/*.js',
-  'extensions/amp-ad-network-*/**/test/**/*.js',
-  'ads/google/a4a/test/*.js',
 ]);
 
 const unitTestPaths = [
@@ -156,7 +160,6 @@ const prettifyGlobs = [
   '.codecov.yml',
   '.lando.yml',
   '.lgtm.yml',
-  '.travis.yml',
   '.prettierrc',
   '.renovaterc.json',
   '.circleci/config.yml',
@@ -167,7 +170,7 @@ const prettifyGlobs = [
   '**/*.md',
   '!**/package*.json',
   '!.github/ISSUE_TEMPLATE/**',
-  '!**/{node_modules,build,dist,dist.3p,dist.tools,.karma-cache}/**',
+  '!**/{node_modules,build,dist,dist.3p,dist.tools}/**',
 ];
 
 /**
@@ -176,7 +179,7 @@ const prettifyGlobs = [
  */
 const linkCheckGlobs = [
   '**/*.md',
-  '!**/{examples,node_modules,build,dist,dist.3p,dist.tools,.karma-cache}/**',
+  '!**/{examples,node_modules,build,dist,dist.3p,dist.tools}/**',
 ];
 
 /**
@@ -211,7 +214,6 @@ const changelogIgnoreFileTypes = /\.md|\.json|\.yaml|LICENSE|CONTRIBUTORS$/;
 
 /** @const  */
 module.exports = {
-  a4aTestPaths,
   changelogIgnoreFileTypes,
   commonIntegrationTestPaths,
   commonUnitTestPaths,
@@ -219,6 +221,7 @@ module.exports = {
   e2eTestPaths,
   integrationTestPaths,
   jisonPaths,
+  fixturesPath,
   linkCheckGlobs,
   lintGlobs,
   presubmitGlobs,

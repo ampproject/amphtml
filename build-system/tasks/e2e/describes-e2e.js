@@ -28,10 +28,6 @@ const {
   installBrowserAssertions,
 } = require('./expect');
 const {
-  getCoverageObject,
-  mergeClientCoverage,
-} = require('istanbul-middleware/lib/core');
-const {
   SeleniumWebDriverController,
 } = require('./selenium-webdriver-controller');
 const {AmpDriver, AmpdocEnvironment} = require('./amp-driver');
@@ -49,6 +45,15 @@ const SETUP_RETRIES = 3;
 const DEFAULT_E2E_INITIAL_RECT = {width: 800, height: 600};
 const COV_REPORT_PATH = '/coverage/client';
 const supportedBrowsers = new Set(['chrome', 'firefox', 'safari']);
+
+/**
+ * Load coverage middleware only if needed.
+ */
+let istanbulMiddleware;
+if (argv.coverage) {
+  istanbulMiddleware = require('istanbul-middleware/lib/core');
+}
+
 /**
  * TODO(cvializ): Firefox now experimentally supports puppeteer.
  * When it's more mature we might want to support it.
@@ -189,6 +194,8 @@ function createDriver(browserName, args, deviceName) {
       //which is also when `Server terminated early with status 1` began appearing. Coincidence? Maybe.
       driver.onQuit = null;
       return driver;
+    case 'safari':
+      return new Builder().forBrowser(browserName).build();
   }
 }
 
@@ -232,7 +239,6 @@ function getFirefoxArgs(config) {
  *  environments: (!Array<!AmpdocEnvironment>|undefined),
  *  testUrl: string|undefined,
  *  fixture: string,
- *  manualFixture: string,
  *  initialRect: ({{width: number, height:number}}|undefined),
  *  deviceName: string|undefined,
  *  version: string|undefined,
@@ -246,7 +252,6 @@ let TestSpec;
  *  environments: (!Array<!AmpdocEnvironment>|undefined),
  *  testUrl: string|undefined,
  *  fixture: string,
- *  manualFixture: string,
  *  initialRect: ({{width: number, height:number}}|undefined),
  *  deviceName: string|undefined,
  *  versions: {{[version: string]: TestSpec}}
@@ -322,32 +327,53 @@ envPresets['ampdoc-amp4ads-preset'] = envPresets['ampdoc-preset'].concat(
  * it.configure().skipViewerDemo().skipShadowDemo().run('Should ...', ...);
  */
 class ItConfig {
+  /**
+   * @param {Function} it
+   * @param {Object} env
+   */
   constructor(it, env) {
     this.it = it;
     this.env = env;
     this.skip = false;
   }
 
+  /**
+   * @return {ItConfig}
+   */
   skipShadowDemo() {
     this.skip = this.skip ? this.skip : this.env.environment == 'shadow-demo';
     return this;
   }
 
+  /**
+   * @return {ItConfig}
+   */
   skipSingle() {
     this.skip = this.skip ? this.skip : this.env.environment == 'single';
     return this;
   }
 
+  /**
+   * @return {ItConfig}
+   */
   skipViewerDemo() {
     this.skip = this.skip ? this.skip : this.env.environment == 'viewer-demo';
     return this;
   }
 
+  /**
+   * @return {ItConfig}
+   */
   skipA4aFie() {
     this.skip = this.skip ? this.skip : this.env.environment == 'a4a-fie';
     return this;
   }
 
+  /**
+   * @param {string} name
+   * @param {Function} fn
+   * @return {ItConfig}
+   */
   run(name, fn) {
     if (this.skip) {
       return this.it.skip(name, fn);
@@ -367,7 +393,7 @@ class ItConfig {
 async function updateCoverage(env) {
   const coverage = await env.controller.evaluate(() => window.__coverage__);
   if (coverage) {
-    mergeClientCoverage(coverage);
+    istanbulMiddleware.mergeClientCoverage(coverage);
   }
 }
 
@@ -376,7 +402,7 @@ async function updateCoverage(env) {
  * @return {Promise<void>}
  */
 async function reportCoverage() {
-  const coverage = getCoverageObject();
+  const coverage = istanbulMiddleware.getCoverageObject();
   await fetch(`https://${HOST}:${PORT}${COV_REPORT_PATH}`, {
     method: 'POST',
     body: JSON.stringify(coverage),
@@ -419,6 +445,9 @@ function describeEnv(factory) {
       spec.browsers = ['chrome'];
     }
 
+    /**
+     * @return {void}
+     */
     function createBrowserDescribe() {
       const allowedBrowsers = getAllowedBrowsers();
 
@@ -431,6 +460,9 @@ function describeEnv(factory) {
         });
     }
 
+    /**
+     * @return {Set<string>}
+     */
     function getAllowedBrowsers() {
       const {engine, browsers} = getConfig();
 
@@ -457,6 +489,10 @@ function describeEnv(factory) {
       return allowedBrowsers;
     }
 
+    /**
+     * @param {string} browserName
+     * @return {void}
+     */
     function createVariantDescribe(browserName) {
       for (const name in variants) {
         it.configure = function () {
@@ -473,7 +509,13 @@ function describeEnv(factory) {
       createBrowserDescribe();
     });
 
-    function doTemplate(name, variant, browserName) {
+    /**
+     *
+     * @param {string} _name
+     * @param {Object} variant
+     * @param {string} browserName
+     */
+    function doTemplate(_name, variant, browserName) {
       const env = Object.create(variant);
       this.timeout(TEST_TIMEOUT);
       beforeEach(async function () {
@@ -613,6 +655,10 @@ class EndToEndFixture {
     }
   }
 
+  /**
+   * @param {!Object} env
+   * @return {Promise<void>}
+   */
   async teardown(env) {
     const {controller} = env;
     if (controller && controller.driver) {
@@ -627,29 +673,18 @@ class EndToEndFixture {
    * @return {!TestSpec}
    */
   setTestUrl(spec) {
-    // TODO(rcebulko): See if it's possible to condense/reorg some test fixtures
-    // and have all e2e fixtures in one folder. Allowing this split for now so
-    // that, if fixtures under `manual` are moved, tests using normal e2e fixture
-    // directory don't need to be updated. Support for `testUrl` should
-    // eventually be removed entirely.
-    let {testUrl} = spec;
-    const {fixture, manualFixture} = spec;
+    const {testUrl, fixture} = spec;
+
     if (testUrl) {
       throw new Error(
         'Setting `testUrl` directly is no longer permitted in e2e tests; please use `fixture` instead'
       );
     }
-    if (fixture && manualFixture) {
-      throw new Error('Only one of [fixture, manualFixture] may be specified');
-    }
 
-    if (fixture) {
-      testUrl = `http://localhost:8000/test/fixtures/e2e/${fixture}`;
-    } else if (manualFixture) {
-      testUrl = `http://localhost:8000/test/manual/${manualFixture}`;
-    }
-
-    return {...spec, testUrl};
+    return {
+      ...spec,
+      testUrl: `http://localhost:8000/test/fixtures/e2e/${fixture}`,
+    };
   }
 }
 
@@ -674,6 +709,16 @@ function getDriver(
   }
 }
 
+/**
+ *
+ * @param {{
+ *  environment: *,
+ *  ampDriver: *,
+ *  controller: *,
+ * }} param0
+ * @param {TestSpec} param1
+ * @return {Promise<void>}
+ */
 async function setUpTest(
   {environment, ampDriver, controller},
   {testUrl, version, experiments = [], initialRect}

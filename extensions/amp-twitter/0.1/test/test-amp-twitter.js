@@ -40,7 +40,7 @@ describes.realWin(
       ampTwitter.setAttribute('width', '111');
       ampTwitter.setAttribute('height', '222');
       doc.body.appendChild(ampTwitter);
-      await ampTwitter.build();
+      await ampTwitter.buildInternal();
       await ampTwitter.layoutCallback();
       return ampTwitter;
     }
@@ -116,9 +116,9 @@ describes.realWin(
 
     it('removes iframe after unlayoutCallback', async () => {
       const ampTwitter = await getAmpTwitter(tweetId);
+      const obj = await ampTwitter.getImpl(false);
       const iframe = ampTwitter.querySelector('iframe');
       expect(iframe).to.not.be.null;
-      const obj = ampTwitter.implementation_;
       obj.unlayoutCallback();
       expect(ampTwitter.querySelector('iframe')).to.be.null;
       expect(obj.iframe_).to.be.null;
@@ -128,7 +128,8 @@ describes.realWin(
     it('should replace iframe after tweetid mutation', async () => {
       const newTweetId = '638793490521001985';
       const ampTwitter = await getAmpTwitter(tweetId);
-      const spy = env.sandbox.spy(ampTwitter.implementation_, 'toggleLoading');
+      const impl = await ampTwitter.getImpl(false);
+      const spy = env.sandbox.spy(impl, 'toggleLoading');
       const iframe = ampTwitter.querySelector('iframe');
       ampTwitter.setAttribute('data-tweetid', newTweetId);
       ampTwitter.mutatedAttributesCallback({'data-tweetid': newTweetId});

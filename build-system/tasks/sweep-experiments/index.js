@@ -16,8 +16,11 @@
 const argv = require('minimist')(process.argv.slice(2));
 const fastGlob = require('fast-glob');
 const path = require('path');
-const tempy = require('tempy');
-const {cyan, magenta, yellow} = require('ansi-colors');
+const {
+  jscodeshift,
+  getJscodeshiftReport,
+} = require('../../test-configs/jscodeshift');
+const {cyan, magenta, yellow} = require('kleur/colors');
 const {getOutput} = require('../../common/process');
 const {log} = require('../../common/logging');
 const {readJsonSync, writeFileSync} = require('fs-extra');
@@ -93,33 +96,32 @@ const getModifiedSourceFiles = (fromHash) =>
   );
 
 /**
- * Runs a jscodeshift transform under this directory.
- * @param {string} transform
- * @param {Array<string>=} args
- * @return {string}
- */
-const jscodeshift = (transform, args = []) =>
-  getStdoutThrowOnError(
-    [
-      'npx jscodeshift',
-      '--parser babylon',
-      `--parser-config ${__dirname}/jscodeshift/parser-config.json`,
-      `--transform ${__dirname}/jscodeshift/${transform}`,
-      ...args,
-    ].join(' ')
-  );
-
-/**
  * @param {string} id
- * @param {string} experimentsRemovedJson
+ * @param {Array} removedFromConfig
  * @return {Array<string>} modified files
  */
-function removeFromExperimentsConfig(id, experimentsRemovedJson) {
-  jscodeshift('remove-experiment-config.js', [
+function removeFromExperimentsConfig(id, removedFromConfig) {
+  const {stdout} = jscodeshift([
+    `--no-babel`,
+    `--transform ${__dirname}/jscodeshift/remove-experiment-config.js`,
     `--experimentId=${id}`,
-    `--experimentsRemovedJson=${experimentsRemovedJson}`,
     experimentsConfigPath,
   ]);
+
+  for (const line of stdout.split('\n')) {
+    const reportLine = getJscodeshiftReport(line);
+    if (reportLine) {
+      const [
+        // eslint-disable-next-line no-unused-vars
+        _,
+        report,
+      ] = reportLine;
+      try {
+        const removed = JSON.parse(report);
+        removedFromConfig.push(removed);
+      } catch (_) {}
+    }
+  }
   return [experimentsConfigPath];
 }
 
@@ -154,7 +156,9 @@ function removeFromRuntimeSource(id, percentage) {
     id
   );
   if (possiblyModifiedSourceFiles.length > 0) {
-    jscodeshift('remove-experiment-runtime.js', [
+    jscodeshift([
+      `--no-babel`,
+      `--transform ${__dirname}/jscodeshift/remove-experiment-runtime.js`,
       `--isExperimentOnLaunched=${percentage}`,
       `--isExperimentOnExperiment=${id}`,
       ...possiblyModifiedSourceFiles,
@@ -271,6 +275,10 @@ const issueUrlToNumberRe = new RegExp(
   ].join('|')
 );
 
+/**
+ * @param {string} url
+ * @return {string}
+ */
 function issueUrlToNumberOrUrl(url) {
   const match = url.match(issueUrlToNumberRe);
   const number = match && match.find((group) => /^\d+$/.test(group));
@@ -459,13 +467,13 @@ async function sweepExperiments() {
 
   const removed = [];
 
-  const removedFromExperimentsConfigJson = tempy.file();
+  const removedFromConfig = [];
 
   Object.entries(include).forEach(([id, workItem], i) => {
     log(`🚮 ${i + 1}/${total}`, magenta(`${id}...`));
 
     const modified = [
-      ...removeFromExperimentsConfig(id, removedFromExperimentsConfigJson),
+      ...removeFromExperimentsConfig(id, removedFromConfig),
       ...removeFromJsonConfig(prodConfig, prodConfigPath, id),
       ...removeFromJsonConfig(canaryConfig, canaryConfigPath, id),
       ...removeFromRuntimeSource(id, workItem.percentage),
@@ -485,10 +493,7 @@ async function sweepExperiments() {
   });
 
   if (removed.length > 0) {
-    const removedFromExperimentsConfig =
-      readJsonSync(removedFromExperimentsConfigJson, {throws: false}) || [];
-
-    const cleanupIssues = removedFromExperimentsConfig.filter(
+    const cleanupIssues = removedFromConfig.filter(
       ({cleanupIssue}) => !!cleanupIssue
     );
 
@@ -531,8 +536,8 @@ sweepExperiments.description =
 
 sweepExperiments.flags = {
   'days_ago':
-    ' How old experiment configuration flips must be for an experiment to be removed. Default is 365 days. This is ignored when using --experiment.',
+    '  How old experiment configuration flips must be for an experiment to be removed. Default is 365 days. This is ignored when using --experiment.',
   'dry_run':
-    " Don't write, but only list the experiments that would be removed by this command.",
-  'experiment': ' Remove a specific experiment id.',
+    "  Don't write, but only list the experiments that would be removed by this command.",
+  'experiment': '  Remove a specific experiment id.',
 };

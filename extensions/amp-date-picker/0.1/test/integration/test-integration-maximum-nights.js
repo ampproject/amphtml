@@ -41,7 +41,7 @@ config.run('amp-date-picker', function () {
       let doc;
       let clock;
 
-      beforeEach(() => {
+      beforeEach(async () => {
         win = env.win;
         doc = env.win.document;
         clock = fakeTimers.withGlobal(win).install({
@@ -61,9 +61,9 @@ config.run('amp-date-picker', function () {
         ></amp-date-picker>
       </div>`);
         const picker = doc.getElementById('picker');
-        return picker.implementation_
-          .buildCallback()
-          .then(() => picker.implementation_.layoutCallback());
+        const impl = await picker.getImpl(false);
+        await impl.buildCallback();
+        await impl.layoutCallback();
       });
 
       afterEach(() => {

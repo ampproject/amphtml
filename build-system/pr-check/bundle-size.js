@@ -26,17 +26,22 @@ const {
   timedExecOrDie,
 } = require('./utils');
 const {buildTargetsInclude, Targets} = require('./build-targets');
-const {isTravisBuild} = require('../common/ci');
 const {runCiJob} = require('./ci-job');
 
 const jobName = 'bundle-size.js';
 
+/**
+ * @return {void}
+ */
 function pushBuildWorkflow() {
   downloadNomoduleOutput();
   downloadModuleOutput();
   timedExecOrDie('gulp bundle-size --on_push_build');
 }
 
+/**
+ * @return {void}
+ */
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME)) {
     downloadNomoduleOutput();
@@ -51,12 +56,4 @@ function prBuildWorkflow() {
   }
 }
 
-// TODO(rsimha): Remove this block once Travis is shut off.
-if (!isTravisBuild()) {
-  printSkipMessage(
-    jobName,
-    'this is a CircleCI build. Sizes will be reported from Travis'
-  );
-  return;
-}
 runCiJob(jobName, pushBuildWorkflow, prBuildWorkflow);

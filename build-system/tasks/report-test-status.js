@@ -21,10 +21,9 @@ const {
   isCircleciBuild,
   isPullRequestBuild,
   isGithubActionsBuild,
-  isTravisBuild,
 } = require('../common/ci');
 const {ciJobUrl} = require('../common/ci');
-const {cyan, green, yellow} = require('ansi-colors');
+const {cyan, yellow} = require('kleur/colors');
 const {determineBuildTargets, Targets} = require('../pr-check/build-targets');
 const {gitCommitHash} = require('../common/git');
 const {log} = require('../common/logging');
@@ -39,13 +38,25 @@ const TEST_TYPE_SUBTYPES = isGithubActionsBuild()
   ? new Map([
       ['integration', ['firefox', 'safari', 'edge', 'ie']],
       ['unit', ['firefox', 'safari', 'edge']],
+      ['e2e', ['firefox', 'safari']],
     ])
-  : // TODO(rsimha): Remove `isTravisBuild()` condition once Travis is shut off.
-  isCircleciBuild() || isTravisBuild()
+  : isCircleciBuild()
   ? new Map([
-      ['integration', ['unminified', 'nomodule', 'module']],
+      [
+        'integration',
+        [
+          'unminified',
+          'nomodule-prod',
+          'nomodule-canary',
+          'module-prod',
+          'module-canary',
+          'experimentA',
+          'experimentB',
+          'experimentC',
+        ],
+      ],
       ['unit', ['unminified', 'local-changes']],
-      ['e2e', ['nomodule']],
+      ['e2e', ['nomodule', 'experimentA', 'experimentB', 'experimentC']],
     ])
   : new Map([]);
 const TEST_TYPE_BUILD_TARGETS = new Map([
@@ -54,6 +65,9 @@ const TEST_TYPE_BUILD_TARGETS = new Map([
   ['e2e', [Targets.RUNTIME, Targets.E2E_TEST]],
 ]);
 
+/**
+ * @return {string|null}
+ */
 function inferTestType() {
   // Determine type (early exit if there's no match).
   const type = IS_GULP_E2E
@@ -80,16 +94,36 @@ function inferTestType() {
     ? 'edge'
     : argv.ie
     ? 'ie'
+    : argv.browsers == 'safari'
+    ? 'safari'
+    : argv.browsers == 'firefox'
+    ? 'firefox'
+    : argv.experiment
+    ? argv.experiment
     : argv.compiled
     ? 'nomodule'
     : 'unminified';
 
-  return `${type}/${subtype}`;
+  return `${type}/${subtype}${maybeAddConfigSubtype()}`;
 }
 
+/**
+ * @return {string}
+ */
+function maybeAddConfigSubtype() {
+  if (isCircleciBuild() && argv.config) {
+    return `-${argv.config}`;
+  }
+  return '';
+}
+
+/**
+ * @param {string} type
+ * @param {string} action
+ * @return {Promise<void>}
+ */
 async function postReport(type, action) {
-  // TODO(rsimha): Remove `!isCircleciBuild()` condition once Travis is shut off.
-  if (type && isPullRequestBuild() && !isCircleciBuild()) {
+  if (type && isPullRequestBuild()) {
     const commitHash = gitCommitHash();
 
     try {
@@ -105,48 +139,55 @@ async function postReport(type, action) {
         // Do not use `json: true` because the response is a string, not JSON.
       });
 
-      log(
-        green('INFO:'),
-        'reported',
-        cyan(`${type}/${action}`),
-        'to the test-status GitHub App'
-      );
-
+      log('Reported', cyan(`${type}/${action}`, 'to GitHub'));
       if (body.length > 0) {
-        log(
-          green('INFO:'),
-          'response from test-status was',
-          cyan(body.substr(0, 100))
-        );
+        log('Response was', cyan(body.substr(0, 100)));
       }
     } catch (error) {
       log(
         yellow('WARNING:'),
         'failed to report',
         cyan(`${type}/${action}`),
-        'to the test-status GitHub App:\n',
+        'to GitHub:\n',
         error.message.substr(0, 100)
       );
     }
   }
 }
 
-function reportTestErrored() {
-  return postReport(inferTestType(), 'report/errored');
+/**
+ * @return {Promise<void>}
+ */
+async function reportTestErrored() {
+  await postReport(inferTestType(), 'report/errored');
 }
 
-function reportTestFinished(success, failed) {
-  return postReport(inferTestType(), `report/${success}/${failed}`);
+/**
+ * @param {number|string} success
+ * @param {number|string} failed
+ * @return {Promise<void>}
+ */
+async function reportTestFinished(success, failed) {
+  await postReport(inferTestType(), `report/${success}/${failed}`);
 }
 
-function reportTestSkipped() {
-  return postReport(inferTestType(), 'skipped');
+/**
+ * @return {Promise<void>}
+ */
+async function reportTestSkipped() {
+  await postReport(inferTestType(), 'skipped');
 }
 
-function reportTestStarted() {
-  return postReport(inferTestType(), 'started');
+/**
+ * @return {Promise<void>}
+ */
+async function reportTestStarted() {
+  await postReport(inferTestType(), 'started');
 }
 
+/**
+ * @return {Promise<void>}
+ */
 async function reportAllExpectedTests() {
   const buildTargets = determineBuildTargets();
   for (const [type, subTypes] of TEST_TYPE_SUBTYPES) {
@@ -168,11 +209,11 @@ async function reportAllExpectedTests() {
  * @param {!any} browsers
  * @param {!Karma.TestResults} results
  */
-function reportTestRunComplete(browsers, results) {
+async function reportTestRunComplete(browsers, results) {
   if (results.error) {
-    reportTestErrored();
+    await reportTestErrored();
   } else {
-    reportTestFinished(results.success, results.failed);
+    await reportTestFinished(results.success, results.failed);
   }
 }
 

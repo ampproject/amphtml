@@ -17,26 +17,23 @@
 const argv = require('minimist')(process.argv.slice(2));
 const babel = require('@babel/core');
 const path = require('path');
-const remapping = require('@ampproject/remapping');
+const Remapping = require('@ampproject/remapping');
 const terser = require('terser');
 const through = require('through2');
 const {debug, CompilationLifecycles} = require('./debug-compilation-lifecycle');
 const {jsBundles} = require('./bundles.config.js');
 
-const mainBundles = Object.keys(jsBundles).map((key) => {
-  const bundle = jsBundles[key];
-  if (bundle.options && bundle.options.minifiedName) {
-    return path.basename(bundle.options.minifiedName, '.js');
-  }
-  return path.basename(key, '.js');
-});
+/** @type {Remapping.default} */
+const remapping = /** @type {*} */ (Remapping);
+
+let mainBundles;
 
 /**
  * Minify passed string.
  *
  * @param {string} code
  * @param {string} filename
- * @return {Promise<Object<string, string>>}
+ * @return {Promise<Object<string, terser.SourceMapOptions['content']>>}
  */
 async function terserMinify(code, filename) {
   const options = {
@@ -54,6 +51,15 @@ async function terserMinify(code, filename) {
     sourceMap: true,
   };
   const basename = path.basename(filename, argv.esm ? '.mjs' : '.js');
+  if (!mainBundles) {
+    mainBundles = Object.keys(jsBundles).map((key) => {
+      const bundle = jsBundles[key];
+      if (bundle.options && bundle.options.minifiedName) {
+        return path.basename(bundle.options.minifiedName, '.js');
+      }
+      return path.basename(key, '.js');
+    });
+  }
   if (mainBundles.includes(basename)) {
     options.output.preamble = ';';
   }
@@ -72,7 +78,7 @@ async function terserMinify(code, filename) {
  * @return {!Promise}
  */
 exports.postClosureBabel = function () {
-  return through.obj(async function (file, enc, next) {
+  return through.obj(async function (file, _enc, next) {
     if ((!argv.esm && !argv.sxg) || path.extname(file.path) === '.map') {
       debug(
         CompilationLifecycles['complete'],
@@ -92,9 +98,13 @@ exports.postClosureBabel = function () {
         file.contents,
         file.sourceMap
       );
-      const {code, map: babelMap} = babel.transformSync(file.contents, {
-        caller: {name: 'post-closure'},
-      });
+      const {code, map: babelMap} =
+        babel.transformSync(file.contents, {
+          caller: {name: 'post-closure'},
+        }) || {};
+      if (!code || !babelMap) {
+        throw new Error(`Error transforming contents of ${file.path}`);
+      }
 
       debug(
         CompilationLifecycles['closured-pre-terser'],
@@ -107,7 +117,10 @@ exports.postClosureBabel = function () {
         code,
         path.basename(file.path)
       );
-      file.contents = Buffer.from(compressed, 'utf-8');
+      if (!compressed) {
+        throw new Error(`Error minifying contents of ${file.path}`);
+      }
+      file.contents = Buffer.from(compressed.toString(), 'utf-8');
       file.sourceMap = remapping(
         [terserMap, babelMap, map],
         () => null,

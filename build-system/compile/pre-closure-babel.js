@@ -23,14 +23,14 @@ const {BABEL_SRC_GLOBS, THIRD_PARTY_TRANSFORM_GLOBS} = require('./sources');
 const {debug, CompilationLifecycles} = require('./debug-compilation-lifecycle');
 const {EventEmitter} = require('events');
 const {log} = require('../common/logging');
-const {red, cyan} = require('ansi-colors');
+const {red, cyan} = require('kleur/colors');
 
 /**
  * Files on which to run pre-closure babel transforms.
  *
  * @private @const {!Array<string>}
  */
-const filesToTransform = getFilesToTransform();
+let filesToTransform;
 
 /**
  * Used to cache babel transforms.
@@ -64,6 +64,9 @@ function preClosureBabel() {
   const babel = gulpBabel({caller: {name: 'pre-closure'}});
 
   return through.obj((file, enc, next) => {
+    if (!filesToTransform) {
+      filesToTransform = getFilesToTransform();
+    }
     if (!filesToTransform.includes(file.relative)) {
       return next(null, file);
     }
@@ -79,10 +82,18 @@ function preClosureBabel() {
       file.contents,
       file.sourceMap
     );
+    /**
+     * @param {*} d
+     * @return {void}
+     */
     function onData(d) {
       babel.off('error', onError);
       data = d;
     }
+    /**
+     * @param {Error} e
+     * @return {void}
+     */
     function onError(e) {
       babel.off('data', onData);
       err = e;
@@ -113,8 +124,8 @@ function preClosureBabel() {
  *
  * @param {Error} err
  * @param {string} outputFilename
- * @param {?Object} options
- * @param {?Function} resolve
+ * @param {?Object=} options
+ * @param {?Function=} resolve
  */
 function handlePreClosureError(err, outputFilename, options, resolve) {
   log(red('ERROR:'), err.message, '\n');

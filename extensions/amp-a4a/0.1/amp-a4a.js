@@ -15,6 +15,7 @@
  */
 
 import {A4AVariableSource} from './a4a-variable-source';
+import {ADS_INITIAL_INTERSECTION_EXP} from '../../../src/experiments/ads-initial-intersection-exp';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {Deferred, tryResolve} from '../../../src/utils/promise';
 import {DetachedDomStream} from '../../../src/utils/detached-dom-stream';
@@ -62,6 +63,7 @@ import {
   installFriendlyIframeEmbed,
   isSrcdocSupported,
 } from '../../../src/friendly-iframe-embed';
+import {installRealTimeConfigServiceForDoc} from '../../../src/service/real-time-config/real-time-config-impl';
 import {installUrlReplacementsForEmbed} from '../../../src/service/url-replacements-impl';
 import {
   intersectionEntryToJson,
@@ -159,6 +161,7 @@ export let CreativeMetaDataDef;
       consentState: (?CONSENT_POLICY_STATE|undefined),
       consentString: (?string|undefined),
       gdprApplies: (?boolean|undefined),
+      additionalConsent: (?string|undefined),
     }} */
 export let ConsentTupleDef;
 
@@ -775,11 +778,14 @@ export class AmpA4A extends AMP.BaseElement {
         const gdprApplies = consentMetadata
           ? consentMetadata['gdprApplies']
           : consentMetadata;
+        const additionalConsent = consentMetadata
+          ? consentMetadata['additionalConsent']
+          : consentMetadata;
 
         return /** @type {!Promise<?string>} */ (this.getServeNpaSignal().then(
           (npaSignal) =>
             this.getAdUrl(
-              {consentState, consentString, gdprApplies},
+              {consentState, consentString, gdprApplies, additionalConsent},
               this.tryExecuteRealTimeConfig_(
                 consentState,
                 consentString,
@@ -908,8 +914,18 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {boolean}
    */
   isInNoSigningExp() {
-    // eslint-disable-next-line no-undef
-    return !!NO_SIGNING_RTV;
+    return NO_SIGNING_RTV;
+  }
+
+  /**
+   * Allow subclasses to skip client side validation of non-amp creatives
+   * based on http headers for perfomance. When true, ads will fall back to
+   * x-domain earlier.
+   * @param {!Headers} unusedHeaders
+   * @return {boolean}
+   */
+  skipClientSideValidation(unusedHeaders) {
+    return false;
   }
 
   /**
@@ -924,12 +940,20 @@ export class AmpA4A extends AMP.BaseElement {
       return Promise.reject(NO_CONTENT_RESPONSE);
     }
 
-    // Duplicating httpResponse stream as safeframe/nameframe rending will need the
-    // unaltered httpResponse content.
-    const fallbackHttpResponse = httpResponse.clone();
-
+    // Extract size will also parse x-ampanalytics header for some subclasses.
     const size = this.extractSize(httpResponse.headers);
     this.creativeSize_ = size || this.creativeSize_;
+
+    if (
+      !isPlatformSupported(this.win) ||
+      this.skipClientSideValidation(httpResponse.headers)
+    ) {
+      return this.handleFallback_(httpResponse, checkStillCurrent);
+    }
+
+    // Duplicating httpResponse stream as safeframe/nameframe rendering will need the
+    // unaltered httpResponse content.
+    const fallbackHttpResponse = httpResponse.clone();
 
     // This transformation consumes the detached DOM chunks and
     // exposes our waitForHead and transferBody methods.
@@ -1078,7 +1102,9 @@ export class AmpA4A extends AMP.BaseElement {
           // via #validateAdResponse_.  See GitHub issue
           // https://github.com/ampproject/amphtml/issues/4187
           let creativeMetaDataDef;
+
           if (
+            !isPlatformSupported(this.win) ||
             !creativeDecoded ||
             !(creativeMetaDataDef = this.getAmpAdMetadata(creativeDecoded))
           ) {
@@ -1907,6 +1933,8 @@ export class AmpA4A extends AMP.BaseElement {
         // Need to guarantee that this is no longer null
         url: devAssert(this.adUrl_),
         html,
+        // TODO(#33020): provide the `extensions` property instead, in
+        // the format of `[{extensionId, extensionVersion}]`.
         extensionIds,
         fonts,
         skipHtmlMerge,
@@ -2052,10 +2080,10 @@ export class AmpA4A extends AMP.BaseElement {
       this.element,
       this.sentinel
     );
-    const asyncIntersection = isExperimentOn(
-      this.win,
-      'ads-initialIntersection'
-    );
+
+    const asyncIntersection =
+      getExperimentBranch(this.win, ADS_INITIAL_INTERSECTION_EXP.id) ===
+      ADS_INITIAL_INTERSECTION_EXP.experiment;
     const intersectionPromise = asyncIntersection
       ? measureIntersection(this.element)
       : Promise.resolve(this.element.getIntersectionChangeEntry());
@@ -2137,10 +2165,9 @@ export class AmpA4A extends AMP.BaseElement {
         this.getAdditionalContextMetadata(method == XORIGIN_MODE.SAFEFRAME)
       );
 
-      const asyncIntersection = isExperimentOn(
-        this.win,
-        'ads-initialIntersection'
-      );
+      const asyncIntersection =
+        getExperimentBranch(this.win, ADS_INITIAL_INTERSECTION_EXP.id) ===
+        ADS_INITIAL_INTERSECTION_EXP.experiment;
       const intersectionPromise = asyncIntersection
         ? measureIntersection(this.element)
         : Promise.resolve(this.element.getIntersectionChangeEntry());
@@ -2361,31 +2388,23 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {Promise<!Array<!rtcResponseDef>>|undefined}
    */
   tryExecuteRealTimeConfig_(consentState, consentString, consentMetadata) {
-    if (!!AMP.RealTimeConfigManager) {
-      return this.getBlockRtc_().then((shouldBlock) => {
-        if (shouldBlock) {
-          return;
-        }
-        try {
-          return new AMP.RealTimeConfigManager(
-            this.getAmpDoc()
-          ).maybeExecuteRealTimeConfig(
-            this.element,
-            this.getCustomRealTimeConfigMacros_(),
-            consentState,
-            consentString,
-            consentMetadata,
-            this.verifyStillCurrent()
-          );
-        } catch (err) {
-          user().error(TAG, 'Could not perform Real Time Config.', err);
-        }
-      });
-    } else if (this.element.getAttribute('rtc-config')) {
-      user().error(
-        TAG,
-        'RTC not supported for ad network ' +
-          `${this.element.getAttribute('type')}`
+    if (this.element.getAttribute('rtc-config')) {
+      installRealTimeConfigServiceForDoc(this.getAmpDoc());
+      return this.getBlockRtc_().then((shouldBlock) =>
+        shouldBlock
+          ? undefined
+          : Services.realTimeConfigForDoc(
+              this.getAmpDoc()
+            ).then((realTimeConfig) =>
+              realTimeConfig.maybeExecuteRealTimeConfig(
+                this.element,
+                this.getCustomRealTimeConfigMacros_(),
+                consentState,
+                consentString,
+                consentMetadata,
+                this.verifyStillCurrent()
+              )
+            )
       );
     }
   }
@@ -2547,4 +2566,29 @@ export function signatureVerifierFor(win) {
     win[propertyName] ||
     (win[propertyName] = new SignatureVerifier(win, signingServerURLs))
   );
+}
+
+/**
+ * @param {!Window} win
+ * @return {boolean}
+ * @visibleForTesting
+ */
+export function isPlatformSupported(win) {
+  // Require Shadow DOM support for a4a.
+  if (
+    !isNative(win.Element.prototype.attachShadow) &&
+    isExperimentOn(win, 'disable-a4a-non-sd')
+  ) {
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Returns `true` if the passed function exists and is native to the browser.
+ * @param {Function|undefined} func
+ * @return {boolean}
+ */
+function isNative(func) {
+  return !!func && func.toString().indexOf('[native code]') != -1;
 }

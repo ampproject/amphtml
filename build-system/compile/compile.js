@@ -17,7 +17,6 @@
 const argv = require('minimist')(process.argv.slice(2));
 const del = require('del');
 const fs = require('fs-extra');
-const gap = require('gulp-append-prepend');
 const gulp = require('gulp');
 const gulpIf = require('gulp-if');
 const nop = require('gulp-nop');
@@ -32,7 +31,7 @@ const {
 const {checkForUnknownDeps} = require('./check-for-unknown-deps');
 const {CLOSURE_SRC_GLOBS} = require('./sources');
 const {cpus} = require('os');
-const {green, cyan} = require('ansi-colors');
+const {green, cyan} = require('kleur/colors');
 const {log, logLocalDev} = require('../common/logging');
 const {postClosureBabel} = require('./post-closure-babel');
 const {preClosureBabel, handlePreClosureError} = require('./pre-closure-babel');
@@ -46,9 +45,29 @@ let inProgress = 0;
 const MAX_PARALLEL_CLOSURE_INVOCATIONS =
   parseInt(argv.closure_concurrency, 10) || cpus().length;
 
-// Compiles AMP with the closure compiler. This is intended only for
-// production use. During development we intend to continue using
-// babel, as it has much faster incremental compilation.
+/**
+ * Compiles AMP with the closure compiler. This is intended only for
+ * production use. During development we intend to continue using
+ * babel, as it has much faster incremental compilation.
+ *
+ * @param {string} entryModuleFilename
+ * @param {string} outputDir
+ * @param {string} outputFilename
+ * @param {{
+ *  esmPassCompilation?: string,
+ *  wrapper?: string,
+ *  extraGlobs?: string,
+ *  include3pDirectories?: boolean,
+ *  includePolyfills?: boolean,
+ *  externs?: string[],
+ *  compilationLevel?: string,
+ *  verboseLogging?: boolean,
+ *  typeCheckOnly?: boolean,
+ *  skipUnknownDepsCheck?: boolean,
+ * }} options
+ * @param {{startTime?: number}} timeInfo
+ * @return {Promise<void>}
+ */
 async function closureCompile(
   entryModuleFilename,
   outputDir,
@@ -59,6 +78,9 @@ async function closureCompile(
   // Rate limit closure compilation to MAX_PARALLEL_CLOSURE_INVOCATIONS
   // concurrent processes.
   return new Promise(function (resolve, reject) {
+    /**
+     * @return {void}
+     */
     function start() {
       inProgress++;
       compile(
@@ -76,6 +98,9 @@ async function closureCompile(
         (reason) => reject(reason)
       );
     }
+    /**
+     * @return {void}
+     */
     function next() {
       if (!queue.length) {
         return;
@@ -89,6 +114,9 @@ async function closureCompile(
   });
 }
 
+/**
+ * @return {void}
+ */
 function cleanupBuildDir() {
   del.sync('build/fake-module');
   del.sync('build/patched-module');
@@ -98,6 +126,25 @@ function cleanupBuildDir() {
   fs.mkdirsSync('build/fake-polyfills/src/polyfills');
 }
 
+/**
+ * @param {string[]|string} entryModuleFilenames
+ * @param {string} outputDir
+ * @param {string} outputFilename
+ * @param {{
+ *  esmPassCompilation?: string,
+ *  wrapper?: string,
+ *  extraGlobs?: string,
+ *  include3pDirectories?: boolean,
+ *  includePolyfills?: boolean,
+ *  externs?: string[],
+ *  compilationLevel?: string,
+ *  verboseLogging?: boolean,
+ *  typeCheckOnly?: boolean,
+ *  skipUnknownDepsCheck?: boolean,
+ * }} options
+ * @param {{startTime?: number}} timeInfo
+ * @return {Promise<void>}
+ */
 function compile(
   entryModuleFilenames,
   outputDir,
@@ -105,13 +152,6 @@ function compile(
   options,
   timeInfo
 ) {
-  function shouldAppendSourcemappingURLText(file) {
-    // Do not append sourceMappingURL if its a sourcemap
-    return (
-      pathModule.extname(file.path) !== '.map' && options.esmPassCompilation
-    );
-  }
-
   const hideWarningsFor = [
     'third_party/amp-toolbox-cache-url/',
     'third_party/caja/',
@@ -211,6 +251,10 @@ function compile(
     }
     externs.push('build-system/externs/amp.multipass.extern.js');
 
+    /**
+     * TODO(#28387) write a type for this.
+     * @type {Object}
+     */
     /* eslint "google-camelcase/google-camelcase": 0*/
     const compilerOptions = {
       compilation_level: options.compilationLevel || 'SIMPLE_OPTIMIZATIONS',
@@ -359,12 +403,6 @@ function compile(
           )
         )
         .on('error', reject)
-        .pipe(
-          gulpIf(
-            shouldAppendSourcemappingURLText,
-            gap.appendText(`\n//# sourceMappingURL=${outputFilename}.map`)
-          )
-        )
         .pipe(postClosureBabel())
         .pipe(sanitize())
         .pipe(writeSourcemaps(options))
@@ -374,10 +412,13 @@ function compile(
   });
 }
 
+/**
+ * @return {void}
+ */
 function printClosureConcurrency() {
   log(
     green('Using up to'),
-    cyan(MAX_PARALLEL_CLOSURE_INVOCATIONS),
+    cyan(MAX_PARALLEL_CLOSURE_INVOCATIONS.toString()),
     green('concurrent invocations of closure compiler.')
   );
   if (!argv.closure_concurrency) {

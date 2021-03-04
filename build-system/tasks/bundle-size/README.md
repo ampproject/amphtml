@@ -1,7 +1,7 @@
 # Bundle Size checks
 
 The `APPROVERS.json` file is a listing of compiled AMP runtime and extensions
-files. Each rule has two parts:
+files in `extglob` syntax. Each rule has two parts:
 
 -   `approvers`: list of GitHub teams whose members may approve pull requests that
     fail the check

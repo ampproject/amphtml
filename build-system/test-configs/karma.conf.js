@@ -17,7 +17,6 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const {dotWrappingWidth} = require('../common/logging');
-const {getPersistentBrowserifyCache} = require('../common/browserify-cache');
 const {isCiBuild} = require('../common/ci');
 
 const TEST_SERVER_PORT = 8081;
@@ -34,44 +33,13 @@ const COMMON_CHROME_FLAGS = [
  * @param {!Object} config
  */
 module.exports = {
-  frameworks: [
-    'fixture',
-    'browserify',
-    'mocha',
-    'sinon-chai',
-    'chai',
-    'source-map-support',
-  ],
+  frameworks: ['fixture', 'mocha', 'sinon-chai', 'chai', 'source-map-support'],
 
-  preprocessors: {
-    // `test-bin` is the output directory of the postHTML transformation.
-    './test-bin/test/fixtures/*.html': ['html2js'],
-    './test/**/*.js': ['browserify'],
-    './ads/**/test/test-*.js': ['browserify'],
-    './extensions/**/test/**/*.js': ['browserify'],
-    './testing/**/*.js': ['browserify'],
-  },
-
-  html2JsPreprocessor: {
-    // Strip the test-bin/ prefix for the transformer destination so that the
-    // change is transparent for users of the path.
-    stripPrefix: 'test-bin/',
-  },
+  preprocessors: {}, // Dynamically populated based on tests being run.
 
   hostname: 'localhost',
 
-  browserify: {
-    watch: true,
-    debug: true,
-    fast: true,
-    basedir: __dirname + '/../../',
-    transform: [['babelify', {caller: {name: 'test'}, global: true}]],
-    // Prevent "cannot find module" errors during CI. See #14166.
-    bundleDelay: isCiBuild() ? 5000 : 1200,
-    persistentCache: getPersistentBrowserifyCache(),
-  },
-
-  reporters: ['super-dots', 'karmaSimpleReporter'],
+  reporters: ['super-dots', 'spec'],
 
   superDotsReporter: {
     nbDotsPerLine: dotWrappingWidth,
@@ -97,6 +65,7 @@ module.exports = {
 
   mochaReporter: {
     output: 'full',
+    divider: false,
     colors: {
       success: 'green',
       error: 'red',
@@ -181,14 +150,11 @@ module.exports = {
   // IF YOU CHANGE THIS, DEBUGGING WILL RANDOMLY KILL THE BROWSER
   browserDisconnectTolerance: isCiBuild() ? 2 : 0,
 
-  // Import our gulp webserver as a Karma server middleware
-  // So we instantly have all the custom server endpoints available
-  beforeMiddleware: ['custom'],
   plugins: [
     '@chiragrupani/karma-chromium-edge-launcher',
-    'karma-browserify',
     'karma-chai',
     'karma-chrome-launcher',
+    'karma-esbuild',
     'karma-firefox-launcher',
     'karma-fixture',
     'karma-html2js-preprocessor',
@@ -197,17 +163,9 @@ module.exports = {
     'karma-mocha',
     'karma-mocha-reporter',
     'karma-safarinative-launcher',
-    'karma-simple-reporter',
     'karma-sinon-chai',
     'karma-source-map-support',
+    'karma-spec-reporter',
     'karma-super-dots-reporter',
-    {
-      'middleware:custom': [
-        'factory',
-        function () {
-          return require(require.resolve('../server/app.js'));
-        },
-      ],
-    },
   ],
 };

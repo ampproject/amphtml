@@ -69,7 +69,7 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, (env) => {
 
   beforeEach(() => {
     ampdoc = env.ampdoc;
-    serviceAdapter = new ServiceAdapter(null);
+    serviceAdapter = new ServiceAdapter({});
     const analytics = new SubscriptionAnalytics(ampdoc.getRootNode());
     env.sandbox.stub(serviceAdapter, 'getAnalytics').callsFake(() => analytics);
     env.sandbox
@@ -211,6 +211,39 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, (env) => {
     );
   });
 
+  it('should add metering params to url, if metering state is available', async () => {
+    env.sandbox
+      .stub(localSubscriptionPlatform.serviceAdapter_, 'loadMeteringState')
+      .returns({key: 'value'});
+    const fetchStub = env.sandbox
+      .stub(localSubscriptionPlatform.xhr_, 'fetchJson')
+      .callsFake(() => Promise.resolve({json: () => Promise.resolve(json)}));
+
+    await localSubscriptionPlatform.getEntitlements();
+    expect(fetchStub).to.be.calledWith(
+      'https://lipsum.com/login/authorize?rid=reader1&meteringState=eyJrZXkiOiJ2YWx1ZSJ9'
+    );
+  });
+
+  it('should save metering state from response', async () => {
+    const meteringState = {key: 'value'};
+    const responseWithMeteringState = {
+      ...json,
+      metering: {state: meteringState},
+    };
+    env.sandbox.stub(localSubscriptionPlatform.xhr_, 'fetchJson').returns(
+      Promise.resolve({
+        json: () => Promise.resolve(responseWithMeteringState),
+      })
+    );
+    const saveMeteringStateStub = env.sandbox
+      .stub(localSubscriptionPlatform.serviceAdapter_, 'saveMeteringState')
+      .returns(Promise.resolve());
+
+    await localSubscriptionPlatform.getEntitlements();
+    expect(saveMeteringStateStub).to.be.calledWith(meteringState);
+  });
+
   describe('validateActionMap', () => {
     let actionMap;
     beforeEach(() => {
@@ -307,8 +340,10 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, (env) => {
         element.setAttribute('subscriptions-action', Action.LOGIN);
         element.removeAttribute('subscriptions-service');
         const platform = {};
-        const serviceId = 'serviceId';
-        platform.getServiceId = env.sandbox.stub().callsFake(() => serviceId);
+        const platformKey = 'platformKey';
+        platform.getPlatformKey = env.sandbox
+          .stub()
+          .callsFake(() => platformKey);
         const loginStub = env.sandbox
           .stub(
             localSubscriptionPlatform.serviceAdapter_,
@@ -321,7 +356,7 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, (env) => {
         );
         localSubscriptionPlatform.handleClick_(element);
         expect(loginStub).to.be.called;
-        expect(delegateStub).to.be.calledWith(Action.LOGIN, serviceId);
+        expect(delegateStub).to.be.calledWith(Action.LOGIN, platformKey);
       }
     );
 
@@ -342,11 +377,13 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, (env) => {
           'delegateActionToService'
         );
         const platform = {};
-        const serviceId = 'serviceId';
-        platform.getServiceId = env.sandbox.stub().callsFake(() => serviceId);
+        const platformKey = 'platformKey';
+        platform.getPlatformKey = env.sandbox
+          .stub()
+          .callsFake(() => platformKey);
         localSubscriptionPlatform.handleClick_(element);
         expect(loginStub).to.be.called;
-        expect(delegateStub).to.be.calledWith(Action.LOGIN, serviceId);
+        expect(delegateStub).to.be.calledWith(Action.LOGIN, platformKey);
       }
     );
 
@@ -366,8 +403,8 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, (env) => {
         'delegateActionToService'
       );
       const platform = {};
-      const serviceId = 'serviceId';
-      platform.getServiceId = env.sandbox.stub().callsFake(() => serviceId);
+      const platformKey = 'platformKey';
+      platform.getPlatformKey = env.sandbox.stub().callsFake(() => platformKey);
       localSubscriptionPlatform.handleClick_(element);
       expect(loginStub).to.not.be.called;
       expect(delegateStub).to.not.be.called;

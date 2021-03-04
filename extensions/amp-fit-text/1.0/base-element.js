@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {CSS} from './component.jss';
 import {FitText} from './component';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 
@@ -24,12 +25,16 @@ BaseElement['Component'] = FitText;
 
 /** @override */
 BaseElement['props'] = {
-  'minFontSize': {attr: 'min-font-size', type: 'number'},
-  'maxFontSize': {attr: 'max-font-size', type: 'number'},
+  'children': {passthrough: true},
+  'minFontSize': {attr: 'min-font-size', type: 'number', media: true},
+  'maxFontSize': {attr: 'max-font-size', type: 'number', media: true},
 };
 
 /** @override */
-BaseElement['passthrough'] = true;
+BaseElement['layoutSizeDefined'] = true;
 
 /** @override */
-BaseElement['layoutSizeDefined'] = true;
+BaseElement['usesShadowDom'] = true;
+
+/** @override */
+BaseElement['shadowCss'] = CSS;
