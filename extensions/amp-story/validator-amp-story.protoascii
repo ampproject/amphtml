@@ -422,7 +422,7 @@ tags: {  # amp-story-bookend (json)
 }
 tags: {  # <amp-story-social-share>
   html_format: AMP
-  tag_name: "AMP-STORY-SOCIAL_SHARE"
+  tag_name: "AMP-STORY-SOCIAL-SHARE"
   mandatory_ancestor: "AMP-STORY"
   mandatory_last_child: true
   descendant_tag_list: "amp-story-social-share-allowed-descendants"
