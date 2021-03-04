@@ -457,7 +457,6 @@ export class ManualAdvancement extends AdvancementConfig {
       },
       /* opt_stopAt */ this.element_
     );
-
     return !!target && this.isInScreenBottom_(target, pageRect);
   }
 
@@ -476,8 +475,8 @@ export class ManualAdvancement extends AdvancementConfig {
       dev().assertElement(event.target),
       (el) => {
         tagName = el.tagName.toLowerCase();
-        
-        if (el.classList.contains('i-amphtml-page-attachment-host')) {
+
+        if (tagName === 'amp-story-page-attachment') {
           shouldHandleEvent = false;
           return true;
         }
@@ -678,6 +677,7 @@ export class ManualAdvancement extends AdvancementConfig {
    */
   maybePerformNavigation_(event) {
     const target = dev().assertElement(event.target);
+    console.log(target);
 
     const pageRect = this.getStoryPageRect_();
 

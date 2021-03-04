@@ -1788,11 +1788,15 @@ export class AmpStoryPage extends AMP.BaseElement {
 
       this.mutateElement(() => {
         textEl.textContent = openLabel;
+
         const container = this.win.document.createElement('div');
         container.classList.add('i-amphtml-page-attachment-host');
+        container.setAttribute("role", "button");
         this.element.appendChild(container);
         createShadowRootWithStyle(container, this.openAttachmentEl_, pageAttachmentCSS);
+
         const clickTarget = container.shadowRoot.querySelector('.i-amphtml-story-page-open-attachment');
+
         clickTarget.addEventListener('click', () =>
           this.openAttachment()
         );
