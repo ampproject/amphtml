@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import {red} from 'ansi-colors';
-
 /**
  * Replaces isExperimentOn() and toggleExperiment() calls when they match a name
  * specified by --isExperimentOnExperiment
@@ -38,7 +36,7 @@ import {red} from 'ansi-colors';
  * @param {*} options
  * @return {*}
  */
-export default function transformer(file, api, options) {
+module.exports = function (file, api, options) {
   const j = api.jscodeshift;
 
   const missingOptions = [
@@ -49,7 +47,7 @@ export default function transformer(file, api, options) {
   if (missingOptions.length > 0) {
     throw new Error(
       `Missing options for ${options.transform}\n` +
-        red(JSON.stringify(missingOptions))
+        JSON.stringify(missingOptions)
     );
   }
 
@@ -119,4 +117,4 @@ export default function transformer(file, api, options) {
       path.replace(replacement);
     })
     .toSource();
-}
+};
