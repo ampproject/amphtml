@@ -16,19 +16,80 @@
 
 import * as Preact from '../../../../src/preact';
 import {FitText} from '../component';
+import {computedStyle} from '../../../../src/style';
 import {mount} from 'enzyme';
+import {waitFor} from '../../../../testing/test-helper';
 
-describes.realWin('FitText preact component v1.0', {}, () => {
-  it('renders', () => {
+describes.realWin('FitText preact component v1.0', {}, (env) => {
+  let win;
+
+  beforeEach(() => {
+    win = env.win;
+  });
+
+  async function expectAsyncFontSize(element, value) {
+    await waitFor(
+      () => computedStyle(win, element).fontSize === value,
+      'font size applied'
+    );
+    expect(computedStyle(win, element).fontSize).to.equal(value);
+  }
+
+  it('renders', async () => {
     const ref = Preact.createRef();
     const wrapper = mount(
       <FitText ref={ref} style={{width: '300px', height: '100px'}}>
         Hello World
-      </FitText>
+      </FitText>,
+      {attachTo: win.document.body}
     );
 
     // Render provided children
     expect(wrapper.children()).to.have.lengthOf(1);
     expect(wrapper.text()).to.equal('Hello World');
+    await expectAsyncFontSize(
+      wrapper.find('[part="content"]').getDOMNode(),
+      '60px'
+    );
+  });
+
+  it('should respect minFontSize', async () => {
+    const ref = Preact.createRef();
+    const wrapper = mount(
+      <FitText ref={ref} style={{width: '1px', height: '1px'}} minFontSize="24">
+        Hello World
+      </FitText>,
+      {attachTo: win.document.body}
+    );
+
+    // Render provided children
+    expect(wrapper.children()).to.have.lengthOf(1);
+    expect(wrapper.text()).to.equal('Hello World');
+    await expectAsyncFontSize(
+      wrapper.find('[part="content"]').getDOMNode(),
+      '24px'
+    );
+  });
+
+  it('should respect maxFontSize', async () => {
+    const ref = Preact.createRef();
+    const wrapper = mount(
+      <FitText
+        ref={ref}
+        style={{width: '300px', height: '100px'}}
+        maxFontSize="48"
+      >
+        Hello World
+      </FitText>,
+      {attachTo: win.document.body}
+    );
+
+    // Render provided children
+    expect(wrapper.children()).to.have.lengthOf(1);
+    expect(wrapper.text()).to.equal('Hello World');
+    await expectAsyncFontSize(
+      wrapper.find('[part="content"]').getDOMNode(),
+      '48px'
+    );
   });
 });
