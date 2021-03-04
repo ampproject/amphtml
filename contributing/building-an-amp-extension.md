@@ -668,7 +668,7 @@ And then protecting your code with a check `isExperimentOn(win, 'amp-my-element'
 
 ```javascript
 import {isExperimentOn} from '../../../src/experiments';
-import {userAssert} from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 /** @const */
 const EXPERIMENT = 'amp-my-element';

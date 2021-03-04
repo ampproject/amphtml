@@ -18,7 +18,7 @@ import {ActionTrust} from '../../../src/action-constants';
 import {BaseCarousel} from './base-carousel';
 import {Services} from '../../../src/services';
 import {isFiniteNumber} from '../../../src/types';
-import {userAssert} from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 export class BaseSlides extends BaseCarousel {
   /** @param {!AmpElement} element */

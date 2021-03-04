@@ -19,12 +19,16 @@ const debounce = require('debounce');
 const fs = require('fs-extra');
 const wrappers = require('../compile/compile-wrappers');
 const {
+  endBuildStep,
+  watchDebounceDelay,
+  invalidateUnminifiedBabelCache,
+} = require('./helpers');
+const {
   extensionAliasBundles,
   extensionBundles,
   verifyExtensionBundles,
 } = require('../compile/bundles.config');
 const {analyticsVendorConfigs} = require('./analytics-vendor-configs');
-const {endBuildStep, watchDebounceDelay} = require('./helpers');
 const {isCiBuild} = require('../common/ci');
 const {jsifyCssAsync} = require('./css/jsify-css');
 const {log} = require('../common/logging');
@@ -382,7 +386,8 @@ async function doBuildExtension(extensions, extension, options) {
  * @param {?Object} options
  */
 function watchExtension(path, name, version, latestVersion, hasCss, options) {
-  const watchFunc = function () {
+  const watchFunc = function (modifiedFile) {
+    invalidateUnminifiedBabelCache(modifiedFile);
     const bundleComplete = buildExtension(
       name,
       version,
@@ -523,6 +528,7 @@ function buildExtensionCss(path, name, version, options) {
  */
 async function buildExtensionJs(path, name, version, latestVersion, options) {
   const filename = options.filename || name + '.js';
+  const latest = version === latestVersion;
   await compileJs(
     path + '/',
     filename,
@@ -530,7 +536,7 @@ async function buildExtensionJs(path, name, version, latestVersion, options) {
     Object.assign(options, {
       toName: `${name}-${version}.max.js`,
       minifiedName: `${name}-${version}.js`,
-      latestName: version === latestVersion ? `${name}-latest.js` : '',
+      latestName: latest ? `${name}-latest.js` : '',
       // Wrapper that either registers the extension or schedules it for
       // execution after the main binary comes back.
       // The `function` is wrapped in `()` to avoid lazy parsing it,
@@ -538,7 +544,13 @@ async function buildExtensionJs(path, name, version, latestVersion, options) {
       // See https://github.com/ampproject/amphtml/issues/3977
       wrapper: options.noWrapper
         ? ''
-        : wrappers.extension(name, argv.esm, options.loadPriority),
+        : wrappers.extension(
+            name,
+            version,
+            latest,
+            argv.esm,
+            options.loadPriority
+          ),
     })
   );
 
