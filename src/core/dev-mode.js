@@ -24,8 +24,7 @@ const IS_DEV = true;
  * Returns true if the `#development` has param has any value set.
  * @private
  * @visibleForTesting
- * @param location {!Location}
- * @param hash
+ * @param {!Location} location
  * @return {boolean}
  */
 export function isDevQueryParamPresent_(location) {
@@ -39,16 +38,15 @@ export function isDevQueryParamPresent_(location) {
 /**
  * Returns true for local development or when the `development` query param
  * is present in the URL.
- * @param win
+ * @param {?Window=} opt_win
  * @return {boolean}
  */
-export function isDevMode(win = window) {
-  return IS_DEV || isDevQueryParamPresent_(win.location);
+export function isDevMode(opt_win = window) {
+  return IS_DEV || isDevQueryParamPresent_(opt_win.location);
 }
 
 /**
  * Returns true for local development and testing.
- * @param win
  * @return {boolean}
  */
 export function isLocalDevMode() {
