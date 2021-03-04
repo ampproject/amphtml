@@ -234,10 +234,8 @@ describes.fakeWin('Viewport', {}, (env) => {
         ampdoc.win.parent = {};
       });
 
-      it('should scroll when *not* in a shadow doc', async () => {
-        env.sandbox.stub(ampdoc, 'getRootNode').returns({
-          nodeType: 9, // DOCUMENT_NODE
-        });
+      it('should scroll when in a single doc', async () => {
+        env.sandbox.stub(ampdoc, 'isSingleDoc').returns(true);
 
         new ViewportImpl(ampdoc, binding, viewer);
         await ampdoc.whenReady();
@@ -245,9 +243,8 @@ describes.fakeWin('Viewport', {}, (env) => {
       });
 
       it('should *not* scroll when in a shadow doc', async () => {
-        env.sandbox.stub(ampdoc, 'getRootNode').returns({
-          nodeType: 1, // ELEMENT_NODE
-        });
+        env.sandbox.stub(ampdoc, 'isSingleDoc').returns(false);
+
         new ViewportImpl(ampdoc, binding, viewer);
         await ampdoc.whenReady();
         expect(ampdoc.win.scrollTo).not.to.have.been.called;

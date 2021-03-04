@@ -209,11 +209,10 @@ export class ViewportImpl {
     // https://github.com/ampproject/amphtml/issues/30838 for more details.
     // The solution is to make a "fake" scrolling API call.
     const isIframedIos = Services.platformFor(win).isIos() && isIframed(win);
-    // Fix for https://github.com/ampproject/amphtml/issues/32165, we don't
-    // want to scroll if we're in a shadow doc.
-    const isShadowDoc =
-      this.ampdoc.getRootNode().nodeType !== /* DOCUMENT_NODE */ 9;
-    if (isIframedIos && !isShadowDoc) {
+    // We dont want to scroll if we're in a shadow doc, so check that we're
+    // in a single doc. Fix for
+    // https://github.com/ampproject/amphtml/issues/32165.
+    if (isIframedIos && this.ampdoc.isSingleDoc()) {
       this.ampdoc.whenReady().then(() => {
         win./*OK*/ scrollTo(-0.1, 0);
       });
