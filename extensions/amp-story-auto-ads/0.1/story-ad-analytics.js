@@ -27,6 +27,7 @@ export const AnalyticsEvents = {
   AD_LOADED: 'story-ad-load',
   AD_INSERTED: 'story-ad-insert',
   AD_VIEWED: 'story-ad-view',
+  AD_SWIPED: 'story-ad-swipe',
   AD_CLICKED: 'story-ad-click',
   AD_EXITED: 'story-ad-exit',
   AD_DISCARDED: 'story-ad-discard',
@@ -42,6 +43,8 @@ export const AnalyticsVars = {
   AD_INSERTED: 'insertTime',
   // Timestamp when page becomes active page.
   AD_VIEWED: 'viewTime',
+  // Timestamp when ad page detects swipe event.
+  AD_SWIPED: 'swipeTime',
   // Timestamp when ad is clicked.
   AD_CLICKED: 'clickTime',
   // Timestamp when ad page moves from active => inactive.
