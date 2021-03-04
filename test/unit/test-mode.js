@@ -68,8 +68,8 @@ describe('getMode', () => {
     expect(getMode(getWin(url)).development).to.be.true;
   });
 
-  it('should not support invalid format for development', () => {
-    const url = 'https://www.amp-site.org#development=amp4invalid';
+  it('should support arbitrary format for development', () => {
+    const url = 'https://www.amp-site.org#development=nonsensevalue';
     expect(getMode(getWin(url)).development).to.be.false;
   });
 });

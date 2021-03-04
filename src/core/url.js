@@ -49,7 +49,7 @@ export function parseQueryString(queryString) {
   while ((match = queryStringRegex.exec(queryString))) {
     const name = tryDecodeUriComponent(match[1], match[1]);
     const value = match[2]
-      ? tryDecodeUriComponent_(match[2].replace(/\+/g, ' '), match[2])
+      ? tryDecodeUriComponent(match[2].replace(/\+/g, ' '), match[2])
       : '';
     params[name] = value;
   }

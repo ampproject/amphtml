@@ -72,13 +72,13 @@ function getMode_(win) {
 
   const runningTests =
     IS_DEV && !!(AMP_CONFIG.test || win.__AMP_TEST || win.__karma__);
-  const hashQuery = parseQueryString_(
+  const hashQuery = parseQueryString(
     // location.originalHash is set by the viewer when it removes the fragment
     // from the URL.
     win.location.originalHash || win.location.hash
   );
 
-  const searchQuery = parseQueryString_(win.location.search);
+  const searchQuery = parseQueryString(win.location.search);
 
   if (!rtvVersion) {
     rtvVersion = getRtvVersion(win);
