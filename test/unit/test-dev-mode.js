@@ -17,26 +17,31 @@
 import {isDevQueryParamPresent_} from '../../src/core/dev-mode';
 import {parseUrlDeprecated} from '../../src/url';
 
-describe('isDevQueryParamPresent_', () => {
-  function expectDevMode(url, shouldBeDevMode) {
-    const location = parseUrlDeprecated(url);
-    expect(isDevQueryParamPresent_(location)).to.equal(shouldBeDevMode);
-  }
+describes.sandboxed('devMode helpers', {}, () => {
+  describe('isDevQueryParamPresent_', () => {
+    function expectDevMode(url, shouldBeDevMode) {
+      const location = parseUrlDeprecated(url);
+      expect(isDevQueryParamPresent_(location)).to.equal(shouldBeDevMode);
+    }
 
-  it('returns true for any parameter value', () => {
-    expectDevMode('https://www.amp-site.org#development=1', true);
-    expectDevMode('https://www.amp-site.org#development=amp', true);
-    expectDevMode('https://www.amp-site.org#development=amp4email', true);
-    expectDevMode('https://www.amp-site.org#development=amp4ads', true);
-    expectDevMode('https://www.amp-site.org#development=actions', true);
-    expectDevMode('https://www.amp-site.org#development=othernonesense', true);
-  });
+    it('returns true for any parameter value', () => {
+      expectDevMode('https://www.amp-site.org#development=1', true);
+      expectDevMode('https://www.amp-site.org#development=amp', true);
+      expectDevMode('https://www.amp-site.org#development=amp4email', true);
+      expectDevMode('https://www.amp-site.org#development=amp4ads', true);
+      expectDevMode('https://www.amp-site.org#development=actions', true);
+      expectDevMode(
+        'https://www.amp-site.org#development=othernonesense',
+        true
+      );
+    });
 
-  it.only('returns false for absent parameter value', () => {
-    expectDevMode('https://www.amp-site.org#development', false);
-  });
+    it('returns false for absent parameter value', () => {
+      expectDevMode('https://www.amp-site.org#development', false);
+    });
 
-  it('returns false when parameter is not present', () => {
-    expectDevMode('https://www.amp-site.org', false);
+    it('returns false when parameter is not present', () => {
+      expectDevMode('https://www.amp-site.org', false);
+    });
   });
 });

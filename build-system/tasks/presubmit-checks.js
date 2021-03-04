@@ -985,7 +985,7 @@ const forbiddenTermsSrcInclusive = {
       'validator/js/webui/webui.js',
       'extensions/amp-pinterest/0.1/util.js',
       'src/url.js',
-      'src/url-try-decode-uri-component.js',
+      'src/core/url.js',
       'src/utils/bytes.js',
     ],
   },
@@ -1160,10 +1160,6 @@ const forbiddenTermsSrcInclusive = {
     allowlist: ['dist.3p/current/integration.js', 'build-system/server/app.js'],
   },
   '\\.indexOf\\(.*===?.*\\.length': 'use endsWith helper in src/string.js',
-  '/url-parse-query-string': {
-    message: 'Import parseQueryString from `src/url.js`',
-    allowlist: ['src/url.js', 'src/mode.js', 'dist.3p/current/integration.js'],
-  },
   '\\.trim(Left|Right)\\(\\)': {
     message: 'Unsupported on IE; use trim() or a helper instead.',
     allowlist: ['validator/js/engine/validator.js'],
