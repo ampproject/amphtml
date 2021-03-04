@@ -105,10 +105,25 @@
         // The listbox has the errors at the bottom of the screen.
         var listbox = this.$.errorListBox;
 
+        var isValidatorInited = false;
+
+        if (amp.validator.init) {
+          amp.validator.init().then(function() {
+            isValidatorInited = true;
+            refreshEditorAndErrors();
+          });
+        } else {
+          isValidatorInited = true;
+        }
+
         // When the editor contents change, trigger validation (with a delay)
         // and propagate the validation errors into the editor (as line
         // widgets) and the listbox below the editor as clickable errors.
         var refreshEditorAndErrors = function() {
+          if (!isValidatorInited) {
+            return ;
+          }
+
           // Clear the list of errors below the editor, and the inline
           // messages.
           listbox.clearErrors();
