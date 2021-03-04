@@ -172,8 +172,7 @@ const buildOpenAttachmentElement = (element) =>
   htmlFor(element)`
       <a class="
           i-amphtml-story-page-open-attachment i-amphtml-story-system-reset"
-          role="button"
-          active>
+          role="button">
         <span class="i-amphtml-story-page-open-attachment-icon">
           <span class="i-amphtml-story-page-open-attachment-bar-left"></span>
           <span class="i-amphtml-story-page-open-attachment-bar-right"></span>

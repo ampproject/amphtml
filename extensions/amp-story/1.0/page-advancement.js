@@ -456,10 +456,6 @@ export class ManualAdvancement extends AdvancementConfig {
       },
       /* opt_stopAt */ this.element_
     );
-<<<<<<< HEAD
-    return !!target && this.isInScreenBottom_(target, pageRect);
-=======
->>>>>>> master
   }
 
   /**
