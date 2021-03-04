@@ -337,7 +337,7 @@ describes.sandboxed('Module Extension Location', {}, () => {
   });
 });
 
-describes.fakeWin.only('getExtensionScripts', {}, (env) => {
+describes.fakeWin('getExtensionScripts', {}, (env) => {
   let win, doc;
 
   beforeEach(() => {
