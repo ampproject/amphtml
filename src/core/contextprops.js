@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Loading, reducer as loadingReducer} from '../loading';
+import {Loading, reducer as loadingReducer} from './loading-instructions';
 import {contextProp} from '../context';
 
 /**
