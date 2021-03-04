@@ -47,12 +47,10 @@ describes.fakeWin('AmpAdTemplateHelper', {amp: true}, (env) => {
         ampCors: false,
         credentials: 'omit',
       })
-      .returns(
-        Promise.resolve({
-          headers: {},
-          text: () => template,
-        })
-      );
+      .resolves({
+        headers: {},
+        text: () => template,
+      });
     return ampAdTemplateHelper
       .fetch(canonicalUrl)
       .then((fetchedTemplate) => expect(fetchedTemplate).to.equal(template));

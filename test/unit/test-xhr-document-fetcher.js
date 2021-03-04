@@ -169,14 +169,12 @@ describes.realWin('DocumentFetcher', {amp: true}, function (env) {
       };
     }
     it('should return correct document response', () => {
-      sendMessageStub.returns(
-        Promise.resolve({
-          body: '<html><body>Foo</body></html>',
-          init: {
-            headers: [],
-          },
-        })
-      );
+      sendMessageStub.resolves({
+        body: '<html><body>Foo</body></html>',
+        init: {
+          headers: [],
+        },
+      });
       return fetchDocument(
         interceptionEnabledWin,
         'https://www.some-url.org/some-resource/'

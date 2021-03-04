@@ -115,12 +115,10 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, (env) => {
             credentials: 'omit',
           }
         )
-        .returns(
-          Promise.resolve({
-            headers: {},
-            text: () => template,
-          })
-        );
+        .resolves({
+          headers: {},
+          text: () => template,
+        });
       return impl
         .maybeValidateAmpCreative(
           utf8Encode(JSON.stringify(adResponseBody)).buffer,
@@ -176,12 +174,10 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, (env) => {
             credentials: 'omit',
           }
         )
-        .returns(
-          Promise.resolve({
-            headers: {},
-            text: () => template,
-          })
-        );
+        .resolves({
+          headers: {},
+          text: () => template,
+        });
     });
 
     it('should auto add amp-analytics if required', () => {

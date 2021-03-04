@@ -83,14 +83,12 @@ describes.realWin(
 
       xhrMock = env.sandbox.mock(Services.xhrFor(win));
       if (attributes) {
-        xhrMock.expects('fetchJson').returns(
-          Promise.resolve({
-            status: 200,
-            json() {
-              return Promise.resolve(currentResopnse);
-            },
-          })
-        );
+        xhrMock.expects('fetchJson').resolves({
+          status: 200,
+          json() {
+            return Promise.resolve(currentResopnse);
+          },
+        });
       } else {
         xhrMock.expects('fetchJson').never();
       }

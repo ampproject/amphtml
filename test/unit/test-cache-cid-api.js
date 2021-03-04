@@ -76,15 +76,13 @@ describes.realWin('cacheCidApi', {amp: true}, (env) => {
       });
 
       it('should use client ID API from api if everything great', () => {
-        fetchJsonStub.returns(
-          Promise.resolve({
-            json: () => {
-              return Promise.resolve({
-                publisherClientId: 'publisher-client-id-from-cache',
-              });
-            },
-          })
-        );
+        fetchJsonStub.resolves({
+          json: () => {
+            return Promise.resolve({
+              publisherClientId: 'publisher-client-id-from-cache',
+            });
+          },
+        });
         return api.getScopedCid('AMP_ECID_GOOGLE').then((cid) => {
           expect(cid).to.equal(
             'amp-mJW1ZjoviqBJydzRI8KnitWEpqyhQqDegGCl' +
@@ -106,15 +104,13 @@ describes.realWin('cacheCidApi', {amp: true}, (env) => {
       });
 
       it('should return null if opted out', () => {
-        fetchJsonStub.returns(
-          Promise.resolve({
-            json: () => {
-              return Promise.resolve({
-                optOut: true,
-              });
-            },
-          })
-        );
+        fetchJsonStub.resolves({
+          json: () => {
+            return Promise.resolve({
+              optOut: true,
+            });
+          },
+        });
         return api.getScopedCid('AMP_ECID_GOOGLE').then((cid) => {
           expect(cid).to.equal(null);
           expect(fetchJsonStub).to.be.calledWith(
@@ -133,25 +129,20 @@ describes.realWin('cacheCidApi', {amp: true}, (env) => {
       });
 
       it('should try alternative url if API provides', () => {
-        fetchJsonStub.onCall(0).returns(
-          Promise.resolve({
-            json: () => {
-              return Promise.resolve({
-                alternateUrl:
-                  'https://ampcid.google.co.uk/v1/cache:getClientId',
-              });
-            },
-          })
-        );
-        fetchJsonStub.onCall(1).returns(
-          Promise.resolve({
-            json: () => {
-              return Promise.resolve({
-                publisherClientId: 'publisher-client-id-from-cache',
-              });
-            },
-          })
-        );
+        fetchJsonStub.onCall(0).resolves({
+          json: () => {
+            return Promise.resolve({
+              alternateUrl: 'https://ampcid.google.co.uk/v1/cache:getClientId',
+            });
+          },
+        });
+        fetchJsonStub.onCall(1).resolves({
+          json: () => {
+            return Promise.resolve({
+              publisherClientId: 'publisher-client-id-from-cache',
+            });
+          },
+        });
         return api.getScopedCid('AMP_ECID_GOOGLE').then((cid) => {
           expect(cid).to.equal(
             'amp-mJW1ZjoviqBJydzRI8KnitWEpqyhQqDegGCl' +

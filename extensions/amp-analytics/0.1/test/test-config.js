@@ -957,16 +957,14 @@ describes.realWin(
 
         const usrObj = user();
         const spy = env.sandbox.spy(usrObj, 'warn');
-        xhrStub.returns(
-          Promise.resolve({
-            json: () => {
-              return {
-                'warningMessage':
-                  'The config you are working with has been deprecated',
-              };
-            },
-          })
-        );
+        xhrStub.resolves({
+          json: () => {
+            return {
+              'warningMessage':
+                'The config you are working with has been deprecated',
+            };
+          },
+        });
 
         return new AnalyticsConfig(element).loadConfig().then((config) => {
           expect(spy).callCount(1);
