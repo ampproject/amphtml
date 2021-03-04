@@ -105,11 +105,11 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     );
   }
 
-  /** @override */
-  layoutCallback() {
-    this.ampImgEl_ = dev().assertElement(
-      this.element_.querySelector('amp-img')
-    );
+  /** @private */
+  setAnimateTo_() {
+    const lockedBounds = this.element_.getAttribute('locked-bounds');
+
+    const zoom = parseFloat(this.element_.getAttribute('zoom'));
 
     let x = 0;
     const xAttr = this.element_.getAttribute('x');
@@ -120,8 +120,14 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       const ampImgWidth = this.ampImgEl_.getAttribute('width');
       const scaledFraction = containerHeight / ampImgHeight;
       const scaledImageWidth = scaledFraction * ampImgWidth;
+      // const additionalZoom = zoom * ;
       x =
         ((scaledImageWidth / 2 - containerWidth / 2) / scaledImageWidth) * 100;
+      // ((scaledImageWidth / 2 - containerWidth / 2) / scaledImageWidth) * 100;
+      // console.log(x);
+      x +=
+        (((containerWidth / 2) * ((zoom - 1) / zoom)) / scaledImageWidth) * 100;
+      console.log((containerWidth / 2) * ((zoom - 1) / zoom));
     } else {
       x = parseFloat(xAttr) || 0;
     }
@@ -131,10 +137,19 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       y: parseFloat(this.element_.getAttribute('y')) || 0,
       zoom: parseFloat(this.element_.getAttribute('zoom')) || 1,
     };
+  }
+
+  /** @override */
+  layoutCallback() {
+    this.ampImgEl_ = dev().assertElement(
+      this.element_.querySelector('amp-img')
+    );
 
     this.groupId_ =
       this.element_.getAttribute('group-id') ||
       this.ampImgEl_.getAttribute('src');
+
+    this.setAnimateTo_();
 
     this.initializeListeners_();
     return whenUpgradedToCustomElement(this.ampImgEl_)
