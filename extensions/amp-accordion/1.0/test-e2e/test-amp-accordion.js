@@ -65,7 +65,7 @@ describes.endtoend(
       // section 1 is collapsed
       await expect(
         controller.getElementProperty(content1, 'clientHeight')
-      ).to.equal(25);
+      ).to.equal(0);
     });
 
     it('renders section in expanded state when expanded attribute provided', async () => {
