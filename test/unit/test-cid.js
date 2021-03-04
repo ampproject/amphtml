@@ -1215,7 +1215,7 @@ describes.fakeWin('cid optout:', {amp: true}, (env) => {
     });
 
     it('should reject promise if storage set fails', () => {
-      storageSetStub.returns(Promise.reject('failed!'));
+      storageSetStub.rejects('failed!');
       return optOutOfCid(ampdoc).should.eventually.be.rejectedWith('failed!');
     });
   });
@@ -1236,7 +1236,7 @@ describes.fakeWin('cid optout:', {amp: true}, (env) => {
     });
 
     it('should return false if storage get fails', () => {
-      storageGetStub.withArgs('amp-cid-optout').returns(Promise.reject('Fail'));
+      storageGetStub.withArgs('amp-cid-optout').rejects('Fail');
       return isOptedOutOfCid(ampdoc).then((isOut) => {
         expect(isOut).to.be.false;
       });

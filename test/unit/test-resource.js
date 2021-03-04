@@ -157,7 +157,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
     elementMock
       .expects('buildInternal')
-      .returns(Promise.reject(new Error('intentional')))
+      .rejects(new Error('intentional'))
       .once();
     elementMock.expects('updateLayoutBox').never();
     const buildPromise = resource.build();
@@ -702,7 +702,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
 
   it('should fail startLayout', () => {
     const error = new Error('intentional');
-    elementMock.expects('layoutCallback').returns(Promise.reject(error)).once();
+    elementMock.expects('layoutCallback').rejects(error).once();
 
     resource.state_ = ResourceState.LAYOUT_SCHEDULED;
     resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 10};

@@ -45,7 +45,7 @@ describes.fakeWin(
       helpers = helpersFactory(env);
       env.sandbox
         .stub(DocumentReady, 'whenDocumentReady')
-        .returns(Promise.reject());
+        .rejects();
     });
 
     afterEach(() => {

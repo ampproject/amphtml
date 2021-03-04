@@ -272,7 +272,7 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, (env) => {
               'Content-Type': 'application/x-www-form-urlencoded',
             },
           })
-          .returns(Promise.reject('intentional'))
+          .rejects('intentional')
           .once();
         const replaceSectionsStub = env.sandbox
           .stub(adapter, 'replaceSections_')
@@ -423,7 +423,7 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, (env) => {
           .withExactArgs('https://acme.com/a?rid=r1', {
             credentials: 'include',
           })
-          .returns(Promise.reject('intentional'))
+          .rejects('intentional')
           .once();
         jwtMock.expects('decode').never();
         return adapter.fetchJwt_().then(

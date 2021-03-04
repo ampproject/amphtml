@@ -122,9 +122,9 @@ describe('Poller', () => {
     retriableErr.retriable = true;
     workStub.onCall(0).resolves();
     workStub.onCall(1).resolves();
-    workStub.onCall(2).returns(Promise.reject(retriableErr));
-    workStub.onCall(3).returns(Promise.reject(retriableErr));
-    workStub.onCall(4).returns(Promise.reject(retriableErr));
+    workStub.onCall(2).rejects(retriableErr);
+    workStub.onCall(3).rejects(retriableErr);
+    workStub.onCall(4).rejects(retriableErr);
     workStub.resolves();
     expect(workStub).to.have.not.been.called;
 
@@ -206,7 +206,7 @@ describe('Poller', () => {
   it('should shutoff backoff if stopped', () => {
     const retriableErr = new Error('HTTP Error');
     retriableErr.retriable = true;
-    workStub.returns(Promise.reject(retriableErr));
+    workStub.rejects(retriableErr);
     expect(workStub).to.have.not.been.called;
     poller.start();
     clock.tick(4000);
@@ -246,8 +246,8 @@ describe('Poller', () => {
     const delaySpy = window.sandbox.spy(timer, 'delay');
     const retriableErr = new Error('HTTP Error');
     retriableErr.retriable = true;
-    workStub.onCall(0).returns(Promise.reject(retriableErr));
-    workStub.onCall(1).returns(Promise.reject(retriableErr));
+    workStub.onCall(0).rejects(retriableErr);
+    workStub.onCall(1).rejects(retriableErr);
     workStub.resolves();
     const clearSpy = window.sandbox.spy(timer, 'cancel');
 

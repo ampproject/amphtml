@@ -175,8 +175,8 @@ describes.fakeWin(
           .withExactArgs('https://builturl', {
             credentials: 'include',
           })
-          .returns(
-            Promise.reject({
+          .rejects(
+            {
               response: {
                 status: 402,
                 json() {
@@ -189,7 +189,7 @@ describes.fakeWin(
                   });
                 },
               },
-            })
+            }
           )
           .once();
         emptyContainerStub.resolves();

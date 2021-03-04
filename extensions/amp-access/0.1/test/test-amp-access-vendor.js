@@ -107,7 +107,7 @@ describes.realWin('AccessVendorAdapter', {amp: true}, (env) => {
         vendorMock
           .expects('authorize')
           .withExactArgs()
-          .returns(Promise.reject('intentional'))
+          .rejects('intentional')
           .once();
         return adapter.authorize().then(
           () => {
@@ -130,7 +130,7 @@ describes.realWin('AccessVendorAdapter', {amp: true}, (env) => {
         vendorMock
           .expects('pingback')
           .withExactArgs()
-          .returns(Promise.reject('intentional'))
+          .rejects('intentional')
           .once();
         return adapter.pingback().then(
           () => {

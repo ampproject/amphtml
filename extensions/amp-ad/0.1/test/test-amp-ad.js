@@ -128,7 +128,7 @@ describes.realWin('Ad loader', {amp: true}, (env) => {
         const extensionsStub = env.sandbox
           .stub(extensions, 'loadElementClass')
           .withArgs('amp-ad-network-zort-impl')
-          .returns(Promise.reject(new Error('I failed!')));
+          .rejects(new Error('I failed!'));
         ampAd = new AmpAd(ampAdElement);
         env.sandbox.stub(ampAd.user(), 'error');
         return ampAd.upgradeCallback().then((baseElement) => {

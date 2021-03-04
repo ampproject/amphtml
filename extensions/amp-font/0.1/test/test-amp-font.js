@@ -66,7 +66,7 @@ describes.repeated(
         it('should timeout while loading custom font', function () {
           env.sandbox
             .stub(FontLoader.prototype, 'load')
-            .returns(Promise.reject('mock rejection'));
+            .rejects('mock rejection');
           return getAmpFont().then(() => {
             expect(root).to.have.class('comic-amp-font-missing');
             expect(root).to.not.have.class('comic-amp-font-loading');

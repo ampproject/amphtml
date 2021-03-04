@@ -67,7 +67,7 @@ describes.fakeWin(
         });
         env.sandbox
           .stub(DocumentReady, 'whenDocumentReady')
-          .returns(Promise.reject());
+          .rejects();
         expect(() => {
           ampSkimlinks.buildCallback();
         }).to.not.throw();

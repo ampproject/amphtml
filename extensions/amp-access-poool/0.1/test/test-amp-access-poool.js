@@ -133,12 +133,12 @@ describes.fakeWin(
           .once();
         xhrMock
           .expects('fetchJson')
-          .returns(
-            Promise.reject({
+          .rejects(
+            {
               response: {
                 status: 402,
               },
-            })
+            }
           )
           .once();
         return vendor.authorize().then((err) => {

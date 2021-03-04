@@ -1089,7 +1089,7 @@ describes.realWin(
         toggleFallbackSpy = env.sandbox.spy(impl, 'toggleFallback');
         getDataSpy = env.sandbox
           .stub(impl, 'getRemoteData_')
-          .returns(Promise.reject('Error for test'));
+          .rejects('Error for test');
       });
 
       it('should throw error when fallback is not provided', () => {

@@ -107,8 +107,8 @@ describes.realWin('viewerCidApi', {amp: true}, (env) => {
     });
 
     it('should reject if Viewer rejects', () => {
-      viewerMock.sendMessageAwaitResponse.returns(
-        Promise.reject('Client API error')
+      viewerMock.sendMessageAwaitResponse.rejects(
+        'Client API error'
       );
       return expect(
         api.getScopedCid('api-key', 'AMP_ECID_GOOGLE')

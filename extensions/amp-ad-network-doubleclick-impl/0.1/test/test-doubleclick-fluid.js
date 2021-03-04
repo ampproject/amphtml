@@ -298,7 +298,7 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, (env) => {
     impl.iframe = impl.win.document.createElement('iframe');
     impl.win.document.body.appendChild(impl.iframe);
     env.sandbox.stub(impl, 'setCssPosition_').resolves();
-    env.sandbox.stub(impl, 'attemptChangeHeight').returns(Promise.reject());
+    env.sandbox.stub(impl, 'attemptChangeHeight').rejects();
     const delayedImpressionSpy = env.sandbox.spy(
       impl,
       'fireDelayedImpressions'
@@ -320,7 +320,7 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, (env) => {
     impl.iframe = impl.win.document.createElement('iframe');
     impl.win.document.body.appendChild(impl.iframe);
     env.sandbox.stub(impl, 'setCssPosition_').resolves();
-    env.sandbox.stub(impl, 'attemptChangeHeight').returns(Promise.reject());
+    env.sandbox.stub(impl, 'attemptChangeHeight').rejects();
     const delayedImpressionSpy = env.sandbox.spy(
       impl,
       'fireDelayedImpressions'
@@ -341,7 +341,7 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, (env) => {
       impl,
       'attemptChangeHeight'
     );
-    attemptChangeHeightStub.returns(Promise.reject());
+    attemptChangeHeightStub.rejects();
     env.sandbox.stub(impl, 'setCssPosition_').resolves();
     env.sandbox.stub(impl, 'attemptToRenderCreative').resolves();
     impl.buildCallback();
@@ -404,7 +404,7 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, (env) => {
       'attemptChangeHeight'
     );
     const mutateElementStub = env.sandbox.stub(impl, 'mutateElement');
-    attemptChangeHeightStub.returns(Promise.reject());
+    attemptChangeHeightStub.rejects();
     mutateElementStub.resolves();
     env.sandbox.stub(impl, 'attemptToRenderCreative').resolves();
     impl.buildCallback();

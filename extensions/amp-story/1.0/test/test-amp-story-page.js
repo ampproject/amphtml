@@ -599,7 +599,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     page.buildCallback();
     const mediaPool = await page.mediaPoolPromise_;
     const mediaPoolPlay = env.sandbox.stub(mediaPool, 'play');
-    mediaPoolPlay.returns(Promise.reject());
+    mediaPoolPlay.rejects();
 
     page.layoutCallback();
 

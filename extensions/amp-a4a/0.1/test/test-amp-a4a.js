@@ -1888,10 +1888,10 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
         // TODO(ccordry): remove renderAmpCreative_ when no signing launched.
         env.sandbox
           .stub(a4a, 'renderAmpCreative_')
-          .returns(Promise.reject('amp render failure'));
+          .rejects('amp render failure');
         env.sandbox
           .stub(a4a, 'renderFriendlyTrustless_')
-          .returns(Promise.reject('amp render failure'));
+          .rejects('amp render failure');
       }
       a4a.buildCallback();
       a4a.onLayoutMeasure();

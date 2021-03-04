@@ -443,7 +443,7 @@ describes.fakeWin(
       adapterMock
         .expects('authorize')
         .withExactArgs()
-        .returns(Promise.reject('intentional'))
+        .rejects('intentional')
         .once();
       const promise = service.runAuthorization_();
       expect(document.documentElement).to.have.class('amp-access-loading');
@@ -1073,7 +1073,7 @@ describes.fakeWin(
       adapterMock
         .expects('pingback')
         .withExactArgs()
-        .returns(Promise.reject('intentional'))
+        .rejects('intentional')
         .once();
       return service
         .reportViewToServer_()
@@ -1490,7 +1490,7 @@ describes.fakeWin(
       sourceMock
         .expects('openLoginDialog_')
         .withExactArgs('https://acme.com/l?rid=R')
-        .returns(Promise.reject('abort'))
+        .rejects('abort')
         .once();
       return service
         .loginWithType_('')
@@ -1923,7 +1923,7 @@ describes.fakeWin(
       adapterBeerMock
         .expects('authorize')
         .withExactArgs()
-        .returns(Promise.reject('rejected'))
+        .rejects('rejected')
         .once();
       adapterDonutsMock
         .expects('authorize')

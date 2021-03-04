@@ -168,15 +168,15 @@ describes.fakeWin(
           .withExactArgs('https://builturl', {
             credentials: 'include',
           })
-          .returns(
-            Promise.reject({
+          .rejects(
+            {
               response: {
                 status: 402,
                 json() {
                   return Promise.resolve({access: false});
                 },
               },
-            })
+            }
           )
           .once();
         emptyContainerStub.resolves();

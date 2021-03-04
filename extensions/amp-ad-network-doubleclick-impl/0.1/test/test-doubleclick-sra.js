@@ -497,8 +497,8 @@ describes.realWin('Doubleclick SRA', config, (env) => {
         }
       );
       if (opt_xhrFail) {
-        xhrWithArgs.returns(
-          Promise.reject(new TypeError('some random network error'))
+        xhrWithArgs.rejects(
+          new TypeError('some random network error')
         );
       } else if (opt_allInvalid) {
         xhrWithArgs.throws(new Error('invalid should not make xhr!'));
