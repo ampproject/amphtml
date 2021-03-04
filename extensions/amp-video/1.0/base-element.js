@@ -95,6 +95,11 @@ VideoBaseElement['props'] = {
   'loop': {attr: 'loop', type: 'boolean'},
   'noaudio': {attr: 'noaudio', type: 'boolean'},
   'poster': {attr: 'poster'},
+  'sources': {
+    selector: 'source',
+    single: false,
+    clone: true,
+  },
   'src': {attr: 'src'},
   'title': {attr: 'title'},
 
@@ -104,14 +109,7 @@ VideoBaseElement['props'] = {
 };
 
 /** @override */
-VideoBaseElement['children'] = {
-  'sources': {
-    name: 'sources',
-    selector: 'source',
-    single: false,
-    clone: true,
-  },
-};
+VideoBaseElement['shadowCss'] = CSS;
 
 /** @override */
-VideoBaseElement['shadowCss'] = CSS;
+VideoBaseElement['usesShadowDom'] = true;

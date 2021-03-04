@@ -62,12 +62,13 @@ export class BaseElement extends PreactBaseElement {
 BaseElement['Component'] = Sidebar;
 
 /** @override */
-BaseElement['passthrough'] = true;
+BaseElement['usesShadowDom'] = true;
 
 /** @override */
 BaseElement['shadowCss'] = COMPONENT_CSS;
 
 /** @override */
 BaseElement['props'] = {
+  'children': {passthrough: true},
   'side': {attr: 'side', type: 'string'},
 };
