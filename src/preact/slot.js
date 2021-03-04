@@ -15,8 +15,8 @@
  */
 
 import * as Preact from './index';
-import {CanPlay, CanRender, LoadingProp} from '../contextprops';
-import {dev} from '../log';
+import {CanPlay, CanRender, LoadingProp} from '../core/contextprops';
+import {pureDevAssert as devAssert} from '../core/assert';
 import {rediscoverChildren, removeProp, setProp} from '../context';
 import {useAmpContext} from './context';
 import {useEffect, useLayoutEffect, useRef} from './index';
@@ -59,14 +59,16 @@ export function Slot(props) {
 export function useSlotContext(ref) {
   const context = useAmpContext();
   useLayoutEffect(() => {
-    const slot = dev().assertElement(ref.current);
+    const slot = ref.current;
+    devAssert(slot?.nodeType == 1, 'Element expected');
+
     setProp(slot, CanRender, Slot, context.renderable);
     setProp(slot, CanPlay, Slot, context.playable);
     setProp(
       slot,
       LoadingProp,
       Slot,
-      /** @type {!../loading.Loading} */ (context.loading)
+      /** @type {!./core/loading-instructions.Loading} */ (context.loading)
     );
     return () => {
       removeProp(slot, CanRender, Slot);
