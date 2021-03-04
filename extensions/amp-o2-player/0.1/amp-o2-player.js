@@ -25,7 +25,7 @@ import {
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor} from '../../../src/iframe-helper';
 import {setIsMediaComponent} from '../../../src/video-interface';
-import {userAssert} from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 class AmpO2Player extends AMP.BaseElement {
   /** @param {!AmpElement} element */

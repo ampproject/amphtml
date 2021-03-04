@@ -15,7 +15,7 @@
  */
 import {LayoutPriority} from '../../../src/layout';
 import {Services} from '../../../src/services';
-import {userAssert} from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 /** @const {string} */
 const TAG = 'amp-action-macro';

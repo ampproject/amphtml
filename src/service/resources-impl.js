@@ -51,7 +51,6 @@ const POST_TASK_PASS_DELAY_ = 1000;
 const MUTATE_DEFER_DELAY_ = 500;
 const FOCUS_HISTORY_TIMEOUT_ = 1000 * 60; // 1min
 const FOUR_FRAME_DELAY_ = 70;
-const MAX_BUILD_CHUNK_SIZE = 10;
 
 /**
  * @implements {ResourcesInterface}
@@ -188,18 +187,6 @@ export class ResourcesImpl {
 
     /** @const @private {!Array<!Element>} */
     this.elementsThatScrolled_ = [];
-
-    /** @const @private {boolean} */
-    this.onlyBuildWhenCloseToViewport_ = isExperimentOn(
-      this.win,
-      'build-close-to-viewport'
-    );
-
-    /** @const @private {boolean} */
-    this.buildInChunks_ = isExperimentOn(this.win, 'build-in-chunks');
-
-    /** @const @private {boolean} */
-    this.removeTaskTimeout_ = isExperimentOn(this.win, 'remove-task-timeout');
 
     /** @const @private {!Deferred} */
     this.firstPassDone_ = new Deferred();
@@ -452,9 +439,6 @@ export class ResourcesImpl {
    * @return {boolean}
    */
   isUnderBuildQuota_() {
-    if (this.buildInChunks_ && this.buildsThisPass_ >= MAX_BUILD_CHUNK_SIZE) {
-      return false;
-    }
     // For pre-render we want to limit the amount of CPU used, so we limit
     // the number of elements build. For pre-render to "seem complete"
     // we only need to build elements in the first viewport. We can't know
@@ -492,17 +476,6 @@ export class ResourcesImpl {
       resource.prerenderAllowed();
     if (!shouldBuildResource) {
       return;
-    }
-
-    if (this.onlyBuildWhenCloseToViewport_) {
-      const isCloseEnoughToViewport =
-        ignoreQuota ||
-        resource.isBuildRenderBlocking() ||
-        resource.renderOutsideViewport() ||
-        (this.isIdle_() && resource.idleRenderOutsideViewport());
-      if (!isCloseEnoughToViewport) {
-        return;
-      }
     }
 
     if (this.documentReady_) {
@@ -1458,9 +1431,7 @@ export class ResourcesImpl {
     let timeout = -1;
     let task = this.queue_.peek(this.boundTaskScorer_);
     while (task) {
-      if (!this.removeTaskTimeout_) {
-        timeout = this.calcTaskTimeout_(task);
-      }
+      timeout = this.calcTaskTimeout_(task);
       dev().fine(
         TAG_,
         'peek from queue:',
@@ -1472,10 +1443,8 @@ export class ResourcesImpl {
         'timeout',
         timeout
       );
-      if (!this.removeTaskTimeout_) {
-        if (timeout > 16) {
-          break;
-        }
+      if (timeout > 16) {
+        break;
       }
 
       this.queue_.dequeue(task);
@@ -1538,12 +1507,10 @@ export class ResourcesImpl {
       this.exec_.getSize()
     );
 
-    if (!this.removeTaskTimeout_) {
-      if (timeout >= 0) {
-        // Still tasks in the queue, but we took too much time.
-        // Schedule the next work pass.
-        return timeout;
-      }
+    if (timeout >= 0) {
+      // Still tasks in the queue, but we took too much time.
+      // Schedule the next work pass.
+      return timeout;
     }
 
     // No tasks left in the queue.
@@ -1797,11 +1764,7 @@ export class ResourcesImpl {
         this.queue_.dequeue(queued);
       }
       this.queue_.enqueue(task);
-      if (this.removeTaskTimeout_) {
-        this.schedulePass();
-      } else {
-        this.schedulePass(this.calcTaskTimeout_(task));
-      }
+      this.schedulePass(this.calcTaskTimeout_(task));
     }
     task.resource.layoutScheduled(task.scheduleTime);
   }
