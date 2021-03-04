@@ -247,7 +247,7 @@ export class BitrateManager {
       ) {
         return;
       }
-      if (this.hasLowerBitrate_(video)) {
+      if (this.hasLowerBitrate_(video, this.acceptableBitrate_)) {
         this.sortSources_(video);
         video.load();
       }
