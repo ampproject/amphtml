@@ -114,19 +114,12 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     let x = 0;
     const xAttr = this.element_.getAttribute('x');
     if (xAttr === 'left') {
-      // get half of container
-      // const containerHalfWidth = this.element.offsetWidth / 2;
-      // const imageHalfWidth = this.ampImgEl_.getAttribute('width') / 2;
-      // console.log(imageHalfWidth);
-      // percentage value
-
       const containerHeight = this.element.offsetHeight;
       const containerWidth = this.element.offsetWidth;
       const ampImgHeight = this.ampImgEl_.getAttribute('height');
       const ampImgWidth = this.ampImgEl_.getAttribute('width');
       const scaledFraction = containerHeight / ampImgHeight;
       const scaledImageWidth = scaledFraction * ampImgWidth;
-
       x =
         ((scaledImageWidth / 2 - containerWidth / 2) / scaledImageWidth) * 100;
     } else {
