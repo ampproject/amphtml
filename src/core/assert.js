@@ -18,6 +18,7 @@ import {
   USER_ERROR_SENTINEL,
   elementStringOrPassThru,
 } from './error-message-helpers';
+import {isMinifiedMode} from './minified-mode';
 
 /** @fileoverview Dependency-free assertion helpers for use in Preact. */
 
@@ -64,7 +65,7 @@ export class UserError extends Error {
  * @throws {Error} when shouldBeTruthy is not truthy.
  */
 function assertion(errorCls, shouldBeTruthy, opt_message, var_args) {
-  if (shouldBeTruthy) {
+  if (isMinifiedMode() || shouldBeTruthy) {
     return shouldBeTruthy;
   }
 
