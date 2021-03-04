@@ -165,10 +165,27 @@ export class AmpOnetapGoogle extends AMP.BaseElement {
 
   /** @private */
   refreshAccess_() {
+    Promise.all([
+      this.refreshAmpAccess_(),
+      this.refreshAmpSubscriptions_(),
+    ]).then((refreshed) => {
+      if (!refreshed.reduce((a, b) => a || b)) {
+        user().warn(
+          TAG,
+          'Sign-in was completed, but there were no entitlements to refresh. Please include amp-access or amp-subscriptions.'
+        );
+      }
+    });
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  refreshAmpAccess_() {
     const accessElement = this.getAmpDoc().getElementById('amp-access');
     if (!accessElement) {
-      user().warn(TAG, 'No <script id="amp-access"> to refresh');
-      return;
+      return false;
     }
     Services.actionServiceForDoc(this.element).execute(
       accessElement,
@@ -178,6 +195,23 @@ export class AmpOnetapGoogle extends AMP.BaseElement {
       /* caller */ null,
       /* event */ null,
       ActionTrust.DEFAULT
+    );
+    return true;
+  }
+
+  /**
+   * @return {!Promise<boolean>}
+   * @private
+   */
+  refreshAmpSubscriptions_() {
+    return Services.subscriptionsServiceForDocOrNull(this.element).then(
+      (subscriptions) => {
+        if (!subscriptions) {
+          return false;
+        }
+        subscriptions.resetPlatforms();
+        return true;
+      }
     );
   }
 
