@@ -528,6 +528,7 @@ function buildExtensionCss(path, name, version, options) {
  */
 async function buildExtensionJs(path, name, version, latestVersion, options) {
   const filename = options.filename || name + '.js';
+  const latest = version === latestVersion;
   await compileJs(
     path + '/',
     filename,
@@ -535,7 +536,7 @@ async function buildExtensionJs(path, name, version, latestVersion, options) {
     Object.assign(options, {
       toName: `${name}-${version}.max.js`,
       minifiedName: `${name}-${version}.js`,
-      latestName: version === latestVersion ? `${name}-latest.js` : '',
+      latestName: latest ? `${name}-latest.js` : '',
       // Wrapper that either registers the extension or schedules it for
       // execution after the main binary comes back.
       // The `function` is wrapped in `()` to avoid lazy parsing it,
@@ -543,7 +544,13 @@ async function buildExtensionJs(path, name, version, latestVersion, options) {
       // See https://github.com/ampproject/amphtml/issues/3977
       wrapper: options.noWrapper
         ? ''
-        : wrappers.extension(name, argv.esm, options.loadPriority),
+        : wrappers.extension(
+            name,
+            version,
+            latest,
+            argv.esm,
+            options.loadPriority
+          ),
     })
   );
 
