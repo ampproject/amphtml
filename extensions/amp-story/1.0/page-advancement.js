@@ -44,7 +44,7 @@ const NEXT_SCREEN_AREA_RATIO = 0.75;
 const PREVIOUS_SCREEN_AREA_RATIO = 0.25;
 
 /** @private @const {number} */
-const TOP_REGION = 0.8;
+const TOP_REGION = 0.79;
 
 /**
  * Protected edges of the screen as a percent of page width. When tapped on these areas, we will
