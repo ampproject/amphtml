@@ -153,7 +153,7 @@ describes.realWin('CustomElement register', {amp: true}, (env) => {
     const element = doc.createElement('amp-element2');
     doc.body.appendChild(element);
     expect(stub).to.be.calledOnce;
-    expect(stub).to.be.calledWithExactly(ampdoc, 'amp-element2');
+    expect(stub).to.be.calledWithExactly(ampdoc, 'amp-element2', '0.1');
   });
 
   it('should not install declared pre-stubbed element extension', () => {
