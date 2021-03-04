@@ -14,20 +14,50 @@
  * limitations under the License.
  */
 
-const {getOutput} = require('../../common/exec');
+const {getOutput, execScriptAsync} = require('../../common/exec');
+
+const command = (args = []) =>
+  [
+    'npx jscodeshift',
+    '--parser=babylon',
+    `--parser-config=${__dirname}/parser-config.json`,
+    ...args,
+  ].join(' ');
 
 /**
  * @param {Array<string>} args
+ * @param {Object} opts
  * @return {string}
  */
-const jscodeshift = (args = []) =>
-  getOutput(
-    [
-      'npx jscodeshift',
-      '--parser babylon',
-      `--parser-config ${__dirname}/parser-config.json`,
-      ...args,
-    ].join(' ')
-  );
+const jscodeshift = (args = [], opts) => getOutput(command(args), opts);
 
-module.exports = {jscodeshift};
+/**
+ * @param {Array<string>} args
+ * @param {Object} opts
+ * @return {ChildProcess}
+ */
+const jscodeshiftAsync = (args = [], opts) =>
+  execScriptAsync(command(args), opts);
+
+const stripColors = (str) => str.replace(/\x1B[[(?);]{0,2}(;?\d)*./g, '');
+
+/**
+ * @param {string} line
+ * @return {Array<string>} [filename, report]
+ */
+function getJscodeshiftReport(line) {
+  const stripped = stripColors(line);
+
+  // Lines starting with " REP " are reports from a transform, which it owns
+  // and formats.
+  if (!stripped.startsWith(' REP ')) {
+    return null;
+  }
+
+  const noPrefix = stripped.substr(' REP '.length);
+  const [filename] = noPrefix.split(' ', 1);
+  const report = noPrefix.substr(filename.length + 1);
+  return [filename, report];
+}
+
+module.exports = {getJscodeshiftReport, jscodeshift, jscodeshiftAsync};

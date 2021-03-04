@@ -542,7 +542,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    * @protected @abstract
    * @param {!Array<!InteractiveOptionType>} unusedOptionsData
    */
-  updateOptionPercentages_(unusedOptionsData) {
+  displayOptionsData(unusedOptionsData) {
     // Subclass must implement
   }
 
@@ -792,7 +792,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
 
     if (this.optionsData_) {
       this.rootEl_.classList.add('i-amphtml-story-interactive-has-data');
-      this.updateOptionPercentages_(this.optionsData_);
+      this.displayOptionsData(this.optionsData_);
     }
     this.getOptionElements().forEach((el) => {
       el.setAttribute('tabindex', -1);
