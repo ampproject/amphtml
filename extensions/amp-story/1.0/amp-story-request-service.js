@@ -130,9 +130,7 @@ export class AmpStoryRequestService {
     let config = null;
     try {
       config = getChildJsonConfig(shareConfigEl);
-    } catch (err) {
-      console.error(err);
-    }
+    } catch (err) {}
 
     return Promise.resolve(config);
   }
