@@ -29,7 +29,7 @@ ValueImpression implementation of AMP Ad tag which requests early by XHR and ren
   </tr>
 </table>
 
-ValueImpression uses the Real Time Config (RTC) to preload configuration settings for ad placements. So the ad tag only works when the install is loaded via the RTC from the following endpoint: https://useast.quantumdex.io/ampv2
+ValueImpression uses the Real Time Config (RTC) to preload configuration settings for ad placements. So the ad tag only works when the install is loaded via the RTC from the following endpoint: `https://useast.quantumdex.io/ampv2`
 
 The following parameters are required
 
@@ -57,7 +57,7 @@ The following parameters are required
   type="valueimpression"
   rtc-config='{
     "urls": [
-        "https://useast.quantumdex.io/ampv2?client=23&metadata=autoCollect&tagid=1234"
+        "https://useast.quantumdex.io/ampv2?client=26&metadata=autoCollect&tagid=1234"
     ]
   }'>
 </amp-ad>
