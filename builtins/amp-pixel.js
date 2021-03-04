@@ -17,7 +17,7 @@
 import {BaseElement} from '../src/base-element';
 import {Services} from '../src/services';
 import {createPixel} from '../src/pixel';
-import {dev, user} from '../src/log';
+import {dev, userAssert} from '../src/log';
 import {registerElement} from '../src/service/custom-element-registry';
 
 const TAG = 'amp-pixel';
@@ -51,7 +51,7 @@ export class AmpPixel extends BaseElement {
       // Safari doesn't support referrerPolicy yet. We're using an
       // iframe based trick to remove referrer, which apparently can
       // only do "no-referrer".
-      user().assert(
+      userAssert(
         this.referrerPolicy_ == 'no-referrer',
         `${TAG}: invalid "referrerpolicy" value "${this.referrerPolicy_}".` +
           ' Only "no-referrer" is supported'
@@ -107,7 +107,7 @@ export class AmpPixel extends BaseElement {
    * @private
    */
   assertSource_(src) {
-    user().assert(
+    userAssert(
       /^(https\:\/\/|\/\/)/i.test(src),
       'The <amp-pixel> src attribute must start with ' +
         '"https://" or "//". Invalid value: ' +
