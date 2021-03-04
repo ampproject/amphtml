@@ -48,13 +48,13 @@ AmpInlineGalleryPagination['props'] = {
 };
 
 /** @override */
-AmpInlineGalleryPagination['children'] = {};
-
-/** @override */
 AmpInlineGalleryPagination['layoutSizeDefined'] = true;
 
 /** @override */
 AmpInlineGalleryPagination['shadowCss'] = CSS;
+
+/** @override */
+AmpInlineGalleryPagination['usesShadowDom'] = true;
 
 /** @override */
 AmpInlineGalleryPagination['useContexts'] = [CarouselContextProp];

@@ -32,3 +32,6 @@ BaseElement['props'] = {
   'credentials': {attr: 'credentials'},
   'params': {attrPrefix: 'data-param-'},
 };
+
+/** @override */
+BaseElement['usesShadowDom'] = true;

@@ -47,15 +47,25 @@ import {getMode} from '../mode';
 import {hydrate, render} from './index';
 import {installShadowStyle} from '../shadow-embed';
 import {sequentialIdGenerator} from '../utils/id-generator';
+import {toArray} from '../types';
 
 /**
  * The following combinations are allowed.
- * - `attr` and (optionally) `type` can be specified when an attribute maps to
- *   a component prop 1:1.
+ * - `attr`, (optionally) `type`, and (optionally) `media` can be specified when
+ *   an attribute maps to a component prop 1:1.
  * - `attrs` and `parseAttrs` can be specified when multiple attributes map
  *   to a single prop.
  * - `attrPrefix` can be specified when multiple attributes with the same prefix
  *   map to a single prop object. The prefix cannot equal the attribute name.
+ * - `selector` can be specified for children of a certain shape and structure
+ *   according to ChildDef.
+ * - `passthrough` can be specified to slot children using a single
+ *   `<slot>` element for all children. This is in contrast to selector mode,
+ *   which creates a new named `<slot>` for every selector.
+ * - `passthroughNonEmpty` is similar to passthrough mode except that when there
+ *   are no children elements, the returned value will be null instead of the
+ *   unnamed `<slot>`. This allows the Preact environment to have conditional
+ *   behavior depending on whether or not there are children.
  *
  * @typedef {{
  *   attr: (string|undefined),
@@ -65,7 +75,7 @@ import {sequentialIdGenerator} from '../utils/id-generator';
  *   parseAttrs: ((function(!Element):*)|undefined),
  *   media: (boolean|undefined),
  *   default: *,
- * }}
+ * }|string}
  */
 let AmpElementPropDef;
 
@@ -131,6 +141,44 @@ const MATCH_ANY = () => true;
 
 const childIdGenerator = sequentialIdGenerator();
 
+const ONE_OF_ERROR_MESSAGE =
+  'Only one of "attr", "attrs", "attrPrefix", "passthrough", ' +
+  '"passthroughNonEmpty", or "selector" must be given';
+
+/**
+ * @param {!Object<string, !AmpElementPropDef>} propDefs
+ * @param {function(!AmpElementPropDef):boolean} cb
+ * @return {boolean}
+ */
+function checkPropsFor(propDefs, cb) {
+  return Object.values(propDefs).some(cb);
+}
+
+/**
+ * @param {!AmpElementPropDef} def
+ * @return {boolean}
+ */
+const HAS_MEDIA = (def) => !!def.media;
+
+/**
+ * @param {!AmpElementPropDef} def
+ * @return {boolean}
+ */
+const HAS_SELECTOR = (def) => typeof def === 'string' || !!def.selector;
+
+/**
+ * @param {!AmpElementPropDef} def
+ * @return {boolean}
+ */
+const HAS_PASSTHROUGH = (def) => !!(def.passthrough || def.passthroughNonEmpty);
+
+/**
+ * @param {Node} node
+ * @return {boolean}
+ */
+const IS_NONEMPTY_TEXT = (node) =>
+  node.nodeType === /* TEXT_NODE */ 3 && node.nodeValue.trim().length === 0;
+
 /**
  * Wraps a Preact Component in a BaseElement class.
  *
@@ -148,7 +196,7 @@ export class PreactBaseElement extends AMP.BaseElement {
    */
   static requiresShadowDom() {
     // eslint-disable-next-line local/no-static-this
-    return usesShadowDom(this);
+    return this['usesShadowDom'];
   }
 
   /** @param {!AmpElement} element */
@@ -260,11 +308,13 @@ export class PreactBaseElement extends AMP.BaseElement {
     const Ctor = this.constructor;
 
     this.observer = new MutationObserver(this.checkMutations_.bind(this));
-    const childrenInit = Ctor['children'] ? CHILDREN_MUTATION_INIT : null;
-    const passthroughInit =
-      Ctor['passthrough'] || Ctor['passthroughNonEmpty']
-        ? PASSTHROUGH_MUTATION_INIT
-        : null;
+    const props = Ctor['props'];
+    const childrenInit = checkPropsFor(props, HAS_SELECTOR)
+      ? CHILDREN_MUTATION_INIT
+      : null;
+    const passthroughInit = checkPropsFor(props, HAS_PASSTHROUGH)
+      ? PASSTHROUGH_MUTATION_INIT
+      : null;
     const templatesInit = Ctor['usesTemplate'] ? TEMPLATES_MUTATION_INIT : null;
     this.observer.observe(this.element, {
       attributes: true,
@@ -273,7 +323,7 @@ export class PreactBaseElement extends AMP.BaseElement {
       ...templatesInit,
     });
 
-    this.mediaQueryProps_ = hasMediaQueryProps(Ctor)
+    this.mediaQueryProps_ = checkPropsFor(props, HAS_MEDIA)
       ? new MediaQueryProps(this.win, () => this.scheduleRender_())
       : null;
 
@@ -502,7 +552,7 @@ export class PreactBaseElement extends AMP.BaseElement {
     }
 
     const Ctor = this.constructor;
-    const isShadow = usesShadowDom(Ctor);
+    const isShadow = Ctor['usesShadowDom'];
     const lightDomTag = isShadow ? null : Ctor['lightDomTag'];
     const isDetached = Ctor['detached'];
 
@@ -512,8 +562,7 @@ export class PreactBaseElement extends AMP.BaseElement {
         devAssert(
           !isDetached,
           'The AMP element cannot be rendered in detached mode ' +
-            'when configured with "children", "passthrough", or ' +
-            '"passthroughNonEmpty" properties.'
+            'when "props" are configured with "children" property.'
         );
         // Check if there's a pre-constructed shadow DOM.
         let {shadowRoot} = this.element;
@@ -845,26 +894,6 @@ PreactBaseElement['lightDomTag'] = '';
 PreactBaseElement['className'] = '';
 
 /**
- * Enabling passthrough mode alters the children slotting to use a single
- * `<slot>` element for all children. This is in contrast to children mode,
- * which creates a new named `<slot>` for every child.
- *
- * @protected {boolean}
- */
-PreactBaseElement['passthrough'] = false;
-
-/**
- * Handling children with passthroughNonEmpty mode is similar to passthrough
- * mode except that when there are no children elements, the returned
- * prop['children'] will be null instead of the unnamed <slot>.  This allows
- * the Preact environment to have conditional behavior depending on whether
- * or not there are children.
- *
- * @protected {boolean}
- */
-PreactBaseElement['passthroughNonEmpty'] = false;
-
-/**
  * Whether this element uses "templates" system.
  *
  * @protected {boolean}
@@ -877,6 +906,13 @@ PreactBaseElement['usesTemplate'] = false;
  * @protected {?string}
  */
 PreactBaseElement['shadowCss'] = null;
+
+/**
+ * Whether this element uses Shadow DOM.
+ *
+ * @protected {boolean}
+ */
+PreactBaseElement['usesShadowDom'] = false;
 
 /**
  * Enabling detached mode alters the children to be rendered in an
@@ -902,23 +938,6 @@ PreactBaseElement['delegatesFocus'] = false;
 PreactBaseElement['props'] = {};
 
 /**
- * @protected {!Object<string, !ChildDef>|null}
- */
-PreactBaseElement['children'] = null;
-
-/**
- * @param {typeof PreactBaseElement} Ctor
- * @return {boolean}
- */
-function usesShadowDom(Ctor) {
-  return !!(
-    Ctor['children'] ||
-    Ctor['passthrough'] ||
-    Ctor['passthroughNonEmpty']
-  );
-}
-
-/**
  * @param {null|string} attributeName
  * @param {string|undefined} attributePrefix
  * @return {boolean}
@@ -942,12 +961,9 @@ function matchesAttrPrefix(attributeName, attributePrefix) {
  */
 function collectProps(Ctor, element, ref, defaultProps, mediaQueryProps) {
   const {
-    'children': childrenDefs,
     'className': className,
     'layoutSizeDefined': layoutSizeDefined,
     'lightDomTag': lightDomTag,
-    'passthrough': passthrough,
-    'passthroughNonEmpty': passthroughNonEmpty,
     'props': propDefs,
   } = Ctor;
 
@@ -970,7 +986,7 @@ function collectProps(Ctor, element, ref, defaultProps, mediaQueryProps) {
 
   // Common styles.
   if (layoutSizeDefined) {
-    if (usesShadowDom(Ctor)) {
+    if (Ctor['usesShadowDom']) {
       props['style'] = SIZE_DEFINED_STYLE;
     } else {
       props['className'] =
@@ -979,47 +995,48 @@ function collectProps(Ctor, element, ref, defaultProps, mediaQueryProps) {
   }
 
   // Props.
-  parsePropDefs(props, propDefs, element, mediaQueryProps);
+  parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps);
+  if (mediaQueryProps) {
+    mediaQueryProps.complete();
+  }
 
-  // Children.
-  // There are plain "children" and there're slotted children assigned
-  // as separate properties. Thus in a carousel the plain "children" are
-  // slides, and the "arrowNext" children are passed via a "arrowNext"
-  // property.
-  const errorMessage =
-    'only one of "passthrough", "passthroughNonEmpty"' +
-    ' or "children" may be given';
-  if (passthrough) {
-    devAssert(!childrenDefs && !passthroughNonEmpty, errorMessage);
-    props['children'] = [<Slot />];
-  } else if (passthroughNonEmpty) {
-    devAssert(!childrenDefs, errorMessage);
-    // If all children are whitespace text nodes, consider the element as
-    // having no children
-    props['children'] = element
-      .getRealChildNodes()
-      .every(
-        (node) =>
-          node.nodeType === /* TEXT_NODE */ 3 &&
-          node.nodeValue.trim().length === 0
-      )
-      ? null
-      : [<Slot />];
-  } else if (childrenDefs) {
-    const children = [];
-    props['children'] = children;
+  return props;
+}
 
-    const nodes = element.getRealChildNodes();
+/**
+ * @param {typeof PreactBaseElement} Ctor
+ * @param {!Object} props
+ * @param {!Object} propDefs
+ * @param {!Element} element
+ * @param {?MediaQueryProps} mediaQueryProps
+ */
+function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
+  // Match all children defined with "selector".
+  if (checkPropsFor(propDefs, HAS_SELECTOR)) {
+    // There are plain "children" and there're slotted children assigned
+    // as separate properties. Thus in a carousel the plain "children" are
+    // slides, and the "arrowNext" children are passed via a "arrowNext"
+    // property.
+    const nodes = element.getRealChildNodes
+      ? element.getRealChildNodes()
+      : toArray(element.childNodes);
     for (let i = 0; i < nodes.length; i++) {
       const childElement = nodes[i];
-      const def = matchChild(childElement, childrenDefs);
-      if (!def) {
+      const match = matchChild(childElement, propDefs);
+      if (!match) {
         continue;
       }
-
-      const {single, name, clone, props: slotProps = {}} = def;
+      const def = propDefs[match];
+      const {single, name = match, clone, props: slotProps = {}} = def;
+      devAssert(clone || Ctor['usesShadowDom']);
       const parsedSlotProps = {};
-      parsePropDefs(parsedSlotProps, slotProps, childElement, mediaQueryProps);
+      parsePropDefs(
+        Ctor,
+        parsedSlotProps,
+        slotProps,
+        childElement,
+        mediaQueryProps
+      );
 
       // TBD: assign keys, reuse slots, etc.
       if (single) {
@@ -1029,8 +1046,7 @@ function collectProps(Ctor, element, ref, defaultProps, mediaQueryProps) {
           parsedSlotProps
         );
       } else {
-        const list =
-          name == 'children' ? children : props[name] || (props[name] = []);
+        const list = props[name] || (props[name] = []);
         list.push(
           clone
             ? createShallowVNodeCopy(childElement)
@@ -1045,24 +1061,28 @@ function collectProps(Ctor, element, ref, defaultProps, mediaQueryProps) {
     }
   }
 
-  if (mediaQueryProps) {
-    mediaQueryProps.complete();
-  }
-
-  return props;
-}
-
-/**
- * @param {!Object} props
- * @param {!Object} propDefs
- * @param {!Element} element
- * @param {?MediaQueryProps} mediaQueryProps
- */
-function parsePropDefs(props, propDefs, element, mediaQueryProps) {
   for (const name in propDefs) {
     const def = /** @type {!AmpElementPropDef} */ (propDefs[name]);
+    devAssert(
+      !!def.attr +
+        !!def.attrs +
+        !!def.attrPrefix +
+        !!def.selector +
+        !!def.passthrough +
+        !!def.passthroughNonEmpty <=
+        1,
+      ONE_OF_ERROR_MESSAGE
+    );
     let value;
-    if (def.attr) {
+    if (def.passthrough) {
+      devAssert(Ctor['usesShadowDom']);
+      value = [<Slot />];
+    } else if (def.passthroughNonEmpty) {
+      devAssert(Ctor['usesShadowDom']);
+      value = element.getRealChildNodes().every(IS_NONEMPTY_TEXT)
+        ? null
+        : [<Slot />];
+    } else if (def.attr) {
       value = element.getAttribute(def.attr);
       if (def.media && value != null) {
         value = mediaQueryProps.resolveListQuery(String(value));
@@ -1137,7 +1157,7 @@ function matchChild(element, defs) {
     const def = defs[match];
     const selector = typeof def == 'string' ? def : def.selector;
     if (matches(element, selector)) {
-      return def;
+      return match;
     }
   }
   return null;
@@ -1200,23 +1220,6 @@ function shouldMutationBeRerendered(Ctor, m) {
       shouldMutationForNodeListBeRerendered(m.addedNodes) ||
       shouldMutationForNodeListBeRerendered(m.removedNodes)
     );
-  }
-  return false;
-}
-
-/**
- * @param {typeof PreactBaseElement} Ctor
- * @return {boolean}
- */
-function hasMediaQueryProps(Ctor) {
-  const props = Ctor['props'];
-  if (props) {
-    for (const name in props) {
-      const def = /** @type {!AmpElementPropDef} */ (props[name]);
-      if (def.media) {
-        return true;
-      }
-    }
   }
   return false;
 }
