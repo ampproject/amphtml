@@ -485,7 +485,11 @@ function maybeLoadCorrectVersion(win, fnOrStruct) {
   if (internalRuntimeVersion() == v) {
     return false;
   }
-  Services.extensionsFor(win).reloadExtension(fnOrStruct.n);
+  Services.extensionsFor(win).reloadExtension(
+    fnOrStruct.n,
+    fnOrStruct.ev,
+    fnOrStruct.l
+  );
   return true;
 }
 
