@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,29 +14,40 @@
  * limitations under the License.
  */
 
-import {tryDecodeUriComponent_} from './url-try-decode-uri-component';
+const queryStringRegex = /(?:^[#?]?|&)([^=&]+)(?:=([^&]*))?/g;
 
-const regex = /(?:^[#?]?|&)([^=&]+)(?:=([^&]*))?/g;
+/**
+ * Tries to decode a URI component, falling back to opt_fallback (or an empty
+ * string)
+ *
+ * @param {string} component
+ * @param {string=} fallback
+ * @return {string}
+ */
+export function tryDecodeUriComponent(component, fallback = '') {
+  try {
+    return decodeURIComponent(component);
+  } catch (e) {
+    return fallback;
+  }
+}
 
 /**
  * Parses the query string of an URL. This method returns a simple key/value
  * map. If there are duplicate keys the latest value is returned.
  *
- * DO NOT import the function from this file. Instead, import parseQueryString
- * from `src/url.js`.
- *
  * @param {string} queryString
  * @return {!JsonObject}
  */
-export function parseQueryString_(queryString) {
+export function parseQueryString(queryString) {
   const params = /** @type {!JsonObject} */ (Object.create(null));
   if (!queryString) {
     return params;
   }
 
   let match;
-  while ((match = regex.exec(queryString))) {
-    const name = tryDecodeUriComponent_(match[1], match[1]);
+  while ((match = queryStringRegex.exec(queryString))) {
+    const name = tryDecodeUriComponent(match[1], match[1]);
     const value = match[2]
       ? tryDecodeUriComponent_(match[2].replace(/\+/g, ' '), match[2])
       : '';
