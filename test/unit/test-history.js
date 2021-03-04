@@ -297,7 +297,7 @@ describes.sandboxed('History install', {}, () => {
   beforeEach(() => {
     viewer = {
       isOvertakeHistory: () => false,
-      onMessage: () => (function() {}),
+      onMessage: () => function () {},
     };
 
     installTimerService(window);

@@ -2125,9 +2125,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         });
 
         it('should toggle loading off after layout failed', () => {
-          env.sandbox
-            .stub(TestElement.prototype, 'layoutCallback')
-            .rejects();
+          env.sandbox.stub(TestElement.prototype, 'layoutCallback').rejects();
           element.setAttribute('height', '10');
           element.setAttribute('width', '10');
           container.appendChild(element);
@@ -2149,9 +2147,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         });
 
         it('should disable toggle loading on after layout failed', () => {
-          env.sandbox
-            .stub(TestElement.prototype, 'layoutCallback')
-            .rejects();
+          env.sandbox.stub(TestElement.prototype, 'layoutCallback').rejects();
           element.setAttribute('height', '10');
           element.setAttribute('width', '10');
           container.appendChild(element);
