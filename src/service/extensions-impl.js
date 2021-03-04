@@ -37,7 +37,6 @@ export const LEGACY_ELEMENTS = ['amp-ad', 'amp-embed', 'amp-video'];
 const TAG = 'extensions';
 const DEFAULT_VERSION = '0.1';
 const UNKNOWN_EXTENSION = '_UNKNOWN_';
-const CUSTOM_TEMPLATES = ['amp-mustache'];
 const LOADER_PROP = '__AMP_EXT_LDR';
 const SCRIPT_LOADED_PROP = '__AMP_SCR_LOADED';
 
