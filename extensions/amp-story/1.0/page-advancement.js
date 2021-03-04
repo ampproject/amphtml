@@ -476,8 +476,8 @@ export class ManualAdvancement extends AdvancementConfig {
       dev().assertElement(event.target),
       (el) => {
         tagName = el.tagName.toLowerCase();
-
-        if (tagName === 'amp-story-page-attachment') {
+        
+        if (el.classList.contains('i-amphtml-page-attachment-host')) {
           shouldHandleEvent = false;
           return true;
         }

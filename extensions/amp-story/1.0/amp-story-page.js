@@ -43,7 +43,7 @@ import {
   expandableElementsSelectors,
 } from './amp-story-embedded-component';
 import {AnimationManager, hasAnimations} from './animation';
-import {CSS} from '../../../build/amp-story-page-attachment-0.1.css';
+import {CSS as pageAttachmentCSS} from '../../../build/amp-story-page-attachment-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {Deferred} from '../../../src/utils/promise';
 import {EventType, dispatch} from './events';
@@ -1788,18 +1788,13 @@ export class AmpStoryPage extends AMP.BaseElement {
 
       this.mutateElement(() => {
         textEl.textContent = openLabel;
-        const container = this.element.ownerDocument.createElement('div');
+        const container = this.win.document.createElement('div');
         container.classList.add('i-amphtml-page-attachment-host');
         this.element.appendChild(container);
-        createShadowRootWithStyle(container, this.openAttachmentEl_, CSS);
-
-        const root = container.shadowRoot;
-        console.log(root);
-        const clickTarget = root.querySelector('.i-amphtml-story-page-open-attachment');
-        console.log(clickTarget);
-
+        createShadowRootWithStyle(container, this.openAttachmentEl_, pageAttachmentCSS);
+        const clickTarget = container.shadowRoot.querySelector('.i-amphtml-story-page-open-attachment');
         clickTarget.addEventListener('click', () =>
-          console.log("clicked")
+          this.openAttachment()
         );
       });
     }
