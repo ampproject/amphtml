@@ -360,7 +360,8 @@ export class ShareWidget {
   loadProviders() {
     this.loadRequiredExtensions();
 
-    this.requestService_.loadBookendConfig().then((config) => {
+    this.requestService_.loadShareConfig().then((config) => {
+      console.log(config);
       const providers =
         config &&
         (config[SHARE_PROVIDERS_KEY] || config[DEPRECATED_SHARE_PROVIDERS_KEY]);
@@ -377,6 +378,7 @@ export class ShareWidget {
    * TODO(alanorozco): Set story metadata in share config.
    */
   setProviders_(providers) {
+    console.log(providers);
     /** @type {!Array} */ (providers).forEach((provider) => {
       if (isObject(provider)) {
         this.add_(
