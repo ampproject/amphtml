@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+const {isCiBuild} = require('../build-system/common/ci');
 
 module.exports = {
   'rules': {
@@ -60,7 +61,7 @@ module.exports = {
         './context/scheduler.js',
         './context/values.js',
       ],
-      'rules': {'import/no-restricted-paths': 1},
+      'rules': {'import/no-restricted-paths': isCiBuild() ? 0 : 1},
     },
   ],
 };

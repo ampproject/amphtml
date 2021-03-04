@@ -30,7 +30,6 @@ const {cyan, green, red, yellow} = require('kleur/colors');
 const {ESLint} = require('eslint');
 const {getFilesChanged, getFilesFromArgv} = require('../common/utils');
 const {gitDiffNameOnlyMaster} = require('../common/git');
-const {isCiBuild} = require('../common/ci');
 const {maybeUpdatePackages} = require('./update-packages');
 
 const rootDir = path.dirname(path.dirname(__dirname));
@@ -125,7 +124,7 @@ function summarizeResults(results, fixedFiles) {
         )
       );
     }
-    process.exitCode = errorCount || !isCiBuild() ? 1 : 0;
+    process.exitCode = 1;
   }
   if (options.fix && Object.keys(fixedFiles).length > 0) {
     log(green('INFO: ') + 'Summary of fixes:');
