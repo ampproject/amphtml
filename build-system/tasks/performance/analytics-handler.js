@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+/**
+ *
+ * @param {!Array<function>} handlersList
+ * @param {?Object} handlerOptions
+ * @param {!function} resolve
+ * @return {void}
+ */
 function setupAnalyticsHandler(handlersList, handlerOptions, resolve) {
   const {extraUrlParam} = handlerOptions;
   const analyticsParam = Object.keys(extraUrlParam)

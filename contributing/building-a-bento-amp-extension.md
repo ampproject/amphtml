@@ -6,13 +6,22 @@ Bento AMP is a project that allows you to take AMP components and use them in ot
 
 Read this document to learn how to create a new Bento AMP component.
 
+<!--
+  (Do not remove or edit this comment.)
+
+  This table-of-contents is automatically generated. To generate it, run:
+    gulp markdown-toc --fix
+-->
+
+<!-- {"maxdepth": 2} -->
+
 -   [Getting started](#getting-started)
 -   [Naming](#naming)
 -   [Directory structure](#directory-structure)
 -   [Extend AMP.PreactBaseElement](#extend-amppreactbaseelement)
     -   [Element and Component classes](#element-and-component-classes)
     -   [PreactBaseElement callbacks](#preactbaseelement-callbacks)
-    -   [AMP/Preact Bridge](#amp-preact-bridge)
+    -   [AMP/Preact Bridge](#amppreact-bridge)
 -   [Element styling](#element-styling)
 -   [Register element with AMP](#register-element-with-amp)
 -   [Actions and events](#actions-and-events)
@@ -20,7 +29,7 @@ Read this document to learn how to create a new Bento AMP component.
 -   [Performance considerations](#performance-considerations)
     -   [Loading external resources](#loading-external-resources)
 -   [Layouts supported in your element](#layouts-supported-in-your-element)
-    -   [What layout should your element support?](#what-layout-should-your-element-support-)
+    -   [What layout should your element support?](#what-layout-should-your-element-support)
 -   [Experiments](#experiments)
     -   [Enabling and removing your experiment](#enabling-and-removing-your-experiment)
 -   [Documenting your extended Bento component](#documenting-your-extended-bento-component)
@@ -91,7 +100,7 @@ All Preact-based Bento AMP extensions extend `AMP.PreactBaseElement`, which buil
 callbacks. Bento AMP extensions differ from AMP extensions because they are self-managing and independent, and therefore usable in a wider range of contexts beyond AMP pages, while still being fully integrated with the AMP environment
 in a fully AMP document.
 
-The configurations which bridge the Preact implementation of the component and its custom element counterpart in an HTML or AMP document are explained in the [AMP/Preact Bridge](#amp/preact-bridge) section, and the callbacks which handle AMP- and DOM- specific mutability traits are explained in the [PreactBaseElement Callbacks](#preactbaseelement-callbacks) section. All of these are also explained inline in the [PreactBaseElement](https://github.com/ampproject/amphtml/blob/master/src/preact/base-element.js) class.
+The configurations which bridge the Preact implementation of the component and its custom element counterpart in an HTML or AMP document are explained in the [AMP/Preact Bridge](#amppreact-bridge) section, and the callbacks which handle AMP- and DOM- specific mutability traits are explained in the [PreactBaseElement Callbacks](#preactbaseelement-callbacks) section. All of these are also explained inline in the [PreactBaseElement](https://github.com/ampproject/amphtml/blob/master/src/preact/base-element.js) class.
 
 ### Element and Component classes
 
@@ -484,7 +493,7 @@ Then protect your code with a check for the component-specific flag `isExperimen
 ```javascript
 import {CSS} from '../../../build/amp-my-element-0.1.css';
 import {isExperimentOn} from '../../../src/experiments';
-import {userAssert} from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 /** @const */
 const TAG = 'amp-my-element';

@@ -108,6 +108,15 @@ export function isSrcdocSupported() {
 }
 
 /**
+ * Get trusted urls enabled for polyfills.
+ * @return {string}
+ */
+export function getFieSafeScriptSrcs() {
+  const cdnBase = getMode().localDev ? 'http://localhost:8000/dist' : urls.cdn;
+  return `${cdnBase}/lts/ ${cdnBase}/rtv/ ${cdnBase}/sw/`;
+}
+
+/**
  * Creates the requested "friendly iframe" embed. Returns the promise that
  * will be resolved as soon as the embed is available. The actual
  * initialization of the embed will start as soon as the `iframe` is added
@@ -300,12 +309,7 @@ function mergeHtml(spec) {
     });
   }
 
-  const cdnBase = getMode().localDev ? 'http://localhost:8000/dist' : urls.cdn;
-  const cspScriptSrc = [
-    `${cdnBase}/lts/`,
-    `${cdnBase}/rtv/`,
-    `${cdnBase}/sw/`,
-  ].join(' ');
+  const cspScriptSrc = getFieSafeScriptSrcs();
 
   // Load CSP
   result.push(
