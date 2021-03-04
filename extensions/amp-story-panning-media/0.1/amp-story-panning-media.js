@@ -230,16 +230,18 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     const {x, y, zoom} = this.animationState_;
     return this.mutateElement(() => {
       setImportantStyles(this.ampImgEl_, {
-        transform: `translate3d(${x}%, ${y}%, ${this.getZoom_(zoom)}px)`,
+        transform: `translate3d(${x}%, ${y}%, ${this.calculateZoom_(zoom)}px)`,
       });
     });
   }
 
   /**
+   * Calculates zoom for translate3d and ensures the number is finite.
    * @private
+   * @param {number} zoom
    * @return {number}
    */
-  getZoom_(zoom) {
+  calculateZoom_(zoom) {
     const calculatedZoom = (zoom - 1) / zoom;
     return isFinite(calculatedZoom) ? calculatedZoom : Number.MIN_SAFE_INTEGER;
   }
