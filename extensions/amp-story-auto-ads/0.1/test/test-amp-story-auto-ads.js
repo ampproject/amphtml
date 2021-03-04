@@ -192,7 +192,8 @@ describes.realWin(
         await autoAds.layoutCallback();
         expect(installExtensionForDocStub).to.be.calledWithExactly(
           env.ampdoc,
-          'amp-mustache'
+          'amp-mustache',
+          'latest'
         );
       });
 
