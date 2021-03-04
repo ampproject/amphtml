@@ -253,7 +253,7 @@ Validator.prototype.init = function() {
   } else {
     return Promise.resolve(undefined);
   }
-}
+};
 
 /**
  * Validates the provided inputString; the htmlFormat can be 'AMP' or
