@@ -243,6 +243,43 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         // expect(build.calledOnce).to.equal(true);
       });
 
+      it('StubElement - should try to install an unregistered legacy extensions', () => {
+        const LegacyElementClass = createAmpElementForTesting(win, ElementStub);
+        win.customElements.define('amp-legacy', LegacyElementClass);
+        win.__AMP_EXTENDED_ELEMENTS['amp-legacy'] = ElementStub;
+
+        const extensions = Services.extensionsFor(win);
+        env.sandbox.stub(extensions, 'installExtensionForDoc');
+
+        const element = new LegacyElementClass();
+        env.sandbox.stub(element, 'buildInternal');
+
+        container.appendChild(element);
+        expect(element.readyState).to.equal('upgrading');
+        expect(extensions.installExtensionForDoc).to.be.calledOnce.calledWith(
+          ampdoc,
+          'amp-legacy',
+          '0.1'
+        );
+      });
+
+      it('StubElement - should not try to install a pre-registered legacy extensions', () => {
+        const LegacyElementClass = createAmpElementForTesting(win, ElementStub);
+        win.customElements.define('amp-legacy', LegacyElementClass);
+        win.__AMP_EXTENDED_ELEMENTS['amp-legacy'] = ElementStub;
+        ampdoc.declareExtension('amp-legacy');
+
+        const extensions = Services.extensionsFor(win);
+        env.sandbox.stub(extensions, 'installExtensionForDoc');
+
+        const element = new LegacyElementClass();
+        env.sandbox.stub(element, 'buildInternal');
+
+        container.appendChild(element);
+        expect(element.readyState).to.equal('upgrading');
+        expect(extensions.installExtensionForDoc).to.not.be.called;
+      });
+
       it('Element - should only add classes on first attachedCallback', () => {
         const element = new ElementClass();
         const buildPromise = Promise.resolve();
