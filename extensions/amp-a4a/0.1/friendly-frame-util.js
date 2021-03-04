@@ -73,6 +73,8 @@ export function renderCreativeIntoFriendlyFrame(
       host: element,
       url: /** @type {string} */ (adUrl),
       html: creativeMetadata.minifiedCreative,
+      // TODO(#33020): provide the `extensions` property instead, in
+      // the format of `[{extensionId, extensionVersion}]`.
       extensionIds: creativeMetadata.customElementExtensions || [],
       fonts: fontsArray,
     },

@@ -755,18 +755,19 @@ class AmpFixture {
       // Notice that ampdoc's themselves install runtime styles in shadow roots.
       // Thus, not changes needed here.
     }
-    const extensionIds = [];
+    const extensions = [];
     if (spec.extensions) {
       spec.extensions.forEach((extensionIdWithVersion) => {
         const tuple = extensionIdWithVersion.split(':');
         const extensionId = tuple[0];
-        extensionIds.push(extensionId);
         // Default to 0.1 if no version was provided.
-        const version = tuple[1] || '0.1';
-        const installer = extensionsBuffer[`${extensionId}:${version}`];
+        const extensionVersion = tuple[1] || '0.1';
+        extensions.push({extensionId, extensionVersion});
+        const installer =
+          extensionsBuffer[`${extensionId}:${extensionVersion}`];
         if (installer) {
           if (env.ampdoc) {
-            env.ampdoc.declareExtension(extensionId);
+            env.ampdoc.declareExtension(extensionId, extensionVersion);
           }
           env.extensions.registerExtension(extensionId, installer, win.AMP);
         }
@@ -799,7 +800,7 @@ class AmpFixture {
         );
       }
       if (env.ampdoc) {
-        env.ampdoc.declareExtension(extensionId);
+        env.ampdoc.declareExtension(extensionId, version);
       }
       env.extensions.registerExtension(extensionId, installer, win.AMP);
     };
@@ -837,7 +838,7 @@ class AmpFixture {
         {
           url: 'http://ads.localhost:8000/example',
           html,
-          extensionIds,
+          extensions,
         },
         (embedWin) => {
           interceptEventListeners(embedWin);
@@ -867,6 +868,8 @@ class AmpFixture {
       );
       const {ampdoc} = ret;
       env.ampdoc = ampdoc;
+      // TODO(#33020): pass the `extensions` array directly.
+      const extensionIds = extensions.map(({extensionId}) => extensionId);
       const promise = Promise.all([
         env.extensions.installExtensionsInDoc(ampdoc, extensionIds),
         ampdoc.whenReady(),

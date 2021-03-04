@@ -241,7 +241,8 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     if (this.config_['type'] === 'custom') {
       Services.extensionsFor(this.win)./*OK*/ installExtensionForDoc(
         this.element.getAmpDoc(),
-        MUSTACHE_TAG
+        MUSTACHE_TAG,
+        'latest'
       );
     }
   }

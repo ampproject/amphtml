@@ -1933,6 +1933,8 @@ export class AmpA4A extends AMP.BaseElement {
         // Need to guarantee that this is no longer null
         url: devAssert(this.adUrl_),
         html,
+        // TODO(#33020): provide the `extensions` property instead, in
+        // the format of `[{extensionId, extensionVersion}]`.
         extensionIds,
         fonts,
         skipHtmlMerge,
