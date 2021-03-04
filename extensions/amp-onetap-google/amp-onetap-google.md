@@ -22,20 +22,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# amp-onetap
+# amp-onetap-google
 
 ## Overview
 
-You can use the `amp-onetap-google` component to embed a Google One Tap on the page, to allow users to sign into your websites with Google accounts.
+`amp-onetap-google` displays [Google One Tap sign-in](https://developers.google.com/identity/one-tap/web).
 
 #### Example
 
 ```html
 <amp-onetap-google
   layout="nodisplay"
-  data-src="https://rp.com/intermediate"
+  data-src="https://example.com/onetap"
 ></amp-onetap-google>
 ```
+
+After a successful sign-in, [`amp-access`](https://go.amp.dev/c/amp-access) and/or [`amp-subscriptions`](https://go.amp.dev/c/amp-subscriptions) are refreshed on the page.
 
 ## Attributes
 
