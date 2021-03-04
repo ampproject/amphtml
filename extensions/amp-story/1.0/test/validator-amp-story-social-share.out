@@ -1,4 +1,4 @@
-FAIL
+PASS
 |  <!doctype html>
 |  <html amp lang="en">
 |    <head>
@@ -30,10 +30,9 @@ FAIL
 |            <h1>Validation test for social-share providers</h1>
 |          </amp-story-grid-layer>
 |        </amp-story-page>
+|        <!-- Valid social share tag -->
 |        <amp-story-social-share layout="nodisplay">
 |          <script type="application/json">
->>         ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-social-share.html:33:8 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
 |            {
 |              "shareProviders": [
 |                "facebook",
