@@ -13,8 +13,6 @@ npm-debug.log
 .idea
 .tm_properties
 .settings
-.karma-cache/
-test-bin/
 typings
 typings.json
 /test/manual/amp-ad.adtech.html

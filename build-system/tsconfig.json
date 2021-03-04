@@ -27,7 +27,7 @@
     "./common/**/*.ts",
     "./server/**/*.js",
     "./server/**/*.ts",
-    "./tasks/**/*.ts",
+    "./tasks/**/*.js",
     "./tasks/**/*.ts"
   ],
   "exclude": [
