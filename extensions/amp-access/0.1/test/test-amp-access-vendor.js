@@ -95,7 +95,7 @@ describes.realWin('AccessVendorAdapter', {amp: true}, (env) => {
         vendorMock
           .expects('authorize')
           .withExactArgs()
-          .returns(Promise.resolve({access: 'A'}))
+          .resolves({access: 'A'})
           .once();
         return adapter.authorize().then((response) => {
           expect(response).to.exist;
@@ -122,11 +122,7 @@ describes.realWin('AccessVendorAdapter', {amp: true}, (env) => {
 
     describe('pingback', () => {
       it('should send pingback signal', () => {
-        vendorMock
-          .expects('pingback')
-          .withExactArgs()
-          .returns(Promise.resolve())
-          .once();
+        vendorMock.expects('pingback').withExactArgs().resolves().once();
         return adapter.pingback();
       });
 

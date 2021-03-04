@@ -55,7 +55,7 @@ describes.fakeWin(
       controllerMock
         .expects('connect')
         .withExactArgs('TARGET_ORIGIN', 'protocol1', config)
-        .returns(Promise.resolve(1))
+        .resolves(1)
         .once();
       const promise = iframeApi.connect();
       iframeApi.handleCommand_('start', {
@@ -69,7 +69,7 @@ describes.fakeWin(
       controllerMock
         .expects('authorize')
         .withExactArgs()
-        .returns(Promise.resolve({a: 1}))
+        .resolves({a: 1})
         .once();
       return iframeApi.handleCommand_('authorize', {}).then((result) => {
         expect(result).to.deep.equal({a: 1});
@@ -77,11 +77,7 @@ describes.fakeWin(
     });
 
     it('should pingback', () => {
-      controllerMock
-        .expects('pingback')
-        .withExactArgs()
-        .returns(Promise.resolve())
-        .once();
+      controllerMock.expects('pingback').withExactArgs().resolves().once();
       return iframeApi.handleCommand_('pingback', {});
     });
 

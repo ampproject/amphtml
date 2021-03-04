@@ -85,7 +85,7 @@ describes.realWin(
       list.element.applySize = () => {};
 
       env.sandbox.stub(list, 'getOverflowElement').returns(null);
-      env.sandbox.stub(list, 'fetchList_').returns(Promise.resolve());
+      env.sandbox.stub(list, 'fetchList_').resolves();
 
       allowConsoleError(() => {
         expect(() => list.buildCallback()).to.throw(
@@ -116,7 +116,7 @@ describes.realWin(
         doc.body.appendChild(element);
 
         env.sandbox.stub(list, 'getOverflowElement').returns(null);
-        env.sandbox.stub(list, 'fetchList_').returns(Promise.resolve());
+        env.sandbox.stub(list, 'fetchList_').resolves();
         list.element.applySize = () => {};
         list.buildCallback();
       });
@@ -202,13 +202,13 @@ describes.realWin(
         env.sandbox.stub(list, 'getOverflowElement').returns(null);
         env.sandbox
           .stub(list, 'prepareAndSendFetch_')
-          .returns(Promise.resolve(HAS_MORE_ITEMS_PAYLOAD));
+          .resolves(HAS_MORE_ITEMS_PAYLOAD);
         list.element.applySize = () => {};
         list.buildCallback();
       });
 
       it('should update the next loading src', async () => {
-        env.sandbox.stub(list, 'scheduleRender_').returns(Promise.resolve());
+        env.sandbox.stub(list, 'scheduleRender_').resolves();
         await list.layoutCallback();
         expect(element.getAttribute('src')).to.equal(
           '/list/infinite-scroll?items=2&left=1'
@@ -227,18 +227,16 @@ describes.realWin(
         div2.textContent = '2';
         env.sandbox
           .stub(list.ssrTemplateHelper_, 'applySsrOrCsrTemplate')
-          .returns(Promise.resolve([]));
+          .resolves([]);
         const updateBindingsStub = env.sandbox.stub(list, 'updateBindings_');
-        env.sandbox
-          .stub(list, 'maybeRenderLoadMoreTemplates_')
-          .returns(Promise.resolve([]));
-        updateBindingsStub.onCall(0).returns(Promise.resolve([div1, div2]));
+        env.sandbox.stub(list, 'maybeRenderLoadMoreTemplates_').resolves([]);
+        updateBindingsStub.onCall(0).resolves([div1, div2]);
 
         const div3 = doc.createElement('div');
         div3.textContent = '3';
         const div4 = doc.createElement('div');
         div4.textContent = '4';
-        updateBindingsStub.onCall(1).returns(Promise.resolve([div3, div4]));
+        updateBindingsStub.onCall(1).resolves([div3, div4]);
 
         const renderSpy = env.sandbox.spy(list, 'render_');
         await list.layoutCallback();
@@ -258,18 +256,16 @@ describes.realWin(
       it('should call focus on the last focusable element after load more is clicked', async () => {
         env.sandbox
           .stub(list.ssrTemplateHelper_, 'applySsrOrCsrTemplate')
-          .returns(Promise.resolve([]));
+          .resolves([]);
         const updateBindingsStub = env.sandbox.stub(list, 'updateBindings_');
-        env.sandbox
-          .stub(list, 'maybeRenderLoadMoreTemplates_')
-          .returns(Promise.resolve([]));
+        env.sandbox.stub(list, 'maybeRenderLoadMoreTemplates_').resolves([]);
 
         const el1 = doc.createElement('div');
         el1.textContent = '1';
         const el2 = doc.createElement('a');
         el2.setAttribute('href', 'https://google.com/');
         el2.textContent = '2';
-        updateBindingsStub.onCall(0).returns(Promise.resolve([el1, el2]));
+        updateBindingsStub.onCall(0).resolves([el1, el2]);
         const focusSpy = env.sandbox.spy(el2, 'focus');
 
         await list.layoutCallback();
@@ -278,7 +274,7 @@ describes.realWin(
         el3.textContent = '3';
         const el4 = doc.createElement('div');
         el4.textContent = '4';
-        updateBindingsStub.onCall(1).returns(Promise.resolve([el3, el4]));
+        updateBindingsStub.onCall(1).resolves([el3, el4]);
 
         await list.loadMoreCallback_(
           /* opt_reload */ false,

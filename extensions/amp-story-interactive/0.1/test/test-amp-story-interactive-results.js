@@ -69,7 +69,7 @@ describes.realWin(
       const localizationService = new LocalizationService(win.document.body);
       env.sandbox
         .stub(Services, 'localizationServiceForOrNull')
-        .returns(Promise.resolve(localizationService));
+        .resolves(localizationService);
 
       storyEl = win.document.createElement('amp-story');
       const storyPage = win.document.createElement('amp-story-page');

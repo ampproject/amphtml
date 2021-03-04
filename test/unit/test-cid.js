@@ -317,9 +317,7 @@ describes.sandboxed('cid', {}, (env) => {
       });
 
       it('should return empty if opted out', () => {
-        storageGetStub
-          .withArgs('amp-cid-optout')
-          .returns(Promise.resolve(true));
+        storageGetStub.withArgs('amp-cid-optout').resolves(true);
 
         storage['amp-cid'] = JSON.stringify({
           cid: 'YYY',
@@ -859,9 +857,7 @@ describes.realWin('cid', {amp: true}, (env) => {
   it.configure().skipSafari(
     'should store CID in cookie when not in Viewer',
     function* () {
-      env.sandbox
-        .stub(cid.viewerCidApi_, 'isSupported')
-        .returns(Promise.resolve(false));
+      env.sandbox.stub(cid.viewerCidApi_, 'isSupported').resolves(false);
       setCookie(win, 'foo', '', 0);
       const fooCid = yield cid.get(
         {
@@ -885,9 +881,7 @@ describes.realWin('cid', {amp: true}, (env) => {
   describe('CID backup', () => {
     beforeEach(() => {
       cid.isBackupCidExpOn = true;
-      env.sandbox
-        .stub(cid.viewerCidApi_, 'isSupported')
-        .returns(Promise.resolve(false));
+      env.sandbox.stub(cid.viewerCidApi_, 'isSupported').resolves(false);
     });
 
     it('generates a new CID and backup', async () => {
@@ -996,19 +990,20 @@ describes.realWin('cid', {amp: true}, (env) => {
   });
 
   it('get method should return CID when in Viewer ', () => {
-    env.sandbox
-      .stub(cid.viewerCidApi_, 'isSupported')
-      .returns(Promise.resolve(true));
+    env.sandbox.stub(cid.viewerCidApi_, 'isSupported').resolves(true);
     win.parent = {};
     stubServiceForDoc(
       env.sandbox,
       ampdoc,
       'viewer',
       'sendMessageAwaitResponse'
-    ).returns(Promise.resolve('cid-from-viewer'));
-    stubServiceForDoc(env.sandbox, ampdoc, 'viewer', 'isTrustedViewer').returns(
-      Promise.resolve(true)
-    );
+    ).resolves('cid-from-viewer');
+    stubServiceForDoc(
+      env.sandbox,
+      ampdoc,
+      'viewer',
+      'isTrustedViewer'
+    ).resolves(true);
     stubServiceForDoc(env.sandbox, ampdoc, 'viewer', 'hasCapability')
       .withArgs('cid')
       .returns(true);
@@ -1019,9 +1014,7 @@ describes.realWin('cid', {amp: true}, (env) => {
   });
 
   it('get method should time out when in Viewer', function* () {
-    env.sandbox
-      .stub(cid.viewerCidApi_, 'isSupported')
-      .returns(Promise.resolve(true));
+    env.sandbox.stub(cid.viewerCidApi_, 'isSupported').resolves(true);
     win.parent = {};
     stubServiceForDoc(
       env.sandbox,
@@ -1029,9 +1022,12 @@ describes.realWin('cid', {amp: true}, (env) => {
       'viewer',
       'sendMessageAwaitResponse'
     ).returns(new Promise(() => {}));
-    stubServiceForDoc(env.sandbox, ampdoc, 'viewer', 'isTrustedViewer').returns(
-      Promise.resolve(true)
-    );
+    stubServiceForDoc(
+      env.sandbox,
+      ampdoc,
+      'viewer',
+      'isTrustedViewer'
+    ).resolves(true);
     storage['amp-cid-optout'] = false;
     env.sandbox.stub(url, 'isProxyOrigin').returns(true);
     let scopedCid = undefined;
@@ -1067,7 +1063,7 @@ describes.realWin('cid', {amp: true}, (env) => {
       it('should use cid api on pub origin if opted in', () => {
         cid.apiKeyMap_ = {'AMP_ECID_GOOGLE': 'cid-api-key'};
         const getScopedCidStub = env.sandbox.stub(cid.cidApi_, 'getScopedCid');
-        getScopedCidStub.returns(Promise.resolve('cid-from-api'));
+        getScopedCidStub.resolves('cid-from-api');
         return cid
           .get(
             {
@@ -1088,9 +1084,7 @@ describes.realWin('cid', {amp: true}, (env) => {
       });
 
       it('should fallback to cookie if cid api returns nothing', () => {
-        env.sandbox
-          .stub(cid.cidApi_, 'getScopedCid')
-          .returns(Promise.resolve());
+        env.sandbox.stub(cid.cidApi_, 'getScopedCid').resolves();
         return cid
           .get(
             {
@@ -1107,9 +1101,7 @@ describes.realWin('cid', {amp: true}, (env) => {
       });
 
       it('should respect CID API opt out', () => {
-        env.sandbox
-          .stub(cid.cidApi_, 'getScopedCid')
-          .returns(Promise.resolve('$OPT_OUT'));
+        env.sandbox.stub(cid.cidApi_, 'getScopedCid').resolves('$OPT_OUT');
         return cid
           .get(
             {
@@ -1135,7 +1127,7 @@ describes.realWin('cid', {amp: true}, (env) => {
             cid.cidApi_,
             'getScopedCid'
           );
-          getScopedCidStub.returns(Promise.resolve('cid-from-api'));
+          getScopedCidStub.resolves('cid-from-api');
           return cid.get(
             {
               scope: 'AMP_ECID_GOOGLE',
@@ -1230,14 +1222,14 @@ describes.fakeWin('cid optout:', {amp: true}, (env) => {
 
   describe('isOptedOutOfCid()', () => {
     it('should return true if bit is set in storage', () => {
-      storageGetStub.withArgs('amp-cid-optout').returns(Promise.resolve(true));
+      storageGetStub.withArgs('amp-cid-optout').resolves(true);
       return isOptedOutOfCid(ampdoc).then((isOut) => {
         expect(isOut).to.be.true;
       });
     });
 
     it('should return false if bit is not set in storage', () => {
-      storageGetStub.withArgs('amp-cid-optout').returns(Promise.resolve(null));
+      storageGetStub.withArgs('amp-cid-optout').resolves(null);
       return isOptedOutOfCid(ampdoc).then((isOut) => {
         expect(isOut).to.be.false;
       });

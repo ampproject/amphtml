@@ -36,7 +36,7 @@ describes.realWin('viewerCidApi', {amp: true}, (env) => {
 
   describe('isSupported', () => {
     it('should return true if Viewer is trusted and has CID capability', () => {
-      viewerMock.isTrustedViewer.returns(Promise.resolve(true));
+      viewerMock.isTrustedViewer.resolves(true);
       viewerMock.hasCapability.withArgs('cid').returns(true);
       return expect(api.isSupported()).to.eventually.be.true;
     });
@@ -48,7 +48,7 @@ describes.realWin('viewerCidApi', {amp: true}, (env) => {
     });
 
     it('should return false if Viewer is not trusted', () => {
-      viewerMock.isTrustedViewer.returns(Promise.resolve(false));
+      viewerMock.isTrustedViewer.resolves(false);
       viewerMock.hasCapability.withArgs('cid').returns(true);
       return expect(api.isSupported()).to.eventually.be.false;
     });
@@ -56,9 +56,7 @@ describes.realWin('viewerCidApi', {amp: true}, (env) => {
 
   describe('getScopedCid', () => {
     function verifyClientIdApiInUse(used) {
-      viewerMock.sendMessageAwaitResponse.returns(
-        Promise.resolve('client-id-from-viewer')
-      );
+      viewerMock.sendMessageAwaitResponse.resolves('client-id-from-viewer');
       return api
         .getScopedCid(used ? 'api-key' : undefined, 'AMP_ECID_GOOGLE')
         .then((cid) => {
@@ -96,14 +94,14 @@ describes.realWin('viewerCidApi', {amp: true}, (env) => {
             'canonicalOrigin': 'http://localhost:9876',
           })
         )
-        .returns(Promise.resolve('client-id-from-viewer'));
+        .resolves('client-id-from-viewer');
       return expect(
         api.getScopedCid(undefined, 'NON_ALLOWLISTED_SCOPE')
       ).to.eventually.equal('client-id-from-viewer');
     });
 
     it('should return undefined if Viewer returns undefined', () => {
-      viewerMock.sendMessageAwaitResponse.returns(Promise.resolve());
+      viewerMock.sendMessageAwaitResponse.resolves();
       return expect(api.getScopedCid('api-key', 'AMP_ECID_GOOGLE')).to
         .eventually.be.undefined;
     });

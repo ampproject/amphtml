@@ -1391,7 +1391,7 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
         return signals;
       },
     };
-    element.buildInternal = sandbox.stub().returns(Promise.resolve());
+    element.buildInternal = sandbox.stub().resolves();
     return element;
   }
 

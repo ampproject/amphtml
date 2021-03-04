@@ -805,25 +805,23 @@ describes.realWin(
 
     describe('optout by function', () => {
       beforeEach(() => {
-        env.sandbox.stub(AnalyticsConfig.prototype, 'loadConfig').returns(
-          Promise.resolve({
-            'requests': {
-              'foo': {
-                baseUrl: 'https://example.test/bar',
-              },
+        env.sandbox.stub(AnalyticsConfig.prototype, 'loadConfig').resolves({
+          'requests': {
+            'foo': {
+              baseUrl: 'https://example.test/bar',
             },
-            'triggers': {
-              'pageview': {'on': 'visible', 'request': 'foo'},
-            },
-            'transport': {
-              'image': true,
-              'xhrpost': false,
-              'beacon': false,
-            },
-            'vars': {},
-            'optout': 'foo.bar',
-          })
-        );
+          },
+          'triggers': {
+            'pageview': {'on': 'visible', 'request': 'foo'},
+          },
+          'transport': {
+            'image': true,
+            'xhrpost': false,
+            'beacon': false,
+          },
+          'vars': {},
+          'optout': 'foo.bar',
+        });
       });
 
       it('works for vendor config when optout returns false', function () {
@@ -858,25 +856,23 @@ describes.realWin(
 
     describe('optout by id', () => {
       beforeEach(() => {
-        env.sandbox.stub(AnalyticsConfig.prototype, 'loadConfig').returns(
-          Promise.resolve({
-            'requests': {
-              'foo': {
-                baseUrl: 'https://example.test/bar',
-              },
+        env.sandbox.stub(AnalyticsConfig.prototype, 'loadConfig').resolves({
+          'requests': {
+            'foo': {
+              baseUrl: 'https://example.test/bar',
             },
-            'triggers': {
-              'pageview': {'on': 'visible', 'request': 'foo'},
-            },
-            'transport': {
-              'image': true,
-              'xhrpost': false,
-              'beacon': false,
-            },
-            'vars': {},
-            'optoutElementId': 'elementId',
-          })
-        );
+          },
+          'triggers': {
+            'pageview': {'on': 'visible', 'request': 'foo'},
+          },
+          'transport': {
+            'image': true,
+            'xhrpost': false,
+            'beacon': false,
+          },
+          'vars': {},
+          'optoutElementId': 'elementId',
+        });
       });
 
       it('doesnt send hit when config optout id is found', function () {
@@ -993,7 +989,7 @@ describes.realWin(
       it('allows a request through', () => {
         const analytics = getAnalyticsTag(getConfig(1));
 
-        env.sandbox.stub(crypto, 'uniform').returns(Promise.resolve(0.005));
+        env.sandbox.stub(crypto, 'uniform').resolves(0.005);
         return waitForSendRequest(analytics).then(() => {
           requestVerifier.verifyRequest('/test1=1');
         });
@@ -1011,10 +1007,7 @@ describes.realWin(
           async: 0,
           sync: 0,
         });
-        env.sandbox
-          .stub(crypto, 'uniform')
-          .withArgs('0')
-          .returns(Promise.resolve(0.005));
+        env.sandbox.stub(crypto, 'uniform').withArgs('0').resolves(0.005);
         return waitForSendRequest(analytics).then(() => {
           requestVerifier.verifyRequest('/test1=1');
         });
@@ -1023,7 +1016,7 @@ describes.realWin(
       it('does not allow a request through', () => {
         const analytics = getAnalyticsTag(getConfig(1));
 
-        env.sandbox.stub(crypto, 'uniform').returns(Promise.resolve(0.1));
+        env.sandbox.stub(crypto, 'uniform').resolves(0.1);
         return waitForNoSendRequest(analytics);
       });
 
@@ -1682,9 +1675,9 @@ describes.realWin(
         env.sandbox
           .stub(crypto, 'uniform')
           .withArgs('0')
-          .returns(Promise.resolve(0.005))
+          .resolves(0.005)
           .withArgs('CLIENT_ID')
-          .returns(Promise.resolve(0.5));
+          .resolves(0.5);
         return waitForSendRequest(analytics).then(() => {
           requestVerifier.verifyRequest('/test1=1');
         });
@@ -1738,7 +1731,7 @@ describes.realWin(
 
         env.sandbox
           .stub(AnalyticsConfig.prototype, 'loadConfig')
-          .returns(Promise.resolve(sampleconfig));
+          .resolves(sampleconfig);
 
         analytics.buildCallback();
         analytics.preconnectCallback();

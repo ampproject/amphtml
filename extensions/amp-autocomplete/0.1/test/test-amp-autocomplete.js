@@ -280,7 +280,7 @@ describes.realWin(
         const rendered = getRenderedSuggestions();
         const ssrSpy = env.sandbox
           .stub(impl.getSsrTemplateHelper(), 'ssr')
-          .returns(Promise.resolve({rendered}));
+          .resolves({rendered});
         await impl.getRemoteData_();
         expect(ssrSpy).to.be.calledOnce;
       });
@@ -332,7 +332,7 @@ describes.realWin(
           renderSpy = env.sandbox.spy(impl, 'renderResults_');
           env.sandbox
             .stub(impl.getSsrTemplateHelper(), 'applySsrOrCsrTemplate')
-            .returns(Promise.resolve(getRenderedSuggestions()));
+            .resolves(getRenderedSuggestions());
         });
 
         it('should add objToJson property to objects', async () => {
@@ -368,7 +368,7 @@ describes.realWin(
         const data = ['apple', 'mango', 'pear'];
         env.sandbox
           .stub(impl.getSsrTemplateHelper(), 'applySsrOrCsrTemplate')
-          .returns(Promise.resolve(getRenderedSuggestions()));
+          .resolves(getRenderedSuggestions());
         await impl.renderResults_(data, impl.container_);
         expect(impl.getSsrTemplateHelper().applySsrOrCsrTemplate).to.be
           .calledOnce;
@@ -405,7 +405,7 @@ describes.realWin(
         impl = await buildAmpAutocomplete(true);
         const renderTemplateSpy = env.sandbox
           .stub(impl.getSsrTemplateHelper(), 'applySsrOrCsrTemplate')
-          .returns(Promise.resolve(getRenderedSuggestions()));
+          .resolves(getRenderedSuggestions());
         await impl.renderResults_(sourceData, impl.container_);
         expect(impl.container_.children).to.have.length(3);
         expect(impl.container_.children[0].getAttribute('data-value')).to.equal(
@@ -1068,7 +1068,7 @@ describes.realWin(
       rendered[2].setAttribute('data-disabled', '');
       env.sandbox
         .stub(impl.getSsrTemplateHelper(), 'applySsrOrCsrTemplate')
-        .returns(Promise.resolve(rendered));
+        .resolves(rendered);
 
       await impl.renderResults_(sourceData, impl.container_);
       expect(impl.container_.children).to.have.length(3);

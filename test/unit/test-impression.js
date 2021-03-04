@@ -50,14 +50,12 @@ describes.realWin('impression', {amp: true}, (env) => {
     const stub = env.sandbox.stub(xhr, 'fetchJson');
     warnStub = env.sandbox.stub(user(), 'warn');
     env.sandbox.stub(dev(), 'warn');
-    stub.returns(
-      Promise.resolve({
-        json() {
-          return Promise.resolve(null);
-        },
-      })
-    );
-    env.sandbox.stub(ampdoc, 'whenFirstVisible').returns(Promise.resolve());
+    stub.resolves({
+      json() {
+        return Promise.resolve(null);
+      },
+    });
+    env.sandbox.stub(ampdoc, 'whenFirstVisible').resolves();
     isTrustedViewer = false;
     env.sandbox.stub(viewer, 'isTrustedViewer').callsFake(() => {
       return Promise.resolve(isTrustedViewer);
@@ -115,15 +113,13 @@ describes.realWin('impression', {amp: true}, (env) => {
           return Promise.resolve({'replaceUrl': undefined});
         }
       });
-    xhr.fetchJson.returns(
-      Promise.resolve({
-        json() {
-          return Promise.resolve({
-            'location': '',
-          });
-        },
-      })
-    );
+    xhr.fetchJson.resolves({
+      json() {
+        return Promise.resolve({
+          'location': '',
+        });
+      },
+    });
     maybeTrackImpression(window);
     return expect(getTrackImpressionPromise()).to.eventually.be.fulfilled;
   });
@@ -226,12 +222,10 @@ describes.realWin('impression', {amp: true}, (env) => {
     it('should resolve if get no content response', function* () {
       toggleExperiment(window, 'alp', true);
       viewer.getParam.withArgs('click').returns('https://www.example.com');
-      xhr.fetchJson.returns(
-        Promise.resolve({
-          // No-content response
-          status: 204,
-        })
-      );
+      xhr.fetchJson.resolves({
+        // No-content response
+        status: 204,
+      });
       maybeTrackImpression(window);
       return getTrackImpressionPromise().then(() => {
         expect(warnStub).to.not.be.called;
@@ -241,11 +235,9 @@ describes.realWin('impression', {amp: true}, (env) => {
     it('should still resolve on request error', function* () {
       toggleExperiment(window, 'alp', true);
       viewer.getParam.withArgs('click').returns('https://www.example.com');
-      xhr.fetchJson.returns(
-        Promise.resolve({
-          status: 404,
-        })
-      );
+      xhr.fetchJson.resolves({
+        status: 404,
+      });
       maybeTrackImpression(window);
       return getTrackImpressionPromise().then(() => {
         expect(warnStub).to.be.calledOnce;
@@ -256,15 +248,13 @@ describes.realWin('impression', {amp: true}, (env) => {
       toggleExperiment(window, 'alp', true);
       viewer.getParam.withArgs('click').returns('https://www.example.com');
       viewer.hasCapability.withArgs('replaceUrl').returns(false);
-      xhr.fetchJson.returns(
-        Promise.resolve({
-          json() {
-            return Promise.resolve({
-              'location': '',
-            });
-          },
-        })
-      );
+      xhr.fetchJson.resolves({
+        json() {
+          return Promise.resolve({
+            'location': '',
+          });
+        },
+      });
       maybeTrackImpression(window);
       return expect(getTrackImpressionPromise()).to.eventually.be.fulfilled;
     });
@@ -273,15 +263,13 @@ describes.realWin('impression', {amp: true}, (env) => {
       toggleExperiment(window, 'alp', true);
       viewer.getParam.withArgs('click').returns('https://www.example.com');
 
-      xhr.fetchJson.returns(
-        Promise.resolve({
-          json() {
-            return Promise.resolve({
-              'location': 'test_location?gclid=123456&foo=bar&example=123',
-            });
-          },
-        })
-      );
+      xhr.fetchJson.resolves({
+        json() {
+          return Promise.resolve({
+            'location': 'test_location?gclid=123456&foo=bar&example=123',
+          });
+        },
+      });
 
       const location = {
         hash: '',

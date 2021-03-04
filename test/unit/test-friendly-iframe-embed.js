@@ -212,7 +212,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
     extensionsMock
       .expects('preloadExtension')
       .withExactArgs('amp-test')
-      .returns(Promise.resolve())
+      .resolves()
       .once();
     extensionsMock
       .expects('preinstallEmbed')
@@ -221,7 +221,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
     extensionsMock
       .expects('installExtensionsInDoc')
       .withExactArgs(ampdoc, ['amp-test'])
-      .returns(Promise.resolve())
+      .resolves()
       .once();
 
     let renderCompleteResolver = null;
@@ -299,7 +299,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
     extensionsMock
       .expects('preloadExtension')
       .withExactArgs('amp-test')
-      .returns(Promise.resolve())
+      .resolves()
       .once();
     extensionsMock
       .expects('preinstallEmbed')
@@ -308,7 +308,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
     extensionsMock
       .expects('installExtensionsInDoc')
       .withExactArgs(ampdoc, ['amp-test'])
-      .returns(Promise.resolve())
+      .resolves()
       .once();
 
     let renderCompleteResolver = null;
@@ -351,7 +351,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
     extensionsMock
       .expects('preloadExtension')
       .withExactArgs('amp-test')
-      .returns(Promise.resolve())
+      .resolves()
       .atLeast(1);
 
     await installFriendlyIframeEmbed(
@@ -426,7 +426,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
 
     env.sandbox
       .stub(FriendlyIframeEmbed.prototype, 'whenRenderStarted')
-      .returns(Promise.resolve());
+      .resolves();
 
     const embed = await installFriendlyIframeEmbed(
       iframe,
@@ -515,7 +515,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
     extensionsMock
       .expects('preloadExtension')
       .withExactArgs('amp-test')
-      .returns(Promise.resolve())
+      .resolves()
       .once();
     extensionsMock
       .expects('preinstallEmbed')
@@ -524,12 +524,12 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
     extensionsMock
       .expects('installExtensionsInDoc')
       .withExactArgs(ampdoc, ['amp-test'])
-      .returns(Promise.resolve())
+      .resolves()
       .once();
 
     env.sandbox
       .stub(FriendlyIframeEmbed.prototype, 'whenRenderStarted')
-      .returns(Promise.resolve());
+      .resolves();
 
     const embedPromise = installFriendlyIframeEmbed(
       iframe,
@@ -582,7 +582,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
             arg.height == iframe.contentWindow.innerHeight
         )
       )
-      .returns(Promise.resolve([]))
+      .resolves([])
       .once();
     const embedPromise = installFriendlyIframeEmbed(iframe, document.body, {
       url: 'https://acme.org/url1',
@@ -621,7 +621,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
             arg.height == 200
         )
       )
-      .returns(Promise.resolve([]))
+      .resolves([])
       .once();
     const embedPromise = installFriendlyIframeEmbed(iframe, document.body, {
       url: 'https://acme.org/url1',

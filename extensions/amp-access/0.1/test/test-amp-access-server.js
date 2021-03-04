@@ -163,12 +163,10 @@ describes.realWin('AccessServerAdapter', {amp: true}, (env) => {
             'https://acme.com/a?rid=READER_ID',
             /* useAuthData */ false
           )
-          .returns(
-            Promise.resolve({
-              'READER_ID': 'reader1',
-              'OTHER': 123,
-            })
-          )
+          .resolves({
+            'READER_ID': 'reader1',
+            'OTHER': 123,
+          })
           .once();
         const request = {
           'url': removeFragment(win.location.href),
@@ -187,7 +185,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, (env) => {
               'Content-Type': 'application/x-www-form-urlencoded',
             },
           })
-          .returns(Promise.resolve(responseDoc))
+          .resolves(responseDoc)
           .once();
         const replaceSectionsStub = env.sandbox
           .stub(adapter, 'replaceSections_')
@@ -209,12 +207,10 @@ describes.realWin('AccessServerAdapter', {amp: true}, (env) => {
             'https://acme.com/a?rid=READER_ID',
             /* useAuthData */ false
           )
-          .returns(
-            Promise.resolve({
-              'READER_ID': 'reader1',
-              'OTHER': 123,
-            })
-          )
+          .resolves({
+            'READER_ID': 'reader1',
+            'OTHER': 123,
+          })
           .once();
         const request = {
           'url': removeFragment(win.location.href),
@@ -253,12 +249,10 @@ describes.realWin('AccessServerAdapter', {amp: true}, (env) => {
             'https://acme.com/a?rid=READER_ID',
             /* useAuthData */ false
           )
-          .returns(
-            Promise.resolve({
-              'READER_ID': 'reader1',
-              'OTHER': 123,
-            })
-          )
+          .resolves({
+            'READER_ID': 'reader1',
+            'OTHER': 123,
+          })
           .once();
         const request = {
           'url': removeFragment(win.location.href),
@@ -325,7 +319,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, (env) => {
 
     describe('pingback', () => {
       it('should always send client pingback', () => {
-        clientAdapterMock.expects('pingback').returns(Promise.resolve()).once();
+        clientAdapterMock.expects('pingback').resolves().once();
         adapter.pingback();
       });
     });

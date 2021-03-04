@@ -307,7 +307,7 @@ describes.fakeWin(
       document.body.appendChild(elementError);
 
       env.sandbox.stub(ampdoc, 'isVisible').returns(true);
-      env.sandbox.stub(ampdoc, 'whenFirstVisible').returns(Promise.resolve());
+      env.sandbox.stub(ampdoc, 'whenFirstVisible').resolves();
       env.sandbox.stub(ampdoc, 'onVisibilityChanged').returns(function () {});
 
       service = new AccessService(ampdoc);
@@ -376,7 +376,7 @@ describes.fakeWin(
           {scope: 'amp-access', createCookieIfNotPresent: true},
           env.sandbox.match(() => true)
         )
-        .returns(Promise.resolve(result))
+        .resolves(result)
         .once();
     }
 
@@ -411,7 +411,7 @@ describes.fakeWin(
       adapterMock
         .expects('authorize')
         .withExactArgs()
-        .returns(Promise.resolve({access: true}))
+        .resolves({access: true})
         .once();
       expectGetReaderId('reader1');
       source.buildLoginUrls_ = env.sandbox.spy();
@@ -478,7 +478,7 @@ describes.fakeWin(
       adapterMock
         .expects('authorize')
         .withExactArgs()
-        .returns(Promise.resolve({access: true}))
+        .resolves({access: true})
         .once();
       const early = createElements();
       const later = createElements();
@@ -512,7 +512,7 @@ describes.fakeWin(
       adapterMock
         .expects('authorize')
         .withExactArgs()
-        .returns(Promise.resolve({access: true}))
+        .resolves({access: true})
         .once();
 
       const applyAuthorizationsStub = env.sandbox.stub();
@@ -660,12 +660,12 @@ describes.fakeWin(
         templatesMock
           .expects('renderTemplate')
           .withExactArgs(template1, {access: true})
-          .returns(Promise.resolve(result1))
+          .resolves(result1)
           .once();
         templatesMock
           .expects('renderTemplate')
           .withExactArgs(template2, {access: true})
-          .returns(Promise.resolve(result2))
+          .resolves(result2)
           .once();
         const p = service.applyAuthorizationToElement_(elementOn, {
           access: true,
@@ -760,7 +760,7 @@ describes.fakeWin(
       document.documentElement.classList.remove('amp-access-error');
 
       isVisibleStub = env.sandbox.stub(ampdoc, 'isVisible').returns(true);
-      env.sandbox.stub(ampdoc, 'whenFirstVisible').returns(Promise.resolve());
+      env.sandbox.stub(ampdoc, 'whenFirstVisible').resolves();
       visibilityChanged = new Observable();
       env.sandbox
         .stub(ampdoc, 'onVisibilityChanged')
@@ -814,7 +814,7 @@ describes.fakeWin(
           {scope: 'amp-access', createCookieIfNotPresent: true},
           env.sandbox.match(() => true)
         )
-        .returns(Promise.resolve(result))
+        .resolves(result)
         .once();
     }
 
@@ -1049,11 +1049,7 @@ describes.fakeWin(
 
     it('should send POST pingback', () => {
       expectGetReaderId('reader1');
-      adapterMock
-        .expects('pingback')
-        .withExactArgs()
-        .returns(Promise.resolve())
-        .once();
+      adapterMock.expects('pingback').withExactArgs().resolves().once();
       return service
         .reportViewToServer_()
         .then(
@@ -1101,9 +1097,7 @@ describes.fakeWin(
     });
 
     it('should broadcast "viewed" signal to other documents', () => {
-      service.reportViewToServer_ = env.sandbox
-        .stub()
-        .returns(Promise.resolve());
+      service.reportViewToServer_ = env.sandbox.stub().resolves();
       const broadcastStub = env.sandbox.stub(service.viewer_, 'broadcast');
       const p = service.reportWhenViewed_(/* timeToView */ 2000);
       return Promise.resolve()
@@ -1308,7 +1302,7 @@ describes.fakeWin(
           {scope: 'amp-access', createCookieIfNotPresent: true},
           env.sandbox.match(() => true)
         )
-        .returns(Promise.resolve('reader1'))
+        .resolves('reader1')
         .once();
       return service.sources_[0].buildLoginUrls_().then((urls) => {
         const {url} = urls[0];
@@ -1329,7 +1323,7 @@ describes.fakeWin(
           {scope: 'amp-access', createCookieIfNotPresent: true},
           env.sandbox.match(() => true)
         )
-        .returns(Promise.resolve('reader1'))
+        .resolves('reader1')
         .atLeast(1);
       return source.buildLoginUrls_().then((urls) => {
         expect(urls).to.have.length(2);
@@ -1368,7 +1362,7 @@ describes.fakeWin(
           {scope: 'amp-access', createCookieIfNotPresent: true},
           env.sandbox.match(() => true)
         )
-        .returns(Promise.resolve('reader1'))
+        .resolves('reader1')
         .once();
       return source.buildLoginUrls_().then((urls) => {
         const {url} = urls[0];
@@ -1410,7 +1404,7 @@ describes.fakeWin(
       sourceMock
         .expects('openLoginDialog_')
         .withExactArgs('https://acme.com/l?rid=R')
-        .returns(Promise.resolve('#success=true'))
+        .resolves('#success=true')
         .once();
       return service.loginWithType_('').then(() => {
         expect(source.getAdapter().postAction).to.be.calledOnce;
@@ -1442,7 +1436,7 @@ describes.fakeWin(
       sourceMock
         .expects('openLoginDialog_')
         .withExactArgs('https://acme.com/l?rid=R')
-        .returns(Promise.resolve('#success=no'))
+        .resolves('#success=no')
         .once();
       return service.loginWithType_('').then(() => {
         expect(source.loginPromise_).to.not.exist;
@@ -1466,7 +1460,7 @@ describes.fakeWin(
       sourceMock
         .expects('openLoginDialog_')
         .withExactArgs('https://acme.com/l?rid=R')
-        .returns(Promise.resolve(''))
+        .resolves('')
         .once();
       return service.loginWithType_('').then(() => {
         expect(source.loginPromise_).to.not.exist;
@@ -1534,7 +1528,7 @@ describes.fakeWin(
       sourceMock
         .expects('openLoginDialog_')
         .withExactArgs('https://acme.com/l2?rid=R')
-        .returns(Promise.resolve('#success=true'))
+        .resolves('#success=true')
         .once();
       return service.loginWithType_('login2').then(() => {
         expect(service.loginPromise_).to.not.exist;
@@ -1607,7 +1601,7 @@ describes.fakeWin(
       sourceMock
         .expects('openLoginDialog_')
         .withExactArgs('https://acme.com/l?rid=R')
-        .returns(Promise.resolve('#success=true'))
+        .resolves('#success=true')
         .once();
       return service.loginWithType_('').then(() => {
         expect(source.loginPromise_).to.not.exist;
@@ -1886,7 +1880,7 @@ describes.fakeWin(
           {scope: 'amp-access', createCookieIfNotPresent: true},
           env.sandbox.match(() => true)
         )
-        .returns(Promise.resolve(result))
+        .resolves(result)
         .once();
     }
 
@@ -1895,12 +1889,12 @@ describes.fakeWin(
       adapterBeerMock
         .expects('authorize')
         .withExactArgs()
-        .returns(Promise.resolve({access: false}))
+        .resolves({access: false})
         .once();
       adapterDonutsMock
         .expects('authorize')
         .withExactArgs()
-        .returns(Promise.resolve({access: true}))
+        .resolves({access: true})
         .once();
 
       const promise = service.runAuthorization_();
@@ -1934,7 +1928,7 @@ describes.fakeWin(
       adapterDonutsMock
         .expects('authorize')
         .withExactArgs()
-        .returns(Promise.resolve({access: true}))
+        .resolves({access: true})
         .once();
       service.runAuthorization_();
       return Promise.all([
@@ -1963,7 +1957,7 @@ describes.fakeWin(
       sourceBeerMock
         .expects('openLoginDialog_')
         .withExactArgs('https://acme.com/l?rid=reader1')
-        .returns(Promise.resolve('#success=true'))
+        .resolves('#success=true')
         .once();
       sourceBeer.analyticsEvent_ = env.sandbox.spy();
       return sourceBeer
@@ -1999,7 +1993,7 @@ describes.fakeWin(
       sourceDonutsMock
         .expects('openLoginDialog_')
         .withExactArgs('https://acme.com/l?rid=reader1')
-        .returns(Promise.resolve('#success=true'))
+        .resolves('#success=true')
         .once();
       sourceDonuts.analyticsEvent_ = env.sandbox.spy();
       return sourceDonuts

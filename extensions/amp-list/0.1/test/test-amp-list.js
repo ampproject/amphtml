@@ -168,7 +168,7 @@ describes.repeated(
           listMock
             .expects('fetch_')
             .withExactArgs(!!opts.refresh)
-            .returns(Promise.resolve(fetched))
+            .resolves(fetched)
             .atLeast(1);
 
           // If "reset-on-refresh" is set, show loading/placeholder before fetch.
@@ -190,7 +190,7 @@ describes.repeated(
           }
           ssrTemplateHelper.applySsrOrCsrTemplate
             .withArgs(element, itemsToRender)
-            .returns(Promise.resolve(rendered));
+            .resolves(rendered);
         }
 
         function expectRender() {
@@ -249,7 +249,7 @@ describes.repeated(
             listMock
               .expects('attemptChangeHeight')
               .withExactArgs(1337)
-              .returns(Promise.resolve());
+              .resolves();
 
             return list.layoutCallback();
           });
@@ -340,10 +340,8 @@ describes.repeated(
                   listMock
                     .expects('attemptChangeHeight')
                     .withExactArgs(1337)
-                    .returns(Promise.resolve());
-                  listMock
-                    .expects('maybeResizeListToFitItems_')
-                    .returns(Promise.resolve(true));
+                    .resolves();
+                  listMock.expects('maybeResizeListToFitItems_').resolves(true);
                   listMock.expects('unlockHeightInsideMutate_').once();
                   return list.layoutCallback();
                 });
@@ -359,7 +357,7 @@ describes.repeated(
                     .returns(Promise.reject(false));
                   listMock
                     .expects('maybeResizeListToFitItems_')
-                    .returns(Promise.resolve(false));
+                    .resolves(false);
                   listMock.expects('unlockHeightInsideMutate_').never();
                   return list.layoutCallback();
                 });
@@ -372,10 +370,8 @@ describes.repeated(
                   listMock
                     .expects('attemptChangeHeight')
                     .withExactArgs(1337)
-                    .returns(Promise.resolve());
-                  listMock
-                    .expects('maybeResizeListToFitItems_')
-                    .returns(Promise.resolve(null));
+                    .resolves();
+                  listMock.expects('maybeResizeListToFitItems_').resolves(null);
                   listMock.expects('unlockHeightInsideMutate_').never();
                   return list.layoutCallback();
                 });
@@ -392,7 +388,7 @@ describes.repeated(
             listMock
               .expects('attemptChangeHeight')
               .withExactArgs(1337)
-              .returns(Promise.resolve());
+              .resolves();
 
             return list.layoutCallback().then(() => {
               expect(list.container_.contains(itemElement)).to.be.true;
@@ -568,7 +564,7 @@ describes.repeated(
 
           it('should fail to load b/c data array is absent', () => {
             expectAsyncConsoleError(/Response must contain an array/, 1);
-            listMock.expects('fetch_').returns(Promise.resolve({})).once();
+            listMock.expects('fetch_').resolves({}).once();
             listMock.expects('toggleLoading').withExactArgs(false).once();
             return expect(list.layoutCallback()).to.eventually.be.rejectedWith(
               /Response must contain an array/
@@ -581,7 +577,7 @@ describes.repeated(
               1
             );
             element.setAttribute('single-item', 'true');
-            listMock.expects('fetch_').returns(Promise.resolve()).once();
+            listMock.expects('fetch_').resolves().once();
             listMock.expects('toggleLoading').withExactArgs(false).once();
             return expect(list.layoutCallback()).to.eventually.be.rejectedWith(
               /Response must contain an array or object/
@@ -699,7 +695,7 @@ describes.repeated(
 
               ssrTemplateHelper.applySsrOrCsrTemplate
                 .withArgs(element, newData)
-                .returns(Promise.resolve([second]));
+                .resolves([second]);
               await list.mutatedAttributesCallback({src: newData});
             }
 
@@ -785,7 +781,7 @@ describes.repeated(
               listMock
                 .expects('attemptChangeHeight')
                 .withExactArgs(1337)
-                .returns(Promise.resolve())
+                .resolves()
                 .twice();
 
               const itemElement = doc.createElement('div');
@@ -845,9 +841,7 @@ describes.repeated(
 
             it('should error if proxied fetch returns invalid data', () => {
               expectAsyncConsoleError(/received no response/, 1);
-              env.sandbox
-                .stub(ssrTemplateHelper, 'ssr')
-                .returns(Promise.resolve(undefined));
+              env.sandbox.stub(ssrTemplateHelper, 'ssr').resolves(undefined);
               listMock.expects('toggleLoading').withExactArgs(false).once();
               return expect(
                 list.layoutCallback()
@@ -858,7 +852,7 @@ describes.repeated(
               expectAsyncConsoleError(/received no response/, 1);
               env.sandbox
                 .stub(ssrTemplateHelper, 'ssr')
-                .returns(Promise.resolve({init: {status: 400}}));
+                .resolves({init: {status: 400}});
               listMock.expects('toggleLoading').withExactArgs(false).once();
               return expect(
                 list.layoutCallback()
@@ -884,16 +878,12 @@ describes.repeated(
               listItem.setAttribute('role', 'item');
               listContainer.appendChild(listItem);
 
-              env.sandbox
-                .stub(ssrTemplateHelper, 'ssr')
-                .returns(Promise.resolve({html}));
-              ssrTemplateHelper.applySsrOrCsrTemplate.returns(
-                Promise.resolve(rendered)
-              );
+              env.sandbox.stub(ssrTemplateHelper, 'ssr').resolves({html});
+              ssrTemplateHelper.applySsrOrCsrTemplate.resolves(rendered);
 
               listMock
                 .expects('updateBindings_')
-                .returns(Promise.resolve(listContainer))
+                .resolves(listContainer)
                 .once();
               const renderSpy = env.sandbox.spy();
               listMock
@@ -988,8 +978,8 @@ describes.repeated(
 
             it('should hide fallback element on fetch success', () => {
               // Stub fetch and render to succeed.
-              listMock.expects('fetch_').returns(Promise.resolve([])).once();
-              templates.findAndRenderTemplate.returns(Promise.resolve([]));
+              listMock.expects('fetch_').resolves([]).once();
+              templates.findAndRenderTemplate.resolves([]);
               // Act as if a fallback is already displayed.
               env.sandbox.stub(list, 'fallbackDisplayed_').callsFake(true);
 
@@ -1081,7 +1071,7 @@ describes.repeated(
                   /*append*/ false,
                   callFunctionResult
                 )
-                .returns(Promise.resolve())
+                .resolves()
                 .once();
 
               await list.layoutCallback();
@@ -1101,7 +1091,7 @@ describes.repeated(
               listMock
                 .expects('scheduleRender_')
                 .withExactArgs([3, 2, 1], /*append*/ false, {items: [3, 2, 1]})
-                .returns(Promise.resolve())
+                .resolves()
                 .once();
 
               await list.layoutCallback();
@@ -1114,7 +1104,7 @@ describes.repeated(
 
           beforeEach(() => {
             bind = {
-              rescan: env.sandbox.stub().returns(Promise.resolve()),
+              rescan: env.sandbox.stub().resolves(),
               signals: () => {
                 return {get: (unusedName) => false};
               },
@@ -1171,7 +1161,7 @@ describes.repeated(
             listMock
               .expects('scheduleRender_')
               .withArgs([bar])
-              .returns(Promise.resolve())
+              .resolves()
               .once();
 
             element.setAttribute('src', 'https://foo.com/list.json');
@@ -1489,7 +1479,7 @@ describes.repeated(
             });
 
             it('should log an error if amp-bind was not included', async () => {
-              Services.bindForDocOrNull.returns(Promise.resolve(null));
+              Services.bindForDocOrNull.resolves(null);
 
               const ampStateEl = doc.createElement('amp-state');
               ampStateEl.setAttribute('id', 'okapis');
@@ -1516,7 +1506,7 @@ describes.repeated(
               listMock
                 .expects('scheduleRender_')
                 .withExactArgs([1, 2, 3], /*append*/ false, {items: [1, 2, 3]})
-                .returns(Promise.resolve())
+                .resolves()
                 .once();
 
               await list.layoutCallback();
@@ -1536,7 +1526,7 @@ describes.repeated(
               listMock
                 .expects('scheduleRender_')
                 .withExactArgs([1, 2, 3], /*append*/ false, {items: [1, 2, 3]})
-                .returns(Promise.resolve())
+                .resolves()
                 .once();
 
               const layoutPromise = list.layoutCallback();

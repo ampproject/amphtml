@@ -137,17 +137,15 @@ describes.fakeWin(
         contextMock
           .expects('collectUrlVars')
           .withExactArgs('VAR1&VAR2', false)
-          .returns(
-            Promise.resolve({
-              'VAR1': 'A',
-              'VAR2': 'B',
-            })
-          )
+          .resolves({
+            'VAR1': 'A',
+            'VAR2': 'B',
+          })
           .once();
         validConfig['iframeVars'] = ['VAR1', 'VAR2'];
         const sendStub = env.sandbox
           .stub(Messenger.prototype, 'sendCommandRsvp')
-          .returns(Promise.resolve({}));
+          .resolves({});
         const adapter = new AccessIframeAdapter(ampdoc, validConfig, context);
         const promise = adapter.connect();
         adapter.handleCommand_('connect');
@@ -203,7 +201,7 @@ describes.fakeWin(
               'protocol': 'amp-access',
               'config': validConfig,
             })
-            .returns(Promise.resolve())
+            .resolves()
             .once();
           adapter.connect();
           adapter.handleCommand_('connect');
@@ -213,7 +211,7 @@ describes.fakeWin(
           messengerMock
             .expects('sendCommandRsvp')
             .withExactArgs('authorize', {})
-            .returns(Promise.resolve({a: 1}))
+            .resolves({a: 1})
             .once();
           return adapter.authorize().then((result) => {
             expect(result).to.deep.equal({a: 1});
@@ -248,7 +246,7 @@ describes.fakeWin(
           messengerMock
             .expects('sendCommandRsvp')
             .withExactArgs('authorize', {})
-            .returns(Promise.resolve(data))
+            .resolves(data)
             .once();
           return adapter.authorize().then(() => {
             // Skip a microtask.
@@ -363,7 +361,7 @@ describes.fakeWin(
               'protocol': 'amp-access',
               'config': validConfig,
             })
-            .returns(Promise.resolve())
+            .resolves()
             .once();
           adapter.connect();
           adapter.handleCommand_('connect');
@@ -373,7 +371,7 @@ describes.fakeWin(
           messengerMock
             .expects('sendCommandRsvp')
             .withExactArgs('pingback', {})
-            .returns(Promise.resolve())
+            .resolves()
             .once();
           return adapter.pingback();
         });

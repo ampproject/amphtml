@@ -55,7 +55,7 @@ describes.realWin(
         .then(() => elem.getImpl())
         .then((impl) => {
           urlMock.expandUrlAsync
-            .returns(Promise.resolve(impl.baseUrl_))
+            .resolves(impl.baseUrl_)
             .withArgs(env.sandbox.match.any);
           if (opt_beforeLayoutCallback) {
             opt_beforeLayoutCallback(elem);

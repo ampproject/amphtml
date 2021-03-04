@@ -620,7 +620,7 @@ describes.realWin('Requests', {amp: 1}, (env) => {
     });
     env.sandbox
       .stub(ResourceTiming, 'getResourceTiming')
-      .returns(Promise.resolve('resource-timing'));
+      .resolves('resource-timing');
     handler.send({}, {}, expansionOptions);
     yield macroTask();
     expect(spy).to.be.calledWith('r1&resource-timing');

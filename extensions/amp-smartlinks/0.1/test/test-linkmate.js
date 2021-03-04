@@ -100,10 +100,7 @@ describes.fakeWin(
         env.sandbox.spy(linkmate, 'postToLinkmate_');
         env.sandbox.stub(linkmate, 'mapLinks_');
 
-        mockFetch
-          .expects('fetchJson')
-          .once()
-          .returns(Promise.resolve(response));
+        mockFetch.expects('fetchJson').once().resolves(response);
 
         const linkmateResponse = linkmate.runLinkmate(anchorList);
 
@@ -115,10 +112,7 @@ describes.fakeWin(
         env.sandbox.spy(linkmate, 'postToLinkmate_');
         env.sandbox.stub(linkmate, 'mapLinks_');
 
-        mockFetch
-          .expects('fetchJson')
-          .once()
-          .returns(Promise.resolve(response));
+        mockFetch.expects('fetchJson').once().resolves(response);
         const linkmateResponse = linkmate.runLinkmate(anchorList);
 
         linkmate.anchorList_ = anchorList;
@@ -131,10 +125,7 @@ describes.fakeWin(
           },
         ].map(helpers.createAnchor);
 
-        mockFetch
-          .expects('fetchJson')
-          .once()
-          .returns(Promise.resolve(response));
+        mockFetch.expects('fetchJson').once().resolves(response);
         const linkmateResponse2 = linkmate.runLinkmate(newAnchorList);
 
         expect(linkmate.postToLinkmate_.calledTwice).to.be.true;
@@ -146,10 +137,7 @@ describes.fakeWin(
         env.sandbox.spy(linkmate, 'postToLinkmate_');
         env.sandbox.spy(linkmate, 'mapLinks_');
 
-        mockFetch
-          .expects('fetchJson')
-          .once()
-          .returns(Promise.resolve(response));
+        mockFetch.expects('fetchJson').once().resolves(response);
         const linkmateResponse = linkmate.runLinkmate(anchorList);
 
         linkmate.anchorList_ = anchorList;
@@ -163,10 +151,7 @@ describes.fakeWin(
           },
         ].map(helpers.createAnchor);
 
-        mockFetch
-          .expects('fetchJson')
-          .once()
-          .returns(Promise.resolve(response));
+        mockFetch.expects('fetchJson').once().resolves(response);
         const linkmateResponse2 = linkmate.runLinkmate(newAnchorList);
 
         expect(linkmate.postToLinkmate_.calledTwice).to.be.true;
@@ -179,10 +164,7 @@ describes.fakeWin(
         env.sandbox.spy(linkmate, 'postToLinkmate_');
         env.sandbox.stub(linkmate, 'mapLinks_');
 
-        mockFetch
-          .expects('fetchJson')
-          .once()
-          .returns(Promise.resolve(response));
+        mockFetch.expects('fetchJson').once().resolves(response);
         const linkmateResponse = linkmate.runLinkmate(anchorList);
 
         linkmate.anchorList_ = anchorList;
@@ -221,10 +203,7 @@ describes.fakeWin(
         env.sandbox.spy(linkmate, 'postToLinkmate_');
         env.sandbox.stub(linkmate, 'buildLinksPayload_').returns({});
         env.sandbox.stub(linkmate, 'getEditInfo_').returns({});
-        mockFetch
-          .expects('fetchJson')
-          .once()
-          .returns(Promise.resolve(response));
+        mockFetch.expects('fetchJson').once().resolves(response);
         linkmate.postToLinkmate_();
 
         expect(linkmate.buildLinksPayload_.calledOnce).to.be.true;

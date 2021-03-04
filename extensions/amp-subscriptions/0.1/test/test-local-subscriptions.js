@@ -231,14 +231,12 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, (env) => {
       ...json,
       metering: {state: meteringState},
     };
-    env.sandbox.stub(localSubscriptionPlatform.xhr_, 'fetchJson').returns(
-      Promise.resolve({
-        json: () => Promise.resolve(responseWithMeteringState),
-      })
-    );
+    env.sandbox.stub(localSubscriptionPlatform.xhr_, 'fetchJson').resolves({
+      json: () => Promise.resolve(responseWithMeteringState),
+    });
     const saveMeteringStateStub = env.sandbox
       .stub(localSubscriptionPlatform.serviceAdapter_, 'saveMeteringState')
-      .returns(Promise.resolve());
+      .resolves();
 
     await localSubscriptionPlatform.getEntitlements();
     expect(saveMeteringStateStub).to.be.calledWith(meteringState);

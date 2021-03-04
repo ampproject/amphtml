@@ -73,10 +73,7 @@ describes.fakeWin(
 
     it('should push new state', () => {
       const onPop = env.sandbox.spy();
-      bindingMock
-        .expects('push')
-        .returns(Promise.resolve({stackIndex: 11}))
-        .once();
+      bindingMock.expects('push').resolves({stackIndex: 11}).once();
       return history.push(onPop).then((unusedHistoryId) => {
         expect(history.stackIndex_).to.equal(11);
         expect(history.stackOnPop_.length).to.equal(12);
@@ -87,14 +84,11 @@ describes.fakeWin(
 
     it('should pop previously pushed state', () => {
       const onPop = env.sandbox.spy();
-      bindingMock
-        .expects('push')
-        .returns(Promise.resolve({stackIndex: 11}))
-        .once();
+      bindingMock.expects('push').resolves({stackIndex: 11}).once();
       bindingMock
         .expects('pop')
         .withExactArgs(11)
-        .returns(Promise.resolve({stackIndex: 10}))
+        .resolves({stackIndex: 10})
         .once();
       return history.push(onPop).then((historyId) => {
         expect(historyId).to.equal(11);
@@ -115,12 +109,12 @@ describes.fakeWin(
       bindingMock
         .expects('push')
         .withExactArgs(undefined)
-        .returns(Promise.resolve({stackIndex: 11}))
+        .resolves({stackIndex: 11})
         .once();
       bindingMock
         .expects('pop')
         .withExactArgs(11)
-        .returns(Promise.resolve({stackIndex: 10}))
+        .resolves({stackIndex: 10})
         .once();
       return history.push(onPop).then((stackIndex) => {
         expect(onPop).to.have.not.been.called;
@@ -140,12 +134,12 @@ describes.fakeWin(
       bindingMock
         .expects('push')
         .withExactArgs(undefined)
-        .returns(Promise.resolve({stackIndex: 11}))
+        .resolves({stackIndex: 11})
         .once();
       bindingMock
         .expects('pop')
         .withExactArgs(11)
-        .returns(Promise.resolve({stackIndex: 10, title}))
+        .resolves({stackIndex: 10, title})
         .once();
       return history.push(onPop).then((stackIndex) => {
         expect(onPop).to.have.not.been.called;
@@ -169,12 +163,12 @@ describes.fakeWin(
       bindingMock
         .expects('push')
         .withExactArgs(pushState)
-        .returns(Promise.resolve({stackIndex: 11}))
+        .resolves({stackIndex: 11})
         .once();
       bindingMock
         .expects('replace')
         .withExactArgs(replaceState)
-        .returns(Promise.resolve())
+        .resolves()
         .once();
       return history.push(onPop, pushState).then((historyId) => {
         expect(historyId).to.equal(11);
@@ -197,11 +191,11 @@ describes.fakeWin(
       bindingMock
         .expects('push')
         .withExactArgs(state)
-        .returns(Promise.resolve({...state, stackIndex: 11}))
+        .resolves({...state, stackIndex: 11})
         .once();
       bindingMock
         .expects('get')
-        .returns(Promise.resolve({...state, stackIndex: 11}))
+        .resolves({...state, stackIndex: 11})
         .once();
       return history.push(onPop, state).then((historyId) => {
         expect(historyId).to.equal(11);
@@ -218,14 +212,8 @@ describes.fakeWin(
     });
 
     it('should push a new state and replace it for target', () => {
-      bindingMock
-        .expects('push')
-        .returns(Promise.resolve({stackIndex: 11}))
-        .once();
-      bindingMock
-        .expects('pop')
-        .returns(Promise.resolve({stackIndex: 10}))
-        .once();
+      bindingMock.expects('push').resolves({stackIndex: 11}).once();
+      bindingMock.expects('pop').resolves({stackIndex: 10}).once();
       bindingMock.expects('replaceStateForTarget').withExactArgs('#hello');
       return history.replaceStateForTarget('#hello').then(() => {
         return history.pop(history.stackIndex_).then(() => {
@@ -238,14 +226,11 @@ describes.fakeWin(
     it('should pop previously pushed state via goBack', () => {
       const onPop = env.sandbox.spy();
       const popState = {title: 'title'};
-      bindingMock
-        .expects('push')
-        .returns(Promise.resolve({stackIndex: 11}))
-        .once();
+      bindingMock.expects('push').resolves({stackIndex: 11}).once();
       bindingMock
         .expects('pop')
         .withExactArgs(11)
-        .returns(Promise.resolve({...popState, stackIndex: 10}))
+        .resolves({...popState, stackIndex: 10})
         .once();
       return history.push(onPop).then((historyId) => {
         expect(historyId).to.equal(11);
@@ -270,10 +255,7 @@ describes.fakeWin(
     });
 
     it('should call pop if stack is empty and passed true', () => {
-      bindingMock
-        .expects('pop')
-        .once()
-        .returns(Promise.resolve({stackIndex: 0}));
+      bindingMock.expects('pop').once().resolves({stackIndex: 0});
 
       return history.goBack(true);
     });
@@ -289,7 +271,7 @@ describes.fakeWin(
       bindingMock
         .expects('getFragment')
         .withExactArgs()
-        .returns(Promise.resolve('fragment'))
+        .resolves('fragment')
         .once();
       return history.getFragment().then((fragment) => {
         expect(fragment).to.be.equal('fragment');
@@ -300,7 +282,7 @@ describes.fakeWin(
       bindingMock
         .expects('updateFragment')
         .withExactArgs('fragment')
-        .returns(Promise.resolve())
+        .resolves()
         .once();
       return history.updateFragment('fragment').then(() => {});
     });
@@ -658,7 +640,7 @@ describes.sandboxed('HistoryBindingVirtual', {}, (env) => {
     capabilityStub = env.sandbox.stub();
     viewer = {
       onMessage: env.sandbox.stub().returns(() => {}),
-      sendMessageAwaitResponse: env.sandbox.stub().returns(Promise.resolve()),
+      sendMessageAwaitResponse: env.sandbox.stub().resolves(),
       hasCapability: capabilityStub,
     };
     history = new HistoryBindingVirtual_(window, viewer);
@@ -699,7 +681,7 @@ describes.sandboxed('HistoryBindingVirtual', {}, (env) => {
       const title = 'title';
       viewer.sendMessageAwaitResponse
         .withArgs('pushHistory', {stackIndex: 1, title})
-        .returns(Promise.resolve({stackIndex: 1, title}));
+        .resolves({stackIndex: 1, title});
 
       return history.push({title}).then((state) => {
         expect(viewer.sendMessageAwaitResponse).to.be.calledOnce;
@@ -719,7 +701,7 @@ describes.sandboxed('HistoryBindingVirtual', {}, (env) => {
       const title = 'title';
       viewer.sendMessageAwaitResponse
         .withArgs('pushHistory', {stackIndex: 1, title})
-        .returns(Promise.resolve(true));
+        .resolves(true);
 
       return history.push({title}).then((state) => {
         expect(viewer.sendMessageAwaitResponse).to.be.calledOnce;
@@ -750,7 +732,7 @@ describes.sandboxed('HistoryBindingVirtual', {}, (env) => {
     it('viewer supports responses', () => {
       viewer.sendMessageAwaitResponse
         .withArgs('popHistory', env.sandbox.match({stackIndex: 0}))
-        .returns(Promise.resolve({stackIndex: -123, title: 'title'}));
+        .resolves({stackIndex: -123, title: 'title'});
 
       return history.pop(0).then((state) => {
         expect(state).to.deep.equal({stackIndex: -123, title: 'title'});
@@ -767,7 +749,7 @@ describes.sandboxed('HistoryBindingVirtual', {}, (env) => {
     it('handles bad viewer responses', () => {
       viewer.sendMessageAwaitResponse
         .withArgs('popHistory', env.sandbox.match({stackIndex: 0}))
-        .returns(Promise.resolve(true));
+        .resolves(true);
 
       return history.pop(0).then((state) => {
         expect(state).to.deep.equal({stackIndex: -1});
@@ -799,7 +781,7 @@ describes.sandboxed('HistoryBindingVirtual', {}, (env) => {
     it('viewer supports responses', () => {
       viewer.sendMessageAwaitResponse
         .withArgs('replaceHistory', {stackIndex: 123, title: 'title'})
-        .returns(Promise.resolve({stackIndex: 123, title: 'different'}));
+        .resolves({stackIndex: 123, title: 'different'});
 
       return history
         .replace({stackIndex: 123, title: 'title'})
@@ -818,7 +800,7 @@ describes.sandboxed('HistoryBindingVirtual', {}, (env) => {
     it('handles bad viewer responses', () => {
       viewer.sendMessageAwaitResponse
         .withArgs('replaceHistory', {stackIndex: 123, title: 'title'})
-        .returns(Promise.resolve(true));
+        .resolves(true);
 
       return history
         .replace({stackIndex: 123, title: 'title'})
@@ -843,14 +825,12 @@ describes.sandboxed('HistoryBindingVirtual', {}, (env) => {
           url: '/page',
           fragment: 'fr2',
         })
-        .returns(
-          Promise.resolve({
-            stackIndex: 123,
-            title: 'different',
-            url: '/otherpage',
-            fragment: 'fr2',
-          })
-        );
+        .resolves({
+          stackIndex: 123,
+          title: 'different',
+          url: '/otherpage',
+          fragment: 'fr2',
+        });
 
       return history
         .replace({
@@ -896,7 +876,7 @@ describes.sandboxed('HistoryBindingVirtual', {}, (env) => {
       const title = 'title';
       viewer.sendMessageAwaitResponse
         .withArgs('pushHistory', {stackIndex: 1, title})
-        .returns(Promise.resolve({stackIndex: 1, title}));
+        .resolves({stackIndex: 1, title});
 
       return history.push({title}).then((state) => {
         expect(viewer.sendMessageAwaitResponse).to.be.calledOnce;
@@ -1002,12 +982,12 @@ describes.fakeWin(
         .expects('sendMessageAwaitResponse')
         .withExactArgs('pushHistory', {stackIndex: startIndex + 1})
         .once()
-        .returns(Promise.resolve({stackIndex: startIndex + 1}));
+        .resolves({stackIndex: startIndex + 1});
       viewerMock
         .expects('sendMessageAwaitResponse')
         .withArgs('popHistory', {stackIndex: startIndex + 1})
         .once()
-        .returns(Promise.resolve({stackIndex: startIndex}));
+        .resolves({stackIndex: startIndex});
       return history.replaceStateForTarget('#hello').then(() => {
         clock.tick(1);
         expect(env.win.location.hash).to.equal('#hello');
@@ -1113,7 +1093,7 @@ describes.fakeWin('Get and update fragment', {}, (env) => {
         .expects('sendMessageAwaitResponse')
         .withExactArgs('getFragment', undefined, true)
         .once()
-        .returns(Promise.resolve('from-viewer'));
+        .resolves('from-viewer');
       return history.getFragment().then((fragment) => {
         expect(fragment).to.equal('from-viewer');
       });
@@ -1156,7 +1136,7 @@ describes.fakeWin('Get and update fragment', {}, (env) => {
         .expects('sendMessageAwaitResponse')
         .withExactArgs('getFragment', undefined, true)
         .once()
-        .returns(Promise.resolve());
+        .resolves();
       return history.getFragment().then((fragment) => {
         expect(fragment).to.equal('');
       });

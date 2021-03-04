@@ -1314,13 +1314,11 @@ describes.realWin(
         extensionsMock
           .expects('preloadExtension')
           .withExactArgs('amp-ext1', '0.1')
-          .returns(
-            Promise.resolve({
-              elements: {
-                'amp-ext1': function () {},
-              },
-            })
-          )
+          .resolves({
+            elements: {
+              'amp-ext1': function () {},
+            },
+          })
           .once();
 
         const scriptEl = win.document.createElement('script');
@@ -1339,13 +1337,11 @@ describes.realWin(
         extensionsMock
           .expects('preloadExtension')
           .withExactArgs('amp-ext1', '0.1')
-          .returns(
-            Promise.resolve({
-              elements: {
-                'amp-ext1': function () {},
-              },
-            })
-          )
+          .resolves({
+            elements: {
+              'amp-ext1': function () {},
+            },
+          })
           .once();
 
         const mod = win.document.createElement('script');
@@ -1374,13 +1370,11 @@ describes.realWin(
         extensionsMock
           .expects('preloadExtension')
           .withExactArgs('amp-ext1', '1.0')
-          .returns(
-            Promise.resolve({
-              elements: {
-                'amp-ext1': function () {},
-              },
-            })
-          )
+          .resolves({
+            elements: {
+              'amp-ext1': function () {},
+            },
+          })
           .once();
 
         const scriptEl = win.document.createElement('script');
@@ -1399,7 +1393,7 @@ describes.realWin(
         extensionsMock
           .expects('preloadExtension')
           .withExactArgs('amp-ext1', '0.1')
-          .returns(Promise.resolve({elements: {}}))
+          .resolves({elements: {}})
           .once();
 
         const scriptEl = win.document.createElement('script');
@@ -1762,13 +1756,11 @@ describes.realWin(
           extensionsMock
             .expects('preloadExtension')
             .withExactArgs('amp-ext1', '0.1')
-            .returns(
-              Promise.resolve({
-                elements: {
-                  'amp-ext1': function () {},
-                },
-              })
-            )
+            .resolves({
+              elements: {
+                'amp-ext1': function () {},
+              },
+            })
             .once();
           writer.write(
             '<script custom-element="amp-ext1" src="https://cdn.ampproject.org/v0/amp-ext1-0.1.js"></script>'
@@ -1787,7 +1779,7 @@ describes.realWin(
           extensionsMock
             .expects('preloadExtension')
             .withExactArgs('amp-ext1', '0.1')
-            .returns(Promise.resolve({elements: {}}))
+            .resolves({elements: {}})
             .once();
           writer.write(
             '<script custom-template="amp-ext1" src="https://cdn.ampproject.org/v0/amp-ext1-0.1.js"></script>'
@@ -2028,7 +2020,7 @@ describes.realWin(
           });
 
         it('should send message', () => {
-          doc1.onMessage.returns(Promise.resolve());
+          doc1.onMessage.resolves();
           return doc1.viewer
             .sendMessageAwaitResponse('test3', {test: 3})
             .then(() => {

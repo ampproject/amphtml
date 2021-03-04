@@ -47,7 +47,7 @@ describes.fakeWin('validator-integration', {}, (env) => {
 
     it('should load validator script if dev mode', () => {
       modeStub.returns({development: true});
-      loadScriptStub.returns(Promise.resolve());
+      loadScriptStub.resolves();
       maybeValidate(win);
       expect(loadScriptStub).to.have.been.called;
     });
@@ -58,9 +58,7 @@ describes.fakeWin('validator-integration', {}, (env) => {
       const scriptEl = env.win.document.createElement('script');
       scriptEl.setAttribute('nonce', '123');
       win.document.head.append(scriptEl);
-      loadScriptStub = env.sandbox
-        .stub(eventHelper, 'loadPromise')
-        .returns(Promise.resolve());
+      loadScriptStub = env.sandbox.stub(eventHelper, 'loadPromise').resolves();
 
       loadScript(win.document, 'http://example.com');
 

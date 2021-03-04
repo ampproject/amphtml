@@ -165,7 +165,7 @@ t.run('Viewer Visibility State', () => {
             env.sandbox.stub(impl, 'isRelayoutNeeded').callsFake(() => true);
             env.sandbox.stub(impl, 'isLayoutSupported').callsFake(() => true);
 
-            layoutCallback.returns(Promise.resolve());
+            layoutCallback.resolves();
             unlayoutCallback.returns(true);
           });
       });

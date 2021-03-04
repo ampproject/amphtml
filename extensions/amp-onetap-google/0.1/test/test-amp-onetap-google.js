@@ -77,9 +77,7 @@ describes.realWin(
       };
 
       // build waits for visibility, force it.
-      env.sandbox
-        .stub(AmpDoc.prototype, 'whenFirstVisible')
-        .returns(Promise.resolve());
+      env.sandbox.stub(AmpDoc.prototype, 'whenFirstVisible').resolves();
 
       // make sync
       env.sandbox

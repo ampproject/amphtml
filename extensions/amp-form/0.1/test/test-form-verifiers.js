@@ -184,7 +184,7 @@ describes.fakeWin('amp-form async verification', {}, (env) => {
         };
         const xhrStub = env.sandbox.stub();
         xhrStub.onCall(0).returns(Promise.reject({response: errorResponse}));
-        xhrStub.onCall(1).returns(Promise.resolve());
+        xhrStub.onCall(1).resolves();
 
         const form = getForm(env.win.document);
         const verifier = getFormVerifier(form, xhrStub);

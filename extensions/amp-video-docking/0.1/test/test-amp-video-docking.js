@@ -721,9 +721,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
       const video = {};
       const target = {};
 
-      const dock = env.sandbox
-        .stub(docking, 'dock_')
-        .returns(Promise.resolve());
+      const dock = env.sandbox.stub(docking, 'dock_').resolves();
 
       await docking.dockInTransferLayerStep_(video, target);
 
@@ -1043,9 +1041,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
       placeElementLtwh(video, 0, 0, 400, 300);
 
       setCurrentlyDocked = env.sandbox.stub(docking, 'setCurrentlyDocked_');
-      placeAt = env.sandbox
-        .stub(docking, 'placeAt_')
-        .returns(Promise.resolve());
+      placeAt = env.sandbox.stub(docking, 'placeAt_').resolves();
 
       env.sandbox.stub(docking, 'getDims_').returns(targetDims);
     });
@@ -1190,9 +1186,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
       trigger = env.sandbox.stub(docking, 'trigger_');
       resetOnUndock = env.sandbox.stub(docking, 'resetOnUndock_');
 
-      placeAt = env.sandbox
-        .stub(docking, 'placeAt_')
-        .returns(Promise.resolve());
+      placeAt = env.sandbox.stub(docking, 'placeAt_').resolves();
 
       docking.currentlyDocked_ = {target: 'foo'};
 

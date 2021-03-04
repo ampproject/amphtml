@@ -224,9 +224,7 @@ describes.realWin('performance', {amp: true}, (env) => {
       describe('channel established', () => {
         it('should flush events when channel is ready', () => {
           env.sandbox.stub(viewer, 'getParam').withArgs('csi').returns(null);
-          env.sandbox
-            .stub(viewer, 'whenMessagingReady')
-            .returns(Promise.resolve());
+          env.sandbox.stub(viewer, 'whenMessagingReady').resolves();
           expect(perf.isMessagingReady_).to.be.false;
           const promise = perf.coreServicesAvailable();
           expect(perf.events_.length).to.equal(0);
@@ -415,9 +413,7 @@ describes.realWin('performance', {amp: true}, (env) => {
         beforeEach(() => {
           env.sandbox.stub(viewer, 'getParam').withArgs('csi').returns('1');
           env.sandbox.stub(viewer, 'isEmbedded').returns(true);
-          env.sandbox
-            .stub(viewer, 'whenMessagingReady')
-            .returns(Promise.resolve());
+          env.sandbox.stub(viewer, 'whenMessagingReady').resolves();
         });
 
         it('should forward all queued tick events', () => {
@@ -531,10 +527,10 @@ describes.realWin('performance', {amp: true}, (env) => {
 
   it('should wait for visible resources', () => {
     const resources = Services.resourcesForDoc(ampdoc);
-    env.sandbox.stub(resources, 'whenFirstPass').returns(Promise.resolve());
+    env.sandbox.stub(resources, 'whenFirstPass').resolves();
     const whenContentIniLoadStub = env.sandbox
       .stub(IniLoad, 'whenContentIniLoad')
-      .returns(Promise.resolve());
+      .resolves();
     perf.resources_ = resources;
 
     return perf.whenViewportLayoutComplete_().then(() => {
@@ -574,7 +570,7 @@ describes.realWin('performance', {amp: true}, (env) => {
 
     beforeEach(() => {
       viewer = Services.viewerForDoc(ampdoc);
-      env.sandbox.stub(viewer, 'whenMessagingReady').returns(Promise.resolve());
+      env.sandbox.stub(viewer, 'whenMessagingReady').resolves();
       viewerSendMessageStub = env.sandbox.stub(viewer, 'sendMessage');
 
       tickSpy = env.sandbox.spy(perf, 'tick');
@@ -751,7 +747,7 @@ describes.realWin('performance with experiment', {amp: true}, (env) => {
     win = env.win;
     const viewer = Services.viewerForDoc(env.ampdoc);
     viewerSendMessageStub = env.sandbox.stub(viewer, 'sendMessage');
-    env.sandbox.stub(viewer, 'whenMessagingReady').returns(Promise.resolve());
+    env.sandbox.stub(viewer, 'whenMessagingReady').resolves();
     env.sandbox.stub(viewer, 'getParam').withArgs('csi').returns('1');
     env.sandbox.stub(viewer, 'isEmbedded').returns(true);
     installPlatformService(win);
@@ -1469,7 +1465,7 @@ describes.realWin('log canonicalUrl', {amp: true}, (env) => {
     win = env.win;
     const viewer = Services.viewerForDoc(env.ampdoc);
     viewerSendMessageStub = env.sandbox.stub(viewer, 'sendMessage');
-    env.sandbox.stub(viewer, 'whenMessagingReady').returns(Promise.resolve());
+    env.sandbox.stub(viewer, 'whenMessagingReady').resolves();
     env.sandbox.stub(viewer, 'getParam').withArgs('csi').returns('1');
     env.sandbox.stub(viewer, 'isEmbedded').returns(true);
     env.sandbox.stub(Services, 'documentInfoForDoc').returns({canonicalUrl});

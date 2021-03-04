@@ -655,7 +655,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
       // inabox-viewer.getReferrerUrl() returns Promise<string>.
       env.sandbox
         .stub(viewer, 'getReferrerUrl')
-        .returns(Promise.resolve('http://fake.example/?foo=bar'));
+        .resolves('http://fake.example/?foo=bar');
 
       const impl = new AmpAdNetworkDoubleclickImpl(element);
       const impl2 = new AmpAdNetworkDoubleclickImpl(element);
@@ -1362,7 +1362,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
       // Stub ini load otherwise FIE could delay test
       env.sandbox
         ./*OK*/ stub(FriendlyIframeEmbed.prototype, 'whenIniLoaded')
-        .returns(Promise.resolve());
+        .resolves();
       impl.buildCallback();
       impl.onLayoutMeasure();
       return impl.layoutCallback().then(() => {
@@ -1451,7 +1451,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
       // Stub ini load otherwise FIE could delay test
       env.sandbox
         ./*OK*/ stub(FriendlyIframeEmbed.prototype, 'whenIniLoaded')
-        .returns(Promise.resolve());
+        .resolves();
       // This would normally be set in AmpA4a#buildCallback.
       impl.creativeSize_ = {width: 200, height: 50};
       impl.buildCallback();
@@ -1494,7 +1494,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
       // Stub ini load otherwise FIE could delay test
       env.sandbox
         ./*OK*/ stub(FriendlyIframeEmbed.prototype, 'whenIniLoaded')
-        .returns(Promise.resolve());
+        .resolves();
       impl.buildCallback();
       impl.onLayoutMeasure();
       return impl.layoutCallback().then(() => {
@@ -1767,7 +1767,7 @@ describes.realWin(
           'type': 'doubleclick',
         });
         impl = new AmpAdNetworkDoubleclickImpl(element);
-        env.sandbox.stub(impl, 'whenWithinViewport').returns(Promise.resolve());
+        env.sandbox.stub(impl, 'whenWithinViewport').resolves();
       });
 
       it('should use experiment value', () => {
@@ -1811,9 +1811,7 @@ describes.realWin(
         impl = new AmpAdNetworkDoubleclickImpl(element);
         impl.postAdResponseExperimentFeatures['render-idle-vp'] = '4';
         impl.postAdResponseExperimentFeatures['render-idle-throttle'] = 'true';
-        env.sandbox
-          .stub(AmpA4A.prototype, 'renderNonAmpCreative')
-          .returns(Promise.resolve());
+        env.sandbox.stub(AmpA4A.prototype, 'renderNonAmpCreative').resolves();
       });
 
       // TODO(jeffkaufman, #13422): this test was silently failing
@@ -2093,7 +2091,7 @@ describes.realWin(
       it('should call super if missing Algorithm header', () => {
         env.sandbox
           .stub(AmpA4A.prototype, 'maybeValidateAmpCreative')
-          .returns(Promise.resolve('foo'));
+          .resolves('foo');
         const creative = '<html><body>This is some text</body></html>';
         const mockHeaders = {
           get: (key) => {

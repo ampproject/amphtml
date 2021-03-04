@@ -318,8 +318,8 @@ describes.realWin(
           if (!resource) {
             return;
           }
-          env.sandbox.stub(resource, 'whenBuilt').returns(Promise.resolve());
-          env.sandbox.stub(resource, 'loadedOnce').returns(Promise.resolve());
+          env.sandbox.stub(resource, 'whenBuilt').resolves();
+          env.sandbox.stub(resource, 'loadedOnce').resolves();
           env.sandbox.stub(element, 'ensureLoaded').resolves(resource.getId());
         });
       });

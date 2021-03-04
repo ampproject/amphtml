@@ -416,7 +416,7 @@ describes.fakeWin(
       adapterMock
         .expects('authorize')
         .withExactArgs()
-        .returns(Promise.resolve({access: true}))
+        .resolves({access: true})
         .once();
       return source.runAuthorization().then(() => {
         return source.whenFirstAuthorized();

@@ -70,7 +70,7 @@ describes.realWin(
       doc.body.appendChild(element);
 
       env.sandbox.stub(list, 'getOverflowElement').returns(null);
-      env.sandbox.stub(list, 'fetchList_').returns(Promise.resolve());
+      env.sandbox.stub(list, 'fetchList_').resolves();
       list.element.applySize = () => {};
       list.buildCallback();
 

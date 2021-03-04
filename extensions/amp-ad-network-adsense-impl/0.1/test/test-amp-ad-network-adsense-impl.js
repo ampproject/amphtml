@@ -1113,14 +1113,12 @@ describes.realWin(
           height: VIEWPORT_HEIGHT,
         });
         didAttemptSizeChange = false;
-        env.sandbox.stub(element, 'getImpl').returns(
-          Promise.resolve({
-            attemptChangeSize: () => {
-              didAttemptSizeChange = true;
-              return Promise.resolve();
-            },
-          })
-        );
+        env.sandbox.stub(element, 'getImpl').resolves({
+          attemptChangeSize: () => {
+            didAttemptSizeChange = true;
+            return Promise.resolve();
+          },
+        });
 
         didMeasure = false;
         didMutate = false;
@@ -1245,9 +1243,7 @@ describes.realWin(
             width: '320',
             height: '150',
           });
-          env.sandbox
-            .stub(adsense, 'attemptChangeSize')
-            .returns(Promise.resolve());
+          env.sandbox.stub(adsense, 'attemptChangeSize').resolves();
 
           const promise = adsense.buildCallback();
           expect(promise).to.exist;
@@ -1279,9 +1275,7 @@ describes.realWin(
             width: '320',
             height: '150',
           });
-          env.sandbox
-            .stub(adsense, 'attemptChangeSize')
-            .returns(Promise.resolve());
+          env.sandbox.stub(adsense, 'attemptChangeSize').resolves();
 
           const promise = adsense.buildCallback();
           expect(promise).to.exist;
@@ -1456,7 +1450,7 @@ describes.realWin(
       it('should call super if missing Algorithm header', () => {
         env.sandbox
           .stub(AmpA4A.prototype, 'maybeValidateAmpCreative')
-          .returns(Promise.resolve('foo'));
+          .resolves('foo');
         const creative = '<html><body>This is some text</body></html>';
         const mockHeaders = {
           get: (key) => {

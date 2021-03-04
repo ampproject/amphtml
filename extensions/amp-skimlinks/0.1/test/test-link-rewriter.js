@@ -185,9 +185,7 @@ describes.fakeWin('LinkRewriterManager', {amp: true}, (env) => {
     });
 
     it('Should call .onDomUpdate() after registering linkRewriter', () => {
-      env.sandbox
-        .stub(LinkRewriter.prototype, 'onDomUpdated')
-        .returns(Promise.resolve());
+      env.sandbox.stub(LinkRewriter.prototype, 'onDomUpdated').resolves();
       const linkRewriter = linkRewriterManager.registerLinkRewriter(
         'vendor',
         env.sandbox.stub(),
@@ -454,9 +452,7 @@ describes.fakeWin('Link Rewriter', {amp: true}, (env) => {
       resolveFunction = resolveFunction || createResolveResponseHelper();
       options = options || {};
       // Prevent scanning the page in the constructor
-      env.sandbox
-        .stub(LinkRewriter.prototype, 'scanLinksOnPage_')
-        .returns(Promise.resolve());
+      env.sandbox.stub(LinkRewriter.prototype, 'scanLinksOnPage_').resolves();
       const linkRewriter = new LinkRewriter(
         rootDocument,
         'test',
@@ -595,9 +591,7 @@ describes.fakeWin('Link Rewriter', {amp: true}, (env) => {
     describe('In dynamic page', () => {
       it('Should scan the when onDomUpdated() is called', () => {
         const linkRewriter = createLinkRewriterHelper();
-        env.sandbox
-          .stub(linkRewriter, 'scanLinksOnPage_')
-          .returns(Promise.resolve());
+        env.sandbox.stub(linkRewriter, 'scanLinksOnPage_').resolves();
         linkRewriter.onDomUpdated();
         expect(linkRewriter.scanLinksOnPage_.calledOnce).to.be.true;
       });

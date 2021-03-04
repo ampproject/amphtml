@@ -193,9 +193,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
 
       it('Element - createdCallback', () => {
         const element = new ElementClass();
-        const build = env.sandbox
-          .stub(element, 'buildInternal')
-          .returns(Promise.resolve());
+        const build = env.sandbox.stub(element, 'buildInternal').resolves();
 
         expect(element.isBuilt()).to.equal(false);
         expect(element.hasAttributes()).to.equal(false);
@@ -322,7 +320,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
       it('Element - should NOT reset on 2nd attachedCallback w/o request', () => {
         clock.tick(1);
         const element = new ElementClass();
-        env.sandbox.stub(element, 'buildInternal').returns(Promise.resolve());
+        env.sandbox.stub(element, 'buildInternal').resolves();
         container.appendChild(element);
         container.removeChild(element);
 

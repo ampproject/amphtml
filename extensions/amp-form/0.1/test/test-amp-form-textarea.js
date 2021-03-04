@@ -177,9 +177,7 @@ describes.realWin(
           },
         };
         env.sandbox.stub(Services, 'resourcesForDoc').returns(fakeResources);
-        env.sandbox
-          .stub(eventHelper, 'listenOncePromise')
-          .returns(Promise.resolve());
+        env.sandbox.stub(eventHelper, 'listenOncePromise').resolves();
 
         let mouseDownEvent;
         if (doc.createEvent) {

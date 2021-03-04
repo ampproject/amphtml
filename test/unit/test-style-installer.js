@@ -67,9 +67,7 @@ describe('Styles', () => {
       expect(getStyle(doc.body, 'animation')).to.equal('');
       expect(ampdoc.signals().get('render-start')).to.be.null;
 
-      waitForServicesStub
-        .withArgs(win)
-        .returns(Promise.resolve(['service1', 'service2']));
+      waitForServicesStub.withArgs(win).resolves(['service1', 'service2']);
       styles.makeBodyVisible(doc);
       return new Promise((resolve) => {
         setTimeout(resolve, 0);
@@ -84,7 +82,7 @@ describe('Styles', () => {
     });
 
     it('should skip schedulePass if no render delaying services', () => {
-      waitForServicesStub.withArgs(win).returns(Promise.resolve([]));
+      waitForServicesStub.withArgs(win).resolves([]);
       styles.makeBodyVisible(doc);
       return new Promise((resolve) => {
         setTimeout(resolve, 0);

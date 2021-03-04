@@ -149,7 +149,7 @@ describe('#line-delimited-response-handler', () => {
           {'stream': true}
         );
         const done = chunk * CHUNK_SIZE >= responseString.length - 1;
-        readStub.onCall(chunk).returns(Promise.resolve({value, done}));
+        readStub.onCall(chunk).resolves({value, done});
       } while (chunk++ * CHUNK_SIZE < responseString.length);
     }
 

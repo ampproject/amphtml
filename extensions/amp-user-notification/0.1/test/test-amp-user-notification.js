@@ -159,7 +159,7 @@ describes.realWin(
       storageMock
         .expects('get')
         .withExactArgs('amp-user-notification:n1')
-        .returns(Promise.resolve(true))
+        .resolves(true)
         .once();
       impl.isDismissed().then((dismissed) => {
         expect(dismissed).to.be.true;
@@ -175,7 +175,7 @@ describes.realWin(
       storageMock
         .expects('get')
         .withExactArgs('amp-user-notification:n1')
-        .returns(Promise.resolve(null))
+        .resolves(null)
         .once();
       impl.isDismissed().then((dismissed) => {
         expect(dismissed).to.be.false;
@@ -221,7 +221,7 @@ describes.realWin(
       storageMock
         .expects('get')
         .withExactArgs('amp-user-notification:n1')
-        .returns(Promise.resolve(true))
+        .resolves(true)
         .once();
       return impl.shouldShow().then((shouldShow) => {
         expect(shouldShow).to.equal(false);
@@ -238,15 +238,13 @@ describes.realWin(
       storageMock
         .expects('get')
         .withExactArgs('amp-user-notification:n1')
-        .returns(Promise.resolve(true))
+        .resolves(true)
         .never();
 
-      const cidStub = env.sandbox
-        .stub(impl, 'getAsyncCid_')
-        .returns(Promise.resolve('12345'));
+      const cidStub = env.sandbox.stub(impl, 'getAsyncCid_').resolves('12345');
       const showEndpointStub = env.sandbox
         .stub(impl, 'getShowEndpoint_')
-        .returns(Promise.resolve({showNotification: true}));
+        .resolves({showNotification: true});
 
       return impl.shouldShow().then((shouldShow) => {
         expect(shouldShow).to.equal(true);
@@ -286,15 +284,13 @@ describes.realWin(
       storageMock
         .expects('get')
         .withExactArgs('amp-user-notification:n1')
-        .returns(Promise.resolve(false))
+        .resolves(false)
         .once();
 
-      const cidStub = env.sandbox
-        .stub(impl, 'getAsyncCid_')
-        .returns(Promise.resolve('12345'));
+      const cidStub = env.sandbox.stub(impl, 'getAsyncCid_').resolves('12345');
       const showEndpointStub = env.sandbox
         .stub(impl, 'getShowEndpoint_')
-        .returns(Promise.resolve({showNotification: true}));
+        .resolves({showNotification: true});
 
       return impl.shouldShow().then((shouldShow) => {
         expect(shouldShow).to.equal(true);
@@ -312,15 +308,13 @@ describes.realWin(
       storageMock
         .expects('get')
         .withExactArgs('amp-user-notification:n1')
-        .returns(Promise.resolve(false))
+        .resolves(false)
         .once();
 
-      const cidStub = env.sandbox
-        .stub(impl, 'getAsyncCid_')
-        .returns(Promise.resolve('12345'));
+      const cidStub = env.sandbox.stub(impl, 'getAsyncCid_').resolves('12345');
       const showEndpointStub = env.sandbox
         .stub(impl, 'getShowEndpoint_')
-        .returns(Promise.resolve({showNotification: false}));
+        .resolves({showNotification: false});
 
       return impl.shouldShow().then((shouldShow) => {
         expect(shouldShow).to.equal(false);
@@ -339,7 +333,7 @@ describes.realWin(
       storageMock
         .expects('get')
         .withExactArgs('amp-user-notification:n1')
-        .returns(Promise.resolve(undefined))
+        .resolves(undefined)
         .once();
       return impl.shouldShow().then((shouldShow) => {
         expect(shouldShow).to.equal(true);
@@ -361,12 +355,10 @@ describes.realWin(
         .returns(Promise.reject('intentional'))
         .once();
 
-      const cidStub = env.sandbox
-        .stub(impl, 'getAsyncCid_')
-        .returns(Promise.resolve('12345'));
+      const cidStub = env.sandbox.stub(impl, 'getAsyncCid_').resolves('12345');
       const showEndpointStub = env.sandbox
         .stub(impl, 'getShowEndpoint_')
-        .returns(Promise.resolve({showNotification: true}));
+        .resolves({showNotification: true});
 
       return impl.shouldShow().then((shouldShow) => {
         expect(shouldShow).to.equal(true);
@@ -404,7 +396,7 @@ describes.realWin(
       storageMock
         .expects('set')
         .withExactArgs('amp-user-notification:n1', true)
-        .returns(Promise.resolve())
+        .resolves()
         .once();
       const postDismissStub = env.sandbox.stub(impl, 'postDismissEnpoint_');
 
@@ -423,7 +415,7 @@ describes.realWin(
       storageMock
         .expects('set')
         .withExactArgs('amp-user-notification:n1', true)
-        .returns(Promise.resolve())
+        .resolves()
         .once();
       const postDismissStub = env.sandbox.stub(impl, 'postDismissEnpoint_');
 
@@ -443,7 +435,7 @@ describes.realWin(
       storageMock
         .expects('set')
         .withExactArgs('amp-user-notification:n1', true)
-        .returns(Promise.resolve())
+        .resolves()
         .never();
       const postDismissStub = env.sandbox.stub(impl, 'postDismissEnpoint_');
 
@@ -466,7 +458,7 @@ describes.realWin(
       storageMock
         .expects('get')
         .withExactArgs('amp-user-notification:n1')
-        .returns(Promise.resolve(false))
+        .resolves(false)
         .once();
 
       return impl.shouldShow().then((shouldShow) => {
@@ -487,7 +479,7 @@ describes.realWin(
       storageMock
         .expects('get')
         .withExactArgs('amp-user-notification:n1')
-        .returns(Promise.resolve(false))
+        .resolves(false)
         .once();
 
       return impl.shouldShow().then((shouldShow) => {
@@ -508,7 +500,7 @@ describes.realWin(
       storageMock
         .expects('get')
         .withExactArgs('amp-user-notification:n1')
-        .returns(Promise.resolve(false))
+        .resolves(false)
         .once();
 
       return impl.shouldShow().then((shouldShow) => {
@@ -585,7 +577,7 @@ describes.realWin(
       storageMock
         .expects('set')
         .withExactArgs('amp-user-notification:n1', true)
-        .returns(Promise.resolve())
+        .resolves()
         .never();
       const postDismissStub = env.sandbox.stub(impl, 'postDismissEnpoint_');
 
@@ -599,10 +591,10 @@ describes.realWin(
     it('should have class `amp-active`', async () => {
       env.sandbox
         .stub(AmpUserNotification.prototype, 'getAsyncCid_')
-        .returns(Promise.resolve('12345'));
+        .resolves('12345');
       env.sandbox
         .stub(AmpUserNotification.prototype, 'getShowEndpoint_')
-        .returns(Promise.resolve({showNotification: true}));
+        .resolves({showNotification: true});
 
       const el = getUserNotification(dftAttrs);
       const impl = await el.getImpl(false);
@@ -628,10 +620,10 @@ describes.realWin(
     it('should not have `amp-active`', async () => {
       env.sandbox
         .stub(AmpUserNotification.prototype, 'getAsyncCid_')
-        .returns(Promise.resolve('12345'));
+        .resolves('12345');
       env.sandbox
         .stub(AmpUserNotification.prototype, 'getShowEndpoint_')
-        .returns(Promise.resolve({showNotification: false}));
+        .resolves({showNotification: false});
 
       const el = getUserNotification(dftAttrs);
       const impl = await el.getImpl(false);
@@ -653,13 +645,13 @@ describes.realWin(
     it('should have `amp-hidden` and no `amp-active`', async () => {
       env.sandbox
         .stub(AmpUserNotification.prototype, 'getAsyncCid_')
-        .returns(Promise.resolve('12345'));
+        .resolves('12345');
       env.sandbox
         .stub(AmpUserNotification.prototype, 'getShowEndpoint_')
-        .returns(Promise.resolve({showNotification: true}));
+        .resolves({showNotification: true});
       const stub2 = env.sandbox
         .stub(AmpUserNotification.prototype, 'postDismissEnpoint_')
-        .returns(Promise.resolve());
+        .resolves();
 
       const el = getUserNotification(dftAttrs);
       const impl = await el.getImpl(false);

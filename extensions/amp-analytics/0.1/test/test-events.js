@@ -2205,16 +2205,13 @@ describes.realWin('Events', {amp: 1}, (env) => {
       });
 
       it('with waitFor INI_LOAD', () => {
-        iniLoadTrackerMock
-          .expects('getRootSignal')
-          .returns(Promise.resolve())
-          .twice();
+        iniLoadTrackerMock.expects('getRootSignal').resolves().twice();
         const promise = tracker.getReadyPromise('ini-load');
         return promise.then(() => {
           iniLoadTrackerMock
             .expects('getElementSignal')
             .withExactArgs('ini-load', target)
-            .returns(Promise.resolve())
+            .resolves()
             .once();
           const promise2 = tracker.getReadyPromise('ini-load', target);
           return promise2;
@@ -2232,14 +2229,14 @@ describes.realWin('Events', {amp: 1}, (env) => {
         signalTrackerMock
           .expects('getRootSignal')
           .withExactArgs('render-start')
-          .returns(Promise.resolve())
+          .resolves()
           .twice();
         const promise = tracker.getReadyPromise('render-start');
         return promise.then(() => {
           signalTrackerMock
             .expects('getElementSignal')
             .withExactArgs('render-start', target)
-            .returns(Promise.resolve())
+            .resolves()
             .once();
           const promise2 = tracker.getReadyPromise('render-start', target);
           return promise2;
@@ -2278,14 +2275,14 @@ describes.realWin('Events', {amp: 1}, (env) => {
           iniLoadTrackerMock
             .expects('getElementSignal')
             .withExactArgs('ini-load', element)
-            .returns(Promise.resolve())
+            .resolves()
             .once();
 
           await tracker.getReadyPromise('render-start', element);
           signalTrackerMock
             .expects('getElementSignal')
             .withExactArgs('render-start')
-            .returns(Promise.resolve())
+            .resolves()
             .once();
         });
       });

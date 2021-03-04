@@ -163,20 +163,18 @@ describes.realWin(
               'https://acme.com/a?rid=READER_ID',
               /* useAuthData */ false
             )
-            .returns(Promise.resolve('https://acme.com/a?rid=reader1'))
+            .resolves('https://acme.com/a?rid=reader1')
             .once();
           xhrMock
             .expects('fetchJson')
             .withExactArgs('https://acme.com/a?rid=reader1', {
               credentials: 'include',
             })
-            .returns(
-              Promise.resolve({
-                json() {
-                  return Promise.resolve({access: 'A'});
-                },
-              })
-            )
+            .resolves({
+              json() {
+                return Promise.resolve({access: 'A'});
+              },
+            })
             .once();
           return adapter.authorize().then((response) => {
             expect(response).to.exist;
@@ -191,7 +189,7 @@ describes.realWin(
               'https://acme.com/a?rid=READER_ID',
               /* useAuthData */ false
             )
-            .returns(Promise.resolve('https://acme.com/a?rid=reader1'))
+            .resolves('https://acme.com/a?rid=reader1')
             .once();
           xhrMock
             .expects('fetchJson')
@@ -217,7 +215,7 @@ describes.realWin(
               'https://acme.com/a?rid=READER_ID',
               /* useAuthData */ false
             )
-            .returns(Promise.resolve('https://acme.com/a?rid=reader1'))
+            .resolves('https://acme.com/a?rid=reader1')
             .once();
           xhrMock
             .expects('fetchJson')
@@ -251,7 +249,7 @@ describes.realWin(
               'https://acme.com/p?rid=READER_ID',
               /* useAuthData */ true
             )
-            .returns(Promise.resolve('https://acme.com/p?rid=reader1'))
+            .resolves('https://acme.com/p?rid=reader1')
             .once();
           xhrMock
             .expects('sendSignal')
@@ -267,7 +265,7 @@ describes.realWin(
                 );
               })
             )
-            .returns(Promise.resolve())
+            .resolves()
             .once();
           return adapter.pingback();
         });
@@ -279,7 +277,7 @@ describes.realWin(
               'https://acme.com/p?rid=READER_ID',
               /* useAuthData */ true
             )
-            .returns(Promise.resolve('https://acme.com/p?rid=reader1'))
+            .resolves('https://acme.com/p?rid=reader1')
             .once();
           xhrMock
             .expects('sendSignal')

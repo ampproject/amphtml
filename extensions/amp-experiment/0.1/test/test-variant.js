@@ -45,14 +45,9 @@ describes.sandboxed('allocateVariant', {}, (env) => {
     fakeHead = {};
 
     getCidStub = env.sandbox.stub();
-    env.sandbox
-      .stub(Services, 'cidForDoc')
-      .withArgs(ampdoc)
-      .returns(
-        Promise.resolve({
-          get: getCidStub,
-        })
-      );
+    env.sandbox.stub(Services, 'cidForDoc').withArgs(ampdoc).resolves({
+      get: getCidStub,
+    });
 
     uniformStub = env.sandbox.stub();
     env.sandbox.stub(Services, 'cryptoFor').withArgs(fakeWin).returns({
@@ -63,11 +58,9 @@ describes.sandboxed('allocateVariant', {}, (env) => {
     env.sandbox
       .stub(Services, 'userNotificationManagerForDoc')
       .withArgs(fakeHead)
-      .returns(
-        Promise.resolve({
-          getNotification: getNotificationStub,
-        })
-      );
+      .resolves({
+        getNotification: getNotificationStub,
+      });
 
     env.sandbox.stub(Services, 'viewerForDoc').withArgs(ampdoc).returns({});
 
@@ -262,8 +255,8 @@ describes.sandboxed('allocateVariant', {}, (env) => {
         scope: 'amp-experiment',
         createCookieIfNotPresent: true,
       })
-      .returns(Promise.resolve('123abc'));
-    uniformStub.withArgs('name:123abc').returns(Promise.resolve(0.4));
+      .resolves('123abc');
+    uniformStub.withArgs('name:123abc').resolves(0.4);
     return expect(
       allocateVariant(ampdoc, 'name', {
         variants: {
@@ -280,8 +273,8 @@ describes.sandboxed('allocateVariant', {}, (env) => {
         scope: 'custom-scope',
         createCookieIfNotPresent: true,
       })
-      .returns(Promise.resolve('123abc'));
-    uniformStub.withArgs('name:123abc').returns(Promise.resolve(0.4));
+      .resolves('123abc');
+    uniformStub.withArgs('name:123abc').resolves(0.4);
     return expect(
       allocateVariant(ampdoc, 'name', {
         cidScope: 'custom-scope',
@@ -299,8 +292,8 @@ describes.sandboxed('allocateVariant', {}, (env) => {
         scope: 'amp-experiment',
         createCookieIfNotPresent: true,
       })
-      .returns(Promise.resolve('123abc'));
-    uniformStub.withArgs('custom-group:123abc').returns(Promise.resolve(0.4));
+      .resolves('123abc');
+    uniformStub.withArgs('custom-group:123abc').resolves(0.4);
     return expect(
       allocateVariant(ampdoc, 'name', {
         group: 'custom-group',
@@ -313,21 +306,19 @@ describes.sandboxed('allocateVariant', {}, (env) => {
   });
 
   it('should have variant allocated if consent is given', () => {
-    getNotificationStub.withArgs('notif-1').returns(
-      Promise.resolve({
-        isDismissed: () => {
-          return Promise.resolve(true);
-        },
-      })
-    );
+    getNotificationStub.withArgs('notif-1').resolves({
+      isDismissed: () => {
+        return Promise.resolve(true);
+      },
+    });
 
     getCidStub
       .withArgs({
         scope: 'amp-experiment',
         createCookieIfNotPresent: true,
       })
-      .returns(Promise.resolve('123abc'));
-    uniformStub.withArgs('name:123abc').returns(Promise.resolve(0.4));
+      .resolves('123abc');
+    uniformStub.withArgs('name:123abc').resolves(0.4);
     return expect(
       allocateVariant(ampdoc, 'name', {
         consentNotificationId: 'notif-1',
@@ -340,7 +331,7 @@ describes.sandboxed('allocateVariant', {}, (env) => {
   });
 
   it('should have no variant allocated if notification not found', () => {
-    getNotificationStub.withArgs('notif-1').returns(Promise.resolve(null));
+    getNotificationStub.withArgs('notif-1').resolves(null);
 
     return expect(
       allocateVariant(ampdoc, 'name', {
@@ -354,16 +345,14 @@ describes.sandboxed('allocateVariant', {}, (env) => {
   });
 
   it('should have no variant allocated if consent is missing', () => {
-    getNotificationStub.withArgs('notif-1').returns(
-      Promise.resolve({
-        isDismissed: () => {
-          return Promise.resolve(false);
-        },
-      })
-    );
+    getNotificationStub.withArgs('notif-1').resolves({
+      isDismissed: () => {
+        return Promise.resolve(false);
+      },
+    });
 
-    getCidStub.returns(Promise.resolve('123abc'));
-    uniformStub.returns(Promise.resolve(0.4));
+    getCidStub.resolves('123abc');
+    uniformStub.resolves(0.4);
     return expect(
       allocateVariant(ampdoc, 'name', {
         consentNotificationId: 'notif-1',

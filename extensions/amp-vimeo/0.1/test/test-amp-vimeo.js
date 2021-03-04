@@ -31,7 +31,7 @@ describes.realWin(
       win = env.win;
       doc = win.document;
       videoUtilsMock = env.sandbox.stub(VideoUtils, 'isAutoplaySupported');
-      videoUtilsMock.returns(Promise.resolve(true));
+      videoUtilsMock.resolves(true);
     });
 
     async function getVimeo(

@@ -202,12 +202,10 @@ describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, (env) => {
       builderMock
         .expects('collectUrlVars')
         .withExactArgs('VAR1&VAR2', false)
-        .returns(
-          Promise.resolve({
-            'VAR1': 'A',
-            'VAR2': 'B',
-          })
-        )
+        .resolves({
+          'VAR1': 'A',
+          'VAR2': 'B',
+        })
         .once();
       const expectedConfigWithVars = {...expectedConfig};
       expectedConfigWithVars.config.iframeVars = {VAR1: 'A', VAR2: 'B'};
@@ -219,7 +217,7 @@ describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, (env) => {
       );
       const sendStub = env.sandbox
         .stub(localSubscriptionPlatform.messenger_, 'sendCommandRsvp')
-        .returns(Promise.resolve({}));
+        .resolves({});
       const promise = localSubscriptionPlatform.connect();
       localSubscriptionPlatform.handleCommand_('connect');
 
@@ -253,7 +251,7 @@ describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, (env) => {
         messengerMock
           .expects('sendCommandRsvp')
           .withExactArgs('start', expectedConfig)
-          .returns(Promise.resolve())
+          .resolves()
           .once();
         localSubscriptionPlatform.connect();
         localSubscriptionPlatform.handleCommand_('connect');
@@ -263,12 +261,10 @@ describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, (env) => {
         messengerMock
           .expects('sendCommandRsvp')
           .withExactArgs('authorize', {})
-          .returns(
-            Promise.resolve({
-              granted: true,
-              grantReason: 'SUBSCRIBER',
-            })
-          )
+          .resolves({
+            granted: true,
+            grantReason: 'SUBSCRIBER',
+          })
           .once();
 
         const result = await localSubscriptionPlatform.getEntitlements();
@@ -284,7 +280,7 @@ describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, (env) => {
         messengerMock
           .expects('sendCommandRsvp')
           .withExactArgs('start', expectedConfig)
-          .returns(Promise.resolve())
+          .resolves()
           .once();
         localSubscriptionPlatform.connect();
         localSubscriptionPlatform.handleCommand_('connect');
@@ -294,7 +290,7 @@ describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, (env) => {
         messengerMock
           .expects('sendCommandRsvp')
           .withExactArgs('pingback', {entitlement: {}})
-          .returns(Promise.resolve())
+          .resolves()
           .once();
 
         await localSubscriptionPlatform.pingback({});

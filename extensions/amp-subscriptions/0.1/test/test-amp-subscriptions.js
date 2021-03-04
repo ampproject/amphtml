@@ -889,7 +889,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
     it('should fetch entitlements on paid pages', async () => {
       const getEntitlementsStub = env.sandbox
         .stub(subscriptionService, 'getEntitlements_')
-        .returns(Promise.resolve(new Entitlement.empty('local')));
+        .resolves(new Entitlement.empty('local'));
       await subscriptionService.initialize_();
 
       await subscriptionService.fetchEntitlements_(platform);
@@ -1079,10 +1079,10 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
       subscriptionService.platformStore_ = new PlatformStore(products);
       const getGrantStatusStub = env.sandbox
         .stub(subscriptionService.platformStore_, 'getGrantStatus')
-        .returns(Promise.resolve());
+        .resolves();
       const getGrantEntitlementStub = env.sandbox
         .stub(subscriptionService.platformStore_, 'getGrantEntitlement')
-        .returns(Promise.resolve());
+        .resolves();
       const selectAndActivateStub = env.sandbox.stub(
         subscriptionService,
         'selectAndActivatePlatform_'

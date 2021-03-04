@@ -333,11 +333,9 @@ describes.realWin(
         },
       };
       lightboxMock = env.sandbox.mock(lightbox);
-      loadPromiseStub = env.sandbox.stub().returns(Promise.resolve());
+      loadPromiseStub = env.sandbox.stub().resolves();
 
-      env.sandbox
-        .stub(Services.timerFor(win), 'promise')
-        .returns(Promise.resolve());
+      env.sandbox.stub(Services.timerFor(win), 'promise').resolves();
       imageViewer = new ImageViewer(lightbox, win, loadPromiseStub);
       doc.body.appendChild(imageViewer.getElement());
     });

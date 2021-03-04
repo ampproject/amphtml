@@ -85,17 +85,15 @@ describes.fakeWin(
       it('uses a non default region', () => {
         const buildUrl = accessSourceMock
           .expects('buildUrl')
-          .returns(Promise.resolve(''))
+          .resolves('')
           .once();
         xhrMock
           .expects('fetchJson')
-          .returns(
-            Promise.resolve({
-              json() {
-                return Promise.resolve({access: true});
-              },
-            })
-          )
+          .resolves({
+            json() {
+              return Promise.resolve({access: true});
+            },
+          })
           .once();
         return vendor.authorize().then(() => {
           expect(
@@ -112,24 +110,22 @@ describes.fakeWin(
             'https://baseurl?param&article_title=test%20title',
             false
           )
-          .returns(Promise.resolve('https://builturl'))
+          .resolves('https://builturl')
           .once();
         accessSourceMock
           .expects('getLoginUrl')
-          .returns(Promise.resolve('https://builturl'))
+          .resolves('https://builturl')
           .once();
         xhrMock
           .expects('fetchJson')
           .withExactArgs('https://builturl', {
             credentials: 'include',
           })
-          .returns(
-            Promise.resolve({
-              json() {
-                return Promise.resolve({access: true});
-              },
-            })
-          )
+          .resolves({
+            json() {
+              return Promise.resolve({access: true});
+            },
+          })
           .once();
         return vendor.authorize().then((resp) => {
           expect(resp.access).to.be.true;
@@ -140,18 +136,18 @@ describes.fakeWin(
       it('authorization fails due to lack of server config', () => {
         accessSourceMock
           .expects('buildUrl')
-          .returns(Promise.resolve('https://builturl'))
+          .resolves('https://builturl')
           .once();
         accessSourceMock
           .expects('getLoginUrl')
-          .returns(Promise.resolve('https://builturl'))
+          .resolves('https://builturl')
           .once();
         xhrMock
           .expects('fetchJson')
           .withExactArgs('https://builturl', {
             credentials: 'include',
           })
-          .returns(Promise.resolve({status: 204}))
+          .resolves({status: 204})
           .once();
         return vendor.authorize().catch((err) => {
           expect(err.message).to.exist;
@@ -161,11 +157,11 @@ describes.fakeWin(
       it('authorization response from server fails', () => {
         accessSourceMock
           .expects('buildUrl')
-          .returns(Promise.resolve('https://builturl'))
+          .resolves('https://builturl')
           .once();
         accessSourceMock
           .expects('getLoginUrl')
-          .returns(Promise.resolve('https://builturl'))
+          .resolves('https://builturl')
           .once();
         xhrMock
           .expects('fetchJson')
@@ -183,7 +179,7 @@ describes.fakeWin(
             })
           )
           .once();
-        emptyContainerStub.returns(Promise.resolve());
+        emptyContainerStub.resolves();
         return vendor.authorize().then((err) => {
           expect(err.access).to.be.false;
         });
@@ -278,7 +274,7 @@ describes.fakeWin(
         container.querySelector('input').dispatchEvent(changeEv);
         accessSourceMock
           .expects('buildUrl')
-          .returns(Promise.resolve('https://builturl'))
+          .resolves('https://builturl')
           .once();
         accessSourceMock.expects('loginWithUrl').once();
         const clickEv = new Event('click');
@@ -289,10 +285,7 @@ describes.fakeWin(
       });
 
       it('sends request for already purchased', (done) => {
-        accessSourceMock
-          .expects('buildUrl')
-          .returns(Promise.resolve('https://apllink'))
-          .once();
+        accessSourceMock.expects('buildUrl').resolves('https://apllink').once();
         accessSourceMock.expects('loginWithUrl').once();
         const clickEv = new Event('click');
         container

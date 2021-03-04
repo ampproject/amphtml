@@ -219,7 +219,7 @@ describes.fakeWin('amp-ad-csa-impl', {}, (env) => {
       // Set up
       const requestResizeSpy = env.sandbox
         .stub(win.context, 'requestResize')
-        .returns(Promise.resolve());
+        .resolves();
       // Try to resize when ads are loaded
       resizeIframe(win, 'csacontainer');
 
@@ -247,7 +247,7 @@ describes.fakeWin('amp-ad-csa-impl', {}, (env) => {
       // Set up
       const requestResizeSpy = env.sandbox
         .stub(win.context, 'requestResize')
-        .returns(Promise.resolve());
+        .resolves();
       // Try to resize when ads are loaded
       resizeIframe(win, 'csacontainer');
 

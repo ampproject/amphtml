@@ -43,9 +43,7 @@ describe('waitForServices', () => {
       },
     };
     variantResolve = waitForService(getService, 'variant', variantService);
-    variantStub = window.sandbox
-      .stub(variantService, 'whenReady')
-      .returns(Promise.resolve());
+    variantStub = window.sandbox.stub(variantService, 'whenReady').resolves();
 
     return createIframePromise().then((iframe) => {
       win = iframe.win;

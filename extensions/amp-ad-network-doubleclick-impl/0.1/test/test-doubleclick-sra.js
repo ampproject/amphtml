@@ -503,24 +503,22 @@ describes.realWin('Doubleclick SRA', config, (env) => {
       } else if (opt_allInvalid) {
         xhrWithArgs.throws(new Error('invalid should not make xhr!'));
       } else {
-        xhrWithArgs.returns(
-          Promise.resolve({
-            arrayBuffer: () => {
-              throw new Error('Expected SRA!');
-            },
-            bodyUsed: false,
-            text: () => {
-              let slotDataString = '';
-              responses.forEach((slot) => {
-                slotDataString += `${JSON.stringify(slot.headers)}\n${
-                  slot.creative
-                }\n`;
-              });
-              return Promise.resolve(slotDataString);
-            },
-            headers,
-          })
-        );
+        xhrWithArgs.resolves({
+          arrayBuffer: () => {
+            throw new Error('Expected SRA!');
+          },
+          bodyUsed: false,
+          text: () => {
+            let slotDataString = '';
+            responses.forEach((slot) => {
+              slotDataString += `${JSON.stringify(slot.headers)}\n${
+                slot.creative
+              }\n`;
+            });
+            return Promise.resolve(slotDataString);
+          },
+          headers,
+        });
       }
     }
 
@@ -541,19 +539,17 @@ describes.realWin('Doubleclick SRA', config, (env) => {
           method: 'GET',
           credentials: 'include',
         })
-        .returns(
-          Promise.resolve({
-            arrayBuffer: () => Promise.resolve(utf8Encode(creative)),
-            bodyUsed: false,
-            headers: {
-              get: (header) => headers[header],
-              has: (header) => header in headers,
-            },
-            text: () => {
-              throw new Error('should not be SRA!');
-            },
-          })
-        );
+        .resolves({
+          arrayBuffer: () => Promise.resolve(utf8Encode(creative)),
+          bodyUsed: false,
+          headers: {
+            get: (header) => headers[header],
+            has: (header) => header in headers,
+          },
+          text: () => {
+            throw new Error('should not be SRA!');
+          },
+        });
     }
 
     /**
@@ -631,7 +627,7 @@ describes.realWin('Doubleclick SRA', config, (env) => {
       });
       env.sandbox
         .stub(AmpAdNetworkDoubleclickImpl.prototype, 'groupSlotsForSra')
-        .returns(Promise.resolve(groupingPromises));
+        .resolves(groupingPromises);
       let idx = 0;
       const layoutCallbacks = [];
       const getLayoutCallback = (impl, creative, isSra, noRender) => {

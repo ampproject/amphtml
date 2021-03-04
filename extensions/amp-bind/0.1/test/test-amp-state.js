@@ -64,9 +64,7 @@ describes.realWin(
 
       // TODO(choumx): Remove stubbing of private function fetch_() once
       // batchFetchJsonFor() is easily stub-able.
-      env.sandbox
-        .stub(ampState, 'fetch_')
-        .returns(Promise.resolve({remote: 'data'}));
+      env.sandbox.stub(ampState, 'fetch_').resolves({remote: 'data'});
 
       bind = {setState: env.sandbox.stub()};
       env.sandbox.stub(Services, 'bindForDocOrNull').resolves(bind);

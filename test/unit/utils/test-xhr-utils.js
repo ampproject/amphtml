@@ -96,7 +96,7 @@ describes.sandboxed('utils/xhr-utils', {}, (env) => {
         getRootNode() {
           return {documentElement: doc};
         },
-        whenFirstVisible: env.sandbox.stub().returns(Promise.resolve()),
+        whenFirstVisible: env.sandbox.stub().resolves(),
       };
       doc = document.createElement('html');
       doc.setAttribute('allow-xhr-interception', 'true');
@@ -105,9 +105,7 @@ describes.sandboxed('utils/xhr-utils', {}, (env) => {
       viewer = {
         hasCapability: (unusedParam) => true,
         isTrustedViewer: () => Promise.resolve(true),
-        sendMessageAwaitResponse: env.sandbox
-          .stub()
-          .returns(Promise.resolve({})),
+        sendMessageAwaitResponse: env.sandbox.stub().resolves({}),
       };
       viewerForDoc = env.sandbox.stub(Services, 'viewerForDoc').returns(viewer);
       win = {
