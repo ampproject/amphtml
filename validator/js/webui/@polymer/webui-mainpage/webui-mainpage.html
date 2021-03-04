@@ -114,7 +114,7 @@
             isValidatorReady = true;
             // In most times, the initilization of AMP validator is slower than
             // the code that fills the minimal valid AMP doc as the default
-            // value in the input box. The `refreshEditorAndErrors` function
+            // value in the input box. The `refreshEditorAndErrors` call
             // triggered by input box default value returns early because
             // `isValidatorReady` is `false` at that time. We need to call
             // `refreshEditorAndErrors` again here to ensure that the validator
