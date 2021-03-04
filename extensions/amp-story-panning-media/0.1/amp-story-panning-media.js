@@ -84,8 +84,11 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     this.animateTo_ = {
       x: parseFloat(this.element_.getAttribute('x')) || 0,
       y: parseFloat(this.element_.getAttribute('y')) || 0,
-      zoom: parseFloat(this.element_.getAttribute('zoom')) || 1,
+      zoom: this.element_.hasAttribute('zoom')
+        ? parseFloat(this.element_.getAttribute('zoom'))
+        : 1,
     };
+
     return Services.storyStoreServiceForOrNull(this.win).then(
       (storeService) => {
         this.storeService_ = storeService;
@@ -227,9 +230,18 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     const {x, y, zoom} = this.animationState_;
     return this.mutateElement(() => {
       setImportantStyles(this.ampImgEl_, {
-        transform: `translate3d(${x}%, ${y}%, ${(zoom - 1) / zoom}px)`,
+        transform: `translate3d(${x}%, ${y}%, ${this.getZoom_(zoom)}px)`,
       });
     });
+  }
+
+  /**
+   * @private
+   * @return {number}
+   */
+  getZoom_(zoom) {
+    const calculatedZoom = (zoom - 1) / zoom;
+    return isFinite(calculatedZoom) ? calculatedZoom : Number.MIN_SAFE_INTEGER;
   }
 
   /**
