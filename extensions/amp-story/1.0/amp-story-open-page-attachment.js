@@ -17,16 +17,16 @@
 /**
  * @fileoverview Helper for amp-story rendering of page-attachment UI.
  */
-import {htmlFor} from '../../../src/static-template';
-import {getLocalizationService} from './amp-story-localization-service';
 import {LocalizedStringId} from '../../../src/localized-strings';
+import {getLocalizationService} from './amp-story-localization-service';
+import {htmlFor} from '../../../src/static-template';
 
 /**
  * @param {!Element} element
  * @return {!Element}
  */
 export const buildOpenAttachmentElement = (element) =>
-htmlFor(element)`
+  htmlFor(element)`
     <a class="
         i-amphtml-story-page-open-attachment i-amphtml-story-system-reset"
         role="button">
@@ -39,24 +39,29 @@ htmlFor(element)`
 
 /**
  * Renders the open attachment UI affordance.
+ * @param {!Element} el
+ * @param {!Element} attachmentEl
+ * @return {!Element}
  */
-export function renderPageAttachmentUI(el, attachmentEl, openAttachmentEl) {
-    // If the attachment is a link, copy href to the element so it can be previewed on hover and long press.
-    const attachmentHref = attachmentEl.getAttribute('href');
-    if (attachmentHref) {
-        openAttachmentEl.setAttribute('href', attachmentHref);
-    }
+export const renderPageAttachmentUI = (el, attachmentEl) => {
+  const openAttachmentEl = buildOpenAttachmentElement(el);
+  // If the attachment is a link, copy href to the element so it can be previewed on hover and long press.
+  const attachmentHref = attachmentEl.getAttribute('href');
+  if (attachmentHref) {
+    openAttachmentEl.setAttribute('href', attachmentHref);
+  }
 
-    const textEl = openAttachmentEl.querySelector(
+  const textEl = openAttachmentEl.querySelector(
     '.i-amphtml-story-page-open-attachment-label'
-    );
+  );
 
-    const openLabelAttr = attachmentEl.getAttribute('data-cta-text');
-    const openLabel =
+  const openLabelAttr = attachmentEl.getAttribute('data-cta-text');
+  const openLabel =
     (openLabelAttr && openLabelAttr.trim()) ||
     getLocalizationService(el).getLocalizedString(
-        LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
+      LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
     );
 
-    textEl.textContent = openLabel;
-    }
+  textEl.textContent = openLabel;
+  return openAttachmentEl;
+};

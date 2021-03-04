@@ -75,11 +75,11 @@ import {isExperimentOn} from '../../../src/experiments';
 import {isPrerenderActivePage} from './prerender-active-page';
 import {listen} from '../../../src/event-helper';
 import {px, toggle} from '../../../src/style';
+import {renderPageAttachmentUI} from './amp-story-open-page-attachment';
 import {renderPageDescription} from './semantic-render';
 import {setTextBackgroundColor} from './utils';
 import {toArray} from '../../../src/types';
 import {upgradeBackgroundAudio} from './audio';
-import {renderPageAttachmentUI, buildOpenAttachmentElement} from './amp-story-open-page-attachment';
 
 /**
  * CSS class for an amp-story-page that indicates the entire page is loaded.
@@ -1745,13 +1745,13 @@ export class AmpStoryPage extends AMP.BaseElement {
     }
 
     if (!this.openAttachmentEl_) {
-      this.openAttachmentEl_ = buildOpenAttachmentElement(this.element);
+      this.openAttachmentEl_ = renderPageAttachmentUI(
+        this.element,
+        attachmentEl
+      );
       this.openAttachmentEl_.addEventListener('click', () =>
         this.openAttachment()
       );
-
-      renderPageAttachmentUI(this.element, attachmentEl, this.openAttachmentEl_);
-
       this.mutateElement(() => {
         this.element.appendChild(this.openAttachmentEl_);
       });
