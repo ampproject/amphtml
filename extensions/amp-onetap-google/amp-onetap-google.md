@@ -37,7 +37,7 @@ You can use the `amp-onetap-google` component to embed a Google One Tap on the p
 ></amp-onetap-google>
 ```
 
-After a successful sign-in [`amp-access`](https://go.amp.dev/c/amp-access) and/or [`amp-subscriptions`](https://go.amp.dev/c/amp-subscriptions) are refreshed on the page.
+After a successful sign-in, [`amp-access`](https://go.amp.dev/c/amp-access) and/or [`amp-subscriptions`](https://go.amp.dev/c/amp-subscriptions) are refreshed on the page.
 
 ## Attributes
 
