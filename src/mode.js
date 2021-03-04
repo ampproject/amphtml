@@ -63,10 +63,9 @@ function getMode_(win) {
   // TODO(erwinmombay): simplify the logic here
   const AMP_CONFIG = self.AMP_CONFIG || {};
 
-  // Magic constants that are replaced by closure compiler.
-  // IS_MINIFIED is always replaced with true when closure compiler is used
-  // while IS_DEV is only replaced when `gulp dist` is called without the
-  // --fortesting flag.
+  // Magic constants that are replaced by babel.
+  // IS_MINIFIED is always replaced with true when babel is used while IS_DEV is
+  // only replaced when `gulp dist` is called without the --fortesting flag.
   const IS_DEV = true;
   const IS_MINIFIED = false;
 
