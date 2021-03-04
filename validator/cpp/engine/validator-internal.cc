@@ -701,8 +701,8 @@ class ParsedDocCssSpec {
   const CssDeclaration* CssDeclarationByName(string_view candidate) const {
     std::string decl_key = AsciiStrToLower(candidate);
     if (spec_.expand_vendor_prefixes())
-      decl_key = std::string(
-          htmlparser::css::StripVendorPrefix(decl_key).data());
+      decl_key =
+          std::string(htmlparser::css::StripVendorPrefix(decl_key).data());
     auto iter = css_declaration_by_name_.find(decl_key);
     if (iter != css_declaration_by_name_.end()) return iter->second;
     return nullptr;
@@ -713,8 +713,8 @@ class ParsedDocCssSpec {
   const CssDeclaration* CssDeclarationSvgByName(string_view candidate) const {
     std::string decl_key = AsciiStrToLower(candidate);
     if (spec_.expand_vendor_prefixes())
-      decl_key = std::string(
-          htmlparser::css::StripVendorPrefix(decl_key).data());
+      decl_key =
+          std::string(htmlparser::css::StripVendorPrefix(decl_key).data());
     auto iter = css_declaration_svg_by_name_.find(decl_key);
     if (iter != css_declaration_svg_by_name_.end()) return iter->second;
     return nullptr;
@@ -1042,7 +1042,7 @@ class ParsedTagSpec {
            parsed_attr_spec->spec().alternative_names())
         attr_ids_by_name_.emplace(std::make_pair(name, parsed_attr_spec->id()));
       if (parsed_attr_spec->spec().dispatch_key() != AttrSpec::NONE_DISPATCH)
-        dispatch_key_attr_spec_ = parsed_attr_spec;
+        dispatch_key_attr_specs_.push_back(parsed_attr_spec);
       if (parsed_attr_spec->spec().implicit())
         implicit_attrspecs_.insert(parsed_attr_spec->id());
       if (parsed_attr_spec->spec().name() == "type" &&
@@ -1119,24 +1119,26 @@ class ParsedTagSpec {
   // TagSpec with the first instance of that dispatch key is used. When an
   // encountered tag matches this dispatch key, it is validated first against
   // that first TagSpec in order to improve validation performance and error
-  // message selection. Not all TagSpecs have a dispatch key.
-  bool HasDispatchKey() const { return dispatch_key_attr_spec_ != nullptr; }
-  // You must check HasDispatchKey() before accessing.
-  // Generates a unique dispatch key for the TagSpec. If the attribute
+  // message selection. Not all TagSpecs have a dispatch key. GetDispatchKeys
+  // returns unique dispatch keys for the TagSpec, if any. If the attribute
   // value is used (either value or value_casei), uses the first value from the
   // protoascii.
-  std::string GetDispatchKey() const {
-    // This CHECK is only used in initialization.
-    CHECK(HasDispatchKey());
-    const ParsedAttrSpec& parsed_attr_spec = *dispatch_key_attr_spec_;
-    return DispatchKey(parsed_attr_spec.spec().dispatch_key(),
-                       parsed_attr_spec.spec().name(),
-                       parsed_attr_spec.spec().value_size() > 0
-                           ? AsciiStrToLower(parsed_attr_spec.spec().value(0))
-                           : (parsed_attr_spec.spec().value_casei_size() > 0
-                                  ? parsed_attr_spec.spec().value_casei(0)
-                                  : ""),
-                       spec_->mandatory_parent());
+  std::vector<std::string> GetDispatchKeys() const {
+    std::vector<std::string> out;
+    out.reserve(dispatch_key_attr_specs_.size());
+    for (const auto* dispatch_key_attr_spec : dispatch_key_attr_specs_) {
+      const ParsedAttrSpec& parsed_attr_spec = *dispatch_key_attr_spec;
+      out.push_back(
+          DispatchKey(parsed_attr_spec.spec().dispatch_key(),
+                      parsed_attr_spec.spec().name(),
+                      parsed_attr_spec.spec().value_size() > 0
+                          ? AsciiStrToLower(parsed_attr_spec.spec().value(0))
+                          : (parsed_attr_spec.spec().value_casei_size() > 0
+                                 ? parsed_attr_spec.spec().value_casei(0)
+                                 : ""),
+                      spec_->mandatory_parent()));
+    }
+    return out;
   }
 
   const vector<int32_t>& AlsoRequiresTagWarnings() const {
@@ -1209,7 +1211,7 @@ class ParsedTagSpec {
   vector<std::string> requires_extension_;
   vector<int32_t> also_requires_tag_warnings_;
   set<int32_t> implicit_attrspecs_;
-  const ParsedAttrSpec* dispatch_key_attr_spec_ = nullptr;
+  vector<const ParsedAttrSpec*> dispatch_key_attr_specs_;
   ParsedTagSpec(const ParsedTagSpec&) = delete;
   ParsedTagSpec& operator=(const ParsedTagSpec&) = delete;
 };  // class ParsedTagSpec
@@ -3060,8 +3062,8 @@ void CdataMatcher::MatchCss(string_view cdata, const CssSpec& css_spec,
                             ValidationResult* result) const {
   vector<unique_ptr<htmlparser::css::ErrorToken>> css_errors;
   vector<unique_ptr<htmlparser::css::ErrorToken>> css_warnings;
-  vector<char32_t> codepoints = htmlparser::Strings::Utf8ToCodepoints(
-      cdata.data());
+  vector<char32_t> codepoints =
+      htmlparser::Strings::Utf8ToCodepoints(cdata.data());
   vector<unique_ptr<htmlparser::css::Token>> tokens = htmlparser::css::Tokenize(
       &codepoints, line_col_.line(), line_col_.col(), &css_errors);
   unique_ptr<htmlparser::css::Stylesheet> stylesheet =
@@ -4662,9 +4664,11 @@ ParsedValidatorRules::ParsedValidatorRules(HtmlFormat::Code html_format)
     if (!parsed_tag_spec.is_reference_point()) {
       auto& tagspec_dispatch =
           tagspecs_by_tagname_[parsed_tag_spec.spec().tag_name()];
-      if (parsed_tag_spec.HasDispatchKey()) {
-        tagspec_dispatch.RegisterDispatchKey(parsed_tag_spec.GetDispatchKey(),
-                                             ii);
+      std::vector<std::string> dispatch_keys =
+          parsed_tag_spec.GetDispatchKeys();
+      if (!dispatch_keys.empty()) {
+        for (const std::string& dispatch_key : dispatch_keys)
+          tagspec_dispatch.RegisterDispatchKey(dispatch_key, ii);
       } else if (tag.has_extension_spec()) {
         tagspec_dispatch.RegisterDispatchKey(
             DispatchKey(AttrSpec::NAME_VALUE_DISPATCH,
