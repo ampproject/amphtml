@@ -49,10 +49,11 @@ const isSpecialCannotBeRemoved = (id) =>
 
 /**
  * @param {string} cmd
+ * @param {string=} cwdForTesting
  * @return {?string}
  */
-function getStdoutThrowOnError(cmd) {
-  const {stdout, stderr} = getOutput(cmd);
+function getStdoutThrowOnError(cmd, cwdForTesting = '.') {
+  const {stdout, stderr} = getOutput(cmd, {cwd: cwdForTesting});
   if (!stdout && stderr) {
     throw new Error(`${cmd}\n\n${stderr}`);
   }
@@ -61,10 +62,11 @@ function getStdoutThrowOnError(cmd) {
 
 /**
  * @param {string} cmd
+ * @param {string=} cwdForTesting
  * @return {Array<string>}
  */
-function getStdoutLines(cmd) {
-  const stdout = getStdoutThrowOnError(cmd);
+function getStdoutLines(cmd, cwdForTesting = '.') {
+  const stdout = getStdoutThrowOnError(cmd, cwdForTesting);
   return !stdout ? [] : stdout.split('\n');
 }
 
@@ -77,11 +79,15 @@ const cmdEscape = (str) => str.replace(/["`]/g, (c) => `\\${c}`);
 /**
  * @param {!Array<string>} glob
  * @param {string} string
+ * @param {string=} cwdForTesting
  * @return {!Array<string>}
  */
-const filesContainingPattern = (glob, string) =>
+const filesContainingPattern = (glob, string, cwdForTesting = '.') =>
   getStdoutLines(
-    `grep -El "${cmdEscape(string)}" {${fastGlob.sync(glob).join(',')}}`
+    `grep -El "${cmdEscape(string)}" {${fastGlob
+      .sync(glob, {cwd: cwdForTesting})
+      .join(',')}}`,
+    cwdForTesting
   );
 
 /**
@@ -96,16 +102,21 @@ const getModifiedSourceFiles = (fromHash) =>
 /**
  * @param {string} id
  * @param {string} experimentsRemovedJson
+ * @param {string=} experimentsConfigPathForTesting
  * @return {Array<string>} modified files
  */
-function removeFromExperimentsConfig(id, experimentsRemovedJson) {
+function removeFromExperimentsConfig(
+  id,
+  experimentsRemovedJson,
+  experimentsConfigPathForTesting = experimentsConfigPath
+) {
   jscodeshift([
     `--transform ${__dirname}/jscodeshift/remove-experiment-config.js`,
     `--experimentId=${id}`,
     `--experimentsRemovedJson=${experimentsRemovedJson}`,
-    experimentsConfigPath,
+    experimentsConfigPathForTesting,
   ]);
-  return [experimentsConfigPath];
+  return [experimentsConfigPathForTesting];
 }
 
 /**
@@ -131,11 +142,16 @@ function removeFromJsonConfig(config, path, id) {
 /**
  * @param {string} id
  * @param {number} percentage
+ * @param {Array<string>=} dirsForTesting
  * @return {Array<string>} modified files
  */
-function removeFromRuntimeSource(id, percentage) {
+function removeFromRuntimeSource(
+  id,
+  percentage,
+  dirsForTesting = containRuntimeSource
+) {
   const possiblyModifiedSourceFiles = filesContainingPattern(
-    containRuntimeSource.map((dir) => `${dir}/**/*.js`),
+    dirsForTesting.map((dir) => `${dir}/**/*.js`),
     id
   );
   if (possiblyModifiedSourceFiles.length > 0) {
@@ -153,9 +169,15 @@ function removeFromRuntimeSource(id, percentage) {
  * @param {string} id
  * @param {*} workItem
  * @param {!Array<string>} modified
+ * @param {string=} cwdForTesting
  * @return {Array<string>}
  */
-function gitCommitSingleExperiment(id, workItem, modified) {
+function gitCommitSingleExperiment(
+  id,
+  workItem,
+  modified,
+  cwdForTesting = '.'
+) {
   const messageParagraphs = [readableRemovalId(id, workItem)];
   if (workItem.previousHistory.length > 0) {
     messageParagraphs.push(
@@ -170,7 +192,8 @@ function gitCommitSingleExperiment(id, workItem, modified) {
   }
   return getStdoutLines(
     `git add ${modified.join(' ')} && ` +
-      `git commit -m "${cmdEscape(messageParagraphs.join('\n\n'))}"`
+      `git commit -m "${cmdEscape(messageParagraphs.join('\n\n'))}"`,
+    cwdForTesting
   );
 }
 
@@ -212,15 +235,17 @@ const truncateYyyyMmDd = (formattedDate) =>
  * @param {string} configJsonPath
  * @param {string} experiment
  * @param {number} percentage
+ * @param {string=} cwdForTesting
  * @return {Array<{hash: string, authorDate: string, subject: string}>}
  */
 const findConfigBitCommits = (
   cutoffDateFormatted,
   configJsonPath,
   experiment,
-  percentage
-) =>
-  getStdoutLines(
+  percentage,
+  cwdForTesting = '.'
+) => {
+  throw new Error(
     [
       'git log',
       `--until=${cutoffDateFormatted}`,
@@ -233,6 +258,21 @@ const findConfigBitCommits = (
       ' --format="%h %aI %s"',
       configJsonPath,
     ].join(' ')
+  );
+  return getStdoutLines(
+    [
+      'git log',
+      `--until=${cutoffDateFormatted}`,
+      // Look for entries that contain exact percentage string, like:
+      // "my-launched-experiment": 1
+      `-S '"${experiment}": ${percentage},'`,
+      // %h: hash
+      // %aI: authorDate
+      // %s: subject
+      ' --format="%h %aI %s"',
+      configJsonPath,
+    ].join(' '),
+    cwdForTesting
   ).map((line) => {
     const tokens = line.split(' ');
     // PR numbers in subject lines create spammy references when committed,
@@ -246,6 +286,7 @@ const findConfigBitCommits = (
       subject: tokens.join(' '),
     };
   });
+};
 
 const issueUrlToNumberRe = new RegExp(
   [
@@ -348,6 +389,7 @@ function summaryCommitMessage({
  * @param {!Object<string, *>} canaryConfig
  * @param {string} cutoffDateFormatted
  * @param {string=} removeExperiment
+ * @param {string=} cwdForTesting
  * @return {!{
  *   include: Object<string, {percentage: number, previousHistory: Array}>,
  *   exclude: Object<string, {percentage: number, previousHistory: Array}>
@@ -357,8 +399,10 @@ function collectWork(
   prodConfig,
   canaryConfig,
   cutoffDateFormatted,
-  removeExperiment
+  removeExperiment,
+  cwdForTesting = '.'
 ) {
+  const localProdConfigPath = `${cwdForTesting}/${prodConfigPath}`;
   if (removeExperiment) {
     // 0 if not on prodConfig
     const percentage = prodConfig[removeExperiment]
@@ -366,9 +410,10 @@ function collectWork(
       : 0;
     const previousHistory = findConfigBitCommits(
       cutoffDateFormatted,
-      prodConfigPath,
+      localProdConfigPath,
       removeExperiment,
-      percentage
+      percentage,
+      cwdForTesting
     );
     const entries = {[removeExperiment]: {percentage, previousHistory}};
     return isSpecialCannotBeRemoved(removeExperiment)
@@ -387,10 +432,12 @@ function collectWork(
     ) {
       const previousHistory = findConfigBitCommits(
         cutoffDateFormatted,
-        prodConfigPath,
+        localProdConfigPath,
         experiment,
-        percentage
+        percentage,
+        cwdForTesting
       );
+      throw new Error(JSON.stringify(previousHistory));
       if (previousHistory.length > 0) {
         const entries = isSpecialCannotBeRemoved(experiment)
           ? exclude
@@ -402,26 +449,35 @@ function collectWork(
   return {include, exclude};
 }
 
-/**
- * Entry point to gulp sweep-experiments.
- * See README.md for usage.
- */
-async function sweepExperiments() {
-  const headHash = getStdoutThrowOnError('git log -1 --format=%h');
+async function sweepExperimentsForTesting(
+  argvForTesting = argv,
+  cwdForTesting = '.'
+) {
+  const headHash = getStdoutThrowOnError(
+    'git log -1 --format=%h',
+    cwdForTesting
+  );
 
-  const prodConfig = readJsonSync(prodConfigPath);
-  const canaryConfig = readJsonSync(canaryConfigPath);
+  const prodConfig = readJsonSync(`${cwdForTesting}/${prodConfigPath}`);
+  const canaryConfig = readJsonSync(`${cwdForTesting}/${canaryConfigPath}`);
 
   const cutoffDateFormatted = dateDaysAgo(
-    argv.experiment ? 0 : argv.days_ago || 365
+    argv.experiment
+      ? 0
+      : argvForTesting.days_ago == null
+      ? 365
+      : argvForTesting.days_ago
   ).toISOString();
 
   const {exclude, include} = collectWork(
     prodConfig,
     canaryConfig,
     cutoffDateFormatted,
-    argv.experiment
+    argv.experiment,
+    cwdForTesting
   );
+
+  throw new Error(JSON.stringify({include}));
 
   if (exclude && Object.keys(exclude).length > 0) {
     log(yellow('The following experiments are excluded as they are special:'));
@@ -458,14 +514,23 @@ async function sweepExperiments() {
       ...removeFromExperimentsConfig(id, removedFromExperimentsConfigJson),
       ...removeFromJsonConfig(prodConfig, prodConfigPath, id),
       ...removeFromJsonConfig(canaryConfig, canaryConfigPath, id),
-      ...removeFromRuntimeSource(id, workItem.percentage),
+      ...removeFromRuntimeSource(
+        id,
+        workItem.percentage,
+        containRuntimeSource.map((dir) => `${cwdForTesting}/${dir}`)
+      ),
     ];
 
-    getStdoutThrowOnError(
-      `./node_modules/prettier/bin-prettier.js --write ${modified.join(' ')}`
-    );
+    getStdoutThrowOnError(`npx prettier.js --write ${modified.join(' ')}`, {
+      cwd: cwdForTesting,
+    });
 
-    for (const line of gitCommitSingleExperiment(id, workItem, modified)) {
+    for (const line of gitCommitSingleExperiment(
+      id,
+      workItem,
+      modified,
+      cwdForTesting
+    )) {
       log(line);
     }
 
@@ -486,7 +551,8 @@ async function sweepExperiments() {
 
     const htmlFilesWithReferences = filesContainingPattern(
       containExampleHtml.map((dir) => `${dir}/**/*.html`),
-      `['"](${Object.keys(include).join('|')})['"]`
+      `['"](${Object.keys(include).join('|')})['"]`,
+      cwdForTesting
     );
 
     log(
@@ -499,21 +565,40 @@ async function sweepExperiments() {
             htmlFilesWithReferences,
             cutoffDateFormatted: truncateYyyyMmDd(cutoffDateFormatted),
           })
-        )}"`
+        )}"`,
+        {cwd: cwdForTesting}
       ),
       '\n\n',
-      getStdoutThrowOnError('git log -1 --format=%b'),
+      getStdoutThrowOnError('git log -1 --format=%b', {cwd: cwdForTesting}),
       `\n\n`
     );
 
-    const reportHash = getStdoutThrowOnError('git log -1 --format=%h');
+    const reportHash = getStdoutThrowOnError('git log -1 --format=%h', {
+      cwd: cwdForTesting,
+    });
     log(cyan('You may recover the above report at any point:'));
     log(`git log ${reportHash}`);
   }
 }
 
+/**
+ * Entry point to gulp sweep-experiments.
+ * See README.md for usage.
+ * @return {!Promise}
+ */
+function sweepExperiments() {
+  return sweepExperimentsForTesting(argv.days_ago);
+}
+
 module.exports = {
   sweepExperiments,
+  sweepExperimentsForTesting,
+  removeFromExperimentsConfig,
+  removeFromJsonConfig,
+  removeFromRuntimeSource,
+  gitCommitSingleExperiment,
+  findConfigBitCommits,
+  collectWork,
 };
 
 sweepExperiments.description =
