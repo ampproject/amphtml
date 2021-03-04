@@ -21,10 +21,17 @@ const path = require('path');
 const postcss = require('postcss');
 const prettier = require('prettier');
 const textTable = require('text-table');
+const {
+  jscodeshiftAsync,
+  getJscodeshiftReport,
+} = require('../../test-configs/jscodeshift');
+const {getStdout} = require('../../common/process');
+const {gray, magenta} = require('kleur/colors');
+const {logOnSameLineLocalDev, logLocalDev} = require('../../common/logging');
 const {writeDiffOrFail} = require('../../common/diff');
 
 const tableHeaders = [
-  ['selector', 'z-index', 'file'],
+  ['context', 'z-index', 'file'],
   ['---', '---', '---'],
 ];
 
@@ -33,7 +40,16 @@ const tableOptions = {
   hsep: '   |   ',
 };
 
-const preamble = '**Run `gulp get-zindex --fix` to generate this file.**';
+const preamble = `
+**Run \`gulp get-zindex --fix\` to generate this file.**
+
+<!-- markdown-link-check-disable -->
+`.trim();
+
+const logChecking = (filename) =>
+  logOnSameLineLocalDev(gray(path.basename(filename)));
+
+const sortedByEntryKey = (a, b) => a[0].localeCompare(b[0]);
 
 /**
  * @param {!Object<string, !Array<number>} acc accumulator object for selectors
@@ -63,18 +79,18 @@ function zIndexCollector(acc, css) {
  */
 function createTable(filesData) {
   const rows = [];
-  Object.keys(filesData)
-    .sort()
-    .forEach((fileName) => {
-      const selectors = filesData[fileName];
-      Object.keys(selectors)
-        .sort()
-        .forEach((selectorName) => {
-          const zIndex = selectors[selectorName];
-          const row = [selectorName, zIndex, fileName];
-          rows.push(row);
-        });
-    });
+  for (const filename of Object.keys(filesData).sort()) {
+    // JS entries are Arrays of Arrays since they can have duplicate contexts
+    // like [['context', 9999]]
+    // CSS entries are Obejcts since they should not have duplicate selectors
+    // like {'.selector': 9999}
+    const entry = Array.isArray(filesData[filename])
+      ? filesData[filename]
+      : Object.entries(filesData[filename]).sort(sortedByEntryKey);
+    for (const [context, zIndex] of entry) {
+      rows.push([`\`${context}\``, zIndex, `[${filename}](/${filename})`]);
+    }
+  }
   rows.sort((a, b) => {
     const aZIndex = parseInt(a[1], 10);
     const bZIndex = parseInt(b[1], 10);
@@ -98,7 +114,7 @@ function createTable(filesData) {
 /**
  * Extract z-index selectors from all files matching the given glob starting at
  * the given working directory
- * @param {string} glob
+ * @param {string|Array<string>} glob
  * @param {string=} cwd
  * @return {Object}
  */
@@ -109,17 +125,93 @@ async function getZindexSelectors(glob, cwd = '.') {
     const contents = await fs.promises.readFile(path.join(cwd, file), 'utf-8');
     const selectors = Object.create(null);
     const plugins = [zIndexCollector.bind(null, selectors)];
+    logChecking(file);
     await postcss(plugins).process(contents, {from: file});
-    filesData[file] = selectors;
+    if (Object.keys(selectors).length) {
+      filesData[file] = selectors;
+    }
   }
   return filesData;
+}
+
+/**
+ * @param {string|Array<string>} glob
+ * @param {string=} cwd
+ * @return {!Promise<Object>}
+ */
+function getZindexChainsInJs(glob, cwd = '.') {
+  return new Promise((resolve) => {
+    const files = globby.sync(glob, {cwd}).map((file) => path.join(cwd, file));
+
+    const filesIncludingString = getStdout(
+      ['grep -irl "z-*index"', ...files].join(' ')
+    )
+      .trim()
+      .split('\n');
+
+    const result = {};
+
+    const {stdout, stderr} = jscodeshiftAsync([
+      '--dry',
+      '--no-babel',
+      `--transform=${__dirname}/jscodeshift/collect-zindex.js`,
+      ...filesIncludingString,
+    ]);
+
+    stderr.on('data', (data) => {
+      throw new Error(data.toString());
+    });
+
+    stdout.on('data', (data) => {
+      const reportLine = getJscodeshiftReport(data.toString());
+
+      if (!reportLine) {
+        return;
+      }
+
+      const [filename, report] = reportLine;
+      const relative = path.relative(cwd, filename);
+
+      logChecking(filename);
+
+      try {
+        const reportParsed = JSON.parse(report);
+
+        if (reportParsed.length) {
+          result[relative] = reportParsed.sort(sortedByEntryKey);
+        }
+      } catch (_) {}
+    });
+
+    stdout.on('close', () => {
+      resolve(result);
+    });
+  });
 }
 
 /**
  * Entry point for gulp get-zindex
  */
 async function getZindex() {
-  const filesData = await getZindexSelectors('{css,src,extensions}/**/*.css');
+  logLocalDev('...');
+
+  const filesData = Object.assign(
+    {},
+    ...(await Promise.all([
+      getZindexSelectors('{css,src,extensions}/**/*.css'),
+      getZindexChainsInJs([
+        '{3p,src,extensions}/**/*.js',
+        '!extensions/**/test/**/*.js',
+        '!extensions/**/storybook/**/*.js',
+      ]),
+    ]))
+  );
+
+  logOnSameLineLocalDev(
+    'Generating z-index table from',
+    magenta(`${Object.keys(filesData).length} files`)
+  );
+
   const filename = 'css/Z_INDEX.md';
   const rows = [...tableHeaders, ...createTable(filesData)];
   const table = textTable(rows, tableOptions);
@@ -154,6 +246,7 @@ module.exports = {
   createTable,
   getZindex,
   getZindexSelectors,
+  getZindexChainsInJs,
 };
 
 getZindex.description =
