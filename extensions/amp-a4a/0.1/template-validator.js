@@ -65,19 +65,15 @@ export class TemplateValidator extends Validator {
       .fetch(parsedResponseBody.templateUrl)
       .then((template) => {
         const creativeMetadata = getAmpAdMetadata(template);
+        const customElementExtensions =
+          creativeMetadata['customElementExtensions'];
         if (parsedResponseBody.analytics) {
-          pushIfNotExist(
-            creativeMetadata['customElementExtensions'],
-            'amp-analytics'
-          );
+          pushIfNotExist(customElementExtensions, 'amp-analytics');
         }
-        pushIfNotExist(
-          creativeMetadata['customElementExtensions'],
-          'amp-mustache'
-        );
+        pushIfNotExist(customElementExtensions, 'amp-mustache');
 
         const extensions = Services.extensionsFor(context.win);
-        creativeMetadata.customElementExtensions.forEach((extensionId) =>
+        customElementExtensions.forEach((extensionId) =>
           extensions./*OK*/ preloadExtension(extensionId)
         );
         // TODO(levitzky) Add preload logic for fonts / images.

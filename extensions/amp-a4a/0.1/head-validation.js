@@ -103,6 +103,7 @@ export function processHead(win, adElement, head) {
 
   const extensionService = Services.extensionsFor(win);
   const urlService = Services.urlForDoc(adElement);
+  /** @type {!Array<{extensionId: string, extensionVersion: string}>} */
   const extensions = [];
   const fonts = [];
   const images = [];
@@ -136,8 +137,8 @@ export function processHead(win, adElement, head) {
 
   // Load any extensions; do not wait on their promises as this
   // is just to prefetch.
-  extensions.forEach((extension) =>
-    extensionService.preloadExtension(extension.extensionId)
+  extensions.forEach(({extensionId}) =>
+    extensionService.preloadExtension(extensionId)
   );
   // Preload any fonts.
   fonts.forEach((fontUrl) =>
@@ -158,7 +159,7 @@ export function processHead(win, adElement, head) {
 
 /**
  * Allows json scripts and allowlisted amp elements while removing others.
- * @param {!Array} extensions
+ * @param {!Array<{extensionId: string, extensionVersion: string}>} extensions
  * @param {!Element} script
  */
 function handleScript(extensions, script) {
