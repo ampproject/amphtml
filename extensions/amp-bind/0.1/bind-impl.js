@@ -595,13 +595,23 @@ export class Bind {
     const allowUrlProperties = !isAmp4Email(this.localWin_.document);
     this.validator_ = new BindValidator(allowUrlProperties);
 
+    // If the document was SSRed, then we can find all the bindings via query selector.
+    // instead of needing to use a TreeWalker.
+    const doc = this.win_.document;
+    const shouldFastScan = doc.documentElement.hasAttribute(
+      'i-amphtml-binding'
+    );
+    const scanForBindings = shouldFastScan
+      ? () => this.fastScan_([doc.documentElement], [])
+      : () => this.addBindingsForNodes_([root]);
+
     // The web worker's evaluator also has an instance of BindValidator
     // that should be initialized with the same `allowUrlProperties` value.
     return this.ww_('bind.init', [allowUrlProperties])
       .then(() => {
         return Promise.all([
           this.addMacros_().then(() => this.addMacrosDeferred_.resolve()),
-          this.addBindingsForNodes_([root]),
+          scanForBindings(),
         ]);
       })
       .then(() => {
@@ -889,6 +899,7 @@ export class Bind {
       null,
       /* entityReferenceExpansion */ false
     );
+
     // Set to true if number of bindings in `node` exceeds `limit`.
     let limitExceeded = false;
     // Helper function for scanning the tree walker's next node.
