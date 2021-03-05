@@ -104,7 +104,7 @@ export function createShadowRootWithStyle(container, element, css) {
 
   const containerToUse = getMode().test
     ? container
-    : createShadowRoot(container);
+    : container;
 
   containerToUse.appendChild(style);
   containerToUse.appendChild(element);
