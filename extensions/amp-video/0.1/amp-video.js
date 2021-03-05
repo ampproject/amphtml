@@ -40,10 +40,6 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen, listenOncePromise} from '../../../src/event-helper';
 import {mutedOrUnmutedEvent} from '../../../src/iframe-video';
 import {
-  observeContentSize,
-  unobserveContentSize,
-} from '../../../src/utils/size-observer';
-import {
   propagateObjectFitStyles,
   setImportantStyles,
   setInitialDisplay,
@@ -703,11 +699,7 @@ export class AmpVideo extends AMP.BaseElement {
       return;
     }
     this.isPlaying_ = isPlaying;
-    if (isPlaying) {
-      observeContentSize(this.element, this.pauseWhenNoSize_);
-    } else {
-      unobserveContentSize(this.element, this.pauseWhenNoSize_);
-    }
+    this.pauseWhenNoSize_({width: 0, height: 0});
   }
 
   /**
