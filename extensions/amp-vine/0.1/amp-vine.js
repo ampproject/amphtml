@@ -16,7 +16,7 @@
 
 import {Services} from '../../../src/services';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {userAssert} from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 class AmpVine extends AMP.BaseElement {
   /** @param {!AmpElement} element */

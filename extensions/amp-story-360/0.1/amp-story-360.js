@@ -674,17 +674,13 @@ export class AmpStory360 extends AMP.BaseElement {
     // Used to update the video in animate_.
     this.ampVideoEl_ = this.element.querySelector('amp-video');
 
+    const mediaEl = ampImgEl || this.ampVideoEl_;
     userAssert(
-      ampImgEl || this.ampVideoEl_,
+      mediaEl,
       'amp-story-360 must contain an amp-img or amp-video element.'
     );
-
-    // Puts alt-text on canvas element so it can be read by screen readers.
-    // The media element is hidden with CSS it no longer can read it.
-    const altText = (ampImgEl || this.ampVideoEl_).getAttribute('alt-text');
-    if (altText) {
-      this.canvas_.setAttribute('role', 'img');
-      this.canvas_.setAttribute('aria-label', altText);
+    if (mediaEl) {
+      this.setAccessibleText_(mediaEl);
     }
 
     if (ampImgEl) {
@@ -692,6 +688,22 @@ export class AmpStory360 extends AMP.BaseElement {
     }
     if (this.ampVideoEl_) {
       return this.setupAmpVideoRenderer_();
+    }
+  }
+
+  /**
+   * Puts a11y text on canvas element so it can be read by screen readers.
+   * The media element is hidden by CSS it no longer can read it.
+   * @param {!Element} mediaEl Either an amp-img or amp-video
+   * @private
+   */
+  setAccessibleText_(mediaEl) {
+    const altTags = ['alt', 'title', 'aria-label']; /** In order of priority. */
+    const altTag = altTags.find((attr) => mediaEl.getAttribute(attr));
+    if (altTag) {
+      const altText = mediaEl.getAttribute(altTag);
+      this.canvas_.setAttribute('role', 'img');
+      this.canvas_.setAttribute('aria-label', altText);
     }
   }
 

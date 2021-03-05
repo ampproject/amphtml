@@ -752,7 +752,6 @@ const forbiddenTerms = {
       'ads/google/test/test-utils.js',
       'extensions/amp-a4a/0.1/test/test-a4a-integration.js',
       'extensions/amp-a4a/0.1/test/test-a4a-var-source.js',
-      'extensions/amp-a4a/0.1/test/test-amp-a4a.js',
       'extensions/amp-a4a/0.1/test/test-amp-ad-utils.js',
       'extensions/amp-a4a/0.1/test/test-refresh.js',
       'extensions/amp-access/0.1/test/test-access-expr.js',
@@ -1025,11 +1024,6 @@ const forbiddenTermsSrcInclusive = {
       'src/extension-analytics.js',
       'src/services.js',
       'extensions/amp-ad/0.1/amp-ad.js',
-      'extensions/amp-a4a/0.1/amp-a4a.js',
-      'extensions/amp-a4a/0.1/head-validation.js',
-      'extensions/amp-a4a/0.1/template-validator.js',
-      'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',
-      'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js',
       'extensions/amp-lightbox-gallery/0.1/amp-lightbox-gallery.js',
       'extensions/amp-animation/0.1/install-polyfill.js',
     ],
@@ -1246,6 +1240,7 @@ const forbiddenTermsSrcInclusive = {
     message:
       'Instead of fancy-log, use the logging functions in build-system/common/logging.js.',
     allowlist: [
+      'babel.config.js',
       'build-system/common/logging.js',
       'build-system/tasks/visual-diff/helpers.js',
       'validator/js/gulpjs/index.js',

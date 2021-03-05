@@ -62,6 +62,7 @@ const ATTRS_TO_PROPAGATE_ON_BUILD = [
   'crossorigin',
   'disableremoteplayback',
   'controlsList',
+  'title',
 ];
 
 /** @private {!Map<string, number>} the bitrate in Kb/s of amp_quality for videos in the ampproject cdn */
@@ -236,6 +237,7 @@ export class AmpVideo extends AMP.BaseElement {
     this.video_.setAttribute('webkit-playsinline', '');
     // Disable video preload in prerender mode.
     this.video_.setAttribute('preload', 'none');
+    this.checkA11yAttributeText_();
     this.propagateAttributes(
       ATTRS_TO_PROPAGATE_ON_BUILD,
       this.video_,
@@ -267,6 +269,19 @@ export class AmpVideo extends AMP.BaseElement {
     installVideoManagerForDoc(element);
 
     Services.videoManagerForDoc(element).register(this);
+  }
+
+  /**
+   * @private
+   * Overrides aria-label with alt if aria-label or title is not specified.
+   */
+  checkA11yAttributeText_() {
+    const altText = this.element.getAttribute('alt');
+    const hasTitle = this.element.hasAttribute('title');
+    const hasAriaLabel = this.element.hasAttribute('aria-label');
+    if (altText && !hasTitle && !hasAriaLabel) {
+      this.element.setAttribute('aria-label', altText);
+    }
   }
 
   /** @override */

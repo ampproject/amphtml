@@ -19,6 +19,7 @@ import {Key} from '../../../../build-system/tasks/e2e/functional-test-controller
 describes.endtoend(
   'amp-sidebar',
   {
+    version: '0.1',
     fixture: 'amp-sidebar/amp-sidebar.html',
     environments: ['single', 'viewer-demo'],
   },
