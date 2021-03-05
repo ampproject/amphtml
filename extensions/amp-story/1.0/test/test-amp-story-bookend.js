@@ -968,7 +968,7 @@ describes.fakeWin('amp-story-bookend', {win: {location}, amp: true}, (env) => {
       );
     });
 
-    it('should have an alt attribute on the image', () => {
+    it('should have an empty alt attribute on image if no alt is specified', () => {
       const noAltComponent = {
         url: 'http://example.com/small.html',
         domainName: 'example.com',
@@ -977,15 +977,13 @@ describes.fakeWin('amp-story-bookend', {win: {location}, amp: true}, (env) => {
         image: 'http://placehold.it/256x128',
       };
 
-      const emptyAltComponent = {
-        url: 'http://example.com/small.html',
-        domainName: 'example.com',
-        type: 'small',
-        title: 'This image has an empty alt attribute',
-        image: 'http://placehold.it/256x128',
-        alt: '',
-      };
+      const small = new ArticleComponent();
 
+      const noAlt = small.buildElement(noAltComponent, win, {position: 0});
+      expect(noAlt.querySelector('img').alt).to.equal('');
+    });
+
+    it('should propagate alt attribute if specified', () => {
       const textAltComponent = {
         url: 'http://example.com/small.html',
         domainName: 'example.com',
@@ -997,16 +995,8 @@ describes.fakeWin('amp-story-bookend', {win: {location}, amp: true}, (env) => {
 
       const small = new ArticleComponent();
 
-      const noAlt = small.buildElement(noAltComponent, win, {position: 0});
-      expect(noAlt.querySelector('img').alt).to.equal('');
-
-      const emptyAlt = small.buildElement(emptyAltComponent, win, {
-        position: 0,
-      });
-      expect(emptyAlt.querySelector('img').alt).to.equal('');
-
-      const textAlt = small.buildElement(textAltComponent, win, {position: 0});
-      expect(textAlt.querySelector('img').alt).to.equal('test');
+      const noAlt = small.buildElement(textAltComponent, win, {position: 0});
+      expect(noAlt.querySelector('img').alt).to.equal('test');
     });
   });
 
@@ -1212,28 +1202,26 @@ describes.fakeWin('amp-story-bookend', {win: {location}, amp: true}, (env) => {
       );
     });
 
-    it('should have an alt attribute on the image', () => {
+    it('should have an empty alt attribute on image if no alt is specified', () => {
       const noAltComponent = {
-        url: 'http://example.com/small.html',
+        url: 'http://example.com/landscape.html',
         domainName: 'example.com',
-        type: 'small',
+        type: 'landscape',
         title: 'This image has no alt attribute',
         image: 'http://placehold.it/256x128',
       };
 
-      const emptyAltComponent = {
-        url: 'http://example.com/small.html',
-        domainName: 'example.com',
-        type: 'small',
-        title: 'This image has an empty alt attribute',
-        image: 'http://placehold.it/256x128',
-        alt: '',
-      };
+      const landscape = new LandscapeComponent();
 
+      const noAlt = landscape.buildElement(noAltComponent, win, {position: 0});
+      expect(noAlt.querySelector('img').alt).to.equal('');
+    });
+
+    it('should propagate alt attribute if specified', () => {
       const textAltComponent = {
-        url: 'http://example.com/small.html',
+        url: 'http://example.com/landscape.html',
         domainName: 'example.com',
-        type: 'small',
+        type: 'landscape',
         title: 'This image has text in its alt attribute',
         image: 'http://placehold.it/256x128',
         alt: 'test',
@@ -1241,18 +1229,10 @@ describes.fakeWin('amp-story-bookend', {win: {location}, amp: true}, (env) => {
 
       const landscape = new LandscapeComponent();
 
-      const noAlt = landscape.buildElement(noAltComponent, win, {position: 0});
-      expect(noAlt.querySelector('img').alt).to.equal('');
-
-      const emptyAlt = landscape.buildElement(emptyAltComponent, win, {
+      const noAlt = landscape.buildElement(textAltComponent, win, {
         position: 0,
       });
-      expect(emptyAlt.querySelector('img').alt).to.equal('');
-
-      const textAlt = landscape.buildElement(textAltComponent, win, {
-        position: 0,
-      });
-      expect(textAlt.querySelector('img').alt).to.equal('test');
+      expect(noAlt.querySelector('img').alt).to.equal('test');
     });
   });
 
@@ -1448,28 +1428,26 @@ describes.fakeWin('amp-story-bookend', {win: {location}, amp: true}, (env) => {
       );
     });
 
-    it('should have an alt attribute on the image', () => {
+    it('should have an empty alt attribute on image if no alt is specified', () => {
       const noAltComponent = {
-        url: 'http://example.com/small.html',
+        url: 'http://example.com/portrait.html',
         domainName: 'example.com',
-        type: 'small',
+        type: 'portrait',
         title: 'This image has no alt attribute',
         image: 'http://placehold.it/256x128',
       };
 
-      const emptyAltComponent = {
-        url: 'http://example.com/small.html',
-        domainName: 'example.com',
-        type: 'small',
-        title: 'This image has an empty alt attribute',
-        image: 'http://placehold.it/256x128',
-        alt: '',
-      };
+      const portrait = new PortraitComponent();
 
+      const noAlt = portrait.buildElement(noAltComponent, win, {position: 0});
+      expect(noAlt.querySelector('img').alt).to.equal('');
+    });
+
+    it('should propagate alt attribute if specified', () => {
       const textAltComponent = {
-        url: 'http://example.com/small.html',
+        url: 'http://example.com/portrait.html',
         domainName: 'example.com',
-        type: 'small',
+        type: 'portrait',
         title: 'This image has text in its alt attribute',
         image: 'http://placehold.it/256x128',
         alt: 'test',
@@ -1477,18 +1455,10 @@ describes.fakeWin('amp-story-bookend', {win: {location}, amp: true}, (env) => {
 
       const portrait = new PortraitComponent();
 
-      const noAlt = portrait.buildElement(noAltComponent, win, {position: 0});
-      expect(noAlt.querySelector('img').alt).to.equal('');
-
-      const emptyAlt = portrait.buildElement(emptyAltComponent, win, {
+      const noAlt = portrait.buildElement(textAltComponent, win, {
         position: 0,
       });
-      expect(emptyAlt.querySelector('img').alt).to.equal('');
-
-      const textAlt = portrait.buildElement(textAltComponent, win, {
-        position: 0,
-      });
-      expect(textAlt.querySelector('img').alt).to.equal('test');
+      expect(noAlt.querySelector('img').alt).to.equal('test');
     });
   });
 });
