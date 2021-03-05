@@ -57,10 +57,12 @@ import {whenContentIniLoad} from './ini-load';
  * - html: The complete content of an AMP embed, which is itself an AMP
  *   document. Can include whatever is normally allowed in an AMP document,
  *   except for AMP `<script>` declarations. Those should be passed as an
- *   array of `extensionIds`.
+ *   array of `extensions`.
  * - extensions: An optional array of AMP extension IDs/versions used in
  *   this embed.
  * - fonts: An optional array of fonts used in this embed.
+ *
+ * TODO(#33020): remove extensionIds once extensions is used everywhere.
  *
  * @typedef {{
  *   host: (?AmpElement|undefined),
@@ -119,6 +121,37 @@ export function getFieSafeScriptSrcs() {
 }
 
 /**
+ * @param {!Window} win
+ * @param {!Array<{extensionId: string, extensionVersion: string}>} extensions
+ */
+export function preloadFriendlyIframeEmbedExtensions(win, extensions) {
+  // TODO(#33020): Use the format directly and preload with the specified
+  // version.
+  preloadFriendlyIframeEmbedExtensionIdsDeprecated(
+    win,
+    extensions.map(({extensionId}) => extensionId)
+  );
+}
+
+/**
+ * @param {!Window} win
+ * @param {!Array<string>} extensionIds
+ * TODO(#33020): remove this method in favor `preloadFriendlyIframeEmbedExtensions`.
+ */
+export function preloadFriendlyIframeEmbedExtensionIdsDeprecated(
+  win,
+  extensionIds
+) {
+  const extensionsService = Services.extensionsFor(win);
+
+  // Load any extensions; do not wait on their promises as this
+  // is just to prefetch.
+  extensionIds.forEach((extensionId) =>
+    extensionsService.preloadExtension(extensionId)
+  );
+}
+
+/**
  * Creates the requested "friendly iframe" embed. Returns the promise that
  * will be resolved as soon as the embed is available. The actual
  * initialization of the embed will start as soon as the `iframe` is added
@@ -157,9 +190,7 @@ export function installFriendlyIframeEmbed(
       : [];
 
   // Pre-load extensions.
-  extensionIds.forEach((extensionId) =>
-    extensionsService.preloadExtension(extensionId)
-  );
+  preloadFriendlyIframeEmbedExtensionIdsDeprecated(win, extensionIds);
 
   const html = spec.skipHtmlMerge ? spec.html : mergeHtml(spec);
   // Receive the signal when iframe is ready: it's document is formed.
