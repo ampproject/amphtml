@@ -35,7 +35,11 @@ function LightboxWithActions({children, ...rest}) {
   return (
     <section>
       <Lightbox
-        closeButton={<button aria-label="My custom close button">close</button>}
+        closeButtonAs={(props) => (
+          <button {...props} aria-label="My custom close button">
+            close
+          </button>
+        )}
         ref={ref}
         {...rest}
       >

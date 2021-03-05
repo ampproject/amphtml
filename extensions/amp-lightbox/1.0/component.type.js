@@ -34,8 +34,9 @@ LightboxDef.Props;
 
 /**
  * @typedef {{
- *   close: function,
- *   closeButton: (?PreactDef.Renderable|undefined),
+ *   aria-label: (string),
+ *   as: (function:PreactDef.Renderable|undefined),
+ *   onClick: function,
  * }}
  */
 LightboxDef.CloseButtonProps;

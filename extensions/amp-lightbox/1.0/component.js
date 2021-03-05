@@ -55,7 +55,7 @@ function LightboxWithRef(
   {
     animation = 'fade-in',
     children,
-    closeButton,
+    closeButtonAs,
     onBeforeOpen,
     onAfterClose,
     scrollable = false,
@@ -177,10 +177,7 @@ function LightboxWithRef(
         }}
         {...rest}
       >
-        <CloseButton
-          customCloseButton={closeButton}
-          close={() => setVisible(false)}
-        />
+        <CloseButton as={closeButtonAs} onClick={() => setVisible(false)} />
         {children}
       </ContainWrapper>
     )
@@ -196,17 +193,8 @@ export {Lightbox};
  * @param {!LightboxDef.CloseButtonProps} props
  * @return {PreactDef.Renderable}
  */
-function CloseButton({close, customCloseButton = <ScreenReaderCloseButton />}) {
-  const {'onClick': onCustomClick} = customCloseButton.props;
-  const onClick = (e) => {
-    if (onCustomClick) {
-      onCustomClick(e);
-    }
-    close();
-  };
-  return Preact.cloneElement(customCloseButton, {
-    'onClick': onClick,
-  });
+function CloseButton({onClick, as: Comp = ScreenReaderCloseButton}) {
+  return <Comp aria-label={DEFAULT_CLOSE_LABEL} onClick={onClick} />;
 }
 
 /**
@@ -218,15 +206,10 @@ function CloseButton({close, customCloseButton = <ScreenReaderCloseButton />}) {
  * We do not want this in the tab order since it is not really "visible"
  * and would be confusing to tab to if not using a screen reader.
  *
+ * @param {!LightboxDef.CloseButtonProps} props
  * @return {PreactDef.Renderable}
  */
-function ScreenReaderCloseButton() {
+function ScreenReaderCloseButton(props) {
   const classes = useStyles();
-  return (
-    <button
-      ariaLabel={DEFAULT_CLOSE_LABEL}
-      tabIndex={-1}
-      className={classes.closeButton}
-    />
-  );
+  return <button {...props} tabIndex={-1} className={classes.closeButton} />;
 }

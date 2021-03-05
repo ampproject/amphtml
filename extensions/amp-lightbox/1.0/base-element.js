@@ -38,6 +38,11 @@ export class BaseElement extends PreactBaseElement {
     });
   }
 
+  /** @override */
+  updatePropsForRendering(props) {
+    props['closeButtonAs'] = () => props['closeButton'];
+  }
+
   /**
    * Toggle open/closed attributes.
    * @param {boolean} opt_state

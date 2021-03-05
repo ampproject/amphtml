@@ -90,9 +90,11 @@ describes.sandboxed('Lightbox preact component v1.0', {}, () => {
       <Lightbox
         id="lightbox"
         ref={ref}
-        closeButton={
-          <button aria-label="close my fancy lightbox">Close!</button>
-        }
+        closeButtonAs={(props) => (
+          <button {...props} aria-label="close my fancy lightbox">
+            Close!
+          </button>
+        )}
       >
         <p>Hello World</p>
       </Lightbox>
