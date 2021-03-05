@@ -64,7 +64,7 @@ describes.sandboxed('Lightbox preact component v1.0', {}, () => {
         .find('div[part="lightbox"]')
         .getDOMNode()
         .className.includes('contain-scroll')
-    ).to.be.false;
+    ).to.be.true;
     expect(
       wrapper.find('div[part="lightbox"] > div').getDOMNode().style.overflow
     ).to.equal('scroll');
