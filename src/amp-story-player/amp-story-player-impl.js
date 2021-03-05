@@ -386,10 +386,16 @@ export class AmpStoryPlayer {
   initializeAnchorElStories_() {
     const anchorEls = toArray(this.element_.querySelectorAll('a'));
     anchorEls.forEach((element) => {
+      const posterImgEl = element.querySelector(
+        'img[data-amp-story-player-poster-img]'
+      );
+      const posterImgSrc = posterImgEl && posterImgEl.getAttribute('src');
+
       const story = /** @type {!StoryDef} */ ({
         href: element.href,
         title: (element.textContent && element.textContent.trim()) || null,
-        posterImage: element.getAttribute('data-poster-portrait-src'),
+        posterImage:
+          element.getAttribute('data-poster-portrait-src') || posterImgSrc,
       });
 
       this.initializeAndAddStory_(story);
