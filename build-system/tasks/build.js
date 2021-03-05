@@ -26,6 +26,7 @@ const {
   exitCtrlcHandler,
 } = require('../common/ctrlcHandler');
 const {buildExtensions} = require('./extension-helpers');
+const {buildVendorConfigs} = require('./3p-vendor-helpers');
 const {compileCss} = require('./css');
 const {compileJison} = require('./compile-jison');
 const {maybeUpdatePackages} = require('./update-packages');
@@ -74,6 +75,7 @@ async function doBuild(extraArgs = {}) {
     await compileCoreRuntime(options);
   } else {
     await compileAllJs(options);
+    await buildVendorConfigs(options);
   }
   await buildExtensions(options);
   if (!argv.watch) {
