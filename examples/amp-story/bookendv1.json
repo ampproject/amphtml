@@ -21,7 +21,7 @@
       "title": "This is an example article",
       "url": "/article.html",
       "image": "http://placehold.it/500x600",
-      "alt": "All images should receive an alt attribute, even if the value is an empty string or the alt key is not provided."
+      "alt": "Example alt text for the image. If alt is not specified it will default to an empty string."
     },
     {
       "type": "small",
