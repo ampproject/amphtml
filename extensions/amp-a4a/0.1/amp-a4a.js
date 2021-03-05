@@ -56,13 +56,15 @@ import {
   getConsentPolicyState,
 } from '../../../src/consent';
 import {getContextMetadata} from '../../../src/iframe-attributes';
-import {getExperimentBranch} from '../../../src/experiments';
+import {getExperimentBranch, isExperimentOn} from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {
   installFriendlyIframeEmbed,
   isSrcdocSupported,
+  preloadFriendlyIframeEmbedExtensionIdsDeprecated,
 } from '../../../src/friendly-iframe-embed';
+import {installRealTimeConfigServiceForDoc} from '../../../src/service/real-time-config/real-time-config-impl';
 import {installUrlReplacementsForEmbed} from '../../../src/service/url-replacements-impl';
 import {
   intersectionEntryToJson,
@@ -160,6 +162,7 @@ export let CreativeMetaDataDef;
       consentState: (?CONSENT_POLICY_STATE|undefined),
       consentString: (?string|undefined),
       gdprApplies: (?boolean|undefined),
+      additionalConsent: (?string|undefined),
     }} */
 export let ConsentTupleDef;
 
@@ -776,11 +779,14 @@ export class AmpA4A extends AMP.BaseElement {
         const gdprApplies = consentMetadata
           ? consentMetadata['gdprApplies']
           : consentMetadata;
+        const additionalConsent = consentMetadata
+          ? consentMetadata['additionalConsent']
+          : consentMetadata;
 
         return /** @type {!Promise<?string>} */ (this.getServeNpaSignal().then(
           (npaSignal) =>
             this.getAdUrl(
-              {consentState, consentString, gdprApplies},
+              {consentState, consentString, gdprApplies, additionalConsent},
               this.tryExecuteRealTimeConfig_(
                 consentState,
                 consentString,
@@ -909,8 +915,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {boolean}
    */
   isInNoSigningExp() {
-    // eslint-disable-next-line no-undef
-    return !!NO_SIGNING_RTV;
+    return NO_SIGNING_RTV;
   }
 
   /**
@@ -936,16 +941,20 @@ export class AmpA4A extends AMP.BaseElement {
       return Promise.reject(NO_CONTENT_RESPONSE);
     }
 
-    if (this.skipClientSideValidation(httpResponse.headers)) {
+    // Extract size will also parse x-ampanalytics header for some subclasses.
+    const size = this.extractSize(httpResponse.headers);
+    this.creativeSize_ = size || this.creativeSize_;
+
+    if (
+      !isPlatformSupported(this.win) ||
+      this.skipClientSideValidation(httpResponse.headers)
+    ) {
       return this.handleFallback_(httpResponse, checkStillCurrent);
     }
 
-    // Duplicating httpResponse stream as safeframe/nameframe rending will need the
+    // Duplicating httpResponse stream as safeframe/nameframe rendering will need the
     // unaltered httpResponse content.
     const fallbackHttpResponse = httpResponse.clone();
-
-    const size = this.extractSize(httpResponse.headers);
-    this.creativeSize_ = size || this.creativeSize_;
 
     // This transformation consumes the detached DOM chunks and
     // exposes our waitForHead and transferBody methods.
@@ -1094,7 +1103,9 @@ export class AmpA4A extends AMP.BaseElement {
           // via #validateAdResponse_.  See GitHub issue
           // https://github.com/ampproject/amphtml/issues/4187
           let creativeMetaDataDef;
+
           if (
+            !isPlatformSupported(this.win) ||
             !creativeDecoded ||
             !(creativeMetaDataDef = this.getAmpAdMetadata(creativeDecoded))
           ) {
@@ -1108,12 +1119,16 @@ export class AmpA4A extends AMP.BaseElement {
 
           // Update priority.
           this.updateLayoutPriority(LayoutPriority.CONTENT);
+
           // Load any extensions; do not wait on their promises as this
           // is just to prefetch.
-          const extensions = Services.extensionsFor(this.win);
-          creativeMetaDataDef.customElementExtensions.forEach((extensionId) =>
-            extensions.preloadExtension(extensionId)
+          // TODO(#33020): switch to `preloadFriendlyIframeEmbedExtensions` with
+          // the format of `[{extensionId, extensionVersion}]`.
+          preloadFriendlyIframeEmbedExtensionIdsDeprecated(
+            this.win,
+            creativeMetaDataDef.customElementExtensions
           );
+
           // Preload any fonts.
           (creativeMetaDataDef.customStylesheets || []).forEach((font) =>
             Services.preconnectFor(this.win).preload(
@@ -1923,6 +1938,8 @@ export class AmpA4A extends AMP.BaseElement {
         // Need to guarantee that this is no longer null
         url: devAssert(this.adUrl_),
         html,
+        // TODO(#33020): provide the `extensions` property instead, in
+        // the format of `[{extensionId, extensionVersion}]`.
         extensionIds,
         fonts,
         skipHtmlMerge,
@@ -2376,31 +2393,23 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {Promise<!Array<!rtcResponseDef>>|undefined}
    */
   tryExecuteRealTimeConfig_(consentState, consentString, consentMetadata) {
-    if (!!AMP.RealTimeConfigManager) {
-      return this.getBlockRtc_().then((shouldBlock) => {
-        if (shouldBlock) {
-          return;
-        }
-        try {
-          return new AMP.RealTimeConfigManager(
-            this.getAmpDoc()
-          ).maybeExecuteRealTimeConfig(
-            this.element,
-            this.getCustomRealTimeConfigMacros_(),
-            consentState,
-            consentString,
-            consentMetadata,
-            this.verifyStillCurrent()
-          );
-        } catch (err) {
-          user().error(TAG, 'Could not perform Real Time Config.', err);
-        }
-      });
-    } else if (this.element.getAttribute('rtc-config')) {
-      user().error(
-        TAG,
-        'RTC not supported for ad network ' +
-          `${this.element.getAttribute('type')}`
+    if (this.element.getAttribute('rtc-config')) {
+      installRealTimeConfigServiceForDoc(this.getAmpDoc());
+      return this.getBlockRtc_().then((shouldBlock) =>
+        shouldBlock
+          ? undefined
+          : Services.realTimeConfigForDoc(
+              this.getAmpDoc()
+            ).then((realTimeConfig) =>
+              realTimeConfig.maybeExecuteRealTimeConfig(
+                this.element,
+                this.getCustomRealTimeConfigMacros_(),
+                consentState,
+                consentString,
+                consentMetadata,
+                this.verifyStillCurrent()
+              )
+            )
       );
     }
   }
@@ -2562,4 +2571,29 @@ export function signatureVerifierFor(win) {
     win[propertyName] ||
     (win[propertyName] = new SignatureVerifier(win, signingServerURLs))
   );
+}
+
+/**
+ * @param {!Window} win
+ * @return {boolean}
+ * @visibleForTesting
+ */
+export function isPlatformSupported(win) {
+  // Require Shadow DOM support for a4a.
+  if (
+    !isNative(win.Element.prototype.attachShadow) &&
+    isExperimentOn(win, 'disable-a4a-non-sd')
+  ) {
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Returns `true` if the passed function exists and is native to the browser.
+ * @param {Function|undefined} func
+ * @return {boolean}
+ */
+function isNative(func) {
+  return !!func && func.toString().indexOf('[native code]') != -1;
 }

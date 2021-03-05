@@ -907,6 +907,19 @@ describes.realWin(
         expect(ampSlideScroll.hasAttribute('loop')).to.be.false;
       });
 
+      it('sets the correct scrollLeft for looping carousel', async () => {
+        const ampSlideScroll = await getAmpSlideScroll(true, 7, false, true);
+        doc.body.appendChild(ampSlideScroll);
+        await ampSlideScroll.buildInternal();
+        const impl = await ampSlideScroll.getImpl();
+        ampSlideScroll.layoutCallback();
+        expect(impl.slideWidth_).to.not.be.null;
+        expect(impl.slideWidth_).to.be.greaterThan(0);
+
+        // I.e. the scrollContainer is centered (not at 0)
+        expect(impl.slidesContainer_.scrollLeft).to.equal(impl.slideWidth_);
+      });
+
       // TODO(#17197): This test triggers sinonjs/sinon issues 1709 and 1321.
       it.skip('should hide unwanted slides when looping', async () => {
         const ampSlideScroll = await getAmpSlideScroll(true);
@@ -1269,6 +1282,17 @@ describes.realWin(
         args = {'index': '4'};
         impl.executeAction({method: 'goToSlide', args, satisfiesTrust});
         expect(showSlideSpy).to.have.been.calledWith(4);
+      });
+
+      it('should handle carousel snapping & hiding race', async () => {
+        const ampSlideScroll = await getAmpSlideScroll(true);
+        const impl = await ampSlideScroll.getImpl();
+
+        // simluate carousel hidding
+        impl.slideWidth_ = 0;
+
+        // simulate snapping
+        expect(impl.getNextSlideIndex_(0)).to.equal(0);
       });
 
       it('should NOT call showSlide_ before layout', async () => {

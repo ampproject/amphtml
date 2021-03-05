@@ -244,6 +244,18 @@ function Validator(scriptContents) {
 }
 
 /**
+ * Initialize the validator.
+ * @return {Promise<undefined>!}
+ */
+Validator.prototype.init = function() {
+  if (this.sandbox.amp.validator.init) {
+    return this.sandbox.amp.validator.init();
+  } else {
+    return Promise.resolve(undefined);
+  }
+};
+
+/**
  * Validates the provided inputString; the htmlFormat can be 'AMP' or
  * 'AMP4ADS'; it defaults to 'AMP' if not specified.
  * @param {string} inputString
@@ -440,6 +452,9 @@ function main() {
     }
   }
   getInstance(program.validator_js, program.userAgent)
+      .then(function(validator) {
+        return validator.init().then(() => validator);
+      })
       .then(function(validator) {
         Promise.all(inputs)
             .then(function(resolvedInputs) {

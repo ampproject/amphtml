@@ -27,6 +27,7 @@ import {
   createAmpElementForTesting,
   getImplSyncForTesting,
 } from '../../src/custom-element';
+import {toggleExperiment} from '../../src/experiments';
 
 describes.realWin('CustomElement', {amp: true}, (env) => {
   // TODO(dvoytenko, #11827): Make this test work on Safari.
@@ -200,7 +201,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         expect(element.hasAttributes()).to.equal(false);
         expect(element.isUpgraded()).to.equal(false);
         expect(element.upgradeState_).to.equal(/* NOT_UPGRADED */ 1);
-        expect(element.readyState).to.equal('loading');
+        expect(element.readyState).to.equal('upgrading');
         expect(element.everAttached).to.equal(false);
         expect(element.getLayout()).to.equal(Layout.NODISPLAY);
 
@@ -225,7 +226,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         expect(element.isBuilt()).to.equal(false);
         expect(element.hasAttributes()).to.equal(false);
         expect(element.isUpgraded()).to.equal(false);
-        expect(element.readyState).to.equal('loading');
+        expect(element.readyState).to.equal('upgrading');
         expect(element.everAttached).to.equal(false);
         expect(element.getLayout()).to.equal(Layout.NODISPLAY);
 
@@ -240,6 +241,43 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         // the return value from `env.sandbox.stub(element, 'buildInternal')`.
         //
         // expect(build.calledOnce).to.equal(true);
+      });
+
+      it('StubElement - should try to install an unregistered legacy extensions', () => {
+        const LegacyElementClass = createAmpElementForTesting(win, ElementStub);
+        win.customElements.define('amp-legacy', LegacyElementClass);
+        win.__AMP_EXTENDED_ELEMENTS['amp-legacy'] = ElementStub;
+
+        const extensions = Services.extensionsFor(win);
+        env.sandbox.stub(extensions, 'installExtensionForDoc');
+
+        const element = new LegacyElementClass();
+        env.sandbox.stub(element, 'buildInternal');
+
+        container.appendChild(element);
+        expect(element.readyState).to.equal('upgrading');
+        expect(extensions.installExtensionForDoc).to.be.calledOnce.calledWith(
+          ampdoc,
+          'amp-legacy',
+          '0.1'
+        );
+      });
+
+      it('StubElement - should not try to install a pre-registered legacy extensions', () => {
+        const LegacyElementClass = createAmpElementForTesting(win, ElementStub);
+        win.customElements.define('amp-legacy', LegacyElementClass);
+        win.__AMP_EXTENDED_ELEMENTS['amp-legacy'] = ElementStub;
+        ampdoc.declareExtension('amp-legacy');
+
+        const extensions = Services.extensionsFor(win);
+        env.sandbox.stub(extensions, 'installExtensionForDoc');
+
+        const element = new LegacyElementClass();
+        env.sandbox.stub(element, 'buildInternal');
+
+        container.appendChild(element);
+        expect(element.readyState).to.equal('upgrading');
+        expect(extensions.installExtensionForDoc).to.not.be.called;
       });
 
       it('Element - should only add classes on first attachedCallback', () => {
@@ -396,6 +434,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         element.upgrade(TestElement);
 
         expect(element.isUpgraded()).to.equal(true);
+        expect(element.readyState).to.equal('building');
         const impl = getImplSyncForTesting(element);
         expect(impl).to.be.instanceOf(TestElement);
         expect(impl.getLayout()).to.equal(Layout.FILL);
@@ -414,6 +453,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         element.upgrade(TestElement);
 
         expect(element.isUpgraded()).to.equal(false);
+        expect(element.readyState).to.equal('upgrading');
         expect(getImplSyncForTesting(element)).to.be.null;
         expect(element.isBuilt()).to.equal(false);
       });
@@ -435,6 +475,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         element.upgrade(TestElement);
 
         expect(element.isUpgraded()).to.equal(true);
+        expect(element.readyState).to.equal('building');
         expect(getImplSyncForTesting(element)).to.be.instanceOf(TestElement);
         expect(element.isBuilt()).to.equal(false);
       });
@@ -448,6 +489,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
 
         element.upgrade(TestElement);
         expect(element.isUpgraded()).to.equal(false);
+        expect(element.readyState).to.equal('upgrading');
         expect(element.isBuilt()).to.equal(false);
       });
 
@@ -532,15 +574,6 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         expect(element.isUpgraded()).to.equal(false);
       });
 
-      it('Element - build NOT allowed before attachment', () => {
-        const element = new ElementClass();
-        allowConsoleError(() => {
-          expect(() => {
-            element.buildInternal();
-          }).to.throw(/upgrade/);
-        });
-      });
-
       it('Element - build allowed', () => {
         const element = new ElementClass();
 
@@ -601,6 +634,20 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         return element.whenBuilt();
       });
 
+      it('should build on no consent policy', () => {
+        const element = new ElementClass();
+        env.sandbox
+          .stub(Services, 'consentPolicyServiceForDocOrNull')
+          .resolves(null);
+        env.sandbox.stub(element, 'getConsentPolicy_').callsFake(() => {
+          return 'default';
+        });
+
+        clock.tick(1);
+        container.appendChild(element);
+        return element.whenBuilt();
+      });
+
       it('should not build on consent insufficient', () => {
         const element = new ElementClass();
         env.sandbox
@@ -646,6 +693,101 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         );
       });
 
+      describe('granular consent experiment', () => {
+        beforeEach(() => {
+          toggleExperiment(win, 'amp-consent-granular-consent', true);
+        });
+
+        afterEach(() => {
+          toggleExperiment(win, 'amp-consent-granular-consent', false);
+        });
+
+        it('should find the correct purposes', () => {
+          const element = new ElementClass();
+          expect(element.getPurposesConsent_()).to.be.null;
+          element.setAttribute('data-block-on-consent-purposes', '');
+          expect(element.getPurposesConsent_()).to.be.null;
+          element.setAttribute(
+            'data-block-on-consent-purposes',
+            'purpose-foo,purpose-bar'
+          );
+          expect(element.getPurposesConsent_()).to.deep.equals([
+            'purpose-foo',
+            'purpose-bar',
+          ]);
+        });
+
+        it('should default to policyId', () => {
+          const element = new ElementClass();
+          const purposesSpy = env.sandbox.spy();
+          env.sandbox
+            .stub(Services, 'consentPolicyServiceForDocOrNull')
+            .resolves({
+              whenPolicyUnblock: () => {
+                return Promise.resolve(true);
+              },
+              whenPurposesUnblock: () => purposesSpy,
+            });
+          element.setAttribute('data-block-on-consent', '');
+          element.setAttribute(
+            'data-block-on-consent-purposes',
+            'purpose-foo,purpose-bar'
+          );
+
+          clock.tick(1);
+          container.appendChild(element);
+          return element.whenBuilt().then(() => {
+            expect(purposesSpy).to.not.be.called;
+          });
+        });
+
+        it('should build on purpose consents', () => {
+          const element = new ElementClass();
+          const defaultPolicySpy = env.sandbox.spy();
+          env.sandbox
+            .stub(Services, 'consentPolicyServiceForDocOrNull')
+            .resolves({
+              whenPolicyUnblock: () => {
+                return defaultPolicySpy;
+              },
+              whenPurposesUnblock: () => {
+                return Promise.resolve(true);
+              },
+            });
+          element.setAttribute(
+            'data-block-on-consent-purposes',
+            'purpose-foo,purpose-bar'
+          );
+
+          clock.tick(1);
+          container.appendChild(element);
+          return element.whenBuilt().then(() => {
+            expect(defaultPolicySpy).to.not.be.called;
+          });
+        });
+
+        it('should not build on insufficient purpose consents', () => {
+          const element = new ElementClass();
+          env.sandbox
+            .stub(Services, 'consentPolicyServiceForDocOrNull')
+            .resolves({
+              whenPurposesUnblock: () => {
+                return Promise.resolve(false);
+              },
+            });
+          element.setAttribute(
+            'data-block-on-consent-purposes',
+            'purpose-foo,purpose-bar'
+          );
+
+          clock.tick(1);
+          container.appendChild(element);
+          return expect(element.whenBuilt()).to.eventually.be.rejectedWith(
+            /BLOCK_BY_CONSENT/
+          );
+        });
+      });
+
       it('should anticipate sync build errors', () => {
         expectAsyncConsoleError(/intentional/, 2);
         const element = new ElementClass();
@@ -684,6 +826,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         container.appendChild(element);
         return element.buildingPromise_.then(() => {
           expect(element.isBuilt()).to.equal(true);
+          expect(element.readyState).to.equal('loading');
           expect(testElementCreatePlaceholderCallback).to.have.not.been.called;
         });
       });
@@ -702,6 +845,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
           // Call again.
           return element.buildInternal().then(() => {
             expect(element.isBuilt()).to.equal(true);
+            expect(element.readyState).to.equal('loading');
             expect(testElementBuildCallback).to.be.calledOnce;
             setTimeout(() => {
               expect(testElementPreconnectCallback).to.be.calledOnce;
@@ -710,7 +854,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         });
       });
 
-      it('Element - build is repeatable', () => {
+      it('Element - build is repeatable', async () => {
         const element = new ElementClass();
         expect(element.isBuilt()).to.equal(false);
         expect(testElementBuildCallback).to.have.not.been.called;
@@ -718,6 +862,8 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         container.appendChild(element);
         const buildingPromise = element.buildingPromise_;
         expect(element.buildInternal()).to.equal(buildingPromise);
+        // Skip a task.
+        await new Promise(setTimeout);
         expect(testElementBuildCallback).to.be.calledOnce;
       });
 
@@ -896,8 +1042,10 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         const element = new ElementClass();
         element.setAttribute('layout', 'fill');
         container.appendChild(element);
+        expect(element.readyState).to.equal('building');
         return element.buildInternal().then(() => {
           expect(element.isBuilt()).to.equal(true);
+          expect(element.readyState).to.equal('loading');
           expect(testElementLayoutCallback).to.have.not.been.called;
 
           const p = element.layoutCallback();
@@ -1038,21 +1186,6 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
             }).to.throw(/Must never be called in template/);
           });
         });
-      });
-
-      it('StubElement - layoutCallback should fail before attach', () => {
-        const element = new StubElementClass();
-        element.setAttribute('layout', 'fill');
-        resourcesMock.expects('upgraded').withExactArgs(element).never();
-        element.upgrade(TestElement);
-        allowConsoleError(() => {
-          expect(() => element.buildInternal()).to.throw(
-            /Cannot build unupgraded element/
-          );
-        });
-        expect(element.isUpgraded()).to.equal(false);
-        expect(element.isBuilt()).to.equal(false);
-        expect(testElementLayoutCallback).to.have.not.been.called;
       });
 
       it('StubElement - layoutCallback after attached', () => {
@@ -1598,7 +1731,8 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
             .once();
 
           const promise = element.ensureLoaded(parentPriority);
-          await element.buildInternal();
+          await resource.build();
+          await resource.whenBuilt();
           await element.layoutCallback();
 
           await promise;
@@ -1613,7 +1747,8 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
           container.appendChild(element);
           const resource = element.getResource_();
 
-          await element.buildInternal();
+          await resource.build();
+          await resource.whenBuilt();
           expect(element.isBuilt()).to.be.true;
 
           const parentPriority = 1;
@@ -1640,7 +1775,8 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
           container.appendChild(element);
           const resource = element.getResource_();
 
-          await element.buildInternal();
+          await resource.build();
+          await resource.whenBuilt();
           resource.measure();
           resource.layoutScheduled(Date.now());
           await resource.startLayout();
@@ -1658,7 +1794,8 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
           container.appendChild(element);
           const resource = element.getResource_();
 
-          await element.buildInternal();
+          await resource.build();
+          await resource.whenBuilt();
           resource.measure();
           resource.layoutScheduled(Date.now());
           const layoutCallbackStub = env.sandbox.stub(
@@ -1692,7 +1829,10 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
           const element = new ElementClass();
           element.setAttribute('layout', 'nodisplay');
           container.appendChild(element);
-          await element.buildInternal();
+          const resource = element.getResource_();
+
+          await resource.build();
+          await resource.whenBuilt();
 
           resourcesMock.expects('scheduleLayoutOrPreload').never();
 
@@ -1704,7 +1844,9 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
           element.setAttribute('layout', 'nodisplay');
           container.appendChild(element);
           const resource = element.getResource_();
-          await element.buildInternal();
+
+          await resource.build();
+          await resource.whenBuilt();
 
           const measureSpy = env.sandbox.spy(resource, 'measure');
           resourcesMock.expects('scheduleLayoutOrPreload').never();

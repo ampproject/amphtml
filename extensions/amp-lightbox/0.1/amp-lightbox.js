@@ -39,6 +39,10 @@ import {dict, hasOwn} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
 import {isInFie} from '../../../src/iframe-helper';
+import {
+  registerContainer,
+  unregisterContainer,
+} from '../../../src/utils/display-observer';
 import {toArray} from '../../../src/types';
 import {tryFocus} from '../../../src/dom';
 
@@ -283,6 +287,7 @@ class AmpLightbox extends AMP.BaseElement {
       return;
     }
     this.initialize_();
+    registerContainer(this.element, this.container_);
     this.boundCloseOnEscape_ = /** @type {?function(this:AmpLightbox, Event)} */ (this.closeOnEscape_.bind(
       this
     ));
@@ -557,6 +562,7 @@ class AmpLightbox extends AMP.BaseElement {
     if (!this.active_) {
       return;
     }
+    unregisterContainer(this.element);
     if (this.isScrollable_) {
       setStyle(this.element, 'webkitOverflowScrolling', '');
     }

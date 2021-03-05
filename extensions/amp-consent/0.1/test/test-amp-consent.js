@@ -18,11 +18,14 @@ import {ACTION_TYPE, AmpConsent} from '../amp-consent';
 import {
   CONSENT_ITEM_STATE,
   METADATA_STORAGE_KEY,
+  PURPOSE_CONSENT_STATE,
   STORAGE_KEY,
+  constructConsentInfo,
   constructMetadata,
   getConsentStateValue,
 } from '../consent-info';
 import {CONSENT_STRING_TYPE} from '../../../../src/consent-state';
+import {ConsentStateManager} from '../consent-state-manager';
 import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
 import {dev, user} from '../../../../src/log';
 import {dict} from '../../../../src/utils/object';
@@ -230,6 +233,23 @@ describes.realWin(
         });
       });
 
+      // TODO(micajuineho): remove test once granular consent launches
+      it('send post request to server with stores purpose consents', async () => {
+        ampConsent.isGranularConsentExperimentOn_ = true;
+        await ampConsent.buildCallback();
+        await macroTask();
+        expect(requestBody).to.deep.equal({
+          'consentInstanceId': 'ABC',
+          'consentStateValue': 'unknown',
+          'consentString': undefined,
+          'consentMetadata': undefined,
+          'purposeConsents': undefined,
+          'isDirty': false,
+          'matchedGeoGroup': null,
+        });
+        ampConsent.isGranularConsentExperimentOn_ = false;
+      });
+
       it('read promptIfUnknown from server response', async () => {
         await ampConsent.buildCallback();
         await macroTask();
@@ -253,7 +273,7 @@ describes.realWin(
       });
     });
 
-    describe('geo-override server communication', () => {
+    describe('server communication', () => {
       let ampConsent;
 
       it('checks local storage before making sever request', async () => {
@@ -326,60 +346,6 @@ describes.realWin(
           .true;
       });
 
-      it('send post request to server with matched group', async () => {
-        const remoteConfig = {
-          'consentInstanceId': 'abc',
-          'geoOverride': {
-            'nafta': {
-              'checkConsentHref': 'https://geo-override-check2/',
-              'consentRequired': true,
-            },
-          },
-        };
-        ISOCountryGroups = ['nafta'];
-        ampConsent = getAmpConsent(doc, remoteConfig);
-        await ampConsent.buildCallback();
-        await macroTask();
-        expect(requestBody).to.deep.equal({
-          'consentInstanceId': 'abc',
-          'consentStateValue': 'unknown',
-          'consentString': undefined,
-          'consentMetadata': undefined,
-          'isDirty': false,
-          'matchedGeoGroup': 'nafta',
-        });
-      });
-
-      it('only geoOverrides the first matched group', async () => {
-        const remoteConfig = {
-          'consentInstanceId': 'abc',
-          'geoOverride': {
-            'na': {
-              'checkConsentHref': 'https://geo-override-check2/',
-              'consentRequired': true,
-            },
-            'eea': {
-              'consentRequired': false,
-            },
-          },
-        };
-        ISOCountryGroups = ['na', 'eea'];
-        ampConsent = getAmpConsent(doc, remoteConfig);
-        await ampConsent.buildCallback();
-        await macroTask();
-        expect(await ampConsent.getConsentRequiredPromiseForTesting()).to.be
-          .true;
-        expect(ampConsent.matchedGeoGroup_).to.equal('na');
-        expect(requestBody).to.deep.equal({
-          'consentInstanceId': 'abc',
-          'consentStateValue': 'unknown',
-          'consentString': undefined,
-          'consentMetadata': undefined,
-          'isDirty': false,
-          'matchedGeoGroup': 'na',
-        });
-      });
-
       it('fallsback to true with invalid remote reponse', async () => {
         const remoteConfig = {
           'consentInstanceId': 'abc',
@@ -393,13 +359,71 @@ describes.realWin(
           .true;
       });
 
+      describe('geoOverride server communication', () => {
+        it('send post request to server with matched group', async () => {
+          const remoteConfig = {
+            'consentInstanceId': 'abc',
+            'geoOverride': {
+              'nafta': {
+                'checkConsentHref': 'https://geo-override-check2/',
+                'consentRequired': true,
+              },
+            },
+          };
+          ISOCountryGroups = ['nafta'];
+          ampConsent = getAmpConsent(doc, remoteConfig);
+          await ampConsent.buildCallback();
+          await macroTask();
+          expect(requestBody).to.deep.equal({
+            'consentInstanceId': 'abc',
+            'consentStateValue': 'unknown',
+            'consentString': undefined,
+            'consentMetadata': undefined,
+            'isDirty': false,
+            'matchedGeoGroup': 'nafta',
+          });
+        });
+
+        it('only geoOverrides the first matched group', async () => {
+          const remoteConfig = {
+            'consentInstanceId': 'abc',
+            'geoOverride': {
+              'na': {
+                'checkConsentHref': 'https://geo-override-check2/',
+                'consentRequired': true,
+              },
+              'eea': {
+                'consentRequired': false,
+              },
+            },
+          };
+          ISOCountryGroups = ['na', 'eea'];
+          ampConsent = getAmpConsent(doc, remoteConfig);
+          await ampConsent.buildCallback();
+          await macroTask();
+          expect(await ampConsent.getConsentRequiredPromiseForTesting()).to.be
+            .true;
+          expect(ampConsent.matchedGeoGroup_).to.equal('na');
+          expect(requestBody).to.deep.equal({
+            'consentInstanceId': 'abc',
+            'consentStateValue': 'unknown',
+            'consentString': undefined,
+            'consentMetadata': undefined,
+            'isDirty': false,
+            'matchedGeoGroup': 'na',
+          });
+        });
+      });
+
       describe('remote server response', () => {
         beforeEach(() => {
           jsonMockResponses = {
             'https://server-test-1/':
               '{"consentRequired": false, "consentStateValue": "unknown", "consentString": "hello"}',
             'https://server-test-2/':
-              '{"consentRequired": true, "consentStateValue": "rejected", "consentString": "mystring", "consentMetadata":{"consentStringType": 3, "additionalConsent": "1~1.35.41.101", "gdprApplies": false, "purposeOne": true}}',
+              '{"consentRequired": true, "consentStateValue": "rejected", "consentString": "mystring", ' +
+              '"consentMetadata":{"consentStringType": 3, "additionalConsent": "1~1.35.41.101", "gdprApplies": false, "purposeOne": true},' +
+              '"purposeConsents": {"abc":true, "xyz": false}}',
             'https://server-test-3/':
               '{"consentRequired": true, "consentStateValue": "unknown"}',
             'https://geo-override-check2/': '{"consentRequired": true}',
@@ -427,12 +451,9 @@ describes.realWin(
           expect(stateValue).to.equal('unknown');
           // 3 is dismissed, 4 is not requried, and 5 is unknown.
           // All 3 turn into 'unknown'.
-          expect(stateManagerInfo).to.deep.equal({
-            'consentState': 4,
-            'consentString': undefined,
-            'consentMetadata': undefined,
-            'isDirty': undefined,
-          });
+          expect(stateManagerInfo).to.deep.equal(
+            constructConsentInfo(CONSENT_ITEM_STATE.NOT_REQUIRED)
+          );
         });
 
         it('should not update local storage when consent value response is null', async () => {
@@ -452,12 +473,9 @@ describes.realWin(
           );
 
           expect(stateValue).to.equal('unknown');
-          expect(stateManagerInfo).to.deep.equal({
-            'consentState': CONSENT_ITEM_STATE.UNKNOWN,
-            'consentString': undefined,
-            'consentMetadata': undefined,
-            'isDirty': undefined,
-          });
+          expect(stateManagerInfo).to.deep.equal(
+            constructConsentInfo(CONSENT_ITEM_STATE.UNKNOWN)
+          );
           expect(await ampConsent.getConsentRequiredPromiseForTesting()).to.be
             .true;
         });
@@ -489,7 +507,44 @@ describes.realWin(
               true
             ),
             'isDirty': undefined,
+            'purposeConsents': undefined,
           });
+        });
+
+        it('updates local storage and uses those values (granular consent on)', async () => {
+          toggleExperiment(win, 'amp-consent-granular-consent', true);
+          const inlineConfig = {
+            'consentInstanceId': 'abc',
+            'consentRequired': 'remote',
+            'checkConsentHref': 'https://server-test-2/',
+          };
+          ampConsent = getAmpConsent(doc, inlineConfig);
+          await ampConsent.buildCallback();
+          await macroTask();
+          const stateManagerInfo = await ampConsent
+            .getConsentStateManagerForTesting()
+            .getConsentInstanceInfo();
+          const stateValue = getConsentStateValue(
+            stateManagerInfo.consentState
+          );
+
+          expect(stateValue).to.equal('rejected');
+          expect(stateManagerInfo).to.deep.equal({
+            'consentState': CONSENT_ITEM_STATE.REJECTED,
+            'consentString': 'mystring',
+            'consentMetadata': constructMetadata(
+              CONSENT_STRING_TYPE.US_PRIVACY_STRING,
+              '1~1.35.41.101',
+              false,
+              true
+            ),
+            'isDirty': undefined,
+            'purposeConsents': {
+              'abc': PURPOSE_CONSENT_STATE.ACCEPTED,
+              'xyz': PURPOSE_CONSENT_STATE.REJECTED,
+            },
+          });
+          toggleExperiment(win, 'amp-consent-granular-consent', false);
         });
 
         it('accepts unknown as a response', async () => {
@@ -509,12 +564,9 @@ describes.realWin(
           );
 
           expect(stateValue).to.equal('unknown');
-          expect(stateManagerInfo).to.deep.equal({
-            'consentState': CONSENT_ITEM_STATE.UNKNOWN,
-            'consentString': undefined,
-            'consentMetadata': undefined,
-            'isDirty': undefined,
-          });
+          expect(stateManagerInfo).to.deep.equal(
+            constructConsentInfo(CONSENT_ITEM_STATE.UNKNOWN)
+          );
         });
       });
 
@@ -527,6 +579,8 @@ describes.realWin(
               '{"consentRequired": true, "consentStateValue": "accepted", "consentString": "newstring", "consentMetadata": {"consentStringType": 3, "additionalConsent": "1~1.35.41.101", "gdprApplies": true, "purposeOne": true}}',
             'https://server-test-6/':
               '{"consentRequired": true, "consentStateValue": "accepted", "consentString": "newstring"}',
+            'https://server-test-7/':
+              '{"consentRequired": true, "consentStateValue": "accepted", "consentString": "newstring", "purposeConsents": {"xyz": false}}',
             'https://geo-override-check2/': '{"consentRequired": true}',
           };
         });
@@ -555,12 +609,84 @@ describes.realWin(
           );
 
           expect(stateValue).to.equal('accepted');
-          expect(stateManagerInfo).to.deep.equal({
-            'consentState': CONSENT_ITEM_STATE.ACCEPTED,
-            'consentString': 'newstring',
-            'isDirty': undefined,
-            'consentMetadata': undefined,
-          });
+          expect(stateManagerInfo).to.deep.equal(
+            constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED, 'newstring')
+          );
+        });
+
+        it('syncs undefined values overriding', async () => {
+          const inlineConfig = {
+            'consentInstanceId': 'abc',
+            'consentRequired': true,
+            'checkConsentHref': 'https://server-test-4/',
+          };
+          storageValue = {
+            'amp-consent:abc': {
+              [STORAGE_KEY.STATE]: 0,
+              [STORAGE_KEY.STRING]: 'oldstring',
+              [STORAGE_KEY.METADATA]: {
+                [METADATA_STORAGE_KEY.CONSENT_STRING_TYPE]:
+                  CONSENT_STRING_TYPE.TCF_V2,
+                [METADATA_STORAGE_KEY.ADDITIONAL_CONSENT]: '3~3.33.303',
+              },
+              [STORAGE_KEY.PURPOSE_CONSENTS]: {
+                'abc': PURPOSE_CONSENT_STATE.ACCEPTED,
+              },
+            },
+          };
+          ampConsent = getAmpConsent(doc, inlineConfig);
+          await ampConsent.buildCallback();
+          await macroTask();
+          const stateManagerInfo = await ampConsent
+            .getConsentStateManagerForTesting()
+            .getConsentInstanceInfo();
+          const stateValue = getConsentStateValue(
+            stateManagerInfo.consentState
+          );
+
+          expect(stateValue).to.equal('accepted');
+          expect(stateManagerInfo).to.deep.equal(
+            constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED, 'newstring')
+          );
+        });
+
+        it('syncs purposeConsents from server', async () => {
+          toggleExperiment(win, 'amp-consent-granular-consent', true);
+          const inlineConfig = {
+            'consentInstanceId': 'abc',
+            'consentRequired': true,
+            'checkConsentHref': 'https://server-test-7/',
+          };
+          // 0 represents 'rejected' in storage
+          storageValue = {
+            'amp-consent:abc': {
+              [STORAGE_KEY.STATE]: 0,
+              [STORAGE_KEY.STRING]: 'oldstring',
+              [STORAGE_KEY.PURPOSE_CONSENTS]: {
+                'abc': PURPOSE_CONSENT_STATE.ACCEPTED,
+              },
+            },
+          };
+          ampConsent = getAmpConsent(doc, inlineConfig);
+          await ampConsent.buildCallback();
+          await macroTask();
+          const stateManagerInfo = await ampConsent
+            .getConsentStateManagerForTesting()
+            .getConsentInstanceInfo();
+          const stateValue = getConsentStateValue(
+            stateManagerInfo.consentState
+          );
+
+          expect(stateValue).to.equal('accepted');
+          expect(stateManagerInfo).to.deep.equal(
+            constructConsentInfo(
+              CONSENT_ITEM_STATE.ACCEPTED,
+              'newstring',
+              undefined,
+              {'xyz': PURPOSE_CONSENT_STATE.REJECTED}
+            )
+          );
+          toggleExperiment(win, 'amp-consent-granular-consent', false);
         });
 
         it('syncs metadata from server', async () => {
@@ -602,6 +728,7 @@ describes.realWin(
               true,
               true
             ),
+            'purposeConsents': undefined,
           });
         });
 
@@ -629,12 +756,28 @@ describes.realWin(
           );
 
           expect(stateValue).to.equal('accepted');
-          expect(stateManagerInfo).to.deep.equal({
-            'consentState': CONSENT_ITEM_STATE.ACCEPTED,
-            'consentString': 'newstring',
-            'isDirty': undefined,
-            'consentMetadata': undefined,
-          });
+          expect(stateManagerInfo).to.deep.equal(
+            constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED, 'newstring')
+          );
+        });
+
+        it('should validate purpose consents before syncing', async () => {
+          toggleExperiment(win, 'amp-consent-granular-consent', true);
+          const inlineConfig = {
+            'consentInstanceId': 'abc',
+            'consentRequired': true,
+            'checkConsentHref': 'https://server-test-7/',
+          };
+          ampConsent = getAmpConsent(doc, inlineConfig);
+          const validationSpy = window.sandbox.spy(
+            ampConsent,
+            'validatePurposeConsents_'
+          );
+          await ampConsent.buildCallback();
+          await macroTask();
+          expect(validationSpy).to.be.calledOnce;
+          expect(validationSpy).to.be.calledWith({'xyz': false});
+          toggleExperiment(win, 'amp-consent-granular-consent', false);
         });
 
         it('should not sync data if response is null', async () => {
@@ -670,6 +813,7 @@ describes.realWin(
             'consentString': 'mystring',
             'isDirty': undefined,
             'consentMetadata': constructMetadata(CONSENT_STRING_TYPE.TCF_V2),
+            'purposeConsents': undefined,
           });
         });
       });
@@ -699,6 +843,7 @@ describes.realWin(
                 [METADATA_STORAGE_KEY.CONSENT_STRING_TYPE]:
                   CONSENT_STRING_TYPE.TCF_V2,
               },
+              [STORAGE_KEY.PURPOSE_CONSENTS]: {'abc': 1},
             },
           };
           ampConsent = getAmpConsent(doc, inlineConfig);
@@ -717,6 +862,7 @@ describes.realWin(
             'consentString': 'mystring',
             'isDirty': true,
             'consentMetadata': constructMetadata(CONSENT_STRING_TYPE.TCF_V2),
+            'purposeConsents': {'abc': PURPOSE_CONSENT_STATE.ACCEPTED},
           });
         });
 
@@ -753,6 +899,7 @@ describes.realWin(
             'consentString': 'mystring',
             'isDirty': true,
             'consentMetadata': constructMetadata(CONSENT_STRING_TYPE.TCF_V2),
+            'purposeConsents': undefined,
           });
         });
       });
@@ -960,6 +1107,7 @@ describes.realWin(
         consentElement = createConsentElement(doc, defaultConfig);
       });
 
+      // GEO
       it('in geo group', async () => {
         doc.body.appendChild(consentElement);
         ampConsent = new AmpConsent(consentElement);
@@ -1109,6 +1257,18 @@ describes.realWin(
 
           expect(managerSpy).to.not.be.called;
           expect(actionSpy).to.be.calledWith(ACTION_TYPE.DISMISS);
+        });
+
+        it('does not set purposeConsentMap with empty consent map', () => {
+          event.data.purposeConsents = {};
+          event.source = iframe.contentWindow;
+          win.dispatchEvent(event);
+
+          expect(managerSpy).to.not.be.called;
+          expect(actionSpy).to.be.calledWith(
+            ACTION_TYPE.ACCEPT,
+            'accept-string'
+          );
         });
       });
 
@@ -1602,6 +1762,133 @@ describes.realWin(
           expect(devSpy).to.be.calledOnce;
           expect(updateConsentInstancePurposeSpy).not.be.called;
         });
+      });
+
+      describe('server communication', () => {
+        beforeEach(() => {
+          jsonMockResponses = {
+            'https://server-test-1/':
+              '{"consentRequired": true, "consentStateValue": "accepted", "purposeConsentRequired": ["abc","xyz"]}',
+          };
+          defaultConfig = {
+            'consentInstanceId': 'abc',
+            'consentRequired': 'remote',
+            'checkConsentHref': 'https://server-test-1/',
+          };
+        });
+
+        it('checks global consent and then purpose consents', async () => {
+          const localStorageSpy = env.sandbox.spy(storageMock, 'get');
+          consentElement = createConsentElement(doc, defaultConfig);
+          doc.body.appendChild(consentElement);
+          ampConsent = new AmpConsent(consentElement);
+          const checkGranularConsentSpy = env.sandbox.spy(
+            ampConsent,
+            'checkGranularConsentRequired_'
+          );
+          await ampConsent.buildCallback();
+          await macroTask();
+
+          expect(localStorageSpy).to.be.calledBefore(checkGranularConsentSpy);
+          expect(checkGranularConsentSpy).to.be.calledOnce;
+        });
+
+        it('returns true if all purpose consents are stored', async () => {
+          storageValue = {
+            'amp-consent:abc': {
+              [STORAGE_KEY.STATE]: 1,
+              [STORAGE_KEY.PURPOSE_CONSENTS]: {
+                'abc': 1,
+                'hij': 1,
+                'xyz': 0,
+              },
+            },
+          };
+          consentElement = createConsentElement(doc, defaultConfig);
+          doc.body.appendChild(consentElement);
+          ampConsent = new AmpConsent(consentElement);
+          const hasRequiredConsentsSpy = env.sandbox.spy(
+            ampConsent,
+            'hasRequiredConsents_'
+          );
+          await ampConsent.buildCallback();
+          await macroTask();
+          expect(await hasRequiredConsentsSpy.returnValues[0]).to.equal(true);
+        });
+
+        it('returns false if not all purpose consents are stored', async () => {
+          storageValue = {
+            'amp-consent:abc': {
+              [STORAGE_KEY.STATE]: 1,
+              [STORAGE_KEY.PURPOSE_CONSENTS]: {
+                'abc': 1,
+                'hij': 1,
+                'zzz': 0,
+              },
+            },
+          };
+          consentElement = createConsentElement(doc, defaultConfig);
+          doc.body.appendChild(consentElement);
+          ampConsent = new AmpConsent(consentElement);
+          const hasRequiredConsentsSpy = env.sandbox.spy(
+            ampConsent,
+            'hasRequiredConsents_'
+          );
+          await ampConsent.buildCallback();
+          await macroTask();
+          expect(await hasRequiredConsentsSpy.returnValues[0]).to.equal(false);
+        });
+
+        it('informs consent state manager if all purpose consents are collected', async () => {
+          storageValue = {
+            'amp-consent:abc': {
+              [STORAGE_KEY.STATE]: 1,
+              [STORAGE_KEY.PURPOSE_CONSENTS]: {
+                'abc': 1,
+                'hij': 1,
+                'xyz': 0,
+              },
+            },
+          };
+          consentElement = createConsentElement(doc, defaultConfig);
+          doc.body.appendChild(consentElement);
+          ampConsent = new AmpConsent(consentElement);
+          const consentStateManagerSpy = env.sandbox.spy(
+            ConsentStateManager.prototype,
+            'hasAllPurposeConsents'
+          );
+          await ampConsent.buildCallback();
+          await macroTask();
+          // Once for remote sync, once for showing UI flow
+          expect(consentStateManagerSpy).to.be.calledTwice;
+        });
+
+        it(
+          'does not inform consent state manager if not all' +
+            'purpose consents are collected',
+          async () => {
+            storageValue = {
+              'amp-consent:abc': {
+                [STORAGE_KEY.STATE]: 1,
+                [STORAGE_KEY.PURPOSE_CONSENTS]: {
+                  'abc': 1,
+                  'hij': 1,
+                },
+              },
+            };
+            consentElement = createConsentElement(doc, defaultConfig);
+            doc.body.appendChild(consentElement);
+            ampConsent = new AmpConsent(consentElement);
+            const consentStateManagerSpy = env.sandbox.spy(
+              ConsentStateManager.prototype,
+              'hasAllPurposeConsents'
+            );
+            await ampConsent.buildCallback();
+            await macroTask();
+            // Only once b/c of sync flow
+            expect(consentStateManagerSpy).to.be.calledOnce;
+          }
+        );
       });
     });
   }
