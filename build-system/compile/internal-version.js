@@ -88,7 +88,9 @@ function getVersion() {
   const numberOfCherryPicks = gitCherryMaster().length;
   if (numberOfCherryPicks > 999) {
     throw new Error(
-      `This branch has ${numberOfCherryPicks} cherry-picks, which is more than 999, the maximum allowed number of cherry-picks!`
+      `This branch has ${numberOfCherryPicks} cherry-picks, which is more ` +
+        'than 999, the maximum allowed number of cherry-picks! Please make ' +
+        'sure your local master branch is up to date.'
     );
   }
 
