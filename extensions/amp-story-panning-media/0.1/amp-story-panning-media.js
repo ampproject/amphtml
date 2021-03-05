@@ -116,7 +116,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     const ampImgWidth = this.ampImgEl_.getAttribute('width');
     const scaledFraction = containerHeight / ampImgHeight;
     const scaledImageWidth = scaledFraction * ampImgWidth;
-    const widthFraction = 1 - (containerWidth * zoom) / scaledImageWidth;
+    const widthFraction = 1 - containerWidth / (scaledImageWidth * zoom);
 
     let x = 0;
     const xAttr = this.element_.getAttribute('x');
