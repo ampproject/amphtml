@@ -151,43 +151,48 @@ function LightboxWithRef(
 
   return (
     mounted && (
-      <ContainWrapper
-        ref={(r) => {
-          lightboxRef.current = r;
-        }}
-        size={true}
-        layout={true}
-        paint={true}
-        part="lightbox"
-        contentStyle={
-          // Prefer style over class to override `ContainWrapper`'s overflow
-          scrollable && {
-            overflow: 'scroll',
-            overscrollBehavior: 'none',
-          }
-        }
-        wrapperClassName={`${classes.defaultStyles} ${classes.wrapper} ${
-          scrollable ? '' : classes.containScroll
-        }`}
-        role="dialog"
-        tabindex="0"
-        onKeyDown={(event) => {
-          if (event.key === 'Escape') {
-            setVisible(false);
-          }
-        }}
-        {...rest}
-      >
-        {children}
-        <button
-          ariaLabel={DEFAULT_CLOSE_LABEL}
-          tabIndex={-1}
-          className={classes.closeButton}
-          onClick={() => {
-            setVisible(false);
+      <>
+        <ContainWrapper
+          ref={(r) => {
+            lightboxRef.current = r;
           }}
-        />
-      </ContainWrapper>
+          size={true}
+          layout={true}
+          paint={true}
+          part="lightbox"
+          contentStyle={
+            // Prefer style over class to override `ContainWrapper`'s overflow
+            scrollable && {
+              overflow: 'scroll',
+              overscrollBehavior: 'none',
+            }
+          }
+          wrapperClassName={`${classes.defaultStyles} ${classes.wrapper} ${
+            scrollable ? '' : classes.containScroll
+          }`}
+          role="dialog"
+          tabindex="0"
+          onKeyDown={(event) => {
+            if (event.key === 'Escape') {
+              setVisible(false);
+            }
+          }}
+          {...rest}
+        >
+          {children}
+          <button
+            ariaLabel={DEFAULT_CLOSE_LABEL}
+            tabIndex={-1}
+            className={classes.closeButton}
+            onClick={() => {
+              setVisible(false);
+            }}
+          />
+        </ContainWrapper>
+        <div className={classes.backdrop}>
+          <div className={classes.backdropOverscrollBlocker}></div>
+        </div>
+      </>
     )
   );
 }

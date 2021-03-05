@@ -62,11 +62,29 @@ const defaultStyles = {
   scrolling inside the lightbox.
 */
 const containScroll = {
-  overflow: 'auto', // Prevent scrolling inside lightbox.
+  overflow: 'scroll', // Prevent scrolling inside lightbox.
   overscrollBehavior: 'none', // Prevent scrolling outside lightbox.
 };
 
+const backdrop = {
+  position: 'fixed !important',
+  top: '0 !important',
+  left: '0 !important',
+  width: '101vw !important',
+  height: '100vh !important',
+  overflow: 'hidden scroll !important',
+};
+
+//TODO(#32400): See PR description.  This is a workaround dependent on a
+// a browser bug fix and should be removed when the browser bug is fixed.
+const backdropOverscrollBlocker = {
+  height: '101vh !important',
+  width: '0 !important',
+};
+
 const JSS = {
+  backdrop,
+  backdropOverscrollBlocker,
   closeButton,
   wrapper,
   defaultStyles,
