@@ -183,7 +183,13 @@ function adoptShared(global, callback) {
         if (typeof fnOrStruct == 'function') {
           fnOrStruct(global.AMP, global.AMP._);
         } else {
-          extensions.registerExtension(fnOrStruct.n, fnOrStruct.f, global.AMP);
+          extensions.registerExtension(
+            fnOrStruct.n,
+            fnOrStruct.ev,
+            fnOrStruct.l,
+            fnOrStruct.f,
+            global.AMP
+          );
         }
       });
     };

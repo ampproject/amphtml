@@ -94,6 +94,9 @@ export function calculateEntryPointScriptUrl(
  * @return {?{extensionId: string, extensionVersion: string}}
  */
 export function parseExtensionUrl(scriptUrl) {
+  if (!scriptUrl) {
+    return null;
+  }
   // Note that the "(\.max)?" group only applies to local dev.
   const matches = scriptUrl.match(
     /^(.*)\/(.*)-([0-9.]+|latest)(\.max)?\.(?:js|mjs)$/i
@@ -210,7 +213,7 @@ export function getExtensionScripts(
  * @param {HTMLHeadElement|Element|ShadowRoot|Document} head
  * @return {!Array<{extensionId: string, extensionVersion: string}>}
  */
-export function extensionScriptsInNode(head) {//QQQQ:calls
+export function extensionScriptsInNode(head) {
   // ampdoc.getHeadNode() can return null.
   if (!head) {
     return [];
@@ -229,8 +232,10 @@ export function extensionScriptsInNode(head) {//QQQQ:calls
     const extensionId =
       script.getAttribute('custom-element') ||
       script.getAttribute('custom-template');
-    const {extensionVersion} = parseExtensionUrl(script.src);
-    scripts.push({extensionId, extensionVersion});
+    const urlParts = parseExtensionUrl(script.src);
+    if (extensionId && urlParts) {
+      scripts.push({extensionId, extensionVersion: urlParts.extensionVersion});
+    }
   }
   return scripts;
 }

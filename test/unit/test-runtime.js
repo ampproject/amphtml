@@ -593,7 +593,7 @@ describes.fakeWin(
 
         class TemplateType {}
 
-        ampdoc.declareExtension('amp-ext');
+        ampdoc.declareExtension('amp-ext', '0.1');
         win.AMP.push({
           n: 'amp-ext',
           f: (amp) => {
@@ -633,7 +633,7 @@ describes.fakeWin(
           'installStylesForDoc'
         );
 
-        ampdoc.declareExtension('amp-ext');
+        ampdoc.declareExtension('amp-ext', '0.1');
         win.AMP.push({
           n: 'amp-ext',
           f: (amp) => {
@@ -677,7 +677,7 @@ describes.fakeWin(
             installStylesCallback = cb;
           });
 
-        ampdoc.declareExtension('amp-ext');
+        ampdoc.declareExtension('amp-ext', '0.1');
         win.AMP.push({
           n: 'amp-ext',
           f: (amp) => {
@@ -722,7 +722,7 @@ describes.fakeWin(
       it('should register doc-service as ctor and install imm', function* () {
         class Service1 {}
         const ampdoc = new AmpDocSingle(win);
-        ampdoc.declareExtension('amp-ext');
+        ampdoc.declareExtension('amp-ext', '0.1');
         ampdocServiceMock.expects('getAmpDoc').returns(ampdoc).atLeast(1);
         win.AMP.push({
           n: 'amp-ext',
@@ -752,7 +752,7 @@ describes.fakeWin(
           return {str: 'A'};
         }
         const ampdoc = new AmpDocSingle(win);
-        ampdoc.declareExtension('amp-ext');
+        ampdoc.declareExtension('amp-ext', '0.1');
         ampdocServiceMock.expects('getAmpDoc').returns(ampdoc).atLeast(1);
         win.AMP.push({
           n: 'amp-ext',
