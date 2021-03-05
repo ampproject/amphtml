@@ -70,7 +70,7 @@ describe('getMode', () => {
 
   it('should support arbitrary format for development', () => {
     const url = 'https://www.amp-site.org#development=nonsensevalue';
-    expect(getMode(getWin(url)).development).to.be.false;
+    expect(getMode(getWin(url)).development).to.be.true;
   });
 });
 
