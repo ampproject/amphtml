@@ -689,7 +689,6 @@ export class AmpVideo extends AMP.BaseElement {
 
   /** @override */
   pauseCallback() {
-    console.log('amp-video: pauseCallback');
     if (this.video_) {
       this.video_.pause();
     }
@@ -703,7 +702,6 @@ export class AmpVideo extends AMP.BaseElement {
     if (isPlaying === this.isPlaying_) {
       return;
     }
-    console.log('amp-video: updateIsPlaying_:', isPlaying);
     this.isPlaying_ = isPlaying;
     if (isPlaying) {
       observeContentSize(this.element, this.pauseWhenNoSize_);
@@ -718,9 +716,7 @@ export class AmpVideo extends AMP.BaseElement {
    */
   pauseWhenNoSize_({width, height}) {
     const hasSize = width > 0 && height > 0;
-    console.log('amp-video: pauseWhenNoSize_:', hasSize, width, height);
     if (!hasSize && this.video_) {
-      console.log('amp-video: pauseWhenNoSize_: pause');
       this.video_.pause();
     }
   }
