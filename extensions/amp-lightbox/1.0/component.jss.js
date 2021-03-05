@@ -48,6 +48,14 @@ const wrapper = {
   boxSizing: 'border-box',
 };
 
+const scrollable = {};
+const content = {
+  overflow: 'hidden !important',
+  '&$scrollable': {
+    overflow: 'scroll !important',
+  },
+};
+
 // User overridable styles
 const defaultStyles = {
   zIndex: 1000,
@@ -89,6 +97,8 @@ const JSS = {
   wrapper,
   defaultStyles,
   containScroll,
+  content,
+  scrollable,
 };
 
 // useStyles gets replaced for AMP builds via `babel-plugin-transform-jss`.

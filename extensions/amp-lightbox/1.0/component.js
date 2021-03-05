@@ -50,7 +50,14 @@ const DEFAULT_CLOSE_LABEL = 'Close the modal';
  * @return {PreactDef.Renderable}
  */
 function LightboxWithRef(
-  {animation = 'fade-in', children, onBeforeOpen, onAfterClose, ...rest},
+  {
+    animation = 'fade-in',
+    children,
+    onBeforeOpen,
+    onAfterClose,
+    scrollable,
+    ...rest
+  },
   ref
 ) {
   // There are two phases to open and close.
@@ -153,8 +160,10 @@ function LightboxWithRef(
           layout={true}
           paint={true}
           part="lightbox"
-          contentClassName={classes.containScroll}
-          wrapperClassName={`${classes.defaultStyles} ${classes.wrapper} `}
+          contentClassName={`${classes.content} ${
+            scrollable && classes.scrollable
+          }`}
+          wrapperClassName={`${classes.defaultStyles} ${classes.wrapper} ${classes.containScroll}`}
           role="dialog"
           tabindex="0"
           onKeyDown={(event) => {
