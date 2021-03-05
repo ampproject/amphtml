@@ -675,7 +675,6 @@ export class ManualAdvancement extends AdvancementConfig {
    */
   maybePerformNavigation_(event) {
     const target = dev().assertElement(event.target);
-    console.log(target);
 
     const pageRect = this.getStoryPageRect_();
 
