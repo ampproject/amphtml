@@ -27,7 +27,7 @@ if (argv.update_tests) {
  * Simple wrapper around the python based validator build.
  */
 async function validator() {
-  execOrDie('python build.py' + validatorArgs, {
+  execOrDie('python3 build.py' + validatorArgs, {
     cwd: 'validator',
     stdio: 'inherit',
   });
@@ -37,7 +37,7 @@ async function validator() {
  * Simple wrapper around the python based validator webui build.
  */
 async function validatorWebui() {
-  execOrDie('python build.py' + validatorArgs, {
+  execOrDie('python3 build.py' + validatorArgs, {
     cwd: 'validator/js/webui',
     stdio: 'inherit',
   });

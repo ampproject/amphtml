@@ -88,6 +88,10 @@ export class AmpSmartlinks extends AMP.BaseElement {
    */
   runSmartlinks_() {
     this.getLinkmateOptions_().then((config) => {
+      if (!config) {
+        return;
+      }
+
       this.linkmateOptions_.linkmateExpected = config['linkmate_enabled'];
       this.linkmateOptions_.publisherID = config['publisher_id'];
 
@@ -98,7 +102,9 @@ export class AmpSmartlinks extends AMP.BaseElement {
         /** @type {!../../../src/service/xhr-impl.Xhr} */
         (this.xhr_),
         /** @type {!Object} */
-        (this.linkmateOptions_)
+        (this.linkmateOptions_),
+        /** @type {!Object} */
+        (this.win)
       );
       this.smartLinkRewriter_ = this.initLinkRewriter_();
 
@@ -199,11 +205,20 @@ export class AmpSmartlinks extends AMP.BaseElement {
       'organization_type': 'publisher',
       'user': {
         'page_session_uuid': this.generateUUID_(),
-        'source_url': this.ampDoc_.getUrl(),
+        'source_url': this.getLocationHref_(),
         'previous_url': this.referrer_,
         'user_agent': this.ampDoc_.win.navigator.userAgent,
       },
     }));
+  }
+
+  /**
+   * Retrieve url of the current doc.
+   * @return {string}
+   * @private
+   */
+  getLocationHref_() {
+    return this.win.location.href;
   }
 
   /**

@@ -19,11 +19,11 @@ This document outlines the configuration options that will determine in which co
 }
 ```
 
-- `paramName` - This user defined name determines the name of the query parameter appended to the links.
-- `ids` - An object containing key-value pairs that is partially encoded and passed along in the param.
-- `proxyOnly` - (optional) Flag indicating whether the links should only be appended on pages served on a proxy origin. Defaults to `true`.
-- `destinationDomains` - (optional) Links will be decorated if their domains are included in this array. Defaults to [`canonical`](https://github.com/ampproject/amphtml/blob/3b0feadab3b9b12ddb80edc9a30f959087134905/spec/amp-html-format.md#canon) and `source` domains. A link matching the exact same hostname will not be decorated unless specified in this array.
-- `enabled` - Publishers must explicity set this to `true` to opt-in to using this feature.
+-   `paramName` - This user defined name determines the name of the query parameter appended to the links.
+-   `ids` - An object containing key-value pairs that is partially encoded and passed along in the param.
+-   `proxyOnly` - (optional) Flag indicating whether the links should only be appended on pages served on a proxy origin. Defaults to `true`.
+-   `destinationDomains` - (optional) Links will be decorated if their domains are included in this array. Defaults to [`canonical`](https://github.com/ampproject/amphtml/blob/3b0feadab3b9b12ddb80edc9a30f959087134905/spec/amp-html-format.md#canon) and `source` domains. A link matching the exact same hostname will not be decorated unless specified in this array. Links will never be decorated when the window host matches the link host.
+-   `enabled` - Publishers must explicitly set this to `true` to opt-in to using this feature.
 
 This linker uses this configuration to generate a string in this structure: `<paramName>=<version>*<checkSum>*<idName1>*<idValue1>*<idName2>*<idValue2>...` For more details see [Linker Param Format](./linker-id-receiving.md#Format)
 
@@ -61,7 +61,7 @@ An example of a config that grants more granular control may look like the examp
 }
 ```
 
-In this example configuration, the parameter would be appendend to any outgoing links matching the `source` or `canonical` domains that are not an exact hostname match. This is because the `destinationDomains` entry has been omitted and this is the default behavior. The example has `proxyOnly` set to `false`, this overrides the default behavior and indicates that the linker should manage outgoing links in all contexts this amp page might be served in. Finally, we have set `enabled` to be `true`. This is necessary to tell the runtime that we would like to enable this linker configuration.
+In this example configuration, the parameter would be appended to any outgoing links matching the `source` or `canonical` domains that are not an exact hostname match. This is because the `destinationDomains` entry has been omitted and this is the default behavior. The example has `proxyOnly` set to `false`, this overrides the default behavior and indicates that the linker should manage outgoing links in all contexts this amp page might be served in. Finally, we have set `enabled` to be `true`. This is necessary to tell the runtime that we would like to enable this linker configuration.
 
 #### Destination Domain Matching
 
@@ -88,7 +88,7 @@ For example: you may have a site `example.com` that links to `a.example.com`, `b
 "destinationDomains": ["*.example.com"]
 ```
 
-Using this configuration links to `a.example.com`, `b.example.com` and `a.b.example.com` will all be decorated. Similarily, you may want to decorate links to `example.co`, `example.co.uk`, and `example.fr`. This can be accomplished using the config below.
+Using this configuration links to `a.example.com`, `b.example.com` and `a.b.example.com` will all be decorated. Similarly, you may want to decorate links to `example.co`, `example.co.uk`, and `example.fr`. This can be accomplished using the config below.
 
 ```json
 "destinationDomains": ["example.*"]

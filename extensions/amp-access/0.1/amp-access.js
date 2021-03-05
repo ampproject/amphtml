@@ -90,7 +90,7 @@ export class AccessService {
     this.viewport_ = Services.viewportForDoc(ampdoc);
 
     /** @private @const {!../../../src/service/template-impl.Templates} */
-    this.templates_ = Services.templatesFor(ampdoc.win);
+    this.templates_ = Services.templatesForDoc(ampdoc);
 
     /** @private @const {!../../../src/service/mutator-interface.MutatorInterface} */
     this.mutator_ = Services.mutatorForDoc(ampdoc);
@@ -464,16 +464,24 @@ export class AccessService {
    */
   applyAuthorizationToElement_(element, response) {
     const expr = element.getAttribute('amp-access');
-    const on = this.evaluator_.evaluate(expr, response);
-    let renderPromise = null;
+    let on = false;
+    try {
+      on = this.evaluator_.evaluate(expr, response);
+    } catch (err) {
+      // If evaluating the expression yields an error
+      // it is most likely an invalid expression (publisher error).
+      user().error(TAG, err);
+    }
+
     if (on) {
-      renderPromise = this.renderTemplates_(element, response);
+      const renderTemplate = this.renderTemplates_(element, response);
+      if (renderTemplate) {
+        return renderTemplate.then(() =>
+          this.applyAuthorizationAttrs_(element, on)
+        );
+      }
     }
-    if (renderPromise) {
-      return renderPromise.then(() =>
-        this.applyAuthorizationAttrs_(element, on)
-      );
-    }
+
     return this.applyAuthorizationAttrs_(element, on);
   }
 

@@ -23,6 +23,10 @@ import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber, isObject} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {
+  observeContentSize,
+  unobserveContentSize,
+} from '../../../src/utils/size-observer';
 import {tryParseJson} from '../../../src/json';
 
 export class AmpVizVega extends AMP.BaseElement {
@@ -62,6 +66,8 @@ export class AmpVizVega extends AMP.BaseElement {
      * Instance of Vega chart object. https://goo.gl/laszHL
      */
     this.chart_ = null;
+
+    this.onResized_ = this.onResized_.bind(this);
   }
 
   /** @override */
@@ -107,22 +113,34 @@ export class AmpVizVega extends AMP.BaseElement {
   }
 
   /** @override */
+  attachedCallback() {
+    observeContentSize(this.element, this.onResized_);
+  }
+
+  /** @override */
+  detachedCallback() {
+    unobserveContentSize(this.element, this.onResized_);
+  }
+
+  /** @override */
   layoutCallback() {
     this.initialize_();
     return this.loadData_().then(() => this.renderGraph_());
   }
 
-  /** @override */
-  onLayoutMeasure() {
-    const box = this.getLayoutBox();
+  /**
+   * @param {!../layout-rect.LayoutSizeDef} size
+   * @private
+   */
+  onResized_(size) {
     if (
-      this.measuredWidth_ == box.width &&
-      this.measuredHeight_ == box.height
+      this.measuredWidth_ == size.width &&
+      this.measuredHeight_ == size.height
     ) {
       return;
     }
-    this.measuredWidth_ = box.width;
-    this.measuredHeight_ = box.height;
+    this.measuredWidth_ = size.width;
+    this.measuredHeight_ = size.height;
     if (this.chart_) {
       this.renderGraph_();
     }

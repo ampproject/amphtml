@@ -18,9 +18,15 @@ const {VERSION} = require('./internal-version');
 
 // If there is a sync JS error during initial load,
 // at least try to unhide the body.
+// If "AMP" is already an object then that means another runtime has already
+// been initialized and the current runtime must exit early. This can occur
+// if multiple AMP libraries are included in the html or when both the module
+// and nomodule runtimes execute in older browsers such as safari < 11.
 exports.mainBinary =
   'var global=self;self.AMP=self.AMP||[];' +
-  'try{(function(_){\n<%= contents %>})(AMP._=AMP._||{})}catch(e){' +
+  'try{(function(_){' +
+  'if(self.AMP&&!Array.isArray(self.AMP))return;' +
+  '\n<%= contents %>})(AMP._=AMP._||{})}catch(e){' +
   'setTimeout(function(){' +
   'var s=document.body.style;' +
   's.opacity=1;' +
@@ -30,6 +36,9 @@ exports.mainBinary =
 
 exports.extension = function (
   name,
+  version,
+  latest,
+  isModule,
   loadPriority,
   intermediateDeps,
   opt_splitMarker
@@ -39,6 +48,11 @@ exports.extension = function (
   let deps = '';
   if (intermediateDeps && intermediateDeps.length) {
     deps = 'i:';
+    /**
+     * Wraps the provided string in quotes.
+     * @param {string} s
+     * @return {string}
+     */
     function quote(s) {
       return `"${s}"`;
     }
@@ -56,9 +70,12 @@ exports.extension = function (
     }
     priority = 'p:"high",';
   }
+  // Use a numeric value instead of boolean. "m" stands for "module"
+  const m = isModule ? 1 : 0;
   return (
-    `(self.AMP=self.AMP||[]).push({n:"${name}",${priority}${deps}` +
-    `v:"${VERSION}",f:(function(AMP,_){${opt_splitMarker}\n` +
+    `(self.AMP=self.AMP||[]).push({n:"${name}",ev:"${version}",l:${latest},` +
+    `${priority}${deps}` +
+    `v:"${VERSION}",m:${m},f:(function(AMP,_){${opt_splitMarker}\n` +
     '<%= contents %>\n})});'
   );
 };

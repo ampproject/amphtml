@@ -71,15 +71,39 @@ ${cyan('$')} npm uninstall [package_name]
 ${yellow('For detailed instructions, see')} ${cyan(setupInstructionsUrl)}`;
 
 // Color formatting libraries may not be available when this script is run.
+/**
+ * Formats the text to appear red
+ *
+ * @param {string} text
+ * @return {string}
+ */
 function red(text) {
   return '\x1b[31m' + text + '\x1b[0m';
 }
+/**
+ * Formats the text to appear cyan
+ *
+ * @param {string} text
+ * @return {string}
+ */
 function cyan(text) {
   return '\x1b[36m' + text + '\x1b[0m';
 }
+/**
+ * Formats the text to appear green
+ *
+ * @param {string} text
+ * @return {string}
+ */
 function green(text) {
   return '\x1b[32m' + text + '\x1b[0m';
 }
+/**
+ * Formats the text to appear yellow
+ *
+ * @param {string} text
+ * @return {string}
+ */
 function yellow(text) {
   return '\x1b[33m' + text + '\x1b[0m';
 }
@@ -247,15 +271,20 @@ function runGulpChecks() {
     );
     updatesNeeded.add('gulp');
   } else if (!globalGulpCli) {
-    console.log(
-      yellow('WARNING: Could not find a global install of'),
-      cyan('gulp-cli') + yellow('.')
-    );
-    console.log(
-      yellow('⤷ To fix this, run'),
-      cyan('"npm install --global gulp-cli"') + yellow('.')
-    );
-    updatesNeeded.add('gulp-cli');
+    const whichGulp = getStdout('which gulp').trim();
+    if (!whichGulp.match(/\/gulp/)) {
+      // User is missing a global gulp install on a terminal supporting `which`.
+      // Or they do not have it installed via NPM.
+      console.log(
+        yellow('WARNING: Could not find a global install of'),
+        cyan('gulp-cli') + yellow('.')
+      );
+      console.log(
+        yellow('⤷ To fix this, run'),
+        cyan('"npm install --global gulp-cli"') + yellow('.')
+      );
+      updatesNeeded.add('gulp-cli');
+    }
   } else {
     printGulpVersion('gulp-cli');
   }
@@ -363,11 +392,6 @@ function checkPythonVersion() {
  * @return {Promise}
  */
 async function main() {
-  // NPM is already used by default on Travis and Github Actions, so there is
-  // nothing more to do.
-  if (process.env.TRAVIS || process.env.GITHUB_ACTIONS) {
-    return;
-  }
   ensureNpm();
   await checkNodeVersion();
   runGulpChecks();

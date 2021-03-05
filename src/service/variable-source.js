@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {Services} from '../services';
-import {devAssert} from '../log';
+import {pureDevAssert as devAssert} from '../core/assert';
 import {isAmp4Email} from '../format';
 import {isFiniteNumber} from '../types';
 import {loadPromise} from '../event-helper';
@@ -271,7 +271,7 @@ export class VariableSource {
    * Returns a Regular expression that can be used to detect all the variables
    * in a template.
    * @param {!Object<string, *>=} opt_bindings
-   * @param {!Object<string, boolean>=} opt_allowlist Optional white list of names
+   * @param {!Object<string, boolean>=} opt_allowlist Optional allowlist of names
    *   that can be substituted.
    * @return {!RegExp}
    */
@@ -285,7 +285,7 @@ export class VariableSource {
 
   /**
    * @param {!Array<string>} keys
-   * @param {!Object<string, boolean>=} opt_allowlist Optional white list of names
+   * @param {!Object<string, boolean>=} opt_allowlist Optional allowlist of names
    *   that can be substituted.
    * @return {!RegExp}
    * @private

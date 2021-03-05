@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-import {getNextArrow, getPrevArrow, getSlides} from './helpers';
-import sleep from 'sleep-promise';
+import {getNextArrow, getPrevArrow, getSlides, sleep} from './helpers';
 
 const pageWidth = 500;
 const pageHeight = 800;
 
 describes.endtoend(
-  'AMP carousel advance',
+  'amp-base-carousel - advance',
   {
-    testUrl:
-      'http://localhost:8000/test/manual/amp-base-carousel/advance.amp.html',
+    version: '0.1',
+    fixture: 'amp-base-carousel/advance.amp.html',
     experiments: ['amp-base-carousel'],
     environments: ['single'],
     initialRect: {width: pageWidth, height: pageHeight},
@@ -48,7 +47,8 @@ describes.endtoend(
       nextArrow = await getNextArrow(controller);
     });
 
-    it('should move forwards once', async () => {
+    // TODO(micajuine-ho, #24195): This test is flaky during CI.
+    it.skip('should move forwards once', async () => {
       await controller.click(nextArrow);
       await sleep(500);
       prevArrow = await getPrevArrow(controller);

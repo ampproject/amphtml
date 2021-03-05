@@ -37,8 +37,8 @@ Vars can be defined by the platform, in the config at the top level, inside the 
 
 For the following event types, variables can be passed as part of the element level data attribute
 
-- visible
-- click
+-   visible
+-   click
 
 The variables passed as data attributes should follow the format `data-vars-*`.
 

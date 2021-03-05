@@ -25,7 +25,6 @@ describe('devdash', () => {
       it('joins simple fragments', () => {
         expect(joinFragments(['a', 'b', 'c'])).to.equal('abc');
       });
-
       it('joins mapped fragments', () => {
         expect(joinFragments([1, 2, 3], a => a + 1)).to.equal('234');
       });

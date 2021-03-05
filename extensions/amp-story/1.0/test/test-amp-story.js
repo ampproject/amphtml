@@ -247,18 +247,17 @@ describes.realWin(
       await createStoryWithPages();
       const pages = story.element.querySelectorAll('amp-story-page');
 
-      element.build();
+      element.buildInternal();
 
       expect(pages[0].hasAttribute('active')).to.be.true;
       expect(pages[1].hasAttribute('active')).to.be.false;
 
       // Stubbing because we need to assert synchronously
-      env.sandbox
-        .stub(element.implementation_, 'mutateElement')
-        .callsFake((mutator) => {
-          mutator();
-          return Promise.resolve();
-        });
+      const impl = await element.getImpl(false);
+      env.sandbox.stub(impl, 'mutateElement').callsFake((mutator) => {
+        mutator();
+        return Promise.resolve();
+      });
 
       const eventObj = createEvent('keydown');
       eventObj.key = Keys.RIGHT_ARROW;
@@ -1656,14 +1655,6 @@ describes.realWin(
       });
 
       describe('amp-story rewriteStyles', () => {
-        beforeEach(() => {
-          toggleExperiment(win, 'amp-story-responsive-units', true);
-        });
-
-        afterEach(() => {
-          toggleExperiment(win, 'amp-story-responsive-units', false);
-        });
-
         it('should rewrite vw styles', async () => {
           await createStoryWithPages(1, ['cover']);
           const styleEl = win.document.createElement('style');

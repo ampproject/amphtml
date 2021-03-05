@@ -869,6 +869,27 @@ describes.realWin(
           .then((url) => {
             expect(url).to.not.match(/(\?|&)npa=(&|$)/);
           }));
+      it('should include npa=1 if `serveNpaSignal` is found, regardless of consent', () =>
+        impl
+          .getAdUrl(
+            {consentState: CONSENT_POLICY_STATE.SUFFICIENT},
+            undefined,
+            true
+          )
+          .then((url) => {
+            expect(url).to.match(/(\?|&)npa=1(&|$)/);
+          }));
+
+      it('should include npa=1 if `serveNpaSignal` is false & insufficient consent', () =>
+        impl
+          .getAdUrl(
+            {consentState: CONSENT_POLICY_STATE.INSUFFICIENT},
+            undefined,
+            false
+          )
+          .then((url) => {
+            expect(url).to.match(/(\?|&)npa=1(&|$)/);
+          }));
 
       it('should include gdpr_consent, if TC String is provided', () =>
         impl.getAdUrl({consentString: 'tcstring'}).then((url) => {
@@ -890,6 +911,16 @@ describes.realWin(
           expect(url).to.not.match(/(\?|&)gdpr=(&|$)/);
         }));
 
+      it('should include addtl_consent', () =>
+        impl.getAdUrl({additionalConsent: 'abc123'}).then((url) => {
+          expect(url).to.match(/(\?|&)addtl_consent=abc123(&|$)/);
+        }));
+
+      it('should not include addtl_consent, if additionalConsent is missing', () =>
+        impl.getAdUrl({}).then((url) => {
+          expect(url).to.not.match(/(\?|&)addtl_consent=(&|$)/);
+        }));
+
       it('should have spsa and size 1x1 when single page story ad', () => {
         impl.isSinglePageStoryAd = true;
         return impl.getAdUrl().then((url) => {
@@ -906,9 +937,10 @@ describes.realWin(
             .stub(ampdoc, 'getMetaByName')
             .withArgs('runtime-type')
             .returns('2');
-          impl.buildCallback();
-          return impl.getAdUrl().then((url) => {
-            expect(url).to.have.string(MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT);
+          return impl.buildCallback().then(() => {
+            impl.getAdUrl().then((url) => {
+              expect(url).to.have.string(MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT);
+            });
           });
         });
 
@@ -917,9 +949,10 @@ describes.realWin(
             .stub(ampdoc, 'getMetaByName')
             .withArgs('runtime-type')
             .returns('10');
-          impl.buildCallback();
-          return impl.getAdUrl().then((url) => {
-            expect(url).to.have.string(MODULE_NOMODULE_PARAMS_EXP.CONTROL);
+          return impl.buildCallback().then(() => {
+            impl.getAdUrl().then((url) => {
+              expect(url).to.have.string(MODULE_NOMODULE_PARAMS_EXP.CONTROL);
+            });
           });
         });
 
@@ -945,9 +978,10 @@ describes.realWin(
             .stub(ampdoc, 'getMetaByName')
             .withArgs('amp-usqp')
             .returns('5798237482=45,3579282=0');
-          impl.buildCallback();
-          return impl.getAdUrl().then((url) => {
-            expect(url).to.have.string('579823748245!357928200');
+          return impl.buildCallback().then(() => {
+            impl.getAdUrl().then((url) => {
+              expect(url).to.have.string('579823748245!357928200');
+            });
           });
         });
 
@@ -956,9 +990,10 @@ describes.realWin(
             .stub(ampdoc, 'getMetaByName')
             .withArgs('amp-usqp')
             .returns('5798237482=1');
-          impl.buildCallback();
-          return impl.getAdUrl().then((url) => {
-            expect(url).to.have.string('579823748201');
+          return impl.buildCallback().then(() => {
+            impl.getAdUrl().then((url) => {
+              expect(url).to.have.string('579823748201');
+            });
           });
         });
 
@@ -1006,7 +1041,7 @@ describes.realWin(
         impl.win.ampAdSlotIdCounter = 1;
         expect(impl.element.getAttribute('data-amp-slot-index')).to.not.be.ok;
         impl.layoutMeasureExecuted_ = true;
-        impl.uiHandler = {applyUnlayoutUI: () => {}};
+        impl.uiHandler = {applyUnlayoutUI: () => {}, cleanup: () => {}};
         const placeholder = doc.createElement('div');
         placeholder.setAttribute('placeholder', '');
         const fallback = doc.createElement('div');
@@ -1177,25 +1212,6 @@ describes.realWin(
           env.sandbox.stub(storage, 'get').callsFake((key) => {
             return Promise.resolve(storageContent[key]);
           });
-        });
-
-        it('does nothing if experiment is disabled', async () => {
-          forceExperimentBranch(
-            impl.win,
-            AD_SIZE_OPTIMIZATION_EXP.branch,
-            AD_SIZE_OPTIMIZATION_EXP.control
-          );
-          const adsense = constructImpl({
-            width: '320',
-            height: '150',
-          });
-
-          const promise = adsense.buildCallback();
-          expect(promise).to.exist;
-          await promise;
-
-          expect(didAttemptSizeChange).to.be.false;
-          expect(adsense.element.hasAttribute('data-auto-format')).to.be.false;
         });
 
         it('does nothing if ad unit is responsive already', async () => {

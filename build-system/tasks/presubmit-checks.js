@@ -15,12 +15,12 @@
  */
 'use strict';
 
-const colors = require('ansi-colors');
-const gulp = require('gulp');
-const log = require('fancy-log');
+const fs = require('fs');
+const globby = require('globby');
 const path = require('path');
 const srcGlobs = require('../test-configs/config').presubmitGlobs;
-const through2 = require('through2');
+const {cyan, red, yellow} = require('kleur/colors');
+const {log} = require('../common/logging');
 
 const dedicatedCopyrightNoteSources = /(\.js|\.css|\.go)$/;
 
@@ -89,12 +89,6 @@ const forbiddenTerms = {
   '[^.]user\\(\\)\\.assert\\(': 'Use the userAssert function instead.',
   'it\\.only': '',
   'Math.random[^;()]*=': 'Use Sinon to stub!!!',
-  'gulp-util': {
-    message:
-      '`gulp-util` will be deprecated soon. See ' +
-      'https://medium.com/gulpjs/gulp-util-ca3b1f9f9ac5 ' +
-      'for a list of alternatives.',
-  },
   'sinon\\.(spy|stub|mock)\\(': {
     message: 'Use a sandbox instead to avoid repeated `#restore` calls',
   },
@@ -111,37 +105,14 @@ const forbiddenTerms = {
       '  If this is cross domain, overwrite the method directly.',
   },
   'console\\.\\w+\\(': {
-    message:
-      'If you run against this, use console/*OK*/.[log|error] to ' +
-      'allowlist a legit case.',
+    message: String(
+      'console.log is generally forbidden. For the runtime, use ' +
+        'console/*OK*/.[log|error] to allowlist a legit case. ' +
+        'For build-system, use the functions in build-system/common/logging.js.'
+    ),
     allowlist: [
       'build-system/common/check-package-manager.js',
-      'build-system/pr-check/build.js',
-      'build-system/pr-check/build-targets.js',
-      'build-system/pr-check/checks.js',
-      'build-system/pr-check/dist-bundle-size.js',
-      'build-system/pr-check/dist-tests.js',
-      'build-system/pr-check/module-dist-bundle-size.js',
-      'build-system/pr-check/esm-tests.js',
-      'build-system/pr-check/experiment-tests.js',
-      'build-system/pr-check/e2e-tests.js',
-      'build-system/pr-check/local-tests.js',
-      'build-system/pr-check/npm-checks.js',
-      'build-system/pr-check/performance-tests.js',
-      'build-system/pr-check/utils.js',
-      'build-system/pr-check/validator-tests.js',
-      'build-system/pr-check/visual-diff-tests.js',
-      'build-system/server/app.js',
-      'build-system/server/amp4test.js',
-      'build-system/tasks/build.js',
-      'build-system/tasks/check-exact-versions.js',
-      'build-system/tasks/check-owners.js',
-      'build-system/tasks/check-types.js',
-      'build-system/tasks/dist.js',
-      'build-system/tasks/dns-monitor.js',
-      'build-system/tasks/helpers.js',
-      'build-system/tasks/prettify.js',
-      'build-system/tasks/server-tests.js',
+      'build-system/common/logging.js',
       'src/purifier/noop.js',
       'validator/js/engine/parse-css.js',
       'validator/js/engine/validator-in-browser.js',
@@ -175,6 +146,18 @@ const forbiddenTerms = {
       'extensions/amp-analytics/0.1/config.js',
       'extensions/amp-analytics/0.1/requests.js',
     ],
+  },
+  '\\.buildInternal': {
+    message: 'can only be called by the framework',
+    allowlist: [
+      'src/service/builder.js',
+      'src/service/resource.js',
+      'testing/iframe.js',
+    ],
+  },
+  'getBuilderForDoc': {
+    message: 'can only be used by the runtime',
+    allowlist: ['src/custom-element.js', 'src/service/builder.js'],
   },
   // Service factories that should only be installed once.
   'installActionServiceForDoc': {
@@ -257,10 +240,11 @@ const forbiddenTerms = {
       'src/service/storage-impl.js',
     ],
   },
-  'installTemplatesService': {
+  'installTemplatesServiceForDoc': {
     message: privateServiceFactory,
     allowlist: [
       'src/runtime.js',
+      'src/inabox/inabox-services.js',
       'src/service/core-services.js',
       'src/service/template-impl.js',
     ],
@@ -330,6 +314,7 @@ const forbiddenTerms = {
     allowlist: [
       // Do not allowlist additional "extensions/*" paths.
       // TODO(#22414): Remove paths as they are migrated off of sync API.
+      'extensions/amp-a4a/0.1/amp-ad-template-helper.js',
       'extensions/amp-analytics/0.1/instrumentation.js',
       'extensions/amp-analytics/0.1/variables.js',
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js',
@@ -337,16 +322,19 @@ const forbiddenTerms = {
       'src/chunk.js',
       'src/element-service.js',
       'src/service.js',
+      'src/service/builder.js',
       'src/service/cid-impl.js',
       'src/service/origin-experiments-impl.js',
+      'src/service/template-impl.js',
       'src/services.js',
+      'src/utils/display-observer.js',
       'testing/test-helper.js',
     ],
   },
   'initLogConstructor|setReportError': {
     message: 'Should only be called from JS binary entry files.',
     allowlist: [
-      '3p/integration.js',
+      '3p/integration-lib.js',
       '3p/ampcontext-lib.js',
       '3p/iframe-transport-client-lib.js',
       '3p/recaptcha.js',
@@ -467,7 +455,7 @@ const forbiddenTerms = {
     message: shouldNeverBeUsed,
     allowlist: ['extension/amp-bind/0.1/test/test-bind-expr.js'],
   },
-  'storageForDoc': {
+  'storageForDoc|storageForTopLevelDoc': {
     message:
       requiresReviewPrivacy +
       ' Please refer to spec/amp-localstorage.md for more information on' +
@@ -542,7 +530,7 @@ const forbiddenTerms = {
   '(doc.*)\\.referrer': {
     message: 'Use Viewer.getReferrerUrl() instead.',
     allowlist: [
-      '3p/integration.js',
+      '3p/integration-lib.js',
       'ads/google/a4a/utils.js',
       'dist.3p/current/integration.js',
       'src/inabox/inabox-viewer.js',
@@ -609,6 +597,7 @@ const forbiddenTerms = {
   'overrideVisibilityState': {
     message: 'overrideVisibilityState is a restricted API.',
     allowlist: [
+      'src/friendly-iframe-embed.js',
       'src/multidoc-manager.js',
       'src/service/ampdoc-impl.js',
       'src/service/viewer-impl.js',
@@ -616,7 +605,7 @@ const forbiddenTerms = {
   },
   '\\.scheduleLayoutOrPreload\\(': {
     message: 'scheduleLayoutOrPreload is a restricted API.',
-    allowlist: ['src/service/owners-impl.js', 'src/service/resources-impl.js'],
+    allowlist: ['src/custom-element.js', 'src/service/resources-impl.js'],
   },
   '(win|Win)(dow)?(\\(\\))?\\.open\\W': {
     message: 'Use dom.openWindowDialog',
@@ -658,7 +647,7 @@ const forbiddenTerms = {
       'build-system/tasks/firebase.js',
       'build-system/tasks/integration.js',
       'build-system/tasks/prepend-global/index.js',
-      'build-system/tasks/prepend-global/test.js',
+      'build-system/tasks/prepend-global/prepend-global.test.js',
       'build-system/tasks/release/index.js',
       'build-system/tasks/visual-diff/index.js',
       'build-system/tasks/build.js',
@@ -763,7 +752,6 @@ const forbiddenTerms = {
       'ads/google/test/test-utils.js',
       'extensions/amp-a4a/0.1/test/test-a4a-integration.js',
       'extensions/amp-a4a/0.1/test/test-a4a-var-source.js',
-      'extensions/amp-a4a/0.1/test/test-amp-a4a.js',
       'extensions/amp-a4a/0.1/test/test-amp-ad-utils.js',
       'extensions/amp-a4a/0.1/test/test-refresh.js',
       'extensions/amp-access/0.1/test/test-access-expr.js',
@@ -775,7 +763,6 @@ const forbiddenTerms = {
       'extensions/amp-ad/0.1/test/test-amp-ad-xorigin-iframe-handler.js',
       'extensions/amp-addthis/0.1/test/addthis-utils/test-fragment.js',
       'extensions/amp-addthis/0.1/test/addthis-utils/test-rot13.js',
-      'extensions/amp-analytics/0.1/test/test-crc32.js',
       'extensions/amp-analytics/0.1/test/test-iframe-transport-client.js',
       'extensions/amp-analytics/0.1/test/test-linker-manager.js',
       'extensions/amp-analytics/0.1/test/test-linker-reader.js',
@@ -784,17 +771,14 @@ const forbiddenTerms = {
       'extensions/amp-analytics/0.1/test/test-vendors.js',
       'extensions/amp-animation/0.1/test/test-css-expr.js',
       'extensions/amp-auto-ads/0.1/test/test-attributes.js',
-      'extensions/amp-base-carousel/0.1/test/test-responsive-attributes.js',
       'extensions/amp-bind/0.1/test/test-bind-evaluator.js',
       'extensions/amp-bind/0.1/test/test-bind-expression.js',
       'extensions/amp-bind/0.1/test/test-bind-validator.js',
       'extensions/amp-dynamic-css-classes/0.1/test/test-dynamic-classes.js',
-      'extensions/amp-form/0.1/test/test-form-submit-service.js',
       'extensions/amp-fx-collection/0.1/test/integration/test-amp-fx-fly-in.js',
       'extensions/amp-lightbox-gallery/0.1/test/integration/test-amp-lightbox-gallery.js',
       'extensions/amp-list/0.1/test/integration/test-amp-list.js',
       'extensions/amp-live-list/0.1/test/test-poller.js',
-      'extensions/amp-next-page/0.1/test/test-config.js',
       'extensions/amp-script/0.1/test/unit/test-amp-script.js',
       'extensions/amp-sidebar/0.1/test/test-toolbar.js',
       'extensions/amp-truncate-text/0.1/test/test-binary-search.js',
@@ -919,6 +903,10 @@ const bannedTermsHelpString =
   'forbidden property/method or mark it with `object./*REVIEW*/property` ' +
   'if you are unsure and so that it stands out in code reviews.';
 
+const measurementApiDeprecated =
+  'getLayoutSize/Box APIs are being deprecated. Please contact the' +
+  ' @ampproject/wg-performance for questions.';
+
 const forbiddenTermsSrcInclusive = {
   '\\.innerHTML(?!_)': bannedTermsHelpString,
   '\\.outerHTML(?!_)': bannedTermsHelpString,
@@ -985,7 +973,7 @@ const forbiddenTermsSrcInclusive = {
       'decodeURIComponent throws for malformed URL components. Please ' +
       'use tryDecodeUriComponent from src/url.js',
     allowlist: [
-      '3p/integration.js',
+      '3p/integration-lib.js',
       'dist.3p/current/integration.js',
       'examples/pwa/pwa.js',
       'validator/js/engine/parse-url.js',
@@ -1026,6 +1014,7 @@ const forbiddenTermsSrcInclusive = {
       'src/element-stub.js',
       'src/friendly-iframe-embed.js',
       'src/polyfillstub/intersection-observer-stub.js',
+      'src/polyfillstub/resize-observer-stub.js',
       'src/runtime.js',
       'src/service/extensions-impl.js',
       'src/service/lightbox-manager-discovery.js',
@@ -1035,11 +1024,6 @@ const forbiddenTermsSrcInclusive = {
       'src/extension-analytics.js',
       'src/services.js',
       'extensions/amp-ad/0.1/amp-ad.js',
-      'extensions/amp-a4a/0.1/amp-a4a.js',
-      'extensions/amp-a4a/0.1/head-validation.js',
-      'extensions/amp-a4a/0.1/template-validator.js',
-      'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',
-      'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js',
       'extensions/amp-lightbox-gallery/0.1/amp-lightbox-gallery.js',
       'extensions/amp-animation/0.1/install-polyfill.js',
     ],
@@ -1083,7 +1067,7 @@ const forbiddenTermsSrcInclusive = {
     message: 'Unless you do weird date math (allowlist), use Date.now().',
     allowlist: [
       'extensions/amp-timeago/0.1/amp-timeago.js',
-      'extensions/amp-timeago/1.0/timeago.js',
+      'extensions/amp-timeago/1.0/component.js',
       'src/utils/date.js',
     ],
   },
@@ -1103,6 +1087,7 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-analytics/0.1/cookie-writer.js',
       'extensions/amp-analytics/0.1/requests.js',
       'extensions/amp-analytics/0.1/variables.js',
+      'extensions/amp-consent/0.1/cookie-writer.js',
     ],
   },
   '\\.expandInputValueSync\\(': {
@@ -1153,6 +1138,7 @@ const forbiddenTermsSrcInclusive = {
       'testing/local-amp-chrome-extension/background.js',
       'tools/errortracker/errortracker.go',
       'tools/experiments/experiments.js',
+      'validator/js/engine/htmlparser-interface.js',
       'validator/js/engine/validator-in-browser.js',
       'validator/js/engine/validator.js',
       'validator/js/nodejs/index.js',
@@ -1178,24 +1164,98 @@ const forbiddenTermsSrcInclusive = {
     message: 'Unsupported on IE; use trim() or a helper instead.',
     allowlist: ['validator/js/engine/validator.js'],
   },
-  "process\\.env(\\.TRAVIS|\\[\\'TRAVIS)": {
+  "process\\.env(\\.|\\[\\')(GITHUB_ACTIONS|CIRCLECI)": {
     message:
-      'Do not directly use process.env.TRAVIS. Instead, add a ' +
-      'function to build-system/common/travis.js',
-    allowlist: [
-      'build-system/common/check-package-manager.js',
-      'build-system/common/travis.js',
-    ],
+      'Do not directly use CI-specific environment vars. Instead, add a ' +
+      'function to build-system/common/ci.js',
   },
   '\\.matches\\(': 'Please use matches() helper in src/dom.js',
+  '\\.getLayoutBox': {
+    message: measurementApiDeprecated,
+    allowlist: [
+      'src/base-element.js',
+      'src/custom-element.js',
+      'src/friendly-iframe-embed.js',
+      'src/service/mutator-impl.js',
+      'src/service/resource.js',
+      'src/service/resources-impl.js',
+      'extensions/amp-ad/0.1/amp-ad-3p-impl.js',
+      'extensions/amp-ad-network-adsense-impl/0.1/responsive-state.js',
+      'extensions/amp-fx-flying-carpet/0.1/amp-fx-flying-carpet.js',
+      'extensions/amp-iframe/0.1/amp-iframe.js',
+      'extensions/amp-next-page/1.0/visibility-observer.js',
+      'extensions/amp-playbuzz/0.1/amp-playbuzz.js',
+      'extensions/amp-story/1.0/page-advancement.js',
+    ],
+  },
+  '\\.getLayoutSize': {
+    message: measurementApiDeprecated,
+    allowlist: [
+      'builtins/amp-img.js',
+      'src/base-element.js',
+      'src/custom-element.js',
+      'src/iframe-helper.js',
+      'src/service/mutator-impl.js',
+      'src/service/resources-impl.js',
+      'src/service/video-manager-impl.js',
+      'extensions/amp-a4a/0.1/amp-a4a.js',
+      'extensions/amp-auto-lightbox/0.1/amp-auto-lightbox.js',
+      'extensions/amp-fx-flying-carpet/0.1/amp-fx-flying-carpet.js',
+      'extensions/amp-script/0.1/amp-script.js',
+      'extensions/amp-story/1.0/amp-story-page.js',
+    ],
+  },
+  'onLayoutMeasure': {
+    message: measurementApiDeprecated,
+    allowlist: [
+      'src/base-element.js',
+      'src/custom-element.js',
+      'extensions/amp-a4a/0.1/amp-a4a.js',
+      'extensions/amp-a4a/0.1/amp-ad-network-base.js',
+      'extensions/amp-ad/0.1/amp-ad-3p-impl.js',
+      'extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler.js',
+      'extensions/amp-ad-exit/0.1/amp-ad-exit.js',
+      'extensions/amp-ad-exit/0.1/filters/click-location.js',
+      'extensions/amp-ad-exit/0.1/filters/filter.js',
+      'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',
+      'extensions/amp-iframe/0.1/amp-iframe.js',
+      'extensions/amp-script/0.1/amp-script.js',
+      'extensions/amp-sidebar/0.1/amp-sidebar.js',
+      'extensions/amp-sidebar/0.2/amp-sidebar.js',
+      'extensions/amp-story/1.0/amp-story-page.js',
+    ],
+  },
+  '\\.getIntersectionElementLayoutBox': {
+    message: measurementApiDeprecated,
+    allowlist: [
+      'src/custom-element.js',
+      'extensions/amp-a4a/0.1/amp-a4a.js',
+      'extensions/amp-ad/0.1/amp-ad-3p-impl.js',
+      'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',
+      'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js',
+      'extensions/amp-iframe/0.1/amp-iframe.js',
+    ],
+  },
+  "require\\('fancy-log'\\)": {
+    message:
+      'Instead of fancy-log, use the logging functions in build-system/common/logging.js.',
+    allowlist: [
+      'babel.config.js',
+      'build-system/common/logging.js',
+      'build-system/tasks/visual-diff/helpers.js',
+      'validator/js/gulpjs/index.js',
+    ],
+  },
 };
 
 // Terms that must appear in a source file.
 const requiredTerms = {
-  'Copyright 20(15|16|17|18|19|20) The AMP HTML Authors\\.': dedicatedCopyrightNoteSources,
+  'Copyright 20(15|16|17|18|19|2\\d) The AMP HTML Authors\\.': dedicatedCopyrightNoteSources,
   'Licensed under the Apache License, Version 2\\.0': dedicatedCopyrightNoteSources,
   'http\\://www\\.apache\\.org/licenses/LICENSE-2\\.0': dedicatedCopyrightNoteSources,
 };
+// Exclude extension generator templates
+const requiredTermsExcluded = /amp-__component_name_hyphenated__/;
 
 /**
  * Check if root of path is test/ or file is in a folder named test.
@@ -1209,11 +1269,11 @@ function isInTestFolder(path) {
 
 /**
  * Check if file is inside the build-system/babel-plugins test/fixture folder.
- * @param {string} filePath
+ * @param {string} srcFile
  * @return {boolean}
  */
-function isInBuildSystemFixtureFolder(filePath) {
-  const folder = path.dirname(filePath);
+function isInBuildSystemFixtureFolder(srcFile) {
+  const folder = path.dirname(srcFile);
   return (
     folder.startsWith('build-system/babel-plugins') &&
     folder.includes('test/fixtures')
@@ -1247,15 +1307,14 @@ function stripComments(contents) {
  * patterns), and provides any possible fix information for matched terms if
  * possible
  *
- * @param {!File} file a vinyl file object to scan for term matches
+ * @param {string} srcFile a file to scan for term matches
  * @param {!Array<string, string>} terms Pairs of regex patterns and possible
  *   fix messages.
  * @return {boolean} true if any of the terms match the file content,
  *   false otherwise
  */
-function matchTerms(file, terms) {
-  const contents = stripComments(file.contents.toString());
-  const {relative} = file;
+function matchTerms(srcFile, terms) {
+  const contents = stripComments(fs.readFileSync(srcFile, 'utf-8'));
   return Object.keys(terms)
     .map(function (term) {
       let fix;
@@ -1263,10 +1322,10 @@ function matchTerms(file, terms) {
       // NOTE: we could do a glob test instead of exact check in the future
       // if needed but that might be too permissive.
       if (
-        isInBuildSystemFixtureFolder(relative) ||
+        isInBuildSystemFixtureFolder(srcFile) ||
         (Array.isArray(allowlist) &&
-          (allowlist.indexOf(relative) != -1 ||
-            (isInTestFolder(relative) && !checkInTestFolder)))
+          (allowlist.indexOf(srcFile) != -1 ||
+            (isInTestFolder(srcFile) && !checkInTestFolder)))
       ) {
         return false;
       }
@@ -1294,16 +1353,11 @@ function matchTerms(file, terms) {
         }
 
         log(
-          colors.red(
-            'Found forbidden: "' +
-              match[0] +
-              '" in ' +
-              relative +
-              ':' +
-              line +
-              ':' +
-              column
-          )
+          red('ERROR:'),
+          'Found forbidden',
+          cyan(`"${match[0]}"`),
+          'in',
+          cyan(`${srcFile}:${line}:${column}`)
         );
         if (typeof terms[term] === 'string') {
           fix = terms[term];
@@ -1313,9 +1367,8 @@ function matchTerms(file, terms) {
 
         // log the possible fix information if provided for the term.
         if (fix) {
-          log(colors.blue(fix));
+          log('⤷', yellow('To fix:'), fix);
         }
-        log(colors.blue('=========='));
       }
 
       return hasTerm;
@@ -1326,28 +1379,26 @@ function matchTerms(file, terms) {
 }
 
 /**
- * Test if a file's contents match any of the
- * forbidden terms
- *
- * @param {!File} file file is a vinyl file object
+ * Test if a file's contents match any of the forbidden terms
+ * @param {string} srcFile
  * @return {boolean} true if any of the terms match the file content,
  *   false otherwise
  */
-function hasAnyTerms(file) {
-  const pathname = file.path;
-  const basename = path.basename(pathname);
+function hasAnyTerms(srcFile) {
+  const basename = path.basename(srcFile);
   let hasTerms = false;
   let hasSrcInclusiveTerms = false;
 
-  hasTerms = matchTerms(file, forbiddenTerms);
+  hasTerms = matchTerms(srcFile, forbiddenTerms);
 
   const isTestFile =
     /^test-/.test(basename) ||
     /^_init_tests/.test(basename) ||
     /_test\.js$/.test(basename) ||
-    /storybook\/[^/]+\.js$/.test(pathname);
+    /testing\//.test(srcFile) ||
+    /storybook\/[^/]+\.js$/.test(srcFile);
   if (!isTestFile) {
-    hasSrcInclusiveTerms = matchTerms(file, forbiddenTermsSrcInclusive);
+    hasSrcInclusiveTerms = matchTerms(srcFile, forbiddenTermsSrcInclusive);
   }
 
   return hasTerms || hasSrcInclusiveTerms;
@@ -1357,27 +1408,28 @@ function hasAnyTerms(file) {
  * Test if a file's contents fail to match any of the required terms and log
  * any missing terms
  *
- * @param {!File} file file is a vinyl file object
+ * @param {string} srcFile
  * @return {boolean} true if any of the terms are not matched in the file
  *  content, false otherwise
  */
-function isMissingTerms(file) {
-  const contents = file.contents.toString();
+function isMissingTerms(srcFile) {
+  const contents = fs.readFileSync(srcFile, 'utf-8');
   return Object.keys(requiredTerms)
     .map(function (term) {
       const filter = requiredTerms[term];
-      if (!filter.test(file.path)) {
+      if (!filter.test(srcFile) || requiredTermsExcluded.test(srcFile)) {
         return false;
       }
 
       const matches = contents.match(new RegExp(term));
       if (!matches) {
         log(
-          colors.red(
-            'Did not find required: "' + term + '" in ' + file.relative
-          )
+          red('ERROR:'),
+          'Did not find required',
+          cyan(`"${term}"`),
+          'in',
+          cyan(srcFile)
         );
-        log(colors.blue('=========='));
         return true;
       }
       return false;
@@ -1388,47 +1440,35 @@ function isMissingTerms(file) {
 }
 
 /**
- * Check a file for all the required terms and
- * any forbidden terms and log any errors found.
- * @return {!Promise}
+ * Entry point for gulp presubmit.
  */
-function presubmit() {
+async function presubmit() {
   let forbiddenFound = false;
   let missingRequirements = false;
-  return gulp
-    .src(srcGlobs)
-    .pipe(
-      through2.obj(function (file, enc, cb) {
-        forbiddenFound = hasAnyTerms(file) || forbiddenFound;
-        missingRequirements = isMissingTerms(file) || missingRequirements;
-        cb();
-      })
-    )
-    .on('end', function () {
-      if (forbiddenFound) {
-        log(
-          colors.blue(
-            'Please remove these usages or consult with the AMP team.'
-          )
-        );
-      }
-      if (missingRequirements) {
-        log(
-          colors.blue(
-            'Adding these terms (e.g. by adding a required LICENSE ' +
-              'to the file)'
-          )
-        );
-      }
-      if (forbiddenFound || missingRequirements) {
-        process.exitCode = 1;
-      }
-    });
+  const srcFiles = globby.sync(srcGlobs);
+  for (const srcFile of srcFiles) {
+    forbiddenFound = hasAnyTerms(srcFile) || forbiddenFound;
+    missingRequirements = isMissingTerms(srcFile) || missingRequirements;
+  }
+  if (forbiddenFound) {
+    log(
+      yellow('NOTE:'),
+      'Please remove these usages or consult with the AMP team.'
+    );
+  }
+  if (missingRequirements) {
+    log(
+      yellow('NOTE:'),
+      'Please add these terms (e.g. a required LICENSE) to the files.'
+    );
+  }
+  if (forbiddenFound || missingRequirements) {
+    process.exitCode = 1;
+  }
 }
 
 module.exports = {
   presubmit,
 };
 
-presubmit.description =
-  'Run validation against files to check for forbidden and required terms';
+presubmit.description = 'Check source files for forbidden and required terms';

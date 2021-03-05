@@ -15,12 +15,13 @@
  */
 'use strict';
 
-const colors = require('ansi-colors');
 const fs = require('fs-extra');
-const log = require('fancy-log');
 const path = require('path');
 const ts = require('typescript');
+/** @type {*} */
 const tsickle = require('tsickle');
+const {log} = require('../common/logging');
+const {red} = require('kleur/colors');
 
 /**
  * Given a file path `foo/bar.js`, transpiles the TypeScript entry point of
@@ -41,7 +42,7 @@ exports.transpileTs = async function (srcDir, srcFilename) {
   );
   const tsOptions = tsConfig.options;
   if (tsConfig.errors.length) {
-    log(colors.red('TSickle:'), tsickle.formatDiagnostics(tsConfig.errors));
+    log(red('TSickle:'), tsickle.formatDiagnostics(tsConfig.errors));
   }
 
   const compilerHost = ts.createCompilerHost(tsOptions);
@@ -58,6 +59,8 @@ exports.transpileTs = async function (srcDir, srcFilename) {
     }
     return fileName;
   };
+  // TODO(#28387) fix this typing.
+  /** @type {Object} */
   const transformerHost = {
     host: compilerHost,
     options: tsOptions,
@@ -81,6 +84,6 @@ exports.transpileTs = async function (srcDir, srcFilename) {
     .getPreEmitDiagnostics(program)
     .concat(emitResult.diagnostics);
   if (diagnostics.length) {
-    log(colors.red('TSickle:'), tsickle.formatDiagnostics(diagnostics));
+    log(red('TSickle:'), tsickle.formatDiagnostics(diagnostics));
   }
 };

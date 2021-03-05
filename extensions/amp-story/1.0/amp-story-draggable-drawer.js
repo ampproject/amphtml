@@ -72,6 +72,11 @@ const getHeaderEl = (element) => {
  * @abstract
  */
 export class DraggableDrawer extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    return false;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -119,11 +124,6 @@ export class DraggableDrawer extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return layout === Layout.NODISPLAY;
-  }
-
-  /** @override */
-  prerenderAllowed() {
-    return false;
   }
 
   /** @override */
@@ -290,7 +290,9 @@ export class DraggableDrawer extends AMP.BaseElement {
       return;
     }
 
-    event.stopPropagation();
+    if (this.shouldStopPropagation_()) {
+      event.stopPropagation();
+    }
 
     if (this.touchEventState_.isSwipeY === null) {
       this.touchEventState_.isSwipeY =
@@ -309,6 +311,18 @@ export class DraggableDrawer extends AMP.BaseElement {
         last: false,
       },
     });
+  }
+
+  /**
+   * Checks for when scroll event should be stopped from propagating.
+   * @return {boolean}
+   * @private
+   */
+  shouldStopPropagation_() {
+    return (
+      this.state_ !== DrawerState.CLOSED ||
+      (this.state_ === DrawerState.CLOSED && this.touchEventState_.swipingUp)
+    );
   }
 
   /**
@@ -343,7 +357,7 @@ export class DraggableDrawer extends AMP.BaseElement {
   onSwipeY_(gesture) {
     const {data} = gesture;
 
-    if (this.ignoreCurrentSwipeYGesture_ === true) {
+    if (this.ignoreCurrentSwipeYGesture_) {
       this.ignoreCurrentSwipeYGesture_ = !data.last;
       return;
     }
@@ -470,6 +484,7 @@ export class DraggableDrawer extends AMP.BaseElement {
       setImportantStyles(this.element, {
         transform: translate,
         transition: 'none',
+        visibility: 'visible',
       });
     });
   }
@@ -489,7 +504,7 @@ export class DraggableDrawer extends AMP.BaseElement {
 
     this.mutateElement(() => {
       this.element.setAttribute('aria-hidden', false);
-      resetStyles(this.element, ['transform', 'transition']);
+      resetStyles(this.element, ['transform', 'transition', 'visibility']);
 
       if (!shouldAnimate) {
         // Resets the 'transition' property, and removes this override in the

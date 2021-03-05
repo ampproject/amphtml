@@ -17,7 +17,6 @@ import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from './autoplay.jss';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {VideoWrapper} from './video-wrapper';
-import {isLayoutSizeDefined} from '../../../src/layout';
 
 /** @extends {PreactBaseElement<VideoWrapperDef.Api>} */
 export class VideoBaseElement extends PreactBaseElement {
@@ -58,15 +57,13 @@ export class VideoBaseElement extends PreactBaseElement {
       minTrust
     );
   }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout);
-  }
 }
 
 /** @override */
 VideoBaseElement['Component'] = VideoWrapper;
+
+/** @override */
+VideoBaseElement['loadable'] = true;
 
 /** @override */
 VideoBaseElement['layoutSizeDefined'] = true;
@@ -98,6 +95,11 @@ VideoBaseElement['props'] = {
   'loop': {attr: 'loop', type: 'boolean'},
   'noaudio': {attr: 'noaudio', type: 'boolean'},
   'poster': {attr: 'poster'},
+  'sources': {
+    selector: 'source',
+    single: false,
+    clone: true,
+  },
   'src': {attr: 'src'},
   'title': {attr: 'title'},
 
@@ -107,14 +109,7 @@ VideoBaseElement['props'] = {
 };
 
 /** @override */
-VideoBaseElement['children'] = {
-  'sources': {
-    name: 'sources',
-    selector: 'source',
-    single: false,
-    clone: true,
-  },
-};
+VideoBaseElement['shadowCss'] = CSS;
 
 /** @override */
-VideoBaseElement['shadowCss'] = CSS;
+VideoBaseElement['usesShadowDom'] = true;

@@ -15,8 +15,7 @@
  */
 import {LayoutPriority} from '../../../src/layout';
 import {Services} from '../../../src/services';
-import {isExperimentOn} from '../../../src/experiments';
-import {userAssert} from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 /** @const {string} */
 const TAG = 'amp-action-macro';
@@ -38,10 +37,6 @@ export class AmpActionMacro extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    userAssert(
-      isExperimentOn(this.win, 'amp-action-macro'),
-      'Experiment is off'
-    );
     const {element} = this;
 
     this.actions_ = Services.actionServiceForDoc(element);

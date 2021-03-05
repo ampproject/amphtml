@@ -145,9 +145,9 @@ This URL may make a request to something like `https://foo.com/config.json?0.839
 
 The `<amp-next-page>` component renders the recommendation box if one of the following situations arise:
 
-- The user reaches the end of the page before the next page had loaded.
-- The next page fails to load.
-- If the [`max-pages`](<https://amp.dev/documentation/components/amp-next-page/#max-pages+(optional)>) attribute is specified and the number of displayed pages is met.
+-   The user reaches the end of the page before the next page had loaded.
+-   The next page fails to load.
+-   If the [`max-pages`](<https://amp.dev/documentation/components/amp-next-page/#max-pages+(optional)>) attribute is specified and the number of displayed pages is met.
 
 The recommendation box contains links to the remaining pages. The default recommendation box renders the specified `image` and `title` used in the JSON configuration. It can be styled as specified in the [Styling](https://amp.dev/documentation/components/amp-next-page/#styling) section.
 
@@ -202,9 +202,9 @@ Alternatively, it is possible to create a custom separator by defining an elemen
 
 Hide elements which are common across multiple loaded pages by using the `next-page-hide` attribute. Hiding certain elements helps create an uncluttered infinite scroll experience. Such considerations include:
 
-- Avoiding stacking common page elements, such as footers.
-- Avoiding duplicate page headers in subsequent pages
-- Preventing multiple sidebars, etc.
+-   Avoiding stacking common page elements, such as footers.
+-   Avoiding duplicate page headers in subsequent pages
+-   Preventing multiple sidebars, etc.
 
 Elements with the `next-page-hide` attribute are set to `display: none` when loaded as a suggestion inside `<amp-next-page>`. These elements are visible when the document is loaded as a top-level host.
 
@@ -256,35 +256,35 @@ The experimental `0.1` version of `amp-next-page` had a similar but more restric
 1. Update your `<script custom-element>` tag to link to the `1.0` bundle of `amp-next-page`
 2. Make sure that `amp-next-page` is the last child of the body element, move any footers or other components that used to follow `<amp-next-page>` inside a container that has the `footer` attribute within the `<amp-next-page>` tag.
 3. If you were using an inline configuration, the JSON config is now an `array` of pages instead of an `object` with a `pages` entry. Additionally, you must rename the `ampUrl` key of each page to `url`.
-   ```html
-   <amp-next-page>
-     <!-- BEFORE: amp-next-page 0.1 -->
-     <script type="application/json">
-       {
-         "pages": [
-           {
-             "image": "https://example.com/image1.jpg",
-             "title": "This article shows first",
-             "ampUrl": "https://example.com/article1.amp.html"
-           }
-         ],
-         "hideSelectors": [".header", ".main footer", "#navigation"]
-       }
-     </script>
-     <!-- AFTER: amp-next-page 1.0 -->
-     <script type="application/json">
-       [
-         {
-           "image": "https://example.com/image1.jpg",
-           "title": "This article shows first",
-           // `ampUrl` was renamed to `url`
-           "url": "https://example.com/article1.amp.html"
-         }
-       ]
-       // Instead of `hideSelectors`, use the `next-page-hide` attribute
-     </script>
-   </amp-next-page>
-   ```
+    ```html
+    <amp-next-page>
+      <!-- BEFORE: amp-next-page 0.1 -->
+      <script type="application/json">
+        {
+          "pages": [
+            {
+              "image": "https://example.com/image1.jpg",
+              "title": "This article shows first",
+              "ampUrl": "https://example.com/article1.amp.html"
+            }
+          ],
+          "hideSelectors": [".header", ".main footer", "#navigation"]
+        }
+      </script>
+      <!-- AFTER: amp-next-page 1.0 -->
+      <script type="application/json">
+        [
+          {
+            "image": "https://example.com/image1.jpg",
+            "title": "This article shows first",
+            // `ampUrl` was renamed to `url`
+            "url": "https://example.com/article1.amp.html"
+          }
+        ]
+        // Instead of `hideSelectors`, use the `next-page-hide` attribute
+      </script>
+    </amp-next-page>
+    ```
 
 ## Attributes
 
@@ -320,10 +320,10 @@ The `<amp-next-page>` component renders a default recommendation box and separat
 
 You may add custom CSS styles to the default recommendation box. It exposes the following classes:
 
-- `.amp-next-page-links` for the parent container element
-- `.amp-next-page-link` for an individual article which contains:
-- `.amp-next-page-image` for the link image
-- `.amp-next-page-text` for the link text
+-   `.amp-next-page-links` for the parent container element
+-   `.amp-next-page-link` for an individual article which contains:
+-   `.amp-next-page-image` for the link image
+-   `.amp-next-page-text` for the link text
 
 ### Style the default page separator
 

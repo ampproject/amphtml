@@ -19,8 +19,11 @@ const SLIDE_CLASS = 'slideElement';
 const SCROLLER_CLASS = 'hideScrollbar';
 const PREV_ARROW_CLASS = 'arrowPrev';
 const NEXT_ARROW_CLASS = 'arrowNext';
-const PREV_ARROW_SLOT_SELECTOR = 'slot[name="prev-arrow"]';
-const NEXT_ARROW_SLOT_SELECTOR = 'slot[name="next-arrow"]';
+const PREV_ARROW_SLOT_SELECTOR = '[slot="prev-arrow"]';
+const NEXT_ARROW_SLOT_SELECTOR = '[slot="next-arrow"]';
+
+/** Increase element wait timeout for Selenium controller */
+const ELEMENT_WAIT_TIMEOUT = 10000;
 
 export function getCarousel(controller) {
   return controller.findElement(TAG_NAME);
@@ -35,21 +38,34 @@ export async function getSlide(styles, controller, n) {
 }
 
 export async function getScrollingElement(styles, controller) {
-  return controller.findElement(`.${styles[SCROLLER_CLASS]}`);
+  return controller.findElement(
+    `.${styles[SCROLLER_CLASS]}`,
+    ELEMENT_WAIT_TIMEOUT
+  );
 }
 
-export function getPrevArrowSlot(controller) {
+export async function getPrevArrowSlot(controller) {
   return controller.findElement(PREV_ARROW_SLOT_SELECTOR);
 }
 
-export function getNextArrowSlot(controller) {
+export async function getNextArrowSlot(controller) {
   return controller.findElement(NEXT_ARROW_SLOT_SELECTOR);
 }
 
-export function getPrevArrow(styles, controller) {
-  return controller.findElement(`.${styles[PREV_ARROW_CLASS]}`);
+export async function getPrevArrow(styles, controller) {
+  return controller.findElement(
+    `.${styles[PREV_ARROW_CLASS]}`,
+    ELEMENT_WAIT_TIMEOUT
+  );
 }
 
-export function getNextArrow(styles, controller) {
-  return controller.findElement(`.${styles[NEXT_ARROW_CLASS]}`);
+export async function getNextArrow(styles, controller) {
+  return controller.findElement(
+    `.${styles[NEXT_ARROW_CLASS]}`,
+    ELEMENT_WAIT_TIMEOUT
+  );
+}
+
+export function sleep(ms) {
+  return new Promise((res) => setTimeout(res, ms));
 }

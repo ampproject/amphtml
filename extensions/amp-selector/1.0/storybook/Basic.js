@@ -15,10 +15,10 @@
  */
 
 import * as Preact from '../../../../src/preact';
-import {Option, Selector} from '../selector';
+import {Option, Selector} from '../component';
+import {select, withKnobs} from '@storybook/addon-knobs';
 import {useState} from '../../../../src/preact';
 import {withA11y} from '@storybook/addon-a11y';
-import {withKnobs} from '@storybook/addon-knobs';
 export default {
   title: 'Selector',
   component: Selector,
@@ -50,7 +50,7 @@ function SelectorWithActions(props) {
       <Selector ref={ref} {...props}>
         {props.children.slice(0, 2)}
         {show && (
-          <Option as="div" option="2.5">
+          <Option as="div" option="2.5" index={2}>
             Option 2.5
           </Option>
         )}
@@ -70,22 +70,39 @@ function SelectorWithActions(props) {
         <button onClick={() => ref.current./*OK*/ toggle('2', false)}>
           deselect (option "2")
         </button>
+        <button onClick={() => ref.current./*OK*/ selectBy(-2)}>
+          select up by 2
+        </button>
+        <button onClick={() => ref.current./*OK*/ selectBy(1)}>
+          select down by 1
+        </button>
         <button onClick={() => ref.current./*OK*/ clear()}>clear all</button>
       </div>
     </section>
   );
 }
 
-export const listItems = () => {
+export const actionsAndOrder = () => {
+  const keyboardSelectMode = select(
+    'keyboard select mode',
+    ['none', 'focus', 'select'],
+    'select'
+  );
   return (
-    <>
-      <SelectorWithActions multiple aria-label="Image menu">
+    <form>
+      <SelectorWithActions
+        keyboardSelectMode={keyboardSelectMode}
+        multiple
+        name="poll"
+        aria-label="Image menu"
+      >
         <Option
           as="img"
           alt="Sea landscape"
           style={imgStyle}
           src="https://amp.dev/static/samples/img/landscape_sea_300x199.jpg"
           option="1"
+          index={0}
           disabled
         ></Option>
         <Option
@@ -94,6 +111,7 @@ export const listItems = () => {
           style={imgStyle}
           src="https://amp.dev/static/samples/img/landscape_desert_300x200.jpg"
           option="2"
+          index={1}
         ></Option>
         <br />
         <Option
@@ -102,6 +120,7 @@ export const listItems = () => {
           style={imgStyle}
           src="https://amp.dev/static/samples/img/landscape_ship_300x200.jpg"
           option="3"
+          index={3}
         ></Option>
         <Option
           as="img"
@@ -109,9 +128,10 @@ export const listItems = () => {
           style={imgStyle}
           src="https://amp.dev/static/samples/img/landscape_village_300x200.jpg"
           option="4"
+          index={4}
         ></Option>
       </SelectorWithActions>
-    </>
+    </form>
   );
 };
 
@@ -128,7 +148,12 @@ export const optionItems = () => {
 
 export const multiselect = () => {
   return (
-    <Selector as="ul" multiple aria-label="Multiselect menu">
+    <Selector
+      as="ul"
+      multiple
+      aria-label="Multiselect menu"
+      defaultValue={['2']}
+    >
       <Option as="li" option="1">
         Option 1
       </Option>

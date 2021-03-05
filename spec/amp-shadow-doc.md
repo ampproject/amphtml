@@ -87,17 +87,17 @@ The `options` argument is optional and can provide configuration parameters for 
 
 Both `AMP.attachShadowDoc` and `AMP.attachShadowDocAsStream` return a `ShadowDoc` object that provides numerous ways for interracting with attached AMP documents. This object exposes the following methods and properties:
 
-- `shadowDoc.writer` - the writer that can be used to stream the AMP document. Only available for `attachShadowDocAsStream`.
-- `shadowDoc.url` - the URL used in the `attachShadowDoc` or `attachShadowDocAsStream`.
-- `shadowDoc.title` - the title of the AMP document.
-- `shadowDoc.canonicalUrl` - the canonical URL of the AMP document.
-- `shadowDoc.ampdoc` - the instance of the AMP document.
-- `shadowDoc.ampdoc.whenReady()` - returns a promise when the AMP document has been fully rendered.
-- `shadowDoc.setVisibilityState()` - changes the visibility state of the AMP document.
-- `shadowDoc.postMessage()` and `shadowDoc.onMessage()` - can be used to message with the AMP document.
-- `shadowDoc.close()` - closes the AMP document, frees the resources, and returns a promise that resolves when cleanup is complete.
-- `shadowDoc.getState(expr)` - Get an `amp-bind` state from the AMP document using a JSON expression string, e.g. `foo.bar`
-- `shadowDoc.setState(state)` - Deep merge an object into the AMP document's global `amp-bind` state. `state` can be passed as either an `Object` or an expression string matching the syntax used by `amp-bind` in `on="AMP.setState()` attributes.
+-   `shadowDoc.writer` - the writer that can be used to stream the AMP document. Only available for `attachShadowDocAsStream`.
+-   `shadowDoc.url` - the URL used in the `attachShadowDoc` or `attachShadowDocAsStream`.
+-   `shadowDoc.title` - the title of the AMP document.
+-   `shadowDoc.canonicalUrl` - the canonical URL of the AMP document.
+-   `shadowDoc.ampdoc` - the instance of the AMP document.
+-   `shadowDoc.ampdoc.whenReady()` - returns a promise when the AMP document has been fully rendered.
+-   `shadowDoc.setVisibilityState()` - changes the visibility state of the AMP document.
+-   `shadowDoc.postMessage()` and `shadowDoc.onMessage()` - can be used to message with the AMP document.
+-   `shadowDoc.close()` - closes the AMP document, frees the resources, and returns a promise that resolves when cleanup is complete.
+-   `shadowDoc.getState(expr)` - Get an `amp-bind` state from the AMP document using a JSON expression string, e.g. `foo.bar`
+-   `shadowDoc.setState(state)` - Deep merge an object into the AMP document's global `amp-bind` state. `state` can be passed as either an `Object` or an expression string matching the syntax used by `amp-bind` in `on="AMP.setState()` attributes.
 
 ## Shadow DOM API and polyfills
 

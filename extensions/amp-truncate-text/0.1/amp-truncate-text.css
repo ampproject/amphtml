@@ -42,7 +42,7 @@ amp-truncate-text:not([i-amphtml-truncate-expanded]) .i-amphtml-truncate-expande
   right: 0 !important;
 }
 
-.i-amphtml-truncate-content [slot="expand"] {
+.i-amphtml-truncate-content [slot="expanded"] {
   margin: 0 !important;
   white-space: nowrap !important;
 }

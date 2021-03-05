@@ -30,10 +30,13 @@ var BaseCarouselDef = {};
  *   autoAdvanceLoops: (number|undefined),
  *   children: (!PreactDef.Renderable),
  *   controls: (string|undefined),
+ *   defaultSlide: (number|undefined),
  *   loop: (boolean|undefined),
  *   mixedLength: (boolean|undefined),
  *   onSlideChange: (function(number):undefined|undefined),
+ *   orientation: (string|undefined),
  *   snap: (boolean|undefined),
+ *   snapAlign: (string|undefined),
  *   snapBy: (number|undefined),
  *   visibleCount: (number|undefined),
  * }}
@@ -43,12 +46,14 @@ BaseCarouselDef.Props;
 /**
  * @typedef {{
  *   advanceCount: (number|undefined),
+ *   axis: number,
  *   children: !Array<PreactDef.Renderable>,
  *   loop: (boolean|undefined),
  *   mixedLength: (boolean|undefined),
  *   restingIndex: number,
  *   setRestingIndex: (function(number):undefined),
  *   snap: (boolean|undefined),
+ *   snapAlign: (string|undefined),
  *   snapBy: (number|undefined),
  *   visibleCount: (number|undefined),
  * }}

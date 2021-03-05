@@ -519,6 +519,15 @@ describe
         );
       });
 
+      it('should allowlist h1, h2, h3 and amp-img elements', () => {
+        const html =
+          '<h1>Heading 1</h1>' +
+          '<h2>Heading 2</h2>' +
+          '<h3>Heading 3</h3>' +
+          '<amp-img></amp-img>';
+        expect(purifyTripleMustache(html)).to.be.equal(html);
+      });
+
       it('should allowlist table related elements and anchor tags', () => {
         const html =
           '<table class="valid-class">' +
@@ -532,6 +541,24 @@ describe
           '<td colspan="2"><span>footer</span></td>' +
           '</tr></tfoot>' +
           '</table>';
+        expect(purifyTripleMustache(html)).to.be.equal(html);
+      });
+
+      it('should allowlist container elements', () => {
+        const html =
+          '<article>Article</article>' +
+          '<aside></aside>' +
+          '<blockquote>A quote</blockquote>' +
+          '<details></details>' +
+          '<figcaption></figcaption>' +
+          '<figure></figure>' +
+          '<footer>Footer</footer>' +
+          '<header></header>' +
+          '<main class="content"></main>' +
+          '<nav></nav>' +
+          '<pre></pre>' +
+          '<section id="sec"></section>' +
+          '<summary></summary>';
         expect(purifyTripleMustache(html)).to.be.equal(html);
       });
 

@@ -20,6 +20,8 @@
 // Most other ad networks will want to put their A4A code entirely in the
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
+import {ADS_INITIAL_INTERSECTION_EXP} from '../../../src/experiments/ads-initial-intersection-exp';
+import {AMP_SIGNATURE_HEADER} from '../../amp-a4a/0.1/signature-verifier';
 import {AdsenseSharedState} from './adsense-shared-state';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
@@ -35,12 +37,14 @@ import {
   getCsiAmpAnalyticsVariables,
   getEnclosingContainerTypes,
   getIdentityToken,
+  getServeNpaPromise,
   googleAdUrl,
   isCdnProxy,
   isReportingEnabled,
   maybeAppendErrorParameter,
 } from '../../../ads/google/a4a/utils';
 import {ResponsiveState} from './responsive-state';
+import {STICKY_AD_TRANSITION_EXP} from '../../../ads/google/a4a/sticky-ad-transition-exp';
 import {Services} from '../../../src/services';
 import {
   addAmpExperimentIdToElement,
@@ -53,12 +57,9 @@ import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {getAmpAdRenderOutsideViewport} from '../../amp-ad/0.1/concurrent-load';
 import {getData} from '../../../src/event-helper';
 import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
-import {
-  getExperimentBranch,
-  randomlySelectUnsetExperiments,
-} from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
+import {randomlySelectUnsetExperiments} from '../../../src/experiments';
 import {removeElement} from '../../../src/dom';
 import {stringHash32} from '../../../src/string';
 import {utf8Decode} from '../../../src/utils/bytes';
@@ -68,15 +69,6 @@ const ADSENSE_BASE_URL = 'https://googleads.g.doubleclick.net/pagead/ads';
 
 /** @const {string} */
 const TAG = 'amp-ad-network-adsense-impl';
-
-/** @const {string} */
-const PTT_EXP = 'adsense-ptt-exp';
-
-/** @const @enum{string} */
-const PTT_EXP_BRANCHES = {
-  CONTROL: '21068091',
-  EXPERIMENT: '21068092',
-};
 
 /**
  * Shared state for AdSense ad slots. This is used primarily for ad request url
@@ -234,9 +226,20 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   divertExperiments() {
     const experimentInfoList = /** @type {!Array<!../../../src/experiments.ExperimentInfo>} */ ([
       {
-        experimentId: PTT_EXP,
+        experimentId: STICKY_AD_TRANSITION_EXP.id,
         isTrafficEligible: () => true,
-        branches: Object.values(PTT_EXP_BRANCHES),
+        branches: [
+          STICKY_AD_TRANSITION_EXP.control,
+          STICKY_AD_TRANSITION_EXP.experiment,
+        ],
+      },
+      {
+        experimentId: ADS_INITIAL_INTERSECTION_EXP.id,
+        isTrafficEligible: () => true,
+        branches: [
+          ADS_INITIAL_INTERSECTION_EXP.control,
+          ADS_INITIAL_INTERSECTION_EXP.experiment,
+        ],
       },
     ]);
     const setExps = randomlySelectUnsetExperiments(
@@ -250,6 +253,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     if (moduleNomoduleExpId) {
       addExperimentIdToElement(moduleNomoduleExpId, this.element);
     }
+
     const ssrExpIds = this.getSsrExpIds_();
     for (let i = 0; i < ssrExpIds.length; i++) {
       addAmpExperimentIdToElement(ssrExpIds[i], this.element);
@@ -271,14 +275,16 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 
   /** @override */
-  getAdUrl(consentTuple) {
+  getAdUrl(consentTuple, opt_unusedRtcResponsesPromise, opt_serveNpaSignal) {
     let consentState = undefined;
     let consentString = undefined;
     let gdprApplies = undefined;
+    let additionalConsent = undefined;
     if (consentTuple) {
       consentState = consentTuple.consentState;
       consentString = consentTuple.consentString;
       gdprApplies = consentTuple.gdprApplies;
+      additionalConsent = consentTuple.additionalConsent;
     }
     if (
       consentState == CONSENT_POLICY_STATE.UNKNOWN &&
@@ -341,14 +347,12 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'format': format,
       'w': sizeToSend.width,
       'h': sizeToSend.height,
-      'ptt':
-        getExperimentBranch(this.win, PTT_EXP) === PTT_EXP_BRANCHES.EXPERIMENT
-          ? 12
-          : null,
+      'ptt': 12,
       'iu': slotname,
       'npa':
         consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
-        consentState == CONSENT_POLICY_STATE.UNKNOWN
+        consentState == CONSENT_POLICY_STATE.UNKNOWN ||
+        !!opt_serveNpaSignal
           ? 1
           : null,
       'adtest': adTestOn ? 'on' : null,
@@ -375,6 +379,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
           : null,
       'gdpr': gdprApplies === true ? '1' : gdprApplies === false ? '0' : null,
       'gdpr_consent': consentString,
+      'addtl_consent': additionalConsent,
       'pfx': pfx ? '1' : '0',
       'aanf': /^(true|false)$/i.test(this.element.getAttribute('data-no-fill'))
         ? this.element.getAttribute('data-no-fill')
@@ -415,6 +420,11 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 
   /** @override */
+  getServeNpaSignal() {
+    return getServeNpaPromise(this.element);
+  }
+
+  /** @override */
   onNetworkFailure(error, adUrl) {
     dev().info(TAG, 'network error, attempt adding of error parameter', error);
     return {adUrl: maybeAppendErrorParameter(adUrl, 'n')};
@@ -444,6 +454,13 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       );
     }
     return this.size_;
+  }
+
+  /**
+   * @override
+   */
+  skipClientSideValidation(headers) {
+    return headers && !headers.has(AMP_SIGNATURE_HEADER);
   }
 
   /**

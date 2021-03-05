@@ -33,13 +33,6 @@
 // Token, which in a sane world would be in a distinct
 // hierarchy. However the parsing routines sometimes instantiate a
 // temporary TokenStream and put some AST nodes into there.
-//
-// TODO:
-// - Sufficient accessor methods to make this useful (for now, using
-//   JSON only tests).
-// - Parsing numbers (right now unlike the Javascript this library leaves
-//   numbers as strings).
-// - Higher level concepts e.g. selectors?
 
 #ifndef HTMLPARSER__CSS_PARSE_CSS_H_
 #define HTMLPARSER__CSS_PARSE_CSS_H_
@@ -51,11 +44,13 @@
 #include <vector>
 
 #include "absl/memory/memory.h"
+#include "absl/strings/strip.h"
 #include "css/parse-css.pb.h"
 #include "json/types.h"
 #include "validator.pb.h"
 
 namespace htmlparser::css {
+
 // Implements 3.3. Preprocessing the input stream.
 // http://www.w3.org/TR/css-syntax-3/#input-preprocessing
 void Preprocess(std::vector<char32_t>* codepoints);
@@ -461,13 +456,41 @@ class ErrorToken : public Token {
   const std::vector<std::string> params_;
 };
 
-// Strips the prefix 'min-' or 'max-' from the start of a media feature
-// identifier, if present. E.g., "min-width" -> "width".
-std::string_view StripMinMaxPrefix(std::string_view prefixed_string);
+namespace internal {
+
+std::string_view StripVendorPrefix(absl::string_view prefixed_string);
+std::string_view StripMinMaxPrefix(absl::string_view prefixed_string);
+
+// Macro to generate method that may accept any string parameter of type
+// absl::string_view, std::string_view, std::string, char* and const char*
+#define TEMPLATED_METHOD_FOR_STRING_TYPES(PUBLIC_METHOD, INTERNAL_IMPL)\
+    /* absl::string_view specialization */\
+template<class T, \
+         typename std::enable_if<std::is_same<T, absl::string_view>::value, \
+                                              bool>::type = true>\
+std::string_view PUBLIC_METHOD(T prefixed_string) {\
+  return INTERNAL_IMPL(prefixed_string);\
+}\
+\
+    /* std::string, char* specialization */\
+template<class T, typename std::enable_if<\
+    std::is_same<T, std::string>::value || \
+    std::is_same<char const*, typename std::decay<T>::type>::value || \
+    std::is_same<char*, typename std::decay<T>::type>::value, \
+    bool>::type = true>\
+std::string_view PUBLIC_METHOD(const T& str) {\
+  absl::string_view prefixed_string(str);\
+  return INTERNAL_IMPL(prefixed_string);\
+}
+
+}  // namespace internal
 
 // Strips vendor prefixes from identifiers, e.g. property names or names
 // of at rules. E.g., "-moz-keyframes" -> "keyframes".
-std::string_view StripVendorPrefix(std::string_view prefixed_string);
+TEMPLATED_METHOD_FOR_STRING_TYPES(StripVendorPrefix,
+                                  internal::StripVendorPrefix);
+TEMPLATED_METHOD_FOR_STRING_TYPES(StripMinMaxPrefix,
+                                  internal::StripMinMaxPrefix);
 
 class RuleVisitor;
 

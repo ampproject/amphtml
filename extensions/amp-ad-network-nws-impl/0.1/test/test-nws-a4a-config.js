@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
+// These two are required for reasons internal to AMP
+import '../../../../extensions/amp-ad/0.1/amp-ad-ui';
+import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {AmpAdNetworkNwsImpl} from '../amp-ad-network-nws-impl';
+import {Services} from '../../../../src/services';
 import {createElementWithAttributes} from '../../../../src/dom';
 
 describes.fakeWin('amp-ad-network-nws-impl', {amp: true}, (env) => {
-  let win, doc, element, impl;
+  let win, doc, element, impl, preloadExtensionSpy;
 
   beforeEach(() => {
     win = env.win;
@@ -29,6 +33,8 @@ describes.fakeWin('amp-ad-network-nws-impl', {amp: true}, (env) => {
     });
     doc.body.appendChild(element);
     impl = new AmpAdNetworkNwsImpl(element);
+    const extensions = Services.extensionsFor(impl.win);
+    preloadExtensionSpy = env.sandbox.spy(extensions, 'preloadExtension');
   });
 
   describe('#getAdUrl', () => {
@@ -38,6 +44,36 @@ describes.fakeWin('amp-ad-network-nws-impl', {amp: true}, (env) => {
       expect(impl.getAdUrl()).to.equal(
         `https://svr.nws.ai/a4a?slot=${encodeURIComponent(dataSlot)}`
       );
+    });
+  });
+
+  describe('#extractSize', () => {
+    it('should not load amp-analytics without header', () => {
+      impl.extractSize({
+        get() {
+          return undefined;
+        },
+        has() {
+          return false;
+        },
+      });
+      expect(preloadExtensionSpy.withArgs('amp-analytics')).to.not.be.called;
+    });
+    it('should load amp-analytics with header', () => {
+      impl.extractSize({
+        get(name) {
+          switch (name) {
+            case 'X-NWS':
+              return '{"ampAnalytics": {}}';
+            default:
+              return undefined;
+          }
+        },
+        has(name) {
+          return !!this.get(name);
+        },
+      });
+      expect(preloadExtensionSpy.withArgs('amp-analytics')).to.not.be.called;
     });
   });
 });

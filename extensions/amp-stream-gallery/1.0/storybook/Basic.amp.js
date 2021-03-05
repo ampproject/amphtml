@@ -19,7 +19,7 @@ import {boolean, number, select, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
 
-const INSET_ARROW_VISIBILITY = ['auto', 'always', 'never'];
+const CONTROLS = ['auto', 'always', 'never'];
 
 export default {
   title: 'amp-stream-gallery-1_0',
@@ -28,17 +28,14 @@ export default {
   parameters: {
     extensions: [{name: 'amp-stream-gallery', version: '1.0'}],
 
-    experiments: ['amp-stream-gallery-bento', 'amp-stream-carousel-bento'],
+    experiments: ['bento'],
   },
 };
 
 export const Default = () => {
   const slideCount = number('slide count', 15, {min: 3, max: 99});
   const extraSpace = boolean('extra space around?', true);
-  const insetArrowVisibility = select(
-    'inset arrow visibility',
-    INSET_ARROW_VISIBILITY
-  );
+  const controls = select('controls', CONTROLS);
   const loop = boolean('loop', true);
   const snap = boolean('snap', true);
   const slideAlign = select('slide align', ['start', 'center']);
@@ -50,38 +47,47 @@ export const Default = () => {
   const outsetArrows = boolean('outset arrows', true);
   const colorIncrement = Math.floor(255 / (slideCount + 1));
   return (
-    <amp-stream-gallery
-      width="735"
-      height="225"
-      layout="responsive"
-      extra-space={extraSpace}
-      inset-arrow-visibility={insetArrowVisibility}
-      loop={loop}
-      min-item-width={minItemWidth}
-      max-item-width={maxItemWidth}
-      min-visible-count={minVisibleCount}
-      max-visible-count={maxVisibleCount}
-      outset-arrows={outsetArrows}
-      peek={peek}
-      slide-align={slideAlign}
-      snap={snap}
-    >
-      {Array.from({length: slideCount}, (x, i) => {
-        const v = colorIncrement * (i + 1);
-        return (
-          <amp-layout width="245" height="225" layout="flex-item">
-            <svg viewBox="0 0 440 225">
-              <rect
-                style={{fill: `rgb(${v}, 100, 100)`}}
-                width="440"
-                height="225"
-              />
-              Sorry, your browser does not support inline SVG.
-            </svg>
-          </amp-layout>
-        );
-      })}
-    </amp-stream-gallery>
+    <>
+      <amp-stream-gallery
+        id="carousel"
+        width="735"
+        height="225"
+        layout="responsive"
+        controls={controls}
+        extra-space={extraSpace}
+        loop={loop}
+        min-item-width={minItemWidth}
+        max-item-width={maxItemWidth}
+        min-visible-count={minVisibleCount}
+        max-visible-count={maxVisibleCount}
+        outset-arrows={outsetArrows}
+        peek={peek}
+        slide-align={slideAlign}
+        snap={snap}
+      >
+        {Array.from({length: slideCount}, (x, i) => {
+          const v = colorIncrement * (i + 1);
+          return (
+            <amp-layout width="245" height="225" layout="flex-item">
+              <svg viewBox="0 0 440 225">
+                <rect
+                  style={{fill: `rgb(${v}, 100, 100)`}}
+                  width="440"
+                  height="225"
+                />
+                Sorry, your browser does not support inline SVG.
+              </svg>
+            </amp-layout>
+          );
+        })}
+      </amp-stream-gallery>
+
+      <div class="buttons" style={{marginTop: 8}}>
+        <button on="tap:carousel.goToSlide(index=3)">goToSlide(index=3)</button>
+        <button on="tap:carousel.next">Next</button>
+        <button on="tap:carousel.prev">Prev</button>
+      </div>
+    </>
   );
 };
 

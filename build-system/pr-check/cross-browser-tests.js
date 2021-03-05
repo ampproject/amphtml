@@ -15,53 +15,140 @@
  */
 'use strict';
 
-const log = require('fancy-log');
-const {red, cyan} = require('ansi-colors');
-
 /**
- * @fileoverview
- * This script kicks off the unit and integration tests on Linux, Mac OS, and
- * Windows. This is run on Github Actions CI stage = Cross-Browser Tests.
+ * @fileoverview Script that builds and tests on Linux, macOS, and Windows during CI.
  */
 
-const {
-  startTimer,
-  stopTimer,
-  timedExecOrDie: timedExecOrDieBase,
-} = require('./utils');
+const {buildTargetsInclude, Targets} = require('./build-targets');
+const {log} = require('../common/logging');
+const {printSkipMessage, timedExecOrDie} = require('./utils');
+const {red, cyan} = require('kleur/colors');
+const {reportAllExpectedTests} = require('../tasks/report-test-status');
+const {runCiJob} = require('./ci-job');
 
-const FILENAME = 'cross-browser-tests.js';
-const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
+const jobName = 'cross-browser-tests.js';
 
-async function main() {
-  const startTime = startTimer(FILENAME, FILENAME);
-  timedExecOrDie('gulp update-packages');
-  timedExecOrDie('gulp dist --fortesting');
-
+/**
+ * Helper that runs platform-specific integration tests
+ */
+function runIntegrationTestsForPlatform() {
   switch (process.platform) {
     case 'linux':
-      timedExecOrDie('gulp unit --nobuild --headless --firefox');
       timedExecOrDie(
         'gulp integration --nobuild --compiled --headless --firefox'
       );
       break;
     case 'darwin':
-      timedExecOrDie('gulp unit --nobuild --safari');
       timedExecOrDie('gulp integration --nobuild --compiled --safari');
       break;
     case 'win32':
-      timedExecOrDie('gulp unit --nobuild --headless --edge');
       timedExecOrDie('gulp integration --nobuild --compiled --headless --edge');
       timedExecOrDie('gulp integration --nobuild --compiled --ie');
       break;
     default:
       log(
         red('ERROR:'),
-        'Cannot run cross-browser tests on',
+        'Cannot run cross-browser integration tests on',
         cyan(process.platform) + '.'
       );
   }
-  stopTimer(FILENAME, FILENAME, startTime);
 }
 
-main();
+/**
+ * Helper that runs platform-specific E2E tests
+ */
+function runE2eTestsForPlatform() {
+  switch (process.platform) {
+    case 'linux':
+      timedExecOrDie('gulp e2e --nobuild --compiled --browsers=firefox');
+      break;
+    case 'darwin':
+      timedExecOrDie('gulp e2e --nobuild --compiled --browsers=safari');
+      break;
+    case 'win32':
+      break;
+    default:
+      log(
+        red('ERROR:'),
+        'Cannot run cross-browser E2E tests on',
+        cyan(process.platform) + '.'
+      );
+  }
+}
+
+/**
+ * Helper that runs platform-specific unit tests
+ */
+function runUnitTestsForPlatform() {
+  switch (process.platform) {
+    case 'linux':
+      timedExecOrDie('gulp unit --headless --firefox');
+      break;
+    case 'darwin':
+      timedExecOrDie('gulp unit --safari');
+      break;
+    case 'win32':
+      timedExecOrDie('gulp unit --headless --edge');
+      break;
+    default:
+      log(
+        red('ERROR:'),
+        'Cannot run cross-browser unit tests on',
+        cyan(process.platform) + '.'
+      );
+  }
+}
+
+/**
+ * @return {void}
+ */
+function pushBuildWorkflow() {
+  timedExecOrDie('gulp update-packages');
+  runUnitTestsForPlatform();
+  timedExecOrDie('gulp dist --fortesting');
+  runIntegrationTestsForPlatform();
+}
+
+/**
+ * @return {Promise<void>}
+ */
+async function prBuildWorkflow() {
+  if (process.platform == 'linux') {
+    await reportAllExpectedTests(); // Only once is sufficient.
+  }
+  if (
+    !buildTargetsInclude(
+      Targets.RUNTIME,
+      Targets.UNIT_TEST,
+      Targets.E2E_TEST,
+      Targets.INTEGRATION_TEST
+    )
+  ) {
+    printSkipMessage(
+      jobName,
+      'this PR does not affect the runtime, unit tests, integration tests, or end-to-end tests'
+    );
+    return;
+  }
+  timedExecOrDie('gulp update-packages');
+  if (buildTargetsInclude(Targets.RUNTIME, Targets.UNIT_TEST)) {
+    runUnitTestsForPlatform();
+  }
+  if (
+    buildTargetsInclude(
+      Targets.RUNTIME,
+      Targets.INTEGRATION_TEST,
+      Targets.E2E_TEST
+    )
+  ) {
+    timedExecOrDie('gulp dist --fortesting');
+  }
+  if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {
+    runIntegrationTestsForPlatform();
+  }
+  if (buildTargetsInclude(Targets.RUNTIME, Targets.E2E_TEST)) {
+    runE2eTestsForPlatform();
+  }
+}
+
+runCiJob(jobName, pushBuildWorkflow, prBuildWorkflow);

@@ -20,9 +20,9 @@ import {
 } from './amp-story-interactive-abstract';
 import {CSS} from '../../../build/amp-story-interactive-quiz-0.1.css';
 import {LocalizedStringId} from '../../../src/localized-strings';
-import {Services} from '../../../src/services';
 import {htmlFor} from '../../../src/static-template';
 import {setStyle} from '../../../src/style';
+import objstr from 'obj-str';
 
 /**
  * Generates the template for the quiz.
@@ -49,11 +49,14 @@ const buildQuizTemplate = (element) => {
 const buildOptionTemplate = (option) => {
   const html = htmlFor(option);
   return html`
-    <span
+    <button
       class="i-amphtml-story-interactive-quiz-option i-amphtml-story-interactive-option"
+      aria-live="polite"
     >
-      <span class="i-amphtml-story-interactive-quiz-answer-choice"></span>
-    </span>
+      <span
+        class="i-amphtml-story-interactive-quiz-answer-choice notranslate"
+      ></span>
+    </button>
   `;
 };
 
@@ -91,13 +94,12 @@ export class AmpStoryInteractiveQuiz extends AmpStoryInteractive {
     this.attachPrompt_(root);
 
     // Localize the answer choice options
-    const localizationService = Services.localizationForDoc(this.element);
     this.localizedAnswerChoices_ = [
       LocalizedStringId.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_A,
       LocalizedStringId.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_B,
       LocalizedStringId.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_C,
       LocalizedStringId.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_D,
-    ].map((choice) => localizationService.getLocalizedString(choice));
+    ].map((choice) => this.localizationService.getLocalizedString(choice));
     const optionContainer = this.rootEl_.querySelector(
       '.i-amphtml-story-interactive-quiz-option-container'
     );
@@ -120,9 +122,10 @@ export class AmpStoryInteractiveQuiz extends AmpStoryInteractive {
     const convertedOption = buildOptionTemplate(this.element);
 
     // Fill in the answer choice and set the option ID
-    convertedOption.querySelector(
+    const answerChoiceEl = convertedOption.querySelector(
       '.i-amphtml-story-interactive-quiz-answer-choice'
-    ).textContent = this.localizedAnswerChoices_[index];
+    );
+    answerChoiceEl.textContent = this.localizedAnswerChoices_[index];
     convertedOption.optionIndex_ = option['optionIndex'];
 
     // Extract and structure the option information
@@ -147,18 +150,35 @@ export class AmpStoryInteractiveQuiz extends AmpStoryInteractive {
   /**
    * @override
    */
-  updateOptionPercentages_(optionsData) {
+  displayOptionsData(optionsData) {
     if (!optionsData) {
       return;
     }
 
     const percentages = this.preprocessPercentages_(optionsData);
-    percentages.forEach((percentage, index) => {
-      const option = this.getOptionElements()[index];
-      option.querySelector(
+
+    this.getOptionElements().forEach((el, index) => {
+      // Update the aria-label so they read "selected" and "correct" or "incorrect"
+      const ariaDescription = objstr({
+        selected: optionsData[index].selected,
+        correct: el.hasAttribute('correct'),
+        incorrect: !el.hasAttribute('correct'),
+      });
+      el.querySelector(
+        '.i-amphtml-story-interactive-quiz-answer-choice'
+      ).setAttribute('aria-hidden', true);
+      const optionText = el.querySelector(
+        '.i-amphtml-story-interactive-quiz-option-text'
+      );
+      optionText.setAttribute(
+        'aria-label',
+        ariaDescription + ' ' + optionText.textContent
+      );
+      // Update percentage text
+      el.querySelector(
         '.i-amphtml-story-interactive-quiz-percentage-text'
-      ).textContent = `${percentage}%`;
-      setStyle(option, '--option-percentage', percentage + '%');
+      ).textContent = `${percentages[index]}%`;
+      setStyle(el, '--option-percentage', `${percentages[index]}%`);
     });
   }
 }
