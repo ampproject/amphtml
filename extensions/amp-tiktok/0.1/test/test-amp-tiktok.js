@@ -62,15 +62,6 @@ describes.realWin(
         .then(() => tiktok);
     }
 
-    // async function sendFakeMessage(tiktok, iframe, details) {
-    //   const impl = await tiktok.getImpl(false);
-    //   impl.handleTiktokMessages_({
-    //     origin: 'https://www.tiktok.com',
-    //     source: iframe.contentWindow,
-    //     data: JSON.stringify(details),
-    //   });
-    // }
-
     it('renders with full src url', async () => {
       const videoId = '6718335390845095173';
       const player = await getTiktok(videoId, true);
@@ -109,19 +100,5 @@ describes.realWin(
       expect(player.querySelector('iframe')).to.be.null;
       expect(impl.iframe_).to.be.null;
     });
-    // it('resizes in response to messges from Tiktok iframe', async () => {
-    //   const tiktok = await getTiktok();
-    //   const impl = await tiktok.getImpl(false);
-    //   const iframe = tiktok.querySelector('iframe');
-    //   const forceChangeHeight = env.sandbox.spy(impl, 'forceChangeHeight');
-    //   expect(iframe).to.not.be.null;
-    //   const newHeight = 900;
-    //   await sendFakeMessage(tiktok, iframe, {height: newHeight});
-    //   await Promise.resolve().then(() => {
-    //     clock.tick(2000);
-    //   });
-    //   expect(forceChangeHeight).to.be.calledOnce;
-    //   expect(forceChangeHeight.firstCall.args[0]).to.equal(newHeight);
-    // });
   }
 );
