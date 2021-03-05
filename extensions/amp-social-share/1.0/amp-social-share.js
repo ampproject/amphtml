@@ -26,7 +26,7 @@ import {getSocialConfig} from './social-share-config';
 import {isExperimentOn} from '../../../src/experiments';
 import {toWin} from '../../../src/types';
 import {toggle} from '../../../src/style';
-import {userAssert} from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 /** @const {string} */
 const TAG = 'amp-social-share';
@@ -231,16 +231,17 @@ AmpSocialShare['Component'] = SocialShare;
 AmpSocialShare['layoutSizeDefined'] = true;
 
 /** @override */
-AmpSocialShare['passthroughNonEmpty'] = true;
-
-/** @override */
 AmpSocialShare['delegatesFocus'] = true;
 
 /** @override */
 AmpSocialShare['props'] = {
+  'children': {passthroughNonEmpty: true},
   'tabIndex': {attr: 'tabindex'},
   'type': {attr: 'type'},
 };
+
+/** @override */
+AmpSocialShare['usesShadowDom'] = true;
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpSocialShare, CSS);
