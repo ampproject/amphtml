@@ -66,7 +66,7 @@ describes.fakeWin(
       ampdocServiceMock = env.sandbox.mock(ampdocService);
       win.AMP = [];
       win.__AMP_SERVICES = {
-        ampdoc: {obj: ampdocService},
+        ampdoc: {obj: ampdocService, ctor: Object},
       };
       const ampdoc = new AmpDocSingle(win);
       ampdocService.getSingleDoc = () => ampdoc;

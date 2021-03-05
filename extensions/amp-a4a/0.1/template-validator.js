@@ -15,9 +15,9 @@
  */
 
 import {AdResponseType, Validator, ValidatorResult} from './amp-ad-type-defs';
-import {Services} from '../../../src/services';
 import {getAmpAdMetadata} from './amp-ad-utils';
 import {getAmpAdTemplateHelper} from './amp-ad-template-helper';
+import {preloadFriendlyIframeEmbedExtensionIdsDeprecated} from '../../../src/friendly-iframe-embed';
 import {pushIfNotExist} from '../../../src/utils/array';
 import {tryParseJson} from '../../../src/json';
 import {utf8Decode} from '../../../src/utils/bytes';
@@ -65,21 +65,22 @@ export class TemplateValidator extends Validator {
       .fetch(parsedResponseBody.templateUrl)
       .then((template) => {
         const creativeMetadata = getAmpAdMetadata(template);
+        const customElementExtensions =
+          creativeMetadata['customElementExtensions'];
         if (parsedResponseBody.analytics) {
-          pushIfNotExist(
-            creativeMetadata['customElementExtensions'],
-            'amp-analytics'
-          );
+          pushIfNotExist(customElementExtensions, 'amp-analytics');
         }
-        pushIfNotExist(
-          creativeMetadata['customElementExtensions'],
-          'amp-mustache'
+        pushIfNotExist(customElementExtensions, 'amp-mustache');
+
+        // Load any extensions; do not wait on their promises as this
+        // is just to prefetch.
+        // TODO(#33020): switch to `preloadFriendlyIframeEmbedExtensions` with
+        // the format of `[{extensionId, extensionVersion}]`.
+        preloadFriendlyIframeEmbedExtensionIdsDeprecated(
+          context.win,
+          customElementExtensions
         );
 
-        const extensions = Services.extensionsFor(context.win);
-        creativeMetadata.customElementExtensions.forEach((extensionId) =>
-          extensions./*OK*/ preloadExtension(extensionId)
-        );
         // TODO(levitzky) Add preload logic for fonts / images.
         return Promise.resolve(
           /** @type {!./amp-ad-type-defs.ValidatorOutput} */ ({

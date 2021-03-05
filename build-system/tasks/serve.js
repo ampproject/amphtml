@@ -90,6 +90,7 @@ async function startServer(
   serverOptions = {},
   modeOptions = {}
 ) {
+  buildNewServer();
   if (serverOptions.lazyBuild) {
     lazyBuild = serverOptions.lazyBuild;
   }
@@ -116,6 +117,10 @@ async function startServer(
   connect.server(options, started);
   await startedPromise;
 
+  /**
+   * @param {string} host
+   * @return {string}
+   */
   function makeUrl(host) {
     return `http${options.https ? 's' : ''}://${host}:${options.port}`;
   }
@@ -164,13 +169,11 @@ async function stopServer() {
  */
 async function restartServer() {
   stopServer();
-  if (argv.new_server) {
-    try {
-      buildNewServer();
-    } catch {
-      log(red('ERROR:'), 'Could not build', cyan('AMP Dev Server'));
-      return;
-    }
+  try {
+    buildNewServer();
+  } catch {
+    log(red('ERROR:'), 'Could not rebuild', cyan('AMP Server'));
+    return;
   }
   resetServerFiles();
   startServer();
@@ -201,9 +204,6 @@ async function doServe(lazyBuild = false) {
     await restartServer();
   };
   watch(serverFiles).on('change', debounce(watchFunc, watchDebounceDelay));
-  if (argv.new_server) {
-    buildNewServer();
-  }
   await startServer({}, {lazyBuild}, {});
   if (lazyBuild) {
     await performPreBuildSteps();
@@ -229,9 +229,8 @@ serve.flags = {
   quiet: "  Run in quiet mode and don't log HTTP requests",
   cache: '  Make local resources cacheable by the browser',
   no_caching_extensions: '  Disable caching for extensions',
-  new_server: '  Use new server transforms',
   compiled: '  Serve minified JS',
-  esm: '  Serve ESM JS (requires the use of --new_server)',
+  esm: '  Serve ESM JS (uses the new typescript server transforms)',
   cdn: '  Serve current prod JS',
   rtv: '  Serve JS from the RTV provided',
   coverage:
