@@ -15,6 +15,7 @@
  */
 
 import '../amp-3q-player';
+import * as dom from '../../../../src/dom';
 import {Services} from '../../../../src/services';
 import {VideoEvents} from '../../../../src/video-interface';
 import {createElementWithAttributes} from '../../../../src/dom';
@@ -58,41 +59,124 @@ describes.realWin(
       return player;
     }
 
-    it('renders', async () => {
-      const player = await get3QElement('c8dbe7f4-7f7f-11e6-a407-0cc47a188158');
-      const iframe = player.querySelector('iframe');
-      expect(iframe).to.not.be.null;
-      expect(iframe.src).to.equal(
-        'https://playout.3qsdn.com/c8dbe7f4-7f7f-11e6-a407-0cc47a188158?autoplay=false&amp=true'
-      );
-    });
-
-    it('requires data-id', () => {
-      return allowConsoleError(() => {
-        return get3QElement('').should.eventually.be.rejectedWith(
-          /The data-id attribute is required/
+    describe('rendering', async () => {
+      it('renders', async () => {
+        const player = await get3QElement(
+          'c8dbe7f4-7f7f-11e6-a407-0cc47a188158'
         );
+        const iframe = player.querySelector('iframe');
+        expect(iframe).to.not.be.null;
+        expect(iframe.src).to.equal(
+          'https://playout.3qsdn.com/c8dbe7f4-7f7f-11e6-a407-0cc47a188158?autoplay=false&amp=true'
+        );
+      });
+
+      it('requires data-id', () => {
+        return allowConsoleError(() => {
+          return get3QElement('').should.eventually.be.rejectedWith(
+            /The data-id attribute is required/
+          );
+        });
+      });
+
+      it('should forward events from amp-3q-player to the amp element', async () => {
+        const player = await get3QElement(
+          'c8dbe7f4-7f7f-11e6-a407-0cc47a188158'
+        );
+        const impl = await player.getImpl();
+        const iframe = player.querySelector('iframe');
+        await Promise.resolve();
+        const p1 = listenOncePromise(player, VideoEvents.MUTED);
+        sendFakeMessage(impl, iframe, 'muted');
+        await p1;
+        const p2 = listenOncePromise(player, VideoEvents.PLAYING);
+        sendFakeMessage(impl, iframe, 'playing');
+        await p2;
+        const p3 = listenOncePromise(player, VideoEvents.PAUSE);
+        sendFakeMessage(impl, iframe, 'paused');
+        await p3;
+        const p4 = listenOncePromise(player, VideoEvents.UNMUTED);
+        sendFakeMessage(impl, iframe, 'unmuted');
+        const successTimeout = timer.promise(10);
+        return Promise.race([p4, successTimeout]);
+      });
+
+      it('removes iframe after unlayoutCallback', async () => {
+        const player = await get3QElement(
+          'c8dbe7f4-7f7f-11e6-a407-0cc47a188158'
+        );
+        const impl = await player.getImpl(false);
+        const iframe = player.querySelector('iframe');
+        expect(iframe).to.not.be.null;
+        impl.unlayoutCallback();
+        expect(player.querySelector('iframe')).to.be.null;
+        expect(impl.iframe_).to.be.null;
       });
     });
 
-    it('should forward events from amp-3q-player to the amp element', async () => {
-      const player = await get3QElement('c8dbe7f4-7f7f-11e6-a407-0cc47a188158');
-      const impl = await player.getImpl();
-      const iframe = player.querySelector('iframe');
-      await Promise.resolve();
-      const p1 = listenOncePromise(player, VideoEvents.MUTED);
-      sendFakeMessage(impl, iframe, 'muted');
-      await p1;
-      const p2 = listenOncePromise(player, VideoEvents.PLAYING);
-      sendFakeMessage(impl, iframe, 'playing');
-      await p2;
-      const p3 = listenOncePromise(player, VideoEvents.PAUSE);
-      sendFakeMessage(impl, iframe, 'paused');
-      await p3;
-      const p4 = listenOncePromise(player, VideoEvents.UNMUTED);
-      sendFakeMessage(impl, iframe, 'unmuted');
-      const successTimeout = timer.promise(10);
-      return Promise.race([p4, successTimeout]);
+    describe('methods', async () => {
+      let impl;
+      beforeEach(async () => {
+        const player = await get3QElement(
+          'c8dbe7f4-7f7f-11e6-a407-0cc47a188158'
+        );
+        impl = await player.getImpl(false);
+      });
+
+      it('can play', () => {
+        const spy = env.sandbox.spy(impl, 'sdnPostMessage_');
+        impl.play();
+        expect(spy).to.be.calledWith('play2');
+      });
+
+      it('can pause', () => {
+        const spy = env.sandbox.spy(impl, 'sdnPostMessage_');
+        impl.pause();
+        expect(spy).to.be.calledWith('pause');
+      });
+
+      it('can mute', () => {
+        const spy = env.sandbox.spy(impl, 'sdnPostMessage_');
+        impl.mute();
+        expect(spy).to.be.calledWith('mute');
+      });
+
+      it('can unmute', () => {
+        const spy = env.sandbox.spy(impl, 'sdnPostMessage_');
+        impl.unmute();
+        expect(spy).to.be.calledWith('unmute');
+      });
+
+      it('supports platform', () => {
+        expect(impl.supportsPlatform()).to.be.true;
+      });
+
+      it('is interactive', () => {
+        expect(impl.isInteractive()).to.be.true;
+      });
+
+      it('toggles controls', () => {
+        const spy = env.sandbox.stub(impl, 'sdnPostMessage_');
+        impl.showControls();
+        expect(spy).calledWith('showControlbar');
+        impl.hideControls();
+        expect(spy).calledWith('hideControlbar');
+        impl.showControls();
+        expect(spy).calledWith('showControlbar');
+      });
+
+      it('can enter fullscreen', () => {
+        const spy = env.sandbox.spy(dom, 'fullscreenEnter');
+        impl.fullscreenEnter();
+        expect(spy).calledWith(impl.iframe_);
+      });
+
+      it('can exit fullscreen', () => {
+        const spy = env.sandbox.spy(dom, 'fullscreenExit');
+        impl.fullscreenExit();
+        expect(spy).calledWith(impl.iframe_);
+        expect(impl.isFullscreen()).to.be.false;
+      });
     });
 
     function sendFakeMessage(impl, iframe, command) {
