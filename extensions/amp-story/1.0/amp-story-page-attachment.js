@@ -273,17 +273,11 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    */
   openRemote_() {
     const animationEl = this.win.document.createElement('div');
-    //console.log("expand");
     animationEl.classList.add('i-amphtml-story-page-attachment-expand');
     const storyEl = closest(this.element, (el) => el.tagName === 'AMP-STORY');
-    //console.log("expand2");
-    //debugger;
 
     this.mutateElement(() => {
       storyEl.appendChild(animationEl);
-      //console.log("expand3");
-      //console.log(animationEl.classList);
-      //debugger;
     }).then(() => {
       // Give some time for the 120ms CSS animation to run (cf
       // amp-story-page-attachment.css). The navigation itself will take some
