@@ -27,8 +27,7 @@
       "type": "small",
       "title": "This is an example article2",
       "url": "http://example.com/article.html",
-      "image": "http://placehold.it/256x128",
-      "alt": ""
+      "image": "http://placehold.it/256x128"
     },
     {
       "type": "small",
