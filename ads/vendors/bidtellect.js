@@ -18,7 +18,24 @@ import {validateData, writeScript} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   t: string,
+ *   pid: string,
+ *   sid: string,
+ *   width: string,
+ *   height: string,
+ *   sname: (string|undefined),
+ *   pubid: (string|undefined),
+ *   pubname: (string|undefined),
+ *   renderid: (string|undefined),
+ *   bestrender: (string|undefined),
+ *   autoplay: (string|undefined),
+ *   playbutton: (string|undefined),
+ *   videotypeid: (string|undefined),
+ *   videocloseicon: (string|undefined),
+ *   targetid: (string|undefined),
+ *   bustframe: (string|undefined),
+ * }} data
  */
 export function bidtellect(global, data) {
   const requiredParams = ['t', 'pid', 'sid'];
@@ -47,7 +64,11 @@ export function bidtellect(global, data) {
   }
   optionalParams.forEach(function (param) {
     if (data[param]) {
-      params += '&' + param + '=' + encodeURIComponent(data[param]);
+      params +=
+        '&' +
+        param +
+        '=' +
+        encodeURIComponent(/** @type {string} */ (data[param]));
     }
   });
   const url = 'https://cdn.bttrack.com/js/infeed/2.0/infeed.min.js' + params;

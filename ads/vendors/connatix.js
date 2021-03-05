@@ -20,14 +20,19 @@ import {validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   connatix: string
+ * }} data
  */
 export function connatix(global, data) {
   validateData(data, ['connatix']);
 
   // Because 3p's loadScript does not allow for data attributes,
   // we will write the JS tag ourselves.
-  const script = global.document.createElement('script');
+  /** @type {HTMLScriptElement} */
+  const script = /** @type {HTMLScriptElement} */ (global.document.createElement(
+    'script'
+  ));
   const cnxData = Object.assign(Object(tryParseJson(data['connatix'])));
   global.cnxAmpAd = true;
   for (const key in cnxData) {
@@ -39,13 +44,13 @@ export function connatix(global, data) {
   window.addEventListener(
     'connatix_no_content',
     function () {
-      window.context.noContentAvailable();
+      /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (window.context).noContentAvailable();
     },
     false
   );
 
   script.onload = () => {
-    global.context.renderStart();
+    /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context).renderStart();
   };
 
   script.src = 'https://cdn.connatix.com/min/connatix.renderer.infeed.min.js';

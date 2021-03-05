@@ -18,7 +18,12 @@ import {validateData, writeScript} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   domain: (string|null),
+ *   adslot: (string|null),
+ *   height: string,
+ *   preview: (string|null)
+ * }} data
  */
 export function conative(global, data) {
   validateData(data, ['domain', 'adslot', 'height'], ['preview']);
@@ -33,14 +38,16 @@ export function conative(global, data) {
   window.dmConativeData.preview = window.dmConativeData.preview || data.preview;
   window.dmConativeData.visibility = window.dmConativeData.visibility || 0;
 
-  window.context.observeIntersection(function (changes) {
-    /** @type {!Array} */ (changes).forEach(function (c) {
-      window.dmConativeData.visibility = parseInt(
-        (c.intersectionRect.height / c.boundingClientRect.height) * 100,
-        10
-      );
-    });
-  });
+  /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context).observeIntersection(
+    function (changes) {
+      /** @type {!Array} */ (changes).forEach(function (c) {
+        window.dmConativeData.visibility = parseInt(
+          (c.intersectionRect.height / c.boundingClientRect.height) * 100,
+          10
+        );
+      });
+    }
+  );
 
   if (data.domain) {
     writeScript(

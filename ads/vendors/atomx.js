@@ -18,7 +18,16 @@ import {validateData, writeScript} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   id: string,
+ *   width: string,
+ *   height: string,
+ *   click: (string|undefined),
+ *   uv1: (string|undefined),
+ *   uv2: (string|undefined),
+ *   uv3: (string|undefined),
+ *   context: (string|undefined)
+ * }} data
  */
 export function atomx(global, data) {
   const optionals = ['click', 'uv1', 'uv2', 'uv3', 'context'];

@@ -388,13 +388,47 @@ adventive.Plugin;
 adventive.plugins;
 adventive.utility;
 
+// appnexus.js
+window.adUnitTargetIds;
+
+// baidu.js
+window.slotbydup;
+
+// bringhub.js
+window._bringhub;
+
+// broadstreetads.js
+window.broadstreet;
+window.broadstreet.loadAMPZone;
+window.broadstreet.run;
+
+// byplay.js
+window.BYPLAY_VAST_URL;
+
+// caajainfeed.js
+window.caAjaInfeedConfig;
+
+// caprofitx.js
+window.caprofitxConfig;
+
 // colombia.js
-data.clmb_slot;
-data.clmb_position;
-data.clmb_section;
-data.clmb_divid;
+window._colombia;
+
+// conative.js
+window.dmConativeData;
+window.dmConativeData.domain;
+window.dmConativeData.adslot;
+window.dmConativeData.preview;
+window.dmConativeData.visibility;
+
+// connatix.js
+window.cnxAmpAd;
 
 // contentad.js
+window.id;
+window.d;
+window.wid;
+window.url;
 data.d;
 data.wid;
 data.url;

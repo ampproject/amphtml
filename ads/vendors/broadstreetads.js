@@ -18,7 +18,14 @@ import {loadScript, validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   network: string,
+ *   zone: string,
+ *   width: string,
+ *   height: string,
+ *   keywords: (string|undefined),
+ *   place: (number|undefined)
+ * }} data
  */
 export function broadstreetads(global, data) {
   validateData(

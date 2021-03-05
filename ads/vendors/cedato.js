@@ -20,7 +20,16 @@ import {validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   id: string,
+ *   width: string,
+ *   height: string,
+ *   domain: (string|undefined),
+ *   servingDomain: (string|undefined),
+ *   subid: (string|undefined),
+ *   version: (string|undefined),
+ *   extraParams: (string|undefined)
+ * }} data
  */
 export function cedato(global, data) {
   const requiredParams = ['id'];
@@ -33,14 +42,16 @@ export function cedato(global, data) {
   ];
   validateData(data, requiredParams, optionalParams);
 
+  /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */
+  const context = /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context);
   if (!data || !data.id) {
-    global.context.noContentAvailable();
+    context.noContentAvailable();
     return;
   }
 
   const cb = Math.floor(Math.random() * 10000);
   const domain =
-    data.domain || parseUrlDeprecated(global.context.sourceUrl).origin;
+    data.domain || parseUrlDeprecated(context.sourceUrl || '').origin;
 
   /* Create div for ad to target */
   const playerDiv = global.document.createElement('div');
@@ -49,7 +60,10 @@ export function cedato(global, data) {
     width: '100%',
     height: '100%',
   });
-  const playerScript = global.document.createElement('script');
+  /** @type {HTMLScriptElement} */
+  const playerScript = /** @type {HTMLScriptElement} */ (global.document.createElement(
+    'script'
+  ));
   const servingDomain = data.servingDomain
     ? encodeURIComponent(data.servingDomain)
     : 'algovid.com';
@@ -59,14 +73,18 @@ export function cedato(global, data) {
     '&cb=' + cb,
     '&w=' + encodeURIComponent(data.width),
     '&h=' + encodeURIComponent(data.height),
-    data.version ? '&pv=' + encodeURIComponent(data.version) : '',
-    data.subid ? '&subid=' + encodeURIComponent(data.subid) : '',
-    domain ? '&d=' + encodeURIComponent(domain) : '',
+    data.version
+      ? '&pv=' + encodeURIComponent(/** @type {string} */ (data.version))
+      : '',
+    data.subid
+      ? '&subid=' + encodeURIComponent(/** @type {string} */ (data.subid))
+      : '',
+    domain ? '&d=' + encodeURIComponent(/** @type {string} */ (domain)) : '',
     data.extraParams || '', // already encoded url query string
   ];
 
   playerScript.onload = () => {
-    global.context.renderStart();
+    context.renderStart();
   };
 
   playerScript.src = srcParams.join('');

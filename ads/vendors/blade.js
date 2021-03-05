@@ -14,12 +14,21 @@
  * limitations under the License.
  */
 
+import {dict} from '../../src/utils/object';
 import {loadScript, validateData} from '../../3p/3p';
 import {tryParseJson} from '../../src/json';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   width: string,
+ *   height: string,
+ *   blade_api_key: string,
+ *   blade_player_id: string,
+ *   blade_player_type: string,
+ *   servingDomain: (string|undefined),
+ *   blade_macros: (string|undefined)
+ * }} data
  */
 export function blade(global, data) {
   // ensure mandatory fields
@@ -31,10 +40,13 @@ export function blade(global, data) {
     'blade_player_type',
   ]);
 
+  /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */
+  const context = /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context);
   const marcosObj = tryParseJson(data['blade_macros']) || {};
   marcosObj['rand'] = Math.random().toString();
-  marcosObj['page_url'] = marcosObj['page_url'] || global.context.canonicalUrl;
-  const macros = {...marcosObj};
+  marcosObj['page_url'] = marcosObj['page_url'] || context.canonicalUrl;
+  /** @type {{width:string,height:string}} */
+  const macros = /** @type {{width:string,height:string}} */ ({...marcosObj});
   macros.width = data.width;
   macros.height = data.height;
 
@@ -48,19 +60,27 @@ export function blade(global, data) {
     version: '1.0',
     macros,
   };
-  const ctx = global.context;
 
   const bladeOnLoad = `_bladeOnLoad-${containerId}`;
+  /**
+   * @param {boolean} error
+   * @param {{
+   *   width: string,
+   *   height: string
+   * }} player
+   */
   global[bladeOnLoad] = function (error, player) {
     if (error) {
-      global.context.noContentAvailable();
+      context.noContentAvailable();
       return;
     }
-    ctx.reportRenderedEntityIdentifier(containerId);
-    ctx.renderStart({
-      width: player.width,
-      height: player.height,
-    });
+    context.reportRenderedEntityIdentifier(containerId);
+    context.renderStart(
+      dict({
+        'width': player.width,
+        'height': player.height,
+      })
+    );
   };
 
   const servingDomain = data.servingDomain
@@ -72,7 +92,7 @@ export function blade(global, data) {
     `https://${servingDomain}/js/${data['blade_api_key']}/${data['blade_player_id']}/player.js?t=${data['blade_player_type']}&callback=${bladeOnLoad}&config=${bladeConfig}&c=${containerId}`,
     undefined,
     () => {
-      global.context.noContentAvailable();
+      context.noContentAvailable();
     }
   );
   /**

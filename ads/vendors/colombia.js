@@ -18,7 +18,12 @@ import {loadScript, validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   clmb_slot: string,
+ *   clmb_position: string,
+ *   clmb_section: string,
+ *   clmb_divid: string
+ * }} data
  */
 export function colombia(global, data) {
   validateData(data, [
@@ -36,16 +41,18 @@ export function colombia(global, data) {
     clmbdivid: data.clmb_divid,
   });
   // install observation on entering/leaving the view
-  global.context.observeIntersection(function (newrequest) {
-    /** @type {!Array} */ (newrequest).forEach(function (d) {
-      if (d.intersectionRect.height > 0) {
-        global._colombia.push({
-          visible: true,
-          rect: d,
-        });
-      }
-    });
-  });
+  /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context).observeIntersection(
+    function (newrequest) {
+      /** @type {!Array} */ (newrequest).forEach(function (d) {
+        if (d.intersectionRect.height > 0) {
+          global._colombia.push({
+            visible: true,
+            rect: d,
+          });
+        }
+      });
+    }
+  );
   loadScript(
     global,
     'https://static.clmbtech.com/ad/commons/js/colombia-amp.js'

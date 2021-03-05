@@ -18,7 +18,9 @@ import {loadScript, validateData} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   cproid: string
+ * }} data
  */
 export function baidu(global, data) {
   validateData(data, ['cproid']);
@@ -37,7 +39,7 @@ export function baidu(global, data) {
   });
 
   global.addEventListener('message', () => {
-    global.context.renderStart();
+    /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context).renderStart();
   });
 
   loadScript(
@@ -49,7 +51,7 @@ export function baidu(global, data) {
       // if parent iframe receives no message.
       // setTimeout can work, but it's not that reliable.
       // So, only the faliure of JS loading is dealed with for now.
-      global.context.noContentAvailable();
+      /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context).noContentAvailable();
     }
   );
 }

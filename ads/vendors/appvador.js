@@ -18,7 +18,12 @@ import {validateData, writeScript} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   id: string,
+ *   options: (string|undefined),
+ *   jsType: (string|undefined),
+ *   customScriptSrc: (string|undefined)
+ * }} data
  */
 export function appvador(global, data) {
   validateData(data, ['id'], ['options', 'jsType', 'customScriptSrc']);

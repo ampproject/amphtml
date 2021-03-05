@@ -19,7 +19,12 @@ import {validateData, writeScript} from '../../3p/3p';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   id: string,
+ *   d: string,
+ *   wid: string,
+ *   url: (string|undefined)
+ * }} data
  */
 export function contentad(global, data) {
   validateData(data, [], ['id', 'd', 'wid', 'url']);

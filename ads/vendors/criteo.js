@@ -24,7 +24,10 @@ const TAG = 'CRITEO';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   zone: string,
+ *   tagtype: (string|undefined)
+ * }} data
  */
 export function criteo(global, data) {
   loadScript(global, 'https://static.criteo.net/js/ld/publishertag.js', () => {

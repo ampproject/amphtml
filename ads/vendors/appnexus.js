@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {dict} from '../../src/utils/object';
 import {loadScript, validateData, writeScript} from '../../3p/3p';
 import {setStyles} from '../../src/style';
 
@@ -21,7 +22,17 @@ const APPNEXUS_AST_URL = 'https://acdn.adnxs.com/ast/ast.js';
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   width: string,
+ *   height: string,
+ *   target: string,
+ *   adUnits: (Array<Object>|undefined),
+ *   tagid: (string|undefined),
+ *   member: (string|undefined),
+ *   code: (string|undefined),
+ *   pageOpts: (string|undefined),
+ *   debug: (boolean|undefined)
+ * }} data
  */
 export function appnexus(global, data) {
   const args = [];
@@ -60,11 +71,22 @@ export function appnexus(global, data) {
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @param {{
+ *   width: string,
+ *   height: string,
+ *   target: string,
+ *   adUnits: (Array<Object>|undefined),
+ *   tagid: (string|undefined),
+ *   member: (string|undefined),
+ *   code: (string|undefined),
+ *   pageOpts: (string|undefined),
+ *   debug: (boolean|undefined)
+ * }} data
  */
 function appnexusAst(global, data) {
   validateData(data, ['adUnits']);
-  const {context} = global;
+  /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */
+  const context = /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context);
   let apntag;
   if (context.isMaster) {
     // in case we are in the master iframe, we load AST
@@ -151,10 +173,16 @@ function appnexusAst(global, data) {
   /**
    * resolve getAd with an available ad object
    *
-   * @param {{targetId: string}} adObj
+   * @param {{
+   *   width: string,
+   *   height: string,
+   *   targetId: string
+   * }} adObj
    */
   function isAdAvailable(adObj) {
-    global.context.renderStart({width: adObj.width, height: adObj.height});
+    /** @type {./3p/ampcontext-integration.IntegrationAmpContext} */ (global.context).renderStart(
+      dict({'width': adObj.width, 'height': adObj.height})
+    );
     global.apntag.showTag(adObj.targetId, global.window);
   }
 }
