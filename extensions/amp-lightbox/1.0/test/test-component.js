@@ -34,16 +34,8 @@ describes.sandboxed('Lightbox preact component v1.0', {}, () => {
     wrapper.update();
 
     // Render provided children
-    expect(wrapper.children()).to.have.lengthOf(1);
-    expect(
-      wrapper
-        .find('div[part="lightbox"]')
-        .getDOMNode()
-        .className.includes('contain-scroll')
-    ).to.be.true;
-    expect(
-      wrapper.find('div[part="lightbox"] > div').getDOMNode().style.overflow
-    ).to.equal('hidden');
+    const innerDiv = wrapper.find('div[part="lightbox"] > div').getDOMNode();
+    expect(innerDiv.className).not.to.include('scrollable');
     expect(wrapper.find('p').text()).to.equal('Hello World');
   });
 
@@ -59,14 +51,8 @@ describes.sandboxed('Lightbox preact component v1.0', {}, () => {
     wrapper.update();
 
     // Render provided children
-    expect(
-      wrapper
-        .find('div[part="lightbox"]')
-        .getDOMNode()
-        .className.includes('contain-scroll')
-    ).to.be.true;
-    expect(
-      wrapper.find('div[part="lightbox"] > div').getDOMNode().style.overflow
-    ).to.equal('scroll');
+    const innerDiv = wrapper.find('div[part="lightbox"] > div').getDOMNode();
+    expect(innerDiv.className).to.include('scrollable');
+    expect(wrapper.find('p').text()).to.equal('Hello World');
   });
 });
