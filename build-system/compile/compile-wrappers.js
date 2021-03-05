@@ -36,6 +36,8 @@ exports.mainBinary =
 
 exports.extension = function (
   name,
+  version,
+  latest,
   isModule,
   loadPriority,
   intermediateDeps,
@@ -46,6 +48,11 @@ exports.extension = function (
   let deps = '';
   if (intermediateDeps && intermediateDeps.length) {
     deps = 'i:';
+    /**
+     * Wraps the provided string in quotes.
+     * @param {string} s
+     * @return {string}
+     */
     function quote(s) {
       return `"${s}"`;
     }
@@ -66,7 +73,8 @@ exports.extension = function (
   // Use a numeric value instead of boolean. "m" stands for "module"
   const m = isModule ? 1 : 0;
   return (
-    `(self.AMP=self.AMP||[]).push({n:"${name}",${priority}${deps}` +
+    `(self.AMP=self.AMP||[]).push({n:"${name}",ev:"${version}",l:${latest},` +
+    `${priority}${deps}` +
     `v:"${VERSION}",m:${m},f:(function(AMP,_){${opt_splitMarker}\n` +
     '<%= contents %>\n})});'
   );

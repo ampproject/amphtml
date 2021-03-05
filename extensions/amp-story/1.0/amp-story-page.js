@@ -918,7 +918,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   /**
    * Applies the specified callback to each media element on the page, after the
    * media element is loaded.
-   * @param {!function(!./media-pool.MediaPool, !Element)} callbackFn The
+   * @param {function(!./media-pool.MediaPool, !Element)} callbackFn The
    *     callback to be applied to each media element.
    * @return {!Promise} Promise that resolves after the callbacks are called.
    * @private
@@ -1855,7 +1855,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   initializeImgAltTags_() {
     toArray(this.element.querySelectorAll('amp-img')).forEach((ampImgNode) => {
       if (!ampImgNode.getAttribute('alt')) {
-        ampImgNode.setAttribute('alt', ' ');
+        ampImgNode.setAttribute('alt', '');
         // If the child img element is in the dom, propogate the attribute to it.
         const childImgNode = ampImgNode.querySelector('img');
         childImgNode &&

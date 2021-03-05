@@ -16,11 +16,14 @@
 
 const {resolve, dirname, relative, join} = require('path').posix;
 
-// Returns a new Map<string, {detected: boolean, removeable: Array<string>}
-// key is a valid callee name to potentially remove.
-// value.detected indicates if the callee name (key) was imported into the current module.
-// value.removeable is the array of property names that can be removed.
-// Example: ['dev', {detected: false, removeable: ['fine']}] would mean ... `dev().fine(...)` can be removed.
+/**
+ * Returns a new Map<string, {detected: boolean, removeable: Array<string>}
+ * key is a valid callee name to potentially remove.
+ * value.detected indicates if the callee name (key) was imported into the current module.
+ * value.removeable is the array of property names that can be removed.
+ * Example: ['dev', {detected: false, removeable: ['fine']}] would mean ... `dev().fine(...)` can be removed.
+ * @return {Map<string, {detected: boolean, removeable: Array<string>}}
+ */
 function defaultCalleeToPropertiesMap() {
   return new Map([
     [

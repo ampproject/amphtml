@@ -18,7 +18,7 @@ import {Services} from '../../../src/services';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor} from '../../../src/iframe-helper';
-import {userAssert} from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 class AmpReddit extends AMP.BaseElement {
   /**

@@ -839,6 +839,7 @@ export class AmpStory extends AMP.BaseElement {
     // there is a way to navigate to pages that does not involve using private
     // amp-story methods.
     this.viewer_.onMessage('selectPage', (data) => this.onSelectPage_(data));
+    this.viewer_.onMessage('rewind', () => this.replay_());
 
     if (this.viewerMessagingHandler_) {
       this.viewerMessagingHandler_.startListening();
@@ -1138,7 +1139,7 @@ export class AmpStory extends AMP.BaseElement {
 
     const storyLoadPromise = Promise.all(
       pagesToWaitFor
-        .filter((page) => !!page)
+        .filter(Boolean)
         .map((page) =>
           page.element.signals().whenSignal(CommonSignals.LOAD_END)
         )
