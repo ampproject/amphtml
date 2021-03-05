@@ -107,27 +107,26 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
 
   /** @private */
   setAnimateTo_() {
-    const lockedBounds = this.element_.getAttribute('locked-bounds');
-
+    const lockBounds = this.element_.hasAttribute('lock-bounds');
     const zoom = parseFloat(this.element_.getAttribute('zoom'));
+
+    const containerHeight = this.element.offsetHeight;
+    const containerWidth = this.element.offsetWidth;
+    const ampImgHeight = this.ampImgEl_.getAttribute('height');
+    const ampImgWidth = this.ampImgEl_.getAttribute('width');
+    const scaledFraction = containerHeight / ampImgHeight;
+    const scaledImageWidth = scaledFraction * ampImgWidth;
+    const widthFraction = 1 - (containerWidth * zoom) / scaledImageWidth;
 
     let x = 0;
     const xAttr = this.element_.getAttribute('x');
+
     if (xAttr === 'left') {
-      const containerHeight = this.element.offsetHeight;
-      const containerWidth = this.element.offsetWidth;
-      const ampImgHeight = this.ampImgEl_.getAttribute('height');
-      const ampImgWidth = this.ampImgEl_.getAttribute('width');
-      const scaledFraction = containerHeight / ampImgHeight;
-      const scaledImageWidth = scaledFraction * ampImgWidth;
-      // const additionalZoom = zoom * ;
-      x =
-        ((scaledImageWidth / 2 - containerWidth / 2) / scaledImageWidth) * 100;
-      // ((scaledImageWidth / 2 - containerWidth / 2) / scaledImageWidth) * 100;
-      // console.log(x);
-      x +=
-        (((containerWidth / 2) * ((zoom - 1) / zoom)) / scaledImageWidth) * 100;
-      console.log((containerWidth / 2) * ((zoom - 1) / zoom));
+      x = 50 * widthFraction;
+    } else if (xAttr === 'right') {
+      x = -50 * widthFraction;
+    } else if (lockBounds) {
+      x = parseFloat(xAttr) * widthFraction;
     } else {
       x = parseFloat(xAttr) || 0;
     }
