@@ -14,5 +14,6 @@
   "visibility-trigger-improvements": 1,
   "layout-aspect-ratio-css": 0,
   "sticky-ad-transition": 0.02,
-  "disable-a4a-non-sd": 1
+  "disable-a4a-non-sd": 1,
+  "amp-cid-backup": 1
 }
