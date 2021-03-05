@@ -15,6 +15,7 @@
  */
 
 import * as dom from './dom';
+import {extensionScriptsInNode} from './service/extension-script';
 import {
   getAmpdoc,
   getService,
@@ -25,29 +26,6 @@ import {
   getServicePromiseOrNullForDoc,
 } from './service';
 import {pureUserAssert as userAssert} from './core/assert';
-
-/**
- * Returns a promise for a service for the given id and window. Also expects an
- * element that has the actual implementation. The promise resolves when the
- * implementation loaded. Users should typically wrap this as a special purpose
- * function (e.g. Services.viewportForDoc(...)) for type safety and because the
- * factory should not be passed around.
- * @param {!Window} win
- * @param {string} id of the service.
- * @param {string} extension Name of the custom extension that provides the
- *     implementation of this service.
- * @param {boolean=} opt_element Whether this service is provided by an element,
- *     not the extension.
- * @return {!Promise<*>}
- */
-export function getElementService(win, id, extension, opt_element) {
-  return getElementServiceIfAvailable(
-    win,
-    id,
-    extension,
-    opt_element
-  ).then((service) => assertService(service, id, extension));
-}
 
 /**
  * Same as getElementService but produces null if the given element is not
@@ -186,32 +164,6 @@ function assertService(service, id, extension) {
     extension,
     extension
   ));
-}
-
-/**
- * Get list of all the extension JS files.
- * @param {HTMLHeadElement|Element|ShadowRoot} head
- * @return {!Array<string>}
- */
-export function extensionScriptsInNode(head) {
-  // ampdoc.getHeadNode() can return null.
-  if (!head) {
-    return [];
-  }
-  const scripts = {};
-  // Note: Some extensions don't have [custom-element] or [custom-template]
-  // e.g. amp-viewer-integration.
-  const list = head.querySelectorAll(
-    'script[custom-element],script[custom-template]'
-  );
-  for (let i = 0; i < list.length; i++) {
-    const script = list[i];
-    const name =
-      script.getAttribute('custom-element') ||
-      script.getAttribute('custom-template');
-    scripts[name] = true;
-  }
-  return Object.keys(scripts);
 }
 
 /**

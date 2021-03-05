@@ -57,6 +57,11 @@
   },
   {"name": "amp-ad-network-nws-impl", "version": "0.1", "latestVersion": "0.1"},
   {
+    "name": "amp-ad-network-valueimpression-impl",
+    "version": "0.1",
+    "latestVersion": "0.1"
+  },
+  {
     "name": "amp-addthis",
     "version": "0.1",
     "latestVersion": "0.1",

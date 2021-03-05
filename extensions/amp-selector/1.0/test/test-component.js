@@ -298,14 +298,14 @@ describes.sandboxed('Selector preact component', {}, () => {
         expect(disabledOption).to.not.have.attribute('selected');
       });
 
-      it('force toggle disabled option does nothing', () => {
+      it('force toggle disabled option will select', () => {
         ref.current.toggle('c', /* force */ true);
         wrapper.update();
 
-        // Disabled option cannot be selected.
+        // Disabled option can be selected with force toggle.
         expect(option0).to.have.attribute('selected');
         expect(option1).to.not.have.attribute('selected');
-        expect(disabledOption).to.not.have.attribute('selected');
+        expect(disabledOption).to.have.attribute('selected');
 
         ref.current.toggle('c', /* force */ true);
         wrapper.update();
@@ -313,7 +313,7 @@ describes.sandboxed('Selector preact component', {}, () => {
         // Nothing has changed.
         expect(option0).to.have.attribute('selected');
         expect(option1).to.not.have.attribute('selected');
-        expect(disabledOption).to.not.have.attribute('selected');
+        expect(disabledOption).to.have.attribute('selected');
       });
 
       it('clear all options', async () => {
@@ -434,14 +434,14 @@ describes.sandboxed('Selector preact component', {}, () => {
         expect(disabledOption).to.not.have.attribute('selected');
       });
 
-      it('force toggle disabled option does nothing', () => {
+      it('force toggle disabled option will select', () => {
         ref.current.toggle('c', /* force */ true);
         wrapper.update();
 
-        // Disabled option cannot be selected.
+        // Disabled option can be selected with force toggle.
         expect(option0).to.not.have.attribute('selected');
         expect(option1).to.not.have.attribute('selected');
-        expect(disabledOption).to.not.have.attribute('selected');
+        expect(disabledOption).to.have.attribute('selected');
 
         ref.current.toggle('c', /* force */ true);
         wrapper.update();
@@ -449,7 +449,7 @@ describes.sandboxed('Selector preact component', {}, () => {
         // Nothing has changed.
         expect(option0).to.not.have.attribute('selected');
         expect(option1).to.not.have.attribute('selected');
-        expect(disabledOption).to.not.have.attribute('selected');
+        expect(disabledOption).to.have.attribute('selected');
       });
 
       it('clear all options', async () => {
