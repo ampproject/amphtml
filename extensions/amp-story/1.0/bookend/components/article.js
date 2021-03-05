@@ -78,7 +78,7 @@ export class ArticleComponent {
       domainName,
       type: articleJson['type'],
       title: articleJson['title'],
-      alt: articleJson['alt'],
+      alt: articleJson['image-alt-text'],
     };
 
     if (articleJson['image']) {

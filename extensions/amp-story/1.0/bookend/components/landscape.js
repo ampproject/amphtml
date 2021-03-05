@@ -88,7 +88,7 @@ export class LandscapeComponent {
       title: landscapeJson['title'],
       category: landscapeJson['category'],
       image: landscapeJson['image'],
-      alt: landscapeJson['alt'],
+      alt: landscapeJson['image-alt-text'],
     };
 
     if (landscapeJson['amphtml']) {

@@ -88,7 +88,7 @@ export class PortraitComponent {
       category: portraitJson['category'],
       title: portraitJson['title'],
       image: portraitJson['image'],
-      alt: portraitJson['alt'],
+      alt: portraitJson['image-alt-text'],
     };
 
     if (portraitJson['amphtml']) {
