@@ -110,10 +110,12 @@ export class AmpTiktok extends AMP.BaseElement {
     this.iframe_.setAttribute('name', '__tt_embed__v$');
     this.iframe_.setAttribute('aria-hidden', 'true');
     this.iframe_.setAttribute('frameborder', '0');
+    this.iframe_.setAttribute('class', 'i-amphtml-tiktok-centered');
     setStyles(this.iframe_, {
       'position': 'fixed',
       'opacity': '0',
       'pointer-events': 'none',
+      'width': '375px',
     });
 
     this.element.appendChild(iframe);
