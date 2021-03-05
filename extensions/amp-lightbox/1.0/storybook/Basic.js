@@ -34,9 +34,12 @@ function LightboxWithActions({children, ...rest}) {
   const ref = useRef();
   return (
     <section>
-      <Lightbox ref={ref} {...rest}>
+      <Lightbox
+        closeButton={<button aria-label="My custom close button">close</button>}
+        ref={ref}
+        {...rest}
+      >
         {children}
-        <button onClick={() => ref.current.close()}>close</button>
       </Lightbox>
       <div style={{marginTop: 8}}>
         <button onClick={() => ref.current.open()}>open</button>

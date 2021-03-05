@@ -22,7 +22,8 @@ var LightboxDef = {};
  * @typedef {{
  *   id: (string),
  *   animation: (string|undefined),
- *   closeButtonAriaLabel: (string|undefined),
+ *   children: (?PreactDef.Renderable|undefined),
+ *   closeButton: (?PreactDef.Renderable|undefined),
  *   scrollable: (boolean),
  *   initialOpen: (boolean),
  *   onBeforeOpen: (function|undefined),
@@ -30,6 +31,14 @@ var LightboxDef = {};
  * }}
  */
 LightboxDef.Props;
+
+/**
+ * @typedef {{
+ *   close: function,
+ *   closeButton: (?PreactDef.Renderable|undefined),
+ * }}
+ */
+LightboxDef.CloseButtonProps;
 
 /** @interface */
 Lightbox.LightboxApi = class {

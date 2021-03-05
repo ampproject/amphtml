@@ -55,6 +55,7 @@ function LightboxWithRef(
   {
     animation = 'fade-in',
     children,
+    closeButton,
     onBeforeOpen,
     onAfterClose,
     scrollable = false,
@@ -176,13 +177,11 @@ function LightboxWithRef(
         }}
         {...rest}
       >
-        {children}
-        <button
-          ariaLabel={DEFAULT_CLOSE_LABEL}
-          tabIndex={-1}
-          className={classes.closeButton}
-          onClick={() => setVisible(false)}
+        <CloseButton
+          customCloseButton={closeButton}
+          close={() => setVisible(false)}
         />
+        {children}
       </ContainWrapper>
     )
   );
@@ -191,3 +190,43 @@ function LightboxWithRef(
 const Lightbox = forwardRef(LightboxWithRef);
 Lightbox.displayName = 'Lightbox';
 export {Lightbox};
+
+/**
+ *
+ * @param {!LightboxDef.CloseButtonProps} props
+ * @return {PreactDef.Renderable}
+ */
+function CloseButton({close, customCloseButton = <ScreenReaderCloseButton />}) {
+  const {'onClick': onCustomClick} = customCloseButton.props;
+  const onClick = (e) => {
+    if (onCustomClick) {
+      onCustomClick(e);
+    }
+    close();
+  };
+  return Preact.cloneElement(customCloseButton, {
+    'onClick': onClick,
+  });
+}
+
+/**
+ * This is for screen-readers only, should not get a tab stop. Note that
+ * screen readers can still swipe / navigate to this element, it just will
+ * not be reachable via the tab button. Note that for desktop, hitting esc
+ * to close is also an option.
+ *
+ * We do not want this in the tab order since it is not really "visible"
+ * and would be confusing to tab to if not using a screen reader.
+ *
+ * @return {PreactDef.Renderable}
+ */
+function ScreenReaderCloseButton() {
+  const classes = useStyles();
+  return (
+    <button
+      ariaLabel={DEFAULT_CLOSE_LABEL}
+      tabIndex={-1}
+      className={classes.closeButton}
+    />
+  );
+}
