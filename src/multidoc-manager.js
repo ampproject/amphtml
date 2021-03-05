@@ -238,8 +238,7 @@ export class MultidocManager {
       opt_initParams,
       (amp, shadowRoot, ampdoc) => {
         // Install extensions.
-        const extensionIds = this.mergeShadowHead_(ampdoc, shadowRoot, doc);
-        this.extensions_.installExtensionsInDoc(ampdoc, extensionIds);
+        this.mergeShadowHead_(ampdoc, shadowRoot, doc);
 
         // Append body.
         if (doc.body) {
@@ -284,9 +283,7 @@ export class MultidocManager {
         amp['writer'] = writer;
         writer.onBody((doc) => {
           // Install extensions.
-          const extensionIds = this.mergeShadowHead_(ampdoc, shadowRoot, doc);
-          // Apply all doc extensions.
-          this.extensions_.installExtensionsInDoc(ampdoc, extensionIds);
+          this.mergeShadowHead_(ampdoc, shadowRoot, doc);
 
           // Append shallow body.
           const body = importShadowBody(
@@ -326,11 +323,9 @@ export class MultidocManager {
    * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!ShadowRoot} shadowRoot
    * @param {!Document} doc
-   * @return {!Array<string>}
    * @private
    */
   mergeShadowHead_(ampdoc, shadowRoot, doc) {
-    const extensionIds = [];
     if (doc.head) {
       shadowRoot.AMP.head = doc.head;
       const parentLinks = {};
@@ -444,9 +439,6 @@ export class MultidocManager {
                   extensionId,
                   urlParts.extensionVersion
                 );
-                if (customElement) {
-                  extensionIds.push(customElement);
-                }
               } else if (!n.hasAttribute('data-amp-report-test')) {
                 user().error(TAG, '- unknown script: ', n, src);
               }
@@ -471,7 +463,6 @@ export class MultidocManager {
         }
       }
     }
-    return extensionIds;
   }
 
   /**
