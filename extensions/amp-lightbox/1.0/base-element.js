@@ -47,6 +47,16 @@ export class BaseElement extends PreactBaseElement {
     toggle(this.element, this.open_);
     this.triggerEvent(this.element, this.open_ ? 'open' : 'close');
   }
+
+  /** @override */
+  mutationObserverCallback() {
+    const open = this.element.hasAttribute('open');
+    if (open === this.open_) {
+      return;
+    }
+    this.open_ = open;
+    open ? this.api().open() : this.api().close();
+  }
 }
 
 /** @override */
