@@ -50,14 +50,7 @@ const DEFAULT_CLOSE_LABEL = 'Close the modal';
  * @return {PreactDef.Renderable}
  */
 function LightboxWithRef(
-  {
-    animation = 'fade-in',
-    children,
-    onBeforeOpen,
-    onAfterClose,
-    scrollable = false,
-    ...rest
-  },
+  {animation = 'fade-in', children, onBeforeOpen, onAfterClose, ...rest},
   ref
 ) {
   // There are two phases to open and close.
@@ -160,16 +153,8 @@ function LightboxWithRef(
           layout={true}
           paint={true}
           part="lightbox"
-          contentStyle={
-            // Prefer style over class to override `ContainWrapper`'s overflow
-            scrollable && {
-              overflow: 'scroll',
-              overscrollBehavior: 'none',
-            }
-          }
-          wrapperClassName={`${classes.defaultStyles} ${classes.wrapper} ${
-            scrollable ? '' : classes.containScroll
-          }`}
+          contentClassName={classes.containScroll}
+          wrapperClassName={`${classes.defaultStyles} ${classes.wrapper} `}
           role="dialog"
           tabindex="0"
           onKeyDown={(event) => {

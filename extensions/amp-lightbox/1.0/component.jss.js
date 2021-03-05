@@ -62,8 +62,8 @@ const defaultStyles = {
   scrolling inside the lightbox.
 */
 const containScroll = {
-  overflow: 'scroll', // Prevent scrolling inside lightbox.
-  overscrollBehavior: 'none', // Prevent scrolling outside lightbox.
+  overflow: 'scroll !important', // Prevent scrolling inside lightbox.
+  overscrollBehavior: 'none !important', // Prevent scrolling outside lightbox.
 };
 
 const backdrop = {
