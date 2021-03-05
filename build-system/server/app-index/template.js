@@ -54,6 +54,17 @@ const HeaderBackToMainLink = () => html` <a href="/">← Back to main</a> `;
 
 const ProxyFormOptional = ({isMainPage}) => (isMainPage ? ProxyForm() : '');
 
+/**
+ * @param {{
+ *  basepath?: string,
+ *  css?: string
+ *  isMainPage?: boolean,
+ *  fileSet?: Array,
+ *  serveMode?: string,
+ *  selectModePrefix?: string,
+ * }=} opt_params
+ * @return {string}
+ */
 function renderTemplate(opt_params = {}) {
   const {
     basepath = '/',

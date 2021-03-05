@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,24 +14,7 @@
  * limitations under the License.
  */
 
-// TODO(wg-bento): These are non-overridable non-essential styles.
-// See https://github.com/ampproject/wg-bento/issues/12.
+/* eslint-disable */
 
-export const OPTION = {
-  'cursor': 'pointer',
-};
-
-export const SELECTED = {
-  'cursor': 'auto',
-  'outline': 'solid 1px rgba(0, 0, 0, 0.7)',
-};
-
-export const DISABLED = {
-  'cursor': 'auto',
-  'outline': 'none',
-};
-
-export const MULTI_SELECTED = {
-  'cursor': 'pointer',
-  'outline': 'solid 1px rgba(0, 0, 0, 0.7)',
-};
+<Component style={{'z-index': 12345}} />;
+<Component style={{'z-index': thisShouldBeIgnoredBecauseItsNotALiteral}} />;

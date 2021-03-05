@@ -27,6 +27,7 @@ import {
   createAmpElementForTesting,
   getImplSyncForTesting,
 } from '../../src/custom-element';
+import {toggleExperiment} from '../../src/experiments';
 
 describes.realWin('CustomElement', {amp: true}, (env) => {
   // TODO(dvoytenko, #11827): Make this test work on Safari.
@@ -240,6 +241,43 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         // the return value from `env.sandbox.stub(element, 'buildInternal')`.
         //
         // expect(build.calledOnce).to.equal(true);
+      });
+
+      it('StubElement - should try to install an unregistered legacy extensions', () => {
+        const LegacyElementClass = createAmpElementForTesting(win, ElementStub);
+        win.customElements.define('amp-legacy', LegacyElementClass);
+        win.__AMP_EXTENDED_ELEMENTS['amp-legacy'] = ElementStub;
+
+        const extensions = Services.extensionsFor(win);
+        env.sandbox.stub(extensions, 'installExtensionForDoc');
+
+        const element = new LegacyElementClass();
+        env.sandbox.stub(element, 'buildInternal');
+
+        container.appendChild(element);
+        expect(element.readyState).to.equal('upgrading');
+        expect(extensions.installExtensionForDoc).to.be.calledOnce.calledWith(
+          ampdoc,
+          'amp-legacy',
+          '0.1'
+        );
+      });
+
+      it('StubElement - should not try to install a pre-registered legacy extensions', () => {
+        const LegacyElementClass = createAmpElementForTesting(win, ElementStub);
+        win.customElements.define('amp-legacy', LegacyElementClass);
+        win.__AMP_EXTENDED_ELEMENTS['amp-legacy'] = ElementStub;
+        ampdoc.declareExtension('amp-legacy');
+
+        const extensions = Services.extensionsFor(win);
+        env.sandbox.stub(extensions, 'installExtensionForDoc');
+
+        const element = new LegacyElementClass();
+        env.sandbox.stub(element, 'buildInternal');
+
+        container.appendChild(element);
+        expect(element.readyState).to.equal('upgrading');
+        expect(extensions.installExtensionForDoc).to.not.be.called;
       });
 
       it('Element - should only add classes on first attachedCallback', () => {
@@ -596,6 +634,20 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         return element.whenBuilt();
       });
 
+      it('should build on no consent policy', () => {
+        const element = new ElementClass();
+        env.sandbox
+          .stub(Services, 'consentPolicyServiceForDocOrNull')
+          .resolves(null);
+        env.sandbox.stub(element, 'getConsentPolicy_').callsFake(() => {
+          return 'default';
+        });
+
+        clock.tick(1);
+        container.appendChild(element);
+        return element.whenBuilt();
+      });
+
       it('should not build on consent insufficient', () => {
         const element = new ElementClass();
         env.sandbox
@@ -639,6 +691,101 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         expect(element.getAttribute('data-block-on-consent')).to.equal(
           'default'
         );
+      });
+
+      describe('granular consent experiment', () => {
+        beforeEach(() => {
+          toggleExperiment(win, 'amp-consent-granular-consent', true);
+        });
+
+        afterEach(() => {
+          toggleExperiment(win, 'amp-consent-granular-consent', false);
+        });
+
+        it('should find the correct purposes', () => {
+          const element = new ElementClass();
+          expect(element.getPurposesConsent_()).to.be.null;
+          element.setAttribute('data-block-on-consent-purposes', '');
+          expect(element.getPurposesConsent_()).to.be.null;
+          element.setAttribute(
+            'data-block-on-consent-purposes',
+            'purpose-foo,purpose-bar'
+          );
+          expect(element.getPurposesConsent_()).to.deep.equals([
+            'purpose-foo',
+            'purpose-bar',
+          ]);
+        });
+
+        it('should default to policyId', () => {
+          const element = new ElementClass();
+          const purposesSpy = env.sandbox.spy();
+          env.sandbox
+            .stub(Services, 'consentPolicyServiceForDocOrNull')
+            .resolves({
+              whenPolicyUnblock: () => {
+                return Promise.resolve(true);
+              },
+              whenPurposesUnblock: () => purposesSpy,
+            });
+          element.setAttribute('data-block-on-consent', '');
+          element.setAttribute(
+            'data-block-on-consent-purposes',
+            'purpose-foo,purpose-bar'
+          );
+
+          clock.tick(1);
+          container.appendChild(element);
+          return element.whenBuilt().then(() => {
+            expect(purposesSpy).to.not.be.called;
+          });
+        });
+
+        it('should build on purpose consents', () => {
+          const element = new ElementClass();
+          const defaultPolicySpy = env.sandbox.spy();
+          env.sandbox
+            .stub(Services, 'consentPolicyServiceForDocOrNull')
+            .resolves({
+              whenPolicyUnblock: () => {
+                return defaultPolicySpy;
+              },
+              whenPurposesUnblock: () => {
+                return Promise.resolve(true);
+              },
+            });
+          element.setAttribute(
+            'data-block-on-consent-purposes',
+            'purpose-foo,purpose-bar'
+          );
+
+          clock.tick(1);
+          container.appendChild(element);
+          return element.whenBuilt().then(() => {
+            expect(defaultPolicySpy).to.not.be.called;
+          });
+        });
+
+        it('should not build on insufficient purpose consents', () => {
+          const element = new ElementClass();
+          env.sandbox
+            .stub(Services, 'consentPolicyServiceForDocOrNull')
+            .resolves({
+              whenPurposesUnblock: () => {
+                return Promise.resolve(false);
+              },
+            });
+          element.setAttribute(
+            'data-block-on-consent-purposes',
+            'purpose-foo,purpose-bar'
+          );
+
+          clock.tick(1);
+          container.appendChild(element);
+          return expect(element.whenBuilt()).to.eventually.be.rejectedWith(
+            /BLOCK_BY_CONSENT/
+          );
+        });
       });
 
       it('should anticipate sync build errors', () => {
