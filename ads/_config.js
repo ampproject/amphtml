@@ -502,6 +502,8 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'finative': {},
+
   'firstimpression': {
     prefetch: 'https://ecdn.firstimpression.io/static/js/fiamp.js',
     preconnect: 'https://cdn.firstimpression.io',
@@ -1230,6 +1232,12 @@ const adConfig = jsonConfiguration({
 
   'vdoai': {
     prefetch: 'https://a.vdo.ai/core/dependencies_amp/vdo.min.js',
+    renderStartImplemented: true,
+  },
+
+  'verizonmedia': {
+    prefetch: 'https://jac.yahoosandbox.com/amp/jac.js',
+    preconnect: ['https://jill.fc.yahoo.com'],
     renderStartImplemented: true,
   },
 

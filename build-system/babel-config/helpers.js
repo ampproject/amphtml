@@ -39,7 +39,7 @@ function getExperimentConstant() {
 }
 
 /**
- * Computes options for the minify-replace plugin
+ * Computes options for minify-replace and returns the plugin object.
  *
  * @return {Array<string|Object>}
  */
@@ -98,7 +98,47 @@ function getReplacePlugin() {
   return ['minify-replace', {replacements}];
 }
 
+/**
+ * Returns a Babel plugin that replaces the global identifier with the correct
+ * alternative. Used before transforming test code with esbuild.
+ *
+ * @return {Array<string|Object>}
+ */
+function getReplaceGlobalsPlugin() {
+  return [
+    (babel) => {
+      const {types: t} = babel;
+      return {
+        visitor: {
+          ReferencedIdentifier(path) {
+            const {node, scope} = path;
+            if (node.name !== 'global') {
+              return;
+            }
+            if (scope.getBinding('global')) {
+              return;
+            }
+            const possibleNames = ['globalThis', 'self'];
+            // See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/globalThis#browser_compatibility
+            if (argv.ie) {
+              possibleNames.shift();
+            }
+            const name = possibleNames.find((name) => !scope.getBinding(name));
+            if (!name) {
+              throw path.buildCodeFrameError(
+                'Could not replace `global` with globalThis identifier'
+              );
+            }
+            path.replaceWith(t.identifier(name));
+          },
+        },
+      };
+    },
+  ];
+}
+
 module.exports = {
   getExperimentConstant,
   getReplacePlugin,
+  getReplaceGlobalsPlugin,
 };

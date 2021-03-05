@@ -154,9 +154,6 @@ var process = {};
 process.env;
 process.env.NODE_ENV;
 
-/** @type {boolean|undefined} */
-window.IS_AMP_ALT;
-
 // Exposed to ads.
 // Preserve these filedNames so they can be accessed by 3p code.
 window.context = {};
@@ -665,8 +662,8 @@ const RTC_ERROR_ENUM = {};
 var rtcResponseDef;
 
 /**
- * This symbol is exposed by browserify bundles transformed by
- * `scoped-require.js` to avoid polluting the global namespace with `require`.
+ * This symbol is exposed by bundles transformed by `scoped-require.js` to avoid
+ * polluting the global namespace with `require`.
  * It allows AMP extensions to consume code injected into their binaries that
  * cannot be run through Closure Compiler, e.g. React code with JSX.
  * @type {!function(string):?}

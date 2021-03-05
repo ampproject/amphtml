@@ -147,6 +147,18 @@ const forbiddenTerms = {
       'extensions/amp-analytics/0.1/requests.js',
     ],
   },
+  '\\.buildInternal': {
+    message: 'can only be called by the framework',
+    allowlist: [
+      'src/service/builder.js',
+      'src/service/resource.js',
+      'testing/iframe.js',
+    ],
+  },
+  'getBuilderForDoc': {
+    message: 'can only be used by the runtime',
+    allowlist: ['src/custom-element.js', 'src/service/builder.js'],
+  },
   // Service factories that should only be installed once.
   'installActionServiceForDoc': {
     message: privateServiceFactory,
@@ -228,10 +240,11 @@ const forbiddenTerms = {
       'src/service/storage-impl.js',
     ],
   },
-  'installTemplatesService': {
+  'installTemplatesServiceForDoc': {
     message: privateServiceFactory,
     allowlist: [
       'src/runtime.js',
+      'src/inabox/inabox-services.js',
       'src/service/core-services.js',
       'src/service/template-impl.js',
     ],
@@ -301,6 +314,7 @@ const forbiddenTerms = {
     allowlist: [
       // Do not allowlist additional "extensions/*" paths.
       // TODO(#22414): Remove paths as they are migrated off of sync API.
+      'extensions/amp-a4a/0.1/amp-ad-template-helper.js',
       'extensions/amp-analytics/0.1/instrumentation.js',
       'extensions/amp-analytics/0.1/variables.js',
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js',
@@ -308,8 +322,10 @@ const forbiddenTerms = {
       'src/chunk.js',
       'src/element-service.js',
       'src/service.js',
+      'src/service/builder.js',
       'src/service/cid-impl.js',
       'src/service/origin-experiments-impl.js',
+      'src/service/template-impl.js',
       'src/services.js',
       'src/utils/display-observer.js',
       'testing/test-helper.js',
@@ -736,7 +752,6 @@ const forbiddenTerms = {
       'ads/google/test/test-utils.js',
       'extensions/amp-a4a/0.1/test/test-a4a-integration.js',
       'extensions/amp-a4a/0.1/test/test-a4a-var-source.js',
-      'extensions/amp-a4a/0.1/test/test-amp-a4a.js',
       'extensions/amp-a4a/0.1/test/test-amp-ad-utils.js',
       'extensions/amp-a4a/0.1/test/test-refresh.js',
       'extensions/amp-access/0.1/test/test-access-expr.js',
@@ -748,7 +763,6 @@ const forbiddenTerms = {
       'extensions/amp-ad/0.1/test/test-amp-ad-xorigin-iframe-handler.js',
       'extensions/amp-addthis/0.1/test/addthis-utils/test-fragment.js',
       'extensions/amp-addthis/0.1/test/addthis-utils/test-rot13.js',
-      'extensions/amp-analytics/0.1/test/test-crc32.js',
       'extensions/amp-analytics/0.1/test/test-iframe-transport-client.js',
       'extensions/amp-analytics/0.1/test/test-linker-manager.js',
       'extensions/amp-analytics/0.1/test/test-linker-reader.js',
@@ -757,17 +771,14 @@ const forbiddenTerms = {
       'extensions/amp-analytics/0.1/test/test-vendors.js',
       'extensions/amp-animation/0.1/test/test-css-expr.js',
       'extensions/amp-auto-ads/0.1/test/test-attributes.js',
-      'extensions/amp-base-carousel/0.1/test/test-responsive-attributes.js',
       'extensions/amp-bind/0.1/test/test-bind-evaluator.js',
       'extensions/amp-bind/0.1/test/test-bind-expression.js',
       'extensions/amp-bind/0.1/test/test-bind-validator.js',
       'extensions/amp-dynamic-css-classes/0.1/test/test-dynamic-classes.js',
-      'extensions/amp-form/0.1/test/test-form-submit-service.js',
       'extensions/amp-fx-collection/0.1/test/integration/test-amp-fx-fly-in.js',
       'extensions/amp-lightbox-gallery/0.1/test/integration/test-amp-lightbox-gallery.js',
       'extensions/amp-list/0.1/test/integration/test-amp-list.js',
       'extensions/amp-live-list/0.1/test/test-poller.js',
-      'extensions/amp-next-page/0.1/test/test-config.js',
       'extensions/amp-script/0.1/test/unit/test-amp-script.js',
       'extensions/amp-sidebar/0.1/test/test-toolbar.js',
       'extensions/amp-truncate-text/0.1/test/test-binary-search.js',
@@ -1234,6 +1245,7 @@ const forbiddenTermsSrcInclusive = {
     message:
       'Instead of fancy-log, use the logging functions in build-system/common/logging.js.',
     allowlist: [
+      'babel.config.js',
       'build-system/common/logging.js',
       'build-system/tasks/visual-diff/helpers.js',
       'validator/js/gulpjs/index.js',
@@ -1388,6 +1400,7 @@ function hasAnyTerms(srcFile) {
     /^test-/.test(basename) ||
     /^_init_tests/.test(basename) ||
     /_test\.js$/.test(basename) ||
+    /testing\//.test(srcFile) ||
     /storybook\/[^/]+\.js$/.test(srcFile);
   if (!isTestFile) {
     hasSrcInclusiveTerms = matchTerms(srcFile, forbiddenTermsSrcInclusive);

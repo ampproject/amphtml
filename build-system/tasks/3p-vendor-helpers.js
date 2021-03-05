@@ -16,7 +16,7 @@
 
 const debounce = require('debounce');
 const globby = require('globby');
-const {compileJs} = require('./helpers');
+const {compileJs, invalidateUnminifiedBabelCache} = require('./helpers');
 const {endBuildStep} = require('./helpers');
 const {VERSION} = require('../compile/internal-version');
 const {watchDebounceDelay} = require('./helpers');
@@ -42,7 +42,8 @@ async function buildVendorConfigs(options) {
   if (options.watch) {
     // Do not set watchers again when we get called by the watcher.
     const copyOptions = {...options, watch: false, calledByWatcher: true};
-    const watchFunc = () => {
+    const watchFunc = (modifiedFile) => {
+      invalidateUnminifiedBabelCache(modifiedFile);
       buildVendorConfigs(copyOptions);
     };
     watch(srcPath).on('change', debounce(watchFunc, watchDebounceDelay));
@@ -94,7 +95,6 @@ async function buildVendor(name, options) {
       externs: ['./ads/ads.extern.js'],
       toName: `current/vendor/${name}.max.js`,
       minifiedName: `${VERSION}/vendor/${name}.js`,
-      esmPassCompilation: false,
     })
   );
 

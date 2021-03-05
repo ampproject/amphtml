@@ -20,7 +20,7 @@ import {dict} from '../../../src/utils/object';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {setIsMediaComponent} from '../../../src/video-interface';
-import {userAssert} from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 class AmpKaltura extends AMP.BaseElement {
   /** @param {!AmpElement} element */

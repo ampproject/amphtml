@@ -30,11 +30,15 @@ export class AmpGoogleAssistantVoiceButton extends AMP.BaseElement {
 
     /** @private {?AssistjsConfigService} */
     this.configService_ = null;
+
+    /** @private {?AssistjsFrameService} */
+    this.frameService_ = null;
   }
 
   /** @override */
   buildCallback() {
     this.configService_ = Services.assistjsConfigServiceForDoc(this.element);
+    this.frameService_ = Services.assistjsFrameServiceForDoc(this.element);
   }
 
   /** @override */
@@ -49,12 +53,18 @@ export class AmpGoogleAssistantVoiceButton extends AMP.BaseElement {
     this.configService_.getWidgetIframeUrl('voicebutton').then((iframeUrl) => {
       addAttributesToElement(iframe, {
         src: iframeUrl,
+        sandbox: 'allow-scripts',
       });
 
       // applyFillContent so that frame covers the entire component.
       this.applyFillContent(iframe, /* replacedContent */ true);
 
       this.element.appendChild(iframe);
+    });
+
+    iframe.addEventListener('load', () => {
+      // TODO: create a channel to receive requests from underlying assist.js iframe.
+      this.frameService_.openMic();
     });
 
     // Return a load promise for the frame so the runtime knows when the
