@@ -22,7 +22,7 @@
 import {Services} from '../../../src/services';
 import {addAttributesToElement} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import * as closure from './libs/closure-bundle'
+import * as closure from './closure/closure-bundle'
 
 export class AmpGoogleAssistantVoiceBar extends AMP.BaseElement {
   /** @param {!AmpElement} element */

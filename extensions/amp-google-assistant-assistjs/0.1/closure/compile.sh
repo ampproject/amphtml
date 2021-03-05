@@ -2,30 +2,20 @@
 
 # install google closure library:  `npm install google-closure-library` at amphtml
 # folder
-
-# use closure builder to generate dependencies
-# BUILDER=../../../../node_modules/google-closure-library/closure/bin/build/closurebuilder.py
-# $BUILDER \
-#   --root=closure-library/ \
-#   --root=wrapper/ \
-#   --namespace="assistjs"
-
 CLOSURE_LIB=../../../../node_modules/google-closure-library
 
 npx google-closure-compiler \
   --compilation_level ADVANCED_OPTIMIZATIONS \
-  --manage_closure_dependencies \
-  --define "goog.DEBUG=true" \
-  --use_types_for_optimization \
-  --process_closure_primitives \
+  --define "goog.DEBUG=false" \
+  --define "goog.TRANSPILE=never" \
+  --define "goog.LOAD_MODULE_USING_EVAL=false" \
+  --js_output_file "closure-bundle.js" \
   --output_wrapper "
   %output%;
   export function createRespondingChannel(window, origin, serviceHandlersMap) {
     const rc = createRC(window, origin, serviceHandlersMap);
     return rc;
   }" \
-  --js_output_file "closure-bundle.js" \
-  --js "closure-wrapper.js" \
   --js "$CLOSURE_LIB/closure/goog/base.js" \
   --js "$CLOSURE_LIB/closure/goog/promise/resolver.js" \
   --js "$CLOSURE_LIB/closure/goog/dom/nodetype.js" \
@@ -106,8 +96,6 @@ npx google-closure-compiler \
   --js "$CLOSURE_LIB/closure/goog/debug/logger.js" \
   --js "$CLOSURE_LIB/closure/goog/log/log.js" \
   --js "$CLOSURE_LIB/closure/goog/messaging/messaging.js" \
-  --js "$CLOSURE_LIB/closure/goog/messaging/loggerserver.js" \
-  --js "$CLOSURE_LIB/closure/goog/messaging/loggerclient.js" \
   --js "$CLOSURE_LIB/closure/goog/messaging/messagechannel.js" \
   --js "$CLOSURE_LIB/closure/goog/messaging/abstractchannel.js" \
   --js "$CLOSURE_LIB/closure/goog/messaging/bufferedchannel.js" \
@@ -118,4 +106,7 @@ npx google-closure-compiler \
   --js "$CLOSURE_LIB/closure/goog/messaging/portoperator.js" \
   --js "$CLOSURE_LIB/closure/goog/messaging/multichannel.js" \
   --js "$CLOSURE_LIB/closure/goog/messaging/respondingchannel.js" \
-  --js "$CLOSURE_LIB/third_party/closure/goog/mochikit/async/deferred.js"
+  --js "$CLOSURE_LIB/third_party/closure/goog/mochikit/async/deferred.js" \
+  --output_manifest manifest.MF \
+  --js "closure-wrapper.js" \
+  --entry_point "closure-wrapper.js"
