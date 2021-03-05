@@ -26,7 +26,7 @@ function queryParametersToObject(input) {
   }
   return input
     .split('&')
-    .filter((_) => _)
+    .filter(Boolean)
     .reduce((obj, val) => {
       const kv = val.split('=');
       return Object.assign(obj, {[kv[0]]: kv[1] || true});
