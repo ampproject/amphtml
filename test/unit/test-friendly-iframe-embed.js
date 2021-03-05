@@ -24,6 +24,8 @@ import {
   Installers,
   installFriendlyIframeEmbed,
   mergeHtmlForTesting,
+  preloadFriendlyIframeEmbedExtensionIdsDeprecated,
+  preloadFriendlyIframeEmbedExtensions,
   setSrcdocSupportedForTesting,
 } from '../../src/friendly-iframe-embed';
 import {Services} from '../../src/services';
@@ -742,6 +744,41 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
     });
     await promise;
     expect(mutateSpy).to.be.called;
+  });
+
+  describe('preloadFriendlyIframeEmbedExtensions', () => {
+    // TODO(#33020): Remove this test once `extensions` format is adopted.
+    it('should preload non-versioned extensions', () => {
+      extensionsMock
+        .expects('preloadExtension')
+        .withExactArgs('amp-ext1')
+        .once();
+      extensionsMock
+        .expects('preloadExtension')
+        .withExactArgs('amp-ext2')
+        .once();
+      preloadFriendlyIframeEmbedExtensionIdsDeprecated(window, [
+        'amp-ext1',
+        'amp-ext2',
+      ]);
+    });
+
+    it('should preload versioned extensions', () => {
+      // TODO(#33020): Modify this test with an explicit version once the format
+      // is adopted.
+      extensionsMock
+        .expects('preloadExtension')
+        .withExactArgs('amp-ext1')
+        .once();
+      extensionsMock
+        .expects('preloadExtension')
+        .withExactArgs('amp-ext2')
+        .once();
+      preloadFriendlyIframeEmbedExtensions(window, [
+        {extensionId: 'amp-ext1', extensionVersion: '0.2'},
+        {extensionId: 'amp-ext2', extensionVersion: '0.3'},
+      ]);
+    });
   });
 
   describe('mergeHtml', () => {
