@@ -27,19 +27,18 @@ import {
 } from '../../../src/iframe-video';
 import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
-import {
-  createElementWithAttributes,
-  dispatchCustomEvent,
-  getDataParamsFromAttributes,
-  isFullscreenElement,
-  removeElement,
-} from '../../../src/dom';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
   disableScrollingOnIframe,
   looksLikeTrackingIframe,
 } from '../../../src/iframe-helper';
+import {
+  dispatchCustomEvent,
+  getDataParamsFromAttributes,
+  isFullscreenElement,
+  removeElement,
+} from '../../../src/dom';
 import {getConsentDataToForward} from '../../../src/consent';
 import {getData, listen} from '../../../src/event-helper';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
@@ -208,7 +207,7 @@ class AmpVideoIframe extends AMP.BaseElement {
     }
     const img = new Image();
     img.src = addDataParamsToUrl(poster, element);
-    this.applyFillContent(img);
+    img.setAttribute('placeholder', '');
     return img;
   }
 

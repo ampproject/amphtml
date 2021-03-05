@@ -204,8 +204,7 @@ describes.realWin(
         const poster = 'foo.bar';
         const placeholder = createVideoIframe({poster}).createPlaceholder();
         expect(placeholder).to.have.attribute('placeholder');
-        expect(placeholder.tagName.toLowerCase()).to.equal('amp-img');
-        expect(placeholder.getAttribute('layout')).to.equal('fill');
+        expect(placeholder.tagName.toLowerCase()).to.equal('img');
         expect(placeholder.getAttribute('src')).to.equal(poster);
       });
 
