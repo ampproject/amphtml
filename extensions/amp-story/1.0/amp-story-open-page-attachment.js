@@ -39,12 +39,12 @@ export const buildOpenAttachmentElement = (element) =>
 
 /**
  * Renders the open attachment UI affordance.
- * @param {!Element} el
+ * @param {!Element} pageEl
  * @param {!Element} attachmentEl
  * @return {!Element}
  */
-export const renderPageAttachmentUI = (el, attachmentEl) => {
-  const openAttachmentEl = buildOpenAttachmentElement(el);
+export const renderPageAttachmentUI = (pageEl, attachmentEl) => {
+  const openAttachmentEl = buildOpenAttachmentElement(pageEl);
   // If the attachment is a link, copy href to the element so it can be previewed on hover and long press.
   const attachmentHref = attachmentEl.getAttribute('href');
   if (attachmentHref) {
@@ -58,7 +58,7 @@ export const renderPageAttachmentUI = (el, attachmentEl) => {
   const openLabelAttr = attachmentEl.getAttribute('data-cta-text');
   const openLabel =
     (openLabelAttr && openLabelAttr.trim()) ||
-    getLocalizationService(el).getLocalizedString(
+    getLocalizationService(pageEl).getLocalizedString(
       LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
     );
 
