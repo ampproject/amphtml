@@ -2050,6 +2050,35 @@ describes.repeated(
             });
           });
 
+          it('should manage valid/invalid on submit for elements outside form', async () => {
+            setReportValiditySupportedForTesting(false);
+            const ampForm = await getAmpForm(getForm(/*button1*/ true));
+            const form = ampForm.form_;
+            form.setAttribute('id', 'registration');
+            const fieldset = createElement('fieldset');
+            const emailInput = createElement('input');
+            emailInput.setAttribute('name', 'email');
+            emailInput.setAttribute('type', 'email');
+            emailInput.setAttribute('form', 'registration');
+            emailInput.setAttribute('required', '');
+            fieldset.setAttribute('form', 'registration');
+            fieldset.appendChild(emailInput);
+            env.ampdoc.getBody().appendChild(fieldset);
+
+            env.sandbox.spy(form, 'checkValidity');
+            env.sandbox.spy(emailInput, 'checkValidity');
+            env.sandbox.spy(fieldset, 'checkValidity');
+
+            ampForm.checkValidity_();
+            expect(form.checkValidity).to.be.called;
+            expect(emailInput.checkValidity).to.be.called;
+            // Fieldset is not a direct descendant of the form
+            // and is not an input
+            expect(fieldset.checkValidity).to.not.be.called;
+            expect(form.className).to.contain('user-invalid');
+            expect(emailInput.className).to.contain('user-invalid');
+          });
+
           it('should manage valid/invalid on input user interaction', () => {
             setReportValiditySupportedForTesting(false);
             return getAmpForm(getForm(/*button1*/ true)).then((ampForm) => {
@@ -2354,16 +2383,25 @@ describes.repeated(
         });
 
         describe('Var Substitution', () => {
-          it('should substitute hidden fields variables in XHR async', () => {
-            return getAmpForm(getForm()).then((ampForm) => {
-              const form = ampForm.form_;
-              const clientIdField = createElement('input');
+          describe('basic XHR request', () => {
+            let form, ampForm, clientIdField, canonicalUrlField;
+
+            beforeEach(async () => {
+              ampForm = await getAmpForm(getForm());
+              form = ampForm.form_;
+              form.setAttribute('id', 'registration');
+              env.sandbox.stub(form, 'checkValidity').returns(true);
+              env.sandbox.stub(ampForm.xhr_, 'xssiJson').resolves();
+              env.sandbox.stub(ampForm.xhr_, 'fetch').resolves();
+              env.sandbox.stub(ampForm, 'handleSubmitSuccess_');
+              env.sandbox.spy(ampForm.urlReplacement_, 'expandInputValueAsync');
+              env.sandbox.stub(ampForm.urlReplacement_, 'expandInputValueSync');
+              clientIdField = createElement('input');
               clientIdField.setAttribute('name', 'clientId');
               clientIdField.setAttribute('type', 'hidden');
               clientIdField.value = 'CLIENT_ID(form)';
               clientIdField.setAttribute('data-amp-replace', 'CLIENT_ID');
-              form.appendChild(clientIdField);
-              const canonicalUrlField = createElement('input');
+              canonicalUrlField = createElement('input');
               canonicalUrlField.setAttribute('name', 'clientId');
               canonicalUrlField.setAttribute('type', 'hidden');
               canonicalUrlField.value = 'CANONICAL_URL';
@@ -2371,36 +2409,88 @@ describes.repeated(
                 'data-amp-replace',
                 'CANONICAL_URL'
               );
+            });
+
+            it('should substitute hidden fields variables in XHR async', async () => {
+              form.appendChild(clientIdField);
               form.appendChild(canonicalUrlField);
 
-              env.sandbox.stub(form, 'checkValidity').returns(true);
-              env.sandbox.stub(ampForm.xhr_, 'fetch').resolves();
-              env.sandbox.stub(ampForm, 'handleSubmitSuccess_');
-              env.sandbox.spy(ampForm.urlReplacement_, 'expandInputValueAsync');
-              env.sandbox.stub(ampForm.urlReplacement_, 'expandInputValueSync');
-
-              const submitPromise = ampForm.submit_(ActionTrust.HIGH);
-              expect(ampForm.xhr_.fetch).to.have.not.been.called;
+              expect(ampForm.xhr_.xssiJson).to.have.not.been.called;
               expect(ampForm.urlReplacement_.expandInputValueSync).to.not.have
                 .been.called;
 
-              submitPromise.then(() => {
-                expect(ampForm.urlReplacement_.expandInputValueAsync).to.have
-                  .been.calledTwice;
-                expect(
-                  ampForm.urlReplacement_.expandInputValueAsync
-                ).to.have.been.calledWith(clientIdField);
-                expect(
-                  ampForm.urlReplacement_.expandInputValueAsync
-                ).to.have.been.calledWith(canonicalUrlField);
-                return whenCalled(ampForm.xhr_.fetch).then(() => {
-                  expect(ampForm.xhr_.fetch).to.be.called;
-                  expect(clientIdField.value).to.match(/amp-.+/);
-                  expect(canonicalUrlField.value).to.equal(
-                    'https%3A%2F%2Fexample.com%2Famps.html'
-                  );
-                });
-              });
+              await ampForm.submit_(ActionTrust.HIGH);
+              expect(ampForm.urlReplacement_.expandInputValueAsync).to.have.been
+                .calledTwice;
+              expect(
+                ampForm.urlReplacement_.expandInputValueAsync
+              ).to.have.been.calledWith(clientIdField);
+              expect(
+                ampForm.urlReplacement_.expandInputValueAsync
+              ).to.have.been.calledWith(canonicalUrlField);
+
+              expect(ampForm.xhr_.xssiJson).to.be.called;
+              expect(clientIdField.value).to.match(/amp-.+/);
+              expect(canonicalUrlField.value).to.equal(
+                'https%3A%2F%2Fexample.com%2Famps.html'
+              );
+            });
+
+            it('should substitute input fields outside of the form', async () => {
+              // Outside input fields must have `form` attribute
+              clientIdField.setAttribute('form', 'registration');
+              canonicalUrlField.setAttribute('form', 'registration');
+              env.ampdoc.getBody().appendChild(clientIdField);
+              env.ampdoc.getBody().appendChild(canonicalUrlField);
+
+              expect(ampForm.xhr_.xssiJson).to.have.not.been.called;
+              expect(ampForm.urlReplacement_.expandInputValueSync).to.not.have
+                .been.called;
+
+              await ampForm.submit_(ActionTrust.HIGH);
+              expect(ampForm.urlReplacement_.expandInputValueAsync).to.have.been
+                .calledTwice;
+              expect(
+                ampForm.urlReplacement_.expandInputValueAsync
+              ).to.have.been.calledWith(clientIdField);
+              expect(
+                ampForm.urlReplacement_.expandInputValueAsync
+              ).to.have.been.calledWith(canonicalUrlField);
+              await whenCalled(ampForm.xhr_.fetch);
+              expect(ampForm.xhr_.fetch).to.be.called;
+              expect(clientIdField.value).to.match(/amp-.+/);
+              expect(canonicalUrlField.value).to.equal(
+                'https%3A%2F%2Fexample.com%2Famps.html'
+              );
+            });
+
+            it('should not do var substitution on invalid elements', async () => {
+              // remove hidden
+              clientIdField.removeAttribute('type');
+
+              // wrong form
+              clientIdField.removeAttribute('type');
+
+              // not an input
+              const randomField = createElement('textarea');
+              randomField.setAttribute('name', 'clientId');
+              randomField.setAttribute('type', 'hidden');
+              randomField.value = 'RANDOM';
+              randomField.setAttribute('data-amp-replace', 'RANDOM');
+              randomField.setAttribute('form', 'registration');
+
+              env.ampdoc.getBody().appendChild(clientIdField);
+              env.ampdoc.getBody().appendChild(canonicalUrlField);
+              env.ampdoc.getBody().appendChild(randomField);
+
+              await ampForm.submit_(ActionTrust.HIGH);
+              expect(ampForm.urlReplacement_.expandInputValueAsync).to.not.be
+                .called;
+              await whenCalled(ampForm.xhr_.fetch);
+              expect(ampForm.xhr_.fetch).to.be.called;
+              expect(clientIdField.value).to.equal('CLIENT_ID(form)');
+              expect(randomField.value).to.equal('RANDOM');
+              expect(canonicalUrlField.value).to.equal('CANONICAL_URL');
             });
           });
 

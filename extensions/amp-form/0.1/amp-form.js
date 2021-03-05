@@ -694,12 +694,19 @@ export class AmpForm {
 
   /**
    * Get form fields that require variable substitutions
-   * @return {!IArrayLike<!HTMLInputElement>}
+   * @return {!Array<!HTMLInputElement>}
    * @private
    */
   getVarSubsFields_() {
     // Fields that support var substitutions.
-    return this.form_.querySelectorAll('[type="hidden"][data-amp-replace]');
+    const {elements} = this.form_;
+    return Array.from(elements).filter((ele) => {
+      return (
+        ele.tagName.toUpperCase() === 'INPUT' &&
+        ele.hasAttribute('data-amp-replace') &&
+        ele.type.toLocaleLowerCase() === 'hidden'
+      );
+    });
   }
 
   /**
@@ -1448,8 +1455,18 @@ export class AmpForm {
  * @return {boolean} Whether the form is currently valid or not.
  */
 function checkUserValidityOnSubmission(form) {
-  const elements = form.querySelectorAll('input,select,textarea,fieldset');
-  iterateCursor(elements, (element) => checkUserValidity(element));
+  const {elements} = form;
+  const formElementTagNames = ['INPUT', 'SELECT', 'TEXTAREA', 'FIELDSET'];
+  const elementsToBeChecked = Array.from(elements).filter((ele) => {
+    const tagName = ele.tagName.toUpperCase();
+    // Only allow allow-listed elements and elements must be direct descendant
+    // of form or an <input> 
+    return formElementTagNames.indexOf(tagName) > -1 && (
+      tagName === 'INPUT' ||
+      form.contains(ele)
+    );
+  });
+  iterateCursor(elementsToBeChecked, (element) => checkUserValidity(element));
   return checkUserValidity(form);
 }
 
