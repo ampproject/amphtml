@@ -107,35 +107,55 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
 
   /** @private */
   setAnimateTo_() {
+    const attrX = this.element_.getAttribute('x') || 0;
+    const attrY = this.element_.getAttribute('y') || 0;
     const lockBounds = this.element_.hasAttribute('lock-bounds');
-    const zoom = parseFloat(this.element_.getAttribute('zoom'));
+    let zoom;
+
+    if (this.element_.hasAttribute('zoom')) {
+      const attrZoom = parseFloat(this.element_.getAttribute('zoom'));
+      if (lockBounds && attrZoom < 1) {
+        zoom = 1;
+      } else {
+        zoom = attrZoom || 1;
+      }
+    } else {
+      zoom = 1;
+    }
 
     const containerHeight = this.element.offsetHeight;
     const containerWidth = this.element.offsetWidth;
-    const ampImgHeight = this.ampImgEl_.getAttribute('height');
     const ampImgWidth = this.ampImgEl_.getAttribute('width');
+    const ampImgHeight = this.ampImgEl_.getAttribute('height');
     const scaledFraction = containerHeight / ampImgHeight;
     const scaledImageWidth = scaledFraction * ampImgWidth;
+    const scaledImageHeight = scaledFraction * ampImgHeight;
     const widthFraction = 1 - containerWidth / (scaledImageWidth * zoom);
+    const heightFraction = 1 - containerHeight / (scaledImageHeight * zoom);
 
     let x = 0;
-    const xAttr = this.element_.getAttribute('x');
-
-    if (xAttr === 'left') {
+    if (attrX === 'left') {
       x = 50 * widthFraction;
-    } else if (xAttr === 'right') {
+    } else if (attrX === 'right') {
       x = -50 * widthFraction;
     } else if (lockBounds) {
-      x = parseFloat(xAttr) * widthFraction;
+      x = parseFloat(attrX) * widthFraction;
     } else {
-      x = parseFloat(xAttr) || 0;
+      x = parseFloat(attrX);
     }
 
-    this.animateTo_ = {
-      x,
-      y: parseFloat(this.element_.getAttribute('y')) || 0,
-      zoom: parseFloat(this.element_.getAttribute('zoom')) || 1,
-    };
+    let y = 0;
+    if (attrY === 'top') {
+      y = 50 * heightFraction;
+    } else if (attrY === 'bottom') {
+      y = -50 * heightFraction;
+    } else if (lockBounds) {
+      y = (parseFloat(attrY) || 0) * heightFraction;
+    } else {
+      y = parseFloat(attrY) || 0;
+    }
+
+    this.animateTo_ = {x, y, zoom};
   }
 
   /** @override */
