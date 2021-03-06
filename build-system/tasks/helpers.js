@@ -15,7 +15,6 @@
  */
 
 const argv = require('minimist')(process.argv.slice(2));
-const babel = require('@babel/core');
 const debounce = require('debounce');
 const del = require('del');
 const esbuild = require('esbuild');
@@ -32,6 +31,7 @@ const {
 } = require('../compile/internal-version');
 const {applyConfig, removeConfig} = require('./prepend-global/index.js');
 const {closureCompile} = require('../compile/compile');
+const {getEsbuildBabelPlugin} = require('../common/esbuild-babel');
 const {green, red, cyan} = require('kleur/colors');
 const {isCiBuild} = require('../common/ci');
 const {jsBundles} = require('../compile/bundles.config');
@@ -94,24 +94,10 @@ const hostname3p = argv.hostname3p || '3p.ampproject.net';
 const watchDebounceDelay = 1000;
 
 /**
- * Used to cache babel transforms done by esbuild.
- * @private @const {!Map<string, Promise<File>>}
- */
-const cache = new Map();
-
-/**
  * Stores esbuild's watch mode rebuilders.
  * @private @const {!Map<string, {rebuild: function():!Promise<void>}>}
  */
 const watchedTargets = new Map();
-
-/*
- * Used to remove a file from the babel cache after it is modified.
- * @param {string} filepath relative to the project root.
- */
-function invalidateUnminifiedBabelCache(filepath) {
-  cache.delete(path.resolve(filepath)); // Must be absolute path.
-}
 
 /**
  * @param {!Object} jsBundles
@@ -173,11 +159,9 @@ async function bootstrapThirdPartyFrames(options) {
  */
 async function compileCoreRuntime(options) {
   /**
-   * @param {string} modifiedFile
    * @return {Promise<void>}
    */
-  async function watchFunc(modifiedFile) {
-    invalidateUnminifiedBabelCache(modifiedFile);
+  async function watchFunc() {
     const bundleComplete = await doBuildJs(jsBundles, 'amp.js', {
       ...options,
       watch: false,
@@ -466,57 +450,6 @@ async function finishBundle(
 }
 
 /**
- * Creates a babel plugin for esbuild for the given caller. Optionally enables
- * caching to speed up transforms.
- * @param {string} callerName
- * @param {boolean} enableCache
- * @param {function()} preSetup
- * @param {function()} postLoad
- * @return {!Object}
- */
-function getEsbuildBabelPlugin(
-  callerName,
-  enableCache,
-  preSetup = () => {},
-  postLoad = () => {}
-) {
-  return {
-    name: 'babel',
-    async setup(build) {
-      preSetup();
-      const transformContents = async (file) => {
-        const contents = await fs.promises.readFile(file.path, 'utf-8');
-        const babelOptions =
-          babel.loadOptions({
-            caller: {name: callerName},
-            filename: file.path,
-            sourceFileName: path.basename(file.path),
-          }) || undefined;
-        const result = await babel.transformAsync(contents, babelOptions);
-        return {contents: result.code};
-      };
-
-      build.onLoad({filter: /.*\.[cm]?js$/, namespace: ''}, async (file) => {
-        const {path} = file;
-        if (enableCache && cache.has(path)) {
-          return cache.get(path);
-        }
-        const promise = transformContents(file);
-        if (enableCache) {
-          // Cache needs to be set before awaiting, because esbuild can issue
-          // multiple "loads" to import a file while waiting for babel to
-          // transform.
-          cache.set(path, promise);
-        }
-        const transformed = await promise;
-        postLoad();
-        return transformed;
-      });
-    },
-  };
-}
-
-/**
  * Transforms a given JavaScript file entry point with esbuild and babel, and
  * watches it for changes (if required).
  * @param {string} srcDir
@@ -795,12 +728,10 @@ module.exports = {
   compileTs,
   doBuildJs,
   endBuildStep,
-  getEsbuildBabelPlugin,
   maybePrintCoverageMessage,
   maybeToEsmName,
   mkdirSync,
   printConfigHelp,
   printNobuildHelp,
   watchDebounceDelay,
-  invalidateUnminifiedBabelCache,
 };
