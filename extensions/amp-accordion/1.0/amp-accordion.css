@@ -46,7 +46,7 @@ amp-accordion > section > * {
  * TODO(#32155): Use instead `supports selector(:where(A))` when the
  * https://github.com/postcss/postcss/issues/1520 is fixed.
  */
-@media (min-width: 1px) {
+@supports selector(:where(A)) {
   :where(amp-accordion > section) > :first-child {
     cursor: pointer;
     background-color: #efefef;
