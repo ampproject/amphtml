@@ -21,7 +21,7 @@ const path = require('path');
 
 /**
  * Used to cache babel transforms done by esbuild.
- * @private @const {!Map<string, {hash: string, contents: Promise<string>}>}
+ * @private @const {!Map<string, {hash: string, promise: Promise<{contents: string}>}>}
  */
 const transformCache = new Map();
 
