@@ -30,7 +30,6 @@ import {
   discover,
   setGroupProp,
   setParent,
-  setProp,
   subscribe,
 } from '../context';
 import {
@@ -47,6 +46,7 @@ import {getDate} from '../utils/date';
 import {getMode} from '../mode';
 import {hydrate, render} from './index';
 import {installShadowStyle} from '../shadow-embed';
+import {observeContentSize, unobserveContentSize} from '../utils/size-observer';
 import {sequentialIdGenerator} from '../utils/id-generator';
 import {toArray} from '../types';
 
@@ -217,6 +217,7 @@ export class PreactBaseElement extends AMP.BaseElement {
     this.defaultProps_ = dict({
       'loading': Loading.AUTO,
       'onReadyState': this.onReadyState_.bind(this),
+      'onPlayingState': this.updateIsPlaying_.bind(this),
     });
 
     /** @private {!AmpContextDef.ContextType} */
@@ -280,8 +281,13 @@ export class PreactBaseElement extends AMP.BaseElement {
     /** @protected {?MutationObserver} */
     this.observer = null;
 
+    /** @private {boolean} */
+    this.isPlaying_ = false;
+
     /** @protected {?MediaQueryProps} */
     this.mediaQueryProps_ = null;
+
+    this.pauseWhenNoSize_ = this.pauseWhenNoSize_.bind(this);
   }
 
   /**
@@ -413,17 +419,8 @@ export class PreactBaseElement extends AMP.BaseElement {
   /** @override */
   detachedCallback() {
     discover(this.element);
+    this.updateIsPlaying_(false);
     this.mediaQueryProps_?.dispose();
-  }
-
-  /** @override */
-  pauseCallback() {
-    setProp(this.element, CanPlay, this.element, false);
-  }
-
-  /** @override */
-  resumeCallback() {
-    setProp(this.element, CanPlay, this.element, true);
   }
 
   /** @override */
@@ -540,8 +537,13 @@ export class PreactBaseElement extends AMP.BaseElement {
   onReadyState_(state, opt_failure) {
     this.setReadyState(state, opt_failure);
 
+    const Ctor = this.constructor;
+    if (Ctor['unloadOnPause']) {
+      this.updateIsPlaying_(state == ReadyState.COMPLETE);
+    }
+
     // Reset "loading" property back to "auto".
-    if (state != ReadyState.LOADING && this.resetLoading_) {
+    if (this.resetLoading_) {
       this.resetLoading_ = false;
       this.mutateProps({'loading': Loading.AUTO});
     }
@@ -804,6 +806,48 @@ export class PreactBaseElement extends AMP.BaseElement {
   triggerEvent(element, eventName, detail) {
     dispatchCustomEvent(element, eventName, detail);
   }
+
+  /** @override */
+  pauseCallback() {
+    const Ctor = this.constructor;
+    if (Ctor['unloadOnPause']) {
+      this.mutateProps(dict({'loading': Loading.UNLOAD}));
+      this.resetLoading_ = true;
+    } else {
+      const {currentRef_: api} = this;
+      const apiPause = api && api['pause'];
+      if (apiPause) {
+        apiPause();
+      }
+    }
+  }
+
+  /**
+   * @param {boolean} isPlaying
+   * @private
+   */
+  updateIsPlaying_(isPlaying) {
+    if (isPlaying === this.isPlaying_) {
+      return;
+    }
+    this.isPlaying_ = isPlaying;
+    if (isPlaying) {
+      observeContentSize(this.element, this.pauseWhenNoSize_);
+    } else {
+      unobserveContentSize(this.element, this.pauseWhenNoSize_);
+    }
+  }
+
+  /**
+   * @param {!../../../src/layout-rect.LayoutSizeDef} size
+   * @private
+   */
+  pauseWhenNoSize_({width, height}) {
+    const hasSize = width > 0 && height > 0;
+    if (!hasSize) {
+      this.pauseCallback();
+    }
+  }
 }
 
 /**
@@ -869,6 +913,13 @@ PreactBaseElement['useContexts'] = getMode().localDev ? Object.freeze([]) : [];
  * @protected {boolean}
  */
 PreactBaseElement['loadable'] = false;
+
+/**
+ * Whether a component should be unloaded for `pauseCallback`.
+ *
+ * @protected {boolean}
+ */
+PreactBaseElement['unloadOnPause'] = false;
 
 /**
  * An override to specify that the component requires `layoutSizeDefined`.

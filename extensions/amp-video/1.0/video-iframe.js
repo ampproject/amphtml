@@ -67,6 +67,7 @@ function VideoIframeWithRef(
     origin,
     onCanPlay,
     onMessage,
+    playerStateRef,
     makeMethodMessage: makeMethodMessageProp,
     onIframeLoad,
     ...rest
@@ -97,10 +98,20 @@ function VideoIframeWithRef(
   useImperativeHandle(
     ref,
     () => ({
+      get currentTime() {
+        const playerState = playerStateRef && playerStateRef.current;
+        const value = playerState && playerState['currentTime'];
+        return typeof value == 'number' ? value : NaN;
+      },
+      get duration() {
+        const playerState = playerStateRef && playerStateRef.current;
+        const value = playerState && playerState['duration'];
+        return typeof value == 'number' ? value : NaN;
+      },
       play: () => postMethodMessage('play'),
       pause: () => postMethodMessage('pause'),
     }),
-    [postMethodMessage]
+    [playerStateRef, postMethodMessage]
   );
 
   // Keep `onMessage` in a ref to prevent re-listening on every render.

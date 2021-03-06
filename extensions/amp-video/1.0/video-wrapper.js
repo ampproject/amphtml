@@ -93,6 +93,7 @@ function VideoWrapperWithRef(
     sources,
     poster,
     onReadyState,
+    onPlayingState,
     ...rest
   },
   ref
@@ -103,7 +104,7 @@ function VideoWrapperWithRef(
   const load = loading !== Loading.UNLOAD;
 
   const [muted, setMuted] = useState(autoplay);
-  const [playing, setPlaying] = useState(false);
+  const [playing, setPlaying_] = useState(false);
   const [metadata, setMetadata] = useState(/** @type {?MetadataDef}*/ (null));
   const [hasUserInteracted, setHasUserInteracted] = useState(!autoplay);
 
@@ -130,6 +131,27 @@ function VideoWrapperWithRef(
     },
     [onReadyStateRef]
   );
+
+  // The `onPlayingStateRef` is passed via a ref to avoid the changed values
+  // of `onPlayingState` re-triggering the side effects.
+  const onPlayingStateRef = useValueRef(onPlayingState);
+  const setPlayingState = useCallback(
+    (playing) => {
+      setPlaying_(playing);
+      const onPlayingState = onPlayingStateRef.current;
+      if (onPlayingState) {
+        onPlayingState(playing);
+      }
+    },
+    [onPlayingStateRef]
+  );
+
+  // Reset playing state when the video player is unmounted.
+  useLayoutEffect(() => {
+    if (!load) {
+      setPlayingState(false);
+    }
+  }, [load, setPlayingState]);
 
   const play = useCallback(() => {
     return readyDeferred.promise.then(() => playerRef.current.play());
@@ -263,8 +285,9 @@ function VideoWrapperWithRef(
             }
             setReadyState(ReadyState.COMPLETE);
           }}
-          onPlaying={() => setPlaying(true)}
-          onPause={() => setPlaying(false)}
+          onPlaying={() => setPlayingState(true)}
+          onPause={() => setPlayingState(false)}
+          onEnded={() => setPlayingState(false)}
           onError={(e) => setReadyState(ReadyState.ERROR, e)}
           style={fillStretch}
           src={src}

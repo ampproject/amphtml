@@ -197,6 +197,58 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
     expect(onReadyState).to.be.calledOnce.calledWith('error');
   });
 
+  it('should send playing state on events', async () => {
+    const onPlayingState = env.sandbox.spy();
+    const wrapper = mount(
+      <VideoWrapper
+        component={TestPlayer}
+        sources={<div></div>}
+        onPlayingState={onPlayingState}
+      />
+    );
+    expect(onPlayingState).to.not.be.called;
+
+    // onPlaying
+    await wrapper.find(TestPlayer).invoke('onPlaying')();
+    expect(onPlayingState).to.be.calledOnce.calledWith(true);
+
+    // onPause
+    onPlayingState.resetHistory();
+    await wrapper.find(TestPlayer).invoke('onPause')();
+    expect(onPlayingState).to.be.calledOnce.calledWith(false);
+
+    // onPlaying again
+    onPlayingState.resetHistory();
+    await wrapper.find(TestPlayer).invoke('onPlaying')();
+    expect(onPlayingState).to.be.calledOnce.calledWith(true);
+
+    // onEnded
+    onPlayingState.resetHistory();
+    await wrapper.find(TestPlayer).invoke('onEnded')();
+    expect(onPlayingState).to.be.calledOnce.calledWith(false);
+  });
+
+  it('should reset playing state when component is not mounted', async () => {
+    const onPlayingState = env.sandbox.spy();
+    const wrapper = mount(
+      <WithAmpContext playable={true}>
+        <VideoWrapper
+          unloadOnPause={true}
+          component={TestPlayer}
+          sources={<div></div>}
+          onPlayingState={onPlayingState}
+        />
+      </WithAmpContext>
+    );
+    await wrapper.find(TestPlayer).invoke('onPlaying')();
+    expect(onPlayingState).to.be.calledOnce.calledWith(true);
+
+    // Unmount via unloadOnPause.
+    onPlayingState.resetHistory();
+    wrapper.setProps({playable: false});
+    expect(onPlayingState).to.be.calledOnce.calledWith(false);
+  });
+
   describe('MediaSession', () => {
     let navigator;
 
