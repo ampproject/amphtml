@@ -16,6 +16,7 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const babel = require('@babel/core');
+const crypto = require('crypto');
 const debounce = require('debounce');
 const del = require('del');
 const esbuild = require('esbuild');
@@ -39,7 +40,6 @@ const {log, logLocalDev} = require('../common/logging');
 const {thirdPartyFrames} = require('../test-configs/config');
 const {transpileTs} = require('../compile/typescript');
 const {watch: fileWatch} = require('chokidar');
-const crypto = require('crypto');
 
 /** @type {Remapping.default} */
 const remapping = /** @type {*} */ (Remapping);
@@ -96,9 +96,16 @@ const watchDebounceDelay = 1000;
 
 /**
  * Used to cache babel transforms done by esbuild.
- * @private @const {!Map<string, Promise<File>>}
+ * @private @const {!Map<string, {hash: string, contents: Promise<string>}>}
  */
-const cache = new Map();
+const transformCache = new Map();
+
+/**
+ * Used to cache file reads done by esbuild, since it can issue multiple
+ * "loads" per file. This batches consecutive reads into a single, and then
+ * clears its cache item for the next load.
+ * @private @const {!Map<string, Promise<{hash: string, contents: string}>>}
+ */
 const readCache = new Map();
 
 /**
@@ -112,7 +119,7 @@ const watchedTargets = new Map();
  * @param {string} filepath relative to the project root.
  */
 function invalidateUnminifiedBabelCache(filepath) {
-  cache.delete(path.resolve(filepath)); // Must be absolute path.
+  transformCache.delete(path.resolve(filepath)); // Must be absolute path.
 }
 
 /**
@@ -492,62 +499,61 @@ function getEsbuildBabelPlugin(
     return hash.digest();
   }
 
+  function batchedRead(path) {
+    let read = readCache.get(path);
+    if (!read) {
+      read = fs.promises
+        .readFile(path)
+        .then((contents) => {
+          return {
+            contents,
+            hash: sha256(contents),
+          };
+        })
+        .finally(() => {
+          readCache.delete(path);
+        });
+      readCache.set(path, read);
+    }
+    return read;
+  }
+
+  function transformContents(filepath, contents, hash) {
+    if (enableCache) {
+      const cached = transformCache.get(filepath);
+      if (cached && cached.hash === hash) {
+        return cached.promise;
+      }
+    }
+
+    const babelOptions =
+      babel.loadOptions({
+        caller: {name: callerName},
+        filename: filepath,
+        sourceFileName: path.basename(filepath),
+      }) || undefined;
+    const promise = babel
+      .transformAsync(contents, babelOptions)
+      .then((result) => {
+        return {contents: result.code};
+      });
+
+    if (enableCache) {
+      transformCache.set(filepath, {hash, promise});
+    }
+
+    return promise.finally(postLoad);
+  }
+
   return {
     name: 'babel',
     async setup(build) {
       preSetup();
 
-      async function transformContents(contents, hash, filepath) {
-        if (enableCache) {
-          const cached = cache.get(filepath);
-          if (cached && cached.hash === hash) {
-            return cached.promise;
-          }
-        }
-
-        const babelOptions =
-          babel.loadOptions({
-            caller: {name: callerName},
-            filename: filepath,
-            sourceFileName: path.basename(filepath),
-          }) || undefined;
-        const promise = babel
-          .transformAsync(contents, babelOptions)
-          .then((result) => {
-            return {contents: result.code};
-          });
-
-        if (enableCache) {
-          // Cache needs to be set before awaiting, because esbuild can issue
-          // multiple "loads" to import a file while waiting for babel to
-          // transform.
-          cache.set(filepath, {hash, promise});
-        }
-
-        const transformed = await promise;
-        postLoad();
-        return transformed;
-      }
-
       build.onLoad({filter: /.*\.[cm]?js$/, namespace: ''}, async (file) => {
         const {path} = file;
-        let read = readCache.get(path);
-        if (!read) {
-          read = fs.promises
-            .readFile(path)
-            .then((contents) => {
-              return {
-                contents,
-                hash: sha256(contents),
-              };
-            })
-            .finally(() => {
-              readCache.delete(path);
-            });
-          readCache.set(path, read);
-        }
-        const {contents, hash} = await read;
-        return transformContents(contents, hash, path);
+        const {contents, hash} = await batchedRead(path);
+        return transformContents(path, contents, hash);
       });
     },
   };
