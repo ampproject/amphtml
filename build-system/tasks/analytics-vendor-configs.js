@@ -20,7 +20,7 @@ const debounce = require('debounce');
 const fs = require('fs-extra');
 const globby = require('globby');
 const jsonminify = require('jsonminify');
-const {endBuildStep, invalidateUnminifiedBabelCache} = require('./helpers');
+const {endBuildStep} = require('./helpers');
 const {join, basename, dirname, extname} = require('path');
 const {watchDebounceDelay} = require('./helpers');
 const {watch} = require('chokidar');
@@ -45,8 +45,7 @@ async function analyticsVendorConfigs(opt_options) {
   if (options.watch) {
     // Do not set watchers again when we get called by the watcher.
     const copyOptions = {...options, watch: false, calledByWatcher: true};
-    const watchFunc = (modifiedFile) => {
-      invalidateUnminifiedBabelCache(modifiedFile);
+    const watchFunc = () => {
       analyticsVendorConfigs(copyOptions);
     };
     watch(srcPath).on('change', debounce(watchFunc, watchDebounceDelay));
