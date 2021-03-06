@@ -109,7 +109,7 @@ function getEsbuildBabelPlugin(
     async setup(build) {
       preSetup();
 
-      build.onLoad({filter: /.*\.[cm]?js$/, namespace: ''}, async (file) => {
+      build.onLoad({filter: /\.[cm]?js$/, namespace: ''}, async (file) => {
         const {path} = file;
         const {contents, hash} = await batchedRead(path);
         return transformContents(path, contents, hash);
