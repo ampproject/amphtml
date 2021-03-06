@@ -55,7 +55,7 @@ function getEsbuildBabelPlugin(
     const hash = crypto.createHash('sha256');
     hash.update(callerName);
     hash.update(contents);
-    return hash.digest();
+    return hash.digest('hex');
   }
 
   function batchedRead(path) {
