@@ -297,7 +297,7 @@ function updateEsbuildConfig(config) {
   };
   const babelPlugin = getEsbuildBabelPlugin(
     /* callerName */ 'test',
-    /* enableCache */ !argv.watch, // TODO(jridgewell): Make this true when unifiedJsFile goes away.
+    /* enableCache */ true,
     /* preSetup */ logBabelStart,
     /* postLoad */ printBabelDot
   );

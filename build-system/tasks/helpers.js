@@ -39,6 +39,7 @@ const {log, logLocalDev} = require('../common/logging');
 const {thirdPartyFrames} = require('../test-configs/config');
 const {transpileTs} = require('../compile/typescript');
 const {watch: fileWatch} = require('chokidar');
+const crypto = require('crypto');
 
 /** @type {Remapping.default} */
 const remapping = /** @type {*} */ (Remapping);
@@ -98,6 +99,7 @@ const watchDebounceDelay = 1000;
  * @private @const {!Map<string, Promise<File>>}
  */
 const cache = new Map();
+const readCache = new Map();
 
 /**
  * Stores esbuild's watch mode rebuilders.
@@ -480,37 +482,72 @@ function getEsbuildBabelPlugin(
   preSetup = () => {},
   postLoad = () => {}
 ) {
+  function sha256(contents) {
+    if (!enableCache) {
+      return '';
+    }
+    const hash = crypto.createHash('sha256');
+    hash.update(callerName);
+    hash.update(contents);
+    return hash.digest();
+  }
+
   return {
     name: 'babel',
     async setup(build) {
       preSetup();
-      const transformContents = async (file) => {
-        const contents = await fs.promises.readFile(file.path, 'utf-8');
+
+      async function transformContents(contents, hash, filepath) {
+        if (enableCache) {
+          const cached = cache.get(filepath);
+          if (cached && cached.hash === hash) {
+            return cached.promise;
+          }
+        }
+
         const babelOptions =
           babel.loadOptions({
             caller: {name: callerName},
-            filename: file.path,
-            sourceFileName: path.basename(file.path),
+            filename: filepath,
+            sourceFileName: path.basename(filepath),
           }) || undefined;
-        const result = await babel.transformAsync(contents, babelOptions);
-        return {contents: result.code};
-      };
+        const promise = babel
+          .transformAsync(contents, babelOptions)
+          .then((result) => {
+            return {contents: result.code};
+          });
 
-      build.onLoad({filter: /.*\.[cm]?js$/, namespace: ''}, async (file) => {
-        const {path} = file;
-        if (enableCache && cache.has(path)) {
-          return cache.get(path);
-        }
-        const promise = transformContents(file);
         if (enableCache) {
           // Cache needs to be set before awaiting, because esbuild can issue
           // multiple "loads" to import a file while waiting for babel to
           // transform.
-          cache.set(path, promise);
+          cache.set(filepath, {hash, promise});
         }
+
         const transformed = await promise;
         postLoad();
         return transformed;
+      }
+
+      build.onLoad({filter: /.*\.[cm]?js$/, namespace: ''}, async (file) => {
+        const {path} = file;
+        let read = readCache.get(path);
+        if (!read) {
+          read = fs.promises
+            .readFile(path)
+            .then((contents) => {
+              return {
+                contents,
+                hash: sha256(contents),
+              };
+            })
+            .finally(() => {
+              readCache.delete(path);
+            });
+          readCache.set(path, read);
+        }
+        const {contents, hash} = await read;
+        return transformContents(contents, hash, path);
       });
     },
   };
