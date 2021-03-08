@@ -88,7 +88,7 @@ VideoBaseElement['props'] = {
   'artwork': {attr: 'artwork'},
   'attribution': {attr: 'attribution'},
   'autoplay': {attr: 'autoplay', type: 'boolean'},
-  'controls': {attr: 'controls', type: 'boolean', media: true},
+  'controls': {attr: 'controls', type: 'boolean'},
   'controlslist': {attr: 'controlslist'},
   'crossorigin': {attr: 'crossorigin'},
   'disableremoteplayback': {attr: 'disableremoteplayback'},
