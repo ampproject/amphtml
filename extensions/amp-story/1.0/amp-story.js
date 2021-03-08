@@ -2466,8 +2466,15 @@ export class AmpStory extends AMP.BaseElement {
    *     specified element, if any.
    */
   getPageContainingElement_(element) {
+    let startingElement = element;
+    // If the element is inside an iframe (most likely an ad), start from the
+    // containing iframe element.
+    if (element.ownerDocument !== this.win.document) {
+      startingElement = element.ownerDocument.defaultView.frameElement;
+    }
+
     const pageIndex = findIndex(this.pages_, (page) => {
-      const pageEl = closest(element, (el) => {
+      const pageEl = closest(startingElement, (el) => {
         return el === page.element;
       });
 
