@@ -4,7 +4,7 @@
 export const data = {
   reserialized: `
 <!doctype html>
-<html ⚡>
+<html ⚡ lang="en">
 <head>
   <meta charset="utf-8">
   <link rel="canonical" href="./regular-html-version.html">
@@ -49,7 +49,7 @@ export const data = {
   limitations under the license.
 -->
 <!doctype html>
-<html ⚡>
+<html ⚡ lang="en">
 <head>
   <meta charset="utf-8">
   <link rel="canonical" href="./regular-html-version.html">

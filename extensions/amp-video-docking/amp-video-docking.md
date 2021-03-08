@@ -95,7 +95,7 @@ Custom positioning will be rejected when the element target is not visible. This
 ## Attributes
 
 N/A. `amp-video-docking` does not define any custom elements. To use this extension, set the `dock` attribute on
-an [elligible video player component.](#support)
+an [eligible video player component.](#support)
 
 ## Events
 

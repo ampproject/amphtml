@@ -37,7 +37,7 @@ constraints specified by the ad network. These constraints will limit:
   <li>The minimum distance that there should be between any adjacent ads</li>
 </ul>
 In addition to this, ads will only be inserted in locations on the page that do
-not cause an unacceptable re-flow (as determined by attemptChangeSize).
+not cause an unacceptable re-flow (as determined by `attemptChangeSize`).
 
 The `<amp-auto-ads>` tag should be placed as the first child of the `<body>`.
 

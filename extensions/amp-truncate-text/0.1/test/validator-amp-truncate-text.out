@@ -15,7 +15,7 @@ FAIL
 |    limitations under the license.
 |  -->
 |  <!doctype html>
-|  <html ⚡>
+|  <html ⚡ lang="en">
 |  <head>
 |    <meta charset="utf-8">
 |    <title>amp-truncate-text example</title>

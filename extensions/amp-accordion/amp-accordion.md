@@ -85,6 +85,7 @@ The example below contains an `amp-accordion` with three sections. The
   <section expanded>
     <h2>Section 3</h2>
     <amp-img src="{{server_for_email}}/static/inline-examples/images/squirrel.jpg"
+      alt="Squirrel"
       width="320"
       height="256"></amp-img>
   </section>

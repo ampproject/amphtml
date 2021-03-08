@@ -16,7 +16,7 @@ FAIL
 |    Tests the presence of the the amp-mraid script tag is disallowed in AMP.
 |  -->
 |  <!doctype html>
-|  <html ⚡>
+|  <html ⚡ lang="en">
 |  <head>
 |    <meta charset="utf-8">
 |    <title>amp-mraid example</title>

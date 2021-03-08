@@ -20,7 +20,7 @@ FAIL
 |    and we want to see if the error messages are any good at distinguishing.
 |  -->
 |  <!doctype html>
-|  <html ⚡>
+|  <html ⚡ lang="en">
 |  <head>
 |    <meta charset="utf-8">
 |    <link rel="canonical" href="./regular-html-version.html">

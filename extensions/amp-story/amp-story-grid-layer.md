@@ -299,7 +299,7 @@ Example:
 
 ```html
 <amp-story-grid-layer template="fill">
-  <amp-img src="cat.jpg"></amp-img>
+  <amp-img src="cat.jpg" alt="cat"></amp-img>
 </amp-story-grid-layer>
 ```
 

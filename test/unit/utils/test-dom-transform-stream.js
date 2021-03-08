@@ -44,7 +44,7 @@ describes.fakeWin('DomTransformStream', {amp: true}, (env) => {
       const {body} = win.document;
       detachedDoc.write(`
         <!doctype html>
-        <html ⚡>
+        <html ⚡ lang="en">
         <head>
         <script async src="https://cdn.ampproject.org/v0.js"></script>
         </head>
@@ -75,7 +75,7 @@ describes.fakeWin('DomTransformStream', {amp: true}, (env) => {
       transformer.waitForHead().then(headSpy);
       detachedDoc.write(`
         <!doctype html>
-          <html ⚡>
+          <html ⚡ lang="en">
           <head>
             <script async src="https://cdn.ampproject.org/v0.js"></script>
       `);
@@ -98,7 +98,7 @@ describes.fakeWin('DomTransformStream', {amp: true}, (env) => {
       const {body} = win.document;
       detachedDoc.write(`
         <!doctype html>
-          <html ⚡>
+          <html ⚡ lang="en">
           <head>
             <script async src="https://cdn.ampproject.org/v0.js"></script>
           </head>
@@ -123,7 +123,7 @@ describes.fakeWin('DomTransformStream', {amp: true}, (env) => {
       const {body} = win.document;
       detachedDoc.write(`
         <!doctype html>
-          <html ⚡>
+          <html ⚡ lang="en">
           <head>
             <script async src="https://cdn.ampproject.org/v0.js"></script>
           </head>
@@ -156,7 +156,7 @@ describes.fakeWin('DomTransformStream', {amp: true}, (env) => {
 
       detachedDoc.write(`
         <!doctype html>
-          <html ⚡>
+          <html ⚡ lang="en">
           <head>
             <script async src="https://cdn.ampproject.org/v0.js"></script>
           </head>
@@ -185,7 +185,7 @@ describes.fakeWin('DomTransformStream', {amp: true}, (env) => {
 
       detachedDoc.write(`
         <!doctype html>
-          <html ⚡>
+          <html ⚡ lang="en">
           <head>
             <script async src="https://cdn.ampproject.org/v0.js"></script>
           </head>
@@ -221,7 +221,7 @@ describes.fakeWin('DomTransformStream', {amp: true}, (env) => {
 
       detachedDoc.write(`
         <!doctype html>
-          <html ⚡>
+          <html ⚡ lang="en">
           <head>
             <script async src="https://cdn.ampproject.org/v0.js"></script>
           </head>

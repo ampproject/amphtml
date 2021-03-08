@@ -339,7 +339,7 @@ describe('ValidatorOutput', () => {
 
   it('validate amp format', () => {
     const results = validator.validateString(
-        '<!doctype html><html ⚡><head><meta charset="utf-8">' +
+        '<!doctype html><html ⚡ lang="en"><head><meta charset="utf-8">' +
             '<link rel="canonical" href="self.html" />' +
             '<meta name="viewport" content="width=device-width,minimum-scale=1">' +
             '<style amp-boilerplate>body{-webkit-animation:-amp-start 8s ' +
@@ -362,7 +362,7 @@ describe('ValidatorOutput', () => {
 
   it('default to validating the amp format', () => {
     const results = validator.validateString(
-        '<!doctype html><html ⚡><head><meta charset="utf-8">' +
+        '<!doctype html><html ⚡ lang="en"><head><meta charset="utf-8">' +
         '<link rel="canonical" href="self.html" />' +
         '<meta name="viewport" content="width=device-width,minimum-scale=1">' +
         '<style amp-boilerplate>body{-webkit-animation:-amp-start 8s ' +

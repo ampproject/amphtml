@@ -45,7 +45,7 @@ For example:
 
 ```html
 <!DOCTYPE html>
-<html ⚡>
+<html ⚡ lang="en">
   <head>
     <style amp-custom>
       amp-img {
@@ -81,7 +81,7 @@ example:
 
 ```html
 <!DOCTYPE html>
-<html ⚡>
+<html ⚡ lang="en">
   <head>
     <style amp-custom>
       .my-frame > [overflow] {

@@ -27,7 +27,7 @@ static constexpr std::string_view kValidAMPHtml{R"HTML(
      here and the AMP Validator will re-check your document on the fly.
 -->
 <!doctype html>
-<html ⚡>
+<html ⚡ lang="en">
 <head>
   <meta charset="utf-8">
   <link rel="canonical" href="self.html">

@@ -1,6 +1,6 @@
 # Auto-lightbox
 
-The standard AMP runtime finds elligible [`amp-img`](https://amp.dev/documentation/components/amp-img)
+The standard AMP runtime finds eligible [`amp-img`](https://amp.dev/documentation/components/amp-img)
 elements and automatically makes them clickable in order to open an [`amp-lightbox-gallery`](https://amp.dev/documentation/components/amp-lightbox-gallery)
 for enhanced user experience that includes panning and pinch-to-zoom.
 

@@ -45,18 +45,21 @@ The `<amp-inline-gallery>` component uses an `<amp-base-carousel>` to display sl
   >
     <amp-img
       src="{{server_for_email}}/static/inline-examples/images/image1.jpg"
+      alt="Apples"
       layout="responsive"
       width="450"
       height="300"
     ></amp-img>
     <amp-img
       src="{{server_for_email}}/static/inline-examples/images/image2.jpg"
+      alt="Lemons"
       layout="responsive"
       width="450"
       height="300"
     ></amp-img>
     <amp-img
       src="{{server_for_email}}/static/inline-examples/images/image3.jpg"
+      alt="Blueberries"
       layout="responsive"
       width="450"
       height="300"

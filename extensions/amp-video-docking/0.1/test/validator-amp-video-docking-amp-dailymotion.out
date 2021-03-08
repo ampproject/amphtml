@@ -19,7 +19,7 @@ PASS
 |    Tests for amp-video-docking tag with amp-dailymotion player.
 |  -->
 |  <!doctype html>
-|  <html ⚡>
+|  <html ⚡ lang="en">
 |  <head>
 |    <meta charset="utf-8">
 |    <link rel="canonical" href="./regular-html-version.html">
