@@ -16,7 +16,7 @@
 
 import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
-import {devAssert} from '../../../src/log';
+import {pureDevAssert as devAssert} from '../../../src/core/assert';
 
 /**
  * @typedef {{

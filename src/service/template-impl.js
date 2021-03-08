@@ -17,7 +17,7 @@
 import {Deferred} from '../utils/promise';
 import {getServiceForDoc, registerServiceBuilderForDoc} from '../service';
 import {rootNodeFor, scopedQuerySelector} from '../dom';
-import {userAssert} from '../log';
+import {pureUserAssert as userAssert} from '../core/assert';
 
 /**
  * @fileoverview

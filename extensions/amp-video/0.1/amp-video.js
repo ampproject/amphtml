@@ -40,9 +40,9 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen, listenOncePromise} from '../../../src/event-helper';
 import {mutedOrUnmutedEvent} from '../../../src/iframe-video';
 import {
-  observeDisplay,
-  unobserveDisplay,
-} from '../../../src/utils/display-observer';
+  observeContentSize,
+  unobserveContentSize,
+} from '../../../src/utils/size-observer';
 import {
   propagateObjectFitStyles,
   setImportantStyles,
@@ -172,7 +172,7 @@ export class AmpVideo extends AMP.BaseElement {
     /** @private {?boolean} whether there are sources that will use a BitrateManager */
     this.hasBitrateSources_ = null;
 
-    this.onDisplay_ = this.onDisplay_.bind(this);
+    this.pauseWhenNoSize_ = this.pauseWhenNoSize_.bind(this);
   }
 
   /**
@@ -687,6 +687,13 @@ export class AmpVideo extends AMP.BaseElement {
     dispatchCustomEvent(this.element, VideoEvents.LOAD);
   }
 
+  /** @override */
+  pauseCallback() {
+    if (this.video_) {
+      this.video_.pause();
+    }
+  }
+
   /** @private */
   updateIsPlaying_(isPlaying) {
     if (this.isManagedByPool_()) {
@@ -697,15 +704,19 @@ export class AmpVideo extends AMP.BaseElement {
     }
     this.isPlaying_ = isPlaying;
     if (isPlaying) {
-      observeDisplay(this.element, this.onDisplay_);
+      observeContentSize(this.element, this.pauseWhenNoSize_);
     } else {
-      unobserveDisplay(this.element, this.onDisplay_);
+      unobserveContentSize(this.element, this.pauseWhenNoSize_);
     }
   }
 
-  /** @private */
-  onDisplay_(isDisplayed) {
-    if (!isDisplayed && this.video_) {
+  /**
+   * @param {!../../../src/layout-rect.LayoutSizeDef} size
+   * @private
+   */
+  pauseWhenNoSize_({width, height}) {
+    const hasSize = width > 0 && height > 0;
+    if (!hasSize && this.video_) {
       this.video_.pause();
     }
   }

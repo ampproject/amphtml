@@ -20,7 +20,7 @@ import {
   BookendComponentInterface,
 } from './bookend-component-interface';
 import {htmlFor} from '../../../../../src/static-template';
-import {userAssert} from '../../../../../src/log';
+import {pureUserAssert as userAssert} from '../../../../../src/core/assert';
 
 /**
  * @typedef {{

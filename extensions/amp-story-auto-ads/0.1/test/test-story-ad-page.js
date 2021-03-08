@@ -23,6 +23,7 @@ import {
 } from '../../../amp-story/1.0/amp-story-store-service';
 import {ButtonTextFitter} from '../story-ad-button-text-fitter';
 import {CommonSignals} from '../../../../src/common-signals';
+import {Gestures} from '../../../../src/gesture';
 import {StoryAdAnalytics} from '../story-ad-analytics';
 import {StoryAdLocalization} from '../story-ad-localization';
 import {StoryAdPage} from '../story-ad-page';
@@ -509,6 +510,26 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
         1, // adIndex
         'story-ad-load',
         {loadTime: window.sandbox.match.number}
+      );
+    });
+
+    it('should fire "story-ad-swipe" upon ad swipe', async () => {
+      const onGestureStub = env.sandbox.stub(Gestures.prototype, 'onGesture');
+      const pageElement = storyAdPage.build();
+      doc.body.appendChild(pageElement);
+      // Stub delegateVideoAutoplay.
+      pageElement.getImpl = () => Promise.resolve(pageImplMock);
+
+      expect(fireEventStub).not.to.be.called;
+      const gestureHandler = onGestureStub.lastCall.args[1];
+      // Fake X swipe.
+      gestureHandler();
+      await macroTask();
+      expect(fireEventStub).to.be.calledWithExactly(
+        pageElement,
+        1, // adIndex
+        'story-ad-swipe',
+        {swipeTime: window.sandbox.match.number}
       );
     });
 
