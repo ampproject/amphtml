@@ -13,7 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export {isDevMode} from './dev-mode';
-export {isLocalDevMode} from './local-dev-mode';
-export {isMinifiedMode} from './minified-mode';
-export {isTestingMode} from './testing-mode';
+import {isLocalDevMode} from './local-dev-mode';
+
+/**
+ * Returns true during testing.
+ * @param {?Window=} opt_win
+ * @return {boolean}
+ */
+export function isTestingMode(opt_win = window) {
+  // The `isLocalDevMode` check here lets this function be DCE'd away during
+  // `gulp dist`
+  return isLocalDevMode() && (opt_win.__AMP_TEST || opt_win.__karma__);
+}

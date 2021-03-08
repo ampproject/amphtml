@@ -15,7 +15,12 @@
  */
 
 import {internalRuntimeVersion} from './internal-version';
-import {isDevMode, isLocalDevMode, isMinifiedMode} from './core/mode';
+import {
+  isDevMode,
+  isLocalDevMode,
+  isMinifiedMode,
+  isTestingMode,
+} from './core/mode';
 import {parseQueryString} from './core/url';
 
 /**
@@ -61,22 +66,11 @@ export function getMode(opt_win) {
  * @return {!ModeDef}
  */
 function getMode_(win) {
-  // TODO(erwinmombay): simplify the logic here
-  const AMP_CONFIG = self.AMP_CONFIG || {};
-
-  // Magic constants that are replaced by babel.
-  // IS_MINIFIED is always replaced with true when babel is used while IS_DEV is
-  // only replaced when `gulp dist` is called without the --fortesting flag.
-  const IS_DEV = true;
-
-  const runningTests =
-    IS_DEV && !!(AMP_CONFIG.test || win.__AMP_TEST || win.__karma__);
   const hashQuery = parseQueryString(
     // location.originalHash is set by the viewer when it removes the fragment
     // from the URL.
     win.location.originalHash || win.location.hash
   );
-
   const searchQuery = parseQueryString(win.location.search);
 
   if (!rtvVersion) {
@@ -100,7 +94,7 @@ function getMode_(win) {
     // Whether document is in an amp-lite viewer. It signal that the user
     // would prefer to use less bandwidth.
     lite: searchQuery['amp_lite'] != undefined,
-    test: runningTests,
+    test: isTestingMode(win),
     log: hashQuery['log'],
     version: internalRuntimeVersion(),
     rtvVersion,

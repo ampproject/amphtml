@@ -13,12 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+import {isLocalDevMode} from './local-dev-mode';
+import {isTestingMode} from './testing-mode';
 import {parseQueryString} from '../url';
-
-// Magic constant that is replaced by babel when `gulp dist` is called without
-// the --fortesting flag.
-const IS_DEV = true;
 
 /**
  * Returns true if the `#development` has param has any value set.
@@ -35,20 +32,19 @@ function isDevQueryParamPresent_(location) {
 }
 
 /**
- * Returns true for local development or when the `development` query param
- * is present in the URL.
+ * Returns true for local development environments, testing environments, or
+ * when the `#development` hash query param has a truthy value in the URL.
+ *
+ * If you're not sure what to use to check "Is this non-production environment?"
+ * use this one.
+ *
  * @param {?Window=} opt_win
  * @return {boolean}
  */
 export function isDevMode(opt_win = window) {
-  // TODO(rcebulko): Pull this out into `test-mode.js`
-  return opt_win.__AMP_TEST || isDevQueryParamPresent_(opt_win.location);
-}
-
-/**
- * Returns true for local development and testing.
- * @return {boolean}
- */
-export function isLocalDevMode() {
-  return IS_DEV;
+  return (
+    isLocalDevMode() ||
+    isTestingMode(opt_win) ||
+    isDevQueryParamPresent_(opt_win.location)
+  );
 }

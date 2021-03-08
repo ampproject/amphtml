@@ -13,7 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export {isDevMode} from './dev-mode';
-export {isLocalDevMode} from './local-dev-mode';
-export {isMinifiedMode} from './minified-mode';
-export {isTestingMode} from './testing-mode';
+
+// Magic constant that is replaced by babel when `gulp dist` is called without
+// the --fortesting flag.
+const IS_DEV = true;
+
+/**
+ * Returns true for local development.
+ * @return {boolean}
+ */
+export function isLocalDevMode() {
+  return IS_DEV;
+}
