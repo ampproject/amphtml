@@ -23,7 +23,7 @@ var LightboxDef = {};
  *   id: (string),
  *   animation: (string|undefined),
  *   children: (?PreactDef.Renderable|undefined),
- *   closeButton: (?PreactDef.Renderable|undefined),
+ *   closeButtonAs: (function:PreactDef.Renderable|undefined),
  *   scrollable: (boolean),
  *   initialOpen: (boolean),
  *   onBeforeOpen: (function|undefined),
