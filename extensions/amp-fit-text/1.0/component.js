@@ -94,8 +94,9 @@ export function FitText({
  * @param {number} minFontSize
  * @param {number} maxFontSize
  * @return {number}
+ * @visibleForTesting
  */
-function calculateFontSize(
+export function calculateFontSize(
   measurer,
   expectedHeight,
   expectedWidth,
@@ -123,8 +124,9 @@ function calculateFontSize(
  * @param {Element} measurer
  * @param {number} maxHeight
  * @param {number} fontSize
+ * @visibleForTesting
  */
-function setOverflowStyle(measurer, maxHeight, fontSize) {
+export function setOverflowStyle(measurer, maxHeight, fontSize) {
   const overflowed = measurer./*OK*/ scrollHeight > maxHeight;
   const lineHeight = fontSize * LINE_HEIGHT_EM_;
   const numberOfLines = Math.floor(maxHeight / lineHeight);
