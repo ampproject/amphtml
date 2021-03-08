@@ -68,9 +68,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     /** @private {?StoryAdPage} */
     this.visibleAdPage_ = null;
 
-    /** @private {number|null} */
-    this.idOfVisibleAd_ = null;
-
     /** @private {!JsonObject} */
     this.config_ = dict();
 
@@ -84,9 +81,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
      * @private {?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService}
      */
     this.storeService_ = null;
-
-    /** @private {boolean} */
-    this.hasForcedRender_ = false;
 
     /** @private {?StoryAdPlacementAlgorithm} */
     this.placementAlgorithm_ = null;
@@ -162,27 +156,25 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   /**
    * Force an immediate ad placement without waiting for ad being loaded,
    * and then navigate to the ad page.
-   * @param {string=} pageBeforeAdId
-   * @visibleForTesting
+   * @param {!StoryAdPage} adPage
    */
-  forcePlaceAdAfterPage(pageBeforeAdId) {
-    const pageBeforeId =
-      pageBeforeAdId ||
-      /** @type {string} */ (this.storeService_.get(
-        StateProperty.CURRENT_PAGE_ID
-      ));
-    this.tryToPlaceAdAfterPage_(pageBeforeId);
-    this.navigateToFirstAdPage_();
-    this.hasForcedRender_ = true;
+  forcePlaceAdAfterPage_(adPage) {
+    const pageBeforeAdId = /** @type {string} */ (this.storeService_.get(
+      StateProperty.CURRENT_PAGE_ID
+    ));
+    adPage.registerLoadCallback(() =>
+      this.adPageManager_
+        .maybeInsertPageAfter(pageBeforeAdId, adPage)
+        .then(() => this.navigateToFirstAdPage_(adPage))
+    );
   }
 
   /**
    * Fires event to navigate to ad page once inserted into the story.
+   * @param {!StoryAdPage} adPage
    */
-  navigateToFirstAdPage_() {
-    const firstAdPageElement = this.adPageManager_
-      .getUnusedAdPage()
-      .getPageElement();
+  navigateToFirstAdPage_(adPage) {
+    const firstAdPageElement = adPage.getPageElement();
     // Setting distance manually to avoid flash of next page.
     firstAdPageElement.setAttribute('distance', '1');
     const payload = dict({
@@ -340,23 +332,19 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    */
   initializePages_() {
     const pages = this.placementAlgorithm_.initializePages();
-    console.log(pages);
-    // WIPP
-    // this.maybeForceAdPlacement_(devAssert(pages[0]));
+    this.maybeForceAdPlacement_(devAssert(pages[0]));
   }
 
   /**
    * Development mode forces navigation to ad page for better dev-x.
-   * Only do this once to prevent an infinite view->request->navigate loop.
-   * @param {StoryAdPage} page
+   * @param {StoryAdPage} adPage
    */
-  maybeForceAdPlacement_(page) {
+  maybeForceAdPlacement_(adPage) {
     if (
       this.element.hasAttribute('development') &&
-      this.config_['type'] === 'fake' &&
-      !this.hasForcedRender_
+      this.config_['type'] === 'fake'
     ) {
-      page.registerLoadCallback(() => this.forcePlaceAdAfterPage());
+      this.forcePlaceAdAfterPage_(adPage);
     }
   }
 
@@ -377,7 +365,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
     this.placementAlgorithm_.onPageChange(pageId);
 
-    if (this.idOfVisibleAd_) {
+    if (this.visibleAdPage_) {
       this.transitionFromAdShowing_();
     }
 
@@ -391,15 +379,15 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    */
   transitionFromAdShowing_() {
     // We are transitioning away from an ad
-    // WIP make sure toggle etc works. dont need vis id && vis page.
-    const page = this.adPageManager.getAdPageById(this.idOfVisibleAd_);
-    page.toggleVisibility();
+    const adPageId = this.visibleAdPage_.getId();
+    const adIndex = this.adPageManager_.getIndexById(adPageId);
+    console.log(adIndex);
+    this.removeVisibleAttribute_();
     // Fire the exit event.
     this.analyticsEvent_(AnalyticsEvents.AD_EXITED, {
       [AnalyticsVars.AD_EXITED]: Date.now(),
-      [AnalyticsVars.AD_INDEX]: this.idOfVisibleAd_,
+      [AnalyticsVars.AD_INDEX]: adIndex,
     });
-    this.idOfVisibleAd_ = null;
   }
 
   /**
@@ -408,7 +396,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @param {string} adPageId
    */
   transitionToAdShowing_(pageIndex, adPageId) {
-    const adPage = this.adPageManager_.getPageById(adPageId);
+    const adPage = this.adPageManager_.getAdPageById(adPageId);
     const adIndex = this.adPageManager_.getIndexById(adPageId);
 
     if (!adPage.hasBeenViewed()) {

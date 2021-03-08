@@ -18,18 +18,10 @@ import {InsertionState} from './story-ad-page-manager';
 import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
 import {hasOwn} from '../../../src/utils/object';
 
-/** @enum {number} */
-const AdState = {
-  PENDING: 0,
-  PLACING: 1,
-  INSERTED: 2,
-  FAILED: 3,
-};
-
 /**
  * Choose placement algorithm implementation.
  * @param {!StoryStoreService} storeService
- * @param pageManager
+ * @param {!StoryAdPageManager} pageManager
  * @return {!StoryAdPlacementAlgorithm}
  */
 export function getPlacementAlgo(storeService, pageManager) {
@@ -48,20 +40,17 @@ export function getPlacementAlgo(storeService, pageManager) {
  */
 class EverySevenAlgorithm {
   /**
-   * @param isDesktop
-   * @param storeService
-   * @param pageManager
+   * @param {?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} storeService
+   * @param {StoryAdPageManager} pageManager
    */
   constructor(storeService, pageManager) {
     this.pageManager_ = pageManager;
     this.interval_ = 7;
     this.uniquePageIds_ = new Map();
     this.storeService_ = storeService;
-    // TODO
-    this.isDesktop_ = this.storeService_.get(StateProperty.DESKTOP_STATE);
-    // this.numOrganicPages = storeService.get(nuPages)
-    this.newPagesSinceLastAd_ = 0;
+    this.newPagesSinceLastAd_ = 1;
     this.pendingAdView_ = false;
+    this.tryingToInsert_ = false;
   }
 
   /**
@@ -75,13 +64,14 @@ class EverySevenAlgorithm {
 
   /**
    *
+   * @return {!Array<!StoryAdPage>}
    */
   initializePages() {
     return [this.pageManager_.createAdPage()];
   }
 
   /**
-   * @param pageId
+   * @param {string }pageId
    */
   onPageChange(pageId) {
     console.log('on page change', pageId);
@@ -94,7 +84,7 @@ class EverySevenAlgorithm {
       this.pendingAdView_ ||
       this.tryingToInsert_ ||
       !this.readyToPlaceAd_() ||
-      !this.pageManager_.hasUnusedPage()
+      !this.pageManager_.hasUnusedAdPage()
     ) {
       return;
     }
@@ -104,11 +94,12 @@ class EverySevenAlgorithm {
   }
 
   /**
-   * @param pageIndex
+   * @param {number} pageIndex
    */
   onNewAdView(pageIndex) {
+    this.pendingAdView_ = false;
     this.newPagesSinceLastAd_ = 0;
-    if (this.shouldCreateNextAd(pageIndex)) {
+    if (this.shouldCreateNextAd_(pageIndex)) {
       this.pageManager_.createAdPage();
     }
   }
@@ -120,7 +111,7 @@ class EverySevenAlgorithm {
    * @param {number} pageIndex
    * @return {boolean}
    */
-  shouldCreateNextAd(pageIndex) {
+  shouldCreateNextAd_(pageIndex) {
     const numPages = this.storeService_.get(StateProperty.PAGE_IDS).length;
     return numPages - pageIndex > this.interval_;
   }
@@ -146,7 +137,7 @@ class EverySevenAlgorithm {
 
     // Timeout fail, move to next ad on next navigation.
     if (!nextAdPage.isLoaded() && nextAdPage.hasTimedOut()) {
-      this.moveToNextAd_();
+      this.pageManager_.pageManager_discardCurrentAd();
       return;
     }
 
@@ -160,18 +151,11 @@ class EverySevenAlgorithm {
     this.pageManager_
       .maybeInsertPageAfter(pageBeforeAdId, nextAdPage)
       .then((insertionState) => {
+        console.log('insertion state', insertionState);
         this.tryingToInsert_ = false;
-        if (insertionState === InsertionState.DELAYED) {
-          return;
-        }
-
-        if (insertionState === InsertionState.INSERTED) {
+        if (insertionState === InsertionState.SUCCESS) {
           // We have an ad inserted that has yet to be viewed.
           this.pendingAdView_ = true;
-        }
-
-        if (insertionState === InsertionState.FAILED) {
-          this.pageManager_discardCurrentAd();
         }
       });
   }
