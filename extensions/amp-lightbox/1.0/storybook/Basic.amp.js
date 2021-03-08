@@ -214,7 +214,9 @@ export const scrollable = () => {
               </p>
             </>
           )}
-          <button slot="close-button" on="tap:lightbox.close">Close</button>
+          <button slot="close-button" on="tap:lightbox.close">
+            Close
+          </button>
         </amp-lightbox>
         <div class="buttons">
           <button on="tap:lightbox">Open</button>
