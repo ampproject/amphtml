@@ -52,7 +52,6 @@ export const Attributes = {
   AD_SHOWING: 'ad-showing',
   DESKTOP_PANELS: 'desktop-panels',
   DIR: 'dir',
-  NEXT_PAGE_NO_AD: 'next-page-no-ad',
 };
 
 export class AmpStoryAutoAds extends AMP.BaseElement {
@@ -130,13 +129,9 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    if (
-      !this.isAutomaticAdInsertionAllowed_() ||
-      !this.placementAlgorithm_.isStoryEligible()
-    ) {
+    if (!this.isAutomaticAdInsertionAllowed_()) {
       return Promise.resolve();
     }
-
     return this.ampStory_
       .signals()
       .whenSignal(CommonSignals.INI_LOAD)
@@ -150,6 +145,10 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
           this.storeService_,
           this.adPageManager_
         );
+        // Bail out early on short stories.
+        if (!this.placementAlgorithm_.isStoryEligible()) {
+          return;
+        }
         this.analytics_ = getServicePromiseForDoc(
           this.element,
           STORY_AD_ANALYTICS
@@ -414,10 +413,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
     if (!adPage.hasBeenViewed()) {
       this.pendingAdView_ = false;
-      this.placementAlgorithm_.onNewAdView();
-      if (this.placementAlgorithm_.shouldCreateNextAd(pageIndex)) {
-        this.schedulePage_();
-      }
+      this.placementAlgorithm_.onNewAdView(pageIndex);
     }
 
     // Tell the iframe that it is visible.
@@ -452,17 +448,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
         this.visibleAdPage_ = null;
       }
     });
-  }
-
-  /**
-   * Call an analytics event with the last created Ad.
-   * @param {string} eventType
-   * @param {!Object<string, number>} vars A map of vars and their values.
-   * @private
-   */
-  analyticsEventWithCurrentAd_(eventType, vars) {
-    Object.assign(vars, {[AnalyticsVars.AD_INDEX]: this.adPagesCreated_});
-    this.analyticsEvent_(eventType, vars);
   }
 
   /**
