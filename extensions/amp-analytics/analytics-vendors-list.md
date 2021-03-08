@@ -467,7 +467,11 @@ Type attribute value: `piStats`
 
 Type attribute value: `pressboard`
 
+<!--
+(Link 404s, unclear whether vendor is still supported.)
+
 Adds support for Pressboard. Configuration details can be found at [help.pressboard.ca](http://help.pressboard.ca/publisher-resources/getting-started/implementing-google-amp).
+-->
 
 ### Quantcast Measurement
 
@@ -575,7 +579,7 @@ Adds support for Top.Mail.Ru. Configuration details can be found at [Top.Mail.Ru
 
 Type attribute value: `treasuredata`
 
-Adds support for Treasure Data. Configuration details can be found at [docs.treasuredata.com](https://docs.treasuredata.com/articles/javascript-sdk-google-amp).
+Adds support for Treasure Data. Configuration details can be found at [docs.treasuredata.com](https://docs.treasuredata.com/display/public/INT/Google+Accelerated+Mobile+Pages+AMP).
 
 ### Umeng+ Analytics
 
