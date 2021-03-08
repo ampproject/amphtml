@@ -76,7 +76,7 @@ not already have a fragment.</td>
   </tr>
   <tr>
     <td width="40%"><strong>poster</strong></td>
-    <td>URL to an image displayed while the video loads. <strong>It's recommended to set this attribute</strong> for perceived performance.</td>
+    <td>URL to an image displayed while the video loads. <strong>It's recommended to always set this attribute for best perceived performance.</strong></td>
   </tr>
   <tr>
     <td width="40%"><strong>autoplay</strong></td>
