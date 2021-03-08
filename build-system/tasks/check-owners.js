@@ -44,7 +44,7 @@ async function checkOwners() {
   if (!usesFilesOrLocalChanges('check-owners')) {
     return;
   }
-  const filesToCheck = getFilesToCheck('**/OWNERS');
+  const filesToCheck = getFilesToCheck(['**/OWNERS']);
   for (const file of filesToCheck) {
     await checkFile(file);
   }

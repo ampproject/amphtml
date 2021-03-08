@@ -30,7 +30,6 @@ const {runCiJob} = require('./ci-job');
 const jobName = 'module-build.js';
 
 /**
- * @return {void}
  */
 function pushBuildWorkflow() {
   timedExecOrDie('gulp dist --esm --fortesting');
@@ -38,7 +37,6 @@ function pushBuildWorkflow() {
 }
 
 /**
- * @return {void}
  */
 function prBuildWorkflow() {
   // TODO(#31102): This list must eventually match the same buildTargets check

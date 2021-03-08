@@ -33,7 +33,6 @@ const {runCiJob} = require('./ci-job');
 const jobName = 'nomodule-tests.js';
 
 /**
- * @return {void}
  */
 function prependConfig() {
   const targets = MINIFIED_TARGETS.flatMap((target) => [
@@ -45,7 +44,6 @@ function prependConfig() {
 }
 
 /**
- * @return {void}
  */
 function pushBuildWorkflow() {
   downloadNomoduleOutput();
@@ -65,7 +63,6 @@ function pushBuildWorkflow() {
 }
 
 /**
- * @return {void}
  */
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.INTEGRATION_TEST)) {

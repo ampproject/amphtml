@@ -31,7 +31,6 @@ const {runCiJob} = require('./ci-job');
 const jobName = 'visual-diff-tests.js';
 
 /**
- * @return {void}
  */
 function pushBuildWorkflow() {
   downloadNomoduleOutput();
@@ -40,7 +39,6 @@ function pushBuildWorkflow() {
 }
 
 /**
- * @return {void}
  */
 function prBuildWorkflow() {
   process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);

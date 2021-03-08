@@ -100,7 +100,6 @@ function runUnitTestsForPlatform() {
 }
 
 /**
- * @return {void}
  */
 function pushBuildWorkflow() {
   runUnitTestsForPlatform();

@@ -23,7 +23,6 @@ let lastExpectError;
 let networkLogger;
 
 /**
- * @return {void}
  */
 function clearLastExpectError() {
   lastExpectError = null;
@@ -141,7 +140,6 @@ const chaiMethodsAndProperties = [
 /**
  * @param {Chai.ChaiStatic} chai
  * @param {Chai.ChaiUtils} utils
- * @return {void}
  */
 function installWrappers(chai, utils) {
   const {METHOD, PROPERTY, CHAINABLE_METHOD} = ChaiType;
@@ -260,7 +258,6 @@ function overwriteUnsupported(_super) {
 
 /**
  * @param {*} _networkLogger
- * @return {void}
  */
 function installBrowserAssertions(_networkLogger) {
   networkLogger = _networkLogger;
@@ -271,7 +268,6 @@ function installBrowserAssertions(_networkLogger) {
  *
  * @param {Chai.ChaiStatic} chai
  * @param {Chai.ChaiUtils} utils
- * @return {void}
  */
 function installBrowserWrappers(chai, utils) {
   const {Assertion} = chai;

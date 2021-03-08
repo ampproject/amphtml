@@ -108,7 +108,6 @@ const TARGETS_TO_CONFIG = MINIFIED_TARGETS.flatMap((minifiedTarget) => [
 ]);
 
 /**
- * @return {void}
  */
 function logSeparator_() {
   log('---\n\n');

@@ -69,7 +69,6 @@ async function handleListingRequest({query: {path, search}}, res) {
 
 /**
  * @param {*} app require('express')
- * @return {void}
  */
 function installExpressMiddleware(app) {
   app.get('/dashboard/api/listing', handleListingRequest);
