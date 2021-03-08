@@ -5,10 +5,31 @@
 CLOSURE_LIB=../../../../node_modules/google-closure-library
 
 npx google-closure-compiler \
+  --jscomp_warning=nonStandardJsDocs \
+  --jscomp_warning=checkDebuggerStatement \
+  --jscomp_warning=externsValidation \
+  --jscomp_warning=missingOverride \
+  --jscomp_error=checkRegExp \
+  --jscomp_error=checkTypes \
+  --jscomp_error=const \
+  --jscomp_error=es5Strict \
+  --jscomp_error=globalThis \
+  --jscomp_error=missingProvide \
+  --jscomp_error=missingProperties \
+  --jscomp_error=missingReturn \
+  --jscomp_error=nonStandardJsDocs \
+  --jscomp_error=suspiciousCode \
+  --jscomp_error=tooManyTypeParams \
+  --jscomp_error=unknownDefines \
+  --jscomp_error=uselessCode \
+  --jscomp_error=visibility \
+  --language_out=ECMASCRIPT5_STRICT \
+  --define=goog.DEBUG=false \
+  --generate_exports \
+  --use_types_for_optimization \
   --compilation_level ADVANCED_OPTIMIZATIONS \
-  --define "goog.DEBUG=false" \
-  --define "goog.TRANSPILE=never" \
-  --define "goog.LOAD_MODULE_USING_EVAL=false" \
+  --define=goog.TRANSPILE=never \
+  --define=goog.LOAD_MODULE_USING_EVAL=false \
   --js_output_file "closure-bundle.js" \
   --output_wrapper "
   %output%;
