@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {parseQueryString} from './url';
+import {parseQueryString} from '../url';
 
 // Magic constant that is replaced by babel when `gulp dist` is called without
 // the --fortesting flag.

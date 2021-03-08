@@ -15,7 +15,7 @@
  */
 
 import {internalRuntimeVersion} from './internal-version';
-import {isDevMode, isLocalDevMode} from './core/dev-mode';
+import {isDevMode, isLocalDevMode, isMinifiedMode} from './core/mode';
 import {parseQueryString} from './core/url';
 
 /**
@@ -68,7 +68,6 @@ function getMode_(win) {
   // IS_MINIFIED is always replaced with true when babel is used while IS_DEV is
   // only replaced when `gulp dist` is called without the --fortesting flag.
   const IS_DEV = true;
-  const IS_MINIFIED = false;
 
   const runningTests =
     IS_DEV && !!(AMP_CONFIG.test || win.__AMP_TEST || win.__karma__);
@@ -97,7 +96,7 @@ function getMode_(win) {
     esm: IS_ESM,
     // amp-geo override
     geoOverride: hashQuery['amp-geo'],
-    minified: IS_MINIFIED,
+    minified: isMinifiedMode(),
     // Whether document is in an amp-lite viewer. It signal that the user
     // would prefer to use less bandwidth.
     lite: searchQuery['amp_lite'] != undefined,

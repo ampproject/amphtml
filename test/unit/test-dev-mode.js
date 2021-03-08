@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {isDevMode} from '../../src/core/dev-mode';
+import {isDevMode} from '../../src/core/mode';
 import {parseUrlDeprecated} from '../../src/url';
 
 describes.sandboxed('devMode', {}, () => {

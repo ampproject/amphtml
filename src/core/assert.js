@@ -18,7 +18,7 @@ import {
   USER_ERROR_SENTINEL,
   elementStringOrPassThru,
 } from './error-message-helpers';
-import {isMinifiedMode} from './minified-mode';
+import {isMinifiedMode} from './mode';
 
 /** @fileoverview Dependency-free assertion helpers for use in Preact. */
 
