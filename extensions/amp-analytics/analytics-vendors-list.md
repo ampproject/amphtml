@@ -500,7 +500,7 @@ Type attribute value: `retargetly`
 Type attribute value: `rudderstack`
 
 Adds support for RudderStack page views and events.
-Find out more on the implementation check our documentation at [docs.rudderstack.com](https://docs.rudderstack.com/sdk-integration-guide/getting-started-with-javascript-sdk/amp-analytics).
+Find out more on the implementation check our documentation at [docs.rudderstack.com](https://docs.rudderstack.com/rudderstack-sdk-integration-guides/amp-analytics).
 
 ### Segment
 
