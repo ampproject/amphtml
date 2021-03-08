@@ -64,7 +64,7 @@ You may apply responsive attribute values to the following components:
 -   [amp-fit-text](./../extensions/amp-fit-text/amp-fit-text.md#media-queries)
 -   [amp-inline-gallery-pagination](./../extensions/amp-inline-gallery/amp-inline-gallery.md#include-pagination-indicators)
 -   [amp-inline-gallery-thumbnails](./../extensions/amp-inline-gallery/amp-inline-gallery.md#include-pagination-thumbnails)
--   [amp-lightbox](./../extensions/amp-lightbox/amp-lightbox.md#animation-(optional))
+-   [amp-lightbox](./../extensions/amp-lightbox/amp-lightbox.md#animation)
 -   [amp-selector](./../extensions/amp-selector/amp-selector.md#keyboard-select-mode)
 -   [amp-stream-gallery](./../extensions/amp-stream-gallery/amp-stream-gallery.md#media-queries)
 -   [amp-video](./../extensions/amp-video/amp-video.md#rotate-to-fullscreen)
