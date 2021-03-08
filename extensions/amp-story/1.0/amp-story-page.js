@@ -60,6 +60,7 @@ import {
   scopedQuerySelectorAll,
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
+import {createShadowRootWithStyle, setTextBackgroundColor} from './utils';
 import {debounce} from '../../../src/utils/rate-limit';
 import {delegateAutoplay} from '../../../src/video-interface';
 import {dev} from '../../../src/log';
@@ -74,9 +75,9 @@ import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {isPrerenderActivePage} from './prerender-active-page';
 import {listen} from '../../../src/event-helper';
+import {CSS as pageAttachmentCSS} from '../../../build/amp-story-open-page-attachment-0.1.css';
 import {px, toggle} from '../../../src/style';
 import {renderPageDescription} from './semantic-render';
-import {setTextBackgroundColor} from './utils';
 import {toArray} from '../../../src/types';
 import {upgradeBackgroundAudio} from './audio';
 
@@ -471,6 +472,9 @@ export class AmpStoryPage extends AMP.BaseElement {
     switch (state) {
       case PageState.NOT_ACTIVE:
         this.element.removeAttribute('active');
+        if (this.openAttachmentEl_) {
+          this.openAttachmentEl_.removeAttribute('active');
+        }
         this.pause_();
         this.state_ = state;
         break;
@@ -478,6 +482,9 @@ export class AmpStoryPage extends AMP.BaseElement {
         if (this.state_ === PageState.NOT_ACTIVE) {
           this.element.setAttribute('active', '');
           this.resume_();
+          if (this.openAttachmentEl_) {
+            this.openAttachmentEl_.setAttribute('active', '');
+          }
         }
 
         if (this.state_ === PageState.PAUSED) {
@@ -1781,9 +1788,18 @@ export class AmpStoryPage extends AMP.BaseElement {
           LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
         );
 
+      const container = this.win.document.createElement('div');
+      container.classList.add('i-amphtml-page-attachment-host');
+      container.setAttribute('role', 'button');
+
       this.mutateElement(() => {
         textEl.textContent = openLabel;
-        this.element.appendChild(this.openAttachmentEl_);
+        this.element.appendChild(container);
+        createShadowRootWithStyle(
+          container,
+          this.openAttachmentEl_,
+          pageAttachmentCSS
+        );
       });
     }
   }
