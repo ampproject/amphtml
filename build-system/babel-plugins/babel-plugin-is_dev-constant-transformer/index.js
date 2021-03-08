@@ -16,7 +16,8 @@
 
 /**
  * Changes the values of IS_DEV to false and IS_MINIFIED to true.
- * The above said variables are in src/mode.js and src/core/dev-mode files.
+ * The above said variables are in files src/core/dev-mode.js and
+ * src/core/minified-mode.js
  * @param {{types: string}} options
  * @return {!Object}
  */

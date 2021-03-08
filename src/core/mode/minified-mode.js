@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-// Magic constant that is replaced by babel.
-// IS_MINIFIED is always replaced with true when closure compiler is used
+// Magic constant that is replaced by babel when closure compiler is used.
 const IS_MINIFIED = false;
 
 /**
