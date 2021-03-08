@@ -117,7 +117,7 @@ function maybeAddConfigSubtype() {
 }
 
 /**
- * @param {string} type
+ * @param {string|null} type
  * @param {string} action
  * @return {Promise<void>}
  */
@@ -210,7 +210,11 @@ async function reportAllExpectedTests() {
 /**
  * Callback to the Karma.Server on('run_complete') event for simple test types.
  *
- * @param {!Karma.TestResults} results
+ * @param {{
+ *  error: string,
+ *  success: string|number,
+ *  failed: string|number,
+ * }} results
  */
 async function reportTestRunComplete(results) {
   if (results.error) {

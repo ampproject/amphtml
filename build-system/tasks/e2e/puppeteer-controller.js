@@ -15,12 +15,7 @@
  */
 
 const fs = require('fs');
-const {
-  Browser, // eslint-disable-line no-unused-vars
-  JSHandle, // eslint-disable-line no-unused-vars
-  Page, // eslint-disable-line no-unused-vars
-  ElementHandle: PuppeteerHandle, // eslint-disable-line no-unused-vars
-} = require('puppeteer');
+const puppeteer = require('puppeteer');
 const {
   DOMRectDef,
   ElementHandle,
@@ -29,6 +24,13 @@ const {
 } = require('./functional-test-controller');
 const {ControllerPromise} = require('./controller-promise');
 const {dirname, join} = require('path');
+
+const {
+  Browser, // eslint-disable-line no-unused-vars
+  JSHandle, // eslint-disable-line no-unused-vars
+  Page, // eslint-disable-line no-unused-vars
+  ElementHandle: PuppeteerHandle, // eslint-disable-line no-unused-vars
+} = puppeteer;
 
 /**
  * For a list of all possible key strings, see
@@ -51,12 +53,13 @@ const DEFAULT_WAIT_TIMEOUT = 10000;
  * Make the test runner wait until the value returned by the valueFn matches
  * the given condition.
  * @param {!Page} page
- * @param {function(): !Promise<T>} valueFn
- * @param {!IArrayLike<*>} args
- * @param {function(T):boolean} condition
- * @param {function(T):T} opt_mutate
- * @return {!Promise<?T>}
- * @template T
+ * @param {function(T1): !Promise<?T2>|?T2} valueFn
+ * @param {!*[]} args
+ * @param {function(T2): boolean} condition
+ * @param {function(T1): T2} opt_mutate
+ * @return {!Promise<?T2>}
+ * @template T1
+ * @template T2
  */
 async function waitFor(page, valueFn, args, condition, opt_mutate) {
   const handle = await evaluate(page, valueFn, ...args);
@@ -82,9 +85,8 @@ async function waitFor(page, valueFn, args, condition, opt_mutate) {
 /**
  * Remove the jsonValue wrapper from a PuppeteerHandle and
  * remove an outer object wrapper if present.
- * @param {!PuppeteerHandle} handle
- * @return {T}
- * @template T
+ * @param {!puppeteer.PuppeteerHandle} handle
+ * @return {!Promise<*>}
  */
 async function unboxHandle(handle) {
   const prop = await handle.jsonValue();
@@ -93,7 +95,7 @@ async function unboxHandle(handle) {
 
 /**
  * Evaluate the given function and its arguments in the context of the document.
- * @param {!Frame} frame
+ * @param {!puppeteer.Frame} frame
  * @param {function(...*):*} fn
  * @return {!Promise<!JSHandle>}
  */
@@ -138,7 +140,7 @@ class PuppeteerController {
 
   /**
    * Get the current page object. Create the object if it does not exist.
-   * @return {!Promise<!Frame>}
+   * @return {!Promise<!puppeteer.Frame>}
    */
   async getCurrentFrame_() {
     if (!this.currentFrame_) {
@@ -152,10 +154,11 @@ class PuppeteerController {
   /**
    * Return a wait function. When called, the function will cause the test
    * runner to wait until the given value matches the expected value.
-   * @param {function(): !Promise<?T>} valueFn
-   * @param {...*} args
-   * @return {function(T,T): !Promise<?T>}
-   * @template T
+   * @param {function(T1): !Promise<?T2>|?T2} valueFn
+   * @param {...T1} args
+   * @return {function(function(T2): boolean, function(T1): T2): ReturnType<waitFor<T1, T2>>}
+   * @template T1
+   * @template T2
    */
   getWaitFn_(valueFn, ...args) {
     return async (condition, opt_mutate) => {
@@ -463,7 +466,7 @@ class PuppeteerController {
   }
 
   /**
-   * @param {!WindowRectDef} rect
+   * @param {!puppeteer.WindowRectDef} rect
    * @return {!Promise}
    * @override
    */
@@ -585,7 +588,7 @@ class PuppeteerController {
 
   /**
    * @param {!ElementHandle<!PuppeteerHandle>} handle
-   * @param {!ScrollToOptionsDef=} opt_scrollToOptions
+   * @param {!puppeteer.ScrollToOptionsDef=} opt_scrollToOptions
    * @return {!Promise}
    * @override
    */
@@ -602,7 +605,7 @@ class PuppeteerController {
 
   /**
    * @param {!ElementHandle<!PuppeteerHandle>} handle
-   * @param {!ScrollToOptionsDef=} opt_scrollToOptions
+   * @param {!puppeteer.ScrollToOptionsDef=} opt_scrollToOptions
    * @return {!Promise}
    * @override
    */
@@ -637,7 +640,8 @@ class PuppeteerController {
   async takeElementScreenshot(handle, path) {
     const relative = join(__dirname, path);
     try {
-      await fs.mkdirAsync(dirname(relative), {recursive: true});
+      // TODO(rileyajones) ask questions about this line...
+      await fs.mkdir(dirname(relative), {recursive: true});
     } catch (err) {
       if (err.code != 'EEXIST') {
         throw err;
@@ -653,7 +657,7 @@ class PuppeteerController {
   }
 
   /**
-   * @param {?ElementHandle<!PuppeteerHandle>} handle
+   * @param {ElementHandle<!PuppeteerHandle>} handle
    * @return {!Promise}
    */
   async switchToFrame(handle) {
@@ -675,7 +679,7 @@ class PuppeteerController {
 
   /**
    * Switch controller to shadowRoot body hosted by given element.
-   * @param {!ElementHandle<!PuppeteerHandle} handle
+   * @param {!ElementHandle<!PuppeteerHandle>} handle
    * @return {!Promise}
    */
   switchToShadow(handle) {
@@ -695,7 +699,7 @@ class PuppeteerController {
 
   /**.
    * @param {!ElementHandle<!PuppeteerHandle>} handle
-   * @param {!Function} getter
+   * @param {!Parameters<evaluate>[1]} getter
    */
   async switchToShadowInternal_(handle, getter) {
     const shadowHost = handle.getElement();

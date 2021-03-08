@@ -48,7 +48,7 @@ const COV_OUTPUT_HTML = path.resolve(COV_OUTPUT_DIR, 'lcov-report/index.html');
 
 /**
  * Set up the e2e testing environment.
- * @return {!Promise}
+ * @return {!Promise<void>}
  */
 async function setUpTesting_() {
   require('@babel/register')({caller: {name: 'test'}});
@@ -114,6 +114,7 @@ function addMochaFile_(mocha, file) {
 /**
  * Fetch aggregated coverage data from server.
  * @param {string} outDir relative path to coverage files directory.
+ * @return {Promise<void>}
  */
 async function fetchCoverage_(outDir) {
   // Note: We could access the coverage UI directly through the server started
@@ -127,6 +128,7 @@ async function fetchCoverage_(outDir) {
 
   const zipFilename = path.join(outDir, 'coverage.zip');
   const zipFile = fs.createWriteStream(zipFilename);
+
   await new Promise((resolve, reject) => {
     http
       .get(
@@ -137,7 +139,10 @@ async function fetchCoverage_(outDir) {
         },
         (response) => {
           response.pipe(zipFile);
-          zipFile.on('finish', () => zipFile.close(resolve));
+          zipFile.on('finish', () => {
+            zipFile.close();
+            resolve(undefined);
+          });
         }
       )
       .on('error', (err) => {
@@ -150,7 +155,7 @@ async function fetchCoverage_(outDir) {
 
 /**
  * Runs e2e tests on all files under test.
- * @return {!Promise}
+ * @return {!Promise<void>}
  */
 async function runTests_() {
   const mocha = createMocha_();
@@ -183,7 +188,7 @@ async function runTests_() {
 
 /**
  * Watches files a under test, running affected e2e tests on changes.
- * @return {!Promise}
+ * @return {!Promise<void>}
  */
 async function runWatch_() {
   const filesToWatch = argv.files ? getFilesFromArgv() : config.e2eTestPaths;

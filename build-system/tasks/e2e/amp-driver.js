@@ -33,7 +33,7 @@ const HOST = 'http://localhost:8000';
 
 const EnvironmentBehaviorMap = {
   [AmpdocEnvironment.SINGLE]: {
-    ready(unusedController) {
+    ready(_unusedController) {
       return Promise.resolve();
     },
 
@@ -136,7 +136,7 @@ const EnvironmentBehaviorMap = {
 /**
  * @param {string} url
  * @param {Object=} opts
- * @param {boolean} opts.isEmail
+ * @param {boolean=} opts.isEmail
  * @return {string}
  */
 function getViewerUrl(url, {isEmail} = {isEmail: false}) {

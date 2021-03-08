@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+// @ts-nocheck
 
 /**
  * A wrapper class that allows client code to own references to
@@ -26,10 +27,9 @@ class ElementHandle {
   /**
    * Wrap the framework-specific element handle object.
    * @param {!T} element
-   * @param {!T} unusedController
    * @package
    */
-  constructor(element, unusedController) {
+  constructor(element) {
     /** @private */
     this.element_ = element;
   }

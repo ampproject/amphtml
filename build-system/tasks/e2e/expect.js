@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+// @ts-nocheck
 
 const chai = require('chai');
 chai.use(require('chai-as-promised'));
@@ -36,7 +37,7 @@ function getLastExpectError() {
 /**
  * @param {*} actual
  * @param {string=} opt_message
- * @return {!ExpectStatic}
+ * @return {!chai.ExpectStatic}
  */
 function expect(actual, opt_message) {
   if (!installed) {
@@ -136,8 +137,8 @@ const chaiMethodsAndProperties = [
 ];
 
 /**
- * @param {Chai.ChaiStatic} chai
- * @param {Chai.ChaiUtils} utils
+ * @param {chai.ChaiStatic} chai
+ * @param {chai.ChaiUtils} utils
  */
 function installWrappers(chai, utils) {
   const {METHOD, PROPERTY, CHAINABLE_METHOD} = ChaiType;
@@ -169,8 +170,8 @@ function installWrappers(chai, utils) {
 }
 
 /**
- * @param {Chai.ChaiUtils} utils
- * @return {Function(_super: Chai.AssertionStatic): Function(): any}
+ * @param {chai.ChaiUtils} utils
+ * @return {function(_super: chai.AssertionStatic): function(): any}
  */
 function overwriteAlwaysUseSuper(utils) {
   const {flag} = utils;
@@ -228,8 +229,8 @@ function overwriteAlwaysUseSuper(utils) {
 }
 
 /**
- * @param {Chai.AssertionStatic} _super
- * @return {Function(): *}
+ * @param {chai.AssertionStatic} _super
+ * @return {function(): *}
  */
 function inheritChainingBehavior(_super) {
   return function () {
@@ -238,8 +239,8 @@ function inheritChainingBehavior(_super) {
 }
 
 /**
- * @param {Chai.AssertionStatic} _super
- * @return {Function(): *}
+ * @param {chai.AssertionStatic} _super
+ * @return {function(): *}
  */
 function overwriteUnsupported(_super) {
   return function () {
@@ -263,9 +264,8 @@ function installBrowserAssertions(_networkLogger) {
 }
 
 /**
- *
- * @param {Chai.ChaiStatic} chai
- * @param {Chai.ChaiUtils} utils
+ * @param {chai.ChaiStatic} chai
+ * @param {chai.ChaiUtils} utils
  */
 function installBrowserWrappers(chai, utils) {
   const {Assertion} = chai;

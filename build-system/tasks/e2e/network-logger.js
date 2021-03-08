@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {logging} from 'selenium-webdriver';
+import {logging, WebDriver} from 'selenium-webdriver';
 
 /** @enum {string} */
 const PerformanceMethods = {
@@ -54,7 +54,7 @@ class NetworkLogger {
   /**
    * Gets sent requests with an optional url to filter by.
    * @param {string=} url
-   * @return {Array<logging.Entry>}
+   * @return {Promise<Array<logging.Entry>>}
    */
   async getSentRequests(url) {
     const entries = await this.getEntries_(
