@@ -43,7 +43,6 @@ import {
   expandableElementsSelectors,
 } from './amp-story-embedded-component';
 import {AnimationManager, hasAnimations} from './animation';
-import {CSS as pageAttachmentCSS} from '../../../build/amp-story-open-page-attachment-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {Deferred} from '../../../src/utils/promise';
 import {EventType, dispatch} from './events';
@@ -76,6 +75,7 @@ import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {isPrerenderActivePage} from './prerender-active-page';
 import {listen} from '../../../src/event-helper';
+import {CSS as pageAttachmentCSS} from '../../../build/amp-story-open-page-attachment-0.1.css';
 import {px, toggle} from '../../../src/style';
 import {renderPageDescription} from './semantic-render';
 import {toArray} from '../../../src/types';
@@ -1787,7 +1787,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         getLocalizationService(this.element).getLocalizedString(
           LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
         );
-      
+
       const container = this.win.document.createElement('div');
       container.classList.add('i-amphtml-page-attachment-host');
       container.setAttribute('role', 'button');
@@ -1795,7 +1795,11 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.mutateElement(() => {
         textEl.textContent = openLabel;
         this.element.appendChild(container);
-        createShadowRootWithStyle(container, this.openAttachmentEl_, pageAttachmentCSS);
+        createShadowRootWithStyle(
+          container,
+          this.openAttachmentEl_,
+          pageAttachmentCSS
+        );
       });
     }
   }
