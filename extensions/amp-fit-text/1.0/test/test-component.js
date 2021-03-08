@@ -18,10 +18,13 @@ import * as Preact from '../../../../src/preact';
 import {FitText, calculateFontSize, setOverflowStyle} from '../component';
 import {computedStyle} from '../../../../src/style';
 import {mount} from 'enzyme';
+import {useStyles} from '../component.jss';
 import {waitFor} from '../../../../testing/test-helper';
 
 describes.realWin('FitText preact component v1.0', {}, (env) => {
   let win;
+
+  const styles = useStyles();
 
   beforeEach(() => {
     win = env.win;
@@ -48,7 +51,7 @@ describes.realWin('FitText preact component v1.0', {}, (env) => {
     expect(wrapper.children()).to.have.lengthOf(1);
     expect(wrapper.text()).to.equal('Hello World');
     await expectAsyncFontSize(
-      wrapper.find('[part="content"]').getDOMNode(),
+      wrapper.find(`.${styles.minContentHeight}`).getDOMNode(),
       '60px'
     );
   });
@@ -66,7 +69,7 @@ describes.realWin('FitText preact component v1.0', {}, (env) => {
     expect(wrapper.children()).to.have.lengthOf(1);
     expect(wrapper.text()).to.equal('Hello World');
     await expectAsyncFontSize(
-      wrapper.find('[part="content"]').getDOMNode(),
+      wrapper.find(`.${styles.minContentHeight}`).getDOMNode(),
       '24px'
     );
   });
@@ -88,7 +91,7 @@ describes.realWin('FitText preact component v1.0', {}, (env) => {
     expect(wrapper.children()).to.have.lengthOf(1);
     expect(wrapper.text()).to.equal('Hello World');
     await expectAsyncFontSize(
-      wrapper.find('[part="content"]').getDOMNode(),
+      wrapper.find(`.${styles.minContentHeight}`).getDOMNode(),
       '48px'
     );
   });

@@ -78,16 +78,8 @@ export function FitText({
       contentClassName={classes.fitTextContentWrapper}
       {...rest}
     >
-      <div
-        ref={measurerRef}
-        className={classes.fitTextContent}
-        part="container"
-      >
-        <div
-          ref={heightRef}
-          className={classes.minContentHeight}
-          part="content"
-        >
+      <div ref={measurerRef} className={classes.fitTextContent}>
+        <div ref={heightRef} className={classes.minContentHeight}>
           {children}
         </div>
       </div>
