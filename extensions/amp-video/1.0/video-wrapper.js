@@ -175,8 +175,7 @@ function VideoWrapperWithRef(
   // Update the initial readyState. Using `useLayoutEffect` here to avoid
   // race conditions with possible future events.
   useLayoutEffect(() => {
-    const player = playerRef.current;
-    const readyState = player && player.readyState;
+    const readyState = playerRef.current?.readyState;
     if (readyState != null) {
       setReadyState(readyState > 0 ? ReadyState.COMPLETE : ReadyState.LOADING);
     }

@@ -99,14 +99,10 @@ function VideoIframeWithRef(
     ref,
     () => ({
       get currentTime() {
-        const playerState = playerStateRef && playerStateRef.current;
-        const value = playerState && playerState['currentTime'];
-        return typeof value == 'number' ? value : NaN;
+        return playerStateRef?.current?.['currentTime'] ?? NaN;
       },
       get duration() {
-        const playerState = playerStateRef && playerStateRef.current;
-        const value = playerState && playerState['duration'];
-        return typeof value == 'number' ? value : NaN;
+        return playerStateRef?.current?.['duration'] ?? NaN;
       },
       play: () => postMethodMessage('play'),
       pause: () => postMethodMessage('pause'),

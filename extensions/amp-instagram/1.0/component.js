@@ -63,9 +63,7 @@ export function InstagramWithRef(
       if (value !== loadedRef.current) {
         loadedRef.current = value;
         const onReadyState = onReadyStateRef.current;
-        if (onReadyState) {
-          onReadyState(value ? ReadyState.COMPLETE : ReadyState.LOADING);
-        }
+        onReadyState?.(value ? ReadyState.COMPLETE : ReadyState.LOADING);
       }
     },
     [onReadyStateRef]
@@ -89,6 +87,8 @@ export function InstagramWithRef(
 
   // Reset readyState to "loading" when an iframe is unloaded. Has to be
   // a `useLayoutEffect` to avoid race condition with a future "load" event.
+  // A race condition can happen when a `useEffect` would be executed
+  // after a future "load" is dispatched.
   useLayoutEffect(() => {
     if (!load) {
       setLoaded(false);
