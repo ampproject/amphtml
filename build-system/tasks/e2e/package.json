@@ -8,7 +8,7 @@
     "babel-regenerator-runtime": "6.5.0",
     "chromedriver": "89.0.0",
     "puppeteer": "8.0.0",
-    "geckodriver": "1.22.1",
+    "geckodriver": "1.22.2",
     "selenium-webdriver": "4.0.0-beta.1"
   },
   "resolutions": {
