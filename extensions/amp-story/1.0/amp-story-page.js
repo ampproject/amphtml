@@ -1787,13 +1787,13 @@ export class AmpStoryPage extends AMP.BaseElement {
         getLocalizationService(this.element).getLocalizedString(
           LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
         );
+      
+      const container = this.win.document.createElement('div');
+      container.classList.add('i-amphtml-page-attachment-host');
+      container.setAttribute('role', 'button');
 
       this.mutateElement(() => {
         textEl.textContent = openLabel;
-
-        const container = this.win.document.createElement('div');
-        container.classList.add('i-amphtml-page-attachment-host');
-        container.setAttribute("role", "button");
         this.element.appendChild(container);
         createShadowRootWithStyle(container, this.openAttachmentEl_, pageAttachmentCSS);
       });
