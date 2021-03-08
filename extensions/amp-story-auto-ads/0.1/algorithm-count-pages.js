@@ -19,35 +19,20 @@ import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
 import {hasOwn} from '../../../src/utils/object';
 
 /**
- * Choose placement algorithm implementation.
- * @param {!StoryStoreService} storeService
- * @param {!StoryAdPageManager} pageManager
- * @return {!StoryAdPlacementAlgorithm}
- */
-export function getPlacementAlgo(storeService, pageManager) {
-  // TODO(ccordry): Update to use experiment branching.
-  return new EverySevenAlgorithm(storeService, pageManager);
-}
-
-// WIP do abstraction.
-// class StoryAdPlacementAlgorithm {
-//   constructor() {}
-// }
-
-/**
  * Original Story Ads placement algorithm. Tries to place ad every seven pages.
  * Will not place if ad is still loading.
+ * @implements {./algorithm-interface.StoryAdPlacementAlgorithm}
  */
-class EverySevenAlgorithm {
+export class CountPagesAlgorithm {
   /**
    * @param {?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} storeService
    * @param {StoryAdPageManager} pageManager
    */
   constructor(storeService, pageManager) {
+    this.storeService_ = storeService;
     this.pageManager_ = pageManager;
     this.interval_ = 7;
     this.uniquePageIds_ = new Map();
-    this.storeService_ = storeService;
     this.newPagesSinceLastAd_ = 1;
     this.pendingAdView_ = false;
     this.tryingToInsert_ = false;
@@ -55,7 +40,7 @@ class EverySevenAlgorithm {
 
   /**
    *
-   * @return {boolean}
+   *@return {boolean}
    */
   isStoryEligible() {
     const numPages = this.storeService_.get(StateProperty.PAGE_IDS).length;
