@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {isLocalDevMode} from './local-dev-mode';
 import {isTestingMode} from './testing-mode';
 import {parseQueryString} from '../url';
 
