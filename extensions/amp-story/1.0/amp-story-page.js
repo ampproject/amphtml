@@ -410,6 +410,14 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
+   * @return {boolean}
+   * @private
+   */
+  isPageAttachmentOutlinkV2ExperimentOn_() {
+    return isExperimentOn(this.win, 'amp-story-page-attachment-outlink-v2');
+  }
+
+  /**
    * Delegates video autoplay so the video manager does not follow the
    * autoplay attribute that may have been set by a publisher, which could
    * play videos from an inactive page.
