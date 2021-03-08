@@ -72,13 +72,6 @@
       }
     },
     {
-      "groupName": "Renovate Bot",
-      "matchPackagePatterns": ["renovate"],
-      "matchDepTypes": ["devDependencies"],
-      "matchUpdateTypes": ["major", "minor"],
-      "extends": ["schedule:weekly"]
-    },
-    {
       "excludePackagePatterns": ["^@ampproject/"],
       "matchDepTypes": ["dependencies"],
       "enabled": false
