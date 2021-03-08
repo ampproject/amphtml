@@ -45,7 +45,11 @@ Type attribute value: `adobeanalytics`, `adobeanalytics_nativeConfig`
 
 Adds support for Adobe Analytics. More details for adding Adobe Analytics support can be found at [experienceleague.adobe.com](https://experienceleague.adobe.com/docs/analytics/implementation/other/amp.html).
 
-> ⚠️ Do not use both the `adobeanalytics` and `adobeanalytics_nativeConfig` types on the same page. If you attempt to do so, you can generate errors in the browser console and double-count visitors.
+[tip type="important"]
+
+Do not use both the `adobeanalytics` and `adobeanalytics_nativeConfig` types on the same page. If you attempt to do so, you can generate errors in the browser console and double-count visitors.
+
+[/tip]
 
 <!--
 ### adobeanalytics_nativeConfig (included above)
@@ -395,7 +399,7 @@ Adds support for Nielsen Marketing Cloud. More details can be found at [Nielsen 
 
 Type attribute value: `oewa`
 
-Adds support for `[OEWA](https://www.oewa.at)`. Requires a copy of [amp-analytics-oewa.html](http://www.oewa.at/fileadmin/downloads/amp-analytics-oewa.html) on a different subdomain than the including AMP file ([why?](https://github.com/ampproject/amphtml/blob/master/spec/amp-iframe-origin-policy.md)). The file must be served via HTTPS. For example, if your AMP files are hosted on `www.example.com`, then `amp-analytics-oewa.html` needs to be on another subdomain such as `oewa-amp.example.com`. More details for adding OEWA support can be found [here](http://www.oewa.at/Implementierung).
+Adds support for [OEWA](https://www.oewa.at). Requires a copy of [amp-analytics-oewa.html](http://www.oewa.at/fileadmin/downloads/amp-analytics-oewa.html) on a different subdomain than the including AMP file ([why?](https://github.com/ampproject/amphtml/blob/master/spec/amp-iframe-origin-policy.md)). The file must be served via HTTPS. For example, if your AMP files are hosted on `www.example.com`, then `amp-analytics-oewa.html` needs to be on another subdomain such as `oewa-amp.example.com`. More details for adding OEWA support can be found [here](http://www.oewa.at/Implementierung).
 
 Additionally, the following variables must be defined:
 
@@ -412,7 +416,11 @@ In the `requests` section:
 
 Type attribute value: `oewadirect`
 
-> ⚠️ This is a variation of `oewa` that does not use the iframe-ping solution and has a better client detection by using `AMP CLIENT_ID`. This is currently EXPERIMENTAL, and prohibited by the OEWA because it does not use `oewa2.js`.
+[tip type="important"]
+
+This is a variation of `oewa` that does not use the iframe-ping solution and has a better client detection by using `AMP CLIENT_ID`. This is currently EXPERIMENTAL, and prohibited by the OEWA because it does not use `oewa2.js`.
+
+[/tip]
 
 ### Oracle Infinity Analytics
 
@@ -439,7 +447,7 @@ Use `extraUrlParams` to add additional event properties. Full configuration deta
 
 Type attribute value: `piano`
 
-Adds support for Piano. Configuration details can be found at `http://vx.piano.io/javascript-tracking-amp`
+Adds support for Piano. Configuration details can be found at [piano.io](http://vx.piano.io/javascript-tracking-amp).
 
 ### Pinpoll
 
@@ -455,7 +463,7 @@ Type attribute value: `piStats`
 
 Type attribute value: `pressboard`
 
-Adds support for Pressboard. Configuration details can be found at [help.pressboard.ca] `http://help.pressboard.ca/publisher-resources/getting-started/implementing-google-amp`.
+Adds support for Pressboard. Configuration details can be found at [help.pressboard.ca](http://help.pressboard.ca/publisher-resources/getting-started/implementing-google-amp`).
 
 ### Quantcast Measurement
 
@@ -484,7 +492,7 @@ Type attribute value: `retargetly`
 Type attribute value: `rudderstack`
 
 Adds support for RudderStack page views and events.
-Find out more on the implementation check our documentation at `https://docs.rudderstack.com/sdk-integration-guide/getting-started-with-javascript-sdk/amp-analytics`.
+Find out more on the implementation check our documentation at [docs.rudderstack.com](https://docs.rudderstack.com/sdk-integration-guide/getting-started-with-javascript-sdk/amp-analytics).
 
 ### Segment
 
@@ -507,7 +515,7 @@ Type attribute value: `shinystat`
 
 Type attribute value: `simplereach`
 
-Adds support for SimpleReach. Configuration details can be found at `http://docs.simplereach.com/dev-guide/implementation/google-amp-implementation`.
+Adds support for SimpleReach. Configuration details can be found at [docs.simplereach.com](http://docs.simplereach.com/dev-guide/implementation/google-amp-implementation).
 
 ### Snowplow Analytics
 
@@ -559,7 +567,7 @@ Adds support for Top.Mail.Ru. Configuration details can be found at [Top.Mail.Ru
 
 Type attribute value: `treasuredata`
 
-Adds support for Treasure Data. Configuration details can be found at `https://docs.treasuredata.com/articles/javascript-sdk-google-amp`.
+Adds support for Treasure Data. Configuration details can be found at [docs.treasuredata.com](https://docs.treasuredata.com/articles/javascript-sdk-google-amp).
 
 ### Umeng+ Analytics
 
@@ -591,6 +599,10 @@ Type attribute value: `webtrekk`
 
 Type attribute value: `webtrekk_v2`
 
-> ⚠️ ~~`webtrekk`~~ is deprecated. **Use `webtrekk_v2` instead.**
+[tip type="important"]
+
+<span style="text-decoration: line-through;">`webtrekk`</span> is deprecated. **Use `webtrekk_v2` instead.**
+
+[/tip]
 
 Adds support for Webtrekk. Configuration details can be found at [supportcenter.webtrekk.com](https://supportcenter.webtrekk.com/en/public/amp-analytics.html).
