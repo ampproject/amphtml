@@ -61,6 +61,7 @@ class EverySevenAlgorithm {
     this.isDesktop_ = this.storeService_.get(StateProperty.DESKTOP_STATE);
     // this.numOrganicPages = storeService.get(nuPages)
     this.newPagesSinceLastAd_ = 0;
+    this.pendingAdView_ = false;
   }
 
   /**
@@ -83,6 +84,7 @@ class EverySevenAlgorithm {
    * @param pageId
    */
   onPageChange(pageId) {
+    console.log('on page change', pageId);
     if (!hasOwn(this.uniquePageIds_, pageId)) {
       this.uniquePageIds_[pageId] = true;
       this.newPagesSinceLastAd_++;
@@ -90,21 +92,25 @@ class EverySevenAlgorithm {
 
     if (
       this.pendingAdView_ ||
-      this.tryingToPlace_ ||
-      !this.placementAlgorithm_.readyToPlaceAd() ||
-      !this.adPageManager_.hasUnusedPage()
+      this.tryingToInsert_ ||
+      !this.readyToPlaceAd_() ||
+      !this.pageManager_.hasUnusedPage()
     ) {
       return;
     }
 
-    this.tryingToPlace_ = true;
+    this.tryingToInsert_ = true;
     this.tryToPlaceAdAfterPage_(pageId);
   }
 
   /**
+   * @param pageIndex
    */
-  onNewAdView() {
+  onNewAdView(pageIndex) {
     this.newPagesSinceLastAd_ = 0;
+    if (this.shouldCreateNextAd(pageIndex)) {
+      this.pageManager_.createAdPage();
+    }
   }
 
   /**
@@ -125,7 +131,7 @@ class EverySevenAlgorithm {
    * thereafter.
    * @return {boolean}
    */
-  readyToPlaceAd() {
+  readyToPlaceAd_() {
     console.log(this.newPagesSinceLastAd_ >= this.interval_);
     return this.newPagesSinceLastAd_ >= this.interval_;
   }
@@ -136,7 +142,7 @@ class EverySevenAlgorithm {
    * @private
    */
   tryToPlaceAdAfterPage_(pageBeforeAdId) {
-    const nextAdPage = this.adPageManager_.getUnusedAdPage();
+    const nextAdPage = this.pageManager_.getUnusedAdPage();
 
     // Timeout fail, move to next ad on next navigation.
     if (!nextAdPage.isLoaded() && nextAdPage.hasTimedOut()) {
@@ -152,30 +158,21 @@ class EverySevenAlgorithm {
     // WIPP moving placement logic around out of asaa.
     // need to figure out analytics
     this.pageManager_
-      .insertAdPageAfter(pageBeforeAdId, nextAdPage)
+      .maybeInsertPageAfter(pageBeforeAdId, nextAdPage)
       .then((insertionState) => {
+        this.tryingToInsert_ = false;
         if (insertionState === InsertionState.DELAYED) {
           return;
         }
 
-        this.adPageManager_.moveToNextAd();
-
         if (insertionState === InsertionState.INSERTED) {
-          this.analyticsEventWithCurrentAd_(AnalyticsEvents.AD_INSERTED, {
-            [AnalyticsVars.AD_INSERTED]: Date.now(),
-          });
           // We have an ad inserted that has yet to be viewed.
           this.pendingAdView_ = true;
         }
 
         if (insertionState === InsertionState.FAILED) {
-          this.analyticsEventWithCurrentAd_(AnalyticsEvents.AD_DISCARDED, {
-            [AnalyticsVars.AD_DISCARDED]: Date.now(),
-          });
-          this.startNextAd();
+          this.pageManager_discardCurrentAd();
         }
       });
   }
-
-  startNextAd() {}
 }

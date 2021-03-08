@@ -13,14 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {AnalyticsVars} from './story-ad-analytics';
+
+import {
+  AnalyticsEvents,
+  AnalyticsVars,
+  STORY_AD_ANALYTICS,
+} from './story-ad-analytics';
 import {ButtonTextFitter} from './story-ad-button-text-fitter';
 import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
 import {StoryAdLocalization} from './story-ad-localization';
 import {StoryAdPage} from './story-ad-page';
 import {devAssert} from '../../../src/log';
 import {findIndex} from '../../../src/utils/array';
-import {getServiceForDoc} from '../../../src/service';
+import {getServiceForDoc, getServicePromiseForDoc} from '../../../src/service';
 
 const TAG = 'amp-story-auto-ads:page-manager';
 
@@ -30,6 +35,8 @@ export const InsertionState = {
   FAILURE: 1,
   SUCCESS: 2,
 };
+
+const NEXT_PAGE_NO_AD_ATTR = 'next-page-no-ad';
 
 /**
  *
@@ -44,7 +51,7 @@ export class StoryAdPageManager {
     this.ampStory_ = ampStory;
     this.config_ = config;
     this.ampdoc_ = ampStory.getAmpDoc();
-
+    this.analytics_ = getServicePromiseForDoc(this.ampdoc_, STORY_AD_ANALYTICS);
     this.localizationService_ = new StoryAdLocalization(this.ampStory_.element);
     this.buttonFitter_ = new ButtonTextFitter(this.ampdoc_);
     // id => impl
@@ -75,7 +82,22 @@ export class StoryAdPageManager {
   /**
    * Called when ad has failed or been placed and we should move to next ad.
    */
-  moveToNextAd() {
+  discardCurrentAd() {
+    this.analyticsEvent_(AnalyticsEvents.AD_DISCARDED, {
+      [AnalyticsVars.AD_INDEX]: this.adsConsumed_,
+      [AnalyticsVars.AD_DISCARDED]: Date.now(),
+    });
+    this.adsConsumed_++;
+  }
+
+  /**
+   *
+   */
+  insertCurrentAd() {
+    this.analyticsEvent_(AnalyticsEvents.AD_INSERTED, {
+      [AnalyticsVars.AD_INDEX]: this.adsConsumed_,
+      [AnalyticsVars.AD_INSERTED]: Date.now(),
+    });
     this.adsConsumed_++;
   }
 
@@ -203,7 +225,7 @@ export class StoryAdPageManager {
 
     // If we are inserted we now have a `position` macro available for any
     // analytics events moving forward.
-    const adIndex = this.adPageManager_.getIndexById(nextAdPageId);
+    const adIndex = this.getIndexById(nextAdPageId);
     const pageNumber = this.ampStory_.getPageIndexById(pageBeforeAdId);
 
     this.analytics_.then((analytics) =>
@@ -229,6 +251,18 @@ export class StoryAdPageManager {
    * @private
    */
   nextPageNoAd_(page) {
-    return page.element.hasAttribute(Attributes.NEXT_PAGE_NO_AD);
+    return page.element.hasAttribute(NEXT_PAGE_NO_AD_ATTR);
+  }
+
+  /**
+   * Construct an analytics event and trigger it.
+   * @param {string} eventType
+   * @param {!Object<string, number>} vars A map of vars and their values.
+   * @private
+   */
+  analyticsEvent_(eventType, vars) {
+    this.analytics_.then((analytics) =>
+      analytics.fireEvent(this.element, vars['adIndex'], eventType, vars)
+    );
   }
 }
