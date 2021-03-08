@@ -34,37 +34,31 @@ export const _default = () => {
   const renderable = boolean('top renderable', true);
   const playable = boolean('top playable', true);
   const loading = select('top loading', LOADING_OPTIONS, LOADING_OPTIONS[0]);
-  const unloadOnPause = boolean('unload on pause', false);
   return (
     <WithAmpContext
       renderable={renderable}
       playable={playable}
       loading={loading}
     >
-      <Composite unloadOnPause={unloadOnPause} />
+      <Composite />
     </WithAmpContext>
   );
 };
 
 /**
- * @param {{unloadOnPause: boolean}} props
  * @return {PreactDef.Renderable}
  */
-function Composite({unloadOnPause}) {
+function Composite() {
   return (
     <div class="composite">
-      <Info title="Default" unloadOnPause={unloadOnPause} />
+      <Info title="Default" />
       <WithAmpContext renderable={false}>
-        <Info title="Context: non-renderable" unloadOnPause={unloadOnPause} />
+        <Info title="Context: non-renderable" />
       </WithAmpContext>
       <WithAmpContext playable={false}>
-        <Info title="Context: non-playable" unloadOnPause={unloadOnPause} />
+        <Info title="Context: non-playable" />
       </WithAmpContext>
-      <Info
-        title="Prop: loading = lazy"
-        loading="lazy"
-        unloadOnPause={unloadOnPause}
-      />
+      <Info title="Prop: loading = lazy" loading="lazy" />
     </div>
   );
 }
@@ -73,9 +67,9 @@ function Composite({unloadOnPause}) {
  * @param {{title: string, loading: string}} props
  * @return {PreactDef.Renderable}
  */
-function Info({title, loading: loadingProp, unloadOnPause, ...rest}) {
+function Info({title, loading: loadingProp, ...rest}) {
   const {renderable, playable, loading: loadingContext} = useAmpContext();
-  const loading = useLoading(loadingProp, unloadOnPause);
+  const loading = useLoading(loadingProp);
   const load = loading != 'unload';
   const infoStyle = {border: '1px dotted gray', margin: 8};
   const imgStyle = {
@@ -91,7 +85,6 @@ function Info({title, loading: loadingProp, unloadOnPause, ...rest}) {
         <div>context.renderable: {String(renderable)}</div>
         <div>context.playable: {String(playable)}</div>
         <div>context.loading: {String(loadingContext)}</div>
-        <div>unloadOnPause: {String(unloadOnPause)}</div>
         <div>useLoading.loading: {String(loading)}</div>
         <div>load: {String(load)}</div>
         <div>

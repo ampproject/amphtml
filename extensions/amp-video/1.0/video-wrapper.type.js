@@ -46,7 +46,6 @@ VideoWrapperDef.PlayerComponent;
  * @typedef {{
  *   component: (!VideoWrapperDef.PlayerComponent|undefined),
  *   loading: (string|undefined),
- *   unloadOnPause: (boolean|undefined),
  *   src: (string|undefined),
  *   sources: (?PreactDef.Renderable|undefined),
  *   autoplay: (boolean|undefined),

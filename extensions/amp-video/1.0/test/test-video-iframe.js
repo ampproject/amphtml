@@ -178,6 +178,38 @@ describes.realWin('VideoIframe Preact component', {}, (env) => {
     expect(removeEventListener.withArgs('message')).to.have.been.calledOnce;
   });
 
+  it('should reset an unloadOnPause-iframe on pause', () => {
+    const ref = createRef();
+
+    const makeMethodMessageStub = env.sandbox.stub();
+
+    const videoIframe = mount(
+      <VideoIframe
+        ref={ref}
+        src="about:blank"
+        makeMethodMessage={makeMethodMessageStub}
+        unloadOnPause={true}
+      />
+    );
+
+    const iframe = videoIframe.getDOMNode();
+    let iframeSrc = iframe.src;
+    const iframeSrcSetterSpy = env.sandbox.spy();
+    Object.defineProperty(iframe, 'src', {
+      get() {
+        return iframeSrc;
+      },
+      set(value) {
+        iframeSrc = value;
+        iframeSrcSetterSpy(value);
+      },
+    });
+
+    ref.current.pause();
+    expect(iframeSrcSetterSpy).to.be.calledOnce;
+    expect(makeMethodMessageStub).to.not.be.calledWith('pause');
+  });
+
   describe('uses playerStateRef to read the imperative state', () => {
     const makeMethodMessage = (method) => ({makeMethodMessageFor: method});
 

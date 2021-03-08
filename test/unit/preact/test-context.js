@@ -25,7 +25,7 @@ import {mount} from 'enzyme';
 describes.sandboxed('preact/context', {}, () => {
   function Component(props) {
     const context = useAmpContext();
-    const loading = useLoading(props.loading, props.unloadOnPause);
+    const loading = useLoading(props.loading);
     return <ContextReader {...context} computedLoading={loading} />;
   }
 
@@ -72,71 +72,6 @@ describes.sandboxed('preact/context', {}, () => {
       playable: false,
       loading: 'auto',
       computedLoading: 'auto',
-    });
-  });
-
-  it('should disable loading when not playable and unloadOnPause', () => {
-    const wrapper = mount(
-      <WithAmpContext playable={false}>
-        <Component unloadOnPause={true} />
-      </WithAmpContext>
-    );
-    expect(wrapper.find(ContextReader).props()).to.contain({
-      renderable: true,
-      playable: false,
-      loading: 'auto',
-      computedLoading: 'unload',
-    });
-  });
-
-  it('should restore loading when unloadOnPause but eager', () => {
-    const wrapper = mount(
-      <WithAmpContext playable={false}>
-        <Component unloadOnPause={true} />
-      </WithAmpContext>
-    );
-    expect(wrapper.find(ContextReader).props()).to.contain({
-      renderable: true,
-      playable: false,
-      loading: 'auto',
-      computedLoading: 'unload',
-    });
-
-    // Going to "lazy" doesn't change anything.
-    wrapper.setProps({loading: 'lazy'});
-    expect(wrapper.find(ContextReader).props()).to.contain({
-      renderable: true,
-      playable: false,
-      loading: 'lazy',
-      computedLoading: 'unload',
-    });
-
-    // Going to "eager" restores the loading.
-    wrapper.setProps({loading: 'eager'});
-    expect(wrapper.find(ContextReader).props()).to.contain({
-      renderable: true,
-      playable: false,
-      loading: 'eager',
-      computedLoading: 'eager',
-    });
-
-    // Going back to "auto" keeps "auto".
-    wrapper.setProps({loading: 'auto'});
-    expect(wrapper.find(ContextReader).props()).to.contain({
-      renderable: true,
-      playable: false,
-      loading: 'auto',
-      computedLoading: 'auto',
-    });
-
-    // Resetting playable goes back to "unload".
-    wrapper.setProps({playable: true});
-    wrapper.setProps({playable: false});
-    expect(wrapper.find(ContextReader).props()).to.contain({
-      renderable: true,
-      playable: false,
-      loading: 'auto',
-      computedLoading: 'unload',
     });
   });
 

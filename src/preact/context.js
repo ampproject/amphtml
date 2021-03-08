@@ -16,7 +16,7 @@
 
 import * as Preact from './index';
 import {Loading, reducer as loadingReducer} from '../core/loading-instructions';
-import {createContext, useContext, useMemo, useRef} from './index';
+import {createContext, useContext, useMemo} from './index';
 
 /** @type {PreactDef.Context} */
 let context;
@@ -90,27 +90,9 @@ export function useAmpContext() {
  * Whether the calling component should currently be in the loaded state.
  *
  * @param {!Loading|string} loadingProp
- * @param {boolean} unloadOnPause
  * @return {boolean}
  */
-export function useLoading(loadingProp, unloadOnPause = false) {
-  const {loading: loadingContext, playable} = useAmpContext();
-  const loading = loadingReducer(loadingProp, loadingContext);
-
-  const shouldUnloadOnPauseRef = useRef(false);
-  const triggerUnloadOnPauseRef = useRef(false);
-
-  // Force unload only when the playable goes from true -> false.
-  const shouldUnloadOnPause = !playable && unloadOnPause;
-  if (shouldUnloadOnPause != shouldUnloadOnPauseRef.current) {
-    shouldUnloadOnPauseRef.current = shouldUnloadOnPause;
-    triggerUnloadOnPauseRef.current = shouldUnloadOnPause;
-  }
-
-  // Reset triggerUnloadOnPause when loading becomes eager.
-  if (loading == Loading.EAGER) {
-    triggerUnloadOnPauseRef.current = false;
-  }
-
-  return triggerUnloadOnPauseRef.current ? Loading.UNLOAD : loading;
+export function useLoading(loadingProp) {
+  const {loading: loadingContext} = useAmpContext();
+  return loadingReducer(loadingProp, loadingContext);
 }

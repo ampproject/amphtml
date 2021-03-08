@@ -125,45 +125,34 @@ describes.sandboxed('Instagram preact component v1.0', {}, (env) => {
     expect(onReadyState).to.be.calledOnce.calledWith('complete');
   });
 
-  it('should render only shell when paused in unloadOnPause', () => {
+  it('should reset iframe on pause', () => {
     const ref = createRef();
-    const wrapper = mount(
-      <WithAmpContext playable={false}>
-        <Instagram
-          ref={ref}
-          shortcode="B8QaZW4AQY_"
-          style={{'width': 500, 'height': 600}}
-        />
-      </WithAmpContext>
-    );
-    expect(wrapper.find('iframe')).to.have.lengthOf(0);
-  });
-
-  it('should reload after pause', async () => {
-    const ref = createRef();
-    const onReadyState = env.sandbox.spy();
     const wrapper = mount(
       <WithAmpContext playable={true}>
         <Instagram
           ref={ref}
           shortcode="B8QaZW4AQY_"
           style={{'width': 500, 'height': 600}}
-          onReadyState={onReadyState}
         />
       </WithAmpContext>
     );
-
-    await wrapper.find('iframe').invoke('onLoad')();
-    let api = ref.current;
-    expect(api.readyState).to.equal('complete');
-    expect(onReadyState).to.be.calledOnce.calledWith('complete');
     expect(wrapper.find('iframe')).to.have.lengthOf(1);
 
+    const iframe = wrapper.find('iframe').getDOMNode();
+    let iframeSrc = iframe.src;
+    const iframeSrcSetterSpy = env.sandbox.spy();
+    Object.defineProperty(iframe, 'src', {
+      get() {
+        return iframeSrc;
+      },
+      set(value) {
+        iframeSrc = value;
+        iframeSrcSetterSpy(value);
+      },
+    });
+
     wrapper.setProps({playable: false});
-    api = ref.current;
-    expect(api.readyState).to.equal('loading');
-    expect(onReadyState).to.be.calledTwice.calledWith('loading');
-    expect(wrapper.find('iframe')).to.have.lengthOf(0);
+    expect(iframeSrcSetterSpy).to.be.calledOnce;
   });
 });
 

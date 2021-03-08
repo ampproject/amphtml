@@ -22,14 +22,15 @@ import {dict} from '../../../src/utils/object';
 import {forwardRef} from '../../../src/preact/compat';
 import {getData} from '../../../src/event-helper';
 import {parseJson} from '../../../src/json';
+import {useAmpContext, useLoading} from '../../../src/preact/context';
 import {
   useCallback,
+  useEffect,
   useImperativeHandle,
   useLayoutEffect,
   useRef,
   useState,
 } from '../../../src/preact';
-import {useLoading} from '../../../src/preact/context';
 
 const NO_HEIGHT_STYLE = dict();
 
@@ -51,7 +52,8 @@ export function InstagramWithRef(
   },
   ref
 ) {
-  const loading = useLoading(loadingProp, /* unlayoutOnPause */ true);
+  const {playable} = useAmpContext();
+  const loading = useLoading(loadingProp);
   const load = loading !== Loading.UNLOAD;
 
   const loadedRef = useRef(false);
@@ -94,6 +96,17 @@ export function InstagramWithRef(
       setLoaded(false);
     }
   }, [load, setLoaded]);
+
+  // Pause if the post goes into a "paused" context.
+  useEffect(() => {
+    const iframe = iframeRef.current;
+    if (!playable && iframe) {
+      // Resetting the `src` will reset the iframe and pause it. It will force
+      // the reload of the whole iframe. But it's the only reliable option
+      // to force pause.
+      iframe.src = iframe.src;
+    }
+  }, [playable]);
 
   useLayoutEffect(() => {
     if (!iframeRef.current || !load) {

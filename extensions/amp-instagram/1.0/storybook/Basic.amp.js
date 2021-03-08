@@ -51,7 +51,7 @@ export const _default = () => {
 };
 
 export const InsideAccordion = () => {
-  const shortcode = text('shortcode', 'B8QaZW4AQY_');
+  const shortcode = text('shortcode', 'Bp4I3hRhd_v');
   const width = number('width', 300);
   const height = number('height', 200);
   return (

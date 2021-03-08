@@ -81,7 +81,6 @@ function VideoWrapperWithRef(
   {
     component: Component = 'video',
     loading: loadingProp,
-    unloadOnPause = false,
     autoplay = false,
     controls = false,
     loop = false,
@@ -100,7 +99,7 @@ function VideoWrapperWithRef(
 ) {
   useResourcesNotify();
   const {playable} = useAmpContext();
-  const loading = useLoading(loadingProp, unloadOnPause);
+  const loading = useLoading(loadingProp);
   const load = loading !== Loading.UNLOAD;
 
   const [muted, setMuted] = useState(autoplay);

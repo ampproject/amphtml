@@ -110,20 +110,6 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
     expect(api.duration).to.be.NaN;
   });
 
-  it('should render only shell when paused in unloadOnPause', () => {
-    const wrapper = mount(
-      <WithAmpContext playable={false}>
-        <VideoWrapper
-          unloadOnPause={true}
-          component={TestPlayer}
-          sources={<div></div>}
-        />
-      </WithAmpContext>
-    );
-    const player = wrapper.find(TestPlayer);
-    expect(player).to.have.lengthOf(0);
-  });
-
   it('should initialize in a readyState=complete', () => {
     playerReadyState = 1;
     const ref = createRef();
@@ -233,7 +219,6 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
     const wrapper = mount(
       <WithAmpContext playable={true}>
         <VideoWrapper
-          unloadOnPause={true}
           component={TestPlayer}
           sources={<div></div>}
           onPlayingState={onPlayingState}
@@ -242,11 +227,6 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
     );
     await wrapper.find(TestPlayer).invoke('onPlaying')();
     expect(onPlayingState).to.be.calledOnce.calledWith(true);
-
-    // Unmount via unloadOnPause.
-    onPlayingState.resetHistory();
-    wrapper.setProps({playable: false});
-    expect(onPlayingState).to.be.calledOnce.calledWith(false);
   });
 
   describe('MediaSession', () => {
