@@ -23,11 +23,10 @@ const IS_DEV = true;
 /**
  * Returns true if the `#development` has param has any value set.
  * @private
- * @visibleForTesting
  * @param {!Location} location
  * @return {boolean}
  */
-export function isDevQueryParamPresent_(location) {
+function isDevQueryParamPresent_(location) {
   return !!parseQueryString(
     // location.originalHash is set by the viewer when it removes the fragment
     // from the URL.

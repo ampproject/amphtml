@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {isDevQueryParamPresent_} from '../../src/core/dev-mode';
+import {isDevMode} from '../../src/core/dev-mode';
 import {parseUrlDeprecated} from '../../src/url';
 
-describes.sandboxed('devMode helpers', {}, () => {
-  describe('isDevQueryParamPresent_', () => {
+describes.sandboxed('devMode', {}, () => {
+  describe('isDevMode', () => {
     function expectDevMode(url, shouldBeDevMode) {
       const location = parseUrlDeprecated(url);
-      expect(isDevQueryParamPresent_(location)).to.equal(shouldBeDevMode);
+      expect(isDevMode({location})).to.equal(shouldBeDevMode);
     }
 
     it('returns true for any parameter value', () => {
