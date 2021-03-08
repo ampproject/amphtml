@@ -37,7 +37,7 @@ const {app} = require('../../server/test-server');
 const {createKarmaServer, getAdTypes} = require('./helpers');
 const {cyan, green, red, yellow} = require('kleur/colors');
 const {dotWrappingWidth} = require('../../common/logging');
-const {getEsbuildBabelPlugin} = require('../helpers');
+const {getEsbuildBabelPlugin} = require('../../common/esbuild-babel');
 const {getFilesFromArgv} = require('../../common/utils');
 const {isCiBuild} = require('../../common/ci');
 const {log} = require('../../common/logging');
@@ -297,7 +297,7 @@ function updateEsbuildConfig(config) {
   };
   const babelPlugin = getEsbuildBabelPlugin(
     /* callerName */ 'test',
-    /* enableCache */ !argv.watch, // TODO(jridgewell): Make this true when unifiedJsFile goes away.
+    /* enableCache */ true,
     /* preSetup */ logBabelStart,
     /* postLoad */ printBabelDot
   );
