@@ -154,14 +154,8 @@ Defines the style of animation for opening the lightbox. By default, this will
 be set to `fade-in`. Valid values are `fade-in`, `fly-in-bottom`, and
 `fly-in-top`.
 
-[tip type="important"]
-
-The `fly-in-top` and `fly-in-bottom` animation presets modify the `transform`
-property of the `amp-lightbox` element. Do not rely on transforming the
-`amp-lightbox` element directly. If you need to apply a transform, set it on a
-nested element instead.
-
-[/tip]
+This attribute can be configured to use different
+options based on a [media query](./../../spec/amp-html-responsive-attributes.md).
 
 ### `scrollable` (optional)
 
