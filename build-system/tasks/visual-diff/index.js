@@ -247,8 +247,8 @@ async function launchBrowser() {
  * Opens a new browser tab, resizes its viewport, and returns a Page handler.
  *
  * @param {!puppeteer.Browser} browser a Puppeteer controlled browser.
- * @param {!JsonObject} viewport optional viewport size object with numeric
- *     fields `width` and `height`.
+ * @param {?{height: number, width: number}} viewport optional viewport size
+ *     object with numeric fields `width` and `height`.
  * @return {!Promise<!puppeteer.Page>}
  */
 async function newPage(browser, viewport = null) {
@@ -301,8 +301,8 @@ async function newPage(browser, viewport = null) {
  * Resets the size of a tab and loads about:blank.
  *
  * @param {!puppeteer.Page} page a Puppeteer control browser tab/page.
- * @param {!JsonObject} viewport optional viewport size object with numeric
- *     fields `width` and `height`.
+ * @param {?{height: number, width: number}} viewport optional viewport size
+ *     object with numeric fields `width` and `height`.
  */
 async function resetPage(page, viewport = null) {
   const width = viewport ? viewport.width : VIEWPORT_WIDTH;
