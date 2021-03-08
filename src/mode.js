@@ -89,7 +89,7 @@ function getMode_(win) {
   // flags. This improved DCE on the production file we deploy as the code
   // paths for localhost/testing/development are eliminated.
   return {
-    localDev: isLocalDevMode(win),
+    localDev: isLocalDevMode(),
     // Triggers validation or enable pub level logging. Validation can be
     // bypassed via #validate=0.
     development: isDevMode(win),

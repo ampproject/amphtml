@@ -42,7 +42,8 @@ export function isDevQueryParamPresent_(location) {
  * @return {boolean}
  */
 export function isDevMode(opt_win = window) {
-  return isDevQueryParamPresent_(opt_win.location);
+  // TODO(rcebulko): Pull this out into `test-mode.js`
+  return opt_win.__AMP_TEST || isDevQueryParamPresent_(opt_win.location);
 }
 
 /**
