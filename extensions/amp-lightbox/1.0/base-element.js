@@ -38,6 +38,11 @@ export class BaseElement extends PreactBaseElement {
     });
   }
 
+  /** @override */
+  updatePropsForRendering(props) {
+    props['closeButtonAs'] = () => props['closeButton'];
+  }
+
   /**
    * Toggle open/closed attributes.
    * @param {boolean} opt_state
@@ -47,6 +52,16 @@ export class BaseElement extends PreactBaseElement {
     toggle(this.element, this.open_);
     this.triggerEvent(this.element, this.open_ ? 'open' : 'close');
   }
+
+  /** @override */
+  mutationObserverCallback() {
+    const open = this.element.hasAttribute('open');
+    if (open === this.open_) {
+      return;
+    }
+    this.open_ = open;
+    open ? this.api().open() : this.api().close();
+  }
 }
 
 /** @override */
@@ -55,6 +70,7 @@ BaseElement['Component'] = Lightbox;
 /** @override */
 BaseElement['props'] = {
   'animation': {attr: 'animation'},
+  'closeButton': {selector: '[slot="close-button"]', single: true},
   'children': {passthrough: true},
   'id': {attr: 'id'},
   'scrollable': {attr: 'scrollable', type: 'boolean'},
