@@ -1752,7 +1752,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     }
 
     if (!this.openAttachmentEl_) {
-      container, this.openAttachmentEl_ = renderPageAttachmentUI(
+      this.openAttachmentEl_ = renderPageAttachmentUI(
         this.element,
         attachmentEl
       );
