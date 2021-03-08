@@ -21,7 +21,7 @@ import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
 import {isExperimentOn} from '../../../src/experiments';
 import {toWin} from '../../../src/types';
-import {userAssert} from '../../../src/log';
+import {pureUserAssert as userAssert} from '../../../src/core/assert';
 
 /** @const {string} */
 const TAG = 'amp-accordion';
@@ -62,12 +62,14 @@ class AmpAccordion extends BaseElement {
       `accordionSection.${eventName}`,
       detail
     );
-    Services.actionServiceForDoc(section).triggerWithDispatch(
+    Services.actionServiceForDoc(section).trigger(
       section,
       eventName,
       event,
       ActionTrust.HIGH
     );
+
+    super.triggerEvent(section, eventName, detail);
   }
 
   /** @override */

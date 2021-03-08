@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /**
  * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
  *
@@ -15,16 +14,13 @@
  * limitations under the License.
  */
 
-const fs = require('fs-extra');
-const {getHashObject} = require('./browserify-cache');
-
+import {validateData, writeScript} from '../../3p/3p';
 /**
- * Writes the browserify hashObject representing all the test files we care
- * about to a file. Used during CI to determine when to refresh .karma-cache.
+ * @param {!Window} global
+ * @param {{config: string}} data
  */
-function main() {
-  const hashObject = getHashObject();
-  fs.writeJSONSync('.karma-cache-hash', hashObject, {spaces: 2});
+export function verizonmedia(global, data) {
+  validateData(data, ['config']);
+  global.jacData = data;
+  writeScript(global, 'https://jac.yahoosandbox.com/amp/jac.js');
 }
-
-main();

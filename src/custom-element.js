@@ -40,6 +40,7 @@ import {dev, devAssert, rethrowAsync, user, userAssert} from './log';
 import {getBuilderForDoc} from './service/builder';
 import {getIntersectionChangeEntry} from './utils/intersection-observer-3p-host';
 import {getMode} from './mode';
+import {isExperimentOn} from './experiments';
 import {setStyle} from './style';
 import {shouldBlockOnConsentByMeta} from './consent';
 import {startupChunk} from './chunk';
@@ -481,15 +482,27 @@ function createBaseCustomElementClass(win) {
       // Wait for consent.
       const consentPromise = implPromise.then(() => {
         const policyId = this.getConsentPolicy_();
-        if (!policyId) {
+        const isGranularConsentExperimentOn = isExperimentOn(
+          win,
+          'amp-consent-granular-consent'
+        );
+        const purposeConsents =
+          isGranularConsentExperimentOn && !policyId
+            ? this.getPurposesConsent_()
+            : null;
+
+        if (!policyId && !(isGranularConsentExperimentOn && purposeConsents)) {
           return;
         }
+        // Must have policyId or granularExp w/ purposeConsents
         return Services.consentPolicyServiceForDocOrNull(this)
           .then((policy) => {
             if (!policy) {
               return true;
             }
-            return policy.whenPolicyUnblock(policyId);
+            return policyId
+              ? policy.whenPolicyUnblock(policyId)
+              : policy.whenPurposesUnblock(purposeConsents);
           })
           .then((shouldUnblock) => {
             if (!shouldUnblock) {
@@ -951,11 +964,13 @@ function createBaseCustomElementClass(win) {
         const ampdoc = ampdocService.getAmpDoc(this);
         this.ampdoc_ = ampdoc;
         // Load the pre-stubbed extension if needed.
-        const extensionId = this.tagName.toLowerCase();
+        const extensionId = this.localName;
         if (!this.implClass_ && !ampdoc.declaresExtension(extensionId)) {
           Services.extensionsFor(win).installExtensionForDoc(
             ampdoc,
-            extensionId
+            extensionId,
+            // The legacy auto-extensions are always 0.1.
+            '0.1'
           );
         }
       }
@@ -1662,6 +1677,15 @@ function createBaseCustomElementClass(win) {
         return devAssert(this.impl_).getConsentPolicy();
       }
       return policyId;
+    }
+
+    /**
+     * Get the purpose consents that should be granted.
+     * @return {?Array<string>}
+     */
+    getPurposesConsent_() {
+      const purposes = this.getAttribute('data-block-on-consent-purposes');
+      return purposes ? purposes.split(',') : null;
     }
 
     /**

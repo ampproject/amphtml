@@ -24,6 +24,8 @@ import {
   Installers,
   installFriendlyIframeEmbed,
   mergeHtmlForTesting,
+  preloadFriendlyIframeEmbedExtensionIdsDeprecated,
+  preloadFriendlyIframeEmbedExtensions,
   setSrcdocSupportedForTesting,
 } from '../../src/friendly-iframe-embed';
 import {Services} from '../../src/services';
@@ -178,6 +180,87 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
   });
 
   it('should create ampdoc and install extensions', () => {
+    // AmpDoc is created.
+    const ampdocSignals = new Signals();
+    let childWinForAmpDoc;
+    const ampdoc = {
+      get win() {
+        return childWinForAmpDoc;
+      },
+      getParent: () => env.ampdoc,
+      setReady: env.sandbox.spy(),
+      signals: () => ampdocSignals,
+      getHeadNode: () => childWinForAmpDoc.document.head,
+    };
+    ampdocServiceMock
+      .expects('installFieDoc')
+      .withExactArgs(
+        'https://acme.org/url1',
+        env.sandbox.match((arg) => {
+          // Match childWin argument.
+          childWinForAmpDoc = arg;
+          return true;
+        }),
+        env.sandbox.match((arg) => {
+          // Match options with no signals.
+          expect(arg && arg.signals).to.not.be.ok;
+          return true;
+        })
+      )
+      .returns(ampdoc)
+      .once();
+
+    // Extensions preloading have been requested.
+    extensionsMock
+      .expects('preloadExtension')
+      .withExactArgs('amp-test')
+      .returns(Promise.resolve())
+      .once();
+    extensionsMock
+      .expects('preinstallEmbed')
+      .withExactArgs(ampdoc, ['amp-test'])
+      .once();
+    extensionsMock
+      .expects('installExtensionsInDoc')
+      .withExactArgs(ampdoc, ['amp-test'])
+      .returns(Promise.resolve())
+      .once();
+
+    let renderCompleteResolver = null;
+    const renderCompletePromise = new Promise((resolve) => {
+      renderCompleteResolver = resolve;
+    });
+    env.sandbox
+      .stub(FriendlyIframeEmbed.prototype, 'whenRenderComplete')
+      .callsFake(() => renderCompletePromise);
+
+    const embedPromise = installFriendlyIframeEmbed(
+      iframe,
+      document.body,
+      {
+        url: 'https://acme.org/url1',
+        html: '<amp-test></amp-test>',
+        extensions: [{extensionId: 'amp-test', extensionVersion: '0.2'}],
+      },
+      preinstallCallback
+    );
+    return embedPromise
+      .then((embed) => {
+        expect(childWinForAmpDoc).to.equal(embed.win);
+        expect(ampdoc).to.equal(embed.ampdoc);
+        expect(installServicesStub).to.be.calledOnce.calledWith(ampdoc);
+        expect(ampdoc.setReady).to.not.be.called;
+        renderCompleteResolver();
+        return renderCompletePromise;
+      })
+      .then(() => {
+        expect(ampdoc.setReady).to.be.calledOnce;
+      });
+  });
+
+  // TODO(#33020): Remove this test once `extensions` format is supported
+  // everywhere.
+  it('should create ampdoc and install extensions with extensionIds', () => {
     // AmpDoc is created.
     const ampdocSignals = new Signals();
     let childWinForAmpDoc;
@@ -661,6 +744,41 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
     });
     await promise;
     expect(mutateSpy).to.be.called;
+  });
+
+  describe('preloadFriendlyIframeEmbedExtensions', () => {
+    // TODO(#33020): Remove this test once `extensions` format is adopted.
+    it('should preload non-versioned extensions', () => {
+      extensionsMock
+        .expects('preloadExtension')
+        .withExactArgs('amp-ext1')
+        .once();
+      extensionsMock
+        .expects('preloadExtension')
+        .withExactArgs('amp-ext2')
+        .once();
+      preloadFriendlyIframeEmbedExtensionIdsDeprecated(window, [
+        'amp-ext1',
+        'amp-ext2',
+      ]);
+    });
+
+    it('should preload versioned extensions', () => {
+      // TODO(#33020): Modify this test with an explicit version once the format
+      // is adopted.
+      extensionsMock
+        .expects('preloadExtension')
+        .withExactArgs('amp-ext1')
+        .once();
+      extensionsMock
+        .expects('preloadExtension')
+        .withExactArgs('amp-ext2')
+        .once();
+      preloadFriendlyIframeEmbedExtensions(window, [
+        {extensionId: 'amp-ext1', extensionVersion: '0.2'},
+        {extensionId: 'amp-ext2', extensionVersion: '0.3'},
+      ]);
+    });
   });
 
   describe('mergeHtml', () => {

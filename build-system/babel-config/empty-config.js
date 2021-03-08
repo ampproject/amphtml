@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
+
+/**
+ * Helper that creates an empty babel config object.
+ *
+ * @return {!Object}
+ */
+const getEmptyConfig = () => ({});
 
 module.exports = {
-  'rules': {
-    'no-restricted-imports': [
-      'error',
-      {
-        // Disallow importing dependencies from outside this directory
-        'patterns': ['..'],
-      },
-    ],
-  },
+  getEmptyConfig,
 };

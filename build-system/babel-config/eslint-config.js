@@ -37,9 +37,14 @@ function getEslintConfig() {
   };
 }
 
+/**
+ * @return {{
+ *  manipulateOptions: {Function(_opts: *, parserOpts: *): void}
+ * }}
+ */
 function enableSyntax() {
   return {
-    manipulateOptions(opts, parserOpts) {
+    manipulateOptions(_opts, parserOpts) {
       parserOpts.plugins.push('jsx', 'importAssertions');
     },
   };
