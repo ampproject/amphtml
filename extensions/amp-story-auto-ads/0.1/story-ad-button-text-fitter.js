@@ -130,3 +130,7 @@ function calculateFontSize(
   // Did not fit within design spec.
   return minFontSize - 1;
 }
+
+function getButtonFitter() {
+  
+}
