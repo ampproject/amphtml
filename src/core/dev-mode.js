@@ -42,7 +42,7 @@ export function isDevQueryParamPresent_(location) {
  * @return {boolean}
  */
 export function isDevMode(opt_win = window) {
-  return IS_DEV || isDevQueryParamPresent_(opt_win.location);
+  return isDevQueryParamPresent_(opt_win.location);
 }
 
 /**
