@@ -1752,13 +1752,18 @@ export class AmpStoryPage extends AMP.BaseElement {
     }
 
     if (!this.openAttachmentEl_) {
-      this.openAttachmentEl_ = renderPageAttachmentUI(
+      container, this.openAttachmentEl_ = renderPageAttachmentUI(
         this.element,
         attachmentEl
       );
       this.openAttachmentEl_.addEventListener('click', () =>
         this.openAttachment()
       );
+
+      const container = this.win.document.createElement('div');
+      container.classList.add('i-amphtml-page-attachment-host');
+      container.setAttribute('role', 'button');
+
       this.mutateElement(() => {
         this.element.appendChild(container);
         createShadowRootWithStyle(container, this.openAttachmentEl_, pageAttachmentCSS);

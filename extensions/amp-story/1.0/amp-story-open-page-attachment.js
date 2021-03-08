@@ -61,10 +61,6 @@ export const renderPageAttachmentUI = (pageEl, attachmentEl) => {
     getLocalizationService(pageEl).getLocalizedString(
       LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
     );
-  
-  const container = this.win.document.createElement('div');
-  container.classList.add('i-amphtml-page-attachment-host');
-  container.setAttribute('role', 'button');
 
   textEl.textContent = openLabel;
   return openAttachmentEl;
