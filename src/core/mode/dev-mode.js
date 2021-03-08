@@ -20,10 +20,11 @@ import {parseQueryString} from '../url';
 /**
  * Returns true if the `#development` has param has any value set.
  * @private
+ * @visibleForTesting
  * @param {!Location} location
  * @return {boolean}
  */
-function isDevQueryParamPresent_(location) {
+export function isDevQueryParamPresent_(location) {
   return !!parseQueryString(
     // location.originalHash is set by the viewer when it removes the fragment
     // from the URL.
@@ -32,8 +33,8 @@ function isDevQueryParamPresent_(location) {
 }
 
 /**
- * Returns true for local development environments, testing environments, or
- * when the `#development` hash query param has a truthy value in the URL.
+ * Returns true for testing environments or when the `#development` hash query
+ * param has a truthy value in the URL.
  *
  * If you're not sure what to use to check "Is this non-production environment?"
  * use this one.
@@ -42,9 +43,5 @@ function isDevQueryParamPresent_(location) {
  * @return {boolean}
  */
 export function isDevMode(opt_win = window) {
-  return (
-    isLocalDevMode() ||
-    isTestingMode(opt_win) ||
-    isDevQueryParamPresent_(opt_win.location)
-  );
+  return isTestingMode(opt_win) || isDevQueryParamPresent_(opt_win.location);
 }

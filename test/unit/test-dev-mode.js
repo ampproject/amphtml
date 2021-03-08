@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-import {isDevMode} from '../../src/core/mode';
+import {isDevQueryParamPresent_} from '../../src/core/mode/dev-mode';
 import {parseUrlDeprecated} from '../../src/url';
 
+// Since the `devMode` helper itself will always be true for tests, we only test
+// the `#development=1`query param extraction
 describes.sandboxed('devMode', {}, () => {
-  describe('isDevMode', () => {
+  describe('isDevQueryParamPresent', () => {
     function expectDevMode(url, shouldBeDevMode) {
       const location = parseUrlDeprecated(url);
-      expect(isDevMode({location})).to.equal(shouldBeDevMode);
+      expect(isDevQueryParamPresent_(location)).to.equal(shouldBeDevMode);
     }
 
     it('returns true for any parameter value', () => {
