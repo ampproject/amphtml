@@ -447,8 +447,6 @@ Use `extraUrlParams` to add additional event properties. Full configuration deta
 
 Type attribute value: `piano`
 
-Adds support for Piano. Configuration details can be found at [piano.io](http://vx.piano.io/javascript-tracking-amp).
-
 ### Pinpoll
 
 Type attribute value: `pinpoll`
