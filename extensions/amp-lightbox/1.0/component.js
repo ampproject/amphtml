@@ -16,8 +16,10 @@
 
 import * as Preact from '../../../src/preact';
 import {ContainWrapper, useValueRef} from '../../../src/preact/component';
+import {Keys} from '../../../src/utils/key-codes';
 import {forwardRef} from '../../../src/preact/compat';
 import {setStyle} from '../../../src/style';
+import {tryFocus} from '../../../src/dom';
 import {
   useImperativeHandle,
   useLayoutEffect,
@@ -53,6 +55,7 @@ function LightboxWithRef(
   {
     animation = 'fade-in',
     children,
+    closeButtonAs,
     onBeforeOpen,
     onAfterClose,
     scrollable = false,
@@ -86,9 +89,7 @@ function LightboxWithRef(
         setMounted(true);
         setVisible(true);
       },
-      close: () => {
-        setVisible(false);
-      },
+      close: () => setVisible(false),
     }),
     [onBeforeOpenRef]
   );
@@ -107,7 +108,7 @@ function LightboxWithRef(
       const postVisibleAnim = () => {
         setStyle(element, 'opacity', 1);
         setStyle(element, 'visibility', 'visible');
-        element./*REVIEW*/ focus();
+        tryFocus(element);
       };
       if (!element.animate) {
         postVisibleAnim();
@@ -152,9 +153,7 @@ function LightboxWithRef(
   return (
     mounted && (
       <ContainWrapper
-        ref={(r) => {
-          lightboxRef.current = r;
-        }}
+        ref={lightboxRef}
         size={true}
         layout={true}
         paint={true}
@@ -172,21 +171,14 @@ function LightboxWithRef(
         role="dialog"
         tabindex="0"
         onKeyDown={(event) => {
-          if (event.key === 'Escape') {
+          if (event.key === Keys.ESCAPE) {
             setVisible(false);
           }
         }}
         {...rest}
       >
+        <CloseButton as={closeButtonAs} onClick={() => setVisible(false)} />
         {children}
-        <button
-          ariaLabel={DEFAULT_CLOSE_LABEL}
-          tabIndex={-1}
-          className={classes.closeButton}
-          onClick={() => {
-            setVisible(false);
-          }}
-        />
       </ContainWrapper>
     )
   );
@@ -195,3 +187,29 @@ function LightboxWithRef(
 const Lightbox = forwardRef(LightboxWithRef);
 Lightbox.displayName = 'Lightbox';
 export {Lightbox};
+
+/**
+ *
+ * @param {!LightboxDef.CloseButtonProps} props
+ * @return {PreactDef.Renderable}
+ */
+function CloseButton({onClick, as: Comp = ScreenReaderCloseButton}) {
+  return <Comp aria-label={DEFAULT_CLOSE_LABEL} onClick={onClick} />;
+}
+
+/**
+ * This is for screen-readers only, should not get a tab stop. Note that
+ * screen readers can still swipe / navigate to this element, it just will
+ * not be reachable via the tab button. Note that for desktop, hitting esc
+ * to close is also an option.
+ *
+ * We do not want this in the tab order since it is not really "visible"
+ * and would be confusing to tab to if not using a screen reader.
+ *
+ * @param {!LightboxDef.CloseButtonProps} props
+ * @return {PreactDef.Renderable}
+ */
+function ScreenReaderCloseButton(props) {
+  const classes = useStyles();
+  return <button {...props} tabIndex={-1} className={classes.closeButton} />;
+}
