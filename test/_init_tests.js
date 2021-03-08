@@ -450,7 +450,6 @@ afterEach(function () {
   }
   window.localStorage.clear();
   window.ENABLE_LOG = false;
-  window.AMP_DEV_MODE = false;
   window.context = undefined;
   window.__AMP_MODE = undefined;
   delete window.document['__AMPDOC'];

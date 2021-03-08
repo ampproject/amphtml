@@ -33,27 +33,16 @@ t.run('error page', function () {
 
   let fixture;
   beforeEach(() => {
-    return createFixtureIframe('test/fixtures/errors.html', 1000, (win) => {
-      // Trigger dev mode.
-      try {
-        win.history.pushState({}, '', 'test2.html#development=1');
-      } catch (e) {
-        // Some browsers do not allow this.
-        win.AMP_DEV_MODE = true;
-      }
-    }).then((f) => {
+    return createFixtureIframe('test/fixtures/errors.html', 1000).then((f) => {
       fixture = f;
       return poll(
         'errors to happen',
-        () => {
-          return fixture.doc.querySelectorAll('[error-message]').length >= 2;
-        },
-        () => {
-          return new Error(
+        () => fixture.doc.querySelectorAll('[error-message]').length >= 2,
+        () =>
+          new Error(
             'Failed to find errors. HTML\n' +
               fixture.doc.documentElement./*TEST*/ innerHTML
-          );
-        },
+          ),
         TIMEOUT - 1000
       );
     });

@@ -752,7 +752,6 @@ describe
         window.sandbox
           .stub(viewer, 'isTrustedViewer')
           .returns(Promise.resolve(false));
-        interceptionEnabledWin.AMP_DEV_MODE = false;
 
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
@@ -816,7 +815,6 @@ describe
         window.sandbox
           .stub(viewer, 'isTrustedViewer')
           .returns(Promise.resolve(true));
-        interceptionEnabledWin.AMP_DEV_MODE = false;
 
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
