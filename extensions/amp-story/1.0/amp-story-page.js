@@ -43,7 +43,6 @@ import {
   expandableElementsSelectors,
 } from './amp-story-embedded-component';
 import {AnimationManager, hasAnimations} from './animation';
-import {CSS as pageAttachmentCSS} from '../../../build/amp-story-open-page-attachment-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {Deferred} from '../../../src/utils/promise';
 import {EventType, dispatch} from './events';
@@ -76,6 +75,7 @@ import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {isPrerenderActivePage} from './prerender-active-page';
 import {listen} from '../../../src/event-helper';
+import {CSS as pageAttachmentCSS} from '../../../build/amp-story-open-page-attachment-0.1.css';
 import {px, toggle} from '../../../src/style';
 import {renderPageAttachmentUI} from './amp-story-open-page-attachment';
 import {renderPageDescription} from './semantic-render';
@@ -1766,7 +1766,11 @@ export class AmpStoryPage extends AMP.BaseElement {
 
       this.mutateElement(() => {
         this.element.appendChild(container);
-        createShadowRootWithStyle(container, this.openAttachmentEl_, pageAttachmentCSS);
+        createShadowRootWithStyle(
+          container,
+          this.openAttachmentEl_,
+          pageAttachmentCSS
+        );
       });
     }
   }
