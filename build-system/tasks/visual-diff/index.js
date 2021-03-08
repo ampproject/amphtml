@@ -164,6 +164,7 @@ async function launchPercyAgent() {
     token: process.env.PERCY_TOKEN,
     loglevel: argv.percy_agent_debug ? 'debug' : 'info',
     port: PERCY_AGENT_PORT,
+    config: path.join(__dirname, '.percy.yaml'),
     discovery: {
       launchOptions: {
         executable: browserFetcher.revisionInfo(PUPPETEER_CHROMIUM_REVISION)
