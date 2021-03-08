@@ -42,11 +42,8 @@ amp-accordion > section > * {
  * Note! This is a new CSS incompatible with older browsers. It provides
  * low-specificity UI styles. The same styles are later set for older browsers
  * via the `i-amphtml-accordion-header` class.
- *
- * TODO(#32155): Use instead `supports selector(:where(A))` when the
- * https://github.com/postcss/postcss/issues/1520 is fixed.
  */
-@media (min-width: 1px) {
+@supports selector(:where(A)) {
   :where(amp-accordion > section) > :first-child {
     cursor: pointer;
     background-color: #efefef;
