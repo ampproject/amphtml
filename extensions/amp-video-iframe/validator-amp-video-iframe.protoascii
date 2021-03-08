@@ -70,7 +70,6 @@ tags: {  # <amp-video-iframe>
   html_format: AMP
   disabled_by: "transformed"
   tag_name: "AMP-VIDEO-IFRAME"
-  spec_name: "AMP-VIDEO-IFRAME"
   requires_extension: "amp-video-iframe"
   attr_lists: "extended-amp-global"
   attr_lists: "amp-video-iframe-common"
@@ -93,13 +92,11 @@ tags: {  # <amp-video-iframe> (transformed)
   tag_name: "AMP-VIDEO-IFRAME"
   spec_name: "AMP-VIDEO-IFRAME (transformed)"
   requires_extension: "amp-video-iframe"
+  requires: "amp-video-iframe > i-amphtml-sizer"
   attr_lists: "extended-amp-global"
   attr_lists: "amp-video-iframe-common"
   attr_lists: "lightboxable-elements"
   spec_url: "https://amp.dev/documentation/components/amp-video-iframe/"
-  reference_points: {
-    tag_spec_name: "AMP-VIDEO-IFRAME > I-AMPHTML-SIZER [style]"
-  }
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
@@ -114,9 +111,11 @@ tags: {  # <amp-video-iframe> (transformed)
 tags: {
   html_format: AMP
   enabled_by: "transformed"
-  tag_name: "$REFERENCE_POINT"
-  spec_name: "AMP-VIDEO-IFRAME > I-AMPHTML-SIZER [style]"
+  tag_name: "I-AMPHTML-SIZER"
+  spec_name: "AMP-VIDEO-IFRAME > I-AMPHTML-SIZER"
+  mandatory_parent: "AMP-VIDEO-IFRAME"
   explicit_attrs_only: true
+  satisfies: "amp-video-iframe > i-amphtml-sizer"
   attrs: {
     name: "style"
     mandatory: true
@@ -127,5 +126,4 @@ tags: {
     }
     css_declaration: { name: "padding-top" }
   }
-  spec_url: "https://amp.dev/documentation/components/amp-video-iframe/"
 }

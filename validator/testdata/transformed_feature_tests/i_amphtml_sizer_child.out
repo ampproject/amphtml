@@ -42,10 +42,6 @@ FAIL
 |     <amp-video-iframe id="myVideo" src="/amp-video-iframe-videojs.html" width="720" height="405" layout="responsive" autoplay="" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive">
 |       <i-amphtml-sizer style="display:block;padding-top:56.2500%;"></i-amphtml-sizer>
 |       <amp-img placeholder="" src="/img/amp-video-iframe-sample-placeholder.jpg" layout="fill" class="i-amphtml-layout-fill i-amphtml-layout-size-defined" i-amphtml-layout="fill"></amp-img>
->>      ^~~~~~~~~
-transformed_feature_tests/i_amphtml_sizer_child.html:43:5 The mandatory attribute 'style' is missing in tag '$reference_point'. (see https://amp.dev/documentation/components/amp-video-iframe/)
->>      ^~~~~~~~~
-transformed_feature_tests/i_amphtml_sizer_child.html:43:5 The tag 'amp-img', a child tag of 'AMP-VIDEO-IFRAME (transformed)', does not satisfy the reference point 'AMP-VIDEO-IFRAME > I-AMPHTML-SIZER [style]'. (see https://amp.dev/documentation/components/amp-video-iframe/)
 |     </amp-video-iframe>
 |
 |    <!-- Valid: amp-image-slider > i-amphtml-sizer with aspect-ratio -->
@@ -65,15 +61,9 @@ transformed_feature_tests/i_amphtml_sizer_child.html:43:5 The tag 'amp-img', a c
 |     <!-- Invalid: amp-video-iframe > div posing as i-amphtml-sizer -->
 |     <amp-video-iframe id="myVideo" src="/amp-video-iframe-videojs.html" width="720" height="405" layout="responsive" autoplay="" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive">
 |       <div style="color:blue;"></div>
->>      ^~~~~~~~~
-transformed_feature_tests/i_amphtml_sizer_child.html:62:5 The property 'color' in attribute 'style' in tag '$reference_point' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
->>      ^~~~~~~~~
-transformed_feature_tests/i_amphtml_sizer_child.html:62:5 The tag 'div', a child tag of 'AMP-VIDEO-IFRAME (transformed)', does not satisfy the reference point 'AMP-VIDEO-IFRAME > I-AMPHTML-SIZER [style]'. (see https://amp.dev/documentation/components/amp-video-iframe/)
 |       <amp-img placeholder="" src="/img/amp-video-iframe-sample-placeholder.jpg" layout="fill" class="i-amphtml-layout-fill i-amphtml-layout-size-defined" i-amphtml-layout="fill"></amp-img>
->>      ^~~~~~~~~
-transformed_feature_tests/i_amphtml_sizer_child.html:63:5 The mandatory attribute 'style' is missing in tag '$reference_point'. (see https://amp.dev/documentation/components/amp-video-iframe/)
->>      ^~~~~~~~~
-transformed_feature_tests/i_amphtml_sizer_child.html:63:5 The tag 'amp-img', a child tag of 'AMP-VIDEO-IFRAME (transformed)', does not satisfy the reference point 'AMP-VIDEO-IFRAME > I-AMPHTML-SIZER [style]'. (see https://amp.dev/documentation/components/amp-video-iframe/)
 |     </amp-video-iframe>
 |  </body>
 |  </html>
+>>       ^~~~~~~~~
+transformed_feature_tests/i_amphtml_sizer_child.html:66:6 The tag 'amp-video-iframe > i-amphtml-sizer' is missing or incorrect, but required by 'amp-video-iframe'. (see https://amp.dev/documentation/components/amp-video-iframe/)
