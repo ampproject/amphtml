@@ -184,5 +184,8 @@
     "tsickle": "0.39.1",
     "typescript": "4.2.3",
     "util": "0.12.3"
+  },
+  "resolutions": {
+    "@babel/helper-transform-fixture-test-runner": "7.12.13"
   }
 }
