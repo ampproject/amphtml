@@ -1764,10 +1764,6 @@ export class AmpStoryPage extends AMP.BaseElement {
       container.classList.add('i-amphtml-page-attachment-host');
       container.setAttribute('role', 'button');
 
-      const container = this.win.document.createElement('div');
-      container.classList.add('i-amphtml-page-attachment-host');
-      container.setAttribute('role', 'button');
-
       this.mutateElement(() => {
         this.element.appendChild(container);
         createShadowRootWithStyle(
