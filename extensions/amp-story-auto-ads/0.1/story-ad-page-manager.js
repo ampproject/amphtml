@@ -62,14 +62,15 @@ export class StoryAdPageManager {
   }
 
   /**
-   * Check if we have any pages left to be consumed.
+   * Check if we have any pages left that have not been inserted or discarded.
    * @return {boolean}
    */
-  hasUnusedPage() {
+  hasUnusedAdPage() {
     return this.adsConsumed_ <= this.createdPageIds.length;
   }
+
   /**
-   *
+   * Gets the next ad page that has not yet been inserted or discarded.
    * @return {!StoryAdPage}
    */
   getUnusedAdPage() {
@@ -91,18 +92,7 @@ export class StoryAdPageManager {
   }
 
   /**
-   *
-   */
-  insertCurrentAd() {
-    this.analyticsEvent_(AnalyticsEvents.AD_INSERTED, {
-      [AnalyticsVars.AD_INDEX]: this.adsConsumed_,
-      [AnalyticsVars.AD_INSERTED]: Date.now(),
-    });
-    this.adsConsumed_++;
-  }
-
-  /**
-   *
+   * Number of ads created by this manager.
    * @return {number}
    */
   numberOfAdsCreated() {
@@ -110,7 +100,8 @@ export class StoryAdPageManager {
   }
 
   /**
-   *
+   * Creates a StoryAdPage, appends the element to DOM, and adds it to
+   * parent story pages Array.
    * @return {!StoryAdPage}
    */
   createAdPage() {
@@ -139,7 +130,6 @@ export class StoryAdPageManager {
   }
 
   /**
-   *
    * @param {*} pageId
    * @return {boolean}
    */
@@ -148,17 +138,15 @@ export class StoryAdPageManager {
   }
 
   /**
-   *
-   * @param {*} pageId
-   * @return
+   * @param {string} pageId
+   * @return {StoryAdPage}
    */
-  getPageById(pageId) {
+  getAdPageById(pageId) {
     return this.pages_[pageId];
   }
 
   /**
-   *
-   * @param {*} pageId
+   * @param {string} pageId
    * @return {number}
    */
   getIndexById(pageId) {
@@ -169,8 +157,8 @@ export class StoryAdPageManager {
    * Can fail if slot is protected by next-page-no-ad, if there are not enough
    * pages left in the story for insertion, or the page before or after is an ad.
    * @param {string} pageBeforeAdId
-   * @param nextAdPage
-   * @return {!InsertionState}
+   * @param {!StoryAdPage} nextAdPage
+   * @return {!Promise<!InsertionState>}
    */
   maybeInsertPageAfter(pageBeforeAdId, nextAdPage) {
     const pageBeforeAd = this.ampStory_.getPageById(pageBeforeAdId);
@@ -179,7 +167,6 @@ export class StoryAdPageManager {
       return Promise.resolve(InsertionState.DELAYED);
     }
 
-    // WIP maybe make this prettier
     if (this.isDesktopView_()) {
       // If we are in desktop view the ad must be inserted 2 pages away because
       // the next page will already be in view
@@ -201,25 +188,22 @@ export class StoryAdPageManager {
       return Promise.resolve(InsertionState.DELAYED);
     }
 
-    return nextAdPage
-      .maybeCreateCta()
-      .then((ctaCreated) =>
-        this.afterCtaCreation_(nextAdPage, ctaCreated, pageBeforeAdId)
-      );
+    return nextAdPage.maybeCreateCta().then((ctaCreated) => {
+      if (!ctaCreated) {
+        this.discardCurrentAd();
+        return InsertionState.FAILURE;
+      }
+      return this.insertIntoParentStory_(nextAdPage, pageBeforeAdId);
+    });
   }
 
   /**
    *
-   * @param nextAdPage
-   * @param {*} ctaCreated
-   * @param pageBeforeAdId
-   * @return
+   * @param {!StoryAdPage} nextAdPage
+   * @param {string} pageBeforeAdId
+   * @return {InsertionState}
    */
-  afterCtaCreation_(nextAdPage, ctaCreated, pageBeforeAdId) {
-    if (!ctaCreated) {
-      return InsertionState.FAILURE;
-    }
-
+  insertIntoParentStory_(nextAdPage, pageBeforeAdId) {
     const nextAdPageId = nextAdPage.getId();
     this.ampStory_.insertPage(pageBeforeAdId, nextAdPageId);
 
@@ -232,7 +216,19 @@ export class StoryAdPageManager {
       analytics.setVar(adIndex, AnalyticsVars.POSITION, pageNumber + 1)
     );
 
+    this.currentAdInserted_();
     return InsertionState.SUCCESS;
+  }
+
+  /**
+   *
+   */
+  currentAdInserted_() {
+    this.analyticsEvent_(AnalyticsEvents.AD_INSERTED, {
+      [AnalyticsVars.AD_INDEX]: this.adsConsumed_,
+      [AnalyticsVars.AD_INSERTED]: Date.now(),
+    });
+    this.adsConsumed_++;
   }
 
   /**
@@ -262,7 +258,12 @@ export class StoryAdPageManager {
    */
   analyticsEvent_(eventType, vars) {
     this.analytics_.then((analytics) =>
-      analytics.fireEvent(this.element, vars['adIndex'], eventType, vars)
+      analytics.fireEvent(
+        this.ampStory_.element,
+        vars['adIndex'],
+        eventType,
+        vars
+      )
     );
   }
 }
