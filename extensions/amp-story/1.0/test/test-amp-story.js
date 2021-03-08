@@ -1173,8 +1173,8 @@ describes.realWin(
           const hostPage = pageArray[1];
           hostPage.setAttribute('distance', '4');
           const iframe = win.document.createElement('iframe');
-          iframe.appendChild(elToFind);
           hostPage.appendChild(iframe);
+          iframe.contentDocument.body.appendChild(elToFind);
           const distance = story.getElementDistance(elToFind);
           expect(distance).to.equal(4);
         });
