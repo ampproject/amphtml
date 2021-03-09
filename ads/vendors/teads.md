@@ -21,7 +21,7 @@ limitations under the License.
 ```html
 <amp-ad
   width="300"
-  height="250"
+  height="1"
   type="teads"
   data-pid="42266"
   layout="responsive"
