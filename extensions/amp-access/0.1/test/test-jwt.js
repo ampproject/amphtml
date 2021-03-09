@@ -231,7 +231,7 @@ describe('JwtHelper', () => {
           /* extractable */ false,
           /* uses */ ['verify']
         )
-        .returns(Promise.resolve(key))
+        .resolves(key)
         .once();
       subtleMock
         .expects('verify')
@@ -241,7 +241,7 @@ describe('JwtHelper', () => {
           /* sig */ window.sandbox.match(() => true),
           /* verifiable */ window.sandbox.match(() => true)
         )
-        .returns(Promise.resolve(true))
+        .resolves(true)
         .once();
       return helper.decodeAndVerify(TOKEN, Promise.resolve(PEM)).then((tok) => {
         expect(tok['name']).to.equal('John Do');

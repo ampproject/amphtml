@@ -116,13 +116,11 @@ describes.realWin('ConsentConfig', {amp: 1}, (env) => {
           'postPromptUI': 'test',
         })
       );
-      env.sandbox.stub(Services, 'geoForDocOrNull').returns(
-        Promise.resolve({
-          isInCountryGroup() {
-            return false;
-          },
-        })
-      );
+      env.sandbox.stub(Services, 'geoForDocOrNull').resolves({
+        isInCountryGroup() {
+          return false;
+        },
+      });
       const consentConfig = new ConsentConfig(element);
       expect(await consentConfig.getConsentConfigPromise()).to.deep.equal(
         dict({
@@ -164,13 +162,11 @@ describes.realWin('ConsentConfig', {amp: 1}, (env) => {
           'postPromptUI': 'test',
         })
       );
-      env.sandbox.stub(Services, 'geoForDocOrNull').returns(
-        Promise.resolve({
-          isInCountryGroup() {
-            return GEO_IN_GROUP.IN;
-          },
-        })
-      );
+      env.sandbox.stub(Services, 'geoForDocOrNull').resolves({
+        isInCountryGroup() {
+          return GEO_IN_GROUP.IN;
+        },
+      });
       const consentConfig = new ConsentConfig(element);
       expect(await consentConfig.getConsentConfigPromise()).to.deep.equal(
         dict({
@@ -211,13 +207,11 @@ describes.realWin('ConsentConfig', {amp: 1}, (env) => {
           'postPromptUI': 'test',
         })
       );
-      env.sandbox.stub(Services, 'geoForDocOrNull').returns(
-        Promise.resolve({
-          isInCountryGroup() {
-            return false;
-          },
-        })
-      );
+      env.sandbox.stub(Services, 'geoForDocOrNull').resolves({
+        isInCountryGroup() {
+          return false;
+        },
+      });
       element.setAttribute('type', '_ping_');
       const consentConfig = new ConsentConfig(element);
       // Make a deep copy of the config to avoid error when deleting fields
@@ -277,13 +271,11 @@ describes.realWin('ConsentConfig', {amp: 1}, (env) => {
 
       it('should return the original config if no geo matches', async () => {
         appendConfigScriptElement(doc, element, geoConfig);
-        env.sandbox.stub(Services, 'geoForDocOrNull').returns(
-          Promise.resolve({
-            isInCountryGroup() {
-              return GEO_IN_GROUP.NOT_IN;
-            },
-          })
-        );
+        env.sandbox.stub(Services, 'geoForDocOrNull').resolves({
+          isInCountryGroup() {
+            return GEO_IN_GROUP.NOT_IN;
+          },
+        });
 
         const consentConfig = new ConsentConfig(element);
         return expect(
@@ -297,16 +289,14 @@ describes.realWin('ConsentConfig', {amp: 1}, (env) => {
 
       it('should work with single field override', async () => {
         appendConfigScriptElement(doc, element, geoConfig);
-        env.sandbox.stub(Services, 'geoForDocOrNull').returns(
-          Promise.resolve({
-            isInCountryGroup(geoGroup) {
-              if (geoGroup === 'nafta') {
-                return GEO_IN_GROUP.IN;
-              }
-              return GEO_IN_GROUP.NOT_IN;
-            },
-          })
-        );
+        env.sandbox.stub(Services, 'geoForDocOrNull').resolves({
+          isInCountryGroup(geoGroup) {
+            if (geoGroup === 'nafta') {
+              return GEO_IN_GROUP.IN;
+            }
+            return GEO_IN_GROUP.NOT_IN;
+          },
+        });
 
         const consentConfig = new ConsentConfig(element);
         expect(await consentConfig.getConsentConfigPromise()).to.deep.equal({
@@ -318,16 +308,14 @@ describes.realWin('ConsentConfig', {amp: 1}, (env) => {
 
       it('should work with multiple fields override', async () => {
         appendConfigScriptElement(doc, element, geoConfig);
-        env.sandbox.stub(Services, 'geoForDocOrNull').returns(
-          Promise.resolve({
-            isInCountryGroup(geoGroup) {
-              if (geoGroup === 'waldo') {
-                return GEO_IN_GROUP.IN;
-              }
-              return GEO_IN_GROUP.NOT_IN;
-            },
-          })
-        );
+        env.sandbox.stub(Services, 'geoForDocOrNull').resolves({
+          isInCountryGroup(geoGroup) {
+            if (geoGroup === 'waldo') {
+              return GEO_IN_GROUP.IN;
+            }
+            return GEO_IN_GROUP.NOT_IN;
+          },
+        });
 
         const consentConfig = new ConsentConfig(element);
         expect(await consentConfig.getConsentConfigPromise()).to.deep.equal({
@@ -348,16 +336,14 @@ describes.realWin('ConsentConfig', {amp: 1}, (env) => {
           },
         };
         appendConfigScriptElement(doc, element, geoConfig);
-        env.sandbox.stub(Services, 'geoForDocOrNull').returns(
-          Promise.resolve({
-            isInCountryGroup(geoGroup) {
-              if (geoGroup === 'geoGroupUnknown') {
-                return GEO_IN_GROUP.IN;
-              }
-              return GEO_IN_GROUP.NOT_IN;
-            },
-          })
-        );
+        env.sandbox.stub(Services, 'geoForDocOrNull').resolves({
+          isInCountryGroup(geoGroup) {
+            if (geoGroup === 'geoGroupUnknown') {
+              return GEO_IN_GROUP.IN;
+            }
+            return GEO_IN_GROUP.NOT_IN;
+          },
+        });
 
         const consentConfig = new ConsentConfig(element);
         expect(await consentConfig.getConsentConfigPromise()).to.deep.equal({
@@ -386,16 +372,14 @@ describes.realWin('ConsentConfig', {amp: 1}, (env) => {
           'consentInstanceId': 'abc',
           'promptIfUnknownForGeoGroup': 'na',
         };
-        env.sandbox.stub(Services, 'geoForDocOrNull').returns(
-          Promise.resolve({
-            isInCountryGroup(geoGroup) {
-              if (geoGroup === 'na') {
-                return GEO_IN_GROUP.IN;
-              }
-              return GEO_IN_GROUP.NOT_IN;
-            },
-          })
-        );
+        env.sandbox.stub(Services, 'geoForDocOrNull').resolves({
+          isInCountryGroup(geoGroup) {
+            if (geoGroup === 'na') {
+              return GEO_IN_GROUP.IN;
+            }
+            return GEO_IN_GROUP.NOT_IN;
+          },
+        });
         appendConfigScriptElement(doc, element, geoConfig);
         const consentConfig = new ConsentConfig(element);
         expect(await consentConfig.getConsentConfigPromise()).to.deep.equal({
@@ -408,16 +392,14 @@ describes.realWin('ConsentConfig', {amp: 1}, (env) => {
       it('should not override consentInstanceId', async () => {
         expectAsyncConsoleError(/consentInstanceId/, 1);
         appendConfigScriptElement(doc, element, geoConfig);
-        env.sandbox.stub(Services, 'geoForDocOrNull').returns(
-          Promise.resolve({
-            isInCountryGroup(geoGroup) {
-              if (geoGroup === 'invalid') {
-                return GEO_IN_GROUP.IN;
-              }
-              return GEO_IN_GROUP.NOT_IN;
-            },
-          })
-        );
+        env.sandbox.stub(Services, 'geoForDocOrNull').resolves({
+          isInCountryGroup(geoGroup) {
+            if (geoGroup === 'invalid') {
+              return GEO_IN_GROUP.IN;
+            }
+            return GEO_IN_GROUP.NOT_IN;
+          },
+        });
         const consentConfig = new ConsentConfig(element);
         expect(await consentConfig.getConsentConfigPromise()).to.deep.equal({
           'consentInstanceId': 'abc',
@@ -447,13 +429,11 @@ describes.realWin('ConsentConfig', {amp: 1}, (env) => {
         'amp-consent/consent-config: ' +
         '`checkConsentHref` must be specified if `consentRequired` is remote';
 
-      env.sandbox.stub(Services, 'geoForDocOrNull').returns(
-        Promise.resolve({
-          isInCountryGroup() {
-            return false;
-          },
-        })
-      );
+      env.sandbox.stub(Services, 'geoForDocOrNull').resolves({
+        isInCountryGroup() {
+          return false;
+        },
+      });
 
       const scriptElement = doc.createElement('script');
       scriptElement.textContent = JSON.stringify(defaultConfig);

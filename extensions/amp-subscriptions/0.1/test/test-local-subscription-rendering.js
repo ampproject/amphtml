@@ -196,7 +196,7 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, (env) => {
       templatesMock
         .expects('renderTemplate')
         .withExactArgs(dialog2, data)
-        .returns(Promise.resolve(rendered))
+        .resolves(rendered)
         .once();
       let content;
       dialogMock

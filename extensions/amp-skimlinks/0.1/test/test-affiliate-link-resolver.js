@@ -103,7 +103,7 @@ describes.fakeWin(
             .expects('fetchDomainResolverApi')
             .once()
             .withArgs(['merchant1.com', 'non-merchant.com', 'merchant2.com'])
-            .returns(Promise.resolve({}));
+            .resolves({});
 
           resolver.resolveUnknownAnchors(anchorList);
         });
@@ -116,7 +116,7 @@ describes.fakeWin(
             .expects('fetchDomainResolverApi')
             .once()
             .withArgs(['merchant1.com', 'non-merchant.com', 'merchant2.com'])
-            .returns(Promise.resolve({}));
+            .resolves({});
 
           resolver.resolveUnknownAnchors(anchorList);
         });
@@ -129,7 +129,7 @@ describes.fakeWin(
             .expects('fetchDomainResolverApi')
             .once()
             .withArgs(['non-merchant-new.com', 'merchant-new'])
-            .returns(Promise.resolve({}));
+            .resolves({});
 
           resolver.resolveUnknownAnchors(
             [
@@ -159,7 +159,7 @@ describes.fakeWin(
             .expects('fetchDomainResolverApi')
             .once()
             .withArgs(['merchant1.com', 'non-merchant.com', 'merchant2.com'])
-            .returns(Promise.resolve({}));
+            .resolves({});
 
           resolver.resolveUnknownAnchors(
             [helpers.createAnchor('https://www.excluded-merchant.com')].concat(
@@ -225,11 +225,7 @@ describes.fakeWin(
             json: () => Promise.resolve({}),
           };
 
-          mock
-            .expects('fetchJson')
-            .once()
-            .withArgs(url)
-            .returns(Promise.resolve(response));
+          mock.expects('fetchJson').once().withArgs(url).resolves(response);
 
           resolver.fetchDomainResolverApi(domains);
         });
@@ -262,7 +258,7 @@ describes.fakeWin(
             // Ideally only focused on fetchOptions but using sinon.match.any
             // as the first arg makes the test fail for some reasons.
             .withArgs(url, fetchOptions)
-            .returns(Promise.resolve(response));
+            .resolves(response);
 
           resolver.fetchDomainResolverApi(domains);
         });

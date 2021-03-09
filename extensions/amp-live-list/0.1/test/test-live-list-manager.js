@@ -44,9 +44,7 @@ describes.fakeWin('LiveListManager', {amp: true}, (env) => {
       ready = resolve;
     });
     env.sandbox.stub(manager, 'whenDocReady_').returns(docReadyPromise);
-    env.sandbox
-      .stub(LiveListManager, 'forDoc')
-      .returns(Promise.resolve(manager));
+    env.sandbox.stub(LiveListManager, 'forDoc').resolves(manager);
 
     liveList = getLiveList({'data-sort-time': '1111'});
     env.sandbox.stub(liveList, 'getInterval').callsFake(() => 5000);
@@ -813,9 +811,7 @@ describes.realWin(
       ampdoc = env.ampdoc;
       extensions = env.extensions;
       manager = new LiveListManager(ampdoc);
-      env.sandbox
-        .stub(LiveListManager, 'forDoc')
-        .returns(Promise.resolve(manager));
+      env.sandbox.stub(LiveListManager, 'forDoc').resolves(manager);
     });
 
     it('should install newly discovered script tags on xhr doc', () => {

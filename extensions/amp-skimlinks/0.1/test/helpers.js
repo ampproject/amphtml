@@ -39,7 +39,7 @@ const helpersFactory = (env) => {
       };
 
       return {
-        fetchJson: env.sandbox.stub().returns(Promise.resolve(response)),
+        fetchJson: env.sandbox.stub().resolves(response),
       };
     },
 

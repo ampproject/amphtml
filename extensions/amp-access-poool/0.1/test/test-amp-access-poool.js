@@ -85,21 +85,19 @@ describes.fakeWin(
         accessSourceMock
           .expects('buildUrl')
           .withExactArgs('https://baseurl?param&iid=amp-test-article', false)
-          .returns(Promise.resolve('https://builturl'))
+          .resolves('https://builturl')
           .once();
         accessSourceMock
           .expects('getLoginUrl')
-          .returns(Promise.resolve('https://builturl'))
+          .resolves('https://builturl')
           .once();
         xhrMock
           .expects('fetchJson')
-          .returns(
-            Promise.resolve({
-              json() {
-                return Promise.resolve({access: true});
-              },
-            })
-          )
+          .resolves({
+            json() {
+              return Promise.resolve({access: true});
+            },
+          })
           .once();
         return vendor.authorize().then((resp) => {
           expect(resp.access).to.be.true;
@@ -109,21 +107,19 @@ describes.fakeWin(
       it('authorization fails because of wrong or missing server config', () => {
         accessSourceMock
           .expects('buildUrl')
-          .returns(Promise.resolve('https://builturl'))
+          .resolves('https://builturl')
           .once();
         accessSourceMock
           .expects('getLoginUrl')
-          .returns(Promise.resolve('https://builturl'))
+          .resolves('https://builturl')
           .once();
         xhrMock
           .expects('fetchJson')
-          .returns(
-            Promise.resolve({
-              json() {
-                return Promise.resolve({access: true});
-              },
-            })
-          )
+          .resolves({
+            json() {
+              return Promise.resolve({access: true});
+            },
+          })
           .once();
         return vendor.authorize().catch((err) => {
           expect(err.message).to.exist;
@@ -133,7 +129,7 @@ describes.fakeWin(
       it('authorization response fails - 402 error', () => {
         accessSourceMock
           .expects('buildUrl')
-          .returns(Promise.resolve('https://builturl'))
+          .resolves('https://builturl')
           .once();
         xhrMock
           .expects('fetchJson')

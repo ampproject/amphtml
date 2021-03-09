@@ -50,11 +50,9 @@ describe('batchFetchJsonFor', () => {
       .stub(Services, 'urlReplacementsForDoc')
       .returns(urlReplacements);
 
-    fetchJson = window.sandbox.stub().returns(
-      Promise.resolve({
-        json: () => Promise.resolve(data),
-      })
-    );
+    fetchJson = window.sandbox.stub().resolves({
+      json: () => Promise.resolve(data),
+    });
 
     xhr = {xssiJson: () => Promise.resolve(data)};
     window.sandbox.stub(Services, 'xhrFor').returns(xhr);
@@ -82,7 +80,7 @@ describe('batchFetchJsonFor', () => {
 
         urlReplacements.expandUrlAsync
           .withArgs('https://data.com?x=FOO&y=BAR')
-          .returns(Promise.resolve('https://data.com?x=abc&y=BAR'));
+          .resolves('https://data.com?x=abc&y=BAR');
         urlReplacements.collectDisallowedVarsSync.withArgs(el).returns(['BAR']);
 
         const optIn = UrlReplacementPolicy.OPT_IN;
@@ -98,7 +96,7 @@ describe('batchFetchJsonFor', () => {
 
       urlReplacements.expandUrlAsync
         .withArgs('https://data.com?x=FOO&y=BAR')
-        .returns(Promise.resolve('https://data.com?x=abc&y=BAR'));
+        .resolves('https://data.com?x=abc&y=BAR');
 
       const userError = window.sandbox.stub(user(), 'error');
       const all = UrlReplacementPolicy.ALL;

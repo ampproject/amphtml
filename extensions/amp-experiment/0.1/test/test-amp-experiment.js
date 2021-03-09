@@ -138,13 +138,13 @@ describes.realWin(
       const stub = env.sandbox.stub(variant, 'allocateVariant');
       stub
         .withArgs(ampdoc, 'experiment-1', config['experiment-1'])
-        .returns(Promise.resolve('variant-a'));
+        .resolves('variant-a');
       stub
         .withArgs(ampdoc, 'experiment-2', config['experiment-2'])
-        .returns(Promise.resolve('variant-d'));
+        .resolves('variant-d');
       stub
         .withArgs(ampdoc, 'experiment-3', config['experiment-3'])
-        .returns(Promise.resolve(null));
+        .resolves(null);
 
       experiment.buildCallback();
       return Services.variantsForDocOrNull(ampdoc.getHeadNode())

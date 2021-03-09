@@ -85,7 +85,7 @@ describes.sandboxed('Storage', {}, (env) => {
         bindingMock
           .expects('loadBlob')
           .withExactArgs('https://acme.com')
-          .returns(Promise.resolve(btoa(JSON.stringify(store1.obj))))
+          .resolves(btoa(JSON.stringify(store1.obj)))
           .once();
         return storage
           .get('key1')
@@ -101,7 +101,7 @@ describes.sandboxed('Storage', {}, (env) => {
         bindingMock
           .expects('loadBlob')
           .withExactArgs('https://acme.com')
-          .returns(Promise.resolve(null))
+          .resolves(null)
           .once();
         return storage
           .get('key1')
@@ -121,7 +121,7 @@ describes.sandboxed('Storage', {}, (env) => {
         bindingMock
           .expects('loadBlob')
           .withExactArgs('https://acme.com')
-          .returns(Promise.resolve(btoa(JSON.stringify(store1.obj))))
+          .resolves(btoa(JSON.stringify(store1.obj)))
           .once();
         return storage
           .get('key1')
@@ -141,7 +141,7 @@ describes.sandboxed('Storage', {}, (env) => {
         bindingMock
           .expects('loadBlob')
           .withExactArgs('https://acme.com')
-          .returns(Promise.resolve(btoa(JSON.stringify(store1.obj))))
+          .resolves(btoa(JSON.stringify(store1.obj)))
           .once();
         expect(storage.storePromise_).to.not.exist;
         const promise = storage.get('key1');
@@ -162,7 +162,7 @@ describes.sandboxed('Storage', {}, (env) => {
         bindingMock
           .expects('loadBlob')
           .withExactArgs('https://acme.com')
-          .returns(Promise.resolve(null))
+          .resolves(null)
           .once();
         expect(storage.storePromise_).to.not.exist;
         const promise = storage.get('key1');
@@ -199,7 +199,7 @@ describes.sandboxed('Storage', {}, (env) => {
         bindingMock
           .expects('loadBlob')
           .withExactArgs('https://acme.com')
-          .returns(Promise.resolve('UNKNOWN FORMAT'))
+          .resolves('UNKNOWN FORMAT')
           .once();
         expect(storage.storePromise_).to.not.exist;
         const promise = storage.get('key1');
@@ -216,7 +216,7 @@ describes.sandboxed('Storage', {}, (env) => {
         bindingMock
           .expects('loadBlob')
           .withExactArgs('https://acme.com')
-          .returns(Promise.resolve(btoa(JSON.stringify(store1.obj))))
+          .resolves(btoa(JSON.stringify(store1.obj)))
           .once();
         bindingMock
           .expects('saveBlob')
@@ -230,7 +230,7 @@ describes.sandboxed('Storage', {}, (env) => {
               );
             })
           )
-          .returns(Promise.resolve())
+          .resolves()
           .twice();
         viewerMock
           .expects('broadcast')
@@ -270,7 +270,7 @@ describes.sandboxed('Storage', {}, (env) => {
         bindingMock
           .expects('loadBlob')
           .withExactArgs('https://acme.com')
-          .returns(Promise.resolve(btoa(JSON.stringify(store1.obj))))
+          .resolves(btoa(JSON.stringify(store1.obj)))
           .once();
         bindingMock
           .expects('saveBlob')
@@ -281,7 +281,7 @@ describes.sandboxed('Storage', {}, (env) => {
               return store2.get('key1') === undefined;
             })
           )
-          .returns(Promise.resolve())
+          .resolves()
           .twice();
         viewerMock
           .expects('broadcast')
@@ -325,7 +325,7 @@ describes.sandboxed('Storage', {}, (env) => {
         bindingMock
           .expects('loadBlob')
           .withExactArgs('https://acme.com')
-          .returns(Promise.resolve(btoa(JSON.stringify(store1.obj))))
+          .resolves(btoa(JSON.stringify(store1.obj)))
           .once();
         bindingMock
           .expects('saveBlob')
@@ -336,7 +336,7 @@ describes.sandboxed('Storage', {}, (env) => {
               return store2.get('key1') === undefined;
             })
           )
-          .returns(Promise.resolve())
+          .resolves()
           .twice();
         viewerMock
           .expects('broadcast')
@@ -361,7 +361,7 @@ describes.sandboxed('Storage', {}, (env) => {
         bindingMock
           .expects('loadBlob')
           .withExactArgs('https://acme.com')
-          .returns(Promise.resolve(btoa(JSON.stringify(store1.obj))))
+          .resolves(btoa(JSON.stringify(store1.obj)))
           .twice();
         return storage.get('key1').then((value) => {
           expect(value).to.equal('value1');
@@ -387,7 +387,7 @@ describes.sandboxed('Storage', {}, (env) => {
         bindingMock
           .expects('loadBlob')
           .withExactArgs('https://acme.com')
-          .returns(Promise.resolve(btoa(JSON.stringify(store1.obj))))
+          .resolves(btoa(JSON.stringify(store1.obj)))
           .twice();
         return storage.get('key1').then((value) => {
           expect(value).to.equal('value1');
@@ -709,7 +709,7 @@ describes.sandboxed('ViewerStorageBinding', {}, (env) => {
           return arg['origin'] == 'https://acme.com';
         })
       )
-      .returns(Promise.resolve({'blob': 'BLOB1'}))
+      .resolves({'blob': 'BLOB1'})
       .once();
     return binding.loadBlob('https://acme.com').then((blob) => {
       expect(blob).to.equal('BLOB1');
@@ -725,7 +725,7 @@ describes.sandboxed('ViewerStorageBinding', {}, (env) => {
           return arg['origin'] == 'https://acme.com';
         })
       )
-      .returns(Promise.resolve({}))
+      .resolves({})
       .once();
     return binding.loadBlob('https://acme.com').then((blob) => {
       expect(blob).to.not.exist;
@@ -763,7 +763,7 @@ describes.sandboxed('ViewerStorageBinding', {}, (env) => {
           return arg['origin'] == 'https://acme.com' && arg['blob'] == 'BLOB1';
         })
       )
-      .returns(Promise.resolve())
+      .resolves()
       .once();
     return binding.saveBlob('https://acme.com', 'BLOB1');
   });

@@ -710,7 +710,7 @@ describes.sandboxed('StandardActions', {}, (env) => {
       beforeEach(() => {
         navigateToStub = env.sandbox
           .stub(standardActions, 'handleNavigateTo_')
-          .returns(Promise.resolve());
+          .resolves();
 
         closeOrNavigateToSpy = env.sandbox.spy(
           standardActions,
@@ -814,11 +814,11 @@ describes.sandboxed('StandardActions', {}, (env) => {
       const bind = {invoke: env.sandbox.stub()};
       // Bind.invoke() doesn't actually resolve with a value,
       // but add one here to check that the promise is chained.
-      bind.invoke.returns(Promise.resolve('set-state-complete'));
+      bind.invoke.resolves('set-state-complete');
       env.sandbox
         .stub(Services, 'bindForDocOrNull')
         .withArgs(element)
-        .returns(Promise.resolve(bind));
+        .resolves(bind);
 
       invocation.method = 'setState';
       invocation.args = {
@@ -839,11 +839,11 @@ describes.sandboxed('StandardActions', {}, (env) => {
       const bind = {invoke: env.sandbox.stub()};
       // Bind.invoke() doesn't actually resolve with a value,
       // but add one here to check that the promise is chained.
-      bind.invoke.returns(Promise.resolve('push-state-complete'));
+      bind.invoke.resolves('push-state-complete');
       env.sandbox
         .stub(Services, 'bindForDocOrNull')
         .withArgs(element)
-        .returns(Promise.resolve(bind));
+        .resolves(bind);
 
       invocation.method = 'pushState';
       invocation.args = {

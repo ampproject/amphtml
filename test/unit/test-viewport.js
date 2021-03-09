@@ -1026,9 +1026,7 @@ describes.fakeWin('Viewport', {}, (env) => {
 
   it('should calculate client rect w/o global client rect', () => {
     const bindingMock = env.sandbox.mock(binding);
-    bindingMock
-      .expects('getRootClientRectAsync')
-      .returns(Promise.resolve(null));
+    bindingMock.expects('getRootClientRectAsync').resolves(null);
     const el = document.createElement('div');
     el.getBoundingClientRect = () => layoutRectLtwh(1, 2, 3, 4);
     stubVsyncMeasure();
@@ -1041,7 +1039,7 @@ describes.fakeWin('Viewport', {}, (env) => {
     const bindingMock = env.sandbox.mock(binding);
     bindingMock
       .expects('getRootClientRectAsync')
-      .returns(Promise.resolve(layoutRectLtwh(5, 5, 5, 5)))
+      .resolves(layoutRectLtwh(5, 5, 5, 5))
       .twice();
     const el = document.createElement('div');
     el.getBoundingClientRect = () => layoutRectLtwh(1, 2, 3, 4);

@@ -81,12 +81,10 @@ function createScaffoldingForFluidRendering(impl, sandbox, resize = true) {
   impl.attemptChangeHeight = resize
     ? () => Promise.resolve()
     : () => Promise.reject('Creative in viewport');
-  sandbox.stub(impl, 'sendXhrRequest').returns(
-    Promise.resolve({
-      arrayBuffer: () => Promise.resolve(utf8Encode(rawCreative)),
-      headers: {has: () => false, get: () => undefined},
-    })
-  );
+  sandbox.stub(impl, 'sendXhrRequest').resolves({
+    arrayBuffer: () => Promise.resolve(utf8Encode(rawCreative)),
+    headers: {has: () => false, get: () => undefined},
+  });
   impl.sentinel = 'sentinel';
   impl.initiateAdRequest();
   impl.safeframeApi_ = new SafeframeHostApi(impl, true, impl.creativeSize_);
@@ -299,7 +297,7 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, (env) => {
   it('should fire impression for AMP fluid creative, if partly visible', () => {
     impl.iframe = impl.win.document.createElement('iframe');
     impl.win.document.body.appendChild(impl.iframe);
-    env.sandbox.stub(impl, 'setCssPosition_').returns(Promise.resolve());
+    env.sandbox.stub(impl, 'setCssPosition_').resolves();
     env.sandbox.stub(impl, 'attemptChangeHeight').returns(Promise.reject());
     const delayedImpressionSpy = env.sandbox.spy(
       impl,
@@ -321,7 +319,7 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, (env) => {
   it('should not fire impression for AMP fluid creative', () => {
     impl.iframe = impl.win.document.createElement('iframe');
     impl.win.document.body.appendChild(impl.iframe);
-    env.sandbox.stub(impl, 'setCssPosition_').returns(Promise.resolve());
+    env.sandbox.stub(impl, 'setCssPosition_').resolves();
     env.sandbox.stub(impl, 'attemptChangeHeight').returns(Promise.reject());
     const delayedImpressionSpy = env.sandbox.spy(
       impl,
@@ -344,10 +342,8 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, (env) => {
       'attemptChangeHeight'
     );
     attemptChangeHeightStub.returns(Promise.reject());
-    env.sandbox.stub(impl, 'setCssPosition_').returns(Promise.resolve());
-    env.sandbox
-      .stub(impl, 'attemptToRenderCreative')
-      .returns(Promise.resolve());
+    env.sandbox.stub(impl, 'setCssPosition_').resolves();
+    env.sandbox.stub(impl, 'attemptToRenderCreative').resolves();
     impl.buildCallback();
     impl.isFluidRequest_ = true;
     impl.isVerifiedAmpCreative_ = true;
@@ -364,10 +360,8 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, (env) => {
       impl,
       'attemptChangeHeight'
     );
-    attemptChangeHeightStub.returns(Promise.resolve());
-    env.sandbox
-      .stub(impl, 'attemptToRenderCreative')
-      .returns(Promise.resolve());
+    attemptChangeHeightStub.resolves();
+    env.sandbox.stub(impl, 'attemptToRenderCreative').resolves();
     env.sandbox.stub(impl, 'setCssPosition_').returns(mockPromise);
     impl.buildCallback();
     impl.isFluidRequest_ = true;
@@ -388,11 +382,9 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, (env) => {
       'attemptChangeHeight'
     );
     const mutateElementStub = env.sandbox.stub(impl, 'mutateElement');
-    attemptChangeHeightStub.returns(Promise.resolve());
-    mutateElementStub.returns(Promise.resolve());
-    env.sandbox
-      .stub(impl, 'attemptToRenderCreative')
-      .returns(Promise.resolve());
+    attemptChangeHeightStub.resolves();
+    mutateElementStub.resolves();
+    env.sandbox.stub(impl, 'attemptToRenderCreative').resolves();
     impl.buildCallback();
     impl.isFluidRequest_ = true;
     impl.isVerifiedAmpCreative_ = true;
@@ -413,10 +405,8 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, (env) => {
     );
     const mutateElementStub = env.sandbox.stub(impl, 'mutateElement');
     attemptChangeHeightStub.returns(Promise.reject());
-    mutateElementStub.returns(Promise.resolve());
-    env.sandbox
-      .stub(impl, 'attemptToRenderCreative')
-      .returns(Promise.resolve());
+    mutateElementStub.resolves();
+    env.sandbox.stub(impl, 'attemptToRenderCreative').resolves();
     impl.buildCallback();
     impl.isFluidRequest_ = true;
     impl.isVerifiedAmpCreative_ = true;

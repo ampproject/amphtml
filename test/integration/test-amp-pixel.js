@@ -136,7 +136,7 @@ describes.fakeWin('amp-pixel with img (inabox)', {amp: true}, (env) => {
       createElementWithAttributes(env.win.document, 'img', {src})
     );
     env.win.document.body.appendChild(pixelElem);
-    env.sandbox.stub(env.ampdoc, 'whenFirstVisible').returns(Promise.resolve());
+    env.sandbox.stub(env.ampdoc, 'whenFirstVisible').resolves();
     const pixel = new AmpPixel(pixelElem);
     pixel.buildCallback();
     expect(pixelElem.querySelectorAll('img').length).to.equal(1);

@@ -321,7 +321,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
     onCreativeRenderSpy = env.sandbox.spy(AmpA4A.prototype, 'onCreativeRender');
     getSigningServiceNamesMock.returns(['google']);
     whenVisibleMock = env.sandbox.stub(AmpDoc.prototype, 'whenFirstVisible');
-    whenVisibleMock.returns(Promise.resolve());
+    whenVisibleMock.resolves();
     getResourceStub = env.sandbox.stub(AmpA4A.prototype, 'getResource');
     getResourceStub.returns({
       getUpgradeDelayMs: () => 12345,
@@ -1701,9 +1701,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
         a4a,
         'renderNonAmpCreative'
       );
-      env.sandbox
-        .stub(a4a, 'maybeValidateAmpCreative')
-        .returns(Promise.resolve());
+      env.sandbox.stub(a4a, 'maybeValidateAmpCreative').resolves();
       a4a.onLayoutMeasure();
       a4a.uiHandler = {
         getScrollPromiseForStickyAd: () => Promise.resolve(null),
@@ -2663,8 +2661,8 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
         'attemptChangeSize'
       );
       // Expect called twice: one for resize and second for reverting.
-      attemptChangeSizeStub.withArgs(123, 456).returns(Promise.resolve());
-      attemptChangeSizeStub.withArgs(200, 50).returns(Promise.resolve());
+      attemptChangeSizeStub.withArgs(123, 456).resolves();
+      attemptChangeSizeStub.withArgs(200, 50).resolves();
       a4a.attemptChangeSize(123, 456);
       a4a.layoutCallback(() => {
         expect(a4aElement.querySelector('iframe')).to.be.ok;
@@ -2733,13 +2731,13 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
         const policyPromise = new Promise(
           (resolver) => (inResolver = resolver)
         );
-        env.sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
-          Promise.resolve({
+        env.sandbox
+          .stub(Services, 'consentPolicyServiceForDocOrNull')
+          .resolves({
             whenPolicyResolved: () => policyPromise,
             getConsentStringInfo: () => consentString,
             getConsentMetadataInfo: () => consentMetadata,
-          })
-        );
+          });
 
         const getAdUrlSpy = env.sandbox.spy(a4a, 'getAdUrl');
         const tryExecuteRealTimeConfigSpy = env.sandbox.spy(
@@ -2789,14 +2787,14 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
         env.sandbox
           .stub(AMP.BaseElement.prototype, 'getConsentPolicy')
           .returns('default');
-        env.sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
-          Promise.resolve({
+        env.sandbox
+          .stub(Services, 'consentPolicyServiceForDocOrNull')
+          .resolves({
             whenPolicyResolved: () =>
               Promise.resolve(CONSENT_POLICY_STATE.SUFFICIENT),
             getConsentStringInfo: () => consentString,
             getConsentMetadataInfo: () => consentMetadata,
-          })
-        );
+          });
 
         const getAdUrlSpy = env.sandbox.spy(a4a, 'getAdUrl');
         const tryExecuteRealTimeConfigSpy = env.sandbox.spy(
@@ -2829,8 +2827,9 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
         env.sandbox
           .stub(AMP.BaseElement.prototype, 'getConsentPolicy')
           .returns('default');
-        env.sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
-          Promise.resolve({
+        env.sandbox
+          .stub(Services, 'consentPolicyServiceForDocOrNull')
+          .resolves({
             whenPolicyResolved: () => {
               throw new Error('consent err!');
             },
@@ -2840,8 +2839,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
             getConsentMetadata: () => {
               throw new Error('consent err!');
             },
-          })
-        );
+          });
 
         const getAdUrlSpy = env.sandbox.spy(a4a, 'getAdUrl');
         const tryExecuteRealTimeConfigSpy = env.sandbox.spy(
@@ -3046,18 +3044,14 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
       });
 
       it('should return if doc is served from a defined geo group', async () => {
-        env.sandbox
-          .stub(Services, 'geoForDocOrNull')
-          .returns(Promise.resolve(geoService));
+        env.sandbox.stub(Services, 'geoForDocOrNull').resolves(geoService);
         element.setAttribute('block-rtc', 'gdpr,usca');
         expect(await a4a.getBlockRtc_()).to.true;
       });
 
       it('should return false when doc is in an undefined group or not in', async () => {
         const warnSpy = env.sandbox.stub(user(), 'warn');
-        env.sandbox
-          .stub(Services, 'geoForDocOrNull')
-          .returns(Promise.resolve(geoService));
+        env.sandbox.stub(Services, 'geoForDocOrNull').resolves(geoService);
 
         // Undefined group
         element.setAttribute('block-rtc', 'tx');
@@ -3072,9 +3066,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
 
       it('should throw an error when there is no geoService', async () => {
         geoService = null;
-        env.sandbox
-          .stub(Services, 'geoForDocOrNull')
-          .returns(Promise.resolve(geoService));
+        env.sandbox.stub(Services, 'geoForDocOrNull').resolves(geoService);
         element.setAttribute('block-rtc', 'usca');
         await expect(a4a.getBlockRtc_()).to.be.rejectedWith(
           /requires <amp-geo> to use `block-rtc`/
@@ -3082,9 +3074,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
       });
 
       it('should not execute RealTimeConfig if the attribute is valid', async () => {
-        env.sandbox
-          .stub(Services, 'geoForDocOrNull')
-          .returns(Promise.resolve(geoService));
+        env.sandbox.stub(Services, 'geoForDocOrNull').resolves(geoService);
 
         const realTimeConfigStub = env.sandbox.stub(
           Services,

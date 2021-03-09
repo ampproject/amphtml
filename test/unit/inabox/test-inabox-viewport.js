@@ -236,7 +236,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, (env) => {
 
     const prepareContainer = env.sandbox
       .stub(binding, 'prepareBodyForOverlay_')
-      .returns(Promise.resolve());
+      .resolves();
 
     const makeRequest = stubIframeClientMakeRequest(
       'full-overlay-frame',
@@ -270,7 +270,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, (env) => {
   it('should reset content and request resize on leave overlay mode', () => {
     const resetContainer = env.sandbox
       .stub(binding, 'resetBodyForOverlay_')
-      .returns(Promise.resolve());
+      .resolves();
 
     const makeRequest = stubIframeClientMakeRequest(
       'cancel-full-overlay-frame',
@@ -308,9 +308,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, (env) => {
       /* opt_once */ true
     );
 
-    env.sandbox
-      .stub(binding, 'prepareBodyForOverlay_')
-      .returns(Promise.resolve());
+    env.sandbox.stub(binding, 'prepareBodyForOverlay_').resolves();
 
     yield binding.updateLightboxMode(true);
 
@@ -339,9 +337,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, (env) => {
       /* opt_once */ true
     );
 
-    env.sandbox
-      .stub(binding, 'resetBodyForOverlay_')
-      .returns(Promise.resolve());
+    env.sandbox.stub(binding, 'resetBodyForOverlay_').resolves();
 
     yield binding.updateLightboxMode(false);
 
@@ -379,12 +375,8 @@ describes.fakeWin('inabox-viewport', {amp: {}}, (env) => {
     const updateBoxRectStub = env.sandbox
       .stub(bindingFriendly, 'updateBoxRect_')
       .callsFake(NOOP);
-    env.sandbox
-      .stub(bindingFriendly, 'prepareBodyForOverlay_')
-      .returns(Promise.resolve());
-    env.sandbox
-      .stub(bindingFriendly, 'resetBodyForOverlay_')
-      .returns(Promise.resolve());
+    env.sandbox.stub(bindingFriendly, 'prepareBodyForOverlay_').resolves();
+    env.sandbox.stub(bindingFriendly, 'resetBodyForOverlay_').resolves();
 
     yield bindingFriendly.updateLightboxMode(true);
 

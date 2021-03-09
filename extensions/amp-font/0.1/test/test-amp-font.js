@@ -74,9 +74,7 @@ describes.repeated(
         });
 
         it('should load custom font', function () {
-          env.sandbox
-            .stub(FontLoader.prototype, 'load')
-            .returns(Promise.resolve());
+          env.sandbox.stub(FontLoader.prototype, 'load').resolves();
           return getAmpFont().then(() => {
             expect(root).to.have.class('comic-amp-font-loaded');
             expect(root).to.not.have.class('comic-amp-font-loading');

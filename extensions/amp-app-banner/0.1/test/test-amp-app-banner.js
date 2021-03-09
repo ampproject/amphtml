@@ -87,13 +87,11 @@ describes.realWin(
         env.sandbox
           .mock(Services.xhrFor(win))
           .expects('fetchJson')
-          .returns(
-            Promise.resolve({
-              json() {
-                return Promise.resolve(manifestObj.content);
-              },
-            })
-          );
+          .resolves({
+            json() {
+              return Promise.resolve(manifestObj.content);
+            },
+          });
       }
 
       const banner = doc.createElement('amp-app-banner');

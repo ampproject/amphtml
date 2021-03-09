@@ -749,9 +749,7 @@ describe
       });
 
       it('should not intercept if viewer untrusted and non-dev mode', () => {
-        window.sandbox
-          .stub(viewer, 'isTrustedViewer')
-          .returns(Promise.resolve(false));
+        window.sandbox.stub(viewer, 'isTrustedViewer').resolves(false);
         interceptionEnabledWin.AMP_DEV_MODE = false;
 
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
@@ -778,9 +776,7 @@ describe
       });
 
       it('should intercept if viewer untrusted but in local dev mode', () => {
-        window.sandbox
-          .stub(viewer, 'isTrustedViewer')
-          .returns(Promise.resolve(false));
+        window.sandbox.stub(viewer, 'isTrustedViewer').resolves(false);
         window.sandbox.stub(mode, 'getMode').returns({localDev: true});
 
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
@@ -791,9 +787,7 @@ describe
       });
 
       it('should intercept if untrusted-xhr-interception experiment enabled', () => {
-        window.sandbox
-          .stub(viewer, 'isTrustedViewer')
-          .returns(Promise.resolve(false));
+        window.sandbox.stub(viewer, 'isTrustedViewer').resolves(false);
         window.sandbox.stub(mode, 'getMode').returns({localDev: false});
         window.sandbox
           .stub(viewer, 'hasCapability')
@@ -813,9 +807,7 @@ describe
       });
 
       it('should intercept if non-dev mode but viewer trusted', () => {
-        window.sandbox
-          .stub(viewer, 'isTrustedViewer')
-          .returns(Promise.resolve(true));
+        window.sandbox.stub(viewer, 'isTrustedViewer').resolves(true);
         interceptionEnabledWin.AMP_DEV_MODE = false;
 
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
@@ -936,7 +928,7 @@ describe
 
       it('should be rejected when response undefined', () => {
         expectAsyncConsoleError(/Object expected/);
-        sendMessageStub.returns(Promise.resolve());
+        sendMessageStub.resolves();
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
         return expect(
@@ -946,7 +938,7 @@ describe
 
       it('should be rejected when response null', () => {
         expectAsyncConsoleError(/Object expected/);
-        sendMessageStub.returns(Promise.resolve(null));
+        sendMessageStub.resolves(null);
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
         return expect(
@@ -956,7 +948,7 @@ describe
 
       it('should be rejected when response is string', () => {
         expectAsyncConsoleError(/Object expected/);
-        sendMessageStub.returns(Promise.resolve('response text'));
+        sendMessageStub.resolves('response text');
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
         return expect(
@@ -971,19 +963,17 @@ describe
         beforeEach(() => (interceptionEnabledWin.Response = window.Response));
 
         it('should return correct non-document response', () => {
-          sendMessageStub.returns(
-            Promise.resolve({
-              body: '{"content":32}',
-              init: {
-                status: 242,
-                statusText: 'Magic status',
-                headers: [
-                  ['a', 2],
-                  ['b', false],
-                ],
-              },
-            })
-          );
+          sendMessageStub.resolves({
+            body: '{"content":32}',
+            init: {
+              status: 242,
+              statusText: 'Magic status',
+              headers: [
+                ['a', 2],
+                ['b', false],
+              ],
+            },
+          });
           const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
           return xhr
@@ -1010,19 +1000,17 @@ describe
         beforeEach(() => (interceptionEnabledWin.Response = undefined));
 
         it('should return correct non-document response', () => {
-          sendMessageStub.returns(
-            Promise.resolve({
-              body: '{"content":32}',
-              init: {
-                status: 242,
-                statusText: 'Magic status',
-                headers: [
-                  ['a', 2],
-                  ['b', false],
-                ],
-              },
-            })
-          );
+          sendMessageStub.resolves({
+            body: '{"content":32}',
+            init: {
+              status: 242,
+              statusText: 'Magic status',
+              headers: [
+                ['a', 2],
+                ['b', false],
+              ],
+            },
+          });
           const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
           return xhr
@@ -1039,7 +1027,7 @@ describe
         });
 
         it('should return default response when body/init missing', () => {
-          sendMessageStub.returns(Promise.resolve({}));
+          sendMessageStub.resolves({});
           const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
           return xhr
@@ -1054,7 +1042,7 @@ describe
         });
 
         it('should return default response when status/headers missing', () => {
-          sendMessageStub.returns(Promise.resolve({body: '', init: {}}));
+          sendMessageStub.resolves({body: '', init: {}});
           const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
           return xhr
@@ -1067,7 +1055,7 @@ describe
         });
 
         it('should convert body to string', () => {
-          sendMessageStub.returns(Promise.resolve({body: 32}));
+          sendMessageStub.resolves({body: 32});
           const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
           return xhr
@@ -1078,7 +1066,7 @@ describe
         });
 
         it('should convert status to int', () => {
-          sendMessageStub.returns(Promise.resolve({init: {status: '209.6'}}));
+          sendMessageStub.resolves({init: {status: '209.6'}});
           const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
           return xhr
@@ -1091,17 +1079,15 @@ describe
         });
 
         it('should convert headers to string', () => {
-          sendMessageStub.returns(
-            Promise.resolve({
-              init: {
-                headers: [
-                  [1, true],
-                  [false, NaN],
-                  [undefined, null],
-                ],
-              },
-            })
-          );
+          sendMessageStub.resolves({
+            init: {
+              headers: [
+                [1, true],
+                [false, NaN],
+                [undefined, null],
+              ],
+            },
+          });
           const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
           return xhr
@@ -1114,17 +1100,15 @@ describe
         });
 
         it('should support case-insensitive header search', () => {
-          sendMessageStub.returns(
-            Promise.resolve({
-              init: {
-                headers: [
-                  ['Content-Type', 'text/plain'],
-                  ['ACCEPT', 'text/plain'],
-                  ['x-amp-custom', 'foo'],
-                ],
-              },
-            })
-          );
+          sendMessageStub.resolves({
+            init: {
+              headers: [
+                ['Content-Type', 'text/plain'],
+                ['ACCEPT', 'text/plain'],
+                ['x-amp-custom', 'foo'],
+              ],
+            },
+          });
           const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
           return xhr

@@ -445,8 +445,9 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
     });
 
     it('replaces CONSENT_METADATA', () => {
-      window.sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
-        Promise.resolve({
+      window.sandbox
+        .stub(Services, 'consentPolicyServiceForDocOrNull')
+        .resolves({
           getConsentMetadataInfo: () => {
             return Promise.resolve({
               'gdprApplies': true,
@@ -454,8 +455,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
               'consentStringType': 1,
             });
           },
-        })
-      );
+        });
 
       return check(
         'CONSENT_METADATA(gdprApplies)&CONSENT_METADATA(additionalConsent)&CONSENT_METADATA(consentStringType)&CONSENT_METADATA(invalid_key)',
@@ -464,13 +464,13 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
     });
 
     it('replaces CONSENT_STRING', () => {
-      window.sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
-        Promise.resolve({
+      window.sandbox
+        .stub(Services, 'consentPolicyServiceForDocOrNull')
+        .resolves({
           getConsentStringInfo: () => {
             return Promise.resolve('userConsentString');
           },
-        })
-      );
+        });
 
       return check('a=CONSENT_STRING', 'a=userConsentString');
     });

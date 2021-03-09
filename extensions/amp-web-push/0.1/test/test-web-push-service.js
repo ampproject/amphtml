@@ -531,7 +531,7 @@ describes.realWin(
         );
         iframeWindowControllerMock
           .expects('waitUntilWorkerControlsPage')
-          .returns(Promise.resolve(true));
+          .resolves(true);
         env.sandbox
           ./*OK*/ stub(
             iframeWindow._ampWebPushHelperFrame,
@@ -620,7 +620,7 @@ describes.realWin(
             .expects('register')
             .once()
             .withArgs(swUrl, {scope: swScope})
-            .returns(Promise.resolve(true));
+            .resolves(true);
           return webPush.registerServiceWorker();
         })
         .then(() => {
@@ -637,7 +637,7 @@ describes.realWin(
         );
         iframeWindowControllerMock
           .expects('waitUntilWorkerControlsPage')
-          .returns(Promise.resolve(true));
+          .resolves(true);
         env.sandbox
           ./*OK*/ stub(
             iframeWindow._ampWebPushHelperFrame,
@@ -779,7 +779,7 @@ describes.realWin(
         );
         iframeWindowControllerMock
           .expects('waitUntilWorkerControlsPage')
-          .returns(Promise.resolve(true));
+          .resolves(true);
         env.sandbox
           ./*OK*/ stub(
             iframeWindow._ampWebPushHelperFrame,

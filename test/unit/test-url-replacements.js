@@ -283,7 +283,7 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
               ampdoc,
               'viewer',
               'getReferrerUrl'
-            ).returns(Promise.resolve('http://example.org/page.html'));
+            ).resolves('http://example.org/page.html');
             return replacements.expandUrlAsync('?ref=EXTERNAL_REFERRER');
           })
           .then((res) => {
@@ -304,7 +304,7 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
                 ampdoc,
                 'viewer',
                 'getReferrerUrl'
-              ).returns(Promise.resolve('http://example.org/page.html'));
+              ).resolves('http://example.org/page.html');
               return replacements.expandUrlAsync('?ref=EXTERNAL_REFERRER');
             })
             .then((res) => {
@@ -326,10 +326,8 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
                 ampdoc,
                 'viewer',
                 'getReferrerUrl'
-              ).returns(
-                Promise.resolve(
-                  'https://example-org.cdn.ampproject.org/v/example.org/page.html'
-                )
+              ).resolves(
+                'https://example-org.cdn.ampproject.org/v/example.org/page.html'
               );
               return replacements.expandUrlAsync('?ref=EXTERNAL_REFERRER');
             })
@@ -352,11 +350,7 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
                 ampdoc,
                 'viewer',
                 'getReferrerUrl'
-              ).returns(
-                Promise.resolve(
-                  'https://cdn.ampproject.org/v/example.org/page.html'
-                )
-              );
+              ).resolves('https://cdn.ampproject.org/v/example.org/page.html');
               return replacements.expandUrlAsync('?ref=EXTERNAL_REFERRER');
             })
             .then((res) => {
@@ -633,9 +627,7 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
       it('should allow empty CLIENT_ID', () => {
         return getReplacements()
           .then((replacements) => {
-            stubServiceForDoc(env.sandbox, ampdoc, 'cid', 'get').returns(
-              Promise.resolve()
-            );
+            stubServiceForDoc(env.sandbox, ampdoc, 'cid', 'get').resolves();
             return replacements.expandUrlAsync('?a=CLIENT_ID(_ga)');
           })
           .then((res) => {
@@ -692,14 +684,12 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
 
       it('should replace AMP_STATE(key)', () => {
         const win = getFakeWindow();
-        env.sandbox.stub(Services, 'bindForDocOrNull').returns(
-          Promise.resolve({
-            getStateValue(key) {
-              expect(key).to.equal('foo.bar');
-              return Promise.resolve('baz');
-            },
-          })
-        );
+        env.sandbox.stub(Services, 'bindForDocOrNull').resolves({
+          getStateValue(key) {
+            expect(key).to.equal('foo.bar');
+            return Promise.resolve('baz');
+          },
+        });
         return Services.urlReplacementsForDoc(win.document.documentElement)
           .expandUrlAsync('?state=AMP_STATE(foo.bar)')
           .then((res) => {
@@ -1015,7 +1005,7 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
         return getReplacements().then((replacements) => {
           env.sandbox
             .stub(viewerService, 'getViewerOrigin')
-            .returns(Promise.resolve('https://www.google.com'));
+            .resolves('https://www.google.com');
           return replacements.expandUrlAsync('?sh=VIEWER').then((res) => {
             expect(res).to.equal('?sh=https%3A%2F%2Fwww.google.com');
           });
@@ -1024,9 +1014,7 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
 
       it('should replace VIEWER with empty string', () => {
         return getReplacements().then((replacements) => {
-          env.sandbox
-            .stub(viewerService, 'getViewerOrigin')
-            .returns(Promise.resolve(''));
+          env.sandbox.stub(viewerService, 'getViewerOrigin').resolves('');
           return replacements.expandUrlAsync('?sh=VIEWER').then((res) => {
             expect(res).to.equal('?sh=');
           });
@@ -1070,15 +1058,13 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
       });
 
       it('should replace AMP_GEO(ISOCountry) and AMP_GEO', () => {
-        env.sandbox.stub(Services, 'geoForDocOrNull').returns(
-          Promise.resolve({
-            'ISOCountry': 'unknown',
-            'ISOCountryGroups': ['nafta', 'waldo'],
-            'nafta': true,
-            'waldo': true,
-            'matchedISOCountryGroups': ['nafta', 'waldo'],
-          })
-        );
+        env.sandbox.stub(Services, 'geoForDocOrNull').resolves({
+          'ISOCountry': 'unknown',
+          'ISOCountryGroups': ['nafta', 'waldo'],
+          'nafta': true,
+          'waldo': true,
+          'matchedISOCountryGroups': ['nafta', 'waldo'],
+        });
         return expandUrlAsync('?geo=AMP_GEO,country=AMP_GEO(ISOCountry)').then(
           (res) => {
             expect(res).to.equal('?geo=nafta%2Cwaldo,country=unknown');
@@ -1596,7 +1582,7 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
         it('should replace ACCESS_READER_ID', () => {
           accessServiceMock
             .expects('getAccessReaderId')
-            .returns(Promise.resolve('reader1'))
+            .resolves('reader1')
             .once();
           return expandUrlAsync('?a=ACCESS_READER_ID').then((res) => {
             expect(res).to.match(/a=reader1/);
@@ -1608,7 +1594,7 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
           accessServiceMock
             .expects('getAuthdataField')
             .withExactArgs('field1')
-            .returns(Promise.resolve('value1'))
+            .resolves('value1')
             .once();
           return expandUrlAsync('?a=AUTHDATA(field1)').then((res) => {
             expect(res).to.match(/a=value1/);
@@ -1670,7 +1656,7 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
         it('should replace ACCESS_READER_ID', () => {
           subscriptionsServiceMock
             .expects('getAccessReaderId')
-            .returns(Promise.resolve('reader1'))
+            .resolves('reader1')
             .once();
           return expandUrlAsync('?a=ACCESS_READER_ID').then((res) => {
             expect(res).to.match(/a=reader1/);
@@ -1682,7 +1668,7 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
           subscriptionsServiceMock
             .expects('getAuthdataField')
             .withExactArgs('field1')
-            .returns(Promise.resolve('value1'))
+            .resolves('value1')
             .once();
           return expandUrlAsync('?a=AUTHDATA(field1)').then((res) => {
             expect(res).to.match(/a=value1/);
@@ -1717,7 +1703,7 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
           subscriptionsServiceMock
             .expects('getAuthdataField')
             .withExactArgs('field1')
-            .returns(Promise.resolve('value1'))
+            .resolves('value1')
             .once();
           return expandUrlAsync('?a=AUTHDATA(field1)').then((res) => {
             expect(res).to.match(/a=value1/);

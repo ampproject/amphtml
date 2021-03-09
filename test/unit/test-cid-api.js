@@ -46,16 +46,14 @@ describes.realWin('test-cid-api', {amp: true}, (env) => {
 
   describe('getScopedCid', () => {
     it('should get CID when no AMP_TOKEN exists', () => {
-      fetchJsonStub.returns(
-        Promise.resolve({
-          json: () => {
-            return {
-              clientId: 'amp-12345',
-              securityToken: 'amp-token-123',
-            };
-          },
-        })
-      );
+      fetchJsonStub.resolves({
+        json: () => {
+          return {
+            clientId: 'amp-12345',
+            securityToken: 'amp-token-123',
+          };
+        },
+      });
       return api.getScopedCid('api-key', 'scope-a').then((cid) => {
         expect(cid).to.equal('amp-12345');
         expect(getCookie(win, 'AMP_TOKEN')).to.equal('amp-token-123');
@@ -77,15 +75,13 @@ describes.realWin('test-cid-api', {amp: true}, (env) => {
 
     it('should get CID when AMP_TOKEN exists', () => {
       persistCookie('AMP_TOKEN', 'amp-token-123');
-      fetchJsonStub.returns(
-        Promise.resolve({
-          json: () => {
-            return {
-              clientId: 'amp-12345',
-            };
-          },
-        })
-      );
+      fetchJsonStub.resolves({
+        json: () => {
+          return {
+            clientId: 'amp-12345',
+          };
+        },
+      });
       return api.getScopedCid('api-key', 'scope-a').then((cid) => {
         expect(cid).to.equal('amp-12345');
         expect(getCookie(win, 'AMP_TOKEN')).to.equal('amp-token-123');
@@ -108,15 +104,13 @@ describes.realWin('test-cid-api', {amp: true}, (env) => {
   });
 
   it('should return $OPT_OUT if API returns optOut', () => {
-    fetchJsonStub.returns(
-      Promise.resolve({
-        json: () => {
-          return {
-            optOut: true,
-          };
-        },
-      })
-    );
+    fetchJsonStub.resolves({
+      json: () => {
+        return {
+          optOut: true,
+        };
+      },
+    });
     return api.getScopedCid('api-key', 'scope-a').then((cid) => {
       expect(cid).to.equal('$OPT_OUT');
       expect(getCookie(win, 'AMP_TOKEN')).to.equal('$OPT_OUT');
@@ -124,13 +118,11 @@ describes.realWin('test-cid-api', {amp: true}, (env) => {
   });
 
   it('should return null if API returns no CID', () => {
-    fetchJsonStub.returns(
-      Promise.resolve({
-        json: () => {
-          return {};
-        },
-      })
-    );
+    fetchJsonStub.resolves({
+      json: () => {
+        return {};
+      },
+    });
     return api.getScopedCid('api-key', 'scope-a').then((cid) => {
       expect(cid).to.be.null;
       expect(getCookie(win, 'AMP_TOKEN')).to.equal('$NOT_FOUND');
@@ -138,25 +130,20 @@ describes.realWin('test-cid-api', {amp: true}, (env) => {
   });
 
   it('should try alternative url if API provides', () => {
-    fetchJsonStub.onCall(0).returns(
-      Promise.resolve({
-        json: () => {
-          return {
-            alternateUrl:
-              'https://ampcid.google.co.uk/v1/publisher:getClientId',
-          };
-        },
-      })
-    );
-    fetchJsonStub.onCall(1).returns(
-      Promise.resolve({
-        json: () => {
-          return {
-            clientId: 'amp-alt-12345',
-          };
-        },
-      })
-    );
+    fetchJsonStub.onCall(0).resolves({
+      json: () => {
+        return {
+          alternateUrl: 'https://ampcid.google.co.uk/v1/publisher:getClientId',
+        };
+      },
+    });
+    fetchJsonStub.onCall(1).resolves({
+      json: () => {
+        return {
+          clientId: 'amp-alt-12345',
+        };
+      },
+    });
     return api.getScopedCid('api-key', 'scope-a').then((cid) => {
       expect(cid).to.equal('amp-alt-12345');
       expect(fetchJsonStub.getCall(1).args[0]).to.equal(
@@ -199,16 +186,14 @@ describes.realWin('test-cid-api', {amp: true}, (env) => {
     'should fetch CID from API if AMP_TOKEN=$NOT_FOUND ' +
       'and document referrer is proxy origin',
     () => {
-      fetchJsonStub.returns(
-        Promise.resolve({
-          json: () => {
-            return {
-              clientId: 'amp-12345',
-              securityToken: 'amp-token-123',
-            };
-          },
-        })
-      );
+      fetchJsonStub.resolves({
+        json: () => {
+          return {
+            clientId: 'amp-12345',
+            securityToken: 'amp-token-123',
+          };
+        },
+      });
       const windowInterface = mockWindowInterface(env.sandbox);
       windowInterface.getDocumentReferrer.returns(
         'https://cdn.ampproject.org/'

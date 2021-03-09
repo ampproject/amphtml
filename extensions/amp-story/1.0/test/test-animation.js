@@ -439,7 +439,7 @@ describes.realWin('amp-story animations', {}, (env) => {
       env.sandbox.stub(Services, 'vsyncFor').returns({});
       env.sandbox
         .stub(Services, 'webAnimationServiceFor')
-        .returns(Promise.resolve(webAnimationService));
+        .resolves(webAnimationService);
 
       runner = {
         applyFirstFrame: env.sandbox.spy(() => Promise.resolve()),

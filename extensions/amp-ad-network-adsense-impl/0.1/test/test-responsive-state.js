@@ -85,14 +85,12 @@ describes.realWin(
         .stub(element, 'getLayoutBox')
         .returns(layoutRectLtwh(50, 200, 375, 100));
 
-      env.sandbox.stub(element, 'getImpl').returns(
-        Promise.resolve({
-          attemptChangeSize: (h, w) => {
-            lastSizeChangeAttempt = {height: h, width: w};
-            return Promise.resolve();
-          },
-        })
-      );
+      env.sandbox.stub(element, 'getImpl').resolves({
+        attemptChangeSize: (h, w) => {
+          lastSizeChangeAttempt = {height: h, width: w};
+          return Promise.resolve();
+        },
+      });
 
       const viewport = Services.viewportForDoc(doc);
       env.sandbox.stub(viewport, 'getSize').returns({width: 375, height: 667});

@@ -171,9 +171,7 @@ describe('reportErrorToServerOrViewer', () => {
   });
 
   it('should report to server if viewer is not trusted', () => {
-    window.sandbox
-      .stub(viewer, 'isTrustedViewer')
-      .returns(Promise.resolve(false));
+    window.sandbox.stub(viewer, 'isTrustedViewer').resolves(false);
     return reportErrorToServerOrViewer(win, data).then(() => {
       expect(createXhr).to.be.calledOnce;
       expect(sendMessageStub).to.not.have.been.called;

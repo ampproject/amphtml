@@ -237,7 +237,7 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, (env) => {
               'Content-Type': 'application/x-www-form-urlencoded',
             },
           })
-          .returns(Promise.resolve(responseDoc))
+          .resolves(responseDoc)
           .once();
         const replaceSectionsStub = env.sandbox
           .stub(adapter, 'replaceSections_')
@@ -388,20 +388,18 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, (env) => {
             'https://acme.com/a?rid=READER_ID',
             /* useAuthData */ false
           )
-          .returns(Promise.resolve('https://acme.com/a?rid=r1'))
+          .resolves('https://acme.com/a?rid=r1')
           .once();
         xhrMock
           .expects('fetchText')
           .withExactArgs('https://acme.com/a?rid=r1', {
             credentials: 'include',
           })
-          .returns(
-            Promise.resolve({
-              text() {
-                return Promise.resolve(encoded);
-              },
-            })
-          )
+          .resolves({
+            text() {
+              return Promise.resolve(encoded);
+            },
+          })
           .once();
         jwtMock.expects('decode').withExactArgs(encoded).returns(jwt).once();
         env.sandbox.stub(adapter, 'shouldBeValidated_').callsFake(() => false);
@@ -418,7 +416,7 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, (env) => {
             'https://acme.com/a?rid=READER_ID',
             /* useAuthData */ false
           )
-          .returns(Promise.resolve('https://acme.com/a?rid=r1'))
+          .resolves('https://acme.com/a?rid=r1')
           .once();
         xhrMock
           .expects('fetchText')
@@ -446,7 +444,7 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, (env) => {
             'https://acme.com/a?rid=READER_ID',
             /* useAuthData */ false
           )
-          .returns(Promise.resolve('https://acme.com/a?rid=r1'))
+          .resolves('https://acme.com/a?rid=r1')
           .once();
         xhrMock
           .expects('fetchText')
@@ -484,38 +482,34 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, (env) => {
             'https://acme.com/a?rid=READER_ID',
             /* useAuthData */ false
           )
-          .returns(Promise.resolve('https://acme.com/a?rid=r1'))
+          .resolves('https://acme.com/a?rid=r1')
           .once();
         xhrMock
           .expects('fetchText')
           .withExactArgs('https://acme.com/a?rid=r1', {
             credentials: 'include',
           })
-          .returns(
-            Promise.resolve({
-              text() {
-                return Promise.resolve(encoded);
-              },
-            })
-          )
+          .resolves({
+            text() {
+              return Promise.resolve(encoded);
+            },
+          })
           .once();
         xhrMock
           .expects('fetchText')
           .withExactArgs('https://acme.com/pk')
-          .returns(
-            Promise.resolve({
-              text() {
-                return pemPromise;
-              },
-            })
-          )
+          .resolves({
+            text() {
+              return pemPromise;
+            },
+          })
           .once();
         jwtMock.expects('decode').withExactArgs(encoded).returns(jwt).once();
         jwtMock.expects('isVerificationSupported').returns(true).once();
         jwtMock
           .expects('decodeAndVerify')
           .withExactArgs(encoded, pemPromise)
-          .returns(Promise.resolve(jwt))
+          .resolves(jwt)
           .once();
         env.sandbox.stub(adapter, 'shouldBeValidated_').callsFake(() => true);
         const validateStub = env.sandbox.stub(adapter, 'validateJwt_');
@@ -538,20 +532,18 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, (env) => {
             'https://acme.com/a?rid=READER_ID',
             /* useAuthData */ false
           )
-          .returns(Promise.resolve('https://acme.com/a?rid=r1'))
+          .resolves('https://acme.com/a?rid=r1')
           .once();
         xhrMock
           .expects('fetchText')
           .withExactArgs('https://acme.com/a?rid=r1', {
             credentials: 'include',
           })
-          .returns(
-            Promise.resolve({
-              text() {
-                return Promise.resolve(encoded);
-              },
-            })
-          )
+          .resolves({
+            text() {
+              return Promise.resolve(encoded);
+            },
+          })
           .once();
         xhrMock
           .expects('fetchText')
@@ -569,7 +561,7 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, (env) => {
               return true;
             })
           )
-          .returns(Promise.resolve(jwt))
+          .resolves(jwt)
           .once();
         env.sandbox.stub(adapter, 'shouldBeValidated_').callsFake(() => true);
         const validateStub = env.sandbox.stub(adapter, 'validateJwt_');
@@ -596,20 +588,18 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, (env) => {
             'https://acme.com/a?rid=READER_ID',
             /* useAuthData */ false
           )
-          .returns(Promise.resolve('https://acme.com/a?rid=r1'))
+          .resolves('https://acme.com/a?rid=r1')
           .once();
         xhrMock
           .expects('fetchText')
           .withExactArgs('https://acme.com/a?rid=r1', {
             credentials: 'include',
           })
-          .returns(
-            Promise.resolve({
-              text() {
-                return Promise.resolve(encoded);
-              },
-            })
-          )
+          .resolves({
+            text() {
+              return Promise.resolve(encoded);
+            },
+          })
           .once();
         jwtMock.expects('decode').withExactArgs(encoded).returns(jwt).once();
         jwtMock.expects('isVerificationSupported').returns(false).once();
@@ -706,7 +696,7 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, (env) => {
 
     describe('pingback', () => {
       it('should always send client pingback', () => {
-        clientAdapterMock.expects('pingback').returns(Promise.resolve()).once();
+        clientAdapterMock.expects('pingback').resolves().once();
         adapter.pingback();
       });
     });

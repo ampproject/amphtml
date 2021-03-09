@@ -978,14 +978,14 @@ describes.realWin(
         const consentPolicyState = 'baz-consentPolicyState';
         const consentPolicySharedData = 'foo-consentPolicySharedData';
 
-        env.sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
-          Promise.resolve({
+        env.sandbox
+          .stub(Services, 'consentPolicyServiceForDocOrNull')
+          .resolves({
             getConsentMetadataInfo: () => Promise.resolve(consentMetadata),
             getConsentStringInfo: () => Promise.resolve(consentString),
             whenPolicyResolved: () => Promise.resolve(consentPolicyState),
             getMergedSharedData: () => Promise.resolve(consentPolicySharedData),
-          })
-        );
+          });
 
         iframe.contentWindow.postMessage(
           {
@@ -1017,7 +1017,7 @@ describes.realWin(
       it('is sent with empty fields when consent service not available', async () => {
         env.sandbox
           .stub(Services, 'consentPolicyServiceForDocOrNull')
-          .returns(Promise.resolve(null));
+          .resolves(null);
 
         iframe.contentWindow.postMessage(
           {

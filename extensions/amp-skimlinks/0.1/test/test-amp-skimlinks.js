@@ -76,9 +76,7 @@ describes.fakeWin(
 
     describe('When loading the amp-skimlinks extension', () => {
       it('Should start skimcore on buildCallback', () => {
-        env.sandbox
-          .stub(DocumentReady, 'whenDocumentReady')
-          .returns(Promise.resolve());
+        env.sandbox.stub(DocumentReady, 'whenDocumentReady').resolves();
         env.sandbox.stub(ampSkimlinks, 'startSkimcore_');
         return ampSkimlinks.buildCallback().then(() => {
           expect(ampSkimlinks.startSkimcore_.calledOnce).to.be.true;
@@ -86,9 +84,7 @@ describes.fakeWin(
       });
 
       it('Should parse options', () => {
-        env.sandbox
-          .stub(DocumentReady, 'whenDocumentReady')
-          .returns(Promise.resolve());
+        env.sandbox.stub(DocumentReady, 'whenDocumentReady').resolves();
         env.sandbox.spy(SkimOptionsModule, 'getAmpSkimlinksOptions');
         const options = {
           'publisher-code': '666X666',
@@ -286,9 +282,7 @@ describes.fakeWin(
         });
 
         it('Should make the fallback call', () => {
-          ampSkimlinks.sendImpressionTracking_ = env.sandbox
-            .stub()
-            .returns(Promise.resolve());
+          ampSkimlinks.sendImpressionTracking_ = env.sandbox.stub().resolves();
 
           return ampSkimlinks.onPageScanned_().then(() => {
             const stub =
@@ -347,9 +341,7 @@ describes.fakeWin(
         });
 
         it('Should not make the fallback call', () => {
-          ampSkimlinks.sendImpressionTracking_ = env.sandbox
-            .stub()
-            .returns(Promise.resolve());
+          ampSkimlinks.sendImpressionTracking_ = env.sandbox.stub().resolves();
           return ampSkimlinks.onPageScanned_().then(() => {
             const stub =
               ampSkimlinks.affiliateLinkResolver_.fetchDomainResolverApi;

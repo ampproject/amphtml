@@ -86,7 +86,7 @@ describes.realWin(
       const extensions = Services.extensionsFor(win);
       env.sandbox
         .stub(extensions, 'loadElementClass')
-        .returns(Promise.resolve((el) => new FakeA4A(el)));
+        .resolves((el) => new FakeA4A(el));
 
       const viewportMock = env.sandbox.mock(Services.viewportForDoc(doc));
       viewportMock
@@ -170,7 +170,7 @@ describes.realWin(
       env.sandbox.spy(xhr, 'fetchJson');
 
       whenVisible = env.sandbox.stub(env.ampdoc, 'whenFirstVisible');
-      whenVisible.returns(Promise.resolve());
+      whenVisible.resolves();
     });
 
     function getAmpAutoAds(type) {

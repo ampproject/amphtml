@@ -78,12 +78,10 @@ describes.realWin('real-time-config service', {amp: true}, (env) => {
           ? Promise.resolve(JSON.stringify(response))
           : Promise.resolve(response);
       };
-      fetchJsonStub.withArgs(params).returns(
-        Promise.resolve({
-          status: 200,
-          text: textFunction,
-        })
-      );
+      fetchJsonStub.withArgs(params).resolves({
+        status: 200,
+        text: textFunction,
+      });
     }
   }
 

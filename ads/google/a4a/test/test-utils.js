@@ -893,11 +893,11 @@ describe('Google A4A utils', () => {
             validLifetimeSecs: '5678',
           })
         );
-        env.sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
-          Promise.resolve({
+        env.sandbox
+          .stub(Services, 'consentPolicyServiceForDocOrNull')
+          .resolves({
             whenPolicyResolved: () => CONSENT_POLICY_STATE.SUFFICIENT,
-          })
-        );
+          });
         return getIdentityToken(env.win, env.ampdoc, 'default').then((result) =>
           expect(result.token).to.equal('abc')
         );
@@ -908,11 +908,9 @@ describe('Google A4A utils', () => {
         .run('should not fetch if INSUFFICIENT consent', () => {
           env.sandbox
             .stub(Services, 'consentPolicyServiceForDocOrNull')
-            .returns(
-              Promise.resolve({
-                whenPolicyResolved: () => CONSENT_POLICY_STATE.INSUFFICIENT,
-              })
-            );
+            .resolves({
+              whenPolicyResolved: () => CONSENT_POLICY_STATE.INSUFFICIENT,
+            });
           return expect(
             getIdentityToken(env.win, env.ampdoc, 'default')
           ).to.eventually.jsonEqual({});
@@ -923,11 +921,9 @@ describe('Google A4A utils', () => {
         .run('should not fetch if UNKNOWN consent', () => {
           env.sandbox
             .stub(Services, 'consentPolicyServiceForDocOrNull')
-            .returns(
-              Promise.resolve({
-                whenPolicyResolved: () => CONSENT_POLICY_STATE.UNKNOWN,
-              })
-            );
+            .resolves({
+              whenPolicyResolved: () => CONSENT_POLICY_STATE.UNKNOWN,
+            });
           return expect(
             getIdentityToken(env.win, env.ampdoc, 'default')
           ).to.eventually.jsonEqual({});
@@ -1085,18 +1081,14 @@ describe('Google A4A utils', () => {
     });
 
     it('should return if doc is served from a defined geo group', async () => {
-      env.sandbox
-        .stub(Services, 'geoForDocOrNull')
-        .returns(Promise.resolve(geoService));
+      env.sandbox.stub(Services, 'geoForDocOrNull').resolves(geoService);
       element.setAttribute('always-serve-npa', 'gdpr,usca');
       expect(await getServeNpaPromise(element)).to.true;
     });
 
     it('should return false when doc is in an undefined group or not in', async () => {
       const warnSpy = env.sandbox.stub(user(), 'warn');
-      env.sandbox
-        .stub(Services, 'geoForDocOrNull')
-        .returns(Promise.resolve(geoService));
+      env.sandbox.stub(Services, 'geoForDocOrNull').resolves(geoService);
 
       // Undefined group
       element.setAttribute('always-serve-npa', 'tx');
@@ -1111,9 +1103,7 @@ describe('Google A4A utils', () => {
 
     it('should return true when geoService is null', async () => {
       geoService = null;
-      env.sandbox
-        .stub(Services, 'geoForDocOrNull')
-        .returns(Promise.resolve(geoService));
+      env.sandbox.stub(Services, 'geoForDocOrNull').resolves(geoService);
       element.setAttribute('always-serve-npa', 'gdpr');
       expect(await getServeNpaPromise(element)).to.true;
     });

@@ -909,9 +909,7 @@ describe
 
           describe('with trusted viewer', () => {
             beforeEach(() => {
-              window.sandbox
-                .stub(viewer, 'isTrustedViewer')
-                .returns(Promise.resolve(true));
+              window.sandbox.stub(viewer, 'isTrustedViewer').resolves(true);
             });
 
             it('should replace history on AMP.setState()', () => {

@@ -55,7 +55,7 @@ describe('Poller', () => {
   });
 
   it('should execute work', () => {
-    workStub.returns(Promise.resolve());
+    workStub.resolves();
     expect(workStub).to.have.not.been.called;
     poller.start();
     clock.tick(4000);
@@ -75,7 +75,7 @@ describe('Poller', () => {
   });
 
   it('should execute work w/o initial delay', () => {
-    workStub.returns(Promise.resolve());
+    workStub.resolves();
     expect(workStub).to.have.not.been.called;
     poller.start(true);
     expect(workStub).to.be.calledOnce;
@@ -98,7 +98,7 @@ describe('Poller', () => {
   });
 
   it('should not double any work if already started', () => {
-    workStub.returns(Promise.resolve());
+    workStub.resolves();
     expect(workStub).to.have.not.been.called;
     poller.start();
     clock.tick(4000);
@@ -120,12 +120,12 @@ describe('Poller', () => {
   it('should run backoff and recover on retriable error', () => {
     const retriableErr = new Error('HTTP Error');
     retriableErr.retriable = true;
-    workStub.onCall(0).returns(Promise.resolve());
-    workStub.onCall(1).returns(Promise.resolve());
+    workStub.onCall(0).resolves();
+    workStub.onCall(1).resolves();
     workStub.onCall(2).returns(Promise.reject(retriableErr));
     workStub.onCall(3).returns(Promise.reject(retriableErr));
     workStub.onCall(4).returns(Promise.reject(retriableErr));
-    workStub.returns(Promise.resolve());
+    workStub.resolves();
     expect(workStub).to.have.not.been.called;
 
     poller.start();
@@ -179,7 +179,7 @@ describe('Poller', () => {
   });
 
   it('should stop work if stopped', () => {
-    workStub.returns(Promise.resolve());
+    workStub.resolves();
     expect(workStub).to.have.not.been.called;
     poller.start();
     clock.tick(4000);
@@ -248,7 +248,7 @@ describe('Poller', () => {
     retriableErr.retriable = true;
     workStub.onCall(0).returns(Promise.reject(retriableErr));
     workStub.onCall(1).returns(Promise.reject(retriableErr));
-    workStub.returns(Promise.resolve());
+    workStub.resolves();
     const clearSpy = window.sandbox.spy(timer, 'cancel');
 
     expect(poller.lastTimeoutId_).to.be.null;

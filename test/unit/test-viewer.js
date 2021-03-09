@@ -885,7 +885,7 @@ describes.sandboxed('Viewer', {}, (env) => {
         );
 
         const delivererSpy = env.sandbox.stub();
-        delivererSpy.returns(Promise.resolve());
+        delivererSpy.resolves();
 
         viewer.setMessageDeliverer(delivererSpy, 'https://www.example.com');
         env.sandbox.assert.callOrder(
@@ -915,12 +915,8 @@ describes.sandboxed('Viewer', {}, (env) => {
         );
 
         const delivererSpy = env.sandbox.stub();
-        delivererSpy
-          .withArgs('event-a', {value: 2}, true)
-          .returns(Promise.resolve('result-2'));
-        delivererSpy
-          .withArgs('event-a', {value: 3}, true)
-          .returns(Promise.resolve('result-3'));
+        delivererSpy.withArgs('event-a', {value: 2}, true).resolves('result-2');
+        delivererSpy.withArgs('event-a', {value: 3}, true).resolves('result-3');
         viewer.setMessageDeliverer(delivererSpy, 'https://www.example.com');
 
         const response3 = viewer.sendMessageAwaitResponse(

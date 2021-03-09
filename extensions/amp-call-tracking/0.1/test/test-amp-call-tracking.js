@@ -67,13 +67,11 @@ describes.realWin(
           url,
           env.sandbox.match((init) => init.credentials == 'include')
         )
-        .returns(
-          Promise.resolve({
-            json() {
-              return Promise.resolve(response);
-            },
-          })
-        );
+        .resolves({
+          json() {
+            return Promise.resolve(response);
+          },
+        });
     }
 
     function expectHyperlinkToBe(callTrackingEl, href, textContent) {

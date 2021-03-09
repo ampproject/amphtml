@@ -109,7 +109,7 @@ describes.fakeWin(
         };
         const sendMessage = env.sandbox
           .stub(viewer, 'sendMessageAwaitResponse')
-          .returns(Promise.resolve({}));
+          .resolves({});
         maybeFindTemplateStub.returns(null);
         const templates = {
           successTemplate: {'innerHTML': '<div>much success</div>'},

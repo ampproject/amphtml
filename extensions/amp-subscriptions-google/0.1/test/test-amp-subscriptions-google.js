@@ -676,7 +676,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     serviceAdapterMock
       .expects('delegateActionToLocal')
       .withExactArgs(Action.LOGIN, null)
-      .returns(Promise.resolve(false))
+      .resolves(false)
       .once();
     callback(callbacks.loginRequest)({linkRequested: false});
     expect(methods.linkAccount).to.not.be.called;
@@ -687,7 +687,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     serviceAdapterMock
       .expects('delegateActionToLocal')
       .withExactArgs(Action.LOGIN, null)
-      .returns(Promise.resolve(false))
+      .resolves(false)
       .once();
     callback(callbacks.loginRequest)({linkRequested: true});
     expect(methods.linkAccount).to.not.be.called;
@@ -816,7 +816,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     serviceAdapterMock
       .expects('delegateActionToLocal')
       .withExactArgs(Action.SUBSCRIBE, null)
-      .returns(Promise.resolve(false))
+      .resolves(false)
       .once();
     callback(callbacks.subscribeRequest)();
   });

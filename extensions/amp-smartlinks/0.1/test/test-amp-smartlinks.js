@@ -141,7 +141,7 @@ describes.fakeWin(
       it('should not call downstream methods with invalid configuration', () => {
         env.sandbox
           .stub(ampSmartlinks, 'getLinkmateOptions_')
-          .returns(Promise.resolve(undefined));
+          .resolves(undefined);
         env.sandbox.spy(ampSmartlinks, 'postPageImpression_');
         env.sandbox.spy(ampSmartlinks, 'initLinkRewriter_');
 
@@ -156,7 +156,7 @@ describes.fakeWin(
       it('Should call postPageImpression_', () => {
         env.sandbox
           .stub(ampSmartlinks, 'getLinkmateOptions_')
-          .returns(Promise.resolve({'publisher_id': 999}));
+          .resolves({'publisher_id': 999});
         env.sandbox.spy(ampSmartlinks, 'postPageImpression_');
 
         return ampSmartlinks.buildCallback().then(() => {
@@ -169,7 +169,7 @@ describes.fakeWin(
       it('Should call initLinkRewriter_', () => {
         env.sandbox
           .stub(ampSmartlinks, 'getLinkmateOptions_')
-          .returns(Promise.resolve({'publisher_id': 999}));
+          .resolves({'publisher_id': 999});
         env.sandbox.spy(ampSmartlinks, 'initLinkRewriter_');
 
         return ampSmartlinks.buildCallback().then(() => {
@@ -235,7 +235,7 @@ describes.fakeWin(
         ampSmartlinks = helpers.createAmpSmartlinks(options);
         env.sandbox
           .stub(ampSmartlinks, 'getLinkmateOptions_')
-          .returns(Promise.resolve({'publisher_id': 999}));
+          .resolves({'publisher_id': 999});
       });
 
       it('Should register link rewriter', () => {

@@ -168,7 +168,7 @@ describes.realWin('Ad loader', {amp: true}, (env) => {
         const extensionsStub = env.sandbox
           .stub(extensions, 'loadElementClass')
           .withArgs('amp-ad-network-zort-impl')
-          .returns(Promise.resolve(zortConstructor));
+          .resolves(zortConstructor);
         ampAd = new AmpAd(ampAdElement);
         return ampAd.upgradeCallback().then((baseElement) => {
           expect(extensionsStub).to.be.called;
@@ -197,7 +197,7 @@ describes.realWin('Ad loader', {amp: true}, (env) => {
         const extensionsStub = env.sandbox
           .stub(extensions, 'loadElementClass')
           .withArgs('amp-ad-network-zort-impl')
-          .returns(Promise.resolve(zortConstructor));
+          .resolves(zortConstructor);
         ampAd = new AmpAd(ampAdElement);
         return ampAd.upgradeCallback().then((baseElement) => {
           expect(extensionsStub).to.be.called;
@@ -221,7 +221,7 @@ describes.realWin('Ad loader', {amp: true}, (env) => {
         const extensionsStub = env.sandbox
           .stub(extensions, 'loadElementClass')
           .withArgs('amp-ad-network-zort-impl')
-          .returns(Promise.resolve(zortConstructor));
+          .resolves(zortConstructor);
         ampAd = new AmpAd(ampAdElement);
         return ampAd.upgradeCallback().then((baseElement) => {
           expect(extensionsStub).to.be.called;

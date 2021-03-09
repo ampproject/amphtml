@@ -1634,7 +1634,7 @@ describes.realWin(
             await ampConsent.buildCallback();
             window.sandbox
               .stub(ampConsent.consentStateManager_, 'getConsentInstanceInfo')
-              .returns(Promise.resolve({}));
+              .resolves({});
             const spy = window.sandbox.spy(
               ampConsent,
               'checkGranularConsentRequired_'
