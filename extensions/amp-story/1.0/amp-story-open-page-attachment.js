@@ -48,11 +48,11 @@ export const buildOpenInlineAttachmentElement = (element) =>
     <a class="
         i-amphtml-story-page-open-attachment i-amphtml-story-system-reset"
         role="button">
-        <span class="i-amphtml-story-inline-page-attachment-chip">
-          <span class="i-amphtml-story-inline-page-attachment-img"></span>
-          <span class="i-amphtml-story-inline-page-attachment-img-2"></span>
-          <span class="i-amphtml-story-inline-page-attachment-arrow"></span>
-        </span>
+      <div class="i-amphtml-story-inline-page-attachment-chip">
+        <div class="i-amphtml-story-inline-page-attachment-img"></div>
+        <div class="i-amphtml-story-inline-page-attachment-img-2"></div>
+        <div class="i-amphtml-story-inline-page-attachment-arrow"></div>
+      </div>
     </a>`;
 
 /**
