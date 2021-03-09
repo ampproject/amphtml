@@ -334,6 +334,7 @@ async function makeExtension() {
     ? makeBentoExtension()
     : makeAmpExtension());
   if (!bundleConfig) {
+    log(yellow('WARNING:'), 'Could not write extension files.');
     return;
   }
 
