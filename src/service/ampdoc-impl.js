@@ -440,8 +440,10 @@ export class AmpDoc {
    * @restricted
    */
   declareExtension(extensionId, version) {
+    devAssert(version); // QQQ: remove/debugging.
     devAssert(
-      (this.declaredExtensions_[extensionId] || version) === version,
+      !this.declaredExtensions_[extensionId] ||
+        this.declaredExtensions_[extensionId] === version,
       'extension already declared %s',
       extensionId
     );
