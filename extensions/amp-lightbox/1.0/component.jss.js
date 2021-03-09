@@ -38,23 +38,14 @@ before allowing buttons to be activated. */
 };
 
 const wrapper = {
-  top: '0 !important',
-  left: '0 !important',
-  bottom: '0 !important',
-  right: '0 !important',
-  width: '100% !important',
-  height: '100% !important',
-  position: 'fixed !important',
-  boxSizing: 'border-box !important',
-
-  /** Scroll containment:
-   *  overflow: hidden does not trigger overscrollBehavior, so
-   *  overflow: scroll is applied even though the lightbox should not scroll.
-   *  We rely instead on the overflow: hidden in content layer to prevent
-   *  scrolling inside the lightbox.
-   */
-  overflow: 'scroll !important', // Prevent scrolling inside lightbox.
-  overscrollBehavior: 'none !important', // Prevent scrolling outside lightbox.
+  top: 0,
+  left: 0,
+  bottom: 0,
+  right: 0,
+  width: '100%',
+  height: '100%',
+  position: 'fixed',
+  boxSizing: 'border-box',
 
   // User overridable styles
   zIndex: 1000,
@@ -66,7 +57,7 @@ const scrollable = {};
 const content = {
   overflow: 'hidden !important',
   '&$scrollable': {
-    overflow: 'scroll !important',
+    overflow: 'auto !important',
   },
 };
 
@@ -77,6 +68,7 @@ const backdrop = {
   width: '101vw !important',
   height: '100vh !important',
   overflow: 'hidden scroll !important',
+  overscrollBehavior: 'none !important',
 };
 
 //TODO(#32400): See PR description.  This is a workaround dependent on a
