@@ -364,6 +364,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [Invibes](../../ads/vendors/invibes.md)
 -   [Iprom](../../ads/vendors/iprom.md)
 -   [Kargo](../../ads/vendors/kargo.md)
+-   [Ketshwa](../../ads/vendors/ketshwa.md)
 -   [Kiosked](../../ads/vendors/kiosked.md)
 -   [Kixer](../../ads/vendors/kixer.md)
 -   [Kuadio](../../ads/vendors/kuadio.md)
