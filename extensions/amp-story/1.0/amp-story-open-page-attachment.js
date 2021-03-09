@@ -21,15 +21,6 @@ import {LocalizedStringId} from '../../../src/localized-strings';
 import {getLocalizationService} from './amp-story-localization-service';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
-import {getStyle, px, setImportantStyles, toggle} from '../../../src/style';
-
-/**
- * @enum {string}
- */
-const AttachmentTheme = {
-  LIGHT: 'light', // default
-  DARK: 'dark',
-};
 
 /**
  * @param {!Element} element
@@ -119,7 +110,13 @@ const renderOutlinkPageAttachmentUI = (pageEl, attachmentEl) => {
  * @param {!Element} attachmentEl
  * @return {!Element}
  */
-const renderInlinePageAttachmentUI = (pageEl, attachmentEl) => {}
+const renderInlinePageAttachmentUI = (pageEl, attachmentEl) => {
+  // TODO(raxsha): build inline functionality
+  return renderOutlinkPageAttachmentUI(
+    pageEl,
+    attachmentEl
+  );
+}
 
 /**
  * Returns true if new inline attachment UI is enabled.
