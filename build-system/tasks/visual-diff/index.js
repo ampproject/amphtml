@@ -152,14 +152,15 @@ function setPercyTargetCommit() {
 /**
  * Launches a @percy/cli instance.
  *
+ * @param {!puppeteer.BrowserFetcher} browserFetcher Puppeteer browser binaries
+ *     manager.
  * @return {!Promise<Percy|undefined>} percy agent instance.
  */
-async function launchPercyAgent() {
+async function launchPercyAgent(browserFetcher) {
   if (argv.percy_disabled) {
     return;
   }
 
-  const browserFetcher = puppeteer.createBrowserFetcher();
   const percy = await Percy.start({
     token: process.env.PERCY_TOKEN,
     loglevel: argv.percy_agent_debug ? 'debug' : 'info',
@@ -202,36 +203,17 @@ async function launchWebServer() {
  * Waits until the browser is up and reachable, and ties its lifecycle to this
  * process's lifecycle.
  *
+ * @param {!puppeteer.BrowserFetcher} browserFetcher Puppeteer browser binaries
+ *     manager.
  * @return {!Promise<!puppeteer.Browser>} a Puppeteer controlled browser.
  */
-async function launchBrowser() {
-  // Downloads (or reuses an already downloaded) binary of Chromium that matches
-  // the same version used on Percy servers.
-  const browserFetcher = puppeteer.createBrowserFetcher();
-  if (
-    !(await browserFetcher.localRevisions()).includes(
-      PUPPETEER_CHROMIUM_REVISION
-    )
-  ) {
-    log(
-      'info',
-      'Percy-compatible version of Chromium',
-      cyan(PUPPETEER_CHROMIUM_REVISION),
-      'was not found. Downloading...'
-    );
-  }
-  const revision = await browserFetcher.download(
-    PUPPETEER_CHROMIUM_REVISION,
-    (/* downloadedBytes, totalBytes */) => {
-      // TODO(@ampproject/wg-infra): display download progress.
-      // Logging every call is too verbose.
-    }
-  );
+async function launchBrowser(browserFetcher) {
   const browserOptions = {
     args: ['--no-sandbox', '--disable-extensions', '--disable-gpu'],
     dumpio: argv.chrome_debug,
     headless: true,
-    executablePath: revision.executablePath,
+    executablePath: browserFetcher.revisionInfo(PUPPETEER_CHROMIUM_REVISION)
+      .executablePath,
   };
 
   try {
@@ -518,6 +500,7 @@ async function snapshotWebpages(browser, webpages) {
       // ignore timeouts again.
       const pagePromise = (async () => {
         try {
+          /** @type {Promise<void>} */
           const responseWatcher = new Promise((resolve, reject) => {
             const responseTimeout = setTimeout(() => {
               reject(
@@ -731,12 +714,12 @@ async function createEmptyBuild(browser) {
 
 /**
  * Runs the AMP visual diff tests.
- * @return {!Promise}
+ * @return {!Promise<void>}
  */
 async function visualDiff() {
   const handlerProcess = createCtrlcHandler('visual-diff');
   await ensureOrBuildAmpRuntimeInTestMode_();
-  installPercy_();
+  const browserFetcher = await installDependencies_();
   maybeOverridePercyEnvironmentVariables();
   setPercyBranch();
   setPercyTargetCommit();
@@ -749,9 +732,9 @@ async function visualDiff() {
     log('fatal', 'Could not find', cyan('PERCY_TOKEN'), 'environment variable');
   }
 
-  const percy = await launchPercyAgent();
+  const percy = await launchPercyAgent(browserFetcher);
   try {
-    await performVisualTests();
+    await performVisualTests(browserFetcher);
   } finally {
     await percy.stop();
   }
@@ -760,11 +743,14 @@ async function visualDiff() {
 
 /**
  * Runs the AMP visual diff tests.
+ *
+ * @param {!puppeteer.BrowserFetcher} browserFetcher Puppeteer browser binaries
+ *     manager.
  */
-async function performVisualTests() {
+async function performVisualTests(browserFetcher) {
   setDebuggingLevel();
 
-  const browser = await launchBrowser();
+  const browser = await launchBrowser(browserFetcher);
   await launchWebServer();
 
   try {
@@ -814,10 +800,11 @@ async function ensureOrBuildAmpRuntimeInTestMode_() {
 }
 
 /**
- * @return {void}
+ * Installs package.json dependencies are returns an instance of BrowserFetcher.
+ *
+ * @return {!Promise<!puppeteer.BrowserFetcher>}
  */
-function installPercy_() {
-  process.env['PUPPETEER_CHROMIUM_REVISION'] = PUPPETEER_CHROMIUM_REVISION;
+async function installDependencies_() {
   if (!argv.noinstall) {
     installPackages(__dirname);
   }
@@ -825,6 +812,38 @@ function installPercy_() {
   puppeteer = require('puppeteer');
   percySnapshot = require('@percy/puppeteer');
   Percy = require('@percy/core');
+
+  const browserFetcher = puppeteer.createBrowserFetcher();
+  if (argv.noinstall) {
+    return browserFetcher;
+  }
+
+  if (
+    (await browserFetcher.localRevisions()).includes(
+      PUPPETEER_CHROMIUM_REVISION
+    )
+  ) {
+    log(
+      'info',
+      'Using Percy-compatible version of Chromium',
+      cyan(PUPPETEER_CHROMIUM_REVISION)
+    );
+  } else {
+    log(
+      'info',
+      'Percy-compatible version of Chromium',
+      cyan(PUPPETEER_CHROMIUM_REVISION),
+      'was not found. Downloading...'
+    );
+    await browserFetcher.download(
+      PUPPETEER_CHROMIUM_REVISION,
+      (/* downloadedBytes, totalBytes */) => {
+        // TODO(@ampproject/wg-infra): display download progress.
+        // Logging every call is too verbose.
+      }
+    );
+  }
+  return browserFetcher;
 }
 
 module.exports = {
