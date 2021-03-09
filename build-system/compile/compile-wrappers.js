@@ -39,11 +39,8 @@ exports.extension = function (
   version,
   latest,
   isModule,
-  loadPriority,
-  opt_splitMarker
+  loadPriority
 ) {
-  opt_splitMarker = opt_splitMarker || '';
-
   let priority = '';
   if (loadPriority) {
     if (loadPriority != 'high') {
@@ -56,7 +53,7 @@ exports.extension = function (
   return (
     `(self.AMP=self.AMP||[]).push({n:"${name}",ev:"${version}",l:${latest},` +
     `${priority}` +
-    `v:"${VERSION}",m:${m},f:(function(AMP,_){${opt_splitMarker}\n` +
+    `v:"${VERSION}",m:${m},f:(function(AMP,_){\n` +
     '<%= contents %>\n})});'
   );
 };
