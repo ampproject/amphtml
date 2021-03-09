@@ -178,11 +178,27 @@ export function ssp(global, data) {
           if (!ad || ['error', 'empty'].includes(ad.type)) {
             noContent();
           } else {
+            // listen to message with "height" property -> for responsive ads (111x111) -> set new height / center
+            if (ad.responsive) {
+              global.addEventListener('message', (e) => {
+                try {
+                  const {height} = JSON.parse(e.data);
+                  if (height) {
+                    handlePosition(parentElement, true, {
+                      height: `${height}px`,
+                    });
+                  }
+                } catch (e) {
+                  // no-op
+                }
+              });
+            }
+
             // SSP need parentElement as value in "position.id"
             mW.sssp.writeAd(ad, {...position, id: parentElement});
 
             // init dimensions / centering
-            const d = ad.responsive ? {width: '100%', height: 'auto'} : null;
+            const d = ad.responsive ? {width: '100%', height: '100%'} : null;
             handlePosition(parentElement, true, d);
             global.context.renderStart(sizing);
           }
