@@ -294,7 +294,7 @@ describe('3p', () => {
     it('should handle onSuccess callback', (done) => {
       loadScript(
         window,
-        'http://localhost:9876/test/script',
+        'http://localhost:9876/test/unit/test-3p.js',
         () => {
           done();
         },
