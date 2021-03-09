@@ -188,16 +188,7 @@ function adoptShared(global, callback) {
       });
     };
 
-    // We support extension declarations which declare they have an
-    // "intermediate" dependency that needs to be loaded before they
-    // can execute.
-    if (!(typeof fnOrStruct == 'function') && fnOrStruct.i) {
-      preloadDeps(extensions, fnOrStruct).then(function () {
-        return startRegisterOrChunk(global, fnOrStruct, register);
-      });
-    } else {
-      startRegisterOrChunk(global, fnOrStruct, register);
-    }
+    startRegisterOrChunk(global, fnOrStruct, register);
   }
 
   // Handle high priority extensions now, and if necessary issue
@@ -269,31 +260,6 @@ function adoptShared(global, callback) {
   scheduleResObUpgradeIfNeeded(global);
 
   return iniPromise;
-}
-
-/**
- * @param {!./service/extensions-impl.Extensions} extensions
- * @param {function(!Object, !Object)|!ExtensionPayload} fnOrStruct
- * @return {!Promise}
- */
-function preloadDeps(extensions, fnOrStruct) {
-  // Allow a single string as the intermediate dependency OR allow
-  // for an array if intermediate dependencies that needs to be
-  // resolved first before executing this current extension.
-  if (Array.isArray(fnOrStruct.i)) {
-    const promises = fnOrStruct.i.map((dep) => {
-      return extensions.preloadExtension(dep);
-    });
-    return Promise.all(promises);
-  } else if (typeof fnOrStruct.i == 'string') {
-    return extensions.preloadExtension(fnOrStruct.i);
-  }
-  dev().error(
-    'RUNTIME',
-    'dependency is neither an array or a string',
-    fnOrStruct.i
-  );
-  return Promise.resolve();
 }
 
 /**
