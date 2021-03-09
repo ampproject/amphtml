@@ -18,7 +18,6 @@ import '../amp-video-iframe';
 import {Services} from '../../../../src/services';
 import {VideoEvents} from '../../../../src/video-interface';
 import {
-  addAttributesToElement,
   createElementWithAttributes,
   whenUpgradedToCustomElement,
 } from '../../../../src/dom';
