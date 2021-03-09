@@ -25,6 +25,10 @@ GREEN() { echo -e "\n\033[0;32m$1\033[0m"; }
 YELLOW() { echo -e "\n\033[0;33m$1\033[0m"; }
 RED() { echo -e "\n\033[0;31m$1\033[0m"; }
 
+if [[ -z "$1" ]]; then
+  echo "Usage: fetch_merge_commit.sh [fetch | merge]"
+fi
+
 # Push builds are only run against master and amp-release branches.
 if [[ "$CIRCLE_BRANCH" == "master" || "$CIRCLE_BRANCH" =~ ^amp-release-* ]]; then
   echo $(GREEN "Nothing to do because $CIRCLE_BRANCH is not a PR branch.")
@@ -53,12 +57,25 @@ if [[ -z "$PR_NUMBER" ]]; then
   exit 0
 fi
 
+if [[ "$1" == "fetch" ]]; then
+  MERGE_BRANCH="refs/pull/$PR_NUMBER/merge"
+  echo $(GREEN "Fetching merge SHA from $MERGE_BRANCH...")
+
+  (set -x && git fetch origin "$MERGE_BRANCH") || err=$?
+  if [[ "$err" -ne "0" ]]; then
+    echo $(RED "Failed to fetch merge commit between $CIRCLE_BRANCH and master.")
+    echo $(RED "Please rebase your PR branch.")
+    exit $err
+  fi
+  exit 0
+fi
+
 # GitHub provides refs/pull/<PR_NUMBER>/merge, an up-to-date merge branch for
 # every PR branch that can be cleanly merged to master. For more details, see:
 # https://discuss.circleci.com/t/show-test-results-for-prospective-merge-of-a-github-pr/1662
-MERGE_BRANCH="refs/pull/$PR_NUMBER/merge"
-echo $(GREEN "Fetching merge commit from $MERGE_BRANCH...")
-(set -x && git pull --ff-only origin "$MERGE_BRANCH") || err=$?
+MERGE_SHA="$(awk '{print $1}' .git/FETCH_HEAD)"
+echo $(GREEN "Fetching merge commit $MERGE_SHA...")
+(set -x && git pull --ff-only origin "$MERGE_SHA") || err=$?
 
 # If a clean merge is not possible, do not proceed with the build. GitHub's UI
 # will show an error indicating there was a merge conflict.
