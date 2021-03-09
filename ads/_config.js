@@ -423,6 +423,10 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'digiteka': {
+    renderStartImplemented: true
+  },
+
   'directadvert': {
     renderStartImplemented: true,
   },
@@ -1203,8 +1207,6 @@ const adConfig = jsonConfiguration({
   },
 
   'triplelift': {},
-
-  'digiteka': {},
 
   'trugaze': {
     clientIdScope: '__tg_amp',
