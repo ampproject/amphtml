@@ -21,6 +21,7 @@ import {LocalizedStringId} from '../../../src/localized-strings';
 import {getLocalizationService} from './amp-story-localization-service';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
+import {setImportantStyles} from '../../../src/style';
 
 /**
  * @param {!Element} element
@@ -47,15 +48,18 @@ export const buildOpenInlineAttachmentElement = (element) =>
     <a class="
         i-amphtml-story-page-open-attachment i-amphtml-story-system-reset"
         role="button">
-      <span class="i-amphtml-story-page-open-attachment-icon">
-        <span class="i-amphtml-story-page-open-attachment-bar-left"></span>
-        <span class="i-amphtml-story-page-open-attachment-bar-right"></span>
-      </span>
-      <span class="i-amphtml-story-page-open-attachment-label"></span>
+        <span class="i-amphtml-story-inline-page-attachment-chip">
+          <span class="i-amphtml-story-inline-page-attachment-content">
+            <span class="i-amphtml-story-inline-page-attachment-img"></span>
+            <span class="i-amphtml-story-inline-page-attachment-arrow"></span>
+          </span>
+        </span>
+        <span class="i-amphtml-story-inline-page-attachment-label"></span>
     </a>`;
 
 /**
  * Determines which open attachment UI to render.
+ * @param {!Window} win
  * @param {!Element} pageEl
  * @param {!Element} attachmentEl
  * @return {!Element}
@@ -63,15 +67,9 @@ export const buildOpenInlineAttachmentElement = (element) =>
 export const renderPageAttachmentUI = (win, pageEl, attachmentEl) => {
   const attachmentHref = attachmentEl.getAttribute('href');
   if (!attachmentHref && isInlinePageAttachmentV2ExperimentOn(win)) {
-    return renderInlinePageAttachmentUI(
-      pageEl,
-      attachmentEl
-    );
+    return renderInlinePageAttachmentUI(pageEl, attachmentEl);
   } else {
-    return renderOutlinkPageAttachmentUI(
-      pageEl,
-      attachmentEl
-    );
+    return renderOutlinkPageAttachmentUI(pageEl, attachmentEl);
   }
 };
 
@@ -93,7 +91,7 @@ const renderOutlinkPageAttachmentUI = (pageEl, attachmentEl) => {
     '.i-amphtml-story-page-open-attachment-label'
   );
 
-  const openLabelAttr = attachmentEl.getAttribute('data-cta-text');
+  const openLabelAttr = attachmentEl.getAttribute('cta-text');
   const openLabel =
     (openLabelAttr && openLabelAttr.trim()) ||
     getLocalizationService(pageEl).getLocalizedString(
@@ -111,12 +109,35 @@ const renderOutlinkPageAttachmentUI = (pageEl, attachmentEl) => {
  * @return {!Element}
  */
 const renderInlinePageAttachmentUI = (pageEl, attachmentEl) => {
-  // TODO(raxsha): build inline functionality
-  return renderOutlinkPageAttachmentUI(
-    pageEl,
-    attachmentEl
+  const openAttachmentEl = buildOpenInlineAttachmentElement(pageEl);
+
+  const textEl = openAttachmentEl.querySelector(
+    '.i-amphtml-story-inline-page-attachment-label'
   );
-}
+
+  const openLabelAttr = attachmentEl.getAttribute('cta-text');
+  const openLabel =
+    (openLabelAttr && openLabelAttr.trim()) ||
+    getLocalizationService(pageEl).getLocalizedString(
+      LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
+    );
+
+  textEl.textContent = openLabel;
+
+  const ctaImgEl = openAttachmentEl.querySelector(
+    '.i-amphtml-story-inline-page-attachment-img'
+  );
+
+  const openImgAttr = attachmentEl.getAttribute('cta-img');
+
+  setImportantStyles(ctaImgEl, {
+    height: '24px',
+    width: '24px',
+    'background-image': 'url(' + openImgAttr + ')',
+  });
+
+  return openAttachmentEl;
+};
 
 /**
  * Returns true if new inline attachment UI is enabled.
@@ -125,4 +146,4 @@ const renderInlinePageAttachmentUI = (pageEl, attachmentEl) => {
  */
 export const isInlinePageAttachmentV2ExperimentOn = (win) => {
   return isExperimentOn(win, 'amp-story-inline-page-attachment-v2');
-}
+};
