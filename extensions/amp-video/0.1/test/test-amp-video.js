@@ -15,11 +15,11 @@
  */
 
 import {AmpVideo, isCachedByCdn} from '../amp-video';
-import {DisplayObserver} from '../../../../src/utils/display-observer';
 import {Services} from '../../../../src/services';
 import {VideoEvents} from '../../../../src/video-interface';
 import {VisibilityState} from '../../../../src/visibility-state';
 import {dispatchCustomEvent} from '../../../../src/dom';
+import {installResizeObserverStub} from '../../../../testing/resize-observer-stub';
 import {listenOncePromise} from '../../../../src/event-helper';
 
 describes.realWin(
@@ -32,28 +32,15 @@ describes.realWin(
   (env) => {
     let win, doc;
     let timer;
-    let displayObserverTargets;
+    let resizeObserverStub;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
       timer = Services.timerFor(win);
 
-      displayObserverTargets = [];
-      env.sandbox
-        .stub(DisplayObserver.prototype, 'observe')
-        .callsFake((target, callback) => {
-          displayObserverTargets.push({target, callback});
-        });
+      resizeObserverStub = installResizeObserverStub(env.sandbox, win);
     });
-
-    function setDisplay(aTarget, value) {
-      displayObserverTargets.forEach(({target, callback}) => {
-        if (target === aTarget) {
-          callback(value);
-        }
-      });
-    }
 
     function getFooVideoSrc(filetype) {
       return '//someHost/foo.' + filetype.slice(filetype.indexOf('/') + 1); // assumes no optional params
@@ -477,7 +464,10 @@ describes.realWin(
       env.sandbox.spy(video, 'pause');
       // The auto-pause only happens on when the video is actually playing.
       dispatchCustomEvent(video, 'play');
-      setDisplay(v, false);
+      resizeObserverStub.notifySync({
+        target: v,
+        contentRect: {width: 0, height: 0},
+      });
       expect(video.pause.called).to.be.true;
     });
 

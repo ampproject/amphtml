@@ -57,14 +57,18 @@ import {whenContentIniLoad} from './ini-load';
  * - html: The complete content of an AMP embed, which is itself an AMP
  *   document. Can include whatever is normally allowed in an AMP document,
  *   except for AMP `<script>` declarations. Those should be passed as an
- *   array of `extensionIds`.
- * - extensionsIds: An optional array of AMP extension IDs used in this embed.
+ *   array of `extensions`.
+ * - extensions: An optional array of AMP extension IDs/versions used in
+ *   this embed.
  * - fonts: An optional array of fonts used in this embed.
+ *
+ * TODO(#33020): remove extensionIds once extensions is used everywhere.
  *
  * @typedef {{
  *   host: (?AmpElement|undefined),
  *   url: string,
  *   html: ?string,
+ *   extensions: (?Array<{extensionId: string, extensionVersion: string}>|undefined),
  *   extensionIds: (?Array<string>|undefined),
  *   fonts: (?Array<string>|undefined),
  *   skipHtmlMerge: (boolean|undefined),
@@ -117,6 +121,37 @@ export function getFieSafeScriptSrcs() {
 }
 
 /**
+ * @param {!Window} win
+ * @param {!Array<{extensionId: string, extensionVersion: string}>} extensions
+ */
+export function preloadFriendlyIframeEmbedExtensions(win, extensions) {
+  // TODO(#33020): Use the format directly and preload with the specified
+  // version.
+  preloadFriendlyIframeEmbedExtensionIdsDeprecated(
+    win,
+    extensions.map(({extensionId}) => extensionId)
+  );
+}
+
+/**
+ * @param {!Window} win
+ * @param {!Array<string>} extensionIds
+ * TODO(#33020): remove this method in favor `preloadFriendlyIframeEmbedExtensions`.
+ */
+export function preloadFriendlyIframeEmbedExtensionIdsDeprecated(
+  win,
+  extensionIds
+) {
+  const extensionsService = Services.extensionsFor(win);
+
+  // Load any extensions; do not wait on their promises as this
+  // is just to prefetch.
+  extensionIds.forEach((extensionId) =>
+    extensionsService.preloadExtension(extensionId)
+  );
+}
+
+/**
  * Creates the requested "friendly iframe" embed. Returns the promise that
  * will be resolved as soon as the embed is available. The actual
  * initialization of the embed will start as soon as the `iframe` is added
@@ -136,7 +171,7 @@ export function installFriendlyIframeEmbed(
   /** @const {!Window} */
   const win = getTopWindow(toWin(iframe.ownerDocument.defaultView));
   /** @const {!./service/extensions-impl.Extensions} */
-  const extensions = Services.extensionsFor(win);
+  const extensionsService = Services.extensionsFor(win);
   /** @const {!./service/ampdoc-impl.AmpDocService} */
   const ampdocService = Services.ampdocServiceFor(win);
 
@@ -145,12 +180,17 @@ export function installFriendlyIframeEmbed(
   iframe.setAttribute('marginheight', '0');
   iframe.setAttribute('marginwidth', '0');
 
+  // Compute extensions.
+  const extensionIds =
+    // TODO(#33020): Remove extensionIds format once it's supported everywhere.
+    spec.extensionIds
+      ? spec.extensionIds
+      : spec.extensions
+      ? spec.extensions.map(({extensionId}) => extensionId)
+      : [];
+
   // Pre-load extensions.
-  if (spec.extensionIds) {
-    spec.extensionIds.forEach((extensionId) =>
-      extensions.preloadExtension(extensionId)
-    );
-  }
+  preloadFriendlyIframeEmbedExtensionIdsDeprecated(win, extensionIds);
 
   const html = spec.skipHtmlMerge ? spec.html : mergeHtml(spec);
   // Receive the signal when iframe is ready: it's document is formed.
@@ -230,10 +270,9 @@ export function installFriendlyIframeEmbed(
     }
 
     // Add extensions.
-    const extensionIds = spec.extensionIds || [];
     return Installers.installExtensionsInEmbed(
       embed,
-      extensions,
+      extensionsService,
       ampdoc,
       extensionIds,
       opt_preinstallCallback
@@ -705,7 +744,7 @@ export class Installers {
    * callback, if specified, is executed after polyfills have been configured
    * but before the first extension is installed.
    * @param {!FriendlyIframeEmbed} embed
-   * @param {!./service/extensions-impl.Extensions} extensions
+   * @param {!./service/extensions-impl.Extensions} extensionsService
    * @param {!./service/ampdoc-impl.AmpDocFie} ampdoc
    * @param {!Array<string>} extensionIds
    * @param {function(!Window, ?./service/ampdoc-impl.AmpDoc=)|undefined} preinstallCallback
@@ -714,7 +753,7 @@ export class Installers {
    */
   static installExtensionsInEmbed(
     embed,
-    extensions,
+    extensionsService,
     ampdoc,
     extensionIds,
     preinstallCallback,
@@ -777,7 +816,7 @@ export class Installers {
         if (!childWin.frameElement) {
           return;
         }
-        extensions.preinstallEmbed(ampdoc, extensionIds);
+        extensionsService.preinstallEmbed(ampdoc, extensionIds);
       })
       .then(getDelayPromise)
       .then(() => {
@@ -794,7 +833,10 @@ export class Installers {
         }
         // Intentionally do not wait for the full installation to complete.
         // It's enough of initialization done to return the embed.
-        const promise = extensions.installExtensionsInDoc(ampdoc, extensionIds);
+        const promise = extensionsService.installExtensionsInDoc(
+          ampdoc,
+          extensionIds
+        );
         if (opt_installComplete) {
           opt_installComplete(promise);
         }

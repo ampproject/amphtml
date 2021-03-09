@@ -16,7 +16,7 @@
 'use strict';
 
 const fs = require('fs-extra');
-const glob = require('glob');
+const globby = require('globby');
 const jison = require('jison');
 const path = require('path');
 const {endBuildStep} = require('./helpers');
@@ -46,7 +46,7 @@ async function compileJison() {
   const startTime = Date.now();
   const promises = [];
   jisonPaths.forEach((jisonPath) => {
-    glob.sync(jisonPath).forEach((jisonFile) => {
+    globby.sync(jisonPath).forEach((jisonFile) => {
       const jsFile = path.basename(jisonFile, '.jison');
       const extension = jsFile.replace('-expr-impl', '');
       const parser = extension + 'Parser';

@@ -1,5 +1,5 @@
 #!/bin/sh
-npm install -g browserify babelify envify derequire
+npm install -g browserify babelify derequire envify prop-types react-addons-shallow-compare react-externs react-with-direction uglifyify
 browserify \
 -t [ babelify --presets [ @babel/preset-env ] ] \
 -g [ envify purge --NODE_ENV production ] \
@@ -11,4 +11,4 @@ browserify \
 node ./third_party/react-dates/scope-require.js | \
 derequire > ./third_party/react-dates/bundle.js
 cp ./node_modules/react-dates/lib/css/_datepicker.css ./third_party/react-dates/
-npm uninstall -g browserify babelify envify derequire
+npm uninstall -g browserify babelify derequire envify prop-types react-addons-shallow-compare react-externs react-with-direction uglifyify
