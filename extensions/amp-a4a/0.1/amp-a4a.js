@@ -62,6 +62,7 @@ import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {
   installFriendlyIframeEmbed,
   isSrcdocSupported,
+  preloadFriendlyIframeEmbedExtensionIdsDeprecated,
 } from '../../../src/friendly-iframe-embed';
 import {installRealTimeConfigServiceForDoc} from '../../../src/service/real-time-config/real-time-config-impl';
 import {installUrlReplacementsForEmbed} from '../../../src/service/url-replacements-impl';
@@ -1118,12 +1119,16 @@ export class AmpA4A extends AMP.BaseElement {
 
           // Update priority.
           this.updateLayoutPriority(LayoutPriority.CONTENT);
+
           // Load any extensions; do not wait on their promises as this
           // is just to prefetch.
-          const extensions = Services.extensionsFor(this.win);
-          creativeMetaDataDef.customElementExtensions.forEach((extensionId) =>
-            extensions.preloadExtension(extensionId)
+          // TODO(#33020): switch to `preloadFriendlyIframeEmbedExtensions` with
+          // the format of `[{extensionId, extensionVersion}]`.
+          preloadFriendlyIframeEmbedExtensionIdsDeprecated(
+            this.win,
+            creativeMetaDataDef.customElementExtensions
           );
+
           // Preload any fonts.
           (creativeMetaDataDef.customStylesheets || []).forEach((font) =>
             Services.preconnectFor(this.win).preload(

@@ -24,6 +24,8 @@ import {
   Installers,
   installFriendlyIframeEmbed,
   mergeHtmlForTesting,
+  preloadFriendlyIframeEmbedExtensionIdsDeprecated,
+  preloadFriendlyIframeEmbedExtensions,
   setSrcdocSupportedForTesting,
 } from '../../src/friendly-iframe-embed';
 import {Services} from '../../src/services';
@@ -148,8 +150,10 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
           'https://acme.org/url2'
         );
 
-        return loadPromise(iframe);
+        // Check that extensions-known has been set.
+        return embed.ampdoc.whenExtensionsKnown();
       })
+      .then(() => loadPromise(iframe))
       .then(() => {
         // Iframe is marked as complete.
         expect(iframe.readyState).to.equal('complete');
@@ -189,6 +193,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       setReady: env.sandbox.spy(),
       signals: () => ampdocSignals,
       getHeadNode: () => childWinForAmpDoc.document.head,
+      setExtensionsKnown: env.sandbox.stub(),
     };
     ampdocServiceMock
       .expects('installFieDoc')
@@ -248,6 +253,11 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
         expect(ampdoc).to.equal(embed.ampdoc);
         expect(installServicesStub).to.be.calledOnce.calledWith(ampdoc);
         expect(ampdoc.setReady).to.not.be.called;
+
+        // Check that extensions-known has been set.
+        expect(embed.ampdoc.setExtensionsKnown).to.be.calledOnce;
+
+        // Complete rendering.
         renderCompleteResolver();
         return renderCompletePromise;
       })
@@ -270,6 +280,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       setReady: env.sandbox.spy(),
       signals: () => ampdocSignals,
       getHeadNode: () => childWinForAmpDoc.document.head,
+      setExtensionsKnown: env.sandbox.stub(),
     };
     ampdocServiceMock
       .expects('installFieDoc')
@@ -355,6 +366,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       setReady: env.sandbox.spy(),
       signals: () => ampdocSignals,
       getHeadNode: () => childWinForAmpDoc.document.head,
+      setExtensionsKnown: env.sandbox.stub(),
     };
     let childWinForAmpDoc;
     ampdocServiceMock
@@ -488,6 +500,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       setReady: env.sandbox.spy(),
       signals: () => ampdocSignals,
       getHeadNode: () => childWinForAmpDoc.document.head,
+      setExtensionsKnown: env.sandbox.stub(),
       overrideVisibilityState: env.sandbox.spy(),
       dispose: env.sandbox.spy(),
     };
@@ -576,6 +589,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       setReady: env.sandbox.spy(),
       signals: () => ampdocSignals,
       getHeadNode: () => childWinForAmpDoc.document.head,
+      setExtensionsKnown: env.sandbox.stub(),
       dispose: env.sandbox.spy(),
     };
     ampdocServiceMock
@@ -742,6 +756,41 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
     });
     await promise;
     expect(mutateSpy).to.be.called;
+  });
+
+  describe('preloadFriendlyIframeEmbedExtensions', () => {
+    // TODO(#33020): Remove this test once `extensions` format is adopted.
+    it('should preload non-versioned extensions', () => {
+      extensionsMock
+        .expects('preloadExtension')
+        .withExactArgs('amp-ext1')
+        .once();
+      extensionsMock
+        .expects('preloadExtension')
+        .withExactArgs('amp-ext2')
+        .once();
+      preloadFriendlyIframeEmbedExtensionIdsDeprecated(window, [
+        'amp-ext1',
+        'amp-ext2',
+      ]);
+    });
+
+    it('should preload versioned extensions', () => {
+      // TODO(#33020): Modify this test with an explicit version once the format
+      // is adopted.
+      extensionsMock
+        .expects('preloadExtension')
+        .withExactArgs('amp-ext1')
+        .once();
+      extensionsMock
+        .expects('preloadExtension')
+        .withExactArgs('amp-ext2')
+        .once();
+      preloadFriendlyIframeEmbedExtensions(window, [
+        {extensionId: 'amp-ext1', extensionVersion: '0.2'},
+        {extensionId: 'amp-ext2', extensionVersion: '0.3'},
+      ]);
+    });
   });
 
   describe('mergeHtml', () => {
@@ -1421,6 +1470,8 @@ describes.realWin('installExtensionsInEmbed', {amp: true}, (env) => {
     // Resolve the promise.
     extensions.registerExtension(
       'amp-test',
+      '0.1',
+      true,
       (AMP) => {
         // Main extension with CSS.
         AMP.registerElement('amp-test', AmpTest, 'a{}');
@@ -1498,6 +1549,8 @@ describes.realWin('installExtensionsInEmbed', {amp: true}, (env) => {
     // Resolve the promise `install`.
     extensions.registerExtension(
       'amp-test',
+      '0.1',
+      true,
       (AMP) => {
         AMP.registerServiceForDoc('fake-service-foo', FooService);
       },
@@ -1549,6 +1602,8 @@ describes.realWin('installExtensionsInEmbed', {amp: true}, (env) => {
     // Resolve the promise.
     extensions.registerExtension(
       'amp-test',
+      '0.1',
+      true,
       (AMP) => {
         AMP.registerElement('amp-test', AmpTest);
       },

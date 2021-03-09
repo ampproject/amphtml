@@ -57,6 +57,11 @@
   },
   {"name": "amp-ad-network-nws-impl", "version": "0.1", "latestVersion": "0.1"},
   {
+    "name": "amp-ad-network-valueimpression-impl",
+    "version": "0.1",
+    "latestVersion": "0.1"
+  },
+  {
     "name": "amp-addthis",
     "version": "0.1",
     "latestVersion": "0.1",
@@ -434,6 +439,7 @@
         "amp-story-draggable-drawer-header",
         "amp-story-hint",
         "amp-story-info-dialog",
+        "amp-story-open-page-attachment",
         "amp-story-share",
         "amp-story-share-menu",
         "amp-story-system-layer",

@@ -50,7 +50,7 @@ The `amp-story-interactive-binary-poll` element provides a two option voting use
 
 Does not support pairing with `amp-story-interactive-results`, and can optionally have a prompt.
 
-<amp-img src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story-interactive/img/binary-poll-raw.png" layout="intrinsic" width="400" height="230">
+<amp-img alt="An example of a binary poll: 'Like pizza?' with a button for 'Yes' and 'No'" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story-interactive/img/binary-poll-raw.png" layout="intrinsic" width="400" height="230">
 
 ```html
 <amp-story-interactive-binary-poll
@@ -71,7 +71,7 @@ The `amp-story-interactive-poll` element provides a voting experience with 2-4 o
 
 Display different categories based on user poll answers by pairing `amp-story-interactive-poll` with `amp-story-interactive-results`. Add a prompt for extra context.
 
-<amp-img src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story-interactive/img/poll-raw.png" layout="intrinsic" width="400" height="450">
+<amp-img alt="An example of an interactive poll: 'Pick a season' with options for each season, and their respective percentage votes" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story-interactive/img/poll-raw.png" layout="intrinsic" width="400" height="450">
 
 [sourcecode:html]
 <amp-story-interactive-poll
@@ -92,7 +92,7 @@ The `amp-story-interactive-quiz` element provides a guessing experience with 2-4
 
 Display different categories based on percentage of correct user answers by pairing `amp-story-interactive-quiz` with `amp-story-interactive-results`. Add a prompt for extra context.
 
-<amp-img src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story-interactive/img/quiz-raw.png" layout="intrinsic" width="400" height="450">
+<amp-img alt="Example of an interactive quiz: 'Who was the artist that created the famous painting The Last Supper?', with various options; the correct answer, 'Leonardo da Vinci', has a green tick next to it, compared to the wrong answers which have a red cross; all answers show a percentage of how many people picked that particular answer" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story-interactive/img/quiz-raw.png" layout="intrinsic" width="400" height="450">
 
 [sourcecode:html]
 <amp-story-interactive-quiz
@@ -114,7 +114,7 @@ Each category specifies its content `option-{1/2/3/4}-{text/image/results-catego
 
 Results can feed its state from quizzes if all categories also specify `option-{1/2/3/4}-results-threshold`. If no categories have thresholds, the state will count the `option-{1/2/3/4}-results-category` from options selected in polls.
 
-<amp-img src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story-interactive/img/results-raw.png" layout="intrinsic" width="400" height="500">
+<amp-img alt="Example of a result sheet: 'You are a Dog. You always have energery...'" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story-interactive/img/results-raw.png" layout="intrinsic" width="400" height="500">
 
 [sourcecode:html]
 <amp-story-interactive-results
@@ -341,6 +341,10 @@ The `amp-story-interactive` component elements support [`amp-analytics`](https:/
   </script>
 </amp-analytics>
 ```
+
+## Accessibility considerations
+
+Currently, this component lacks keyboard and screen reader accessibility.
 
 ## Validation
 

@@ -19,16 +19,12 @@ const debounce = require('debounce');
 const fs = require('fs-extra');
 const wrappers = require('../compile/compile-wrappers');
 const {
-  endBuildStep,
-  watchDebounceDelay,
-  invalidateUnminifiedBabelCache,
-} = require('./helpers');
-const {
   extensionAliasBundles,
   extensionBundles,
   verifyExtensionBundles,
 } = require('../compile/bundles.config');
 const {analyticsVendorConfigs} = require('./analytics-vendor-configs');
+const {endBuildStep, watchDebounceDelay} = require('./helpers');
 const {isCiBuild} = require('../common/ci');
 const {jsifyCssAsync} = require('./css/jsify-css');
 const {log} = require('../common/logging');
@@ -386,8 +382,7 @@ async function doBuildExtension(extensions, extension, options) {
  * @param {?Object} options
  */
 function watchExtension(path, name, version, latestVersion, hasCss, options) {
-  const watchFunc = function (modifiedFile) {
-    invalidateUnminifiedBabelCache(modifiedFile);
+  const watchFunc = function () {
     const bundleComplete = buildExtension(
       name,
       version,
