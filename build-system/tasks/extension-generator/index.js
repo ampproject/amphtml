@@ -21,7 +21,7 @@ const path = require('path');
 const {
   insertExtensionBundlesConfig,
 } = require('./insert-extension-bundles-config');
-const {cyan, green, red} = require('kleur/colors');
+const {cyan, green, red, yellow} = require('kleur/colors');
 const {execOrThrow} = require('../../common/exec');
 const {log} = require('../../common/logging');
 const {makeBentoExtension} = require('./bento');
@@ -314,7 +314,7 @@ async function makeAmpExtension() {
     // Don't format .html because AMP boilerplate would expand into multiple lines.
     .filter((filename) => !filename.endsWith('.html'));
   execOrThrow(
-    `npx prettier --ignore-unknown --write ${filenames.join(' ')}`,
+    `npx prettier --ignore-unknown --write ${filenames.join('Could not format files')}`,
     ''
   );
 

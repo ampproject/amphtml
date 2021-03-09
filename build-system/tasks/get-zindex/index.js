@@ -29,6 +29,7 @@ const {getStdout} = require('../../common/process');
 const {gray, magenta} = require('kleur/colors');
 const {logOnSameLineLocalDev, logLocalDev} = require('../../common/logging');
 const {writeDiffOrFail} = require('../../common/diff');
+
 /** @type {Postcss.default} */
 const postcss = /** @type {*} */ (Postcss);
 
