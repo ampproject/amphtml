@@ -38,6 +38,9 @@ const BITRATE_BY_EFFECTIVE_TYPE = {
 /** @const {number} Do not downgrade the quality of a video that has loaded enough content */
 const BUFFERED_THRESHOLD_PERCENTAGE = 0.8;
 
+/** @const {number} Downgrade a video if it takes more than this time to load */
+const SLOW_LOADING_THRESHOLD_MS = 1000;
+
 /** @type {!BitrateManager|undefined} */
 let instance;
 /**
@@ -98,16 +101,53 @@ export class BitrateManager {
     if (video.changedSources) {
       return;
     }
-    onNontrivialWait(video, () => {
-      const current = currentSource(video);
-      this.acceptableBitrate_ = current.bitrate_ - 1;
-      this.switchToLowerBitrate_(video, current.bitrate_);
-      this.updateOtherManagedAndPausedVideos_();
+    video.addEventListener('play', () => {
+      console.log('playing');
     });
-    video.changedSources = () => {
-      this.sortSources_(video);
-    };
+    this.installListeners_(video);
+    // Reset slowLoad unlisten
     this.videos_.push(DomBasedWeakRef.make(this.win, video));
+  }
+
+  /**
+   *
+   * @param {!Element} videoEl
+   */
+  installListeners_(videoEl) {
+    videoEl.bitrateUnlisteners_ = [];
+    videoEl.bitrateUnlisteners_.push(
+      onNontrivialWait(videoEl, () => this.downgradeVideo_(videoEl))
+    );
+    videoEl.bitrateUnlisteners_.push(
+      onSlowLoad(videoEl, () => this.downgradeVideo_(videoEl))
+    );
+    videoEl.changedSources = () => {
+      this.sortSources_(videoEl);
+      this.uninstallListeners_(videoEl);
+      this.installListeners_(videoEl);
+    };
+  }
+
+  /**
+   *
+   * @param {!Element} videoEl
+   */
+  uninstallListeners_(videoEl) {
+    if (!videoEl.bitrateUnlisteners_) {
+      return;
+    }
+    videoEl.bitrateUnlisteners_.forEach((unlistener) => unlistener());
+  }
+
+  /**
+   *
+   * @param {!Element} videoEl
+   */
+  downgradeVideo_(videoEl) {
+    const current = currentSource(videoEl);
+    this.acceptableBitrate_ = current.bitrate_ - 1;
+    this.switchToLowerBitrate_(videoEl, current.bitrate_);
+    this.updateOtherManagedAndPausedVideos_();
   }
 
   /**
@@ -270,6 +310,32 @@ function onNontrivialWait(video, callback) {
       callback();
     }, 100);
   });
+}
+
+/**
+ * @param {!Element} video
+ * @param {function()} callback
+ * @return {function()} unlistener
+ *
+ */
+function onSlowLoad(video, callback) {
+  let timer = null;
+  const unlistener = listen(video, 'loadstart', () => {
+    const startTime = Date.now();
+    const unlisten = listenOnce(video, 'loadeddata', () => {
+      clearTimeout(timer);
+      console.log('loaded in', Date.now() - startTime);
+    });
+    timer = setTimeout(() => {
+      console.log('downgrading from slow load');
+      unlisten();
+      callback();
+    }, SLOW_LOADING_THRESHOLD_MS);
+  });
+  return () => {
+    unlistener();
+    clearTimeout(timer);
+  };
 }
 
 /**
