@@ -61,7 +61,7 @@ const {log} = require('../common/logging');
  */
 async function checkRenovateConfig() {
   const {status, stdout} = getOutput(
-    'node_modules/renovate/dist/config-validator.js'
+    'npx -q -p renovate renovate-config-validator'
   );
   const [configFile] = stdout.match(/(?<=Validating )\S+/);
 
