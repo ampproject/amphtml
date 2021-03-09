@@ -49,14 +49,10 @@ export const buildOpenInlineAttachmentElement = (element) =>
         i-amphtml-story-page-open-attachment i-amphtml-story-system-reset"
         role="button">
         <span class="i-amphtml-story-inline-page-attachment-chip">
-          <span class="i-amphtml-story-inline-page-attachment-content">
-            <span class="i-amphtml-story-inline-page-attachment-img"></span>
-            <span class="i-amphtml-story-inline-page-attachment-img-2"></span>
-            <span class="i-amphtml-story-inline-page-attachment-spacer"></span>
-            <span class="i-amphtml-story-inline-page-attachment-arrow"></span>
-          </span>
+          <span class="i-amphtml-story-inline-page-attachment-img"></span>
+          <span class="i-amphtml-story-inline-page-attachment-img-2"></span>
+          <span class="i-amphtml-story-inline-page-attachment-arrow"></span>
         </span>
-        <span class="i-amphtml-story-inline-page-attachment-label"></span>
     </a>`;
 
 /**
@@ -74,7 +70,7 @@ export const renderPageAttachmentUI = (win, pageEl, attachmentEl) => {
     !attachmentHref &&
     openImgAttr
   ) {
-    return renderInlinePageAttachmentUI(pageEl, attachmentEl);
+    return renderInlinePageAttachmentUI(win, pageEl, attachmentEl);
   } else {
     return renderDefaultPageAttachmentUI(pageEl, attachmentEl);
   }
@@ -116,17 +112,20 @@ const renderDefaultPageAttachmentUI = (pageEl, attachmentEl) => {
  * @param {!Element} attachmentEl
  * @return {!Element}
  */
-const renderInlinePageAttachmentUI = (pageEl, attachmentEl) => {
+const renderInlinePageAttachmentUI = (win, pageEl, attachmentEl) => {
   const openAttachmentEl = buildOpenInlineAttachmentElement(pageEl);
 
-  const textEl = openAttachmentEl.querySelector(
-    '.i-amphtml-story-inline-page-attachment-label'
-  );
-
   const openLabelAttr = attachmentEl.getAttribute('cta-text');
-  const openLabel = openLabelAttr && openLabelAttr.trim();
-
-  textEl.textContent = openLabel;
+  if (openLabelAttr) {
+    const textEl = win.document.createElement('span');
+    textEl.classList.add("i-amphtml-story-inline-page-attachment-label");
+    const openLabel = openLabelAttr && openLabelAttr.trim();
+    textEl.textContent = openLabel;
+    setImportantStyles(textEl, {
+      'display': 'block',
+    });
+    openAttachmentEl.appendChild(textEl);
+  }
 
   const openImgAttr = attachmentEl.getAttribute('cta-img');
 
@@ -145,9 +144,8 @@ const renderInlinePageAttachmentUI = (pageEl, attachmentEl) => {
       '.i-amphtml-story-inline-page-attachment-img-2'
     );
     setImportantStyles(ctaImgEl2, {
-      'background-image': 'url(' + openImgAttr2 + ')',
-      height: '34px',
-      width: '34px',
+      'display': 'block',
+      'background-image': 'url(' + openImgAttr2 + ')'
     });
   }
 

@@ -169,60 +169,58 @@
 
 /** Inline attachment specifications */
 .i-amphtml-story-inline-page-attachment-chip {
-  display: table !important;
+  display: flex !important;
   position: relative !important;
-  margin: 0 0 24px 0 !important;
-  height: 16px !important;
-  max-width: 243px !important;
-  border-radius: 30px !important;
-  background-color: rgba(200,200,200, 1) !important;
+  border-radius: 24px !important;
+  background-color: rgba(255, 255, 255, 0.5) !important;
   color: black !important;
+  align-items: center !important;
+  overflow: hidden !important;
+  margin-bottom: 12px !important;
 }
 
-.i-amphtml-story-inline-page-attachment-content {
-  display: table-row !important;
+.i-amphtml-story-inline-page-attachment-chip:only-child {
+  margin-bottom: 20px !important;
 }
 
 .i-amphtml-story-inline-page-attachment-img,
 .i-amphtml-story-inline-page-attachment-img-2,
-.i-amphtml-story-inline-page-attachment-spacer,
 .i-amphtml-story-inline-page-attachment-arrow {
-  display: table-cell !important;
   vertical-align: middle !important;
   background-size: contain !important;
   background-repeat: no-repeat !important;
-  background-position-x: 50% !important;
-  background-position-y: right;
 }
 
-.i-amphtml-story-inline-page-attachment-img {
-  height: 34px !important;
-  width: 34px !important;
-  border-radius: 30px 0 0 30px !important;
+.i-amphtml-story-inline-page-attachment-img,
+.i-amphtml-story-inline-page-attachment-img-2 {
+  height: 48px !important;
+  width: 48px !important;
+  background-color: white !important;
 }
 
-.i-amphtml-story-inline-page-attachment-spacer {
-  width: 5px !important;
+.i-amphtml-story-inline-page-attachment-img-2 {
+  display: none !important;
+  margin-left: 1px !important;
 }
 
 .i-amphtml-story-inline-page-attachment-arrow {
-  height: 24px !important;
-  width: 24px !important;
+  height: 32px !important;
+  width: 32px !important;
+  margin: 8px !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M16 32C24.8366 32 32 24.8366 32 16C32 7.16344 24.8366 0 16 0C7.16344 0 0 7.16344 0 16C0 24.8366 7.16344 32 16 32Z" fill="white"/> <path d="M6.74612 18.796C6.33376 18.0797 6.57889 17.1649 7.29412 16.7508L15.0632 12.2529C15.7808 11.8374 16.6995 12.0835 17.1132 12.8022C17.5256 13.5184 17.2805 14.4333 16.5652 14.8474L8.7962 19.3453C8.07854 19.7608 7.15989 19.5146 6.74612 18.796Z" fill="black"/> <path d="M14.724 12.8022C15.1377 12.0835 16.0564 11.8374 16.774 12.2528L24.5431 16.7508C25.2583 17.1648 25.5034 18.0797 25.0911 18.7959C24.6773 19.5146 23.7587 19.7607 23.041 19.3452L15.272 14.8473C14.5567 14.4332 14.3116 13.5184 14.724 12.8022Z" fill="black"/> </svg>') !important;
   background-position: center;
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 40 40"><path d="M16 32a16 16 0 100-32 16 16 0 000 32z" fill="white"/><path d="M7 19v-2l8-5a1 1 0 112 3l-8 4H7z" fill="black"/><path d="M15 13l2-1 8 5a1 1 0 11-2 2l-8-4v-2z" fill="black"/></svg>') !important;
 }
 
 .i-amphtml-story-inline-page-attachment-label {
-  display: table-cell !important;
+  display: none !important;
   font-family: 'Roboto', sans-serif !important;
   font-size: 16px !important;
-  font-weight: bold !important;
-  letter-spacing: 0.3px;
+  font-weight: 700 !important;
+  letter-spacing: 0.25px !important;
   line-height: 16px !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
   max-width: 210px !important;
-  vertical-align: middle;
-  margin: 5px 0 35px 0 !important;
+  margin-bottom: 20px !important;
 }
