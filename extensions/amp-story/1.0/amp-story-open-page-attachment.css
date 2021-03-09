@@ -167,13 +167,12 @@
   white-space: nowrap !important;
 }
 
-/** Inline attachment specifications */
+/** For amp-story-inline-page-attachment-v2 experiment elements. */
 .i-amphtml-story-inline-page-attachment-chip {
+  --cta-chip-bg-color: rgba(255, 255, 255, 0.5);
+  background-color: var(--cta-chip-bg-color) !important;
   display: flex !important;
-  position: relative !important;
   border-radius: 24px !important;
-  background-color: rgba(255, 255, 255, 0.5) !important;
-  color: black !important;
   align-items: center !important;
   overflow: hidden !important;
   margin-bottom: 12px !important;
@@ -184,22 +183,19 @@
 }
 
 .i-amphtml-story-inline-page-attachment-img,
-.i-amphtml-story-inline-page-attachment-img-2,
 .i-amphtml-story-inline-page-attachment-arrow {
   vertical-align: middle !important;
   background-size: contain !important;
   background-repeat: no-repeat !important;
 }
 
-.i-amphtml-story-inline-page-attachment-img,
-.i-amphtml-story-inline-page-attachment-img-2 {
+.i-amphtml-story-inline-page-attachment-img {
   height: 48px !important;
   width: 48px !important;
   background-color: white !important;
 }
 
-.i-amphtml-story-inline-page-attachment-img-2 {
-  display: none !important;
+.i-amphtml-story-inline-page-attachment-img:nth-child(2) {
   margin-left: 1px !important;
 }
 
@@ -212,7 +208,6 @@
 }
 
 .i-amphtml-story-inline-page-attachment-label {
-  display: none !important;
   font-family: 'Roboto', sans-serif !important;
   font-size: 16px !important;
   font-weight: 700 !important;

@@ -49,9 +49,8 @@ export const buildOpenInlineAttachmentElement = (element) =>
         i-amphtml-story-page-open-attachment i-amphtml-story-system-reset"
         role="button">
       <div class="i-amphtml-story-inline-page-attachment-chip">
-        <div class="i-amphtml-story-inline-page-attachment-img"></div>
-        <div class="i-amphtml-story-inline-page-attachment-img-2"></div>
-        <div class="i-amphtml-story-inline-page-attachment-arrow"></div>
+        <div role="img" class="i-amphtml-story-inline-page-attachment-img"></div>
+        <div role="img" aria-label="Upward pointing arrow to indicate scroll up to view page attachment" class="i-amphtml-story-inline-page-attachment-arrow"></div>
       </div>
     </a>`;
 
@@ -133,6 +132,11 @@ const renderInlinePageAttachmentUI = (win, pageEl, attachmentEl) => {
     '.i-amphtml-story-inline-page-attachment-img'
   );
 
+  const openImgAttrAlt = attachmentEl.getAttribute('cta-img-alt');
+  if (openImgAttrAlt) {
+    ctaImgEl.setAttribute("aria-label", openImgAttrAlt);
+  }
+
   setImportantStyles(ctaImgEl, {
     'background-image': 'url(' + openImgAttr + ')',
   });
@@ -140,13 +144,19 @@ const renderInlinePageAttachmentUI = (win, pageEl, attachmentEl) => {
   const openImgAttr2 = attachmentEl.getAttribute('cta-img-2');
 
   if (openImgAttr2) {
-    const ctaImgEl2 = openAttachmentEl.querySelector(
-      '.i-amphtml-story-inline-page-attachment-img-2'
-    );
+    const ctaImgEl2 = win.document.createElement('span');
+    ctaImgEl2.classList.add("i-amphtml-story-inline-page-attachment-img");
     setImportantStyles(ctaImgEl2, {
-      'display': 'block',
       'background-image': 'url(' + openImgAttr2 + ')'
     });
+    const openImgAttrAlt2 = attachmentEl.getAttribute('cta-img-2-alt');
+    if (openImgAttrAlt2) {
+      ctaImgEl2.setAttribute("aria-label", openImgAttrAlt2);
+    }
+    const ctaChipEl = openAttachmentEl.querySelector(
+      '.i-amphtml-story-inline-page-attachment-chip'
+    );
+    ctaImgEl.parentNode.insertBefore(ctaImgEl2, ctaImgEl.nextSibling);
   }
 
   return openAttachmentEl;
