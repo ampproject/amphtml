@@ -34,13 +34,7 @@ exports.mainBinary =
   's.animation="none";' +
   's.WebkitAnimation="none;"},1000);throw e};';
 
-exports.extension = function (
-  name,
-  version,
-  latest,
-  isModule,
-  loadPriority
-) {
+exports.extension = function (name, version, latest, isModule, loadPriority) {
   let priority = '';
   if (loadPriority) {
     if (loadPriority != 'high') {
