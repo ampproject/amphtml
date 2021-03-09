@@ -77,12 +77,14 @@ describes.fakeWin(
       installAmpdocServices(ampdoc);
     });
 
-    function regularExtension(fn, opt_version) {
+    function regularExtension(fn, opt_rtvVersion) {
       return {
         n: 'amp-test-element' + extensionElementIndex++,
+        ev: '0.1',
+        l: true,
         f: fn,
         // Default version of uncompiled sources.
-        v: opt_version || '$internalRuntimeVersion$',
+        v: opt_rtvVersion || '$internalRuntimeVersion$',
       };
     }
 
@@ -545,7 +547,7 @@ describes.fakeWin(
       expect(queueExtensions).to.have.length(0);
     });
 
-    it('should load correct extension version', function* () {
+    it('should load correct extension version', async function () {
       self.__AMP_MODE = {
         rtvVersion: 'test-version',
       };
@@ -599,7 +601,7 @@ describes.fakeWin(
       const promise = adopt(win);
       runChunks(win.document);
 
-      yield waitNext(promise);
+      await waitNext(promise);
       // Extensions are still unprocessed
       expect(progress).to.equal('');
 
@@ -617,7 +619,7 @@ describes.fakeWin(
         }, 'version123')
       );
       // Add legacy element (5) and eagarly ask for its load as ElementStub does.
-      Services.extensionsFor(win).preloadExtension('amp-test-element5', false);
+      Services.extensionsFor(win).preloadExtension('amp-test-element5', '0.1');
       win.AMP.push(
         regularExtension((amp) => {
           expect(amp).to.equal(win.AMP);
@@ -626,14 +628,14 @@ describes.fakeWin(
       );
       runChunks(win.document);
 
-      yield waitNext(promise);
+      await waitNext(promise);
       expect(progress).to.equal('');
 
       // Body is available now.
       bodyResolver();
       runChunks(win.document);
 
-      yield waitNext(promise);
+      await waitNext(promise);
       expect(progress).to.equal('134');
       expect(queueExtensions).to.have.length(0);
       expect(s1.getAttribute('i-amphtml-loaded-new-version')).to.equal(
