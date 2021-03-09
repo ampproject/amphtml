@@ -1458,6 +1458,8 @@ describes.realWin('installExtensionsInEmbed', {amp: true}, (env) => {
     // Resolve the promise.
     extensions.registerExtension(
       'amp-test',
+      '0.1',
+      true,
       (AMP) => {
         // Main extension with CSS.
         AMP.registerElement('amp-test', AmpTest, 'a{}');
@@ -1535,6 +1537,8 @@ describes.realWin('installExtensionsInEmbed', {amp: true}, (env) => {
     // Resolve the promise `install`.
     extensions.registerExtension(
       'amp-test',
+      '0.1',
+      true,
       (AMP) => {
         AMP.registerServiceForDoc('fake-service-foo', FooService);
       },
@@ -1586,6 +1590,8 @@ describes.realWin('installExtensionsInEmbed', {amp: true}, (env) => {
     // Resolve the promise.
     extensions.registerExtension(
       'amp-test',
+      '0.1',
+      true,
       (AMP) => {
         AMP.registerElement('amp-test', AmpTest);
       },
