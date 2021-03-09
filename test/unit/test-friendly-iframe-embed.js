@@ -150,8 +150,10 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
           'https://acme.org/url2'
         );
 
-        return loadPromise(iframe);
+        // Check that extensions-known has been set.
+        return embed.ampdoc.whenExtensionsKnown();
       })
+      .then(() => loadPromise(iframe))
       .then(() => {
         // Iframe is marked as complete.
         expect(iframe.readyState).to.equal('complete');
@@ -191,6 +193,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       setReady: env.sandbox.spy(),
       signals: () => ampdocSignals,
       getHeadNode: () => childWinForAmpDoc.document.head,
+      setExtensionsKnown: env.sandbox.stub(),
     };
     ampdocServiceMock
       .expects('installFieDoc')
@@ -250,6 +253,11 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
         expect(ampdoc).to.equal(embed.ampdoc);
         expect(installServicesStub).to.be.calledOnce.calledWith(ampdoc);
         expect(ampdoc.setReady).to.not.be.called;
+
+        // Check that extensions-known has been set.
+        expect(embed.ampdoc.setExtensionsKnown).to.be.calledOnce;
+
+        // Complete rendering.
         renderCompleteResolver();
         return renderCompletePromise;
       })
@@ -272,6 +280,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       setReady: env.sandbox.spy(),
       signals: () => ampdocSignals,
       getHeadNode: () => childWinForAmpDoc.document.head,
+      setExtensionsKnown: env.sandbox.stub(),
     };
     ampdocServiceMock
       .expects('installFieDoc')
@@ -357,6 +366,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       setReady: env.sandbox.spy(),
       signals: () => ampdocSignals,
       getHeadNode: () => childWinForAmpDoc.document.head,
+      setExtensionsKnown: env.sandbox.stub(),
     };
     let childWinForAmpDoc;
     ampdocServiceMock
@@ -490,6 +500,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       setReady: env.sandbox.spy(),
       signals: () => ampdocSignals,
       getHeadNode: () => childWinForAmpDoc.document.head,
+      setExtensionsKnown: env.sandbox.stub(),
       overrideVisibilityState: env.sandbox.spy(),
       dispose: env.sandbox.spy(),
     };
@@ -578,6 +589,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       setReady: env.sandbox.spy(),
       signals: () => ampdocSignals,
       getHeadNode: () => childWinForAmpDoc.document.head,
+      setExtensionsKnown: env.sandbox.stub(),
       dispose: env.sandbox.spy(),
     };
     ampdocServiceMock

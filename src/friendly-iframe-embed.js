@@ -837,6 +837,7 @@ export class Installers {
           ampdoc,
           extensionIds
         );
+        ampdoc.setExtensionsKnown();
         if (opt_installComplete) {
           opt_installComplete(promise);
         }

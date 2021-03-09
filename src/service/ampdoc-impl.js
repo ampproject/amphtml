@@ -55,6 +55,8 @@ export let AmpDocOptions;
  * @enum {string}
  */
 const AmpDocSignals = {
+  // A complete preinstalled list of extensions is known.
+  EXTENSIONS_KNOWN: '-ampdoc-ext-known',
   // Signals the document has become visible for the first time.
   FIRST_VISIBLE: '-ampdoc-first-visible',
   // Signals when the document becomes visible the next time.
@@ -448,6 +450,22 @@ export class AmpDoc {
       extensionId
     );
     this.declaredExtensions_[extensionId] = version;
+  }
+
+  /**
+   * Signal that the initial document set of extensions is known.
+   * @restricted
+   */
+  setExtensionsKnown() {
+    this.signals_.signal(AmpDocSignals.EXTENSIONS_KNOWN);
+  }
+
+  /**
+   * Resolved when the initial document set of extension is known.
+   * @return {!Promise}
+   */
+  whenExtensionsKnown() {
+    return this.signals_.whenSignal(AmpDocSignals.EXTENSIONS_KNOWN);
   }
 
   /**
