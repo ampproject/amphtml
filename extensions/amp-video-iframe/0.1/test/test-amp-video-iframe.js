@@ -212,6 +212,7 @@ describes.realWin(
         const placeholder = createVideoIframe({poster}).createPlaceholder();
         expect(placeholder).to.have.attribute('placeholder');
         expect(placeholder.tagName.toLowerCase()).to.equal('img');
+        expect(placeholder).to.have.class('i-amphtml-fill-content');
         expect(placeholder.getAttribute('src')).to.equal(poster);
       });
 
